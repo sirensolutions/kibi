@@ -1,0 +1,77 @@
+<div class="sindicetech-relational-vis-params" id="sindicetech-relational-vis-params" >
+  <ul>
+    <li ng-repeat="button in vis.params.buttons" class="queryOptionArea" >
+      <div class="header">
+        <h2>Relational filter {{$index + 1}}</h2>
+      </div>
+
+      <div class="content">
+
+        <div class="form-group">
+          <label>Button label</label></br>
+          <input required="true" type="text" ng-model="button.label" class="form-control"/>
+        </div>
+        <div class="form-group">
+          <label>Filter label</label></br>
+          <input type="text" ng-model="button.filterLabel" class="form-control"/>
+        </div>
+
+
+        <div class="form-group">
+          <label>Source index</label></br/>
+          <span>(this button will only work on a dashboard having this index as a search source)</span></br>
+          <st-select required="true" object-type="indexPattern" ng-model="button.sourceIndexPatternId">
+        </div>
+        <div class="form-group">
+          <label>Source index type</label></br/>
+          <st-select required="true" object-type="indexPatternType" index-pattern-id="button.sourceIndexPatternId" ng-model="button.sourceIndexPatternType">
+        </div>
+        <div class="form-group">
+          <label>Source field</label></br/>
+          <st-select required="true" object-type="field" index-pattern-id="button.sourceIndexPatternId"  ng-model="button.sourceField" />
+        </div>
+
+
+        <div class="form-group">
+          <label>Target index</label></br/>
+          <st-select required="true" object-type="indexPattern" ng-model="button.targetIndexPatternId" />
+        </div>
+        <div class="form-group">
+          <label>Target index type</label></br/>
+          <st-select required="true" object-type="indexPatternType" index-pattern-id="button.targetIndexPatternId" ng-model="button.targetIndexPatternType">
+        </div>
+        <div class="form-group">
+          <label>Target field</label></br/>
+          <st-select required="true" object-type="field" index-pattern-id="button.targetIndexPatternId"  ng-model="button.targetField" />
+        </div>
+        <div class="form-group">
+          <label>Target dashboard</label></br/>
+          <span>On click it will redirect to this dashboard</span></br>
+          <st-select required="true" object-type="dashboard" ng-model="button.redirectToDashboard" />
+        </div>
+        <!--
+        TODO: to be discussed but there is an idea to use relationalPanel config to verify that
+        there is a connection from source to target dashboard indexes
+        and show only these target dashboards/indexes which are connected
+         -->
+
+        <!-- positioned via css to be in right top corner (keep it the last element) -->
+        <div class="btn-group rightCorner">
+          <button class="btn btn-xs btn-default" ng-click="upButton($index)" >
+            <i class="fa fa-caret-up"></i>
+          </button>
+          <button class="btn btn-xs btn-default" ng-click="downButton($index)" >
+            <i class="fa fa-caret-down"></i>
+          </button>
+          <button class="btn btn-xs btn-danger" ng-click="removeButton($index)" >
+            <i class="fa fa-times"></i>
+          </button>
+        </div>
+
+      </div>
+    </li>
+  </ul>
+  <button class="btn btn-xs btn-success" ng-click="addNewButton()" >
+    <span>Add filter</span> <i class="fa fa-plus"></i>
+  </button>
+</div>

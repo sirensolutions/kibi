@@ -51,7 +51,8 @@ require.config({
     'eeg-angular':       'bower_components/eeg-angular/index',
     'antlr4':            'bower_components/antlr4/release/antlr4',
     'antlr4-sparql':     'bower_components/antlr4-sparql/release/antlr4-sparql',
-    'antlr4-sql':        'bower_components/antlr4-sql/release/antlr4-sql'
+    'antlr4-sql':        'bower_components/antlr4-sql/release/antlr4-sql',
+    'qtip2': 'bower_components/qtip2/jquery.qtip.min'
   },
   shim: {
     angular: {
@@ -76,6 +77,7 @@ require.config({
 
     'antlr4-sparql' : ['antlr4'],
     'antlr4-sql' : ['antlr4'],
+    'qtip2' : ['jquery'],
 
     'leaflet-heat': {
       deps: ['leaflet']

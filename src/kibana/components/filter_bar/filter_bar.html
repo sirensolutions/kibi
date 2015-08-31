@@ -17,13 +17,29 @@
       <!-- Wrap in double quotes if there is a key -->
       <span ng-if="!filter.meta.key">{{ filter.meta.value }}</span>
       <span ng-if="filter.meta.key">"{{ filter.meta.value }}"</span>
+      <span class="explain" ng-if="filter.join">
+        <i class="fa fa-code-fork"></i>
+      </span>
+      <div style="display: none" class="explanation">
+        <ul>
+          <li ng-repeat="index in filter.join.indexes">
+            Index: <b>{{ index.id }} [{{ index.type }}]</b>
+            <span ng-if="filter.join.filters[index.id]"></span>
+            <ul>
+              <!-- as we do not have any meta information for this filters lets recreate the labels -->
+              <li ng-repeat="filterSpec in filter.join.filters[index.id]" ng-bind-html="recreateFilterLabel(filterSpec)"></li>
+            </ul>
+            </span>
+          </li>
+        </ul>
+      </div>
     </div>
     <div class="filter-actions">
       <a class="action filter-toggle" ng-click="toggleFilter(filter)">
         <i ng-show="filter.meta.disabled" class="fa fa-fw fa-square-o disabled"></i>
         <i ng-hide="filter.meta.disabled" class="fa fa-fw fa-check-square-o enabled"></i>
       </a>
-      <a class="action filter-pin" ng-click="pinFilter(filter)">
+      <a class="action filter-pin" ng-click="pinFilter(filter)" ng-if="!filter.join">
         <i ng-show="filter.$state.store == 'globalState'" class="fa fa-fw fa-thumb-tack pinned"></i>
         <i ng-hide="filter.$state.store == 'globalState'" class="fa fa-fw fa-thumb-tack fa-rotate-270 unpinned"></i>
       </a>

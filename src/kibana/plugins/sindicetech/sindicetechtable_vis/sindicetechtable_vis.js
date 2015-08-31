@@ -9,11 +9,8 @@ define(function (require) {
   require('plugins/sindicetech/sindicetechtable_vis/sindicetechtable_vis_params');
   require('components/doc_table/doc_table');
 
-
-  // define the SwitchboardVisType
   return function SindicetechtableVisTypeProvider(Private) {
     var TemplateVisType = Private(require('plugins/vis_types/template/template_vis_type'));
-    var Schemas = Private(require('plugins/vis_types/_schemas'));
 
     // return the visType object, which kibana will use to display and configure new
     // Vis object of this type.

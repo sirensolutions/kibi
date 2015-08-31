@@ -13,7 +13,8 @@ define(function (require) {
       template: require('text!components/agg_table/agg_table.html'),
       scope: {
         table: '=',
-        perPage: '=?'
+        perPage: '=?',
+        queryFieldName : '=?'
       },
       controllerAs: 'aggTable',
       compile: function ($el) {
@@ -84,6 +85,13 @@ define(function (require) {
               title: col.title,
               filterable: field && field.filterable && agg.schema.group === 'buckets'
             };
+
+            // sindicetech - added to replace the column name in table
+            // it is used in paginated table
+            if ($scope.queryFieldName && col.title === 'custom_queries') {
+              formattedColumn.replacedTitle = $scope.queryFieldName;
+            }
+            // sindicetech end
 
             var last = i === (table.columns.length - 1);
 

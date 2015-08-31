@@ -1,0 +1,53 @@
+<div id="relational-filters-params" class="form-group">
+  <label>Column name</label></br>
+  <input required type="text" ng-model="vis.params.queryFieldName" class="form-control"/>
+</div>
+
+<ul class="custome-queries-aggregation-form">
+  <li ng-repeat="queryId in agg.params.queryIds" class="queryOptionArea" >
+
+    <div class="header">
+      <h2>Filter {{$index +1}}</h2>
+    </div>
+
+    <div class="content">
+      <div class="form-group">
+        <label>Source query id</label>
+        <st-select object-type="query" ng-model="queryId.id"></st-select>
+      </div>
+
+      <div class="form-group">
+        <label>Source query variable</label>
+        <st-select
+          object-type="queryVariable"
+          query-id="queryId.id"
+          ng-model="queryId.queryVariableName">
+        </st-select>
+      </div>
+
+      <div class="form-group">
+        <label>Negate the query</label>
+        <input type="checkbox" ng-model="queryId.negate" />
+      </div>
+
+      <div class="form-group">
+        <label>Target field</label>
+        <st-select
+          object-type="field"
+          index-pattern-id="vis.indexPattern.id"
+          ng-model="queryId.joinElasticsearchField" >
+        </st-select>
+      </div>
+
+      <div class="rightCorner">
+        <button class="btn btn-xs btn-danger" ng-click="agg.params.queryIds.splice($index, 1)" >
+          <i class="fa fa-times"></i>
+        </button>
+      </div>
+    </div>
+
+  </li>
+</ul>
+<button class="btn btn-xs btn-success" ng-click="agg.params.queryIds.push({id:'', queryVariableName:'', targetIndexPatternId: ''})" >
+  <span>Add an external query term filter</span> <i class="fa fa-plus"></i>
+</button>

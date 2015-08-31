@@ -3,7 +3,7 @@ define(function (require) {
 
   require('modules')
   .get('app/visualize')
-  .directive('visAggParamEditor', function (config, $parse, Private) {
+  .directive('visAggParamEditor', function (config, $parse, Private, $http) {
     return {
       restrict: 'E',
       scope: true,

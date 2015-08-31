@@ -31,7 +31,12 @@ define(function (require) {
           };
 
           if (contents instanceof AggConfigResult) {
-            if (contents.type === 'bucket' && contents.aggConfig.field() && contents.aggConfig.field().filterable) {
+            // Modified by SindiceTech
+            // AggConfigResult from a filter query does not have a field
+            // if (contents.type === 'bucket' && contents.aggConfig.field() && contents.aggConfig.field().filterable) {
+            //   $cell = createAggConfigResultCell(contents);
+            // }
+            if (contents.type === 'bucket') {
               $cell = createAggConfigResultCell(contents);
             }
             contents = contents.toString('html');

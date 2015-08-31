@@ -1,7 +1,7 @@
 define(function (require) {
   require('modules')
   .get('kibana/directive')
-  .directive('visualize', function (Notifier, SavedVis, indexPatterns, Private) {
+  .directive('visualize', function (Notifier, SavedVis, indexPatterns, savedDashboards, savedSearches, Private) {
 
     require('components/visualize/spy/spy');
     require('css!components/visualize/visualize.css');
@@ -105,6 +105,18 @@ define(function (require) {
         }));
 
         $scope.$watch('searchSource', prereq(function (searchSource) {
+          if (searchSource && !$scope.vis.type.requiresSearch) {
+            $scope.searchSource.disable();
+            var urlHelper = Private(require('components/sindicetech/urlHelper/urlHelper'));
+            savedDashboards.get(urlHelper.getCurrentDashboardId()).then(function (savedCurrentDashboard) {
+              if (savedCurrentDashboard.savedSearchId) {
+                savedSearches.get(savedCurrentDashboard.savedSearchId).then(function (savedSearch) {
+                  $scope.searchSource.inherits(savedSearch.searchSource);
+                  $scope.searchSource.enable();
+                });
+              }
+            });
+          }
           if (!searchSource || attr.esResp) return;
 
           // TODO: we need to have some way to clean up result requests

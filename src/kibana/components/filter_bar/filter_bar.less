@@ -76,6 +76,19 @@ filter-bar .bar {
     text-overflow: ellipsis;
   }
 
+  .filter.join {
+    background-color: @brand-relational;
+    .filter-description {
+      background-color: @brand-relational;
+    }
+  }
+
+  .filter.join.negate {
+    .filter-description {
+      background-color: @action-remove;
+    }
+  }
+
   .filter {
     position: relative;
     display: inline-block;

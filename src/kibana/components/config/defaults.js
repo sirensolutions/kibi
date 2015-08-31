@@ -122,6 +122,32 @@ define(function () {
       'format:currency:defaultPattern': {
         type: 'string',
         value: '($0,0.[00])'
+      },
+
+      // added by sindicetech
+      'kibi:awesomeDemoMode' : {
+        value: false,
+        description: 'Set to true to suppress all warnings and errors',
+      },
+      'kibi:zoom' : {
+        value: 1.0,
+        description: 'Set the zoom level for the whole page. Good if the default size is too big for you. Does not work in Firefox.',
+      },
+      'kibi:relationalPanelConfig': {
+        type: 'json',
+        value: [
+          '{',
+          '  "enabled": false,',
+          '  "indexes": [],',
+          '  "relations": [],',
+          '  "enabledRelations": [],',
+          '  "graph": {',
+          '    "groupingForce":{},',
+          '    "nodeIcons":{}',
+          '  }',
+          '}'
+        ].join('\n'),
+        description: 'Relational panel configuration.'
       }
     };
   };

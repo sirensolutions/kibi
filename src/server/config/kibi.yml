@@ -1,0 +1,113 @@
+# Kibi configuration file.
+
+# Kibi is served by a back end server. This controls which port to use.
+port: 5602
+
+# The host to bind the server to.
+host: "0.0.0.0"
+
+# The Elasticsearch instance to use for all your queries.
+elasticsearch_url: "http://localhost:9200"
+
+# If set to true, the server will send the hostname specified in `elasticsearch_url`.
+# If set to false, the server will send the hostname
+elasticsearch_preserve_host: true
+
+# Kibi uses an index in Elasticsearch to store saved searches, visualizations
+# and dashboards. It will create a new index if it doesn't already exist.
+kibana_index: ".kibi"
+
+# If your Elasticsearch is protected with basic auth, this is the user credentials
+# used by the the server to perform maintenance on the index at statup. Your
+# users will still need to authenticate with Elasticsearch (which is proxied by
+# the server)
+# kibana_elasticsearch_username: user
+# kibana_elasticsearch_password: pass
+
+# If your Elasticsearch requires client certificate and key
+# kibana_elasticsearch_client_crt: /path/to/your/client.crt
+# kibana_elasticsearch_client_key: /path/to/your/client.key
+
+# The path to the CA certificate PEM file.
+# ca: /path/to/your/CA.pem
+
+# The default application to load.
+default_app_id: "dashboard"
+
+# Time in milliseconds to wait for elasticsearch to respond to pings, defaults to
+# request_timeout setting
+# ping_timeout: 1500
+
+# Time in milliseconds to wait for responses from the back end or elasticsearch.
+# This must be > 0
+request_timeout: 300000
+
+# Time in milliseconds for Elasticsearch to wait for responses from shards.
+# Set to 0 to disable.
+shard_timeout: 0
+
+# Time in milliseconds to wait for Elasticsearch at startup before retrying
+# startup_timeout: 5000
+
+# Set to false to skip certificate validation
+verify_ssl: true
+
+# If you need to provide a CA certificate for your Elasticsearch instance, put
+# the path of the pem file here.
+# ca: /path/to/your/CA.pem
+
+# SSL for outgoing requests from the Kibi Server (PEM formatted)
+# ssl_key_file: /path/to/your/server.key
+# ssl_cert_file: /path/to/your/server.crt
+
+# Set the path to where you would like the process id file to be created.
+# pid_file: /var/run/kibi.pid
+
+# If you would like to send the log output to a file you can set the path below.
+# This will also turn off the STDOUT log output.
+log_file: ./kibi.log
+# log_level: DEBUG
+
+
+# Datasources
+
+datasources:
+  crunchbase-datasource:
+    type: sqlite
+    dbfile: kibi/crunchbase.db
+
+# Sample datasource
+#
+#  sparql-datasource:
+#    type: sparql
+#    uri: http://localhost:3030/sparql/query
+#    timeout: 1000
+#  mysql-datasource:
+#    type: mysql
+#    uri: "mysql://USERNAME:PASSWORD@HOST/DATABASENAME"
+#    timeout: 1000
+#  postgress-datasource:
+#    type: pgsql
+#    uri: "pgsql://USERNAME:PASSWORD@kaste1/crunchbase"
+#    timeout: 1000
+#  mysql-jdbc-datasource:
+#    type: jdbc
+#    libpath: "/ABSOLUTE/PATH/TO/mysql-connector-java-5.1.35-bin.jar"
+#    drivername: "com.mysql.jdbc.Driver"
+#    url: "jdbc:mysql://HOST/DATABASENAME"
+#    libs: []
+#    user: 'USERNAME'
+#    password: 'PASSWORD'
+
+# Set to true to enable datasource query cache
+datasource_enable_cache: true
+
+# The datasource query cache size
+datasource_cache_size: 500
+
+# The max age of an object in the cache, in milliseconds
+datasource_cache_max_age: 3600000
+
+
+# The default dashboard to load. Works only when default_app_id='dashboard'
+default_dashboard_id: Articles

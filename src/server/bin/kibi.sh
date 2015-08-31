@@ -15,7 +15,9 @@ done
 
 DIR=$(dirname "${SCRIPT}")/..
 NODE=${DIR}/node/bin/node
-SERVER=${DIR}/src/bin/kibana.js
+SERVER=${DIR}/src/bin/kibi.js
 
-CONFIG_PATH="${DIR}/config/kibana.yml" NODE_ENV="production" exec "${NODE}" ${SERVER} ${@}
+$DIR/bin/create_symlink.sh
+
+ROOT_DIR="$DIR/../" CONFIG_PATH="${DIR}/config/kibi.yml" NODE_ENV="production" exec "${NODE}" ${SERVER} ${@}
 

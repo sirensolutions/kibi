@@ -11,7 +11,10 @@ if (env !== 'development') {
 var package = require(packagePath);
 
 
-program.description('Kibana is an open source (Apache Licensed), browser based analytics and search dashboard for Elasticsearch.');
+program.description(
+  'Kibi extends Kibana with data intelligence features. ' +
+  'At the core, kibi can join and filter data live from multiple indexes (elasticsearch) or from SQL/NOSQL sources. ' +
+  'Kibana is a trademark of Elasticsearch BV, registered in the U.S. and in other countries.');
 program.version(package.version);
 program.option('-e, --elasticsearch <uri>', 'Elasticsearch instance');
 program.option('-c, --config <path>', 'Path to the config file');
@@ -79,4 +82,9 @@ server.start(function (err) {
     });
   }
 
+  console.log('****************************************');
+  console.log('  Kibi server started successfully.');
+  console.log('  Open your browser at:');
+  console.log('  http://' + (config.host === '0.0.0.0' ? 'localhost' : config.host) + ':' + config.port);
+  console.log('****************************************');
 });

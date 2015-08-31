@@ -3,7 +3,7 @@ var fs = require('fs');
 var yaml = require('js-yaml');
 var path = require('path');
 var listPlugins = require('../lib/listPlugins');
-var configPath = process.env.CONFIG_PATH || path.join(__dirname, 'kibana.yml');
+var configPath = process.env.CONFIG_PATH || path.join(__dirname, 'kibi.yml');
 var kibana = yaml.safeLoad(fs.readFileSync(configPath, 'utf8'));
 var env = process.env.NODE_ENV || 'development';
 
@@ -64,6 +64,11 @@ var config = module.exports = {
 };
 
 config.plugins = listPlugins(config);
+
+if (config.plugins.length === 0) {
+  throw new Error('Kibi plugin list is empty. Check your configuration file it should include the bundled_plugin_ids list.');
+}
+
 //A list of elasticsearch plugins enabled on all known nodes at startup
 config.elasticsearch_plugins = null;
 

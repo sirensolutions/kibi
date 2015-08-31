@@ -3,6 +3,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask('dev', function () {
     var tasks = [
+      'copy:additional_ace_modes',
       'less:dev',
       'jade',
       'esvm:dev',

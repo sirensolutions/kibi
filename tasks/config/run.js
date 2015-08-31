@@ -11,7 +11,7 @@ module.exports = function (grunt) {
 
   var options = {
     wait: false,
-    ready: /kibana server started/i,
+    ready: /Server started/i,
     quiet: true,
     failOnError: true
   };
@@ -26,7 +26,7 @@ module.exports = function (grunt) {
         quiet: true,
         failOnError: false
       },
-      cmd: './target/<%= pkg.name + "-" + pkg.version %>-' + platform + '-' + arch + '/bin/kibana',
+      cmd: './target/<%= pkg.name + "-" + pkg.version %>-' + platform + '-' + arch + '/bin/<%= pkg.name %>',
       args: args
     }
   };

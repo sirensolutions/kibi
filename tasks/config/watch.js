@@ -3,12 +3,11 @@ module.exports = function (grunt) {
     less: {
       files: [
         '<%= app %>/**/styles/**/*.less',
-        '<%= plugins %>/*/styles/**/*.less',
-        '<%= plugins %>/*/*.less',
+        '<%= plugins %>/**/*.less',
         '<%= app %>/**/components/**/*.less',
         '<%= app %>/**/components/vislib/components/styles/**/*.less'
       ],
-      tasks: ['less:dev']
+      tasks: ['newer:less:dev']
     },
 
     jade: {

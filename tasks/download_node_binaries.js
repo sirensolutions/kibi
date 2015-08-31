@@ -11,7 +11,7 @@ var Promise = require('bluebird');
 
 module.exports = function (grunt) {
   grunt.registerTask('download_node_binaries', 'Download the node.js binaries', function () {
-    var platforms = _.without(grunt.config.get('platforms'), 'windows');
+    var platforms = _.without(grunt.config.get('platforms'), 'windows', 'windows64');
     var rootPath = grunt.config.get('root');
     var version = grunt.config.get('nodeVersion');
 
@@ -59,7 +59,26 @@ module.exports = function (grunt) {
       });
     };
 
-    return Promise.map(platforms, download).then(downloadWindows).nodeify(this.async());
+    var downloadWindows64 = function (cb) {
+      return new Promise(function (resolve, reject) {
+        var dest = join(rootPath, '.node_binaries', 'windows64');
+        fs.stat(dest, function (err) {
+          if (!err) return resolve(); // skip downloading if we already have them
+          var url = urlPattern({ version: version, file: 'x64/node.exe'});
+
+          mkdirp(dest, function (err) {
+            if (err) return reject(err);
+            var out = fs.createWriteStream(join(dest, 'node.exe'));
+            out.on('close', resolve).on('error', reject);
+            var req = request.get(url);
+            req.on('response', handle404);
+            req.pipe(out);
+          });
+        });
+      });
+    };
+
+    return Promise.map(platforms, download).then(downloadWindows).then(downloadWindows64).nodeify(this.async());
   });
 };
 

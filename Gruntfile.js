@@ -17,11 +17,11 @@ module.exports = function (grunt) {
     plugins: __dirname + '/src/kibana/plugins', // source directory for the app
     server: __dirname + '/src/server', // source directory for the server
     target: __dirname + '/target',  // location of the compressed build targets
-    buildApp: __dirname + '/build/kibana', // build directory for the app
-    configFile: __dirname + '/src/server/config/kibana.yml',
+    buildApp: __dirname + '/build/kibi', // build directory for the app
+    configFile: __dirname + '/src/server/config/kibi.yml',
 
     nodeVersion: '0.10.35',
-    platforms: ['darwin-x64', 'linux-x64', 'linux-x86', 'windows'],
+    platforms: ['darwin-x64', 'linux-x64', 'linux-x86', 'windows', 'windows64'],
     services: [ [ 'launchd', '10.9'], [ 'upstart', '1.5'], [ 'systemd', 'default'], [ 'sysv', 'lsb-3.1' ] ],
 
     unitTestDir: __dirname + '/test/unit',

@@ -5,6 +5,8 @@ var mkdirp = Promise.promisifyAll(require('mkdirp'));
 var execFile = Promise.promisify(child_process.execFile);
 
 function createServices(grunt) {
+  var packageName = grunt.config.get('pkg.name');
+
   grunt.registerTask('create_services', function () {
     var done = this.async();
     var target = grunt.config.get('target');
@@ -18,10 +20,10 @@ function createServices(grunt) {
       var output = join(distPath, 'services', service);
       var pleaserun_args = ['--install', '--no-install-actions',
                             '--install-prefix', output, '--overwrite',
-                            '--user', 'kibana',
-                            '--sysv-log-path', '/var/log/kibana/',
+                            '--user', packageName,
+                            '--sysv-log-path', '/var/log/' + packageName + '/',
                             '-p', service, '-v', service_version,
-                            '/opt/kibana/bin/kibana'];
+                            '/opt/' + packageName + '/bin/' + packageName];
 
       return mkdirp.mkdirpAsync(target)
         .then(function (arg) {
@@ -39,7 +41,7 @@ function createServices(grunt) {
         // Create the user-management scripts
         var output = join(distPath, 'user');
         return mkdirp.mkdirpAsync(output).then(function () {
-          return execFile('please-manage-user', ['--output', output, 'kibana'], { cwd: distPath });
+          return execFile('please-manage-user', ['--output', output, packageName], { cwd: distPath });
         });
       }, function (err) { console.log('please-manage-user failed: ' + err + '.'); })
       .finally(done);

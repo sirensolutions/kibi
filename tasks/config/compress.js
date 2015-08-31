@@ -16,14 +16,14 @@ module.exports = function (grunt) {
       files: [
         {
           flatten: true,
-          src: '<%= build %>/dist/bin/kibana',
-          dest: '<%= pkg.name %>/bin/kibana',
+          src: '<%= build %>/dist/bin/<%= pkg.name %>',
+          dest: '<%= pkg.name %>/bin/<%= pkg.name %>',
           mode: 755
         },
         {
           flatten: true,
-          src: '<%= build %>/dist/bin/kibana.bat',
-          dest: '<%= pkg.name %>/bin/kibana.bat'
+          src: '<%= build %>/dist/bin/<%= pkg.name %>.bat',
+          dest: '<%= pkg.name %>/bin/<%= pkg.name %>.bat'
         },
         {
           expand: true,

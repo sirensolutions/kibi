@@ -3,7 +3,7 @@ module.exports = function (grunt) {
     build: {
       options: {
         appDir: '<%= build %>/src',
-        dir: '<%= build %>/kibana/public',
+        dir: '<%= build %>/<%= pkg.name %>/public',
         mainConfigFile: '<%= build %>/src/require.config.js',
         modules: [
           {

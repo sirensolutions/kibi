@@ -24,17 +24,22 @@ module.exports = function (grunt) {
         'Public-Domain'
       ],
       overrides: {
-        'assert-plus@0.1.5': ['MIT'],
+        'FileSaver@undefined': ['MIT'],
+        'amdefine@0.1.1': ['MIT'],
+        'amdefine@1.0.0': ['MIT'],
         'angular-bootstrap@0.10.0': ['MIT'],
         'angular-ui-ace@0.2.3': ['MIT'],
+        'assert-plus@0.1.5': ['MIT'],
         'commander@2.2.0': ['MIT'],
+        'cycle@1.0.3': ['Public-Domain'],
+        'debug@0.7.4': ['MIT'],
         'leaflet@0.7.2': ['BSD-2-Clause'],
         'moment-timezone@0.0.6': ['MIT'],
-        'zeroclipboard@2.2.0': ['MIT'],
-        'FileSaver@undefined': ['MIT'],
-        'cycle@1.0.3': ['Public-Domain'],
+        'ng-tags-input@2.3.0': ['MIT'],
         'pkginfo@0.2.3': ['MIT'],
-        'uglify-js@2.2.5': ['BSD']
+        'rc@1.0.3': ['MIT'],
+        'uglify-js@2.2.5': ['BSD'],
+        'zeroclipboard@2.2.0': ['MIT']
       }
     }
   };

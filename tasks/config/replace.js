@@ -15,17 +15,22 @@ module.exports = function (grunt) {
     dist: {
       files: [
         {
-          src: [join(src, 'server', 'bin', 'kibana.sh')],
-          dest: join(build, 'dist', 'kibana', 'bin', 'kibana'),
+          src: [join(src, 'server', 'bin', 'kibi.sh')],
+          dest: join(build, 'dist', '<%= pkg.name %>', 'bin', '<%= pkg.name %>'),
           mode: 0755
         },
         {
-          src: [join(src, 'server', 'bin', 'kibana.bat')],
-          dest: join(build, 'dist', 'kibana', 'bin', 'kibana.bat')
+          src: [join(src, 'server', 'bin', 'create_symlink.sh')],
+          dest: join(build, 'dist', '<%= pkg.name %>', 'bin', 'create_symlink.sh'),
+          mode: 0755
+        },
+        {
+          src: [join(src, 'server', 'bin', 'kibi.bat')],
+          dest: join(build, 'dist', '<%= pkg.name %>', 'bin', '<%= pkg.name %>.bat')
         },
         {
           src: [join(src, 'server', 'config', 'index.js')],
-          dest: join(build, 'dist', 'kibana', 'src', 'config', 'index.js')
+          dest: join(build, 'dist', '<%= pkg.name %>', 'src', 'config', 'index.js')
         }
       ]
     },

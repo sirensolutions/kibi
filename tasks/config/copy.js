@@ -3,6 +3,17 @@ module.exports = function (grunt) {
   var platforms = grunt.config.get('platforms');
   var config = {
 
+    // added by kibi
+    additional_ace_modes: {
+      files: [
+        {
+          src: '<%= root %>/resources/ace_modes/mode-sparql.js',
+          dest: '<%= root %>/src/kibana/bower_components/ace-builds/src-noconflict/mode-sparql.js'
+        }
+      ]
+    },
+    // added by kibi end
+
     kibana_src: {
       expand: true,
       cwd: '<%= app %>',
@@ -14,46 +25,54 @@ module.exports = function (grunt) {
       files: [
         {
           src: '<%= root %>/package.json',
-          dest: '<%= build %>/kibana/package.json'
+          dest: '<%= build %>/<%= pkg.name %>/package.json'
         },
         {
           src: '<%= server %>/app.js',
-          dest: '<%= build %>/kibana/app.js'
+          dest: '<%= build %>/<%= pkg.name %>/app.js'
         },
         {
           src: '<%= server %>/index.js',
-          dest: '<%= build %>/kibana/index.js'
+          dest: '<%= build %>/<%= pkg.name %>/index.js'
         },
         {
           expand: true,
           cwd: '<%= server %>/bin/',
           src: '**',
-          dest: '<%= build %>/kibana/bin'
+          dest: '<%= build %>/<%= pkg.name %>/bin'
         },
         {
           expand: true,
           cwd: '<%= server %>/config/',
           src: '*.yml',
-          dest: '<%= build %>/kibana/config'
+          dest: '<%= build %>/<%= pkg.name %>/config'
         },
         {
           expand: true,
           cwd: '<%= server %>/lib/',
           src: '**',
-          dest: '<%= build %>/kibana/lib'
+          dest: '<%= build %>/<%= pkg.name %>/lib'
         },
         {
           expand: true,
           cwd: '<%= server %>/routes/',
           src: '**',
-          dest: '<%= build %>/kibana/routes'
+          dest: '<%= build %>/<%= pkg.name %>/routes'
         },
         {
           expand: true,
           cwd: '<%= server %>/views/',
           src: '**',
-          dest: '<%= build %>/kibana/views'
+          dest: '<%= build %>/<%= pkg.name %>/views'
+        },
+        // added by kibi - copy dbdrivers needed for demo
+        {
+          expand: true,
+          cwd: '<%= root %>/resources/dbdrivers/',
+          src: '**',
+          dest: '<%= build %>/<%= pkg.name %>/resources/dbdrivers'
         }
+        // added by kibi end
       ]
     },
 
@@ -62,21 +81,21 @@ module.exports = function (grunt) {
       files: [
         {
           expand: true,
-          cwd: '<%= build %>/kibana',
+          cwd: '<%= build %>/<%= pkg.name %>',
           src: '**',
-          dest: '<%= build %>/dist/kibana/src'
+          dest: '<%= build %>/dist/<%= pkg.name %>/src'
         },
         {
           expand: true,
           cwd: '<%= server %>/config/',
-          src: 'kibana.yml',
-          dest: '<%= build %>/dist/kibana/config/'
+          src: 'kibi.yml',
+          dest: '<%= build %>/dist/<%= pkg.name %>/config/'
         },
         {
           expand: true,
           cwd: '<%= bowerComponentsDir %>/ace-builds/src-noconflict/',
           src: 'worker-json.js',
-          dest: '<%= build %>/dist/kibana/src/public/'
+          dest: '<%= build %>/dist/<%= pkg.name %>/src/public/'
         }
       ]
     },
@@ -89,8 +108,8 @@ module.exports = function (grunt) {
     plugin_readme: {
       files: [
         {
-          src: '<%= build %>/kibana/public/plugins/README.txt',
-          dest: '<%= build %>/dist/kibana/plugins/README.txt'
+          src: '<%= build %>/<%= pkg.name %>/public/plugins/README.txt',
+          dest: '<%= build %>/dist/<%= pkg.name %>/plugins/README.txt'
         }
       ]
     }
@@ -100,15 +119,15 @@ module.exports = function (grunt) {
   platforms.forEach(function (platform) {
     config.versioned_dist.files.push({
       expand: true,
-      cwd: '<%= build %>/dist/kibana',
+      cwd: '<%= build %>/dist/<%= pkg.name %>',
       src: '**',
-      dest: '<%= build %>/dist/kibana-' + version + '-' + platform
+      dest: '<%= build %>/dist/<%= pkg.name %>-' + version + '-' + platform
     });
     config.versioned_dist.files.push({
       expand: true,
       cwd: '<%= root %>/.node_binaries/' + platform,
       src: '**',
-      dest: '<%= build %>/dist/kibana-' + version + '-' + platform + '/node'
+      dest: '<%= build %>/dist/<%= pkg.name %>-' + version + '-' + platform + '/node'
     });
   });
 

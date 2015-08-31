@@ -7,6 +7,7 @@ module.exports = function (grunt) {
     }
 
     var tasks = [
+      'copy:additional_ace_modes',
       'licenses',
       'jshint:source',
       'jscs:source',

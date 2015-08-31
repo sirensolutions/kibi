@@ -1,42 +1,38 @@
 {
-  "name": "kibana",
-  "description": "Kibana is an open source (Apache Licensed), browser based analytics and search dashboard for Elasticsearch. Kibana is a snap to setup and start using. Kibana strives to be easy to get started with, while also being flexible and powerful, just like Elasticsearch.",
+  "name": "kibi",
+  "description": "Kibi extends Kibana with data intelligence features. At the core, kibi can join and filter data live from multiple indexes (elasticsearch) or from SQL/NOSQL sources. Kibana is a trademark of Elasticsearch BV, registered in the U.S. and in other countries.",
   "keywords": [
-    "kibana",
-    "elasticsearch",
-    "logstash",
     "analytics",
-    "visualizations",
-    "dashboards",
-    "dashboarding"
+    "data intelligence",
+    "relational",
+    "SQL",
+    "SPARQL"
   ],
   "private": false,
-  "version": "4.1.1",
+  "version": "0.1.0",
   "main": "src/server/app.js",
-  "homepage": "https://www.elastic.co/products/kibana",
+  "homepage": "http://siren.solutions/kibi",
   "bugs": {
-    "url": "http://github.com/elastic/kibana/issues"
+    "url": "https://github.com/sirensolutions/kibi/issues"
   },
   "license": "Apache-2.0",
-  "author": "Rashid Khan <rashid.khan@elastic.co>",
+  "author": "SIREn Solutions <info@siren.solutions>",
   "contributors": [
-    "Spencer Alger <spencer.alger@elastic.co>",
-    "Chris Cowan <chris.cowan@elastic.co>",
-    "Joe Fleming <joe.fleming@elastic.co>",
-    "Lukas Olson <lukas.olson@elastic.co>",
-    "Juan Thomassie <juan.thomassie@elastic.co>",
-    "Shelby Sturgis <shelby@elastic.co>",
-    "Khalah Jones-Golden <khalah.jones@elastic.co>"
+    "Szymon Danielczyk <szydan@siren.solutions>",
+    "Renaud Delbru <renaud@siren.solutions>",
+    "Stéphane Campinas <stephane@siren.solutions>",
+    "Giovanni Tummarello <giovanni@siren.solutions>",
+    "Fabio Corneti <fabio@siren.solutions>"
   ],
   "scripts": {
     "test": "grunt test",
-    "start": "node ./src/server/bin/kibana.js",
+    "start": "node ./src/server/bin/kibi.js",
     "postinstall": "bower install",
     "precommit": "grunt lintStagedFiles"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/elastic/kibana.git"
+    "url": "https://github.com/sirensolutions/kibi.git"
   },
   "dependencies": {
     "ansicolors": "^0.3.2",

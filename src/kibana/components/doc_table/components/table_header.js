@@ -4,7 +4,7 @@ define(function (require) {
 
   require('filters/short_dots');
 
-  module.directive('kbnTableHeader', function (shortDotsFilter) {
+  module.directive('kbnTableHeader', function (shortDotsFilter, $rootScope) {
     var headerHtml = require('text!components/doc_table/components/table_header.html');
     return {
       restrict: 'A',
@@ -55,8 +55,20 @@ define(function (require) {
         };
 
         $scope.toggleColumn = function (fieldName) {
-          _.toggleInOut($scope.columns, fieldName);
+          if (_.contains($scope.columns, fieldName)) {
+            var ind = $scope.columns.indexOf(fieldName);
+            $scope.columns.splice(ind, 1);
+            $rootScope.$emit('kibi:remove:column', { fieldName: fieldName, index: ind });
+          } else {
+            $scope.columns.push(fieldName);
+          }
         };
+
+        $rootScope.$on('kibi:add:column', function (event, column) {
+          if (column) {
+            $scope.columns.splice(column.index, 0, column.fieldName);
+          }
+        });
 
         $scope.sort = function (column) {
           if (!column || !sortableField(column)) return;

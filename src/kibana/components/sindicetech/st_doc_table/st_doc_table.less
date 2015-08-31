@@ -1,0 +1,22 @@
+@import "../../../styles/theme/_variables.less";
+
+// color the cell when selecting the entity
+tr td.selectedEntityCell {
+  background-color: @entity-bg;
+  color: #fff;
+}
+
+// style the cell as an anchor link when the click action is to follow an URL
+.click {
+  color: @link-color;
+  text-decoration: underline;
+  display: block;
+  &:hover {
+    cursor: pointer;
+    color: @link-hover-color;
+  }
+}
+
+.click div.truncate-by-height {
+  .click
+}

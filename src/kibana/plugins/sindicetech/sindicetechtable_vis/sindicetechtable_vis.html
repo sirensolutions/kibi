@@ -1,0 +1,17 @@
+<div ng-controller="KbnSindicetechtableVisController" class="sindicetechtable-vis">
+
+  <st-param-entity-uri entity-uri-holder="holder"></st-param-entity-uri>
+
+  <st-doc-table
+    search-source="savedObj.searchSource"
+    sorting="savedObj.sort"
+    columns="savedObj.columns"
+    filter="filter"
+
+    cell-click-handlers="cellClickHandlers"
+    query-column="queryColumn"
+
+    class="panel-content">
+  </st-doc-table>
+
+</div>

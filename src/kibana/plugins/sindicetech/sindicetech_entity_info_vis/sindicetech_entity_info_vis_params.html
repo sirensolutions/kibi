@@ -1,0 +1,88 @@
+<div id="sindicetech_entity_info_vis_params" class="sindicetech-entity-info-vis-params">
+
+
+  <ul>
+    <li ng-repeat="queryOption in vis.params.queryOptions" class="queryOptionArea" >
+      <div class="header">
+        <h2>Query {{$index + 1}}</h2>
+      </div>
+
+      <div class="content">
+        <div class="form-group">
+          <label>Source query id</label></br>
+          <st-select required="true" object-type="query" ng-model="queryOption.queryId"></st-select>
+        </div>
+
+        <div class="form-group">
+          <label>Template</label>
+          <a ng-if="queryOption.templateId && queryOption.templateId !== ''" ng-click="editTemplate($index)" > Edit selected template</a></br>
+          <st-select required="true" object-type="template" ng-model="queryOption.templateId"></st-select>
+        </div>
+
+        <div class="vis-editor-agg-editor-advanced-toggle">
+          <a ng-click="advancedToggled = !advancedToggled">
+            <i aria-hidden="true" class="fa fa-caret-down"
+            ng-class="{'fa-caret-down': advancedToggled, 'fa-caret-left': !advancedToggled}"></i>
+            Advanced
+          </a>
+        </div>
+
+        <div ng-show="advancedToggled">
+
+          <label>Template variables</label>
+          <div ui-ace="{ onLoad: aceLoaded, mode: 'json', workerPath: 'bower_components/ace-builds/src-noconflict' }" msd-elastic id="templateVars-{{$index}}" ng-model="queryOption._templateVarsString" class="form-control templateVariablesEditor">
+          </div>
+
+          <div class="form-group">
+            <input type="checkbox" ng-model="queryOption.open" />
+            <label>Render opened</label>
+          </div>
+          <div class="form-group">
+            <input type="checkbox" ng-model="queryOption.showFilterButton" />
+            <label>Show relational filter button</label>
+          </div>
+
+          <div ng-if="queryOption.showFilterButton" >
+
+            <div class="form-group">
+              <label>Source query variable</label></br>
+              <st-select required="true" object-type="queryVariable" query-id="queryOption.queryId" ng-model="queryOption.queryVariableName"></st-select>
+            </div>
+
+            <div class="form-group">
+              <label>Target index</label>
+              <st-select required="true" object-type="indexPattern" ng-model="queryOption.targetIndex"></st-select>
+            </div>
+            <div class="form-group">
+              <label>Target field</label>
+              <st-select required="true" object-type="field" index-pattern-id="queryOption.targetIndex" ng-model="queryOption.targetField"></st-select>
+            </div>
+            <div class="form-group">
+              <label>Target dashboard</label>
+              <st-select object-type="dashboard" ng-model="queryOption.redirectToDashboard"></st-select>
+            </div>
+          </div>
+
+
+        </div>
+
+        <div class="btn-group rightCorner">
+          <button class="btn btn-xs btn-default" ng-click="upQuery($index)" >
+            <i class="fa fa-caret-up"></i>
+          </button>
+          <button class="btn btn-xs btn-default" ng-click="downQuery($index)" >
+            <i class="fa fa-caret-down"></i>
+          </button>
+          <button class="btn btn-xs btn-danger" ng-click="removeQuery($index)" >
+            <i class="fa fa-times"></i>
+          </button>
+        </div>
+
+      </div>
+    </li>
+  </ul>
+  <button class="btn btn-xs btn-success" ng-click="addQuery()" >
+    <span>Add query</span> <i class="fa fa-plus"></i>
+  </button>
+
+</div>

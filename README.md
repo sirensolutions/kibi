@@ -1,45 +1,58 @@
-# Kibana 4.1.1
+# Kibi 0.1.0
 
-[![Build Status](https://travis-ci.org/elastic/kibana.svg?branch=master)](https://travis-ci.org/elastic/kibana?branch=master)
+Kibi extends Kibana 4.1 with data intelligence features; the core feature of
+Kibi is the capability to join and filter data from multiple Elasticsearch
+indexes and from SQL/NOSQL data sources ("external queries").
 
-Kibana is an open source ([Apache Licensed](https://github.com/elastic/kibana/blob/master/LICENSE.md)), browser based analytics and search dashboard for Elasticsearch. Kibana is a snap to setup and start using. Kibana strives to be easy to get started with, while also being flexible and powerful, just like Elasticsearch.
+In addition, Kibi provides UI features and visualizations like dashboard
+groups, tabs, cross entity relational navigation buttons, an enhanced search
+results table, analytical aggregators, HTML templates on query results, and
+much more.
 
-## Requirements
+## Quick start
 
-- Elasticsearch version 1.4.4 or later
-- Kibana binary package
+* Download the Kibi demo distribution: [http://siren.solutions/kibi](http://siren.solutions/kibi)
+* Start Elasticsearch by running `elasticsearch\bin\elasticsearch` on Linux/OS X or `elasticsearch\bin\elasticsearch.bat` on Windows.
+* Go to the `kibi` directory and run `bin/kibi` on Linux/OS X or `bin\kibi.bat` on Windows.
+* Visit [http://localhost:5602](http://localhost:5602)
 
-## Installation
-
-* Download: [http://www.elastic.co/downloads/kibana](http://www.elastic.co/downloads/kibana)
-* Run `bin/kibana` on unix, or `bin\kibana.bat` on Windows.
-* Visit [http://localhost:5601](http://localhost:5601)
-
-## Quick Start
-
-You're up and running! Fantastic! Kibana is now running on port 5601, so point your browser at http://YOURDOMAIN.com:5601.
-
-The first screen you arrive at will ask you to configure an **index pattern**. An index pattern describes to Kibana how to access your data. We make the guess that you're working with log data, and we hope (because it's awesome) that you're working with Logstash. By default, we fill in `logstash-*` as your index pattern, thus the only thing you need to do is select which field contains the timestamp you'd like to use. Kibana reads your Elasticsearch mapping to find your time fields - select one from the list and hit *Create*.
-
-**Tip:** there's an optimization in the way of the *Use event times to create index names* option. Since Logstash creates an index every day, Kibana uses that fact to only search indices that could possibly contain data in your selected time range.
-
-Congratulations, you have an index pattern! You should now be looking at a paginated list of the fields in your index or indices, as well as some informative data about them. Kibana has automatically set this new index pattern as your default index pattern. If you'd like to know more about index patterns, pop into to the [Settings](#settings) section of the documentation.
-
-**Did you know:** Both *indices* and *indexes* are acceptable plural forms of the word *index*. Knowledge is power.
-
-Now that you've configured an index pattern, you're ready to hop over to the [Discover](#discover) screen and try out a few searches. Click on **Discover** in the navigation bar at the top of the screen.
+A preconfigured Kibi is now running at [http://localhost:5602](http://localhost:5602)
+and you can try its features on a dataset based on the [CrunchBase](http://www.crunchbase.com) Dataset;
+a complete description of the demo is available in the Kibi documentation.
 
 ## Documentation
 
-Visit [Elastic.co](http://www.elastic.co/guide/en/kibana/current/index.html) for the full Kibana documentation.
+Visit [siren.solutions](http://siren.solutions/kibi/docs) for the full Kibi
+documentation.
 
-## Snapshot Builds
+## License
 
-For the daring, snapshot builds are available. These builds are created after each commit to the master branch, and therefore are not something you should run in production.
+Copyright (c) 2015 SIREn Solutions
 
-| platform |  |  |
-| --- | --- | --- |
-| OSX | [tar](http://download.elastic.co/kibana/kibana/kibana-4.1.1-darwin-x64.tar.gz) | [zip](http://download.elastic.co/kibana/kibana/kibana-4.1.1-darwin-x64.zip) |
-| Linux x64 | [tar](http://download.elastic.co/kibana/kibana/kibana-4.1.1-linux-x64.tar.gz) | [zip](http://download.elastic.co/kibana/kibana/kibana-4.1.1-linux-x64.zip) |
-| Linux x86 | [tar](http://download.elastic.co/kibana/kibana/kibana-4.1.1-linux-x86.tar.gz) | [zip](http://download.elastic.co/kibana/kibana/kibana-4.1.1-linux-x86.zip) |
-| Windows | [tar](http://download.elastic.co/kibana/kibana/kibana-4.1.1-windows.tar.gz) | [zip](http://download.elastic.co/kibana/kibana/kibana-4.1.1-windows.zip) |
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+this software except in compliance with the License. You may obtain a copy of
+the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed
+under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+CONDITIONS OF ANY KIND, either express or implied. See the License for the
+specific language governing permissions and limitations under the License.
+
+To enable index join capabilities, Kibi relies on the the Siren 2
+Elasticsearch plugin. The Kibi binary distribution includes a pre release of
+Siren 2 that is licensed exclusively for personal use, development and
+accredited academic research. For a production license of Siren 2 please
+contact info@siren.solutions .
+
+## Acknowledgments
+
+Kibana is a trademark of Elasticsearch BV, registered in the U.S. and in other
+countries.
+
+Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in
+other countries.
+
+CrunchBase and CrunchBase Dataset are trademarks of AOL Inc, registered in the U.S.
+and in other countries.

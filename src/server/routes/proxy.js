@@ -10,8 +10,11 @@ var target = url.parse(config.elasticsearch);
 var join = require('path').join;
 var logger = require('../lib/logger');
 var validateRequest = require('../lib/validateRequest');
-
+var util = require('../lib/sindicetech/util');
 var filterJoin = require('../lib/sindicetech/filterJoin');
+var dbfilter = require('../lib/sindicetech/dbfilter');
+var inject = require('../lib/sindicetech/inject');
+var queryEngine = require('../lib/sindicetech/queryEngine');
 
 // If the target is backed by an SSL and a CA is provided via the config
 // then we need to inject the CA
@@ -42,6 +45,29 @@ router.use(function (req, res, next) {
   });
 });
 
+/**
+ * Pre-process the query and apply the custom parts of the query
+ */
+router.use(function (req, res, next) {
+  /* Manipulate a set of queries, at the end of which the resulting queries
+   * must be concatenated back into a Buffer. The queries in the body are
+   * separated by a newline.
+   */
+  util.getQueriesAsPromise(req.rawBody).map(function (query) {
+    return dbfilter(queryEngine, query);
+  }).map(function (query) {
+    return filterJoin(query);
+  }).then(function (data) {
+    var buffers = _.map(data, function (query) {
+      return new Buffer(JSON.stringify(query) + '\n');
+    });
+    req.rawBody = Buffer.concat(buffers);
+    next();
+  }).catch(function (err) {
+    _error(res, err);
+  });
+});
+
 router.use(function (req, res, next) {
   try {
     validateRequest(req);
@@ -64,7 +90,11 @@ router.use(function (req, res, next) {
 
   // Add a slash to the end of the URL so resolve doesn't remove it.
   var path = (/\/$/.test(uri.path)) ? uri.path : uri.path + '/';
-  path = url.resolve(path, '.' + req.url);
+
+  // szydan: !!! remove that '.' it breakes everything when elasticsearch runs behind a proxy
+  // e.g: http://localhost/bla/bla
+  // path = url.resolve(path, '.' + req.url);
+  path = url.resolve(path, req.url);
 
   if (uri.auth) {
     var auth = new Buffer(uri.auth);
@@ -105,8 +135,22 @@ router.use(function (req, res, next) {
     options.agentOptions.key = clientKey;
   }
 
+  var savedQueries = {};
   // Only send the body if it's a PATCH, PUT, or POST
   if (req.rawBody) {
+    // Remove the custom queries from the body
+    var queries = _.map(util.getQueries(req.rawBody), function (query) {
+      savedQueries = inject.save(query);
+      return new Buffer(JSON.stringify(query) + '\n');
+    });
+    req.rawBody = Buffer.concat(queries);
+    if (logger.level() <= 20) {
+      var dbgQueries = _.map(util.getQueries(req.rawBody), function (query) {
+        return query;
+      });
+      logger.debug({ queries: dbgQueries });
+    }
+
     options.headers['content-length'] = req.rawBody.length;
     options.body = req.rawBody.toString('utf8');
   } else {
@@ -121,23 +165,54 @@ router.use(function (req, res, next) {
   }
 
   // Create the request and pipe the response
+  var chunks = [];
   var esRequest = request(options);
   esRequest.on('error', function (err) {
-    logger.error({ err: err });
-    var code = 502;
-    var body = { message: 'Bad Gateway' };
-
-    if (err.code === 'ECONNREFUSED') {
-      body.message = 'Unable to connect to Elasticsearch';
+    _error(res, err);
+  }).on('response', function (response) {
+    // Copy the headers
+    _.each(response.headers, function (v, k) {
+      res.setHeader(k, v);
+    });
+    // Set the status code
+    res.statusCode = response.statusCode;
+  }).on('data', function (data) {
+    // buffers the chunks of data
+    chunks.push(data);
+  }).on('end', function () {
+    // Modify the response if necessary
+    var data = Buffer.concat(chunks);
+    if (data.length !== 0) {
+      inject.runSavedQueries(JSON.parse(data.toString()), queryEngine, savedQueries)
+      .then(function (r) {
+        data = new Buffer(JSON.stringify(r));
+        res.setHeader('Content-Length', data.length);
+        res.end(data);
+      }).catch(function (err) {
+        _error(res, err);
+      });
+    } else {
+      res.end(data);
     }
-
-    if (err.message === 'DEPTH_ZERO_SELF_SIGNED_CERT') {
-      body.message = 'SSL handshake with Elasticsearch failed';
-    }
-
-    body.err = err.message;
-    if (!res.headersSent) res.status(code).json(body);
   });
-  esRequest.pipe(res);
 });
 
+/**
+ * Set the http error
+ */
+function _error(res, err) {
+  logger.error({ err: err });
+  var code = 502;
+  var body = { message: 'Bad Gateway' };
+
+  if (err.code === 'ECONNREFUSED') {
+    body.message = 'Unable to connect to Elasticsearch';
+  }
+
+  if (err.message === 'DEPTH_ZERO_SELF_SIGNED_CERT') {
+    body.message = 'SSL handshake with Elasticsearch failed';
+  }
+
+  body.err = err.message;
+  if (!res.headersSent) res.status(code).json(body);
+}

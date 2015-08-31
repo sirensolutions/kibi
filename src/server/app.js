@@ -11,6 +11,7 @@ var config = require('./config');
 
 var routes = require('./routes/index');
 var proxy = require('./routes/proxy');
+var datasourceApi = require('./routes/datasource_api');
 
 var app = express();
 
@@ -27,6 +28,9 @@ app.use(favicon(path.join(config.public_folder, 'styles', 'theme', 'elk.ico')));
 if (app.get('env') === 'development') {
   require('./dev')(app);
 }
+
+app.use('/datasource', datasourceApi);
+
 
 // The proxy must be set up before all the other middleware.
 // TODO: WE might want to move the middleware to each of the individual routes

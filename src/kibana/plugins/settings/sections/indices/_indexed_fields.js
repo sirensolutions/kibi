@@ -1,6 +1,7 @@
 define(function (require) {
   var _ = require('lodash');
   require('components/paginated_table/paginated_table');
+  var isRetrieved = require('./retrieved_field');
 
   require('modules').get('apps/settings')
   .directive('indexedFields', function () {
@@ -23,12 +24,15 @@ define(function (require) {
           { title: 'format' },
           { title: 'analyzed', info: 'Analyzed fields may require extra memory to visualize' },
           { title: 'indexed', info: 'Fields that are not indexed are unavailable for search' },
+          { title: 'retrieved', info: 'Fields that are not retrieved as part of the _source object per hit' },
           { title: 'controls', sortable: false }
         ];
 
         $scope.$watchCollection('indexPattern.fields', function () {
           // clear and destroy row scopes
           _.invoke(rowScopes.splice(0), '$destroy');
+
+          var sourceFiltering = $scope.indexPattern.getSourceFiltering();
 
           $scope.rows = $scope.indexPattern.getNonScriptedFields().map(function (field) {
             var childScope = _.assign($scope.$new(), { field: field });
@@ -53,6 +57,9 @@ define(function (require) {
               {
                 markup: field.indexed ? yesTemplate : noTemplate,
                 value: field.indexed
+              },
+              {
+                markup: isRetrieved(sourceFiltering, field.displayName) ? yesTemplate : noTemplate
               },
               {
                 markup: controlsHtml,

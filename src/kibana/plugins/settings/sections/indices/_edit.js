@@ -2,6 +2,7 @@ define(function (require) {
   var _ = require('lodash');
   require('plugins/settings/sections/indices/_indexed_fields');
   require('plugins/settings/sections/indices/_scripted_fields');
+  require('plugins/settings/sections/indices/_source_filtering');
   require('plugins/settings/sections/indices/_index_header');
 
   require('routes')

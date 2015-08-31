@@ -4,7 +4,9 @@ define(function (require) {
   var template = require('text!components/filter_bar/filter_bar.html');
   var moment = require('moment');
 
-  module.directive('filterBar', function (Private, Promise, getAppState) {
+  require('components/kibi/entity_clipboard/entity_clipboard');
+
+  module.directive('filterBar', function (Private, Promise, getAppState, globalState) {
     var mapAndFlattenFilters = Private(require('components/filter_bar/lib/mapAndFlattenFilters'));
     var mapFlattenAndWrapFilters = Private(require('components/filter_bar/lib/mapFlattenAndWrapFilters'));
     var extractTimeFilter = Private(require('components/filter_bar/lib/extractTimeFilter'));
@@ -12,6 +14,8 @@ define(function (require) {
     var filterAppliedAndUnwrap = require('components/filter_bar/lib/filterAppliedAndUnwrap');
     var changeTimeFilter = Private(require('components/filter_bar/lib/changeTimeFilter'));
     var queryFilter = Private(require('components/filter_bar/query_filter'));
+
+    var urlHelper   = Private(require('components/sindicetech/urlHelper/urlHelper'));
 
     return {
       restrict: 'E',
@@ -107,6 +111,15 @@ define(function (require) {
         }
 
         updateFilters();
+
+        //needed by kibi to show filterbar when entityClipboard contains an entity
+        var getShowEntityClipboard = function () {
+          return !!globalState.entityURI && urlHelper.isItDashboardUrl();
+        };
+        $scope.showEntityClipboard = getShowEntityClipboard();
+        globalState.on('save_with_changes', function () {
+          $scope.showEntityClipboard = getShowEntityClipboard();
+        });
       }
     };
   });

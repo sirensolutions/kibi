@@ -1,0 +1,57 @@
+<div ng-show="entityUriHolder.visible" class="form-group">
+  <label>Entity URI</label>
+  <span class="small-note" ng-show="entityUriHolder.entityURIEnabled">
+    is required by a query. If not provided some results might be missing.
+  </span>
+  <span class="small-note" ng-show="!entityUriHolder.entityURIEnabled">
+    is NOT required by any query.
+  </span>
+  <span class="small-note pull-right" ng-click="showHelp = !showHelp">Help <i class="fa fa-info"></i></span>
+
+  <div class="hintbox" ng-show="showHelp">
+    <h4 class="hintbox-heading">
+      <i class="fa fa-question-circle text-info"></i> Entity URI Schemas
+    </h4>
+    <!-- TODO: change to 3 when uncommenting info about REST -->
+    <p>There are 2 different uri schemas for passing parameters to parametric queries:</p>
+    <ul>
+      <li>
+         <strong>sql://@TABLE@/@PKVALUE@</strong> for sql queries</br>
+         Example: <i>sql://people/123</i>
+      </li>
+      <li>
+         <strong>@URI@</strong> for sparql queries</br>
+         Example: <i>http://example.com/people/123</i>
+      </li>
+      <!-- TODO: uncoment when we officialy support REST
+      <li>
+         <strong>rest://@VAR0@</strong> for rest queries</br>
+         Example: <i>rest://123</i>
+      </li>
+       -->
+    </ul>
+    <p>Query is parametric when it contains one of the following placeholders:<p>
+    <ul>
+      <li>
+         <strong>@TABLE@</strong> or <strong>@PKVALUE@</strong> for sql queries
+      </li>
+      <li>
+         <strong>@URI@</strong> for sparql queries
+      </li>
+      <!-- TODO: uncoment when we officialy support REST
+      <li>
+         <strong>@VAR0@</strong> for rest queries
+      </li>
+      -->
+    </ul>
+
+  </div>
+  <input
+    type="text"
+    name="entityURI"
+    ng-model="entityUriHolder.entityURI"
+    ng-disabled="!entityUriHolder.entityURIEnabled"
+    placeholder="{{placeholder}}"
+    ng-required="entityUriHolder.entityURIEnabled"
+    class="form-control"/>
+</div>

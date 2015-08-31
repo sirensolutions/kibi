@@ -44,6 +44,14 @@ filter-bar .confirm {
   }
 }
 
+/* prevent bar from colapsing when there is only entityClipboard present */
+filter-bar .bar:after{
+  content: " ";
+  display: block;
+  height: 0;
+  clear: both;
+}
+
 filter-bar .bar {
   padding: 6px 6px 4px 6px;
   background: @gray-lighter;

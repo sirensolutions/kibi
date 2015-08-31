@@ -15,6 +15,9 @@ define(function (require) {
         to: '='
       },
       link: function ($scope, $elem) {
+        var splitTemplate = _.template('<span class="from"><%= from %></span>' +
+          '<span class="separator"><%= separator %></span>' +
+          '<span class="to"><%= to %></span>');
         var dateFormat = config.get('dateFormat');
 
         var lookupByRange = {};
@@ -23,6 +26,7 @@ define(function (require) {
         });
 
         var stringify = function () {
+          $elem.removeClass('cant-lookup');
           var text;
           // If both parts are date math, try to look up a reasonable string
           if ($scope.from && $scope.to && !moment.isMoment($scope.from) && !moment.isMoment($scope.to)) {
@@ -49,6 +53,7 @@ define(function (require) {
         };
 
         var cantLookup = function () {
+          $elem.addClass('cant-lookup');
           var display = {};
           _.each(['from', 'to'], function (time) {
             if (moment.isMoment($scope[time])) {
@@ -62,7 +67,11 @@ define(function (require) {
               }
             }
           });
-          $elem.text(display.from + ' to ' + display.to);
+          $elem.html(splitTemplate({
+            from: display.from,
+            separator: ' to ',
+            to: display.to
+          }));
         };
 
         $scope.$watch('from', stringify);

@@ -1,0 +1,35 @@
+<div ng-controller="SindicetechWordcloudVisController" class="sindicetech-wordcloud-vis">
+
+  <div ng-if="!hasSomeRows && hasSomeRows !== null" class="table-vis-error">
+    <h2><i class="fa fa-meh-o"></i></h2>
+    <h4>No results found</h4>
+  </div>
+
+  <!-- Do not set autoResize="true" as it does not work well and our fork of jqcloud takes care about resizing -->
+
+  <div class="wordcloud-containter">
+    <jqcloud ng-if="options.colors"
+      words="options.words"
+      width="options.width"
+      height="options.height"
+      colors={{options.colors}}
+      delay="5"
+      shape="rectangular"
+      steps="7"
+      font-size="{from:0.06, to:0.02}"
+      autoResize="false"
+      removeOverflowing="true" ></jqcloud>
+
+    <jqcloud ng-if="!options.colors"
+      words="options.words"
+      width="options.width"
+      height="options.height"
+      delay="5"
+      shape="rectangular"
+      steps="7"
+      font-size="{from:0.06, to:0.02}"
+      autoResize="false"
+      removeOverflowing="true" ></jqcloud>
+
+  </div>
+</div>

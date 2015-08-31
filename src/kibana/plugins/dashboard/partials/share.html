@@ -5,9 +5,20 @@
       <label>
         Embed this dashboard.
         <kbn-clipboard copy="opts.shareData().embed"></kbn-clipboard>
-        <small>Add to your html source. Note all clients must still be able to access kibana</small>
+        <small>Add to your html source. All clients must have access to Kibi.</small>
       </label>
       <div class="form-control" disabled>{{opts.shareData().embed}}</div>
+    </div>
+  </p>
+
+  <p>
+    <div class="input-group">
+      <label>
+        Embed all dashboards.
+        <kbn-clipboard copy="opts.shareData().embedAllDashboards"></kbn-clipboard>
+        <small>Add to your html source. All clients must have access to Kibi.</small>
+      </label>
+      <div class="form-control" disabled>{{opts.shareData().embedAllDashboards}}</div>
     </div>
   </p>
 

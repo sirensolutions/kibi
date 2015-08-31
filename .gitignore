@@ -4,6 +4,7 @@
 node_modules
 bower_components
 **/*.css
+**/*.css.map
 trash
 build
 target
@@ -13,3 +14,10 @@ target
 *.log
 esvm
 .htpasswd
+/resources/data
+/resources/dbdrivers/mysql-connector-java-5.1.35-bin.jar
+/resources/dbdrivers/postgresql-9.4-1201.jdbc41.jar
+
+**/*.css.map
+# in kibi-docs there are some files like .css that are normally ignored
+!kibi-docs/src/**

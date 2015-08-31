@@ -1,4 +1,10 @@
 module.exports = function (grunt) {
+
+
+  // added by kibi - measures the time each task takes
+  require('time-grunt')(grunt);
+
+
   // set the config once before calling load-grunt-config
   // and once durring so that we have access to it via
   // grunt.config.get() within the config files
@@ -52,11 +58,56 @@ module.exports = function (grunt) {
       '<%= plugins %>/visualize/styles/main.less',
       '<%= plugins %>/table_vis/table_vis.less',
       '<%= plugins %>/metric_vis/metric_vis.less',
-      '<%= plugins %>/markdown_vis/markdown_vis.less'
-    ]
+      '<%= plugins %>/markdown_vis/markdown_vis.less',
+      '<%= src %>/kibana/components/agg_types/styles/*.less',
+      '<%= plugins %>/sindicetech/**/*.less',
+      '<%= src %>/kibana/directives/st_*.less',
+      '<%= src %>/kibana/components/sindicetech/**/*.less',
+      '<%= src %>/kibana/components/kibi/**/*.less'
+    ],
+    newer: {
+      options: {
+        override: function (details, include) {
+          if (details.task === 'less') {
+            checkForNewerImports(details.path, details.time, include);
+          }
+          else {
+            include(false);
+          }
+        }
+      }
+    }
   };
 
   grunt.config.merge(config);
+
+  //checkForNewerImports function taken from gist at
+  // https://gist.github.com/migreva/2a926b95f25366da657c
+  var fs = require('fs');
+  var path = require('path');
+
+  function checkForNewerImports(lessFile, mTime, include) {
+    fs.readFile(lessFile, 'utf8', function (err, data) {
+      var lessDir = path.dirname(lessFile);
+      var regex = /@import "(.+?)(\.less)?";/g;
+      var shouldInclude = false;
+      var match;
+
+      while ((match = regex.exec(data)) !== null) {
+        // All of my less files are in the same directory,
+        // other paths may need to be traversed for different setups...
+        var importFile = lessDir + '/' + match[1] + '.less';
+        if (fs.existsSync(importFile)) {
+          var stat = fs.statSync(importFile);
+          if (stat.mtime > mTime) {
+            shouldInclude = true;
+            break;
+          }
+        }
+      }
+      include(shouldInclude);
+    });
+  }
 
   var dirname = require('path').dirname;
   var indexFiles = grunt.file.expand({ cwd: 'src/kibana/plugins' }, [

@@ -58,7 +58,16 @@
     "requirefrom": "^0.2.0",
     "semver": "^4.2.0",
     "serve-favicon": "^2.2.0",
-    "through": "^2.3.6"
+    "through": "^2.3.6",
+    "handlebars": "2.0.0",
+    "amdefine": ">=0.1.0",
+    "request-promise": "0.4.0",
+    "lru-cache":"~2.6.4",
+    "mysql":"2.5.5",
+    "pg":"4.3.0",
+    "jdbc-sindicetech": "0.0.14-pre2",
+    "jsonutils" : "sindicetech/jsonutils#1.0.0",
+    "sqlite3": "3.0.9"
   },
   "devDependencies": {
     "bower": "^1.4.1",
@@ -90,7 +99,7 @@
     "istanbul": "^0.2.4",
     "license-checker": "3.0.3",
     "load-grunt-config": "^0.7.0",
-    "marked": "^0.3.2",
+    "marked": "0.3.2",
     "marked-text-renderer": "^0.1.0",
     "mkdirp": "^0.5.0",
     "mocha": "^2.2.5",

@@ -64,3 +64,6 @@ var config = module.exports = {
 };
 
 config.plugins = listPlugins(config);
+//A list of elasticsearch plugins enabled on all known nodes at startup
+config.elasticsearch_plugins = null;
+

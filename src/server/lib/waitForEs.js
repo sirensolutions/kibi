@@ -40,6 +40,41 @@ function waitForShards() {
   });
 }
 
+function waitForPluginList() {
+  return client.cat.nodes({'h': 'name'})
+  .then(function (resp) {
+    var nodes = resp.split('\n').filter(function (node) {
+      return !!node;
+    });
+    return client.cat.plugins({'h': 'component'})
+    .then(function (resp) {
+      if (resp) {
+        var plugin_counts = resp.split('\n').filter(function (plugin) {
+          return !!plugin;
+        }).map(function (plugin) {
+          return plugin.trim();
+        }).reduce(function (prev, curr, index, array) {
+          if (prev[curr]) {
+            prev[curr] += 1;
+          } else {
+            prev[curr] = 1;
+          }
+          return prev;
+        }, {});
+
+        config.elasticsearch_plugins = [];
+        for (var plugin_name in plugin_counts) {
+          if (plugin_counts[plugin_name] === nodes.length) {
+            config.elasticsearch_plugins.push(plugin_name);
+          }
+        }
+      } else {
+        config.elasticsearch_plugins = [];
+      }
+    });
+  });
+}
+
 module.exports = function () {
-  return waitForPong().then(waitForShards);
+  return waitForPong().then(waitForShards).then(waitForPluginList);
 };

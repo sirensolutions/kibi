@@ -21,6 +21,8 @@ define(function (require) {
         var serviceObj = registry.get($routeParams.service);
         var service = $injector.get(serviceObj.service);
 
+        var dashboardGroupHelper = Private(require('components/kibi/dashboard_group_helper/dashboard_group_helper'));
+
         /**
          * Creates a field definition and pushes it to the memo stack. This function
          * is designed to be used in conjunction with _.reduce(). If the
@@ -159,15 +161,42 @@ define(function (require) {
          * @returns {type} description
          */
         $scope.delete = function () {
-          es.delete({
-            index: config.file.kibana_index,
-            type: service.type,
-            id: $routeParams.id
-          })
-          .then(function (resp) {
-            return redirectHandler('deleted');
-          })
-          .catch(notify.fatal);
+
+          var _delete = function () {
+            es.delete({
+              index: config.file.kibana_index,
+              type: service.type,
+              id: $routeParams.id
+            })
+            .then(function (resp) {
+              return redirectHandler('deleted');
+            })
+            .catch(notify.fatal);
+          };
+
+
+          // added by sindicetech to prevent deletion of a dashboard which is referenced by dashboardgroup
+          if (service.type === 'dashboard') {
+
+            dashboardGroupHelper.isDashboardInAnyDashboardGroup([$routeParams.id]).then(function (dashboardGroupNames) {
+              if (dashboardGroupNames && dashboardGroupNames.length > 0) {
+                var msg =
+                  'Dashboard [' + $routeParams.id + '] is reffered by following dashboardGroup' +
+                  (dashboardGroupNames.length > 1 ? 's' : '') + ':\n' +
+                  dashboardGroupNames.join(', ') + '\n' +
+                  'Please edit the group' + (dashboardGroupNames.length > 1 ? 's' : '') +
+                  ' and remove the dashboard from its configuration first.';
+                $window.alert(msg);
+                return;
+              } else {
+                _delete();
+              }
+            });
+
+          } else {
+            _delete();
+          }
+          // sindicetech end
         };
 
         $scope.submit = function () {

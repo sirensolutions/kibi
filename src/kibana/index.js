@@ -19,7 +19,9 @@ define(function (require) {
     'elasticsearch',
     'pasvaz.bindonce',
     'ngRoute',
-    'ngClipboard'
+    'ngClipboard',
+    'angular-jqcloud',
+    'eeg-angular'
   ]);
 
 
@@ -46,7 +48,7 @@ define(function (require) {
   // setup routes
   routes
     .otherwise({
-      redirectTo: '/' + configFile.default_app_id
+      redirectTo:  '/default'
     });
 
   // tell the modules util to add it's modules as requirements for kibana

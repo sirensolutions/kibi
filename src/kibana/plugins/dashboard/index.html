@@ -1,4 +1,14 @@
 <div dashboard-app class="app-container dashboard-container">
+
+  <!--
+  kibi - all parts commented below are moved outside the dashboard-app
+
+  the name of dashboard is no needed as we now use st-nav-bar
+  the query form is now in st-dashboard-search
+  the toolbar is now in    st-dashboard-toolbar
+
+  For now this commented code will stay here just in case we would like to change it back
+
   <navbar ng-show="!appEmbedded">
     <span class="name" ng-if="dash.id" bindonce bo-bind="dash.title" tooltip="{{dash.title}}"></span>
 
@@ -75,6 +85,7 @@
       </kbn-tooltip>
     </div>
   </navbar>
+   -->
 
   <config config-template="configTemplate" config-object="opts"></config>
 

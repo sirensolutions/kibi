@@ -14,9 +14,13 @@ define(function (require) {
 
   require('modules').get('apps/settings')
   .directive('kbnSettingsObjects', function (config, Notifier, Private, kbnUrl, queryEngineClient) {
+
+    var dashboardGroupHelper = Private(require('components/kibi/dashboard_group_helper/dashboard_group_helper'));
+    var cache = Private(require('components/sindicetech/cache_helper/cache_helper'));
+
     return {
       restrict: 'E',
-      controller: function ($scope, $injector, $q, AppState, es) {
+      controller: function ($scope, $injector, $q, AppState, es, $window) {
         var notify = new Notifier({ location: 'Saved Objects' });
 
         var $state = $scope.state = new AppState();
@@ -77,7 +81,31 @@ define(function (require) {
         };
 
         $scope.bulkDelete = function () {
-          $scope.currentTab.service.delete(_.pluck($scope.selectedItems, 'id')).then(refreshData);
+
+          var _delete = function () {
+            $scope.currentTab.service.delete(_.pluck($scope.selectedItems, 'id')).then(cache.flush).then(refreshData);
+          };
+
+          // added by kibi to prevent deletion of a dashboard which is referenced by dashboardgroup
+          if ($scope.currentTab.service.type === 'dashboard') {
+            dashboardGroupHelper.isDashboardInAnyDashboardGroup(_.pluck($scope.selectedItems, 'id')).then(function (dashboardGroupNames) {
+              if (dashboardGroupNames && dashboardGroupNames.length > 0) {
+                var msg =
+                  'One of the selected dashboards is reffered by following dashboardGroup' +
+                  (dashboardGroupNames.length > 1 ? 's' : '') + ':\n' +
+                  dashboardGroupNames.join(', ') + '\n' +
+                  'Please edit the group' + (dashboardGroupNames.length > 1 ? 's' : '') +
+                  ' and remove the dashboard from its configuration first.';
+                $window.alert(msg);
+                return;
+              } else {
+                _delete();
+              }
+            });
+          } else {
+            _delete();
+          }
+          // kibi end
         };
 
         $scope.bulkExport = function () {

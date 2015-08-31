@@ -13,7 +13,10 @@ define(function (require) {
   });
 
   // This is the only thing that gets injected into controllers
-  module.service('savedDashboards', function (Promise, SavedDashboard, config, es, kbnUrl) {
+  module.service('savedDashboards', function (Promise, SavedDashboard, config, es, kbnUrl, Private) {
+
+    var cache = Private(require('components/sindicetech/cache_helper/cache_helper'));
+    var self = this;
     this.type = SavedDashboard.type;
     this.Class = SavedDashboard;
 
@@ -37,7 +40,6 @@ define(function (require) {
 
 
     this.find = function (searchString) {
-      var self = this;
       var body;
       if (searchString) {
         body = {
@@ -53,6 +55,12 @@ define(function (require) {
         body = { query: {match_all: {}}};
       }
 
+      // cache the results of this method
+      var cacheKey = 'savedDashboards' + ( searchString ? searchString : '' );
+      if (cache && cache.get(cacheKey)) {
+        return Promise.resolve(cache.get(cacheKey));
+      }
+
       return es.search({
         index: config.file.kibana_index,
         type: 'dashboard',
@@ -60,7 +68,7 @@ define(function (require) {
         size: 100
       })
       .then(function (resp) {
-        return {
+        var ret = {
           total: resp.hits.total,
           hits: resp.hits.hits.map(function (hit) {
             var source = hit._source;
@@ -69,6 +77,10 @@ define(function (require) {
             return source;
           })
         };
+        if (cache) {
+          cache.set(cacheKey, ret);
+        }
+        return ret;
       });
     };
   });

@@ -21,7 +21,8 @@
       ng-href="{{ makeUrl(hit) }}"
       ng-click="onChoose(hit, $event)">
       <li>
-        <i aria-hidden="true" class="fa" ng-if="hit.icon" ng-class="hit.icon"></i> {{hit.title}}
+        <i aria-hidden="true" class="fa" ng-if="hit.icon" ng-class="hit.icon"></i>
+        <span ng-class="{kibiTitle: type == 'dashboardgroups' || type == 'templates' || type == 'queries' }">{{hit.title}}</span>
         <p ng-if="hit.description" ng-bind="hit.description"></p>
       </li>
     </a>

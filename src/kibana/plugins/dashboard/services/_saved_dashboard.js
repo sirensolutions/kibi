@@ -18,7 +18,6 @@ define(function (require) {
 
         // if this is null/undefined then the SavedObject will be assigned the defaults
         id: id,
-
         // default values that will get assigned if the doc is new
         defaults: {
           title: 'New Dashboard',
@@ -28,7 +27,8 @@ define(function (require) {
           version: 1,
           timeRestore: false,
           timeTo: undefined,
-          timeFrom: undefined
+          timeFrom: undefined,
+          savedSearchId: undefined
         },
 
         // if an indexPattern was saved with the searchsource of a SavedDashboard
@@ -43,13 +43,14 @@ define(function (require) {
     // if type:dashboard has no mapping, we push this mapping into ES
     SavedDashboard.mapping = {
       title: 'string',
-      hits: 'integer',
+      hits: 'long',
       description: 'string',
       panelsJSON: 'string',
-      version: 'integer',
+      version: 'long',
       timeRestore: 'boolean',
       timeTo: 'string',
-      timeFrom: 'string'
+      timeFrom: 'string',
+      savedSearchId: 'string'
     };
 
     SavedDashboard.searchsource = true;

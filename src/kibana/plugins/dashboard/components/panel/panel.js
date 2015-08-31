@@ -29,6 +29,10 @@ define(function (require) {
           loadPanel($scope.panel, $scope).then(function (panelConfig) {
             // These could be done in loadPanel, putting them here to make them more explicit
             $scope.savedObj = panelConfig.savedObj;
+            // sindicetech: added visualisation id
+            if ($scope.savedObj && $scope.savedObj.vis) {
+              $scope.savedObj.vis.id = panelConfig.savedObj.id;
+            }
             $scope.edit = panelConfig.edit;
             $scope.$on('$destroy', panelConfig.savedObj.destroy);
 

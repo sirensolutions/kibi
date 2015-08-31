@@ -47,10 +47,11 @@ define(function (require) {
     }
   });
 
-  app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter, kbnUrl) {
+  app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter, kbnUrl, $rootScope) {
     return {
-      controller: function ($scope, $route, $routeParams, $location, configFile, Private, getAppState) {
+      controller: function ($scope, $rootScope, $route, $routeParams, $location, configFile, Private, getAppState) {
         var queryFilter = Private(require('components/filter_bar/query_filter'));
+        var cache = Private(require('components/sindicetech/cache_helper/cache_helper'));
 
         var notify = new Notifier({
           location: 'Dashboard'
@@ -66,7 +67,7 @@ define(function (require) {
         $scope.$on('$destroy', dash.destroy);
 
         var matchQueryFilter = function (filter) {
-          return filter.query && filter.query.query_string && !filter.meta;
+          return filter.query && filter.query.query_string && !filter.meta && !filter.join;
         };
 
         var extractQueryFromFilters = function (filters) {
@@ -129,8 +130,27 @@ define(function (require) {
         // update data when filters fire fetch event
         $scope.$listen(queryFilter, 'fetch', $scope.refresh);
 
+
+        // added by sindicetech so the st-dashboard-toolbar which was moved out
+        // could comunicate with the main app
+        $rootScope.$on('stDashboardInvokeMethod', function (event, methodName) {
+          $scope[methodName]();
+        });
+        $rootScope.$on('stDashboardSetProperty', function (event, property, data) {
+          $scope[property] = data;
+        });
+
+        $scope.$watch('configTemplate', function () {
+          $rootScope.$emit('stDashboardOnProperty', 'configTemplate', $scope.configTemplate);
+        }, true);
+        $scope.$watch('state', function () {
+          $rootScope.$emit('stDashboardOnProperty', 'state', $scope.state);
+        }, true);
+        // sindicetech finish
+
+
         $scope.newDashboard = function () {
-          kbnUrl.change('/dashboard', {});
+          kbnUrl.change('/dashboard/', {});
         };
 
         $scope.filterResults = function () {
@@ -151,9 +171,15 @@ define(function (require) {
             $scope.configTemplate.close('save');
             if (id) {
               notify.info('Saved Dashboard as "' + dash.title + '"');
+              // added by kibi
+              cache.flush();
+              $rootScope.$emit('kibi:dashboard:saved', dash);
+              // added by kibi end
               if (dash.id !== $routeParams.id) {
                 kbnUrl.change('/dashboard/{{id}}', {id: dash.id});
               }
+
+
             }
           })
           .catch(notify.fatal);
@@ -194,9 +220,11 @@ define(function (require) {
           shareData: function () {
             return {
               link: $location.absUrl(),
-              // This sucks, but seems like the cleanest way. Uhg.
+              // These suck, but seems like the cleanest way. Uhg.
               embed: '<iframe src="' + $location.absUrl().replace('?', '?embed&') +
-                '" height="600" width="800"></iframe>'
+                '" height="600" width="800"></iframe>',
+              embedAllDashboards: '<iframe src="' + $location.absUrl().replace('?', '?embed&embedAllDashboards&') +
+              '" height="600" width="800"></iframe>'
             };
           }
         };

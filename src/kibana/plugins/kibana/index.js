@@ -25,6 +25,8 @@ define(function (require) {
   require('directives/pretty_duration');
   require('directives/rows');
   require('components/sindicetech/query_engine_client/query_engine_client');  // added by kibi queryEngineClient service
+  require('components/sindicetech/st_nav_bar/st_nav_bar'); // added by kibi
+  require('plugins/dashboard/directives/st_dashboard_search/st_dashboard_search'); // added by kibi
 
   var Notifier = require('components/notify/_notifier');
 
@@ -34,7 +36,8 @@ define(function (require) {
   .config(function ($tooltipProvider) {
     $tooltipProvider.setTriggers({ 'mouseenter': 'mouseleave click' });
   })
-  .directive('kibana', function (Private, $rootScope, $injector, Promise, config, kbnSetup) {
+  .directive('kibana', function (Private, $rootScope, $injector, Promise, config, kbnSetup, kbnUrl) {
+
     return {
       template: require('text!plugins/kibana/kibana.html'),
       controllerAs: 'kibana',

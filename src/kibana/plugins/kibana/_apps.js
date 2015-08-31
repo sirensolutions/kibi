@@ -1,6 +1,7 @@
 define(function (require) {
   return function KbnControllerApps(Private, $rootScope, $scope, $location, globalState, sessionStorage) {
     var _ = require('lodash');
+    var urlHelper = Private(require('components/sindicetech/urlHelper/urlHelper'));
 
     function appKey(app) {
       return 'lastPath:' + app.id;
@@ -9,7 +10,15 @@ define(function (require) {
     function assignPaths(app) {
       app.rootPath = '/' + app.id;
       app.lastPath = sessionStorage.get(appKey(app)) || app.rootPath;
-      return app.lastPath;
+
+      // added by kibi
+      // make sure that the first time user opens the app
+      // and click dashboard he will see the
+      // the default_dashboard_id or first dashboard if there is any
+      urlHelper.getInitialPath(app).then(function (path) {
+        setLastPath(app, path);
+      });
+      // kibi end
     }
 
     function getShow(app) {

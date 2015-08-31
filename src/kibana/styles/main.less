@@ -448,6 +448,15 @@ button[disabled] {
   }
 }
 
+// added to make st-select red when the model is invalid
+.ng-dirty, .ng-touched {
+  div.ng-invalid {
+    input, select {
+      border-color: @state-danger-bg !important;
+    }
+  }
+}
+
 
 input[type="radio"],
 input[type="checkbox"],
@@ -524,3 +533,6 @@ fieldset {
     overflow-y: hidden;
   }
 }
+
+// Kibi specific styles
+@import "./_kibi.less";

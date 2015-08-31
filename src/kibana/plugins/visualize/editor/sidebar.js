@@ -15,7 +15,12 @@ define(function (require) {
       controller: function ($scope) {
         $scope.$bind('vis', 'editableVis');
         $scope.$bind('outputVis', 'vis');
-        this.section = _.get($scope, 'vis.type.requiresSearch') ? 'data' : 'options';
+        var defaultSection = _.get($scope, 'vis.type.defaultSection');
+        if (defaultSection) {
+          this.section = defaultSection;
+        } else {
+          this.section = _.get($scope, 'vis.type.requiresSearch') ? 'data' : 'options';
+        }
       }
     };
   });

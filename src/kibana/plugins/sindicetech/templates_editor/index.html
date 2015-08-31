@@ -1,0 +1,108 @@
+<kbn-settings-app section="templates">
+  <div ng-controller="TemplatesEditor" class="app-container templates_editor" id="templates_editor" >
+
+    <div ng-if="templateFinderOpen" style="padding:30px;">
+      <saved-object-finder title="Choose a template" type="templates" on-choose="closeTemplateFinder"></saved-object-finder>
+    </div>
+
+
+    <div ng-if="!templateFinderOpen" class="container">
+
+      <div class="header">
+        <h2 class="title">Edit Query Results Templates</h2>
+      </div>
+      <p>
+        Use this form to define a template for displaying results of queries over external datasources.
+      </p>
+
+      <div class="config-section">
+        <h2>Config</h2>
+
+        <form ng-if="template" name="objectForm">
+
+          <div class="form-group">
+            <label>Title</label>
+            <input type="text" ng-model="template.title" class="form-control"/>
+          </div>
+
+          <div class="form-group">
+            <label>Description</label>
+            <input type="text" ng-model="template.description" class="form-control"/>
+          </div>
+
+          <div class="form-group">
+            <label>Engine</label><br/>
+            <select required="true" ng-model="template.st_templateEngine" class="form-control">
+              <option value="jade">jade</option>
+              <option value="handlebars">handlebars</option>
+            <select>
+          </div>
+
+          <div class="form-group">
+            <label>Source</label>
+
+            <textarea ng-if="template.st_templateEngine !== 'jade'"
+            rows="30"
+            ng-model="template.st_templateSource"
+            class="form-control span9"/>
+
+            <div ng-if="template.st_templateEngine === 'jade'"
+              ui-ace="{ onLoad: aceLoaded, mode: 'jade' }" id="{{template.title}}"
+              ng-model="template.st_templateSource"
+              style="height: 400px">
+            </div>
+
+          </div>
+
+          <div class="form-group">
+            <button class="btn btn-primary" ng-click="cancel()">Cancel</button>
+            <button class="btn btn-info" ng-click="clone()">Clone</button>
+            <button class="btn btn-success" ng-click="submit()">Save</button>
+            <button style="float:right;" class="btn btn-danger" ng-click="delete()">Delete</button>
+          </div>
+
+       </form>
+      </div>
+
+
+      <div class="preview-section">
+        <h2>Preview</h2>
+          <st-param-entity-uri entity-uri-holder="holder" datasource-type="datasourceType"></st-param-entity-uri>
+
+          <div class="form-group">
+            <label>Query id</label>
+            <span class="small-note"> Pick the query id to see preview, save template to refresh</span>
+            <a ng-show="template._previewQueryId" ng-click="jumpToQuery()">Edit query</a>
+            <st-select  object-type="query" ng-model="template._previewQueryId"></st-select>
+
+          </div>
+
+
+          <div role="tabpanel">
+          <!-- Nav tabs -->
+            <ul class="nav nav-tabs">
+              <li ng-click="tabClick()" ng-class="htmlPreviewActive ? 'active' : ''">
+                <a aria-controls="preview_html" role="tab" >Preview Html</a>
+              </li>
+              <li ng-click="tabClick()" ng-class="jsonPreviewActive ? 'active' : ''">
+                <a href="" aria-controls="preview_json" role="tab" >Preview Json</a>
+              </li>
+            </ul>
+
+            <!-- Tab panes -->
+            <div class="tab-content">
+              <div role="tabpanel" class="tab-pane" ng-class="htmlPreviewActive ? 'active' : ''" >
+                <div class="html_preview_content" st-dynamic-html="html_preview_content"></div>
+              </div>
+              <div role="tabpanel" class="tab-pane" ng-class="jsonPreviewActive ? 'active' : ''" >
+                <pre class="json_preview_content">{{json_preview_content}}</pre>
+              </div>
+            </div>
+          </div>
+
+
+      </div>
+    </div>
+
+  </div>
+</kbn-settings-app>

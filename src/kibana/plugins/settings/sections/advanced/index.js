@@ -54,6 +54,14 @@ define(function (require) {
             conf.normal = editor === 'normal';
             conf.tooComplex = !editor;
 
+            // added by sindicetech
+            if (conf.json && conf.value) {
+              conf.value = JSON.stringify(
+                JSON.parse(conf.value), null, ' '
+              );
+            }
+            // end of sindicetech
+
             return conf;
           });
         }

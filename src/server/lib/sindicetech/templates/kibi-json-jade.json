@@ -1,0 +1,10 @@
+{
+  "title": "kibi-json-jade",
+  "description": "Generic template to show all returned data as json. Good for the start",
+  "st_templateSource": "//- generic template \n//- to show the **results**  json data \n//- The data against which the template will be evaluated \n//- has the following format\n//- {\n//-   id: STRING,     // unique random id\n//-   results: {...}, // data returned by query\n//-   config: {},     // configuration of the query  \n//-   \n//- }\n//- All data returned by the query are always \n//- assigned to **results** property \n//- which can be used inside the template \n\npre(id=id)= empty\nscript(type='text/javascript').\n  var id = '!{id}';\n  var x = !{JSON.stringify(results)};\n  var el = document.getElementById(id);\n  el.innerHTML = JSON.stringify(x, null, ' '); \n",
+  "st_templateEngine": "jade",
+  "version": 1,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{}"
+  }
+}

@@ -24,6 +24,11 @@ define(function (require) {
   require('directives/paginate');
   require('directives/pretty_duration');
   require('directives/rows');
+  require('directives/st_select');
+  require('directives/st_param_entity_uri');
+  require('directives/st_dynamic_html');
+
+  require('components/sindicetech/st_relational_filter_panel/st_relational_filter_panel'); // added by kibi
   require('components/sindicetech/query_engine_client/query_engine_client');  // added by kibi queryEngineClient service
   require('components/sindicetech/st_nav_bar/st_nav_bar'); // added by kibi
   require('plugins/dashboard/directives/st_dashboard_search/st_dashboard_search'); // added by kibi

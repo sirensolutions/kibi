@@ -251,6 +251,34 @@ define(function (require) {
             notify.info(msg);
           });
         }
+
+        var sindicetechFields = [
+          {name: 'st_activationQuery', size: 1},
+          {name: 'st_resultQuery',     size: 4},
+          {name: 'st_templateVars',    size: 2}
+        ];
+
+        $scope.isItSindicetechField = function (field) {
+          var ret = false;
+          _.each(sindicetechFields, function (st_field) {
+            if (st_field.name === field.name) {
+              ret = true;
+              return false;
+            }
+          });
+          return ret;
+        };
+        $scope.computeSindicetechFieldTextareaSize = function (field) {
+          var size = 1;
+          _.each(sindicetechFields, function (st_field) {
+            if (st_field.name === field.name) {
+              size = st_field.size;
+              return false;
+            }
+          });
+          return size;
+        };
+
       }
     };
   });

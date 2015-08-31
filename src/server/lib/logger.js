@@ -21,13 +21,13 @@ if (env === 'development') {
 // If we are not being oppressed and we are not sending the output to a log file
 // push the default stream to the list of streams
 if (!config.quiet && !config.log_file) {
-  streams.push({ stream: defaultStream });
+  streams.push({ level: config.kibana.log_level, stream: defaultStream });
 }
 
 // Send the stream to a file using the json format.
 if (config.log_file) {
   var fileStream = fs.createWriteStream(config.log_file);
-  streams.push({ stream: createJSONStream().pipe(fileStream) });
+  streams.push({ level: config.kibana.log_level, stream: createJSONStream().pipe(fileStream) });
 }
 
 var logger = module.exports = bunyan.createLogger({

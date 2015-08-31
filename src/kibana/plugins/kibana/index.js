@@ -24,6 +24,7 @@ define(function (require) {
   require('directives/paginate');
   require('directives/pretty_duration');
   require('directives/rows');
+  require('components/sindicetech/query_engine_client/query_engine_client');  // added by kibi queryEngineClient service
 
   var Notifier = require('components/notify/_notifier');
 

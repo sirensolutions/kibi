@@ -14,7 +14,12 @@ define(function (require) {
       });
 
       if (!myHandlers.length) {
-        notify.fatal(new Error('unhandled error ' + (error.stack || error.message)));
+
+        // changed by sindicetech from nutify.fatal to notify.error to avoid the screen of death
+        // added body if exists to handle the case when db query cause elastic search request to fail
+        var body = error.body ? JSON.stringify(error.body, null, ' ') : '';
+        notify.error(new Error('unhandled error: ' + body + (error.stack || error.message)));
+        // sindicetech end
       } else {
         myHandlers.forEach(function (handler) {
           handler.defer.resolve(error);

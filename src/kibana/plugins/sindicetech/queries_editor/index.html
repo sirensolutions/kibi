@@ -1,0 +1,171 @@
+<kbn-settings-app section="queries">
+  <div ng-controller="QueriesEditor" class="app-container query_editor" id="queries_editor" >
+
+    <div ng-if="queryFinderOpen" style="padding:30px;">
+      <saved-object-finder title="Choose a query" type="queries" on-choose="closeQueryFinder"></saved-object-finder>
+    </div>
+
+
+    <div ng-if="!queryFinderOpen" class="container">
+
+      <div class="header">
+        <h2 class="title">Edit Queries over External Datasources</h2>
+      </div>
+      <p>
+        Use this form to define a query over an external datasource, e.g., a SQL database. Query results can be then visualized using templates or used in <i>External Query Terms Filter</i> aggregations in visualizations (which in turn create filters when clicked). <br> Used in conjunction with the Kibi Template Query Viewer visualization, queries can be parametric and will be executed again on user clicks.
+      </p>
+
+      <div class="config-section">
+        <h2>Config</h2>
+
+        <form ng-if="query" name="objectForm">
+
+          <div class="form-group">
+            <label>Title</label>
+            <input type="text" ng-model="query.title" class="form-control span9"/>
+          </div>
+
+          <div class="form-group">
+            <label>Description</label>
+            <input type="text" ng-model="query.description" class="form-control span9"/>
+          </div>
+
+          <div class="form-group">
+            <label>Datasource</label></br>
+            <st-select object-type="datasource" ng-model="query.st_datasourceId"></st-select>
+          </div>
+
+          <div class="form-group">
+            <label>Tag</label> <span>(optional)</span>
+            <tags-input ng-model="tags"></tags-input>
+          </div>
+
+          <div class="form-group">
+            <label ng-if="datasourceType === 'sparql' || datasourceType === 'sql' || datasourceType === 'sqlite' || datasourceType === 'pgsql'">Activation query</label>
+            <label ng-if="datasourceType === 'rest'">Activation regex</label>
+
+            <span ng-if="query.st_datasourceId">(Empty = always active)</span>
+            <div ng-if="datasourceType === 'sparql'" ui-ace="{ onLoad: aceLoaded, mode: 'sparql'}" msd-elastic id="st_templateVars" ng-model="query.st_activationQuery" class="form-control activationQueryEditor"></div>
+            <div ng-if="datasourceType === 'mysql' || datasourceType === 'sqlite' || datasourceType === 'pgsql' || datasourceType === 'jdbc'" ui-ace="{ onLoad: aceLoaded, mode: 'sql'}" msd-elastic id="st_templateVars" ng-model="query.st_activationQuery" class="form-control activationQueryEditor"></div>
+            <div ng-if="datasourceType === 'rest'" ui-ace="{ onLoad: aceLoaded, mode: 'text'}" msd-elastic id="st_templateVars" ng-model="query.st_activationQuery" class="form-control activationQueryEditor"></div>
+          </div>
+
+          <div class="form-group" ng-if="datasourceType !== 'rest'">
+            <label ng-if="query.st_datasourceId">Results query</label></br>
+            <span ng-if="datasourceType === 'mysql' || datasourceType === 'jdbc'">
+              Hint: To start type <b>SHOW TABLES</b>
+            </span>
+            <span ng-if="datasourceType === 'pgsql'">
+              Hint: To start type <b>SELECT * FROM pg_catalog.pg_tables</b>
+            </span>
+            <span ng-if="datasourceType === 'sparql'">
+              Hint: To start type <b>SELECT * WHERE {?s ?p ?o} LIMIT 10</b>
+            </span>
+            </br>
+            <span ng-if="datasourceType === 'sparql'">Special variable <b>@URI@</b> will be replaced by selected entity URI</span>
+            <span ng-if="datasourceType === 'mysql' || datasourceType === 'sqlite' || datasourceType === 'pgsql' || datasourceType === 'jdbc'">Special variables <b>@TABLE@</b> and <b>@PKVALUE@</b> will be replaced by information extracted from selected entity URI</span>
+
+            <span ng-if="starDetectedInAQuery && datasourceType === 'sparql'" style="color:orange;">
+              </br>
+              Star symbol detected. Try to give an explicit list of variables to return
+              - it is better performance wise and will simplify relational filters configuration.
+            </span>
+
+            <div ng-if="datasourceType === 'sparql'"
+            ui-ace="{ onLoad: aceLoaded, mode: 'sparql' }"
+            msd-elastic id="st_templateVars"
+            ng-model="query.st_resultQuery"
+            class="form-control resultQueryEditor"></div>
+
+            <div ng-if="datasourceType === 'mysql' || datasourceType === 'sqlite' || datasourceType === 'pgsql' || datasourceType === 'jdbc'"
+            ui-ace="{ onLoad: aceLoaded, mode: 'sql' }"
+            msd-elastic id="st_templateVars"
+            ng-model="query.st_resultQuery"
+            class="form-control resultQueryEditor"></div>
+          </div>
+
+          <div class="form-inline" ng-if="datasourceType === 'rest'">
+            <div class="form-group">
+              <label>Params</label><br/>
+              <div ng-repeat="param in query.rest_params">
+                <input type="text" ng-model="param.name"  class="form-control"/>
+                <input type="text" ng-model="param.value"  class="form-control"/>
+                <button ng-click="query.rest_params.splice($index, 1)" class="btn btn-xs btn-danger add-button">
+                  <i class="fa fa-times"></i>
+                </button>
+              </div>
+              <button ng-click="query.rest_params.push({name:'', value:''})" class="btn btn-xs btn-success">Add param</button>
+            </div>
+            <br/>
+            <div class="form-group rest-headers">
+              <label>Headers</label><br/>
+              <div ng-repeat="header in query.rest_headers">
+                <input type="text" ng-model="header.name" class="form-control"/>
+                <input type="text" ng-model="header.value"  class="form-control"/>
+                <button ng-click="query.rest_headers.splice($index, 1)" class="btn btn-xs btn-danger add-button">
+                  <i class="fa fa-times"></i>
+                </button>
+              </div>
+              <button ng-click="query.rest_headers.push({name:'', value:''})" class="btn btn-xs btn-success">Add header</button>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-top:10px;">
+            <button class="btn btn-primary" ng-click="cancel()">Cancel</button>
+            <button class="btn btn-info" ng-click="clone()">Clone</button>
+            <button class="btn btn-success" ng-click="submit()">Save</button>
+            <button class="btn btn-danger" ng-click="delete()">Delete</button>
+          </div>
+        </form>
+      </div>
+
+
+      <div class="preview-section">
+        <form name="previewForm">
+        <h2>Preview</h2>
+
+        <st-param-entity-uri entity-uri-holder="holder" datasource-type="datasourceType"></st-param-entity-uri>
+
+        <div class="form-group">
+          <label>Template id</label>
+          <span class="small-note"> Pick the template id to see html preview, save query to refresh</span>
+          <a ng-show="query._previewTemplateId"  ng-click="jumpToTemplate()"> Edit template</a>
+          <st-select  object-type="template" ng-model="query._previewTemplateId"></st-select>
+        </div>
+        <div class="form-group">
+            <button ng-click="setEntityURI()" ng-disabled="previewForm.entityURI.$invalid" class="btn btn-success span3" >
+              Refresh
+            </button>
+        </div>
+
+
+
+        <div role="tabpanel">
+          <!-- Nav tabs -->
+          <ul class="nav nav-tabs">
+            <li ng-click="tabClick()" ng-class="holder.htmlPreviewActive ? 'active' : ''">
+              <a aria-controls="preview_html" role="tab" >Preview Html</a>
+            </li>
+            <li ng-click="tabClick()" ng-class="holder.jsonPreviewActive ? 'active' : ''">
+              <a href="" aria-controls="preview_json" role="tab" >Preview Json</a>
+            </li>
+          </ul>
+
+          <!-- Tab panes -->
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane" ng-class="holder.htmlPreviewActive ? 'active' : ''" >
+              <div class="html_preview_content" st-dynamic-html="holder.htmlPreview"></div>
+            </div>
+            <div role="tabpanel" class="tab-pane" ng-class="holder.jsonPreviewActive ? 'active' : ''" >
+              <pre class="json_preview_content" ng-show="holder.jsonPreview !== ''">{{holder.jsonPreview}}</pre>
+            </div>
+          </div>
+        </div>
+
+        </form>
+      </div>
+    </div>
+    </div><!-- container end -->
+
+  </div>
+</kbn-settings-app>

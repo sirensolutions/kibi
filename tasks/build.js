@@ -1,5 +1,6 @@
 module.exports = function (grunt) {
   grunt.registerTask('build', [
+    'copy:additional_ace_modes',
     'get_build_props',
     'clean:target',
     'clean:build',

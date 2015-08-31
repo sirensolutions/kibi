@@ -15,7 +15,7 @@ define(function (require) {
   .directive('kbnSettingsObjectsView', function (config, Notifier) {
     return {
       restrict: 'E',
-      controller: function ($scope, $injector, $routeParams, $location, $window, $rootScope, es, Private) {
+      controller: function ($scope, $injector, $routeParams, $location, $window, $rootScope, es, Private, queryEngineClient) {
         var notify = new Notifier({ location: 'SavedObject view' });
         var castMappingType = Private(require('components/index_patterns/_cast_mapping_type'));
         var serviceObj = registry.get($routeParams.service);
@@ -194,6 +194,14 @@ define(function (require) {
             body: source
           })
           .then(function (resp) {
+
+            // added by sindicetech
+            // flush the sindicetech cache on the server side
+            if (service.type === 'snippet' || service.type === 'template') {
+              queryEngineClient.clearCache().then(function () {
+                //console.log('Cache cleared');
+              });
+            }
             return redirectHandler('updated');
           })
           .catch(notify.fatal);

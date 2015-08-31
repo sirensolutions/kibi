@@ -9,6 +9,8 @@ define(function (require) {
     var SearchSource = Private(require('components/courier/data_source/search_source'));
     var mappingSetup = Private(require('utils/mapping_setup'));
 
+    var cache = Private(require('components/sindicetech/cache_helper/cache_helper'));
+
     function SavedObject(config) {
       if (!_.isObject(config)) config = {};
 
@@ -233,6 +235,10 @@ define(function (require) {
 
       self.saveSource = function (source) {
         var finish = function (id) {
+          // sindicetech
+          // here good place to clear a objects cache
+          cache.flush();
+
           self.id = id;
           return es.indices.refresh({
             index: configFile.kibana_index

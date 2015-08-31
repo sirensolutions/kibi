@@ -42,7 +42,8 @@ define(function (require) {
       'aggs',
       'from',
       'size',
-      'source'
+      'source',
+      'inject'  // added by sindicetech
     ];
 
     SearchSource.prototype.index = function (indexPattern) {

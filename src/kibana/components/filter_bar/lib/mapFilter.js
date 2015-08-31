@@ -28,6 +28,7 @@ define(function (require) {
       Private(require('./mapQueryString')),
       Private(require('./mapGeoBoundingBox')),
       Private(require('./mapScript')),
+      Private(require('./mapDbFilter')), // kibi specific !!!
       Private(require('./mapDefault'))
     ];
 

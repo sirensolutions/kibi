@@ -13,7 +13,7 @@ define(function (require) {
   });
 
   require('modules').get('apps/settings')
-  .directive('kbnSettingsObjects', function (config, Notifier, Private, kbnUrl) {
+  .directive('kbnSettingsObjects', function (config, Notifier, Private, kbnUrl, queryEngineClient) {
     return {
       restrict: 'E',
       controller: function ($scope, $injector, $q, AppState, es) {
@@ -133,10 +133,17 @@ define(function (require) {
                 body: _.flatten(docs.map(transformToBulk))
               })
               .then(refreshIndex)
+              .then(reloadQueries)
               .then(refreshData, notify.error);
             }
           });
         };
+
+        // added by sindicetech to make sure that after an import
+        // queries are in sync
+        function reloadQueries() {
+          return queryEngineClient.clearCache();
+        }
 
         // Takes a doc and returns the associated two entries for an index bulk API request
         function transformToBulk(doc) {

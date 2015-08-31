@@ -11,6 +11,7 @@ var join = require('path').join;
 var logger = require('../lib/logger');
 var validateRequest = require('../lib/validateRequest');
 
+var filterJoin = require('../lib/sindicetech/filterJoin');
 
 // If the target is backed by an SSL and a CA is provided via the config
 // then we need to inject the CA
@@ -70,8 +71,16 @@ router.use(function (req, res, next) {
     req.headers.authorization = 'Basic ' + auth.toString('base64');
   }
 
+  var elasticsearch_url = config.elasticsearch;
+  if (config.elasticsearch_plugins.indexOf('FilterJoinPlugin') > -1) {
+    var searchInd = path.indexOf('_search') === -1 ? path.indexOf('_msearch') : path.indexOf('_search');
+    elasticsearch_url += (searchInd !== -1 ? path.slice(0, searchInd) + '_coordinate' + path.slice(searchInd) : path);
+  } else {
+    elasticsearch_url += path;
+  }
+
   var options = {
-    url: config.elasticsearch + path,
+    url: elasticsearch_url,
     method: req.method,
     headers: _.defaults({}, req.headers),
     strictSSL: config.kibana.verify_ssl,

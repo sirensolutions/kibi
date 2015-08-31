@@ -22,6 +22,11 @@ define(function (require) {
         $scope.placement = attr.placement || 'top';
         $scope.delay = attr.delay || 400;
         $scope.appendToBody = attr.appendToBody || 0;
+
+        // added by sindicetech so the tooltip text can be assign more dynamically
+        attr.$observe('text', function (value) {
+          $scope.text = value;
+        });
       }
     };
   });

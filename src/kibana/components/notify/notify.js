@@ -9,11 +9,15 @@ define(function (require) {
 
   require('components/notify/directives');
 
-  module.factory('createNotifier', function () {
+  // note for sindicetech folks - please use createNotifier when you need one
+  // it is better as it supports awesomeDemoMode
+  module.factory('createNotifier', ['config', function (config) {
     return function (opts) {
-      return new Notifier(opts);
+      // sindicetech - awesomeDemoMode
+      opts.awesomeDemoMode = config.get('kibi:awesomeDemoMode');
+      return new Notifier(opts, config);
     };
-  });
+  }]);
 
   module.factory('Notifier', function () {
     return Notifier;

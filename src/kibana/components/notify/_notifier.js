@@ -10,6 +10,8 @@ define(function (require) {
 
   var fatalSplashScreen = require('text!components/notify/partials/fatal_splash_screen.html');
 
+  var awesomeDemoMode = false;
+
   var log = _.noop;
   if (typeof KIBANA_DIST === 'undefined') {
     log = function () {
@@ -45,7 +47,7 @@ define(function (require) {
   }
 
   function add(notif, cb) {
-    if (notif.lifetime !== Infinity) {
+    if (notif.lifetime !== Infinity && awesomeDemoMode !== true) {
       notif.timerId = setTO(function () {
         closeNotif(cb, 'ignore').call(notif);
       }, notif.lifetime);
@@ -89,10 +91,21 @@ define(function (require) {
 
   // browsers format Error.stack differently; always include message
   function formatStack(err) {
+    var stackMsg;
     if (err.stack && !~err.stack.indexOf(err.message)) {
-      return 'Error: ' + err.message + '\n' + err.stack;
+      stackMsg = 'Error: ' + err.message + '\n' + err.stack;
+    } else {
+      stackMsg = err.stack;
     }
-    return err.stack;
+
+    // added by sindicetech
+    // to display more information when error has body object
+    if (err.body && err.body.err) {
+      stackMsg = err.body.err + '\n\n' + stackMsg;
+    }
+    // sindicetech end
+
+    return stackMsg;
   }
 
   /**
@@ -101,6 +114,10 @@ define(function (require) {
   function Notifier(opts) {
     var self = this;
     opts = opts || {};
+
+    if (opts.awesomeDemoMode) {
+      awesomeDemoMode = opts.awesomeDemoMode;
+    }
 
     // label type thing to say where notifications came from
     self.from = opts.location;

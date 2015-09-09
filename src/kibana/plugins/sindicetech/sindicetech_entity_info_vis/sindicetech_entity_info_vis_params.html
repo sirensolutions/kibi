@@ -9,7 +9,7 @@
 
       <div class="content">
         <div class="form-group">
-          <label>Source query id</label></br>
+          <label>Source query</label></br>
           <st-select required="true" object-type="query" ng-model="queryOption.queryId"></st-select>
         </div>
 
@@ -37,10 +37,13 @@
             <input type="checkbox" ng-model="queryOption.open" />
             <label>Render opened</label>
           </div>
+
+          <!-- Commenting out for 0.1.0
           <div class="form-group">
             <input type="checkbox" ng-model="queryOption.showFilterButton" />
             <label>Show relational filter button</label>
           </div>
+          -->
 
           <div ng-if="queryOption.showFilterButton" >
 

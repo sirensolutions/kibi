@@ -29,6 +29,8 @@ define(function (require) {
             }
           }
           fulfill(timeRangeFilter);
+        }).catch(function (err) {
+          reject(err);
         });
       });
     };

@@ -6,7 +6,6 @@ define(function (require) {
   require('angular-sanitize');
   require('ng-tags-input');
 
-  var slugifyId = require('utils/slugify_id');
   var $ = require('jquery');
   var _ = require('lodash');
 
@@ -80,6 +79,7 @@ define(function (require) {
       };
 
       $scope.query = $route.current.locals.query;
+      $scope.$queryTitle = $route.current.locals.query.title;
 
       if (!$scope.query._previewTemplateId) {
         $scope.query._previewTemplateId = 'kibi-table-jade';
@@ -174,15 +174,15 @@ define(function (require) {
       };
 
       $scope.submit = function () {
-        var idChanged = $scope.query.id !== $scope.query.title;
+        var titleChanged = $scope.$queryTitle !== $scope.query.title;
         $scope.query.id = $scope.query.title;
-        $scope.query.save().then(function (resp) {
-          // here flush the cache and refresh preview
-          $scope.preview();
+        $scope.query.save().then(function (savedQueryId) {
           notify.info('Query ' + $scope.query.title + ' successfuly saved');
-          // here only if query.id changed !!!
-          if (idChanged) {
-            kbnUrl.change('settings/queries/' + slugifyId($scope.query.id));
+          if (titleChanged) {
+            // redirect only if query.id changed !!!
+            kbnUrl.change('settings/queries/' + savedQueryId);
+          } else {
+            $scope.preview();
           }
         });
       };
@@ -295,11 +295,10 @@ define(function (require) {
         $scope.query.id = $scope.query.title + '-clone';
         $scope.query.title = $scope.query.title + ' clone';
 
-        $scope.query.save().then(function (resp) {
-          // here flush the cache and refresh preview
+        $scope.query.save().then(function (savedQueryid) {
           $scope.preview();
           notify.info('Query ' + $scope.query.title + 'successfuly saved');
-          kbnUrl.change('settings/queries/' + slugifyId($scope.query.id));
+          kbnUrl.change('settings/queries/' + savedQueryid);
         });
       };
 

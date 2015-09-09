@@ -101,9 +101,14 @@ define(function (require) {
               );
               reject(error);
             }
+          })
+          .catch(function (err) {
+            reject(err);
           });
+        })
+        .catch(function (err) {
+          reject(err);
         });
-
       });
     };
 
@@ -228,6 +233,7 @@ define(function (require) {
               selectedDashboardQuery.query_string.analyze_wildcard === true
             )
         ) {
+
           query.query.filtered.filter.bool.must.push({
             query: {
               query_string: selectedDashboardQuery.query_string
@@ -235,7 +241,7 @@ define(function (require) {
           });
         }
 
-        if (savedSearchMeta.query && selectedDashboardQuery &&
+        if (savedSearchMeta.query && !_.isEmpty(savedSearchMeta.query) &&
            !(
               savedSearchMeta.query.query_string &&
               savedSearchMeta.query.query_string.query === '*'  &&

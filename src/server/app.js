@@ -23,7 +23,7 @@ app.set('x-powered-by', false);
 app.use(requestLogger());
 app.use(auth());
 app.use(appHeaders());
-app.use(favicon(path.join(config.public_folder, 'styles', 'theme', 'elk.ico')));
+app.use(favicon(path.join(config.public_folder, 'styles', 'theme', 'favicon.ico')));
 
 if (app.get('env') === 'development') {
   require('./dev')(app);

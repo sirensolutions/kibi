@@ -177,6 +177,7 @@ define(function (require) {
                 dashboards: dashboards,
                 selected: selected,
                 _selected: selected,
+                hide: group.hide,
                 iconCss: group.iconCss,
                 iconUrl: group.iconUrl,
                 onClick: function () {

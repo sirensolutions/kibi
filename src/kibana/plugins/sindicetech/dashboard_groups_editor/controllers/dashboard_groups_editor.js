@@ -37,7 +37,7 @@ define(function (require) {
 
   app.controller(
     'DashboardGroupsEditor',
-    function ($scope, $route, $window, kbnUrl, Notifier, savedDashboards, savedDashboardGroups, Private, Promise) {
+    function ($rootScope, $scope, $route, $window, kbnUrl, Notifier, savedDashboards, savedDashboardGroups, Private, Promise) {
 
       var arrayHelper = Private(require('components/sindicetech/arrayHelper/arrayHelper'));
 
@@ -60,8 +60,9 @@ define(function (require) {
 
       $scope.submit = function () {
         dashboardGroup.id = dashboardGroup.title;
-        dashboardGroup.save().then(function (resp) {
+        dashboardGroup.save().then(function (groupId) {
           notify.info('DashboardGroup ' + dashboardGroup.title + ' successfuly saved');
+          $rootScope.$emit('kibi:dashboardgroup:changed', groupId);
           kbnUrl.change('settings/dashboardgroups/' + slugifyId(dashboardGroup.id));
         });
       };
@@ -69,6 +70,7 @@ define(function (require) {
       $scope.delete = function () {
         if ($window.confirm('Are you sure about deleting [' + dashboardGroup.title + ']')) {
           dashboardGroup.delete().then(function (resp) {
+            $rootScope.$emit('kibi:dashboardgroup:changed', resp);
             kbnUrl.change('settings/dashboardgroups', {});
           });
         }
@@ -90,6 +92,7 @@ define(function (require) {
 
           savedDashboardGroupClone.save().then(function (resp) {
             notify.info('DashboardGroup ' + savedDashboardGroupClone.title + 'successfuly saved');
+            $rootScope.$emit('kibi:dashboardgroup:changed', resp);
             kbnUrl.change('settings/dashboardgroups/' + slugifyId(savedDashboardGroupClone.id));
           });
 

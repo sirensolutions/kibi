@@ -45,6 +45,11 @@
           </div>
 
           <div class="form-group">
+            <label>Hide this dashboard group <i class="fa fa-info-circle ng-scope" tooltip-placement="" tooltip-popup-delay="250" tooltip="Useful if you have half baked dashboards"></i></label>
+            <input type="checkbox" ng-model="dashboardGroup.hide" class="form-control"/>
+          </div>
+
+          <div class="form-group">
             <label>Dashboards</label></br>
             <ul>
               <li ng-repeat="dashboard in dashboardGroup.dashboards_o" class="queryOptionArea" >

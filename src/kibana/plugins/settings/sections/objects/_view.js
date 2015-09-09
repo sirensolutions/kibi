@@ -15,7 +15,7 @@ define(function (require) {
   .directive('kbnSettingsObjectsView', function (config, Notifier) {
     return {
       restrict: 'E',
-      controller: function ($scope, $injector, $routeParams, $location, $window, $rootScope, es, Private, queryEngineClient) {
+      controller: function ($rootScope, $scope, $injector, $routeParams, $location, $window, es, Private, queryEngineClient) {
         var notify = new Notifier({ location: 'SavedObject view' });
         var castMappingType = Private(require('components/index_patterns/_cast_mapping_type'));
         var serviceObj = registry.get($routeParams.service);
@@ -169,6 +169,7 @@ define(function (require) {
               id: $routeParams.id
             })
             .then(function (resp) {
+              $rootScope.$emit('kibi:' + service.type + ':changed', resp);
               return redirectHandler('deleted');
             })
             .catch(notify.fatal);
@@ -226,11 +227,13 @@ define(function (require) {
 
             // added by sindicetech
             // flush the sindicetech cache on the server side
-            if (service.type === 'snippet' || service.type === 'template') {
+            if (service.type === 'query' || service.type === 'template') {
               queryEngineClient.clearCache().then(function () {
                 //console.log('Cache cleared');
               });
             }
+            $rootScope.$emit('kibi:' + service.type + ':changed', resp);
+
             return redirectHandler('updated');
           })
           .catch(notify.fatal);

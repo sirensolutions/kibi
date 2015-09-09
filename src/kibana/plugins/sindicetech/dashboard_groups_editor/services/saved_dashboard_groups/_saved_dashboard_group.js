@@ -24,6 +24,7 @@ define(function (require) {
           priority: 'long',
           iconCss: 'string',
           iconUrl: 'string',
+          hide: 'boolean',
           version: 'long'
         },
 
@@ -34,6 +35,7 @@ define(function (require) {
           priority: 100,
           iconCss: '',
           iconUrl: '',
+          hide: false,
           version: 1
         },
 

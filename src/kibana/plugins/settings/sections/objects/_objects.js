@@ -88,7 +88,8 @@ define(function (require) {
 
           // added by kibi to prevent deletion of a dashboard which is referenced by dashboardgroup
           if ($scope.currentTab.service.type === 'dashboard') {
-            dashboardGroupHelper.isDashboardInAnyDashboardGroup(_.pluck($scope.selectedItems, 'id')).then(function (dashboardGroupNames) {
+            dashboardGroupHelper.getIdsOfDashboardGroupsTheseDashboardsBelongTo(_.pluck($scope.selectedItems, 'id'))
+            .then(function (dashboardGroupNames) {
               if (dashboardGroupNames && dashboardGroupNames.length > 0) {
                 var msg =
                   'One of the selected dashboards is reffered by following dashboardGroup' +

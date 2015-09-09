@@ -9,7 +9,7 @@ define(function (require) {
     function DashboardGroupHelper() {
     }
 
-    DashboardGroupHelper.prototype.isDashboardInAnyDashboardGroup = function (dashboardIds) {
+    DashboardGroupHelper.prototype.getIdsOfDashboardGroupsTheseDashboardsBelongTo = function (dashboardIds) {
       return new Promise(function (fulfill, reject) {
         savedDashboardGroups.find('').then(function (resp) {
           var ret = [];

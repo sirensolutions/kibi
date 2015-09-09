@@ -13,7 +13,7 @@ define(function (require) {
     KibiStateHelper.prototype._updateTimeForOneDashboard = function (dashboard) {
       var skipGlobalStateSave = true;
       if (dashboard.timeRestore === true) {
-        this.saveTimeForDashboardId(dashboard.timeFrom, dashboard.timeTo, dashboard.id, skipGlobalStateSave);
+        this.saveTimeForDashboardId(dashboard.id, dashboard.timeFrom, dashboard.timeTo, skipGlobalStateSave);
       } else {
         this.removeTimeForDashboardId(dashboard.id, skipGlobalStateSave);
       }
@@ -62,7 +62,7 @@ define(function (require) {
           }
           if (currentDashboardId) {
             $timeout(function () {
-              self.saveTimeForDashboardId(globalState.time.from, globalState.time.to, currentDashboardId);
+              self.saveTimeForDashboardId(currentDashboardId, globalState.time.from, globalState.time.to);
             });
           }
         }
@@ -82,10 +82,15 @@ define(function (require) {
 
     KibiStateHelper.prototype.saveQueryForDashboardId = function (dashboardId, query) {
       if (query) {
-        if (!(query.query_string && query.query_string.query && query.query_string.query === '*')) {
+        if (
+            !(query.query_string &&
+              query.query_string.query &&
+              query.query_string.query === '*' &&
+              query.query_string.analyze_wildcard === true)
+        ) {
           globalState.k.q[dashboardId] = query;
         } else {
-          // store '*' instead the full query to make it more compact
+          // store '*' instead the full query to make it more compact as this is very common query
           globalState.k.q[dashboardId] = '*';
         }
       } else {
@@ -128,6 +133,8 @@ define(function (require) {
       // add also pinned filters which are stored in global state
       if (filters && globalState.filters) {
         return filters.concat(globalState.filters);
+      } else if (globalState.filters && globalState.filters.length > 0) {
+        return globalState.filters;
       }
       return filters;
     };
@@ -140,7 +147,7 @@ define(function (require) {
       }
     };
 
-    KibiStateHelper.prototype.saveTimeForDashboardId = function (from, to, dashboardId, skipGlobalStateSave) {
+    KibiStateHelper.prototype.saveTimeForDashboardId = function (dashboardId, from, to, skipGlobalStateSave) {
       globalState.k.t[dashboardId] = {
         f: from,
         t: to

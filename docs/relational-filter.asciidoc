@@ -1,0 +1,97 @@
+[[relational-filter]]
+== Kibi Relational filter
+
+Kibi adds a relational dimension to Kibana when browsing indexes,
+allowing to _filter_ documents on a dashboard by showing only those that have
+a relation with documents displayed in a different dashboard, possibly stored
+in different indices.
+
+The Kibi relational filter visualization allows to "pivot" from a dashboard
+to another by creating a join between multiple indexes based on their
+relations.
+
+Relations are defined between index fields; for example, let's take the
+following indexes:
+
+[horizontal]
+_Articles_:: an index containing articles; each document in the index has
+a field called `companyid` that contains the ID of the company mentioned in the
+article. The index is displayed on dashboard named `Articles`.
+_Companies_:: an index containing information about companies; each document
+in the index has a field called `id` that contains the ID of the company.
+The index is displayed on a dashboard named `Companies`.
+
+Using the Relational filter visualization, it is possible to configure a
+relation between `Articles.company` and `Companies.name` and use it as a
+filter on the Companies index.
+
+The result is that it becomes possible to search specific articles in the
+_Articles_ dashboard, then switch to the _Companies_ dashboard and see only
+companies mentioned in _Articles'_ search results.
+
+In the _Articles_ dashboard, the relation is displayed as a button which,
+if configured properly, will display the number of documents in the _Companies_
+dashboard related to the documents displayed in the _Articles_ dashboard.
+
+The screenshot below shows the button for the relation described in the
+example; there are 48 companies mentioned in the 234 articles currently
+displayed:
+
+image::images/relational-filter/relational-filter-companies-source.png["Relational filter button in source dashboard",align="center"]
+
+Clicking on the button will switch to the _Companies_ dashboard and display
+the 48 companies; the relational filter is displayed in the filter bar, as
+displayed below:
+
+image::images/relational-filter/relational-filter-companies-target.png["Relational filter in target dashboard",align="center"]
+
+The Kibi Relational filter visualization requires the Siren 2.0 plugin for
+Elasticsearch, which is currently available as a pre-release in
+`lib\es-filter-join.zip`; the plugin is compatible with Elasticsearch 1.6 and
+1.7.
+
+For more information about the Siren 2.0 plugin visit our website at
+http://siren.solutions .
+
+[float]
+[[relational-filter-config]]
+=== Configuration
+
+Click on the _Add filter_ button to create a new filter in the visualization;
+the filter is defined by the following parameters:
+
+- _Button label_: the label of the button that will be displayed inside the
+visualization, e.g. `Companies -->`.
+- _Filter label_: the label of the filter that will be displayed in the
+filter bar, e.g. `...mentioned in Articles`.
+- _Source index_: the source index in the relation.
+- _Source index type_: the source index document type.
+- _Source field_: the source index field in the relation.
+- _Target index_: the index to be joined with _Source index_.
+- _Target field_: the field in the target index related to _Source field_.
+- _Target index type_: the target index document type.
+- _Target dashboard_: the dashboard on which the join filter will be applied
+when clicking on the button.
+
+The screenshot below shows the configuration of a relation between
+`Articles` and `Companies`:
+
+image::images/relational-filter/relational-filter-config.png["Relational filter configuration",align="center"]
+
+It is possible to define multiple relations in a single Kibi relational
+filter visualization; the visualization will display only buttons applicable
+to the currently displayed dashboard.
+
+[float]
+[[relational-filter-usage]]
+=== Usage
+
+When clicking on a button in the Kibi Relational filter visualization,
+the filters applied in the source dashboard are permanently merged with the
+filters applied in the target dashboard.
+
+To see the explanation of a relational filter, just move the mouse over it,
+as shown in the screenshot below:
+
+image::images/relational-filter/relational-filter-explanation.png["Relational filter explanation",align="center"]
+

@@ -1,0 +1,271 @@
+[[logstash]]
+== Loading data into Elasticsearch
+
+This chapter contains basic information on how to load data into Elasticsearch
+for evaluation purposes.
+
+[float]
+=== From a SQL database using Logstash
+
+The indexes in the Kibi demo distribution have been populated by running
+four https://www.elastic.co/products/logstash[Logstash] configurations over
+the SQLite database in `kibi/crunchbase.db`.
+
+The database has the following schema:
+
+image::images/logstash/crunchbase-schema.png["SQLite database schema",align="center"]
+
+[float]
+==== Index setup
+
+Before loading data, we need to setup indices and mappings; for
+example, let's create an index called `company-minimal` in the Elasticsearch
+cluster at `http://localhost:9220`.
+
+Create the index by running the following command in a terminal window:
+
+[source,bash]
+curl -X PUT http://localhost:9220/company-minimal
+
+If curl is not available on your system, please download it from
+http://curl.haxx.se/download.html .
+
+If the index is created correctly, Elasticsearch will return the following
+response:
+
+[source,json]
+{"acknowledged":true}
+
+If you want to destroy the index and start from scratch, execute the following
+command:
+
+[source,bash]
+curl -X DELETE http://localhost:9220/company-minimal
+
+[float]
+==== Mapping definition
+
+Mappings allow to configure how documents are stored in the index; for example,
+they allow to define how fields are matched by the search engine and set their
+type (string, dates, numbers, locations etc.).
+
+NOTE: for detailed documentation about indices and mappings we recommend
+reading the {elastic-ref}index.html[Elasticsearch Reference].
+
+Let's define a simple mapping to describe a company; the mapping will define
+the following fields:
+
+- `id`: the id of the company in the SQLite database
+- `name`: the name of the company
+- `description`: a description of the company
+- `homepage`: the URL of the company homepage
+- `number_of_employees`: the number of employees
+- `location`: the geographical coordinates of the company
+
+Open a text editor and paste the following text:
+
+[source,json]
+----
+{
+    "CompanyMinimal": {
+        "properties": {
+            "id": {
+                "index": "not_analyzed",
+                "type": "string"
+            },
+            "number_of_employees": {
+                "type": "long"
+            },
+            "name": {
+                "index": "analyzed",
+                "type": "string"
+            },
+            "description": {
+                "index": "analyzed",
+                "type": "string"
+            },
+            "homepage": {
+                "index": "not_analyzed",
+                "type": "string"
+            },
+            "location": {
+                "geohash": true,
+                "type": "geo_point"
+            }
+        }
+    }
+}
+----
+
+
+`CompanyMinimal` is the name of the mapping; `properties` contains the
+indexing options for each field.
+
+The `type` attribute specifies the field type; the example mapping contains
+four strings, a number and a {elastic-ref}mapping-geo-point-type.html[geo_point],
+which allows to perform geographically aware search queries.
+
+The `index` attribute in each field definition is used to control how the
+field will be handled by search engine; if set to `not_analyzed`, the search
+engine will match a document only if its field value is equal to the value
+set in the search query, if set to `analyzed` the field value will be processed
+by an analyzer to allow full-text queries.
+
+It is also possible to set the `index` attribute to `no` to make the search
+engine ignore the field.
+
+Save the file to `demo/sql/crunchbase/conf/logstash_sqlite/mappings/CompanyMinimal.mapping`
+inside the directory where you extracted the demo distribution.
+
+To apply the mapping, go to the `demo/sql/crunchbase/conf/logstash_sqlite`
+directory and execute the following command:
+
+[source,bash]
+curl -X PUT "http://localhost:9220/company-minimal/_mapping/CompanyMinimal" -d "@mappings/CompanyMinimal.mapping"
+
+If the mapping is created correctly, Elasticsearch will return the following
+response:
+
+[source,json]
+-----
+{"acknowledged":true}
+-----
+
+
+[float]
+==== SQL query definition
+
+To extract the values that will be loaded to the index by Logstash, we need to
+write a SQL query; open a text editor and paste the following one:
+
+[source,sql]
+----
+SELECT id,
+  label AS name,
+  description,
+  homepage_url as homepage,
+  number_of_employees,
+  CASE WHEN lat IS NULL THEN
+    NULL
+  ELSE
+    lat || ', ' || lng
+  END AS location
+  FROM company
+  LEFT JOIN company_geolocation ON company.id = company_geolocation.companyid
+----
+
+Save the file to `demo/sql/crunchbase/conf/logstash_sqlite/company-minimal.sql`
+inside the directory where you extracted the demo distribution.
+
+[float]
+==== Logstash configuration
+
+We now need to write a Logstash configuration to process the records returned
+by the query and populate the `company-minimal` index.
+
+NOTE: support for SQL databases is provided by the
+https://www.elastic.co/guide/en/logstash/current/plugins-inputs-jdbc.html[Logstash jdbc input plugin];
+the plugin comes pre-installed in the Logstash binary bundled in the demo.
+
+Open a text editor and paste the following:
+
+[source,text]
+----
+input {
+  jdbc {
+    jdbc_driver_library => "sqlitejdbc-v056.jar"
+    jdbc_driver_class => "org.sqlite.JDBC"
+    jdbc_connection_string => "jdbc:sqlite:crunchbase.db"
+    jdbc_user => ""
+    jdbc_password => ""
+    statement_filepath => "company-minimal.sql"
+    jdbc_paging_enabled => true
+    jdbc_page_size => 10000
+  }
+}
+
+filter {
+  mutate {
+    remove_field => ["@timestamp", "@version"]
+  }
+}
+
+output {
+  elasticsearch {
+    host => "localhost"
+    protocol => "http"
+    port => 9220
+    manage_template => false
+    action => "index"
+    index => "company-minimal"
+    document_type => "CompanyMinimal"
+  }
+}
+----
+
+The `statement_filepath` parameter specifies the path to the file containing
+the SQL query; the `jdbc_*` parameters set the database connection string and
+authentication options.
+
+The `mutate` filter is configured to remove default Logstash fields which
+are not needed in the destination index.
+
+The `output` section specifies the destination index; `manage_template` is
+set to `false` as the index mapping has been explicitly defined in the
+previous steps.
+
+Save the file to `demo/sql/crunchbase/conf/logstash_sqlite/company-minimal.conf`
+inside the directory where you extracted the demo distribution.
+
+Copy the SQLite database to `demo/sql/crunchbase/conf/logstash_sqlite/crunchbase.db`,
+then go to the `demo/sql/crunchbase/conf/logstash_sqlite` directory and run the
+following command:
+
+[source,bash]
+----
+../../../../../logstash/bin/logstash -f company-minimal.conf
+----
+
+Logstash will execute the query and populate the index.
+
+NOTE: for more information about Logstash, we recommend reading the
+https://www.elastic.co/guide/en/logstash/current/index.html[Logstash reference]
+and the https://www.elastic.co/guide/en/logstash/current/plugins-inputs-jdbc.html[jdbc input plugin]
+documentation.
+
+[float]
+==== Browsing the index in Kibi
+
+Open http://localhost:5602 in your browser, click on the _Settings_ tab then
+on _Indices_ .
+
+Deselect _Index contains time-based events_, then write `company-minimal` in
+the _Index name or pattern_ field:
+
+image::images/logstash/company-minimal-index.png["Adding the company-minimal index",align="center"]
+
+Click on _Create_ to create the the index reference, then click on the
+_Discover_ tab and select _company-minimal_ in the dark grey dropdown:
+
+image::images/logstash/company-minimal-index.png["Discovering the company-minimal index",align="center"]
+
+Click on the right arrow at the beginning of each row to expand it and see all
+the loaded fields:
+
+image::images/logstash/company-minimal-expand.png["Viewing all the fields in a document",align="center"]
+
+[float]
+==== Demo distribution data loading script
+
+The complete demo data loading process can be repeatead by running the
+`demo/sql/bin/index_crunchbase_sqlite.sh` script; the script performs the
+following actions:
+
+- Creates a copy of the database in the directory containing Logstash
+configurations
+- Creates the indices `article`, `company`, `investor` and `investment`
+- Sets the mappings for each index
+- Runs the logstash configuration for each index
+
+The Logstash configurations and Elasticsearch mappings are available in the
+`demo/sql/crunchbase/conf/logstash_sqlite` directory.

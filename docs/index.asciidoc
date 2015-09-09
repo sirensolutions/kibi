@@ -1,9 +1,9 @@
-[[kibana-guide]]
-= Kibana User Guide
+[[kibi-guide]]
+= Kibi User's Guide
+:toc: right
 
-:ref: http://www.elastic.co/guide/en/elasticsearch/reference/current/
-:shield: https://www.elastic.co/guide/en/shield/current
-:k4pull: https://github.com/elastic/kibana/pull/
+:elastic-ref: https://www.elastic.co/guide/en/elasticsearch/reference/1.7/
+:ref: http://siren.solutions/kibi/docs/current/
 
 include::introduction.asciidoc[]
 
@@ -11,11 +11,15 @@ include::setup.asciidoc[]
 
 include::getting-started.asciidoc[]
 
-include::access.asciidoc[]
+include::logstash.asciidoc[]
+
+include::external-datasource.asciidoc[]
 
 include::discover.asciidoc[]
 
 include::visualize.asciidoc[]
+
+include::relational-filter.asciidoc[]
 
 include::dashboard.asciidoc[]
 
@@ -23,4 +27,4 @@ include::settings.asciidoc[]
 
 include::production.asciidoc[]
 
-include::whats-new.asciidoc[]
+include::acknowledgements.asciidoc[]

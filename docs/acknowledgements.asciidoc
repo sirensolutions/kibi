@@ -1,0 +1,17 @@
+[[acknowledgements]]
+== Acknowledgements
+
+Kibana is a trademark of Elasticsearch BV, registered in the U.S. and
+in other countries.
+
+Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and
+in other countries.
+
+Logstash is a trademark of Elasticsearch BV, registered in the U.S. and in
+other countries.
+
+CrunchBase and CrunchBase Dataset are trademarks of AOL Inc, registered in the
+U.S. and in other countries.
+
+All the trademarks, registered trademarks and copyrighted terms in the
+Kibi demo dataset are the property of their respective owners.

@@ -14,10 +14,8 @@ much more.
 * Download the Kibi demo distribution: [http://siren.solutions/kibi](http://siren.solutions/kibi)
 * Start Elasticsearch by running `elasticsearch\bin\elasticsearch` on Linux/OS X or `elasticsearch\bin\elasticsearch.bat` on Windows.
 * Go to the `kibi` directory and run `bin/kibi` on Linux/OS X or `bin\kibi.bat` on Windows.
-* Visit [http://localhost:5602](http://localhost:5602)
 
-A preconfigured Kibi is now running at [http://localhost:5602](http://localhost:5602)
-and you can try its features on a dataset based on the [CrunchBase](http://www.crunchbase.com) Dataset;
+A pre-configured Kibi is now running at [http://localhost:5602](http://localhost:5602);
 a complete description of the demo is available in the Kibi documentation.
 
 ## Documentation
@@ -41,7 +39,7 @@ CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 
 To enable index join capabilities, Kibi relies on the the Siren 2
-Elasticsearch plugin. The Kibi binary distribution includes a pre release of
+Elasticsearch plugin. The Kibi demo distribution includes a pre release of
 Siren 2 that is licensed exclusively for personal use, development and
 accredited academic research. For a production license of Siren 2 please
 contact info@siren.solutions .
@@ -53,6 +51,3 @@ countries.
 
 Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in
 other countries.
-
-CrunchBase and CrunchBase Dataset are trademarks of AOL Inc, registered in the U.S.
-and in other countries.

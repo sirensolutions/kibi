@@ -1,0 +1,269 @@
+[[external-datasources]]
+== External datasources
+
+Kibi provides visualizations and aggregations to integrate data from external
+datasources; this section explains how to setup datasources and configure
+<<datasource-queries, queries>> and <<datasource-templates, query templates>>.
+
+=== Configuration
+
+External datasources can be configured in the `kibi/config/kibi.yml` file.
+
+Kibi provides support for the following datasources:
+
+* SQLite
+* MySQL
+* PostgreSQL
+* any SPARQL HTTP endpoint (tested with Openlink Virtuoso and Joseki)
+* *experimental* JDBC support (tested with http://www.h2database.com/html/main.html[H2]).
+
+To enable query results caching, set the `datasource_enable_cache` parameter
+to `true`; the cache size and max age (in milliseconds) can be set through the
+`datasource_cache_size` and `datasource_cache_max_age` parameters.
+
+A Kibi restart is required to apply configuration changes.
+
+NOTE: Sample connection strings are included in the default configuration file
+for each kind of datasource.
+
+NOTE: Make sure to set the configuration file as readable only to the user running
+the Kibi process as it may contain credentials in the database connection
+strings.
+
+[[entity-selection]]
+=== Datasource entity selection
+
+Entities stored in external datasources are identified by a URI:
+
+- `sql://@TABLE@/@PKVALUE@` for entities stored in SQL datasource, where
+`@TABLE@` represents a table name and `@PKVALUE@` a unique column value; e.g.
+`sql://company/1`.
+
+- `sparql://@URI@` for entities stored in triplestores, where `@URI@`
+represents a uniform resource identifier;
+e.g. `sparql://http://dbpedia.org/resource/California`.
+
+As explained in the following sections, queries on external datasources can
+extract variables from the selected entity URI; in order to allow the user
+to select an entity, you must add an <<enhanced-search-results>> visualization
+to a dashboard and configure at least one <<click-handlers, click handler>>
+to select an entity.
+
+Once the visualization is configured, clicking on the cell will display
+a purple box in the filter bar, and the variables stored in the entity URI
+will be available to queries and query templates.
+
+The screenshot below shows the effect of clicking on a cell configured with an
+entity selection handler; after selecting an entity, the _Company Info_
+template viewer shows the information about the company fetched by a query.
+
+image::images/external-sources/entity-selection.png["Entity selection",align="center"]
+
+image::images/external-sources/entity-selection-config-sample.png["Entity selection configuration example",align="center"]
+
+To disable or cancel the selection, click on the icons displayed inside the
+entity selection widget when the mouse is over it, as displayed in the
+screenshot below:
+
+image::images/external-sources/entity-selection-hover.png["Entity selection options", align="center"]
+
+[[datasource-templates]]
+=== Query templates
+
+You can define templates to format query results.
+
+Kibi supports two template engines:
+
+* http://jade-lang.com/[jade]
+* http://handlebarsjs.com/[handlebars]
+
+There are three pre-defined templates:
+
+* _kibi-json-jade_: this template presents the query results as a pretty-printed
+JSON object using the _jade_ engine. This is useful to test queries while
+writing them.
+* _kibi-table-jade_: this template displays the query results in a table,
+using the _jade_ engine.
+* _kibi-table-handlebars_: like _kibi-table-jade_, using the _handlebars_
+engine instead.
+
+You can define your own custom template by clicking on the _Settings / Templates_
+tab.
+
+Then, pick the engine you prefer and write the template; to see a preview,
+click on the _save_ button and select a query from the list;
+depending on the query you selected, the <<query-variables,_EntityURI_>> may
+need to be set.
+
+image::images/external-sources/templates-editor.png["Query template editor",align="center"]
+
+[[datasource-queries]]
+=== Queries
+
+Queries can be used to provide data to <<datasource-templates>>,
+<<relational-column, tag>> and filter Elasticsearch documents.
+
+To create a new query, click to the _"Settings/Queries"_ tab.
+
+You need then to set the following fields to define a query:
+
+* _Title_: the title of the query.
+* _Datasource_: the name of a configured datasource.
+* _Results query_: the query declaration.
+
+You may also set a description for the query and one or more tags.
+
+Below is an example configuration of a query on a SQL database
+called *Top 50 companies (HR count)* that returns the Top 50 companies by
+number of employees in a table called `company`.
+
+image::images/external-sources/queries-editor-sql1.png["Configuration of a SQL endpoint",align="center"]
+
+The preview section will display the results of the query as a table or as a
+JSON object.
+
+[float]
+[[query-variables]]
+==== Query variables:
+
+One of the most useful features of queries is that it is possible to set some
+of their parameters before execution by using datasource specific variables,
+which can be set at runtime by configuring <<click-handlers, click handlers>>
+in the <<enhanced-search-results>> visualization to select an entity.
+
+Variable values are taken from the selected entity URI which has a different
+format depending on the datasource type.
+
+.SQL.
+
+The following variables can be specified in queries on SQL datasources:
+
+- _@TABLE@_: a table name
+- _@PKVALUE@_: a value that identifies a record (e.g. a primary key value)
+
+In order to view the results of the query, you have to specify an entity URI
+manually in the field on the top right; the URI for SQL entities is
+structured as follows:
+
+----
+sql://@TABLE@/@PKVALUE@
+----
+
+Below is an example of configuration for a query named *Company Info* using
+both variables.
+
+In the example, _@TABLE@_ is replaced with _company_, and _@PKVALUE@_ with
+_company/amazon_ .
+
+image::images/external-sources/query-table-var.png["SQL query with variables",align="center"]
+
+.SPARQL.
+
+The following variables can be specified in queries on SPARQL datasources:
+
+- _@URI@_: the URI of the entity selected by the user.
+
+Below is an example configuration of a query named *Top 10 Properties for a Company*.
+The *@URI@* variable will be replaced at runtime by the selected entity URI.
+
+In order to view the results of the query, you have to specify an entity URI
+manually in the field on the top right.
+
+image::images/external-sources/queries-editor-sparql.png["Configuration of a SPARQL endpoint",align="center"]
+
+[float]
+[[activation-query]]
+==== Activation Query
+
+An activation query can be specified to conditionally execute the results
+query.
+
+For example, if you have a table called _Vehicles_ but some of the queries are
+only relevant to "Motorcycles" and not to "Cars", the activation query could
+be used to determine if the results query should be executed when an entity in
+_Vehicles_ by looking at its type.
+If the query is not executed, any template or aggregator using the query
+will be automatically disabled.
+
+On SQL datasources, activation queries will trigger results query execution
+when returning at least one record.
+
+Example:
+
+[source,sql]
+SELECT id FROM Vehicles WHERE id='@PKVALUE@' AND vehicle_type='Motorcycle'
+
+
+On SPARQL datasources, activation queries must be written using the _ASK_ form;
+the corresponding results query will be executed only if the query has a
+solution.
+
+Example:
+
+[source,sparql]
+----
+PREFIX vehicle: <http://ontologies.example.org/vehicle#>
+
+ASK {
+    <@URI@> a vehicle:Motorcycle
+}
+----
+
+[[datasource-uses]]
+=== Use cases
+
+Once you've configured query templates and queries, you can use them
+in the following visualizations:
+
+- The <<enhanced-search-results>> visualization
+- The <<templated-query-viewer>> visualization
+
+It is also possible to use queries as aggregations as explained below.
+
+[[external-query-terms-filter-aggregation]]
+==== External query terms filters aggregation
+
+The query results from an external data source can be used as an aggregation
+in visualizations.
+
+This allows to compute metrics on Elasticsearch documents _joined_ with query
+results.
+
+To use a query as an aggregation, select a bucket type and select
+_External Query Terms Filter_ in the _Aggregation_ dropdown; then, click on
+the _Add an external query terms filter_ button.
+
+You can then configure how to join the query results with the Elasticsearch
+documents by setting the following parameters:
+
+- _Source query id_: the name of the query on the external datasource.
+- _Source query variable_: the name of the variable in query results
+which contains the first value used in the join.
+- _Target field_: the name of the field in the target index which contains
+the second value used in the join.
+
+The aggregation will return only documents in the Elasticsearch index whose
+target field value is equal to the source query variable value in at least
+one of the results returned by the query; if _Negate the query_ is checked,
+the aggregation will return only documents in the Elasticsearch index whose
+target field value is not equal to any of the values of the source query
+variable in the results returned by the query.
+
+For example, the screenshot below show the configuration of a Data table
+visualization with three aggregations based on external queries:
+
+- A query that selects the labels of the competitors of the currently selected
+company
+- A query that selects the labels of all the companies which have a competitor
+- A query that selects the id's of the top 500 companies by number of employees
+
+If a query requires a selected entity, and no entity is selected, the
+computed aggregation will return 0.
+
+image::images/external-sources/relational-filter-config.png["Configuration of an external query terms filter aggregation on a data table visualization",align="center"]
+
+The screenshot below shows the configuration of two external query terms
+filter aggregation on a pie chart visualization:
+
+image::images/external-sources/relational-filter-config-2.png["Configuration of an external query terms filter aggregation on a pie chart visualization",align="center"]
+

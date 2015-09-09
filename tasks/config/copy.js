@@ -112,6 +112,12 @@ module.exports = function (grunt) {
           dest: '<%= build %>/dist/<%= pkg.name %>/plugins/README.txt'
         }
       ]
+    },
+
+    //NOTE: taken from https://github.com/elastic/kibana/blob/7c61c2e8f54830e1e89f7211db17acbcb38165a0/tasks/config/copy.js
+    shrinkwrap: {
+      src: '<%= root %>/npm-shrinkwrap.json',
+      dest: '<%= build %>/dist/<%= pkg.name %>/src/npm-shrinkwrap.json'
     }
 
   };

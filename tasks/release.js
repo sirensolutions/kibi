@@ -4,7 +4,7 @@ module.exports = function (grunt) {
   grunt.registerTask('release', [
     'distribute:load_s3_config',
     'build',
-    's3:release',
+    's3:release'
   ]);
 
   // collect the key and secret from the .aws-config.json file, finish configuring the s3 task

@@ -1,6 +1,5 @@
 define(function (require) {
-  return function VirtualIndexPatternFactory(Private, timefilter, Notifier, config, Promise, $rootScope) {
-    var _ = require('lodash');
+  return function VirtualIndexPatternFactory(Private) {
     var FieldList = Private(require('components/index_patterns/_field_list'));
 
     /**
@@ -48,4 +47,3 @@ define(function (require) {
     return VirtualIndexPattern;
   };
 });
-

@@ -31,12 +31,6 @@ module.exports = function (grunt) {
     ]);
   });
 
-  grunt.registerTask('coverage', [
-    'blanket',
-    'maybe_start_kibana',
-    'mocha:coverage'
-  ]);
-
   grunt.registerTask('test:watch', [
     'maybe_start_kibana',
     'watch:test'

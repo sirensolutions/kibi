@@ -1,6 +1,5 @@
 define(function (require) {
 
-  var _ = require('lodash');
   var reqRespStatsHTML = require('text!components/visualize/spy/_req_resp_stats.html');
   require('components/clipboard/clipboard');
 
@@ -12,19 +11,32 @@ define(function (require) {
       'req.stopped',
       'searchSource'
     ], function () {
-      if (!$scope.searchSource || !$scope.req) return;
+      if (!$scope.searchSource || !$scope.req) {
+        return;
+      }
 
       var req = $scope.req;
       var resp = $scope.req.resp;
-      var stats = $scope.stats = [];
 
-      if (resp && resp.took != null) stats.push(['Query Duration', resp.took + 'ms']);
-      if (req && req.ms != null) stats.push(['Request Duration', req.ms + 'ms']);
-      if (resp && resp.hits) stats.push(['Hits', resp.hits.total]);
+      if (resp && resp.took !== null) {
+        $scope.stats.push(['Query Duration', resp.took + 'ms']);
+      }
+      if (req && req.ms !== null) {
+        $scope.stats.push(['Request Duration', req.ms + 'ms']);
+      }
+      if (resp && resp.hits) {
+        $scope.stats.push(['Hits', resp.hits.total]);
+      }
 
-      if (req.fetchParams.index) stats.push(['Index', req.fetchParams.index]);
-      if (req.fetchParams.type) stats.push(['Type', req.fetchParams.type]);
-      if (req.fetchParams.id) stats.push(['Id', req.fetchParams.id]);
+      if (req.fetchParams.index) {
+        $scope.stats.push(['Index', req.fetchParams.index]);
+      }
+      if (req.fetchParams.type) {
+        $scope.stats.push(['Type', req.fetchParams.type]);
+      }
+      if (req.fetchParams.id) {
+        $scope.stats.push(['Id', req.fetchParams.id]);
+      }
     });
   };
 

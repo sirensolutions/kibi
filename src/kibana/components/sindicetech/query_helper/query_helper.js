@@ -2,7 +2,7 @@ define(function (require) {
 
   var _ = require('lodash');
 
-  return function QueryHelperFactory(Private, Promise, timefilter, indexPatterns, savedDashboards) {
+  return function QueryHelperFactory(Private, Promise, timefilter, indexPatterns) {
 
     var kibiTimeHelper   = Private(require('components/kibi/kibi_time_helper/kibi_time_helper'));
 
@@ -39,46 +39,6 @@ define(function (require) {
         orFilter.or.push(clause);
       });
       return orFilter;
-    };
-
-    QueryHelper.prototype.constructArrayOfOrFilters = function (label, filters) {
-      if (!label) {
-        return false;
-      }
-      if (!filters) {
-        return false;
-      }
-
-      var groupedOrFilter = {
-        or: [],
-        meta: {
-          key: 'esFieldName',
-          value: label
-        }
-      };
-
-      var metaKeys = [];
-      _.each(filters, function (f) {
-        metaKeys.push(f.meta.key);
-        _.each(f.or, function (c) {
-          groupedOrFilter.or.push(c);
-        });
-      });
-
-      var unique = function (arr) {
-        var n = {};
-        var r = [];
-        for (var i = 0; i < arr.length; i++) {
-          if (!n[arr[i]]) {
-            n[arr[i]] = true;
-            r.push(arr[i]);
-          }
-        }
-        return r;
-      };
-
-      groupedOrFilter.meta.key = unique(metaKeys).join(' ');
-      return groupedOrFilter;
     };
 
     /**

@@ -1,12 +1,24 @@
 define(function (require) {
-  var _ = require('lodash');
 
+  var fakeIndexPatterns = require('fixtures/fake_index_patterns');
+  var fakeTimeFilter = require('fixtures/fake_time_filter');
+  var fakeSavedDashboards = require('fixtures/saved_dashboards');
   var $rootScope;
   var queryHelper;
 
-  function init() {
+  function init(timefilterImpl, savedDashboardsImpl, indexPatternsImpl) {
     return function () {
-      module('kibana');
+      module('app/dashboard', function ($provide) {
+        $provide.service('savedDashboards', savedDashboardsImpl);
+      });
+
+      module('kibana/index_patterns', function ($provide) {
+        $provide.service('indexPatterns', indexPatternsImpl);
+      });
+
+      module('kibana', function ($provide) {
+        $provide.service('timefilter', timefilterImpl);
+      });
 
       inject(function ($injector, Private, _$rootScope_) {
         $rootScope = _$rootScope_;
@@ -16,7 +28,7 @@ define(function (require) {
   }
 
   describe('Kibi Components', function () {
-    beforeEach(init());
+    beforeEach(init(fakeTimeFilter, fakeSavedDashboards, fakeIndexPatterns));
 
     describe('queryHelper', function () {
 

@@ -173,7 +173,7 @@ define(function (require) {
               notify.info('Saved Dashboard as "' + dash.title + '"');
               // added by kibi
               cache.flush();
-              $rootScope.$emit('kibi:dashboard:saved', dash);
+              $rootScope.$emit('kibi:dashboard:changed', id);
               // added by kibi end
               if (dash.id !== $routeParams.id) {
                 kbnUrl.change('/dashboard/{{id}}', {id: dash.id});

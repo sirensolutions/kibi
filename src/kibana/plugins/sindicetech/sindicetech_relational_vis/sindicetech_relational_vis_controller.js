@@ -427,7 +427,7 @@ define(function (require) {
         }
       }; // end of _constructButtons
 
-      $rootScope.$on('kibi:dashboard:saved', function (dash) {
+      $rootScope.$on('kibi:dashboard:changed', function (event, dashId) {
         if ($scope.buttons) {
           _updateCounts();
         }

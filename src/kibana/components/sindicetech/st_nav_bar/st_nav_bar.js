@@ -188,6 +188,10 @@ define(function (require) {
               // selected is tricky as it will be changed by the select input element
               // so instead compare with _selected
               if ($scope.dashboardGroups[gIndex]._selected.id !== g._selected.id) {
+
+                // put the old count first so in case it will be the same it will not flip
+                g.count = $scope.dashboardGroups[gIndex].count;
+
                 // here write the whole group to the scope as
                 // selected must be a proper reference to the correct object in dashboards array
                 $scope.dashboardGroups[gIndex] = g;
@@ -295,6 +299,14 @@ define(function (require) {
 
         });
 
+
+        $rootScope.$on('kibi:dashboardgroup:changed', function (event, dashboardGroup) {
+          // clear the scope in case a group was saved
+          // in this way the new computed groups will be used
+          delete $scope.dashboardGroups;
+        });
+
+
         $scope.relationalFilterPanelOpened = false;
 
         $scope.openRelationalFilterPanel = function () {
@@ -312,7 +324,7 @@ define(function (require) {
         });
 
         // rerender tabs if any dashbord got saved
-        $rootScope.$on('kibi:dashboard:saved', function (event, dash) {
+        $rootScope.$on('kibi:dashboard:changed', function (event, dashId) {
           dashboardGroupHelper.computeGroups().then(function (dashboardGroups) {
             _writeToScope(dashboardGroups);
           });

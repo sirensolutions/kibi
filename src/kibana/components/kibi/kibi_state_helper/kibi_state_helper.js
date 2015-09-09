@@ -44,9 +44,11 @@ define(function (require) {
       }
       this._updateTimeForAllDashboards();
 
-      $rootScope.$on('kibi:dashboard:saved', function (event, dashboard) {
-        self._updateTimeForOneDashboard(dashboard);
-        globalState.save();
+      $rootScope.$on('kibi:dashboard:changed', function (event, dashboardId) {
+        savedDashboards.get(dashboardId).then(function (savedDashboard) {
+          self._updateTimeForOneDashboard(savedDashboard);
+          globalState.save();
+        });
       });
 
       // below listener on globalState is needed to react when the global time is changed by the user

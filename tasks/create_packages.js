@@ -27,6 +27,18 @@ var mkdirSync = function (path) {
   }
 };
 
+
+function copyFile(source, target) {
+  return new Promise(function (resolve, reject) {
+    var rd = fs.createReadStream(source);
+    rd.on('error', reject);
+    var wr = fs.createWriteStream(target);
+    wr.on('error', reject);
+    wr.on('finish', resolve);
+    rd.pipe(wr);
+  });
+}
+
 function copyNodeSqlite3Bindings(name, distPath) {
   var from;
   var toFolder;
@@ -54,7 +66,9 @@ function copyNodeSqlite3Bindings(name, distPath) {
   if (from && toFolder) {
     var to = toFolder + '/node_sqlite3.node';
     mkdirSync(toFolder);
-    fs.createReadStream(from).pipe(fs.createWriteStream(to));
+    return copyFile(from, to);
+  } else {
+    return Promise.reject(new Error('Could not determine source and destination paths while copying Sqlite binding for ' + name));
   }
 }
 
@@ -79,14 +93,18 @@ function copyNodeJavaBindings(name, distPath) {
   if (from) {
     var to = distPath + '/' + name + '/' +
              'src/node_modules/jdbc-sindicetech/node_modules/java/build/Release/nodejavabridge_bindings.node';
-    fs.createReadStream(from).pipe(fs.createWriteStream(to));
+    return copyFile(from, to);
+  } else {
+    return Promise.reject(new Error('Could not determine source path while copying nodejavabridge binding for ' + name));
   }
 }
 
 
 function createPackages(grunt) {
+
   grunt.registerTask('create_packages', function () {
     var done = this.async();
+    var errorCount = this.errorCount;
     var target = grunt.config.get('target');
     var distPath = join(grunt.config.get('build'), 'dist');
     var version = grunt.config.get('pkg.version');
@@ -97,11 +115,6 @@ function createPackages(grunt) {
       var archiveName = join(target, name);
       var commands = [];
       var arch = /x64$/.test(name) ? 'x86_64' : 'i686';
-
-      // sindicetech added - to make the correct build with java bindings
-      copyNodeJavaBindings(name, distPath);
-      copyNodeSqlite3Bindings(name, distPath);
-      // end of sindicetech
 
       var fpm_options = [ 'fpm', '-f', '-p', target, '-s', 'dir', '-n', packageName, '-v', version,
                           '--after-install', join(distPath, 'user', 'installer.sh'),
@@ -130,19 +143,42 @@ function createPackages(grunt) {
         }
       }
 
-      return mkdirp.mkdirpAsync(target)
-        .then(function (arg) {
-          return Promise.map(commands, function (cmd) {
-            return execFile(cmd.shift(), cmd, options);
-          });
-        }, function (err) { console.log('Failure on ' + name + ': ' + err); })
-        .error(function (err) {
-          console.log('Failure on ' + name );
-          console.log(err);
+      // kibi added - to make the correct build with java bindings
+      return copyNodeJavaBindings(name, distPath).then(function () {
+        return copyNodeSqlite3Bindings(name, distPath).then(function () {
+
+          // old stuff before kibi
+          return mkdirp.mkdirpAsync(target).then(function (arg) {
+              return Promise.map(commands, function (cmd) {
+                return execFile(cmd.shift(), cmd, options);
+              });
+            }, function (err) {
+              console.log('Failure on ' + name + ': ' + err);
+              errorCount++;
+            })
+            .error(function (err) {
+              console.log('Failure on ' + name );
+              console.log(err);
+              errorCount++;
+            });
+          // end of old stuff
+
         });
+      }).catch(function (err) {
+        console.log('Failure on ' + name );
+        console.log(err);
+        errorCount++;
+      });
+      // end of kibi
     };
 
-    Promise.map(getBaseNames(grunt), createPackage).finally(done);
+    Promise.map(getBaseNames(grunt), createPackage).finally(function () {
+      if (errorCount > 0) {
+        grunt.fail.fatal('There was ' + errorCount + ' errors');
+      } else {
+        done();
+      }
+    });
   });
 }
 

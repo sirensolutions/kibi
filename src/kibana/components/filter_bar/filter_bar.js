@@ -10,7 +10,7 @@ define(function (require) {
   require('css!components/filter_bar/filter_bar.css');
   require('css!bower_components/qtip2/jquery.qtip.min.css');
 
-  module.directive('filterBar', function (Private, Promise, getAppState, globalState, $timeout) {
+  module.directive('filterBar', function (Private, Promise, getAppState, globalState, $timeout, indexPatterns) {
     var mapAndFlattenFilters = Private(require('components/filter_bar/lib/mapAndFlattenFilters'));
     var mapFlattenAndWrapFilters = Private(require('components/filter_bar/lib/mapFlattenAndWrapFilters'));
     var extractTimeFilter = Private(require('components/filter_bar/lib/extractTimeFilter'));
@@ -114,22 +114,40 @@ define(function (require) {
             $scope.$emit('filterbar:updated');
           });
 
-          $timeout(function () {
-            jQuery('.filter.join').qtip({
-              content: {
-                title: 'Relations',
-                text: jQuery('.filter.join .explanation').html()
-              },
-              position: {
-                my: 'top left',
-                at: 'bottom center'
-              },
-              style: {
-                classes: 'qtip-light qtip-rounded qtip-shadow'
-              }
+          var promises = _.chain(filters)
+          .filter(function (filter) {
+            return !!filter.join;
+          }).map(function (filter) {
+            return filter.join.indexes;
+          })
+          .flatten()
+          .map(function (index) {
+            return indexPatterns.get(index.id);
+          })
+          .value();
+
+          Promise.all(promises).then(function (data) {
+            indexes = _.object(_.map(data, 'id'), data);
+            $timeout(function () {
+              jQuery('.filter.join').qtip({
+                content: {
+                  title: 'Relations',
+                  text: jQuery('.filter.join .explanation').html()
+                },
+                position: {
+                  my: 'top left',
+                  at: 'bottom center'
+                },
+                style: {
+                  classes: 'qtip-light qtip-rounded qtip-shadow'
+                }
+              });
             });
           });
         }
+
+        // the set of index patterns
+        var indexes;
 
         updateFilters();
 
@@ -141,6 +159,19 @@ define(function (require) {
         globalState.on('save_with_changes', function () {
           $scope.showEntityClipboard = getShowEntityClipboard();
         });
+
+        /**
+         * Format the value as a date if the field type is date
+         */
+        function formatDate(fields, fieldName, value) {
+          var field = _.find(fields, function (field) {
+            return field.name === fieldName;
+          });
+          if (field.type === 'date') {
+            return field.format.convert(value, 'html');
+          }
+          return value;
+        }
 
         // needed by kibi to recreate filter label
         // as we do not want to store the meta info in filter join definition
@@ -155,7 +186,11 @@ define(function (require) {
         // .exists
         // .missing
         // .script
-        $scope.recreateFilterLabel = function (f) {
+        $scope.recreateFilterLabel = function (f, indexId) {
+          if (!indexes) {
+            return '';
+          }
+          var fields = indexes[indexId].fields;
           var prop;
           if (f.query && f.query.query_string && f.query.query_string.query) {
             return 'query: <b>' + f.query.query_string.query + '</b> ';
@@ -169,7 +204,8 @@ define(function (require) {
             return ret;
           } else if (f.range) {
             prop = Object.keys(f.range)[0];
-            return ' ' + prop + ': <b>' + f.range[prop].gte + '</b> to <b>' + f.range[prop].lte + '</b> ';
+            return ' ' + prop + ': <b>' + formatDate(fields, prop, f.range[prop].gte) +
+              '</b> to <b>' + formatDate(fields, prop, f.range[prop].lte) + '</b> ';
           } else if (f.dbfilter) {
             return ' ' + (f.dbfilter.negate ? 'NOT' : '') + ' dbfilter: <b>' + f.dbfilter.queryid + '</b> ';
           } else if (f.or) {
@@ -181,7 +217,7 @@ define(function (require) {
             return ' script: script:<b>' + f.script.script + '</b> params: <b>' + f.script.params + '</b> ';
           } else if (f.missing) {
             prop = Object.keys(f.missing)[0];
-            return ' missing: <b>' + prop + ':' + f.missing[prop] + '</b> ';
+            return ' missing: <b>' + prop + ':' + formatDate(fields, prop, f.missing[prop]) + '</b> ';
           } else if (f.not) {
             return ' NOT' + $scope.recreateFilterLabel(f.not);
           } else if (f.geo_bounding_box) {

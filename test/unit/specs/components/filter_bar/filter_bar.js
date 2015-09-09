@@ -9,10 +9,17 @@ define(function (require) {
   describe('Filter Bar Directive', function () {
     var $rootScope, $compile, $timeout, Promise;
     var appState, queryFilter, mapFilter, $el;
-    // require('test_utils/no_digest_promises').activateForSuite();
 
     beforeEach(function () {
       appState = new MockState({ filters: [] });
+
+      module('kibana', function ($provide) {
+        $provide.service('$route', function () {
+          return {
+            reload: _.noop
+          };
+        });
+      });
 
       module('kibana/global_state', function ($provide) {
         $provide.service('getAppState', function () {
@@ -29,6 +36,14 @@ define(function (require) {
 
       module('kibana/courier', function ($provide) {
         $provide.service('courier', require('fixtures/mock_courier'));
+      });
+
+      module('discover/saved_searches', function ($provide) {
+        $provide.service('savedSearches', require('fixtures/empty_saved_searches'));
+      });
+
+      module('app/dashboard', function ($provide) {
+        $provide.service('savedDashboards', require('fixtures/empty_saved_dashboards'));
       });
 
       inject(function (Private, $injector, _$rootScope_, _$compile_, _$timeout_) {

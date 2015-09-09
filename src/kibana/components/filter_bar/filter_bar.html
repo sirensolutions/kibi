@@ -27,7 +27,7 @@
             <span ng-if="filter.join.filters[index.id]"></span>
             <ul>
               <!-- as we do not have any meta information for this filters lets recreate the labels -->
-              <li ng-repeat="filterSpec in filter.join.filters[index.id]" ng-bind-html="recreateFilterLabel(filterSpec)"></li>
+              <li ng-repeat="filterSpec in filter.join.filters[index.id]" ng-bind-html="recreateFilterLabel(filterSpec, index.id)"></li>
             </ul>
             </span>
           </li>

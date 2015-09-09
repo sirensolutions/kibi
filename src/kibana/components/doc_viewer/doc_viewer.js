@@ -7,7 +7,7 @@ define(function (require) {
   require('css!components/doc_viewer/doc_viewer.css');
 
   require('modules').get('kibana')
-  .directive('docViewer', function (config, Private) {
+  .directive('docViewer', function (config, Private, $location) {
     return {
       restrict: 'E',
       template: html,
@@ -18,6 +18,7 @@ define(function (require) {
         columns: '=?'
       },
       link: function ($scope, $el, attr) {
+        $scope.edit = $location.path().indexOf('edit') !== -1;
         // If a field isn't in the mapping, use this
         $scope.mode = 'table';
         $scope.mapping = $scope.indexPattern.fields.byName;

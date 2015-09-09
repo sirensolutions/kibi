@@ -11,9 +11,7 @@ define(function (require) {
       link: function ($scope, $el) {
 
         var updateSelectedEntity = function () {
-          if (globalState.entityDisabled) {
-            $scope.disabled = globalState.entityDisabled;
-          }
+          $scope.disabled = !!globalState.entityDisabled;
           if (globalState.entityURI) {
             $scope.entityURI = globalState.entityURI;
             if (globalState.entityLabel) {
@@ -32,6 +30,8 @@ define(function (require) {
 
         $scope.removeEntity = function () {
           delete $scope.entityURI;
+          delete $scope.label;
+          delete $scope.disabled;
           delete globalState.entityDisabled;
           delete globalState.entityURI;
           delete globalState.entityLabel;

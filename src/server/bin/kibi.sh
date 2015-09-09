@@ -19,5 +19,5 @@ SERVER=${DIR}/src/bin/kibi.js
 
 $DIR/bin/create_symlink.sh
 
-ROOT_DIR="$DIR/../" CONFIG_PATH="${DIR}/config/kibi.yml" NODE_ENV="production" exec "${NODE}" ${SERVER} ${@}
+ROOT_DIR="$DIR/" CONFIG_PATH="${DIR}/config/kibi.yml" NODE_ENV="production" exec "${NODE}" ${SERVER} ${@}
 

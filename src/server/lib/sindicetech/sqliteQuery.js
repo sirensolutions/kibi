@@ -38,10 +38,9 @@ SQLiteQuery.prototype.openConnection = function () {
     if (datasource.dbfile && path.resolve(dbfile) !== path.normalize(dbfile)) {
       // if dbfile is not an absolute path
       var rootDir = process.env.ROOT_DIR;
-      if (!rootDir) {
-        rootDir = process.env.PWD;
+      if (rootDir) {
+        dbfile = path.join(rootDir, datasource.dbfile);
       }
-      dbfile = path.join(rootDir, datasource.dbfile);
     }
     var db = new sqlite3.Database(dbfile, sqlite3.OPEN_READONLY, function (error) {
       if (error) {

@@ -9,7 +9,7 @@ set NODE=%DIR%\node\node.exe
 set SERVER=%DIR%\src\bin\kibi.js
 set NODE_ENV="production"
 set CONFIG_PATH=%DIR%\config\kibi.yml
-set ROOT_DIR=%DIR%\..\
+set ROOT_DIR=%DIR%\
 
 TITLE Kibi Server @@version
 

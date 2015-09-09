@@ -74,7 +74,7 @@ log_file: ./kibi.log
 datasources:
   crunchbase-datasource:
     type: sqlite
-    dbfile: kibi/crunchbase.db
+    dbfile: crunchbase.db
 
 # Sample datasource
 #

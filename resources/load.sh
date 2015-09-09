@@ -14,5 +14,5 @@ do
   filename=$(basename $file)
   id=$(basename $filename .json) 
   echo "loading $filename id $id"
-  curl  -X PUT "$ELASTICSEARCH_URL/.kibana/$OBJECT_NAME/$id" -T $FOLDER/$OBJECT_NAME/$filename --silent
+  curl  -X PUT "$ELASTICSEARCH_URL/.kibi/$OBJECT_NAME/$id" -T $FOLDER/$OBJECT_NAME/$filename --silent
 done

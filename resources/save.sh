@@ -32,7 +32,7 @@ else
   mkdir -p $DIRECTORY
 fi
 
-curl -s  "$ELASTICSEARCH_URL/.kibana/$OBJECT_NAME/_search?size=100&pretty" | \
+curl -s  "$ELASTICSEARCH_URL/.kibi/$OBJECT_NAME/_search?size=100&pretty" | \
 grep "[^st]_id" | \
 sed -E 's/.*"_id" : "(.*)",/\1/' | \
-while read -r id; do curl -s  "$ELASTICSEARCH_URL/.kibana/$OBJECT_NAME/$id/_source" | python -m json.tool > $DIRECTORY/$id.json; done
+while read -r id; do curl -s  "$ELASTICSEARCH_URL/.kibi/$OBJECT_NAME/$id/_source" | python -m json.tool > $DIRECTORY/$id.json; done

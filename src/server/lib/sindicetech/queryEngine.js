@@ -237,15 +237,13 @@ QueryEngine.prototype._fetchQueriesFromEs = function () {
   });
 };
 
-/*
-return a ordered list of query objects which:
-a) do match the URI - this is implemented by executing the ASK query of each of the templates and checking which returns TRUE.
-b) match the templateFolderName
-c) query label matches the names in queryIds (if provided)
-
-Order is given by the priority value.
-*/
-QueryEngine.prototype._getQueries = function (uri, folderName, queryIds) {
+/**
+ * return a ordered list of query objects which:
+ * a) do match the URI - this is implemented by executing the ASK query of each of the templates and checking which returns TRUE.
+ * b) query label matches the names in queryIds (if provided)
+ * Order is given by the priority value.
+ */
+QueryEngine.prototype._getQueries = function (uri, queryIds) {
   var that = this;
 
   if (this.queries.length === 0) {
@@ -294,14 +292,6 @@ QueryEngine.prototype._getQueries = function (uri, folderName, queryIds) {
       new Error('Non of requested queries ' + JSON.stringify(queryIds, null, ' ') + ' found in memory')
     );
   }
-
-  // filter by templateFolderName
-  /*
-  var fromRightFolder = _.filter(withRightId, function (query) {
-    return folderName && folderName === query.config.folder;
-  });
-
-  */
   var fromRightFolder = withRightId;
 
   var promises = _.map(fromRightFolder, function (query) {
@@ -380,7 +370,7 @@ QueryEngine.prototype._getOptionById = function (queryOptions, queryId) {
  *    ...
  *  ]
  */
-QueryEngine.prototype.getIdsFromQueries = function (uri, queryDefs, templateFolderName) {
+QueryEngine.prototype.getIdsFromQueries = function (uri, queryDefs) {
   var self = this;
 
   var queryIds = _.map(queryDefs, function (queryDef) {
@@ -388,7 +378,7 @@ QueryEngine.prototype.getIdsFromQueries = function (uri, queryDefs, templateFold
   });
 
   return self._init().then(function () {
-    return self._getQueries(uri, templateFolderName, queryIds)
+    return self._getQueries(uri, queryIds)
     .then(function (queries) {
       var promises = _.map(queries, function (query) {
         var queryDefinition = self._getQueryDefById(queryDefs, query.id);
@@ -402,7 +392,7 @@ QueryEngine.prototype.getIdsFromQueries = function (uri, queryDefs, templateFold
 
 // Returns an array with response data from all relevant queries
 // Use this method when you need just data and not query html
-QueryEngine.prototype.getQueriesData = function (uri, templateFolderName, queryDefs) {
+QueryEngine.prototype.getQueriesData = function (uri, queryDefs) {
   var self = this;
 
   var queryIds = _.map(queryDefs, function (queryDef) {
@@ -410,7 +400,7 @@ QueryEngine.prototype.getQueriesData = function (uri, templateFolderName, queryD
   });
 
   return self._init().then(function () {
-    return self._getQueries(uri, templateFolderName, queryIds)
+    return self._getQueries(uri, queryIds)
     .then(function (queries) {
 
       var promises = _.map(queries, function (query) {
@@ -424,7 +414,7 @@ QueryEngine.prototype.getQueriesData = function (uri, templateFolderName, queryD
   });
 };
 
-QueryEngine.prototype.getQueriesHtml =  function (uri, templateFolderName, queryDefs) {
+QueryEngine.prototype.getQueriesHtml = function (uri, queryDefs) {
   var self = this;
 
   var queryIds = _.map(queryDefs, function (queryDef) {
@@ -432,7 +422,7 @@ QueryEngine.prototype.getQueriesHtml =  function (uri, templateFolderName, query
   });
 
   return self._init().then(function () {
-    return self._getQueries(uri, templateFolderName, queryIds)
+    return self._getQueries(uri, queryIds)
     .then(function (queries) {
 
       var promises = _.map(queries, function (query) {

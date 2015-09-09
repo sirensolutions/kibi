@@ -238,8 +238,6 @@ define(function (require) {
 
             queryEngineClient.getQueriesHtmlFromServer(
               $scope.holder.entityURI,
-              null,
-              null,
               [
                 {
                   open: true,

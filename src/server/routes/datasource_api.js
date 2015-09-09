@@ -21,9 +21,8 @@ router.get('/clearCache', function (req, res, next) {
 
 router.get('/getQueriesHtml', function (req, res, next) {
 
-  var entityURI    = req.query.entityURI;
-  var folderName   = req.query.folderName;
-  var queryDefs    = JSON.parse(req.query.queryDefs);
+  var entityURI = req.query.entityURI;
+  var queryDefs = JSON.parse(req.query.queryDefs);
 
   if (_validateQueryDefs(queryDefs) === false) {
     res.send({
@@ -33,7 +32,7 @@ router.get('/getQueriesHtml', function (req, res, next) {
     return;
   }
 
-  queryEngine.getQueriesHtml(entityURI, folderName, queryDefs)
+  queryEngine.getQueriesHtml(entityURI, queryDefs)
   .then(function (queries) {
 
     res.send({
@@ -54,9 +53,8 @@ router.get('/getQueriesHtml', function (req, res, next) {
 
 router.get('/getIdsFromQueries', function (req, res, next) {
 
-  var entityURI  = req.query.entityURI;
-  var folderName = req.query.folderName;
-  var queryDefs  = JSON.parse(req.query.queryDefs);
+  var entityURI = req.query.entityURI;
+  var queryDefs = JSON.parse(req.query.queryDefs);
 
   if (_validateQueryDefs(queryDefs) === false) {
     res.send({
@@ -65,7 +63,7 @@ router.get('/getIdsFromQueries', function (req, res, next) {
     });
     return;
   }
-  queryEngine.getIdsFromQueries(entityURI, queryDefs, folderName)
+  queryEngine.getIdsFromQueries(entityURI, queryDefs)
   .then(function (queries) {
 
     res.send({
@@ -86,9 +84,8 @@ router.get('/getIdsFromQueries', function (req, res, next) {
 
 router.get('/getQueriesData', function (req, res, next) {
 
-  var entityURI  = req.query.entityURI;
-  var folderName = req.query.folderName;
-  var queryDefs  = JSON.parse(req.query.queryDefs);
+  var entityURI = req.query.entityURI;
+  var queryDefs = JSON.parse(req.query.queryDefs);
 
   if (_validateQueryDefs(queryDefs) === false) {
     res.send({
@@ -101,7 +98,7 @@ router.get('/getQueriesData', function (req, res, next) {
   // TODO: add some validation throw an error if mandatory params are missing
   // test with queryIds parameter set
 
-  queryEngine.getQueriesData(entityURI, folderName, queryDefs)
+  queryEngine.getQueriesData(entityURI, queryDefs)
   .then(function (queries) {
 
     res.send({

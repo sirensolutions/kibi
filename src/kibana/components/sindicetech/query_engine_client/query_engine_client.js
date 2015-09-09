@@ -1,16 +1,21 @@
 define(function (require) {
 
-  var _ = require('lodash');
   var $ = require('jquery');
-  require('services/es');
-  require('services/promises');
 
   require('modules').get('kibana/query_engine_client')
-  .service('queryEngineClient', function (Promise, Private, Notifier, $http) {
+  .service('queryEngineClient', function ($http) {
 
     function QueryEngineClient() {}
 
-    QueryEngineClient.prototype._makeRequestToServer = function (url, params, async) {
+    QueryEngineClient.prototype._makeRequestToServer = function (url, uri, queryDefs, async) {
+      if (queryDefs && !(queryDefs instanceof Array) && (typeof queryDefs === 'object') && queryDefs !== null) {
+        queryDefs = [queryDefs];
+      }
+      var params = {
+        entityURI: uri,
+        queryDefs: JSON.stringify(queryDefs)
+      };
+
       if (async === false) {
         // here we use jquery to make a sync call as it is not supported in $http
         var p =  $.ajax({
@@ -34,7 +39,6 @@ define(function (require) {
         p.catch = p.fail;
         return p;
       } else {
-        // here we return the Promise the usual way
         return $http({
           method: 'GET',
           url: url,
@@ -43,35 +47,13 @@ define(function (require) {
       }
     };
 
-
-    QueryEngineClient.prototype.getQueriesDataFromServer = function (uri, folderName, datasourceId, queryDefs, async) {
-      if (queryDefs && !(queryDefs instanceof Array) && (typeof queryDefs === 'object') && queryDefs !== null) {
-        queryDefs = [queryDefs];
-      }
-      var params = {
-        entityURI:    uri,
-        datasourceId: datasourceId,
-        folderName:   folderName,
-        queryDefs:    JSON.stringify(queryDefs),
-      };
-      return this._makeRequestToServer('datasource/getQueriesData', params, async);
+    QueryEngineClient.prototype.getQueriesDataFromServer = function (uri, queryDefs, async) {
+      return this._makeRequestToServer('datasource/getQueriesData', uri, queryDefs, async);
     };
 
-
-    QueryEngineClient.prototype.getQueriesHtmlFromServer = function (uri, folderName, datasourceId, queryDefs, async, queryOptions) {
-      if (queryDefs && !(queryDefs instanceof Array) && (typeof queryDefs === 'object') && queryDefs !== null) {
-        queryDefs = [queryDefs];
-      }
-      var params = {
-        entityURI: uri,
-        datasourceId: datasourceId,
-        folderName:   folderName,
-        queryDefs:     JSON.stringify(queryDefs),
-        queryOptions: JSON.stringify(queryOptions)
-      };
-      return this._makeRequestToServer('datasource/getQueriesHtml', params, async);
+    QueryEngineClient.prototype.getQueriesHtmlFromServer = function (uri, queryDefs, async) {
+      return this._makeRequestToServer('datasource/getQueriesHtml', uri, queryDefs, async);
     };
-
 
     QueryEngineClient.prototype.clearCache = function () {
       return $http({

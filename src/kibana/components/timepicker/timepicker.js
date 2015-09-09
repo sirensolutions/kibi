@@ -12,6 +12,8 @@ define(function (require) {
   require('components/timepicker/time_units');
 
   module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshIntervals) {
+
+
     return {
       restrict: 'E',
       scope: {
@@ -109,6 +111,7 @@ define(function (require) {
 
           $scope.mode = thisMode;
         };
+
 
         $scope.setQuick = function (from, to, description) {
           $scope.from = from;

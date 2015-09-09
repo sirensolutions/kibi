@@ -195,7 +195,6 @@ define(function (require) {
           }
         }
 
-        var joins = [];
         if (filters) {
           for (var f in filters) {
             if (filters.hasOwnProperty(f) && f !== focus && filters[f] instanceof Array && filters[f].length > 0) {
@@ -218,55 +217,64 @@ define(function (require) {
                 joinFilter.join.filters[f].push(filter);
               }
 
-              joins.push({ filters: joinFilter.join.filters[f], indexPattern: indexPatterns.get(f) });
-
             }
           }
         }
 
-        var promises = _.map(joins, function (join) {
+        // update the timeFilter
+        var promises = _.chain(indexes)
+        .filter(function (index) {
+          return index.id !== focus;
+        })
+        .map(function (index) {
           return new Promise(function (fulfill, reject) {
-            join.indexPattern.then(function (indexPattern) {
+            indexPatterns.get(index.id).then(function (indexPattern) {
+              // 1 check if there is a timefilter for this index
               var timeFilter = timefilter.get(indexPattern);
               if (timeFilter) {
                 if (indexToDashboardMap) {
                   var dashboardId = indexToDashboardMap[indexPattern.id];
                   // update the timeFilter and add it to filters
                   kibiTimeHelper.updateTimeFilterForDashboard(dashboardId, timeFilter).then(function (updatedTimeFilter) {
-                    fulfill(updatedTimeFilter);
+                    fulfill({
+                      index: index,
+                      timeFilter: updatedTimeFilter
+                    });
                   });
                 } else {
-                  fulfill(timeFilter);
+                  fulfill({
+                    index: index,
+                    timeFilter: timeFilter
+                  });
                 }
               } else {
                 // here resolve the promise with no filter just so the number of resolved one matches
                 fulfill(null);
               }
+            }).catch(function (err) {
+              fulfill(null);
             });
           });
-        });
+        }).value();
 
         Promise.all(promises).then(function (data) {
           // add time filters on their respective index
           for (var i = 0; i < data.length; i++) {
             if (data[i]) {
-              joins[i].filters.push(data[i]);
+              // here we add a time filter to correct filters
+              if (!joinFilter.join.filters[data[i].index.id]) {
+                joinFilter.join.filters[data[i].index.id] = [];
+              }
+              joinFilter.join.filters[data[i].index.id].push(data[i].timeFilter);
             }
           }
 
         }).finally(function () {
           fulfill(joinFilter);
         });
+
       });
     };
-
-
-    var cleanFilter = function (filter) {
-      return _.omit(filter, ['meta']);
-    };
-
-
-
 
     return new QueryHelper();
   };

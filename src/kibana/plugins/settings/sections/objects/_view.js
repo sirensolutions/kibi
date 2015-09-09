@@ -179,7 +179,7 @@ define(function (require) {
           // added by sindicetech to prevent deletion of a dashboard which is referenced by dashboardgroup
           if (service.type === 'dashboard') {
 
-            dashboardGroupHelper.isDashboardInAnyDashboardGroup([$routeParams.id]).then(function (dashboardGroupNames) {
+            dashboardGroupHelper.getIdsOfDashboardGroupsTheseDashboardsBelongTo([$routeParams.id]).then(function (dashboardGroupNames) {
               if (dashboardGroupNames && dashboardGroupNames.length > 0) {
                 var msg =
                   'Dashboard [' + $routeParams.id + '] is reffered by following dashboardGroup' +

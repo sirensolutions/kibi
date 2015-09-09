@@ -39,7 +39,7 @@ define(function (require) {
     'DashboardGroupsEditor',
     function ($rootScope, $scope, $route, $window, kbnUrl, Notifier, savedDashboards, savedDashboardGroups, Private, Promise) {
 
-      var arrayHelper = Private(require('components/sindicetech/arrayHelper/arrayHelper'));
+      var arrayHelper = Private(require('components/kibi/array_helper/array_helper'));
 
       var notify = new Notifier({
         location: 'Dashboard Groups Editor'

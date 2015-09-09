@@ -8,7 +8,7 @@ define(function (require) {
 
   module.controller(
     'SindicetechRelationalVisController',
-    function ($scope, $rootScope, config, indexPatterns, Private, $http, Notifier, kbnUrl, Promise, savedDashboards, savedSearches) {
+    function ($scope, $rootScope, Private, $http, Notifier, kbnUrl, Promise, savedDashboards, savedSearches) {
 
       var isInConfigurationMode = $('#sindicetech-relational-vis-params').is(':visible');
       var notify = new Notifier({

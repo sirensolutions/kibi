@@ -4,6 +4,7 @@ define(function (require) {
   var rison = require('utils/rison');
   var _ = require('lodash');
   var $ = require('jquery');
+  var kibiUtils = require('kibiutils');
 
   module.controller(
     'SindicetechEntityInfoVisController',
@@ -15,11 +16,8 @@ define(function (require) {
 
       var urlHelper = Private(require('components/sindicetech/urlHelper/urlHelper'));
 
-      var SindicetechUuid = Private(require('components/sindicetech/query_engine_client/_sindicetech_uuid'));
-      var uuid = new SindicetechUuid();
-
       // generate random id to avoid collisions if there are multiple widgets on one dashboard
-      $scope.snippetContainerId = uuid.get();
+      $scope.snippetContainerId = kibiUtils.getUuid4();
 
       // we have to wrap the value into object - this prevents weird thing related to transclusion
       // see http://stackoverflow.com/questions/25180613/angularjs-transclusion-creates-new-scope
@@ -61,8 +59,6 @@ define(function (require) {
 
         queryEngineClient.getQueriesHtmlFromServer(
           $scope.holder.entityURI,
-          null,
-          null,
           $scope.vis.params.queryOptions,
           true
         ).then(function (resp) {

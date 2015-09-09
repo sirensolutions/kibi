@@ -58,11 +58,11 @@
     "handlebars": "2.0.0",
     "amdefine": ">=0.1.0",
     "request-promise": "0.4.0",
-    "lru-cache":"~2.6.4",
-    "mysql":"2.5.5",
-    "pg":"4.3.0",
+    "lru-cache": "~2.6.4",
+    "mysql": "2.5.5",
+    "pg": "4.3.0",
     "jdbc-sindicetech": "0.0.14-pre2",
-    "jsonutils" : "sindicetech/jsonutils#1.0.0",
+    "kibiutils": "sindicetech/kibiutils#1.0.0",
     "sqlite3": "3.0.9"
   },
   "devDependencies": {

@@ -1189,10 +1189,10 @@
         }
       }
     },
-    "jsonutils": {
+    "kibiutils": {
       "version": "1.0.0",
-      "from": "git://github.com/sindicetech/jsonutils#1.0.0",
-      "resolved": "git://github.com/sindicetech/jsonutils#f8131d4ad305e263d2b274b411041b2a90686886"
+      "from": "git://github.com/sindicetech/kibiutils#1.0.0",
+      "resolved": "git://github.com/sindicetech/kibiutils#659131e148082453255dd2196b02be9d7c8fb269"
     },
     "lodash": {
       "version": "2.4.2",

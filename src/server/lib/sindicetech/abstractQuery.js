@@ -6,8 +6,7 @@ var url = require('url');
 var http = require('http');
 var handlebars = require('handlebars');
 var jade = require('jade');
-var SindicetechUuid = require('./uuid');
-var uuid = new SindicetechUuid();
+var kibiUtils = require('kibiutils');
 var slugifyId = require('./slugify_id');
 var config = require('../../config');
 var logger = require('../logger');
@@ -198,7 +197,7 @@ Query.prototype.getHtml = function (uri, option) {
         logger.error(e);
       }
       // here unique id
-      dataClone.id = uuid.get();
+      dataClone.id = kibiUtils.getUuid4();
 
       // make sure that only picked not sensitive values goes in config
       // as it will be visible on the frontend

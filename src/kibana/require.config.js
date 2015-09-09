@@ -46,7 +46,7 @@ require.config({
     'angular-sanitize':  'bower_components/angular-sanitize/angular-sanitize',
     jqcloud:             'bower_components/jqcloud2/dist/jqcloud',
     'ng-tags-input':     'bower_components/ng-tags-input/ng-tags-input',
-    'jsonutils':         'bower_components/jsonutils/jsonutils',
+    'kibiutils':         'bower_components/kibiutils/kibiutils',
     'eeg':               'bower_components/eeg/lib/js/eeg',
     'eeg-angular':       'bower_components/eeg-angular/index',
     'antlr4':            'bower_components/antlr4/release/antlr4',

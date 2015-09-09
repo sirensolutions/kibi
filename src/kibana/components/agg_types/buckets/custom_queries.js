@@ -1,5 +1,5 @@
 define(function (require) {
-  return function RelatedEntitiesAggDefinition(Private, Notifier, globalState, queryEngineClient, $rootScope) {
+  return function RelatedEntitiesAggDefinition(Private, Notifier, globalState, queryEngineClient, $rootScope, $timeout) {
 
     // a bit of css
     require('css!components/agg_types/styles/custom_queries.css');
@@ -8,7 +8,6 @@ define(function (require) {
     var angular = require('angular');
     var BucketAggType = Private(require('components/agg_types/buckets/_bucket_agg_type'));
     var createFilter = Private(require('components/agg_types/buckets/create_filter/filters'));
-    var decorateQuery = Private(require('components/courier/data_source/_decorate_query'));
     var _shouldEntityURIBeEnabled = Private(require('plugins/sindicetech/commons/_should_entity_uri_be_enabled'));
     var notify = new Notifier({ location: 'Custom Queries Aggregation' });
 
@@ -73,7 +72,9 @@ define(function (require) {
               if (err) {
                 notify.warning('Could not determine the entity URI for this visualisation: ' + JSON.stringify(err, null, ' '));
               } else {
-                $rootScope.$emit('kibi:entityURIEnabled', value);
+                $timeout(function () {
+                  $rootScope.$emit('kibi:entityURIEnabled', value);
+                });
               }
             });
 

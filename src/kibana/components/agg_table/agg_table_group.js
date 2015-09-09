@@ -30,9 +30,7 @@ define(function (require) {
             }
 
             $rootScope.$on('kibi:entityURIEnabled', function (event, enabled) {
-              if (enabled) {
-                $scope.holder.entityURIEnabled = enabled;
-              }
+              $scope.holder.entityURIEnabled = !!enabled;
             });
             // added by kibi - end
 

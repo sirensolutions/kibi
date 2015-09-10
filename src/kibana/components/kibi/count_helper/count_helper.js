@@ -112,7 +112,8 @@ define(function (require) {
     };
 
     /*
-     * here parameter savedSearch should be actuall object not just id !!!
+     * The parameter savedSearch should be a reference to a SavedSearch
+     * instance, not a SavedSearch id
      */
 
     CountHelper.prototype.constructCountQuery = function (dashboardId, savedSearch, extraFilters, joinFilter) {

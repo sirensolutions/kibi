@@ -11,7 +11,6 @@ define(function (require) {
     var kibiTimeHelper   = Private(require('components/kibi/kibi_time_helper/kibi_time_helper'));
     var joinFilterHelper = Private(require('components/sindicetech/join_filter_helper/join_filter_helper'));
     var urlHelper        = Private(require('components/sindicetech/urlHelper/urlHelper'));
-    var queryHelper      = Private(require('components/sindicetech/query_helper/query_helper'));
 
     function CountHelper() {
     }
@@ -113,7 +112,8 @@ define(function (require) {
     };
 
     /*
-     * here parameter savedSearch should be actuall object not just id !!!
+     * The parameter savedSearch should be a reference to a SavedSearch
+     * instance, not a SavedSearch id
      */
 
     CountHelper.prototype.constructCountQuery = function (dashboardId, savedSearch, extraFilters, joinFilter) {
@@ -245,6 +245,7 @@ define(function (require) {
            !(
               savedSearchMeta.query.query_string &&
               savedSearchMeta.query.query_string.query === '*'  &&
+              selectedDashboardQuery &&
               selectedDashboardQuery.query_string.analyze_wildcard === true
             )
         ) {

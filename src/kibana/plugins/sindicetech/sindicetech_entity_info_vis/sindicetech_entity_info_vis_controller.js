@@ -110,6 +110,8 @@ define(function (require) {
               ) {
                 showFilterButton = true;
               }
+              /* NOTE: disabled experimental feature */
+              showFilterButton = false;
 
               var queryOption = _.find($scope.vis.params.queryOptions, function (option) {
                 return option.queryId === snippet.data.config.id;

@@ -26,6 +26,7 @@ define(function (require) {
         infiniteScroll: '=?',
         filter: '=?',
 
+        // to make the cellClickHandlers available to the scope of stKbnTableRow
         cellClickHandlers: '=',
         queryColumn: '='
       },

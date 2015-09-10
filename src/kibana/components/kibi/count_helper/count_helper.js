@@ -245,6 +245,7 @@ define(function (require) {
            !(
               savedSearchMeta.query.query_string &&
               savedSearchMeta.query.query_string.query === '*'  &&
+              selectedDashboardQuery &&
               selectedDashboardQuery.query_string.analyze_wildcard === true
             )
         ) {

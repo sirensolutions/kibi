@@ -1,5 +1,5 @@
 var util = require('./util');
-var jsonutils = require('jsonutils');
+var kibiUtils = require('kibiutils');
 var Promise = require('bluebird');
 
 // The set of custom queries
@@ -116,7 +116,7 @@ exports._runInject = function (query, queryEngine) {
     .then(function (setOfIds) {
       return function (source) {
         var res = { key: fieldName, value: [] };
-        jsonutils.goToElement(source, sourcePath.slice(0, sourcePath.length - 1), function (val) {
+        kibiUtils.goToElement(source, sourcePath.slice(0, sourcePath.length - 1), function (val) {
           var lastPart = sourcePath[sourcePath.length - 1];
 
           // for each result set of a query

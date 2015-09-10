@@ -1,5 +1,5 @@
 var util = require('./util');
-var jsonutils = require('jsonutils');
+var kibiUtils = require('kibiutils');
 var _ = require('lodash');
 var Promise = require('bluebird');
 
@@ -86,7 +86,7 @@ module.exports = function (queryEngine, json) {
 };
 
 function _deleteDBfilter(json, path, label) {
-  jsonutils.goToElement(json, path.slice(0, path.length - 1), function (njson) {
+  kibiUtils.goToElement(json, path.slice(0, path.length - 1), function (njson) {
     if (path.length === 0) {
       // dbfilter at the root
       delete njson[label];

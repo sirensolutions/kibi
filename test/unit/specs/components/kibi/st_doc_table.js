@@ -38,7 +38,8 @@ define(function (require) {
 
     beforeEach(function () {
       module('kibana');
-      $elem = angular.element('<st-doc-table query-column="queryColumn" search-source="searchSource" columns="columns" sorting="sorting"></st-doc-table>');
+      $elem = angular.element('<st-doc-table query-column="queryColumn" search-source="searchSource" ' +
+        'columns="columns" sorting="sorting"></st-doc-table>');
       inject(function (Private) {
         searchSource = Private(require('fixtures/stubbed_search_source'));
       });

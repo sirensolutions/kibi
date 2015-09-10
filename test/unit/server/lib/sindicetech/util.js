@@ -1,6 +1,5 @@
 var root = require('requirefrom')('');
 var util = root('src/server/lib/sindicetech/util');
-var jsonutil = require('jsonutils');
 var expect = require('expect.js');
 var Promise = require('bluebird');
 var _ = require('lodash');

@@ -1,6 +1,6 @@
 var _ = require('lodash');
 var Promise = require('bluebird');
-var jsonutils = require('jsonutils');
+var kibiUtils = require('kibiutils');
 
 // The string used for separating the componements of a JSON path
 var PATH_SEPARATOR = '!"£$%^&*_+';
@@ -49,7 +49,7 @@ function _traverse0(json, objects, label, apply, curPath) {
  * Add all the elements in the given array to the array in the json at the given path
  */
 exports.addAll = function (json, path, array) {
-  jsonutils.goToElement(json, path, function (json) {
+  kibiUtils.goToElement(json, path, function (json) {
     if (json.constructor === Array) {
       for (var j = 0; j < array.length; j++) {
         json.push(array[j]);
@@ -64,7 +64,7 @@ exports.addAll = function (json, path, array) {
  * Replace the label object at the given path in json with the given object
  */
 exports.replace = function (json, path, label, object) {
-  jsonutils.goToElement(json, path, function (json) {
+  kibiUtils.goToElement(json, path, function (json) {
     // remove the custom query
     delete json[label];
     // replace it with the ES query
@@ -76,7 +76,7 @@ exports.replace = function (json, path, label, object) {
  * Insert all the elements of the object at the given path in json
  */
 exports.insert = function (json, path, object) {
-  jsonutils.goToElement(json, path, function (json) {
+  kibiUtils.goToElement(json, path, function (json) {
     for (var att in object) {
       if (object.hasOwnProperty(att)) {
         json[att] = object[att];
@@ -91,7 +91,7 @@ exports.insert = function (json, path, object) {
 exports.length = function (json, path) {
   var len = 0;
 
-  jsonutils.goToElement(json, path, function (json) {
+  kibiUtils.goToElement(json, path, function (json) {
     for (var att in json) {
       if (json.hasOwnProperty(att)) {
         len++;
@@ -105,7 +105,7 @@ exports.length = function (json, path) {
  * Delete deletes the label entry at the given path in json
  */
 exports.delete = function (json, path, label) {
-  jsonutils.goToElement(json, path, function (json) {
+  kibiUtils.goToElement(json, path, function (json) {
     if (json.constructor === Object) {
       delete json[label];
     } else if (json.constructor === Array) {

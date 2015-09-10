@@ -66,7 +66,6 @@ define(function (require) {
         });
       }
 
-
       if (!savedDashboardsImpl && !timefilterImpl) {
         module('kibana');
       }
@@ -82,7 +81,7 @@ define(function (require) {
   describe('Kibi Components', function () {
     describe('CountHelper', function () {
 
-      describe('Simple tests', function () {
+      describe('.costructCountQuery', function () {
 
         beforeEach(init());
 
@@ -176,6 +175,68 @@ define(function (require) {
             expect(query).to.eql(expected);
             done();
           });
+
+          $rootScope.$apply();
+        });
+
+        it('constructCountQuery / saved search with query * and analyze_wildcard true', function (done) {
+          var dashboardId = 'Articles';
+          var extraFilters = [];
+          var joinFilter = null;
+
+          var savedSearch = {
+            kibanaSavedObjectMeta: {
+              searchSourceJSON: JSON.stringify(
+                {
+                  filter: [],
+                  query: {
+                    query_string: {
+                      query: '*',
+                      analyze_wildcard: true
+                    }
+                  }
+                }
+              )
+            },
+            searchSource: {
+              _state: {
+                index: {
+                  id: 'fake'
+                }
+              }
+            }
+          };
+
+          var expected = {
+            size: 0,
+            query: {
+              filtered: {
+                query: {
+                  match_all: {}
+                },
+                filter: {
+                  bool: {
+                    must: [
+                      {
+                        query: {
+                          query_string: {
+                            query: '*',
+                            analyze_wildcard: true
+                          }
+                        }
+                      }
+                    ],
+                    must_not: []
+                  }
+                }
+              }
+            }
+          };
+
+          countHelper.constructCountQuery(dashboardId, savedSearch, extraFilters, joinFilter).then(function (query) {
+            expect(query).to.eql(expected);
+            done();
+          }, done);
 
           $rootScope.$apply();
         });

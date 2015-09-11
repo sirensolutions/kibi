@@ -1,5 +1,6 @@
 define(function (require) {
 
+  var _ = require('lodash');
   var fakeTimeFilter = require('fixtures/fake_time_filter');
   var fakeSavedDashboards = require('fixtures/fake_saved_dashboards_for_counts');
   var fakeSavedSearches = require('fixtures/fake_saved_searches');
@@ -311,6 +312,136 @@ define(function (require) {
                   bool: {
                     must: [],
                     must_not: []
+                  }
+                }
+              }
+            }
+          };
+
+          countHelper.constructCountQuery(dashboardId, savedSearch, extraFilters, joinFilter).then(function (query) {
+            expect(query).to.eql(expected);
+            done();
+          });
+
+          $rootScope.$apply();
+        });
+
+        it('constructCountQuery - different types of filters', function (done) {
+          var dashboardId = 'Articles';
+          var savedSearch = emptySavedSearch;
+          var joinFilter = null;
+          var extraFilters = [
+            {
+              range: {}
+            },
+            {
+              query: {}
+            },
+            {
+              or: {}
+            },
+            {
+              dbfilter: {}
+            },
+            {
+              exists: {}
+            },
+            {
+              geo_bounding_box: {}
+            },
+            {
+              missing: {}
+            },
+            {
+              script: {}
+            },
+            {
+              join: {}
+            }
+          ];
+
+
+          var expected = {
+            size: 0,
+            query: {
+              filtered: {
+                query: {
+                  match_all: {}
+                },
+                filter: {
+                  bool: {
+                    must: extraFilters,
+                    must_not: []
+                  }
+                }
+              }
+            }
+          };
+
+          countHelper.constructCountQuery(dashboardId, savedSearch, extraFilters, joinFilter).then(function (query) {
+            expect(query).to.eql(expected);
+            done();
+          });
+
+          $rootScope.$apply();
+        });
+
+        it('constructCountQuery - different types of filters negated', function (done) {
+          var dashboardId = 'Articles';
+          var savedSearch = emptySavedSearch;
+          var joinFilter = null;
+          var extraFilters = [
+            {
+              meta:{negate:true},
+              range: {}
+            },
+            {
+              meta:{negate:true},
+              query: {}
+            },
+            {
+              meta:{negate:true},
+              or: {}
+            },
+            {
+              meta:{negate:true},
+              dbfilter: {}
+            },
+            {
+              meta:{negate:true},
+              exists: {}
+            },
+            {
+              meta:{negate:true},
+              geo_bounding_box: {}
+            },
+            {
+              meta:{negate:true},
+              missing: {}
+            },
+            {
+              meta:{negate:true},
+              script: {}
+            },
+            {
+              meta:{negate:true},
+              join: {}
+            }
+          ];
+
+          var expected = {
+            size: 0,
+            query: {
+              filtered: {
+                query: {
+                  match_all: {}
+                },
+                filter: {
+                  bool: {
+                    must: [],
+                    must_not: _.map(extraFilters, function (f) {
+                      return _.omit(f, 'meta');
+                    })
                   }
                 }
               }

@@ -179,68 +179,6 @@ define(function (require) {
           $rootScope.$apply();
         });
 
-        it('constructCountQuery / saved search with query * and analyze_wildcard true', function (done) {
-          var dashboardId = 'Articles';
-          var extraFilters = [];
-          var joinFilter = null;
-
-          var savedSearch = {
-            kibanaSavedObjectMeta: {
-              searchSourceJSON: JSON.stringify(
-                {
-                  filter: [],
-                  query: {
-                    query_string: {
-                      query: '*',
-                      analyze_wildcard: true
-                    }
-                  }
-                }
-              )
-            },
-            searchSource: {
-              _state: {
-                index: {
-                  id: 'fake'
-                }
-              }
-            }
-          };
-
-          var expected = {
-            size: 0,
-            query: {
-              filtered: {
-                query: {
-                  match_all: {}
-                },
-                filter: {
-                  bool: {
-                    must: [
-                      {
-                        query: {
-                          query_string: {
-                            query: '*',
-                            analyze_wildcard: true
-                          }
-                        }
-                      }
-                    ],
-                    must_not: []
-                  }
-                }
-              }
-            }
-          };
-
-          countHelper.constructCountQuery(dashboardId, savedSearch, extraFilters, joinFilter).then(function (query) {
-            expect(query).to.eql(expected);
-            done();
-          }, done);
-
-          $rootScope.$apply();
-        });
-
         it('constructCountQuery - take filter from extra filters', function (done) {
           var dashboardId = 'Articles';
           var joinFilter = null;

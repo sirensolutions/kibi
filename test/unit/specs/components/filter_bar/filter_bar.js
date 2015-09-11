@@ -66,7 +66,7 @@ define(function (require) {
           { meta: { index: 'logstash-*' }, query: { match: { '_type': { query: 'apache' } } } },
           { meta: { index: 'logstash-*' }, query: { match: { '_type': { query: 'nginx' } } } },
           { meta: { index: 'logstash-*' }, exists: { field: '@timestamp' } },
-          { meta: { index: 'logstash-*' }, missing: { field: 'host' }, disabled: true },
+          { meta: { index: 'logstash-*' }, missing: { field: 'host' }, disabled: true }
         ];
 
         Promise.map(filters, mapFilter).then(function (filters) {

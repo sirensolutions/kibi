@@ -154,79 +154,65 @@ define(function (require) {
     };
 
 
+    UrlHelper.prototype.getIndexToDashboardMap = function () {
+      return new Promise(function (fulfill, reject) {
+        savedDashboards.find().then(function (resp) {
+          var promises = [];
+          _.each(resp.hits, function (dashboard) {
+            if (dashboard.savedSearchId) {
+              promises.push(
+                new Promise(function (resolve, reject) {
+                  savedSearches.get(dashboard.savedSearchId).then(function (dashboardSavedSearch) {
+                    resolve({
+                      dashboardId: dashboard.id,
+                      indexId: dashboardSavedSearch.searchSource._state.index.id
+                    });
+                  });
+                })
+              );
+            }
+          });
+          Promise.all(promises).then(function (results) {
+            fulfill(results);
+          });
+        });
+      });
+    };
+
 
     UrlHelper.prototype.getRegularFiltersPerIndex = function () {
+      var self = this;
       // grab filters here - they have to be in a format { indexId: [], indexId2: [] } without any join filter
       // but filters in kibi state are saved per dashboard
       // so iterate over dashboards check that they have savedSearchId and if they do take the filters
       // return a promise
       return new Promise(function (fulfill, reject) {
-
-        savedDashboards.find().then(function (resp) {
-          var promises = [];
-          _.each(resp.hits, function (dashboard) {
-            if (dashboard.savedSearchId) {
-              promises.push(
-                new Promise(function (resolve, reject) {
-                  savedSearches.get(dashboard.savedSearchId).then(function (dashboardSavedSearch) {
-                    resolve({
-                      dashboardId: dashboard.id,
-                      indexId: dashboardSavedSearch.searchSource._state.index.id
-                    });
-                  });
-                })
-              );
-            }
-          });
-
-          var filters = {};
-          Promise.all(promises).then(function (results) {
-            _.each(results, function (res) {
-              var fs = kibiStateHelper.getFiltersForDashboardId(res.dashboardId);
-              filters[res.indexId] = _.filter(fs, function (f) {
-                return !f.join;
-              });
+        var filters = {};
+        self.getIndexToDashboardMap().then(function (results) {
+          _.each(results, function (res) {
+            var fs = kibiStateHelper.getFiltersForDashboardId(res.dashboardId);
+            filters[res.indexId] = _.filter(fs, function (f) {
+              return !f.join;
             });
-
-            fulfill(filters);
           });
-
+          fulfill(filters);
         });
       });
     };
 
     UrlHelper.prototype.getQueriesPerIndex = function () {
+      var self = this;
       return new Promise(function (fulfill, reject) {
-
-        savedDashboards.find().then(function (resp) {
-          var promises = [];
-          _.each(resp.hits, function (dashboard) {
-            if (dashboard.savedSearchId) {
-              promises.push(
-                new Promise(function (resolve, reject) {
-                  savedSearches.get(dashboard.savedSearchId).then(function (dashboardSavedSearch) {
-                    resolve({
-                      dashboardId: dashboard.id,
-                      indexId: dashboardSavedSearch.searchSource._state.index.id
-                    });
-                  });
-                })
-              );
+        var queries = {};
+        self.getIndexToDashboardMap().then(function (results) {
+          _.each(results, function (res) {
+            var query = kibiStateHelper.getQueryForDashboardId(res.dashboardId);
+            if (query) {
+              queries[res.indexId] = query;
             }
           });
 
-          var queries = {};
-          Promise.all(promises).then(function (results) {
-            _.each(results, function (res) {
-              var query = kibiStateHelper.getQueryForDashboardId(res.dashboardId);
-              if (query) {
-                queries[res.indexId] = query;
-              }
-            });
-
-            fulfill(queries);
-          });
-
+          fulfill(queries);
         });
       });
     };

@@ -93,8 +93,14 @@ define(function (require) {
       }
     };
 
+    UrlHelper.prototype.switchDashboard = function (dashboardId) {
+      if (dashboardId) {
+        $location.path('dashboard/' + dashboardId);
+        $route.reload();
+      }
+    };
 
-    UrlHelper.prototype.replaceFiltersAndQueryAndSwitchDashboard = function (filters, query, time, dashboardId) {
+    UrlHelper.prototype.replaceFiltersAndQueryAndTime = function (filters, query, time) {
       var s = $location.search();
       var a = s._a;
       var g = s._g;
@@ -131,10 +137,6 @@ define(function (require) {
           $location.search('_g', encodedG);
         }
       }
-      if (dashboardId) {
-        $location.path('dashboard/' + dashboardId);
-      }
-      $route.reload();
     };
 
 

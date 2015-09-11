@@ -83,18 +83,18 @@ define(function (require) {
         joinFilterHelper.getJoinFilter(dashboardId).then(function (joinFilter) {
           joinFilterHelper.replaceOrAddJoinFilter(targetDashboardFilters, joinFilter);
         }).finally(function () {
-          urlHelper.replaceFiltersAndQueryAndSwitchDashboard(
+          urlHelper.replaceFiltersAndQueryAndTime(
             targetDashboardFilters,
             targetDashboardQuery,
-            targetDashboardTimeFilter,
-            dashboardId);
+            targetDashboardTimeFilter);
+          urlHelper.switchDashboard(dashboardId);
         });
       } else {
-        urlHelper.replaceFiltersAndQueryAndSwitchDashboard(
+        urlHelper.replaceFiltersAndQueryAndTime(
           targetDashboardFilters,
           targetDashboardQuery,
-          targetDashboardTimeFilter,
-          dashboardId);
+          targetDashboardTimeFilter);
+        urlHelper.switchDashboard(dashboardId);
       }
     };
 

@@ -8,7 +8,7 @@ define(function (require) {
 
   module.controller(
     'SindicetechEntityInfoVisController',
-    function ($rootScope, $scope, $window, $location, globalState, savedSearches, Private, queryEngineClient, Notifier) {
+    function ($rootScope, $scope, $route, $window, $location, globalState, savedSearches, Private, queryEngineClient, Notifier) {
 
       var notify = new Notifier({
         location: 'Entity Info Widget'
@@ -160,7 +160,9 @@ define(function (require) {
                   alert(snippet.data.debug.sentResultQuery);
                 },
                 filter: function () {
-                  urlHelper.addFilterSwitchDashboard(dbFilter, queryOption.redirectToDashboard);
+                  urlHelper.addFilter(dbFilter);
+                  $location.path('dashboard/' + queryOption.redirectToDashboard);
+                  $route.reload();
                 }
               });
             });

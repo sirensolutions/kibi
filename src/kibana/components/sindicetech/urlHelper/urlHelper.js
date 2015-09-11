@@ -94,16 +94,6 @@ define(function (require) {
     };
 
 
-    // constructs an or filter
-    // http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/query-dsl-or-filter.html
-    UrlHelper.prototype.addFilterSwitchDashboard = function (filter, dashboardId) {
-      this.addFilter(filter);
-      if (dashboardId) {
-        $location.path('dashboard/' + dashboardId);
-      }
-      $route.reload();
-    };
-
     UrlHelper.prototype.replaceFiltersAndQueryAndSwitchDashboard = function (filters, query, time, dashboardId) {
       var s = $location.search();
       var a = s._a;

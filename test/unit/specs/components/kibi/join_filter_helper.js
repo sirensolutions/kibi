@@ -89,73 +89,118 @@ define(function (require) {
         });
       });
 
-      it('should be disabled/enabled according to relationalPanelConfig', function () {
-        expect(joinFilterHelper.isFilterJoinPluginEnabled()).to.not.be.ok();
-        config.set('kibi:relationalPanelConfig', { enabled: true });
-        expect(joinFilterHelper.isFilterJoinPluginEnabled()).to.be.ok();
-        config.set('kibi:relationalPanelConfig', { enabled: false });
-        expect(joinFilterHelper.isFilterJoinPluginEnabled()).to.not.be.ok();
-      });
+      describe('getJoinFilter', function () {
+        it('should be disabled/enabled according to relationalPanelConfig', function () {
+          expect(joinFilterHelper.isFilterJoinPluginEnabled()).to.not.be.ok();
+          config.set('kibi:relationalPanelConfig', { enabled: true });
+          expect(joinFilterHelper.isFilterJoinPluginEnabled()).to.be.ok();
+          config.set('kibi:relationalPanelConfig', { enabled: false });
+          expect(joinFilterHelper.isFilterJoinPluginEnabled()).to.not.be.ok();
+        });
 
-      it('should be enabled if the plugin is installed', function () {
-        expect(joinFilterHelper.isFilterJoinPluginInstalled()).to.be.ok();
-      });
+        it('should be enabled if the plugin is installed', function () {
+          expect(joinFilterHelper.isFilterJoinPluginInstalled()).to.be.ok();
+        });
 
-      it('should fail if focus dashboard is not passed', function (done) {
-        joinFilterHelper.getJoinFilter().catch(function (err) {
-          expect(err.message).to.be('Specify focusDashboardId');
-          done();
+        it('should fail if focus dashboard is not passed', function (done) {
+          joinFilterHelper.getJoinFilter().catch(function (err) {
+            expect(err.message).to.be('Specify focusDashboardId');
+            done();
+          });
+        });
+
+        it('should fail if the focused dashboard cannot be retrieved', function (done) {
+          joinFilterHelper.getJoinFilter('pluto').catch(function (err) {
+            expect(err.message).to.be('try again');
+            done();
+          });
+        });
+
+        it('should fail if the focused dashboard does not have a saved search', function (done) {
+          joinFilterHelper.getJoinFilter('nossid').catch(function (err) {
+            expect(err.message).to.be('The focus dashboard "nossid" does not have a saveSearchId');
+            done();
+          });
+        });
+
+        it('should fail if the saved search of the focused dashboard does not have an index id', function (done) {
+          joinFilterHelper.getJoinFilter('Boiled Dogs').catch(function (err) {
+            expect(err.message).to.be('The join filter has no enabled relation for the focused index: undefined');
+            done();
+          });
+        });
+
+        it('should fail if the join filter has no enabled relation', function (done) {
+          config.set('kibi:relationalPanelConfig', {
+            enabled: true,
+            enabledRelations: [ [ 'tea', '42' ] ]
+          });
+          joinFilterHelper.getJoinFilter('Corn Dogs').catch(function (err) {
+            expect(err.message).to.be('The join filter has no enabled relation for the focused index: me');
+            done();
+          });
+        });
+
+        it('should build the join filter', function (done) {
+          kibiStateHelper.saveFiltersForDashboardId('Corn Dogs', [ { range: { gte: 20, lte: 40 } } ]);
+          kibiStateHelper.saveFiltersForDashboardId('Corn Flakes', [ { term: { aaa: 'bbb' } } ]);
+          kibiStateHelper.saveFiltersForDashboardId('Potatoes', [ { exists: { field: 'aaa' } } ]);
+          config.set('kibi:relationalPanelConfig', {
+            enabled: true,
+            enabledRelations: [ [ 'me.id', 'you.id' ] ]
+          });
+          joinFilterHelper.getJoinFilter('Corn Dogs').then(function (joinFilter) {
+            expect(joinFilter.join).to.be.ok();
+            expect(joinFilter.join.focus).to.be('me');
+            expect(joinFilter.join.filters.me).to.not.be.ok();
+            expect(joinFilter.join.filters.her).to.not.be.ok();
+            expect(joinFilter.join.filters.you).to.be.ok();
+            expect(joinFilter.join.filters.you[0].term).to.be.ok();
+            done();
+          });
         });
       });
 
-      it('should fail if the focused dashboard cannot be retrieved', function (done) {
-        joinFilterHelper.getJoinFilter('pluto').catch(function (err) {
-          expect(err.message).to.be('try again');
-          done();
-        });
-      });
+      describe('updateJoinFilter', function () {
+        var urlHelper;
+        var sinon = require('test_utils/auto_release_sinon');
 
-      it('should fail if the focused dashboard does not have a saved search', function (done) {
-        joinFilterHelper.getJoinFilter('nossid').catch(function (err) {
-          expect(err.message).to.be('The focus dashboard "nossid" does not have a saveSearchId');
-          done();
+        beforeEach(function () {
+          inject(function (Private) {
+            urlHelper = Private(require('components/sindicetech/urlHelper/urlHelper'));
+          });
+          sinon.spy(urlHelper, 'removeJoinFilter');
+          sinon.spy(urlHelper, 'addFilter');
         });
-      });
 
-      it('should fail if the saved search of the focused dashboard does not have an index id', function (done) {
-        joinFilterHelper.getJoinFilter('Boiled Dogs').catch(function (err) {
-          expect(err.message).to.be('The join filter has no enabled relation for the focused index: undefined');
-          done();
+        it('should remove the join filter 1', function (done) {
+          joinFilterHelper.updateJoinFilter().then(function () {
+            expect(urlHelper.removeJoinFilter.called).to.be.ok();
+            done();
+          });
         });
-      });
 
-      it('should fail if the join filter has no enabled relation', function (done) {
-        config.set('kibi:relationalPanelConfig', {
-          enabled: true,
-          enabledRelations: [ [ 'tea', '42' ] ]
+        it('should remove the join filter 2', function (done) {
+          sinon.stub(urlHelper, 'getCurrentDashboardId').returns('aaa');
+          joinFilterHelper.updateJoinFilter().then(function () {
+            expect(urlHelper.removeJoinFilter.called).to.be.ok();
+            done();
+          });
         });
-        joinFilterHelper.getJoinFilter('Corn Dogs').catch(function (err) {
-          expect(err.message).to.be('The join filter has no enabled relation for the focused index: me');
-          done();
-        });
-      });
 
-      it('should build the join filter', function (done) {
-        kibiStateHelper.saveFiltersForDashboardId('Corn Dogs', [ { range: { gte: 20, lte: 40 } } ]);
-        kibiStateHelper.saveFiltersForDashboardId('Corn Flakes', [ { term: { aaa: 'bbb' } } ]);
-        kibiStateHelper.saveFiltersForDashboardId('Potatoes', [ { exists: { field: 'aaa' } } ]);
-        config.set('kibi:relationalPanelConfig', {
-          enabled: true,
-          enabledRelations: [ [ 'me.id', 'you.id' ] ]
-        });
-        joinFilterHelper.getJoinFilter('Corn Dogs').then(function (joinFilter) {
-          expect(joinFilter.join).to.be.ok();
-          expect(joinFilter.join.focus).to.be('me');
-          expect(joinFilter.join.filters.me).to.not.be.ok();
-          expect(joinFilter.join.filters.her).to.not.be.ok();
-          expect(joinFilter.join.filters.you).to.be.ok();
-          expect(joinFilter.join.filters.you[0].term).to.be.ok();
-          done();
+        it('should add the join filter', function (done) {
+          kibiStateHelper.saveFiltersForDashboardId('Corn Dogs', [ { range: { gte: 20, lte: 40 } } ]);
+          kibiStateHelper.saveFiltersForDashboardId('Corn Flakes', [ { term: { aaa: 'bbb' } } ]);
+          kibiStateHelper.saveFiltersForDashboardId('Potatoes', [ { exists: { field: 'aaa' } } ]);
+          config.set('kibi:relationalPanelConfig', {
+            enabled: true,
+            enabledRelations: [ [ 'me.id', 'you.id' ] ]
+          });
+          sinon.stub(urlHelper, 'getCurrentDashboardId').returns('Corn Dogs');
+          joinFilterHelper.updateJoinFilter().then(function () {
+            expect(urlHelper.addFilter.called).to.be.ok();
+            done();
+          });
         });
       });
     });

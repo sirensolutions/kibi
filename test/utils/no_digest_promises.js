@@ -1,4 +1,4 @@
-define(['angular', 'bluebird', 'services/promises'], function (angular, Bluebird) {
+define(['angular', 'bluebird'], function (angular, Bluebird) {
   /**
    * replace the Promise service with Bluebird so that tests
    * can use promises without having to call $rootScope.apply()

@@ -1,10 +1,10 @@
 define(function (require) {
   return function JoinFilterHelperFactory(config, configFile, Private, savedDashboards, savedSearches, Promise) {
     var _ = require('lodash');
-    var replace_or_add_join_filter   = require('components/sindicetech/join_filter_helper/lib/replace_or_add_join_filter');
+    var replace_or_add_join_filter = require('components/sindicetech/join_filter_helper/lib/replace_or_add_join_filter');
 
     var queryHelper = Private(require('components/sindicetech/query_helper/query_helper'));
-    var urlHelper   = Private(require('components/sindicetech/urlHelper/urlHelper'));
+    var urlHelper = Private(require('components/sindicetech/urlHelper/urlHelper'));
 
     var _isIndexInEnabledRelations = function (indexId, enabledRelations) {
       for (var i = 0; i < enabledRelations.length; i++) {
@@ -20,62 +20,57 @@ define(function (require) {
 
     JoinFilterHelper.prototype.getJoinFilter = function (focusDashboardId) {
       return new Promise(function (fulfill, reject) {
-        var relationalPanelConfig = config.get('kibi:relationalPanelConfig');
         if (focusDashboardId) {
-          savedDashboards.get(focusDashboardId).then(function (dashboard) {
-            if (dashboard.savedSearchId) {
-
-              // get savedSearch to access the index
-              savedSearches.get(dashboard.savedSearchId).then(function (dashboardSavedSearch) {
-
-                var focusIndex = dashboardSavedSearch.searchSource._state.index.id;
-                // here check that the join filter should be present on this dashboard
-                // it should be added only if we find focus in enabled relations
-                if (focusIndex && _isIndexInEnabledRelations(focusIndex, relationalPanelConfig.enabledRelations)) {
-
-                  // here grab the filters per index
-                  urlHelper.getRegularFiltersPerIndex().then(function (filters) {
-                    // keep only the filters which are in the connected component
-                    var labels = queryHelper.getLabelsInConnectedComponent(focusIndex, relationalPanelConfig.enabledRelations);
-                    for (var filter in filters) {
-                      if (filters.hasOwnProperty(filter) && !_.contains(labels, filter)) {
-                        delete filters[filter];
-                      }
-                    }
-                    urlHelper.getQueriesPerIndex().then(function (queries) {
-
-                      queryHelper.constructJoinFilter(
-                        focusIndex,
-                        relationalPanelConfig.indexes,
-                        relationalPanelConfig.enabledRelations,
-                        filters,
-                        queries,
-                        null      // here if we want the dashboard time be taken into consideration this map is necessary
-                      ).then(function (joinFilter) {
-                        fulfill(joinFilter);
-                      }).catch(function (err) {
-                        reject(err);
-                      });
-
-                    });
-                  });
-
-                } else {
-                  reject(new Error('Relational filter it has no enabled relations for focus: ' +  focusIndex));
-                }
-              });
-              // end of get saveSearch
-
+          var relationalPanelConfig = config.get('kibi:relationalPanelConfig');
+          var focusedSavedSearch = savedDashboards.get(focusDashboardId).then(function (dashboard) {
+            // get focused dashboard
+            if (!dashboard.savedSearchId) {
+              reject(new Error('The focus dashboard "' + focusDashboardId + '" does not have a saveSearchId'));
             } else {
-              reject(new Error('The focus dashbord does not have saveSearchId set'));
+              return savedSearches.get(dashboard.savedSearchId);
             }
+          });
+          var filtersPerIndex = urlHelper.getRegularFiltersPerIndex();
+          var queriesPerIndex = urlHelper.getQueriesPerIndex();
+
+          Promise.join(focusedSavedSearch, filtersPerIndex, queriesPerIndex,
+            function (dashboardSavedSearch, filters, queries) {
+              // get savedSearch to access the index
+              var focusIndex = dashboardSavedSearch.searchSource._state.index.id;
+              // here check that the join filter should be present on this dashboard
+              // it should be added only if we find focus in enabled relations
+              if (!focusIndex || !_isIndexInEnabledRelations(focusIndex, relationalPanelConfig.enabledRelations)) {
+                reject(new Error('The join filter has no enabled relation for the focused index: ' +  focusIndex));
+              } else {
+                // keep only the filters which are in the connected component
+                var labels = queryHelper.getLabelsInConnectedComponent(focusIndex, relationalPanelConfig.enabledRelations);
+                for (var filter in filters) {
+                  if (filters.hasOwnProperty(filter) && !_.contains(labels, filter)) {
+                    delete filters[filter];
+                  }
+                }
+
+                // build the join filter
+                return queryHelper.constructJoinFilter(
+                  focusIndex,
+                  relationalPanelConfig.indexes,
+                  relationalPanelConfig.enabledRelations,
+                  filters,
+                  queries,
+                  null      // here if we want the dashboard time be taken into consideration this map is necessary
+                );
+              }
+            }
+          ).then(function (joinFilter) {
+            fulfill(joinFilter);
+          }).catch(function (err) {
+            reject(err);
           });
         } else {
           reject(new Error('Specify focusDashboardId'));
         }
       });
     };
-
 
     JoinFilterHelper.prototype.updateJoinFilter = function () {
       var self = this;
@@ -99,7 +94,6 @@ define(function (require) {
 
       });
     };
-
 
     JoinFilterHelper.prototype.replaceOrAddJoinFilter = function (filterArray, joinFilter, stripMeta) {
       return replace_or_add_join_filter(filterArray, joinFilter, stripMeta);

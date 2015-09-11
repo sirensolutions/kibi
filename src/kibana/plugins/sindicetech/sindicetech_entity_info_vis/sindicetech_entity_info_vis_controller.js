@@ -160,7 +160,8 @@ define(function (require) {
                   alert(snippet.data.debug.sentResultQuery);
                 },
                 filter: function () {
-                  urlHelper.addFilterSwitchDashboard(dbFilter, queryOption.redirectToDashboard);
+                  urlHelper.addFilter(dbFilter);
+                  urlHelper.switchDashboard(queryOption.redirectToDashboard);
                 }
               });
             });

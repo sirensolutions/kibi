@@ -8,7 +8,7 @@ define(function (require) {
 
   module.controller(
     'SindicetechRelationalVisController',
-    function ($scope, $rootScope, Private, $http, Notifier, kbnUrl, Promise, savedDashboards, savedSearches) {
+    function ($scope, $rootScope, Private, $http, Notifier, Promise, savedDashboards, savedSearches) {
 
       var isInConfigurationMode = $('#sindicetech-relational-vis-params').is(':visible');
       var notify = new Notifier({
@@ -390,14 +390,14 @@ define(function (require) {
               }
 
               // switch to target dashboard
-              urlHelper.replaceFiltersAndQueryAndSwitchDashboard(
+              urlHelper.replaceFiltersAndQueryAndTime(
                 targetDashboardFilters,
                 targetDashboardQuery,
-                targetDashboardTimeFilter,
-                this.redirectToDashboard);
+                targetDashboardTimeFilter);
+              urlHelper.switchDashboard(this.redirectToDashboard);
             } else {
               // just redirect to the target dashboard
-              kbnUrl.change('dashboard/' + this.redirectToDashboard);
+              urlHelper.switchDashboard(this.redirectToDashboard);
             }
 
           };

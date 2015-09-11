@@ -1,7 +1,8 @@
 define(function (require) {
   var _ = require('lodash');
   var joinExplanationHelper;
-  var indexes;
+  var $rootScope;
+  var filters;
 
   describe('Kibi Components', function () {
     describe('Join Explanation Helper', function () {
@@ -9,21 +10,52 @@ define(function (require) {
       beforeEach(function () {
         module('kibana');
 
-        inject(function ($injector, Private) {
-          joinExplanationHelper = Private(require('components/filter_bar/join_explanation'));
-          indexes = {
-            article: {
-              fields: Private(require('fixtures/logstash_fields'))
-            }
-          };
+        module('kibana/index_patterns', function ($provide) {
+          $provide.service('indexPatterns', function (Private, Promise) {
+            var indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+            return {
+              get: function (id) {
+                return Promise.resolve(indexPattern);
+              }
+            };
+          });
         });
+
+        inject(function ($injector, Private, _$rootScope_) {
+          $rootScope = _$rootScope_;
+          joinExplanationHelper = Private(require('components/filter_bar/join_explanation'));
+        });
+
+        filters = [
+          {
+            joe: 'eoj'
+          },
+          {
+            join: {
+              indexes: [
+                {
+                  id: 'logstash-*',
+                  type: 'logs'
+                }
+              ]
+            }
+          }
+        ];
+      });
+
+      it('should set the correct set of indexes', function (done) {
+        joinExplanationHelper.setIndexesFromJoinFilter(filters).then(function () {
+          expect(joinExplanationHelper.indexes['logstash-*']).to.be.ok();
+          done();
+        });
+        $rootScope.$apply();
       });
 
       it('should return an empty string if indexes is undefined', function () {
-        expect(joinExplanationHelper.createLabel(null, null, null)).to.be('');
+        expect(joinExplanationHelper.createLabel(null, null)).to.be('');
       });
 
-      it('prints a nice label for query_string', function () {
+      it('prints a nice label for query_string', function (done) {
         var filter = {
           query: {
             query_string: {
@@ -31,11 +63,15 @@ define(function (require) {
             }
           }
         };
-        expect(joinExplanationHelper.createLabel(filter, 'article', indexes))
-        .to.be(' query: <b>' + filter.query.query_string.query + '</b> ');
+        joinExplanationHelper.setIndexesFromJoinFilter(filters).then(function () {
+          expect(joinExplanationHelper.createLabel(filter, 'logstash-*'))
+            .to.be(' query: <b>' + filter.query.query_string.query + '</b> ');
+          done();
+        });
+        $rootScope.$apply();
       });
 
-      it('prints a nice label for match', function () {
+      it('prints a nice label for match', function (done) {
         var assert = function (field) {
           var filter = { query: {} };
           var object = {
@@ -48,21 +84,25 @@ define(function (require) {
           };
 
           filter.query[field] = object;
-          expect(joinExplanationHelper.createLabel(filter, 'article', indexes))
+          expect(joinExplanationHelper.createLabel(filter, 'logstash-*'))
             .to.be(' match on fieldA: <b>aaa bbb</b> ');
 
           filter.query[field] = string;
-          expect(joinExplanationHelper.createLabel(filter, 'article', indexes))
+          expect(joinExplanationHelper.createLabel(filter, 'logstash-*'))
             .to.be(' match on fieldA: <b>aaa bbb</b> ');
         };
 
-        assert('match');
-        assert('match_phrase');
-        assert('match_phrase_prefix');
+        joinExplanationHelper.setIndexesFromJoinFilter(filters).then(function () {
+          assert('match');
+          assert('match_phrase');
+          assert('match_phrase_prefix');
+          done();
+        });
+        $rootScope.$apply();
       });
 
-      it('prints a nice label for range', function () {
-        var filter = {
+      it('prints a nice label for range', function (done) {
+        var filter1 = {
           range: {
             age: {
               gte: 10,
@@ -70,10 +110,7 @@ define(function (require) {
             }
           }
         };
-        expect(joinExplanationHelper.createLabel(filter, 'article', indexes))
-        .to.be(' age: <b>10</b> to <b>20</b> ');
-
-        filter = {
+        var filter2 = {
           range: {
             time: {
               gte: 657147471184,
@@ -81,31 +118,45 @@ define(function (require) {
             }
           }
         };
-        expect(joinExplanationHelper.createLabel(filter, 'article', indexes))
-        .to.be(' time: <b>October 28th 1990, 20:57:51.184</b> to <b>May 10th 2008, 11:22:00.534</b> ');
+        joinExplanationHelper.setIndexesFromJoinFilter(filters).then(function () {
+          expect(joinExplanationHelper.createLabel(filter1, 'logstash-*'))
+            .to.be(' age: <b>10</b> to <b>20</b> ');
+          expect(joinExplanationHelper.createLabel(filter2, 'logstash-*'))
+            .to.be(' time: <b>October 28th 1990, 20:57:51.184</b> to <b>May 10th 2008, 11:22:00.534</b> ');
+          done();
+        });
+        $rootScope.$apply();
       });
 
-      it('prints a nice label for missing filter', function () {
+      it('prints a nice label for missing filter', function (done) {
         var filter = {
           missing: {
             field: 'joe'
           }
         };
-        expect(joinExplanationHelper.createLabel(filter, 'article', indexes))
-        .to.be(' missing: <b>joe</b> ');
+        joinExplanationHelper.setIndexesFromJoinFilter(filters).then(function () {
+          expect(joinExplanationHelper.createLabel(filter, 'logstash-*'))
+            .to.be(' missing: <b>joe</b> ');
+          done();
+        });
+        $rootScope.$apply();
       });
 
-      it('prints a nice label for exists filter', function () {
+      it('prints a nice label for exists filter', function (done) {
         var filter = {
           exists: {
             field: 'joe'
           }
         };
-        expect(joinExplanationHelper.createLabel(filter, 'article', indexes))
-        .to.be(' exists: <b>joe</b> ');
+        joinExplanationHelper.setIndexesFromJoinFilter(filters).then(function () {
+          expect(joinExplanationHelper.createLabel(filter, 'logstash-*'))
+            .to.be(' exists: <b>joe</b> ');
+          done();
+        });
+        $rootScope.$apply();
       });
 
-      it('prints a nice label for negated filters', function () {
+      it('prints a nice label for negated filters', function (done) {
         var filter = {
           not: {
             exists: {
@@ -113,22 +164,30 @@ define(function (require) {
             }
           }
         };
-        expect(joinExplanationHelper.createLabel(filter, 'article', indexes))
-        .to.be(' NOT exists: <b>joe</b> ');
+        joinExplanationHelper.setIndexesFromJoinFilter(filters).then(function () {
+          expect(joinExplanationHelper.createLabel(filter, 'logstash-*'))
+            .to.be(' NOT exists: <b>joe</b> ');
+          done();
+        });
+        $rootScope.$apply();
       });
 
-      it('prints a nice label for unknown filter', function () {
+      it('prints a nice label for unknown filter', function (done) {
         var filter = {
           boo: 'boo',
           baa: 'baa',
           $$hashKey: '42'
         };
-        expect(joinExplanationHelper.createLabel(filter, 'article', indexes))
-        .to.be(' <font color="red">Unable to pretty print the filter:</font> ' +
-          JSON.stringify(_.omit(filter, '$$hashKey'), null, ' ') + ' ');
+        joinExplanationHelper.setIndexesFromJoinFilter(filters).then(function () {
+          expect(joinExplanationHelper.createLabel(filter, 'logstash-*'))
+            .to.be(' <font color="red">Unable to pretty print the filter:</font> ' +
+                JSON.stringify(_.omit(filter, '$$hashKey'), null, ' ') + ' ');
+          done();
+        });
+        $rootScope.$apply();
       });
 
-      it('prints a nice label for geo bounding box filter', function () {
+      it('prints a nice label for geo bounding box filter', function (done) {
         var filter = {
           geo_bounding_box: {
             joe: {
@@ -143,9 +202,13 @@ define(function (require) {
             }
           }
         };
-        expect(joinExplanationHelper.createLabel(filter, 'article', indexes))
-        .to.be(' joe: <b>' + JSON.stringify(filter.geo_bounding_box.joe.top_left, null, '') + '</b> to ' +
-          '<b>' + JSON.stringify(filter.geo_bounding_box.joe.bottom_right, null, '') + '</b> ');
+        joinExplanationHelper.setIndexesFromJoinFilter(filters).then(function () {
+          expect(joinExplanationHelper.createLabel(filter, 'logstash-*'))
+            .to.be(' joe: <b>' + JSON.stringify(filter.geo_bounding_box.joe.top_left, null, '') + '</b> to ' +
+                '<b>' + JSON.stringify(filter.geo_bounding_box.joe.bottom_right, null, '') + '</b> ');
+          done();
+        });
+        $rootScope.$apply();
       });
     });
   });

@@ -1,5 +1,9 @@
 define(function (require) {
-  return function JoinExplanationFactory(Private) {
+  return function JoinExplanationFactory(Private, indexPatterns, Promise, $timeout) {
+
+    var jQuery = require('jquery');
+    var qtip = require('qtip2');
+    require('css!bower_components/qtip2/jquery.qtip.min.css');
 
     function JoinExplanationHelper() {}
 
@@ -7,6 +11,9 @@ define(function (require) {
 
       var fieldFormat = Private(require('registry/field_formats'));
       var _ = require('lodash');
+
+      // the set of index patterns
+      var indexes;
 
       /**
        * Format the value as a date if the field type is date
@@ -36,7 +43,7 @@ define(function (require) {
         }
       }
 
-      var createLabel = function (f, indexId, indexes) {
+      var createLabel = function (f, indexId) {
         if (!indexes) {
           return '';
         }
@@ -76,8 +83,49 @@ define(function (require) {
         }
       };
 
+      /**
+       * get the indexes from the join filters
+       */
+      var setIndexesFromJoinFilter = function (filters) {
+        var promises = _.chain(filters)
+          .filter(function (filter) {
+            return !!filter.join;
+          }).map(function (filter) {
+            return filter.join.indexes;
+          })
+        .flatten()
+          .map(function (index) {
+            return indexPatterns.get(index.id);
+          })
+        .value();
+
+        return Promise.all(promises).then(function (data) {
+          indexes = _.object(_.map(data, 'id'), data);
+          jQuery('.qtip').qtip('destroy', true);
+          $timeout(function () {
+            jQuery('.filter.join').qtip({
+              content: {
+                title: 'Relations',
+                text: jQuery('.filter.join .explanation').html()
+              },
+              position: {
+                my: 'top left',
+                at: 'bottom center'
+              },
+              style: {
+                classes: 'qtip-light qtip-rounded qtip-shadow'
+              }
+            });
+          });
+        });
+      };
+
       return {
-        createLabel: createLabel
+        createLabel: createLabel,
+        setIndexesFromJoinFilter: setIndexesFromJoinFilter,
+        get indexes () {
+          return indexes;
+        }
       };
     })();
 

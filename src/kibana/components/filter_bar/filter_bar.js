@@ -3,14 +3,11 @@ define(function (require) {
   var module = require('modules').get('kibana');
   var template = require('text!components/filter_bar/filter_bar.html');
   var moment = require('moment');
-  var jQuery = require('jquery');
-  var qtip = require('qtip2');
 
   require('components/kibi/entity_clipboard/entity_clipboard');
   require('css!components/filter_bar/filter_bar.css');
-  require('css!bower_components/qtip2/jquery.qtip.min.css');
 
-  module.directive('filterBar', function (Private, Promise, getAppState, globalState, $timeout, indexPatterns) {
+  module.directive('filterBar', function (Private, Promise, getAppState, globalState) {
     var joinExplain = Private(require('components/filter_bar/join_explanation'));
     var mapAndFlattenFilters = Private(require('components/filter_bar/lib/mapAndFlattenFilters'));
     var mapFlattenAndWrapFilters = Private(require('components/filter_bar/lib/mapFlattenAndWrapFilters'));
@@ -106,49 +103,18 @@ define(function (require) {
 
         function updateFilters() {
           var filters = queryFilter.getFilters();
-          mapAndFlattenFilters(filters).then(function (results) {
+          mapAndFlattenFilters(filters)
+          .then(function (results) {
             // used to display the current filters in the state
             $scope.filters = _.sortBy(results, function (filter) {
               return !filter.meta.pinned;
             });
-            jQuery('.qtip').qtip('destroy', true);
+          })
+          .then(joinExplain.setIndexesFromJoinFilter(filters))
+          .then(function () {
             $scope.$emit('filterbar:updated');
           });
-
-          var promises = _.chain(filters)
-          .filter(function (filter) {
-            return !!filter.join;
-          }).map(function (filter) {
-            return filter.join.indexes;
-          })
-          .flatten()
-          .map(function (index) {
-            return indexPatterns.get(index.id);
-          })
-          .value();
-
-          Promise.all(promises).then(function (data) {
-            indexes = _.object(_.map(data, 'id'), data);
-            $timeout(function () {
-              jQuery('.filter.join').qtip({
-                content: {
-                  title: 'Relations',
-                  text: jQuery('.filter.join .explanation').html()
-                },
-                position: {
-                  my: 'top left',
-                  at: 'bottom center'
-                },
-                style: {
-                  classes: 'qtip-light qtip-rounded qtip-shadow'
-                }
-              });
-            });
-          });
         }
-
-        // the set of index patterns
-        var indexes;
 
         updateFilters();
 
@@ -174,9 +140,7 @@ define(function (require) {
         // .exists
         // .missing
         // .script
-        $scope.recreateFilterLabel = function (f, indexId) {
-          return joinExplain.createLabel(f, indexId, indexes);
-        };
+        $scope.recreateFilterLabel = joinExplain.createLabel;
 
       }
     };

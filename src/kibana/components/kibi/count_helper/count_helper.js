@@ -235,9 +235,7 @@ define(function (require) {
         ) {
 
           query.query.filtered.filter.bool.must.push({
-            query: {
-              query_string: selectedDashboardQuery.query_string
-            }
+            query: selectedDashboardQuery
           });
         }
 

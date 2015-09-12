@@ -37,7 +37,6 @@ define(function (require) {
             var dashboardSavedSearch = data[0];
             var filters = data[1];
             var queries = data[2];
-            console.log('data=[%s]', JSON.stringify(data, null, ' '));
             // get savedSearch to access the index
             var focusIndex = dashboardSavedSearch.searchSource._state.index.id;
             // here check that the join filter should be present on this dashboard
@@ -52,6 +51,12 @@ define(function (require) {
                   delete filters[filter];
                 }
               }
+              // keep only the queries which are in the connected component
+              for (var query in queries) {
+                if (queries.hasOwnProperty(query) && !_.contains(labels, query)) {
+                  delete queries[query];
+                }
+              }
 
               // build the join filter
               return queryHelper.constructJoinFilter(
@@ -64,7 +69,6 @@ define(function (require) {
               );
             }
           }).then(function (joinFilter) {
-            console.log('joinFilter=[%s]', JSON.stringify(joinFilter, null, ' '));
             fulfill(joinFilter);
           }).catch(function (err) {
             reject(err);

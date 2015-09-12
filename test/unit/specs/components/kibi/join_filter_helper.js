@@ -142,8 +142,23 @@ define(function (require) {
         });
 
         it('should build the join filter', function (done) {
+          config.set('kibi:relationalPanelConfig', {
+            enabled: true,
+            enabledRelations: [ [ 'me.id', 'you.id' ] ]
+          });
+          joinFilterHelper.getJoinFilter('Corn Dogs').then(function (joinFilter) {
+            expect(joinFilter.join).to.be.ok();
+            expect(joinFilter.join.focus).to.be('me');
+            expect(joinFilter.join.filters.me).to.not.be.ok();
+            done();
+          });
+        });
+
+        it('should build the join filter with filters on dashboards', function (done) {
+          // filters from the focused dashboard are not put in the filters of the join query
           kibiStateHelper.saveFiltersForDashboardId('Corn Dogs', [ { range: { gte: 20, lte: 40 } } ]);
           kibiStateHelper.saveFiltersForDashboardId('Corn Flakes', [ { term: { aaa: 'bbb' } } ]);
+          // filters from the Potatoes dashboard are not taken since its index is not connected to the focus
           kibiStateHelper.saveFiltersForDashboardId('Potatoes', [ { exists: { field: 'aaa' } } ]);
           config.set('kibi:relationalPanelConfig', {
             enabled: true,
@@ -158,6 +173,27 @@ define(function (require) {
             expect(joinFilter.join.filters.you[0].term).to.be.ok();
             done();
           });
+        });
+
+        it('should build the join filter with queries on dashboards', function (done) {
+          // queries from the focused dashboard are not put in the filters of the join query
+          kibiStateHelper.saveQueryForDashboardId('Corn Dogs', { query_string: { query: 'aaa' } });
+          kibiStateHelper.saveQueryForDashboardId('Corn Flakes', { query_string: { query: 'bbb' } });
+          // queries from the Potatoes dashboard are not taken since its index is not connected to the focus
+          kibiStateHelper.saveQueryForDashboardId('Potatoes', { query_string: { query: 'ccc' } });
+          config.set('kibi:relationalPanelConfig', {
+            enabled: true,
+            enabledRelations: [ [ 'me.id', 'you.id' ] ]
+          });
+          joinFilterHelper.getJoinFilter('Corn Dogs').then(function (joinFilter) {
+            expect(joinFilter.join).to.be.ok();
+            expect(joinFilter.join.focus).to.be('me');
+            expect(joinFilter.join.filters.me).to.not.be.ok();
+            expect(joinFilter.join.filters.her).to.not.be.ok();
+            expect(joinFilter.join.filters.you).to.be.ok();
+            expect(joinFilter.join.filters.you[0].query).to.be.ok();
+            done();
+          }).catch(done);
         });
       });
 

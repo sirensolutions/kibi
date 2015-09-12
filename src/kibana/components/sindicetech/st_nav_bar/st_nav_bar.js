@@ -265,7 +265,9 @@ define(function (require) {
                 !_.isEqual(newGlobalTime, oldGlobalTime, true)
               )
           ) {
-            _updateAllCounts(null, 'because of $locationChangeSuccess');
+            dashboardGroupHelper.computeGroups().then(function (dashboardGroups) {
+              _writeToScope(dashboardGroups);
+            });
           }
         });
 

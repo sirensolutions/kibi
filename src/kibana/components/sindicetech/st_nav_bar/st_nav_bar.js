@@ -51,18 +51,6 @@ define(function (require) {
         };
 
 
-        var _updateCount = function (groupIndex) {
-          _getCountQuery(groupIndex).then(function (result) {
-            if (result.query && result.indexPatternId) {
-              $http.post('elasticsearch/' + result.indexPatternId + '/_search', result.query)
-              .success(function (data) {
-                $scope.dashboardGroups[result.groupIndex].count = data.hits.total;
-              });
-            }
-          });
-        };
-
-
         // to prevent this to fire many times with the same queries
         // fire it with a delay of a second
         var lastEventTimer;

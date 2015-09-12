@@ -27,6 +27,7 @@ define(function (require) {
             if (!dashboard.savedSearchId) {
               reject(new Error('The focus dashboard "' + focusDashboardId + '" does not have a saveSearchId'));
             } else {
+              // get savedSearch to access the index
               return savedSearches.get(dashboard.savedSearchId);
             }
           });
@@ -37,15 +38,15 @@ define(function (require) {
             var dashboardSavedSearch = data[0];
             var filters = data[1];
             var queries = data[2];
-            // get savedSearch to access the index
             var focusIndex = dashboardSavedSearch.searchSource._state.index.id;
+
             // here check that the join filter should be present on this dashboard
             // it should be added only if we find focus in enabled relations
             if (!focusIndex || !_isIndexInEnabledRelations(focusIndex, relationalPanelConfig.enabledRelations)) {
               reject(new Error('The join filter has no enabled relation for the focused index: ' +  focusIndex));
             } else {
-              // keep only the filters which are in the connected component
               var labels = queryHelper.getLabelsInConnectedComponent(focusIndex, relationalPanelConfig.enabledRelations);
+              // keep only the filters which are in the connected component
               for (var filter in filters) {
                 if (filters.hasOwnProperty(filter) && !_.contains(labels, filter)) {
                   delete filters[filter];

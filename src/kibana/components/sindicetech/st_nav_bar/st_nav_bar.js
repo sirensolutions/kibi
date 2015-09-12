@@ -345,6 +345,10 @@ define(function (require) {
           $scope.tabScrollerState[1] = sl === tabContainer[0].scrollWidth - tabContainer[0].clientWidth;
         };
 
+        $rootScope.$on('kibi:dashboardgroup:changed', function () {
+          updateTabScroller();
+        });
+
         $scope.onTabContainerResize = function () {
           if (tabContainer[0].offsetWidth < tabContainer[0].scrollWidth) {
             $el.find('.tab-scroller').addClass('visible');

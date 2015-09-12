@@ -51,14 +51,13 @@ define(function (require) {
         };
 
 
-        // to prevent this to fire many times with the same queries
-        // fire it with a delay of a second
+        // debounce count queries
         var lastEventTimer;
         var _updateAllCounts = function (groupIndexesToUpdate, reason) {
           $timeout.cancel(lastEventTimer);
           if (!groupIndexesToUpdate) {
             // there are no indexes so it means we have to update all counts
-            // in this case fire the query immediatelly
+            // in this case fire the query immediately
             _fireUpdateAllCounts(groupIndexesToUpdate, reason);
           } else {
             lastEventTimer = $timeout( function () {
@@ -134,7 +133,7 @@ define(function (require) {
           }
 
           // There is already a $scope.dashboardGroups
-          // lets compare with the new one and update only if neccessary
+          // lets compare with the new one and update only if necessary
           if ($scope.dashboardGroups.length !== newDashboardGroups.length) {
             $scope.dashboardGroups = newDashboardGroups;
             _updateAllCounts(null, 'dashboardsGroups length not the same');
@@ -306,12 +305,12 @@ define(function (require) {
           $scope.relationalFilterPanelOpened = false;
         });
 
-        // close panel when user navigate to different route
+        // close panel when user navigates to a different route
         $rootScope.$on('$routeChangeSuccess', function (event, next, prev, err) {
           $scope.relationalFilterPanelOpened = false;
         });
 
-        // rerender tabs if any dashbord got saved
+        // rerender tabs if any dashboard got saved
         $rootScope.$on('kibi:dashboard:changed', function (event, dashId) {
           dashboardGroupHelper.computeGroups().then(function (dashboardGroups) {
             _writeToScope(dashboardGroups);

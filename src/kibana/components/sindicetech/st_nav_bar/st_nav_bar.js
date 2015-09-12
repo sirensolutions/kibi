@@ -345,7 +345,11 @@ define(function (require) {
           $scope.tabScrollerState[1] = sl === tabContainer[0].scrollWidth - tabContainer[0].clientWidth;
         };
 
-        $rootScope.$on('kibi:dashboardgroup:changed', function () {
+        $rootScope.$on('kibi:dashboardgroup:changed', function (event, id) {
+          updateTabScroller();
+        });
+
+        $rootScope.$on('kibi:dashboard:changed', function (event, id) {
           updateTabScroller();
         });
 
@@ -360,28 +364,28 @@ define(function (require) {
 
         $scope.tabResizeChecker.on('resize', $scope.onTabContainerResize);
 
-        $scope.scrollTabs = function (direction) {
-          var clientWidth = tabContainer[0].clientWidth;
-          var scrollLeft = tabContainer.scrollLeft();
-          var offset = 0;
-          tabContainer.find('li').each(function () {
-            var tab = $(this);
-            var tabWidth = tab.width();
-            var tabLeft = Math.round(tab.position().left);
-            if (direction < 0) {
-              if (-scrollLeft + tabLeft + tabWidth - tabTolerance > clientWidth) {
-                offset = tabLeft + tabWidth - clientWidth;
-                tabContainer.scrollLeft(offset);
-                return false;
-              }
-            } else {
-              if (tabLeft + tabWidth >= scrollLeft) {
-                offset = tabLeft;
-                tabContainer.scrollLeft(offset);
-                return false;
-              }
+        var amount = 90;
+        var stopScrolling = false;
+
+        function scroll(direction, amount) {
+          var scrollLeft = tabContainer.scrollLeft() - direction * amount;
+          tabContainer.animate({scrollLeft: scrollLeft}, 250, 'linear', function () {
+            if (!stopScrolling) {
+              scroll(direction, amount * 1.75);
             }
+            updateTabScroller();
           });
+        }
+
+        $scope.scrollTabs = function (direction) {
+          if (direction === false) {
+            stopScrolling = true;
+            tabContainer.stop();
+            updateTabScroller();
+            return;
+          }
+          stopScrolling = false;
+          scroll(direction, amount);
           updateTabScroller();
         };
 

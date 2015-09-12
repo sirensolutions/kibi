@@ -126,17 +126,18 @@ define(function (require) {
               }
 
               var indexPatternId = scope.indexPatternId;
-              //   here make a call to get Types
               $http.get('elasticsearch/' + indexPatternId + '/_mappings')
-              .success(function (data) {
+              .success(function (response) {
                 var types = [];
-                if (data[indexPatternId] && data[indexPatternId].mappings) {
-                  for (var type in data[indexPatternId].mappings) {
-                    if (data[indexPatternId].mappings.hasOwnProperty(type)) {
-                      types.push({
-                        label: type,
-                        value: type
-                      });
+                for (var indexId in response) {
+                  if (response[indexId].mappings) {
+                    for (var type in response[indexId].mappings) {
+                      if (response[indexId].mappings.hasOwnProperty(type)) {
+                        types.push({
+                          label: type,
+                          value: type
+                        });
+                      }
                     }
                   }
                 }

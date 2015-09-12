@@ -252,7 +252,6 @@ define(function (require) {
           var newQuery = urlHelper.getLocalParamFromUrl(newUrl, 'query');
           var oldQuery = urlHelper.getLocalParamFromUrl(oldUrl, 'query');
 
-
           var newGlobalFilters = urlHelper.getGlobalParamFromUrl(newUrl, 'filters');
           var oldGlobalFilters = urlHelper.getGlobalParamFromUrl(oldUrl, 'filters');
           var newGlobalTime = urlHelper.getGlobalParamFromUrl(newUrl, 'time');
@@ -265,6 +264,7 @@ define(function (require) {
                 !_.isEqual(newGlobalTime, oldGlobalTime, true)
               )
           ) {
+            _updateAllCounts(null, 'locationChangeSuccess');
             dashboardGroupHelper.computeGroups().then(function (dashboardGroups) {
               _writeToScope(dashboardGroups);
             });

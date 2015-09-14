@@ -476,22 +476,83 @@ define(function (require) {
           expect(actual).to.eql(expected);
         });
 
-        it('getLocalParamFromUrl', function () {
+        it('getLocalParamFromUrl (empty)', function () {
           var url = 'http://localhost:5602/?_a=(filters:!())';
           var expected = {};
           var actual = urlHelper.getLocalParamFromUrl(url, 'filters');
           expect(actual).to.eql(expected);
         });
 
-        it('getGlobalParamFromUrl', function () {
+        it('getLocalParamFromUrl (?#, empty)', function () {
+          var url = 'http://localhost:5602/?#/dashboard?_a=(filters:!())';
+          var expected = {};
+          var actual = urlHelper.getLocalParamFromUrl(url, 'filters');
+          expect(actual).to.eql(expected);
+        });
+
+        it('getLocalParamFromUrl (parameters)', function () {
+          var url = 'http://localhost:5602/#/dashboard/Companies?_a=(entityLabel:label,entityURI:\'sql:%2F%2Ftable%2Fid\')';
+          var expected = 'label';
+          var actual = urlHelper.getLocalParamFromUrl(url, 'entityLabel');
+          expect(actual).to.eql(expected);
+          expected = 'sql:%2F%2Ftable%2Fid';
+          actual = urlHelper.getLocalParamFromUrl(url, 'entityURI');
+          expect(actual).to.eql(expected);
+        });
+
+        it('getLocalParamFromUrl (?#, parameters)', function () {
+          var url = 'http://localhost:5602/?#/dashboard/Companies?_a=(entityLabel:label,entityURI:\'sql:%2F%2Ftable%2Fid\')';
+          var expected = 'label';
+          var actual = urlHelper.getLocalParamFromUrl(url, 'entityLabel');
+          expect(actual).to.eql(expected);
+          expected = 'sql:%2F%2Ftable%2Fid';
+          actual = urlHelper.getLocalParamFromUrl(url, 'entityURI');
+          expect(actual).to.eql(expected);
+        });
+
+        it('getGlobalParamFromUrl (empty)', function () {
           var url = 'http://localhost:5602/?_g=(filters:!())';
           var expected = {};
           var actual = urlHelper.getGlobalParamFromUrl(url, 'filters');
           expect(actual).to.eql(expected);
         });
 
+        it('getGlobalParamFromUrl (?#, empty)', function () {
+          var url = 'http://localhost:5602/?#/dashboard?_g=(filters:!())';
+          var expected = {};
+          var actual = urlHelper.getGlobalParamFromUrl(url, 'filters');
+          expect(actual).to.eql(expected);
+        });
+
+        it('getGlobalParamFromUrl (parameters)', function () {
+          var url = 'http://localhost:5602/#/dashboard/Companies?_g=(entityLabel:label,entityURI:\'sql:%2F%2Ftable%2Fid\')';
+          var expected = 'label';
+          var actual = urlHelper.getGlobalParamFromUrl(url, 'entityLabel');
+          expect(actual).to.eql(expected);
+          expected = 'sql:%2F%2Ftable%2Fid';
+          actual = urlHelper.getGlobalParamFromUrl(url, 'entityURI');
+          expect(actual).to.eql(expected);
+        });
+
+        it('getGlobalParamFromUrl (?#, parameters)', function () {
+          var url = 'http://localhost:5602/?#/dashboard/Companies?_g=(entityLabel:label,entityURI:\'sql:%2F%2Ftable%2Fid\')';
+          var expected = 'label';
+          var actual = urlHelper.getGlobalParamFromUrl(url, 'entityLabel');
+          expect(actual).to.eql(expected);
+          expected = 'sql:%2F%2Ftable%2Fid';
+          actual = urlHelper.getGlobalParamFromUrl(url, 'entityURI');
+          expect(actual).to.eql(expected);
+        });
+
         it('getPathnameFromUrl', function () {
           var url = 'http://localhost:5602/#/path/?_g=(filters:!())';
+          var expected = '#/path/';
+          var actual = urlHelper.getPathnameFromUrl(url);
+          expect(actual).to.eql(expected);
+        });
+
+        it('getPathnameFromUrl (?#)', function () {
+          var url = 'http://localhost:5602/?#/path/?_g=(filters:!())';
           var expected = '#/path/';
           var actual = urlHelper.getPathnameFromUrl(url);
           expect(actual).to.eql(expected);

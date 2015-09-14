@@ -15,9 +15,9 @@ define(function (require) {
     title: 'queries'
   });
 
-  module.service('savedQueries', function (Promise, config, configFile, es, createNotifier, SavedQuery, kbnUrl) {
+  module.service('savedQueries', function (Private, Promise, config, configFile, es, createNotifier, SavedQuery, kbnUrl) {
 
-
+    var cache = Private(require('components/sindicetech/cache_helper/cache_helper'));
     var notify = createNotifier({
       location: 'Saved Queries'
     });
@@ -25,7 +25,15 @@ define(function (require) {
     this.type = SavedQuery.type;
 
     this.get = function (id) {
-      return (new SavedQuery(id)).init();
+      var cacheKey = 'savedQueries-id-' + id;
+      if (cache && cache.get(cacheKey)) {
+        return cache.get(cacheKey);
+      }
+      var promise = (new SavedQuery(id)).init();
+      if (cache) {
+        cache.set(cacheKey, promise);
+      }
+      return promise;
     };
 
     this.urlFor = function (id) {
@@ -50,6 +58,13 @@ define(function (require) {
             }
           }
         } : { query: {match_all: {}}};
+
+      // cache the results of this method
+      var cacheKey = 'savedQueries' + ( searchString ? searchString : '' );
+      if (cache && cache.get(cacheKey)) {
+        return Promise.resolve(cache.get(cacheKey));
+      }
+
       return es.search({
         index: configFile.kibana_index,
         type: 'query',
@@ -57,7 +72,7 @@ define(function (require) {
         size: 100
       })
       .then(function (resp) {
-        return {
+        var ret = {
           total: resp.hits.total,
           hits: resp.hits.hits.map(function (hit) {
             var source = hit._source;
@@ -66,6 +81,10 @@ define(function (require) {
             return source;
           })
         };
+        if (cache) {
+          cache.set(cacheKey, ret);
+        }
+        return ret;
       });
     };
   });

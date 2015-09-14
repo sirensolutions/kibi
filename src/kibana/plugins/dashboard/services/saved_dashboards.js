@@ -22,9 +22,15 @@ define(function (require) {
 
     // Returns a single dashboard by ID, should be the name of the dashboard
     this.get = function (id) {
-
-      // Returns a promise that contains a dashboard which is a subclass of docSource
-      return (new SavedDashboard(id)).init();
+      var cacheKey = 'savedDashboards-id-' + id;
+      if (cache && cache.get(cacheKey)) {
+        return cache.get(cacheKey);
+      }
+      var promise = (new SavedDashboard(id)).init();
+      if (cache) {
+        cache.set(cacheKey, promise);
+      }
+      return promise;
     };
 
     this.urlFor = function (id) {

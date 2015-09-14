@@ -15,9 +15,9 @@ define(function (require) {
     title: 'templates'
   });
 
-  module.service('savedTemplates', function (Promise, config, configFile, es, createNotifier, SavedTemplate, kbnUrl) {
+  module.service('savedTemplates', function (Private, Promise, config, configFile, es, createNotifier, SavedTemplate, kbnUrl) {
 
-
+    var cache = Private(require('components/sindicetech/cache_helper/cache_helper'));
     var notify = createNotifier({
       location: 'Saved Templates'
     });
@@ -25,7 +25,15 @@ define(function (require) {
     this.type = SavedTemplate.type;
 
     this.get = function (id) {
-      return (new SavedTemplate(id)).init();
+      var cacheKey = 'savedTemplates-id-' + id;
+      if (cache && cache.get(cacheKey)) {
+        return cache.get(cacheKey);
+      }
+      var promise = (new SavedTemplate(id)).init();
+      if (cache) {
+        cache.set(cacheKey, promise);
+      }
+      return promise;
     };
 
     this.urlFor = function (id) {
@@ -50,6 +58,13 @@ define(function (require) {
             }
           }
         } : { query: {match_all: {}}};
+
+      // cache the results of this method
+      var cacheKey = 'savedTemplates' + ( searchString ? searchString : '' );
+      if (cache && cache.get(cacheKey)) {
+        return Promise.resolve(cache.get(cacheKey));
+      }
+
       return es.search({
         index: configFile.kibana_index,
         type: 'template',
@@ -57,7 +72,7 @@ define(function (require) {
         size: 100
       })
       .then(function (resp) {
-        return {
+        var ret = {
           total: resp.hits.total,
           hits: resp.hits.hits.map(function (hit) {
             var source = hit._source;
@@ -66,6 +81,12 @@ define(function (require) {
             return source;
           })
         };
+
+        if (cache) {
+          cache.set(cacheKey, ret);
+        }
+
+        return ret;
       });
     };
   });

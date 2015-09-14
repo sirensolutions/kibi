@@ -64,8 +64,6 @@ define(function (require) {
           timefilter.time.from = dash.timeFrom;
         }
 
-        $scope.$on('$destroy', dash.destroy);
-
         var matchQueryFilter = function (filter) {
           return filter.query && filter.query.query_string && !filter.meta && !filter.join;
         };
@@ -133,11 +131,17 @@ define(function (require) {
 
         // added by sindicetech so the st-dashboard-toolbar which was moved out
         // could comunicate with the main app
-        $rootScope.$on('stDashboardInvokeMethod', function (event, methodName) {
+        var stDashboardInvokeMethodOff = $rootScope.$on('stDashboardInvokeMethod', function (event, methodName) {
           $scope[methodName]();
         });
-        $rootScope.$on('stDashboardSetProperty', function (event, property, data) {
+        var stDashboardSetProperty = $rootScope.$on('stDashboardSetProperty', function (event, property, data) {
           $scope[property] = data;
+        });
+
+        $scope.$on('$destroy', function () {
+          dash.destroy();
+          stDashboardInvokeMethodOff();
+          stDashboardSetProperty();
         });
 
         $scope.$watch('configTemplate', function () {

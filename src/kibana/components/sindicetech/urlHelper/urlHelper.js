@@ -252,15 +252,15 @@ define(function (require) {
       return null;
     };
 
-
     UrlHelper.prototype.getPathnameFromUrl = function (url) {
       var start = url.indexOf('#');
-      var stop = url.indexOf('?') || url.length;
+      var stop = url.indexOf('?', start) || url.length;
       return url.substring(start, stop);
     };
 
     UrlHelper.prototype._getParamFromUrl = function (url, paramName, urlStateParamName) {
-      var start = url.indexOf('?');
+      var start = url.indexOf('#');
+      start = start === -1 ? url.indexOf('?') : url.indexOf('?', start);
       var queryString = url.substring(start + 1);
       var paramPairs = queryString.split('&');
       for (var i = 0; i < paramPairs.length; i++) {

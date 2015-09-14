@@ -139,18 +139,20 @@ define(function (require) {
         };
 
         // here iterate over queries and add to the filters only this one which are not for focused index
-        for (var index in queries) {
-          if (queries.hasOwnProperty(index) && index !== focus) {
-            var fQuery = queries[index];
-            if (fQuery && fQuery.query_string && fQuery.query_string.query !== '*') {
-              if (!joinFilter.join.filters[index]) {
-                joinFilter.join.filters[index] = [];
-              }
-              joinFilter.join.filters[index].push({
-                query: {
-                  query_string: fQuery.query_string
+        if (queries) {
+          for (var index in queries) {
+            if (queries.hasOwnProperty(index) && index !== focus) {
+              var fQuery = queries[index];
+              if (fQuery && fQuery.query_string && fQuery.query_string.query !== '*') {
+                if (!joinFilter.join.filters[index]) {
+                  joinFilter.join.filters[index] = [];
                 }
-              });
+                joinFilter.join.filters[index].push({
+                  query: {
+                    query_string: fQuery.query_string
+                  }
+                });
+              }
             }
           }
         }

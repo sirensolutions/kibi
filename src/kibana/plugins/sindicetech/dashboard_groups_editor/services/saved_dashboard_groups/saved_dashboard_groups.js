@@ -26,7 +26,16 @@ define(function (require) {
     this.type = SavedDashboardGroup.type;
 
     this.get = function (id) {
-      return (new SavedDashboardGroup(id)).init();
+      var cacheKey = 'savedDashboardgroups-id-' + id;
+      if (cache && cache.get(cacheKey)) {
+        return cache.get(cacheKey);
+      }
+      // Returns a promise that contains a dashboard which is a subclass of docSource
+      var promise = (new SavedDashboardGroup(id)).init();
+      if (cache) {
+        cache.set(cacheKey, promise);
+      }
+      return promise;
     };
 
     this.urlFor = function (id) {

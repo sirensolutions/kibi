@@ -2,7 +2,7 @@ define(function (require) {
 
   var app = require('modules').get('app/dashboard');
 
-  app.directive('stDashboardSearch', function ($compile, Notifier, savedDashboards, kbnUrl, Private, $rootScope) {
+  app.directive('stDashboardSearch', function (Private, $rootScope) {
 
     var urlHelper = Private(require('components/sindicetech/urlHelper/urlHelper'));
 

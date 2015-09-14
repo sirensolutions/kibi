@@ -6,14 +6,10 @@ define(function (require) {
 
 
   var _ = require('lodash');
-  var $ = require('jquery');
 
   var app = require('modules').get('app/dashboard');
 
-  app.directive('stNavBar', function (
-                              $rootScope, $http, Promise, config, savedDashboardGroups,
-                              savedDashboards, savedSearches, indexPatterns, Private, timefilter, $timeout, Notifier) {
-
+  app.directive('stNavBar', function ($rootScope, $http, Promise, config, Private, $timeout, Notifier) {
     var ResizeChecker        = Private(require('components/vislib/lib/resize_checker'));
     var urlHelper            = Private(require('components/sindicetech/urlHelper/urlHelper'));
     var kibiStateHelper      = Private(require('components/kibi/kibi_state_helper/kibi_state_helper'));
@@ -42,12 +38,10 @@ define(function (require) {
             });
           }
 
-          return new Promise(function (fulfill, reject) {
-            countHelper.getCountQueryForDashboardId(dashboard.id).then(function (queryDef) {
-              queryDef.groupIndex = groupIndex;
-              fulfill(queryDef);
-            }).catch(notify.error);
-          });
+          return countHelper.getCountQueryForDashboardId(dashboard.id).then(function (queryDef) {
+            queryDef.groupIndex = groupIndex;
+            return Promise.resolve(queryDef);
+          }).catch(notify.error);
         };
 
 
@@ -119,9 +113,7 @@ define(function (require) {
               });
 
             }
-          }).catch(function (err) {
-            notify.warning(err);
-          });
+          }).catch(notify.warning);
         };
 
 

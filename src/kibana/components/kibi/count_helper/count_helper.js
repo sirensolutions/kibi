@@ -115,7 +115,6 @@ define(function (require) {
      * The parameter savedSearch should be a reference to a SavedSearch
      * instance, not a SavedSearch id
      */
-
     CountHelper.prototype.constructCountQuery = function (dashboardId, savedSearch, extraFilters, joinFilter) {
       return new Promise(function (fulfill, reject) {
 
@@ -273,7 +272,6 @@ define(function (require) {
         }
       });
     };
-
 
     return new CountHelper();
   };

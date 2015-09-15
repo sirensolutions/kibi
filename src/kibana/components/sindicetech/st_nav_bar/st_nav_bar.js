@@ -66,8 +66,6 @@ define(function (require) {
           }
         };
 
-
-
         var lastFiredMultiCountQuery;
 
         var _fireUpdateAllCounts = function (groupIndexesToUpdate, reason) {
@@ -105,7 +103,7 @@ define(function (require) {
             if (query !== '' && lastFiredMultiCountQuery !== query) {
               lastFiredMultiCountQuery = query;
 
-              // ?getCountsOnTabs has no meanning it is just usefull to filter when inspecting requests
+              // ?getCountsOnTabs has no meaning, it is just useful to filter when inspecting requests
               $http.post('elasticsearch/_msearch?getCountsOnTabs', query)
               .success(function (data) {
                 if (data.responses.length !== indexesToUpdate.length) {
@@ -264,9 +262,11 @@ define(function (require) {
                 !_.isEqual(newGlobalTime, oldGlobalTime, true)
               )
           ) {
-            _updateAllCounts(null, 'locationChangeSuccess');
-            dashboardGroupHelper.computeGroups().then(function (dashboardGroups) {
-              _writeToScope(dashboardGroups);
+            $timeout(function () {
+              _updateAllCounts(null, 'locationChangeSuccess');
+              dashboardGroupHelper.computeGroups().then(function (dashboardGroups) {
+                _writeToScope(dashboardGroups);
+              });
             });
           }
         });

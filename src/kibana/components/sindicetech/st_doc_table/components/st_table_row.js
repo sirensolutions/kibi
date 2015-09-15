@@ -108,9 +108,10 @@ define(function (require) {
           createSummaryRow($scope.row);
         });
 
-        $rootScope.$on('kibi:entityURI:changed', function (event, entityURI) {
+        var off = $rootScope.$on('kibi:entityURI:changed', function () {
           createSummaryRow($scope.row);
         });
+        $scope.$on('$destroy', off);
 
         // create a tr element that lists the value for each *column*
         function createSummaryRow(row) {
@@ -276,7 +277,6 @@ define(function (require) {
             $detailsScope.row = row;
           }
 
-
           // trim off cells that were not used rest of the cells
           $cells.filter(':gt(' + (newHtmls.length - 1) + ')').remove();
         }
@@ -314,21 +314,20 @@ define(function (require) {
 
         /*
          * Create the $$_partialFormatted key on a row
-         * added by sindicetech to make sure the injected column works
+         * added by kibi to make sure the injected column works
          */
         function _formatRow(row) {
           row.$$_flattened = row.$$_flattened || $scope.indexPattern.flattenHit(row);
           row.$$_partialFormatted = row.$$_partialFormatted || _.mapValues(row.$$_flattened, _formatField);
 
-          // sindicetech here take care about arrays which were not flatten
-          // for now lets place this enchancment here - we can alway create our version of table_row later
+          // kibi: take care of arrays which were not flatten
           for (var key in row.$$_flattened) {
             if (row.$$_flattened.hasOwnProperty(key)) {
               var value = row.$$_flattened[key];
               if (value instanceof Array && value.length > 0) {
                 var flattenedArray = [];
                 _st_flatten(key, value, flattenedArray);
-                // Now rewrite the flattend properties into row.$$_formatted so it can be displayed
+                // Now rewrite the flattend properties into row.$$_formatted so they can be displayed
                 for (var f in flattenedArray) {
                   if (flattenedArray.hasOwnProperty(f)) {
                     row.$$_partialFormatted[f] = flattenedArray[f].join(', ');
@@ -338,11 +337,11 @@ define(function (require) {
               }
             }
           }
-          // end of sindicetech
+          // kibi end
           return row.$$_partialFormatted;
         }
 
-        // added by sindicetech
+        // added by kibi
         function _st_flatten(key, o, flattenedArray) {
           if (o instanceof Array) {
             _.each(o, function (item) {
@@ -362,8 +361,7 @@ define(function (require) {
             flattenedArray[key].push(o);
           }
         }
-        // end of sindicetech
-
+        // kibi end
 
         init();
       }

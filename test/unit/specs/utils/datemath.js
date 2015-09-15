@@ -150,6 +150,19 @@ define(function (require) {
 
     });
 
+    describe('precise parsing', function () {
+
+      it('parse time with precise', function () {
+
+        _.each(spans, function (precision) {
+          var expected = moment(anchor).startOf(precision).format(format);
+          expect(datemath.parseWithPrecision(anchor, null, precision).format(format)).to.equal(expected);
+          expect(datemath.parseWithPrecision(anchor, true, precision).format(format)).to.equal(expected);
+        });
+      });
+    });
+
+
   });
 
 });

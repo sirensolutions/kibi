@@ -97,8 +97,21 @@ define(function (require) {
     return dateTime;
   }
 
+  // added by kibi
+  function parseWithPrecision(text, roundUp, precizion) {
+    var t = parse(text, roundUp);
+    if (precizion && _.contains(units, precizion)) {
+      return t.startOf(precizion);
+    } else {
+      throw new Error('Wrong precizion argument use one of ' + units);
+    }
+    return t;
+  }
+  // added by kibi end
+
   return {
     parse: parse,
+    parseWithPrecision: parseWithPrecision,
 
     units: Object.freeze(units),
     unitsAsc: Object.freeze(unitsAsc),

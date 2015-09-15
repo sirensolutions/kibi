@@ -288,9 +288,7 @@ define(function (require) {
         });
 
 
-        $rootScope.$on('kibi:dashboardgroup:changed', function (event, dashboardGroup) {
-          // clear the scope in case a group was saved
-          // in this way the new computed groups will be used
+        var removeDashboardGroupChangedHandler = $rootScope.$on('kibi:dashboardgroup:changed', function () {
           delete $scope.dashboardGroups;
         });
 
@@ -379,6 +377,7 @@ define(function (require) {
         $el.on('$destroy', function () {
           removeInitConfigHandler();
           removeDashboardChangedHandler();
+          removeDashboardGroupChangedHandler();
           removeRelationalFilterPanelClosedHandler();
           removeRelationalPanelConfigHandler();
           removeRouteChangeSuccessHandler();

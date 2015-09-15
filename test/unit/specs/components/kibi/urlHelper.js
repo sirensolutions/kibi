@@ -231,7 +231,8 @@ define(function (require) {
           var expected = 'http://server/#/path/?_a=(filters:!((range:(field:(gte:1,lte:3)))))';
           urlHelper.addFilter(filter);
 
-          $rootScope.$on('$locationChangeSuccess', function (event, newUrl, oldUrl) {
+          var off = $rootScope.$on('$locationChangeSuccess', function (event, newUrl, oldUrl) {
+            off();
             expect(newUrl).to.equal(expected);
             done();
           });
@@ -253,7 +254,8 @@ define(function (require) {
           var expected = 'http://server/#/path/?_a=(filters:!((range:(field:(gte:1,lte:3)))))';
           urlHelper.addFilter(filter);
 
-          $rootScope.$on('$locationChangeSuccess', function (event, newUrl, oldUrl) {
+          var off = $rootScope.$on('$locationChangeSuccess', function (event, newUrl, oldUrl) {
+            off();
             expect(newUrl).to.equal(expected);
             done();
           });
@@ -274,7 +276,8 @@ define(function (require) {
           var expected = 'http://server/#/path/?_a=(filters:!((join:(indexes:!((id:7))))))';
           urlHelper.addFilter(filter);
 
-          $rootScope.$on('$locationChangeSuccess', function (event, newUrl, oldUrl) {
+          var off = $rootScope.$on('$locationChangeSuccess', function (event, newUrl, oldUrl) {
+            off();
             expect(newUrl).to.equal(expected);
             done();
           });
@@ -296,7 +299,8 @@ define(function (require) {
           var expected = 'http://server/#/path/?_a=(filters:!((join:(indexes:!((id:7))))))';
           urlHelper.addFilter(filter);
 
-          $rootScope.$on('$locationChangeSuccess', function (event, newUrl, oldUrl) {
+          var off = $rootScope.$on('$locationChangeSuccess', function (event, newUrl, oldUrl) {
+            off();
             expect(newUrl).to.equal(expected);
             done();
           });
@@ -329,7 +333,8 @@ define(function (require) {
 
           var expected = 'http://server/#/path/?_a=(filters:!((join:(indexes:!((id:7))))),query:(query_string:(query:BBB)))';
 
-          $rootScope.$on('$locationChangeSuccess', function (event, newUrl, oldUrl) {
+          var off = $rootScope.$on('$locationChangeSuccess', function (event, newUrl, oldUrl) {
+            off();
             expect(newUrl).to.equal(expected);
             done();
           });
@@ -358,7 +363,8 @@ define(function (require) {
 
           var expected = 'http://server/#/path/?_a=(filters:!((join:(indexes:!((id:7))))))';
 
-          $rootScope.$on('$locationChangeSuccess', function (event, newUrl, oldUrl) {
+          var off = $rootScope.$on('$locationChangeSuccess', function (event, newUrl, oldUrl) {
+            off();
             expect(newUrl).to.equal(expected);
             done();
           });
@@ -393,7 +399,8 @@ define(function (require) {
           var expected = 'http://server/#/path/?_g=(time:(from:now-7,to:now))&' +
                          '_a=(filters:!((join:(indexes:!((id:7))))),query:(query_string:(query:BBB)))';
 
-          $rootScope.$on('$locationChangeSuccess', function (event, newUrl, oldUrl) {
+          var off = $rootScope.$on('$locationChangeSuccess', function (event, newUrl, oldUrl) {
+            off();
             expect(newUrl).to.equal(expected);
             done();
           });
@@ -426,7 +433,8 @@ define(function (require) {
 
           var expected = 'http://server/#/path/';
 
-          $rootScope.$on('$locationChangeSuccess', function (event, newUrl, oldUrl) {
+          var off = $rootScope.$on('$locationChangeSuccess', function (event, newUrl, oldUrl) {
+            off();
             expect(newUrl).to.equal(expected);
             done();
           });

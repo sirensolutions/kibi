@@ -21,9 +21,10 @@ define(function (require) {
           $rootScope.$emit('stDashboardSetProperty', 'configTemplate', $scope.configTemplate);
         }, true);
 
-        $rootScope.$on('stDashboardOnProperty', function (event, property, value) {
+        var off = $rootScope.$on('stDashboardOnProperty', function (event, property, value) {
           $scope[property] = value;
         });
+        $scope.$on('$destroy', off);
       }
     };
   });

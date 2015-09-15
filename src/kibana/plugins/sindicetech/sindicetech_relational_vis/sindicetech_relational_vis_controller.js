@@ -427,11 +427,12 @@ define(function (require) {
         }
       }; // end of _constructButtons
 
-      $rootScope.$on('kibi:dashboard:changed', function (event, dashId) {
+      var off = $rootScope.$on('kibi:dashboard:changed', function (event, dashId) {
         if ($scope.buttons) {
           _updateCounts();
         }
       });
+      $scope.$on('$destroy', off);
 
       $scope.$watchMulti([ 'buttons', 'esResponse' ], function () {
         if ($scope.buttons) {

@@ -29,9 +29,10 @@ define(function (require) {
               $scope.holder.entityURI = globalState.entityURI;
             }
 
-            $rootScope.$on('kibi:entityURIEnabled', function (event, enabled) {
+            var off = $rootScope.$on('kibi:entityURIEnabled', function (event, enabled) {
               $scope.holder.entityURIEnabled = !!enabled;
             });
+            $scope.$on('$destroy', off);
             // added by kibi - end
 
             $scope.$watch('holder.entityURI', function (entityURI) {

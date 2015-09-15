@@ -230,7 +230,7 @@ define(function (require) {
         };
 
 
-        var unbindChangeSuccess = $rootScope.$on('$locationChangeSuccess', function (event, newUrl, oldUrl) {
+        var removeLocationChangeSuccessHandler = $rootScope.$on('$locationChangeSuccess', function (event, newUrl, oldUrl) {
           // only if we are on dashboards
           if (urlHelper.isItDashboardUrl()) {
             $el.show();
@@ -278,20 +278,17 @@ define(function (require) {
         });
 
         $scope.relationalFilterVisible = false;
-        $rootScope.$on('init:config', function () {
+        var removeInitConfigHandler = $rootScope.$on('init:config', function () {
           $scope.relationalPanelConfig = config.get('kibi:relationalPanelConfig');
           $scope.relationalFilterVisible = $scope.relationalPanelConfig.enabled;
         });
-        $rootScope.$on('change:config.kibi:relationalPanelConfig', function () {
+        var removeRelationalPanelConfigHandler = $rootScope.$on('change:config.kibi:relationalPanelConfig', function () {
           $scope.relationalPanelConfig = config.get('kibi:relationalPanelConfig');
           $scope.relationalFilterVisible = $scope.relationalPanelConfig.enabled;
-
         });
 
 
-        $rootScope.$on('kibi:dashboardgroup:changed', function (event, dashboardGroup) {
-          // clear the scope in case a group was saved
-          // in this way the new computed groups will be used
+        var removeDashboardGroupChangedHandler = $rootScope.$on('kibi:dashboardgroup:changed', function () {
           delete $scope.dashboardGroups;
         });
 
@@ -303,17 +300,17 @@ define(function (require) {
           $rootScope.$emit('relationalFilterPanelOpened', $scope.relationalFilterPanelOpened);
         };
 
-        $rootScope.$on('relationalFilterPanelClosed', function () {
+        var removeRelationalFilterPanelClosedHandler = $rootScope.$on('relationalFilterPanelClosed', function () {
           $scope.relationalFilterPanelOpened = false;
         });
 
         // close panel when user navigates to a different route
-        $rootScope.$on('$routeChangeSuccess', function (event, next, prev, err) {
+        var removeRouteChangeSuccessHandler = $rootScope.$on('$routeChangeSuccess', function (event, next, prev, err) {
           $scope.relationalFilterPanelOpened = false;
         });
 
         // rerender tabs if any dashboard got saved
-        $rootScope.$on('kibi:dashboard:changed', function (event, dashId) {
+        var removeDashboardChangedHandler = $rootScope.$on('kibi:dashboard:changed', function (event, dashId) {
           dashboardGroupHelper.computeGroups().then(function (dashboardGroups) {
             _writeToScope(dashboardGroups);
           });
@@ -324,7 +321,6 @@ define(function (require) {
         // =============
 
         var tabContainer = $el.find('.tab-container');
-        var tabTolerance = 4;
         $scope.tabResizeChecker = new ResizeChecker(tabContainer);
         $scope.tabScrollerState = [true, false];
 
@@ -334,11 +330,11 @@ define(function (require) {
           $scope.tabScrollerState[1] = sl === tabContainer[0].scrollWidth - tabContainer[0].clientWidth;
         };
 
-        $rootScope.$on('kibi:dashboardgroup:changed', function (event, id) {
+        var removeTabDashboardGroupChangedHandler = $rootScope.$on('kibi:dashboardgroup:changed', function (event, id) {
           updateTabScroller();
         });
 
-        $rootScope.$on('kibi:dashboard:changed', function (event, id) {
+        var removeTabDashboardChangedHandler = $rootScope.$on('kibi:dashboard:changed', function (event, id) {
           updateTabScroller();
         });
 
@@ -379,7 +375,15 @@ define(function (require) {
         };
 
         $el.on('$destroy', function () {
-          unbindChangeSuccess();
+          removeInitConfigHandler();
+          removeDashboardChangedHandler();
+          removeDashboardGroupChangedHandler();
+          removeRelationalFilterPanelClosedHandler();
+          removeRelationalPanelConfigHandler();
+          removeRouteChangeSuccessHandler();
+          removeLocationChangeSuccessHandler();
+          removeTabDashboardChangedHandler();
+          removeTabDashboardGroupChangedHandler();
 
           $scope.tabResizeChecker.off('resize', $scope.onTabContainerResize);
           $scope.tabResizeChecker.destroy();

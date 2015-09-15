@@ -64,11 +64,12 @@ define(function (require) {
           }
         };
 
-        $rootScope.$on('kibi:add:column', function (event, column) {
+        var off = $rootScope.$on('kibi:add:column', function (event, column) {
           if (column) {
             $scope.columns.splice(column.index, 0, column.fieldName);
           }
         });
+        $scope.$on('$destroy', off);
 
         $scope.sort = function (column) {
           if (!column || !sortableField(column)) return;

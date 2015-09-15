@@ -301,36 +301,6 @@ define(function (require) {
           return text;
         }
 
-        /**
-         * get the value of a field from a row, serialize it to a string
-         * and truncate it if necessary
-         *
-         * @param  {object} row - the row to pull the value from
-         * @param  {string} field - the name of the field (dot-seperated paths are accepted)
-         * @return {[type]} a string, which should be inserted as text, or an element
-         */
-        function _getValForField(row, field) {
-          var val;
-
-          if (row.highlight && row.highlight[field]) {
-            // Strip out the highlight tags so we have the "original" value
-            var untagged = _.map(row.highlight[field], function (value) {
-              return value
-                .split(highlightTags.pre).join('')
-                .split(highlightTags.post).join('');
-            });
-            return _formatField(untagged, field);
-          }
-
-          // discover formats all of the values and puts them in $$_formatted for display
-          val = (row.$$_formatted || _formatRow(row))[field];
-
-          // undefined and null should just be an empty string
-          val = (val == null) ? '' : val;
-
-          return val;
-        }
-
         /*
          * Format a field with the index pattern on scope.
          */

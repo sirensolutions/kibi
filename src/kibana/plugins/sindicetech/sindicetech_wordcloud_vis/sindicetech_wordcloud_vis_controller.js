@@ -38,12 +38,12 @@ define(function (require) {
       colors: ['#800026', '#bd0026', '#e31a1c', '#fc4e2a', '#fd8d3c', '#feb24c', '#fed976'],
       words: []
     };
-    _updateDimentions();
 
-    $rootScope.$on('change:vis', function () {
-      _updateDimentions();
+
+    var off = $rootScope.$on('change:vis', function () {
+      _updateDimensions();
     });
-
+    $scope.$on('$destroy', off);
 
     $scope.$watch('esResponse', function (resp, oldResp) {
       var tableGroups = $scope.tableGroups = null;

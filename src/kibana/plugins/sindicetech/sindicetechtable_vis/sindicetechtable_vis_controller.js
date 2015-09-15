@@ -82,8 +82,6 @@ define(function (require) {
         var indexPattern = $scope.vis.indexPattern;
 
         if ($scope.savedObj && $scope.savedObj.searchSource) {
-          // NOTE: destroy the previous one if any
-          // TODO: check again
           $scope.savedObj.searchSource.destroy();
         }
         requestQueue.markAllRequestsWithSourceIdAsInactive(_id);
@@ -158,26 +156,33 @@ define(function (require) {
         }
       });
 
-      $rootScope.$on('entityURIEnabled', function (event, entityURIEnabled) {
+      var removeEntityURIEnableHandler = $rootScope.$on('entityURIEnabled', function (event, entityURIEnabled) {
         $scope.holder.entityURIEnabled = entityURIEnabled;
       });
+      $scope.$on('$destroy', removeEntityURIEnableHandler);
 
       if (editing) {
-        $rootScope.$on('kibi:vis:state-changed', function () {
+        var removeVisStateChangedHandler = $rootScope.$on('kibi:vis:state-changed', function () {
           _constructQueryColumnObject();
           _constructCellOnClicksObject();
           fetchResults($scope.savedVis);
+        });
+
+        var removeVisColumnsChangedHandler = $rootScope.$on('kibi:vis:columns-changed', function (event, columns) {
+          if ($scope.savedObj && $scope.savedObj.columns) {
+            $scope.savedObj.columns = columns;
+          }
+        }, true);
+
+        $scope.$on('$destroy', function () {
+          removeVisStateChangedHandler();
+          removeVisColumnsChangedHandler();
         });
 
         $scope.$watch('savedObj.columns', function () {
           $rootScope.$emit('kibi:vis:savedObjectColumns-changed', $scope.savedObj);
         });
 
-        $rootScope.$on('kibi:vis:columns-changed', function (event, columns) {
-          if ($scope.savedObj && $scope.savedObj.columns) {
-            $scope.savedObj.columns = columns;
-          }
-        }, true);
       }
 
     });

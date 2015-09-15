@@ -8,9 +8,9 @@ define(function (require) {
 
   module.controller(
     'SindicetechRelationalVisController',
-    function ($scope, $rootScope, Private, $http, Notifier, Promise, savedDashboards, savedSearches) {
+    function ($scope, $rootScope, Private, $http, Notifier, Promise, timefilter,
+              indexPatterns, savedDashboards, savedSearches) {
 
-      var isInConfigurationMode = $('#sindicetech-relational-vis-params').is(':visible');
       var notify = new Notifier({
         location: 'Relational Widget'
       });
@@ -19,6 +19,7 @@ define(function (require) {
       var urlHelper        = Private(require('components/sindicetech/urlHelper/urlHelper'));
       var joinFilterHelper = Private(require('components/sindicetech/join_filter_helper/join_filter_helper'));
       var kibiStateHelper  = Private(require('components/kibi/kibi_state_helper/kibi_state_helper'));
+      var kibiTimeHelper   = Private(require('components/kibi/kibi_time_helper/kibi_time_helper'));
       var countHelper      = Private(require('components/kibi/count_helper/count_helper'));
 
 
@@ -75,7 +76,7 @@ define(function (require) {
       /**
        * Updates the source join.
        */
-      var updateSourceJoin = function (button, existingJoin) {
+      var updateSourceJoin = function (button, existingJoin, currentDashboardSavedSearch) {
         existingJoin = _.cloneDeep(existingJoin);
         return new Promise( function (fulfill, reject) {
           if (!existingJoin) {
@@ -138,12 +139,27 @@ define(function (require) {
             )
           ) {
             existingFilters.push({
-              query: {
-                query_string: fQuery.query_string
-              }
+              query: fQuery
             });
           }
 
+          //6 Add filters and query from the saved search
+          var savedSearchMeta = getSavedSearchMeta(currentDashboardSavedSearch);
+          if (savedSearchMeta.filter && savedSearchMeta.filter.length > 0 ) {
+            existingFilters = existingFilters.concat(savedSearchMeta.filter);
+          }
+          if (savedSearchMeta.query &&
+            !(
+            savedSearchMeta.query.query_string &&
+            savedSearchMeta.query.query_string.query === '*' &&
+            savedSearchMeta.query.query_string.analyze_wildcard === true)
+          ) {
+            existingFilters.push({
+              query: savedSearchMeta.query
+            });
+          }
+
+          // Remove duplicates
           existingJoin.join.filters[button.sourceIndexPatternId] =
             _.uniq(existingFilters, false, function (filter) {
             return JSON.stringify(filter);
@@ -152,7 +168,27 @@ define(function (require) {
           button.joinFilter = existingJoin;
           button.joinFilter.meta.value = button.filterLabel ? button.filterLabel : 'button: ' + button.label;
 
-          fulfill(button);
+          indexPatterns.get(button.sourceIndexPatternId).then(function (indexPattern) {
+            var timeFilter = timefilter.get(indexPattern);
+            if (timeFilter) {
+              kibiTimeHelper.updateTimeFilterForDashboard(urlHelper.getCurrentDashboardId(), timeFilter)
+                .then(function (updatedTimeFilter) {
+                  if (!existingJoin.join.filters[button.sourceIndexPatternId]) {
+                    existingJoin.join.filters[button.sourceIndexPatternId] = [];
+                  }
+                  existingJoin.join.filters[button.sourceIndexPatternId].push(updatedTimeFilter);
+                  button.joinFilter = existingJoin;
+                  fulfill(button);
+                }).catch(function (err) {
+                  notify.error(err);
+                });
+            } else {
+              fulfill(button);
+            }
+          }).catch(function (err) {
+            notify.error(err);
+          });
+
         });
       };
 
@@ -228,7 +264,6 @@ define(function (require) {
           var queries = {};
           queries[button.sourceIndexPatternId] = urlHelper.getCurrentDashboardQuery();
 
-
           var indexToDashboardMap = {};
           indexToDashboardMap[button.sourceIndexPatternId] = urlHelper.getCurrentDashboardId();
           indexToDashboardMap[button.targetIndexPatternId] = button.redirectToDashboard;
@@ -292,7 +327,7 @@ define(function (require) {
                     }
 
                     if (existingJoin) {
-                      updateSourceJoin(button, existingJoin, false).then(function (button) {
+                      updateSourceJoin(button, existingJoin, currentDashboardSavedSearch).then(function (button) {
                         updateTargetDashboardJoin(button).then(function (query) {
                           fulfill({
                             query: query,

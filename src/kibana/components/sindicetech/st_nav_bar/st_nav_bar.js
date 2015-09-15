@@ -323,7 +323,6 @@ define(function (require) {
         // =============
 
         var tabContainer = $el.find('.tab-container');
-        var tabTolerance = 4;
         $scope.tabResizeChecker = new ResizeChecker(tabContainer);
         $scope.tabScrollerState = [true, false];
 

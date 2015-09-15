@@ -31,6 +31,20 @@ define(function (require) {
       });
     };
 
+    KibiStateHelper.prototype._setTimeFromGlobalState = function () {
+      var self = this;
+      var currentDashboardId;
+      var currentPath = $location.path();
+      if (currentPath && currentPath.indexOf('/dashboard/') === 0) {
+        currentDashboardId = currentPath.replace('/dashboard/', '');
+      }
+      if (currentDashboardId) {
+        $timeout(function () {
+          self.saveTimeForDashboardId(currentDashboardId, globalState.time.from, globalState.time.to);
+        });
+      }
+    };
+
     KibiStateHelper.prototype._init = function () {
       var self = this;
       if (!globalState.k) {
@@ -42,7 +56,6 @@ define(function (require) {
         };
         globalState.save();
       }
-      this._updateTimeForAllDashboards();
 
       $rootScope.$on('kibi:dashboard:changed', function (event, dashboardId) {
         savedDashboards.get(dashboardId).then(function (savedDashboard) {
@@ -51,23 +64,25 @@ define(function (require) {
         });
       });
 
+      //NOTE: check if a timefilter has been set into the URL at startup
+      var off = $rootScope.$on('$routeChangeSuccess', function () {
+        $timeout(function () {
+          if (globalState.time) {
+            self._setTimeFromGlobalState();
+          }
+          off();
+        });
+      });
+
       // below listener on globalState is needed to react when the global time is changed by the user
       // either directly in time widget or by clicking on histogram chart etc
       globalState.on('save_with_changes', function (diff) {
         if (diff.indexOf('time') !== -1) {
-          var currentDashboardId;
-          var currentPath = $location.path();
-          if (currentPath && currentPath.indexOf('/dashboard/') === 0) {
-            currentDashboardId = currentPath.replace('/dashboard/', '');
-          }
-          if (currentDashboardId) {
-            $timeout(function () {
-              self.saveTimeForDashboardId(currentDashboardId, globalState.time.from, globalState.time.to);
-            });
-          }
+          self._setTimeFromGlobalState();
         }
       });
 
+      this._updateTimeForAllDashboards();
     };
 
     KibiStateHelper.prototype.saveSelectedDashboardId = function (groupId, dashboardId) {
@@ -78,7 +93,6 @@ define(function (require) {
     KibiStateHelper.prototype.getSelectedDashboardId = function (groupId) {
       return globalState.k.g[groupId];
     };
-
 
     KibiStateHelper.prototype.saveQueryForDashboardId = function (dashboardId, query) {
       if (query) {
@@ -112,7 +126,6 @@ define(function (require) {
         };
       }
     };
-
 
     KibiStateHelper.prototype.saveFiltersForDashboardId = function (dashboardId, filters) {
       if (!dashboardId) {

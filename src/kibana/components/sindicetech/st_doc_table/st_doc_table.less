@@ -1,22 +1,39 @@
+@import (reference) "lesshat.less";
 @import "../../../styles/theme/_variables.less";
 
-// color the cell when selecting the entity
-tr td.selectedEntityCell {
-  background-color: @entity-bg;
-  color: #fff;
-}
+.kbn-table {
 
-// style the cell as an anchor link when the click action is to follow an URL
-.click {
-  color: @link-color;
-  text-decoration: underline;
-  display: block;
-  &:hover {
-    cursor: pointer;
-    color: @link-hover-color;
+  td.selectedEntityCell {
+    background-color: @entity-bg;
+    color: #fff !important;
+
+    .truncate-by-height {
+      color: #fff !important;
+
+      &:before {
+        content: " ";
+        width: 100%;
+        height: 15px;
+        position: absolute;
+        left: 0;
+
+        .background-image(linear-gradient(to bottom, fade(@entity-bg, 0%) 0%, fade(@entity-bg, 1%) 1%, fade(@entity-bg, 99%) 99%, @entity-bg 100%));
+      }
+    }
   }
-}
 
-.click div.truncate-by-height {
-  .click
+  .click {
+    color: @link-color;
+    text-decoration: underline;
+    cursor: pointer;
+
+    &:hover {
+      color: @link-hover-color;
+    }
+  }
+
+  .click div.truncate-by-height {
+    .click
+  }
+
 }

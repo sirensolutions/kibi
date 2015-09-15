@@ -168,7 +168,27 @@ define(function (require) {
           button.joinFilter = existingJoin;
           button.joinFilter.meta.value = button.filterLabel ? button.filterLabel : 'button: ' + button.label;
 
-          fulfill(button);
+          indexPatterns.get(button.sourceIndexPatternId).then(function (indexPattern) {
+            var timeFilter = timefilter.get(indexPattern);
+            if (timeFilter) {
+              kibiTimeHelper.updateTimeFilterForDashboard(urlHelper.getCurrentDashboardId(), timeFilter)
+                .then(function (updatedTimeFilter) {
+                  if (!existingJoin.join.filters[button.sourceIndexPatternId]) {
+                    existingJoin.join.filters[button.sourceIndexPatternId] = [];
+                  }
+                  existingJoin.join.filters[button.sourceIndexPatternId].push(updatedTimeFilter);
+                  button.joinFilter = existingJoin;
+                  fulfill(button);
+                }).catch(function (err) {
+                  notify.error(err);
+                });
+            } else {
+              fulfill(button);
+            }
+          }).catch(function (err) {
+            notify.error(err);
+          });
+
         });
       };
 

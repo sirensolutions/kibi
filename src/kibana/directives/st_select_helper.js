@@ -154,7 +154,7 @@ define(function (require) {
               // do nothing if variables is empty a text box instead of select should be rendered
               break;
             default:
-              return Promise.reject(new Error('Unknown datasource type: ' + datasourceType));
+              return Promise.reject('Unknown datasource type for query=' + queryId + ': ' + datasourceType);
           }
 
           var fields = _.map(variables, function (v) {

@@ -348,7 +348,7 @@ define(function (require) {
         it('should return an error if query has no or unsupported datasource type', function (done) {
           stSelectHelper.getQueryVariables('nodatasource')
           .catch(function (err) {
-            expect(err.message).to.be('Unknown datasource type: undefined');
+            expect(err).to.be('Unknown datasource type for query=nodatasource: undefined');
             done();
           });
         });

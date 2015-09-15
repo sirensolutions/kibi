@@ -84,16 +84,14 @@ define(function (require) {
                 promise = selectHelper.getDatasources();
                 break;
               case 'indexPatternType':
-                var getTypes = selectHelper.getIndexTypes(scope.indexPatternId);
+                promise = selectHelper.getIndexTypes(scope.indexPatternId);
 
-                if (getTypes) {
-                  getTypes.then(function (types) {
-                    if (types) {
-                      if (types.length === 1) {
-                        scope.modelObject = types[0];
-                      }
-                      _renderSelect(types);
+                if (promise) {
+                  promise.promise.then(function (types) {
+                    if (types.length === 1) {
+                      scope.modelObject = types[0];
                     }
+                    return types;
                   });
                 }
                 break;
@@ -104,10 +102,10 @@ define(function (require) {
                 promise = selectHelper.getIndexesId();
                 break;
               case 'queryVariable':
-                var getVariables = selectHelper.getQueryVariables(scope.queryId);
+                promise = selectHelper.getQueryVariables(scope.queryId);
 
-                if (getVariables) {
-                  getVariables.then(function (data) {
+                if (promise) {
+                  promise = promise.then(function (data) {
                     var variables = data[0];
                     var datasourceType = data[1];
 
@@ -116,14 +114,18 @@ define(function (require) {
                       scope.linkToQuery = '#/settings/queries/' + scope.queryId;
                       scope.getVariable = true;
                     }
-                    _renderSelect(variables);
+                    return variables;
                   });
                 }
                 break;
             }
 
+            scope.retrieveError = '';
             if (promise) {
-              promise.then(_renderSelect);
+              promise.then(_renderSelect).catch(function (err) {
+                scope.retrieveError = err;
+                ngModelCtrl.$setValidity('stSelect', false);
+              });
             }
           };
 

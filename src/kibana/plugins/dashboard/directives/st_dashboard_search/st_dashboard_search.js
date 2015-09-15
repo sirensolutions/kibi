@@ -27,9 +27,11 @@ define(function (require) {
           $rootScope.$emit('stDashboardSetProperty', 'state', $scope.state);
         }, true);
 
-        $rootScope.$on('stDashboardOnProperty', function (event, property, value) {
+        var off = $rootScope.$on('stDashboardOnProperty', function (event, property, value) {
           $scope[property] = value;
         });
+        $scope.$on('$destroy', off);
+
       }
 
     };

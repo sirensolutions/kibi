@@ -22,12 +22,6 @@ define(function (require) {
           }
         };
 
-        updateSelectedEntity();
-
-        $rootScope.$on('kibi:entityURI:changed', function () {
-          updateSelectedEntity();
-        });
-
         $scope.removeEntity = function () {
           delete $scope.entityURI;
           delete $scope.label;
@@ -46,6 +40,16 @@ define(function (require) {
           globalState.save();
           $route.reload();
         };
+
+        var removeHandler = $rootScope.$on('kibi:entityURI:changed', function () {
+          updateSelectedEntity();
+        });
+
+        $scope.$on('$destroy', function () {
+          removeHandler();
+        });
+
+        updateSelectedEntity();
       }
     };
   });

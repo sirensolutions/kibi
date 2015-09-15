@@ -11,14 +11,12 @@ define(function (require) {
   // tabular format that we can pass to the table directive
   module.controller('SindicetechWordcloudVisController', function ($scope, $element, $rootScope, Private, getAppState) {
     var filterBarClickHandler = Private(require('components/filter_bar/filter_bar_click_handler'));
-    var AggConfigResult = require('components/vis/_agg_config_result');
     var tabifyAggResponse = Private(require('components/agg_response/tabify/tabify'));
 
-    var _updateDimentions = function () {
+    var _updateDimensions = function () {
       var delta = 18;
       var width =  $($element).parent().width();
       var height = $($element).parent().height();
-      // make it a bit smaller to prevent scrolling
       if (width) {
         if (width > delta) {
           width -= delta;
@@ -32,7 +30,6 @@ define(function (require) {
         $scope.options.height = height;
       }
     };
-
 
     // set default options
     $scope.options = {
@@ -104,6 +101,7 @@ define(function (require) {
         $scope.tableGroups = tableGroups;
       }
 
+      _updateDimensions();
     });
   });
 

@@ -67,8 +67,6 @@ define(function (require) {
           });
 
           button.joinFilter = existingJoin;
-          button.joinFilter.meta.value = button.filterLabel ? button.filterLabel : 'button: ' + button.label;
-
           fulfill(button);
         });
       };
@@ -166,7 +164,6 @@ define(function (require) {
           });
 
           button.joinFilter = existingJoin;
-          button.joinFilter.meta.value = button.filterLabel ? button.filterLabel : 'button: ' + button.label;
 
           indexPatterns.get(button.sourceIndexPatternId).then(function (indexPattern) {
             var timeFilter = timefilter.get(indexPattern);
@@ -293,7 +290,6 @@ define(function (require) {
             indexToDashboardMap
           ).then(function (joinFilter) {
               button.joinFilter = joinFilter;
-              button.joinFilter.meta.value = button.filterLabel ? button.filterLabel : 'button: ' + button.label;
               fulfill(button);
             });
 
@@ -411,6 +407,11 @@ define(function (require) {
             kibiStateHelper.saveFiltersForDashboardId(urlHelper.getCurrentDashboardId(), urlHelper.getCurrentDashboardFilters());
             kibiStateHelper.saveQueryForDashboardId(urlHelper.getCurrentDashboardId(), urlHelper.getCurrentDashboardQuery());
 
+            this.joinFilter.meta.value =
+              button.filterLabel ? button.filterLabel :
+              '... related to (' + this.sourceCount + ') from ' + urlHelper.getCurrentDashboardId();
+
+
             if (this.joinFilter) {
               // get filters from dashboard we would like to switch to
               var targetDashboardQuery   = kibiStateHelper.getQueryForDashboardId(this.redirectToDashboard);
@@ -469,9 +470,18 @@ define(function (require) {
       });
       $scope.$on('$destroy', off);
 
-      $scope.$watchMulti([ 'buttons', 'esResponse' ], function () {
+      $scope.$watch('buttons', function () {
         if ($scope.buttons) {
           _updateCounts();
+        }
+      });
+
+      $scope.$watch('esResponse', function (resp) {
+        if ($scope.buttons) {
+          _updateCounts();
+          _.each($scope.buttons, function (button) {
+            button.sourceCount = resp.hits.total;
+          });
         }
       });
 

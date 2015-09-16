@@ -36,13 +36,17 @@ define(function (require) {
         $scope.holder.entityURI = '';
       }
 
-
-      $rootScope.$on('entityURIEnabled', function (event, entityURIEnabled) {
+      var removeEntityURIEnabledHandler = $rootScope.$on('entityURIEnabled', function (event, entityURIEnabled) {
         $scope.holder.entityURIEnabled = entityURIEnabled;
       });
 
-      $rootScope.$on('kibi:entityURI:changed', function (event, entityURI) {
+      var removeEntityURIChangedHandler = $rootScope.$on('kibi:entityURI:changed', function (event, entityURI) {
         $scope.holder.entityURI = entityURI;
+      });
+
+      $scope.$on('$destroy', function () {
+        removeEntityURIEnabledHandler();
+        removeEntityURIChangedHandler();
       });
 
       $scope.$watchMulti(['holder.entityURI', 'vis.params.queryOptions'], function () {
@@ -52,7 +56,6 @@ define(function (require) {
           $scope.renderTemplates();
         }
       });
-
 
       $scope.renderTemplates = function () {
         $scope.holder.html = 'Loading ...';

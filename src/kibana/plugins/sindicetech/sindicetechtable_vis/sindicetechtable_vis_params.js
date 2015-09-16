@@ -50,17 +50,15 @@ define(function (require) {
             return snippet.queryId;
           });
 
-          _shouldEntityURIBeEnabled(queryIds, function (err, value) {
-            if (err) {
-              notify.warning('Could not determine whether the widget needs an entityURI' +
-                ' to be set: ' + JSON.stringify(err, null, ' '));
-            }
-
+          _shouldEntityURIBeEnabled(queryIds).then(function (value) {
             if ($scope.vis.params.enableQueryFields === true) {
               $rootScope.$emit('entityURIEnabled', value);
             } else {
               $rootScope.$emit('entityURIEnabled', false);
             }
+          }).catch(function (err) {
+            notify.warning('Could not determine whether the widget needs an entityURI' +
+                ' to be set: ' + JSON.stringify(err, null, ' '));
           });
         };
 
@@ -70,7 +68,7 @@ define(function (require) {
 
         // check if there is any click actions / relational column definition
         // before removing a column of the table
-        $rootScope.$on('kibi:remove:column', function (event, column) {
+        var removeRemoveColumnHandler = $rootScope.$on('kibi:remove:column', function (event, column) {
           if (column) {
             var msg;
 
@@ -106,18 +104,24 @@ define(function (require) {
           }
         });
 
+        // Point savedObject.columns to vis.params.columns
+        var removeSavedObjectColumnsChangedHandler = $rootScope.$on('kibi:vis:savedObjectColumns-changed',
+            function (event, savedObject) {
+          if (savedObject && savedObject.columns !== $scope.vis.params.columns) {
+            savedObject.columns = $scope.vis.params.columns;
+          }
+        });
+
+        $scope.$on('$destroy', function () {
+          removeRemoveColumnHandler();
+          removeSavedObjectColumnsChangedHandler();
+        });
+
         // Need to emit an event to update table columns while visualization
         // is dirty
         $scope.$watch('vis.params.columns', function () {
           $rootScope.$emit('kibi:vis:columns-changed', $scope.vis.params.columns);
         }, true);
-
-        // Point savedObject.columns to vis.params.columns
-        $rootScope.$on('kibi:vis:savedObjectColumns-changed', function (event, savedObject) {
-          if (savedObject && savedObject.columns !== $scope.vis.params.columns) {
-            savedObject.columns = $scope.vis.params.columns;
-          }
-        });
 
         // =======
         // Queries

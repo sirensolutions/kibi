@@ -1,5 +1,5 @@
 define(function (require) {
-  return function RelatedEntitiesAggDefinition(Private, Notifier, globalState, queryEngineClient, $rootScope, $timeout) {
+  return function RelatedEntitiesAggDefinition(Private, Notifier, globalState, $rootScope, $timeout) {
 
     // a bit of css
     require('css!components/agg_types/styles/custom_queries.css');
@@ -68,14 +68,13 @@ define(function (require) {
               }
 
             });
-            _shouldEntityURIBeEnabled(queryIds, function (err, value) {
-              if (err) {
-                notify.warning('Could not determine the entity URI for this visualisation: ' + JSON.stringify(err, null, ' '));
-              } else {
-                $timeout(function () {
-                  $rootScope.$emit('kibi:entityURIEnabled', value);
-                });
-              }
+            _shouldEntityURIBeEnabled(queryIds).then(function (value) {
+              $timeout(function () {
+                $rootScope.$emit('kibi:entityURIEnabled', value);
+              });
+            }).catch(function (err) {
+              notify.warning('Could not determine the entity URI for this visualisation: ' +
+                JSON.stringify(err, null, ' '));
             });
 
             params.filters = json;

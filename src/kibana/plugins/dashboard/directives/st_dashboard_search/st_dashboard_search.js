@@ -2,7 +2,7 @@ define(function (require) {
 
   var app = require('modules').get('app/dashboard');
 
-  app.directive('stDashboardSearch', function ($compile, Notifier, savedDashboards, kbnUrl, Private, $rootScope) {
+  app.directive('stDashboardSearch', function (Private, $rootScope) {
 
     var urlHelper = Private(require('components/sindicetech/urlHelper/urlHelper'));
 
@@ -27,9 +27,11 @@ define(function (require) {
           $rootScope.$emit('stDashboardSetProperty', 'state', $scope.state);
         }, true);
 
-        $rootScope.$on('stDashboardOnProperty', function (event, property, value) {
+        var off = $rootScope.$on('stDashboardOnProperty', function (event, property, value) {
           $scope[property] = value;
         });
+        $scope.$on('$destroy', off);
+
       }
 
     };

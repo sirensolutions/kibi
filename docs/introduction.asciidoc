@@ -37,7 +37,7 @@ Elasticsearch, which is currently available as a pre-release in the
 [float]
 === How does Kibi compare to Kibana?
 
-Kibi 0.1 is developed as a fork of Kibana 4.1; we're looking
+Kibi is currently developed as a fork of Kibana 4.1; we're looking
 forward to make use of the plugin API coming in Kibana 4.2 to keep the amount
 of forked code to a minimum.
 

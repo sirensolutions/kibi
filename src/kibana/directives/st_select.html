@@ -22,15 +22,8 @@
 
   <div class="hintbox" ng-show="showAnalyzedFieldWarning">
     <p>
-    <strong>Careful!</strong> The field selected contains analyzed strings. Values such as <i>foo-bar</i> will be broken into <i>foo</i> and <i>bar</i>. See <a href="http://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-core-types.html" target="_blank">Mapping Core Types</a> for more information on setting this field as <i>not_analyzed</i>
+      <strong>Careful!</strong> The field selected contains analyzed strings. Values such as <i>foo-bar</i> will be broken into <i>foo</i> and <i>bar</i>. See <a href="http://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-core-types.html" target="_blank">Mapping Core Types</a> for more information on setting this field as <i>not_analyzed</i>
     </p>
-
-    <!--
-    // TODO: enable this as well
-    <p ng-show="indexedFields.byName[agg.params.field.name + '.raw'].analyzed == false" class="ng-hide">
-      <strong>Tip:</strong> <i class="ng-binding">companyid.raw</i> may be a <i>not_analyzed</i> version of this field.
-    </p>
-    -->
   </div>
 
   <input ng-show="getVariable" type="text" ng-model="modelObject.value" class="form-control"/>
@@ -38,4 +31,14 @@
   <select ng-show="!getVariable" ng-model="modelObject" ng-options="item.label group by item.group for item in items track by item.value" class="form-control" ng-disabled="modelDisabled">
     <option ng-show="false" value=""></option>
   </select>
+
+  <div class="form-group hintbox" ng-if="retrieveError">
+    <h4 class="hintbox-heading">
+      <i class="fa fa-danger text-danger"></i> Select error
+    </h4>
+    <p>
+      An error occured while retrieving this select's data.
+    </p>
+    <pre>{{ retrieveError }}</pre>
+  </div>
 </div>

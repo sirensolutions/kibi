@@ -4,11 +4,8 @@ define(function (require) {
 
   require('modules')
     .get('kibana')
-    .directive('stSelect', function (config, $http, courier, indexPatterns, savedSearches, savedQueries, savedDashboards, Private) {
-
-      var sparqlHelper = Private(require('components/sindicetech/sparql_helper/sparql_helper'));
-      var sqlHelper = Private(require('components/sindicetech/sql_helper/sql_helper'));
-      var datasourceHelper = Private(require('components/sindicetech/datasource_helper/datasource_helper'));
+    .directive('stSelect', function (Private) {
+      var selectHelper = Private(require('directives/st_select_helper'));
 
       return {
         require: 'ngModel',
@@ -17,7 +14,6 @@ define(function (require) {
         scope: {
           required:       '@',  // required property of the ng-select
           objectType:     '@',  // text
-          savedSearchId:  '=?', // optional only for objectType === savedSearchFields
           indexPatternId: '=?', // optional only for objectType === field or objectType === indexPatternType
           queryId:        '=?', // optional only for objectType === queryVariable
           modelDisabled:  '=?'
@@ -71,171 +67,69 @@ define(function (require) {
           };
 
           var _render = function () {
-            if (scope.objectType === 'query') {
-              $http.get('elasticsearch/' + config.file.kibana_index + '/' + scope.objectType + '/_search?size=100')
-              .success(function (data) {
-                if (data.hits.hits) {
-                  var items = _.map(data.hits.hits, function (hit) {
-                    return {
-                      group: hit._source.st_tags.length ? hit._source.st_tags.join() : 'No tag',
-                      label: hit._source.title,
-                      value: hit._id
-                    };
-                  });
-                  _renderSelect(items);
-                }
-              });
-            } else if (scope.objectType === 'dashboard') {
-              savedDashboards.find().then(function (data) {
-                if (data.hits) {
-                  var items = _.map(data.hits, function (hit) {
-                    return {
-                      label: hit.title,
-                      value: hit.id
-                    };
-                  });
-                  _renderSelect(items);
-                }
-              });
-            } else if (scope.objectType === 'search' ||
-                       scope.objectType === 'template') {
-              $http.get('elasticsearch/' + config.file.kibana_index + '/' + scope.objectType + '/_search?size=100')
-              .success(function (data) {
-                if (data.hits.hits) {
-                  var items = _.map(data.hits.hits, function (hit) {
-                    return {
-                      label: hit._source.title,
-                      value: hit._id
-                    };
-                  });
-                  _renderSelect(items);
-                }
-              });
-            } else if (scope.objectType === 'datasource') {
-              var datasources = _.map(config.file.datasources, function (datasource) {
-                return {
-                  label: datasource.id,
-                  value: datasource.id
-                };
-              });
-              _renderSelect(datasources);
-            } else if (scope.objectType === 'indexPatternType') {
+            var promise;
 
-              if (!scope.indexPatternId) {
-                return;
-              }
+            switch (scope.objectType) {
+              case 'query':
+                promise = selectHelper.getQueries();
+                break;
+              case 'dashboard':
+                promise = selectHelper.getDashboards();
+                break;
+              case 'search':
+              case 'template':
+                promise = selectHelper.getObjects(scope.objectType);
+                break;
+              case 'datasource':
+                promise = selectHelper.getDatasources();
+                break;
+              case 'indexPatternType':
+                promise = selectHelper.getIndexTypes(scope.indexPatternId);
 
-              var indexPatternId = scope.indexPatternId;
-              $http.get('elasticsearch/' + indexPatternId + '/_mappings')
-              .success(function (response) {
-                var types = [];
-                for (var indexId in response) {
-                  if (response[indexId].mappings) {
-                    for (var type in response[indexId].mappings) {
-                      if (response[indexId].mappings.hasOwnProperty(type)) {
-                        types.push({
-                          label: type,
-                          value: type
-                        });
-                      }
+                if (promise) {
+                  promise.promise.then(function (types) {
+                    if (types.length === 1) {
+                      scope.modelObject = types[0];
                     }
-                  }
-                }
-                if (types.length === 1) {
-                  scope.modelObject = types[0];
-                }
-
-                _renderSelect(types);
-              });
-
-            } else if (scope.objectType === 'field') {
-              var defId;
-              if (scope.indexPatternId) {
-                defId = scope.indexPatternId;
-              } else {
-                defId = config.get('defaultIndex');
-              }
-
-              indexPatterns.get(defId).then(function (index) {
-
-                var fields = _.chain(index.fields)
-                .filter(function (field) {
-                  // filter some fields
-                  return field.type !== 'boolean' && field.name && field.name.indexOf('_') !== 0;
-                }).sortBy(function (field) {
-                  return field.name;
-                }).map(function (field) {
-                  return {
-                    label: field.name,
-                    value: field.name,
-                    options: {
-                      analyzed: field.analyzed
-                    }
-                  };
-                }).value();
-                _renderSelect(fields);
-              });
-            } else if (scope.objectType === 'savedSearchFields' && scope.savedSearchId) {
-              savedSearches.get(scope.savedSearchId).then(function (search) {
-                var fields = _.map(search.columns, function (column) {
-                  return {
-                    label: column,
-                    value: column
-                  };
-                });
-                _renderSelect(fields);
-              });
-            } else if (scope.objectType === 'indexPattern') {
-              courier.indexPatterns.getIds().then(function (ids) {
-                var fields = _.map(ids, function (id) {
-                  return {
-                    label: id,
-                    value: id
-                  };
-                });
-                _renderSelect(fields);
-              });
-            } else if (scope.objectType === 'queryVariable') {
-              if (scope.queryId && scope.queryId !== '') {
-
-                // first fetch the query
-                savedQueries.get(scope.queryId).then(function (savedQuery) {
-
-                  var resultQuery = savedQuery.st_resultQuery;
-                  // here check if it is sparql or sql
-                  var datasourceType = datasourceHelper.getDatasourceType(savedQuery.st_datasourceId);
-                  var variables = [];
-                  if (datasourceType === 'sparql' || datasourceType === 'jdbc-sparql') {
-                    variables = sparqlHelper.getVariables(resultQuery);
-                  } else if (datasourceType === 'rest') {
-                    // do nothing if variables is empty a text box instead of select should be rendered
-                    variables = [];
-                  } else {
-                    // here must be a sql
-                    variables = sqlHelper.getVariables(resultQuery);
-                  }
-                  scope.getVariable = false;
-                  if (variables.length === 0 && datasourceType !== 'rest') { // either sparql or sql
-                    scope.linkToQuery = '#/settings/queries/' + savedQuery.id;
-                    scope.getVariable = true;
-                  }
-
-                  var fields = [];
-                  _.each(variables, function (v) {
-                    fields.push({
-                      label: v.replace(',', ''),
-                      value: v.replace('?', '').replace(',', '') // in case of sparql we have to remove the '?'
-                    });
+                    return types;
                   });
+                }
+                break;
+              case 'field':
+                promise = selectHelper.getFields(scope.indexPatternId);
+                break;
+              case 'indexPattern':
+                promise = selectHelper.getIndexesId();
+                break;
+              case 'queryVariable':
+                promise = selectHelper.getQueryVariables(scope.queryId);
 
-                  _renderSelect(fields);
-                });
-              }
+                if (promise) {
+                  promise = promise.then(function (data) {
+                    var variables = data[0];
+                    var datasourceType = data[1];
+
+                    scope.getVariable = false;
+                    if (variables.length === 0 && datasourceType !== 'rest') { // either sparql or sql
+                      scope.linkToQuery = '#/settings/queries/' + scope.queryId;
+                      scope.getVariable = true;
+                    }
+                    return variables;
+                  });
+                }
+                break;
             }
 
+            scope.retrieveError = '';
+            if (promise) {
+              promise.then(_renderSelect).catch(function (err) {
+                scope.retrieveError = err;
+                ngModelCtrl.$setValidity('stSelect', false);
+              });
+            }
           };
 
-          scope.$watchMulti(['savedSearchId', 'indexPatternId', 'queryId'], function () {
+          scope.$watchMulti(['indexPatternId', 'queryId'], function () {
             _render();
           });
 

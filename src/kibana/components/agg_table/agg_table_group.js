@@ -1,11 +1,10 @@
 define(function (require) {
-  var $ = require('jquery');
   require('services/compile_recursive_directive');
   require('components/agg_table/agg_table');
 
   require('modules')
   .get('kibana')
-  .directive('kbnAggTableGroup', function (compileRecursiveDirective, globalState, $rootScope, courier) {
+  .directive('kbnAggTableGroup', function (compileRecursiveDirective, globalState, $rootScope, courier, $location) {
     return {
       restrict: 'E',
       template: require('text!components/agg_table/agg_table_group.html'),
@@ -20,8 +19,9 @@ define(function (require) {
         return compileRecursiveDirective.compile($el, {
           post: function ($scope) {
             // added by kibi
+            var currentPath = $location.path();
             $scope.holder = {
-              visible: $('#relational-filters-params').length > 0,
+              visible: currentPath.indexOf('visualize') !== -1,
               entityURIEnabled: false,
               entityURI: ''
             };

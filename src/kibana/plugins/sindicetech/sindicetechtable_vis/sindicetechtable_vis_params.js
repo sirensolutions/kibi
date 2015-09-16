@@ -50,17 +50,15 @@ define(function (require) {
             return snippet.queryId;
           });
 
-          _shouldEntityURIBeEnabled(queryIds, function (err, value) {
-            if (err) {
-              notify.warning('Could not determine whether the widget needs an entityURI' +
-                ' to be set: ' + JSON.stringify(err, null, ' '));
-            }
-
+          _shouldEntityURIBeEnabled(queryIds).then(function (value) {
             if ($scope.vis.params.enableQueryFields === true) {
               $rootScope.$emit('entityURIEnabled', value);
             } else {
               $rootScope.$emit('entityURIEnabled', false);
             }
+          }).catch(function (err) {
+            notify.warning('Could not determine whether the widget needs an entityURI' +
+                ' to be set: ' + JSON.stringify(err, null, ' '));
           });
         };
 

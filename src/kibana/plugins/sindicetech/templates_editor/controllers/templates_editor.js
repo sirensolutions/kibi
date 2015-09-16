@@ -120,13 +120,9 @@ define(function (require) {
 
 
       $scope.$watch('template._previewQueryId', function () {
-        _shouldEntityURIBeEnabled([$scope.template._previewQueryId], function (err, entityURIEnabled) {
-          if (err) {
-            console.err(err);
-          } else {
-            $scope.holder.entityURIEnabled = entityURIEnabled;
-          }
-        });
+        _shouldEntityURIBeEnabled([$scope.template._previewQueryId]).then(function (entityURIEnabled) {
+          $scope.holder.entityURIEnabled = entityURIEnabled;
+        }).catch(notify.error);
 
         // set datasourceType
         savedQueries.get($scope.template._previewQueryId).then(function (savedQuery) {

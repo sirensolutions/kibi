@@ -18,33 +18,6 @@ define(function (require) {
         // And return the linking function(s) which it returns
         return compileRecursiveDirective.compile($el, {
           post: function ($scope) {
-            // added by kibi
-            var currentPath = $location.path();
-            $scope.holder = {
-              visible: currentPath.indexOf('visualize') !== -1,
-              entityURIEnabled: false,
-              entityURI: ''
-            };
-            if (globalState.entityURI) {
-              $scope.holder.entityURI = globalState.entityURI;
-            }
-
-            var off = $rootScope.$on('kibi:entityURIEnabled', function (event, enabled) {
-              $scope.holder.entityURIEnabled = !!enabled;
-            });
-            $scope.$on('$destroy', off);
-            // added by kibi - end
-
-            $scope.$watch('holder.entityURI', function (entityURI) {
-              if (entityURI && $scope.holder.visible) {
-                globalState.entityURI = entityURI;
-                globalState.entityLabel = '';
-                globalState.save();
-                // redraw the table with the selected entity
-                courier.fetch();
-              }
-            });
-
             $scope.$watch('group', function (group) {
               // clear the previous "state"
               $scope.rows = $scope.columns = false;

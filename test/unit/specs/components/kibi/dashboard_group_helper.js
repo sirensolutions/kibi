@@ -170,5 +170,277 @@ define(function (require) {
       });
     });
 
+
+    describe('DashboardGroupHelper.updateDashboardGroups', function () {
+      beforeEach(init(fakeEmptySavedDashboards, fakeEmptySavedDashboardGroups));
+
+      describe('when there is a delta on group level', function () {
+
+        it('should return replace true if oldDashboardGroups is undefined', function () {
+          var oldDashboardGroups = null;
+          var newDashboardGroups = [];
+          var expected = {
+            replace: true,
+            indexes: null,
+            reasons: ['undefined oldDashboardsGroups']
+          };
+
+          var actual = dashboardGroupHelper.updateDashboardGroups(oldDashboardGroups, newDashboardGroups);
+          expect(actual).to.eql(expected);
+        });
+
+        it('should return replace true if oldDashboardGroups.length != newDashboardGroups.length', function () {
+          var oldDashboardGroups = [{}];
+          var newDashboardGroups = [{}, {}];
+
+          var expected = {
+            replace: true,
+            indexes: null,
+            reasons: ['dashboardsGroups length not the same']
+          };
+
+          var actual = dashboardGroupHelper.updateDashboardGroups(oldDashboardGroups, newDashboardGroups);
+          expect(actual).to.eql(expected);
+        });
+
+        it('different dashboard group titles - group 0', function () {
+          var oldDashboardGroups = [{
+            title: 'Title A'
+          }];
+          var newDashboardGroups = [{
+            title: 'Title B'
+          }];
+
+          var expected = {
+            replace: false,
+            indexes: [0],
+            reasons: ['different titles for group 0']
+          };
+
+          var actual = dashboardGroupHelper.updateDashboardGroups(oldDashboardGroups, newDashboardGroups);
+          expect(actual).to.eql(expected);
+        });
+
+        it('different dashboard group titles - group 1', function () {
+          var oldDashboardGroups = [
+            {
+              title: 'Title A0',
+              dashboards: [],
+              _selected: {},
+              selected: {}
+            },
+            {
+              title: 'Title A1',
+              dashboards: [],
+              _selected: {},
+              selected: {}
+            }
+          ];
+          var newDashboardGroups = [
+            {
+              title: 'Title A0',
+              dashboards: [],
+              _selected: {},
+              selected: {}
+            },
+            {
+              title: 'Title B1',
+              dashboards: [],
+              _selected: {},
+              selected: {}
+            }
+          ];
+
+          var expected = {
+            replace: false,
+            indexes: [1],
+            reasons: ['different titles for group 1']
+          };
+
+          var actual = dashboardGroupHelper.updateDashboardGroups(oldDashboardGroups, newDashboardGroups);
+          expect(actual).to.eql(expected);
+        });
+
+        it('different number of dashboards in a group 0', function () {
+          var oldDashboardGroups = [
+            {
+              title: 'Title A0',
+              dashboards: [{}, {}],
+              _selected: {},
+              selected: {}
+            }
+          ];
+          var newDashboardGroups = [
+            {
+              title: 'Title A0',
+              dashboards: [{}],
+              _selected: {},
+              selected: {}
+            }
+          ];
+
+          var expected = {
+            replace: false,
+            indexes: [0],
+            reasons: ['different number of dashboards for group 0']
+          };
+
+          var actual = dashboardGroupHelper.updateDashboardGroups(oldDashboardGroups, newDashboardGroups);
+          expect(actual).to.eql(expected);
+        });
+
+        it('different dashboard is _selected', function () {
+          var oldDashboardGroups = [
+            {
+              title: 'Title A0',
+              dashboards: [{id: 1}, {id: 2}],
+              selected: {id: 1},
+              _selected: {id: 1}
+            }
+          ];
+          var newDashboardGroups = [
+            {
+              title: 'Title A0',
+              dashboards: [{id: 1}, {id: 2}],
+              selected: {id: 1},
+              _selected: {id: 2}
+            }
+          ];
+
+          var expected = {
+            replace: false,
+            indexes: [0],
+            reasons: ['different selected dashboard for group 0']
+          };
+
+          var actual = dashboardGroupHelper.updateDashboardGroups(oldDashboardGroups, newDashboardGroups);
+          expect(actual).to.eql(expected);
+        });
+
+      });
+
+      describe('when there is delta on in single dashboard', function () {
+
+        it('different number of filters for selected dashboard', function () {
+
+          var oldDashboardGroups = [
+            {
+              title: 'Title A0',
+              dashboards: [{id: 1, filters: [{}, {}] }],
+              selected: {id: 1},
+              _selected: {id: 1}
+            }
+          ];
+          var newDashboardGroups = [
+            {
+              title: 'Title A0',
+              dashboards: [{id: 1, filters: [{}] }],
+              selected: {id: 1},
+              _selected: {id: 1}
+            }
+          ];
+
+          var expected = {
+            replace: false,
+            indexes: [0],
+            reasons: ['different number of filters for dashboard 0 for group 0']
+          };
+
+          var actual = dashboardGroupHelper.updateDashboardGroups(oldDashboardGroups, newDashboardGroups);
+          expect(actual).to.eql(expected);
+        });
+
+        it('different indexPatternId for selected dashboard', function () {
+
+          var oldDashboardGroups = [
+            {
+              title: 'Title A0',
+              dashboards: [{id: 1, indexPatternId: 'indexA'}],
+              selected: {id: 1},
+              _selected: {id: 1}
+            }
+          ];
+          var newDashboardGroups = [
+            {
+              title: 'Title A0',
+              dashboards: [{id: 1, indexPatternId: 'indexB'}],
+              selected: {id: 1},
+              _selected: {id: 1}
+            }
+          ];
+
+          var expected = {
+            replace: false,
+            indexes: [0],
+            reasons: ['different indexPatternId for dashboard 0 for group 0']
+          };
+
+          var actual = dashboardGroupHelper.updateDashboardGroups(oldDashboardGroups, newDashboardGroups);
+          expect(actual).to.eql(expected);
+        });
+
+        it('different savedSearchId for selected dashboard', function () {
+
+          var oldDashboardGroups = [
+            {
+              title: 'Title A0',
+              dashboards: [{id: 1, savedSearchId: 'savedSearchA'}],
+              selected: {id: 1},
+              _selected: {id: 1}
+            }
+          ];
+          var newDashboardGroups = [
+            {
+              title: 'Title A0',
+              dashboards: [{id: 1, savedSearchId: 'savedSearchB'}],
+              selected: {id: 1},
+              _selected: {id: 1}
+            }
+          ];
+
+          var expected = {
+            replace: false,
+            indexes: [0],
+            reasons: ['different savedSearchId for dashboard 0 for group 0']
+          };
+
+          var actual = dashboardGroupHelper.updateDashboardGroups(oldDashboardGroups, newDashboardGroups);
+          expect(actual).to.eql(expected);
+        });
+
+        it('different dashboard ids for dashboards on the same positions', function () {
+
+          var oldDashboardGroups = [
+            {
+              title: 'Title A0',
+              dashboards: [{id: 1}, {id: 2}],
+              selected: {id: 1},
+              _selected: {id: 1}
+            }
+          ];
+          var newDashboardGroups = [
+            {
+              title: 'Title A0',
+              dashboards: [{id: 2}, {id: 1}],
+              selected: {id: 1},
+              _selected: {id: 1}
+            }
+          ];
+
+          var expected = {
+            replace: false,
+            indexes: [0],
+            reasons: ['different dashboard id for dashboard 0 for group 0', 'different dashboard id for dashboard 1 for group 0']
+          };
+
+          var actual = dashboardGroupHelper.updateDashboardGroups(oldDashboardGroups, newDashboardGroups);
+          expect(actual).to.eql(expected);
+        });
+
+      });
+
+    });
+
+
   });
 });

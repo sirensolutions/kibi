@@ -310,6 +310,133 @@ define(function (require) {
       });
     };
 
+    /**
+     * when possible update just the different properties
+     * if not possible to update just properties - update the whole dashboard or whole group
+     *
+     * return the list of group indexes on which the count should be updated
+     */
+    DashboardGroupHelper.prototype.updateDashboardGroups = function (oldDashboardGroups, newDashboardGroups) {
+      // here first collect the group indexes to update counts
+      if (!oldDashboardGroups) {
+        return {
+          indexes: null,
+          reasons: ['undefined oldDashboardsGroups'],
+          replace: true
+        };
+      }
+
+      // There is already a oldDashboardGroups
+      // lets compare with the new one and update only if necessary
+      if (oldDashboardGroups.length !== newDashboardGroups.length) {
+        return {
+          indexes: null,
+          reasons: ['dashboardsGroups length not the same'],
+          replace: true
+        };
+      }
+
+      var groupIndexesToUpdateCountsOn = [];
+      var reasons = [];
+
+      for (var gIndex = 0; gIndex < newDashboardGroups.length; gIndex++) {
+        var g = newDashboardGroups[gIndex];
+        // if not the same group replace
+        if (oldDashboardGroups[gIndex].title !== g.title) {
+          oldDashboardGroups[gIndex] = g;
+          if (groupIndexesToUpdateCountsOn.indexOf(gIndex) === -1) {
+            groupIndexesToUpdateCountsOn.push(gIndex);
+            reasons.push('different titles for group ' + gIndex);
+          }
+          continue;
+        } else {
+          // the same group lets compare more
+          if (oldDashboardGroups[gIndex].dashboards.length !== g.dashboards.length) {
+            oldDashboardGroups[gIndex] = g;
+            if (groupIndexesToUpdateCountsOn.indexOf(gIndex) === -1) {
+              groupIndexesToUpdateCountsOn.push(gIndex);
+              reasons.push('different number of dashboards for group ' + gIndex);
+            }
+            continue;
+          }
+
+          if (oldDashboardGroups[gIndex].active !== g.active) {
+            oldDashboardGroups[gIndex].active = g.active;
+          }
+
+          if (oldDashboardGroups[gIndex].iconCss !== g.iconCss) {
+            oldDashboardGroups[gIndex].iconCss = g.iconCss;
+          }
+
+          if (oldDashboardGroups[gIndex].iconUrl !== g.iconUrl) {
+            oldDashboardGroups[gIndex].iconUrl = g.iconUrl;
+          }
+          // selected is tricky as it will be changed by the select input element
+          // so instead compare with _selected
+          if (oldDashboardGroups[gIndex]._selected.id !== g._selected.id) {
+
+            // put the old count first so in case it will be the same it will not flip
+            g.count = oldDashboardGroups[gIndex].count;
+
+            // here write the whole group to the scope as
+            // selected must be a proper reference to the correct object in dashboards array
+            oldDashboardGroups[gIndex] = g;
+            if (groupIndexesToUpdateCountsOn.indexOf(gIndex) === -1) {
+              groupIndexesToUpdateCountsOn.push(gIndex);
+              reasons.push('different selected dashboard for group ' + gIndex);
+            }
+          }
+          // now compare each dashboard
+          var updateCount = false;
+          for (var dIndex = 0; dIndex < oldDashboardGroups[gIndex].dashboards.length; dIndex++) {
+            var d = newDashboardGroups[gIndex].dashboards[dIndex];
+
+            // first check that the number of filters changed on selected dashboard
+            if (oldDashboardGroups[gIndex].selected.id === d.id &&
+                !_.isEqual(oldDashboardGroups[gIndex].dashboards[dIndex].filters, d.filters, true)
+            ) {
+              oldDashboardGroups[gIndex].dashboards[dIndex].filters = d.filters;
+              reasons.push('different number of filters for dashboard ' + dIndex + ' for group ' + gIndex);
+              updateCount = true;
+            }
+
+            if (oldDashboardGroups[gIndex].selected.id === d.id &&
+                oldDashboardGroups[gIndex].dashboards[dIndex].indexPatternId !== d.indexPatternId
+            ) {
+              oldDashboardGroups[gIndex].dashboards[dIndex].indexPatternId = d.indexPatternId;
+              reasons.push('different indexPatternId for dashboard ' + dIndex + ' for group ' + gIndex);
+              updateCount = true;
+            }
+
+            if (oldDashboardGroups[gIndex].selected.id === d.id &&
+                oldDashboardGroups[gIndex].dashboards[dIndex].savedSearchId !== d.savedSearchId
+            ) {
+              oldDashboardGroups[gIndex].dashboards[dIndex].savedSearchId = d.savedSearchId;
+              reasons.push('different savedSearchId for dashboard ' + dIndex + ' for group ' + gIndex);
+              updateCount = true;
+            }
+
+            // then if it is not the same dashboard on the same position
+            if (oldDashboardGroups[gIndex].dashboards[dIndex].id !== d.id) {
+              oldDashboardGroups[gIndex].dashboards[dIndex] = d;
+              reasons.push('different dashboard id for dashboard ' + dIndex + ' for group ' + gIndex);
+              updateCount = true;
+            }
+          }
+
+          if (updateCount && groupIndexesToUpdateCountsOn.indexOf(gIndex) === -1) {
+            groupIndexesToUpdateCountsOn.push(gIndex);
+          }
+        }
+      }
+
+      return {
+        indexes: groupIndexesToUpdateCountsOn,
+        reasons: reasons,
+        replace: false
+      };
+    };
+
     /*
      * Computes the dashboard groups array
      *

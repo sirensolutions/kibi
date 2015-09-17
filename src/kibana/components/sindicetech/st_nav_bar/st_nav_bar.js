@@ -63,7 +63,7 @@ define(function (require) {
         var lastFiredMultiCountQuery;
 
         var _fireUpdateAllCounts = function (groupIndexesToUpdate, reason) {
-          if (console) console.log('_updateAllCounts fired because: [' + reason + ']');
+          if (console) console.log('Counts will be updated because: [' + reason + ']');
 
           var promises = [];
 
@@ -116,107 +116,11 @@ define(function (require) {
 
 
         var _writeToScope = function (newDashboardGroups) {
-          if (!$scope.dashboardGroups) {
+          var changes = dashboardGroupHelper.updateDashboardGroups($scope.dashboardGroups, newDashboardGroups);
+          if (changes.replace === true) {
             $scope.dashboardGroups = newDashboardGroups;
-            _updateAllCounts(null, 'dashboardsGroups not in scope');
-            return;
           }
-
-          // There is already a $scope.dashboardGroups
-          // lets compare with the new one and update only if necessary
-          if ($scope.dashboardGroups.length !== newDashboardGroups.length) {
-            $scope.dashboardGroups = newDashboardGroups;
-            _updateAllCounts(null, 'dashboardsGroups length not the same');
-            return;
-          }
-
-          // here first collect the group indexes to update counts
-          var groupIndexesToUpdateCountsOn = [];
-          for (var gIndex = 0; gIndex < newDashboardGroups.length; gIndex++) {
-            var g = newDashboardGroups[gIndex];
-            // if not the same group replace
-            if ($scope.dashboardGroups[gIndex].title !== g.title) {
-              $scope.dashboardGroups[gIndex] = g;
-              if (groupIndexesToUpdateCountsOn.indexOf(gIndex) === -1) {
-                groupIndexesToUpdateCountsOn.push(gIndex);
-              }
-              continue;
-            } else {
-              // the same group lets compare more
-              if ($scope.dashboardGroups[gIndex].dashboards.length !== g.dashboards.length) {
-                $scope.dashboardGroups[gIndex] = g;
-                if (groupIndexesToUpdateCountsOn.indexOf(gIndex) === -1) {
-                  groupIndexesToUpdateCountsOn.push(gIndex);
-                }
-                continue;
-              }
-
-              if ($scope.dashboardGroups[gIndex].active !== g.active) {
-                $scope.dashboardGroups[gIndex].active = g.active;
-              }
-
-              if ($scope.dashboardGroups[gIndex].iconCss !== g.iconCss) {
-                $scope.dashboardGroups[gIndex].iconCss = g.iconCss;
-              }
-
-              if ($scope.dashboardGroups[gIndex].iconUrl !== g.iconUrl) {
-                $scope.dashboardGroups[gIndex].iconUrl = g.iconUrl;
-              }
-              // selected is tricky as it will be changed by the select input element
-              // so instead compare with _selected
-              if ($scope.dashboardGroups[gIndex]._selected.id !== g._selected.id) {
-
-                // put the old count first so in case it will be the same it will not flip
-                g.count = $scope.dashboardGroups[gIndex].count;
-
-                // here write the whole group to the scope as
-                // selected must be a proper reference to the correct object in dashboards array
-                $scope.dashboardGroups[gIndex] = g;
-                if (groupIndexesToUpdateCountsOn.indexOf(gIndex) === -1) {
-                  groupIndexesToUpdateCountsOn.push(gIndex);
-                }
-              }
-              // now compare each dashboard
-              var updateCount = false;
-              for (var dIndex = 0; dIndex < $scope.dashboardGroups[gIndex].dashboards.length; dIndex++) {
-                var d = newDashboardGroups[gIndex].dashboards[dIndex];
-
-                // first check that the number of filters changed on selected dashboard
-                if ($scope.dashboardGroups[gIndex].selected.id === d.id &&
-                    !_.isEqual($scope.dashboardGroups[gIndex].dashboards[dIndex].filters, d.filters, true)
-                ) {
-                  $scope.dashboardGroups[gIndex].dashboards[dIndex].filters = d.filters;
-                  updateCount = true;
-                }
-
-                if ($scope.dashboardGroups[gIndex].selected.id === d.id &&
-                    $scope.dashboardGroups[gIndex].dashboards[dIndex].indexPatternId !== d.indexPatternId
-                ) {
-                  $scope.dashboardGroups[gIndex].dashboards[dIndex].indexPatternId = d.indexPatternId;
-                  updateCount = true;
-                }
-
-                // then if it is not the same dashboard on the same position
-                if ($scope.dashboardGroups[gIndex].dashboards[dIndex].id !== d.id) {
-                  $scope.dashboardGroups[gIndex].dashboards[dIndex] = d;
-                  updateCount = true;
-                }
-
-                if ($scope.dashboardGroups[gIndex].dashboards[dIndex].savedSearchId !== d.savedSearchId) {
-                  $scope.dashboardGroups[gIndex].dashboards[dIndex] = d;
-                  updateCount = true;
-                }
-              }
-              if (updateCount && groupIndexesToUpdateCountsOn.indexOf(gIndex) === -1) {
-                groupIndexesToUpdateCountsOn.push(gIndex);
-              }
-            }
-          }
-
-          //  now update all collected counts
-          if ( groupIndexesToUpdateCountsOn.length > 0) {
-            _updateAllCounts(groupIndexesToUpdateCountsOn, 'Collected inside writeToScope method');
-          }
+          _updateAllCounts(changes.indexes, changes.reasons);
         };
 
 

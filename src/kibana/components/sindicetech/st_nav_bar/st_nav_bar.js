@@ -118,26 +118,7 @@ define(function (require) {
 
           // here update counts only when filters or query changed
           // on the same dashboard
-          var newPath = urlHelper.getPathnameFromUrl(newUrl);
-          var oldPath = urlHelper.getPathnameFromUrl(oldUrl);
-
-          var newFilters = urlHelper.getLocalParamFromUrl(newUrl, 'filters');
-          var oldFilters = urlHelper.getLocalParamFromUrl(oldUrl, 'filters');
-          var newQuery = urlHelper.getLocalParamFromUrl(newUrl, 'query');
-          var oldQuery = urlHelper.getLocalParamFromUrl(oldUrl, 'query');
-
-          var newGlobalFilters = urlHelper.getGlobalParamFromUrl(newUrl, 'filters');
-          var oldGlobalFilters = urlHelper.getGlobalParamFromUrl(oldUrl, 'filters');
-          var newGlobalTime = urlHelper.getGlobalParamFromUrl(newUrl, 'time');
-          var oldGlobalTime = urlHelper.getGlobalParamFromUrl(oldUrl, 'time');
-
-          if (newPath === oldPath &&
-              ( !_.isEqual(newFilters, oldFilters, true) ||
-                !_.isEqual(newQuery, oldQuery, true) ||
-                !_.isEqual(newGlobalFilters, oldGlobalFilters, true) ||
-                !_.isEqual(newGlobalTime, oldGlobalTime, true)
-              )
-          ) {
+          if (urlHelper.shouldUpdateCountsBasedOnLocation(oldUrl, newUrl)) {
             $timeout(function () {
               _updateAllCounts(null, 'locationChangeSuccess');
               dashboardGroupHelper.computeGroups().then(function (dashboardGroups) {

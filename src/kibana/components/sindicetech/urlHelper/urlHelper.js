@@ -316,6 +316,29 @@ define(function (require) {
       });
     };
 
+    UrlHelper.prototype.shouldUpdateCountsBasedOnLocation = function (oldUrl, newUrl) {
+      var newPath = this.getPathnameFromUrl(newUrl);
+      var oldPath = this.getPathnameFromUrl(oldUrl);
+
+      var newFilters = this.getLocalParamFromUrl(newUrl, 'filters');
+      var oldFilters = this.getLocalParamFromUrl(oldUrl, 'filters');
+      var newQuery = this.getLocalParamFromUrl(newUrl, 'query');
+      var oldQuery = this.getLocalParamFromUrl(oldUrl, 'query');
+
+      var newGlobalFilters = this.getGlobalParamFromUrl(newUrl, 'filters');
+      var oldGlobalFilters = this.getGlobalParamFromUrl(oldUrl, 'filters');
+      var newGlobalTime = this.getGlobalParamFromUrl(newUrl, 'time');
+      var oldGlobalTime = this.getGlobalParamFromUrl(oldUrl, 'time');
+
+      return newPath === oldPath && (
+             !_.isEqual(newFilters, oldFilters, true) ||
+             !_.isEqual(newQuery, oldQuery, true) ||
+             !_.isEqual(newGlobalFilters, oldGlobalFilters, true) ||
+             !_.isEqual(newGlobalTime, oldGlobalTime, true));
+    };
+
+
+
     return new UrlHelper();
   };
 

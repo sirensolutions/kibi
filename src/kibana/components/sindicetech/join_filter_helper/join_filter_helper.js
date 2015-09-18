@@ -4,7 +4,7 @@ define(function (require) {
     var replace_or_add_join_filter = require('components/sindicetech/join_filter_helper/lib/replace_or_add_join_filter');
 
     var queryHelper = Private(require('components/sindicetech/query_helper/query_helper'));
-    var urlHelper = Private(require('components/sindicetech/urlHelper/urlHelper'));
+    var urlHelper   = Private(require('components/kibi/url_helper/url_helper'));
 
     var _isIndexInEnabledRelations = function (indexId, enabledRelations) {
       for (var i = 0; i < enabledRelations.length; i++) {

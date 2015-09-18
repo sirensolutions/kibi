@@ -203,7 +203,7 @@ define(function (require) {
 
         beforeEach(function () {
           inject(function (Private) {
-            urlHelper = Private(require('components/sindicetech/urlHelper/urlHelper'));
+            urlHelper   = Private(require('components/kibi/url_helper/url_helper'));
           });
           sinon.spy(urlHelper, 'removeJoinFilter');
           sinon.spy(urlHelper, 'addFilter');

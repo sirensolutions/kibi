@@ -4,7 +4,7 @@ define(function (require) {
   .when('/default', {
     resolve: {
       path: function (Private, Promise, configFile, kbnUrl) {
-        var urlHelper = Private(require('components/sindicetech/urlHelper/urlHelper'));
+        var urlHelper   = Private(require('components/kibi/url_helper/url_helper'));
 
         return new Promise(function (resolve, reject) {
           urlHelper.getInitialPath().then(function (path) {

@@ -10,7 +10,7 @@ define(function (require) {
     var kibiStateHelper  = Private(require('components/kibi/kibi_state_helper/kibi_state_helper'));
     var kibiTimeHelper   = Private(require('components/kibi/kibi_time_helper/kibi_time_helper'));
     var joinFilterHelper = Private(require('components/sindicetech/join_filter_helper/join_filter_helper'));
-    var urlHelper        = Private(require('components/sindicetech/urlHelper/urlHelper'));
+    var urlHelper        = Private(require('components/kibi/url_helper/url_helper'));
 
     function CountHelper() {
     }
@@ -115,7 +115,6 @@ define(function (require) {
      * The parameter savedSearch should be a reference to a SavedSearch
      * instance, not a SavedSearch id
      */
-
     CountHelper.prototype.constructCountQuery = function (dashboardId, savedSearch, extraFilters, joinFilter) {
       return new Promise(function (fulfill, reject) {
 
@@ -273,7 +272,6 @@ define(function (require) {
         }
       });
     };
-
 
     return new CountHelper();
   };

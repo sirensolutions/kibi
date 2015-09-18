@@ -15,8 +15,8 @@ define(function (require) {
     'stRelationalFilterPanel',
     function ($location, config, configFile, $rootScope, Private, savedDashboards, savedSearches, Notifier) {
 
-      var joinFilterHelper   = Private(require('components/sindicetech/join_filter_helper/join_filter_helper'));
-      var urlHelper          = Private(require('components/sindicetech/urlHelper/urlHelper'));
+      var joinFilterHelper = Private(require('components/sindicetech/join_filter_helper/join_filter_helper'));
+      var urlHelper        = Private(require('components/kibi/url_helper/url_helper'));
       var notify = new Notifier({
         location: 'Relational Filter Panel'
       });

@@ -1,7 +1,7 @@
 define(function (require) {
   return function KbnControllerApps(Private, $rootScope, $scope, $location, globalState, sessionStorage) {
     var _ = require('lodash');
-    var urlHelper = Private(require('components/sindicetech/urlHelper/urlHelper'));
+    var urlHelper   = Private(require('components/kibi/url_helper/url_helper'));
 
     function appKey(app) {
       return 'lastPath:' + app.id;

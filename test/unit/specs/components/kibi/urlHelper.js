@@ -71,7 +71,7 @@ define(function (require) {
       $rootScope = _$rootScope_;
       $location = _$location_;
       $timeout = _$timeout_;
-      urlHelper = Private(require('components/sindicetech/urlHelper/urlHelper'));
+      urlHelper = Private(require('components/kibi/url_helper/url_helper'));
       kibiStateHelper = Private(require('components/kibi/kibi_state_helper/kibi_state_helper'));
     });
   }
@@ -193,6 +193,66 @@ define(function (require) {
         });
 
       });
+
+
+      describe('shouldUpdateCountsBasedOnLocation', function () {
+        beforeEach(minimalInit());
+
+        it('should because filter changed', function () {
+          var oldUrl = '/?_a=(filters:!())';
+          var newUrl = '/?_a=(filters:!((range:())))';
+          expect(urlHelper.shouldUpdateCountsBasedOnLocation(oldUrl, newUrl)).to.equal(true);
+        });
+        it('should NOT because filters are the same', function () {
+          var oldUrl = '/?_a=(filters:!((range:())))';
+          var newUrl = '/?_a=(filters:!((range:())))';
+          expect(urlHelper.shouldUpdateCountsBasedOnLocation(oldUrl, newUrl)).to.equal(false);
+        });
+
+
+        it('should because query changed', function () {
+          var oldUrl = '/?_a=(query:())';
+          var newUrl = '/?_a=(query:(match:()))';
+          expect(urlHelper.shouldUpdateCountsBasedOnLocation(oldUrl, newUrl)).to.equal(true);
+        });
+        it('should NOT because queries are the same', function () {
+          var oldUrl = '/?_a=(query:(match:()))';
+          var newUrl = '/?_a=(query:(match:()))';
+          expect(urlHelper.shouldUpdateCountsBasedOnLocation(oldUrl, newUrl)).to.equal(false);
+        });
+
+
+        it('should Not if paths changed as it will be caught by $routeChangeSuccess event', function () {
+          var oldUrl = '/pathA?_a=(filters:!((range:())))';
+          var newUrl = '/pathB?_a=(filters:!((range:())))';
+          expect(urlHelper.shouldUpdateCountsBasedOnLocation(oldUrl, newUrl)).to.equal(false);
+        });
+
+
+        it('should because gloabal filter changed', function () {
+          var oldUrl = '/?_g=(filters:!())';
+          var newUrl = '/?_g=(filters:!((range:())))';
+          expect(urlHelper.shouldUpdateCountsBasedOnLocation(oldUrl, newUrl)).to.equal(true);
+        });
+        it('should NOT because global filters are the same', function () {
+          var oldUrl = '/?_g=(filters:!((range:())))';
+          var newUrl = '/?_g=(filters:!((range:())))';
+          expect(urlHelper.shouldUpdateCountsBasedOnLocation(oldUrl, newUrl)).to.equal(false);
+        });
+
+
+        it('should because gloabal time changed', function () {
+          var oldUrl = '/?_g=(time:())';
+          var newUrl = '/?_g=(time:(range:()))';
+          expect(urlHelper.shouldUpdateCountsBasedOnLocation(oldUrl, newUrl)).to.equal(true);
+        });
+        it('should NOT because global time are the same', function () {
+          var oldUrl = '/?_g=(time:(range:()))';
+          var newUrl = '/?_g=(time:(range:()))';
+          expect(urlHelper.shouldUpdateCountsBasedOnLocation(oldUrl, newUrl)).to.equal(false);
+        });
+      });
+
 
       describe('test methods', function () {
         beforeEach(minimalInit());

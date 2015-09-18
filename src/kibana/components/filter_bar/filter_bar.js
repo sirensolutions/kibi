@@ -17,7 +17,7 @@ define(function (require) {
     var changeTimeFilter = Private(require('components/filter_bar/lib/changeTimeFilter'));
     var queryFilter = Private(require('components/filter_bar/query_filter'));
 
-    var urlHelper   = Private(require('components/sindicetech/urlHelper/urlHelper'));
+    var urlHelper   = Private(require('components/kibi/url_helper/url_helper'));
 
     return {
       restrict: 'E',

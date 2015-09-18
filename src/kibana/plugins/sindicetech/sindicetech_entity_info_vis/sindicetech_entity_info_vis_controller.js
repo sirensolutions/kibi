@@ -14,7 +14,7 @@ define(function (require) {
         location: 'Entity Info Widget'
       });
 
-      var urlHelper = Private(require('components/sindicetech/urlHelper/urlHelper'));
+      var urlHelper = Private(require('components/kibi/url_helper/url_helper'));
 
       // generate random id to avoid collisions if there are multiple widgets on one dashboard
       $scope.snippetContainerId = kibiUtils.getUuid4();

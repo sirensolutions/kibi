@@ -11,7 +11,7 @@ define(function (require) {
 
   app.directive('stNavBar', function ($rootScope, $http, Promise, config, Private, $timeout, Notifier) {
     var ResizeChecker        = Private(require('components/vislib/lib/resize_checker'));
-    var urlHelper            = Private(require('components/sindicetech/urlHelper/urlHelper'));
+    var urlHelper            = Private(require('components/kibi/url_helper/url_helper'));
     var kibiStateHelper      = Private(require('components/kibi/kibi_state_helper/kibi_state_helper'));
     var dashboardGroupHelper = Private(require('components/kibi/dashboard_group_helper/dashboard_group_helper'));
 

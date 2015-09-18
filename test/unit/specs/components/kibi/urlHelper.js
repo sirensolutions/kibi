@@ -71,7 +71,7 @@ define(function (require) {
       $rootScope = _$rootScope_;
       $location = _$location_;
       $timeout = _$timeout_;
-      urlHelper = Private(require('components/sindicetech/urlHelper/urlHelper'));
+      urlHelper = Private(require('components/kibi/url_helper/url_helper'));
       kibiStateHelper = Private(require('components/kibi/kibi_state_helper/kibi_state_helper'));
     });
   }

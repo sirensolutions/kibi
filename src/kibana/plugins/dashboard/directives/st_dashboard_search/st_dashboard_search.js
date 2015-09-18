@@ -4,7 +4,7 @@ define(function (require) {
 
   app.directive('stDashboardSearch', function (Private, $rootScope) {
 
-    var urlHelper = Private(require('components/sindicetech/urlHelper/urlHelper'));
+    var urlHelper   = Private(require('components/kibi/url_helper/url_helper'));
 
     return {
       restrict: 'E',

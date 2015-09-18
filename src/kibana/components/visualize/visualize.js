@@ -107,7 +107,7 @@ define(function (require) {
         $scope.$watch('searchSource', prereq(function (searchSource) {
           if (searchSource && !$scope.vis.type.requiresSearch) {
             $scope.searchSource.disable();
-            var urlHelper = Private(require('components/sindicetech/urlHelper/urlHelper'));
+            var urlHelper   = Private(require('components/kibi/url_helper/url_helper'));
             savedDashboards.get(urlHelper.getCurrentDashboardId()).then(function (savedCurrentDashboard) {
               if (savedCurrentDashboard.savedSearchId) {
                 savedSearches.get(savedCurrentDashboard.savedSearchId).then(function (savedSearch) {

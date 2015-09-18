@@ -14,7 +14,6 @@ define(function (require) {
     var urlHelper            = Private(require('components/sindicetech/urlHelper/urlHelper'));
     var kibiStateHelper      = Private(require('components/kibi/kibi_state_helper/kibi_state_helper'));
     var dashboardGroupHelper = Private(require('components/kibi/dashboard_group_helper/dashboard_group_helper'));
-    var countHelper          = Private(require('components/kibi/count_helper/count_helper'));
 
     var notify = new Notifier({
       name: 'st_nav_bar component'
@@ -25,25 +24,6 @@ define(function (require) {
       // Note: does not require dashboardApp as the st-nav-bar is placed outside of dashboardApp
       template: require('text!components/sindicetech/st_nav_bar/st_nav_bar.html'),
       link: function ($scope, $el) {
-
-        var _getCountQuery = function (groupIndex) {
-          var dashboard = $scope.dashboardGroups[groupIndex].selected;
-
-          if (!dashboard || !dashboard.indexPatternId) {
-            delete $scope.dashboardGroups[groupIndex].count;
-            return Promise.resolve({
-              query: undefined,
-              indexPatternId: undefined,
-              groupIndex: groupIndex
-            });
-          }
-
-          return countHelper.getCountQueryForDashboardId(dashboard.id).then(function (queryDef) {
-            queryDef.groupIndex = groupIndex;
-            return Promise.resolve(queryDef);
-          }).catch(notify.error);
-        };
-
 
         // debounce count queries
         var lastEventTimer;
@@ -69,11 +49,11 @@ define(function (require) {
 
           if (groupIndexesToUpdate && groupIndexesToUpdate.constructor === Array && groupIndexesToUpdate.length > 0) {
             promises = _.map(groupIndexesToUpdate, function (index) {
-              return _getCountQuery(index);
+              return dashboardGroupHelper.getCountQueryForSelectedDashboard($scope.dashboardGroups, index);
             });
           } else {
             _.each($scope.dashboardGroups, function (g, i) {
-              promises.push(_getCountQuery(i));
+              promises.push(dashboardGroupHelper.getCountQueryForSelectedDashboard($scope.dashboardGroups, i));
             });
           }
 

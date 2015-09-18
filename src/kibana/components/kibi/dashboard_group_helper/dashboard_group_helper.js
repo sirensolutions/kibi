@@ -4,7 +4,7 @@ define(function (require) {
     var urlHelper  = Private(require('components/sindicetech/urlHelper/urlHelper'));
     var kibiStateHelper    = Private(require('components/kibi/kibi_state_helper/kibi_state_helper'));
     var joinFilterHelper   = Private(require('components/sindicetech/join_filter_helper/join_filter_helper'));
-
+    var countHelper          = Private(require('components/kibi/count_helper/count_helper'));
 
     function DashboardGroupHelper() {
     }
@@ -309,6 +309,28 @@ define(function (require) {
         });
       });
     };
+
+
+
+    DashboardGroupHelper.prototype.getCountQueryForSelectedDashboard = function (groups, groupIndex) {
+      var dashboard = groups[groupIndex].selected;
+
+      if (!dashboard || !dashboard.indexPatternId) {
+        delete groups[groupIndex].count;
+        return Promise.resolve({
+          query: undefined,
+          indexPatternId: undefined,
+          groupIndex: groupIndex
+        });
+      }
+
+      return countHelper.getCountQueryForDashboardId(dashboard.id).then(function (queryDef) {
+        queryDef.groupIndex = groupIndex;
+        return Promise.resolve(queryDef);
+      });
+    };
+
+
 
     /**
      * when possible update just the different properties

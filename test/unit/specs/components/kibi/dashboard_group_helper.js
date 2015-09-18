@@ -5,10 +5,14 @@ define(function (require) {
   var fakeSavedDashboardGroups      = require('fixtures/fake_saved_dashboard_groups');
   var fakeEmptySavedDashboardGroups = require('fixtures/fake_empty_saved_dashboard_groups');
 
+
+  var fake_saved_dashboards_for_counts = require('fixtures/fake_saved_dashboards_for_counts');
+  var fakeSavedSearches                = require('fixtures/fake_saved_searches');
+
   var $rootScope;
   var dashboardGroupHelper;
 
-  function init(savedDashboardsImpl, savedDashboardGroupsImpl) {
+  function init(savedDashboardsImpl, savedDashboardGroupsImpl, savedSearchesImpl) {
     return function () {
 
       module('app/dashboard', function ($provide) {
@@ -19,7 +23,14 @@ define(function (require) {
         $provide.service('savedDashboardGroups', savedDashboardGroupsImpl);
       });
 
-      module('kibana');
+      if (savedSearchesImpl) {
+        module('kibana', function ($provide) {
+          $provide.service('savedSearches', savedSearchesImpl);
+        });
+      } else {
+        module('kibana');
+      }
+
 
       inject(function ($injector, Private, _$rootScope_) {
         $rootScope = _$rootScope_;
@@ -439,6 +450,84 @@ define(function (require) {
           });
 
         });
+
+      });
+
+      describe('getCountQueryForSelectedDashboard', function () {
+
+        beforeEach(init(fake_saved_dashboards_for_counts, fakeEmptySavedDashboardGroups, fakeSavedSearches));
+
+        it('selected dashboard does NOT exist', function (done) {
+          var groups = [
+            {
+              title: 'Title A0',
+              dashboards: [{id: 1}]
+            }
+          ];
+
+          var expected = {
+            query: undefined,
+            indexPatternId: undefined,
+            groupIndex: 0
+          };
+
+          dashboardGroupHelper.getCountQueryForSelectedDashboard(groups, 0).then(function (countQueryDef) {
+            expect(countQueryDef).to.eql(expected);
+            done();
+          });
+
+          $rootScope.$apply();
+        });
+
+        it('selected dashboard exists but it does NOT have indexPatternId ', function (done) {
+          var groups = [
+            {
+              title: 'Title A0',
+              dashboards: [{id: 1}, {id: 2}],
+              selected: {id: 1},
+              _selected: {id: 1}
+            }
+          ];
+
+          var expected = {
+            query: undefined,
+            indexPatternId: undefined,
+            groupIndex: 0
+          };
+
+          dashboardGroupHelper.getCountQueryForSelectedDashboard(groups, 0).then(function (countQueryDef) {
+            expect(countQueryDef).to.eql(expected);
+            done();
+          });
+
+          $rootScope.$apply();
+        });
+
+        it('selected dashboard do exist and have indexPatternId ', function (done) {
+
+          // this dashboard has to exist (the fakeDashboard should have it)
+          var selectedDashboard = {id: 'time-testing-4', indexPatternId: 'time-testing-4'};
+          var groups = [
+            {
+              title: 'Group 1',
+              dashboards: [selectedDashboard, {id: 2}],
+              selected: selectedDashboard,
+              _selected: selectedDashboard
+            }
+          ];
+
+          dashboardGroupHelper.getCountQueryForSelectedDashboard(groups, 0).then(function (countQueryDef) {
+            expect(countQueryDef).to.have.property('query');
+            expect(countQueryDef.indexPatternId).to.equal('time-testing-4');
+            expect(countQueryDef.groupIndex).to.equal(0);
+            done();
+          }).catch(function (err) {
+            expect().fail('Should not fail');
+          });
+
+          $rootScope.$apply();
+        });
+
 
       });
 

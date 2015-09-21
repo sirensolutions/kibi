@@ -14,7 +14,8 @@ define(function (require) {
         replace: true,
         scope: {
           searchSource: '=',
-          options: '='
+          options: '=',
+          params: '='
         },
         link: function ($scope, $element) {
 
@@ -33,22 +34,21 @@ define(function (require) {
                   return;
                 }
 
-                // here I've just hardcoded that I'm taking the
-                // pdate field
-                // normaly which field to take wil come from the options
-                console.log(searchResp.hits.hits);
-
+                // here I'm talking the startField name from params
                 var events = [];
                 _.each(searchResp.hits.hits, function (hit) {
                   events.push({
-                    start: new Date(hit._source.pdate),
-                    content: hit._source.pdate
+                    start: new Date(hit._source[$scope.params.startField]),
+                    content: hit._source[$scope.params.startField]
                   });
                 });
 
                 var data = new vis.DataSet(events);
-                timeline = new vis.Timeline($element[0], data, $scope.options);
-
+                if (timeline) {
+                  timeline.redraw();
+                } else {
+                  timeline = new vis.Timeline($element[0], data, $scope.options);
+                }
 
                 return $scope.searchSource.onResults().then(onResults);
               }).catch(function (err) {

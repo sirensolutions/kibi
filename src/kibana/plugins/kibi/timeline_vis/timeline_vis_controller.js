@@ -44,9 +44,27 @@ define(function (require) {
       courier.fetch();
     }
 
+    function setOptions(savedVis) {
+      var options = {
+        width: '100%',
+        height: '350px'
+      };
+      $scope.options = options;
+    }
+
+    function setParams(savedVis) {
+      var params = {
+        startField: savedVis.vis.params.startField,
+        endField: savedVis.vis.params.endField
+      };
+      $scope.params = params;
+    }
+
     $scope.$watch('vis', function () {
       if ($scope.savedVis) {
         fetchResults($scope.savedVis);
+        setOptions($scope.savedVis);
+        setParams($scope.savedVis);
       }
     });
 
@@ -60,6 +78,8 @@ define(function (require) {
     if (editing) {
       var removeVisStateChangedHandler = $rootScope.$on('kibi:vis:state-changed', function () {
         fetchResults($scope.savedVis);
+        setOptions($scope.savedVis);
+        setParams($scope.savedVis);
       });
 
       $scope.$on('$destroy', function () {
@@ -67,14 +87,6 @@ define(function (require) {
       });
     }
 
-
-    var options = {
-      width: '100%',
-      height: '350px'
-    };
-
-
-    $scope.options = options;
 
   });
 

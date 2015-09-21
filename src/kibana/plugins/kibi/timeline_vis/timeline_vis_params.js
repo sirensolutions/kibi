@@ -10,7 +10,12 @@ define(function (require) {
       link: function ($scope, $element, attr) {
 
         // here deal with the parameters
-
+        // Emit an event when state changes
+        $scope.$watch('vis.dirty', function () {
+          if ($scope.vis.dirty === false) {
+            $rootScope.$emit('kibi:vis:state-changed');
+          }
+        });
       }
     };
   });

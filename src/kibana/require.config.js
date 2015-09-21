@@ -41,17 +41,18 @@ require.config({
     zeroclipboard: 'bower_components/zeroclipboard/dist/ZeroClipboard',
     marked: 'bower_components/marked/lib/marked',
     numeral: 'bower_components/numeral/numeral',
-    'angular-jqcloud':   'bower_components/angular-jqcloud/angular-jqcloud',
-    'angular-sanitize':  'bower_components/angular-sanitize/angular-sanitize',
-    jqcloud:             'bower_components/jqcloud2/dist/jqcloud',
-    'ng-tags-input':     'bower_components/ng-tags-input/ng-tags-input',
-    'kibiutils':         'bower_components/kibiutils/kibiutils',
-    'eeg':               'bower_components/eeg/lib/js/eeg',
-    'eeg-angular':       'bower_components/eeg-angular/index',
-    'antlr4':            'bower_components/antlr4/release/antlr4',
-    'antlr4-sparql':     'bower_components/antlr4-sparql/release/antlr4-sparql',
-    'antlr4-sql':        'bower_components/antlr4-sql/release/antlr4-sql',
-    'qtip2': 'bower_components/qtip2/jquery.qtip.min'
+    'angular-jqcloud':  'bower_components/angular-jqcloud/angular-jqcloud',
+    'angular-sanitize': 'bower_components/angular-sanitize/angular-sanitize',
+    jqcloud:            'bower_components/jqcloud2/dist/jqcloud',
+    'ng-tags-input':    'bower_components/ng-tags-input/ng-tags-input',
+    kibiutils:          'bower_components/kibiutils/kibiutils',
+    eeg:                'bower_components/eeg/lib/js/eeg',
+    'eeg-angular':      'bower_components/eeg-angular/index',
+    antlr4:             'bower_components/antlr4/release/antlr4',
+    'antlr4-sparql':    'bower_components/antlr4-sparql/release/antlr4-sparql',
+    'antlr4-sql':       'bower_components/antlr4-sql/release/antlr4-sql',
+    qtip2:              'bower_components/qtip2/jquery.qtip.min',
+    vis:                'bower_components/vis/dist/vis'
   },
   shim: {
     angular: {
@@ -73,6 +74,8 @@ require.config({
     'ng-tags-input': ['angular', 'css!bower_components/ng-tags-input/ng-tags-input.css'],
     'eeg' : ['css!bower_components/eeg/lib/css/eeg.css', 'jquery', 'd3'],
     'eeg-angular': ['angular', 'eeg'],
+    vis: ['css!bower_components/vis/dist/vis.css'],
+
 
     'antlr4-sparql' : ['antlr4'],
     'antlr4-sql' : ['antlr4'],

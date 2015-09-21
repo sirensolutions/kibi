@@ -1,0 +1,31 @@
+@import (reference) "../../../styles/_mixins.less";
+@import (reference) "lesshat.less";
+
+.timeline-vis {
+  padding: 1em;
+  width: 100%;
+}
+
+.vis-editor {
+
+  &.vis-type-timeline {
+
+    .visualization-options {
+      .flex-parent();
+      .flex(1, 1, auto);
+    }
+
+    .timeline-vis-options {
+      .flex-parent();
+      .flex(1, 1, auto);
+
+      textarea {
+        .flex(1, 1, auto);
+        resize: none;
+      }
+
+    }
+
+  }
+
+}

@@ -1,7 +1,7 @@
 define(function (require) {
   var datemath = require('utils/datemath');
 
-  return function TimeMarkerFactory(d3) {
+  return function TimeMarkerFactory($rootScope, d3) {
     function TimeMarker(times, xScale, height) {
       if (!(this instanceof TimeMarker)) {
         return new TimeMarker(times, xScale, height);
@@ -19,7 +19,7 @@ define(function (require) {
       this.height = height;
       this.times = (times.length) ? times.map(function (d) {
         return {
-          'time': datemath.parse(d.time),
+          'time': datemath.parseWithPrecision(d.time, false, $rootScope.kibiTimePrecision),
           'class': d.class || 'time-marker',
           'color': d.color || '#c80000',
           'opacity': d.opacity || 0.3,

@@ -7,7 +7,7 @@ define(function (require) {
   require('components/timepicker/quick_ranges');
   require('components/timepicker/time_units');
 
-  module.directive('prettyDuration', function (config, quickRanges, timeUnits) {
+  module.directive('prettyDuration', function ($rootScope, config, quickRanges, timeUnits) {
     return {
       restrict: 'E',
       scope: {
@@ -62,7 +62,7 @@ define(function (require) {
               if ($scope[time] === 'now') {
                 display[time] = 'now';
               } else {
-                var tryParse = datemath.parse($scope[time], time === 'to' ? true : false);
+                var tryParse = datemath.parseWithPrecision($scope[time], time === 'to' ? true : false, $rootScope.kibiTimePrecision);
                 display[time] = moment.isMoment(tryParse) ? '~ ' + tryParse.fromNow() : $scope[time];
               }
             }

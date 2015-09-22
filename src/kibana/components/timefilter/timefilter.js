@@ -92,8 +92,8 @@
 
     Timefilter.prototype.getBounds = function (timefield) {
       return {
-        min: datemath.parse(this.time.from),
-        max: datemath.parse(this.time.to, true)
+        min: datemath.parseWithPrecision(this.time.from, false, $rootScope.kibiTimePrecision),
+        max: datemath.parseWithPrecision(this.time.to, true, $rootScope.kibiTimePrecision)
       };
     };
 

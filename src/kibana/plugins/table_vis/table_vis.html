@@ -1,4 +1,9 @@
 <div ng-controller="KbnTableVisController" class="table-vis">
+
+  <div class="table-vis-entity-uri">
+    <st-param-entity-uri entity-uri-holder="holder"></st-param-entity-uri>
+  </div>
+
   <div ng-if="!hasSomeRows && hasSomeRows !== null" class="table-vis-error">
     <h2 aria-hidden="true"><i aria-hidden="true" class="fa fa-meh-o"></i></h2>
     <h4>No results found</h4>

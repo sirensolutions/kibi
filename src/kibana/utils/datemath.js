@@ -98,12 +98,14 @@ define(function (require) {
   }
 
   // added by kibi
-  function parseWithPrecision(text, roundUp, precizion) {
+  function parseWithPrecision(text, roundUp, precision) {
     var t = parse(text, roundUp);
-    if (precizion && _.contains(units, precizion)) {
-      return t.startOf(precizion);
-    } else {
-      throw new Error('Wrong precizion argument use one of ' + units);
+    if (precision) {
+      if (_.contains(units, precision)) {
+        return t.startOf(precision);
+      } else {
+        throw new Error('Wrong precision argument use one of ' + units);
+      }
     }
     return t;
   }

@@ -152,7 +152,7 @@ define(function (require) {
 
     describe('precise parsing', function () {
 
-      it('parse time with precise', function () {
+      it('parse time with precision', function () {
 
         _.each(spans, function (precision) {
           var expected = moment(anchor).startOf(precision).format(format);
@@ -160,6 +160,20 @@ define(function (require) {
           expect(datemath.parseWithPrecision(anchor, true, precision).format(format)).to.equal(expected);
         });
       });
+
+      it('parse time with precision - should throw error when wrong precision', function () {
+        try {
+          datemath.parseWithPrecision(anchor, null, 'WRONG');
+        } catch (e) {
+          expect(e.message).to.equal('Wrong precision argument use one of y,M,w,d,h,m,s');
+        }
+      });
+
+      it('parse time with precision - should NOT throw error when precision false or undefined', function () {
+        var expected = moment(anchor).format(format);
+        expect(datemath.parseWithPrecision(anchor).format(format)).to.equal(expected);
+      });
+
     });
 
 

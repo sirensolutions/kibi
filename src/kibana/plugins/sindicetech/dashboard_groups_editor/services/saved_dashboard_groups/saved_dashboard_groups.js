@@ -77,7 +77,6 @@ define(function (require) {
           total: resp.hits.total,
           hits: resp.hits.hits.map(function (hit) {
             var source = hit._source;
-            source.dashboards = JSON.parse(source.dashboards);
             source.id = hit._id;
             source.url = self.urlFor(hit._id);
             return source;

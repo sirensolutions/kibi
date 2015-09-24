@@ -52,7 +52,7 @@
           <div class="form-group">
             <label>Dashboards</label></br>
             <ul>
-              <li ng-repeat="dashboard in dashboardGroup.dashboards_o" class="queryOptionArea" >
+              <li ng-repeat="dashboard in dashboardGroup.dashboards track by dashboard.id" class="queryOptionArea" >
 
                 <div class="content">
                   <div class="form-group">

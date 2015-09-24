@@ -8,6 +8,7 @@ define(function (require) {
     .directive('kibiTimeline', function () {
 
       var timeline;
+      var data;
 
       return {
         restrict: 'E',
@@ -22,6 +23,8 @@ define(function (require) {
           var previousSearchSource;
 
           $scope.$watch('searchSource', function (searchSource) {
+
+
             if ($scope.searchSource) {
 
               previousSearchSource = $scope.searchSource;
@@ -43,7 +46,7 @@ define(function (require) {
                   });
                 });
 
-                var data = new vis.DataSet(events);
+                data = new vis.DataSet(events);
                 if (timeline) {
                   timeline.redraw();
                 } else {
@@ -56,9 +59,9 @@ define(function (require) {
                 console.log(err);
               });
             }
+
+
           });
-
-
 
         }
       };

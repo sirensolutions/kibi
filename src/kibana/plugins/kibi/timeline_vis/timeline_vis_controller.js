@@ -1,7 +1,7 @@
 define(function (require) {
 
   var module = require('modules').get('kibana/kibi/timeline_vis', ['kibana']);
-  module.controller('KbnTimelineVisController', function ($rootScope, $scope, $route, courier, savedVisualizations, Private) {
+  module.controller('KbnTimelineVisController', function ($rootScope, $scope, $route, $log, courier, savedVisualizations, Private) {
 
     var requestQueue = Private(require('components/courier/_request_queue'));
     var SearchSource = Private(require('components/courier/data_source/search_source'));
@@ -22,6 +22,7 @@ define(function (require) {
     }
 
     var _id = '_kibi_timetable_ids_source_flag' + $scope.vis.id;
+
     function fetchResults(savedVis) {
 
       var indexPattern = $scope.vis.indexPattern;
@@ -61,6 +62,8 @@ define(function (require) {
     }
 
     $scope.$watch('vis', function () {
+
+      $log.debug($scope.savedVis);
       if ($scope.savedVis) {
         fetchResults($scope.savedVis);
         setOptions($scope.savedVis);
@@ -71,9 +74,9 @@ define(function (require) {
     $scope.$watch('esResponse', function () {
       if ($scope.savedObj && $scope.savedObj.searchSource) {
         $scope.savedObj.searchSource.fetchQueued();
+        $log.debug($scope.savedObj.searchSource);
       }
     });
-
 
     if (editing) {
       var removeVisStateChangedHandler = $rootScope.$on('kibi:vis:state-changed', function () {
@@ -86,7 +89,6 @@ define(function (require) {
         removeVisStateChangedHandler();
       });
     }
-
 
   });
 

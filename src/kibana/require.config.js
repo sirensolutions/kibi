@@ -29,7 +29,6 @@ require.config({
     file_saver: 'bower_components/FileSaver/FileSaver',
     gridster: 'bower_components/gridster/dist/jquery.gridster',
     'leaflet-heat': 'bower_components/Leaflet.heat/dist/leaflet-heat',
-    inflection: 'bower_components/inflection/lib/inflection',
     jquery: 'bower_components/jquery/dist/jquery',
     'jquery-ui': 'bower_components/jquery-ui/jquery-ui',
     leaflet: 'bower_components/leaflet/dist/leaflet',
@@ -81,9 +80,6 @@ require.config({
 
     'leaflet-heat': {
       deps: ['leaflet']
-    },
-    inflection: {
-      exports: 'inflection'
     },
     file_saver: {
       exports: 'saveAs'

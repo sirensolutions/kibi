@@ -1,6 +1,7 @@
 define(function (require) {
   // get the kibana/table_vis module, and make sure that it requires the "kibana" module if it
   // didn't already
+  var $ = require('jquery');
   var module = require('modules').get('kibana/table_vis', ['kibana']);
 
   // add a controller to tha module, which will transform the esResponse into a

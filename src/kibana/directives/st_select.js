@@ -87,7 +87,7 @@ define(function (require) {
                 promise = selectHelper.getIndexTypes(scope.indexPatternId);
 
                 if (promise) {
-                  promise.promise.then(function (types) {
+                  promise.then(function (types) {
                     if (types.length === 1) {
                       scope.modelObject = types[0];
                     }

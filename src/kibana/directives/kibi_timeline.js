@@ -3,67 +3,72 @@ define(function (require) {
   var _ = require('lodash');
   var vis = require('vis');
 
-  require('modules')
-    .get('kibana')
-    .directive('kibiTimeline', function () {
+  require('modules').get('kibana').directive('kibiTimeline', function () {
 
-      var timeline;
+    return {
+      scope: {
+        searchSource: '=',
+        options: '=',
+        params: '='
+      },
+      restrict: 'E',
+      replace: true,
+      link: _link
+    };
+
+    function _link($scope, $element) {
       var data;
+      var timeline;
+      var previousSearchSource;
 
-      return {
-        restrict: 'E',
-        replace: true,
-        scope: {
-          searchSource: '=',
-          options: '=',
-          params: '='
-        },
-        link: function ($scope, $element) {
+      $scope.$watch('searchSource', function (newValue, oldValue) {
 
-          var previousSearchSource;
+        var events = [];
 
-          $scope.$watch('searchSource', function (searchSource) {
+        if (newValue === oldValue) return;
 
+        if ($scope.searchSource) {
 
-            if ($scope.searchSource) {
+          previousSearchSource = $scope.searchSource;
 
-              previousSearchSource = $scope.searchSource;
+          $scope.searchSource.onResults().then(function onResults(searchResp) {
 
-              $scope.searchSource.onResults().then(function onResults(searchResp) {
-                // Reset infinite scroll limit
-                $scope.limit = 50;
+            // Reset infinite scroll limit
+            $scope.limit = 50;
 
-                if ($scope.searchSource !== previousSearchSource) {
-                  return;
-                }
-
-                // here I'm talking the startField name from params
-                var events = [];
-                _.each(searchResp.hits.hits, function (hit) {
-                  events.push({
-                    start: new Date(hit._source[$scope.params.startField]),
-                    content: hit._source[$scope.params.startField]
-                  });
-                });
-
-                data = new vis.DataSet(events);
-                if (timeline) {
-                  timeline.redraw();
-                } else {
-                  timeline = new vis.Timeline($element[0], data, $scope.options);
-                }
-
-                return $scope.searchSource.onResults().then(onResults);
-              }).catch(function (err) {
-                // HERE WE HAVE TO DECIDE HOW TO HANDLE ERRORS
-                console.log(err);
-              });
+            if ($scope.searchSource !== previousSearchSource) {
+              return;
             }
 
+            _.each(searchResp.hits.hits, function (hit) {
+              events.push({
+                start: new Date(hit._source[$scope.params.startField]),
+                content: hit._source[$scope.params.labelField] || ''
+              });
+            });
 
+            data = new vis.DataSet(events);
+
+            if (timeline) {
+              // clear and redraw the timeline
+              timeline.destroy();
+              timeline = new vis.Timeline($element[0], data, $scope.options);
+            }
+            else {
+              timeline = new vis.Timeline($element[0], data, $scope.options);
+            }
+
+            return $scope.searchSource.onResults().then(onResults);
+
+          }).catch(function (err) {
+            // HERE WE HAVE TO DECIDE HOW TO HANDLE ERRORS
+            console.log(err);
           });
-
         }
-      };
-    });
+
+      });
+
+    }
+
+  });
 });

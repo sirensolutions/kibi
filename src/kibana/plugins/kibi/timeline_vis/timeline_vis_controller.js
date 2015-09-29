@@ -48,13 +48,16 @@ define(function (require) {
     function setOptions(savedVis) {
       var options = {
         width: '100%',
-        height: '350px'
+        height: '350px',
+        selectable: true,
+        autoResize: false
       };
       $scope.options = options;
     }
 
     function setParams(savedVis) {
       var params = {
+        labelField: savedVis.vis.params.labelField,
         startField: savedVis.vis.params.startField,
         endField: savedVis.vis.params.endField
       };

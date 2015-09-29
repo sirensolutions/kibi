@@ -60,7 +60,9 @@ define(function (require) {
 
             // get the id of the clicked timeline item
             timeline.on('select', function (properties) {
-              $scope.params.clickedItemId = properties.items;
+              // pass this to a scope variable
+              $scope.params.clickedItemId = data._data[properties.items];
+              console.log('Selected timeline event', $scope.params.clickedItemId);
             });
 
             return $scope.searchSource.onResults().then(onResults);

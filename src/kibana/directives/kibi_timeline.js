@@ -58,6 +58,11 @@ define(function (require) {
               timeline = new vis.Timeline($element[0], data, $scope.options);
             }
 
+            // get the id of the clicked timeline item
+            timeline.on('select', function (properties) {
+              $scope.params.clickedItemId = properties.items;
+            });
+
             return $scope.searchSource.onResults().then(onResults);
 
           }).catch(function (err) {

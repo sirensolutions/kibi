@@ -2,7 +2,7 @@ define(function (require) {
   var _ = require('lodash');
   var vis = require('vis');
 
-  require('modules').get('kibana/kibi/timeline_vis').directive('kibiTimelineVisParams', function ($rootScope, $log) {
+  require('modules').get('kibana/kibi/timeline_vis').directive('kibiTimelineVisParams', function ($rootScope) {
 
     return {
       restrict: 'E',

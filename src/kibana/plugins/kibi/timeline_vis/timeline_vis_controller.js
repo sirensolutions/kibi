@@ -59,14 +59,15 @@ define(function (require) {
       var params = {
         labelField: savedVis.vis.params.labelField,
         startField: savedVis.vis.params.startField,
-        endField: savedVis.vis.params.endField
+        endField: savedVis.vis.params.endField,
+        clickedItemId: savedVis.vis.params.clickedItemId
       };
+
       $scope.params = params;
     }
 
     $scope.$watch('vis', function () {
 
-      $log.debug($scope.savedVis);
       if ($scope.savedVis) {
         fetchResults($scope.savedVis);
         setOptions($scope.savedVis);
@@ -77,7 +78,6 @@ define(function (require) {
     $scope.$watch('esResponse', function () {
       if ($scope.savedObj && $scope.savedObj.searchSource) {
         $scope.savedObj.searchSource.fetchQueued();
-        $log.debug($scope.savedObj.searchSource);
       }
     });
 

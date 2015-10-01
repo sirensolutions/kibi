@@ -1,0 +1,128 @@
+define(function (require) {
+
+  require('css!plugins/kibi/datasources_editor/styles/datasources_editor.css');
+  require('plugins/kibi/datasources_editor/services/saved_datasources/_saved_datasource');
+  require('plugins/kibi/datasources_editor/services/saved_datasources/saved_datasources');
+  require('angular-sanitize');
+  require('ng-tags-input');
+
+  var slugifyId = require('utils/slugify_id');
+  var $ = require('jquery');
+  var _ = require('lodash');
+
+  require('routes')
+  .when('/settings/datasources', {
+    template: require('text!plugins/kibi/datasources_editor/index.html'),
+    reloadOnSearch: false,
+    resolve: {
+      datasource: function (savedDatasources) {
+        return savedDatasources.get();
+      }
+    }
+  })
+  .when('/settings/datasources/:id?', {
+    template: require('text!plugins/kibi/datasources_editor/index.html'),
+    reloadOnSearch: false,
+    resolve: {
+      datasource: function ($route, courier, savedDatasources) {
+        return savedDatasources.get($route.current.params.id)
+        .catch(courier.redirectWhenMissing({
+          'datasource' : '/settings/datasources'
+        }));
+      }
+    }
+  });
+
+
+  var app = require('modules').get('apps/settings', ['kibana', 'ngSanitize', 'ngTagsInput']);
+
+  app.controller(
+    'DatasourcesEditor',
+    function ($rootScope, $scope, $route, $window, kbnUrl, Notifier, savedDatasources, Private, Promise, queryEngineClient) {
+
+      var setDatasourceSchema = Private(require('plugins/kibi/datasources_editor/lib/set_datasource_schema'));
+
+      var notify = new Notifier({
+        location: 'Dashboard Groups Editor'
+      });
+
+
+      $scope.datasourcesFinderOpen = false;
+
+      $scope.openDatasourcesFinder = function () {
+        $scope.datasourcesFinderOpen = true;
+      };
+      $scope.closeDatasourcesFinder = function (hit, event) {
+        $scope.datasourcesFinderOpen = false;
+        kbnUrl.change('settings/datasources/' + hit.id);
+      };
+
+      var datasource = $scope.datasource = $route.current.locals.datasource;
+
+      $scope.submit = function () {
+        datasource.id = datasource.title;
+
+        // make sure that any parameter which does not belong to the schema
+        // is removed from datasourceParams
+        for (var prop in datasource.datasourceParams) {
+          if (datasource.datasourceParams.hasOwnProperty(prop)) {
+            var remove = true;
+            for (var j = 0; j < datasource.schema.length; j++) {
+              if (datasource.schema[j].name === prop) {
+                remove = false;
+                break;
+              }
+            }
+            if (remove) {
+              delete datasource.datasourceParams[prop];
+            }
+          }
+        }
+
+        datasource.save().then(function (datasourceId) {
+          notify.info('Datasource ' + datasource.title + ' successfuly saved');
+          queryEngineClient.clearCache().then(function () {
+            kbnUrl.change('settings/datasources/' + datasourceId);
+          });
+        });
+      };
+
+      $scope.delete = function () {
+        if ($window.confirm('Are you sure about deleting [' + datasource.title + ']')) {
+          datasource.delete().then(function (resp) {
+            queryEngineClient.clearCache().then(function () {
+              kbnUrl.change('settings/datasources', {});
+            });
+          });
+        }
+      };
+
+      $scope.newDatasource = function () {
+        kbnUrl.change('settings/datasources', {});
+      };
+
+      $scope.clone = function () {
+        savedDatasources.get().then(function (savedDatasourceClone) {
+          savedDatasourceClone.id = datasource.id + '-clone';
+          savedDatasourceClone.title = datasource.title + ' clone';
+          savedDatasourceClone.description = datasource.description;
+
+          savedDatasourceClone.save().then(function (resp) {
+            notify.info('Datasource ' + savedDatasourceClone.title + 'successfuly saved');
+            queryEngineClient.clearCache().then(function () {
+              $rootScope.$emit('kibi:datasource:changed', resp);
+              //TODO: do not need to slugify - use the resp
+              kbnUrl.change('settings/datasources/' + slugifyId(savedDatasourceClone.id));
+            });
+          });
+
+        });
+      };
+
+      $scope.$watch('datasource.datasourceType', function () {
+        // here reinit the datasourceDef
+        setDatasourceSchema(datasource);
+      });
+
+    });
+});

@@ -1,0 +1,113 @@
+<kbn-settings-app section="datasources">
+
+  <div ng-controller="DatasourcesEditor" class="app-container datasources_editor" id="datasources_editor" >
+
+    <div ng-if="datasourcesFinderOpen" style="padding:30px;">
+      <saved-object-finder title="Choose a datasource" type="datasources" on-choose="closeDashboardGroupsFinder"></saved-object-finder>
+    </div>
+
+    <div ng-if="!datasourcesFinderOpen" class="container">
+
+      <div class="header">
+        <h2 class="title">Edit Datasource</h2>
+      </div>
+      <p>
+        Descriptions xxx.
+      </p>
+
+      <div class="config-section">
+
+        <form ng-if="datasource" name="objectForm">
+
+          <div class="form-group">
+            <label>Title</label>
+            <input type="text" ng-model="datasource.title" class="form-control span9"/>
+          </div>
+
+          <div class="form-group">
+            <label>Description</label>
+            <input type="text" ng-model="datasource.description" class="form-control span9"/>
+          </div>
+
+          <div class="form-group">
+            <label>Type</label>
+            <select ng-model="datasource.datasourceType" class="form-control span9">
+              <option value="rest">REST</option>
+              <option value="sqlite">Sqlite</option>
+              <option value="mysql">MySql</option>
+              <option value="postgresql">PostgreSql</option>
+              <option value="sparql_http">Sparql over http</option>
+              <option value="sql_jdbc">Sql JDBC</option>
+              <option value="sparql_jdbc">Sparql JDBC</option>
+            <select>
+          </div>
+
+
+          <div ng-repeat="param in datasource.schema" >
+            <ng-form name="innerForm">
+              <div class="form-group">
+                <label>{{param.name}}</label> <span ng-if="!param.required">(Optional. Default={{param.defaultValue || param.defaultValues}})</span>
+
+                <input
+                  ng-if="param.inputType == 'text'"
+                  name="{{param.name}}"
+                  type="text"
+                  ng-required="param.required"
+                  ng-model="datasource.datasourceParams[param.name]"
+                  placeholder="{{param.placeholder}}"
+                  class="form-control span9"/>
+
+                <input
+                  ng-if="param.inputType == 'password'"
+                  name="{{param.name}}"
+                  type="password"
+                  ng-required="param.required"
+                  ng-model="datasource.datasourceParams[param.name]"
+                  placeholder="{{param.placeholder}}"
+                  class="form-control span9"/>
+
+                <select
+                  ng-if="param.inputType == 'select' && param.multivalued"
+                  name="{{param.name}}"
+                  ng-required="param.required"
+                  multiple
+                  ng-model="datasource.datasourceParams[param.name]" class="form-control span9">
+                  <option
+                    ng-repeat="o in param.possibleValues"
+                    value="{{o}}"
+                    ng-selected="datasource.datasourceParams[param.name].indexOf(o) !== -1">
+                    {{o}}
+                  </option>
+                </select>
+
+                <select
+                  ng-if="param.inputType == 'select' && !param.multivalued"
+                  name="{{param.name}}"
+                  ng-required="param.required"
+                  ng-model="datasource.datasourceParams[param.name]" class="form-control span9">
+                  <option
+                    ng-repeat="o in param.possibleValues"
+                    value="{{o}}"
+                    ng-selected="datasource.datasourceParams[param.name] === o">
+                    {{o}}
+                  </option>
+                </select>
+
+              </div>
+            </ng-form>
+          </div>
+
+          <div class="form-group" style="margin-top:10px;">
+            <button class="btn btn-primary" ng-click="cancel()">Cancel</button>
+            <button class="btn btn-info" ng-click="clone()" ng-disabled="objectForm.$invalid">Clone</button>
+            <button class="btn btn-success" ng-click="submit()" ng-disabled="objectForm.$invalid">Save</button>
+            <button class="btn btn-danger" ng-click="delete()">Delete</button>
+          </div>
+        </form>
+
+
+      </div>
+
+    </div>
+  </div>
+</kbn-settings-app>

@@ -41,31 +41,31 @@
           </div>
 
           <div class="form-group">
-            <label ng-if="datasourceType === 'sparql' || datasourceType === 'sql' || datasourceType === 'sqlite' || datasourceType === 'pgsql'">Activation query</label>
+            <label ng-if="datasourceType === 'sparql' || datasourceType === 'sql_jdbc' || datasourceType === 'sqlite' || datasourceType === 'postgresql'">Activation query</label>
             <label ng-if="datasourceType === 'rest'">Activation regex</label>
 
             <span ng-if="query.st_datasourceId">(Empty = always active)</span>
             <div ng-if="datasourceType === 'sparql_http' || datasourceType === 'sparql_jdbc'" ui-ace="{ onLoad: aceLoaded, mode: 'sparql'}" msd-elastic id="st_templateVars" ng-model="query.st_activationQuery" class="form-control activationQueryEditor"></div>
-            <div ng-if="datasourceType === 'mysql' || datasourceType === 'sqlite' || datasourceType === 'pgsql' || datasourceType === 'jdbc'" ui-ace="{ onLoad: aceLoaded, mode: 'sql'}" msd-elastic id="st_templateVars" ng-model="query.st_activationQuery" class="form-control activationQueryEditor"></div>
+            <div ng-if="datasourceType === 'mysql' || datasourceType === 'sqlite' || datasourceType === 'postgresql' || datasourceType === 'sql_jdbc'" ui-ace="{ onLoad: aceLoaded, mode: 'sql'}" msd-elastic id="st_templateVars" ng-model="query.st_activationQuery" class="form-control activationQueryEditor"></div>
             <div ng-if="datasourceType === 'rest'" ui-ace="{ onLoad: aceLoaded, mode: 'text'}" msd-elastic id="st_templateVars" ng-model="query.st_activationQuery" class="form-control activationQueryEditor"></div>
           </div>
 
           <div class="form-group" ng-if="datasourceType !== 'rest'">
             <label ng-if="query.st_datasourceId">Results query</label></br>
-            <span ng-if="datasourceType === 'mysql' || datasourceType === 'jdbc'">
+            <span ng-if="datasourceType === 'mysql' || datasourceType === 'sql_jdbc'">
               Hint: To start type <b>SHOW TABLES</b>
             </span>
-            <span ng-if="datasourceType === 'pgsql'">
+            <span ng-if="datasourceType === 'postgresql'">
               Hint: To start type <b>SELECT * FROM pg_catalog.pg_tables</b>
             </span>
             <span ng-if="datasourceType === 'sparql'">
               Hint: To start type <b>SELECT * WHERE {?s ?p ?o} LIMIT 10</b>
             </span>
             </br>
-            <span ng-if="datasourceType === 'sparql'">Special variable <b>@URI@</b> will be replaced by selected entity URI</span>
-            <span ng-if="datasourceType === 'mysql' || datasourceType === 'sqlite' || datasourceType === 'pgsql' || datasourceType === 'jdbc'">Special variables <b>@TABLE@</b> and <b>@PKVALUE@</b> will be replaced by information extracted from selected entity URI</span>
+            <span ng-if="datasourceType === 'sparql_http' || datasourceType === 'sparql_jdbc'">Special variable <b>@URI@</b> will be replaced by selected entity URI</span>
+            <span ng-if="datasourceType === 'mysql' || datasourceType === 'sqlite' || datasourceType === 'postgresql' || datasourceType === 'sql_jdbc'">Special variables <b>@TABLE@</b> and <b>@PKVALUE@</b> will be replaced by information extracted from selected entity URI</span>
 
-            <span ng-if="starDetectedInAQuery && datasourceType === 'sparql'" style="color:orange;">
+            <span ng-if="starDetectedInAQuery && (datasourceType === 'sparql_http' || datasourceType === 'sparql_jdbc')" style="color:orange;">
               </br>
               Star symbol detected. Try to give an explicit list of variables to return
               - it is better performance wise and will simplify relational filters configuration.
@@ -77,7 +77,7 @@
             ng-model="query.st_resultQuery"
             class="form-control resultQueryEditor"></div>
 
-            <div ng-if="datasourceType === 'mysql' || datasourceType === 'sqlite' || datasourceType === 'pgsql' || datasourceType === 'jdbc'"
+            <div ng-if="datasourceType === 'mysql' || datasourceType === 'sqlite' || datasourceType === 'postgresql' || datasourceType === 'sql_jdbc'"
             ui-ace="{ onLoad: aceLoaded, mode: 'sql' }"
             msd-elastic id="st_templateVars"
             ng-model="query.st_resultQuery"

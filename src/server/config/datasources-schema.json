@@ -232,7 +232,7 @@
     },
     {
       "name": "libs",
-      "required": true,
+      "required": false,
       "multivalued": true,
       "encrypted": false,
       "inputType": "text",

@@ -4,6 +4,8 @@ define(function (require) {
   var $httpBackend;
   var _ = require('lodash');
 
+  var fake_saved_datasources = require('fixtures/fake_saved_datasources');
+
   describe('Kibi Directives', function () {
     describe('StSelect Helper', function () {
 
@@ -12,23 +14,9 @@ define(function (require) {
       beforeEach(function () {
         module('kibana');
 
+
         module('kibana', function ($provide) {
-          $provide.constant('configFile', {
-            datasources: [
-              {
-                id: 'ds1',
-                type: 'sparql'
-              },
-              {
-                id: 'ds2',
-                type: 'mysql'
-              },
-              {
-                id: 'ds3',
-                type: 'rest'
-              }
-            ]
-          });
+          $provide.service('savedDatasources', fake_saved_datasources);
         });
 
         module('kibana/courier', function ($provide) {
@@ -224,9 +212,9 @@ define(function (require) {
       describe('GetDatasources', function () {
         it('select datasources', function (done) {
           stSelectHelper.getDatasources().then(function (datasources) {
-            expect(datasources).to.have.length(1);
-            expect(datasources[0].label).to.be('crunchbase-datasource');
-            expect(datasources[0].value).to.be('crunchbase-datasource');
+            expect(datasources).to.have.length(3);
+            expect(datasources[0].value).to.be('ds1');
+            expect(datasources[0].label).to.be('ds1 datasource');
             done();
           }).catch(done);
         });
@@ -305,34 +293,38 @@ define(function (require) {
       });
 
       describe('GetQueryVariables', function () {
-        it('should returned undefined if no query ID is passed', function () {
-          expect(stSelectHelper.getQueryVariables()).not.to.be.ok();
+        it('should returned undefined if no query ID is passed', function (done) {
+          stSelectHelper.getQueryVariables()
+          .catch(function (err) {
+            expect(err.message).to.equal('No queryId');
+            done();
+          });
         });
 
         it('should return the variables of the REST query', function (done) {
           stSelectHelper.getQueryVariables('rest').then(function (variables) {
-            expect(variables[0]).to.have.length(0);
-            expect(variables[1]).to.be('rest');
+            expect(variables.fields).to.have.length(0);
+            expect(variables.datasourceType).to.equal('rest');
             done();
-          }).catch(done);
+          });
         });
 
         it('should return the variables of the SQL query', function (done) {
           stSelectHelper.getQueryVariables('sql').then(function (variables) {
-            expect(variables[0]).to.have.length(1);
-            expect(variables[0][0].label).to.be('name');
-            expect(variables[0][0].value).to.be('name');
-            expect(variables[1]).to.be('mysql');
+            expect(variables.fields).to.have.length(1);
+            expect(variables.fields[0].label).to.equal('name');
+            expect(variables.fields[0].value).to.equal('name');
+            expect(variables.datasourceType).to.equal('mysql');
             done();
           }).catch(done);
         });
 
         it('should return the variables of the SPARQL query', function (done) {
           stSelectHelper.getQueryVariables('sparql').then(function (variables) {
-            expect(variables[0]).to.have.length(1);
-            expect(variables[0][0].label).to.be('?name');
-            expect(variables[0][0].value).to.be('name');
-            expect(variables[1]).to.be('sparql');
+            expect(variables.fields).to.have.length(1);
+            expect(variables.fields[0].label).to.equal('?name');
+            expect(variables.fields[0].value).to.equal('name');
+            expect(variables.datasourceType).to.equal('sparql_http');
             done();
           }).catch(done);
         });
@@ -348,7 +340,7 @@ define(function (require) {
         it('should return an error if query has no or unsupported datasource type', function (done) {
           stSelectHelper.getQueryVariables('nodatasource')
           .catch(function (err) {
-            expect(err).to.be('Unknown datasource type for query=nodatasource: undefined');
+            expect(err.message).to.be('SavedQuery [nodatasource] does not have st_datasourceId parameter');
             done();
           });
         });

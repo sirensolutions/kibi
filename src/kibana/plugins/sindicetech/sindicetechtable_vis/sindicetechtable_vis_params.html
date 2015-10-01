@@ -60,7 +60,7 @@
             <div ng-if="clickOption.type === 'link'" class="form-group">
               <label>URL field</label>
               <st-select
-                required="true"
+                required
                 object-type="field"
                 index-pattern-id="vis.indexPattern.id"
                 ng-model="clickOption.valueField" ></st-select>
@@ -89,7 +89,7 @@
               </label>
               <st-select
                 object-type="field"
-                required="true"
+                required
                 index-pattern-id="vis.indexPattern.id"
                 ng-model="clickOption.valueField" ></st-select>
             </div>
@@ -166,7 +166,7 @@
 
       <div class="form-group">
         <label>Source Field</label></br>
-        <st-select required="true" object-type="field" index-pattern-id="vis.indexPattern.id" ng-model="vis.params.joinElasticsearchField" />
+        <st-select required object-type="field" index-pattern-id="vis.indexPattern.id" ng-model="vis.params.joinElasticsearchField" />
       </div>
 
       <ul>
@@ -175,11 +175,11 @@
           <div class="content">
             <div class="form-group">
               <label>Target query {{$index + 1}}</label>
-              <st-select required="true" object-type="query" ng-model="queryId.queryId"></st-select>
+              <st-select required object-type="query" ng-model="queryId.queryId"></st-select>
             </div>
             <div class="form-group">
               <label>Target query variable name {{$index + 1}}</label>
-              <st-select required="true" object-type="queryVariable" query-id="queryId.queryId" ng-model="queryId.queryVariableName"></st-select>
+              <st-select required object-type="queryVariable" query-id="queryId.queryId" ng-model="queryId.queryVariableName"></st-select>
             </div>
 
 

@@ -13,13 +13,13 @@
     <div class="content">
       <div class="form-group">
         <label>Source query id</label>
-        <st-select object-type="query" ng-model="queryId.id" required="true"></st-select>
+        <st-select object-type="query" ng-model="queryId.id" required></st-select>
       </div>
 
       <div class="form-group">
         <label>Source query variable</label>
         <st-select
-          required="true"
+          required
           object-type="queryVariable"
           query-id="queryId.id"
           ng-model="queryId.queryVariableName">
@@ -34,7 +34,7 @@
       <div class="form-group">
         <label>Target field</label>
         <st-select
-          required="true"
+          required
           object-type="field"
           index-pattern-id="vis.indexPattern.id"
           ng-model="queryId.joinElasticsearchField" >

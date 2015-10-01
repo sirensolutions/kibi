@@ -12,7 +12,6 @@ define(function (require) {
         restrict: 'E',
         replace: true,
         scope: {
-          required:       '@',  // required property of the ng-select
           objectType:     '@',  // text
           indexPatternId: '=?', // optional only for objectType === field or objectType === indexPatternType
           queryId:        '=?', // optional only for objectType === queryVariable
@@ -20,6 +19,7 @@ define(function (require) {
         },
         template: require('text!directives/st_select.html'),
         link: function (scope, element, attrs, ngModelCtrl) {
+          scope.required = attrs.hasOwnProperty('required');
           scope.modelObject = ngModelCtrl.$viewValue;
           scope.items = [];
 

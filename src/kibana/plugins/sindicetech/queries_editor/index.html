@@ -31,7 +31,7 @@
           </div>
 
           <div class="form-group">
-            <label>Datasource</label></br>
+            <label>Datasource</label> <a ng-click="jumpToDatasource()">Edit datasource</a></br>
             <st-select object-type="datasource" ng-model="query.st_datasourceId"></st-select>
           </div>
 
@@ -45,7 +45,7 @@
             <label ng-if="datasourceType === 'rest'">Activation regex</label>
 
             <span ng-if="query.st_datasourceId">(Empty = always active)</span>
-            <div ng-if="datasourceType === 'sparql'" ui-ace="{ onLoad: aceLoaded, mode: 'sparql'}" msd-elastic id="st_templateVars" ng-model="query.st_activationQuery" class="form-control activationQueryEditor"></div>
+            <div ng-if="datasourceType === 'sparql_http' || datasourceType === 'sparql_jdbc'" ui-ace="{ onLoad: aceLoaded, mode: 'sparql'}" msd-elastic id="st_templateVars" ng-model="query.st_activationQuery" class="form-control activationQueryEditor"></div>
             <div ng-if="datasourceType === 'mysql' || datasourceType === 'sqlite' || datasourceType === 'pgsql' || datasourceType === 'jdbc'" ui-ace="{ onLoad: aceLoaded, mode: 'sql'}" msd-elastic id="st_templateVars" ng-model="query.st_activationQuery" class="form-control activationQueryEditor"></div>
             <div ng-if="datasourceType === 'rest'" ui-ace="{ onLoad: aceLoaded, mode: 'text'}" msd-elastic id="st_templateVars" ng-model="query.st_activationQuery" class="form-control activationQueryEditor"></div>
           </div>
@@ -71,7 +71,7 @@
               - it is better performance wise and will simplify relational filters configuration.
             </span>
 
-            <div ng-if="datasourceType === 'sparql'"
+            <div ng-if="datasourceType === 'sparql_http' || datasourceType === 'sparql_jdbc'"
             ui-ace="{ onLoad: aceLoaded, mode: 'sparql' }"
             msd-elastic id="st_templateVars"
             ng-model="query.st_resultQuery"

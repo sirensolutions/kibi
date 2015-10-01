@@ -222,6 +222,9 @@ define(function (require) {
         kbnUrl.change('/settings/templates/' + $scope.query._previewTemplateId);
       };
 
+      $scope.jumpToDatasource = function () {
+        kbnUrl.change('/settings/datasources/' + $scope.query.st_datasourceId);
+      };
 
       $scope.preview = function () {
         // here check that all required fields are in place before doing anything

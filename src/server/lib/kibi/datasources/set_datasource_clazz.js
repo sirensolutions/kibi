@@ -23,13 +23,13 @@ module.exports = function (datasource) {
     case 'postgresql':
       datasource.datasourceClazz = new PostgresqlDatasourceDef(datasource);
       break;
-    case 'sparql-http':
+    case 'sparql_http':
       datasource.datasourceClazz = new SparqlHttpDatasourceDef(datasource);
       break;
-    case 'sql-jdbc':
+    case 'sql_jdbc':
       datasource.datasourceClazz = new SqlJdbcDatasourceDef(datasource);
       break;
-    case 'sparql-jdbc':
+    case 'sparql_jdbc':
       datasource.datasourceClazz = new SparqlJdbcDatasourceDef(datasource);
       break;
     default:

@@ -11,7 +11,7 @@ define(function (require) {
   require('components/timepicker/refresh_intervals');
   require('components/timepicker/time_units');
 
-  module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshIntervals) {
+  module.directive('kbnTimepicker', function ($rootScope, quickRanges, timeUnits, refreshIntervals) {
 
 
     return {
@@ -86,7 +86,7 @@ define(function (require) {
               $scope.relative.count = parseInt(relativeParts[1], 10);
               $scope.relative.unit = relativeParts[2];
             } else {
-              var duration = moment.duration(moment().diff(datemath.parse($scope.from)));
+              var duration = moment.duration(moment().diff(datemath.parseWithPrecision($scope.from, false, $rootScope.kibiTimePrecision)));
               var units = _.pluck(_.clone($scope.relativeOptions).reverse(), 'value');
               if ($scope.from.toString().split('/')[1]) $scope.relative.round = true;
               for (var i = 0; i < units.length; i++) {
@@ -104,8 +104,11 @@ define(function (require) {
 
             break;
           case 'absolute':
-            $scope.absolute.from = datemath.parse($scope.from || moment().subtract('minutes', 15));
-            $scope.absolute.to = datemath.parse($scope.to || moment(), true);
+            $scope.absolute.from = datemath.parseWithPrecision(
+              $scope.from || moment().subtract('minutes', 15),
+              false,
+              $rootScope.kibiTimePrecision);
+            $scope.absolute.to = datemath.parseWithPrecision($scope.to || moment(), true, $rootScope.kibiTimePrecision);
             break;
           }
 
@@ -123,7 +126,7 @@ define(function (require) {
         };
 
         $scope.formatRelative = function () {
-          var parsed = datemath.parse(getRelativeString());
+          var parsed = datemath.parseWithPrecision(getRelativeString(), false, $rootScope.kibiTimePrecision);
           $scope.relative.preview =  parsed ? parsed.format($scope.format) : undefined;
           return parsed;
         };

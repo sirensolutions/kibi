@@ -61,7 +61,7 @@ define(function (require) {
     }
   });
 
-  app.controller('discover', function ($scope, config, courier, $route, $window, Notifier,
+  app.controller('discover', function ($rootScope, $scope, config, courier, $route, $window, Notifier,
     AppState, timefilter, Promise, Private, kbnUrl, highlightTags) {
 
     var Vis = Private(require('components/vis/vis'));
@@ -405,8 +405,8 @@ define(function (require) {
 
     $scope.updateTime = function () {
       $scope.timeRange = {
-        from: datemath.parse(timefilter.time.from),
-        to: datemath.parse(timefilter.time.to, true)
+        from: datemath.parseWithPrecision(timefilter.time.from, false, $rootScope.kibiTimePrecision),
+        to: datemath.parseWithPrecision(timefilter.time.to, true, $rootScope.kibiTimePrecision)
       };
     };
 

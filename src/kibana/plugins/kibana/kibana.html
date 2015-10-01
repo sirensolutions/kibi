@@ -43,8 +43,16 @@
         </li>
 
         <li class="to-body interval-display" ng-class="{active: timefilter.timepickerActiveTab === 'filter'}">
-          <a  ng-click="toggleTimepicker('filter')" aria-haspopup="true" aria-expanded="false" class="navbar-timepicker-time-desc">
-            <i aria-hidden="true" class="fa fa-clock-o"></i>
+          <a
+            ng-click="toggleTimepicker('filter')"
+            aria-haspopup="true" aria-expanded="false"
+            class="navbar-timepicker-time-desc"
+            tooltip-enable="kibiTimePrecision"
+            tooltip="kibi:timePrecision set to '{{kibiTimePrecision}}'"
+            tooltip-placement="bottom"
+          >
+            <span aria-hidden="true" class="fa fa-clock-o"></span>
+            <sup  aria-hidden="true" class="fa fa-exclamation" ng-if="kibiTimePrecision"></sup>
             <pretty-duration from="timefilter.time.from" to="timefilter.time.to"></pretty-duration>
           </a>
         </li>

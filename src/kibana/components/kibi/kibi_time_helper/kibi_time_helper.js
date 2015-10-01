@@ -1,7 +1,7 @@
 define(function (require) {
   var datemath = require('utils/datemath');
 
-  return function KibiTimeHelperFactory(Private, Promise, savedDashboards) {
+  return function KibiTimeHelperFactory($rootScope, Private, Promise, savedDashboards) {
     var _ = require('lodash');
     var kibiStateHelper  = Private(require('components/kibi/kibi_state_helper/kibi_state_helper'));
 
@@ -20,8 +20,8 @@ define(function (require) {
             // if there is no value in kibi state then it will already have correct time taken from global time
             var time = kibiStateHelper.getTimeForDashboardId(dashboardId);
             if (time) {
-              var from = datemath.parse(time.from).valueOf();
-              var to = datemath.parse(time.to).valueOf();
+              var from = datemath.parseWithPrecision(time.from, false, $rootScope.kibiTimePrecision).valueOf();
+              var to = datemath.parseWithPrecision(time.to, false, $rootScope.kibiTimePrecision).valueOf();
               if (Object.keys(timeRangeFilter.range).length === 1) {
                 timeRangeFilter.range[Object.keys(timeRangeFilter.range)[0]].gte = from;
                 timeRangeFilter.range[Object.keys(timeRangeFilter.range)[0]].lte = to;

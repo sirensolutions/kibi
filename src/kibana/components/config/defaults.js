@@ -129,6 +129,11 @@ define(function () {
         value: false,
         description: 'Set to true to suppress all warnings and errors',
       },
+      'kibi:timePrecision' : {
+        type: 'string',
+        value: '',
+        description: 'Set to generate time filters with certain precision. Possible values are: s, m, h, d, w, M, y',
+      },
       'kibi:zoom' : {
         value: 1.0,
         description: 'Set the zoom level for the whole page. Good if the default size is too big for you. Does not work in Firefox.',

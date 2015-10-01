@@ -1,4 +1,6 @@
 define(function (require) {
+  var datemath = require('utils/datemath');
+
   return function KibanaControllerInit($rootScope, $scope, $location, courier, $http, globalState, notify, config, Notifier) {
     // expose some globals
     $rootScope.globalState = globalState;
@@ -38,6 +40,18 @@ define(function (require) {
     };
     updateZoom();
     $rootScope.$on('change:config.kibi:zoom', updateZoom);
+
+    var updateTimePrecision = function () {
+      var p = config.get('kibi:timePrecision');
+      if (p && datemath.units.indexOf(p) === -1) {
+        notify.error('kibi:timePrecision valid values are: ' + datemath.units);
+      } else {
+        $scope.kibiTimePrecision = p;
+      }
+    };
+
+    updateTimePrecision();
+    $rootScope.$on('change:config.kibi:timePrecision', updateTimePrecision);
     // kibi end
 
     // wait for the application to finish loading

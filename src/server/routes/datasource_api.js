@@ -44,7 +44,7 @@ router.get('/getQueriesHtml', function (req, res, next) {
 
     res.send({
       query: req.query,
-      error: error
+      error: error.message
     });
 
   });
@@ -75,7 +75,7 @@ router.get('/getIdsFromQueries', function (req, res, next) {
 
     res.send({
       query: req.query,
-      error: error
+      error: error.message
     });
 
   });
@@ -110,7 +110,7 @@ router.get('/getQueriesData', function (req, res, next) {
 
     res.send({
       query: req.query,
-      error: error
+      error: error.message
     });
 
   });

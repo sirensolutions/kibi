@@ -7,7 +7,7 @@ define(function (require) {
     'savedObjectFinder',
     function (savedSearches, savedVisualizations, savedDashboards,
               savedQueries, savedTemplates, savedDashboardGroups,
-              $location, kbnUrl
+              savedDatasources, $location, kbnUrl
     ) {
 
       var vars = {
@@ -25,6 +25,11 @@ define(function (require) {
           noun: 'Dashboard'
         },
         // added by kibi
+        datasources: {
+          service: savedDatasources,
+          noun: 'Datasource',
+          nouns: 'Datasources'
+        },
         queries: {
           service: savedQueries,
           noun: 'Query',

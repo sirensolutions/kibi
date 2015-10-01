@@ -38,7 +38,7 @@ define(function (require) {
   app.controller(
     'QueriesEditor',
     function ($scope, config, globalState, $route, $window, kbnUrl, Notifier, queryEngineClient,
-              savedVisualizations
+              savedVisualizations, savedDatasources
   ) {
 
       // we have to wrap the value into object - this prevents weird thing related to transclusion
@@ -116,30 +116,28 @@ define(function (require) {
       $scope.$watch('query.st_datasourceId', function () {
         if ($scope.query.st_datasourceId) {
           $scope.datasourceType = null;
-          _.each(config.file.datasources, function (datasource) {
-            if (datasource.id === $scope.query.st_datasourceId) {
-              $scope.datasourceType = datasource.type;
 
-              _enableEntityUri();
-              // if the datasource type == rest
-              // init the rest_params and rest_headers arrays
-              if (datasource.type === 'rest' && datasource.params) {
-                _.each(datasource.params, function (param) {
-                  if ( !_.find($scope.query.rest_params, function (p) { return p.name === param.name;})  ) {
-                    $scope.query.rest_params.push(param);
-                  }
-                });
-              }
+          // now check the datasourceType
+          savedDatasources.get($scope.query.st_datasourceId).then(function (savedDatasource) {
+            $scope.datasourceType = savedDatasource.datasourceType;
 
-              if (datasource.type === 'rest' && datasource.headers) {
-                _.each(datasource.headers, function (header) {
-                  if ( !_.find($scope.query.rest_headers, function (h) { return h.name === header.name;})  ) {
-                    $scope.query.rest_headers.push(header);
-                  }
-                });
-              }
+            _enableEntityUri();
+            // if the savedDatasource.datasourceType == rest
+            // init the rest_params and rest_headers arrays
+            if (savedDatasource.datasourceType === 'rest' && savedDatasource.params) {
+              _.each(savedDatasource.params, function (param) {
+                if ( !_.find($scope.query.rest_params, function (p) { return p.name === param.name;})  ) {
+                  $scope.query.rest_params.push(param);
+                }
+              });
+            }
 
-              return false;
+            if (savedDatasource.datasourceType === 'rest' && savedDatasource.headers) {
+              _.each(savedDatasource.headers, function (header) {
+                if ( !_.find($scope.query.rest_headers, function (h) { return h.name === header.name;})  ) {
+                  $scope.query.rest_headers.push(header);
+                }
+              });
             }
           });
         }

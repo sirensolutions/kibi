@@ -28,7 +28,14 @@ MysqlQuery.prototype.checkIfItIsRelevant = function (uri) {
     return Promise.reject('Got empty uri while it is required by mysql activation query');
   }
 
-  var datasource = config.kibana.datasources[this.config.datasourceId];
+  var connectionString = this.config.datasource.datasourceClazz.getConnectionString();
+  var host = this.config.datasource.datasourceClazz.datasource.datasourceParams.host;
+  var dbname = this.config.datasource.datasourceClazz.datasource.datasourceParams.dbname;
+  var timeout = this.config.datasource.datasourceClazz.datasource.datasourceParams.timeout;
+  var max_age = this.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
+
+
+
   var query = this._getSqlQueryFromConfig(this.config.activationQuery, uri);
 
   if (query.trim() === '') {
@@ -37,7 +44,7 @@ MysqlQuery.prototype.checkIfItIsRelevant = function (uri) {
 
   var self = this;
 
-  var cache_key = this.generateCacheKey(datasource.uri, query);
+  var cache_key = this.generateCacheKey(host + dbname, query);
 
   if (self.cache) {
     var v = self.cache.get(cache_key);
@@ -49,15 +56,15 @@ MysqlQuery.prototype.checkIfItIsRelevant = function (uri) {
   return new Promise(function (fulfill, reject) {
     var connection;
     try {
-      connection = mysql.createConnection(datasource.uri);
+      connection = mysql.createConnection(connectionString);
       connection.connect();
-      connection.query({sql: query, timeout: datasource.timeout || 1000}, function (err, rows, fields) {
+      connection.query({sql: query, timeout: timeout || 1000}, function (err, rows, fields) {
         if (err) {
           reject(err);
         }
         var data = {'boolean': rows.length > 0 ? true : false};
         if (self.cache) {
-          self.cache.set(cache_key, data, datasource.maxAge);
+          self.cache.set(cache_key, data, max_age);
         }
         fulfill(data);
       });
@@ -110,7 +117,11 @@ MysqlQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
   var start = new Date().getTime();
   var self = this;
 
-  var datasource = config.kibana.datasources[this.config.datasourceId];
+  var connectionString = this.config.datasource.datasourceClazz.getConnectionString();
+  var host = this.config.datasource.datasourceClazz.datasource.datasourceParams.host;
+  var dbname = this.config.datasource.datasourceClazz.datasource.datasourceParams.dbname;
+  var timeout = this.config.datasource.datasourceClazz.datasource.datasourceParams.timeout;
+  var max_age = this.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
   var query = this._getSqlQueryFromConfig(this.config.resultQuery, uri);
 
   // special case - we can not simply reject the Promise
@@ -119,7 +130,7 @@ MysqlQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
     return this._returnAnEmptyQueryResultsPromise('No data because the query require entityURI');
   }
 
-  var cache_key = this.generateCacheKey(datasource.uri, query, onlyIds, idVariableName);
+  var cache_key = this.generateCacheKey(host + dbname, query, onlyIds, idVariableName);
 
   if (self.cache) {
     var v =  self.cache.get(cache_key);
@@ -133,9 +144,9 @@ MysqlQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
   return new Promise(function (fulfill, reject) {
     var connection;
     try {
-      connection = mysql.createConnection(datasource.uri);
+      connection = mysql.createConnection(connectionString);
       connection.connect();
-      connection.query({sql: query, timeout: datasource.timeout || 1000}, function (err, rows, fields) {
+      connection.query({sql: query, timeout: timeout || 1000}, function (err, rows, fields) {
         if (err) {
           if (err.message) {
             err = {
@@ -188,7 +199,7 @@ MysqlQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
         }
 
         if (self.cache) {
-          self.cache.set(cache_key, data, datasource.maxAge);
+          self.cache.set(cache_key, data, max_age);
         }
 
         data.debug = {

@@ -181,72 +181,74 @@ QueryEngine.prototype.reloadQueries = function () {
 
     if (queryDefinitions.length > 0) {
 
-      // first fetch all datasources definitions
-      // to know the datasources types
-
       var promises = [];
       _.each(datasourcesIds, function (datasourceId) {
-        promises.push(self._getDatasourceFromEs(datasourceId));
+        promises.push(
+          new Promise(function (fulfill, reject) {
+            self._getDatasourceFromEs(datasourceId).then(function (datasource) {
+              fulfill({
+                success: datasource
+              });
+            })
+            .catch(function (err) {
+              fulfill({
+                error: err
+              });
+            });
+          })
+        );
       });
 
-      Promise.all(promises).then(function (datasources) {
+      Promise.all(promises).then(function (results) {
         // now as we have all datasources
         // iterate over them and set the clazz
-        _.each(datasources, function (datasource) {
-          set_datasource_clazz(datasource);
+        var datasources = [];
+        if (results)
+        _.each(results, function (res) {
+          if (res.success) {
+            var datasource = res.success;
+            set_datasource_clazz(datasource);
+            datasources.push(datasource);
+          } else if (res.error) {
+            console.log('Could not load datasource cause: ');
+            console.log(res.error);
+          }
         });
 
         self.datasources = datasources;
 
-
-        //TODO: maybe filter out queries for which datasources does not exists
-
+        //filter out queries for which datasources does not exists
+        var filteredQueryDefinitions = _.filter(queryDefinitions, function (queryDef) {
+          var datasource = self._getDatasourceById(queryDef.datasourceId);
+          if (datasource) {
+            queryDef.datasource = datasource;
+            return true;
+          }
+          return false;
+        });
 
         // now once we have query definitions and datasources
         // load queries
-        self.queries = _.map(queryDefinitions, function (queryDef) {
+        self.queries = _.map(filteredQueryDefinitions, function (queryDef) {
 
-          var datasource = self._getDatasourceById(queryDef.datasourceId);
-          queryDef.datasource = datasource;
-
-          if (datasource.datasourceType === 'sparql') {
+          if (queryDef.datasource.datasourceType === 'sparql_http') {
             return new SparqlQuery(queryDef, self.cache);
-          } else if (datasource.datasourceType === 'postgresql') {
+          } else if (queryDef.datasource.datasourceType === 'postgresql') {
             return new PostgresQuery(queryDef, self.cache);
-          } else if (datasource.datasourceType === 'mysql') {
+          } else if (queryDef.datasource.datasourceType === 'mysql') {
             return new MysqlQuery(queryDef, self.cache);
-          } else if (datasource.datasourceType === 'sparql_jdbc' || datasource.datasourceType === 'sql_jdbc' ) {
+          } else if (queryDef.datasource.datasourceType === 'sparql_jdbc' || queryDef.datasource.datasourceType === 'sql_jdbc' ) {
             return new JdbcQuery(queryDef, self.cache);
-          } else if (datasource.datasourceType === 'rest') {
+          } else if (queryDef.datasource.datasourceType === 'rest') {
             return new RestQuery(queryDef, self.cache);
-          } else if (datasource.datasourceType === 'sqlite') {
+          } else if (queryDef.datasource.datasourceType === 'sqlite') {
             return new SQLiteQuery(queryDef, self.cache);
           } else {
-            logger.error('Unknown datasource type[' + datasource.datasourceType + '] - could NOT create query object');
+            logger.error('Unknown datasource type[' + queryDef.datasource.datasourceType + '] - could NOT create query object');
           }
         });
-
-
-
-
       });
 
-
-
-      /*
-      var queryDefinitionsFiltered  = _.filter(queryDefinitions, function (queryDef) {
-        var datasource = config.kibana.datasources[queryDef.datasourceId];
-        if (!datasource) {
-          console.log(
-            'Unknown datasourceId [' + queryDef.datasourceId + '] in query [' + queryDef.id + ']. ' +
-            'Check your configuration file or review query object in queryEditor.');
-          return false;
-        }
-        return true;
-      });
-      */
-
-      // here array of promises to get the datasource from the index
     }
   }).error(function (err) {
     logger.error('Something is wrong - elastic search is not running');
@@ -329,7 +331,8 @@ QueryEngine.prototype._getQueries = function (uri, queryIds) {
       }
       if (!exists) {
         return Promise.reject(
-          new Error('The query [' + id + '] requested by KiBI kibana but not found in memory. Please check the configuration.')
+          new Error('The query [' + id + '] requested by Kibi but not found in memory. ' +
+                    'Possible reason - query datasource was removed. Please check the configuration')
         );
       }
     }
@@ -480,6 +483,7 @@ QueryEngine.prototype.getQueriesHtml = function (uri, queryDefs) {
   var queryIds = _.map(queryDefs, function (queryDef) {
     return queryDef.queryId;
   });
+
 
   return self._init().then(function () {
     return self._getQueries(uri, queryIds)

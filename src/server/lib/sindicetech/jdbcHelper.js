@@ -1,5 +1,6 @@
 var _       = require('lodash');
 var os      = require('os');
+var sync_request = require('sync-request');
 var config  = require('../../config');
 
 var _endsWith = function (s, suffix) {
@@ -59,12 +60,11 @@ JdbcHelper.prototype.getAbsolutePathToSindicetechFolder = function () {
   return pathToSindicetechFolder;
 };
 
-JdbcHelper.prototype.prepareJdbcConfig = function (datasourceId) {
+JdbcHelper.prototype.prepareJdbcConfig = function (conf) {
 
   var pathToSindicetechFolder = this.getAbsolutePathToSindicetechFolder();
   var libpath = '';
   var libs = [];
-  var conf = config.kibana.datasources[datasourceId];
 
   if (os.platform().indexOf('win') === 0) {
     //windows
@@ -86,8 +86,8 @@ JdbcHelper.prototype.prepareJdbcConfig = function (datasourceId) {
     libpath: libpath,
     libs: libs,
     drivername: conf.drivername,
-    url: conf.url,
-    user: conf.user,
+    url: conf.connection_string,
+    user: conf.username,
     password: conf.password
   };
   return jdbcConfig;
@@ -97,22 +97,39 @@ JdbcHelper.prototype.prepareJdbcConfig = function (datasourceId) {
 JdbcHelper.prototype.prepareJdbcPaths = function () {
   var libpaths = [];
   var libs = [];
-  for (var datasourceId in config.kibana.datasources) {
-    if (config.kibana.datasources.hasOwnProperty(datasourceId)) {
-      var conf = config.kibana.datasources[datasourceId];
-      if (conf.type === 'jdbc') {
-        var jdbcConfig = this.prepareJdbcConfig(datasourceId);
+
+  console.log('Preparing libraries paths before loading java jdbc - might take up to 10 sec');
+  var res = sync_request('GET', config.kibana.elasticsearch_url + '/' + config.kibana.kibana_index + '/datasource/_search', {
+    qs: {
+      size: 100
+    },
+    timeout: 10000
+  });
+
+  var resopnse = JSON.parse(res.getBody('utf8'));
+  if (resopnse.hits && resopnse.hits.hits) {
+    for (var i = 0; i < resopnse.hits.hits.length; i++) {
+      var datasource = resopnse.hits.hits[i];
+      if (datasource._source.datasourceType === 'sql_jdbc' || datasource._source.datasourceType === 'sparql_jdbc') {
+        // here create the clazz
+        var params = {};
+        try {
+          params = JSON.parse(datasource._source.datasourceParams);
+        } catch (e) {}
+        var jdbcConfig = this.prepareJdbcConfig(params);
         libpaths.push(jdbcConfig.libpath);
         libs = libs.concat(jdbcConfig.libs);
       }
     }
   }
-  return {
+
+  var ret = {
     libpaths: libpaths,
     libs: libs
   };
+  console.log('Preparation done:');
+  console.log(JSON.stringify(ret, null, ' '));
+  return ret;
 };
-
-
 
 module.exports = new JdbcHelper();

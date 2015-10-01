@@ -27,8 +27,7 @@ JdbcQuery.prototype._init = function () {
   if (self.initialized === true) {
     return Promise.resolve({'message': 'JDBC driver already initialized'});
   }
-
-  var jdbcConfig = jdbcHelper.prepareJdbcConfig(this.config.datasourceId);
+  var jdbcConfig = jdbcHelper.prepareJdbcConfig(this.config.datasource.datasourceClazz.datasource.datasourceParams);
 
   return new Promise(function (fulfill, reject) {
 
@@ -72,14 +71,16 @@ JdbcQuery.prototype.checkIfItIsRelevant = function (uri) {
       return Promise.reject('Got empty uri while it is required by mysql activation query');
     }
 
-    var datasource = config.kibana.datasources[self.config.datasourceId];
+    // here do not use getConnectionString method as it might contain sensitive information like decrypted password
+    var connection_string = self.config.datasource.datasourceClazz.datasource.datasourceParams.connection_string;
+    var max_age = self.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
     var query = self._getSqlQueryFromConfig(self.config.activationQuery, uri);
 
     if (query.trim() === '') {
       return Promise.resolve({'boolean': true});
     }
 
-    var cache_key = this.generateCacheKey(datasource.uri, query);
+    var cache_key = self.generateCacheKey(connection_string, query);
 
     if (self.cache) {
       var v = self.cache.get(cache_key);
@@ -102,7 +103,7 @@ JdbcQuery.prototype.checkIfItIsRelevant = function (uri) {
             // do something
             var data = {'boolean': results.length > 0 ? true : false};
             if (self.cache) {
-              self.cache.set(cache_key, data, datasource.maxAge);
+              self.cache.set(cache_key, data, max_age);
             }
             fulfill(data);
             self._closeConnection(conn);
@@ -119,7 +120,8 @@ JdbcQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
 
     var start = new Date().getTime();
 
-    var datasource = config.kibana.datasources[self.config.datasourceId];
+    var connection_string = self.config.datasource.datasourceClazz.datasource.datasourceParams.connection_string;
+    var max_age = self.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
     var query = self._getSqlQueryFromConfig(self.config.resultQuery, uri);
 
     // special case - we can not simply reject the Promise
@@ -128,7 +130,7 @@ JdbcQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
       return self._returnAnEmptyQueryResultsPromise('No data because the query require entityURI');
     }
 
-    var cache_key = this.generateCacheKey(datasource.uri, query, onlyIds, idVariableName);
+    var cache_key = self.generateCacheKey(connection_string, query, onlyIds, idVariableName);
 
     if (self.cache) {
       var v =  self.cache.get(cache_key);
@@ -201,7 +203,7 @@ JdbcQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
             }
 
             if (self.cache) {
-              self.cache.set(cache_key, data, datasource.maxAge);
+              self.cache.set(cache_key, data, max_age);
             }
 
             data.debug = {

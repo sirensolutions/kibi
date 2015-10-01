@@ -5,7 +5,7 @@ var config = require('../../../config');
 
 function PostgresqlDatasourceDef(datasource) {
   AbstractDatasourceDef.call(this, datasource);
-  this.schema = config.kibana.datasources_schema.posgresql.concat(config.kibana.datasources_schema.base);
+  this.schema = config.kibana.datasources_schema.postgresql.concat(config.kibana.datasources_schema.base);
 }
 
 util.inherits(PostgresqlDatasourceDef, AbstractDatasourceDef);

@@ -68,37 +68,6 @@ verify_ssl: true
 log_file: ./kibi.log
 # log_level: DEBUG
 
-
-# Datasources
-
-datasources:
-  crunchbase-datasource:
-    type: sqlite
-    dbfile: crunchbase.db
-
-# Sample datasource
-#
-#  sparql-datasource:
-#    type: sparql
-#    uri: http://localhost:3030/sparql/query
-#    timeout: 1000
-#  mysql-datasource:
-#    type: mysql
-#    uri: "mysql://USERNAME:PASSWORD@HOST/DATABASENAME"
-#    timeout: 1000
-#  postgress-datasource:
-#    type: pgsql
-#    uri: "pgsql://USERNAME:PASSWORD@kaste1/crunchbase"
-#    timeout: 1000
-#  mysql-jdbc-datasource:
-#    type: jdbc
-#    libpath: "/ABSOLUTE/PATH/TO/mysql-connector-java-5.1.35-bin.jar"
-#    drivername: "com.mysql.jdbc.Driver"
-#    url: "jdbc:mysql://HOST/DATABASENAME"
-#    libs: []
-#    user: 'USERNAME'
-#    password: 'PASSWORD'
-
 # Set to true to enable datasource query cache
 datasource_enable_cache: true
 
@@ -111,3 +80,7 @@ datasource_cache_max_age: 3600000
 
 # The default dashboard to load. Works only when default_app_id='dashboard'
 default_dashboard_id: Articles
+
+# load jdbc java bindings
+load_jdbc: true
+

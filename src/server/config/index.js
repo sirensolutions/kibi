@@ -6,6 +6,8 @@ var listPlugins = require('../lib/listPlugins');
 var configPath = process.env.CONFIG_PATH || path.join(__dirname, 'kibi.yml');
 var kibana = yaml.safeLoad(fs.readFileSync(configPath, 'utf8'));
 var env = process.env.NODE_ENV || 'development';
+var datasourceSchemaPath = path.join(__dirname, 'datasources-schema.json');
+var datasourceSchema = JSON.parse(fs.readFileSync(datasourceSchemaPath, 'utf8'));
 
 function checkPath(path) {
   try {
@@ -26,6 +28,9 @@ kibana.log_file = kibana.log_file || null;
 kibana.request_timeout = kibana.startup_timeout == null ? 0 : kibana.request_timeout;
 kibana.ping_timeout = kibana.ping_timeout == null ? kibana.request_timeout : kibana.ping_timeout;
 kibana.startup_timeout = kibana.startup_timeout == null ? 5000 : kibana.startup_timeout;
+
+kibana.datasources_schema = datasourceSchema;
+
 
 // Check if the local public folder is present. This means we are running in
 // the NPM module. If it's not there then we are running in the git root.

@@ -8,7 +8,8 @@ router.get('/config', function (req, res, next) {
     'kibana_index',
     'default_app_id',
     'shard_timeout',
-    'default_dashboard_id' // added by kibi
+    'default_dashboard_id', // added by kibi
+    'datasources_schema'
   ];
   var data = _.pick(config.kibana, keys);
 

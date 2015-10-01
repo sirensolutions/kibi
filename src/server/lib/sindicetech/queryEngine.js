@@ -14,37 +14,28 @@ var PostgresQuery  = require('./postgresQuery');
 var SQLiteQuery = require('./sqliteQuery');
 var RestQuery      = require('./restQuery');
 var InactivatedQuery  = require('./inactivatedQuery');
+var set_datasource_clazz = require('../kibi/datasources/set_datasource_clazz');
 
 var JdbcQuery;
 var jdbcHelper;
 var nodeJava;
 
-if (config.kibana.datasources) {
+if (config.kibana.load_jdbc === true) {
 
-  // require few things only if there is a jdbc datasource
-  for (var datasourceId in config.kibana.datasources) {
-    if (config.kibana.datasources.hasOwnProperty(datasourceId)) {
-      var datasourceDef = config.kibana.datasources[datasourceId];
-      if (datasourceDef.type === 'jdbc') {
-        JdbcQuery  = require('./jdbcQuery');
-        jdbcHelper = require('./jdbcHelper');
-        var pathToSindicetechFolder = jdbcHelper.getRelativePathToSindicetechFolder();
-        nodeJava   = require(pathToSindicetechFolder.replace(/\\/g, '/') + 'node_modules/jdbc-sindicetech/node_modules/java');
-        break;
-      }
-    }
-  }
+  JdbcQuery  = require('./jdbcQuery');
+  jdbcHelper = require('./jdbcHelper');
+  var pathToSindicetechFolder = jdbcHelper.getRelativePathToSindicetechFolder();
+  nodeJava   = require(pathToSindicetechFolder.replace(/\\/g, '/') + 'node_modules/jdbc-sindicetech/node_modules/java');
 
   // prepare the java classpath before calling any other method
-  if (nodeJava) {
-    var paths = jdbcHelper.prepareJdbcPaths();
-    _.each(paths.libpaths, function (path) {
-      nodeJava.classpath.push(path);
-    });
-    _.each(paths.libs, function (path) {
-      nodeJava.classpath.push(path);
-    });
-  }
+  var paths = jdbcHelper.prepareJdbcPaths();
+  _.each(paths.libpaths, function (path) {
+    nodeJava.classpath.push(path);
+  });
+  _.each(paths.libs, function (path) {
+    nodeJava.classpath.push(path);
+  });
+
 }
 
 
@@ -151,7 +142,9 @@ QueryEngine.prototype.reloadQueries = function () {
   var self = this;
   return self._fetchQueriesFromEs()
   .then(function (resp) {
+
     var queryDefinitions = [];
+    var datasourcesIds = [];
     if (resp.hits && resp.hits.hits && resp.hits.hits.length > 0) {
       _.each(resp.hits.hits, function (hit) {
 
@@ -165,6 +158,9 @@ QueryEngine.prototype.reloadQueries = function () {
           tags:              hit._source.st_tags
         };
 
+        if (datasourcesIds.indexOf(hit._source.st_datasourceId) === -1) {
+          datasourcesIds.push(hit._source.st_datasourceId);
+        }
         // here we are querying the elastic search
         // and rest_params, rest_headers
         // comes back as strings
@@ -185,6 +181,59 @@ QueryEngine.prototype.reloadQueries = function () {
 
     if (queryDefinitions.length > 0) {
 
+      // first fetch all datasources definitions
+      // to know the datasources types
+
+      var promises = [];
+      _.each(datasourcesIds, function (datasourceId) {
+        promises.push(self._getDatasourceFromEs(datasourceId));
+      });
+
+      Promise.all(promises).then(function (datasources) {
+        // now as we have all datasources
+        // iterate over them and set the clazz
+        _.each(datasources, function (datasource) {
+          set_datasource_clazz(datasource);
+        });
+
+        self.datasources = datasources;
+
+
+        //TODO: maybe filter out queries for which datasources does not exists
+
+
+        // now once we have query definitions and datasources
+        // load queries
+        self.queries = _.map(queryDefinitions, function (queryDef) {
+
+          var datasource = self._getDatasourceById(queryDef.datasourceId);
+          queryDef.datasource = datasource;
+
+          if (datasource.datasourceType === 'sparql') {
+            return new SparqlQuery(queryDef, self.cache);
+          } else if (datasource.datasourceType === 'postgresql') {
+            return new PostgresQuery(queryDef, self.cache);
+          } else if (datasource.datasourceType === 'mysql') {
+            return new MysqlQuery(queryDef, self.cache);
+          } else if (datasource.datasourceType === 'sparql_jdbc' || datasource.datasourceType === 'sql_jdbc' ) {
+            return new JdbcQuery(queryDef, self.cache);
+          } else if (datasource.datasourceType === 'rest') {
+            return new RestQuery(queryDef, self.cache);
+          } else if (datasource.datasourceType === 'sqlite') {
+            return new SQLiteQuery(queryDef, self.cache);
+          } else {
+            logger.error('Unknown datasource type[' + datasource.datasourceType + '] - could NOT create query object');
+          }
+        });
+
+
+
+
+      });
+
+
+
+      /*
       var queryDefinitionsFiltered  = _.filter(queryDefinitions, function (queryDef) {
         var datasource = config.kibana.datasources[queryDef.datasourceId];
         if (!datasource) {
@@ -195,32 +244,25 @@ QueryEngine.prototype.reloadQueries = function () {
         }
         return true;
       });
+      */
 
-      self.queries = _.map(queryDefinitionsFiltered, function (queryDef) {
-
-        var datasource = config.kibana.datasources[queryDef.datasourceId];
-
-        if (datasource.type === 'sparql') {
-          return new SparqlQuery(queryDef, self.cache);
-        } else if (datasource.type === 'pgsql') {
-          return new PostgresQuery(queryDef, self.cache);
-        } else if (datasource.type === 'mysql') {
-          return new MysqlQuery(queryDef, self.cache);
-        } else if (datasource.type === 'jdbc') {
-          return new JdbcQuery(queryDef, self.cache);
-        } else if (datasource.type === 'rest') {
-          return new RestQuery(queryDef, self.cache);
-        } else if (datasource.type === 'sqlite') {
-          return new SQLiteQuery(queryDef, self.cache);
-        } else {
-          logger.error('Unknown endpointType[' + datasource.type + '] - could NOT create query object');
-        }
-      });
+      // here array of promises to get the datasource from the index
     }
   }).error(function (err) {
     logger.error('Something is wrong - elastic search is not running');
     logger.error(err);
   });
+};
+
+
+QueryEngine.prototype._getDatasourceById = function (id) {
+  for (var i = 0; i < this.datasources.length; i++) {
+    if (this.datasources[i].id === id) {
+      return this.datasources[i];
+    }
+  }
+
+  return null;
 };
 
 QueryEngine.prototype._fetchQueriesFromEs = function () {
@@ -236,6 +278,24 @@ QueryEngine.prototype._fetchQueriesFromEs = function () {
     }
   });
 };
+
+QueryEngine.prototype._getDatasourceFromEs = function (datasourceId) {
+  return rp({
+    method: 'GET',
+    uri: url.parse(config.kibana.elasticsearch_url + '/' + config.kibana.kibana_index + '/datasource/' +  datasourceId),
+    transform: function (resp) {
+      var data = JSON.parse(resp);
+      if (data._source) {
+        var o = data._source;
+        o.id = data._id;
+        return o;
+      } else {
+        throw new Error('datasource object for [' + datasourceId + '] has no _source field');
+      }
+    }
+  });
+};
+
 
 /**
  * return a ordered list of query objects which:

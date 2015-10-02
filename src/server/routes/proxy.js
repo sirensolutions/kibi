@@ -6,7 +6,6 @@ var express = require('express');
 var _ = require('lodash');
 var fs = require('fs');
 var url = require('url');
-var target = url.parse(config.elasticsearch);
 var join = require('path').join;
 var logger = require('../lib/logger');
 var validateRequest = require('../lib/validateRequest');
@@ -16,22 +15,12 @@ var dbfilter = require('../lib/sindicetech/dbfilter');
 var inject = require('../lib/sindicetech/inject');
 var queryEngine = require('../lib/sindicetech/queryEngine');
 
-// If the target is backed by an SSL and a CA is provided via the config
-// then we need to inject the CA
-var customCA;
-if (/^https/.test(target.protocol) && config.kibana.ca) {
-  customCA = fs.readFileSync(config.kibana.ca, 'utf8');
-}
-// Add client certificate and key if required by elasticsearch
-var clientCrt;
-var clientKey;
-if (/^https/.test(target.protocol) && config.kibana.kibana_elasticsearch_client_crt && config.kibana.kibana_elasticsearch_client_key) {
-  clientCrt = fs.readFileSync(config.kibana.kibana_elasticsearch_client_crt, 'utf8');
-  clientKey = fs.readFileSync(config.kibana.kibana_elasticsearch_client_key, 'utf8');
-}
-
 // Create the router
 var router = module.exports = express.Router();
+
+// allow overriding agent for testing purposes
+router.proxyTarget = url.parse(config.elasticsearch);
+router.proxyAgent = require('../lib/proxyAgent').buildForProtocol(router.proxyTarget.protocol);
 
 // We need to capture the raw body before moving on
 router.use(function (req, res, next) {
@@ -86,13 +75,13 @@ function getPort(req) {
 
 // Create the proxy middleware
 router.use(function (req, res, next) {
-  var uri = _.defaults({}, target);
+  var uri = _.defaults({}, router.proxyTarget);
 
   // Add a slash to the end of the URL so resolve doesn't remove it.
   var path = (/\/$/.test(uri.path)) ? uri.path : uri.path + '/';
 
-  // szydan: !!! remove that '.' it breakes everything when elasticsearch runs behind a proxy
-  // e.g: http://localhost/bla/bla
+  // kibi: removed the dot to avoid issue with Elasticsearch running  behind a
+  // proxy
   // path = url.resolve(path, '.' + req.url);
   path = url.resolve(path, req.url);
 
@@ -101,6 +90,7 @@ router.use(function (req, res, next) {
     req.headers.authorization = 'Basic ' + auth.toString('base64');
   }
 
+  // kibi: replace _search with _msearch to use FilterJoinPlugin when available
   var elasticsearch_url = config.elasticsearch;
   if (config.elasticsearch_plugins.indexOf('FilterJoinPlugin') > -1) {
     var searchInd = path.indexOf('_search') === -1 ? path.indexOf('_msearch') : path.indexOf('_search');
@@ -110,6 +100,7 @@ router.use(function (req, res, next) {
   }
 
   var options = {
+    agent: router.proxyAgent,
     url: elasticsearch_url,
     method: req.method,
     headers: _.defaults({}, req.headers),
@@ -120,20 +111,6 @@ router.use(function (req, res, next) {
   options.headers['x-forward-for'] = req.connection.remoteAddress || req.socket.remoteAddress;
   options.headers['x-forward-port'] = getPort(req);
   options.headers['x-forward-proto'] = req.connection.pair ? 'https' : 'http';
-
-  // If the server has a custom CA we need to add it to the agent options
-  if (customCA) {
-    options.agentOptions = { ca: [customCA] };
-  }
-
-  // Add client key and certificate for elasticsearch if needed.
-  if (clientCrt && clientKey) {
-    if (!options.agentOptions) {
-      options.agentOptions = {};
-    }
-    options.agentOptions.cert = clientCrt;
-    options.agentOptions.key = clientKey;
-  }
 
   var savedQueries = {};
   // Only send the body if it's a PATCH, PUT, or POST
@@ -161,7 +138,7 @@ router.use(function (req, res, next) {
   // host header to the target host header. I don't quite understand the value
   // of this... but it's a feature we had before so I guess we are keeping it.
   if (config.kibana.elasticsearch_preserve_host) {
-    options.headers.host = target.host;
+    options.headers.host = router.proxyTarget.host;
   }
 
   // Create the request and pipe the response

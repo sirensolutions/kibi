@@ -25,8 +25,6 @@ module.exports = function (grunt) {
       ],
       overrides: {
         'FileSaver@undefined': ['MIT'],
-        'amdefine@0.1.1': ['MIT'],
-        'amdefine@1.0.0': ['MIT'],
         'angular-bootstrap@0.10.0': ['MIT'],
         'angular-ui-ace@0.2.3': ['MIT'],
         'assert-plus@0.1.5': ['MIT'],
@@ -44,7 +42,9 @@ module.exports = function (grunt) {
         'pkginfo@0.2.3': ['MIT'],
         'rc@1.0.3': ['MIT'],
         'uglify-js@2.2.5': ['BSD'],
-        'zeroclipboard@2.2.0': ['MIT']
+        'zeroclipboard@2.2.0': ['MIT'],
+        'amdefine@0.1.1': ['BSD-3-Clause', 'MIT'],
+        'amdefine@1.0.0': ['BSD-3-Clause', 'MIT']
       }
     }
   };

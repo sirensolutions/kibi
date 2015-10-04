@@ -82,5 +82,5 @@ datasource_cache_max_age: 3600000
 default_dashboard_id: Articles
 
 # load jdbc java bindings
-load_jdbc: true
+load_jdbc: false
 

@@ -43,9 +43,8 @@ define(function (require) {
       var setDatasourceSchema = Private(require('plugins/kibi/datasources_editor/lib/set_datasource_schema'));
 
       var notify = new Notifier({
-        location: 'Dashboard Groups Editor'
+        location: 'Datasources Configuration Editor'
       });
-
 
       $scope.datasourcesFinderOpen = false;
 

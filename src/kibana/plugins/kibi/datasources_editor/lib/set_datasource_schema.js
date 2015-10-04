@@ -1,4 +1,5 @@
 define(function (require) {
+  var _ = require('lodash');
 
   return function (Private, configFile) {
 
@@ -30,6 +31,18 @@ define(function (require) {
           break;
         default:
           datasource.datasourceDef = null;
+      }
+
+      if (typeof datasource.id === 'undefined') {
+        _.each(datasource.schema, function (param) {
+          var defaultValue = param.defaultValue;
+          if (typeof defaultValue === 'undefined') {
+            defaultValue = param.defaultValues;
+          }
+          if (typeof datasource.datasourceParams[param.name] === 'undefined' && defaultValue) {
+            datasource.datasourceParams[param.name] = defaultValue;
+          }
+        });
       }
 
     };

@@ -75,7 +75,7 @@
                   <option
                     ng-repeat="o in param.possibleValues"
                     value="{{o}}"
-                    ng-selected="datasource.datasourceParams[param.name].indexOf(o) !== -1">
+                    ng-selected="datasource.datasourceParams[param.name] ? datasource.datasourceParams[param.name].indexOf(o) !== -1 : false">
                     {{o}}
                   </option>
                 </select>

@@ -12,7 +12,7 @@
         <h2 class="title">Edit Datasource</h2>
       </div>
       <p>
-        Descriptions xxx.
+        Use this form to configure an external datasource, e.g. a connection to a SQL database.
       </p>
 
       <div class="config-section">
@@ -33,20 +33,20 @@
             <label>Type</label>
             <select ng-model="datasource.datasourceType" class="form-control span9">
               <option value="rest">REST</option>
-              <option value="sqlite">Sqlite</option>
-              <option value="mysql">MySql</option>
-              <option value="postgresql">PostgreSql</option>
+              <option value="sqlite">SQLite</option>
+              <option value="mysql">MySQL</option>
+              <option value="postgresql">PostgreSQL</option>
               <option value="sparql_http">Sparql over http</option>
-              <option value="sql_jdbc">Sql JDBC</option>
+              <option value="sql_jdbc">SQL JDBC</option>
               <option value="sparql_jdbc">Sparql JDBC</option>
-            <select>
+            </select>
           </div>
 
 
           <div ng-repeat="param in datasource.schema" >
             <ng-form name="innerForm">
               <div class="form-group">
-                <label>{{param.name}}</label> <span ng-if="!param.required">(Optional. Default={{param.defaultValue || param.defaultValues}})</span>
+                <label>{{param.name}}</label> <span ng-if="!param.required">(Optional. Default={{param.defaultValue || param.defaultValues || 'undefined'}})</span>
 
                 <input
                   ng-if="param.inputType == 'text'"

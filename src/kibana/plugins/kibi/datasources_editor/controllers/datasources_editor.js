@@ -79,7 +79,7 @@ define(function (require) {
         }
 
         datasource.save().then(function (datasourceId) {
-          notify.info('Datasource ' + datasource.title + ' successfuly saved');
+          notify.info('Datasource ' + datasource.title + ' successfully saved');
           queryEngineClient.clearCache().then(function () {
             kbnUrl.change('settings/datasources/' + datasourceId);
           });
@@ -87,7 +87,7 @@ define(function (require) {
       };
 
       $scope.delete = function () {
-        if ($window.confirm('Are you sure about deleting [' + datasource.title + ']')) {
+        if ($window.confirm('Are you sure you want to delete the datasource [' + datasource.title + ']')) {
           datasource.delete().then(function (resp) {
             queryEngineClient.clearCache().then(function () {
               kbnUrl.change('settings/datasources', {});
@@ -107,7 +107,7 @@ define(function (require) {
           savedDatasourceClone.description = datasource.description;
 
           savedDatasourceClone.save().then(function (resp) {
-            notify.info('Datasource ' + savedDatasourceClone.title + 'successfuly saved');
+            notify.info('Datasource ' + savedDatasourceClone.title + 'successfully saved');
             queryEngineClient.clearCache().then(function () {
               $rootScope.$emit('kibi:datasource:changed', resp);
               //TODO: do not need to slugify - use the resp

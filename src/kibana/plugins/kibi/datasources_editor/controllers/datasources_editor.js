@@ -6,10 +6,6 @@ define(function (require) {
   require('angular-sanitize');
   require('ng-tags-input');
 
-  var slugifyId = require('utils/slugify_id');
-  var $ = require('jquery');
-  var _ = require('lodash');
-
   require('routes')
   .when('/settings/datasources', {
     template: require('text!plugins/kibi/datasources_editor/index.html'),
@@ -110,11 +106,9 @@ define(function (require) {
             notify.info('Datasource ' + savedDatasourceClone.title + 'successfully saved');
             queryEngineClient.clearCache().then(function () {
               $rootScope.$emit('kibi:datasource:changed', resp);
-              //TODO: do not need to slugify - use the resp
-              kbnUrl.change('settings/datasources/' + slugifyId(savedDatasourceClone.id));
+              kbnUrl.change('settings/datasources/' + resp);
             });
           });
-
         });
       };
 

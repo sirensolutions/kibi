@@ -1,6 +1,5 @@
 var config = require('../config');
 var request = require('request');
-var buffer = require('buffer');
 var querystring = require('querystring');
 var express = require('express');
 var _ = require('lodash');
@@ -14,6 +13,8 @@ var filterJoin = require('../lib/sindicetech/filterJoin');
 var dbfilter = require('../lib/sindicetech/dbfilter');
 var inject = require('../lib/sindicetech/inject');
 var queryEngine = require('../lib/sindicetech/queryEngine');
+var crypto = require('crypto');
+var cryptoHelper = require('../lib/sindicetech/crypto_helper');
 
 // Create the router
 var router = module.exports = express.Router();
@@ -34,6 +35,7 @@ router.use(function (req, res, next) {
   });
 });
 
+
 /**
  * Pre-process the query and apply the custom parts of the query
  */
@@ -44,6 +46,12 @@ router.use(function (req, res, next) {
    */
   util.getQueriesAsPromise(req.rawBody).map(function (query) {
     return dbfilter(queryEngine, query);
+  }).map(function (query) {
+    // here detect if it a request to save datasource
+    if (req.url.indexOf('/.kibi/datasource/') === 0 && query.datasourceParams && query.datasourceType) {
+      cryptoHelper.encryptDatasourceParams(config, query);
+    }
+    return query;
   }).map(function (query) {
     return filterJoin(query);
   }).then(function (data) {

@@ -30,6 +30,8 @@ kibana.ping_timeout = kibana.ping_timeout == null ? kibana.request_timeout : kib
 kibana.startup_timeout = kibana.startup_timeout == null ? 5000 : kibana.startup_timeout;
 
 kibana.datasources_schema = datasourceSchema;
+kibana.datasource_encryption_algorithm = kibana.datasource_encryption_algorithm || 'aes-256-ctr';
+kibana.datasource_encryption_password = kibana.datasource_encryption_password || 'U9JwCx2qiwcvJLPclCOMl1W0S1SZDsto';
 
 
 // Check if the local public folder is present. This means we are running in

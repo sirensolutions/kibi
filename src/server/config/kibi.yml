@@ -95,5 +95,5 @@ datasource_encryption_key: '3zTvzr3p67VC61jmV54rIYu1545x4TlZ'
 default_dashboard_id: Articles
 
 # load jdbc java bindings
-load_jdbc: true
+load_jdbc: false
 

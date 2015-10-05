@@ -77,6 +77,10 @@ datasource_cache_size: 500
 # The max age of an object in the cache, in milliseconds
 datasource_cache_max_age: 3600000
 
+# Set to protect sensitive parts of configuration like passwords
+# gsm modes not supported due to lack of support in 0.10.x nodejs version
+datasource_encryption_algorithm: 'aes-256-ctr'
+datasource_encryption_password: '3zTvzr3p67VC61jmV54rIYu1545x4TlY'
 
 # The default dashboard to load. Works only when default_app_id='dashboard'
 default_dashboard_id: Articles

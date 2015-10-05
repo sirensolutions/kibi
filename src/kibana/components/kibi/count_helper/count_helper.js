@@ -191,13 +191,7 @@ define(function (require) {
               }
             } else {
 
-              if (filter.query &&
-                  !(
-                     filter.query.query_string &&
-                     filter.query.query_string.query === '*' &&
-                     filter.query.query_string.analyze_wildcard === true
-                  )
-              ) {
+              if (filter.query && !kibiStateHelper.isAnalyzedWildcardQueryString(filter.query)) {
                 // here add only if not "match *" as it would not add anything to the query anyway
                 query.query.filtered.filter.bool.must.push({query: filter.query});
               } else if (filter.or) {
@@ -225,26 +219,14 @@ define(function (require) {
 
         //update the query
         var selectedDashboardQuery = kibiStateHelper.getQueryForDashboardId(dashboardId);
-        if (selectedDashboardQuery &&
-           !(
-              selectedDashboardQuery.query_string &&
-              selectedDashboardQuery.query_string.query === '*' &&
-              selectedDashboardQuery.query_string.analyze_wildcard === true
-            )
-        ) {
-
+        if (selectedDashboardQuery && !kibiStateHelper.isAnalyzedWildcardQueryString(selectedDashboardQuery)) {
           query.query.filtered.filter.bool.must.push({
             query: selectedDashboardQuery
           });
         }
 
         if (savedSearchMeta.query && !_.isEmpty(savedSearchMeta.query) &&
-           !(
-              savedSearchMeta.query.query_string &&
-              savedSearchMeta.query.query_string.query === '*'  &&
-              savedSearchMeta.query.query_string.analyze_wildcard === true
-            )
-        ) {
+            !kibiStateHelper.isAnalyzedWildcardQueryString(savedSearchMeta.query)) {
           query.query.filtered.filter.bool.must.push({
             query: savedSearchMeta.query
           });

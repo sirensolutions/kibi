@@ -10,6 +10,19 @@ define(function (require) {
       this._init();
     }
 
+    /**
+     * Returns true if the query is:
+     * - a query_string
+     * - a wildcard only
+     * - analyze_wildcard is set to true
+     */
+    KibiStateHelper.prototype.isAnalyzedWildcardQueryString = function (query) {
+      return query &&
+        query.query_string &&
+        query.query_string.query === '*' &&
+        query.query_string.analyze_wildcard === true;
+    }
+
     KibiStateHelper.prototype._updateTimeForOneDashboard = function (dashboard) {
       var skipGlobalStateSave = true;
       if (dashboard.timeRestore === true) {
@@ -96,12 +109,7 @@ define(function (require) {
 
     KibiStateHelper.prototype.saveQueryForDashboardId = function (dashboardId, query) {
       if (query) {
-        if (
-            !(query.query_string &&
-              query.query_string.query &&
-              query.query_string.query === '*' &&
-              query.query_string.analyze_wildcard === true)
-        ) {
+        if (!this.isAnalyzedWildcardQueryString(query)) {
           globalState.k.q[dashboardId] = query;
         } else {
           // store '*' instead the full query to make it more compact as this is very common query

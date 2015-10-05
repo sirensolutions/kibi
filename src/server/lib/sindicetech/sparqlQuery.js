@@ -5,7 +5,7 @@ var url     = require('url');
 var http    = require('http');
 var config  = require('../../config');
 var AbstractQuery = require('./abstractQuery');
-
+var logger  = require('../logger');
 
 function SparqlQuery(queryDefinition, cache) {
   AbstractQuery.call(this, queryDefinition, cache);
@@ -31,8 +31,12 @@ SparqlQuery.prototype.checkIfItIsRelevant = function (uri) {
     return Promise.reject('Got empty uri while it is required by sparql activation query');
   }
 
-  var datasource = config.kibana.datasources[this.config.datasourceId];
+
+  var endpoint_url = this.config.datasource.datasourceClazz.datasource.datasourceParams.endpoint_url;
+  var timeout = this.config.datasource.datasourceClazz.datasource.datasourceParams.timeout;
+  var max_age = this.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
   var query = this._getQueryFromConfig(this.config.activationQuery, uri);
+
 
   if (query.trim() === '') {
     return Promise.resolve({'boolean': true});
@@ -40,7 +44,7 @@ SparqlQuery.prototype.checkIfItIsRelevant = function (uri) {
 
   var self = this;
 
-  var cache_key = this.generateCacheKey(datasource.uri, query);
+  var cache_key = this.generateCacheKey(endpoint_url, query);
 
   if (self.cache) {
     var v = self.cache.get(cache_key);
@@ -51,16 +55,16 @@ SparqlQuery.prototype.checkIfItIsRelevant = function (uri) {
 
   return rp({
     method: 'GET',
-    uri: url.parse(datasource.uri),
+    uri: url.parse(endpoint_url),
     qs: {
       format: 'application/sparql-results+json',
       query: query
     },
-    timeout: datasource.timeout || 1000,
+    timeout: timeout || 1000,
     transform: function (resp) {
       var data = JSON.parse(resp);
       if (self.cache) {
-        self.cache.set(cache_key, data, datasource.maxAge);
+        self.cache.set(cache_key, data, max_age);
       }
       return data;
     }
@@ -85,7 +89,9 @@ SparqlQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
   var start = new Date().getTime();
   var self = this;
 
-  var datasource = config.kibana.datasources[this.config.datasourceId];
+  var endpoint_url = this.config.datasource.datasourceClazz.datasource.datasourceParams.endpoint_url;
+  var timeout = this.config.datasource.datasourceClazz.datasource.datasourceParams.timeout;
+  var max_age = this.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
   var query = this._getQueryFromConfig(this.config.resultQuery, uri);
 
   // special case - we can not simply reject the Promise
@@ -94,7 +100,7 @@ SparqlQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
     return this._returnAnEmptyQueryResultsPromise('No data because the query require entityURI');
   }
 
-  var cache_key = this.generateCacheKey(datasource.uri, query, onlyIds, idVariableName);
+  var cache_key = this.generateCacheKey(endpoint_url, query, onlyIds, idVariableName);
 
   if (self.cache) {
     var v =  self.cache.get(cache_key);
@@ -106,12 +112,12 @@ SparqlQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
 
   return rp({
     method: 'GET',
-    uri: url.parse(datasource.uri),
+    uri: url.parse(endpoint_url),
     qs: {
       format: 'application/sparql-results+json',
       query: query
     },
-    timeout: datasource.timeout || 1000,
+    timeout: timeout || 1000,
     transform: function (resp) {
       var data = JSON.parse(resp);
 
@@ -137,7 +143,7 @@ SparqlQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
       }
 
       if (self.cache) {
-        self.cache.set(cache_key, data, datasource.maxAge);
+        self.cache.set(cache_key, data, max_age);
       }
 
       data.debug = {

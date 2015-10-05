@@ -1,5 +1,6 @@
 define(function (require) {
-  return function StSelectHelperFactory(config, $http, courier, indexPatterns, savedQueries, savedDashboards, Private, Promise) {
+  return function StSelectHelperFactory(config, $http, courier, indexPatterns,
+                                        savedQueries, savedDashboards, savedDatasources, Private, Promise) {
 
     function StSelectHelper() {
     }
@@ -57,13 +58,17 @@ define(function (require) {
     };
 
     StSelectHelper.prototype.getDatasources = function () {
-      var datasources = _.map(config.file.datasources, function (datasource) {
-        return {
-          label: datasource.id,
-          value: datasource.id
-        };
+      return savedDatasources.find().then(function (data) {
+        if (data.hits) {
+          var items = _.map(data.hits, function (hit) {
+            return {
+              label: hit.title,
+              value: hit.id
+            };
+          });
+          return items;
+        }
       });
-      return Promise.resolve(datasources);
     };
 
     StSelectHelper.prototype.getIndexTypes = function (indexPatternId) {
@@ -132,40 +137,55 @@ define(function (require) {
     };
 
     StSelectHelper.prototype.getQueryVariables = function (queryId) {
-      if (queryId) {
-        // first fetch the query
-        return savedQueries.get(queryId).then(function (savedQuery) {
-          var resultQuery = savedQuery.st_resultQuery;
-          var datasourceType = datasourceHelper.getDatasourceType(savedQuery.st_datasourceId);
-
-          var variables = [];
-          switch (datasourceType) {
-            case 'sparql':
-            case 'jdbc-sparql':
-              variables = sparqlHelper.getVariables(resultQuery);
-              break;
-            case 'sqlite':
-            case 'mysql':
-            case 'pgsql':
-            case 'jdbc':
-              variables = sqlHelper.getVariables(resultQuery);
-              break;
-            case 'rest':
-              // do nothing if variables is empty a text box instead of select should be rendered
-              break;
-            default:
-              return Promise.reject('Unknown datasource type for query=' + queryId + ': ' + datasourceType);
-          }
-
-          var fields = _.map(variables, function (v) {
-            return {
-              label: v.replace(',', ''),
-              value: v.replace('?', '').replace(',', '') // in case of sparql we have to remove the '?'
-            };
-          });
-          return [ fields, datasourceType ];
-        });
+      if (!queryId) {
+        return Promise.reject(new Error('No queryId'));
       }
+      // first fetch the query
+      return new Promise(function (fulfill, reject) {
+        savedQueries.get(queryId).then(function (savedQuery) {
+          if (!savedQuery.st_datasourceId) {
+            reject(new Error('SavedQuery [' + queryId + '] does not have st_datasourceId parameter'));
+          }
+          datasourceHelper.getDatasourceType(savedQuery.st_datasourceId).then(function (datasourceType) {
+            var resultQuery = savedQuery.st_resultQuery;
+            var variables = [];
+            switch (datasourceType) {
+              case 'sparql_http':
+              case 'jdbc-sparql':
+                variables = sparqlHelper.getVariables(resultQuery);
+                break;
+              case 'sqlite':
+              case 'mysql':
+              case 'pgsql':
+              case 'jdbc':
+                variables = sqlHelper.getVariables(resultQuery);
+                break;
+              case 'rest':
+                // do nothing if variables is empty a text box instead of select should be rendered
+                break;
+              default:
+                return reject('Unknown datasource type for query=' + queryId + ': ' + datasourceType);
+            }
+
+            var fields = _.map(variables, function (v) {
+              return {
+                label: v.replace(',', ''),
+                value: v.replace('?', '').replace(',', '') // in case of sparql we have to remove the '?'
+              };
+            });
+            fulfill({
+              fields: fields,
+              datasourceType: datasourceType
+            });
+          })
+          .catch(function (err) {
+            reject(err);
+          });
+        })
+        .catch(function (err) {
+          reject(err);
+        });
+      });
     };
 
     return new StSelectHelper();

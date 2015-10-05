@@ -14,37 +14,28 @@ var PostgresQuery  = require('./postgresQuery');
 var SQLiteQuery = require('./sqliteQuery');
 var RestQuery      = require('./restQuery');
 var InactivatedQuery  = require('./inactivatedQuery');
+var set_datasource_clazz = require('../kibi/datasources/set_datasource_clazz');
 
 var JdbcQuery;
 var jdbcHelper;
 var nodeJava;
 
-if (config.kibana.datasources) {
+if (config.kibana.load_jdbc === true) {
 
-  // require few things only if there is a jdbc datasource
-  for (var datasourceId in config.kibana.datasources) {
-    if (config.kibana.datasources.hasOwnProperty(datasourceId)) {
-      var datasourceDef = config.kibana.datasources[datasourceId];
-      if (datasourceDef.type === 'jdbc') {
-        JdbcQuery  = require('./jdbcQuery');
-        jdbcHelper = require('./jdbcHelper');
-        var pathToSindicetechFolder = jdbcHelper.getRelativePathToSindicetechFolder();
-        nodeJava   = require(pathToSindicetechFolder.replace(/\\/g, '/') + 'node_modules/jdbc-sindicetech/node_modules/java');
-        break;
-      }
-    }
-  }
+  JdbcQuery  = require('./jdbcQuery');
+  jdbcHelper = require('./jdbcHelper');
+  var pathToSindicetechFolder = jdbcHelper.getRelativePathToSindicetechFolder();
+  nodeJava   = require(pathToSindicetechFolder.replace(/\\/g, '/') + 'node_modules/jdbc-sindicetech/node_modules/java');
 
   // prepare the java classpath before calling any other method
-  if (nodeJava) {
-    var paths = jdbcHelper.prepareJdbcPaths();
-    _.each(paths.libpaths, function (path) {
-      nodeJava.classpath.push(path);
-    });
-    _.each(paths.libs, function (path) {
-      nodeJava.classpath.push(path);
-    });
-  }
+  var paths = jdbcHelper.prepareJdbcPaths();
+  _.each(paths.libpaths, function (path) {
+    nodeJava.classpath.push(path);
+  });
+  _.each(paths.libs, function (path) {
+    nodeJava.classpath.push(path);
+  });
+
 }
 
 
@@ -151,7 +142,9 @@ QueryEngine.prototype.reloadQueries = function () {
   var self = this;
   return self._fetchQueriesFromEs()
   .then(function (resp) {
+
     var queryDefinitions = [];
+    var datasourcesIds = [];
     if (resp.hits && resp.hits.hits && resp.hits.hits.length > 0) {
       _.each(resp.hits.hits, function (hit) {
 
@@ -165,6 +158,9 @@ QueryEngine.prototype.reloadQueries = function () {
           tags:              hit._source.st_tags
         };
 
+        if (datasourcesIds.indexOf(hit._source.st_datasourceId) === -1) {
+          datasourcesIds.push(hit._source.st_datasourceId);
+        }
         // here we are querying the elastic search
         // and rest_params, rest_headers
         // comes back as strings
@@ -185,42 +181,90 @@ QueryEngine.prototype.reloadQueries = function () {
 
     if (queryDefinitions.length > 0) {
 
-      var queryDefinitionsFiltered  = _.filter(queryDefinitions, function (queryDef) {
-        var datasource = config.kibana.datasources[queryDef.datasourceId];
-        if (!datasource) {
-          console.log(
-            'Unknown datasourceId [' + queryDef.datasourceId + '] in query [' + queryDef.id + ']. ' +
-            'Check your configuration file or review query object in queryEditor.');
+      var promises = [];
+      _.each(datasourcesIds, function (datasourceId) {
+        promises.push(
+          new Promise(function (fulfill, reject) {
+            self._getDatasourceFromEs(datasourceId).then(function (datasource) {
+              fulfill({
+                success: datasource
+              });
+            })
+            .catch(function (err) {
+              fulfill({
+                error: err
+              });
+            });
+          })
+        );
+      });
+
+      Promise.all(promises).then(function (results) {
+        // now as we have all datasources
+        // iterate over them and set the clazz
+        var datasources = [];
+        if (results)
+        _.each(results, function (res) {
+          if (res.success) {
+            var datasource = res.success;
+            set_datasource_clazz(datasource);
+            datasources.push(datasource);
+          } else if (res.error) {
+            console.log('Could not load datasource cause: ');
+            console.log(res.error);
+          }
+        });
+
+        self.datasources = datasources;
+
+        //filter out queries for which datasources does not exists
+        var filteredQueryDefinitions = _.filter(queryDefinitions, function (queryDef) {
+          var datasource = self._getDatasourceById(queryDef.datasourceId);
+          if (datasource) {
+            queryDef.datasource = datasource;
+            return true;
+          }
           return false;
-        }
-        return true;
+        });
+
+        // now once we have query definitions and datasources
+        // load queries
+        self.queries = _.map(filteredQueryDefinitions, function (queryDef) {
+
+          if (queryDef.datasource.datasourceType === 'sparql_http') {
+            return new SparqlQuery(queryDef, self.cache);
+          } else if (queryDef.datasource.datasourceType === 'postgresql') {
+            return new PostgresQuery(queryDef, self.cache);
+          } else if (queryDef.datasource.datasourceType === 'mysql') {
+            return new MysqlQuery(queryDef, self.cache);
+          } else if (queryDef.datasource.datasourceType === 'sparql_jdbc' || queryDef.datasource.datasourceType === 'sql_jdbc' ) {
+            return new JdbcQuery(queryDef, self.cache);
+          } else if (queryDef.datasource.datasourceType === 'rest') {
+            return new RestQuery(queryDef, self.cache);
+          } else if (queryDef.datasource.datasourceType === 'sqlite') {
+            return new SQLiteQuery(queryDef, self.cache);
+          } else {
+            logger.error('Unknown datasource type[' + queryDef.datasource.datasourceType + '] - could NOT create query object');
+          }
+        });
       });
 
-      self.queries = _.map(queryDefinitionsFiltered, function (queryDef) {
-
-        var datasource = config.kibana.datasources[queryDef.datasourceId];
-
-        if (datasource.type === 'sparql') {
-          return new SparqlQuery(queryDef, self.cache);
-        } else if (datasource.type === 'pgsql') {
-          return new PostgresQuery(queryDef, self.cache);
-        } else if (datasource.type === 'mysql') {
-          return new MysqlQuery(queryDef, self.cache);
-        } else if (datasource.type === 'jdbc') {
-          return new JdbcQuery(queryDef, self.cache);
-        } else if (datasource.type === 'rest') {
-          return new RestQuery(queryDef, self.cache);
-        } else if (datasource.type === 'sqlite') {
-          return new SQLiteQuery(queryDef, self.cache);
-        } else {
-          logger.error('Unknown endpointType[' + datasource.type + '] - could NOT create query object');
-        }
-      });
     }
   }).error(function (err) {
     logger.error('Something is wrong - elastic search is not running');
     logger.error(err);
   });
+};
+
+
+QueryEngine.prototype._getDatasourceById = function (id) {
+  for (var i = 0; i < this.datasources.length; i++) {
+    if (this.datasources[i].id === id) {
+      return this.datasources[i];
+    }
+  }
+
+  return null;
 };
 
 QueryEngine.prototype._fetchQueriesFromEs = function () {
@@ -236,6 +280,24 @@ QueryEngine.prototype._fetchQueriesFromEs = function () {
     }
   });
 };
+
+QueryEngine.prototype._getDatasourceFromEs = function (datasourceId) {
+  return rp({
+    method: 'GET',
+    uri: url.parse(config.kibana.elasticsearch_url + '/' + config.kibana.kibana_index + '/datasource/' +  datasourceId),
+    transform: function (resp) {
+      var data = JSON.parse(resp);
+      if (data._source) {
+        var o = data._source;
+        o.id = data._id;
+        return o;
+      } else {
+        throw new Error('datasource object for [' + datasourceId + '] has no _source field');
+      }
+    }
+  });
+};
+
 
 /**
  * return a ordered list of query objects which:
@@ -269,7 +331,8 @@ QueryEngine.prototype._getQueries = function (uri, queryIds) {
       }
       if (!exists) {
         return Promise.reject(
-          new Error('The query [' + id + '] requested by KiBI kibana but not found in memory. Please check the configuration.')
+          new Error('The query [' + id + '] requested by Kibi but not found in memory. ' +
+                    'Possible reason - query datasource was removed. Please check the configuration')
         );
       }
     }
@@ -420,6 +483,7 @@ QueryEngine.prototype.getQueriesHtml = function (uri, queryDefs) {
   var queryIds = _.map(queryDefs, function (queryDef) {
     return queryDef.queryId;
   });
+
 
   return self._init().then(function () {
     return self._getQueries(uri, queryIds)

@@ -34,7 +34,7 @@ function Query(snippetDefinition, cache) {
     activationQuery   : snippetDefinition.activationQuery || '',
     resultQuery       : snippetDefinition.resultQuery || '',
     datasourceId      : snippetDefinition.datasourceId || null,
-
+    datasource        : snippetDefinition.datasource,
     rest_params       : snippetDefinition.rest_params || [],
     rest_headers      : snippetDefinition.rest_headers || [],
 

@@ -106,15 +106,12 @@ define(function (require) {
 
                 if (promise) {
                   promise = promise.then(function (data) {
-                    var variables = data[0];
-                    var datasourceType = data[1];
-
                     scope.getVariable = false;
-                    if (variables.length === 0 && datasourceType !== 'rest') { // either sparql or sql
+                    if (data.fields.length === 0 && data.datasourceType !== 'rest') { // either sparql or sql
                       scope.linkToQuery = '#/settings/queries/' + scope.queryId;
                       scope.getVariable = true;
                     }
-                    return variables;
+                    return data.fields;
                   });
                 }
                 break;

@@ -1,18 +1,15 @@
 define(function (require) {
-  return function DatasourceHelperFactory(configFile) {
+  return function DatasourceHelperFactory(savedDatasources) {
 
     function DatasourceHelper() {
     }
 
     DatasourceHelper.prototype.getDatasourceType = function (datasourceId) {
-
-      for (var i = 0; i < configFile.datasources.length; i++) {
-        if (configFile.datasources[i].id === datasourceId) {
-          return configFile.datasources[i].type;
-        }
-      }
-
+      return savedDatasources.get(datasourceId).then(function (datasource) {
+        return datasource.datasourceType;
+      });
     };
+
 
     return new DatasourceHelper();
   };

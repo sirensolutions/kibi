@@ -27,7 +27,11 @@ PostgresQuery.prototype.checkIfItIsRelevant = function (uri) {
     return Promise.reject('Got empty uri while it is required by postgres activation query');
   }
 
-  var datasource = config.kibana.datasources[this.config.datasourceId];
+  var connectionString = this.config.datasource.datasourceClazz.getConnectionString();
+  var host = this.config.datasource.datasourceClazz.datasource.datasourceParams.host;
+  var dbname = this.config.datasource.datasourceClazz.datasource.datasourceParams.dbname;
+  var timeout = this.config.datasource.datasourceClazz.datasource.datasourceParams.timeout;
+  var max_age = this.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
   var query = this._getSqlQueryFromConfig(this.config.activationQuery, uri);
 
   if (query.trim() === '') {
@@ -37,7 +41,7 @@ PostgresQuery.prototype.checkIfItIsRelevant = function (uri) {
   var self = this;
 
 
-  var cache_key = this.generateCacheKey(datasource.uri, query);
+  var cache_key = this.generateCacheKey(host + dbname, query);
 
   if (self.cache) {
     var v = self.cache.get(cache_key);
@@ -48,7 +52,7 @@ PostgresQuery.prototype.checkIfItIsRelevant = function (uri) {
 
   return new Promise(function (fulfill, reject) {
     try {
-      pg.connect(datasource.uri, function (err, client, done) {
+      pg.connect(connectionString, function (err, client, done) {
         if (err) {
           reject(err);
         }
@@ -65,7 +69,7 @@ PostgresQuery.prototype.checkIfItIsRelevant = function (uri) {
           var data = {'boolean': result.rows.length > 0 ? true : false};
 
           if (self.cache) {
-            self.cache.set(cache_key, data, datasource.maxAge);
+            self.cache.set(cache_key, data, max_age);
           }
           fulfill(data);
           client.end();
@@ -176,7 +180,12 @@ PostgresQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
   var start = new Date().getTime();
   var self = this;
 
-  var datasource = config.kibana.datasources[this.config.datasourceId];
+  var connectionString = this.config.datasource.datasourceClazz.getConnectionString();
+  var host = this.config.datasource.datasourceClazz.datasource.datasourceParams.host;
+  var dbname = this.config.datasource.datasourceClazz.datasource.datasourceParams.dbname;
+  var timeout = this.config.datasource.datasourceClazz.datasource.datasourceParams.timeout;
+  var max_age = this.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
+
   var query = this._getSqlQueryFromConfig(this.config.resultQuery, uri);
 
   // special case if the uri is required but it is empty
@@ -201,7 +210,7 @@ PostgresQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
     console.log(query);
   }
 
-  var cache_key = this.generateCacheKey(datasource.uri, query, onlyIds, idVariableName);
+  var cache_key = this.generateCacheKey(host + dbname, query, onlyIds, idVariableName);
 
   if (self.cache) {
     var v =  self.cache.get(cache_key);
@@ -214,7 +223,7 @@ PostgresQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
 
   return new Promise(function (fulfill, reject) {
     try {
-      pg.connect(datasource.uri, function (err, client, done) {
+      pg.connect(connectionString, function (err, client, done) {
         if (err) {
           reject(err);
           return;
@@ -288,7 +297,7 @@ PostgresQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
           }
 
           if (self.cache) {
-            self.cache.set(cache_key, data, datasource.maxAge);
+            self.cache.set(cache_key, data, max_age);
           }
 
           data.debug = {

@@ -61,6 +61,7 @@ module.exports = function (grunt) {
       '<%= plugins %>/markdown_vis/markdown_vis.less',
       '<%= src %>/kibana/components/agg_types/styles/*.less',
       '<%= plugins %>/sindicetech/**/*.less',
+      '<%= plugins %>/kibi/**/*.less',
       '<%= src %>/kibana/directives/st_*.less',
       '<%= src %>/kibana/components/sindicetech/**/*.less',
       '<%= src %>/kibana/components/kibi/**/*.less'

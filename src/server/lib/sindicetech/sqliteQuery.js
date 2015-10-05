@@ -26,7 +26,10 @@ SQLiteQuery.prototype = _.create(AbstractQuery.prototype, {
  * opened succesfully or rejected with an error.
  */
 SQLiteQuery.prototype.openConnection = function () {
-  var datasource = config.kibana.datasources[this.config.datasourceId];
+  var dbfile = this.config.datasource.datasourceClazz.datasource.datasourceParams.db_file_path;
+  var modes  = this.config.datasource.datasourceClazz.datasource.datasourceParams.modes;
+  //TODO: how to pass one or more modes ??
+
   var self = this;
   return new Promise(function (fulfill, reject) {
     if (self._connection) {
@@ -34,14 +37,15 @@ SQLiteQuery.prototype.openConnection = function () {
       return;
     }
     var path = require('path');
-    var dbfile = datasource.dbfile;
-    if (datasource.dbfile && path.resolve(dbfile) !== path.normalize(dbfile)) {
+
+    if (dbfile && path.resolve(dbfile) !== path.normalize(dbfile)) {
       // if dbfile is not an absolute path
       var rootDir = process.env.ROOT_DIR;
       if (rootDir) {
-        dbfile = path.join(rootDir, datasource.dbfile);
+        dbfile = path.join(rootDir, dbfile);
       }
     }
+
     var db = new sqlite3.Database(dbfile, sqlite3.OPEN_READONLY, function (error) {
       if (error) {
         reject(self._augmentError(error));
@@ -69,7 +73,9 @@ SQLiteQuery.prototype.checkIfItIsRelevant = function (uri) {
     return Promise.reject('Entity URI must be specified to execute the query.');
   }
 
-  var datasource = config.kibana.datasources[this.config.datasourceId];
+  var dbfile = this.config.datasource.datasourceClazz.datasource.datasourceParams.db_file_path;
+  var max_age = this.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
+
   var query = this._getSqlQueryFromConfig(this.config.activationQuery, uri);
 
   if (query.trim() === '') {
@@ -78,7 +84,7 @@ SQLiteQuery.prototype.checkIfItIsRelevant = function (uri) {
 
   var self = this;
 
-  var cache_key = this.generateCacheKey(datasource.dbfile, query);
+  var cache_key = this.generateCacheKey(dbfile, query);
 
   if (self.cache) {
     var v = self.cache.get(cache_key);
@@ -102,7 +108,7 @@ SQLiteQuery.prototype.checkIfItIsRelevant = function (uri) {
           };
 
           if (self.cache) {
-            self.cache.set(cache_key, data, datasource.maxAge);
+            self.cache.set(cache_key, data, max_age);
           }
 
           fulfill(data);
@@ -122,7 +128,8 @@ SQLiteQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
   var start = new Date().getTime();
   var self = this;
 
-  var datasource = config.kibana.datasources[this.config.datasourceId];
+  var dbfile = this.config.datasource.datasourceClazz.datasource.datasourceParams.db_file_path;
+  var max_age = this.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
   var query = this._getSqlQueryFromConfig(this.config.resultQuery, uri);
 
   // special case - we can not simply reject the Promise
@@ -131,7 +138,7 @@ SQLiteQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
     return this._returnAnEmptyQueryResultsPromise('Missing entityURI');
   }
 
-  var cache_key = this.generateCacheKey(datasource.dbfile, query, onlyIds, idVariableName);
+  var cache_key = this.generateCacheKey(dbfile, query, onlyIds, idVariableName);
 
   if (self.cache) {
     var v =  self.cache.get(cache_key);
@@ -194,7 +201,7 @@ SQLiteQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
           }
 
           if (self.cache) {
-            self.cache.set(cache_key, data, datasource.maxAge);
+            self.cache.set(cache_key, data, max_age);
           }
 
           data.debug = {

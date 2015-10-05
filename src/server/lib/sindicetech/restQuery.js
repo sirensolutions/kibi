@@ -47,27 +47,19 @@ RestQuery.prototype.checkIfItIsRelevant = function (uri) {
 RestQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
   var self = this;
 
+  var url_s = this.config.datasource.datasourceClazz.datasource.datasourceParams.url;
+  var method = this.config.datasource.datasourceClazz.datasource.datasourceParams.method.toLowerCase();
+  var timeout = this.config.datasource.datasourceClazz.datasource.datasourceParams.timeout;
+  var max_age = this.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
+
+
   return new Promise(function (fulfill, reject) {
     var start = new Date().getTime();
-    var datasource = config.kibana.datasources[self.config.datasourceId];
-
-    var requestParts = datasource.request.split(/\s+/);
-    if (requestParts.length !== 2) {
-      reject(
-        new Error(
-          'Wrong request parameter in ' + self.config.datasourceId + '. Request parameter should be in a form "GET|POST url"'
-        )
-      );
-    }
-
-    var method = requestParts[0].toLowerCase();
     var regex = /^get|post$/;
 
     if (!regex.test(method)) {
       reject(new Error('Only GET|POST methods are supported at the moment'));
     }
-    var url_s = requestParts[1];
-
 
     if (uri.indexOf('rest://') !== 0) {
       reject(new Error('Wrong URI scheme. For rest query uri scheme should strat with "rest://"'));
@@ -123,22 +115,9 @@ RestQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
       }
     });
 
-
-    _.each(datasource.params, function (param) {
-      if (param.display === false) {
-        data[param.name] = param.value;
-      }
-    });
-
-    _.each(datasource.headers, function (header) {
-      if (header.display === false) {
-        headers[header.name] = header.value;
-      }
-    });
-
     var key;
     if (self.cache) {
-      key = datasource.resource + JSON.stringify(headers) + JSON.stringify(data);
+      key = url_s + method + JSON.stringify(headers) + JSON.stringify(data);
     }
 
     if (self.cache) {
@@ -152,13 +131,13 @@ RestQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
       method: method.toUpperCase(),
       uri: url.parse(url_s),
       headers: headers,
-      timeout: datasource.timeout || 5000,
+      timeout: timeout || 5000,
       transform: function (resp) {
         var data = {
           results: JSON.parse(resp)
         };
         if (self.cache) {
-          self.cache.set(key, data, datasource.maxAge);
+          self.cache.set(key, data, max_age);
         }
         return data;
       }

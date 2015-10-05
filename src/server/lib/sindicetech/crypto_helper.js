@@ -7,6 +7,8 @@ function endsWith(str, suffix) {
 
 
 function CryptoHelper() {
+  this.defaultAlgorithm = 'aes-256-ctr';
+  this.defaultKey = '3zTvzr3p67VC61jmV54rIYu1545x4TlY';
 }
 
 
@@ -15,7 +17,7 @@ CryptoHelper.prototype.encrypt = function (algorithm, password, plaintext) {
   var encrypted;
   var finalBuffer;
 
-  if (endsWith(algorithm, '-gcm')) {
+  if (endsWith(algorithm, '-gcm') || endsWith(algorithm, '-xts') || endsWith(algorithm, '-cbc-hmac-sha1')) {
     throw new Error ('Not supported in node 0.10.x');
     /*
     Enable when we switch to node 0.11
@@ -93,7 +95,7 @@ CryptoHelper.prototype.encryptDatasourceParams = function (config, query) {
 
     // now iterate over params and check if any of them has to be encrypted
     var algorithm = config.kibana.datasource_encryption_algorithm;
-    var password = config.kibana.datasource_encryption_password;
+    var password = config.kibana.datasource_encryption_key;
 
     for (var paramName in params) {
       if (params.hasOwnProperty(paramName)) {

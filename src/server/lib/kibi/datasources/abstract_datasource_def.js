@@ -27,7 +27,7 @@ AbstractDatasourceDef.prototype._getDefinitionFromSchema = function (name) {
 };
 
 AbstractDatasourceDef.prototype._decryptValue = function (v) {
-  return cryptoHelper.decrypt(config.kibana.datasource_encryption_password, v);
+  return cryptoHelper.decrypt(config.kibana.datasource_encryption_key, v);
 };
 
 AbstractDatasourceDef.prototype.populateParameters = function (s) {

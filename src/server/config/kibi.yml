@@ -78,13 +78,22 @@ datasource_cache_size: 500
 datasource_cache_max_age: 3600000
 
 # Set to protect sensitive parts of configuration like passwords
-# gsm modes not supported due to lack of support in 0.10.x nodejs version
+# currently supported modes:
+# aes256            camellia256
+# aes-256-ctr
+# aes-256-cbc       camellia-256-cbc
+# aes-256-cfb       camellia-256-cfb
+# aes-256-cfb1      camellia-256-cfb1
+# aes-256-cfb8      camellia-256-cfb8
+# aes-256-ctr
+# aes-256-ecb       camellia-256-ecb
+# aes-256-ofb       camellia-256-ofb
 datasource_encryption_algorithm: 'aes-256-ctr'
-datasource_encryption_password: '3zTvzr3p67VC61jmV54rIYu1545x4TlY'
+datasource_encryption_key: '3zTvzr3p67VC61jmV54rIYu1545x4TlZ'
 
 # The default dashboard to load. Works only when default_app_id='dashboard'
 default_dashboard_id: Articles
 
 # load jdbc java bindings
-load_jdbc: false
+load_jdbc: true
 

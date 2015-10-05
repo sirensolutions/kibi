@@ -129,13 +129,7 @@ define(function (require) {
 
           //5 add query for the source
           var fQuery = urlHelper.getCurrentDashboardQuery();
-          if (fQuery &&
-            !(
-              fQuery.query_string &&
-              fQuery.query_string.query === '*' &&
-              fQuery.query_string.analyze_wildcard === true
-            )
-          ) {
+          if (fQuery && !kibiStateHelper.isAnalyzedWildcardQueryString(fQuery)) {
             existingFilters.push({
               query: fQuery
             });
@@ -146,12 +140,7 @@ define(function (require) {
           if (savedSearchMeta.filter && savedSearchMeta.filter.length > 0 ) {
             existingFilters = existingFilters.concat(savedSearchMeta.filter);
           }
-          if (savedSearchMeta.query &&
-            !(
-            savedSearchMeta.query.query_string &&
-            savedSearchMeta.query.query_string.query === '*' &&
-            savedSearchMeta.query.query_string.analyze_wildcard === true)
-          ) {
+          if (savedSearchMeta.query && !kibiStateHelper.isAnalyzedWildcardQueryString(savedSearchMeta.query)) {
             existingFilters.push({
               query: savedSearchMeta.query
             });
@@ -269,12 +258,7 @@ define(function (require) {
           if (savedSearchMeta.filter && savedSearchMeta.filter.length > 0 ) {
             filters[button.sourceIndexPatternId] = filters[button.sourceIndexPatternId].concat(savedSearchMeta.filter);
           }
-          if (savedSearchMeta.query &&
-            !(
-            savedSearchMeta.query.query_string &&
-            savedSearchMeta.query.query_string.query === '*' &&
-            savedSearchMeta.query.query_string.analyze_wildcard === true)
-          ) {
+          if (savedSearchMeta.query && !kibiStateHelper.isAnalyzedWildcardQueryString(savedSearchMeta.query)) {
             filters[button.sourceIndexPatternId].push({
               query: savedSearchMeta.query
             });

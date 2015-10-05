@@ -143,15 +143,12 @@ define(function (require) {
           for (var index in queries) {
             if (queries.hasOwnProperty(index) && index !== focus) {
               var fQuery = queries[index];
-              if (fQuery && fQuery.query_string && fQuery.query_string.query !== '*') {
+              // filter out only query_string queries that are only a wildcard
+              if (fQuery && (!fQuery.query_string || fQuery.query_string.query !== '*')) {
                 if (!joinFilter.join.filters[index]) {
                   joinFilter.join.filters[index] = [];
                 }
-                joinFilter.join.filters[index].push({
-                  query: {
-                    query_string: fQuery.query_string
-                  }
-                });
+                joinFilter.join.filters[index].push({ query: fQuery });
               }
             }
           }

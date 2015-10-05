@@ -207,18 +207,6 @@ define(function (require) {
         var _initUriFormat = function (clickOption) {
           if (clickOption.type === 'link') {
             clickOption.uriFormat = '@URL@';
-          } else if (clickOption.type === 'select') {
-            if (clickOption.uriScheme === 'sparql') {
-              clickOption.uriFormat = '@URI@';
-            } else if (clickOption.uriScheme === 'sql') {
-              clickOption.uriFormat = 'sql://@TABLE@/@PKVALUE@';
-            } else if (clickOption.uriScheme === 'rest') {
-              clickOption.uriFormat = 'rest://@VAR0@';
-            } else if (!clickOption.uriScheme) {
-              clickOption.uriFormat = '';
-            } else {
-              notify.error('Unknown entity scheme: ' + clickOption.uriScheme);
-            }
           }
         };
 
@@ -229,25 +217,18 @@ define(function (require) {
           // and modify clickOption.uriFormat
           _.each($scope.vis.params.clickOptions, function (clickOption, ind) {
             var prevType = $scope.prevClickOptions[ind] ? $scope.prevClickOptions[ind].type : '';
-            var prevScheme = $scope.prevClickOptions[ind] ? $scope.prevClickOptions[ind].scheme : '';
-
-            // Initialise the uriFormat if unset and (the uriScheme is defined or the type is link)
-            if ((clickOption.type === 'link' || clickOption.uriScheme) && !clickOption.uriFormat) {
-              _initUriFormat(clickOption);
-            }
 
             if (clickOption.type === 'select' && prevType === 'link') {
               _initUriFormat(clickOption);
-            } else if ((prevType && prevType !== clickOption.type) || (prevScheme && prevScheme !== clickOption.uriScheme)) {
+            } else if ((prevType && prevType !== clickOption.type)) {
               _initUriFormat(clickOption);
             }
 
             // Update the list of visited click options
             if (ind < $scope.prevClickOptions.length) {
               $scope.prevClickOptions[ind].type = clickOption.type;
-              $scope.prevClickOptions[ind].scheme = clickOption.uriScheme;
             } else {
-              $scope.prevClickOptions.splice(ind, 0, { type: clickOption.type, scheme: clickOption.uriScheme });
+              $scope.prevClickOptions.splice(ind, 0, {type: clickOption.type});
             }
           });
 

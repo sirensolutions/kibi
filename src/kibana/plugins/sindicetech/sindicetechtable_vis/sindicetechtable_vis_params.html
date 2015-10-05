@@ -31,6 +31,16 @@
 
             <div class="form-group">
               <label>On click I want to</label>
+              <a href="http://siren.solutions/kibi/docs/current/" >
+                <i class="fa fa-info-circle help-icon"
+                   tooltip="Click to see the documetation"
+                   tooltip-placement="right"
+                   tooltip-animation="false"
+                   tooltip-popup-delay="0"
+                   tooltip-append-to-body="true">
+                </i>
+              </a>
+              </br>
               <select required ng-model="clickOption.type" class="form-control">
                 <option value="link">Follow the URL</option>
                 <option value="select">Select an entity</option>
@@ -38,21 +48,6 @@
                 THIS OPTION IS COMING
                 <option value="filter">Filter</option>
                  -->
-              </select>
-            </div>
-
-
-            <div ng-if="clickOption.type === 'select'" class="form-group">
-              <label>Selected entity URI scheme</label>
-              <select
-                required
-                ng-model="clickOption.uriScheme"
-                class="form-control" >
-                <option value="sql">SQL</option>
-                <!-- ENABLE BACK WHEN REST is officialy supported in 0.2
-                <option value="rest">REST</option>
-                -->
-                <option value="sparql">SPARQL</option>
               </select>
             </div>
 
@@ -70,56 +65,6 @@
               <input type="text" ng-model="clickOption.uriFormat" class="form-control" required/>
               <span style="color:orange;">If <b>URL field</b> contains valid URL there is no need to modify URL format.</span>
             </div>
-
-
-            <div ng-if="clickOption.type === 'select' && clickOption.uriScheme === 'sql'" class="form-group">
-              <label>Table name</label>
-              <input type="text" ng-model="clickOption.tableName" class="form-control">
-            </div>
-
-            <div ng-if="clickOption.uriScheme && clickOption.type === 'select'" class="form-group">
-              <label ng-if="clickOption.uriScheme === 'sparql' || clickOption.uriScheme === '' || !clickOption.uriScheme">
-                URI field
-              </label>
-              <label ng-if="clickOption.uriScheme === 'sql'">
-                PKVALUE field
-              </label>
-              <label ng-if="clickOption.uriScheme === 'rest'">
-                VAR0 field
-              </label>
-              <st-select
-                object-type="field"
-                required
-                index-pattern-id="vis.indexPattern.id"
-                ng-model="clickOption.valueField" ></st-select>
-            </div>
-
-            <div ng-if="clickOption.uriScheme && clickOption.type === 'select'" class="form-group">
-              <label>URI format</label></br>
-              <span ng-if="clickOption.uriScheme === 'sparql'" style="color:orange;">
-                If <b>URI field</b> contains correct URI there is no need to modify URI format.
-                In SPARQL queries user can refer to the value using @URI@ placeholder.
-              </span>
-              <span ng-if="clickOption.uriScheme === 'sql'" style="color:orange;">
-                If <b>PKVALUE field</b> contains correct identifier and correct table name was given there is no need to modify URI format. In SQL queries user can refer to the values using @TABLE@ and @PKVALUE@ placeholders.
-              </span>
-              <span ng-if="clickOption.uriScheme === 'rest'" style="color:orange;">
-                Currently you can pass only one variable to REST query called <b>@VAR0@</b>.
-                In REST queries user can refer to the value using @VAR0@ placeholder.
-              </span>
-              <!--
-                here the value of each uriformat should be computed
-                and presented to the user
-                for uriScheme == sparql
-                @URI@
-                for uriScheme == sql
-                sql://@TABLE@/@PKVALUE@
-                for uriScheme == rest
-                rest://@VAR0@/@VAR1@/@VAR2@
-              -->
-              <input type="text" ng-model="clickOption.uriFormat" class="form-control" required/>
-            </div>
-
 
 
             <div ng-if="clickOption.uriScheme && clickOption.type === 'select'" class="form-group">

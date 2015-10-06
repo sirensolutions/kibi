@@ -1,4 +1,5 @@
 var config = require('../../../config');
+var cryptoHelper = require('../../sindicetech/crypto_helper');
 
 function AbstractDatasourceDef(datasource) {
   if (typeof datasource.datasourceParams === 'string' || datasource.datasourceParams instanceof String) {
@@ -26,9 +27,7 @@ AbstractDatasourceDef.prototype._getDefinitionFromSchema = function (name) {
 };
 
 AbstractDatasourceDef.prototype._decryptValue = function (v) {
-  //TODO: get the key and decrypt
-  console.log('decrypting');
-  return v;
+  return cryptoHelper.decrypt(config.kibana.datasource_encryption_key, v);
 };
 
 AbstractDatasourceDef.prototype.populateParameters = function (s) {

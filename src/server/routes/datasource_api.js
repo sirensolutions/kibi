@@ -42,8 +42,6 @@ router.get('/getQueriesHtml', function (req, res, next) {
 
   }).catch(function (error) {
 
-    console.log(error);
-
     res.send({
       query: req.query,
       error: error.message

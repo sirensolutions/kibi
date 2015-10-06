@@ -12,7 +12,8 @@ define(function (require) {
   require('angular-route');
   require('angular-bindonce');
 
-  var configFile = JSON.parse(require('text!config'));
+  var c = JSON.parse(require('text!config'));
+  var configFile = c.configFile;
 
   var kibana = modules.get('kibana', [
     // list external requirements here

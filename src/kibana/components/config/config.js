@@ -3,7 +3,9 @@ define(function (require) {
     'kibana/notify'
   ]);
 
-  var configFile = JSON.parse(require('text!config'));
+  var c = JSON.parse(require('text!config'));
+  var configFile = c.configFile;
+
   configFile.elasticsearch = (function () {
     var a = document.createElement('a');
     a.href = 'elasticsearch';
@@ -42,6 +44,11 @@ define(function (require) {
      ******/
 
     config.file = configFile;
+
+    if (c.warnings && c.warnings.length > 0) {
+      notify.warning(c.warnings[0]);
+    }
+
 
     /**
      * Executes once and returns a promise that is resolved once the

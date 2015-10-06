@@ -12,24 +12,24 @@ define(function (require) {
 
         var updateSelectedEntity = function () {
           $scope.disabled = !!globalState.entityDisabled;
-          if (globalState.entityURI) {
-            $scope.entityURI = globalState.entityURI;
-            if (globalState.entityLabel) {
-              $scope.label = globalState.entityLabel;
+          if (globalState.se && globalState.se.length > 0) {
+            // for now we support a single entity
+            $scope.entityURI = globalState.se[0];
+            var parts = globalState.se[0].split('/');
+            if (parts.length === 5) {
+              $scope.label = parts[4];
             } else {
-              $scope.label = globalState.entityURI;
+              $scope.label = globalState.se[0];
             }
           }
         };
 
-        $scope.removeEntity = function () {
+        $scope.removeAllEntities = function () {
           delete $scope.entityURI;
           delete $scope.label;
           delete $scope.disabled;
           delete globalState.entityDisabled;
-          delete globalState.entityURI;
-          delete globalState.entityLabel;
-          delete globalState.selectedEntityId;
+          delete globalState.se;
           globalState.save();
           $route.reload();
         };
@@ -41,7 +41,7 @@ define(function (require) {
           $route.reload();
         };
 
-        var removeHandler = $rootScope.$on('kibi:entityURI:changed', function () {
+        var removeHandler = $rootScope.$on('kibi:selectedEntities:changed', function (se) {
           updateSelectedEntity();
         });
 

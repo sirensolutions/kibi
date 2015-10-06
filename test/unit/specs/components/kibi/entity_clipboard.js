@@ -8,7 +8,7 @@ define(function (require) {
       var MockState = require('fixtures/mock_state');
       var _ = require('lodash');
 
-      function init(entityDisabled, entityURI, entityLabel) {
+      function init(entityDisabled, selectedEntities) {
         module('kibana', function ($provide) {
           $provide.service('$route', function () {
             return {
@@ -19,9 +19,8 @@ define(function (require) {
         module('kibana/global_state', function ($provide) {
           $provide.service('globalState', function () {
             globalState = new MockState({
-              entityURI: entityURI,
+              se: selectedEntities,
               entityDisabled: entityDisabled,
-              entityLabel: entityLabel
             });
             return globalState;
           });
@@ -33,40 +32,40 @@ define(function (require) {
       }
 
       it('selected entity', function () {
-        init(false, 'uri', 'aaa');
-        $rootScope.$emit('kibi:entityURI:changed', null);
+        init(false, ['index/type/id/column/label']);
+        $rootScope.$emit('kibi:selectedEntities:changed', null);
         expect($rootScope.disabled).to.be(false);
-        expect($rootScope.entityURI).to.be('uri');
-        expect($rootScope.label).to.be('aaa');
+        expect($rootScope.entityURI).to.be('index/type/id/column/label');
+        expect($rootScope.label).to.be('label');
       });
 
       it('selected entity but disabled', function () {
-        init(true, 'uri', 'aaa');
-        $rootScope.$emit('kibi:entityURI:changed', null);
+        init(true, ['index/type/id/column/label']);
+        $rootScope.$emit('kibi:selectedEntities:changed', null);
         expect($rootScope.disabled).to.be(true);
-        expect($rootScope.entityURI).to.be('uri');
-        expect($rootScope.label).to.be('aaa');
+        expect($rootScope.entityURI).to.be('index/type/id/column/label');
+        expect($rootScope.label).to.be('label');
       });
 
       it('an entity missing label takes the URI as label', function () {
-        init(false, 'uri', null);
-        $rootScope.$emit('kibi:entityURI:changed', null);
+        init(false, ['index/type/id/column']);
+        $rootScope.$emit('kibi:selectedEntities:changed', null);
         expect($rootScope.disabled).to.be(false);
-        expect($rootScope.entityURI).to.be('uri');
-        expect($rootScope.label).to.be('uri');
+        expect($rootScope.entityURI).to.be('index/type/id/column');
+        expect($rootScope.label).to.be('index/type/id/column');
       });
 
       it('an entity missing the URI', function () {
-        init(false, null, 'bye');
-        $rootScope.$emit('kibi:entityURI:changed', null);
+        init(false, []);
+        $rootScope.$emit('kibi:selectedEntities:changed', null);
         expect($rootScope.disabled).to.be(false);
         expect($rootScope.entityURI).to.be(undefined);
         expect($rootScope.label).to.be(undefined);
       });
 
       it('should remove the entity', function () {
-        init(false, 'good', 'bye');
-        $rootScope.removeEntity();
+        init(false, ['index/type/id/column/label']);
+        $rootScope.removeAllEntities();
         expect($rootScope.disabled).to.be(undefined);
         expect($rootScope.entityURI).to.be(undefined);
         expect($rootScope.label).to.be(undefined);
@@ -78,7 +77,7 @@ define(function (require) {
 
       it('should toggle the entity', function () {
         init(false);
-        $rootScope.$emit('kibi:entityURI:changed', null);
+        $rootScope.$emit('kibi:selectedEntities:changed', null);
         expect($rootScope.disabled).to.be(false);
         expect(globalState.entityDisabled).to.be(false);
         $rootScope.toggleClipboard();
@@ -88,6 +87,7 @@ define(function (require) {
         expect($rootScope.disabled).to.be(false);
         expect(globalState.entityDisabled).to.be(false);
       });
+
     });
   });
 });

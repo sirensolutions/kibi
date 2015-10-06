@@ -3,7 +3,6 @@ define(function (require) {
   var module = require('modules').get('kibana/sindicetech_entity_info_vis', ['kibana']);
   var rison = require('utils/rison');
   var _ = require('lodash');
-  var $ = require('jquery');
   var kibiUtils = require('kibiutils');
 
   module.controller(
@@ -24,14 +23,14 @@ define(function (require) {
       $scope.holder = {
         entityURI: '',
         entityURIEnabled: false,
-        visible: $('#sindicetech_entity_info_vis_params').is(':visible'),
+        visible: $location.path().indexOf('/visualize/edit/') === 0,
         html: '',
         htmlEvents:[]
       };
 
 
-      if (globalState.entityURI) {
-        $scope.holder.entityURI = globalState.entityURI;
+      if (globalState.se && globalState.se.length > 0) {
+        $scope.holder.entityURI = globalState.se[0];
       } else {
         $scope.holder.entityURI = '';
       }
@@ -40,8 +39,8 @@ define(function (require) {
         $scope.holder.entityURIEnabled = entityURIEnabled;
       });
 
-      var removeEntityURIChangedHandler = $rootScope.$on('kibi:entityURI:changed', function (event, entityURI) {
-        $scope.holder.entityURI = entityURI;
+      var removeEntityURIChangedHandler = $rootScope.$on('kibi:selectedEntities:changed', function (event, se) {
+        $scope.holder.entityURI = se[0];
       });
 
       $scope.$on('$destroy', function () {

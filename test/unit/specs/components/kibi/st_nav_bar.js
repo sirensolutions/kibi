@@ -10,6 +10,7 @@ define(function (require) {
       var sinon = require('test_utils/auto_release_sinon');
       var dashboardGroupHelper;
       var Promise;
+      var urlHelper;
 
       beforeEach(function () {
         module('kibana', function ($provide) {
@@ -27,6 +28,7 @@ define(function (require) {
           $rootScope = _$rootScope_;
           $compile('<st-nav-bar></st-nav-bar>')($rootScope);
           dashboardGroupHelper = Private(require('components/kibi/dashboard_group_helper/dashboard_group_helper'));
+          urlHelper = Private(require('components/kibi/url_helper/url_helper'));
         });
       });
 
@@ -282,6 +284,37 @@ define(function (require) {
         expect($rootScope.dashboardGroups[0].count).to.be(42);
       });
 
+      it('should update counts on location change', function () {
+        var countOnTabsResponse = {
+          responses: [
+            {
+              hits: {
+                total: 42
+              }
+            }
+          ]
+        };
+        var dashboardGroups = [
+          {
+            id: 'fake',
+            query: true
+          }
+        ];
+
+        sinon.stub(urlHelper, 'isItDashboardUrl').returns(true);
+        sinon.stub(urlHelper, 'shouldUpdateCountsBasedOnLocation').returns(true);
+
+        initStubs(dashboardGroups, {});
+        $httpBackend.whenPOST('elasticsearch/_msearch?getCountsOnTabs').respond(200, countOnTabsResponse);
+        $rootScope.$broadcast('$locationChangeSuccess');
+        $timeout.flush();
+        $timeout.verifyNoPendingTasks();
+        $httpBackend.flush();
+
+        expect($rootScope.dashboardGroups).to.have.length(1);
+        expect($rootScope.dashboardGroups[0].id).to.be('fake');
+        expect($rootScope.dashboardGroups[0].count).to.be(42);
+      });
     });
   });
 });

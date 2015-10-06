@@ -34,11 +34,11 @@ define(function (require) {
     var truncateByHeightTemplate = _.template(noWhiteSpace(require('text!partials/truncate_by_height.html')));
 
     var fieldFormats = Private(require('registry/field_formats'));
+    var _isInSelectedEntities = Private(require('components/sindicetech/st_doc_table/components/_is_this_entity_in_selected_entities'));
 
     var notify = new Notifier({
       location: 'Enhanced search results'
     });
-
 
     return {
       restrict: 'A',
@@ -108,7 +108,7 @@ define(function (require) {
           createSummaryRow($scope.row);
         });
 
-        var off = $rootScope.$on('kibi:entityURI:changed', function () {
+        var off = $rootScope.$on('kibi:selectedEntities:changed', function () {
           createSummaryRow($scope.row);
         });
         $scope.$on('$destroy', off);
@@ -153,30 +153,14 @@ define(function (require) {
 
               _.each($scope.cellClickHandlers[column], function (clickHandler) {
 
-                var valueField = clickHandler.valueField;
-                var idValue = row.$$_flattened[valueField];
                 var type = clickHandler.type;
-                var uriFormat = clickHandler.uriFormat;
 
-                // Check if idValue is an array; if so, use the first
-                // element of the array as the value and display a warning
-                if (idValue instanceof Array && idValue.length > 0) {
-                  notify.warning(
-                    'Field [' + valueField + '] used in an click handler contains more than one value.' +
-                    'The first value will be used.'
-                  );
-                  idValue = idValue[0];
-                }
-
-                // skip event handling if no value is set
-                if (!idValue) {
-                  return;
-                }
                 // Style the cell value as a link
                 $cell.addClass('click');
 
-                if (globalState && globalState.selectedEntityId === row.$$_partialFormatted._id &&
-                  globalState.selectedEntityColumn === column && !globalState.entityDisabled) {
+                if (globalState.se && globalState.se.length > 0 &&
+                    type === 'select' && !globalState.entityDisabled &&
+                    _isInSelectedEntities(globalState.se, row.$$_partialFormatted._id, column)) {
                   $cell.addClass('selectedEntityCell');
                 }
 
@@ -184,7 +168,24 @@ define(function (require) {
                   e.preventDefault();
 
                   if (type === 'link') {
+                    var valueField = clickHandler.valueField;
+                    var idValue = row.$$_flattened[valueField];
+                    var uriFormat = clickHandler.uriFormat;
 
+                    // Check if idValue is an array; if so, use the first
+                    // element of the array as the value and display a warning
+                    if (idValue instanceof Array && idValue.length > 0) {
+                      notify.warning(
+                        'Field [' + valueField + '] used in an click handler contains more than one value.' +
+                        'The first value will be used.'
+                      );
+                      idValue = idValue[0];
+                    }
+
+                    // skip event handling if no value is set
+                    if (!idValue) {
+                      return;
+                    }
                     // open the URL in a new tab
                     var win;
                     if (uriFormat.trim() === '@URL@') {
@@ -197,35 +198,26 @@ define(function (require) {
                     }
 
                   } else if (type === 'select') {
-                    var uri = null;
-                    var uriScheme = clickHandler.uriScheme;
+                    var entityLabel = row.$$_partialFormatted[column];
+                    var entityId = row.$$_partialFormatted._index + '/' +
+                                   row.$$_partialFormatted._type + '/' +
+                                   row.$$_partialFormatted._id + '/' +
+                                   column + '/' +
+                                   entityLabel;
 
-                    // set the selected entity id
-                    globalState.selectedEntityId = row.$$_partialFormatted._id;
-                    globalState.selectedEntityColumn = column;
-
-                    if (uriScheme === 'sparql') {
-                      // for URI slashes are fine
-                      uri = uriFormat.replace(/@URI@/g, idValue);
-                    } else if (uriScheme === 'sql') {
-                      var tableName = clickHandler.tableName;
-                      // as far as I know tablenames should not have any slashes
-                      uri = uriFormat.replace(/@TABLE@/g, tableName).replace(/@PKVALUE@/, idValue);
-                    } else if (uriScheme === 'rest') {
-                      // if there are any slashes in the value replace them with a special placeholder
-                      uri = uriFormat.replace(/@VAR0@/g, idValue.replace(/\//g, '--SLASH--'));
+                    if (!globalState.se) {
+                      globalState.se = [];
                     }
+                    if (globalState.se.indexOf(entityId) === -1) {
 
-                    if (uri) {
-                      globalState.entityURI = uri;
+                      // this is to make sure only one gets selected for now
+                      // to allow multiple selection simpy remove the line below
+                      globalState.se = [];
+
+                      globalState.se.push(entityId);
                       delete globalState.entityDisabled;
+                      globalState.save();
                     }
-                    // set the selected entity label
-                    var label = row.$$_partialFormatted[column];
-                    if (label) {
-                      globalState.entityLabel = label;
-                    }
-                    globalState.save();
 
                     // switch to different dashboard only if user gave one in settings
                     var targetDashboardId = clickHandler.targetDashboardId;
@@ -234,7 +226,7 @@ define(function (require) {
                       $route.reload();
                     } else {
                       // as there is no need for reload just broadcast the change
-                      $rootScope.$emit('kibi:entityURI:changed', uri);
+                      $rootScope.$emit('kibi:selectedEntities:changed', globalState.se);
 
                       // Call courier.fetch to update visualizations
                       // This will update all the visualisations, not only the one

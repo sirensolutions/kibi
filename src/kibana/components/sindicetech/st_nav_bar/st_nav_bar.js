@@ -34,7 +34,7 @@ define(function (require) {
             // in this case fire the query immediately
             _fireUpdateAllCounts(groupIndexesToUpdate, reason);
           } else {
-            lastEventTimer = $timeout( function () {
+            lastEventTimer = $timeout(function () {
               _fireUpdateAllCounts(groupIndexesToUpdate, reason);
             }, 750);
           }
@@ -45,20 +45,17 @@ define(function (require) {
         var _fireUpdateAllCounts = function (groupIndexesToUpdate, reason) {
           if (console) console.log('Counts will be updated because: [' + reason + ']');
 
-          var promises = [];
-
+          var array = [];
           if (groupIndexesToUpdate && groupIndexesToUpdate.constructor === Array && groupIndexesToUpdate.length > 0) {
-            promises = _.map(groupIndexesToUpdate, function (index) {
-              return dashboardGroupHelper.getCountQueryForSelectedDashboard($scope.dashboardGroups, index);
-            });
+            array = groupIndexesToUpdate;
           } else {
-            _.each($scope.dashboardGroups, function (g, i) {
-              promises.push(dashboardGroupHelper.getCountQueryForSelectedDashboard($scope.dashboardGroups, i));
-            });
+            array = $scope.dashboardGroups;
           }
+          var promises = _.map(array, function (g, index) {
+            return dashboardGroupHelper.getCountQueryForSelectedDashboard($scope.dashboardGroups, index);
+          });
 
           Promise.all(promises).then(function (results) {
-
             // if there is resolved promise with no query property
             // it means that this group has no index attached and should be skipped when updating the group counts
             // so keep track of indexes to know which group counts should be updated
@@ -73,17 +70,16 @@ define(function (require) {
               }
             });
 
-
             if (query !== '' && lastFiredMultiCountQuery !== query) {
               lastFiredMultiCountQuery = query;
 
               // ?getCountsOnTabs has no meaning, it is just useful to filter when inspecting requests
               $http.post('elasticsearch/_msearch?getCountsOnTabs', query)
-              .success(function (data) {
-                if (data.responses.length !== indexesToUpdate.length) {
+              .then(function (response) {
+                if (response.data.responses.length !== indexesToUpdate.length) {
                   notify.warning('The number of counts responses does not match the dashboardGroups which should be updated');
                 } else {
-                  _.each(data.responses, function (hit, i) {
+                  _.each(response.data.responses, function (hit, i) {
                     // get the coresponding groupIndex from results
                     $scope.dashboardGroups[results[indexesToUpdate[i]].groupIndex].count = hit.hits.total;
                   });
@@ -96,11 +92,16 @@ define(function (require) {
 
 
         var _writeToScope = function (newDashboardGroups) {
-          var changes = dashboardGroupHelper.updateDashboardGroups($scope.dashboardGroups, newDashboardGroups);
-          if (changes.replace === true) {
+          if (!$scope.dashboardGroups) {
             $scope.dashboardGroups = newDashboardGroups;
+            _updateAllCounts(null, [ 'undefined oldDashboardsGroups' ]);
+          } else if ($scope.dashboardGroups.length !== newDashboardGroups.length) {
+            $scope.dashboardGroups = newDashboardGroups;
+            _updateAllCounts(null, [ 'dashboardsGroups length not the same' ]);
+          } else {
+            var changes = dashboardGroupHelper.updateDashboardGroups($scope.dashboardGroups, newDashboardGroups);
+            _updateAllCounts(changes.indexes, changes.reasons);
           }
-          _updateAllCounts(changes.indexes, changes.reasons);
         };
 
 
@@ -119,7 +120,7 @@ define(function (require) {
           // check that changes on the same dashboard require counts update
           if (urlHelper.shouldUpdateCountsBasedOnLocation(oldUrl, newUrl)) {
             $timeout(function () {
-              _updateAllCounts(null, 'locationChangeSuccess');
+              _updateAllCounts(null, [ 'locationChangeSuccess' ]);
               dashboardGroupHelper.computeGroups().then(function (dashboardGroups) {
                 _writeToScope(dashboardGroups);
               });

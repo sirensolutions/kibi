@@ -339,25 +339,6 @@ define(function (require) {
      * return the list of group indexes on which the count should be updated
      */
     DashboardGroupHelper.prototype.updateDashboardGroups = function (oldDashboardGroups, newDashboardGroups) {
-      // here first collect the group indexes to update counts
-      if (!oldDashboardGroups) {
-        return {
-          indexes: null,
-          reasons: ['undefined oldDashboardsGroups'],
-          replace: true
-        };
-      }
-
-      // There is already a oldDashboardGroups
-      // lets compare with the new one and update only if necessary
-      if (oldDashboardGroups.length !== newDashboardGroups.length) {
-        return {
-          indexes: null,
-          reasons: ['dashboardsGroups length not the same'],
-          replace: true
-        };
-      }
-
       var groupIndexesToUpdateCountsOn = [];
       var reasons = [];
 
@@ -454,8 +435,7 @@ define(function (require) {
 
       return {
         indexes: groupIndexesToUpdateCountsOn,
-        reasons: reasons,
-        replace: false
+        reasons: reasons
       };
     };
 

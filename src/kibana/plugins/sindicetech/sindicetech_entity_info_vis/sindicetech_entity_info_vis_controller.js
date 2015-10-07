@@ -54,6 +54,9 @@ define(function (require) {
         if ($scope.vis.params.queryOptions) {
           $scope.renderTemplates();
         }
+
+        globalState.se = [$scope.holder.entityURI];
+        globalState.save();
       });
 
       $scope.renderTemplates = function () {

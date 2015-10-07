@@ -24,8 +24,8 @@ define(function (require) {
         visible: $('#sindicetechtable_vis_params').is(':visible')
       };
 
-      if (globalState.entityURI) {
-        $scope.holder.entityURI = globalState.entityURI;
+      if (globalState.se && globalState.se.length > 0) {
+        $scope.holder.entityURI = globalState.se[0];
       } else {
         $scope.holder.entityURI = '';
       }

@@ -45,15 +45,16 @@ define(function (require) {
         var _fireUpdateAllCounts = function (groupIndexesToUpdate, reason) {
           if (console) console.log('Counts will be updated because: [' + reason + ']');
 
-          var array = [];
+          var promises  = [];
           if (groupIndexesToUpdate && groupIndexesToUpdate.constructor === Array && groupIndexesToUpdate.length > 0) {
-            array = groupIndexesToUpdate;
+            promises = _.map(groupIndexesToUpdate, function (index) {
+              return dashboardGroupHelper.getCountQueryForSelectedDashboard($scope.dashboardGroups, index);
+            });
           } else {
-            array = $scope.dashboardGroups;
+            promises = _.map($scope.dashboardGroups, function (g, index) {
+              return dashboardGroupHelper.getCountQueryForSelectedDashboard($scope.dashboardGroups, index);
+            });
           }
-          var promises = _.map(array, function (g, index) {
-            return dashboardGroupHelper.getCountQueryForSelectedDashboard($scope.dashboardGroups, index);
-          });
 
           Promise.all(promises).then(function (results) {
             // if there is resolved promise with no query property
@@ -120,7 +121,6 @@ define(function (require) {
           // check that changes on the same dashboard require counts update
           if (urlHelper.shouldUpdateCountsBasedOnLocation(oldUrl, newUrl)) {
             $timeout(function () {
-              _updateAllCounts(null, [ 'locationChangeSuccess' ]);
               dashboardGroupHelper.computeGroups().then(function (dashboardGroups) {
                 _writeToScope(dashboardGroups);
               });

@@ -232,24 +232,13 @@ define(function (require) {
 
       it('update counts only for the modified group', function () {
         // set the dashboardgroup
-        var dashboardGroups = [
-          {
-            id: 'fake',
-            query: false
-          }
-        ];
-
-        initStubs(dashboardGroups, {});
-        $rootScope.$broadcast('$routeChangeSuccess');
-        $rootScope.$apply();
-
-        expect($rootScope.dashboardGroups).to.have.length(1);
-        expect($rootScope.dashboardGroups[0].id).to.be('fake');
-        expect($rootScope.dashboardGroups[0].count).to.be(undefined);
-
-        // compare with previous dashboardGroups
         var countOnTabsResponse = {
           responses: [
+            {
+              hits: {
+                total: 42
+              }
+            },
             {
               hits: {
                 total: 42
@@ -257,31 +246,56 @@ define(function (require) {
             }
           ]
         };
-        var changes = {
-          indexes: [
-            {
-              id: 'fake'
-            }
-          ]
-        };
-        dashboardGroups = [
+        var dashboardGroups = [
           {
             id: 'fake',
+            query: true
+          },
+          {
+            id: 'john',
             query: true
           }
         ];
 
+        initStubs(dashboardGroups, {});
+        var response = $httpBackend.whenPOST('elasticsearch/_msearch?getCountsOnTabs');
+        response.respond(200, countOnTabsResponse);
+        $rootScope.$broadcast('$routeChangeSuccess');
+        $httpBackend.flush();
+
+        expect($rootScope.dashboardGroups).to.have.length(2);
+        expect($rootScope.dashboardGroups[0].id).to.be('fake');
+        expect($rootScope.dashboardGroups[0].count).to.be(42);
+        expect($rootScope.dashboardGroups[1].id).to.be('john');
+        expect($rootScope.dashboardGroups[1].count).to.be(42);
+
+        // compare with previous dashboardGroups
+        countOnTabsResponse = {
+          responses: [
+            {
+              hits: {
+                total: 24
+              }
+            }
+          ]
+        };
+        var changes = {
+          indexes: [ 1 ]
+        };
+
         initStubs(dashboardGroups, changes);
-        $httpBackend.whenPOST('elasticsearch/_msearch?getCountsOnTabs').respond(200, countOnTabsResponse);
+        response.respond(200, countOnTabsResponse);
         $rootScope.$broadcast('$routeChangeSuccess');
         $rootScope.$apply();
         $timeout.flush();
         $timeout.verifyNoPendingTasks();
         $httpBackend.flush();
 
-        expect($rootScope.dashboardGroups).to.have.length(1);
+        expect($rootScope.dashboardGroups).to.have.length(2);
         expect($rootScope.dashboardGroups[0].id).to.be('fake');
         expect($rootScope.dashboardGroups[0].count).to.be(42);
+        expect($rootScope.dashboardGroups[1].id).to.be('john');
+        expect($rootScope.dashboardGroups[1].count).to.be(24);
       });
 
       it('should update counts on location change', function () {

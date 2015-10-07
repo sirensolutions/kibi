@@ -120,7 +120,7 @@ define(function (require) {
 
         //needed by kibi to show filterbar when entityClipboard contains an entity
         var getShowEntityClipboard = function () {
-          return !!globalState.entityURI && urlHelper.isItDashboardUrl();
+          return globalState.se && globalState.se.length > 0 && urlHelper.isItDashboardUrl();
         };
         $scope.showEntityClipboard = getShowEntityClipboard();
         globalState.on('save_with_changes', function () {

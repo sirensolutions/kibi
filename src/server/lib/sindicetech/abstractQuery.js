@@ -10,6 +10,7 @@ var kibiUtils = require('kibiutils');
 var slugifyId = require('./slugify_id');
 var config = require('../../config');
 var logger = require('../logger');
+var queryHelper = require('./query_helper');
 var debug = false;
 
 handlebars.registerHelper('json', function (context) {
@@ -64,9 +65,7 @@ Query.prototype.generateCacheKey = function (prefix, query, onlyValues, valueVar
 };
 
 Query.prototype._checkIfQueryRequireEntityURI  = function (query) {
-  return query.indexOf('@URI@') !== -1 ||
-    query.indexOf('@TABLE@') !== -1 ||
-    query.indexOf('@PKVALUE@') !== -1;
+  return query.match(/@doc\[.+?]@/);
 };
 
 
@@ -91,43 +90,26 @@ Query.prototype._extractIdsFromSql = function (rows, idVariableName) {
 
 
 Query.prototype._getSqlQueryFromConfig = function (query, uri) {
-  // remove extra white spaces
-  // and replace the @PKVALUE@ and @TABLE@placeholder
-  // parse the uri which should have the form
-  // sql://TABLE/PKVALUE
-  // where
-  // TABLE is alphanumeric string A-Za-z0-9-_.
-  // PKVALUE string string A-Za-z0-9-_.:/#
-  var retQuery = query.replace(/\s{2,}/g, ' ');
-  if (uri && uri.trim() !== '') {
-    try {
-      var regex = /^sql:\/\/([A-Z-a-z0-9-_.]+)\/([A-Z-a-z0-9-_.:\/#]+)$/;
-      var groups = regex.exec(uri);
-      var table = groups[1];
-      var pkvalue = groups[2];
-
-
-      if (pkvalue && query.match(/@PKVALUE@/) && !query.match(/'@PKVALUE@'/)) {
-        pkvalue = '\'' + pkvalue + '\'';
-      }
-
-      if (table) {
-        retQuery = retQuery.replace(/@TABLE@/g, table);
-      }
-      if (pkvalue) {
-        retQuery = retQuery.replace(/@PKVALUE@/g, pkvalue);
-      }
-    } catch (err) {
-      if (debug) {
-        console.log('Could not parse entityURI [' + uri + ']');
-        console.log(err);
-      } else {
-        logger.error('Could not parse entityURI [' + uri + ']');
-      }
-    }
+  if (!uri || uri.trim() === '' ) {
+    return Promise.resolve(query);
   }
 
-  return retQuery;
+  var retQuery = query.replace(/\s{2,}/g, ' ');
+  var parts = uri.trim().split('/');
+  if (parts.length < 3) {
+    Promise.reject('Malformed uri - should have at least 3 parts: index, type, id');
+  }
+
+  var index = parts[0];
+  var type = parts[1];
+  var id = parts[2];
+
+  // TODO: add caching of documet
+
+  return queryHelper.fetchDocument(index, type, id).then(function (doc) {
+    //now parse the query and replace the placeholders
+    return queryHelper.replaceVariablesInTheQuery(doc, retQuery);
+  });
 };
 
 

@@ -69,6 +69,7 @@ SQLiteQuery.prototype.openConnection = function () {
  * }
  */
 SQLiteQuery.prototype.checkIfItIsRelevant = function (uri) {
+  var self = this;
   if (this.requireEntityURI && (!uri || uri === '')) {
     return Promise.reject('Entity URI must be specified to execute the query.');
   }
@@ -76,47 +77,47 @@ SQLiteQuery.prototype.checkIfItIsRelevant = function (uri) {
   var dbfile = this.config.datasource.datasourceClazz.datasource.datasourceParams.db_file_path;
   var max_age = this.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
 
-  var query = this._getSqlQueryFromConfig(this.config.activationQuery, uri);
+  return this._getSqlQueryFromConfig(this.config.activationQuery, uri).then(function (query) {
 
-  if (query.trim() === '') {
-    return Promise.resolve({'boolean': true});
-  }
-
-  var self = this;
-
-  var cache_key = this.generateCacheKey(dbfile, query);
-
-  if (self.cache) {
-    var v = self.cache.get(cache_key);
-    if (v) {
-      return Promise.resolve(v);
+    if (query.trim() === '') {
+      return Promise.resolve({'boolean': true});
     }
-  }
 
-  return new Promise(function (fulfill, reject) {
-    self.openConnection()
-      .then(function (connection) {
-        connection.get(query, function (error, row) {
 
-          if (error) {
-            reject(self._augmentError(error));
-            return;
-          }
+    var cache_key = self.generateCacheKey(dbfile, query);
 
-          var data = {
-            'boolean': row ? true : false
-          };
+    if (self.cache) {
+      var v = self.cache.get(cache_key);
+      if (v) {
+        return Promise.resolve(v);
+      }
+    }
 
-          if (self.cache) {
-            self.cache.set(cache_key, data, max_age);
-          }
+    return new Promise(function (fulfill, reject) {
+      self.openConnection()
+        .then(function (connection) {
+          connection.get(query, function (error, row) {
 
-          fulfill(data);
+            if (error) {
+              reject(self._augmentError(error));
+              return;
+            }
+
+            var data = {
+              'boolean': row ? true : false
+            };
+
+            if (self.cache) {
+              self.cache.set(cache_key, data, max_age);
+            }
+
+            fulfill(data);
+          });
+        })
+        .catch(function (error) {
+          reject(self._augmentError(error));
         });
-      })
-      .catch(function (error) {
-        reject(self._augmentError(error));
-      });
+    });
   });
 };
 
@@ -130,7 +131,6 @@ SQLiteQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
 
   var dbfile = this.config.datasource.datasourceClazz.datasource.datasourceParams.db_file_path;
   var max_age = this.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
-  var query = this._getSqlQueryFromConfig(this.config.resultQuery, uri);
 
   // special case - we can not simply reject the Promise
   // bacause this will cause the whole group of promises to be rejected
@@ -138,86 +138,89 @@ SQLiteQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
     return this._returnAnEmptyQueryResultsPromise('Missing entityURI');
   }
 
-  var cache_key = this.generateCacheKey(dbfile, query, onlyIds, idVariableName);
 
-  if (self.cache) {
-    var v =  self.cache.get(cache_key);
-    if (v) {
-      v.queryExecutionTime = new Date().getTime() - start;
-      return Promise.resolve(v);
+  return this._getSqlQueryFromConfig(this.config.resultQuery, uri).then(function (query) {
+
+    var cache_key = self.generateCacheKey(dbfile, query, onlyIds, idVariableName);
+
+    if (self.cache) {
+      var v =  self.cache.get(cache_key);
+      if (v) {
+        v.queryExecutionTime = new Date().getTime() - start;
+        return Promise.resolve(v);
+      }
     }
-  }
 
-  return new Promise(function (fulfill, reject) {
-    self.openConnection()
-      .then(function (connection) {
-        connection.all(query, function (error, rows) {
-          if (error) {
-            reject(self._augmentError(error));
-            return;
-          }
-
-          var data = {
-            ids: [],
-            queryActivated: true
-          };
-
-          if (!onlyIds) {
-            var fields;
-
-            data.head = {
-              vars: []
-            };
-            data.config = {
-              label: self.config.label,
-              esFieldName: self.config.esFieldName
-            };
-            data.results = {
-              bindings: _.map(rows, function (row) {
-                var res = {};
-
-                if (!fields) {
-                  fields = Object.keys(row);
-                }
-                for (var v in row) {
-                  if (row.hasOwnProperty(v)) {
-                    res[v] = {
-                      type: 'unknown',
-                      value: row[v]
-                    };
-                  }
-                }
-                return res;
-              })
-            };
-
-            if (fields) {
-              data.head.vars = fields;
+    return new Promise(function (fulfill, reject) {
+      self.openConnection()
+        .then(function (connection) {
+          connection.all(query, function (error, rows) {
+            if (error) {
+              reject(self._augmentError(error));
+              return;
             }
-          }
 
-          if (idVariableName) {
-            data.ids = self._extractIdsFromSql(rows, idVariableName);
-          }
+            var data = {
+              ids: [],
+              queryActivated: true
+            };
 
-          if (self.cache) {
-            self.cache.set(cache_key, data, max_age);
-          }
+            if (!onlyIds) {
+              var fields;
 
-          data.debug = {
-            sentDatasourceId: self.config.datasourceId,
-            sentResultQuery: query,
-            queryExecutionTime: new Date().getTime() - start
-          };
+              data.head = {
+                vars: []
+              };
+              data.config = {
+                label: self.config.label,
+                esFieldName: self.config.esFieldName
+              };
+              data.results = {
+                bindings: _.map(rows, function (row) {
+                  var res = {};
 
-          fulfill(data);
+                  if (!fields) {
+                    fields = Object.keys(row);
+                  }
+                  for (var v in row) {
+                    if (row.hasOwnProperty(v)) {
+                      res[v] = {
+                        type: 'unknown',
+                        value: row[v]
+                      };
+                    }
+                  }
+                  return res;
+                })
+              };
+
+              if (fields) {
+                data.head.vars = fields;
+              }
+            }
+
+            if (idVariableName) {
+              data.ids = self._extractIdsFromSql(rows, idVariableName);
+            }
+
+            if (self.cache) {
+              self.cache.set(cache_key, data, max_age);
+            }
+
+            data.debug = {
+              sentDatasourceId: self.config.datasourceId,
+              sentResultQuery: query,
+              queryExecutionTime: new Date().getTime() - start
+            };
+
+            fulfill(data);
+          });
+        })
+        .catch(function (error) {
+          reject(self._augmentError(error));
         });
-      })
-      .catch(function (error) {
-        reject(self._augmentError(error));
-      });
+    });
   });
-
 };
 
 SQLiteQuery.prototype._postprocessResults = function (data) {

@@ -9,7 +9,8 @@
 
       <div class="content">
         <div class="form-group">
-          <label>Source query</label></br>
+          <label>Source query</label>
+          <a ng-if="queryOption.queryId && queryOption.queryId !== ''" ng-click="editQuery($index)" > Edit selected query</a></br>
           <st-select required object-type="query" ng-model="queryOption.queryId"></st-select>
         </div>
 

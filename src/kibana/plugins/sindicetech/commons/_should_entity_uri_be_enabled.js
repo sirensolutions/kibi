@@ -7,7 +7,7 @@ define(function (require) {
     return function (queryIds) {
       var promises = _(queryIds).compact().map(savedQueries.get).value();
 
-      var regex = /@URI@|@TABLE@|@PKVALUE@/g;
+      var regex = /@doc\[.+?\]@/;
       var regexRest = /@VAR[0-9]{1,}@/g;
 
       return Promise.all(promises).then(function (results) {

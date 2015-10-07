@@ -53,8 +53,8 @@ define(function (require) {
       };
       $scope.starDetectedInAQuery = false;
 
-      if (globalState.entityURI && globalState.entityURI !== '') {
-        $scope.holder.entityURI = globalState.entityURI;
+      if (globalState.se && globalState.se.length > 0) {
+        $scope.holder.entityURI = globalState.se[0];
       } else {
         $scope.holder.entityURI = '';
       }

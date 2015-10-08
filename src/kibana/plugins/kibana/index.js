@@ -27,6 +27,7 @@ define(function (require) {
   require('directives/st_select');
   require('directives/st_param_entity_uri');
   require('directives/st_dynamic_html');
+  require('directives/array_param');
 
   require('components/sindicetech/st_relational_filter_panel/st_relational_filter_panel'); // added by kibi
   require('components/sindicetech/query_engine_client/query_engine_client');  // added by kibi queryEngineClient service

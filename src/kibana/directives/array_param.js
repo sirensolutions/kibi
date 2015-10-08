@@ -1,0 +1,98 @@
+define(function (require) {
+  require('modules').get('kibana')
+  .directive('arrayParamAdd', function (Private) {
+    var arrayHelper = Private(require('components/kibi/array_helper/array_helper'));
+
+    return {
+      require: 'ngModel',
+      restrict: 'E',
+      replace: true,
+      scope: {
+        label: '@',
+        postAction: '&'
+      },
+      template: require('text!directives/array_param_add.html'),
+      link: function ($scope, element, attrs, ngModelCtrl) {
+        $scope.required = attrs.hasOwnProperty('required');
+
+        $scope.array = ngModelCtrl.$modelValue ? ngModelCtrl.$modelValue : [];
+
+        $scope.isValid = true;
+        var validate = function () {
+          $scope.isValid = !$scope.required || $scope.array.length !== 0;
+          ngModelCtrl.$setValidity('arrayParam', $scope.isValid);
+        };
+
+        validate();
+        $scope.$watch(function () {
+          return ngModelCtrl.$modelValue;
+        }, function () {
+          validate();
+        }, true);
+
+        $scope.addParam = function () {
+          if (ngModelCtrl.$modelValue) {
+            $scope.array = ngModelCtrl.$modelValue;
+          }
+          arrayHelper.add($scope.array, {}, $scope.postAction);
+          ngModelCtrl.$setViewValue($scope.array);
+        };
+      }
+    };
+  }).directive('arrayParamUp', function (Private) {
+    var arrayHelper = Private(require('components/kibi/array_helper/array_helper'));
+
+    return {
+      restrict: 'E',
+      replace: true,
+      scope: {
+        ngModel: '=',
+        index: '@',
+        postAction: '&'
+      },
+      template: '<button class="btn btn-xs btn-default" ng-click="upParam()" > <i class="fa fa-caret-up"></i> </button>',
+      link: function ($scope, element, attrs) {
+        $scope.upParam = function () {
+          arrayHelper.up($scope.ngModel, $scope.index, $scope.postAction);
+        };
+      }
+    };
+  }).directive('arrayParamDown', function (Private) {
+    var arrayHelper = Private(require('components/kibi/array_helper/array_helper'));
+
+    return {
+      restrict: 'E',
+      replace: true,
+      scope: {
+        ngModel: '=',
+        index: '@',
+        postAction: '&'
+      },
+      template: '<button class="btn btn-xs btn-default" ng-click="downParam()" > <i class="fa fa-caret-down"></i> </button>',
+      link: function ($scope, element, attrs) {
+        $scope.downParam = function () {
+          arrayHelper.down($scope.ngModel, $scope.index, $scope.postAction);
+        };
+      }
+    };
+  }).directive('arrayParamRemove', function (Private) {
+    var arrayHelper = Private(require('components/kibi/array_helper/array_helper'));
+
+    return {
+      restrict: 'E',
+      replace: true,
+      scope: {
+        ngModel: '=',
+        index: '@',
+        postAction: '&'
+      },
+      template: '<button class="btn btn-xs btn-danger" ng-click="removeParam()" > <i class="fa fa-times"></i> </button>',
+      link: function ($scope, element, attrs) {
+        $scope.removeParam = function () {
+          arrayHelper.remove($scope.ngModel, $scope.index, $scope.postAction);
+        };
+      }
+    };
+  });
+});
+

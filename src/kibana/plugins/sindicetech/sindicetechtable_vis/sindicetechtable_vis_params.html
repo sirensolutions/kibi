@@ -124,20 +124,14 @@
 
             <div ng-if="clickOption.uriScheme && clickOption.type === 'select'" class="form-group">
               <label>Redirect to dashboard</label></br/>
-              <span>if set after entity is selected you will be redirected to another dashboard</span></br>
+              <span>if set then after an entity is selected, you will be redirected to that dashboard</span></br>
               <st-select object-type="dashboard" ng-model="clickOption.targetDashboardId" />
             </div>
 
             <div class="btn-group rightCorner">
-              <button class="btn btn-xs btn-default" ng-click="upClickOption($index)" >
-                <i class="fa fa-caret-up"></i>
-              </button>
-              <button class="btn btn-xs btn-default" ng-click="downClickOption($index)" >
-                <i class="fa fa-caret-down"></i>
-              </button>
-              <button class="btn btn-xs btn-danger" ng-click="removeClickOption($index)" >
-                <i class="fa fa-times"></i>
-              </button>
+              <array-param-up index="{{ $index }}" post-action="clickHandlersChanged" ng-model="vis.params.clickOptions"></array-param-up>
+              <array-param-down index="{{ $index }}" post-action="clickHandlersChanged" ng-model="vis.params.clickOptions"></array-param-down>
+              <array-param-remove index="{{ $index }}" post-action="clickHandlersChanged" ng-model="vis.params.clickOptions"></array-param-remove>
             </div>
 
           </div>
@@ -145,9 +139,7 @@
       </ul>
     </div>
 
-    <button class="btn btn-xs btn-success" ng-click="addClickOption()" >
-      <span>Add click handler</span> <i class="fa fa-plus"></i>
-    </button>
+    <array-param-add label="click handler" post-action="clickHandlersChanged" ng-model="vis.params.clickOptions"></array-param-add>
 
   </section>
 
@@ -184,20 +176,14 @@
 
 
             <div class="btn-group rightCorner">
-              <button class="btn btn-xs btn-danger" ng-click="vis.params.queryIds.splice($index,1)" >
-                <i class="fa fa-times"></i>
-              </button>
+              <array-param-remove index="{{ $index }}" ng-model="vis.params.queryIds"></array-param-remove>
             </div>
 
           </div>
         </li>
       </ul>
-      <button class="btn btn-xs btn-success" ng-click="addQuery()" >
-        <span>Add query</span> <i class="fa fa-plus"></i>
-      </button>
+      <array-param-add required label="query" ng-model="vis.params.queryIds"></array-param-add>
     </div>
   </section>
-
-
 
 </div>

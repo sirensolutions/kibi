@@ -120,7 +120,7 @@ define(function (require) {
             scope.retrieveError = '';
             if (promise) {
               promise.then(_renderSelect).catch(function (err) {
-                scope.retrieveError = err;
+                scope.retrieveError = _.isEmpty(err) ? '' : err;
                 ngModelCtrl.$setValidity('stSelect', false);
               });
             }

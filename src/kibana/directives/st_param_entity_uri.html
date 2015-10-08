@@ -21,27 +21,27 @@
       <li>LABEL - <i>optional</i> a clicked label from kibi table</li>
      </ul>
   </div>
-
   <form name="entityURI">
-    <st-select required
-               ng-model="c.index"
+    <st-select ng-model="c.index"
                object-type="indexPattern"
-               ng-disabled="!entityUriHolder.entityURIEnabled"
+               model-disabled="!entityUriHolder.entityURIEnabled"
+               model-required="entityUriHolder.entityURIEnabled"
                class="selectEntityUriParts"></st-select>
-    <st-select required
-               ng-model="c.type"
+    <st-select ng-model="c.type"
                object-type="indexPatternType"
                index-pattern-id="c.index"
-               ng-disabled="!entityUriHolder.entityURIEnabled"
+               model-disabled="!entityUriHolder.entityURIEnabled"
+               model-required="entityUriHolder.entityURIEnabled"
                class="selectEntityUriParts"></st-select>
-    <st-select required
-               ng-model="c.id"
+    <st-select ng-model="c.id"
                object-type="documentIds"
                index-pattern-id="c.index"
                index-pattern-type="c.type"
                extra-items="c.extraItems"
-               ng-disabled="!entityUriHolder.entityURIEnabled"
+               model-disabled="!entityUriHolder.entityURIEnabled"
+               model-required="entityUriHolder.entityURIEnabled"
                class="selectEntityUriParts"></st-select>
+
     <div class="selectEntityUriParts">
       <input type="text"
              ng-model="c.column"

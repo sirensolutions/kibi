@@ -74,7 +74,7 @@ define(function (require) {
 
     StSelectHelper.prototype.getDocumentIds = function (indexPatternId, indexPatternType) {
       if (!indexPatternId || !indexPatternType || indexPatternId === '' || indexPatternType === '') {
-        return;
+        return Promise.resolve([]);
       }
 
       return $http.get('elasticsearch/' + indexPatternId + '/' + indexPatternType + '/_search?size=10')
@@ -94,7 +94,7 @@ define(function (require) {
 
     StSelectHelper.prototype.getIndexTypes = function (indexPatternId) {
       if (!indexPatternId) {
-        return;
+        return Promise.resolve([]);
       }
 
       return $http.get('elasticsearch/' + indexPatternId + '/_mappings')

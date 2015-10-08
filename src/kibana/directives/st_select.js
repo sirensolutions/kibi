@@ -16,12 +16,17 @@ define(function (require) {
           indexPatternId:   '=?', // optional only for objectType === field | indexPatternType | documentIds
           indexPatternType: '=?', // optional only for objectType === documentIds
           queryId:          '=?', // optional only for objectType === queryVariable
-          modelDisabled:    '=?',
+          modelDisabled:    '=?', // use to disable the underlying select
+          modelRequired:    '=?', // use to disable the underlying select
           extraItems:       '=?'  // extra values can be passed here
         },
         template: require('text!directives/st_select.html'),
         link: function (scope, element, attrs, ngModelCtrl) {
-          scope.required = attrs.hasOwnProperty('required');
+          scope.required = scope.modelRequired;
+          scope.disabled = scope.modelDisabled;
+          if (attrs.hasOwnProperty('required')) {
+            scope.required = true;
+          }
           scope.modelObject = ngModelCtrl.$viewValue; //object
           scope.items = [];
 
@@ -34,10 +39,27 @@ define(function (require) {
             }
           );
 
-          scope.$watch('modelObject', function () {
+          var _setViewValue = function () {
             if (scope.modelObject) {
               ngModelCtrl.$setViewValue(scope.modelObject);
             }
+          };
+
+          scope.$watch('modelDisabled', function () {
+            scope.disabled = scope.modelDisabled;
+            if (scope.modelDisabled) {
+              scope.required = false;
+            }
+            _setViewValue();
+          });
+
+          scope.$watch('modelRequired', function () {
+            scope.required = scope.modelRequired;
+            _setViewValue();
+          });
+
+          scope.$watch('modelObject', function () {
+            _setViewValue();
           }, true);
 
           ngModelCtrl.$formatters.push(function (modelValue) {
@@ -144,7 +166,7 @@ define(function (require) {
             }
           };
 
-          scope.$watchMulti(['indexPatternId', 'indexPatternType', 'queryId', 'extraItems'], function () {
+          scope.$watchMulti(['indexPatternId', 'indexPatternType', 'queryId', 'extraItems', 'modelDisabled', 'modelRequire'], function () {
             _render();
           });
 

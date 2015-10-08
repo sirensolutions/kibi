@@ -12,35 +12,72 @@ define(function (require) {
         restrict: 'E',
         replace: true,
         scope: {
-          objectType:     '@',  // text
-          indexPatternId: '=?', // optional only for objectType === field or objectType === indexPatternType
-          queryId:        '=?', // optional only for objectType === queryVariable
-          modelDisabled:  '=?'
+          objectType:       '@',  // text
+          indexPatternId:   '=?', // optional only for objectType === field | indexPatternType | documentIds
+          indexPatternType: '=?', // optional only for objectType === documentIds
+          queryId:          '=?', // optional only for objectType === queryVariable
+          modelDisabled:    '=?', // use to disable the underlying select
+          modelRequired:    '=?', // use to disable the underlying select
+          extraItems:       '=?'  // extra values can be passed here
         },
         template: require('text!directives/st_select.html'),
         link: function (scope, element, attrs, ngModelCtrl) {
-          scope.required = attrs.hasOwnProperty('required');
-          scope.modelObject = ngModelCtrl.$viewValue;
+          scope.required = scope.modelRequired;
+          scope.disabled = scope.modelDisabled;
+          if (attrs.hasOwnProperty('required')) {
+            scope.required = true;
+          }
+          scope.modelObject = ngModelCtrl.$viewValue; //object
           scope.items = [];
 
-          scope.$watch(attrs.ngModel, function () {
-            scope.modelObject = ngModelCtrl.$viewValue;
+          scope.$watch(
+            function () {
+              return ngModelCtrl.$modelValue;
+            },
+            function (newValue) {
+              scope.modelObject = ngModelCtrl.$viewValue; //object
+            }
+          );
+
+          var _setViewValue = function () {
+            if (scope.modelObject) {
+              ngModelCtrl.$setViewValue(scope.modelObject);
+            }
+          };
+
+          scope.$watch('modelDisabled', function () {
+            scope.disabled = scope.modelDisabled;
+            if (scope.modelDisabled) {
+              scope.required = false;
+            }
+            _setViewValue();
+          });
+
+          scope.$watch('modelRequired', function () {
+            scope.required = scope.modelRequired;
+            _setViewValue();
           });
 
           scope.$watch('modelObject', function () {
-            ngModelCtrl.$setViewValue(scope.modelObject);
+            _setViewValue();
           }, true);
 
           ngModelCtrl.$formatters.push(function (modelValue) {
+            // here what is passed to a formatter is just a string
+            var formatted;
             if (scope.items.length) {
-              return _.find(scope.items, function (item) {
+              formatted = _.find(scope.items, function (item) {
                 return item.value === modelValue;
               });
             }
-            return {
-              value: modelValue,
-              label: ''
-            };
+
+            if (!formatted && modelValue) {
+              formatted = {
+                value: modelValue,
+                label: ''
+              };
+            }
+            return formatted;
           });
 
           ngModelCtrl.$parsers.push(function (viewValue) {
@@ -49,14 +86,23 @@ define(function (require) {
             return ret;
           });
 
+
           var _renderSelect = function (items) {
             scope.analyzedField = false;
             scope.items = items;
+            if (scope.extraItems && scope.items) {
+              scope.items = scope.extraItems.concat(scope.items);
+            }
+
             var item = _.find(scope.items, function (item) {
               return ngModelCtrl.$viewValue && item.value === ngModelCtrl.$viewValue.value;
             });
+
             if (item && item.options && item.options.analyzed) {
               scope.analyzedField = true;
+            } else if (scope.items && scope.items.length === 1) {
+              // select automatically if only 1 option available
+              scope.modelObject = scope.items[0];
             } else if (scope.items && scope.items.length > 0 && !item) {
               // object saved in the model is not in the list of items
               scope.modelObject = {
@@ -85,21 +131,15 @@ define(function (require) {
                 break;
               case 'indexPatternType':
                 promise = selectHelper.getIndexTypes(scope.indexPatternId);
-
-                if (promise) {
-                  promise.then(function (types) {
-                    if (types.length === 1) {
-                      scope.modelObject = types[0];
-                    }
-                    return types;
-                  });
-                }
                 break;
               case 'field':
                 promise = selectHelper.getFields(scope.indexPatternId);
                 break;
               case 'indexPattern':
                 promise = selectHelper.getIndexesId();
+                break;
+              case 'documentIds':
+                promise = selectHelper.getDocumentIds(scope.indexPatternId, scope.indexPatternType);
                 break;
               case 'queryVariable':
                 promise = selectHelper.getQueryVariables(scope.queryId);
@@ -126,7 +166,7 @@ define(function (require) {
             }
           };
 
-          scope.$watchMulti(['indexPatternId', 'queryId'], function () {
+          scope.$watchMulti(['indexPatternId', 'indexPatternType', 'queryId', 'extraItems', 'modelDisabled', 'modelRequire'], function () {
             _render();
           });
 

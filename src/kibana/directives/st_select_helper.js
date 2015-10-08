@@ -71,9 +71,30 @@ define(function (require) {
       });
     };
 
+
+    StSelectHelper.prototype.getDocumentIds = function (indexPatternId, indexPatternType) {
+      if (!indexPatternId || !indexPatternType || indexPatternId === '' || indexPatternType === '') {
+        return Promise.resolve([]);
+      }
+
+      return $http.get('elasticsearch/' + indexPatternId + '/' + indexPatternType + '/_search?size=10')
+      .then(function (response) {
+        var ids = [];
+        _.each(response.data.hits.hits, function (hit) {
+          ids.push({
+            label: hit._id,
+            value: hit._id
+          });
+        });
+
+        return ids;
+      });
+    };
+
+
     StSelectHelper.prototype.getIndexTypes = function (indexPatternId) {
       if (!indexPatternId) {
-        return;
+        return Promise.resolve([]);
       }
 
       return $http.get('elasticsearch/' + indexPatternId + '/_mappings')

@@ -1,5 +1,5 @@
 <div ng-show="entityUriHolder.visible" class="form-group">
-  <label>Entity URI</label>
+  <label>Selected entity</label>
   <span class="small-note" ng-show="entityUriHolder.entityURIEnabled">
     is required by a query. If not provided some results might be missing.
   </span>
@@ -9,49 +9,52 @@
   <span class="small-note pull-right" ng-click="showHelp = !showHelp">Help <i class="fa fa-info"></i></span>
 
   <div class="hintbox" ng-show="showHelp">
-    <h4 class="hintbox-heading">
-      <i class="fa fa-question-circle text-info"></i> Entity URI Schemas
-    </h4>
     <!-- TODO: change to 3 when uncommenting info about REST -->
-    <p>There are 2 different uri schemas for passing parameters to parametric queries:</p>
+    <p>Selected entity schema is:</p>
+    <strong>INDEX/TYPE/ID/COLUMN/LABEL</strong>
+    <p>Where:</p>
     <ul>
-      <li>
-         <strong>sql://@TABLE@/@PKVALUE@</strong> for sql queries</br>
-         Example: <i>sql://people/123</i>
-      </li>
-      <li>
-         <strong>@URI@</strong> for sparql queries</br>
-         Example: <i>http://example.com/people/123</i>
-      </li>
-      <!-- TODO: uncoment when we officialy support REST
-      <li>
-         <strong>rest://@VAR0@</strong> for rest queries</br>
-         Example: <i>rest://123</i>
-      </li>
-       -->
-    </ul>
-    <p>Query is parametric when it contains one of the following placeholders:<p>
-    <ul>
-      <li>
-         <strong>@TABLE@</strong> or <strong>@PKVALUE@</strong> for sql queries
-      </li>
-      <li>
-         <strong>@URI@</strong> for sparql queries
-      </li>
-      <!-- TODO: uncoment when we officialy support REST
-      <li>
-         <strong>@VAR0@</strong> for rest queries
-      </li>
-      -->
-    </ul>
-
+      <li>INDEX - <i>mandatory</i> an index name</li>
+      <li>TYPE - <i>mandatory</i>an index type</li>
+      <li>ID - <i>mandatory</i>a document id</li>
+      <li>COLUMN - <i>optional</i> a name of clicked column from kibi table</li>
+      <li>LABEL - <i>optional</i> a clicked label from kibi table</li>
+     </ul>
   </div>
-  <input
-    type="text"
-    name="entityURI"
-    ng-model="entityUriHolder.entityURI"
-    ng-disabled="!entityUriHolder.entityURIEnabled"
-    placeholder="{{placeholder}}"
-    ng-required="entityUriHolder.entityURIEnabled"
-    class="form-control"/>
+  <form name="entityURI">
+    <st-select ng-model="c.index"
+               object-type="indexPattern"
+               model-disabled="!entityUriHolder.entityURIEnabled"
+               model-required="entityUriHolder.entityURIEnabled"
+               class="selectEntityUriParts"></st-select>
+    <st-select ng-model="c.type"
+               object-type="indexPatternType"
+               index-pattern-id="c.index"
+               model-disabled="!entityUriHolder.entityURIEnabled"
+               model-required="entityUriHolder.entityURIEnabled"
+               class="selectEntityUriParts"></st-select>
+    <st-select ng-model="c.id"
+               object-type="documentIds"
+               index-pattern-id="c.index"
+               index-pattern-type="c.type"
+               extra-items="c.extraItems"
+               model-disabled="!entityUriHolder.entityURIEnabled"
+               model-required="entityUriHolder.entityURIEnabled"
+               class="selectEntityUriParts"></st-select>
+
+    <div class="selectEntityUriParts">
+      <input type="text"
+             ng-model="c.column"
+             ng-disabled="!entityUriHolder.entityURIEnabled"
+             class="form-control"
+             placeholder="COLUMN optional"/>
+    </div>
+    <div class="selectEntityUriParts">
+      <input type="text"
+             ng-model="c.label"
+             ng-disabled="!entityUriHolder.entityURIEnabled"
+             class="form-control"
+             placeholder="LABEL optional"/>
+    </div>
+  </form>
 </div>

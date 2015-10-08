@@ -24,6 +24,7 @@ MysqlQuery.prototype = _.create(AbstractQuery.prototype, {
  * }
  */
 MysqlQuery.prototype.checkIfItIsRelevant = function (uri) {
+  var self = this;
   if (this.requireEntityURI && (!uri || uri === '')) {
     return Promise.reject('Got empty uri while it is required by mysql activation query');
   }
@@ -35,46 +36,44 @@ MysqlQuery.prototype.checkIfItIsRelevant = function (uri) {
   var max_age = this.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
 
 
+  return this._getQueryFromConfig(this.config.activationQuery, uri).then(function (query) {
 
-  var query = this._getSqlQueryFromConfig(this.config.activationQuery, uri);
-
-  if (query.trim() === '') {
-    return Promise.resolve({'boolean': true});
-  }
-
-  var self = this;
-
-  var cache_key = this.generateCacheKey(host + dbname, query);
-
-  if (self.cache) {
-    var v = self.cache.get(cache_key);
-    if (v) {
-      return Promise.resolve(v);
+    if (query.trim() === '') {
+      return Promise.resolve({'boolean': true});
     }
-  }
 
-  return new Promise(function (fulfill, reject) {
-    var connection;
-    try {
-      connection = mysql.createConnection(connectionString);
-      connection.connect();
-      connection.query({sql: query, timeout: timeout || 1000}, function (err, rows, fields) {
-        if (err) {
-          reject(err);
-        }
-        var data = {'boolean': rows.length > 0 ? true : false};
-        if (self.cache) {
-          self.cache.set(cache_key, data, max_age);
-        }
-        fulfill(data);
-      });
-    } catch (err) {
-      reject(err);
-    } finally {
-      if (connection) {
-        connection.end();
+    var cache_key = self.generateCacheKey(host + dbname, query);
+
+    if (self.cache) {
+      var v = self.cache.get(cache_key);
+      if (v) {
+        return Promise.resolve(v);
       }
     }
+
+    return new Promise(function (fulfill, reject) {
+      var connection;
+      try {
+        connection = mysql.createConnection(connectionString);
+        connection.connect();
+        connection.query({sql: query, timeout: timeout || 1000}, function (err, rows, fields) {
+          if (err) {
+            reject(err);
+          }
+          var data = {'boolean': rows.length > 0 ? true : false};
+          if (self.cache) {
+            self.cache.set(cache_key, data, max_age);
+          }
+          fulfill(data);
+        });
+      } catch (err) {
+        reject(err);
+      } finally {
+        if (connection) {
+          connection.end();
+        }
+      }
+    });
   });
 };
 
@@ -116,109 +115,109 @@ MysqlQuery.prototype._getType = function (typeNum) {
 MysqlQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
   var start = new Date().getTime();
   var self = this;
-
-  var connectionString = this.config.datasource.datasourceClazz.getConnectionString();
-  var host = this.config.datasource.datasourceClazz.datasource.datasourceParams.host;
-  var dbname = this.config.datasource.datasourceClazz.datasource.datasourceParams.dbname;
-  var timeout = this.config.datasource.datasourceClazz.datasource.datasourceParams.timeout;
-  var max_age = this.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
-  var query = this._getSqlQueryFromConfig(this.config.resultQuery, uri);
-
   // special case - we can not simply reject the Promise
   // bacause this will cause the whole group of promissses to be rejected
   if (this.resultQueryRequireEntityURI && (!uri || uri === '')) {
     return this._returnAnEmptyQueryResultsPromise('No data because the query require entityURI');
   }
 
-  var cache_key = this.generateCacheKey(host + dbname, query, onlyIds, idVariableName);
+  var connectionString = this.config.datasource.datasourceClazz.getConnectionString();
+  var host = this.config.datasource.datasourceClazz.datasource.datasourceParams.host;
+  var dbname = this.config.datasource.datasourceClazz.datasource.datasourceParams.dbname;
+  var timeout = this.config.datasource.datasourceClazz.datasource.datasourceParams.timeout;
+  var max_age = this.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
 
-  if (self.cache) {
-    var v =  self.cache.get(cache_key);
-    if (v) {
-      v.queryExecutionTime = new Date().getTime() - start;
-      return Promise.resolve(v);
+  return this._getQueryFromConfig(this.config.resultQuery, uri).then(function (query) {
+
+    var cache_key = self.generateCacheKey(host + dbname, query, onlyIds, idVariableName);
+
+    if (self.cache) {
+      var v =  self.cache.get(cache_key);
+      if (v) {
+        v.queryExecutionTime = new Date().getTime() - start;
+        return Promise.resolve(v);
+      }
     }
-  }
 
 
-  return new Promise(function (fulfill, reject) {
-    var connection;
-    try {
-      connection = mysql.createConnection(connectionString);
-      connection.connect();
-      connection.query({sql: query, timeout: timeout || 1000}, function (err, rows, fields) {
-        if (err) {
-          if (err.message) {
-            err = {
-              error: err,
-              message: err.message
+    return new Promise(function (fulfill, reject) {
+      var connection;
+      try {
+        connection = mysql.createConnection(connectionString);
+        connection.connect();
+        connection.query({sql: query, timeout: timeout || 1000}, function (err, rows, fields) {
+          if (err) {
+            if (err.message) {
+              err = {
+                error: err,
+                message: err.message
+              };
+            }
+
+            reject(err);
+            return;
+          }
+
+          var data = {
+            ids: [],
+            queryActivated: true
+          };
+          if (!onlyIds) {
+            var _varTypes = {};
+            _.each(fields, function (field) {
+              _varTypes[field.name] = self._getType(field.type);
+            });
+
+            data.head = {
+              vars: _.map(fields, function (field) {
+                return field.name;
+              })
+            };
+            data.config = {
+              label: self.config.label,
+              esFieldName: self.config.esFieldName
+            };
+            data.results = {
+              bindings: _.map(rows, function (row) {
+                var res = {};
+                for (var v in row) {
+                  if (row.hasOwnProperty(v)) {
+                    res[v] = {
+                      type: _varTypes[v],
+                      value: row[v]
+                    };
+                  }
+                }
+                return res;
+              })
             };
           }
 
-          reject(err);
-          return;
-        }
+          if (idVariableName) {
+            data.ids = self._extractIdsFromSql(rows, idVariableName);
+          }
 
-        var data = {
-          ids: [],
-          queryActivated: true
-        };
-        if (!onlyIds) {
-          var _varTypes = {};
-          _.each(fields, function (field) {
-            _varTypes[field.name] = self._getType(field.type);
-          });
+          if (self.cache) {
+            self.cache.set(cache_key, data, max_age);
+          }
 
-          data.head = {
-            vars: _.map(fields, function (field) {
-              return field.name;
-            })
+          data.debug = {
+            sentDatasourceId: self.config.datasourceId,
+            sentResultQuery: query,
+            queryExecutionTime: new Date().getTime() - start
           };
-          data.config = {
-            label: self.config.label,
-            esFieldName: self.config.esFieldName
-          };
-          data.results = {
-            bindings: _.map(rows, function (row) {
-              var res = {};
-              for (var v in row) {
-                if (row.hasOwnProperty(v)) {
-                  res[v] = {
-                    type: _varTypes[v],
-                    value: row[v]
-                  };
-                }
-              }
-              return res;
-            })
-          };
+
+          fulfill(data);
+        });
+      } catch (err) {
+        reject(err);
+      } finally {
+        if (connection) {
+          connection.end();
         }
-
-        if (idVariableName) {
-          data.ids = self._extractIdsFromSql(rows, idVariableName);
-        }
-
-        if (self.cache) {
-          self.cache.set(cache_key, data, max_age);
-        }
-
-        data.debug = {
-          sentDatasourceId: self.config.datasourceId,
-          sentResultQuery: query,
-          queryExecutionTime: new Date().getTime() - start
-        };
-
-        fulfill(data);
-      });
-    } catch (err) {
-      reject(err);
-    } finally {
-      if (connection) {
-        connection.end();
       }
-    }
+    });
   });
-
 };
 
 MysqlQuery.prototype._postprocessResults = function (data) {

@@ -15,8 +15,8 @@ define(function (require) {
       entityURIEnabled: false,
       entityURI: ''
     };
-    if (globalState.entityURI) {
-      $scope.holder.entityURI = globalState.entityURI;
+    if (globalState.se && globalState.se.length > 0) {
+      $scope.holder.entityURI = globalState.se[0];
     }
 
     var off = $rootScope.$on('kibi:entityURIEnabled', function (event, enabled) {

@@ -21,7 +21,7 @@ define(function (require) {
         query.query_string &&
         query.query_string.query === '*' &&
         query.query_string.analyze_wildcard === true;
-    }
+    };
 
     KibiStateHelper.prototype._updateTimeForOneDashboard = function (dashboard) {
       var skipGlobalStateSave = true;

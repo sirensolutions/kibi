@@ -38,8 +38,10 @@ define(function (require) {
   app.controller(
     'QueriesEditor',
     function ($scope, config, globalState, $route, $window, kbnUrl, Notifier, queryEngineClient,
-              savedVisualizations, savedDatasources
+              savedVisualizations, savedDatasources, Private
   ) {
+      var _shouldEntityURIBeEnabled = Private(require('plugins/sindicetech/commons/_should_entity_uri_be_enabled'));
+
 
       // we have to wrap the value into object - this prevents weird thing related to transclusion
       // see http://stackoverflow.com/questions/25180613/angularjs-transclusion-creates-new-scope
@@ -53,8 +55,8 @@ define(function (require) {
       };
       $scope.starDetectedInAQuery = false;
 
-      if (globalState.entityURI && globalState.entityURI !== '') {
-        $scope.holder.entityURI = globalState.entityURI;
+      if (globalState.se && globalState.se.length > 0) {
+        $scope.holder.entityURI = globalState.se[0];
       } else {
         $scope.holder.entityURI = '';
       }
@@ -88,16 +90,11 @@ define(function (require) {
 
       //TODO: use the module from commons here
       var _enableEntityUri = function () {
-        var regex;
-        if ($scope.datasourceType === 'rest') {
-          regex = /@VAR[0-9]{1,}@/g;
-          $scope.holder.entityURIEnabled =
-            regex.test(JSON.stringify($scope.query.rest_headers)) ||
-            regex.test(JSON.stringify($scope.query.rest_params));
-        } else {
-          regex = /@URI@|@TABLE@|@PKVALUE@/g;
-          $scope.holder.entityURIEnabled = regex.test($scope.query.st_activationQuery) || regex.test($scope.query.st_resultQuery);
-        }
+        _shouldEntityURIBeEnabled([$scope.query.id]).then(function (value) {
+          $scope.holder.entityURIEnabled = value;
+        }).catch(function (err) {
+          notify.warning('Could not determine that widget need entityURI' + JSON.stringify(err, null, ' '));
+        });
       };
 
       $scope.$watch(['query.rest_headers', 'query.rest_params'], function () {

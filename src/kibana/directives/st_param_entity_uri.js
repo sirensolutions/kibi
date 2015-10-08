@@ -14,18 +14,48 @@ define(function (require) {
         },
         template: require('text!directives/st_param_entity_uri.html'),
         link: function ($scope, $el) {
+          $scope.c = {
+            index: '',
+            type: '',
+            id: '',
+            column: '',
+            label: '',
+            extraItems: []
+          };
 
-          $scope.$watch('datasourceType', function (datasourceType) {
-            if (datasourceType === 'pgsql' || datasourceType === 'mysql' || datasourceType === 'sqlite' || datasourceType === 'jdbc') {
-              $scope.placeholder = 'http://@TABLE@/@PKVALUE@';
-            } else if (datasourceType === 'sparql') {
-              $scope.placeholder = '@URI@';
-            } else if (datasourceType === 'rest') {
-              $scope.placeholder = 'rest://@VAR0@';
-            } else {
-              $scope.placeholder = 'Type entityURI here';
+          $scope.$watch('entityUriHolder', function () {
+            if ($scope.entityUriHolder) {
+              if ($scope.entityUriHolder.entityURI) {
+                var parts = $scope.entityUriHolder.entityURI.split('/');
+                $scope.c.index  = parts[0];
+                $scope.c.type   = parts[1];
+                $scope.c.id     = parts[2];
+                if (parts.length > 3) {
+                  $scope.c.column = parts[3];
+                  $scope.c.label  = parts[4];
+                }
+                if ($scope.c.id) {
+                  $scope.c.extraItems = [{
+                    label: $scope.c.id,
+                    value: $scope.c.id
+                  }];
+                }
+              }
             }
           });
+
+          $scope.$watchMulti(['c.index', 'c.type', 'c.id'], function () {
+            $scope.c.column = '';
+            $scope.c.label = '';
+
+            if ($scope.c.index && $scope.c.type && $scope.c.id) {
+              $scope.entityUriHolder.entityURI =
+                $scope.c.index + '/' +
+                $scope.c.type + '/' +
+                $scope.c.id;
+            }
+          });
+
         }
       };
     });

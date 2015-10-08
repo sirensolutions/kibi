@@ -24,22 +24,22 @@ define(function (require) {
                     break;
                   case 'sql-result-query':
                     query = {
-                      st_resultQuery: 'select name from @TABLE@ where id = @PKVALUE@'
+                      st_resultQuery: 'select name from table where id = @doc[_source][id]@'
                     };
                     break;
                   case 'sparql-result-query':
                     query = {
-                      st_resultQuery: 'select ?name { <@URI@> :name ?name }'
+                      st_resultQuery: 'select ?name { <@doc[_source][id]@> :name ?name }'
                     };
                     break;
                   case 'sql-activation-query':
                     query = {
-                      st_activationQuery: 'select name from @TABLE@ where id = @PKVALUE@'
+                      st_activationQuery: 'select name from table where id = @doc[_source][id]@'
                     };
                     break;
                   case 'sparql-activation-query':
                     query = {
-                      st_resultQuery: 'ask { <@URI@> :name ?name }'
+                      st_resultQuery: 'ask { <@doc[_source][id]@> :name ?name }'
                     };
                     break;
                   case 'rest-params':

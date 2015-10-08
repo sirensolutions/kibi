@@ -96,6 +96,10 @@ define(function (require) {
           kbnUrl.change('/settings/templates/' + $scope.vis.params.queryOptions[index].templateId);
         };
 
+        $scope.editQuery = function (index) {
+          kbnUrl.change('/settings/queries/' + $scope.vis.params.queryOptions[index].queryId);
+        };
+
       }
     };
   });

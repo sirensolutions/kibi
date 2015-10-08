@@ -7,15 +7,46 @@ datasources; this section explains how to setup datasources and configure
 
 === Configuration
 
-External datasources can be configured in the `kibi/config/kibi.yml` file.
+To create a new external datasource navigate to "Setttings/Datasources"
+First fill datasource title, name and pick the type
+Kibi supports following datasource types:
 
-Kibi provides support for the following datasources:
-
+* REST
 * SQLite
 * MySQL
 * PostgreSQL
-* any SPARQL HTTP endpoint (tested with Openlink Virtuoso and Joseki)
-* *experimental* JDBC support (tested with http://www.h2database.com/html/main.html[H2]).
+* Sparql over http - any SPARQL HTTP endpoint (tested with Openlink Virtuoso and Joseki)
+* SQL JDBC - *experimental* JDBC support for SQL (tested with http://www.h2database.com/html/main.html[H2]).
+* SPARQL JDBC - *experimental* JDBC support for SPARQL
+
+After selecting the datasource type additional parameters will appear.
+Below list of additional mandatory parameters for each datasource type:
+
+*REST*
+
+* TODO: !!! fill this in when REST reimplemented
+
+*SQLite*
+
+* db_file_path - path to database file
+
+*MySQL, PostgreSQL*
+
+* host - hostname
+* dbname - database name
+* username - username with read access to the database
+* password - corresponding password
+
+*Sparql over http*
+
+* endpoint_url - url of the SPARQL http endpoint
+
+*SQL JDBC, SPARQL JDBC*
+
+* drivername - e.g.: "org.postgresql.Driver"
+* libpath - absolute path to the driver jar file e.g.: "/otp/dbdrivers/postgresql-9.4-1201.jdbc41.jar"
+* connection_string - JDBC connection string without username and password e.g.: "jdbc:postgresql://localhost/mydatabase"
+
 
 To enable query results caching, set the `datasource_enable_cache` parameter
 to `true`; the cache size and max age (in milliseconds) can be set through the
@@ -23,25 +54,19 @@ to `true`; the cache size and max age (in milliseconds) can be set through the
 
 A Kibi restart is required to apply configuration changes.
 
-NOTE: Sample connection strings are included in the default configuration file
-for each kind of datasource.
+NOTE: Sensitive datasource configuration elements like passwords are encrypted.
+Make sure to change *datasource_encryption_key* in kibi.yml.
 
 NOTE: Make sure to set the configuration file as readable only to the user running
-the Kibi process as it may contain credentials in the database connection
-strings.
+the Kibi process as it contains the *datasource_encryption_key*.
 
 [[entity-selection]]
 === Datasource entity selection
 
-Entities stored in external datasources are identified by a URI:
+Selected Entities can be used to as source of parameters for queries
+Each selected entity is uniquely identified by an URI:
 
-- `sql://@TABLE@/@PKVALUE@` for entities stored in SQL datasource, where
-`@TABLE@` represents a table name and `@PKVALUE@` a unique column value; e.g.
-`sql://company/1`.
-
-- `sparql://@URI@` for entities stored in triplestores, where `@URI@`
-represents a uniform resource identifier;
-e.g. `sparql://http://dbpedia.org/resource/California`.
+- `INDEX/TYPE/ID` where INDEX is an index pattern, TYPE is a type of a document, and ID is document ID
 
 As explained in the following sections, queries on external datasources can
 extract variables from the selected entity URI; in order to allow the user
@@ -131,45 +156,30 @@ of their parameters before execution by using datasource specific variables,
 which can be set at runtime by configuring <<click-handlers, click handlers>>
 in the <<enhanced-search-results>> visualization to select an entity.
 
-Variable values are taken from the selected entity URI which has a different
-format depending on the datasource type.
+Variable values are taken from elasticsearch document selected via selected entity URI.
 
-.SQL.
+All properties from selected document can be accessed using the following syntax:
+_@doc[PATH_ELEMENT_1][PATH_ELEMENT_2]...[PATH_ELEMENT_N]@_
 
-The following variables can be specified in queries on SQL datasources:
+- to get the document id use:
+  *@doc[_id]@*
+- to get the value of property called *action* use:
+  *@doc[_source][action]@*
+  - to get the value of nested property called *person.age* use:
+    *@doc[_source][person][age]@*
 
-- _@TABLE@_: a table name
-- _@PKVALUE@_: a value that identifies a record (e.g. a primary key value)
 
 In order to view the results of the query, you have to specify an entity URI
-manually in the field on the top right; the URI for SQL entities is
-structured as follows:
-
-----
-sql://@TABLE@/@PKVALUE@
-----
+manually in the field on the top right;
 
 Below is an example of configuration for a query named *Company Info* using
-both variables.
+a variable to get the value of property called *id* of currently selected entity
+In the example, _@doc[_source][id]@_ is replaced with an id taken from selected company.
+In the Selected Entity box we see that the selected company is
+from index: *company*, has a type: *Company* and id begins with *AU9XeLivtCp*
 
-In the example, _@TABLE@_ is replaced with _company_, and _@PKVALUE@_ with
-_company/amazon_ .
 
 image::images/external-sources/query-table-var.png["SQL query with variables",align="center"]
-
-.SPARQL.
-
-The following variables can be specified in queries on SPARQL datasources:
-
-- _@URI@_: the URI of the entity selected by the user.
-
-Below is an example configuration of a query named *Top 10 Properties for a Company*.
-The *@URI@* variable will be replaced at runtime by the selected entity URI.
-
-In order to view the results of the query, you have to specify an entity URI
-manually in the field on the top right.
-
-image::images/external-sources/queries-editor-sparql.png["Configuration of a SPARQL endpoint",align="center"]
 
 [float]
 [[activation-query]]
@@ -191,7 +201,7 @@ when returning at least one record.
 Example:
 
 [source,sql]
-SELECT id FROM Vehicles WHERE id='@PKVALUE@' AND vehicle_type='Motorcycle'
+SELECT id FROM Vehicles WHERE id='@doc[_source][id]@' AND vehicle_type='Motorcycle'
 
 
 On SPARQL datasources, activation queries must be written using the _ASK_ form;
@@ -205,7 +215,7 @@ Example:
 PREFIX vehicle: <http://ontologies.example.org/vehicle#>
 
 ASK {
-    <@URI@> a vehicle:Motorcycle
+    <@doc[_source][uri]@> a vehicle:Motorcycle
 }
 ----
 
@@ -258,7 +268,8 @@ company
 - A query that selects the id's of the top 500 companies by number of employees
 
 If a query requires a selected entity, and no entity is selected, the
-computed aggregation will return 0.
+computed aggregation will return 0, also the controls to select *Selected entity*
+will indicate (red borders arround) that it is necessary to select one.
 
 image::images/external-sources/relational-filter-config.png["Configuration of an external query terms filter aggregation on a data table visualization",align="center"]
 
@@ -266,4 +277,3 @@ The screenshot below shows the configuration of two external query terms
 filter aggregation on a pie chart visualization:
 
 image::images/external-sources/relational-filter-config-2.png["Configuration of an external query terms filter aggregation on a pie chart visualization",align="center"]
-

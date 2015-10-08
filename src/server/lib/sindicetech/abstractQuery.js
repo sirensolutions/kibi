@@ -89,7 +89,7 @@ Query.prototype._extractIdsFromSql = function (rows, idVariableName) {
 };
 
 
-Query.prototype._getSqlQueryFromConfig = function (query, uri) {
+Query.prototype._getQueryFromConfig = function (query, uri) {
   if (!uri || uri.trim() === '' ) {
     return Promise.resolve(query);
   }
@@ -247,10 +247,6 @@ Query.prototype.getHtml = function (uri, option) {
   });
 };
 
-
-Query.prototype._getQueryFromConfig = function (query, uri) {
-  throw 'Must be implemented by subclass';
-};
 
 // return a promise which when resolved should return
 // a following response object

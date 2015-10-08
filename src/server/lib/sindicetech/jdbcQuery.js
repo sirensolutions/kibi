@@ -74,41 +74,44 @@ JdbcQuery.prototype.checkIfItIsRelevant = function (uri) {
     // here do not use getConnectionString method as it might contain sensitive information like decrypted password
     var connection_string = self.config.datasource.datasourceClazz.datasource.datasourceParams.connection_string;
     var max_age = self.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
-    var query = self._getSqlQueryFromConfig(self.config.activationQuery, uri);
 
-    if (query.trim() === '') {
-      return Promise.resolve({'boolean': true});
-    }
 
-    var cache_key = self.generateCacheKey(connection_string, query);
+    return this._getQueryFromConfig(this.config.activationQuery, uri).then(function (query) {
 
-    if (self.cache) {
-      var v = self.cache.get(cache_key);
-      if (v) {
-        return Promise.resolve(v);
+      if (query.trim() === '') {
+        return Promise.resolve({'boolean': true});
       }
-    }
 
-    return new Promise(function (fulfill, reject) {
-      self.jdbc.open(function (err, conn) {
-        if (err) {
-          reject(err);
-        }
+      var cache_key = self.generateCacheKey(connection_string, query);
 
-        if (conn) {
-          self.jdbc.executeQuery(query, function (err, results) {
-            if (err) {
-              reject(err);
-            }
-            // do something
-            var data = {'boolean': results.length > 0 ? true : false};
-            if (self.cache) {
-              self.cache.set(cache_key, data, max_age);
-            }
-            fulfill(data);
-            self._closeConnection(conn);
-          });
+      if (self.cache) {
+        var v = self.cache.get(cache_key);
+        if (v) {
+          return Promise.resolve(v);
         }
+      }
+
+      return new Promise(function (fulfill, reject) {
+        self.jdbc.open(function (err, conn) {
+          if (err) {
+            reject(err);
+          }
+
+          if (conn) {
+            self.jdbc.executeQuery(query, function (err, results) {
+              if (err) {
+                reject(err);
+              }
+              // do something
+              var data = {'boolean': results.length > 0 ? true : false};
+              if (self.cache) {
+                self.cache.set(cache_key, data, max_age);
+              }
+              fulfill(data);
+              self._closeConnection(conn);
+            });
+          }
+        });
       });
     });
   });
@@ -119,105 +122,106 @@ JdbcQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
   return self._init().then(function (data) {
 
     var start = new Date().getTime();
-
-    var connection_string = self.config.datasource.datasourceClazz.datasource.datasourceParams.connection_string;
-    var max_age = self.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
-    var query = self._getSqlQueryFromConfig(self.config.resultQuery, uri);
-
     // special case - we can not simply reject the Promise
     // bacause it will cause the whole group of promissses to be rejected
     if (self.resultQueryRequireEntityURI && (!uri || uri === '')) {
       return self._returnAnEmptyQueryResultsPromise('No data because the query require entityURI');
     }
 
-    var cache_key = self.generateCacheKey(connection_string, query, onlyIds, idVariableName);
+    var connection_string = self.config.datasource.datasourceClazz.datasource.datasourceParams.connection_string;
+    var max_age = self.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
 
-    if (self.cache) {
-      var v =  self.cache.get(cache_key);
-      if (v) {
-        v.queryExecutionTime = new Date().getTime() - start;
-        return Promise.resolve(v);
+    return self._getQueryFromConfig(self.config.resultQuery, uri).then(function (query) {
+
+      var cache_key = self.generateCacheKey(connection_string, query, onlyIds, idVariableName);
+
+      if (self.cache) {
+        var v =  self.cache.get(cache_key);
+        if (v) {
+          v.queryExecutionTime = new Date().getTime() - start;
+          return Promise.resolve(v);
+        }
       }
-    }
 
 
-    return new Promise(function (fulfill, reject) {
-      self.jdbc.open(function (err, conn) {
-        if (err) {
-          reject(err);
-        }
+      return new Promise(function (fulfill, reject) {
+        self.jdbc.open(function (err, conn) {
+          if (err) {
+            reject(err);
+          }
 
-        if (conn) {
-          self.jdbc.executeQuery(query, function (err, results) {
-            if (err) {
-              if (err.message) {
-                err = {
-                  error: err,
-                  message: err.message
+          if (conn) {
+            self.jdbc.executeQuery(query, function (err, results) {
+              if (err) {
+                if (err.message) {
+                  err = {
+                    error: err,
+                    message: err.message
+                  };
+                }
+                reject(err);
+              }
+
+              var data = {
+                ids: [],
+                queryActivated: true
+              };
+
+              if (!onlyIds) {
+                var fields;
+
+                data.head = {
+                  vars: []
                 };
-              }
-              reject(err);
-            }
+                data.config = {
+                  label: self.config.label,
+                  esFieldName: self.config.esFieldName
+                };
+                data.results = {
+                  bindings: _.map(results, function (row) {
+                    var res = {};
 
-            var data = {
-              ids: [],
-              queryActivated: true
-            };
-
-            if (!onlyIds) {
-              var fields;
-
-              data.head = {
-                vars: []
-              };
-              data.config = {
-                label: self.config.label,
-                esFieldName: self.config.esFieldName
-              };
-              data.results = {
-                bindings: _.map(results, function (row) {
-                  var res = {};
-
-                  if (!fields) {
-                    fields = Object.keys(row);
-                  }
-                  for (var v in row) {
-                    if (row.hasOwnProperty(v)) {
-                      res[v] = {
-                        type: 'unknown', // the driver does not return any information about the fields
-                        value: row[v]
-                      };
+                    if (!fields) {
+                      fields = Object.keys(row);
                     }
-                  }
-                  return res;
-                })
+                    for (var v in row) {
+                      if (row.hasOwnProperty(v)) {
+                        res[v] = {
+                          type: 'unknown', // the driver does not return any information about the fields
+                          value: row[v]
+                        };
+                      }
+                    }
+                    return res;
+                  })
+                };
+
+                if (fields) {
+                  data.head.vars = fields;
+                }
+              }
+
+              if (idVariableName) {
+                data.ids = self._extractIdsFromSql(results, idVariableName);
+              }
+
+              if (self.cache) {
+                self.cache.set(cache_key, data, max_age);
+              }
+
+              data.debug = {
+                sentDatasourceId: self.config.datasourceId,
+                sentResultQuery: query,
+                queryExecutionTime: new Date().getTime() - start
               };
 
-              if (fields) {
-                data.head.vars = fields;
-              }
-            }
+              fulfill(data);
+              self._closeConnection(conn);
 
-            if (idVariableName) {
-              data.ids = self._extractIdsFromSql(results, idVariableName);
-            }
-
-            if (self.cache) {
-              self.cache.set(cache_key, data, max_age);
-            }
-
-            data.debug = {
-              sentDatasourceId: self.config.datasourceId,
-              sentResultQuery: query,
-              queryExecutionTime: new Date().getTime() - start
-            };
-
-            fulfill(data);
-            self._closeConnection(conn);
-
-          });
-        }
-      }); // end of jdbc open
+            });
+          }
+        }); // end of jdbc open
+      });
     });
   });
 };

@@ -129,9 +129,9 @@
             </div>
 
             <div class="btn-group rightCorner">
-              <array-param-up index="{{ $index }}" post-action="clickHandlersChanged" ng-model="vis.params.clickOptions"></array-param-up>
-              <array-param-down index="{{ $index }}" post-action="clickHandlersChanged" ng-model="vis.params.clickOptions"></array-param-down>
-              <array-param-remove index="{{ $index }}" post-action="clickHandlersChanged" ng-model="vis.params.clickOptions"></array-param-remove>
+              <array-param-up index="{{ $index }}" post-action="clickHandlersChanged()" ng-model="vis.params.clickOptions"></array-param-up>
+              <array-param-down index="{{ $index }}" post-action="clickHandlersChanged()" ng-model="vis.params.clickOptions"></array-param-down>
+              <array-param-remove index="{{ $index }}" post-action="clickHandlersChanged()" ng-model="vis.params.clickOptions"></array-param-remove>
             </div>
 
           </div>
@@ -139,7 +139,7 @@
       </ul>
     </div>
 
-    <array-param-add label="click handler" post-action="clickHandlersChanged" ng-model="vis.params.clickOptions"></array-param-add>
+    <array-param-add label="click handler" post-action="clickHandlersChanged()" ng-model="vis.params.clickOptions"></array-param-add>
 
   </section>
 

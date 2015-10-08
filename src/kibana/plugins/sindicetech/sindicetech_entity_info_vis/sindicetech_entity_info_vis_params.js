@@ -6,7 +6,7 @@ define(function (require) {
   .directive('sindicetechEntityInfoVisParams', function ($http, $rootScope, config, kbnUrl, $window, Private, Notifier) {
 
     var notify = new Notifier({
-      location: 'Entity Info Widget Params'
+      location: 'Templated Query Viewer Params'
     });
 
     return {

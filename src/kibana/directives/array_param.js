@@ -9,7 +9,8 @@ define(function (require) {
       replace: true,
       scope: {
         label: '@',
-        postAction: '&'
+        postAction: '&',
+        default: '@' // used to define the default element added to the array. It is an empty object if unset
       },
       template: require('text!directives/array_param_add.html'),
       link: function ($scope, element, attrs, ngModelCtrl) {
@@ -32,7 +33,16 @@ define(function (require) {
         }, true);
 
         $scope.addParam = function () {
-          arrayHelper.add($scope.array, {}, $scope.postAction);
+          var el = {};
+          if ($scope.default) {
+            var json;
+            try {
+              json = JSON.parse($scope.default);
+              el = json;
+            } catch (err) {
+            }
+          }
+          arrayHelper.add($scope.array, el, $scope.postAction);
           ngModelCtrl.$setViewValue($scope.array);
         };
       }

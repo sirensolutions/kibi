@@ -11,7 +11,7 @@ define(function (require) {
     function ($rootScope, $scope, $window, $location, globalState, savedSearches, Private, queryEngineClient, Notifier) {
 
       var notify = new Notifier({
-        location: 'Entity Info Widget'
+        location: 'Templated Query Viewer'
       });
 
       var urlHelper = Private(require('components/kibi/url_helper/url_helper'));

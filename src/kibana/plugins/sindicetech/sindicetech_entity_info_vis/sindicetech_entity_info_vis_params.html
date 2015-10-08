@@ -70,14 +70,14 @@
         </div>
 
         <div class="btn-group rightCorner">
-          <array-param-up post-action="updateScope" index="{{ $index }}" ng-model="vis.params.queryOptions"></array-param-up>
-          <array-param-down post-action="updateScope" index="{{ $index }}" ng-model="vis.params.queryOptions"></array-param-down>
-          <array-param-remove post-action="updateScope" index="{{ $index }}" ng-model="vis.params.queryOptions"></array-param-remove>
+          <array-param-up post-action="updateScope()" index="{{ $index }}" ng-model="vis.params.queryOptions"></array-param-up>
+          <array-param-down post-action="updateScope()" index="{{ $index }}" ng-model="vis.params.queryOptions"></array-param-down>
+          <array-param-remove post-action="updateScope()" index="{{ $index }}" ng-model="vis.params.queryOptions"></array-param-remove>
         </div>
 
       </div>
     </li>
   </ul>
-  <array-param-add required post-action="updateScope" label="filter" ng-model="vis.params.queryOptions"></array-param-add>
+  <array-param-add required post-action="updateScope()" default="{{ { open: true } }}" label="filter" ng-model="vis.params.queryOptions"></array-param-add>
 
 </div>

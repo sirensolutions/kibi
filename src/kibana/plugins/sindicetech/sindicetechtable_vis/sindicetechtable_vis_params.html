@@ -67,7 +67,7 @@
             </div>
 
 
-            <div ng-if="clickOption.uriScheme && clickOption.type === 'select'" class="form-group">
+            <div ng-if="clickOption.type === 'select'" class="form-group">
               <label>Redirect to dashboard</label></br/>
               <span>if set after entity is selected you will be redirected to another dashboard</span></br>
               <st-select object-type="dashboard" ng-model="clickOption.targetDashboardId" />

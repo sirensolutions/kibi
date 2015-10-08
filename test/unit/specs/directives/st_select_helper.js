@@ -221,8 +221,11 @@ define(function (require) {
       });
 
       describe('GetIndexTypes', function () {
-        it('no index pattern id specified', function () {
-          expect(stSelectHelper.getIndexTypes()).to.be(undefined);
+        it('no index pattern id specified', function (done) {
+          stSelectHelper.getIndexTypes().then(function (types) {
+            expect(types).to.eql([]);
+            done();
+          });
         });
 
         it('should get the type of the dog index', function (done) {

@@ -188,33 +188,6 @@ define(function (require) {
 
         describe('when there is a delta on group level', function () {
 
-          it('should return replace true if oldDashboardGroups is undefined', function () {
-            var oldDashboardGroups = null;
-            var newDashboardGroups = [];
-            var expected = {
-              replace: true,
-              indexes: null,
-              reasons: ['undefined oldDashboardsGroups']
-            };
-
-            var actual = dashboardGroupHelper.updateDashboardGroups(oldDashboardGroups, newDashboardGroups);
-            expect(actual).to.eql(expected);
-          });
-
-          it('should return replace true if oldDashboardGroups.length != newDashboardGroups.length', function () {
-            var oldDashboardGroups = [{}];
-            var newDashboardGroups = [{}, {}];
-
-            var expected = {
-              replace: true,
-              indexes: null,
-              reasons: ['dashboardsGroups length not the same']
-            };
-
-            var actual = dashboardGroupHelper.updateDashboardGroups(oldDashboardGroups, newDashboardGroups);
-            expect(actual).to.eql(expected);
-          });
-
           it('different dashboard group titles - group 0', function () {
             var oldDashboardGroups = [{
               title: 'Title A'
@@ -224,7 +197,6 @@ define(function (require) {
             }];
 
             var expected = {
-              replace: false,
               indexes: [0],
               reasons: ['different titles for group 0']
             };
@@ -264,7 +236,6 @@ define(function (require) {
             ];
 
             var expected = {
-              replace: false,
               indexes: [1],
               reasons: ['different titles for group 1']
             };
@@ -292,7 +263,6 @@ define(function (require) {
             ];
 
             var expected = {
-              replace: false,
               indexes: [0],
               reasons: ['different number of dashboards for group 0']
             };
@@ -320,7 +290,6 @@ define(function (require) {
             ];
 
             var expected = {
-              replace: false,
               indexes: [0],
               reasons: ['different selected dashboard for group 0']
             };
@@ -353,7 +322,6 @@ define(function (require) {
             ];
 
             var expected = {
-              replace: false,
               indexes: [0],
               reasons: ['different number of filters for dashboard 0 for group 0']
             };
@@ -382,7 +350,6 @@ define(function (require) {
             ];
 
             var expected = {
-              replace: false,
               indexes: [0],
               reasons: ['different indexPatternId for dashboard 0 for group 0']
             };
@@ -411,7 +378,6 @@ define(function (require) {
             ];
 
             var expected = {
-              replace: false,
               indexes: [0],
               reasons: ['different savedSearchId for dashboard 0 for group 0']
             };
@@ -440,7 +406,6 @@ define(function (require) {
             ];
 
             var expected = {
-              replace: false,
               indexes: [0],
               reasons: ['different dashboard id for dashboard 0 for group 0', 'different dashboard id for dashboard 1 for group 0']
             };

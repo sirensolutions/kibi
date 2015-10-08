@@ -24,7 +24,7 @@ define(function (require) {
                     break;
                   case 'sql-result-query':
                     query = {
-                      st_resultQuery: 'select name from @doc[_source][id]@ where id = @doc[_source][id]@'
+                      st_resultQuery: 'select name from table where id = @doc[_source][id]@'
                     };
                     break;
                   case 'sparql-result-query':
@@ -34,7 +34,7 @@ define(function (require) {
                     break;
                   case 'sql-activation-query':
                     query = {
-                      st_activationQuery: 'select name from @doc[_source][id]@ where id = @doc[_source][id]@'
+                      st_activationQuery: 'select name from table where id = @doc[_source][id]@'
                     };
                     break;
                   case 'sparql-activation-query':

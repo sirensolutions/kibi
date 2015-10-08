@@ -27,13 +27,11 @@ define(function (require) {
         $scope.$watch(function () {
           return ngModelCtrl.$modelValue;
         }, function () {
+          $scope.array = ngModelCtrl.$modelValue ? ngModelCtrl.$modelValue : [];
           validate();
         }, true);
 
         $scope.addParam = function () {
-          if (ngModelCtrl.$modelValue) {
-            $scope.array = ngModelCtrl.$modelValue;
-          }
           arrayHelper.add($scope.array, {}, $scope.postAction);
           ngModelCtrl.$setViewValue($scope.array);
         };

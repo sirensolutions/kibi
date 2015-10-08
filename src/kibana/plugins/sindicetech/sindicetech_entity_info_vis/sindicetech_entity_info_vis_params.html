@@ -70,22 +70,14 @@
         </div>
 
         <div class="btn-group rightCorner">
-          <button class="btn btn-xs btn-default" ng-click="upQuery($index)" >
-            <i class="fa fa-caret-up"></i>
-          </button>
-          <button class="btn btn-xs btn-default" ng-click="downQuery($index)" >
-            <i class="fa fa-caret-down"></i>
-          </button>
-          <button class="btn btn-xs btn-danger" ng-click="removeQuery($index)" >
-            <i class="fa fa-times"></i>
-          </button>
+          <array-param-up post-action="updateScope" index="{{ $index }}" ng-model="vis.params.queryOptions"></array-param-up>
+          <array-param-down post-action="updateScope" index="{{ $index }}" ng-model="vis.params.queryOptions"></array-param-down>
+          <array-param-remove post-action="updateScope" index="{{ $index }}" ng-model="vis.params.queryOptions"></array-param-remove>
         </div>
 
       </div>
     </li>
   </ul>
-  <button class="btn btn-xs btn-success" ng-click="addQuery()" >
-    <span>Add query</span> <i class="fa fa-plus"></i>
-  </button>
+  <array-param-add required post-action="updateScope" label="filter" ng-model="vis.params.queryOptions"></array-param-add>
 
 </div>

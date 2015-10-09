@@ -3,6 +3,7 @@ define(function (require) {
   var joinExplanationHelper;
   var $rootScope;
   var filters;
+  var fieldFormat;
 
   describe('Kibi Components', function () {
     describe('Join Explanation Helper', function () {
@@ -24,6 +25,7 @@ define(function (require) {
         inject(function ($injector, Private, _$rootScope_) {
           $rootScope = _$rootScope_;
           joinExplanationHelper = Private(require('components/filter_bar/join_explanation'));
+          fieldFormat = Private(require('registry/field_formats'));
         });
 
         filters = [
@@ -119,10 +121,13 @@ define(function (require) {
           }
         };
         joinExplanationHelper.setIndexesFromJoinFilter(filters).then(function () {
+          var format = fieldFormat.getDefaultInstance('date');
+
           expect(joinExplanationHelper.createLabel(filter1, 'logstash-*'))
             .to.be(' age: <b>10</b> to <b>20</b> ');
           expect(joinExplanationHelper.createLabel(filter2, 'logstash-*'))
-            .to.be(' time: <b>October 28th 1990, 20:57:51.184</b> to <b>May 10th 2008, 11:22:00.534</b> ');
+            .to.be(' time: <b>' + format.convert(657147471184, 'html') + '</b> to <b>' +
+              format.convert(1210414920534, 'html') + '</b> ');
           done();
         });
         $rootScope.$apply();

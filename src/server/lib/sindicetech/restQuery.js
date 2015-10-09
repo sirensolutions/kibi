@@ -52,7 +52,8 @@ RestQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
   var method = this.config.datasource.datasourceClazz.datasource.datasourceParams.method.toLowerCase();
   var timeout = this.config.datasource.datasourceClazz.datasource.datasourceParams.timeout;
   var max_age = this.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
-
+  var username = this.config.datasource.datasourceClazz.datasource.datasourceParams.username;
+  var password = this.config.datasource.datasourceClazz.datasource.datasourceParams.password;
 
   return new Promise(function (fulfill, reject) {
     var start = new Date().getTime();
@@ -165,6 +166,14 @@ RestQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
         return data;
       }
     };
+
+    if (username && password) {
+      rp_options.auth = {
+        username: username,
+        password: password,
+        sendImmediately: false
+      };
+    }
 
     if (method === 'get') {
       rp_options.qs = params;

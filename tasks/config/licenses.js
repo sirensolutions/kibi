@@ -44,7 +44,10 @@ module.exports = function (grunt) {
         'uglify-js@2.2.5': ['BSD'],
         'zeroclipboard@2.2.0': ['MIT'],
         'amdefine@0.1.1': ['BSD-3-Clause', 'MIT'],
-        'amdefine@1.0.0': ['BSD-3-Clause', 'MIT']
+        'amdefine@1.0.0': ['BSD-3-Clause', 'MIT'],
+        'jison@0.4.13': ['MIT'],
+        'JSONSelect@0.4.0': ['MIT'],
+        'nomnom@1.5.2': ['MIT']
       }
     }
   };

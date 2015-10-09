@@ -40,6 +40,7 @@ define(function (require) {
               json = JSON.parse($scope.default);
               el = json;
             } catch (err) {
+              el = $scope.default;
             }
           }
           arrayHelper.add($scope.array, el, $scope.postAction);

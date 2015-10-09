@@ -42,14 +42,10 @@
       </div>
 
       <div class="rightCorner">
-        <button class="btn btn-xs btn-danger" ng-click="agg.params.queryIds.splice($index, 1)" >
-          <i class="fa fa-times"></i>
-        </button>
+        <array-param-remove ng-model="agg.params.queryIds"></array-param-remove>
       </div>
     </div>
 
   </li>
 </ul>
-<button class="btn btn-xs btn-success" ng-click="agg.params.queryIds.push({id:'', queryVariableName:'', targetIndexPatternId: ''})" >
-  <span>Add an external query terms filter</span> <i class="fa fa-plus"></i>
-</button>
+<array-param-add required label="external query terms filter" ng-model="agg.params.queryIds"></array-param-add>

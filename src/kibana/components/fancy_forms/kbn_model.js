@@ -22,7 +22,7 @@ define(function (require) {
    *
    * @param {$scope} $scope
    */
-  function KbnModelController($scope, $element, $animate) {
+  function KbnModelController($scope, $element, $animate, $timeout) {
     var ngModel = this;
 
     // verify that angular works the way we are assuming it does
@@ -118,7 +118,10 @@ define(function (require) {
     ngModel.$setUntouched();
     $element.one('blur', function () {
       ngModel.$setTouched();
-      $scope.$apply();
+      $timeout(function () {
+        // kibi: added timeout to avoid digest cycle conflict that appeared with arrayParam* directives
+        $scope.$apply();
+      });
     });
     $scope.$on('$destroy', function () {
       $element.off('blur', ngModel.$setTouched);

@@ -1,4 +1,4 @@
-<div class="sindicetech-relational-vis-params" id="sindicetech-relational-vis-params" >
+<div class="sindicetech-relational-vis-params" id="sindicetech-relational-vis-params">
   <ul>
     <li ng-repeat="button in vis.params.buttons" class="queryOptionArea" >
       <div class="header">
@@ -63,21 +63,13 @@
 
         <!-- positioned via css to be in right top corner (keep it the last element) -->
         <div class="btn-group rightCorner">
-          <button class="btn btn-xs btn-default" ng-click="upButton($index)" >
-            <i class="fa fa-caret-up"></i>
-          </button>
-          <button class="btn btn-xs btn-default" ng-click="downButton($index)" >
-            <i class="fa fa-caret-down"></i>
-          </button>
-          <button class="btn btn-xs btn-danger" ng-click="removeButton($index)" >
-            <i class="fa fa-times"></i>
-          </button>
+          <array-param-up index="{{ $index }}" ng-model="vis.params.buttons"></array-param-up>
+          <array-param-down index="{{ $index }}" ng-model="vis.params.buttons"></array-param-down>
+          <array-param-remove index="{{ $index }}" ng-model="vis.params.buttons"></array-param-remove>
         </div>
 
       </div>
     </li>
   </ul>
-  <button class="btn btn-xs btn-success" ng-click="addNewButton()" >
-    <span>Add filter</span> <i class="fa fa-plus"></i>
-  </button>
+  <array-param-add required label="filter" ng-model="vis.params.buttons"></array-param-add>
 </div>

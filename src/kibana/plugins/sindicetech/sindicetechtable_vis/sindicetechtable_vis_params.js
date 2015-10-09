@@ -166,13 +166,6 @@ define(function (require) {
           shouldEntityURIBeEnabled();
         });
 
-        $scope.addQuery = function () {
-          if (!$scope.vis.params.queryIds) {
-            $scope.vis.params.queryIds = [];
-          }
-          arrayHelper.add($scope.vis.params.queryIds, {id: ''}, null);
-        };
-
         $scope.$watchMulti([
           'vis.params.showMeticsAtAllLevels',
           'vis.params.datasourceId',
@@ -212,7 +205,7 @@ define(function (require) {
 
         // Initialise the clicks parameters.
         // Reset the click if the type/uriScheme of the click changed.
-        var clickHandlersChanged = function () {
+        var clickHandlersChanged = $scope.clickHandlersChanged = function () {
           // here detect change for each clickOption.uriScheme
           // and modify clickOption.uriFormat
           _.each($scope.vis.params.clickOptions, function (clickOption, ind) {
@@ -276,26 +269,6 @@ define(function (require) {
           clickHandlersChanged();
           _checkForDuplicates();
         }, true);
-
-
-        $scope.addClickOption = function () {
-          if (!$scope.vis.params.clickOptions) {
-            $scope.vis.params.clickOptions = [];
-          }
-          arrayHelper.add($scope.vis.params.clickOptions, {}, clickHandlersChanged);
-        };
-
-        $scope.removeClickOption = function (index) {
-          arrayHelper.remove($scope.vis.params.clickOptions, index, clickHandlersChanged);
-        };
-
-        $scope.upClickOption = function (index) {
-          arrayHelper.up($scope.vis.params.clickOptions, index, clickHandlersChanged);
-        };
-
-        $scope.downClickOption = function (index) {
-          arrayHelper.down($scope.vis.params.clickOptions, index, clickHandlersChanged);
-        };
 
       }
     };

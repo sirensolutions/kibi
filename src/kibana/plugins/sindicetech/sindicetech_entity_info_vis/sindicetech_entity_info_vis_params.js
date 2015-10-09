@@ -6,7 +6,7 @@ define(function (require) {
   .directive('sindicetechEntityInfoVisParams', function ($http, $rootScope, config, kbnUrl, $window, Private, Notifier) {
 
     var notify = new Notifier({
-      location: 'Entity Info Widget Params'
+      location: 'Templated Query Viewer Params'
     });
 
     return {
@@ -16,7 +16,7 @@ define(function (require) {
 
         var _shouldEntityURIBeEnabled = Private(require('plugins/sindicetech/commons/_should_entity_uri_be_enabled'));
 
-        var updateScope = function () {
+        $scope.updateScope = function () {
           $scope.vis.params.queryOptions = _.map($scope.vis.params.queryOptions, function (option) {
             try {
               option.templateVars = JSON.parse(option._templateVarsString);
@@ -32,9 +32,8 @@ define(function (require) {
           $scope.vis.params.random = $window.performance.now();
         };
 
-
         $scope.$watch('vis.params.queryOptions', function () {
-          updateScope();
+          $scope.updateScope();
 
           var queryIds = _.map($scope.vis.params.queryOptions, function (snippet) {
             return snippet.queryId;
@@ -50,47 +49,6 @@ define(function (require) {
             notify.warning('Could not determine that widget need entityURI' + JSON.stringify(err, null, ' '));
           });
         }, true);
-
-        $scope.addQuery = function () {
-          if (!$scope.vis.params.queryOptions) {
-            $scope.vis.params.queryOptions = [];
-          }
-
-          $scope.vis.params.queryOptions.push({
-            queryId: '',
-            templateId: '',
-            open: true,
-            showFilterButton: false,
-            _templateVarsString: '{}'
-          });
-
-          updateScope();
-        };
-
-        $scope.removeQuery = function (index) {
-          $scope.vis.params.queryOptions.splice(index, 1);
-          updateScope();
-        };
-
-        $scope.upQuery = function (index) {
-          if (index > 0) {
-            var newIndex = index - 1;
-            var currentElement = _.clone($scope.vis.params.queryOptions[index], true);
-            $scope.vis.params.queryOptions.splice(index, 1);
-            $scope.vis.params.queryOptions.splice(newIndex, 0, currentElement);
-            updateScope();
-          }
-        };
-
-        $scope.downQuery = function (index) {
-          if (index < $scope.vis.params.queryOptions.length - 1) {
-            var newIndex = index + 1;
-            var currentElement = _.clone($scope.vis.params.queryOptions[index], true);
-            $scope.vis.params.queryOptions.splice(index, 1);
-            $scope.vis.params.queryOptions.splice(newIndex, 0, currentElement);
-            updateScope();
-          }
-        };
 
         $scope.editTemplate = function (index) {
           kbnUrl.change('/settings/templates/' + $scope.vis.params.queryOptions[index].templateId);

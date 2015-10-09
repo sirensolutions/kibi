@@ -38,6 +38,10 @@ function Query(snippetDefinition, cache) {
     datasource        : snippetDefinition.datasource,
     rest_params       : snippetDefinition.rest_params || [],
     rest_headers      : snippetDefinition.rest_headers || [],
+    rest_body         : snippetDefinition.rest_body || '',
+    rest_path         : snippetDefinition.rest_path || '',
+    rest_resp_status_code: snippetDefinition.rest_resp_status_code || 200,
+    rest_resp_restriction_path: snippetDefinition.rest_resp_restriction_path || '$',
 
     tags              : snippetDefinition.tags || [],
     entityWeight      : snippetDefinition.entityWeight || 0.3,

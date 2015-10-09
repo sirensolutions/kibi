@@ -27,6 +27,10 @@ define(function (require) {
           st_tags: 'string',
           rest_params: 'json',
           rest_headers: 'json',
+          rest_body: 'string',
+          rest_path: 'string',
+          rest_resp_status_code: 'long',
+          rest_resp_restriction_path: 'string',
           version: 'long'
         },
 
@@ -38,8 +42,12 @@ define(function (require) {
           st_datasourceId: '',
           _previewTemplateId: '',
           st_tags: '',
-          rest_params: '[]',
-          rest_headers: '[]',
+          rest_params: [],
+          rest_headers: [],
+          rest_body: '',
+          rest_path: '',
+          rest_resp_status_code: 200,
+          rest_resp_restriction_path: '$',
           version: 1
         },
 

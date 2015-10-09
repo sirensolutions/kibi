@@ -4,6 +4,7 @@ var url     = require('url');
 var rp      = require('request-promise');
 var config  = require('../../config');
 var logger  = require('../logger');
+var jsonpath      = require('jsonpath');
 var AbstractQuery = require('./abstractQuery');
 
 function RestQuery(queryDefinition, cache) {
@@ -61,30 +62,36 @@ RestQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
       reject(new Error('Only GET|POST methods are supported at the moment'));
     }
 
-    if (uri.indexOf('rest://') !== 0) {
-      reject(new Error('Wrong URI scheme. For rest query uri scheme should strat with "rest://"'));
-    }
-
-    var variables = uri.substring('rest://'.length).split('/');
-
-    _.each(variables, function (v, index) {
-      variables[index] = variables[index].replace(/--SLASH--/g, '/');
-    });
-
-    var data = {};
+    var params = {};
     var headers = {};
-    regex = /@VAR([0-9]{1,})@/;
 
     if ( !(self.config.rest_params instanceof Array)) {
       reject(new Error('rest_params should be an Array. Check the elasticsearch mapping'));
     }
 
+    if ( !(self.config.rest_headers instanceof Array)) {
+      reject(new Error('rest_headers should be an Array. Check the elasticsearch mapping'));
+    }
+
+    // TODO add variables repalcement based on new selected entity
+    // here reuse _getQueryFromConfig for each parameter
+    // !!!!!
+
+    _.each(self.config.rest_params, function (param) {
+      params[param.name] = param.value;
+    });
+
+    _.each(self.config.rest_headers, function (header) {
+      headers[header.name] = header.value;
+    });
+
+    /*
     _.each(self.config.rest_params, function (param) {
       if (regex.test(param.value)) {
         var match = regex.exec(param.value);
         if (match && match.length > 1) {
           var index = match[1];
-          data[param.name] = variables[index];
+          params[param.name] = variables[index];
         } else {
           reject(
             new Error(
@@ -93,7 +100,7 @@ RestQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
           );
         }
       } else {
-        data[param.name] = param.value;
+        params[param.name] = param.value;
       }
     });
 
@@ -114,10 +121,11 @@ RestQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
         headers[header.name] = header.value;
       }
     });
+    */
 
     var key;
     if (self.cache) {
-      key = url_s + method + JSON.stringify(headers) + JSON.stringify(data);
+      key = method + url_s + self.config.rest_path + JSON.stringify(headers) + JSON.stringify(params);
     }
 
     if (self.cache) {
@@ -129,13 +137,24 @@ RestQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
 
     var rp_options = {
       method: method.toUpperCase(),
-      uri: url.parse(url_s),
+      uri: url.parse(url_s + self.config.rest_path),
       headers: headers,
       timeout: timeout || 5000,
-      transform: function (resp) {
+      transform: function (body, resp) {
         var data = {
-          results: JSON.parse(resp)
+          results: {}
         };
+        if (resp.statusCode !== self.config.rest_resp_status_code) {
+          data.error = 'Response status code [' + resp.statusCode + '] while expected [' + self.config.rest_resp_status_code + ']';
+          return data;
+        }
+        try {
+          data.results = jsonpath.query(JSON.parse(body), self.config.rest_resp_restriction_path);
+        } catch (e) {
+          data.error = e.message;
+          return data;
+        }
+
         if (self.cache) {
           self.cache.set(key, data, max_age);
         }
@@ -144,7 +163,7 @@ RestQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
     };
 
     if (method === 'get') {
-      rp_options.qs = data;
+      rp_options.qs = params;
     } else {
       // set body or json
       // TODO: work on it

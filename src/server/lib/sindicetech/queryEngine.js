@@ -155,6 +155,9 @@ QueryEngine.prototype.reloadQueries = function () {
           activationQuery:   hit._source.st_activationQuery,
           resultQuery:       hit._source.st_resultQuery,
           datasourceId:      hit._source.st_datasourceId,
+          rest_path:         hit._source.rest_path,
+          rest_body:         hit._source.rest_body,
+          rest_resp_restriction_path: hit._source.rest_resp_restriction_path,
           tags:              hit._source.st_tags
         };
 
@@ -174,6 +177,12 @@ QueryEngine.prototype.reloadQueries = function () {
         } catch (e) {
           queryDefinition.rest_headers = [];
         }
+        try {
+          queryDefinition.rest_resp_status_code = parseInt(hit._source.rest_resp_status_code);
+        } catch (e) {
+          queryDefinition.rest_resp_status_code = 200;
+        }
+
 
         queryDefinitions.push(queryDefinition);
       });

@@ -169,6 +169,15 @@
       "encrypted": true,
       "defaultValue": "",
       "placeholder": "Password"
+    },
+    {
+      "name": "auth_token",
+      "inputType": "password",
+      "required": false,
+      "multivalued": false,
+      "encrypted": true,
+      "defaultValue": "",
+      "placeholder": "Long-lived token"
     }
   ],
 

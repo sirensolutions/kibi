@@ -5,6 +5,7 @@ var rp      = require('request-promise');
 var config  = require('../../config');
 var logger  = require('../logger');
 var jsonpath      = require('jsonpath');
+var queryHelper = require('./query_helper');
 var AbstractQuery = require('./abstractQuery');
 
 function RestQuery(queryDefinition, cache) {
@@ -54,6 +55,7 @@ RestQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
   var max_age = this.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
   var username = this.config.datasource.datasourceClazz.datasource.datasourceParams.username;
   var password = this.config.datasource.datasourceClazz.datasource.datasourceParams.password;
+  var auth_token = this.config.datasource.datasourceClazz.datasource.datasourceParams.auth_token;
 
   return new Promise(function (fulfill, reject) {
     var start = new Date().getTime();
@@ -63,9 +65,6 @@ RestQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
       reject(new Error('Only GET|POST methods are supported at the moment'));
     }
 
-    var params = {};
-    var headers = {};
-
     if ( !(self.config.rest_params instanceof Array)) {
       reject(new Error('rest_params should be an Array. Check the elasticsearch mapping'));
     }
@@ -74,119 +73,90 @@ RestQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
       reject(new Error('rest_headers should be an Array. Check the elasticsearch mapping'));
     }
 
-    // TODO add variables repalcement based on new selected entity
-    // here reuse _getQueryFromConfig for each parameter
-    // !!!!!
-
-    _.each(self.config.rest_params, function (param) {
-      params[param.name] = param.value;
-    });
-
-    _.each(self.config.rest_headers, function (header) {
-      headers[header.name] = header.value;
-    });
-
-    /*
-    _.each(self.config.rest_params, function (param) {
-      if (regex.test(param.value)) {
-        var match = regex.exec(param.value);
-        if (match && match.length > 1) {
-          var index = match[1];
-          params[param.name] = variables[index];
-        } else {
-          reject(
-            new Error(
-              'Something wrong with the variable placeholder. Variable palceholders should follow the format: @VAR0@, @VAR1@, ...'
-            )
-          );
-        }
-      } else {
-        params[param.name] = param.value;
-      }
-    });
-
-    _.each(self.config.rest_headers, function (header) {
-      if (regex.test(header.value)) {
-        var match = regex.exec(header.value);
-        if (match && match.length > 1) {
-          var index = match[1];
-          headers[header.name] = variables[index];
-        } else {
-          reject(
-            new Error(
-              'Something wrong with the variable placeholder. Variable palceholders should follow the format: @VAR0@, @VAR1@, ...'
-            )
-          );
-        }
-      } else {
-        headers[header.name] = header.value;
-      }
-    });
-    */
-
-    var key;
-    if (self.cache) {
-      key = method + url_s + self.config.rest_path + JSON.stringify(headers) + JSON.stringify(params);
-    }
-
-    if (self.cache) {
-      var v = self.cache.get(key);
-      if (v) {
-        return fulfill(v);
-      }
-    }
-
-    // to check any option visit
-    // https://github.com/request/request#requestoptions-callback
-    var rp_options = {
-      method: method.toUpperCase(),
-      uri: url.parse(url_s + self.config.rest_path),
-      headers: headers,
-      timeout: timeout || 5000,
-      transform: function (body, resp) {
-        var data = {
-          results: {}
-        };
-        if (resp.statusCode !== self.config.rest_resp_status_code) {
-          data.error = 'Response status code [' + resp.statusCode + '] while expected [' + self.config.rest_resp_status_code + ']';
-          return data;
-        }
-
-        // TODO: change this once we support xml resp or text resp
-        try {
-          data.results = jsonpath.query(JSON.parse(body), self.config.rest_resp_restriction_path);
-        } catch (e) {
-          data.error = e.message;
-          return data;
-        }
-
-        if (self.cache) {
-          self.cache.set(key, data, max_age);
-        }
-        return data;
-      }
+    // user can also use a special variables like $auth_token
+    var availableVariables = {
+      $auth_token: auth_token // TODO: !!! decrypt the token
     };
 
-    if (username && password) {
-      rp_options.auth = {
-        username: username,
-        password: password,
-        sendImmediately: false
+    // the whole replacement of values is happening here
+    queryHelper.replaceVariablesForREST(
+      self.config.rest_headers,
+      self.config.rest_params,
+      self.config.rest_body,
+      uri, availableVariables)
+    .then(function (results) {
+      // here convert the params and headers from array to map
+      var headers = _.zipObject(_.pluck(results.headers, 'name'), _.pluck(results.headers, 'value'));
+      var params = _.zipObject(_.pluck(results.params, 'name'), _.pluck(results.params, 'value'));
+      var body = results.body;
+
+      var key;
+      if (self.cache) {
+        key = method + url_s + self.config.rest_path + JSON.stringify(headers) + JSON.stringify(params) + body;
+      }
+
+      if (self.cache) {
+        var v = self.cache.get(key);
+        if (v) {
+          return fulfill(v);
+        }
+      }
+
+      // to check any option visit
+      // https://github.com/request/request#requestoptions-callback
+      var rp_options = {
+        method: method.toUpperCase(),
+        uri: url.parse(url_s + self.config.rest_path),
+        headers: headers,
+        timeout: timeout || 5000,
+        transform: function (body, resp) {
+          var data = {
+            results: {}
+          };
+          if (resp.statusCode !== self.config.rest_resp_status_code) {
+            data.error = 'Response status code [' + resp.statusCode + '] while expected [' + self.config.rest_resp_status_code + ']';
+            return data;
+          }
+
+          // TODO: change this once we support xml resp or text resp
+          try {
+            data.results = jsonpath.query(JSON.parse(body), self.config.rest_resp_restriction_path);
+          } catch (e) {
+            data.error = e.message;
+            return data;
+          }
+
+          if (self.cache) {
+            self.cache.set(key, data, max_age);
+          }
+          return data;
+        }
       };
-    }
 
-    if (method === 'get') {
-      rp_options.qs = params;
-    } else if (method === 'post') {
-      rp_options.body = self.config.rest_body;
-      // TODO: for now we only support json - change it here once we add xml support
-      rp_options.json = true; // if the body is a json object
-    }
+      if (username && password) {
+        rp_options.auth = {
+          username: username,
+          password: password,
+          sendImmediately: false
+        };
+      }
 
-    rp(rp_options).then(function (resp) {
-      fulfill(resp);
-    }).catch(function (err) {
-      reject(err);
+      if (method === 'get') {
+        rp_options.qs = params;
+      } else if (method === 'post') {
+        rp_options.body = body;
+        // TODO: for now we only support json - change it here once we add xml support
+        rp_options.json = true; // if the body is a json object
+      }
+
+      console.log(rp_options);
+
+      rp(rp_options).then(function (resp) {
+        fulfill(resp);
+      }).catch(function (err) {
+        reject(err);
+      });
+
     });
   });
 };

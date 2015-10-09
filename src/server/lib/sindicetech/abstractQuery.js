@@ -93,30 +93,6 @@ Query.prototype._extractIdsFromSql = function (rows, idVariableName) {
 };
 
 
-Query.prototype._getQueryFromConfig = function (query, uri) {
-  if (!uri || uri.trim() === '' ) {
-    return Promise.resolve(query);
-  }
-
-  var retQuery = query.replace(/\s{2,}/g, ' ');
-  var parts = uri.trim().split('/');
-  if (parts.length < 3) {
-    Promise.reject('Malformed uri - should have at least 3 parts: index, type, id');
-  }
-
-  var index = parts[0];
-  var type = parts[1];
-  var id = parts[2];
-
-  // TODO: add caching of documet
-
-  return queryHelper.fetchDocument(index, type, id).then(function (doc) {
-    //now parse the query and replace the placeholders
-    return queryHelper.replaceVariablesInTheQuery(doc, retQuery);
-  });
-};
-
-
 Query.prototype._returnAnEmptyQueryResultsPromise = function (message) {
   var self = this;
   var data = {

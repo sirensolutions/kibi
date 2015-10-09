@@ -5,6 +5,7 @@ var config = require('../../config');
 var sqlite3 = require('sqlite3');
 var logger = require('../logger');
 var AbstractQuery = require('./abstractQuery');
+var queryHelper = require('./query_helper');
 
 var debug = false;
 
@@ -77,7 +78,7 @@ SQLiteQuery.prototype.checkIfItIsRelevant = function (uri) {
   var dbfile = this.config.datasource.datasourceClazz.datasource.datasourceParams.db_file_path;
   var max_age = this.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
 
-  return this._getQueryFromConfig(this.config.activationQuery, uri).then(function (query) {
+  return queryHelper.replaceVariablesUsingEsDocument(this.config.activationQuery, uri).then(function (query) {
 
     if (query.trim() === '') {
       return Promise.resolve({'boolean': true});
@@ -139,7 +140,7 @@ SQLiteQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
   }
 
 
-  return this._getQueryFromConfig(this.config.resultQuery, uri).then(function (query) {
+  return queryHelper.replaceVariablesUsingEsDocument(this.config.resultQuery, uri).then(function (query) {
 
     var cache_key = self.generateCacheKey(dbfile, query, onlyIds, idVariableName);
 

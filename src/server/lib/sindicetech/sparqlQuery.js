@@ -5,6 +5,7 @@ var url     = require('url');
 var http    = require('http');
 var config  = require('../../config');
 var AbstractQuery = require('./abstractQuery');
+var queryHelper = require('./query_helper');
 var logger  = require('../logger');
 
 function SparqlQuery(queryDefinition, cache) {
@@ -31,7 +32,7 @@ SparqlQuery.prototype.checkIfItIsRelevant = function (uri) {
   var max_age = this.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
 
 
-  return this._getQueryFromConfig(this.config.activationQuery, uri).then(function (queryNoPrefixes) {
+  return queryHelper.replaceVariablesUsingEsDocument(this.config.activationQuery, uri).then(function (queryNoPrefixes) {
 
     if (queryNoPrefixes.trim() === '') {
       return Promise.resolve({'boolean': true});
@@ -94,7 +95,7 @@ SparqlQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
   var timeout = this.config.datasource.datasourceClazz.datasource.datasourceParams.timeout;
   var max_age = this.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
 
-  return this._getQueryFromConfig(this.config.resultQuery, uri).then(function (query) {
+  return queryHelper.replaceVariablesUsingEsDocument(this.config.resultQuery, uri).then(function (query) {
 
     var cache_key = self.generateCacheKey(endpoint_url, query, onlyIds, idVariableName);
 

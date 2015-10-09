@@ -129,6 +129,13 @@
               <br/>
 
               <div class="form-group">
+                <label>Body</label><br/>
+                <textarea ng-model="query.rest_body"  class="form-control">{{query.rest_body}}</textarea>
+              </div>
+
+              <br/>
+
+              <div class="form-group">
                 <label>Expected response status code</label><br/>
                 <input type="text" ng-model="query.rest_resp_status_code"  class="form-control"/>
               </div>

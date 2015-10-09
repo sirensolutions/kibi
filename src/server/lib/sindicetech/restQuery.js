@@ -135,6 +135,8 @@ RestQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
       }
     }
 
+    // to check any option visit
+    // https://github.com/request/request#requestoptions-callback
     var rp_options = {
       method: method.toUpperCase(),
       uri: url.parse(url_s + self.config.rest_path),
@@ -148,6 +150,8 @@ RestQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
           data.error = 'Response status code [' + resp.statusCode + '] while expected [' + self.config.rest_resp_status_code + ']';
           return data;
         }
+
+        // TODO: change this once we support xml resp or text resp
         try {
           data.results = jsonpath.query(JSON.parse(body), self.config.rest_resp_restriction_path);
         } catch (e) {
@@ -164,11 +168,10 @@ RestQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
 
     if (method === 'get') {
       rp_options.qs = params;
-    } else {
-      // set body or json
-      // TODO: work on it
-      rp_options.body = '';
-      rp_options.json = {};
+    } else if (method === 'post') {
+      rp_options.body = self.config.rest_body;
+      // TODO: for now we only support json - change it here once we add xml support
+      rp_options.json = true; // if the body is a json object
     }
 
     rp(rp_options).then(function (resp) {

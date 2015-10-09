@@ -7,8 +7,8 @@ define(function (require) {
   require('ng-tags-input');
 
   var slugifyId = require('utils/slugify_id');
-  var $ = require('jquery');
   var _ = require('lodash');
+
   require('routes')
   .when('/settings/dashboardgroups', {
     template: require('text!plugins/sindicetech/dashboard_groups_editor/index.html'),
@@ -26,7 +26,7 @@ define(function (require) {
       dashboardGroup: function ($route, courier, savedDashboardGroups) {
         return savedDashboardGroups.get($route.current.params.id)
         .catch(courier.redirectWhenMissing({
-          'dashboardGroup' : '/settings/dashboardgroups'
+          dashboardGroup : '/settings/dashboardgroups'
         }));
       }
     }
@@ -37,9 +37,7 @@ define(function (require) {
 
   app.controller(
     'DashboardGroupsEditor',
-    function ($rootScope, $scope, $route, $window, kbnUrl, Notifier, savedDashboards, savedDashboardGroups, Private, Promise) {
-
-      var arrayHelper = Private(require('components/kibi/array_helper/array_helper'));
+    function ($rootScope, $scope, $route, $window, kbnUrl, Notifier, savedDashboards, savedDashboardGroups, Promise) {
 
       var notify = new Notifier({
         location: 'Dashboard Groups Editor'
@@ -61,7 +59,7 @@ define(function (require) {
       $scope.submit = function () {
         dashboardGroup.id = dashboardGroup.title;
         dashboardGroup.save().then(function (groupId) {
-          notify.info('DashboardGroup ' + dashboardGroup.title + ' successfuly saved');
+          notify.info('Dashboard Group ' + dashboardGroup.title + ' was successfuly saved');
           $rootScope.$emit('kibi:dashboardgroup:changed', groupId);
           kbnUrl.change('settings/dashboardgroups/' + slugifyId(dashboardGroup.id));
         });
@@ -91,7 +89,7 @@ define(function (require) {
           savedDashboardGroupClone.iconUrl = dashboardGroup.iconUrl;
 
           savedDashboardGroupClone.save().then(function (resp) {
-            notify.info('DashboardGroup ' + savedDashboardGroupClone.title + 'successfuly saved');
+            notify.info('Dashboard Group ' + savedDashboardGroupClone.title + ' was successfuly cloned');
             $rootScope.$emit('kibi:dashboardgroup:changed', resp);
             kbnUrl.change('settings/dashboardgroups/' + slugifyId(savedDashboardGroupClone.id));
           });
@@ -99,61 +97,21 @@ define(function (require) {
         });
       };
 
-      $scope.$watch('dashboardGroup.dashboards', function () {
-        var dashboards;
-        try {
-          dashboards = JSON.parse($scope.dashboardGroup.dashboards);
-          if (dashboards instanceof Array) {
-            $scope.dashboardGroup.dashboards_o = dashboards;
-          } else {
-            $scope.dashboardGroup.dashboards_o = [];
-          }
-        } catch (e) {
-          $scope.dashboardGroup.dashboards_o = [];
-        }
-      });
-
-      $scope.$watch('dashboardGroup.dashboards_o', function () {
-        dashboardsToString();
-      }, true);
-
-
-      var dashboardsToString = function () {
-        var promises = [];
-        _.each($scope.dashboardGroup.dashboards_o, function (d) {
-          promises.push(savedDashboards.get(d.id));
+      function addTitle() {
+        var promises = _.map($scope.dashboardGroup.dashboards, function (d) {
+          return savedDashboards.get(d.id);
         });
 
         Promise.all(promises).then(function (dashboards, index) {
           _.each(dashboards, function (dashboard, index) {
-            $scope.dashboardGroup.dashboards_o[index].title = dashboard.title;
+            $scope.dashboardGroup.dashboards[index].title = dashboard.title;
           });
-
-          $scope.dashboardGroup.dashboards = JSON.stringify($scope.dashboardGroup.dashboards_o, function (key, value) {
-            return key === '$$hashKey' ? undefined : value;
-          }, ' ');
         });
-      };
+      }
 
-      $scope.addDashboard = function () {
-        if (!$scope.dashboardGroup.dashboards_o) {
-          $scope.dashboardGroup.dashboards_o = [];
-        }
-        arrayHelper.add($scope.dashboardGroup.dashboards_o, {id: ''}, dashboardsToString);
-      };
-
-      $scope.removeDashboard = function (index) {
-        arrayHelper.remove($scope.dashboardGroup.dashboards_o, index, dashboardsToString);
-      };
-
-      $scope.upDashboard = function (index) {
-        arrayHelper.up($scope.dashboardGroup.dashboards_o, index, dashboardsToString);
-      };
-
-      $scope.downDashboard = function (index) {
-        arrayHelper.down($scope.dashboardGroup.dashboards_o, index, dashboardsToString);
-      };
-
+      $scope.$watch('dashboardGroup.dashboards', function () {
+        addTitle();
+      }, true);
 
     });
 });

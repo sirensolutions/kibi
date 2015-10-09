@@ -116,38 +116,33 @@ define(function (require) {
               var dashboards = [];
 
               try {
-                var dashboardsArray = JSON.parse(group.dashboards);
-                if (dashboardsArray instanceof Array) {
-
-                  // check that all dashboards still exists
-                  // in case there is one which does not display a warning
-                  _.each(dashboardsArray, function (d) {
-                    savedDashboards.get(d.id).catch(function (err) {
-                      reject(new Error(
-                        '"' + group.title + '"' + 'dashboard group contains non existing dashboard "' + d.id + '". ' +
-                        'Edit dashboard group to remove non existing dashboard'
-                      ));
-                    });
+                var dashboardsArray = group.dashboards;
+                // check that all dashboards still exists
+                // in case there is one which does not display a warning
+                _.each(dashboardsArray, function (d) {
+                  savedDashboards.get(d.id).catch(function (err) {
+                    reject(new Error(
+                      '"' + group.title + '"' + 'dashboard group contains non existing dashboard "' + d.id + '". ' +
+                      'Edit dashboard group to remove non existing dashboard'
+                    ));
                   });
+                });
 
-                  dashboards = _.map(dashboardsArray, function (d) {
+                dashboards = _.map(dashboardsArray, function (d) {
 
-                    var dashboard = {
-                      id: d.id,
-                      title: self.shortenDashboardName(group.title, d.title),
-                      onClick: function () {
-                        self._getOnClickForDashboardInGroup(d.id, group.id);
-                      },
-                      filters: kibiStateHelper.getFiltersForDashboardId(d.id)
-                    };
-                    if (currentDashboardId === d.id) {
-                      selected = dashboard;
-                    }
-                    return dashboard;
-                  });
-                } else {
-                  console.log('Property dashboards should be an Array, but was [' + JSON.stringify(dashboardsArray, null, '') + ']');
-                }
+                  var dashboard = {
+                    id: d.id,
+                    title: self.shortenDashboardName(group.title, d.title),
+                    onClick: function () {
+                      self._getOnClickForDashboardInGroup(d.id, group.id);
+                    },
+                    filters: kibiStateHelper.getFiltersForDashboardId(d.id)
+                  };
+                  if (currentDashboardId === d.id) {
+                    selected = dashboard;
+                  }
+                  return dashboard;
+                });
               } catch (e) {
                 // swallow the error as if for some reason the jsonstring could not be parsed
                 // the dashboards array will stay empty

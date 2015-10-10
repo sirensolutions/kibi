@@ -88,7 +88,6 @@
     "grunt-run": "^0.2.3",
     "grunt-s3": "^0.2.0-alpha.3",
     "grunt-simple-mocha": "^0.4.0",
-    "time-grunt": "1.2.1",
     "html-entities": "^1.1.1",
     "http-proxy": "^1.8.1",
     "husky": "^0.6.0",
@@ -99,6 +98,7 @@
     "marked-text-renderer": "^0.1.0",
     "mkdirp": "^0.5.0",
     "mocha": "^2.2.5",
+    "mockery": "^1.4.0",
     "npm": "^2.11.0",
     "opn": "^1.0.0",
     "path-browserify": "0.0.0",
@@ -108,8 +108,9 @@
     "simple-git": "^0.11.0",
     "sinon": "^1.12.2",
     "sinon-as-promised": "^2.0.3",
+    "sync-request": "2.0.1",
     "tar": "^1.0.1",
-    "sync-request": "2.0.1"
+    "time-grunt": "1.2.1"
   },
   "engines": {
     "node": "~0.10 || ~0.12",

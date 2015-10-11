@@ -31,6 +31,7 @@ define(function (require) {
 
 
   var app = require('modules').get('apps/settings', ['kibana', 'ngSanitize', 'ngTagsInput']);
+  var angular = require('angular');
 
   app.controller(
     'DatasourcesEditor',
@@ -55,6 +56,10 @@ define(function (require) {
       var datasource = $scope.datasource = $route.current.locals.datasource;
 
       $scope.submit = function () {
+        if (!angular.element('form[name="objectForm"]').hasClass('ng-valid')) {
+          $window.alert('Please fill in all the required parameters.');
+          return;
+        }
         datasource.id = datasource.title;
 
         // make sure that any parameter which does not belong to the schema

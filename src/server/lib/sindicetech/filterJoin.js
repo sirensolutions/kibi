@@ -111,8 +111,8 @@ function _addFilterJoin(query, source, target, indexes) {
   }
 
   var filterJoin = {
-    index: targetIndex,
-    type: type,
+    indices: [targetIndex],
+    types: [type],
     path: targetPath,
     query: {
       filtered: {

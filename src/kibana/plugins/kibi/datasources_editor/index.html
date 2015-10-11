@@ -31,7 +31,10 @@
 
           <div class="form-group">
             <label>Type</label>
-            <select ng-model="datasource.datasourceType" class="form-control span9">
+            <select name="datasource-type"
+                    ng-model="datasource.datasourceType"
+                    class="form-control span9"
+                    required>
               <option value="rest">REST</option>
               <option value="sqlite">SQLite</option>
               <option value="mysql">MySQL</option>

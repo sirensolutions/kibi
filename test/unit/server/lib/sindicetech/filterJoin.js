@@ -74,9 +74,9 @@ describe('FilterJoin querying', function () {
                     }
                   }
                 },
-                index: 'i2',
+                indices: ['i2'],
                 path: 'id2',
-                type: 'cafard'
+                types: ['cafard']
               }
             }
           }
@@ -131,9 +131,9 @@ describe('FilterJoin querying', function () {
                 }
               }
             },
-            index: 'i2',
+            indices: ['i2'],
             path: 'id2',
-            type: 'cafard'
+            types: ['cafard']
           }
         }
       }
@@ -201,9 +201,9 @@ describe('FilterJoin querying', function () {
                 }
               }
             },
-            index: 'i2',
+            indices: ['i2'],
             path: 'id2',
-            type: 'cafard'
+            types: ['cafard']
           }
         }
       }
@@ -251,8 +251,8 @@ describe('FilterJoin querying', function () {
       {
         filterjoin: {
           id1: {
-            index: 'i2',
-            type: 'cafard',
+            indices: ['i2'],
+            types: ['cafard'],
             path: 'id2',
             query: {
               filtered: {
@@ -325,8 +325,8 @@ describe('FilterJoin querying', function () {
       {
         filterjoin: {
           id1: {
-            index: 'i2',
-            type: 'cafard',
+            indices: ['i2'],
+            types: ['cafard'],
             path: 'id2',
             query: {
               filtered: {
@@ -408,8 +408,8 @@ describe('FilterJoin querying', function () {
       {
         filterjoin: {
           id1: {
-            index: 'i2',
-            type: 'cafard',
+            indices: ['i2'],
+            types: ['cafard'],
             path: 'id2',
             query: {
               filtered: {
@@ -496,8 +496,8 @@ describe('FilterJoin querying', function () {
       {
         filterjoin: {
           id1: {
-            index: 'i2',
-            type: 'cafard',
+            indices: ['i2'],
+            types: ['cafard'],
             path: 'id2',
             query: {
               filtered: {
@@ -516,8 +516,8 @@ describe('FilterJoin querying', function () {
                       {
                         filterjoin: {
                           id2: {
-                            index: 'i3',
-                            type: 'cafard',
+                            indices: ['i3'],
+                            types: ['cafard'],
                             path: 'id3',
                             query: {
                               filtered: {
@@ -607,8 +607,8 @@ describe('FilterJoin querying', function () {
       {
         filterjoin: {
           aaa: {
-            index: 'i2',
-            type: 'cafard',
+            indices: ['i2'],
+            types: ['cafard'],
             path: 'id2',
             query: {
               filtered: {
@@ -640,8 +640,8 @@ describe('FilterJoin querying', function () {
       {
         filterjoin: {
           bbb: {
-            index: 'i3',
-            type: 'cafard',
+            indices: ['i3'],
+            types: ['cafard'],
             path: 'id3',
             query: {
               filtered: {
@@ -769,8 +769,8 @@ describe('FilterJoin querying', function () {
       {
         filterjoin: {
           aaa: {
-            index: 'i2',
-            type: 'cafard',
+            indices: ['i2'],
+            types: ['cafard'],
             path: 'id2',
             query: {
               filtered: {
@@ -789,8 +789,8 @@ describe('FilterJoin querying', function () {
                       {
                         filterjoin: {
                           a: {
-                            index: 'i4',
-                            type: 'cafard',
+                            indices: ['i4'],
+                            types: ['cafard'],
                             path: 'id',
                             query: {
                               filtered: {
@@ -822,8 +822,8 @@ describe('FilterJoin querying', function () {
                       {
                         filterjoin: {
                           b: {
-                            index: 'i5',
-                            type: 'cafard',
+                            indices: ['i5'],
+                            types: ['cafard'],
                             path: 'id',
                             query: {
                               filtered: {
@@ -863,8 +863,8 @@ describe('FilterJoin querying', function () {
         {
           filterjoin: {
             bbb: {
-              index: 'i3',
-              type: 'cafard',
+              indices: ['i3'],
+              types: ['cafard'],
               path: 'id3',
               query: {
                 filtered: {
@@ -883,8 +883,8 @@ describe('FilterJoin querying', function () {
                         {
                           filterjoin: {
                             a: {
-                              index: 'i6',
-                              type: 'cafard',
+                              indices: ['i6'],
+                              types: ['cafard'],
                               path: 'id',
                               query: {
                                 filtered: {
@@ -916,8 +916,8 @@ describe('FilterJoin querying', function () {
                         {
                           filterjoin: {
                             b: {
-                              index: 'i7',
-                              type: 'cafard',
+                              indices: ['i7'],
+                              types: ['cafard'],
                               path: 'id',
                               query: {
                                 filtered: {
@@ -1012,9 +1012,9 @@ describe('FilterJoin querying', function () {
                 }
               }
             },
-            index: 'i2',
+            indices: ['i2'],
             path: 'id2',
-            type: 'cafard'
+            types: ['cafard']
           }
         }
       }
@@ -1073,9 +1073,9 @@ describe('FilterJoin querying', function () {
                 }
               }
             },
-            index: 'i2',
+            indices: ['i2'],
             path: 'id2',
-            type: 'cafard'
+            types: ['cafard']
           }
         }
       },
@@ -1100,9 +1100,9 @@ describe('FilterJoin querying', function () {
                 }
               }
             },
-            index: 'i0',
+            indices: ['i0'],
             path: 'id0',
-            type: 'cafard'
+            types: ['cafard']
           }
         }
       }
@@ -1157,9 +1157,9 @@ describe('FilterJoin querying', function () {
                 }
               }
             },
-            index: 'i2',
+            indices: ['i2'],
             path: 'id2',
-            type: 'cafard',
+            types: ['cafard'],
             orderBy: 'doc_score',
             maxTermsPerShard: '10'
           }
@@ -1232,9 +1232,9 @@ describe('FilterJoin querying', function () {
                 }
               }
             },
-            index: 'i2',
+            indices: ['i2'],
             path: 'id2',
-            type: 'cafard'
+            types: ['cafard']
           }
         }
       }

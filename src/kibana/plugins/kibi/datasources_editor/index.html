@@ -21,7 +21,7 @@
 
           <div class="form-group">
             <label>Title</label>
-            <input type="text" ng-model="datasource.title" class="form-control span9"/>
+            <input type="text" ng-model="datasource.title" class="form-control span9" required/>
           </div>
 
           <div class="form-group">
@@ -45,7 +45,6 @@
             </select>
           </div>
 
-
           <div ng-repeat="param in datasource.schema" >
             <ng-form name="innerForm">
               <div class="form-group">
@@ -55,7 +54,7 @@
                   ng-if="param.inputType == 'text'"
                   name="{{param.name}}"
                   type="text"
-                  ng-required="param.required"
+                  ng-required="{{ param.required }}"
                   ng-model="datasource.datasourceParams[param.name]"
                   placeholder="{{param.placeholder}}"
                   class="form-control span9"/>
@@ -64,7 +63,7 @@
                   ng-if="param.inputType == 'password'"
                   name="{{param.name}}"
                   type="password"
-                  ng-required="param.required"
+                  ng-required="{{ param.required }}"
                   ng-model="datasource.datasourceParams[param.name]"
                   placeholder="{{param.placeholder}}"
                   class="form-control span9"/>
@@ -72,7 +71,7 @@
                 <select
                   ng-if="param.inputType == 'select' && param.multivalued"
                   name="{{param.name}}"
-                  ng-required="param.required"
+                  ng-required="{{ param.required }}"
                   multiple
                   ng-model="datasource.datasourceParams[param.name]" class="form-control span9">
                   <option
@@ -86,7 +85,7 @@
                 <select
                   ng-if="param.inputType == 'select' && !param.multivalued"
                   name="{{param.name}}"
-                  ng-required="param.required"
+                  ng-required="{{ param.required }}"
                   ng-model="datasource.datasourceParams[param.name]" class="form-control span9">
                   <option
                     ng-repeat="o in param.possibleValues"

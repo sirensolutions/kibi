@@ -20,7 +20,7 @@ define(function (require) {
         mapping: {
           title: 'string',
           description: 'string',
-          dashboards: 'string',
+          dashboards: 'json',
           priority: 'long',
           iconCss: 'string',
           iconUrl: 'string',
@@ -39,7 +39,16 @@ define(function (require) {
           version: 1
         },
 
-        searchSource: true
+        searchSource: true,
+        init: function () {
+          try {
+            if (this.dashboards && typeof this.dashboards === 'string') {
+              this.dashboards = JSON.parse(this.dashboards);
+            }
+          } catch (e) {
+            throw new Error('Could not parse dashboards for dashboard group [' + this.id + ']');
+          }
+        }
       });
     }
 

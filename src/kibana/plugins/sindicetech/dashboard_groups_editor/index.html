@@ -52,7 +52,7 @@
           <div class="form-group">
             <label>Dashboards</label></br>
             <ul>
-              <li ng-repeat="dashboard in dashboardGroup.dashboards_o" class="queryOptionArea" >
+              <li ng-repeat="dashboard in dashboardGroup.dashboards track by dashboard.id" class="queryOptionArea" >
 
                 <div class="content">
                   <div class="form-group">
@@ -60,23 +60,15 @@
                     <st-select object-type="dashboard" ng-model="dashboard.id" name="dashboard" required></st-select>
                   </div>
                   <div class="btn-group rightCorner">
-                    <button class="btn btn-xs btn-default" ng-click="upDashboard($index)" title="move up">
-                      <i class="fa fa-caret-up"></i>
-                    </button>
-                    <button class="btn btn-xs btn-default" ng-click="downDashboard($index)" title="move down" >
-                      <i class="fa fa-caret-down"></i>
-                    </button>
-                    <button class="btn btn-xs btn-danger" ng-click="removeDashboard($index)" title="remove" >
-                      <i class="fa fa-times"></i>
-                    </button>
+                    <array-param-up index="{{ $index }}" ng-model="dashboardGroup.dashboards"></array-param-up>
+                    <array-param-down index="{{ $index }}" ng-model="dashboardGroup.dashboards"></array-param-down>
+                    <array-param-remove index="{{ $index }}" ng-model="dashboardGroup.dashboards"></array-param-remove>
                   </div>
 
                 </div>
               </li>
             </ul>
-            <button class="btn btn-xs btn-success" ng-click="addDashboard()" >
-              <span>Add dashboard</span> <i class="fa fa-plus"></i>
-            </button>
+            <array-param-add required label="dashboard" ng-model="dashboardGroup.dashboards"></array-param-add>
           </div>
 
 

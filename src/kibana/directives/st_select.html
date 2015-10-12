@@ -29,7 +29,7 @@
   <input ng-show="getVariable" type="text" ng-model="modelObject.value" class="form-control"/>
 
   <select ng-show="!getVariable" ng-model="modelObject" ng-options="item.label group by item.group for item in items track by item.value" class="form-control" ng-disabled="disabled" ng-required="required">
-    <option ng-show="false" value=""></option>
+    <option value="" ng-if="false"></option>
   </select>
 
   <div class="form-group hintbox" ng-if="retrieveError">

@@ -95,24 +95,22 @@ function _addFilterJoin(query, source, target, indexes) {
   var targetIndex = target.substr(0, targetDot);
   var targetPath = target.substr(targetDot + 1);
 
-  var type = '';
+  var types = [];
   var orderBy;
   var maxTermsPerShard;
   for (var i = 0; i < indexes.length; i++) {
     if (indexes[i].id === targetIndex) {
-      type = indexes[i].type;
+      if (indexes[i].type) {
+        types.push(indexes[i].type);
+      }
       orderBy = indexes[i].orderBy;
       maxTermsPerShard = indexes[i].maxTermsPerShard;
       break;
     }
   }
-  if (!type) {
-    throw new Error('Type of index [' + targetIndex + '] was not found');
-  }
 
   var filterJoin = {
     indices: [targetIndex],
-    types: [type],
     path: targetPath,
     query: {
       filtered: {
@@ -133,6 +131,9 @@ function _addFilterJoin(query, source, target, indexes) {
       }
     }
   };
+  if (types.length > 0) {
+    filterJoin.types = types;
+  }
   if (orderBy) {
     filterJoin.orderBy = orderBy;
   }

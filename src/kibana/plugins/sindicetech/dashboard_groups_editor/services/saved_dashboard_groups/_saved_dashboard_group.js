@@ -46,7 +46,7 @@ define(function (require) {
               this.dashboards = JSON.parse(this.dashboards);
             }
           } catch (e) {
-            throw new Error('Could not parse dashboards for this ' + this.id + ' dashboard group');
+            throw new Error('Could not parse dashboards for dashboard group [' + this.id + ']');
           }
         }
       });

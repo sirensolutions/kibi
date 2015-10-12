@@ -6,6 +6,21 @@ var expect = require('expect.js');
 describe('Crypto Helper', function () {
   describe('Encrypt', function () {
 
+    var config = {
+      kibana: {
+        datasource_encryption_algorithm: 'aes-256-ctr',
+        datasource_encryption_key: '3zTvzr3p67VC61jmV54rIYu1545x4TlZ',
+        datasources_schema: {
+          type1: [
+            {
+              name: 'password',
+              encrypted: true
+            }
+          ]
+        }
+      }
+    };
+
     var plainText = 'hallo';
     var password = '3zTvzr3p67VC61jmV54rIYu1545x4TlY';
 
@@ -56,6 +71,102 @@ describe('Crypto Helper', function () {
       }
 
     });
+
+    it('decrypt with undefined value should return undefined', function () {
+      expect(cryptoHelper.decrypt(password, undefined)).to.equal(undefined);
+    });
+
+    it('decrypt value with too many partsshould throw an error', function () {
+      try {
+        cryptoHelper.decrypt(password, 'algo:iv:encrypted:extra');
+      } catch (e) {
+        expect(e.message).to.equal('Invalid encrypted message.');
+      }
+    });
+
+    it('decrypt value with 3 parts not supported yet should throw an error', function () {
+      try {
+        cryptoHelper.decrypt(password, 'algo:iv:encrypted');
+      } catch (e) {
+        expect(e.message).to.equal('Ciphers with iv parts not fully supported in node 0.10.x');
+      }
+    });
+
+    it('decrypt value with too few parts should throw an error', function () {
+      try {
+        cryptoHelper.decrypt(password, 'only-algo');
+      } catch (e) {
+        expect(e.message).to.equal('Invalid encrypted message.');
+      }
+    });
+
+
+    it ('encryptDatasourceParams malformed datasourceParams in the query', function () {
+      var query = {
+        datasourceType: 'type1',
+        datasourceParams: '{invalid json}'
+      };
+
+      try {
+        cryptoHelper.encryptDatasourceParams(config, query);
+      } catch (e) {
+        expect(e.message).to.eql('Could not parse datasourceParams: [{invalid json}] in the query ');
+      }
+    });
+
+    it ('encryptDatasourceParams missing schema', function () {
+      var query = {
+        datasourceType: 'type1',
+        datasourceParams: JSON.stringify(
+          {
+            password: 'xxx'
+          }
+        )
+      };
+
+      var config1 = {
+        kibana: {
+          datasource_encryption_algorithm: 'aes-256-ctr',
+          datasource_encryption_key: '3zTvzr3p67VC61jmV54rIYu1545x4TlZ',
+          datasources_schema: {}
+        }
+      };
+
+      try {
+        cryptoHelper.encryptDatasourceParams(config1, query);
+      } catch (e) {
+        expect(e.message).to.eql('Could not get schema for datasource type: [type1]');
+      }
+    });
+
+    it ('encryptDatasourceParams', function () {
+
+      var query = {
+        datasourceType: 'type1',
+        datasourceParams: JSON.stringify(
+          {
+            password: 'xxx'
+          }
+        )
+      };
+
+      var expected =  {
+        datasourceType: 'type1',
+        datasourceParams: JSON.stringify(
+          {
+            password: 'aes-256-ctr:50ecc5'
+          }
+        )
+      };
+
+      cryptoHelper.encryptDatasourceParams(config, query);
+
+      expect(query).to.eql(expected);
+    });
+
+
+
+
   });
 });
 

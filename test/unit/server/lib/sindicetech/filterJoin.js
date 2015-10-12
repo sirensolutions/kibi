@@ -87,6 +87,67 @@ describe('FilterJoin querying', function () {
     expect(actual).to.eql(expected);
   });
 
+  it('in a bool clause with no type specified for one of the indexes', function () {
+    var relations = [
+      [ 'i1.id1', 'i2.id2' ]
+    ];
+    var query = {
+      bool: {
+        must: [
+          {
+            join: {
+              focus: 'i1',
+              indexes: [
+                {
+                  id: 'i1',
+                  type: 'cafard'
+                },
+                {
+                  id: 'i2'
+                }
+              ],
+              relations: relations
+            }
+          }
+        ]
+      }
+    };
+    var expected = {
+      bool: {
+        must: [
+          {
+            filterjoin: {
+              id1: {
+                query: {
+                  filtered: {
+                    query: {
+                      bool: {
+                        must: [
+                          {
+                            match_all: {}
+                          }
+                        ]
+                      }
+                    },
+                    filter: {
+                      bool: {
+                        must: []
+                      }
+                    }
+                  }
+                },
+                indices: ['i2'],
+                path: 'id2'
+              }
+            }
+          }
+        ]
+      }
+    };
+    var actual = filterJoin(query);
+    expect(actual).to.eql(expected);
+  });
+
   it('no filter', function () {
     var relations = [
       [ 'i1.id1', 'i2.id2' ]
@@ -134,6 +195,58 @@ describe('FilterJoin querying', function () {
             indices: ['i2'],
             path: 'id2',
             types: ['cafard']
+          }
+        }
+      }
+    ];
+    var actual = filterJoin(query);
+    expect(actual).to.eql(expected);
+  });
+
+  it('no filter and no types', function () {
+    var relations = [
+      [ 'i1.id1', 'i2.id2' ]
+    ];
+    var query = [
+      {
+        join: {
+          focus: 'i1',
+          indexes: [
+            {
+              id: 'i1'
+            },
+            {
+              id: 'i2'
+            }
+          ],
+          relations: relations
+        }
+      }
+    ];
+    var expected = [
+      {
+        filterjoin: {
+          id1: {
+            query: {
+              filtered: {
+                query: {
+                  bool: {
+                    must: [
+                      {
+                        match_all: {}
+                      }
+                    ]
+                  }
+                },
+                filter: {
+                  bool: {
+                    must: []
+                  }
+                }
+              }
+            },
+            indices: ['i2'],
+            path: 'id2'
           }
         }
       }

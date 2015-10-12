@@ -42,7 +42,7 @@ define(function (require) {
         searchSource: true,
         init: function () {
           try {
-            if (typeof this.dashboards === 'string') {
+            if (this.dashboards && typeof this.dashboards === 'string') {
               this.dashboards = JSON.parse(this.dashboards);
             }
           } catch (e) {

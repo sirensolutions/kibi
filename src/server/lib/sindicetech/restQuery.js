@@ -41,8 +41,6 @@ RestQuery.prototype.checkIfItIsRelevant = function (uri) {
   } catch (e) {
     return Promise.reject(new Error('Problem parsing regex [' + query + ']'));
   }
-
-  return Promise.resolve({'boolean': false});
 };
 
 
@@ -116,7 +114,7 @@ RestQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
       // https://github.com/request/request#requestoptions-callback
       var rp_options = {
         method: method.toUpperCase(),
-        uri: url.parse(url_s + self.config.rest_path),
+        uri: url.parse(url.resolve(url_s, self.config.rest_path)),
         headers: headers,
         timeout: timeout || 5000,
         transform: function (body, resp) {
@@ -158,8 +156,8 @@ RestQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
         rp_options.qs = params;
       } else if (method === 'post') {
         rp_options.body = body;
-        // TODO: for now we only support json - change it here once we add xml support
-        rp_options.json = true; // if the body is a json object
+        // WARNING: do not set rp_options.json = true/false; even for json content
+        // rather ask user to set correct Content-Type: application/json header
       }
 
       rp(rp_options).then(function (resp) {

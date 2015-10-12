@@ -245,6 +245,7 @@ QueryEngine.prototype.reloadQueries = function () {
             return new SQLiteQuery(queryDef, self.cache);
           } else {
             logger.error('Unknown datasource type[' + queryDef.datasource.datasourceType + '] - could NOT create query object');
+            return false;
           }
         });
       });

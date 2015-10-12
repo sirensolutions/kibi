@@ -39,6 +39,10 @@ CryptoHelper.prototype.encrypt = function (algorithm, password, plaintext) {
 };
 
 CryptoHelper.prototype.decrypt = function (password, encrypted) {
+  if (!encrypted) {
+    return;
+  }
+
   var parts = encrypted.split(':');
   if (!(parts.length === 2 || parts.length === 3)) {
     throw new Error('Invalid encrypted message.');

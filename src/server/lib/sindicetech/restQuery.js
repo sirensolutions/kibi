@@ -55,7 +55,6 @@ RestQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
   var max_age = this.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
   var username = this.config.datasource.datasourceClazz.datasource.datasourceParams.username;
   var password = this.config.datasource.datasourceClazz.datasource.datasourceParams.password;
-  var auth_token = this.config.datasource.datasourceClazz.datasource.datasourceParams.auth_token;
 
   return new Promise(function (fulfill, reject) {
     var start = new Date().getTime();
@@ -75,8 +74,13 @@ RestQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
 
     // user can also use a special variables like $auth_token
     var availableVariables = {
-      $auth_token: auth_token // TODO: !!! decrypt the token
+      // for now we support only auth_token username password
+      // so user can provide any of these in params, headers, or body
+      '${auth_token}': self.config.datasource.datasourceClazz.populateParameters('${auth_token}'),
+      '${username}': self.config.datasource.datasourceClazz.populateParameters('${username}'),
+      '${password}': self.config.datasource.datasourceClazz.populateParameters('${password}')
     };
+
 
     // the whole replacement of values is happening here
     queryHelper.replaceVariablesForREST(
@@ -135,8 +139,9 @@ RestQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
 
       if (username && password) {
         rp_options.auth = {
-          username: username,
-          password: password,
+          // as they might be encrypted make sure to call populateParameters
+          username: self.config.datasource.datasourceClazz.populateParameters('${username}'),
+          password: self.config.datasource.datasourceClazz.populateParameters('${password}'),
           sendImmediately: false
         };
       }

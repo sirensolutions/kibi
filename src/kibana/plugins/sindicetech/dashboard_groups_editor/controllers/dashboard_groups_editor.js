@@ -8,6 +8,7 @@ define(function (require) {
 
   var slugifyId = require('utils/slugify_id');
   var _ = require('lodash');
+  var angular = require('angular');
 
   require('routes')
   .when('/settings/dashboardgroups', {
@@ -57,6 +58,10 @@ define(function (require) {
       var dashboardGroup = $scope.dashboardGroup = $route.current.locals.dashboardGroup;
 
       $scope.submit = function () {
+        if (!angular.element('form[name="objectForm"]').hasClass('ng-valid')) {
+          $window.alert('Please fill in all the required parameters.');
+          return;
+        }
         dashboardGroup.id = dashboardGroup.title;
         dashboardGroup.save().then(function (groupId) {
           notify.info('Dashboard Group ' + dashboardGroup.title + ' was successfuly saved');

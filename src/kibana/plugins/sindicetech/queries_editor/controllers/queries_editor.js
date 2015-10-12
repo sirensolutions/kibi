@@ -6,8 +6,8 @@ define(function (require) {
   require('angular-sanitize');
   require('ng-tags-input');
 
-  var $ = require('jquery');
   var _ = require('lodash');
+  var angular = require('angular');
 
   require('routes')
   .when('/settings/queries', {
@@ -162,13 +162,11 @@ define(function (require) {
         $scope.submit();
       };
 
-      $scope.editTemplate = function () {
-        // TODO: try to do it without jquery
-        var id = $('#selectTemplateId').val();
-        kbnUrl.change('/templates_editor/' + id);
-      };
-
       $scope.submit = function () {
+        if (!angular.element('form[name="objectForm"]').hasClass('ng-valid')) {
+          $window.alert('Please fill in all the required parameters.');
+          return;
+        }
         var titleChanged = $scope.$queryTitle !== $scope.query.title;
         $scope.query.id = $scope.query.title;
         $scope.query.save().then(function (savedQueryId) {

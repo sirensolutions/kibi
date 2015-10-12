@@ -18,11 +18,11 @@
       <div class="config-section">
         <h2>Config</h2>
 
-        <form ng-if="template" name="objectForm">
+        <form ng-if="template" name="objectForm" novalidate>
 
           <div class="form-group">
             <label>Title</label>
-            <input type="text" ng-model="template.title" class="form-control"/>
+            <input type="text" ng-model="template.title" class="form-control" required/>
           </div>
 
           <div class="form-group">
@@ -44,21 +44,25 @@
             <textarea ng-if="template.st_templateEngine !== 'jade'"
             rows="30"
             ng-model="template.st_templateSource"
-            class="form-control span9"/>
+            ng-class="{ 'red-border': objectForm.notJadeTemplate.$invalid }"
+            name="notJadeTemplate"
+            class="form-control span9" required/>
 
             <div ng-if="template.st_templateEngine === 'jade'"
               ui-ace="{ onLoad: aceLoaded, mode: 'jade' }" id="{{template.title}}"
               ng-model="template.st_templateSource"
-              style="height: 400px">
+              ng-class="{ 'red-border': objectForm.jadeTemplate.$invalid }"
+              name="jadeTemplate"
+              style="height: 400px" required>
             </div>
 
           </div>
 
           <div class="form-group">
             <button class="btn btn-primary" ng-click="cancel()">Cancel</button>
-            <button class="btn btn-info" ng-click="clone()">Clone</button>
-            <button class="btn btn-success" ng-click="submit()">Save</button>
-            <button style="float:right;" class="btn btn-danger" ng-click="delete()">Delete</button>
+            <button class="btn btn-info" ng-click="clone()" ng-disabled="objectForm.invalid">Clone</button>
+            <button class="btn btn-success" ng-click="submit()" ng-disabled="objectForm.invalid">Save</button>
+            <button class="btn btn-danger" ng-click="delete()">Delete</button>
           </div>
 
        </form>

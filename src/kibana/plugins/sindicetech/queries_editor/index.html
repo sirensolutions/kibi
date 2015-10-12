@@ -18,7 +18,7 @@
       <div class="config-section">
         <h2>Config</h2>
 
-        <form ng-if="query" name="objectForm">
+        <form ng-if="query" name="objectForm" novalidate>
 
           <div class="form-group">
             <label>Title</label>
@@ -32,7 +32,7 @@
 
           <div class="form-group">
             <label>Datasource</label> <a ng-click="jumpToDatasource()">Edit datasource</a></br>
-            <st-select object-type="datasource" ng-model="query.st_datasourceId"></st-select>
+            <st-select required object-type="datasource" ng-model="query.st_datasourceId"></st-select>
           </div>
 
           <div class="form-group">
@@ -75,13 +75,19 @@
             ui-ace="{ onLoad: aceLoaded, mode: 'sparql' }"
             msd-elastic id="st_templateVars"
             ng-model="query.st_resultQuery"
-            class="form-control resultQueryEditor"></div>
+            class="form-control resultQueryEditor"
+            ng-class="{ 'red-border': objectForm.sparqlQuery.$invalid }"
+            name="sparqlQuery"
+            required></div>
 
             <div ng-if="datasourceType === 'mysql' || datasourceType === 'sqlite' || datasourceType === 'postgresql' || datasourceType === 'sql_jdbc'"
             ui-ace="{ onLoad: aceLoaded, mode: 'sql' }"
             msd-elastic id="st_templateVars"
             ng-model="query.st_resultQuery"
-            class="form-control resultQueryEditor"></div>
+            class="form-control resultQueryEditor"
+            ng-class="{ 'red-border': objectForm.sqlQuery.$invalid }"
+            name="sqlQuery"
+            required></div>
           </div>
 
           <div class="form-inline" ng-if="datasourceType === 'rest'">
@@ -112,8 +118,8 @@
 
           <div class="form-group" style="margin-top:10px;">
             <button class="btn btn-primary" ng-click="cancel()">Cancel</button>
-            <button class="btn btn-info" ng-click="clone()">Clone</button>
-            <button class="btn btn-success" ng-click="submit()">Save</button>
+            <button class="btn btn-info" ng-click="clone()" ng-disabled="objectForm.$invalid">Clone</button>
+            <button class="btn btn-success" ng-click="submit()" ng-disabled="objectForm.$invalid">save</button>
             <button class="btn btn-danger" ng-click="delete()">Delete</button>
           </div>
         </form>

@@ -46,6 +46,12 @@ RestQuery.prototype.checkIfItIsRelevant = function (uri) {
 };
 
 
+RestQuery.prototype._logFailedRequestDetails = function (msg, originalError, resp) {
+  logger.error(msg, originalError);
+  logger.error('See the full resp object below');
+  logger.error(resp);
+};
+
 RestQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
   var self = this;
 
@@ -118,16 +124,20 @@ RestQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
             results: {}
           };
           if (resp.statusCode !== self.config.rest_resp_status_code) {
-            data.error = 'Response status code [' + resp.statusCode + '] while expected [' + self.config.rest_resp_status_code + ']';
-            return data;
+            // log the details to a file
+            var msg = 'Response status code [' + resp.statusCode + '] while expected [' + self.config.rest_resp_status_code + ']';
+            self._logFailedRequestDetails(msg, null, resp);
+            throw new Error(msg);
           }
 
           // TODO: change this once we support xml resp or text resp
           try {
             data.results = jsonpath.query(JSON.parse(body), self.config.rest_resp_restriction_path);
           } catch (e) {
-            data.error = e.message;
-            return data;
+            // log the details to a file
+            var msg = 'Error while applying the jsonpath expression. Details: ' + e.message;
+            self._logFailedRequestDetails(msg, e, resp);
+            throw new Error(msg);
           }
 
           if (self.cache) {
@@ -154,12 +164,13 @@ RestQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
         rp_options.json = true; // if the body is a json object
       }
 
-      console.log(rp_options);
-
       rp(rp_options).then(function (resp) {
         fulfill(resp);
       }).catch(function (err) {
-        reject(err);
+        // log the details to a file
+        var msg = 'Rest request failed. Details: ' + err.message;
+        self._logFailedRequestDetails(msg, err, null);
+        reject(new Error(msg));
       });
 
     });

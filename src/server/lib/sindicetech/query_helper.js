@@ -57,7 +57,7 @@ QueryHelper.prototype.replaceVariablesUsingEsDocument = function (s, uri) {
 
   var parts = uri.trim().split('/');
   if (parts.length < 3) {
-    Promise.reject('Malformed uri - should have at least 3 parts: index, type, id');
+    return Promise.reject(new Error('Malformed uri - should have at least 3 parts: index, type, id'));
   }
 
   var index = parts[0];

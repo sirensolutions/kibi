@@ -91,15 +91,18 @@
           </div>
 
 
-          <div class="form-inline" ng-if="datasourceType === 'rest'">
+          <div class="form" ng-if="datasourceType === 'rest'">
 
               <div class="form-group">
                 <label>Path</label><br/>
                 <input type="text" ng-model="query.rest_path"  class="form-control"/>
               </div>
-
-              <br/>
-
+            </div>
+            <div class="form-inline" ng-if="datasourceType === 'rest'">
+              <p>
+                Special pleaceholders for username, password and auth_token can be used in values of the headers, parameters and body. </br>
+                They are respectively: <strong>${username}</strong>, <strong>${password}</strong>, <strong>${auth_token}</strong>
+              </p>
               <div class="form-group">
                 <label>Params</label><br/>
                 <div ng-repeat="param in query.rest_params">
@@ -126,7 +129,8 @@
                 <button ng-click="query.rest_headers.push({name:'', value:''})" class="btn btn-xs btn-success">Add header</button>
               </div>
 
-              <br/>
+            </div>
+            <div class="form" ng-if="datasourceType === 'rest'">
 
               <div class="form-group">
                 <label>Body</label><br/>

@@ -387,7 +387,11 @@ define(function (require) {
         .map(function (buttonDef) {
           var button = _.clone(buttonDef);
           button.joinFilter = null;
+
           button.click = function () {
+            if (!currentDashboardIndexId) {
+              return;
+            }
             kibiStateHelper.saveFiltersForDashboardId(urlHelper.getCurrentDashboardId(), urlHelper.getCurrentDashboardFilters());
             kibiStateHelper.saveQueryForDashboardId(urlHelper.getCurrentDashboardId(), urlHelper.getCurrentDashboardQuery());
 

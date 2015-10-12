@@ -54,8 +54,10 @@ define(function (require) {
           });
 
           scope.$watch('modelRequired', function () {
-            scope.required = scope.modelRequired;
-            _setViewValue();
+            if (scope.modelRequired !== undefined) {
+              scope.required = scope.modelRequired;
+              _setViewValue();
+            }
           });
 
           scope.$watch('modelObject', function () {

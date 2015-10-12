@@ -33,6 +33,7 @@ define(function (require) {
 
 
   var app = require('modules').get('apps/settings', ['kibana', 'ui.ace', 'ngSanitize']);
+  var angular = require('angular');
 
   app.controller(
     'TemplatesEditor',
@@ -139,6 +140,10 @@ define(function (require) {
       });
 
       $scope.submit = function () {
+        if (!angular.element('form[name="objectForm"]').hasClass('ng-valid')) {
+          $window.alert('Please fill in all the required parameters.');
+          return;
+        }
         template.id = template.title;
         template.save().then(function (resp) {
           // here flush the cache and refresh preview

@@ -124,7 +124,6 @@ RestQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
             results: {}
           };
           if (resp.statusCode !== self.config.rest_resp_status_code) {
-            // log the details to a file
             var msg = 'Response status code [' + resp.statusCode + '] while expected [' + self.config.rest_resp_status_code + ']';
             self._logFailedRequestDetails(msg, null, resp);
             throw new Error(msg);
@@ -134,7 +133,6 @@ RestQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
           try {
             data.results = jsonpath.query(JSON.parse(body), self.config.rest_resp_restriction_path);
           } catch (e) {
-            // log the details to a file
             var msg = 'Error while applying the jsonpath expression. Details: ' + e.message;
             self._logFailedRequestDetails(msg, e, resp);
             throw new Error(msg);
@@ -167,7 +165,6 @@ RestQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
       rp(rp_options).then(function (resp) {
         fulfill(resp);
       }).catch(function (err) {
-        // log the details to a file
         var msg = 'Rest request failed. Details: ' + err.message;
         self._logFailedRequestDetails(msg, err, null);
         reject(new Error(msg));

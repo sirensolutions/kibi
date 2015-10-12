@@ -42,6 +42,8 @@ define(function (require) {
           var _setViewValue = function () {
             if (scope.modelObject) {
               ngModelCtrl.$setViewValue(scope.modelObject);
+            } else {
+              ngModelCtrl.$setViewValue(null);
             }
           };
 
@@ -92,6 +94,13 @@ define(function (require) {
             scope.items = items;
             if (scope.extraItems && scope.items) {
               scope.items = scope.extraItems.concat(scope.items);
+            }
+
+            if (!scope.required) {
+              scope.items.splice(0, 0, {
+                label: '',
+                value: null
+              });
             }
 
             var item = _.find(scope.items, function (item) {

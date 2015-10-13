@@ -42,13 +42,29 @@ define(function (require) {
           st_datasourceId: '',
           _previewTemplateId: '',
           st_tags: '',
-          rest_params: [],
-          rest_headers: [],
+          rest_params: '[]',
+          rest_headers: '[]',
           rest_body: '',
           rest_path: '',
           rest_resp_status_code: 200,
           rest_resp_restriction_path: '$',
           version: 1
+        },
+        init: function () {
+          try {
+            if (this.rest_params && typeof this.rest_params === 'string') {
+              this.rest_params = JSON.parse(this.rest_params);
+            }
+          } catch (e) {
+            throw new Error('Could not parse rest_params for query [' + this.id + ']');
+          }
+          try {
+            if (this.rest_headers && typeof this.rest_headers === 'string') {
+              this.rest_headers = JSON.parse(this.rest_headers);
+            }
+          } catch (e) {
+            throw new Error('Could not parse rest_headers for query [' + this.id + ']');
+          }
         },
 
         searchSource: true

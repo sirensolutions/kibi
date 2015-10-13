@@ -1,0 +1,268 @@
+define(function (require) {
+  var sinon = require('test_utils/auto_release_sinon');
+  var angular = require('angular');
+  var _ = require('lodash');
+
+  require('directives/st_select');
+
+  var $rootScope;
+  var $elem;
+
+  var init = function (items, required, modelDisabled, modelRequired, include, exclude) {
+    // Load the application
+    module('kibana');
+
+    // Create the scope
+    inject(function (Private, _$rootScope_, $compile, Promise) {
+      $rootScope = _$rootScope_;
+
+      var selectHelper = Private(require('directives/st_select_helper'));
+      $rootScope.action = sinon.stub(selectHelper, 'getQueries').returns(Promise.resolve(items));
+
+      var select = '<st-select ng-model="model" object-type="query"';
+      if (required) {
+        select += ' required';
+      }
+      if (modelDisabled !== null && modelDisabled !== undefined) {
+        select += ' model-disabled="' + modelDisabled + '"';
+      }
+      if (modelRequired !== null && modelRequired !== undefined) {
+        select += ' model-required="' + modelRequired + '"';
+      }
+      if (include !== null && include !== undefined) {
+        $rootScope.include = include;
+        select += ' include="include"';
+      }
+      if (exclude !== null && exclude !== undefined) {
+        $rootScope.exclude = exclude;
+        select += ' exclude="exclude"';
+      }
+      $elem = angular.element(select + '></st-select>');
+
+      $compile($elem)($rootScope);
+      $elem.scope().$digest();
+    });
+  };
+
+  describe('Kibi Directives', function () {
+    describe('st-select directive', function () {
+      afterEach(function () {
+        $elem.remove();
+      });
+
+      function firstElementIsEmpty(options) {
+        expect(options[0]).to.be.ok();
+        expect(options[0].value).to.be('');
+        expect(options[0].text).to.be('');
+      }
+
+      it('should populate the select options with items returned from the object-type action', function () {
+        var items = [ { value: 1, label: 'joe' } ];
+
+        init(items);
+
+        expect($rootScope.action.called).to.be.ok();
+
+        var select = $elem.find('select');
+        expect(select[0].required).to.be(false);
+        expect(select[0].disabled).to.be(false);
+
+        var options = $elem.find('option');
+        expect(options).to.have.length(2); // the joe element plus the null one
+
+        firstElementIsEmpty(options);
+
+        expect(options[1]).to.be.ok();
+        expect(options[1].value).to.be('1');
+        expect(options[1].text).to.be('joe');
+      });
+
+      it('should populate the select options with required on', function () {
+        var items = [ { value: 1, label: 'joe' } ];
+
+        init(items, true);
+
+        expect($rootScope.action.called).to.be.ok();
+
+        var select = $elem.find('select');
+        expect(select[0].required).to.be(true);
+
+        var options = $elem.find('option');
+        expect(options).to.have.length(2);
+
+        firstElementIsEmpty(options);
+
+        expect(options[1]).to.be.ok();
+        expect(options[1].value).to.be('1');
+        expect(options[1].text).to.be('joe');
+      });
+
+      it('should require an option to be selected 1', function () {
+        var items = [ { value: 1, label: 'joe' } ];
+
+        init(items, null, null, true);
+
+        expect($rootScope.action.called).to.be.ok();
+        var select = $elem.find('select');
+        expect(select[0].required).to.be(true);
+      });
+
+      it('should require an option to be selected 2', function () {
+        var items = [ { value: 1, label: 'joe' } ];
+
+        init(items, true);
+
+        expect($rootScope.action.called).to.be.ok();
+        var select = $elem.find('select');
+        expect(select[0].required).to.be(true);
+      });
+
+      it('should disable the select menu', function () {
+        var items = [ { value: 1, label: 'joe' } ];
+
+        init(items, null, true);
+
+        expect($rootScope.action.called).to.be.ok();
+        var select = $elem.find('select');
+        expect(select[0].disabled).to.be(true);
+      });
+
+      it('should add the include to the select options', function () {
+        var items = [ { value: 1, label: 'joe' } ];
+        var include = [ { value: 2, label: 'toto' } ];
+
+        init(items, null, null, null, include);
+
+        expect($rootScope.action.called).to.be.ok();
+        var options = $elem.find('option');
+        expect(options).to.have.length(3);
+
+        firstElementIsEmpty(options);
+
+        expect(options[1]).to.be.ok();
+        expect(options[1].value).to.be('2');
+        expect(options[1].text).to.be('toto');
+
+        expect(options[2]).to.be.ok();
+        expect(options[2].value).to.be('1');
+        expect(options[2].text).to.be('joe');
+      });
+
+      it('should add the include to the select options and take care of duplicates', function () {
+        var items = [ { value: 1, label: 'joe' }, { value: 3, label: 'tata' } ];
+        var include = [ { value: 1, label: 'joe' }, { value: 2, label: 'toto' } ];
+
+        init(items, null, null, null, include);
+
+        expect($rootScope.action.called).to.be.ok();
+        var options = $elem.find('option');
+        expect(options).to.have.length(4);
+
+        firstElementIsEmpty(options);
+
+        expect(options[1]).to.be.ok();
+        expect(options[1].value).to.be('1');
+        expect(options[1].text).to.be('joe');
+
+        expect(options[2]).to.be.ok();
+        expect(options[2].value).to.be('2');
+        expect(options[2].text).to.be('toto');
+
+        expect(options[3]).to.be.ok();
+        expect(options[3].value).to.be('3');
+        expect(options[3].text).to.be('tata');
+      });
+
+      it('should exclude items from the select options', function () {
+        var items = [ { value: 1, label: 'joe' }, { value: 2, label: 'toto' } ];
+        var exclude = [ { id: 1, label: 'joe' } ];
+
+        init(items, null, null, null, null, exclude);
+
+        expect($rootScope.action.called).to.be.ok();
+        var options = $elem.find('option');
+        expect(options).to.have.length(2);
+
+        firstElementIsEmpty(options);
+
+        expect(options[1]).to.be.ok();
+        expect(options[1].value).to.be('2');
+        expect(options[1].text).to.be('toto');
+      });
+
+      it('should exclude some items and include others from the select options', function () {
+        var items = [ { value: 1, label: 'joe' }, { value: 2, label: 'toto' } ];
+        var exclude = [ { id: 1, label: 'joe' } ];
+        var include = [ { value: 3, label: 'tata' } ];
+
+        init(items, null, null, null, include, exclude);
+
+        expect($rootScope.action.called).to.be.ok();
+        var options = $elem.find('option');
+        expect(options).to.have.length(3);
+
+        firstElementIsEmpty(options);
+
+        expect(options[1]).to.be.ok();
+        expect(options[1].value).to.be('3');
+        expect(options[1].text).to.be('tata');
+
+        expect(options[2]).to.be.ok();
+        expect(options[2].value).to.be('2');
+        expect(options[2].text).to.be('toto');
+      });
+
+      it('should exclude items that were explicitly included', function () {
+        var items = [ { value: 2, label: 'toto' } ];
+        var exclude = [ { id: 1, label: 'joe' } ];
+        var include = [ { value: 1, label: 'joe' } ];
+
+        init(items, null, null, null, include, exclude);
+
+        expect($rootScope.action.called).to.be.ok();
+        var options = $elem.find('option');
+        expect(options).to.have.length(2);
+
+        firstElementIsEmpty(options);
+
+        expect(options[1]).to.be.ok();
+        expect(options[1].value).to.be('2');
+        expect(options[1].text).to.be('toto');
+      });
+
+      it('should add an empty element only if there are items', function () {
+        var items = [];
+
+        init(items);
+
+        expect($rootScope.action.called).to.be.ok();
+        var options = $elem.find('option');
+        expect(options).to.have.length(0);
+      });
+
+      it('should automatically select the element if it is the only one and the select is required', function () {
+        var items = [ { value: 2, label: 'toto' } ];
+
+        init(items, true);
+
+        var options = $elem.find('option');
+        expect(options).to.have.length(2);
+
+        expect(options[0].defaultSelected).to.be(false);
+        expect(options[1].defaultSelected).to.be(true);
+      });
+
+      it('should NOT automatically select the element if it is the only one and the select is optional', function () {
+        var items = [ { value: 2, label: 'toto' } ];
+
+        init(items);
+
+        var options = $elem.find('option');
+        expect(options).to.have.length(2);
+
+        expect(options[0].defaultSelected).to.be(false);
+        expect(options[1].defaultSelected).to.be(false);
+      });
+    });
+  });
+});

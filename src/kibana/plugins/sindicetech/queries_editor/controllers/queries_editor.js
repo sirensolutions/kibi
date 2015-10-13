@@ -87,8 +87,6 @@ define(function (require) {
         $scope.query._previewTemplateId = 'kibi-table-jade';
       }
 
-
-      //TODO: use the module from commons here
       var _enableEntityUri = function () {
         _shouldEntityURIBeEnabled([$scope.query.id]).then(function (value) {
           $scope.holder.entityURIEnabled = value;
@@ -119,23 +117,12 @@ define(function (require) {
             $scope.datasourceType = savedDatasource.datasourceType;
 
             _enableEntityUri();
-            // if the savedDatasource.datasourceType == rest
-            // init the rest_params and rest_headers arrays
-            if (savedDatasource.datasourceType === 'rest' && savedDatasource.params) {
-              _.each(savedDatasource.params, function (param) {
-                if ( !_.find($scope.query.rest_params, function (p) { return p.name === param.name;})  ) {
-                  $scope.query.rest_params.push(param);
-                }
-              });
+
+            if (savedDatasource.datasourceType === 'rest') {
+              $scope.query._previewTemplateId = 'kibi-json-jade';
+              $scope.preview();
             }
 
-            if (savedDatasource.datasourceType === 'rest' && savedDatasource.headers) {
-              _.each(savedDatasource.headers, function (header) {
-                if ( !_.find($scope.query.rest_headers, function (h) { return h.name === header.name;})  ) {
-                  $scope.query.rest_headers.push(header);
-                }
-              });
-            }
           });
         }
       }, true);

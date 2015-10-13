@@ -21,3 +21,4 @@ esvm
 **/*.css.map
 # in kibi-docs there are some files like .css that are normally ignored
 !kibi-docs/src/**
+/coverage/

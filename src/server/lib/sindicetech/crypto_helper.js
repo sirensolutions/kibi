@@ -39,6 +39,10 @@ CryptoHelper.prototype.encrypt = function (algorithm, password, plaintext) {
 };
 
 CryptoHelper.prototype.decrypt = function (password, encrypted) {
+  if (!encrypted) {
+    return;
+  }
+
   var parts = encrypted.split(':');
   if (!(parts.length === 2 || parts.length === 3)) {
     throw new Error('Invalid encrypted message.');
@@ -52,7 +56,7 @@ CryptoHelper.prototype.decrypt = function (password, encrypted) {
   var finalBuffer;
 
   if (parts.length === 3) {
-    throw new Error ('Not supported in node 0.10.x');
+    throw new Error ('Ciphers with iv parts not fully supported in node 0.10.x');
     /*
     Enable when we switch to node 0.11
     algorithm = parts[0];
@@ -79,19 +83,17 @@ CryptoHelper.prototype.decrypt = function (password, encrypted) {
 CryptoHelper.prototype.encryptDatasourceParams = function (config, query) {
   if (query.datasourceParams && query.datasourceType) {
     var datasourceType = query.datasourceType;
-    var schema;
+    var schema = config.kibana.datasources_schema[datasourceType];
     var params;
     try {
       params = JSON.parse(query.datasourceParams, null, ' ');
     } catch (e) {
-      throw new Error('Could not parse datasource params in the query');
-    }
-    try {
-      schema = config.kibana.datasources_schema[datasourceType];
-    } catch (e) {
-      throw new Error('Could not get schema for datasource type: [' + datasourceType + ']');
+      throw new Error('Could not parse datasourceParams: [' + query.datasourceParams + '] in the query ');
     }
 
+    if (!schema) {
+      throw new Error('Could not get schema for datasource type: [' + datasourceType + ']');
+    }
 
     // now iterate over params and check if any of them has to be encrypted
     var algorithm = config.kibana.datasource_encryption_algorithm;

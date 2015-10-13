@@ -5,6 +5,7 @@ var config  = require('../../config');
 var pg      = require('pg');
 var logger  = require('../logger');
 var AbstractQuery = require('./abstractQuery');
+var queryHelper = require('./query_helper');
 
 var debug = false;
 
@@ -35,7 +36,7 @@ PostgresQuery.prototype.checkIfItIsRelevant = function (uri) {
   var max_age = this.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
 
 
-  return this._getQueryFromConfig(this.config.activationQuery, uri).then(function (query) {
+  return queryHelper.replaceVariablesUsingEsDocument(this.config.activationQuery, uri).then(function (query) {
 
     if (query.trim() === '') {
       return Promise.resolve({'boolean': true});
@@ -195,7 +196,7 @@ PostgresQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
   var timeout = this.config.datasource.datasourceClazz.datasource.datasourceParams.timeout;
   var max_age = this.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
 
-  return this._getQueryFromConfig(this.config.resultQuery, uri).then(function (query) {
+  return queryHelper.replaceVariablesUsingEsDocument(this.config.resultQuery, uri).then(function (query) {
 
     // special case if the uri is required but it is empty
     if (debug) {

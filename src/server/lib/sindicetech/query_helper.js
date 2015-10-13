@@ -1,12 +1,87 @@
 var url    = require('url');
 var rp     = require('request-promise');
+var Promise = require('bluebird');
 var config = require('../../config');
 
 
 function QueryHelper() {}
 
 
-QueryHelper.prototype.fetchDocument = function (index, type, id) {
+QueryHelper.prototype.replaceVariablesForREST = function (headers, params, body, uri, variables) {
+
+  var self = this;
+  // first try to replace placeholders using variables
+  if (variables) {
+    for (var name in variables) {
+      if (variables.hasOwnProperty(name)) {
+        var regex = new RegExp(self._escapeRegexSpecialCharacters(name), 'g');
+        body = body.replace(regex, variables[name]);
+
+        var i;
+        for (i = 0; i < headers.length; i++) {
+          headers[i].value = headers[i].value.replace(regex, variables[name]);
+        }
+
+        for (i = 0; i < params.length; i++) {
+          params[i].value = params[i].value.replace(regex, variables[name]);
+        }
+
+      }
+    }
+  }
+
+  // second replace placeholders based on selected entity uri
+  var promises = [
+    self.replaceVariablesUsingEsDocument(headers, uri),
+    self.replaceVariablesUsingEsDocument(params, uri),
+    self.replaceVariablesUsingEsDocument(body, uri)
+  ];
+
+  return Promise.all(promises).then(function (results) {
+    return {
+      headers: results[0],
+      params: results[1],
+      body: results[2]
+    };
+  });
+};
+
+/**
+ * s can be either a string or (key, value) map
+ */
+QueryHelper.prototype.replaceVariablesUsingEsDocument = function (s, uri) {
+  var self = this;
+  if (!uri || uri.trim() === '' ) {
+    return Promise.resolve(s);
+  }
+
+  var parts = uri.trim().split('/');
+  if (parts.length < 3) {
+    return Promise.reject(new Error('Malformed uri - should have at least 3 parts: index, type, id'));
+  }
+
+  var index = parts[0];
+  var type = parts[1];
+  var id = parts[2];
+
+  // TODO: add caching of documet
+
+  return self._fetchDocument(index, type, id).then(function (doc) {
+    //now parse the query and replace the placeholders
+    if (typeof s === 'string' || s instanceof String) {
+      return self._replaceVariablesInTheQuery(doc, s);
+    } else {
+      // array of objects with name value
+      for (var i = 0; i < s.length; i++) {
+        s[i].value = self._replaceVariablesInTheQuery(doc, s[i].value);
+      }
+      return s;
+    }
+  });
+};
+
+
+QueryHelper.prototype._fetchDocument = function (index, type, id) {
   return rp({
     method: 'GET',
     uri: url.parse(config.kibana.elasticsearch_url + '/' + index + '/' + type + '/' + id),
@@ -23,7 +98,7 @@ QueryHelper.prototype.fetchDocument = function (index, type, id) {
  *    @doc[_source][id]@
  *
  */
-QueryHelper.prototype.replaceVariablesInTheQuery = function (doc, query) {
+QueryHelper.prototype._replaceVariablesInTheQuery = function (doc, query) {
   var self = this;
   var ret = query;
   var regex = /(@doc\[.+?\]@)/g;
@@ -35,7 +110,7 @@ QueryHelper.prototype.replaceVariablesInTheQuery = function (doc, query) {
     group = group.substring(0, group.length - 1);
 
     var value = self._getValue(doc, group);
-    var reGroup = match[1].replace(/([.*+?^=!:${}()|\[\]\/\\])/g, '\\$1');
+    var reGroup = self._escapeRegexSpecialCharacters(match[1]);
     var re = new RegExp(reGroup, 'g');
     ret = ret.replace(re, value);
 
@@ -43,6 +118,10 @@ QueryHelper.prototype.replaceVariablesInTheQuery = function (doc, query) {
   }
 
   return ret;
+};
+
+QueryHelper.prototype._escapeRegexSpecialCharacters = function (s) {
+  return s.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, '\\$1');
 };
 
 

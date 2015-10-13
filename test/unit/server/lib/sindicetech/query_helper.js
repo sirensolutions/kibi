@@ -1,46 +1,160 @@
 var root = require('requirefrom')('');
 var queryHelper = root('src/server/lib/sindicetech/query_helper');
 var expect = require('expect.js');
+var sinon = require('sinon');
+var Promise = require('bluebird');
+
+
+var doc = {
+  _id: '_12345_',
+  _source: {
+    id: '12345',
+    title: 'title12345'
+  }
+};
+
+sinon.stub(queryHelper, '_fetchDocument').returns(
+  Promise.resolve({
+    _id: '_id1',
+    _source: {
+      id: 'id1'
+    }
+  })
+);
 
 
 describe('Query Helper', function () {
-  var doc = {
-    _id: '_12345_',
-    _source: {
-      id: '12345',
-      title: 'title12345'
-    }
-  };
 
-  it('replaceVariablesInTheQuery', function () {
-    var query = '@doc[_source][id]@';
-    var expected = '12345';
-    expect(queryHelper.replaceVariablesInTheQuery(doc, query)).to.eql(expected);
+  describe('replaceVariablesForREST', function () {
+
+    describe('with URI', function () {
+
+      it('replace in single string', function (done) {
+        var uri = 'index1/type1/id1';
+        var s        = 'select * from table1 where id = \'@doc[_source][id]@\'';
+        var expected = 'select * from table1 where id = \'id1\'';
+
+        queryHelper.replaceVariablesUsingEsDocument(s, uri).then(function (ret) {
+          expect(ret).to.equal(expected);
+          done();
+        });
+      });
+
+      it('replace in an array of objects with name and value', function (done) {
+        var uri = 'index1/type1/id1';
+        var s_a = [
+          {name: 'param1', value: 'select * from table1 where id = \'@doc[_source][id]@\''},
+          {name: 'param2', value: 'select * from table1 where id = \'@doc[_id]@\''}
+        ];
+        var expected_a = [
+          {name: 'param1', value: 'select * from table1 where id = \'id1\''},
+          {name: 'param2', value: 'select * from table1 where id = \'_id1\''}
+        ];
+
+        queryHelper.replaceVariablesUsingEsDocument(s_a, uri).then(function (a) {
+          expect(a).to.eql(expected_a);
+          done();
+        });
+      });
+
+      it('malformed uri', function (done) {
+        queryHelper.replaceVariablesUsingEsDocument('s', 'index1/type1-and-no-id')
+        .catch(function (err) {
+          expect(err.message).to.equal('Malformed uri - should have at least 3 parts: index, type, id');
+          done();
+        });
+      });
+    });
+
+    describe('no URI', function () {
+
+      it('ignore the elastic document and varaibles', function (done) {
+        var headers = [
+          { name: 'header1', value: 'header1value'}
+        ];
+        var params = [
+          { name: 'param1', value: 'param1value'}
+        ];
+        var body = 'body';
+
+        var expected = {
+          headers: headers,
+          params: params,
+          body: body
+        };
+
+        queryHelper.replaceVariablesForREST(headers, params, body, null, null).then(function (result) {
+
+          expect(result).to.eql(expected);
+          done();
+        });
+      });
+
+      it('ignore the elastic document but use variables', function (done) {
+        var headers = [
+          { name: 'header1', value: 'header1value $auth_token'}
+        ];
+        var params = [
+          { name: 'param1', value: 'param1value  $auth_token'}
+        ];
+        var body = 'body $auth_token';
+
+        var variables = {
+          $auth_token: '123456'
+        };
+
+        var expected = {
+          headers: [
+            { name: 'header1', value: 'header1value 123456'}
+          ],
+          params: [
+            { name: 'param1', value: 'param1value  123456'}
+          ],
+          body: 'body 123456'
+        };
+
+        queryHelper.replaceVariablesForREST(headers, params, body, null, variables).then(function (result) {
+
+          expect(result).to.eql(expected);
+          done();
+        });
+      });
+    });
+
   });
 
-  it('replaceVariablesInTheQuery multiple expresions', function () {
-    var query = '  @doc[_source][title]@  @doc[_source][id]@  @doc[_id]@  ';
-    var expected = '  title12345  12345  _12345_  ';
-    expect(queryHelper.replaceVariablesInTheQuery(doc, query)).to.eql(expected);
+  describe('_replaceVariablesInTheQuery', function () {
+    it('replaceVariablesInTheQuery', function () {
+      var query = '@doc[_source][id]@';
+      var expected = '12345';
+      expect(queryHelper._replaceVariablesInTheQuery(doc, query)).to.eql(expected);
+    });
+
+    it('replaceVariablesInTheQuery multiple expresions', function () {
+      var query = '  @doc[_source][title]@  @doc[_source][id]@  @doc[_id]@  ';
+      var expected = '  title12345  12345  _12345_  ';
+      expect(queryHelper._replaceVariablesInTheQuery(doc, query)).to.eql(expected);
+    });
+
+    it('replaceVariablesInTheQuery multiple same expresions', function () {
+      var query = '  @doc[_source][id]@  @doc[_source][id]@  ';
+      var expected = '  12345  12345  ';
+      expect(queryHelper._replaceVariablesInTheQuery(doc, query)).to.eql(expected);
+    });
+
+
+    it('replaceVariablesInTheQuery sql query', function () {
+      var query = 'select label, description, category_code, url ' +
+                'from company ' +
+                'where id = \'@doc[_source][id]@\' ' +
+                'limit 100';
+      var expected = 'select label, description, category_code, url ' +
+                'from company ' +
+                'where id = \'12345\' ' +
+                'limit 100';
+      expect(queryHelper._replaceVariablesInTheQuery(doc, query)).to.eql(expected);
+    });
   });
 
-  it('replaceVariablesInTheQuery multiple same expresions', function () {
-    var query = '  @doc[_source][id]@  @doc[_source][id]@  ';
-    var expected = '  12345  12345  ';
-    expect(queryHelper.replaceVariablesInTheQuery(doc, query)).to.eql(expected);
-  });
-
-
-  it('replaceVariablesInTheQuery sql query', function () {
-    var query = 'select label, description, category_code, url ' +
-              'from company ' +
-              'where id = \'@doc[_source][id]@\' ' +
-              'limit 100';
-    var expected = 'select label, description, category_code, url ' +
-              'from company ' +
-              'where id = \'12345\' ' +
-              'limit 100';
-    expect(queryHelper.replaceVariablesInTheQuery(doc, query)).to.eql(expected);
-  });
 
 });

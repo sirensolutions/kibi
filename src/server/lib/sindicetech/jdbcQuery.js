@@ -6,7 +6,7 @@ var logger  = require('../logger');
 var AbstractQuery = require('./abstractQuery');
 var jdbcHelper    = require('./jdbcHelper');
 var Jdbc    = require('jdbc-sindicetech');
-
+var queryHelper = require('./query_helper');
 var debug = false;
 
 function JdbcQuery(queryDefinition, cache) {
@@ -76,7 +76,7 @@ JdbcQuery.prototype.checkIfItIsRelevant = function (uri) {
     var max_age = self.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
 
 
-    return this._getQueryFromConfig(this.config.activationQuery, uri).then(function (query) {
+    return queryHelper.replaceVariablesUsingEsDocument(this.config.activationQuery, uri).then(function (query) {
 
       if (query.trim() === '') {
         return Promise.resolve({'boolean': true});
@@ -131,7 +131,7 @@ JdbcQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
     var connection_string = self.config.datasource.datasourceClazz.datasource.datasourceParams.connection_string;
     var max_age = self.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
 
-    return self._getQueryFromConfig(self.config.resultQuery, uri).then(function (query) {
+    return queryHelper.replaceVariablesUsingEsDocument(self.config.resultQuery, uri).then(function (query) {
 
       var cache_key = self.generateCacheKey(connection_string, query, onlyIds, idVariableName);
 

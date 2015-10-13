@@ -4,6 +4,8 @@ var url     = require('url');
 var rp      = require('request-promise');
 var config  = require('../../config');
 var logger  = require('../logger');
+var jsonpath      = require('jsonpath');
+var queryHelper = require('./query_helper');
 var AbstractQuery = require('./abstractQuery');
 
 function RestQuery(queryDefinition, cache) {
@@ -39,10 +41,14 @@ RestQuery.prototype.checkIfItIsRelevant = function (uri) {
   } catch (e) {
     return Promise.reject(new Error('Problem parsing regex [' + query + ']'));
   }
-
-  return Promise.resolve({'boolean': false});
 };
 
+
+RestQuery.prototype._logFailedRequestDetails = function (msg, originalError, resp) {
+  logger.error(msg, originalError);
+  logger.error('See the full resp object below');
+  logger.error(resp);
+};
 
 RestQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
   var self = this;
@@ -51,7 +57,8 @@ RestQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
   var method = this.config.datasource.datasourceClazz.datasource.datasourceParams.method.toLowerCase();
   var timeout = this.config.datasource.datasourceClazz.datasource.datasourceParams.timeout;
   var max_age = this.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
-
+  var username = this.config.datasource.datasourceClazz.datasource.datasourceParams.username;
+  var password = this.config.datasource.datasourceClazz.datasource.datasourceParams.password;
 
   return new Promise(function (fulfill, reject) {
     var start = new Date().getTime();
@@ -61,101 +68,106 @@ RestQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
       reject(new Error('Only GET|POST methods are supported at the moment'));
     }
 
-    if (uri.indexOf('rest://') !== 0) {
-      reject(new Error('Wrong URI scheme. For rest query uri scheme should strat with "rest://"'));
-    }
-
-    var variables = uri.substring('rest://'.length).split('/');
-
-    _.each(variables, function (v, index) {
-      variables[index] = variables[index].replace(/--SLASH--/g, '/');
-    });
-
-    var data = {};
-    var headers = {};
-    regex = /@VAR([0-9]{1,})@/;
-
     if ( !(self.config.rest_params instanceof Array)) {
       reject(new Error('rest_params should be an Array. Check the elasticsearch mapping'));
     }
 
-    _.each(self.config.rest_params, function (param) {
-      if (regex.test(param.value)) {
-        var match = regex.exec(param.value);
-        if (match && match.length > 1) {
-          var index = match[1];
-          data[param.name] = variables[index];
-        } else {
-          reject(
-            new Error(
-              'Something wrong with the variable placeholder. Variable palceholders should follow the format: @VAR0@, @VAR1@, ...'
-            )
-          );
-        }
-      } else {
-        data[param.name] = param.value;
-      }
-    });
-
-    _.each(self.config.rest_headers, function (header) {
-      if (regex.test(header.value)) {
-        var match = regex.exec(header.value);
-        if (match && match.length > 1) {
-          var index = match[1];
-          headers[header.name] = variables[index];
-        } else {
-          reject(
-            new Error(
-              'Something wrong with the variable placeholder. Variable palceholders should follow the format: @VAR0@, @VAR1@, ...'
-            )
-          );
-        }
-      } else {
-        headers[header.name] = header.value;
-      }
-    });
-
-    var key;
-    if (self.cache) {
-      key = url_s + method + JSON.stringify(headers) + JSON.stringify(data);
+    if ( !(self.config.rest_headers instanceof Array)) {
+      reject(new Error('rest_headers should be an Array. Check the elasticsearch mapping'));
     }
 
-    if (self.cache) {
-      var v = self.cache.get(key);
-      if (v) {
-        return fulfill(v);
-      }
-    }
-
-    var rp_options = {
-      method: method.toUpperCase(),
-      uri: url.parse(url_s),
-      headers: headers,
-      timeout: timeout || 5000,
-      transform: function (resp) {
-        var data = {
-          results: JSON.parse(resp)
-        };
-        if (self.cache) {
-          self.cache.set(key, data, max_age);
-        }
-        return data;
-      }
+    // user can also use a special variables like $auth_token
+    var availableVariables = {
+      // for now we support only auth_token username password
+      // so user can provide any of these in params, headers, or body
+      '${auth_token}': self.config.datasource.datasourceClazz.populateParameters('${auth_token}'),
+      '${username}': self.config.datasource.datasourceClazz.populateParameters('${username}'),
+      '${password}': self.config.datasource.datasourceClazz.populateParameters('${password}')
     };
 
-    if (method === 'get') {
-      rp_options.qs = data;
-    } else {
-      // set body or json
-      // TODO: work on it
-      rp_options.body = '';
-      rp_options.json = {};
-    }
 
-    rp(rp_options).then(function (resp) {
-      fulfill(resp);
-    }).catch(function (err) {
-      reject(err);
+    // the whole replacement of values is happening here
+    queryHelper.replaceVariablesForREST(
+      self.config.rest_headers,
+      self.config.rest_params,
+      self.config.rest_body,
+      uri, availableVariables)
+    .then(function (results) {
+      // here convert the params and headers from array to map
+      var headers = _.zipObject(_.pluck(results.headers, 'name'), _.pluck(results.headers, 'value'));
+      var params = _.zipObject(_.pluck(results.params, 'name'), _.pluck(results.params, 'value'));
+      var body = results.body;
+
+      var key;
+      if (self.cache) {
+        key = method + url_s + self.config.rest_path + JSON.stringify(headers) + JSON.stringify(params) + body;
+      }
+
+      if (self.cache) {
+        var v = self.cache.get(key);
+        if (v) {
+          return fulfill(v);
+        }
+      }
+
+      // to check any option visit
+      // https://github.com/request/request#requestoptions-callback
+      var rp_options = {
+        method: method.toUpperCase(),
+        uri: url.parse(url.resolve(url_s, self.config.rest_path)),
+        headers: headers,
+        timeout: timeout || 5000,
+        transform: function (body, resp) {
+          var data = {
+            results: {}
+          };
+          if (resp.statusCode !== self.config.rest_resp_status_code) {
+            var msg = 'Invalid response status code: [' + resp.statusCode + '] Expected: [' + self.config.rest_resp_status_code + ']';
+            self._logFailedRequestDetails(msg, null, resp);
+            throw new Error(msg);
+          }
+
+          // TODO: change this once we support xml resp or text resp
+          try {
+            data.results = jsonpath.query(JSON.parse(body), self.config.rest_resp_restriction_path);
+          } catch (e) {
+            var msg = 'Error while applying the jsonpath expression. Details: ' + e.message;
+            self._logFailedRequestDetails(msg, e, resp);
+            throw new Error(msg);
+          }
+
+          if (self.cache) {
+            self.cache.set(key, data, max_age);
+          }
+          return data;
+        }
+      };
+
+      if (username && password) {
+        rp_options.auth = {
+          // as they might be encrypted make sure to call populateParameters
+          username: self.config.datasource.datasourceClazz.populateParameters('${username}'),
+          password: self.config.datasource.datasourceClazz.populateParameters('${password}'),
+          sendImmediately: false
+        };
+      }
+
+      if (method === 'get') {
+        rp_options.qs = params;
+      } else if (method === 'post') {
+        rp_options.body = body;
+        // WARNING: do not set rp_options.json = true/false; even for json content
+        // rather ask user to set correct Content-Type: application/json header
+      }
+
+      rp(rp_options).then(function (resp) {
+        fulfill(resp);
+      }).catch(function (err) {
+        var msg = 'Rest request failed. Details: ' + err.message;
+        self._logFailedRequestDetails(msg, err, null);
+        reject(new Error(msg));
+      });
+
     });
   });
 };

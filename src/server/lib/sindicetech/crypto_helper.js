@@ -9,6 +9,16 @@ function endsWith(str, suffix) {
 function CryptoHelper() {
   this.defaultAlgorithm = 'aes-256-ctr';
   this.defaultKey = '3zTvzr3p67VC61jmV54rIYu1545x4TlY';
+  this.supportedAlghorithms = [
+    'aes-256-ctr',   'camellia256',
+    'aes-256-cbc',   'camellia-256-cbc',
+    'aes-256-cfb',   'camellia-256-cfb',
+    'aes-256-cfb1',  'camellia-256-cfb1',
+    'aes-256-cfb8',  'camellia-256-cfb8',
+    'aes-256-ctr',
+    'aes-256-ecb',   'camellia-256-ecb',
+    'aes-256-ofb',   'camellia-256-ofb'
+  ];
 }
 
 
@@ -83,6 +93,9 @@ CryptoHelper.prototype.decrypt = function (password, encrypted) {
 CryptoHelper.prototype.encryptDatasourceParams = function (config, query) {
   if (query.datasourceParams && query.datasourceType) {
     var datasourceType = query.datasourceType;
+    if (datasourceType === 'sql_jdbc' || datasourceType === 'sparql_jdbc') {
+      datasourceType = 'jdbc';
+    }
     var schema = config.kibana.datasources_schema[datasourceType];
     var params;
     try {
@@ -117,6 +130,7 @@ CryptoHelper.prototype.encryptDatasourceParams = function (config, query) {
     query.datasourceParams = JSON.stringify(params);
   }
 };
+
 
 module.exports = new CryptoHelper();
 

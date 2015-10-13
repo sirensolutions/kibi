@@ -122,7 +122,7 @@ RestQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
             results: {}
           };
           if (resp.statusCode !== self.config.rest_resp_status_code) {
-            var msg = 'Response status code [' + resp.statusCode + '] while expected [' + self.config.rest_resp_status_code + ']';
+            var msg = 'Invalid response status code: [' + resp.statusCode + '] Expected: [' + self.config.rest_resp_status_code + ']';
             self._logFailedRequestDetails(msg, null, resp);
             throw new Error(msg);
           }

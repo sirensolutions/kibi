@@ -1,6 +1,6 @@
 <div>
 
-  <button ng-class="{ 'red-border': !isValid }" class="btn btn-xs btn-success" ng-click="addParam()">
+  <button ng-disabled="disable" ng-class="{ 'red-border': !isValid }" class="btn btn-xs btn-success" ng-click="addParam()">
     <span>Add {{ label }}</span> <i class="fa fa-plus"></i>
   </button>
 

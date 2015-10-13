@@ -18,6 +18,7 @@ define(function (require) {
           queryId:          '=?', // optional only for objectType === queryVariable
           modelDisabled:    '=?', // use to disable the underlying select
           modelRequired:    '=?', // use to disable the underlying select
+          exclude:          '=?', // elements to exclude from the selection set
           extraItems:       '=?'  // extra values can be passed here
         },
         template: require('text!directives/st_select.html'),
@@ -90,12 +91,24 @@ define(function (require) {
             return ret;
           });
 
-
           var _renderSelect = function (items) {
             scope.analyzedField = false;
             scope.items = items;
-            if (scope.extraItems && scope.items) {
-              scope.items = scope.extraItems.concat(scope.items);
+            if (scope.items) {
+              if (scope.extraItems) {
+                scope.items = scope.extraItems.concat(scope.items);
+              }
+              if (scope.exclude) {
+                var ids = _(scope.exclude).pluck('id').compact().value();
+                if (ids.length !== 0) {
+                  // remove items that are in the exclude set except for the one that is selected
+                  _.remove(scope.items, function (item) {
+                    var selected = !(ngModelCtrl.$viewValue && ngModelCtrl.$viewValue.value) ||
+                      ngModelCtrl.$viewValue.value !== item.value;
+                    return _.contains(ids, item.value) && selected;
+                  });
+                }
+              }
             }
 
             if (!scope.required) {
@@ -181,6 +194,9 @@ define(function (require) {
             _render();
           });
 
+          scope.$watch('exclude', function () {
+            _render();
+          }, true);
           _render();
         }
 

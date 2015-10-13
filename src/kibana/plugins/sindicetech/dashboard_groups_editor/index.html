@@ -57,7 +57,7 @@
                 <div class="content">
                   <div class="form-group">
                     <label>Dashboard id</label></br>
-                    <st-select object-type="dashboard" ng-model="dashboard.id" name="dashboard" required></st-select>
+                    <st-select object-type="dashboard" ng-model="dashboard.id" name="dashboard" exclude="dashboardGroup.dashboards" required></st-select>
                   </div>
                   <div class="btn-group rightCorner">
                     <array-param-up index="{{ $index }}" ng-model="dashboardGroup.dashboards"></array-param-up>
@@ -68,7 +68,7 @@
                 </div>
               </li>
             </ul>
-            <array-param-add required label="dashboard" ng-model="dashboardGroup.dashboards"></array-param-add>
+            <array-param-add disable="nbDashboards === dashboardGroup.dashboards.length" required label="dashboard" ng-model="dashboardGroup.dashboards"></array-param-add>
           </div>
 
 

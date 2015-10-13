@@ -83,6 +83,14 @@ define(function (require) {
         kbnUrl.change('settings/dashboardgroups', {});
       };
 
+      function getNumberOfDashboards() {
+        return savedDashboards.find().then(function (data) {
+          $scope.nbDashboards = data.hits ? data.hits.length : 0;
+        });
+      }
+      $scope.nbDashboards = 0;
+      getNumberOfDashboards();
+
       $scope.clone = function () {
         savedDashboardGroups.get().then(function (savedDashboardGroupClone) {
           savedDashboardGroupClone.id = dashboardGroup.id + '-clone';

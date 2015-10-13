@@ -8,6 +8,7 @@ define(function (require) {
       restrict: 'E',
       replace: true,
       scope: {
+        disable: '=?',
         label: '@',
         postAction: '&',
         default: '@' // used to define the default element added to the array. It is an empty object if unset

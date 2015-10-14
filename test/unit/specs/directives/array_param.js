@@ -7,7 +7,7 @@ define(function (require) {
   var $rootScope;
   var $elems = {};
 
-  var init = function (required, defaultElement, index) {
+  var init = function (required, defaultElement, index, disable) {
     // Load the application
     module('kibana');
 
@@ -16,6 +16,9 @@ define(function (require) {
       $rootScope = _$rootScope_;
       // Create the elements
       var addAttributes = 'ng-model="array" label="element" post-action="action()"';
+      if (disable) {
+        addAttributes += ' disable="true"';
+      }
       if (required) {
         addAttributes += ' required';
       }
@@ -99,6 +102,12 @@ define(function (require) {
           expect(ngModel.$valid).to.be(false);
           $elems.add.find('button').click();
           expect(ngModel.$valid).to.be(true);
+        });
+
+        it('should disable array-param-add', function () {
+          init(null, null, null, true);
+
+          expect($elems.add.find('button')[0].disabled).to.be(true);
         });
       });
 

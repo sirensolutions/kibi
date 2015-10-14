@@ -8,13 +8,14 @@ define(function (require) {
   var $rootScope;
   var $elem;
 
-  var init = function (items, required, modelDisabled, modelRequired, include, exclude) {
+  var init = function (initValue, items, required, modelDisabled, modelRequired, include, exclude) {
     // Load the application
     module('kibana');
 
     // Create the scope
     inject(function (Private, _$rootScope_, $compile, Promise) {
       $rootScope = _$rootScope_;
+      $rootScope.model = initValue;
 
       var selectHelper = Private(require('directives/st_select_helper'));
       $rootScope.action = sinon.stub(selectHelper, 'getQueries').returns(Promise.resolve(items));
@@ -59,7 +60,7 @@ define(function (require) {
       it('should populate the select options with items returned from the object-type action', function () {
         var items = [ { value: 1, label: 'joe' } ];
 
-        init(items);
+        init(null, items);
 
         expect($rootScope.action.called).to.be.ok();
 
@@ -80,7 +81,7 @@ define(function (require) {
       it('should populate the select options with required on', function () {
         var items = [ { value: 1, label: 'joe' } ];
 
-        init(items, true);
+        init(null, items, true);
 
         expect($rootScope.action.called).to.be.ok();
 
@@ -100,7 +101,7 @@ define(function (require) {
       it('should require an option to be selected 1', function () {
         var items = [ { value: 1, label: 'joe' } ];
 
-        init(items, null, null, true);
+        init(null, items, null, null, true);
 
         expect($rootScope.action.called).to.be.ok();
         var select = $elem.find('select');
@@ -110,7 +111,7 @@ define(function (require) {
       it('should require an option to be selected 2', function () {
         var items = [ { value: 1, label: 'joe' } ];
 
-        init(items, true);
+        init(null, items, true);
 
         expect($rootScope.action.called).to.be.ok();
         var select = $elem.find('select');
@@ -120,7 +121,7 @@ define(function (require) {
       it('should disable the select menu', function () {
         var items = [ { value: 1, label: 'joe' } ];
 
-        init(items, null, true);
+        init(null, items, null, true);
 
         expect($rootScope.action.called).to.be.ok();
         var select = $elem.find('select');
@@ -131,7 +132,7 @@ define(function (require) {
         var items = [ { value: 1, label: 'joe' } ];
         var include = [ { value: 2, label: 'toto' } ];
 
-        init(items, null, null, null, include);
+        init(null, items, null, null, null, include);
 
         expect($rootScope.action.called).to.be.ok();
         var options = $elem.find('option');
@@ -152,7 +153,7 @@ define(function (require) {
         var items = [ { value: 1, label: 'joe' }, { value: 3, label: 'tata' } ];
         var include = [ { value: 1, label: 'joe' }, { value: 2, label: 'toto' } ];
 
-        init(items, null, null, null, include);
+        init(null, items, null, null, null, include);
 
         expect($rootScope.action.called).to.be.ok();
         var options = $elem.find('option');
@@ -177,7 +178,7 @@ define(function (require) {
         var items = [ { value: 1, label: 'joe' }, { value: 2, label: 'toto' } ];
         var exclude = [ { id: 1, label: 'joe' } ];
 
-        init(items, null, null, null, null, exclude);
+        init(null, items, null, null, null, null, exclude);
 
         expect($rootScope.action.called).to.be.ok();
         var options = $elem.find('option');
@@ -195,7 +196,7 @@ define(function (require) {
         var exclude = [ { id: 1, label: 'joe' } ];
         var include = [ { value: 3, label: 'tata' } ];
 
-        init(items, null, null, null, include, exclude);
+        init(null, items, null, null, null, include, exclude);
 
         expect($rootScope.action.called).to.be.ok();
         var options = $elem.find('option');
@@ -217,7 +218,7 @@ define(function (require) {
         var exclude = [ { id: 1, label: 'joe' } ];
         var include = [ { value: 1, label: 'joe' } ];
 
-        init(items, null, null, null, include, exclude);
+        init(null, items, null, null, null, include, exclude);
 
         expect($rootScope.action.called).to.be.ok();
         var options = $elem.find('option');
@@ -233,7 +234,7 @@ define(function (require) {
       it('should add an empty element only if there are items', function () {
         var items = [];
 
-        init(items);
+        init(null, items);
 
         expect($rootScope.action.called).to.be.ok();
         var options = $elem.find('option');
@@ -243,25 +244,60 @@ define(function (require) {
       it('should automatically select the element if it is the only one and the select is required', function () {
         var items = [ { value: 2, label: 'toto' } ];
 
-        init(items, true);
+        init(null, items, true);
 
         var options = $elem.find('option');
         expect(options).to.have.length(2);
 
         expect(options[0].defaultSelected).to.be(false);
+        expect(options[0].value).to.be('');
         expect(options[1].defaultSelected).to.be(true);
+        expect(options[1].value).to.be('2');
       });
 
       it('should NOT automatically select the element if it is the only one and the select is optional', function () {
         var items = [ { value: 2, label: 'toto' } ];
 
-        init(items);
+        init(null, items);
 
         var options = $elem.find('option');
         expect(options).to.have.length(2);
 
         expect(options[0].defaultSelected).to.be(false);
+        expect(options[0].value).to.be('');
         expect(options[1].defaultSelected).to.be(false);
+        expect(options[1].value).to.be('2');
+      });
+
+      it('should set analyzedField to true if the selected item is analysed', function () {
+        var items = [ { value: 2, label: 'toto', options: { analyzed: true } } ];
+
+        init(2, items);
+        expect($elem.isolateScope().analyzedField).to.be(true);
+      });
+
+      it('should select the option that is already in the ngModel controller', function () {
+        var items = [ { value: 2, label: 'toto', options: { analyzed: true } } ];
+
+        init(2, items);
+
+        var ngModel = $elem.controller('ngModel');
+        expect(ngModel.$valid).to.be(true);
+
+        var options = $elem.find('option');
+        expect(options).to.have.length(2);
+        expect(options[1].selected).to.be(true);
+        expect(options[1].value).to.be('2');
+        expect(options[1].text).to.be('toto');
+      });
+
+      it('should set model as invalid if empty and select is required', function () {
+        var items = [ { value: 2, label: 'toto', options: { analyzed: true } } ];
+
+        init('', items, true);
+
+        var ngModel = $elem.controller('ngModel');
+        expect(ngModel.$valid).to.be(false);
       });
     });
   });

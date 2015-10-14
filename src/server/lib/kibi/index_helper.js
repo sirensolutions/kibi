@@ -20,11 +20,30 @@ IndexHelper.prototype._getDefinitionFromSchema = function (schema, name) {
 };
 
 IndexHelper.prototype.rencryptAllValuesInKibiIndex = function (oldkey, algorithm, key, path) {
+  if (!oldkey) {
+    return Promise.reject(new Error('oldkey not defined'));
+  }
+  if (!algorithm) {
+    return Promise.reject(new Error('algorithm not defined'));
+  }
+  if (!key) {
+    return Promise.reject(new Error('key not defined'));
+  }
+  if (!path) {
+    return Promise.reject(new Error('path not defined'));
+  }
+
+  if (cryptoHelper.supportedAlghorithms.indexOf(algorithm) === -1) {
+    return Promise.reject(new Error('not supported algorithm. Use one of: ' + cryptoHelper.supportedAlghorithms));
+  }
+
+
   var self = this;
   var report = [];
   return new Promise(function (fulfill, reject) {
     // get all datasources
     self.getDatasources().then(function (res1) {
+
       report.push('Got ' + res1.length + ' datasources.');
       // now assemble the bulk api request body
       var body = '';

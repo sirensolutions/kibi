@@ -2,6 +2,7 @@ define(function (require) {
   describe('Kibi Controllers', function () {
     var $scope, $el;
     var sinon = require('test_utils/auto_release_sinon');
+    var $ = require('jquery');
 
     function init(dashboardGroup) {
       module('apps/settings');
@@ -15,12 +16,22 @@ define(function (require) {
                 default:
                   return Promise.reject(new Error('try again'));
               }
+            },
+            find: function () {
+              return Promise.resolve(
+                [
+                  {
+                    id: 'Dogs'
+                  }
+                ]
+              );
             }
           };
         });
       });
       inject(function (Promise, _$rootScope_, $controller) {
         dashboardGroup.save = sinon.stub().returns(Promise.resolve('123'));
+
         var fakeRoute = {
           current: {
             locals: {
@@ -32,7 +43,8 @@ define(function (require) {
         $scope = _$rootScope_;
         $controller('DashboardGroupsEditor', {
           $scope: $scope,
-          $route: fakeRoute
+          $route: fakeRoute,
+          $element: $('<div><form name="objectForm" class="ng-valid"></div>')
         });
         $scope.$digest();
       });

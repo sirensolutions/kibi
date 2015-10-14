@@ -38,7 +38,7 @@ define(function (require) {
 
   app.controller(
     'DashboardGroupsEditor',
-    function ($rootScope, $scope, $route, $window, kbnUrl, Notifier, savedDashboards, savedDashboardGroups, Promise) {
+    function ($rootScope, $scope, $route, $window, kbnUrl, Notifier, savedDashboards, savedDashboardGroups, Promise, $element) {
 
       var notify = new Notifier({
         location: 'Dashboard Groups Editor'
@@ -58,7 +58,7 @@ define(function (require) {
       var dashboardGroup = $scope.dashboardGroup = $route.current.locals.dashboardGroup;
 
       $scope.submit = function () {
-        if (!angular.element('form[name="objectForm"]').hasClass('ng-valid')) {
+        if (!$element.find('form[name="objectForm"]').hasClass('ng-valid')) {
           $window.alert('Please fill in all the required parameters.');
           return;
         }

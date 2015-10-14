@@ -38,7 +38,7 @@ define(function (require) {
   app.controller(
     'TemplatesEditor',
     function ($scope, config, globalState, $route, $window,
-              kbnUrl, Private, SavedTemplate, savedQueries, savedTemplates, Notifier, queryEngineClient, $compile
+              kbnUrl, Private, SavedTemplate, savedQueries, savedTemplates, Notifier, queryEngineClient, $compile, $element
   ) {
 
       var _shouldEntityURIBeEnabled = Private(require('plugins/sindicetech/commons/_should_entity_uri_be_enabled'));
@@ -140,7 +140,7 @@ define(function (require) {
       });
 
       $scope.submit = function () {
-        if (!angular.element('form[name="objectForm"]').hasClass('ng-valid')) {
+        if ($element.find('form[name="objectForm"]').hasClass('ng-valid')) {
           $window.alert('Please fill in all the required parameters.');
           return;
         }

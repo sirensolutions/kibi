@@ -35,7 +35,7 @@ define(function (require) {
 
   app.controller(
     'DatasourcesEditor',
-    function ($rootScope, $scope, $route, $window, kbnUrl, Notifier, savedDatasources, Private, Promise, queryEngineClient) {
+    function ($rootScope, $scope, $route, $window, kbnUrl, Notifier, savedDatasources, Private, Promise, queryEngineClient, $element) {
 
       var setDatasourceSchema = Private(require('plugins/kibi/datasources_editor/lib/set_datasource_schema'));
 
@@ -56,7 +56,7 @@ define(function (require) {
       var datasource = $scope.datasource = $route.current.locals.datasource;
 
       $scope.submit = function () {
-        if (!angular.element('form[name="objectForm"]').hasClass('ng-valid')) {
+        if ($element.find('form[name="objectForm"]').hasClass('ng-valid')) {
           $window.alert('Please fill in all the required parameters.');
           return;
         }

@@ -8,7 +8,7 @@ define(function (require) {
         id: 'group-1',
         title: 'Group 1',
         priority: 1,
-        dashboards: JSON.stringify([
+        dashboards: [
           {
             title: 'Companies',
             id: 'Companies'
@@ -17,13 +17,13 @@ define(function (require) {
             id: 'Articles',
             title: 'Articles'
           }
-        ])
+        ]
       },
       {
         id: 'group-2',
         title: 'Group 2',
         priority: 2,
-        dashboards: JSON.stringify([])
+        dashboards: []
       }
     ];
 

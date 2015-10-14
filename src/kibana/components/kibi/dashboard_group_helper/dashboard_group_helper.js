@@ -15,23 +15,14 @@ define(function (require) {
           var ret = [];
           _.each(resp.hits, function (hit) {
             var id = hit.id;
-            var dashboardO;
-            try {
-              dashboardO = JSON.parse(hit.dashboards);
-              if (dashboardO instanceof Array) {
-                _.each(dashboardO, function (d) {
-                  if (dashboardIds.indexOf(d.id) !== -1) {
-                    ret.push(id);
-                  }
-                });
-              } else {
-                reject(new Error('Property dashboards should be and Array, but was [' + JSON.stringify(hit.dashboards, null, '') + ']'));
-              }
-            } catch (e) {
-              // ignore this error but report on the console
-              console.log('Could not parse dashboards json');
-              console.log(hit.dashboards);
-              console.log(e);
+            if (hit.dashboards instanceof Array) {
+              _.each(hit.dashboards, function (d) {
+                if (dashboardIds.indexOf(d.id) !== -1) {
+                  ret.push(id);
+                }
+              });
+            } else {
+              reject(new Error('Property dashboards should be and Array, but was [' + JSON.stringify(hit.dashboards, null, '') + ']'));
             }
           });
           fulfill(_.unique(ret));

@@ -1,5 +1,5 @@
 var rp = require('request-promise');
-var indexHelper = require('./index_helper');
+var indexHelper = require('../lib/kibi/index_helper');
 
 if (process.argv.length !== 6) {
   console.log(

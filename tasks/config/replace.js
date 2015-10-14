@@ -25,6 +25,15 @@ module.exports = function (grunt) {
           mode: 0755
         },
         {
+          src: [join(src, 'server', 'bin', 'replace_encryption_key.sh')],
+          dest: join(build, 'dist', '<%= pkg.name %>', 'bin', 'replace_encryption_key.sh'),
+          mode: 0755
+        },
+        {
+          src: [join(src, 'server', 'bin', 'replace_encryption_key.bat')],
+          dest: join(build, 'dist', '<%= pkg.name %>', 'bin', 'replace_encryption_key.bat')
+        },
+        {
           src: [join(src, 'server', 'bin', 'kibi.bat')],
           dest: join(build, 'dist', '<%= pkg.name %>', 'bin', '<%= pkg.name %>.bat')
         },

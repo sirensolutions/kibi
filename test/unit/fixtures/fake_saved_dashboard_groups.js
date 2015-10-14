@@ -23,7 +23,7 @@ define(function (require) {
         id: 'group-2',
         title: 'Group 2',
         priority: 2,
-        dashboards: JSON.stringify([])
+        dashboards: []
       }
     ];
 

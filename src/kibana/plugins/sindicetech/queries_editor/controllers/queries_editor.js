@@ -38,7 +38,7 @@ define(function (require) {
   app.controller(
     'QueriesEditor',
     function ($scope, config, globalState, $route, $window, kbnUrl, Notifier, queryEngineClient,
-              savedVisualizations, savedDatasources, Private
+              savedVisualizations, savedDatasources, Private, $element
   ) {
       var _shouldEntityURIBeEnabled = Private(require('plugins/sindicetech/commons/_should_entity_uri_be_enabled'));
 
@@ -150,7 +150,7 @@ define(function (require) {
       };
 
       $scope.submit = function () {
-        if (!angular.element('form[name="objectForm"]').hasClass('ng-valid')) {
+        if ($element.find('form[name="objectForm"]').hasClass('ng-valid')) {
           $window.alert('Please fill in all the required parameters.');
           return;
         }

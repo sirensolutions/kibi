@@ -19,7 +19,7 @@ define(function (require) {
           modelDisabled:    '=?', // use to disable the underlying select
           modelRequired:    '=?', // use to disable the underlying select
           exclude:          '=?', // elements to exclude from the selection set
-          extraItems:       '=?'  // extra values can be passed here
+          include:          '=?'  // extra values can be passed here
         },
         template: require('text!directives/st_select.html'),
         link: function (scope, element, attrs, ngModelCtrl) {
@@ -91,12 +91,26 @@ define(function (require) {
             return ret;
           });
 
+          function autoSelect(items) {
+            if (scope.required) {
+              return items.length === 2; // first element is the empty one
+            }
+            return false;
+          }
+
           var _renderSelect = function (items) {
             scope.analyzedField = false;
             scope.items = items;
             if (scope.items) {
-              if (scope.extraItems) {
-                scope.items = scope.extraItems.concat(scope.items);
+              if (scope.include) {
+                // adds the extra items at the head
+                // remove elements in items that appear in the extra items
+                _.remove(scope.items, function (item) {
+                  return !!_.find(scope.include, function (extraItem) {
+                    return item.value === extraItem.value;
+                  });
+                });
+                scope.items = scope.include.concat(scope.items);
               }
               if (scope.exclude) {
                 var ids = _(scope.exclude).pluck('id').compact().value();
@@ -109,13 +123,13 @@ define(function (require) {
                   });
                 }
               }
-            }
-
-            if (!scope.required) {
-              scope.items.splice(0, 0, {
-                label: '',
-                value: null
-              });
+              // if the select is NOT required, the user is able to choose an empty element
+              if (scope.items.length > 0 && _.first(scope.items).value !== null) {
+                scope.items.splice(0, 0, {
+                  label: '',
+                  value: null
+                });
+              }
             }
 
             var item = _.find(scope.items, function (item) {
@@ -124,9 +138,9 @@ define(function (require) {
 
             if (item && item.options && item.options.analyzed) {
               scope.analyzedField = true;
-            } else if (scope.items && scope.items.length === 1) {
-              // select automatically if only 1 option available
-              scope.modelObject = scope.items[0];
+            } else if (autoSelect(scope.items)) {
+              // select automatically if only 1 option is available and the select is required
+              scope.modelObject = scope.items[1];
             } else if (scope.items && scope.items.length > 0 && !item) {
               // object saved in the model is not in the list of items
               scope.modelObject = {
@@ -190,7 +204,7 @@ define(function (require) {
             }
           };
 
-          scope.$watchMulti(['indexPatternId', 'indexPatternType', 'queryId', 'extraItems', 'modelDisabled', 'modelRequire'], function () {
+          scope.$watchMulti(['indexPatternId', 'indexPatternType', 'queryId', 'include', 'modelDisabled', 'modelRequire'], function () {
             _render();
           });
 

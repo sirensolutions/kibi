@@ -22,5 +22,3 @@ esvm
 # in kibi-docs there are some files like .css that are normally ignored
 !kibi-docs/src/**
 /coverage/
-
-/test/unit/fixtures/fake_kibi.yml

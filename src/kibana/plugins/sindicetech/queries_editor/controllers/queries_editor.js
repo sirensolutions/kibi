@@ -150,7 +150,7 @@ define(function (require) {
       };
 
       $scope.submit = function () {
-        if ($element.find('form[name="objectForm"]').hasClass('ng-valid')) {
+        if (!$element.find('form[name="objectForm"]').hasClass('ng-valid')) {
           $window.alert('Please fill in all the required parameters.');
           return;
         }

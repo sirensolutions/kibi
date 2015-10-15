@@ -19,6 +19,7 @@ module.exports = function (grunt) {
     'compile_dist_readme',
     'chmod_kibana',
     'chmod_create_symlink',
+    'chmod_replace_encryption_key',
     'make_plugin_dir',
     'copy:plugin_readme',
     'describe_bundled_plugins',

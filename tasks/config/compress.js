@@ -26,6 +26,17 @@ module.exports = function (grunt) {
           dest: '<%= pkg.name %>/bin/<%= pkg.name %>.bat'
         },
         {
+          flatten: true,
+          src: '<%= build %>/dist/bin/replace_encryption_key.sh',
+          dest: '<%= pkg.name %>/bin/replace_encryption_key.sh',
+          mode: 755
+        },
+        {
+          flatten: true,
+          src: '<%= build %>/dist/bin/replace_encryption_key.bat',
+          dest: '<%= pkg.name %>/bin/replace_encryption_key.bat'
+        },
+        {
           expand: true,
           cwd: '<%= build %>/dist/config',
           src: ['**/*'],

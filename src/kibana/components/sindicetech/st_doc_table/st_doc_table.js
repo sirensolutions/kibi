@@ -1,6 +1,5 @@
 define(function (require) {
   var _ = require('lodash');
-  var $ = require('jquery');
   var html = require('text!components/sindicetech/st_doc_table/st_doc_table.html');
   var getSort = require('components/doc_table/lib/get_sort');
 

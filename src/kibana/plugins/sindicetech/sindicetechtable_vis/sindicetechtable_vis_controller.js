@@ -2,13 +2,12 @@ define(function (require) {
   var module = require('modules').get('kibana/sindicetechtable_vis', ['kibana']);
   var rison = require('utils/rison');
   var _ = require('lodash');
-  var $ = require('jquery');
 
   require('components/sindicetech/st_doc_table/st_doc_table');
 
   module.controller(
     'KbnSindicetechtableVisController',
-    function ($scope, $rootScope, $route, globalState, savedSearches, savedVisualizations, Private, Notifier, getAppState, courier) {
+    function ($location, $scope, $rootScope, $route, globalState, savedVisualizations, Private, courier) {
       var requestQueue = Private(require('components/courier/_request_queue'));
       var SearchSource = Private(require('components/courier/data_source/search_source'));
       var filterManager = Private(require('components/filter_manager/filter_manager'));
@@ -21,7 +20,7 @@ define(function (require) {
       $scope.holder = {
         entityURI: '',
         entityURIEnabled: false,
-        visible: $('#sindicetechtable_vis_params').is(':visible')
+        visible: $location.path().indexOf('/visualize/edit/') !== -1
       };
 
       if (globalState.se && globalState.se.length > 0) {

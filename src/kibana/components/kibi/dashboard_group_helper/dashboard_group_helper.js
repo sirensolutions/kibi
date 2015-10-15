@@ -1,5 +1,5 @@
 define(function (require) {
-  return function DashboardGroupHelperFactory(Private, config, savedSearches, savedDashboards, savedDashboardGroups, Promise) {
+  return function DashboardGroupHelperFactory(Private, savedSearches, savedDashboards, savedDashboardGroups, Promise) {
     var _ = require('lodash');
     var urlHelper        = Private(require('components/kibi/url_helper/url_helper'));
     var kibiStateHelper  = Private(require('components/kibi/kibi_state_helper/kibi_state_helper'));
@@ -68,9 +68,7 @@ define(function (require) {
       var targetDashboardFilters = kibiStateHelper.getFiltersForDashboardId(dashboardId);
       var targetDashboardTimeFilter = kibiStateHelper.getTimeForDashboardId(dashboardId);
 
-      var relationalPanelConfig = config.get('kibi:relationalPanelConfig');
-
-      if (relationalPanelConfig.enabled) {
+      if (joinFilterHelper.isFilterJoinPluginEnabled()) {
         joinFilterHelper.getJoinFilter(dashboardId).then(function (joinFilter) {
           joinFilterHelper.replaceOrAddJoinFilter(targetDashboardFilters, joinFilter);
         }).finally(function () {

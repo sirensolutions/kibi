@@ -115,7 +115,7 @@ define(function (require) {
           };
 
           var _checkFilterJoinPlugin = function () {
-            var enabled = joinFilterHelper.isFilterJoinPluginEnabled();
+            var enabled = joinFilterHelper.isRelationalPanelEnabled();
             var installed = joinFilterHelper.isFilterJoinPluginInstalled();
             if (enabled && !installed) {
               notify.error(

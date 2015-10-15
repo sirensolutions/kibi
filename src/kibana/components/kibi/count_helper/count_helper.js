@@ -39,7 +39,7 @@ define(function (require) {
 
             // now construct the query
             var extraFilters = [];
-            if (joinFilterHelper.isFilterJoinPluginEnabled() && joinFilterHelper.isFilterJoinPluginInstalled()) {
+            if (joinFilterHelper.isRelationalPanelEnabled() && joinFilterHelper.isFilterJoinPluginInstalled()) {
 
               joinFilterHelper.getJoinFilter(dashboard.id).then(function (joinFilter) {
                 self.constructCountQuery(dashboard.id, savedSearch, extraFilters, joinFilter)
@@ -65,7 +65,7 @@ define(function (require) {
                 });
               });
 
-            } else if (!joinFilterHelper.isFilterJoinPluginEnabled() && joinFilterHelper.isFilterJoinPluginInstalled()) {
+            } else if (!joinFilterHelper.isRelationalPanelEnabled() && joinFilterHelper.isFilterJoinPluginInstalled()) {
               // get the join filter if present on the dashboard
               var joinFilter = urlHelper.getJoinFilter();
               // add it only for the dashboard where focus match
@@ -81,7 +81,7 @@ define(function (require) {
                 });
               });
 
-            } else if (!joinFilterHelper.isFilterJoinPluginEnabled() && !joinFilterHelper.isFilterJoinPluginInstalled()) {
+            } else if (!joinFilterHelper.isRelationalPanelEnabled() && !joinFilterHelper.isFilterJoinPluginInstalled()) {
 
               self.constructCountQuery(dashboard.id, savedSearch, [], null)
               .then(function (query) {
@@ -91,7 +91,7 @@ define(function (require) {
                 });
               });
 
-            } else if (joinFilterHelper.isFilterJoinPluginEnabled() && !joinFilterHelper.isFilterJoinPluginInstalled()) {
+            } else if (joinFilterHelper.isRelationalPanelEnabled() && !joinFilterHelper.isFilterJoinPluginInstalled()) {
 
               var error = new Error(
                 'The FilterJoin plugin is enabled but not installed. ' +

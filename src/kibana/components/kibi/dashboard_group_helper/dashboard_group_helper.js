@@ -68,7 +68,7 @@ define(function (require) {
       var targetDashboardFilters = kibiStateHelper.getFiltersForDashboardId(dashboardId);
       var targetDashboardTimeFilter = kibiStateHelper.getTimeForDashboardId(dashboardId);
 
-      if (joinFilterHelper.isFilterJoinPluginEnabled()) {
+      if (joinFilterHelper.isRelationalPanelEnabled()) {
         joinFilterHelper.getJoinFilter(dashboardId).then(function (joinFilter) {
           joinFilterHelper.replaceOrAddJoinFilter(targetDashboardFilters, joinFilter);
         }).finally(function () {

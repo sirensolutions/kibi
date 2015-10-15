@@ -100,6 +100,12 @@ define(function (require) {
           createSummaryRow($scope.row);
         }, true);
 
+        globalState.on('save_with_changes', function (diff) {
+          if (diff.indexOf('entityDisabled') !== -1 || diff.indexOf('se') !== -1 ) {
+            createSummaryRow($scope.row);
+          }
+        });
+
         $scope.$watch('row', function () {
           createSummaryRow($scope.row);
         }, true);
@@ -141,7 +147,7 @@ define(function (require) {
           var $cells = $el.children();
 
           $el.children('[data-column]')
-            .removeClass('selectedEntityCell')
+            .removeClass('selectedEntityCell disabled')
             .css('cursor', 'auto')
             .off('click');
 
@@ -158,10 +164,14 @@ define(function (require) {
                 // Style the cell value as a link
                 $cell.addClass('click');
 
-                if (globalState.se && globalState.se.length > 0 &&
-                    type === 'select' && !globalState.entityDisabled &&
-                    _isInSelectedEntities(globalState.se, row.$$_partialFormatted._id, column)) {
-                  $cell.addClass('selectedEntityCell');
+                if (globalState.se && globalState.se.length > 0 && type === 'select' &&
+                    _isInSelectedEntities(globalState.se, row.$$_partialFormatted._id, column)
+                ) {
+                  if (globalState.entityDisabled === true) {
+                    $cell.addClass('selectedEntityCell disabled');
+                  } else {
+                    $cell.addClass('selectedEntityCell');
+                  }
                 }
 
                 $cell.css('cursor', 'pointer').bind('click', function (e) {
@@ -215,7 +225,7 @@ define(function (require) {
                       globalState.se = [];
 
                       globalState.se.push(entityId);
-                      delete globalState.entityDisabled;
+                      globalState.entityDisabled = false;
                       globalState.save();
                     }
 

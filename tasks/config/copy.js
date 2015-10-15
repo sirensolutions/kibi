@@ -50,6 +50,12 @@ module.exports = function (grunt) {
         },
         {
           expand: true,
+          cwd: '<%= server %>/config/',
+          src: 'datasources-schema.json',
+          dest: '<%= build %>/<%= pkg.name %>/config'
+        },
+        {
+          expand: true,
           cwd: '<%= server %>/lib/',
           src: '**',
           dest: '<%= build %>/<%= pkg.name %>/lib'
@@ -90,6 +96,12 @@ module.exports = function (grunt) {
           expand: true,
           cwd: '<%= server %>/config/',
           src: 'kibi.yml',
+          dest: '<%= build %>/dist/<%= pkg.name %>/config/'
+        },
+        {
+          expand: true,
+          cwd: '<%= server %>/config/',
+          src: 'datasources-schema.json',
           dest: '<%= build %>/dist/<%= pkg.name %>/config/'
         },
         {

@@ -107,7 +107,7 @@ define(function (require) {
       return replace_or_add_join_filter(filterArray, joinFilter, stripMeta);
     };
 
-    JoinFilterHelper.prototype.isFilterJoinPluginEnabled = function () {
+    JoinFilterHelper.prototype.isRelationalPanelEnabled = function () {
       return config.get('kibi:relationalPanelConfig') && config.get('kibi:relationalPanelConfig').enabled;
     };
 

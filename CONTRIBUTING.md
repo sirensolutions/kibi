@@ -52,6 +52,20 @@ Please make sure you have signed the [Contributor License Agreement](http://sire
   grunt dev # use the "--with-es" flag to install & start elasticsearch too
   ```
 
+#### Debug backend queries
+
+Kibi has custom queries that are formatted for execution on the Elasticsearch index. In order to view the result of this processing, you need to set the logging level to `DEBUG` in **kibi.yml**:
+
+```yml
+log_level: DEBUG
+```
+
+The logs are JSON-formatted, and the queries sent to Elasticsearch -- after custom processing -- are available in the `queries` attribute. You can grab for those queries, by using the [jq](https://stedolan.github.io/jq/) tool for example, as follows:
+
+```sh
+tail -f kibi.log | jq 'select(has("queries"))'
+```
+
 #### Backup and restore of the .kibi index
 
 To make a backup of the .kibi index run:

@@ -29,7 +29,7 @@ define(function (require) {
       };
 
 
-      if (globalState.se && globalState.se.length > 0) {
+      if (globalState.se && globalState.se.length > 0 && globalState.entityDisabled === false) {
         $scope.holder.entityURI = globalState.se[0];
       } else {
         $scope.holder.entityURI = '';
@@ -54,9 +54,17 @@ define(function (require) {
         if ($scope.vis.params.queryOptions) {
           $scope.renderTemplates();
         }
+      });
 
-        globalState.se = [$scope.holder.entityURI];
-        globalState.save();
+      globalState.on('save_with_changes', function (diff) {
+        if (diff.indexOf('entityDisabled') !== -1 || diff.indexOf('se') !== -1 ) {
+          if (globalState.se && globalState.se.length > 0 && globalState.entityDisabled === false) {
+            $scope.holder.entityURI = globalState.se[0];
+          } else {
+            $scope.holder.entityURI = '';
+          }
+          $scope.renderTemplates();
+        }
       });
 
       $scope.renderTemplates = function () {

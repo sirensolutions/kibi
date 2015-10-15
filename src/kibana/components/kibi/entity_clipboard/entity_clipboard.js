@@ -38,7 +38,6 @@ define(function (require) {
           $scope.disabled = !$scope.disabled;
           globalState.entityDisabled = !globalState.entityDisabled;
           globalState.save();
-          $route.reload();
         };
 
         var removeHandler = $rootScope.$on('kibi:selectedEntities:changed', function (se) {

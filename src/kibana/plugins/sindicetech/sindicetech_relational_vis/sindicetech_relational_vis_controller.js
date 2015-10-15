@@ -3,7 +3,6 @@ define(function (require) {
   // didn't already
   var module = require('modules').get('kibana/sindicetech_relational_vis', ['kibana']);
   var _ = require('lodash');
-  var $ = require('jquery');
   var getSavedSearchMeta =  require('components/kibi/count_helper/lib/get_saved_search_meta');
 
   module.controller(

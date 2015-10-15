@@ -91,11 +91,11 @@ define(function (require) {
 
       describe('getJoinFilter', function () {
         it('should be disabled/enabled according to relationalPanelConfig', function () {
-          expect(joinFilterHelper.isFilterJoinPluginEnabled()).to.not.be.ok();
+          expect(joinFilterHelper.isRelationalPanelEnabled()).to.not.be.ok();
           config.set('kibi:relationalPanelConfig', { enabled: true });
-          expect(joinFilterHelper.isFilterJoinPluginEnabled()).to.be.ok();
+          expect(joinFilterHelper.isRelationalPanelEnabled()).to.be.ok();
           config.set('kibi:relationalPanelConfig', { enabled: false });
-          expect(joinFilterHelper.isFilterJoinPluginEnabled()).to.not.be.ok();
+          expect(joinFilterHelper.isRelationalPanelEnabled()).to.not.be.ok();
         });
 
         it('should be enabled if the plugin is installed', function () {

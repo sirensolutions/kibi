@@ -7,12 +7,14 @@ define(function (require) {
 
   module.controller(
     'KbnSindicetechtableVisController',
-    function ($location, $scope, $rootScope, $route, globalState, savedVisualizations, Private, courier) {
+    function ($rootScope, $scope, $location, $route, savedVisualizations, Private, courier) {
       var requestQueue = Private(require('components/courier/_request_queue'));
       var SearchSource = Private(require('components/courier/data_source/search_source'));
       var filterManager = Private(require('components/filter_manager/filter_manager'));
       var fieldFormats = Private(require('registry/field_formats'));
       var VirtualIndexPattern = Private(require('components/kibi/virtual_index_pattern/virtual_index_pattern'));
+
+      var _set_entity_uri =  Private(require('plugins/sindicetech/commons/_set_entity_uri'));
 
       $scope.queryColumn = {};
       $scope.cellClickHandlers = {};
@@ -23,11 +25,15 @@ define(function (require) {
         visible: $location.path().indexOf('/visualize/edit/') !== -1
       };
 
-      if (globalState.se && globalState.se.length > 0) {
-        $scope.holder.entityURI = globalState.se[0];
-      } else {
-        $scope.holder.entityURI = '';
-      }
+
+      _set_entity_uri($scope.holder);
+      var removeSetEntityUriHandler = $rootScope.$on('kibi:selectedEntities:changed', function (event, se) {
+        _set_entity_uri($scope.holder);
+      });
+
+      $scope.refresh = function () {
+        fetchResults($scope.savedVis);
+      };
 
       // Set to true in editing mode
       var editing = false;
@@ -158,7 +164,10 @@ define(function (require) {
       var removeEntityURIEnableHandler = $rootScope.$on('kibi:entityURIEnabled', function (event, entityURIEnabled) {
         $scope.holder.entityURIEnabled = entityURIEnabled;
       });
-      $scope.$on('$destroy', removeEntityURIEnableHandler);
+      $scope.$on('$destroy', function () {
+        removeSetEntityUriHandler();
+        removeEntityURIEnableHandler();
+      });
 
       if (editing) {
         var removeVisStateChangedHandler = $rootScope.$on('kibi:vis:state-changed', function () {

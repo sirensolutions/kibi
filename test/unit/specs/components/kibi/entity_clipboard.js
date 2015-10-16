@@ -70,9 +70,7 @@ define(function (require) {
         expect($rootScope.entityURI).to.be(undefined);
         expect($rootScope.label).to.be(undefined);
         expect(globalState.entityDisabled).to.be(undefined);
-        expect(globalState.entityURI).to.be(undefined);
-        expect(globalState.selectedEntityId).to.be(undefined);
-        expect(globalState.entityLabel).to.be(undefined);
+        expect(globalState.se).to.be(undefined);
       });
 
       it('should toggle the entity', function () {

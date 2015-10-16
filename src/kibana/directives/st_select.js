@@ -19,7 +19,8 @@ define(function (require) {
           modelDisabled:    '=?', // use to disable the underlying select
           modelRequired:    '=?', // use to disable the underlying select
           exclude:          '=?', // elements to exclude from the selection set
-          include:          '=?'  // extra values can be passed here
+          include:          '=?', // extra values can be passed here
+          analyzedWarning:  '@'   // set to true or false to disable/enable analyzed warning
         },
         template: require('text!directives/st_select.html'),
         link: function (scope, element, attrs, ngModelCtrl) {

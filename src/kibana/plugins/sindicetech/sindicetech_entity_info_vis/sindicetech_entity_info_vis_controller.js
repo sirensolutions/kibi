@@ -149,8 +149,13 @@ define(function (require) {
                 // add entity only if present - prevent errors when comparing 2 filters
                 // as undefined value is not preserved in url it will get lost
                 // and 2 dbfilters migth appear as different one
-                if (globalState.entityURI) {
-                  dbFilter.dbfilter.entity = globalState.entityURI;
+
+                // here depends that we are in configuration mode or not
+                // use different selected entityURI
+                if ($scope.holder.visible) {
+                  dbFilter.dbfilter.entity = $scope.holder.entityURI;
+                } else if (!$scope.holder.visible && globalState.se && globalState.se.length > 0) {
+                  dbFilter.dbfilter.entity = globalState.se[0];
                 }
               }
 

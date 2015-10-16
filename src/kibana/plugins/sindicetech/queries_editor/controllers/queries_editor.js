@@ -37,11 +37,11 @@ define(function (require) {
 
   app.controller(
     'QueriesEditor',
-    function ($scope, config, globalState, $route, $window, kbnUrl, Notifier, queryEngineClient,
+    function ($rootScope, $scope, config, $route, $window, kbnUrl, Notifier, queryEngineClient,
               savedVisualizations, savedDatasources, Private, $element
   ) {
       var _shouldEntityURIBeEnabled = Private(require('plugins/sindicetech/commons/_should_entity_uri_be_enabled'));
-
+      var _set_entity_uri =  Private(require('plugins/sindicetech/commons/_set_entity_uri'));
 
       // we have to wrap the value into object - this prevents weird thing related to transclusion
       // see http://stackoverflow.com/questions/25180613/angularjs-transclusion-creates-new-scope
@@ -55,11 +55,11 @@ define(function (require) {
       };
       $scope.starDetectedInAQuery = false;
 
-      if (globalState.se && globalState.se.length > 0) {
-        $scope.holder.entityURI = globalState.se[0];
-      } else {
-        $scope.holder.entityURI = '';
-      }
+      _set_entity_uri($scope.holder);
+      var off = $rootScope.$on('kibi:selectedEntities:changed', function (event, se) {
+        _set_entity_uri($scope.holder);
+      });
+      $scope.$on('$destroy', off);
 
       $scope.tabClick = function () {
         $scope.holder.jsonPreviewActive = !$scope.holder.jsonPreviewActive;
@@ -142,12 +142,6 @@ define(function (require) {
         });
         $scope.query.st_tags.sort();
       }, true);
-
-      $scope.setEntityURI = function () {
-        globalState.entityURI = $scope.holder.entityURI;
-        globalState.save();
-        $scope.submit();
-      };
 
       $scope.submit = function () {
         if (!$element.find('form[name="objectForm"]').hasClass('ng-valid')) {

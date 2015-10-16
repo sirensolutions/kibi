@@ -11,14 +11,13 @@
   <div class="hintbox" ng-show="showHelp">
     <!-- TODO: change to 3 when uncommenting info about REST -->
     <p>Selected entity schema is:</p>
-    <strong>INDEX/TYPE/ID/COLUMN/LABEL</strong>
+    <strong>INDEX/TYPE/ID/COLUMN</strong>
     <p>Where:</p>
     <ul>
       <li>INDEX - <i>mandatory</i> an index name</li>
       <li>TYPE - <i>mandatory</i>an index type</li>
       <li>ID - <i>mandatory</i>a document id</li>
       <li>COLUMN - <i>optional</i> a name of clicked column from kibi table</li>
-      <li>LABEL - <i>optional</i> a clicked label from kibi table</li>
      </ul>
   </div>
   <form name="entityURI">
@@ -41,20 +40,12 @@
                model-disabled="!entityUriHolder.entityURIEnabled"
                model-required="entityUriHolder.entityURIEnabled"
                class="selectEntityUriParts"></st-select>
-
-    <div class="selectEntityUriParts">
-      <input type="text"
-             ng-model="c.column"
-             ng-disabled="!entityUriHolder.entityURIEnabled"
-             class="form-control"
-             placeholder="COLUMN optional"/>
-    </div>
-    <div class="selectEntityUriParts">
-      <input type="text"
-             ng-model="c.label"
-             ng-disabled="!entityUriHolder.entityURIEnabled"
-             class="form-control"
-             placeholder="LABEL optional"/>
-    </div>
+    <st-select ng-model="c.column"
+               object-type="field"
+               analyzed-warning="false"
+               index-pattern-id="c.index"
+               index-pattern-type="c.type"
+               model-disabled="!entityUriHolder.entityURIEnabled"
+               class="selectEntityUriParts"></st-select>
   </form>
 </div>

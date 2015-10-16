@@ -1,6 +1,14 @@
 <div ng-controller="KbnSindicetechtableVisController" class="sindicetechtable-vis">
 
-  <st-param-entity-uri entity-uri-holder="holder"></st-param-entity-uri>
+  <form name="previewForm" ng-if="holder.visible">
+    <st-param-entity-uri entity-uri-holder="holder"></st-param-entity-uri>
+    <div class="form-group">
+      <!-- here we are accessing entityURI form inside st-param-entity-uri -->
+      <button ng-click="refresh()" ng-disabled="previewForm.entityURI.$invalid" class="btn btn-success span3" >
+        Refresh
+      </button>
+    </div>
+  </form>
 
   <st-doc-table
     search-source="savedObj.searchSource"

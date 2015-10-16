@@ -34,7 +34,8 @@
         </div>
         <div class="form-group">
           <label>Source field</label></br/>
-          <st-select required object-type="field" index-pattern-id="button.sourceIndexPatternId"  ng-model="button.sourceField" />
+          <st-select required object-type="field" analyzed-warning="true"
+                     index-pattern-id="button.sourceIndexPatternId"  ng-model="button.sourceField" />
         </div>
 
 
@@ -48,7 +49,8 @@
         </div>
         <div class="form-group">
           <label>Target field</label></br/>
-          <st-select required object-type="field" index-pattern-id="button.targetIndexPatternId"  ng-model="button.targetField" />
+          <st-select required object-type="field" analyzed-warning="true"
+                     index-pattern-id="button.targetIndexPatternId"  ng-model="button.targetField" />
         </div>
         <div class="form-group">
           <label>Target dashboard</label></br/>

@@ -19,7 +19,6 @@ define(function (require) {
             type: '',
             id: '',
             column: '',
-            label: '',
             extraItems: []
           };
 
@@ -29,9 +28,8 @@ define(function (require) {
               $scope.c.index  = parts[0];
               $scope.c.type   = parts[1];
               $scope.c.id     = parts[2];
-              if (parts.length > 3) {
+              if (parts.length >= 4) {
                 $scope.c.column = parts[3];
-                $scope.c.label  = parts[4];
               }
               if ($scope.c.id) {
                 $scope.c.extraItems = [{
@@ -42,15 +40,14 @@ define(function (require) {
             }
           }, true);
 
-          $scope.$watchMulti(['c.index', 'c.type', 'c.id'], function () {
-            $scope.c.column = '';
-            $scope.c.label = '';
 
+          $scope.$watchMulti(['c.index', 'c.type', 'c.id', 'c.column'], function () {
             if ($scope.c.index && $scope.c.type && $scope.c.id) {
               $scope.entityUriHolder.entityURI =
                 $scope.c.index + '/' +
                 $scope.c.type + '/' +
-                $scope.c.id;
+                $scope.c.id + '/' +
+                $scope.c.column;
             }
           });
 

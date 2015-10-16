@@ -176,10 +176,12 @@
           <a ng-show="query._previewTemplateId"  ng-click="jumpToTemplate()"> Edit template</a>
           <st-select  object-type="template" ng-model="query._previewTemplateId"></st-select>
         </div>
+
         <div class="form-group">
-            <button ng-click="setEntityURI()" ng-disabled="previewForm.entityURI.$invalid" class="btn btn-success span3" >
-              Refresh
-            </button>
+          <!-- here we are accessing entityURI form inside st-param-entity-uri -->
+          <button ng-click="submit()" ng-disabled="previewForm.entityURI.$invalid" class="btn btn-success span3" >
+            Refresh
+          </button>
         </div>
 
 

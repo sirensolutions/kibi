@@ -1,33 +1,38 @@
 define(function (require) {
   // get the kibana/table_vis module, and make sure that it requires the "kibana" module if it
   // didn't already
-  var $ = require('jquery');
   var module = require('modules').get('kibana/table_vis', ['kibana']);
 
   // add a controller to tha module, which will transform the esResponse into a
   // tabular format that we can pass to the table directive
-  module.controller('KbnTableVisController', function ($scope, Private, globalState, $rootScope, courier) {
+  module.controller('KbnTableVisController', function ($scope, Private, globalState, $rootScope, courier, $location) {
     var tabifyAggResponse = Private(require('components/agg_response/tabify/tabify'));
+    var _set_entity_uri =  Private(require('plugins/sindicetech/commons/_set_entity_uri'));
 
     // added by kibi - start
     $scope.holder = {
-      visible: $('#relational-filters-params').length > 0,
+      visible: $location.path().indexOf('/visualize/edit/') === 0,
       entityURIEnabled: false,
       entityURI: ''
     };
-    if (globalState.se && globalState.se.length > 0) {
-      $scope.holder.entityURI = globalState.se[0];
-    }
 
-    var off = $rootScope.$on('kibi:entityURIEnabled', function (event, enabled) {
+    _set_entity_uri($scope.holder);
+    var off1 = $rootScope.$on('kibi:selectedEntities:changed', function (event, se) {
+      _set_entity_uri($scope.holder);
+    });
+
+    var off2 = $rootScope.$on('kibi:entityURIEnabled', function (event, enabled) {
       $scope.holder.entityURIEnabled = !!enabled;
     });
-    $scope.$on('$destroy', off);
+    $scope.$on('$destroy', function () {
+      off1();
+      off2();
+    });
 
     $scope.$watch('holder.entityURI', function (entityURI) {
       if (entityURI && $scope.holder.visible) {
-        globalState.entityURI = entityURI;
-        globalState.entityLabel = '';
+        // here we have to set a temporary value for se
+        globalState.se_temp = [entityURI];
         globalState.save();
         // redraw the table with the selected entity
         courier.fetch();
@@ -37,7 +42,7 @@ define(function (require) {
 
     $scope.$watch('esResponse', function (resp, oldResp) {
       // added by kibi - start
-      $scope.holder.visible = $('#relational-filters-params').length > 0;
+      $scope.holder.visible = $location.path().indexOf('/visualize/edit/') === 0;
       // added by kibi - end
 
       var tableGroups = $scope.tableGroups = null;

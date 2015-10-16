@@ -1,5 +1,5 @@
 define(function (require) {
-  return function RelatedEntitiesAggDefinition(Private, Notifier, globalState, $rootScope, $timeout) {
+  return function RelatedEntitiesAggDefinition(Private, Notifier, globalState, $rootScope, $timeout, $location) {
 
     // a bit of css
     require('css!components/agg_types/styles/custom_queries.css');
@@ -36,6 +36,9 @@ define(function (require) {
 
             if (!_.size(queryIds)) return;
 
+
+            var configurationMode = $location.path().indexOf('/visualize/edit/') === 0;
+
             var json = {};
             _.each(aggConfig.params.queryIds, function (queryIdDef) {
 
@@ -56,8 +59,13 @@ define(function (require) {
                 // add entity only if present - prevent errors when comparing 2 filters
                 // as undefined value is not preserved in url it will get lost
                 // and 2 dbfilters migth appear as different one
-                if (globalState.entityURI) {
-                  dbfilter.entity = globalState.entityURI;
+
+                // here depends that we are in configuration mode or not
+                // pick selected entityURI from different places
+                if (configurationMode && globalState.se_temp && globalState.se_temp.length > 0) {
+                  dbfilter.entity = globalState.se_temp[0];
+                } else if (!configurationMode && globalState.se && globalState.se.length > 0) {
+                  dbfilter.entity = globalState.se[0];
                 }
 
                 // here we need a label for each one for now it is queryid

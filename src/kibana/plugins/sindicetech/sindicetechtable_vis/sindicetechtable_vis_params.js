@@ -52,9 +52,9 @@ define(function (require) {
 
           _shouldEntityURIBeEnabled(queryIds).then(function (value) {
             if ($scope.vis.params.enableQueryFields === true) {
-              $rootScope.$emit('entityURIEnabled', value);
+              $rootScope.$emit('kibi:entityURIEnabled', value);
             } else {
-              $rootScope.$emit('entityURIEnabled', false);
+              $rootScope.$emit('kibi:entityURIEnabled', false);
             }
           }).catch(function (err) {
             notify.warning('Could not determine whether the widget needs an entityURI' +

@@ -24,25 +24,23 @@ define(function (require) {
           };
 
           $scope.$watch('entityUriHolder', function () {
-            if ($scope.entityUriHolder) {
-              if ($scope.entityUriHolder.entityURI) {
-                var parts = $scope.entityUriHolder.entityURI.split('/');
-                $scope.c.index  = parts[0];
-                $scope.c.type   = parts[1];
-                $scope.c.id     = parts[2];
-                if (parts.length > 3) {
-                  $scope.c.column = parts[3];
-                  $scope.c.label  = parts[4];
-                }
-                if ($scope.c.id) {
-                  $scope.c.extraItems = [{
-                    label: $scope.c.id,
-                    value: $scope.c.id
-                  }];
-                }
+            if ($scope.entityUriHolder && $scope.entityUriHolder.entityURI) {
+              var parts = $scope.entityUriHolder.entityURI.split('/');
+              $scope.c.index  = parts[0];
+              $scope.c.type   = parts[1];
+              $scope.c.id     = parts[2];
+              if (parts.length > 3) {
+                $scope.c.column = parts[3];
+                $scope.c.label  = parts[4];
+              }
+              if ($scope.c.id) {
+                $scope.c.extraItems = [{
+                  label: $scope.c.id,
+                  value: $scope.c.id
+                }];
               }
             }
-          });
+          }, true);
 
           $scope.$watchMulti(['c.index', 'c.type', 'c.id'], function () {
             $scope.c.column = '';

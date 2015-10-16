@@ -2,6 +2,7 @@ var _       = require('lodash');
 var os      = require('os');
 var sync_request = require('sync-request');
 var config  = require('../../config');
+var logger  = require('../logger');
 
 var _endsWith = function (s, suffix) {
   return s.indexOf(suffix, s.length - suffix.length) !== -1;
@@ -99,35 +100,52 @@ JdbcHelper.prototype.prepareJdbcPaths = function () {
   var libs = [];
 
   console.log('Preparing libraries paths before loading java jdbc - might take up to 10 sec');
-  var res = sync_request('GET', config.kibana.elasticsearch_url + '/' + config.kibana.kibana_index + '/datasource/_search', {
+  var resp = sync_request('GET', config.kibana.elasticsearch_url + '/' + config.kibana.kibana_index + '/datasource/_search', {
     qs: {
       size: 100
     },
     timeout: 10000
   });
 
-  var resopnse = JSON.parse(res.getBody('utf8'));
-  if (resopnse.hits && resopnse.hits.hits) {
-    for (var i = 0; i < resopnse.hits.hits.length; i++) {
-      var datasource = resopnse.hits.hits[i];
-      if (datasource._source.datasourceType === 'sql_jdbc' || datasource._source.datasourceType === 'sparql_jdbc') {
-        // here create the clazz
-        var params = {};
-        try {
-          params = JSON.parse(datasource._source.datasourceParams);
-        } catch (e) {}
-        var jdbcConfig = this.prepareJdbcConfig(params);
-        libpaths.push(jdbcConfig.libpath);
-        libs = libs.concat(jdbcConfig.libs);
+  var body;
+  try {
+    body = JSON.parse(resp.getBody('utf8'));
+  } catch (e) {
+    logger.error('Could not parse resp as json [' + body + ']');
+  }
+
+  if (resp.statusCode === 200) {
+    if (body && body.hits && body.hits.hits) {
+      for (var i = 0; i < body.hits.hits.length; i++) {
+        var datasource = body.hits.hits[i];
+        if (datasource._source.datasourceType === 'sql_jdbc' || datasource._source.datasourceType === 'sparql_jdbc') {
+          // here create the clazz
+          var params = {};
+          try {
+            params = JSON.parse(datasource._source.datasourceParams);
+          } catch (e) {}
+          var jdbcConfig = this.prepareJdbcConfig(params);
+          libpaths.push(jdbcConfig.libpath);
+          libs = libs.concat(jdbcConfig.libs);
+        }
       }
     }
+  } else {
+    var msg =
+      'Fetching datasources from ' + config.kibana.kibana_index +
+      ' index failed with status [' + resp.statusCode + '].\n' +
+      'This is fine if you just started kibi first time and ' + config.kibana.kibana_index +
+      ' index does not yet exists.\n' +
+      'If this warning persist after restart - check the logs.';
+    console.log(msg);
+    logger.error(msg + 'Body:\n', body);
   }
 
   var ret = {
     libpaths: libpaths,
     libs: libs
   };
-  console.log('Preparation done:');
+  console.log('Following libraries will be loaded:');
   console.log(JSON.stringify(ret, null, ' '));
   return ret;
 };

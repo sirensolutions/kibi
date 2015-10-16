@@ -269,7 +269,7 @@ define(function (require) {
         expect(options[1].value).to.be('2');
       });
 
-      it('should set analyzedField to true if the selected item is analysed', function () {
+      it('should set analyzedField to true if the selected item is analyzed', function () {
         var items = [ { value: 2, label: 'toto', options: { analyzed: true } } ];
 
         init(2, items);

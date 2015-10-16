@@ -143,7 +143,7 @@ define(function (require) {
             $rootScope.$apply();
           });
 
-          it('query_string is an analysed wildcard', function (done) {
+          it('query_string is an analyzed wildcard', function (done) {
             var focus = 'article';
             var indexes = [{id: 'article', type: 'article'}, {id: 'company', type: 'company'} ];
             var relations = [

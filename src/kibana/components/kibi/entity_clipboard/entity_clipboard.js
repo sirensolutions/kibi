@@ -2,7 +2,7 @@ define(function (require) {
 
   require('css!components/kibi/entity_clipboard/entity_clipboard.css');
 
-  require('modules').get('kibana').directive('kibiEntityClipboard', function ($rootScope, $route, globalState) {
+  require('modules').get('kibana').directive('kibiEntityClipboard', function ($rootScope, $route, globalState, $http, configFile) {
 
     return {
       restrict: 'E',
@@ -16,10 +16,19 @@ define(function (require) {
             // for now we support a single entity
             $scope.entityURI = globalState.se[0];
             var parts = globalState.se[0].split('/');
-            if (parts.length === 5) {
-              $scope.label = parts[4];
+            if (parts.length === 4) {
+              var index = parts[0];
+              var type = parts[1];
+              var id = parts[2];
+              var column = parts[3];
+              // fetch document and grab the field value to populate the label
+              $http.get(configFile.elasticsearch + '/' + index + '/' + type + '/' + id).then(function (doc) {
+                if (doc.data && doc.data._source && doc.data._source[column]) {
+                  $scope.label = doc.data._source[column];
+                }
+              });
             } else {
-              $scope.label = globalState.se[0];
+              $scope.label = '';
             }
           }
         };

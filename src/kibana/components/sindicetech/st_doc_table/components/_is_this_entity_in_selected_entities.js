@@ -6,7 +6,7 @@ define(function (require) {
       for (var i = 0; i < se.length; i++) {
         var entityIdToCompare = se[i];
         var entityIdToCompareParts = entityIdToCompare.split('/');
-        if (entityIdToCompareParts.length === 5) {
+        if (entityIdToCompareParts.length === 4) {
           var idToCompare  = entityIdToCompareParts[2];
           var colToCompare = entityIdToCompareParts[3];
           if (idToCompare === entityId && colToCompare === column) {

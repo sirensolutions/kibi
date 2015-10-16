@@ -208,12 +208,10 @@ define(function (require) {
                     }
 
                   } else if (type === 'select') {
-                    var entityLabel = row.$$_partialFormatted[column];
                     var entityId = row.$$_partialFormatted._index + '/' +
                                    row.$$_partialFormatted._type + '/' +
                                    row.$$_partialFormatted._id + '/' +
-                                   column + '/' +
-                                   entityLabel;
+                                   column;
 
                     if (!globalState.se) {
                       globalState.se = [];

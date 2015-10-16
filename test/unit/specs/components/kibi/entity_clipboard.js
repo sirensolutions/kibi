@@ -32,27 +32,25 @@ define(function (require) {
       }
 
       it('selected entity', function () {
-        init(false, ['index/type/id/column/label']);
-        $rootScope.$emit('kibi:selectedEntities:changed', null);
-        expect($rootScope.disabled).to.be(false);
-        expect($rootScope.entityURI).to.be('index/type/id/column/label');
-        expect($rootScope.label).to.be('label');
-      });
-
-      it('selected entity but disabled', function () {
-        init(true, ['index/type/id/column/label']);
-        $rootScope.$emit('kibi:selectedEntities:changed', null);
-        expect($rootScope.disabled).to.be(true);
-        expect($rootScope.entityURI).to.be('index/type/id/column/label');
-        expect($rootScope.label).to.be('label');
-      });
-
-      it('an entity missing label takes the URI as label', function () {
         init(false, ['index/type/id/column']);
         $rootScope.$emit('kibi:selectedEntities:changed', null);
         expect($rootScope.disabled).to.be(false);
         expect($rootScope.entityURI).to.be('index/type/id/column');
-        expect($rootScope.label).to.be('index/type/id/column');
+      });
+
+      it('selected entity but disabled', function () {
+        init(true, ['index/type/id/column']);
+        $rootScope.$emit('kibi:selectedEntities:changed', null);
+        expect($rootScope.disabled).to.be(true);
+        expect($rootScope.entityURI).to.be('index/type/id/column');
+      });
+
+      it('an entity missing column takes the URI as label', function () {
+        init(false, ['index/type/id']);
+        $rootScope.$emit('kibi:selectedEntities:changed', null);
+        expect($rootScope.disabled).to.be(false);
+        expect($rootScope.entityURI).to.be('index/type/id');
+        expect($rootScope.label).to.be('index/type/id');
       });
 
       it('an entity missing the URI', function () {

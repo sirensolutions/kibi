@@ -28,7 +28,7 @@ define(function (require) {
                 }
               });
             } else {
-              $scope.label = '';
+              $scope.label = globalState.se[0];
             }
           }
         };

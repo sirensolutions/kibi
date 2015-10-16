@@ -37,12 +37,12 @@ define(function (require) {
 
   app.controller(
     'TemplatesEditor',
-    function ($scope, config, globalState, $route, $window,
+    function ($rootScope, $scope, config, $route, $window,
               kbnUrl, Private, SavedTemplate, savedQueries, savedTemplates, Notifier, queryEngineClient, $compile, $element
   ) {
 
       var _shouldEntityURIBeEnabled = Private(require('plugins/sindicetech/commons/_should_entity_uri_be_enabled'));
-
+      var _set_entity_uri =  Private(require('plugins/sindicetech/commons/_set_entity_uri'));
 
       var notify = new Notifier({
         location: 'Templates editor'
@@ -54,11 +54,11 @@ define(function (require) {
         visible: true
       };
 
-      if (globalState.se && globalState.se.length > 0) {
-        $scope.holder.entityURI = globalState.se[0];
-      } else {
-        $scope.holder.entityURI = '';
-      }
+      _set_entity_uri($scope.holder);
+      var off = $rootScope.$on('kibi:selectedEntities:changed', function (event, se) {
+        _set_entity_uri($scope.holder);
+      });
+      $scope.$on('$destroy', off);
 
 
       $scope.jsonPreviewActive = false;
@@ -79,6 +79,8 @@ define(function (require) {
       };
 
       var template = $scope.template = $route.current.locals.template;
+      $scope.$templateTitle = $route.current.locals.template.title;
+
 
       $scope.jumpToQuery = function () {
         kbnUrl.change('/settings/queries/' + $scope.template._previewQueryId);
@@ -144,17 +146,17 @@ define(function (require) {
           $window.alert('Please fill in all the required parameters.');
           return;
         }
+        var titleChanged = $scope.$templateTitle !== $scope.template.title;
         template.id = template.title;
         template.save().then(function (resp) {
           // here flush the cache and refresh preview
           queryEngineClient.clearCache().then(function () {
             notify.info('Template ' + template.title + 'successfuly saved');
-            try {
+            if (titleChanged) {
               kbnUrl.change('/settings/templates/' + template.id);
-            } catch (e) {
-              console.log('There was a problem when changing url: ' + JSON.stringify(e, null, ' '));
+            } else {
+              refreshPreview();
             }
-            refreshPreview();
           });
         });
       };

@@ -41,7 +41,7 @@ define(function (require) {
           }, true);
 
 
-          $scope.$watchMulti(['c.index', 'c.type', 'c.id', 'c.column', 'c.label'], function () {
+          $scope.$watchMulti(['c.index', 'c.type', 'c.id', 'c.column'], function () {
             if ($scope.c.index && $scope.c.type && $scope.c.id) {
               $scope.entityUriHolder.entityURI =
                 $scope.c.index + '/' +

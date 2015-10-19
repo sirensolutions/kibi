@@ -3,7 +3,7 @@ define(function (require) {
 
   require('modules').get('kibana/sindicetech_entity_info_vis')
 
-  .directive('sindicetechEntityInfoVisParams', function ($http, $rootScope, config, kbnUrl, $window, Private, Notifier) {
+  .directive('sindicetechEntityInfoVisParams', function ($rootScope, kbnUrl, $window, Private, Notifier) {
 
     var notify = new Notifier({
       location: 'Templated Query Viewer Params'
@@ -18,6 +18,9 @@ define(function (require) {
 
         $scope.updateScope = function () {
           $scope.vis.params.queryOptions = _.map($scope.vis.params.queryOptions, function (option) {
+            if (!option || !option._templateVarsString) {
+              return option;
+            }
             try {
               option.templateVars = JSON.parse(option._templateVarsString);
             } catch (err) {

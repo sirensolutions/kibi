@@ -11,8 +11,10 @@ define(function (require) {
           return {
             get: function (id) {
               switch (id) {
+                case 'Cats':
+                  return Promise.resolve({ id: 'Cats', title: 'Water' });
                 case 'Dogs':
-                  return Promise.resolve({ title: 'Boiled' });
+                  return Promise.resolve({ id: 'Dogs', title: 'Boiled' });
                 default:
                   return Promise.reject(new Error('try again'));
               }
@@ -30,8 +32,6 @@ define(function (require) {
         });
       });
       inject(function (Promise, _$rootScope_, $controller) {
-        dashboardGroup.save = sinon.stub().returns(Promise.resolve('123'));
-
         var fakeRoute = {
           current: {
             locals: {
@@ -39,6 +39,8 @@ define(function (require) {
             }
           }
         };
+
+        dashboardGroup.save = sinon.stub().returns(Promise.resolve('123'));
 
         $scope = _$rootScope_;
         $controller('DashboardGroupsEditor', {
@@ -56,6 +58,9 @@ define(function (require) {
           dashboards: [
             {
               id: 'Dogs'
+            },
+            {
+              id: 'Cats'
             }
           ]
         };
@@ -64,8 +69,31 @@ define(function (require) {
         $scope.$digest();
 
         expect($scope.dashboardGroup).to.be.ok();
-        expect($scope.dashboardGroup.dashboards).to.have.length(1);
+        expect($scope.dashboardGroup.dashboards).to.have.length(2);
         expect($scope.dashboardGroup.dashboards[0].title).to.be('Boiled');
+        expect($scope.dashboardGroup.dashboards[1].title).to.be('Water');
+      });
+
+      it('should only retrieve the title of the dashboard if it is missing', function () {
+        var dashboardGroup = {
+          dashboards: [
+            {
+              id: 'Dogs',
+              title: 'my bad one'
+            },
+            {
+              id: 'Cats'
+            }
+          ]
+        };
+
+        init(dashboardGroup);
+        $scope.$digest();
+
+        expect($scope.dashboardGroup).to.be.ok();
+        expect($scope.dashboardGroup.dashboards).to.have.length(2);
+        expect($scope.dashboardGroup.dashboards[0].title).to.be('my bad one');
+        expect($scope.dashboardGroup.dashboards[1].title).to.be('Water');
       });
 
       it('should save the dashboardGroup on submit', function (done) {

@@ -14,6 +14,8 @@ define(function (require) {
     // Create the scope
     inject(function (_$rootScope_, $compile) {
       $rootScope = _$rootScope_;
+      $rootScope.array = [];
+
       // Create the elements
       var addAttributes = 'ng-model="array" label="element" post-action="action()"';
       if (disable) {
@@ -46,7 +48,6 @@ define(function (require) {
       // Add a function to check the run status of.
       $rootScope.action = sinon.spy();
     });
-    return $elems.add.find('button').controller('ngModel');
   };
 
   describe('Kibi Components', function () {
@@ -58,56 +59,51 @@ define(function (require) {
       });
 
       it('should set the button label to "Add element"', function () {
-        var ngModel = init(false);
+        init(false);
         var label = $elems.add.find('span').text();
 
-        expect(ngModel.$valid).to.be(true);
         expect(label).to.be('Add element');
       });
 
       describe('add element', function () {
         it('should add an empty object if no default is given', function () {
-          var ngModel = init(false);
+          init(false);
 
-          expect(ngModel.$valid).to.be(true);
-          $elems.add.find('button').click();
+          $elems.add.click();
           expect($rootScope.array).to.have.length(1);
           expect($rootScope.array[0]).to.eql({});
           expect($rootScope.action.called).to.be(true);
         });
 
         it('should add the default element if passed', function () {
-          var ngModel = init(false, 'aaa');
+          init(false, 'aaa');
 
-          expect(ngModel.$valid).to.be(true);
-          $elems.add.find('button').click();
+          $elems.add.click();
           expect($rootScope.array).to.have.length(1);
           expect($rootScope.array[0]).to.eql('aaa');
           expect($rootScope.action.called).to.be(true);
         });
 
         it('default element is an object', function () {
-          var ngModel = init(false, { a: 'b' });
+          init(false, { a: 'b' });
 
-          expect(ngModel.$valid).to.be(true);
-          $elems.add.find('button').click();
+          $elems.add.click();
           expect($rootScope.array).to.have.length(1);
           expect($rootScope.array[0]).to.eql({ a: 'b' });
           expect($rootScope.action.called).to.be(true);
         });
 
-        it('should invalidate the model if array-param-add is required', function () {
-          var ngModel = init(true);
+        it('should add an element if the array is empty and array-param-add is required', function () {
+          init(true);
 
-          expect(ngModel.$valid).to.be(false);
-          $elems.add.find('button').click();
-          expect(ngModel.$valid).to.be(true);
+          expect($rootScope.array).to.have.length(1);
         });
 
         it('should disable array-param-add', function () {
           init(null, null, null, true);
 
-          expect($elems.add.find('button')[0].disabled).to.be(true);
+          expect($elems.add).to.have.length(1);
+          expect($elems.add[0].disabled).to.be(true);
         });
       });
 
@@ -115,18 +111,18 @@ define(function (require) {
         it('should remove the element', function () {
           init();
 
-          $elems.add.find('button').click();
+          $elems.add.click();
           expect($rootScope.array).to.have.length(1);
           $elems.remove.click();
           expect($rootScope.array).to.have.length(0);
         });
 
-        it('should invalidate the model when removing last element if required', function () {
-          var ngModel = init(true);
+        it('should not remove last element if array is required', function () {
+          init(true);
 
-          $elems.add.find('button').click();
+          expect($rootScope.array).to.have.length(1);
           $elems.remove.click();
-          expect(ngModel.$valid).to.be(false);
+          expect($rootScope.array).to.have.length(1);
         });
       });
 
@@ -134,9 +130,9 @@ define(function (require) {
         it('should move the element up', function () {
           init(null, null, 1);
 
-          $elems.add.find('button').click();
-          $elems.add.find('button').click();
-          $elems.add.find('button').click();
+          $elems.add.click();
+          $elems.add.click();
+          $elems.add.click();
           expect($rootScope.array).to.have.length(3);
 
           $rootScope.array[0] = { a: 1 };
@@ -152,9 +148,9 @@ define(function (require) {
         it('should move the element down', function () {
           init(null, null, 1);
 
-          $elems.add.find('button').click();
-          $elems.add.find('button').click();
-          $elems.add.find('button').click();
+          $elems.add.click();
+          $elems.add.click();
+          $elems.add.click();
           expect($rootScope.array).to.have.length(3);
 
           $rootScope.array[0] = { a: 1 };

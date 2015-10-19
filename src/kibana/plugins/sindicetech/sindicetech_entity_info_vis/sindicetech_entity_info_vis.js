@@ -21,6 +21,7 @@ define(function (require) {
       template: require('text!plugins/sindicetech/sindicetech_entity_info_vis/sindicetech_entity_info_vis.html'),
       params: {
         defaults: {
+          queryOptions: []
         },
         editor: '<sindicetech-entity-info-vis-params></sindicetech-entity-info-vis-params>'
       },

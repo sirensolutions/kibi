@@ -161,7 +161,7 @@ define(function (require) {
         }
       });
 
-      var removeEntityURIEnableHandler = $rootScope.$on('kibi:entityURIEnabled', function (event, entityURIEnabled) {
+      var removeEntityURIEnableHandler = $rootScope.$on('kibi:entityURIEnabled:kibitable', function (event, entityURIEnabled) {
         $scope.holder.entityURIEnabled = entityURIEnabled;
       });
       $scope.$on('$destroy', function () {

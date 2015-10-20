@@ -1,5 +1,7 @@
 <div class="panel panel-default" ng-switch on="panel.type" ng-if="savedObj || error">
-  <div class="panel-heading">
+
+  <div class="panel-heading"
+       ng-class="{selectedEntitiesDependent: markDependOnSelectedEntities && dependsOnSelectedEntities, disabled: selectedEntitiesDisabled && dependsOnSelectedEntities}">
     <span class="panel-title">{{savedObj.title}}</span>
     <div class="btn-group">
       <a aria-label="Edit" ng-show="!appEmbedded && editUrl" ng-href="{{editUrl}}">

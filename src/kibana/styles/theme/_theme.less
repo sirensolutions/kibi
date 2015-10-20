@@ -279,9 +279,25 @@ input, {
 // Panel =================================================================
 
 .panel {
-  border-radius: 0;
+  border-radius: 0px;
   .box-shadow(0 0 0 rgba(0,0,0,0));
 }
+
+.panel .panel-heading.selectedEntitiesDependent {
+    background-color: @entity-bg;
+    .panel-title {
+      color: #fff;
+    }
+    .btn-group i{
+      color: #fff;
+    }
+
+    &.disabled {
+      opacity: 0.6;
+      background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,.3) 10px, rgba(255,255,255,.3) 20px);
+    }
+}
+
 
 // Indicators =================================================================
 

@@ -18,13 +18,27 @@ define(function (require) {
 
         $scope.updateScope = function () {
           $scope.vis.params.queryOptions = _.map($scope.vis.params.queryOptions, function (option) {
-            if (!option || !option._templateVarsString) {
+            $scope.jsonError = {
+              message: '',
+              block: ''
+            };
+            if (!option) {
               return option;
             }
+            if (!option.templateVars) {
+              option.templateVars = {};
+            }
             try {
-              option.templateVars = JSON.parse(option._templateVarsString);
+              if (option._templateVarsString) {
+                option.templateVars = JSON.parse(option._templateVarsString);
+              }
+
+              option.templateVars.label = '';
+              if (option._label) {
+                option.templateVars.label = option._label;
+              }
             } catch (err) {
-              console.log(err);
+              $scope.jsonError.message = err.toString();
             }
             return option;
           });

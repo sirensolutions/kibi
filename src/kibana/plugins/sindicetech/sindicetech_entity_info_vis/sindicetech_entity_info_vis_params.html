@@ -8,6 +8,14 @@
 
       <div class="content">
         <div class="form-group">
+          <label>
+            Label
+            <kbn-info info="The label is passed to the template via the config object, i.e., 'config.templateVars.label'."></kbn-info>
+          </label>
+          <input type="text" ng-model="queryOption._label" placeholder="Optional" class="form-control" />
+        </div>
+
+        <div class="form-group">
           <label>Source query</label>
           <a ng-if="queryOption.queryId && queryOption.queryId !== ''" ng-click="editQuery($index)" > Edit selected query</a></br>
           <st-select required object-type="query" ng-model="queryOption.queryId"></st-select>
@@ -20,7 +28,7 @@
         </div>
 
         <div class="vis-editor-agg-editor-advanced-toggle">
-          <a ng-click="advancedToggled = !advancedToggled">
+          <a ng-click="advancedToggled = !advancedToggled || jsonError.message">
             <i aria-hidden="true" class="fa fa-caret-down"
             ng-class="{'fa-caret-down': advancedToggled, 'fa-caret-left': !advancedToggled}"></i>
             Advanced
@@ -29,8 +37,18 @@
 
         <div ng-show="advancedToggled">
 
-          <label>Template variables</label>
-          <div ui-ace="{ onLoad: aceLoaded, mode: 'json', workerPath: 'bower_components/ace-builds/src-noconflict' }" msd-elastic id="templateVars-{{$index}}" ng-model="queryOption._templateVarsString" class="form-control templateVariablesEditor">
+          <label>
+            Template variables
+            <kbn-info info="Specify the JSON configuration passed to the template."></kbn-info>
+          </label>
+          <div ng-class="{ 'red-border': !!jsonError.message }" ui-ace="{ onLoad: aceLoaded, mode: 'json', workerPath: 'bower_components/ace-builds/src-noconflict' }" msd-elastic id="templateVars-{{$index}}" ng-model="queryOption._templateVarsString" class="form-control templateVariablesEditor">
+          </div>
+          <div class="form-group hintbox" ng-if="!!jsonError.message">
+            <h4 class="hintbox-heading">
+              <i class="fa fa-danger text-danger"></i> JSON parsing error
+            </h4>
+            <pre>{{ jsonError.message }}</pre>
+            <input type="hidden" required ng-model="jsonError.block"/>
           </div>
 
           <div class="form-group">

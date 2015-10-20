@@ -8,7 +8,7 @@ define(function (require) {
     var angular = require('angular');
     var BucketAggType = Private(require('components/agg_types/buckets/_bucket_agg_type'));
     var createFilter = Private(require('components/agg_types/buckets/create_filter/filters'));
-    var _shouldEntityURIBeEnabled = Private(require('plugins/sindicetech/commons/_should_entity_uri_be_enabled'));
+    var _shouldEntityURIBeEnabled = Private(require('plugins/kibi/commons/_should_entity_uri_be_enabled'));
     var notify = new Notifier({ location: 'Custom Queries Aggregation' });
 
     return new BucketAggType({

@@ -13,7 +13,7 @@ define(function (require) {
       restrict: 'E',
       template: require('text!plugins/sindicetech/sindicetechtable_vis/sindicetechtable_vis_params.html'),
       link: function ($scope) {
-        var _shouldEntityURIBeEnabled = Private(require('plugins/sindicetech/commons/_should_entity_uri_be_enabled'));
+        var _shouldEntityURIBeEnabled = Private(require('plugins/kibi/commons/_should_entity_uri_be_enabled'));
         var arrayHelper = Private(require('components/kibi/array_helper/array_helper'));
 
         // Saved visualization

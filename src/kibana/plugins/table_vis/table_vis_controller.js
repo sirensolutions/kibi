@@ -7,7 +7,7 @@ define(function (require) {
   // tabular format that we can pass to the table directive
   module.controller('KbnTableVisController', function ($scope, Private, globalState, $rootScope, courier, $location) {
     var tabifyAggResponse = Private(require('components/agg_response/tabify/tabify'));
-    var _set_entity_uri =  Private(require('plugins/sindicetech/commons/_set_entity_uri'));
+    var _set_entity_uri =  Private(require('plugins/kibi/commons/_set_entity_uri'));
 
     // added by kibi - start
     $scope.holder = {

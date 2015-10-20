@@ -14,7 +14,7 @@ define(function (require) {
       template: require('text!plugins/sindicetech/sindicetech_entity_info_vis/sindicetech_entity_info_vis_params.html'),
       link: function ($scope) {
 
-        var _shouldEntityURIBeEnabled = Private(require('plugins/sindicetech/commons/_should_entity_uri_be_enabled'));
+        var _shouldEntityURIBeEnabled = Private(require('plugins/kibi/commons/_should_entity_uri_be_enabled'));
 
         $scope.updateScope = function () {
           $scope.vis.params.queryOptions = _.map($scope.vis.params.queryOptions, function (option) {

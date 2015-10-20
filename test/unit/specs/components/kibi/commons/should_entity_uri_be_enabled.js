@@ -62,7 +62,7 @@ define(function (require) {
         });
 
         inject(function (Private) {
-          shouldEntityUriBeEnabled = Private(require('plugins/sindicetech/commons/_should_entity_uri_be_enabled'));
+          shouldEntityUriBeEnabled = Private(require('plugins/kibi/commons/_should_entity_uri_be_enabled'));
         });
       });
 

@@ -3,7 +3,7 @@ define(function (require) {
   return function MarkFiltersBySelectedEntitiesFactory(Promise, Private, globalState) {
 
     var _ = require('lodash');
-    var _shouldEntityURIBeEnabled = Private(require('plugins/sindicetech/commons/_should_entity_uri_be_enabled'));
+    var _shouldEntityURIBeEnabled = Private(require('plugins/kibi/commons/_should_entity_uri_be_enabled'));
 
     return function (filters) {
       return new Promise(function (fulfill, reject) {

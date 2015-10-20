@@ -17,7 +17,7 @@ define(function (require) {
       $rootScope.array = [];
 
       // Create the elements
-      var addAttributes = 'ng-model="array" label="element" post-action="action()"';
+      var addAttributes = 'model="array" label="element" post-action="action()"';
       if (disable) {
         addAttributes += ' disable="true"';
       }
@@ -30,13 +30,13 @@ define(function (require) {
       }
       $elems.add = angular.element('<array-param-add ' + addAttributes + '></array-param-add>');
 
-      var rm = '<array-param-remove ng-model="array" post-action="action()" index="' + index + '"></array-param-remove>';
+      var rm = '<array-param-remove model="array" post-action="action()" index="' + index + '"></array-param-remove>';
       $elems.remove = angular.element(rm);
 
-      var up = '<array-param-up ng-model="array" post-action="action()" index="' + index + '"></array-param-up>';
+      var up = '<array-param-up model="array" post-action="action()" index="' + index + '"></array-param-up>';
       $elems.up = angular.element(up);
 
-      var down = '<array-param-down ng-model="array" post-action="action()" index="' + index + '"></array-param-down>';
+      var down = '<array-param-down model="array" post-action="action()" index="' + index + '"></array-param-down>';
       $elems.down = angular.element(down);
 
       'add remove up down'.split(' ').forEach(function (type) {

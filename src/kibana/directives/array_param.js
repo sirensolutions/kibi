@@ -24,7 +24,7 @@ define(function (require) {
         arrayParamService.label = $scope.label;
 
         if (!$scope.model) {
-          notify.error('You must initialise the model!');
+          notify.error('You must initialise the model for the button labelled "' + $scope.label + '" !');
           return;
         }
 

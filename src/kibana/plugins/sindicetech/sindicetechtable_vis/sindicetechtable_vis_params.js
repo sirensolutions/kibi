@@ -159,7 +159,9 @@ define(function (require) {
             previousName = null;
             delete $scope.vis.params.enableQueryFields;
             delete $scope.vis.params.joinElasticsearchField;
-            delete $scope.vis.params.queryIds;
+            if ($scope.vis.params.queryIds) {
+              $scope.vis.params.queryIds.length = 0;
+            }
             delete $scope.vis.params.queryFieldName;
             $scope.vis.dirty = true;
           }
@@ -184,53 +186,16 @@ define(function (require) {
         // Click handlers
         // =========================
 
-        $scope.$watchCollection('vis.params.clickOptions', function () {
-          if ($scope.vis.params.clickOptions && $scope.vis.params.clickOptions.length === 0) {
-            delete $scope.vis.params.clickOptions;
-          }
-        });
-
-        // holds the previous list of click types and uriSchemes
-        $scope.prevClickOptions = [];
-
         // holds option validation status
         $scope.clickHandlerValidationStates = [];
 
-        // Initialise the uriFormat field
-        var _initUriFormat = function (clickOption) {
-          if (clickOption.type === 'link') {
-            clickOption.uriFormat = '@URL@';
-          }
-        };
-
         // Initialise the clicks parameters.
-        // Reset the click if the type/uriScheme of the click changed.
         var clickHandlersChanged = $scope.clickHandlersChanged = function () {
-          // here detect change for each clickOption.uriScheme
-          // and modify clickOption.uriFormat
           _.each($scope.vis.params.clickOptions, function (clickOption, ind) {
-            var prevType = $scope.prevClickOptions[ind] ? $scope.prevClickOptions[ind].type : '';
-
-            if (clickOption.type === 'select' && prevType === 'link') {
-              _initUriFormat(clickOption);
-            } else if ((prevType && prevType !== clickOption.type)) {
-              _initUriFormat(clickOption);
-            }
-
-            // Update the list of visited click options
-            if (ind < $scope.prevClickOptions.length) {
-              $scope.prevClickOptions[ind].type = clickOption.type;
-            } else {
-              $scope.prevClickOptions.splice(ind, 0, {type: clickOption.type});
+            if (!clickOption.uriFormat && clickOption.type === 'link') {
+              clickOption.uriFormat = '@URL@';
             }
           });
-
-          // remove previous saved clickoptions leftover
-          if ($scope.vis.params.clickOptions) {
-            $scope.prevClickOptions.splice($scope.vis.params.clickOptions.length, $scope.vis.params.clickOptions.length);
-          }
-
-          $rootScope.$emit('kibi:vis:clickHandlers-changed');
         };
 
         /**

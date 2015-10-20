@@ -23,6 +23,8 @@ define(function (require) {
       template: require('text!plugins/sindicetech/sindicetechtable_vis/sindicetechtable_vis.html'),
       params: {
         defaults: {
+          clickOptions: [],
+          queryIds: []
         },
         editor: '<sindicetechtable-vis-params></sindicetechtable-vis-params>'
       },

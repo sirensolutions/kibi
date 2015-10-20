@@ -94,7 +94,7 @@ define(function (require) {
             } else if (joinFilterHelper.isRelationalPanelEnabled() && !joinFilterHelper.isFilterJoinPluginInstalled()) {
 
               var error = new Error(
-                'The FilterJoin plugin is enabled but not installed. ' +
+                'The SIREn Join plugin is enabled but not installed. ' +
                 'Please install the plugin and restart Kibi ' +
                 'or disable the relationalPanel in Settings -> Advanced -> kibi:relationalPanelConfig'
               );

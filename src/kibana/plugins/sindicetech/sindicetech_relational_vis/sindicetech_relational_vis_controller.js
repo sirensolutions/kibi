@@ -25,7 +25,7 @@ define(function (require) {
       var currentDashboardId = urlHelper.getCurrentDashboardId();
 
       if (!joinFilterHelper.isFilterJoinPluginInstalled()) {
-        notify.error('This version of Kibi Relational filter require FilterJoinPlugin. Please install it and restart Kibi.');
+        notify.error('This version of Kibi Relational filter requires the SIREn Join plugin. Please install it and restart Kibi.');
       }
 
       /**

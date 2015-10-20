@@ -37,7 +37,7 @@ define(function (require) {
 
       searchSource._id = _id;
       searchSource.index(indexPattern);
-      searchSource.size(100);
+      searchSource.size(savedVis.vis.params.size || 100);
 
       $scope.savedObj = {
         searchSource: searchSource,
@@ -48,7 +48,7 @@ define(function (require) {
     function setOptions(savedVis) {
       var options = {
         width: '100%',
-        height: '350px',
+        height: (savedVis.vis.params.height || 350) + 'px',
         selectable: true,
         autoResize: false
       };

@@ -111,13 +111,20 @@ define(function (require) {
       };
 
       function addTitle() {
-        var promises = _.map($scope.dashboardGroup.dashboards, function (d) {
+        var promises = _($scope.dashboardGroup.dashboards).filter(function (d) {
+          return !!d.id && !d.title;
+        }).map(function (d) {
           return savedDashboards.get(d.id);
-        });
+        }).value();
 
+        if (promises.length === 0) {
+          return;
+        }
         Promise.all(promises).then(function (dashboards, index) {
-          _.each(dashboards, function (dashboard, index) {
-            $scope.dashboardGroup.dashboards[index].title = dashboard.title;
+          _.each(dashboards, function (dashboard) {
+            _.find($scope.dashboardGroup.dashboards, function (d) {
+              return d.id === dashboard.id;
+            }).title = dashboard.title;
           });
         });
       }

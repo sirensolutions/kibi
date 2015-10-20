@@ -1,14 +1,3 @@
-<div>
-
-  <button ng-disabled="disable" ng-class="{ 'red-border': !isValid }" class="btn btn-xs btn-success" ng-click="addParam()">
-    <span>Add {{ label }}</span> <i class="fa fa-plus"></i>
-  </button>
-
-  <div class="form-group hintbox" ng-if="!isValid">
-    <p>
-      <i class="fa fa-danger text-danger"></i>
-      You need to add at least one {{ label }}.
-    </p>
-  </div>
-
-</div>
+<button ng-disabled="disable" class="btn btn-xs btn-success" ng-click="addParam()">
+  <span>Add {{ label }}</span> <i class="fa fa-plus"></i>
+</button>

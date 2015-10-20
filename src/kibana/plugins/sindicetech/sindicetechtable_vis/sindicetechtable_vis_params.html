@@ -75,9 +75,9 @@
             </div>
 
             <div class="btn-group rightCorner">
-              <array-param-up index="{{ $index }}" post-action="clickHandlersChanged()" ng-model="vis.params.clickOptions"></array-param-up>
-              <array-param-down index="{{ $index }}" post-action="clickHandlersChanged()" ng-model="vis.params.clickOptions"></array-param-down>
-              <array-param-remove index="{{ $index }}" post-action="clickHandlersChanged()" ng-model="vis.params.clickOptions"></array-param-remove>
+              <array-param-up index="{{ $index }}" post-action="clickHandlersChanged()" model="vis.params.clickOptions"></array-param-up>
+              <array-param-down index="{{ $index }}" post-action="clickHandlersChanged()" model="vis.params.clickOptions"></array-param-down>
+              <array-param-remove index="{{ $index }}" post-action="clickHandlersChanged()" model="vis.params.clickOptions"></array-param-remove>
             </div>
 
           </div>
@@ -85,7 +85,7 @@
       </ul>
     </div>
 
-    <array-param-add label="click handler" post-action="clickHandlersChanged()" ng-model="vis.params.clickOptions"></array-param-add>
+    <array-param-add label="click handler" post-action="clickHandlersChanged()" model="vis.params.clickOptions"></array-param-add>
 
   </section>
 
@@ -122,13 +122,13 @@
 
 
             <div class="btn-group rightCorner">
-              <array-param-remove index="{{ $index }}" ng-model="vis.params.queryIds"></array-param-remove>
+              <array-param-remove index="{{ $index }}" model="vis.params.queryIds"></array-param-remove>
             </div>
 
           </div>
         </li>
       </ul>
-      <array-param-add required label="query" ng-model="vis.params.queryIds"></array-param-add>
+      <array-param-add required label="query" model="vis.params.queryIds"></array-param-add>
     </div>
   </section>
 

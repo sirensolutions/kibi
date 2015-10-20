@@ -60,22 +60,22 @@
                     <st-select object-type="dashboard" ng-model="dashboard.id" name="dashboard" exclude="dashboardGroup.dashboards" required></st-select>
                   </div>
                   <div class="btn-group rightCorner">
-                    <array-param-up index="{{ $index }}" ng-model="dashboardGroup.dashboards"></array-param-up>
-                    <array-param-down index="{{ $index }}" ng-model="dashboardGroup.dashboards"></array-param-down>
-                    <array-param-remove index="{{ $index }}" ng-model="dashboardGroup.dashboards"></array-param-remove>
+                    <array-param-up index="{{ $index }}" model="dashboardGroup.dashboards"></array-param-up>
+                    <array-param-down index="{{ $index }}" model="dashboardGroup.dashboards"></array-param-down>
+                    <array-param-remove index="{{ $index }}" model="dashboardGroup.dashboards"></array-param-remove>
                   </div>
 
                 </div>
               </li>
             </ul>
-            <array-param-add disable="nbDashboards === dashboardGroup.dashboards.length" required label="dashboard" ng-model="dashboardGroup.dashboards"></array-param-add>
+            <array-param-add disable="nbDashboards === dashboardGroup.dashboards.length" required label="dashboard" model="dashboardGroup.dashboards"></array-param-add>
           </div>
 
 
           <div class="form-group" style="margin-top:10px;">
             <button class="btn btn-primary" ng-click="cancel()">Cancel</button>
-            <button class="btn btn-info" ng-click="clone()" ng-disabled="objectForm.dashboard.$invalid">Clone</button>
-            <button class="btn btn-success" ng-click="submit()" ng-disabled="objectForm.dashboard.$invalid">Save</button>
+            <button class="btn btn-info" ng-click="clone()" ng-disabled="objectForm.$invalid">Clone</button>
+            <button class="btn btn-success" ng-click="submit()" ng-disabled="objectForm.$invalid">Save</button>
             <button class="btn btn-danger" ng-click="delete()">Delete</button>
           </div>
         </form>

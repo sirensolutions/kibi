@@ -28,7 +28,6 @@ define(function (require) {
         htmlEvents:[]
       };
 
-
       if (globalState.se && globalState.se.length > 0 && globalState.entityDisabled === false) {
         $scope.holder.entityURI = globalState.se[0];
       } else {
@@ -68,6 +67,10 @@ define(function (require) {
       });
 
       $scope.renderTemplates = function () {
+        if ($scope.vis.params.queryOptions && $scope.vis.params.queryOptions.length === 0) {
+          return;
+        }
+
         $scope.holder.html = 'Loading ...';
 
         queryEngineClient.getQueriesHtmlFromServer(

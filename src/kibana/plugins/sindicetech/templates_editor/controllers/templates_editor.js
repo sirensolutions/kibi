@@ -41,8 +41,8 @@ define(function (require) {
               kbnUrl, Private, SavedTemplate, savedQueries, savedTemplates, Notifier, queryEngineClient, $compile, $element
   ) {
 
-      var _shouldEntityURIBeEnabled = Private(require('plugins/sindicetech/commons/_should_entity_uri_be_enabled'));
-      var _set_entity_uri =  Private(require('plugins/sindicetech/commons/_set_entity_uri'));
+      var _shouldEntityURIBeEnabled = Private(require('plugins/kibi/commons/_should_entity_uri_be_enabled'));
+      var _set_entity_uri =  Private(require('plugins/kibi/commons/_set_entity_uri'));
 
       var notify = new Notifier({
         location: 'Templates editor'

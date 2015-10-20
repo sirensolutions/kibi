@@ -40,6 +40,9 @@ define(function (require) {
           delete globalState.entityDisabled;
           delete globalState.se;
           globalState.save();
+
+          // have to reload so all visualisations which might depend on selected entities
+          // get refreshed
           $route.reload();
         };
 
@@ -47,6 +50,9 @@ define(function (require) {
           $scope.disabled = !$scope.disabled;
           globalState.entityDisabled = !globalState.entityDisabled;
           globalState.save();
+          // have to reload so all visualisations which might depend on selected entities
+          // get refreshed
+          $route.reload();
         };
 
         var removeHandler = $rootScope.$on('kibi:selectedEntities:changed', function (se) {

@@ -680,7 +680,7 @@ define(function (require) {
           expect(queryHelper.constructOrFilter(esFieldName, ids, meta)).to.eql(expected);
         });
 
-        it('esFieldNmae === null', function () {
+        it('esFieldName === null', function () {
           var esFieldName = null;
           var ids = [1, 2, 3];
           var meta = {

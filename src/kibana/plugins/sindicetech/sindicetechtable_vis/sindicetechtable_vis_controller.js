@@ -14,7 +14,7 @@ define(function (require) {
       var fieldFormats = Private(require('registry/field_formats'));
       var VirtualIndexPattern = Private(require('components/kibi/virtual_index_pattern/virtual_index_pattern'));
 
-      var _set_entity_uri =  Private(require('plugins/sindicetech/commons/_set_entity_uri'));
+      var _set_entity_uri =  Private(require('plugins/kibi/commons/_set_entity_uri'));
 
       $scope.queryColumn = {};
       $scope.cellClickHandlers = {};
@@ -161,7 +161,7 @@ define(function (require) {
         }
       });
 
-      var removeEntityURIEnableHandler = $rootScope.$on('kibi:entityURIEnabled', function (event, entityURIEnabled) {
+      var removeEntityURIEnableHandler = $rootScope.$on('kibi:entityURIEnabled:kibitable', function (event, entityURIEnabled) {
         $scope.holder.entityURIEnabled = entityURIEnabled;
       });
       $scope.$on('$destroy', function () {

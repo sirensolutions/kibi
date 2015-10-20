@@ -40,8 +40,8 @@ define(function (require) {
     function ($rootScope, $scope, config, $route, $window, kbnUrl, Notifier, queryEngineClient,
               savedVisualizations, savedDatasources, Private, $element
   ) {
-      var _shouldEntityURIBeEnabled = Private(require('plugins/sindicetech/commons/_should_entity_uri_be_enabled'));
-      var _set_entity_uri =  Private(require('plugins/sindicetech/commons/_set_entity_uri'));
+      var _shouldEntityURIBeEnabled = Private(require('plugins/kibi/commons/_should_entity_uri_be_enabled'));
+      var _set_entity_uri =  Private(require('plugins/kibi/commons/_set_entity_uri'));
 
       // we have to wrap the value into object - this prevents weird thing related to transclusion
       // see http://stackoverflow.com/questions/25180613/angularjs-transclusion-creates-new-scope

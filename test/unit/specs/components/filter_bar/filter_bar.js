@@ -34,6 +34,10 @@ define(function (require) {
       // load the application
       module('kibana');
 
+      module('queries_editor/services/saved_queries', function ($provide) {
+        $provide.service('savedQueries', require('fixtures/empty_saved_queries'));
+      });
+
       module('kibana/courier', function ($provide) {
         $provide.service('courier', require('fixtures/mock_courier'));
       });

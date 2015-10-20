@@ -7,7 +7,7 @@ define(function (require) {
   require('components/kibi/entity_clipboard/entity_clipboard');
   require('css!components/filter_bar/filter_bar.css');
 
-  module.directive('filterBar', function (Private, Promise, getAppState, globalState) {
+  module.directive('filterBar', function ($rootScope, Private, Promise, getAppState, globalState) {
     var joinExplain = Private(require('components/filter_bar/join_explanation'));
     var mapAndFlattenFilters = Private(require('components/filter_bar/lib/mapAndFlattenFilters'));
     var mapFlattenAndWrapFilters = Private(require('components/filter_bar/lib/mapFlattenAndWrapFilters'));
@@ -18,7 +18,7 @@ define(function (require) {
     var queryFilter = Private(require('components/filter_bar/query_filter'));
 
     var urlHelper   = Private(require('components/kibi/url_helper/url_helper'));
-
+    var _mark_filters_by_selected_entities = Private(require('plugins/kibi/commons/_mark_filters_by_selected_entities'));
     return {
       restrict: 'E',
       template: template,
@@ -111,6 +111,8 @@ define(function (require) {
             });
           })
           .then(joinExplain.setIndexesFromJoinFilter(filters))
+          // added by kibi to mark filters which depends on selected entities
+          .then(_mark_filters_by_selected_entities(filters))
           .then(function () {
             $scope.$emit('filterbar:updated');
           });
@@ -141,6 +143,17 @@ define(function (require) {
         // .missing
         // .script
         $scope.recreateFilterLabel = joinExplain.createLabel;
+
+        var off1 = $rootScope.$on('kibi:entityURIEnabled', function (event, entityURIEnabled) {
+          updateFilters();
+        });
+        var off2 = $rootScope.$on('kibi:selectedEntities:changed', function (event, se) {
+          updateFilters();
+        });
+        $scope.$on('$destroy', function () {
+          off1();
+          off2();
+        });
 
       }
     };

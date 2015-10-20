@@ -13,7 +13,7 @@ define(function (require) {
       restrict: 'E',
       template: require('text!plugins/sindicetech/sindicetechtable_vis/sindicetechtable_vis_params.html'),
       link: function ($scope) {
-        var _shouldEntityURIBeEnabled = Private(require('plugins/sindicetech/commons/_should_entity_uri_be_enabled'));
+        var _shouldEntityURIBeEnabled = Private(require('plugins/kibi/commons/_should_entity_uri_be_enabled'));
         var arrayHelper = Private(require('components/kibi/array_helper/array_helper'));
 
         // Saved visualization
@@ -52,9 +52,9 @@ define(function (require) {
 
           _shouldEntityURIBeEnabled(queryIds).then(function (value) {
             if ($scope.vis.params.enableQueryFields === true) {
-              $rootScope.$emit('kibi:entityURIEnabled', value);
+              $rootScope.$emit('kibi:entityURIEnabled:kibitable', value);
             } else {
-              $rootScope.$emit('kibi:entityURIEnabled', false);
+              $rootScope.$emit('kibi:entityURIEnabled:kibitable', false);
             }
           }).catch(function (err) {
             notify.warning('Could not determine whether the widget needs an entityURI' +

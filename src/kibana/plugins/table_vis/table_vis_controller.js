@@ -21,7 +21,7 @@ define(function (require) {
       _set_entity_uri($scope.holder);
     });
 
-    var off2 = $rootScope.$on('kibi:entityURIEnabled', function (event, enabled) {
+    var off2 = $rootScope.$on('kibi:entityURIEnabled:customqueries', function (event, enabled) {
       $scope.holder.entityURIEnabled = !!enabled;
     });
     $scope.$on('$destroy', function () {

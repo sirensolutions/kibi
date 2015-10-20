@@ -62,9 +62,9 @@ define(function (require) {
 
                 // here depends that we are in configuration mode or not
                 // pick selected entityURI from different places
-                if (configurationMode && globalState.se_temp && globalState.se_temp.length > 0) {
+                if (configurationMode && globalState.se_temp && globalState.se_temp.length > 0 && !globalState.entityDisabled) {
                   dbfilter.entity = globalState.se_temp[0];
-                } else if (!configurationMode && globalState.se && globalState.se.length > 0) {
+                } else if (!configurationMode && globalState.se && globalState.se.length > 0 && !globalState.entityDisabled) {
                   dbfilter.entity = globalState.se[0];
                 }
 
@@ -78,7 +78,7 @@ define(function (require) {
             });
             _shouldEntityURIBeEnabled(queryIds).then(function (value) {
               $timeout(function () {
-                $rootScope.$emit('kibi:entityURIEnabled', value);
+                $rootScope.$emit('kibi:entityURIEnabled:customqueries', value);
               });
             }).catch(function (err) {
               notify.warning('Could not determine the entity URI for this visualisation: ' +

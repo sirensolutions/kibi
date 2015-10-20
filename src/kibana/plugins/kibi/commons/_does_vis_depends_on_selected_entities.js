@@ -25,7 +25,7 @@ define(function (require) {
                    vis.type.name === 'histogram'
         ) {
           // check agregations and if any of them has param queryIds use it to test
-          var index = null;
+          var index;
           _.each(vis.aggs, function (agg, i) {
             if (agg.params && agg.params.queryIds) {
               index = i;
@@ -33,7 +33,7 @@ define(function (require) {
             }
           });
 
-          if (index) {
+          if (index !== undefined) {
             queryIds = _.map(vis.aggs[index].params.queryIds, function (snippet) {
               return snippet.id;
             });

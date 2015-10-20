@@ -121,7 +121,6 @@ define(function (require) {
 
         // create a tr element that lists the value for each *column*
         function createSummaryRow(row) {
-          _formatRow(row);
           // We just create a string here because its faster.
           var newHtmls = [
             openRowHtml
@@ -165,7 +164,7 @@ define(function (require) {
                 $cell.addClass('click');
 
                 if (globalState.se && globalState.se.length > 0 && type === 'select' &&
-                    _isInSelectedEntities(globalState.se, row.$$_partialFormatted._id, column)
+                    _isInSelectedEntities(globalState.se, row.$$_flattened._id, column)
                 ) {
                   if (globalState.entityDisabled === true) {
                     $cell.addClass('selectedEntityCell disabled');
@@ -208,9 +207,9 @@ define(function (require) {
                     }
 
                   } else if (type === 'select') {
-                    var entityId = row.$$_partialFormatted._index + '/' +
-                                   row.$$_partialFormatted._type + '/' +
-                                   row.$$_partialFormatted._id + '/' +
+                    var entityId = row.$$_flattened._index + '/' +
+                                   row.$$_flattened._type + '/' +
+                                   row.$$_flattened._id + '/' +
                                    column;
 
                     if (!globalState.se) {
@@ -300,68 +299,6 @@ define(function (require) {
 
           return text;
         }
-
-        /*
-         * Format a field with the index pattern on scope.
-         */
-        function _formatField(value, name) {
-          var defaultFormat = fieldFormats.getDefaultInstance('string');
-          var field = $scope.indexPattern.fields.byName[name];
-          var formatter = (field && field.format) ? field.format : defaultFormat;
-
-          return formatter.convert(value);
-        }
-
-        /*
-         * Create the $$_partialFormatted key on a row
-         * added by kibi to make sure the injected column works
-         */
-        function _formatRow(row) {
-          row.$$_flattened = row.$$_flattened || $scope.indexPattern.flattenHit(row);
-          row.$$_partialFormatted = row.$$_partialFormatted || _.mapValues(row.$$_flattened, _formatField);
-
-          // kibi: take care of arrays which were not flatten
-          for (var key in row.$$_flattened) {
-            if (row.$$_flattened.hasOwnProperty(key)) {
-              var value = row.$$_flattened[key];
-              if (value instanceof Array && value.length > 0) {
-                var flattenedArray = [];
-                _st_flatten(key, value, flattenedArray);
-                // Now rewrite the flattend properties into row.$$_formatted so they can be displayed
-                for (var f in flattenedArray) {
-                  if (flattenedArray.hasOwnProperty(f)) {
-                    row.$$_partialFormatted[f] = flattenedArray[f].join(', ');
-                  }
-                }
-
-              }
-            }
-          }
-          // kibi end
-          return row.$$_partialFormatted;
-        }
-
-        // added by kibi
-        function _st_flatten(key, o, flattenedArray) {
-          if (o instanceof Array) {
-            _.each(o, function (item) {
-              _st_flatten(key, item, flattenedArray);
-            });
-          } else if (typeof o === 'object') {
-            for (var oKey in o) {
-              if (o.hasOwnProperty(oKey)) {
-                _st_flatten(key + '.' + oKey, o[oKey], flattenedArray);
-              }
-            }
-          } else {
-            // prymitive
-            if (!flattenedArray[key]) {
-              flattenedArray[key] = [];
-            }
-            flattenedArray[key].push(o);
-          }
-        }
-        // kibi end
 
         init();
       }

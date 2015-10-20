@@ -21,6 +21,7 @@ define(function (require) {
       template: require('text!plugins/sindicetech/sindicetech_relational_vis/sindicetech_relational_vis.html'),
       params: {
         defaults: {
+          buttons: []
         },
         editor: '<sindicetech-relational-vis-params></sindicetech-relational-vis-params>'
       },

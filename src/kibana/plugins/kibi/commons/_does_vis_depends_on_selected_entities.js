@@ -9,7 +9,16 @@ define(function (require) {
       return new Promise(function (fulfill, reject) {
 
         var queryIds;
-        if (vis.type.name === 'sindicetechentityinfo') {
+        if (vis.type.name === 'sindicetechtable') {
+          queryIds = _.map(vis.params.queryIds, function (snippet) {
+            return snippet.queryId;
+          });
+          _shouldEntityURIBeEnabled(queryIds).then(function (value) {
+            fulfill(value);
+          }).catch(function (err) {
+            reject(err);
+          });
+        } else if (vis.type.name === 'sindicetechentityinfo') {
           queryIds = _.map(vis.params.queryOptions, function (snippet) {
             return snippet.queryId;
           });

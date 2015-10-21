@@ -17,7 +17,11 @@ DIR=$(dirname "${SCRIPT}")/..
 NODE=${DIR}/node/bin/node
 SERVER=${DIR}/src/bin/kibi.js
 
-$DIR/bin/create_symlink.sh
+# create symlink only when load_jdbc: true
+if grep  "^load_jdbc:\\s\{1,\}true\\s*$" ${DIR}/config/kibi.yml
+then
+  $DIR/bin/create_symlink.sh
+fi
 
 ROOT_DIR="$DIR/" CONFIG_PATH="${DIR}/config/kibi.yml" NODE_ENV="production" exec "${NODE}" ${SERVER} ${@}
 

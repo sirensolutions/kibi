@@ -44,8 +44,8 @@ define(function (require) {
           group: 'metrics',
           name: 'metric',
           title: 'Metric',
-          //aggFilter: ['count'],
           min: 1,
+          max: 1,
           defaults: [
             { type: 'count', schema: 'metric' }
           ]
@@ -55,13 +55,8 @@ define(function (require) {
           name: 'bucket',
           title: 'Split Rows',
           aggFilter: ['terms', 'significant_terms'],
+          max: 1
         }
-        //,
-        //{
-        //  group: 'buckets',
-        //  name: 'split',
-        //  title: 'Split Table'
-        //}
       ])
     });
   };

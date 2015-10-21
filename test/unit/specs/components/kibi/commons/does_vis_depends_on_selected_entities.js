@@ -24,6 +24,68 @@ define(function (require) {
         });
 
 
+        it('vis sindicetechtable', function (done) {
+          var vis = {
+            type: {
+              name: 'sindicetechtable'
+            },
+            params: {
+              queryIds: [
+                {queryId: 'query1'} // this query depends on selected entity
+              ]
+            }
+          };
+
+          _does_vis_depends_on_selected_entities(vis).then(function (res) {
+            expect(res).to.equal(true);
+            done();
+          });
+
+          $rootScope.$apply();
+        });
+
+
+        it('vis sindicetechtable - query does not depends on selected entity', function (done) {
+          var vis = {
+            type: {
+              name: 'sindicetechtable'
+            },
+            params: {
+              queryIds: [
+                {queryId: 'query2'}
+              ]
+            }
+          };
+
+          _does_vis_depends_on_selected_entities(vis).then(function (res) {
+            expect(res).to.equal(false);
+            done();
+          });
+
+          $rootScope.$apply();
+        });
+
+
+        it('vis sindicetechtable - query does not exists', function (done) {
+          var vis = {
+            type: {
+              name: 'sindicetechtable'
+            },
+            params: {
+              queryIds: [
+                {queryId: 'query-does-not-exists'}
+              ]
+            }
+          };
+
+          _does_vis_depends_on_selected_entities(vis).catch(function (err) {
+            expect(err.message).to.equal('Could not find query [query-does-not-exists]');
+            done();
+          });
+
+          $rootScope.$apply();
+        });
+
         it('vis sindicetechentityinfo', function (done) {
           var vis = {
             type: {

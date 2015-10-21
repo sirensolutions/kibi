@@ -66,7 +66,7 @@ if (program.host) {
 // have been made since the server also requires the config.
 var server = require('../');
 var logger = require('../lib/logger');
-server.start(function (err) {
+var serverStart = function (err) {
   // If we get here then things have gone sideways and we need to give up.
   if (err) {
     logger.fatal({ err: err });
@@ -79,12 +79,37 @@ server.start(function (err) {
         logger.fatal({ err: err }, 'Failed to write PID file to %s', config.kibana.pid_file);
         process.exit(1);
       }
+      readyMessage();
     });
   }
+  readyMessage();
+};
 
+var isProcessRunning = function (pid) {
+  try {
+    return process.kill(pid, 0);
+  }
+  catch (e) {
+    return e.code === 'EPERM';
+  }
+};
+
+if (config.kibana.pid_file) {
+  fs.readFile(config.kibana.pid_file, fs.R_OK, function (err, pid) {
+    if (!err && isProcessRunning(pid.toString())) {
+      logger.warn('An instance of Kibi is already running with PID=%s', pid);
+      process.exit(0);
+    }
+    server.start(serverStart);
+  });
+} else {
+  server.start(serverStart);
+}
+
+function readyMessage() {
   console.log('****************************************');
   console.log('  Kibi server started successfully.');
   console.log('  Open your browser at:');
   console.log('  http://' + (config.host === '0.0.0.0' ? 'localhost' : config.host) + ':' + config.port);
   console.log('****************************************');
-});
+}

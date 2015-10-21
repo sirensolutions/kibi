@@ -109,6 +109,12 @@ module.exports = function (grunt) {
           cwd: '<%= bowerComponentsDir %>/ace-builds/src-noconflict/',
           src: 'worker-json.js',
           dest: '<%= build %>/dist/<%= pkg.name %>/src/public/'
+        },
+        {
+          expand: true,
+          cwd: '<%= bowerComponentsDir %>/eeg/lib/img/',
+          src: 'ajax-loader.gif',
+          dest: '<%= build %>/dist/<%= pkg.name %>/src/public/img/'
         }
       ]
     },

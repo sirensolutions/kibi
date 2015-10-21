@@ -89,13 +89,19 @@ define(function (require) {
 
       // below listener on globalState is needed to react when the global time is changed by the user
       // either directly in time widget or by clicking on histogram chart etc
-      globalState.on('save_with_changes', function (diff) {
+      self.save_with_changes_handler = function (diff) {
         if (diff.indexOf('time') !== -1) {
           self._setTimeFromGlobalState();
         }
-      });
+      };
+      globalState.on('save_with_changes', self.save_with_changes_handler);
 
       this._updateTimeForAllDashboards();
+    };
+
+    KibiStateHelper.prototype.destroyHandlers = function () {
+      globalState.off('save_with_changes', this.save_with_changes_handler);
+
     };
 
     KibiStateHelper.prototype.saveSelectedDashboardId = function (groupId, dashboardId) {

@@ -125,9 +125,10 @@ define(function (require) {
           return globalState.se && globalState.se.length > 0 && urlHelper.isItDashboardUrl();
         };
         $scope.showEntityClipboard = getShowEntityClipboard();
-        globalState.on('save_with_changes', function () {
+        var save_with_changes_handler = function () {
           $scope.showEntityClipboard = getShowEntityClipboard();
-        });
+        };
+        globalState.on('save_with_changes', save_with_changes_handler);
 
         // needed by kibi to recreate filter label.
         // as we do not want to store the meta info in filter join definition
@@ -153,6 +154,7 @@ define(function (require) {
         $scope.$on('$destroy', function () {
           off1();
           off2();
+          globalState.off('save_with_changes', save_with_changes_handler);
         });
 
       }

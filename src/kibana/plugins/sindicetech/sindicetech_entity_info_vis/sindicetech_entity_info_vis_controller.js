@@ -44,11 +44,6 @@ define(function (require) {
         $scope.holder.entityURI = se[0];
       });
 
-      $scope.$on('$destroy', function () {
-        removeEntityURIEnabledHandler();
-        removeEntityURIChangedHandler();
-      });
-
       $scope.$watchMulti(['holder.entityURI', 'vis.params.queryOptions'], function () {
         if (!$scope.vis) return;
 
@@ -57,7 +52,7 @@ define(function (require) {
         }
       });
 
-      globalState.on('save_with_changes', function (diff) {
+      var save_with_changes_handler = function (diff) {
         if (diff.indexOf('entityDisabled') !== -1 || diff.indexOf('se') !== -1 ) {
           if (globalState.se && globalState.se.length > 0 && globalState.entityDisabled === false) {
             $scope.holder.entityURI = globalState.se[0];
@@ -66,6 +61,13 @@ define(function (require) {
           }
           $scope.renderTemplates();
         }
+      };
+      globalState.on('save_with_changes', save_with_changes_handler);
+
+      $scope.$on('$destroy', function () {
+        removeEntityURIEnabledHandler();
+        removeEntityURIChangedHandler();
+        globalState.off('save_with_changes', save_with_changes_handler);
       });
 
       $scope.renderTemplates = function () {

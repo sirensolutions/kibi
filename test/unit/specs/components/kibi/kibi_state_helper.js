@@ -214,6 +214,45 @@ define(function (require) {
       });
 
 
+      it('is time for current dashboard is NOT updated when globalState time changed but we called destroy on the helper', function (done) {
+        // first call destroy to make sure
+        // state is not updated on save_with_changes
+        kibiStateHelper.destroyHandlers();
+
+        var dashboardWithTimeId = 'time-testing-2';
+        var expected = {
+          from: 'now-15y',
+          to: 'now'
+        };
+
+        // now listen on save_with_changes which should be called only once
+        var counter = 0;
+        globalState.on('save_with_changes', function (diff) {
+          if (diff.indexOf('k') !== -1) {
+            counter++;
+            expect(kibiStateHelper.getTimeForDashboardId(dashboardWithTimeId)).to.eql(expected);
+          }
+        });
+
+        // now update global time
+        globalState.time = {
+          from: 'now-123',
+          to: 'now-97'
+        };
+        globalState.save();
+
+        $timeout.flush(); // kibiStateHelper uses the $timeout flush the queue of the $timeout service
+        $rootScope.$apply();
+
+        // after 250 ms check that save_with_changes was called only once and the time for dashboard did not changed
+        setTimeout(function () {
+          expect(counter).to.equal(1);
+          expect(kibiStateHelper.getTimeForDashboardId(dashboardWithTimeId)).to.eql(expected);
+          done();
+        }, 100);
+      });
+
+
     });
   });
 });

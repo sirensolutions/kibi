@@ -100,11 +100,13 @@ define(function (require) {
           createSummaryRow($scope.row);
         }, true);
 
-        globalState.on('save_with_changes', function (diff) {
+        var save_with_changes_handler = function (diff) {
           if (diff.indexOf('entityDisabled') !== -1 || diff.indexOf('se') !== -1 ) {
             createSummaryRow($scope.row);
           }
-        });
+        };
+
+        globalState.on('save_with_changes', save_with_changes_handler);
 
         $scope.$watch('row', function () {
           createSummaryRow($scope.row);
@@ -117,7 +119,10 @@ define(function (require) {
         var off = $rootScope.$on('kibi:selectedEntities:changed', function () {
           createSummaryRow($scope.row);
         });
-        $scope.$on('$destroy', off);
+        $scope.$on('$destroy', function () {
+          off();
+          globalState.off('save_with_changes', save_with_changes_handler);
+        });
 
         // create a tr element that lists the value for each *column*
         function createSummaryRow(row) {

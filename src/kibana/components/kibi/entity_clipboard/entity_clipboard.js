@@ -1,8 +1,12 @@
 define(function (require) {
 
+  var _ = require('lodash');
+
   require('css!components/kibi/entity_clipboard/entity_clipboard.css');
 
-  require('modules').get('kibana').directive('kibiEntityClipboard', function ($rootScope, $route, globalState, $http, configFile) {
+  require('modules').get('kibana').directive('kibiEntityClipboard', function ($rootScope, $route, globalState, $http, configFile, Private) {
+
+    var urlHelper = Private(require('components/kibi/url_helper/url_helper'));
 
     return {
       restrict: 'E',
@@ -40,6 +44,12 @@ define(function (require) {
           delete globalState.entityDisabled;
           delete globalState.se;
           globalState.save();
+
+          // remove filters which depends on selected entities
+          var filters = _.filter(urlHelper.getCurrentDashboardFilters(), function (f) {
+            return f.meta.dependsOnSelectedEntities !== true;
+          });
+          urlHelper.replaceFiltersAndQueryAndTime(filters);
 
           // have to reload so all visualisations which might depend on selected entities
           // get refreshed

@@ -19,14 +19,6 @@ var getBaseNames = function (grunt) {
 var _endsWith = function (s, suffix) {
   return s.indexOf(suffix, s.length - suffix.length) !== -1;
 };
-var mkdirSync = function (path) {
-  try {
-    fs.mkdirSync(path);
-  } catch (e) {
-    if ( e.code !== 'EEXIST' ) throw e;
-  }
-};
-
 
 function copyFile(source, target) {
   return new Promise(function (resolve, reject) {
@@ -65,8 +57,9 @@ function copyNodeSqlite3Bindings(name, distPath) {
 
   if (from && toFolder) {
     var to = toFolder + '/node_sqlite3.node';
-    mkdirSync(toFolder);
-    return copyFile(from, to);
+    return mkdirp.mkdirpAsync(toFolder).then(function () {
+      return copyFile(from, to);
+    });
   } else {
     return Promise.reject(new Error('Could not determine source and destination paths while copying Sqlite binding for ' + name));
   }
@@ -91,9 +84,11 @@ function copyNodeJavaBindings(name, distPath) {
   }
 
   if (from) {
-    var to = distPath + '/' + name + '/' +
-             'src/node_modules/jdbc-sindicetech/node_modules/java/build/Release/nodejavabridge_bindings.node';
-    return copyFile(from, to);
+    var toFolder = distPath + '/' + name + '/src/node_modules/jdbc-sindicetech/node_modules/java/build/Release/';
+    var to = toFolder + 'nodejavabridge_bindings.node';
+    return mkdirp.mkdirpAsync(toFolder).then(function () {
+      return copyFile(from, to);
+    });
   } else {
     return Promise.reject(new Error('Could not determine source path while copying nodejavabridge binding for ' + name));
   }

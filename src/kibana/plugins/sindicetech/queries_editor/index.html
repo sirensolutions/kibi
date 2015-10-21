@@ -62,7 +62,10 @@
               Hint: To start type <b>SELECT * WHERE {?s ?p ?o} LIMIT 10</b>
             </span>
             </br>
-            <span>Special variables <b>@doc[_source][property_name]@</b> will be replaced by values extracted from indexed documents based on selected entity</span>
+            <span>
+              Special variables <b>@doc[_source][property_name]@</b> will be replaced by values extracted
+              from the documents matching the current selection
+            </span>
             <span ng-if="starDetectedInAQuery && (datasourceType === 'sparql_http' || datasourceType === 'sparql_jdbc')" style="color:orange;">
               </br>
               Star symbol detected. Try to give an explicit list of variables to return

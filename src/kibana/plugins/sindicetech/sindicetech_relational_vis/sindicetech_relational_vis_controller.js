@@ -394,9 +394,14 @@ define(function (require) {
             kibiStateHelper.saveFiltersForDashboardId(urlHelper.getCurrentDashboardId(), urlHelper.getCurrentDashboardFilters());
             kibiStateHelper.saveQueryForDashboardId(urlHelper.getCurrentDashboardId(), urlHelper.getCurrentDashboardQuery());
 
-            this.joinFilter.meta.value =
-              button.filterLabel ? button.filterLabel :
-              '... related to (' + this.sourceCount + ') from ' + urlHelper.getCurrentDashboardId();
+
+            if (button.filterLabel) {
+              this.joinFilter.meta.value = button.filterLabel
+              .replace(/\$COUNT/g, this.sourceCount)
+              .replace(/\$DASHBOARD/g, urlHelper.getCurrentDashboardId());
+            } else {
+              this.joinFilter.meta.value = '... related to (' + this.sourceCount + ') from ' + urlHelper.getCurrentDashboardId();
+            }
 
 
             if (this.joinFilter) {

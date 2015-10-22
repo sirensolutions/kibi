@@ -54,7 +54,9 @@ define(function (require) {
           // optional make-url attr, sets the userMakeUrl in our scope
           userMakeUrl: '=?makeUrl',
           // optional on-choose attr, sets the userOnChoose in our scope
-          userOnChoose: '=?onChoose'
+          userOnChoose: '=?onChoose',
+          // optional only for visualizations
+          savedSearchId: '=?savedSearchId'
         },
         template: require('text!partials/saved_object_finder.html'),
         link: function ($scope, $el) {
@@ -126,6 +128,15 @@ define(function (require) {
             // ensure that the currentFilter changes from undefined to ''
             // which triggers
             currentFilter = newFilter || '';
+            filterResults();
+          });
+
+          $scope.kibi = {
+            basedOnSameSavedSearch: true, // boolean HAS to be wrapped in object
+            _prevBasedOnSameSavedSearch: true
+          };
+
+          $scope.$watch('kibi.basedOnSameSavedSearch', function () {
             filterResults();
           });
 
@@ -228,11 +239,29 @@ define(function (require) {
             // but ensure that we don't search for the same
             // thing twice. This is called from multiple places
             // and needs to be smart about when it actually searches
+            var basedOnSameSavedSearch = $scope.kibi.basedOnSameSavedSearch;
             var filter = currentFilter;
-            if (prevSearch === filter) return;
+            if (prevSearch === filter && $scope.kibi._prevBasedOnSameSavedSearch === basedOnSameSavedSearch) return;
 
             prevSearch = filter;
+            $scope.kibi._prevBasedOnSameSavedSearch = basedOnSameSavedSearch;
+
             service.find(filter)
+            .then(function (hits) {
+
+              var filtered = _.filter(hits.hits, function (hit) {
+                if ($scope.savedSearchId && basedOnSameSavedSearch) {
+                  return hit.savedSearchId === $scope.savedSearchId;
+                } else {
+                  return true;
+                }
+              });
+              return {
+                hits: filtered,
+                total: filtered.length
+              };
+
+            })
             .then(function (hits) {
               // ensure that we don't display old results
               // as we can't really cancel requests

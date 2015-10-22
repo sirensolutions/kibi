@@ -1,6 +1,10 @@
 <form role="form">
   <div class="form-group finder-form">
-    <div class="finder-form-options">
+    <div style="float:left;" ng-if="type == 'visualizations' && savedSearchId">
+      <input type="checkbox" ng-model="kibi.basedOnSameSavedSearch" />
+      <label>Based on current dashboard saved search: {{savedSearchId}}</label>
+    </div>
+    <div class="finder-form-options" style="float:right;">
       <a class="small" ng-click="manageObject(type)">manage {{type}}</a>
     </div>
     <div class="clearfix visible-xs-block"></div>

@@ -22,9 +22,8 @@ define(function (require) {
       },
       controllerAs: 'typeahead',
 
-      controller: function ($scope, $element, $timeout, PersistedLog, config) {
+      controller: function ($rootScope, $scope, PersistedLog, config) {
         var self = this;
-        self.form = $element.closest('form');
         self.query = '';
         self.hidden = true;
         self.focused = false;
@@ -112,15 +111,7 @@ define(function (require) {
           self.persistEntry();
 
           if (ev && ev.type === 'click') {
-            $timeout(function () {
-              self.submitForm();
-            });
-          }
-        };
-
-        self.submitForm = function () {
-          if (self.form.length) {
-            self.form.submit();
+            $rootScope.$emit('stDashboardInvokeMethod', 'filterResults');
           }
         };
 

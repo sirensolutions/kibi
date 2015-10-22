@@ -27,7 +27,7 @@ JdbcQuery.prototype._init = function () {
   if (self.initialized === true) {
     return Promise.resolve({'message': 'JDBC driver already initialized'});
   }
-  var jdbcConfig = jdbcHelper.prepareJdbcConfig(this.config.datasource.datasourceClazz.datasource.datasourceParams);
+  var jdbcConfig = jdbcHelper.prepareJdbcConfig(self.config.datasource.datasourceClazz.datasource.datasourceParams);
 
   return new Promise(function (fulfill, reject) {
 
@@ -75,8 +75,7 @@ JdbcQuery.prototype.checkIfItIsRelevant = function (uri) {
     var connection_string = self.config.datasource.datasourceClazz.datasource.datasourceParams.connection_string;
     var max_age = self.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
 
-
-    return queryHelper.replaceVariablesUsingEsDocument(this.config.activationQuery, uri).then(function (query) {
+    return queryHelper.replaceVariablesUsingEsDocument(self.config.activationQuery, uri).then(function (query) {
 
       if (query.trim() === '') {
         return Promise.resolve({'boolean': true});
@@ -142,7 +141,6 @@ JdbcQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
           return Promise.resolve(v);
         }
       }
-
 
       return new Promise(function (fulfill, reject) {
         self.jdbc.open(function (err, conn) {

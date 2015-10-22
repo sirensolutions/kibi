@@ -5,7 +5,10 @@
   </ul>
 
   <li class="list-group-item" ng-switch-when="visualization">
-    <saved-object-finder title="Choose a visualization" type="visualizations" on-choose="opts.addVis"></saved-object-finder>
+    <saved-object-finder title="Choose a visualization"
+                         type="visualizations"
+                         saved-search-id="opts.dashboard.savedSearchId"
+                         on-choose="opts.addVis"></saved-object-finder>
   </li>
 
   <li class="list-group-item" ng-switch-when="search">

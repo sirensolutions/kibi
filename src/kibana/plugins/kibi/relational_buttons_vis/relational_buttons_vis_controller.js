@@ -1,12 +1,11 @@
 define(function (require) {
-  // get the kibana/sindicetech_relational_vis module, and make sure that it requires the "kibana" module if it
-  // didn't already
-  var module = require('modules').get('kibana/sindicetech_relational_vis', ['kibana']);
+
+  var module = require('modules').get('kibana/kibi_relational_buttons_vis', ['kibana']);
   var _ = require('lodash');
   var getSavedSearchMeta =  require('components/kibi/count_helper/lib/get_saved_search_meta');
 
   module.controller(
-    'SindicetechRelationalVisController',
+    'KibiRelationalButtonsVisController',
     function ($scope, $rootScope, Private, $http, Notifier, Promise, timefilter,
               indexPatterns, savedDashboards, savedSearches) {
 

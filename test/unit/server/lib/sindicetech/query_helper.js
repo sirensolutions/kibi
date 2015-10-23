@@ -90,7 +90,7 @@ describe('Query Helper', function () {
         });
       });
 
-      it('should not modify suplied params headers or body', function (done) {
+      it('should not modify supplied params, headers and body', function (done) {
         var headers = [
           { name: 'header1', value: 'header1value $auth_token'}
         ];

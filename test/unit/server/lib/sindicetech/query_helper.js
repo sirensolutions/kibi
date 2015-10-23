@@ -90,6 +90,37 @@ describe('Query Helper', function () {
         });
       });
 
+      it('should not modify supplied params, headers and body', function (done) {
+        var headers = [
+          { name: 'header1', value: 'header1value $auth_token'}
+        ];
+        var params = [
+          { name: 'param1', value: 'param1value  $auth_token'}
+        ];
+        var body = 'body $auth_token';
+        var variables = {
+          $auth_token: '123456'
+        };
+
+        var exp_headers = [
+          { name: 'header1', value: 'header1value $auth_token'}
+        ];
+        var exp_params = [
+          { name: 'param1', value: 'param1value  $auth_token'}
+        ];
+        var exp_body = 'body $auth_token';
+
+
+        queryHelper.replaceVariablesForREST(headers, params, body, null, variables).then(function (result) {
+          // after repalcement supplied params shoud NOT be modified
+          expect(headers).to.eql(exp_headers);
+          expect(params).to.eql(exp_params);
+          expect(body).to.eql(exp_body);
+          done();
+        });
+      });
+
+
       it('ignore the elastic document but use variables', function (done) {
         var headers = [
           { name: 'header1', value: 'header1value $auth_token'}

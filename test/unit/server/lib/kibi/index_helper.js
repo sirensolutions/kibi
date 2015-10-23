@@ -62,11 +62,15 @@ describe('Index Helper', function () {
 
       mockery.registerMock('request-promise', function (rp_options) {
         // here return different resp depends on rp_options.href
-        if (rp_options.uri.href === 'http://localhost:9200/.kibi/_bulk') {
+        var endsWith = function (s, suffix) {
+          return s.indexOf(suffix, s.length - suffix.length) !== -1;
+        };
+
+        if (endsWith(rp_options.uri.href, '/.kibi/_bulk')) {
           return Promise.resolve(
             {}
           );
-        } else if (rp_options.uri.href === 'http://localhost:9200/.kibi/datasource/_search?size=100') {
+        } else if (endsWith(rp_options.uri.href, '/.kibi/datasource/_search?size=100')) {
           return Promise.resolve(
             [
               {
@@ -112,7 +116,7 @@ describe('Index Helper', function () {
       });
     });
 
-    it('1', function (done) {
+    it('reencrypt with the same key to check that file was created', function (done) {
       var indexHelper = root('src/server/lib/kibi/index_helper');
       var expected = [
       'Got 1 datasources.',

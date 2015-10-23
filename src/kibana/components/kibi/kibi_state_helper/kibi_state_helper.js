@@ -10,6 +10,52 @@ define(function (require) {
       this._init();
     }
 
+    KibiStateHelper.prototype._init = function () {
+      var self = this;
+      if (!globalState.k) {
+        globalState.k = {
+          // will hold information about selected dashboards in each group
+          g: {},
+          // will hold information about each dashboard
+          // each dashboard is a map whith following properties:
+          //   q:, // queries
+          //   f:, // filters
+          //   t:  // time
+          d: {}
+        };
+        globalState.save();
+      }
+
+      $rootScope.$on('kibi:dashboard:changed', function (event, dashboardId) {
+        savedDashboards.get(dashboardId).then(function (savedDashboard) {
+          self._updateTimeForOneDashboard(savedDashboard);
+          globalState.save();
+        });
+      });
+
+      //NOTE: check if a timefilter has been set into the URL at startup
+      var off = $rootScope.$on('$routeChangeSuccess', function () {
+        $timeout(function () {
+          if (globalState.time) {
+            self._setTimeFromGlobalState();
+          }
+          off();
+        });
+      });
+
+      // below listener on globalState is needed to react when the global time is changed by the user
+      // either directly in time widget or by clicking on histogram chart etc
+      self.save_with_changes_handler = function (diff) {
+        if (diff.indexOf('time') !== -1) {
+          self._setTimeFromGlobalState();
+        }
+      };
+      globalState.on('save_with_changes', self.save_with_changes_handler);
+
+      this._updateTimeForAllDashboards();
+    };
+
+
     /**
      * Returns true if the query is:
      * - a query_string
@@ -58,46 +104,6 @@ define(function (require) {
       }
     };
 
-    KibiStateHelper.prototype._init = function () {
-      var self = this;
-      if (!globalState.k) {
-        globalState.k = {
-          g:{}, // will hold information about selected dashboards in each group
-          q:{}, // will hold queries per dashboard
-          f:{}, // will hold filters per dashboard
-          t:{}  // will hold time per dashboard
-        };
-        globalState.save();
-      }
-
-      $rootScope.$on('kibi:dashboard:changed', function (event, dashboardId) {
-        savedDashboards.get(dashboardId).then(function (savedDashboard) {
-          self._updateTimeForOneDashboard(savedDashboard);
-          globalState.save();
-        });
-      });
-
-      //NOTE: check if a timefilter has been set into the URL at startup
-      var off = $rootScope.$on('$routeChangeSuccess', function () {
-        $timeout(function () {
-          if (globalState.time) {
-            self._setTimeFromGlobalState();
-          }
-          off();
-        });
-      });
-
-      // below listener on globalState is needed to react when the global time is changed by the user
-      // either directly in time widget or by clicking on histogram chart etc
-      self.save_with_changes_handler = function (diff) {
-        if (diff.indexOf('time') !== -1) {
-          self._setTimeFromGlobalState();
-        }
-      };
-      globalState.on('save_with_changes', self.save_with_changes_handler);
-
-      this._updateTimeForAllDashboards();
-    };
 
     KibiStateHelper.prototype.destroyHandlers = function () {
       globalState.off('save_with_changes', this.save_with_changes_handler);
@@ -116,21 +122,23 @@ define(function (require) {
     KibiStateHelper.prototype.saveQueryForDashboardId = function (dashboardId, query) {
       if (query) {
         if (!this.isAnalyzedWildcardQueryString(query)) {
-          globalState.k.q[dashboardId] = query;
+          this._setDashboardProperty(dashboardId, 'q', query);
         } else {
           // store '*' instead the full query to make it more compact as this is very common query
-          globalState.k.q[dashboardId] = '*';
+          this._setDashboardProperty(dashboardId, 'q', '*');
         }
       } else {
-        delete globalState.k.q[dashboardId];
+        this._deleteDashboardProperty(dashboardId, 'q');
       }
       globalState.save();
     };
 
     KibiStateHelper.prototype.getQueryForDashboardId = function (dashboardId) {
-      if (globalState.k.q[dashboardId] && globalState.k.q[dashboardId] !== '*') {
-        return globalState.k.q[dashboardId];
-      } else if (globalState.k.q[dashboardId] && globalState.k.q[dashboardId] === '*') {
+      var q = this._getDashboardProperty(dashboardId, 'q');
+
+      if (q && q !== '*') {
+        return q;
+      } else if (q && q === '*') {
         // if '*' was stored make it again full query
         return {
           query_string: {
@@ -146,17 +154,17 @@ define(function (require) {
         return;
       }
       if (filters && filters.length > 0) {
-        globalState.k.f[dashboardId] = filters;
+        this._setDashboardProperty(dashboardId, 'f', filters);
       } else {
         // do NOT delete - instead store empty array
         // in other case the previous filters will be restored
-        globalState.k.f[dashboardId] = [];
+        this._setDashboardProperty(dashboardId, 'f', []);
       }
       globalState.save();
     };
 
     KibiStateHelper.prototype.getFiltersForDashboardId = function (dashboardId) {
-      var filters =  globalState.k.f[dashboardId];
+      var filters =  this._getDashboardProperty(dashboardId, 'f');
       // add also pinned filters which are stored in global state
       if (filters && globalState.filters) {
         return filters.concat(globalState.filters);
@@ -168,30 +176,57 @@ define(function (require) {
 
 
     KibiStateHelper.prototype.removeTimeForDashboardId = function (dashboardId, skipGlobalStateSave) {
-      delete globalState.k.t[dashboardId];
+      this._deleteDashboardProperty(dashboardId, 't');
       if (!skipGlobalStateSave) {
         globalState.save();
       }
     };
 
     KibiStateHelper.prototype.saveTimeForDashboardId = function (dashboardId, from, to, skipGlobalStateSave) {
-      globalState.k.t[dashboardId] = {
+      this._setDashboardProperty(dashboardId, 't', {
         f: from,
         t: to
-      };
+      });
       if (!skipGlobalStateSave) {
         globalState.save();
       }
     };
 
     KibiStateHelper.prototype.getTimeForDashboardId = function (dashboardId) {
-      if (globalState.k.t[dashboardId]) {
+      var t = this._getDashboardProperty(dashboardId, 't');
+      if (t) {
         return {
-          from: globalState.k.t[dashboardId].f,
-          to: globalState.k.t[dashboardId].t
+          from: t.f,
+          to: t.t
         };
       }
       return null;
+    };
+
+
+    KibiStateHelper.prototype._setDashboardProperty = function (dashboardId, prop, value) {
+      if (!globalState.k.d[dashboardId]) {
+        globalState.k.d[dashboardId] = {};
+      }
+      globalState.k.d[dashboardId][prop] = value;
+    };
+    KibiStateHelper.prototype._getDashboardProperty = function (dashboardId, prop) {
+      if (!globalState.k.d[dashboardId]) {
+        return undefined;
+      }
+      return globalState.k.d[dashboardId][prop];
+    };
+
+    KibiStateHelper.prototype._deleteDashboardProperty = function (dashboardId, prop) {
+      if (!globalState.k.d[dashboardId]) {
+        return;
+      }
+      delete globalState.k.d[dashboardId][prop];
+      // check if this was the last and only
+      // if yes delete the whole dashboard object
+      if (Object.keys(globalState.k.d[dashboardId]).length === 0) {
+        delete globalState.k.d[dashboardId];
+      }
     };
 
 

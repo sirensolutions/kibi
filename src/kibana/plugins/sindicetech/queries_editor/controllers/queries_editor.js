@@ -211,6 +211,7 @@ define(function (require) {
 
         if ($scope.query.id) {
 
+          $scope.spinIt = true;
           queryEngineClient.clearCache().then(function () {
 
             queryEngineClient.getQueriesHtmlFromServer(
@@ -250,6 +251,7 @@ define(function (require) {
                 $scope.holder.jsonPreview = JSON.stringify(resp.data.snippets[0], null, ' ');
                 $scope.holder.htmlPreview = resp.data.snippets[0].html;
               }
+              $scope.spinIt = false;
             });
           });
 

@@ -19,6 +19,7 @@ define(function (require) {
       var kibiStateHelper  = Private(require('components/kibi/kibi_state_helper/kibi_state_helper'));
       var kibiTimeHelper   = Private(require('components/kibi/kibi_time_helper/kibi_time_helper'));
       var countHelper      = Private(require('components/kibi/count_helper/count_helper'));
+      var relVisHelper     = Private(require('plugins/kibi/relational_buttons_vis/relational_buttons_vis_helper'));
 
 
       var currentDashboardId = urlHelper.getCurrentDashboardId();
@@ -374,65 +375,6 @@ define(function (require) {
       };
 
 
-      var _constructButtonsArray = function (currentDashboardIndexId) {
-        return _.chain($scope.vis.params.buttons)
-        .filter(function (buttonDef) {
-          if (!currentDashboardIndexId) {
-            return buttonDef.sourceIndexPatternId && buttonDef.label;
-          }
-          return buttonDef.sourceIndexPatternId === currentDashboardIndexId && buttonDef.label;
-        })
-        .map(function (buttonDef) {
-          var button = _.clone(buttonDef);
-          button.joinFilter = null;
-
-          button.click = function () {
-            if (!currentDashboardIndexId) {
-              return;
-            }
-            kibiStateHelper.saveFiltersForDashboardId(urlHelper.getCurrentDashboardId(), urlHelper.getCurrentDashboardFilters());
-            kibiStateHelper.saveQueryForDashboardId(urlHelper.getCurrentDashboardId(), urlHelper.getCurrentDashboardQuery());
-
-
-            if (button.filterLabel) {
-              this.joinFilter.meta.value = button.filterLabel
-              .replace(/\$COUNT/g, this.sourceCount)
-              .replace(/\$DASHBOARD/g, urlHelper.getCurrentDashboardId());
-            } else {
-              this.joinFilter.meta.value = '... related to (' + this.sourceCount + ') from ' + urlHelper.getCurrentDashboardId();
-            }
-
-
-            if (this.joinFilter) {
-              // get filters from dashboard we would like to switch to
-              var targetDashboardQuery   = kibiStateHelper.getQueryForDashboardId(this.redirectToDashboard);
-              var targetDashboardFilters = kibiStateHelper.getFiltersForDashboardId(this.redirectToDashboard);
-              var targetDashboardTimeFilter = kibiStateHelper.getTimeForDashboardId(this.redirectToDashboard);
-
-              // add or Filter and switch
-              if (!targetDashboardFilters) {
-                targetDashboardFilters = [this.joinFilter];
-              } else {
-                joinFilterHelper.replaceOrAddJoinFilter(targetDashboardFilters, this.joinFilter);
-              }
-
-              // switch to target dashboard
-              urlHelper.replaceFiltersAndQueryAndTime(
-                targetDashboardFilters,
-                targetDashboardQuery,
-                targetDashboardTimeFilter);
-              urlHelper.switchDashboard(this.redirectToDashboard);
-            } else {
-              // just redirect to the target dashboard
-              urlHelper.switchDashboard(this.redirectToDashboard);
-            }
-
-          };
-          return button;
-        }).value();
-      };
-
-
       var _constructButtons = function () {
         if (currentDashboardId) {
           // check that current dashboard has assigned indexPatternId
@@ -440,7 +382,9 @@ define(function (require) {
             if (savedDashboard.savedSearchId) {
               savedSearches.get(savedDashboard.savedSearchId)
               .then(function (dashboardSavedSearch) {
-                $scope.buttons = _constructButtonsArray(dashboardSavedSearch.searchSource._state.index.id);
+                $scope.buttons = relVisHelper.constructButtonsArray(
+                  $scope.vis.params.buttons, dashboardSavedSearch.searchSource._state.index.id
+                );
               })
               .catch(notify.error);
             } else {
@@ -450,7 +394,7 @@ define(function (require) {
             }
           });
         } else {
-          $scope.buttons = _constructButtonsArray();
+          $scope.buttons = relVisHelper.constructButtonsArray($scope.vis.params.buttons);
         }
       }; // end of _constructButtons
 

@@ -2,12 +2,18 @@ var url    = require('url');
 var rp     = require('request-promise');
 var Promise = require('bluebird');
 var config = require('../../config');
+var _      = require('lodash');
 
 
 function QueryHelper() {}
 
 
 QueryHelper.prototype.replaceVariablesForREST = function (headers, params, body, uri, variables) {
+  // clone here !!! headers, params, body
+  // so the original one in the config are not modified
+  var h = _.cloneDeep(headers);
+  var p = _.cloneDeep(params);
+  var b = _.cloneDeep(body);
 
   var self = this;
   // first try to replace placeholders using variables
@@ -15,15 +21,15 @@ QueryHelper.prototype.replaceVariablesForREST = function (headers, params, body,
     for (var name in variables) {
       if (variables.hasOwnProperty(name)) {
         var regex = new RegExp(self._escapeRegexSpecialCharacters(name), 'g');
-        body = body.replace(regex, variables[name]);
+        b = b.replace(regex, variables[name]);
 
         var i;
-        for (i = 0; i < headers.length; i++) {
-          headers[i].value = headers[i].value.replace(regex, variables[name]);
+        for (i = 0; i < h.length; i++) {
+          h[i].value = h[i].value.replace(regex, variables[name]);
         }
 
-        for (i = 0; i < params.length; i++) {
-          params[i].value = params[i].value.replace(regex, variables[name]);
+        for (i = 0; i < p.length; i++) {
+          p[i].value = p[i].value.replace(regex, variables[name]);
         }
 
       }
@@ -32,9 +38,9 @@ QueryHelper.prototype.replaceVariablesForREST = function (headers, params, body,
 
   // second replace placeholders based on selected entity uri
   var promises = [
-    self.replaceVariablesUsingEsDocument(headers, uri),
-    self.replaceVariablesUsingEsDocument(params, uri),
-    self.replaceVariablesUsingEsDocument(body, uri)
+    self.replaceVariablesUsingEsDocument(h, uri),
+    self.replaceVariablesUsingEsDocument(p, uri),
+    self.replaceVariablesUsingEsDocument(b, uri)
   ];
 
   return Promise.all(promises).then(function (results) {
@@ -110,6 +116,13 @@ QueryHelper.prototype._replaceVariablesInTheQuery = function (doc, query) {
     group = group.substring(0, group.length - 1);
 
     var value = self._getValue(doc, group);
+    // for now if value is an array pick the first element
+    if (value instanceof Array && value.length > 0) {
+      value = value[0];
+    } else if (value instanceof Array && value.length === 0) {
+      value = '';
+    }
+
     var reGroup = self._escapeRegexSpecialCharacters(match[1]);
     var re = new RegExp(reGroup, 'g');
     ret = ret.replace(re, value);

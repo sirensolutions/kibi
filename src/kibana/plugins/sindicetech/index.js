@@ -9,8 +9,8 @@ define(function (require) {
   require('registry/vis_types').register(function SindicetechWordcloudVisPrivateModuleLoader(Private) {
     return Private(require('plugins/sindicetech/sindicetech_wordcloud_vis/sindicetech_wordcloud_vis'));
   });
-  require('registry/vis_types').register(function SindicetechRelationalVisPrivateModuleLoader(Private) {
-    return Private(require('plugins/sindicetech/sindicetech_relational_vis/sindicetech_relational_vis'));
+  require('registry/vis_types').register(function KibiRelationalButtonsVisPrivateModuleLoader(Private) {
+    return Private(require('plugins/kibi/relational_buttons_vis/relational_buttons_vis'));
   });
 
 });

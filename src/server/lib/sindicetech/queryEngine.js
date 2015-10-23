@@ -13,6 +13,7 @@ var MysqlQuery  = require('./mysqlQuery');
 var PostgresQuery  = require('./postgresQuery');
 var SQLiteQuery = require('./sqliteQuery');
 var RestQuery      = require('./restQuery');
+var ErrorQuery  = require('./errorQuery');
 var InactivatedQuery  = require('./inactivatedQuery');
 var set_datasource_clazz = require('../kibi/datasources/set_datasource_clazz');
 
@@ -247,6 +248,9 @@ QueryEngine.prototype.reloadQueries = function () {
           } else if (queryDef.datasource.datasourceType === 'mysql') {
             return new MysqlQuery(queryDef, self.cache);
           } else if (queryDef.datasource.datasourceType === 'sparql_jdbc' || queryDef.datasource.datasourceType === 'sql_jdbc' ) {
+            if (config.kibana.load_jdbc === false) {
+              return new ErrorQuery('You need to have the "load_jdbc" option enabled; this can be done in the kibi.yml file.');
+            }
             return new JdbcQuery(queryDef, self.cache);
           } else if (queryDef.datasource.datasourceType === 'rest') {
             return new RestQuery(queryDef, self.cache);
@@ -322,6 +326,19 @@ QueryEngine.prototype._getQueries = function (uri, queryIds) {
     return Promise.reject(
       new Error('There are no queries in memory. Create a new query or reload the existing ones from elastic search index')
     );
+  }
+
+  var errors = _(this.queries).filter(function (query) {
+    return query instanceof ErrorQuery;
+  }).map(function (err) {
+    return err.getErrorMessage();
+  }).value();
+  if (errors && errors.length !== 0) {
+    var msg = '';
+    _.each(errors, function (err) {
+      msg += err + '\n';
+    });
+    return Promise.reject(new Error(msg));
   }
 
   var all = !queryIds || (queryIds && queryIds.length === 1 && queryIds[0] === 'ALL');

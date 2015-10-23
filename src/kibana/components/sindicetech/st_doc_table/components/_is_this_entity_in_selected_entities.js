@@ -3,6 +3,9 @@ define(function (require) {
 
   return function _isThisEntityInSelectedEntities() {
     return function (se, entityId, column) {
+      if (!se || !entityId || !column) {
+        return false;
+      }
       for (var i = 0; i < se.length; i++) {
         var entityIdToCompare = se[i];
         var entityIdToCompareParts = entityIdToCompare.split('/');

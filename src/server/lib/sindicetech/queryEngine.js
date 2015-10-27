@@ -156,6 +156,7 @@ QueryEngine.prototype.reloadQueries = function () {
           activationQuery:   hit._source.st_activationQuery,
           resultQuery:       hit._source.st_resultQuery,
           datasourceId:      hit._source.st_datasourceId,
+          rest_method:       hit._source.rest_method,
           rest_path:         hit._source.rest_path,
           rest_body:         hit._source.rest_body,
           rest_resp_restriction_path: hit._source.rest_resp_restriction_path,

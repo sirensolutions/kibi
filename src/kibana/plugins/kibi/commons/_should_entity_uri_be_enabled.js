@@ -4,42 +4,65 @@ define(function (require) {
 
     var _ = require('lodash');
 
-    return function (queryIds) {
-      var promises = _(queryIds).compact().map(savedQueries.get).value();
-
+    var _checkSingleQuery = function (query) {
       var regex = /@doc\[.+?\]@/;
-      var regexRest = /@VAR[0-9]{1,}@/g;
+      // check for sparql and sql queries
+      if (regex.test(query.st_activationQuery) || regex.test(query.st_resultQuery)) {
+        // requires entityURI
+        return true;
+      }
 
-      return Promise.all(promises).then(function (results) {
-        var entityURIEnabled = false;
+      // test for rest queries
+      if (query.rest_params || query.rest_headers || query.rest_body) {
+        if (regex.test(query.rest_body)) {
+          // requires entityURI
+          return true;
+        }
 
-        _.each(results, function (savedQuery) {
-          // check for sparql and sql queries
-          if (regex.test(savedQuery.st_activationQuery) || regex.test(savedQuery.st_resultQuery)) {
-            // requires entityURI
-            entityURIEnabled = true;
-            return false;
+        var i;
+        if (query.rest_params) {
+          for (i = 0; i < query.rest_params.length; i++) {
+            if (regex.test(query.rest_params[i].value)) {
+              return true;
+            }
           }
-          // test for rest queries
-          if (savedQuery.rest_params || savedQuery.rest_headers) {
-            _.each(savedQuery.rest_params, function (param) {
-              if (regexRest.test(param.value)) {
-                // requires entityURI
-                entityURIEnabled = true;
-                return false;
-              }
-            });
-            _.each(savedQuery.rest_headers, function (header) {
-              if (regexRest.test(header.value)) {
-                // requires entityURI
-                entityURIEnabled = true;
-                return false;
-              }
-            });
+        }
+        if (query.rest_headers) {
+          for (i = 0; i < query.rest_headers.length; i++) {
+            if (regex.test(query.rest_headers[i].value)) {
+              return true;
+            }
           }
+        }
+      }
+      return false;
+    };
+
+    return function (queryIds, queries) {
+
+      // if queries provided check them
+      if (queries) {
+
+        for (var i = 0; i < queries.length; i++) {
+          if (_checkSingleQuery(queries[i]) === true) {
+            return Promise.resolve(true);
+          }
+        }
+        return Promise.resolve(false);
+
+      } else {
+
+        var promises = _(queryIds).compact().map(savedQueries.get).value();
+        return Promise.all(promises).then(function (results) {
+          for (var i = 0; i < results.length; i++) {
+            if (_checkSingleQuery(results[i]) === true) {
+              return true;
+            }
+          }
+          return false;
         });
-        return entityURIEnabled;
-      });
+
+      }
     };
 
   };

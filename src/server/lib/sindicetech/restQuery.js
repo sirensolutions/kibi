@@ -54,7 +54,6 @@ RestQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
   var self = this;
 
   var url_s = this.config.datasource.datasourceClazz.datasource.datasourceParams.url;
-  var method = this.config.datasource.datasourceClazz.datasource.datasourceParams.method.toLowerCase();
   var timeout = this.config.datasource.datasourceClazz.datasource.datasourceParams.timeout;
   var max_age = this.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
   var username = this.config.datasource.datasourceClazz.datasource.datasourceParams.username;
@@ -62,9 +61,9 @@ RestQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
 
   return new Promise(function (fulfill, reject) {
     var start = new Date().getTime();
-    var regex = /^get|post$/;
+    var regex = /^GET|POST$/;
 
-    if (!regex.test(method)) {
+    if (!regex.test(self.config.rest_method)) {
       reject(new Error('Only GET|POST methods are supported at the moment'));
     }
 
@@ -100,7 +99,7 @@ RestQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
 
       var key;
       if (self.cache) {
-        key = method + url_s + self.config.rest_path + JSON.stringify(headers) + JSON.stringify(params) + body;
+        key = self.config.rest_method + url_s + self.config.rest_path + JSON.stringify(headers) + JSON.stringify(params) + body;
       }
 
       if (self.cache) {
@@ -113,7 +112,7 @@ RestQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
       // to check any option visit
       // https://github.com/request/request#requestoptions-callback
       var rp_options = {
-        method: method.toUpperCase(),
+        method: self.config.rest_method,
         uri: url.parse(url.resolve(url_s, self.config.rest_path)),
         headers: headers,
         timeout: timeout || 5000,
@@ -152,9 +151,9 @@ RestQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
         };
       }
 
-      if (method === 'get') {
+      if (self.config.rest_method === 'GET') {
         rp_options.qs = params;
-      } else if (method === 'post') {
+      } else if (self.config.rest_method === 'POST') {
         rp_options.body = body;
         // WARNING: do not set rp_options.json = true/false; even for json content
         // rather ask user to set correct Content-Type: application/json header

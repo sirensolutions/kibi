@@ -133,16 +133,6 @@
       "placeholder": "Rest API url"
     },
     {
-      "name": "method",
-      "required": true,
-      "multivalued": false,
-      "encrypted": false,
-      "inputType": "select",
-      "defaultValue": "GET",
-      "possibleValues": ["GET", "POST"],
-      "placeholder": "Http method"
-    },
-    {
       "name": "response_type",
       "required": true,
       "multivalued": false,

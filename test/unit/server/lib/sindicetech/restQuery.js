@@ -122,12 +122,12 @@ describe('RestQuery', function () {
       var RestQuery = root('src/server/lib/sindicetech/restQuery');
       var restQuery = new RestQuery({
         activationQuery: '',
+        rest_method: 'GET',
         datasource: {
           datasourceClazz: {
             datasource: {
               datasourceParams: {
-                url: 'http://localhost:3000/posts',
-                method: 'GET'
+                url: 'http://localhost:3000/posts'
               }
             },
             populateParameters: function () {
@@ -147,12 +147,12 @@ describe('RestQuery', function () {
       var RestQuery = root('src/server/lib/sindicetech/restQuery');
       var restQuery = new RestQuery({
         activationQuery: '',
+        rest_method: 'POST',
         datasource: {
           datasourceClazz: {
             datasource: {
               datasourceParams: {
-                url: 'http://localhost:3000/posts',
-                method: 'POST'
+                url: 'http://localhost:3000/posts'
               }
             },
             populateParameters: function () {
@@ -172,12 +172,12 @@ describe('RestQuery', function () {
       var RestQuery = root('src/server/lib/sindicetech/restQuery');
       var restQuery = new RestQuery({
         activationQuery: '',
+        rest_method: 'PUT',
         datasource: {
           datasourceClazz: {
             datasource: {
               datasourceParams: {
-                url: 'http://localhost:3000/posts',
-                method: 'PUT'
+                url: 'http://localhost:3000/posts'
               }
             },
             populateParameters: function () {
@@ -197,12 +197,12 @@ describe('RestQuery', function () {
       var RestQuery = root('src/server/lib/sindicetech/restQuery');
       var restQuery = new RestQuery({
         activationQuery: '',
+        rest_method: 'GET',
         datasource: {
           datasourceClazz: {
             datasource: {
               datasourceParams: {
                 url: 'http://localhost:3000/user/1',
-                method: 'GET',
                 username: 'user',
                 password: 'password'
               }

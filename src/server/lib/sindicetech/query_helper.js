@@ -116,13 +116,6 @@ QueryHelper.prototype._replaceVariablesInTheQuery = function (doc, query) {
     group = group.substring(0, group.length - 1);
 
     var value = self._getValue(doc, group);
-    // for now if value is an array pick the first element
-    if (value instanceof Array && value.length > 0) {
-      value = value[0];
-    } else if (value instanceof Array && value.length === 0) {
-      value = '';
-    }
-
     var reGroup = self._escapeRegexSpecialCharacters(match[1]);
     var re = new RegExp(reGroup, 'g');
     ret = ret.replace(re, value);
@@ -141,7 +134,7 @@ QueryHelper.prototype._escapeRegexSpecialCharacters = function (s) {
 QueryHelper.prototype._getValue = function (doc, group) {
   // parse a group and get the value from doc
   var value = null;
-  var regex = /(\[[^\[\]].+?\])/g;
+  var regex = /(\[[^\[\]].*?\])/g;
   var match = regex.exec(group);
   var i = 1;
   while (match !== null) {

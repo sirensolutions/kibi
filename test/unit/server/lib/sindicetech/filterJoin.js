@@ -4,25 +4,6 @@ var expect = require('expect.js');
 var Promise = require('bluebird');
 var _ = require('lodash');
 
-describe('All you errors', function () {
-  it('join must be in an array', function () {
-    var query = {
-      aaa: {
-        join: {
-          focus: 'i1',
-          indexes: [
-            {
-              id: 'i1',
-              type: 'cafard'
-            }
-          ]
-        }
-      }
-    };
-    expect(filterJoin).withArgs(query).to.throwException(/array/);
-  });
-});
-
 describe('FilterJoin querying', function () {
   it('in a bool clause', function () {
     var relations = [
@@ -1222,6 +1203,239 @@ describe('FilterJoin querying', function () {
     ];
     var actual = filterJoin(query);
     expect(actual).to.eql(expected);
+  });
+
+  describe('Filterjoin with pre-defined join sequence', function () {
+    it('joins with filters on leaf', function () {
+      var query = [
+        {
+          join: {
+            isSequence: true,
+            focus: 'investment',
+            indexes: [ { id: 'investment' }, { id: 'company' } ],
+            relations: [
+              [ [ 'investment.companyid', 'company.id' ] ],
+              [ [ 'investment.companyid', 'company.id' ] ]
+            ],
+            filters: [
+              {
+                investment: [
+                  {
+                    query: {
+                      query_string: {
+                        query: '360buy'
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+              }
+            ]
+          }
+        }
+      ];
+      var expected = [
+        {
+          filterjoin: {
+            companyid: {
+              path: 'id',
+              indices: ['company'],
+              query: {
+                filtered: {
+                  query: {
+                    bool: {
+                      must: [
+                        {
+                          match_all: {}
+                        }
+                      ]
+                    }
+                  },
+                  filter: {
+                    bool: {
+                      must: [
+                        {
+                          filterjoin: {
+                            id: {
+                              path: 'companyid',
+                              indices: ['investment'],
+                              query: {
+                                filtered: {
+                                  query: {
+                                    bool: {
+                                      must: [
+                                        {
+                                          match_all: {}
+                                        },
+                                        {
+                                          query_string: {
+                                            query: '360buy'
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  filter: {
+                                    bool: {
+                                      must: []
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ];
+      var actual = filterJoin(query);
+      expect(actual).to.eql(expected);
+    });
+
+    it('joins with filters on all nodes', function () {
+      var query = [
+        {
+          join: {
+            isSequence: true,
+            focus: 'investment',
+            indexes: [ { id: 'investment' }, { id: 'company' } ],
+            relations: [
+              [ [ 'investment.companyid', 'company.id' ] ],
+              [ [ 'investment.companyid', 'company.id' ] ]
+            ],
+            filters: [
+              {
+                investment: [
+                  {
+                    query: {
+                      query_string: {
+                        query: '360buy'
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                company: [
+                  {
+                    query: {
+                      query_string: {
+                        query: 'amazon'
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ];
+      var expected = [
+        {
+          filterjoin: {
+            companyid: {
+              path: 'id',
+              indices: ['company'],
+              query: {
+                filtered: {
+                  query: {
+                    bool: {
+                      must: [
+                        {
+                          match_all: {}
+                        },
+                        {
+                          query_string: {
+                            query: 'amazon'
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  filter: {
+                    bool: {
+                      must: [
+                        {
+                          filterjoin: {
+                            id: {
+                              path: 'companyid',
+                              indices: ['investment'],
+                              query: {
+                                filtered: {
+                                  query: {
+                                    bool: {
+                                      must: [
+                                        {
+                                          match_all: {}
+                                        },
+                                        {
+                                          query_string: {
+                                            query: '360buy'
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  filter: {
+                                    bool: {
+                                      must: []
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ];
+      var actual = filterJoin(query);
+      expect(actual).to.eql(expected);
+    });
+
+    it('unsupported configuration', function () {
+      var query = [
+        {
+          join: {
+            isSequence: true,
+            focus: 'aaa',
+            indexes: [
+              {
+                id: 'aaa'
+              },
+              {
+                id: 'bbb'
+              },
+              {
+                id: 'ccc'
+              },
+              {
+                id: 'ddd'
+              }
+            ],
+            relations: [
+              [ [ 'bbb.id', 'ccc.id' ] ],
+              [ [ 'ccc.id', 'ddd.id' ] ],
+              [ [ 'aaa.id', 'bbb.id' ] ]
+            ]
+          }
+        }
+      ];
+      expect(filterJoin).withArgs(query).to.throwError(/expected index/i);
+    });
   });
 
   it('accepts orderby and maxtermspershard parameters', function () {

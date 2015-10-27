@@ -88,18 +88,23 @@ define(function (require) {
       }
 
       var _enableEntityUri = function () {
-        _shouldEntityURIBeEnabled([$scope.query.id]).then(function (value) {
+        _shouldEntityURIBeEnabled(null, [$scope.query]).then(function (value) {
           $scope.holder.entityURIEnabled = value;
         }).catch(function (err) {
           notify.warning('Could not determine that widget need entityURI' + JSON.stringify(err, null, ' '));
         });
       };
 
-      $scope.$watch(['query.rest_headers', 'query.rest_params'], function () {
-        _enableEntityUri();
-      });
 
-      $scope.$watchMulti(['query.st_activationQuery', 'query.st_resultQuery'], function () {
+      // for headers and params $watch with true as normal watch fail to detect the cahnge in the arrays
+      $scope.$watch('query.rest_headers', function () {
+        _enableEntityUri();
+      }, true);
+      $scope.$watch('query.rest_params', function () {
+        _enableEntityUri();
+      }, true);
+
+      $scope.$watchMulti(['query.st_activationQuery', 'query.st_resultQuery', 'query.rest_body'], function () {
         _enableEntityUri();
         if ($scope.datasourceType !== 'rest') {
           var starRegex = /\*/g;

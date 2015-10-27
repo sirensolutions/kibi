@@ -1025,40 +1025,47 @@
         }
       }
     },
-    "jdbc-sindicetech": {
-      "version": "0.0.14-pre2",
-      "from": "jdbc-sindicetech@0.0.14-pre2",
+    "jdbc": {
+      "version": "0.0.15",
+      "from": "jdbc@0.0.15",
+      "resolved": "https://registry.npmjs.org/jdbc/-/jdbc-0.0.15.tgz",
       "dependencies": {
         "java": {
           "version": "0.4.7",
-          "from": "java@~0.4.4",
+          "from": "java@>=0.4.4 <0.5.0",
+          "resolved": "https://registry.npmjs.org/java/-/java-0.4.7.tgz",
           "dependencies": {
             "find-java-home": {
               "version": "0.1.2",
               "from": "find-java-home@0.1.2",
+              "resolved": "https://registry.npmjs.org/find-java-home/-/find-java-home-0.1.2.tgz",
               "dependencies": {
                 "which": {
                   "version": "1.0.9",
-                  "from": "which@~1.0.5"
+                  "from": "which@>=1.0.5 <1.1.0",
+                  "resolved": "https://registry.npmjs.org/which/-/which-1.0.9.tgz"
                 }
               }
             },
             "glob": {
               "version": "3.2.11",
-              "from": "glob@~3.2.9",
+              "from": "glob@>=3.2.9 <3.3.0",
+              "resolved": "https://registry.npmjs.org/glob/-/glob-3.2.11.tgz",
               "dependencies": {
                 "inherits": {
                   "version": "2.0.1",
-                  "from": "inherits@2",
+                  "from": "inherits@>=2.0.0 <3.0.0",
                   "resolved": "http://registry.npmjs.org/inherits/-/inherits-2.0.1.tgz"
                 },
                 "minimatch": {
                   "version": "0.3.0",
-                  "from": "minimatch@0.3",
+                  "from": "minimatch@>=0.3.0 <0.4.0",
+                  "resolved": "https://registry.npmjs.org/minimatch/-/minimatch-0.3.0.tgz",
                   "dependencies": {
                     "sigmund": {
                       "version": "1.0.1",
-                      "from": "sigmund@~1.0.0"
+                      "from": "sigmund@>=1.0.0 <1.1.0",
+                      "resolved": "https://registry.npmjs.org/sigmund/-/sigmund-1.0.1.tgz"
                     }
                   }
                 }
@@ -1073,15 +1080,17 @@
         },
         "underscore": {
           "version": "1.7.0",
-          "from": "underscore@~1.7.0"
+          "from": "underscore@>=1.7.0 <1.8.0",
+          "resolved": "https://registry.npmjs.org/underscore/-/underscore-1.7.0.tgz"
         },
         "promise": {
           "version": "6.0.1",
-          "from": "promise@~6.0.1",
+          "from": "promise@>=6.0.1 <6.1.0",
+          "resolved": "https://registry.npmjs.org/promise/-/promise-6.0.1.tgz",
           "dependencies": {
             "asap": {
               "version": "1.0.0",
-              "from": "asap@~1.0.0",
+              "from": "asap@>=1.0.0 <1.1.0",
               "resolved": "http://registry.npmjs.org/asap/-/asap-1.0.0.tgz"
             }
           }

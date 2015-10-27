@@ -1234,8 +1234,8 @@
     },
     "kibiutils": {
       "version": "1.0.0",
-      "from": "git://github.com/sindicetech/kibiutils#1.0.0",
-      "resolved": "git://github.com/sindicetech/kibiutils#659131e148082453255dd2196b02be9d7c8fb269"
+      "from": "git://github.com/sirensolutions/kibiutils#1.0.0",
+      "resolved": "git://github.com/sirensolutions/kibiutils#659131e148082453255dd2196b02be9d7c8fb269"
     },
     "lodash": {
       "version": "2.4.2",

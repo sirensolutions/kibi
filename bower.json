@@ -54,11 +54,11 @@
     "angular-jqcloud": "szydan/angular-jqcloud#1.0.2szydan",
     "angular-sanitize": "1.2.28",
     "ng-tags-input": "2.3.0",
-    "kibiutils": "sindicetech/kibiutils#1.0.0",
+    "kibiutils": "sirensolutions/kibiutils#1.0.0",
     "eeg-angular": "~1.0.12",
     "antlr4": "szydan/antlr4-javascript#1.0.2",
     "antlr4-sparql": "szydan/antlr4-javascript-sparql#1.0.7",
-    "antlr4-sql": "sindicetech/antlr4-javascript-sql#1.0.2",
+    "antlr4-sql": "sirensolutions/antlr4-javascript-sql#1.0.2",
     "qtip2": "2.2.1"
   },
   "devDependencies": {},

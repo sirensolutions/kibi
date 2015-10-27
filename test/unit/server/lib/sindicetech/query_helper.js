@@ -9,7 +9,16 @@ var doc = {
   _id: '_12345_',
   _source: {
     id: '12345',
-    title: 'title12345'
+    title: 'title12345',
+    ids: ['id0', 'id1', 'id2'],
+    nested1: {
+      nested2: {
+        nested3: {
+          id: 'nested12345',
+          ids: ['nested_id0']
+        }
+      }
+    }
   }
 };
 
@@ -185,6 +194,43 @@ describe('Query Helper', function () {
                 'limit 100';
       expect(queryHelper._replaceVariablesInTheQuery(doc, query)).to.eql(expected);
     });
+  });
+
+  describe('_replaceVariablesInTheQuery nested', function () {
+    it('nested', function () {
+      var query = '@doc[_source][nested1][nested2][nested3][id]@';
+      var expected = 'nested12345';
+      expect(queryHelper._replaceVariablesInTheQuery(doc, query)).to.eql(expected);
+    });
+
+    it('nested multivalued first', function () {
+      var query = '@doc[_source][nested1][nested2][nested3][ids][0]@';
+      var expected = 'nested_id0';
+      expect(queryHelper._replaceVariablesInTheQuery(doc, query)).to.eql(expected);
+    });
+  });
+
+
+  describe('_replaceVariablesInTheQuery multivalued', function () {
+
+    it('first element of multivalued', function () {
+      var query = '@doc[_source][ids][0]@';
+      var expected = 'id0';
+      expect(queryHelper._replaceVariablesInTheQuery(doc, query)).to.eql(expected);
+    });
+
+    it('second element of multivalued', function () {
+      var query = '@doc[_source][ids][1]@';
+      var expected = 'id1';
+      expect(queryHelper._replaceVariablesInTheQuery(doc, query)).to.eql(expected);
+    });
+
+    it('third element of multivalued', function () {
+      var query = '@doc[_source][ids][2]@';
+      var expected = 'id2';
+      expect(queryHelper._replaceVariablesInTheQuery(doc, query)).to.eql(expected);
+    });
+
   });
 
 

@@ -3,7 +3,9 @@ define(function (require) {
 
   describe('Kibi Components', function () {
     describe('Commons', function () {
-      describe('_should_entity_uri_be_enabled', function () {
+
+
+      describe('_should_entity_uri_be_enabled use query ids', function () {
 
         require('test_utils/no_digest_promises').activateForSuite();
 
@@ -43,14 +45,19 @@ define(function (require) {
                         st_resultQuery: 'ask { <@doc[_source][id]@> :name ?name }'
                       };
                       break;
+                    case 'rest-body':
+                      query = {
+                        rest_body: '@doc[_source][id]@'
+                      };
+                      break;
                     case 'rest-params':
                       query = {
-                        rest_params: [ { value: '@VAR42@' } ]
+                        rest_params: [ { value: '@doc[_source][id]@' } ]
                       };
                       break;
                     case 'rest-headers':
                       query = {
-                        rest_headers: [ { value: '@VAR42@' } ]
+                        rest_headers: [ { value: '@doc[_source][id]@' } ]
                       };
                       break;
                     default:
@@ -115,6 +122,49 @@ define(function (require) {
             done();
           });
         });
+      });
+
+
+      describe('_should_entity_uri_be_enabled use queries', function () {
+
+        require('test_utils/no_digest_promises').activateForSuite();
+
+        beforeEach(function () {
+          module('kibana');
+
+          inject(function (Private) {
+            shouldEntityUriBeEnabled = Private(require('plugins/kibi/commons/_should_entity_uri_be_enabled'));
+          });
+        });
+
+        it('single query should return true', function (done) {
+
+          var query = {
+            rest_params: [
+              {name: 'param1', value: '@doc[_source][id]@'}
+            ]
+          };
+
+          shouldEntityUriBeEnabled(null, [query]).then(function (required) {
+            expect(required).to.be(true);
+            done();
+          }).catch(done);
+
+        });
+
+        it('single query should return false', function (done) {
+          var query = {
+            rest_params: [
+              {name: 'param1', value: 'id'}
+            ]
+          };
+
+          shouldEntityUriBeEnabled(null, [ 'select * from table1 where 1 limit 10' ]).then(function (required) {
+            expect(required).to.be(false);
+            done();
+          });
+        });
+
       });
     });
   });

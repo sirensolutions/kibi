@@ -17,10 +17,10 @@
       <li>INDEX - <i>mandatory</i> an index name</li>
       <li>TYPE - <i>mandatory</i>an index type</li>
       <li>ID - <i>mandatory</i>a document id</li>
-      <li>COLUMN - <i>optional</i> a name of clicked column from kibi table</li>
+      <li>COLUMN - <i>optional</i> name of a column with a click option from the enhanced search result visualisation</li>
      </ul>
   </div>
-  <form name="entityURI">
+  <form name="entityURI" ng-if="!!c">
     <st-select ng-model="c.index"
                object-type="indexPattern"
                model-disabled="!entityUriHolder.entityURIEnabled"

@@ -14,7 +14,6 @@ define(function (require) {
       beforeEach(function () {
         module('kibana');
 
-
         module('kibana', function ($provide) {
           $provide.service('savedDatasources', fake_saved_datasources);
         });
@@ -151,6 +150,40 @@ define(function (require) {
               done();
             });
           $httpBackend.flush();
+        });
+      });
+
+      describe('GetDocumentIds', function () {
+        it('should return the ids of the given index', function (done) {
+          var ids = fakeHits({
+            _id: 'id1',
+          },
+          {
+            _id: 'id2',
+          });
+
+          $httpBackend.whenGET('elasticsearch/a/A/_search?size=10').respond(200, ids);
+          stSelectHelper.getDocumentIds('a', 'A').then(function (data) {
+            expect(data).to.have.length(2);
+            expect(data[0]).to.eql({ label: 'id1', value: 'id1' });
+            expect(data[1]).to.eql({ label: 'id2', value: 'id2' });
+            done();
+          }).catch(done);
+          $httpBackend.flush();
+        });
+
+        it('should return empty set when the index is not passed', function (done) {
+          stSelectHelper.getDocumentIds('', 'A').then(function (data) {
+            expect(data).to.have.length(0);
+            done();
+          }).catch(done);
+        });
+
+        it('should return empty set when the type is not passed', function (done) {
+          stSelectHelper.getDocumentIds('a', '').then(function (data) {
+            expect(data).to.have.length(0);
+            done();
+          }).catch(done);
         });
       });
 

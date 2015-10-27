@@ -14,8 +14,7 @@ define(function (require) {
         restrict: 'E',
         replace: true,
         scope: {
-          entityUriHolder: '=',
-          datasourceType: '='
+          entityUriHolder: '='
         },
         template: require('text!directives/st_param_entity_uri.html'),
         link: function ($scope, $el) {
@@ -30,9 +29,7 @@ define(function (require) {
           $scope.$watch('entityUriHolder', function () {
             if ($scope.entityUriHolder && $scope.entityUriHolder.entityURI) {
               var parts = $scope.entityUriHolder.entityURI.split('/');
-              if (parts[0].indexOf('*') !== -1) {
-                $scope.c.index  = parts[0];
-              }
+              $scope.c.index  = parts[0];
               $scope.c.type   = parts[1];
               $scope.c.id     = parts[2];
               if (parts.length >= 4) {
@@ -50,7 +47,6 @@ define(function (require) {
 
           $scope.$watchMulti(['c.index', 'c.type', 'c.id', 'c.column'], function () {
             if ($scope.c.index && $scope.c.type && $scope.c.id) {
-
               if ($scope.c.index.indexOf('*') !== -1) {
                 // user used index pattern with a star
                 // try to find out which index it is about
@@ -78,8 +74,8 @@ define(function (require) {
                       $scope.c.column;
 
                   } else {
-                    notify('Please use more restrictive indexPattern for entity selection. ' +
-                           'Currently selected one [' + $scope.c.index + '] is too ambiguous.');
+                    notify.warning('Please use more restrictive indexPattern for entity selection. ' +
+                           'The current one [' + $scope.c.index + '] is too ambiguous.');
                   }
                 });
 

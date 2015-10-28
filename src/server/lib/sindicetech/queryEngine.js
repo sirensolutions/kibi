@@ -25,6 +25,9 @@ if (config.kibana.load_jdbc === true) {
 
   JdbcQuery  = require('./jdbcQuery');
   jdbcHelper = require('./jdbcHelper');
+  var JdbcHelper    = require('./jdbcHelper');
+  jdbcHelper = new JdbcHelper();
+
   var pathToSindicetechFolder = jdbcHelper.getRelativePathToSindicetechFolder();
   nodeJava   = require(pathToSindicetechFolder.replace(/\\/g, '/') + 'node_modules/jdbc/node_modules/java');
 

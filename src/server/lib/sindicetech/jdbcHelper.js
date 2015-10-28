@@ -69,19 +69,28 @@ JdbcHelper.prototype.prepareJdbcConfig = function (conf) {
   var libs = [];
 
   if (os.platform().indexOf('win') === 0) {
+
     //windows
-    libpath = pathToSindicetechFolder + conf.libpath.replace(/\//g, '\\');
-    // just in case of any double backslashes replace them to single ones
-    libpath = libpath.replace(/\\{2}/g, '\\');
-    libs = _.map(conf.libs, function (libpath) {
-      return pathToSindicetechFolder + libpath.replace(/\//g, '\\');
-    });
+    var winAbspathRegex = /^[A-Z]:\\\\/;
+    libpath = winAbspathRegex.test(conf.libpath) ?
+      conf.libpath.replace(/\//g, '\\') :
+      pathToSindicetechFolder + conf.libpath.replace(/\\{2}/g, '\\').replace(/\//g, '\\');
+
+    if (conf.libs) {
+      libs = _.map(conf.libs, function (libpath) {
+        return winAbspathRegex.test(libpath.test) ?
+          libpath.replace(/\//g, '\\') :
+          pathToSindicetechFolder + libpath.replace(/\\{2}/g, '\\').replace(/\//g, '\\');
+      });
+    }
   } else {
     //unix
     libpath = conf.libpath.indexOf('/') === 0 ? conf.libpath : pathToSindicetechFolder + conf.libpath;
-    libs = _.map(conf.libs, function (libpath) {
-      return libpath.indexOf('/') === 0 ? libpath : pathToSindicetechFolder + libpath;
-    });
+    if (conf.libs) {
+      libs = _.map(conf.libs, function (libpath) {
+        return libpath.indexOf('/') === 0 ? libpath : pathToSindicetechFolder + libpath;
+      });
+    }
   }
 
   var jdbcConfig = {
@@ -158,4 +167,4 @@ JdbcHelper.prototype.prepareJdbcPaths = function () {
   return ret;
 };
 
-module.exports = new JdbcHelper();
+module.exports = JdbcHelper;

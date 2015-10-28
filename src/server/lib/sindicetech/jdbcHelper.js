@@ -1,8 +1,9 @@
-var _       = require('lodash');
-var os      = require('os');
+var _            = require('lodash');
+var os           = require('os');
 var sync_request = require('sync-request');
-var config  = require('../../config');
-var logger  = require('../logger');
+var config       = require('../../config');
+var logger       = require('../logger');
+var cryptoHelper = require('./crypto_helper');
 
 var _endsWith = function (s, suffix) {
   return s.indexOf(suffix, s.length - suffix.length) !== -1;
@@ -61,8 +62,8 @@ JdbcHelper.prototype.getAbsolutePathToSindicetechFolder = function () {
   return pathToSindicetechFolder;
 };
 
-JdbcHelper.prototype.prepareJdbcConfig = function (conf) {
 
+JdbcHelper.prototype.prepareJdbcConfig = function (conf) {
   var pathToSindicetechFolder = this.getAbsolutePathToSindicetechFolder();
   var libpath = '';
   var libs = [];
@@ -88,8 +89,15 @@ JdbcHelper.prototype.prepareJdbcConfig = function (conf) {
     libs: libs,
     drivername: conf.drivername,
     url: conf.connection_string,
-    user: conf.username,
-    password: conf.password
+    properties: [
+      [ 'user', conf.username ],
+      [ 'password', cryptoHelper.decrypt(config.kibana.datasource_encryption_key, conf.password) ]
+      // IMPROVE ME
+      // here it is fine as password is always encrypted
+      // but we need a better method to decrypt all parameters based on schema
+      // however when loading jdbc libs the datasource was not created yet so there is no datasourceClazz available
+      // so we would have to get the schema ourselves here
+    ]
   };
   return jdbcConfig;
 

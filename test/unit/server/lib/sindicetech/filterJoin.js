@@ -1,5 +1,6 @@
 var root = require('requirefrom')('');
-var filterJoin = root('src/server/lib/sindicetech/filterJoin');
+var filterJoinSet = root('src/server/lib/sindicetech/filterJoin').set;
+var filterJoinSeq = root('src/server/lib/sindicetech/filterJoin').sequence;
 var expect = require('expect.js');
 var Promise = require('bluebird');
 var _ = require('lodash');
@@ -64,7 +65,7 @@ describe('FilterJoin querying', function () {
         ]
       }
     };
-    var actual = filterJoin(query);
+    var actual = filterJoinSet(query);
     expect(actual).to.eql(expected);
   });
 
@@ -125,7 +126,7 @@ describe('FilterJoin querying', function () {
         ]
       }
     };
-    var actual = filterJoin(query);
+    var actual = filterJoinSet(query);
     expect(actual).to.eql(expected);
   });
 
@@ -180,7 +181,7 @@ describe('FilterJoin querying', function () {
         }
       }
     ];
-    var actual = filterJoin(query);
+    var actual = filterJoinSet(query);
     expect(actual).to.eql(expected);
   });
 
@@ -232,7 +233,7 @@ describe('FilterJoin querying', function () {
         }
       }
     ];
-    var actual = filterJoin(query);
+    var actual = filterJoinSet(query);
     expect(actual).to.eql(expected);
   });
 
@@ -302,7 +303,7 @@ describe('FilterJoin querying', function () {
         }
       }
     ];
-    var actual = filterJoin(query);
+    var actual = filterJoinSet(query);
     expect(actual).to.eql(expected);
   });
 
@@ -379,7 +380,7 @@ describe('FilterJoin querying', function () {
         }
       }
     ];
-    var actual = filterJoin(query);
+    var actual = filterJoinSet(query);
     expect(actual).to.eql(expected);
   });
 
@@ -450,7 +451,7 @@ describe('FilterJoin querying', function () {
         }
       }
     ];
-    var actual = filterJoin(query);
+    var actual = filterJoinSet(query);
     expect(actual).to.eql(expected);
   });
 
@@ -533,7 +534,7 @@ describe('FilterJoin querying', function () {
         }
       }
     ];
-    var actual = filterJoin(query);
+    var actual = filterJoinSet(query);
     expect(actual).to.eql(expected);
   });
 
@@ -649,7 +650,7 @@ describe('FilterJoin querying', function () {
         }
       }
     ];
-    var actual = filterJoin(query);
+    var actual = filterJoinSet(query);
     expect(actual).to.eql(expected);
   });
 
@@ -765,7 +766,7 @@ describe('FilterJoin querying', function () {
         }
       }
     ];
-    var actual = filterJoin(query);
+    var actual = filterJoinSet(query);
     expect(actual).to.eql(expected);
   });
 
@@ -1049,7 +1050,7 @@ describe('FilterJoin querying', function () {
           }
         }
     ];
-    var actual = filterJoin(query);
+    var actual = filterJoinSet(query);
     expect(actual).to.eql(expected);
   });
 
@@ -1113,7 +1114,7 @@ describe('FilterJoin querying', function () {
         }
       }
     ];
-    var actual = filterJoin(query);
+    var actual = filterJoinSet(query);
     expect(actual).to.eql(expected);
   });
 
@@ -1201,7 +1202,7 @@ describe('FilterJoin querying', function () {
         }
       }
     ];
-    var actual = filterJoin(query);
+    var actual = filterJoinSet(query);
     expect(actual).to.eql(expected);
   });
 
@@ -1209,8 +1210,7 @@ describe('FilterJoin querying', function () {
     it('joins with filters on leaf', function () {
       var query = [
         {
-          join: {
-            isSequence: true,
+          join_sequence: {
             focus: 'investment',
             indexes: [ { id: 'investment' }, { id: 'company' } ],
             relations: [
@@ -1295,15 +1295,14 @@ describe('FilterJoin querying', function () {
           }
         }
       ];
-      var actual = filterJoin(query);
+      var actual = filterJoinSeq(query);
       expect(actual).to.eql(expected);
     });
 
     it('joins with filters on all nodes', function () {
       var query = [
         {
-          join: {
-            isSequence: true,
+          join_sequence: {
             focus: 'investment',
             indexes: [ { id: 'investment' }, { id: 'company' } ],
             relations: [
@@ -1402,15 +1401,14 @@ describe('FilterJoin querying', function () {
           }
         }
       ];
-      var actual = filterJoin(query);
+      var actual = filterJoinSeq(query);
       expect(actual).to.eql(expected);
     });
 
     it('unsupported configuration', function () {
       var query = [
         {
-          join: {
-            isSequence: true,
+          join_sequence: {
             focus: 'aaa',
             indexes: [
               {
@@ -1434,7 +1432,7 @@ describe('FilterJoin querying', function () {
           }
         }
       ];
-      expect(filterJoin).withArgs(query).to.throwError(/expected index/i);
+      expect(filterJoinSeq).withArgs(query).to.throwError(/expected index/i);
     });
   });
 
@@ -1493,7 +1491,7 @@ describe('FilterJoin querying', function () {
         }
       }
     ];
-    var actual = filterJoin(query);
+    var actual = filterJoinSet(query);
     expect(actual).to.eql(expected);
   });
 
@@ -1566,7 +1564,7 @@ describe('FilterJoin querying', function () {
         }
       }
     ];
-    var actual = filterJoin(query);
+    var actual = filterJoinSet(query);
     expect(actual).to.eql(expected);
   });
 });

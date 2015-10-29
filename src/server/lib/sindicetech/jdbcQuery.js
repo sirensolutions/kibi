@@ -4,8 +4,9 @@ var url     = require('url');
 var config  = require('../../config');
 var logger  = require('../logger');
 var AbstractQuery = require('./abstractQuery');
-var jdbcHelper    = require('./jdbcHelper');
-var Jdbc    = require('jdbc-sindicetech');
+var JdbcHelper    = require('./jdbcHelper');
+var jdbcHelper = new JdbcHelper();
+var Jdbc    = require('jdbc');
 var queryHelper = require('./query_helper');
 var debug = false;
 
@@ -27,7 +28,8 @@ JdbcQuery.prototype._init = function () {
   if (self.initialized === true) {
     return Promise.resolve({'message': 'JDBC driver already initialized'});
   }
-  var jdbcConfig = jdbcHelper.prepareJdbcConfig(self.config.datasource.datasourceClazz.datasource.datasourceParams);
+
+  var jdbcConfig = jdbcHelper.prepareJdbcConfig(self.config.datasource.datasourceParams);
 
   return new Promise(function (fulfill, reject) {
 

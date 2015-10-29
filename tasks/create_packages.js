@@ -84,7 +84,7 @@ function copyNodeJavaBindings(name, distPath) {
   }
 
   if (from) {
-    var toFolder = distPath + '/' + name + '/src/node_modules/jdbc-sindicetech/node_modules/java/build/Release/';
+    var toFolder = distPath + '/' + name + '/src/node_modules/jdbc/node_modules/java/build/Release/';
     var to = toFolder + 'nodejavabridge_bindings.node';
     return mkdirp.mkdirpAsync(toFolder).then(function () {
       return copyFile(from, to);

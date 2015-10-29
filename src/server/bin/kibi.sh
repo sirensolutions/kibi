@@ -23,5 +23,8 @@ then
   $DIR/bin/create_symlink.sh
 fi
 
+# add shipped node to the path as sync_request in fallback mode requires installed node
+export PATH="$PATH:${DIR}/node/bin"
+
 ROOT_DIR="$DIR/" CONFIG_PATH="${DIR}/config/kibi.yml" NODE_ENV="production" exec "${NODE}" ${SERVER} ${@}
 

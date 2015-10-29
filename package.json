@@ -61,10 +61,11 @@
     "lru-cache": "~2.6.4",
     "mysql": "2.5.5",
     "pg": "4.3.0",
-    "jdbc-sindicetech": "0.0.14-pre2",
+    "jdbc": "0.0.15",
     "kibiutils": "sirensolutions/kibiutils#1.0.0",
     "sqlite3": "3.0.9",
-    "jsonpath": "0.2.0"
+    "jsonpath": "0.2.0",
+    "sync-request": "2.0.1"
   },
   "devDependencies": {
     "bower": "^1.4.1",
@@ -110,7 +111,6 @@
     "simple-git": "^0.11.0",
     "sinon": "^1.12.2",
     "sinon-as-promised": "^2.0.3",
-    "sync-request": "2.0.1",
     "tar": "^1.0.1",
     "time-grunt": "1.2.1",
     "mockery": "1.4.0"

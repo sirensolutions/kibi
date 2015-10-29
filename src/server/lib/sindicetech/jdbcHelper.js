@@ -1,8 +1,9 @@
-var _       = require('lodash');
-var os      = require('os');
+var _            = require('lodash');
+var os           = require('os');
 var sync_request = require('sync-request');
-var config  = require('../../config');
-var logger  = require('../logger');
+var config       = require('../../config');
+var logger       = require('../logger');
+var cryptoHelper = require('./crypto_helper');
 
 var _endsWith = function (s, suffix) {
   return s.indexOf(suffix, s.length - suffix.length) !== -1;
@@ -61,26 +62,35 @@ JdbcHelper.prototype.getAbsolutePathToSindicetechFolder = function () {
   return pathToSindicetechFolder;
 };
 
-JdbcHelper.prototype.prepareJdbcConfig = function (conf) {
 
+JdbcHelper.prototype.prepareJdbcConfig = function (conf) {
   var pathToSindicetechFolder = this.getAbsolutePathToSindicetechFolder();
   var libpath = '';
   var libs = [];
 
   if (os.platform().indexOf('win') === 0) {
+
     //windows
-    libpath = pathToSindicetechFolder + conf.libpath.replace(/\//g, '\\');
-    // just in case of any double backslashes replace them to single ones
-    libpath = libpath.replace(/\\{2}/g, '\\');
-    libs = _.map(conf.libs, function (libpath) {
-      return pathToSindicetechFolder + libpath.replace(/\//g, '\\');
-    });
+    var winAbspathRegex = /^[A-Z]:\\\\/;
+    libpath = winAbspathRegex.test(conf.libpath) ?
+      conf.libpath.replace(/\//g, '\\') :
+      pathToSindicetechFolder + conf.libpath.replace(/\\{2}/g, '\\').replace(/\//g, '\\');
+
+    if (conf.libs) {
+      libs = _.map(conf.libs, function (libpath) {
+        return winAbspathRegex.test(libpath.test) ?
+          libpath.replace(/\//g, '\\') :
+          pathToSindicetechFolder + libpath.replace(/\\{2}/g, '\\').replace(/\//g, '\\');
+      });
+    }
   } else {
     //unix
     libpath = conf.libpath.indexOf('/') === 0 ? conf.libpath : pathToSindicetechFolder + conf.libpath;
-    libs = _.map(conf.libs, function (libpath) {
-      return libpath.indexOf('/') === 0 ? libpath : pathToSindicetechFolder + libpath;
-    });
+    if (conf.libs) {
+      libs = _.map(conf.libs, function (libpath) {
+        return libpath.indexOf('/') === 0 ? libpath : pathToSindicetechFolder + libpath;
+      });
+    }
   }
 
   var jdbcConfig = {
@@ -88,8 +98,15 @@ JdbcHelper.prototype.prepareJdbcConfig = function (conf) {
     libs: libs,
     drivername: conf.drivername,
     url: conf.connection_string,
-    user: conf.username,
-    password: conf.password
+    properties: [
+      [ 'user', conf.username ],
+      [ 'password', cryptoHelper.decrypt(config.kibana.datasource_encryption_key, conf.password) ]
+      // IMPROVE ME
+      // here it is fine as password is always encrypted
+      // but we need a better method to decrypt all parameters based on schema
+      // however when loading jdbc libs the datasource was not created yet so there is no datasourceClazz available
+      // so we would have to get the schema ourselves here
+    ]
   };
   return jdbcConfig;
 
@@ -150,4 +167,4 @@ JdbcHelper.prototype.prepareJdbcPaths = function () {
   return ret;
 };
 
-module.exports = new JdbcHelper();
+module.exports = JdbcHelper;

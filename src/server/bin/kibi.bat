@@ -14,9 +14,11 @@ set ROOT_DIR=%DIR%\
 TITLE Kibi Server @@version
 
 
-set JAVA_POST_INSTALL=%DIR%\src\node_modules\jdbc-sindicetech\node_modules\java\postInstall.js
+set JAVA_POST_INSTALL=%DIR%\src\node_modules\jdbc\node_modules\java\postInstall.js
 "%NODE%" "%JAVA_POST_INSTALL%"
 
+REM add shipped node to the path as sync_request in fallback mode requires installed node
+set PATH=%PATH%;%DIR%\node
 
 "%NODE%" "%SERVER%" %*
 

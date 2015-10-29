@@ -47,7 +47,11 @@ module.exports = function (grunt) {
         'amdefine@1.0.0': ['BSD-3-Clause', 'MIT'],
         'jison@0.4.13': ['MIT'],
         'JSONSelect@0.4.0': ['MIT'],
-        'nomnom@1.5.2': ['MIT']
+        'nomnom@1.5.2': ['MIT'],
+        'process-nextick-args@1.0.3': ['MIT'],
+        'util-deprecate@1.0.2': ['MIT'],
+        'is-my-json-valid@2.12.1': ['MIT'],
+        'rc@1.1.0': ['MIT']
       }
     }
   };

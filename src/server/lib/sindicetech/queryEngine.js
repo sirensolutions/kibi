@@ -28,8 +28,8 @@ if (config.kibana.load_jdbc === true) {
   var JdbcHelper    = require('./jdbcHelper');
   jdbcHelper = new JdbcHelper();
 
-  var pathToSindicetechFolder = jdbcHelper.getRelativePathToSindicetechFolder();
-  nodeJava   = require(pathToSindicetechFolder.replace(/\\/g, '/') + 'node_modules/jdbc/node_modules/java');
+  var pathToNodeModulesFolder = jdbcHelper.getRelativePathToNodeModulesFolder();
+  nodeJava   = require(pathToNodeModulesFolder.replace(/\\/g, '/') + 'jdbc/node_modules/java');
 
   // prepare the java classpath before calling any other method
   var paths = jdbcHelper.prepareJdbcPaths();

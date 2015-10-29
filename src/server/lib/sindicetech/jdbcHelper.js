@@ -14,49 +14,58 @@ function JdbcHelper() {
 }
 
 
-JdbcHelper.prototype.getRelativePathToSindicetechFolder = function () {
-  var pathToSindicetechFolder = '';
+// this method exists purely to be able to test
+// getRelativePathToNodeModulesFolder and getAbsolutePathToSindicetechFolder
+JdbcHelper.prototype._getDirName = function () {
+  return __dirname;
+};
+
+
+JdbcHelper.prototype.getRelativePathToNodeModulesFolder = function () {
+  var currentDir = this._getDirName();
+  var pathToNodeModulesFolder = '';
   if (os.platform().indexOf('win') === 0) {
     //windows
-    if (_endsWith(__dirname, '\\src\\server\\lib\\sindicetech')) {
+    if (_endsWith(currentDir, '\\src\\server\\lib\\sindicetech')) {
       // development
-      pathToSindicetechFolder = '..\\..\\..\\..\\';
-    } else if (_endsWith(__dirname, '\\lib\\sindicetech')) {
+      pathToNodeModulesFolder = '..\\..\\..\\..\\node_modules\\';
+    } else if (_endsWith(currentDir, '\\src\\lib\\sindicetech')) {
       // production
-      pathToSindicetechFolder = '..\\..\\';
+      pathToNodeModulesFolder = '..\\..\\node_modules\\';
     }
   } else {
     //unix
-    if (_endsWith(__dirname, '/src/server/lib/sindicetech')) {
+    if (_endsWith(currentDir, '/src/server/lib/sindicetech')) {
       // development
-      pathToSindicetechFolder = '../../../../';
-    } else if (_endsWith(__dirname, '/lib/sindicetech')) {
+      pathToNodeModulesFolder = '../../../../node_modules/';
+    } else if (_endsWith(currentDir, '/src/lib/sindicetech')) {
       // production
-      pathToSindicetechFolder = '../../';
+      pathToNodeModulesFolder = '../../node_modules/';
     }
   }
-  return pathToSindicetechFolder;
+  return pathToNodeModulesFolder;
 };
 
 JdbcHelper.prototype.getAbsolutePathToSindicetechFolder = function () {
+  var currentDir = this._getDirName();
   var pathToSindicetechFolder = '';
   if (os.platform().indexOf('win') === 0) {
     //windows
-    if (_endsWith(__dirname, '\\src\\server\\lib\\sindicetech')) {
+    if (_endsWith(currentDir, '\\src\\server\\lib\\sindicetech')) {
       // development
-      pathToSindicetechFolder = __dirname.replace(/src\\server\\lib\\sindicetech$/, '');
-    } else if (_endsWith(__dirname, '\\lib\\sindicetech')) {
+      pathToSindicetechFolder = currentDir.replace(/src\\server\\lib\\sindicetech$/, '');
+    } else if (_endsWith(currentDir, '\\src\\lib\\sindicetech')) {
       // production
-      pathToSindicetechFolder = __dirname.replace(/lib\\sindicetech$/, '');
+      pathToSindicetechFolder = currentDir.replace(/src\\lib\\sindicetech$/, '');
     }
   } else {
     //unix
-    if (_endsWith(__dirname, '/src/server/lib/sindicetech')) {
+    if (_endsWith(currentDir, '/src/server/lib/sindicetech')) {
       // development
-      pathToSindicetechFolder = __dirname.replace(/src\/server\/lib\/sindicetech$/, '');
-    } else if (_endsWith(__dirname, '/lib/sindicetech')) {
+      pathToSindicetechFolder = currentDir.replace(/src\/server\/lib\/sindicetech$/, '');
+    } else if (_endsWith(currentDir, '/src/lib/sindicetech')) {
       // production
-      pathToSindicetechFolder = __dirname.replace(/lib\/sindicetech$/, '');
+      pathToSindicetechFolder = currentDir.replace(/src\/lib\/sindicetech$/, '');
     }
   }
   return pathToSindicetechFolder;

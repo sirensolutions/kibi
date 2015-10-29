@@ -60,6 +60,11 @@ define(function (require) {
           $window.alert('Please fill in all the required parameters.');
           return;
         }
+
+        if (datasource.datasourceType === 'sql_jdbc' || datasource.datasourceType === 'sparql_jdbc') {
+          notify.warning('Changes in jdbc datasource require application restart. Please restart kibi');
+        }
+
         datasource.id = datasource.title;
 
         // make sure that any parameter which does not belong to the schema

@@ -147,6 +147,9 @@ image::images/external-sources/queries-editor-sql1.png["Configuration of a SQL e
 The preview section will display the results of the query as a table or as a
 JSON object.
 
+NOTE: Currently, a query is executed synchronously on the server. Kibi needs then to wait until results are retrieved.
+Therefore, long standing queries may block Kibi for an undeterminate amount of time.
+
 [float]
 [[query-variables]]
 ==== Query variables:

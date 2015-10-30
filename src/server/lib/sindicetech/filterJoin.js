@@ -1,4 +1,5 @@
 var util = require('./util');
+var _ = require('lodash');
 
 /**
  * Generate a SIREn filterjoin query based on the given relations with the focused index as the root of the query.
@@ -28,44 +29,20 @@ var util = require('./util');
  */
 exports.sequence = function (json) {
   var label = 'join_sequence';
-  var objects = util.traverse(json, label, function (err, data) {
+  var objects = util.traverse(json, label, function (err, sequence) {
     if (err) {
       throw err;
     }
 
-    var focus = data.focus;
-    var relations = data.relations;
-    var filters = data.filters;
-    var indexes = data.indexes;
-
-    if (focus === undefined) {
-      throw new Error('Missing focus field in the join object: ' + JSON.stringify(data, null, ' '));
+    if (!sequence || sequence.constructor !== Array || sequence.length === 0) {
+      throw new Error('Specify the join sequence: ' + JSON.stringify(sequence, null, ' '));
     }
-    if (indexes === undefined) {
-      throw new Error('Missing indexes field in the join object: ' + JSON.stringify(data, null, ' '));
-    }
-    if (relations === undefined) {
-      throw new Error('Missing relations field in the join object: ' + JSON.stringify(data, null, ' '));
-    }
-    if (filters === undefined) {
-      filters = [];
-      for (var i = 0; i < relations.length; i++) {
-        filters.push({});
-      }
-    }
-    if (relations.length !== filters.length) {
-      throw new Error('The relations and filters arrays must have the same length');
-    }
-
-    // restrict the supported filterjoin queries
-    for (var j = 0; j < relations.length; j++) {
-      if (relations[j].length !== 1) {
-        throw new Error('Only one join is currently supported');
-      }
+    if (sequence.length < 2) {
+      throw new Error('Sequence must have at least two elements');
     }
 
     var query = [];
-    _sequenceJoins(query, focus, relations, filters, indexes);
+    _sequenceJoins(query, sequence);
     return query;
   });
   _replaceObjects(json, objects);
@@ -129,34 +106,20 @@ function _replaceObjects(json, objects) {
   }
 }
 
-function _assertRelation(relation) {
-  if (relation.length !== 2) {
-    throw new Error('Expected relation entry with 2 elements: got ' + relation);
-  }
-}
-
 /**
  * Create the filterjoin from the sequence of relations
  */
-function _sequenceJoins(query, focus, relations, filters, indexes) {
-  var curQuery = query;
-  var curFocus = focus;
+function _sequenceJoins(query, sequence) {
+  var ind = sequence.length - 1;
 
-  for (var i = relations.length - 1; i >= 0; i--) {
-    var relation = relations[i][0];
-    var dotFocus = curFocus + '.';
-
-    _assertRelation(relation);
-
-    var ind = _getFocusedRelationIndex(dotFocus, relation);
-    if (ind !== -1) {
-      var targetRel = relation[ind === 0 ? 1 : 0];
-      curQuery = _addFilterJoin(curQuery, relation[ind], targetRel, indexes);
-      curFocus = targetRel.substr(0, targetRel.indexOf('.'));
-      _addFilters(curQuery, curFocus, filters[i]);
-    } else {
-      throw new Error('Expected index [' + curFocus + '] in relation ' + JSON.stringify(relation, null, ' '));
-    }
+  if (!!sequence[ind].queries) {
+    throw new Error('Queries for the root node are already set');
+  }
+  var curQuery = _addFilterJoin(query, sequence[ind].path, sequence[ind - 1].path, sequence[ind - 1]);
+  _addFilters(curQuery, sequence[ind - 1].queries);
+  for (var i = ind - 2; i >= 0; i--) {
+    curQuery = _addFilterJoin(curQuery, sequence[i + 1].path, sequence[i].path, sequence[i]);
+    _addFilters(curQuery, sequence[i].queries);
   }
 }
 
@@ -173,16 +136,40 @@ function _process(query, focus, relations, filters, indexes, visitedIndices) {
 
   var dotFocus = focus + '.';
 
-  _addFilters(query, focus, filters);
+  if (filters.hasOwnProperty(focus)) {
+    var focusFilters = filters[focus];
+    _addFilters(query, focusFilters);
+  }
   for (var i = 0; i < relations.length; i++) {
-    _assertRelation(relations[i]);
+    if (relations[i].length !== 2) {
+      throw new Error('Expected relation entry with 2 elements: got ' + relations[i]);
+    }
     var ind = _getFocusedRelationIndex(dotFocus, relations[i]);
     if (ind !== -1) {
       var targetInd = ind === 0 ? 1 : 0;
+      var sourceRel = relations[i][ind];
       var targetRel = relations[i][targetInd];
-      var targetIndex = targetRel.substr(0, targetRel.indexOf('.'));
+
+      // path in the source indices
+      var sourceDot = sourceRel.indexOf('.');
+      if (sourceDot === -1) {
+        throw new Error('Missing dot in [' + sourceRel + ']');
+      }
+      var sourcePath = sourceRel.substr(sourceDot + 1);
+
+      // path in target indices
+      var targetDot = targetRel.indexOf('.');
+      if (targetDot === -1) {
+        throw new Error('Missing dot in [' + targetRel + ']');
+      }
+      var targetPath = targetRel.substr(targetDot + 1);
+
+      // TODO update the definition of the indexes array
+      var targetIndex = targetRel.substr(0, targetDot);
       if (!visitedIndices.hasOwnProperty(targetIndex)) {
-        var childFilters = _addFilterJoin(query, relations[i][ind], targetRel, indexes);
+        var ti = _.find(indexes, { id: targetIndex });
+        ti.indices = [ targetIndex ];
+        var childFilters = _addFilterJoin(query, sourcePath, targetPath, ti);
         _process(childFilters, targetIndex, relations, filters, indexes, visitedIndices);
       }
     }
@@ -192,37 +179,22 @@ function _process(query, focus, relations, filters, indexes, visitedIndices) {
 /**
  * Adds a filterjoin filter to the given query, from the source index to the target index
  */
-function _addFilterJoin(query, source, target, indexes) {
-  var sourceDot = source.indexOf('.');
-  if (sourceDot === -1) {
-    throw new Error('Missing dot in [' + source + ']');
-  }
-  var sourceIndex = source.substr(0, sourceDot);
-  var sourcePath = source.substr(sourceDot + 1);
-
-  var targetDot = target.indexOf('.');
-  if (targetDot === -1) {
-    throw new Error('Missing dot in [' + target + ']');
-  }
-  var targetIndex = target.substr(0, targetDot);
-  var targetPath = target.substr(targetDot + 1);
-
+function _addFilterJoin(query, sourcePath, targetPath, targetIndex) {
   var types = [];
   var orderBy;
   var maxTermsPerShard;
-  for (var i = 0; i < indexes.length; i++) {
-    if (indexes[i].id === targetIndex) {
-      if (indexes[i].type) {
-        types.push(indexes[i].type);
-      }
-      orderBy = indexes[i].orderBy;
-      maxTermsPerShard = indexes[i].maxTermsPerShard;
-      break;
-    }
+
+  if (!targetIndex) {
+    throw new Error('The target index must be defined');
   }
+  if (targetIndex.type) {
+    types.push(targetIndex.type);
+  }
+  orderBy = targetIndex.orderBy;
+  maxTermsPerShard = targetIndex.maxTermsPerShard;
 
   var filterJoin = {
-    indices: [targetIndex],
+    indices: targetIndex.indices,
     path: targetPath,
     query: {
       filtered: {
@@ -281,22 +253,22 @@ function _getFocusedRelationIndex(focus, relation) {
 /**
  * Adds all the filters about the focus
  */
-function _addFilters(query, focus, filters) {
-  if (filters.hasOwnProperty(focus)) {
-    var focusFilters = filters[focus];
-    if (focusFilters.constructor !== Array) {
-      throw new Error('The filter for the index=[' + focus + '] must be an array');
-    }
-    for (var i = 0; i < focusFilters.length; i++) {
-      if (query.constructor === Array) {
-        query.push(focusFilters[i]);
+function _addFilters(query, focusFilters) {
+  if (!focusFilters) {
+    return;
+  }
+  if (focusFilters.constructor !== Array) {
+    throw new Error('The queries field must be an array');
+  }
+  for (var i = 0; i < focusFilters.length; i++) {
+    if (query.constructor === Array) {
+      query.push(focusFilters[i]);
+    } else {
+      // add the query object to filtered.query so that the score is computed
+      if (focusFilters[i].hasOwnProperty('query')) {
+        query.query.bool.must.push(focusFilters[i].query);
       } else {
-        // add the query object to filtered.query so that the score is computed
-        if (focusFilters[i].hasOwnProperty('query')) {
-          query.query.bool.must.push(focusFilters[i].query);
-        } else {
-          query.filter.bool.must.push(focusFilters[i]);
-        }
+        query.filter.bool.must.push(focusFilters[i]);
       }
     }
   }

@@ -131,7 +131,7 @@ RestQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
           try {
             json = JSON.parse(body);
           } catch (e) {
-            var msg = 'Error while parsing body into json. Details: ' + e.message;
+            var msg = 'Error while parsing body as JSON. Details: ' + e.message;
             self._logFailedRequestDetails(msg, e, resp);
             throw new Error(msg);
           }
@@ -141,7 +141,7 @@ RestQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
             try {
               data.results = jsonpath.query(json, self.config.rest_resp_restriction_path);
             } catch (e) {
-              var msg = 'Error while applying the jsonpath expression. Details: ' + e.message;
+              var msg = 'Error while executing the JSONPath expression. Details: ' + e.message;
               self._logFailedRequestDetails(msg, e, resp);
               throw new Error(msg);
             }

@@ -2,30 +2,16 @@ var util = require('./util');
 var _ = require('lodash');
 
 /**
- * Generate a SIREn filterjoin query based on the given relations with the focused index as the root of the query.
- * The sequence of joins is explicitly defined in the query.
+ * Generate a SIREn filterjoin query where the sequence of joins is explicitly defined in the query.
  *
- * A filterjoin is an object with the following fields:
- * - focus: the focused index as a string
- * - relations: the sequence of relations. It is an array with each element being an array that describes the graph.
- *   A graph is a collection of arrays that represent a connection between two indices. An edge is a path to the join
- *   field in an index.
- *   For example, a sequence can be as follows:
- *      [
- *        [
- *          [ "b.id", "c.bid" ],
- *          [ "b.id", "d.bid" ]
- *        ],
- *        [
- *          [ "a.id", "b.aid" ]
- *        ]
- *      ]
- *   This sequence has two graphs, the first one has one edge, and the second has two edges.
- *   The sequence is read in **reverse**.
- * - filters: the filters for each index as an array of object, each object with entries being the index names. There
- *   should be as many filters as there are elements in the sequence. The filters and relations arrays go in pair.
- * - indexes: the list of indexes involved in the filterjoin query. This is an array of object, each object describing
- *   an index by specifying two properties, i.e., the id and the type of index.
+ * A join_sequence is an array where each element defines a node of the join sequence.
+ * Each element contains the following fields:
+ * - path: the path to the joined field
+ * - indices: an array of indices to join on
+ * - types: the corresponding array of types
+ * - orderBy: the filterjoin ordering option
+ * - maxTermsPerShard: the maximum number of terms to consider in the filterjoin
+ * - queries: and array of queries that are applied on the set of indices
  */
 exports.sequence = function (json) {
   var label = 'join_sequence';

@@ -148,19 +148,16 @@ Query.prototype.getHtml = function (uri, option) {
     that.fetchResults(uri, null, option.queryVariableName).then(function (data) {
       // here take the results and compile the result template
 
-
-      var dataClone = _.clone(data, true);
-
       // here if there is a prefix replace it in values when they are uris
       // this does not go to the fetch results function because
       // the results from that function should not be modified in any way
       try {
-        dataClone = that._postprocessResults(dataClone);
+        data = that._postprocessResults(data);
       } catch (e) {
         logger.error(e);
       }
       // here unique id
-      dataClone.id = kibiUtils.getUuid4();
+      data.id = kibiUtils.getUuid4();
 
       // make sure that only picked not sensitive values goes in config
       // as it will be visible on the frontend
@@ -171,7 +168,7 @@ Query.prototype.getHtml = function (uri, option) {
       safeConfig.showFilterButton = option.showFilterButton;
       safeConfig.redirectToDashbord = option.redirectToDashbord;
       // now override the oryginal config
-      dataClone.config = safeConfig;
+      data.config = safeConfig;
 
       // here fetch template via $http and cache it
       that._fetchTemplate(option.templateId)
@@ -187,12 +184,12 @@ Query.prototype.getHtml = function (uri, option) {
           if (templateEngine === 'handlebars') {
 
             var hbTemplate = handlebars.compile(templateSource);
-            html = hbTemplate(dataClone);
+            html = hbTemplate(data);
 
           } else if (templateEngine === 'jade') {
 
             var jadeFn = jade.compile(templateSource);
-            html = jadeFn(dataClone);
+            html = jadeFn(data);
 
           } else {
 
@@ -202,7 +199,7 @@ Query.prototype.getHtml = function (uri, option) {
 
           fulfill({
             queryActivated: true,
-            data: dataClone,
+            data: data,
             html: html
           });
 
@@ -217,7 +214,7 @@ Query.prototype.getHtml = function (uri, option) {
         logger.error(err);
         fulfill({
           error: err.message,
-          data: dataClone
+          data: data
         });
 
       });

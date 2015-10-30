@@ -147,6 +147,8 @@ image::images/external-sources/queries-editor-sql1.png["Configuration of a SQL e
 The preview section will display the results of the query as a table or as a
 JSON object.
 
+NOTE: Template rendering is currently a blocking operation, therefore queries returning a large number of results might make the backend unresponsive for an indeterminate amount of time.
+
 [float]
 [[query-variables]]
 ==== Query variables:

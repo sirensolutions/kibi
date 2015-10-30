@@ -145,12 +145,12 @@ Query.prototype._fetchTemplate  = function (templateId) {
 };
 
 
-Query.prototype.getHtml = function (queryOption, options) {
+Query.prototype.getHtml = function (queryDef, options) {
   var that = this;
 
   return new Promise(function (fulfill, reject) {
     // first run fetch results
-    that.fetchResults(options, null, queryOption.queryVariableName).then(function (data) {
+    that.fetchResults(options, null, queryDef.queryVariableName).then(function (data) {
       // here take the results and compile the result template
 
       // here if there is a prefix replace it in values when they are uris
@@ -168,15 +168,15 @@ Query.prototype.getHtml = function (queryOption, options) {
       // as it will be visible on the frontend
       var safeConfig = {};
       safeConfig.id = that.id;
-      safeConfig.templateVars = queryOption.templateVars;
-      safeConfig.open = queryOption.open;
-      safeConfig.showFilterButton = queryOption.showFilterButton;
-      safeConfig.redirectToDashbord = queryOption.redirectToDashbord;
+      safeConfig.templateVars = queryDef.templateVars;
+      safeConfig.open = queryDef.open;
+      safeConfig.showFilterButton = queryDef.showFilterButton;
+      safeConfig.redirectToDashbord = queryDef.redirectToDashbord;
       // now override the oryginal config
       data.config = safeConfig;
 
       // here fetch template via $http and cache it
-      that._fetchTemplate(queryOption.templateId)
+      that._fetchTemplate(queryDef.templateId)
       .then(function (template) {
 
         var templateSource = template.st_templateSource;

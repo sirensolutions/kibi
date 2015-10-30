@@ -23,7 +23,7 @@ RestQuery.prototype = _.create(AbstractQuery.prototype, {
  *    "boolean": true/false
  * }
  */
-RestQuery.prototype.checkIfItIsRelevant = function (uri) {
+RestQuery.prototype.checkIfItIsRelevant = function (options) {
   // in case of rest query the activation query is a regex string
   var query = '';
   if (this.config.activationQuery) {
@@ -35,12 +35,16 @@ RestQuery.prototype.checkIfItIsRelevant = function (uri) {
   }
 
   // here match uri against the regex
-  try {
-    var regex = new RegExp(query);
-    return Promise.resolve({'boolean': regex.test(uri)});
-  } catch (e) {
-    return Promise.reject(new Error('Problem parsing regex [' + query + ']'));
+  if (options.selectedDocuments && options.selectedDocuments.length > 0) {
+    try {
+      var regex = new RegExp(query);
+      return Promise.resolve({'boolean': regex.test(options.selectedDocuments[0])});
+    } catch (e) {
+      return Promise.reject(new Error('Problem parsing regex [' + query + ']'));
+    }
   }
+
+  return Promise.resolve({'boolean': true});
 };
 
 
@@ -50,8 +54,14 @@ RestQuery.prototype._logFailedRequestDetails = function (msg, originalError, res
   logger.error(resp);
 };
 
-RestQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
+RestQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) {
   var self = this;
+
+  if (self._checkIfSelectedDocumentRequiredAndPresent(options)) {
+    return self._returnAnEmptyQueryResultsPromise('No data because the query require entityURI');
+  }
+  // currently we use only single selected document
+  var uri = options.selectedDocuments && options.selectedDocuments.length > 0 ? options.selectedDocuments[0] : '';
 
   var url_s = this.config.datasource.datasourceClazz.datasource.datasourceParams.url;
   var timeout = this.config.datasource.datasourceClazz.datasource.datasourceParams.timeout;

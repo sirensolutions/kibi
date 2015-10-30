@@ -64,14 +64,15 @@ JdbcQuery.prototype._closeConnection = function (conn) {
  *    "boolean": true/false
  * }
  */
-JdbcQuery.prototype.checkIfItIsRelevant = function (uri) {
+JdbcQuery.prototype.checkIfItIsRelevant = function (options) {
   var self = this;
 
   return self._init().then(function (data) {
 
-    if (self.requireEntityURI && (!uri || uri === '')) {
-      return Promise.reject('Got empty uri while it is required by mysql activation query');
+    if (self._checkIfSelectedDocumentRequiredAndPresent(options)) {
+      return Promise.reject('No elasticsearch document selected while required by the jdbc activation query. [' + self.config.id + ']');
     }
+    var uri = options.selectedDocuments && options.selectedDocuments.length > 0 ? options.selectedDocuments[0] : '';
 
     // here do not use getConnectionString method as it might contain sensitive information like decrypted password
     var connection_string = self.config.datasource.datasourceClazz.datasource.datasourceParams.connection_string;
@@ -118,16 +119,18 @@ JdbcQuery.prototype.checkIfItIsRelevant = function (uri) {
   });
 };
 
-JdbcQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
+JdbcQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) {
   var self = this;
   return self._init().then(function (data) {
 
     var start = new Date().getTime();
     // special case - we can not simply reject the Promise
     // bacause it will cause the whole group of promissses to be rejected
-    if (self.resultQueryRequireEntityURI && (!uri || uri === '')) {
+    if (self._checkIfSelectedDocumentRequiredAndPresent(options)) {
       return self._returnAnEmptyQueryResultsPromise('No data because the query require entityURI');
     }
+    // currently we use only single selected document
+    var uri = options.selectedDocuments && options.selectedDocuments.length > 0 ? options.selectedDocuments[0] : '';
 
     var connection_string = self.config.datasource.datasourceClazz.datasource.datasourceParams.connection_string;
     var max_age = self.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;

@@ -5,7 +5,7 @@ function InactivatedQuery(id) {
 }
 
 
-InactivatedQuery.prototype.fetchResults = function (uri, onlyIds) {
+InactivatedQuery.prototype.fetchResults = function (options, onlyIds) {
   return Promise.resolve({
     ids: [],
     queryActivated: false
@@ -13,7 +13,7 @@ InactivatedQuery.prototype.fetchResults = function (uri, onlyIds) {
 };
 
 
-InactivatedQuery.prototype.getHtml = function (uri, queryOptions) {
+InactivatedQuery.prototype.getHtml = function (queryDef, options) {
   return Promise.resolve({
     queryActivated: false
   });

@@ -323,7 +323,7 @@ QueryEngine.prototype._getDatasourceFromEs = function (datasourceId) {
  * b) query label matches the names in queryIds (if provided)
  * Order is given by the priority value.
  */
-QueryEngine.prototype._getQueries = function (uri, queryIds) {
+QueryEngine.prototype._getQueries = function (queryIds, options) {
   var that = this;
 
   if (this.queries.length === 0) {
@@ -389,7 +389,7 @@ QueryEngine.prototype._getQueries = function (uri, queryIds) {
   var fromRightFolder = withRightId;
 
   var promises = _.map(fromRightFolder, function (query) {
-    return query.checkIfItIsRelevant(uri);
+    return query.checkIfItIsRelevant(options);
   });
 
 
@@ -443,14 +443,6 @@ QueryEngine.prototype._getQueryDefById = function (queryDefs, queryId) {
 };
 
 
-QueryEngine.prototype._getOptionById = function (queryOptions, queryId) {
-  // find the right option
-  return _.find(queryOptions, function (option) {
-    return option.queryId === queryId;
-  });
-};
-
-
 /*
  * Executes given queries and returns only extracted ids
  * Use this method when you need just ids
@@ -464,7 +456,7 @@ QueryEngine.prototype._getOptionById = function (queryOptions, queryId) {
  *    ...
  *  ]
  */
-QueryEngine.prototype.getIdsFromQueries = function (uri, queryDefs) {
+QueryEngine.prototype.getIdsFromQueries = function (queryDefs, options) {
   var self = this;
 
   var queryIds = _.map(queryDefs, function (queryDef) {
@@ -472,12 +464,12 @@ QueryEngine.prototype.getIdsFromQueries = function (uri, queryDefs) {
   });
 
   return self._init().then(function () {
-    return self._getQueries(uri, queryIds)
+    return self._getQueries(queryIds, options)
     .then(function (queries) {
       var promises = _.map(queries, function (query) {
         var queryDefinition = self._getQueryDefById(queryDefs, query.id);
         var queryVariableName = queryDefinition ? queryDefinition.queryVariableName : null;
-        return query.fetchResults(uri, true, queryVariableName);
+        return query.fetchResults(options, true, queryVariableName);
       });
       return Promise.all(promises);
     });
@@ -486,7 +478,7 @@ QueryEngine.prototype.getIdsFromQueries = function (uri, queryDefs) {
 
 // Returns an array with response data from all relevant queries
 // Use this method when you need just data and not query html
-QueryEngine.prototype.getQueriesData = function (uri, queryDefs) {
+QueryEngine.prototype.getQueriesData = function (queryDefs, options) {
   var self = this;
 
   var queryIds = _.map(queryDefs, function (queryDef) {
@@ -494,21 +486,21 @@ QueryEngine.prototype.getQueriesData = function (uri, queryDefs) {
   });
 
   return self._init().then(function () {
-    return self._getQueries(uri, queryIds)
+    return self._getQueries(queryIds, options)
     .then(function (queries) {
 
       var promises = _.map(queries, function (query) {
 
         var queryDefinition = self._getQueryDefById(queryDefs, query.id);
         var queryVariableName = queryDefinition ? queryDefinition.queryVariableName : null;
-        return query.fetchResults(uri, null, queryVariableName);
+        return query.fetchResults(options, null, queryVariableName);
       });
       return Promise.all(promises);
     });
   });
 };
 
-QueryEngine.prototype.getQueriesHtml = function (uri, queryDefs) {
+QueryEngine.prototype.getQueriesHtml = function (queryDefs, options) {
   var self = this;
 
   var queryIds = _.map(queryDefs, function (queryDef) {
@@ -517,13 +509,13 @@ QueryEngine.prototype.getQueriesHtml = function (uri, queryDefs) {
 
 
   return self._init().then(function () {
-    return self._getQueries(uri, queryIds)
+    return self._getQueries(queryIds, options)
     .then(function (queries) {
 
       var promises = _.map(queries, function (query) {
 
         var queryDef = self._getQueryDefById(queryDefs, query.id);
-        return query.getHtml(uri, queryDef);
+        return query.getHtml(queryDef, options);
 
       });
       return Promise.all(promises);

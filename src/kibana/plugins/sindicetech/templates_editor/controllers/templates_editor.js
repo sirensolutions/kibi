@@ -93,7 +93,6 @@ define(function (require) {
         if ($scope.template._previewQueryId && $scope.template._previewQueryId !== '') {
 
           queryEngineClient.getQueriesHtmlFromServer(
-            $scope.holder.entityURI,
             [
               {
                 open: true,
@@ -105,6 +104,9 @@ define(function (require) {
                 }
               }
             ],
+            {
+              selectedDocuments: [$scope.holder.entityURI]
+            },
             true
           ).then(function (resp) {
             if (resp && resp.data && resp.data.snippets && resp.data.snippets.length === 1) {

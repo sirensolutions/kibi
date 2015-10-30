@@ -7,12 +7,12 @@ define(function (require) {
 
     function QueryEngineClient() {}
 
-    QueryEngineClient.prototype._makeRequestToServer = function (url, uri, queryDefs, async) {
+    QueryEngineClient.prototype._makeRequestToServer = function (url, queryDefs, options, async) {
       if (queryDefs && !(queryDefs instanceof Array) && (typeof queryDefs === 'object') && queryDefs !== null) {
         queryDefs = [queryDefs];
       }
       var params = {
-        entityURI: uri,
+        options: JSON.stringify(options),
         queryDefs: JSON.stringify(queryDefs)
       };
 
@@ -47,12 +47,12 @@ define(function (require) {
       }
     };
 
-    QueryEngineClient.prototype.getQueriesDataFromServer = function (uri, queryDefs, async) {
-      return this._makeRequestToServer('datasource/getQueriesData', uri, queryDefs, async);
+    QueryEngineClient.prototype.getQueriesDataFromServer = function (queryDefs, options, async) {
+      return this._makeRequestToServer('datasource/getQueriesData', queryDefs, options, async);
     };
 
-    QueryEngineClient.prototype.getQueriesHtmlFromServer = function (uri, queryDefs, async) {
-      return this._makeRequestToServer('datasource/getQueriesHtml', uri, queryDefs, async);
+    QueryEngineClient.prototype.getQueriesHtmlFromServer = function (queryDefs, options, async) {
+      return this._makeRequestToServer('datasource/getQueriesHtml', queryDefs, options, async);
     };
 
     QueryEngineClient.prototype.clearCache = function () {

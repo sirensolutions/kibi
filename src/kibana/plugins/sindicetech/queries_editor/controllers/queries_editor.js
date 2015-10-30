@@ -220,7 +220,6 @@ define(function (require) {
           queryEngineClient.clearCache().then(function () {
 
             queryEngineClient.getQueriesHtmlFromServer(
-              $scope.holder.entityURI,
               [
                 {
                   open: true,
@@ -233,6 +232,9 @@ define(function (require) {
                   }
                 }
               ],
+              {
+                selectedDocuments: [$scope.holder.entityURI]
+              },
               true
             ).then(function (resp) {
               if (resp && resp.data && resp.data.error) {

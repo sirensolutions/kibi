@@ -21,7 +21,7 @@ router.get('/clearCache', function (req, res, next) {
 
 router.get('/getQueriesHtml', function (req, res, next) {
 
-  var entityURI = req.query.entityURI;
+  var options = JSON.parse(req.query.options);
   var queryDefs = JSON.parse(req.query.queryDefs);
 
   if (_validateQueryDefs(queryDefs) === false) {
@@ -32,7 +32,7 @@ router.get('/getQueriesHtml', function (req, res, next) {
     return;
   }
 
-  queryEngine.getQueriesHtml(entityURI, queryDefs)
+  queryEngine.getQueriesHtml(queryDefs, options)
   .then(function (queries) {
 
     res.send({
@@ -53,7 +53,7 @@ router.get('/getQueriesHtml', function (req, res, next) {
 
 router.get('/getIdsFromQueries', function (req, res, next) {
 
-  var entityURI = req.query.entityURI;
+  var options = JSON.parse(req.query.options);
   var queryDefs = JSON.parse(req.query.queryDefs);
 
   if (_validateQueryDefs(queryDefs) === false) {
@@ -63,7 +63,7 @@ router.get('/getIdsFromQueries', function (req, res, next) {
     });
     return;
   }
-  queryEngine.getIdsFromQueries(entityURI, queryDefs)
+  queryEngine.getIdsFromQueries(queryDefs, options)
   .then(function (queries) {
 
     res.send({
@@ -84,7 +84,7 @@ router.get('/getIdsFromQueries', function (req, res, next) {
 
 router.get('/getQueriesData', function (req, res, next) {
 
-  var entityURI = req.query.entityURI;
+  var options = JSON.parse(req.query.options);
   var queryDefs = JSON.parse(req.query.queryDefs);
 
   if (_validateQueryDefs(queryDefs) === false) {
@@ -98,7 +98,7 @@ router.get('/getQueriesData', function (req, res, next) {
   // TODO: add some validation throw an error if mandatory params are missing
   // test with queryIds parameter set
 
-  queryEngine.getQueriesData(entityURI, queryDefs)
+  queryEngine.getQueriesData(queryDefs, options)
   .then(function (queries) {
 
     res.send({

@@ -98,7 +98,6 @@ QueryEngine.prototype._init = function (enableCache, cacheSize, cacheMaxAge) {
     'kibi-table-handlebars'
   ];
 
-
   _.each(templatesToLoad, function (templateId) {
     fs.readFile(path.join(__dirname, 'templates', templateId + '.json'), function (err, data) {
       if (err) {
@@ -266,7 +265,6 @@ QueryEngine.prototype.reloadQueries = function () {
           }
         });
       });
-
     }
   }).error(function (err) {
     logger.error('Something is wrong - elastic search is not running');
@@ -324,7 +322,7 @@ QueryEngine.prototype._getDatasourceFromEs = function (datasourceId) {
  * Order is given by the priority value.
  */
 QueryEngine.prototype._getQueries = function (queryIds, options) {
-  var that = this;
+  var self = this;
 
   if (this.queries.length === 0) {
     return Promise.reject(
@@ -354,8 +352,8 @@ QueryEngine.prototype._getQueries = function (queryIds, options) {
       var id = queryIds[i];
       var exists = false;
 
-      for (var j = 0; j < that.queries.length; j++) {
-        if (id === that.queries[j].id) {
+      for (var j = 0; j < self.queries.length; j++) {
+        if (id === self.queries[j].id) {
           exists = true;
           break;
         }

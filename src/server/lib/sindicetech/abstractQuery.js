@@ -73,7 +73,7 @@ Query.prototype._checkIfQueryRequireEntityURI  = function (query) {
   return query.match(/@doc\[.+?]@/);
 };
 
-Query.prototype._checkIfSelectedDocumentRequiredAndPresent = function (options) {
+Query.prototype._checkIfSelectedDocumentRequiredAndNotPresent = function (options) {
   return this.requireEntityURI &&
     (!options.selectedDocuments || options.selectedDocuments.length === 0 || options.selectedDocuments[0] === '');
 };

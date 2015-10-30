@@ -57,7 +57,7 @@ RestQuery.prototype._logFailedRequestDetails = function (msg, originalError, res
 RestQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) {
   var self = this;
 
-  if (self._checkIfSelectedDocumentRequiredAndPresent(options)) {
+  if (self._checkIfSelectedDocumentRequiredAndNotPresent(options)) {
     return self._returnAnEmptyQueryResultsPromise('No data because the query require entityURI');
   }
   // currently we use only single selected document

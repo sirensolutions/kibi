@@ -26,7 +26,7 @@ PostgresQuery.prototype = _.create(AbstractQuery.prototype, {
 PostgresQuery.prototype.checkIfItIsRelevant = function (options) {
   var self = this;
 
-  if (self._checkIfSelectedDocumentRequiredAndPresent(options)) {
+  if (self._checkIfSelectedDocumentRequiredAndNotPresent(options)) {
     return Promise.reject('No elasticsearch document selected while required by the posgres activation query. [' + self.config.id + ']');
   }
   var uri = options.selectedDocuments && options.selectedDocuments.length > 0 ? options.selectedDocuments[0] : '';
@@ -185,7 +185,7 @@ PostgresQuery.prototype.fetchResults = function (options, onlyIds, idVariableNam
   var self = this;
   // special case - we can not simply reject the Promise
   // bacause this will cause the whole group of promissses to be rejected
-  if (self._checkIfSelectedDocumentRequiredAndPresent(options)) {
+  if (self._checkIfSelectedDocumentRequiredAndNotPresent(options)) {
     return self._returnAnEmptyQueryResultsPromise('No data because the query require entityURI');
   }
   // currently we use only single selected document

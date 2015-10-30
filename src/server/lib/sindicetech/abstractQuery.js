@@ -42,7 +42,7 @@ function Query(snippetDefinition, cache) {
     rest_method       : snippetDefinition.rest_method || 'GET',
     rest_path         : snippetDefinition.rest_path || '',
     rest_resp_status_code: snippetDefinition.rest_resp_status_code || 200,
-    rest_resp_restriction_path: snippetDefinition.rest_resp_restriction_path || '$',
+    rest_resp_restriction_path: snippetDefinition.rest_resp_restriction_path || '',
 
     tags              : snippetDefinition.tags || [],
     entityWeight      : snippetDefinition.entityWeight || 0.3,

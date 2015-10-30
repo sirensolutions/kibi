@@ -157,7 +157,14 @@
             <br/>
 
             <div class="form-group">
-              <label>JsonPath to restrict response</label><br/>
+              <label>JsonPath to filter response</label>
+              <span class="small-note"
+                    tooltip="Optional JSONPath expression to restrict the results. Note: The expression always returns an array"
+                    tooltip-placement="top"
+                    tooltip-animation="false"
+                    tooltip-popup-delay="0"
+                    tooltip-append-to-body="true"><i class="fa fa-info"></i></span>
+              <br/>
               <input type="text" ng-model="query.rest_resp_restriction_path"  class="form-control"/>
             </div>
 

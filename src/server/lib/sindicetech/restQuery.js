@@ -127,12 +127,26 @@ RestQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
           }
 
           // TODO: change this once we support xml resp or text resp
+          var json;
           try {
-            data.results = jsonpath.query(JSON.parse(body), self.config.rest_resp_restriction_path);
+            json = JSON.parse(body);
           } catch (e) {
-            var msg = 'Error while applying the jsonpath expression. Details: ' + e.message;
+            var msg = 'Error while parsing body as JSON. Details: ' + e.message;
             self._logFailedRequestDetails(msg, e, resp);
             throw new Error(msg);
+          }
+
+          // extract subset of the data only if user specified jsonpath expression
+          if (self.config.rest_resp_restriction_path && self.config.rest_resp_restriction_path !== '') {
+            try {
+              data.results = jsonpath.query(json, self.config.rest_resp_restriction_path);
+            } catch (e) {
+              var msg = 'Error while executing the JSONPath expression. Details: ' + e.message;
+              self._logFailedRequestDetails(msg, e, resp);
+              throw new Error(msg);
+            }
+          } else {
+            data.results = json;
           }
 
           if (self.cache) {

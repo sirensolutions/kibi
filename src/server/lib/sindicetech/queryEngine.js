@@ -18,30 +18,8 @@ var InactivatedQuery  = require('./inactivatedQuery');
 var set_datasource_clazz = require('../kibi/datasources/set_datasource_clazz');
 
 var JdbcQuery;
-var jdbcHelper;
-var nodeJava;
-
-if (config.kibana.load_jdbc === true) {
-
-  JdbcQuery  = require('./jdbcQuery');
-  jdbcHelper = require('./jdbcHelper');
-  var JdbcHelper    = require('./jdbcHelper');
-  jdbcHelper = new JdbcHelper();
-
-  var pathToNodeModulesFolder = jdbcHelper.getRelativePathToNodeModulesFolder();
-  nodeJava   = require(pathToNodeModulesFolder.replace(/\\/g, '/') + 'jdbc/node_modules/java');
-
-  // prepare the java classpath before calling any other method
-  var paths = jdbcHelper.prepareJdbcPaths();
-  _.each(paths.libpaths, function (path) {
-    nodeJava.classpath.push(path);
-  });
-  _.each(paths.libs, function (path) {
-    nodeJava.classpath.push(path);
-  });
-
-}
-
+var JdbcHelper;
+var NodeJava;
 
 function QueryEngine() {
   this.queries = [];
@@ -128,9 +106,13 @@ QueryEngine.prototype._init = function (enableCache, cacheSize, cacheMaxAge) {
   return new Promise(function (fulfill, reject) {
     waitForEs().then(function () {
 
-      self.reloadQueries().then(function () {
-        self.initialized = true;
-        fulfill({'message': 'QueryEngine initialization successfully done'});
+      self.setupJDBC().then(function () {
+        self.reloadQueries().then(function () {
+          self.initialized = true;
+          fulfill({'message': 'QueryEngine initialized successfully.'});
+        }).error(function (err) {
+          reject(err);
+        });
       }).error(function (err) {
         reject(err);
       });
@@ -138,6 +120,36 @@ QueryEngine.prototype._init = function (enableCache, cacheSize, cacheMaxAge) {
     }).error(function (err) {
       reject(err);
     });
+  });
+};
+
+QueryEngine.prototype.setupJDBC = function () {
+
+  return new Promise(function (resolve, reject) {
+
+    if (config.kibana.load_jdbc === true) {
+      JdbcQuery  = require('./jdbcQuery');
+      JdbcHelper = require('./jdbcHelper');
+      var jdbcHelper = new JdbcHelper();
+
+      var pathToNodeModulesFolder = jdbcHelper.getRelativePathToNodeModulesFolder();
+      NodeJava = require(pathToNodeModulesFolder.replace(/\\/g, '/') + 'jdbc/node_modules/java');
+
+      jdbcHelper.prepareJdbcPaths().then(function (paths) {
+        _.each(paths.libpaths, function (path) {
+          NodeJava.classpath.push(path);
+        });
+        _.each(paths.libs, function (path) {
+          NodeJava.classpath.push(path);
+        });
+        resolve(true);
+      }).catch(function (err) {
+        reject(err);
+      });
+      return;
+    }
+
+    resolve(true);
   });
 };
 

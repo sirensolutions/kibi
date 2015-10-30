@@ -64,8 +64,7 @@
     "jdbc": "0.0.15",
     "kibiutils": "sirensolutions/kibiutils#1.0.0",
     "sqlite3": "3.0.9",
-    "jsonpath": "0.2.0",
-    "sync-request": "2.0.1"
+    "jsonpath": "0.2.0"
   },
   "devDependencies": {
     "bower": "^1.4.1",

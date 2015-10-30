@@ -14,9 +14,6 @@ function JdbcQuery(queryDefinition, cache) {
   AbstractQuery.call(this, queryDefinition, cache);
   this.initialized = false;
   this.jdbc = new Jdbc();
-  this._init().then(function (data) {
-    logger.info(data);
-  });
 }
 
 JdbcQuery.prototype = _.create(AbstractQuery.prototype, {
@@ -26,20 +23,24 @@ JdbcQuery.prototype = _.create(AbstractQuery.prototype, {
 JdbcQuery.prototype._init = function () {
   var self = this;
   if (self.initialized === true) {
-    return Promise.resolve({'message': 'JDBC driver already initialized'});
+    return Promise.resolve({'message': 'JDBC driver already initialized.'});
   }
 
   var jdbcConfig = jdbcHelper.prepareJdbcConfig(self.config.datasource.datasourceParams);
 
   return new Promise(function (fulfill, reject) {
-
-    self.jdbc.initialize(jdbcConfig, function (err, res) {
-      if (err) {
-        reject(err);
-      }
-      self.initialized = true;
-      fulfill({'message': 'Jdbc driver initialization successfully done'});
-    });
+    try {
+      self.jdbc.initialize(jdbcConfig, function (err, res) {
+        if (err) {
+          reject(err);
+          return;
+        }
+        self.initialized = true;
+        fulfill({'message': 'JDBC driver initialized successfully.'});
+      });
+    } catch (err) {
+      reject(err);
+    }
   });
 };
 

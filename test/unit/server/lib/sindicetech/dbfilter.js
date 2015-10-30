@@ -10,7 +10,7 @@ var buffer = require('buffer');
  * This query engine always throws an error
  */
 var queryEngineError = {
-  getIdsFromQueries: function (entity, queryDefs) {
+  getIdsFromQueries: function (queryDefs, options) {
     return Promise.rejected(new Error('This should fail!'));
   }
 };
@@ -19,7 +19,7 @@ var queryEngineError = {
  * This query engine returns ids depending of the query id
  */
 var queryEngine = {
-  getIdsFromQueries: function (entity, queryDefs) {
+  getIdsFromQueries: function (queryDefs, options) {
     var results = [];
     _.each(queryDefs, function (queryDef) {
 

@@ -15,28 +15,32 @@ define(function (require) {
 
       it('gets the queries html from the server synchronously', function () {
         var queryDef = encodeURIComponent('[{}]');
-        $httpBackend.expectGET('datasource/getQueriesHtml?entityURI=&queryDefs=' + queryDef).respond();
-        queryEngineClient.getQueriesHtmlFromServer('', {}, true);
+        var options = encodeURIComponent('{}');
+        $httpBackend.expectGET('datasource/getQueriesHtml?options=' + options + '&queryDefs=' + queryDef).respond();
+        queryEngineClient.getQueriesHtmlFromServer({}, {}, true);
         $httpBackend.flush();
       });
 
       it('gets the queries html from the server asynchronously', function () {
         var queryDef = encodeURIComponent('[{}]');
-        $httpBackend.expectGET('datasource/getQueriesHtml?entityURI=&queryDefs=' + queryDef).respond();
-        queryEngineClient.getQueriesHtmlFromServer('', {}, false);
+        var options = encodeURIComponent('{}');
+        $httpBackend.expectGET('datasource/getQueriesHtml?options=' + options + '&queryDefs=' + queryDef).respond();
+        queryEngineClient.getQueriesHtmlFromServer({}, {}, false);
       });
 
       it('gets the queries data from the server synchronously', function () {
         var queryDef = encodeURIComponent('[{}]');
-        $httpBackend.expectGET('datasource/getQueriesData?entityURI=&queryDefs=' + queryDef).respond();
-        queryEngineClient.getQueriesDataFromServer('', {}, true);
+        var options = encodeURIComponent('{}');
+        $httpBackend.expectGET('datasource/getQueriesData?options=' + options + '&queryDefs=' + queryDef).respond();
+        queryEngineClient.getQueriesDataFromServer({}, {}, true);
         $httpBackend.flush();
       });
 
       it('gets the queries data from the server asynchronously', function () {
         var queryDef = encodeURIComponent('[{}]');
-        $httpBackend.expectGET('datasource/getQueriesData?entityURI=&queryDefs=' + queryDef).respond();
-        queryEngineClient.getQueriesDataFromServer('', {}, false);
+        var options = encodeURIComponent('{}');
+        $httpBackend.expectGET('datasource/getQueriesData?options=' + options + '&queryDefs=' + queryDef).respond();
+        queryEngineClient.getQueriesDataFromServer({}, {}, false);
       });
     });
   });

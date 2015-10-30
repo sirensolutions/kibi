@@ -23,11 +23,13 @@ PostgresQuery.prototype = _.create(AbstractQuery.prototype, {
  *    "boolean": true/false
  * }
  */
-PostgresQuery.prototype.checkIfItIsRelevant = function (uri) {
+PostgresQuery.prototype.checkIfItIsRelevant = function (options) {
   var self = this;
-  if (this.activationQueryRequireEntityURI && (!uri || uri === '')) {
-    return Promise.reject('Got empty uri while it is required by postgres activation query');
+
+  if (self._checkIfSelectedDocumentRequiredAndNotPresent(options)) {
+    return Promise.reject('No elasticsearch document selected while required by the posgres activation query. [' + self.config.id + ']');
   }
+  var uri = options.selectedDocuments && options.selectedDocuments.length > 0 ? options.selectedDocuments[0] : '';
 
   var connectionString = this.config.datasource.datasourceClazz.getConnectionString();
   var host = this.config.datasource.datasourceClazz.datasource.datasourceParams.host;
@@ -178,17 +180,16 @@ PostgresQuery.prototype._getType = function (typeNum) {
 };
 
 
-PostgresQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
+PostgresQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) {
   var start = new Date().getTime();
   var self = this;
   // special case - we can not simply reject the Promise
   // bacause this will cause the whole group of promissses to be rejected
-  if (this.resultQueryRequireEntityURI && (!uri || uri === '')) {
-    if (debug) {
-      console.log('Special case going to return resolved Promise with empty results data');
-    }
-    return this._returnAnEmptyQueryResultsPromise('No data because the query require entityURI');
+  if (self._checkIfSelectedDocumentRequiredAndNotPresent(options)) {
+    return self._returnAnEmptyQueryResultsPromise('No data because the query require entityURI');
   }
+  // currently we use only single selected document
+  var uri = options.selectedDocuments && options.selectedDocuments.length > 0 ? options.selectedDocuments[0] : '';
 
   var connectionString = this.config.datasource.datasourceClazz.getConnectionString();
   var host = this.config.datasource.datasourceClazz.datasource.datasourceParams.host;
@@ -197,7 +198,6 @@ PostgresQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
   var max_age = this.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
 
   return queryHelper.replaceVariablesUsingEsDocument(this.config.resultQuery, uri).then(function (query) {
-
     // special case if the uri is required but it is empty
     if (debug) {
       console.log('----------');

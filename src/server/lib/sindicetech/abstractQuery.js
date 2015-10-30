@@ -73,6 +73,11 @@ Query.prototype._checkIfQueryRequireEntityURI  = function (query) {
   return query.match(/@doc\[.+?]@/);
 };
 
+Query.prototype._checkIfSelectedDocumentRequiredAndNotPresent = function (options) {
+  return this.requireEntityURI &&
+    (!options.selectedDocuments || options.selectedDocuments.length === 0 || options.selectedDocuments[0] === '');
+};
+
 
 Query.prototype._extractIdsFromSql = function (rows, idVariableName) {
   var ids = [];
@@ -140,12 +145,12 @@ Query.prototype._fetchTemplate  = function (templateId) {
 };
 
 
-Query.prototype.getHtml = function (uri, option) {
+Query.prototype.getHtml = function (queryDef, options) {
   var that = this;
 
   return new Promise(function (fulfill, reject) {
     // first run fetch results
-    that.fetchResults(uri, null, option.queryVariableName).then(function (data) {
+    that.fetchResults(options, null, queryDef.queryVariableName).then(function (data) {
       // here take the results and compile the result template
 
       // here if there is a prefix replace it in values when they are uris
@@ -163,15 +168,15 @@ Query.prototype.getHtml = function (uri, option) {
       // as it will be visible on the frontend
       var safeConfig = {};
       safeConfig.id = that.id;
-      safeConfig.templateVars = option.templateVars;
-      safeConfig.open = option.open;
-      safeConfig.showFilterButton = option.showFilterButton;
-      safeConfig.redirectToDashbord = option.redirectToDashbord;
+      safeConfig.templateVars = queryDef.templateVars;
+      safeConfig.open = queryDef.open;
+      safeConfig.showFilterButton = queryDef.showFilterButton;
+      safeConfig.redirectToDashbord = queryDef.redirectToDashbord;
       // now override the oryginal config
       data.config = safeConfig;
 
       // here fetch template via $http and cache it
-      that._fetchTemplate(option.templateId)
+      that._fetchTemplate(queryDef.templateId)
       .then(function (template) {
 
         var templateSource = template.st_templateSource;
@@ -231,16 +236,15 @@ Query.prototype.getHtml = function (uri, option) {
 // {
 //    "boolean": true/false
 // }
-Query.prototype.checkIfItIsRelevant = function (uri, datasource) {
+Query.prototype.checkIfItIsRelevant = function (options) {
   throw 'Must be implemented by subclass';
 };
-
 
 Query.prototype._extractIds = function (data) {
   throw 'Must be implemented by subclass';
 };
 
-Query.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
+Query.prototype.fetchResults = function (options, onlyIds, idVariableName) {
   throw 'Must be implemented by subclass';
 };
 

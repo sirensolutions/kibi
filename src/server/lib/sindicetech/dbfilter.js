@@ -33,7 +33,7 @@ module.exports = function (queryEngine, json) {
         throw new Error('Missing path field in the dbfilter object: ' + data);
       }
 
-      return queryEngine.getIdsFromQueries(entity, [{queryId:queryid, queryVariableName: queryVariableName}])
+      return queryEngine.getIdsFromQueries([{queryId:queryid, queryVariableName: queryVariableName}], {selectedDocuments: [entity]})
         .then(function createObject(queries) {
           return new Promise(function (fulfill, reject) {
             var filter = {};

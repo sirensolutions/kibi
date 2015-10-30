@@ -69,11 +69,13 @@ SQLiteQuery.prototype.openConnection = function () {
  *    "boolean": true/false
  * }
  */
-SQLiteQuery.prototype.checkIfItIsRelevant = function (uri) {
+SQLiteQuery.prototype.checkIfItIsRelevant = function (options) {
   var self = this;
-  if (this.requireEntityURI && (!uri || uri === '')) {
-    return Promise.reject('Entity URI must be specified to execute the query.');
+
+  if (self._checkIfSelectedDocumentRequiredAndNotPresent(options)) {
+    return Promise.reject('No elasticsearch document selected while required by the sqlite activation query. [' + self.config.id + ']');
   }
+  var uri = options.selectedDocuments && options.selectedDocuments.length > 0 ? options.selectedDocuments[0] : '';
 
   var dbfile = this.config.datasource.datasourceClazz.datasource.datasourceParams.db_file_path;
   var max_age = this.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
@@ -126,19 +128,20 @@ SQLiteQuery.prototype.checkIfItIsRelevant = function (uri) {
 /**
  * Executes the query.
  */
-SQLiteQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
+SQLiteQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) {
   var start = new Date().getTime();
   var self = this;
 
-  var dbfile = this.config.datasource.datasourceClazz.datasource.datasourceParams.db_file_path;
-  var max_age = this.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
-
   // special case - we can not simply reject the Promise
   // bacause this will cause the whole group of promises to be rejected
-  if (this.resultQueryRequireEntityURI && (!uri || uri === '')) {
-    return this._returnAnEmptyQueryResultsPromise('Missing entityURI');
+  if (self._checkIfSelectedDocumentRequiredAndNotPresent(options)) {
+    return self._returnAnEmptyQueryResultsPromise('No data because the query require entityURI');
   }
+  // currently we use only single selected document
+  var uri = options.selectedDocuments && options.selectedDocuments.length > 0 ? options.selectedDocuments[0] : '';
 
+  var dbfile = this.config.datasource.datasourceClazz.datasource.datasourceParams.db_file_path;
+  var max_age = this.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
 
   return queryHelper.replaceVariablesUsingEsDocument(this.config.resultQuery, uri).then(function (query) {
 

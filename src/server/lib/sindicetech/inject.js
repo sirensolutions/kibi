@@ -112,7 +112,7 @@ exports._runInject = function (query, queryEngine) {
 
     sourcePath = sourcePath.split('.');
 
-    return queryEngine.getIdsFromQueries(entityURI, queryDefs)
+    return queryEngine.getIdsFromQueries(queryDefs, {selectedDocuments: [entityURI]})
     .then(function (setOfIds) {
       return function (source) {
         var res = { key: fieldName, value: [] };

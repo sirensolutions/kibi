@@ -24,11 +24,13 @@ MysqlQuery.prototype = _.create(AbstractQuery.prototype, {
  *    "boolean": true/false
  * }
  */
-MysqlQuery.prototype.checkIfItIsRelevant = function (uri) {
+MysqlQuery.prototype.checkIfItIsRelevant = function (options) {
   var self = this;
-  if (this.requireEntityURI && (!uri || uri === '')) {
-    return Promise.reject('Got empty uri while it is required by mysql activation query');
+
+  if (self._checkIfSelectedDocumentRequiredAndNotPresent(options)) {
+    return Promise.reject('No elasticsearch document selected while required by the mysql activation query. [' + self.config.id + ']');
   }
+  var uri = options.selectedDocuments && options.selectedDocuments.length > 0 ? options.selectedDocuments[0] : '';
 
   var connectionString = this.config.datasource.datasourceClazz.getConnectionString();
   var host = this.config.datasource.datasourceClazz.datasource.datasourceParams.host;
@@ -113,14 +115,16 @@ MysqlQuery.prototype._getType = function (typeNum) {
   return types[typeNum] ? types[typeNum] : typeNum;
 };
 
-MysqlQuery.prototype.fetchResults = function (uri, onlyIds, idVariableName) {
+MysqlQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) {
   var start = new Date().getTime();
   var self = this;
   // special case - we can not simply reject the Promise
   // bacause this will cause the whole group of promissses to be rejected
-  if (this.resultQueryRequireEntityURI && (!uri || uri === '')) {
-    return this._returnAnEmptyQueryResultsPromise('No data because the query require entityURI');
+  if (self._checkIfSelectedDocumentRequiredAndNotPresent(options)) {
+    return self._returnAnEmptyQueryResultsPromise('No data because the query require entityURI');
   }
+  // currently we use only single selected document
+  var uri = options.selectedDocuments && options.selectedDocuments.length > 0 ? options.selectedDocuments[0] : '';
 
   var connectionString = this.config.datasource.datasourceClazz.getConnectionString();
   var host = this.config.datasource.datasourceClazz.datasource.datasourceParams.host;

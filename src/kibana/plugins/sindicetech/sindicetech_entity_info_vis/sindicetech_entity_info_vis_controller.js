@@ -78,8 +78,10 @@ define(function (require) {
         $scope.holder.html = 'Loading ...';
 
         queryEngineClient.getQueriesHtmlFromServer(
-          $scope.holder.entityURI,
           $scope.vis.params.queryOptions,
+          {
+            selectedDocuments: [$scope.holder.entityURI]
+          },
           true
         ).then(function (resp) {
 

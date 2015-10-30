@@ -70,12 +70,17 @@ define(function (require) {
         globalState.off('save_with_changes', save_with_changes_handler);
       });
 
+      $scope.$watch('esResponse', function () {
+        $scope.renderTemplates();
+      });
+
       $scope.renderTemplates = function () {
         if ($scope.vis.params.queryOptions && $scope.vis.params.queryOptions.length === 0) {
           return;
         }
 
         $scope.holder.html = 'Loading ...';
+        $scope.holder.activeFetch = true;
 
         queryEngineClient.getQueriesHtmlFromServer(
           $scope.vis.params.queryOptions,
@@ -168,6 +173,7 @@ define(function (require) {
                 }
               }
 
+              $scope.holder.activeFetch = false;
               $scope.holder.html +=
                 '<div class="snippetContainer">' +
                   '<div class="snippet-' + index + '">' +

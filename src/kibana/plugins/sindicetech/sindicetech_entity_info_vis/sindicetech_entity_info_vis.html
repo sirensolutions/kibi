@@ -1,5 +1,7 @@
 <div ng-controller="SindicetechEntityInfoVisController" class="sindicetech-entity-info-vis">
 
+  <div class="spinner large" ng-show="holder.activeFetch"></div>
+
   <st-param-entity-uri entity-uri-holder="holder"></st-param-entity-uri>
 
   <div ng-if="vis.params.queryIds.length === 0" class="table-vis-error ng-scope">

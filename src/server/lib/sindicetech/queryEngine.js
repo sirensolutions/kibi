@@ -144,7 +144,7 @@ QueryEngine.prototype.setupJDBC = function () {
         });
         resolve(true);
       }).catch(function (err) {
-        reject(err);
+        resolve(true);
       });
       return;
     }

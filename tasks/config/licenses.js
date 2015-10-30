@@ -51,7 +51,10 @@ module.exports = function (grunt) {
         'process-nextick-args@1.0.3': ['MIT'],
         'util-deprecate@1.0.2': ['MIT'],
         'is-my-json-valid@2.12.1': ['MIT'],
-        'rc@1.1.0': ['MIT']
+        'rc@1.1.0': ['MIT'],
+        'rc@1.1.1': ['MIT'],
+        'ansi@0.3.0': ['MIT'],
+        'bluebird@2.10.0': ['MIT']
       }
     }
   };

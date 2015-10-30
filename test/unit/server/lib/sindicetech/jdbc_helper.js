@@ -38,6 +38,55 @@ describe('Jdbc Helper', function () {
       done();
     });
 
+    describe('getRelativePathToNodeModulesFolder', function () {
+
+      it('development', function () {
+        var JdbcHelper = root('src/server/lib/sindicetech/jdbcHelper');
+        var jdbcHelper = new JdbcHelper();
+        sinon.stub(jdbcHelper, '_getDirName').returns(
+          'C:\\\\Users\\kibi\\src\\server\\lib\\sindicetech'
+        );
+
+        expect(jdbcHelper.getRelativePathToNodeModulesFolder()).to.equal('..\\..\\..\\..\\node_modules\\');
+      });
+
+      it('production', function () {
+        var JdbcHelper = root('src/server/lib/sindicetech/jdbcHelper');
+        var jdbcHelper = new JdbcHelper();
+        sinon.stub(jdbcHelper, '_getDirName').returns(
+          'C:\\\\Users\\kibi\\src\\lib\\sindicetech'
+        );
+
+        expect(jdbcHelper.getRelativePathToNodeModulesFolder()).to.equal('..\\..\\node_modules\\');
+      });
+
+    });
+
+
+    describe('getAbsolutePathToSindicetechFolder', function () {
+
+      it('development', function () {
+        var JdbcHelper = root('src/server/lib/sindicetech/jdbcHelper');
+        var jdbcHelper = new JdbcHelper();
+        sinon.stub(jdbcHelper, '_getDirName').returns(
+          'C:\\\\Users\\kibi\\src\\server\\lib\\sindicetech'
+        );
+
+        expect(jdbcHelper.getAbsolutePathToSindicetechFolder()).to.equal('C:\\\\Users\\kibi\\');
+      });
+
+      it('production', function () {
+        var JdbcHelper = root('src/server/lib/sindicetech/jdbcHelper');
+        var jdbcHelper = new JdbcHelper();
+        sinon.stub(jdbcHelper, '_getDirName').returns(
+          'C:\\\\Users\\kibi\\src\\lib\\sindicetech'
+        );
+
+        expect(jdbcHelper.getAbsolutePathToSindicetechFolder()).to.equal('C:\\\\Users\\kibi\\');
+      });
+
+    });
+
 
     describe('prepareJdbcConfig', function () {
 
@@ -88,8 +137,57 @@ describe('Jdbc Helper', function () {
       done();
     });
 
-    describe('prepareJdbcConfig', function () {
 
+    describe('getRelativePathToNodeModulesFolder', function () {
+
+      it('development', function () {
+        var JdbcHelper = root('src/server/lib/sindicetech/jdbcHelper');
+        var jdbcHelper = new JdbcHelper();
+        sinon.stub(jdbcHelper, '_getDirName').returns(
+          '/opt/kibi/src/server/lib/sindicetech'
+        );
+
+        expect(jdbcHelper.getRelativePathToNodeModulesFolder()).to.equal('../../../../node_modules/');
+      });
+
+      it('production', function () {
+        var JdbcHelper = root('src/server/lib/sindicetech/jdbcHelper');
+        var jdbcHelper = new JdbcHelper();
+        sinon.stub(jdbcHelper, '_getDirName').returns(
+          '/opt/kibi/src/lib/sindicetech'
+        );
+
+        expect(jdbcHelper.getRelativePathToNodeModulesFolder()).to.equal('../../node_modules/');
+      });
+    });
+
+
+    describe('getAbsolutePathToSindicetechFolder', function () {
+
+      it('development', function () {
+        var JdbcHelper = root('src/server/lib/sindicetech/jdbcHelper');
+        var jdbcHelper = new JdbcHelper();
+        sinon.stub(jdbcHelper, '_getDirName').returns(
+          '/opt/kibi/src/server/lib/sindicetech'
+        );
+
+        expect(jdbcHelper.getAbsolutePathToSindicetechFolder()).to.equal('/opt/kibi/');
+      });
+
+      it('production', function () {
+        var JdbcHelper = root('src/server/lib/sindicetech/jdbcHelper');
+        var jdbcHelper = new JdbcHelper();
+        sinon.stub(jdbcHelper, '_getDirName').returns(
+          '/opt/kibi/src/lib/sindicetech'
+        );
+
+        expect(jdbcHelper.getAbsolutePathToSindicetechFolder()).to.equal('/opt/kibi/');
+      });
+    });
+
+
+
+    describe('prepareJdbcConfig', function () {
 
       it('absolute libpath', function () {
         var JdbcHelper = root('src/server/lib/sindicetech/jdbcHelper');

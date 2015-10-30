@@ -106,16 +106,24 @@ JdbcHelper.prototype.prepareJdbcConfig = function (conf) {
     libs: libs,
     drivername: conf.drivername,
     url: conf.connection_string,
-    properties: [
-      [ 'user', conf.username ],
-      [ 'password', cryptoHelper.decrypt(config.kibana.datasource_encryption_key, conf.password) ]
-      // IMPROVE ME
-      // here it is fine as password is always encrypted
-      // but we need a better method to decrypt all parameters based on schema
-      // however when loading jdbc libs the datasource was not created yet so there is no datasourceClazz available
-      // so we would have to get the schema ourselves here
-    ]
+    properties: []
   };
+
+  if (conf.username) {
+    jdbcConfig.properties.push(['user', conf.username]);
+  }
+
+  // TODO: IMPROVE ME
+  // here it is fine as password is always encrypted
+  // but we need a better method to decrypt all parameters based on schema
+  // however when loading jdbc libs the datasource was not created yet so there is no datasourceClazz available
+  // so we would have to get the schema ourselves here
+  if (conf.password) {
+    jdbcConfig.properties.push([
+      'password',
+      cryptoHelper.decrypt(config.kibana.datasource_encryption_key, conf.password)
+    ]);
+  }
   return jdbcConfig;
 
 };

@@ -52,7 +52,7 @@ describe('RestQuery', function () {
         activationQuery: ''
       });
 
-      restQuery.checkIfItIsRelevant('').then(function (ret) {
+      restQuery.checkIfItIsRelevant({}).then(function (ret) {
         expect(ret).to.eql({ boolean: true });
         done();
       });
@@ -64,7 +64,7 @@ describe('RestQuery', function () {
         activationQuery: ''
       });
 
-      restQuery.checkIfItIsRelevant('/company/company/id1').then(function (ret) {
+      restQuery.checkIfItIsRelevant({selectedDocuments: ['/company/company/id1']}).then(function (ret) {
         expect(ret).to.eql({ boolean: true });
         done();
       });
@@ -76,7 +76,7 @@ describe('RestQuery', function () {
         activationQuery: '^/company'
       });
 
-      restQuery.checkIfItIsRelevant('/company/company/id1').then(function (ret) {
+      restQuery.checkIfItIsRelevant({selectedDocuments: ['/company/company/id1']}).then(function (ret) {
         expect(ret).to.eql({ boolean: true });
         done();
       });
@@ -91,7 +91,7 @@ describe('RestQuery', function () {
         activationQuery: '^/people'
       });
 
-      restQuery.checkIfItIsRelevant('/company/company/id1').then(function (ret) {
+      restQuery.checkIfItIsRelevant({selectedDocuments: ['/company/company/id1']}).then(function (ret) {
         expect(ret).to.eql({ boolean: false });
         done();
       });
@@ -107,7 +107,7 @@ describe('RestQuery', function () {
         activationQuery: 'd\\'
       });
 
-      restQuery.checkIfItIsRelevant('/company/company/id1').catch(function (err) {
+      restQuery.checkIfItIsRelevant({selectedDocuments: ['/company/company/id1']}).catch(function (err) {
         expect(err.message).to.equal('Problem parsing regex [d\\]');
         done();
       });

@@ -3,7 +3,7 @@ var rp     = require('request-promise');
 var Promise = require('bluebird');
 var config = require('../../config');
 var _      = require('lodash');
-
+var logger = require('../logger');
 
 function QueryHelper() {}
 
@@ -88,13 +88,22 @@ QueryHelper.prototype.replaceVariablesUsingEsDocument = function (s, uri) {
 
 
 QueryHelper.prototype._fetchDocument = function (index, type, id) {
-  return rp({
-    method: 'GET',
-    uri: url.parse(config.kibana.elasticsearch_url + '/' + index + '/' + type + '/' + id),
-    transform: function (resp) {
-      var data = JSON.parse(resp);
-      return data;
-    }
+  return new Promise(function (fulfill, reject) {
+    rp({
+      method: 'GET',
+      uri: url.parse(config.kibana.elasticsearch_url + '/' + index + '/' + type + '/' + id),
+      transform: function (resp) {
+        var data = JSON.parse(resp);
+        fulfill(data);
+        return data;
+      }
+    })
+    .catch(function (err) {
+      var msg = 'Could not fetch document [/' + index + '/' + type + '/' + id + '].';
+      logger.warn(msg, err);
+      reject(new Error(msg + ' Check logs for details'));
+    });
+
   });
 };
 

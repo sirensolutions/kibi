@@ -86,7 +86,7 @@ JdbcHelper.prototype.prepareJdbcConfig = function (conf) {
 
     if (conf.libs) {
       libs = _.map(conf.libs, function (libpath) {
-        return winAbspathRegex.test(libpath.test) ?
+        return winAbspathRegex.test(libpath) ?
           libpath.replace(/\//g, '\\') :
           pathToSindicetechFolder + libpath.replace(/\\{2}/g, '\\').replace(/\//g, '\\');
       });

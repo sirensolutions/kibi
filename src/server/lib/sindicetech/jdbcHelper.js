@@ -79,7 +79,7 @@ JdbcHelper.prototype.prepareJdbcConfig = function (conf) {
   if (os.platform().indexOf('win') === 0) {
 
     //windows
-    var winAbspathRegex = /^[A-Z]:\\\\/;
+    var winAbspathRegex = /^[A-Z]:\\/;
     libpath = winAbspathRegex.test(conf.libpath) ?
       conf.libpath.replace(/\//g, '\\') :
       pathToSindicetechFolder + conf.libpath.replace(/\\{2}/g, '\\').replace(/\//g, '\\');

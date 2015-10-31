@@ -44,7 +44,7 @@ describe('Jdbc Helper', function () {
         var JdbcHelper = root('src/server/lib/sindicetech/jdbcHelper');
         var jdbcHelper = new JdbcHelper();
         sinon.stub(jdbcHelper, '_getDirName').returns(
-          'C:\\\\Users\\kibi\\src\\server\\lib\\sindicetech'
+          'C:\\Users\\kibi\\src\\server\\lib\\sindicetech'
         );
 
         expect(jdbcHelper.getRelativePathToNodeModulesFolder()).to.equal('..\\..\\..\\..\\node_modules\\');
@@ -54,7 +54,7 @@ describe('Jdbc Helper', function () {
         var JdbcHelper = root('src/server/lib/sindicetech/jdbcHelper');
         var jdbcHelper = new JdbcHelper();
         sinon.stub(jdbcHelper, '_getDirName').returns(
-          'C:\\\\Users\\kibi\\src\\lib\\sindicetech'
+          'C:\\Users\\kibi\\src\\lib\\sindicetech'
         );
 
         expect(jdbcHelper.getRelativePathToNodeModulesFolder()).to.equal('..\\..\\node_modules\\');
@@ -69,20 +69,20 @@ describe('Jdbc Helper', function () {
         var JdbcHelper = root('src/server/lib/sindicetech/jdbcHelper');
         var jdbcHelper = new JdbcHelper();
         sinon.stub(jdbcHelper, '_getDirName').returns(
-          'C:\\\\Users\\kibi\\src\\server\\lib\\sindicetech'
+          'C:\\Users\\kibi\\src\\server\\lib\\sindicetech'
         );
 
-        expect(jdbcHelper.getAbsolutePathToSindicetechFolder()).to.equal('C:\\\\Users\\kibi\\');
+        expect(jdbcHelper.getAbsolutePathToSindicetechFolder()).to.equal('C:\\Users\\kibi\\');
       });
 
       it('production', function () {
         var JdbcHelper = root('src/server/lib/sindicetech/jdbcHelper');
         var jdbcHelper = new JdbcHelper();
         sinon.stub(jdbcHelper, '_getDirName').returns(
-          'C:\\\\Users\\kibi\\src\\lib\\sindicetech'
+          'C:\\Users\\kibi\\src\\lib\\sindicetech'
         );
 
-        expect(jdbcHelper.getAbsolutePathToSindicetechFolder()).to.equal('C:\\\\Users\\kibi\\');
+        expect(jdbcHelper.getAbsolutePathToSindicetechFolder()).to.equal('C:\\Users\\kibi\\');
       });
 
     });
@@ -94,25 +94,25 @@ describe('Jdbc Helper', function () {
         var JdbcHelper = root('src/server/lib/sindicetech/jdbcHelper');
         var jdbcHelper = new JdbcHelper();
         var conf = {
-          libpath: 'C:\\\\Users\\libs'
+          libpath: 'C:\\Users\\libs\\pg.jar'
         };
 
         var actual = jdbcHelper.prepareJdbcConfig(conf);
-        expect(actual.libpath).to.equal('C:\\\\Users\\libs');
+        expect(actual.libpath).to.equal('C:\\Users\\libs\\pg.jar');
       });
 
       it('relative libpath', function () {
         var JdbcHelper = root('src/server/lib/sindicetech/jdbcHelper');
         var jdbcHelper = new JdbcHelper();
         sinon.stub(jdbcHelper, 'getAbsolutePathToSindicetechFolder').returns(
-          'C:\\\\Users\\libs'
+          'C:\\Users\\libs'
         );
         var conf = {
-          libpath: '\\kibilibs'
+          libpath: '\\kibilibs\\pg.jar'
         };
 
         var actual = jdbcHelper.prepareJdbcConfig(conf);
-        expect(actual.libpath).to.equal('C:\\\\Users\\libs\\kibilibs');
+        expect(actual.libpath).to.equal('C:\\Users\\libs\\kibilibs\\pg.jar');
       });
 
     });

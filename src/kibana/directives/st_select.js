@@ -15,6 +15,7 @@ define(function (require) {
           objectType:       '@',  // text
           indexPatternId:   '=?', // optional only for objectType === field | indexPatternType | documentIds
           indexPatternType: '=?', // optional only for objectType === documentIds
+          fieldTypes:       '=?', // optional only for objectType === field, value should be array of strings
           queryId:          '=?', // optional only for objectType === queryVariable
           modelDisabled:    '=?', // use to disable the underlying select
           modelRequired:    '=?', // use to disable the underlying select
@@ -172,7 +173,7 @@ define(function (require) {
                 promise = selectHelper.getIndexTypes(scope.indexPatternId);
                 break;
               case 'field':
-                promise = selectHelper.getFields(scope.indexPatternId);
+                promise = selectHelper.getFields(scope.indexPatternId, scope.fieldTypes);
                 break;
               case 'indexPattern':
                 promise = selectHelper.getIndexesId();

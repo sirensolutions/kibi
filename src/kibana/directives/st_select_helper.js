@@ -117,7 +117,7 @@ define(function (require) {
       });
     };
 
-    StSelectHelper.prototype.getFields = function (indexPatternId) {
+    StSelectHelper.prototype.getFields = function (indexPatternId, fieldTypes) {
       var defId;
       if (indexPatternId) {
         defId = indexPatternId;
@@ -129,7 +129,11 @@ define(function (require) {
         var fields = _.chain(index.fields)
         .filter(function (field) {
           // filter some fields
-          return field.type !== 'boolean' && field.name && field.name.indexOf('_') !== 0;
+          if (fieldTypes instanceof Array && fieldTypes.length > 0) {
+            return fieldTypes.indexOf(field.type) !== -1 && field.name && field.name.indexOf('_') !== 0;
+          } else {
+            return field.type !== 'boolean' && field.name && field.name.indexOf('_') !== 0;
+          }
         }).sortBy(function (field) {
           return field.name;
         }).map(function (field) {

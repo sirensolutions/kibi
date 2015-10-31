@@ -313,6 +313,16 @@ define(function (require) {
             done();
           }).catch(done);
         });
+
+        it('should return only date fields ', function (done) {
+          stSelectHelper.getFields(null, ['date']).then(function (fields) {
+            expect(fields.length).to.equal(3);
+            expect(_.find(fields, { label: '@timestamp' })).to.be.ok();
+            expect(_.find(fields, { label: 'time' })).to.be.ok();
+            expect(_.find(fields, { label: 'utc_time' })).to.be.ok();
+            done();
+          }).catch(done);
+        });
       });
 
       describe('GetIndexesId', function () {

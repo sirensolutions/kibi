@@ -3,7 +3,9 @@ define(function (require) {
   var _ = require('lodash');
   var vis = require('vis');
 
-  require('modules').get('kibana').directive('kibiTimeline', function () {
+  require('modules').get('kibana').directive('kibiTimeline', function (Private) {
+
+    var filterManager = Private(require('components/filter_manager/filter_manager'));
 
     return {
       scope: {
@@ -22,8 +24,14 @@ define(function (require) {
       var _previousSearchSource;
       var onSelect = function (properties) {
         // pass this to a scope variable
-        $scope.params.clickedItemId = data._data[properties.items];
-        console.log('Selected timeline event', $scope.params.clickedItemId);
+        var selected = data._data[properties.items];
+
+        var index = $scope.searchSource.get('index').id;
+        var field = $scope.params.labelField;
+        var value = selected.content;
+        var operator = '+';
+
+        filterManager.add(field, value, operator, index);
       };
 
       $scope.$watch('options', function (newOptions, oldOptions) {

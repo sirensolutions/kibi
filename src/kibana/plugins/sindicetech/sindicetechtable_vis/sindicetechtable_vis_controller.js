@@ -155,6 +155,7 @@ define(function (require) {
         }
       });
 
+      // when autoupdate is on we detect the refresh here
       $scope.$watch('esResponse', function () {
         if ($scope.savedObj && $scope.savedObj.searchSource) {
           $scope.savedObj.searchSource.fetchQueued();

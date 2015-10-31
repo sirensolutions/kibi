@@ -70,6 +70,7 @@ define(function (require) {
         globalState.off('save_with_changes', save_with_changes_handler);
       });
 
+      // when autoupdate is on we detect the refresh here
       $scope.$watch('esResponse', function () {
         $scope.renderTemplates();
       });

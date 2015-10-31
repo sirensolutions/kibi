@@ -18,30 +18,8 @@ var InactivatedQuery  = require('./inactivatedQuery');
 var set_datasource_clazz = require('../kibi/datasources/set_datasource_clazz');
 
 var JdbcQuery;
-var jdbcHelper;
-var nodeJava;
-
-if (config.kibana.load_jdbc === true) {
-
-  JdbcQuery  = require('./jdbcQuery');
-  jdbcHelper = require('./jdbcHelper');
-  var JdbcHelper    = require('./jdbcHelper');
-  jdbcHelper = new JdbcHelper();
-
-  var pathToNodeModulesFolder = jdbcHelper.getRelativePathToNodeModulesFolder();
-  nodeJava   = require(pathToNodeModulesFolder.replace(/\\/g, '/') + 'jdbc/node_modules/java');
-
-  // prepare the java classpath before calling any other method
-  var paths = jdbcHelper.prepareJdbcPaths();
-  _.each(paths.libpaths, function (path) {
-    nodeJava.classpath.push(path);
-  });
-  _.each(paths.libs, function (path) {
-    nodeJava.classpath.push(path);
-  });
-
-}
-
+var JdbcHelper;
+var NodeJava;
 
 function QueryEngine() {
   this.queries = [];
@@ -98,7 +76,6 @@ QueryEngine.prototype._init = function (enableCache, cacheSize, cacheMaxAge) {
     'kibi-table-handlebars'
   ];
 
-
   _.each(templatesToLoad, function (templateId) {
     fs.readFile(path.join(__dirname, 'templates', templateId + '.json'), function (err, data) {
       if (err) {
@@ -129,9 +106,13 @@ QueryEngine.prototype._init = function (enableCache, cacheSize, cacheMaxAge) {
   return new Promise(function (fulfill, reject) {
     waitForEs().then(function () {
 
-      self.reloadQueries().then(function () {
-        self.initialized = true;
-        fulfill({'message': 'QueryEngine initialization successfully done'});
+      self.setupJDBC().then(function () {
+        self.reloadQueries().then(function () {
+          self.initialized = true;
+          fulfill({'message': 'QueryEngine initialized successfully.'});
+        }).error(function (err) {
+          reject(err);
+        });
       }).error(function (err) {
         reject(err);
       });
@@ -139,6 +120,36 @@ QueryEngine.prototype._init = function (enableCache, cacheSize, cacheMaxAge) {
     }).error(function (err) {
       reject(err);
     });
+  });
+};
+
+QueryEngine.prototype.setupJDBC = function () {
+
+  return new Promise(function (resolve, reject) {
+
+    if (config.kibana.load_jdbc === true) {
+      JdbcQuery  = require('./jdbcQuery');
+      JdbcHelper = require('./jdbcHelper');
+      var jdbcHelper = new JdbcHelper();
+
+      var pathToNodeModulesFolder = jdbcHelper.getRelativePathToNodeModulesFolder();
+      NodeJava = require(pathToNodeModulesFolder.replace(/\\/g, '/') + 'jdbc/node_modules/java');
+
+      jdbcHelper.prepareJdbcPaths().then(function (paths) {
+        _.each(paths.libpaths, function (path) {
+          NodeJava.classpath.push(path);
+        });
+        _.each(paths.libs, function (path) {
+          NodeJava.classpath.push(path);
+        });
+        resolve(true);
+      }).catch(function (err) {
+        resolve(true);
+      });
+      return;
+    }
+
+    resolve(true);
   });
 };
 
@@ -253,7 +264,7 @@ QueryEngine.prototype.reloadQueries = function () {
             return new MysqlQuery(queryDef, self.cache);
           } else if (queryDef.datasource.datasourceType === 'sparql_jdbc' || queryDef.datasource.datasourceType === 'sql_jdbc' ) {
             if (config.kibana.load_jdbc === false) {
-              return new ErrorQuery('You need to have the "load_jdbc" option enabled; this can be done in the kibi.yml file.');
+              return new ErrorQuery('Please set the "load_jdbc" option to true in kibi.yml and restart the backend.');
             }
             return new JdbcQuery(queryDef, self.cache);
           } else if (queryDef.datasource.datasourceType === 'rest') {
@@ -266,7 +277,6 @@ QueryEngine.prototype.reloadQueries = function () {
           }
         });
       });
-
     }
   }).error(function (err) {
     logger.error('Something is wrong - elastic search is not running');
@@ -324,7 +334,7 @@ QueryEngine.prototype._getDatasourceFromEs = function (datasourceId) {
  * Order is given by the priority value.
  */
 QueryEngine.prototype._getQueries = function (queryIds, options) {
-  var that = this;
+  var self = this;
 
   if (this.queries.length === 0) {
     return Promise.reject(
@@ -354,8 +364,8 @@ QueryEngine.prototype._getQueries = function (queryIds, options) {
       var id = queryIds[i];
       var exists = false;
 
-      for (var j = 0; j < that.queries.length; j++) {
-        if (id === that.queries[j].id) {
+      for (var j = 0; j < self.queries.length; j++) {
+        if (id === self.queries[j].id) {
           exists = true;
           break;
         }

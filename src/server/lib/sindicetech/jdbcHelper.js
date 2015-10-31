@@ -1,18 +1,17 @@
 var _            = require('lodash');
-var os           = require('os');
-var sync_request = require('sync-request');
+var Promise      = require('bluebird');
 var config       = require('../../config');
-var logger       = require('../logger');
 var cryptoHelper = require('./crypto_helper');
+var indexHelper  = require('../kibi/index_helper');
+var logger       = require('../logger');
+var os           = require('os');
 
 var _endsWith = function (s, suffix) {
   return s.indexOf(suffix, s.length - suffix.length) !== -1;
 };
 
-
 function JdbcHelper() {
 }
-
 
 // this method exists purely to be able to test
 // getRelativePathToNodeModulesFolder and getAbsolutePathToSindicetechFolder
@@ -80,14 +79,14 @@ JdbcHelper.prototype.prepareJdbcConfig = function (conf) {
   if (os.platform().indexOf('win') === 0) {
 
     //windows
-    var winAbspathRegex = /^[A-Z]:\\\\/;
+    var winAbspathRegex = /^[A-Z]:\\/;
     libpath = winAbspathRegex.test(conf.libpath) ?
       conf.libpath.replace(/\//g, '\\') :
       pathToSindicetechFolder + conf.libpath.replace(/\\{2}/g, '\\').replace(/\//g, '\\');
 
     if (conf.libs) {
       libs = _.map(conf.libs, function (libpath) {
-        return winAbspathRegex.test(libpath.test) ?
+        return winAbspathRegex.test(libpath) ?
           libpath.replace(/\//g, '\\') :
           pathToSindicetechFolder + libpath.replace(/\\{2}/g, '\\').replace(/\//g, '\\');
       });
@@ -107,73 +106,76 @@ JdbcHelper.prototype.prepareJdbcConfig = function (conf) {
     libs: libs,
     drivername: conf.drivername,
     url: conf.connection_string,
-    properties: [
-      [ 'user', conf.username ],
-      [ 'password', cryptoHelper.decrypt(config.kibana.datasource_encryption_key, conf.password) ]
-      // IMPROVE ME
-      // here it is fine as password is always encrypted
-      // but we need a better method to decrypt all parameters based on schema
-      // however when loading jdbc libs the datasource was not created yet so there is no datasourceClazz available
-      // so we would have to get the schema ourselves here
-    ]
+    properties: []
   };
+
+  if (conf.username) {
+    jdbcConfig.properties.push(['user', conf.username]);
+  }
+
+  // TODO: IMPROVE ME
+  // here it is fine as password is always encrypted
+  // but we need a better method to decrypt all parameters based on schema
+  // however when loading jdbc libs the datasource was not created yet so there is no datasourceClazz available
+  // so we would have to get the schema ourselves here
+  if (conf.password) {
+    jdbcConfig.properties.push([
+      'password',
+      cryptoHelper.decrypt(config.kibana.datasource_encryption_key, conf.password)
+    ]);
+  }
   return jdbcConfig;
 
 };
 
 JdbcHelper.prototype.prepareJdbcPaths = function () {
-  var libpaths = [];
-  var libs = [];
+  var self = this;
 
-  console.log('Preparing libraries paths before loading java jdbc - might take up to 10 sec');
-  var resp = sync_request('GET', config.kibana.elasticsearch_url + '/' + config.kibana.kibana_index + '/datasource/_search', {
-    qs: {
-      size: 100
-    },
-    timeout: 10000
+  return new Promise(function (resolve) {
+
+    logger.info('Preparing JDBC library paths');
+
+    var ret = {
+      libpaths: [],
+      libs: []
+    };
+
+    indexHelper.getDatasources().then(function (datasources) {
+
+      _.each(datasources, function (datasource) {
+        if (datasource._source.datasourceType.indexOf('_jdbc') > 0) {
+          if (datasource._source.datasourceParams) {
+            var params = {};
+            try {
+              params = JSON.parse(datasource._source.datasourceParams);
+            } catch (error) {
+              logger.error(error);
+              return;
+            }
+            var jdbcConfig = self.prepareJdbcConfig(params);
+            ret.libpaths.push(jdbcConfig.libpath);
+            ret.libs = ret.libs.concat(jdbcConfig.libs);
+          }
+        }
+      });
+
+      logger.info('The following libraries will be loaded:');
+      logger.info(JSON.stringify(ret, null, ' '));
+
+      resolve(ret);
+    }).catch(function (err) {
+      var msg =
+        'An error occurred while fetching datasources from ' + config.kibana.kibana_index + '\n' +
+        '. This is fine if you just started kibi first time and ' +
+        ' the index does not yet exists.\n' +
+        'Please check the logs if the warning persists after restarting Kibi.';
+      console.log(msg);
+      logger.error(err);
+      resolve(ret);
+    });
+
   });
 
-  var body;
-  try {
-    body = JSON.parse(resp.getBody('utf8'));
-  } catch (e) {
-    logger.error('Could not parse resp as json [' + body + ']');
-  }
-
-  if (resp.statusCode === 200) {
-    if (body && body.hits && body.hits.hits) {
-      for (var i = 0; i < body.hits.hits.length; i++) {
-        var datasource = body.hits.hits[i];
-        if (datasource._source.datasourceType === 'sql_jdbc' || datasource._source.datasourceType === 'sparql_jdbc') {
-          // here create the clazz
-          var params = {};
-          try {
-            params = JSON.parse(datasource._source.datasourceParams);
-          } catch (e) {}
-          var jdbcConfig = this.prepareJdbcConfig(params);
-          libpaths.push(jdbcConfig.libpath);
-          libs = libs.concat(jdbcConfig.libs);
-        }
-      }
-    }
-  } else {
-    var msg =
-      'Fetching datasources from ' + config.kibana.kibana_index +
-      ' index failed with status [' + resp.statusCode + '].\n' +
-      'This is fine if you just started kibi first time and ' + config.kibana.kibana_index +
-      ' index does not yet exists.\n' +
-      'If this warning persist after restart - check the logs.';
-    console.log(msg);
-    logger.error(msg + 'Body:\n', body);
-  }
-
-  var ret = {
-    libpaths: libpaths,
-    libs: libs
-  };
-  console.log('Following libraries will be loaded:');
-  console.log(JSON.stringify(ret, null, ' '));
-  return ret;
 };
 
 module.exports = JdbcHelper;

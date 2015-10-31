@@ -131,7 +131,7 @@ JdbcHelper.prototype.prepareJdbcConfig = function (conf) {
 JdbcHelper.prototype.prepareJdbcPaths = function () {
   var self = this;
 
-  return new Promise(function (resolve, reject) {
+  return new Promise(function (resolve) {
 
     logger.info('Preparing JDBC library paths');
 
@@ -149,7 +149,7 @@ JdbcHelper.prototype.prepareJdbcPaths = function () {
             try {
               params = JSON.parse(datasource._source.datasourceParams);
             } catch (error) {
-              reject(error);
+              logger.error(error);
               return;
             }
             var jdbcConfig = self.prepareJdbcConfig(params);

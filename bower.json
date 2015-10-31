@@ -59,7 +59,8 @@
     "antlr4": "sirensolutions/antlr4-javascript#1.0.2",
     "antlr4-sparql": "sirensolutions/antlr4-javascript-sparql#1.0.7",
     "antlr4-sql": "sirensolutions/antlr4-javascript-sql#1.0.2",
-    "qtip2": "2.2.1"
+    "qtip2": "2.2.1",
+    "vis": "4.9.0"
   },
   "devDependencies": {},
   "resolutions": {

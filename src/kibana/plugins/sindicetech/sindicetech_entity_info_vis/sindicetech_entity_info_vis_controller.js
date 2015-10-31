@@ -99,6 +99,7 @@ define(function (require) {
               msg = JSON.stringify(resp.data.error, null, '');
             }
             notify.warning(msg);
+            $scope.holder.activeFetch = false;
             return;
           }
 

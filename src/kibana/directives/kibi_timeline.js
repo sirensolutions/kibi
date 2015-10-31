@@ -32,8 +32,9 @@ define(function (require) {
         }
         if (timeline) {
           timeline.setOptions(newOptions);
+          timeline.redraw();
         }
-      });
+      }, true); // has to be true in other way the change in height is not detected
 
 
       $scope.$watch('searchSource', function (newValue, oldValue) {

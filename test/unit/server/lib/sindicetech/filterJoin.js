@@ -1,27 +1,9 @@
 var root = require('requirefrom')('');
-var filterJoin = root('src/server/lib/sindicetech/filterJoin');
+var filterJoinSet = root('src/server/lib/sindicetech/filterJoin').set;
+var filterJoinSeq = root('src/server/lib/sindicetech/filterJoin').sequence;
 var expect = require('expect.js');
 var Promise = require('bluebird');
 var _ = require('lodash');
-
-describe('All you errors', function () {
-  it('join must be in an array', function () {
-    var query = {
-      aaa: {
-        join: {
-          focus: 'i1',
-          indexes: [
-            {
-              id: 'i1',
-              type: 'cafard'
-            }
-          ]
-        }
-      }
-    };
-    expect(filterJoin).withArgs(query).to.throwException(/array/);
-  });
-});
 
 describe('FilterJoin querying', function () {
   it('in a bool clause', function () {
@@ -83,7 +65,7 @@ describe('FilterJoin querying', function () {
         ]
       }
     };
-    var actual = filterJoin(query);
+    var actual = filterJoinSet(query);
     expect(actual).to.eql(expected);
   });
 
@@ -144,7 +126,7 @@ describe('FilterJoin querying', function () {
         ]
       }
     };
-    var actual = filterJoin(query);
+    var actual = filterJoinSet(query);
     expect(actual).to.eql(expected);
   });
 
@@ -199,7 +181,7 @@ describe('FilterJoin querying', function () {
         }
       }
     ];
-    var actual = filterJoin(query);
+    var actual = filterJoinSet(query);
     expect(actual).to.eql(expected);
   });
 
@@ -251,7 +233,7 @@ describe('FilterJoin querying', function () {
         }
       }
     ];
-    var actual = filterJoin(query);
+    var actual = filterJoinSet(query);
     expect(actual).to.eql(expected);
   });
 
@@ -321,7 +303,7 @@ describe('FilterJoin querying', function () {
         }
       }
     ];
-    var actual = filterJoin(query);
+    var actual = filterJoinSet(query);
     expect(actual).to.eql(expected);
   });
 
@@ -398,7 +380,7 @@ describe('FilterJoin querying', function () {
         }
       }
     ];
-    var actual = filterJoin(query);
+    var actual = filterJoinSet(query);
     expect(actual).to.eql(expected);
   });
 
@@ -469,7 +451,7 @@ describe('FilterJoin querying', function () {
         }
       }
     ];
-    var actual = filterJoin(query);
+    var actual = filterJoinSet(query);
     expect(actual).to.eql(expected);
   });
 
@@ -552,7 +534,7 @@ describe('FilterJoin querying', function () {
         }
       }
     ];
-    var actual = filterJoin(query);
+    var actual = filterJoinSet(query);
     expect(actual).to.eql(expected);
   });
 
@@ -668,7 +650,7 @@ describe('FilterJoin querying', function () {
         }
       }
     ];
-    var actual = filterJoin(query);
+    var actual = filterJoinSet(query);
     expect(actual).to.eql(expected);
   });
 
@@ -784,7 +766,7 @@ describe('FilterJoin querying', function () {
         }
       }
     ];
-    var actual = filterJoin(query);
+    var actual = filterJoinSet(query);
     expect(actual).to.eql(expected);
   });
 
@@ -1068,7 +1050,7 @@ describe('FilterJoin querying', function () {
           }
         }
     ];
-    var actual = filterJoin(query);
+    var actual = filterJoinSet(query);
     expect(actual).to.eql(expected);
   });
 
@@ -1132,7 +1114,7 @@ describe('FilterJoin querying', function () {
         }
       }
     ];
-    var actual = filterJoin(query);
+    var actual = filterJoinSet(query);
     expect(actual).to.eql(expected);
   });
 
@@ -1220,8 +1202,297 @@ describe('FilterJoin querying', function () {
         }
       }
     ];
-    var actual = filterJoin(query);
+    var actual = filterJoinSet(query);
     expect(actual).to.eql(expected);
+  });
+
+  describe('Filterjoin with pre-defined join sequence', function () {
+    it('joins with filters on leaf', function () {
+      var query = [{
+        join_sequence: [
+          {
+            path: 'companyid',
+            indices: [ 'investment' ],
+            queries: [
+              {
+                query: {
+                  query_string: {
+                    query: '360buy'
+                  }
+                }
+              }
+            ]
+          },
+          {
+            path: 'id',
+            indices: [ 'company' ]
+          },
+          {
+            path: 'companyid',
+            indices: [ 'investment' ]
+          }
+        ]
+      }];
+      var expected = [
+        {
+          filterjoin: {
+            companyid: {
+              path: 'id',
+              indices: ['company'],
+              query: {
+                filtered: {
+                  query: {
+                    bool: {
+                      must: [
+                        {
+                          match_all: {}
+                        }
+                      ]
+                    }
+                  },
+                  filter: {
+                    bool: {
+                      must: [
+                        {
+                          filterjoin: {
+                            id: {
+                              path: 'companyid',
+                              indices: ['investment'],
+                              query: {
+                                filtered: {
+                                  query: {
+                                    bool: {
+                                      must: [
+                                        {
+                                          match_all: {}
+                                        },
+                                        {
+                                          query_string: {
+                                            query: '360buy'
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  filter: {
+                                    bool: {
+                                      must: []
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ];
+      var actual = filterJoinSeq(query);
+      expect(actual).to.eql(expected);
+    });
+
+    it('joins with two filters', function () {
+      var query = [{
+        join_sequence: [
+          {
+            path: 'companyid',
+            indices: [ 'investment' ],
+            queries: [
+              {
+                query: {
+                  query_string: {
+                    query: '360buy'
+                  }
+                }
+              }
+            ]
+          },
+          {
+            path: 'id',
+            indices: [ 'company' ],
+            queries: [
+              {
+                query: {
+                  query_string: {
+                    query: 'yoplait'
+                  }
+                }
+              }
+            ]
+          },
+          {
+            path: 'companyid',
+            indices: [ 'investment' ]
+          }
+        ]
+      }];
+      var expected = [
+        {
+          filterjoin: {
+            companyid: {
+              path: 'id',
+              indices: ['company'],
+              query: {
+                filtered: {
+                  query: {
+                    bool: {
+                      must: [
+                        {
+                          match_all: {}
+                        },
+                        {
+                          query_string: {
+                            query: 'yoplait'
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  filter: {
+                    bool: {
+                      must: [
+                        {
+                          filterjoin: {
+                            id: {
+                              path: 'companyid',
+                              indices: ['investment'],
+                              query: {
+                                filtered: {
+                                  query: {
+                                    bool: {
+                                      must: [
+                                        {
+                                          match_all: {}
+                                        },
+                                        {
+                                          query_string: {
+                                            query: '360buy'
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  filter: {
+                                    bool: {
+                                      must: []
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ];
+      var actual = filterJoinSeq(query);
+      expect(actual).to.eql(expected);
+    });
+
+    it('loop', function () {
+      var query = [{
+        join_sequence: [
+          {
+            path: 'here',
+            indices: [ 'aaa' ],
+            queries: [
+              {
+                query: {
+                  query_string: {
+                    query: '360buy'
+                  }
+                }
+              }
+            ]
+          },
+          {
+            path: 'there',
+            indices: [ 'aaa' ]
+          }
+        ]
+      }];
+      var expected = [
+        {
+          filterjoin: {
+            there: {
+              path: 'here',
+              indices: ['aaa'],
+              query: {
+                filtered: {
+                  query: {
+                    bool: {
+                      must: [
+                        {
+                          match_all: {}
+                        },
+                        {
+                          query_string: {
+                            query: '360buy'
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  filter: {
+                    bool: {
+                      must: []
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ];
+      var actual = filterJoinSeq(query);
+      expect(actual).to.eql(expected);
+    });
+
+    it('joins with filters everywhere', function () {
+      var query = [{
+        join_sequence: [
+          {
+            path: 'id',
+            indices: [ 'company' ],
+            queries: [
+              {
+                query: {
+                  query_string: {
+                    query: 'yoplait'
+                  }
+                }
+              }
+            ]
+          },
+          {
+            path: 'companyid',
+            indices: [ 'investment' ],
+            queries: [
+              {
+                query: {
+                  query_string: {
+                    query: 'boom'
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      }];
+      expect(filterJoinSeq).withArgs(query).to.throwError();
+    });
   });
 
   it('accepts orderby and maxtermspershard parameters', function () {
@@ -1279,7 +1550,7 @@ describe('FilterJoin querying', function () {
         }
       }
     ];
-    var actual = filterJoin(query);
+    var actual = filterJoinSet(query);
     expect(actual).to.eql(expected);
   });
 
@@ -1352,7 +1623,7 @@ describe('FilterJoin querying', function () {
         }
       }
     ];
-    var actual = filterJoin(query);
+    var actual = filterJoinSet(query);
     expect(actual).to.eql(expected);
   });
 });

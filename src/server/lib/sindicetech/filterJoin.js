@@ -1,12 +1,54 @@
 var util = require('./util');
+var _ = require('lodash');
 
 /**
- * Generate a relational query based on the given relations with the focused index as the root of the query
- * focus: the focused index as a string
- * relations: the relation graph of indices as an array of arrays, each array being an edge between two indices
- * filters: the filters for each index as an object, which entries are the index names
+ * Generate a SIREn filterjoin query where the sequence of joins is explicitly defined in the query.
+ *
+ * A join_sequence is an array where each element defines a node of the join sequence.
+ * Each element contains the following fields:
+ * - path: the path to the joined field
+ * - indices: an array of indices to join on
+ * - types: the corresponding array of types
+ * - orderBy: the filterjoin ordering option
+ * - maxTermsPerShard: the maximum number of terms to consider in the filterjoin
+ * - queries: and array of queries that are applied on the set of indices
  */
-module.exports = function (json) {
+exports.sequence = function (json) {
+  var label = 'join_sequence';
+  var objects = util.traverse(json, label, function (err, sequence) {
+    if (err) {
+      throw err;
+    }
+
+    if (!sequence || sequence.constructor !== Array || sequence.length === 0) {
+      throw new Error('Specify the join sequence: ' + JSON.stringify(sequence, null, ' '));
+    }
+    if (sequence.length < 2) {
+      throw new Error('Sequence must have at least two elements');
+    }
+
+    var query = [];
+    _sequenceJoins(query, sequence);
+    return query;
+  });
+  _replaceObjects(json, objects);
+  return json;
+};
+
+/**
+ * Generate a SIREn filterjoin query based on the given relations with the focused index as the root of the query.
+ *
+ * A filterjoin is an object with the following fields:
+ * - focus: the focused index as a string
+ * - relations: the relation graph of indices as an array of arrays, each array being an edge between two indices. An
+ *   edge is a path to the join field in an index.
+ *   For example it can be [ [ "a.id", "b.aid" ] ], which means that there is a join between indexes "a" and "b", on
+ *   the fields "id" of "a" and "aid" of "b".
+ * - filters: the filters for each index as an object, which entries are the index names
+ * - indexes: the list of indexes involved in the filterjoin query. This is an array of object, each object describing
+ *   an index by specifying two properties, i.e., the id and the type of index.
+ */
+exports.set = function (json) {
   var label = 'join';
   var objects = util.traverse(json, label, function (err, data) {
     if (err) {
@@ -19,13 +61,13 @@ module.exports = function (json) {
     var indexes = data.indexes;
 
     if (focus === undefined) {
-      throw new Error('Missing focus field in the join object: ' + data);
+      throw new Error('Missing focus field in the join object: ' + JSON.stringify(data, null, ' '));
     }
     if (indexes === undefined) {
-      throw new Error('Missing indexes field in the join object: ' + data);
+      throw new Error('Missing indexes field in the join object: ' + JSON.stringify(data, null, ' '));
     }
     if (relations === undefined) {
-      relations = [];
+      throw new Error('Missing relations field in the join object: ' + JSON.stringify(data, null, ' '));
     }
     if (filters === undefined) {
       filters = {};
@@ -35,6 +77,11 @@ module.exports = function (json) {
     _process(query, focus, relations, filters, indexes, {});
     return query;
   });
+  _replaceObjects(json, objects);
+  return json;
+};
+
+function _replaceObjects(json, objects) {
   for (var i = 0; i < objects.length; i++) {
     var path = objects[i].path;
     if (util.length(json, path) !== 1) {
@@ -43,8 +90,24 @@ module.exports = function (json) {
     util.delete(json, path.slice(0, path.length - 1), path[path.length - 1]);
     util.addAll(json, path.slice(0, path.length - 1), objects[i].value);
   }
-  return json;
-};
+}
+
+/**
+ * Create the filterjoin from the sequence of relations
+ */
+function _sequenceJoins(query, sequence) {
+  var ind = sequence.length - 1;
+
+  if (!!sequence[ind].queries) {
+    throw new Error('Queries for the root node are already set');
+  }
+  var curQuery = _addFilterJoin(query, sequence[ind].path, sequence[ind - 1].path, sequence[ind - 1]);
+  _addFilters(curQuery, sequence[ind - 1].queries);
+  for (var i = ind - 2; i >= 0; i--) {
+    curQuery = _addFilterJoin(curQuery, sequence[i + 1].path, sequence[i].path, sequence[i]);
+    _addFilters(curQuery, sequence[i].queries);
+  }
+}
 
 /**
  * Processes the current focused indexed: adds its own direct filters
@@ -59,7 +122,10 @@ function _process(query, focus, relations, filters, indexes, visitedIndices) {
 
   var dotFocus = focus + '.';
 
-  _addFilters(query, focus, filters);
+  if (filters.hasOwnProperty(focus)) {
+    var focusFilters = filters[focus];
+    _addFilters(query, focusFilters);
+  }
   for (var i = 0; i < relations.length; i++) {
     if (relations[i].length !== 2) {
       throw new Error('Expected relation entry with 2 elements: got ' + relations[i]);
@@ -67,10 +133,29 @@ function _process(query, focus, relations, filters, indexes, visitedIndices) {
     var ind = _getFocusedRelationIndex(dotFocus, relations[i]);
     if (ind !== -1) {
       var targetInd = ind === 0 ? 1 : 0;
+      var sourceRel = relations[i][ind];
       var targetRel = relations[i][targetInd];
-      var targetIndex = targetRel.substr(0, targetRel.indexOf('.'));
+
+      // path in the source indices
+      var sourceDot = sourceRel.indexOf('.');
+      if (sourceDot === -1) {
+        throw new Error('Missing dot in [' + sourceRel + ']');
+      }
+      var sourcePath = sourceRel.substr(sourceDot + 1);
+
+      // path in target indices
+      var targetDot = targetRel.indexOf('.');
+      if (targetDot === -1) {
+        throw new Error('Missing dot in [' + targetRel + ']');
+      }
+      var targetPath = targetRel.substr(targetDot + 1);
+
+      // TODO update the definition of the indexes array
+      var targetIndex = targetRel.substr(0, targetDot);
       if (!visitedIndices.hasOwnProperty(targetIndex)) {
-        var childFilters = _addFilterJoin(query, relations[i][ind], targetRel, indexes);
+        var ti = _.find(indexes, { id: targetIndex });
+        ti.indices = [ targetIndex ];
+        var childFilters = _addFilterJoin(query, sourcePath, targetPath, ti);
         _process(childFilters, targetIndex, relations, filters, indexes, visitedIndices);
       }
     }
@@ -80,37 +165,22 @@ function _process(query, focus, relations, filters, indexes, visitedIndices) {
 /**
  * Adds a filterjoin filter to the given query, from the source index to the target index
  */
-function _addFilterJoin(query, source, target, indexes) {
-  var sourceDot = source.indexOf('.');
-  if (sourceDot === -1) {
-    throw new Error('Missing dot in [' + source + ']');
-  }
-  var sourceIndex = source.substr(0, sourceDot);
-  var sourcePath = source.substr(sourceDot + 1);
-
-  var targetDot = target.indexOf('.');
-  if (targetDot === -1) {
-    throw new Error('Missing dot in [' + target + ']');
-  }
-  var targetIndex = target.substr(0, targetDot);
-  var targetPath = target.substr(targetDot + 1);
-
+function _addFilterJoin(query, sourcePath, targetPath, targetIndex) {
   var types = [];
   var orderBy;
   var maxTermsPerShard;
-  for (var i = 0; i < indexes.length; i++) {
-    if (indexes[i].id === targetIndex) {
-      if (indexes[i].type) {
-        types.push(indexes[i].type);
-      }
-      orderBy = indexes[i].orderBy;
-      maxTermsPerShard = indexes[i].maxTermsPerShard;
-      break;
-    }
+
+  if (!targetIndex) {
+    throw new Error('The target index must be defined');
   }
+  if (targetIndex.type) {
+    types.push(targetIndex.type);
+  }
+  orderBy = targetIndex.orderBy;
+  maxTermsPerShard = targetIndex.maxTermsPerShard;
 
   var filterJoin = {
-    indices: [targetIndex],
+    indices: targetIndex.indices,
     path: targetPath,
     query: {
       filtered: {
@@ -145,9 +215,10 @@ function _addFilterJoin(query, source, target, indexes) {
   };
   fjObject.filterjoin[sourcePath] = filterJoin;
   if (query.constructor === Array) {
+    // this filterjoin is the root
     query.push(fjObject);
   } else {
-    // this is a nested filter join
+    // add to the parent filterjoin
     query.filter.bool.must.push(fjObject);
   }
   return filterJoin.query.filtered;
@@ -168,22 +239,22 @@ function _getFocusedRelationIndex(focus, relation) {
 /**
  * Adds all the filters about the focus
  */
-function _addFilters(query, focus, filters) {
-  if (filters.hasOwnProperty(focus)) {
-    var focusFilters = filters[focus];
-    if (focusFilters.constructor !== Array) {
-      throw new Error('The filter for the index=[' + focus + '] must be an array');
-    }
-    for (var i = 0; i < focusFilters.length; i++) {
-      if (query.constructor === Array) {
-        query.push(focusFilters[i]);
+function _addFilters(query, focusFilters) {
+  if (!focusFilters) {
+    return;
+  }
+  if (focusFilters.constructor !== Array) {
+    throw new Error('The queries field must be an array');
+  }
+  for (var i = 0; i < focusFilters.length; i++) {
+    if (query.constructor === Array) {
+      query.push(focusFilters[i]);
+    } else {
+      // add the query object to filtered.query so that the score is computed
+      if (focusFilters[i].hasOwnProperty('query')) {
+        query.query.bool.must.push(focusFilters[i].query);
       } else {
-        // add the query object to filtered.query so that the score is computed
-        if (focusFilters[i].hasOwnProperty('query')) {
-          query.query.bool.must.push(focusFilters[i].query);
-        } else {
-          query.filter.bool.must.push(focusFilters[i]);
-        }
+        query.filter.bool.must.push(focusFilters[i]);
       }
     }
   }

@@ -3,9 +3,12 @@ define(function (require) {
   var _ = require('lodash');
   var vis = require('vis');
 
-  require('modules').get('kibana').directive('kibiTimeline', function (Private) {
+  require('modules').get('kibana').directive('kibiTimeline', function (Private, Notifier) {
 
     var filterManager = Private(require('components/filter_manager/filter_manager'));
+    var notify = new Notifier({
+      name: 'Kibi Timeline'
+    });
 
     return {
       scope: {
@@ -84,8 +87,7 @@ define(function (require) {
             return $scope.searchSource.onResults().then(onResults);
 
           }).catch(function (err) {
-            // HERE WE HAVE TO DECIDE HOW TO HANDLE ERRORS
-            console.log(err);
+            notify.error(err);
           });
         }
 

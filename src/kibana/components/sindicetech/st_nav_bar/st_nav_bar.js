@@ -173,6 +173,16 @@ define(function (require) {
           });
         });
 
+
+        // everywhere use this event !!! to be consistent
+        // make a comment that it was required because not all compononts can listen to
+        // esResponse
+        var removeAutorefreshHandler = $rootScope.$on('kibi:autorefresh', function (event) {
+          dashboardGroupHelper.computeGroups().then(function (dashboardGroups) {
+            _writeToScope(dashboardGroups);
+          });
+        });
+
         // =============
         // Tab scrolling
         // =============
@@ -232,6 +242,7 @@ define(function (require) {
         };
 
         $el.on('$destroy', function () {
+          removeAutorefreshHandler();
           removeInitConfigHandler();
           removeDashboardChangedHandler();
           removeDashboardGroupChangedHandler();

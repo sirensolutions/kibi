@@ -1,5 +1,5 @@
 define(function (require) {
-  return function SearchLooperService(Private, Promise, Notifier) {
+  return function SearchLooperService($rootScope, Private, Promise, Notifier) {
     var fetch = Private(require('components/courier/fetch/fetch'));
     var searchStrategy = Private(require('components/courier/fetch/strategy/search'));
     var requestQueue = Private(require('components/courier/_request_queue'));
@@ -12,6 +12,10 @@ define(function (require) {
      * @type {Looper}
      */
     var searchLooper = new Looper(null, function () {
+
+      // kibi emit event so directives can also have an idea that content was updated (or reloaded by autorefresh)
+      $rootScope.$emit('kibi:autorefresh');
+
       return fetch.these(
         requestQueue.getInactive(searchStrategy)
       );

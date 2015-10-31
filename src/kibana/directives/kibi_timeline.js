@@ -19,51 +19,54 @@ define(function (require) {
     function _link($scope, $element) {
       var data;
       var timeline;
-      var previousSearchSource;
+      var _previousSearchSource;
+      var onSelect = function (properties) {
+        // pass this to a scope variable
+        $scope.params.clickedItemId = data._data[properties.items];
+        console.log('Selected timeline event', $scope.params.clickedItemId);
+      };
+
+      $scope.$watch('options', function (newOptions, oldOptions) {
+        if (!newOptions || newOptions === oldOptions) {
+          return;
+        }
+        if (timeline) {
+          timeline.setOptions(newOptions);
+        }
+      });
+
 
       $scope.$watch('searchSource', function (newValue, oldValue) {
-
-        var events = [];
 
         if (newValue === oldValue) return;
 
         if ($scope.searchSource) {
 
-          previousSearchSource = $scope.searchSource;
+          _previousSearchSource = $scope.searchSource;
 
           $scope.searchSource.onResults().then(function onResults(searchResp) {
 
-            // Reset infinite scroll limit
-            $scope.limit = 50;
-
-            if ($scope.searchSource !== previousSearchSource) {
+            if ($scope.searchSource !== _previousSearchSource) {
               return;
             }
 
-            _.each(searchResp.hits.hits, function (hit) {
-              events.push({
+            var events = _.map(searchResp.hits.hits, function (hit) {
+              return {
                 start: new Date(hit._source[$scope.params.startField]),
                 content: hit._source[$scope.params.labelField] || ''
-              });
+              };
             });
 
             data = new vis.DataSet(events);
 
             if (timeline) {
-              // clear and redraw the timeline
-              timeline.destroy();
+              // just update data points
+              timeline.setItems(data);
+            } else {
+              // create a new one
               timeline = new vis.Timeline($element[0], data, $scope.options);
+              timeline.on('select', onSelect);
             }
-            else {
-              timeline = new vis.Timeline($element[0], data, $scope.options);
-            }
-
-            // get the id of the clicked timeline item
-            timeline.on('select', function (properties) {
-              // pass this to a scope variable
-              $scope.params.clickedItemId = data._data[properties.items];
-              console.log('Selected timeline event', $scope.params.clickedItemId);
-            });
 
             return $scope.searchSource.onResults().then(onResults);
 
@@ -72,6 +75,12 @@ define(function (require) {
             console.log(err);
           });
         }
+
+        $element.on('$destroy', function () {
+          if (timeline) {
+            timeline.off('select', onSelect);
+          }
+        });
 
       });
 

@@ -75,6 +75,7 @@ define(function (require) {
       }
     });
 
+    // used also in autorefresh mode
     $scope.$watch('esResponse', function () {
       if ($scope.savedObj && $scope.savedObj.searchSource) {
         $scope.savedObj.searchSource.fetchQueued();

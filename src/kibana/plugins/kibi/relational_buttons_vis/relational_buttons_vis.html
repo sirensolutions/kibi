@@ -1,4 +1,6 @@
-<div ng-controller="KibiRelationalButtonsVisController" class="kibi-relational-vis">
+<div ng-controller="KibiRelationalButtonsVisController" class="kibi-relational-vis" ng-class="{loading: holder.activeFetch}">
+
+  <div class="spinner large" ng-show="holder.activeFetch"></div>
 
   <button
     ng-repeat="button in buttons"

@@ -1,4 +1,6 @@
-<div ng-controller="SindicetechEntityInfoVisController" class="sindicetech-entity-info-vis">
+<div ng-controller="SindicetechEntityInfoVisController" class="sindicetech-entity-info-vis" ng-class="{loading: holder.activeFetch}">
+
+  <div class="spinner large" ng-show="holder.activeFetch"></div>
 
   <st-param-entity-uri entity-uri-holder="holder"></st-param-entity-uri>
 

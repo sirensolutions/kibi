@@ -9,6 +9,10 @@ define(function (require) {
     function ($scope, $rootScope, Private, $http, Notifier, Promise, timefilter,
               indexPatterns, savedDashboards, savedSearches) {
 
+      $scope.holder = {
+        activeFetch: false
+      };
+
       var notify = new Notifier({
         location: 'Relational Widget'
       });
@@ -282,6 +286,7 @@ define(function (require) {
 
       // Update the counts on each button of the related filter
       var _updateCounts = function () {
+        $scope.holder.activeFetch = true;
         var countQueries = [];
         _.each($scope.buttons, function (button) {
 
@@ -368,6 +373,7 @@ define(function (require) {
                 }
               }
             });
+            $scope.holder.activeFetch = false;
           });
         }).catch(function (err) {
           notify.error(err);
@@ -411,6 +417,7 @@ define(function (require) {
         }
       });
 
+      // when autoupdate is on we detect the refresh here
       $scope.$watch('esResponse', function (resp) {
         if ($scope.buttons) {
           _updateCounts();

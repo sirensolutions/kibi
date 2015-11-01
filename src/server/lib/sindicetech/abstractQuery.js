@@ -70,7 +70,10 @@ Query.prototype.generateCacheKey = function (prefix, query, onlyValues, valueVar
 };
 
 Query.prototype._checkIfQueryRequireEntityURI  = function (query) {
-  return query.match(/@doc\[.+?]@/);
+  if (query) {
+    return /@doc\[.+?]@/.test(query);
+  }
+  return false;
 };
 
 Query.prototype._checkIfSelectedDocumentRequiredAndNotPresent = function (options) {

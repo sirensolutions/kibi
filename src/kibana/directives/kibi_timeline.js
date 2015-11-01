@@ -53,7 +53,7 @@ define(function (require) {
 
       $scope.$watch('searchSource', function (newValue, oldValue) {
 
-        if (newValue === oldValue) return;
+        if (newValue === oldValue && !!timeline) return;
 
         if ($scope.searchSource) {
 

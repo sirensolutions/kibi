@@ -29,12 +29,15 @@ define(function (require) {
         // pass this to a scope variable
         var selected = data._data[properties.items];
 
-        var index = $scope.searchSource.get('index').id;
-        var field = $scope.params.labelField;
-        var value = selected.content;
-        var operator = '+';
+        if (selected) {
+          var index = $scope.searchSource.get('index').id;
+          var field = $scope.params.labelField;
+          var value = selected.content;
+          var operator = '+';
 
-        filterManager.add(field, value, operator, index);
+          filterManager.add(field, value, operator, index);
+        }
+
       };
 
       $scope.$watch('options', function (newOptions, oldOptions) {

@@ -52,7 +52,6 @@ function Query(snippetDefinition, cache) {
   this.activationQueryRequireEntityURI = this._checkIfQueryRequireEntityURI(config.activationQuery);
   this.resultQueryRequireEntityURI = this._checkIfQueryRequireEntityURI(config.resultQuery);
 
-
   this.config = config;
   this.config.prefixesString = _.map(this.config.queryPrefixes, function (value, key) {
     return 'prefix ' + key + ': <' + value + '>';
@@ -77,8 +76,8 @@ Query.prototype._checkIfQueryRequireEntityURI  = function (query) {
 };
 
 Query.prototype._checkIfSelectedDocumentRequiredAndNotPresent = function (options) {
-  return this.requireEntityURI &&
-    (!options.selectedDocuments || options.selectedDocuments.length === 0 || options.selectedDocuments[0] === '');
+  return (this.activationQueryRequireEntityURI || this.resultQueryRequireEntityURI) &&
+    (!options || !options.selectedDocuments || options.selectedDocuments.length === 0 || options.selectedDocuments[0] === '');
 };
 
 

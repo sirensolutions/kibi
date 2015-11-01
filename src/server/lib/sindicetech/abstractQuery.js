@@ -171,8 +171,8 @@ Query.prototype.getHtml = function (queryDef, options) {
       safeConfig.templateVars = queryDef.templateVars;
       safeConfig.open = queryDef.open;
       safeConfig.showFilterButton = queryDef.showFilterButton;
-      safeConfig.redirectToDashbord = queryDef.redirectToDashbord;
-      // now override the oryginal config
+      safeConfig.redirectToDashboard = queryDef.redirectToDashboard;
+      // now override the original config
       data.config = safeConfig;
 
       // here fetch template via $http and cache it

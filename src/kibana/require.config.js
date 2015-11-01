@@ -52,7 +52,7 @@ require.config({
     'antlr4-sparql':    'bower_components/antlr4-sparql/release/antlr4-sparql',
     'antlr4-sql':       'bower_components/antlr4-sql/release/antlr4-sql',
     qtip2:              'bower_components/qtip2/jquery.qtip.min',
-    vis:                'bower_components/vis/dist/vis'
+    vis:                'bower_components/vis/dist/vis.min'
   },
   shim: {
     angular: {
@@ -75,8 +75,6 @@ require.config({
     'eeg' : ['css!bower_components/eeg/lib/css/eeg.css', 'jquery', 'd3'],
     'eeg-angular': ['angular', 'eeg'],
     vis: ['css!bower_components/vis/dist/vis.css'],
-
-
     'antlr4-sparql' : ['antlr4'],
     'antlr4-sql' : ['antlr4'],
     'qtip2' : ['jquery'],

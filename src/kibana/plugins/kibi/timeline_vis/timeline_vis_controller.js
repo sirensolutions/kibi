@@ -42,7 +42,7 @@ define(function (require) {
         searchSource.size(savedVis.vis.params.size || 100);
 
         $scope.savedObj = {
-          searchSource: searchSource,
+          searchSource: searchSource
         };
         courier.fetch();
       }

@@ -24,6 +24,25 @@ define(function (require) {
           expect(isRetrieved(sourceFiltering, 'connor')).to.be(false);
         });
 
+        it('should retrieve connor', function () {
+          var sourceFiltering = {
+            exclude: '*.connor'
+          };
+
+          expect(isRetrieved(sourceFiltering, 'connor')).to.be(true);
+          expect(isRetrieved(sourceFiltering, 'john.connor')).to.be(false);
+        });
+
+        it('should not retrieve neither john nor connor', function () {
+          var sourceFiltering = {
+            exclude: [ 'john', 'connor' ]
+          };
+
+          expect(isRetrieved(sourceFiltering, 'connor')).to.be(false);
+          expect(isRetrieved(sourceFiltering, 'john')).to.be(false);
+          expect(isRetrieved(sourceFiltering, 'toto')).to.be(true);
+        });
+
         it('should not retrieve john.*.connor', function () {
           var sourceFiltering = {
             exclude: 'john.*.connor'

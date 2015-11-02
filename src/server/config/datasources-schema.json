@@ -209,7 +209,7 @@
       "encrypted": false,
       "inputType": "text",
       "defaultValue": "",
-      "placeholder": "Full class name e.g.: com.mysql.jdbc.Driver"
+      "placeholder": "JDBC driver class name (e.g. com.mysql.jdbc.Driver)"
     },
     {
       "name": "libpath",
@@ -218,7 +218,7 @@
       "encrypted": false,
       "inputType": "text",
       "defaultValue": "",
-      "placeholder": "Absolute path to the database file"
+      "placeholder": "Absolute path to the JDBC driver jar file"
     },
     {
       "name": "connection_string",

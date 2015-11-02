@@ -87,9 +87,10 @@ SQLiteQuery.prototype.checkIfItIsRelevant = function (options) {
     }
 
 
-    var cache_key = self.generateCacheKey(dbfile, query);
+    var cache_key = null;
 
     if (self.cache) {
+      cache_key = self.generateCacheKey(dbfile, query);
       var v = self.cache.get(cache_key);
       if (v) {
         return Promise.resolve(v);
@@ -145,9 +146,10 @@ SQLiteQuery.prototype.fetchResults = function (options, onlyIds, idVariableName)
 
   return queryHelper.replaceVariablesUsingEsDocument(this.config.resultQuery, uri).then(function (query) {
 
-    var cache_key = self.generateCacheKey(dbfile, query, onlyIds, idVariableName);
+    var cache_key = null;
 
     if (self.cache) {
+      cache_key = self.generateCacheKey(dbfile, query, onlyIds, idVariableName);
       var v =  self.cache.get(cache_key);
       if (v) {
         v.queryExecutionTime = new Date().getTime() - start;

@@ -85,9 +85,10 @@ JdbcQuery.prototype.checkIfItIsRelevant = function (options) {
         return Promise.resolve({'boolean': true});
       }
 
-      var cache_key = self.generateCacheKey(connection_string, query);
+      var cache_key = null;
 
       if (self.cache) {
+        cache_key = self.generateCacheKey(connection_string, query);
         var v = self.cache.get(cache_key);
         if (v) {
           return Promise.resolve(v);
@@ -138,9 +139,10 @@ JdbcQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) {
 
     return queryHelper.replaceVariablesUsingEsDocument(self.config.resultQuery, uri).then(function (query) {
 
-      var cache_key = self.generateCacheKey(connection_string, query, onlyIds, idVariableName);
+      var cache_key = null;
 
       if (self.cache) {
+        cache_key = self.generateCacheKey(connection_string, query, onlyIds, idVariableName);
         var v =  self.cache.get(cache_key);
         if (v) {
           v.queryExecutionTime = new Date().getTime() - start;

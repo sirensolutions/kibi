@@ -57,6 +57,12 @@ define(function (require) {
           // on change timeline directive should call redraw()
           autoResize: false
         };
+
+        if (savedVis && savedVis.vis.params.startField === savedVis.vis.params.endField) {
+          options.type = 'point';
+        } else if (savedVis && savedVis.vis.params.startField !== savedVis.vis.params.endField) {
+          options.type = 'box';
+        }
         $scope.options = options;
       }
 
@@ -94,9 +100,9 @@ define(function (require) {
 
       if (editing) {
         var removeVisStateChangedHandler = $rootScope.$on('kibi:vis:state-changed', function () {
-          fetchResults($scope.savedVis);
           initOptions($scope.savedVis);
           initParams($scope.savedVis);
+          fetchResults($scope.savedVis);
         });
 
         $scope.$on('$destroy', function () {

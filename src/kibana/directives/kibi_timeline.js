@@ -7,7 +7,7 @@ define(function (require) {
 
     var filterManager = Private(require('components/filter_manager/filter_manager'));
     var notify = new Notifier({
-      name: 'Kibi Timeline'
+      location: 'Kibi Timeline'
     });
 
     return {
@@ -37,7 +37,22 @@ define(function (require) {
 
           filterManager.add(field, value, operator, index);
         }
+      };
 
+      var _isMultivalued = function (doc, field) {
+        return doc[field] instanceof Array;
+      };
+
+      var _pickFirstIfMultivalued = function (doc, field, defaultValue) {
+        if (!doc[field]) {
+          return defaultValue || '';
+        } else {
+          if (_isMultivalued(doc, field) && doc[field].length > 0) {
+            return doc[field][0];
+          } else {
+            return doc[field];
+          }
+        }
       };
 
       $scope.$watch('options', function (newOptions, oldOptions) {
@@ -67,16 +82,41 @@ define(function (require) {
 
             var events = [];
             if ($scope.params.startField) {
+              var detectedMultivaluedLabel;
+              var detectedMultivaluedStart;
+              var detectedMultivaluedEnd;
               _.each(searchResp.hits.hits, function (hit) {
-                var e =  {
-                  start: new Date(hit._source[$scope.params.startField]),
-                  content: hit._source[$scope.params.labelField] || ''
-                };
-                if ($scope.params.endField) {
-                  e.end = new Date(hit._source[$scope.params.endField]);
+                if (hit._source[$scope.params.startField]) {
+
+                  if (_isMultivalued(hit._source, $scope.params.labelField)) {
+                    detectedMultivaluedLabel = true;
+                  }
+                  if (_isMultivalued(hit._source, $scope.params.startField)) {
+                    detectedMultivaluedStart = true;
+                  }
+                  var e =  {
+                    content: _pickFirstIfMultivalued(hit._source, $scope.params.labelField, ''),
+                    start: new Date(_pickFirstIfMultivalued(hit._source, $scope.params.startField))
+                  };
+                  if ($scope.params.endField) {
+                    if (_isMultivalued(hit._source, $scope.params.endField)) {
+                      detectedMultivaluedEnd = true;
+                    }
+                    e.end = new Date(_pickFirstIfMultivalued(hit._source, $scope.params.endField));
+                  }
+                  events.push(e);
                 }
-                events.push(e);
               });
+
+              if (detectedMultivaluedLabel) {
+                notify.warning('Label field [' + $scope.params.labelField + '] is multivalued - the first value will be used.');
+              }
+              if (detectedMultivaluedStart) {
+                notify.warning('Start Date field [' + $scope.params.startField + '] is multivalued - the first date will be used.');
+              }
+              if (detectedMultivaluedEnd) {
+                notify.warning('End Date field [' + $scope.params.endField + '] is multivalued - the first date will be used.');
+              }
             }
 
             data = new vis.DataSet(events);

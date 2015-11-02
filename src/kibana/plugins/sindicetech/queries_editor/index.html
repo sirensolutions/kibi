@@ -40,15 +40,57 @@
             <tags-input ng-model="tags"></tags-input>
           </div>
 
-          <div class="form-group">
-            <label ng-if="datasourceType === 'sparql' || datasourceType === 'sql_jdbc' || datasourceType === 'sqlite' || datasourceType === 'postgresql'">Activation query</label>
-            <label ng-if="datasourceType === 'rest'">Activation regex</label>
-
+          <div class="form-group" ng-if="datasourceType !== 'rest'">
+            <label>Activation query</label>
             <span ng-if="query.st_datasourceId">(Empty = always active)</span>
+
             <div ng-if="datasourceType === 'sparql_http' || datasourceType === 'sparql_jdbc'" ui-ace="{ onLoad: aceLoaded, mode: 'sparql'}" msd-elastic id="st_templateVars" ng-model="query.st_activationQuery" class="form-control activationQueryEditor"></div>
             <div ng-if="datasourceType === 'mysql' || datasourceType === 'sqlite' || datasourceType === 'postgresql' || datasourceType === 'sql_jdbc'" ui-ace="{ onLoad: aceLoaded, mode: 'sql'}" msd-elastic id="st_templateVars" ng-model="query.st_activationQuery" class="form-control activationQueryEditor"></div>
-            <div ng-if="datasourceType === 'rest'" ui-ace="{ onLoad: aceLoaded, mode: 'text'}" msd-elastic id="st_templateVars" ng-model="query.st_activationQuery" class="form-control activationQueryEditor"></div>
           </div>
+
+          <div class="form-group" ng-if="datasourceType === 'rest'">
+            <label>Activation rules</label>
+
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Subject</th>
+                  <th>Action</th>
+                  <th>Value</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr ng-repeat="rule in query.activation_rules" class="queryOptionArea" >
+                  <td>
+                      <input required type="text" ng-model="rule.s" />
+                  </td>
+                  <td>
+                    <select ng-model="rule.p">
+                      <option value="exists">Exists</option>
+                      <option value="is_an_array">Is an array</option>
+                      <option value="is_not_empty">Is NOT empty</option>
+                      <option value="length_greater_than">has length greater than</option>
+                      <option value="matches">Matches regex</option>
+                    </select>
+                  </td>
+                  <td>
+                      <input ng-show="rule.p !== 'exists' && rule.p !== 'is_an_array' && rule.p !== 'is_not_empty'" type="text" ng-model="rule.v"/>
+                  </td>
+                  <td>
+                    <div class="btn-group rightCorner" style="width:60px;">
+                      <array-param-up index="{{ $index }}" model="query.activation_rules"></array-param-up>
+                      <array-param-down index="{{ $index }}" model="query.activation_rules"></array-param-down>
+                      <array-param-remove index="{{ $index }}" model="query.activation_rules"></array-param-remove>
+                    </div>
+
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <array-param-add label="rule" model="query.activation_rules"></array-param-add>
+          </div>
+
 
           <div class="form-group" ng-if="datasourceType !== 'rest'">
             <label ng-if="query.st_datasourceId">Results query</label></br>

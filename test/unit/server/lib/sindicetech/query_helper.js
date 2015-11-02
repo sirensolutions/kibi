@@ -22,7 +22,7 @@ var doc = {
   }
 };
 
-sinon.stub(queryHelper, '_fetchDocument').returns(
+sinon.stub(queryHelper, 'fetchDocument').returns(
   Promise.resolve({
     _id: '_id1',
     _source: {

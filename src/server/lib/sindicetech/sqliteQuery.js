@@ -31,6 +31,12 @@ SQLiteQuery.prototype.openConnection = function () {
   var modes  = this.config.datasource.datasourceClazz.datasource.datasourceParams.modes;
   //TODO: how to pass one or more modes ??
 
+  var timeout = this.config.datasource.datasourceClazz.datasource.datasourceParams.timeout;
+  if (!timeout) {
+    timeout = 1000;
+  }
+  timeout = parseInt(timeout);
+
   var self = this;
   return new Promise(function (fulfill, reject) {
     if (self._connection) {
@@ -54,6 +60,14 @@ SQLiteQuery.prototype.openConnection = function () {
       }
 
       self._connection = db;
+
+      try {
+        self._connection.configure('busyTimeout', timeout);
+      } catch (error) {
+        reject(self._augmentError({message: 'Invalid timeout: ' + timeout}));
+        return;
+      }
+
       fulfill(self._connection);
     });
   });

@@ -84,9 +84,11 @@ define(function (require) {
             if (timeline) {
               // just update data points
               timeline.setItems(data);
+              timeline.fit();
             } else {
               // create a new one
               timeline = new vis.Timeline($element[0], data, $scope.options);
+              timeline.fit();
               timeline.on('select', onSelect);
             }
 

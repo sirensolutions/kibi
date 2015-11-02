@@ -44,9 +44,10 @@ PostgresQuery.prototype.checkIfItIsRelevant = function (options) {
       return Promise.resolve({'boolean': true});
     }
 
-    var cache_key = self.generateCacheKey(host + dbname, query);
+    var cache_key = null;
 
     if (self.cache) {
+      cache_key = self.generateCacheKey(host + dbname, query);
       var v = self.cache.get(cache_key);
       if (v) {
         return Promise.resolve(v);
@@ -212,9 +213,10 @@ PostgresQuery.prototype.fetchResults = function (options, onlyIds, idVariableNam
       console.log(query);
     }
 
-    var cache_key = self.generateCacheKey(host + dbname, query, onlyIds, idVariableName);
+    var cache_key = null;
 
     if (self.cache) {
+      cache_key = self.generateCacheKey(host + dbname, query, onlyIds, idVariableName);
       var v =  self.cache.get(cache_key);
       if (v) {
         v.queryExecutionTime = new Date().getTime() - start;

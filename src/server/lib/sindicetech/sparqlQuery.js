@@ -41,9 +41,10 @@ SparqlQuery.prototype.checkIfItIsRelevant = function (options) {
     }
 
     var query = self.config.prefixesString + ' ' + queryNoPrefixes;
-    var cache_key = self.generateCacheKey(endpoint_url, query);
+    var cache_key = null;
 
     if (self.cache) {
+      cache_key = self.generateCacheKey(endpoint_url, query);
       var v = self.cache.get(cache_key);
       if (v) {
         return Promise.resolve(v);
@@ -101,9 +102,10 @@ SparqlQuery.prototype.fetchResults = function (options, onlyIds, idVariableName)
 
   return queryHelper.replaceVariablesUsingEsDocument(this.config.resultQuery, uri).then(function (query) {
 
-    var cache_key = self.generateCacheKey(endpoint_url, query, onlyIds, idVariableName);
+    var cache_key = null;
 
     if (self.cache) {
+      cache_key = self.generateCacheKey(endpoint_url, query, onlyIds, idVariableName);
       var v =  self.cache.get(cache_key);
       if (v) {
         v.queryExecutionTime = new Date().getTime() - start;

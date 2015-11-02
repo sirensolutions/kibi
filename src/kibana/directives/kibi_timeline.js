@@ -65,16 +65,19 @@ define(function (require) {
               return;
             }
 
-            var events = _.map(searchResp.hits.hits, function (hit) {
-              var e =  {
-                start: new Date(hit._source[$scope.params.startField]),
-                content: hit._source[$scope.params.labelField] || ''
-              };
-              if ($scope.params.endField) {
-                e.end = new Date(hit._source[$scope.params.endField]);
-              }
-              return e;
-            });
+            var events = [];
+            if ($scope.params.startField) {
+              _.each(searchResp.hits.hits, function (hit) {
+                var e =  {
+                  start: new Date(hit._source[$scope.params.startField]),
+                  content: hit._source[$scope.params.labelField] || ''
+                };
+                if ($scope.params.endField) {
+                  e.end = new Date(hit._source[$scope.params.endField]);
+                }
+                events.push(e);
+              });
+            }
 
             data = new vis.DataSet(events);
 

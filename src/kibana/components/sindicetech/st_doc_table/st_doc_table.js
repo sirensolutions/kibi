@@ -11,7 +11,7 @@ define(function (require) {
   require('components/sindicetech/st_doc_table/components/st_table_row');
 
   require('modules').get('kibana')
-  .directive('stDocTable', function (config, Notifier, queryEngineClient, savedQueries, Promise, Private) {
+  .directive('stDocTable', function (config, Notifier, queryEngineClient, savedQueries, Promise, Private, courier) {
 
     return {
       restrict: 'E',
@@ -42,12 +42,34 @@ define(function (require) {
           $scope.limit += 50;
         };
 
+
+        try {
+          $scope.size = parseInt(config.get('discover:sampleSize'));
+        } catch (e) {
+          throw new Error(
+            'Could not parse discover:sampleSize configuration value.' +
+            ' Expected number got [' + config.get('discover:sampleSize') + ']'
+          );
+        }
+
+        $scope.increaseSize = function () {
+          if ($scope.size < $scope.total) {
+            if ($scope.size * 2 >= $scope.total) {
+              $scope.size = $scope.total;
+            } else {
+              $scope.size = $scope.size * 2;
+            }
+            $scope.searchSource.size($scope.size);
+            courier.fetch();
+          }
+        };
+
         $scope.$watch('searchSource', function (searchSource) {
           if (!$scope.searchSource) return;
 
           $scope.indexPattern = $scope.searchSource.get('index');
 
-          $scope.searchSource.size(config.get('discover:sampleSize'));
+          $scope.searchSource.size($scope.size);
           $scope.searchSource.sort(getSort($scope.sorting, $scope.indexPattern));
 
           var sourceFiltering = $scope.indexPattern.getSourceFiltering();
@@ -71,6 +93,9 @@ define(function (require) {
 
           // TODO: we need to have some way to clean up result requests
           $scope.searchSource.onResults().then(function onResults(searchResp) {
+
+            $scope.total = searchResp.hits.total || 0;
+
             // Reset infinite scroll limit
             $scope.limit = 50;
 

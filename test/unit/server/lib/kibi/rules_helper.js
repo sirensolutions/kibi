@@ -18,7 +18,8 @@ describe('Rule Helper', function () {
           id: 'id1',
           ids: ['id1', 'id2'],
           empty_id: '',
-          empty_ids: []
+          empty_ids: [],
+          age: 37
         }
       })
     );
@@ -139,7 +140,7 @@ describe('Rule Helper', function () {
 
     describe('Length_greater_than', function () {
 
-      it('should return true as ids is an array', function (done) {
+      it('should return true as ids is an array with 2 values', function (done) {
         var rules = [
           {
             s: '@doc[_source][ids]@',
@@ -158,12 +159,40 @@ describe('Rule Helper', function () {
         });
       });
 
+      it('should return true as id value is 3 characters long', function (done) {
+        var rules = [
+          {
+            s: '@doc[_source][id]@',
+            p: 'length_greater_than',
+            v: '2'
+          }
+        ];
+
+        rulesHelper.evaluate(rules, selectedDocuments).then(function (res) {
+          expect(res).to.equal(true);
+          done();
+        });
+      });
+
+      it('should return false as age is an integer', function (done) {
+        var rules = [
+          {
+            s: '@doc[_source][age]@',
+            p: 'length_greater_than',
+            v: '2'
+          }
+        ];
+
+        rulesHelper.evaluate(rules, selectedDocuments).then(function (res) {
+          expect(res).to.equal(false);
+          done();
+        });
+      });
+
     });
 
 
-
     describe('Exists', function () {
-
 
       it('should return false as "not_existant" property does NOT exists', function (done) {
         var rules = [

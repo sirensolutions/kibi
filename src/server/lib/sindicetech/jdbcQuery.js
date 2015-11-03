@@ -71,7 +71,8 @@ JdbcQuery.prototype.checkIfItIsRelevant = function (options) {
   return self._init().then(function (data) {
 
     if (self._checkIfSelectedDocumentRequiredAndNotPresent(options)) {
-      return Promise.reject('No elasticsearch document selected while required by the jdbc activation query. [' + self.config.id + ']');
+      logger.warn('No elasticsearch document selected while required by the jdbc activation query. [' + self.config.id + ']');
+      return Promise.resolve({'boolean': false});
     }
     var uri = options.selectedDocuments && options.selectedDocuments.length > 0 ? options.selectedDocuments[0] : '';
 

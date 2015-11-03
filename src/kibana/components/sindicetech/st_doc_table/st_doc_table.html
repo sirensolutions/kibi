@@ -1,7 +1,7 @@
 <div ng-if="hits.length">
 
-  <div ng-show="!infiniteScroll && hits.length < total" class="limiInfo">
-    Displying  {{hits.length}} out of {{total}}
+  <div ng-show="!infiniteScroll && hits.length < total" class="limit-info">
+    Showing {{hits.length}} out of {{total}}
     <a ng-click="increaseSize()">See more</a>
   </div>
 

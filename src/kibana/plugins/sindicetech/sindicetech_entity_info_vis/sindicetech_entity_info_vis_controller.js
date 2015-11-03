@@ -71,7 +71,7 @@ define(function (require) {
       });
 
       // when autoupdate is on we detect the refresh here
-      $scope.$watch('esResponse', function () {
+      $rootScope.$on('kibi:autorefresh', function (event) {
         $scope.renderTemplates();
       });
 

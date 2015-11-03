@@ -114,11 +114,21 @@ define(function (require) {
             $scope.holder.html = '';
             _.forEach(resp.data.snippets, function (snippet, index) {
 
+              var label = String(index + 1);
+
               if (snippet.queryActivated === false) {
+                $scope.holder.activeFetch = false;
+                $scope.holder.html +=
+                  '<div class="snippetContainer">' +
+                  '  <div class="snippet-' + index + '">' +
+                  '    <div class="templateResult undefined">' +
+                  '      <i class="fa fa-warning"></i>' +
+                  '        Query not activated for ' + label + ', select different document or check activation rules' +
+                  '    </div>' +
+                  '  </div>' +
+                  '</div>';
                 return;
               }
-
-              var label = String(index + 1);
 
               if (typeof snippet.html === 'undefined') {
                 $scope.holder.html +=

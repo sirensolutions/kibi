@@ -44,12 +44,12 @@ describe('RestQuery', function () {
     done();
   });
 
-  describe('checkIfItIsRelevant - should be', function () {
+  describe('checkIfItIsRelevant - should be active', function () {
 
-    it('empty uri, empty activationQuery', function (done) {
+    it('empty uri, empty activation_rules', function (done) {
       var RestQuery = root('src/server/lib/sindicetech/restQuery');
       var restQuery = new RestQuery({
-        activationQuery: ''
+        activation_rules: []
       });
 
       restQuery.checkIfItIsRelevant({}).then(function (ret) {
@@ -58,10 +58,10 @@ describe('RestQuery', function () {
       });
     });
 
-    it('NOT empty uri, empty activationQuery', function (done) {
+    it('NOT empty uri, empty activation_rules', function (done) {
       var RestQuery = root('src/server/lib/sindicetech/restQuery');
       var restQuery = new RestQuery({
-        activationQuery: ''
+        activation_rules: []
       });
 
       restQuery.checkIfItIsRelevant({selectedDocuments: ['/company/company/id1']}).then(function (ret) {
@@ -70,7 +70,7 @@ describe('RestQuery', function () {
       });
     });
 
-    it('NOT empty uri, NOT empty activationQuery', function (done) {
+    it('NOT empty uri, activation_rules does not exists, ignored old activationQuery param', function (done) {
       var RestQuery = root('src/server/lib/sindicetech/restQuery');
       var restQuery = new RestQuery({
         activationQuery: '^/company'
@@ -83,38 +83,24 @@ describe('RestQuery', function () {
     });
   });
 
-  describe('checkIfItIsRelevant - should NOT be', function () {
+  describe('checkIfItIsRelevant - should fail', function () {
 
-    it('NOT empty uri, NOT empty activationQuery', function (done) {
+    it('NOT empty uri, NOT empty activation_rules should reject as it is not able to fetch the document', function (done) {
       var RestQuery = root('src/server/lib/sindicetech/restQuery');
       var restQuery = new RestQuery({
-        activationQuery: '^/people'
-      });
-
-      restQuery.checkIfItIsRelevant({selectedDocuments: ['/company/company/id1']}).then(function (ret) {
-        expect(ret).to.eql({ boolean: false });
-        done();
-      });
-    });
-
-  });
-
-  describe('checkIfItIsRelevant - should reject', function () {
-
-    it('cause wrong regex', function (done) {
-      var RestQuery = root('src/server/lib/sindicetech/restQuery');
-      var restQuery = new RestQuery({
-        activationQuery: 'd\\'
+        activation_rules: [{
+          s: '@doc[_source][does_not_exist]@',
+          p: 'exists'
+        }]
       });
 
       restQuery.checkIfItIsRelevant({selectedDocuments: ['/company/company/id1']}).catch(function (err) {
-        expect(err.message).to.equal('Problem parsing regex [d\\]');
+        expect(err.message).to.eql('Could not fetch document [//company/company]. Check logs for details');
         done();
       });
     });
 
   });
-
 
   describe('fetchResults', function () {
 

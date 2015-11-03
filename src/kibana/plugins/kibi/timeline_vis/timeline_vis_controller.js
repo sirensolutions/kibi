@@ -58,11 +58,16 @@ define(function (require) {
           autoResize: false
         };
 
-        if (savedVis && savedVis.vis.params.startField === savedVis.vis.params.endField) {
-          options.type = 'point';
-        } else if (savedVis && savedVis.vis.params.startField !== savedVis.vis.params.endField) {
-          options.type = 'box';
+        if (savedVis) {
+          if (!savedVis.vis.params.endField ) {
+            options.type = 'box';
+          } else if (savedVis.vis.params.endField && savedVis.vis.params.startField === savedVis.vis.params.endField) {
+            options.type = 'point';
+          } else if (savedVis.vis.params.endField && savedVis.vis.params.startField !== savedVis.vis.params.endField) {
+            options.type = 'range';
+          }
         }
+
         $scope.options = options;
       }
 

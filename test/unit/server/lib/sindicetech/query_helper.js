@@ -1,9 +1,8 @@
 var root = require('requirefrom')('');
 var queryHelper = root('src/server/lib/sindicetech/query_helper');
 var expect = require('expect.js');
-var sinon = require('sinon');
 var Promise = require('bluebird');
-
+var sinon = require('sinon');
 
 var doc = {
   _id: '_12345_',
@@ -22,17 +21,27 @@ var doc = {
   }
 };
 
-sinon.stub(queryHelper, 'fetchDocument').returns(
-  Promise.resolve({
-    _id: '_id1',
-    _source: {
-      id: 'id1'
-    }
-  })
-);
 
+var stub;
 
 describe('Query Helper', function () {
+
+  before(function () {
+    stub = sinon.stub(queryHelper, 'fetchDocument').returns(
+      Promise.resolve({
+        _id: '_id1',
+        _source: {
+          id: 'id1'
+        }
+      })
+    );
+  });
+
+  after(function () {
+    if (stub) {
+      stub.restore();
+    }
+  });
 
   describe('replaceVariablesForREST', function () {
 

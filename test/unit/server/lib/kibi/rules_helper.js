@@ -2,27 +2,35 @@ var root = require('requirefrom')('');
 var expect = require('expect.js');
 var Promise = require('bluebird');
 var queryHelper = root('src/server/lib/sindicetech/query_helper');
-var sinon = require('sinon');
-sinon.stub(queryHelper, 'fetchDocument').returns(
-  Promise.resolve({
-    _id: '_id1',
-    _source: {
-      id: 'id1',
-      ids: ['id1', 'id2'],
-      empty_id: '',
-      empty_ids: []
-    }
-  })
-);
 var rulesHelper = root('src/server/lib/kibi/rules_helper');
 var selectedDocuments = ['index/type/1'];
+var sinon = require('sinon');
 
+var stub;
 
 describe('Rule Helper', function () {
 
+  before(function () {
+    stub = sinon.stub(queryHelper, 'fetchDocument').returns(
+      Promise.resolve({
+        _id: '_id1',
+        _source: {
+          id: 'id1',
+          ids: ['id1', 'id2'],
+          empty_id: '',
+          empty_ids: []
+        }
+      })
+    );
+  });
+
+  after(function () {
+    if (stub) {
+      stub.restore();
+    }
+  });
+
   describe('Evaluating rules', function () {
-
-
 
     describe('Matches', function () {
 

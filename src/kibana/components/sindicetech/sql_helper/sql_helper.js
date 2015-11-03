@@ -83,10 +83,11 @@ define(function (require) {
 
       return {
         getVariables: function (query) {
-          query = query.replace(/@TABLE@/g, 'TABLE');
-          query = query.replace(/@PKVALUE@/g, 'VALUE');
+          // here replace any instance of @doc[]...[]@ with neutral string value like 'VALUE'
+          var queryCopy = query.replace(/(@doc\[.+?\]@)/g, '\'VALUE\'');
 
-          var chars = new antlr4.InputStream(query);
+
+          var chars = new antlr4.InputStream(queryCopy);
           var lexer = new antlr4SQL.SQLLexer(chars);
           var tokens  = new antlr4.CommonTokenStream(lexer);
           var parser = new antlr4SQL.SQLParser(tokens);
@@ -94,7 +95,7 @@ define(function (require) {
 
           var context = parser.select_stmt();
 
-          var parametersParser = new SelectParametersParser(query);
+          var parametersParser = new SelectParametersParser(queryCopy);
           antlr4.tree.ParseTreeWalker.DEFAULT.walk(parametersParser, context);
 
           return parametersParser.parameters;

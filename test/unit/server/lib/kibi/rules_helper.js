@@ -19,7 +19,10 @@ describe('Rule Helper', function () {
           ids: ['id1', 'id2'],
           empty_id: '',
           empty_ids: [],
-          age: 37
+          age: 37,
+          zero: 0,
+          null_field: null,
+          undefined_field: undefined
         }
       })
     );
@@ -57,6 +60,63 @@ describe('Rule Helper', function () {
     });
 
     describe('Not_empty', function () {
+
+      it('should return true as "age" is not empty integer', function (done) {
+        var rules = [
+          {
+            s: '@doc[_source][age]@',
+            p: 'is_not_empty'
+          }
+        ];
+
+        rulesHelper.evaluate(rules, selectedDocuments).then(function (res) {
+          expect(res).to.equal(true);
+          done();
+        });
+      });
+
+      it('should return true as "zero" is not empty integer', function (done) {
+        var rules = [
+          {
+            s: '@doc[_source][zero]@',
+            p: 'is_not_empty'
+          }
+        ];
+
+        rulesHelper.evaluate(rules, selectedDocuments).then(function (res) {
+          expect(res).to.equal(true);
+          done();
+        });
+      });
+
+      it('should return false as "null_field" is property with null value', function (done) {
+        var rules = [
+          {
+            s: '@doc[_source][null_field]@',
+            p: 'is_not_empty'
+          }
+        ];
+
+        rulesHelper.evaluate(rules, selectedDocuments).then(function (res) {
+          expect(res).to.equal(false);
+          done();
+        });
+      });
+
+      it('should return false as "undefined_field" is property with undefined value', function (done) {
+        var rules = [
+          {
+            s: '@doc[_source][undefined_field]@',
+            p: 'is_not_empty'
+          }
+        ];
+
+        rulesHelper.evaluate(rules, selectedDocuments).then(function (res) {
+          expect(res).to.equal(false);
+          done();
+        });
+      });
+
 
       it('should return true as "id" is not empty', function (done) {
         var rules = [

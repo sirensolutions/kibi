@@ -49,7 +49,7 @@ RulesHelper.prototype.evaluate = function (rules, selectedDocuments) {
           if (value instanceof Array) {
             pass = value.length > 0;
           } else {
-            pass = value !== '';
+            pass = value !== '' && value !== undefined && value !== null;
           }
           break;
         case 'exists':

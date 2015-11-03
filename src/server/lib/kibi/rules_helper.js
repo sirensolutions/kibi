@@ -30,8 +30,9 @@ RulesHelper.prototype.evaluate = function (rules, selectedDocuments) {
 
   return queryHelper.fetchDocument(index, type, id).then(function (doc) {
 
-    var checks = [rules.length];
     for (var i = 0; i < rules.length; i++) {
+
+      var pass = false;
       var rule = rules[i];
 
       var regex = /^@doc\[.+?\]@$/;
@@ -46,29 +47,29 @@ RulesHelper.prototype.evaluate = function (rules, selectedDocuments) {
       switch (rule.p) {
         case 'is_not_empty':
           if (value instanceof Array) {
-            checks[i] = value.length > 0;
+            pass = value.length > 0;
           } else {
-            checks[i] = value !== '';
+            pass = value !== '';
           }
           break;
         case 'exists':
-          checks[i] = typeof value !== 'undefined';
+          pass = typeof value !== 'undefined';
           break;
         case 'is_an_array':
-          checks[i] = queryHelper._getValue(doc, propertyGroup) instanceof Array;
+          pass = queryHelper._getValue(doc, propertyGroup) instanceof Array;
           break;
         case 'length_greater_than':
           var expected = parseInt(rule.v);
-          checks[i] = value.length && value.length > expected;
+          pass = value.length && value.length > expected;
           break;
         case 'matches':
           regex = new RegExp(rule.v);
-          checks[i] = regex.test(value);
+          pass = regex.test(value);
           break;
         default:
       }
 
-      if (checks[i] !== true) {
+      if (pass !== true) {
         return false;
       }
     }

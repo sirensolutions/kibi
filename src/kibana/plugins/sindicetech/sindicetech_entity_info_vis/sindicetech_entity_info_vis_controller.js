@@ -139,7 +139,7 @@ define(function (require) {
                 $scope.holder.activeFetch = false;
                 $scope.holder.html += emptyResultsTemplate
                 .replace(/@INDEX@/, 0)
-                .replace(/@MESSAGE@/, 'Query ' + label + ' not activated, select different document or check activation rules');
+                .replace(/@MESSAGE@/, 'Query ' + label + ' not activated, select another document or check activation rules');
                 return;
               }
 

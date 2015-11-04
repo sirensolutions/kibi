@@ -92,8 +92,10 @@ define(function (require) {
           true
         ).then(function (resp) {
           $scope.holder.activeFetch = false;
+          $scope.emptyResults =  resp.data.snippets ? resp.data.snippets.length === 0 : true;
+          $scope.noSelectedDocument = resp.data.error === 'Empty selected document uri';
 
-          if (resp.data.error) {
+          if (resp.data.error && resp.data.error !== 'Empty selected document uri' ) {
             var msg  = '';
             if (typeof resp.data.error === 'string') {
               msg = resp.data.error;
@@ -104,43 +106,47 @@ define(function (require) {
             return;
           }
 
-          $scope.emptyResults =  resp.data.snippets.length === 0;
+          var emptyResultsTemplate =
+            '<div class="snippetContainer">' +
+            '  <div class="snippet-@INDEX@">' +
+            '    <div class="templateResult results-not-ok">' +
+            '      <i class="fa fa-warning"></i>' +
+            '        @MESSAGE@' +
+            '    </div>' +
+            '  </div>' +
+            '</div>';
 
-          if (resp.data.snippets.length === 0) {
+          if ($scope.emptyResults && !$scope.noSelectedDocument) {
 
             $scope.holder.html = 'No results';
+
+          } else if ($scope.noSelectedDocument) {
+
+            $scope.holder.activeFetch = false;
+            $scope.holder.html = emptyResultsTemplate
+            .replace(/@INDEX@/, 0)
+            .replace(/@MESSAGE@/, 'No selected document, please select one');
+            return;
 
           } else {
 
             $scope.holder.html = '';
             _.forEach(resp.data.snippets, function (snippet, index) {
 
-              var label = String(index + 1);
+              var label = String(index + 1) + ' id: [' + snippet.queryId + ']';
 
               if (snippet.queryActivated === false) {
                 $scope.holder.activeFetch = false;
-                $scope.holder.html +=
-                  '<div class="snippetContainer">' +
-                  '  <div class="snippet-' + index + '">' +
-                  '    <div class="templateResult undefined">' +
-                  '      <i class="fa fa-warning"></i>' +
-                  '        Query not activated for ' + label + ', select different document or check activation rules' +
-                  '    </div>' +
-                  '  </div>' +
-                  '</div>';
+                $scope.holder.html += emptyResultsTemplate
+                .replace(/@INDEX@/, 0)
+                .replace(/@MESSAGE@/, 'Query ' + label + ' not activated, select another document or check activation rules');
                 return;
               }
 
               if (typeof snippet.html === 'undefined') {
-                $scope.holder.html +=
-                  '<div class="snippetContainer">' +
-                  '  <div class="snippet-' + index + '">' +
-                  '    <div class="templateResult undefined">' +
-                  '      <i class="fa fa-warning"></i> No template set for ' +
-                  '        query ' + label + ', please check view options' +
-                  '    </div>' +
-                  '  </div>' +
-                  '</div>';
+                $scope.holder.html += emptyResultsTemplate
+                .replace(/@INDEX@/, 0)
+                .replace(/@MESSAGE@/, 'No template set for query ' + label + ', please check view options');
                 return;
               }
 

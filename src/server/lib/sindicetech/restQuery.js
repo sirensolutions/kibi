@@ -6,6 +6,7 @@ var config  = require('../../config');
 var logger  = require('../logger');
 var jsonpath      = require('jsonpath');
 var queryHelper = require('./query_helper');
+var rulesHelper = require('../kibi/rules_helper');
 var AbstractQuery = require('./abstractQuery');
 
 function RestQuery(queryDefinition, cache) {
@@ -24,27 +25,20 @@ RestQuery.prototype = _.create(AbstractQuery.prototype, {
  * }
  */
 RestQuery.prototype.checkIfItIsRelevant = function (options) {
-  // in case of rest query the activation query is a regex string
-  var query = '';
-  if (this.config.activationQuery) {
-    query = this.config.activationQuery.trim();
-  }
-
-  if (query === '') {
+  // no document selected there is nothing to check against
+  if (!options.selectedDocuments || options.selectedDocuments.length === 0) {
     return Promise.resolve({'boolean': true});
   }
 
-  // here match uri against the regex
-  if (options.selectedDocuments && options.selectedDocuments.length > 0) {
-    try {
-      var regex = new RegExp(query);
-      return Promise.resolve({'boolean': regex.test(options.selectedDocuments[0])});
-    } catch (e) {
-      return Promise.reject(new Error('Problem parsing regex [' + query + ']'));
-    }
+  // empty rules - let it go
+  if (this.config.activation_rules.length === 0) {
+    return Promise.resolve({'boolean': true});
   }
 
-  return Promise.resolve({'boolean': true});
+  // evaluate the rules
+  return rulesHelper.evaluate(this.config.activation_rules, options.selectedDocuments).then(function (res) {
+    return {'boolean': res};
+  });
 };
 
 

@@ -198,6 +198,11 @@ QueryEngine.prototype.reloadQueries = function () {
         } catch (e) {
           queryDefinition.rest_resp_status_code = 200;
         }
+        try {
+          queryDefinition.activation_rules = JSON.parse(hit._source.activation_rules);
+        } catch (e) {
+          queryDefinition.activation_rules = [];
+        }
 
 
         queryDefinitions.push(queryDefinition);

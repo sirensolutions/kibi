@@ -72,7 +72,7 @@ QueryHelper.prototype.replaceVariablesUsingEsDocument = function (s, uri) {
 
   // TODO: add caching of documet
 
-  return self._fetchDocument(index, type, id).then(function (doc) {
+  return self.fetchDocument(index, type, id).then(function (doc) {
     //now parse the query and replace the placeholders
     if (typeof s === 'string' || s instanceof String) {
       return self._replaceVariablesInTheQuery(doc, s);
@@ -87,7 +87,7 @@ QueryHelper.prototype.replaceVariablesUsingEsDocument = function (s, uri) {
 };
 
 
-QueryHelper.prototype._fetchDocument = function (index, type, id) {
+QueryHelper.prototype.fetchDocument = function (index, type, id) {
   return new Promise(function (fulfill, reject) {
     rp({
       method: 'GET',

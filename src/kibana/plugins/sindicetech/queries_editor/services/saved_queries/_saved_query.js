@@ -32,6 +32,7 @@ define(function (require) {
           rest_path: 'string',
           rest_resp_status_code: 'long',
           rest_resp_restriction_path: 'string',
+          activation_rules: 'json',
           version: 'long'
         },
 
@@ -50,6 +51,7 @@ define(function (require) {
           rest_path: '',
           rest_resp_status_code: 200,
           rest_resp_restriction_path: '$',
+          activation_rules: '[]',
           version: 1
         },
         init: function () {
@@ -66,6 +68,13 @@ define(function (require) {
             }
           } catch (e) {
             throw new Error('Could not parse rest_headers for query [' + this.id + ']');
+          }
+          try {
+            if (this.activation_rules && typeof this.activation_rules === 'string') {
+              this.activation_rules = JSON.parse(this.activation_rules);
+            }
+          } catch (e) {
+            throw new Error('Could not parse activation_rules for query [' + this.id + ']');
           }
         },
 

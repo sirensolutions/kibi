@@ -90,6 +90,7 @@ define(function (require) {
           },
           true
         ).then(function (resp) {
+          $scope.holder.activeFetch = false;
 
           if (resp.data.error) {
             var msg  = '';
@@ -99,7 +100,6 @@ define(function (require) {
               msg = JSON.stringify(resp.data.error, null, '');
             }
             notify.warning(msg);
-            $scope.holder.activeFetch = false;
             return;
           }
 
@@ -185,7 +185,6 @@ define(function (require) {
                 }
               }
 
-              $scope.holder.activeFetch = false;
               $scope.holder.html +=
                 '<div class="snippetContainer">' +
                   '<div class="snippet-' + index + '">' +

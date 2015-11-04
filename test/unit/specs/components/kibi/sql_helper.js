@@ -92,17 +92,17 @@ define(function (require) {
           expect(sqlHelper.getVariables(query10)).to.eql(['investor.id', 'c']);
         });
 
-        var query11 = 'select quantity FROM @TABLE@ WHERE code = @PKVALUE@';
+        var query11 = 'select quantity FROM @doc[_source][table]@ WHERE code = @doc[_source][code]@';
         it(query11, function () {
           expect(sqlHelper.getVariables(query11)).to.eql(['quantity']);
         });
 
-        var query12 = 'select quantity FROM @TABLE@ WHERE code = \'@PKVALUE@\'';
+        var query12 = 'select quantity FROM @doc[_source][table]@ WHERE code = \'@doc[_source][code]@\'';
         it(query12, function () {
           expect(sqlHelper.getVariables(query12)).to.eql(['quantity']);
         });
 
-        var query13 = 'select quantity FROM @TABLE@ WHERE code = \'@PKVALUE@';
+        var query13 = 'select quantity FROM @doc[_source][table]@ WHERE code = \'@doc[_source][code]@';
         it(query13, function () {
           expect(sqlHelper.getVariables(query13)).to.throw;
         });
@@ -111,7 +111,7 @@ define(function (require) {
           'from company ' +
           'where company.category_code IN ( ' +
           'select category_code from company ' +
-          'where company.id = \'@PKVALUE@\' ' +
+          'where company.id = \'@doc[_source][companyidF]@\' ' +
           ') ' +
           'limit 100';
         it(queryNestedSelectIn, function () {

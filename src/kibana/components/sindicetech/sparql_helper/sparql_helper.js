@@ -49,18 +49,17 @@ define(function (require) {
 
       return {
         getVariables: function (query) {
-          // here in case the query has placeholders like @URI@
-          // we have to replace it with valid URI
-          query = query.replace(/@URI@/g, 'http://example.com');
+          // here replace any instance of @doc[]...[]@ with neutral string literal value like 'VALUE'
+          var queryCopy = query.replace(/(@doc\[.+?\]@)/g, '\'VALUE\'');
 
-          var chars = new antlr4.InputStream(query);
+          var chars = new antlr4.InputStream(queryCopy);
           var lexer = new antlr4Sparql.SparqlLexer(chars);
           var tokens  = new antlr4.CommonTokenStream(lexer);
           var parser = new antlr4Sparql.SparqlParser(tokens);
           parser.buildParseTrees = true;
           var tree = parser.query();
 
-          var printer = new VariableNamePrinter(query);
+          var printer = new VariableNamePrinter(queryCopy);
           antlr4.tree.ParseTreeWalker.DEFAULT.walk(printer, tree);
 
           var varFromSelect = _.unique(printer.selectRegister);

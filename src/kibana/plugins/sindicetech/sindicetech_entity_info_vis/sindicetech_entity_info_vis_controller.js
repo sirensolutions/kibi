@@ -64,15 +64,16 @@ define(function (require) {
       };
       globalState.on('save_with_changes', save_with_changes_handler);
 
+      // when autoupdate is on we detect the refresh here
+      var removeAutorefreshHandler = $rootScope.$on('kibi:autorefresh', function (event) {
+        $scope.renderTemplates();
+      });
+
       $scope.$on('$destroy', function () {
         removeEntityURIEnabledHandler();
         removeEntityURIChangedHandler();
+        removeAutorefreshHandler();
         globalState.off('save_with_changes', save_with_changes_handler);
-      });
-
-      // when autoupdate is on we detect the refresh here
-      $scope.$watch('esResponse', function () {
-        $scope.renderTemplates();
       });
 
       $scope.renderTemplates = function () {

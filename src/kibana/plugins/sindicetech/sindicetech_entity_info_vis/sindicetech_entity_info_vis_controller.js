@@ -109,7 +109,7 @@ define(function (require) {
           var emptyResultsTemplate =
             '<div class="snippetContainer">' +
             '  <div class="snippet-@INDEX@">' +
-            '    <div class="templateResult undefined">' +
+            '    <div class="templateResult results-not-ok">' +
             '      <i class="fa fa-warning"></i>' +
             '        @MESSAGE@' +
             '    </div>' +

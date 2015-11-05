@@ -2,12 +2,39 @@ define(function (require) {
 
   var _ = require('lodash');
 
-  return function QueryHelperFactory(Private, Promise, timefilter, indexPatterns) {
+  return function QueryHelperFactory(savedVisualizations, Private, Promise, timefilter, indexPatterns) {
 
     var kibiTimeHelper   = Private(require('components/kibi/kibi_time_helper/kibi_time_helper'));
 
     function QueryHelper() {
     }
+
+    /**
+     * GetVisualisations returns visualisations that are used by the list of queries
+     */
+    QueryHelper.prototype.getVisualisations = function (queryIds) {
+      if (!queryIds) {
+        return Promise.reject(new Error('Empty argument'));
+      }
+      return savedVisualizations.find('').then(function (resp) {
+        var selectedQueries = [];
+
+        var queryIds2 = _.map(queryIds, function (id) {
+          return '"queryId":"' + id + '"';
+        });
+        var vis = _.filter(resp.hits, function (hit) {
+          var list = _.filter(queryIds2, function (id, index) {
+            if (hit.visState.indexOf(id) !== -1) {
+              selectedQueries.push(queryIds[index]);
+              return true;
+            }
+            return false;
+          });
+          return !!list.length;
+        });
+        return [ _(selectedQueries).compact().unique().value(), vis ];
+      });
+    };
 
     // constructs an or filter
     // http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/query-dsl-or-filter.html

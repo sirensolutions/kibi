@@ -3,10 +3,11 @@ define(function (require) {
   var fakeIndexPatterns = require('fixtures/fake_index_patterns');
   var fakeTimeFilter = require('fixtures/fake_time_filter');
   var fakeSavedDashboards = require('fixtures/saved_dashboards');
+  var fakeSavedVisualisations = require('fixtures/saved_visualisations');
   var $rootScope;
   var queryHelper;
 
-  function init(timefilterImpl, savedDashboardsImpl, indexPatternsImpl) {
+  function init(timefilterImpl, savedDashboardsImpl, indexPatternsImpl, visualizationsImpl) {
     return function () {
       module('app/dashboard', function ($provide) {
         $provide.service('savedDashboards', savedDashboardsImpl);
@@ -20,6 +21,10 @@ define(function (require) {
         $provide.service('timefilter', timefilterImpl);
       });
 
+      module('app/visualize', function ($provide) {
+        $provide.service('savedVisualizations', visualizationsImpl);
+      });
+
       inject(function ($injector, Private, _$rootScope_) {
         $rootScope = _$rootScope_;
         queryHelper = Private(require('components/sindicetech/query_helper/query_helper'));
@@ -28,7 +33,7 @@ define(function (require) {
   }
 
   describe('Kibi Components', function () {
-    beforeEach(init(fakeTimeFilter, fakeSavedDashboards, fakeIndexPatterns));
+    beforeEach(init(fakeTimeFilter, fakeSavedDashboards, fakeIndexPatterns, fakeSavedVisualisations));
 
     describe('queryHelper', function () {
       describe('constructJoinFilter', function () {
@@ -621,6 +626,43 @@ define(function (require) {
 
             queryHelper.constructJoinFilter(focus, indexes, relations, filters, queries, indexToDashboardMap).then(function (filter) {
               expect(filter).to.eql(expected);
+              done();
+            });
+
+            $rootScope.$apply();
+          });
+        });
+
+        describe('getVisualisations', function () {
+          it('should return the visualisation that use query 456', function (done) {
+            queryHelper.getVisualisations([ '456', '789' ]).then(function (visData) {
+              expect(visData[0]).to.eql([ '456' ]);
+              expect(visData[1]).to.have.length(1);
+              expect(visData[1][0].title).to.be('myvis2');
+              done();
+            });
+
+            $rootScope.$apply();
+          });
+
+          it('should return the visualisations that use queries 123 and 456', function (done) {
+            queryHelper.getVisualisations([ '456', '123' ]).then(function (visData) {
+              expect(visData[0]).to.have.length(2);
+              expect(visData[0]).to.contain('123');
+              expect(visData[0]).to.contain('456');
+              expect(visData[1]).to.have.length(2);
+              expect(visData[1][0].title).to.be('myvis1');
+              expect(visData[1][1].title).to.be('myvis2');
+              done();
+            });
+
+            $rootScope.$apply();
+          });
+
+          it('should return no visualisation', function (done) {
+            queryHelper.getVisualisations([ '666' ]).then(function (visData) {
+              expect(visData[0]).to.have.length(0);
+              expect(visData[1]).to.have.length(0);
               done();
             });
 

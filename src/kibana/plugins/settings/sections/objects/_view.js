@@ -20,7 +20,7 @@ define(function (require) {
         var serviceObj = registry.get($routeParams.service);
         var service = $injector.get(serviceObj.service);
 
-        var dashboardGroupHelper = Private(require('components/kibi/dashboard_group_helper/dashboard_group_helper'));
+        var deleteHelper = Private(require('plugins/settings/sections/objects/delete_helper'));
 
         /**
          * Creates a field definition and pushes it to the memo stack. This function
@@ -161,6 +161,7 @@ define(function (require) {
          */
         $scope.delete = function () {
 
+          var self = this;
           var _delete = function () {
             es.delete({
               index: config.file.kibana_index,
@@ -169,34 +170,12 @@ define(function (require) {
             })
             .then(function (resp) {
               $rootScope.$emit('kibi:' + service.type + ':changed', resp);
-              return redirectHandler('deleted');
+              return self.redirectHandler('deleted');
             })
             .catch(notify.fatal);
           };
 
-
-          // added by sindicetech to prevent deletion of a dashboard which is referenced by dashboardgroup
-          if (service.type === 'dashboard') {
-
-            dashboardGroupHelper.getIdsOfDashboardGroupsTheseDashboardsBelongTo([$routeParams.id]).then(function (dashboardGroupNames) {
-              if (dashboardGroupNames && dashboardGroupNames.length > 0) {
-                var msg =
-                  'Dashboard [' + $routeParams.id + '] is reffered by following dashboardGroup' +
-                  (dashboardGroupNames.length > 1 ? 's' : '') + ':\n' +
-                  dashboardGroupNames.join(', ') + '\n' +
-                  'Please edit the group' + (dashboardGroupNames.length > 1 ? 's' : '') +
-                  ' and remove the dashboard from its configuration first.';
-                $window.alert(msg);
-                return;
-              } else {
-                _delete();
-              }
-            });
-
-          } else {
-            _delete();
-          }
-          // sindicetech end
+          deleteHelper.deleteByType(service.type, [$routeParams.id], _delete);
         };
 
         $scope.submit = function () {

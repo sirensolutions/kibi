@@ -15,12 +15,12 @@ define(function (require) {
   require('modules').get('apps/settings')
   .directive('kbnSettingsObjects', function (config, Notifier, Private, kbnUrl, Promise, queryEngineClient) {
 
-    var dashboardGroupHelper = Private(require('components/kibi/dashboard_group_helper/dashboard_group_helper'));
     var cache = Private(require('components/sindicetech/cache_helper/cache_helper'));
+    var deleteHelper = Private(require('plugins/settings/sections/objects/delete_helper'));
 
     return {
       restrict: 'E',
-      controller: function ($scope, $injector, $q, AppState, es, $window) {
+      controller: function ($scope, $injector, $q, AppState, es) {
         var notify = new Notifier({ location: 'Saved Objects' });
 
         var $state = $scope.state = new AppState();
@@ -85,33 +85,17 @@ define(function (require) {
 
         $scope.bulkDelete = function () {
 
+          var self = this;
           var _delete = function () {
-            $scope.currentTab.service.delete(_.pluck($scope.selectedItems, 'id')).then(cache.flush).then(refreshData).then(function () {
+            $scope.currentTab.service.delete(_.pluck($scope.selectedItems, 'id'))
+            .then(self.cache.flush)
+            .then(self.refreshData)
+            .then(function () {
               $scope.selectedItems.length = 0;
             });
           };
 
-          // added by kibi to prevent deletion of a dashboard which is referenced by dashboardgroup
-          if ($scope.currentTab.service.type === 'dashboard') {
-            dashboardGroupHelper.getIdsOfDashboardGroupsTheseDashboardsBelongTo(_.pluck($scope.selectedItems, 'id'))
-            .then(function (dashboardGroupNames) {
-              if (dashboardGroupNames && dashboardGroupNames.length > 0) {
-                var msg =
-                  'One of the selected dashboards is reffered by following dashboardGroup' +
-                  (dashboardGroupNames.length > 1 ? 's' : '') + ':\n' +
-                  dashboardGroupNames.join(', ') + '\n' +
-                  'Please edit the group' + (dashboardGroupNames.length > 1 ? 's' : '') +
-                  ' and remove the dashboard from its configuration first.';
-                $window.alert(msg);
-                return;
-              } else {
-                _delete();
-              }
-            });
-          } else {
-            _delete();
-          }
-          // kibi end
+          deleteHelper.deleteByType($scope.currentTab.service.type, _.pluck($scope.selectedItems, 'id'), _delete);
         };
 
         $scope.bulkExport = function () {

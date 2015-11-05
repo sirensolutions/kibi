@@ -37,11 +37,12 @@ define(function (require) {
 
   app.controller(
     'QueriesEditor',
-    function ($rootScope, $scope, config, $route, $window, kbnUrl, Notifier, queryEngineClient,
-              savedVisualizations, savedDatasources, Private, $element
+    function ($rootScope, $scope, $route, $window, kbnUrl, Notifier, queryEngineClient,
+              savedDatasources, Private, $element
   ) {
       var _shouldEntityURIBeEnabled = Private(require('plugins/kibi/commons/_should_entity_uri_be_enabled'));
       var _set_entity_uri =  Private(require('plugins/kibi/commons/_set_entity_uri'));
+      var queryHelper = Private(require('components/sindicetech/query_helper/query_helper'));
 
       // we have to wrap the value into object - this prevents weird thing related to transclusion
       // see http://stackoverflow.com/questions/25180613/angularjs-transclusion-creates-new-scope
@@ -96,7 +97,7 @@ define(function (require) {
       };
 
 
-      // for headers and params $watch with true as normal watch fail to detect the cahnge in the arrays
+      // for headers and params $watch with true as normal watch fail to detect the change in the arrays
       $scope.$watch('query.rest_headers', function () {
         _enableEntityUri();
       }, true);
@@ -109,6 +110,7 @@ define(function (require) {
         if ($scope.datasourceType !== 'rest') {
           var starRegex = /\*/g;
           // test for a star in a query
+          // TODO why test st_activationQuery ?
           $scope.starDetectedInAQuery = starRegex.test($scope.query.st_activationQuery) || starRegex.test($scope.query.st_resultQuery);
         }
       });
@@ -155,47 +157,40 @@ define(function (require) {
         }
         var titleChanged = $scope.$queryTitle !== $scope.query.title;
         $scope.query.id = $scope.query.title;
-        $scope.query.save().then(function (savedQueryId) {
+        return $scope.query.save().then(function (savedQueryId) {
           notify.info('Query ' + $scope.query.title + ' successfuly saved');
           if (titleChanged) {
             // redirect only if query.id changed !!!
             kbnUrl.change('settings/queries/' + savedQueryId);
           } else {
-            $scope.preview();
+            return $scope.preview();
           }
         });
       };
 
       $scope.delete = function () {
+        if (!$scope.query.id) {
+          notify.error('The query [' + $scope.query.title + '] does not have an ID');
+          return;
+        }
+
         // here check if this query is used in any visualisation
-        savedVisualizations.find('').then(function (resp) {
-
-          var vis = [];
-          _.each(resp.hits, function (hit) {
-            var s = JSON.stringify(hit);
-            if (s.indexOf($scope.query.id) !== -1) {
-              vis.push(hit.id);
-            }
-          });
-
-          if (vis.length > 0 ) {
+        return queryHelper.getVisualisations([ $scope.query.id ]).then(function (visData) {
+          var vis = visData[1];
+          if (vis.length) {
             $window.alert(
-              'This query [' + $scope.query.title + '] is used in following' +
-              (vis.length === 1 ? ' visualization' : ' visualizations') +
-              ': \n' +
-              vis.join('\n') +
-              '\nPlease edit or delete' +
-              (vis.length === 1 ? ' it ' : ' them ') +
-              'first.' +
-              '\n\n');
+              'This query [' + $scope.query.title + '] is used in the following' +
+              (vis.length === 1 ? ' visualization' : ' visualizations') + ': \n' +
+              JSON.stringify(_.pluck(vis, 'title'), null, ' ') +
+              '\n\nPlease edit or delete' + (vis.length === 1 ? ' it ' : ' them ') + 'first.\n\n'
+            );
           } else {
             if ($window.confirm('Are you sure about deleting [' + $scope.query.title + '] ?')) {
-              $scope.query.delete().then(function (resp) {
+              return $scope.query.delete().then(function (resp) {
                 kbnUrl.change('settings/queries', {});
               });
             }
           }
-
         });
       };
 
@@ -215,9 +210,8 @@ define(function (require) {
         $scope.holder.htmlPreview = '';
 
         if ($scope.query.id) {
-
           $scope.spinIt = true;
-          queryEngineClient.clearCache().then(function () {
+          return queryEngineClient.clearCache().then(function () {
 
             queryEngineClient.getQueriesHtmlFromServer(
               [

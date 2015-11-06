@@ -20,14 +20,8 @@ exports.sequence = function (json) {
       throw err;
     }
 
-    if (!sequence || sequence.constructor !== Array || sequence.length === 0) {
-      throw new Error('Specify the join sequence: ' + JSON.stringify(sequence, null, ' '));
-    }
-    if (sequence.length < 2) {
-      throw new Error('Sequence must have at least two elements');
-    }
-
     var query = [];
+    _verifySequence(sequence);
     _sequenceJoins(query, sequence);
     return query;
   });
@@ -87,9 +81,63 @@ function _replaceObjects(json, objects) {
     if (util.length(json, path) !== 1) {
       throw new Error('The object at ' + JSON.stringify(path, null, ' ') + ' must only contain the join filter');
     }
-    util.delete(json, path.slice(0, path.length - 1), path[path.length - 1]);
-    util.addAll(json, path.slice(0, path.length - 1), objects[i].value);
+    var label = path[path.length - 1];
+    util.replace(json, path.slice(0, path.length - 1), label, label, objects[i].value);
   }
+}
+
+/**
+ * Checks that the sequence of joins is valid
+ */
+function _verifySequence(sequence) {
+  if (!sequence || sequence.constructor !== Array) {
+    throw new Error('The join sequence must be an array. Got: ' + JSON.stringify(sequence, null, ' '));
+  }
+
+  if (sequence.length === 0) {
+    throw new Error('Specify the join sequence: ' + JSON.stringify(sequence, null, ' '));
+  }
+
+  if (sequence.length < 2) {
+    throw new Error('Sequence must have at least two elements');
+  }
+
+  // check element of the sequence
+  _.each(sequence, function (element, index) {
+    if (element.constructor === Array) {
+      if (index !== 0) {
+        throw new Error('There can be only one sequence object and it must be the first element of the array');
+      }
+      if (sequence.length < 3) {
+        throw new Error('Missing elements! only got: ' + JSON.stringify(sequence, null, ' '));
+      }
+      _.each(element, function (seq) {
+        _verifySequence(seq);
+      });
+    } else {
+      var keys = _.keys(element);
+
+      if (!_.contains(keys, 'path')) {
+        throw new Error('The join path is required');
+      }
+      _.each(keys, function (key) {
+        if (key === 'queries' && index === sequence.length - 1) {
+          throw new Error('Queries for the root node should be already set: ' + JSON.stringify(element, null, ' '));
+        }
+        switch (key) {
+          case 'queries':
+          case 'path':
+          case 'indices':
+          case 'types':
+          case 'orderBy':
+          case 'maxTermsPerShard':
+            break;
+          default:
+            throw new Error('Got unknown field [' + key + '] in ' + JSON.stringify(element, null, ' '));
+        }
+      });
+    }
+  });
 }
 
 /**
@@ -97,15 +145,19 @@ function _replaceObjects(json, objects) {
  */
 function _sequenceJoins(query, sequence) {
   var ind = sequence.length - 1;
+  var curQuery = query;
 
-  if (!!sequence[ind].queries) {
-    throw new Error('Queries for the root node are already set');
-  }
-  var curQuery = _addFilterJoin(query, sequence[ind].path, sequence[ind - 1].path, sequence[ind - 1]);
-  _addFilters(curQuery, sequence[ind - 1].queries);
-  for (var i = ind - 2; i >= 0; i--) {
+  for (var i = ind - 1; i > 0; i--) {
     curQuery = _addFilterJoin(curQuery, sequence[i + 1].path, sequence[i].path, sequence[i]);
     _addFilters(curQuery, sequence[i].queries);
+  }
+  if (sequence[0].constructor === Array) {
+    _.each(sequence[0], function (seq) {
+      _sequenceJoins(curQuery.filter.bool.must, seq);
+    });
+  } else {
+    curQuery = _addFilterJoin(curQuery, sequence[1].path, sequence[0].path, sequence[0]);
+    _addFilters(curQuery, sequence[0].queries);
   }
 }
 
@@ -123,6 +175,9 @@ function _process(query, focus, relations, filters, indexes, visitedIndices) {
   var dotFocus = focus + '.';
 
   if (filters.hasOwnProperty(focus)) {
+    if (query.constructor === Array) {
+      throw new Error('There cannot be filters on the root of the filterjoin');
+    }
     var focusFilters = filters[focus];
     _addFilters(query, focusFilters);
   }
@@ -153,8 +208,10 @@ function _process(query, focus, relations, filters, indexes, visitedIndices) {
       // TODO update the definition of the indexes array
       var targetIndex = targetRel.substr(0, targetDot);
       if (!visitedIndices.hasOwnProperty(targetIndex)) {
+        // TODO the following will be removed with GH#382
         var ti = _.find(indexes, { id: targetIndex });
         ti.indices = [ targetIndex ];
+        ti.types = ti.type ? [ ti.type ] : [];
         var childFilters = _addFilterJoin(query, sourcePath, targetPath, ti);
         _process(childFilters, targetIndex, relations, filters, indexes, visitedIndices);
       }
@@ -166,15 +223,11 @@ function _process(query, focus, relations, filters, indexes, visitedIndices) {
  * Adds a filterjoin filter to the given query, from the source index to the target index
  */
 function _addFilterJoin(query, sourcePath, targetPath, targetIndex) {
-  var types = [];
   var orderBy;
   var maxTermsPerShard;
 
   if (!targetIndex) {
     throw new Error('The target index must be defined');
-  }
-  if (targetIndex.type) {
-    types.push(targetIndex.type);
   }
   orderBy = targetIndex.orderBy;
   maxTermsPerShard = targetIndex.maxTermsPerShard;
@@ -201,8 +254,8 @@ function _addFilterJoin(query, sourcePath, targetPath, targetIndex) {
       }
     }
   };
-  if (types.length > 0) {
-    filterJoin.types = types;
+  if (targetIndex.types && targetIndex.types.length > 0) {
+    filterJoin.types = targetIndex.types;
   }
   if (orderBy) {
     filterJoin.orderBy = orderBy;
@@ -240,6 +293,9 @@ function _getFocusedRelationIndex(focus, relation) {
  * Adds all the filters about the focus
  */
 function _addFilters(query, focusFilters) {
+  if (query.constructor !== Object) {
+    throw new Error('Query should be an object');
+  }
   if (!focusFilters) {
     return;
   }
@@ -247,15 +303,11 @@ function _addFilters(query, focusFilters) {
     throw new Error('The queries field must be an array');
   }
   for (var i = 0; i < focusFilters.length; i++) {
-    if (query.constructor === Array) {
-      query.push(focusFilters[i]);
+    // add the query object to filtered.query so that the score is computed
+    if (focusFilters[i].hasOwnProperty('query')) {
+      query.query.bool.must.push(focusFilters[i].query);
     } else {
-      // add the query object to filtered.query so that the score is computed
-      if (focusFilters[i].hasOwnProperty('query')) {
-        query.query.bool.must.push(focusFilters[i].query);
-      } else {
-        query.filter.bool.must.push(focusFilters[i]);
-      }
+      query.filter.bool.must.push(focusFilters[i]);
     }
   }
 }

@@ -77,7 +77,7 @@ module.exports = function (queryEngine, json) {
           // If it is the only child, delete the parent as well.
           _deleteDBfilter(json, path, label);
         } else {
-          util.replace(json, path, label, data[i]);
+          util.replace(json, path, label, 'bool', data[i]);
         }
       }
       return json;

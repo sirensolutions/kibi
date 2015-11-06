@@ -1,51 +1,33 @@
-<div ng-show="entityUriHolder.visible" class="form-group">
-  <label>Selected document</label>
-  <span class="small-note" ng-show="entityUriHolder.entityURIEnabled">
-    is required by a query. If not provided some results might be missing.
-  </span>
-  <span class="small-note" ng-show="!entityUriHolder.entityURIEnabled">
-    is NOT required by any query.
-  </span>
-  <span class="small-note pull-right" ng-click="showHelp = !showHelp">Help <i class="fa fa-info"></i></span>
+<div ng-show="entityUriHolder.visible"
+     class="form-group document-selection-widget">
+  <p class="small-note" ng-if="entityUriHolder.entityURIEnabled">
+    A query requires the selection of a document; you can set
+    a sample selection for testing using the dropdowns below.
+  </p>
+  <p class="small-note" ng-if="!entityUriHolder.entityURIEnabled">
+    There are no queries that require the selection of a document.
+  </p>
 
-  <div class="hintbox" ng-show="showHelp">
-    <!-- TODO: change to 3 when uncommenting info about REST -->
-    <p>Selected document schema is:</p>
-    <strong>INDEX/TYPE/ID/COLUMN</strong>
-    <p>Where:</p>
-    <ul>
-      <li>INDEX - <i>mandatory</i> an index name</li>
-      <li>TYPE - <i>mandatory</i>an index type</li>
-      <li>ID - <i>mandatory</i>a document id</li>
-      <li>COLUMN - <i>optional</i> name of a column with a click option from the enhanced search result visualisation</li>
-     </ul>
-  </div>
   <form name="entityURI" ng-if="!!c">
-    <st-select ng-model="c.index"
+    <st-select ng-model="c.indexPattern"
                object-type="indexPattern"
-               model-disabled="!entityUriHolder.entityURIEnabled"
                model-required="entityUriHolder.entityURIEnabled"
+               include="c.extraIndexPatternItems"
+               model-disabled="!entityUriHolder.entityURIEnabled"
                class="selectEntityUriParts"></st-select>
     <st-select ng-model="c.type"
                object-type="indexPatternType"
-               index-pattern-id="c.index"
-               model-disabled="!entityUriHolder.entityURIEnabled"
-               model-required="entityUriHolder.entityURIEnabled"
+               index-pattern-id="c.indexPattern"
+               model-disabled="!(entityUriHolder.entityURIEnabled && c.indexPattern)"
+               model-required="entiryUriHolder.entityURIEnabled"
                class="selectEntityUriParts"></st-select>
     <st-select ng-model="c.id"
                object-type="documentIds"
-               index-pattern-id="c.index"
+               index-pattern-id="c.indexPattern"
                index-pattern-type="c.type"
-               include="c.extraItems"
-               model-disabled="!entityUriHolder.entityURIEnabled"
-               model-required="entityUriHolder.entityURIEnabled"
-               class="selectEntityUriParts"></st-select>
-    <st-select ng-model="c.column"
-               object-type="field"
-               analyzed-warning="false"
-               index-pattern-id="c.index"
-               index-pattern-type="c.type"
-               model-disabled="!entityUriHolder.entityURIEnabled"
+               include="c.extraIdItems"
+               model-disabled="!(entityUriHolder.entityURIEnabled && c.type)"
+               model-required="entiryUriHolder.entityURIEnabled"
                class="selectEntityUriParts"></st-select>
   </form>
 </div>

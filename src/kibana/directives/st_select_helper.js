@@ -1,5 +1,5 @@
 define(function (require) {
-  return function StSelectHelperFactory(config, $http, courier, indexPatterns,
+  return function StSelectHelperFactory(config, $http, courier, indexPatterns, timefilter,
                                         savedQueries, savedDashboards, savedDatasources, Private, Promise) {
 
     function StSelectHelper() {
@@ -9,6 +9,7 @@ define(function (require) {
     var sparqlHelper = Private(require('components/sindicetech/sparql_helper/sparql_helper'));
     var sqlHelper = Private(require('components/sindicetech/sql_helper/sql_helper'));
     var datasourceHelper = Private(require('components/sindicetech/datasource_helper/datasource_helper'));
+    var indexPath = Private(require('plugins/kibi/commons/_index_path'));
 
     var searchRequest = function (type) {
       return $http.get('elasticsearch/' + config.file.kibana_index + '/' + type + '/_search?size=100');
@@ -77,7 +78,7 @@ define(function (require) {
         return Promise.resolve([]);
       }
 
-      return $http.get('elasticsearch/' + indexPatternId + '/' + indexPatternType + '/_search?size=10')
+      return $http.get('elasticsearch/' + indexPath(indexPatternId) + '/' + indexPatternType + '/_search?size=10')
       .then(function (response) {
         var ids = [];
         _.each(response.data.hits.hits, function (hit) {
@@ -97,23 +98,26 @@ define(function (require) {
         return Promise.resolve([]);
       }
 
-      return $http.get('elasticsearch/' + indexPatternId + '/_mappings')
+      return $http.get('elasticsearch/' + indexPath(indexPatternId) + '/_mappings')
       .then(function (response) {
         var types = [];
+
 
         for (var indexId in response.data) {
           if (response.data[indexId].mappings) {
             for (var type in response.data[indexId].mappings) {
-              if (response.data[indexId].mappings.hasOwnProperty(type)) {
-                types.push({
-                  label: type,
-                  value: type
-                });
+              if (response.data[indexId].mappings.hasOwnProperty(type) && types.indexOf(type) === -1) {
+                types.push(type);
               }
             }
           }
         }
-        return types;
+        return _.map(types, function (type) {
+          return {
+            label: type,
+            value: type
+          };
+        });
       });
     };
 

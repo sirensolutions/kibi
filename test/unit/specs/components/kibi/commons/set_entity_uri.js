@@ -15,14 +15,14 @@ define(function (require) {
           });
         });
 
-        it('Should set entity uri if in globalScope.se contains items', function () {
+        it('Should set document uri if in globalScope.se contains items', function () {
           globalState.se = ['uri1', 'uri2'];
           var holder = {};
           _set_entity_uri(holder);
           expect(holder.entityURI).to.equal('uri1');
         });
 
-        it('Should set entity uri if globalScope.se empty', function () {
+        it('Should set document uri if globalScope.se empty', function () {
           globalState.se = [];
           var holder = {};
           _set_entity_uri(holder);

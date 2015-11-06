@@ -223,7 +223,7 @@ define(function (require) {
         });
       });
 
-      it('should grab the selected entity', function () {
+      it('should grab the selected document', function () {
         var query = {
           id: '123'
         };

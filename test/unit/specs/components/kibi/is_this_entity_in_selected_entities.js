@@ -13,7 +13,7 @@ define(function (require) {
           });
         });
 
-        it('entity should be in the selected entities', function () {
+        it('document should be in the selected documents', function () {
           var se = [
             'a/b/c/d'
           ];
@@ -22,7 +22,7 @@ define(function (require) {
           expect(a(se, entityId, column)).to.be(true);
         });
 
-        it('entity should not be in the selected entities', function () {
+        it('document should not be in the selected documents', function () {
           var se = [
             'a/b/c/e',
             'a/b/f/d'

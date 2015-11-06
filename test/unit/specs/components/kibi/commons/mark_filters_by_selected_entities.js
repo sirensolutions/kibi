@@ -49,7 +49,8 @@ define(function (require) {
           $rootScope.$apply();
         });
 
-        it('should mark disabled dbfilter with query which depends on selected entity and selected entity NOT disabled', function (done) {
+        it('should mark disabled dbfilter with query which ' +
+           'depends on selected document and selected document is NOT disabled', function (done) {
           var filters = [
             {
               dbfilter: {
@@ -75,7 +76,7 @@ define(function (require) {
           $rootScope.$apply();
         });
 
-        it('should NOT mark dbfilter with query which does NOT depends on selected entity', function (done) {
+        it('should NOT mark dbfilter with query which does NOT depends on selected document', function (done) {
           var filters = [
             {
               dbfilter: {

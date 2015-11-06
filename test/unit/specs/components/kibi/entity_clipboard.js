@@ -31,14 +31,14 @@ define(function (require) {
         });
       }
 
-      it('selected entity', function () {
+      it('selected document', function () {
         init(false, ['index/type/id/column']);
         $rootScope.$emit('kibi:selectedEntities:changed', null);
         expect($rootScope.disabled).to.be(false);
         expect($rootScope.entityURI).to.be('index/type/id/column');
       });
 
-      it('selected entity but disabled', function () {
+      it('selected document but disabled', function () {
         init(true, ['index/type/id/column']);
         $rootScope.$emit('kibi:selectedEntities:changed', null);
         expect($rootScope.disabled).to.be(true);
@@ -53,7 +53,7 @@ define(function (require) {
         expect($rootScope.label).to.be('index/type/id');
       });
 
-      it('an entity missing the URI', function () {
+      it('an document missing the URI', function () {
         init(false, []);
         $rootScope.$emit('kibi:selectedEntities:changed', null);
         expect($rootScope.disabled).to.be(false);
@@ -61,7 +61,7 @@ define(function (require) {
         expect($rootScope.label).to.be(undefined);
       });
 
-      it('should remove the entity', function () {
+      it('should remove the document', function () {
         init(false, ['index/type/id/column/label']);
         $rootScope.removeAllEntities();
         expect($rootScope.disabled).to.be(undefined);
@@ -71,7 +71,7 @@ define(function (require) {
         expect(globalState.se).to.be(undefined);
       });
 
-      it('should toggle the entity', function () {
+      it('should toggle the selected document', function () {
         init(false);
         $rootScope.$emit('kibi:selectedEntities:changed', null);
         expect($rootScope.disabled).to.be(false);

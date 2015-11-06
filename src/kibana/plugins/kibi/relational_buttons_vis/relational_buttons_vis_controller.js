@@ -300,9 +300,81 @@ define(function (require) {
           countQueries.push(
             new Promise( function (fulfill, reject) {
 
-              savedDashboards.get(urlHelper.getCurrentDashboardId()).then(function (savedCurrentDashboard) {
-                if (savedCurrentDashboard.savedSearchId) {
-                  savedSearches.get(savedCurrentDashboard.savedSearchId).then(function (currentDashboardSavedSearch) {
+              savedDashboards.get(urlHelper.getCurrentDashboardId()).then(function (savedSourceDashboard) {
+                if (savedSourceDashboard.savedSearchId) {
+                  savedSearches.get(savedSourceDashboard.savedSearchId).then(function (sourceDashboardSavedSearch) {
+
+
+
+                    // check that there are any join_seq filters already on this dashboard
+                    //    if there is only 1:
+                    //      take the join sequence from it, update the queries in last element
+                    //      add new target dashboard
+                    //    if there is more then 1:
+                    //      create a group of sequences from them, add queries and target element
+                    //    if there is 0:
+                    //      create new join_seq filter to join current with new dashboard
+
+                    // how to create new join_filter
+                    //     * take current filters, query etc
+                    //     * create a squence current, target (target has no filters)
+
+
+                    var existingJoinFilters = _.cloneDeep(urlHelper.getFiltersOfType('join_sequence'));
+
+                    if (existingJoinFilters.length === 0) {
+
+                      relVisHelper.buildNewJoinSeqFilter(button, sourceDashboardSavedSearch).then(function (joinSeqFilter) {
+                        button.joinSeqFilter = joinSeqFilter;
+                        relVisHelper.buildCountQuery(button.redirectToDashboard, joinSeqFilter).then(function (query) {
+                          fulfill({
+                            query: query,
+                            button: button
+                          });
+                        }).catch(notify.error);
+                      }).catch(notify.error);
+
+                    } else if (existingJoinFilters.length === 1) {
+
+                      // update the filters of source
+                      relVisHelper.updateQueriesOnLastElement(
+                        button,
+                        sourceDashboardSavedSearch,
+                        existingJoinFilters[0])
+                      .then(function (joinSeqFilter) {
+
+                        relVisHelper.addTargetToTheSequence(button, joinSeqFilter);
+
+                        button.joinSeqFilter = joinSeqFilter;
+                        relVisHelper.buildCountQuery(button.redirectToDashboard, joinSeqFilter).then(function (query) {
+                          fulfill({
+                            query: query,
+                            button: button
+                          });
+                        }).catch(notify.error);
+                      }).catch(notify.error);
+
+                    } else if (existingJoinFilters.length > 1) {
+
+                      // build join sequence + add a group of sequances to the top of the array
+                      relVisHelper.buildNewJoinSeqFilter(button, sourceDashboardSavedSearch).then(function (joinSeqFilter) {
+
+                        // here create a group from existing ones and add it on the top
+                        relVisHelper.addGroupFromExistingJoinFilters(joinSeqFilter, existingJoinFilters);
+
+                        button.joinSeqFilter = joinSeqFilter;
+                        relVisHelper.buildCountQuery(button.redirectToDashboard, joinSeqFilter).then(function (query) {
+                          fulfill({
+                            query: query,
+                            button: button
+                          });
+                        }).catch(notify.error);
+                      }).catch(notify.error);
+
+                    }
+
+
+                    /*
 
                     var existingJoin = _.cloneDeep(urlHelper.getJoinFilter());
                     if (existingJoin && existingJoin.meta && existingJoin.meta.negate === true) {
@@ -343,6 +415,7 @@ define(function (require) {
                         notify.error(err);
                       });
                     }
+                    */
 
                   });
                 }

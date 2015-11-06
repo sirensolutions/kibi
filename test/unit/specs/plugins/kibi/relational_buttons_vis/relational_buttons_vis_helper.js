@@ -85,6 +85,43 @@ define(function (require) {
 
       });
 
+
+      describe('addGroupFromExistingJoinFilters', function () {
+
+        it('should create a group and add it', function () {
+          var existingFilters = [
+            {
+              join_sequence: [{indices: ['index1']}, {indices: ['index2']}]
+            },
+            {
+              join_sequence: [{indices: ['index3']}, {indices: ['index4']}]
+            }
+          ];
+
+          var joinSequenceFilter = {
+            meta: {},
+            join_sequence: [{indices: ['index5']}, {indices: ['index6']}]
+          };
+
+          var expected = {
+            meta: {},
+            join_sequence: [
+              [
+                [{indices: ['index1']}, {indices: ['index2']}],
+                [{indices: ['index3']}, {indices: ['index4']}]
+              ],
+              {indices: ['index5']}, {indices: ['index6']}
+            ]
+          };
+
+          relationalButtonsVisHelper.addGroupFromExistingJoinFilters(joinSequenceFilter, existingFilters);
+
+          expect(joinSequenceFilter).to.eql(expected);
+
+        });
+
+      });
+
     });
   });
 });

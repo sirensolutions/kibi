@@ -1083,23 +1083,24 @@ describe('FilterJoin querying', function () {
         expect(filterJoinSeq).withArgs([ { join_sequence: {} } ]).to.throwError(/must be an array/i);
       });
 
-      it('should fail on sequence having less than 2 elements', function () {
+      it('should fail on empty sequence', function () {
         expect(filterJoinSeq).withArgs([ { join_sequence: [] } ]).to.throwError(/specify the join sequence/i);
-        expect(filterJoinSeq).withArgs([ { join_sequence: [ 1 ] } ]).to.throwError(/at least two elements/i);
       });
 
       it('should fail on incorrect nested sequence', function () {
-        expect(filterJoinSeq).withArgs([ { join_sequence: [ [], {} ] } ]).to.throwError(/missing elements/i);
+        expect(filterJoinSeq).withArgs([ { join_sequence: [ { group: [] } ] } ]).to.throwError(/missing elements/i);
         // recurse on the nested sequence
-        expect(filterJoinSeq).withArgs([ { join_sequence: [ [ 1, 2, 3 ], {}, {} ] } ])
+        expect(filterJoinSeq).withArgs([ { join_sequence: [ { group: [ 1, 2 ] }, { relation: [ 1, 2 ] } ] } ])
         .to.throwError(/The join sequence must be an array. Got: 1/i);
       });
 
       it('should fail on incorrect dashboard element', function () {
-        expect(filterJoinSeq).withArgs([ { join_sequence: [ {}, {} ] } ]).to.throwError(/join path is required/i);
-        expect(filterJoinSeq).withArgs([ { join_sequence: [ { path: 'bbb' }, { path: 'aaa', queries: [] } ] } ])
+        expect(filterJoinSeq).withArgs([ { join_sequence: [ { relation: [ {}, {} ] } ] } ]).to.throwError(/join path is required/i);
+        expect(filterJoinSeq).withArgs([ { join_sequence: [ { relation: [ { path: 'bbb' } ] } ] } ])
+        .to.throwError(/pair of dashboards/i);
+        expect(filterJoinSeq).withArgs([ { join_sequence: [ { relation: [ { path: 'bbb' }, { path: 'aaa', queries: [] } ] } ] } ])
         .to.throwError(/already set/i);
-        expect(filterJoinSeq).withArgs([ { join_sequence: [ { path: 'bbb', dog: 'bbb' }, { path: 'aaa' } ] } ])
+        expect(filterJoinSeq).withArgs([ { join_sequence: [ { relation: [ { path: 'bbb', dog: 'bbb' }, { path: 'aaa' } ] } ] } ])
         .to.throwError(/unknown field \[dog\]/i);
       });
     });
@@ -1109,24 +1110,32 @@ describe('FilterJoin querying', function () {
       var joinSequence1 = {
         join_sequence: [
           {
-            path: 'aaa',
-            indices: [ 'A' ]
-          },
-          {
-            path: 'bbb',
-            indices: [ 'B' ]
+            relation: [
+              {
+                path: 'aaa',
+                indices: [ 'A' ]
+              },
+              {
+                path: 'bbb',
+                indices: [ 'B' ]
+              }
+            ]
           }
         ]
       };
       var joinSequence2 = {
         join_sequence: [
           {
-            path: 'ccc',
-            indices: [ 'C' ]
-          },
-          {
-            path: 'ddd',
-            indices: [ 'D' ]
+            relation: [
+              {
+                path: 'ccc',
+                indices: [ 'C' ]
+              },
+              {
+                path: 'ddd',
+                indices: [ 'D' ]
+              }
+            ]
           }
         ]
       };
@@ -1221,34 +1230,44 @@ describe('FilterJoin querying', function () {
     it('nested sequence 1', function () {
       var query = [{
         join_sequence: [
-          [
-            [
-              {
-                path: 'companyid',
-                indices: [ 'investment' ],
-                queries: [
-                  {
-                    query: {
-                      query_string: {
-                        query: '360buy'
-                      }
+          {
+            group: [
+              [
+                {
+                  relation: [
+                    {
+                      path: 'companyid',
+                      indices: [ 'investment' ],
+                      queries: [
+                        {
+                          query: {
+                            query_string: {
+                              query: '360buy'
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      path: 'id',
+                      indices: [ 'company' ]
                     }
-                  }
-                ]
-              },
+                  ]
+                }
+              ]
+            ]
+          },
+          {
+            relation: [
               {
                 path: 'id',
                 indices: [ 'company' ]
+              },
+              {
+                path: 'companyid',
+                indices: [ 'investment' ]
               }
             ]
-          ],
-          {
-            path: 'id',
-            indices: [ 'company' ]
-          },
-          {
-            path: 'companyid',
-            indices: [ 'investment' ]
           }
         ]
       }];
@@ -1319,75 +1338,97 @@ describe('FilterJoin querying', function () {
     it('nested sequence 2', function () {
       var query = [{
         join_sequence: [
-          [
-            [
-              {
-                path: 'id',
-                indices: [ 'A' ],
-                queries: [
-                  {
-                    query: {
-                      query_string: {
-                        query: 'aaa'
-                      }
-                    }
-                  }
-                ]
-              },
-              {
-                path: 'aid',
-                indices: [ 'B' ]
-              }
-            ],
-            [
-              {
-                path: 'did',
-                indices: [ 'C' ],
-                queries: [
-                  {
-                    query: {
-                      query_string: {
-                        query: 'ccc'
-                      }
-                    }
-                  }
-                ]
-              },
-              {
-                path: 'id',
-                indices: [ 'D' ],
-                queries: [
-                  {
-                    query: {
-                      query_string: {
-                        query: 'ddd'
-                      }
-                    }
-                  }
-                ]
-              },
-              {
-                path: 'did',
-                indices: [ 'B' ]
-              }
-            ]
-          ],
           {
-            path: 'id',
-            indices: [ 'B' ],
-            queries: [
-              {
-                query: {
-                  query_string: {
-                    query: 'bbb'
-                  }
+            group: [
+              [
+                {
+                  relation: [
+                    {
+                      path: 'id',
+                      indices: [ 'A' ],
+                      queries: [
+                        {
+                          query: {
+                            query_string: {
+                              query: 'aaa'
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      path: 'aid',
+                      indices: [ 'B' ]
+                    }
+                  ]
                 }
-              }
+              ],
+              [
+                {
+                  relation: [
+                    {
+                      path: 'did',
+                      indices: [ 'C' ],
+                      queries: [
+                        {
+                          query: {
+                            query_string: {
+                              query: 'ccc'
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      path: 'id',
+                      indices: [ 'D' ]
+                    }
+                  ]
+                },
+                {
+                  relation: [
+                    {
+                      path: 'id',
+                      indices: [ 'D' ],
+                      queries: [
+                        {
+                          query: {
+                            query_string: {
+                              query: 'ddd'
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      path: 'did',
+                      indices: [ 'B' ]
+                    }
+                  ]
+                }
+              ]
             ]
           },
           {
-            path: 'bid',
-            indices: [ 'A' ]
+            relation: [
+              {
+                path: 'id',
+                indices: [ 'B' ],
+                queries: [
+                  {
+                    query: {
+                      query_string: {
+                        query: 'bbb'
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                path: 'bid',
+                indices: [ 'A' ]
+              }
+            ]
           }
         ]
       }];
@@ -1529,25 +1570,37 @@ describe('FilterJoin querying', function () {
       var query = [{
         join_sequence: [
           {
-            path: 'companyid',
-            indices: [ 'investment' ],
-            queries: [
+            relation: [
               {
-                query: {
-                  query_string: {
-                    query: '360buy'
+                path: 'companyid',
+                indices: [ 'investment' ],
+                queries: [
+                  {
+                    query: {
+                      query_string: {
+                        query: '360buy'
+                      }
+                    }
                   }
-                }
+                ]
+              },
+              {
+                path: 'id',
+                indices: [ 'company' ]
               }
             ]
           },
           {
-            path: 'id',
-            indices: [ 'company' ]
-          },
-          {
-            path: 'companyid',
-            indices: [ 'investment' ]
+            relation: [
+              {
+                path: 'id',
+                indices: [ 'company' ]
+              },
+              {
+                path: 'companyid',
+                indices: [ 'investment' ]
+              }
+            ]
           }
         ]
       }];
@@ -1619,34 +1672,46 @@ describe('FilterJoin querying', function () {
       var query = [{
         join_sequence: [
           {
-            path: 'companyid',
-            indices: [ 'investment' ],
-            queries: [
+            relation: [
               {
-                query: {
-                  query_string: {
-                    query: '360buy'
+                path: 'companyid',
+                indices: [ 'investment' ],
+                queries: [
+                  {
+                    query: {
+                      query_string: {
+                        query: '360buy'
+                      }
+                    }
                   }
-                }
+                ]
+              },
+              {
+                path: 'id',
+                indices: [ 'company' ]
               }
             ]
           },
           {
-            path: 'id',
-            indices: [ 'company' ],
-            queries: [
+            relation: [
               {
-                query: {
-                  query_string: {
-                    query: 'yoplait'
+                path: 'id',
+                indices: [ 'company' ],
+                queries: [
+                  {
+                    query: {
+                      query_string: {
+                        query: 'yoplait'
+                      }
+                    }
                   }
-                }
+                ]
+              },
+              {
+                path: 'companyid',
+                indices: [ 'investment' ]
               }
             ]
-          },
-          {
-            path: 'companyid',
-            indices: [ 'investment' ]
           }
         ]
       }];
@@ -1723,21 +1788,25 @@ describe('FilterJoin querying', function () {
       var query = [{
         join_sequence: [
           {
-            path: 'here',
-            indices: [ 'aaa' ],
-            queries: [
+            relation: [
               {
-                query: {
-                  query_string: {
-                    query: '360buy'
+                path: 'here',
+                indices: [ 'aaa' ],
+                queries: [
+                  {
+                    query: {
+                      query_string: {
+                        query: '360buy'
+                      }
+                    }
                   }
-                }
+                ]
+              },
+              {
+                path: 'there',
+                indices: [ 'aaa' ]
               }
             ]
-          },
-          {
-            path: 'there',
-            indices: [ 'aaa' ]
           }
         ]
       }];

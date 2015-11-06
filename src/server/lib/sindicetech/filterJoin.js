@@ -8,19 +8,23 @@ var _ = require('lodash');
  * 1. a node of the join sequence; or
  * 2. another sequence.
  *
- * A sequence can be nested by adding to an array as the first element of the sequence it is nested in.
+ * A sequence can be nested by adding an object which field name is "group", and its value the sequence to nest.
  * For example, the sequence [ node1, node2 ] can be nested in the sequence [ node3, node4 ] as follows:
  *    {
  *      join_sequence: [
- *        [
- *          [ node1, node2 ]
- *        ],
+ *        {
+ *          group: [
+ *            [ node1, node2 ]
+ *          ]
+ *        },
  *        node3,
  *        node4
  *      ]
  *    }
  *
- * Each node of a sequence contains the following fields:
+ * Each node of a sequence is a relation that connects two dashboards. The relation is directed: [ node1, node2 ] is
+ * a join from node2 to node1.
+ * A dashboard is an object that contains the following fields:
  * - path: the path to the joined field
  * - indices: an array of indices to join on
  * - types: the corresponding array of types
@@ -113,44 +117,50 @@ function _verifySequence(sequence) {
     throw new Error('Specify the join sequence: ' + JSON.stringify(sequence, null, ' '));
   }
 
-  if (sequence.length < 2) {
-    throw new Error('Sequence must have at least two elements');
-  }
-
   // check element of the sequence
   _.each(sequence, function (element, index) {
-    if (element.constructor === Array) {
+    if (element.group) {
       if (index !== 0) {
         throw new Error('There can be only one sequence object and it must be the first element of the array');
       }
-      if (sequence.length < 3) {
+      if (sequence.length < 2) {
         throw new Error('Missing elements! only got: ' + JSON.stringify(sequence, null, ' '));
       }
-      _.each(element, function (seq) {
+      _.each(element.group, function (seq) {
         _verifySequence(seq);
       });
-    } else {
-      var keys = _.keys(element);
-
-      if (!_.contains(keys, 'path')) {
-        throw new Error('The join path is required');
+    } else if (element.relation) {
+      var relation = element.relation;
+      if (relation.constructor !== Array || relation.length !== 2) {
+        throw new Error('Expecting a pair of dashboards to join, got: ' + JSON.stringify(relation, null, ' '));
       }
-      _.each(keys, function (key) {
-        if (key === 'queries' && index === sequence.length - 1) {
-          throw new Error('Queries for the root node should be already set: ' + JSON.stringify(element, null, ' '));
+      var _check = function (dashboard, isSource) {
+        var keys = _.keys(dashboard);
+
+        if (!_.contains(keys, 'path')) {
+          throw new Error('The join path is required');
         }
-        switch (key) {
-          case 'queries':
-          case 'path':
-          case 'indices':
-          case 'types':
-          case 'orderBy':
-          case 'maxTermsPerShard':
-            break;
-          default:
-            throw new Error('Got unknown field [' + key + '] in ' + JSON.stringify(element, null, ' '));
-        }
-      });
+        _.each(keys, function (key) {
+          if (isSource && key === 'queries') {
+            throw new Error('Queries for the root node should be already set: ' + JSON.stringify(relation, null, ' '));
+          }
+          switch (key) {
+            case 'queries':
+            case 'path':
+            case 'indices':
+            case 'types':
+            case 'orderBy':
+            case 'maxTermsPerShard':
+              break;
+            default:
+              throw new Error('Got unknown field [' + key + '] in ' + JSON.stringify(dashboard, null, ' '));
+          }
+        });
+      };
+      _check(relation[0]);
+      _check(relation[1], true);
+    } else {
+      throw new Error('Unknown element: ' + JSON.stringify(element, null, ' '));
     }
   });
 }
@@ -162,17 +172,19 @@ function _sequenceJoins(query, sequence) {
   var ind = sequence.length - 1;
   var curQuery = query;
 
-  for (var i = ind - 1; i > 0; i--) {
-    curQuery = _addFilterJoin(curQuery, sequence[i + 1].path, sequence[i].path, sequence[i]);
-    _addFilters(curQuery, sequence[i].queries);
+  for (var i = ind; i > 0; i--) {
+    var join = sequence[i].relation;
+    curQuery = _addFilterJoin(curQuery, join[1].path, join[0].path, join[0]);
+    _addFilters(curQuery, join[0].queries);
   }
-  if (sequence[0].constructor === Array) {
-    _.each(sequence[0], function (seq) {
+  if (sequence[0].group) {
+    _.each(sequence[0].group, function (seq) {
       _sequenceJoins(curQuery.filter.bool.must, seq);
     });
   } else {
-    curQuery = _addFilterJoin(curQuery, sequence[1].path, sequence[0].path, sequence[0]);
-    _addFilters(curQuery, sequence[0].queries);
+    var lastJoin = sequence[0].relation;
+    curQuery = _addFilterJoin(curQuery, lastJoin[1].path, lastJoin[0].path, lastJoin[0]);
+    _addFilters(curQuery, lastJoin[0].queries);
   }
 }
 

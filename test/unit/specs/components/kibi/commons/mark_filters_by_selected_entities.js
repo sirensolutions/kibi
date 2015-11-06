@@ -37,12 +37,9 @@ define(function (require) {
           globalState.entityDisabled = false;
 
           _mark_filters_by_selected_entities(filters).then(function (filters) {
-            console.log(filters[0].meta);
-
             expect(filters[0].meta.dependsOnSelectedEntities).to.equal(true);
             expect(filters[0].meta.dependsOnSelectedEntitiesDisabled).to.equal(false);
             expect(filters[0].meta.markDependOnSelectedEntities).to.equal(true);
-
             done();
           });
 
@@ -64,12 +61,9 @@ define(function (require) {
           globalState.entityDisabled = true;
 
           _mark_filters_by_selected_entities(filters).then(function (filters) {
-            console.log(filters[0].meta);
-
             expect(filters[0].meta.dependsOnSelectedEntities).to.equal(true);
             expect(filters[0].meta.dependsOnSelectedEntitiesDisabled).to.equal(true);
             expect(filters[0].meta.markDependOnSelectedEntities).to.equal(true);
-
             done();
           });
 
@@ -90,12 +84,9 @@ define(function (require) {
           globalState.entityDisabled = false;
 
           _mark_filters_by_selected_entities(filters).then(function (filters) {
-            console.log(filters[0].meta);
-
             expect(filters[0].meta.dependsOnSelectedEntities).to.equal(false);
             expect(filters[0].meta.dependsOnSelectedEntitiesDisabled).to.equal(false);
             expect(filters[0].meta.markDependOnSelectedEntities).to.equal(true);
-
             done();
           });
 

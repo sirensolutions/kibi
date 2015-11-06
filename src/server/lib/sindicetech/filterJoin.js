@@ -4,8 +4,23 @@ var _ = require('lodash');
 /**
  * Generate a SIREn filterjoin query where the sequence of joins is explicitly defined in the query.
  *
- * A join_sequence is an array where each element defines a node of the join sequence.
- * Each element contains the following fields:
+ * A join_sequence is an array where each element is either:
+ * 1. a node of the join sequence; or
+ * 2. another sequence.
+ *
+ * A sequence can be nested by adding to an array as the first element of the sequence it is nested in.
+ * For example, the sequence [ node1, node2 ] can be nested in the sequence [ node3, node4 ] as follows:
+ *    {
+ *      join_sequence: [
+ *        [
+ *          [ node1, node2 ]
+ *        ],
+ *        node3,
+ *        node4
+ *      ]
+ *    }
+ *
+ * Each node of a sequence contains the following fields:
  * - path: the path to the joined field
  * - indices: an array of indices to join on
  * - types: the corresponding array of types

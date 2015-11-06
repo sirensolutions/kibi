@@ -17,16 +17,43 @@ describe('Json traversing', function () {
     expect(json).to.eql(expected);
   });
 
-  it('addall', function () {
-    var arr = [ 3, 4 ];
-    var json = {
-      aaa: [ 1, 2 ]
-    };
-    var expected = {
-      aaa: [ 1, 2, 3, 4 ]
-    };
-    util.addAll(json, [ 'aaa' ], arr);
-    expect(json).to.eql(expected);
+  describe('replace that element at a given path', function () {
+    it('should replace { old: 666 } with { new: 123 }', function () {
+      var json = {
+        aaa: {
+          old: 666
+        }
+      };
+      var expected = {
+        aaa: {
+          new: 123
+        }
+      };
+      util.replace(json, [ 'aaa' ], 'old', 'new', 123);
+      expect(json).to.eql(expected);
+    });
+
+    it('should replace the element in array', function () {
+      var json = {
+        aaa: [ 1, 2, 3 ]
+      };
+      var expected = {
+        aaa: [ 1, 4, 3 ]
+      };
+      util.replace(json, [ 'aaa' ], '1', '1', 4);
+      expect(json).to.eql(expected);
+    });
+
+    it('should merge arrays', function () {
+      var json = {
+        aaa: [ 1, 2, 3 ]
+      };
+      var expected = {
+        aaa: [ 4, 5, 6, 1, 3 ]
+      };
+      util.replace(json, [ 'aaa' ], '1', '0', [ 4, 5, 6 ]);
+      expect(json).to.eql(expected);
+    });
   });
 
   it('element length', function () {

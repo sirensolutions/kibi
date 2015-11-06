@@ -23,7 +23,8 @@ function _traverse0(json, objects, label, apply, curPath) {
       if (attribute === label) {
         // attribute to modify is found
         if (json[attribute] === null || typeof (json[attribute]) !== 'object') {
-          apply(new Error('Unexpected value for [' + label + ']'), null);
+          apply(new Error('Unexpected value for [' + label + ']. ' +
+            'Got ' + json[attribute] + ' of type [' + typeof (json[attribute]) + ']'), null);
         } else {
           objects.push({
             path: curPath.length === 0 ? [] : curPath.split(PATH_SEPARATOR),
@@ -46,29 +47,25 @@ function _traverse0(json, objects, label, apply, curPath) {
 
 
 /**
- * Add all the elements in the given array to the array in the json at the given path
- */
-exports.addAll = function (json, path, array) {
-  kibiUtils.goToElement(json, path, function (json) {
-    if (json.constructor === Array) {
-      for (var j = 0; j < array.length; j++) {
-        json.push(array[j]);
-      }
-    } else {
-      throw new Error('AddAll can only add elements to an array: got ' + JSON.stringify(json, null, ' '));
-    }
-  });
-};
-
-/**
  * Replace the label object at the given path in json with the given object
  */
-exports.replace = function (json, path, label, object) {
+exports.replace = function (json, path, oldLabel, newLabel, object) {
   kibiUtils.goToElement(json, path, function (json) {
-    // remove the custom query
-    delete json[label];
-    // replace it with the ES query
-    json.bool = object;
+    _delete(json, oldLabel);
+    if (json.constructor === Array) {
+      var offset = parseInt(newLabel, 10);
+      if (object.constructor === Array) {
+        // merge the two arrays
+        for (var j = 0; j < object.length; j++) {
+          json.splice(offset, 0, object[j]);
+          offset++;
+        }
+      } else {
+        json.splice(offset, 0, object);
+      }
+    } else {
+      json[newLabel] = object;
+    }
   });
 };
 
@@ -101,18 +98,22 @@ exports.length = function (json, path) {
   return len;
 };
 
+function _delete(json, label) {
+  if (json.constructor === Object) {
+    delete json[label];
+  } else if (json.constructor === Array) {
+    json.splice(parseInt(label, 10), 1);
+  } else {
+    throw new Error('Unable to delete element ' + label + ' in ' + JSON.stringify(json, null, ' '));
+  }
+}
+
 /**
  * Delete deletes the label entry at the given path in json
  */
 exports.delete = function (json, path, label) {
   kibiUtils.goToElement(json, path, function (json) {
-    if (json.constructor === Object) {
-      delete json[label];
-    } else if (json.constructor === Array) {
-      json.splice(parseInt(label, 10), 1);
-    } else {
-      throw new Error('Unable to delete element ' + label + ' in ' + JSON.stringify(json, null, ' '));
-    }
+    _delete(json, label);
   });
 };
 

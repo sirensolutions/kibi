@@ -237,7 +237,7 @@ describe('FilterJoin querying', function () {
     expect(actual).to.eql(expected);
   });
 
-  it('filter on focused index', function () {
+  it('should fail if there are filters on focused index', function () {
     var relations = [
       [ 'i1.id1', 'i2.id2' ]
     ];
@@ -269,42 +269,7 @@ describe('FilterJoin querying', function () {
         }
       }
     ];
-    var expected = [
-      {
-        terms: {
-          tag: [ 'grishka' ]
-        }
-      },
-      {
-        filterjoin: {
-          id1: {
-            query: {
-              filtered: {
-                query: {
-                  bool: {
-                    must: [
-                      {
-                        match_all: {}
-                      }
-                    ]
-                  }
-                },
-                filter: {
-                  bool: {
-                    must: []
-                  }
-                }
-              }
-            },
-            indices: ['i2'],
-            path: 'id2',
-            types: ['cafard']
-          }
-        }
-      }
-    ];
-    var actual = filterJoinSet(query);
-    expect(actual).to.eql(expected);
+    expect(filterJoinSet).withArgs(query).to.throwError(/There cannot be filters on the root of the filterjoin/);
   });
 
   it('focus filter array', function () {
@@ -455,96 +420,13 @@ describe('FilterJoin querying', function () {
     expect(actual).to.eql(expected);
   });
 
-  it('filter on focused and related indices', function () {
-    var relations = [
-      [ 'i1.id1', 'i2.id2' ]
-    ];
-    var filters = {
-      i1: [
-        {
-          terms: {
-            tag: [ 'pluto' ]
-          }
-        }
-      ],
-      i2: [
-        {
-          terms: {
-            tag: [ 'grishka' ]
-          }
-        }
-      ]
-    };
-    var query = [
-      {
-        join: {
-          focus: 'i1',
-          indexes: [
-            {
-              id: 'i1',
-              type: 'cafard'
-            },
-            {
-              id: 'i2',
-              type: 'cafard'
-            }
-          ],
-          relations: relations,
-          filters: filters
-        }
-      }
-    ];
-    var expected = [
-      {
-        terms: {
-          tag: [ 'pluto' ]
-        }
-      },
-      {
-        filterjoin: {
-          id1: {
-            indices: ['i2'],
-            types: ['cafard'],
-            path: 'id2',
-            query: {
-              filtered: {
-                query: {
-                  bool: {
-                    must: [
-                      {
-                        match_all: {}
-                      }
-                    ]
-                  }
-                },
-                filter: {
-                  bool: {
-                    must: [
-                      {
-                        terms: {
-                          tag: [ 'grishka' ]
-                        }
-                      }
-                    ]
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    ];
-    var actual = filterJoinSet(query);
-    expect(actual).to.eql(expected);
-  });
-
   it('three related indices - line', function () {
     var relations = [
       [ 'i1.id1', 'i2.id2' ],
       [ 'i3.id3', 'i2.id2' ]
     ];
     var filters = {
-      i1: [
+      i2: [
         {
           terms: {
             tag: [ 'pluto' ]
@@ -584,11 +466,6 @@ describe('FilterJoin querying', function () {
     ];
     var expected = [
       {
-        terms: {
-          tag: [ 'pluto' ]
-        }
-      },
-      {
         filterjoin: {
           id1: {
             indices: ['i2'],
@@ -608,6 +485,11 @@ describe('FilterJoin querying', function () {
                 filter: {
                   bool: {
                     must: [
+                      {
+                        terms: {
+                          tag: [ 'pluto' ]
+                        }
+                      },
                       {
                         filterjoin: {
                           id2: {
@@ -780,13 +662,6 @@ describe('FilterJoin querying', function () {
       [ 'i7.id', 'i3.b' ]
     ];
     var filters = {
-      i1: [
-        {
-          terms: {
-            tag: [ 'grishka' ]
-          }
-        }
-      ],
       i4: [
         {
           terms: {
@@ -856,11 +731,6 @@ describe('FilterJoin querying', function () {
       }
     ];
     var expected = [
-      {
-        terms: {
-          tag: [ 'grishka' ]
-        }
-      },
       {
         filterjoin: {
           aaa: {
@@ -1204,6 +1074,454 @@ describe('FilterJoin querying', function () {
     ];
     var actual = filterJoinSet(query);
     expect(actual).to.eql(expected);
+  });
+
+  describe('Filterjoin with nested join sequence', function () {
+    describe('Error handling', function () {
+      it('should fail on the sequence not being an array', function () {
+        expect(filterJoinSeq).withArgs([ { join_sequence: 123 } ]).to.throwError(/unexpected value/i);
+        expect(filterJoinSeq).withArgs([ { join_sequence: {} } ]).to.throwError(/must be an array/i);
+      });
+
+      it('should fail on sequence having less than 2 elements', function () {
+        expect(filterJoinSeq).withArgs([ { join_sequence: [] } ]).to.throwError(/specify the join sequence/i);
+        expect(filterJoinSeq).withArgs([ { join_sequence: [ 1 ] } ]).to.throwError(/at least two elements/i);
+      });
+
+      it('should fail on incorrect nested sequence', function () {
+        expect(filterJoinSeq).withArgs([ { join_sequence: [ [], {} ] } ]).to.throwError(/missing elements/i);
+        // recurse on the nested sequence
+        expect(filterJoinSeq).withArgs([ { join_sequence: [ [ 1, 2, 3 ], {}, {} ] } ])
+        .to.throwError(/The join sequence must be an array. Got: 1/i);
+      });
+
+      it('should fail on incorrect dashboard element', function () {
+        expect(filterJoinSeq).withArgs([ { join_sequence: [ {}, {} ] } ]).to.throwError(/join path is required/i);
+        expect(filterJoinSeq).withArgs([ { join_sequence: [ { path: 'bbb' }, { path: 'aaa', queries: [] } ] } ])
+        .to.throwError(/already set/i);
+        expect(filterJoinSeq).withArgs([ { join_sequence: [ { path: 'bbb', dog: 'bbb' }, { path: 'aaa' } ] } ])
+        .to.throwError(/unknown field \[dog\]/i);
+      });
+    });
+
+    it('2 join sequences', function () {
+
+      var joinSequence1 = {
+        join_sequence: [
+          {
+            path: 'aaa',
+            indices: [ 'A' ]
+          },
+          {
+            path: 'bbb',
+            indices: [ 'B' ]
+          }
+        ]
+      };
+      var joinSequence2 = {
+        join_sequence: [
+          {
+            path: 'ccc',
+            indices: [ 'C' ]
+          },
+          {
+            path: 'ddd',
+            indices: [ 'D' ]
+          }
+        ]
+      };
+
+      var query = [{
+        query: {
+          filtered: {
+            query: {
+              match_all:{}
+            },
+            filter: {
+              bool: {
+                must: [joinSequence1, joinSequence2]
+              }
+            }
+          }
+        }
+      }];
+
+      var expectedJoin1 = {
+        filterjoin: {
+          bbb: {
+            indices :['A'],
+            path : 'aaa',
+            query : {
+              filtered: {
+                query: {
+                  bool: {
+                    must: [
+                      {
+                        match_all: {}
+                      }
+                    ]
+                  }
+                },
+                filter: {
+                  bool: {
+                    must: []
+                  }
+                }
+              }
+            }
+          }
+        }
+      };
+      var expectedJoin2 = {
+        filterjoin: {
+          ddd: {
+            indices :['C'],
+            path : 'ccc',
+            query : {
+              filtered: {
+                query: {
+                  bool: {
+                    must: [
+                      {
+                        match_all: {}
+                      }
+                    ]
+                  }
+                },
+                filter: {
+                  bool: {
+                    must: []
+                  }
+                }
+              }
+            }
+          }
+        }
+      };
+
+      var expected = [{
+        query: {
+          filtered: {
+            query: {
+              match_all:{}
+            },
+            filter: {
+              bool: {
+                must:[expectedJoin1, expectedJoin2]
+              }
+            }
+          }
+        }
+      }];
+
+      var actual = filterJoinSeq(query);
+      expect(actual).to.eql(expected);
+    });
+
+    it('nested sequence 1', function () {
+      var query = [{
+        join_sequence: [
+          [
+            [
+              {
+                path: 'companyid',
+                indices: [ 'investment' ],
+                queries: [
+                  {
+                    query: {
+                      query_string: {
+                        query: '360buy'
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                path: 'id',
+                indices: [ 'company' ]
+              }
+            ]
+          ],
+          {
+            path: 'id',
+            indices: [ 'company' ]
+          },
+          {
+            path: 'companyid',
+            indices: [ 'investment' ]
+          }
+        ]
+      }];
+      var expected = [
+        {
+          filterjoin: {
+            companyid: {
+              path: 'id',
+              indices: ['company'],
+              query: {
+                filtered: {
+                  query: {
+                    bool: {
+                      must: [
+                        {
+                          match_all: {}
+                        }
+                      ]
+                    }
+                  },
+                  filter: {
+                    bool: {
+                      must: [
+                        {
+                          filterjoin: {
+                            id: {
+                              path: 'companyid',
+                              indices: ['investment'],
+                              query: {
+                                filtered: {
+                                  query: {
+                                    bool: {
+                                      must: [
+                                        {
+                                          match_all: {}
+                                        },
+                                        {
+                                          query_string: {
+                                            query: '360buy'
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  filter: {
+                                    bool: {
+                                      must: []
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ];
+      var actual = filterJoinSeq(query);
+      expect(actual).to.eql(expected);
+    });
+
+    it('nested sequence 2', function () {
+      var query = [{
+        join_sequence: [
+          [
+            [
+              {
+                path: 'id',
+                indices: [ 'A' ],
+                queries: [
+                  {
+                    query: {
+                      query_string: {
+                        query: 'aaa'
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                path: 'aid',
+                indices: [ 'B' ]
+              }
+            ],
+            [
+              {
+                path: 'did',
+                indices: [ 'C' ],
+                queries: [
+                  {
+                    query: {
+                      query_string: {
+                        query: 'ccc'
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                path: 'id',
+                indices: [ 'D' ],
+                queries: [
+                  {
+                    query: {
+                      query_string: {
+                        query: 'ddd'
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                path: 'did',
+                indices: [ 'B' ]
+              }
+            ]
+          ],
+          {
+            path: 'id',
+            indices: [ 'B' ],
+            queries: [
+              {
+                query: {
+                  query_string: {
+                    query: 'bbb'
+                  }
+                }
+              }
+            ]
+          },
+          {
+            path: 'bid',
+            indices: [ 'A' ]
+          }
+        ]
+      }];
+      var expected = [
+        {
+          filterjoin: {
+            bid: {
+              path: 'id',
+              indices: ['B'],
+              query: {
+                filtered: {
+                  query: {
+                    bool: {
+                      must: [
+                        {
+                          match_all: {}
+                        },
+                        {
+                          query_string: {
+                            query: 'bbb'
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  filter: {
+                    bool: {
+                      must: [
+                        {
+                          filterjoin: {
+                            aid: {
+                              path: 'id',
+                              indices: ['A'],
+                              query: {
+                                filtered: {
+                                  query: {
+                                    bool: {
+                                      must: [
+                                        {
+                                          match_all: {}
+                                        },
+                                        {
+                                          query_string: {
+                                            query: 'aaa'
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  filter: {
+                                    bool: {
+                                      must: []
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        {
+                          filterjoin: {
+                            did: {
+                              path: 'id',
+                              indices: ['D'],
+                              query: {
+                                filtered: {
+                                  query: {
+                                    bool: {
+                                      must: [
+                                        {
+                                          match_all: {}
+                                        },
+                                        {
+                                          query_string: {
+                                            query: 'ddd'
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  filter: {
+                                    bool: {
+                                      must: [
+                                        {
+                                          filterjoin: {
+                                            id: {
+                                              path: 'did',
+                                              indices: ['C'],
+                                              query: {
+                                                filtered: {
+                                                  query: {
+                                                    bool: {
+                                                      must: [
+                                                        {
+                                                          match_all: {}
+                                                        },
+                                                        {
+                                                          query_string: {
+                                                            query: 'ccc'
+                                                          }
+                                                        }
+                                                      ]
+                                                    }
+                                                  },
+                                                  filter: {
+                                                    bool: {
+                                                      must: []
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ];
+      var actual = filterJoinSeq(query);
+      expect(actual).to.eql(expected);
+    });
   });
 
   describe('Filterjoin with pre-defined join sequence', function () {

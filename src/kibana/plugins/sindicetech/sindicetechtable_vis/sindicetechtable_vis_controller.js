@@ -7,7 +7,7 @@ define(function (require) {
 
   module.controller(
     'KbnSindicetechtableVisController',
-    function ($rootScope, $scope, $location, $route, savedVisualizations, Private, courier) {
+    function ($rootScope, $scope, $location, $route, globalState, savedVisualizations, Private, courier) {
       var requestQueue = Private(require('components/courier/_request_queue'));
       var SearchSource = Private(require('components/courier/data_source/search_source'));
       var filterManager = Private(require('components/filter_manager/filter_manager'));
@@ -24,7 +24,13 @@ define(function (require) {
         entityURIEnabled: false,
         visible: $location.path().indexOf('/visualize/edit/') !== -1
       };
-
+      $scope.$watch('holder.entityURI', function (entityURI) {
+        if (entityURI && $scope.holder.visible) {
+          globalState.se_temp = [entityURI];
+          globalState.save();
+          fetchResults($scope.savedVis);
+        }
+      });
 
       _set_entity_uri($scope.holder);
       var removeSetEntityUriHandler = $rootScope.$on('kibi:selectedEntities:changed', function (event, se) {

@@ -37,6 +37,7 @@ define(function (require) {
       /**
        * Merges the button join spec with the target join.
        */
+      /*
       var mergeTargetJoin = function (button, targetJoin) {
         targetJoin = _.cloneDeep(targetJoin);
         return new Promise(function (fulfill, reject) {
@@ -75,10 +76,11 @@ define(function (require) {
           fulfill(button);
         });
       };
-
+      */
       /**
        * Updates the source join.
        */
+      /*
       var updateSourceJoin = function (button, existingJoin, currentDashboardSavedSearch) {
         existingJoin = _.cloneDeep(existingJoin);
         return new Promise( function (fulfill, reject) {
@@ -182,11 +184,12 @@ define(function (require) {
 
         });
       };
-
+      */
       /**
        * Updates the target dashboard join specification with the join specification
        * built for the current dashboard.
        */
+      /*
       var updateTargetDashboardJoin = function (button) {
         return new Promise(function (fulfill, reject) {
           savedDashboards.get(button.redirectToDashboard).then(function (targetSavedDashboard) {
@@ -214,10 +217,12 @@ define(function (require) {
           });
         });
       };
+      */
 
       /**
        * Creates a join for the current dashboard saved search.
        */
+      /*
       var buildSourceJoin = function (button, currentDashboardSavedSearch) {
         return new Promise(function (fulfill, reject) {
 
@@ -285,6 +290,7 @@ define(function (require) {
         });
 
       };
+      */
 
       // Update the counts on each button of the related filter
       var _updateCounts = function () {
@@ -304,27 +310,24 @@ define(function (require) {
                 if (savedSourceDashboard.savedSearchId) {
                   savedSearches.get(savedSourceDashboard.savedSearchId).then(function (sourceDashboardSavedSearch) {
 
-
-
                     // check that there are any join_seq filters already on this dashboard
-                    //    if there is only 1:
-                    //      take the join sequence from it, update the queries in last element
-                    //      add new target dashboard
-                    //    if there is more then 1:
-                    //      create a group of sequences from them, add queries and target element
                     //    if there is 0:
-                    //      create new join_seq filter to join current with new dashboard
-
-                    // how to create new join_filter
-                    //     * take current filters, query etc
-                    //     * create a squence current, target (target has no filters)
-
+                    //      create new join_seq filter with 1 relation from current dashboard to target dashboard
+                    //    if there is only 1:
+                    //      take the join_sequence filter and add to the sequence
+                    //      - new relation from current dashboard to target dashboard
+                    //    if there is more then 1:
+                    //      create join_sequence filter with:
+                    //      - group from all existing join_seq filters and add this group at the top
+                    //      - new relation from current dashboard to target dashboard
 
                     var existingJoinFilters = _.cloneDeep(urlHelper.getFiltersOfType('join_sequence'));
-
                     if (existingJoinFilters.length === 0) {
 
-                      relVisHelper.buildNewJoinSeqFilter(button, sourceDashboardSavedSearch).then(function (joinSeqFilter) {
+                      relVisHelper.buildNewJoinSeqFilter(
+                        button,
+                        sourceDashboardSavedSearch)
+                      .then(function (joinSeqFilter) {
                         button.joinSeqFilter = joinSeqFilter;
                         relVisHelper.buildCountQuery(button.redirectToDashboard, joinSeqFilter).then(function (query) {
                           fulfill({
@@ -336,14 +339,11 @@ define(function (require) {
 
                     } else if (existingJoinFilters.length === 1) {
 
-                      // update the filters of source
-                      relVisHelper.updateQueriesOnLastElement(
+                      relVisHelper.addRelationToJoinSeqFilter(
                         button,
                         sourceDashboardSavedSearch,
                         existingJoinFilters[0])
                       .then(function (joinSeqFilter) {
-
-                        relVisHelper.addTargetToTheSequence(button, joinSeqFilter);
 
                         button.joinSeqFilter = joinSeqFilter;
                         relVisHelper.buildCountQuery(button.redirectToDashboard, joinSeqFilter).then(function (query) {
@@ -360,7 +360,9 @@ define(function (require) {
                       relVisHelper.buildNewJoinSeqFilter(button, sourceDashboardSavedSearch).then(function (joinSeqFilter) {
 
                         // here create a group from existing ones and add it on the top
-                        relVisHelper.addGroupFromExistingJoinFilters(joinSeqFilter, existingJoinFilters);
+
+                        var group = relVisHelper.composeGroupFromExistingJoinFilters(existingJoinFilters);
+                        joinSeqFilter.join_sequence.unshift(group);
 
                         button.joinSeqFilter = joinSeqFilter;
                         relVisHelper.buildCountQuery(button.redirectToDashboard, joinSeqFilter).then(function (query) {
@@ -375,7 +377,6 @@ define(function (require) {
 
 
                     /*
-
                     var existingJoin = _.cloneDeep(urlHelper.getJoinFilter());
                     if (existingJoin && existingJoin.meta && existingJoin.meta.negate === true) {
                       button.disabled = true;
@@ -389,7 +390,7 @@ define(function (require) {
                     }
 
                     if (existingJoin) {
-                      updateSourceJoin(button, existingJoin, currentDashboardSavedSearch).then(function (button) {
+                      updateSourceJoin(button, existingJoin, sourceDashboardSavedSearch).then(function (button) {
                         updateTargetDashboardJoin(button).then(function (query) {
                           fulfill({
                             query: query,
@@ -402,7 +403,7 @@ define(function (require) {
                         notify.error(err);
                       });
                     } else {
-                      buildSourceJoin(button, currentDashboardSavedSearch).then(function (button) {
+                      buildSourceJoin(button, sourceDashboardSavedSearch).then(function (button) {
                         updateTargetDashboardJoin(button).then(function (query) {
                           fulfill({
                             query: query,

@@ -98,45 +98,68 @@ define(function (require) {
 
 
     RelationVisHelper.prototype.buildNewJoinSeqFilter = function (button, currentDashboardSavedSearch) {
-      return new Promise(function (fulfill, reject) {
+      // Returns:
+      //
+      // join_sequence: {
+      //   meta:
+      //   join_sequence: []
+      // }
+      // where join_sequence conains 1 relation object between 2 dashboard elements
+      // [
+      //   {
+      //       relation: [
+      //        {
+      //          path: source.path
+      //          indices: [source]
+      //          queries: [{
+      //            query: {
+      //              filtered: {
+      //                query: {},
+      //                filter: {
+      //                  bool: {
+      //                    must: [],
+      //                    must_not: []
+      //                  }
+      //                }
+      //              }
+      //            }
+      //          }
+      //        ]
+      //   },
+      //   {
+      //     path: target.path
+      //     indices: [target]
+      //   }
+      //       ]
+      //    }
+      // ]
 
-        // at the end we need
-        // join_sequence: {
-        //   meta:
-        //   join_sequence: []
-        // }
-        // where seq conains 2 dashboard elements
-        // [
-        //   {
-        //     path: source.path
-        //     indices: [source]
-        //     queries: [{
-        //       query: {
-        //         filtered: {
-        //           query: {},
-        //           filter: {
-        //             bool: {
-        //               must: [],
-        //               must_not: []
-        //             }
-        //           }
-        //         }
-        //       }
-        //     }]
-        //   },
-        //   {
-        //     path: target.path
-        //     indices: [target]
-        //   }
-        // ]
+      return this._getRelation(button, currentDashboardSavedSearch).then(function (relation) {
 
         var label = 'First join_seq filter ever';
-
-        var joinSeqFilter = {
+        return {
           meta: {
             value: label
           },
-          join_sequence: [
+          join_sequence: [relation]
+        };
+
+      });
+    };
+
+    RelationVisHelper.prototype.addRelationToJoinSeqFilter = function (button, currentDashboardSavedSearch, joinSeqFilter) {
+      return this._getRelation(button, currentDashboardSavedSearch).then(function (relation) {
+        joinSeqFilter.join_sequence.push(relation);
+        return joinSeqFilter;
+      });
+
+    };
+
+
+    RelationVisHelper.prototype._getRelation = function (button, currentDashboardSavedSearch) {
+      return new Promise(function (fulfill, reject) {
+        var ret = {
+          relation: [
             {
               path: button.sourceField,
               indices: [button.sourceIndexPatternId],
@@ -164,77 +187,6 @@ define(function (require) {
           ]
         };
 
-        var sourceIndexPatternId = button.sourceIndexPatternId;
-        var sequenceElementIndex = 0;
-
-        // TODO: refactor
-        // below this line code is identical to code in updateQueriesOnLastElement method
-
-        var $queries_ref = joinSeqFilter.join_sequence[sequenceElementIndex].queries;
-
-        var sourceFilters = urlHelper.getCurrentDashboardFilters();
-
-        // add filters and query from saved search
-        var savedSearchMeta = getSavedSearchMeta(currentDashboardSavedSearch);
-        if (savedSearchMeta.query && !kibiStateHelper.isAnalyzedWildcardQueryString(savedSearchMeta.query)) {
-          $queries_ref.push(savedSearchMeta.query);
-        }
-        if (savedSearchMeta.filter && savedSearchMeta.filter.length > 0 ) {
-          sourceFilters = sourceFilters.concat(savedSearchMeta.filter);
-        }
-
-        // check all filters - remove meta and push to must or must not depends on negate flag
-        _.each(sourceFilters, function (f) {
-          if (f.meta && f.meta.negate === true) {
-            delete f.meta;
-            $queries_ref[0].query.filtered.filter.bool.must_not.push(f);
-          } else if (f.meta) {
-            delete f.meta;
-            $queries_ref[0].query.filtered.filter.bool.must.push(f);
-          }
-        });
-
-
-        // update the timeFilter
-        var sourceTimeFilter = timefilter.get(sourceIndexPatternId);
-        if (sourceTimeFilter) {
-          var sourceDashboardId = urlHelper.getCurrentDashboardId();
-          kibiTimeHelper.updateTimeFilterForDashboard(sourceDashboardId, sourceTimeFilter).then(function (updatedTimeFilter) {
-            // add time filter
-            $queries_ref[0].query.filtered.filter.bool.must.push(updatedTimeFilter);
-            fulfill(joinSeqFilter);
-          });
-        } else {
-          fulfill(joinSeqFilter);
-        }
-      });
-    };
-
-    RelationVisHelper.prototype.updateQueriesOnLastElement = function (button, currentDashboardSavedSearch, joinSeqFilter) {
-      return new Promise(function (fulfill, reject) {
-
-        var sequenceElementIndex = joinSeqFilter.join_sequence.length - 1;
-
-        // set a query
-        joinSeqFilter.join_sequence[sequenceElementIndex].queries = [
-          {
-            query: {
-              filtered: {
-                query: urlHelper.getCurrentDashboardQuery(),
-                // will be created below if needed
-                filter: {
-                  bool: {
-                    must: [],
-                    must_not: []
-                  }
-                }
-              }
-            }
-          }
-        ];
-
-        var $queries_ref = joinSeqFilter.join_sequence[sequenceElementIndex].queries;
-
         var sourceFilters = _.filter(urlHelper.getCurrentDashboardFilters(), function (f) {
           // all except join_sequence
           return !f.join_sequence;
@@ -243,21 +195,20 @@ define(function (require) {
         // add filters and query from saved search
         var savedSearchMeta = getSavedSearchMeta(currentDashboardSavedSearch);
         if (savedSearchMeta.query && !kibiStateHelper.isAnalyzedWildcardQueryString(savedSearchMeta.query)) {
-          $queries_ref.push(savedSearchMeta.query);
+          ret.relation[0].queries.push(savedSearchMeta.query);
         }
         if (savedSearchMeta.filter && savedSearchMeta.filter.length > 0 ) {
           sourceFilters = sourceFilters.concat(savedSearchMeta.filter);
         }
 
-
         // check all filters - remove meta and push to must or must not depends on negate flag
         _.each(sourceFilters, function (f) {
           if (f.meta && f.meta.negate === true) {
             delete f.meta;
-            $queries_ref[0].query.filtered.filter.bool.must_not.push(f);
+            ret.relation[0].queries[0].query.filtered.filter.bool.must_not.push(f);
           } else if (f.meta) {
             delete f.meta;
-            $queries_ref[0].query.filtered.filter.bool.must.push(f);
+            ret.relation[0].queries[0].query.filtered.filter.bool.must.push(f);
           }
         });
 
@@ -268,30 +219,24 @@ define(function (require) {
           var sourceDashboardId = urlHelper.getCurrentDashboardId();
           kibiTimeHelper.updateTimeFilterForDashboard(sourceDashboardId, sourceTimeFilter).then(function (updatedTimeFilter) {
             // add time filter
-            $queries_ref[0].query.filtered.filter.bool.must.push(updatedTimeFilter);
-            fulfill(joinSeqFilter);
+            ret.relation[0].queries[0].query.filtered.filter.bool.must.push(updatedTimeFilter);
+            fulfill(ret);
           });
         } else {
-          fulfill(joinSeqFilter);
+          fulfill(ret);
         }
       });
     };
 
 
-    RelationVisHelper.prototype.addTargetToTheSequence = function (button, joinSeqFilter) {
-      joinSeqFilter.join_sequence.push({
-        path: button.targetField,
-        indices: [button.targetIndexPatternId]
-      });
-    };
-
-    RelationVisHelper.prototype.addGroupFromExistingJoinFilters = function (joinSeqFilter, joinSeqFilters) {
-      var group = [];
+    RelationVisHelper.prototype.composeGroupFromExistingJoinFilters = function (joinSeqFilters) {
+      var g = {
+        group: []
+      };
       _.each(joinSeqFilters, function (f) {
-        group.push(f.join_sequence);
+        g.group.push(f.join_sequence);
       });
-
-      joinSeqFilter.join_sequence.unshift(group);
+      return g;
     };
 
 

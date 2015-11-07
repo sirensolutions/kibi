@@ -86,7 +86,7 @@ define(function (require) {
       });
 
 
-      describe('addGroupFromExistingJoinFilters', function () {
+      describe('composeGroupFromExistingJoinFilters', function () {
 
         it('should create a group and add it', function () {
           var existingFilters = [
@@ -98,25 +98,15 @@ define(function (require) {
             }
           ];
 
-          var joinSequenceFilter = {
-            meta: {},
-            join_sequence: [{indices: ['index5']}, {indices: ['index6']}]
-          };
-
           var expected = {
-            meta: {},
-            join_sequence: [
-              [
-                [{indices: ['index1']}, {indices: ['index2']}],
-                [{indices: ['index3']}, {indices: ['index4']}]
-              ],
-              {indices: ['index5']}, {indices: ['index6']}
+            group: [
+              [{indices: ['index1']}, {indices: ['index2']}],
+              [{indices: ['index3']}, {indices: ['index4']}]
             ]
           };
 
-          relationalButtonsVisHelper.addGroupFromExistingJoinFilters(joinSequenceFilter, existingFilters);
-
-          expect(joinSequenceFilter).to.eql(expected);
+          var actual = relationalButtonsVisHelper.composeGroupFromExistingJoinFilters(existingFilters);
+          expect(actual).to.eql(expected);
 
         });
 

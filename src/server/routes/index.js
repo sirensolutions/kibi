@@ -19,16 +19,13 @@ router.get('/config', function (req, res, next) {
 
   var warnings = [];
   if (config.kibana.datasource_encryption_key === 'iSxvZRYisyUW33FreTBSyJJ34KpEquWznUPDvn+ka14=') {
-    warnings.push(
-      'Default key used for encryption! ' +
-      'Please change datasource_encryption_key in kibi.yml ' +
-      'and restart kibi');
+    data.datasource_encryption_warning = true;
   }
   // added by kibi end
 
   res.json({
     configFile: data,
-    warnings: warnings  // as this is the first thing we gat from the server kibi will use it to pass some warnings
+    warnings: warnings
   });
 
 });

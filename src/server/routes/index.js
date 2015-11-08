@@ -18,7 +18,7 @@ router.get('/config', function (req, res, next) {
   data.elasticsearch_plugins = config.elasticsearch_plugins;
 
   var warnings = [];
-  if (config.kibana.datasource_encryption_key === '3zTvzr3p67VC61jmV54rIYu1545x4TlY') {
+  if (config.kibana.datasource_encryption_key === 'iSxvZRYisyUW33FreTBSyJJ34KpEquWznUPDvn+ka14=') {
     warnings.push(
       'Default key used for encryption! ' +
       'Please change datasource_encryption_key in kibi.yml ' +

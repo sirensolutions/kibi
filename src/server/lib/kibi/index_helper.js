@@ -32,11 +32,9 @@ IndexHelper.prototype.rencryptAllValuesInKibiIndex = function (oldkey, algorithm
   if (!path) {
     return Promise.reject(new Error('path not defined'));
   }
-
-  if (cryptoHelper.supportedAlghorithms.indexOf(algorithm) === -1) {
-    return Promise.reject(new Error('not supported algorithm. Use one of: ' + cryptoHelper.supportedAlghorithms));
+  if (!cryptoHelper.supportsAlgorithm(algorithm)) {
+    return Promise.reject(new Error('Unsupported algorithm. Use one of: ' + cryptoHelper.supportedAlgorithms));
   }
-
 
   var self = this;
   var report = [];
@@ -70,9 +68,8 @@ IndexHelper.prototype.rencryptAllValuesInKibiIndex = function (oldkey, algorithm
               report.push('param: ' + name + ' value: ' + params[name]);
               // first check that the value match the encrypted pattern
               var parts = params[name].split(':');
-              if (parts.length === 2) {
-                // check that the first part match the cipher list
-                if (cryptoHelper.supportedAlghorithms.indexOf(parts[0]) !== -1) {
+              if (parts.length >= 4) {
+                if (cryptoHelper.supportsAlgorithm(parts[0])) {
                   var plaintext = cryptoHelper.decrypt(oldkey, params[name]);
                   report.push('decrypted value');
                   params[name] = cryptoHelper.encrypt(algorithm, key, plaintext);

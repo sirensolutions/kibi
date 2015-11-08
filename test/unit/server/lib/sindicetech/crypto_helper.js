@@ -129,7 +129,7 @@ describe('Crypto Helper', function () {
 
   describe('.decrypt', function () {
 
-    it('should return null when request to decrypt empty values', function () {
+    it('should return null when requested to decrypt empty values', function () {
       expect(cryptoHelper.decrypt(default_key, undefined)).to.be.null;
       expect(cryptoHelper.decrypt(default_key, null)).to.be.null;
       expect(cryptoHelper.decrypt(default_key, '')).to.be.null;

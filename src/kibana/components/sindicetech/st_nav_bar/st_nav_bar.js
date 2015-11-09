@@ -14,6 +14,7 @@ define(function (require) {
     var urlHelper            = Private(require('components/kibi/url_helper/url_helper'));
     var kibiStateHelper      = Private(require('components/kibi/kibi_state_helper/kibi_state_helper'));
     var dashboardGroupHelper = Private(require('components/kibi/dashboard_group_helper/dashboard_group_helper'));
+    var indexPath            = Private(require('plugins/kibi/commons/_index_path'));
 
     var notify = new Notifier({
       name: 'st_nav_bar component'
@@ -24,10 +25,13 @@ define(function (require) {
       // Note: does not require dashboardApp as the st-nav-bar is placed outside of dashboardApp
       template: require('text!components/sindicetech/st_nav_bar/st_nav_bar.html'),
       link: function ($scope, $el) {
-
         // debounce count queries
         var lastEventTimer;
         var _updateAllCounts = function (groupIndexesToUpdate, reason) {
+          if ($el.css('display') === 'none') {
+            return;
+          }
+
           $timeout.cancel(lastEventTimer);
           if (!groupIndexesToUpdate) {
             // there are no indexes so it means we have to update all counts
@@ -65,7 +69,7 @@ define(function (require) {
 
             _.each(results, function (result, index) {
               if (result.query && result.indexPatternId) {
-                query += '{"index" : "' + result.indexPatternId + '"}\n';
+                query += '{"index" : "' + indexPath(result.indexPatternId) + '"}\n';
                 query += JSON.stringify(result.query) + '\n';
                 indexesToUpdate.push(index);
               }
@@ -82,7 +86,12 @@ define(function (require) {
                 } else {
                   _.each(response.data.responses, function (hit, i) {
                     // get the coresponding groupIndex from results
-                    $scope.dashboardGroups[results[indexesToUpdate[i]].groupIndex].count = hit.hits.total;
+                    var tab = $scope.dashboardGroups[results[indexesToUpdate[i]].groupIndex];
+                    try {
+                      tab.count = hit.hits.total;
+                    } catch (e) {
+                      notify.warning('An error occurred while getting counts for tab ' + tab.title + ': ' + e);
+                    }
                   });
                 }
               });

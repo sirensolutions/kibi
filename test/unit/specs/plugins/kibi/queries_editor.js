@@ -6,14 +6,18 @@ define(function (require) {
     var Promise = require('bluebird');
     var globalState;
 
-    function init(query, snippet, snippetError, hits) {
+    function init(options) {
       module('apps/settings');
+
+      module('kibana', function ($provide) {
+        $provide.service('savedDatasources', require('fixtures/fake_saved_datasources'));
+      });
 
       module('app/visualize', function ($provide) {
         $provide.service('savedVisualizations', function () {
           return {
             find: function () {
-              return Promise.resolve({ hits: hits });
+              return Promise.resolve({ hits: options.hits });
             }
           };
         });
@@ -28,8 +32,8 @@ define(function (require) {
             getQueriesHtmlFromServer: function () {
               var resp = {
                 data: {
-                  snippets: snippet ? [ snippet ] : [],
-                  error: snippetError
+                  snippets: options.snippet ? [ options.snippet ] : [],
+                  error: options.snippetError
                 }
               };
               return Promise.resolve(resp);
@@ -44,10 +48,11 @@ define(function (require) {
             locals: {}
           }
         };
-        fakeRoute.current.locals.query = query;
+        fakeRoute.current.locals.query = options.query;
 
         globalState = _globalState_;
         $scope = $rootScope;
+        $scope.datasourceType = options.datasourceType;
         $controller('QueriesEditor', {
           $scope: $scope,
           $route: fakeRoute,
@@ -62,7 +67,7 @@ define(function (require) {
         var query = {
           title: 'ahah'
         };
-        init(query);
+        init({ query: query });
         expect(query._previewTemplateId).to.be('kibi-table-jade');
       });
 
@@ -72,7 +77,7 @@ define(function (require) {
           _previewTemplateId: 'mytmpl',
           st_activationQuery: '@doc[id]@'
         };
-        init(query);
+        init({ query: query });
         expect(query._previewTemplateId).to.be('mytmpl');
         expect($scope.holder.entityURIEnabled).to.be(true);
       });
@@ -83,7 +88,7 @@ define(function (require) {
           _previewTemplateId: 'mytmpl',
           st_activationQuery: 'select * { ?s :name ?o }'
         };
-        init(query);
+        init({ query: query });
         expect(query._previewTemplateId).to.be('mytmpl');
         expect($scope.holder.entityURIEnabled).to.be(false);
         expect($scope.starDetectedInAQuery).to.be(true);
@@ -99,7 +104,7 @@ define(function (require) {
           html: 'are you there'
         };
 
-        init(query, snippet);
+        init({ query: query, snippet: snippet });
 
         expect($scope.holder.htmlPreview).not.to.be.ok();
         expect($scope.holder.jsonPreview).not.to.be.ok();
@@ -116,7 +121,7 @@ define(function (require) {
           save: sinon.stub().returns(Promise.resolve('queryid'))
         };
 
-        init(query, null, 'error with the query');
+        init({ query: query, snippetError:'error with the query' });
 
         expect($scope.holder.htmlPreview).not.to.be.ok();
         expect($scope.holder.jsonPreview).not.to.be.ok();
@@ -151,7 +156,7 @@ define(function (require) {
 
         sinon.stub(window, 'confirm').returns(true);
 
-        init(query, snippet, null, hits);
+        init({ query: query, snippet: snippet, hits: hits });
 
         $scope.delete().then(function () {
           expect(query.delete.callCount).to.be(1);
@@ -183,7 +188,7 @@ define(function (require) {
 
         sinon.stub(window, 'confirm').returns(true);
 
-        init(query, snippet, null, hits);
+        init({ query: query, snippet: snippet, hits: hits });
 
         $scope.delete().then(function () {
           expect(query.delete.callCount).to.be(1);
@@ -214,7 +219,7 @@ define(function (require) {
         };
         var stub = sinon.stub(window, 'alert', function () { return false; });
 
-        init(query, snippet, null, hits);
+        init({ query: query, snippet: snippet, hits: hits });
 
         $scope.delete().then(function () {
           expect(stub.callCount).to.be(1);
@@ -227,10 +232,36 @@ define(function (require) {
         var query = {
           id: '123'
         };
-        init(query);
+        init({ query: query });
 
         globalState.se = [ 'grishka' ];
         $scope.$emit('kibi:selectedEntities:changed', '');
+      });
+
+      it('should update the REST datasource', function () {
+        var query = {};
+        init({ query: query, datasourceType: '123' });
+
+        var stub = sinon.spy($scope, 'preview');
+        expect($scope.datasourceType).to.be('123');
+        query.st_datasourceId = 'ds3';
+        $scope.$digest();
+        expect($scope.datasourceType).to.be('rest');
+        expect(query._previewTemplateId).to.be('kibi-json-jade');
+        expect(stub.called).to.be(true);
+      });
+
+      it('should update the datasource type along with the datasource ID', function () {
+        var query = {};
+        init({ query: query, datasourceType: '123' });
+
+        var stub = sinon.spy($scope, 'preview');
+        expect($scope.datasourceType).to.be('123');
+        query.st_datasourceId = 'ds1';
+        $scope.$digest();
+        expect($scope.datasourceType).to.be('sparql_http');
+        expect(query._previewTemplateId).to.be('kibi-table-jade');
+        expect(stub.called).to.be(true);
       });
     });
   });

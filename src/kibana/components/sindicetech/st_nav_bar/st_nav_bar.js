@@ -28,6 +28,10 @@ define(function (require) {
         // debounce count queries
         var lastEventTimer;
         var _updateAllCounts = function (groupIndexesToUpdate, reason) {
+          if ($el.css('display') === 'none') {
+            return;
+          }
+
           $timeout.cancel(lastEventTimer);
           if (!groupIndexesToUpdate) {
             // there are no indexes so it means we have to update all counts

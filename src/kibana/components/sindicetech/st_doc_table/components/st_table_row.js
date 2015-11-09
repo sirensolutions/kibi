@@ -33,7 +33,6 @@ define(function (require) {
     var cellTemplate = _.template(noWhiteSpace(require('text!components/sindicetech/st_doc_table/components/st_table_row/st_cell.html')));
     var truncateByHeightTemplate = _.template(noWhiteSpace(require('text!partials/truncate_by_height.html')));
 
-    var fieldFormats = Private(require('registry/field_formats'));
     var _isInSelectedEntities = Private(require('components/sindicetech/st_doc_table/components/_is_this_entity_in_selected_entities'));
 
     var notify = new Notifier({

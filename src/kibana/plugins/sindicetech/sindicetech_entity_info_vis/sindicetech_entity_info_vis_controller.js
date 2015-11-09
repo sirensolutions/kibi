@@ -9,8 +9,6 @@ define(function (require) {
     'SindicetechEntityInfoVisController',
     function ($rootScope, $scope, $window, $location, globalState, savedSearches, Private, queryEngineClient, Notifier) {
 
-      var _shouldEntityURIBeEnabled = Private(require('plugins/kibi/commons/_should_entity_uri_be_enabled'));
-
       var notify = new Notifier({
         location: 'Templated Query Viewer'
       });

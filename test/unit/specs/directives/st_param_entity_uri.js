@@ -44,12 +44,16 @@ define(function (require) {
       $provide.service('savedDashboards', function () {});
     });
 
-    module('kibana/index_patterns', function ($provide) {
-      $provide.service('indexPatterns', function (Promise, Private) {
-        var indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+
+    module('kibana/courier', function ($provide) {
+      $provide.service('courier', function (Promise) {
         return {
-          get: function (id) {
-            return Promise.resolve(indexPattern);
+          indexPatterns: {
+            getIds: function () {
+              return Promise.resolve(_.map(mappings, function (m) {
+                return m.pattern;
+              }));
+            }
           }
         };
       });
@@ -62,6 +66,7 @@ define(function (require) {
 
       Notifier = $injector.get('Notifier');
       sinon.stub(Notifier.prototype, 'warning');
+      sinon.stub(Notifier.prototype, 'error');
       $httpBackend = $injector.get('$httpBackend');
 
       _.each(mappings, function (m) {
@@ -82,10 +87,57 @@ define(function (require) {
             return val;
           })
         );
+
+
         // data for getTypes of st_select_helper
         $httpBackend.whenGET('elasticsearch/' + parts[0] + '/_mappings').respond(200, mappingsObject);
         // data for getDocumentIds of st_select_helper
         $httpBackend.whenGET('elasticsearch/' + parts[0] + '/' + parts[1] + '/_search?size=10').respond(200, ids);
+
+        // responses to wildcard id queries
+        if (parts[0] === 'm*') {
+          // more than one result
+          $httpBackend.whenGET('elasticsearch/' + parts[0] + '/' + parts[1] + '/_search?q=_id:' + parts[2]).respond(200, {
+            hits: {
+              total: 2,
+              hits: [
+                {
+                  _index: mappings[0].index,
+                  _type: mappings[0].type,
+                  _id: parts[2]
+                },
+                {
+                  _index: mappings[0].index,
+                  _type: mappings[0].type,
+                  _id: parts[2]
+                }
+              ]
+            }
+          });
+        } else if (parts[0] === 'n*') {
+          $httpBackend.whenGET('elasticsearch/' + parts[0] + '/' + parts[1] + '/_search?q=_id:' + parts[2]).respond(200, {
+            hits: {
+              total: 0,
+              hits: []
+            }
+          });
+        } else if (parts[0] === 'e*') {
+          $httpBackend.whenGET('elasticsearch/' + parts[0] + '/' + parts[1] + '/_search?q=_id:' + parts[2]).respond(500);
+        } else {
+          // one result
+          $httpBackend.whenGET('elasticsearch/' + parts[0] + '/' + parts[1] + '/_search?q=_id:' + parts[2]).respond(200, {
+            hits: {
+              total: 1,
+              hits: [
+                {
+                  _index: mappings[0].index,
+                  _type: mappings[0].type,
+                  _id: parts[2]
+                }
+              ]
+            }
+          });
+        }
       }
 
       $rootScope = _$rootScope_;
@@ -111,6 +163,7 @@ define(function (require) {
         };
         var mappings = [
           {
+            pattern: 'a',
             index: 'a',
             type: 'b'
           }
@@ -121,25 +174,26 @@ define(function (require) {
 
         expect(Notifier.prototype.warning.called).to.be(false);
         expect($scope.c).to.be.ok();
+        expect($scope.c.indexPattern).to.be('a');
         expect($scope.c.index).to.be('a');
         expect($scope.c.type).to.be('b');
         expect($scope.c.id).to.be('c');
         expect($scope.c.column).to.be('area');
       });
 
-      it('should select the index for the specified type', function () {
+      it('should handle a wildcard index pattern', function () {
         var holder = {
-          entityURI: 'a*/b2/c/area'
+          entityURI: 'a*/b1/c/area'
         };
         var mappings = [
           {
             pattern: 'a*',
-            index: 'a1',
+            index: 'a-1',
             type: 'b1'
           },
           {
             pattern: 'a*',
-            index: 'a2',
+            index: 'a-2',
             type: 'b2'
           }
         ];
@@ -149,26 +203,115 @@ define(function (require) {
 
         expect(Notifier.prototype.warning.called).to.be(false);
         expect($scope.c).to.be.ok();
-        expect($scope.c.index).to.be('a2');
-        expect($scope.c.type).to.be('b2');
+        expect($scope.c.indexPattern).to.be('a*');
+        expect($scope.c.index).to.be('a-1');
+        expect($scope.c.type).to.be('b1');
         expect($scope.c.id).to.be('c');
         expect($scope.c.column).to.be('area');
       });
 
-      it('should return an error if index pattern is ambiguous', function () {
+      it('should unset the type and set the index when the index pattern is changed', function () {
         var holder = {
-          entityURI: 'a*/b2/c/area'
+          entityURI: 'a*/b1/c/area'
         };
         var mappings = [
           {
             pattern: 'a*',
-            index: 'a1',
+            index: 'a-1',
             type: 'b1'
           },
           {
             pattern: 'a*',
-            index: 'a2',
+            index: 'a-2',
+            type: 'b2'
+          }
+        ];
+
+        init(holder, mappings);
+
+        $scope.c.indexPattern = 'a-1';
+        $scope.$digest();
+
+        $httpBackend.flush();
+
+        expect($scope.c.index).to.be('a-1');
+        expect($scope.c.type).to.be.null;
+      });
+
+      it('should unset id related parameter and column when index pattern is changed', function () {
+        var holder = {
+          entityURI: 'a*/b1/c/area'
+        };
+        var mappings = [
+          {
+            pattern: 'a*',
+            index: 'a-1',
             type: 'b1'
+          },
+          {
+            pattern: 'a*',
+            index: 'a-2',
+            type: 'b2'
+          }
+        ];
+
+        init(holder, mappings);
+
+        $scope.c.indexPattern = 'a-1';
+        $scope.$digest();
+
+        $httpBackend.flush();
+
+        expect($scope.c.index).to.be('a-1');
+        expect($scope.c.type).to.be.empty;
+        expect($scope.c.id).to.be.empty;
+        expect($scope.c.extraIdItems.length).to.be(0);
+      });
+
+      it('should unset id related parameter and column when type is changed', function () {
+        var holder = {
+          entityURI: 'a-1/b1/c/area'
+        };
+        var mappings = [
+          {
+            pattern: 'a*',
+            index: 'a-1',
+            type: 'b1'
+          },
+          {
+            pattern: 'a*',
+            index: 'a-2',
+            type: 'b2'
+          }
+        ];
+
+        init(holder, mappings);
+
+        $scope.c.type = '';
+        $scope.$digest();
+
+        $httpBackend.flush();
+
+        expect($scope.c.indexPattern).to.be('a-1');
+        expect($scope.c.type).to.be.empty;
+        expect($scope.c.id).to.be.empty;
+        expect($scope.c.extraIdItems.length).to.be(0);
+      });
+
+      it('should handle a wildcard query returning more than one hit for the sample selection', function () {
+        var holder = {
+          entityURI: 'm*/t/c/area'
+        };
+        var mappings = [
+          {
+            pattern: 'm*',
+            index: 'm-1',
+            type: 't'
+          },
+          {
+            pattern: 'm*',
+            index: 'm-2',
+            type: 't'
           }
         ];
 
@@ -176,7 +319,72 @@ define(function (require) {
         $httpBackend.flush();
 
         expect(Notifier.prototype.warning.called).to.be(true);
+        expect($scope.c).to.be.ok();
+        expect($scope.c.indexPattern).to.be('m*');
+        expect($scope.c.index).to.be('m-1');
+        expect($scope.c.type).to.be('t');
+        expect($scope.c.id).to.be('c');
+        expect($scope.c.column).to.be('area');
       });
+
+      it('should handle a wildcard query returning no hits for the sample selection', function () {
+        var holder = {
+          entityURI: 'n*/t/c/area'
+        };
+        var mappings = [
+          {
+            pattern: 'n*',
+            index: 'n-1',
+            type: 't'
+          },
+          {
+            pattern: 'n*',
+            index: 'n-2',
+            type: 't'
+          }
+        ];
+
+        init(holder, mappings);
+        $httpBackend.flush();
+
+        expect(Notifier.prototype.warning.called).to.be(true);
+        expect($scope.c).to.be.ok();
+        expect($scope.c.indexPattern).to.be.empty;
+        expect($scope.c.index).to.be.empty;
+        expect($scope.c.type).to.be.empty;
+        expect($scope.c.id).to.be.empty;
+        expect($scope.c.column).to.be.empty;
+      });
+
+      it('should handle an ES error', function () {
+        var holder = {
+          entityURI: 'e*/t/c/area'
+        };
+        var mappings = [
+          {
+            pattern: 'e*',
+            index: 'e-1',
+            type: 't'
+          },
+          {
+            pattern: 'e*',
+            index: 'e-2',
+            type: 't'
+          }
+        ];
+
+        init(holder, mappings);
+        $httpBackend.flush();
+
+        expect(Notifier.prototype.error.called).to.be(true);
+        expect($scope.c).to.be.ok();
+        expect($scope.c.indexPattern).to.be.empty;
+        expect($scope.c.index).to.be.empty;
+        expect($scope.c.type).to.be.empty;
+        expect($scope.c.id).to.be.empty;
+        expect($scope.c.column).to.be.empty;
+      });
+
     });
   });
 });

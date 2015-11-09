@@ -6,12 +6,14 @@ define(function (require) {
 
   module.controller(
     'KibiRelationalButtonsVisController',
-    function ($scope, $rootScope, Private, $http, Notifier, Promise, timefilter,
+    function ($scope, $rootScope, Private, $http, $location, Notifier, Promise, timefilter,
               indexPatterns, savedDashboards, savedSearches) {
 
       $scope.holder = {
         activeFetch: false
       };
+
+      $scope.configMode = /\/visualize\/(create|edit)\/.*/.test($location.path());
 
       var notify = new Notifier({
         location: 'Relational Widget'
@@ -286,7 +288,11 @@ define(function (require) {
 
       // Update the counts on each button of the related filter
       var _updateCounts = function () {
-        $scope.holder.activeFetch = true;
+
+        if ($scope.configMode) {
+          return;
+        }
+
         var countQueries = [];
         _.each($scope.buttons, function (button) {
 
@@ -345,6 +351,7 @@ define(function (require) {
           );
         });
 
+        $scope.holder.activeFetch = countQueries.length > 0;
 
         Promise.all(countQueries).then(function (results) {
           var query = '';

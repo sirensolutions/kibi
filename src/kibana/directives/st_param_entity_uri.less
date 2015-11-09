@@ -1,5 +1,26 @@
 @import (reference) "../styles/_st_variables.less";
 
+.document-selection-widget {
+  clear: both;
+  margin-bottom: 30px;
+  background-color: #FAFAFA;
+  border: 1px solid #F0F0F0;
+  padding: 5px;
+
+  form {
+    overflow: hidden;
+
+    .selectEntityUriParts {
+      width: 100% / 3;
+      float: left;
+    }
+  }
+}
+
+.visualize-chart .document-selection-widget {
+  margin: 8px 8px 16px;
+}
+
 .small-note {
   color: @st-dark-gray;
   .pull-right{
@@ -7,7 +28,3 @@
   }
 }
 
-div.selectEntityUriParts {
-  width: 25%;
-  float: left;
-}

@@ -166,31 +166,6 @@ define(function (require) {
       };
 
 
-      var getFilterExplenations = function (filters) {
-        var promises = [];
-        _.each(filters, function (f) {
-          if (f.join_sequence) {
-            promises.push(explainJoinSequence(f.join_sequence));
-          } else {
-            // Note: in future
-            // compute the explanation for the other type of join filter like join_set here as well
-            // it would be f.join.filters
-
-            // for now push an empty explanation so array lenght is correct
-            promises.push(Promise.resolve(''));
-          }
-        });
-
-        return Promise.all(promises).then(function (results) {
-          var filterExplanations = [];
-          _.each(results, function (explanation) {
-            filterExplanations.push(explanation);
-          });
-          return filterExplanations;
-        });
-      };
-
-
       var explainRelation = function (relation) {
         var promises = [];
         if (relation[0].queries instanceof Array && relation[0].queries.length > 0) {
@@ -223,6 +198,7 @@ define(function (require) {
         });
       };
 
+
       var explainGroup = function (group) {
         var promises = [];
         _.each(group, function (sequence) {
@@ -240,6 +216,7 @@ define(function (require) {
         });
       };
 
+
       var explainJoinSequence = function (join_sequence) {
         var promises = [];
         _.each(join_sequence, function (el) {
@@ -256,6 +233,31 @@ define(function (require) {
             html += '<tr><td>' + element + '</td></tr>';
           });
           return html + '</table>';
+        });
+      };
+
+
+      var getFilterExplenations = function (filters) {
+        var promises = [];
+        _.each(filters, function (f) {
+          if (f.join_sequence) {
+            promises.push(explainJoinSequence(f.join_sequence));
+          } else {
+            // Note: in future
+            // compute the explanation for the other type of join filter like join_set here as well
+            // it would be f.join.filters
+
+            // for now push an empty explanation so array lenght is correct
+            promises.push(Promise.resolve(''));
+          }
+        });
+
+        return Promise.all(promises).then(function (results) {
+          var filterExplanations = [];
+          _.each(results, function (explanation) {
+            filterExplanations.push(explanation);
+          });
+          return filterExplanations;
         });
       };
 

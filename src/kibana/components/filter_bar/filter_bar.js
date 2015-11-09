@@ -103,6 +103,7 @@ define(function (require) {
 
         function updateFilters() {
           var filters = queryFilter.getFilters();
+
           mapAndFlattenFilters(filters)
           .then(function (results) {
             // used to display the current filters in the state
@@ -110,7 +111,12 @@ define(function (require) {
               return !filter.meta.pinned;
             });
           })
-          .then(joinExplain.setIndexesFromJoinFilter(filters))
+          .then(function () {
+            return joinExplain.getFilterExplenations(filters);
+          })
+          .then(function (explanations) {
+            return joinExplain.initQtip(explanations);
+          })
           // added by kibi to mark filters which depends on selected entities
           .then(_mark_filters_by_selected_entities(filters))
           .then(function () {

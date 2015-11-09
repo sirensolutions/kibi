@@ -127,8 +127,10 @@ define(function (require) {
 
             if (savedDatasource.datasourceType === 'rest') {
               $scope.query._previewTemplateId = 'kibi-json-jade';
-              $scope.preview();
+            } else {
+              $scope.query._previewTemplateId = 'kibi-table-jade';
             }
+            $scope.preview();
 
           });
         }

@@ -2,7 +2,7 @@ define(function (require) {
   var _ = require('lodash');
   var getSavedSearchMeta =  require('components/kibi/count_helper/lib/get_saved_search_meta');
 
-  return function RelationVisHelperFactory(Private, savedDashboards, savedSearches, timefilter, Promise) {
+  return function RelationVisHelperFactory(Private, savedDashboards, savedSearches, indexPatterns, timefilter, Promise) {
 
     var kibiTimeHelper   = Private(require('components/kibi/kibi_time_helper/kibi_time_helper'));
     var kibiStateHelper  = Private(require('components/kibi/kibi_state_helper/kibi_state_helper'));
@@ -214,17 +214,20 @@ define(function (require) {
 
 
         // update the timeFilter
-        var sourceTimeFilter = timefilter.get(button.sourceIndexPatternId);
-        if (sourceTimeFilter) {
-          var sourceDashboardId = urlHelper.getCurrentDashboardId();
-          kibiTimeHelper.updateTimeFilterForDashboard(sourceDashboardId, sourceTimeFilter).then(function (updatedTimeFilter) {
-            // add time filter
-            ret.relation[0].queries[0].query.filtered.filter.bool.must.push(updatedTimeFilter);
+        indexPatterns.get(button.sourceIndexPatternId).then(function (indexPattern) {
+          var sourceTimeFilter = timefilter.get(indexPattern);
+          if (sourceTimeFilter) {
+            var sourceDashboardId = urlHelper.getCurrentDashboardId();
+            kibiTimeHelper.updateTimeFilterForDashboard(sourceDashboardId, sourceTimeFilter).then(function (updatedTimeFilter) {
+              // add time filter
+              ret.relation[0].queries[0].query.filtered.filter.bool.must.push(updatedTimeFilter);
+              fulfill(ret);
+            });
+          } else {
             fulfill(ret);
-          });
-        } else {
-          fulfill(ret);
-        }
+          }
+        });
+
       });
     };
 

@@ -149,6 +149,8 @@ define(function (require) {
           }
         ];
 
+        sinon.stub(urlHelper, 'isItDashboardUrl').returns(true);
+
         initStubs(dashboardGroups, {});
         var response = $httpBackend.whenPOST('elasticsearch/_msearch?getCountsOnTabs');
         response.respond(200, countOnTabsResponse);
@@ -256,6 +258,8 @@ define(function (require) {
             query: true
           }
         ];
+
+        sinon.stub(urlHelper, 'isItDashboardUrl').returns(true);
 
         initStubs(dashboardGroups, {});
         var response = $httpBackend.whenPOST('elasticsearch/_msearch?getCountsOnTabs');

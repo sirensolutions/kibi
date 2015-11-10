@@ -85,15 +85,14 @@ define(function (require) {
 
         $scope.bulkDelete = function () {
 
-          var self = this;
-          var _delete = function () {
+          var _delete = _.createCallback(function () {
             $scope.currentTab.service.delete(_.pluck($scope.selectedItems, 'id'))
-            .then(self.cache.flush)
-            .then(self.refreshData)
+            .then(cache.flush)
+            .then(refreshData)
             .then(function () {
               $scope.selectedItems.length = 0;
             });
-          };
+          }, this);
 
           deleteHelper.deleteByType($scope.currentTab.service.type, _.pluck($scope.selectedItems, 'id'), _delete);
         };

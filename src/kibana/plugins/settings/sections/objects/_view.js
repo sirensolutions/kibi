@@ -161,8 +161,7 @@ define(function (require) {
          */
         $scope.delete = function () {
 
-          var self = this;
-          var _delete = function () {
+          var _delete = _.createCallback(function () {
             es.delete({
               index: config.file.kibana_index,
               type: service.type,
@@ -170,10 +169,10 @@ define(function (require) {
             })
             .then(function (resp) {
               $rootScope.$emit('kibi:' + service.type + ':changed', resp);
-              return self.redirectHandler('deleted');
+              return redirectHandler('deleted');
             })
             .catch(notify.fatal);
-          };
+          }, this);
 
           deleteHelper.deleteByType(service.type, [$routeParams.id], _delete);
         };

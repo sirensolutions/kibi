@@ -97,43 +97,40 @@ define(function (require) {
     };
 
 
+    // Returns:
+    //
+    // join_sequence: {
+    //   meta:
+    //   join_sequence: []
+    // }
+    // where join_sequence conains 1 relation object between 2 dashboard elements
+    // [
+    //   {
+    //     relation: [
+    //      {
+    //        path: source.path
+    //        indices: [source]
+    //        queries: [{
+    //          query: {
+    //            filtered: {
+    //              query: {},
+    //              filter: {
+    //                bool: {
+    //                  must: [],
+    //                  must_not: []
+    //                }
+    //              }
+    //            }
+    //          }
+    //        }
+    //      ]
+    //   },
+    //   {
+    //     path: target.path
+    //     indices: [target]
+    //   }
+    // ]
     RelationVisHelper.prototype.buildNewJoinSeqFilter = function (button, currentDashboardSavedSearch) {
-      // Returns:
-      //
-      // join_sequence: {
-      //   meta:
-      //   join_sequence: []
-      // }
-      // where join_sequence conains 1 relation object between 2 dashboard elements
-      // [
-      //   {
-      //       relation: [
-      //        {
-      //          path: source.path
-      //          indices: [source]
-      //          queries: [{
-      //            query: {
-      //              filtered: {
-      //                query: {},
-      //                filter: {
-      //                  bool: {
-      //                    must: [],
-      //                    must_not: []
-      //                  }
-      //                }
-      //              }
-      //            }
-      //          }
-      //        ]
-      //   },
-      //   {
-      //     path: target.path
-      //     indices: [target]
-      //   }
-      //       ]
-      //    }
-      // ]
-
       return this._getRelation(button, currentDashboardSavedSearch).then(function (relation) {
 
         var label = 'First join_seq filter ever';

@@ -119,15 +119,8 @@ define(function (require) {
       };
 
 
-      var explainNOTFilter = function (filter, indexId) {
-        if (filter.range || filter.not) {
-          // fields might be needed
-          return indexPatterns.get(indexId).then(function (index) {
-            return 'NOT ' + createFilterLabel(filter, index.fields);
-          });
-        } else {
-          return 'NOT ' + createFilterLabel(filter);
-        }
+      var explainFilterInMustNot = function (filter, indexId) {
+        return 'NOT ' + explainFilter(filter, indexId);
       };
 
 
@@ -150,7 +143,7 @@ define(function (require) {
             }
             if (must_not instanceof Array && must_not.length > 0) {
               _.each(must_not, function (filter) {
-                promises.push(explainNOTFilter(filter, indexId));
+                promises.push(explainFilterInMustNot(filter, indexId));
               });
             }
           }

@@ -31,6 +31,8 @@ var _ = require('lodash');
  * - orderBy: the filterjoin ordering option
  * - maxTermsPerShard: the maximum number of terms to consider in the filterjoin
  * - queries: and array of queries that are applied on the set of indices
+ *
+ * An element can be negated by setting the field "negate" to true.
  */
 exports.sequence = function (json) {
   var label = 'join_sequence';
@@ -169,21 +171,30 @@ function _verifySequence(sequence) {
  * Create the filterjoin from the sequence of relations
  */
 function _sequenceJoins(query, sequence) {
-  var ind = sequence.length - 1;
   var curQuery = query;
 
-  for (var i = ind; i > 0; i--) {
+  for (var i = sequence.length - 1; i > 0; i--) {
     var join = sequence[i].relation;
-    curQuery = _addFilterJoin(curQuery, join[1].path, join[0].path, join[0]);
+    curQuery = _addFilterJoin(curQuery, join[1].path, join[0].path, join[0], sequence[i].negate);
     _addFilters(curQuery, join[0].queries);
   }
   if (sequence[0].group) {
+    var array;
+
+    if (sequence[0].negate) {
+      if (!curQuery.filter.bool.must_not) {
+        curQuery.filter.bool.must_not = [];
+      }
+      array = curQuery.filter.bool.must_not;
+    } else {
+      array = curQuery.filter.bool.must;
+    }
     _.each(sequence[0].group, function (seq) {
-      _sequenceJoins(curQuery.filter.bool.must, seq);
+      _sequenceJoins(array, seq);
     });
   } else {
     var lastJoin = sequence[0].relation;
-    curQuery = _addFilterJoin(curQuery, lastJoin[1].path, lastJoin[0].path, lastJoin[0]);
+    curQuery = _addFilterJoin(curQuery, lastJoin[1].path, lastJoin[0].path, lastJoin[0], sequence[0].negate);
     _addFilters(curQuery, lastJoin[0].queries);
   }
 }
@@ -249,7 +260,7 @@ function _process(query, focus, relations, filters, indexes, visitedIndices) {
 /**
  * Adds a filterjoin filter to the given query, from the source index to the target index
  */
-function _addFilterJoin(query, sourcePath, targetPath, targetIndex) {
+function _addFilterJoin(query, sourcePath, targetPath, targetIndex, negate) {
   var orderBy;
   var maxTermsPerShard;
 
@@ -299,7 +310,14 @@ function _addFilterJoin(query, sourcePath, targetPath, targetIndex) {
     query.push(fjObject);
   } else {
     // add to the parent filterjoin
-    query.filter.bool.must.push(fjObject);
+    if (negate) {
+      if (!query.filter.bool.must_not) {
+        query.filter.bool.must_not = [];
+      }
+      query.filter.bool.must_not.push(fjObject);
+    } else {
+      query.filter.bool.must.push(fjObject);
+    }
   }
   return filterJoin.query.filtered;
 }

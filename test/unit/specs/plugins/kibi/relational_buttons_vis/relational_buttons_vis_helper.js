@@ -85,6 +85,33 @@ define(function (require) {
 
       });
 
+
+      describe('composeGroupFromExistingJoinFilters', function () {
+
+        it('should create a group and add it', function () {
+          var existingFilters = [
+            {
+              join_sequence: [{indices: ['index1']}, {indices: ['index2']}]
+            },
+            {
+              join_sequence: [{indices: ['index3']}, {indices: ['index4']}]
+            }
+          ];
+
+          var expected = {
+            group: [
+              [{indices: ['index1']}, {indices: ['index2']}],
+              [{indices: ['index3']}, {indices: ['index4']}]
+            ]
+          };
+
+          var actual = relationalButtonsVisHelper.composeGroupFromExistingJoinFilters(existingFilters);
+          expect(actual).to.eql(expected);
+
+        });
+
+      });
+
     });
   });
 });

@@ -188,6 +188,8 @@ define(function (require) {
                 query.query.filtered.filter.bool.must_not.push({script: filter.script});
               } else if (filter.join) {
                 query.query.filtered.filter.bool.must_not.push({join: filter.join});
+              } else if (filter.join_sequence) {
+                query.query.filtered.filter.bool.must_not.push({join_sequence: filter.join_sequence});
               }
             } else {
 
@@ -210,6 +212,8 @@ define(function (require) {
                 query.query.filtered.filter.bool.must.push({script: filter.script});
               } else if (filter.join) {
                 query.query.filtered.filter.bool.must.push({join: filter.join});
+              } else if (filter.join_sequence) {
+                query.query.filtered.filter.bool.must.push({join_sequence: filter.join_sequence});
               }
 
             }

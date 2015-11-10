@@ -357,6 +357,9 @@ define(function (require) {
             },
             {
               join: {}
+            },
+            {
+              join_sequence: {}
             }
           ];
 

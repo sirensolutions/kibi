@@ -14,24 +14,26 @@ define(function (require) {
     function UrlHelper() {
     }
 
-    // get just the join filter from the url
-    UrlHelper.prototype.getJoinFilter = function () {
+    UrlHelper.prototype.getFiltersOfType = function (type) {
       var s = $location.search();
       var a = s._a;
-      var ret = null;
       if (a) {
         var decodedA = rison.decode(a);
         if (decodedA.filters) {
-          var index = -1;
-          _.each(decodedA.filters, function (f, i) {
-            if (f.join) {
-              ret = f;
-              return false;
-            }
+          return _.filter(decodedA.filters, function (f) {
+            return f[type];
           });
         }
       }
-      return ret;
+      return [];
+    };
+
+    UrlHelper.prototype.getJoinFilter = function () {
+      var joinFilters = this.getFiltersOfType('join');
+      if (joinFilters.length > 0) {
+        return joinFilters[0];
+      }
+      return null;
     };
 
     UrlHelper.prototype.removeJoinFilter = function () {

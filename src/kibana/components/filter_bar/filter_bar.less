@@ -2,6 +2,53 @@
 @import (reference) "../../styles/theme/_theme.less";
 @import (reference) "lesshat.less";
 
+.qtip-content{
+
+  table.sequence{
+    border: none;
+    td {
+      padding: 0;
+    }
+  }
+
+  table.group {
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    border-bottom: 2px #ccc solid;
+    td {
+      padding: 4px;
+    }
+  }
+
+  table.relation {
+    width:100%;
+    table-layout:fixed;
+    border-bottom: 1px #dedede solid;
+
+    td:FIRST-CHILD {
+      border-right: 1px #dedede solid;
+      padding: 4px 4px 4px 0;
+      width: 70%;
+    }
+    td:NTH-CHILD(2) {
+      width: 30%;
+      padding: 0 4px;
+    }
+  }
+
+  td {
+    vertical-align: top;
+
+    ul {
+      padding:0;
+      margin:0 0 0 16px;
+    }
+  }
+
+}
+
+
 filter-bar .confirm {
   padding: 8px 10px 4px;
   background: @gray-lighter;

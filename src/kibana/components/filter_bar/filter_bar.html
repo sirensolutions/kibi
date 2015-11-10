@@ -11,29 +11,16 @@
 
 <div class="bar" ng-show="filters.length || showEntityClipboard">
   <div class="filter"
-       ng-class="{join: filter.join, dependsOnSelectedEntities: filter.meta.dependsOnSelectedEntities && filter.meta.markDependOnSelectedEntities, dependsOnSelectedEntitiesDisabled: filter.meta.dependsOnSelectedEntitiesDisabled && filter.meta.dependsOnSelectedEntities, negate: filter.meta.negate, disabled: filter.meta.disabled }" ng-repeat="filter in filters">
+       ng-class="{join: filter.join, join: filter.join_sequence, dependsOnSelectedEntities: filter.meta.dependsOnSelectedEntities && filter.meta.markDependOnSelectedEntities, dependsOnSelectedEntitiesDisabled: filter.meta.dependsOnSelectedEntitiesDisabled && filter.meta.dependsOnSelectedEntities, negate: filter.meta.negate, disabled: filter.meta.disabled }" ng-repeat="filter in filters">
     <div class="filter-description">
       <span ng-if="filter.$state.store == 'globalState'"><i class="fa fa-fw fa-thumb-tack pinned"></i></span>
       <span ng-if="filter.meta.key">{{ filter.meta.key }}:</span>
       <!-- Wrap in double quotes if there is a key -->
       <span ng-if="!filter.meta.key">{{ filter.meta.value }}</span>
       <span ng-if="filter.meta.key">"{{ filter.meta.value }}"</span>
-      <span class="explain" ng-if="filter.join">
+      <span class="explain" ng-if="filter.join || filter.join_sequence">
         <i class="fa fa-code-fork"></i>
       </span>
-      <div style="display: none" class="explanation">
-        <ul>
-          <li ng-repeat="index in filter.join.indexes">
-            Index: <b>{{ index.id }} [{{ index.type }}]</b>
-            <span ng-if="filter.join.filters[index.id]"></span>
-            <ul>
-              <!-- as we do not have any meta information for this filters lets recreate the labels -->
-              <li ng-repeat="filterSpec in filter.join.filters[index.id]" ng-bind-html="recreateFilterLabel(filterSpec, index.id)"></li>
-            </ul>
-            </span>
-          </li>
-        </ul>
-      </div>
     </div>
     <div class="filter-actions">
       <a class="action filter-toggle" ng-click="toggleFilter(filter)">

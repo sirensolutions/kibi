@@ -507,6 +507,49 @@ define(function (require) {
       describe('getter methods', function () {
         beforeEach(minimalInit());
 
+        it('getFiltersOfType join_sequence', function () {
+
+          $location.url(
+            '/?_a=(filters:!(' +
+              '(join_sequence:(' +
+                'meta:(disabled:!f,negate:!f,value:\'button:label1\'),' +
+                'seq:!()' +
+              ')),' +
+              '(join_sequence:(' +
+                'meta:(disabled:!f,negate:!f,value:\'button:label2\'),' +
+                'seq:!()' +
+              '))' +
+            '))'
+          );
+
+          var expected = [
+            {
+              join_sequence: {
+                seq: [],
+                meta: {
+                  disabled: false,
+                  negate: false,
+                  value: 'button:label1'
+                }
+              }
+            },
+            {
+              join_sequence: {
+                seq: [],
+                meta: {
+                  disabled: false,
+                  negate: false,
+                  value: 'button:label2'
+                }
+              }
+            }
+          ];
+
+          var actual = urlHelper.getFiltersOfType('join_sequence');
+          expect(actual).to.eql(expected);
+        });
+
+
         it('getJoinFilter', function () {
           $location.url(
             '/?_a=(filters:!((join:(filters:(),focus:company,indexes:!((id:article,type:Article),(id:company,type:Company)),' +

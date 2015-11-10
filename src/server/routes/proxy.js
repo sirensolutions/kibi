@@ -9,7 +9,9 @@ var join = require('path').join;
 var logger = require('../lib/logger');
 var validateRequest = require('../lib/validateRequest');
 var util = require('../lib/sindicetech/util');
-var filterJoin = require('../lib/sindicetech/filterJoin').set;
+var filterJoinSet = require('../lib/sindicetech/filterJoin').set;
+var filterJoinSequence = require('../lib/sindicetech/filterJoin').sequence;
+
 var dbfilter = require('../lib/sindicetech/dbfilter');
 var inject = require('../lib/sindicetech/inject');
 var queryEngine = require('../lib/sindicetech/queryEngine');
@@ -53,7 +55,9 @@ router.use(function (req, res, next) {
     }
     return query;
   }).map(function (query) {
-    return filterJoin(query);
+    return filterJoinSet(query);
+  }).map(function (query) {
+    return filterJoinSequence(query);
   }).then(function (data) {
     var buffers = _.map(data, function (query) {
       return new Buffer(JSON.stringify(query) + '\n');

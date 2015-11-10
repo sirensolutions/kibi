@@ -2,8 +2,10 @@ define(function (require) {
   var _ = require('lodash');
   var joinExplanationHelper;
   var $rootScope;
-  var filters;
+  var joinSequenceFilters;
   var fieldFormat;
+
+
 
   describe('Kibi Components', function () {
     describe('Join Explanation Helper', function () {
@@ -28,34 +30,42 @@ define(function (require) {
           fieldFormat = Private(require('registry/field_formats'));
         });
 
-        filters = [
+
+        joinSequenceFilters = [
           {
-            joe: 'eoj'
-          },
-          {
-            join: {
-              indexes: [
-                {
-                  id: 'logstash-*',
-                  type: 'logs'
-                }
-              ]
-            }
+            join_sequence: [
+              {
+                relation: [
+                  {
+                    indices: ['article'],
+                    path: 'id',
+                    queries: [
+                      {
+                        query: {
+                          filtered: {
+                            filter: {
+                              bool: {
+                                must: [],
+                                must_not: []
+                              }
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    indices: ['company'],
+                    path: 'articleid'
+                  }
+                ]
+              }
+            ]
           }
         ];
+
       });
 
-      it('should set the correct set of indexes', function (done) {
-        joinExplanationHelper.setIndexesFromJoinFilter(filters).then(function () {
-          expect(joinExplanationHelper.indexes['logstash-*']).to.be.ok();
-          done();
-        });
-        $rootScope.$apply();
-      });
-
-      it('should return an empty string if indexes is undefined', function () {
-        expect(joinExplanationHelper.createLabel(null, null)).to.be('');
-      });
 
       it('prints a nice label for query_string', function (done) {
         var filter = {
@@ -65,41 +75,173 @@ define(function (require) {
             }
           }
         };
-        joinExplanationHelper.setIndexesFromJoinFilter(filters).then(function () {
-          expect(joinExplanationHelper.createLabel(filter, 'logstash-*'))
-            .to.be(' query: <b>' + filter.query.query_string.query + '</b> ');
+
+        joinSequenceFilters[0].join_sequence[0].relation[0].queries[0].query.filtered.filter.bool.must.push(filter);
+
+        var expected =
+        '<table class="sequence"><tr><td><b>Relation:</b></br><table class="relation"><tr><td>from: <b>article.id</b></br><ul>' +
+        '<li> query: <b>aaa</b> </li></ul></td><td>to: <b>company.articleid</b></td></tr></table></td></tr></table>';
+
+        joinExplanationHelper.getFilterExplanations(joinSequenceFilters).then(function (expl) {
+          expect(expl.length).to.equal(1);
+          expect(expl[0]).to.equal(expected);
           done();
         });
+
         $rootScope.$apply();
       });
 
-      it('prints a nice label for match', function (done) {
-        var assert = function (field) {
-          var filter = { query: {} };
-          var object = {
-            fieldA: {
-              query: 'aaa bbb'
+
+      it('prints a nice label for match_phrase_prefix object', function (done) {
+        var filter = {
+          query: {
+            match_phrase_prefix: {
+              fieldA: {
+                query: 'aaa bbb'
+              }
             }
-          };
-          var string = {
-            fieldA: 'aaa bbb'
-          };
-
-          filter.query[field] = object;
-          expect(joinExplanationHelper.createLabel(filter, 'logstash-*'))
-            .to.be(' match on fieldA: <b>aaa bbb</b> ');
-
-          filter.query[field] = string;
-          expect(joinExplanationHelper.createLabel(filter, 'logstash-*'))
-            .to.be(' match on fieldA: <b>aaa bbb</b> ');
+          }
         };
 
-        joinExplanationHelper.setIndexesFromJoinFilter(filters).then(function () {
-          assert('match');
-          assert('match_phrase');
-          assert('match_phrase_prefix');
+        joinSequenceFilters[0].join_sequence[0].relation[0].queries[0].query.filtered.filter.bool.must.push(filter);
+
+        var expected =
+        '<table class="sequence"><tr><td><b>Relation:</b></br><table class="relation"><tr><td>from: <b>article.id</b></br><ul>' +
+        '<li> match on fieldA: <b>aaa bbb</b> </li></ul></td><td>to: <b>company.articleid</b></td></tr></table></td></tr></table>';
+
+        joinExplanationHelper.getFilterExplanations(joinSequenceFilters).then(function (expl) {
+          expect(expl.length).to.equal(1);
+          expect(expl[0]).to.equal(expected);
           done();
         });
+
+        $rootScope.$apply();
+      });
+
+      it('prints a nice label for match_phrase_prefix string', function (done) {
+        var filter = {
+          query: {
+            match_phrase_prefix: {
+              fieldA: 'aaa bbb'
+            }
+          }
+        };
+
+        joinSequenceFilters[0].join_sequence[0].relation[0].queries[0].query.filtered.filter.bool.must.push(filter);
+
+        var expected =
+        '<table class="sequence"><tr><td><b>Relation:</b></br><table class="relation"><tr><td>from: <b>article.id</b></br><ul>' +
+        '<li> match on fieldA: <b>aaa bbb</b> </li></ul></td><td>to: <b>company.articleid</b></td></tr></table></td></tr></table>';
+
+        joinExplanationHelper.getFilterExplanations(joinSequenceFilters).then(function (expl) {
+          expect(expl.length).to.equal(1);
+          expect(expl[0]).to.equal(expected);
+          done();
+        });
+
+        $rootScope.$apply();
+      });
+
+
+
+      it('prints a nice label for match_phrase object', function (done) {
+        var filter = {
+          query: {
+            match_phrase: {
+              fieldA: {
+                query: 'aaa bbb'
+              }
+            }
+          }
+        };
+
+        joinSequenceFilters[0].join_sequence[0].relation[0].queries[0].query.filtered.filter.bool.must.push(filter);
+
+        var expected =
+        '<table class="sequence"><tr><td><b>Relation:</b></br><table class="relation"><tr><td>from: <b>article.id</b></br><ul>' +
+        '<li> match on fieldA: <b>aaa bbb</b> </li></ul></td><td>to: <b>company.articleid</b></td></tr></table></td></tr></table>';
+
+        joinExplanationHelper.getFilterExplanations(joinSequenceFilters).then(function (expl) {
+          expect(expl.length).to.equal(1);
+          expect(expl[0]).to.equal(expected);
+          done();
+        });
+
+        $rootScope.$apply();
+      });
+
+      it('prints a nice label for match_phrase string', function (done) {
+        var filter = {
+          query: {
+            match_phrase: {
+              fieldA: 'aaa bbb'
+            }
+          }
+        };
+
+        joinSequenceFilters[0].join_sequence[0].relation[0].queries[0].query.filtered.filter.bool.must.push(filter);
+
+        var expected =
+        '<table class="sequence"><tr><td><b>Relation:</b></br><table class="relation"><tr><td>from: <b>article.id</b></br><ul>' +
+        '<li> match on fieldA: <b>aaa bbb</b> </li></ul></td><td>to: <b>company.articleid</b></td></tr></table></td></tr></table>';
+
+        joinExplanationHelper.getFilterExplanations(joinSequenceFilters).then(function (expl) {
+          expect(expl.length).to.equal(1);
+          expect(expl[0]).to.equal(expected);
+          done();
+        });
+
+        $rootScope.$apply();
+      });
+
+
+      it('prints a nice label for match object', function (done) {
+        var filter = {
+          query: {
+            match: {
+              fieldA: {
+                query: 'aaa bbb'
+              }
+            }
+          }
+        };
+
+        joinSequenceFilters[0].join_sequence[0].relation[0].queries[0].query.filtered.filter.bool.must.push(filter);
+
+        var expected =
+        '<table class="sequence"><tr><td><b>Relation:</b></br><table class="relation"><tr><td>from: <b>article.id</b></br><ul>' +
+        '<li> match on fieldA: <b>aaa bbb</b> </li></ul></td><td>to: <b>company.articleid</b></td></tr></table></td></tr></table>';
+
+        joinExplanationHelper.getFilterExplanations(joinSequenceFilters).then(function (expl) {
+          expect(expl.length).to.equal(1);
+          expect(expl[0]).to.equal(expected);
+          done();
+        });
+
+        $rootScope.$apply();
+      });
+
+      it('prints a nice label for match string', function (done) {
+        var filter = {
+          query: {
+            match: {
+              fieldA: 'aaa bbb'
+            }
+          }
+        };
+
+        joinSequenceFilters[0].join_sequence[0].relation[0].queries[0].query.filtered.filter.bool.must.push(filter);
+
+        var expected =
+        '<table class="sequence"><tr><td><b>Relation:</b></br><table class="relation"><tr><td>from: <b>article.id</b></br><ul>' +
+        '<li> match on fieldA: <b>aaa bbb</b> </li></ul></td><td>to: <b>company.articleid</b></td></tr></table></td></tr></table>';
+
+        joinExplanationHelper.getFilterExplanations(joinSequenceFilters).then(function (expl) {
+          expect(expl.length).to.equal(1);
+          expect(expl[0]).to.equal(expected);
+          done();
+        });
+
         $rootScope.$apply();
       });
 
@@ -120,16 +262,23 @@ define(function (require) {
             }
           }
         };
-        joinExplanationHelper.setIndexesFromJoinFilter(filters).then(function () {
-          var format = fieldFormat.getDefaultInstance('date');
 
-          expect(joinExplanationHelper.createLabel(filter1, 'logstash-*'))
-            .to.be(' age: <b>10</b> to <b>20</b> ');
-          expect(joinExplanationHelper.createLabel(filter2, 'logstash-*'))
-            .to.be(' time: <b>' + format.convert(657147471184, 'html') + '</b> to <b>' +
-              format.convert(1210414920534, 'html') + '</b> ');
+        joinSequenceFilters[0].join_sequence[0].relation[0].queries[0].query.filtered.filter.bool.must.push(filter1);
+        joinSequenceFilters[0].join_sequence[0].relation[0].queries[0].query.filtered.filter.bool.must.push(filter2);
+
+        var format = fieldFormat.getDefaultInstance('date');
+        var expected =
+        '<table class="sequence"><tr><td><b>Relation:</b></br><table class="relation"><tr><td>from: <b>article.id</b></br><ul>' +
+        '<li> age: <b>10</b> to <b>20</b> </li>' +
+        '<li> time: <b>' + format.convert(657147471184, 'html') + '</b> to <b>' + format.convert(1210414920534, 'html') + '</b> </li>' +
+        '</ul></td><td>to: <b>company.articleid</b></td></tr></table></td></tr></table>';
+
+        joinExplanationHelper.getFilterExplanations(joinSequenceFilters).then(function (expl) {
+          expect(expl.length).to.equal(1);
+          expect(expl[0]).to.equal(expected);
           done();
         });
+
         $rootScope.$apply();
       });
 
@@ -139,11 +288,19 @@ define(function (require) {
             field: 'joe'
           }
         };
-        joinExplanationHelper.setIndexesFromJoinFilter(filters).then(function () {
-          expect(joinExplanationHelper.createLabel(filter, 'logstash-*'))
-            .to.be(' missing: <b>joe</b> ');
+
+        joinSequenceFilters[0].join_sequence[0].relation[0].queries[0].query.filtered.filter.bool.must.push(filter);
+
+        var expected =
+        '<table class="sequence"><tr><td><b>Relation:</b></br><table class="relation"><tr><td>from: <b>article.id</b></br><ul>' +
+        '<li> missing: <b>joe</b> </li></ul></td><td>to: <b>company.articleid</b></td></tr></table></td></tr></table>';
+
+        joinExplanationHelper.getFilterExplanations(joinSequenceFilters).then(function (expl) {
+          expect(expl.length).to.equal(1);
+          expect(expl[0]).to.equal(expected);
           done();
         });
+
         $rootScope.$apply();
       });
 
@@ -153,11 +310,19 @@ define(function (require) {
             field: 'joe'
           }
         };
-        joinExplanationHelper.setIndexesFromJoinFilter(filters).then(function () {
-          expect(joinExplanationHelper.createLabel(filter, 'logstash-*'))
-            .to.be(' exists: <b>joe</b> ');
+
+        joinSequenceFilters[0].join_sequence[0].relation[0].queries[0].query.filtered.filter.bool.must.push(filter);
+
+        var expected =
+        '<table class="sequence"><tr><td><b>Relation:</b></br><table class="relation"><tr><td>from: <b>article.id</b></br><ul>' +
+        '<li> exists: <b>joe</b> </li></ul></td><td>to: <b>company.articleid</b></td></tr></table></td></tr></table>';
+
+        joinExplanationHelper.getFilterExplanations(joinSequenceFilters).then(function (expl) {
+          expect(expl.length).to.equal(1);
+          expect(expl[0]).to.equal(expected);
           done();
         });
+
         $rootScope.$apply();
       });
 
@@ -169,11 +334,19 @@ define(function (require) {
             }
           }
         };
-        joinExplanationHelper.setIndexesFromJoinFilter(filters).then(function () {
-          expect(joinExplanationHelper.createLabel(filter, 'logstash-*'))
-            .to.be(' NOT exists: <b>joe</b> ');
+
+        joinSequenceFilters[0].join_sequence[0].relation[0].queries[0].query.filtered.filter.bool.must.push(filter);
+
+        var expected =
+        '<table class="sequence"><tr><td><b>Relation:</b></br><table class="relation"><tr><td>from: <b>article.id</b></br><ul>' +
+        '<li> NOT exists: <b>joe</b> </li></ul></td><td>to: <b>company.articleid</b></td></tr></table></td></tr></table>';
+
+        joinExplanationHelper.getFilterExplanations(joinSequenceFilters).then(function (expl) {
+          expect(expl.length).to.equal(1);
+          expect(expl[0]).to.equal(expected);
           done();
         });
+
         $rootScope.$apply();
       });
 
@@ -183,12 +356,22 @@ define(function (require) {
           baa: 'baa',
           $$hashKey: '42'
         };
-        joinExplanationHelper.setIndexesFromJoinFilter(filters).then(function () {
-          expect(joinExplanationHelper.createLabel(filter, 'logstash-*'))
-            .to.be(' <font color="red">Unable to pretty print the filter:</font> ' +
-                JSON.stringify(_.omit(filter, '$$hashKey'), null, ' ') + ' ');
+
+        joinSequenceFilters[0].join_sequence[0].relation[0].queries[0].query.filtered.filter.bool.must.push(filter);
+
+        var expected =
+        '<table class="sequence"><tr><td><b>Relation:</b></br>' +
+        '<table class="relation"><tr><td>from: <b>article.id</b></br><ul><li>' +
+        ' <font color="red">Unable to pretty print the filter:</font> ' +
+        JSON.stringify(_.omit(filter, '$$hashKey'), null, ' ') + ' </li></ul></td>' +
+        '<td>to: <b>company.articleid</b></td></tr></table></td></tr></table>';
+
+        joinExplanationHelper.getFilterExplanations(joinSequenceFilters).then(function (expl) {
+          expect(expl.length).to.equal(1);
+          expect(expl[0]).to.equal(expected);
           done();
         });
+
         $rootScope.$apply();
       });
 
@@ -207,12 +390,26 @@ define(function (require) {
             }
           }
         };
-        joinExplanationHelper.setIndexesFromJoinFilter(filters).then(function () {
-          expect(joinExplanationHelper.createLabel(filter, 'logstash-*'))
-            .to.be(' joe: <b>' + JSON.stringify(filter.geo_bounding_box.joe.top_left, null, '') + '</b> to ' +
-                '<b>' + JSON.stringify(filter.geo_bounding_box.joe.bottom_right, null, '') + '</b> ');
+        joinSequenceFilters[0].join_sequence[0].relation[0].queries[0].query.filtered.filter.bool.must.push(filter);
+
+        var expected =
+        '<table class="sequence">' +
+        '<tr>' +
+        '<td><b>Relation:</b></br>' +
+        '<table class="relation">' +
+        '<tr><td>from: <b>article.id</b></br>' +
+        '<ul><li>' +
+        ' joe: <b>{"lat":40.73,"lon":-74.1}</b> to <b>{"lat":40.01,"lon":-71.12}</b> ' +
+        '</li></ul></td>' +
+        '<td>to: <b>company.articleid</b></td></tr></table></td></tr></table>';
+
+
+        joinExplanationHelper.getFilterExplanations(joinSequenceFilters).then(function (expl) {
+          expect(expl.length).to.equal(1);
+          expect(expl[0]).to.equal(expected);
           done();
         });
+
         $rootScope.$apply();
       });
     });

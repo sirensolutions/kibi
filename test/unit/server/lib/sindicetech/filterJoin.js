@@ -1227,6 +1227,102 @@ describe('FilterJoin querying', function () {
       expect(actual).to.eql(expected);
     });
 
+    it('negate nested sequence', function () {
+      var query = [{
+        join_sequence: [
+          {
+            negate: true,
+            group: [
+              [
+                {
+                  relation: [
+                    {
+                      path: 'companyid',
+                      indices: [ 'investment' ]
+                    },
+                    {
+                      path: 'id',
+                      indices: [ 'company' ]
+                    }
+                  ]
+                }
+              ]
+            ]
+          },
+          {
+            relation: [
+              {
+                path: 'id',
+                indices: [ 'company' ]
+              },
+              {
+                path: 'companyid',
+                indices: [ 'investment' ]
+              }
+            ]
+          }
+        ]
+      }];
+      var expected = [
+        {
+          filterjoin: {
+            companyid: {
+              path: 'id',
+              indices: ['company'],
+              query: {
+                filtered: {
+                  query: {
+                    bool: {
+                      must: [
+                        {
+                          match_all: {}
+                        }
+                      ]
+                    }
+                  },
+                  filter: {
+                    bool: {
+                      must: [],
+                      must_not: [
+                        {
+                          filterjoin: {
+                            id: {
+                              path: 'companyid',
+                              indices: ['investment'],
+                              query: {
+                                filtered: {
+                                  query: {
+                                    bool: {
+                                      must: [
+                                        {
+                                          match_all: {}
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  filter: {
+                                    bool: {
+                                      must: []
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ];
+      var actual = filterJoinSeq(query);
+      expect(actual).to.eql(expected);
+    });
+
     it('nested sequence 1', function () {
       var query = [{
         join_sequence: [
@@ -1641,6 +1737,96 @@ describe('FilterJoin querying', function () {
                                           query_string: {
                                             query: '360buy'
                                           }
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  filter: {
+                                    bool: {
+                                      must: []
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ];
+      var actual = filterJoinSeq(query);
+      expect(actual).to.eql(expected);
+    });
+
+    it('negate relation', function () {
+      var query = [{
+        join_sequence: [
+          {
+            relation: [
+              {
+                path: 'companyid',
+                indices: [ 'investment' ]
+              },
+              {
+                path: 'id',
+                indices: [ 'company' ]
+              }
+            ],
+            negate: true
+          },
+          {
+            relation: [
+              {
+                path: 'id',
+                indices: [ 'company' ]
+              },
+              {
+                path: 'companyid',
+                indices: [ 'investment' ]
+              }
+            ]
+          }
+        ]
+      }];
+      var expected = [
+        {
+          filterjoin: {
+            companyid: {
+              path: 'id',
+              indices: ['company'],
+              query: {
+                filtered: {
+                  query: {
+                    bool: {
+                      must: [
+                        {
+                          match_all: {}
+                        }
+                      ]
+                    }
+                  },
+                  filter: {
+                    bool: {
+                      must: [],
+                      must_not: [
+                        {
+                          filterjoin: {
+                            id: {
+                              path: 'companyid',
+                              indices: ['investment'],
+                              query: {
+                                filtered: {
+                                  query: {
+                                    bool: {
+                                      must: [
+                                        {
+                                          match_all: {}
                                         }
                                       ]
                                     }

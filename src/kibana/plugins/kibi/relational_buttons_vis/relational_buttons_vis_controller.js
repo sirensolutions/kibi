@@ -49,7 +49,9 @@ define(function (require) {
             new Promise( function (fulfill, reject) {
 
               savedDashboards.get(urlHelper.getCurrentDashboardId()).then(function (savedSourceDashboard) {
-                if (savedSourceDashboard.savedSearchId) {
+                if (!savedSourceDashboard.savedSearchId) {
+                  reject(new Error('Dashboard [' + savedSourceDashboard.id + '] should have savedSearchId'));
+                } else {
                   savedSearches.get(savedSourceDashboard.savedSearchId).then(function (sourceDashboardSavedSearch) {
 
                     // check that there are any join_seq filters already on this dashboard
@@ -76,8 +78,8 @@ define(function (require) {
                             query: query,
                             button: button
                           });
-                        }).catch(notify.error);
-                      }).catch(notify.error);
+                        }).catch(reject);
+                      }).catch(reject);
 
                     } else if (existingJoinFilters.length === 1) {
 
@@ -93,8 +95,8 @@ define(function (require) {
                             query: query,
                             button: button
                           });
-                        }).catch(notify.error);
-                      }).catch(notify.error);
+                        }).catch(reject);
+                      }).catch(reject);
 
                     } else if (existingJoinFilters.length > 1) {
 
@@ -112,13 +114,9 @@ define(function (require) {
                             query: query,
                             button: button
                           });
-                        }).catch(notify.error);
-                      }).catch(notify.error);
-
+                        }).catch(reject);
+                      }).catch(reject);
                     }
-
-
-
                   });
                 }
               });

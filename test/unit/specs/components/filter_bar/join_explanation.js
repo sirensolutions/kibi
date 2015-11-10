@@ -82,7 +82,7 @@ define(function (require) {
         '<table class="sequence"><tr><td><b>Relation:</b></br><table class="relation"><tr><td>from: <b>article.id</b></br><ul>' +
         '<li> query: <b>aaa</b> </li></ul></td><td>to: <b>company.articleid</b></td></tr></table></td></tr></table>';
 
-        joinExplanationHelper.getFilterExplenations(joinSequenceFilters).then(function (expl) {
+        joinExplanationHelper.getFilterExplanations(joinSequenceFilters).then(function (expl) {
           expect(expl.length).to.equal(1);
           expect(expl[0]).to.equal(expected);
           done();
@@ -109,7 +109,7 @@ define(function (require) {
         '<table class="sequence"><tr><td><b>Relation:</b></br><table class="relation"><tr><td>from: <b>article.id</b></br><ul>' +
         '<li> match on fieldA: <b>aaa bbb</b> </li></ul></td><td>to: <b>company.articleid</b></td></tr></table></td></tr></table>';
 
-        joinExplanationHelper.getFilterExplenations(joinSequenceFilters).then(function (expl) {
+        joinExplanationHelper.getFilterExplanations(joinSequenceFilters).then(function (expl) {
           expect(expl.length).to.equal(1);
           expect(expl[0]).to.equal(expected);
           done();
@@ -133,7 +133,7 @@ define(function (require) {
         '<table class="sequence"><tr><td><b>Relation:</b></br><table class="relation"><tr><td>from: <b>article.id</b></br><ul>' +
         '<li> match on fieldA: <b>aaa bbb</b> </li></ul></td><td>to: <b>company.articleid</b></td></tr></table></td></tr></table>';
 
-        joinExplanationHelper.getFilterExplenations(joinSequenceFilters).then(function (expl) {
+        joinExplanationHelper.getFilterExplanations(joinSequenceFilters).then(function (expl) {
           expect(expl.length).to.equal(1);
           expect(expl[0]).to.equal(expected);
           done();
@@ -161,7 +161,7 @@ define(function (require) {
         '<table class="sequence"><tr><td><b>Relation:</b></br><table class="relation"><tr><td>from: <b>article.id</b></br><ul>' +
         '<li> match on fieldA: <b>aaa bbb</b> </li></ul></td><td>to: <b>company.articleid</b></td></tr></table></td></tr></table>';
 
-        joinExplanationHelper.getFilterExplenations(joinSequenceFilters).then(function (expl) {
+        joinExplanationHelper.getFilterExplanations(joinSequenceFilters).then(function (expl) {
           expect(expl.length).to.equal(1);
           expect(expl[0]).to.equal(expected);
           done();
@@ -185,7 +185,7 @@ define(function (require) {
         '<table class="sequence"><tr><td><b>Relation:</b></br><table class="relation"><tr><td>from: <b>article.id</b></br><ul>' +
         '<li> match on fieldA: <b>aaa bbb</b> </li></ul></td><td>to: <b>company.articleid</b></td></tr></table></td></tr></table>';
 
-        joinExplanationHelper.getFilterExplenations(joinSequenceFilters).then(function (expl) {
+        joinExplanationHelper.getFilterExplanations(joinSequenceFilters).then(function (expl) {
           expect(expl.length).to.equal(1);
           expect(expl[0]).to.equal(expected);
           done();
@@ -212,7 +212,7 @@ define(function (require) {
         '<table class="sequence"><tr><td><b>Relation:</b></br><table class="relation"><tr><td>from: <b>article.id</b></br><ul>' +
         '<li> match on fieldA: <b>aaa bbb</b> </li></ul></td><td>to: <b>company.articleid</b></td></tr></table></td></tr></table>';
 
-        joinExplanationHelper.getFilterExplenations(joinSequenceFilters).then(function (expl) {
+        joinExplanationHelper.getFilterExplanations(joinSequenceFilters).then(function (expl) {
           expect(expl.length).to.equal(1);
           expect(expl[0]).to.equal(expected);
           done();
@@ -236,7 +236,7 @@ define(function (require) {
         '<table class="sequence"><tr><td><b>Relation:</b></br><table class="relation"><tr><td>from: <b>article.id</b></br><ul>' +
         '<li> match on fieldA: <b>aaa bbb</b> </li></ul></td><td>to: <b>company.articleid</b></td></tr></table></td></tr></table>';
 
-        joinExplanationHelper.getFilterExplenations(joinSequenceFilters).then(function (expl) {
+        joinExplanationHelper.getFilterExplanations(joinSequenceFilters).then(function (expl) {
           expect(expl.length).to.equal(1);
           expect(expl[0]).to.equal(expected);
           done();
@@ -273,7 +273,7 @@ define(function (require) {
         '<li> time: <b>' + format.convert(657147471184, 'html') + '</b> to <b>' + format.convert(1210414920534, 'html') + '</b> </li>' +
         '</ul></td><td>to: <b>company.articleid</b></td></tr></table></td></tr></table>';
 
-        joinExplanationHelper.getFilterExplenations(joinSequenceFilters).then(function (expl) {
+        joinExplanationHelper.getFilterExplanations(joinSequenceFilters).then(function (expl) {
           expect(expl.length).to.equal(1);
           expect(expl[0]).to.equal(expected);
           done();
@@ -295,7 +295,7 @@ define(function (require) {
         '<table class="sequence"><tr><td><b>Relation:</b></br><table class="relation"><tr><td>from: <b>article.id</b></br><ul>' +
         '<li> missing: <b>joe</b> </li></ul></td><td>to: <b>company.articleid</b></td></tr></table></td></tr></table>';
 
-        joinExplanationHelper.getFilterExplenations(joinSequenceFilters).then(function (expl) {
+        joinExplanationHelper.getFilterExplanations(joinSequenceFilters).then(function (expl) {
           expect(expl.length).to.equal(1);
           expect(expl[0]).to.equal(expected);
           done();
@@ -317,7 +317,7 @@ define(function (require) {
         '<table class="sequence"><tr><td><b>Relation:</b></br><table class="relation"><tr><td>from: <b>article.id</b></br><ul>' +
         '<li> exists: <b>joe</b> </li></ul></td><td>to: <b>company.articleid</b></td></tr></table></td></tr></table>';
 
-        joinExplanationHelper.getFilterExplenations(joinSequenceFilters).then(function (expl) {
+        joinExplanationHelper.getFilterExplanations(joinSequenceFilters).then(function (expl) {
           expect(expl.length).to.equal(1);
           expect(expl[0]).to.equal(expected);
           done();
@@ -341,7 +341,7 @@ define(function (require) {
         '<table class="sequence"><tr><td><b>Relation:</b></br><table class="relation"><tr><td>from: <b>article.id</b></br><ul>' +
         '<li> NOT exists: <b>joe</b> </li></ul></td><td>to: <b>company.articleid</b></td></tr></table></td></tr></table>';
 
-        joinExplanationHelper.getFilterExplenations(joinSequenceFilters).then(function (expl) {
+        joinExplanationHelper.getFilterExplanations(joinSequenceFilters).then(function (expl) {
           expect(expl.length).to.equal(1);
           expect(expl[0]).to.equal(expected);
           done();
@@ -366,7 +366,7 @@ define(function (require) {
         JSON.stringify(_.omit(filter, '$$hashKey'), null, ' ') + ' </li></ul></td>' +
         '<td>to: <b>company.articleid</b></td></tr></table></td></tr></table>';
 
-        joinExplanationHelper.getFilterExplenations(joinSequenceFilters).then(function (expl) {
+        joinExplanationHelper.getFilterExplanations(joinSequenceFilters).then(function (expl) {
           expect(expl.length).to.equal(1);
           expect(expl[0]).to.equal(expected);
           done();
@@ -404,7 +404,7 @@ define(function (require) {
         '<td>to: <b>company.articleid</b></td></tr></table></td></tr></table>';
 
 
-        joinExplanationHelper.getFilterExplenations(joinSequenceFilters).then(function (expl) {
+        joinExplanationHelper.getFilterExplanations(joinSequenceFilters).then(function (expl) {
           expect(expl.length).to.equal(1);
           expect(expl[0]).to.equal(expected);
           done();

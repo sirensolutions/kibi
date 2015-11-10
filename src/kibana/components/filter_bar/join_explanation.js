@@ -230,7 +230,7 @@ define(function (require) {
       };
 
 
-      var getFilterExplenations = function (filters) {
+      var getFilterExplanations = function (filters) {
         var promises = [];
         _.each(filters, function (f) {
           if (f.join_sequence) {
@@ -256,7 +256,7 @@ define(function (require) {
 
 
       return {
-        getFilterExplenations: getFilterExplenations,
+        getFilterExplanations: getFilterExplanations,
         initQtip: initQtip
       };
     })();

@@ -112,7 +112,7 @@ define(function (require) {
             });
           })
           .then(function () {
-            return joinExplain.getFilterExplenations(filters);
+            return joinExplain.getFilterExplanations(filters);
           })
           .then(function (explanations) {
             return joinExplain.initQtip(explanations);

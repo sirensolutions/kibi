@@ -1,13 +1,12 @@
 /*global alert:false */
 define(function (require) {
   var module = require('modules').get('kibana/sindicetech_entity_info_vis', ['kibana']);
-  var rison = require('utils/rison');
   var _ = require('lodash');
   var kibiUtils = require('kibiutils');
 
   module.controller(
     'SindicetechEntityInfoVisController',
-    function ($rootScope, $scope, $window, $location, globalState, savedSearches, Private, queryEngineClient, Notifier) {
+    function ($rootScope, $scope, $location, globalState, Private, queryEngineClient, Notifier) {
 
       var notify = new Notifier({
         location: 'Templated Query Viewer'
@@ -34,8 +33,8 @@ define(function (require) {
         $scope.holder.entityURI = '';
       }
 
-      var removeEntityURIEnabledHandler = $rootScope.$on('kibi:entityURIEnabled:entityinfo', function (event, entityURIEnabled) {
-        $scope.holder.entityURIEnabled = entityURIEnabled;
+      var removeEntityURIEnabledHandler = $rootScope.$on('kibi:entityURIEnabled:entityinfo', function (event, enabled) {
+        $scope.holder.entityURIEnabled = enabled;
       });
 
       var removeEntityURIChangedHandler = $rootScope.$on('kibi:selectedEntities:changed', function (event, se) {
@@ -43,9 +42,7 @@ define(function (require) {
       });
 
       $scope.$watchMulti(['holder.entityURI', 'vis.params.queryOptions'], function () {
-        if (!$scope.vis) return;
-
-        if ($scope.vis.params.queryOptions) {
+        if ($scope.vis && $scope.vis.params.queryOptions) {
           $scope.renderTemplates();
         }
       });
@@ -75,14 +72,16 @@ define(function (require) {
       });
 
       $scope.renderTemplates = function () {
-        if ($scope.vis.params.queryOptions && $scope.vis.params.queryOptions.length === 0) {
+        if (!$scope.vis.params.queryOptions || $scope.vis.params.queryOptions.length === 0) {
+          $scope.holder.html = '';
+          $scope.holder.activeFetch = false;
           return;
         }
 
         $scope.holder.html = 'Loading ...';
         $scope.holder.activeFetch = true;
 
-        queryEngineClient.getQueriesHtmlFromServer(
+        return queryEngineClient.getQueriesHtmlFromServer(
           $scope.vis.params.queryOptions,
           {
             selectedDocuments: [$scope.holder.entityURI]
@@ -90,10 +89,10 @@ define(function (require) {
           true
         ).then(function (resp) {
           $scope.holder.activeFetch = false;
-          $scope.emptyResults =  resp.data.snippets ? resp.data.snippets.length === 0 : true;
+          $scope.emptyResults = !resp.data.snippets || resp.data.snippets.length === 0;
           $scope.noSelectedDocument = resp.data.error === 'Empty selected document uri';
 
-          if (resp.data.error && resp.data.error !== 'Empty selected document uri' ) {
+          if (resp.data.error && resp.data.error !== 'Empty selected document uri') {
             var msg  = '';
             if (typeof resp.data.error === 'string') {
               msg = resp.data.error;
@@ -116,11 +115,10 @@ define(function (require) {
 
           if ($scope.emptyResults && !$scope.noSelectedDocument) {
 
-            $scope.holder.html = 'No results';
+            $scope.holder.html = 'No result';
 
           } else if ($scope.noSelectedDocument) {
 
-            $scope.holder.activeFetch = false;
             $scope.holder.html = emptyResultsTemplate
             .replace(/@INDEX@/, 0)
             .replace(/@MESSAGE@/, 'No selected document, please select one');
@@ -134,7 +132,6 @@ define(function (require) {
               var label = String(index + 1) + ' id: [' + snippet.queryId + ']';
 
               if (snippet.queryActivated === false) {
-                $scope.holder.activeFetch = false;
                 $scope.holder.html += emptyResultsTemplate
                 .replace(/@INDEX@/, 0)
                 .replace(/@MESSAGE@/, 'Query ' + label + ' not activated, select another document or check activation rules');
@@ -149,13 +146,13 @@ define(function (require) {
               }
 
               var showFilterButton = false;
+              /* NOTE: disabled experimental feature
               if (snippet.data && snippet.data.ids && snippet.data.ids.length !== 0 &&
                  (snippet.data.config.showFilterButton === true || snippet.data.config.showFilterButton === 1)
               ) {
                 showFilterButton = true;
               }
-              /* NOTE: disabled experimental feature */
-              showFilterButton = false;
+              */
 
               var queryOption = _.find($scope.vis.params.queryOptions, function (option) {
                 return option.queryId === snippet.data.config.id;
@@ -165,7 +162,6 @@ define(function (require) {
               if (queryOption.targetField && queryOption.targetField !== '' &&
                  queryOption.queryVariableName && queryOption.queryVariableName !== ''
               ) {
-
                 dbFilter = {
                   meta: {
                     key: 'Relational Filter',
@@ -216,10 +212,7 @@ define(function (require) {
             });
           }
 
-        }).catch(function (error) {
-          notify.error(error);
-        });
-
+        }).catch(notify.error);
       };
 
     });

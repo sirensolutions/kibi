@@ -11,14 +11,17 @@
 
 <div class="bar" ng-show="filters.length || showEntityClipboard">
   <div class="filter"
-       ng-class="{join: filter.join || filter.join_sequence, dependsOnSelectedEntities: filter.meta.dependsOnSelectedEntities && filter.meta.markDependOnSelectedEntities, dependsOnSelectedEntitiesDisabled: filter.meta.dependsOnSelectedEntitiesDisabled && filter.meta.dependsOnSelectedEntities, negate: filter.meta.negate, disabled: filter.meta.disabled }" ng-repeat="filter in filters">
+       ng-class="{join: filter.join_set || filter.join_sequence, dependsOnSelectedEntities: filter.meta.dependsOnSelectedEntities && filter.meta.markDependOnSelectedEntities, dependsOnSelectedEntitiesDisabled: filter.meta.dependsOnSelectedEntitiesDisabled && filter.meta.dependsOnSelectedEntities, negate: filter.meta.negate, disabled: filter.meta.disabled }" ng-repeat="filter in filters">
+    <div class="filter-description">
+      <span ng-if="filter.$state.store == 'globalState'"><i class="fa fa-fw fa-thumb-tack pinned"></i></span>
+      <span ng-if="filter.meta.key">{{ filter.meta.key }}:</span>
     <div class="filter-description">
       <span ng-if="filter.$state.store == 'globalState'"><i class="fa fa-fw fa-thumb-tack pinned"></i></span>
       <span ng-if="filter.meta.key">{{ filter.meta.key }}:</span>
       <!-- Wrap in double quotes if there is a key -->
       <span ng-if="!filter.meta.key">{{ filter.meta.value }}</span>
       <span ng-if="filter.meta.key">"{{ filter.meta.value }}"</span>
-      <span class="explain" ng-if="filter.join || filter.join_sequence">
+      <span class="explain" ng-if="filter.join_set || filter.join_sequence">
         <i class="fa fa-code-fork"></i>
       </span>
     </div>

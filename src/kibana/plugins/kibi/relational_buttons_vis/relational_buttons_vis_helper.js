@@ -24,6 +24,7 @@ define(function (require) {
         })
         .map(function (buttonDef) {
           var button = _.clone(buttonDef);
+          // TODO what about this ??
           button.joinFilter = null;
 
           button.click = function () {

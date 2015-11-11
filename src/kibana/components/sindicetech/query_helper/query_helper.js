@@ -157,7 +157,7 @@ define(function (require) {
           meta: {
             value: labelValue
           },
-          join: {
+          join_set: {
             focus: focus,
             indexes: indexes,
             relations: relations,

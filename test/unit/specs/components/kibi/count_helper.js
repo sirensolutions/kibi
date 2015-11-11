@@ -356,7 +356,7 @@ define(function (require) {
               script: {}
             },
             {
-              join: {}
+              join_set: {}
             },
             {
               join_sequence: {}
@@ -428,7 +428,7 @@ define(function (require) {
             },
             {
               meta:{negate:true},
-              join: {}
+              join_set: {}
             }
           ];
 
@@ -571,14 +571,14 @@ define(function (require) {
           var savedSearch = emptySavedSearch;
           var stateFilters = [
             {
-              join: {
+              join_set: {
                 indexes: [{id: 'index1'}]
               }
             }
           ];
           var extraFilters = [
             {
-              join: {
+              join_set: {
                 indexes: [{id: 'index2'}]
               }
             }
@@ -597,7 +597,7 @@ define(function (require) {
                   bool: {
                     must: [
                       {
-                        join: {
+                        join_set: {
                           indexes: [{id: 'index2'}]
                         }
                       }
@@ -623,13 +623,13 @@ define(function (require) {
           var extraFilters = [];
           var stateFilters = [
             {
-              join: {
+              join_set: {
                 indexes: [{id: 'index1'}]
               }
             }
           ];
           var joinFilter = {
-            join: {
+            join_set: {
               indexes: [{id: 'index2'}]
             }
           };
@@ -647,7 +647,7 @@ define(function (require) {
                   bool: {
                     must: [
                       {
-                        join: {
+                        join_set: {
                           indexes: [{id: 'index2'}]
                         }
                       }

@@ -9,11 +9,11 @@ define(function (require) {
       it('add to empty and strip meta', function () {
         var filters = [];
         var joinFilter = {
-          join: {},
+          join_set: {},
           meta: {}
         };
         var expected = [{
-          join: {}
+          join_set: {}
         }];
         replace_or_add_join_filter(filters, joinFilter, true);
         expect(filters).to.eql(expected);
@@ -22,11 +22,11 @@ define(function (require) {
       it('add to empty and do not strip meta', function () {
         var filters = [];
         var joinFilter = {
-          join: {},
+          join_set: {},
           meta: {}
         };
         var expected = [{
-          join: {},
+          join_set: {},
           meta: {}
         }];
         replace_or_add_join_filter(filters, joinFilter, false);
@@ -35,11 +35,11 @@ define(function (require) {
 
       it('replace', function () {
         var filter1 = {
-          join: {},
+          join_set: {},
           meta: {label: '1'}
         };
         var filter2 = {
-          join: {},
+          join_set: {},
           meta: {label: '2'}
         };
 
@@ -51,17 +51,17 @@ define(function (require) {
 
       it('replace and strip meta', function () {
         var filter1 = {
-          join: {indexes:['index1']},
+          join_set: {indexes:['index1']},
           meta: {label: '1'}
         };
         var filter2 = {
-          join: {indexes:['index2']},
+          join_set: {indexes:['index2']},
           meta: {label: '2'}
         };
 
         var filters = [filter1];
         var expected = [{
-          join:{indexes:['index2']}
+          join_set:{indexes:['index2']}
         }];
         replace_or_add_join_filter(filters, filter2, true);
         expect(filters).to.eql(expected);

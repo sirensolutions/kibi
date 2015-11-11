@@ -118,7 +118,7 @@ define(function (require) {
               meta: {
                 value: 'article <-> company'
               },
-              join: {
+              join_set: {
                 focus: focus,
                 indexes: indexes,
                 relations: relations,
@@ -168,7 +168,7 @@ define(function (require) {
               meta: {
                 value: 'article <-> company'
               },
-              join: {
+              join_set: {
                 focus: focus,
                 indexes: indexes,
                 relations: relations,
@@ -204,7 +204,7 @@ define(function (require) {
               meta: {
                 value: 'article <-> company'
               },
-              join: {
+              join_set: {
                 focus: focus,
                 indexes: indexes,
                 relations: relations,
@@ -250,7 +250,7 @@ define(function (require) {
               meta: {
                 value: 'article <-> company'
               },
-              join: {
+              join_set: {
                 focus: focus,
                 indexes: indexes,
                 relations: relations,
@@ -290,7 +290,7 @@ define(function (require) {
               meta: {
                 value: 'article <-> company'
               },
-              join: {
+              join_set: {
                 focus: focus,
                 indexes: indexes,
                 relations: relations,
@@ -340,7 +340,7 @@ define(function (require) {
               meta: {
                 value: 'article <-> company'
               },
-              join: {
+              join_set: {
                 focus: focus,
                 indexes: indexes,
                 relations: relations,
@@ -392,7 +392,7 @@ define(function (require) {
               meta: {
                 value: 'article <-> company'
               },
-              join: {
+              join_set: {
                 focus: focus,
                 indexes: indexes,
                 relations: relations,
@@ -440,7 +440,7 @@ define(function (require) {
               meta: {
                 value: 'article <-> company'
               },
-              join: {
+              join_set: {
                 focus: focus,
                 indexes: indexes,
                 relations: relations,
@@ -482,7 +482,7 @@ define(function (require) {
               meta: {
                 value: 'article <-> time-testing-3'
               },
-              join: {
+              join_set: {
                 focus: focus,
                 indexes: indexes,
                 relations: relations,
@@ -532,7 +532,7 @@ define(function (require) {
               meta: {
                 value: 'article <-> time-testing-3'
               },
-              join: {
+              join_set: {
                 focus: focus,
                 indexes: indexes,
                 relations: relations,
@@ -575,7 +575,7 @@ define(function (require) {
               meta: {
                 value: 'article <-> time-testing-3'
               },
-              join: {
+              join_set: {
                 focus: focus,
                 indexes: indexes,
                 relations: relations,
@@ -605,7 +605,7 @@ define(function (require) {
               meta: {
                 value: 'article <-> time-testing-3'
               },
-              join: {
+              join_set: {
                 focus: focus,
                 indexes: indexes,
                 relations: relations,
@@ -684,7 +684,7 @@ define(function (require) {
             meta: {
               value: 'article <-> company'
             },
-            join: {
+            join_set: {
               focus: focus,
               indexes: indexes,
               relations: relations,

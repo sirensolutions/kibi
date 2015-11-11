@@ -186,8 +186,8 @@ define(function (require) {
                 query.query.filtered.filter.bool.must_not.push({range: filter.range});
               } else if (filter.script) {
                 query.query.filtered.filter.bool.must_not.push({script: filter.script});
-              } else if (filter.join) {
-                query.query.filtered.filter.bool.must_not.push({join: filter.join});
+              } else if (filter.join_set) {
+                query.query.filtered.filter.bool.must_not.push({join: filter.join_set});
               } else if (filter.join_sequence) {
                 query.query.filtered.filter.bool.must_not.push({join_sequence: filter.join_sequence});
               }
@@ -210,8 +210,8 @@ define(function (require) {
                 query.query.filtered.filter.bool.must.push({range: filter.range});
               } else if (filter.script) {
                 query.query.filtered.filter.bool.must.push({script: filter.script});
-              } else if (filter.join) {
-                query.query.filtered.filter.bool.must.push({join: filter.join});
+              } else if (filter.join_set) {
+                query.query.filtered.filter.bool.must.push({join_set: filter.join});
               } else if (filter.join_sequence) {
                 query.query.filtered.filter.bool.must.push({join_sequence: filter.join_sequence});
               }

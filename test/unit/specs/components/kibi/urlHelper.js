@@ -326,7 +326,7 @@ define(function (require) {
         it('addFilter make sure join filter the app state', function (done) {
           $location.url('/path/?_a=(filters:!())');
           var filter = {
-            join: {
+            join_set: {
               indexes: [
                 {id: 7}
               ]
@@ -349,7 +349,7 @@ define(function (require) {
         it('addFilter make sure join filter is replaced if present in the app state', function (done) {
           $location.url('/path/?_a=(filters:!((join:(indexes:!((id:1))))))');
           var filter = {
-            join: {
+            join_set: {
               indexes: [
                 {id: 7}
               ]
@@ -373,7 +373,7 @@ define(function (require) {
           urlHelper.replaceFiltersAndQueryAndTime(
             [
               {
-                join: {
+                join_set: {
                   indexes: [
                     {id: 7}
                   ]
@@ -407,7 +407,7 @@ define(function (require) {
           urlHelper.replaceFiltersAndQueryAndTime(
             [
               {
-                join: {
+                join_set: {
                   indexes: [
                     {id: 7}
                   ]
@@ -438,7 +438,7 @@ define(function (require) {
           urlHelper.replaceFiltersAndQueryAndTime(
             [
               {
-                join: {
+                join_set: {
                   indexes: [
                     {id: 7}
                   ]
@@ -473,7 +473,7 @@ define(function (require) {
           urlHelper.replaceFiltersAndQueryAndTime(
             [
               {
-                join: {
+                join_set: {
                   indexes: [
                     {id: 7}
                   ]
@@ -556,7 +556,7 @@ define(function (require) {
              'relations:!(!(article.id,company.articles))),meta:(disabled:!f,negate:!f,value:\'button:label\'))))'
             );
           var expected = {
-            join: {
+            join_set: {
               focus: 'company',
               filters: {},
               indexes: [
@@ -684,7 +684,7 @@ define(function (require) {
           var expected = [
             {
               meta:{},
-              join: {
+              join_set: {
                 indexes: [
                   {id: 7}
                 ]
@@ -784,7 +784,7 @@ define(function (require) {
         it('getRegularFiltersPerIndex - with a join in the kibi state', function (done) {
           kibiStateHelper.saveFiltersForDashboardId('time-testing-4', [
             {
-              join: {}
+              join_set: {}
             }
           ]);
           var expected = {

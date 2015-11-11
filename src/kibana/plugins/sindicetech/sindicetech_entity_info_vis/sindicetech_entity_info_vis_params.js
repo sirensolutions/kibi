@@ -3,7 +3,7 @@ define(function (require) {
 
   require('modules').get('kibana/sindicetech_entity_info_vis')
 
-  .directive('sindicetechEntityInfoVisParams', function ($rootScope, kbnUrl, $window, Private, Notifier) {
+  .directive('sindicetechEntityInfoVisParams', function ($rootScope, kbnUrl, Private, Notifier) {
 
     var notify = new Notifier({
       location: 'Templated Query Viewer Params'
@@ -16,12 +16,13 @@ define(function (require) {
 
         var _shouldEntityURIBeEnabled = Private(require('plugins/kibi/commons/_should_entity_uri_be_enabled'));
 
-        $scope.updateScope = function () {
-          $scope.vis.params.queryOptions = _.map($scope.vis.params.queryOptions, function (option) {
-            $scope.jsonError = {
+        var updateScope = function () {
+          $scope.jsonError = [];
+          $scope.vis.params.queryOptions = _.map($scope.vis.params.queryOptions, function (option, index) {
+            $scope.jsonError.push({
               message: '',
               block: ''
-            };
+            });
             if (!option) {
               return option;
             }
@@ -33,27 +34,28 @@ define(function (require) {
                 option.templateVars = JSON.parse(option._templateVarsString);
               }
 
-              option.templateVars.label = '';
               if (option._label) {
                 option.templateVars.label = option._label;
+              } else if (!option.templateVars.label) {
+                option.templateVars.label = '';
               }
             } catch (err) {
-              $scope.jsonError.message = err.toString();
+              $scope.jsonError[index].message = err.toString();
             }
             return option;
           });
-
-          // trick to force the option window to pickup the changes
-          // as it will only pickup changes on primitive values
-          // while we are editind an object here
-          $scope.vis.params.random = $window.performance.now();
         };
 
-        $scope.$watch('vis.params.queryOptions', function () {
-          $scope.updateScope();
+        $scope.$watch(function (myscope) {
+          // only triggers when the queryId, template vars or the _label change
+          return _.map(myscope.vis.params.queryOptions, function (option) {
+            return option._templateVarsString + option._label + option.queryId;
+          });
+        }, function () {
+          updateScope();
 
-          var queryIds = _.map($scope.vis.params.queryOptions, function (snippet) {
-            return snippet.queryId;
+          var queryIds = _.map($scope.vis.params.queryOptions, function (option) {
+            return option.queryId;
           });
 
           _shouldEntityURIBeEnabled(queryIds).then(function (value) {
@@ -63,7 +65,7 @@ define(function (require) {
               $rootScope.$emit('kibi:entityURIEnabled:entityinfo', value);
             }
           }).catch(function (err) {
-            notify.warning('Could not determine that widget need entityURI' + JSON.stringify(err, null, ' '));
+            notify.warning('Could not determine that widget need entityURI\n' + JSON.stringify(err, null, ' '));
           });
         }, true);
 

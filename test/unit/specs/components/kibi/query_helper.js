@@ -122,7 +122,7 @@ define(function (require) {
                 focus: focus,
                 indexes: indexes,
                 relations: relations,
-                filters: {
+                queries: {
                   company : [
                     {
                       query: {
@@ -172,7 +172,7 @@ define(function (require) {
                 focus: focus,
                 indexes: indexes,
                 relations: relations,
-                filters: {}
+                queries: {}
               }
             };
 
@@ -208,7 +208,7 @@ define(function (require) {
                 focus: focus,
                 indexes: indexes,
                 relations: relations,
-                filters: {
+                queries: {
                   company : [
                   {
                     query: {
@@ -254,7 +254,7 @@ define(function (require) {
                 focus: focus,
                 indexes: indexes,
                 relations: relations,
-                filters: {}
+                queries: {}
               }
             };
 
@@ -294,7 +294,7 @@ define(function (require) {
                 focus: focus,
                 indexes: indexes,
                 relations: relations,
-                filters: {
+                queries: {
                   company : [
                   {
                     query: {
@@ -344,7 +344,7 @@ define(function (require) {
                 focus: focus,
                 indexes: indexes,
                 relations: relations,
-                filters: {
+                queries: {
                   company : [
                   {
                     query: {
@@ -396,7 +396,7 @@ define(function (require) {
                 focus: focus,
                 indexes: indexes,
                 relations: relations,
-                filters: {
+                queries: {
                   company : [
                   {
                     not: {
@@ -444,7 +444,7 @@ define(function (require) {
                 focus: focus,
                 indexes: indexes,
                 relations: relations,
-                filters: {}
+                queries: {}
               }
             };
 
@@ -486,7 +486,7 @@ define(function (require) {
                 focus: focus,
                 indexes: indexes,
                 relations: relations,
-                filters: {
+                queries: {
                   'time-testing-3': [
                   {
                     query: {
@@ -536,7 +536,7 @@ define(function (require) {
                 focus: focus,
                 indexes: indexes,
                 relations: relations,
-                filters: {
+                queries: {
                   'time-testing-3': [
                   {
                     range: {
@@ -579,7 +579,7 @@ define(function (require) {
                 focus: focus,
                 indexes: indexes,
                 relations: relations,
-                filters: {}
+                queries: {}
               }
             };
 
@@ -609,7 +609,7 @@ define(function (require) {
                 focus: focus,
                 indexes: indexes,
                 relations: relations,
-                filters: {
+                queries: {
                   'time-testing-3': [
                   {
                     range: {
@@ -688,7 +688,7 @@ define(function (require) {
               focus: focus,
               indexes: indexes,
               relations: relations,
-              filters: {}
+              queries: {}
             }
           };
 

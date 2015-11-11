@@ -69,7 +69,7 @@ define(function (require) {
               // get the join filter if present on the dashboard
               var joinFilter = urlHelper.getJoinFilter();
               // add it only for the dashboard where focus match
-              if (joinFilter && joinFilter.join.focus === savedSearch.searchSource._state.index.id) {
+              if (joinFilter && joinFilter.join_set.focus === savedSearch.searchSource._state.index.id) {
                 extraFilters.push(joinFilter);
               }
 
@@ -144,10 +144,10 @@ define(function (require) {
         if (extraFilters) {
           if (!selectedDashboardFilters) {
             selectedDashboardFilters = extraFilters;
-          } else if (extraFilters.length === 1 && extraFilters[0].join) {
+          } else if (extraFilters.length === 1 && extraFilters[0].join_set) {
             // remove any other join filter from filters
             selectedDashboardFilters = _.filter(selectedDashboardFilters, function (f) {
-              return !f.join;
+              return !f.join_set;
             });
           }
         }
@@ -187,7 +187,7 @@ define(function (require) {
               } else if (filter.script) {
                 query.query.filtered.filter.bool.must_not.push({script: filter.script});
               } else if (filter.join_set) {
-                query.query.filtered.filter.bool.must_not.push({join: filter.join_set});
+                query.query.filtered.filter.bool.must_not.push({join_set: filter.join_set});
               } else if (filter.join_sequence) {
                 query.query.filtered.filter.bool.must_not.push({join_sequence: filter.join_sequence});
               }
@@ -211,7 +211,7 @@ define(function (require) {
               } else if (filter.script) {
                 query.query.filtered.filter.bool.must.push({script: filter.script});
               } else if (filter.join_set) {
-                query.query.filtered.filter.bool.must.push({join_set: filter.join});
+                query.query.filtered.filter.bool.must.push({join_set: filter.join_set});
               } else if (filter.join_sequence) {
                 query.query.filtered.filter.bool.must.push({join_sequence: filter.join_sequence});
               }

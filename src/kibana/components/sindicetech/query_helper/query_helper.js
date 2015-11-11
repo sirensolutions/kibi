@@ -161,7 +161,7 @@ define(function (require) {
             focus: focus,
             indexes: indexes,
             relations: relations,
-            filters: {}
+            queries: {}
           }
         };
 
@@ -172,10 +172,10 @@ define(function (require) {
               var fQuery = queries[index];
               // filter out only query_string queries that are only a wildcard
               if (fQuery && (!fQuery.query_string || fQuery.query_string.query !== '*')) {
-                if (!joinFilter.join.filters[index]) {
-                  joinFilter.join.filters[index] = [];
+                if (!joinFilter.join_set.queries[index]) {
+                  joinFilter.join_set.queries[index] = [];
                 }
-                joinFilter.join.filters[index].push({ query: fQuery });
+                joinFilter.join_set.queries[index].push({ query: fQuery });
               }
             }
           }
@@ -184,8 +184,8 @@ define(function (require) {
         if (filters) {
           for (var f in filters) {
             if (filters.hasOwnProperty(f) && f !== focus && filters[f] instanceof Array && filters[f].length > 0) {
-              if (!joinFilter.join.filters[f]) {
-                joinFilter.join.filters[f] = [];
+              if (!joinFilter.join_set.queries[f]) {
+                joinFilter.join_set.queries[f] = [];
               }
 
 
@@ -201,7 +201,7 @@ define(function (require) {
                   delete filter.meta;
                 }
 
-                joinFilter.join.filters[f].push(filter);
+                joinFilter.join_set.queries[f].push(filter);
               }
 
             }
@@ -249,10 +249,10 @@ define(function (require) {
           for (var i = 0; i < data.length; i++) {
             if (data[i]) {
               // here we add a time filter to correct filters
-              if (!joinFilter.join.filters[data[i].index.id]) {
-                joinFilter.join.filters[data[i].index.id] = [];
+              if (!joinFilter.join_set.queries[data[i].index.id]) {
+                joinFilter.join_set.queries[data[i].index.id] = [];
               }
-              joinFilter.join.filters[data[i].index.id].push(data[i].timeFilter);
+              joinFilter.join_set.queries[data[i].index.id].push(data[i].timeFilter);
             }
           }
 

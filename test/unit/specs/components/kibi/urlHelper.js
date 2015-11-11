@@ -259,7 +259,7 @@ define(function (require) {
 
         it('removeJoinFilter', function () {
           $location.url(
-            '/?_a=(filters:!((join:(filters:(),focus:company,indexes:!((id:article,type:Article),(id:company,type:Company)),' +
+            '/?_a=(filters:!((join_set:(queries:(),focus:company,indexes:!((id:article,type:Article),(id:company,type:Company)),' +
             'relations:!(!(article.id,company.articles))),meta:(disabled:!f,negate:!f,value:\'button:label\'))))'
           );
           var expected = '/?_a=(filters:!())';
@@ -333,7 +333,7 @@ define(function (require) {
             }
           };
 
-          var expected = 'http://server/#/path/?_a=(filters:!((join:(indexes:!((id:7))))))';
+          var expected = 'http://server/#/path/?_a=(filters:!((join_set:(indexes:!((id:7))))))';
           urlHelper.addFilter(filter);
 
           var off = $rootScope.$on('$locationChangeSuccess', function (event, newUrl, oldUrl) {
@@ -347,7 +347,7 @@ define(function (require) {
 
 
         it('addFilter make sure join filter is replaced if present in the app state', function (done) {
-          $location.url('/path/?_a=(filters:!((join:(indexes:!((id:1))))))');
+          $location.url('/path/?_a=(filters:!((join_set:(indexes:!((id:1))))))');
           var filter = {
             join_set: {
               indexes: [
@@ -356,7 +356,7 @@ define(function (require) {
             }
           };
 
-          var expected = 'http://server/#/path/?_a=(filters:!((join:(indexes:!((id:7))))))';
+          var expected = 'http://server/#/path/?_a=(filters:!((join_set:(indexes:!((id:7))))))';
           urlHelper.addFilter(filter);
 
           var off = $rootScope.$on('$locationChangeSuccess', function (event, newUrl, oldUrl) {
@@ -369,7 +369,7 @@ define(function (require) {
         });
 
         it('replaceFiltersAndQueryAndTime _g not present', function (done) {
-          $location.url('/path/?_a=(query:(query_string:(query:\'AAA\')),filters:!((join:(indexes:!((id:1))))))');
+          $location.url('/path/?_a=(query:(query_string:(query:\'AAA\')),filters:!((join_set:(indexes:!((id:1))))))');
           urlHelper.replaceFiltersAndQueryAndTime(
             [
               {
@@ -391,7 +391,7 @@ define(function (require) {
             }
           );
 
-          var expected = 'http://server/#/path/?_a=(filters:!((join:(indexes:!((id:7))))),query:(query_string:(query:BBB)))';
+          var expected = 'http://server/#/path/?_a=(filters:!((join_set:(indexes:!((id:7))))),query:(query_string:(query:BBB)))';
 
           var off = $rootScope.$on('$locationChangeSuccess', function (event, newUrl, oldUrl) {
             off();
@@ -403,7 +403,7 @@ define(function (require) {
         });
 
         it('replaceFiltersAndQueryAndTime - delete query if undefined', function (done) {
-          $location.url('/path/?_a=(query:(query_string:(query:\'AAA\')),filters:!((join:(indexes:!((id:1))))))');
+          $location.url('/path/?_a=(query:(query_string:(query:\'AAA\')),filters:!((join_set:(indexes:!((id:1))))))');
           urlHelper.replaceFiltersAndQueryAndTime(
             [
               {
@@ -421,7 +421,7 @@ define(function (require) {
             }
           );
 
-          var expected = 'http://server/#/path/?_a=(filters:!((join:(indexes:!((id:7))))))';
+          var expected = 'http://server/#/path/?_a=(filters:!((join_set:(indexes:!((id:7))))))';
 
           var off = $rootScope.$on('$locationChangeSuccess', function (event, newUrl, oldUrl) {
             off();
@@ -434,7 +434,7 @@ define(function (require) {
 
         it('replaceFiltersAndQueryAndTime _g present', function (done) {
           $location.url('/path/?_g=(time:(from:\'now-1\',to:\'now\'))&' +
-                        '_a=(query:(query_string:(query:\'AAA\')),filters:!((join:(indexes:!((id:1))))))');
+                        '_a=(query:(query_string:(query:\'AAA\')),filters:!((join_set:(indexes:!((id:1))))))');
           urlHelper.replaceFiltersAndQueryAndTime(
             [
               {
@@ -457,7 +457,7 @@ define(function (require) {
           );
 
           var expected = 'http://server/#/path/?_g=(time:(from:now-7,to:now))&' +
-                         '_a=(filters:!((join:(indexes:!((id:7))))),query:(query_string:(query:BBB)))';
+                         '_a=(filters:!((join_set:(indexes:!((id:7))))),query:(query_string:(query:BBB)))';
 
           var off = $rootScope.$on('$locationChangeSuccess', function (event, newUrl, oldUrl) {
             off();
@@ -552,13 +552,13 @@ define(function (require) {
 
         it('getJoinFilter', function () {
           $location.url(
-            '/?_a=(filters:!((join:(filters:(),focus:company,indexes:!((id:article,type:Article),(id:company,type:Company)),' +
+            '/?_a=(filters:!((join_set:(queries:(),focus:company,indexes:!((id:article,type:Article),(id:company,type:Company)),' +
              'relations:!(!(article.id,company.articles))),meta:(disabled:!f,negate:!f,value:\'button:label\'))))'
             );
           var expected = {
             join_set: {
               focus: 'company',
-              filters: {},
+              queries: {},
               indexes: [
                 {
                   id: 'article',
@@ -680,7 +680,7 @@ define(function (require) {
         });
 
         it('getCurrentDashboardFilters', function () {
-          $location.url('/dashboard/dashboard1/?_a=(filters:!((meta:(),join:(indexes:!((id:7))))))');
+          $location.url('/dashboard/dashboard1/?_a=(filters:!((meta:(),join_set:(indexes:!((id:7))))))');
           var expected = [
             {
               meta:{},
@@ -695,7 +695,7 @@ define(function (require) {
         });
 
         it('getCurrentDashboardFilters when not on dasgboard', function () {
-          $location.url('/notdashboard/XXX/?_a=(filters:!((meta:(),join:(indexes:!((id:7))))))');
+          $location.url('/notdashboard/XXX/?_a=(filters:!((meta:(),join_set:(indexes:!((id:7))))))');
           expect(urlHelper.getCurrentDashboardFilters()).to.eql(undefined);
         });
 

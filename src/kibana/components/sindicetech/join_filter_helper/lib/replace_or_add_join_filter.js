@@ -14,7 +14,7 @@ define(function (require) {
       }
 
       _.each(filterArray, function (f, index) {
-        if (f.join) {
+        if (f.join_set) {
           filterArray[index] = joinFilter;
           replaced = true;
           return false;

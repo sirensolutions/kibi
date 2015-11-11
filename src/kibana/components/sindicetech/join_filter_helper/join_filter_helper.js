@@ -57,6 +57,12 @@ define(function (require) {
             var dashboardSavedSearch = data[0];
             var filters = data[1];
             var queries = data[2];
+
+            if (!dashboardSavedSearch) {
+              reject(new Error('Not possible to get joinFilter as SavedSearch is undefined for for [' +  focusDashboardId + ']'));
+              return;
+            }
+
             var focusIndex = dashboardSavedSearch.searchSource._state.index.id;
 
             // here check that the join filter should be present on this dashboard
@@ -64,30 +70,12 @@ define(function (require) {
             var isFocusDashboardInEnabledRelations = self.isDashboardInEnabledRelations(focusDashboardId, relationalPanelConfig.relations);
             if (!focusIndex) {
               reject(new Error('SavedSearch for [' +  focusDashboardId + '] dashboard seems to not have an index id'));
+              return;
             }
             if (!isFocusDashboardInEnabledRelations) {
               reject(new Error('The join filter has no enabled relation for the focused dashboard : ' +  focusDashboardId));
+              return;
             }
-
-            /*
-            THIS SHOUL NOT BE NEEDED AS we filter queries and filters in
-            queryHelper.constructJoinFilter
-
-            var labels = queryHelper.getLabelsInConnectedComponent(focusIndex, relationalPanelConfig.relations);
-            var labels = "ddd"
-            // keep only the filters which are in the connected component
-            for (var filter in filters) {
-              if (filters.hasOwnProperty(filter) && !_.contains(labels, filter)) {
-                delete filters[filter];
-              }
-            }
-            // keep only the queries which are in the connected component
-            for (var query in queries) {
-              if (queries.hasOwnProperty(query) && !_.contains(labels, query)) {
-                delete queries[query];
-              }
-            }
-            */
 
 
             var promises = [];
@@ -121,8 +109,6 @@ define(function (require) {
               return relation.enabled === true;
             });
 
-
-
             return Promise.all(promises).then(function (results) {
               var indexToDashboardMap = {};
 
@@ -151,14 +137,29 @@ define(function (require) {
                 ]);
               });
 
-              // build the join filter
+
+              var labels = queryHelper.getLabelsInConnectedComponent(focusIndex, relations);
+              // keep only the filters which are in the connected component
+              for (var filter in filters) {
+                if (filters.hasOwnProperty(filter) && !_.contains(labels, filter)) {
+                  delete filters[filter];
+                }
+              }
+              // keep only the queries which are in the connected component
+              for (var query in queries) {
+                if (queries.hasOwnProperty(query) && !_.contains(labels, query)) {
+                  delete queries[query];
+                }
+              }
+
+              // build the join_set filter
               return queryHelper.constructJoinFilter(
                 focusIndex,
                 indexes,
                 relations,
                 filters,
                 queries,
-                indexToDashboardMap   // null here if we want the dashboard time be taken into consideration this map is necessary
+                indexToDashboardMap
               );
 
             });

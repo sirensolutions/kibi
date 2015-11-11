@@ -46,11 +46,16 @@ define(function (require) {
           });
         };
 
-        $scope.$watch('vis.params.queryOptions', function () {
+        $scope.$watch(function (myscope) {
+          // only triggers when the queryId, template vars or the _label change
+          return _.map(myscope.vis.params.queryOptions, function (option) {
+            return option._templateVarsString + option._label + option.queryId;
+          });
+        }, function () {
           updateScope();
 
-          var queryIds = _.map($scope.vis.params.queryOptions, function (snippet) {
-            return snippet.queryId;
+          var queryIds = _.map($scope.vis.params.queryOptions, function (option) {
+            return option.queryId;
           });
 
           _shouldEntityURIBeEnabled(queryIds).then(function (value) {

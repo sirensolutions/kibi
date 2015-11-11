@@ -11,7 +11,7 @@ define(function (require) {
 
     // added by kibi - start
     $scope.holder = {
-      visible: $location.path().indexOf('/visualize/edit/') === 0,
+      visible: $location.path().indexOf('/visualize/') === 0,
       entityURIEnabled: false,
       entityURI: ''
     };

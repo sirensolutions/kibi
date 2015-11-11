@@ -22,7 +22,7 @@ define(function (require) {
       $scope.holder = {
         entityURI: '',
         entityURIEnabled: false,
-        visible: $location.path().indexOf('/visualize/edit/') !== -1
+        visible: $location.path().indexOf('/visualize/') !== -1
       };
       $scope.$watch('holder.entityURI', function (entityURI) {
         if (entityURI && $scope.holder.visible) {

@@ -114,13 +114,15 @@ define(function (require) {
             return createFilterLabel(filter, index.fields);
           });
         } else {
-          return createFilterLabel(filter);
+          return Promise.resolve(createFilterLabel(filter));
         }
       };
 
 
       var explainFilterInMustNot = function (filter, indexId) {
-        return 'NOT ' + explainFilter(filter, indexId);
+        return explainFilter(filter, indexId).then(function (filterExplanation) {
+          return 'NOT ' + filterExplanation;
+        });
       };
 
 
@@ -230,16 +232,52 @@ define(function (require) {
       };
 
 
+      var explainFiltersForJoinSet = function (index, filters) {
+        var html = '<li>Index: <b>' + index.id + '</b></li>';
+        if (!filters) {
+          return Promise.resolve(html);
+        }
+
+        var promises = [];
+        _.each(filters, function (filter) {
+          promises.push(explainFilter(filter));
+        });
+
+        return Promise.all(promises).then(function (explanations) {
+          html += '<ul>';
+          _.each(explanations, function (expl) {
+            html += '<li>' + expl + '</li>';
+          });
+          html += '</ul>';
+          return html;
+        });
+      };
+
+
+      var explainJoinSet = function (joinSet) {
+        var promises = [];
+        _.each(joinSet.indexes, function (index) {
+          promises.push(explainFiltersForJoinSet(index, joinSet.filters[index.id]));
+        });
+
+        return Promise.all(promises).then(function (explanations) {
+          var html = '<ul>';
+          _.each(explanations, function (expl) {
+            html += '<li>' + expl + '</li>';
+          });
+          return html + '</ul>';
+        });
+      };
+
+
       var getFilterExplanations = function (filters) {
         var promises = [];
         _.each(filters, function (f) {
           if (f.join_sequence) {
             promises.push(explainJoinSequence(f.join_sequence));
+          } else if (f.join) {
+            promises.push(explainJoinSet(f.join));
           } else {
-            // Note: in future
-            // compute the explanation for the other type of join filter like join_set here as well
-            // it would be f.join.filters
-
             // for now push an empty explanation so array lenght is correct
             promises.push(Promise.resolve(''));
           }

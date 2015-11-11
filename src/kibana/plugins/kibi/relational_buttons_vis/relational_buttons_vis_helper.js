@@ -144,12 +144,39 @@ define(function (require) {
       });
     };
 
-    RelationVisHelper.prototype.addRelationToJoinSeqFilter = function (button, currentDashboardSavedSearch, joinSeqFilter) {
-      return this._getRelation(button, currentDashboardSavedSearch).then(function (relation) {
-        joinSeqFilter.join_sequence.push(relation);
-        return joinSeqFilter;
-      });
 
+    RelationVisHelper.prototype.addRelationToJoinSeqFilter = function (button, currentDashboardSavedSearch, joinSeqFilter) {
+      var self = this;
+      var joinSeqFiltersCloned = _.cloneDeep(joinSeqFilter);
+
+      return this._getRelation(button, currentDashboardSavedSearch).then(function (relation) {
+        self._negateLastElementOfTheSequenceIfFilterWasNegated(joinSeqFiltersCloned);
+        joinSeqFiltersCloned.join_sequence.push(relation);
+        // make sure that the new filter is not negated
+        joinSeqFiltersCloned.meta.negate = false;
+        return joinSeqFiltersCloned;
+      });
+    };
+
+
+    RelationVisHelper.prototype.composeGroupFromExistingJoinFilters = function (joinSeqFilters) {
+      var self = this;
+      var g = {
+        group: []
+      };
+      _.each(joinSeqFilters, function (f) {
+        var joinSeqFiltersCloned = _.cloneDeep(f);
+        self._negateLastElementOfTheSequenceIfFilterWasNegated(joinSeqFiltersCloned);
+        g.group.push(joinSeqFiltersCloned);
+      });
+      return g;
+    };
+
+
+    RelationVisHelper.prototype._negateLastElementOfTheSequenceIfFilterWasNegated = function (joinSeqFilter) {
+      if (joinSeqFilter.meta.negate === true) {
+        joinSeqFilter.join_sequence[joinSeqFilter.join_sequence.length - 1].negate = true;
+      }
     };
 
 
@@ -226,17 +253,6 @@ define(function (require) {
         });
 
       });
-    };
-
-
-    RelationVisHelper.prototype.composeGroupFromExistingJoinFilters = function (joinSeqFilters) {
-      var g = {
-        group: []
-      };
-      _.each(joinSeqFilters, function (f) {
-        g.group.push(f.join_sequence);
-      });
-      return g;
     };
 
 

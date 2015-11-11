@@ -6,22 +6,41 @@ define(function (require) {
     var queryHelper = Private(require('components/sindicetech/query_helper/query_helper'));
     var urlHelper   = Private(require('components/kibi/url_helper/url_helper'));
 
-    var _isIndexInEnabledRelations = function (indexId, enabledRelations) {
-      for (var i = 0; i < enabledRelations.length; i++) {
-        var enabledRelation = enabledRelations[i];
-        if (enabledRelation[0].indexOf(indexId) === 0 || enabledRelation[1].indexOf(indexId) === 0) {
+
+    var _invert = function (obj) {
+      var new_obj = {};
+      for (var prop in obj) {
+        if (obj.hasOwnProperty(prop)) {
+          new_obj[obj[prop]] = prop;
+        }
+      }
+      return new_obj;
+    };
+
+
+    function JoinFilterHelper() {}
+
+    JoinFilterHelper.prototype.isDashboardInEnabledRelations = function (dashboardId, relations) {
+      for (var i = 0; i < relations.length; i++) {
+        if (relations[i].enabled && relations[i].from === dashboardId || relations[i].to === dashboardId) {
           return true;
         }
       }
       return false;
     };
 
-    function JoinFilterHelper() {}
-
     JoinFilterHelper.prototype.getJoinFilter = function (focusDashboardId) {
+      var self = this;
       return new Promise(function (fulfill, reject) {
         if (focusDashboardId) {
           var relationalPanelConfig = config.get('kibi:relationalPanelConfig');
+          if (!relationalPanelConfig) {
+            reject(new Error('Could not get kibi:relationalPanelConfig'));
+          }
+          if (!relationalPanelConfig.relations) {
+            reject(new Error('Could not get kibi:relationalPanelConfig.relations'));
+          }
+
           var focusedSavedSearch = savedDashboards.get(focusDashboardId).then(function (dashboard) {
             // get focused dashboard
             if (!dashboard.savedSearchId) {
@@ -41,34 +60,109 @@ define(function (require) {
             var focusIndex = dashboardSavedSearch.searchSource._state.index.id;
 
             // here check that the join filter should be present on this dashboard
-            // it should be added only if we find focus in enabled relations
-            if (!focusIndex || !_isIndexInEnabledRelations(focusIndex, relationalPanelConfig.enabledRelations)) {
-              reject(new Error('The join filter has no enabled relation for the focused index: ' +  focusIndex));
-            } else {
-              var labels = queryHelper.getLabelsInConnectedComponent(focusIndex, relationalPanelConfig.enabledRelations);
-              // keep only the filters which are in the connected component
-              for (var filter in filters) {
-                if (filters.hasOwnProperty(filter) && !_.contains(labels, filter)) {
-                  delete filters[filter];
+            // it should be added only if we find current dashboardId in enabled relations
+            var isFocusDashboardInEnabledRelations = self.isDashboardInEnabledRelations(focusDashboardId, relationalPanelConfig.relations);
+            if (!focusIndex) {
+              reject(new Error('SavedSearch for [' +  focusDashboardId + '] dashboard seems to not have an index id'));
+            }
+            if (!isFocusDashboardInEnabledRelations) {
+              reject(new Error('The join filter has no enabled relation for the focused dashboard : ' +  focusDashboardId));
+            }
+
+            /*
+            THIS SHOUL NOT BE NEEDED AS we filter queries and filters in
+            queryHelper.constructJoinFilter
+
+            var labels = queryHelper.getLabelsInConnectedComponent(focusIndex, relationalPanelConfig.relations);
+            var labels = "ddd"
+            // keep only the filters which are in the connected component
+            for (var filter in filters) {
+              if (filters.hasOwnProperty(filter) && !_.contains(labels, filter)) {
+                delete filters[filter];
+              }
+            }
+            // keep only the queries which are in the connected component
+            for (var query in queries) {
+              if (queries.hasOwnProperty(query) && !_.contains(labels, query)) {
+                delete queries[query];
+              }
+            }
+            */
+
+
+            var promises = [];
+            _.each(relationalPanelConfig.relations, function (relation) {
+
+              promises.push(savedDashboards.get(relation.from).then(function (savedDashboard) {
+                if (!savedDashboard.savedSearchId) {
+                  throw new Error('Should have savedSearchId');
+                }
+                return savedSearches.get(savedDashboard.savedSearchId).then(function (savedSearch) {
+                  return {
+                    indexId: savedSearch.searchSource._state.index.id,
+                    dashboardId: savedDashboard.id
+                  };
+                });
+              }));
+              promises.push(savedDashboards.get(relation.to).then(function (savedDashboard) {
+                if (!savedDashboard.savedSearchId) {
+                  throw new Error('Should have savedSearchId');
+                }
+                return savedSearches.get(savedDashboard.savedSearchId).then(function (savedSearch) {
+                  return {
+                    indexId: savedSearch.searchSource._state.index.id,
+                    dashboardId: savedDashboard.id
+                  };
+                });
+              }));
+            });
+
+            var enabledRelations = _.filter(relationalPanelConfig.relations, function (relation) {
+              return relation.enabled === true;
+            });
+
+
+
+            return Promise.all(promises).then(function (results) {
+              var indexToDashboardMap = {};
+
+              _.each(results, function (mapping) {
+                indexToDashboardMap[mapping.indexId] = mapping.dashboardId;
+              });
+
+              var indexes = [];
+              for (var indexId in indexToDashboardMap) {
+                if (indexToDashboardMap.hasOwnProperty(indexId)) {
+                  indexes.push({id: indexId});
                 }
               }
-              // keep only the queries which are in the connected component
-              for (var query in queries) {
-                if (queries.hasOwnProperty(query) && !_.contains(labels, query)) {
-                  delete queries[query];
-                }
-              }
+
+              // here translate to old format array of arrays
+              // [
+              //  "article.companyid",
+              //  "company.id"
+              // ]
+              var dashboardsToIndexesMap = _invert(indexToDashboardMap);
+              var relations = [];
+              _.each(enabledRelations, function (r) {
+                relations.push([
+                  dashboardsToIndexesMap[r.from] + '.' + r.fromPath,
+                  dashboardsToIndexesMap[r.to] + '.' + r.toPath,
+                ]);
+              });
 
               // build the join filter
               return queryHelper.constructJoinFilter(
                 focusIndex,
-                relationalPanelConfig.indexes,
-                relationalPanelConfig.enabledRelations,
+                indexes,
+                relations,
                 filters,
                 queries,
-                null      // here if we want the dashboard time be taken into consideration this map is necessary
+                indexToDashboardMap   // null here if we want the dashboard time be taken into consideration this map is necessary
               );
-            }
+
+            });
+
           }).then(function (joinFilter) {
             fulfill(joinFilter);
           }).catch(function (err) {

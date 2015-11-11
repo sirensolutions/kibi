@@ -167,14 +167,14 @@ define(function (require) {
       _.each(joinSeqFilters, function (f) {
         var joinSeqFiltersCloned = _.cloneDeep(f);
         self._negateLastElementOfTheSequenceIfFilterWasNegated(joinSeqFiltersCloned);
-        g.group.push(joinSeqFiltersCloned);
+        g.group.push(joinSeqFiltersCloned.join_sequence);
       });
       return g;
     };
 
 
     RelationVisHelper.prototype._negateLastElementOfTheSequenceIfFilterWasNegated = function (joinSeqFilter) {
-      if (joinSeqFilter.meta.negate === true) {
+      if (joinSeqFilter.meta && joinSeqFilter.meta.negate === true) {
         joinSeqFilter.join_sequence[joinSeqFilter.join_sequence.length - 1].negate = true;
       }
     };

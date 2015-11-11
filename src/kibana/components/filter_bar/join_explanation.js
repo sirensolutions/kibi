@@ -179,7 +179,7 @@ define(function (require) {
         return Promise.all(promises).then(function (explanations) {
           var html =
             '<b>Relation:</b></br>' +
-            '<table class="relation ' + (el.negate === true ? 'negated' : '' ) + '">' +
+            '<table class="relation' + (el.negate === true ? ' negated' : '' ) + '">' +
             '<tr>' +
             '<td>from: <b>' + relation[0].indices[0] + '.' + relation[0].path + '</b>' +
             (explanations[0] ? '</br>' + explanations[0] : '') +

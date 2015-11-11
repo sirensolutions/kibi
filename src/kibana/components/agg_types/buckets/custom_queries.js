@@ -37,7 +37,7 @@ define(function (require) {
             if (!_.size(queryIds)) return;
 
 
-            var configurationMode = $location.path().indexOf('/visualize/edit/') === 0;
+            var configurationMode = $location.path().indexOf('/visualize/') === 0;
 
             var json = {};
             _.each(aggConfig.params.queryIds, function (queryIdDef) {

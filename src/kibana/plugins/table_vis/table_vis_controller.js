@@ -42,7 +42,7 @@ define(function (require) {
 
     $scope.$watch('esResponse', function (resp, oldResp) {
       // added by kibi - start
-      $scope.holder.visible = $location.path().indexOf('/visualize/edit/') === 0;
+      $scope.holder.visible = $location.path().indexOf('/visualize/') === 0;
       // added by kibi - end
 
       var tableGroups = $scope.tableGroups = null;

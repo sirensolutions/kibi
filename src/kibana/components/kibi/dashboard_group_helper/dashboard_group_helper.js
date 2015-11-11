@@ -314,7 +314,26 @@ define(function (require) {
       });
     };
 
-
+    DashboardGroupHelper.prototype.detectJoinFilterInGroups = function (newDashboardGroups) {
+      for (var gIndex = 0; gIndex < newDashboardGroups.length; gIndex++) {
+        var g = newDashboardGroups[gIndex];
+        if (g.dashboards) {
+          for (var dIndex = 0; dIndex < g.dashboards.length; dIndex++ ) {
+            var d = g.dashboards[dIndex];
+            if (d.filters) {
+              for (var fIndex = 0; fIndex < d.filters.length; fIndex++ ) {
+                var f = d.filters[fIndex];
+                if (f.join) {
+                  // return all groups
+                  return true;
+                }
+              }
+            }
+          }
+        }
+      }
+      return false;
+    };
 
     /**
      * when possible update just the different properties
@@ -327,37 +346,7 @@ define(function (require) {
       var reasons = [];
 
 
-      var gIndex;
-      var dIndex;
-      var fIndex;
-
-      // if there is a join filter on any dashboard just update all groups
-      for (gIndex = 0; gIndex < newDashboardGroups.length; gIndex++) {
-        var gr = newDashboardGroups[gIndex];
-        if (gr.dashboards) {
-          for (dIndex = 0; dIndex < gr.dashboards.length; dIndex++ ) {
-            var da = gr.dashboards[dIndex];
-            if (da.filters) {
-              for (fIndex = 0; fIndex < da.filters.length; fIndex++ ) {
-                var f = da.filters[fIndex];
-                if (f.join) {
-                  // return all groups
-                  for (var i = 0; i < newDashboardGroups.length; i++) {
-                    groupIndexesToUpdateCountsOn.push(i);
-                  }
-                  return {
-                    indexes: groupIndexesToUpdateCountsOn,
-                    reasons: ['There is a join filter so lets update all groups']
-                  };
-                }
-              }
-            }
-          }
-        }
-      }
-
-
-      for (gIndex = 0; gIndex < newDashboardGroups.length; gIndex++) {
+      for (var gIndex = 0; gIndex < newDashboardGroups.length; gIndex++) {
         var g = newDashboardGroups[gIndex];
         // if not the same group replace
         if (oldDashboardGroups[gIndex].title !== g.title) {
@@ -406,7 +395,7 @@ define(function (require) {
           }
           // now compare each dashboard
           var updateCount = false;
-          for (dIndex = 0; dIndex < oldDashboardGroups[gIndex].dashboards.length; dIndex++) {
+          for (var dIndex = 0; dIndex < oldDashboardGroups[gIndex].dashboards.length; dIndex++) {
             var d = newDashboardGroups[gIndex].dashboards[dIndex];
 
             // first check that the number of filters changed on selected dashboard
@@ -446,6 +435,20 @@ define(function (require) {
             groupIndexesToUpdateCountsOn.push(gIndex);
           }
         }
+      }
+
+
+      // if there is a join filter on any dashboard just update all groups
+      // this can not go at the top as the code above if modifying the oldDashboardGroups
+      // e.g updating the selected one etc...
+      if (this.detectJoinFilterInGroups(newDashboardGroups)) {
+        for (var i = 0; i < newDashboardGroups.length; i++) {
+          groupIndexesToUpdateCountsOn.push(i);
+        }
+        return {
+          indexes: groupIndexesToUpdateCountsOn,
+          reasons: ['There is a join filter so lets update all groups']
+        };
       }
 
       return {

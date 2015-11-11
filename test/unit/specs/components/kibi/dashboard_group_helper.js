@@ -416,6 +416,51 @@ define(function (require) {
 
         });
 
+        describe('when there is joinFilter on the dashboard update all counts', function () {
+          //TODO: later we can analyze which dashboardGroups should be
+          // updated but for now just update all
+          it('different number of filters for selected dashboard', function () {
+
+            var oldDashboardGroups = [
+              {
+                title: 'Title A0',
+                dashboards: [{ id: 1, filters: [ {join:{}} ] }],
+                selected: {id: 1},
+                _selected: {id: 1}
+              },
+              {
+                title: 'Title B0',
+                dashboards: [{ id: 2, filters: [] }],
+                selected: {id: 2},
+                _selected: {id: 2}
+              }
+            ];
+            var newDashboardGroups = [
+              {
+                title: 'Title A0',
+                dashboards: [{ id: 1, filters: [ {join:{}} ] }],
+                selected: {id: 1},
+                _selected: {id: 1}
+              },
+              {
+                title: 'Title B0',
+                dashboards: [{id: 2, filters: [] }],
+                selected: {id: 2},
+                _selected: {id: 2}
+              }
+            ];
+
+            var expected = {
+              indexes: [0, 1],
+              reasons: ['There is a join filter so lets update all groups']
+            };
+
+            var actual = dashboardGroupHelper.updateDashboardGroups(oldDashboardGroups, newDashboardGroups);
+            expect(actual).to.eql(expected);
+          });
+
+        });
+
       });
 
       describe('getCountQueryForSelectedDashboard', function () {

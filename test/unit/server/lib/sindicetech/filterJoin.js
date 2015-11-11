@@ -14,7 +14,7 @@ describe('FilterJoin querying', function () {
       bool: {
         must: [
           {
-            join: {
+            join_set: {
               focus: 'i1',
               indexes: [
                 {
@@ -77,7 +77,7 @@ describe('FilterJoin querying', function () {
       bool: {
         must: [
           {
-            join: {
+            join_set: {
               focus: 'i1',
               indexes: [
                 {
@@ -136,7 +136,7 @@ describe('FilterJoin querying', function () {
     ];
     var query = [
       {
-        join: {
+        join_set: {
           focus: 'i1',
           indexes: [
             {
@@ -191,7 +191,7 @@ describe('FilterJoin querying', function () {
     ];
     var query = [
       {
-        join: {
+        join_set: {
           focus: 'i1',
           indexes: [
             {
@@ -241,7 +241,7 @@ describe('FilterJoin querying', function () {
     var relations = [
       [ 'i1.id1', 'i2.id2' ]
     ];
-    var filters = {
+    var queries = {
       i1: [
         {
           terms: {
@@ -252,7 +252,7 @@ describe('FilterJoin querying', function () {
     };
     var query = [
       {
-        join: {
+        join_set: {
           focus: 'i1',
           indexes: [
             {
@@ -265,7 +265,7 @@ describe('FilterJoin querying', function () {
             }
           ],
           relations: relations,
-          filters: filters
+          queries: queries
         }
       }
     ];
@@ -276,7 +276,7 @@ describe('FilterJoin querying', function () {
     var relations = [
       [ 'i1.id1', 'i2.id2' ]
     ];
-    var filters = {
+    var queries = {
       i2: [
         {
           terms: {
@@ -290,7 +290,7 @@ describe('FilterJoin querying', function () {
     };
     var query = [
       {
-        join: {
+        join_set: {
           focus: 'i1',
           indexes: [
             {
@@ -303,7 +303,7 @@ describe('FilterJoin querying', function () {
             }
           ],
           relations: relations,
-          filters: filters
+          queries: queries
         }
       }
     ];
@@ -353,7 +353,7 @@ describe('FilterJoin querying', function () {
     var relations = [
       [ 'i1.id1', 'i2.id2' ]
     ];
-    var filters = {
+    var queries = {
       i2: [
         {
           terms: {
@@ -364,7 +364,7 @@ describe('FilterJoin querying', function () {
     };
     var query = [
       {
-        join: {
+        join_set: {
           focus: 'i1',
           indexes: [
             {
@@ -377,7 +377,7 @@ describe('FilterJoin querying', function () {
             }
           ],
           relations: relations,
-          filters: filters
+          queries: queries
         }
       }
     ];
@@ -425,7 +425,7 @@ describe('FilterJoin querying', function () {
       [ 'i1.id1', 'i2.id2' ],
       [ 'i3.id3', 'i2.id2' ]
     ];
-    var filters = {
+    var queries = {
       i2: [
         {
           terms: {
@@ -443,7 +443,7 @@ describe('FilterJoin querying', function () {
     };
     var query = [
       {
-        join: {
+        join_set: {
           focus: 'i1',
           indexes: [
             {
@@ -460,7 +460,7 @@ describe('FilterJoin querying', function () {
             }
           ],
           relations: relations,
-          filters: filters
+          queries: queries
         }
       }
     ];
@@ -541,7 +541,7 @@ describe('FilterJoin querying', function () {
       [ 'i1.aaa', 'i2.id2' ],
       [ 'i3.id3', 'i1.bbb' ]
     ];
-    var filters = {
+    var queries = {
       i2: [
         {
           terms: {
@@ -559,7 +559,7 @@ describe('FilterJoin querying', function () {
     };
     var query = [
       {
-        join: {
+        join_set: {
           focus: 'i1',
           indexes: [
             {
@@ -576,7 +576,7 @@ describe('FilterJoin querying', function () {
             }
           ],
           relations: relations,
-          filters: filters
+          queries: queries
         }
       }
     ];
@@ -661,7 +661,7 @@ describe('FilterJoin querying', function () {
       [ 'i6.id', 'i3.a' ],
       [ 'i7.id', 'i3.b' ]
     ];
-    var filters = {
+    var queries = {
       i4: [
         {
           terms: {
@@ -693,7 +693,7 @@ describe('FilterJoin querying', function () {
     };
     var query = [
       {
-        join: {
+        join_set: {
           focus: 'i1',
           indexes: [
             {
@@ -726,7 +726,7 @@ describe('FilterJoin querying', function () {
             }
           ],
           relations: relations,
-          filters: filters
+          queries: queries
         }
       }
     ];
@@ -931,7 +931,7 @@ describe('FilterJoin querying', function () {
     ];
     var query = [
       {
-        join: {
+        join_set: {
           focus: 'i1',
           indexes: [
             {
@@ -996,7 +996,7 @@ describe('FilterJoin querying', function () {
     ];
     var query = [
       {
-        join: {
+        join_set: {
           focus: 'i1',
           indexes: [
             {
@@ -2074,7 +2074,7 @@ describe('FilterJoin querying', function () {
     ];
     var query = [
       {
-        join: {
+        join_set: {
           focus: 'i1',
           indexes: [
             {
@@ -2133,7 +2133,7 @@ describe('FilterJoin querying', function () {
     ];
     var query = [
       {
-        join: {
+        join_set: {
           focus: 'i1',
           indexes: [
             {
@@ -2146,7 +2146,7 @@ describe('FilterJoin querying', function () {
             }
           ],
           relations: relations,
-          filters: {
+          queries: {
             i2: [
               {
                 query: {

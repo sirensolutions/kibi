@@ -59,12 +59,12 @@ exports.sequence = function (json) {
  *   edge is a path to the join field in an index.
  *   For example it can be [ [ "a.id", "b.aid" ] ], which means that there is a join between indexes "a" and "b", on
  *   the fields "id" of "a" and "aid" of "b".
- * - filters: the filters for each index as an object, which entries are the index names
+ * - queries: the queries for each index as an object, which entries are the index names
  * - indexes: the list of indexes involved in the filterjoin query. This is an array of object, each object describing
  *   an index by specifying two properties, i.e., the id and the type of index.
  */
 exports.set = function (json) {
-  var label = 'join';
+  var label = 'join_set';
   var objects = util.traverse(json, label, function (err, data) {
     if (err) {
       throw err;
@@ -72,7 +72,7 @@ exports.set = function (json) {
 
     var focus = data.focus;
     var relations = data.relations;
-    var filters = data.filters;
+    var queries = data.queries;
     var indexes = data.indexes;
 
     if (focus === undefined) {
@@ -84,12 +84,12 @@ exports.set = function (json) {
     if (relations === undefined) {
       throw new Error('Missing relations field in the join object: ' + JSON.stringify(data, null, ' '));
     }
-    if (filters === undefined) {
-      filters = {};
+    if (queries === undefined) {
+      queries = {};
     }
 
     var query = [];
-    _process(query, focus, relations, filters, indexes, {});
+    _process(query, focus, relations, queries, indexes, {});
     return query;
   });
   _replaceObjects(json, objects);

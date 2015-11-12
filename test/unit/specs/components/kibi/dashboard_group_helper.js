@@ -424,7 +424,7 @@ define(function (require) {
             var oldDashboardGroups = [
               {
                 title: 'Title A0',
-                dashboards: [{ id: 1, filters: [ {join:{}} ] }],
+                dashboards: [{ id: 1, filters: [ {join_set:{}} ] }],
                 selected: {id: 1},
                 _selected: {id: 1}
               },
@@ -438,7 +438,7 @@ define(function (require) {
             var newDashboardGroups = [
               {
                 title: 'Title A0',
-                dashboards: [{ id: 1, filters: [ {join:{}} ] }],
+                dashboards: [{ id: 1, filters: [ {join_set:{}} ] }],
                 selected: {id: 1},
                 _selected: {id: 1}
               },

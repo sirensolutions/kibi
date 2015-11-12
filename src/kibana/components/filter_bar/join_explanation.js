@@ -49,7 +49,7 @@ define(function (require) {
             if ($el.hasClass('join')) {
               $el.qtip({
                 content: {
-                  title: 'Steps',
+                  title: 'Steps - last one on top',
                   text: explanations[index]
                 },
                 position: {
@@ -129,7 +129,12 @@ define(function (require) {
         var promises = [];
         _.each(queries, function (query) {
           // in our case we have filtered query for now
-          if (query.query && query.query.filtered && query.query.filtered.query) {
+          if (query.query && query.query.filtered && query.query.filtered.query &&
+             !(query.query.filtered.query.query_string &&
+               query.query.filtered.query.query_string.query === '*' &&
+               query.query.filtered.query.query_string.analyze_wildcard === true)
+          ) {
+            // only if the query is different than star query
             promises.push(explainFilter({query: query.query.filtered.query}, indexId));
           }
 
@@ -178,8 +183,8 @@ define(function (require) {
 
         return Promise.all(promises).then(function (explanations) {
           var html =
-            '<b>Relation:</b></br>' +
-            '<table class="relation' + (el.negate === true ? ' negated' : '' ) + '">' +
+            '<b>' + (el.negate === true ? 'NOT ' : '' ) + 'Relation:</b></br>' +
+            '<table class="relation">' +
             '<tr>' +
             '<td>from: <b>' + relation[0].indices[0] + '.' + relation[0].path + '</b>' +
             (explanations[0] ? '</br>' + explanations[0] : '') +
@@ -215,8 +220,13 @@ define(function (require) {
 
 
       var explainJoinSequence = function (join_sequence) {
+
+        // clone and reverse to iterate backwords to show the last step on top
+        var sequence = _.cloneDeep(join_sequence);
+        sequence.reverse();
+
         var promises = [];
-        _.each(join_sequence, function (el) {
+        _.each(sequence, function (el) {
           if (el.relation) {
             promises.push(explainRelation(el));
           } else if (el.group) {
@@ -226,9 +236,10 @@ define(function (require) {
 
         return Promise.all(promises).then(function (sequenceElementExplanations) {
           var html = '<table class="sequence">';
-          _.each(sequenceElementExplanations, function (element) {
-            html += '<tr><td>' + element + '</td></tr>';
-          });
+          // iterate backwords to show the last step on top
+          for (var i = 0; i < sequenceElementExplanations.length; i++) {
+            html += '<tr class="' + (sequence[i].negate ? 'negated' : '') + '" ><td>' + sequenceElementExplanations[i] + '</td></tr>';
+          }
           return html + '</table>';
         });
       };

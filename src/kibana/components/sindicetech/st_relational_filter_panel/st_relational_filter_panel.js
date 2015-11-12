@@ -27,7 +27,6 @@ define(function (require) {
         link: function ($scope, $el) {
 
 
-
           $scope.relationalPanelConfig = {
             enabled: false
           };
@@ -73,37 +72,40 @@ define(function (require) {
               return s.substring(index + 1);
             };
 
-            _.each($scope.relationalPanelConfig.indexes, function (index) {
-              g.nodes.push({id: index.id, label: index.id, nodeType: index.id, size: g.options.minNodeSize});
+
+            // each node is a dashboard
+            var dashboards = [];
+            _.each($scope.relationalPanelConfig.relations, function (relation) {
+              if (dashboards.indexOf(relation.from) === -1) {
+                dashboards.push(relation.from);
+              }
+              if (dashboards.indexOf(relation.to) === -1) {
+                dashboards.push(relation.to);
+              }
             });
+            _.each(dashboards, function (dashboardId) {
+              g.nodes.push({id: dashboardId, label: dashboardId, nodeType: dashboardId, size: g.options.minNodeSize});
+            });
+
 
             _.each($scope.relationalPanelConfig.relations, function (relation) {
 
-              var fromId = extractIndexId(relation[0]);
-              var toId = extractIndexId(relation[1]);
-              var fromPath = extractPath(relation[0]);
-              var toPath = extractPath(relation[1]);
-
-              var checked = getRelationIndex($scope.relationalPanelConfig.enabledRelations, relation) === -1 ? '' : 'checked="checked"';
-
               g.links.push({
-                source: fromId,
-                target: toId,
+                source: relation.from,
+                target: relation.to,
                 linkType: 'link',
                 htmlElement: $('<div>').html(
                   '<div style="width:69px;">' +
-                    '<input type="checkbox" ' + checked + '/>' +
-                    '&nbsp;<label> Enable</label>' +
+                    '<input type="checkbox" ' + (relation.enabled ? 'checked' : '') + '/>' +
+                    '&nbsp;<label> ' + relation.fromPath + '-> ' + relation.toPath + '</label>' +
                   '</div>').get(0),
                 htmlElementWidth: 70,
                 htmlElementHeight: 18,
                 onLinkClick: function (THIS, d, i) {
                   if ($(THIS).find('input[type=\'checkbox\']').is(':checked')) {
-                    // make sure it is inside $scope.relationalFilter
-                    addToRelations(relation);
+                    enableRelation(relation);
                   } else {
-                    // make sure it is removed from $scope.relationalFilter
-                    removeFromRelations(relation);
+                    disableRelation(relation);
                   }
                 }
               });
@@ -112,6 +114,18 @@ define(function (require) {
 
             $scope.graph = g;
             init = true;
+          };
+
+          var enableRelation = function (relation) {
+            relation.enabled = true;
+            $scope.ignoreNextConfigurationChangedEvent = true;
+            _saveRelationalPanelConfig();
+          };
+
+          var disableRelation = function (relation) {
+            relation.enabled = false;
+            $scope.ignoreNextConfigurationChangedEvent = true;
+            _saveRelationalPanelConfig();
           };
 
           var _checkFilterJoinPlugin = function () {
@@ -130,38 +144,6 @@ define(function (require) {
             _checkFilterJoinPlugin();
             _initPanel();
           });
-
-          var getRelationIndex = function (relationsArray, relation) {
-            var index = -1;
-            _.each(relationsArray, function (r, i) {
-              if (r[0] === relation[0] && r[1] === relation[1]) {
-                index = i;
-                return false;
-              }
-            });
-            return index;
-          };
-
-          var addToRelations = function (relation) {
-            if (getRelationIndex($scope.relationalPanelConfig.enabledRelations, relation) === -1) {
-              $scope.relationalPanelConfig.enabledRelations.push(relation);
-              // there is no need to redraw the panel
-              // so set ignoreNextConfigurationChangedEvent to true
-              $scope.ignoreNextConfigurationChangedEvent = true;
-              _saveRelationalPanelConfig();
-            }
-          };
-
-          var removeFromRelations = function (relation) {
-            var index = getRelationIndex($scope.relationalPanelConfig.enabledRelations, relation);
-            if (index !== -1) {
-              $scope.relationalPanelConfig.enabledRelations.splice(index, 1);
-              // there is no need to redraw the panel
-              // so set ignoreNextConfigurationChangedEvent to true
-              $scope.ignoreNextConfigurationChangedEvent = true;
-              _saveRelationalPanelConfig();
-            }
-          };
 
 
           // recreate it after user change configuration

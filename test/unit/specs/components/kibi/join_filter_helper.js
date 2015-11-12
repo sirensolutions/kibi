@@ -31,30 +31,35 @@ define(function (require) {
                 return Promise.resolve({
                   hits: [
                     {
-                      id: 'Corn Dogs',
-                      savedSearchId: 'Corn'
+                      id: 'dashboard-nossid'
                     },
                     {
-                      id: 'Corn Flakes',
-                      savedSearchId: 'Flakes'
+                      id: 'dashboard-noindexid',
+                      savedSearchId: 'savedsearch-noindexid'
                     },
                     {
-                      id: 'Potatoes',
-                      savedSearchId: 'potato'
+                      id: 'dashboard-a',
+                      savedSearchId: 'savedsearch-a'
+                    },
+                    {
+                      id: 'dashboard-b',
+                      savedSearchId: 'savedsearch-b'
                     }
                   ]
                 });
               },
               get: function (id) {
                 switch (id) {
-                  case 'nossid':
-                    return Promise.resolve({ id: 'cry' });
-                  case 'Corn Dogs':
-                    return Promise.resolve({ id: 'cry', savedSearchId: 'Corn' });
-                  case 'Boiled Dogs':
-                    return Promise.resolve({ savedSearchId: 'Boiled' });
+                  case 'dashboard-nossid':
+                    return Promise.resolve({ id: 'dashboard-nossid' });
+                  case 'dashboard-noindexid':
+                    return Promise.resolve({ id: 'dashboard-noindexid', savedSearchId: 'savedsearch-noindexid' });
+                  case 'dashboard-a':
+                    return Promise.resolve({ id: 'dashboard-a', savedSearchId: 'savedsearch-a' });
+                  case 'dashboard-b':
+                    return Promise.resolve({ id: 'dashboard-b', savedSearchId: 'savedsearch-b' });
                   default:
-                    return Promise.reject(new Error('try again'));
+                    return Promise.reject(new Error('no dashboard ' + id));
                 }
               }
             };
@@ -66,16 +71,14 @@ define(function (require) {
             return {
               get: function (id) {
                 switch (id) {
-                  case 'potato':
-                    return Promise.resolve({ searchSource: { _state: { index: { id: 'her' } } } });
-                  case 'Flakes':
-                    return Promise.resolve({ searchSource: { _state: { index: { id: 'you' } } } });
-                  case 'Corn':
-                    return Promise.resolve({ searchSource: { _state: { index: { id: 'me' } } } });
-                  case 'Boiled':
-                    return Promise.resolve({ searchSource: { _state: { index: {} } } });
+                  case 'savedsearch-a':
+                    return Promise.resolve({ searchSource: { _state: { index: { id: 'index-a' } } } });
+                  case 'savedsearch-b':
+                    return Promise.resolve({ searchSource: { _state: { index: { id: 'index-b' } } } });
+                  case 'savedsearch-noindexid':
+                    return Promise.resolve({ searchSource: { _state: { index: { } } } });
                   default:
-                    return Promise.reject(new Error('try again'));
+                    return Promise.reject(new Error('no savedSearch ' + id));
                 }
               }
             };
@@ -110,88 +113,137 @@ define(function (require) {
         });
 
         it('should fail if the focused dashboard cannot be retrieved', function (done) {
-          joinFilterHelper.getJoinFilter('pluto').catch(function (err) {
-            expect(err.message).to.be('try again');
+          config.set('kibi:relationalPanelConfig', {
+            enabled: true,
+            relations: []
+          });
+          joinFilterHelper.getJoinFilter('does-not-exist').catch(function (err) {
+            expect(err.message).to.be('no dashboard does-not-exist');
             done();
           });
         });
 
         it('should fail if the focused dashboard does not have a saved search', function (done) {
-          joinFilterHelper.getJoinFilter('nossid').catch(function (err) {
-            expect(err.message).to.be('The focus dashboard "nossid" does not have a saveSearchId');
+          config.set('kibi:relationalPanelConfig', {
+            enabled: true,
+            relations: []
+          });
+          joinFilterHelper.getJoinFilter('dashboard-nossid').catch(function (err) {
+            expect(err.message).to.be('The focus dashboard "dashboard-nossid" does not have a saveSearchId');
+            done();
+          });
+        });
+
+        it('should fail if there is no kibi:relationalPanelConfig set', function (done) {
+          joinFilterHelper.getJoinFilter('Boiled Dogs').catch(function (err) {
+            expect(err.message).to.be('Could not get kibi:relationalPanelConfig');
+            done();
+          });
+        });
+
+        it('should fail if there is no kibi:relationalPanelConfig.relations set', function (done) {
+          config.set('kibi:relationalPanelConfig', { enabled: true });
+          joinFilterHelper.getJoinFilter('dashboard-a').catch(function (err) {
+            expect(err.message).to.be('Could not get kibi:relationalPanelConfig.relations');
             done();
           });
         });
 
         it('should fail if the saved search of the focused dashboard does not have an index id', function (done) {
-          joinFilterHelper.getJoinFilter('Boiled Dogs').catch(function (err) {
-            expect(err.message).to.be('The join filter has no enabled relation for the focused index: undefined');
+          config.set('kibi:relationalPanelConfig', {
+            enabled: true,
+            relations: [{
+              enabled: true,
+              from: 'dashboard-a',
+              fromPath: 'id',
+              to: 'dashboard-noindexid',
+              toPath: 'id'
+            }]
+          });
+          joinFilterHelper.getJoinFilter('dashboard-noindexid').catch(function (err) {
+            expect(err.message).to.be('SavedSearch for [dashboard-noindexid] dashboard seems to not have an index id');
             done();
           });
         });
 
-        it('should fail if the join filter has no enabled relation', function (done) {
-          config.set('kibi:relationalPanelConfig', {
-            enabled: true,
-            enabledRelations: [ [ 'tea', '42' ] ]
-          });
-          joinFilterHelper.getJoinFilter('Corn Dogs').catch(function (err) {
-            expect(err.message).to.be('The join filter has no enabled relation for the focused index: me');
-            done();
-          });
-        });
 
-        it('should build the join filter', function (done) {
+        it('1 should build the join filter', function (done) {
           config.set('kibi:relationalPanelConfig', {
             enabled: true,
-            enabledRelations: [ [ 'me.id', 'you.id' ] ]
+            relations: [{
+              enabled: true,
+              from: 'dashboard-a',
+              fromPath: 'id',
+              to: 'dashboard-b',
+              toPath: 'id'
+            }]
           });
-          joinFilterHelper.getJoinFilter('Corn Dogs').then(function (joinFilter) {
+          joinFilterHelper.getJoinFilter('dashboard-a').then(function (joinFilter) {
             expect(joinFilter.join).to.be.ok();
-            expect(joinFilter.join.focus).to.be('me');
-            expect(joinFilter.join.filters.me).to.not.be.ok();
+            expect(joinFilter.meta).to.be.ok();
+            expect(joinFilter.meta.value).to.equal('index-a <-> index-b');
+            expect(joinFilter.join.focus).to.be('index-a');
+            expect(joinFilter.join.filters['index-a']).to.not.be.ok();
             done();
           });
         });
 
-        it('should build the join filter with filters on dashboards', function (done) {
+        it('2 should build the join filter with filters on dashboards', function (done) {
           // filters from the focused dashboard are not put in the filters of the join query
-          kibiStateHelper.saveFiltersForDashboardId('Corn Dogs', [ { range: { gte: 20, lte: 40 } } ]);
-          kibiStateHelper.saveFiltersForDashboardId('Corn Flakes', [ { term: { aaa: 'bbb' } } ]);
+          kibiStateHelper.saveFiltersForDashboardId('dashbbord-a', [ { range: { gte: 20, lte: 40 } } ]);
           // filters from the Potatoes dashboard are not taken since its index is not connected to the focus
-          kibiStateHelper.saveFiltersForDashboardId('Potatoes', [ { exists: { field: 'aaa' } } ]);
+          kibiStateHelper.saveFiltersForDashboardId('dashboard-b', [ { exists: { field: 'aaa' } } ]);
           config.set('kibi:relationalPanelConfig', {
             enabled: true,
-            enabledRelations: [ [ 'me.id', 'you.id' ] ]
+            relations: [{
+              enabled: true,
+              from: 'dashboard-a',
+              fromPath: 'id',
+              to: 'dashboard-b',
+              toPath: 'id'
+            }]
           });
-          joinFilterHelper.getJoinFilter('Corn Dogs').then(function (joinFilter) {
+          joinFilterHelper.getJoinFilter('dashboard-a').then(function (joinFilter) {
             expect(joinFilter.join).to.be.ok();
-            expect(joinFilter.join.focus).to.be('me');
-            expect(joinFilter.join.filters.me).to.not.be.ok();
-            expect(joinFilter.join.filters.her).to.not.be.ok();
-            expect(joinFilter.join.filters.you).to.be.ok();
-            expect(joinFilter.join.filters.you[0].term).to.be.ok();
+            expect(joinFilter.meta).to.be.ok();
+            expect(joinFilter.meta.value).to.equal('index-a <-> index-b');
+            expect(joinFilter.join.focus).to.be('index-a');
+            expect(joinFilter.join.filters['index-a']).to.not.be.ok();
+            expect(joinFilter.join.filters['index-b']).to.be.ok();
+            expect(joinFilter.join.filters['index-b'][0]).to.eql({
+              exists: { field: 'aaa' }
+            });
             done();
           });
         });
 
-        it('should build the join filter with queries on dashboards', function (done) {
+        it('2 should build the join filter with queries on dashboards', function (done) {
           // queries from the focused dashboard are not put in the filters of the join query
-          kibiStateHelper.saveQueryForDashboardId('Corn Dogs', { query_string: { query: 'aaa' } });
-          kibiStateHelper.saveQueryForDashboardId('Corn Flakes', { query_string: { query: 'bbb' } });
+          kibiStateHelper.saveQueryForDashboardId('dashboard-a', { query_string: { query: 'aaa' } });
           // queries from the Potatoes dashboard are not taken since its index is not connected to the focus
-          kibiStateHelper.saveQueryForDashboardId('Potatoes', { query_string: { query: 'ccc' } });
+          kibiStateHelper.saveQueryForDashboardId('dashboard-b', { query_string: { query: 'ccc' } });
           config.set('kibi:relationalPanelConfig', {
             enabled: true,
-            enabledRelations: [ [ 'me.id', 'you.id' ] ]
+            relations: [{
+              enabled: true,
+              from: 'dashboard-a',
+              fromPath: 'id',
+              to: 'dashboard-b',
+              toPath: 'id'
+            }]
           });
-          joinFilterHelper.getJoinFilter('Corn Dogs').then(function (joinFilter) {
+          joinFilterHelper.getJoinFilter('dashboard-a').then(function (joinFilter) {
             expect(joinFilter.join).to.be.ok();
-            expect(joinFilter.join.focus).to.be('me');
-            expect(joinFilter.join.filters.me).to.not.be.ok();
-            expect(joinFilter.join.filters.her).to.not.be.ok();
-            expect(joinFilter.join.filters.you).to.be.ok();
-            expect(joinFilter.join.filters.you[0].query).to.be.ok();
+            expect(joinFilter.meta).to.be.ok();
+            expect(joinFilter.meta.value).to.equal('index-a <-> index-b');
+            expect(joinFilter.join.focus).to.be('index-a');
+            expect(joinFilter.join.filters['index-a']).to.not.be.ok();
+            expect(joinFilter.join.filters['index-b']).to.be.ok();
+            expect(joinFilter.join.filters['index-b'][0]).to.eql({
+              query: {
+                query_string: { query: 'ccc' }
+              }
+            });
             done();
           }).catch(done);
         });
@@ -225,14 +277,19 @@ define(function (require) {
         });
 
         it('should add the join filter', function (done) {
-          kibiStateHelper.saveFiltersForDashboardId('Corn Dogs', [ { range: { gte: 20, lte: 40 } } ]);
-          kibiStateHelper.saveFiltersForDashboardId('Corn Flakes', [ { term: { aaa: 'bbb' } } ]);
-          kibiStateHelper.saveFiltersForDashboardId('Potatoes', [ { exists: { field: 'aaa' } } ]);
+          kibiStateHelper.saveFiltersForDashboardId('dashboard-a', [ { range: { gte: 20, lte: 40 } } ]);
+          kibiStateHelper.saveFiltersForDashboardId('dashboard-b', [ { term: { aaa: 'bbb' } } ]);
           config.set('kibi:relationalPanelConfig', {
             enabled: true,
-            enabledRelations: [ [ 'me.id', 'you.id' ] ]
+            relations: [{
+              enabled: true,
+              from: 'dashboard-a',
+              fromPath: 'id',
+              to: 'dashboard-b',
+              toPath: 'id'
+            }]
           });
-          sinon.stub(urlHelper, 'getCurrentDashboardId').returns('Corn Dogs');
+          sinon.stub(urlHelper, 'getCurrentDashboardId').returns('dashboard-b');
           joinFilterHelper.updateJoinFilter().then(function () {
             expect(urlHelper.addFilter.called).to.be.ok();
             done();

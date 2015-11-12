@@ -143,9 +143,7 @@ define(function () {
         value: [
           '{',
           '  "enabled": false,',
-          '  "indexes": [],',
           '  "relations": [],',
-          '  "enabledRelations": [],',
           '  "graph": {',
           '    "groupingForce":{},',
           '    "nodeIcons":{}',

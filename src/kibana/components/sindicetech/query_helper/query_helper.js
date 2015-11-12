@@ -190,7 +190,8 @@ define(function (require) {
 
 
               for (i = 0; i < filters[f].length; i++) {
-                var filter = filters[f][i];
+                // clone it first so when we remove meta the original object is not modified
+                var filter = _.cloneDeep(filters[f][i]);
                 if (filter.meta && filter.meta.negate === true) {
                   delete filter.meta;
                   filter = {

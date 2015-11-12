@@ -73,13 +73,9 @@ exports.set = function (json) {
     var focus = data.focus;
     var relations = data.relations;
     var queries = data.queries;
-    var indexes = data.indexes;
 
     if (focus === undefined) {
       throw new Error('Missing focus field in the join object: ' + JSON.stringify(data, null, ' '));
-    }
-    if (indexes === undefined) {
-      throw new Error('Missing indexes field in the join object: ' + JSON.stringify(data, null, ' '));
     }
     if (relations === undefined) {
       throw new Error('Missing relations field in the join object: ' + JSON.stringify(data, null, ' '));
@@ -89,7 +85,7 @@ exports.set = function (json) {
     }
 
     var query = [];
-    _process(query, focus, relations, queries, indexes, {});
+    _process(query, focus, relations, queries, {});
     return query;
   });
   _replaceObjects(json, objects);
@@ -132,39 +128,55 @@ function _verifySequence(sequence) {
         _verifySequence(seq);
       });
     } else if (element.relation) {
-      var relation = element.relation;
-      if (relation.constructor !== Array || relation.length !== 2) {
-        throw new Error('Expecting a pair of dashboards to join, got: ' + JSON.stringify(relation, null, ' '));
-      }
-      var _check = function (dashboard, isSource) {
-        var keys = _.keys(dashboard);
-
-        if (!_.contains(keys, 'path')) {
-          throw new Error('The join path is required');
-        }
-        _.each(keys, function (key) {
-          if (isSource && key === 'queries') {
-            throw new Error('Queries for the root node should be already set: ' + JSON.stringify(relation, null, ' '));
-          }
-          switch (key) {
-            case 'queries':
-            case 'path':
-            case 'indices':
-            case 'types':
-            case 'orderBy':
-            case 'maxTermsPerShard':
-              break;
-            default:
-              throw new Error('Got unknown field [' + key + '] in ' + JSON.stringify(dashboard, null, ' '));
-          }
-        });
-      };
-      _check(relation[0]);
-      _check(relation[1], true);
+      _checkRelation(element.relation);
     } else {
       throw new Error('Unknown element: ' + JSON.stringify(element, null, ' '));
     }
   });
+}
+
+/**
+ * Asserts the fields of a relation
+ */
+function _checkRelation(relation, maxIndices) {
+  if (relation.constructor !== Array || relation.length !== 2) {
+    throw new Error('Expecting a pair of dashboards to join, got: ' + JSON.stringify(relation, null, ' '));
+  }
+  var _check = function (dashboard, isSource) {
+    var keys = _.keys(dashboard);
+
+    if (!_.contains(keys, 'path')) {
+      throw new Error('The join path is required');
+    }
+    _.each(keys, function (key) {
+      switch (key) {
+        case 'queries':
+        case 'path':
+        case 'indices':
+        case 'types':
+        case 'orderBy':
+        case 'maxTermsPerShard':
+          break;
+        default:
+          throw new Error('Got unknown field [' + key + '] in ' + JSON.stringify(dashboard, null, ' '));
+      }
+    });
+  };
+
+  _check(relation[0]);
+  _check(relation[1]);
+
+  if (!!relation[1].queries) {
+    throw new Error('Queries for the root node should be already set: ' + JSON.stringify(relation, null, ' '));
+  }
+  if (maxIndices && relation[0].indices && maxIndices < relation[0].indices.length) {
+    throw new Error('Too many indices. Expected to have only ' + maxIndices + ' but got '
+      + JSON.stringify(relation[0].indices, null, ' '));
+  }
+  if (maxIndices && relation[1].indices && maxIndices < relation[1].indices.length) {
+    throw new Error('Too many indices. Expected to have only ' + maxIndices + ' but got '
+      + JSON.stringify(relation[1].indices, null, ' '));
+  }
 }
 
 /**
@@ -204,13 +216,11 @@ function _sequenceJoins(query, sequence) {
  * and the filterjoins as well, if it is connected to any of the other
  * indices.
  */
-function _process(query, focus, relations, filters, indexes, visitedIndices) {
+function _process(query, focus, relations, filters, visitedIndices) {
   if (visitedIndices[focus] === true) {
     return;
   }
   visitedIndices[focus] = true;
-
-  var dotFocus = focus + '.';
 
   if (filters.hasOwnProperty(focus)) {
     if (query.constructor === Array) {
@@ -220,38 +230,19 @@ function _process(query, focus, relations, filters, indexes, visitedIndices) {
     _addFilters(query, focusFilters);
   }
   for (var i = 0; i < relations.length; i++) {
-    if (relations[i].length !== 2) {
-      throw new Error('Expected relation entry with 2 elements: got ' + relations[i]);
+    _checkRelation(relations[i], 1);
+    if (relations[i][0].indices[0] === relations[i][1].indices[0]) {
+      throw new Error('Loops in the join_set are not supported!\n' + JSON.stringify(relations[i], null, ' '));
     }
-    var ind = _getFocusedRelationIndex(dotFocus, relations[i]);
+    var ind = _getFocusedRelationIndex(focus, relations[i]);
     if (ind !== -1) {
       var targetInd = ind === 0 ? 1 : 0;
       var sourceRel = relations[i][ind];
       var targetRel = relations[i][targetInd];
 
-      // path in the source indices
-      var sourceDot = sourceRel.indexOf('.');
-      if (sourceDot === -1) {
-        throw new Error('Missing dot in [' + sourceRel + ']');
-      }
-      var sourcePath = sourceRel.substr(sourceDot + 1);
-
-      // path in target indices
-      var targetDot = targetRel.indexOf('.');
-      if (targetDot === -1) {
-        throw new Error('Missing dot in [' + targetRel + ']');
-      }
-      var targetPath = targetRel.substr(targetDot + 1);
-
-      // TODO update the definition of the indexes array
-      var targetIndex = targetRel.substr(0, targetDot);
-      if (!visitedIndices.hasOwnProperty(targetIndex)) {
-        // TODO the following will be removed with GH#382
-        var ti = _.find(indexes, { id: targetIndex });
-        ti.indices = [ targetIndex ];
-        ti.types = ti.type ? [ ti.type ] : [];
-        var childFilters = _addFilterJoin(query, sourcePath, targetPath, ti);
-        _process(childFilters, targetIndex, relations, filters, indexes, visitedIndices);
+      if (!visitedIndices.hasOwnProperty(targetRel.indices[0])) {
+        var childFilters = _addFilterJoin(query, sourceRel.path, targetRel.path, targetRel);
+        _process(childFilters, targetRel.indices[0], relations, filters, visitedIndices);
       }
     }
   }
@@ -326,12 +317,7 @@ function _addFilterJoin(query, sourcePath, targetPath, targetIndex, negate) {
  * Returns the index in relation of the element which is about the given index
  */
 function _getFocusedRelationIndex(focus, relation) {
-  for (var i = 0; i < relation.length; i++) {
-    if (relation[i].indexOf(focus) === 0) {
-      return i;
-    }
-  }
-  return -1;
+  return relation[0].indices[0] === focus ? 0 : (relation[1].indices[0] === focus ? 1 : -1);
 }
 
 /**

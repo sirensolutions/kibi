@@ -6,27 +6,56 @@ var Promise = require('bluebird');
 var _ = require('lodash');
 
 describe('FilterJoin querying', function () {
-  it('in a bool clause', function () {
-    var relations = [
-      [ 'i1.id1', 'i2.id2' ]
-    ];
+  it('join set loop', function () {
     var query = {
       bool: {
         must: [
           {
             join_set: {
               focus: 'i1',
-              indexes: [
-                {
-                  id: 'i1',
-                  type: 'cafard'
-                },
-                {
-                  id: 'i2',
-                  type: 'cafard'
-                }
-              ],
-              relations: relations
+              relations: [
+                [
+                  {
+                    indices: [ 'i1' ],
+                    types: [ 'cafard' ],
+                    path: 'id1'
+                  },
+                  {
+                    indices: [ 'i1' ],
+                    types: [ 'cafard' ],
+                    path: 'id2'
+                  }
+                ]
+              ]
+            }
+          }
+        ]
+      }
+    };
+    expect(filterJoinSet).withArgs(query).to.throwError(/loops/i);
+  });
+
+  it('in a bool clause', function () {
+    var query = {
+      bool: {
+        must: [
+          {
+            join_set: {
+              focus: 'i1',
+              relations: [
+                [
+                  {
+                    indices: [ 'i1' ],
+                    types: [ 'cafard' ],
+                    path: 'id1'
+                  },
+                  {
+                    indices: [ 'i2' ],
+                    types: [ 'cafard' ],
+                    path: 'id2'
+                  }
+                ]
+              ]
             }
           }
         ]
@@ -70,25 +99,25 @@ describe('FilterJoin querying', function () {
   });
 
   it('in a bool clause with no type specified for one of the indexes', function () {
-    var relations = [
-      [ 'i1.id1', 'i2.id2' ]
-    ];
     var query = {
       bool: {
         must: [
           {
             join_set: {
               focus: 'i1',
-              indexes: [
-                {
-                  id: 'i1',
-                  type: 'cafard'
-                },
-                {
-                  id: 'i2'
-                }
-              ],
-              relations: relations
+              relations: [
+                [
+                  {
+                    indices: [ 'i1' ],
+                    types: [ 'cafard' ],
+                    path: 'id1'
+                  },
+                  {
+                    indices: [ 'i2' ],
+                    path: 'id2'
+                  }
+                ]
+              ]
             }
           }
         ]
@@ -131,24 +160,24 @@ describe('FilterJoin querying', function () {
   });
 
   it('no filter', function () {
-    var relations = [
-      [ 'i1.id1', 'i2.id2' ]
-    ];
     var query = [
       {
         join_set: {
           focus: 'i1',
-          indexes: [
-            {
-              id: 'i1',
-              type: 'cafard'
-            },
-            {
-              id: 'i2',
-              type: 'cafard'
-            }
-          ],
-          relations: relations
+          relations: [
+            [
+              {
+                indices: [ 'i1' ],
+                types: [ 'cafard' ],
+                path: 'id1'
+              },
+              {
+                indices: [ 'i2' ],
+                types: [ 'cafard' ],
+                path: 'id2'
+              }
+            ]
+          ]
         }
       }
     ];
@@ -186,22 +215,22 @@ describe('FilterJoin querying', function () {
   });
 
   it('no filter and no types', function () {
-    var relations = [
-      [ 'i1.id1', 'i2.id2' ]
-    ];
     var query = [
       {
         join_set: {
           focus: 'i1',
-          indexes: [
-            {
-              id: 'i1'
-            },
-            {
-              id: 'i2'
-            }
-          ],
-          relations: relations
+          relations: [
+            [
+              {
+                indices: [ 'i1' ],
+                path: 'id1'
+              },
+              {
+                indices: [ 'i2' ],
+                path: 'id2'
+              }
+            ]
+          ]
         }
       }
     ];
@@ -238,9 +267,6 @@ describe('FilterJoin querying', function () {
   });
 
   it('should fail if there are filters on focused index', function () {
-    var relations = [
-      [ 'i1.id1', 'i2.id2' ]
-    ];
     var queries = {
       i1: [
         {
@@ -254,17 +280,20 @@ describe('FilterJoin querying', function () {
       {
         join_set: {
           focus: 'i1',
-          indexes: [
-            {
-              id: 'i1',
-              type: 'cafard'
-            },
-            {
-              id: 'i2',
-              type: 'cafard'
-            }
+          relations: [
+            [
+              {
+                indices: [ 'i1' ],
+                types: [ 'cafard' ],
+                path: 'id1'
+              },
+              {
+                indices: [ 'i2' ],
+                types: [ 'cafard' ],
+                path: 'id2'
+              }
+            ]
           ],
-          relations: relations,
           queries: queries
         }
       }
@@ -273,9 +302,6 @@ describe('FilterJoin querying', function () {
   });
 
   it('focus filter array', function () {
-    var relations = [
-      [ 'i1.id1', 'i2.id2' ]
-    ];
     var queries = {
       i2: [
         {
@@ -292,17 +318,20 @@ describe('FilterJoin querying', function () {
       {
         join_set: {
           focus: 'i1',
-          indexes: [
-            {
-              id: 'i1',
-              type: 'cafard'
-            },
-            {
-              id: 'i2',
-              type: 'cafard'
-            }
+          relations: [
+            [
+              {
+                indices: [ 'i1' ],
+                types: [ 'cafard' ],
+                path: 'id1'
+              },
+              {
+                indices: [ 'i2' ],
+                types: [ 'cafard' ],
+                path: 'id2'
+              }
+            ]
           ],
-          relations: relations,
           queries: queries
         }
       }
@@ -350,9 +379,6 @@ describe('FilterJoin querying', function () {
   });
 
   it('filter on related index', function () {
-    var relations = [
-      [ 'i1.id1', 'i2.id2' ]
-    ];
     var queries = {
       i2: [
         {
@@ -366,17 +392,20 @@ describe('FilterJoin querying', function () {
       {
         join_set: {
           focus: 'i1',
-          indexes: [
-            {
-              id: 'i1',
-              type: 'cafard'
-            },
-            {
-              id: 'i2',
-              type: 'cafard'
-            }
+          relations: [
+            [
+              {
+                indices: [ 'i1' ],
+                types: [ 'cafard' ],
+                path: 'id1'
+              },
+              {
+                indices: [ 'i2' ],
+                types: [ 'cafard' ],
+                path: 'id2'
+              }
+            ]
           ],
-          relations: relations,
           queries: queries
         }
       }
@@ -421,10 +450,6 @@ describe('FilterJoin querying', function () {
   });
 
   it('three related indices - line', function () {
-    var relations = [
-      [ 'i1.id1', 'i2.id2' ],
-      [ 'i3.id3', 'i2.id2' ]
-    ];
     var queries = {
       i2: [
         {
@@ -445,21 +470,32 @@ describe('FilterJoin querying', function () {
       {
         join_set: {
           focus: 'i1',
-          indexes: [
-            {
-              id: 'i1',
-              type: 'cafard'
-            },
-            {
-              id: 'i2',
-              type: 'cafard'
-            },
-            {
-              id: 'i3',
-              type: 'cafard'
-            }
+          relations: [
+            [
+              {
+                indices: [ 'i1' ],
+                types: [ 'cafard' ],
+                path: 'id1'
+              },
+              {
+                indices: [ 'i2' ],
+                types: [ 'cafard' ],
+                path: 'id2'
+              },
+            ],
+            [
+              {
+                indices: [ 'i2' ],
+                types: [ 'cafard' ],
+                path: 'id2'
+              },
+              {
+                indices: [ 'i3' ],
+                types: [ 'cafard' ],
+                path: 'id3'
+              }
+            ]
           ],
-          relations: relations,
           queries: queries
         }
       }
@@ -537,10 +573,6 @@ describe('FilterJoin querying', function () {
   });
 
   it('three related indices - V', function () {
-    var relations = [
-      [ 'i1.aaa', 'i2.id2' ],
-      [ 'i3.id3', 'i1.bbb' ]
-    ];
     var queries = {
       i2: [
         {
@@ -561,21 +593,32 @@ describe('FilterJoin querying', function () {
       {
         join_set: {
           focus: 'i1',
-          indexes: [
-            {
-              id: 'i1',
-              type: 'cafard'
-            },
-            {
-              id: 'i2',
-              type: 'cafard'
-            },
-            {
-              id: 'i3',
-              type: 'cafard'
-            }
+          relations: [
+            [
+              {
+                indices: [ 'i1' ],
+                types: [ 'cafard' ],
+                path: 'aaa'
+              },
+              {
+                indices: [ 'i2' ],
+                types: [ 'cafard' ],
+                path: 'id2'
+              },
+            ],
+            [
+              {
+                indices: [ 'i1' ],
+                types: [ 'cafard' ],
+                path: 'bbb'
+              },
+              {
+                indices: [ 'i3' ],
+                types: [ 'cafard' ],
+                path: 'id3'
+              }
+            ]
           ],
-          relations: relations,
           queries: queries
         }
       }
@@ -653,14 +696,6 @@ describe('FilterJoin querying', function () {
   });
 
   it('three related indices - spock', function () {
-    var relations = [
-      [ 'i1.aaa', 'i2.id2' ],
-      [ 'i4.id', 'i2.a' ],
-      [ 'i5.id', 'i2.b' ],
-      [ 'i3.id3', 'i1.bbb' ],
-      [ 'i6.id', 'i3.a' ],
-      [ 'i7.id', 'i3.b' ]
-    ];
     var queries = {
       i4: [
         {
@@ -695,37 +730,80 @@ describe('FilterJoin querying', function () {
       {
         join_set: {
           focus: 'i1',
-          indexes: [
-            {
-              id: 'i1',
-              type: 'cafard'
-            },
-            {
-              id: 'i2',
-              type: 'cafard'
-            },
-            {
-              id: 'i3',
-              type: 'cafard'
-            },
-            {
-              id: 'i4',
-              type: 'cafard'
-            },
-            {
-              id: 'i5',
-              type: 'cafard'
-            },
-            {
-              id: 'i6',
-              type: 'cafard'
-            },
-            {
-              id: 'i7',
-              type: 'cafard'
-            }
+          relations: [
+            [
+              {
+                indices: [ 'i1' ],
+                types: [ 'cafard' ],
+                path: 'aaa'
+              },
+              {
+                indices: [ 'i2' ],
+                types: [ 'cafard' ],
+                path: 'id2'
+              }
+            ],
+            [
+              {
+                indices: [ 'i2' ],
+                types: [ 'cafard' ],
+                path: 'a'
+              },
+              {
+                indices: [ 'i4' ],
+                types: [ 'cafard' ],
+                path: 'id'
+              }
+            ],
+            [
+              {
+                indices: [ 'i2' ],
+                types: [ 'cafard' ],
+                path: 'b'
+              },
+              {
+                indices: [ 'i5' ],
+                types: [ 'cafard' ],
+                path: 'id'
+              }
+            ],
+            [
+              {
+                indices: [ 'i1' ],
+                types: [ 'cafard' ],
+                path: 'bbb'
+              },
+              {
+                indices: [ 'i3' ],
+                types: [ 'cafard' ],
+                path: 'id3'
+              }
+            ],
+            [
+              {
+                indices: [ 'i6' ],
+                types: [ 'cafard' ],
+                path: 'id'
+              },
+              {
+                indices: [ 'i3' ],
+                types: [ 'cafard' ],
+                path: 'a'
+              }
+            ],
+            [
+              {
+                indices: [ 'i7' ],
+                types: [ 'cafard' ],
+                path: 'id'
+              },
+              {
+                indices: [ 'i3' ],
+                types: [ 'cafard' ],
+                path: 'b'
+              }
+            ]
           ],
-          relations: relations,
           queries: queries
         }
       }
@@ -825,133 +903,136 @@ describe('FilterJoin querying', function () {
           }
         }
       },
-        {
-          filterjoin: {
-            bbb: {
-              indices: ['i3'],
-              types: ['cafard'],
-              path: 'id3',
-              query: {
-                filtered: {
-                  query: {
-                    bool: {
-                      must: [
-                        {
-                          match_all: {}
-                        }
-                      ]
-                    }
-                  },
-                  filter: {
-                    bool: {
-                      must: [
-                        {
-                          filterjoin: {
-                            a: {
-                              indices: ['i6'],
-                              types: ['cafard'],
-                              path: 'id',
-                              query: {
-                                filtered: {
-                                  query: {
-                                    bool: {
-                                      must: [
-                                        {
-                                          match_all: {}
-                                        }
-                                      ]
-                                    }
-                                  },
-                                  filter: {
-                                    bool: {
-                                      must: [
-                                        {
-                                          terms: {
-                                            tag: [ 'mickey' ]
-                                          }
-                                        }
-                                      ]
-                                    }
+      {
+        filterjoin: {
+          bbb: {
+            indices: ['i3'],
+            types: ['cafard'],
+            path: 'id3',
+            query: {
+              filtered: {
+                query: {
+                  bool: {
+                    must: [
+                      {
+                        match_all: {}
+                      }
+                    ]
+                  }
+                },
+                filter: {
+                  bool: {
+                    must: [
+                      {
+                        filterjoin: {
+                          a: {
+                            indices: ['i6'],
+                            types: ['cafard'],
+                            path: 'id',
+                            query: {
+                              filtered: {
+                                query: {
+                                  bool: {
+                                    must: [
+                                      {
+                                        match_all: {}
+                                      }
+                                    ]
                                   }
-                                }
-                              }
-                            }
-                          }
-                        },
-                        {
-                          filterjoin: {
-                            b: {
-                              indices: ['i7'],
-                              types: ['cafard'],
-                              path: 'id',
-                              query: {
-                                filtered: {
-                                  query: {
-                                    bool: {
-                                      must: [
-                                        {
-                                          match_all: {}
+                                },
+                                filter: {
+                                  bool: {
+                                    must: [
+                                      {
+                                        terms: {
+                                          tag: [ 'mickey' ]
                                         }
-                                      ]
-                                    }
-                                  },
-                                  filter: {
-                                    bool: {
-                                      must: [
-                                        {
-                                          terms: {
-                                            tag: [ 'donald' ]
-                                          }
-                                        }
-                                      ]
-                                    }
+                                      }
+                                    ]
                                   }
                                 }
                               }
                             }
                           }
                         }
-                      ]
-                    }
+                      },
+                      {
+                        filterjoin: {
+                          b: {
+                            indices: ['i7'],
+                            types: ['cafard'],
+                            path: 'id',
+                            query: {
+                              filtered: {
+                                query: {
+                                  bool: {
+                                    must: [
+                                      {
+                                        match_all: {}
+                                      }
+                                    ]
+                                  }
+                                },
+                                filter: {
+                                  bool: {
+                                    must: [
+                                      {
+                                        terms: {
+                                          tag: [ 'donald' ]
+                                        }
+                                      }
+                                    ]
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    ]
                   }
                 }
               }
             }
           }
         }
+      }
     ];
     var actual = filterJoinSet(query);
     expect(actual).to.eql(expected);
   });
 
   it('connected component 1', function () {
-    var relations = [
-      [ 'i1.id1', 'i2.id2' ],
-      [ 'i3.id3', 'i4.id4' ]
-    ];
     var query = [
       {
         join_set: {
           focus: 'i1',
-          indexes: [
-            {
-              id: 'i1',
-              type: 'cafard'
-            },
-            {
-              id: 'i2',
-              type: 'cafard'
-            },
-            {
-              id: 'i3',
-              type: 'cafard'
-            },
-            {
-              id: 'i4',
-              type: 'cafard'
-            }
-          ],
-          relations: relations
+          relations: [
+            [
+              {
+                indices: [ 'i1' ],
+                types: [ 'cafard' ],
+                path: 'id1'
+              },
+              {
+                indices: [ 'i2' ],
+                types: [ 'cafard' ],
+                path: 'id2'
+              }
+            ],
+            [
+              {
+                indices: [ 'i3' ],
+                types: [ 'cafard' ],
+                path: 'id3'
+              },
+              {
+                indices: [ 'i4' ],
+                types: [ 'cafard' ],
+                path: 'id4'
+              }
+            ]
+          ]
         }
       }
     ];
@@ -989,30 +1070,48 @@ describe('FilterJoin querying', function () {
   });
 
   it('connected component 2', function () {
-    var relations = [
-      [ 'i1.id1', 'i2.id2' ],
-      [ 'i1.id0', 'i0.id0' ],
-      [ 'i3.id3', 'i4.id4' ]
-    ];
     var query = [
       {
         join_set: {
           focus: 'i1',
-          indexes: [
-            {
-              id: 'i0',
-              type: 'cafard'
-            },
-            {
-              id: 'i1',
-              type: 'cafard'
-            },
-            {
-              id: 'i2',
-              type: 'cafard'
-            }
-          ],
-          relations: relations
+          relations: [
+            [
+              {
+                indices: [ 'i1' ],
+                types: [ 'cafard' ],
+                path: 'id1'
+              },
+              {
+                indices: [ 'i2' ],
+                types: [ 'cafard' ],
+                path: 'id2'
+              }
+            ],
+            [
+              {
+                indices: [ 'i0' ],
+                types: [ 'cafard' ],
+                path: 'id0'
+              },
+              {
+                indices: [ 'i1' ],
+                types: [ 'cafard' ],
+                path: 'id0'
+              }
+            ],
+            [
+              {
+                indices: [ 'i3' ],
+                types: [ 'cafard' ],
+                path: 'id3'
+              },
+              {
+                indices: [ 'i4' ],
+                types: [ 'cafard' ],
+                path: 'id4'
+              }
+            ]
+          ]
         }
       }
     ];
@@ -2069,26 +2168,26 @@ describe('FilterJoin querying', function () {
   });
 
   it('accepts orderby and maxtermspershard parameters', function () {
-    var relations = [
-      [ 'i1.id1', 'i2.id2' ]
-    ];
     var query = [
       {
         join_set: {
           focus: 'i1',
-          indexes: [
-            {
-              id: 'i1',
-              type: 'cafard'
-            },
-            {
-              id: 'i2',
-              type: 'cafard',
-              orderBy: 'doc_score',
-              maxTermsPerShard: '10'
-            }
-          ],
-          relations: relations
+          relations: [
+            [
+              {
+                indices: [ 'i1' ],
+                types: [ 'cafard' ],
+                path: 'id1'
+              },
+              {
+                indices: [ 'i2' ],
+                types: [ 'cafard' ],
+                path: 'id2',
+                orderBy: 'doc_score',
+                maxTermsPerShard: '10'
+              }
+            ]
+          ]
         }
       }
     ];
@@ -2128,24 +2227,24 @@ describe('FilterJoin querying', function () {
   });
 
   it('moves the query object to filtered.query', function () {
-    var relations = [
-      [ 'i1.id1', 'i2.id2' ]
-    ];
     var query = [
       {
         join_set: {
           focus: 'i1',
-          indexes: [
-            {
-              id: 'i1',
-              type: 'cafard'
-            },
-            {
-              id: 'i2',
-              type: 'cafard'
-            }
+          relations: [
+            [
+              {
+                indices: [ 'i1' ],
+                types: [ 'cafard' ],
+                path: 'id1'
+              },
+              {
+                indices: [ 'i2' ],
+                types: [ 'cafard' ],
+                path: 'id2'
+              }
+            ]
           ],
-          relations: relations,
           queries: {
             i2: [
               {

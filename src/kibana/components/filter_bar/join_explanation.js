@@ -238,7 +238,7 @@ define(function (require) {
           var html = '<table class="sequence">';
           // iterate backwords to show the last step on top
           for (var i = 0; i < sequenceElementExplanations.length; i++) {
-            html += '<tr class="' + (sequence[i].negate ? 'negated' : '') + '" ><td>' + sequenceElementExplanations[i] + '</td></tr>';
+            html += '<tr' + (sequence[i].negate ? 'class="negated"' : '') + '><td>' + sequenceElementExplanations[i] + '</td></tr>';
           }
           return html + '</table>';
         });

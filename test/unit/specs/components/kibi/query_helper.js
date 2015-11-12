@@ -41,13 +41,40 @@ define(function (require) {
           it('should output correct join label 1', function (done) {
             var focus = 'a';
             var relations = [
-              [ 'a.id', 'b.id' ],
-              [ 'b.id', 'c.id' ],
-              [ 'd.id', 'e.id' ]
+              [
+                {
+                  indices: [ 'a' ],
+                  path: 'id'
+                },
+                {
+                  indices: [ 'b' ],
+                  path: 'id'
+                }
+              ],
+              [
+                {
+                  indices: [ 'b' ],
+                  path: 'id'
+                },
+                {
+                  indices: [ 'c' ],
+                  path: 'id'
+                }
+              ],
+              [
+                {
+                  indices: [ 'd' ],
+                  path: 'id'
+                },
+                {
+                  indices: [ 'e' ],
+                  path: 'id'
+                }
+              ]
             ];
             var expected = 'a <-> b <-> c';
 
-            queryHelper.constructJoinFilter(focus, null, relations, null).then(function (join) {
+            queryHelper.constructJoinFilter(focus, relations, null).then(function (join) {
               expect(join.meta.value).to.be(expected);
               done();
             }).catch(function (err) {
@@ -60,12 +87,39 @@ define(function (require) {
           it('should output correct join label 2', function (done) {
             var focus = 'a';
             var relations = [
-              [ 'a.id', 'b.id' ],
-              [ 'b.id', 'c.id' ],
-              [ 'c.id', 'd.id' ]
+              [
+                {
+                  indices: [ 'a' ],
+                  path: 'id'
+                },
+                {
+                  indices: [ 'b' ],
+                  path: 'id'
+                }
+              ],
+              [
+                {
+                  indices: [ 'b' ],
+                  path: 'id'
+                },
+                {
+                  indices: [ 'c' ],
+                  path: 'id'
+                }
+              ],
+              [
+                {
+                  indices: [ 'c' ],
+                  path: 'id'
+                },
+                {
+                  indices: [ 'd' ],
+                  path: 'id'
+                }
+              ]
             ];
             var expected = 'a <-> b <-> c <-> d';
-            queryHelper.constructJoinFilter(focus, null, relations, null).then(function (join) {
+            queryHelper.constructJoinFilter(focus, relations, null).then(function (join) {
               expect(join.meta.value).to.be(expected);
               done();
             }).catch(function (err) {
@@ -78,11 +132,29 @@ define(function (require) {
           it('should output correct join label 3', function (done) {
             var focus = 'a';
             var relations = [
-              [ 'a.id', 'b.id' ],
-              [ 'b.id', 'b.id' ]
+              [
+                {
+                  indices: [ 'a' ],
+                  path: 'id'
+                },
+                {
+                  indices: [ 'b' ],
+                  path: 'id'
+                }
+              ],
+              [
+                {
+                  indices: [ 'b' ],
+                  path: 'id'
+                },
+                {
+                  indices: [ 'b' ],
+                  path: 'id'
+                }
+              ]
             ];
             var expected = 'a <-> b';
-            queryHelper.constructJoinFilter(focus, null, relations, null).then(function (join) {
+            queryHelper.constructJoinFilter(focus, relations, null).then(function (join) {
               expect(join.meta.value).to.be(expected);
               done();
             }).catch(function (err) {
@@ -96,10 +168,6 @@ define(function (require) {
         describe('with queries', function () {
           it('query is custom - not a query_string', function (done) {
             var focus = 'article';
-            var indexes = [{id: 'article', type: 'article'}, {id: 'company', type: 'company'} ];
-            var relations = [
-              ['article.id', 'company.articleId']
-            ];
             var filters = {};
             var queries = {
               company: {
@@ -113,6 +181,20 @@ define(function (require) {
               }
             };
             var indexToDashboardMap;
+            var relations = [
+              [
+                {
+                  indices: [ 'article' ],
+                  types: [ 'article' ],
+                  path: 'id'
+                },
+                {
+                  indices: [ 'company' ],
+                  types: [ 'company' ],
+                  path: 'articleid'
+                }
+              ]
+            ];
 
             var expected = {
               meta: {
@@ -120,7 +202,6 @@ define(function (require) {
               },
               join_set: {
                 focus: focus,
-                indexes: indexes,
                 relations: relations,
                 queries: {
                   company : [
@@ -140,7 +221,7 @@ define(function (require) {
               }
             };
 
-            queryHelper.constructJoinFilter(focus, indexes, relations, filters, queries, indexToDashboardMap).then(function (filter) {
+            queryHelper.constructJoinFilter(focus, relations, filters, queries, indexToDashboardMap).then(function (filter) {
               expect(filter).to.eql(expected);
               done();
             });
@@ -150,10 +231,6 @@ define(function (require) {
 
           it('query_string is an analyzed wildcard', function (done) {
             var focus = 'article';
-            var indexes = [{id: 'article', type: 'article'}, {id: 'company', type: 'company'} ];
-            var relations = [
-              ['article.id', 'company.articleId']
-            ];
             var filters = {};
             var queries = {
               company: {
@@ -163,6 +240,20 @@ define(function (require) {
               }
             };
             var indexToDashboardMap;
+            var relations = [
+              [
+                {
+                  indices: [ 'article' ],
+                  types: [ 'article' ],
+                  path: 'id'
+                },
+                {
+                  indices: [ 'company' ],
+                  types: [ 'company' ],
+                  path: 'articleid'
+                }
+              ]
+            ];
 
             var expected = {
               meta: {
@@ -170,13 +261,12 @@ define(function (require) {
               },
               join_set: {
                 focus: focus,
-                indexes: indexes,
                 relations: relations,
                 queries: {}
               }
             };
 
-            queryHelper.constructJoinFilter(focus, indexes, relations, filters, queries, indexToDashboardMap).then(function (filter) {
+            queryHelper.constructJoinFilter(focus, relations, filters, queries, indexToDashboardMap).then(function (filter) {
               expect(filter).to.eql(expected);
               done();
             });
@@ -186,10 +276,6 @@ define(function (require) {
 
           it('add queries', function (done) {
             var focus = 'article';
-            var indexes = [{id: 'article', type: 'article'}, {id: 'company', type: 'company'} ];
-            var relations = [
-              ['article.id', 'company.articleId']
-            ];
             var filters = {};
             var queries = {
               company: {
@@ -199,6 +285,20 @@ define(function (require) {
               }
             };
             var indexToDashboardMap;
+            var relations = [
+              [
+                {
+                  indices: [ 'article' ],
+                  types: [ 'article' ],
+                  path: 'id'
+                },
+                {
+                  indices: [ 'company' ],
+                  types: [ 'company' ],
+                  path: 'articleid'
+                }
+              ]
+            ];
 
             var expected = {
               meta: {
@@ -206,7 +306,6 @@ define(function (require) {
               },
               join_set: {
                 focus: focus,
-                indexes: indexes,
                 relations: relations,
                 queries: {
                   company : [
@@ -222,7 +321,7 @@ define(function (require) {
               }
             };
 
-            queryHelper.constructJoinFilter(focus, indexes, relations, filters, queries, indexToDashboardMap).then(function (filter) {
+            queryHelper.constructJoinFilter(focus, relations, filters, queries, indexToDashboardMap).then(function (filter) {
               expect(filter).to.eql(expected);
               done();
             });
@@ -232,10 +331,6 @@ define(function (require) {
 
           it('add queries - query for focus ignored', function (done) {
             var focus = 'article';
-            var indexes = [{id: 'article', type: 'article'}, {id: 'company', type: 'company'} ];
-            var relations = [
-              ['article.id', 'company.articleId']
-            ];
             var filters = {};
             var queries = {
               article: {
@@ -245,6 +340,20 @@ define(function (require) {
               }
             };
             var indexToDashboardMap;
+            var relations = [
+              [
+                {
+                  indices: [ 'article' ],
+                  types: [ 'article' ],
+                  path: 'id'
+                },
+                {
+                  indices: [ 'company' ],
+                  types: [ 'company' ],
+                  path: 'articleid'
+                }
+              ]
+            ];
 
             var expected = {
               meta: {
@@ -252,13 +361,12 @@ define(function (require) {
               },
               join_set: {
                 focus: focus,
-                indexes: indexes,
                 relations: relations,
                 queries: {}
               }
             };
 
-            queryHelper.constructJoinFilter(focus, indexes, relations, filters, queries, indexToDashboardMap).then(function (filter) {
+            queryHelper.constructJoinFilter(focus, relations, filters, queries, indexToDashboardMap).then(function (filter) {
               expect(filter).to.eql(expected);
               done();
             });
@@ -270,10 +378,6 @@ define(function (require) {
         describe('with filters', function () {
           it('add filters', function (done) {
             var focus = 'article';
-            var indexes = [{id: 'article', type: 'article'}, {id: 'company', type: 'company'} ];
-            var relations = [
-              ['article.id', 'company.articleId']
-            ];
             var queries = {};
             var filters = {
               company: [{
@@ -285,6 +389,20 @@ define(function (require) {
               }]
             };
             var indexToDashboardMap;
+            var relations = [
+              [
+                {
+                  indices: [ 'article' ],
+                  types: [ 'article' ],
+                  path: 'id'
+                },
+                {
+                  indices: [ 'company' ],
+                  types: [ 'company' ],
+                  path: 'articleid'
+                }
+              ]
+            ];
 
             var expected = {
               meta: {
@@ -292,7 +410,6 @@ define(function (require) {
               },
               join_set: {
                 focus: focus,
-                indexes: indexes,
                 relations: relations,
                 queries: {
                   company : [
@@ -308,7 +425,7 @@ define(function (require) {
               }
             };
 
-            queryHelper.constructJoinFilter(focus, indexes, relations, filters, queries, indexToDashboardMap).then(function (filter) {
+            queryHelper.constructJoinFilter(focus, relations, filters, queries, indexToDashboardMap).then(function (filter) {
               //console.log(JSON.stringify(filter, null, ' '));
               expect(filter).to.eql(expected);
               done();
@@ -319,10 +436,6 @@ define(function (require) {
 
           it('add filters make sure no meta in result', function (done) {
             var focus = 'article';
-            var indexes = [{id: 'article', type: 'article'}, {id: 'company', type: 'company'} ];
-            var relations = [
-              ['article.id', 'company.articleId']
-            ];
             var queries = {};
             var filters = {
               company: [{
@@ -335,6 +448,20 @@ define(function (require) {
               }]
             };
             var indexToDashboardMap;
+            var relations = [
+              [
+                {
+                  indices: [ 'article' ],
+                  types: [ 'article' ],
+                  path: 'id'
+                },
+                {
+                  indices: [ 'company' ],
+                  types: [ 'company' ],
+                  path: 'articleid'
+                }
+              ]
+            ];
 
             var expected = {
               meta: {
@@ -342,7 +469,6 @@ define(function (require) {
               },
               join_set: {
                 focus: focus,
-                indexes: indexes,
                 relations: relations,
                 queries: {
                   company : [
@@ -358,7 +484,7 @@ define(function (require) {
               }
             };
 
-            queryHelper.constructJoinFilter(focus, indexes, relations, filters, queries, indexToDashboardMap).then(function (filter) {
+            queryHelper.constructJoinFilter(focus, relations, filters, queries, indexToDashboardMap).then(function (filter) {
               //console.log(JSON.stringify(filter, null, ' '));
               expect(filter).to.eql(expected);
               done();
@@ -369,10 +495,6 @@ define(function (require) {
 
           it('add filters - respect negation', function (done) {
             var focus = 'article';
-            var indexes = [{id: 'article', type: 'article'}, {id: 'company', type: 'company'} ];
-            var relations = [
-              ['article.id', 'company.articleId']
-            ];
             var queries = {};
             var filters = {
               company: [{
@@ -387,6 +509,20 @@ define(function (require) {
               }]
             };
             var indexToDashboardMap;
+            var relations = [
+              [
+                {
+                  indices: [ 'article' ],
+                  types: [ 'article' ],
+                  path: 'id'
+                },
+                {
+                  indices: [ 'company' ],
+                  types: [ 'company' ],
+                  path: 'articleid'
+                }
+              ]
+            ];
 
             var expected = {
               meta: {
@@ -394,7 +530,6 @@ define(function (require) {
               },
               join_set: {
                 focus: focus,
-                indexes: indexes,
                 relations: relations,
                 queries: {
                   company : [
@@ -412,7 +547,7 @@ define(function (require) {
               }
             };
 
-            queryHelper.constructJoinFilter(focus, indexes, relations, filters, queries, indexToDashboardMap).then(function (filter) {
+            queryHelper.constructJoinFilter(focus, relations, filters, queries, indexToDashboardMap).then(function (filter) {
               expect(filter).to.eql(expected);
               done();
             });
@@ -422,10 +557,6 @@ define(function (require) {
 
           it('add filters - filter for focus ignored', function (done) {
             var focus = 'article';
-            var indexes = [{id: 'article', type: 'article'}, {id: 'company', type: 'company'} ];
-            var relations = [
-              ['article.id', 'company.articleId']
-            ];
             var queries = {};
             var filters = {
               article: {
@@ -435,6 +566,20 @@ define(function (require) {
               }
             };
             var indexToDashboardMap;
+            var relations = [
+              [
+                {
+                  indices: [ 'article' ],
+                  types: [ 'article' ],
+                  path: 'id'
+                },
+                {
+                  indices: [ 'company' ],
+                  types: [ 'company' ],
+                  path: 'articleid'
+                }
+              ]
+            ];
 
             var expected = {
               meta: {
@@ -442,13 +587,12 @@ define(function (require) {
               },
               join_set: {
                 focus: focus,
-                indexes: indexes,
                 relations: relations,
                 queries: {}
               }
             };
 
-            queryHelper.constructJoinFilter(focus, indexes, relations, filters, queries, indexToDashboardMap).then(function (filter) {
+            queryHelper.constructJoinFilter(focus, relations, filters, queries, indexToDashboardMap).then(function (filter) {
               expect(filter).to.eql(expected);
               done();
             });
@@ -458,10 +602,6 @@ define(function (require) {
 
           it('add filters - update time filter', function (done) {
             var focus = 'article';
-            var indexes = [{id: 'article', type: 'article'}, {id: 'time-testing-3', type: 'time-testing-3'} ];
-            var relations = [
-              ['article.id', 'time-testing-3.articleId']
-            ];
             var queries = {};
             var filters = {
               'time-testing-3': [
@@ -477,6 +617,20 @@ define(function (require) {
             var indexToDashboardMap = {
               'time-testing-3': 'time-testing-3'
             };
+            var relations = [
+              [
+                {
+                  indices: [ 'article' ],
+                  types: [ 'article' ],
+                  path: 'id'
+                },
+                {
+                  indices: [ 'time-testing-3' ],
+                  types: [ 'time-testing-3' ],
+                  path: 'articleId'
+                }
+              ]
+            ];
 
             var expected = {
               meta: {
@@ -484,7 +638,6 @@ define(function (require) {
               },
               join_set: {
                 focus: focus,
-                indexes: indexes,
                 relations: relations,
                 queries: {
                   'time-testing-3': [
@@ -508,7 +661,7 @@ define(function (require) {
               }
             };
 
-            queryHelper.constructJoinFilter(focus, indexes, relations, filters, queries, indexToDashboardMap).then(function (filter) {
+            queryHelper.constructJoinFilter(focus, relations, filters, queries, indexToDashboardMap).then(function (filter) {
               expect(filter).to.eql(expected);
               done();
             });
@@ -518,15 +671,25 @@ define(function (require) {
 
           it('add filters - update time filter when no other filters present', function (done) {
             var focus = 'article';
-            var indexes = [{id: 'article', type: 'article'}, {id: 'time-testing-3', type: 'time-testing-3'} ];
-            var relations = [
-              ['article.id', 'time-testing-3.articleId']
-            ];
             var queries = {};
             var filters = {};
             var indexToDashboardMap = {
               'time-testing-3': 'time-testing-3'
             };
+            var relations = [
+              [
+                {
+                  indices: [ 'article' ],
+                  types: [ 'article' ],
+                  path: 'id'
+                },
+                {
+                  indices: [ 'time-testing-3' ],
+                  types: [ 'time-testing-3' ],
+                  path: 'articleId'
+                }
+              ]
+            ];
 
             var expected = {
               meta: {
@@ -534,7 +697,6 @@ define(function (require) {
               },
               join_set: {
                 focus: focus,
-                indexes: indexes,
                 relations: relations,
                 queries: {
                   'time-testing-3': [
@@ -551,7 +713,7 @@ define(function (require) {
               }
             };
 
-            queryHelper.constructJoinFilter(focus, indexes, relations, filters, queries, indexToDashboardMap).then(function (filter) {
+            queryHelper.constructJoinFilter(focus, relations, filters, queries, indexToDashboardMap).then(function (filter) {
               expect(filter).to.eql(expected);
               done();
             });
@@ -561,15 +723,25 @@ define(function (require) {
 
           it('add filters - update time filter when no other filters exept for focused index', function (done) {
             var focus = 'time-testing-3';
-            var indexes = [{id: 'article', type: 'article'}, {id: 'time-testing-3', type: 'time-testing-3'} ];
-            var relations = [
-              ['article.id', 'time-testing-3.articleId']
-            ];
             var queries = {};
             var filters = {};
             var indexToDashboardMap = {
               'time-testing-3': 'time-testing-3'
             };
+            var relations = [
+              [
+                {
+                  indices: [ 'article' ],
+                  types: [ 'article' ],
+                  path: 'id'
+                },
+                {
+                  indices: [ 'time-testing-3' ],
+                  types: [ 'time-testing-3' ],
+                  path: 'articleId'
+                }
+              ]
+            ];
 
             var expected = {
               meta: {
@@ -577,13 +749,12 @@ define(function (require) {
               },
               join_set: {
                 focus: focus,
-                indexes: indexes,
                 relations: relations,
                 queries: {}
               }
             };
 
-            queryHelper.constructJoinFilter(focus, indexes, relations, filters, queries, indexToDashboardMap).then(function (filter) {
+            queryHelper.constructJoinFilter(focus, relations, filters, queries, indexToDashboardMap).then(function (filter) {
               expect(filter).to.eql(expected);
               done();
             });
@@ -593,13 +764,23 @@ define(function (require) {
 
           it('add filters - update time filter when no other filters present - no indexToDashboard', function (done) {
             var focus = 'article';
-            var indexes = [{id: 'article', type: 'article'}, {id: 'time-testing-3', type: 'time-testing-3'} ];
-            var relations = [
-              ['article.id', 'time-testing-3.articleId']
-            ];
             var queries = {};
             var filters = {};
             var indexToDashboardMap = null;
+            var relations = [
+              [
+                {
+                  indices: [ 'article' ],
+                  types: [ 'article' ],
+                  path: 'id'
+                },
+                {
+                  indices: [ 'time-testing-3' ],
+                  types: [ 'time-testing-3' ],
+                  path: 'articleId'
+                }
+              ]
+            ];
 
             var expected = {
               meta: {
@@ -607,7 +788,6 @@ define(function (require) {
               },
               join_set: {
                 focus: focus,
-                indexes: indexes,
                 relations: relations,
                 queries: {
                   'time-testing-3': [
@@ -624,7 +804,7 @@ define(function (require) {
               }
             };
 
-            queryHelper.constructJoinFilter(focus, indexes, relations, filters, queries, indexToDashboardMap).then(function (filter) {
+            queryHelper.constructJoinFilter(focus, relations, filters, queries, indexToDashboardMap).then(function (filter) {
               expect(filter).to.eql(expected);
               done();
             });
@@ -672,13 +852,23 @@ define(function (require) {
 
         it('simple', function (done) {
           var focus = 'article';
-          var indexes = [{id: 'article', type: 'article'}, {id: 'company', type: 'company'} ];
-          var relations = [
-            ['article.id', 'company.articleId']
-          ];
           var filters = {};
           var queries = {};
           var indexToDashboardMap;
+          var relations = [
+            [
+              {
+                indices: [ 'article' ],
+                types: [ 'article' ],
+                path: 'id'
+              },
+              {
+                indices: [ 'company' ],
+                types: [ 'company' ],
+                path: 'articleId'
+              }
+            ]
+          ];
 
           var expected = {
             meta: {
@@ -686,13 +876,12 @@ define(function (require) {
             },
             join_set: {
               focus: focus,
-              indexes: indexes,
               relations: relations,
               queries: {}
             }
           };
 
-          queryHelper.constructJoinFilter(focus, indexes, relations, filters, queries, indexToDashboardMap).then(function (filter) {
+          queryHelper.constructJoinFilter(focus, relations, filters, queries, indexToDashboardMap).then(function (filter) {
             expect(filter).to.eql(expected);
             done();
           });

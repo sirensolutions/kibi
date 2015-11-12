@@ -107,7 +107,6 @@ define(function (require) {
                   } else {
                     disableRelation(relation);
                   }
-                  console.log($scope.relationalPanelConfig.relations);
                 }
               });
 

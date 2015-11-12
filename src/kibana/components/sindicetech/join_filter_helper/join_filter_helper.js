@@ -128,6 +128,7 @@ define(function (require) {
               //  "article.companyid",
               //  "company.id"
               // ]
+              // TODO: Stephane - refactor this after the new API for join_set is out
               var dashboardsToIndexesMap = _invert(indexToDashboardMap);
               var relations = [];
               _.each(enabledRelations, function (r) {

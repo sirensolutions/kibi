@@ -204,6 +204,29 @@ define(function (require) {
     };
 
 
+    KibiStateHelper.prototype.removeAllFilters = function () {
+      if (globalState.k.d) {
+        for (var dashboard in globalState.k.d) {
+          if (globalState.k.d.hasOwnProperty(dashboard)) {
+            globalState.k.d[dashboard].f = [];
+          }
+        }
+      }
+      globalState.save();
+    };
+
+    KibiStateHelper.prototype.removeAllQueries = function () {
+      if (globalState.k.d) {
+        for (var dashboard in globalState.k.d) {
+          if (globalState.k.d.hasOwnProperty(dashboard)) {
+            globalState.k.d[dashboard].q = '*';
+          }
+        }
+      }
+      globalState.save();
+    };
+
+
     KibiStateHelper.prototype._setDashboardProperty = function (dashboardId, prop, value) {
       if (!globalState.k.d[dashboardId]) {
         globalState.k.d[dashboardId] = {};

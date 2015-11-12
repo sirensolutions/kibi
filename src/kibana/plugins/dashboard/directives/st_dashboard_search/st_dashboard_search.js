@@ -2,9 +2,10 @@ define(function (require) {
 
   var app = require('modules').get('app/dashboard');
 
-  app.directive('stDashboardSearch', function (Private, $rootScope) {
+  app.directive('stDashboardSearch', function (Private, $rootScope, getAppState) {
 
     var urlHelper   = Private(require('components/kibi/url_helper/url_helper'));
+    var kibiStateHelper  = Private(require('components/kibi/kibi_state_helper/kibi_state_helper'));
 
     return {
       restrict: 'E',
@@ -21,6 +22,17 @@ define(function (require) {
 
         $scope.filterResults = function () {
           $rootScope.$emit('stDashboardInvokeMethod', 'filterResults');
+        };
+
+        $scope.removeAllFilters = function () {
+          // remove all filters and queries acros dashboards except pinned filters
+          var appState = getAppState();
+          appState.filters = [];
+          appState.query = {query_string: {analyze_wildcard: true, query: '*'}};
+          appState.save();
+
+          kibiStateHelper.removeAllFilters();
+          kibiStateHelper.removeAllQueries();
         };
 
         $scope.$watch('state', function () {

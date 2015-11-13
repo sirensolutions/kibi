@@ -32,7 +32,7 @@ var _ = require('lodash');
  * - maxTermsPerShard: the maximum number of terms to consider in the filterjoin
  * - queries: and array of queries that are applied on the set of indices
  *
- * An element can be negated by setting the field "negate" to true.
+ * A relation can be negated by setting the field "negate" to true.
  */
 exports.sequence = function (json) {
   var label = 'join_sequence';
@@ -185,18 +185,8 @@ function _sequenceJoins(query, sequence) {
     _addFilters(curQuery, join[0].queries);
   }
   if (sequence[0].group) {
-    var array;
-
-    if (sequence[0].negate) {
-      if (!curQuery.filter.bool.must_not) {
-        curQuery.filter.bool.must_not = [];
-      }
-      array = curQuery.filter.bool.must_not;
-    } else {
-      array = curQuery.filter.bool.must;
-    }
     _.each(sequence[0].group, function (seq) {
-      _sequenceJoins(array, seq);
+      _sequenceJoins(curQuery.filter.bool.must, seq);
     });
   } else {
     var lastJoin = sequence[0].relation;

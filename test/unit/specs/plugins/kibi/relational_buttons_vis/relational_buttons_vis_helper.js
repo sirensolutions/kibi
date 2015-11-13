@@ -46,14 +46,14 @@ define(function (require) {
           expect(typeof button.click).to.equal('function');
 
           // now add fake join filter
-          button.joinFilter = {
+          button.joinSeqFilter = {
             meta: {
               value: ''
             }
           };
 
           button.click();
-          expect(button.joinFilter.meta.value).to.eql('... related to (123) from dashboard 1');
+          expect(button.joinSeqFilter.meta.value).to.eql('... related to (123) from dashboard 1');
         });
 
         it('test that on click filter label is constructed when filterLabel defined', function () {
@@ -72,7 +72,7 @@ define(function (require) {
           expect(typeof button.click).to.equal('function');
 
           // now add fake join filter
-          button.joinFilter = {
+          button.joinSeqFilter = {
             meta: {
               value: ''
             }
@@ -80,7 +80,7 @@ define(function (require) {
 
 
           button.click();
-          expect(button.joinFilter.meta.value).to.eql('My custom label with placeholders 123 dashboard 1');
+          expect(button.joinSeqFilter.meta.value).to.eql('My custom label with placeholders 123 dashboard 1');
         });
 
       });

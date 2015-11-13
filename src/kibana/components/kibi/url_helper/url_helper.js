@@ -29,7 +29,7 @@ define(function (require) {
     };
 
     UrlHelper.prototype.getJoinFilter = function () {
-      var joinFilters = this.getFiltersOfType('join');
+      var joinFilters = this.getFiltersOfType('join_set');
       if (joinFilters.length > 0) {
         return joinFilters[0];
       }
@@ -44,7 +44,7 @@ define(function (require) {
         if (decodedA.filters) {
           var index = -1;
           _.each(decodedA.filters, function (f, i) {
-            if (f.join) {
+            if (f.join_set) {
               index = i;
               return false;
             }
@@ -68,11 +68,11 @@ define(function (require) {
         }
 
         // here if there is a relational filter it should be replaced
-        if (filter.join) {
+        if (filter.join_set) {
           // replace
           var index = -1;
           _.each(decodedA.filters, function (f, i) {
-            if (f.join) {
+            if (f.join_set) {
               index = i;
               return false;
             }
@@ -194,7 +194,7 @@ define(function (require) {
           _.each(results, function (res) {
             var fs = kibiStateHelper.getFiltersForDashboardId(res.dashboardId);
             filters[res.indexId] = _.filter(fs, function (f) {
-              return !f.join;
+              return !f.join_set;
             });
           });
           fulfill(filters);

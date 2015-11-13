@@ -65,7 +65,7 @@ define(function (require) {
         }
 
         var matchQueryFilter = function (filter) {
-          return filter.query && filter.query.query_string && !filter.meta && !filter.join;
+          return filter.query && filter.query.query_string && !filter.meta && !filter.join_set;
         };
 
         var extractQueryFromFilters = function (filters) {

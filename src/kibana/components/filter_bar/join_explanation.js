@@ -270,8 +270,8 @@ define(function (require) {
 
       var explainJoinSet = function (joinSet) {
         var promises = [];
-        _.each(joinSet.indexes, function (index) {
-          promises.push(explainFiltersForJoinSet(index, joinSet.filters[index.id]));
+        _.each(joinSet.queries, function (query, index) {
+          promises.push(explainFiltersForJoinSet(index, query));
         });
 
         return Promise.all(promises).then(function (explanations) {
@@ -289,8 +289,8 @@ define(function (require) {
         _.each(filters, function (f) {
           if (f.join_sequence) {
             promises.push(explainJoinSequence(f.join_sequence));
-          } else if (f.join) {
-            promises.push(explainJoinSet(f.join));
+          } else if (f.join_set) {
+            promises.push(explainJoinSet(f.join_set));
           } else {
             // for now push an empty explanation so array lenght is correct
             promises.push(Promise.resolve(''));

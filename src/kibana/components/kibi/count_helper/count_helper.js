@@ -2,7 +2,7 @@ define(function (require) {
 
   var _ = require('lodash');
   var uniqFilters = require('components/filter_bar/lib/uniqFilters');
-  var replace_or_add_join_filter   = require('components/sindicetech/join_filter_helper/lib/replace_or_add_join_filter');
+  var replace_or_add_join_set_filter   = require('components/sindicetech/join_filter_helper/lib/replace_or_add_join_set_filter');
   var getSavedSearchMeta =  require('components/kibi/count_helper/lib/get_saved_search_meta');
 
   return function CountHelperFactory(Private, Promise, timefilter, indexPatterns, savedSearches, savedDashboards) {
@@ -69,7 +69,7 @@ define(function (require) {
               // get the join filter if present on the dashboard
               var joinFilter = urlHelper.getJoinFilter();
               // add it only for the dashboard where focus match
-              if (joinFilter && joinFilter.join.focus === savedSearch.searchSource._state.index.id) {
+              if (joinFilter && joinFilter.join_set.focus === savedSearch.searchSource._state.index.id) {
                 extraFilters.push(joinFilter);
               }
 
@@ -144,10 +144,10 @@ define(function (require) {
         if (extraFilters) {
           if (!selectedDashboardFilters) {
             selectedDashboardFilters = extraFilters;
-          } else if (extraFilters.length === 1 && extraFilters[0].join) {
+          } else if (extraFilters.length === 1 && extraFilters[0].join_set) {
             // remove any other join filter from filters
             selectedDashboardFilters = _.filter(selectedDashboardFilters, function (f) {
-              return !f.join;
+              return !f.join_set;
             });
           }
         }
@@ -186,8 +186,8 @@ define(function (require) {
                 query.query.filtered.filter.bool.must_not.push({range: filter.range});
               } else if (filter.script) {
                 query.query.filtered.filter.bool.must_not.push({script: filter.script});
-              } else if (filter.join) {
-                query.query.filtered.filter.bool.must_not.push({join: filter.join});
+              } else if (filter.join_set) {
+                query.query.filtered.filter.bool.must_not.push({join_set: filter.join_set});
               } else if (filter.join_sequence) {
                 query.query.filtered.filter.bool.must_not.push({join_sequence: filter.join_sequence});
               }
@@ -210,8 +210,8 @@ define(function (require) {
                 query.query.filtered.filter.bool.must.push({range: filter.range});
               } else if (filter.script) {
                 query.query.filtered.filter.bool.must.push({script: filter.script});
-              } else if (filter.join) {
-                query.query.filtered.filter.bool.must.push({join: filter.join});
+              } else if (filter.join_set) {
+                query.query.filtered.filter.bool.must.push({join_set: filter.join_set});
               } else if (filter.join_sequence) {
                 query.query.filtered.filter.bool.must.push({join_sequence: filter.join_sequence});
               }
@@ -238,7 +238,7 @@ define(function (require) {
 
 
         if (joinFilter) {
-          replace_or_add_join_filter(query.query.filtered.filter.bool.must, joinFilter, true);
+          replace_or_add_join_set_filter(query.query.filtered.filter.bool.must, joinFilter, true);
         }
 
         // update time filter

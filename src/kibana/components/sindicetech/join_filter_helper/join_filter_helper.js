@@ -1,7 +1,7 @@
 define(function (require) {
   return function JoinFilterHelperFactory(config, configFile, Private, savedDashboards, savedSearches, Promise) {
     var _ = require('lodash');
-    var replace_or_add_join_filter = require('components/sindicetech/join_filter_helper/lib/replace_or_add_join_filter');
+    var replace_or_add_join_set_filter = require('components/sindicetech/join_filter_helper/lib/replace_or_add_join_set_filter');
 
     var queryHelper = Private(require('components/sindicetech/query_helper/query_helper'));
     var urlHelper   = Private(require('components/kibi/url_helper/url_helper'));
@@ -116,28 +116,20 @@ define(function (require) {
                 indexToDashboardMap[mapping.indexId] = mapping.dashboardId;
               });
 
-              var indexes = [];
-              for (var indexId in indexToDashboardMap) {
-                if (indexToDashboardMap.hasOwnProperty(indexId)) {
-                  indexes.push({id: indexId});
-                }
-              }
-
-              // here translate to old format array of arrays
-              // [
-              //  "article.companyid",
-              //  "company.id"
-              // ]
-              // TODO: Stephane - refactor this after the new API for join_set is out
               var dashboardsToIndexesMap = _invert(indexToDashboardMap);
               var relations = [];
               _.each(enabledRelations, function (r) {
                 relations.push([
-                  dashboardsToIndexesMap[r.from] + '.' + r.fromPath,
-                  dashboardsToIndexesMap[r.to] + '.' + r.toPath,
+                  {
+                    indices: [ dashboardsToIndexesMap[r.from] ],
+                    path: r.fromPath
+                  },
+                  {
+                    indices: [ dashboardsToIndexesMap[r.to] ],
+                    path: r.toPath
+                  }
                 ]);
               });
-
 
               var labels = queryHelper.getLabelsInConnectedComponent(focusIndex, relations);
               // keep only the filters which are in the connected component
@@ -156,7 +148,6 @@ define(function (require) {
               // build the join_set filter
               return queryHelper.constructJoinFilter(
                 focusIndex,
-                indexes,
                 relations,
                 filters,
                 queries,
@@ -200,7 +191,7 @@ define(function (require) {
     };
 
     JoinFilterHelper.prototype.replaceOrAddJoinFilter = function (filterArray, joinFilter, stripMeta) {
-      return replace_or_add_join_filter(filterArray, joinFilter, stripMeta);
+      return replace_or_add_join_set_filter(filterArray, joinFilter, stripMeta);
     };
 
     JoinFilterHelper.prototype.isRelationalPanelEnabled = function () {

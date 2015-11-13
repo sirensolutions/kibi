@@ -24,7 +24,6 @@ define(function (require) {
         })
         .map(function (buttonDef) {
           var button = _.clone(buttonDef);
-          button.joinFilter = null;
 
           button.click = function () {
             if (!currentDashboardIndexId) {
@@ -55,30 +54,6 @@ define(function (require) {
                 targetDashboardFilters = [];
               }
               targetDashboardFilters.push(this.joinSeqFilter);
-
-              // switch to target dashboard
-              urlHelper.replaceFiltersAndQueryAndTime(
-                targetDashboardFilters,
-                targetDashboardQuery,
-                targetDashboardTimeFilter);
-              urlHelper.switchDashboard(this.redirectToDashboard);
-
-            } else if (this.joinFilter) {
-              if (button.filterLabel) {
-                this.joinFilter.meta.value = button.filterLabel
-                .replace(/\$COUNT/g, this.sourceCount)
-                .replace(/\$DASHBOARD/g, urlHelper.getCurrentDashboardId());
-              } else {
-                this.joinFilter.meta.value = '... related to (' + this.sourceCount + ') from ' + urlHelper.getCurrentDashboardId();
-              }
-
-
-              // add or Filter and switch
-              if (!targetDashboardFilters) {
-                targetDashboardFilters = [this.joinFilter];
-              } else {
-                joinFilterHelper.replaceOrAddJoinFilter(targetDashboardFilters, this.joinFilter);
-              }
 
               // switch to target dashboard
               urlHelper.replaceFiltersAndQueryAndTime(

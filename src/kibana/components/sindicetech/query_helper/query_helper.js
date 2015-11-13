@@ -74,26 +74,14 @@ define(function (require) {
      */
     var _getLabelsInConnectedComponent = QueryHelper.prototype.getLabelsInConnectedComponent = function (focus, relations) {
       var labels = [];
-      var dotFocus = focus + '.';
 
       // the set of current nodes to visit
-      var current = [ dotFocus ];
+      var current = [ focus ];
       // the set of nodes to visit in the next iteration
       var toVisit = [];
       // the set of visited nodes
       var visited = [];
 
-      /**
-       * Returns the index in current of the element that starts with relation, and -1 otherwise.
-       */
-      function indexOf(current, relation) {
-        for (var i = 0; i < current.length; i++) {
-          if (relation.indexOf(current[i]) === 0) {
-            return i;
-          }
-        }
-        return -1;
-      }
 
       do {
 
@@ -101,25 +89,27 @@ define(function (require) {
         // - if some node is in the current ones, then add the adjacent
         // node to toVisit if it was not visited already
         for (var i = 0; i < relations.length; i++) {
+          var relation = relations[i];
           var ind = -1;
+          var label = '';
 
-          if ((ind = indexOf(current, relations[i][0])) !== -1) {
-            var label1 = relations[i][1].substring(0, relations[i][1].indexOf('.') + 1);
-            if (label1 !== current[ind] && visited.indexOf(label1) === -1) {
-              toVisit.push(label1);
-            }
-          } else if ((ind = indexOf(current, relations[i][1])) !== -1) {
-            var label2 = relations[i][0].substring(0, relations[i][0].indexOf('.') + 1);
-            if (label2 !== current[ind] && visited.indexOf(label2) === -1) {
-              toVisit.push(label2);
-            }
+          if (relation[0].indices.length !== 1 || relation[1].indices.length !== 1) {
+            throw new Error('Expected indices of size 1, but got: ' + JSON.stringify(relation, null, ' '));
+          }
+          if ((ind = current.indexOf(relation[0].indices[0])) !== -1) {
+            label = relation[1].indices[0];
+          } else if ((ind = current.indexOf(relation[1].indices[0])) !== -1) {
+            label = relation[0].indices[0];
+          }
+
+          if (!!label && label !== current[ind] && visited.indexOf(label) === -1) {
+            toVisit.push(label);
           }
         }
 
         // update the visisted set
         for (var j = current.length - 1; j >= 0; j--) {
-          // minus the trailing dot
-          labels.push(current[j].substring(0, current[j].length - 1));
+          labels.push(current[j]);
           visited.push(current.pop());
         }
         // update the current set
@@ -138,30 +128,22 @@ define(function (require) {
     //   indexId2: [],
     //   ...
     // }
-    QueryHelper.prototype.constructJoinFilter = function (focus, indexes, relations, filters, queries, indexToDashboardMap) {
+    QueryHelper.prototype.constructJoinFilter = function (focus, relations, filters, queries, indexToDashboardMap) {
       return new Promise(function (fulfill, reject) {
         // compute part of the label
         var labels = _getLabelsInConnectedComponent(focus, relations);
         labels.sort();
 
-        var labelValue = '';
-        for (var i = 0; i < labels.length; i++) {
-          if (i === 0) {
-            labelValue = labels[0];
-          } else if (labels[i] !== labels[i - 1]) {
-            labelValue += ' <-> ' + labels[i];
-          }
-        }
+        var labelValue = labels.join(' <-> ');
 
         var joinFilter = {
           meta: {
             value: labelValue
           },
-          join: {
+          join_set: {
             focus: focus,
-            indexes: indexes,
             relations: relations,
-            filters: {}
+            queries: {}
           }
         };
 
@@ -172,10 +154,10 @@ define(function (require) {
               var fQuery = queries[index];
               // filter out only query_string queries that are only a wildcard
               if (fQuery && (!fQuery.query_string || fQuery.query_string.query !== '*')) {
-                if (!joinFilter.join.filters[index]) {
-                  joinFilter.join.filters[index] = [];
+                if (!joinFilter.join_set.queries[index]) {
+                  joinFilter.join_set.queries[index] = [];
                 }
-                joinFilter.join.filters[index].push({ query: fQuery });
+                joinFilter.join_set.queries[index].push({ query: fQuery });
               }
             }
           }
@@ -184,12 +166,12 @@ define(function (require) {
         if (filters) {
           for (var f in filters) {
             if (filters.hasOwnProperty(f) && f !== focus && filters[f] instanceof Array && filters[f].length > 0) {
-              if (!joinFilter.join.filters[f]) {
-                joinFilter.join.filters[f] = [];
+              if (!joinFilter.join_set.queries[f]) {
+                joinFilter.join_set.queries[f] = [];
               }
 
 
-              for (i = 0; i < filters[f].length; i++) {
+              for (var i = 0; i < filters[f].length; i++) {
                 // clone it first so when we remove meta the original object is not modified
                 var filter = _.cloneDeep(filters[f][i]);
                 if (filter.meta && filter.meta.negate === true) {
@@ -201,7 +183,7 @@ define(function (require) {
                   delete filter.meta;
                 }
 
-                joinFilter.join.filters[f].push(filter);
+                joinFilter.join_set.queries[f].push(filter);
               }
 
             }
@@ -209,13 +191,13 @@ define(function (require) {
         }
 
         // update the timeFilter
-        var promises = _.chain(indexes)
+        var promises = _.chain(labels)
         .filter(function (index) {
-          return index.id !== focus;
+          return index !== focus;
         })
         .map(function (index) {
           return new Promise(function (fulfill, reject) {
-            indexPatterns.get(index.id).then(function (indexPattern) {
+            indexPatterns.get(index).then(function (indexPattern) {
               // 1 check if there is a timefilter for this index
               var timeFilter = timefilter.get(indexPattern);
               if (timeFilter) {
@@ -249,10 +231,10 @@ define(function (require) {
           for (var i = 0; i < data.length; i++) {
             if (data[i]) {
               // here we add a time filter to correct filters
-              if (!joinFilter.join.filters[data[i].index.id]) {
-                joinFilter.join.filters[data[i].index.id] = [];
+              if (!joinFilter.join_set.queries[data[i].index]) {
+                joinFilter.join_set.queries[data[i].index] = [];
               }
-              joinFilter.join.filters[data[i].index.id].push(data[i].timeFilter);
+              joinFilter.join_set.queries[data[i].index].push(data[i].timeFilter);
             }
           }
 

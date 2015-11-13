@@ -209,7 +209,7 @@ define(function (require) {
           var searchSourceJSON = _.omit(self.searchSource.toJSON(), ['sort', 'size']);
 
           // kibi - we have to filter out join_set filter as this filter
-          // can only be turn on/off by relational panel and should not be saved
+          // can only be turned on/off by relational panel and should not be saved
           if (searchSourceJSON.filter && searchSourceJSON.filter.length > 0) {
             searchSourceJSON.filter = _.filter(searchSourceJSON.filter, function (filter) {
               return !filter.join_set;
@@ -218,7 +218,7 @@ define(function (require) {
           // kibi end
 
           body.kibanaSavedObjectMeta = {
-            searchSourceJSON:  angular.toJson(searchSourceJSON)
+            searchSourceJSON: angular.toJson(searchSourceJSON)
           };
         }
 

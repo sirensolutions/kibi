@@ -221,7 +221,7 @@ define(function (require) {
 
       var explainJoinSequence = function (join_sequence) {
 
-        // clone and reverse to iterate backwords to show the last step on top
+        // clone and reverse to iterate backwards to show the last step on top
         var sequence = _.cloneDeep(join_sequence);
         sequence.reverse();
 
@@ -236,7 +236,6 @@ define(function (require) {
 
         return Promise.all(promises).then(function (sequenceElementExplanations) {
           var html = '<table class="sequence">';
-          // iterate backwords to show the last step on top
           for (var i = 0; i < sequenceElementExplanations.length; i++) {
             html += '<tr' + (sequence[i].negate ? 'class="negated"' : '') + '><td>' + sequenceElementExplanations[i] + '</td></tr>';
           }

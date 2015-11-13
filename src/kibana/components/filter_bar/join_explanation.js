@@ -247,7 +247,7 @@ define(function (require) {
 
 
       var explainFiltersForJoinSet = function (index, filters) {
-        var html = '<li>Index: <b>' + index.id + '</b></li>';
+        var html = '<li>Index: <b>' + index + '</b></li>';
         if (!filters) {
           return Promise.resolve(html);
         }

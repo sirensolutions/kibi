@@ -94,15 +94,28 @@ define(function (require) {
                   if (_isMultivalued(hit._source, $scope.params.startField)) {
                     detectedMultivaluedStart = true;
                   }
+                  var startValue = _pickFirstIfMultivalued(hit._source, $scope.params.startField);
                   var e =  {
                     content: _pickFirstIfMultivalued(hit._source, $scope.params.labelField, ''),
-                    start: new Date(_pickFirstIfMultivalued(hit._source, $scope.params.startField))
+                    start: new Date(startValue)
                   };
                   if ($scope.params.endField) {
                     if (_isMultivalued(hit._source, $scope.params.endField)) {
                       detectedMultivaluedEnd = true;
                     }
-                    e.end = new Date(_pickFirstIfMultivalued(hit._source, $scope.params.endField));
+                    if (!hit._source[$scope.params.endField]) {
+                      // here the end field value missing but expected
+                      // force the event to be of type point
+                      e.type = 'point';
+                    } else {
+                      var endValue = _pickFirstIfMultivalued(hit._source, $scope.params.endField);
+                      if (startValue === endValue) {
+                        // also force it to be a point
+                        e.type = 'point';
+                      } else {
+                        e.end = new Date(endValue);
+                      }
+                    }
                   }
                   events.push(e);
                 }

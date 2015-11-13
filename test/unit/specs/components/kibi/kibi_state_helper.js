@@ -253,6 +253,48 @@ define(function (require) {
       });
 
 
+      it('should remove all filters', function () {
+        var filters = [{filter: 1}, {filter: 2}];
+        globalState.k = {
+          d: {
+            dashboard1: {
+              f: filters
+            },
+            dashboard2: {
+              f: filters
+            }
+          }
+        };
+        globalState.save();
+
+        kibiStateHelper.removeAllFilters();
+
+        expect(globalState.k.d.dashboard1.f).to.eql([]);
+        expect(globalState.k.d.dashboard2.f).to.eql([]);
+      });
+
+
+      it('should remove all queries', function () {
+        var query = {string_match: {}};
+        globalState.k = {
+          d: {
+            dashboard1: {
+              q: query
+            },
+            dashboard2: {
+              q: query
+            }
+          }
+        };
+        globalState.save();
+
+        kibiStateHelper.removeAllQueries();
+
+        expect(globalState.k.d.dashboard1.q).to.eql('*');
+        expect(globalState.k.d.dashboard2.q).to.eql('*');
+      });
+
+
     });
   });
 });

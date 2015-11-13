@@ -52,16 +52,18 @@ exports.sequence = function (json) {
 
 /**
  * Generate a SIREn filterjoin query based on the given relations with the focused index as the root of the query.
+ * The joins and their order is decided based on the given focus.
  *
  * A filterjoin is an object with the following fields:
  * - focus: the focused index as a string
- * - relations: the relation graph of indices as an array of arrays, each array being an edge between two indices. An
- *   edge is a path to the join field in an index.
- *   For example it can be [ [ "a.id", "b.aid" ] ], which means that there is a join between indexes "a" and "b", on
- *   the fields "id" of "a" and "aid" of "b".
+ * - relations: an array of relations. A relation is an array with two objects, each describing one end of a join.
+ *   This object contains the following fields:
+ *     - path: the path to the joined field
+ *     - indices: an array of indices to join on
+ *     - types: the corresponding array of types
+ *     - orderBy: the filterjoin ordering option
+ *     - maxTermsPerShard: the maximum number of terms to consider in the filterjoin
  * - queries: the queries for each index as an object, which entries are the index names
- * - indexes: the list of indexes involved in the filterjoin query. This is an array of object, each object describing
- *   an index by specifying two properties, i.e., the id and the type of index.
  */
 exports.set = function (json) {
   var label = 'join_set';
@@ -128,7 +130,7 @@ function _verifySequence(sequence) {
         _verifySequence(seq);
       });
     } else if (element.relation) {
-      _checkRelation(element.relation);
+      _checkRelation(element.relation, [ 'queries', 'path', 'indices', 'types', 'orderBy', 'maxTermsPerShard' ]);
     } else {
       throw new Error('Unknown element: ' + JSON.stringify(element, null, ' '));
     }
@@ -138,7 +140,7 @@ function _verifySequence(sequence) {
 /**
  * Asserts the fields of a relation
  */
-function _checkRelation(relation, maxIndices) {
+function _checkRelation(relation, fields, maxIndices) {
   if (relation.constructor !== Array || relation.length !== 2) {
     throw new Error('Expecting a pair of dashboards to join, got: ' + JSON.stringify(relation, null, ' '));
   }
@@ -149,16 +151,8 @@ function _checkRelation(relation, maxIndices) {
       throw new Error('The join path is required');
     }
     _.each(keys, function (key) {
-      switch (key) {
-        case 'queries':
-        case 'path':
-        case 'indices':
-        case 'types':
-        case 'orderBy':
-        case 'maxTermsPerShard':
-          break;
-        default:
-          throw new Error('Got unknown field [' + key + '] in ' + JSON.stringify(dashboard, null, ' '));
+      if (fields.indexOf(key) === -1) {
+        throw new Error('Got unknown field [' + key + '] in ' + JSON.stringify(dashboard, null, ' '));
       }
     });
   };
@@ -230,7 +224,7 @@ function _process(query, focus, relations, filters, visitedIndices) {
     _addFilters(query, focusFilters);
   }
   for (var i = 0; i < relations.length; i++) {
-    _checkRelation(relations[i], 1);
+    _checkRelation(relations[i], [ 'path', 'indices', 'types', 'orderBy', 'maxTermsPerShard' ], 1);
     if (relations[i][0].indices[0] === relations[i][1].indices[0]) {
       throw new Error('Loops in the join_set are not supported!\n' + JSON.stringify(relations[i], null, ' '));
     }

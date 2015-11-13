@@ -1,7 +1,7 @@
 define(function (require) {
   return function JoinFilterHelperFactory(config, configFile, Private, savedDashboards, savedSearches, Promise) {
     var _ = require('lodash');
-    var replace_or_add_join_filter = require('components/sindicetech/join_filter_helper/lib/replace_or_add_join_filter');
+    var replace_or_add_join_set_filter = require('components/sindicetech/join_filter_helper/lib/replace_or_add_join_set_filter');
 
     var queryHelper = Private(require('components/sindicetech/query_helper/query_helper'));
     var urlHelper   = Private(require('components/kibi/url_helper/url_helper'));
@@ -191,7 +191,7 @@ define(function (require) {
     };
 
     JoinFilterHelper.prototype.replaceOrAddJoinFilter = function (filterArray, joinFilter, stripMeta) {
-      return replace_or_add_join_filter(filterArray, joinFilter, stripMeta);
+      return replace_or_add_join_set_filter(filterArray, joinFilter, stripMeta);
     };
 
     JoinFilterHelper.prototype.isRelationalPanelEnabled = function () {

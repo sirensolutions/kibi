@@ -2,7 +2,7 @@ define(function (require) {
 
   var _ = require('lodash');
   var uniqFilters = require('components/filter_bar/lib/uniqFilters');
-  var replace_or_add_join_filter   = require('components/sindicetech/join_filter_helper/lib/replace_or_add_join_filter');
+  var replace_or_add_join_set_filter   = require('components/sindicetech/join_filter_helper/lib/replace_or_add_join_set_filter');
   var getSavedSearchMeta =  require('components/kibi/count_helper/lib/get_saved_search_meta');
 
   return function CountHelperFactory(Private, Promise, timefilter, indexPatterns, savedSearches, savedDashboards) {
@@ -238,7 +238,7 @@ define(function (require) {
 
 
         if (joinFilter) {
-          replace_or_add_join_filter(query.query.filtered.filter.bool.must, joinFilter, true);
+          replace_or_add_join_set_filter(query.query.filtered.filter.bool.must, joinFilter, true);
         }
 
         // update time filter

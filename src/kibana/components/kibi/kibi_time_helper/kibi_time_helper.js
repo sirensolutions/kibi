@@ -11,9 +11,10 @@ define(function (require) {
     function KibiTimeHelper() {
     }
 
-    KibiTimeHelper.prototype.updateTimeFilterForDashboard = function (dashboardId, timeRangeFilter) {
+    KibiTimeHelper.prototype.updateTimeFilterForDashboard = function (dashboardId, timeRangeF) {
       return new Promise(function (fulfill, reject) {
         savedDashboards.get(dashboardId).then(function (savedDashboard) {
+          var timeRangeFilter = _.cloneDeep(timeRangeF);
           // check if timeRestore is set to true and only in this case try to modify the timeFilter
           if (savedDashboard.timeRestore === true && savedDashboard.timeFrom && savedDashboard.timeTo) {
             // here take this values from kibiState

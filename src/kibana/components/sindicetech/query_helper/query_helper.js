@@ -146,7 +146,7 @@ define(function (require) {
      *   ...
      * }
      */
-    QueryHelper.prototype.constructJoinFilter = function (focus, relations, filtersPerIndex, queriesPerIndex, indexToDashboardMap) {
+    QueryHelper.prototype.constructJoinFilter = function (focus, relations, filtersPerIndex, queriesPerIndex, indexToDashboardsMap) {
       return new Promise(function (fulfill, reject) {
         // compute part of the label
         var labels = _getLabelsInConnectedComponent(focus, relations);
@@ -210,56 +210,60 @@ define(function (require) {
         }
 
         // update the timeFilter
-        var promises = _.chain(labels)
-        .filter(function (index) {
-          return index !== focus;
-        })
-        .map(function (index) {
-          return new Promise(function (fulfill, reject) {
-            indexPatterns.get(index).then(function (indexPattern) {
-              // 1 check if there is a timefilter for this index
-              var timeFilter = timefilter.get(indexPattern);
-              if (timeFilter) {
-                if (indexToDashboardMap) {
-                  var dashboardId = indexToDashboardMap[indexPattern.id];
-                  // update the timeFilter and add it to filters
-                  kibiTimeHelper.updateTimeFilterForDashboard(dashboardId, timeFilter).then(function (updatedTimeFilter) {
-                    fulfill({
-                      index: index,
-                      timeFilter: updatedTimeFilter
-                    });
-                  });
-                } else {
-                  fulfill({
-                    index: index,
-                    timeFilter: timeFilter
-                  });
-                }
-              } else {
-                // here resolve the promise with no filter just so the number of resolved one matches
-                fulfill(null);
-              }
-            }).catch(function (err) {
-              fulfill(null);
-            });
-          });
-        }).value();
-
-        Promise.all(promises).then(function (data) {
-          // add time filters on their respective index
-          for (var i = 0; i < data.length; i++) {
-            if (data[i]) {
-              // here we add a time filter to correct filters
-              if (!joinFilter.join_set.queries[data[i].index]) {
-                joinFilter.join_set.queries[data[i].index] = [];
-              }
-              joinFilter.join_set.queries[data[i].index].push(data[i].timeFilter);
-            }
+        // indexToDashboardsMap - contains an array now
+        // so we have to add all time filters
+        var promises1 = [];
+        _.each(labels, function (indexId) {
+          if (indexId !== focus) {
+            promises1.push( indexPatterns.get(indexId) );
           }
-
-        }).finally(function () {
-          fulfill(joinFilter);
         });
+
+        Promise.all(promises1).then(function (results1) {
+          var promises2 = [];
+          _.each(results1, function (indexPattern) {
+
+            var indexId = indexPattern.id;
+            var timeFilter = timefilter.get(indexPattern);
+
+            if (timeFilter) {
+              if (indexToDashboardsMap) {
+                _.each(indexToDashboardsMap[indexId], function (dashboardId) {
+                  promises2.push(
+                    kibiTimeHelper.updateTimeFilterForDashboard(dashboardId, timeFilter).then(function (updatedTimeFilter) {
+                      return {
+                        indexId: indexId,
+                        timeFilter: updatedTimeFilter
+                      };
+                    })
+                  );
+                });
+              } else {
+                promises2.push(Promise.resolve({
+                  indexId: indexId,
+                  timeFilter: timeFilter
+                }));
+              }
+            }
+          });
+
+          Promise.all(promises2).then(function (results2) {
+            // here remove duplicates
+
+            // here all correctly updated time filters
+            _.each(results2, function (res) {
+              var indexId = res.indexId;
+              var timeFilter = res.timeFilter;
+              if (!joinFilter.join_set.queries[indexId]) {
+                joinFilter.join_set.queries[indexId] = [];
+              }
+              joinFilter.join_set.queries[indexId].push(timeFilter);
+            });
+
+            fulfill(joinFilter);
+          })
+          .catch(reject);
+        }).catch(reject);
 
       });
     };

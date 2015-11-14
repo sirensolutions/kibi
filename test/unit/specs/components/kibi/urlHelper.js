@@ -682,12 +682,9 @@ define(function (require) {
         beforeEach(init2(fake_saved_dashboards, fake_saved_searches));
 
         it('getIndexToDashboardMap', function (done) {
-          var expected = [
-            {
-              dashboardId: 'time-testing-4',
-              indexId: 'time-testing-4'
-            }
-          ];
+          var expected = {
+            'time-testing-4': ['time-testing-4']
+          };
 
           urlHelper.getIndexToDashboardMap().then(function (results) {
             expect(results).to.eql(expected);
@@ -696,6 +693,22 @@ define(function (require) {
 
           $rootScope.$apply();
         });
+
+
+        it('getIndexToDashboardMap pass ids of dashboards', function (done) {
+          var expected = {
+            'time-testing-4': ['time-testing-4']
+          };
+
+          urlHelper.getIndexToDashboardMap(['time-testing-4']).then(function (results) {
+            expect(results).to.eql(expected);
+            done();
+          });
+
+          $rootScope.$apply();
+        });
+
+
 
         it('getRegularFiltersPerIndex', function (done) {
           var expected = {
@@ -766,9 +779,9 @@ define(function (require) {
             query_string: {}
           });
           var expected = {
-            'time-testing-4':{
+            'time-testing-4':[{
               query_string: {}
-            }
+            }]
           };
 
           urlHelper.getQueriesPerIndex().then(function (results) {

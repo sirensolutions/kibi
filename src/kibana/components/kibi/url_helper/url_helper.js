@@ -156,33 +156,85 @@ define(function (require) {
     };
 
 
-    UrlHelper.prototype.getIndexToDashboardMap = function () {
-      return new Promise(function (fulfill, reject) {
-        savedDashboards.find().then(function (resp) {
+    // creates a map index -> dashboards
+    // {
+    //   indexId: [dashboardId1, dashboardId2],
+    //   ...
+    // }
+    UrlHelper.prototype.getIndexToDashboardMap = function (dashboardsIds) {
+
+      var _createMap = function (results) {
+        // postprocess the results to create the map
+        var indexToDashboardArrayMap = {};
+        _.each(results, function (mapping) {
+          if (!indexToDashboardArrayMap[mapping.indexId]) {
+            indexToDashboardArrayMap[mapping.indexId] = [mapping.dashboardId];
+          } else {
+            if (indexToDashboardArrayMap[mapping.indexId].indexOf(mapping.dashboardId) === -1) {
+              indexToDashboardArrayMap[mapping.indexId].push(mapping.dashboardId);
+            }
+          }
+        });
+        return indexToDashboardArrayMap;
+      };
+
+
+      if (dashboardsIds instanceof Array && dashboardsIds.length > 0) {
+
+        var promises1 = [];
+        _.each(dashboardsIds, function (dashboardId) {
+          promises1.push(savedDashboards.get(dashboardId));
+        });
+
+        return Promise.all(promises1).then(function (savedDashboards) {
+
+          var promises2 = [];
+          _.each(savedDashboards, function (savedDashboard) {
+            if (savedDashboard.savedSearchId) {
+              promises2.push(savedSearches.get(savedDashboard.savedSearchId).then(function (dashboardSavedSearch) {
+                return {
+                  dashboardId: savedDashboard.id,
+                  indexId: dashboardSavedSearch.searchSource._state.index.id
+                };
+              }));
+            }
+          });
+
+          return Promise.all(promises2).then(function (results) {
+            return _createMap(results);
+          });
+        });
+
+
+
+
+      } else {
+
+        return savedDashboards.find().then(function (resp) {
           var promises = [];
           _.each(resp.hits, function (dashboard) {
             if (dashboard.savedSearchId) {
               promises.push(
-                new Promise(function (resolve, reject) {
-                  savedSearches.get(dashboard.savedSearchId).then(function (dashboardSavedSearch) {
-                    resolve({
-                      dashboardId: dashboard.id,
-                      indexId: dashboardSavedSearch.searchSource._state.index.id
-                    });
-                  });
+                savedSearches.get(dashboard.savedSearchId).then(function (dashboardSavedSearch) {
+                  return {
+                    dashboardId: dashboard.id,
+                    indexId: dashboardSavedSearch.searchSource._state.index.id
+                  };
                 })
               );
             }
           });
-          Promise.all(promises).then(function (results) {
-            fulfill(results);
+
+          return Promise.all(promises).then(function (results) {
+            return _createMap(results);
           });
         });
-      });
+
+      }
     };
 
 
-    UrlHelper.prototype.getRegularFiltersPerIndex = function () {
+    UrlHelper.prototype.getRegularFiltersPerIndex = function (dashboardsIds) {
       var self = this;
       // grab filters here - they have to be in a format { indexId: [], indexId2: [] } without any join filter
       // but filters in kibi state are saved per dashboard
@@ -190,11 +242,18 @@ define(function (require) {
       // return a promise
       return new Promise(function (fulfill, reject) {
         var filters = {};
-        self.getIndexToDashboardMap().then(function (results) {
-          _.each(results, function (res) {
-            var fs = kibiStateHelper.getFiltersForDashboardId(res.dashboardId);
-            filters[res.indexId] = _.filter(fs, function (f) {
-              return !f.join_set;
+        self.getIndexToDashboardMap(dashboardsIds).then(function (indexToDashboardsMap) {
+          _.each(indexToDashboardsMap, function (dashboardIds, indexId) {
+            _.each(dashboardIds, function (dashboardId) {
+              var fs = kibiStateHelper.getFiltersForDashboardId(dashboardId);
+              var fsFiltered = _.filter(fs, function (f) {
+                return !f.join_set;
+              });
+              if (!filters[indexId]) {
+                filters[indexId] = fsFiltered;
+              } else {
+                filters[indexId] = filters[indexId].concat(fsFiltered);
+              }
             });
           });
           fulfill(filters);
@@ -202,16 +261,22 @@ define(function (require) {
       });
     };
 
-    UrlHelper.prototype.getQueriesPerIndex = function () {
+    UrlHelper.prototype.getQueriesPerIndex = function (dashboardsIds) {
       var self = this;
       return new Promise(function (fulfill, reject) {
         var queries = {};
-        self.getIndexToDashboardMap().then(function (results) {
-          _.each(results, function (res) {
-            var query = kibiStateHelper.getQueryForDashboardId(res.dashboardId);
-            if (query) {
-              queries[res.indexId] = query;
-            }
+        self.getIndexToDashboardMap(dashboardsIds).then(function (indexToDashboardsMap) {
+          _.each(indexToDashboardsMap, function (dashboardIds, indexId) {
+            _.each(dashboardIds, function (dashboardId) {
+              var query = kibiStateHelper.getQueryForDashboardId(dashboardId);
+              if (query) {
+                if (!queries[indexId]) {
+                  queries[indexId] = [query];
+                } else {
+                  queries[indexId].push(query);
+                }
+              }
+            });
           });
 
           fulfill(queries);

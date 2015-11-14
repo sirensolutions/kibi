@@ -122,13 +122,31 @@ define(function (require) {
       return labels;
     };
 
-    // filters should be an object
-    // {
-    //   indexId1: [],
-    //   indexId2: [],
-    //   ...
-    // }
-    QueryHelper.prototype.constructJoinFilter = function (focus, relations, filters, queries, indexToDashboardMap) {
+    /**
+     * focus - is the focused index id
+     *
+     * relations - array of enabled relations
+     *
+     * filtersPerIndex should be an object
+     * {
+     *   indexId1: [],
+     *   indexId2: [],
+     *   ...
+     * }
+     * queriesPerIndex should be an object
+     * {
+     *   indexId1: [],
+     *   indexId2: [],
+     *   ...
+     * }
+     * indexDashboardsMap should be an object
+     * {
+     *   indexId1: [],
+     *   indexId2: [],
+     *   ...
+     * }
+     */
+    QueryHelper.prototype.constructJoinFilter = function (focus, relations, filtersPerIndex, queriesPerIndex, indexToDashboardMap) {
       return new Promise(function (fulfill, reject) {
         // compute part of the label
         var labels = _getLabelsInConnectedComponent(focus, relations);
@@ -148,32 +166,34 @@ define(function (require) {
         };
 
         // here iterate over queries and add to the filters only this one which are not for focused index
-        if (queries) {
-          for (var index in queries) {
-            if (queries.hasOwnProperty(index) && index !== focus) {
-              var fQuery = queries[index];
-              // filter out only query_string queries that are only a wildcard
-              if (fQuery && (!fQuery.query_string || fQuery.query_string.query !== '*')) {
-                if (!joinFilter.join_set.queries[index]) {
-                  joinFilter.join_set.queries[index] = [];
-                }
-                joinFilter.join_set.queries[index].push({ query: fQuery });
+        if (queriesPerIndex) {
+          _.each(queriesPerIndex, function (queries, index) {
+            if (index !== focus && queries instanceof Array && queries.length > 0) {
+              if (!joinFilter.join_set.queries[index]) {
+                joinFilter.join_set.queries[index] = [];
               }
+              _.each(queries, function (fQuery) {
+                // filter out only query_string queries that are only a wildcard
+                if (fQuery && (!fQuery.query_string || fQuery.query_string.query !== '*')) {
+                  if (!joinFilter.join_set.queries[index]) {
+                    joinFilter.join_set.queries[index] = [];
+                  }
+                  joinFilter.join_set.queries[index].push({ query: fQuery });
+                }
+              });
             }
-          }
+          });
         }
 
-        if (filters) {
-          for (var f in filters) {
-            if (filters.hasOwnProperty(f) && f !== focus && filters[f] instanceof Array && filters[f].length > 0) {
-              if (!joinFilter.join_set.queries[f]) {
-                joinFilter.join_set.queries[f] = [];
+        if (filtersPerIndex) {
+          _.each(filtersPerIndex, function (filters, index) {
+            if (index !== focus && filters instanceof Array && filters.length > 0) {
+              if (!joinFilter.join_set.queries[index]) {
+                joinFilter.join_set.queries[index] = [];
               }
-
-
-              for (var i = 0; i < filters[f].length; i++) {
+              _.each(filters, function (fFilter) {
                 // clone it first so when we remove meta the original object is not modified
-                var filter = _.cloneDeep(filters[f][i]);
+                var filter = _.cloneDeep(fFilter);
                 if (filter.meta && filter.meta.negate === true) {
                   delete filter.meta;
                   filter = {
@@ -183,11 +203,10 @@ define(function (require) {
                   delete filter.meta;
                 }
 
-                joinFilter.join_set.queries[f].push(filter);
-              }
-
+                joinFilter.join_set.queries[index].push(filter);
+              });
             }
-          }
+          });
         }
 
         // update the timeFilter

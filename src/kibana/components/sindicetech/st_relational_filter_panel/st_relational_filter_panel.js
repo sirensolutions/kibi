@@ -62,17 +62,6 @@ define(function (require) {
             }
 
 
-            var extractIndexId = function (s) {
-              var index = s.indexOf('.');
-              return s.substring(0, index);
-            };
-
-            var extractPath = function (s) {
-              var index = s.indexOf('.');
-              return s.substring(index + 1);
-            };
-
-
             // each node is a dashboard
             var dashboards = [];
             _.each($scope.relationalPanelConfig.relations, function (relation) {

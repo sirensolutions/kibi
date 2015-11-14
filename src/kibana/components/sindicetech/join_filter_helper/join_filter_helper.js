@@ -29,6 +29,17 @@ define(function (require) {
       return false;
     };
 
+
+    JoinFilterHelper.prototype.findIndexAssociatedToDashboard = function (indexToDashboardsMap, dashboardId) {
+      for (var indexId in indexToDashboardsMap) {
+        if (indexToDashboardsMap.hasOwnProperty(indexId)) {
+          if (indexToDashboardsMap[indexId].indexOf(dashboardId) !== -1) {
+            return indexId;
+          }
+        }
+      }
+    };
+
     JoinFilterHelper.prototype.getJoinFilter = function (focusDashboardId) {
       var self = this;
       return new Promise(function (fulfill, reject) {
@@ -50,13 +61,31 @@ define(function (require) {
               return savedSearches.get(dashboard.savedSearchId);
             }
           });
-          var filtersPerIndex = urlHelper.getRegularFiltersPerIndex();
-          var queriesPerIndex = urlHelper.getQueriesPerIndex();
 
-          Promise.all([ focusedSavedSearch, filtersPerIndex, queriesPerIndex]).then(function (data) {
+          // grab only enabled relations
+          var enabledRelations = _.filter(relationalPanelConfig.relations, function (relation) {
+            return relation.enabled === true;
+          });
+
+          // collect ids of dashboards from enabled relations
+          var dashboardIds = [];
+          _.each(enabledRelations, function (relation) {
+            if (dashboardIds.indexOf(relation.from) === -1) {
+              dashboardIds.push(relation.from);
+            }
+            if (dashboardIds.indexOf(relation.to) === -1) {
+              dashboardIds.push(relation.to);
+            }
+          });
+
+          var filtersPerIndexPromise = urlHelper.getRegularFiltersPerIndex(dashboardIds);
+          var queriesPerIndexPromise = urlHelper.getQueriesPerIndex(dashboardIds);
+
+
+          Promise.all([focusedSavedSearch, filtersPerIndexPromise, queriesPerIndexPromise]).then(function (data) {
             var dashboardSavedSearch = data[0];
-            var filters = data[1];
-            var queries = data[2];
+            var filtersPerIndex = data[1];
+            var queriesPerIndex = data[2];
 
             if (!dashboardSavedSearch) {
               reject(new Error('Not possible to get joinFilter as SavedSearch is undefined for for [' +  focusDashboardId + ']'));
@@ -78,54 +107,17 @@ define(function (require) {
             }
 
 
-            var promises = [];
-            _.each(relationalPanelConfig.relations, function (relation) {
+            return urlHelper.getIndexToDashboardMap(dashboardIds).then(function (indexToDashboardsMap) {
 
-              promises.push(savedDashboards.get(relation.from).then(function (savedDashboard) {
-                if (!savedDashboard.savedSearchId) {
-                  throw new Error('Should have savedSearchId');
-                }
-                return savedSearches.get(savedDashboard.savedSearchId).then(function (savedSearch) {
-                  return {
-                    indexId: savedSearch.searchSource._state.index.id,
-                    dashboardId: savedDashboard.id
-                  };
-                });
-              }));
-              promises.push(savedDashboards.get(relation.to).then(function (savedDashboard) {
-                if (!savedDashboard.savedSearchId) {
-                  throw new Error('Should have savedSearchId');
-                }
-                return savedSearches.get(savedDashboard.savedSearchId).then(function (savedSearch) {
-                  return {
-                    indexId: savedSearch.searchSource._state.index.id,
-                    dashboardId: savedDashboard.id
-                  };
-                });
-              }));
-            });
-
-            var enabledRelations = _.filter(relationalPanelConfig.relations, function (relation) {
-              return relation.enabled === true;
-            });
-
-            return Promise.all(promises).then(function (results) {
-              var indexToDashboardMap = {};
-
-              _.each(results, function (mapping) {
-                indexToDashboardMap[mapping.indexId] = mapping.dashboardId;
-              });
-
-              var dashboardsToIndexesMap = _invert(indexToDashboardMap);
               var relations = [];
               _.each(enabledRelations, function (r) {
                 relations.push([
                   {
-                    indices: [ dashboardsToIndexesMap[r.from] ],
+                    indices: [ self.findIndexAssociatedToDashboard(indexToDashboardsMap, r.from) ],
                     path: r.fromPath
                   },
                   {
-                    indices: [ dashboardsToIndexesMap[r.to] ],
+                    indices: [ self.findIndexAssociatedToDashboard(indexToDashboardsMap, r.to) ],
                     path: r.toPath
                   }
                 ]);
@@ -133,25 +125,26 @@ define(function (require) {
 
               var labels = queryHelper.getLabelsInConnectedComponent(focusIndex, relations);
               // keep only the filters which are in the connected component
-              for (var filter in filters) {
-                if (filters.hasOwnProperty(filter) && !_.contains(labels, filter)) {
-                  delete filters[filter];
+              _.each(filtersPerIndex, function (filters, indexId) {
+                if (!_.contains(labels, indexId)) {
+                  delete filtersPerIndex[indexId];
                 }
-              }
+              });
+
               // keep only the queries which are in the connected component
-              for (var query in queries) {
-                if (queries.hasOwnProperty(query) && !_.contains(labels, query)) {
-                  delete queries[query];
+              _.each(queriesPerIndex, function (queries, indexId) {
+                if (!_.contains(labels, indexId)) {
+                  delete queriesPerIndex[indexId];
                 }
-              }
+              });
 
               // build the join_set filter
               return queryHelper.constructJoinFilter(
                 focusIndex,
                 relations,
-                filters,
-                queries,
-                indexToDashboardMap
+                filtersPerIndex,
+                queriesPerIndex,
+                indexToDashboardsMap
               );
 
             });

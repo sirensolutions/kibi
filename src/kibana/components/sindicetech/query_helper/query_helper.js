@@ -5,6 +5,7 @@ define(function (require) {
   return function QueryHelperFactory(savedVisualizations, Private, Promise, timefilter, indexPatterns) {
 
     var kibiTimeHelper   = Private(require('components/kibi/kibi_time_helper/kibi_time_helper'));
+    var uniqFilters = require('components/filter_bar/lib/uniqFilters');
 
     function QueryHelper() {
     }
@@ -248,7 +249,6 @@ define(function (require) {
           });
 
           Promise.all(promises2).then(function (results2) {
-            // here remove duplicates
 
             // here all correctly updated time filters
             _.each(results2, function (res) {
@@ -258,6 +258,8 @@ define(function (require) {
                 joinFilter.join_set.queries[indexId] = [];
               }
               joinFilter.join_set.queries[indexId].push(timeFilter);
+              // here remove any duplicates
+              joinFilter.join_set.queries[indexId] = uniqFilters(joinFilter.join_set.queries[indexId]);
             });
 
             fulfill(joinFilter);

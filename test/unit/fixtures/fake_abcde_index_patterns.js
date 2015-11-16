@@ -1,14 +1,20 @@
 define(function (require) {
 
   var fakeIndexes = {
-    article: {
-      id: 'article'
+    a: {
+      id: 'a'
     },
-    company: {
-      id: 'company'
+    b: {
+      id: 'b'
     },
-    'time-testing-3': {
-      id: 'time-testing-3'
+    c: {
+      id: 'c'
+    },
+    d: {
+      id: 'd'
+    },
+    e: {
+      id: 'e'
     }
   };
 

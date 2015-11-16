@@ -1,6 +1,7 @@
 define(function (require) {
 
   var fakeIndexPatterns = require('fixtures/fake_index_patterns');
+  var fakeABCDEIndexPatterns = require('fixtures/fake_abcde_index_patterns');
   var fakeTimeFilter = require('fixtures/fake_time_filter');
   var fakeSavedDashboards = require('fixtures/saved_dashboards');
   var fakeSavedVisualisations = require('fixtures/saved_visualisations');
@@ -33,144 +34,147 @@ define(function (require) {
   }
 
   describe('Kibi Components', function () {
-    beforeEach(init(fakeTimeFilter, fakeSavedDashboards, fakeIndexPatterns, fakeSavedVisualisations));
-
     describe('queryHelper', function () {
-      describe('constructJoinFilter', function () {
-        describe('join label', function () {
-          it('should output correct join label 1', function (done) {
-            var focus = 'a';
-            var relations = [
-              [
-                {
-                  indices: [ 'a' ],
-                  path: 'id'
-                },
-                {
-                  indices: [ 'b' ],
-                  path: 'id'
-                }
-              ],
-              [
-                {
-                  indices: [ 'b' ],
-                  path: 'id'
-                },
-                {
-                  indices: [ 'c' ],
-                  path: 'id'
-                }
-              ],
-              [
-                {
-                  indices: [ 'd' ],
-                  path: 'id'
-                },
-                {
-                  indices: [ 'e' ],
-                  path: 'id'
-                }
-              ]
-            ];
-            var expected = 'a <-> b <-> c';
+      describe('join label', function () {
+        beforeEach(init(fakeTimeFilter, fakeSavedDashboards, fakeABCDEIndexPatterns, fakeSavedVisualisations));
 
-            queryHelper.constructJoinFilter(focus, relations, null).then(function (join) {
-              expect(join.meta.value).to.be(expected);
-              done();
-            }).catch(function (err) {
-              done(err);
-            });
+        it('should output correct join label 1', function (done) {
+          var focus = 'a';
+          var relations = [
+            [
+              {
+                indices: [ 'a' ],
+                path: 'id'
+              },
+              {
+                indices: [ 'b' ],
+                path: 'id'
+              }
+            ],
+            [
+              {
+                indices: [ 'b' ],
+                path: 'id'
+              },
+              {
+                indices: [ 'c' ],
+                path: 'id'
+              }
+            ],
+            [
+              {
+                indices: [ 'd' ],
+                path: 'id'
+              },
+              {
+                indices: [ 'e' ],
+                path: 'id'
+              }
+            ]
+          ];
+          var expected = 'a <-> b <-> c';
 
-            $rootScope.$apply();
+          queryHelper.constructJoinFilter(focus, relations, null).then(function (join) {
+            expect(join.meta.value).to.be(expected);
+            done();
+          }).catch(function (err) {
+            done(err);
           });
 
-          it('should output correct join label 2', function (done) {
-            var focus = 'a';
-            var relations = [
-              [
-                {
-                  indices: [ 'a' ],
-                  path: 'id'
-                },
-                {
-                  indices: [ 'b' ],
-                  path: 'id'
-                }
-              ],
-              [
-                {
-                  indices: [ 'b' ],
-                  path: 'id'
-                },
-                {
-                  indices: [ 'c' ],
-                  path: 'id'
-                }
-              ],
-              [
-                {
-                  indices: [ 'c' ],
-                  path: 'id'
-                },
-                {
-                  indices: [ 'd' ],
-                  path: 'id'
-                }
-              ]
-            ];
-            var expected = 'a <-> b <-> c <-> d';
-            queryHelper.constructJoinFilter(focus, relations, null).then(function (join) {
-              expect(join.meta.value).to.be(expected);
-              done();
-            }).catch(function (err) {
-              done(err);
-            });
-
-            $rootScope.$apply();
-          });
-
-          it('should output correct join label 3', function (done) {
-            var focus = 'a';
-            var relations = [
-              [
-                {
-                  indices: [ 'a' ],
-                  path: 'id'
-                },
-                {
-                  indices: [ 'b' ],
-                  path: 'id'
-                }
-              ],
-              [
-                {
-                  indices: [ 'b' ],
-                  path: 'id'
-                },
-                {
-                  indices: [ 'b' ],
-                  path: 'id'
-                }
-              ]
-            ];
-            var expected = 'a <-> b';
-            queryHelper.constructJoinFilter(focus, relations, null).then(function (join) {
-              expect(join.meta.value).to.be(expected);
-              done();
-            }).catch(function (err) {
-              done(err);
-            });
-
-            $rootScope.$apply();
-          });
+          $rootScope.$apply();
         });
+
+        it('should output correct join label 2', function (done) {
+          var focus = 'a';
+          var relations = [
+            [
+              {
+                indices: [ 'a' ],
+                path: 'id'
+              },
+              {
+                indices: [ 'b' ],
+                path: 'id'
+              }
+            ],
+            [
+              {
+                indices: [ 'b' ],
+                path: 'id'
+              },
+              {
+                indices: [ 'c' ],
+                path: 'id'
+              }
+            ],
+            [
+              {
+                indices: [ 'c' ],
+                path: 'id'
+              },
+              {
+                indices: [ 'd' ],
+                path: 'id'
+              }
+            ]
+          ];
+          var expected = 'a <-> b <-> c <-> d';
+          queryHelper.constructJoinFilter(focus, relations, null).then(function (join) {
+            expect(join.meta.value).to.be(expected);
+            done();
+          }).catch(function (err) {
+            done(err);
+          });
+
+          $rootScope.$apply();
+        });
+
+        it('should output correct join label 3', function (done) {
+          var focus = 'a';
+          var relations = [
+            [
+              {
+                indices: [ 'a' ],
+                path: 'id'
+              },
+              {
+                indices: [ 'b' ],
+                path: 'id'
+              }
+            ],
+            [
+              {
+                indices: [ 'b' ],
+                path: 'id'
+              },
+              {
+                indices: [ 'b' ],
+                path: 'id'
+              }
+            ]
+          ];
+          var expected = 'a <-> b';
+          queryHelper.constructJoinFilter(focus, relations, null).then(function (join) {
+            expect(join.meta.value).to.be(expected);
+            done();
+          }).catch(function (err) {
+            done(err);
+          });
+
+          $rootScope.$apply();
+        });
+      });
+
+
+      describe('constructJoinFilter', function () {
+        beforeEach(init(fakeTimeFilter, fakeSavedDashboards, fakeIndexPatterns, fakeSavedVisualisations));
 
         describe('with queries', function () {
           it('query is custom - not a query_string', function (done) {
             var focus = 'article';
-            var filters = {};
-            var queries = {
-              company: {
+            var filtersPerIndex = {};
+            var queriesPerIndex = {
+              company: [{
                 constant_score: {
                   query: {
                     match: {
@@ -178,7 +182,7 @@ define(function (require) {
                     }
                   }
                 }
-              }
+              }]
             };
             var indexToDashboardMap;
             var relations = [
@@ -221,7 +225,9 @@ define(function (require) {
               }
             };
 
-            queryHelper.constructJoinFilter(focus, relations, filters, queries, indexToDashboardMap).then(function (filter) {
+            queryHelper.constructJoinFilter(
+              focus, relations, filtersPerIndex, queriesPerIndex, indexToDashboardMap
+            ).then(function (filter) {
               expect(filter).to.eql(expected);
               done();
             });
@@ -231,8 +237,8 @@ define(function (require) {
 
           it('query_string is an analyzed wildcard', function (done) {
             var focus = 'article';
-            var filters = {};
-            var queries = {
+            var filtersPerIndex = {};
+            var queriesPerIndex = {
               company: {
                 query_string: {
                   query: '*'
@@ -266,7 +272,9 @@ define(function (require) {
               }
             };
 
-            queryHelper.constructJoinFilter(focus, relations, filters, queries, indexToDashboardMap).then(function (filter) {
+            queryHelper.constructJoinFilter(
+              focus, relations, filtersPerIndex, queriesPerIndex, indexToDashboardMap
+            ).then(function (filter) {
               expect(filter).to.eql(expected);
               done();
             });
@@ -276,13 +284,13 @@ define(function (require) {
 
           it('add queries', function (done) {
             var focus = 'article';
-            var filters = {};
-            var queries = {
-              company: {
+            var filtersPerIndex = {};
+            var queriesPerIndex = {
+              company: [{
                 query_string: {
                   query: 'Awesome company'
                 }
-              }
+              }]
             };
             var indexToDashboardMap;
             var relations = [
@@ -321,7 +329,9 @@ define(function (require) {
               }
             };
 
-            queryHelper.constructJoinFilter(focus, relations, filters, queries, indexToDashboardMap).then(function (filter) {
+            queryHelper.constructJoinFilter(
+              focus, relations, filtersPerIndex, queriesPerIndex, indexToDashboardMap
+            ).then(function (filter) {
               expect(filter).to.eql(expected);
               done();
             });
@@ -331,8 +341,8 @@ define(function (require) {
 
           it('add queries - query for focus ignored', function (done) {
             var focus = 'article';
-            var filters = {};
-            var queries = {
+            var filtersPerIndex = {};
+            var queriesPerIndex = {
               article: {
                 query_string: {
                   query: 'Awesome company'
@@ -366,7 +376,9 @@ define(function (require) {
               }
             };
 
-            queryHelper.constructJoinFilter(focus, relations, filters, queries, indexToDashboardMap).then(function (filter) {
+            queryHelper.constructJoinFilter(
+              focus, relations, filtersPerIndex, queriesPerIndex, indexToDashboardMap
+            ).then(function (filter) {
               expect(filter).to.eql(expected);
               done();
             });
@@ -376,10 +388,10 @@ define(function (require) {
         });
 
         describe('with filters', function () {
-          it('add filters', function (done) {
+          it('add filters 1', function (done) {
             var focus = 'article';
-            var queries = {};
-            var filters = {
+            var queriesPerIndex = {};
+            var filtersPerIndex = {
               company: [{
                 query: {
                   query_string: {
@@ -425,8 +437,9 @@ define(function (require) {
               }
             };
 
-            queryHelper.constructJoinFilter(focus, relations, filters, queries, indexToDashboardMap).then(function (filter) {
-              //console.log(JSON.stringify(filter, null, ' '));
+            queryHelper.constructJoinFilter(
+              focus, relations, filtersPerIndex, queriesPerIndex, indexToDashboardMap
+            ).then(function (filter) {
               expect(filter).to.eql(expected);
               done();
             });
@@ -434,10 +447,10 @@ define(function (require) {
             $rootScope.$apply();
           });
 
-          it('add filters make sure no meta in result', function (done) {
+          it('add filters 2 - make sure no meta in result', function (done) {
             var focus = 'article';
-            var queries = {};
-            var filters = {
+            var queriesPerIndex = {};
+            var filtersPerIndex = {
               company: [{
                 query: {
                   query_string: {
@@ -484,8 +497,9 @@ define(function (require) {
               }
             };
 
-            queryHelper.constructJoinFilter(focus, relations, filters, queries, indexToDashboardMap).then(function (filter) {
-              //console.log(JSON.stringify(filter, null, ' '));
+            queryHelper.constructJoinFilter(
+              focus, relations, filtersPerIndex, queriesPerIndex, indexToDashboardMap
+            ).then(function (filter) {
               expect(filter).to.eql(expected);
               done();
             });
@@ -493,10 +507,10 @@ define(function (require) {
             $rootScope.$apply();
           });
 
-          it('add filters - respect negation', function (done) {
+          it('add filters 3 - respect negation', function (done) {
             var focus = 'article';
-            var queries = {};
-            var filters = {
+            var queriesPerIndex = {};
+            var filtersPerIndex = {
               company: [{
                 query: {
                   query_string: {
@@ -547,7 +561,9 @@ define(function (require) {
               }
             };
 
-            queryHelper.constructJoinFilter(focus, relations, filters, queries, indexToDashboardMap).then(function (filter) {
+            queryHelper.constructJoinFilter(
+              focus, relations, filtersPerIndex, queriesPerIndex, indexToDashboardMap
+            ).then(function (filter) {
               expect(filter).to.eql(expected);
               done();
             });
@@ -555,10 +571,10 @@ define(function (require) {
             $rootScope.$apply();
           });
 
-          it('add filters - filter for focus ignored', function (done) {
+          it('add filters 4 - filter for focus ignored', function (done) {
             var focus = 'article';
-            var queries = {};
-            var filters = {
+            var queriesPerIndex = {};
+            var filtersPerIndex = {
               article: {
                 query_string: {
                   query: 'Awesome company'
@@ -592,7 +608,9 @@ define(function (require) {
               }
             };
 
-            queryHelper.constructJoinFilter(focus, relations, filters, queries, indexToDashboardMap).then(function (filter) {
+            queryHelper.constructJoinFilter(
+              focus, relations, filtersPerIndex, queriesPerIndex, indexToDashboardMap
+            ).then(function (filter) {
               expect(filter).to.eql(expected);
               done();
             });
@@ -600,10 +618,10 @@ define(function (require) {
             $rootScope.$apply();
           });
 
-          it('add filters - update time filter', function (done) {
+          it('add filters 5 - update time filter', function (done) {
             var focus = 'article';
-            var queries = {};
-            var filters = {
+            var queriesPerIndex = {};
+            var filtersPerIndex = {
               'time-testing-3': [
               {
                 query: {
@@ -615,7 +633,7 @@ define(function (require) {
               ]
             };
             var indexToDashboardMap = {
-              'time-testing-3': 'time-testing-3'
+              'time-testing-3': ['time-testing-3']
             };
             var relations = [
               [
@@ -661,7 +679,10 @@ define(function (require) {
               }
             };
 
-            queryHelper.constructJoinFilter(focus, relations, filters, queries, indexToDashboardMap).then(function (filter) {
+
+            queryHelper.constructJoinFilter(
+              focus, relations, filtersPerIndex, queriesPerIndex, indexToDashboardMap
+            ).then(function (filter) {
               expect(filter).to.eql(expected);
               done();
             });
@@ -669,12 +690,12 @@ define(function (require) {
             $rootScope.$apply();
           });
 
-          it('add filters - update time filter when no other filters present', function (done) {
+          it('add filters 6 - update time filter when no other filters present', function (done) {
             var focus = 'article';
-            var queries = {};
-            var filters = {};
+            var queriesPerIndex = {};
+            var filtersPerIndex = {};
             var indexToDashboardMap = {
-              'time-testing-3': 'time-testing-3'
+              'time-testing-3': ['time-testing-3']
             };
             var relations = [
               [
@@ -713,7 +734,9 @@ define(function (require) {
               }
             };
 
-            queryHelper.constructJoinFilter(focus, relations, filters, queries, indexToDashboardMap).then(function (filter) {
+            queryHelper.constructJoinFilter(
+              focus, relations, filtersPerIndex, queriesPerIndex, indexToDashboardMap
+            ).then(function (filter) {
               expect(filter).to.eql(expected);
               done();
             });
@@ -721,10 +744,10 @@ define(function (require) {
             $rootScope.$apply();
           });
 
-          it('add filters - update time filter when no other filters exept for focused index', function (done) {
+          it('add filters 7 - update time filter when no other filters exept for focused index', function (done) {
             var focus = 'time-testing-3';
-            var queries = {};
-            var filters = {};
+            var queriesPerIndex = {};
+            var filtersPerIndex = {};
             var indexToDashboardMap = {
               'time-testing-3': 'time-testing-3'
             };
@@ -754,7 +777,9 @@ define(function (require) {
               }
             };
 
-            queryHelper.constructJoinFilter(focus, relations, filters, queries, indexToDashboardMap).then(function (filter) {
+            queryHelper.constructJoinFilter(
+              focus, relations, filtersPerIndex, queriesPerIndex, indexToDashboardMap
+            ).then(function (filter) {
               expect(filter).to.eql(expected);
               done();
             });
@@ -762,10 +787,10 @@ define(function (require) {
             $rootScope.$apply();
           });
 
-          it('add filters - update time filter when no other filters present - no indexToDashboard', function (done) {
+          it('add filters 8 - update time filter when no other filters present - no indexToDashboard', function (done) {
             var focus = 'article';
-            var queries = {};
-            var filters = {};
+            var queriesPerIndex = {};
+            var filtersPerIndex = {};
             var indexToDashboardMap = null;
             var relations = [
               [
@@ -804,7 +829,9 @@ define(function (require) {
               }
             };
 
-            queryHelper.constructJoinFilter(focus, relations, filters, queries, indexToDashboardMap).then(function (filter) {
+            queryHelper.constructJoinFilter(
+              focus, relations, filtersPerIndex, queriesPerIndex, indexToDashboardMap
+            ).then(function (filter) {
               expect(filter).to.eql(expected);
               done();
             });
@@ -852,8 +879,8 @@ define(function (require) {
 
         it('simple', function (done) {
           var focus = 'article';
-          var filters = {};
-          var queries = {};
+          var filtersPerIndex = {};
+          var queriesPerIndex = {};
           var indexToDashboardMap;
           var relations = [
             [
@@ -881,7 +908,9 @@ define(function (require) {
             }
           };
 
-          queryHelper.constructJoinFilter(focus, relations, filters, queries, indexToDashboardMap).then(function (filter) {
+          queryHelper.constructJoinFilter(
+            focus, relations, filtersPerIndex, queriesPerIndex, indexToDashboardMap
+          ).then(function (filter) {
             expect(filter).to.eql(expected);
             done();
           });

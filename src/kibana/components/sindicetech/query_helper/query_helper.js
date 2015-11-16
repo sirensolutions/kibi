@@ -5,6 +5,7 @@ define(function (require) {
   return function QueryHelperFactory(savedVisualizations, Private, Promise, timefilter, indexPatterns) {
 
     var kibiTimeHelper   = Private(require('components/kibi/kibi_time_helper/kibi_time_helper'));
+    var uniqFilters = require('components/filter_bar/lib/uniqFilters');
 
     function QueryHelper() {
     }
@@ -119,16 +120,36 @@ define(function (require) {
 
       } while (current.length !== 0);
 
-      return labels;
+      // TODO:
+      // refactor see issue https://github.com/sirensolutions/kibi-internal/issues/500
+      return _.uniq(labels);
     };
 
-    // filters should be an object
-    // {
-    //   indexId1: [],
-    //   indexId2: [],
-    //   ...
-    // }
-    QueryHelper.prototype.constructJoinFilter = function (focus, relations, filters, queries, indexToDashboardMap) {
+    /**
+     * focus - is the focused index id
+     *
+     * relations - array of enabled relations
+     *
+     * filtersPerIndex should be an object
+     * {
+     *   indexId1: [],
+     *   indexId2: [],
+     *   ...
+     * }
+     * queriesPerIndex should be an object
+     * {
+     *   indexId1: [],
+     *   indexId2: [],
+     *   ...
+     * }
+     * indexDashboardsMap should be an object
+     * {
+     *   indexId1: [],
+     *   indexId2: [],
+     *   ...
+     * }
+     */
+    QueryHelper.prototype.constructJoinFilter = function (focus, relations, filtersPerIndex, queriesPerIndex, indexToDashboardsMap) {
       return new Promise(function (fulfill, reject) {
         // compute part of the label
         var labels = _getLabelsInConnectedComponent(focus, relations);
@@ -148,32 +169,34 @@ define(function (require) {
         };
 
         // here iterate over queries and add to the filters only this one which are not for focused index
-        if (queries) {
-          for (var index in queries) {
-            if (queries.hasOwnProperty(index) && index !== focus) {
-              var fQuery = queries[index];
-              // filter out only query_string queries that are only a wildcard
-              if (fQuery && (!fQuery.query_string || fQuery.query_string.query !== '*')) {
-                if (!joinFilter.join_set.queries[index]) {
-                  joinFilter.join_set.queries[index] = [];
-                }
-                joinFilter.join_set.queries[index].push({ query: fQuery });
+        if (queriesPerIndex) {
+          _.each(queriesPerIndex, function (queries, index) {
+            if (index !== focus && queries instanceof Array && queries.length > 0) {
+              if (!joinFilter.join_set.queries[index]) {
+                joinFilter.join_set.queries[index] = [];
               }
+              _.each(queries, function (fQuery) {
+                // filter out only query_string queries that are only a wildcard
+                if (fQuery && (!fQuery.query_string || fQuery.query_string.query !== '*')) {
+                  if (!joinFilter.join_set.queries[index]) {
+                    joinFilter.join_set.queries[index] = [];
+                  }
+                  joinFilter.join_set.queries[index].push({ query: fQuery });
+                }
+              });
             }
-          }
+          });
         }
 
-        if (filters) {
-          for (var f in filters) {
-            if (filters.hasOwnProperty(f) && f !== focus && filters[f] instanceof Array && filters[f].length > 0) {
-              if (!joinFilter.join_set.queries[f]) {
-                joinFilter.join_set.queries[f] = [];
+        if (filtersPerIndex) {
+          _.each(filtersPerIndex, function (filters, index) {
+            if (index !== focus && filters instanceof Array && filters.length > 0) {
+              if (!joinFilter.join_set.queries[index]) {
+                joinFilter.join_set.queries[index] = [];
               }
-
-
-              for (var i = 0; i < filters[f].length; i++) {
+              _.each(filters, function (fFilter) {
                 // clone it first so when we remove meta the original object is not modified
-                var filter = _.cloneDeep(filters[f][i]);
+                var filter = _.cloneDeep(fFilter);
                 if (filter.meta && filter.meta.negate === true) {
                   delete filter.meta;
                   filter = {
@@ -183,64 +206,68 @@ define(function (require) {
                   delete filter.meta;
                 }
 
-                joinFilter.join_set.queries[f].push(filter);
-              }
-
+                joinFilter.join_set.queries[index].push(filter);
+              });
             }
-          }
+          });
         }
 
         // update the timeFilter
-        var promises = _.chain(labels)
-        .filter(function (index) {
-          return index !== focus;
-        })
-        .map(function (index) {
-          return new Promise(function (fulfill, reject) {
-            indexPatterns.get(index).then(function (indexPattern) {
-              // 1 check if there is a timefilter for this index
-              var timeFilter = timefilter.get(indexPattern);
-              if (timeFilter) {
-                if (indexToDashboardMap) {
-                  var dashboardId = indexToDashboardMap[indexPattern.id];
-                  // update the timeFilter and add it to filters
-                  kibiTimeHelper.updateTimeFilterForDashboard(dashboardId, timeFilter).then(function (updatedTimeFilter) {
-                    fulfill({
-                      index: index,
-                      timeFilter: updatedTimeFilter
-                    });
-                  });
-                } else {
-                  fulfill({
-                    index: index,
-                    timeFilter: timeFilter
-                  });
-                }
-              } else {
-                // here resolve the promise with no filter just so the number of resolved one matches
-                fulfill(null);
-              }
-            }).catch(function (err) {
-              fulfill(null);
-            });
-          });
-        }).value();
-
-        Promise.all(promises).then(function (data) {
-          // add time filters on their respective index
-          for (var i = 0; i < data.length; i++) {
-            if (data[i]) {
-              // here we add a time filter to correct filters
-              if (!joinFilter.join_set.queries[data[i].index]) {
-                joinFilter.join_set.queries[data[i].index] = [];
-              }
-              joinFilter.join_set.queries[data[i].index].push(data[i].timeFilter);
-            }
+        // indexToDashboardsMap - contains an array now
+        // so we have to add all time filters
+        var promises1 = [];
+        _.each(labels, function (indexId) {
+          if (indexId !== focus) {
+            promises1.push( indexPatterns.get(indexId) );
           }
-
-        }).finally(function () {
-          fulfill(joinFilter);
         });
+
+        Promise.all(promises1).then(function (results1) {
+          var promises2 = [];
+          _.each(results1, function (indexPattern) {
+
+            var indexId = indexPattern.id;
+            var timeFilter = timefilter.get(indexPattern);
+
+            if (timeFilter) {
+              if (indexToDashboardsMap) {
+                _.each(indexToDashboardsMap[indexId], function (dashboardId) {
+                  promises2.push(
+                    kibiTimeHelper.updateTimeFilterForDashboard(dashboardId, timeFilter).then(function (updatedTimeFilter) {
+                      return {
+                        indexId: indexId,
+                        timeFilter: updatedTimeFilter
+                      };
+                    })
+                  );
+                });
+              } else {
+                promises2.push(Promise.resolve({
+                  indexId: indexId,
+                  timeFilter: timeFilter
+                }));
+              }
+            }
+          });
+
+          Promise.all(promises2).then(function (results2) {
+
+            // here all correctly updated time filters
+            _.each(results2, function (res) {
+              var indexId = res.indexId;
+              var timeFilter = res.timeFilter;
+              if (!joinFilter.join_set.queries[indexId]) {
+                joinFilter.join_set.queries[indexId] = [];
+              }
+              joinFilter.join_set.queries[indexId].push(timeFilter);
+              // here remove any duplicates
+              joinFilter.join_set.queries[indexId] = uniqFilters(joinFilter.join_set.queries[indexId]);
+            });
+
+            fulfill(joinFilter);
+          })
+          .catch(reject);
+        }).catch(reject);
 
       });
     };

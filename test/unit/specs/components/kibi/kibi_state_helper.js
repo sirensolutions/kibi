@@ -294,6 +294,26 @@ define(function (require) {
         expect(globalState.k.d.dashboard2.q).to.eql('*');
       });
 
+      it('should remove all filters of type', function () {
+        var filters = [{join_set: {}}, {range:{}}];
+        globalState.k = {
+          d: {
+            dashboard1: {
+              f: filters
+            },
+            dashboard2: {
+              f: filters
+            }
+          }
+        };
+        globalState.save();
+
+        kibiStateHelper.removeAllFiltersOfType('join_set');
+
+        expect(globalState.k.d.dashboard1.f).to.eql([{range:{}}]);
+        expect(globalState.k.d.dashboard2.f).to.eql([{range:{}}]);
+      });
+
 
     });
   });

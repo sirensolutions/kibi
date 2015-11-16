@@ -16,6 +16,7 @@ define(function (require) {
     function ($location, config, configFile, $rootScope, Private, savedDashboards, savedSearches, Notifier) {
 
       var joinFilterHelper = Private(require('components/sindicetech/join_filter_helper/join_filter_helper'));
+      var kibiStateHelper  = Private(require('components/kibi/kibi_state_helper/kibi_state_helper'));
       var urlHelper        = Private(require('components/kibi/url_helper/url_helper'));
       var notify = new Notifier({
         location: 'Relational Filter Panel'
@@ -62,17 +63,6 @@ define(function (require) {
             }
 
 
-            var extractIndexId = function (s) {
-              var index = s.indexOf('.');
-              return s.substring(0, index);
-            };
-
-            var extractPath = function (s) {
-              var index = s.indexOf('.');
-              return s.substring(index + 1);
-            };
-
-
             // each node is a dashboard
             var dashboards = [];
             _.each($scope.relationalPanelConfig.relations, function (relation) {
@@ -88,7 +78,7 @@ define(function (require) {
             });
 
 
-            _.each($scope.relationalPanelConfig.relations, function (relation) {
+            _.each($scope.relationalPanelConfig.relations, function (relation, index) {
 
               g.links.push({
                 source: relation.from,
@@ -103,9 +93,9 @@ define(function (require) {
                 htmlElementHeight: 18,
                 onLinkClick: function (THIS, d, i) {
                   if ($(THIS).find('input[type=\'checkbox\']').is(':checked')) {
-                    enableRelation(relation);
+                    enableRelation(index);
                   } else {
-                    disableRelation(relation);
+                    disableRelation(index);
                   }
                 }
               });
@@ -116,16 +106,28 @@ define(function (require) {
             init = true;
           };
 
-          var enableRelation = function (relation) {
-            relation.enabled = true;
-            $scope.ignoreNextConfigurationChangedEvent = true;
-            _saveRelationalPanelConfig();
+          var enableRelation = function (relationIndex) {
+            if (init) {
+              $scope.relationalPanelConfig.relations[relationIndex].enabled = true;
+              $scope.ignoreNextConfigurationChangedEvent = true;
+              _saveRelationalPanelConfig().then(function () {
+                if ($scope.relationalPanelConfig.enabled) {
+                  joinFilterHelper.updateJoinFilter();
+                }
+              });
+            }
           };
 
-          var disableRelation = function (relation) {
-            relation.enabled = false;
-            $scope.ignoreNextConfigurationChangedEvent = true;
-            _saveRelationalPanelConfig();
+          var disableRelation = function (relationIndex) {
+            if (init) {
+              $scope.relationalPanelConfig.relations[relationIndex].enabled = false;
+              $scope.ignoreNextConfigurationChangedEvent = true;
+              _saveRelationalPanelConfig().then(function () {
+                if ($scope.relationalPanelConfig.enabled) {
+                  joinFilterHelper.updateJoinFilter();
+                }
+              });
+            }
           };
 
           var _checkFilterJoinPlugin = function () {
@@ -170,9 +172,9 @@ define(function (require) {
 
           $rootScope.$on('$routeChangeSuccess', function (event, next, prev, err) {
             $scope.show = false;
-            if (urlHelper.isItDashboardUrl()) {
+            if (urlHelper.isItDashboardUrl() && init && $scope.relationalPanelConfig.enabled) {
               // try to enable filter when user switch to dashboards app
-              $scope.applyFilter();
+              joinFilterHelper.updateJoinFilter();
             }
           });
 
@@ -182,6 +184,8 @@ define(function (require) {
             _saveRelationalPanelConfig().then(function () {
               // here just remove the joinFilter if present
               urlHelper.removeJoinFilter();
+              // remove join_set for all dashboards from kibi_state
+              kibiStateHelper.removeAllFiltersOfType('join_set');
             });
           };
 
@@ -190,12 +194,6 @@ define(function (require) {
             _saveRelationalPanelConfig().then(function () {
               joinFilterHelper.updateJoinFilter();
             });
-          };
-
-          $scope.applyFilter = function () {
-            if (init && $scope.relationalPanelConfig.enabled) {
-              joinFilterHelper.updateJoinFilter();
-            }
           };
 
         } // end of link function

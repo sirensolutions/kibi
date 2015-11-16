@@ -85,11 +85,71 @@ define(function (require) {
           });
         });
 
+
+        // have to provide a stub for indexPatterns
+        // as joinFilterHelper.getJoinFilter will call indexPatterns.get(indexId)
+        module('kibana/index_patterns', function ($provide) {
+          $provide.service('indexPatterns', function (Promise) {
+            return {
+              get: function (id) {
+                switch (id) {
+                  case 'index-a':
+                    return Promise.resolve({ id: 'index-a' });
+                  case 'index-b':
+                    return Promise.resolve({ id: 'index-b' });
+                  default:
+                    return Promise.reject(new Error('no indexPattern for: ' + id));
+                }
+              }
+            };
+          });
+        });
+
+
+
         inject(function (Private, _config_) {
           config = _config_;
           joinFilterHelper = Private(require('components/sindicetech/join_filter_helper/join_filter_helper'));
           kibiStateHelper = Private(require('components/kibi/kibi_state_helper/kibi_state_helper'));
         });
+      });
+
+      describe('util methods methods', function () {
+        it('isDashboardInEnabledRelations', function () {
+          var relations = [
+            {
+              enabled: true,
+              from: 'A',
+              to: 'B',
+              fromPath: 'a',
+              toPath: 'b'
+            },
+            {
+              enabled: false,
+              from: 'A1',
+              to: 'B1',
+              fromPath: 'a1',
+              toPath: 'b1'
+            }
+          ];
+
+          expect(joinFilterHelper.isDashboardInEnabledRelations('A',  relations)).to.equal(true);
+          expect(joinFilterHelper.isDashboardInEnabledRelations('B',  relations)).to.equal(true);
+          expect(joinFilterHelper.isDashboardInEnabledRelations('A1', relations)).to.equal(false);
+          expect(joinFilterHelper.isDashboardInEnabledRelations('A1', relations)).to.equal(false);
+        });
+
+        it('findIndexAssociatedToDashboard', function () {
+          var map = {
+            indexa: ['A', 'B'],
+            indexc: ['C']
+          };
+
+          expect(joinFilterHelper.findIndexAssociatedToDashboard(map, 'A')).to.equal('indexa');
+          expect(joinFilterHelper.findIndexAssociatedToDashboard(map, 'B')).to.equal('indexa');
+          expect(joinFilterHelper.findIndexAssociatedToDashboard(map, 'C')).to.equal('indexc');
+        });
+
       });
 
       describe('getJoinFilter', function () {
@@ -293,6 +353,8 @@ define(function (require) {
           joinFilterHelper.updateJoinFilter().then(function () {
             expect(urlHelper.addFilter.called).to.be.ok();
             done();
+          }).catch(function (err) {
+            done(err);
           });
         });
       });

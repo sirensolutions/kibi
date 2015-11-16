@@ -1,5 +1,25 @@
 @import (reference) "../../../styles/_st_variables.less";
 
+// override the table-condensed cell style to make it more compact
+.table-condensed > thead > tr.queryOptionArea > td,
+.table-condensed > tbody > tr.queryOptionArea > td,
+.table-condensed > tfoot > tr.queryOptionArea > td {
+  vertical-align: middle;
+  padding-left: 0;
+  &:last-child {
+    padding-right: 0;
+  }
+}
+
+.query_editor .table-condensed {
+  margin-bottom: 0;
+}
+
+.queries-settings .btn {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
 .query_editor .preview-section {
   width: 50%;
   float: left;

@@ -48,10 +48,10 @@
             <div ng-if="datasourceType === 'mysql' || datasourceType === 'sqlite' || datasourceType === 'postgresql' || datasourceType === 'sql_jdbc'" ui-ace="{ onLoad: aceLoaded, mode: 'sql'}" msd-elastic id="st_templateVars" ng-model="query.st_activationQuery" class="form-control activationQueryEditor"></div>
           </div>
 
-          <div class="form-group" ng-if="datasourceType === 'rest'">
+          <div class="form-group table-responsive" ng-if="datasourceType === 'rest'">
             <label>Activation rules</label>
 
-            <table class="table">
+            <table class="table table-condensed">
               <thead>
                 <tr>
                   <th>Subject</th>
@@ -63,10 +63,10 @@
               <tbody>
                 <tr ng-repeat="rule in query.activation_rules" class="queryOptionArea" >
                   <td>
-                      <input required type="text" ng-model="rule.s" />
+                      <input required type="text" ng-model="rule.s" class="form-control"/>
                   </td>
                   <td>
-                    <select ng-model="rule.p">
+                    <select required ng-model="rule.p" class="form-control">
                       <option value="exists">Exists</option>
                       <option value="is_an_array">Is an array</option>
                       <option value="is_not_empty">Is NOT empty</option>
@@ -75,7 +75,7 @@
                     </select>
                   </td>
                   <td>
-                      <input ng-show="rule.p !== 'exists' && rule.p !== 'is_an_array' && rule.p !== 'is_not_empty'" type="text" ng-model="rule.v"/>
+                      <input required class="form-control" ng-show="rule.p !== 'exists' && rule.p !== 'is_an_array' && rule.p !== 'is_not_empty'" type="text" ng-model="rule.v"/>
                   </td>
                   <td>
                     <div class="btn-group rightCorner" style="width:60px;">
@@ -149,35 +149,73 @@
             </div>
           </div>
 
-          <div class="form-inline" ng-if="datasourceType === 'rest'">
+          <div ng-if="datasourceType === 'rest'">
             <p>
               Special placeholders for username, password and auth_token can be used in values of the headers, parameters and body. </br>
               They are respectively: <strong>${username}</strong>, <strong>${password}</strong>, <strong>${auth_token}</strong>
             </p>
-            <div class="form-group">
+            <div class="form-group table-responsive">
               <label>Params</label><br/>
-              <div ng-repeat="param in query.rest_params">
-                <input type="text" ng-model="param.name"  class="form-control"/>
-                <input type="text" ng-model="param.value"  class="form-control"/>
-                <button ng-click="query.rest_params.splice($index, 1)" class="btn btn-xs btn-danger add-button">
-                  <i class="fa fa-times"></i>
-                </button>
-              </div>
-              <button ng-click="query.rest_params.push({name:'', value:''})" class="btn btn-xs btn-success">Add param</button>
+              <table class="table table-condensed">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Value</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr ng-repeat="param in query.rest_params" class="queryOptionArea">
+                    <td>
+                      <input required type="text" ng-model="param.name" class="form-control"/>
+                    </td>
+                    <td>
+                      <input required type="text" ng-model="param.value" class="form-control"/>
+                    </td>
+                    <td>
+                      <div class="btn-group rightCorner" style="width:60px;">
+                        <array-param-up index="{{ $index }}" model="query.rest_params"></array-param-up>
+                        <array-param-down index="{{ $index }}" model="query.rest_params"></array-param-down>
+                        <array-param-remove index="{{ $index }}" model="query.rest_params"></array-param-remove>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <array-param-add label="param" model="query.rest_params"></array-param-add>
             </div>
 
             <br/>
 
-            <div class="form-group rest-headers">
+            <div class="form-group table-responsive rest-headers">
               <label>Headers</label><br/>
-              <div ng-repeat="header in query.rest_headers">
-                <input type="text" ng-model="header.name" class="form-control"/>
-                <input type="text" ng-model="header.value"  class="form-control"/>
-                <button ng-click="query.rest_headers.splice($index, 1)" class="btn btn-xs btn-danger add-button">
-                  <i class="fa fa-times"></i>
-                </button>
-              </div>
-              <button ng-click="query.rest_headers.push({name:'', value:''})" class="btn btn-xs btn-success">Add header</button>
+              <table class="table table-condensed">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Value</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr ng-repeat="header in query.rest_headers" class="queryOptionArea">
+                    <td>
+                      <input required type="text" ng-model="header.name" class="form-control"/>
+                    </td>
+                    <td>
+                      <input required type="text" ng-model="header.value"  class="form-control"/>
+                    </td>
+                    <td>
+                      <div class="btn-group rightCorner" style="width:60px;">
+                        <array-param-up index="{{ $index }}" model="query.rest_headers"></array-param-up>
+                        <array-param-down index="{{ $index }}" model="query.rest_headers"></array-param-down>
+                        <array-param-remove index="{{ $index }}" model="query.rest_headers"></array-param-remove>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <array-param-add label="header" model="query.rest_headers"></array-param-add>
             </div>
 
           </div>
@@ -215,7 +253,7 @@
           <div class="form-group" style="margin-top:10px;">
             <button class="btn btn-primary" ng-click="cancel()">Cancel</button>
             <button class="btn btn-info" ng-click="clone()" ng-disabled="objectForm.$invalid">Clone</button>
-            <button class="btn btn-success" ng-click="submit()" ng-disabled="objectForm.$invalid">save</button>
+            <button class="btn btn-success" ng-click="submit()" ng-disabled="objectForm.$invalid">Save</button>
             <button class="btn btn-danger" ng-click="delete()">Delete</button>
           </div>
         </form>
@@ -230,7 +268,7 @@
 
         <div class="form-group">
           <label>Template id</label>
-          <span class="small-note"> Pick the template id to see html preview, save query to refresh</span>
+          <span class="small-note"> Pick the template id to see html preview, save query to refresh</span><br/>
           <a ng-show="query._previewTemplateId"  ng-click="jumpToTemplate()"> Edit template</a>
           <st-select  object-type="template" ng-model="query._previewTemplateId"></st-select>
         </div>

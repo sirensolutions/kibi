@@ -120,7 +120,7 @@ define(function (require) {
 
       } while (current.length !== 0);
 
-      return labels;
+      return _.uniq(labels);
     };
 
     /**

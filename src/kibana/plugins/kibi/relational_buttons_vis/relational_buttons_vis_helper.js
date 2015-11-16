@@ -237,8 +237,7 @@ define(function (require) {
           if (targetSavedDashboard.savedSearchId) {
             savedSearches.get(targetSavedDashboard.savedSearchId).then(function (targetSavedSearch) {
               var targetDashboardFilters = kibiStateHelper.getFiltersForDashboardId(targetSavedDashboard.id);
-              var extraFilters = [join_seq_filter];
-              countHelper.constructCountQuery(targetDashboardId, targetSavedSearch, extraFilters, null)
+              countHelper.constructCountQuery(targetDashboardId, targetSavedSearch, join_seq_filter)
               .then(function (query) {
                 fulfill(query);
               }).catch(reject);

@@ -38,11 +38,14 @@ define(function (require) {
           savedSearches.get(dashboard.savedSearchId).then(function (savedSearch) {
 
             // now construct the query
-            var extraFilters = [];
             if (joinFilterHelper.isRelationalPanelEnabled() && joinFilterHelper.isFilterJoinPluginInstalled()) {
 
               joinFilterHelper.getJoinFilter(dashboard.id).then(function (joinFilter) {
-                self.constructCountQuery(dashboard.id, savedSearch, extraFilters, joinFilter)
+                self.constructCountQuery(
+                  dashboard.id,
+                  savedSearch,
+                  joinFilter
+                )
                 .then(function (query) {
                   fulfill({
                     query: query,
@@ -56,7 +59,11 @@ define(function (require) {
                 if (console) {
                   console.log(err);
                 }
-                self.constructCountQuery(dashboard.id, savedSearch, extraFilters, null)
+                self.constructCountQuery(
+                  dashboard.id,
+                  savedSearch,
+                  null
+                )
                 .then(function (query) {
                   fulfill({
                     query: query,
@@ -67,13 +74,13 @@ define(function (require) {
 
             } else if (!joinFilterHelper.isRelationalPanelEnabled() && joinFilterHelper.isFilterJoinPluginInstalled()) {
               // get the join filter if present on the dashboard
-              var joinFilter = urlHelper.getJoinFilter();
               // add it only for the dashboard where focus match
-              if (joinFilter && joinFilter.join_set.focus === savedSearch.searchSource._state.index.id) {
-                extraFilters.push(joinFilter);
-              }
-
-              self.constructCountQuery(dashboard.id, savedSearch, extraFilters, null)
+              var joinFilter = urlHelper.getJoinFilter();
+              self.constructCountQuery(
+                dashboard.id,
+                savedSearch,
+                (joinFilter && joinFilter.join_set.focus === savedSearch.searchSource._state.index.id) ? joinFilter : null
+              )
               .then(function (query) {
                 fulfill({
                   query: query,
@@ -83,7 +90,11 @@ define(function (require) {
 
             } else if (!joinFilterHelper.isRelationalPanelEnabled() && !joinFilterHelper.isFilterJoinPluginInstalled()) {
 
-              self.constructCountQuery(dashboard.id, savedSearch, [], null)
+              self.constructCountQuery(
+                dashboard.id,
+                savedSearch,
+                null
+              )
               .then(function (query) {
                 fulfill({
                   query: query,
@@ -115,7 +126,7 @@ define(function (require) {
      * The parameter savedSearch should be a reference to a SavedSearch
      * instance, not a SavedSearch id
      */
-    CountHelper.prototype.constructCountQuery = function (dashboardId, savedSearch, extraFilters, joinFilter) {
+    CountHelper.prototype.constructCountQuery = function (dashboardId, savedSearch, joinSetFilter) {
       return new Promise(function (fulfill, reject) {
 
         var indexPattern = savedSearch.searchSource._state.index;
@@ -138,19 +149,11 @@ define(function (require) {
         };
 
         //update the filters
-        var selectedDashboardFilters = kibiStateHelper.getFiltersForDashboardId(dashboardId);
+        var selectedDashboardFilters = kibiStateHelper.getFiltersForDashboardId(dashboardId) || [];
 
-        // add extra filters if any
-        if (extraFilters) {
-          if (!selectedDashboardFilters) {
-            selectedDashboardFilters = extraFilters;
-          } else if (extraFilters.length === 1 && extraFilters[0].join_set) {
-            // remove any other join filter from filters
-            selectedDashboardFilters = _.filter(selectedDashboardFilters, function (f) {
-              return !f.join_set;
-            });
-          }
-        }
+        // if join_set enabled we should also get filters and queries from
+        // connected dashboards which are based on the same index
+
 
         // if there are any filters in savedSearch add them
         var savedSearchMeta = getSavedSearchMeta(savedSearch);
@@ -159,7 +162,7 @@ define(function (require) {
         }
 
         // here we have to make sure that there are no duplicates
-        selectedDashboardFilters = uniqFilters(selectedDashboardFilters.concat(extraFilters));
+        selectedDashboardFilters = uniqFilters(selectedDashboardFilters);
 
         if (selectedDashboardFilters) {
           _.each(selectedDashboardFilters, function (filter) {
@@ -237,8 +240,8 @@ define(function (require) {
         }
 
 
-        if (joinFilter) {
-          replace_or_add_join_set_filter(query.query.filtered.filter.bool.must, joinFilter, true);
+        if (joinSetFilter) {
+          replace_or_add_join_set_filter(query.query.filtered.filter.bool.must, joinSetFilter, true);
         }
 
         // update time filter

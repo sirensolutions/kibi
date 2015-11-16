@@ -77,7 +77,7 @@ define(function (require) {
             });
 
 
-            _.each($scope.relationalPanelConfig.relations, function (relation) {
+            _.each($scope.relationalPanelConfig.relations, function (relation, index) {
 
               g.links.push({
                 source: relation.from,
@@ -92,9 +92,9 @@ define(function (require) {
                 htmlElementHeight: 18,
                 onLinkClick: function (THIS, d, i) {
                   if ($(THIS).find('input[type=\'checkbox\']').is(':checked')) {
-                    enableRelation(relation);
+                    enableRelation(index);
                   } else {
-                    disableRelation(relation);
+                    disableRelation(index);
                   }
                 }
               });
@@ -105,16 +105,28 @@ define(function (require) {
             init = true;
           };
 
-          var enableRelation = function (relation) {
-            relation.enabled = true;
-            $scope.ignoreNextConfigurationChangedEvent = true;
-            _saveRelationalPanelConfig();
+          var enableRelation = function (relationIndex) {
+            if (init) {
+              $scope.relationalPanelConfig.relations[relationIndex].enabled = true;
+              $scope.ignoreNextConfigurationChangedEvent = true;
+              _saveRelationalPanelConfig().then(function () {
+                if ($scope.relationalPanelConfig.enabled) {
+                  joinFilterHelper.updateJoinFilter();
+                }
+              });
+            }
           };
 
-          var disableRelation = function (relation) {
-            relation.enabled = false;
-            $scope.ignoreNextConfigurationChangedEvent = true;
-            _saveRelationalPanelConfig();
+          var disableRelation = function (relationIndex) {
+            if (init) {
+              $scope.relationalPanelConfig.relations[relationIndex].enabled = false;
+              $scope.ignoreNextConfigurationChangedEvent = true;
+              _saveRelationalPanelConfig().then(function () {
+                if ($scope.relationalPanelConfig.enabled) {
+                  joinFilterHelper.updateJoinFilter();
+                }
+              });
+            }
           };
 
           var _checkFilterJoinPlugin = function () {
@@ -159,9 +171,9 @@ define(function (require) {
 
           $rootScope.$on('$routeChangeSuccess', function (event, next, prev, err) {
             $scope.show = false;
-            if (urlHelper.isItDashboardUrl()) {
+            if (urlHelper.isItDashboardUrl() && init && $scope.relationalPanelConfig.enabled) {
               // try to enable filter when user switch to dashboards app
-              $scope.applyFilter();
+              joinFilterHelper.updateJoinFilter();
             }
           });
 
@@ -179,12 +191,6 @@ define(function (require) {
             _saveRelationalPanelConfig().then(function () {
               joinFilterHelper.updateJoinFilter();
             });
-          };
-
-          $scope.applyFilter = function () {
-            if (init && $scope.relationalPanelConfig.enabled) {
-              joinFilterHelper.updateJoinFilter();
-            }
           };
 
         } // end of link function

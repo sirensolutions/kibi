@@ -246,15 +246,15 @@ define(function (require) {
       };
 
 
-      var explainFiltersForJoinSet = function (index, filters) {
-        var html = '<li>Index: <b>' + index + '</b></li>';
+      var explainFiltersForJoinSet = function (indexId, filters) {
+        var html = '<li>Index: <b>' + indexId + '</b></li>';
         if (!filters) {
           return Promise.resolve(html);
         }
 
         var promises = [];
         _.each(filters, function (filter) {
-          promises.push(explainFilter(filter));
+          promises.push(explainFilter(filter, indexId));
         });
 
         return Promise.all(promises).then(function (explanations) {

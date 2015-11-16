@@ -16,6 +16,7 @@ define(function (require) {
     function ($location, config, configFile, $rootScope, Private, savedDashboards, savedSearches, Notifier) {
 
       var joinFilterHelper = Private(require('components/sindicetech/join_filter_helper/join_filter_helper'));
+      var kibiStateHelper  = Private(require('components/kibi/kibi_state_helper/kibi_state_helper'));
       var urlHelper        = Private(require('components/kibi/url_helper/url_helper'));
       var notify = new Notifier({
         location: 'Relational Filter Panel'
@@ -183,6 +184,8 @@ define(function (require) {
             _saveRelationalPanelConfig().then(function () {
               // here just remove the joinFilter if present
               urlHelper.removeJoinFilter();
+              // remove join_set for all dashboards from kibi_state
+              kibiStateHelper.removeAllFiltersOfType('join_set');
             });
           };
 

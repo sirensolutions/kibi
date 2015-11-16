@@ -203,25 +203,32 @@ define(function (require) {
       return null;
     };
 
+    KibiStateHelper.prototype.removeAllFiltersOfType = function (type) {
+      if (globalState.k.d) {
+        _.each(globalState.k.d, function (dashboard, dashboardId) {
+          globalState.k.d[dashboardId].f = _.filter(globalState.k.d[dashboardId].f, function (filter) {
+            return !filter[type];
+          });
+        });
+      }
+      globalState.save();
+    };
+
 
     KibiStateHelper.prototype.removeAllFilters = function () {
       if (globalState.k.d) {
-        for (var dashboard in globalState.k.d) {
-          if (globalState.k.d.hasOwnProperty(dashboard)) {
-            globalState.k.d[dashboard].f = [];
-          }
-        }
+        _.each(globalState.k.d, function (dashboard, dashboardId) {
+          globalState.k.d[dashboardId].f = [];
+        });
       }
       globalState.save();
     };
 
     KibiStateHelper.prototype.removeAllQueries = function () {
       if (globalState.k.d) {
-        for (var dashboard in globalState.k.d) {
-          if (globalState.k.d.hasOwnProperty(dashboard)) {
-            globalState.k.d[dashboard].q = '*';
-          }
-        }
+        _.each(globalState.k.d, function (dashboard, dashboardId) {
+          globalState.k.d[dashboardId].q = '*';
+        });
       }
       globalState.save();
     };

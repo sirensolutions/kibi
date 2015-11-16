@@ -120,6 +120,8 @@ define(function (require) {
 
       } while (current.length !== 0);
 
+      // TODO:
+      // refactor see issue https://github.com/sirensolutions/kibi-internal/issues/500
       return _.uniq(labels);
     };
 

@@ -41,17 +41,29 @@ define(function (require) {
             if (joinFilterHelper.isRelationalPanelEnabled() && joinFilterHelper.isFilterJoinPluginInstalled()) {
 
               joinFilterHelper.getJoinFilter(dashboard.id).then(function (joinFilter) {
-                self.constructCountQuery(
-                  dashboard.id,
-                  savedSearch,
-                  joinFilter
-                )
-                .then(function (query) {
-                  fulfill({
-                    query: query,
-                    indexPatternId: savedSearch.searchSource._state.index.id
-                  });
-                });
+
+                var dashboardIndex = savedSearch.searchSource._state.index;
+                var promises = [
+                  urlHelper.getQueriesFromDashboardsWithSameIndex(dashboardId, dashboardIndex),
+                  urlHelper.getFiltersFromDashboardsWithSameIndex(dashboardId, dashboardIndex)
+                ];
+                Promise.all(promises).then(function (results) {
+                  var queriesFromDashboardsWirhSameIndex = results[0];
+                  var filtersFromDashboardsWirhSameIndex = results[1];
+                  self.constructCountQuery(
+                    dashboard.id,
+                    savedSearch,
+                    joinFilter,
+                    queriesFromDashboardsWirhSameIndex,
+                    filtersFromDashboardsWirhSameIndex
+                  )
+                  .then(function (query) {
+                    fulfill({
+                      query: query,
+                      indexPatternId: savedSearch.searchSource._state.index.id
+                    });
+                  }).catch(reject);
+                }).catch(reject);
               }).catch(function (err) {
                 // we could not get joinFilter
                 // there could be multiple reasons - most of them is missconfiguration
@@ -126,7 +138,10 @@ define(function (require) {
      * The parameter savedSearch should be a reference to a SavedSearch
      * instance, not a SavedSearch id
      */
-    CountHelper.prototype.constructCountQuery = function (dashboardId, savedSearch, joinSetFilter) {
+    CountHelper.prototype.constructCountQuery = function (
+      dashboardId, savedSearch, joinSetFilter,
+      extraQueries, extraFilters
+    ) {
       return new Promise(function (fulfill, reject) {
 
         var indexPattern = savedSearch.searchSource._state.index;
@@ -149,23 +164,25 @@ define(function (require) {
         };
 
         //update the filters
-        var selectedDashboardFilters = kibiStateHelper.getFiltersForDashboardId(dashboardId) || [];
-
-        // if join_set enabled we should also get filters and queries from
-        // connected dashboards which are based on the same index
+        var filters = kibiStateHelper.getFiltersForDashboardId(dashboardId) || [];
 
 
         // if there are any filters in savedSearch add them
         var savedSearchMeta = getSavedSearchMeta(savedSearch);
         if (savedSearchMeta.filter) {
-          selectedDashboardFilters = selectedDashboardFilters.concat(savedSearchMeta.filter);
+          filters = filters.concat(savedSearchMeta.filter);
+        }
+
+        // any extra filters
+        if (extraFilters instanceof Array) {
+          filters = filters.concat(extraFilters);
         }
 
         // here we have to make sure that there are no duplicates
-        selectedDashboardFilters = uniqFilters(selectedDashboardFilters);
+        filters = uniqFilters(filters);
 
-        if (selectedDashboardFilters) {
-          _.each(selectedDashboardFilters, function (filter) {
+        if (filters) {
+          _.each(filters, function (filter) {
 
             if (filter.meta && filter.meta.disabled === true) {
               return;  // this return does not break is like continue
@@ -224,21 +241,40 @@ define(function (require) {
           });
         }
 
-        //update the query
+        var queries = [];
+
+        // query from kibiState
         var selectedDashboardQuery = kibiStateHelper.getQueryForDashboardId(dashboardId);
         if (selectedDashboardQuery && !kibiStateHelper.isAnalyzedWildcardQueryString(selectedDashboardQuery)) {
-          query.query.filtered.filter.bool.must.push({
+          queries.push({
             query: selectedDashboardQuery
           });
         }
 
+        // query from savedSearchMeta
         if (savedSearchMeta.query && !_.isEmpty(savedSearchMeta.query) &&
             !kibiStateHelper.isAnalyzedWildcardQueryString(savedSearchMeta.query)) {
-          query.query.filtered.filter.bool.must.push({
+          queries.push({
             query: savedSearchMeta.query
           });
         }
 
+        // any extra queries
+        if (extraQueries instanceof Array) {
+          _.each(extraQueries, function (q) {
+            if (!kibiStateHelper.isAnalyzedWildcardQueryString(q)) {
+              queries.push({
+                query: q
+              });
+            }
+          });
+        }
+
+        queries = uniqFilters(queries);
+
+        _.each(queries, function (q) {
+          query.query.filtered.filter.bool.must.push(q);
+        });
 
         if (joinSetFilter) {
           replace_or_add_join_set_filter(query.query.filtered.filter.bool.must, joinSetFilter, true);

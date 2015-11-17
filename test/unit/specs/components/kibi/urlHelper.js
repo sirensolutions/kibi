@@ -78,6 +78,35 @@ define(function (require) {
   describe('Kibi Components', function () {
     describe('UrlHelper', function () {
 
+      describe('util methods', function () {
+        beforeEach(minimalInit());
+
+        it('isDashboardInEnabledRelations', function () {
+          var relations = [
+            {
+              enabled: true,
+              from: 'A',
+              to: 'B',
+              fromPath: 'a',
+              toPath: 'b'
+            },
+            {
+              enabled: false,
+              from: 'A1',
+              to: 'B1',
+              fromPath: 'a1',
+              toPath: 'b1'
+            }
+          ];
+
+          expect(urlHelper.isDashboardInEnabledRelations('A',  relations)).to.equal(true);
+          expect(urlHelper.isDashboardInEnabledRelations('B',  relations)).to.equal(true);
+          expect(urlHelper.isDashboardInEnabledRelations('A1', relations)).to.equal(false);
+          expect(urlHelper.isDashboardInEnabledRelations('A1', relations)).to.equal(false);
+        });
+      });
+
+
       describe('UrlHelper.getInitialPath with no arguments', function () {
 
         describe('for a configuration with default_dashboard_id set to Companies' +

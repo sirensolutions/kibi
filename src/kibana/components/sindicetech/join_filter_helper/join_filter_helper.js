@@ -20,16 +20,6 @@ define(function (require) {
 
     function JoinFilterHelper() {}
 
-    JoinFilterHelper.prototype.isDashboardInEnabledRelations = function (dashboardId, relations) {
-      for (var i = 0; i < relations.length; i++) {
-        if (relations[i].enabled && relations[i].from === dashboardId || relations[i].to === dashboardId) {
-          return true;
-        }
-      }
-      return false;
-    };
-
-
     JoinFilterHelper.prototype.findIndexAssociatedToDashboard = function (indexToDashboardsMap, dashboardId) {
       for (var indexId in indexToDashboardsMap) {
         if (indexToDashboardsMap.hasOwnProperty(indexId)) {
@@ -96,7 +86,9 @@ define(function (require) {
 
             // here check that the join filter should be present on this dashboard
             // it should be added only if we find current dashboardId in enabled relations
-            var isFocusDashboardInEnabledRelations = self.isDashboardInEnabledRelations(focusDashboardId, relationalPanelConfig.relations);
+            var isFocusDashboardInEnabledRelations = urlHelper.isDashboardInEnabledRelations(
+              focusDashboardId, relationalPanelConfig.relations
+            );
             if (!focusIndex) {
               reject(new Error('SavedSearch for [' +  focusDashboardId + '] dashboard seems to not have an index id'));
               return;

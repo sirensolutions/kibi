@@ -231,15 +231,33 @@ define(function (require) {
     };
 
 
-    RelationVisHelper.prototype.buildCountQuery = function (targetDashboardId, join_seq_filter) {
+    RelationVisHelper.prototype.buildCountQuery = function (targetDashboardId, joinSeqFilter) {
       return new Promise(function (fulfill, reject) {
         savedDashboards.get(targetDashboardId).then(function (targetSavedDashboard) {
           if (targetSavedDashboard.savedSearchId) {
             savedSearches.get(targetSavedDashboard.savedSearchId).then(function (targetSavedSearch) {
-              var targetDashboardFilters = kibiStateHelper.getFiltersForDashboardId(targetSavedDashboard.id);
-              countHelper.constructCountQuery(targetDashboardId, targetSavedSearch, join_seq_filter)
-              .then(function (query) {
-                fulfill(query);
+
+              // in case relational panel is enabled at the same time
+              // as buttons take care about extra filters and queries from
+              // dashboards based on the same index
+              var targetDashboardIndex = targetSavedSearch.searchSource._state.index;
+              var promises = [
+                urlHelper.getQueriesFromDashboardsWithSameIndex(targetDashboardId, targetDashboardIndex),
+                urlHelper.getFiltersFromDashboardsWithSameIndex(targetDashboardId, targetDashboardIndex)
+              ];
+              Promise.all(promises).then(function (results) {
+                var queriesFromDashboardsWirhSameIndex = results[0];
+                var filtersFromDashboardsWirhSameIndex = results[1] || [];
+                countHelper.constructCountQuery(
+                  targetDashboardId,
+                  targetSavedSearch,
+                  null,  // do not put joinSeqFilter here as this parameter is reserved to join_set only !!!
+                  queriesFromDashboardsWirhSameIndex,
+                  filtersFromDashboardsWirhSameIndex.concat(joinSeqFilter)
+                )
+                .then(function (query) {
+                  fulfill(query);
+                }).catch(reject);
               }).catch(reject);
             }).catch(reject);
           } else {

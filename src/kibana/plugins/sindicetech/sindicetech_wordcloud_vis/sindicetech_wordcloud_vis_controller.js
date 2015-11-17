@@ -3,7 +3,6 @@ define(function (require) {
   // didn't already
   var module = require('modules').get('kibana/sindicetech_wordcloud_vis', ['kibana']);
   var _ = require('lodash');
-  var $ = require('jquery');
   require('jqcloud');
   require('angular-jqcloud');
 
@@ -15,8 +14,8 @@ define(function (require) {
 
     var _updateDimensions = function () {
       var delta = 18;
-      var width =  $($element).parent().width();
-      var height = $($element).parent().height();
+      var width = $element.parent().width();
+      var height = $element.parent().height();
       if (width) {
         if (width > delta) {
           width -= delta;

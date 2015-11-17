@@ -292,9 +292,11 @@ define(function (require) {
 
 
     UrlHelper.prototype.isDashboardInEnabledRelations = function (dashboardId, relations) {
-      for (var i = 0; i < relations.length; i++) {
-        if (relations[i].enabled && relations[i].from === dashboardId || relations[i].to === dashboardId) {
-          return true;
+      if (relations) {
+        for (var i = 0; i < relations.length; i++) {
+          if (relations[i].enabled && relations[i].from === dashboardId || relations[i].to === dashboardId) {
+            return true;
+          }
         }
       }
       return false;

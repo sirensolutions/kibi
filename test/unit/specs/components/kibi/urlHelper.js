@@ -7,9 +7,14 @@ define(function (require) {
   var fake_saved_dashboards = require('fixtures/fake_saved_dashboards_for_counts');
   var fake_saved_searches = require('fixtures/fake_saved_searches');
 
+  var fake_saved_dashboards2 = require('fixtures/fake_saved_dashboards_connected');
+  var fake_saved_searches2 = require('fixtures/fake_saved_searches_connected');
+  var fake_timeFilter2 = require('fixtures/fake_time_filter_connected');
+
   var $rootScope;
   var $location;
   var $timeout;
+  var config;
   var urlHelper;
   var kibiStateHelper;
   var configFile;
@@ -64,12 +69,47 @@ define(function (require) {
     };
   }
 
+  function init3(savedDashboardsImpl, savedSearchesImpl, timefilterImpl) {
+    return function () {
+      module('app/dashboard', function ($provide) {
+        $provide.service('savedDashboards', savedDashboardsImpl);
+      });
+
+      module('discover/saved_searches', function ($provide) {
+        $provide.service('savedSearches', savedSearchesImpl);
+      });
+
+      module('kibana', function ($provide) {
+        $provide.service('timefilter', timefilterImpl);
+      });
+
+      module('kibana', function ($provide) {
+        $provide.service('config', function () {
+          var keys = {};
+          return {
+            get: function (key) { return keys[key]; },
+            set: function (key, value) { keys[key] = value; }
+          };
+        });
+        $provide.constant('configFile', {
+          elasticsearch_plugins: [ 'FilterJoinPlugin' ]
+        });
+      });
+
+      module('kibana');
+
+      _initInject();
+    };
+  }
+
 
   function _initInject() {
-    inject(function ($injector, Private, _$rootScope_, _$location_, _$timeout_) {
+    inject(function ($injector, Private, _$rootScope_, _$location_, _$timeout_, _config_) {
       $rootScope = _$rootScope_;
       $location = _$location_;
       $timeout = _$timeout_;
+      config = _config_;
+
       urlHelper = Private(require('components/kibi/url_helper/url_helper'));
       kibiStateHelper = Private(require('components/kibi/kibi_state_helper/kibi_state_helper'));
     });
@@ -821,6 +861,140 @@ define(function (require) {
           $rootScope.$apply();
         });
 
+
+      });
+
+      describe('getFiltersFromDashboardsWithSameIndex', function () {
+
+        beforeEach(init3(fake_saved_dashboards2, fake_saved_searches2, fake_timeFilter2));
+
+        it('should be empty as relational panel is disabled', function (done) {
+          var dashboardId = 'Articles1';
+          var indexPattern = {
+            id: 'articles'
+          };
+          config.set('kibi:relationalPanelConfig', {enabled: false});
+          urlHelper.getFiltersFromDashboardsWithSameIndex(dashboardId, indexPattern).then(function (filters) {
+            expect(filters).to.eql([]);
+            done();
+          }).catch(done);
+          $rootScope.$apply();
+        });
+
+        it('should be empty as relational panel is enabled but no relations', function (done) {
+          var dashboardId = 'Articles1';
+          var indexPattern = {
+            id: 'articles'
+          };
+          config.set('kibi:relationalPanelConfig', {enabled: true});
+          urlHelper.getFiltersFromDashboardsWithSameIndex(dashboardId, indexPattern).then(function (filters) {
+            expect(filters).to.eql([]);
+            done();
+          }).catch(done);
+          $rootScope.$apply();
+        });
+
+        it('should NOT be empty as relational panel is enabled and there is a relation', function (done) {
+          var dashboardId = 'Articles1';
+          var indexPattern = {
+            id: 'articles'
+          };
+          config.set('kibi:relationalPanelConfig', {
+            enabled: true,
+            relations: [
+              {
+                enabled: true,
+                from: 'Articles2',
+                to: 'Companies'
+              }
+            ]
+          });
+          // now add a filter on Articles2
+          kibiStateHelper.saveFiltersForDashboardId('Articles2', [{term : { user : 'FOO_FILTER'}}]);
+
+          var expected = [
+            {term : { user : 'FOO_FILTER'}}, // comes from kibi state
+            {term : { user : 'BAR_FILTER'}}, // comes from saved search meta
+            // comes from the fact that there is a time filter for this dashboard
+            {
+              range: {
+                fake_field: {
+                  gte: 20,
+                  lte: 40
+                }
+              }
+            },
+          ];
+
+          urlHelper.getFiltersFromDashboardsWithSameIndex(dashboardId, indexPattern).then(function (filters) {
+            expect(filters).to.eql(expected);
+            done();
+          }).catch(done);
+          $rootScope.$apply();
+        });
+
+      });
+
+
+      describe('getQueriesFromDashboardsWithSameIndex', function () {
+
+        beforeEach(init3(fake_saved_dashboards2, fake_saved_searches2, fake_timeFilter2));
+
+        it('should be empty as relational panel is disabled', function (done) {
+          var dashboardId = 'Articles1';
+          var indexPattern = {
+            id: 'articles'
+          };
+          config.set('kibi:relationalPanelConfig', {enabled: false});
+          urlHelper.getQueriesFromDashboardsWithSameIndex(dashboardId, indexPattern).then(function (queries) {
+            expect(queries).to.eql([]);
+            done();
+          }).catch(done);
+          $rootScope.$apply();
+        });
+
+        it('should be empty as relational panel is enabled but no relations', function (done) {
+          var dashboardId = 'Articles1';
+          var indexPattern = {
+            id: 'articles'
+          };
+          config.set('kibi:relationalPanelConfig', {enabled: true});
+          urlHelper.getQueriesFromDashboardsWithSameIndex(dashboardId, indexPattern).then(function (queries) {
+            expect(queries).to.eql([]);
+            done();
+          }).catch(done);
+          $rootScope.$apply();
+        });
+
+        it('should NOT be empty as relational panel is enabled and there is a relation', function (done) {
+          var dashboardId = 'Articles1';
+          var indexPattern = {
+            id: 'articles'
+          };
+          config.set('kibi:relationalPanelConfig', {
+            enabled: true,
+            relations: [
+              {
+                enabled: true,
+                from: 'Articles2',
+                to: 'Companies'
+              }
+            ]
+          });
+          // now add a filter on Articles2
+          kibiStateHelper.saveQueryForDashboardId('Articles2', {query: {query_string: {query: 'FOO_QUERY'}}});
+
+          var expected = [
+            {query: {query_string: {query: 'FOO_QUERY'}}}, // comes from kibi state
+            {query: {query_string: {query: 'BAR_QUERY'}}}  // comes from saved search meta
+          ];
+
+          urlHelper.getQueriesFromDashboardsWithSameIndex(dashboardId, indexPattern).then(function (queries) {
+            expect(queries).to.eql(expected);
+            done();
+          }).catch(done);
+          $rootScope.$apply();
+        });
 
       });
 

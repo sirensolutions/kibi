@@ -3,8 +3,31 @@ define(function (require) {
   var _ = require('lodash');
   var vis = require('vis');
 
-  require('modules').get('kibana').directive('kibiTimeline', function (Private, Notifier) {
+  require('modules').get('kibana').directive('kibiTimeline', function (Private, Notifier, courier) {
 
+    // color pallete borowed from d3
+    var d3_category_20 = [
+      '#1f77b4',
+      '#aec7e8',
+      '#ff7f0e',
+      '#ffbb78',
+      '#2ca02c',
+      '#98df8a',
+      '#d62728',
+      '#ff9896',
+      '#9467bd',
+      '#c5b0d5',
+      '#8c564b',
+      '#c49c94',
+      '#e377c2',
+      '#f7b6d2',
+      '#7f7f7f',
+      '#c7c7c7',
+      '#bcbd22',
+      '#dbdb8d',
+      '#17becf',
+      '#9edae5'
+    ];
     var filterManager = Private(require('components/filter_manager/filter_manager'));
     var notify = new Notifier({
       location: 'Kibi Timeline'
@@ -12,9 +35,8 @@ define(function (require) {
 
     return {
       scope: {
-        searchSource: '=',
+        groups: '=',
         options: '=',
-        params: '='
       },
       restrict: 'E',
       replace: true,
@@ -22,19 +44,20 @@ define(function (require) {
     };
 
     function _link($scope, $element) {
-      var data;
       var timeline;
       var _previousSearchSource;
+      var data;
+
       var onSelect = function (properties) {
         // pass this to a scope variable
         var selected = data._data[properties.items];
 
+        // for now it should be single object
         if (selected) {
-          var index = $scope.searchSource.get('index').id;
-          var field = $scope.params.labelField;
+          var index = selected.index;
+          var field = selected.field;
           var value = selected.content;
           var operator = '+';
-
           filterManager.add(field, value, operator, index);
         }
       };
@@ -59,108 +82,153 @@ define(function (require) {
         if (!newOptions || newOptions === oldOptions) {
           return;
         }
-        if (timeline) {
-          timeline.setOptions(newOptions);
-          timeline.redraw();
-        }
+        initTimeline();
+        timeline.setOptions(newOptions);
+        timeline.redraw();
       }, true); // has to be true in other way the change in height is not detected
 
+      var groupEvents = [];
 
-      $scope.$watch('searchSource', function (newValue, oldValue) {
+      var initTimeline = function () {
+        if (!timeline) {
+          // create a new one
+          timeline = new vis.Timeline($element[0]);
+          timeline.setOptions($scope.options);
+          timeline.on('select', onSelect);
+        }
+      };
 
-        if (newValue === oldValue && !!timeline) return;
+      var updateTimelineGroups = function (groups) {
+        initTimeline();
+        var dataGroups = new vis.DataSet(groups);
+        timeline.setGroups(dataGroups);
+      };
 
-        if ($scope.searchSource) {
+      var updateTimeline = function (groupIndex, events) {
+        groupEvents[groupIndex] = _.cloneDeep(events);
+        data = new vis.DataSet(_.flatten(groupEvents));
+        initTimeline();
+        // just update data points
+        timeline.setItems(data);
+        timeline.fit();
+      };
 
-          _previousSearchSource = $scope.searchSource;
+      var initSingleGroup = function (group, index) {
+        var searchSource = group.searchSource;
+        var params = group.params;
+        searchSource.onResults().then(function onResults(searchResp) {
+          var events = [];
 
-          $scope.searchSource.onResults().then(function onResults(searchResp) {
+          if (params.startField) {
+            var detectedMultivaluedLabel;
+            var detectedMultivaluedStart;
+            var detectedMultivaluedEnd;
+            _.each(searchResp.hits.hits, function (hit) {
+              if (hit._source[params.startField]) {
 
-            if ($scope.searchSource !== _previousSearchSource) {
-              return;
-            }
-
-            var events = [];
-            if ($scope.params.startField) {
-              var detectedMultivaluedLabel;
-              var detectedMultivaluedStart;
-              var detectedMultivaluedEnd;
-              _.each(searchResp.hits.hits, function (hit) {
-                if (hit._source[$scope.params.startField]) {
-
-                  if (_isMultivalued(hit._source, $scope.params.labelField)) {
-                    detectedMultivaluedLabel = true;
+                if (_isMultivalued(hit._source, params.labelField)) {
+                  detectedMultivaluedLabel = true;
+                }
+                if (_isMultivalued(hit._source, params.startField)) {
+                  detectedMultivaluedStart = true;
+                }
+                var startValue = _pickFirstIfMultivalued(hit._source, params.startField);
+                var e =  {
+                  // index, field and content needed to create a filter on click
+                  index: searchSource.get('index').id,
+                  field: params.labelField,
+                  content: _pickFirstIfMultivalued(hit._source, params.labelField, ''),
+                  // group needed for grouping
+                  group: index,
+                  start: new Date(startValue),
+                  type: 'box',
+                  style: 'background-color: ' + d3_category_20[index] + '; color: #fff;'
+                };
+                if (params.endField) {
+                  if (_isMultivalued(hit._source, params.endField)) {
+                    detectedMultivaluedEnd = true;
                   }
-                  if (_isMultivalued(hit._source, $scope.params.startField)) {
-                    detectedMultivaluedStart = true;
-                  }
-                  var startValue = _pickFirstIfMultivalued(hit._source, $scope.params.startField);
-                  var e =  {
-                    content: _pickFirstIfMultivalued(hit._source, $scope.params.labelField, ''),
-                    start: new Date(startValue)
-                  };
-                  if ($scope.params.endField) {
-                    if (_isMultivalued(hit._source, $scope.params.endField)) {
-                      detectedMultivaluedEnd = true;
-                    }
-                    if (!hit._source[$scope.params.endField]) {
-                      // here the end field value missing but expected
-                      // force the event to be of type point
+                  if (!hit._source[params.endField]) {
+                    // here the end field value missing but expected
+                    // force the event to be of type point
+                    e.type = 'point';
+                  } else {
+                    var endValue = _pickFirstIfMultivalued(hit._source, params.endField);
+                    if (startValue === endValue) {
+                      // also force it to be a point
                       e.type = 'point';
                     } else {
-                      var endValue = _pickFirstIfMultivalued(hit._source, $scope.params.endField);
-                      if (startValue === endValue) {
-                        // also force it to be a point
-                        e.type = 'point';
-                      } else {
-                        e.end = new Date(endValue);
-                      }
+                      e.type = 'range';
+                      e.end = new Date(endValue);
                     }
                   }
-                  events.push(e);
                 }
-              });
+                events.push(e);
+              }
+            });
 
-              if (detectedMultivaluedLabel) {
-                notify.warning('Label field [' + $scope.params.labelField + '] is multivalued - the first value will be used.');
-              }
-              if (detectedMultivaluedStart) {
-                notify.warning('Start Date field [' + $scope.params.startField + '] is multivalued - the first date will be used.');
-              }
-              if (detectedMultivaluedEnd) {
-                notify.warning('End Date field [' + $scope.params.endField + '] is multivalued - the first date will be used.');
-              }
+            if (detectedMultivaluedLabel) {
+              notify.warning('Label field [' + params.labelField + '] is multivalued - the first value will be used.');
+            }
+            if (detectedMultivaluedStart) {
+              notify.warning('Start Date field [' + params.startField + '] is multivalued - the first date will be used.');
+            }
+            if (detectedMultivaluedEnd) {
+              notify.warning('End Date field [' + params.endField + '] is multivalued - the first date will be used.');
             }
 
-            data = new vis.DataSet(events);
-
-            if (timeline) {
-              // just update data points
-              timeline.setItems(data);
-              timeline.fit();
-            } else {
-              // create a new one
-              timeline = new vis.Timeline($element[0], data, $scope.options);
-              timeline.fit();
-              timeline.on('select', onSelect);
-            }
-
-            return $scope.searchSource.onResults().then(onResults);
-
-          }).catch(function (err) {
-            notify.error(err);
-          });
-        }
-
-        $element.on('$destroy', function () {
-          if (timeline) {
-            timeline.off('select', onSelect);
           }
-        });
 
+          updateTimeline(index, events);
+
+          return searchSource.onResults().then(onResults);
+
+        }).catch(notify.error);
+      };
+
+
+
+      $scope.$watch(
+        function ($scope) {
+          // here to make a comparison use all properties except a searchSource as it was causing angular to
+          // enter an infinite loop when trying to determine the object equality
+          return _.map($scope.groups, function (g) {
+            return _.omit(g, 'searchSource');
+          });
+        },
+        function (newValue, oldValue) {
+          if (newValue === oldValue) {
+            return;
+          }
+          if ($scope.groups) {
+
+            var groups = [];
+            _.each($scope.groups, function (group, index) {
+              groups.push({
+                id: index,
+                content: group.label,
+                style: 'background-color:' + d3_category_20[index] + '; color: #fff;'
+              });
+            });
+            updateTimelineGroups(groups);
+
+            // do not use newValue as it does not have searchSource as we filtered it out
+            _.each($scope.groups, initSingleGroup);
+
+            courier.fetch();
+          }
+        },
+        true
+      );
+
+
+      $element.on('$destroy', function () {
+        if (timeline) {
+          timeline.off('select', onSelect);
+        }
       });
+    } // end of link function
 
-    }
 
   });
 });

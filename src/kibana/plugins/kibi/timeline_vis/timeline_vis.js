@@ -22,6 +22,7 @@ define(function (require) {
       template: require('text!plugins/kibi/timeline_vis/timeline_vis.html'),
       params: {
         defaults: {
+          groups: []
         },
         editor: '<kibi-timeline-vis-params></kibi-timeline-vis-params>'
       },

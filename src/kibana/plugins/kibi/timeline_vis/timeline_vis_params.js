@@ -2,7 +2,7 @@ define(function (require) {
   var _ = require('lodash');
   var vis = require('vis');
 
-  require('modules').get('kibana/kibi/timeline_vis').directive('kibiTimelineVisParams', function ($rootScope) {
+  require('modules').get('kibana/kibi/timeline_vis').directive('kibiTimelineVisParams', function ($rootScope, savedSearches) {
 
     return {
       restrict: 'E',
@@ -16,6 +16,18 @@ define(function (require) {
             $rootScope.$emit('kibi:vis:state-changed');
           }
         });
+
+        $scope.$watch('vis.params.groups', function (groups) {
+
+          _.each($scope.vis.params.groups, function (group) {
+            if (!group.groupLabel) {
+              group.groupLabel = group.savedSearchId;
+            }
+            savedSearches.get(group.savedSearchId).then(function (savedSearch) {
+              group.indexPatternId = savedSearch.searchSource._state.index.id;
+            });
+          });
+        }, true);
       }
     };
   });

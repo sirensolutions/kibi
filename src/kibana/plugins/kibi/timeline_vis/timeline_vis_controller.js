@@ -1,13 +1,17 @@
 define(function (require) {
+  var _ = require('lodash');
 
   var module = require('modules').get('kibana/kibi/timeline_vis', ['kibana']);
   module.controller(
     'KbnTimelineVisController',
-    function ($rootScope, $scope, $route, $log, courier, savedVisualizations, Private, $element) {
+    function ($rootScope, $scope, $route, $log, courier, savedSearches, savedVisualizations, Private, $element, Promise) {
 
       var requestQueue = Private(require('components/courier/_request_queue'));
       var SearchSource = Private(require('components/courier/data_source/search_source'));
 
+      $scope.savedObj = {
+        groups: []
+      };
       // Set to true in editing mode
       var editing = false;
 
@@ -23,28 +27,37 @@ define(function (require) {
         });
       }
 
-      var _id = '_kibi_timetable_ids_source_flag' + $scope.vis.id;
-
-      function fetchResults(savedVis) {
-
-        var indexPattern = $scope.vis.indexPattern;
-
-        if ($scope.savedObj && $scope.savedObj.searchSource) {
-          $scope.savedObj.searchSource.destroy();
+      $scope.$on('change:vis', function () {
+        if ($scope.options) {
+          $scope.options.height = $element[0].offsetHeight;
         }
-        requestQueue.markAllRequestsWithSourceIdAsInactive(_id);
+      });
 
-        var searchSource = new SearchSource();
-        searchSource.inherits(savedVis.searchSource);
+      $scope.$watch('vis', function () {
+        if ($scope.savedVis) {
+          initOptions($scope.savedVis);
+          initSearchSources($scope.savedVis);
+        }
+      });
 
-        searchSource._id = _id;
-        searchSource.index(indexPattern);
-        searchSource.size(savedVis.vis.params.size || 100);
+      // used also in autorefresh mode
+      $scope.$watch('esResponse', function () {
+        if ($scope.savedObj && $scope.savedObj.searchSources) {
+          _.each($scope.savedObj.searchSources, function (ss) {
+            ss.fetchQueued();
+          });
+        }
+      });
 
-        $scope.savedObj = {
-          searchSource: searchSource
-        };
-        courier.fetch();
+      if (editing) {
+        var removeVisStateChangedHandler = $rootScope.$on('kibi:vis:state-changed', function () {
+          initOptions($scope.savedVis);
+          initSearchSources($scope.savedVis);
+        });
+
+        $scope.$on('$destroy', function () {
+          removeVisStateChangedHandler();
+        });
       }
 
       function initOptions(savedVis) {
@@ -57,63 +70,58 @@ define(function (require) {
           // on change timeline directive should call redraw()
           autoResize: false
         };
-
-        if (savedVis) {
-          if (!savedVis.vis.params.endField ) {
-            options.type = 'box';
-          } else if (savedVis.vis.params.endField && savedVis.vis.params.startField === savedVis.vis.params.endField) {
-            options.type = 'point';
-          } else if (savedVis.vis.params.endField && savedVis.vis.params.startField !== savedVis.vis.params.endField) {
-            options.type = 'range';
-          }
-        }
-
         $scope.options = options;
       }
 
-      function initParams(savedVis) {
-        var params = {
-          labelField: savedVis.vis.params.labelField,
-          startField: savedVis.vis.params.startField,
-          endField: savedVis.vis.params.endField,
-          clickedItemId: savedVis.vis.params.clickedItemId
-        };
+      var initSearchSources = function (savedVis) {
 
-        $scope.params = params;
-      }
-
-      $scope.$on('change:vis', function () {
-        if ($scope.options) {
-          $scope.options.height = $element[0].offsetHeight;
-        }
-      });
-
-      $scope.$watch('vis', function () {
-        if ($scope.savedVis) {
-          fetchResults($scope.savedVis);
-          initParams($scope.savedVis);
-          initOptions($scope.savedVis);
-        }
-      });
-
-      // used also in autorefresh mode
-      $scope.$watch('esResponse', function () {
-        if ($scope.savedObj && $scope.savedObj.searchSource) {
-          $scope.savedObj.searchSource.fetchQueued();
-        }
-      });
-
-      if (editing) {
-        var removeVisStateChangedHandler = $rootScope.$on('kibi:vis:state-changed', function () {
-          initOptions($scope.savedVis);
-          initParams($scope.savedVis);
-          fetchResults($scope.savedVis);
+        // here iterate over groups from savedVis.vis.params.groups
+        var promises = [];
+        _.each(savedVis.vis.params.groups, function (group) {
+          if (group.savedSearchId) {
+            promises.push(
+              savedSearches.get(group.savedSearchId).then(function (savedSearch) {
+                return {
+                  savedSearch: savedSearch,
+                  group: group
+                };
+              })
+            );
+          }
         });
 
-        $scope.$on('$destroy', function () {
-          removeVisStateChangedHandler();
+
+        Promise.all(promises).then(function (results) {
+          var groups = [];
+
+          _.each(results, function (result) {
+            var savedSearch = result.savedSearch;
+            var group = result.group;
+
+            var _id = '_kibi_timetable_ids_source_flag' + savedSearch.id;
+            requestQueue.markAllRequestsWithSourceIdAsInactive(_id);
+
+            var searchSource = new SearchSource();
+            searchSource.inherits(savedSearch.searchSource);
+            searchSource._id = _id;
+            searchSource.index(savedSearch.searchSource._state.index);
+            searchSource.size(group.size || 100);
+
+            groups.push({
+              label: group.groupLabel,
+              searchSource: searchSource,
+              params: {
+                labelField: group.labelField,
+                startField: group.startField,
+                endField: group.endField
+              }
+            });
+          });
+
+          $scope.savedObj.groups = groups;
         });
-      }
+      };
+
 
     });
 });

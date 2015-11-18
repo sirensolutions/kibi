@@ -1,23 +1,52 @@
 <div id="kibi_timeline_vis_params" class="kibi-timeline-vis-params">
 
   <div class="form-group">
-    <label>Label field</label>
-    <st-select required object-type="field" index-pattern-id="vis.indexPattern.id" ng-model="vis.params.labelField"></st-select>
-  </div>
+    <label>Groups</label></br>
+    <ul>
+      <li ng-repeat="group in vis.params.groups" class="queryOptionArea" >
 
-  <div class="form-group">
-    <label>Start Date</label>
-    <st-select required object-type="field" index-pattern-id="vis.indexPattern.id" field-types="['date']" ng-model="vis.params.startField"></st-select>
-  </div>
+        <div class="content">
 
-  <div class="form-group">
-    <label>End Date  <span class="small_note">(Optional)</span></label>
-    <st-select object-type="field" index-pattern-id="vis.indexPattern.id" field-types="['date']" ng-model="vis.params.endField"></st-select>
-  </div>
+          <div class="form-group">
+            <label>Saved search id</label>
+            <st-select required object-type="search" ng-model="group.savedSearchId"></st-select>
+          </div>
 
-  <div class="form-group">
-    <label>Events number limit <span class="small_note">(Optional, default: 100)</span></label>
-    <input type="text" ng-model="vis.params.size" class="form-control" />
+          <div class="form-group">
+            <label>Group label</label>
+            <input required ng-model="group.groupLabel" class="form-control"/>
+          </div>
+
+          <div class="form-group">
+            <label>Event label</label>
+            <st-select required object-type="field" index-pattern-id="group.indexPatternId" ng-model="group.labelField"></st-select>
+          </div>
+
+          <div class="form-group">
+            <label>Event start date</label>
+            <st-select required object-type="field" index-pattern-id="group.indexPatternId" field-types="['date']" ng-model="group.startField"></st-select>
+          </div>
+
+          <div class="form-group">
+            <label>Event end date  <span class="small_note">(Optional)</span></label>
+            <st-select object-type="field" index-pattern-id="group.indexPatternId" field-types="['date']" ng-model="group.endField"></st-select>
+          </div>
+
+          <div class="form-group">
+            <label>Events number limit <span class="small_note">(Optional, default: 100)</span></label>
+            <input type="text" ng-model="group.size" class="form-control" />
+          </div>
+
+          <div class="btn-group rightCorner">
+            <array-param-up index="{{ $index }}" model="vis.params.groups"></array-param-up>
+            <array-param-down index="{{ $index }}" model="vis.params.groups"></array-param-down>
+            <array-param-remove index="{{ $index }}" model="vis.params.groups"></array-param-remove>
+          </div>
+
+        </div>
+      </li>
+    </ul>
+    <array-param-add required label="group" model="vis.params.groups"></array-param-add>
   </div>
 
 </div>

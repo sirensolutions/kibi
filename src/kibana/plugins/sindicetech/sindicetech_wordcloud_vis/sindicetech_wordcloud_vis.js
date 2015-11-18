@@ -55,6 +55,7 @@ define(function (require) {
           name: 'bucket',
           title: 'Split Rows',
           aggFilter: ['terms', 'significant_terms'],
+          min: 1,
           max: 1
         }
       ])

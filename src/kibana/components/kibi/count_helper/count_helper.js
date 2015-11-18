@@ -38,17 +38,32 @@ define(function (require) {
           savedSearches.get(dashboard.savedSearchId).then(function (savedSearch) {
 
             // now construct the query
-            var extraFilters = [];
             if (joinFilterHelper.isRelationalPanelEnabled() && joinFilterHelper.isFilterJoinPluginInstalled()) {
 
               joinFilterHelper.getJoinFilter(dashboard.id).then(function (joinFilter) {
-                self.constructCountQuery(dashboard.id, savedSearch, extraFilters, joinFilter)
-                .then(function (query) {
-                  fulfill({
-                    query: query,
-                    indexPatternId: savedSearch.searchSource._state.index.id
-                  });
-                });
+
+                var dashboardIndex = savedSearch.searchSource._state.index;
+                var promises = [
+                  urlHelper.getQueriesFromDashboardsWithSameIndex(dashboardId, dashboardIndex),
+                  urlHelper.getFiltersFromDashboardsWithSameIndex(dashboardId, dashboardIndex)
+                ];
+                Promise.all(promises).then(function (results) {
+                  var queriesFromDashboardsWirhSameIndex = results[0];
+                  var filtersFromDashboardsWirhSameIndex = results[1];
+                  self.constructCountQuery(
+                    dashboard.id,
+                    savedSearch,
+                    joinFilter,
+                    queriesFromDashboardsWirhSameIndex,
+                    filtersFromDashboardsWirhSameIndex
+                  )
+                  .then(function (query) {
+                    fulfill({
+                      query: query,
+                      indexPatternId: savedSearch.searchSource._state.index.id
+                    });
+                  }).catch(reject);
+                }).catch(reject);
               }).catch(function (err) {
                 // we could not get joinFilter
                 // there could be multiple reasons - most of them is missconfiguration
@@ -56,7 +71,11 @@ define(function (require) {
                 if (console) {
                   console.log(err);
                 }
-                self.constructCountQuery(dashboard.id, savedSearch, extraFilters, null)
+                self.constructCountQuery(
+                  dashboard.id,
+                  savedSearch,
+                  null
+                )
                 .then(function (query) {
                   fulfill({
                     query: query,
@@ -67,13 +86,13 @@ define(function (require) {
 
             } else if (!joinFilterHelper.isRelationalPanelEnabled() && joinFilterHelper.isFilterJoinPluginInstalled()) {
               // get the join filter if present on the dashboard
-              var joinFilter = urlHelper.getJoinFilter();
               // add it only for the dashboard where focus match
-              if (joinFilter && joinFilter.join_set.focus === savedSearch.searchSource._state.index.id) {
-                extraFilters.push(joinFilter);
-              }
-
-              self.constructCountQuery(dashboard.id, savedSearch, extraFilters, null)
+              var joinFilter = urlHelper.getJoinFilter();
+              self.constructCountQuery(
+                dashboard.id,
+                savedSearch,
+                (joinFilter && joinFilter.join_set.focus === savedSearch.searchSource._state.index.id) ? joinFilter : null
+              )
               .then(function (query) {
                 fulfill({
                   query: query,
@@ -83,7 +102,11 @@ define(function (require) {
 
             } else if (!joinFilterHelper.isRelationalPanelEnabled() && !joinFilterHelper.isFilterJoinPluginInstalled()) {
 
-              self.constructCountQuery(dashboard.id, savedSearch, [], null)
+              self.constructCountQuery(
+                dashboard.id,
+                savedSearch,
+                null
+              )
               .then(function (query) {
                 fulfill({
                   query: query,
@@ -115,7 +138,10 @@ define(function (require) {
      * The parameter savedSearch should be a reference to a SavedSearch
      * instance, not a SavedSearch id
      */
-    CountHelper.prototype.constructCountQuery = function (dashboardId, savedSearch, extraFilters, joinFilter) {
+    CountHelper.prototype.constructCountQuery = function (
+      dashboardId, savedSearch, joinSetFilter,
+      extraQueries, extraFilters
+    ) {
       return new Promise(function (fulfill, reject) {
 
         var indexPattern = savedSearch.searchSource._state.index;
@@ -138,31 +164,25 @@ define(function (require) {
         };
 
         //update the filters
-        var selectedDashboardFilters = kibiStateHelper.getFiltersForDashboardId(dashboardId);
+        var filters = kibiStateHelper.getFiltersForDashboardId(dashboardId) || [];
 
-        // add extra filters if any
-        if (extraFilters) {
-          if (!selectedDashboardFilters) {
-            selectedDashboardFilters = extraFilters;
-          } else if (extraFilters.length === 1 && extraFilters[0].join_set) {
-            // remove any other join filter from filters
-            selectedDashboardFilters = _.filter(selectedDashboardFilters, function (f) {
-              return !f.join_set;
-            });
-          }
-        }
 
         // if there are any filters in savedSearch add them
         var savedSearchMeta = getSavedSearchMeta(savedSearch);
         if (savedSearchMeta.filter) {
-          selectedDashboardFilters = selectedDashboardFilters.concat(savedSearchMeta.filter);
+          filters = filters.concat(savedSearchMeta.filter);
+        }
+
+        // any extra filters
+        if (extraFilters instanceof Array) {
+          filters = filters.concat(extraFilters);
         }
 
         // here we have to make sure that there are no duplicates
-        selectedDashboardFilters = uniqFilters(selectedDashboardFilters.concat(extraFilters));
+        filters = uniqFilters(filters);
 
-        if (selectedDashboardFilters) {
-          _.each(selectedDashboardFilters, function (filter) {
+        if (filters) {
+          _.each(filters, function (filter) {
 
             if (filter.meta && filter.meta.disabled === true) {
               return;  // this return does not break is like continue
@@ -221,24 +241,43 @@ define(function (require) {
           });
         }
 
-        //update the query
+        var queries = [];
+
+        // query from kibiState
         var selectedDashboardQuery = kibiStateHelper.getQueryForDashboardId(dashboardId);
         if (selectedDashboardQuery && !kibiStateHelper.isAnalyzedWildcardQueryString(selectedDashboardQuery)) {
-          query.query.filtered.filter.bool.must.push({
+          queries.push({
             query: selectedDashboardQuery
           });
         }
 
+        // query from savedSearchMeta
         if (savedSearchMeta.query && !_.isEmpty(savedSearchMeta.query) &&
             !kibiStateHelper.isAnalyzedWildcardQueryString(savedSearchMeta.query)) {
-          query.query.filtered.filter.bool.must.push({
+          queries.push({
             query: savedSearchMeta.query
           });
         }
 
+        // any extra queries
+        if (extraQueries instanceof Array) {
+          _.each(extraQueries, function (q) {
+            if (!kibiStateHelper.isAnalyzedWildcardQueryString(q)) {
+              queries.push({
+                query: q
+              });
+            }
+          });
+        }
 
-        if (joinFilter) {
-          replace_or_add_join_set_filter(query.query.filtered.filter.bool.must, joinFilter, true);
+        queries = uniqFilters(queries);
+
+        _.each(queries, function (q) {
+          query.query.filtered.filter.bool.must.push(q);
+        });
+
+        if (joinSetFilter) {
+          replace_or_add_join_set_filter(query.query.filtered.filter.bool.must, joinSetFilter, true);
         }
 
         // update time filter

@@ -88,8 +88,7 @@ define(function (require) {
 
         it('constructCountQuery - empty', function (done) {
           var dashboardId = 'Articles';
-          var extraFilters = [];
-          var joinFilter = null;
+          var joinSetFilter = null;
           var savedSearch = emptySavedSearch;
 
           var expected = {
@@ -109,18 +108,17 @@ define(function (require) {
             }
           };
 
-          countHelper.constructCountQuery(dashboardId, savedSearch, extraFilters, joinFilter).then(function (query) {
+          countHelper.constructCountQuery(dashboardId, savedSearch, joinSetFilter).then(function (query) {
             expect(query).to.eql(expected);
             done();
-          });
+          }).catch(done);
 
           $rootScope.$apply();
         });
 
         it('constructCountQuery - saved search', function (done) {
           var dashboardId = 'Articles';
-          var extraFilters = [];
-          var joinFilter = null;
+          var joinSetFilter = null;
 
           // fake savedSearch
           var savedSearch = {
@@ -172,293 +170,13 @@ define(function (require) {
             }
           };
 
-          countHelper.constructCountQuery(dashboardId, savedSearch, extraFilters, joinFilter).then(function (query) {
+          countHelper.constructCountQuery(dashboardId, savedSearch, joinSetFilter).then(function (query) {
             expect(query).to.eql(expected);
             done();
-          });
+          }).catch(done);
 
           $rootScope.$apply();
         });
-
-        it('constructCountQuery - take filter from extra filters', function (done) {
-          var dashboardId = 'Articles';
-          var joinFilter = null;
-          var savedSearch = emptySavedSearch;
-          var extraFilters = [
-            {
-              range: {
-                fake_field: {
-                  gte: 20,
-                  lte: 40
-                }
-              }
-            }
-          ];
-
-
-          var expected = {
-            size: 0,
-            query: {
-              filtered: {
-                query: {
-                  match_all: {}
-                },
-                filter: {
-                  bool: {
-                    must: [
-                      {
-                        range: {
-                          fake_field: {
-                            gte: 20,
-                            lte: 40
-                          }
-                        }
-                      }
-                    ],
-                    must_not: []
-                  }
-                }
-              }
-            }
-          };
-
-          countHelper.constructCountQuery(dashboardId, savedSearch, extraFilters, joinFilter).then(function (query) {
-            expect(query).to.eql(expected);
-            done();
-          });
-
-          $rootScope.$apply();
-        });
-
-        it('constructCountQuery - take negated filter from extra filters', function (done) {
-          var dashboardId = 'Articles';
-          var savedSearch = emptySavedSearch;
-          var joinFilter = null;
-          var extraFilters = [
-            {
-              meta:{
-                negate: true
-              },
-              range: {
-                fake_field: {
-                  gte: 20,
-                  lte: 40
-                }
-              }
-            }
-          ];
-
-          var expected = {
-            size: 0,
-            query: {
-              filtered: {
-                query: {
-                  match_all: {}
-                },
-                filter: {
-                  bool: {
-                    must: [],
-                    must_not: [
-                      {
-                        range: {
-                          fake_field: {
-                            gte: 20,
-                            lte: 40
-                          }
-                        }
-                      }
-                    ]
-                  }
-                }
-              }
-            }
-          };
-
-          countHelper.constructCountQuery(dashboardId, savedSearch, extraFilters, joinFilter).then(function (query) {
-            expect(query).to.eql(expected);
-            done();
-          });
-
-          $rootScope.$apply();
-        });
-
-        it('constructCountQuery - do not take filter from extra filters when disabled', function (done) {
-          var dashboardId = 'Articles';
-          var savedSearch = emptySavedSearch;
-          var joinFilter = null;
-          var extraFilters = [
-            {
-              meta:{
-                disabled: true
-              },
-              range: {
-                fake_field: {
-                  gte: 20,
-                  lte: 40
-                }
-              }
-            }
-          ];
-
-
-          var expected = {
-            size: 0,
-            query: {
-              filtered: {
-                query: {
-                  match_all: {}
-                },
-                filter: {
-                  bool: {
-                    must: [],
-                    must_not: []
-                  }
-                }
-              }
-            }
-          };
-
-          countHelper.constructCountQuery(dashboardId, savedSearch, extraFilters, joinFilter).then(function (query) {
-            expect(query).to.eql(expected);
-            done();
-          });
-
-          $rootScope.$apply();
-        });
-
-        it('constructCountQuery - different types of filters', function (done) {
-          var dashboardId = 'Articles';
-          var savedSearch = emptySavedSearch;
-          var joinFilter = null;
-          var extraFilters = [
-            {
-              range: {}
-            },
-            {
-              query: {}
-            },
-            {
-              or: {}
-            },
-            {
-              dbfilter: {}
-            },
-            {
-              exists: {}
-            },
-            {
-              geo_bounding_box: {}
-            },
-            {
-              missing: {}
-            },
-            {
-              script: {}
-            },
-            {
-              join_set: {}
-            },
-            {
-              join_sequence: {}
-            }
-          ];
-
-
-          var expected = {
-            size: 0,
-            query: {
-              filtered: {
-                query: {
-                  match_all: {}
-                },
-                filter: {
-                  bool: {
-                    must: extraFilters,
-                    must_not: []
-                  }
-                }
-              }
-            }
-          };
-
-          countHelper.constructCountQuery(dashboardId, savedSearch, extraFilters, joinFilter).then(function (query) {
-            expect(query).to.eql(expected);
-            done();
-          });
-
-          $rootScope.$apply();
-        });
-
-        it('constructCountQuery - different types of filters negated', function (done) {
-          var dashboardId = 'Articles';
-          var savedSearch = emptySavedSearch;
-          var joinFilter = null;
-          var extraFilters = [
-            {
-              meta:{negate:true},
-              range: {}
-            },
-            {
-              meta:{negate:true},
-              query: {}
-            },
-            {
-              meta:{negate:true},
-              or: {}
-            },
-            {
-              meta:{negate:true},
-              dbfilter: {}
-            },
-            {
-              meta:{negate:true},
-              exists: {}
-            },
-            {
-              meta:{negate:true},
-              geo_bounding_box: {}
-            },
-            {
-              meta:{negate:true},
-              missing: {}
-            },
-            {
-              meta:{negate:true},
-              script: {}
-            },
-            {
-              meta:{negate:true},
-              join_set: {}
-            }
-          ];
-
-          var expected = {
-            size: 0,
-            query: {
-              filtered: {
-                query: {
-                  match_all: {}
-                },
-                filter: {
-                  bool: {
-                    must: [],
-                    must_not: _.map(extraFilters, function (f) {
-                      return _.omit(f, 'meta');
-                    })
-                  }
-                }
-              }
-            }
-          };
-
-          countHelper.constructCountQuery(dashboardId, savedSearch, extraFilters, joinFilter).then(function (query) {
-            expect(query).to.eql(expected);
-            done();
-          });
-
-          $rootScope.$apply();
-        });
-
 
       });
 
@@ -468,8 +186,7 @@ define(function (require) {
 
         it('constructCountQuery - check if filters taken from kibiState', function (done) {
           var dashboardId = 'Articles';
-          var extraFilters = [];
-          var joinFilter = null;
+          var joinSetFilter = null;
           var savedSearch = emptySavedSearch;
           var filters = [
             {
@@ -510,7 +227,7 @@ define(function (require) {
             }
           };
 
-          countHelper.constructCountQuery(dashboardId, savedSearch, extraFilters, joinFilter).then(function (query) {
+          countHelper.constructCountQuery(dashboardId, savedSearch, joinSetFilter).then(function (query) {
             expect(query).to.eql(expected);
             done();
           });
@@ -521,8 +238,7 @@ define(function (require) {
 
         it('constructCountQuery - check if query is taken from kibiState', function (done) {
           var dashboardId = 'Articles';
-          var extraFilters = [];
-          var joinFilter = null;
+          var joinSetFilter = null;
           var savedSearch = emptySavedSearch;
           var query = {
             query_string: {
@@ -557,7 +273,7 @@ define(function (require) {
             }
           };
 
-          countHelper.constructCountQuery(dashboardId, savedSearch, extraFilters, joinFilter).then(function (query) {
+          countHelper.constructCountQuery(dashboardId, savedSearch, joinSetFilter).then(function (query) {
             expect(query).to.eql(expected);
             done();
           });
@@ -565,21 +281,201 @@ define(function (require) {
           $rootScope.$apply();
         });
 
+
+        it('constructCountQuery - do not take filter from kibi state when disabled', function (done) {
+          var dashboardId = 'Articles';
+          var savedSearch = emptySavedSearch;
+          var joinSetFilter = null;
+          var negatedFilters = [
+            {
+              meta:{
+                disabled: true
+              },
+              range: {
+                fake_field: {
+                  gte: 20,
+                  lte: 40
+                }
+              }
+            }
+          ];
+          kibiStateHelper.saveFiltersForDashboardId(dashboardId, negatedFilters);
+
+
+          var expected = {
+            size: 0,
+            query: {
+              filtered: {
+                query: {
+                  match_all: {}
+                },
+                filter: {
+                  bool: {
+                    must: [],
+                    must_not: []
+                  }
+                }
+              }
+            }
+          };
+
+          countHelper.constructCountQuery(dashboardId, savedSearch, joinSetFilter).then(function (query) {
+            expect(query).to.eql(expected);
+            done();
+          });
+
+          $rootScope.$apply();
+        });
+
+        it('constructCountQuery - different types of filters', function (done) {
+          var dashboardId = 'Articles';
+          var savedSearch = emptySavedSearch;
+          var joinSetFilter = null;
+          var differentKindOfFilters = [
+            {
+              range: {}
+            },
+            {
+              query: {}
+            },
+            {
+              or: {}
+            },
+            {
+              dbfilter: {}
+            },
+            {
+              exists: {}
+            },
+            {
+              geo_bounding_box: {}
+            },
+            {
+              missing: {}
+            },
+            {
+              script: {}
+            },
+            {
+              join_set: {}
+            },
+            {
+              join_sequence: {}
+            }
+          ];
+          kibiStateHelper.saveFiltersForDashboardId(dashboardId, differentKindOfFilters);
+
+
+          var expected = {
+            size: 0,
+            query: {
+              filtered: {
+                query: {
+                  match_all: {}
+                },
+                filter: {
+                  bool: {
+                    must: differentKindOfFilters,
+                    must_not: []
+                  }
+                }
+              }
+            }
+          };
+
+          countHelper.constructCountQuery(dashboardId, savedSearch, joinSetFilter).then(function (query) {
+            expect(query).to.eql(expected);
+            done();
+          });
+
+          $rootScope.$apply();
+        });
+
+        it('constructCountQuery - different types of filters negated', function (done) {
+          var dashboardId = 'Articles';
+          var savedSearch = emptySavedSearch;
+          var joinSetFilter = null;
+          var differentKindOfNegatedFilters = [
+            {
+              meta:{negate:true},
+              range: {}
+            },
+            {
+              meta:{negate:true},
+              query: {}
+            },
+            {
+              meta:{negate:true},
+              or: {}
+            },
+            {
+              meta:{negate:true},
+              dbfilter: {}
+            },
+            {
+              meta:{negate:true},
+              exists: {}
+            },
+            {
+              meta:{negate:true},
+              geo_bounding_box: {}
+            },
+            {
+              meta:{negate:true},
+              missing: {}
+            },
+            {
+              meta:{negate:true},
+              script: {}
+            },
+            {
+              meta:{negate:true},
+              join_set: {}
+            }
+          ];
+          kibiStateHelper.saveFiltersForDashboardId(dashboardId, differentKindOfNegatedFilters);
+
+
+          var expected = {
+            size: 0,
+            query: {
+              filtered: {
+                query: {
+                  match_all: {}
+                },
+                filter: {
+                  bool: {
+                    must: [],
+                    must_not: _.map(differentKindOfNegatedFilters, function (f) {
+                      return _.omit(f, 'meta');
+                    })
+                  }
+                }
+              }
+            }
+          };
+
+          countHelper.constructCountQuery(dashboardId, savedSearch, joinSetFilter).then(function (query) {
+            expect(query).to.eql(expected);
+            done();
+          });
+
+          $rootScope.$apply();
+        });
+
+
         it('constructCountQuery - replace join filter if present in kibiState', function (done) {
           var dashboardId = 'Articles';
-          var joinFilter = null;
+          var joinSetFilter = {
+            join_set: {
+              indexes: [{id: 'index2'}]
+            }
+          };
           var savedSearch = emptySavedSearch;
           var stateFilters = [
             {
               join_set: {
                 indexes: [{id: 'index1'}]
-              }
-            }
-          ];
-          var extraFilters = [
-            {
-              join_set: {
-                indexes: [{id: 'index2'}]
               }
             }
           ];
@@ -609,7 +505,7 @@ define(function (require) {
             }
           };
 
-          countHelper.constructCountQuery(dashboardId, savedSearch, extraFilters, joinFilter).then(function (query) {
+          countHelper.constructCountQuery(dashboardId, savedSearch, joinSetFilter).then(function (query) {
             expect(query).to.eql(expected);
             done();
           });
@@ -620,7 +516,6 @@ define(function (require) {
         it('constructCountQuery - replace join filter if present in kibiState', function (done) {
           var dashboardId = 'Articles';
           var savedSearch = emptySavedSearch;
-          var extraFilters = [];
           var stateFilters = [
             {
               join_set: {
@@ -628,7 +523,7 @@ define(function (require) {
               }
             }
           ];
-          var joinFilter = {
+          var joinSetFilter = {
             join_set: {
               indexes: [{id: 'index2'}]
             }
@@ -659,7 +554,7 @@ define(function (require) {
             }
           };
 
-          countHelper.constructCountQuery(dashboardId, savedSearch, extraFilters, joinFilter).then(function (query) {
+          countHelper.constructCountQuery(dashboardId, savedSearch, joinSetFilter).then(function (query) {
             expect(query).to.eql(expected);
             done();
           });
@@ -669,8 +564,7 @@ define(function (require) {
 
         it('constructCountQuery - get time filter', function (done) {
           var dashboardId = 'time-testing-4';
-          var extraFilters = [];
-          var joinFilter = null;
+          var joinSetFilter = null;
           var savedSearch = emptySavedSearchWithIndexWithTime;
 
           var expected = {
@@ -699,7 +593,7 @@ define(function (require) {
             }
           };
 
-          countHelper.constructCountQuery(dashboardId, savedSearch, extraFilters, joinFilter).then(function (query) {
+          countHelper.constructCountQuery(dashboardId, savedSearch, joinSetFilter).then(function (query) {
             expect(query).to.eql(expected);
             done();
           });
@@ -709,11 +603,10 @@ define(function (require) {
 
         it('constructCountQuery - get time filter - dashboard does not exists -should reject', function (done) {
           var dashboardId = 'time-testing-3XXX';
-          var extraFilters = [];
-          var joinFilter = null;
+          var joinSetFilter = null;
           var savedSearch = emptySavedSearchWithIndexWithTime;
 
-          countHelper.constructCountQuery(dashboardId, savedSearch, extraFilters, joinFilter).then(function (query) {
+          countHelper.constructCountQuery(dashboardId, savedSearch, joinSetFilter).then(function (query) {
             // should not go here
           }).catch(function (err) {
             expect(err.message).to.equal('Could not find a dashboard with id: time-testing-3XXX');

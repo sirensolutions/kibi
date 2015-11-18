@@ -115,29 +115,6 @@ define(function (require) {
       });
 
       describe('util methods methods', function () {
-        it('isDashboardInEnabledRelations', function () {
-          var relations = [
-            {
-              enabled: true,
-              from: 'A',
-              to: 'B',
-              fromPath: 'a',
-              toPath: 'b'
-            },
-            {
-              enabled: false,
-              from: 'A1',
-              to: 'B1',
-              fromPath: 'a1',
-              toPath: 'b1'
-            }
-          ];
-
-          expect(joinFilterHelper.isDashboardInEnabledRelations('A',  relations)).to.equal(true);
-          expect(joinFilterHelper.isDashboardInEnabledRelations('B',  relations)).to.equal(true);
-          expect(joinFilterHelper.isDashboardInEnabledRelations('A1', relations)).to.equal(false);
-          expect(joinFilterHelper.isDashboardInEnabledRelations('A1', relations)).to.equal(false);
-        });
 
         it('findIndexAssociatedToDashboard', function () {
           var map = {

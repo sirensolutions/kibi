@@ -1,9 +1,17 @@
 define(function (require) {
-  return function UrlHelperFactory(Private, $location, $route, sessionStorage, savedDashboards, savedSearches, Promise, configFile) {
+
+  var getSavedSearchMeta =  require('components/kibi/count_helper/lib/get_saved_search_meta');
+  var uniqFilters = require('components/filter_bar/lib/uniqFilters');
+
+  return function UrlHelperFactory(
+    Private, $location, $route, sessionStorage, savedDashboards,
+    savedSearches, Promise, configFile, config, timefilter
+  ) {
     var rison = require('utils/rison');
     var _ = require('lodash');
     var apps = Private(require('registry/apps'));
     var kibiStateHelper    = Private(require('components/kibi/kibi_state_helper/kibi_state_helper'));
+    var kibiTimeHelper   = Private(require('components/kibi/kibi_time_helper/kibi_time_helper'));
 
 
     var defaultApp = _.find(apps, function (app) {
@@ -206,8 +214,6 @@ define(function (require) {
         });
 
 
-
-
       } else {
 
         return savedDashboards.find().then(function (resp) {
@@ -281,6 +287,162 @@ define(function (require) {
 
           fulfill(queries);
         });
+      });
+    };
+
+
+    UrlHelper.prototype.isDashboardInEnabledRelations = function (dashboardId, relations) {
+      if (relations) {
+        for (var i = 0; i < relations.length; i++) {
+          if (relations[i].enabled && relations[i].from === dashboardId || relations[i].to === dashboardId) {
+            return true;
+          }
+        }
+      }
+      return false;
+    };
+
+
+    UrlHelper.prototype._filterDashboardsWithSameIndex = function (dashboardId, dashboards, relations) {
+      var self = this;
+      return _.filter(dashboards, function (dashId) {
+        if (dashId === dashboardId) {
+          return false;
+        }
+        // now checked that the dashId is in enabled relations either as a source or target
+        return self.isDashboardInEnabledRelations(dashId, relations);
+      });
+    };
+
+
+    /**
+     * For each dashboard based on the same index it should take
+     *  a) filters from kibiState (except join_set one)
+     *  b) time from kibiState (transform it to proper range filter)
+     *  c) filters from savedSearch Meta
+     * do it only if relational panel enaabled
+     */
+    UrlHelper.prototype.getFiltersFromDashboardsWithSameIndex = function (dashboardId, indexPattern) {
+      var self = this;
+      return new Promise(function (fulfill, reject) {
+        // get relations for config
+        var connectedDashboardIds = [];
+        var relationalPanelConfig = config.get('kibi:relationalPanelConfig');
+        if (relationalPanelConfig.enabled === true) {
+          self.getIndexToDashboardMap().then(function (indexToDashboardsMap) {
+            if (indexToDashboardsMap[indexPattern.id]) {
+              // filter out current dashboard
+              // and all dashboards which are not in enabled relations
+              // we want filters only from dashboards which are in the currently enabled relations
+              var dashboardIds = self._filterDashboardsWithSameIndex(
+                dashboardId,
+                indexToDashboardsMap[indexPattern.id],
+                relationalPanelConfig.relations
+              );
+              // now for each dashboard we have to take:
+              // filters from kibiState
+              // filters from savedSearchMeta
+              // time filter from kibiState
+              var promises = [];
+              _.each(dashboardIds, function (dashId) {
+                promises.push(savedDashboards.get(dashId).then(function (savedDash) {
+                  if (!savedDash.savedSearchId) {
+                    throw new Error('Dashboard [' + savedDash + '] is expected to have savedSearchId');
+                  }
+                  return savedSearches.get(savedDash.savedSearchId).then(function (savedSearch) {
+                    var dashFilters = kibiStateHelper.getFiltersForDashboardId(dashId) || [];
+                    var filters = _.filter(dashFilters, function (df) {
+                      return !df.join_set;
+                    });
+                    var savedSearchMeta = getSavedSearchMeta(savedSearch);
+                    if (savedSearchMeta.filter) {
+                      filters = filters.concat(savedSearchMeta.filter);
+                    }
+
+                    var timeFilter = timefilter.get(indexPattern);
+                    if (timeFilter) {
+                      return kibiTimeHelper.updateTimeFilterForDashboard(dashId, timeFilter)
+                        .then(function (updatedTimeFilter) {
+                          filters.push(updatedTimeFilter);
+                          return uniqFilters(filters);
+                        });
+                    } else {
+                      return uniqFilters(filters);
+                    }
+                  });
+                }));
+              });
+              Promise.all(promises).then(function (results) {
+                var all = [];
+                _.each(results, function (res) {
+                  all = all.concat(res);
+                });
+                fulfill(all);
+              }).catch(reject);
+            } else {
+              fulfill([]);
+            }
+          });
+        } else {
+          fulfill([]);
+        }
+      });
+    };
+
+    UrlHelper.prototype.getQueriesFromDashboardsWithSameIndex = function (dashboardId, indexPattern) {
+      var self = this;
+      return new Promise(function (fulfill, reject) {
+        // get relations for config
+        var connectedDashboardIds = [];
+        var relationalPanelConfig = config.get('kibi:relationalPanelConfig');
+        if (relationalPanelConfig.enabled === true) {
+          self.getIndexToDashboardMap().then(function (indexToDashboardsMap) {
+            if (indexToDashboardsMap[indexPattern.id]) {
+              // filter out current dashboard
+              // and all dashboards which are not in enabled relations
+              // we want queries only from dashboards which are in the currently enabled relations
+              var dashboardIds = self._filterDashboardsWithSameIndex(
+                dashboardId,
+                indexToDashboardsMap[indexPattern.id],
+                relationalPanelConfig.relations
+              );
+              // now for each dashboard we have to take:
+              // query from kibiState
+              // query from savedSearch
+              var promises = [];
+              _.each(dashboardIds, function (dashId) {
+                promises.push(savedDashboards.get(dashId).then(function (savedDash) {
+                  if (!savedDash.savedSearchId) {
+                    throw new Error('Dashboard [' + savedDash + '] is expected to have savedSearchId');
+                  }
+                  return savedSearches.get(savedDash.savedSearchId).then(function (savedSearch) {
+                    var queries = [];
+                    var q1 = kibiStateHelper.getQueryForDashboardId(dashId);
+                    if (q1) {
+                      queries.push(q1);
+                    }
+                    var savedSearchMeta = getSavedSearchMeta(savedSearch);
+                    if (savedSearchMeta.query) {
+                      queries.push(savedSearchMeta.query);
+                    }
+                    return queries;
+                  });
+                }));
+              });
+              Promise.all(promises).then(function (results) {
+                var all = [];
+                _.each(results, function (res) {
+                  all = all.concat(res);
+                });
+                fulfill(all);
+              }).catch(reject);
+            } else {
+              fulfill([]);
+            }
+          });
+        } else {
+          fulfill([]);
+        }
       });
     };
 

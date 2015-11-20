@@ -121,6 +121,20 @@ define(function (require) {
       });
     };
 
+    StSelectHelper.prototype.getJoinRelations = function () {
+      var relations = config.get('kibi:relations');
+
+      if (!!relations && !!relations.relationsIndices) {
+        var labels = _.map(relations.relationsIndices, function (relInd) {
+          return {
+            label: relInd.label,
+            value: relInd.id
+          };
+        });
+        return Promise.resolve(labels);
+      }
+    };
+
     StSelectHelper.prototype.getFields = function (indexPatternId, fieldTypes) {
       var defId;
       if (indexPatternId) {

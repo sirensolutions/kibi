@@ -8,13 +8,13 @@ define(function (require) {
   var $rootScope;
   var $elem;
 
-  var init = function (initValue, items, required, modelDisabled, modelRequired, include, exclude) {
+  var init = function (initValue, items, required, modelDisabled, modelRequired, include, filter) {
     // Load the application
     module('kibana');
 
     // Create the scope
     inject(function (Private, _$rootScope_, $compile, Promise) {
-      $rootScope = _$rootScope_;
+      $rootScope = _$rootScope_.$new();
       $rootScope.model = initValue;
 
       var selectHelper = Private(require('directives/st_select_helper'));
@@ -34,9 +34,9 @@ define(function (require) {
         $rootScope.include = include;
         select += ' include="include"';
       }
-      if (exclude !== null && exclude !== undefined) {
-        $rootScope.exclude = exclude;
-        select += ' exclude="exclude"';
+      if (filter !== null && filter !== undefined) {
+        $rootScope.filter = filter;
+        select += ' filter="filter"';
       }
       $elem = angular.element(select + '></st-select>');
 
@@ -174,11 +174,13 @@ define(function (require) {
         expect(options[3].text).to.be('tata');
       });
 
-      it('should exclude items from the select options', function () {
+      it('should exclude items from the select', function () {
         var items = [ { value: 1, label: 'joe' }, { value: 2, label: 'toto' } ];
-        var exclude = [ { id: 1, label: 'joe' } ];
+        var filter = function (id, value) {
+          return value === 1;
+        };
 
-        init(null, items, null, null, null, null, exclude);
+        init(null, items, null, null, null, null, filter);
 
         expect($rootScope.action.called).to.be.ok();
         var options = $elem.find('option');
@@ -193,10 +195,12 @@ define(function (require) {
 
       it('should exclude some items and include others from the select options', function () {
         var items = [ { value: 1, label: 'joe' }, { value: 2, label: 'toto' } ];
-        var exclude = [ { id: 1, label: 'joe' } ];
+        var filter = function (id, value) {
+          return value === 1;
+        };
         var include = [ { value: 3, label: 'tata' } ];
 
-        init(null, items, null, null, null, include, exclude);
+        init(null, items, null, null, null, include, filter);
 
         expect($rootScope.action.called).to.be.ok();
         var options = $elem.find('option');
@@ -215,10 +219,12 @@ define(function (require) {
 
       it('should exclude items that were explicitly included', function () {
         var items = [ { value: 2, label: 'toto' } ];
-        var exclude = [ { id: 1, label: 'joe' } ];
+        var filter = function (id, value) {
+          return value === 1;
+        };
         var include = [ { value: 1, label: 'joe' } ];
 
-        init(null, items, null, null, null, include, exclude);
+        init(null, items, null, null, null, include, filter);
 
         expect($rootScope.action.called).to.be.ok();
         var options = $elem.find('option');

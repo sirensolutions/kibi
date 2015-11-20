@@ -1,8 +1,6 @@
 define(function (require) {
   describe('Kibi Controllers', function () {
     var $scope;
-    var jQuery = require('jquery');
-    var sinon = require('test_utils/auto_release_sinon');
     var Promise = require('bluebird');
     var globalState;
 

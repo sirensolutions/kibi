@@ -151,6 +151,11 @@ define(function () {
           '}'
         ].join('\n'),
         description: 'Relational panel configuration.'
+      },
+      'kibi:relations': {
+        type: 'json',
+        value: '{ "relationsIndices": [], "relationsDashboards": [] }',
+        description: 'Relations between indices and dashboards'
       }
     };
   };

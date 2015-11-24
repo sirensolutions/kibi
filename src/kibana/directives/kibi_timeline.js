@@ -101,17 +101,25 @@ define(function (require) {
 
       var updateTimeline = function (groupIndex, events) {
         initTimeline();
+        var existingGroupIds = _.map($scope.groups, function (g) {
+          return g.id;
+        });
+
         groupEvents[groupIndex] = _.cloneDeep(events);
 
         // make sure all events have correct group index
+        // add only events from groups which still exists
+        var points = [];
         _.each(groupEvents, function (events, index) {
           _.each(events, function (e) {
             e.group = $scope.groupsOnSeparateLevels === true ? index : 0;
+            if (existingGroupIds.indexOf(e.groupId) !== -1) {
+              points.push(e);
+            }
           });
         });
 
-        data = new vis.DataSet(_.flatten(groupEvents));
-        // just update data points
+        data = new vis.DataSet(points);
         timeline.setItems(data);
         timeline.fit();
       };
@@ -119,6 +127,7 @@ define(function (require) {
       var initSingleGroup = function (group, index) {
         var searchSource = group.searchSource;
         var params = group.params;
+        var groupId = group.id;
         searchSource.onResults().then(function onResults(searchResp) {
           var events = [];
 
@@ -145,7 +154,8 @@ define(function (require) {
                   start: new Date(startValue),
                   type: 'box',
                   style: 'background-color: ' + d3_category_20[index] + '; color: #fff;',
-                  group: $scope.groupsOnSeparateLevels === true ? index : 0
+                  group: $scope.groupsOnSeparateLevels === true ? index : 0,
+                  groupId: groupId
                 };
 
                 if (params.endField) {

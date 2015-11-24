@@ -17,15 +17,33 @@ define(function (require) {
           }
         });
 
+
+        var getUUID = function () {
+          return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+            var r = Math.random() * 16 | 0;
+            var v = c === 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+          });
+        };
+
+
         $scope.$watch('vis.params.groups', function (groups) {
 
           _.each($scope.vis.params.groups, function (group) {
+
+            // we need unique ids to manage data series in timeline component
+            if (!group.id) {
+              group.id = getUUID();
+            }
+
             if (!group.groupLabel) {
               group.groupLabel = group.savedSearchId;
             }
-            savedSearches.get(group.savedSearchId).then(function (savedSearch) {
-              group.indexPatternId = savedSearch.searchSource._state.index.id;
-            });
+            if (group.savedSearchId) {
+              savedSearches.get(group.savedSearchId).then(function (savedSearch) {
+                group.indexPatternId = savedSearch.searchSource._state.index.id;
+              });
+            }
           });
         }, true);
       }

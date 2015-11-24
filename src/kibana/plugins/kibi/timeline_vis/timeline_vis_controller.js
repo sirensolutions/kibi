@@ -107,6 +107,7 @@ define(function (require) {
             searchSource.size(group.size || 100);
 
             groups.push({
+              id: group.id,
               label: group.groupLabel,
               searchSource: searchSource,
               params: {

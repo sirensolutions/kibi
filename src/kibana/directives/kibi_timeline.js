@@ -102,6 +102,14 @@ define(function (require) {
       var updateTimeline = function (groupIndex, events) {
         initTimeline();
         groupEvents[groupIndex] = _.cloneDeep(events);
+
+        // make sure all events have correct group index
+        _.each(groupEvents, function (events, index) {
+          _.each(events, function (e) {
+            e.group = $scope.groupsOnSeparateLevels === true ? index : 0;
+          });
+        });
+
         data = new vis.DataSet(_.flatten(groupEvents));
         // just update data points
         timeline.setItems(data);
@@ -136,15 +144,9 @@ define(function (require) {
 
                   start: new Date(startValue),
                   type: 'box',
-                  style: 'background-color: ' + d3_category_20[index] + '; color: #fff;'
+                  style: 'background-color: ' + d3_category_20[index] + '; color: #fff;',
+                  group: $scope.groupsOnSeparateLevels === true ? index : 0
                 };
-
-                // if group on different levels - group needed for grouping
-                if ($scope.groupsOnSeparateLevels === true) {
-                  e.group = index;
-                } else {
-                  e.group = 0;
-                }
 
                 if (params.endField) {
                   if (_isMultivalued(hit._source, params.endField)) {
@@ -202,7 +204,7 @@ define(function (require) {
 
         } else {
           // single group
-          // - a bit of hack as I do not know at the moment how to do it with no groups at all
+          // - a bit of hack but currently the only way I could make it work
           groups.push({
             id: 0,
             content: '',

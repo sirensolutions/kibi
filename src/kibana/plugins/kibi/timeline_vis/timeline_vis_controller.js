@@ -51,7 +51,6 @@ define(function (require) {
 
       if (editing) {
         var removeVisStateChangedHandler = $rootScope.$on('kibi:vis:state-changed', function () {
-          initOptions($scope.savedVis);
           initSearchSources($scope.savedVis);
         });
 
@@ -119,6 +118,7 @@ define(function (require) {
           });
 
           $scope.savedObj.groups = groups;
+          $scope.savedObj.groupsOnSeparateLevels = savedVis.vis.params.groupsOnSeparateLevels;
         });
       };
 

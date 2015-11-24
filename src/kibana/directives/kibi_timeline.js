@@ -36,6 +36,7 @@ define(function (require) {
     return {
       scope: {
         groups: '=',
+        groupsOnSeparateLevels: '=',
         options: '=',
       },
       restrict: 'E',
@@ -98,16 +99,10 @@ define(function (require) {
         }
       };
 
-      var updateTimelineGroups = function (groups) {
-        initTimeline();
-        var dataGroups = new vis.DataSet(groups);
-        timeline.setGroups(dataGroups);
-      };
-
       var updateTimeline = function (groupIndex, events) {
+        initTimeline();
         groupEvents[groupIndex] = _.cloneDeep(events);
         data = new vis.DataSet(_.flatten(groupEvents));
-        initTimeline();
         // just update data points
         timeline.setItems(data);
         timeline.fit();
@@ -138,12 +133,19 @@ define(function (require) {
                   index: searchSource.get('index').id,
                   field: params.labelField,
                   content: _pickFirstIfMultivalued(hit._source, params.labelField, ''),
-                  // group needed for grouping
-                  group: index,
+
                   start: new Date(startValue),
                   type: 'box',
                   style: 'background-color: ' + d3_category_20[index] + '; color: #fff;'
                 };
+
+                // if group on different levels - group needed for grouping
+                if ($scope.groupsOnSeparateLevels === true) {
+                  e.group = index;
+                } else {
+                  e.group = 0;
+                }
+
                 if (params.endField) {
                   if (_isMultivalued(hit._source, params.endField)) {
                     detectedMultivaluedEnd = true;
@@ -186,35 +188,52 @@ define(function (require) {
         }).catch(notify.error);
       };
 
+      var initGroups = function () {
+        initTimeline();
+        var groups = [];
+        if ($scope.groupsOnSeparateLevels === true) {
+          _.each($scope.groups, function (group, index) {
+            groups.push({
+              id: index,
+              content: group.label,
+              style: 'background-color:' + d3_category_20[index] + '; color: #fff;'
+            });
+          });
+
+        } else {
+          // single group
+          // - a bit of hack as I do not know at the moment how to do it with no groups at all
+          groups.push({
+            id: 0,
+            content: '',
+            style: 'background-color: none;'
+          });
+        }
+        var dataGroups = new vis.DataSet(groups);
+        timeline.setGroups(dataGroups);
+      };
 
 
       $scope.$watch(
         function ($scope) {
           // here to make a comparison use all properties except a searchSource as it was causing angular to
           // enter an infinite loop when trying to determine the object equality
-          return _.map($scope.groups, function (g) {
+          var arr =  _.map($scope.groups, function (g) {
             return _.omit(g, 'searchSource');
           });
+
+          arr.push($scope.groupsOnSeparateLevels);
+          return arr;
         },
         function (newValue, oldValue) {
           if (newValue === oldValue) {
             return;
           }
+          initTimeline();
           if ($scope.groups) {
-
-            var groups = [];
-            _.each($scope.groups, function (group, index) {
-              groups.push({
-                id: index,
-                content: group.label,
-                style: 'background-color:' + d3_category_20[index] + '; color: #fff;'
-              });
-            });
-            updateTimelineGroups(groups);
-
+            initGroups();
             // do not use newValue as it does not have searchSource as we filtered it out
             _.each($scope.groups, initSingleGroup);
-
             courier.fetch();
           }
         },

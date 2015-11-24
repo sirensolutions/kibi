@@ -49,4 +49,22 @@
     <array-param-add required label="group" model="vis.params.groups"></array-param-add>
   </div>
 
+  <div class="vis-editor-agg-editor-advanced-toggle">
+    <a ng-click="advancedToggled = !advancedToggled || jsonError[$index].message">
+      <i aria-hidden="true" class="fa fa-caret-down"
+      ng-class="{'fa-caret-down': advancedToggled, 'fa-caret-left': !advancedToggled}"></i>
+      Advanced
+    </a>
+  </div>
+
+  <div ng-show="advancedToggled">
+    <form class="form-inline">
+      <div class="checkbox">
+        <label>
+          <input type="checkbox" ng-model="vis.params.groupsOnSeparateLevels"/> Groups rendered on separate levels
+        </label>
+      </div>
+    </form>
+  </div>
+
 </div>

@@ -14,7 +14,7 @@ define(function (require) {
 
     // Create the scope
     inject(function (Private, _$rootScope_, $compile, Promise) {
-      $rootScope = _$rootScope_.$new();
+      $rootScope = _$rootScope_;
       $rootScope.model = initValue;
 
       var selectHelper = Private(require('directives/st_select_helper'));

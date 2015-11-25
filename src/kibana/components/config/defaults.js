@@ -155,7 +155,7 @@ define(function () {
       'kibi:relations': {
         type: 'json',
         value: '{ "relationsIndices": [], "relationsDashboards": [] }',
-        description: 'Relations between indices and dashboards'
+        description: 'Relations between index patterns and dashboards'
       }
     };
   };

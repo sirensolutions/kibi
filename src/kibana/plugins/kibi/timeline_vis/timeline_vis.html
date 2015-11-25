@@ -1,5 +1,9 @@
 <div ng-controller="KbnTimelineVisController" class="timeline-vis">
 
-  <kibi-timeline search-source="savedObj.searchSource" options="options" params="params"></kibi-timeline>
+  <kibi-timeline
+    groups="savedObj.groups"
+    groups-on-separate-levels="savedObj.groupsOnSeparateLevels"
+    options="options">
+  </kibi-timeline>
 
 </div>

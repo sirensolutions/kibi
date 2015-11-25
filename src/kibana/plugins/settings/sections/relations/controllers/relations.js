@@ -160,6 +160,18 @@ define(function (require) {
       return ia < ib ? ia + '/' + ib : ib + '/' + ia;
     }
 
+    function _getRelationLabel(relationId) {
+      var label;
+
+      _.each($scope.relations.relationsIndices, function (relation) {
+        if (relation.id === relationId) {
+          label = relation.label;
+          return false;
+        }
+      });
+      return label;
+    }
+
     /**
      * Updates the relationships between dashboards
      */
@@ -218,7 +230,7 @@ define(function (require) {
               linkType: 'link',
               htmlElement: $('<div>').html(
                   '<div style="width:69px;">' +
-                  '<label> ' + relDash.relation.label + '</label>' +
+                  '<label> ' + _getRelationLabel(relDash.relation) + '</label>' +
                   '</div>').get(0),
               htmlElementWidth: 70,
               htmlElementHeight: 18
@@ -265,8 +277,14 @@ define(function (require) {
       };
 
       // check for duplicates
-      var uniq = _.groupBy($scope.relations.relationsIndices, function (relation) {
-        return _getJoinIndicesUniqueID(relation.indices[0], relation.indices[1]);
+      var uniq = _.groupBy($scope.relations.relationsIndices, function (relation, offset) {
+        var indexa = relation.indices[0];
+        var indexb = relation.indices[1];
+
+        if (indexa.indexPatternId && indexa.path && indexb.indexPatternId && indexb.path) {
+          return _getJoinIndicesUniqueID(indexa, indexb);
+        }
+        return offset;
       });
 
       _.each($scope.relations.relationsIndices, function (relation) {

@@ -1,9 +1,10 @@
 @import (reference) "../../../styles/_st_variables.less";
 
+
 // override the table-condensed cell style to make it more compact
-.table-condensed > thead > tr.queryOptionArea > td,
-.table-condensed > tbody > tr.queryOptionArea > td,
-.table-condensed > tfoot > tr.queryOptionArea > td {
+.table-condensed > thead > tr.relation-row > td,
+.table-condensed > tbody > tr.relation-row > td,
+.table-condensed > tfoot > tr.relation-row > td {
   vertical-align: middle;
   padding-left: 0;
   &:last-child {
@@ -11,11 +12,15 @@
   }
 }
 
+input.small-input {
+  width: 80px;
+}
+
 .relations .table-condensed {
   margin-bottom: 0;
 }
 
-.queries-settings .btn {
+.relations-settings .btn {
   margin-top: 5px;
   margin-bottom: 5px;
 }

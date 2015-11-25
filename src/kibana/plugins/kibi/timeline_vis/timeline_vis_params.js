@@ -17,23 +17,30 @@ define(function (require) {
           }
         });
 
-
-        var getUUID = function () {
-          return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-            var r = Math.random() * 16 | 0;
-            var v = c === 'x' ? r : (r & 0x3 | 0x8);
-            return v.toString(16);
-          });
+        var _pickNextFreeId = function (takenIds) {
+          // we start from 5000 to avoid confusion with index
+          // index can not be used as user can move elements up and down
+          // and if we use index that would affect colors
+          if (takenIds.length === 0) {
+            return 5000;
+          }
+          takenIds.sort();
+          return takenIds[takenIds.length - 1] + 1;
         };
-
 
         $scope.$watch('vis.params.groups', function (groups) {
 
+          var existingGroupIds = [];
+          _.each($scope.vis.params.groups, function (group) {
+            if (group.id) {
+              existingGroupIds.push(group.id);
+            }
+          });
           _.each($scope.vis.params.groups, function (group) {
 
             // we need unique ids to manage data series in timeline component
             if (!group.id) {
-              group.id = getUUID();
+              group.id = _pickNextFreeId(existingGroupIds);
             }
 
             if (!group.groupLabel) {

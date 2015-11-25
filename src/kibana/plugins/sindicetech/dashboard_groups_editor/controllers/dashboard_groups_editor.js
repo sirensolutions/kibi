@@ -57,6 +57,15 @@ define(function (require) {
 
       var dashboardGroup = $scope.dashboardGroup = $route.current.locals.dashboardGroup;
 
+      $scope.filter = function (id, dashboard) {
+        var allDashboards = _($scope.dashboardGroup.dashboards).pluck('id');
+
+        if (!dashboard) {
+          return allDashboards.value();
+        }
+        return allDashboards.compact().contains(dashboard);
+      };
+
       $scope.submit = function () {
         if (!$element.find('form[name="objectForm"]').hasClass('ng-valid')) {
           $window.alert('Please fill in all the required parameters.');

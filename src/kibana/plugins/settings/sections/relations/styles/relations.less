@@ -1,0 +1,43 @@
+@import (reference) "../../../styles/_st_variables.less";
+
+
+// override the table-condensed cell style to make it more compact
+.table-condensed > thead > tr.relation-row > td,
+.table-condensed > tbody > tr.relation-row > td,
+.table-condensed > tfoot > tr.relation-row > td {
+  vertical-align: middle;
+  padding-left: 0;
+  &:last-child {
+    padding-right: 0;
+  }
+}
+
+input.small-input {
+  width: 80px;
+}
+
+.relations .table-condensed {
+  margin-bottom: 0;
+}
+
+.relations-settings .btn {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+.relations .graph-section {
+  width: 50%;
+  float: left;
+  padding: 16px;
+}
+
+.relations .config-section {
+  width: 49%;
+  float: left;
+  padding: 16px 0 0 16px;
+}
+
+.container h2 {
+  margin-top: 0;
+  font-size: 24px;
+}

@@ -53,6 +53,7 @@ module.exports = function (grunt) {
       '<%= plugins %>/dashboard/styles/main.less',
       '<%= plugins %>/discover/styles/main.less',
       '<%= plugins %>/settings/styles/main.less',
+      '<%= plugins %>/settings/sections/relations/styles/relations.less',
       '<%= plugins %>/visualize/styles/main.less',
       '<%= plugins %>/visualize/styles/visualization.less',
       '<%= plugins %>/visualize/styles/main.less',

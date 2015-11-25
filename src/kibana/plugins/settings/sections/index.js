@@ -3,6 +3,7 @@ define(function (require) {
   // are used to create the nav bar
   return [
     require('plugins/settings/sections/indices/index'),
+    require('plugins/settings/sections/relations/index'), // added by kibi
     require('plugins/kibi/datasources_editor/index'),      // added by kibi
     require('plugins/sindicetech/queries_editor/index'),   // added by kibi
     require('plugins/sindicetech/templates_editor/index'), // added by kibi

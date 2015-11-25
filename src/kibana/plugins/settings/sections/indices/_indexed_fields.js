@@ -2,9 +2,10 @@ define(function (require) {
   var _ = require('lodash');
   require('components/paginated_table/paginated_table');
   var isRetrieved = require('./retrieved_field');
+  var joinFields = require('./join_fields');
 
   require('modules').get('apps/settings')
-  .directive('indexedFields', function () {
+  .directive('indexedFields', function (config) {
     var yesTemplate = '<i class="fa fa-check" aria-label="yes"></i>';
     var noTemplate = '';
     var nameHtml = require('text!plugins/settings/sections/indices/_field_name.html');
@@ -33,9 +34,13 @@ define(function (require) {
           _.invoke(rowScopes.splice(0), '$destroy');
 
           var sourceFiltering = $scope.indexPattern.getSourceFiltering();
+          var relations = config.get('kibi:relations');
 
           $scope.rows = $scope.indexPattern.getNonScriptedFields().map(function (field) {
-            var childScope = _.assign($scope.$new(), { field: field });
+            var childScope = _.assign($scope.$new(), {
+              field: field,
+              join: joinFields(relations.relationsIndices, $scope.indexPattern.id, field.name)
+            });
             rowScopes.push(childScope);
 
             return [

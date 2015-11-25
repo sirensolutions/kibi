@@ -12,6 +12,18 @@ define(function (require) {
         restrict: 'E',
         replace: true,
         scope: {
+          // the id of the st-select object
+          id: '=?',
+          // Filter function which returns true for items to be removed.
+          // There are two arguments:
+          // - id: the id of the st-select
+          // - value: the value of the item
+          // Since the filter function is called with arguments, a function named "myfunc" should be passed
+          // as 'filter="myfunc"'.
+          // See http://weblogs.asp.net/dwahlin/creating-custom-angularjs-directives-part-3-isolate-scope-and-function-parameters
+          //
+          // If the value is **undefined**, the function may return an object that is used in the angular watcher.
+          filter: '&?',
           objectType:       '@',  // text
           indexPatternId:   '=?', // optional only for objectType === field | indexPatternType | documentIds
           indexPatternType: '=?', // optional only for objectType === documentIds
@@ -19,7 +31,6 @@ define(function (require) {
           queryId:          '=?', // optional only for objectType === queryVariable
           modelDisabled:    '=?', // use to disable the underlying select
           modelRequired:    '=?', // use to disable the underlying select
-          exclude:          '=?', // elements to exclude from the selection set
           include:          '=?', // extra values can be passed here
           analyzedWarning:  '@'   // set to true or false to disable/enable analyzed field warning
         },
@@ -114,16 +125,13 @@ define(function (require) {
                 });
                 scope.items = scope.include.concat(scope.items);
               }
-              if (scope.exclude) {
-                var ids = _(scope.exclude).pluck('id').compact().value();
-                if (ids.length !== 0) {
-                  // remove items that are in the exclude set except for the one that is selected
-                  _.remove(scope.items, function (item) {
-                    var selected = !(ngModelCtrl.$viewValue && ngModelCtrl.$viewValue.value) ||
-                      ngModelCtrl.$viewValue.value !== item.value;
-                    return _.contains(ids, item.value) && selected;
-                  });
-                }
+              if (_.isFunction(scope.filter())) {
+                _.remove(scope.items, function (item) {
+                  var selected = !!ngModelCtrl.$viewValue && !!ngModelCtrl.$viewValue.value &&
+                    ngModelCtrl.$viewValue.value === item.value;
+                  var toRemove = scope.filter()(scope.id, item.value);
+                  return toRemove && !selected;
+                });
               }
               // if the select is NOT required, the user is able to choose an empty element
               if (scope.items.length > 0 && _.first(scope.items).value !== null) {
@@ -181,6 +189,9 @@ define(function (require) {
               case 'documentIds':
                 promise = selectHelper.getDocumentIds(scope.indexPatternId, scope.indexPatternType);
                 break;
+              case 'joinRelations':
+                promise = selectHelper.getJoinRelations();
+                break;
               case 'queryVariable':
                 promise = selectHelper.getQueryVariables(scope.queryId);
 
@@ -210,7 +221,11 @@ define(function (require) {
             _render();
           });
 
-          scope.$watch('exclude', function () {
+          scope.$watch(function (scope) {
+            if (_.isFunction(scope.filter())) {
+              return scope.filter()(scope.id);
+            }
+          }, function () {
             _render();
           }, true);
           _render();

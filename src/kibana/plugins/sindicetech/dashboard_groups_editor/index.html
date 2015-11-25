@@ -57,7 +57,7 @@
                 <div class="content">
                   <div class="form-group">
                     <label>Dashboard id</label></br>
-                    <st-select object-type="dashboard" ng-model="dashboard.id" name="dashboard" exclude="dashboardGroup.dashboards" required></st-select>
+                    <st-select object-type="dashboard" ng-model="dashboard.id" name="dashboard" filter="filter" required></st-select>
                   </div>
                   <div class="btn-group rightCorner">
                     <array-param-up index="{{ $index }}" model="dashboardGroup.dashboards"></array-param-up>

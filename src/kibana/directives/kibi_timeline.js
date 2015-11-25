@@ -5,29 +5,7 @@ define(function (require) {
 
   require('modules').get('kibana').directive('kibiTimeline', function (Private, Notifier, courier) {
 
-    // color pallete borowed from d3
-    var d3_category_20 = [
-      '#1f77b4',
-      '#aec7e8',
-      '#ff7f0e',
-      '#ffbb78',
-      '#2ca02c',
-      '#98df8a',
-      '#d62728',
-      '#ff9896',
-      '#9467bd',
-      '#c5b0d5',
-      '#8c564b',
-      '#c49c94',
-      '#e377c2',
-      '#f7b6d2',
-      '#7f7f7f',
-      '#c7c7c7',
-      '#bcbd22',
-      '#dbdb8d',
-      '#17becf',
-      '#9edae5'
-    ];
+    var color = Private(require('components/vislib/components/color/color'));
     var filterManager = Private(require('components/filter_manager/filter_manager'));
     var notify = new Notifier({
       location: 'Kibi Timeline'
@@ -45,15 +23,13 @@ define(function (require) {
     };
 
     function _link($scope, $element) {
+      var mapGroupIdToColor;
       var timeline;
-      var _previousSearchSource;
       var data;
 
       var onSelect = function (properties) {
         // pass this to a scope variable
         var selected = data._data[properties.items];
-
-        // for now it should be single object
         if (selected) {
           var index = selected.index;
           var field = selected.field;
@@ -153,8 +129,8 @@ define(function (require) {
 
                   start: new Date(startValue),
                   type: 'box',
-                  style: 'background-color: ' + d3_category_20[index] + '; color: #fff;',
                   group: $scope.groupsOnSeparateLevels === true ? index : 0,
+                  style: 'background-color: ' + mapGroupIdToColor(groupId) + '; color: #fff;',
                   groupId: groupId
                 };
 
@@ -203,12 +179,13 @@ define(function (require) {
       var initGroups = function () {
         initTimeline();
         var groups = [];
+        var groupIds = [];
         if ($scope.groupsOnSeparateLevels === true) {
           _.each($scope.groups, function (group, index) {
             groups.push({
               id: index,
               content: group.label,
-              style: 'background-color:' + d3_category_20[index] + '; color: #fff;'
+              style: 'background-color:' + mapGroupIdToColor(group.id) + '; color: #fff;'
             });
           });
 
@@ -221,6 +198,13 @@ define(function (require) {
             style: 'background-color: none;'
           });
         }
+
+        groupIds.push(0);
+        _.each($scope.groups, function (group) {
+          groupIds.push(group.id);
+        });
+        mapGroupIdToColor = color(groupIds);
+
         var dataGroups = new vis.DataSet(groups);
         timeline.setGroups(dataGroups);
       };

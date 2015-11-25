@@ -33,7 +33,7 @@ define(function (require) {
         if (selected) {
           var index = selected.index;
           var field = selected.field;
-          var value = selected.content;
+          var value = selected.value;
           var operator = '+';
           filterManager.add(field, value, operator, index);
         }
@@ -120,13 +120,15 @@ define(function (require) {
                 if (_isMultivalued(hit._source, params.startField)) {
                   detectedMultivaluedStart = true;
                 }
+                var indexId = searchSource.get('index').id;
                 var startValue = _pickFirstIfMultivalued(hit._source, params.startField);
+                var labelFieldValue = _pickFirstIfMultivalued(hit._source, params.labelField, '');
                 var e =  {
                   // index, field and content needed to create a filter on click
-                  index: searchSource.get('index').id,
+                  index: indexId,
                   field: params.labelField,
-                  content: _pickFirstIfMultivalued(hit._source, params.labelField, ''),
-
+                  content: '<div title="index: ' + indexId + ', field: ' + params.labelField + '">' + labelFieldValue + '</div>',
+                  value: labelFieldValue,
                   start: new Date(startValue),
                   type: 'box',
                   group: $scope.groupsOnSeparateLevels === true ? index : 0,

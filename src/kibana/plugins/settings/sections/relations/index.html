@@ -34,8 +34,10 @@
                   <th></th>
                 </tr>
               </thead>
-              <tbody ng-repeat="relation in relations.relationsIndices">
-                <tr class="relation-row" ng-class="{ 'red-border' : !!relation.error }">
+              <tbody>
+                <tr ng-repeat="relation in relations.relationsIndices"
+                    class="relation-row"
+                    ng-class="{ 'red-border' : relation.error }">
                   <td>
                     <st-select required object-type="indexPattern" ng-model="relation.indices[0].indexPatternId">
                   </td>
@@ -92,8 +94,10 @@
                   <th></th>
                 </tr>
               </thead>
-              <tbody ng-repeat="relation in relations.relationsDashboards">
-                <tr class="relation-row" ng-class="{ 'red-border' : !!relation.error }">
+              <tbody>
+                <tr ng-repeat="relation in relations.relationsDashboards"
+                    class="relation-row"
+                    ng-class="{ 'red-border' : relation.error }">
                   <td>
                     <st-select required object-type="dashboard" ng-model="relation.dashboards[0]" id="$index" filter="filterDashboards"></st-select>
                   </td>

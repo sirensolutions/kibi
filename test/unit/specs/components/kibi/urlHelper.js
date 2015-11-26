@@ -125,17 +125,13 @@ define(function (require) {
           var relations = [
             {
               enabled: true,
-              from: 'A',
-              to: 'B',
-              fromPath: 'a',
-              toPath: 'b'
+              dashboards: [ 'A', 'B' ],
+              relation: 'indexa/a/indexb/b'
             },
             {
               enabled: false,
-              from: 'A1',
-              to: 'B1',
-              fromPath: 'a1',
-              toPath: 'b1'
+              dashboards: [ 'A1', 'B1' ],
+              relation: 'indexa/a1/indexb/b1'
             }
           ];
 
@@ -873,7 +869,7 @@ define(function (require) {
           var indexPattern = {
             id: 'articles'
           };
-          config.set('kibi:relationalPanelConfig', {enabled: false});
+          config.set('kibi:relationalPanel', false);
           urlHelper.getFiltersFromDashboardsWithSameIndex(dashboardId, indexPattern).then(function (filters) {
             expect(filters).to.eql([]);
             done();
@@ -886,7 +882,8 @@ define(function (require) {
           var indexPattern = {
             id: 'articles'
           };
-          config.set('kibi:relationalPanelConfig', {enabled: true});
+          config.set('kibi:relationalPanel', true);
+          config.set('kibi:relations', { relationsDashboards: [] });
           urlHelper.getFiltersFromDashboardsWithSameIndex(dashboardId, indexPattern).then(function (filters) {
             expect(filters).to.eql([]);
             done();
@@ -899,13 +896,14 @@ define(function (require) {
           var indexPattern = {
             id: 'articles'
           };
-          config.set('kibi:relationalPanelConfig', {
-            enabled: true,
-            relations: [
+
+          config.set('kibi:relationalPanel', true);
+          config.set('kibi:relations', {
+            relationsDashboards: [
               {
                 enabled: true,
-                from: 'Articles2',
-                to: 'Companies'
+                dashboards: [ 'Articles2', 'Companies' ],
+                relation: 'article/companyid/company/id'
               }
             ]
           });
@@ -945,7 +943,7 @@ define(function (require) {
           var indexPattern = {
             id: 'articles'
           };
-          config.set('kibi:relationalPanelConfig', {enabled: false});
+          config.set('kibi:relationalPanel', false);
           urlHelper.getQueriesFromDashboardsWithSameIndex(dashboardId, indexPattern).then(function (queries) {
             expect(queries).to.eql([]);
             done();
@@ -958,7 +956,8 @@ define(function (require) {
           var indexPattern = {
             id: 'articles'
           };
-          config.set('kibi:relationalPanelConfig', {enabled: true});
+          config.set('kibi:relationalPanel', true);
+          config.set('kibi:relations', { relationsDashboards: [] });
           urlHelper.getQueriesFromDashboardsWithSameIndex(dashboardId, indexPattern).then(function (queries) {
             expect(queries).to.eql([]);
             done();
@@ -971,13 +970,14 @@ define(function (require) {
           var indexPattern = {
             id: 'articles'
           };
-          config.set('kibi:relationalPanelConfig', {
-            enabled: true,
-            relations: [
+
+          config.set('kibi:relationalPanel', true);
+          config.set('kibi:relations', {
+            relationsDashboards: [
               {
                 enabled: true,
-                from: 'Articles2',
-                to: 'Companies'
+                dashboards: [ 'Articles2', 'Companies' ],
+                relation: 'article/companyid/company/id'
               }
             ]
           });

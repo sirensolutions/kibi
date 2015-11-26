@@ -118,8 +118,8 @@ define(function (require) {
 
               var error = new Error(
                 'The SIREn Join plugin is enabled but not installed. ' +
-                'Please install the plugin and restart Kibi ' +
-                'or disable the relationalPanel in Settings -> Advanced -> kibi:relationalPanelConfig'
+                'Please install the plugin and restart Kibi, ' +
+                'or disable the relational panel in Settings -> Advanced -> kibi:relationalPanel'
               );
               reject(error);
             }

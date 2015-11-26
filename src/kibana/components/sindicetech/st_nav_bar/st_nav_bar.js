@@ -145,12 +145,10 @@ define(function (require) {
 
         $scope.relationalFilterVisible = false;
         var removeInitConfigHandler = $rootScope.$on('init:config', function () {
-          $scope.relationalPanelConfig = config.get('kibi:relationalPanelConfig');
-          $scope.relationalFilterVisible = $scope.relationalPanelConfig.enabled;
+          $scope.relationalFilterVisible = config.get('kibi:relationalPanel');
         });
-        var removeRelationalPanelConfigHandler = $rootScope.$on('change:config.kibi:relationalPanelConfig', function () {
-          $scope.relationalPanelConfig = config.get('kibi:relationalPanelConfig');
-          $scope.relationalFilterVisible = $scope.relationalPanelConfig.enabled;
+        var removeRelationalPanelHandler = $rootScope.$on('change:config.kibi:relationalPanel', function () {
+          $scope.relationalFilterVisible = config.get('kibi:relationalPanel');
         });
 
 
@@ -256,7 +254,7 @@ define(function (require) {
           removeDashboardChangedHandler();
           removeDashboardGroupChangedHandler();
           removeRelationalFilterPanelClosedHandler();
-          removeRelationalPanelConfigHandler();
+          removeRelationalPanelHandler();
           removeRouteChangeSuccessHandler();
           removeLocationChangeSuccessHandler();
           removeTabDashboardChangedHandler();

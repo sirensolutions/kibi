@@ -28,15 +28,29 @@ define(function (require) {
         link: function ($scope, $el) {
 
 
-          $scope.relationalPanelConfig = {
+          $scope.relationalPanel = {
             enabled: false
           };
 
-          var  _saveRelationalPanelConfig = function () {
+          var _saveRelationalPanel = function () {
             //return a promise so we can do action when it is resolved
-            return config.set('kibi:relationalPanelConfig', $scope.relationalPanelConfig);
+            return config.set('kibi:relationalPanel', $scope.relationalPanel.enabled)
+            .then(function () {
+              config.set('kibi:relations', $scope.relationalPanel.relations);
+            });
           };
 
+          var _getRelationLabel = function (relationId) {
+            var label;
+
+            _.each($scope.relationalPanel.relations.relationsIndices, function (relation) {
+              if (relationId === relation.id) {
+                label = relation.label;
+                return false;
+              }
+            });
+            return label;
+          };
 
           var init = false;
           var _initPanel = function () {
@@ -54,40 +68,24 @@ define(function (require) {
               links: []
             };
 
-
-            if ($scope.relationalPanelConfig.graph && $scope.relationalPanelConfig.graph.groupingForce) {
-              g.options.groupingForce = $scope.relationalPanelConfig.graph.groupingForce;
-            }
-            if ($scope.relationalPanelConfig.graph && $scope.relationalPanelConfig.graph.nodeIcons) {
-              g.options.nodeIcons = $scope.relationalPanelConfig.graph.nodeIcons;
-            }
-
-
             // each node is a dashboard
-            var dashboards = [];
-            _.each($scope.relationalPanelConfig.relations, function (relation) {
-              if (dashboards.indexOf(relation.from) === -1) {
-                dashboards.push(relation.from);
-              }
-              if (dashboards.indexOf(relation.to) === -1) {
-                dashboards.push(relation.to);
-              }
-            });
-            _.each(dashboards, function (dashboardId) {
+            _($scope.relationalPanel.relations.relationsDashboards).map(function (relation) {
+              return relation.dashboards;
+            }).flatten().uniq().each(function (dashboardId) {
               g.nodes.push({id: dashboardId, label: dashboardId, nodeType: dashboardId, size: g.options.minNodeSize});
             });
 
 
-            _.each($scope.relationalPanelConfig.relations, function (relation, index) {
+            _.each($scope.relationalPanel.relations.relationsDashboards, function (relation, index) {
 
               g.links.push({
-                source: relation.from,
-                target: relation.to,
+                source: relation.dashboards[0],
+                target: relation.dashboards[1],
                 linkType: 'link',
                 htmlElement: $('<div>').html(
                   '<div style="width:69px;">' +
                     '<input type="checkbox" ' + (relation.enabled ? 'checked' : '') + '/>' +
-                    '&nbsp;<label> ' + relation.fromPath + '-> ' + relation.toPath + '</label>' +
+                    '&nbsp;<label> ' + _getRelationLabel(relation.relation) + '</label>' +
                   '</div>').get(0),
                 htmlElementWidth: 70,
                 htmlElementHeight: 18,
@@ -108,10 +106,10 @@ define(function (require) {
 
           var enableRelation = function (relationIndex) {
             if (init) {
-              $scope.relationalPanelConfig.relations[relationIndex].enabled = true;
+              $scope.relationalPanel.relations.relationsDashboards[relationIndex].enabled = true;
               $scope.ignoreNextConfigurationChangedEvent = true;
-              _saveRelationalPanelConfig().then(function () {
-                if ($scope.relationalPanelConfig.enabled) {
+              _saveRelationalPanel().then(function () {
+                if ($scope.relationalPanel.enabled) {
                   joinFilterHelper.updateJoinFilter();
                 }
               });
@@ -120,10 +118,10 @@ define(function (require) {
 
           var disableRelation = function (relationIndex) {
             if (init) {
-              $scope.relationalPanelConfig.relations[relationIndex].enabled = false;
+              $scope.relationalPanel.relations.relationsDashboards[relationIndex].enabled = false;
               $scope.ignoreNextConfigurationChangedEvent = true;
-              _saveRelationalPanelConfig().then(function () {
-                if ($scope.relationalPanelConfig.enabled) {
+              _saveRelationalPanel().then(function () {
+                if ($scope.relationalPanel.enabled) {
                   joinFilterHelper.updateJoinFilter();
                 }
               });
@@ -136,21 +134,23 @@ define(function (require) {
             if (enabled && !installed) {
               notify.error(
                 'The FilterJoin plugin is enabled but not installed. ' +
-                'Please install the plugin and restart Kibi or ' +
-                'disable the relationalPanel in Settings -> Advanced -> kibi:relationalPanelConfig');
+                'Please install the plugin and restart Kibi, or ' +
+                'disable the relational panel in Settings -> Advanced -> kibi:relationalPanel');
             }
           };
 
           $rootScope.$on('init:config', function () {
-            $scope.relationalPanelConfig = config.get('kibi:relationalPanelConfig');
+            $scope.relationalPanel.enabled = config.get('kibi:relationalPanel');
+            $scope.relationalPanel.relations = config.get('kibi:relations');
             _checkFilterJoinPlugin();
             _initPanel();
           });
 
 
           // recreate it after user change configuration
-          $rootScope.$on('change:config.kibi:relationalPanelConfig', function () {
-            $scope.relationalPanelConfig = config.get('kibi:relationalPanelConfig');
+          $rootScope.$on('change:config.kibi:relations', function () {
+            $scope.relationalPanel.enabled = config.get('kibi:relationalPanel');
+            $scope.relationalPanel.relations = config.get('kibi:relations');
             _checkFilterJoinPlugin();
             if ($scope.ignoreNextConfigurationChangedEvent === true) {
               $scope.ignoreNextConfigurationChangedEvent = false;
@@ -172,7 +172,7 @@ define(function (require) {
 
           $rootScope.$on('$routeChangeSuccess', function (event, next, prev, err) {
             $scope.show = false;
-            if (urlHelper.isItDashboardUrl() && init && $scope.relationalPanelConfig.enabled) {
+            if (urlHelper.isItDashboardUrl() && init && $scope.relationalPanel.enabled) {
               // try to enable filter when user switch to dashboards app
               joinFilterHelper.updateJoinFilter();
             }
@@ -180,8 +180,8 @@ define(function (require) {
 
 
           $scope.disableFilter = function () {
-            $scope.relationalPanelConfig.enabled = false;
-            _saveRelationalPanelConfig().then(function () {
+            $scope.relationalPanel.enabled = false;
+            _saveRelationalPanel().then(function () {
               // here just remove the joinFilter if present
               urlHelper.removeJoinFilter();
               // remove join_set for all dashboards from kibi_state
@@ -190,8 +190,8 @@ define(function (require) {
           };
 
           $scope.enableFilter = function () {
-            $scope.relationalPanelConfig.enabled = true;
-            _saveRelationalPanelConfig().then(function () {
+            $scope.relationalPanel.enabled = true;
+            _saveRelationalPanel().then(function () {
               joinFilterHelper.updateJoinFilter();
             });
           };

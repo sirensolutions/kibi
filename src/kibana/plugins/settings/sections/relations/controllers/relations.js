@@ -202,6 +202,7 @@ define(function (require) {
         }
       });
 
+      $scope.invalid = false;
       _.each($scope.relations.relationsDashboards, function (relDash) {
         var error = '';
 
@@ -238,6 +239,9 @@ define(function (require) {
           }
         }
         relDash.error = error;
+        if (!!error) {
+          $scope.invalid = true;
+        }
       });
       $scope.dashboardsGraph = g;
     }
@@ -287,6 +291,7 @@ define(function (require) {
         return offset;
       });
 
+      $scope.invalid = false;
       _.each($scope.relations.relationsIndices, function (relation) {
         var indices = relation.indices;
         var error = '';
@@ -332,6 +337,9 @@ define(function (require) {
         }
 
         relation.error = error;
+        if (!!error) {
+          $scope.invalid = true;
+        }
       });
       $scope.indicesGraph = g;
     }, true);

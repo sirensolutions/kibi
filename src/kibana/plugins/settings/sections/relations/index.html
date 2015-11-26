@@ -34,9 +34,9 @@
                   <th></th>
                 </tr>
               </thead>
-              <tbody>
-                <tr ng-repeat="relation in relations.relationsIndices"
-                    class="relation-row"
+              <!-- here we repeat tbody to be able to show row with the error properly -->
+              <tbody ng-repeat="relation in relations.relationsIndices">
+                <tr class="relation-row"
                     ng-class="{ 'red-border' : relation.error }">
                   <td>
                     <st-select required object-type="indexPattern" ng-model="relation.indices[0].indexPatternId">
@@ -94,9 +94,9 @@
                   <th></th>
                 </tr>
               </thead>
-              <tbody>
-                <tr ng-repeat="relation in relations.relationsDashboards"
-                    class="relation-row"
+              <!-- here we repeat tbody to be able to show row with the error properly -->
+              <tbody ng-repeat="relation in relations.relationsDashboards">
+                <tr class="relation-row"
                     ng-class="{ 'red-border' : relation.error }">
                   <td>
                     <st-select required object-type="dashboard" ng-model="relation.dashboards[0]" id="$index" filter="filterDashboards"></st-select>
@@ -137,9 +137,9 @@
 
     <div class="graph-section">
       <h2>Graph of Index Patterns</h2>
-      <eeg graph="indicesGraph" class="eeg"></eeg>
+      <eeg graph="indicesGraph" class="eeg indicesGraph"></eeg>
       <h2 ng-if="state.tab === 'dashboards'">Graph of Dashboards</h2>
-      <eeg ng-if="state.tab === 'dashboards'" graph="dashboardsGraph" class="eeg"></eeg>
+      <eeg ng-if="state.tab === 'dashboards'" graph="dashboardsGraph" class="eeg dashboardsGraph"></eeg>
     </div>
 
   </div>

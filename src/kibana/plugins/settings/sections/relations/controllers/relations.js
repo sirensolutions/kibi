@@ -186,7 +186,7 @@ define(function (require) {
           stopAfter: 2000,
           groupingForce: {},
           nodeIcons: {},
-          minNodeSize: 30
+          minNodeSize: 20
         },
         nodes: [],
         links: []
@@ -231,13 +231,8 @@ define(function (require) {
             g.links.push({
               source: relDash.dashboards[0],
               target: relDash.dashboards[1],
-              linkType: 'link',
-              htmlElement: $('<div>').html(
-                  '<div style="width:69px;">' +
-                  '<label> ' + _getRelationLabel(relDash.relation) + '</label>' +
-                  '</div>').get(0),
-              htmlElementWidth: 70,
-              htmlElementHeight: 18
+              linkType: _getRelationLabel(relDash.relation),
+              undirected: true
             });
           }
         }
@@ -272,12 +267,13 @@ define(function (require) {
       // each node is an index
       var g = {
         options: {
+          showLegend: false,
           monitorContainerSize: true,
           alwaysShowLinksLabels: true,
           stopAfter: 2000,
           groupingForce: {},
           nodeIcons: {},
-          minNodeSize: 30
+          minNodeSize: 20
         },
         nodes: [],
         links: []
@@ -328,13 +324,8 @@ define(function (require) {
             g.links.push({
               source: indices[0].indexPatternId,
               target: indices[1].indexPatternId,
-              linkType: 'link',
-              htmlElement: $('<div>').html(
-                  '<div style="width:69px;">' +
-                  '<label> ' + relation.label + '</label>' +
-                  '</div>').get(0),
-              htmlElementWidth: 70,
-              htmlElementHeight: 18
+              linkType: relation.label,
+              undirected: true
             });
           }
         }

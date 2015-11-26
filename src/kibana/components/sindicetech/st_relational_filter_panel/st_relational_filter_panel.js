@@ -36,7 +36,7 @@ define(function (require) {
             //return a promise so we can do action when it is resolved
             return config.set('kibi:relationalPanel', $scope.relationalPanel.enabled)
             .then(function () {
-              config.set('kibi:relations', $scope.relationalPanel.relations);
+              return config.set('kibi:relations', $scope.relationalPanel.relations);
             });
           };
 

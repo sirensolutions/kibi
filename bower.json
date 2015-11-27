@@ -55,7 +55,7 @@
     "angular-sanitize": "1.2.28",
     "ng-tags-input": "2.3.0",
     "kibiutils": "sirensolutions/kibiutils#1.0.0",
-    "eeg-angular": "~1.0.12",
+    "eeg-angular": "~1.0.14",
     "antlr4": "sirensolutions/antlr4-javascript#1.0.2",
     "antlr4-sparql": "sirensolutions/antlr4-javascript-sparql#1.0.7",
     "antlr4-sql": "sirensolutions/antlr4-javascript-sql#1.0.2",

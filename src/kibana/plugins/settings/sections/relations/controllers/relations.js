@@ -20,12 +20,17 @@ define(function (require) {
     var $state = $scope.state = new AppState();
 
     $scope.relations = config.get('kibi:relations');
+    $scope.relationalPanel = config.get('kibi:relationalPanel');
 
     $scope.changeTab = function (tab) {
       $state.tab = tab;
       $state.save();
     };
     $scope.changeTab('indices');
+
+    $scope.$watch('relationalPanel', function () {
+      config.set('kibi:relationalPanel', $scope.relationalPanel);
+    });
 
     var indexToDashboardsMap = null;
 

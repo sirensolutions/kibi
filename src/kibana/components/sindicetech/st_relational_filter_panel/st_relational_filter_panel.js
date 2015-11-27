@@ -28,16 +28,11 @@ define(function (require) {
         link: function ($scope, $el) {
 
 
-          $scope.relationalPanel = {
-            enabled: false
-          };
+          $scope.relationalPanel = {};
 
           var _saveRelationalPanel = function () {
             //return a promise so we can do action when it is resolved
-            return config.set('kibi:relationalPanel', $scope.relationalPanel.enabled)
-            .then(function () {
-              return config.set('kibi:relations', $scope.relationalPanel.relations);
-            });
+            return config.set('kibi:relations', $scope.relationalPanel.relations);
           };
 
           var _getRelationLabel = function (relationId) {
@@ -177,24 +172,6 @@ define(function (require) {
               joinFilterHelper.updateJoinFilter();
             }
           });
-
-
-          $scope.disableFilter = function () {
-            $scope.relationalPanel.enabled = false;
-            _saveRelationalPanel().then(function () {
-              // here just remove the joinFilter if present
-              urlHelper.removeJoinFilter();
-              // remove join_set for all dashboards from kibi_state
-              kibiStateHelper.removeAllFiltersOfType('join_set');
-            });
-          };
-
-          $scope.enableFilter = function () {
-            $scope.relationalPanel.enabled = true;
-            _saveRelationalPanel().then(function () {
-              joinFilterHelper.updateJoinFilter();
-            });
-          };
 
         } // end of link function
       };

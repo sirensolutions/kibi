@@ -33,6 +33,14 @@ define(function (require) {
         });
       });
 
+      $rootScope.$on('change:config.kibi:relationalPanel', function (event, enabled) {
+        // if enabled === false
+        // remove join_set filter
+        if (enabled === false) {
+          self.removeAllFiltersOfType('join_set');
+        }
+      });
+
       //NOTE: check if a timefilter has been set into the URL at startup
       var off = $rootScope.$on('$routeChangeSuccess', function () {
         $timeout(function () {

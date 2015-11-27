@@ -40,8 +40,10 @@
                   <th></th>
                 </tr>
               </thead>
+              <!-- here we repeat tbody to be able to show row with the error properly -->
               <tbody ng-repeat="relation in relations.relationsIndices">
-                <tr class="relation-row" ng-class="{ 'red-border' : !!relation.error }">
+                <tr class="relation-row"
+                    ng-class="{ 'red-border' : relation.error }">
                   <td>
                     <st-select required object-type="indexPattern" ng-model="relation.indices[0].indexPatternId">
                   </td>
@@ -98,8 +100,10 @@
                   <th></th>
                 </tr>
               </thead>
+              <!-- here we repeat tbody to be able to show row with the error properly -->
               <tbody ng-repeat="relation in relations.relationsDashboards">
-                <tr class="relation-row" ng-class="{ 'red-border' : !!relation.error }">
+                <tr class="relation-row"
+                    ng-class="{ 'red-border' : relation.error }">
                   <td>
                     <st-select required object-type="dashboard" ng-model="relation.dashboards[0]" id="$index" filter="filterDashboards"></st-select>
                   </td>
@@ -139,9 +143,15 @@
 
     <div class="graph-section">
       <h2>Graph of Index Patterns</h2>
-      <eeg graph="indicesGraph" class="eeg"></eeg>
-      <h2 ng-if="state.tab === 'dashboards'">Graph of Dashboards</h2>
-      <eeg ng-if="state.tab === 'dashboards'" graph="dashboardsGraph" class="eeg"></eeg>
+      <eeg eeg-id="'indicesGraph'"
+           graph="indicesGraph"
+           class="eeg indicesGraph"></eeg>
+      <!-- do not use ng-if as this will cause the graph to rerendered on each tab switch -->
+      <h2 ng-show="state.tab === 'dashboards'">Graph of Dashboards</h2>
+      <eeg ng-show="state.tab === 'dashboards'"
+           eeg-id="'dashboardsGraph'"
+           graph="dashboardsGraph"
+           class="eeg dashboardsGraph"></eeg>
     </div>
 
   </div>

@@ -14,8 +14,10 @@ define(function (require) {
     reloadOnSearch: false
   });
 
-  app.controller('RelationsController', function ($scope, AppState, config, Notifier, Private) {
+  app.controller('RelationsController', function ($rootScope, $scope, AppState, config, Notifier, Private) {
     var urlHelper = Private(require('components/kibi/url_helper/url_helper'));
+    var color = Private(require('components/vislib/components/color/color'));
+
     var notify = new Notifier({ location: 'Kibi Relations'});
     var $state = $scope.state = new AppState();
 
@@ -33,7 +35,7 @@ define(function (require) {
     });
 
     var indexToDashboardsMap = null;
-
+    var nodeTypes = [];
     /**
      * Filters out the dashboards that are not relevant in the row with the given id
      */
@@ -191,10 +193,11 @@ define(function (require) {
           stopAfter: 2000,
           groupingForce: {},
           nodeIcons: {},
-          minNodeSize: 30
+          minNodeSize: 20
         },
         nodes: [],
-        links: []
+        links: [],
+        colors: {}
       };
 
       var relationId = function (relation) {
@@ -221,29 +224,35 @@ define(function (require) {
               error = 'This row has already been defined!';
             }
             // build the graph visualisation
+            var sourceNodeIndexId = _getIndexForDashboard(relDash.dashboards[0]);
+            var targetNodeIndexId = _getIndexForDashboard(relDash.dashboards[1]);
+
             g.nodes.push({
               id: relDash.dashboards[0],
               label: relDash.dashboards[0],
-              nodeType: _getIndexForDashboard(relDash.dashboards[0]),
+              nodeType: sourceNodeIndexId,
               size: g.options.minNodeSize
             });
             g.nodes.push({
               id: relDash.dashboards[1],
               label: relDash.dashboards[1],
-              nodeType: _getIndexForDashboard(relDash.dashboards[1]),
+              nodeType: targetNodeIndexId,
               size: g.options.minNodeSize
             });
             g.links.push({
               source: relDash.dashboards[0],
               target: relDash.dashboards[1],
-              linkType: 'link',
-              htmlElement: $('<div>').html(
-                  '<div style="width:69px;">' +
-                  '<label> ' + _getRelationLabel(relDash.relation) + '</label>' +
-                  '</div>').get(0),
-              htmlElementWidth: 70,
-              htmlElementHeight: 18
+              linkType: _getRelationLabel(relDash.relation),
+              undirected: true
             });
+
+            if ( nodeTypes.indexOf(sourceNodeIndexId) === -1) {
+              nodeTypes.push(sourceNodeIndexId);
+            }
+            if (nodeTypes.indexOf(targetNodeIndexId) === -1) {
+              nodeTypes.push(targetNodeIndexId);
+            }
+
           }
         }
         relDash.error = error;
@@ -251,6 +260,12 @@ define(function (require) {
           $scope.invalid = true;
         }
       });
+
+      $scope.typeToColor = color(nodeTypes);
+      _.each(nodeTypes, function (nodeType) {
+        g.colors[nodeType] = $scope.typeToColor(nodeType);
+      });
+
       $scope.dashboardsGraph = g;
     }
 
@@ -277,15 +292,17 @@ define(function (require) {
       // each node is an index
       var g = {
         options: {
+          showLegend: false,
           monitorContainerSize: true,
           alwaysShowLinksLabels: true,
           stopAfter: 2000,
           groupingForce: {},
           nodeIcons: {},
-          minNodeSize: 30
+          minNodeSize: 20
         },
         nodes: [],
-        links: []
+        links: [],
+        colors: {}
       };
 
       // check for duplicates
@@ -318,29 +335,36 @@ define(function (require) {
 
           if (relation.label) {
             // build the graph visualisation
+            var sourceNodeId = indices[0].indexPatternId;
+            var targetNodeId = indices[1].indexPatternId;
+
             g.nodes.push({
-              id: indices[0].indexPatternId,
-              label: indices[0].indexPatternId,
-              nodeType: indices[0].indexPatternId,
+              id: sourceNodeId,
+              label: sourceNodeId,
+              nodeType: sourceNodeId,
               size: g.options.minNodeSize
             });
             g.nodes.push({
-              id: indices[1].indexPatternId,
-              label: indices[1].indexPatternId,
-              nodeType: indices[1].indexPatternId,
+              id: targetNodeId,
+              label: targetNodeId,
+              nodeType: targetNodeId,
               size: g.options.minNodeSize
             });
             g.links.push({
-              source: indices[0].indexPatternId,
-              target: indices[1].indexPatternId,
-              linkType: 'link',
-              htmlElement: $('<div>').html(
-                  '<div style="width:69px;">' +
-                  '<label> ' + relation.label + '</label>' +
-                  '</div>').get(0),
-              htmlElementWidth: 70,
-              htmlElementHeight: 18
+              source: sourceNodeId,
+              target: targetNodeId,
+              linkType: relation.label,
+              undirected: true
             });
+
+            // build types array to build color map
+            if ( nodeTypes.indexOf(sourceNodeId) === -1) {
+              nodeTypes.push(sourceNodeId);
+            }
+            if (nodeTypes.indexOf(targetNodeId) === -1) {
+              nodeTypes.push(targetNodeId);
+            }
+
           }
         }
 
@@ -349,22 +373,54 @@ define(function (require) {
           $scope.invalid = true;
         }
       });
+
+      $scope.typeToColor = color(nodeTypes);
+      _.each(nodeTypes, function (nodeType) {
+        g.colors[nodeType] = $scope.typeToColor(nodeType);
+      });
+
       $scope.indicesGraph = g;
     }, true);
 
+    var indicesGraphExportOff = $rootScope.$on('egg:indicesGraph:results', function (event, method, results) {
+      if (method === 'exportGraph') {
+        var relations = config.get('kibi:relations', {});
+        relations.relationsIndicesSerialized = results;
+        config.set('kibi:relations', relations);
+      }
+    });
+    var dashboardsGraphExportOff = $rootScope.$on('egg:dashboardsGraph:results', function (event, method, results) {
+      if (method === 'exportGraph') {
+        var relations = config.get('kibi:relations', {});
+        relations.relationsDashboardsSerialized = results;
+        config.set('kibi:relations', relations);
+      }
+    });
+    $scope.$on('$destroy', function () {
+      indicesGraphExportOff();
+      dashboardsGraphExportOff();
+    });
+
+
     $scope.submit = function (elements) {
-      var relations = {
-        relationsIndices: _.map($scope.relations.relationsIndices, function (relation) {
-          return _.omit(relation, [ 'error' ]);
-        }),
-        relationsDashboards: _.map($scope.relations.relationsDashboards, function (relation) {
-          return _.omit(relation, [ 'error' ]);
-        })
-      };
+      var relations = config.get('kibi:relations', {});
+
+      relations.relationsIndices = _.map($scope.relations.relationsIndices, function (relation) {
+        return _.omit(relation, [ 'error' ]);
+      });
+
+      relations.relationsDashboards = _.map($scope.relations.relationsDashboards, function (relation) {
+        return _.omit(relation, [ 'error' ]);
+      });
 
       config.set('kibi:relations', relations).then(function () {
         notify.info('Saved the relationships between ' + elements);
+        $rootScope.$emit('egg:indicesGraph:run', 'stop');
+        $rootScope.$emit('egg:dashboardsGraph:run', 'stop');
+        $rootScope.$emit('egg:indicesGraph:run', 'exportGraph');
+        $rootScope.$emit('egg:dashboardsGraph:run', 'exportGraph');
       });
+
     };
   });
 });

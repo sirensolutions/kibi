@@ -47,11 +47,12 @@ define(function (require) {
     }
   });
 
-  app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter, kbnUrl, $rootScope) {
+  app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter, kbnUrl, $rootScope, config) {
     return {
       controller: function ($scope, $rootScope, $route, $routeParams, $location, configFile, Private, getAppState) {
         var queryFilter = Private(require('components/filter_bar/query_filter'));
         var cache = Private(require('components/sindicetech/cache_helper/cache_helper'));
+        var joinFilterHelper = Private(require('components/sindicetech/join_filter_helper/join_filter_helper'));
 
         var notify = new Notifier({
           location: 'Dashboard'
@@ -81,6 +82,21 @@ define(function (require) {
         };
 
         var $state = $scope.state = new AppState(stateDefaults);
+
+        var _addRemoveJoinSetFilter = function (panelEnabled) {
+          if (panelEnabled === false) {
+            $state.filters = _.filter($state.filters, function (f) {
+              return !f.join_set;
+            });
+          } else {
+            joinFilterHelper.updateJoinFilter();
+          }
+        };
+
+        var relationalPanelListenerOff = $rootScope.$on('change:config.kibi:relationalPanel', function (event, panelEnabled) {
+          _addRemoveJoinSetFilter(panelEnabled);
+        });
+        _addRemoveJoinSetFilter(config.get('kibi:relationalPanel'));
 
         $scope.configTemplate = new ConfigTemplate({
           save: require('text!plugins/dashboard/partials/save_dashboard.html'),
@@ -142,6 +158,7 @@ define(function (require) {
           dash.destroy();
           stDashboardInvokeMethodOff();
           stDashboardSetProperty();
+          relationalPanelListenerOff();
         });
 
         $scope.$watch('configTemplate', function () {

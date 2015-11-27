@@ -57,7 +57,7 @@ define(function (require) {
                 stopAfter: 2000,
                 groupingForce: {},
                 nodeIcons: {},
-                minNodeSize: 30
+                minNodeSize: 20
               },
               nodes: [],
               links: []

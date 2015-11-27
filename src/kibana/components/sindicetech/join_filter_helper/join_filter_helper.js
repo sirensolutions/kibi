@@ -20,26 +20,13 @@ define(function (require) {
 
     function JoinFilterHelper() {}
 
-    JoinFilterHelper.prototype.findIndexAssociatedToDashboard = function (indexToDashboardsMap, dashboardId) {
-      for (var indexId in indexToDashboardsMap) {
-        if (indexToDashboardsMap.hasOwnProperty(indexId)) {
-          if (indexToDashboardsMap[indexId].indexOf(dashboardId) !== -1) {
-            return indexId;
-          }
-        }
-      }
-    };
-
     JoinFilterHelper.prototype.getJoinFilter = function (focusDashboardId) {
       var self = this;
       return new Promise(function (fulfill, reject) {
         if (focusDashboardId) {
-          var relationalPanelConfig = config.get('kibi:relationalPanelConfig');
-          if (!relationalPanelConfig) {
-            reject(new Error('Could not get kibi:relationalPanelConfig'));
-          }
-          if (!relationalPanelConfig.relations) {
-            reject(new Error('Could not get kibi:relationalPanelConfig.relations'));
+          var relations = config.get('kibi:relations').relationsDashboards;
+          if (!relations) {
+            reject(new Error('Could not get kibi:relations'));
           }
 
           var focusedSavedSearch = savedDashboards.get(focusDashboardId).then(function (dashboard) {
@@ -53,20 +40,14 @@ define(function (require) {
           });
 
           // grab only enabled relations
-          var enabledRelations = _.filter(relationalPanelConfig.relations, function (relation) {
-            return relation.enabled === true;
+          var enabledRelations = _.filter(relations, function (relation) {
+            return relation.enabled;
           });
 
           // collect ids of dashboards from enabled relations
-          var dashboardIds = [];
-          _.each(enabledRelations, function (relation) {
-            if (dashboardIds.indexOf(relation.from) === -1) {
-              dashboardIds.push(relation.from);
-            }
-            if (dashboardIds.indexOf(relation.to) === -1) {
-              dashboardIds.push(relation.to);
-            }
-          });
+          var dashboardIds = _(enabledRelations).map(function (relation) {
+            return relation.dashboards;
+          }).flatten().uniq().value();
 
           var filtersPerIndexPromise = urlHelper.getRegularFiltersPerIndex(dashboardIds);
           var queriesPerIndexPromise = urlHelper.getQueriesPerIndex(dashboardIds);
@@ -87,7 +68,7 @@ define(function (require) {
             // here check that the join filter should be present on this dashboard
             // it should be added only if we find current dashboardId in enabled relations
             var isFocusDashboardInEnabledRelations = urlHelper.isDashboardInEnabledRelations(
-              focusDashboardId, relationalPanelConfig.relations
+              focusDashboardId, relations
             );
             if (!focusIndex) {
               reject(new Error('SavedSearch for [' +  focusDashboardId + '] dashboard seems to not have an index id'));
@@ -101,18 +82,19 @@ define(function (require) {
 
             return urlHelper.getIndexToDashboardMap(dashboardIds).then(function (indexToDashboardsMap) {
 
-              var relations = [];
-              _.each(enabledRelations, function (r) {
-                relations.push([
+              var relations = _.map(enabledRelations, function (r) {
+                var parts = r.relation.split('/');
+
+                return [
                   {
-                    indices: [ self.findIndexAssociatedToDashboard(indexToDashboardsMap, r.from) ],
-                    path: r.fromPath
+                    indices: [ parts[0].replace('-slash-', '/') ],
+                    path: parts[1].replace('-slash-', '/')
                   },
                   {
-                    indices: [ self.findIndexAssociatedToDashboard(indexToDashboardsMap, r.to) ],
-                    path: r.toPath
+                    indices: [ parts[2].replace('-slash-', '/') ],
+                    path: parts[3].replace('-slash-', '/')
                   }
-                ]);
+                ];
               });
 
               var labels = queryHelper.getLabelsInConnectedComponent(focusIndex, relations);
@@ -180,7 +162,7 @@ define(function (require) {
     };
 
     JoinFilterHelper.prototype.isRelationalPanelEnabled = function () {
-      return config.get('kibi:relationalPanelConfig') && config.get('kibi:relationalPanelConfig').enabled;
+      return !!config.get('kibi:relationalPanel');
     };
 
     JoinFilterHelper.prototype.isFilterJoinPluginInstalled = function () {

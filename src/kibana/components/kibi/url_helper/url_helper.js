@@ -290,11 +290,14 @@ define(function (require) {
       });
     };
 
-
+    /**
+     * The relations are from kibi:relations.relationsDashboards
+     */
     UrlHelper.prototype.isDashboardInEnabledRelations = function (dashboardId, relations) {
       if (relations) {
         for (var i = 0; i < relations.length; i++) {
-          if (relations[i].enabled && relations[i].from === dashboardId || relations[i].to === dashboardId) {
+          var relation = relations[i];
+          if (relation.enabled && relation.dashboards[0] === dashboardId || relation.dashboards[1] === dashboardId) {
             return true;
           }
         }
@@ -327,8 +330,7 @@ define(function (require) {
       return new Promise(function (fulfill, reject) {
         // get relations for config
         var connectedDashboardIds = [];
-        var relationalPanelConfig = config.get('kibi:relationalPanelConfig');
-        if (relationalPanelConfig.enabled === true) {
+        if (config.get('kibi:relationalPanel')) {
           self.getIndexToDashboardMap().then(function (indexToDashboardsMap) {
             if (indexToDashboardsMap[indexPattern.id]) {
               // filter out current dashboard
@@ -337,7 +339,7 @@ define(function (require) {
               var dashboardIds = self._filterDashboardsWithSameIndex(
                 dashboardId,
                 indexToDashboardsMap[indexPattern.id],
-                relationalPanelConfig.relations
+                config.get('kibi:relations').relationsDashboards
               );
               // now for each dashboard we have to take:
               // filters from kibiState
@@ -394,8 +396,7 @@ define(function (require) {
       return new Promise(function (fulfill, reject) {
         // get relations for config
         var connectedDashboardIds = [];
-        var relationalPanelConfig = config.get('kibi:relationalPanelConfig');
-        if (relationalPanelConfig.enabled === true) {
+        if (config.get('kibi:relationalPanel')) {
           self.getIndexToDashboardMap().then(function (indexToDashboardsMap) {
             if (indexToDashboardsMap[indexPattern.id]) {
               // filter out current dashboard
@@ -404,7 +405,7 @@ define(function (require) {
               var dashboardIds = self._filterDashboardsWithSameIndex(
                 dashboardId,
                 indexToDashboardsMap[indexPattern.id],
-                relationalPanelConfig.relations
+                config.get('kibi:relations').relationsDashboards
               );
               // now for each dashboard we have to take:
               // query from kibiState

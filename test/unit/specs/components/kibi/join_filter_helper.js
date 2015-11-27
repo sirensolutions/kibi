@@ -114,27 +114,12 @@ define(function (require) {
         });
       });
 
-      describe('util methods methods', function () {
-
-        it('findIndexAssociatedToDashboard', function () {
-          var map = {
-            indexa: ['A', 'B'],
-            indexc: ['C']
-          };
-
-          expect(joinFilterHelper.findIndexAssociatedToDashboard(map, 'A')).to.equal('indexa');
-          expect(joinFilterHelper.findIndexAssociatedToDashboard(map, 'B')).to.equal('indexa');
-          expect(joinFilterHelper.findIndexAssociatedToDashboard(map, 'C')).to.equal('indexc');
-        });
-
-      });
-
       describe('getJoinFilter', function () {
-        it('should be disabled/enabled according to relationalPanelConfig', function () {
+        it('should be disabled/enabled according to relationalPanel', function () {
           expect(joinFilterHelper.isRelationalPanelEnabled()).to.not.be.ok();
-          config.set('kibi:relationalPanelConfig', { enabled: true });
+          config.set('kibi:relationalPanel', true);
           expect(joinFilterHelper.isRelationalPanelEnabled()).to.be.ok();
-          config.set('kibi:relationalPanelConfig', { enabled: false });
+          config.set('kibi:relationalPanel', false);
           expect(joinFilterHelper.isRelationalPanelEnabled()).to.not.be.ok();
         });
 
@@ -150,10 +135,8 @@ define(function (require) {
         });
 
         it('should fail if the focused dashboard cannot be retrieved', function (done) {
-          config.set('kibi:relationalPanelConfig', {
-            enabled: true,
-            relations: []
-          });
+          config.set('kibi:relationalPanel', true);
+          config.set('kibi:relations', { relationsDashboards: [] });
           joinFilterHelper.getJoinFilter('does-not-exist').catch(function (err) {
             expect(err.message).to.be('no dashboard does-not-exist');
             done();
@@ -161,40 +144,29 @@ define(function (require) {
         });
 
         it('should fail if the focused dashboard does not have a saved search', function (done) {
-          config.set('kibi:relationalPanelConfig', {
-            enabled: true,
-            relations: []
-          });
+          config.set('kibi:relationalPanel', true);
+          config.set('kibi:relations', { relationsDashboards: [] });
           joinFilterHelper.getJoinFilter('dashboard-nossid').catch(function (err) {
             expect(err.message).to.be('The focus dashboard "dashboard-nossid" does not have a saveSearchId');
             done();
           });
         });
 
-        it('should fail if there is no kibi:relationalPanelConfig set', function (done) {
+        it('should fail if there is no kibi:relations set', function (done) {
+          config.set('kibi:relations', {});
           joinFilterHelper.getJoinFilter('Boiled Dogs').catch(function (err) {
-            expect(err.message).to.be('Could not get kibi:relationalPanelConfig');
-            done();
-          });
-        });
-
-        it('should fail if there is no kibi:relationalPanelConfig.relations set', function (done) {
-          config.set('kibi:relationalPanelConfig', { enabled: true });
-          joinFilterHelper.getJoinFilter('dashboard-a').catch(function (err) {
-            expect(err.message).to.be('Could not get kibi:relationalPanelConfig.relations');
+            expect(err.message).to.be('Could not get kibi:relations');
             done();
           });
         });
 
         it('should fail if the saved search of the focused dashboard does not have an index id', function (done) {
-          config.set('kibi:relationalPanelConfig', {
-            enabled: true,
-            relations: [{
+          config.set('kibi:relationalPanel', true);
+          config.set('kibi:relations', {
+            relationsDashboards: [{
               enabled: true,
-              from: 'dashboard-a',
-              fromPath: 'id',
-              to: 'dashboard-noindexid',
-              toPath: 'id'
+              dashboards: [ 'dashboard-a', 'dashboard-noindexid' ],
+              relation: 'a/id/noindexid/id'
             }]
           });
           joinFilterHelper.getJoinFilter('dashboard-noindexid').catch(function (err) {
@@ -205,15 +177,13 @@ define(function (require) {
 
 
         it('1 should build the join filter', function (done) {
-          config.set('kibi:relationalPanelConfig', {
-            enabled: true,
-            relations: [{
+          config.set('kibi:relationalPanel', true);
+          config.set('kibi:relations', {
+            relationsDashboards: [{
               enabled: true,
-              from: 'dashboard-a',
-              fromPath: 'id',
-              to: 'dashboard-b',
-              toPath: 'id'
-            }]
+              dashboards: [ 'dashboard-a', 'dashboard-b' ],
+              relation: 'index-a/id/index-b/id'
+            }],
           });
           joinFilterHelper.getJoinFilter('dashboard-a').then(function (joinFilter) {
             expect(joinFilter.join_set).to.be.ok();
@@ -222,7 +192,7 @@ define(function (require) {
             expect(joinFilter.join_set.focus).to.be('index-a');
             expect(joinFilter.join_set.queries['index-a']).to.not.be.ok();
             done();
-          });
+          }).catch(done);
         });
 
         it('2 should build the join filter with filters on dashboards', function (done) {
@@ -230,14 +200,12 @@ define(function (require) {
           kibiStateHelper.saveFiltersForDashboardId('dashbbord-a', [ { range: { gte: 20, lte: 40 } } ]);
           // filters from the Potatoes dashboard are not taken since its index is not connected to the focus
           kibiStateHelper.saveFiltersForDashboardId('dashboard-b', [ { exists: { field: 'aaa' } } ]);
-          config.set('kibi:relationalPanelConfig', {
-            enabled: true,
-            relations: [{
+          config.set('kibi:relationalPanel', true);
+          config.set('kibi:relations', {
+            relationsDashboards: [{
               enabled: true,
-              from: 'dashboard-a',
-              fromPath: 'id',
-              to: 'dashboard-b',
-              toPath: 'id'
+              dashboards: [ 'dashboard-a', 'dashboard-b' ],
+              relation: 'index-a/id/index-b/id'
             }]
           });
           joinFilterHelper.getJoinFilter('dashboard-a').then(function (joinFilter) {
@@ -251,7 +219,7 @@ define(function (require) {
               exists: { field: 'aaa' }
             });
             done();
-          });
+          }).catch(done);
         });
 
         it('2 should build the join filter with queries on dashboards', function (done) {
@@ -259,14 +227,12 @@ define(function (require) {
           kibiStateHelper.saveQueryForDashboardId('dashboard-a', { query_string: { query: 'aaa' } });
           // queries from the Potatoes dashboard are not taken since its index is not connected to the focus
           kibiStateHelper.saveQueryForDashboardId('dashboard-b', { query_string: { query: 'ccc' } });
-          config.set('kibi:relationalPanelConfig', {
-            enabled: true,
-            relations: [{
+          config.set('kibi:relationalPanel', true);
+          config.set('kibi:relations', {
+            relationsDashboards: [{
               enabled: true,
-              from: 'dashboard-a',
-              fromPath: 'id',
-              to: 'dashboard-b',
-              toPath: 'id'
+              dashboards: [ 'dashboard-a', 'dashboard-b' ],
+              relation: 'index-a/id/index-b/id'
             }]
           });
           joinFilterHelper.getJoinFilter('dashboard-a').then(function (joinFilter) {
@@ -302,7 +268,7 @@ define(function (require) {
           joinFilterHelper.updateJoinFilter().then(function () {
             expect(urlHelper.removeJoinFilter.called).to.be.ok();
             done();
-          });
+          }).catch(done);
         });
 
         it('should remove the join filter 2', function (done) {
@@ -310,29 +276,25 @@ define(function (require) {
           joinFilterHelper.updateJoinFilter().then(function () {
             expect(urlHelper.removeJoinFilter.called).to.be.ok();
             done();
-          });
+          }).catch(done);
         });
 
         it('should add the join filter', function (done) {
           kibiStateHelper.saveFiltersForDashboardId('dashboard-a', [ { range: { gte: 20, lte: 40 } } ]);
           kibiStateHelper.saveFiltersForDashboardId('dashboard-b', [ { term: { aaa: 'bbb' } } ]);
-          config.set('kibi:relationalPanelConfig', {
-            enabled: true,
-            relations: [{
+          config.set('kibi:relationalPanel', true);
+          config.set('kibi:relations', {
+            relationsDashboards: [{
               enabled: true,
-              from: 'dashboard-a',
-              fromPath: 'id',
-              to: 'dashboard-b',
-              toPath: 'id'
+              dashboards: [ 'dashboard-a', 'dashboard-b' ],
+              relation: 'a/id/b/id'
             }]
           });
           sinon.stub(urlHelper, 'getCurrentDashboardId').returns('dashboard-b');
           joinFilterHelper.updateJoinFilter().then(function () {
             expect(urlHelper.addFilter.called).to.be.ok();
             done();
-          }).catch(function (err) {
-            done(err);
-          });
+          }).catch(done);
         });
       });
     });

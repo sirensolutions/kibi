@@ -11,6 +11,12 @@
     <div class="config-section">
       <h2>Config</h2>
 
+      <div class="checkbox">
+        <label>
+          <input type="checkbox" ng-model="relationalPanel"/> Enable relational panel
+        </label>
+      </div>
+
       <ul class="nav nav-tabs">
         <li ng-class="{ active: state.tab === 'indices' }" class="kbn-settings-tab">
           <a title="Relations between Index Patterns" ng-click="changeTab('indices')">Relations between Index Patterns</a>

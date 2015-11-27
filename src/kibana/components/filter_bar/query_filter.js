@@ -87,7 +87,11 @@ define(function (require) {
      */
     queryFilter.removeAll = function () {
       var appState = getAppState();
-      appState.filters = [];
+      // kibi - remove all except join_set one
+      appState.filters = _.filter(appState.filters, function (f) {
+        return f.join_set;
+      });
+      // kibi end
       globalState.filters = [];
     };
 

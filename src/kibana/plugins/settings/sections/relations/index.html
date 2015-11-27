@@ -137,9 +137,15 @@
 
     <div class="graph-section">
       <h2>Graph of Index Patterns</h2>
-      <eeg graph="indicesGraph" class="eeg indicesGraph"></eeg>
-      <h2 ng-if="state.tab === 'dashboards'">Graph of Dashboards</h2>
-      <eeg ng-if="state.tab === 'dashboards'" graph="dashboardsGraph" class="eeg dashboardsGraph"></eeg>
+      <eeg eeg-id="'indicesGraph'"
+           graph="indicesGraph"
+           class="eeg indicesGraph"></eeg>
+      <!-- do not use ng-if as this will cause the graph to rerendered on each tab switch -->
+      <h2 ng-show="state.tab === 'dashboards'">Graph of Dashboards</h2>
+      <eeg ng-show="state.tab === 'dashboards'"
+           eeg-id="'dashboardsGraph'"
+           graph="dashboardsGraph"
+           class="eeg dashboardsGraph"></eeg>
     </div>
 
   </div>

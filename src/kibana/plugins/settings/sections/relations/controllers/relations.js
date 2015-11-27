@@ -66,6 +66,9 @@ define(function (require) {
           remove = true;
         }
 
+        if (!!relDash.dashboards[0] && !!relDash.dashboards[1] && !!relDash.relation) {
+          remove = true;
+        }
         return remove;
       }
       return false;

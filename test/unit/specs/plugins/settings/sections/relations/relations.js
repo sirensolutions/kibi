@@ -185,6 +185,60 @@ define(function (require) {
       });
 
       describe('dashboards graph', function () {
+        it('should remove all if all components are defined - what is retained is up to st-select', function (done) {
+          var relations = {
+            relationsIndices: [
+              {
+                indices: [
+                  {
+                    indexPatternId: 'index-a',
+                    path: 'path-a1'
+                  },
+                  {
+                    indexPatternId: 'index-a',
+                    path: 'path-a2'
+                  }
+                ],
+                label: 'rel'
+              },
+              {
+                indices: [
+                  {
+                    indexPatternId: 'index-b',
+                    path: 'path-b'
+                  },
+                  {
+                    indexPatternId: 'index-c',
+                    path: 'path-c'
+                  }
+                ],
+                label: 'rel'
+              }
+            ],
+            relationsDashboards: [
+              {
+                dashboards: [ 'Da2', 'Da1' ],
+                relation: 'index-a/path-a1/index-a/path-a2'
+              }
+            ]
+          };
+          var map = {
+            'index-a': [ 'Da1', 'Da2' ],
+            'index-b': [ 'Db' ],
+            'index-c': [ 'Dc' ]
+          };
+
+          init({ relations: relations, indexToDashboardsMap: map });
+          indexToDashboardMapPromise.then(function () {
+            expect($scope.relations.relationsDashboards).to.have.length(1);
+            expect($scope.filterDashboards(0, 'Da1')).to.be(true);
+            expect($scope.filterDashboards(0, 'Da2')).to.be(true);
+            expect($scope.filterDashboards(0, 'Db')).to.be(true);
+            expect($scope.filterDashboards(0, 'Dc')).to.be(true);
+            done();
+          });
+        });
+
         it('should support dashboards recommendation connected with a loop', function (done) {
           var relations = {
             relationsIndices: [

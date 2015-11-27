@@ -77,7 +77,7 @@
             <array-param-add label="relation" model="relations.relationsIndices" default="{{ { indices: [ {}, {} ] } }}"></array-param-add>
           </div>
           <div class="form-group">
-            <button class="btn btn-success" ng-click="submit('indices')" ng-disabled="indicesForm.$invalid">Save</button>
+            <button class="btn btn-success" ng-click="submit('indices')" ng-disabled="indicesForm.$invalid || invalid">Save</button>
           </div>
         </form>
         <form name="dashboardsForm" ng-class="{ active: state.tab === 'dashboards' }" class="tab-pane" novalidate>
@@ -125,7 +125,7 @@
             <array-param-add label="relation" model="relations.relationsDashboards" default="{{ { dashboards: [ '', '' ] } }}"></array-param-add>
           </div>
           <div class="form-group">
-            <button class="btn btn-success" ng-click="submit('dashboards')" ng-disabled="dashboardsForm.$invalid">Save</button>
+            <button class="btn btn-success" ng-click="submit('dashboards')" ng-disabled="dashboardsForm.$invalid || invalid">Save</button>
           </div>
         </form>
       </div>

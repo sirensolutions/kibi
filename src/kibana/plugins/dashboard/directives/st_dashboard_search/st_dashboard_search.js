@@ -1,5 +1,5 @@
 define(function (require) {
-
+  var _ = require('lodash');
   var app = require('modules').get('app/dashboard');
 
   app.directive('stDashboardSearch', function (Private, $rootScope, getAppState) {
@@ -25,9 +25,12 @@ define(function (require) {
         };
 
         $scope.removeAllFilters = function () {
-          // remove all filters and queries acros dashboards except pinned filters
+          // remove all filters and queries acros dashboards
+          // except pinned filters and join_set filter
           var appState = getAppState();
-          appState.filters = [];
+          appState.filters = _.filter(appState.filters, function (f) {
+            return f.join_set;
+          });
           appState.query = {query_string: {analyze_wildcard: true, query: '*'}};
           appState.save();
 

@@ -91,13 +91,13 @@ IndexHelper.prototype.rencryptAllValuesInKibiIndex = function (oldkey, algorithm
         } catch (e) {
           reject(e);
         }
-        body += JSON.stringify(datasource._source).replace(/AES/g, 'aes' ) + '\n';
+        body += JSON.stringify(datasource._source) + '\n';
       });
 
       self.setDatasources(body).then(function (res2) {
         report.push('Saving new kibi.yml');
         self.swapKibiYml(path, algorithm, key).then(function () {
-          report.push('New kibi.yml saved. Old kibi.yml moved to kibi.yml.back');
+          report.push('New kibi.yml saved. Old kibi.yml moved to kibi.yml.bak');
           report.push('DONE');
           fulfill(report);
         });
@@ -117,14 +117,13 @@ IndexHelper.prototype.swapKibiYml = function (path, algorithm, key) {
         reject(err);
       }
 
-
       var c = data
       .replace(/datasource_encryption_algorithm:.+?\n/g, 'datasource_encryption_algorithm: \'' + algorithm + '\'\n')
       .replace(/datasource_encryption_key:.+?\n/g, 'datasource_encryption_key: \'' + key + '\'\n');
 
-      fs.rename(path, path + '.back', function (err) {
+      fs.rename(path, path + '.bak', function (err) {
         if ( err ) {
-          console.log('Could not rename kibi.yml to kibi.yml.back');
+          console.log('Could not rename kibi.yml to kibi.yml.bak');
           reject(err);
         }
 
@@ -161,7 +160,7 @@ IndexHelper.prototype.getDatasources = function () {
       if (data.hits && data.hits.hits) {
         return data.hits.hits;
       } else {
-        throw new Error('Could not take datasources');
+        throw new Error('Could not get datasources');
       }
     }
   });

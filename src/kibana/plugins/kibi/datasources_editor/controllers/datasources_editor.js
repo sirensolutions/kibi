@@ -64,9 +64,8 @@ define(function (require) {
 
         if (config.file.datasource_encryption_warning) {
           var encrypted = false;
-          var s = 0;
           var field;
-          for (s; s < datasource.schema.length; s++) {
+          for (var s = 0; s < datasource.schema.length; s++) {
             field = datasource.schema[s];
             if (field.encrypted) {
               encrypted = true;

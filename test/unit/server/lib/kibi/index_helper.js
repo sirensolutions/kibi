@@ -6,7 +6,7 @@ var Promise = require('bluebird');
 var fs = require('fs');
 
 var fake_kibi_yml_path      = __dirname + '/../../../fixtures/fake_kibi.yml';
-var fake_kibi_yml_back_path = __dirname + '/../../../fixtures/fake_kibi.yml.back';
+var fake_kibi_yml_bak_path = __dirname + '/../../../fixtures/fake_kibi.yml.bak';
 
 describe('Index Helper', function () {
 
@@ -103,14 +103,14 @@ describe('Index Helper', function () {
       mockery.disable();
       mockery.deregisterAll();
 
-      // if there is fake_kibi.yml.back in fixtures
+      // if there is fake_kibi.yml.bak in fixtures
       // rename it back to fake_kibi.yml
-      fs.exists(fake_kibi_yml_back_path, function (exists) {
+      fs.exists(fake_kibi_yml_bak_path, function (exists) {
         if (!exists) {
           // there is no such file
           done();
         } else {
-          fs.rename(fake_kibi_yml_back_path, fake_kibi_yml_path, function (err) {
+          fs.rename(fake_kibi_yml_bak_path, fake_kibi_yml_path, function (err) {
             done();
           });
         }
@@ -125,7 +125,7 @@ describe('Index Helper', function () {
       'decrypted value',
       'encrypted the value',
       'Saving new kibi.yml',
-      'New kibi.yml saved. Old kibi.yml moved to kibi.yml.back',
+      'New kibi.yml saved. Old kibi.yml moved to kibi.yml.bak',
       'DONE'];
 
       indexHelper.rencryptAllValuesInKibiIndex(
@@ -134,7 +134,7 @@ describe('Index Helper', function () {
       .then(function (report) {
         expect(report).to.eql(expected);
         expect(fs.existsSync(fake_kibi_yml_path)).to.equal(true);
-        expect(fs.existsSync(fake_kibi_yml_back_path)).to.equal(true);
+        expect(fs.existsSync(fake_kibi_yml_bak_path)).to.equal(true);
         done();
       });
     });

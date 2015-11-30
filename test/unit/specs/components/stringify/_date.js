@@ -12,8 +12,8 @@ define(function (require) {
       var date = new DateFormat({
         pattern: 'dd-MM-yyyy'
       });
-      expect(date.convert(null)).to.be('-');
-      expect(date.convert(undefined)).to.be('-');
+      expect(date.convert(null)).to.be('');
+      expect(date.convert(undefined)).to.be('');
     });
 
   }];

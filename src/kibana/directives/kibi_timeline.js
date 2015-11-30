@@ -180,8 +180,14 @@ define(function (require) {
 
       var initGroups = function () {
         initTimeline();
+
+        var groupIds = [0]; // 0 should always be there in case user switch to mixed mode
+        _.each($scope.groups, function (group) {
+          groupIds.push(group.id);
+        });
+        mapGroupIdToColor = color(groupIds);
+
         var groups = [];
-        var groupIds = [];
         if ($scope.groupsOnSeparateLevels === true) {
           _.each($scope.groups, function (group, index) {
             groups.push({
@@ -190,7 +196,6 @@ define(function (require) {
               style: 'background-color:' + mapGroupIdToColor(group.id) + '; color: #fff;'
             });
           });
-
         } else {
           // single group
           // - a bit of hack but currently the only way I could make it work
@@ -200,13 +205,6 @@ define(function (require) {
             style: 'background-color: none;'
           });
         }
-
-        groupIds.push(0);
-        _.each($scope.groups, function (group) {
-          groupIds.push(group.id);
-        });
-        mapGroupIdToColor = color(groupIds);
-
         var dataGroups = new vis.DataSet(groups);
         timeline.setGroups(dataGroups);
       };

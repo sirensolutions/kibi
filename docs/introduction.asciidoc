@@ -22,6 +22,9 @@ cross-dashboard filters (pivoting).
 - The <<wordcloud,Kibi Word Cloud>> visualization, which displays a cloud of
 high frequency terms from the documents returned by an Elasticsearch query.
 
+- The <<timeline,Kibi Timeline>> visualization, which displays a timeline
+with multiple groups of data coming from different indexes.
+
 - The <<enhanced-search-results,Enhanced search results>> visualization, which
 displays query results in a table.
 

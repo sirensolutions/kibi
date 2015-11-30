@@ -384,14 +384,14 @@ define(function (require) {
 
     var indicesGraphExportOff = $rootScope.$on('egg:indicesGraph:results', function (event, method, results) {
       if (method === 'exportGraph') {
-        var relations = config.get('kibi:relations', {});
+        var relations = config.get('kibi:relations');
         relations.relationsIndicesSerialized = results;
         config.set('kibi:relations', relations);
       }
     });
     var dashboardsGraphExportOff = $rootScope.$on('egg:dashboardsGraph:results', function (event, method, results) {
       if (method === 'exportGraph') {
-        var relations = config.get('kibi:relations', {});
+        var relations = config.get('kibi:relations');
         relations.relationsDashboardsSerialized = results;
         config.set('kibi:relations', relations);
       }
@@ -403,7 +403,7 @@ define(function (require) {
 
 
     $scope.submit = function (elements) {
-      var relations = config.get('kibi:relations', {});
+      var relations = config.get('kibi:relations');
 
       relations.relationsIndices = _.map($scope.relations.relationsIndices, function (relation) {
         return _.omit(relation, [ 'error' ]);

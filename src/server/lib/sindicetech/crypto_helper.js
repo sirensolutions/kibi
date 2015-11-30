@@ -1,114 +1,165 @@
 var crypto = require('crypto');
-
-
-function endsWith(str, suffix) {
-  return str.indexOf(suffix, str.length - suffix.length) !== -1;
-}
-
+var forge = require('node-forge');
 
 function CryptoHelper() {
-  this.defaultAlgorithm = 'aes-256-ctr';
-  this.defaultKey = '3zTvzr3p67VC61jmV54rIYu1545x4TlY';
-  this.supportedAlghorithms = [
-    'aes-256-ctr',   'camellia256',
-    'aes-256-cbc',   'camellia-256-cbc',
-    'aes-256-cfb',   'camellia-256-cfb',
-    'aes-256-cfb1',  'camellia-256-cfb1',
-    'aes-256-cfb8',  'camellia-256-cfb8',
-    'aes-256-ctr',
-    'aes-256-ecb',   'camellia-256-ecb',
-    'aes-256-ofb',   'camellia-256-ofb'
+  this.supportedAlgorithms = [
+    'AES-GCM'
   ];
 }
 
-
-CryptoHelper.prototype.encrypt = function (algorithm, password, plaintext) {
-  var cipher;
-  var encrypted;
-  var finalBuffer;
-
-  if (endsWith(algorithm, '-gcm') || endsWith(algorithm, '-xts') || endsWith(algorithm, '-cbc-hmac-sha1')) {
-    throw new Error ('Not supported in node 0.10.x');
-    /*
-    Enable when we switch to node 0.11
-
-    var iv = new crypto.randomBytes(32);
-    var key = new Buffer(password);
-    cipher = crypto.createCipheriv(algorithm, key, iv);
-    encrypted = cipher.update(plaintext, 'utf8');
-    finalBuffer = Buffer.concat([encrypted, cipher.final()]);
-    var tag = cipher.getAuthTag();
-    return algorithm + ':' + tag + ':' + finalBuffer.toString('hex');
-    */
-  } else {
-    cipher = crypto.createCipher(algorithm, password);
-    encrypted = cipher.update(plaintext, 'utf8');
-    finalBuffer = Buffer.concat([encrypted, cipher.final()]);
-    return algorithm + ':' + finalBuffer.toString('hex');
-  }
+/**
+ * Decodes a base64 string and returns a node-forge buffer.
+ * @private
+ */
+CryptoHelper.prototype._decodeBase64 = function (base64) {
+  return forge.util.createBuffer((new Buffer(base64, 'base64')).toString('binary'));
 };
 
-CryptoHelper.prototype.decrypt = function (password, encrypted) {
+
+/**
+ * Generates a random IV using node-forge.
+ *
+ * @returns {string} a random IV
+ */
+CryptoHelper.prototype.generateIV = function () {
+  return forge.random.getBytesSync(12);
+};
+
+/**
+ * Decodes and validates a base64 encoded key.
+ *
+ * @return the key as a node-forge buffer.
+ * @throws {Error} if the key is invalid.
+ */
+CryptoHelper.prototype.decodeBase64Key = function (base64key) {
+  var keyBuffer = this._decodeBase64(base64key);
+
+  switch (keyBuffer.length()) {
+    case 16:
+    case 24:
+    case 32:
+      return keyBuffer;
+  }
+
+  throw new Error('Invalid key length.');
+};
+
+/**
+ * @returns {boolean} - true if the algorithm is supported.
+ */
+CryptoHelper.prototype.supportsAlgorithm = function (algorithm) {
+  return this.supportedAlgorithms.indexOf(algorithm) !== -1;
+};
+
+/**
+ * Encrypts a plain text using the specified algorithm and key; currently the
+ * only supported algorithm is AES-GCM, using the implementation provided by
+ * the node-forge library.
+ *
+ * @param {string} algorithm
+ * @param {string} key - base64 encoded encryption key, key size is expected to be
+ *                       must be 128, 192 or 256 bits.
+ * @param {string} plaintext - the plaintext. Plaintext is encoded to utf-8.
+ *
+ * @returns {string} - a representation of the encrypted text in the following format:
+ *
+ *          <algorithm>:<ciphertext>:<iv>:<auth_tag>
+ *
+ *          ciphertext, iv and auth_tag are base64 encoded; the IV length is
+ *          set to 96 bits, the auth_tag length is set to 128 bits.
+ *          Additional data is not set.
+ */
+CryptoHelper.prototype.encrypt = function (algorithm, key, plaintext) {
+  if (!this.supportsAlgorithm(algorithm)) {
+    throw new Error('Unsupported algorithm.');
+  }
+
+  var keyBuffer = this.decodeBase64Key(key);
+  var iv = this.generateIV();
+  var cipher = forge.cipher.createCipher(algorithm, keyBuffer);
+  cipher.start({
+    iv: iv,
+    tagLength: 128
+  });
+  cipher.update(forge.util.createBuffer(plaintext, 'utf8'), 'utf8');
+  cipher.finish();
+
+  return [
+    algorithm,
+    forge.util.encode64(cipher.output.data),
+    forge.util.encode64(iv),
+    forge.util.encode64(cipher.mode.tag.data)
+  ].join(':');
+};
+
+
+/**
+ * Decrypts an encrypted value using the specified key.
+ *
+ * @param {string} key - base64 encoded encryption key, key size is expected to be
+ *                       must be 128, 192 or 256 bits.
+ * @param {string} encrypted - the encrypted value as returned by the encrypt method.
+ *
+ * @returns {string} - the plaintext
+ */
+CryptoHelper.prototype.decrypt = function (key, encrypted) {
+  var algorithm;
+  var keyBuffer;
+
   if (!encrypted) {
-    return;
+    return null;
   }
 
   var parts = encrypted.split(':');
-  if (!(parts.length === 2 || parts.length === 3)) {
+  if (parts.length < 4) {
     throw new Error('Invalid encrypted message.');
   }
 
+  algorithm = parts[0];
+  if (!this.supportsAlgorithm(algorithm)) {
+    throw new Error('Unsupported algorithm.');
+  }
 
-  var algorithm;
-  var tag;
-  var decipher;
-  var decrypted;
-  var finalBuffer;
+  keyBuffer = this.decodeBase64Key(key);
+  encrypted = this._decodeBase64(parts[1]);
 
-  if (parts.length === 3) {
-    throw new Error ('Ciphers with iv parts not fully supported in node 0.10.x');
-    /*
-    Enable when we switch to node 0.11
-    algorithm = parts[0];
-    tag = parts[1];
-    encrypted = parts[2];
-    var key = new Buffer(password);
-    decipher = crypto.createDecipheriv(algorithm, key, iv);
-    decipher.setAuthTag(tag);
-    decrypted = decipher.update(encrypted, 'hex');
-    finalBuffer = Buffer.concat([decrypted, decipher.final()]);
-    return finalBuffer.toString('hex');
-    */
+  var decipher = forge.cipher.createDecipher(algorithm, keyBuffer);
+  decipher.start({
+    iv: this._decodeBase64(parts[2]),
+    tag: this._decodeBase64(parts[3])
+  });
+  decipher.update(encrypted);
+  if (decipher.finish()) {
+    return decipher.output.toString();
   } else {
-    algorithm = parts[0];
-    encrypted = parts[1];
-    decipher = crypto.createDecipher(algorithm, password);
-    decrypted = decipher.update(encrypted, 'hex');
-    finalBuffer = Buffer.concat([decrypted, decipher.final()]);
-    return finalBuffer.toString('utf8');
+    throw new Error('Value can\'t be decrypted.');
   }
 };
 
 
+/**
+ * Encrypts datasource parameters marked as encrypted in the schema.
+ */
 CryptoHelper.prototype.encryptDatasourceParams = function (config, query) {
   if (query.datasourceParams && query.datasourceType) {
+
     var datasourceType = query.datasourceType;
     if (datasourceType === 'sql_jdbc' || datasourceType === 'sparql_jdbc') {
       datasourceType = 'jdbc';
     }
     var schema = config.kibana.datasources_schema[datasourceType];
+
     var params;
     try {
       params = JSON.parse(query.datasourceParams, null, ' ');
     } catch (e) {
-      throw new Error('Could not parse datasourceParams: [' + query.datasourceParams + '] in the query ');
+      throw new Error('Could not parse datasourceParams: ' + query.datasourceParams + ' is not valid JSON.');
     }
 
     if (!schema) {
-      throw new Error('Could not get schema for datasource type: [' + datasourceType + ']');
+      throw new Error('Could not get schema for datasource type: ' + datasourceType + ' .');
     }
 
-    // now iterate over params and check if any of them has to be encrypted
     var algorithm = config.kibana.datasource_encryption_algorithm;
     var password = config.kibana.datasource_encryption_key;
 

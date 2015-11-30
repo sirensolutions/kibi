@@ -1,172 +1,248 @@
 var root = require('requirefrom')('');
 var cryptoHelper = root('src/server/lib/sindicetech/crypto_helper');
 var expect = require('expect.js');
+var sinon = require('sinon');
+var forge = require('node-forge');
 
 
 describe('Crypto Helper', function () {
-  describe('Encrypt', function () {
+  var default_key = 'iSxvZRYisyUW33FreTBSyJJ34KpEquWznUPDvn+ka14=';
 
-    var config = {
-      kibana: {
-        datasource_encryption_algorithm: 'aes-256-ctr',
-        datasource_encryption_key: '3zTvzr3p67VC61jmV54rIYu1545x4TlZ',
-        datasources_schema: {
-          type1: [
-            {
-              name: 'password',
-              encrypted: true
-            }
-          ]
+  var default_config = {
+    kibana: {
+      datasource_encryption_algorithm: 'AES-GCM',
+      datasource_encryption_key: default_key,
+      datasources_schema: {
+        type1: [
+          {
+            name: 'password',
+            encrypted: true
+          }
+        ]
+      }
+    }
+  };
+
+  var decryptTest = cryptoHelper.decrypt.bind(cryptoHelper);
+  var encryptTest = cryptoHelper.encrypt.bind(cryptoHelper);
+  var encryptDatasourceparamsTest = cryptoHelper.encryptDatasourceParams.bind(cryptoHelper);
+
+  describe('.encrypt', function () {
+
+    describe('getting a known IV', function () {
+      beforeEach(function () {
+        sinon.stub(forge.random, 'getBytesSync').returns(forge.util.hexToBytes('0a0305555550000300a00000'));
+      });
+
+      it('should encrypt plain text correctly', function () {
+        var plainText = 'BONTEMPIàÀ的123';
+        var encrypted = cryptoHelper.encrypt('AES-GCM', default_key, plainText);
+
+        expect(encrypted).to.eql('AES-GCM:NhxjhWFkEf8wrxfAA1oHo644:CgMFVVVQAAMAoAAA:FaPn/SPOXfqYMWNysdOkVw==');
+
+        expect(cryptoHelper.decrypt(default_key, encrypted)).to.eql(plainText);
+      });
+
+      it('should throw an error if the value cannot be decrypted', function () {
+        var encrypted = 'AES-GCM:NhxjhWFkEf8wrxfAA1oHo644:CgMFVVVQAAMAoAAA:FaPn/SPOXfqYMWNysdOkVw==';
+
+        expect(decryptTest)
+          .withArgs(default_key, encrypted)
+          .to.not.throwError('Value can\'t be decrypted.');
+
+        //invalid tag
+        encrypted = 'AES-GCM:NhxjhWFkEf8wrxfAA1oHo644:CgMFVVVQAAMAoAAA:faPn/SPOXfqYMWNysdOkVw==';
+
+        expect(decryptTest)
+          .withArgs(default_key, encrypted)
+          .to.throwError('Value can\'t be decrypted.');
+
+        //invalid iv
+        encrypted = 'AES-GCM:NhxjhWFkEf8wrxfAA1oHo644:AgMFVVVQAAMAoAAA:FaPn/SPOXfqYMWNysdOkVw==';
+        expect(decryptTest)
+          .withArgs('JhWzsL2ZrgiaPjv+sHtMIPSDxu3yfPvNqMSQoEectxo=', encrypted)
+          .to.throwError('Value can\'t be decrypted.');
+
+        // invalid key
+        encrypted = 'AES-GCM:NhxjhWFkEf8wrxfAA1oHo644:CgMFVVVQAAMAoAAA:FaPn/SPOXfqYMWNysdOkVw==';
+        expect(decryptTest)
+          .withArgs('JhWzsL2ZrgiaPjv+sHtMIPSDxu3yfPvNqMSQoEectxo=', encrypted)
+          .to.throwError('Value can\'t be decrypted.');
+      });
+
+      afterEach(function () {
+        forge.random.getBytesSync.restore();
+      });
+    });
+
+    describe('getting a random IV', function () {
+      it('should encrypt plain text correctly using the default key', function () {
+        var plainText = 'BONTEMPIàÀ的123 12389889HHSD$$$';
+        var encrypted = cryptoHelper.encrypt('AES-GCM', default_key, plainText);
+        expect(cryptoHelper.decrypt(default_key, encrypted)).to.eql(plainText);
+      });
+
+      it('should encrypt plain text correctly using random keys', function () {
+        var plainText = 'BONTEMPIàÀ的123 23k12jJASDjhj';
+        var encrypted;
+
+        var keys = [
+          forge.util.encode64(forge.random.getBytesSync(16)),
+          forge.util.encode64(forge.random.getBytesSync(24)),
+          forge.util.encode64(forge.random.getBytesSync(32))
+        ];
+
+        for (var k = keys.length; k--;) {
+          encrypted = cryptoHelper.encrypt('AES-GCM', keys[k], plainText);
+          expect(cryptoHelper.decrypt(keys[k], encrypted)).to.eql(plainText);
         }
-      }
-    };
-
-    var plainText = 'hallo';
-    var password = '3zTvzr3p67VC61jmV54rIYu1545x4TlY';
-
-    // authenticated encryption modes which are currently not supported due to nodejs version
-    var algosNOK = [
-      'aes-256-cbc-hmac-sha1',
-      'aes-256-xts',
-      'aes-256-gcm'
-    ];
-
-    var algosOK = [
-      'aes-256-ctr',
-      'aes-256-cbc',
-      'aes-256-cfb',
-      'aes-256-cfb1',
-      'aes-256-cfb8',
-      'aes-256-ctr',
-      'aes-256-ecb',
-      'aes-256-ofb',
-      'aes256',
-      'camellia-256-cbc',
-      'camellia-256-cfb',
-      'camellia-256-cfb1',
-      'camellia-256-cfb8',
-      'camellia-256-ecb',
-      'camellia-256-ofb',
-      'camellia256',
-    ];
-
-    it('authenticated encryption modes', function () {
-      for (var i = 0; i < algosNOK.length; i++) {
-        var algo = algosNOK[i];
-        try {
-          var encrypted = cryptoHelper.encrypt(algo, password, plainText);
-          expect().fail('Should fail for' + algo + ' but produced: ' + encrypted);
-        } catch (e) {
-          expect(e.message).to.equal('Not supported in node 0.10.x');
-        }
-      }
+      });
     });
 
-    it('different algos', function () {
-      for (var i = 0; i < algosOK.length; i++) {
-        var algo = algosOK[i];
-        var encrypted = cryptoHelper.encrypt(algo, password, plainText);
-        var decrypted = cryptoHelper.decrypt(password, encrypted);
-        expect(decrypted).to.equal(plainText);
-      }
-
+    it('should throw an error if the algorithm is not supported', function () {
+      expect(encryptTest)
+        .withArgs('', 'key', 'plain')
+        .to.throwError('Unsupported algorithm.');
+      expect(encryptTest)
+        .withArgs('AES-CTR', 'key', 'plain')
+        .to.throwError('Unsupported algorithm.');
     });
 
-    it('decrypt with undefined value should return undefined', function () {
-      expect(cryptoHelper.decrypt(password, undefined)).to.equal(undefined);
+    it('should throw an error if the key length is invalid', function () {
+      expect(encryptTest)
+        .withArgs('AES-GCM', 'SU5WQUxJRCBLRVk=', 'plain')
+        .to.throwError('Invalid key length.');
     });
 
-    it('decrypt value with too many partsshould throw an error', function () {
-      try {
-        cryptoHelper.decrypt(password, 'algo:iv:encrypted:extra');
-      } catch (e) {
-        expect(e.message).to.equal('Invalid encrypted message.');
-      }
+    it('should return null when requested to encrypt empty values', function () {
+      var encrypted = cryptoHelper.encrypt('AES-GCM', default_key, '');
+      expect(encrypted).to.be.null;
+
+      encrypted = cryptoHelper.encrypt('AES-GCM', default_key, null);
+      expect(encrypted).to.be.null;
+
+      encrypted = cryptoHelper.encrypt('AES-GCM', default_key);
+      expect(encrypted).to.be.null;
     });
 
-    it('decrypt value with 3 parts not supported yet should throw an error', function () {
-      try {
-        cryptoHelper.decrypt(password, 'algo:iv:encrypted');
-      } catch (e) {
-        expect(e.message).to.equal('Ciphers with iv parts not fully supported in node 0.10.x');
-      }
+  });
+
+  describe('.decrypt', function () {
+
+    it('should return null when requested to decrypt empty values', function () {
+      expect(cryptoHelper.decrypt(default_key, undefined)).to.be.null;
+      expect(cryptoHelper.decrypt(default_key, null)).to.be.null;
+      expect(cryptoHelper.decrypt(default_key, '')).to.be.null;
     });
 
-    it('decrypt value with too few parts should throw an error', function () {
-      try {
-        cryptoHelper.decrypt(password, 'only-algo');
-      } catch (e) {
-        expect(e.message).to.equal('Invalid encrypted message.');
-      }
+    it('should throw an error if the encrypted message an incorrect number of parts', function () {
+      expect(decryptTest).withArgs(default_key, 'a')
+        .to.throwError('Invalid encrypted message.');
+      expect(decryptTest).withArgs(default_key, 'a:b')
+        .to.throwError('Invalid encrypted message.');
+      expect(decryptTest).withArgs(default_key, 'a:b:c')
+        .to.throwError('Invalid encrypted message.');
     });
 
+    it('should throw an error if the algorithm is not supported', function () {
+      var encrypted = 'AES-CTR:NhxjhWFkEf8wrxfAA1oHo644:CgMFVVVQAAMAoAAA:FaPn/SPOXfqYMWNysdOkVw==';
+      expect(decryptTest)
+        .withArgs(default_key, encrypted)
+        .to.throwError('Unsupported algorithm.');
+    });
 
-    it ('encryptDatasourceParams malformed datasourceParams in the query', function () {
+    it('should throw an error if the key size is invalid', function () {
+      expect(decryptTest)
+        .withArgs('SU5WQUxJRCBLRVk=:SU5WQUxJRCBLRVk=:SU5WQUxJRCBLRVk=:SU5WQUxJRCBLRVk=', 'plain')
+        .to.throwError('Invalid key length.');
+    });
+
+  });
+
+  describe('.encryptDatasourceParams', function () {
+
+    it ('should throw an error when passed an invalid json.', function () {
       var query = {
         datasourceType: 'type1',
         datasourceParams: '{invalid json}'
       };
 
-      try {
-        cryptoHelper.encryptDatasourceParams(config, query);
-      } catch (e) {
-        expect(e.message).to.eql('Could not parse datasourceParams: [{invalid json}] in the query ');
-      }
+      expect(encryptDatasourceparamsTest)
+        .withArgs(default_config, query)
+        .to.throwError('Could not parse datasourceParams: [{invalid json}] in the query ');
     });
 
-    it ('encryptDatasourceParams missing schema', function () {
+    it ('should throw an error if datasource type has no associated schema.', function () {
       var query = {
         datasourceType: 'type1',
-        datasourceParams: JSON.stringify(
-          {
-            password: 'xxx'
-          }
-        )
+        datasourceParams: JSON.stringify({
+          password: 'xxx'
+        })
       };
 
-      var config1 = {
+      var config = {
         kibana: {
-          datasource_encryption_algorithm: 'aes-256-ctr',
-          datasource_encryption_key: '3zTvzr3p67VC61jmV54rIYu1545x4TlZ',
+          datasource_encryption_algorithm: default_config.kibana.datasource_encryption_algorithm,
+          datasource_encryption_key: default_config.kibana.datasource_encryption_key,
           datasources_schema: {}
         }
       };
 
-      try {
-        cryptoHelper.encryptDatasourceParams(config1, query);
-      } catch (e) {
-        expect(e.message).to.eql('Could not get schema for datasource type: [type1]');
-      }
+      expect(encryptDatasourceparamsTest)
+        .withArgs(config, query)
+        .to.throwError('Could not get schema for datasource type: type1 .');
     });
 
-    it ('encryptDatasourceParams', function () {
+    describe('getting a known IV', function () {
+      beforeEach(function () {
+        sinon.stub(forge.random, 'getBytesSync').returns(forge.util.hexToBytes('0a0305555550000300a00000'));
+      });
 
-      var query = {
-        datasourceType: 'type1',
-        datasourceParams: JSON.stringify(
-          {
-            password: 'xxx'
-          }
-        )
-      };
+      it('should encrypt datasource parameters correctly', function () {
+        var query = {
+          datasourceType: 'type1',
+          datasourceParams: JSON.stringify({
+            password: 'BONTEMPIàÀ的123'
+          })
+        };
 
-      var expected =  {
-        datasourceType: 'type1',
-        datasourceParams: JSON.stringify(
-          {
-            password: 'aes-256-ctr:50ecc5'
-          }
-        )
-      };
+        var expected =  {
+          datasourceType: 'type1',
+          datasourceParams: JSON.stringify(
+            {
+              password: 'AES-GCM:NhxjhWFkEf8wrxfAA1oHo644:CgMFVVVQAAMAoAAA:FaPn/SPOXfqYMWNysdOkVw=='
+            }
+          )
+        };
 
-      cryptoHelper.encryptDatasourceParams(config, query);
+        cryptoHelper.encryptDatasourceParams(default_config, query);
+        expect(query).to.eql(expected);
+      });
 
-      expect(query).to.eql(expected);
+      afterEach(function () {
+        forge.random.getBytesSync.restore();
+      });
     });
 
+    describe('getting a random IV', function () {
+      it('should encrypt datasource parameters correctly using the default key', function () {
+        var password = 'BONTEMPIàÀ的123';
 
+        var query = {
+          datasourceType: 'type1',
+          datasourceParams: JSON.stringify({
+            password: password
+          })
+        };
 
+        cryptoHelper.encryptDatasourceParams(default_config, query);
 
+        expect(query.datasourceType).to.eql(query.datasourceType);
+        var params = JSON.parse(query.datasourceParams);
+        expect(cryptoHelper.decrypt(default_key, params.password)).to.eql(password);
+      });
+    });
   });
+
 });
 

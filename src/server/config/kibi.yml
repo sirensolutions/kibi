@@ -81,19 +81,16 @@ datasource_cache_size: 500
 # The max age of an object in the cache, in milliseconds
 datasource_cache_max_age: 3600000
 
-# Set to protect sensitive parts of configuration like passwords
-# currently supported modes:
-# aes256            camellia256
-# aes-256-ctr
-# aes-256-cbc       camellia-256-cbc
-# aes-256-cfb       camellia-256-cfb
-# aes-256-cfb1      camellia-256-cfb1
-# aes-256-cfb8      camellia-256-cfb8
-# aes-256-ctr
-# aes-256-ecb       camellia-256-ecb
-# aes-256-ofb       camellia-256-ofb
-datasource_encryption_algorithm: 'aes-256-ctr'
-datasource_encryption_key: '3zTvzr3p67VC61jmV54rIYu1545x4TlZ'
+# The encryption algorithm used to encrypt sensitive datasource configuration
+# fields.
+#
+# Valid values:
+# AES-GCM
+datasource_encryption_algorithm: 'AES-GCM'
+
+#The encryption key in base64 format; to change the key, use the
+# bin/replace_encryption_key script
+datasource_encryption_key: 'iSxvZRYisyUW33FreTBSyJJ34KpEquWznUPDvn+ka14='
 
 # The default dashboard to load. Works only when default_app_id='dashboard'
 default_dashboard_id: Articles

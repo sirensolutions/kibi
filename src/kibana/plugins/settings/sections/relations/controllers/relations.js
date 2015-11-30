@@ -403,7 +403,7 @@ define(function (require) {
 
 
     $scope.submit = function (elements) {
-      var relations = config.get('kibi:relations', {});
+      var relations = config.get('kibi:relations');
 
       relations.relationsIndices = _.map($scope.relations.relationsIndices, function (relation) {
         return _.omit(relation, [ 'error' ]);

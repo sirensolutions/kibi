@@ -45,7 +45,9 @@ define(function (require) {
     };
 
 
-    this.find = function (searchString) {
+    this.find = function (searchString, size) {
+      var self = this;
+      size = (size == null) ? 100 : size;
       var body;
       if (searchString) {
         body = {

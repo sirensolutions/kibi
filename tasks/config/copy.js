@@ -104,6 +104,12 @@ module.exports = function (grunt) {
           src: 'datasources-schema.json',
           dest: '<%= build %>/dist/<%= pkg.name %>/config/'
         },
+      ]
+    },
+
+    deps: {
+      options: { mode: '0644' },
+      files: [
         {
           expand: true,
           cwd: '<%= bowerComponentsDir %>/ace-builds/src-noconflict/',

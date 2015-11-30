@@ -114,6 +114,7 @@ router.use(function (req, res, next) {
   var options = {
     agent: router.proxyAgent,
     url: elasticsearch_url,
+    //url: uri.protocol + '//' + uri.host + path,
     method: req.method,
     headers: _.defaults({}, req.headers),
     strictSSL: config.kibana.verify_ssl,

@@ -48,8 +48,9 @@ define(function (require) {
       });
     };
 
-    this.find = function (searchString) {
+    this.find = function (searchString, size) {
       var self = this;
+      size = (size == null) ? 100 : size;
       var body;
       if (searchString) {
         body = {
@@ -75,7 +76,7 @@ define(function (require) {
         index: configFile.kibana_index,
         type: 'search',
         body: body,
-        size: 100
+        size: size
       })
       .then(function (resp) {
         var ret = {

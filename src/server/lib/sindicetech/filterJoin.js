@@ -95,7 +95,7 @@ exports.set = function (json) {
 };
 
 function _replaceObjects(json, objects) {
-  for (var i = 0; i < objects.length; i++) {
+  for (var i = objects.length - 1; i >= 0; i--) {
     var path = objects[i].path;
     if (util.length(json, path) !== 1) {
       throw new Error('The object at ' + JSON.stringify(path, null, ' ') + ' must only contain the join filter');

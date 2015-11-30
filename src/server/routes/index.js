@@ -8,6 +8,7 @@ router.get('/config', function (req, res, next) {
     'kibana_index',
     'default_app_id',
     'shard_timeout',
+    'xsrf_token',
     'default_dashboard_id', // added by kibi
     'datasources_schema' // added by kibi
   ];

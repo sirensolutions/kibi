@@ -1326,6 +1326,254 @@ describe('FilterJoin querying', function () {
       expect(actual).to.eql(expected);
     });
 
+    it('should consider the position of queries before being replaced by their filterjoin equivalent', function () {
+      var query = {
+        query: [
+          {
+            join_set: {
+              focus: 'company',
+              relations: [
+                [
+                  {
+                    indices: [
+                      'company'
+                    ],
+                    path: 'id'
+                  },
+                  {
+                    indices: [
+                      'investment'
+                    ],
+                    path: 'companyid'
+                  }
+                ],
+                [
+                  {
+                    indices: [
+                      'article'
+                    ],
+                    path: 'companyid'
+                  },
+                  {
+                    indices: [
+                      'company'
+                    ],
+                    path: 'id'
+                  }
+                ]
+              ]
+            }
+          },
+          {
+            other: {
+              join_set: {
+                focus: 'article',
+                relations: [
+                  [
+                    {
+                      indices: [
+                        'article'
+                      ],
+                      path: 'companyid'
+                    },
+                    {
+                      indices: [
+                        'company'
+                      ],
+                      path: 'id'
+                    }
+                  ]
+                ]
+              }
+            }
+          }
+        ]
+      };
+      var expected = {
+        query: [
+          {
+            filterjoin: {
+              id: {
+                query: {
+                  filtered: {
+                    query: {
+                      bool: {
+                        must: [
+                          {
+                            match_all: {}
+                          }
+                        ]
+                      }
+                    },
+                    filter: {
+                      bool: {
+                        must: []
+                      }
+                    }
+                  }
+                },
+                indices: ['investment'],
+                path: 'companyid'
+              }
+            }
+          },
+          {
+            filterjoin: {
+              id: {
+                query: {
+                  filtered: {
+                    query: {
+                      bool: {
+                        must: [
+                          {
+                            match_all: {}
+                          }
+                        ]
+                      }
+                    },
+                    filter: {
+                      bool: {
+                        must: []
+                      }
+                    }
+                  }
+                },
+                indices: ['article'],
+                path: 'companyid'
+              }
+            }
+          },
+          {
+            other: [
+              {
+                filterjoin: {
+                  companyid: {
+                    query: {
+                      filtered: {
+                        query: {
+                          bool: {
+                            must: [
+                              {
+                                match_all: {}
+                              }
+                            ]
+                          }
+                        },
+                        filter: {
+                          bool: {
+                            must: []
+                          }
+                        }
+                      }
+                    },
+                    indices: ['company'],
+                    path: 'id'
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      };
+      var actual = filterJoinSeq(filterJoinSet(query));
+      expect(actual).to.eql(expected);
+    });
+
+    it('join_sequence with a join_set', function () {
+      var query = [{
+        join_sequence: [
+          {
+            relation: [
+              {
+                path: 'id',
+                indices: [ 'company' ],
+                queries: [
+                  {
+                    join_set: {
+                      focus: 'i1',
+                      relations: [
+                        [
+                          {
+                            indices: [ 'i1' ],
+                            path: 'id2'
+                          },
+                          {
+                            indices: [ 'i2' ],
+                            path: 'id'
+                          }
+                        ]
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                path: 'companyid',
+                indices: [ 'investment' ]
+              }
+            ]
+          }
+        ]
+      }];
+      var expected = [
+        {
+          filterjoin: {
+            companyid: {
+              path: 'id',
+              indices: ['company'],
+              query: {
+                filtered: {
+                  query: {
+                    bool: {
+                      must: [
+                        {
+                          match_all: {}
+                        }
+                      ]
+                    }
+                  },
+                  filter: {
+                    bool: {
+                      must: [
+                        {
+                          filterjoin: {
+                            id2: {
+                              query: {
+                                filtered: {
+                                  query: {
+                                    bool: {
+                                      must: [
+                                        {
+                                          match_all: {}
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  filter: {
+                                    bool: {
+                                      must: []
+                                    }
+                                  }
+                                }
+                              },
+                              indices: ['i2'],
+                              path: 'id'
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ];
+      var actual = filterJoinSeq(filterJoinSet(query));
+      expect(actual).to.eql(expected);
+    });
+
     it('nested sequence 1', function () {
       var query = [{
         join_sequence: [

@@ -1,2 +1,2 @@
-datasource_encryption_algorithm: 'aes-256-ctr'
-datasource_encryption_key: '3zTvzr3p67VC61jmV54rIYu1545x4TlX'
+datasource_encryption_algorithm: 'AES-GCM'
+datasource_encryption_key: 'JhWzsL2ZrgiaPjv+sHtMIPSDxu3yfPvNqMSQoEectxo='

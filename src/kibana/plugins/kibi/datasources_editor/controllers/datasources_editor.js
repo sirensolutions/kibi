@@ -35,7 +35,8 @@ define(function (require) {
 
   app.controller(
     'DatasourcesEditor',
-    function ($rootScope, $scope, $route, $window, kbnUrl, Notifier, savedDatasources, Private, Promise, queryEngineClient, $element) {
+    function ($rootScope, $scope, $route, $window, config, kbnUrl, Notifier,
+              savedDatasources, Private, Promise, queryEngineClient, $element) {
 
       var setDatasourceSchema = Private(require('plugins/kibi/datasources_editor/lib/set_datasource_schema'));
 
@@ -59,6 +60,22 @@ define(function (require) {
         if (!$element.find('form[name="objectForm"]').hasClass('ng-valid')) {
           $window.alert('Please fill in all the required parameters.');
           return;
+        }
+
+        if (config.file.datasource_encryption_warning) {
+          var encrypted = false;
+          var field;
+          for (var s = 0; s < datasource.schema.length; s++) {
+            field = datasource.schema[s];
+            if (field.encrypted) {
+              encrypted = true;
+              break;
+            }
+          }
+          if (encrypted && !$window.confirm('You haven\'t set a custom encryption key;' +
+              ' are you sure you want to save this datasource?')) {
+            return;
+          }
         }
 
         if (datasource.datasourceType === 'sql_jdbc' || datasource.datasourceType === 'sparql_jdbc') {

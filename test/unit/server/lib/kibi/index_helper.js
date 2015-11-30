@@ -6,7 +6,7 @@ var Promise = require('bluebird');
 var fs = require('fs');
 
 var fake_kibi_yml_path      = __dirname + '/../../../fixtures/fake_kibi.yml';
-var fake_kibi_yml_back_path = __dirname + '/../../../fixtures/fake_kibi.yml.back';
+var fake_kibi_yml_bak_path = __dirname + '/../../../fixtures/fake_kibi.yml.bak';
 
 describe('Index Helper', function () {
 
@@ -44,7 +44,7 @@ describe('Index Helper', function () {
 
     it('when not supported algorithm', function (done) {
       indexHelper.rencryptAllValuesInKibiIndex('oldkey', 'algorithm', 'newkey', 'path').catch(function (err) {
-        expect(err.message.indexOf('not supported algorithm. Use one of') === 0).to.equal(true);
+        expect(err.message.indexOf('Unsupported algorithm. Use one of') === 0).to.be(true);
         done();
       });
     });
@@ -82,7 +82,8 @@ describe('Index Helper', function () {
                   title: 'mysql test datasource',
                   description: '',
                   datasourceType: 'mysql',
-                  datasourceParams: '{"host":"localhost","dbname":"test","username":"root","password":"aes-256-ctr:3b28a10425fd"}',
+                  datasourceParams: '{"host":"localhost","dbname":"test","username":"root",' +
+                    '"password":"AES-GCM:NhxjhWFkEf8wrxfAA1oHo644:CgMFVVVQAAMAoAAA:FaPn/SPOXfqYMWNysdOkVw=="}',
                   version: 1,
                   kibanaSavedObjectMeta: {
                     searchSourceJSON: '{}'
@@ -102,14 +103,14 @@ describe('Index Helper', function () {
       mockery.disable();
       mockery.deregisterAll();
 
-      // if there is fake_kibi.yml.back in fixtures
+      // if there is fake_kibi.yml.bak in fixtures
       // rename it back to fake_kibi.yml
-      fs.exists(fake_kibi_yml_back_path, function (exists) {
+      fs.exists(fake_kibi_yml_bak_path, function (exists) {
         if (!exists) {
           // there is no such file
           done();
         } else {
-          fs.rename(fake_kibi_yml_back_path, fake_kibi_yml_path, function (err) {
+          fs.rename(fake_kibi_yml_bak_path, fake_kibi_yml_path, function (err) {
             done();
           });
         }
@@ -120,20 +121,20 @@ describe('Index Helper', function () {
       var indexHelper = root('src/server/lib/kibi/index_helper');
       var expected = [
       'Got 1 datasources.',
-      'param: password value: aes-256-ctr:3b28a10425fd',
+      'param: password value: AES-GCM:NhxjhWFkEf8wrxfAA1oHo644:CgMFVVVQAAMAoAAA:FaPn/SPOXfqYMWNysdOkVw==',
       'decrypted value',
       'encrypted the value',
       'Saving new kibi.yml',
-      'New kibi.yml saved. Old kibi.yml moved to kibi.yml.back',
+      'New kibi.yml saved. Old kibi.yml moved to kibi.yml.bak',
       'DONE'];
 
       indexHelper.rencryptAllValuesInKibiIndex(
-        '3zTvzr3p67VC61jmV54rIYu1545x4TlX', 'aes-256-ctr',
-        '3zTvzr3p67VC61jmV54rIYu1545x4TlX', fake_kibi_yml_path)
+        'iSxvZRYisyUW33FreTBSyJJ34KpEquWznUPDvn+ka14=', 'AES-GCM',
+        'JhWzsL2ZrgiaPjv+sHtMIPSDxu3yfPvNqMSQoEectxo=', fake_kibi_yml_path)
       .then(function (report) {
         expect(report).to.eql(expected);
         expect(fs.existsSync(fake_kibi_yml_path)).to.equal(true);
-        expect(fs.existsSync(fake_kibi_yml_back_path)).to.equal(true);
+        expect(fs.existsSync(fake_kibi_yml_bak_path)).to.equal(true);
         done();
       });
     });

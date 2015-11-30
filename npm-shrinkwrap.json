@@ -1297,6 +1297,10 @@
         }
       }
     },
+    "node-forge": {
+      "version": "0.6.37",
+      "from": "node-forge@*"
+    },
     "pg": {
       "version": "4.3.0",
       "from": "pg@4.3.0",

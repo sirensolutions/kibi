@@ -14,21 +14,14 @@ define(function (require) {
     reloadOnSearch: false
   });
 
-  app.controller('RelationsController', function ($rootScope, $scope, AppState, config, Notifier, Private) {
+  app.controller('RelationsController', function ($rootScope, $scope, config, Notifier, Private, $element, $window) {
     var urlHelper = Private(require('components/kibi/url_helper/url_helper'));
     var color = Private(require('components/vislib/components/color/color'));
 
     var notify = new Notifier({ location: 'Kibi Relations'});
-    var $state = $scope.state = new AppState();
 
     $scope.relations = config.get('kibi:relations');
     $scope.relationalPanel = config.get('kibi:relationalPanel');
-
-    $scope.changeTab = function (tab) {
-      $state.tab = tab;
-      $state.save();
-    };
-    $scope.changeTab('indices');
 
     $scope.$watch('relationalPanel', function () {
       config.set('kibi:relationalPanel', $scope.relationalPanel);
@@ -242,7 +235,17 @@ define(function (require) {
             g.links.push({
               source: relDash.dashboards[0],
               target: relDash.dashboards[1],
-              linkType: _getRelationLabel(relDash.relation),
+              linkType: 'link',
+              htmlElement: $('<div>').html(
+                  '<div style="width:69px;">' +
+                    '<input type="checkbox" ' + (relDash.enabled ? 'checked' : '') + '/>' +
+                    '&nbsp;<label> ' + _getRelationLabel(relDash.relation) + '</label>' +
+                  '</div>').get(0),
+              htmlElementWidth: 70,
+              htmlElementHeight: 18,
+              onLinkClick: function (THIS, d, i) {
+                relDash.enabled = $(THIS).find('input[type=\'checkbox\']').is(':checked');
+              },
               undirected: true
             });
 
@@ -402,7 +405,13 @@ define(function (require) {
     });
 
 
-    $scope.submit = function (elements) {
+    $scope.submit = function () {
+      if (!$element.find('form[name="indicesForm"]').hasClass('ng-valid') ||
+          !$element.find('form[name="dashboardsForm"]').hasClass('ng-valid')) {
+        $window.alert('Please fill in all the required parameters.');
+        return;
+      }
+
       var relations = config.get('kibi:relations');
 
       relations.relationsIndices = _.map($scope.relations.relationsIndices, function (relation) {
@@ -414,7 +423,7 @@ define(function (require) {
       });
 
       config.set('kibi:relations', relations).then(function () {
-        notify.info('Saved the relationships between ' + elements);
+        notify.info('Saved relationships');
         $rootScope.$emit('egg:indicesGraph:run', 'stop');
         $rootScope.$emit('egg:dashboardsGraph:run', 'stop');
         $rootScope.$emit('egg:indicesGraph:run', 'exportGraph');

@@ -9,6 +9,9 @@ define(function (require) {
     name: 'relations',
     buttonLabel: 'Relation',
     display: 'Relations',
-    url: '#/settings/relations'
+    url: '#/settings/relations',
+    saveObject: function () {
+      angular.element(document.getElementById('relations')).scope().submit();
+    }
   };
 });

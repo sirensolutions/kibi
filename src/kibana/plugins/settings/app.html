@@ -19,14 +19,14 @@
         }
       </style>
       <div class="button-group navbar-button-group"
-           ng-show="section.name === 'datasources' || section.name === 'queries' || section.name === 'templates' || section.name === 'dashboardgroups'">
-        <kbn-tooltip text="New {{section.buttonLabel}}" placement="bottom" append-to-body="1">
+           ng-show="section.name === 'relations' || section.name === 'datasources' || section.name === 'queries' || section.name === 'templates' || section.name === 'dashboardgroups'">
+        <kbn-tooltip ng-if="!!section.newObject" text="New {{section.buttonLabel}}" placement="bottom" append-to-body="1">
           <button ng-click="section.newObject()" class="navbar-button"><i class="fa fa-file-new-o"></i></button>
         </kbn-tooltip>
-        <kbn-tooltip text="Save {{section.buttonLabel}}" placement="bottom" append-to-body="1">
+        <kbn-tooltip ng-if="!!section.saveObject" text="Save {{section.buttonLabel}}" placement="bottom" append-to-body="1">
           <button ng-click="section.saveObject()" class="navbar-button"><i class="fa fa-save"></i></button>
         </kbn-tooltip>
-        <kbn-tooltip text="Load Saved {{section.buttonLabel}}" placement="bottom" append-to-body="1">
+        <kbn-tooltip ng-if="!!section.rpenObjectFinder" text="Load Saved {{section.buttonLabel}}" placement="bottom" append-to-body="1">
           <button ng-click="section.openObjectFinder()" class="navbar-button"><i class="fa fa-folder-open-o"></i></button>
         </kbn-tooltip>
       </div>

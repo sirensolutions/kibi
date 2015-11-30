@@ -5,6 +5,7 @@ define(function (require) {
     var Promise = require('bluebird');
     var $scope;
     var config;
+    var jQuery = require('jquery');
     var indexToDashboardMapPromise;
 
     function init(options) {
@@ -20,7 +21,11 @@ define(function (require) {
         config.set('kibi:relations', options.relations);
 
         $scope = $rootScope;
-        $controller('RelationsController', { $scope: $scope });
+        var el = '<div><form name="dashboardsForm" class="ng-valid"/><form name="indicesForm" class="ng-valid"/></div>';
+        $controller('RelationsController', {
+          $scope: $scope,
+          $element: jQuery(el)
+        });
         $scope.$digest();
       });
     }
@@ -180,7 +185,6 @@ define(function (require) {
             });
             done();
           });
-          $scope.submit('indices');
         });
       });
 

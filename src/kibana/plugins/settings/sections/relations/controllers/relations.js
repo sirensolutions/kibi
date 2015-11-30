@@ -14,21 +14,12 @@ define(function (require) {
     reloadOnSearch: false
   });
 
-  app.controller('RelationsController', function ($rootScope, $scope, AppState, config, Notifier, Private) {
+  app.controller('RelationsController', function ($rootScope, $scope, config, Private, $element) {
     var urlHelper = Private(require('components/kibi/url_helper/url_helper'));
     var color = Private(require('components/vislib/components/color/color'));
 
-    var notify = new Notifier({ location: 'Kibi Relations'});
-    var $state = $scope.state = new AppState();
-
     $scope.relations = config.get('kibi:relations');
     $scope.relationalPanel = config.get('kibi:relationalPanel');
-
-    $scope.changeTab = function (tab) {
-      $state.tab = tab;
-      $state.save();
-    };
-    $scope.changeTab('indices');
 
     $scope.$watch('relationalPanel', function () {
       config.set('kibi:relationalPanel', $scope.relationalPanel);
@@ -36,6 +27,7 @@ define(function (require) {
 
     var indexToDashboardsMap = null;
     var nodeTypes = [];
+
     /**
      * Filters out the dashboards that are not relevant in the row with the given id
      */
@@ -44,7 +36,7 @@ define(function (require) {
 
       if (!value) {
         // this is the watched value
-        return relDash;
+        return _.pluck($scope.relations.relationsIndices, 'id').concat(relDash);
       }
       if (!!value) {
         var remove = true;
@@ -129,7 +121,9 @@ define(function (require) {
       var rIndex = '';
 
       if (!relationId) {
-        return dashboards;
+        return _.pluck($scope.relations.relationsIndices, 'id')
+        .concat(_.pluck($scope.relations.relationsIndices, 'label'))
+        .concat(dashboards);
       }
       _.each(indexToDashboardsMap, function (map, index) {
         if (map.indexOf(dashboards[0]) !== -1) {
@@ -242,7 +236,17 @@ define(function (require) {
             g.links.push({
               source: relDash.dashboards[0],
               target: relDash.dashboards[1],
-              linkType: _getRelationLabel(relDash.relation),
+              linkType: 'link',
+              htmlElement: $('<div>').html(
+                  '<div style="width:69px;">' +
+                    '<input type="checkbox" ' + (relDash.enabled ? 'checked' : '') + '/>' +
+                    '&nbsp;<label> ' + _getRelationLabel(relDash.relation) + '</label>' +
+                  '</div>').get(0),
+              htmlElementWidth: 70,
+              htmlElementHeight: 18,
+              onLinkClick: function (THIS, d, i) {
+                relDash.enabled = $(THIS).find('input[type=\'checkbox\']').is(':checked');
+              },
               undirected: true
             });
 
@@ -267,6 +271,9 @@ define(function (require) {
       });
 
       $scope.dashboardsGraph = g;
+      if (_isValid('dashboards')) {
+        save('dashboards');
+      }
     }
 
     $scope.$watch(function ($scope) {
@@ -288,7 +295,7 @@ define(function (require) {
       return _.map($scope.relations.relationsIndices, function (relation) {
         return _.omit(relation, 'error');
       });
-    }, function () {
+    }, function (newRelations, oldRelations) {
       // each node is an index
       var g = {
         options: {
@@ -380,6 +387,44 @@ define(function (require) {
       });
 
       $scope.indicesGraph = g;
+
+      if (_isValid('indices')) {
+        save('indices').then(function () {
+          if (oldRelations && oldRelations.length) {
+            var relationsIndices = config.get('kibi:relations').relationsIndices;
+
+            if (relationsIndices.length < oldRelations.length) {
+              // a relation was deleted
+              var diff = _.difference(_.pluck(oldRelations, 'id'), _.pluck(relationsIndices, 'id'));
+              _.each($scope.relations.relationsDashboards, function (relation) {
+                if (diff.indexOf(relation.relation) !== -1) {
+                  relation.relation = '';
+                }
+              });
+            } else if (relationsIndices.length === oldRelations.length) {
+              // check if the definition of a relation was changed
+              var clearRelation = function (oldRelationId) {
+                _.each($scope.relations.relationsDashboards, function (relation) {
+                  if (relation.relation === oldRelationId) {
+                    relation.relation = '';
+                  }
+                });
+              };
+
+              for (var i = 0; i < relationsIndices.length; i++) {
+                if (relationsIndices[i].id && oldRelations[i].id) {
+                  var newRelationId = relationsIndices[i].id.split('/');
+                  var oldRelationId = oldRelations[i].id.split('/');
+
+                  if (newRelationId[0] !== oldRelationId[0] || newRelationId[2] !== oldRelationId[2]) {
+                    clearRelation(oldRelations[i].id);
+                  }
+                }
+              }
+            }
+          }
+        });
+      }
     }, true);
 
     var indicesGraphExportOff = $rootScope.$on('egg:indicesGraph:results', function (event, method, results) {
@@ -401,26 +446,31 @@ define(function (require) {
       dashboardsGraphExportOff();
     });
 
+    function _isValid(graph) {
+      if (graph === 'indices') {
+        return $element.find('form[name="indicesForm"]').hasClass('ng-valid');
+      } else {
+        return $element.find('form[name="dashboardsForm"]').hasClass('ng-valid');
+      }
+    }
 
-    $scope.submit = function (elements) {
+    function save(graph) {
       var relations = config.get('kibi:relations');
 
-      relations.relationsIndices = _.map($scope.relations.relationsIndices, function (relation) {
-        return _.omit(relation, [ 'error' ]);
-      });
+      if (graph === 'indices') {
+        relations.relationsIndices = _.map($scope.relations.relationsIndices, function (relation) {
+          return _.omit(relation, [ 'error' ]);
+        });
+      } else {
+        relations.relationsDashboards = _.map($scope.relations.relationsDashboards, function (relation) {
+          return _.omit(relation, [ 'error' ]);
+        });
+      }
 
-      relations.relationsDashboards = _.map($scope.relations.relationsDashboards, function (relation) {
-        return _.omit(relation, [ 'error' ]);
-      });
-
-      config.set('kibi:relations', relations).then(function () {
-        notify.info('Saved the relationships between ' + elements);
-        $rootScope.$emit('egg:indicesGraph:run', 'stop');
-        $rootScope.$emit('egg:dashboardsGraph:run', 'stop');
+      return config.set('kibi:relations', relations).then(function () {
         $rootScope.$emit('egg:indicesGraph:run', 'exportGraph');
         $rootScope.$emit('egg:dashboardsGraph:run', 'exportGraph');
       });
-
-    };
+    }
   });
 });

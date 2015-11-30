@@ -29,7 +29,7 @@ router.get('/config', function (req, res, next) {
 
   res.json({
     configFile: data,
-    warnings: warnings  // as this is the first thing we gat from the server kibi will use it to pass some warnings
+    warnings: warnings  // as this is the first thing we got from the server kibi will use it to pass some warnings
   });
 
 });

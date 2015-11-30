@@ -18,7 +18,7 @@ describe('xsrf request filter', function () {
       request(app)
       .get('/config')
       .expect(function (res) {
-        expect(res.body).to.have.property('xsrf_token', xsrfToken);
+        expect(res.body.configFile).to.have.property('xsrf_token', xsrfToken);
       })
       .end(done);
     });

@@ -119,7 +119,7 @@ define(function (require) {
             emptyResultsTemplate =
               '<div class="snippetContainer">' +
               '  <div class="snippet-@INDEX@">' +
-              '    <div class="templateResult">' +
+              '    <div class="templateResult results-not-ok-less-verbose">' +
               '      @MESSAGE@' +
               '    </div>' +
               '  </div>' +

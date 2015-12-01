@@ -22,7 +22,7 @@ in the index has a field called `id` that contains the ID of the company.
 The index is displayed on a dashboard named `Companies`.
 
 Using the Relational filter visualization, it is possible to configure a
-relation between `Articles.company` and `Companies.name` and use it as a
+relation between `Articles.companyid` and `Companies.id` and use it as a
 filter on the Companies index.
 
 The result is that it becomes possible to search specific articles in the
@@ -37,13 +37,13 @@ The screenshot below shows the button for the relation described in the
 example; there are 48 companies mentioned in the 234 articles currently
 displayed:
 
-image::images/relational-filter/relational-filter-companies-source.png["Relational filter button in source dashboard",align="center"]
+image::images/relational-filter/relational-filter-companies-source.png["Relational filter button in source dashboard",align="center", width="400"]
 
 Clicking on the button will switch to the _Companies_ dashboard and display
 the 48 companies; the relational filter is displayed in the filter bar, as
 displayed below:
 
-image::images/relational-filter/relational-filter-companies-target.png["Relational filter in target dashboard",align="center"]
+image::images/relational-filter/relational-filter-companies-target.png["Relational filter in target dashboard",align="center", width="400"]
 
 The Kibi Relational filter visualization requires the Siren 2.0 plugin for
 Elasticsearch, which is currently available as a pre-release in
@@ -63,7 +63,11 @@ the filter is defined by the following parameters:
 - _Button label_: the label of the button that will be displayed inside the
 visualization, e.g. `Companies -->`.
 - _Filter label_: the label of the filter that will be displayed in the
-filter bar, e.g. `...mentioned in Articles`.
+filter bar, Default is `... related to ($COUNT) from $DASHBOARD.`,
+where:
+$COUNT is a number of items on source dashboard,
+$DASHBOARD is a source dashboard name.
+User can use these two variable placeholders when writing custom filter label.
 - _Source index_: the source index in the relation.
 - _Source index type_: the source index document type.
 - _Source field_: the source index field in the relation.
@@ -87,11 +91,37 @@ to the currently displayed dashboard.
 === Usage
 
 When clicking on a button in the Kibi Relational filter visualization,
-the filters applied in the source dashboard are permanently merged with the
-filters applied in the target dashboard.
+the current state of the source dashboard is added to relational filter
+and applied on the target dashboard.
+To see the explanation of a relational filter, just move the mouse over it.
 
-To see the explanation of a relational filter, just move the mouse over it,
-as shown in the screenshot below:
+Below we started on **Articles** dashboard, searched for pizza and clicked
+on the relational button to rotate to **Companies**.
+As we see on the explanation there is only one step which shows
+what queries and filters were applied on **Articles**.
 
-image::images/relational-filter/relational-filter-explanation.png["Relational filter explanation",align="center"]
+```
+1 article.companyid -> company.id
+  query pizza
+  time filter on pdate
+```
 
+image::images/relational-filter/relational-filter-explanation1.png["Relational filter explanation",align="center"]
+
+Next we added a regular filter country to USA (`countrycode: USA`) and clicked
+on a relational filter button to go to **Investments**.
+Now the explanation shows two steps.
+
+```
+2 company.id -> investment.companyid
+  filter countrycode
+  time filter on funded_date
+
+1 article.companyid -> company.id
+  query pizza
+  time filter on pdate
+```
+
+image::images/relational-filter/relational-filter-explanation2.png["Relational filter explanation",align="center"]
+
+Explanation steps are always shown in reverse - last one on the top.

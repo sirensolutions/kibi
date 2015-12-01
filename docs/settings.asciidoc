@@ -343,11 +343,22 @@ A relationship between dashboards is defined with the following parameters
 
 For example, the image below shows a graph of five dashboards:
 
-1. the dashboard "Articles" with a saved search associated to the index "article" depicted with the circle +++<span style="border-radius: 50%; width: 20px; height: 20px; background-color: #57c17b; display: inline-block;"></span>+++;
-2. the dashboard "Articles detailed per source" with a saved search associated to the index "article" depicted with the circle +++<span style="border-radius: 50%; width: 20px; height: 20px; background-color: #57c17b; display: inline-block;"></span>+++;
-3. the dashboard "Companies" with a saved search associated to the index "company" depicted with the circle +++<span style="border-radius: 50%; width: 20px; height: 20px; background-color: #006e8a; display: inline-block;"></span>+++;
-4. the dashboard "Investments" with a saved search associated to the index "investment" depicted with the circle +++<span style="border-radius: 50%; width: 20px; height: 20px; background-color: #6f87d8; display: inline-block;"></span>+++; and
-5. the dashboard "Investors" with a saved search associated to the index "investor" depicted with the circle +++<span style="border-radius: 50%; width: 20px; height: 20px; background-color: #663db8; display: inline-block;"></span>+++.
++++
+<style>
+.small-circle{
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: inline-block;
+}
+</style>
++++
+
+1. the dashboard "Articles" with a saved search associated to the index "article" depicted with the circle +++<span class="small-circle" style="background-color: #57c17b;"></span>+++;
+2. the dashboard "Articles detailed per source" with a saved search associated to the index "article" depicted with the circle +++<span class="small-circle" style="background-color: #57c17b;"></span>+++;
+3. the dashboard "Companies" with a saved search associated to the index "company" depicted with the circle +++<span class="small-circle" style="background-color: #006e8a;"></span>+++;
+4. the dashboard "Investments" with a saved search associated to the index "investment" depicted with the circle +++<span class="small-circle" style="background-color: #6f87d8;"></span>+++; and
+5. the dashboard "Investors" with a saved search associated to the index "investor" depicted with the circle +++<span class="small-circle" style="background-color: #663db8;"></span>+++.
 
 Such relationships between dashboards are defined on the right side of the panel, as shown in the image below.
 

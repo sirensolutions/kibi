@@ -25,7 +25,7 @@ Below list of additional mandatory parameters for each datasource type:
 *REST*
 
 * url - an URL of rest API endpoint
-* response_type - API results format, currently kibi supports only *json*
+* response_type - API results format, currently Kibi supports only *JSON*
 * username (optional) - username with access to the API
 * password (optional) - corresponding password
 * auth_token (optional) - token used in Token Authentication
@@ -70,7 +70,7 @@ bin/replace_encryption_key.sh OLD_KEY ALGORITHM NEW_KEY PATH_TO_KIBI_YML
 ```
 Windows:
 ```
-bin/replace_encryption_key.bat OLD_KEY ALGORITHM NEW_KEY PATH_TO_KIBI_YML
+bin\replace_encryption_key.bat OLD_KEY ALGORITHM NEW_KEY PATH_TO_KIBI_YML
 ```
 ====
 

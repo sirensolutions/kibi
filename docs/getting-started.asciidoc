@@ -103,7 +103,7 @@ To understand how to define a relational filter, click the pencil icon
 inside the _Relational widget_ visualization heading; this will open the
 configuration editor:
 
-image::images/getting-started/relational-filter-config.png["Relational filter configuration",align="center"]
+image::images/getting-started/relational-filter-config.png["Relational filter configuration",align="center", width="300"]
 
 As you can see, it is possible to set two different values for label displayed
 on the button and for the label displayed in the filter; it is also possible
@@ -203,13 +203,15 @@ clicking on its label in the _Companies Table_.
 The selected entity can be used as a parameter in <<datasource-queries, queries>>;
 for example, click on `Baidu` in _Companies Table_:
 
-image::images/getting-started/entity-selection.png["Entity selection",align="center"]
+image::images/getting-started/entity-selection.png["Entity selection",align="center", width="800"]
 
 Selecting an entity enables additional queries on external datasources; for
 example, in the _Query on Companies_ visualization you can see that, amongst
 the top 500 companies by number of employees mentioned in articles about
-`wireless` or `wifi`, `Baidu` has one competitor and there are two companies
+`wireless` or `wifi`, `Baidu` has one competitor and there are five companies
 in the same domain.
+All widgets affected by the selected entity are marked by a purple header.
+
 
 Selecting an entity also enables the display of additional data in the
 _Company Info_ visualization; by clicking on the _(show)_ links you can

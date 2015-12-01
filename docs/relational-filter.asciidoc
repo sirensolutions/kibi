@@ -37,13 +37,13 @@ The screenshot below shows the button for the relation described in the
 example; there are 48 companies mentioned in the 234 articles currently
 displayed:
 
-image::images/relational-filter/relational-filter-companies-source.png["Relational filter button in source dashboard",align="center"]
+image::images/relational-filter/relational-filter-companies-source.png["Relational filter button in source dashboard",align="center", width="400"]
 
 Clicking on the button will switch to the _Companies_ dashboard and display
 the 48 companies; the relational filter is displayed in the filter bar, as
 displayed below:
 
-image::images/relational-filter/relational-filter-companies-target.png["Relational filter in target dashboard",align="center"]
+image::images/relational-filter/relational-filter-companies-target.png["Relational filter in target dashboard",align="center", width="400"]
 
 The Kibi Relational filter visualization requires the Siren 2.0 plugin for
 Elasticsearch, which is currently available as a pre-release in
@@ -63,9 +63,11 @@ the filter is defined by the following parameters:
 - _Button label_: the label of the button that will be displayed inside the
 visualization, e.g. `Companies -->`.
 - _Filter label_: the label of the filter that will be displayed in the
-filter bar, Default is `... related to ($COUNT) from $DASHBOARD.`, where
-$COUNT corresponds to number of items on source $DASHBOARD. User can write
-use these two variable placeholders when writing custom filter label.
+filter bar, Default is `... related to ($COUNT) from $DASHBOARD.`,
+where:
+$COUNT is a number of items on source dashboard,
+$DASHBOARD is a source dashboard name.
+User can use these two variable placeholders when writing custom filter label.
 - _Source index_: the source index in the relation.
 - _Source index type_: the source index document type.
 - _Source field_: the source index field in the relation.

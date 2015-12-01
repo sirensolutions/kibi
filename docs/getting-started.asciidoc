@@ -210,7 +210,7 @@ example, in the _Query on Companies_ visualization you can see that, amongst
 the top 500 companies by number of employees mentioned in articles about
 `wireless` or `wifi`, `Baidu` has one competitor and there are five companies
 in the same domain.
-All widget affected by selected entity are marked by purple header.
+All widgets affected by the selected entity are marked by a purple header.
 
 
 Selecting an entity also enables the display of additional data in the

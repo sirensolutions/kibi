@@ -60,6 +60,11 @@ define(function (require) {
                         rest_headers: [ { value: '@doc[_source][id]@' } ]
                       };
                       break;
+                    case 'rest-path':
+                      query = {
+                        rest_path: '/users/@doc[_source][user]@'
+                      };
+                      break;
                     default:
                       return Promise.reject('What is this id? ' + id);
                   }
@@ -122,6 +127,14 @@ define(function (require) {
             done();
           });
         });
+
+        it('should be required for REST path', function (done) {
+          shouldEntityUriBeEnabled([ 'rest-path' ]).then(function (required) {
+            expect(required).to.be(true);
+            done();
+          });
+        });
+
       });
 
 

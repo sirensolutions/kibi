@@ -13,8 +13,12 @@ define(function (require) {
       }
 
       // test for rest queries
-      if (query.rest_params || query.rest_headers || query.rest_body) {
+      if (query.rest_params || query.rest_headers || query.rest_body || query.rest_path) {
         if (regex.test(query.rest_body)) {
+          // requires entityURI
+          return true;
+        }
+        if (regex.test(query.rest_path)) {
           // requires entityURI
           return true;
         }

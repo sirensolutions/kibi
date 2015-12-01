@@ -94,16 +94,18 @@ RestQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) {
       self.config.rest_headers,
       self.config.rest_params,
       self.config.rest_body,
+      self.config.rest_path,
       uri, availableVariables)
     .then(function (results) {
       // here convert the params and headers from array to map
       var headers = _.zipObject(_.pluck(results.headers, 'name'), _.pluck(results.headers, 'value'));
       var params = _.zipObject(_.pluck(results.params, 'name'), _.pluck(results.params, 'value'));
       var body = results.body;
+      var path = results.path;
 
       var key;
       if (self.cache) {
-        key = self.config.rest_method + url_s + self.config.rest_path + JSON.stringify(headers) + JSON.stringify(params) + body;
+        key = self.config.rest_method + url_s + path + JSON.stringify(headers) + JSON.stringify(params) + body;
       }
 
       if (self.cache) {
@@ -117,7 +119,7 @@ RestQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) {
       // https://github.com/request/request#requestoptions-callback
       var rp_options = {
         method: self.config.rest_method,
-        uri: url.parse(url.resolve(url_s, self.config.rest_path)),
+        uri: url.parse(url.resolve(url_s, path)),
         headers: headers,
         timeout: timeout || 5000,
         transform: function (body, resp) {

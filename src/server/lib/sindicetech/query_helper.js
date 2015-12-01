@@ -8,12 +8,13 @@ var logger = require('../logger');
 function QueryHelper() {}
 
 
-QueryHelper.prototype.replaceVariablesForREST = function (headers, params, body, uri, variables) {
+QueryHelper.prototype.replaceVariablesForREST = function (headers, params, body, path, uri, variables) {
   // clone here !!! headers, params, body
   // so the original one in the config are not modified
   var h = _.cloneDeep(headers);
   var p = _.cloneDeep(params);
   var b = _.cloneDeep(body);
+  var pa = _.cloneDeep(path);
 
   var self = this;
   // first try to replace placeholders using variables
@@ -21,7 +22,9 @@ QueryHelper.prototype.replaceVariablesForREST = function (headers, params, body,
     for (var name in variables) {
       if (variables.hasOwnProperty(name)) {
         var regex = new RegExp(self._escapeRegexSpecialCharacters(name), 'g');
+
         b = b.replace(regex, variables[name]);
+        pa = pa.replace(regex, variables[name]);
 
         var i;
         for (i = 0; i < h.length; i++) {
@@ -40,14 +43,16 @@ QueryHelper.prototype.replaceVariablesForREST = function (headers, params, body,
   var promises = [
     self.replaceVariablesUsingEsDocument(h, uri),
     self.replaceVariablesUsingEsDocument(p, uri),
-    self.replaceVariablesUsingEsDocument(b, uri)
+    self.replaceVariablesUsingEsDocument(b, uri),
+    self.replaceVariablesUsingEsDocument(pa, uri)
   ];
 
   return Promise.all(promises).then(function (results) {
     return {
       headers: results[0],
       params: results[1],
-      body: results[2]
+      body: results[2],
+      path: results[3]
     };
   });
 };

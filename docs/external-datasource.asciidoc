@@ -24,7 +24,11 @@ Below list of additional mandatory parameters for each datasource type:
 
 *REST*
 
-* TODO: !!! fill this in when REST reimplemented
+* url - an URL of rest API endpoint
+* response_type - API results format, currently kibi supports only *json*
+* username (optional) - username with access to the API
+* password (optional) - corresponding password
+* auth_token (optional) - token used in Token Authentication
 
 *SQLite*
 
@@ -54,8 +58,21 @@ to `true`; the cache size and max age (in milliseconds) can be set through the
 
 A Kibi restart is required to apply configuration changes.
 
-NOTE: Sensitive datasource configuration elements like passwords are encrypted.
-Make sure to change *datasource_encryption_key* in kibi.yml.
+[NOTE]
+====
+Sensitive datasource configuration elements like passwords are encrypted.
+Make sure to change *datasource_encryption_key* in kibi.yml. To do it use scripts
+provided in _bin/_ folder.
+
+Linux:
+```
+bin/replace_encryption_key.sh OLD_KEY ALGORITHM NEW_KEY PATH_TO_KIBI_YML
+```
+Windows:
+```
+bin/replace_encryption_key.bat OLD_KEY ALGORITHM NEW_KEY PATH_TO_KIBI_YML
+```
+====
 
 NOTE: Make sure to set the configuration file as readable only to the user running
 the Kibi process as it contains the *datasource_encryption_key*.

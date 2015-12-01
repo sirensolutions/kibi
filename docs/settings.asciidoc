@@ -1,7 +1,8 @@
 [[settings]]
 == Settings
 
-=== The "Indices" menu
+[[kbn-settings-indices]]
+=== Indices
 
 To use Kibi, you have to tell it about the Elasticsearch indices that you
 want to explore by configuring one or more index patterns. You can also:
@@ -204,7 +205,7 @@ include::string-formatter.asciidoc[]
 
 include::url-formatter.asciidoc[]
 
-The `Bytes`, `Number`, and `Percentage` formatters enable you to choose the display formats of numbers in this field using 
+The `Bytes`, `Number`, and `Percentage` formatters enable you to choose the display formats of numbers in this field using
 the https://adamwdraper.github.io/Numeral-js/[numeral.js] standard format definitions.
 
 [float]
@@ -305,21 +306,79 @@ image::images/source-filtering/config.png["Source filtering configuration",align
 The column _retrieved_ in the _Fields_ tab specifies if the values associated
 with a field should be retrieved or not according to the filtering rules.
 
-[float]
+[[kibi-settings-relations]]
+=== Relations
+
+In this panel, you can define relationships between index patterns. These relationships ultimately form a **graph** of index patterns. This graph is used in conjunction with the Siren 2.0 plugin; this allows to perform join operations between **dashboards**, i.e., filtering a dashboard's documents with regards to an other.
+
+==== Graph of Index Patterns
+
+A relationship is defined as a **join** operation between two indices with the following fields:
+
+- _Left Index Pattern_: the left index of the join;
+- _Left Field_: the field of the left index to join on;
+- _Right Index Pattern_: the right index of the join;
+- _Right Field_: the field of the right index to join with; and
+- _Label_: the label of the relation.
+
+The image below displays a graph of 4 index patterns, where 3 relationships have defined. You can add a new relationship by clicking on the "_Add relation_" button.
+
+image::images/relations-settings/indices-graph.png["Graph of Index Patterns",align="center"]
+
+A relation is also indicated on the <<kbn-settings-indices,Indices>> tab thanks to the icon image:images/relations-settings/index-relation-icon.png["Index relation icon"].
+If you hover the mouse over it, a tooltip message is displayed indicating the index pattern and field that field is joined with.
+
+For example, in the image below, that icon is displayed next to the field "id" of the "investor" index, which is join with the field "investorid" of the "investment" index.
+
+image::images/relations-settings/investor-index.png["Investor Index",align="center"]
+
+==== Graph of Dashboards
+
+Based on the graph of index patterns, one can define relationships between dashboards, since a dashboard may be associated with a <<saving-dashboards,saved search>>.
+
+A relationship between dashboards is defined with the following parameters
+
+- _Left Dashboard_ and _Right Dashboard_: the dashboards to be linked; and
+- _Relation_: the relation that connects the two dashboards; it is the label of a relation previously defined.
+
+For example, the image below shows a graph of 5 dashboards:
+
+1. the dashboard "Articles" with a saved search associated to the index "article" depicted with the circle +++<span style="border-radius: 50%; width: 20px; height: 20px; background-color: #57c17b; display: inline-block;"></span>+++;
+2. the dashboard "Articles detailed per source" with a saved search associated to the index "article" depicted with the circle +++<span style="border-radius: 50%; width: 20px; height: 20px; background-color: #57c17b; display: inline-block;"></span>+++;
+3. the dashboard "Companies" with a saved search associated to the index "company" depicted with the circle +++<span style="border-radius: 50%; width: 20px; height: 20px; background-color: #006e8a; display: inline-block;"></span>+++;
+4. the dashboard "Investments" with a saved search associated to the index "investment" depicted with the circle +++<span style="border-radius: 50%; width: 20px; height: 20px; background-color: #6f87d8; display: inline-block;"></span>+++; and
+5. the dashboard "Investors" with a saved search associated to the index "investor" depicted with the circle +++<span style="border-radius: 50%; width: 20px; height: 20px; background-color: #663db8; display: inline-block;"></span>+++.
+
+Such relationships between dashboards are defined on the right side of the panel, as shown in the image below.
+
+image::images/relations-settings/dashboards-graph.png["Graph of Dashboards",align="center"]
+
+===== Enabling Relations
+
+A relation between two dashboard can be enabled or disabled. If it is enabled, the documents are filtered based on that relation.
+You can disable/enable a relation by checking the box on an edge of the graph.
+
+In the previous image, the AC and CI relations between the dashboards Articles, Companies, and Investments are enabled. This means that filtering documents from the Articles will retain only the Companies, and Investments, that are connected to those articles.
+
+==== Enabling Relational Panel
+
+By checking the "Enable relational panel" checkbox, the relationships that you defined between dashboards will be made effective while browsing.
+The relational panel can be opened by clicking on the icon image:images/relations-settings/relational-panel-icon.png["Relational panel icon"] in the Dashboard tab.
+
+With relations between dashboards enabled in the previous example, you will see the "relational" filter image:images/relations-settings/relational-filter.png["Relational filter"] displayed on the dashboards Articles, Companies, and Investments.
+
 [[kibi-settings-templates]]
 === Query Templates
 
 For an overview of query templates, please read the <<external-datasources>>
 chapter.
 
-[float]
 [[kibi-settings-queries]]
 === Queries
 
-For an overview of queries, please read the <<external-datasource>>
+For an overview of queries, please read the <<external-datasources>>
 chapter.
 
-[float]
 [[kibi-settings-dashboards-groups]]
 === Dashboard Groups
 

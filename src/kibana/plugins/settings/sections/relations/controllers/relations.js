@@ -187,11 +187,11 @@ define(function (require) {
           stopAfter: 2000,
           groupingForce: {},
           nodeIcons: {},
-          minNodeSize: 20
+          minNodeSize: 20,
+          colors: {}
         },
         nodes: [],
-        links: [],
-        colors: {}
+        links: []
       };
 
       var relationId = function (relation) {
@@ -250,7 +250,7 @@ define(function (require) {
               undirected: true
             });
 
-            if ( nodeTypes.indexOf(sourceNodeIndexId) === -1) {
+            if (nodeTypes.indexOf(sourceNodeIndexId) === -1) {
               nodeTypes.push(sourceNodeIndexId);
             }
             if (nodeTypes.indexOf(targetNodeIndexId) === -1) {
@@ -265,9 +265,8 @@ define(function (require) {
         }
       });
 
-      $scope.typeToColor = color(nodeTypes);
       _.each(nodeTypes, function (nodeType) {
-        g.colors[nodeType] = $scope.typeToColor(nodeType);
+        g.options.colors[nodeType] = $scope.typeToColor(nodeType);
       });
 
       $scope.dashboardsGraph = g;
@@ -305,11 +304,11 @@ define(function (require) {
           stopAfter: 2000,
           groupingForce: {},
           nodeIcons: {},
-          minNodeSize: 20
+          minNodeSize: 20,
+          colors: {}
         },
         nodes: [],
-        links: [],
-        colors: {}
+        links: []
       };
 
       // check for duplicates
@@ -365,7 +364,7 @@ define(function (require) {
             });
 
             // build types array to build color map
-            if ( nodeTypes.indexOf(sourceNodeId) === -1) {
+            if (nodeTypes.indexOf(sourceNodeId) === -1) {
               nodeTypes.push(sourceNodeId);
             }
             if (nodeTypes.indexOf(targetNodeId) === -1) {
@@ -383,7 +382,7 @@ define(function (require) {
 
       $scope.typeToColor = color(nodeTypes);
       _.each(nodeTypes, function (nodeType) {
-        g.colors[nodeType] = $scope.typeToColor(nodeType);
+        g.options.colors[nodeType] = $scope.typeToColor(nodeType);
       });
 
       $scope.indicesGraph = g;

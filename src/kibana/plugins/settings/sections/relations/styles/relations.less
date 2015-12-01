@@ -1,66 +1,73 @@
 @import (reference) "../../../styles/_st_variables.less";
 
-.relations-config {
-  padding-left: 16px;
-  padding-top: 16px;
-  padding-right: 16px;
-}
 
-// override the table-condensed cell style to make it more compact
-.table-condensed > thead > tr > th {
-  border-bottom-width: 1px;
-  height: 70px;
-  vertical-align: bottom;
-}
 
-.table-condensed > thead > tr.relation-row > td,
-.table-condensed > tbody > tr.relation-row > td,
-.table-condensed > tfoot > tr.relation-row > td {
-  vertical-align: middle;
-  padding-left: 0;
-  &:first-child {
-    padding-left: 5px !important;
+.relations-settings {
+
+  .btn {
+    margin-top: 5px;
+    margin-bottom: 5px;
   }
-}
 
-input.small-input {
-  width: 80px;
-}
-
-.relations .table-condensed {
-  margin-bottom: 0;
-}
-
-.relations-settings .btn {
-  margin-top: 5px;
-  margin-bottom: 5px;
-}
-
-.relations .indices-section {
-  width: 50%;
-  float: left;
-  padding: 16px;
-
-  .indicesGraph{
-    height: 250px;
-    border: 1px #ECF0F1 solid;
-    border-radius: 4px;
+  .relations-config {
+    padding-left: 16px;
+    padding-top: 16px;
+    padding-right: 16px;
   }
-}
 
-.relations .dashboards-section {
-  width: 49%;
-  float: left;
-  padding: 16px 0 0 16px;
-
-  .dashboardsGraph{
-    height: 250px;
-    border: 1px #ECF0F1 solid;
-    border-radius: 4px;
+  // override the table-condensed cell style to make it more compact
+  .table-condensed > thead > tr > th {
+    border-bottom-width: 1px;
+    height: 70px;
+    vertical-align: bottom;
   }
+
+  .table-condensed > thead > tr.relation-row > td,
+  .table-condensed > tbody > tr.relation-row > td,
+  .table-condensed > tfoot > tr.relation-row > td {
+    vertical-align: middle;
+    padding-left: 0;
+    &:first-child {
+      padding-left: 5px !important;
+    }
+  }
+
+  input.small-input {
+    width: 80px;
+  }
+
+  .relations .table-condensed {
+    margin-bottom: 0;
+  }
+
+  .relations .indices-section {
+    width: 50%;
+    float: left;
+    padding: 16px;
+
+    .indicesGraph{
+      height: 250px;
+      border: 1px #ECF0F1 solid;
+      border-radius: 4px;
+    }
+  }
+
+  .relations .dashboards-section {
+    width: 49%;
+    float: left;
+    padding: 16px 0 0 16px;
+
+    .dashboardsGraph{
+      height: 250px;
+      border: 1px #ECF0F1 solid;
+      border-radius: 4px;
+    }
+  }
+
+  .container h2 {
+    margin-top: 0;
+    font-size: 24px;
+  }
+
 }
 
-.container h2 {
-  margin-top: 0;
-  font-size: 24px;
-}

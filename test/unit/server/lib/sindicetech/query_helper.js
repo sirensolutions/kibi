@@ -87,6 +87,7 @@ describe('Query Helper', function () {
     describe('no URI', function () {
 
       it('ignore the elastic document and varaibles', function (done) {
+        var path = '';
         var headers = [
           { name: 'header1', value: 'header1value'}
         ];
@@ -98,10 +99,11 @@ describe('Query Helper', function () {
         var expected = {
           headers: headers,
           params: params,
-          body: body
+          body: body,
+          path: path
         };
 
-        queryHelper.replaceVariablesForREST(headers, params, body, null, null).then(function (result) {
+        queryHelper.replaceVariablesForREST(headers, params, body, path, null, null).then(function (result) {
 
           expect(result).to.eql(expected);
           done();
@@ -109,6 +111,7 @@ describe('Query Helper', function () {
       });
 
       it('should not modify supplied params, headers and body', function (done) {
+        var path = 'path/$auth_token';
         var headers = [
           { name: 'header1', value: 'header1value $auth_token'}
         ];
@@ -127,19 +130,22 @@ describe('Query Helper', function () {
           { name: 'param1', value: 'param1value  $auth_token'}
         ];
         var exp_body = 'body $auth_token';
+        var exp_path = 'path/$auth_token';
 
 
-        queryHelper.replaceVariablesForREST(headers, params, body, null, variables).then(function (result) {
+        queryHelper.replaceVariablesForREST(headers, params, body, path, null, variables).then(function (result) {
           // after repalcement supplied params shoud NOT be modified
           expect(headers).to.eql(exp_headers);
           expect(params).to.eql(exp_params);
           expect(body).to.eql(exp_body);
+          expect(path).to.eql(exp_path);
           done();
         });
       });
 
 
       it('ignore the elastic document but use variables', function (done) {
+        var path = 'path/$auth_token';
         var headers = [
           { name: 'header1', value: 'header1value $auth_token'}
         ];
@@ -159,10 +165,11 @@ describe('Query Helper', function () {
           params: [
             { name: 'param1', value: 'param1value  123456'}
           ],
-          body: 'body 123456'
+          body: 'body 123456',
+          path: 'path/123456'
         };
 
-        queryHelper.replaceVariablesForREST(headers, params, body, null, variables).then(function (result) {
+        queryHelper.replaceVariablesForREST(headers, params, body, path, null, variables).then(function (result) {
 
           expect(result).to.eql(expected);
           done();

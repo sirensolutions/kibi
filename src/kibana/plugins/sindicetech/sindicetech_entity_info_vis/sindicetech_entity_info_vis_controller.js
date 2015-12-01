@@ -103,15 +103,29 @@ define(function (require) {
             return;
           }
 
-          var emptyResultsTemplate =
-            '<div class="snippetContainer">' +
-            '  <div class="snippet-@INDEX@">' +
-            '    <div class="templateResult results-not-ok">' +
-            '      <i class="fa fa-warning"></i>' +
-            '        @MESSAGE@' +
-            '    </div>' +
-            '  </div>' +
-            '</div>';
+          var emptyResultsTemplate = '';
+          if ($scope.holder.visible) {
+            emptyResultsTemplate =
+              '<div class="snippetContainer">' +
+              '  <div class="snippet-@INDEX@">' +
+              '    <div class="templateResult results-not-ok-verbose">' +
+              '      <i class="fa fa-warning"></i>' +
+              '        @MESSAGE@' +
+              '    </div>' +
+              '  </div>' +
+              '</div>';
+
+          } else {
+            emptyResultsTemplate =
+              '<div class="snippetContainer">' +
+              '  <div class="snippet-@INDEX@">' +
+              '    <div class="templateResult">' +
+              '      @MESSAGE@' +
+              '    </div>' +
+              '  </div>' +
+              '</div>';
+          }
+
 
           if ($scope.emptyResults && !$scope.noSelectedDocument) {
 
@@ -129,19 +143,20 @@ define(function (require) {
             $scope.holder.html = '';
             _.forEach(resp.data.snippets, function (snippet, index) {
 
-              var label = String(index + 1) + ' id: [' + snippet.queryId + ']';
-
               if (snippet.queryActivated === false) {
                 $scope.holder.html += emptyResultsTemplate
                 .replace(/@INDEX@/, 0)
-                .replace(/@MESSAGE@/, 'Query ' + label + ' not activated, select another document or check activation rules');
+                .replace(
+                  /@MESSAGE@/,
+                  'Query <b>' + snippet.queryId + '</b> not activated, select another document or check activation rules'
+                );
                 return;
               }
 
               if (typeof snippet.html === 'undefined') {
                 $scope.holder.html += emptyResultsTemplate
                 .replace(/@INDEX@/, 0)
-                .replace(/@MESSAGE@/, 'No template set for query ' + label + ', please check view options');
+                .replace(/@MESSAGE@/, 'No template set for query <b>' + snippet.queryId + '</b>, please check view options');
                 return;
               }
 

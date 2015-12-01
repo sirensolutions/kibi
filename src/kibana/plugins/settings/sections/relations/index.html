@@ -5,13 +5,16 @@
       <h2 class="title">Relations in Kibi</h2>
     </div>
     <p>
-      Use this to configure the relations.
+    Use this panel to configure the relations between index patterns and dashboards.<br/>
+    You start by defining the graph of index patterns. Then based on that graph, you can define through which relation dashboards are connected.
     </p>
 
-    <div class="checkbox">
-      <label>
-        <input type="checkbox" ng-model="relationalPanel"/> Enable relational panel
-      </label>
+    <div class="relations-config">
+      <div class="checkbox">
+        <label>
+          <input type="checkbox" ng-model="relationalPanel"/> Enable relational panel
+        </label>
+      </div>
     </div>
 
     <div class="indices-section">

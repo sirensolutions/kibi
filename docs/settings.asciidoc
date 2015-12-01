@@ -321,7 +321,7 @@ A relationship is defined as a **join** operation between two indices with the f
 - _Right Field_: the field of the right index to join with; and
 - _Label_: the label of the relation.
 
-The image below displays a graph of 4 index patterns, where 3 relationships have defined. You can add a new relationship by clicking on the "_Add relation_" button.
+The image below displays a graph of four index patterns, where three relationships have defined. You can add a new relationship by clicking on the "_Add relation_" button.
 
 image::images/relations-settings/indices-graph.png["Graph of Index Patterns",align="center"]
 
@@ -341,7 +341,7 @@ A relationship between dashboards is defined with the following parameters
 - _Left Dashboard_ and _Right Dashboard_: the dashboards to be linked; and
 - _Relation_: the relation that connects the two dashboards; it is the label of a relation previously defined.
 
-For example, the image below shows a graph of 5 dashboards:
+For example, the image below shows a graph of five dashboards:
 
 1. the dashboard "Articles" with a saved search associated to the index "article" depicted with the circle +++<span style="border-radius: 50%; width: 20px; height: 20px; background-color: #57c17b; display: inline-block;"></span>+++;
 2. the dashboard "Articles detailed per source" with a saved search associated to the index "article" depicted with the circle +++<span style="border-radius: 50%; width: 20px; height: 20px; background-color: #57c17b; display: inline-block;"></span>+++;

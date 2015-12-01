@@ -91,14 +91,14 @@ to the currently displayed dashboard.
 === Usage
 
 When clicking on a button in the Kibi Relational filter visualization,
-the current state of the source dashboard is added to filter sequence
+the current state of the source dashboard is added to relational filter
 and applied on the target dashboard.
 To see the explanation of a relational filter, just move the mouse over it.
 
 Below we started on **Articles** dashboard, searched for pizza and clicked
-relational button to rotate to **Companies**.
+on the relational button to rotate to **Companies**.
 As we see on the explanation there is only one step which shows
-what filters and queries where applied on **Articles**.
+what queries and filters were applied on **Articles**.
 
 ```
 1 article.companyid -> company.id
@@ -109,7 +109,7 @@ what filters and queries where applied on **Articles**.
 image::images/relational-filter/relational-filter-explanation1.png["Relational filter explanation",align="center"]
 
 Next we added a regular filter country to USA (`countrycode: USA`) and clicked
-a relational filter button to go to investments.
+on a relational filter button to go to **Investments**.
 Now the explanation shows two steps.
 
 ```

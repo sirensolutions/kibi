@@ -378,17 +378,27 @@ The relational panel can be opened by clicking on the icon image:images/relation
 
 With relations between dashboards enabled in the previous example, you will see the "relational" filter image:images/relations-settings/relational-filter.png["Relational filter"] displayed on the dashboards Articles, Companies, and Investments.
 
-[[kibi-settings-templates]]
-=== Query Templates
 
-For an overview of query templates, please read the <<external-datasources>>
+[[kibi-settings-queries]]
+=== Datasources
+
+For an overview of datasources, please read the <<external-datasources>>
 chapter.
+
 
 [[kibi-settings-queries]]
 === Queries
 
 For an overview of queries, please read the <<external-datasources>>
 chapter.
+
+
+[[kibi-settings-templates]]
+=== Query Templates
+
+For an overview of query templates, please read the <<external-datasources>>
+chapter.
+
 
 [[kibi-settings-dashboards-groups]]
 === Dashboard Groups
@@ -409,7 +419,7 @@ either as a PNG image or a CSS font class; Kibi includes the
 https://fortawesome.github.io/Font-Awesome/[Font Awesome] toolkit.
 
 [[advanced-settings]]
-=== Advanced settings
+=== Advanced
 The Advanced Settings page enables you to directly edit settings that control
 the behavior of the Kibi application. For example, you can change the format
 used to display dates, specify the default index pattern, and set the precision

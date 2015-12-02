@@ -13,7 +13,7 @@ We also recommend to create a database user without write privileges
 as they are not required by the system.
 
 To prevent data loss it is a good practice to restrict access to the
-elasticsearch cluster. Below simple nginx configuration to do it.
+elasticsearch cluster. Below is a simple nginx configuration to do it.
 
 ```
 events {
@@ -34,4 +34,5 @@ http {
   }
 }
 ```
+
 For more information about nginx configuration visit https://www.elastic.co/blog/playing-http-tricks-nginx[Playing HTTP Tricks with Nginx]

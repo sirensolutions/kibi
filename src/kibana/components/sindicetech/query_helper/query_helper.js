@@ -155,7 +155,15 @@ define(function (require) {
         var labels = _getLabelsInConnectedComponent(focus, relations);
         labels.sort();
 
-        var labelValue = labels.join(' <-> ');
+        var labelValue;
+
+        if (!indexToDashboardsMap) {
+          labelValue = labels.join(' <-> ');
+        } else {
+          labelValue = _(labels).map(function (index) {
+            return indexToDashboardsMap[index];
+          }).flatten().value().join(' <-> ');
+        }
 
         var joinFilter = {
           meta: {

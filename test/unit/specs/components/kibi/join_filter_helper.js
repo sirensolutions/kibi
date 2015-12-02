@@ -188,7 +188,7 @@ define(function (require) {
           joinFilterHelper.getJoinFilter('dashboard-a').then(function (joinFilter) {
             expect(joinFilter.join_set).to.be.ok();
             expect(joinFilter.meta).to.be.ok();
-            expect(joinFilter.meta.value).to.equal('index-a <-> index-b');
+            expect(joinFilter.meta.value).to.equal('dashboard-a <-> dashboard-b');
             expect(joinFilter.join_set.focus).to.be('index-a');
             expect(joinFilter.join_set.queries['index-a']).to.not.be.ok();
             done();
@@ -211,7 +211,7 @@ define(function (require) {
           joinFilterHelper.getJoinFilter('dashboard-a').then(function (joinFilter) {
             expect(joinFilter.join_set).to.be.ok();
             expect(joinFilter.meta).to.be.ok();
-            expect(joinFilter.meta.value).to.equal('index-a <-> index-b');
+            expect(joinFilter.meta.value).to.equal('dashboard-a <-> dashboard-b');
             expect(joinFilter.join_set.focus).to.be('index-a');
             expect(joinFilter.join_set.queries['index-a']).to.not.be.ok();
             expect(joinFilter.join_set.queries['index-b']).to.be.ok();
@@ -238,7 +238,7 @@ define(function (require) {
           joinFilterHelper.getJoinFilter('dashboard-a').then(function (joinFilter) {
             expect(joinFilter.join_set).to.be.ok();
             expect(joinFilter.meta).to.be.ok();
-            expect(joinFilter.meta.value).to.equal('index-a <-> index-b');
+            expect(joinFilter.meta.value).to.equal('dashboard-a <-> dashboard-b');
             expect(joinFilter.join_set.focus).to.be('index-a');
             expect(joinFilter.join_set.queries['index-a']).to.not.be.ok();
             expect(joinFilter.join_set.queries['index-b']).to.be.ok();

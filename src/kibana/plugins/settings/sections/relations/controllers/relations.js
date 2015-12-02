@@ -179,9 +179,18 @@ define(function (require) {
     /**
      * Updates the relationships between dashboards
      */
-    function _updateRelationsDashboards() {
+    function _updateRelationsDashboards(oldRelations) {
       var g = {
         options: {
+          onLinkClick: function (el, d, i) {
+            _.each($scope.relations.relationsDashboards, function (relation) {
+              if (relation.dashboards.indexOf(d.source.label) !== -1 &&
+                  relation.dashboards.indexOf(d.target.label) !== -1) {
+                relation.enabled = !relation.enabled;
+                return false;
+              }
+            });
+          },
           monitorContainerSize: true,
           alwaysShowLinksLabels: true,
           stopAfter: 2000,
@@ -217,6 +226,10 @@ define(function (require) {
             if (uniq[key].length !== 1) {
               error = 'This row has already been defined!';
             }
+            // by default the relation is enabled
+            if (relDash.enabled === undefined) {
+              relDash.enabled = true;
+            }
             // build the graph visualisation
             var sourceNodeIndexId = _getIndexForDashboard(relDash.dashboards[0]);
             var targetNodeIndexId = _getIndexForDashboard(relDash.dashboards[1]);
@@ -244,9 +257,6 @@ define(function (require) {
                   '</div>').get(0),
               htmlElementWidth: 70,
               htmlElementHeight: 18,
-              onLinkClick: function (THIS, d, i) {
-                relDash.enabled = $(THIS).find('input[type=\'checkbox\']').is(':checked');
-              },
               undirected: true
             });
 
@@ -269,8 +279,14 @@ define(function (require) {
         g.options.colors[nodeType] = $scope.typeToColor(nodeType);
       });
 
+      g.nodes = _.uniq(g.nodes, function (node) {
+        return node.id;
+      });
       $scope.dashboardsGraph = g;
-      if (_isValid('dashboards')) {
+      var isEqual = _($scope.relations.relationsDashboards).map(function (relation) {
+        return _.omit(relation, [ '$$hashKey', 'error' ]);
+      }).isEqual(oldRelations);
+      if (_isValid('dashboards') && !isEqual) {
         save('dashboards');
       }
     }
@@ -279,14 +295,14 @@ define(function (require) {
       return _.map($scope.relations.relationsDashboards, function (relation) {
         return _.omit(relation, [ 'error' ]);
       });
-    }, function () {
+    }, function (newRelations, oldRelations) {
       if (indexToDashboardsMap === null) {
         urlHelper.getIndexToDashboardMap().then(function (map) {
           indexToDashboardsMap = map;
-          _updateRelationsDashboards();
+          _updateRelationsDashboards(oldRelations);
         });
       } else {
-        _updateRelationsDashboards();
+        _updateRelationsDashboards(oldRelations);
       }
     }, true);
 
@@ -385,9 +401,15 @@ define(function (require) {
         g.options.colors[nodeType] = $scope.typeToColor(nodeType);
       });
 
+      g.nodes = _.uniq(g.nodes, function (node) {
+        return node.id;
+      });
       $scope.indicesGraph = g;
 
-      if (_isValid('indices')) {
+      var isEqual = _($scope.relations.relationsIndices).map(function (relation) {
+        return _.omit(relation, [ '$$hashKey', 'error' ]);
+      }).isEqual(oldRelations);
+      if (_isValid('indices') && !isEqual) {
         save('indices').then(function () {
           if (oldRelations && oldRelations.length) {
             var relationsIndices = config.get('kibi:relations').relationsIndices;
@@ -467,8 +489,11 @@ define(function (require) {
       }
 
       return config.set('kibi:relations', relations).then(function () {
-        $rootScope.$emit('egg:indicesGraph:run', 'exportGraph');
-        $rootScope.$emit('egg:dashboardsGraph:run', 'exportGraph');
+        if (graph === 'indices') {
+          $rootScope.$emit('egg:indicesGraph:run', 'exportGraph');
+        } else {
+          $rootScope.$emit('egg:dashboardsGraph:run', 'exportGraph');
+        }
       });
     }
   });

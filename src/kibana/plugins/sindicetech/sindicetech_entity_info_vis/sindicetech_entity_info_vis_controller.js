@@ -141,15 +141,25 @@ define(function (require) {
           } else {
 
             $scope.holder.html = '';
+            var emptyResultsMsgCounter = 0;
             _.forEach(resp.data.snippets, function (snippet, index) {
 
               if (snippet.queryActivated === false) {
+
+                var message = 'Query <b>' + snippet.queryId + '</b> not activated, select another document or check activation rules';
+                if (!$scope.holder.visible) {
+                  // if in view mode increase the counter
+                  emptyResultsMsgCounter++;
+                  // show only 1 message when in "view" mode
+                  if (emptyResultsMsgCounter > 1) {
+                    return;
+                  }
+                  message = 'No query template is triggered now. Select a document?';
+                }
+
                 $scope.holder.html += emptyResultsTemplate
                 .replace(/@INDEX@/, 0)
-                .replace(
-                  /@MESSAGE@/,
-                  'Query <b>' + snippet.queryId + '</b> not activated, select another document or check activation rules'
-                );
+                .replace(/@MESSAGE@/, message);
                 return;
               }
 

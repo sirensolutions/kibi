@@ -633,7 +633,8 @@ define(function (require) {
               ]
             };
             var indexToDashboardMap = {
-              'time-testing-3': ['time-testing-3']
+              'time-testing-3': ['time-testing-3'],
+              article: [ 'Articles' ]
             };
             var relations = [
               [
@@ -652,7 +653,7 @@ define(function (require) {
 
             var expected = {
               meta: {
-                value: 'article <-> time-testing-3'
+                value: 'Articles <-> time-testing-3'
               },
               join_set: {
                 focus: focus,
@@ -685,7 +686,7 @@ define(function (require) {
             ).then(function (filter) {
               expect(filter).to.eql(expected);
               done();
-            });
+            }).catch(done);
 
             $rootScope.$apply();
           });
@@ -695,7 +696,8 @@ define(function (require) {
             var queriesPerIndex = {};
             var filtersPerIndex = {};
             var indexToDashboardMap = {
-              'time-testing-3': ['time-testing-3']
+              'time-testing-3': ['time-testing-3'],
+              article: [ 'Articles' ]
             };
             var relations = [
               [
@@ -714,7 +716,7 @@ define(function (require) {
 
             var expected = {
               meta: {
-                value: 'article <-> time-testing-3'
+                value: 'Articles <-> time-testing-3'
               },
               join_set: {
                 focus: focus,
@@ -749,7 +751,8 @@ define(function (require) {
             var queriesPerIndex = {};
             var filtersPerIndex = {};
             var indexToDashboardMap = {
-              'time-testing-3': 'time-testing-3'
+              'time-testing-3': ['time-testing-3'],
+              article: [ 'Articles' ]
             };
             var relations = [
               [
@@ -768,7 +771,7 @@ define(function (require) {
 
             var expected = {
               meta: {
-                value: 'article <-> time-testing-3'
+                value: 'Articles <-> time-testing-3'
               },
               join_set: {
                 focus: focus,

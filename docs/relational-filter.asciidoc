@@ -16,7 +16,7 @@ There are two paradigms a user can follow:
 
 With the relational panel browsing paradigm, all the dashboards of interest are join together. Effectivelly, documents that can be viewed in each dashboard are those that are connected with the rest.
 
-For example, consider two dashboards Articles and Companies which documents are related to one an other; if one filters articles by their publishing date to a certain range, then only the companies that are mentioned in articles published within that range are displayed.
+For example, consider two dashboards Articles and Companies which documents are related to one another; if one filters articles by their publishing date to a certain range, then only the companies that are mentioned in articles published within that range are displayed.
 
 ==== Configuration
 
@@ -29,7 +29,7 @@ image::images/relational-panel/panel.png["Relational panel",align="center"]
 
 ==== Browsing
 
-Since a <<saving-dashboards,saved search>> is now associated with a dashboard, a count indicating the current number of documents in that dashboard is displayed on each tab. For example in the previous image, there are 3558 articles, 840 companies, and 840 investments rounds that are inter-connected. These numbers coupled with the relational panel allows to get a feeling of the current state of the joined dashboards.
+Since a <<saving-dashboards,saved search>> is now associated with a dashboard, a count indicating the current number of documents in that dashboard is displayed on each tab. For example on the previous image, there are 3558 articles, 840 companies, and 840 investments rounds that are inter-connected. These numbers coupled with the relational panel allows to get a feeling of the current state of the joined dashboards.
 The current set of connected dashboards are displayed in the label of the blue filter image:images/relational-panel/filter.png["relational panel filter"].
 
 Since all the dashboards in the set are connected to each other, adding a filter to a dashboard will also update the connected dashboards. If you select **TechCrunch** as the source for articles, there are now in total 653 articles. Being automatically updated, we observe that only 311 companies and investments out of 840 are actually connected to those articles from TechCrunch.

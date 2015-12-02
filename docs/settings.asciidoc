@@ -131,7 +131,7 @@ To set a different pattern as the default index pattern:
 . Select the pattern you want to set as the default in the Index Patterns list.
 . Click the pattern's *Favorite* button.
 
-NOTE: You can also manually set the default index pattern in *Advanced > Settings*.
+NOTE: You can also manually set the default index pattern in <<advanced-settings,advanced settings>>.
 
 [float]
 [[reload-fields]]
@@ -434,6 +434,10 @@ To set advanced settings:
 . Click the *Edit* button for the option you want to modify.
 . Enter a new value for the option.
 . Click the *Save* button.
+
+==== Query string options
+
+You can set the default options used when performing a {elastic-ref}query-dsl-query-string-query.html[query_string] query thanks to the advanced option _query:queryString:options_.
 
 [float]
 [[managing-saved-objects]]

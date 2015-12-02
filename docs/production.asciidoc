@@ -7,5 +7,32 @@ the *Controlling access* section.
 
 Make sure to set the configuration file as readable only to the user running
 the Kibi process as it may contain credentials in the database connection
-strings; we also recommend to create a database user without write privileges
+strings.
+
+We also recommend to create a database user without write privileges
 as they are not required by the system.
+
+To prevent data loss it is a good practice to restrict access to the
+elasticsearch cluster. Below is a simple nginx configuration to do it.
+
+```
+events {
+  worker_connections  1024;
+}
+http {
+  upstream elasticsearch {
+    server 127.0.0.1:9200;
+  }
+  server {
+    listen 8080;
+    auth_basic "Protected Elasticsearch";
+    auth_basic_user_file passwords;
+    location / {
+      proxy_pass http://elasticsearch;
+      proxy_redirect off;
+    }
+  }
+}
+```
+
+For more information about nginx configuration visit https://www.elastic.co/blog/playing-http-tricks-nginx[Playing HTTP Tricks with Nginx]

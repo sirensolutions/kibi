@@ -99,7 +99,7 @@ define(function (require) {
 
         init({ params: params, snippet: snippet });
         $scope.renderTemplates().then(function () {
-          expect($scope.holder.html).to.contain('not activated');
+          expect($scope.holder.html).to.contain('No query template is triggered now. Select a document?');
           expect($scope.holder.activeFetch).to.be(false);
           done();
         });

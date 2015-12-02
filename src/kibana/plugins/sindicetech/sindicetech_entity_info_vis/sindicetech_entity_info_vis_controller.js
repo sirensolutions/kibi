@@ -103,15 +103,29 @@ define(function (require) {
             return;
           }
 
-          var emptyResultsTemplate =
-            '<div class="snippetContainer">' +
-            '  <div class="snippet-@INDEX@">' +
-            '    <div class="templateResult results-not-ok">' +
-            '      <i class="fa fa-warning"></i>' +
-            '        @MESSAGE@' +
-            '    </div>' +
-            '  </div>' +
-            '</div>';
+          var emptyResultsTemplate = '';
+          if ($scope.holder.visible) {
+            emptyResultsTemplate =
+              '<div class="snippetContainer">' +
+              '  <div class="snippet-@INDEX@">' +
+              '    <div class="templateResult results-not-ok-verbose">' +
+              '      <i class="fa fa-warning"></i>' +
+              '        @MESSAGE@' +
+              '    </div>' +
+              '  </div>' +
+              '</div>';
+
+          } else {
+            emptyResultsTemplate =
+              '<div class="snippetContainer">' +
+              '  <div class="snippet-@INDEX@">' +
+              '    <div class="templateResult results-not-ok-less-verbose">' +
+              '      @MESSAGE@' +
+              '    </div>' +
+              '  </div>' +
+              '</div>';
+          }
+
 
           if ($scope.emptyResults && !$scope.noSelectedDocument) {
 
@@ -127,21 +141,32 @@ define(function (require) {
           } else {
 
             $scope.holder.html = '';
+            var emptyResultsMsgCounter = 0;
             _.forEach(resp.data.snippets, function (snippet, index) {
 
-              var label = String(index + 1) + ' id: [' + snippet.queryId + ']';
-
               if (snippet.queryActivated === false) {
+
+                var message = 'Query <b>' + snippet.queryId + '</b> not activated, select another document or check activation rules';
+                if (!$scope.holder.visible) {
+                  // if in view mode increase the counter
+                  emptyResultsMsgCounter++;
+                  // show only 1 message when in "view" mode
+                  if (emptyResultsMsgCounter > 1) {
+                    return;
+                  }
+                  message = 'No query template is triggered now. Select a document?';
+                }
+
                 $scope.holder.html += emptyResultsTemplate
                 .replace(/@INDEX@/, 0)
-                .replace(/@MESSAGE@/, 'Query ' + label + ' not activated, select another document or check activation rules');
+                .replace(/@MESSAGE@/, message);
                 return;
               }
 
               if (typeof snippet.html === 'undefined') {
                 $scope.holder.html += emptyResultsTemplate
                 .replace(/@INDEX@/, 0)
-                .replace(/@MESSAGE@/, 'No template set for query ' + label + ', please check view options');
+                .replace(/@MESSAGE@/, 'No template set for query <b>' + snippet.queryId + '</b>, please check view options');
                 return;
               }
 

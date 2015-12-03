@@ -37,7 +37,10 @@
       aria-label="Remove all filters"
       aria-haspopup="true"
       ng-click="removeAllFilters();">
-      <i aria-hidden="true" class="fa fa-minus-square"></i>
+      <span class="fa-stack fa-lg">
+        <i class="fa fa-filter fa-stack-1x"></i>
+        <i class="fa fa-thincross-2 fa-stack-1x text-danger"></i>
+      </span>
     </button>
   </kbn-tooltip>
 </div>

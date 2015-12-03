@@ -1,5 +1,7 @@
 define(function (require) {
 
+  require('css!plugins/dashboard/directives/st_dashboard_toolbar/st_dashboard_toolbar.css');
+
   var app = require('modules').get('app/dashboard');
 
   app.directive('stDashboardToolbar', function ($compile, Notifier, savedDashboards, kbnUrl, Private, $rootScope) {

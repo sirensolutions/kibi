@@ -182,6 +182,9 @@ define(function (require) {
     function _updateRelationsDashboards(oldRelations) {
       var g = {
         options: {
+          onNodeDragEnd: function () {
+            $rootScope.$emit('egg:dashboardsGraph:run', 'exportGraph');
+          },
           onLinkClick: function (el, d, i) {
             _.each($scope.relations.relationsDashboards, function (relation) {
               if (relation.dashboards.indexOf(d.source.label) !== -1 &&

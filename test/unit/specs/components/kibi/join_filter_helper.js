@@ -44,6 +44,10 @@ define(function (require) {
                     {
                       id: 'dashboard-b',
                       savedSearchId: 'savedsearch-b'
+                    },
+                    {
+                      id: 'dashboard-c',
+                      savedSearchId: 'savedsearch-c'
                     }
                   ]
                 });
@@ -58,6 +62,8 @@ define(function (require) {
                     return Promise.resolve({ id: 'dashboard-a', savedSearchId: 'savedsearch-a' });
                   case 'dashboard-b':
                     return Promise.resolve({ id: 'dashboard-b', savedSearchId: 'savedsearch-b' });
+                  case 'dashboard-c':
+                    return Promise.resolve({ id: 'dashboard-c', savedSearchId: 'savedsearch-c' });
                   default:
                     return Promise.reject(new Error('no dashboard ' + id));
                 }
@@ -75,6 +81,8 @@ define(function (require) {
                     return Promise.resolve({ searchSource: { _state: { index: { id: 'index-a' } } } });
                   case 'savedsearch-b':
                     return Promise.resolve({ searchSource: { _state: { index: { id: 'index-b' } } } });
+                  case 'savedsearch-c':
+                    return Promise.resolve({ searchSource: { _state: { index: { id: 'index-c' } } } });
                   case 'savedsearch-noindexid':
                     return Promise.resolve({ searchSource: { _state: { index: { } } } });
                   default:
@@ -97,6 +105,8 @@ define(function (require) {
                     return Promise.resolve({ id: 'index-a' });
                   case 'index-b':
                     return Promise.resolve({ id: 'index-b' });
+                  case 'index-c':
+                    return Promise.resolve({ id: 'index-c' });
                   default:
                     return Promise.reject(new Error('no indexPattern for: ' + id));
                 }
@@ -175,6 +185,27 @@ define(function (require) {
           });
         });
 
+        it('should not build join_set filter if focused index does not have an enabled relation', function (done) {
+          config.set('kibi:relationalPanel', true);
+          config.set('kibi:relations', {
+            relationsDashboards: [
+              {
+                enabled: true,
+                dashboards: [ 'dashboard-a', 'dashboard-b' ],
+                relation: 'index-a/id/index-b/id'
+              },
+              {
+                enabled: false,
+                dashboards: [ 'dashboard-b', 'dashboard-c' ],
+                relation: 'index-b/id/index-c/id'
+              }
+            ]
+          });
+          joinFilterHelper.getJoinFilter('dashboard-c').catch(function (err) {
+            expect(err.message).to.be('The join filter has no enabled relation for the focused dashboard : dashboard-c');
+            done();
+          });
+        });
 
         it('1 should build the join filter', function (done) {
           config.set('kibi:relationalPanel', true);

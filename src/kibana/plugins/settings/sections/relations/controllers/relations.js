@@ -187,6 +187,7 @@ define(function (require) {
               if (relation.dashboards.indexOf(d.source.label) !== -1 &&
                   relation.dashboards.indexOf(d.target.label) !== -1) {
                 relation.enabled = !relation.enabled;
+                save('dashboards');
                 return false;
               }
             });
@@ -488,13 +489,7 @@ define(function (require) {
         });
       }
 
-      return config.set('kibi:relations', relations).then(function () {
-        if (graph === 'indices') {
-          $rootScope.$emit('egg:indicesGraph:run', 'exportGraph');
-        } else {
-          $rootScope.$emit('egg:dashboardsGraph:run', 'exportGraph');
-        }
-      });
+      return config.set('kibi:relations', relations);
     }
   });
 });

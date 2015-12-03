@@ -4,7 +4,6 @@ define(function (require) {
 
   require('angular-animate');
   require('eeg');
-  require('eeg-angular');
 
   var _ = require('lodash');
   var $ = require('jquery');
@@ -70,13 +69,8 @@ define(function (require) {
                   return false;
                 }
               });
-              var ggg1 = _.pluck($scope.relationalPanel.relations.relationsDashboards, 'enabled');
-              var ggg2 = _.pluck($scope.relationalPanel.relations.relationsDashboards, 'relation');
-              console.log('ggg1=[%s]', JSON.stringify(ggg1, null, ' '));
-              console.log('ggg2=[%s]', JSON.stringify(ggg2, null, ' '));
             };
 
-            console.log(relDashboards);
             $rootScope.$emit('egg:relationalPanel:run', 'importGraph', relDashboards);
             init = true;
           };

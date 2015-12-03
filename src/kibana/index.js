@@ -21,8 +21,7 @@ define(function (require) {
     'pasvaz.bindonce',
     'ngRoute',
     'ngClipboard',
-    'angular-jqcloud',
-    'eeg-angular'
+    'angular-jqcloud'
   ]);
 
 

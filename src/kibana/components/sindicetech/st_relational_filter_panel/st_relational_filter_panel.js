@@ -2,14 +2,29 @@ define(function (require) {
 
   require('css!components/sindicetech/st_relational_filter_panel/styles/st_relational_filter_panel.css');
 
-  require('jquery');
+  require('angular-animate');
   require('eeg');
   require('eeg-angular');
 
   var _ = require('lodash');
   var $ = require('jquery');
 
-  var app = require('modules').get('kibana');
+  var app = require('modules').get('kibana', ['ngAnimate']);
+
+  app.animation('.animate-relational-filter-panel', function () {
+    return {
+      beforeAddClass: function (element, className, doneFn) {
+        // close
+        $(element).slideUp(250, doneFn);
+      },
+
+      removeClass: function (element, className, doneFn) {
+        // open
+        element.css('display', 'none');
+        $(element).slideDown(250, doneFn);
+      }
+    };
+  });
 
   app.directive(
     'stRelationalFilterPanel',

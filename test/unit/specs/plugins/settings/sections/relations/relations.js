@@ -26,6 +26,11 @@ define(function (require) {
           $scope: $scope,
           $element: jQuery(el)
         });
+        if (options.events) {
+          _.each(options.events, function (func, e) {
+            $scope.$on(e, func);
+          });
+        }
         $scope.$digest();
       });
     }
@@ -175,16 +180,21 @@ define(function (require) {
               }
             ]
           };
+          var options = {
+            relations: relations,
+            events: {
+              'change:config.kibi:relations': function (event, relations) {
+                _.each(relations.relationsIndices, function (relation) {
+                  expect(relation.error).to.be(undefined);
+                  expect(relation.label).not.to.be(undefined);
+                  expect(relation.indices).not.to.be(undefined);
+                });
+                done();
+              }
+            }
+          };
 
-          init({ relations: relations });
-          $scope.$on('change:config.kibi:relations', function (event, relations) {
-            _.each(relations.relationsIndices, function (relation) {
-              expect(relation.error).to.be(undefined);
-              expect(relation.label).not.to.be(undefined);
-              expect(relation.indices).not.to.be(undefined);
-            });
-            done();
-          });
+          init(options);
         });
       });
 

@@ -263,14 +263,6 @@ define(function (require) {
               htmlElementHeight: 18,
               undirected: true
             });
-
-            if (nodeTypes.indexOf(sourceNodeIndexId) === -1) {
-              nodeTypes.push(sourceNodeIndexId);
-            }
-            if (nodeTypes.indexOf(targetNodeIndexId) === -1) {
-              nodeTypes.push(targetNodeIndexId);
-            }
-
           }
         }
         relDash.error = error;

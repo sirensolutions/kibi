@@ -254,13 +254,10 @@ define(function (require) {
               source: relDash.dashboards[0],
               target: relDash.dashboards[1],
               linkType: 'link',
-              htmlElement: $('<div>').html(
-                  '<div style="width:69px;">' +
+              html: '<div>' +
                     '<input type="checkbox" ' + (relDash.enabled ? 'checked' : '') + '/>' +
-                    '&nbsp;<label> ' + _getRelationLabel(relDash.relation) + '</label>' +
-                  '</div>').get(0),
-              htmlElementWidth: 70,
-              htmlElementHeight: 18,
+                    '&nbsp;<label>' + _getRelationLabel(relDash.relation) + '</label>' +
+                    '</div>',
               undirected: true
             });
           }

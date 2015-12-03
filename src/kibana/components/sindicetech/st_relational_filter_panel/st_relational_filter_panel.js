@@ -52,6 +52,7 @@ define(function (require) {
           var init = false;
           var _initPanel = function () {
             var relDashboards = $scope.relationalPanel.relations.relationsDashboardsSerialized;
+            relDashboards.options.draggable = false;
             relDashboards.options.onLinkClick = function (el, d, i) {
               if (!init) {
                 return;

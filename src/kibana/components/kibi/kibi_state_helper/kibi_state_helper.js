@@ -211,6 +211,47 @@ define(function (require) {
       return null;
     };
 
+    KibiStateHelper.prototype.addFilterToDashboard = function (dashboardId, filter) {
+      if (globalState.k.d) {
+        if (!globalState.k.d[dashboardId].f) {
+          globalState.k.d[dashboardId].f = [];
+        }
+        var filters = globalState.k.d[dashboardId].f;
+
+        // here if there is a relational filter it should be replaced
+        if (filter.join_set) {
+          // replace
+          var index = -1;
+          _.each(filters, function (f, i) {
+            if (f.join_set) {
+              index = i;
+              return false;
+            }
+          });
+          if (index !== -1) {
+            // exists so replace
+            filters[index] = filter;
+          } else {
+            // do not exists so add
+            filters.push(filter);
+          }
+        } else {
+          // add
+          filters.push(filter);
+        }
+        globalState.save();
+      }
+    };
+
+    KibiStateHelper.prototype.removeFilterOfTypeInDashboard = function (type, dashboardId) {
+      if (globalState.k.d) {
+        globalState.k.d[dashboardId].f = _.filter(globalState.k.d[dashboardId].f, function (filter) {
+          return !filter[type];
+        });
+        globalState.save();
+      }
+    };
+
     KibiStateHelper.prototype.removeAllFiltersOfType = function (type) {
       if (globalState.k.d) {
         _.each(globalState.k.d, function (dashboard, dashboardId) {

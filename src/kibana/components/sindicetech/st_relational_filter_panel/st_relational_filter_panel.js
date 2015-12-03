@@ -4,7 +4,6 @@ define(function (require) {
 
   require('angular-animate');
   require('eeg');
-  require('eeg-angular');
 
   var _ = require('lodash');
   var $ = require('jquery');
@@ -50,92 +49,30 @@ define(function (require) {
             return config.set('kibi:relations', $scope.relationalPanel.relations);
           };
 
-          var _getRelationLabel = function (relationId) {
-            var label;
-
-            _.each($scope.relationalPanel.relations.relationsIndices, function (relation) {
-              if (relationId === relation.id) {
-                label = relation.label;
-                return false;
-              }
-            });
-            return label;
-          };
-
           var init = false;
           var _initPanel = function () {
-            var g = {
-              options: {
-                title: 'Check required relations',
-                monitorContainerSize: true,
-                alwaysShowLinksLabels: true,
-                stopAfter: 2000,
-                groupingForce: {},
-                nodeIcons: {},
-                minNodeSize: 20
-              },
-              nodes: [],
-              links: []
+            var relDashboards = $scope.relationalPanel.relations.relationsDashboardsSerialized;
+            relDashboards.options.onLinkClick = function (el, d, i) {
+              if (!init) {
+                return;
+              }
+              _.each($scope.relationalPanel.relations.relationsDashboards, function (relation) {
+                if (relation.dashboards.indexOf(d.source.label) !== -1 &&
+                    relation.dashboards.indexOf(d.target.label) !== -1) {
+                  relation.enabled = $(el).find('input[type=\'checkbox\']').is(':checked');
+                  $scope.ignoreNextConfigurationChangedEvent = true;
+                  _saveRelationalPanel().then(function () {
+                    if ($scope.relationalPanel.enabled) {
+                      joinFilterHelper.updateJoinFilter();
+                    }
+                  });
+                  return false;
+                }
+              });
             };
 
-            // each node is a dashboard
-            _($scope.relationalPanel.relations.relationsDashboards).map(function (relation) {
-              return relation.dashboards;
-            }).flatten().uniq().each(function (dashboardId) {
-              g.nodes.push({id: dashboardId, label: dashboardId, nodeType: dashboardId, size: g.options.minNodeSize});
-            });
-
-
-            _.each($scope.relationalPanel.relations.relationsDashboards, function (relation, index) {
-
-              g.links.push({
-                source: relation.dashboards[0],
-                target: relation.dashboards[1],
-                linkType: 'link',
-                htmlElement: $('<div>').html(
-                  '<div style="width:69px;">' +
-                    '<input type="checkbox" ' + (relation.enabled ? 'checked' : '') + '/>' +
-                    '&nbsp;<label> ' + _getRelationLabel(relation.relation) + '</label>' +
-                  '</div>').get(0),
-                htmlElementWidth: 70,
-                htmlElementHeight: 18,
-                onLinkClick: function (THIS, d, i) {
-                  if ($(THIS).find('input[type=\'checkbox\']').is(':checked')) {
-                    enableRelation(index);
-                  } else {
-                    disableRelation(index);
-                  }
-                }
-              });
-
-            });
-
-            $scope.graph = g;
+            $rootScope.$emit('egg:relationalPanel:run', 'importGraph', relDashboards);
             init = true;
-          };
-
-          var enableRelation = function (relationIndex) {
-            if (init) {
-              $scope.relationalPanel.relations.relationsDashboards[relationIndex].enabled = true;
-              $scope.ignoreNextConfigurationChangedEvent = true;
-              _saveRelationalPanel().then(function () {
-                if ($scope.relationalPanel.enabled) {
-                  joinFilterHelper.updateJoinFilter();
-                }
-              });
-            }
-          };
-
-          var disableRelation = function (relationIndex) {
-            if (init) {
-              $scope.relationalPanel.relations.relationsDashboards[relationIndex].enabled = false;
-              $scope.ignoreNextConfigurationChangedEvent = true;
-              _saveRelationalPanel().then(function () {
-                if ($scope.relationalPanel.enabled) {
-                  joinFilterHelper.updateJoinFilter();
-                }
-              });
-            }
           };
 
           var _checkFilterJoinPlugin = function () {

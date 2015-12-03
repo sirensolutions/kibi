@@ -68,7 +68,7 @@ define(function (require) {
             // here check that the join filter should be present on this dashboard
             // it should be added only if we find current dashboardId in enabled relations
             var isFocusDashboardInEnabledRelations = urlHelper.isDashboardInEnabledRelations(
-              focusDashboardId, relations
+              focusDashboardId, enabledRelations
             );
             if (!focusIndex) {
               reject(new Error('SavedSearch for [' +  focusDashboardId + '] dashboard seems to not have an index id'));

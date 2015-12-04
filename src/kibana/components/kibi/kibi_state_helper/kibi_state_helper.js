@@ -172,7 +172,7 @@ define(function (require) {
     };
 
     KibiStateHelper.prototype.getFiltersForDashboardId = function (dashboardId) {
-      var filters =  this._getDashboardProperty(dashboardId, 'f');
+      var filters = this._getDashboardProperty(dashboardId, 'f');
       // add also pinned filters which are stored in global state
       if (filters && globalState.filters) {
         return filters.concat(globalState.filters);
@@ -293,6 +293,7 @@ define(function (require) {
       }
       globalState.k.d[dashboardId][prop] = value;
     };
+
     KibiStateHelper.prototype._getDashboardProperty = function (dashboardId, prop) {
       if (!globalState.k.d[dashboardId]) {
         return undefined;

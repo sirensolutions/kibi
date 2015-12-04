@@ -81,7 +81,9 @@ define(function (require) {
 
                   _saveRelationalPanel().then(function () {
                     if ($scope.relationalPanel.enabled) {
-                      joinFilterHelper.updateJoinSetFilter(relation.dashboards);
+                      joinFilterHelper.updateJoinSetFilter(relation.dashboards).then(function () {
+                        $rootScope.$emit('kibi:update-counts:join_set');
+                      });
                     }
                   });
                   return false;

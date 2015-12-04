@@ -11,6 +11,7 @@ define(function (require) {
 
   var $rootScope;
   var dashboardGroupHelper;
+  var kibiStateHelper;
 
   function init(savedDashboardsImpl, savedDashboardGroupsImpl, savedSearchesImpl) {
     return function () {
@@ -35,6 +36,7 @@ define(function (require) {
       inject(function ($injector, Private, _$rootScope_) {
         $rootScope = _$rootScope_;
         dashboardGroupHelper = Private(require('components/kibi/dashboard_group_helper/dashboard_group_helper'));
+        kibiStateHelper = Private(require('components/kibi/kibi_state_helper/kibi_state_helper'));
       });
     };
   }
@@ -459,6 +461,48 @@ define(function (require) {
             expect(actual).to.eql(expected);
           });
 
+          it('should update counts if the kibi state has a join_set that is not yet in the app state', function () {
+
+            var oldDashboardGroups = [
+              {
+                id: 'd0',
+                title: 'Title A0',
+                dashboards: [{ id: 1, filters: [] }],
+                selected: {id: 1},
+                _selected: {id: 1}
+              },
+              {
+                id: 'd1',
+                title: 'Title B0',
+                dashboards: [{ id: 2, filters: [] }],
+                selected: {id: 2},
+                _selected: {id: 2}
+              }
+            ];
+            var newDashboardGroups = [
+              {
+                title: 'Title A0',
+                dashboards: [{ id: 1, filters: [] }],
+                selected: {id: 1},
+                _selected: {id: 1}
+              },
+              {
+                title: 'Title B0',
+                dashboards: [{id: 2, filters: [] }],
+                selected: {id: 2},
+                _selected: {id: 2}
+              }
+            ];
+
+            var expected = {
+              indexes: [0, 1],
+              reasons: ['There is a join_set filter so lets update all groups']
+            };
+
+            kibiStateHelper.saveFiltersForDashboardId(1, [ { join_set: {} } ]);
+            var actual = dashboardGroupHelper.updateDashboardGroups(oldDashboardGroups, newDashboardGroups);
+            expect(actual).to.eql(expected);
+          });
         });
 
       });

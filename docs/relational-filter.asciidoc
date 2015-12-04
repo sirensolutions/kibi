@@ -27,6 +27,7 @@ In the image below, the dashboards Articles, Companies, and Investments are conn
 
 image::images/relational-panel/panel.png["Relational panel",align="center"]
 
+[[relational-panel-browsing]]
 ==== Browsing
 
 Since a <<saving-dashboards,saved search>> is now associated with a dashboard, a count indicating the current number of documents in that dashboard is displayed on each tab. For example on the previous image, there are 3558 articles, 840 companies, and 840 investments rounds that are inter-connected. These numbers coupled with the relational panel allows to get a feeling of the current state of the joined dashboards.

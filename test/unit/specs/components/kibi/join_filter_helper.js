@@ -293,7 +293,7 @@ define(function (require) {
         });
       });
 
-      describe('updateJoinFilter', function () {
+      describe('updateJoinSetFilter', function () {
         var urlHelper;
         var sinon = require('test_utils/auto_release_sinon');
 
@@ -306,7 +306,7 @@ define(function (require) {
         });
 
         it('should remove the join filter 1', function (done) {
-          joinFilterHelper.updateJoinFilter().then(function () {
+          joinFilterHelper.updateJoinSetFilter().then(function () {
             expect(urlHelper.removeJoinFilter.called).to.be.ok();
             done();
           }).catch(done);
@@ -321,7 +321,7 @@ define(function (require) {
             }]
           });
           sinon.stub(urlHelper, 'getCurrentDashboardId').returns('aaa');
-          joinFilterHelper.updateJoinFilter().then(function () {
+          joinFilterHelper.updateJoinSetFilter().then(function () {
             expect(urlHelper.removeJoinFilter.called).to.be.ok();
             done();
           }).catch(done);
@@ -339,7 +339,7 @@ define(function (require) {
             }]
           });
           sinon.stub(urlHelper, 'getCurrentDashboardId').returns('dashboard-b');
-          joinFilterHelper.updateJoinFilter().then(function () {
+          joinFilterHelper.updateJoinSetFilter().then(function () {
             expect(urlHelper.addFilter.called).to.be.ok();
             done();
           }).catch(done);
@@ -371,7 +371,7 @@ define(function (require) {
             ]
           });
           sinon.stub(urlHelper, 'getCurrentDashboardId').returns('dashboard-a');
-          joinFilterHelper.updateJoinFilter([ 'dashboard-c', 'dashboard-d' ]).then(function () {
+          joinFilterHelper.updateJoinSetFilter([ 'dashboard-c', 'dashboard-d' ]).then(function () {
             var filtersa = kibiStateHelper.getFiltersForDashboardId('dashboard-a');
             expect(filtersa).to.have.length(2);
             expect(filtersa[0].term).to.be.ok();
@@ -419,7 +419,7 @@ define(function (require) {
             ]
           });
           sinon.stub(urlHelper, 'getCurrentDashboardId').returns('dashboard-a');
-          joinFilterHelper.updateJoinFilter([ 'dashboard-c', 'dashboard-d' ]).then(function () {
+          joinFilterHelper.updateJoinSetFilter([ 'dashboard-c', 'dashboard-d' ]).then(function () {
             var filtersa = kibiStateHelper.getFiltersForDashboardId('dashboard-a');
             expect(filtersa).to.have.length(2);
             expect(filtersa[0].term).to.be.ok();

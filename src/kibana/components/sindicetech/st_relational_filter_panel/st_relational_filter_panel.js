@@ -49,29 +49,37 @@ define(function (require) {
             return config.set('kibi:relations', $scope.relationalPanel.relations);
           };
 
-          var dashboardsGraphExportOff = $rootScope.$on('egg:relationalPanel:results', function (event, method, results) {
-            if (method === 'exportGraph') {
-              var relations = config.get('kibi:relations');
-              relations.relationsDashboardsSerialized = results;
-              config.set('kibi:relations', relations);
-            }
-          });
 
           var init = false;
           var _initPanel = function () {
-            var relDashboards = $scope.relationalPanel.relations.relationsDashboardsSerialized;
+            var relDashboards = _.cloneDeep($scope.relationalPanel.relations.relationsDashboardsSerialized);
             relDashboards.options.draggable = false;
-            relDashboards.options.onLinkClick = function (el, d, i) {
-              if (!init) {
+
+            _.each(relDashboards.links, function (link) {
+              var relation = _.find(
+                $scope.relationalPanel.relations.relationsDashboards,
+                {relation: link.data.id, dashboards: [link.source.replace(/^eegid-/, ''), link.target.replace(/^eegid-/, '')]}
+              );
+              if (!relation) {
                 return;
               }
+
+              link.html = '<div>' +
+                '<input type="checkbox" ' + (relation.enabled ? 'checked' : '') + '/>' +
+                '&nbsp;<label>' + link.linkType + '</label>' +
+                '</div>';
+            });
+
+
+
+            relDashboards.options.onLinkClick = function (el, d, i) {
               _.each($scope.relationalPanel.relations.relationsDashboards, function (relation) {
                 if (relation.dashboards.indexOf(d.source.label) !== -1 &&
                     relation.dashboards.indexOf(d.target.label) !== -1) {
                   relation.enabled = $(el).find('input[type=\'checkbox\']').is(':checked');
                   $scope.ignoreNextConfigurationChangedEvent = true;
+
                   _saveRelationalPanel().then(function () {
-                    $rootScope.$emit('egg:relationalPanel:run', 'exportGraph');
                     if ($scope.relationalPanel.enabled) {
                       joinFilterHelper.updateJoinSetFilter(relation.dashboards);
                     }

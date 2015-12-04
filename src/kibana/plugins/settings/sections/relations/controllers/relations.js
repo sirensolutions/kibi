@@ -176,25 +176,18 @@ define(function (require) {
       return label;
     }
 
+    function _addClickHandlers(name, options) {
+      options.onNodeDragEnd = function () {
+        $rootScope.$emit('egg:' + name + 'Graph:run', 'exportGraph');
+      };
+    }
+
     /**
      * Updates the relationships between dashboards
      */
     function _updateRelationsDashboards(oldRelations) {
       var g = {
         options: {
-          onNodeDragEnd: function () {
-            $rootScope.$emit('egg:dashboardsGraph:run', 'exportGraph');
-          },
-          onLinkClick: function (el, d, i) {
-            _.each($scope.relations.relationsDashboards, function (relation) {
-              if (relation.dashboards.indexOf(d.source.label) !== -1 &&
-                  relation.dashboards.indexOf(d.target.label) !== -1) {
-                relation.enabled = !relation.enabled;
-                save('dashboards');
-                return false;
-              }
-            });
-          },
           monitorContainerSize: true,
           alwaysShowLinksLabels: true,
           stopAfter: 2000,
@@ -230,10 +223,7 @@ define(function (require) {
             if (uniq[key].length !== 1) {
               error = 'This row has already been defined!';
             }
-            // by default the relation is enabled
-            if (relDash.enabled === undefined) {
-              relDash.enabled = true;
-            }
+
             // build the graph visualisation
             var sourceNodeIndexId = _getIndexForDashboard(relDash.dashboards[0]);
             var targetNodeIndexId = _getIndexForDashboard(relDash.dashboards[1]);
@@ -253,11 +243,8 @@ define(function (require) {
             g.links.push({
               source: relDash.dashboards[0],
               target: relDash.dashboards[1],
-              linkType: 'link',
-              html: '<div>' +
-                    '<input type="checkbox" ' + (relDash.enabled ? 'checked' : '') + '/>' +
-                    '&nbsp;<label>' + _getRelationLabel(relDash.relation) + '</label>' +
-                    '</div>',
+              linkType: _getRelationLabel(relDash.relation),
+              data: { id: relDash.relation },
               undirected: true
             });
           }
@@ -275,10 +262,22 @@ define(function (require) {
       g.nodes = _.uniq(g.nodes, function (node) {
         return node.id;
       });
-      $scope.dashboardsGraph = g;
+
+      if (!$scope.dashboardsGraph && $scope.relations.relationsDashboardsSerialized ) {
+        // check the serialized one
+        var graph = $scope.relations.relationsDashboardsSerialized;
+        _addClickHandlers('dashboards', graph.options);
+        $scope.dashboardsGraph = graph;
+
+      } else {
+        _addClickHandlers('dashboards', g.options);
+        $scope.dashboardsGraph = g;
+      }
+
       var isEqual = _($scope.relations.relationsDashboards).map(function (relation) {
         return _.omit(relation, [ '$$hashKey', 'error' ]);
       }).isEqual(oldRelations);
+
       if (_isValid('dashboards') && !isEqual) {
         save('dashboards');
       }
@@ -397,7 +396,17 @@ define(function (require) {
       g.nodes = _.uniq(g.nodes, function (node) {
         return node.id;
       });
-      $scope.indicesGraph = g;
+
+      if (!$scope.indicesGraph && $scope.relations.relationsIndicesSerialized ) {
+        // check the serialized one
+        var graph = $scope.relations.relationsIndicesSerialized;
+        _addClickHandlers('indices', graph.options);
+        $scope.indicesGraph = graph;
+
+      } else {
+        _addClickHandlers('indices', g.options);
+        $scope.indicesGraph = g;
+      }
 
       var isEqual = _($scope.relations.relationsIndices).map(function (relation) {
         return _.omit(relation, [ '$$hashKey', 'error' ]);

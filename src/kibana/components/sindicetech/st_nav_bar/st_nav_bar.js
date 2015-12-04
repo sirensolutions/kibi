@@ -190,6 +190,12 @@ define(function (require) {
           });
         });
 
+        var removeJoinSet = $rootScope.$on('kibi:update-counts:join_set', function (event) {
+          dashboardGroupHelper.computeGroups().then(function (dashboardGroups) {
+            _writeToScope(dashboardGroups);
+          });
+        });
+
         // =============
         // Tab scrolling
         // =============
@@ -249,6 +255,7 @@ define(function (require) {
         };
 
         $el.on('$destroy', function () {
+          removeJoinSet();
           removeAutorefreshHandler();
           removeInitConfigHandler();
           removeDashboardChangedHandler();

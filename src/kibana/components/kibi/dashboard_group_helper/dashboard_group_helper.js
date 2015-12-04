@@ -320,6 +320,17 @@ define(function (require) {
         if (g.dashboards) {
           for (var dIndex = 0; dIndex < g.dashboards.length; dIndex++ ) {
             var d = g.dashboards[dIndex];
+            var filtersDashboard = kibiStateHelper.getFiltersForDashboardId(d.id);
+            if (filtersDashboard) {
+              // check if there is a join_set in the kibi state
+              for (var fdIndex = 0; fdIndex < filtersDashboard.length; fdIndex++ ) {
+                var fd = filtersDashboard[fdIndex];
+                if (fd.join_set) {
+                  // return all groups
+                  return true;
+                }
+              }
+            }
             if (d.filters) {
               for (var fIndex = 0; fIndex < d.filters.length; fIndex++ ) {
                 var f = d.filters[fIndex];

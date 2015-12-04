@@ -49,6 +49,14 @@ define(function (require) {
             return config.set('kibi:relations', $scope.relationalPanel.relations);
           };
 
+          var dashboardsGraphExportOff = $rootScope.$on('egg:relationalPanel:results', function (event, method, results) {
+            if (method === 'exportGraph') {
+              var relations = config.get('kibi:relations');
+              relations.relationsDashboardsSerialized = results;
+              config.set('kibi:relations', relations);
+            }
+          });
+
           var init = false;
           var _initPanel = function () {
             var relDashboards = $scope.relationalPanel.relations.relationsDashboardsSerialized;
@@ -63,8 +71,9 @@ define(function (require) {
                   relation.enabled = $(el).find('input[type=\'checkbox\']').is(':checked');
                   $scope.ignoreNextConfigurationChangedEvent = true;
                   _saveRelationalPanel().then(function () {
+                    $rootScope.$emit('egg:relationalPanel:run', 'exportGraph');
                     if ($scope.relationalPanel.enabled) {
-                      joinFilterHelper.updateJoinFilter();
+                      joinFilterHelper.updateJoinSetFilter(relation.dashboards);
                     }
                   });
                   return false;
@@ -122,7 +131,7 @@ define(function (require) {
             $scope.show = false;
             if (urlHelper.isItDashboardUrl() && init && $scope.relationalPanel.enabled) {
               // try to enable filter when user switch to dashboards app
-              joinFilterHelper.updateJoinFilter();
+              joinFilterHelper.updateJoinSetFilter();
             }
           });
 

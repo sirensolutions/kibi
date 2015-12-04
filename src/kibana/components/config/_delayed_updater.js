@@ -69,7 +69,6 @@ define(function (require) {
 
         var defer = Promise.defer();
         queue.push(defer);
-        notify.log('config change: ' + key + ': ' + oldVal + ' -> ' + newVal);
         $rootScope.$broadcast('change:config.' + key, newVal, oldVal);
 
         // reset the fire timer

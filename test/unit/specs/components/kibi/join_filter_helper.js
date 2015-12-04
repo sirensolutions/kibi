@@ -48,6 +48,10 @@ define(function (require) {
                     {
                       id: 'dashboard-c',
                       savedSearchId: 'savedsearch-c'
+                    },
+                    {
+                      id: 'dashboard-d',
+                      savedSearchId: 'savedsearch-d'
                     }
                   ]
                 });
@@ -64,6 +68,8 @@ define(function (require) {
                     return Promise.resolve({ id: 'dashboard-b', savedSearchId: 'savedsearch-b' });
                   case 'dashboard-c':
                     return Promise.resolve({ id: 'dashboard-c', savedSearchId: 'savedsearch-c' });
+                  case 'dashboard-d':
+                    return Promise.resolve({ id: 'dashboard-d', savedSearchId: 'savedsearch-d' });
                   default:
                     return Promise.reject(new Error('no dashboard ' + id));
                 }
@@ -83,6 +89,8 @@ define(function (require) {
                     return Promise.resolve({ searchSource: { _state: { index: { id: 'index-b' } } } });
                   case 'savedsearch-c':
                     return Promise.resolve({ searchSource: { _state: { index: { id: 'index-c' } } } });
+                  case 'savedsearch-d':
+                    return Promise.resolve({ searchSource: { _state: { index: { id: 'index-d' } } } });
                   case 'savedsearch-noindexid':
                     return Promise.resolve({ searchSource: { _state: { index: { } } } });
                   default:
@@ -107,6 +115,8 @@ define(function (require) {
                     return Promise.resolve({ id: 'index-b' });
                   case 'index-c':
                     return Promise.resolve({ id: 'index-c' });
+                  case 'index-d':
+                    return Promise.resolve({ id: 'index-d' });
                   default:
                     return Promise.reject(new Error('no indexPattern for: ' + id));
                 }
@@ -303,6 +313,13 @@ define(function (require) {
         });
 
         it('should remove the join filter 2', function (done) {
+          config.set('kibi:relations', {
+            relationsDashboards: [{
+              enabled: true,
+              dashboards: [ 'dashboard-a', 'dashboard-b' ],
+              relation: 'a/id/b/id'
+            }]
+          });
           sinon.stub(urlHelper, 'getCurrentDashboardId').returns('aaa');
           joinFilterHelper.updateJoinFilter().then(function () {
             expect(urlHelper.removeJoinFilter.called).to.be.ok();
@@ -324,6 +341,104 @@ define(function (require) {
           sinon.stub(urlHelper, 'getCurrentDashboardId').returns('dashboard-b');
           joinFilterHelper.updateJoinFilter().then(function () {
             expect(urlHelper.addFilter.called).to.be.ok();
+            done();
+          }).catch(done);
+        });
+
+        it('should remove the join filter from all dashboards that do not have an enabled relation adjacent', function (done) {
+          kibiStateHelper.saveFiltersForDashboardId('dashboard-a', [ { term: {} }, { join_set: {} } ]);
+          kibiStateHelper.saveFiltersForDashboardId('dashboard-b', [ { term: {} }, { join_set: {} } ]);
+          kibiStateHelper.saveFiltersForDashboardId('dashboard-c', [ { term: {} }, { join_set: {} } ]);
+          kibiStateHelper.saveFiltersForDashboardId('dashboard-d', [ { term: {} }, { join_set: {} } ]);
+          config.set('kibi:relationalPanel', true);
+          config.set('kibi:relations', {
+            relationsDashboards: [
+              {
+                enabled: true,
+                dashboards: [ 'dashboard-a', 'dashboard-b' ],
+                relation: 'a/id/b/id'
+              },
+              {
+                enabled: false,
+                dashboards: [ 'dashboard-b', 'dashboard-c' ],
+                relation: 'b/id/c/id'
+              },
+              {
+                enabled: false,
+                dashboards: [ 'dashboard-c', 'dashboard-d' ],
+                relation: 'c/id/d/id'
+              }
+            ]
+          });
+          sinon.stub(urlHelper, 'getCurrentDashboardId').returns('dashboard-a');
+          joinFilterHelper.updateJoinFilter([ 'dashboard-c', 'dashboard-d' ]).then(function () {
+            var filtersa = kibiStateHelper.getFiltersForDashboardId('dashboard-a');
+            expect(filtersa).to.have.length(2);
+            expect(filtersa[0].term).to.be.ok();
+            expect(filtersa[1].join_set).to.be.ok();
+
+            var filtersb = kibiStateHelper.getFiltersForDashboardId('dashboard-b');
+            expect(filtersb).to.have.length(2);
+            expect(filtersb[0].term).to.be.ok();
+            expect(filtersb[1].join_set).to.be.ok();
+
+            var filtersc = kibiStateHelper.getFiltersForDashboardId('dashboard-c');
+            expect(filtersc).to.have.length(1);
+            expect(filtersc[0].term).to.be.ok();
+
+            var filtersd = kibiStateHelper.getFiltersForDashboardId('dashboard-d');
+            expect(filtersd).to.have.length(1);
+            expect(filtersd[0].term).to.be.ok();
+            done();
+          }).catch(done);
+        });
+
+        it('should add the join filter to all dashboards that have an enabled relation adjacent', function (done) {
+          kibiStateHelper.saveFiltersForDashboardId('dashboard-a', [ { term: {} }, { join_set: {} } ]);
+          kibiStateHelper.saveFiltersForDashboardId('dashboard-b', [ { term: {} }, { join_set: {} } ]);
+          kibiStateHelper.saveFiltersForDashboardId('dashboard-c', [ { term: {} } ]);
+          kibiStateHelper.saveFiltersForDashboardId('dashboard-d', [ { term: {} } ]);
+          config.set('kibi:relationalPanel', true);
+          config.set('kibi:relations', {
+            relationsDashboards: [
+              {
+                enabled: true,
+                dashboards: [ 'dashboard-a', 'dashboard-b' ],
+                relation: 'a/id/b/id'
+              },
+              {
+                enabled: false,
+                dashboards: [ 'dashboard-b', 'dashboard-c' ],
+                relation: 'b/id/c/id'
+              },
+              {
+                enabled: true,
+                dashboards: [ 'dashboard-c', 'dashboard-d' ],
+                relation: 'c/id/d/id'
+              }
+            ]
+          });
+          sinon.stub(urlHelper, 'getCurrentDashboardId').returns('dashboard-a');
+          joinFilterHelper.updateJoinFilter([ 'dashboard-c', 'dashboard-d' ]).then(function () {
+            var filtersa = kibiStateHelper.getFiltersForDashboardId('dashboard-a');
+            expect(filtersa).to.have.length(2);
+            expect(filtersa[0].term).to.be.ok();
+            expect(filtersa[1].join_set).to.be.ok();
+
+            var filtersb = kibiStateHelper.getFiltersForDashboardId('dashboard-b');
+            expect(filtersb).to.have.length(2);
+            expect(filtersb[0].term).to.be.ok();
+            expect(filtersb[1].join_set).to.be.ok();
+
+            var filtersc = kibiStateHelper.getFiltersForDashboardId('dashboard-c');
+            expect(filtersc).to.have.length(2);
+            expect(filtersc[0].term).to.be.ok();
+            expect(filtersc[1].join_set).to.be.ok();
+
+            var filtersd = kibiStateHelper.getFiltersForDashboardId('dashboard-d');
+            expect(filtersd).to.have.length(2);
+            expect(filtersd[0].term).to.be.ok();
+            expect(filtersd[1].join_set).to.be.ok();
             done();
           }).catch(done);
         });

@@ -89,7 +89,7 @@ define(function (require) {
               return !f.join_set;
             });
           } else {
-            joinFilterHelper.updateJoinFilter();
+            joinFilterHelper.updateJoinSetFilter();
           }
         };
 

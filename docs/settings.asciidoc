@@ -371,6 +371,7 @@ You can disable/enable a relation by checking the box on an edge of the graph.
 
 In the previous image, the AC and CI relations between the dashboards Articles, Companies, and Investments are enabled. This means that filtering documents from the Articles will retain only the Companies, and Investments, that are connected to those articles.
 
+[[relations-settings-enable]]
 ==== Enabling Relational Panel
 
 By checking the "Enable relational panel" checkbox, the relationships that you defined between dashboards will be made effective while browsing.

@@ -25,24 +25,6 @@ To create a new dashboard, click on the _New Dashboard_ button:
 image:images/NewDashboard.jpg[]
 
 [float]
-[[adding-visualizations-to-a-dashboard]]
-==== Adding Visualizations to a Dashboard
-
-To add a visualization to the dashboard, click the *Add Visualization* image:images/AddVis.png[Plus]
-button in the toolbar panel, then select a previously created visualization
-from the list:
-
-image::images/dashboard/add-vis.png["Adding a visualization to the dashboard",align="center"]
-
-You can filter the list of visualizations by typing a filter string into the
-*Visualization Filter* field.
-
-The visualization you select appears in a _container_ on your dashboard.
-
-NOTE: If you see a message about the container's height or width being too
-small, <<resizing-containers,resize the container>>.
-
-[float]
 [[saving-dashboards]]
 ==== Saving Dashboards
 
@@ -80,6 +62,31 @@ image::images/dashboard/share-dashboard.png["Dashboard sharing options",align="c
 
 Click on the button next to a sharing option to copy the corresponding
 code to your clipboard.
+
+[float]
+[[adding-visualizations-to-a-dashboard]]
+==== Adding Visualizations to a Dashboard
+
+To add a visualization to the dashboard, click the *Add Visualization* image:images/AddVis.png[Plus]
+button in the toolbar panel, then select a previously created visualization
+from the list:
+
+image::images/dashboard/add-vis.png["Adding a visualization to the dashboard",align="center"]
+
+You can filter the list of visualizations by typing a filter string into the
+*Visualization Filter* field.
+
+The visualization you select appears in a _container_ on your dashboard.
+
+NOTE: If you see a message about the container's height or width being too
+small, <<resizing-containers,resize the container>>.
+
+[float]
+==== Removing filters on all dashboard
+
+To remove filters on **all** dashboards, click the *Remove all filters* image:images/remove-all-filters.png[Minus] button in the toolbar panel.
+
+NOTE: If the <<relational-panel,relational panel>> is <<relations-settings-enable,enabled>>, clicking this button does not remove the <<relational-panel-browsing,filter>>. If you want to do so, you need to disable the relational panel in the <<kibi-settings-relations,Relations settings>>.
 
 [float]
 [[customizing-your-dashboard]]
@@ -138,7 +145,7 @@ index pattern used to make the query.
 image:images/NYCTA-Statistics.jpg[]
 
 To export the raw data behind the visualization as a comma-separated-values (CSV) file, click on either the
-*Raw* or *Formatted* links at the bottom of any of the detailed information tabs. A raw export contains the data as it 
+*Raw* or *Formatted* links at the bottom of any of the detailed information tabs. A raw export contains the data as it
 is stored in Elasticsearch. A formatted export contains the results of any applicable Kibana [field formatters].
 
 [float]

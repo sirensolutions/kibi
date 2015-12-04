@@ -23,14 +23,14 @@
     </form>
 
     <div class="button-group" role="toolbar">
-      <kbn-tooltip text="New Search" placement="bottom" append-to-body="1">
+      <kbn-tooltip text="New Search" placement="bottom">
         <button
           ng-click="newQuery()"
           aria-label="New Search">
           <i aria-hidden="true" class="fa fa-file-new-o"></i>
         </button>
       </kbn-tooltip>
-      <kbn-tooltip text="Save Search" placement="bottom" append-to-body="1">
+      <kbn-tooltip text="Save Search" placement="bottom">
         <button
           ng-click="configTemplate.toggle('save');"
           ng-class="{active: configTemplate.is('save')}"
@@ -40,7 +40,7 @@
           <i aria-hidden="true" class="fa fa-save"></i>
         </button>
       </kbn-tooltip>
-      <kbn-tooltip text="Load Saved Search" placement="bottom" append-to-body="1">
+      <kbn-tooltip text="Load Saved Search" placement="bottom">
         <button
           aria-haspopup="true"
           aria-expanded="{{ configTemplate.is('load') }}"

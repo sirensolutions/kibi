@@ -65,11 +65,11 @@
     </div>
 
     <div class="button-group">
-      <kbn-tooltip text="New Visualization" placement="bottom" append-to-body="1">
+      <kbn-tooltip text="New Visualization" placement="bottom">
         <button ng-click="startOver()" aria-label="New Visualization"><i aria-hidden="true" class="fa fa-file-new-o"></i></button>
       </kbn-tooltip>
 
-      <kbn-tooltip text="Save Visualization" placement="bottom" append-to-body="1">
+      <kbn-tooltip text="Save Visualization" placement="bottom">
         <!-- normal save -->
         <button
           ng-class="{active: configTemplate.is('save')}"
@@ -86,7 +86,7 @@
         </button>
       </kbn-tooltip>
 
-      <kbn-tooltip text="Load Saved Visualization" placement="bottom" append-to-body="1">
+      <kbn-tooltip text="Load Saved Visualization" placement="bottom">
         <button
           ng-class="{active: configTemplate.is('load')}"
           ng-click="configTemplate.toggle('load')"
@@ -96,7 +96,7 @@
           <i aria-hidden="true" class="fa fa-folder-open-o"></i>
         </button>
       </kbn-tooltip>
-      <kbn-tooltip text="Share Visualization" placement="bottom" append-to-body="1">
+      <kbn-tooltip text="Share Visualization" placement="bottom">
         <button
           ng-class="{active: configTemplate.is('share')}"
           ng-click="configTemplate.toggle('share')"
@@ -106,7 +106,7 @@
           <i aria-hidden="true" class="fa fa-external-link"></i>
         </button>
       </kbn-tooltip>
-      <kbn-tooltip text="Refresh" placement="bottom" append-to-body="1">
+      <kbn-tooltip text="Refresh" placement="bottom">
         <button
           ng-click="fetch()"
           aria-label="Refresh">

@@ -322,6 +322,7 @@ define(function (require) {
             var d = g.dashboards[dIndex];
             var filtersDashboard = kibiStateHelper.getFiltersForDashboardId(d.id);
             if (filtersDashboard) {
+              // check if there is a join_set in the kibi state
               for (var fdIndex = 0; fdIndex < filtersDashboard.length; fdIndex++ ) {
                 var fd = filtersDashboard[fdIndex];
                 if (fd.join_set) {

@@ -82,6 +82,7 @@ define(function (require) {
                   _saveRelationalPanel().then(function () {
                     if ($scope.relationalPanel.enabled) {
                       joinFilterHelper.updateJoinSetFilter(relation.dashboards).then(function () {
+                        // TODO pass the array of dashboards to update, instead of updating everything
                         $rootScope.$emit('kibi:update-counts:join_set');
                       });
                     }

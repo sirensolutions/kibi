@@ -245,9 +245,13 @@ define(function (require) {
 
     KibiStateHelper.prototype.removeFilterOfTypeFromDashboard = function (type, dashboardId) {
       if (globalState.k.d) {
-        globalState.k.d[dashboardId].f = _.filter(globalState.k.d[dashboardId].f, function (filter) {
+        if (!globalState.k.d[dashboardId].f) {
+          globalState.k.d[dashboardId].f = [];
+        }
+        var filters = _.filter(globalState.k.d[dashboardId].f, function (filter) {
           return !filter[type];
         });
+        this._setDashboardProperty(dashboardId, 'f', filters);
         globalState.save();
       }
     };

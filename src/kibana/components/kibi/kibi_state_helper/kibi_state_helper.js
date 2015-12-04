@@ -243,7 +243,7 @@ define(function (require) {
       }
     };
 
-    KibiStateHelper.prototype.removeFilterOfTypeInDashboard = function (type, dashboardId) {
+    KibiStateHelper.prototype.removeFilterOfTypeFromDashboard = function (type, dashboardId) {
       if (globalState.k.d) {
         globalState.k.d[dashboardId].f = _.filter(globalState.k.d[dashboardId].f, function (filter) {
           return !filter[type];

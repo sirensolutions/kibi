@@ -126,7 +126,7 @@ define(function (require) {
       }
     };
 
-    JoinFilterHelper.prototype.updateJoinFilter = function (dashboards) {
+    JoinFilterHelper.prototype.updateJoinSetFilter = function (dashboards) {
       var self = this;
       var updateDashboards;
 
@@ -136,13 +136,15 @@ define(function (require) {
             return;
           }
 
+          // the updateDashboards method is called recursively to process all dashboards
+          // since we need to perform an operation if there is an error as well
           var dashboardId = dashboards.pop();
 
           return self.getJoinFilter(dashboardId).then(function (joinFilter) {
             kibiStateHelper.addFilterToDashboard(dashboardId, joinFilter);
             return updateDashboards(dashboards);
           }).catch(function (error) {
-            kibiStateHelper.removeFilterOfTypeInDashboard('join_set', dashboardId);
+            kibiStateHelper.removeFilterOfTypeFromDashboard('join_set', dashboardId);
             return updateDashboards(dashboards);
           });
         };

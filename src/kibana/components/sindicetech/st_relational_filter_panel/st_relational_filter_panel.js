@@ -73,7 +73,7 @@ define(function (require) {
                   _saveRelationalPanel().then(function () {
                     $rootScope.$emit('egg:relationalPanel:run', 'exportGraph');
                     if ($scope.relationalPanel.enabled) {
-                      joinFilterHelper.updateJoinFilter(relation.dashboards);
+                      joinFilterHelper.updateJoinSetFilter(relation.dashboards);
                     }
                   });
                   return false;
@@ -131,7 +131,7 @@ define(function (require) {
             $scope.show = false;
             if (urlHelper.isItDashboardUrl() && init && $scope.relationalPanel.enabled) {
               // try to enable filter when user switch to dashboards app
-              joinFilterHelper.updateJoinFilter();
+              joinFilterHelper.updateJoinSetFilter();
             }
           });
 

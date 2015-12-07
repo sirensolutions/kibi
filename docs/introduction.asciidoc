@@ -46,7 +46,7 @@ of forked code to a minimum.
 
 === What's new in Kibi v{kibi-version}
 
-This new version of Kibi provides many improvments and new features, the main one are listed below:
+This new version of Kibi provides many improvements and new features, the main one are listed below:
 
 - Kibi is merged with Kibana 4.1.3 which provides a number of https://www.elastic.co/blog/kibana-4-2-1-and-4-1-3[bug fixes and performance improvments].
 - A new <<relational-panel,relational browsing>> feature and an improved interactive <<relational-filter,join construction>>.

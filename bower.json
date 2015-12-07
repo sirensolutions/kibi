@@ -1,8 +1,8 @@
 {
-  "name": "kibana",
-  "version": "0.0.0",
+  "name": "kibi",
+  "version": "0.2.0",
   "authors": [
-    "Spencer Alger <spencer@spenceralger.com>"
+    "SIREn Solutions <info@siren.solutions>"
   ],
   "description": "Browser based analytics and search interface to Logstash and other timestamped data sets stored in ElasticSearch",
   "main": "src/index.html",

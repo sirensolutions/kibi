@@ -1,4 +1,4 @@
-# Kibi 0.2.0-snapshot
+# Kibi 0.2.0
 
 Kibi extends Kibana 4.1 with data intelligence features; the core feature of
 Kibi is the capability to join and filter data from multiple Elasticsearch

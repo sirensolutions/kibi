@@ -9,7 +9,7 @@
     "SPARQL"
   ],
   "private": false,
-  "version": "0.2.0-snapshot",
+  "version": "0.2.0",
   "main": "src/server/app.js",
   "homepage": "http://siren.solutions/kibi",
   "bugs": {

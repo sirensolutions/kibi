@@ -13,7 +13,7 @@ define(function (require) {
         activeFetch: false
       };
 
-      $scope.configMode = /\/visualize\/(create|edit)\/.*/.test($location.path());
+      $scope.configMode = /\/visualize\/(create|edit).*/.test($location.path());
 
       var notify = new Notifier({
         location: 'Relational Widget'

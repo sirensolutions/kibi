@@ -213,10 +213,10 @@ define(function (require) {
 
     KibiStateHelper.prototype.addFilterToDashboard = function (dashboardId, filter) {
       if (globalState.k.d) {
-        if (!globalState.k.d[dashboardId].f) {
-          globalState.k.d[dashboardId].f = [];
+        var filters = [];
+        if (globalState.k.d[dashboardId] && globalState.k.d[dashboardId].f) {
+          filters = globalState.k.d[dashboardId].f;
         }
-        var filters = globalState.k.d[dashboardId].f;
 
         // here if there is a relational filter it should be replaced
         if (filter.join_set) {
@@ -239,16 +239,18 @@ define(function (require) {
           // add
           filters.push(filter);
         }
+        this._setDashboardProperty(dashboardId, 'f', filters);
         globalState.save();
       }
     };
 
     KibiStateHelper.prototype.removeFilterOfTypeFromDashboard = function (type, dashboardId) {
       if (globalState.k.d) {
-        if (!globalState.k.d[dashboardId].f) {
-          globalState.k.d[dashboardId].f = [];
+        var filters = [];
+        if (globalState.k.d[dashboardId] && globalState.k.d[dashboardId].f) {
+          filters = globalState.k.d[dashboardId].f;
         }
-        var filters = _.filter(globalState.k.d[dashboardId].f, function (filter) {
+        filters = _.filter(filters, function (filter) {
           return !filter[type];
         });
         this._setDashboardProperty(dashboardId, 'f', filters);

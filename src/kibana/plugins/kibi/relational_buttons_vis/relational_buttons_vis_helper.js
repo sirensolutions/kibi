@@ -248,15 +248,21 @@ define(function (require) {
               Promise.all(promises).then(function (results) {
                 var queriesFromDashboardsWirhSameIndex = results[0];
                 var filtersFromDashboardsWirhSameIndex = results[1] || [];
+                if (joinSeqFilter) {
+                  filtersFromDashboardsWirhSameIndex = filtersFromDashboardsWirhSameIndex.concat(joinSeqFilter);
+                }
                 countHelper.constructCountQuery(
                   targetDashboardId,
                   targetSavedSearch,
                   null,  // do not put joinSeqFilter here as this parameter is reserved to join_set only !!!
                   queriesFromDashboardsWirhSameIndex,
-                  filtersFromDashboardsWirhSameIndex.concat(joinSeqFilter)
+                  filtersFromDashboardsWirhSameIndex
                 )
                 .then(function (query) {
-                  fulfill(query);
+                  fulfill({
+                    query: query,
+                    index: targetDashboardIndex
+                  });
                 }).catch(reject);
               }).catch(reject);
             }).catch(reject);

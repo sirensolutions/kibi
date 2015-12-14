@@ -75,7 +75,7 @@ define(function (require) {
                         button.joinSeqFilter = joinSeqFilter;
                         relVisHelper.buildCountQuery(button.redirectToDashboard, joinSeqFilter).then(function (query) {
                           fulfill({
-                            query: query,
+                            query: query.query,
                             button: button
                           });
                         }).catch(reject);
@@ -92,7 +92,7 @@ define(function (require) {
                         button.joinSeqFilter = joinSeqFilter;
                         relVisHelper.buildCountQuery(button.redirectToDashboard, joinSeqFilter).then(function (query) {
                           fulfill({
-                            query: query,
+                            query: query.query,
                             button: button
                           });
                         }).catch(reject);
@@ -111,7 +111,7 @@ define(function (require) {
                         button.joinSeqFilter = joinSeqFilter;
                         relVisHelper.buildCountQuery(button.redirectToDashboard, joinSeqFilter).then(function (query) {
                           fulfill({
-                            query: query,
+                            query: query.query,
                             button: button
                           });
                         }).catch(reject);
@@ -161,6 +161,23 @@ define(function (require) {
       };
 
 
+      var _updateSourceCount = function () {
+        // here instead of relaying on others make a query and get the correct count for current dashboard
+        var joinSequenceFilter = _.cloneDeep(urlHelper.getFiltersOfType('join_sequence'));
+        relVisHelper.buildCountQuery(currentDashboardId, joinSequenceFilter).then(function (query) {
+          var queryS  = '{"index" : "' + query.index.id + '"}\n';
+          queryS += JSON.stringify(query.query) + '\n';
+          $http.post('elasticsearch/_msearch?getSourceCountForJoinSeqFilter', queryS)
+          .success(function (data) {
+            if (data.responses && data.responses.length === 1 && data.responses[0].hits) {
+              _.each($scope.buttons, function (button) {
+                button.sourceCount = data.responses[0].hits.total;
+              });
+            }
+          });
+        });
+      };
+
       var _constructButtons = function () {
         if (currentDashboardId) {
           // check that current dashboard has assigned indexPatternId
@@ -171,6 +188,7 @@ define(function (require) {
                 $scope.buttons = relVisHelper.constructButtonsArray(
                   $scope.vis.params.buttons, dashboardSavedSearch.searchSource._state.index.id
                 );
+                _updateSourceCount();
               })
               .catch(notify.error);
             } else {
@@ -181,6 +199,7 @@ define(function (require) {
           });
         } else {
           $scope.buttons = relVisHelper.constructButtonsArray($scope.vis.params.buttons);
+          _updateSourceCount();
         }
       }; // end of _constructButtons
 
@@ -201,9 +220,7 @@ define(function (require) {
       $scope.$watch('esResponse', function (resp) {
         if ($scope.buttons) {
           _updateCounts();
-          _.each($scope.buttons, function (button) {
-            button.sourceCount = resp.hits.total;
-          });
+          _updateSourceCount();
         }
       });
 

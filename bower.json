@@ -62,7 +62,7 @@
     "qtip2": "2.2.1",
     "vis": "4.9.0",
     "eeg": "~1.0.23",
-    "icons": "szydan/icons#1.0.0"
+    "icons": "szydan/icons#1.0.1"
   },
   "devDependencies": {},
   "resolutions": {

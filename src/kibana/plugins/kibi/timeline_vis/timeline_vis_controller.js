@@ -28,9 +28,7 @@ define(function (require) {
       }
 
       $scope.$on('change:vis', function () {
-        if ($scope.options) {
-          $scope.options.height = $element[0].offsetHeight;
-        }
+        initOptions($scope.savedVis);
       });
 
       $scope.$watch('vis', function () {
@@ -51,6 +49,7 @@ define(function (require) {
 
       if (editing) {
         var removeVisStateChangedHandler = $rootScope.$on('kibi:vis:state-changed', function () {
+          initOptions($scope.savedVis, true);
           initSearchSources($scope.savedVis);
         });
 
@@ -59,10 +58,17 @@ define(function (require) {
         });
       }
 
-      function initOptions(savedVis) {
+      function initOptions(savedVis, inEditMode) {
+        var height = $element[0].offsetHeight;
+        // make sure that it is never too small
+        // as the height might be reported wrongly when element is not yet fully rendered
+        if (height < 175) {
+          height = 175;
+        }
+
         var options = {
           width: '100%',
-          height: ($element[0].offsetHeight || 350) + 'px',
+          height: height + 'px',
           selectable: true,
           // ! does not work correctly inside the panel
           // instead we would have to calculate the proper height on panel resize and change it

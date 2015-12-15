@@ -70,7 +70,9 @@ define(function (require) {
         if (!timeline) {
           // create a new one
           timeline = new vis.Timeline($element[0]);
-          timeline.setOptions($scope.options);
+          if ($scope.options) {
+            timeline.setOptions($scope.options);
+          }
           timeline.on('select', onSelect);
         }
       };

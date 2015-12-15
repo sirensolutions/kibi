@@ -57,7 +57,8 @@ define(function (require) {
       };
 
       $scope.$watch('options', function (newOptions, oldOptions) {
-        if (!newOptions || newOptions === oldOptions) {
+
+        if (!newOptions || _.isEqual(newOptions, oldOptions)) {
           return;
         }
         initTimeline();
@@ -183,10 +184,13 @@ define(function (require) {
       var initGroups = function () {
         initTimeline();
 
-        var groupIds = [0]; // 0 should always be there in case user switch to mixed mode
+        var groupIds = [];
         _.each($scope.groups, function (group) {
           groupIds.push(group.id);
         });
+        if (groupIds.length === 0) {
+          groupIds.push(0);  // 0 should always be there in case user switch to mixed mode
+        }
         mapGroupIdToColor = color(groupIds);
 
         var groups = [];

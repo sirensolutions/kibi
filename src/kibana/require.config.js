@@ -59,7 +59,11 @@ require.config({
       deps: ['jquery'],
       exports: 'angular'
     },
-    gridster: ['jquery', 'css!bower_components/gridster/dist/jquery.gridster.css'],
+    gridster: [
+      'jquery',
+      'css!bower_components/gridster/dist/jquery.gridster.css',
+      'css!bower_components/icons/lib/stylesheets/FontMoreAwesome.css'
+    ],
     'angular-route': ['angular'],
     'angular-animate': ['angular'],
     'elasticsearch': ['angular'],

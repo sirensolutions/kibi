@@ -17,7 +17,7 @@ define(function (require) {
     return new TemplateVisType({
       name: 'timeline',
       title: 'Timeline widget',
-      icon: 'fa-align-left',
+      icon: 'fma-timeline',
       description: 'Timeline widget for visualization of events',
       template: require('text!plugins/kibi/timeline_vis/timeline_vis.html'),
       params: {

@@ -2,6 +2,7 @@ define(function (require) {
 
   var _ = require('lodash');
   var vis = require('vis');
+  var moment = require('moment');
 
   require('modules').get('kibana').directive('kibiTimeline', function (Private, Notifier, courier) {
 
@@ -70,7 +71,9 @@ define(function (require) {
         if (!timeline) {
           // create a new one
           timeline = new vis.Timeline($element[0]);
-          timeline.setOptions($scope.options);
+          if ($scope.options) {
+            timeline.setOptions($scope.options);
+          }
           timeline.on('select', onSelect);
         }
       };
@@ -129,7 +132,7 @@ define(function (require) {
                   field: params.labelField,
                   content: '<div title="index: ' + indexId + ', field: ' + params.labelField + '">' + labelFieldValue + '</div>',
                   value: labelFieldValue,
-                  start: new Date(startValue),
+                  start: moment(startValue).toDate(),
                   type: 'box',
                   group: $scope.groupsOnSeparateLevels === true ? index : 0,
                   style: 'background-color: ' + mapGroupIdToColor(groupId) + '; color: #fff;',
@@ -151,7 +154,7 @@ define(function (require) {
                       e.type = 'point';
                     } else {
                       e.type = 'range';
-                      e.end = new Date(endValue);
+                      e.end = moment(endValue).toDate();
                     }
                   }
                 }

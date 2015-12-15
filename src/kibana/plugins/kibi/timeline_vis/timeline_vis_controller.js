@@ -66,6 +66,10 @@ define(function (require) {
           height = 175;
         }
 
+        if (height > 175) {
+          height -= 25;
+        }
+
         var options = {
           width: '100%',
           height: height + 'px',

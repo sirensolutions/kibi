@@ -119,6 +119,7 @@ define(function (require) {
 
             groups.push({
               id: group.id,
+              savedSearchId: savedSearch.id,
               label: group.groupLabel,
               searchSource: searchSource,
               // *size* used to track that sized was changed and points has to be reloaded

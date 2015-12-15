@@ -135,7 +135,7 @@ define(function (require) {
                   start: moment(startValue).toDate(),
                   type: 'box',
                   group: $scope.groupsOnSeparateLevels === true ? index : 0,
-                  content: '<div title="index: ' + indexId + ', field: ' + params.labelField + '">' +
+                  content: '<div title="Saved search: ' + group.savedSearchId + '">' +
                            '<span class="fa fa-circle"> <span style="color: #000">' + labelFieldValue + '</span>' +
                            '</div>',
                   style: 'border: none; background-color: #fff; color:' + mapGroupIdToColor(groupId) + ';',
@@ -151,7 +151,7 @@ define(function (require) {
                     if (startValue !== endValue) {
                       e.type = 'range';
                       e.end = moment(endValue).toDate();
-                      e.content = '<div title="index: ' + indexId + ', field: ' + params.labelField + '">' +
+                      e.content = '<div title="Saved search: ' + group.savedSearchId + '">' +
                                   '<span>' + labelFieldValue + '</span>' +
                                   '</div>';
                       e.style = 'color: #fff; background-color: ' + mapGroupIdToColor(groupId) + ';';

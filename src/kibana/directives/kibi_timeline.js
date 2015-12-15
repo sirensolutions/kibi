@@ -57,7 +57,8 @@ define(function (require) {
       };
 
       $scope.$watch('options', function (newOptions, oldOptions) {
-        if (!newOptions || newOptions === oldOptions) {
+
+        if (!newOptions || _.isEqual(newOptions, oldOptions)) {
           return;
         }
         initTimeline();
@@ -130,12 +131,14 @@ define(function (require) {
                   // index, field and content needed to create a filter on click
                   index: indexId,
                   field: params.labelField,
-                  content: '<div title="index: ' + indexId + ', field: ' + params.labelField + '">' + labelFieldValue + '</div>',
                   value: labelFieldValue,
                   start: moment(startValue).toDate(),
                   type: 'box',
                   group: $scope.groupsOnSeparateLevels === true ? index : 0,
-                  style: 'background-color: ' + mapGroupIdToColor(groupId) + '; color: #fff;',
+                  content: '<div title="index: ' + indexId + ', field: ' + params.labelField + '">' +
+                           '<span class="fa fa-circle"> <span style="color: #000">' + labelFieldValue + '</span>' +
+                           '</div>',
+                  style: 'border: none; background-color: #fff; color:' + mapGroupIdToColor(groupId) + ';',
                   groupId: groupId
                 };
 
@@ -143,18 +146,15 @@ define(function (require) {
                   if (_isMultivalued(hit._source, params.endField)) {
                     detectedMultivaluedEnd = true;
                   }
-                  if (!hit._source[params.endField]) {
-                    // here the end field value missing but expected
-                    // force the event to be of type point
-                    e.type = 'point';
-                  } else {
+                  if (hit._source[params.endField]) {
                     var endValue = _pickFirstIfMultivalued(hit._source, params.endField);
-                    if (startValue === endValue) {
-                      // also force it to be a point
-                      e.type = 'point';
-                    } else {
+                    if (startValue !== endValue) {
                       e.type = 'range';
                       e.end = moment(endValue).toDate();
+                      e.content = '<div title="index: ' + indexId + ', field: ' + params.labelField + '">' +
+                                  '<span>' + labelFieldValue + '</span>' +
+                                  '</div>';
+                      e.style = 'color: #fff; background-color: ' + mapGroupIdToColor(groupId) + ';';
                     }
                   }
                 }
@@ -184,10 +184,13 @@ define(function (require) {
       var initGroups = function () {
         initTimeline();
 
-        var groupIds = [0]; // 0 should always be there in case user switch to mixed mode
+        var groupIds = [];
         _.each($scope.groups, function (group) {
           groupIds.push(group.id);
         });
+        if (groupIds.length === 0) {
+          groupIds.push(0);  // 0 should always be there in case user switch to mixed mode
+        }
         mapGroupIdToColor = color(groupIds);
 
         var groups = [];

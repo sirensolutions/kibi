@@ -66,6 +66,10 @@ define(function (require) {
           height = 175;
         }
 
+        if (height > 175) {
+          height -= 25;
+        }
+
         var options = {
           width: '100%',
           height: height + 'px',
@@ -106,16 +110,19 @@ define(function (require) {
             var _id = '_kibi_timetable_ids_source_flag' + savedSearch.id;
             requestQueue.markAllRequestsWithSourceIdAsInactive(_id);
 
+            var size = group.size || 100;
             var searchSource = new SearchSource();
             searchSource.inherits(savedSearch.searchSource);
             searchSource._id = _id;
             searchSource.index(savedSearch.searchSource._state.index);
-            searchSource.size(group.size || 100);
+            searchSource.size(size);
 
             groups.push({
               id: group.id,
               label: group.groupLabel,
               searchSource: searchSource,
+              // *size* used to track that sized was changed and points has to be reloaded
+              size: size,
               params: {
                 labelField: group.labelField,
                 startField: group.startField,

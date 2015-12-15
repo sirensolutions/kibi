@@ -18,7 +18,7 @@ define(function (require) {
       name: 'timeline',
       title: 'Timeline widget',
       icon: 'fma-timeline',
-      description: 'Timeline widget for visualization of events',
+      description: 'Timeline widget, displaying events also from multiple searches/indexes',
       template: require('text!plugins/kibi/timeline_vis/timeline_vis.html'),
       params: {
         defaults: {

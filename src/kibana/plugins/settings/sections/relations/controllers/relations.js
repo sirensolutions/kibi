@@ -348,7 +348,7 @@ define(function (require) {
 
     $scope.$watch(function ($scope) {
       return _.map($scope.relations.relationsIndices, function (relation) {
-        return _.omit(relation, 'error');
+        return _.omit(relation, ['error', 'id']); // id is redundand
       });
     }, function (newRelations, oldRelations) {
       // each node is an index

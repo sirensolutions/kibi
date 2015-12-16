@@ -7,6 +7,7 @@ define(function (require) {
     var config;
     var jQuery = require('jquery');
     var indexToDashboardMapPromise;
+    var unbind = [];
 
     function init(options) {
       module('kibana');
@@ -28,15 +29,25 @@ define(function (require) {
         });
         if (options.events) {
           _.each(options.events, function (func, e) {
-            $scope.$on(e, func);
+            unbind.push($scope.$on(e, func));
           });
         }
         $scope.$digest();
       });
     }
 
+    function after() {
+      _.each(unbind, function (off) {
+        off();
+      });
+      unbind = [];
+    }
+
     describe('Relations Section', function () {
       describe('index patterns graph', function () {
+
+        afterEach(after);
+
         it('should create the graph of indices', function () {
           var relations = {
             relationsIndices: [
@@ -180,6 +191,7 @@ define(function (require) {
               }
             ]
           };
+
           var options = {
             relations: relations,
             events: {

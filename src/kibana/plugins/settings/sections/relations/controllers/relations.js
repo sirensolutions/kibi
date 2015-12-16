@@ -158,8 +158,10 @@ define(function (require) {
      * Filters out the relations that are not relevant in the row with the given id
      */
     $scope.filterRelations = function (id, relationId) {
+      // here for anything about indices relations - we take them from config as they are already saved
       var relations = config.get('kibi:relations');
 
+      //for anything about the dashboards relations - we take them from the scope
       var dashboards = $scope.relations.relationsDashboards[id].dashboards;
       var lIndex = '';
       var rIndex = '';
@@ -348,7 +350,7 @@ define(function (require) {
 
     $scope.$watch(function ($scope) {
       return _.map($scope.relations.relationsIndices, function (relation) {
-        return _.omit(relation, ['error', 'id']); // id is redundand
+        return _.omit(relation, ['error', 'id']); // id is redundant
       });
     }, function (newRelations, oldRelations) {
       // each node is an index
@@ -381,20 +383,18 @@ define(function (require) {
       $scope.invalid = false;
       _.each($scope.relations.relationsIndices, function (relation) {
 
-        if (!relation.label &&
-          relation.indices && relation.indices.length === 2 &&
-          relation.indices[0].indexPatternId && relation.indices[0].path &&
-          relation.indices[1].indexPatternId && relation.indices[1].path
-        ) {
-          relation.label = relation.indices[0].indexPatternId + '.' + relation.indices[0].path +
-                           ' -- ' +
-                           relation.indices[1].indexPatternId + '.' + relation.indices[1].path;
-        }
-
         var indices = relation.indices;
         var error = '';
 
         if (indices[0].indexPatternId && indices[0].path && indices[1].indexPatternId && indices[1].path) {
+
+          // automatically compute the label if not present
+          if (!relation.label) {
+            relation.label = relation.indices[0].indexPatternId + '.' + relation.indices[0].path +
+                             ' -- ' +
+                             relation.indices[1].indexPatternId + '.' + relation.indices[1].path;
+          }
+
           var key = _getJoinIndicesUniqueID(indices[0], indices[1]);
 
           if (uniq[key].length !== 1) {

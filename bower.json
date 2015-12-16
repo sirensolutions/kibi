@@ -61,7 +61,8 @@
     "antlr4-sql": "sirensolutions/antlr4-javascript-sql#1.0.2",
     "qtip2": "2.2.1",
     "vis": "4.9.0",
-    "eeg": "~1.0.23"
+    "eeg": "~1.0.23",
+    "icons": "szydan/icons#1.0.1"
   },
   "devDependencies": {},
   "resolutions": {

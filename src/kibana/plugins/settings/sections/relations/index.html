@@ -61,7 +61,12 @@
                                                           ng-model="relation.indices[1].path"/>
                 </td>
                 <td>
-                  <input required class="form-control small-input" type="text" ng-model="relation.label"/>
+                  <input required
+                    ng-model="relation.label"
+                    kibi-debounce="350"
+                    class="form-control small-input"
+                    type="text"
+                    kibi-stop-enter-key-down />
                 </td>
                 <td>
                   <div class="btn-group rightCorner">

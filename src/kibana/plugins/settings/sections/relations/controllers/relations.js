@@ -8,6 +8,48 @@ define(function (require) {
 
   var app = require('modules').get('apps/settings', ['kibana']);
 
+  app.directive('kibiDebounce', function ($timeout) {
+    return {
+      restrict: 'A',
+      require: 'ngModel',
+      priority: 99,
+      link: function (scope, elm, attr, ngModelCtrl) {
+        if (attr.type === 'radio' || attr.type === 'checkbox') return;
+
+        elm.unbind('input');
+
+        var debounce;
+        elm.bind('input', function () {
+          $timeout.cancel(debounce);
+          debounce = $timeout( function () {
+            scope.$apply(function () {
+              ngModelCtrl.$setViewValue(elm.val());
+            });
+          }, attr.ngDebounce || 1000);
+        });
+        elm.bind('blur', function () {
+          scope.$apply(function () {
+            ngModelCtrl.$setViewValue(elm.val());
+          });
+        });
+      }
+    };
+  });
+
+  app.directive('kibiStopEnterKeyDown', function () {
+    return {
+      restrict: 'A',
+      link: function (scope, element, attr) {
+        element.bind('keydown', function (e) {
+          if (e.which === 13) {
+            e.preventDefault();
+            e.stopPropagation();
+          }
+        });
+      }
+    };
+  });
+
   require('routes')
   .when('/settings/relations', {
     template: require('text!plugins/settings/sections/relations/index.html'),
@@ -116,13 +158,17 @@ define(function (require) {
      * Filters out the relations that are not relevant in the row with the given id
      */
     $scope.filterRelations = function (id, relationId) {
+      // here for anything about indices relations - we take them from config as they are already saved
+      var relations = config.get('kibi:relations');
+
+      //for anything about the dashboards relations - we take them from the scope
       var dashboards = $scope.relations.relationsDashboards[id].dashboards;
       var lIndex = '';
       var rIndex = '';
 
       if (!relationId) {
-        return _.pluck($scope.relations.relationsIndices, 'id')
-        .concat(_.pluck($scope.relations.relationsIndices, 'label'))
+        return _.pluck(relations.relationsIndices, 'id')
+        .concat(_.pluck(relations.relationsIndices, 'label'))
         .concat(dashboards);
       }
       _.each(indexToDashboardsMap, function (map, index) {
@@ -132,12 +178,13 @@ define(function (require) {
         if (map.indexOf(dashboards[1]) !== -1) {
           rIndex = index;
         }
-        if (!!lIndex && !!rIndex) {
+        if (lIndex && rIndex) {
+          // break the loop
           return false;
         }
       });
 
-      return (!!lIndex || !!rIndex) && !_($scope.relations.relationsIndices).map(function (relInd) {
+      return (!!lIndex || !!rIndex) && !_(relations.relationsIndices).map(function (relInd) {
         if (lIndex && rIndex) {
           if ((lIndex === relInd.indices[0].indexPatternId && rIndex === relInd.indices[1].indexPatternId) ||
               (lIndex === relInd.indices[1].indexPatternId && rIndex === relInd.indices[0].indexPatternId)) {
@@ -284,9 +331,12 @@ define(function (require) {
     }
 
     $scope.$watch(function ($scope) {
-      return _.map($scope.relations.relationsDashboards, function (relation) {
-        return _.omit(relation, [ 'error' ]);
-      });
+      return {
+        labelsFromIndices: _.pluck($scope.relations.relationsIndices, 'label'),
+        dashboards: _.map($scope.relations.relationsDashboards, function (relation) {
+          return _.omit(relation, [ 'error' ]);
+        })
+      };
     }, function (newRelations, oldRelations) {
       if (indexToDashboardsMap === null) {
         urlHelper.getIndexToDashboardMap().then(function (map) {
@@ -300,7 +350,7 @@ define(function (require) {
 
     $scope.$watch(function ($scope) {
       return _.map($scope.relations.relationsIndices, function (relation) {
-        return _.omit(relation, 'error');
+        return _.omit(relation, ['error', 'id']); // id is redundant
       });
     }, function (newRelations, oldRelations) {
       // each node is an index
@@ -332,10 +382,19 @@ define(function (require) {
 
       $scope.invalid = false;
       _.each($scope.relations.relationsIndices, function (relation) {
+
         var indices = relation.indices;
         var error = '';
 
         if (indices[0].indexPatternId && indices[0].path && indices[1].indexPatternId && indices[1].path) {
+
+          // automatically compute the label if not present
+          if (!relation.label) {
+            relation.label = relation.indices[0].indexPatternId + '.' + relation.indices[0].path +
+                             ' -- ' +
+                             relation.indices[1].indexPatternId + '.' + relation.indices[1].path;
+          }
+
           var key = _getJoinIndicesUniqueID(indices[0], indices[1]);
 
           if (uniq[key].length !== 1) {

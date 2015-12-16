@@ -158,13 +158,15 @@ define(function (require) {
      * Filters out the relations that are not relevant in the row with the given id
      */
     $scope.filterRelations = function (id, relationId) {
+      var relations = config.get('kibi:relations');
+
       var dashboards = $scope.relations.relationsDashboards[id].dashboards;
       var lIndex = '';
       var rIndex = '';
 
       if (!relationId) {
-        return _.pluck($scope.relations.relationsIndices, 'id')
-        .concat(_.pluck($scope.relations.relationsIndices, 'label'))
+        return _.pluck(relations.relationsIndices, 'id')
+        .concat(_.pluck(relations.relationsIndices, 'label'))
         .concat(dashboards);
       }
       _.each(indexToDashboardsMap, function (map, index) {
@@ -174,12 +176,13 @@ define(function (require) {
         if (map.indexOf(dashboards[1]) !== -1) {
           rIndex = index;
         }
-        if (!!lIndex && !!rIndex) {
+        if (lIndex && rIndex) {
+          // break the loop
           return false;
         }
       });
 
-      return (!!lIndex || !!rIndex) && !_($scope.relations.relationsIndices).map(function (relInd) {
+      return (!!lIndex || !!rIndex) && !_(relations.relationsIndices).map(function (relInd) {
         if (lIndex && rIndex) {
           if ((lIndex === relInd.indices[0].indexPatternId && rIndex === relInd.indices[1].indexPatternId) ||
               (lIndex === relInd.indices[1].indexPatternId && rIndex === relInd.indices[0].indexPatternId)) {
@@ -326,9 +329,12 @@ define(function (require) {
     }
 
     $scope.$watch(function ($scope) {
-      return _.map($scope.relations.relationsDashboards, function (relation) {
-        return _.omit(relation, [ 'error' ]);
-      });
+      return {
+        labelsFromIndices: _.pluck($scope.relations.relationsIndices, 'label'),
+        dashboards: _.map($scope.relations.relationsDashboards, function (relation) {
+          return _.omit(relation, [ 'error' ]);
+        })
+      };
     }, function (newRelations, oldRelations) {
       if (indexToDashboardsMap === null) {
         urlHelper.getIndexToDashboardMap().then(function (map) {
@@ -374,6 +380,17 @@ define(function (require) {
 
       $scope.invalid = false;
       _.each($scope.relations.relationsIndices, function (relation) {
+
+        if (!relation.label &&
+          relation.indices && relation.indices.length === 2 &&
+          relation.indices[0].indexPatternId && relation.indices[0].path &&
+          relation.indices[1].indexPatternId && relation.indices[1].path
+        ) {
+          relation.label = relation.indices[0].indexPatternId + '.' + relation.indices[0].path +
+                           ' -- ' +
+                           relation.indices[1].indexPatternId + '.' + relation.indices[1].path;
+        }
+
         var indices = relation.indices;
         var error = '';
 

@@ -336,7 +336,50 @@ define(function (require) {
         kibiStateHelper.addFilterToDashboard('dashboard_which_does_not_yet_exist_in_kibi_state', {range:{}});
 
         expect(globalState.k.d.dashboard_which_does_not_yet_exist_in_kibi_state).to.eql({f: [{range:{}}]});
+      });
 
+      it('enableRelation', function () {
+        globalState.k = {
+          j: []
+        };
+        globalState.save();
+
+        kibiStateHelper.enableRelation('a');
+
+        expect(globalState.k.j.length).to.equal(1);
+        expect(globalState.k.j[0]).to.equal('a');
+      });
+
+      it('disableRelation', function () {
+        globalState.k = {
+          j: ['a', 'b', 'c']
+        };
+        globalState.save();
+
+        kibiStateHelper.disableRelation('b');
+
+        expect(globalState.k.j.length).to.equal(2);
+        expect(globalState.k.j[0]).to.equal('a');
+        expect(globalState.k.j[1]).to.equal('c');
+      });
+
+      it('isRelationEnabled', function () {
+        globalState.k = {
+          j: ['a']
+        };
+        globalState.save();
+
+        expect(kibiStateHelper.isRelationEnabled('a')).to.equal(true);
+        expect(kibiStateHelper.isRelationEnabled('b')).to.equal(false);
+      });
+
+      it('isRelationEnabled should return false if j not initialized', function () {
+        globalState.k = {
+        };
+        globalState.save();
+
+        expect(kibiStateHelper.isRelationEnabled('a')).to.equal(false);
+        expect(kibiStateHelper.isRelationEnabled('b')).to.equal(false);
       });
 
     });

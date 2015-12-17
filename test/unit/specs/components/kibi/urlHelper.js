@@ -121,24 +121,18 @@ define(function (require) {
       describe('util methods', function () {
         beforeEach(minimalInit());
 
-        it('isDashboardInEnabledRelations', function () {
+        it('isDashboardInTheseRelations', function () {
           var relations = [
             {
-              enabled: true,
               dashboards: [ 'A', 'B' ],
               relation: 'indexa/a/indexb/b'
-            },
-            {
-              enabled: false,
-              dashboards: [ 'A1', 'B1' ],
-              relation: 'indexa/a1/indexb/b1'
             }
           ];
 
-          expect(urlHelper.isDashboardInEnabledRelations('A',  relations)).to.equal(true);
-          expect(urlHelper.isDashboardInEnabledRelations('B',  relations)).to.equal(true);
-          expect(urlHelper.isDashboardInEnabledRelations('A1', relations)).to.equal(false);
-          expect(urlHelper.isDashboardInEnabledRelations('A1', relations)).to.equal(false);
+          expect(urlHelper.isDashboardInTheseRelations('A',  relations)).to.equal(true);
+          expect(urlHelper.isDashboardInTheseRelations('B',  relations)).to.equal(true);
+          expect(urlHelper.isDashboardInTheseRelations('A1', relations)).to.equal(false);
+          expect(urlHelper.isDashboardInTheseRelations('A1', relations)).to.equal(false);
         });
       });
 
@@ -901,12 +895,12 @@ define(function (require) {
           config.set('kibi:relations', {
             relationsDashboards: [
               {
-                enabled: true,
                 dashboards: [ 'Articles2', 'Companies' ],
                 relation: 'article/companyid/company/id'
               }
             ]
           });
+          kibiStateHelper.enableRelation('article/companyid/company/id');
           // now add a filter on Articles2
           kibiStateHelper.saveFiltersForDashboardId('Articles2', [{term : { user : 'FOO_FILTER'}}]);
 
@@ -975,12 +969,12 @@ define(function (require) {
           config.set('kibi:relations', {
             relationsDashboards: [
               {
-                enabled: true,
                 dashboards: [ 'Articles2', 'Companies' ],
                 relation: 'article/companyid/company/id'
               }
             ]
           });
+          kibiStateHelper.enableRelation('article/companyid/company/id');
           // now add a filter on Articles2
           kibiStateHelper.saveQueryForDashboardId('Articles2', {query: {query_string: {query: 'FOO_QUERY'}}});
 

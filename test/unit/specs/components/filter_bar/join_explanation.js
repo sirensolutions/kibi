@@ -412,6 +412,60 @@ define(function (require) {
 
         $rootScope.$apply();
       });
+
+      it('prints a nice label for join_set', function (done) {
+        var relations = [
+          [
+            {
+              indices: [ 'article' ],
+              types: [ 'article' ],
+              path: 'id'
+            },
+            {
+              indices: [ 'time-testing-3' ],
+              types: [ 'time-testing-3' ],
+              path: 'articleId'
+            }
+          ]
+        ];
+
+        var filters = [{
+          join_set: {
+            focus: focus,
+            relations: relations,
+            queries: {
+              'time-testing-3': [
+              {
+                range: {
+                  'fake_field': {
+                    'gte': 1125576000000,  // these timestamps match the times in fakeSavedDashboards time-testing-3 dashboard
+                    'lte': 1441454400000
+                  }
+                }
+              }
+              ]
+            }
+          }
+        }];
+
+        var expected =
+        '<ul>' +
+          '<li>Index: <b>time-testing-3</b></br>' +
+            '<ul>' +
+              '<li> fake_field: <b>1125576000000</b> to <b>1441454400000</b> </li>' +
+            '</ul>' +
+          '</li>' +
+        '</ul>';
+
+        joinExplanationHelper.getFilterExplanations(filters).then(function (expl) {
+          expect(expl.length).to.equal(1);
+          expect(expl[0]).to.equal(expected);
+          done();
+        });
+
+        $rootScope.$apply();
+      });
+
     });
   });
 });

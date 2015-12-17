@@ -132,8 +132,8 @@ define(function (require) {
           });
 
           $scope.kibi = {
-            basedOnSameSavedSearch: true, // boolean HAS to be wrapped in object
-            _prevBasedOnSameSavedSearch: true
+            basedOnSameSavedSearch: false, // boolean HAS to be wrapped in object
+            _prevBasedOnSameSavedSearch: false
           };
 
           $scope.$watch('kibi.basedOnSameSavedSearch', function () {

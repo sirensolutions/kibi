@@ -26,16 +26,17 @@ define(function (require) {
 
         $scope.removeAllFilters = function () {
           // remove all filters and queries acros dashboards
-          // except pinned filters and join_set filter
+          // except pinned filters
           var appState = getAppState();
-          appState.filters = _.filter(appState.filters, function (f) {
-            return f.join_set;
-          });
+          appState.filters = [];
           appState.query = {query_string: {analyze_wildcard: true, query: '*'}};
           appState.save();
 
+          kibiStateHelper.disableAllRelations();
           kibiStateHelper.removeAllFilters();
           kibiStateHelper.removeAllQueries();
+          //emit event so other components can react
+          $rootScope.$emit('kibi:allFiltersRemoved');
         };
 
         $scope.$watch('state', function () {

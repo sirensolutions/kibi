@@ -307,6 +307,13 @@ define(function (require) {
       }
     };
 
+    KibiStateHelper.prototype.disableAllRelations = function () {
+      if (globalState.k.j) {
+        globalState.k.j = [];
+        globalState.save();
+      }
+    };
+
     KibiStateHelper.prototype.disableRelation = function (relationId) {
       if (!globalState.k.j) {
         globalState.k.j = [];

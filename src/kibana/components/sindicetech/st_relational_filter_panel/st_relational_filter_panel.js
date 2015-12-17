@@ -42,7 +42,12 @@ define(function (require) {
         link: function ($scope, $el) {
 
 
-          $scope.relationalPanel = {};
+          var _initScope = function () {
+            $scope.relationalPanel = {
+              enabled: config.get('kibi:relationalPanel'),
+              relations: config.get('kibi:relations')
+            };
+          };
 
           var init = false;
           var _initPanel = function () {
@@ -63,7 +68,6 @@ define(function (require) {
                 '&nbsp;<label>' + link.linkType + '</label>' +
                 '</div>';
             });
-
 
 
             relDashboards.options.onLinkClick = function (el, d, i) {
@@ -92,6 +96,11 @@ define(function (require) {
             init = true;
           };
 
+          $scope.close = function () {
+            $scope.show = false;
+            $rootScope.$emit('relationalFilterPanelClosed', false);
+          };
+
           var _checkFilterJoinPlugin = function () {
             var enabled = joinFilterHelper.isRelationalPanelEnabled();
             var installed = joinFilterHelper.isFilterJoinPluginInstalled();
@@ -103,18 +112,16 @@ define(function (require) {
             }
           };
 
-          $rootScope.$on('init:config', function () {
-            $scope.relationalPanel.enabled = config.get('kibi:relationalPanel');
-            $scope.relationalPanel.relations = config.get('kibi:relations');
+          var off1 = $rootScope.$on('init:config', function () {
+            _initScope();
             _checkFilterJoinPlugin();
             _initPanel();
           });
 
 
           // recreate it after user change configuration
-          $rootScope.$on('change:config.kibi:relations', function () {
-            $scope.relationalPanel.enabled = config.get('kibi:relationalPanel');
-            $scope.relationalPanel.relations = config.get('kibi:relations');
+          var off2 = $rootScope.$on('change:config.kibi:relations', function () {
+            _initScope();
             _checkFilterJoinPlugin();
             if ($scope.ignoreNextConfigurationChangedEvent === true) {
               $scope.ignoreNextConfigurationChangedEvent = false;
@@ -124,22 +131,30 @@ define(function (require) {
           });
 
           $scope.show = false;
-          $rootScope.$on('relationalFilterPanelOpened', function (event, relationalFilterPanelOpened) {
+          var off3 = $rootScope.$on('relationalFilterPanelOpened', function (event, relationalFilterPanelOpened) {
             $scope.show = relationalFilterPanelOpened;
           });
 
-          $scope.close = function () {
-            $scope.show = false;
-            $rootScope.$emit('relationalFilterPanelClosed', false);
-          };
-
-
-          $rootScope.$on('$routeChangeSuccess', function (event, next, prev, err) {
+          var off4 = $rootScope.$on('$routeChangeSuccess', function (event, next, prev, err) {
             $scope.show = false;
             if (urlHelper.isItDashboardUrl() && init && $scope.relationalPanel.enabled) {
               // try to enable filter when user switch to dashboards app
               joinFilterHelper.updateJoinSetFilter();
             }
+          });
+
+          var off5 = $rootScope.$on('kibi:allFiltersRemoved', function () {
+            _initScope();
+            _initPanel();
+          });
+
+
+          $scope.$on('$destroy', function () {
+            off1();
+            off2();
+            off3();
+            off4();
+            off5();
           });
 
         } // end of link function

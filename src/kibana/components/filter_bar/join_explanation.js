@@ -73,36 +73,46 @@ define(function (require) {
       var createFilterLabel = function (f, fields) {
         var prop;
         if (f.query && f.query.query_string && f.query.query_string.query) {
-          return ' query: <b>' + f.query.query_string.query + '</b> ';
+          return Promise.resolve(' query: <b>' + f.query.query_string.query + '</b> ');
         } else if (f.query && f.query.match) {
-          return formatMatch(f, 'match');
+          return Promise.resolve(formatMatch(f, 'match'));
         } else if (f.query && f.query.match_phrase) {
-          return formatMatch(f, 'match_phrase');
+          return Promise.resolve(formatMatch(f, 'match_phrase'));
         } else if (f.query && f.query.match_phrase_prefix) {
-          return formatMatch(f, 'match_phrase_prefix');
+          return Promise.resolve(formatMatch(f, 'match_phrase_prefix'));
         } else if (f.range) {
           prop = Object.keys(f.range)[0];
-          return ' ' + prop + ': <b>' + formatDate(fields, prop, f.range[prop].gte) +
-            '</b> to <b>' + formatDate(fields, prop, f.range[prop].lte) + '</b> ';
+          return Promise.resolve(' ' + prop + ': <b>' + formatDate(fields, prop, f.range[prop].gte) +
+            '</b> to <b>' + formatDate(fields, prop, f.range[prop].lte) + '</b> ');
         } else if (f.dbfilter) {
-          return ' ' + (f.dbfilter.negate ? 'NOT' : '') + ' dbfilter: <b>' + f.dbfilter.queryid + '</b> ';
+          return Promise.resolve(' ' + (f.dbfilter.negate ? 'NOT' : '') + ' dbfilter: <b>' + f.dbfilter.queryid + '</b> ');
         } else if (f.or) {
-          return ' or filter <b>' + f.or.length + ' terms</b> ';
+          return Promise.resolve(' or filter <b>' + f.or.length + ' terms</b> ');
         } else if (f.exists) {
-          return ' exists: <b>' + f.exists.field + '</b> ';
+          return Promise.resolve(' exists: <b>' + f.exists.field + '</b> ');
         } else if (f.script) {
-          return ' script: script:<b>' + f.script.script + '</b> params: <b>' + f.script.params + '</b> ';
+          return Promise.resolve(' script: script:<b>' + f.script.script + '</b> params: <b>' + f.script.params + '</b> ');
         } else if (f.missing) {
-          return ' missing: <b>' + f.missing.field + '</b> ';
+          return Promise.resolve(' missing: <b>' + f.missing.field + '</b> ');
         } else if (f.not) {
-          return ' NOT' + createFilterLabel(f.not, fields);
+          return createFilterLabel(f.not, fields).then(function (html) {
+            return ' NOT' + html;
+          });
         } else if (f.geo_bounding_box) {
           prop = Object.keys(f.geo_bounding_box)[0];
-          return ' ' + prop + ': <b>' + JSON.stringify(f.geo_bounding_box[prop].top_left, null, '') + '</b> to <b>'
-            + JSON.stringify(f.geo_bounding_box[prop].bottom_right, null, '') + '</b> ';
+          return Promise.resolve(' ' + prop + ': <b>' + JSON.stringify(f.geo_bounding_box[prop].top_left, null, '') + '</b> to <b>'
+            + JSON.stringify(f.geo_bounding_box[prop].bottom_right, null, '') + '</b> ');
+        } else if (f.join_set) {
+          return explainJoinSet(f.join_set).then(function (html) {
+            return 'join_set: ' + html;
+          });
+        } else if (f.join_sequence) {
+          return explainJoinSequence(f.join_sequence).then(function (html) {
+            return 'join_sequence: ' + html;
+          });
         } else {
-          return ' <font color="red">Unable to pretty print the filter:</font> ' +
-            JSON.stringify(_.omit(f, '$$hashKey'), null, ' ') + ' ';
+          return Promise.resolve(' <font color="red">Unable to pretty print the filter:</font> ' +
+            JSON.stringify(_.omit(f, '$$hashKey'), null, ' ') + ' ');
         }
       };
 
@@ -247,7 +257,7 @@ define(function (require) {
 
 
       var explainFiltersForJoinSet = function (indexId, filters) {
-        var html = '<li>Index: <b>' + indexId + '</b></li>';
+        var html = 'Index: <b>' + indexId + '</b></br>';
         if (!filters) {
           return Promise.resolve(html);
         }

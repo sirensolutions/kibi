@@ -2,23 +2,28 @@
   <div ng-controller="RelationsController" class="app-container container relations" id="relations">
 
     <div class="header">
-      <h2 class="title">Relations in Kibi</h2>
+      <h2 class="title">Relational Configuration</h2>
     </div>
     <p>
-    Use this panel to configure the relations between index patterns and dashboards.<br/>
-    You start by defining the graph of index patterns. Then based on that graph, you can define through which relation dashboards are connected.
+    Kibi makes use of the relations between indices (Index Patters). </br>
+    Once these are defined, one can optionally enable the <b>Relational Panel</b> filter.
     </p>
 
-    <div class="relations-config">
-      <div class="checkbox">
-        <label>
-          <input type="checkbox" ng-model="relationalPanel"/> Enable relational panel
-        </label>
-      </div>
+
+    <div class="indices-relations-config">
+      <!-- do not remove - it is here to make sure the graphs are aligned -->
+    </div>
+    <div class="dashboards-relations-config">
+        <div class="checkbox">
+          <label>
+            <input type="checkbox" ng-model="relationalPanel"/> Enable relational panel
+          </label>
+        </div>
     </div>
 
+
     <div class="indices-section">
-      <h2>Graph of Index Patterns</h2>
+      <h2>Relations between Index Patterns</h2>
       <eeg eeg-id="'indicesGraph'"
            graph="indicesGraph"
            class="eeg indicesGraph"></eeg>
@@ -89,8 +94,9 @@
       </form>
     </div>
 
-    <div class="dashboards-section">
-      <h2>Graph of Dashboards</h2>
+
+    <div class="dashboards-section" ng-class="{disabled: !relationalPanel}">
+      <h2>Relational Panel Configuration</h2>
       <eeg eeg-id="'dashboardsGraph'"
            graph="dashboardsGraph"
            class="eeg dashboardsGraph"></eeg>

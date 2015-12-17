@@ -4,17 +4,33 @@
 
 .relations-settings {
 
+  .header {
+    margin-top: 4px;
+  }
+
   .btn {
     margin-top: 5px;
     margin-bottom: 5px;
   }
 
-  .relations-config {
-    padding-left: 16px;
-    padding-top: 16px;
-    padding-right: 16px;
-  }
 
+  .indices-relations-config {
+    width: 50%;
+    height: 24px;
+    float: left;
+  }
+  .dashboards-relations-config {
+    width: 49%;
+    float: left;
+    clear: right;
+    height: 24px;
+    .checkbox {
+      margin: 0 0 0 8px;
+      input[type="checkbox"] {
+        margin-left:0;
+      }
+    }
+  }
   // override the table-condensed cell style to make it more compact
   .table-condensed > thead > tr > th {
     border-bottom-width: 1px;
@@ -44,7 +60,7 @@
   .relations .indices-section {
     width: 50%;
     float: left;
-    padding: 16px;
+    padding: 8px;
 
     .indicesGraph{
       height: 250px;
@@ -53,10 +69,15 @@
     }
   }
 
+  .relations .dashboards-section.disabled {
+    opacity: 0.5;
+    background-color: #dedede;
+  }
+
   .relations .dashboards-section {
     width: 49%;
     float: left;
-    padding: 16px 0 0 16px;
+    padding: 8px;
 
     .dashboardsGraph{
       height: 250px;

@@ -132,7 +132,7 @@ define(function (require) {
 
           init({ relations: relations });
           _.each($scope.relations.relationsIndices, function (relation) {
-            expect(relation.error).to.be('These relationsships are equivalent, please remove one');
+            expect(relation.error).to.be('These relationships are equivalent, please remove one');
           });
         });
 
@@ -865,8 +865,8 @@ define(function (require) {
           init({ relations: relations, indexToDashboardsMap: map });
           indexToDashboardMapPromise.then(function () {
             expect($scope.relations.relationsDashboards).to.have.length(2);
-            expect($scope.relations.relationsDashboards[0].error).to.be('These relationsships are equivalent, please remove one');
-            expect($scope.relations.relationsDashboards[1].error).to.be('These relationsships are equivalent, please remove one');
+            expect($scope.relations.relationsDashboards[0].error).to.be('These relationships are equivalent, please remove one');
+            expect($scope.relations.relationsDashboards[1].error).to.be('These relationships are equivalent, please remove one');
             done();
           }).catch(done);
         });

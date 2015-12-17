@@ -87,12 +87,23 @@ define(function (require) {
      */
     queryFilter.removeAll = function () {
       var appState = getAppState();
-      // kibi - remove all except join_set one
-      appState.filters = _.filter(appState.filters, function (f) {
+
+      // kibi - find out if there was a join_set
+      var join_set_found = _.find(appState.filters, function (f) {
         return f.join_set;
       });
+      // and if it was remove it
+      if (join_set_found) {
+        if (globalState.k.j) {
+          globalState.k.j = [];
+        }
+        //emit event so other components can react
+        $rootScope.$emit('kibi:allFiltersRemoved');
+      }
       // kibi end
+
       globalState.filters = [];
+      appState.filters = [];
     };
 
     /**

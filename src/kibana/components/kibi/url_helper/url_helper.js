@@ -293,11 +293,11 @@ define(function (require) {
     /**
      * The relations are from kibi:relations.relationsDashboards
      */
-    UrlHelper.prototype.isDashboardInEnabledRelations = function (dashboardId, relations) {
+    UrlHelper.prototype.isDashboardInTheseRelations = function (dashboardId, relations) {
       if (relations) {
         for (var i = 0; i < relations.length; i++) {
           var relation = relations[i];
-          if (relation.enabled && relation.dashboards[0] === dashboardId || relation.dashboards[1] === dashboardId) {
+          if (relation.dashboards[0] === dashboardId || relation.dashboards[1] === dashboardId) {
             return true;
           }
         }
@@ -306,14 +306,18 @@ define(function (require) {
     };
 
 
-    UrlHelper.prototype._filterDashboardsWithSameIndex = function (dashboardId, dashboards, relations) {
+    UrlHelper.prototype._filterDashboardsWithSameIndex = function (dashboardId, dashboards) {
       var self = this;
       return _.filter(dashboards, function (dashId) {
         if (dashId === dashboardId) {
           return false;
         }
+        // grab only enabled relations based on kibiState
+        var enabledRelations = _.filter(config.get('kibi:relations').relationsDashboards, function (relation) {
+          return kibiStateHelper.isRelationEnabled(relation.relation);
+        });
         // now checked that the dashId is in enabled relations either as a source or target
-        return self.isDashboardInEnabledRelations(dashId, relations);
+        return self.isDashboardInTheseRelations(dashId, enabledRelations);
       });
     };
 
@@ -338,8 +342,7 @@ define(function (require) {
               // we want filters only from dashboards which are in the currently enabled relations
               var dashboardIds = self._filterDashboardsWithSameIndex(
                 dashboardId,
-                indexToDashboardsMap[indexPattern.id],
-                config.get('kibi:relations').relationsDashboards
+                indexToDashboardsMap[indexPattern.id]
               );
               // now for each dashboard we have to take:
               // filters from kibiState
@@ -404,8 +407,7 @@ define(function (require) {
               // we want queries only from dashboards which are in the currently enabled relations
               var dashboardIds = self._filterDashboardsWithSameIndex(
                 dashboardId,
-                indexToDashboardsMap[indexPattern.id],
-                config.get('kibi:relations').relationsDashboards
+                indexToDashboardsMap[indexPattern.id]
               );
               // now for each dashboard we have to take:
               // query from kibiState

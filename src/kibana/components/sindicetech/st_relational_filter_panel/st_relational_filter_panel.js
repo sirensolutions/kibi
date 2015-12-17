@@ -44,12 +44,6 @@ define(function (require) {
 
           $scope.relationalPanel = {};
 
-          var _saveRelationalPanel = function () {
-            //return a promise so we can do action when it is resolved
-            return config.set('kibi:relations', $scope.relationalPanel.relations);
-          };
-
-
           var init = false;
           var _initPanel = function () {
             var relDashboards = _.cloneDeep($scope.relationalPanel.relations.relationsDashboardsSerialized);
@@ -65,7 +59,7 @@ define(function (require) {
               }
 
               link.html = '<div>' +
-                '<input type="checkbox" ' + (relation.enabled ? 'checked' : '') + '/>' +
+                '<input type="checkbox" ' + ( kibiStateHelper.isRelationEnabled(relation.relation) ? 'checked' : '') + '/>' +
                 '&nbsp;<label>' + link.linkType + '</label>' +
                 '</div>';
             });
@@ -76,18 +70,20 @@ define(function (require) {
               _.each($scope.relationalPanel.relations.relationsDashboards, function (relation) {
                 if (relation.dashboards.indexOf(d.source.label) !== -1 &&
                     relation.dashboards.indexOf(d.target.label) !== -1) {
-                  relation.enabled = $(el).find('input[type=\'checkbox\']').is(':checked');
-                  $scope.ignoreNextConfigurationChangedEvent = true;
 
-                  _saveRelationalPanel().then(function () {
-                    if ($scope.relationalPanel.enabled) {
-                      joinFilterHelper.updateJoinSetFilter(relation.dashboards).then(function () {
-                        // TODO pass the array of dashboards to update, instead of updating everything
-                        $rootScope.$emit('kibi:update-counts:join_set');
-                      });
-                    }
-                  });
-                  return false;
+                  // add or remove the relation id from kibi state
+                  var enabled = $(el).find('input[type=\'checkbox\']').is(':checked');
+                  if (enabled) {
+                    kibiStateHelper.enableRelation(relation.relation);
+                  } else {
+                    kibiStateHelper.disableRelation(relation.relation);
+                  }
+                  if ($scope.relationalPanel.enabled) {
+                    joinFilterHelper.updateJoinSetFilter(relation.dashboards).then(function () {
+                      $rootScope.$emit('kibi:update-counts:join_set');
+                    });
+                  }
+                  return false; // break the loop
                 }
               });
             };

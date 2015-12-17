@@ -39,9 +39,9 @@ define(function (require) {
           }
         });
 
-        // grab only enabled relations
+        // grab only enabled relations based on kibiState
         var enabledRelations = _.filter(relations, function (relation) {
-          return relation.enabled;
+          return kibiStateHelper.isRelationEnabled(relation.relation);
         });
 
         // collect ids of dashboards from enabled relations
@@ -66,7 +66,7 @@ define(function (require) {
 
           // here check that the join filter should be present on this dashboard
           // it should be added only if we find current dashboardId in enabled relations
-          var isFocusDashboardInEnabledRelations = urlHelper.isDashboardInEnabledRelations(
+          var isFocusDashboardInEnabledRelations = urlHelper.isDashboardInTheseRelations(
             focusDashboardId, enabledRelations
           );
           if (!focusIndex) {
@@ -129,23 +129,29 @@ define(function (require) {
     JoinFilterHelper.prototype.updateJoinSetFilter = function (dashboards) {
       var self = this;
       var updateDashboards;
+      var dashboardsClone;
 
+      // define updateDashboards only if needed
       if (dashboards) {
-        updateDashboards = function (dashboards) {
-          if (!dashboards.length) {
+        // define as well a dashboardsClone to make sure we do not modify passed
+        // parameter
+        dashboardsClone = _.cloneDeep(dashboards);
+
+        updateDashboards = function (dashboardsArray) {
+          if (!dashboardsArray.length) {
             return;
           }
 
           // the updateDashboards method is called recursively to process all dashboards
           // since we need to perform an operation if there is an error as well
-          var dashboardId = dashboards.pop();
+          var dashboardId = dashboardsArray.pop();
 
           return self.getJoinFilter(dashboardId).then(function (joinFilter) {
             kibiStateHelper.addFilterToDashboard(dashboardId, joinFilter);
-            return updateDashboards(dashboards);
+            return updateDashboards(dashboardsArray);
           }).catch(function (error) {
             kibiStateHelper.removeFilterOfTypeFromDashboard('join_set', dashboardId);
-            return updateDashboards(dashboards);
+            return updateDashboards(dashboardsArray);
           });
         };
       }
@@ -156,19 +162,19 @@ define(function (require) {
         return self.getJoinFilter(currentDashboardId).then(function (joinFilter) {
           urlHelper.addFilter(joinFilter);
           if (updateDashboards) {
-            return updateDashboards(dashboards);
+            return updateDashboards(dashboardsClone);
           }
         }).catch(function (error) {
           urlHelper.removeJoinFilter();
           if (updateDashboards) {
-            return updateDashboards(dashboards);
+            return updateDashboards(dashboardsClone);
           }
         });
 
       } else {
         return Promise.resolve(urlHelper.removeJoinFilter()).then(function () {
           if (updateDashboards) {
-            return updateDashboards(dashboards);
+            return updateDashboards(dashboardsClone);
           }
         });
       }

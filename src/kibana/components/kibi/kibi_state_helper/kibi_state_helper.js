@@ -21,7 +21,9 @@ define(function (require) {
           //   q:, // queries
           //   f:, // filters
           //   t:  // time
-          d: {}
+          d: {},
+          // will hold ids of enabled relations for relational panel and join_set filter
+          j: []
         };
         globalState.save();
       }
@@ -286,6 +288,34 @@ define(function (require) {
         });
       }
       globalState.save();
+    };
+
+    KibiStateHelper.prototype.isRelationEnabled = function (relationId) {
+      if (globalState.k.j instanceof Array) {
+        return globalState.k.j.indexOf(relationId) !== -1;
+      }
+      return false;
+    };
+
+    KibiStateHelper.prototype.enableRelation = function (relationId) {
+      if (!globalState.k.j) {
+        globalState.k.j = [];
+      }
+      if (globalState.k.j.indexOf(relationId) === -1) {
+        globalState.k.j.push(relationId);
+        globalState.save();
+      }
+    };
+
+    KibiStateHelper.prototype.disableRelation = function (relationId) {
+      if (!globalState.k.j) {
+        globalState.k.j = [];
+      }
+      var index = globalState.k.j.indexOf(relationId);
+      if (index !== -1) {
+        globalState.k.j.splice(index, 1);
+        globalState.save();
+      }
     };
 
 

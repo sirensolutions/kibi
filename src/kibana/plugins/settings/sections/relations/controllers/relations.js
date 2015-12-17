@@ -268,7 +268,7 @@ define(function (require) {
           if (relDash.relation) {
             var key = relationId(relDash);
             if (uniq[key].length !== 1) {
-              error = 'This row has already been defined!';
+              error = 'These relationships are equivalent, please remove one';
             }
 
             // build the graph visualisation
@@ -398,7 +398,7 @@ define(function (require) {
           var key = _getJoinIndicesUniqueID(indices[0], indices[1]);
 
           if (uniq[key].length !== 1) {
-            error = 'This row has already been defined!';
+            error = 'These relationships are equivalent, please remove one';
           }
           if (indices[0].indexPatternId === indices[1].indexPatternId &&
               indices[0].path === indices[1].path) {

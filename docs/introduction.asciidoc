@@ -48,7 +48,7 @@ of forked code to a minimum.
 
 This new version of Kibi provides many improvements and new features, the main one are listed below:
 
-- Kibi is merged with Kibana 4.1.3 which provides a number of https://www.elastic.co/blog/kibana-4-2-1-and-4-1-3[bug fixes and performance improvments].
+- Kibi is merged with Kibana 4.1.4 which provides a number of https://www.elastic.co/blog/kibana-4-3-1-and-4-2-2-and-4-1-4[bug fixes and performance improvments].
 - A new <<relational-panel,relational browsing>> feature and an improved interactive <<relational-filter,join construction>>.
 - A new <<timeline,timeline>> visualisation.
 - The <<relational-filter,relational filtering>> is more expressive.

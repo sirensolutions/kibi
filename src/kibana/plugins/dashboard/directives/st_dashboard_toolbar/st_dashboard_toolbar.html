@@ -32,14 +32,15 @@
       <i aria-hidden="true" class="fa fa-plus-circle"></i>
     </button>
   </kbn-tooltip>
-  <kbn-tooltip text="Remove filters and queries from all dashboards" placement="bottom">
+  <kbn-tooltip text="Remove filters and queries from all dashboards" placement="left">
     <button
+      class="removeAllFilters"
       aria-label="Remove filters and queries from all dashboards"
       aria-haspopup="true"
       ng-click="removeAllFilters();">
       <span class="fa-stack fa-lg">
         <i class="fa fa-filter fa-stack-1x"></i>
-        <i class="fa fa-thincross-2 fa-stack-1x text-danger"></i>
+        <i class="fa fa-thincross fa-stack-1x text-danger"></i>
       </span>
     </button>
   </kbn-tooltip>

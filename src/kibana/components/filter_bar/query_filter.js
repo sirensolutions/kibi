@@ -80,6 +80,13 @@ define(function (require) {
       }
 
       state.filters.splice(index, 1);
+
+      // kibi - if it was a join_set one
+      // emit event so others can react (kibiStateHelper, relationalPanel)
+      if (filter.join_set) {
+        $rootScope.$emit('kibi:join_set:removed');
+      }
+      // kibi end
     };
 
     /**
@@ -87,12 +94,21 @@ define(function (require) {
      */
     queryFilter.removeAll = function () {
       var appState = getAppState();
-      // kibi - remove all except join_set one
-      appState.filters = _.filter(appState.filters, function (f) {
+
+      // kibi - find out if there was a join_set
+      var join_set_found = _.find(appState.filters, function (f) {
         return f.join_set;
       });
+
+      // kibi - if it was a join_set one
+      // emit event so others can react (kibiStateHelper, relationalPanel)
+      if (join_set_found) {
+        $rootScope.$emit('kibi:join_set:removed');
+      }
       // kibi end
+
       globalState.filters = [];
+      appState.filters = [];
     };
 
     /**

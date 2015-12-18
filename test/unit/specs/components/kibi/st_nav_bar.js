@@ -361,6 +361,60 @@ define(function (require) {
         expect($rootScope.dashboardGroups[0].count).to.be(42);
       });
 
+      it('should update counts on kibi:update-tab-counts', function () {
+        var countOnTabsResponse = {
+          responses: [
+            {
+              hits: {
+                total: 42
+              }
+            }
+          ]
+        };
+        var dashboardGroups = [
+          {
+            id: 'fake',
+            query: true
+          }
+        ];
+
+        initStubs(dashboardGroups, {});
+        $httpBackend.whenPOST('elasticsearch/_msearch?getCountsOnTabs').respond(200, countOnTabsResponse);
+        $rootScope.$broadcast('kibi:update-tab-counts');
+        $httpBackend.flush();
+
+        expect($rootScope.dashboardGroups).to.have.length(1);
+        expect($rootScope.dashboardGroups[0].id).to.be('fake');
+        expect($rootScope.dashboardGroups[0].count).to.be(42);
+      });
+
+      it('should update counts on kibi:autorefresh', function () {
+        var countOnTabsResponse = {
+          responses: [
+            {
+              hits: {
+                total: 42
+              }
+            }
+          ]
+        };
+        var dashboardGroups = [
+          {
+            id: 'fake',
+            query: true
+          }
+        ];
+
+        initStubs(dashboardGroups, {});
+        $httpBackend.whenPOST('elasticsearch/_msearch?getCountsOnTabs').respond(200, countOnTabsResponse);
+        $rootScope.$broadcast('kibi:autorefresh');
+        $httpBackend.flush();
+
+        expect($rootScope.dashboardGroups).to.have.length(1);
+        expect($rootScope.dashboardGroups[0].id).to.be('fake');
+        expect($rootScope.dashboardGroups[0].count).to.be(42);
+      });
+
       it('should remove dashboardGroups on kibi:dashboardgroup:changed', function () {
         var countOnTabsResponse = {
           responses: [

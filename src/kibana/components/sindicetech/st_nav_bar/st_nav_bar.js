@@ -173,6 +173,12 @@ define(function (require) {
           $scope.relationalFilterPanelOpened = false;
         });
 
+        // rerender tabs if any dashboard got saved
+        var removeDashboardChangedHandler = $rootScope.$on('kibi:dashboard:changed', function (event, dashId) {
+          dashboardGroupHelper.computeGroups().then(function (dashboardGroups) {
+            _writeToScope(dashboardGroups);
+          });
+        });
         // everywhere use this event !!! to be consistent
         // make a comment that it was required because not all compononts can listen to
         // esResponse
@@ -254,6 +260,7 @@ define(function (require) {
           removeRelationalPanelHandler();
           removeRouteChangeSuccessHandler();
           removeLocationChangeSuccessHandler();
+          removeDashboardChangedHandler();
           removeTabDashboardChangedHandler();
           removeTabDashboardGroupChangedHandler();
           removeUpdateTabCounts();

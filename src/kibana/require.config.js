@@ -42,6 +42,8 @@ require.config({
     zeroclipboard: 'bower_components/zeroclipboard/dist/ZeroClipboard',
     marked: 'bower_components/marked/lib/marked',
     numeral: 'bower_components/numeral/numeral',
+    semver: 'bower_components/semver/semver.browser',
+
     'angular-jqcloud':  'bower_components/angular-jqcloud/angular-jqcloud',
     'angular-sanitize': 'bower_components/angular-sanitize/angular-sanitize',
     jqcloud:            'bower_components/jqcloud2/dist/jqcloud',

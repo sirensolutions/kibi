@@ -22,6 +22,7 @@ that the filter applies to. E.g. a filter "name:giovanni" will results in 0 resu
 Toggle Filter image:images/filter-toggle.png[]:: Click this icon to _toggle_ a filter. By default, filters are inclusion
 filters, and display in green. Only elements that match the filter are displayed. To change this to an exclusion
 filters, displaying only elements that _don't_ match, toggle the filter. Exclusion filters display in red.
+
 Remove Filter image:images/filter-delete.png[]:: Click this icon to remove a filter entirely.
 
 To apply any of the filter actions to all the filters currently in place, click the image:images/filter-actions.png[]

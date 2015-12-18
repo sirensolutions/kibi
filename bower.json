@@ -51,6 +51,8 @@
     "marked": "0.3.3",
     "numeral": "1.5.3",
     "leaflet-draw": "0.2.4",
+    "semver": "~4.3.4",
+
     "jqcloud2": "2.0.1",
     "angular-jqcloud": "sirensolutions/angular-jqcloud#1.0.2szydan",
     "angular-sanitize": "1.2.28",

@@ -44,9 +44,10 @@ define(function (require) {
       });
 
       $rootScope.$on('kibi:join_set:removed', function () {
-        if (globalState.k.j) {
-          self._disableAllRelations();
-        }
+        self.removeAllFiltersOfType('join_set');
+        self._disableAllRelations();
+        $rootScope.$emit('kibi:update-tab-counts');
+        $rootScope.$emit('kibi:update-relational-panel');
       });
 
       //NOTE: check if a timefilter has been set into the URL at startup

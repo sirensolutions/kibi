@@ -100,15 +100,17 @@ define(function (require) {
         return f.join_set;
       });
 
+      globalState.filters = [];
+      appState.filters = [];
+
       // kibi - if it was a join_set one
       // emit event so others can react (kibiStateHelper, relationalPanel)
       if (join_set_found) {
         $rootScope.$emit('kibi:join_set:removed');
+      } else {
+        $rootScope.$emit('kibi:update-tab-counts');
       }
       // kibi end
-
-      globalState.filters = [];
-      appState.filters = [];
     };
 
     /**

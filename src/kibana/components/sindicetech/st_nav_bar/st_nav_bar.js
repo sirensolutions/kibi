@@ -179,8 +179,6 @@ define(function (require) {
             _writeToScope(dashboardGroups);
           });
         });
-
-
         // everywhere use this event !!! to be consistent
         // make a comment that it was required because not all compononts can listen to
         // esResponse
@@ -190,7 +188,7 @@ define(function (require) {
           });
         });
 
-        var removeJoinSet = $rootScope.$on('kibi:update-counts:join_set', function (event) {
+        var removeUpdateTabCounts = $rootScope.$on('kibi:update-tab-counts', function (event) {
           dashboardGroupHelper.computeGroups().then(function (dashboardGroups) {
             _writeToScope(dashboardGroups);
           });
@@ -255,17 +253,17 @@ define(function (require) {
         };
 
         $el.on('$destroy', function () {
-          removeJoinSet();
           removeAutorefreshHandler();
           removeInitConfigHandler();
-          removeDashboardChangedHandler();
           removeDashboardGroupChangedHandler();
           removeRelationalFilterPanelClosedHandler();
           removeRelationalPanelHandler();
           removeRouteChangeSuccessHandler();
           removeLocationChangeSuccessHandler();
+          removeDashboardChangedHandler();
           removeTabDashboardChangedHandler();
           removeTabDashboardGroupChangedHandler();
+          removeUpdateTabCounts();
 
           $scope.tabResizeChecker.off('resize', $scope.onTabContainerResize);
           $scope.tabResizeChecker.destroy();

@@ -79,6 +79,16 @@ define(function (require) {
         else return; // not found in either state, do nothing
       }
 
+      // kibi - if it was a join_set one clean the relations from kibi state
+      if (filter.join_set) {
+        if (globalState.k.j) {
+          globalState.k.j = [];
+        }
+        //emit event so other components can react
+        $rootScope.$emit('kibi:allFiltersRemoved');
+      }
+      // kibi end
+
       state.filters.splice(index, 1);
     };
 

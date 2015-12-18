@@ -79,17 +79,14 @@ define(function (require) {
         else return; // not found in either state, do nothing
       }
 
-      // kibi - if it was a join_set one clean the relations from kibi state
+      state.filters.splice(index, 1);
+
+      // kibi - if it was a join_set one
+      // emit event so others can react (kibiStateHelper, relationalPanel)
       if (filter.join_set) {
-        if (globalState.k.j) {
-          globalState.k.j = [];
-        }
-        //emit event so other components can react
-        $rootScope.$emit('kibi:allFiltersRemoved');
+        $rootScope.$emit('kibi:join_set:removed');
       }
       // kibi end
-
-      state.filters.splice(index, 1);
     };
 
     /**
@@ -102,13 +99,11 @@ define(function (require) {
       var join_set_found = _.find(appState.filters, function (f) {
         return f.join_set;
       });
-      // and if it was remove it
+
+      // kibi - if it was a join_set one
+      // emit event so others can react (kibiStateHelper, relationalPanel)
       if (join_set_found) {
-        if (globalState.k.j) {
-          globalState.k.j = [];
-        }
-        //emit event so other components can react
-        $rootScope.$emit('kibi:allFiltersRemoved');
+        $rootScope.$emit('kibi:join_set:removed');
       }
       // kibi end
 

@@ -43,6 +43,12 @@ define(function (require) {
         }
       });
 
+      $rootScope.$on('kibi:join_set:removed', function () {
+        if (globalState.k.j) {
+          self._disableAllRelations();
+        }
+      });
+
       //NOTE: check if a timefilter has been set into the URL at startup
       var off = $rootScope.$on('$routeChangeSuccess', function () {
         $timeout(function () {
@@ -307,7 +313,7 @@ define(function (require) {
       }
     };
 
-    KibiStateHelper.prototype.disableAllRelations = function () {
+    KibiStateHelper.prototype._disableAllRelations = function () {
       if (globalState.k.j) {
         globalState.k.j = [];
         globalState.save();

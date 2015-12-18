@@ -143,7 +143,7 @@ define(function (require) {
             }
           });
 
-          var off5 = $rootScope.$on('kibi:allFiltersRemoved', function () {
+          var off5 = $rootScope.$on('kibi:join_set:removed', function () {
             _initScope();
             _initPanel();
           });

@@ -84,7 +84,7 @@ define(function (require) {
                   }
                   if ($scope.relationalPanel.enabled) {
                     joinFilterHelper.updateJoinSetFilter(relation.dashboards).then(function () {
-                      $rootScope.$emit('kibi:update-counts:join_set');
+                      $rootScope.$emit('kibi:update-tab-counts');
                     });
                   }
                   return false; // break the loop
@@ -143,7 +143,7 @@ define(function (require) {
             }
           });
 
-          var off5 = $rootScope.$on('kibi:join_set:removed', function () {
+          var off5 = $rootScope.$on('kibi:update-relational-panel', function () {
             _initScope();
             _initPanel();
           });

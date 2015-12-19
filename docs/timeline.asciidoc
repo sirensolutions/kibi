@@ -9,7 +9,7 @@ Each event on a timeline become a clickable term filter which
 allow to quickly filter the related data based on what is shown on the timeline.
 
 
-image::images/timeline/timeline.png["Timeline",align="center"]
+image::images/timeline/timeline-mixed-mode.png["Timeline",align="center"]
 
 [float]
 ==== Configuration
@@ -37,4 +37,4 @@ image::images/timeline/timeline-advanced-config.png["Timeline advanced configura
 
 Below timeline where each group is rendered on separate level
 
-image::images/timeline/timeline2.png["Timeline",align="center"]
+image::images/timeline/timeline-levels-mode.png["Timeline",align="center"]

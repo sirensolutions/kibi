@@ -2,7 +2,7 @@
 == Introduction
 
 Kibi is an open source data intelligence platform built upon
-https://www.elastic.co/products/kibana[Kibana 4.1].
+https://www.elastic.co/products/kibana[Kibana 4.1.4].
 
 Kibi allows to perform complex analytics on large volumes of data by providing
 customizable visualizations (charts, maps, metrics and tables) on Elasticsearch

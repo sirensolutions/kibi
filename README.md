@@ -16,7 +16,7 @@ much more.
 * Go to the `kibi` directory and run `bin/kibi` on Linux/OS X or `bin\kibi.bat` on Windows.
 
 A pre-configured Kibi is now running at [http://localhost:5602](http://localhost:5602);
-a complete description of the demo is available in the Kibi documentation.
+a complete description of the demo is [available](http://siren.solutions/kibi/docs/current/getting-started.html) in the Kibi documentation.
 
 ## Documentation
 

@@ -1,0 +1,331 @@
+<kbn-settings-app section="queries">
+  <div ng-controller="QueriesEditor" class="app-container query_editor" id="queries_editor" >
+
+    <div ng-if="queryFinderOpen" style="padding:30px;">
+      <saved-object-finder title="Choose a query" type="queries" on-choose="closeQueryFinder"></saved-object-finder>
+    </div>
+
+
+    <div ng-if="!queryFinderOpen" class="container">
+
+      <div class="header">
+        <h2 class="title">Edit Queries over External Datasources</h2>
+      </div>
+      <p>
+        Use this form to define a query over an external datasource, e.g., a SQL database. Query results can be then visualized using templates or used in <i>External Query Terms Filter</i> aggregations in visualizations (which in turn create filters when clicked). <br> Used in conjunction with the Kibi Template Query Viewer visualization, queries can be parametric and will be executed again on user clicks.
+      </p>
+
+      <div class="config-section">
+        <h2>Config</h2>
+
+        <form ng-if="query" name="objectForm" novalidate>
+
+          <div class="form-group">
+            <label>Title</label>
+            <input type="text" ng-model="query.title" class="form-control span9"/>
+          </div>
+
+          <div class="form-group">
+            <label>Description</label>
+            <input type="text" ng-model="query.description" class="form-control span9"/>
+          </div>
+
+          <div class="form-group">
+            <label>Datasource</label> <a ng-click="jumpToDatasource()">Edit datasource</a></br>
+            <kibi-select required object-type="datasource" ng-model="query.st_datasourceId"></kibi-select>
+          </div>
+
+          <div class="form-group">
+            <label>Tag</label> <span>(optional)</span>
+            <tags-input ng-model="tags"></tags-input>
+          </div>
+
+
+          <div class="form-group" ng-if="datasourceType !== 'rest' && datasourceType !== 'tinkerpop3'">
+            <label>Activation query</label>
+            <span ng-if="query.st_datasourceId">(Empty = always active)</span>
+
+            <div ng-if="datasourceType === 'sparql_http' || datasourceType === 'sparql_jdbc'" ui-ace="{ onLoad: aceLoaded, mode: 'sparql'}" msd-elastic id="st_templateVars" ng-model="query.st_activationQuery" class="form-control activationQueryEditor"></div>
+            <div ng-if="datasourceType === 'mysql' || datasourceType === 'sqlite' || datasourceType === 'postgresql' || datasourceType === 'sql_jdbc'" ui-ace="{ onLoad: aceLoaded, mode: 'sql'}" msd-elastic id="st_templateVars" ng-model="query.st_activationQuery" class="form-control activationQueryEditor"></div>
+          </div>
+
+          <div class="form-group table-responsive" ng-if="datasourceType === 'rest'">
+            <label>Activation rules</label>
+
+            <table class="table table-condensed">
+              <thead>
+                <tr>
+                  <th>Subject</th>
+                  <th>Action</th>
+                  <th>Value</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr ng-repeat="rule in query.activation_rules" class="queryOptionArea" >
+                  <td>
+                      <input required type="text" ng-model="rule.s" class="form-control"/>
+                  </td>
+                  <td>
+                    <select required ng-model="rule.p" class="form-control">
+                      <option value="exists">Exists</option>
+                      <option value="is_an_array">Is an array</option>
+                      <option value="is_not_empty">Is NOT empty</option>
+                      <option value="length_greater_than">has length greater than</option>
+                      <option value="matches">Matches regex</option>
+                    </select>
+                  </td>
+                  <td>
+                      <input required class="form-control" ng-show="rule.p !== 'exists' && rule.p !== 'is_an_array' && rule.p !== 'is_not_empty'" type="text" ng-model="rule.v"/>
+                  </td>
+                  <td>
+                    <div class="btn-group rightCorner" style="width:60px;">
+                      <kibi-array-param-up index="{{ $index }}" model="query.activation_rules"></kibi-array-param-up>
+                      <kibi-array-param-down index="{{ $index }}" model="query.activation_rules"></kibi-array-param-down>
+                      <kibi-array-param-remove index="{{ $index }}" model="query.activation_rules"></kibi-array-param-remove>
+                    </div>
+
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <kibi-array-param-add label="rule" model="query.activation_rules"></kibi-array-param-add>
+          </div>
+
+
+          <div class="form-group" ng-if="datasourceType !== 'rest'">
+            <label ng-if="query.st_datasourceId && datasourceType !== 'tinkerpop3'">Results query</label></br>
+            <label ng-if="query.st_datasourceId && datasourceType === 'tinkerpop3'">Graph traversal script</label></br>
+            <span ng-if="datasourceType === 'mysql' || datasourceType === 'sql_jdbc'">
+              Hint: To start type <b>SHOW TABLES</b>
+            </span>
+            <span ng-if="datasourceType === 'postgresql'">
+              Hint: To start type <b>SELECT * FROM pg_catalog.pg_tables</b>
+            </span>
+            <span ng-if="datasourceType === 'sparql'">
+              Hint: To start type <b>SELECT * WHERE {?s ?p ?o} LIMIT 10</b>
+            </span>
+            <span ng-if="datasourceType === 'tinkerpop3'">
+              <b>Note</b>: to use the script with the Graph Browser visualization it should return a list of
+              vertices, edges or both.
+            </span>
+            <br />
+            <span>
+              Special variables <b>@doc[_source][property_name]@</b> will be replaced by values extracted
+              from the documents matching the current selection
+            </span>
+            <span ng-if="starDetectedInAQuery && (datasourceType === 'sparql_http' || datasourceType === 'sparql_jdbc')" style="color:orange;">
+              <br/>
+              Star symbol detected. Try to give an explicit list of variables to return
+              - it is better performance wise and will simplify relational filters configuration.
+            </span>
+
+            <div ng-if="datasourceType === 'tinkerpop3'"
+                 ui-ace="{ onLoad: aceLoaded, mode: 'text' }"
+                 msd-elastic id="st_templateVars"
+                 ng-model="query.st_resultQuery"
+                 class="form-control resultQueryEditor"
+                 ng-class="{ 'red-border': objectForm.sparqlQuery.$invalid }"
+                 name="sparqlQuery"
+                 required>
+            </div>
+
+            <div ng-if="datasourceType === 'sparql_http' || datasourceType === 'sparql_jdbc'"
+                 ui-ace="{ onLoad: aceLoaded, mode: 'sparql' }"
+                 msd-elastic id="st_templateVars"
+                 ng-model="query.st_resultQuery"
+                 class="form-control resultQueryEditor"
+                 ng-class="{ 'red-border': objectForm.sparqlQuery.$invalid }"
+                 name="sparqlQuery"
+                 required>
+            </div>
+
+            <div ng-if="datasourceType === 'mysql' || datasourceType === 'sqlite' || datasourceType === 'postgresql' || datasourceType === 'sql_jdbc'"
+                 ui-ace="{ onLoad: aceLoaded, mode: 'sql' }"
+                 msd-elastic id="st_templateVars"
+                 ng-model="query.st_resultQuery"
+                 class="form-control resultQueryEditor"
+                 ng-class="{ 'red-border': objectForm.sqlQuery.$invalid }"
+                 name="sqlQuery"
+                 required>
+            </div>
+          </div>
+
+
+          <div class="form" ng-if="datasourceType === 'rest'">
+            <div class="form-group">
+              <label>Method</label><br/>
+              <select ng-model="query.rest_method"  class="form-control">
+                <option value="GET">GET</div>
+                <option value="POST">POST</div>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Path</label><br/>
+              <input type="text" ng-model="query.rest_path"  class="form-control"/>
+            </div>
+          </div>
+
+          <div ng-if="datasourceType === 'rest'">
+            <p>
+              Special placeholders for username, password and auth_token can be used in values of the headers, parameters and body. </br>
+              They are respectively: <strong>${username}</strong>, <strong>${password}</strong>, <strong>${auth_token}</strong>
+            </p>
+            <div class="form-group table-responsive">
+              <label>Params</label><br/>
+              <table class="table table-condensed">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Value</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr ng-repeat="param in query.rest_params" class="queryOptionArea">
+                    <td>
+                      <input required type="text" ng-model="param.name" class="form-control"/>
+                    </td>
+                    <td>
+                      <input required type="text" ng-model="param.value" class="form-control"/>
+                    </td>
+                    <td>
+                      <div class="btn-group rightCorner" style="width:60px;">
+                        <kibi-array-param-up index="{{ $index }}" model="query.rest_params"></kibi-array-param-up>
+                        <kibi-array-param-down index="{{ $index }}" model="query.rest_params"></kibi-array-param-down>
+                        <kibi-array-param-remove index="{{ $index }}" model="query.rest_params"></kibi-array-param-remove>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <kibi-array-param-add label="param" model="query.rest_params"></kibi-array-param-add>
+            </div>
+
+            <br/>
+
+            <div class="form-group table-responsive rest-headers">
+              <label>Headers</label><br/>
+              <table class="table table-condensed">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Value</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr ng-repeat="header in query.rest_headers" class="queryOptionArea">
+                    <td>
+                      <input required type="text" ng-model="header.name" class="form-control"/>
+                    </td>
+                    <td>
+                      <input required type="text" ng-model="header.value"  class="form-control"/>
+                    </td>
+                    <td>
+                      <div class="btn-group rightCorner" style="width:60px;">
+                        <kibi-array-param-up index="{{ $index }}" model="query.rest_headers"></kibi-array-param-up>
+                        <kibi-array-param-down index="{{ $index }}" model="query.rest_headers"></kibi-array-param-down>
+                        <kibi-array-param-remove index="{{ $index }}" model="query.rest_headers"></kibi-array-param-remove>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <kibi-array-param-add label="header" model="query.rest_headers"></kibi-array-param-add>
+            </div>
+
+          </div>
+
+          <div class="form" ng-if="datasourceType === 'rest'">
+
+            <div class="form-group">
+              <label>Body</label><br/>
+              <textarea ng-model="query.rest_body"  class="form-control">{{query.rest_body}}</textarea>
+            </div>
+
+            <br/>
+
+            <div class="form-group">
+              <label>Expected response status code</label><br/>
+              <input type="text" ng-model="query.rest_resp_status_code"  class="form-control"/>
+            </div>
+
+            <br/>
+
+            <div class="form-group">
+              <label>JsonPath to filter response</label>
+              <span class="small-note"
+                    tooltip="Optional JSONPath expression to restrict the results. Note: The expression always returns an array"
+                    tooltip-placement="top"
+                    tooltip-animation="false"
+                    tooltip-popup-delay="0"
+                    tooltip-append-to-body="true"><i class="fa fa-info"></i></span>
+              <br/>
+              <input type="text" ng-model="query.rest_resp_restriction_path"  class="form-control"/>
+            </div>
+
+        </div>
+
+          <div class="form-group" style="margin-top:10px;">
+            <button class="btn btn-primary" ng-click="cancel()">Cancel</button>
+            <button class="btn btn-info" ng-click="clone()" ng-disabled="objectForm.$invalid">Clone</button>
+            <button class="btn btn-success" ng-click="submit()" ng-disabled="objectForm.$invalid">Save</button>
+            <button class="btn btn-danger" ng-click="delete()">Delete</button>
+          </div>
+        </form>
+      </div>
+
+
+      <div class="preview-section">
+        <form name="previewForm">
+        <h2>Preview</h2>
+
+        <kibi-param-entity-uri entity-uri-holder="holder"></kibi-param-entity-uri>
+
+        <div class="form-group">
+          <label>Template id</label>
+          <span class="small-note"> Pick the template id to see html preview, save query to refresh</span><br/>
+          <a ng-show="query._previewTemplateId" ng-click="jumpToTemplate()"> Edit template</a>
+          <kibi-select object-type="template" ng-model="query._previewTemplateId"></kibi-select>
+        </div>
+
+        <div class="form-group">
+          <!-- here we are accessing entityURI form inside kibi-param-entity-uri -->
+          <button ng-click="submit()" ng-disabled="previewForm.entityURI.$invalid" class="btn btn-success span3" >
+            Refresh
+          </button>
+        </div>
+
+
+
+        <div role="tabpanel">
+          <!-- Nav tabs -->
+          <ul class="nav nav-tabs">
+            <li ng-click="tabClick()" ng-class="holder.htmlPreviewActive ? 'active' : ''">
+              <a aria-controls="preview_html" role="tab" >Preview Html</a>
+            </li>
+            <li ng-click="tabClick()" ng-class="holder.jsonPreviewActive ? 'active' : ''">
+              <a href="" aria-controls="preview_json" role="tab" >Preview Json</a>
+            </li>
+          </ul>
+
+          <!-- Tab panes -->
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane" ng-class="holder.htmlPreviewActive ? 'active' : ''" >
+              <div class="spinner large" ng-show="spinIt"></div>
+              <div class="html_preview_content" kibi-dynamic-html="holder.htmlPreview"></div>
+            </div>
+            <div role="tabpanel" class="tab-pane" ng-class="holder.jsonPreviewActive ? 'active' : ''" >
+              <pre class="json_preview_content" ng-show="holder.jsonPreview !== ''">{{holder.jsonPreview}}</pre>
+            </div>
+          </div>
+        </div>
+
+        </form>
+      </div>
+    </div>
+    </div><!-- container end -->
+
+  </div>
+</kbn-settings-app>

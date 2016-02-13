@@ -17,21 +17,10 @@ as it's possible to set values that are incompatible with one another.
 [float]
 [[settings-create-pattern]]
 === Creating an Index Pattern to Connect to Elasticsearch
-
-An _index pattern_ identifies one or more Elasticsearch indices that you want to
-explore with Kibi. Kibi looks for index names that match the specified pattern.
-An asterisk (*) in the pattern matches zero or more characters. For example, the pattern
-`myindex-*` matches all indices whose names start with `myindex-`, such as `myindex-1`
-and `myindex-2`.
-
-If you use event times to create index names (for example, if you're pushing data
-into Elasticsearch from Logstash), the index pattern can also contain a date format.
-In this case, the static text in the pattern must be enclosed in brackets, and you
-specify the date format using the tokens described in <<date-format-tokens>>.
-
-For example, `[logstash-]YYYY.MM.DD` matches all indices whose names have a
-timestamp of the form `YYYY.MM.DD` appended to the prefix `logstash-`, such as
-`logstash-2015.01.31` and `logstash-2015-02-01`.
+An _index pattern_ identifies one or more Elasticsearch indices that you want to explore with Kibi. Kibi looks for
+index names that match the specified pattern.
+An asterisk ({asterisk}) in the pattern matches zero or more characters. For example, the pattern `myindex-{asterisk}` matches all
+indices whose names start with `myindex-`, such as `myindex-1` and `myindex-2`.
 
 An index pattern can also simply be the name of a single index.
 
@@ -48,21 +37,20 @@ to the Discover tab, and then go back to the Settings tab, Kibi displays the
 index pattern you last looked at. To get to the create pattern form, click
 the *Add* button in the Index Patterns list.
 
-. If your index contains a timestamp field that you want to use to perform
-time-based comparisons, select the *Index contains time-based events* option
-and select the index field that contains the timestamp. Kibi reads the
-index mapping to list all of the fields that contain a timestamp.
-
-. If new indices are generated periodically and have a timestamp appended to
-the name, select the *Use event times to create index names* option and select
-the *Index pattern interval*. This enables Kibi to search only those indices
-that could possibly contain data in the time range you specify. This is
-primarily applicable if you are using Logstash to feed data into Elasticsearch.
+. If your index contains a timestamp field that you want to use to perform time-based comparisons, select the *Index
+contains time-based events* option and select the index field that contains the timestamp. Kibi reads the index
+mapping to list all of the fields that contain a timestamp.
 
 . Click *Create* to add the index pattern.
 
-. To designate the new pattern as the default pattern to load when you view
-the Discover tab, click the *favorite* button.
+. To designate the new pattern as the default pattern to load when you view the Discover tab, click the *favorite*
+button.
+
+To use an event time in an index name, enclose the static text in the pattern and specify the date format using the
+tokens described in the following table.
+
+For example, `[logstash-]YYYY.MM.DD` matches all indices whose names have a timestamp of the form `YYYY.MM.DD` appended
+to the prefix `logstash-`, such as `logstash-2015.01.31` and `logstash-2015-02-01`.
 
 [float]
 [[date-format-tokens]]
@@ -170,7 +158,7 @@ the field's format from the *Format* drop-down. Format options vary based on the
 You can also set the field's popularity value in the *Popularity* text entry box to any desired value. Click the
 *Update Field* button to confirm your changes or *Cancel* to return to the list of fields.
 
-Kibana has https://www.elastic.co/blog/kibana-4-1-field-formatters[field formatters] for the following field types:
+Kibi has https://www.elastic.co/blog/kibana-4-1-field-formatters[field formatters] for the following field types:
 
 ==== String Field Formatters
 
@@ -199,11 +187,13 @@ include::string-formatter.asciidoc[]
 
 ==== Numeric Field Formatters
 
-Numeric fields support the `Url`, `String`, `Bytes`, `Number`, and `Percentage` formatters.
+Numeric fields support the `Url`, `String`, `Bytes`, `Number`, `Percentage`, and `Color` formatters.
 
 include::string-formatter.asciidoc[]
 
 include::url-formatter.asciidoc[]
+
+include::color-formatter.asciidoc[]
 
 The `Bytes`, `Number`, and `Percentage` formatters enable you to choose the display formats of numbers in this field using
 the https://adamwdraper.github.io/Numeral-js/[numeral.js] standard format definitions.
@@ -214,8 +204,8 @@ the https://adamwdraper.github.io/Numeral-js/[numeral.js] standard format defini
 Scripted fields compute data on the fly from the data in your
 Elasticsearch indices. Scripted field data is shown on the Discover tab as
 part of the document data, and you can use scripted fields in your visualizations.
-(Scripted field values are computed at query time so they aren't indexed and
-cannot be searched.)
+Scripted field values are computed at query time so they aren't indexed and
+cannot be searched.
 
 WARNING: Computing data on the fly with scripted fields can be very resource
 intensive and can have a direct impact on Kibi's performance. Keep in mind
@@ -380,7 +370,7 @@ The relational panel can be opened by clicking on the icon image:images/relation
 With relations between dashboards enabled in the previous example, you will see the "relational" filter image:images/relations-settings/relational-filter.png["Relational filter"] displayed on the dashboards Articles, Companies, and Investments.
 
 
-[[kibi-settings-queries]]
+[[kibi-settings-datasources]]
 === Datasources
 
 For an overview of datasources, please read the <<external-datasources>>
@@ -503,60 +493,140 @@ To import a set of objects:
 [[Kibi-server-configuration]]
 === Kibi server configuration
 
-The Kibi server reads its configuration from the `config/kibi.yml` file at
-startup.
+The Kibi server reads its configuration from the `config/kibi.yml` file at startup.
+The default settings configure Kibi to run on `localhost:5606`. To change the host or port number, or connect to Elasticsearch running on a different machine,
+you'll need to update your `kibi.yml` file. You can also enable SSL and set a variety of other options.
 
-.Configuration properties
-|===
-|Property |Description
+include::kibi_yml.asciidoc[]
 
-|`ca`
-|The path to the CA certificate for your Elasticsearch instance. Specify if you are using a self-signed certificate so the certificate can be verified. (Otherwise, you have to disable `verify_ssl`.) Default: not set.
+External datasource configuration is documented in the <<external-datasources>> chapter.
 
-|`default_app_id`
-|The page that will be displayed when you launch Kibi: `discover`, `visualize`, `dashboard`, or `settings`. Default: `dashboard`.
+deprecated[0.3, The names of several Kibi server properties changed in the 0.3 release of Kibana. The previous names remain as functional aliases, but are now deprecated and will be removed in a future release of Kibi]
 
-|`default_dashboard_id`
-|The dashboard that is displayed when clicking on the Dashboard tab for the first time. Default: not set.
+[horizontal]
+.Kibi Server Properties Changed in the 0.3 Release
+`server.port` added[0.3]:: The port that the Kibana server runs on.
++
+*alias*: `port` deprecated[0.3]
++
+*default*: `5601`
 
-|`elasticsearch_preserve_host`
-|By default, the host specified in the incoming request from the browser is specified as the host in the corresponding request Kibi sends to Elasticsearch. If you set this option to `false`, Kibi uses the host specified in `elasticsearch_url`. You probably don't need to worry about this setting--just use the default.  Default: `true`.
+`server.host` added[0.3]:: The host to bind the Kibana server to.
++
+*alias*: `host` deprecated[0.3]
++
+*default*: `"0.0.0.0"`
 
-|`elasticsearch_url`
-|The Elasticsearch instance where the indices you want to query reside. Default: `http://localhost:9200`.
+`elasticsearch.url` added[0.3]:: The Elasticsearch instance where the indices you want to query reside.
++
+*alias*: `elasticsearch_url` deprecated[0.3]
++
+*default*: `"http://localhost:9200"`
 
-|`host`
-|The host to bind the Kibi server to. Default: `localhost`.
+`elasticsearch.preserveHost` added[0.3]:: By default, the host specified in the incoming request from the browser is specified as the host in the corresponding request Kibana sends to Elasticsearch. If you set this option to `false`, Kibana uses the host specified in `elasticsearch_url`.
++
+*alias*: `elasticsearch_preserve_host` deprecated[0.3]
++
+*default*: `true`
 
-|`kibana_index`
-|The name of the index where Kibi configuration be stored. Default: `.kibi`.
+`elasticsearch.ssl.cert` added[0.3]:: This parameter specifies the path to the SSL certificate for Elasticsearch instances that require a client certificate.
++
+*alias*: `kibana_elasticsearch_client_crt` deprecated[0.3]
 
-|`log_file`
-|The location where you want to store the Kibi's log output. If not specified, log output is written to standard output and not stored. Specifying a log file suppresses log writes to standard output. Default: none.
+`elasticsearch.ssl.key` added[0.3]:: This parameter specifies the path to the SSL key for Elasticsearch instances that require a client key.
++
+*alias*: `kibana_elasticsearch_client_key` deprecated[0.3]
 
-|`pid_file`
-|The path to the file where the server process ID is stored; the file is created only if the option is set.
-The file is not removed automatically during shut down. Default: not set.
+`elasticsearch.password` added[0.3]:: This parameter specifies the password for Elasticsearch instances that use HTTP basic authentication. Kibana users still need to authenticate with Elasticsearch, which is proxied through the Kibana server.
++
+*alias*: `kibana_elasticsearch_password` deprecated[0.3]
 
-|`port`
-|The port that the Kibi server runs on. Default: `5602`.
+`elasticsearch.username` added[0.3]:: This parameter specifies the username for Elasticsearch instances that use HTTP basic authentication. Kibana users still need to authenticate with Elasticsearch, which is proxied through the Kibana server.
++
+*alias*: `kibana_elasticsearch_username` deprecated[0.3]
 
-|`request_timeout`
-|How long to wait for responses from the Kibi backend or Elasticsearch, in milliseconds. Default: `500000`.
+`elasticsearch.pingTimeout` added[0.3]:: This parameter specifies the maximum wait time in milliseconds for ping responses by Elasticsearch.
++
+*alias*: `ping_timeout` deprecated[0.3]
++
+*default*: `1500`
 
-|`shard_timeout`
-|How long Elasticsearch should wait for responses from shards. Set to 0 to disable. Default: `0`.
+`elasticsearch.startupTimeout` added[0.3]:: This parameter specifies the maximum wait time in milliseconds for Elasticsearch discovery at Kibana startup. Kibana repeats attempts to discover an Elasticsearch cluster after the specified time elapses.
++
+*alias*: `startup_timeout` deprecated[0.3]
++
+*default*: `5000`
 
-|`ssl_cert_file`
-|The path to your Kibi server's certificate file. Must be set to encrypt communications between the browser and Kibi. Default: not set.
+`kibana.index` added[0.3]:: The name of the index where saved searched, visualizations, and dashboards will be stored..
++
+*alias*: `kibana_index` deprecated[0.3]
++
+*default*: `.kibana`
 
-|`ssl_key_file`
-|The path to your Kibi server's key file. Must be set to encrypt communications between the browser and Kibi. Default: not set.
+`kibana.defaultAppId` added[0.3]:: The page that will be displayed when you launch Kibana: `discover`, `visualize`, `dashboard`, or `settings`.
++
+*alias*: `default_app_id` deprecated[0.3]
++
+*default*: `"discover"`
 
-|`verify_ssl`
-|Indicates whether or not to validate the Elasticsearch SSL certificate. Set to `false` to disable SSL verification.  Default: `true`.
+`logging.silent` added[0.3]:: Set this value to `true` to suppress all logging output.
++
+*default*: `false`
 
-|===
+`logging.quiet` added[0.3]:: Set this value to `true` to suppress all logging output except for log messages tagged `error`, `fatal`, or Hapi.js errors.
++
+*default*: `false`
 
-External datasource configuration is documented in the <<external-datasources>>
-chapter.
+`logging.verbose` added[0.3]:: Set this value to `true` to log all events, including system usage information and all requests.
++
+*default*: `false`
+
+`logging.events` added[0.3]:: You can specify a map of log types to output tags for this parameter to create a customized set of loggable events, as in the following example:
++
+[source,json]
+{
+  log: ['info', 'warning', 'error', 'fatal'],
+  response: '*',
+  error: '*'
+}
+
+`elasticsearch.requestTimeout` added[0.3]:: How long to wait for responses from the Kibana backend or Elasticsearch, in milliseconds.
++
+*alias*: `request_timeout` deprecated[0.3]
++
+*default*: `500000`
+
+`elasticsearch.shardTimeout` added[0.3]:: How long Elasticsearch should wait for responses from shards. Set to 0 to disable.
++
+*alias*: `shard_timeout` deprecated[0.3]
++
+*default*: `0`
+
+`elasticsearch.ssl.verify` added[0.3]:: Indicates whether or not to validate the Elasticsearch SSL certificate. Set to false to disable SSL verification.
++
+*alias*: `verify_ssl` deprecated[0.3]
++
+*default*: `true`
+
+`elasticsearch.ssl.ca`:: An array of paths to the CA certificates for your Elasticsearch instance. Specify if
+you are using a self-signed certificate so the certificate can be verified. Disable `elasticsearch.ssl.verify` otherwise.
++
+*alias*: `ca` deprecated[0.3]
+
+`server.ssl.key` added[0.3]:: The path to your Kibana server's key file. Must be set to encrypt communications between the browser and Kibana.
++
+*alias*: `ssl_key_file` deprecated[0.3]
+
+`server.ssl.cert` added[0.3]:: The path to your Kibana server's certificate file. Must be set to encrypt communications between the browser and Kibana.
++
+*alias*: `ssl_cert_file` deprecated[0.3]
+
+`pid.file` added[0.3]:: The location where you want to store the process ID file.
++
+*alias*: `pid_file` deprecated[0.3]
++
+*default*: `/var/run/kibana.pid`
+
+`logging.dest` added[0.3]:: The location where you want to store the Kibana's log output. If not specified, log output is written to standard output and not stored. Specifying a log file suppresses log writes to standard output.
++
+*alias*: `log_file` deprecated[0.3]

@@ -1,0 +1,51 @@
+<div class="form-group">
+  <label>Column name</label></br>
+  <input required type="text" ng-model="vis.params.queryFieldName" class="form-control"/>
+</div>
+
+<ul class="external-query-terms-filter">
+  <li ng-repeat="queryId in agg.params.queryIds" class="queryOptionArea" >
+
+    <div class="header">
+      <h2>Filter {{$index +1}}</h2>
+    </div>
+
+    <div class="content">
+      <div class="form-group">
+        <label>Source query id</label>
+        <kibi-select object-type="query" ng-model="queryId.id" required></kibi-select>
+      </div>
+
+      <div class="form-group">
+        <label>Source query variable</label>
+        <kibi-select
+          required
+          object-type="queryVariable"
+          query-id="queryId.id"
+          ng-model="queryId.queryVariableName">
+        </kibi-select>
+      </div>
+
+      <div class="form-group">
+        <label><input type="checkbox" ng-model="queryId.negate"/>Negate the query</label>
+      </div>
+
+      <div class="form-group">
+        <label>Target field</label>
+        <kibi-select
+          required
+          object-type="field"
+          analyzed-warning="true"
+          index-pattern-id="vis.indexPattern.id"
+          ng-model="queryId.joinElasticsearchField" >
+        </kibi-select>
+      </div>
+
+      <div class="rightCorner">
+        <kibi-array-param-remove index="{{ $index }}" model="agg.params.queryIds"></kibi-array-param-remove>
+      </div>
+    </div>
+
+  </li>
+</ul>
+<kibi-array-param-add required label="external query terms filter" model="agg.params.queryIds"></kibi-array-param-add>

@@ -1,0 +1,42 @@
+<div class="app-container">
+  <nav class="navbar navbar-default navbar-static-top subnav" data-test-subj="settingsNav">
+    <div class="container-fluid">
+      <ul class="nav navbar-nav">
+        <li ng-repeat="section in sections" ng-class="section.class">
+          <a class="navbar-link" kbn-href="{{section.url}}" data-test-subj="{{section.name}}">{{section.display}}</a>
+        </li>
+      </ul>
+
+      <!-- kibi: added by kibi -->
+      <style>
+        /* just to make it appear as it is inside navbar */
+        .navbar-button-group{
+          float:right;
+          margin-top:6px;
+        }
+        .navbar-button{
+          background-color:transparent;
+          color:#ecf0f1;
+        }
+      </style>
+
+      <div class="button-group navbar-button-group"
+           ng-show="section.name === 'datasources' || section.name === 'queries' || section.name === 'templates' || section.name === 'dashboardgroups'">
+        <kbn-tooltip text="New {{section.buttonLabel}}" placement="bottom">
+          <button ng-click="section.newObject()" class="navbar-button"><i class="fa fa-file-new-o"></i></button>
+        </kbn-tooltip>
+        <kbn-tooltip text="Save {{section.buttonLabel}}" placement="bottom">
+          <button ng-click="section.saveObject()" class="navbar-button"><i class="fa fa-save"></i></button>
+        </kbn-tooltip>
+        <kbn-tooltip text="Load Saved {{section.buttonLabel}}" placement="bottom">
+          <button ng-click="section.openObjectFinder()" class="navbar-button"><i class="fa fa-folder-open-o"></i></button>
+        </kbn-tooltip>
+      </div>
+      <!-- kibi: added by kibi -->
+
+
+    </div>
+  </nav>
+
+  <div role="main" class="settings-section-container {{section.name}}-settings" ng-transclude></div>
+</div>

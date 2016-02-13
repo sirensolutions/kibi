@@ -1,0 +1,93 @@
+@import (reference) "~ui/kibi/styles/kibi_variables.less";
+
+.relations-settings {
+
+  .header {
+    margin-top: 4px;
+  }
+
+  .btn {
+    margin-top: 5px;
+    margin-bottom: 5px;
+  }
+
+
+  .indices-relations-config {
+    width: 50%;
+    height: 24px;
+    float: left;
+  }
+  .dashboards-relations-config {
+    width: 49%;
+    float: left;
+    clear: right;
+    height: 24px;
+    .checkbox {
+      margin: 0 0 0 8px;
+      input[type="checkbox"] {
+        margin-left:0;
+      }
+    }
+  }
+  // override the table-condensed cell style to make it more compact
+  .table-condensed > thead > tr > th {
+    border-bottom-width: 1px;
+    height: 70px;
+    vertical-align: bottom;
+  }
+
+  .table-condensed > thead > tr.relation-row > td,
+  .table-condensed > tbody > tr.relation-row > td,
+  .table-condensed > tfoot > tr.relation-row > td {
+    vertical-align: middle;
+    padding-left: 0;
+    &:first-child {
+      padding-left: 5px !important;
+    }
+  }
+
+  input.small-input.form-control {
+    width: 80px;
+    padding: 5px;
+  }
+
+  .relations .table-condensed {
+    margin-bottom: 0;
+  }
+
+  .relations .indices-section {
+    width: 50%;
+    float: left;
+    padding: 8px;
+
+    .indicesGraph{
+      height: 250px;
+      border: 1px #ECF0F1 solid;
+      border-radius: 4px;
+    }
+  }
+
+  .relations .dashboards-section.disabled {
+    opacity: 0.5;
+    background-color: #dedede;
+  }
+
+  .relations .dashboards-section {
+    width: 49%;
+    float: left;
+    padding: 8px;
+
+    .dashboardsGraph{
+      height: 250px;
+      border: 1px #ECF0F1 solid;
+      border-radius: 4px;
+    }
+  }
+
+  .container h2 {
+    margin-top: 0;
+    font-size: 24px;
+  }
+
+}
+

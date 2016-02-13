@@ -1,0 +1,26 @@
+<form role="form" class="vis-share">
+  <div class="form-group" ng-if="allowEmbed">
+    <label>
+      Embed this {{objectType}}
+      <small>Add to your html source. Note all clients must still be able to access Kibi</small>
+    </label>
+    <share-object-url share-as-embed="true"></share-object-url>
+  </div>
+
+  <!-- kibi: added to be able to share dashboards with visible kibi-nav-bar -->
+  <div class="form-group" ng-if="allowEmbed && objectType === 'dashboard'">
+    <label>
+      Embed all {{objectTypePlural}}.
+      <small>Add to your html source. Note all clients must still be able to access Kibi</small>
+    </label>
+    <share-object-url share-as-embed="true"  kibi-navbar-visible="true"></share-object-url>
+  </div>
+  <!-- kibi: end -->
+
+  <div class="form-group">
+    <label>
+      Share a link
+    </label>
+    <share-object-url share-as-embed="false"></share-object-url>
+  </div>
+</form>

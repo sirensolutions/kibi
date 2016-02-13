@@ -1,0 +1,63 @@
+@import (reference) "~ui/styles/variables";
+
+.collapsible-sidebar {
+  position: relative;
+  z-index: 1;
+
+  .sidebar-collapser {
+    background-color: @collapser-bg;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    right: -(@collapser-width);
+    width: @collapser-width;
+    cursor: pointer;
+    z-index: -1;
+
+    &:hover {
+      background-color: @collapser-hover-bg;
+      border-color: @collapser-hover-bg;
+      color: @collapser-hover-color;
+    }
+
+    .chevron-cont{
+      position: absolute;
+      left: 2px;
+      top: 8px;
+      font-size: 10px;
+
+      &:before {
+        font-family: FontAwesome;
+        content: "\F053";
+      }
+    }
+  }
+
+  &.closed {
+    width: 0 !important;
+    border-right-width: 0;
+    border-left-width: 0;
+
+    > * {
+      visibility: hidden;
+    }
+
+    .sidebar-collapser {
+      visibility: visible;
+      .chevron-cont:before {
+        content: "\F054";
+      }
+    }
+  }
+}
+
+@media (max-width: 992px) {
+  .collapsible-sidebar {
+    &.closed {
+      display: none;
+    }
+    .sidebar-collapser {
+      display: none;
+    }
+  }
+}

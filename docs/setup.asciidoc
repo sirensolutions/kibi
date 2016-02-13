@@ -16,23 +16,35 @@ terminal window, change to the directory where you extracted Kibi and run
 the following command:
 
 [source,shell]
-elastic/bin/elasticsearch
+----
+$ cd elasticsearch/
+$ ./bin/elasticsearch
+----
 
 If you're on Windows, run the following command:
 
 [source,shell]
-elastic\bin\elasticsearch.bat
+----
+$ cd elasticsearch\
+$ .\bin\elasticsearch.bat
+----
 
 To start Kibi, open a second terminal window, change to the directory where you
 extracted Kibi and run the following command:
 
 [source,shell]
-kibi/bin/kibi
+----
+$ cd kibi/
+$ ./bin/kibi
+----
 
 If you're on Windows, run the following command:
 
 [source,shell]
-kibi\bin\kibi.bat
+----
+$ cd kibi\
+$ .\bin\kibi.bat
+----
 
 Upon first launch, the Windows firewall might display the following dialog
 box; to allow the Kibi backend to connect to external datasources, please
@@ -40,18 +52,18 @@ check both check boxes (as shown below) and press the *Allow access* button.
 
 image::images/node-windows-firewall-warning.png["Windows firewall warning",align="center"]
 
-Kibi can be accessed by visiting http://localhost:5602/; an overview of the
+Kibi can be accessed by visiting http://localhost:5606/; an overview of the
 included demo dataset is available in <<getting-started, Getting started>>
 section.
 
 If you want to connect Kibi to a different Elasticsearch cluster, open
 the configuration file in `kibi/config/kibi.yml`, set the correct URL in
-the `elasticsearch_url` parameter, then restart Kibi.
+the `elasticsearch.url` parameter, then restart Kibi.
 
 [float]
 [[kibi-dynamic-mapping]]
 === Kibi and Elasticsearch Dynamic Mapping
-By default, Elasticsearch enables  {elastic-ref}mapping-dynamic-mapping.html[dynamic mapping] for fields.
+By default, Elasticsearch enables  {elastic-ref}mapping.html#_dynamic_mapping[dynamic mapping] for fields.
 Kibi needs dynamic mapping to use fields in visualizations correctly, as well
 as to manage the `.kibi` index where all its configuration is stored.
 

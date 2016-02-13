@@ -1,38 +1,50 @@
 var _ = require('lodash');
 module.exports = function (grunt) {
-  grunt.registerTask('test', function () {
-    if (grunt.option('quick')) {
-      grunt.task.run('quick-test');
-      return;
-    }
+  grunt.registerTask('test:server', [ 'esvm:test', 'simplemocha:all', 'esvm_shutdown:test' ]);
+  grunt.registerTask('test:browser', [ 'run:testServer', 'karma:unit' ]);
+  grunt.registerTask('test:coverage', [ 'run:testCoverageServer', 'karma:coverage' ]);
 
-    var tasks = [
-      'copy:additional_ace_modes',
-      'licenses',
-      'jshint:source',
-      'jscs:source',
-      'maybe_start_kibana',
-      'jade',
-      'less:build',
-      'simplemocha:all',
-      'mocha:unit'
-    ];
-
-    if (process.env.TRAVIS) tasks.unshift('esvm:dev');
-
-    grunt.task.run(tasks);
-  });
-
-  grunt.registerTask('quick-test', function () {
-    grunt.task.run([
-      'maybe_start_kibana',
-      'simplemocha:all',
-      'mocha:unit'
-    ]);
-  });
-
-  grunt.registerTask('test:watch', [
-    'maybe_start_kibana',
-    'watch:test'
+  grunt.registerTask('test:quick', [
+    'test:server',
+    'test:ui',
+    'test:browser'
   ]);
+
+  grunt.registerTask('test:dev', [
+    'run:devTestServer',
+    'karma:dev'
+  ]);
+
+  grunt.registerTask('test:ui', [
+    'esvm:ui',
+    'run:testUIServer',
+    'downloadSelenium',
+    'run:seleniumServer',
+    'intern:dev',
+    'esvm_shutdown:ui',
+    'stop:seleniumServer',
+    'stop:testUIServer'
+  ]);
+
+  grunt.registerTask('test:ui:server', [
+    'esvm:ui',
+    'run:testUIServer',
+    'downloadSelenium',
+    'run:devSeleniumServer:keepalive'
+  ]);
+
+  grunt.registerTask('test:ui:runner', [
+    'intern:dev'
+  ]);
+
+  grunt.registerTask('test', function (subTask) {
+    if (subTask) grunt.fail.fatal(`invalid task "test:${subTask}"`);
+
+    grunt.task.run(_.compact([
+      !grunt.option('quick') && 'eslint:source',
+      'test:quick'
+    ]));
+  });
+
+  grunt.registerTask('quick-test', ['test:quick']); // historical alias
 };

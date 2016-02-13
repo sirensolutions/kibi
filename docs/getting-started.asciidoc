@@ -1,5 +1,5 @@
 [[getting-started]]
-== Getting started
+== Getting Started
 
 [float]
 === The demo distribution
@@ -8,7 +8,7 @@ distribution from http://siren.solutions/kibi ; the page contains also
 introductory screencast which we recommend to watch.
 
 The Kibi demo distribution includes a ready to use Elasticsearch cluster in
-the `elasticsearch` directory; the cluster contains five indexes:
+the `elasticsearch` directory; the cluster contains five indices:
 
 [horizontal]
 `company`:: a collection of companies
@@ -17,24 +17,24 @@ the `elasticsearch` directory; the cluster contains five indexes:
 `investor`:: a collection of investors
 `.kibi`:: Kibi configuration
 
-The indexes have been populated through https://www.elastic.co/products/logstash[Logstash]
+The indices have been populated through https://www.elastic.co/products/logstash[Logstash]
 from the SQLite database in `kibi/crunchbase.db`; the Logstash configuration
-used to populate the indexes is described in the <<logstash>> chapter.
+used to populate the indices is described in the <<logstash>> chapter.
 
 NOTE: The demo dataset has been built from a sample of articles gathered from
 tech blogs in 2013 and from data about companies, investments and investors in
-the CrunchBase 2013 Snapshot, which is copyright &copy; 2013 AOL Inc.
+the CrunchBase 2013 Snapshot, which is copyright (C) 2013 AOL Inc.
 
 The current CrunchBase dataset is available at http://data.crunchbase.com/.
 
 [float]
 === Search
 After starting Elasticsearch and Kibi, as described in the <<setup, Setup chapter>>,
-start your web browser and navigate to http://localhost:5602 .
+start your web browser and navigate to http://localhost:5606 .
 
 By default, Kibi displays the _Articles_ dashboard; <<dashboard, dashboards>>
 can be configured to display multiple <<visualize, visualizations>> on the
-documents stored in a specific index or returned by a saved search on an index.
+documents stored in a specific index or returned by a <<save-search,saved search>> on an index.
 
 Each dashboard is represented by a tab containing the dashboard title and
 the number of documents available to visualizations.
@@ -73,7 +73,7 @@ please read the <<visualize-filters, filters>> chapter.
 
 [float]
 === Relational filters
-The <<relational-filter, Kibi relational filter>> visualization allows to
+The <<relational-filter, Relational Filter>> visualization allows to
 create cross-dashboard filters; for example, by looking at the _Companies_
 button in the dashboard, you can see that there are 96 companies mentioned in
 the TechCrunch articles about _wireless_ or _wifi_.
@@ -87,7 +87,7 @@ image::images/getting-started/demo-companies-dashboard-overview.png["Relational 
 
 The relational filter created by clicking on the button is displayed in the
 filter bar, and can be disabled or deleted just like any other filter; moving
-the mouse over the filter will display the list of joined indexes and their
+the mouse over the filter will display the list of joined indices and their
 filters:
 
 image::images/getting-started/relational-filter-explanation.png["Relational filter in the filter bar",align="center"]

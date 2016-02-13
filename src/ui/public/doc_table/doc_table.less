@@ -1,0 +1,23 @@
+@import (reference) "~ui/styles/variables";
+
+doc-table {
+  overflow: auto;
+  flex: 1 1 100%;
+
+  .discover-table-datafield {
+    white-space: pre-wrap;
+  }
+
+  .loading {
+    opacity: @loading-opacity;
+  }
+
+  .spinner {
+    position: absolute;
+    top: 40%;
+    left: 0;
+    right: 0;
+    z-index: 20;
+    opacity: @loading-opacity;
+  }
+}

@@ -195,7 +195,7 @@ Below is an example of configuration for a query named *Company Info* using
 a variable to get the value of property called *id* of currently selected entity
 In the example, _@doc[_source][id]@_ is replaced with an id taken from selected company.
 In the Selected Entity box we see that the selected company is
-from index: *company*, has a type: *Company* and id begins with *AU9XeLivtCp*
+from index: *company*, has a type: *Company* and has the id *AU9r0i2d0nSzQcsnt*
 
 
 image::images/external-sources/query-table-var.png["SQL query with variables",align="center"]
@@ -220,8 +220,11 @@ when returning at least one record.
 Example:
 
 [source,sql]
-SELECT id FROM Vehicles WHERE id='@doc[_source][id]@' AND vehicle_type='Motorcycle'
-
+----
+SELECT id
+FROM Vehicles
+WHERE id='@doc[_source][id]@' AND vehicle_type='Motorcycle'
+----
 
 On SPARQL datasources, activation queries must be written using the _ASK_ form;
 the corresponding results query will be executed only if the query has a

@@ -19,7 +19,7 @@ of values for a numeric field. Click *Add Range* to add a set of range endpoints
 a range.
 *Date Range*:: A {elastic-ref}search-aggregations-bucket-daterange-aggregation.html[_date range_] aggregation reports values
 that are within a range of dates that you specify. You can specify the ranges for the dates using
-{elastic-ref}mapping-date-format.html#date-math[_date math_] expressions. Click *Add Range* to add a set of range endpoints.
+{elastic-ref}common-options.html#date-math[_date math_] expressions. Click *Add Range* to add a set of range endpoints.
 Click the red *(/)* symbol to remove a range.
 *IPv4 Range*:: The {elastic-ref}search-aggregations-bucket-iprange-aggregation.html[_IPv4 range_] aggregation enables you to
 specify ranges of IPv4 addresses. Click *Add Range* to add a set of range endpoints. Click the red *(/)* symbol to
@@ -28,7 +28,8 @@ remove a range.
 or bottom _n_ elements of a  given field to display, ordered by count or a custom metric.
 *Filters*:: You can specify a set of {elastic-ref}search-aggregations-bucket-filters-aggregation.html[_filters_] for the data.
 You can specify a filter as a query string or in JSON format, just as in the Discover search bar. Click *Add Filter* to
-add another filter.
+add another filter. Click the images:labelbutton.png[] *label* button to open the label field, where you can type in a 
+name to display on the visualization.
 *Significant Terms*:: Displays the results of the experimental
 {elastic-ref}search-aggregations-bucket-significantterms-aggregation.html[_significant terms_] aggregation.
 

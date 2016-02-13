@@ -2,7 +2,7 @@
 == Dashboard
 
 A Kibi _dashboard_ displays a set of saved visualizations in a customizable
-grid layout.
+grid layout. You can save a dashboard to share or reload at a later time.
 
 In Kibi, dashboards are displayed as tabs and can be organized as <<dashboard-groups, dashboard groups>>.
 
@@ -10,12 +10,11 @@ In Kibi, dashboards are displayed as tabs and can be organized as <<dashboard-gr
 [[dashboard-getting-started]]
 === Getting Started
 
-You need at least one saved <<visualize, visualization>> to create a useable
-dashboard.
+You need at least one saved <<visualize, visualization>> to use a dashboard.
 
 [float]
 [[creating-a-new-dashboard]]
-==== Creating a new dashboard
+==== Building a New Dashboard
 
 The first time you click the *Dashboard* tab, Kibi displays the first available
 dashboard or, if no dashboards have been defined, the dashboard creation screen.
@@ -62,6 +61,12 @@ image::images/dashboard/share-dashboard.png["Dashboard sharing options",align="c
 
 Click on the button next to a sharing option to copy the corresponding
 code to your clipboard.
+
+[float]
+[[embedding-dashboards]]
+==== Embedding Dashboards
+
+To embed a dashboard, copy the embed code from the _Share_ display into your external web application.
 
 [float]
 [[adding-visualizations-to-a-dashboard]]

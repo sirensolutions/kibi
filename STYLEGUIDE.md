@@ -2,6 +2,7 @@ This is a collection of style guides for Kibana projects. The include guides for
 
 - [JavaScript](#javascript-style-guide)
 - [Kibana Project](#kibana-style-guide)
+- [Html](#html-style-guide)
 
 # JavaScript Style Guide
 
@@ -242,7 +243,7 @@ Don't do this. Everything should be wrapped in a module that can be depended on 
 
 Prefer the use of function declarations over function expressions. Function expressions are allowed, but should usually be avoided.
 
-Also, keep function definitions above other code instead of relying on function hoising.
+Also, keep function definitions above other code instead of relying on function hoisting.
 
 *Preferred:*
 
@@ -504,6 +505,13 @@ d3.selectAll('g.bar')
 .each(function() ... )
 ```
 
+```js
+$http.get('/info')
+.then(({ data }) => this.transfromInfo(data))
+.then((transformed) => $http.post('/new-info', transformed))
+.then(({ data }) => console.log(data));
+```
+
 *Wrong:*
 
 ```js
@@ -516,6 +524,13 @@ $('.someClass')
 d3.selectAll('g.bar')
 .enter().append('thing').data(anything).exit()
 .each(function() ... )
+```
+
+```js
+$http.get('/info')
+  .then(({ data }) => this.transfromInfo(data))
+  .then((transformed) => $http.post('/new-info', transformed))
+  .then(({ data }) => console.log(data));
 ```
 
 ## Name your closures
@@ -650,7 +665,7 @@ While you can do it with pure JS, a utility will remove a lot of boilerplate, an
 ```js
 // uses a lodash inherits mixin
 // inheritance is defined first - it's easier to read and the function will be hoisted
-_(Square).inherits(Shape);
+_.class(Square).inherits(Shape);
 
 function Square(width, height) {
   Square.Super.call(this);
@@ -758,41 +773,36 @@ When creating a utility function, attach it as a lodash mixin.
 
 Several already exist, and can be found in `src/kibana/utils/_mixins.js`
 
-## Modules
+## Filenames
 
-Kibana uses AMD modules to organize code, and require.js to load those modules.
-
-Even Angular code is loaded this way.
-
-### Module paths
-
-Paths to modules should not be relative (ie. no dot notation). Instead, they should be loaded from one of the defined paths in the require config.
+All filenames should use `snake_case` and *can* start with an underscore if the module is not intended to be used outside of it's containing module.
 
 *Right:*
-
-```js
-require('some/base/path/my_module');
-require('another/path/another_module');
-```
+  - `src/kibana/index_patterns/index_pattern.js`
+  - `src/kibana/index_patterns/_field.js`
 
 *Wrong:*
+  - `src/kibana/IndexPatterns/IndexPattern.js`
+  - `src/kibana/IndexPatterns/Field.js`
 
-```js
-require('../my_module');
-require('./path/another_module');
-```
+## Modules
+
+Kibana uses WebPack, which supports many types of module definitions.
 
 ### CommonJS Syntax
 
-Module dependencies should be loaded via the CommonJS syntax:
+Module dependencies should be written using CommonJS or ES2015 syntax:
 
 *Right:*
 
 ```js
-define(function (require) {
-  var _ = require('lodash');
-  ...
-});
+const _ = require('lodash');
+module.exports = ...;
+```
+
+```js
+import _ from 'lodash';
+export default ...;
 ```
 
 *Wrong:*
@@ -809,10 +819,10 @@ Kibana is written in Angular, and uses several utility methods to make using Ang
 
 ### Defining modules
 
-Angular modules are defined using a custom require module named `module`. It is used as follows:
+Angular modules are defined using a custom require module named `ui/modules`. It is used as follows:
 
 ```js
-var app = require('modules').get('app/namespace');
+var app = require('ui/modules').get('app/namespace');
 ```
 
 `app` above is a reference to an Angular module, and can be used to define controllers, providers and anything else used in Angular.
@@ -849,10 +859,60 @@ app.service('CustomService', function(Promise, otherDeps) {
 Angular routes are defined using a custom require modules named `routes` that remove much of the required boilerplate.
 
 ```js
-require('routes')
+require('ui/routes')
 .when('/my/object/route/:id?', {
   // angular route code goes here
 });
+```
+
+# Html Style Guide
+
+## Multiple attribute values
+
+When a node has multiple attributes that would cause it to exceed the line character limit, each attribute including the first should be on its own line with a single indent. Also, when a node that is styled in this way has child nodes, there should be a blank line between the openening parent tag and the first child tag.
+
+```
+<ul
+  attribute1="value1"
+  attribute2="value2"
+  attribute3="value3">
+
+  <li></li>
+  <li></li>
+  ...
+</ul>
+```
+
+# Api Style Guide
+
+## Paths
+
+API routes must start with the `/api/` path segment, and should be followed by the plugin id if applicable:
+
+*Right:* `/api/marvel/v1/nodes`
+*Wrong:* `/marvel/api/v1/nodes`
+
+## Versions
+
+Kibana won't be supporting multiple API versions, so API's should not define a version.
+
+*Right:* `/api/kibana/index_patterns`
+*Wrong:* `/api/kibana/v1/index_patterns`
+
+## snake_case
+
+Kibana uses `snake_case` for the entire API, just like Elasticsearch. All urls, paths, query string parameters, values, and bodies should be `snake_case` formatted.
+
+*Right:*
+```
+POST /api/kibana/index_patterns
+{
+  "id": "...",
+  "time_field_name": "...",
+  "fields": [
+    ...
+  ]
+}
 ```
 
 # Attribution

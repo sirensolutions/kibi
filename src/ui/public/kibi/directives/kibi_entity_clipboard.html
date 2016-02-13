@@ -1,0 +1,19 @@
+<div ng-if="entityURI" class="filter kibi-entity-clipboard" ng-class="{disabled: disabled}" title="{{entityURI}}" >
+  <!--
+  html borrowed from filterbar component
+  remember that the filter styles are reused
+  -->
+  <div class="filter-description onHoverEnabled">
+    <span>Document:</span>
+    <span>{{label}}</span>
+  </div>
+  <div class="filter-actions onHoverEnabled">
+    <a class="action filter-toggle" ng-click="toggleClipboard()">
+      <i ng-show="disabled" class="fa fa-fw fa-square-o disabled"></i>
+      <i ng-hide="disabled" class="fa fa-fw fa-check-square-o enabled"></i>
+    </a>
+    <a class="action filter-remove" ng-click="removeAllEntities()">
+      <i class="fa fa-fw fa-trash"></i>
+    </a>
+  </div>
+</div>

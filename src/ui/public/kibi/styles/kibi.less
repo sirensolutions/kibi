@@ -1,0 +1,124 @@
+@import (reference) "~ui/styles/control_group.less";
+@import (reference) "~ui/styles/variables.less";
+@import (reference) "~ui/kibi/styles/kibi_variables";
+
+// Buttons ================================================
+.btn-relational {
+  .button-variant(@btn-relational-color; @btn-relational-bg; @btn-relational-border);
+}
+
+// Panel ================================================
+.panel .panel-heading.selectedEntitiesDependent {
+    background-color: @entity-bg;
+    .panel-title {
+      color: #fff;
+    }
+    .btn-group i{
+      color: #fff;
+    }
+
+    &.disabled {
+      opacity: 0.6;
+      background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,.3) 10px, rgba(255,255,255,.3) 20px);
+    }
+}
+
+ul.navbar-right {
+  margin-right: 15px;
+}
+
+nav .spinner {
+  opacity: 0;
+
+  &.visible {
+    opacity: 1;
+  }
+}
+
+// Errors
+// added to make st-select red when the model is invalid
+.ng-dirty, .ng-touched {
+  div.ng-invalid {
+    input, select {
+      border-color: @state-danger-bg !important;
+    }
+  }
+}
+.red-border {
+  border: 2px @state-danger-bg solid !important;
+}
+
+.red-border:hover {
+  border: 2px @state-danger-bg solid !important;
+}
+
+.about-kibi-logo{
+  background-image: url('../images/siren_solutions_logo_matt.png');
+  width: 128px;
+  height: 128px;
+}
+
+div#kibi-primary-navbar {
+  .logo {
+    background-image: url('../images/no_border@2x.png');
+    background-repeat: no-repeat;
+    background-size: auto 41px;
+    background-position: 2px center;
+    background-color: #222222;
+    width: 202px;
+  }
+  .logo-small {
+    background-image: url('../images/no_border_sm@2x.png');
+    background-repeat: no-repeat;
+    background-size: auto 41px;
+    background-position: 2px center;
+    background-color: #222222;
+    width: 42px;
+  }
+}
+
+.kibiTitle {
+  font-weight: bold;
+}
+
+@media (min-width: @screen-sm-min) {
+
+  .navbar-timepicker-time-desc {
+    padding: 0!important;
+  }
+
+  .kibiTimePrecisionContainer{
+    display: inline-block;
+    vertical-align: middle;
+    margin-top: -20px;
+  }
+
+  pretty-duration {
+    display: inline-block;
+
+    padding-top: @navbar-padding-vertical;
+    padding-bottom: @navbar-padding-vertical;
+
+    &.cant-lookup {
+      padding: 5px 0 0 0;
+      height: @navbar-height;
+      font-size: 90%;
+
+      span {
+        display: block;
+
+        &.from {
+          border-bottom: 1px dotted #555;
+        }
+      }
+
+      span.separator {
+        /* using trick to hide it to make tests pass
+           as they all expect the separator to be visible
+        */
+        height: 0;
+        font-size: 0;
+      }
+    }
+  }
+}

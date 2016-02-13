@@ -34,8 +34,8 @@ Choose a visualization type when you start the New Visualization wizard:
 table of documents returned by an Elasticsearch query.
 <<templated-query-viewer,Templated Query Viewer>>:: Display the results of
 queries on external datasources in Jade/Handlebards templates.
-<<relational-filter,Kibi Relational filter>>:: Apply cross-dashboard filters
-based on the relations between different indexes.
+<<relational-filter,Relational Filter>>:: Apply cross-dashboard filters
+based on the relations between different indices.
 <<area-chart,Area chart>>:: Use area charts to visualize the total contribution of several different series.
 <<data-table,Data table>>:: Use data tables to display the raw data of a composed aggregation. You can display the data
 table for several other visualizations by clicking at the bottom of the visualization.
@@ -49,6 +49,7 @@ dashboard.
 <<wordcloud,Kibi Word Cloud>>:: Display a cloud of high frequency terms in a document collection.
 <<timeline,Kibi Timeline>>:: Displays series of data coming from different
 saved searches on a single timeline component.
+<<radar-chart, Radar Chart>>:: Display multivariate data with a two-dimensional chart.
 
 You can also load a saved visualization that you created earlier. The saved visualization selector includes a text
 field to filter by visualization name and a link to the Object Editor, accessible through *Settings > Edit Saved
@@ -63,7 +64,7 @@ selection.
 ==== Step 2: Choose a Data Source
 
 You can choose a new or saved search to serve as the data source for your visualization. Searches are associated with
-an index or a set of indexes. When you select _new search_ on a system with multiple indices configured, select an
+an index or a set of indices. When you select _new search_ on a system with multiple indices configured, select an
 index pattern from the drop-down to bring up the visualization editor.
 
 When you create a visualization from a saved search and save the visualization, the search is tied to the visualization.
@@ -103,7 +104,7 @@ the current visualization.
 ===== Aggregation Builder
 
 Use the aggregation builder on the left of the page to configure the
-{elastic-ref}search-aggregations.html#_metrics_aggregations[metric] and {elastic-ref}search-aggregations.html#_bucket_aggregations[bucket] aggregations used in your
+{elastic-ref}search-aggregations-metrics[metric] and {elastic-ref}search-aggregations-bucket.html[bucket] aggregations used in your
 visualization. Buckets are analogous to SQL `GROUP BY` statements. For more information on aggregations, see the main
 {elastic-ref}search-aggregations.html[Elasticsearch aggregations reference].
 
@@ -185,3 +186,5 @@ include::vertbar.asciidoc[]
 include::wordcloud.asciidoc[]
 
 include::timeline.asciidoc[]
+
+include::radar-chart.asciidoc[]

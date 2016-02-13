@@ -1,7 +1,7 @@
 [[relational-browsing]]
 == Kibi Relational Browsing
 
-Kibi adds a relational dimension to Kibana when browsing indexes,
+Kibi adds a relational dimension to Kibana when browsing indices,
 allowing to _filter_ documents on a dashboard by showing only those that have
 a relation with documents displayed in a different dashboard, possibly stored
 in different indices.
@@ -48,12 +48,12 @@ image::images/relational-panel/explanation.png["Explanation of the relational fi
 [[relational-filter]]
 === Relational filter
 
-The Kibi relational filter visualization allows to "pivot" from a dashboard
-to another by creating a join between multiple indexes based on their
+The Relational Filter visualization allows to "pivot" from a dashboard
+to another by creating a join between multiple indices based on their
 relations. This allows to interactivelly build the sequence of dashboards to join.
 
 Relations are defined between index fields; for example, let's take the
-following indexes:
+following indices:
 
 [horizontal]
 _Articles_:: an index containing articles; each document in the index has
@@ -87,12 +87,10 @@ displayed below:
 
 image::images/relational-filter/relational-filter-companies-target.png["Relational filter in target dashboard",align="center", width="400"]
 
-The Kibi Relational filter visualization requires the Siren 2.0 plugin for
-Elasticsearch, which is currently available as a pre-release in
-`lib\es-filter-join.zip`; the plugin is compatible with Elasticsearch 1.6 and
-1.7.
+The Relational Filter visualization requires the {siren-join-website}[Siren Join plugin {siren-join-version}] for
+Elasticsearch. The plugin is compatible with Elasticsearch {siren-join-version}.
 
-For more information about the Siren 2.0 plugin visit our website at
+For more information about the Siren Join plugin visit our website at
 http://siren.solutions .
 
 [float]
@@ -132,7 +130,7 @@ to the currently displayed dashboard.
 [[relational-filter-usage]]
 ==== Usage
 
-When clicking on a button in the Kibi Relational filter visualization,
+When clicking on a button in the Relational Filter visualization,
 the current state of the source dashboard is added to relational filter
 and applied on the target dashboard.
 To see the explanation of a relational filter, just move the mouse over it.

@@ -1,0 +1,47 @@
+@import (reference) "~ui/kibi/styles/kibi_variables.less";
+
+.templates_editor .preview-section {
+  width: 50%;
+  float: left;
+  padding: 16px;
+}
+
+.templates_editor .preview-section .small-note {
+  color: @st-dark-gray;
+}
+
+.templates_editor .config-section {
+  width: 49%;
+  float: left;
+  padding: 16px 0 0 16px;
+}
+
+.templates_editor .config-section .ace_editor {
+  height: 300px;
+  border: 2px @st-gray-blured solid;
+  border-radius: 4px;
+}
+
+.templates_editor .config-section .ace_focus {
+  border: 2px @st-gray-focused solid;
+}
+
+
+.templates_editor {
+
+  .container h2 {
+    margin-top: 0;
+    font-size: 24px;
+  }
+
+ .html_preview_content {
+    padding:4px;
+    margin-top:4px;
+    border: 1px solid #cccccc;
+    padding: 4px;
+    overflow: auto;
+  }
+  .json_preview_content {
+    margin-top: 4px;
+  }
+}

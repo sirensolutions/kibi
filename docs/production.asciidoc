@@ -1,7 +1,7 @@
 [[production]]
 == Using Kibi in a Production Environment
 
-Please read the https://www.elastic.co/guide/en/kibana/4.1/production.html[Kibana in Production]
+Please read the https://www.elastic.co/guide/en/kibana/4.4/production.html[Kibana in Production]
 section in the Kibana manual for production best practices, especially
 the *Controlling access* section.
 

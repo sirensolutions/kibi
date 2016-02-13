@@ -1,35 +1,129 @@
 module.exports = function (grunt) {
-  var os = require('os');
-  var arch = os.arch();
-  var platform = os.platform();
+  let platform = require('os').platform();
+  let {format} = require('url');
+  let {resolve} = require('path');
+  let root = p => resolve(__dirname, '../../', p);
+  let binScript =  /^win/.test(platform) ? '.\\bin\\kibi.bat' : './bin/kibi'; // kibi: replaced name to kibi
+  let uiConfig = require(root('test/serverConfig'));
 
-  // config:
-  // wait: should task wait until the script exits before finishing
-  // ready: if not waiting, then how do we know the process is ready?
-  // quiet: ignore stdout from the process
-  // failOnError: the process is killed if output to stderr
-
-  var options = {
-    wait: false,
-    ready: /Server started/i,
-    quiet: true,
-    failOnError: true
-  };
-
-  var args = ['-H', '127.0.0.1'];
-
-  var config = {
-    built_kibana: {
+  return {
+    testServer: {
       options: {
         wait: false,
-        ready: /Listening/i,
+        ready: /Server running/,
+        quiet: false,
+        failOnError: false
+      },
+      cmd: binScript,
+      args: [
+        '--server.port=5610',
+        '--env.name=development',
+        '--logging.json=false',
+        '--optimize.bundleFilter=tests',
+        '--plugins.initialize=false'
+      ]
+    },
+
+    testUIServer: {
+      options: {
+        wait: false,
+        ready: /Server running/,
+        quiet: false,
+        failOnError: false
+      },
+      cmd: /^win/.test(platform) ? '.\\bin\\kibi.bat' : './bin/kibi', // kibi: replaced name to kibi
+      args: [
+        '--server.port=' + uiConfig.servers.kibana.port,
+        '--env.name=development',
+        '--elasticsearch.url=' + format(uiConfig.servers.elasticsearch),
+        '--logging.json=false'
+      ]
+    },
+
+    testCoverageServer: {
+      options: {
+        wait: false,
+        ready: /Server running/,
+        quiet: false,
+        failOnError: false
+      },
+      cmd: binScript,
+      args: [
+        '--server.port=5610',
+        '--env.name=development',
+        '--logging.json=false',
+        '--optimize.bundleFilter=tests',
+        '--plugins.initialize=false',
+        '--testsBundle.instrument=true'
+      ]
+    },
+
+    devTestServer: {
+      options: {
+        wait: false,
+        ready: /Server running/,
+        quiet: false,
+        failOnError: false
+      },
+      cmd: binScript,
+      args: [
+        '--dev',
+        '--no-watch',
+        '--server.port=5610',
+        '--optimize.lazyPort=5611',
+        '--optimize.lazyPrebuild=true',
+        '--logging.json=false',
+        '--optimize.bundleFilter=tests',
+        '--plugins.initialize=false'
+      ]
+    },
+
+    seleniumServer: {
+      options: {
+        wait: false,
+        ready: /Selenium Server is up and running/,
         quiet: true,
         failOnError: false
       },
-      cmd: './target/<%= pkg.name + "-" + pkg.version %>-' + platform + '-' + arch + '/bin/<%= pkg.name %>',
-      args: args
+      cmd: 'java',
+      args: [
+        '-jar',
+        'selenium/selenium-server-standalone-2.48.2.jar',
+        '-port',
+        uiConfig.servers.webdriver.port
+      ]
+    },
+
+    devSeleniumServer: {
+      options: {
+        wait: false,
+        ready: /Selenium Server is up and running/,
+        quiet: false,
+        failOnError: false
+      },
+      cmd: 'java',
+      args: [
+        '-jar',
+        'selenium/selenium-server-standalone-2.48.2.jar',
+        '-port',
+        uiConfig.servers.webdriver.port
+      ]
+    },
+
+    optimizeBuild: {
+      options: {
+        wait: false,
+        ready: /Optimization .+ complete/,
+        quiet: true
+      },
+      cmd: './build/kibana/bin/kibi', // kibi: replaced name to kibi
+      args: [
+        '--env.name=production',
+        '--logging.json=false',
+        '--plugins.initialize=false',
+        '--server.autoListen=false'
+      ]
     }
   };
 
-  return config;
 };

@@ -37,7 +37,7 @@ add another filter.
 *Size* parameter defines the number of entries this aggregation returns.
 *Geohash*:: The {elastic-ref}search-aggregations-bucket-geohashgrid-aggregation.html[_geohash_] aggregation displays points
 based on the geohash coordinates.
-*External query term match*:: this aggregation matches terms of a specified field against the value returned by an external query (SQL/REST etc). Multiple queries can be specified thus creating multiple aggregation bins. Queries are configured under Settings/Queries.
+*External query terms filter*:: this aggregation matches terms of a specified field against the value returned by an external query (SQL/REST etc). Multiple queries can be specified thus creating multiple aggregation bins. Queries are configured under Settings/Queries.
 
 
 

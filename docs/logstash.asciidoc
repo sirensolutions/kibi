@@ -7,7 +7,7 @@ for evaluation purposes.
 [float]
 === From a SQL database using Logstash
 
-The indexes in the Kibi demo distribution have been populated by running
+The indices in the Kibi demo distribution have been populated by running
 four https://www.elastic.co/products/logstash[Logstash] configurations over
 the SQLite database in `kibi/crunchbase.db`.
 
@@ -236,7 +236,7 @@ documentation.
 [float]
 ==== Browsing the index in Kibi
 
-Open http://localhost:5602 in your browser, click on the _Settings_ tab then
+Open http://localhost:5606 in your browser, click on the _Settings_ tab then
 on _Indices_ .
 
 Deselect _Index contains time-based events_, then write `company-minimal` in

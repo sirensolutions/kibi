@@ -1,0 +1,50 @@
+<div>
+
+  <span class="pull-right text-warning hintbox-label"
+        ng-show="modelObject.options.analyzed && analyzedWarning"
+        ng-click="showAnalyzedFieldWarning = !showAnalyzedFieldWarning">
+    <i class="fa fa-warning"></i> Analyzed Field
+  </span>
+
+  <span class="pull-right text-warning hintbox-label"
+        ng-show="getVariable"
+        ng-click="showWildcardWarning = !showWildcardWarning">
+    <i class="fa fa-warning"></i> Wildcard Query
+  </span>
+
+  <div style="clear: both;"></div>
+
+  <div class="hintbox" ng-show="showWildcardWarning">
+    <p>
+    Unable to determine variable names from a wildcard query, please specify the variable name below. You can You can review the list of columns in <strong><a href="{{linkToQuery}}">the query</a></strong> or explicitly return the relevant columns in the SELECT clause.
+    </p>
+  </div>
+
+  <div class="hintbox" ng-show="showAnalyzedFieldWarning">
+    <p>
+      <strong>Careful!</strong> The field selected contains analyzed strings. Values such as <i>foo-bar</i> will be broken into <i>foo</i> and <i>bar</i>. See <a href="http://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-core-types.html" target="_blank">Mapping Core Types</a> for more information on setting this field as <i>not_analyzed</i>
+    </p>
+  </div>
+
+  <input ng-show="getVariable" type="text" ng-model="modelObject.value" class="form-control"/>
+
+  <select
+    ng-class="{ 'red-border' : !isValid }"
+    ng-show="!getVariable"
+    ng-model="modelObject"
+    ng-options="item.label group by item.group for item in items track by item.value"
+    class="form-control"
+    ng-disabled="disabled"
+    ng-required="required">
+  </select>
+
+  <div class="form-group hintbox" ng-if="retrieveError">
+    <h4 class="hintbox-heading">
+      <i class="fa fa-danger text-danger"></i> Select error
+    </h4>
+    <p>
+      An error occured while retrieving this select's data.
+    </p>
+    <pre>{{ retrieveError }}</pre>
+  </div>
+</div>

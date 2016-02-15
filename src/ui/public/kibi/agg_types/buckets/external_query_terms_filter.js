@@ -10,6 +10,8 @@ define(function (require) {
     var _shouldEntityURIBeEnabled = Private(require('ui/kibi/components/commons/_should_entity_uri_be_enabled'));
     var notify = createNotifier({ location: 'External Query Terms Filter Aggregation' });
 
+    var everySocondTick = false;
+
     return new BucketAggType({
       name: 'external_query_terms_filter',
       dslName: 'filters',
@@ -74,14 +76,22 @@ define(function (require) {
               }
 
             });
-            _shouldEntityURIBeEnabled(queryIds).then(function (value) {
-              $timeout(function () {
-                $rootScope.$emit('kibi:entityURIEnabled:external_query_terms_filter', value);
+
+            // Note: run every second tick
+            // workaround for https://github.com/sirensolutions/kibi-internal/issues/724
+            if (everySocondTick === false) {
+              everySocondTick = true;
+              _shouldEntityURIBeEnabled(queryIds).then(function (value) {
+                $timeout(function () {
+                  $rootScope.$emit('kibi:entityURIEnabled:external_query_terms_filter', value);
+                  everySocondTick = false;
+                });
+              }).catch(function (err) {
+                notify.warning('Could not determine the entity URI for this visualisation: ' +
+                  JSON.stringify(err, null, ' '));
               });
-            }).catch(function (err) {
-              notify.warning('Could not determine the entity URI for this visualisation: ' +
-                JSON.stringify(err, null, ' '));
-            });
+            }
+
 
             params.filters = json;
           }

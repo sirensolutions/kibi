@@ -1,27 +1,35 @@
 [[releasenotes]]
-== Kibana 4.3 Release Notes
+== Kibi 0.3 and Kibana 4.4 Release Notes
 
-The 4.3 release of Kibana requires Elasticsearch 2.1 or later.
+The 0.3 release of Kibi requires Elasticsearch 2.1.2.
 
-Using event times to create index names is *deprecated* in this release of Kibana. Support for this functionality will be 
-removed entirely in the next major Kibana release. Elasticsearch 2.1 includes sophisticated date parsing APIs that Kibana 
-uses to determine date information, removing the need to specify dates in the index pattern name.
+Using event times to create index names is no longer supported as of this release. Current versions of Elasticsearch include sophisticated date parsing APIs that Kibana uses to determine date information, removing the need to specify dates in the index pattern name.
 
-[float]
-[[enhancements]]
-== Enhancements
+Below are the issues relevant to Kibana.
 
-* {k4issue}5109[Issue 5109]: Adds custom JSON and filter alias naming for filters.
-* {k4issue}1726[Issue 1726]: Adds a color field formatter for value ranges in numeric fields.
-* {k4issue}4342[Issue 4342]: Increased performance for wildcard indices.
-* {k4issue}1600[Issue 1600]: Support for global time zones.
-* {k4pull}5275[Pull Request 5275]: Highlighting values in Discover can now be disabled.
-* {k4issue}5212[Issue 5212]: Adds support for multiple certificate authorities.
-* {k4issue}2716[Issue 2716]: The open/closed position of the spy panel now persists across UI state changes.
+Enhancements
 
-[float]
-[[bugfixes]]
-== Bug Fixes
+http://github.com/elastic/kibana/issues/1362[Issue 1362]: Color palette selector added.
+http://github.com/elastic/kibana/issues/1553[Issue 1553]: Kibana can shorten URLs for shared or embedded items.
+http://github.com/elastic/kibana/issues/5733[Issue 5733]: Time-based index pattern expansion can be set at index pattern creation time.
+http://github.com/elastic/kibana/issues/5775[Issue 5775]: Adds a configuration option to change the maximum payload size sent to the server.
+http://github.com/elastic/kibana/issues/4966[Issue 4966]: Logo is now in SVG format.
+http://github.com/elastic/kibana/issues/3625[Issue 3625]: Downloaded visualizations now use the visualization name as the filename.
+http://github.com/elastic/kibana/issues/5279[Issue 5279]: Large strings are truncated with an ellipsis (...).
+http://github.com/elastic/kibana/issues/5241[Issue 5241]: Truncated visualization names are displayed in full as tooltips.
 
-* {k4issue}5165[Issue 5165]: Resolves a display error in embedded views.
-* {k4issue}5021[Issue 5021]: Improves visualization dimming for dashboards with auto-refresh.
+Bug Fixes
+
+http://github.com/elastic/kibana/issues/5897[Issue 5897]: Embedding links no longer include navigation and search bars.
+http://github.com/elastic/kibana/issues/5896[Issue 5896]: Bookmarked URLs to saved filtered searches from a previous version of Kibana display correctly.
+http://github.com/elastic/kibana/issues/5744[Issue 5744]: Fixes bug that caused incorrect display of "No results found" in some cases.
+http://github.com/elastic/kibana/issues/5824[Issue 5824]: Corrects a fatal error when Kibana starts with node x86 on Windows x64 systems.
+
+Plugin System Changes
+
+http://github.com/elastic/kibana/issues/5226[Issue 5226]: Plugins are explicit when they start to route.
+http://github.com/elastic/kibana/pull/5725[Pull Request 5725]: Plugins can extend Chrome navigation.
+http://github.com/elastic/kibana/issues/4720[Issue 4720]: Adds support for zip compression.
+http://github.com/elastic/kibana/pull/5704[Pull Request 5704]: Removes Github shortcuts from the plugin installer.
+http://github.com/elastic/kibana/issues/5661[Issue 5661]: Fixes the plugin optimization path.
+http://github.com/elastic/kibana/pull/5538[Pull Request 5538]: Apps can use empty export types.

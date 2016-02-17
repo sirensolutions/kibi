@@ -54,7 +54,7 @@
         </li>
       </ul>
 
-      <kibi-dashboard-search class="kibi-fill-2"></kibi-dashboard-search>
+      <kibi-dashboard-search ng-if="chrome.getApp().id === 'kibana'" class="kibi-fill-2"></kibi-dashboard-search>
 
     </div>
     <!-- /Full navbar -->
@@ -74,10 +74,8 @@
     config-close="pickerTemplate.close">
   </config>
 
-  <kibi-nav-bar chrome="chrome" ng-show="chrome.getVisible() || chrome.getKibiNavbarVisible()"></kibi-nav-bar>
-
-  <!-- kibi: directive for the relational filter panel with the dashboards graph -->
-  <kibi-relational-filter-panel></kibi-relational-filter-panel>
+  <kibi-nav-bar chrome="chrome" ng-if="chrome.getApp().id === 'kibana'" ng-show="chrome.getVisible() || chrome.getKibiNavbarVisible()"></kibi-nav-bar>
+  <kibi-relational-filter-panel ng-if="chrome.getApp().id === 'kibana'" ></kibi-relational-filter-panel>
 
   <div class="application" ng-class="'tab-' + chrome.getActiveTabId('-none-') + ' ' + chrome.getApplicationClasses()" ng-view></div>
 </div>

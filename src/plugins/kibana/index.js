@@ -11,7 +11,7 @@ module.exports = function (kibana) {
 
     uiExports: {
       app: {
-        title: 'Kibana',
+        title: 'Kibi',
         description: 'the kibana you know and love',
         //icon: 'plugins/kibana/settings/sections/about/barcode.svg',
         main: 'plugins/kibana/kibana',

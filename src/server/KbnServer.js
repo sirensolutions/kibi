@@ -75,6 +75,7 @@ module.exports = class KbnServer {
     await this.ready();
     await fromNode(cb => server.start(cb));
     await require('./pid')(this, server, config);
+    await require('./gremlin_server')(this, server, config);
 
     server.log(['listening', 'info'], 'Server running at ' + server.info.uri);
     return server;

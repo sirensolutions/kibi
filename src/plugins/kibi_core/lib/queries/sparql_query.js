@@ -31,7 +31,7 @@ SparqlQuery.prototype.checkIfItIsRelevant = function (options) {
   }
   var uri = options.selectedDocuments && options.selectedDocuments.length > 0 ? options.selectedDocuments[0] : '';
 
-  var endpointUrl = this.config.datasource.datasourceClazz.datasource.datasourceParams.endpointUrl;
+  var endpointUrl = this.config.datasource.datasourceClazz.datasource.datasourceParams.endpoint_url;
   var timeout = this.config.datasource.datasourceClazz.datasource.datasourceParams.timeout;
   var maxAge = this.config.datasource.datasourceClazz.datasource.datasourceParams.maxAge;
 
@@ -97,7 +97,7 @@ SparqlQuery.prototype.fetchResults = function (options, onlyIds, idVariableName)
   // currently we use only single selected document
   var uri = options.selectedDocuments && options.selectedDocuments.length > 0 ? options.selectedDocuments[0] : '';
 
-  var endpointUrl = this.config.datasource.datasourceClazz.datasource.datasourceParams.endpointUrl;
+  var endpointUrl = this.config.datasource.datasourceClazz.datasource.datasourceParams.endpoint_url;
   var timeout = this.config.datasource.datasourceClazz.datasource.datasourceParams.timeout;
   var maxAge = this.config.datasource.datasourceClazz.datasource.datasourceParams.maxAge;
 

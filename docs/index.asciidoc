@@ -4,9 +4,9 @@
 
 :siren-join-version: 2.1.2
 :siren-join-website: https://github.com/sirensolutions/siren-join/
-:kibana-version: 4.4.0
-:kibana-announcement: https://www.elastic.co/blog/kibana-4-4-0
-:kibi-version: 0.3.0
+:kibana-version: 4.4.1
+:kibana-announcement: https://www.elastic.co/blog/kibana-4-4-1-and-4-3-2-and-4-1-5
+:kibi-version: 0.3.1
 :elastic-ref: https://www.elastic.co/guide/en/elasticsearch/reference/2.1/
 :ref: http://siren.solutions/kibi/docs/current/
 

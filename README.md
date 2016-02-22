@@ -1,6 +1,6 @@
-# Kibi 0.3.0
+# Kibi 0.3.1
 
-Kibi extends Kibana 4.4.0 with data intelligence features; the core feature of
+Kibi extends Kibana 4.4.1 with data intelligence features; the core feature of
 Kibi is the capability to join and filter data from multiple Elasticsearch
 indexes and from SQL/NOSQL data sources ("external queries").
 

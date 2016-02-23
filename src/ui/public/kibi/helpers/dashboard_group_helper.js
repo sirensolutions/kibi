@@ -91,90 +91,98 @@ define(function (require) {
       var self = this;
       return new Promise(function (fulfill, reject) {
         // get all dashboard groups
-        savedDashboardGroups.find().then(function (resp) {
-          if (!resp.hits) {
+        savedDashboardGroups.find().then(function (respGroups) {
+          if (!respGroups.hits) {
             fulfill([]);
           } else {
-
-            var dashboardGroups1 = [];
-            // first iterate over existing groups
-            _.each(resp.hits, function (group) {
-
-              // selected dashboard
-              var selected;
-              var dashboards = [];
-
-              try {
-                var dashboardsArray = group.dashboards;
-                // check that all dashboards still exists
-                // in case there is one which does not display a warning
-                _.each(dashboardsArray, function (d) {
-                  savedDashboards.get(d.id).catch(function (err) {
-                    reject(new Error(
-                      '"' + group.title + '"' + 'dashboard group contains non existing dashboard "' + d.id + '". ' +
-                      'Edit dashboard group to remove non existing dashboard'
-                    ));
-                  });
-                });
-
-                dashboards = _.map(dashboardsArray, function (d) {
-
-                  var dashboard = {
-                    id: d.id,
-                    title: self.shortenDashboardName(group.title, d.title),
-                    onClick: function () {
-                      self._getOnClickForDashboardInGroup(d.id, group.id);
-                    },
-                    filters: kibiStateHelper.getFiltersForDashboardId(d.id)
-                  };
-                  if (currentDashboardId === d.id) {
-                    selected = dashboard;
-                  }
-                  return dashboard;
-                });
-              } catch (e) {
-                // swallow the error as if for some reason the jsonstring could not be parsed
-                // the dashboards array will stay empty
-                console.log(e);
-              }
-
-
-              // try to get the last selected one for this group
-              if (!selected && dashboards.length > 0) {
-                var lastSelectedId = kibiStateHelper.getSelectedDashboardId(group.id);
-                _.each(dashboards, function (dashboard) {
-                  if (dashboard.id === lastSelectedId) {
-                    selected = dashboard;
-                    return false;
-                  }
-                });
-              }
-
-              // nothing worked select the first one
-              if (!selected && dashboards.length > 0) {
-                selected = dashboards[0];
-              }
-
-              dashboardGroups1.push({
-                title: group.title,
-                priority: group.priority,
-                dashboards: dashboards,
-                selected: selected,
-                _selected: selected,
-                hide: group.hide,
-                iconCss: group.iconCss,
-                iconUrl: group.iconUrl,
-                onClick: function () {
-                  this.selected.onClick();
-                }
+            // here first fetch all dashboards to be able to verify that dashboards mentioned in the group still exists
+            savedDashboards.find().then(function (respDashboards) {
+              var listOfDashboards = _.map(respDashboards.hits, function (hit) {
+                return hit.id;
               });
 
-            }); // end of each
+              var dashboardGroups1 = [];
+              // first iterate over existing groups
+              _.each(respGroups.hits, function (group) {
+
+                // selected dashboard
+                var selected;
+                var dashboards = [];
+
+                try {
+                  var dashboardsArray = group.dashboards;
+                  // check that all dashboards still exists
+                  // in case there is one which does not display a warning
+                  _.each(dashboardsArray, function (d) {
+                    if (listOfDashboards.indexOf(d.id) === -1) {
+                      reject(new Error(
+                        '"' + group.title + '"' + ' dashboard group contains non existing dashboard "' + d.id + '". ' +
+                        'Edit dashboard group to remove non existing dashboard'
+                      ));
+                    }
+                  });
+
+                  dashboards = _.map(dashboardsArray, function (d) {
+
+                    var dashboard = {
+                      id: d.id,
+                      title: self.shortenDashboardName(group.title, d.title),
+                      onClick: function () {
+                        self._getOnClickForDashboardInGroup(d.id, group.id);
+                      },
+                      filters: kibiStateHelper.getFiltersForDashboardId(d.id)
+                    };
+                    if (currentDashboardId === d.id) {
+                      selected = dashboard;
+                    }
+                    return dashboard;
+                  });
+                } catch (e) {
+                  // swallow the error as if for some reason the jsonstring could not be parsed
+                  // the dashboards array will stay empty
+                  console.log(e);
+                }
 
 
-            sortByPriority(dashboardGroups1);
+                // try to get the last selected one for this group
+                if (!selected && dashboards.length > 0) {
+                  var lastSelectedId = kibiStateHelper.getSelectedDashboardId(group.id);
+                  _.each(dashboards, function (dashboard) {
+                    if (dashboard.id === lastSelectedId) {
+                      selected = dashboard;
+                      return false;
+                    }
+                  });
+                }
 
-            fulfill(dashboardGroups1);
+                // nothing worked select the first one
+                if (!selected && dashboards.length > 0) {
+                  selected = dashboards[0];
+                }
+
+                dashboardGroups1.push({
+                  title: group.title,
+                  priority: group.priority,
+                  dashboards: dashboards,
+                  selected: selected,
+                  _selected: selected,
+                  hide: group.hide,
+                  iconCss: group.iconCss,
+                  iconUrl: group.iconUrl,
+                  onClick: function () {
+                    this.selected.onClick();
+                  }
+                });
+
+              }); // end of each
+
+              sortByPriority(dashboardGroups1);
+
+              fulfill(dashboardGroups1);
+
+            }).catch(function (err) {
+              console.log(err);
+            });
           }
         });
       });
@@ -490,15 +498,9 @@ define(function (require) {
      */
     DashboardGroupHelper.prototype.computeGroups = function () {
       var self = this;
-      return new Promise(function (fulfill, reject) {
-
-        var currentDashboardId = urlHelper.getCurrentDashboardId();
-
-        self._computeGroupsFromSavedDashboardGroups(currentDashboardId).then(function (dashboardGroups1) {
-          self._addAdditionalGroupsFromSavedDashboards(currentDashboardId, dashboardGroups1).then(function (dashboardGroups2) {
-            fulfill(dashboardGroups2);
-          });
-        });
+      var currentDashboardId = urlHelper.getCurrentDashboardId();
+      return self._computeGroupsFromSavedDashboardGroups(currentDashboardId).then(function (dashboardGroups1) {
+        return self._addAdditionalGroupsFromSavedDashboards(currentDashboardId, dashboardGroups1);
       });
     };
 

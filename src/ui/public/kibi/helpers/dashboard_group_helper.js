@@ -108,40 +108,33 @@ define(function (require) {
                 // selected dashboard
                 var selected;
                 var dashboards = [];
+                var dashboardsArray = group.dashboards;
+                // check that all dashboards still exists
+                // in case there is one which does not display a warning
+                _.each(dashboardsArray, function (d) {
+                  if (listOfDashboards.indexOf(d.id) === -1) {
+                    reject(new Error(
+                      '"' + group.title + '"' + ' dashboard group contains non existing dashboard "' + d.id + '". ' +
+                      'Edit dashboard group to remove non existing dashboard'
+                    ));
+                  }
+                });
 
-                try {
-                  var dashboardsArray = group.dashboards;
-                  // check that all dashboards still exists
-                  // in case there is one which does not display a warning
-                  _.each(dashboardsArray, function (d) {
-                    if (listOfDashboards.indexOf(d.id) === -1) {
-                      reject(new Error(
-                        '"' + group.title + '"' + ' dashboard group contains non existing dashboard "' + d.id + '". ' +
-                        'Edit dashboard group to remove non existing dashboard'
-                      ));
-                    }
-                  });
+                dashboards = _.map(dashboardsArray, function (d) {
 
-                  dashboards = _.map(dashboardsArray, function (d) {
-
-                    var dashboard = {
-                      id: d.id,
-                      title: self.shortenDashboardName(group.title, d.title),
-                      onClick: function () {
-                        self._getOnClickForDashboardInGroup(d.id, group.id);
-                      },
-                      filters: kibiStateHelper.getFiltersForDashboardId(d.id)
-                    };
-                    if (currentDashboardId === d.id) {
-                      selected = dashboard;
-                    }
-                    return dashboard;
-                  });
-                } catch (e) {
-                  // swallow the error as if for some reason the jsonstring could not be parsed
-                  // the dashboards array will stay empty
-                  console.log(e);
-                }
+                  var dashboard = {
+                    id: d.id,
+                    title: self.shortenDashboardName(group.title, d.title),
+                    onClick: function () {
+                      self._getOnClickForDashboardInGroup(d.id, group.id);
+                    },
+                    filters: kibiStateHelper.getFiltersForDashboardId(d.id)
+                  };
+                  if (currentDashboardId === d.id) {
+                    selected = dashboard;
+                  }
+                  return dashboard;
+                });
 
 
                 // try to get the last selected one for this group
@@ -181,9 +174,11 @@ define(function (require) {
               fulfill(dashboardGroups1);
 
             }).catch(function (err) {
-              console.log(err);
+              reject(err);
             });
           }
+        }).catch(function (err) {
+          reject(err);
         });
       });
     };

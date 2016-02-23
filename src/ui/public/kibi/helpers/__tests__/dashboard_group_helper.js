@@ -151,10 +151,11 @@ describe('Kibi Components', function () {
       beforeEach(init(fakeEmptySavedDashboards, fakeSavedDashboardGroups));
 
       it('computeGroups 2', function (done) {
-        var expected = [];
-        dashboardGroupHelper.computeGroups().then(function (groups) {
-          // here if there are groups but there is no dashboards we should still get the groups
-          expect(groups).to.have.length(2);
+        dashboardGroupHelper.computeGroups().catch(function (err) {
+          // here if there are groups but there is no dashboards we should get na error
+          expect(err.message).to.be(
+            '"Group 1" dashboard group contains non existing dashboard "Companies". Edit dashboard group to remove non existing dashboard'
+          );
           done();
         });
 
@@ -166,7 +167,6 @@ describe('Kibi Components', function () {
       beforeEach(init(fakeSavedDashboards, fakeEmptySavedDashboardGroups));
 
       it('computeGroups 3', function (done) {
-        var expected = [];
         dashboardGroupHelper.computeGroups().then(function (groups) {
           // here if there are no groups but there are 5 dashboards we expect 5 pseudo group created
           expect(groups).to.have.length(5);
@@ -181,7 +181,6 @@ describe('Kibi Components', function () {
       beforeEach(init(fakeEmptySavedDashboards, fakeEmptySavedDashboardGroups));
 
       it('computeGroups 4', function (done) {
-        var expected = [];
         dashboardGroupHelper.computeGroups().then(function (groups) {
           // here if there are no groups but there are 5 dashboards we expect 5 pseudo group created
           expect(groups).to.have.length(0);

@@ -38,18 +38,12 @@ GremlinServerHandler.prototype.start = function () {
     self.gremlinServer.stdout.on('data', function (data) {
       var stringData = data.toString().trim();
       if (stringData.length > 0) {
-        console.log(stringData);
-
         if (stringData.indexOf('Started Application in') > -1) {
           // stop timer
           clearTimeout(to);
           fulfill({ message: 'GremlinServer started successfully.' });
         }
       }
-    });
-
-    self.gremlinServer.stderr.on('data', function (data) {
-      console.log('stderr: ' + data);
     });
 
     self.gremlinServer.on('close', function (code) {

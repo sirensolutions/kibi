@@ -22,12 +22,22 @@ define(function (require) {
      *   indexPatternId:
      * }
      */
-    CountHelper.prototype.getCountQueryForDashboardId = function (dashboardId) {
 
+    CountHelper.prototype.getCountQueryForDashboardId = function (dashboardId) {
       var self = this;
 
       return new Promise(function (fulfill, reject) {
-        savedDashboards.get(dashboardId).then(function (dashboard) {
+
+        // use find to minimize number of requests
+        savedDashboards.find().then(function (dashboardResp) {
+          var dashboard = _.find(dashboardResp.hits, function (hit) {
+            return hit.id === dashboardId;
+          });
+
+          if (dashboard === undefined) {
+            return Promise.reject(new Error('Dashboard: [' + dashboardId + '] does not exists'));
+          }
+
           if (!dashboard.id) {
             return Promise.reject(new Error('Dashboard must have an id'));
           }

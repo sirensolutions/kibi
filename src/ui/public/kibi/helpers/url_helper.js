@@ -180,57 +180,35 @@ define(function (require) {
         return indexToDashboardArrayMap;
       };
 
-
-      if (dashboardsIds instanceof Array && dashboardsIds.length > 0) {
-
-        var promises1 = [];
-        _.each(dashboardsIds, function (dashboardId) {
-          promises1.push(savedDashboards.get(dashboardId));
-        });
-
-        return Promise.all(promises1).then(function (savedDashboards) {
-
-          var promises2 = [];
-          _.each(savedDashboards, function (savedDashboard) {
-            if (savedDashboard.savedSearchId) {
-              promises2.push(savedSearches.get(savedDashboard.savedSearchId).then(function (dashboardSavedSearch) {
+      return savedDashboards.find().then(function (resp) {
+        var promises = [];
+        _.each(resp.hits, function (dashboard) {
+          // here filter dashboards if dashboardsIds provided
+          if (dashboardsIds && dashboardsIds.length > 0 && dashboardsIds.indexOf(dashboard.id) !== -1 && dashboard.savedSearchId) {
+            promises.push(
+              savedSearches.get(dashboard.savedSearchId).then(function (dashboardSavedSearch) {
                 return {
-                  dashboardId: savedDashboard.id,
+                  dashboardId: dashboard.id,
                   indexId: dashboardSavedSearch.searchSource._state.index.id
                 };
-              }));
-            }
-          });
-
-          return Promise.all(promises2).then(function (results) {
-            return _createMap(results);
-          });
+              })
+            );
+          } else if (dashboard.savedSearchId) {
+            promises.push(
+              savedSearches.get(dashboard.savedSearchId).then(function (dashboardSavedSearch) {
+                return {
+                  dashboardId: dashboard.id,
+                  indexId: dashboardSavedSearch.searchSource._state.index.id
+                };
+              })
+            );
+          }
         });
 
-
-      } else {
-
-        return savedDashboards.find().then(function (resp) {
-          var promises = [];
-          _.each(resp.hits, function (dashboard) {
-            if (dashboard.savedSearchId) {
-              promises.push(
-                savedSearches.get(dashboard.savedSearchId).then(function (dashboardSavedSearch) {
-                  return {
-                    dashboardId: dashboard.id,
-                    indexId: dashboardSavedSearch.searchSource._state.index.id
-                  };
-                })
-              );
-            }
-          });
-
-          return Promise.all(promises).then(function (results) {
-            return _createMap(results);
-          });
+        return Promise.all(promises).then(function (results) {
+          return _createMap(results);
         });
-
-      }
+      });
     };
 
 

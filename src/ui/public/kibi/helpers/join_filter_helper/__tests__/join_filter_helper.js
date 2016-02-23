@@ -158,7 +158,7 @@ describe('Kibi Components', function () {
         config.set('kibi:relationalPanel', true);
         config.set('kibi:relations', { relationsDashboards: [] });
         joinFilterHelper.getJoinFilter('does-not-exist').catch(function (err) {
-          expect(err.message).to.be('no dashboard does-not-exist');
+          expect(err.message).to.be('The focus dashboard "does-not-exist" does not exists');
           done();
         });
       });

@@ -28,15 +28,20 @@ define(function (require) {
           return Promise.reject(new Error('Could not get kibi:relations'));
         }
         relations = relations.relationsDashboards;
-
-        var focusedSavedSearch = savedDashboards.get(focusDashboardId).then(function (dashboard) {
+        var focusedSavedSearch = savedDashboards.find().then(function (dashboardResp) {
           // get focused dashboard
+          // use find to mininize the number of requests
+          var dashboard = _.find(dashboardResp.hits, function (hit) {
+            return hit.id === focusDashboardId;
+          });
+          if (dashboard === undefined) {
+            return Promise.reject(new Error('The focus dashboard "' + focusDashboardId + '" does not exists'));
+          }
           if (!dashboard.savedSearchId) {
             return Promise.reject(new Error('The focus dashboard "' + focusDashboardId + '" does not have a saveSearchId'));
-          } else {
-            // get savedSearch to access the index
-            return savedSearches.get(dashboard.savedSearchId);
           }
+          // get savedSearch to access the index
+          return savedSearches.get(dashboard.savedSearchId);
         });
 
         // grab only enabled relations based on kibiState

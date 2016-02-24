@@ -6,8 +6,7 @@ module.exports = function (grunt) {
 
   return {
     options: {
-      version: '2.1.2',
-      plugins: ['solutions.siren/siren-join/2.1.2'],
+      branch: '2.2',
       fresh: !grunt.option('esvm-no-fresh'),
       config: {
         network: {

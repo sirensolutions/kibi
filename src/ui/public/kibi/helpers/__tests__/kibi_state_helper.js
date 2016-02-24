@@ -347,7 +347,7 @@ describe('Kibi Components', function () {
       kibiStateHelper.enableRelation({ dashboards: [ 'dA', 'dB' ], relation: 'A/a/B/b' });
 
       expect(globalState.k.j.length).to.equal(1);
-      expect(globalState.k.j[0]).to.equal('dAdBab');
+      expect(globalState.k.j[0]).to.equal('dA/dB/a/b');
     });
 
     it('disableRelation', function () {

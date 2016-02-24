@@ -927,15 +927,12 @@ describe('Kibi Components', function () {
         };
 
         config.set('kibi:relationalPanel', true);
-        config.set('kibi:relations', {
-          relationsDashboards: [
-            {
-              dashboards: [ 'Articles2', 'Companies' ],
-              relation: 'article/companyid/company/id'
-            }
-          ]
-        });
-        kibiStateHelper.enableRelation('article/companyid/company/id');
+        var relDash = {
+          dashboards: [ 'Articles2', 'Companies' ],
+          relation: 'article/companyid/company/id'
+        };
+        config.set('kibi:relations', { relationsDashboards: [ relDash ] });
+        kibiStateHelper.enableRelation(relDash);
         // now add a filter on Articles2
         kibiStateHelper.saveFiltersForDashboardId('Articles2', [{term : { user : 'FOO_FILTER'}}]);
 
@@ -1001,15 +998,12 @@ describe('Kibi Components', function () {
         };
 
         config.set('kibi:relationalPanel', true);
-        config.set('kibi:relations', {
-          relationsDashboards: [
-            {
-              dashboards: [ 'Articles2', 'Companies' ],
-              relation: 'article/companyid/company/id'
-            }
-          ]
-        });
-        kibiStateHelper.enableRelation('article/companyid/company/id');
+        var relDash = {
+          dashboards: [ 'Articles2', 'Companies' ],
+          relation: 'article/companyid/company/id'
+        };
+        config.set('kibi:relations', { relationsDashboards: [ relDash ] });
+        kibiStateHelper.enableRelation(relDash);
         // now add a filter on Articles2
         kibiStateHelper.saveQueryForDashboardId('Articles2', {query: {query_string: {query: 'FOO_QUERY'}}});
 

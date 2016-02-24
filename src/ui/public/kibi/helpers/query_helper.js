@@ -118,135 +118,130 @@ define(function (require) {
      * }
      */
     QueryHelper.prototype.constructJoinFilter = function (focus, relations, filtersPerIndex, queriesPerIndex, indexToDashboardsMap) {
-      return new Promise(function (fulfill, reject) {
-        // compute part of the label
-        var labels = _getLabelsInConnectedComponent(focus, relations);
-        labels.sort();
+      // compute part of the label
+      var labels = _getLabelsInConnectedComponent(focus, relations);
+      labels.sort();
 
-        var labelValue;
+      var labelValue;
 
-        if (!indexToDashboardsMap) {
-          labelValue = labels.join(' <-> ');
-        } else {
-          labelValue = _(labels).map(function (index) {
-            return indexToDashboardsMap[index];
-          }).flatten().value().join(' <-> ');
+      if (!indexToDashboardsMap) {
+        labelValue = labels.join(' <-> ');
+      } else {
+        labelValue = _(labels).map(function (index) {
+          return indexToDashboardsMap[index];
+        }).flatten().value().join(' <-> ');
+      }
+
+      var joinFilter = {
+        meta: {
+          alias: labelValue
+        },
+        join_set: {
+          focus: focus,
+          relations: relations,
+          queries: {}
         }
+      };
 
-        var joinFilter = {
-          meta: {
-            alias: labelValue
-          },
-          join_set: {
-            focus: focus,
-            relations: relations,
-            queries: {}
+      // here iterate over queries and add to the filters only this one which are not for focused index
+      if (queriesPerIndex) {
+        _.each(queriesPerIndex, function (queries, index) {
+          if (index !== focus && queries instanceof Array && queries.length > 0) {
+            if (!joinFilter.join_set.queries[index]) {
+              joinFilter.join_set.queries[index] = [];
+            }
+            _.each(queries, function (fQuery) {
+              // filter out only query_string queries that are only a wildcard
+              if (fQuery && (!fQuery.query_string || fQuery.query_string.query !== '*')) {
+                if (!joinFilter.join_set.queries[index]) {
+                  joinFilter.join_set.queries[index] = [];
+                }
+                joinFilter.join_set.queries[index].push({ query: fQuery });
+              }
+            });
           }
-        };
+        });
+      }
 
-        // here iterate over queries and add to the filters only this one which are not for focused index
-        if (queriesPerIndex) {
-          _.each(queriesPerIndex, function (queries, index) {
-            if (index !== focus && queries instanceof Array && queries.length > 0) {
-              if (!joinFilter.join_set.queries[index]) {
-                joinFilter.join_set.queries[index] = [];
-              }
-              _.each(queries, function (fQuery) {
-                // filter out only query_string queries that are only a wildcard
-                if (fQuery && (!fQuery.query_string || fQuery.query_string.query !== '*')) {
-                  if (!joinFilter.join_set.queries[index]) {
-                    joinFilter.join_set.queries[index] = [];
-                  }
-                  joinFilter.join_set.queries[index].push({ query: fQuery });
-                }
-              });
+      if (filtersPerIndex) {
+        _.each(filtersPerIndex, function (filters, index) {
+          if (index !== focus && filters instanceof Array && filters.length > 0) {
+            if (!joinFilter.join_set.queries[index]) {
+              joinFilter.join_set.queries[index] = [];
             }
-          });
-        }
-
-        if (filtersPerIndex) {
-          _.each(filtersPerIndex, function (filters, index) {
-            if (index !== focus && filters instanceof Array && filters.length > 0) {
-              if (!joinFilter.join_set.queries[index]) {
-                joinFilter.join_set.queries[index] = [];
+            _.each(filters, function (fFilter) {
+              // clone it first so when we remove meta the original object is not modified
+              var filter = _.cloneDeep(fFilter);
+              if (filter.meta && filter.meta.negate === true) {
+                delete filter.meta;
+                delete filter.$state;
+                filter = {
+                  not: filter
+                };
+              } else if (filter.meta) {
+                delete filter.meta;
+                delete filter.$state;
               }
-              _.each(filters, function (fFilter) {
-                // clone it first so when we remove meta the original object is not modified
-                var filter = _.cloneDeep(fFilter);
-                if (filter.meta && filter.meta.negate === true) {
-                  delete filter.meta;
-                  delete filter.$state;
-                  filter = {
-                    not: filter
+
+              joinFilter.join_set.queries[index].push(filter);
+            });
+          }
+        });
+      }
+
+      // update the timeFilter
+      // indexToDashboardsMap - contains an array now
+      // so we have to add all time filters
+      var promises1 = [];
+      _.each(labels, function (indexId) {
+        if (indexId !== focus) {
+          promises1.push(indexPatterns.get(indexId));
+        }
+      });
+
+      return Promise.all(promises1).then(function (results1) {
+        var promises2 = [];
+        _.each(results1, function (indexPattern) {
+
+          var indexId = indexPattern.id;
+          var timeFilter = timefilter.get(indexPattern);
+
+          if (timeFilter) {
+            if (indexToDashboardsMap) {
+              _.each(indexToDashboardsMap[indexId], function (dashboardId) {
+                promises2.push(kibiTimeHelper.updateTimeFilterForDashboard(dashboardId, timeFilter)
+                .then(function (updatedTimeFilter) {
+                  return {
+                    indexId: indexId,
+                    timeFilter: updatedTimeFilter
                   };
-                } else if (filter.meta) {
-                  delete filter.meta;
-                  delete filter.$state;
-                }
-
-                joinFilter.join_set.queries[index].push(filter);
+                }));
               });
+            } else {
+              promises2.push(Promise.resolve({
+                indexId: indexId,
+                timeFilter: timeFilter
+              }));
             }
-          });
-        }
-
-        // update the timeFilter
-        // indexToDashboardsMap - contains an array now
-        // so we have to add all time filters
-        var promises1 = [];
-        _.each(labels, function (indexId) {
-          if (indexId !== focus) {
-            promises1.push(indexPatterns.get(indexId));
           }
         });
 
-        Promise.all(promises1).then(function (results1) {
-          var promises2 = [];
-          _.each(results1, function (indexPattern) {
+        return Promise.all(promises2).then(function (results2) {
 
-            var indexId = indexPattern.id;
-            var timeFilter = timefilter.get(indexPattern);
-
-            if (timeFilter) {
-              if (indexToDashboardsMap) {
-                _.each(indexToDashboardsMap[indexId], function (dashboardId) {
-                  promises2.push(
-                    kibiTimeHelper.updateTimeFilterForDashboard(dashboardId, timeFilter).then(function (updatedTimeFilter) {
-                      return {
-                        indexId: indexId,
-                        timeFilter: updatedTimeFilter
-                      };
-                    })
-                  );
-                });
-              } else {
-                promises2.push(Promise.resolve({
-                  indexId: indexId,
-                  timeFilter: timeFilter
-                }));
-              }
+          // here all correctly updated time filters
+          _.each(results2, function (res) {
+            var indexId = res.indexId;
+            var timeFilter = res.timeFilter;
+            if (!joinFilter.join_set.queries[indexId]) {
+              joinFilter.join_set.queries[indexId] = [];
             }
+            joinFilter.join_set.queries[indexId].push(timeFilter);
+            // here remove any duplicates
+            joinFilter.join_set.queries[indexId] = uniqFilters(joinFilter.join_set.queries[indexId]);
           });
 
-          Promise.all(promises2).then(function (results2) {
-
-            // here all correctly updated time filters
-            _.each(results2, function (res) {
-              var indexId = res.indexId;
-              var timeFilter = res.timeFilter;
-              if (!joinFilter.join_set.queries[indexId]) {
-                joinFilter.join_set.queries[indexId] = [];
-              }
-              joinFilter.join_set.queries[indexId].push(timeFilter);
-              // here remove any duplicates
-              joinFilter.join_set.queries[indexId] = uniqFilters(joinFilter.join_set.queries[indexId]);
-            });
-
-            fulfill(joinFilter);
-          })
-          .catch(reject);
-        }).catch(reject);
-
+          return joinFilter;
+        });
       });
     };
 

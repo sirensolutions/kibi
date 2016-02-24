@@ -216,13 +216,12 @@ describe('Kibi Components', function () {
 
       it('1 should build the join filter', function (done) {
         config.set('kibi:relationalPanel', true);
-        config.set('kibi:relations', {
-          relationsDashboards: [{
-            dashboards: [ 'dashboard-a', 'dashboard-b' ],
-            relation: 'index-a/id/index-b/id'
-          }],
-        });
-        kibiStateHelper.enableRelation('index-a/id/index-b/id');
+        var relDash = {
+          dashboards: [ 'dashboard-a', 'dashboard-b' ],
+          relation: 'index-a/id/index-b/id'
+        };
+        config.set('kibi:relations', { relationsDashboards: [ relDash ] });
+        kibiStateHelper.enableRelation(relDash);
 
         joinFilterHelper.getJoinFilter('dashboard-a').then(function (joinFilter) {
           expect(joinFilter.join_set).to.be.ok();
@@ -240,13 +239,12 @@ describe('Kibi Components', function () {
         // filters from the Potatoes dashboard are not taken since its index is not connected to the focus
         kibiStateHelper.saveFiltersForDashboardId('dashboard-b', [ { exists: { field: 'aaa' } } ]);
         config.set('kibi:relationalPanel', true);
-        config.set('kibi:relations', {
-          relationsDashboards: [{
-            dashboards: [ 'dashboard-a', 'dashboard-b' ],
-            relation: 'index-a/id/index-b/id'
-          }]
-        });
-        kibiStateHelper.enableRelation('index-a/id/index-b/id');
+        const relDash = {
+          dashboards: [ 'dashboard-a', 'dashboard-b' ],
+          relation: 'index-a/id/index-b/id'
+        };
+        config.set('kibi:relations', { relationsDashboards: [ relDash ] });
+        kibiStateHelper.enableRelation(relDash);
 
         joinFilterHelper.getJoinFilter('dashboard-a').then(function (joinFilter) {
           expect(joinFilter.join_set).to.be.ok();
@@ -268,13 +266,12 @@ describe('Kibi Components', function () {
         // queries from the Potatoes dashboard are not taken since its index is not connected to the focus
         kibiStateHelper.saveQueryForDashboardId('dashboard-b', { query_string: { query: 'ccc' } });
         config.set('kibi:relationalPanel', true);
-        config.set('kibi:relations', {
-          relationsDashboards: [{
-            dashboards: [ 'dashboard-a', 'dashboard-b' ],
-            relation: 'index-a/id/index-b/id'
-          }]
-        });
-        kibiStateHelper.enableRelation('index-a/id/index-b/id');
+        const relDash = {
+          dashboards: [ 'dashboard-a', 'dashboard-b' ],
+          relation: 'index-a/id/index-b/id'
+        };
+        config.set('kibi:relations', { relationsDashboards: [ relDash ] });
+        kibiStateHelper.enableRelation(relDash);
 
         joinFilterHelper.getJoinFilter('dashboard-a').then(function (joinFilter) {
           expect(joinFilter.join_set).to.be.ok();
@@ -330,13 +327,12 @@ describe('Kibi Components', function () {
         kibiStateHelper.saveFiltersForDashboardId('dashboard-a', [ { range: { gte: 20, lte: 40 } } ]);
         kibiStateHelper.saveFiltersForDashboardId('dashboard-b', [ { term: { aaa: 'bbb' } } ]);
         config.set('kibi:relationalPanel', true);
-        config.set('kibi:relations', {
-          relationsDashboards: [{
-            dashboards: [ 'dashboard-a', 'dashboard-b' ],
-            relation: 'a/id/b/id'
-          }]
-        });
-        kibiStateHelper.enableRelation('a/id/b/id');
+        const relDash = {
+          dashboards: [ 'dashboard-a', 'dashboard-b' ],
+          relation: 'index-a/id/index-b/id'
+        };
+        config.set('kibi:relations', { relationsDashboards: [ relDash ] });
+        kibiStateHelper.enableRelation(relDash);
         sinon.stub(urlHelper, 'getCurrentDashboardId').returns('dashboard-b');
 
         joinFilterHelper.updateJoinSetFilter().then(function () {
@@ -351,25 +347,22 @@ describe('Kibi Components', function () {
         kibiStateHelper.saveFiltersForDashboardId('dashboard-c', [ { term: {} }, { join_set: {} } ]);
         kibiStateHelper.saveFiltersForDashboardId('dashboard-d', [ { term: {} }, { join_set: {} } ]);
         config.set('kibi:relationalPanel', true);
-        config.set('kibi:relations', {
-          relationsDashboards: [
-            {
-              dashboards: [ 'dashboard-a', 'dashboard-b' ],
-              relation: 'a/id/b/id'
-            },
-            {
-              dashboards: [ 'dashboard-b', 'dashboard-c' ],
-              relation: 'b/id/c/id'
-            },
-            {
-              dashboards: [ 'dashboard-c', 'dashboard-d' ],
-              relation: 'c/id/d/id'
-            }
-          ]
-        });
-        kibiStateHelper.enableRelation('a/id/b/id');
-        kibiStateHelper.disableRelation('b/id/c/id');
-        kibiStateHelper.disableRelation('c/id/d/id');
+        const relDash1 = {
+          dashboards: [ 'dashboard-a', 'dashboard-b' ],
+          relation: 'a/id/b/id'
+        };
+        const relDash2 = {
+          dashboards: [ 'dashboard-b', 'dashboard-c' ],
+          relation: 'b/id/c/id'
+        };
+        const relDash3 = {
+          dashboards: [ 'dashboard-c', 'dashboard-d' ],
+          relation: 'c/id/d/id'
+        };
+        config.set('kibi:relations', { relationsDashboards: [ relDash1, relDash2, relDash3 ] });
+        kibiStateHelper.enableRelation(relDash1);
+        kibiStateHelper.disableRelation(relDash2);
+        kibiStateHelper.disableRelation(relDash3);
 
         sinon.stub(urlHelper, 'getCurrentDashboardId').returns('dashboard-a');
         joinFilterHelper.updateJoinSetFilter([ 'dashboard-c', 'dashboard-d' ]).then(function () {
@@ -400,25 +393,22 @@ describe('Kibi Components', function () {
         kibiStateHelper.saveFiltersForDashboardId('dashboard-c', [ { term: {} } ]);
         kibiStateHelper.saveFiltersForDashboardId('dashboard-d', [ { term: {} } ]);
         config.set('kibi:relationalPanel', true);
-        config.set('kibi:relations', {
-          relationsDashboards: [
-            {
-              dashboards: [ 'dashboard-a', 'dashboard-b' ],
-              relation: 'a/id/b/id'
-            },
-            {
-              dashboards: [ 'dashboard-b', 'dashboard-c' ],
-              relation: 'b/id/c/id'
-            },
-            {
-              dashboards: [ 'dashboard-c', 'dashboard-d' ],
-              relation: 'c/id/d/id'
-            }
-          ]
-        });
-        kibiStateHelper.enableRelation('a/id/b/id');
-        kibiStateHelper.disableRelation('b/id/c/id');
-        kibiStateHelper.enableRelation('c/id/d/id');
+        const relDash1 = {
+          dashboards: [ 'dashboard-a', 'dashboard-b' ],
+          relation: 'a/id/b/id'
+        };
+        const relDash2 = {
+          dashboards: [ 'dashboard-b', 'dashboard-c' ],
+          relation: 'b/id/c/id'
+        };
+        const relDash3 = {
+          dashboards: [ 'dashboard-c', 'dashboard-d' ],
+          relation: 'c/id/d/id'
+        };
+        config.set('kibi:relations', { relationsDashboards: [ relDash1, relDash2, relDash3 ] });
+        kibiStateHelper.enableRelation(relDash1);
+        kibiStateHelper.disableRelation(relDash2);
+        kibiStateHelper.enableRelation(relDash3);
 
         sinon.stub(urlHelper, 'getCurrentDashboardId').returns('dashboard-a');
         joinFilterHelper.updateJoinSetFilter([ 'dashboard-c', 'dashboard-d' ]).then(function () {

@@ -777,7 +777,8 @@ describe('Kibi Components', function () {
 
       it('getIndexToDashboardMap', function (done) {
         var expected = {
-          'time-testing-4': ['time-testing-4']
+          'time-testing-4': ['time-testing-4'],
+          'search-ste': ['search-ste']
         };
 
         urlHelper.getIndexToDashboardMap().then(function (results) {
@@ -787,7 +788,6 @@ describe('Kibi Components', function () {
 
         $rootScope.$apply();
       });
-
 
       it('getIndexToDashboardMap pass ids of dashboards', function (done) {
         var expected = {
@@ -803,10 +803,23 @@ describe('Kibi Components', function () {
       });
 
 
+      it('dashboard is not selected but has a savedsearch', function (done) {
+        var expected = {
+          'search-ste': ['search-ste']
+        };
+
+        urlHelper.getIndexToDashboardMap(['search-ste']).then(function (results) {
+          expect(results).to.eql(expected);
+          done();
+        });
+
+        $rootScope.$apply();
+      });
 
       it('getRegularFiltersPerIndex', function (done) {
         var expected = {
-          'time-testing-4': []
+          'time-testing-4': [],
+          'search-ste': []
         };
 
         urlHelper.getRegularFiltersPerIndex().then(function (results) {
@@ -839,7 +852,8 @@ describe('Kibi Components', function () {
             {
               range: {}
             }
-          ]
+          ],
+          'search-ste': []
         };
 
         urlHelper.getRegularFiltersPerIndex().then(function (results) {
@@ -857,6 +871,7 @@ describe('Kibi Components', function () {
           }
         ]);
         var expected = {
+          'search-ste': [],
           'time-testing-4': []
         };
 

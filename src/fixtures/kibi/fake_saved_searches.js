@@ -1,6 +1,23 @@
 define(function (require) {
 
   var fakeSavedSearches = {
+    'search-ste': {
+      kibanaSavedObjectMeta: {
+        searchSourceJSON: JSON.stringify(
+          {
+            'filter': [],
+            'query': {}
+          }
+        )
+      },
+      searchSource: {
+        _state: {
+          index: {
+            id: 'search-ste'
+          }
+        }
+      }
+    },
     'time-testing-4': {
       kibanaSavedObjectMeta: {
         searchSourceJSON: JSON.stringify(

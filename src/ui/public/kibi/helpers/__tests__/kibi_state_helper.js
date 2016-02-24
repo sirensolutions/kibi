@@ -352,7 +352,7 @@ describe('Kibi Components', function () {
 
     it('disableRelation', function () {
       globalState.k = {
-        j: ['a', 'ABab', 'c']
+        j: ['a', 'A/B/a/b', 'c']
       };
       globalState.save();
 
@@ -365,7 +365,7 @@ describe('Kibi Components', function () {
 
     it('isRelationEnabled', function () {
       globalState.k = {
-        j: ['d1d2ab']
+        j: ['d1/d2/a/b']
       };
       globalState.save();
 

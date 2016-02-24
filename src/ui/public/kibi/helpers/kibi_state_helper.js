@@ -298,9 +298,8 @@ define(function (require) {
     };
 
     function makeRelationId(relation) {
-      let id = relation.dashboards.join('');
       const parts = relation.relation.split('/');
-      return id + parts[1] + parts[3];
+      return `${relation.dashboards[0]}/${relation.dashboards[1]}/${parts[1]}/${parts[3]}`;
     }
 
     KibiStateHelper.prototype.isRelationEnabled = function (relation) {

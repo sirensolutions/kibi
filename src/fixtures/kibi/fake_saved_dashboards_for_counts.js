@@ -8,6 +8,10 @@ define(function (require) {
         id: 'Articles'
       },
       {
+        id: 'search-ste',
+        savedSearchId: 'search-ste'
+      },
+      {
         id: 'time-testing-4',
         timeRestore: true,
         timeFrom: '2005-09-01T12:00:00.000Z',

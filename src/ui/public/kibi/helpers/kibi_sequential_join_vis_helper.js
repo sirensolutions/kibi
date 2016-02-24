@@ -227,42 +227,49 @@ define(function (require) {
 
 
     RelationVisHelper.prototype.buildCountQuery = function (targetDashboardId, joinSeqFilter) {
-      return savedDashboards.get(targetDashboardId).then(function (targetSavedDashboard) {
-        if (targetSavedDashboard.savedSearchId) {
-          return savedSearches.get(targetSavedDashboard.savedSearchId).then(function (targetSavedSearch) {
-
-            // in case relational panel is enabled at the same time
-            // as buttons take care about extra filters and queries from
-            // dashboards based on the same index
-            var targetDashboardIndex = targetSavedSearch.searchSource._state.index;
-            var promises = [
-              urlHelper.getQueriesFromDashboardsWithSameIndex(targetDashboardId, targetDashboardIndex),
-              urlHelper.getFiltersFromDashboardsWithSameIndex(targetDashboardId, targetDashboardIndex)
-            ];
-            return Promise.all(promises).then(function (results) {
-              var queriesFromDashboardsWirhSameIndex = results[0];
-              var filtersFromDashboardsWirhSameIndex = results[1] || [];
-              if (joinSeqFilter) {
-                filtersFromDashboardsWirhSameIndex = filtersFromDashboardsWirhSameIndex.concat(joinSeqFilter);
-              }
-              return countHelper.constructCountQuery(
-                  targetDashboardId,
-                  targetSavedSearch,
-                  null,  // do not put joinSeqFilter here as this parameter is reserved to join_set only !!!
-                  queriesFromDashboardsWirhSameIndex,
-                  filtersFromDashboardsWirhSameIndex
-                  )
-                .then(function (query) {
-                  return {
-                    query: query,
-                    index: targetDashboardIndex
-                  };
-                });
-            });
-          });
-        } else {
+      return savedDashboards.find().then(function (targetSavedDashboardResp) {
+        // use find to minimize number of requests
+        var targetSavedDashboard = _.find(targetSavedDashboardResp.hits, function (hit) {
+          return hit.id === targetDashboardId;
+        });
+        if (targetSavedDashboard === undefined) {
+          return Promise.reject(new Error('Target dashboard [' + targetDashboardId + '] does not exists'));
+        }
+        if (!targetSavedDashboard.savedSearchId) {
           return Promise.reject(new Error(`Target dashboard [${targetDashboardId}] does not have saved search`));
         }
+
+        return savedSearches.get(targetSavedDashboard.savedSearchId).then(function (targetSavedSearch) {
+
+          // in case relational panel is enabled at the same time
+          // as buttons take care about extra filters and queries from
+          // dashboards based on the same index
+          var targetDashboardIndex = targetSavedSearch.searchSource._state.index;
+          var promises = [
+            urlHelper.getQueriesFromDashboardsWithSameIndex(targetDashboardId, targetDashboardIndex),
+            urlHelper.getFiltersFromDashboardsWithSameIndex(targetDashboardId, targetDashboardIndex)
+          ];
+          return Promise.all(promises).then(function (results) {
+            var queriesFromDashboardsWirhSameIndex = results[0];
+            var filtersFromDashboardsWirhSameIndex = results[1] || [];
+            if (joinSeqFilter) {
+              filtersFromDashboardsWirhSameIndex = filtersFromDashboardsWirhSameIndex.concat(joinSeqFilter);
+            }
+            return countHelper.constructCountQuery(
+                targetDashboardId,
+                targetSavedSearch,
+                null,  // do not put joinSeqFilter here as this parameter is reserved to join_set only !!!
+                queriesFromDashboardsWirhSameIndex,
+                filtersFromDashboardsWirhSameIndex
+                )
+              .then(function (query) {
+                return {
+                  query: query,
+                  index: targetDashboardIndex
+                };
+              });
+          });
+        });
       });
     };
 

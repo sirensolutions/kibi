@@ -41,76 +41,82 @@ define(function (require) {
         if ($scope.configMode) {
           return Promise.resolve('configMode');
         }
+        var currentDashboardId = urlHelper.getCurrentDashboardId();
 
         var countQueries = _.map($scope.buttons, function (button) {
-          return savedDashboards.get(urlHelper.getCurrentDashboardId())
-          .then(function (savedSourceDashboard) {
+          // use find to minimize number of requests
+          return savedDashboards.find().then(function (dashboardsResp) {
+            var savedSourceDashboard = _.find(dashboardsResp.hits, function (hit) {
+              return hit.id === currentDashboardId;
+            });
+            if (savedSourceDashboard === undefined) {
+              return Promise.reject(new Error('Dashboard [' + currentDashboardId + '] does not exists'));
+            }
             if (!savedSourceDashboard.savedSearchId) {
               return Promise.reject(new Error('Dashboard [' + savedSourceDashboard.id + '] should have savedSearchId'));
-            } else {
-              return savedSearches.get(savedSourceDashboard.savedSearchId)
-              .then(function (sourceDashboardSavedSearch) {
-                // check that there are any join_seq filters already on this dashboard
-                //    if there is 0:
-                //      create new join_seq filter with 1 relation from current dashboard to target dashboard
-                //    if there is only 1:
-                //      take the join_sequence filter and add to the sequence
-                //      - new relation from current dashboard to target dashboard
-                //    if there is more then 1:
-                //      create join_sequence filter with:
-                //      - group from all existing join_seq filters and add this group at the top
-                //      - new relation from current dashboard to target dashboard
-
-                var existingJoinFilters = _.cloneDeep(urlHelper.getFiltersOfType('join_sequence'));
-                if (existingJoinFilters.length === 0) {
-
-                  return relVisHelper.buildNewJoinSeqFilter(button, sourceDashboardSavedSearch)
-                  .then(function (joinSeqFilter) {
-                    button.joinSeqFilter = joinSeqFilter;
-                    return relVisHelper.buildCountQuery(button.redirectToDashboard, joinSeqFilter)
-                    .then(function (query) {
-                      return Promise.resolve({
-                        query: query.query,
-                        button: button
-                      });
-                    });
-                  });
-
-                } else if (existingJoinFilters.length === 1) {
-
-                  return relVisHelper.addRelationToJoinSeqFilter(button, sourceDashboardSavedSearch, existingJoinFilters[0])
-                  .then(function (joinSeqFilter) {
-                    button.joinSeqFilter = joinSeqFilter;
-                    return relVisHelper.buildCountQuery(button.redirectToDashboard, joinSeqFilter)
-                    .then(function (query) {
-                      return Promise.resolve({
-                        query: query.query,
-                        button: button
-                      });
-                    });
-                  });
-
-                } else if (existingJoinFilters.length > 1) {
-
-                  // build join sequence + add a group of sequances to the top of the array
-                  return relVisHelper.buildNewJoinSeqFilter(button, sourceDashboardSavedSearch).then(function (joinSeqFilter) {
-
-                    // here create a group from existing ones and add it on the top
-
-                    var group = relVisHelper.composeGroupFromExistingJoinFilters(existingJoinFilters);
-                    joinSeqFilter.join_sequence.unshift(group);
-
-                    button.joinSeqFilter = joinSeqFilter;
-                    return relVisHelper.buildCountQuery(button.redirectToDashboard, joinSeqFilter).then(function (query) {
-                      return Promise.resolve({
-                        query: query.query,
-                        button: button
-                      });
-                    });
-                  });
-                }
-              });
             }
+
+            return savedSearches.get(savedSourceDashboard.savedSearchId).then(function (sourceDashboardSavedSearch) {
+              // check that there are any join_seq filters already on this dashboard
+              //    if there is 0:
+              //      create new join_seq filter with 1 relation from current dashboard to target dashboard
+              //    if there is only 1:
+              //      take the join_sequence filter and add to the sequence
+              //      - new relation from current dashboard to target dashboard
+              //    if there is more then 1:
+              //      create join_sequence filter with:
+              //      - group from all existing join_seq filters and add this group at the top
+              //      - new relation from current dashboard to target dashboard
+
+              var existingJoinFilters = _.cloneDeep(urlHelper.getFiltersOfType('join_sequence'));
+              if (existingJoinFilters.length === 0) {
+
+                return relVisHelper.buildNewJoinSeqFilter(button, sourceDashboardSavedSearch)
+                .then(function (joinSeqFilter) {
+                  button.joinSeqFilter = joinSeqFilter;
+                  return relVisHelper.buildCountQuery(button.redirectToDashboard, joinSeqFilter)
+                  .then(function (query) {
+                    return Promise.resolve({
+                      query: query.query,
+                      button: button
+                    });
+                  });
+                });
+
+              } else if (existingJoinFilters.length === 1) {
+
+                return relVisHelper.addRelationToJoinSeqFilter(button, sourceDashboardSavedSearch, existingJoinFilters[0])
+                .then(function (joinSeqFilter) {
+                  button.joinSeqFilter = joinSeqFilter;
+                  return relVisHelper.buildCountQuery(button.redirectToDashboard, joinSeqFilter)
+                  .then(function (query) {
+                    return Promise.resolve({
+                      query: query.query,
+                      button: button
+                    });
+                  });
+                });
+
+              } else if (existingJoinFilters.length > 1) {
+
+                // build join sequence + add a group of sequances to the top of the array
+                return relVisHelper.buildNewJoinSeqFilter(button, sourceDashboardSavedSearch).then(function (joinSeqFilter) {
+
+                  // here create a group from existing ones and add it on the top
+
+                  var group = relVisHelper.composeGroupFromExistingJoinFilters(existingJoinFilters);
+                  joinSeqFilter.join_sequence.unshift(group);
+
+                  button.joinSeqFilter = joinSeqFilter;
+                  return relVisHelper.buildCountQuery(button.redirectToDashboard, joinSeqFilter).then(function (query) {
+                    return Promise.resolve({
+                      query: query.query,
+                      button: button
+                    });
+                  });
+                });
+              }
+            });
           });
         });
 
@@ -180,20 +186,25 @@ define(function (require) {
       var _constructButtons = function () {
         if (currentDashboardId) {
           // check that current dashboard has assigned indexPatternId
-          savedDashboards.get(currentDashboardId).then(function (savedDashboard) {
-            if (savedDashboard.savedSearchId) {
-              return savedSearches.get(savedDashboard.savedSearchId)
-              .then(function (dashboardSavedSearch) {
-                $scope.buttons = relVisHelper.constructButtonsArray(
-                  $scope.vis.params.buttons, dashboardSavedSearch.searchSource._state.index.id
-                );
-                return _updateSourceCount();
-              });
-            } else {
+          // use find to minimize numner of requests
+          savedDashboards.find().then(function (dashboardsResp) {
+            var savedDashboard = _.find(dashboardsResp.hits, function (hit) {
+              return hit.id === currentDashboardId;
+            });
+            if (savedDashboard === undefined) {
+              notify.warning('The current dashboard [' + currentDashboardId + '] does not exists');
+            }
+            if (!savedDashboard.savedSearchId) {
               notify.warning('The current dashboard, ' + currentDashboardId + ', ' +
                              'has no SavedSearch set. ' +
                              'Please save the dashboard to set one');
             }
+            return savedSearches.get(savedDashboard.savedSearchId).then(function (dashboardSavedSearch) {
+              $scope.buttons = relVisHelper.constructButtonsArray(
+                $scope.vis.params.buttons, dashboardSavedSearch.searchSource._state.index.id
+              );
+              return _updateSourceCount();
+            });
           }).catch(notify.error);
         } else {
           $scope.buttons = relVisHelper.constructButtonsArray($scope.vis.params.buttons);

@@ -344,19 +344,19 @@ describe('Kibi Components', function () {
       };
       globalState.save();
 
-      kibiStateHelper.enableRelation('a');
+      kibiStateHelper.enableRelation({ dashboards: [ 'dA', 'dB' ], relation: 'A/a/B/b' });
 
       expect(globalState.k.j.length).to.equal(1);
-      expect(globalState.k.j[0]).to.equal('a');
+      expect(globalState.k.j[0]).to.equal('dA/dB/a/b');
     });
 
     it('disableRelation', function () {
       globalState.k = {
-        j: ['a', 'b', 'c']
+        j: ['a', 'A/B/a/b', 'c']
       };
       globalState.save();
 
-      kibiStateHelper.disableRelation('b');
+      kibiStateHelper.disableRelation({ dashboards: [ 'A', 'B' ], relation: 'ia/a/ib/b' });
 
       expect(globalState.k.j.length).to.equal(2);
       expect(globalState.k.j[0]).to.equal('a');
@@ -365,21 +365,20 @@ describe('Kibi Components', function () {
 
     it('isRelationEnabled', function () {
       globalState.k = {
-        j: ['a']
+        j: ['d1/d2/a/b']
       };
       globalState.save();
 
-      expect(kibiStateHelper.isRelationEnabled('a')).to.equal(true);
-      expect(kibiStateHelper.isRelationEnabled('b')).to.equal(false);
+      expect(kibiStateHelper.isRelationEnabled({ dashboards: [ 'd1', 'd2' ], relation: 'i1/a/i2/b' })).to.equal(true);
+      expect(kibiStateHelper.isRelationEnabled({ dashboards: [ 'd1', 'd3' ], relation: 'i1/a/i2/b' })).to.equal(false);
     });
 
     it('isRelationEnabled should return false if j not initialized', function () {
-      globalState.k = {
-      };
+      globalState.k = {};
       globalState.save();
 
-      expect(kibiStateHelper.isRelationEnabled('a')).to.equal(false);
-      expect(kibiStateHelper.isRelationEnabled('b')).to.equal(false);
+      expect(kibiStateHelper.isRelationEnabled({ dashboards: [ 'd1', 'd2' ], relation: 'i1/a/i2/b' })).to.equal(false);
+      expect(kibiStateHelper.isRelationEnabled({ dashboards: [ 'd1', 'd3' ], relation: 'i1/a/i2/b' })).to.equal(false);
     });
 
   });

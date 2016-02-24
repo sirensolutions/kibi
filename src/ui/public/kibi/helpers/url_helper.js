@@ -193,7 +193,7 @@ define(function (require) {
                 };
               })
             );
-          } else if (dashboard.savedSearchId) {
+          } else if ((!dashboardsIds || !dashboardsIds.length) && dashboard.savedSearchId) {
             promises.push(
               savedSearches.get(dashboard.savedSearchId).then(function (dashboardSavedSearch) {
                 return {
@@ -286,7 +286,7 @@ define(function (require) {
         }
         // grab only enabled relations based on kibiState
         var enabledRelations = _.filter(config.get('kibi:relations').relationsDashboards, function (relation) {
-          return kibiStateHelper.isRelationEnabled(relation.relation);
+          return kibiStateHelper.isRelationEnabled(relation);
         });
         // now checked that the dashId is in enabled relations either as a source or target
         return self.isDashboardInTheseRelations(dashId, enabledRelations);

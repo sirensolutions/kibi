@@ -46,7 +46,7 @@ define(function (require) {
 
         // grab only enabled relations based on kibiState
         var enabledRelations = _.filter(relations, function (relation) {
-          return kibiStateHelper.isRelationEnabled(relation.relation);
+          return kibiStateHelper.isRelationEnabled(relation);
         });
 
         // collect ids of dashboards from enabled relations

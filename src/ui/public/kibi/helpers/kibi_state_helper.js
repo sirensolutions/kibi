@@ -297,19 +297,37 @@ define(function (require) {
       globalState.save();
     };
 
-    KibiStateHelper.prototype.isRelationEnabled = function (relationId) {
+    function makeRelationId(relation) {
+      const parts = relation.relation.split('/');
+      return `${relation.dashboards[0]}/${relation.dashboards[1]}/${parts[1]}/${parts[3]}`;
+    }
+
+    KibiStateHelper.prototype.isRelationEnabled = function (relation) {
       if (globalState.k.j instanceof Array) {
-        return globalState.k.j.indexOf(relationId) !== -1;
+        return globalState.k.j.indexOf(makeRelationId(relation)) !== -1;
       }
       return false;
     };
 
-    KibiStateHelper.prototype.enableRelation = function (relationId) {
+    KibiStateHelper.prototype.enableRelation = function (relation) {
       if (!globalState.k.j) {
         globalState.k.j = [];
       }
+      const relationId = makeRelationId(relation);
       if (globalState.k.j.indexOf(relationId) === -1) {
         globalState.k.j.push(relationId);
+        globalState.save();
+      }
+    };
+
+    KibiStateHelper.prototype.disableRelation = function (relation) {
+      if (!globalState.k.j) {
+        globalState.k.j = [];
+      }
+      const relationId = makeRelationId(relation);
+      const index = globalState.k.j.indexOf(relationId);
+      if (index !== -1) {
+        globalState.k.j.splice(index, 1);
         globalState.save();
       }
     };
@@ -320,18 +338,6 @@ define(function (require) {
         globalState.save();
       }
     };
-
-    KibiStateHelper.prototype.disableRelation = function (relationId) {
-      if (!globalState.k.j) {
-        globalState.k.j = [];
-      }
-      var index = globalState.k.j.indexOf(relationId);
-      if (index !== -1) {
-        globalState.k.j.splice(index, 1);
-        globalState.save();
-      }
-    };
-
 
     KibiStateHelper.prototype._setDashboardProperty = function (dashboardId, prop, value) {
       if (!globalState.k.d[dashboardId]) {

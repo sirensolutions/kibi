@@ -68,7 +68,7 @@ define(function (require) {
               }
 
               link.html = '<div>' +
-                '<input type="checkbox" ' + (kibiStateHelper.isRelationEnabled(relation.relation) ? 'checked' : '') + '/>' +
+                '<input type="checkbox" ' + (kibiStateHelper.isRelationEnabled(relation) ? 'checked' : '') + '/>' +
                 '&nbsp;<label>' + link.linkType + '</label>' +
                 '</div>';
             });
@@ -82,9 +82,9 @@ define(function (require) {
                   // add or remove the relation id from kibi state
                   var enabled = jQuery(el).find('input[type=\'checkbox\']').is(':checked');
                   if (enabled) {
-                    kibiStateHelper.enableRelation(relation.relation);
+                    kibiStateHelper.enableRelation(relation);
                   } else {
-                    kibiStateHelper.disableRelation(relation.relation);
+                    kibiStateHelper.disableRelation(relation);
                   }
                   if ($scope.relationalPanel.enabled) {
                     joinFilterHelper.updateJoinSetFilter(relation.dashboards).then(function () {

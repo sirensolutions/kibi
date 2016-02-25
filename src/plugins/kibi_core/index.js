@@ -65,6 +65,7 @@ module.exports = function (kibana) {
   };
 
   return new kibana.Plugin({
+    // During the enterprise build this line has to be swapped, to add the 'kibi_graph_browser_vis' requirement
     require: ['kibana'],
 
     id: 'kibi_core',
@@ -76,6 +77,9 @@ module.exports = function (kibana) {
         load_jdbc: Joi.boolean().default(false),
 
         enterprise_enabled: Joi.boolean().default(false),
+
+        es_cluster_name: Joi.string().default('elasticsearch'),
+        es_transport_port: Joi.number().default(9330),
 
         datasource_encryption_algorithm: Joi.string().default('AES-GCM'),
         datasource_encryption_key: Joi.string().default('iSxvZRYisyUW33FreTBSyJJ34KpEquWznUPDvn+ka14='),

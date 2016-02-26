@@ -8,6 +8,9 @@ define(function (require) {
   require('ui/collapsible_sidebar');
   require('ui/share');
 
+  require('ui/kibi/directives/kibi_param_entity_uri');
+
+
   require('ui/routes')
   .when('/visualize/create', {
     template: require('plugins/kibana/visualize/editor/editor.html'),
@@ -46,7 +49,10 @@ define(function (require) {
     'kibana/notify',
     'kibana/courier'
   ])
-  .controller('VisEditor', function ($scope, $route, timefilter, AppState, $location, kbnUrl, $timeout, courier, Private, Promise) {
+  .controller('VisEditor', function (
+    $rootScope, globalState, $scope, $route, timefilter, AppState,
+    $location, kbnUrl, $timeout, courier, Private, Promise
+  ) {
 
     var angular = require('angular');
     var ConfigTemplate = require('ui/ConfigTemplate');
@@ -55,6 +61,33 @@ define(function (require) {
     var brushEvent = Private(require('ui/utils/brush_event'));
     var queryFilter = Private(require('ui/filter_bar/query_filter'));
     var filterBarClickHandler = Private(require('ui/filter_bar/filter_bar_click_handler'));
+
+    var setEntityURI = Private(require('ui/kibi/components/commons/_set_entity_uri'));
+
+    $scope.holder = {
+      entityURI: '',
+      entityURIEnabled: false,
+      visible: $location.path().indexOf('/visualize/') !== -1
+    };
+    $scope.$watch('holder.entityURI', function (entityURI) {
+      if (entityURI && $scope.holder.visible) {
+        globalState.se_temp = [entityURI];
+        globalState.save();
+        $scope.fetch();
+      }
+    });
+
+    setEntityURI($scope.holder);
+    var removeSetEntityUriHandler = $rootScope.$on('kibi:selectedEntities:changed', function (event, se) {
+      setEntityURI($scope.holder);
+    });
+
+    var off1 = $rootScope.$on('kibi:entityURIEnabled:kibitable', function (event, enabled) {
+      $scope.holder.entityURIEnabled = !!enabled;
+    });
+    var off2 = $rootScope.$on('kibi:entityURIEnabled:external_query_terms_filter', function (event, enabled) {
+      $scope.holder.entityURIEnabled = !!enabled;
+    });
 
     var notify = new Notifier({
       location: 'Visualization Editor'
@@ -202,6 +235,8 @@ define(function (require) {
 
       $scope.$on('$destroy', function () {
         savedVis.destroy();
+        off1();
+        off2();
       });
     }
 

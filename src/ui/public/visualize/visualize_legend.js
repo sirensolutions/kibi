@@ -11,6 +11,7 @@ define(function (require) {
     var Data = Private(require('ui/vislib/lib/data'));
     var colorPalette = Private(require('ui/vislib/components/color/color'));
     var filterBarClickHandler = Private(require('ui/filter_bar/filter_bar_click_handler'));
+    var cache = Private(require('ui/kibi/helpers/cache_helper')); // kibi: added by kibi
 
     return {
       restrict: 'E',
@@ -53,7 +54,16 @@ define(function (require) {
         };
 
         $scope.canFilter = function (legendData) {
+          // kibi: we cache the value to avoid going into a loop of digests
+          var cacheKey = legendData.values.aggConfigResult.key + legendData.values.aggConfigResult.value;
+          if (cache && cache.get(cacheKey)) {
+            return cache.get(cacheKey);
+          }
           var filters = clickHandler({point: legendData}, true) || [];
+          if (cache) {
+            cache.set(cacheKey, filters.length);
+          }
+          // kibi: end
           return filters.length;
         };
 

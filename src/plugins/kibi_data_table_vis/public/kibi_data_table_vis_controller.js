@@ -14,32 +14,18 @@ define(function (require) {
       var fieldFormats = Private(require('ui/registry/field_formats'));
       var VirtualIndexPattern = Private(require('ui/kibi/components/commons/virtual_index_pattern'));
 
-      var setEntityURI = Private(require('ui/kibi/components/commons/_set_entity_uri'));
-
       $scope.queryColumn = {};
       $scope.cellClickHandlers = {};
 
-      $scope.holder = {
-        entityURI: '',
-        entityURIEnabled: false,
-        visible: $location.path().indexOf('/visualize/') !== -1
-      };
-      $scope.$watch('holder.entityURI', function (entityURI) {
-        if (entityURI && $scope.holder.visible) {
-          globalState.se_temp = [entityURI];
-          globalState.save();
-          fetchResults($scope.savedVis);
-        }
-      });
-
-      setEntityURI($scope.holder);
-      var removeSetEntityUriHandler = $rootScope.$on('kibi:selectedEntities:changed', function (event, se) {
-        setEntityURI($scope.holder);
-      });
 
       $scope.refresh = function () {
         fetchResults($scope.savedVis);
       };
+
+      var configMode = $location.path().indexOf('/visualize/') !== -1;
+      if (configMode) {
+        globalState.on('save_with_changes', $scope.refresh);
+      }
 
       // Set to true in editing mode
       var editing = false;
@@ -113,9 +99,16 @@ define(function (require) {
           var virtualIndexPattern = new VirtualIndexPattern(indexPattern);
           searchSource.index(virtualIndexPattern);
 
+          var entityURI = '';
+          if (configMode && globalState.se_temp && globalState.se_temp.length > 0) {
+            entityURI = globalState.se_temp[0];
+          } else if (globalState.se && globalState.se.length > 0) {
+            entityURI = globalState.se[0];
+          }
+
           searchSource.inject([
             {
-              entityURI: $scope.holder.entityURI,
+              entityURI: entityURI,
               queryDefs: $scope.vis.params.queryIds, //TODO: rename to queryDefs
               sourcePath: $scope.vis.params.joinElasticsearchField, // it is the field from table to do the comparison
               fieldName: $scope.vis.params.queryFieldName
@@ -166,14 +159,6 @@ define(function (require) {
         if ($scope.savedObj && $scope.savedObj.searchSource) {
           $scope.savedObj.searchSource.fetchQueued();
         }
-      });
-
-      var removeEntityURIEnableHandler = $rootScope.$on('kibi:entityURIEnabled:kibitable', function (event, entityURIEnabled) {
-        $scope.holder.entityURIEnabled = entityURIEnabled;
-      });
-      $scope.$on('$destroy', function () {
-        removeSetEntityUriHandler();
-        removeEntityURIEnableHandler();
       });
 
       if (editing) {

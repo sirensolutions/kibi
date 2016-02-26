@@ -419,6 +419,72 @@ describe('post process hook test', function () {
 
 describe('query negation', function () {
 
+  it('empty ids negate true', function (done) {
+    const query = {
+      foo: 'bar',
+      path: {
+        dbfilter: {
+          queryid: 'emptyIdsQuery',
+          queryVariableName: 'xxx',
+          path: 'ohoh',
+          negate: true
+        }
+      }
+    };
+    const expected = {
+      foo: 'bar',
+      path: {
+        bool: {
+          must_not: [{
+            term: {
+              snxrcngu: 'tevfuxnvfpbzcyrgrylpenfl'
+            }
+          }]
+        }
+      }
+    };
+
+    dbFilter(queryEngine, query).then(function (data) {
+      expect(data).to.eql(expected);
+      done();
+    }).catch(function (err) {
+      done(err);
+    });
+  });
+
+  it('empty ids negate false', function (done) {
+    const query = {
+      foo: 'bar',
+      path: {
+        dbfilter: {
+          queryid: 'emptyIdsQuery',
+          queryVariableName: 'xxx',
+          path: 'ohoh',
+          negate: false
+        }
+      }
+    };
+    const expected = {
+      foo: 'bar',
+      path: {
+        bool: {
+          should: [{
+            term: {
+              snxrcngu: 'tevfuxnvfpbzcyrgrylpenfl'
+            }
+          }]
+        }
+      }
+    };
+
+    dbFilter(queryEngine, query).then(function (data) {
+      expect(data).to.eql(expected);
+      done();
+    }).catch(function (err) {
+      done(err);
+    });
+  });
+
   it('simple query', function (done) {
     const query = {
       foo: 'bar',

@@ -395,7 +395,7 @@ define(function (require) {
           let elements = [];
           _.each(results, (object) => {
             if (object[index]) {
-              elements = elements.concat(...object[index]);
+              elements = elements.concat(object[index]);
             }
           });
           return elements;

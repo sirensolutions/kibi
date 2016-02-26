@@ -104,7 +104,7 @@ describe('Kibi Components', function () {
                     id: 'savedsearch-b',
                     kibanaSavedObjectMeta: {
                       searchSourceJSON: JSON.stringify({
-                        index: 'index-a',
+                        index: 'index-b',
                         filter: [],
                         query: {
                           query: {
@@ -120,7 +120,7 @@ describe('Kibi Components', function () {
                     id: 'savedsearch-c',
                     kibanaSavedObjectMeta: {
                       searchSourceJSON: JSON.stringify({
-                        index: 'index-a',
+                        index: 'index-c',
                         filter: [],
                         query: {
                           query: {
@@ -136,7 +136,7 @@ describe('Kibi Components', function () {
                     id: 'savedsearch-d',
                     kibanaSavedObjectMeta: {
                       searchSourceJSON: JSON.stringify({
-                        index: 'index-a',
+                        index: 'index-d',
                         filter: [],
                         query: {
                           query: {

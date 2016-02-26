@@ -81,6 +81,79 @@ describe('Kibi Components', function () {
       ngMock.module('discover/saved_searches', function ($provide) {
         $provide.service('savedSearches', function (Promise) {
           return {
+            find: function () {
+              return Promise.resolve({
+                hits: [
+                  {
+                    id: 'savedsearch-a',
+                    kibanaSavedObjectMeta: {
+                      searchSourceJSON: JSON.stringify({
+                        index: 'index-a',
+                        filter: [],
+                        query: {
+                          query: {
+                            query_string: {
+                              term: 'aaa'
+                            }
+                          }
+                        }
+                      })
+                    }
+                  },
+                  {
+                    id: 'savedsearch-b',
+                    kibanaSavedObjectMeta: {
+                      searchSourceJSON: JSON.stringify({
+                        index: 'index-b',
+                        filter: [],
+                        query: {
+                          query: {
+                            query_string: {
+                              term: 'bbb'
+                            }
+                          }
+                        }
+                      })
+                    }
+                  },
+                  {
+                    id: 'savedsearch-c',
+                    kibanaSavedObjectMeta: {
+                      searchSourceJSON: JSON.stringify({
+                        index: 'index-c',
+                        filter: [],
+                        query: {
+                          query: {
+                            query_string: {
+                              term: 'ccc'
+                            }
+                          }
+                        }
+                      })
+                    }
+                  },
+                  {
+                    id: 'savedsearch-d',
+                    kibanaSavedObjectMeta: {
+                      searchSourceJSON: JSON.stringify({
+                        index: 'index-d',
+                        filter: [],
+                        query: {
+                          query: {
+                            query_string: {
+                              term: 'ddd'
+                            }
+                          }
+                        }
+                      })
+                    }
+                  },
+                  {
+                    id: 'savedsearch-noindexid'
+                  },
+                ]
+              });
+            },
             get: function (id) {
               switch (id) {
                 case 'savedsearch-a':
@@ -100,7 +173,6 @@ describe('Kibi Components', function () {
           };
         });
       });
-
 
       // have to provide a stub for indexPatterns
       // as joinFilterHelper.getJoinFilter will call indexPatterns.get(indexId)
@@ -252,10 +324,9 @@ describe('Kibi Components', function () {
           expect(joinFilter.meta.alias).to.equal('dashboard-a <-> dashboard-b');
           expect(joinFilter.join_set.focus).to.be('index-a');
           expect(joinFilter.join_set.queries['index-a']).to.not.be.ok();
-          expect(joinFilter.join_set.queries['index-b']).to.be.ok();
-          expect(joinFilter.join_set.queries['index-b'][0]).to.eql({
-            exists: { field: 'aaa' }
-          });
+          expect(joinFilter.join_set.queries['index-b']).to.have.length(2);
+          expect(joinFilter.join_set.queries['index-b'][0]).to.eql({ query: { query: { query_string: { term: 'bbb' } } } });
+          expect(joinFilter.join_set.queries['index-b'][1]).to.eql({ exists: { field: 'aaa' } });
           done();
         }).catch(done);
       });

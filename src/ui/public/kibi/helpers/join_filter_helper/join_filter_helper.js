@@ -54,9 +54,8 @@ define(function (require) {
           return relation.dashboards;
         }).flatten().uniq().value();
 
-        var filtersPerIndexPromise = urlHelper.getRegularFiltersPerIndex(dashboardIds);
-        var queriesPerIndexPromise = urlHelper.getQueriesPerIndex(dashboardIds);
-
+        var filtersPerIndexPromise = urlHelper.getFiltersPerIndexFromDashboards(dashboardIds);
+        var queriesPerIndexPromise = urlHelper.getQueriesPerIndexFromDashboards(dashboardIds);
 
         return Promise.all([focusedSavedSearch, filtersPerIndexPromise, queriesPerIndexPromise]).then(function (data) {
           var dashboardSavedSearch = data[0];
@@ -71,9 +70,7 @@ define(function (require) {
 
           // here check that the join filter should be present on this dashboard
           // it should be added only if we find current dashboardId in enabled relations
-          var isFocusDashboardInEnabledRelations = urlHelper.isDashboardInTheseRelations(
-            focusDashboardId, enabledRelations
-          );
+          var isFocusDashboardInEnabledRelations = urlHelper.isDashboardInTheseRelations(focusDashboardId, enabledRelations);
           if (!focusIndex) {
             return Promise.reject(new Error('SavedSearch for [' +  focusDashboardId + '] dashboard seems to not have an index id'));
           }
@@ -99,7 +96,7 @@ define(function (require) {
               ];
             });
 
-            var labels = queryHelper.getLabelsInConnectedComponent(focusIndex, relations);
+            var labels = queryHelper.getLabelOfIndexPatternsInConnectedComponent(focusIndex, relations);
             // keep only the filters which are in the connected component
             _.each(filtersPerIndex, function (filters, indexId) {
               if (!_.contains(labels, indexId)) {

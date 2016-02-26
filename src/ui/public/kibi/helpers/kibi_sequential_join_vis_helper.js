@@ -244,28 +244,27 @@ define(function (require) {
           // in case relational panel is enabled at the same time
           // as buttons take care about extra filters and queries from
           // dashboards based on the same index
-          var targetDashboardIndex = targetSavedSearch.searchSource._state.index;
           var promises = [
-            urlHelper.getQueriesFromDashboardsWithSameIndex(targetDashboardId, targetDashboardIndex),
-            urlHelper.getFiltersFromDashboardsWithSameIndex(targetDashboardId, targetDashboardIndex)
+            urlHelper.getQueriesFromDashboardsWithSameIndex(targetDashboardId),
+            urlHelper.getFiltersFromDashboardsWithSameIndex(targetDashboardId)
           ];
           return Promise.all(promises).then(function (results) {
-            var queriesFromDashboardsWirhSameIndex = results[0];
-            var filtersFromDashboardsWirhSameIndex = results[1] || [];
+            var queriesFromDashboardsWithSameIndex = results[0];
+            var filtersFromDashboardsWithSameIndex = results[1] || [];
             if (joinSeqFilter) {
-              filtersFromDashboardsWirhSameIndex = filtersFromDashboardsWirhSameIndex.concat(joinSeqFilter);
+              filtersFromDashboardsWithSameIndex = filtersFromDashboardsWithSameIndex.concat(joinSeqFilter);
             }
             return countHelper.constructCountQuery(
                 targetDashboardId,
                 targetSavedSearch,
                 null,  // do not put joinSeqFilter here as this parameter is reserved to join_set only !!!
-                queriesFromDashboardsWirhSameIndex,
-                filtersFromDashboardsWirhSameIndex
+                queriesFromDashboardsWithSameIndex,
+                filtersFromDashboardsWithSameIndex
                 )
               .then(function (query) {
                 return {
                   query: query,
-                  index: targetDashboardIndex
+                  index: targetSavedSearch.searchSource._state.index
                 };
               });
           });

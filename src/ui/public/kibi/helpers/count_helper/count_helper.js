@@ -52,20 +52,19 @@ define(function (require) {
 
               joinFilterHelper.getJoinFilter(dashboard.id).then(function (joinFilter) {
 
-                var dashboardIndex = savedSearch.searchSource._state.index;
                 var promises = [
-                  urlHelper.getQueriesFromDashboardsWithSameIndex(dashboardId, dashboardIndex),
-                  urlHelper.getFiltersFromDashboardsWithSameIndex(dashboardId, dashboardIndex)
+                  urlHelper.getQueriesFromDashboardsWithSameIndex(dashboardId),
+                  urlHelper.getFiltersFromDashboardsWithSameIndex(dashboardId)
                 ];
                 Promise.all(promises).then(function (results) {
-                  var queriesFromDashboardsWirhSameIndex = results[0];
-                  var filtersFromDashboardsWirhSameIndex = results[1];
+                  var queriesFromDashboardsWithSameIndex = results[0] || [];
+                  var filtersFromDashboardsWithSameIndex = results[1] || [];
                   self.constructCountQuery(
                     dashboard.id,
                     savedSearch,
                     joinFilter,
-                    queriesFromDashboardsWirhSameIndex,
-                    filtersFromDashboardsWirhSameIndex
+                    queriesFromDashboardsWithSameIndex,
+                    filtersFromDashboardsWithSameIndex
                   )
                   .then(function (query) {
                     fulfill({

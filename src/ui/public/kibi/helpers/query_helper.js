@@ -41,7 +41,7 @@ define(function (require) {
      * GetLabels returns the set of indices which are connected to the focused index,
      * i.e., the connected component of the graph.
      */
-    var _getLabelsInConnectedComponent = QueryHelper.prototype.getLabelsInConnectedComponent = function (focus, relations) {
+    QueryHelper.prototype.getLabelOfIndexPatternsInConnectedComponent = function (focus, relations) {
       var labels = [];
 
       // the set of current nodes to visit
@@ -119,7 +119,7 @@ define(function (require) {
      */
     QueryHelper.prototype.constructJoinFilter = function (focus, relations, filtersPerIndex, queriesPerIndex, indexToDashboardsMap) {
       // compute part of the label
-      var labels = _getLabelsInConnectedComponent(focus, relations);
+      var labels = this.getLabelOfIndexPatternsInConnectedComponent(focus, relations);
       labels.sort();
 
       var labelValue;

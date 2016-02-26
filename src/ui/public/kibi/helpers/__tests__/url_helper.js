@@ -1084,6 +1084,30 @@ describe('Kibi Components', function () {
         }).catch(done);
         $rootScope.$apply();
       });
+
+      it('should be empty as relational panel is enabled and the dashboard is the only one with index company', function (done) {
+        config.set('kibi:relationalPanel', true);
+        var relDash = {
+          dashboards: [ 'Articles2', 'Companies' ],
+          relation: 'article/companyid/company/id'
+        };
+        config.set('kibi:relations', {
+          relationsDashboards: [
+            {
+              dashboards: [ 'Articles1', 'Companies' ],
+              relation: 'article/companyid/company/id'
+            },
+            relDash
+          ]
+        });
+        kibiStateHelper.enableRelation(relDash);
+
+        urlHelper.getFiltersFromDashboardsWithSameIndex('Companies').then(function (filters) {
+          expect(filters).to.eql([]);
+          done();
+        }).catch(done);
+        $rootScope.$apply();
+      });
     });
 
 

@@ -229,7 +229,7 @@ define(function (require) {
     /**
      * For each dashboard id in the argument, return a promise with the saved dashboard and associated saved search meta
      */
-    UrlHelper.prototype._getDashboardsAndSavedSearchMetas = function (dashboardIds) {
+    UrlHelper.prototype.getDashboardAndSavedSearchMetas = function (dashboardIds) {
       return Promise.all([ savedSearches.find(), savedDashboards.find() ]).then((results) => {
         const savedSearchesRes = results[0];
         const savedDashboardsRes = results[1];
@@ -310,7 +310,7 @@ define(function (require) {
         return Promise.reject(new Error('getFiltersPerIndexFromDashboards requires a list of dashboard IDs'));
       }
 
-      return this._getDashboardsAndSavedSearchMetas(dashboardIds).then((results) => {
+      return this.getDashboardAndSavedSearchMetas(dashboardIds).then((results) => {
         const filters = _.map(results, ([ savedDash, savedSearchMeta ]) => this._getFiltersFromDashboard(savedDash, savedSearchMeta));
         return Promise.all(filters).then((results) => {
           return _({}).merge(...results, (filter1, filter2) => {
@@ -336,7 +336,7 @@ define(function (require) {
         return Promise.reject(new Error('getQueriesPerIndexFromDashboards requires a list of dashboard IDs'));
       }
 
-      return this._getDashboardsAndSavedSearchMetas(dashboardIds).then((results) => {
+      return this.getDashboardAndSavedSearchMetas(dashboardIds).then((results) => {
         const filters = _.map(results, ([ savedDash, savedSearchMeta ]) => this._getQueriesFromDashboard(savedDash, savedSearchMeta));
         return Promise.all(filters).then((results) => _.merge({}, ...results, (query1, query2) => {
           if (!query1) {
@@ -369,7 +369,7 @@ define(function (require) {
         return Promise.resolve([]);
       }
 
-      return this._getDashboardsAndSavedSearchMetas().then((results) => {
+      return this.getDashboardAndSavedSearchMetas().then((results) => {
         const [ savedDash, savedSearchMeta ] = _.find(results, ([ savedDash, savedSearchMeta ]) => savedDash.id === dashboardId);
         if (!savedSearchMeta) {
           return Promise.resolve([]);
@@ -386,7 +386,7 @@ define(function (require) {
         .filter(([ savedDash, savedSearchMeta ]) => this.isDashboardInTheseRelations(savedDash.id, enabledRelations))
         .map(([ savedDash, savedSearchMeta ]) => {
           if (index !== savedSearchMeta.index) {
-            return Promise.resolve([]);
+            return Promise.resolve({});
           }
           return cb(savedDash, savedSearchMeta);
         })
@@ -394,7 +394,9 @@ define(function (require) {
         return Promise.all(promises).then((results) => {
           let elements = [];
           _.each(results, (object) => {
-            elements = elements.concat(...object[index]);
+            if (object[index]) {
+              elements = elements.concat(...object[index]);
+            }
           });
           return elements;
         });

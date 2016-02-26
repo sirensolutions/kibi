@@ -19,6 +19,10 @@ define(function (require) {
       {
         id: 'Articles2',
         savedSearchId: 'saved-search-articles2'
+      },
+      {
+        id: 'Companies',
+        savedSearchId: 'saved-search-companies'
       }
     ];
 

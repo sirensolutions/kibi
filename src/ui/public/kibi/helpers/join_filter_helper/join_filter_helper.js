@@ -96,7 +96,7 @@ define(function (require) {
               ];
             });
 
-            var labels = queryHelper.getIndexPatternsInConnectedComponent(focusIndex, relations);
+            var labels = queryHelper.getLabelOfIndexPatternsInConnectedComponent(focusIndex, relations);
             // keep only the filters which are in the connected component
             _.each(filtersPerIndex, function (filters, indexId) {
               if (!_.contains(labels, indexId)) {

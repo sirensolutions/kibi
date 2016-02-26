@@ -86,6 +86,30 @@ define(function (require) {
           }
         )
       }
+    },
+    {
+      id: 'saved-search-companies',
+      kibanaSavedObjectMeta: {
+        searchSourceJSON: JSON.stringify(
+          {
+            index: 'company',
+            filter: [
+              {
+                term: {
+                  user: 'company'
+                }
+              }
+            ],
+            query: {
+              query: {
+                query_string: {
+                  query: 'company'
+                }
+              }
+            }
+          }
+        )
+      }
     }
   ];
 

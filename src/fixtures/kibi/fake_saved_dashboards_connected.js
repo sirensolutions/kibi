@@ -5,6 +5,14 @@ define(function (require) {
 
     var dashboards = [
       {
+        id: 'Persons',
+        savedSearchId: 'saved-search-person'
+      },
+      {
+        id: 'Articles0',
+        savedSearchId: 'saved-search-articles0'
+      },
+      {
         id: 'Articles1',
         savedSearchId: 'saved-search-articles1'
       },

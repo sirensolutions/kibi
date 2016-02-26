@@ -9,8 +9,8 @@ define(function (require) {
     Private, $location, $route, sessionStorage, savedDashboards,
     savedSearches, Promise, config, kbnDefaultAppId, kibiDefaultDashboardId, timefilter
   ) {
-    var kibiStateHelper    = Private(require('ui/kibi/helpers/kibi_state_helper'));
-    var kibiTimeHelper   = Private(require('ui/kibi/helpers/kibi_time_helper'));
+    var kibiStateHelper = Private(require('ui/kibi/helpers/kibi_state_helper'));
+    var kibiTimeHelper = Private(require('ui/kibi/helpers/kibi_time_helper'));
 
 
     function UrlHelper() {
@@ -211,57 +211,6 @@ define(function (require) {
       });
     };
 
-
-    UrlHelper.prototype.getRegularFiltersPerIndex = function (dashboardsIds) {
-      var self = this;
-      // grab filters here - they have to be in a format { indexId: [], indexId2: [] } without any join filter
-      // but filters in kibi state are saved per dashboard
-      // so iterate over dashboards check that they have savedSearchId and if they do take the filters
-      // return a promise
-      return new Promise(function (fulfill, reject) {
-        var filters = {};
-        self.getIndexToDashboardMap(dashboardsIds).then(function (indexToDashboardsMap) {
-          _.each(indexToDashboardsMap, function (dashboardIds, indexId) {
-            _.each(dashboardIds, function (dashboardId) {
-              var fs = kibiStateHelper.getFiltersForDashboardId(dashboardId);
-              var fsFiltered = _.filter(fs, function (f) {
-                return !f.join_set;
-              });
-              if (!filters[indexId]) {
-                filters[indexId] = fsFiltered;
-              } else {
-                filters[indexId] = filters[indexId].concat(fsFiltered);
-              }
-            });
-          });
-          fulfill(filters);
-        });
-      });
-    };
-
-    UrlHelper.prototype.getQueriesPerIndex = function (dashboardsIds) {
-      var self = this;
-      return new Promise(function (fulfill, reject) {
-        var queries = {};
-        self.getIndexToDashboardMap(dashboardsIds).then(function (indexToDashboardsMap) {
-          _.each(indexToDashboardsMap, function (dashboardIds, indexId) {
-            _.each(dashboardIds, function (dashboardId) {
-              var query = kibiStateHelper.getQueryForDashboardId(dashboardId);
-              if (query) {
-                if (!queries[indexId]) {
-                  queries[indexId] = [query];
-                } else {
-                  queries[indexId].push(query);
-                }
-              }
-            });
-          });
-
-          fulfill(queries);
-        });
-      });
-    };
-
     /**
      * The relations are from kibi:relations.relationsDashboards
      */
@@ -277,150 +226,209 @@ define(function (require) {
       return false;
     };
 
+    /**
+     * For each dashboard id in the argument, return a promise with the saved dashboard and associated saved search meta
+     */
+    UrlHelper.prototype._getDashboardsAndSavedSearchMetas = function (dashboardIds) {
+      return Promise.all([ savedSearches.find(), savedDashboards.find() ]).then((results) => {
+        const savedSearchesRes = results[0];
+        const savedDashboardsRes = results[1];
 
-    UrlHelper.prototype._filterDashboardsWithSameIndex = function (dashboardId, dashboards) {
-      var self = this;
-      return _.filter(dashboards, function (dashId) {
-        if (dashId === dashboardId) {
-          return false;
-        }
-        // grab only enabled relations based on kibiState
-        var enabledRelations = _.filter(config.get('kibi:relations').relationsDashboards, function (relation) {
-          return kibiStateHelper.isRelationEnabled(relation);
-        });
-        // now checked that the dashId is in enabled relations either as a source or target
-        return self.isDashboardInTheseRelations(dashId, enabledRelations);
+        const promises = _(savedDashboardsRes.hits)
+        // keep the dashboards that are in the array passed as argument
+        .filter((savedDash) => !dashboardIds || _.contains(dashboardIds, savedDash.id))
+        .map((savedDash) => {
+          if (!savedDash.savedSearchId) {
+            return Promise.reject(new Error(`The dashboard [${savedDash.title}] is expected to be associated with a saved search`));
+          }
+          const savedSearch = _.find(savedSearchesRes.hits, (hit) => hit.id === savedDash.savedSearchId);
+          const savedSearchMeta = getSavedSearchMeta(savedSearch);
+          return [ savedDash, savedSearchMeta ];
+        })
+        .value();
+
+        return Promise.all(promises);
       });
     };
 
+    /**
+     * Return a promise with the set of queries associated with the dashboard, and in its saved search
+     */
+    UrlHelper.prototype._getQueriesFromDashboard = function (savedDash, savedSearchMeta) {
+      const queries = [];
+
+      //  query from the kibiState
+      const query = kibiStateHelper.getQueryForDashboardId(savedDash.id);
+      if (query) {
+        queries.push(query);
+      }
+      // query from the saved search
+      if (savedSearchMeta.query) {
+        queries.push(savedSearchMeta.query);
+      }
+      const queriesIndex = {};
+      queriesIndex[savedSearchMeta.index] = queries;
+      return Promise.resolve(queriesIndex);
+    };
 
     /**
-     * For each dashboard based on the same index it should take
+     * Return a promise with the set of filters associated with the dashboard, and in its saved search
+     */
+    UrlHelper.prototype._getFiltersFromDashboard = function (savedDash, savedSearchMeta) {
+      // filters from kibiState
+      const dashFilters = kibiStateHelper.getFiltersForDashboardId(savedDash.id) || [];
+      let filters = _.filter(dashFilters, (df) => !df.join_set);
+      // filters from savedSearchMeta
+      if (savedSearchMeta.filter) {
+        filters = filters.concat(savedSearchMeta.filter);
+      }
+
+      const filtersIndex = {};
+
+      // time filter from kibiState
+      return savedSearches.get(savedDash.savedSearchId).then(function (dashboardSavedSearch) {
+        const timeFilter = timefilter.get(dashboardSavedSearch.searchSource._state.index);
+        if (timeFilter) {
+          return kibiTimeHelper.updateTimeFilterForDashboard(savedDash.id, timeFilter)
+          .then((updatedTimeFilter) => {
+            filters.push(updatedTimeFilter);
+            filtersIndex[savedSearchMeta.index] = uniqFilters(filters);
+            return filtersIndex;
+          });
+        } else {
+          filtersIndex[savedSearchMeta.index] = uniqFilters(filters);
+          return Promise.resolve(filtersIndex);
+        }
+      });
+    };
+
+    /**
+     * Return a promise with the filters from each dashboard organised per associated index
+     */
+    UrlHelper.prototype.getFiltersPerIndexFromDashboards = function (dashboardIds) {
+      if (!dashboardIds) {
+        return Promise.reject(new Error('getFiltersPerIndexFromDashboards requires a list of dashboard IDs'));
+      }
+
+      return this._getDashboardsAndSavedSearchMetas(dashboardIds).then((results) => {
+        const filters = _.map(results, ([ savedDash, savedSearchMeta ]) => this._getFiltersFromDashboard(savedDash, savedSearchMeta));
+        return Promise.all(filters).then((results) => {
+          return _({}).merge(...results, (filter1, filter2) => {
+            if (!filter1) {
+              return filter2;
+            }
+            if (!filter2) {
+              return filter1;
+            }
+            return filter2.concat(filter1);
+          })
+          .mapValues((filters) => uniqFilters(filters))
+          .value();
+        });
+      });
+    };
+
+    /**
+     * Return a promise with the queries from each dashboard organised per associated index
+     */
+    UrlHelper.prototype.getQueriesPerIndexFromDashboards = function (dashboardIds) {
+      if (!dashboardIds) {
+        return Promise.reject(new Error('getQueriesPerIndexFromDashboards requires a list of dashboard IDs'));
+      }
+
+      return this._getDashboardsAndSavedSearchMetas(dashboardIds).then((results) => {
+        const filters = _.map(results, ([ savedDash, savedSearchMeta ]) => this._getQueriesFromDashboard(savedDash, savedSearchMeta));
+        return Promise.all(filters).then((results) => _.merge({}, ...results, (query1, query2) => {
+          if (!query1) {
+            return query2;
+          }
+          if (!query2) {
+            return query1;
+          }
+          return query2.concat(query1);
+        }));
+      });
+    };
+
+    /**
+     * Returns a promise with objects (either queries or filters) come from:
+     * - a set of dashboards associated with the same index as dashboardId.
+     * - the dashboards are part of an enabled relation.
+     * The promised object is an array with an element being an array of objects for some dashboard.
+     */
+    UrlHelper.prototype._objectsFromDashboardsWithSameIndexInEnabledRelations = function (dashboardId, cb) {
+      if (!config.get('kibi:relationalPanel')) {
+        return Promise.resolve([]);
+      }
+
+      // grab only enabled relations based on kibiState
+      const relationsDashboards = config.get('kibi:relations').relationsDashboards;
+      const enabledRelations = _.filter(relationsDashboards, (relation) => kibiStateHelper.isRelationEnabled(relation));
+
+      if (!this.isDashboardInTheseRelations(dashboardId, enabledRelations)) {
+        return Promise.resolve([]);
+      }
+
+      return this._getDashboardsAndSavedSearchMetas().then((results) => {
+        const [ savedDash, savedSearchMeta ] = _.find(results, ([ savedDash, savedSearchMeta ]) => savedDash.id === dashboardId);
+        if (!savedSearchMeta) {
+          return Promise.resolve([]);
+        }
+        const index = savedSearchMeta.index;
+
+        // all dashboards:
+        // - except the one from the given argument
+        // - which index is the same as the one associated with the dashboard in argument
+        const promises = _(results)
+        // filter out dashboards that are in the array passed as argument
+        .filter(([ savedDash, savedSearchMeta ]) => dashboardId !== savedDash.id)
+        // remove dashboards that are not in any enabled relations
+        .filter(([ savedDash, savedSearchMeta ]) => this.isDashboardInTheseRelations(savedDash.id, enabledRelations))
+        .map(([ savedDash, savedSearchMeta ]) => {
+          if (index !== savedSearchMeta.index) {
+            return Promise.resolve([]);
+          }
+          return cb(savedDash, savedSearchMeta);
+        })
+        .value();
+        return Promise.all(promises).then((results) => {
+          let elements = [];
+          _.each(results, (object) => {
+            elements = elements.concat(...object[index]);
+          });
+          return elements;
+        });
+      });
+    };
+
+    /**
+     * For each dashboard based on the same index that is in an enabled relation, it should take:
      *  a) filters from kibiState (except join_set one)
      *  b) time from kibiState (transform it to proper range filter)
      *  c) filters from savedSearch Meta
-     * do it only if relational panel enaabled
+     * Do it only if the relational panel is enabled.
      */
-    UrlHelper.prototype.getFiltersFromDashboardsWithSameIndex = function (dashboardId, indexPattern) {
-      var self = this;
-      return new Promise(function (fulfill, reject) {
-        // get relations for config
-        var connectedDashboardIds = [];
-        if (config.get('kibi:relationalPanel')) {
-          self.getIndexToDashboardMap().then(function (indexToDashboardsMap) {
-            if (indexToDashboardsMap[indexPattern.id]) {
-              // filter out current dashboard
-              // and all dashboards which are not in enabled relations
-              // we want filters only from dashboards which are in the currently enabled relations
-              var dashboardIds = self._filterDashboardsWithSameIndex(
-                dashboardId,
-                indexToDashboardsMap[indexPattern.id]
-              );
-              // now for each dashboard we have to take:
-              // filters from kibiState
-              // filters from savedSearchMeta
-              // time filter from kibiState
-              var promises = [];
-              _.each(dashboardIds, function (dashId) {
-                promises.push(savedDashboards.get(dashId).then(function (savedDash) {
-                  if (!savedDash.savedSearchId) {
-                    throw new Error('Dashboard [' + savedDash + '] is expected to have savedSearchId');
-                  }
-                  return savedSearches.get(savedDash.savedSearchId).then(function (savedSearch) {
-                    var dashFilters = kibiStateHelper.getFiltersForDashboardId(dashId) || [];
-                    var filters = _.filter(dashFilters, function (df) {
-                      return !df.join_set;
-                    });
-                    var savedSearchMeta = getSavedSearchMeta(savedSearch);
-                    if (savedSearchMeta.filter) {
-                      filters = filters.concat(savedSearchMeta.filter);
-                    }
+    UrlHelper.prototype.getFiltersFromDashboardsWithSameIndex = function (dashboardId) {
+      if (!dashboardId) {
+        return Promise.reject(new Error('getFiltersFromDashboardsWithSameIndex requires a list of dashboard IDs'));
+      }
 
-                    var timeFilter = timefilter.get(indexPattern);
-                    if (timeFilter) {
-                      return kibiTimeHelper.updateTimeFilterForDashboard(dashId, timeFilter)
-                        .then(function (updatedTimeFilter) {
-                          filters.push(updatedTimeFilter);
-                          return uniqFilters(filters);
-                        });
-                    } else {
-                      return uniqFilters(filters);
-                    }
-                  });
-                }));
-              });
-              Promise.all(promises).then(function (results) {
-                var all = [];
-                _.each(results, function (res) {
-                  all = all.concat(res);
-                });
-                fulfill(all);
-              }).catch(reject);
-            } else {
-              fulfill([]);
-            }
-          });
-        } else {
-          fulfill([]);
-        }
-      });
+      return this._objectsFromDashboardsWithSameIndexInEnabledRelations(dashboardId, this._getFiltersFromDashboard);
     };
 
-    UrlHelper.prototype.getQueriesFromDashboardsWithSameIndex = function (dashboardId, indexPattern) {
-      var self = this;
-      return new Promise(function (fulfill, reject) {
-        // get relations for config
-        var connectedDashboardIds = [];
-        if (config.get('kibi:relationalPanel')) {
-          self.getIndexToDashboardMap().then(function (indexToDashboardsMap) {
-            if (indexToDashboardsMap[indexPattern.id]) {
-              // filter out current dashboard
-              // and all dashboards which are not in enabled relations
-              // we want queries only from dashboards which are in the currently enabled relations
-              var dashboardIds = self._filterDashboardsWithSameIndex(
-                dashboardId,
-                indexToDashboardsMap[indexPattern.id]
-              );
-              // now for each dashboard we have to take:
-              // query from kibiState
-              // query from savedSearch
-              var promises = [];
-              _.each(dashboardIds, function (dashId) {
-                promises.push(savedDashboards.get(dashId).then(function (savedDash) {
-                  if (!savedDash.savedSearchId) {
-                    throw new Error('Dashboard [' + savedDash + '] is expected to have savedSearchId');
-                  }
-                  return savedSearches.get(savedDash.savedSearchId).then(function (savedSearch) {
-                    var queries = [];
-                    var q1 = kibiStateHelper.getQueryForDashboardId(dashId);
-                    if (q1) {
-                      queries.push(q1);
-                    }
-                    var savedSearchMeta = getSavedSearchMeta(savedSearch);
-                    if (savedSearchMeta.query) {
-                      queries.push(savedSearchMeta.query);
-                    }
-                    return queries;
-                  });
-                }));
-              });
-              Promise.all(promises).then(function (results) {
-                var all = [];
-                _.each(results, function (res) {
-                  all = all.concat(res);
-                });
-                fulfill(all);
-              }).catch(reject);
-            } else {
-              fulfill([]);
-            }
-          });
-        } else {
-          fulfill([]);
-        }
-      });
-    };
+    /**
+     * For each dashboard based on the same index that is in an enabled relation, it should take:
+     *  a) queries from kibiState (except join_set one)
+     *  c) queries from savedSearch Meta
+     * Do it only if the relational panel is enabled.
+     */
+    UrlHelper.prototype.getQueriesFromDashboardsWithSameIndex = function (dashboardId) {
+      if (!dashboardId) {
+        return Promise.reject(new Error('getQueriesFromDashboardsWithSameIndex requires a list of dashboard IDs'));
+      }
 
+      return this._objectsFromDashboardsWithSameIndexInEnabledRelations(dashboardId, this._getQueriesFromDashboard);
+    };
 
     UrlHelper.prototype.getCurrentDashboardQuery = function () {
       var currentDashboardId = this.getCurrentDashboardId();

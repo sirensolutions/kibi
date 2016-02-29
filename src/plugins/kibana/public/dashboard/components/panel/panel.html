@@ -23,9 +23,11 @@
     <div class="clearfix"></div>
   </div>
 
-  <div ng-if="error" class="load-error">
+  <div ng-if="savedObj.vis.error || error" class="load-error">
     <i aria-hidden="true" class="fa fa-exclamation-triangle"></i>
-    <span ng-bind="error"></span>
+    <span ng-if="error" ng-bind="error"></span>
+    <!--kibi: added error reporting by a visualization-->
+    <span ng-if="savedObj.vis.error" ng-bind="savedObj.vis.error"></span>
   </div>
 
   <visualize

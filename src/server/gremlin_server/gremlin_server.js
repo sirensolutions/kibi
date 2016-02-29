@@ -18,7 +18,7 @@ GremlinServerHandler.prototype.start = function () {
   }
 
   return new Promise(function (fulfill, reject) {
-    self.server.log(['pid', 'info'], 'Starting kibi gremlin server');
+    self.server.log(['gremlin', 'info'], 'Starting kibi gremlin server');
 
     var config = self.server.config();
 
@@ -50,7 +50,7 @@ GremlinServerHandler.prototype.start = function () {
       if (code === 0) {
         fulfill(code);
       } else {
-        reject(new Error('gramlin-server exited with non zero status: [' + code + ']'));
+        reject(new Error('gremlin-server exited with non zero status: [' + code + ']'));
       }
     });
   });
@@ -59,7 +59,7 @@ GremlinServerHandler.prototype.start = function () {
 GremlinServerHandler.prototype.stop = function () {
   var self = this;
   return new Promise(function (fulfill, reject) {
-    self.server.log(['pid', 'info'], 'Stopping kibi gremlin server');
+    self.server.log(['gremlin', 'info'], 'Stopping kibi gremlin server');
 
     childProcess.exec('kill -INT -' + self.gremlinServer.pid, function (error, stdout, stderr) {
       if (error !== null) {

@@ -11,13 +11,6 @@ define(function (require) {
 
   module.factory('createNotifier', function (config) {
     return function (opts) {
-      // kibi: set the awesomeDemoMode and shieldAuthorizationWarning flag
-      if (!opts) {
-        opts = {};
-      }
-      opts.awesomeDemoMode = config.get('kibi:awesomeDemoMode');
-      opts.shieldAuthorizationWarning = config.get('kibi:shieldAuthorizationWarning');
-      // kibi: end
       return new Notifier(opts);
     };
   });
@@ -26,14 +19,35 @@ define(function (require) {
     return Notifier;
   });
 
-  module.run(function ($timeout) {
-    // provide alternate methods for setting timeouts, which will properly trigger digest cycles
-    Notifier.setTimerFns($timeout, $timeout.cancel);
+  module.run(function ($interval, $rootScope, config) {
+    var configInitListener = $rootScope.$on('init:config', function () {
+      applyConfig();
+      configInitListener();
+    });
+
+    $rootScope.$on('change:config', applyConfig);
+
+    Notifier.applyConfig({
+      setInterval: $interval,
+      clearInterval: $interval.cancel
+    });
+
+    function applyConfig() {
+      Notifier.applyConfig({
+        // kibi: set the awesomeDemoMode and shieldAuthorizationWarning flag
+        awesomeDemoMode: config.get('kibi:awesomeDemoMode'),
+        shieldAuthorizationWarning: config.get('kibi:shieldAuthorizationWarning'),
+        // kibi: end
+        errorLifetime: config.get('notifications:lifetime:error'),
+        warningLifetime: config.get('notifications:lifetime:warning'),
+        infoLifetime: config.get('notifications:lifetime:info')
+      });
+    }
   });
 
   /**
-   * Global Angular exception handler (NOT JUST UNCAUGHT EXCEPTIONS)
-   */
+  * Global Angular exception handler (NOT JUST UNCAUGHT EXCEPTIONS)
+  */
   // modules
   //   .get('exceptionOverride')
   //   .factory('$exceptionHandler', function () {
@@ -48,5 +62,4 @@ define(function (require) {
   };
 
   return rootNotifier;
-
 });

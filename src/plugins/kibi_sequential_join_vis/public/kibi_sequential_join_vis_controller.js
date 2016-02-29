@@ -184,6 +184,7 @@ define(function (require) {
       };
 
       var _constructButtons = function () {
+        $scope.vis.error = '';
         if (currentDashboardId) {
           // check that current dashboard has assigned indexPatternId
           // use find to minimize numner of requests
@@ -192,17 +193,25 @@ define(function (require) {
               return hit.id === currentDashboardId;
             });
             if (savedDashboard === undefined) {
-              notify.warning('The current dashboard [' + currentDashboardId + '] does not exists');
+              const msg = 'The current dashboard [' + currentDashboardId + '] does not exists';
+              return Promise.reject(new Error(msg));
             }
             if (!savedDashboard.savedSearchId) {
-              notify.warning('The current dashboard, ' + currentDashboardId + ', ' +
-                             'has no SavedSearch set. ' +
-                             'Please save the dashboard to set one');
+              const msg = `The current dashboard, ${currentDashboardId}, has no SavedSearch set. Please save the dashboard to set one`;
+              return Promise.reject(new Error(msg));
             }
             return savedSearches.get(savedDashboard.savedSearchId).then(function (dashboardSavedSearch) {
+              const index = dashboardSavedSearch.searchSource._state.index.id;
               $scope.buttons = relVisHelper.constructButtonsArray(
-                $scope.vis.params.buttons, dashboardSavedSearch.searchSource._state.index.id
+                $scope.vis.params.buttons, index
               );
+              if (!$scope.buttons.length) {
+                const msg = `The relational filter visualization "${$scope.vis.title}" is not configured for this dashboard. ` +
+                  `No button has a source index set to ${index}.`;
+                $scope.vis.error = msg;
+                notify.error(msg);
+                return;
+              }
               return _updateSourceCount();
             });
           }).catch(notify.error);
@@ -219,14 +228,14 @@ define(function (require) {
       $scope.$on('$destroy', off);
 
       $scope.$watch('buttons', function () {
-        if ($scope.buttons) {
+        if ($scope.buttons && $scope.buttons.length) {
           _updateCounts();
         }
       });
 
       // when autoupdate is on we detect the refresh here
       $scope.$watch('esResponse', function (resp) {
-        if ($scope.buttons) {
+        if ($scope.buttons && $scope.buttons.length) {
           _updateCounts().then(_updateSourceCount()).catch(notify.error);
         }
       });

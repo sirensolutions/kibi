@@ -69,6 +69,7 @@ src/plugins/table_vis/public/table_vis_controller.js
 src/plugins/testsBundle/testsEntryTemplate.js
 
 src/server/http/short_url_lookup.js
+src/server/config/schema.js
 src/server/KbnServer.js
 
 src/testUtils/stub_index_pattern.js

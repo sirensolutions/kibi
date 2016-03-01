@@ -207,6 +207,9 @@ define(function (require) {
                 });
               }
               break;
+            case 'fontAwesomeIcon':
+              promise = selectHelper.getFontAwesomeIcon();
+              break;
           }
 
           scope.retrieveError = '';

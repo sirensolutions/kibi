@@ -239,7 +239,7 @@ define(function (require) {
     };
 
     KibiSelectHelper.prototype.getFontAwesomeIcon = function () {
-      /*eslint max-len: [2, 180, 4]*/ // maximum length of 80 characters
+      /*eslint max-len: [2, 180, 4]*/ // maximum length of 180 characters
       var icons = ['fa-500px','fa-adjust','fa-adn','fa-align-center','fa-align-justify','fa-align-left','fa-align-right',
                   'fa-amazon','fa-ambulance','fa-anchor','fa-android','fa-angellist','fa-angle-double-down','fa-angle-double-left',
                   'fa-angle-double-right','fa-angle-double-up','fa-angle-down','fa-angle-left','fa-angle-right','fa-angle-up','fa-apple',

@@ -55,7 +55,7 @@ define(function (require) {
       panelsJSON: 'string',
       optionsJSON: 'string',
       uiStateJSON: 'string',
-      version: 'long',
+      version: 'integer',
       timeRestore: 'boolean',
       timeTo: 'string',
       timeFrom: 'string',

@@ -24,7 +24,7 @@ define(function (require) {
           description: 'string',
           datasourceType: 'string',
           datasourceParams: 'json',
-          version: 'long'
+          version: 'integer'
         },
 
         defaults: {

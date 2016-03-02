@@ -67,7 +67,13 @@ QueryEngine.prototype._init =  function (enableCache = false, cacheSize = 500, c
 
     elasticsearchStatus.on('change', function (prev, prevmsg) {
       if (elasticsearchStatus.state === 'green') {
-        self._loadTemplates();
+
+        self._loadTemplatesMapping().then(function () {
+          self._loadTemplates();
+        }).catch(function (err) {
+          self.logger.error('Could not load the mapping for tempalte object', err);
+        });
+
         self.setupJDBC()
         .then(self.reloadQueries())
         .then(() => {
@@ -78,6 +84,31 @@ QueryEngine.prototype._init =  function (enableCache = false, cacheSize = 500, c
     });
   });
 
+};
+
+
+QueryEngine.prototype._loadTemplatesMapping =  function () {
+  var self = this;
+
+  // here prevent an issue where by default version field was mapped to type long
+  var mapping = {
+    properties: {
+      version: {
+        type: 'integer'
+      }
+    }
+  };
+
+  return rp({
+    method: 'PUT',
+    uri: url.parse(self.config.get('elasticsearch.url') + '/' +
+                   self.config.get('kibana.index') + '/_mapping/template'),
+    headers: {
+      'content-type': 'application/json'
+    },
+    body: JSON.stringify(mapping),
+    timeout: 1000
+  });
 };
 
 

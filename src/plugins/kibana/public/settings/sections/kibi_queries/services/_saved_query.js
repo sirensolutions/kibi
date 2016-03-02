@@ -35,7 +35,7 @@ define(function (require) {
           rest_resp_status_code: 'long',
           rest_resp_restriction_path: 'string',
           activation_rules: 'json',
-          version: 'long'
+          version: 'integer'
         },
 
         defaults: {

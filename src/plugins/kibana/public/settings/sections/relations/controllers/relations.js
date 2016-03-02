@@ -4,6 +4,7 @@ define(function (require) {
   require('plugins/kibana/settings/sections/relations/styles/relations.less');
 
   var _ = require('lodash');
+  var $ = require('jquery');
 
   var app = require('ui/modules').get('apps/settings', ['kibana']);
 
@@ -62,6 +63,16 @@ define(function (require) {
 
     var urlHelper = Private(require('ui/kibi/helpers/url_helper'));
     var color = Private(require('ui/vislib/components/color/color'));
+
+    // Tabs
+    $scope.indexRel = true;
+    $scope.configRel = false;
+
+    $scope.tabClick = function () {
+      $scope.indexRel = !$scope.indexRel;
+      $scope.configRel = !$scope.configRel;
+    };
+    // End of Tabs functionality
 
     $scope.relations = config.get('kibi:relations');
     $scope.relationalPanel = config.get('kibi:relationalPanel');

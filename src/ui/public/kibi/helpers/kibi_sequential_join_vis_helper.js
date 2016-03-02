@@ -1,8 +1,7 @@
 define(function (require) {
   var _ = require('lodash');
-  var getSavedSearchMeta =  require('ui/kibi/helpers/count_helper/lib/get_saved_search_meta');
 
-  return function RelationVisHelperFactory(Private, savedDashboards, savedSearches, indexPatterns, timefilter, Promise) {
+  return function RelationVisHelperFactory(Private, indexPatterns, timefilter, Promise) {
 
     var kibiTimeHelper   = Private(require('ui/kibi/helpers/kibi_time_helper'));
     var kibiStateHelper  = Private(require('ui/kibi/helpers/kibi_state_helper'));
@@ -104,8 +103,8 @@ define(function (require) {
     //     indices: [target]
     //   }
     // ]
-    RelationVisHelper.prototype.buildNewJoinSeqFilter = function (button, currentDashboardSavedSearch) {
-      return this._getRelation(button, currentDashboardSavedSearch).then(function (relation) {
+    RelationVisHelper.prototype.buildNewJoinSeqFilter = function (button, savedSearchMeta) {
+      return this._getRelation(button, savedSearchMeta).then(function (relation) {
 
         var label = 'First join_seq filter ever';
         return {
@@ -119,11 +118,11 @@ define(function (require) {
     };
 
 
-    RelationVisHelper.prototype.addRelationToJoinSeqFilter = function (button, currentDashboardSavedSearch, joinSeqFilter) {
+    RelationVisHelper.prototype.addRelationToJoinSeqFilter = function (button, savedSearchMeta, joinSeqFilter) {
       var self = this;
       var joinSeqFiltersCloned = _.cloneDeep(joinSeqFilter);
 
-      return this._getRelation(button, currentDashboardSavedSearch).then(function (relation) {
+      return this._getRelation(button, savedSearchMeta).then(function (relation) {
         self._negateLastElementOfTheSequenceIfFilterWasNegated(joinSeqFiltersCloned);
         joinSeqFiltersCloned.join_sequence.push(relation);
         // make sure that the new filter is not negated
@@ -151,7 +150,7 @@ define(function (require) {
     };
 
 
-    RelationVisHelper.prototype._getRelation = function (button, currentDashboardSavedSearch) {
+    RelationVisHelper.prototype._getRelation = function (button, savedSearchMeta) {
       const ret = {
         relation: [
           {
@@ -187,7 +186,6 @@ define(function (require) {
       });
 
       // add filters and query from saved search
-      var savedSearchMeta = getSavedSearchMeta(currentDashboardSavedSearch);
       if (savedSearchMeta.query && !kibiStateHelper.isAnalyzedWildcardQueryString(savedSearchMeta.query)) {
         ret.relation[0].queries.push(savedSearchMeta.query);
       }
@@ -227,46 +225,32 @@ define(function (require) {
 
 
     RelationVisHelper.prototype.buildCountQuery = function (targetDashboardId, joinSeqFilter) {
-      return savedDashboards.find().then(function (targetSavedDashboardResp) {
-        // use find to minimize number of requests
-        var targetSavedDashboard = _.find(targetSavedDashboardResp.hits, function (hit) {
-          return hit.id === targetDashboardId;
-        });
-        if (targetSavedDashboard === undefined) {
-          return Promise.reject(new Error('Target dashboard [' + targetDashboardId + '] does not exists'));
-        }
-        if (!targetSavedDashboard.savedSearchId) {
-          return Promise.reject(new Error(`Target dashboard [${targetDashboardId}] does not have saved search`));
-        }
-
-        return savedSearches.get(targetSavedDashboard.savedSearchId).then(function (targetSavedSearch) {
-
-          // in case relational panel is enabled at the same time
-          // as buttons take care about extra filters and queries from
-          // dashboards based on the same index
-          var promises = [
-            urlHelper.getQueriesFromDashboardsWithSameIndex(targetDashboardId),
-            urlHelper.getFiltersFromDashboardsWithSameIndex(targetDashboardId)
-          ];
-          return Promise.all(promises).then(function (results) {
-            var queriesFromDashboardsWithSameIndex = results[0];
-            var filtersFromDashboardsWithSameIndex = results[1] || [];
-            if (joinSeqFilter) {
-              filtersFromDashboardsWithSameIndex = filtersFromDashboardsWithSameIndex.concat(joinSeqFilter);
-            }
-            return countHelper.constructCountQuery(
-                targetDashboardId,
-                targetSavedSearch,
-                null,  // do not put joinSeqFilter here as this parameter is reserved to join_set only !!!
-                queriesFromDashboardsWithSameIndex,
-                filtersFromDashboardsWithSameIndex
-                )
-              .then(function (query) {
-                return {
-                  query: query,
-                  index: targetSavedSearch.searchSource._state.index
-                };
-              });
+      return urlHelper.getDashboardAndSavedSearchMetas([ targetDashboardId ]).then(function ([ [ savedDash, savedSearchMeta ] ]) {
+        // in case relational panel is enabled at the same time
+        // as buttons take care about extra filters and queries from
+        // dashboards based on the same index
+        var promises = [
+          urlHelper.getQueriesFromDashboardsWithSameIndex(targetDashboardId),
+          urlHelper.getFiltersFromDashboardsWithSameIndex(targetDashboardId)
+        ];
+        return Promise.all(promises).then(function (results) {
+          var queriesFromDashboardsWithSameIndex = results[0];
+          var filtersFromDashboardsWithSameIndex = results[1] || [];
+          if (joinSeqFilter) {
+            filtersFromDashboardsWithSameIndex = filtersFromDashboardsWithSameIndex.concat(joinSeqFilter);
+          }
+          return countHelper.constructCountQuery(
+            savedDash,
+            savedSearchMeta,
+            null,  // do not put joinSeqFilter here as this parameter is reserved to join_set only !!!
+            queriesFromDashboardsWithSameIndex,
+            filtersFromDashboardsWithSameIndex
+          )
+          .then(function (query) {
+            return {
+              query: query,
+              index: savedSearchMeta.index
+            };
           });
         });
       });

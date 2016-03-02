@@ -44,79 +44,66 @@ define(function (require) {
         var currentDashboardId = urlHelper.getCurrentDashboardId();
 
         var countQueries = _.map($scope.buttons, function (button) {
-          // use find to minimize number of requests
-          return savedDashboards.find().then(function (dashboardsResp) {
-            var savedSourceDashboard = _.find(dashboardsResp.hits, function (hit) {
-              return hit.id === currentDashboardId;
-            });
-            if (savedSourceDashboard === undefined) {
-              return Promise.reject(new Error('Dashboard [' + currentDashboardId + '] does not exists'));
-            }
-            if (!savedSourceDashboard.savedSearchId) {
-              return Promise.reject(new Error('Dashboard [' + savedSourceDashboard.id + '] should have savedSearchId'));
-            }
+          return urlHelper.getDashboardAndSavedSearchMetas([ currentDashboardId ]).then(([ [ savedDash, savedSearchMeta ] ]) => {
+            // check that there are any join_seq filters already on this dashboard
+            //    if there is 0:
+            //      create new join_seq filter with 1 relation from current dashboard to target dashboard
+            //    if there is only 1:
+            //      take the join_sequence filter and add to the sequence
+            //      - new relation from current dashboard to target dashboard
+            //    if there is more then 1:
+            //      create join_sequence filter with:
+            //      - group from all existing join_seq filters and add this group at the top
+            //      - new relation from current dashboard to target dashboard
 
-            return savedSearches.get(savedSourceDashboard.savedSearchId).then(function (sourceDashboardSavedSearch) {
-              // check that there are any join_seq filters already on this dashboard
-              //    if there is 0:
-              //      create new join_seq filter with 1 relation from current dashboard to target dashboard
-              //    if there is only 1:
-              //      take the join_sequence filter and add to the sequence
-              //      - new relation from current dashboard to target dashboard
-              //    if there is more then 1:
-              //      create join_sequence filter with:
-              //      - group from all existing join_seq filters and add this group at the top
-              //      - new relation from current dashboard to target dashboard
+            var existingJoinFilters = _.cloneDeep(urlHelper.getFiltersOfType('join_sequence'));
+            if (existingJoinFilters.length === 0) {
 
-              var existingJoinFilters = _.cloneDeep(urlHelper.getFiltersOfType('join_sequence'));
-              if (existingJoinFilters.length === 0) {
-
-                return relVisHelper.buildNewJoinSeqFilter(button, sourceDashboardSavedSearch)
+              return relVisHelper.buildNewJoinSeqFilter(button, savedSearchMeta)
                 .then(function (joinSeqFilter) {
                   button.joinSeqFilter = joinSeqFilter;
                   return relVisHelper.buildCountQuery(button.redirectToDashboard, joinSeqFilter)
-                  .then(function (query) {
-                    return Promise.resolve({
-                      query: query.query,
-                      button: button
+                    .then(function (query) {
+                      return Promise.resolve({
+                        query: query.query,
+                        button: button
+                      });
                     });
-                  });
                 });
 
-              } else if (existingJoinFilters.length === 1) {
+            } else if (existingJoinFilters.length === 1) {
 
-                return relVisHelper.addRelationToJoinSeqFilter(button, sourceDashboardSavedSearch, existingJoinFilters[0])
+              return relVisHelper.addRelationToJoinSeqFilter(button, savedSearchMeta, existingJoinFilters[0])
                 .then(function (joinSeqFilter) {
                   button.joinSeqFilter = joinSeqFilter;
                   return relVisHelper.buildCountQuery(button.redirectToDashboard, joinSeqFilter)
-                  .then(function (query) {
-                    return Promise.resolve({
-                      query: query.query,
-                      button: button
+                    .then(function (query) {
+                      return Promise.resolve({
+                        query: query.query,
+                        button: button
+                      });
                     });
-                  });
                 });
 
-              } else if (existingJoinFilters.length > 1) {
+            } else if (existingJoinFilters.length > 1) {
 
-                // build join sequence + add a group of sequances to the top of the array
-                return relVisHelper.buildNewJoinSeqFilter(button, sourceDashboardSavedSearch).then(function (joinSeqFilter) {
+              // build join sequence + add a group of sequances to the top of the array
+              return relVisHelper.buildNewJoinSeqFilter(button, savedSearchMeta).then(function (joinSeqFilter) {
 
-                  // here create a group from existing ones and add it on the top
+                // here create a group from existing ones and add it on the top
 
-                  var group = relVisHelper.composeGroupFromExistingJoinFilters(existingJoinFilters);
-                  joinSeqFilter.join_sequence.unshift(group);
+                var group = relVisHelper.composeGroupFromExistingJoinFilters(existingJoinFilters);
+                joinSeqFilter.join_sequence.unshift(group);
 
-                  button.joinSeqFilter = joinSeqFilter;
-                  return relVisHelper.buildCountQuery(button.redirectToDashboard, joinSeqFilter).then(function (query) {
-                    return Promise.resolve({
-                      query: query.query,
-                      button: button
-                    });
+                button.joinSeqFilter = joinSeqFilter;
+                return relVisHelper.buildCountQuery(button.redirectToDashboard, joinSeqFilter).then(function (query) {
+                  return Promise.resolve({
+                    query: query.query,
+                    button: button
                   });
                 });
-              }
-            });
+              });
+            }
           });
         });
 
@@ -188,32 +175,17 @@ define(function (require) {
         if (currentDashboardId) {
           // check that current dashboard has assigned indexPatternId
           // use find to minimize numner of requests
-          savedDashboards.find().then(function (dashboardsResp) {
-            var savedDashboard = _.find(dashboardsResp.hits, function (hit) {
-              return hit.id === currentDashboardId;
-            });
-            if (savedDashboard === undefined) {
-              const msg = 'The current dashboard [' + currentDashboardId + '] does not exists';
-              return Promise.reject(new Error(msg));
+          urlHelper.getDashboardAndSavedSearchMetas([ currentDashboardId ]).then(([ [ savedDash, savedSearchMeta ] ]) => {
+            const index = savedSearchMeta.index;
+            $scope.buttons = relVisHelper.constructButtonsArray($scope.vis.params.buttons, index);
+            if (!$scope.buttons.length) {
+              const msg = `The relational filter visualization "${$scope.vis.title}" is not configured for this dashboard. ` +
+                `No button has a source index set to ${index}.`;
+              $scope.vis.error = msg;
+              notify.error(msg);
+              return;
             }
-            if (!savedDashboard.savedSearchId) {
-              const msg = `The current dashboard, ${currentDashboardId}, has no SavedSearch set. Please save the dashboard to set one`;
-              return Promise.reject(new Error(msg));
-            }
-            return savedSearches.get(savedDashboard.savedSearchId).then(function (dashboardSavedSearch) {
-              const index = dashboardSavedSearch.searchSource._state.index.id;
-              $scope.buttons = relVisHelper.constructButtonsArray(
-                $scope.vis.params.buttons, index
-              );
-              if (!$scope.buttons.length) {
-                const msg = `The relational filter visualization "${$scope.vis.title}" is not configured for this dashboard. ` +
-                  `No button has a source index set to ${index}.`;
-                $scope.vis.error = msg;
-                notify.error(msg);
-                return;
-              }
-              return _updateSourceCount();
-            });
+            return _updateSourceCount();
           }).catch(notify.error);
         } else {
           $scope.buttons = relVisHelper.constructButtonsArray($scope.vis.params.buttons);

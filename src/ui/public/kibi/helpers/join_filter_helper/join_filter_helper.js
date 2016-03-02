@@ -28,22 +28,6 @@ define(function (require) {
           return Promise.reject(new Error('Could not get kibi:relations'));
         }
         relations = relations.relationsDashboards;
-        var focusedSavedSearch = savedDashboards.find().then(function (dashboardResp) {
-          // get focused dashboard
-          // use find to mininize the number of requests
-          var dashboard = _.find(dashboardResp.hits, function (hit) {
-            return hit.id === focusDashboardId;
-          });
-          if (dashboard === undefined) {
-            return Promise.reject(new Error('The focus dashboard "' + focusDashboardId + '" does not exists'));
-          }
-          if (!dashboard.savedSearchId) {
-            return Promise.reject(new Error('The focus dashboard "' + focusDashboardId + '" does not have a saveSearchId'));
-          }
-          // get savedSearch to access the index
-          return savedSearches.get(dashboard.savedSearchId);
-        });
-
         // grab only enabled relations based on kibiState
         var enabledRelations = _.filter(relations, function (relation) {
           return kibiStateHelper.isRelationEnabled(relation);
@@ -54,30 +38,28 @@ define(function (require) {
           return relation.dashboards;
         }).flatten().uniq().value();
 
+        if (dashboardIds.indexOf(focusDashboardId) === -1) {
+          // focused dashboard is not part of enabled relation
+          return Promise.resolve(null);
+        }
+
+        var focusedSavedSearch = urlHelper.getDashboardAndSavedSearchMetas([ focusDashboardId ]);
         var filtersPerIndexPromise = urlHelper.getFiltersPerIndexFromDashboards(dashboardIds);
         var queriesPerIndexPromise = urlHelper.getQueriesPerIndexFromDashboards(dashboardIds);
 
         return Promise.all([focusedSavedSearch, filtersPerIndexPromise, queriesPerIndexPromise]).then(function (data) {
-          var dashboardSavedSearch = data[0];
+          var [ [ savedDash, savedSearchMeta ] ] = data[0];
           var filtersPerIndex = data[1];
           var queriesPerIndex = data[2];
 
-          if (!dashboardSavedSearch) {
-            return Promise.reject(new Error('Not possible to get joinFilter as SavedSearch is undefined for [' +  focusDashboardId + ']'));
-          }
-
-          var focusIndex = dashboardSavedSearch.searchSource._state.index.id;
+          var focusIndex = savedSearchMeta.index;
 
           // here check that the join filter should be present on this dashboard
           // it should be added only if we find current dashboardId in enabled relations
           var isFocusDashboardInEnabledRelations = urlHelper.isDashboardInTheseRelations(focusDashboardId, enabledRelations);
-          if (!focusIndex) {
-            return Promise.reject(new Error('SavedSearch for [' +  focusDashboardId + '] dashboard seems to not have an index id'));
-          }
           if (!isFocusDashboardInEnabledRelations) {
             return Promise.reject(new Error('The join filter has no enabled relation for the focused dashboard : ' +  focusDashboardId));
           }
-
 
           return urlHelper.getIndexToDashboardMap(dashboardIds).then(function (indexToDashboardsMap) {
 
@@ -162,7 +144,11 @@ define(function (require) {
       if (currentDashboardId) {
 
         return self.getJoinFilter(currentDashboardId).then(function (joinFilter) {
-          urlHelper.addFilter(joinFilter);
+          if (!joinFilter) {
+            urlHelper.removeJoinFilter();
+          } else {
+            urlHelper.addFilter(joinFilter);
+          }
           if (updateDashboards) {
             return updateDashboards(dashboardsClone);
           }

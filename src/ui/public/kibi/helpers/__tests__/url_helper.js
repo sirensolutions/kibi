@@ -158,6 +158,38 @@ describe('Kibi Components', function () {
       });
     });
 
+    describe('getDashboardAndSavedSearchMetas', function () {
+      beforeEach(init2(fakeSavedDashboards, fakeSavedSearches));
+
+      require('testUtils/noDigestPromises').activateForSuite();
+
+      it('get saved dashboard and saved search', function (done) {
+        urlHelper.getDashboardAndSavedSearchMetas([ 'search-ste' ]).then(function (results) {
+          expect(results).to.have.length(1);
+          expect(results[0][0].id).to.be('search-ste');
+          expect(results[0][1].index).to.be('search-ste');
+          done();
+        }).catch(done);
+      });
+
+      it('should reject promise if saved search is missing for dashboard', function (done) {
+        urlHelper.getDashboardAndSavedSearchMetas([ 'Articles' ]).then(function (results) {
+          done('should fail');
+        }).catch(function (err) {
+          expect(err.message).to.be('The dashboard [Articles] is expected to be associated with a saved search.');
+          done();
+        });
+      });
+
+      it('should reject promise if an unknown dashboard is requested', function (done) {
+        urlHelper.getDashboardAndSavedSearchMetas([ 'search-ste', 'unknown dashboard' ]).then(function (results) {
+          done('should fail');
+        }).catch(function (err) {
+          expect(err.message).to.be('Unable to retrieve dashboards: ["unknown dashboard"].');
+          done();
+        });
+      });
+    });
 
     // There can not possibly be such situation now
     // as to see anything kibana app has to be set
@@ -775,14 +807,11 @@ describe('Kibi Components', function () {
     describe('methods which maps indexes to dashboards', function () {
       beforeEach(init2(fakeSavedDashboards, fakeSavedSearches));
 
-      it('getIndexToDashboardMap', function (done) {
-        var expected = {
-          'time-testing-4': ['time-testing-4'],
-          'search-ste': ['search-ste']
-        };
-
+      it('getIndexToDashboardMap should fail because a dashboard does not have a saved search', function (done) {
         urlHelper.getIndexToDashboardMap().then(function (results) {
-          expect(results).to.eql(expected);
+          done('should fail');
+        }).catch(function (err) {
+          expect(err.message).to.be('The dashboard [Articles] is expected to be associated with a saved search.');
           done();
         });
 
@@ -797,7 +826,7 @@ describe('Kibi Components', function () {
         urlHelper.getIndexToDashboardMap(['time-testing-4']).then(function (results) {
           expect(results).to.eql(expected);
           done();
-        });
+        }).catch(done);
 
         $rootScope.$apply();
       });
@@ -810,7 +839,7 @@ describe('Kibi Components', function () {
         urlHelper.getIndexToDashboardMap(['search-ste']).then(function (results) {
           expect(results).to.eql(expected);
           done();
-        });
+        }).catch(done);
 
         $rootScope.$apply();
       });

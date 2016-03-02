@@ -7,6 +7,9 @@ define(function (require) {
    *  This method modifies "filterArray"
    */
   return function replaceOrAddJoinSetFilter(filterArray, joinSetFilter, stripMeta) {
+    if (!joinSetFilter) {
+      return;
+    }
     if (filterArray instanceof Array) {
       var replaced = false;
       if (stripMeta === true) {

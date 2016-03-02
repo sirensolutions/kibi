@@ -362,7 +362,7 @@ define(function (require) {
         return Promise.resolve([]);
       }
 
-      return this.getDashboardAndSavedSearchMetas().then((results) => {
+      return this.getDashboardAndSavedSearchMetas(undefined, true).then((results) => {
         const [ savedDash, savedSearchMeta ] = _.find(results, ([ savedDash, savedSearchMeta ]) => savedDash.id === dashboardId);
         if (!savedSearchMeta) {
           return Promise.resolve([]);

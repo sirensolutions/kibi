@@ -28,6 +28,10 @@ define(function (require) {
         id: 'Companies',
         title: 'Companies',
         savedSearchId: 'saved-search-companies'
+      },
+      {
+        id: 'No Saved Search',
+        title: 'No Saved Search'
       }
     ];
 

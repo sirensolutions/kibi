@@ -60,7 +60,7 @@ define(function (require) {
     QueryEngineClient.prototype.clearCache = function () {
       return $http({
         method: 'GET',
-        url: '/clearCache'
+        url: chrome.getBasePath() + '/clearCache'
       });
     };
 

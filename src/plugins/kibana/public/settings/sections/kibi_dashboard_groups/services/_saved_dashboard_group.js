@@ -24,7 +24,7 @@ define(function (require) {
           iconCss: 'string',
           iconUrl: 'string',
           hide: 'boolean',
-          version: 'long'
+          version: 'integer'
         },
 
         defaults: {

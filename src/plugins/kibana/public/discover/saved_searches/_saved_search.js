@@ -36,7 +36,7 @@ define(function (require) {
       hits: 'integer',
       columns: 'string',
       sort: 'string',
-      version: 'long'
+      version: 'integer'
     };
 
     SavedSearch.searchSource = true;

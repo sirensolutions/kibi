@@ -23,7 +23,7 @@ define(function (require) {
           st_templateSource: 'string',
           st_templateEngine: 'string',
           _previewQueryId: 'string', // used only to temporary store query id for preview
-          version: 'long'
+          version: 'integer'
         },
 
         defaults: {

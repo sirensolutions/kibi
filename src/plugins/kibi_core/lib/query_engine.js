@@ -91,6 +91,7 @@ QueryEngine.prototype._loadTemplatesMapping =  function () {
   var self = this;
 
   // here prevent an issue where by default version field was mapped to type long
+  // https://github.com/sirensolutions/kibi-internal/issues/775
   var mapping = {
     properties: {
       version: {

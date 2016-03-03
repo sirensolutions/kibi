@@ -31,9 +31,6 @@ define(function (require) {
       addExtra: function (dashboard) {
         extras.push(dashboard);
       },
-      removeExtras: function () {
-        extras = [];
-      },
       get: function (id) {
         const concatenated = dashboards.concat(extras);
         var dashboard = _.find(concatenated, 'id', id);

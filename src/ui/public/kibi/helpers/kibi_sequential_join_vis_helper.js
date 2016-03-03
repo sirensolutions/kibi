@@ -225,33 +225,33 @@ define(function (require) {
 
 
     RelationVisHelper.prototype.buildCountQuery = function (targetDashboardId, joinSeqFilter) {
-      return urlHelper.getDashboardAndSavedSearchMetas([ targetDashboardId ]).then(function ([ [ savedDash, savedSearchMeta ] ]) {
-        // in case relational panel is enabled at the same time
-        // as buttons take care about extra filters and queries from
-        // dashboards based on the same index
-        var promises = [
-          urlHelper.getQueriesFromDashboardsWithSameIndex(targetDashboardId),
-          urlHelper.getFiltersFromDashboardsWithSameIndex(targetDashboardId)
-        ];
-        return Promise.all(promises).then(function (results) {
-          var queriesFromDashboardsWithSameIndex = results[0];
-          var filtersFromDashboardsWithSameIndex = results[1] || [];
-          if (joinSeqFilter) {
-            filtersFromDashboardsWithSameIndex = filtersFromDashboardsWithSameIndex.concat(joinSeqFilter);
-          }
-          return countHelper.constructCountQuery(
-            savedDash,
-            savedSearchMeta,
-            null,  // do not put joinSeqFilter here as this parameter is reserved to join_set only !!!
-            queriesFromDashboardsWithSameIndex,
-            filtersFromDashboardsWithSameIndex
-          )
-          .then(function (query) {
-            return {
-              query: query,
-              index: savedSearchMeta.index
-            };
-          });
+      // in case relational panel is enabled at the same time
+      // as buttons take care about extra filters and queries from
+      // dashboards based on the same index
+      var promises = [
+        urlHelper.getDashboardAndSavedSearchMetas([ targetDashboardId ]),
+        urlHelper.getQueriesFromDashboardsWithSameIndex(targetDashboardId),
+        urlHelper.getFiltersFromDashboardsWithSameIndex(targetDashboardId)
+      ];
+      return Promise.all(promises).then(function (results) {
+        var [ [ savedDash, savedSearchMeta ] ] = results[0];
+        var queriesFromDashboardsWithSameIndex = results[1] || [];
+        var filtersFromDashboardsWithSameIndex = results[2] || [];
+        if (joinSeqFilter) {
+          filtersFromDashboardsWithSameIndex = filtersFromDashboardsWithSameIndex.concat(joinSeqFilter);
+        }
+        return countHelper.constructCountQuery(
+          savedDash,
+          savedSearchMeta,
+          null,  // do not put joinSeqFilter here as this parameter is reserved to join_set only !!!
+          queriesFromDashboardsWithSameIndex,
+          filtersFromDashboardsWithSameIndex
+        )
+        .then(function (query) {
+          return {
+            query: query,
+            index: savedSearchMeta.index
+          };
         });
       });
     };

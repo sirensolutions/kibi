@@ -186,7 +186,7 @@ QueryEngine.prototype._loadTemplates =  function () {
       });
     });
   }).catch(function (err) {
-    self.log.error('Could not load the mapping for tempalte object', err);
+    self.log.error('Could not load the mapping for template object', err);
   });
 };
 

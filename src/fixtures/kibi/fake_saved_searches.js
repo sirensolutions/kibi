@@ -37,9 +37,6 @@ define(function (require) {
       addExtra: function (dashboard) {
         extras.push(dashboard);
       },
-      removeExtras: function () {
-        extras = [];
-      },
       find: function () {
         const ss = fakeSavedSearches.concat(extras);
         return Promise.resolve({ hits: ss, total: ss.length });

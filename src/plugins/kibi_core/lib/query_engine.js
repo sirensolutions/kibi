@@ -71,7 +71,7 @@ QueryEngine.prototype._init =  function (enableCache = false, cacheSize = 500, c
         self._loadTemplatesMapping().then(function () {
           self._loadTemplates();
         }).catch(function (err) {
-          self.logger.error('Could not load the mapping for tempalte object', err);
+          self.log.error('Could not load the mapping for tempalte object', err);
         });
 
         self.setupJDBC()

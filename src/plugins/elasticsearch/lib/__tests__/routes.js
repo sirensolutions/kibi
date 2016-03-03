@@ -5,6 +5,8 @@ var format = util.format;
 
 var KbnServer = src('server/KbnServer');
 var fromRoot = src('utils/fromRoot');
+var rp = require('request-promise'); // kibi: added by kibi
+var url = require('url');  // kibi: added by kibi
 
 describe('plugins/elasticsearch', function () {
   describe('routes', function () {
@@ -33,7 +35,27 @@ describe('plugins/elasticsearch', function () {
         }
       });
 
-      return kbnServer.ready();
+      return kbnServer.ready().then(function () {
+        // kibi: added by kibi to make sure that there is no kibi index when this tests are run
+        // here make sure that .kibi index does not exists
+        return new Promise(function (fulfill, reject) {
+          rp({
+            method: 'DELETE',
+            uri: url.parse('http://localhost:9210/' + kbnServer.server.config().get('kibana.index') + '/'),
+            json: true,
+            headers: {
+              'content-type': 'application/json'
+            },
+            timeout: 1000
+          }).then(function () {
+            fulfill(true);
+          }).catch(function (err) {
+            // error here means that there was not kibi index - so all fine
+            fulfill(true);
+          });
+        });
+        // kibi: end
+      });
     });
 
 

@@ -245,7 +245,7 @@ define(function (require) {
     };
 
     KibiSelectHelper.prototype.getIconType = function () {
-      var icons = [{
+      var types = [{
         label:'Font Awesome',
         value: 'fontawesome'
       },
@@ -254,10 +254,10 @@ define(function (require) {
         value: 'relpath'
       }];
 
-      var labels = _.map(icons, function (icon) {
+      var labels = _.map(types, function (type) {
         return {
-          label: icon.label,
-          value: icon.value
+          label: type.label,
+          value: type.value
         };
       });
       return Promise.resolve(labels);

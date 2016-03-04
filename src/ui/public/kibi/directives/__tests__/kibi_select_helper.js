@@ -426,5 +426,19 @@ describe('Kibi Directives', function () {
         }).catch(done);
       });
     });
+
+    describe('GetIconType', function () {
+      it('should return the ID of indices', function (done) {
+        stSelectHelper.getIconType().then(function (types) {
+          expect(types).to.have.length(2);
+          expect(types[0].label).to.be('Font Awesome');
+          expect(types[0].value).to.be('fontawesome');
+          expect(types[1].label).to.be('Relative Path');
+          expect(types[1].value).to.be('relpath');
+          done();
+        }).catch(done);
+      });
+    });
+
   });
 });

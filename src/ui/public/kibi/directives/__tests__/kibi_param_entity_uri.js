@@ -38,13 +38,12 @@ var init = function (entityUriHolder, mappings) {
   });
 
   ngMock.module('kibana', function ($provide) {
+    // these services were added because they are used by the kibi-select directive
     $provide.service('savedDatasources', function () {});
-  });
-
-  ngMock.module('app/dashboard', function ($provide) {
     $provide.service('savedDashboards', function () {});
+    $provide.service('savedSearches', function () {});
+    $provide.service('savedTemplates', function () {});
   });
-
 
   ngMock.module('kibana/courier', function ($provide) {
     $provide.service('courier', function (Promise) {

@@ -17,6 +17,7 @@ describe('Kibi Directives', function () {
 
       ngMock.module('kibana', function ($provide) {
         $provide.service('savedDatasources', fakeSavedDatasources);
+        $provide.service('savedSearches', require('fixtures/kibi/fake_saved_searches'));
         $provide.constant('kbnIndex', '.kibi');
       });
 
@@ -32,41 +33,63 @@ describe('Kibi Directives', function () {
         });
       });
 
+      ngMock.module('templates_editor/services/saved_templates', function ($provide) {
+        $provide.service('savedTemplates', function (Promise) {
+          return {
+            find: function () {
+              const templates = [
+                {
+                  id: 'template-1',
+                  title: 'template 1',
+                  description: '',
+                  st_templateSource: '',
+                  st_templateEngine: 'jade',
+                  _previewQueryId: '',
+                  version: 1
+                }
+              ];
+              return Promise.resolve({ hits: templates });
+            }
+          };
+        });
+      });
+
       ngMock.module('queries_editor/services/saved_queries', function ($provide) {
         $provide.service('savedQueries', function (Promise) {
           return {
-            get: function (id) {
-              var query;
-
-              switch (id) {
-                case 'sparql':
-                  query = {
-                    st_resultQuery: 'select ?name { ?s ?p ?o }',
-                    st_datasourceId: 'ds1'
-                  };
-                  break;
-                case 'sql':
-                  query = {
-                    st_resultQuery: 'select name from person',
-                    st_datasourceId: 'ds2'
-                  };
-                  break;
-                case 'rest':
-                  query = {
-                    st_resultQuery: '',
-                    st_datasourceId: 'ds3'
-                  };
-                  break;
-                case 'nodatasource':
-                  query = {
-                    st_resultQuery: '',
-                    st_datasourceId: ''
-                  };
-                  break;
-                default:
-                  return Promise.reject('What is this id? ' + id);
-              }
-              return Promise.resolve(query);
+            find: function () {
+              const queries = [
+                {
+                  id: 'sparql',
+                  st_resultQuery: 'select ?name { ?s ?p ?o }',
+                  st_datasourceId: 'ds1',
+                  st_tags: []
+                },
+                {
+                  id: 'sql',
+                  st_resultQuery: 'select name from person',
+                  st_datasourceId: 'ds2',
+                  st_tags: []
+                },
+                {
+                  id: 'rest',
+                  st_resultQuery: '',
+                  st_datasourceId: 'ds3',
+                  st_tags: []
+                },
+                {
+                  id: 'nodatasource',
+                  st_resultQuery: '',
+                  st_datasourceId: '',
+                  st_tags: []
+                },
+                {
+                  id: 'q2',
+                  title: 'q2',
+                  st_tags: [ 'tag2', '42' ]
+                }
+              ];
+              return Promise.resolve({ hits: queries, length: queries.length });
             }
           };
         });
@@ -110,50 +133,15 @@ describe('Kibi Directives', function () {
 
     describe('GetQueries', function () {
       it('select queries', function (done) {
-        var data = fakeHits(
-          {
-            _id: 'q1',
-            _source: {
-              title: 'q1',
-              st_tags: []
-            }
-          },
-          {
-            _id: 'q2',
-            _source: {
-              title: 'q2',
-              st_tags: [ 'tag2', '42' ]
-            }
-          }
-        );
-
-        $httpBackend.whenGET('/elasticsearch/.kibi/query/_search?size=100').respond(200, data);
         stSelectHelper.getQueries().then(function (queries) {
-          expect(queries).to.have.length(2);
+          expect(queries).to.have.length(5);
           expect(queries[0].group).to.be('No tag');
-          expect(queries[1].group).to.be('tag2,42');
+          expect(queries[1].group).to.be('No tag');
+          expect(queries[2].group).to.be('No tag');
+          expect(queries[3].group).to.be('No tag');
+          expect(queries[4].group).to.be('tag2,42');
           done();
         }).catch(done);
-        $httpBackend.flush();
-      });
-
-      it('select queries without hits', function (done) {
-        var data = { aaa: 'aaa' };
-        $httpBackend.whenGET('/elasticsearch/.kibi/query/_search?size=100').respond(200, data);
-        stSelectHelper.getQueries().then(function (queries) {
-          expect(queries).to.be(undefined);
-          done();
-        }).catch(done);
-        $httpBackend.flush();
-      });
-
-      it('select queries with error', function (done) {
-        $httpBackend.whenGET('/elasticsearch/.kibi/query/_search?size=100').respond(404, '');
-        stSelectHelper.getQueries()
-          .catch(function () {
-            done();
-          });
-        $httpBackend.flush();
       });
     });
 
@@ -193,29 +181,37 @@ describe('Kibi Directives', function () {
       });
     });
 
-    describe('GetObjects', function () {
-      it('select saved searches or templates', function (done) {
-        var savedSearches = fakeHits(
-          {
-            _id: 'ss1',
-            _source: {
-              title: 'ss1',
+    describe('GetTemplates', function () {
+      it('select saved templates', function (done) {
+        stSelectHelper.getTemplates().then(function (templates) {
+          var expectedTemplates = [
+            {
+              value: 'template-1',
+              label: 'template 1'
             }
-          },
-          {
-            _id: 'ss2',
-            _source: {
-              title: 'ss2'
-            }
-          }
-        );
-
-        $httpBackend.whenGET('/elasticsearch/.kibi/search/_search?size=100').respond(200, savedSearches);
-        stSelectHelper.getObjects('search').then(function (searches) {
-          expect(searches).to.have.length(2);
+          ];
+          expect(templates).to.be.eql(expectedTemplates);
           done();
         }).catch(done);
-        $httpBackend.flush();
+      });
+    });
+
+    describe('GetSavedSearches', function () {
+      it('select saved searches', function (done) {
+        stSelectHelper.getSavedSearches().then(function (savedSearches) {
+          var expectedSavedSearches = [
+            {
+              value: 'search-ste',
+              label: undefined
+            },
+            {
+              value: 'time-testing-4',
+              label: undefined
+            }
+          ];
+          expect(savedSearches).to.be.eql(expectedSavedSearches);
+          done();
+        }).catch(done);
       });
     });
 
@@ -360,7 +356,7 @@ describe('Kibi Directives', function () {
           expect(variables.fields).to.have.length(0);
           expect(variables.datasourceType).to.equal('rest');
           done();
-        });
+        }).catch(done);
       });
 
       it('should return the variables of the SQL query', function (done) {
@@ -386,7 +382,7 @@ describe('Kibi Directives', function () {
       it('should return an error if query is unknown', function (done) {
         stSelectHelper.getQueryVariables('boo')
         .catch(function (err) {
-          expect(err).to.be('What is this id? boo');
+          expect(err.message).to.be('Query with id [boo] was not found');
           done();
         });
       });

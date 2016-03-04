@@ -172,8 +172,10 @@ define(function (require) {
               promise = selectHelper.getDashboards();
               break;
             case 'search':
+              promise = selectHelper.getSavedSearches();
+              break;
             case 'template':
-              promise = selectHelper.getObjects(scope.objectType);
+              promise = selectHelper.getTemplates();
               break;
             case 'datasource':
               promise = selectHelper.getDatasources();

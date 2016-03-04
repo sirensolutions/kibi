@@ -4,7 +4,7 @@ define(function (require) {
 
   return function KibiSelectHelperFactory(
     config, $http, courier, indexPatterns, timefilter, Private, Promise,
-    savedDashboards, savedQueries, savedDatasources, kbnIndex
+    savedSearches, savedTemplates, savedDashboards, savedQueries, savedDatasources, kbnIndex
     ) {
 
     function KibiSelectHelper() {
@@ -16,18 +16,42 @@ define(function (require) {
     var indexPath = Private(require('ui/kibi/components/commons/_index_path'));
     var datasourceHelper = Private(require('ui/kibi/helpers/datasource_helper'));
 
-    var searchRequest = function (type) {
-      return $http.get(chrome.getBasePath() + '/elasticsearch/' + kbnIndex + '/' + type + '/_search?size=100');
+    KibiSelectHelper.prototype.getQueries = function () {
+      return savedQueries.find().then(function (queries) {
+        if (queries.hits) {
+          var items = _.map(queries.hits, function (hit) {
+            return {
+              group: hit.st_tags.length ? hit.st_tags.join() : 'No tag',
+              label: hit.title,
+              value: hit.id
+            };
+          });
+          return items;
+        }
+      });
     };
 
-    KibiSelectHelper.prototype.getQueries = function () {
-      return searchRequest('query').then(function (queries) {
-        if (queries.data.hits && queries.data.hits.hits) {
-          var items = _.map(queries.data.hits.hits, function (hit) {
+    KibiSelectHelper.prototype.getSavedSearches = function () {
+      return savedSearches.find().then(function (data) {
+        if (data.hits) {
+          var items = _.map(data.hits, function (hit) {
             return {
-              group: hit._source.st_tags.length ? hit._source.st_tags.join() : 'No tag',
-              label: hit._source.title,
-              value: hit._id
+              label: hit.title,
+              value: hit.id
+            };
+          });
+          return items;
+        }
+      });
+    };
+
+    KibiSelectHelper.prototype.getTemplates = function () {
+      return savedTemplates.find().then(function (data) {
+        if (data.hits) {
+          var items = _.map(data.hits, function (hit) {
+            return {
+              label: hit.title,
+              value: hit.id
             };
           });
           return items;
@@ -42,20 +66,6 @@ define(function (require) {
             return {
               label: hit.title,
               value: hit.id
-            };
-          });
-          return items;
-        }
-      });
-    };
-
-    KibiSelectHelper.prototype.getObjects = function (type) {
-      return searchRequest(type).then(function (objects) {
-        if (objects.data.hits && objects.data.hits.hits) {
-          var items = _.map(objects.data.hits.hits, function (hit) {
-            return {
-              label: hit._source.title,
-              value: hit._id
             };
           });
           return items;
@@ -190,50 +200,46 @@ define(function (require) {
         return Promise.reject(new Error('No queryId'));
       }
       // first fetch the query
-      return new Promise(function (fulfill, reject) {
-        savedQueries.get(queryId).then(function (savedQuery) {
-          if (!savedQuery.st_datasourceId) {
-            reject(new Error('SavedQuery [' + queryId + '] does not have st_datasourceId parameter'));
+      return savedQueries.find(queryId).then(function (queries) {
+        const savedQuery = _.find(queries.hits, 'id', queryId);
+        if (!savedQuery) {
+          return Promise.reject(new Error('Query with id [' + queryId + '] was not found'));
+        }
+        if (!savedQuery.st_datasourceId) {
+          return Promise.reject(new Error('SavedQuery [' + queryId + '] does not have st_datasourceId parameter'));
+        }
+        return datasourceHelper.getDatasourceType(savedQuery.st_datasourceId).then(function (datasourceType) {
+          var resultQuery = savedQuery.st_resultQuery;
+          var variables = [];
+          switch (datasourceType) {
+            case 'sparql_http':
+            case 'jdbc-sparql':
+              variables = sparqlHelper.getVariables(resultQuery);
+              break;
+            case 'sqlite':
+            case 'mysql':
+            case 'pgsql':
+            case 'jdbc':
+              variables = sqlHelper.getVariables(resultQuery);
+              break;
+            case 'rest':
+            case 'tinkerpop3':
+              // do nothing if variables is empty a text box instead of select should be rendered
+              break;
+            default:
+              return Promise.reject('Unknown datasource type for query=' + queryId + ': ' + datasourceType);
           }
-          datasourceHelper.getDatasourceType(savedQuery.st_datasourceId).then(function (datasourceType) {
-            var resultQuery = savedQuery.st_resultQuery;
-            var variables = [];
-            switch (datasourceType) {
-              case 'sparql_http':
-              case 'jdbc-sparql':
-                variables = sparqlHelper.getVariables(resultQuery);
-                break;
-              case 'sqlite':
-              case 'mysql':
-              case 'pgsql':
-              case 'jdbc':
-                variables = sqlHelper.getVariables(resultQuery);
-                break;
-              case 'rest':
-              case 'tinkerpop3':
-                // do nothing if variables is empty a text box instead of select should be rendered
-                break;
-              default:
-                return reject('Unknown datasource type for query=' + queryId + ': ' + datasourceType);
-            }
 
-            var fields = _.map(variables, function (v) {
-              return {
-                label: v.replace(',', ''),
-                value: v.replace('?', '').replace(',', '') // in case of sparql we have to remove the '?'
-              };
-            });
-            fulfill({
-              fields: fields,
-              datasourceType: datasourceType
-            });
-          })
-          .catch(function (err) {
-            reject(err);
+          var fields = _.map(variables, function (v) {
+            return {
+              label: v.replace(',', ''),
+              value: v.replace('?', '').replace(',', '') // in case of sparql we have to remove the '?'
+            };
           });
-        })
-        .catch(function (err) {
-          reject(err);
+          return {
+            fields: fields,
+            datasourceType: datasourceType
+          };
         });
       });
     };

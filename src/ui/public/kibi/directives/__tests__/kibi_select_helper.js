@@ -428,7 +428,7 @@ describe('Kibi Directives', function () {
     });
 
     describe('GetIconType', function () {
-      it('should return the ID of indices', function (done) {
+      it('should return available icon types', function (done) {
         stSelectHelper.getIconType().then(function (types) {
           expect(types).to.have.length(2);
           expect(types[0].label).to.be('Font Awesome');

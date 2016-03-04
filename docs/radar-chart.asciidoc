@@ -13,5 +13,5 @@ image::images/radar_settings.png["Radar chart settings",align="center"]
 
 
 The radar chart is also known as web chart, spider chart, star chart.
-is developed as a https://github.com/sirensolutions/kibi_radar_vis[standalone plugin]
+It is developed as a https://github.com/sirensolutions/kibi_radar_vis[standalone plugin]
 suitable to install in both Kibi 0.3+ and Kibana 4.3+.

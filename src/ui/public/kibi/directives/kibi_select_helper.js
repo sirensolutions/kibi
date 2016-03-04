@@ -244,6 +244,25 @@ define(function (require) {
       });
     };
 
+    KibiSelectHelper.prototype.getIconType = function () {
+      var icons = [{
+        label:'Font Awesome',
+        value: 'fontawesome'
+      },
+      {
+        label:'Relative Path',
+        value: 'relpath'
+      }];
+
+      var labels = _.map(icons, function (icon) {
+        return {
+          label: icon.label,
+          value: icon.value
+        };
+      });
+      return Promise.resolve(labels);
+    };
+
     KibiSelectHelper.prototype.getFontAwesomeIcon = function () {
       /*eslint max-len: [2, 180, 4]*/ // maximum length of 180 characters
       var icons = ['fa-500px','fa-adjust','fa-adn','fa-align-center','fa-align-justify','fa-align-left','fa-align-right',

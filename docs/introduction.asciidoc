@@ -49,5 +49,6 @@ Kibi is currently developed as a fork of Kibana {kibana-version}. The plugin API
 
 This new version of Kibi provides many improvements and new features, the main one are listed below:
 
-- Kibi is merged with {kibana-announcement}[Kibana {kibana-version}] which introduced a major refactoring of the code.
-- A new <<radar-chart,radar chart>> visualisation.
+- Kibi is merged with {kibana-announcement}[Kibana {kibana-version}].
+- Support for new version of elasticsearch v{elasticsearch-version}.
+- Siren join plugin version upgraded to v{siren-join-version}.

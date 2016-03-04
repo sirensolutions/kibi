@@ -166,8 +166,8 @@ describe('Kibi Components', function () {
       it('get saved dashboard and saved search', function (done) {
         urlHelper.getDashboardAndSavedSearchMetas([ 'search-ste' ]).then(function (results) {
           expect(results).to.have.length(1);
-          expect(results[0][0].id).to.be('search-ste');
-          expect(results[0][1].index).to.be('search-ste');
+          expect(results[0].savedDash.id).to.be('search-ste');
+          expect(results[0].savedSearchMeta.index).to.be('search-ste');
           done();
         }).catch(done);
       });
@@ -185,8 +185,12 @@ describe('Kibi Components', function () {
         urlHelper.getDashboardAndSavedSearchMetas([ 'search-ste', 'unknown dashboard' ]).then(function (results) {
           done('should fail');
         }).catch(function (err) {
-          expect(err.message).to.be('Unable to retrieve dashboards: ["unknown dashboard"].');
-          done();
+          try {
+            expect(err.message).to.be('Unable to retrieve dashboards: ["unknown dashboard"].');
+            done();
+          } catch (e) {
+            done(e);
+          }
         });
       });
     });

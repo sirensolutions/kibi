@@ -44,7 +44,7 @@ define(function (require) {
         var currentDashboardId = urlHelper.getCurrentDashboardId();
 
         var countQueries = _.map($scope.buttons, function (button) {
-          return urlHelper.getDashboardAndSavedSearchMetas([ currentDashboardId ]).then(([ [ savedDash, savedSearchMeta ] ]) => {
+          return urlHelper.getDashboardAndSavedSearchMetas([ currentDashboardId ]).then(([ { savedDash, savedSearchMeta } ]) => {
             // check that there are any join_seq filters already on this dashboard
             //    if there is 0:
             //      create new join_seq filter with 1 relation from current dashboard to target dashboard
@@ -175,7 +175,7 @@ define(function (require) {
         if (currentDashboardId) {
           // check that current dashboard has assigned indexPatternId
           // use find to minimize numner of requests
-          urlHelper.getDashboardAndSavedSearchMetas([ currentDashboardId ]).then(([ [ savedDash, savedSearchMeta ] ]) => {
+          urlHelper.getDashboardAndSavedSearchMetas([ currentDashboardId ]).then(([ { savedDash, savedSearchMeta } ]) => {
             const index = savedSearchMeta.index;
             $scope.buttons = relVisHelper.constructButtonsArray($scope.vis.params.buttons, index);
             if (!$scope.buttons.length) {

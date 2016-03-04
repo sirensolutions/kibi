@@ -168,7 +168,7 @@ define(function (require) {
       var _createMap = function (results) {
         // postprocess the results to create the map
         var indexToDashboardArrayMap = {};
-        _.each(results, function ([ savedDash, savedSearchMeta ]) {
+        _.each(results, function ({ savedDash, savedSearchMeta }) {
           if (!indexToDashboardArrayMap[savedSearchMeta.index]) {
             indexToDashboardArrayMap[savedSearchMeta.index] = [savedDash.id];
           } else {
@@ -232,12 +232,12 @@ define(function (require) {
           }
           const savedSearch = _.find(savedSearchesRes.hits, (hit) => hit.id === savedDash.savedSearchId);
           const savedSearchMeta = savedSearch ? getSavedSearchMeta(savedSearch) : null;
-          return [ savedDash, savedSearchMeta ];
+          return { savedDash, savedSearchMeta };
         })
         .value();
 
         if (!getAllDashboards && dashboardIds.length !== promises.length) {
-          const found = _(promises).filter((arg) => Array.isArray(arg)).map(([ savedDash, savedSearchMeta ]) => savedDash.id).value();
+          const found = _(promises).filter((arg) => typeof arg === 'object').map(({ savedDash, savedSearchMeta }) => savedDash.id).value();
           return Promise.reject(new Error(`Unable to retrieve dashboards: ${JSON.stringify(_.difference(dashboardIds, found))}.`));
         }
         return Promise.all(promises);
@@ -304,7 +304,7 @@ define(function (require) {
       }
 
       return this.getDashboardAndSavedSearchMetas(dashboardIds).then((results) => {
-        const filters = _.map(results, ([ savedDash, savedSearchMeta ]) => this._getFiltersFromDashboard(savedDash, savedSearchMeta));
+        const filters = _.map(results, ({ savedDash, savedSearchMeta }) => this._getFiltersFromDashboard(savedDash, savedSearchMeta));
         return Promise.all(filters).then((results) => {
           return _({}).merge(...results, (filter1, filter2) => {
             if (!filter1) {
@@ -330,7 +330,7 @@ define(function (require) {
       }
 
       return this.getDashboardAndSavedSearchMetas(dashboardIds).then((results) => {
-        const filters = _.map(results, ([ savedDash, savedSearchMeta ]) => this._getQueriesFromDashboard(savedDash, savedSearchMeta));
+        const filters = _.map(results, ({ savedDash, savedSearchMeta }) => this._getQueriesFromDashboard(savedDash, savedSearchMeta));
         return Promise.all(filters).then((results) => _.merge({}, ...results, (query1, query2) => {
           if (!query1) {
             return query2;
@@ -363,7 +363,7 @@ define(function (require) {
       }
 
       return this.getDashboardAndSavedSearchMetas(undefined, true).then((results) => {
-        const [ savedDash, savedSearchMeta ] = _.find(results, ([ savedDash, savedSearchMeta ]) => savedDash.id === dashboardId);
+        const { savedDash, savedSearchMeta } = _.find(results, ({ savedDash, savedSearchMeta }) => savedDash.id === dashboardId);
         if (!savedSearchMeta) {
           return Promise.resolve([]);
         }
@@ -374,10 +374,10 @@ define(function (require) {
         // - which index is the same as the one associated with the dashboard in argument
         const promises = _(results)
         // filter out dashboards that are in the array passed as argument
-        .filter(([ savedDash, savedSearchMeta ]) => dashboardId !== savedDash.id)
+        .filter(({ savedDash, savedSearchMeta }) => dashboardId !== savedDash.id)
         // remove dashboards that are not in any enabled relations
-        .filter(([ savedDash, savedSearchMeta ]) => this.isDashboardInTheseRelations(savedDash.id, enabledRelations))
-        .map(([ savedDash, savedSearchMeta ]) => {
+        .filter(({ savedDash, savedSearchMeta }) => this.isDashboardInTheseRelations(savedDash.id, enabledRelations))
+        .map(({ savedDash, savedSearchMeta }) => {
           if (index !== savedSearchMeta.index) {
             return Promise.resolve({});
           }

@@ -26,7 +26,7 @@ define(function (require) {
       var self = this;
 
       return urlHelper.getDashboardAndSavedSearchMetas([ dashboardId ])
-      .then(function ([ [ savedDash, savedSearchMeta ] ]) {
+      .then(function ([ { savedDash, savedSearchMeta } ]) {
         // now construct the query
         if (joinFilterHelper.isRelationalPanelEnabled() && joinFilterHelper.isSirenJoinPluginInstalled()) {
 

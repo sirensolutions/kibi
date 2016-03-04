@@ -154,7 +154,7 @@ describe('Kibi Components', function () {
         };
 
         urlHelper.getDashboardAndSavedSearchMetas([ 'empty-dashboard' ])
-        .then(([ [ savedDash, savedSearchMeta ] ]) =>  countHelper.constructCountQuery(savedDash, savedSearchMeta, joinSetFilter))
+        .then(([ { savedDash, savedSearchMeta } ]) =>  countHelper.constructCountQuery(savedDash, savedSearchMeta, joinSetFilter))
         .then(function (query) {
           expect(query).to.eql(expected);
           done();
@@ -191,7 +191,7 @@ describe('Kibi Components', function () {
         };
 
         urlHelper.getDashboardAndSavedSearchMetas([ 'query-dashboard' ])
-        .then(([ [ savedDash, savedSearchMeta ] ]) =>  countHelper.constructCountQuery(savedDash, savedSearchMeta, joinSetFilter))
+        .then(([ { savedDash, savedSearchMeta } ]) =>  countHelper.constructCountQuery(savedDash, savedSearchMeta, joinSetFilter))
         .then(function (query) {
           expect(query).to.eql(expected);
           done();
@@ -244,7 +244,7 @@ describe('Kibi Components', function () {
         };
 
         urlHelper.getDashboardAndSavedSearchMetas([ 'empty-dashboard' ])
-        .then(([ [ savedDash, savedSearchMeta ] ]) =>  countHelper.constructCountQuery(savedDash, savedSearchMeta, joinSetFilter))
+        .then(([ { savedDash, savedSearchMeta } ]) =>  countHelper.constructCountQuery(savedDash, savedSearchMeta, joinSetFilter))
         .then(function (query) {
           expect(query).to.eql(expected);
           done();
@@ -288,7 +288,7 @@ describe('Kibi Components', function () {
         };
 
         urlHelper.getDashboardAndSavedSearchMetas([ 'empty-dashboard' ])
-        .then(([ [ savedDash, savedSearchMeta ] ]) =>  countHelper.constructCountQuery(savedDash, savedSearchMeta, joinSetFilter))
+        .then(([ { savedDash, savedSearchMeta } ]) =>  countHelper.constructCountQuery(savedDash, savedSearchMeta, joinSetFilter))
         .then(function (query) {
           expect(query).to.eql(expected);
           done();
@@ -331,7 +331,7 @@ describe('Kibi Components', function () {
         };
 
         urlHelper.getDashboardAndSavedSearchMetas([ 'empty-dashboard' ])
-        .then(([ [ savedDash, savedSearchMeta ] ]) =>  countHelper.constructCountQuery(savedDash, savedSearchMeta, joinSetFilter))
+        .then(([ { savedDash, savedSearchMeta } ]) =>  countHelper.constructCountQuery(savedDash, savedSearchMeta, joinSetFilter))
         .then(function (query) {
           expect(query).to.eql(expected);
           done();
@@ -389,7 +389,7 @@ describe('Kibi Components', function () {
         };
 
         urlHelper.getDashboardAndSavedSearchMetas([ 'empty-dashboard' ])
-        .then(([ [ savedDash, savedSearchMeta ] ]) =>  countHelper.constructCountQuery(savedDash, savedSearchMeta, joinSetFilter))
+        .then(([ { savedDash, savedSearchMeta } ]) =>  countHelper.constructCountQuery(savedDash, savedSearchMeta, joinSetFilter))
         .then(function (query) {
           expect(query).to.eql(expected);
           done();
@@ -454,7 +454,7 @@ describe('Kibi Components', function () {
         };
 
         urlHelper.getDashboardAndSavedSearchMetas([ 'empty-dashboard' ])
-        .then(([ [ savedDash, savedSearchMeta ] ]) =>  countHelper.constructCountQuery(savedDash, savedSearchMeta, joinSetFilter))
+        .then(([ { savedDash, savedSearchMeta } ]) =>  countHelper.constructCountQuery(savedDash, savedSearchMeta, joinSetFilter))
         .then(function (query) {
           expect(query).to.eql(expected);
           done();
@@ -502,7 +502,7 @@ describe('Kibi Components', function () {
         };
 
         urlHelper.getDashboardAndSavedSearchMetas([ 'empty-dashboard' ])
-        .then(([ [ savedDash, savedSearchMeta ] ]) =>  countHelper.constructCountQuery(savedDash, savedSearchMeta, joinSetFilter))
+        .then(([ { savedDash, savedSearchMeta } ]) =>  countHelper.constructCountQuery(savedDash, savedSearchMeta, joinSetFilter))
         .then(function (query) {
           expect(query).to.eql(expected);
           done();
@@ -550,7 +550,7 @@ describe('Kibi Components', function () {
         };
 
         urlHelper.getDashboardAndSavedSearchMetas([ dashboardId ])
-        .then(([ [ savedDash, savedSearchMeta ] ]) =>  countHelper.constructCountQuery(savedDash, savedSearchMeta, joinSetFilter))
+        .then(([ { savedDash, savedSearchMeta } ]) =>  countHelper.constructCountQuery(savedDash, savedSearchMeta, joinSetFilter))
         .then(function (query) {
           expect(query).to.eql(expected);
           done();
@@ -588,7 +588,7 @@ describe('Kibi Components', function () {
         };
 
         urlHelper.getDashboardAndSavedSearchMetas([ dashboardId ])
-        .then(([ [ savedDash, savedSearchMeta ] ]) =>  countHelper.constructCountQuery(savedDash, savedSearchMeta, joinSetFilter))
+        .then(([ { savedDash, savedSearchMeta } ]) =>  countHelper.constructCountQuery(savedDash, savedSearchMeta, joinSetFilter))
         .then(function (query) {
           expect(query).to.eql(expected);
           done();

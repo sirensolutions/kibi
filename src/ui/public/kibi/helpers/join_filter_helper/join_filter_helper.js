@@ -48,7 +48,7 @@ define(function (require) {
         var queriesPerIndexPromise = urlHelper.getQueriesPerIndexFromDashboards(dashboardIds);
 
         return Promise.all([focusedSavedSearch, filtersPerIndexPromise, queriesPerIndexPromise]).then(function (data) {
-          var [ [ savedDash, savedSearchMeta ] ] = data[0];
+          var [ { savedDash, savedSearchMeta } ] = data[0];
           var filtersPerIndex = data[1];
           var queriesPerIndex = data[2];
 

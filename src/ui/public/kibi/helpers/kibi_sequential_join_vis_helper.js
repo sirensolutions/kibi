@@ -234,7 +234,7 @@ define(function (require) {
         urlHelper.getFiltersFromDashboardsWithSameIndex(targetDashboardId)
       ];
       return Promise.all(promises).then(function (results) {
-        var [ [ savedDash, savedSearchMeta ] ] = results[0];
+        var [ { savedDash, savedSearchMeta } ] = results[0];
         var queriesFromDashboardsWithSameIndex = results[1] || [];
         var filtersFromDashboardsWithSameIndex = results[2] || [];
         if (joinSeqFilter) {

@@ -207,7 +207,7 @@ define(function (require) {
       var dashboardsInGroups = self._getListOfDashboardsFromGroups(dashboardGroups1);
 
       return urlHelper.getDashboardAndSavedSearchMetas(undefined, true).then(function (results) {
-        const promises = _.map(results, function ([ savedDash, savedSearchMeta ]) {
+        const promises = _.map(results, function ({ savedDash, savedSearchMeta }) {
           if (savedSearchMeta) {
             return {
               id: savedDash.id,

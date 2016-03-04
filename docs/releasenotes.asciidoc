@@ -1,4 +1,16 @@
 [[releasenotes]]
+
+== Kibi 0.3.1 and Kibana 4.4.1 Release Notes
+
+* Various bug fixes and stability improvements.
+* The 0.3.1 release of Kibi requires Elasticsearch 2.2.0.
+* Siren join plugin version upgraded to https://github.com/sirensolutions/siren-join/tree/2.2.0[2.2.0].
+
+Below are the issues relevant to Kibana.
+
+* Bump node.js to 0.12.10 from 0.12.9
+* http://github.com/elastic/kibana/issues/6185[Issue 6185]:  Fixes a bug where the active HTTP spinner in the chrome bar is gone
+
 == Kibi 0.3 and Kibana 4.4 Release Notes
 
 The 0.3 release of Kibi requires Elasticsearch 2.1.2.
@@ -9,27 +21,27 @@ Below are the issues relevant to Kibana.
 
 Enhancements
 
-http://github.com/elastic/kibana/issues/1362[Issue 1362]: Color palette selector added.
-http://github.com/elastic/kibana/issues/1553[Issue 1553]: Kibana can shorten URLs for shared or embedded items.
-http://github.com/elastic/kibana/issues/5733[Issue 5733]: Time-based index pattern expansion can be set at index pattern creation time.
-http://github.com/elastic/kibana/issues/5775[Issue 5775]: Adds a configuration option to change the maximum payload size sent to the server.
-http://github.com/elastic/kibana/issues/4966[Issue 4966]: Logo is now in SVG format.
-http://github.com/elastic/kibana/issues/3625[Issue 3625]: Downloaded visualizations now use the visualization name as the filename.
-http://github.com/elastic/kibana/issues/5279[Issue 5279]: Large strings are truncated with an ellipsis (...).
-http://github.com/elastic/kibana/issues/5241[Issue 5241]: Truncated visualization names are displayed in full as tooltips.
+* http://github.com/elastic/kibana/issues/1362[Issue 1362]: Color palette selector added.
+* http://github.com/elastic/kibana/issues/1553[Issue 1553]: Kibana can shorten URLs for shared or embedded items.
+* http://github.com/elastic/kibana/issues/5733[Issue 5733]: Time-based index pattern expansion can be set at index pattern creation time.
+* http://github.com/elastic/kibana/issues/5775[Issue 5775]: Adds a configuration option to change the maximum payload size sent to the server.
+* http://github.com/elastic/kibana/issues/4966[Issue 4966]: Logo is now in SVG format.
+* http://github.com/elastic/kibana/issues/3625[Issue 3625]: Downloaded visualizations now use the visualization name as the filename.
+* http://github.com/elastic/kibana/issues/5279[Issue 5279]: Large strings are truncated with an ellipsis (...).
+* http://github.com/elastic/kibana/issues/5241[Issue 5241]: Truncated visualization names are displayed in full as tooltips.
 
 Bug Fixes
 
-http://github.com/elastic/kibana/issues/5897[Issue 5897]: Embedding links no longer include navigation and search bars.
-http://github.com/elastic/kibana/issues/5896[Issue 5896]: Bookmarked URLs to saved filtered searches from a previous version of Kibana display correctly.
-http://github.com/elastic/kibana/issues/5744[Issue 5744]: Fixes bug that caused incorrect display of "No results found" in some cases.
-http://github.com/elastic/kibana/issues/5824[Issue 5824]: Corrects a fatal error when Kibana starts with node x86 on Windows x64 systems.
+* http://github.com/elastic/kibana/issues/5897[Issue 5897]: Embedding links no longer include navigation and search bars.
+* http://github.com/elastic/kibana/issues/5896[Issue 5896]: Bookmarked URLs to saved filtered searches from a previous version of Kibana display correctly.
+* http://github.com/elastic/kibana/issues/5744[Issue 5744]: Fixes bug that caused incorrect display of "No results found" in some cases.
+* http://github.com/elastic/kibana/issues/5824[Issue 5824]: Corrects a fatal error when Kibana starts with node x86 on Windows x64 systems.
 
 Plugin System Changes
 
-http://github.com/elastic/kibana/issues/5226[Issue 5226]: Plugins are explicit when they start to route.
-http://github.com/elastic/kibana/pull/5725[Pull Request 5725]: Plugins can extend Chrome navigation.
-http://github.com/elastic/kibana/issues/4720[Issue 4720]: Adds support for zip compression.
-http://github.com/elastic/kibana/pull/5704[Pull Request 5704]: Removes Github shortcuts from the plugin installer.
-http://github.com/elastic/kibana/issues/5661[Issue 5661]: Fixes the plugin optimization path.
-http://github.com/elastic/kibana/pull/5538[Pull Request 5538]: Apps can use empty export types.
+* http://github.com/elastic/kibana/issues/5226[Issue 5226]: Plugins are explicit when they start to route.
+* http://github.com/elastic/kibana/pull/5725[Pull Request 5725]: Plugins can extend Chrome navigation.
+* http://github.com/elastic/kibana/issues/4720[Issue 4720]: Adds support for zip compression.
+* http://github.com/elastic/kibana/pull/5704[Pull Request 5704]: Removes Github shortcuts from the plugin installer.
+* http://github.com/elastic/kibana/issues/5661[Issue 5661]: Fixes the plugin optimization path.
+* http://github.com/elastic/kibana/pull/5538[Pull Request 5538]: Apps can use empty export types.

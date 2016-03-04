@@ -88,6 +88,9 @@ define(function (require) {
     var off2 = $rootScope.$on('kibi:entityURIEnabled:external_query_terms_filter', function (event, enabled) {
       $scope.holder.entityURIEnabled = !!enabled;
     });
+    var off3 = $rootScope.$on('kibi:entityURIEnabled:kibigraph', function (event, enabled) {
+      $scope.holder.entityURIEnabled = !!enabled;
+    });
 
     var notify = new Notifier({
       location: 'Visualization Editor'
@@ -237,6 +240,7 @@ define(function (require) {
         savedVis.destroy();
         off1();
         off2();
+        off3();
       });
     }
 

@@ -382,7 +382,7 @@ describe('Kibi Directives', function () {
       it('should return an error if query is unknown', function (done) {
         stSelectHelper.getQueryVariables('boo')
         .catch(function (err) {
-          expect(err).to.be('Query with id [boo] was not found');
+          expect(err.message).to.be('Query with id [boo] was not found');
           done();
         });
       });

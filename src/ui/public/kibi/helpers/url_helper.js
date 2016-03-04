@@ -163,51 +163,25 @@ define(function (require) {
     //   indexId: [dashboardId1, dashboardId2],
     //   ...
     // }
-    UrlHelper.prototype.getIndexToDashboardMap = function (dashboardsIds) {
+    UrlHelper.prototype.getIndexToDashboardMap = function (dashboardIds) {
 
       var _createMap = function (results) {
         // postprocess the results to create the map
         var indexToDashboardArrayMap = {};
-        _.each(results, function (mapping) {
-          if (!indexToDashboardArrayMap[mapping.indexId]) {
-            indexToDashboardArrayMap[mapping.indexId] = [mapping.dashboardId];
+        _.each(results, function ([ savedDash, savedSearchMeta ]) {
+          if (!indexToDashboardArrayMap[savedSearchMeta.index]) {
+            indexToDashboardArrayMap[savedSearchMeta.index] = [savedDash.id];
           } else {
-            if (indexToDashboardArrayMap[mapping.indexId].indexOf(mapping.dashboardId) === -1) {
-              indexToDashboardArrayMap[mapping.indexId].push(mapping.dashboardId);
+            if (indexToDashboardArrayMap[savedSearchMeta.index].indexOf(savedDash.id) === -1) {
+              indexToDashboardArrayMap[savedSearchMeta.index].push(savedDash.id);
             }
           }
         });
         return indexToDashboardArrayMap;
       };
 
-      return savedDashboards.find().then(function (resp) {
-        var promises = [];
-        _.each(resp.hits, function (dashboard) {
-          // here filter dashboards if dashboardsIds provided
-          if (dashboardsIds && dashboardsIds.length > 0 && dashboardsIds.indexOf(dashboard.id) !== -1 && dashboard.savedSearchId) {
-            promises.push(
-              savedSearches.get(dashboard.savedSearchId).then(function (dashboardSavedSearch) {
-                return {
-                  dashboardId: dashboard.id,
-                  indexId: dashboardSavedSearch.searchSource._state.index.id
-                };
-              })
-            );
-          } else if ((!dashboardsIds || !dashboardsIds.length) && dashboard.savedSearchId) {
-            promises.push(
-              savedSearches.get(dashboard.savedSearchId).then(function (dashboardSavedSearch) {
-                return {
-                  dashboardId: dashboard.id,
-                  indexId: dashboardSavedSearch.searchSource._state.index.id
-                };
-              })
-            );
-          }
-        });
-
-        return Promise.all(promises).then(function (results) {
-          return _createMap(results);
-        });
+      return this.getDashboardAndSavedSearchMetas(dashboardIds).then(function (results) {
+        return _createMap(results);
       });
     };
 
@@ -227,26 +201,45 @@ define(function (require) {
     };
 
     /**
-     * For each dashboard id in the argument, return a promise with the saved dashboard and associated saved search meta
+     * For each dashboard id in the argument, return a promise with the saved dashboard and associated saved search meta.
+     * The promise is rejected if a dashboard does not have a saved search associated.
+     * If dashboardIds is undefined, all dashboards are returned.
      */
-    UrlHelper.prototype.getDashboardAndSavedSearchMetas = function (dashboardIds) {
+    UrlHelper.prototype.getDashboardAndSavedSearchMetas = function (dashboardIds, ignoreMissingSavedSearch = false) {
+      let getAllDashboards = false;
+
+      if (!dashboardIds) {
+        getAllDashboards = true;
+      }
+
+      dashboardIds = _.compact(dashboardIds);
+
+      if (!getAllDashboards && !dashboardIds.length) {
+        return Promise.reject(new Error('Your current dashboard is not saved. It needs to be for one of the visualizations.'));
+      }
+
+      // use find to minimize number of requests
       return Promise.all([ savedSearches.find(), savedDashboards.find() ]).then((results) => {
         const savedSearchesRes = results[0];
         const savedDashboardsRes = results[1];
 
         const promises = _(savedDashboardsRes.hits)
         // keep the dashboards that are in the array passed as argument
-        .filter((savedDash) => !dashboardIds || _.contains(dashboardIds, savedDash.id))
+        .filter((savedDash) => getAllDashboards || _.contains(dashboardIds, savedDash.id))
         .map((savedDash) => {
-          if (!savedDash.savedSearchId) {
-            return Promise.reject(new Error(`The dashboard [${savedDash.title}] is expected to be associated with a saved search`));
+          if (!ignoreMissingSavedSearch && !savedDash.savedSearchId) {
+            return Promise.reject(new Error(`The dashboard [${savedDash.title}] is expected to be associated with a saved search.`));
           }
           const savedSearch = _.find(savedSearchesRes.hits, (hit) => hit.id === savedDash.savedSearchId);
-          const savedSearchMeta = getSavedSearchMeta(savedSearch);
+          const savedSearchMeta = savedSearch ? getSavedSearchMeta(savedSearch) : null;
           return [ savedDash, savedSearchMeta ];
         })
         .value();
 
+        if (!getAllDashboards && dashboardIds.length !== promises.length) {
+          const found = _(promises).filter((arg) => Array.isArray(arg)).map(([ savedDash, savedSearchMeta ]) => savedDash.id).value();
+          return Promise.reject(new Error(`Unable to retrieve dashboards: ${JSON.stringify(_.difference(dashboardIds, found))}.`));
+        }
         return Promise.all(promises);
       });
     };
@@ -369,7 +362,7 @@ define(function (require) {
         return Promise.resolve([]);
       }
 
-      return this.getDashboardAndSavedSearchMetas().then((results) => {
+      return this.getDashboardAndSavedSearchMetas(undefined, true).then((results) => {
         const [ savedDash, savedSearchMeta ] = _.find(results, ([ savedDash, savedSearchMeta ]) => savedDash.id === dashboardId);
         if (!savedSearchMeta) {
           return Promise.resolve([]);

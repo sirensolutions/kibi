@@ -6,23 +6,32 @@ define(function (require) {
     var dashboards = [
       {
         id: 'Persons',
+        title: 'Persons',
         savedSearchId: 'saved-search-person'
       },
       {
         id: 'Articles0',
+        title: 'Articles0',
         savedSearchId: 'saved-search-articles0'
       },
       {
         id: 'Articles1',
+        title: 'Articles1',
         savedSearchId: 'saved-search-articles1'
       },
       {
         id: 'Articles2',
+        title: 'Articles2',
         savedSearchId: 'saved-search-articles2'
       },
       {
         id: 'Companies',
+        title: 'Companies',
         savedSearchId: 'saved-search-companies'
+      },
+      {
+        id: 'No Saved Search',
+        title: 'No Saved Search'
       }
     ];
 

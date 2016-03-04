@@ -10,44 +10,7 @@ var dateMath = require('ui/utils/dateMath');
 var $rootScope;
 var countHelper;
 var kibiStateHelper;
-
-var emptySavedSearch = {
-  kibanaSavedObjectMeta: {
-    searchSourceJSON: JSON.stringify(
-      {
-        filter: [],
-        query: {}
-      }
-    )
-  },
-  searchSource: {
-    _state: {
-      index: {
-        id: 'fake'
-      }
-    }
-  }
-};
-
-
-var emptySavedSearchWithIndexWithTime = {
-  kibanaSavedObjectMeta: {
-    searchSourceJSON: JSON.stringify(
-      {
-        filter: [],
-        query: {}
-      }
-    )
-  },
-  searchSource: {
-    _state: {
-      index: {
-        id: 'time-testing-4'  // here put this id to make sure fakeTimeFilter will supply the timfilter for it
-      }
-    }
-  }
-};
-
+var urlHelper;
 
 function init(timefilterImpl, savedDashboardsImpl, savedSearchesImpl) {
   return function () {
@@ -59,12 +22,74 @@ function init(timefilterImpl, savedDashboardsImpl, savedSearchesImpl) {
     }
     if (savedDashboardsImpl) {
       ngMock.module('app/dashboard', function ($provide) {
-        $provide.service('savedDashboards', savedDashboardsImpl);
+        $provide.service('savedDashboards', function (Promise) {
+          const savedDashboards = savedDashboardsImpl(Promise);
+          savedDashboards.addExtra({
+            id: 'empty-dashboard',
+            title: 'empty-dashboard',
+            savedSearchId: 'empty saved search'
+          });
+          savedDashboards.addExtra({
+            id: 'empty-dashboard-with-time',
+            title: 'empty-dashboard-with-time',
+            savedSearchId: 'empty saved search with index with time'
+          });
+          savedDashboards.addExtra({
+            id: 'query-dashboard',
+            title: 'query-dashboard',
+            savedSearchId: 'saved search with query'
+          });
+          return savedDashboards;
+        });
       });
     }
     if (savedSearchesImpl) {
       ngMock.module('discover/saved_searches', function ($provide) {
-        $provide.service('savedSearches', savedSearchesImpl);
+        $provide.service('savedSearches', function (Promise) {
+          const savedSearches = savedSearchesImpl(Promise);
+          savedSearches.addExtra({
+            id: 'empty saved search',
+            kibanaSavedObjectMeta: {
+              searchSourceJSON: JSON.stringify(
+                {
+                  index: 'fake',
+                  filter: [],
+                  query: {}
+                }
+              )
+            }
+          });
+          savedSearches.addExtra({
+            id: 'empty saved search with index with time',
+            kibanaSavedObjectMeta: {
+              searchSourceJSON: JSON.stringify(
+                {
+                  index: 'time-testing-4', // here put this id to make sure fakeTimeFilter will supply the timfilter for it
+                  filter: [],
+                  query: {}
+                }
+              )
+            }
+          });
+          savedSearches.addExtra({
+            id: 'saved search with query',
+            kibanaSavedObjectMeta: {
+              searchSourceJSON: JSON.stringify(
+                {
+                  index: 'fake',
+                  filter: [],
+                  query: {
+                    query_string: {
+                      query: 'funded_year:>2010',
+                      analyze_wildcard: true
+                    }
+                  }
+                }
+              )
+            }
+          });
+          return savedSearches;
+        });
       });
     }
     if (!savedDashboardsImpl && !timefilterImpl) {
@@ -94,6 +119,7 @@ function init(timefilterImpl, savedDashboardsImpl, savedSearchesImpl) {
       $rootScope = _$rootScope_;
       countHelper = Private(require('ui/kibi/helpers/count_helper/count_helper'));
       kibiStateHelper = Private(require('ui/kibi/helpers/kibi_state_helper'));
+      urlHelper = Private(require('ui/kibi/helpers/url_helper'));
     });
   };
 }
@@ -103,14 +129,12 @@ describe('Kibi Components', function () {
 
     require('testUtils/noDigestPromises').activateForSuite();
 
+    beforeEach(init(fakeTimeFilter, fakeSavedDashboards, fakeSavedSearches));
+
     describe('constructCountQuery', function () {
 
-      beforeEach(init());
-
       it('constructCountQuery - empty', function (done) {
-        var dashboardId = 'Articles';
         var joinSetFilter = null;
-        var savedSearch = emptySavedSearch;
 
         var expected = {
           size: 0,
@@ -129,39 +153,16 @@ describe('Kibi Components', function () {
           }
         };
 
-        countHelper.constructCountQuery(dashboardId, savedSearch, joinSetFilter).then(function (query) {
+        urlHelper.getDashboardAndSavedSearchMetas([ 'empty-dashboard' ])
+        .then(([ [ savedDash, savedSearchMeta ] ]) =>  countHelper.constructCountQuery(savedDash, savedSearchMeta, joinSetFilter))
+        .then(function (query) {
           expect(query).to.eql(expected);
           done();
         }).catch(done);
       });
 
       it('constructCountQuery - saved search', function (done) {
-        var dashboardId = 'Articles';
         var joinSetFilter = null;
-
-        // fake savedSearch
-        var savedSearch = {
-          kibanaSavedObjectMeta: {
-            searchSourceJSON: JSON.stringify(
-              {
-                filter: [],
-                query: {
-                  query_string: {
-                    query: 'funded_year:>2010',
-                    analyze_wildcard: true
-                  }
-                }
-              }
-            )
-          },
-          searchSource: {
-            _state: {
-              index: {
-                id: 'fake'
-              }
-            }
-          }
-        };
 
         var expected = {
           size: 0,
@@ -189,7 +190,9 @@ describe('Kibi Components', function () {
           }
         };
 
-        countHelper.constructCountQuery(dashboardId, savedSearch, joinSetFilter).then(function (query) {
+        urlHelper.getDashboardAndSavedSearchMetas([ 'query-dashboard' ])
+        .then(([ [ savedDash, savedSearchMeta ] ]) =>  countHelper.constructCountQuery(savedDash, savedSearchMeta, joinSetFilter))
+        .then(function (query) {
           expect(query).to.eql(expected);
           done();
         }).catch(done);
@@ -199,12 +202,8 @@ describe('Kibi Components', function () {
 
     describe('Using kibiStateHelper and kibiTimeHelper', function () {
 
-      beforeEach(init(fakeTimeFilter, fakeSavedDashboards));
-
       it('constructCountQuery - check if filters taken from kibiState', function (done) {
-        var dashboardId = 'Articles';
         var joinSetFilter = null;
-        var savedSearch = emptySavedSearch;
         var filters = [
           {
             range: {
@@ -216,7 +215,7 @@ describe('Kibi Components', function () {
           }
         ];
 
-        kibiStateHelper.saveFiltersForDashboardId(dashboardId, filters);
+        kibiStateHelper.saveFiltersForDashboardId('empty-dashboard', filters);
 
         var expected = {
           size: 0,
@@ -244,24 +243,24 @@ describe('Kibi Components', function () {
           }
         };
 
-        countHelper.constructCountQuery(dashboardId, savedSearch, joinSetFilter).then(function (query) {
+        urlHelper.getDashboardAndSavedSearchMetas([ 'empty-dashboard' ])
+        .then(([ [ savedDash, savedSearchMeta ] ]) =>  countHelper.constructCountQuery(savedDash, savedSearchMeta, joinSetFilter))
+        .then(function (query) {
           expect(query).to.eql(expected);
           done();
-        });
+        }).catch(done);
       });
 
 
       it('constructCountQuery - check if query is taken from kibiState', function (done) {
-        var dashboardId = 'Articles';
         var joinSetFilter = null;
-        var savedSearch = emptySavedSearch;
         var query = {
           query_string: {
             query: 'AAA'
           }
         };
 
-        kibiStateHelper.saveQueryForDashboardId(dashboardId, query);
+        kibiStateHelper.saveQueryForDashboardId('empty-dashboard', query);
 
         var expected = {
           size: 0,
@@ -288,16 +287,16 @@ describe('Kibi Components', function () {
           }
         };
 
-        countHelper.constructCountQuery(dashboardId, savedSearch, joinSetFilter).then(function (query) {
+        urlHelper.getDashboardAndSavedSearchMetas([ 'empty-dashboard' ])
+        .then(([ [ savedDash, savedSearchMeta ] ]) =>  countHelper.constructCountQuery(savedDash, savedSearchMeta, joinSetFilter))
+        .then(function (query) {
           expect(query).to.eql(expected);
           done();
-        });
+        }).catch(done);
       });
 
 
       it('constructCountQuery - do not take filter from kibi state when disabled', function (done) {
-        var dashboardId = 'Articles';
-        var savedSearch = emptySavedSearch;
         var joinSetFilter = null;
         var negatedFilters = [
           {
@@ -312,8 +311,7 @@ describe('Kibi Components', function () {
             }
           }
         ];
-        kibiStateHelper.saveFiltersForDashboardId(dashboardId, negatedFilters);
-
+        kibiStateHelper.saveFiltersForDashboardId('empty-dashboard', negatedFilters);
 
         var expected = {
           size: 0,
@@ -332,15 +330,15 @@ describe('Kibi Components', function () {
           }
         };
 
-        countHelper.constructCountQuery(dashboardId, savedSearch, joinSetFilter).then(function (query) {
+        urlHelper.getDashboardAndSavedSearchMetas([ 'empty-dashboard' ])
+        .then(([ [ savedDash, savedSearchMeta ] ]) =>  countHelper.constructCountQuery(savedDash, savedSearchMeta, joinSetFilter))
+        .then(function (query) {
           expect(query).to.eql(expected);
           done();
-        });
+        }).catch(done);
       });
 
       it('constructCountQuery - different types of filters', function (done) {
-        var dashboardId = 'Articles';
-        var savedSearch = emptySavedSearch;
         var joinSetFilter = null;
         var differentKindOfFilters = [
           {
@@ -371,8 +369,7 @@ describe('Kibi Components', function () {
             join_sequence: {}
           }
         ];
-        kibiStateHelper.saveFiltersForDashboardId(dashboardId, differentKindOfFilters);
-
+        kibiStateHelper.saveFiltersForDashboardId('empty-dashboard', differentKindOfFilters);
 
         var expected = {
           size: 0,
@@ -391,15 +388,15 @@ describe('Kibi Components', function () {
           }
         };
 
-        countHelper.constructCountQuery(dashboardId, savedSearch, joinSetFilter).then(function (query) {
+        urlHelper.getDashboardAndSavedSearchMetas([ 'empty-dashboard' ])
+        .then(([ [ savedDash, savedSearchMeta ] ]) =>  countHelper.constructCountQuery(savedDash, savedSearchMeta, joinSetFilter))
+        .then(function (query) {
           expect(query).to.eql(expected);
           done();
         }).catch(done);
       });
 
       it('constructCountQuery - different types of filters negated', function (done) {
-        var dashboardId = 'Articles';
-        var savedSearch = emptySavedSearch;
         var joinSetFilter = null;
         var differentKindOfNegatedFilters = [
           {
@@ -435,8 +432,7 @@ describe('Kibi Components', function () {
             join_set: {}
           }
         ];
-        kibiStateHelper.saveFiltersForDashboardId(dashboardId, differentKindOfNegatedFilters);
-
+        kibiStateHelper.saveFiltersForDashboardId('empty-dashboard', differentKindOfNegatedFilters);
 
         var expected = {
           size: 0,
@@ -457,7 +453,9 @@ describe('Kibi Components', function () {
           }
         };
 
-        countHelper.constructCountQuery(dashboardId, savedSearch, joinSetFilter).then(function (query) {
+        urlHelper.getDashboardAndSavedSearchMetas([ 'empty-dashboard' ])
+        .then(([ [ savedDash, savedSearchMeta ] ]) =>  countHelper.constructCountQuery(savedDash, savedSearchMeta, joinSetFilter))
+        .then(function (query) {
           expect(query).to.eql(expected);
           done();
         }).catch(done);
@@ -465,13 +463,11 @@ describe('Kibi Components', function () {
 
 
       it('constructCountQuery - replace join filter if present in kibiState', function (done) {
-        var dashboardId = 'Articles';
         var joinSetFilter = {
           join_set: {
             indexes: [{id: 'index2'}]
           }
         };
-        var savedSearch = emptySavedSearch;
         var stateFilters = [
           {
             join_set: {
@@ -480,7 +476,7 @@ describe('Kibi Components', function () {
           }
         ];
 
-        kibiStateHelper.saveFiltersForDashboardId(dashboardId, stateFilters);
+        kibiStateHelper.saveFiltersForDashboardId('empty-dashboard', stateFilters);
 
         var expected = {
           size: 0,
@@ -505,15 +501,16 @@ describe('Kibi Components', function () {
           }
         };
 
-        countHelper.constructCountQuery(dashboardId, savedSearch, joinSetFilter).then(function (query) {
+        urlHelper.getDashboardAndSavedSearchMetas([ 'empty-dashboard' ])
+        .then(([ [ savedDash, savedSearchMeta ] ]) =>  countHelper.constructCountQuery(savedDash, savedSearchMeta, joinSetFilter))
+        .then(function (query) {
           expect(query).to.eql(expected);
           done();
-        });
+        }).catch(done);
       });
 
       it('constructCountQuery - replace join filter if present in kibiState', function (done) {
-        var dashboardId = 'Articles';
-        var savedSearch = emptySavedSearch;
+        var dashboardId = 'empty-dashboard';
         var stateFilters = [
           {
             join_set: {
@@ -552,7 +549,9 @@ describe('Kibi Components', function () {
           }
         };
 
-        countHelper.constructCountQuery(dashboardId, savedSearch, joinSetFilter).then(function (query) {
+        urlHelper.getDashboardAndSavedSearchMetas([ dashboardId ])
+        .then(([ [ savedDash, savedSearchMeta ] ]) =>  countHelper.constructCountQuery(savedDash, savedSearchMeta, joinSetFilter))
+        .then(function (query) {
           expect(query).to.eql(expected);
           done();
         }).catch(done);
@@ -561,7 +560,6 @@ describe('Kibi Components', function () {
       it('constructCountQuery - get time filter', function (done) {
         var dashboardId = 'time-testing-4';
         var joinSetFilter = null;
-        var savedSearch = emptySavedSearchWithIndexWithTime;
 
         var expected = {
           size: 0,
@@ -577,7 +575,7 @@ describe('Kibi Components', function () {
                     {
                       range: {
                         fake_field: {
-                          gte: dateMath.parse('2005-09-01T12:00:00.000Z').valueOf(), // taken from dashboard time-testing-3
+                          gte: dateMath.parse('2005-09-01T12:00:00.000Z').valueOf(), // taken from dashboard time-testing-4
                           lte: dateMath.parse('2015-09-05T12:00:00.000Z').valueOf()
                         }
                       }
@@ -589,51 +587,33 @@ describe('Kibi Components', function () {
           }
         };
 
-        countHelper.constructCountQuery(dashboardId, savedSearch, joinSetFilter).then(function (query) {
+        urlHelper.getDashboardAndSavedSearchMetas([ dashboardId ])
+        .then(([ [ savedDash, savedSearchMeta ] ]) =>  countHelper.constructCountQuery(savedDash, savedSearchMeta, joinSetFilter))
+        .then(function (query) {
           expect(query).to.eql(expected);
           done();
         }).catch(done);
       });
-
-      it('constructCountQuery - get time filter - dashboard does not exists -should reject', function (done) {
-        var dashboardId = 'time-testing-3XXX';
-        var joinSetFilter = null;
-        var savedSearch = emptySavedSearchWithIndexWithTime;
-
-        countHelper.constructCountQuery(dashboardId, savedSearch, joinSetFilter).then(function (query) {
-          // should not go here
-          done(query);
-        }).catch(function (err) {
-          expect(err.message).to.equal('Could not find a dashboard with id: time-testing-3XXX');
-          done();
-        });
-      });
     });
 
-    describe('Using kibiStateHelper and kibiTimeHelper and saveSearches', function () {
-
-      beforeEach(init(fakeTimeFilter, fakeSavedDashboards, fakeSavedSearches));
+    describe('Using kibiStateHelper and kibiTimeHelper and savedSearches', function () {
 
       it('getCountQueryForDashboardId - should reject if dashboard does not have savedSearchId', function (done) {
-
         countHelper.getCountQueryForDashboardId('Articles').then(function (query) {
           done(query);
         }).catch(function (err) {
-          expect(err.message).to.equal('For computing counts dashboard must have savedSearchId');
+          expect(err.message).to.equal('The dashboard [Articles] is expected to be associated with a saved search.');
           done();
         });
       });
 
       it('getCountQueryForDashboardId - dashboard has savedSearchId', function (done) {
-        var expected = '';
-
         countHelper.getCountQueryForDashboardId('time-testing-4').then(function (queryDef) {
           expect(queryDef.indexPatternId).to.equal('time-testing-4');
           expect(queryDef).to.have.property('query');
           done();
         }).catch(done);
       });
-
 
     });
 

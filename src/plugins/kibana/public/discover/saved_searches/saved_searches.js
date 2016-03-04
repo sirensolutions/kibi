@@ -38,7 +38,6 @@ define(function (require) {
       nouns: 'saved searches'
     };
 
-
     this.scanAll = function (queryString, pageSize = 1000) {
       return scanner.scanAndMap(queryString, {
         pageSize,

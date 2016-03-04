@@ -51,9 +51,9 @@ function init(savedDashboardsImpl, savedDashboardGroupsImpl, savedSearchesImpl) 
 
 describe('Kibi Components', function () {
   describe('DashboardGroupHelper', function () {
-    describe('Simpe tests', function () {
+    describe('Simple tests', function () {
 
-      beforeEach(init(fakeSavedDashboards, fakeSavedDashboardGroups));
+      beforeEach(init(fakeSavedDashboards, fakeSavedDashboardGroups, fakeSavedSearches));
 
       it('shortenDashboardName should shorten', function () {
         expect(dashboardGroupHelper.shortenDashboardName('TEST', 'TEST dashboard')).to.be('dashboard');
@@ -139,7 +139,7 @@ describe('Kibi Components', function () {
           expect(groups[4].dashboards[0].title).to.equal('time testing 3');
 
           done();
-        });
+        }).catch(done);
 
         $rootScope.$apply();
       });
@@ -164,28 +164,28 @@ describe('Kibi Components', function () {
     });
 
     describe('no dashboards groups', function () {
-      beforeEach(init(fakeSavedDashboards, fakeEmptySavedDashboardGroups));
+      beforeEach(init(fakeSavedDashboards, fakeEmptySavedDashboardGroups, fakeSavedSearches));
 
       it('computeGroups 3', function (done) {
         dashboardGroupHelper.computeGroups().then(function (groups) {
           // here if there are no groups but there are 5 dashboards we expect 5 pseudo group created
           expect(groups).to.have.length(5);
           done();
-        });
+        }).catch(done);
 
         $rootScope.$apply();
       });
     });
 
     describe('no dashboards groups, no dashboards', function () {
-      beforeEach(init(fakeEmptySavedDashboards, fakeEmptySavedDashboardGroups));
+      beforeEach(init(fakeEmptySavedDashboards, fakeEmptySavedDashboardGroups, fakeSavedSearches));
 
       it('computeGroups 4', function (done) {
         dashboardGroupHelper.computeGroups().then(function (groups) {
           // here if there are no groups but there are 5 dashboards we expect 5 pseudo group created
           expect(groups).to.have.length(0);
           done();
-        });
+        }).catch(done);
 
         $rootScope.$apply();
       });
@@ -582,9 +582,7 @@ describe('Kibi Components', function () {
           expect(countQueryDef.indexPatternId).to.equal('time-testing-4');
           expect(countQueryDef.groupIndex).to.equal(0);
           done();
-        }).catch(function (err) {
-          expect().fail('Should not fail');
-        });
+        }).catch(done);
 
         $rootScope.$apply();
       });

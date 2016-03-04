@@ -1,5 +1,6 @@
 var expect = require('expect.js');
 var ngMock = require('ngMock');
+var _ = require('lodash');
 
 var joinFilterHelper;
 var kibiStateHelper;
@@ -26,52 +27,40 @@ describe('Kibi Components', function () {
 
       ngMock.module('app/dashboard', function ($provide) {
         $provide.service('savedDashboards', function (Promise) {
+          const dashboards = [
+            {
+              id: 'dashboard-nossid',
+              title: 'dashboard-nossid'
+            },
+            {
+              id: 'dashboard-a',
+              title: 'dashboard-a',
+              savedSearchId: 'savedsearch-a'
+            },
+            {
+              id: 'dashboard-b',
+              title: 'dashboard-b',
+              savedSearchId: 'savedsearch-b'
+            },
+            {
+              id: 'dashboard-c',
+              title: 'dashboard-c',
+              savedSearchId: 'savedsearch-c'
+            },
+            {
+              id: 'dashboard-d',
+              title: 'dashboard-d',
+              savedSearchId: 'savedsearch-d'
+            }
+          ];
           return {
             find: function () {
-              return Promise.resolve({
-                hits: [
-                  {
-                    id: 'dashboard-nossid'
-                  },
-                  {
-                    id: 'dashboard-noindexid',
-                    savedSearchId: 'savedsearch-noindexid'
-                  },
-                  {
-                    id: 'dashboard-a',
-                    savedSearchId: 'savedsearch-a'
-                  },
-                  {
-                    id: 'dashboard-b',
-                    savedSearchId: 'savedsearch-b'
-                  },
-                  {
-                    id: 'dashboard-c',
-                    savedSearchId: 'savedsearch-c'
-                  },
-                  {
-                    id: 'dashboard-d',
-                    savedSearchId: 'savedsearch-d'
-                  }
-                ]
-              });
+              return Promise.resolve({ hits: dashboards });
             },
             get: function (id) {
-              switch (id) {
-                case 'dashboard-nossid':
-                  return Promise.resolve({ id: 'dashboard-nossid' });
-                case 'dashboard-noindexid':
-                  return Promise.resolve({ id: 'dashboard-noindexid', savedSearchId: 'savedsearch-noindexid' });
-                case 'dashboard-a':
-                  return Promise.resolve({ id: 'dashboard-a', savedSearchId: 'savedsearch-a' });
-                case 'dashboard-b':
-                  return Promise.resolve({ id: 'dashboard-b', savedSearchId: 'savedsearch-b' });
-                case 'dashboard-c':
-                  return Promise.resolve({ id: 'dashboard-c', savedSearchId: 'savedsearch-c' });
-                case 'dashboard-d':
-                  return Promise.resolve({ id: 'dashboard-d', savedSearchId: 'savedsearch-d' });
-                default:
-                  return Promise.reject(new Error('no dashboard ' + id));
+              const savedDash = _.find(dashboards, 'id', id);
+              if (!savedDash) {
+                return Promise.reject(new Error('no dashboard ' + id));
               }
             }
           };
@@ -80,95 +69,91 @@ describe('Kibi Components', function () {
 
       ngMock.module('discover/saved_searches', function ($provide) {
         $provide.service('savedSearches', function (Promise) {
+          const savedSearches = [
+            {
+              id: 'savedsearch-a',
+              kibanaSavedObjectMeta: {
+                searchSourceJSON: JSON.stringify({
+                  index: 'index-a',
+                  filter: [],
+                  query: {
+                    query: {
+                      query_string: {
+                        term: 'aaa'
+                      }
+                    }
+                  }
+                })
+              }
+            },
+            {
+              id: 'savedsearch-b',
+              kibanaSavedObjectMeta: {
+                searchSourceJSON: JSON.stringify({
+                  index: 'index-b',
+                  filter: [],
+                  query: {
+                    query: {
+                      query_string: {
+                        term: 'bbb'
+                      }
+                    }
+                  }
+                })
+              }
+            },
+            {
+              id: 'savedsearch-c',
+              kibanaSavedObjectMeta: {
+                searchSourceJSON: JSON.stringify({
+                  index: 'index-c',
+                  filter: [],
+                  query: {
+                    query: {
+                      query_string: {
+                        term: 'ccc'
+                      }
+                    }
+                  }
+                })
+              }
+            },
+            {
+              id: 'savedsearch-d',
+              kibanaSavedObjectMeta: {
+                searchSourceJSON: JSON.stringify({
+                  index: 'index-d',
+                  filter: [],
+                  query: {
+                    query: {
+                      query_string: {
+                        term: 'ddd'
+                      }
+                    }
+                  }
+                })
+              }
+            }
+          ];
           return {
             find: function () {
-              return Promise.resolve({
-                hits: [
-                  {
-                    id: 'savedsearch-a',
-                    kibanaSavedObjectMeta: {
-                      searchSourceJSON: JSON.stringify({
-                        index: 'index-a',
-                        filter: [],
-                        query: {
-                          query: {
-                            query_string: {
-                              term: 'aaa'
-                            }
-                          }
-                        }
-                      })
-                    }
-                  },
-                  {
-                    id: 'savedsearch-b',
-                    kibanaSavedObjectMeta: {
-                      searchSourceJSON: JSON.stringify({
-                        index: 'index-b',
-                        filter: [],
-                        query: {
-                          query: {
-                            query_string: {
-                              term: 'bbb'
-                            }
-                          }
-                        }
-                      })
-                    }
-                  },
-                  {
-                    id: 'savedsearch-c',
-                    kibanaSavedObjectMeta: {
-                      searchSourceJSON: JSON.stringify({
-                        index: 'index-c',
-                        filter: [],
-                        query: {
-                          query: {
-                            query_string: {
-                              term: 'ccc'
-                            }
-                          }
-                        }
-                      })
-                    }
-                  },
-                  {
-                    id: 'savedsearch-d',
-                    kibanaSavedObjectMeta: {
-                      searchSourceJSON: JSON.stringify({
-                        index: 'index-d',
-                        filter: [],
-                        query: {
-                          query: {
-                            query_string: {
-                              term: 'ddd'
-                            }
-                          }
-                        }
-                      })
-                    }
-                  },
-                  {
-                    id: 'savedsearch-noindexid'
-                  },
-                ]
-              });
+              return Promise.resolve({ hits: savedSearches });
             },
             get: function (id) {
-              switch (id) {
-                case 'savedsearch-a':
-                  return Promise.resolve({ searchSource: { _state: { index: { id: 'index-a' } } } });
-                case 'savedsearch-b':
-                  return Promise.resolve({ searchSource: { _state: { index: { id: 'index-b' } } } });
-                case 'savedsearch-c':
-                  return Promise.resolve({ searchSource: { _state: { index: { id: 'index-c' } } } });
-                case 'savedsearch-d':
-                  return Promise.resolve({ searchSource: { _state: { index: { id: 'index-d' } } } });
-                case 'savedsearch-noindexid':
-                  return Promise.resolve({ searchSource: { _state: { index: { } } } });
-                default:
-                  return Promise.reject(new Error('no savedSearch ' + id));
+              return Promise.resolve({ searchSource: { _state: { index: { id: 'index-b' } } } });
+              const savedSearch = _.find(savedSearches, 'id', id);
+              if (!savedSearch) {
+                return Promise.reject(new Error(`SavedSearch for [${id}] dashboard seems to not have an index id`));
               }
+              const savedSearchMeta = JSON.parse(savedSearch.kibanaSavedObjectMeta.searchSourceJSON);
+              savedSearch.searchSource = {
+                _state: {
+                  index: {
+                    id: savedSearchMeta.index
+                  }
+                }
+              };
+              return Promise.resolve(savedSearch);
             }
           };
         });
@@ -197,8 +182,6 @@ describe('Kibi Components', function () {
         });
       });
 
-
-
       ngMock.inject(function (Private, _config_) {
         config = _config_;
         joinFilterHelper = Private(require('ui/kibi/helpers/join_filter_helper/join_filter_helper'));
@@ -223,25 +206,44 @@ describe('Kibi Components', function () {
         joinFilterHelper.getJoinFilter().catch(function (err) {
           expect(err.message).to.be('Specify focusDashboardId');
           done();
-        });
+        }).catch(done);
+      });
+
+      it('should fail if the focused dashboard is not in an enabled relation', function (done) {
+        config.set('kibi:relationalPanel', true);
+        config.set('kibi:relations', { relationsDashboards: [] });
+        joinFilterHelper.getJoinFilter('does-not-exist').then(function (query) {
+          expect(query).to.be(null);
+          done();
+        }).catch(done);
       });
 
       it('should fail if the focused dashboard cannot be retrieved', function (done) {
+        var relDash = {
+          dashboards: [ 'dashboard-a', 'does-not-exist' ],
+          relation: 'index-a/id/index-b/id'
+        };
         config.set('kibi:relationalPanel', true);
-        config.set('kibi:relations', { relationsDashboards: [] });
+        kibiStateHelper.enableRelation(relDash);
+        config.set('kibi:relations', { relationsDashboards: [ relDash ] });
         joinFilterHelper.getJoinFilter('does-not-exist').catch(function (err) {
-          expect(err.message).to.be('The focus dashboard "does-not-exist" does not exists');
+          expect(err.message).to.be('Unable to retrieve dashboards: ["does-not-exist"].');
           done();
-        });
+        }).catch(done);
       });
 
       it('should fail if the focused dashboard does not have a saved search', function (done) {
+        var relDash = {
+          dashboards: [ 'dashboard-a', 'dashboard-nossid' ],
+          relation: 'index-a/id/index-b/id'
+        };
         config.set('kibi:relationalPanel', true);
-        config.set('kibi:relations', { relationsDashboards: [] });
+        config.set('kibi:relations', { relationsDashboards: [ relDash ] });
+        kibiStateHelper.enableRelation(relDash);
         joinFilterHelper.getJoinFilter('dashboard-nossid').catch(function (err) {
-          expect(err.message).to.be('The focus dashboard "dashboard-nossid" does not have a saveSearchId');
+          expect(err.message).to.be('The dashboard [dashboard-nossid] is expected to be associated with a saved search.');
           done();
-        });
+        }).catch(done);
       });
 
       it('should fail if there is no kibi:relations set', function (done) {
@@ -249,21 +251,7 @@ describe('Kibi Components', function () {
         joinFilterHelper.getJoinFilter('Boiled Dogs').catch(function (err) {
           expect(err.message).to.be('Could not get kibi:relations');
           done();
-        });
-      });
-
-      it('should fail if the saved search of the focused dashboard does not have an index id', function (done) {
-        config.set('kibi:relationalPanel', true);
-        config.set('kibi:relations', {
-          relationsDashboards: [{
-            dashboards: [ 'dashboard-a', 'dashboard-noindexid' ],
-            relation: 'a/id/noindexid/id'
-          }]
-        });
-        joinFilterHelper.getJoinFilter('dashboard-noindexid').catch(function (err) {
-          expect(err.message).to.be('SavedSearch for [dashboard-noindexid] dashboard seems to not have an index id');
-          done();
-        });
+        }).catch(done);
       });
 
       it('should not build join_set filter if focused index does not have an enabled relation', function (done) {
@@ -280,10 +268,10 @@ describe('Kibi Components', function () {
             }
           ]
         });
-        joinFilterHelper.getJoinFilter('dashboard-c').catch(function (err) {
-          expect(err.message).to.be('The join filter has no enabled relation for the focused dashboard : dashboard-c');
+        joinFilterHelper.getJoinFilter('dashboard-c').then(function (query) {
+          expect(query).to.be(null);
           done();
-        });
+        }).catch(done);
       });
 
       it('1 should build the join filter', function (done) {

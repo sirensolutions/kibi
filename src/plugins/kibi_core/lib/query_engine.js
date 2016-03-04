@@ -68,11 +68,7 @@ QueryEngine.prototype._init =  function (enableCache = false, cacheSize = 500, c
     elasticsearchStatus.on('change', function (prev, prevmsg) {
       if (elasticsearchStatus.state === 'green') {
 
-        self._loadTemplatesMapping().then(function () {
-          self._loadTemplates();
-        }).catch(function (err) {
-          self.log.error('Could not load the mapping for tempalte object', err);
-        });
+        self.loadTemplates();
 
         self.setupJDBC()
         .then(self.reloadQueries())
@@ -83,9 +79,44 @@ QueryEngine.prototype._init =  function (enableCache = false, cacheSize = 500, c
       }
     });
   });
-
 };
 
+
+QueryEngine.prototype.loadTemplates = function () {
+  var self = this;
+  self._isKibiIndexPresent().then(function () {
+    self.log.info('Found kibi index');
+    self._loadTemplates();
+  }).catch(function (err) {
+    self.log.warn('Kibi index NOT found');
+    setTimeout(self.loadTemplates, 500);
+  });
+};
+
+
+QueryEngine.prototype._isKibiIndexPresent =  function () {
+  var self = this;
+  return rp({
+    method: 'GET',
+    uri: url.parse(self.config.get('elasticsearch.url') + '/_cat/indices'),
+    json: true,
+    headers: {
+      'content-type': 'application/json'
+    },
+    timeout: 1000
+  }).then(function (indexes) {
+    var kibiIndex = _.find(indexes, function (index) {
+      return index.index === self.config.get('kibana.index');
+    });
+    if (kibiIndex !== undefined) {
+      return true;
+    } else {
+      return Promise.reject(new Error('Kibi index does not exists'));
+    }
+  });
+
+
+};
 
 QueryEngine.prototype._loadTemplatesMapping =  function () {
   var self = this;
@@ -122,34 +153,40 @@ QueryEngine.prototype._loadTemplates =  function () {
     'kibi-table-handlebars'
   ];
 
-  _.each(templatesToLoad, function (templateId) {
-    fs.readFile(path.join(__dirname, 'templates', templateId + '.json'), function (err, data) {
-      if (err) {
-        throw err;
-      }
-      var body = JSON.parse(data.toString());
-      rp({
-        method: 'POST',
-        //op_type=create create templates documents only if they do not exist
-        uri: url.parse(self.config.get('elasticsearch.url') + '/' +
-                       self.config.get('kibana.index') + '/template/' +
-                       templateId + '?op_type=create'
-        ),
-        headers: {
-          'content-type': 'application/json'
-        },
-        body: JSON.stringify(body),
-        timeout: 1000
-      })
-      .then(function (resp) {
-        self.log.info('Template [' + templateId + '] successfully loaded');
-      })
-      .catch(function (err) {
-        if (err.statusCode === 409) {
-          self.log.warn('Template [' + templateId + '] already exists');
+  self._loadTemplatesMapping().then(function () {
+    _.each(templatesToLoad, function (templateId) {
+      fs.readFile(path.join(__dirname, 'templates', templateId + '.json'), function (err, data) {
+        if (err) {
+          throw err;
         }
+        var body = JSON.parse(data.toString());
+        rp({
+          method: 'POST',
+          //op_type=create create templates documents only if they do not exist
+          uri: url.parse(self.config.get('elasticsearch.url') + '/' +
+                         self.config.get('kibana.index') + '/template/' +
+                         templateId + '?op_type=create'
+          ),
+          headers: {
+            'content-type': 'application/json'
+          },
+          body: JSON.stringify(body),
+          timeout: 1000
+        })
+        .then(function (resp) {
+          self.log.info('Template [' + templateId + '] successfully loaded');
+        })
+        .catch(function (err) {
+          if (err.statusCode === 409) {
+            self.log.warn('Template [' + templateId + '] already exists');
+          } else {
+            self.log.error('Could not load template [' + templateId + ']', err);
+          }
+        });
       });
     });
+  }).catch(function (err) {
+    self.log.error('Could not load the mapping for tempalte object', err);
   });
 };
 

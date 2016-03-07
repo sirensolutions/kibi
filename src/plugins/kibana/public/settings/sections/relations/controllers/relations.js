@@ -50,7 +50,10 @@ define(function (require) {
     };
   });
 
-  require('ui/routes').when('/settings/relations/:service/:id');
+  var relAdvViewHTML = require('plugins/kibana/settings/sections/relations/_view.html');
+  require('ui/routes').when('/settings/relations/:service/:id', {
+    template: relAdvViewHTML
+  });
 
   app.controller('RelationsAdvancedController', function (
 		$rootScope, $scope, $routeParams, $window, config, kbnUrl, kbnIndex, es, queryEngineClient) {
@@ -105,7 +108,7 @@ define(function (require) {
     reloadOnSearch: false
   });
 
-  app.controller('RelationsController', function ($rootScope, $scope, config, Private, $element, $timeout, createNotifier) {
+  app.controller('RelationsController', function ($rootScope, $scope, config, Private, $element, $timeout, kbnUrl, createNotifier) {
     var notify = createNotifier({
       location: 'Relations Editor'
     });
@@ -113,7 +116,7 @@ define(function (require) {
     var urlHelper = Private(require('ui/kibi/helpers/url_helper'));
     var color = Private(require('ui/vislib/components/color/color'));
 
-    // Tabs
+    // tabs
     $scope.tab = {
       'indexRel': true,
       'configRel': false
@@ -123,7 +126,16 @@ define(function (require) {
       $scope.tab.indexRel = !$scope.tab.indexRel;
       $scope.tab.configRel = !$scope.tab.configRel;
     };
-    // End of Tabs functionality
+
+    // advanced options button
+    $scope.edit = function (item, index) {
+      var params = {
+        service: 'indices' in item ? 'indices' : 'dashboards',
+        id: index
+      };
+
+      kbnUrl.change('/settings/relations/{{ service }}/{{ id }}', params);
+    };
 
     $scope.relations = config.get('kibi:relations');
     $scope.relationalPanel = config.get('kibi:relationalPanel');

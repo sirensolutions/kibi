@@ -78,12 +78,15 @@ TinkerPop3Query.prototype.fetchResults = function (options, onlyIds, idVariableN
       }
 
       var kibiRelations = null;
-      if (config.hits.total === 1) {
-        if (config.hits.hits[0]._source['kibi:relations']) {
-          kibiRelations = config.hits.hits[0]._source['kibi:relations'];
-        }
+      var configDocs = _.drop(config.hits.hits, function (doc) {
+        return doc._id !== self.config.get('pkg').version;
+      });
+      if (configDocs.length === 0) {
+        Promise.reject(new Error('No config documents found'));
+      } else if (configDocs.length > 1) {
+        Promise.reject(new Error('Multiple config documents found'));
       } else {
-        Promise.reject(new Error('Found multiple config documents'));
+        kibiRelations = configDocs[0]._source['kibi:relations'];
       }
 
       var kibiRelationsJson = JSON.parse(kibiRelations);

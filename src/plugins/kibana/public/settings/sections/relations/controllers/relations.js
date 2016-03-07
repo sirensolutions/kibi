@@ -55,7 +55,11 @@ define(function (require) {
     reloadOnSearch: false
   });
 
-  app.controller('RelationsController', function ($rootScope, $scope, config, Private, $element, $timeout) {
+  app.controller('RelationsController', function ($rootScope, $scope, config, Private, $element, $timeout, createNotifier) {
+    var notify = createNotifier({
+      location: 'Relations Editor'
+    });
+
     var urlHelper = Private(require('ui/kibi/helpers/url_helper'));
     var color = Private(require('ui/vislib/components/color/color'));
 
@@ -342,9 +346,11 @@ define(function (require) {
       };
     }, function (newRelations, oldRelations) {
       if (indexToDashboardsMap === null) {
-        urlHelper.getIndexToDashboardMap().then(function (map) {
+        urlHelper.getIndexToDashboardMap(null, true).then(function (map) {
           indexToDashboardsMap = map;
           _updateRelationsDashboards(oldRelations);
+        }).catch(function (err) {
+          notify.error('Problem getting index to dashboard map', err);
         });
       } else {
         _updateRelationsDashboards(oldRelations);

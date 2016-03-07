@@ -163,16 +163,16 @@ define(function (require) {
     //   indexId: [dashboardId1, dashboardId2],
     //   ...
     // }
-    UrlHelper.prototype.getIndexToDashboardMap = function (dashboardIds) {
+    UrlHelper.prototype.getIndexToDashboardMap = function (dashboardIds, ignoreMissingSavedSearch = false) {
 
       var _createMap = function (results) {
         // postprocess the results to create the map
         var indexToDashboardArrayMap = {};
         _.each(results, function ({ savedDash, savedSearchMeta }) {
-          if (!indexToDashboardArrayMap[savedSearchMeta.index]) {
+          if (savedSearchMeta && !indexToDashboardArrayMap[savedSearchMeta.index]) {
             indexToDashboardArrayMap[savedSearchMeta.index] = [savedDash.id];
           } else {
-            if (indexToDashboardArrayMap[savedSearchMeta.index].indexOf(savedDash.id) === -1) {
+            if (savedSearchMeta && indexToDashboardArrayMap[savedSearchMeta.index].indexOf(savedDash.id) === -1) {
               indexToDashboardArrayMap[savedSearchMeta.index].push(savedDash.id);
             }
           }
@@ -180,7 +180,7 @@ define(function (require) {
         return indexToDashboardArrayMap;
       };
 
-      return this.getDashboardAndSavedSearchMetas(dashboardIds).then(function (results) {
+      return this.getDashboardAndSavedSearchMetas(dashboardIds, ignoreMissingSavedSearch).then(function (results) {
         return _createMap(results);
       });
     };

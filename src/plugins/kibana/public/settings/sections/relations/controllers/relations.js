@@ -50,6 +50,55 @@ define(function (require) {
     };
   });
 
+  require('ui/routes').when('/settings/relations/:service/:id');
+
+  app.controller('RelationsAdvancedController', function (
+		$rootScope, $scope, $routeParams, $window, config, kbnUrl, kbnIndex, es, queryEngineClient) {
+
+    $scope.relations = config.get('kibi:relations');
+
+    $scope.serviceId = $routeParams.id;
+    var serviceName = $routeParams.service;
+
+    if (serviceName === 'indices') {
+      $scope.relationsName = 'relationsIndices';
+    } else {
+      $scope.relationsName = 'relationsDashboards';
+    }
+    $scope.relation = $scope.relations[$scope.relationsName][$scope.serviceId];
+
+    // lists of values to display
+    $scope.value = {
+      'orderByValues': ['default', 'doc_score'],
+      'maxTermsPerShardValues': ['all items'],
+      'termsEncodingValues': ['long', 'integer', 'bloom']
+    };
+
+    // object properties
+    if (!$scope.relation.orderBy) {
+      $scope.relation.orderBy = 'default';
+    }
+
+    if (!$scope.relation.maxTermsPerShard) {
+      $scope.relation.maxTermsPerShard = 'all terms';
+    }
+
+    if (!$scope.relation.termsEncoding) {
+      $scope.relation.termsEncoding = 'bloom';
+    }
+
+    // cancel button
+    $scope.cancel = function () {
+      kbnUrl.change('/settings/relations');
+    };
+
+    // save button
+    $scope.submit = function () {
+      config.set('kibi:relations', $scope.relations);
+    };
+
+  });
+
   require('ui/routes')
   .when('/settings/relations', {
     template: require('plugins/kibana/settings/sections/relations/index.html'),
@@ -65,12 +114,14 @@ define(function (require) {
     var color = Private(require('ui/vislib/components/color/color'));
 
     // Tabs
-    $scope.indexRel = true;
-    $scope.configRel = false;
+    $scope.tab = {
+      'indexRel': true,
+      'configRel': false
+    };
 
     $scope.tabClick = function () {
-      $scope.indexRel = !$scope.indexRel;
-      $scope.configRel = !$scope.configRel;
+      $scope.tab.indexRel = !$scope.tab.indexRel;
+      $scope.tab.configRel = !$scope.tab.configRel;
     };
     // End of Tabs functionality
 

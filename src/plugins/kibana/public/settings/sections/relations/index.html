@@ -23,7 +23,7 @@
     	    </div>
     	</div>
 
-    	<div class="indices-section" ng-class="{highlight: indexRel}">
+    	<div class="indices-section" ng-class="{highlight: tab.indexRel}">
     	  <h2>Relations between Index Patterns</h2>
     	  <eeg eeg-id="'indicesGraph'"
     	       graph="indicesGraph"
@@ -31,7 +31,7 @@
     	</div>
 
 
-    	<div class="dashboards-section" ng-class="{highlight: configRel, disabled: !relationalPanel}">
+    	<div class="dashboards-section" ng-class="{highlight: tab.configRel, disabled: !relationalPanel}">
     	<!--<div class="dashboards-section" ng-class="dashboards-section">-->
     	  <h2>Relational Panel Configuration</h2>
     	  <eeg eeg-id="'dashboardsGraph'"
@@ -43,17 +43,17 @@
 	<div class="tabpanel" id="tabpanel" role="tabpanel">
 	  <!-- Nav tabs -->
 	  <ul class="nav nav-tabs">
-	    <li ng-click="tabClick()" ng-class="indexRel ? 'active' : ''" class="active" style="">
+	    <li ng-click="tabClick()" ng-class="tab.indexRel ? 'active' : ''" class="active" style="">
 	      <a href="" aria-controls="index_rel" role="tab">Index Relations</a>
 	    </li>
-	    <li ng-click="tabClick()" ng-class="configRel ? 'active' : ''" class="" style="">
-	      <a href="" aria-controls="config_rel" role="tab">Configure Relations</a>
+	    <li ng-click="tabClick()" ng-class="tab.configRel ? 'active' : ''" class="" style="">
+	      <a href="" aria-controls="config_rel" role="tab">Dashboard Relations</a>
 	    </li>
 	  </ul>
 	
 	  <!-- Tab panes -->
 	  <div class="tab-content">
-	    <div role="tabpanel" class="tab-pane active" ng-class="indexRel ? 'active' : ''" style="">
+	    <div role="tabpanel" class="tab-pane active" ng-class="tab.indexRel ? 'active' : ''" style="">
       		<form name="indicesForm" novalidate>
       		  <div class="form-group table-responsive">
       		    <table class="table table-condensed">
@@ -105,6 +105,16 @@
       		              type="text"
       		              kibi-stop-enter-key-down />
       		          </td>
+                      <td class="ng-scope"><div class="actions">
+						<button
+							ng-click="edit(relation, $index)"
+							class="btn btn-sm"
+							aria-label="Edit">
+							<span class="sr-only">Edit</span>
+							<i aria-hidden="true" class="fa fa-pencil"></i>
+						</button>
+                      </div>
+                      </td>
       		          <td>
       		            <div class="btn-group rightCorner">
       		              <kibi-array-param-remove index="{{ $index }}" model="relations.relationsIndices"></kibi-array-param-remove>
@@ -125,7 +135,7 @@
       		  </div>
       		</form>
 	    </div>
-	    <div role="tabpanel" class="tab-pane" ng-class="configRel ? 'active' : ''" style="">
+	    <div role="tabpanel" class="tab-pane" ng-class="tab.configRel ? 'active' : ''" style="">
       		<form name="dashboardsForm" novalidate>
       		  <div class="form-group table-responsive">
       		    <table class="table table-condensed">

@@ -212,6 +212,9 @@ define(function (require) {
             case 'fontAwesomeIcon':
               promise = selectHelper.getFontAwesomeIcon();
               break;
+            case 'iconType':
+              promise = selectHelper.getIconType();
+              break;
           }
 
           scope.retrieveError = '';

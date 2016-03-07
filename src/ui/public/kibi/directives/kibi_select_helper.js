@@ -245,14 +245,15 @@ define(function (require) {
     };
 
     KibiSelectHelper.prototype.getIconType = function () {
-      var types = [{
-        label:'Font Awesome',
-        value: 'fontawesome'
-      },
-      {
-        label:'Relative Path',
-        value: 'relpath'
-      }];
+      var types = [
+        {
+          label:'Font Awesome',
+          value: 'fontawesome'
+        },
+        {
+          label:'Relative Path',
+          value: 'relpath'
+        }];
 
       var labels = _.map(types, function (type) {
         return {

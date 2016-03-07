@@ -811,16 +811,54 @@ describe('Kibi Components', function () {
     describe('methods which maps indexes to dashboards', function () {
       beforeEach(init2(fakeSavedDashboards, fakeSavedSearches));
 
-      it('getIndexToDashboardMap should fail because a dashboard does not have a saved search', function (done) {
-        urlHelper.getIndexToDashboardMap().then(function (results) {
-          done('should fail');
-        }).catch(function (err) {
-          expect(err.message).to.be('The dashboard [Articles] is expected to be associated with a saved search.');
-          done();
-        });
+      it(
+        'getIndexToDashboardMap should fail because a dashboard does not have a saved search ' +
+        'and ignoreMissingSavedSearch not set', function (done) {
+          urlHelper.getIndexToDashboardMap().then(function (results) {
+            done('should fail');
+          }).catch(function (err) {
+            expect(err.message).to.be('The dashboard [Articles] is expected to be associated with a saved search.');
+            done();
+          });
 
-        $rootScope.$apply();
-      });
+          $rootScope.$apply();
+        }
+      );
+
+      it(
+        'getIndexToDashboardMap should NOT fail because a dashboard does not have a saved search ' +
+        'but ignoreMissingSavedSearch set to true and first parameter empty', function (done) {
+          var expected = {
+            'search-ste': ['search-ste'],
+            'time-testing-4': ['time-testing-4']
+          };
+
+          urlHelper.getIndexToDashboardMap(null, true).then(function (results) {
+            expect(results, expected);
+            done();
+          }).catch(done);
+
+          $rootScope.$apply();
+        }
+      );
+
+      it(
+        'getIndexToDashboardMap should NOT fail because a dashboard does not have a saved search ' +
+        'but ignoreMissingSavedSearch set to true and first parameter is array of ids', function (done) {
+          var expected = {
+            'time-testing-4': ['time-testing-4']
+          };
+
+          urlHelper.getIndexToDashboardMap(['time-testing-4'], true).then(function (results) {
+            expect(results, expected);
+            done();
+          }).catch(done);
+
+          $rootScope.$apply();
+        }
+      );
+
+
 
       it('getIndexToDashboardMap pass ids of dashboards', function (done) {
         var expected = {

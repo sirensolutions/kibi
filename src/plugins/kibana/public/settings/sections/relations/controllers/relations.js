@@ -50,44 +50,46 @@ define(function (require) {
     };
   });
 
+  // path to view template
   var relAdvViewHTML = require('plugins/kibana/settings/sections/relations/_view.html');
   require('ui/routes').when('/settings/relations/:service/:id', {
     template: relAdvViewHTML
   });
 
+  // relation edit button controller
   app.controller('RelationsAdvancedController', function (
 		$rootScope, $scope, $routeParams, $window, config, kbnUrl, kbnIndex, es, queryEngineClient) {
 
     $scope.relations = config.get('kibi:relations');
 
-    $scope.serviceId = $routeParams.id;
-    var serviceName = $routeParams.service;
+    var relationsName = '';
 
-    if (serviceName === 'indices') {
-      $scope.relationsName = 'relationsIndices';
+    if ($routeParams.service === 'indices') {
+      relationsName = 'relationsIndices';
     } else {
-      $scope.relationsName = 'relationsDashboards';
+      relationsName = 'relationsDashboards';
     }
-    $scope.relation = $scope.relations[$scope.relationsName][$scope.serviceId];
+
+	// current relation
+    $scope.relationService = $scope.relations[relationsName][$routeParams.id][$routeParams.service];
 
     // lists of values to display
-    $scope.value = {
+    $scope.values = {
       'orderByValues': ['default', 'doc_score'],
       'maxTermsPerShardValues': ['all items'],
       'termsEncodingValues': ['long', 'integer', 'bloom']
     };
 
-    // object properties
-    if (!$scope.relation.orderBy) {
-      $scope.relation.orderBy = 'default';
-    }
+	// default values
+    var defValues = {'orderBy': 'default', 'maxTermsPerShard': 'all terms', 'termsEncoding': 'bloom'};
 
-    if (!$scope.relation.maxTermsPerShard) {
-      $scope.relation.maxTermsPerShard = 'all terms';
-    }
-
-    if (!$scope.relation.termsEncoding) {
-      $scope.relation.termsEncoding = 'bloom';
+    // set default object properties
+    for (var i = 0; i <= 1; i++) {
+      for (var key in defValues) {
+        if (!$scope.relationService[i][key] || $scope.relationService[i][key] === 'undefined') {
+          $scope.relationService[i][key] = defValues[key];
+        }
+      }
     }
 
     // cancel button

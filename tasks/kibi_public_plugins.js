@@ -9,7 +9,7 @@ module.exports = function (grunt) {
   var archives = [
     {url: 'https://github.com/sirensolutions/kibi_radar_vis/archive/0.1.0.zip', dest: '/tmp/kibi_radar_vis.zip'},
     {url: 'https://github.com/sirensolutions/kibi_wordcloud_vis/raw/0.1.0/target/kibi_wordcloud_vis-0.1.0.zip', dest: '/tmp/kibi_wordcloud_vis.zip'},
-    {url: 'https://github.com/sirensolutions/kibi_timeline_vis/raw/0.1.0/target/kibi_timeline_vis-0.1.0.zip', dest: '/tmp/kibi_timeline_vis.zip'}
+    {url: 'https://github.com/sirensolutions/kibi_timeline_vis/raw/0.1.1/target/kibi_timeline_vis-0.1.1.zip', dest: '/tmp/kibi_timeline_vis.zip'}
   ];
 
   var download = function (url, dest) {

@@ -50,6 +50,26 @@ define(function (require) {
     };
   });
 
+  // test if value is a positive integer
+  app.directive('kibiPositiveInteger', function () {
+    return {
+      restrict: 'A',
+      require: 'ngModel',
+      link: function (scope, element, attrs, ctrl) {
+        ctrl.$parsers.unshift(function (value) {
+          var INTREGEXP = /^\d+$/;
+          if (INTREGEXP.test(value) || value === 'all terms') {
+            ctrl.$setValidity('kibiPositiveInteger', true);
+            return value;
+          } else {
+            ctrl.$setValidity('kibiPositiveInteger', false);
+            return 'all terms';
+          }
+        });
+      }
+    };
+  });
+
   // path to view template
   var relAdvViewHTML = require('plugins/kibana/settings/sections/relations/_view.html');
   require('ui/routes').when('/settings/relations/:service/:id', {

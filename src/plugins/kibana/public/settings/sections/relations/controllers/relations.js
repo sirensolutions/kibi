@@ -62,16 +62,10 @@ define(function (require) {
 
     $scope.relations = config.get('kibi:relations');
 
-    var relationsName = '';
-
-    if ($routeParams.service === 'indices') {
-      relationsName = 'relationsIndices';
-    } else {
-      relationsName = 'relationsDashboards';
-    }
-
-	// current relation
-    $scope.relationService = $scope.relations[relationsName][$routeParams.id][$routeParams.service];
+	// default values
+    var i = 0;
+    var key = 0;
+    var defValues = {'orderBy': 'default', 'maxTermsPerShard': 'all terms', 'termsEncoding': 'bloom'};
 
     // lists of values to display
     $scope.values = {
@@ -80,14 +74,33 @@ define(function (require) {
       'termsEncodingValues': ['long', 'integer', 'bloom']
     };
 
-	// default values
-    var defValues = {'orderBy': 'default', 'maxTermsPerShard': 'all terms', 'termsEncoding': 'bloom'};
-
     // set default object properties
-    for (var i = 0; i <= 1; i++) {
-      for (var key in defValues) {
-        if (!$scope.relationService[i][key] || $scope.relationService[i][key] === 'undefined') {
-          $scope.relationService[i][key] = defValues[key];
+    if ($routeParams.service === 'indices') { // indices
+      $scope.relationService = $scope.relations.relationsIndices[$routeParams.id][$routeParams.service];
+
+      for (i = 0; i <= 1; i++) {
+        if (typeof $scope.relationService[i] === 'object' && $scope.relationService[i] != null) {
+          for (key in defValues) {
+            if (!$scope.relationService[i][key] || $scope.relationService[i][key] === 'undefined') {
+              $scope.relationService[i][key] = defValues[key];
+            }
+          }
+        }
+      }
+    } else {// dashboards
+      $scope.relationService = $scope.relations.relationsDashboards[$routeParams.id];
+
+      var directions = ['forward', 'back'];
+
+      for (i in directions) {
+        if (!$scope.relationService[i] || $scope.relationService[i] === 'undefined') {
+          $scope.relationService[i] = {};
+        }
+
+        for (key in defValues) {
+          if (!$scope.relationService[i][key] || $scope.relationService[i][key] === 'undefined') {
+            $scope.relationService[i][key] = defValues[key];
+          }
         }
       }
     }
@@ -121,12 +134,12 @@ define(function (require) {
     // tabs
     $scope.tab = {
       'indexRel': true,
-      'configRel': false
+      'dashboardRel': false
     };
 
     $scope.tabClick = function () {
       $scope.tab.indexRel = !$scope.tab.indexRel;
-      $scope.tab.configRel = !$scope.tab.configRel;
+      $scope.tab.dashboardRel = !$scope.tab.dashboardRel;
     };
 
     // advanced options button

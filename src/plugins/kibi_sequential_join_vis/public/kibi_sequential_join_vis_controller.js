@@ -151,7 +151,7 @@ define(function (require) {
         // here instead of relaying on others make a query and get the correct count for current dashboard
         var joinSequenceFilter = _.cloneDeep(urlHelper.getFiltersOfType('join_sequence'));
         return relVisHelper.buildCountQuery(currentDashboardId, joinSequenceFilter).then(function (query) {
-          var queryS  = '{"index" : "' + query.index.id + '"}\n';
+          var queryS  = '{"index" : "' + query.index + '"}\n';
           queryS += JSON.stringify(query.query) + '\n';
           return $http.post(chrome.getBasePath() + '/elasticsearch/_msearch?getSourceCountForJoinSeqFilter', queryS)
           .then(function (response) {

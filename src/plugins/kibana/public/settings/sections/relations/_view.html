@@ -1,93 +1,78 @@
 <kbn-settings-app section="relations">
 
-	<div ng-controller="RelationsAdvancedController">
-      <div>
-        <h3>Forward direction</h3>
-        <p>{{relationService[0]}}</p>
-        <form name="forwardForm" novalidate>
+	<div ng-controller="RelationsAdvancedController" class="app-container dashboard_groups_editor ng-scope">
+      <div class="container ng-scope">
+      	<div class="config-section">
+      	  <div>
+      	    <div class="header">
+              <h2 class="title">Forward direction</h2>
+            </div>
+      	    <!--<p>{{relationService[0]}}</p>-->
+      	    <form name="forwardForm" novalidate>
 
-          <div class="form-group table-responsive">
-            <table class="table table-condensed">
-              <thead>
-                <tr>
-                  <th>Order By</th>
-                  <th>Terms per Shard</th>
-                  <th>Terms Encoding</th>
-                </tr>
-              </thead>
-              <!-- here we repeat tbody to be able to show row with the error properly -->
-              <tbody>
-                  <td>
-                    <select ng-model="relationService[0].orderBy" class="form-control small-input">
-                      <option ng-repeat="value in values.orderByValues" value="{{value}}">{{value}}</option>
-	    			</select>
-                  </td>
-                  <td>
-                    <input required
-                      ng-model="relationService[0].maxTermsPerShard"
-                      kibi-debounce="350"
-                      class="form-control small-input"
-                      type="text"
-                      kibi-stop-enter-key-down />
-                  </td>
-                  <td>
-                    <select ng-model="relationService[0].termsEncoding" class="form-control small-input">
-                      <option ng-repeat="value in values.termsEncodingValues" value="{{value}}">{{value}}</option>
-	    			</select>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+      	      <div class="form-group">
+      	        <label>Order By</label>
+      	        <select ng-model="relationService[0].orderBy" class="form-control small-input">
+      	          <option ng-repeat="value in values.orderByValues" value="{{value}}">{{value}}</option>
+      	        </select>
+      	      </div>
+      	      <div class="form-group">
+      	        <label>Terms per Shard</label>
+      	        <input required
+      	          ng-model="relationService[0].maxTermsPerShard"
+      	          kibi-debounce="350"
+      	          class="form-control small-input"
+      	          type="text"
+      	          kibi-stop-enter-key-down />
+      	      </div>
+      	      <div class="form-group">
+      	        <label>Terms Encoding</label>
+      	        <select ng-model="relationService[0].termsEncoding" class="form-control small-input">
+      	          <option ng-repeat="value in values.termsEncodingValues" value="{{value}}">{{value}}</option>
+      	        </select>
+      	      </div>
 
-        </form>
+      	    </form>
+	  	  </div>
+
+      	  <div>
+      	    <div class="header">
+              <h2 class="title">Back direction</h2>
+            </div>
+      	    <!--<p>{{relationService[1]}}</p>-->
+      	    <form name="forwardForm" novalidate>
+
+      	      <div class="form-group">
+      	        <label>Order By</label>
+      	        <select ng-model="relationService[0].orderBy" class="form-control small-input">
+      	          <option ng-repeat="value in values.orderByValues" value="{{value}}">{{value}}</option>
+      	        </select>
+      	      </div>
+      	      <div class="form-group">
+      	        <label>Terms per Shard</label>
+      	        <input required
+      	          ng-model="relationService[0].maxTermsPerShard"
+      	          kibi-debounce="350"
+      	          class="form-control small-input"
+      	          type="text"
+      	          kibi-stop-enter-key-down />
+      	      </div>
+      	      <div class="form-group">
+      	        <label>Terms Encoding</label>
+      	        <select ng-model="relationService[0].termsEncoding" class="form-control small-input">
+      	          <option ng-repeat="value in values.termsEncodingValues" value="{{value}}">{{value}}</option>
+      	        </select>
+      	      </div>
+
+      	    </form>
+	  	  </div>
+
+	  	  <div class="form-group">
+	  	  	<button aria-label="Cancel" class="btn btn-primary" ng-click="cancel()">Cancel</button>
+	  	  	<button aria-label="Save" class="btn btn-success ng-binding" ng-click="submit()">Save</button>
+	  	  </div>
+
+	  	</div>
 	  </div>
-
-      <div>
-        <h3>Back direction</h3>
-        <p>{{relationService[1]}}</p>
-        <form name="backForm" novalidate>
-
-          <div class="form-group table-responsive">
-            <table class="table table-condensed">
-              <thead>
-                <tr>
-                  <th>Order By</th>
-                  <th>Terms per Shard</th>
-                  <th>Terms Encoding</th>
-                </tr>
-              </thead>
-              <!-- here we repeat tbody to be able to show row with the error properly -->
-              <tbody>
-                  <td>
-                    <select ng-model="relationService[1].orderBy" class="form-control small-input">
-                      <option ng-repeat="value in values.orderByValues" value="{{value}}">{{value}}</option>
-	    			</select>
-                  </td>
-                  <td>
-                    <input required
-                      ng-model="relationService[1].maxTermsPerShard"
-                      kibi-debounce="350"
-                      class="form-control small-input"
-                      type="text"
-                      kibi-stop-enter-key-down />
-                  </td>
-                  <td>
-                    <select ng-model="relationService[1].termsEncoding" class="form-control small-input">
-                      <option ng-repeat="value in values.termsEncodingValues" value="{{value}}">{{value}}</option>
-	    			</select>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </form>
-	  </div>
-
-	  <div class="form-group">
-	  	<button aria-label="Cancel" class="btn btn-primary" ng-click="cancel()">Cancel</button>
-	  	<button aria-label="Save" class="btn btn-success ng-binding" ng-click="submit()">Save</button>
-	  </div>
-
 	</div>
 </kbn-settings-app>

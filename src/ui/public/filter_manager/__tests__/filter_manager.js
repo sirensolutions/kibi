@@ -143,4 +143,18 @@ describe('Filter Manager', function () {
       expect(appState.filters[0].meta.disabled).to.be(false);
     });
   });
+
+  it('should not expect query to be a match query', function () {
+    appState.filters = [{
+      query_string: { query: 'amazon' },
+      meta: { disabled: true }
+    }];
+    expect(appState.filters.length).to.be(1);
+    expect(appState.filters[0].meta.disabled).to.be(true);
+
+    filterManager.add('myField', 1, '+', 'myIndex');
+    expect(appState.filters.length).to.be(2);
+    expect(appState.filters[0].query_string).to.be.ok();
+    expect(appState.filters[1].query).to.be.ok();
+  });
 });

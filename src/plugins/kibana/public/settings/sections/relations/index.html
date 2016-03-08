@@ -165,16 +165,6 @@
       		          <td>
       		            <kibi-select required object-type="joinRelations" ng-model="relation.relation" id="$index" filter="filterRelations"></kibi-select>
       		          </td>
-                      <td class="ng-scope"><div class="actions">
-						<button
-							ng-click="edit(relation, $index)"
-							class="btn btn-xs"
-							aria-label="Edit">
-							<span class="sr-only">Edit</span>
-							<i aria-hidden="true" class="fa fa-pencil"></i>
-						</button>
-                      </div>
-                      </td>
       		          <td>
       		            <div class="btn-group rightCorner">
       		              <kibi-array-param-remove index="{{ $index }}" model="relations.relationsDashboards"></kibi-array-param-remove>

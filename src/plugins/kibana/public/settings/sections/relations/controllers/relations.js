@@ -75,7 +75,7 @@ define(function (require) {
     };
 
     // set default object properties
-    if ($routeParams.service === 'indices') { // indices
+    if ($routeParams.service === 'indices') {
       $scope.relationService = $scope.relations.relationsIndices[$routeParams.id][$routeParams.service];
 
       for (i = 0; i <= 1; i++) {
@@ -84,22 +84,6 @@ define(function (require) {
             if (!$scope.relationService[i][key] || $scope.relationService[i][key] === 'undefined') {
               $scope.relationService[i][key] = defValues[key];
             }
-          }
-        }
-      }
-    } else {// dashboards
-      $scope.relationService = $scope.relations.relationsDashboards[$routeParams.id];
-
-      var directions = ['forward', 'back'];
-
-      for (i in directions) {
-        if (!$scope.relationService[i] || $scope.relationService[i] === 'undefined') {
-          $scope.relationService[i] = {};
-        }
-
-        for (key in defValues) {
-          if (!$scope.relationService[i][key] || $scope.relationService[i][key] === 'undefined') {
-            $scope.relationService[i][key] = defValues[key];
           }
         }
       }

@@ -6,7 +6,7 @@ module.exports = Promise.method(function (kbnServer, server) {
 
   var clean = _.once(function (code) {
 
-    return kbnServer.cleaningArray.reduce(function(p, task) {
+    return kbnServer.cleaningArray.reduce(function (p, task) {
       return p.then(task());
     }, Promise.resolve());
   });

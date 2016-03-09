@@ -107,6 +107,7 @@ module.exports = class ClusterManager {
 
     rl.on('SIGINT', () => {
       rl.pause();
+      this.server.shutdown();
       process.kill(process.pid, 'SIGINT');
     });
   }

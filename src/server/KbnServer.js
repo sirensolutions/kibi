@@ -71,11 +71,13 @@ module.exports = class KbnServer {
    */
   async listen() {
     let { server, config } = this;
+    this.cleaningArray = [];
 
     await this.ready();
     await fromNode(cb => server.start(cb));
     await require('./pid')(this, server, config);
     await require('./gremlin_server')(this, server, config); // kibi: added here to manage gremlin server
+    await require('./shutdown_manager')(this, server); // kibi: added here to manage pid and gremlin server shutdown
 
     server.log(['listening', 'info'], 'Server running at ' + server.info.uri);
     return server;

@@ -15,12 +15,15 @@ TinkerPop3Query.prototype = _.create(AbstractQuery.prototype, {
   'constructor': TinkerPop3Query
 });
 
+/*
+ * Return a promise which when resolved should return true or false.
+ */
 TinkerPop3Query.prototype.checkIfItIsRelevant = function (options) {
   if (this._checkIfSelectedDocumentRequiredAndNotPresent(options)) {
     return Promise.reject('No elasticsearch document selected while required by the activation query. [' + this.config.id + ']');
   }
 
-  return Promise.resolve({'boolean': true});
+  return Promise.resolve(true);
 };
 
 

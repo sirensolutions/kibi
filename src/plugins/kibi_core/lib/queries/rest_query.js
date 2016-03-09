@@ -19,27 +19,22 @@ RestQuery.prototype = _.create(AbstractQuery.prototype, {
 });
 
 
-/* return a promise which when resolved should return
- * a following response object
- * {
- *    "boolean": true/false
- * }
+/*
+ * Return a promise which when resolved should return true or false.
  */
 RestQuery.prototype.checkIfItIsRelevant = function (options) {
   // no document selected there is nothing to check against
   if (!options.selectedDocuments || options.selectedDocuments.length === 0) {
-    return Promise.resolve({'boolean': true});
+    return Promise.resolve(true);
   }
 
   // empty rules - let it go
   if (this.config.activation_rules.length === 0) {
-    return Promise.resolve({'boolean': true});
+    return Promise.resolve(true);
   }
 
   // evaluate the rules
-  return this.rulesHelper.evaluate(this.config.activation_rules, options.selectedDocuments).then(function (res) {
-    return {'boolean': res};
-  });
+  return this.rulesHelper.evaluate(this.config.activation_rules, options.selectedDocuments);
 };
 
 

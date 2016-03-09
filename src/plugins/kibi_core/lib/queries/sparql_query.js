@@ -17,17 +17,15 @@ SparqlQuery.prototype = _.create(AbstractQuery.prototype, {
 });
 
 
-// return a promise which when resolved should return
-// a following response object
-// {
-//    "boolean": true/false
-// }
+/**
+ * Return a promise which when resolved should return true or false
+ */
 SparqlQuery.prototype.checkIfItIsRelevant = function (options) {
   var self = this;
 
   if (self._checkIfSelectedDocumentRequiredAndNotPresent(options)) {
     self.logger.warn('No elasticsearch document selected while required by the sparql activation query. [' + self.config.id + ']');
-    return Promise.resolve({'boolean': false});
+    return Promise.resolve(false);
   }
   var uri = options.selectedDocuments && options.selectedDocuments.length > 0 ? options.selectedDocuments[0] : '';
 
@@ -38,7 +36,7 @@ SparqlQuery.prototype.checkIfItIsRelevant = function (options) {
   return self.queryHelper.replaceVariablesUsingEsDocument(this.config.activationQuery, uri).then(function (queryNoPrefixes) {
 
     if (queryNoPrefixes.trim() === '') {
-      return Promise.resolve({'boolean': true});
+      return Promise.resolve(true);
     }
 
     var query = self.config.prefixesString + ' ' + queryNoPrefixes;
@@ -63,7 +61,7 @@ SparqlQuery.prototype.checkIfItIsRelevant = function (options) {
       transform: function (resp) {
         var data = JSON.parse(resp);
         if (self.cache) {
-          self.cache.set(cacheKey, data, maxAge);
+          self.cache.set(cacheKey, data.boolean, maxAge);
         }
         return data;
       }

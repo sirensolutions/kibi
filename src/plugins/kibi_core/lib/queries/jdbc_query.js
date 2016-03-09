@@ -62,11 +62,8 @@ JdbcQuery.prototype._closeConnection = function (conn) {
   }, 100);
 };
 
-/* return a promise which when resolved should return
- * a following response object
- * {
- *    "boolean": true/false
- * }
+/*
+ * Return a promise which when resolved should return true or false
  */
 JdbcQuery.prototype.checkIfItIsRelevant = function (options) {
   var self = this;
@@ -75,7 +72,7 @@ JdbcQuery.prototype.checkIfItIsRelevant = function (options) {
 
     if (self._checkIfSelectedDocumentRequiredAndNotPresent(options)) {
       self.logger.warn('No elasticsearch document selected while required by the jdbc activation query. [' + self.config.id + ']');
-      return Promise.resolve({'boolean': false});
+      return Promise.resolve(false);
     }
     var uri = options.selectedDocuments && options.selectedDocuments.length > 0 ? options.selectedDocuments[0] : '';
 
@@ -86,7 +83,7 @@ JdbcQuery.prototype.checkIfItIsRelevant = function (options) {
     return self.queryHelper.replaceVariablesUsingEsDocument(self.config.activationQuery, uri).then(function (query) {
 
       if (query.trim() === '') {
-        return Promise.resolve({'boolean': true});
+        return Promise.resolve(true);
       }
 
       var cacheKey = null;
@@ -126,7 +123,7 @@ JdbcQuery.prototype.checkIfItIsRelevant = function (options) {
                   if (err) {
                     reject(err);
                   }
-                  var data = {'boolean': results.length > 0 ? true : false};
+                  var data = results.length > 0 ? true : false;
                   if (self.cache) {
                     self.cache.set(cacheKey, data, maxAge);
                   }

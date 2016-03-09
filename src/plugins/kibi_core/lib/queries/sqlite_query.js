@@ -77,18 +77,14 @@ SQLiteQuery.prototype.openConnection = function () {
 /**
  * Checks if the query is relevant (i.e. if it returns one or more rows).
  *
- * Returns a promise fulfilled with the following object:
- *
- * {
- *    "boolean": true/false
- * }
+ * Returns a promise fulfilled with true or false.
  */
 SQLiteQuery.prototype.checkIfItIsRelevant = function (options) {
   var self = this;
 
   if (self._checkIfSelectedDocumentRequiredAndNotPresent(options)) {
     self.logger.warn('No elasticsearch document selected while required by the sqlite activation query. [' + self.config.id + ']');
-    return Promise.resolve({'boolean': false});
+    return Promise.resolve(false);
   }
   var uri = options.selectedDocuments && options.selectedDocuments.length > 0 ? options.selectedDocuments[0] : '';
 
@@ -98,7 +94,7 @@ SQLiteQuery.prototype.checkIfItIsRelevant = function (options) {
   return self.queryHelper.replaceVariablesUsingEsDocument(this.config.activationQuery, uri).then(function (query) {
 
     if (query.trim() === '') {
-      return Promise.resolve({'boolean': true});
+      return Promise.resolve(true);
     }
 
 
@@ -114,28 +110,26 @@ SQLiteQuery.prototype.checkIfItIsRelevant = function (options) {
 
     return new Promise(function (fulfill, reject) {
       self.openConnection()
-        .then(function (connection) {
-          connection.get(query, function (error, row) {
+      .then(function (connection) {
+        connection.get(query, function (error, row) {
 
-            if (error) {
-              reject(self._augmentError(error));
-              return;
-            }
+          if (error) {
+            reject(self._augmentError(error));
+            return;
+          }
 
-            var data = {
-              'boolean': row ? true : false
-            };
+          var data = row ? true : false;
 
-            if (self.cache) {
-              self.cache.set(cacheKey, data, maxAge);
-            }
+          if (self.cache) {
+            self.cache.set(cacheKey, data, maxAge);
+          }
 
-            fulfill(data);
-          });
-        })
-        .catch(function (error) {
-          reject(self._augmentError(error));
+          fulfill(data);
         });
+      })
+      .catch(function (error) {
+        reject(self._augmentError(error));
+      });
     });
   });
 };

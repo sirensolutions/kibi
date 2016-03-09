@@ -36,16 +36,13 @@ module.exports = Promise.method(function (kbnServer, server, config) {
       pid: pid
     });
 
-    var clean = _.once(function (code) {
-      unlink(path);
-    });
+    var clean = function (code) {
+      return new Promise(function (fulfill, reject) {
+        unlink(path);
+        fulfill(true);
+      });
+    };
 
-    process.once('exit', clean); // for "natural" exits
-    process.once('SIGINT', function () { // for Ctrl-C exits
-      clean();
-
-      // resend SIGINT
-      process.kill(process.pid, 'SIGINT');
-    });
+    kbnServer.cleaningArray.push(clean);
   });
 });

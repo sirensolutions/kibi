@@ -1,6 +1,8 @@
 var childProcess = require('child_process');
 var fs = require('fs');
 var Promise = require('bluebird');
+var rp = require('request-promise');
+var http = require("http");
 
 function GremlinServerHandler(server) {
   this.gremlinServer = null;
@@ -26,49 +28,76 @@ GremlinServerHandler.prototype.start = function () {
     var esTransportPort = config.get('kibi_core.es_transport_port');
     var esClusterName = config.get('kibi_core.es_cluster_name');
 
-    var gremlinShellCommand = 'java -jar gremlin-es2-server-0.1.0.jar --elasticNodeHost="' + esHost
-                           + '" --elasticNodePort="' + esTransportPort + '" --elasticClusterName="' + esClusterName + '"';
-    self.gremlinServer = childProcess.spawn('sh', ['-c', gremlinShellCommand], { stdio: 'pipe', detached: true });
+    self.gremlinServer = childProcess.spawn('java',
+      ['-jar', 'gremlin-es2-server-0.1.0.jar', '--elasticNodeHost="' + esHost
+      + '" --elasticNodePort="' + esTransportPort + '" --elasticClusterName="' + esClusterName + '"']);
 
-    // add timer
-    var to = setTimeout(function () {
-      reject(new Error('An error has occurred while starting the kibi gremlin server'));
-    }, 30000);
-
-    self.gremlinServer.stdout.on('data', function (data) {
-      var stringData = data.toString().trim();
-      if (stringData.length > 0) {
-        if (stringData.indexOf('Started Application in') > -1) {
-          // stop timer
-          clearTimeout(to);
-          fulfill({ message: 'GremlinServer started successfully.' });
+    var counter = 15;
+    var timeout = 5000;
+    var serverLoaded = false;
+    self.ping = function(counter) {
+      setTimeout(function () {
+        var pingResponse = self._ping();
+        if(pingResponse === true){
+          self.server.log(['gremlin', 'info'], 'Kibi gremlin-server running at http://localhost:8080');
+          self.initialized = true;
+          fulfill({ message: 'Kibi gremlin-server started successfully.' });
+        } else if(counter === 0){
+          self.server.log(['gremlin', 'error'], 'The kibi gremlin-server did not start correctly');
+          reject(new Error('The kibi gremlin-server did not start correctly'));
+          return false;
+        } else {
+          self.server.log(['gremlin', 'warning'], 'Waiting the kibi gremlin-server');
+          counter--;
+          setTimeout( self.ping(counter), timeout);
         }
-      }
-    });
+      }, timeout);
+    };
+    self.ping(counter);
 
-    self.gremlinServer.on('close', function (code) {
-      if (code === 0) {
-        fulfill(code);
-      } else {
-        reject(new Error('gremlin-server exited with non zero status: [' + code + ']'));
-      }
-    });
   });
 };
 
 GremlinServerHandler.prototype.stop = function () {
   var self = this;
+
   return new Promise(function (fulfill, reject) {
     self.server.log(['gremlin', 'info'], 'Stopping kibi gremlin server');
 
-    childProcess.exec('kill -INT -' + self.gremlinServer.pid, function (error, stdout, stderr) {
-      if (error !== null) {
-        reject(error);
-      }
-
+    var exit = self.gremlinServer.kill('SIGINT');
+    if(exit) {
+      self.server.log(['gremlin', 'info'], 'gremlin-server exited successfully');
       fulfill(true);
-    });
+    } else {
+      self.server.log(['gremlin', 'error'], 'gremlin-server got an error while shutting down', error);
+      reject(new Error('gremlin-server got an error while shutting down'));
+    }
   });
+};
+
+GremlinServerHandler.prototype._ping = function () {
+  var self = this;
+
+  self.pingResponse;
+  http.get({
+      host: '127.0.0.1',
+      port: 8080,
+      path: '/ping'
+    },
+    function(res) {
+      res.on('data', function(data) {
+        var jsonResp = JSON.parse(data.toString());
+        if(jsonResp.status === 'ok'){
+          self.pingResponse = true;
+        } else {
+          self.pingResponse = false;
+        }
+      });
+    }
+  ).on('error', function (e) {
+    self.pingResponse = false;
+  });
+  return self.pingResponse;
 };
 
 module.exports = GremlinServerHandler;

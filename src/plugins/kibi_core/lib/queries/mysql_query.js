@@ -18,18 +18,15 @@ MysqlQuery.prototype = _.create(AbstractQuery.prototype, {
 });
 
 
-/* return a promise which when resolved should return
- * a following response object
- * {
- *    "boolean": true/false
- * }
+/*
+ * Return a promise which when resolved should return true or false
  */
 MysqlQuery.prototype.checkIfItIsRelevant = function (options) {
   var self = this;
 
   if (self._checkIfSelectedDocumentRequiredAndNotPresent(options)) {
     self.logger.warn('No elasticsearch document selected while required by the mysql activation query. [' + self.config.id + ']');
-    return Promise.resolve({'boolean': false});
+    return Promise.resolve(false);
   }
   var uri = options.selectedDocuments && options.selectedDocuments.length > 0 ? options.selectedDocuments[0] : '';
 
@@ -43,7 +40,7 @@ MysqlQuery.prototype.checkIfItIsRelevant = function (options) {
   return self.queryHelper.replaceVariablesUsingEsDocument(this.config.activationQuery, uri).then(function (query) {
 
     if (query.trim() === '') {
-      return Promise.resolve({'boolean': true});
+      return Promise.resolve(true);
     }
 
     var cacheKey = null;
@@ -65,7 +62,7 @@ MysqlQuery.prototype.checkIfItIsRelevant = function (options) {
           if (err) {
             reject(err);
           }
-          var data = {'boolean': rows.length > 0 ? true : false};
+          var data = rows.length > 0 ? true : false;
           if (self.cache) {
             self.cache.set(cacheKey, data, maxAge);
           }

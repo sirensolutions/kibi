@@ -251,11 +251,9 @@ Query.prototype._handleError = function (error) {
 };
 
 
-// return a promise which when resolved should return
-// a following response object
-// {
-//    "boolean": true/false
-// }
+/**
+ * Return a promise which when resolved should return true or false
+ */
 Query.prototype.checkIfItIsRelevant = function (options) {
   throw 'Must be implemented by subclass';
 };

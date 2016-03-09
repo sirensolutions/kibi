@@ -70,7 +70,7 @@ describe('RestQuery', function () {
       });
 
       restQuery.checkIfItIsRelevant({}).then(function (ret) {
-        expect(ret).to.eql({ boolean: true });
+        expect(ret).to.be(true);
         done();
       });
     });
@@ -82,7 +82,7 @@ describe('RestQuery', function () {
       });
 
       restQuery.checkIfItIsRelevant({selectedDocuments: ['/company/company/id1']}).then(function (ret) {
-        expect(ret).to.eql({ boolean: true });
+        expect(ret).to.be(true);
         done();
       });
     });
@@ -94,7 +94,7 @@ describe('RestQuery', function () {
       });
 
       restQuery.checkIfItIsRelevant({selectedDocuments: ['/company/company/id1']}).then(function (ret) {
-        expect(ret).to.eql({ boolean: true });
+        expect(ret).to.be(true);
         done();
       });
     });

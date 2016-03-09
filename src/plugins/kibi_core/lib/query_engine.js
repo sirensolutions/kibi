@@ -447,7 +447,7 @@ QueryEngine.prototype._getQueries = function (queryIds, options) {
 
     var filteredQueries = [];
     _.forEach(sparqlResponses, function (resp, i) {
-      if (resp && resp.boolean === true) {
+      if (resp) {
         filteredQueries.push(fromRightFolder[i]); // here important to use fromRightFolder !!!
       } else {
         filteredQueries.push(new InactivatedQuery(fromRightFolder[i].id));

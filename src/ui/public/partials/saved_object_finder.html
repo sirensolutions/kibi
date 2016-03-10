@@ -1,10 +1,15 @@
 <form role="form">
   <div class="form-group finder-form">
     <!--kibi: filter visualizations based on the savedSearchId-->
-    <div style="float:left;" ng-if="type === 'visualizations' && savedSearchId">
+    <div ng-if="type === 'visualizations' && savedSearchId" class="visualisation-filter-checkbox">
       <input type="checkbox" ng-model="kibi.basedOnSameSavedSearch" />
       <label>Based on the saved search of the current dashboard: {{savedSearchId}}</label>
     </div>
+    <div ng-if="type === 'visualizations' && !savedSearchId" class="visualisation-filter-checkbox">
+      <input type="checkbox" disabled/>
+      <label>To be able to filter visualisations based on dashboard's saved search - associate a saved search when saving this dashboard</label>
+    </div>
+
     <div class="finder-form-options" style="float:right;">
       <a class="small" ng-click="finder.manageObjects(finder.properties.name)">manage {{finder.properties.nouns}}</a>
     </div>

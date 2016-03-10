@@ -36,7 +36,7 @@ GremlinServerHandler.prototype.start = function () {
         '--elasticNodeHost=' + esHost,
         '--elasticNodePort=' + esTransportPort,
         '--elasticClusterName=' + esClusterName,
-        '-Dlogging.config='+loggingFilePath+'gremlin-es2-server-log.properties'
+        '-Dlogging.config=' + loggingFilePath + 'gremlin-es2-server-log.properties'
       ]
     );
 

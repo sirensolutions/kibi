@@ -6,29 +6,15 @@ module.exports = Promise.method(function (kbnServer, server, config) {
   if (server.config().get('kibi_core.enterprise_enabled') === true) {
     var gremlin = new GremlinServerHandler(server);
 
-    gremlin.start().then(function (message) {
+    return gremlin.start().then(function (message) {
 
-      var clean = _.once(function (code) {
+      var clean = function (code) {
         return gremlin.stop();
-      });
+      };
 
-      process.once('exit', function () {
-        // for "natural" exits
-        clean().finally(function () {
-
-          // resend exit
-          process.kill(process.pid, 'exit');
-        });
-      });
-
-      process.once('SIGINT', function () {
-        // for Ctrl-C exits
-        clean().finally(function () {
-
-          // resend SIGINT
-          process.kill(process.pid, 'SIGINT');
-        });
-      });
+      kbnServer.cleaningArray.push(clean);
     });
+  } else {
+    return true;
   }
 });

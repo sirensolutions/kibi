@@ -1,0 +1,32 @@
+var _ = require('lodash');
+var Promise = require('bluebird');
+
+module.exports = Promise.method(function (kbnServer, server) {
+  var self = this;
+
+  var clean = _.once(function (code) {
+
+    return kbnServer.cleaningArray.reduce(function (p, task) {
+      return p.then(task());
+    }, Promise.resolve());
+  });
+
+  process.once('SIGTERM', function () {
+
+    // for Ctrl-C exits
+    clean().finally(function () {
+
+      // resend SIGINT
+      process.kill(process.pid, 'SIGTERM');
+    });
+  }).once('SIGINT', function () {
+
+    clean().finally(function () {
+
+      // resend SIGINT
+      process.kill(process.pid, 'SIGINT');
+    });
+  });
+
+  return true;
+});

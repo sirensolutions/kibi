@@ -2,7 +2,7 @@ var _ = require('lodash');
 var Boom = require('boom');
 var Promise = require('bluebird');
 var writeFile = Promise.promisify(require('fs').writeFile);
-var unlink = require('fs').unlinkSync;
+var unlink = Promise.promisify(require('fs').unlinkSync);
 
 module.exports = Promise.method(function (kbnServer, server, config) {
   var path = config.get('pid.file');
@@ -36,16 +36,10 @@ module.exports = Promise.method(function (kbnServer, server, config) {
       pid: pid
     });
 
-    var clean = _.once(function (code) {
-      unlink(path);
-    });
+    var clean = function (code) {
+      return unlink(path);
+    };
 
-    process.once('exit', clean); // for "natural" exits
-    process.once('SIGINT', function () { // for Ctrl-C exits
-      clean();
-
-      // resend SIGINT
-      process.kill(process.pid, 'SIGINT');
-    });
+    kbnServer.cleaningArray.push(clean); // Kibi: added to manage the cleanup function
   });
 });

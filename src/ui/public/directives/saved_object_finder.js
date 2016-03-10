@@ -17,15 +17,24 @@ define(function (require) {
         // optional make-url attr, sets the userMakeUrl in our scope
         userMakeUrl: '=?makeUrl',
         // optional on-choose attr, sets the userOnChoose in our scope
-        userOnChoose: '=?onChoose'
+        userOnChoose: '=?onChoose',
+        // kibi: optional needed for filtering visualizations based on dashboard savedSearchId
+        savedSearchId: '=?savedSearchId'
       },
       template: require('ui/partials/saved_object_finder.html'),
       controllerAs: 'finder',
       controller: function ($scope, $element, $timeout) {
+
+        // kibi: variable to store the checkbox state
         $scope.kibi = {
           basedOnSameSavedSearch: false,
           _prevBasedOnSameSavedSearch: false
         };
+
+        $scope.$watch('kibi.basedOnSameSavedSearch', function () {
+          filterResults();
+        });
+        // kibi: end
 
         var self = this;
 
@@ -249,9 +258,17 @@ define(function (require) {
           .then(function (hits) {
             // ensure that we don't display old results
             // as we can't really cancel requests
+            var filtered = _.filter(hits.hits, function (hit) {
+              if ($scope.savedSearchId && basedOnSameSavedSearch) {
+                return hit.savedSearchId === $scope.savedSearchId;
+              } else {
+                return true;
+              }
+            });
+
             if (currentFilter === filter) {
-              self.hitCount = hits.total;
-              self.hits = _.sortBy(hits.hits, 'title');
+              self.hitCount = filtered.length;
+              self.hits = _.sortBy(filtered, 'title');
             }
           });
         }

@@ -17,6 +17,8 @@ src/fixtures/mock_state.js
 src/fixtures/stubbed_doc_source_response.js
 src/fixtures/stubbed_search_source.js
 
+src/optimize/BaseOptimizer.js
+
 src/plugins/elasticsearch/index.js
 src/plugins/elasticsearch/lib/__tests__/health_check.js
 src/plugins/elasticsearch/lib/__tests__/is_upgradeable.js

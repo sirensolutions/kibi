@@ -9,6 +9,7 @@ docs/getting-started.asciidoc
 docs/settings.asciidoc
 
 src/cli/cli.js
+src/cli/cluster/ClusterManager.js
 src/cli/plugin/__tests__/plugin_downloader.js
 src/cli/plugin/plugin.js
 src/cli/serve/serve.js
@@ -71,6 +72,7 @@ src/plugins/testsBundle/testsEntryTemplate.js
 src/server/http/short_url_lookup.js
 src/server/config/schema.js
 src/server/KbnServer.js
+src/server/pid/index.js
 
 src/testUtils/stub_index_pattern.js
 

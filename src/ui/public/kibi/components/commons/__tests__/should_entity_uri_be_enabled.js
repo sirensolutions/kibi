@@ -1,6 +1,7 @@
 var ngMock = require('ngMock');
 var shouldEntityUriBeEnabled;
 var expect = require('expect.js');
+var _ = require('lodash');
 
 describe('Kibi Components', function () {
   describe('Commons', function () {
@@ -15,59 +16,56 @@ describe('Kibi Components', function () {
 
         ngMock.module('queries_editor/services/saved_queries', function ($provide) {
           $provide.service('savedQueries', function (Promise) {
+            const queries = {
+              hits: [
+                {
+                  id: 'goaway',
+                  st_resultQuery: 'select name from person',
+                  st_activationQuery: 'select name from person'
+                },
+                {
+                  id: 'sql-result-query',
+                  st_resultQuery: 'select name from table where id = @doc[_source][id]@'
+                },
+                {
+                  id: 'sparql-result-query',
+                  st_resultQuery: 'select ?name { <@doc[_source][id]@> :name ?name }'
+                },
+                {
+                  id: 'sql-activation-query',
+                  st_activationQuery: 'select name from table where id = @doc[_source][id]@'
+                },
+                {
+                  id: 'sparql-activation-query',
+                  st_resultQuery: 'ask { <@doc[_source][id]@> :name ?name }'
+                },
+                {
+                  id: 'rest-body',
+                  rest_body: '@doc[_source][id]@'
+                },
+                {
+                  id: 'rest-params',
+                  rest_params: [ { value: '@doc[_source][id]@' } ]
+                },
+                {
+                  id: 'rest-headers',
+                  rest_headers: [ { value: '@doc[_source][id]@' } ]
+                },
+                {
+                  id: 'rest-path',
+                  rest_path: '/users/@doc[_source][user]@'
+                }
+              ]
+            };
             return {
+              find: function () {
+                return Promise.resolve(queries);
+              },
               get: function (id) {
-                var query;
+                var query = _.find(queries.hits, 'id', id);
 
-                switch (id) {
-                  case 'goaway':
-                    query = {
-                      st_resultQuery: 'select name from person',
-                      st_activationQuery: 'select name from person'
-                    };
-                    break;
-                  case 'sql-result-query':
-                    query = {
-                      st_resultQuery: 'select name from table where id = @doc[_source][id]@'
-                    };
-                    break;
-                  case 'sparql-result-query':
-                    query = {
-                      st_resultQuery: 'select ?name { <@doc[_source][id]@> :name ?name }'
-                    };
-                    break;
-                  case 'sql-activation-query':
-                    query = {
-                      st_activationQuery: 'select name from table where id = @doc[_source][id]@'
-                    };
-                    break;
-                  case 'sparql-activation-query':
-                    query = {
-                      st_resultQuery: 'ask { <@doc[_source][id]@> :name ?name }'
-                    };
-                    break;
-                  case 'rest-body':
-                    query = {
-                      rest_body: '@doc[_source][id]@'
-                    };
-                    break;
-                  case 'rest-params':
-                    query = {
-                      rest_params: [ { value: '@doc[_source][id]@' } ]
-                    };
-                    break;
-                  case 'rest-headers':
-                    query = {
-                      rest_headers: [ { value: '@doc[_source][id]@' } ]
-                    };
-                    break;
-                  case 'rest-path':
-                    query = {
-                      rest_path: '/users/@doc[_source][user]@'
-                    };
-                    break;
-                  default:
-                    return Promise.reject('What is this id? ' + id);
+                if (!query) {
+                  return Promise.reject('What is this id? ' + id);
                 }
                 return Promise.resolve(query);
               }
@@ -81,59 +79,59 @@ describe('Kibi Components', function () {
       });
 
       it('should not be required', function (done) {
-        shouldEntityUriBeEnabled([ 'goaway', '' ]).then(function (required) {
+        shouldEntityUriBeEnabled([ 'goaway' ]).then(function (required) {
           expect(required).to.be(false);
           done();
-        });
+        }).catch(done);
       });
 
       it('should be required for SQL result query', function (done) {
         shouldEntityUriBeEnabled([ 'sql-result-query' ]).then(function (required) {
           expect(required).to.be(true);
           done();
-        });
+        }).catch(done);
       });
 
       it('should be required for SPARQL result query', function (done) {
         shouldEntityUriBeEnabled([ 'sparql-result-query' ]).then(function (required) {
           expect(required).to.be(true);
           done();
-        });
+        }).catch(done);
       });
 
       it('should be required for SQL activation query', function (done) {
         shouldEntityUriBeEnabled([ 'sql-activation-query' ]).then(function (required) {
           expect(required).to.be(true);
           done();
-        });
+        }).catch(done);
       });
 
       it('should be required for SPARQL activation query', function (done) {
         shouldEntityUriBeEnabled([ 'sparql-activation-query' ]).then(function (required) {
           expect(required).to.be(true);
           done();
-        });
+        }).catch(done);
       });
 
       it('should be required for REST params', function (done) {
         shouldEntityUriBeEnabled([ 'rest-params' ]).then(function (required) {
           expect(required).to.be(true);
           done();
-        });
+        }).catch(done);
       });
 
       it('should be required for REST headers', function (done) {
         shouldEntityUriBeEnabled([ 'rest-headers' ]).then(function (required) {
           expect(required).to.be(true);
           done();
-        });
+        }).catch(done);
       });
 
       it('should be required for REST path', function (done) {
         shouldEntityUriBeEnabled([ 'rest-path' ]).then(function (required) {
           expect(required).to.be(true);
           done();
-        });
+        }).catch(done);
       });
 
     });
@@ -176,7 +174,7 @@ describe('Kibi Components', function () {
         shouldEntityUriBeEnabled(null, [ 'select * from table1 where 1 limit 10' ]).then(function (required) {
           expect(required).to.be(false);
           done();
-        });
+        }).catch(done);
       });
 
     });

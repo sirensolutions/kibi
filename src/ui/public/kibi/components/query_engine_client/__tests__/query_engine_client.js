@@ -15,7 +15,7 @@ describe('Kibi Components', function () {
 
     it('gets the queries html from the server synchronously', function () {
       var queryDef = encodeURIComponent('[{}]');
-      var options = encodeURIComponent('{}');
+      var options = encodeURIComponent('{"selectedDocuments":[]}');
       $httpBackend.expectGET('/getQueriesHtml?options=' + options + '&queryDefs=' + queryDef).respond();
       queryEngineClient.getQueriesHtmlFromServer({}, {}, true);
       $httpBackend.flush();
@@ -30,7 +30,7 @@ describe('Kibi Components', function () {
 
     it('gets the queries data from the server synchronously', function () {
       var queryDef = encodeURIComponent('[{}]');
-      var options = encodeURIComponent('{}');
+      var options = encodeURIComponent('{"selectedDocuments":[]}');
       $httpBackend.expectGET('/getQueriesData?options=' + options + '&queryDefs=' + queryDef).respond();
       queryEngineClient.getQueriesDataFromServer({}, {}, true);
       $httpBackend.flush();

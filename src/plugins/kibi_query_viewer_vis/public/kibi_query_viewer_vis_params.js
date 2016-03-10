@@ -56,16 +56,20 @@ define(function (require) {
         }, function () {
           updateScope();
 
-          var queryIds = _.map($scope.vis.params.queryOptions, function (option) {
-            return option.queryId;
-          });
+          var queryIds = _($scope.vis.params.queryOptions).pluck('queryId').compact().value();
 
-          _shouldEntityURIBeEnabled(queryIds).then(function (value) {
-            if ($scope.vis.params.enableQueryFields === false) {
-              $rootScope.$emit('kibi:entityURIEnabled:entityinfo', false);
-            } else {
-              $rootScope.$emit('kibi:entityURIEnabled:entityinfo', value);
-            }
+          _shouldEntityURIBeEnabled(queryIds, null, true).then((results) => {
+            let value = false;
+
+            _.each($scope.vis.params.queryOptions, (queryOption, index) => {
+              queryOption.isEntityDependent = results[index];
+              if (results[index]) {
+                value = true;
+              }
+            });
+            $scope.vis.params.hasEntityDependentQuery = value;
+
+            $rootScope.$emit('kibi:entityURIEnabled:kibiqueryviewer', value);
           }).catch(function (err) {
             notify.warning('Could not determine that widget need entityURI\n' + JSON.stringify(err, null, ' '));
           });

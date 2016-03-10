@@ -42,43 +42,13 @@ define(function (require) {
       return false;
     };
 
-    return function (queryIds, queries, detailed = false) {
-
-      // if queries provided check them
-      if (queries) {
-
-        if (detailed) {
-          return Promise.resolve(_.map(queries, (query) => _checkSingleQuery(query)));
-        } else {
-          for (var i = 0; i < queries.length; i++) {
-            if (_checkSingleQuery(queries[i]) === true) {
-              return Promise.resolve(true);
-            }
-          }
-          return Promise.resolve(false);
+    return function (queryIds) {
+      for (var i = 0; i < queryIds.length; i++) {
+        if (_checkSingleQuery(queryIds[i])) {
+          return true;
         }
-
-      } else {
-
-        return savedQueries.find().then((results) => {
-          const missingQueries = _.filter(queryIds, (queryId) => !_.find(results.hits, 'id', queryId));
-          if (missingQueries.length) {
-            return Promise.reject(new Error(`Unable to find queries: ${JSON.stringify(missingQueries)}`));
-          }
-
-          if (detailed) {
-            return _.map(queryIds, (queryId) => _checkSingleQuery(_.find(results.hits, 'id', queryId)));
-          } else {
-            for (var i = 0; i < results.hits.length; i++) {
-              if (_.contains(queryIds, results.hits[i].id) && _checkSingleQuery(results.hits[i]) === true) {
-                return true;
-              }
-            }
-            return false;
-          }
-        });
-
       }
+      return false;
     };
 
   };

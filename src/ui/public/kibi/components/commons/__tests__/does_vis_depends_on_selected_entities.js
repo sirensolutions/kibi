@@ -40,7 +40,7 @@ describe('Kibi Components', function () {
         doesVisDependsOnSelectedEntities(vis).then(function (res) {
           expect(res).to.equal(true);
           done();
-        });
+        }).catch(done);
 
         $rootScope.$apply();
       });
@@ -61,7 +61,7 @@ describe('Kibi Components', function () {
         doesVisDependsOnSelectedEntities(vis).then(function (res) {
           expect(res).to.equal(false);
           done();
-        });
+        }).catch(done);
 
         $rootScope.$apply();
       });
@@ -79,8 +79,10 @@ describe('Kibi Components', function () {
           }
         };
 
-        doesVisDependsOnSelectedEntities(vis).catch(function (err) {
-          expect(err.message).to.equal('Could not find query [query-does-not-exists]');
+        doesVisDependsOnSelectedEntities(vis).then(function () {
+          done('should fail');
+        }).catch(function (err) {
+          expect(err.message).to.equal('Unable to find queries: ["query-does-not-exists"]');
           done();
         });
 
@@ -90,7 +92,7 @@ describe('Kibi Components', function () {
       it('vis sindicetechentityinfo', function (done) {
         var vis = {
           type: {
-            name: 'sindicetechentityinfo'
+            name: 'kibiqueryviewervis'
           },
           params: {
             queryOptions: [
@@ -102,7 +104,7 @@ describe('Kibi Components', function () {
         doesVisDependsOnSelectedEntities(vis).then(function (res) {
           expect(res).to.equal(true);
           done();
-        });
+        }).catch(done);
 
         $rootScope.$apply();
       });
@@ -110,7 +112,7 @@ describe('Kibi Components', function () {
       it('vis sindicetechentityinfo - query does not depend on selected entity', function (done) {
         var vis = {
           type: {
-            name: 'sindicetechentityinfo'
+            name: 'kibiqueryviewervis'
           },
           params: {
             queryOptions: [
@@ -122,7 +124,7 @@ describe('Kibi Components', function () {
         doesVisDependsOnSelectedEntities(vis).then(function (res) {
           expect(res).to.equal(false);
           done();
-        });
+        }).catch(done);
 
         $rootScope.$apply();
       });
@@ -130,7 +132,7 @@ describe('Kibi Components', function () {
       it('vis sindicetechentityinfo - query does not exists', function (done) {
         var vis = {
           type: {
-            name: 'sindicetechentityinfo'
+            name: 'kibiqueryviewervis'
           },
           params: {
             queryOptions: [
@@ -139,8 +141,10 @@ describe('Kibi Components', function () {
           }
         };
 
-        doesVisDependsOnSelectedEntities(vis).catch(function (err) {
-          expect(err.message).to.equal('Could not find query [query-does-not-exists]');
+        doesVisDependsOnSelectedEntities(vis).then(function () {
+          done('should fail');
+        }).catch(function (err) {
+          expect(err.message).to.equal('Unable to find queries: ["query-does-not-exists"]');
           done();
         });
 
@@ -165,7 +169,7 @@ describe('Kibi Components', function () {
         doesVisDependsOnSelectedEntities(vis).then(function (res) {
           expect(res).to.equal(true);
           done();
-        });
+        }).catch(done);
 
         $rootScope.$apply();
       });
@@ -188,7 +192,7 @@ describe('Kibi Components', function () {
         doesVisDependsOnSelectedEntities(vis).then(function (res) {
           expect(res).to.equal(false);
           done();
-        });
+        }).catch(done);
 
         $rootScope.$apply();
       });
@@ -208,8 +212,10 @@ describe('Kibi Components', function () {
 
         };
 
-        doesVisDependsOnSelectedEntities(vis).catch(function (err) {
-          expect(err.message).to.equal('Could not find query [query-does-not-exists]');
+        doesVisDependsOnSelectedEntities(vis).then(function () {
+          done('should fail');
+        }).catch(function (err) {
+          expect(err.message).to.equal('Unable to find queries: ["query-does-not-exists"]');
           done();
         });
 
@@ -233,7 +239,7 @@ describe('Kibi Components', function () {
         doesVisDependsOnSelectedEntities(vis).then(function (res) {
           expect(res).to.equal(false);
           done();
-        });
+        }).catch(done);
 
         $rootScope.$apply();
       });
@@ -257,7 +263,7 @@ describe('Kibi Components', function () {
         doesVisDependsOnSelectedEntities(vis).then(function (res) {
           expect(res).to.equal(false);
           done();
-        });
+        }).catch(done);
 
         $rootScope.$apply();
       });

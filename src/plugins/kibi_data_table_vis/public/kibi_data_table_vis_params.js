@@ -44,11 +44,19 @@ define(function (require) {
 
         var shouldEntityURIBeEnabled = function () {
           // examine all used queries in order to check if any of them require entityURI
-          var queryIds = _.map($scope.vis.params.queryIds, function (snippet) {
-            return snippet.queryId;
-          });
+          var queryIds = _($scope.vis.params.queryIds).pluck('queryId').compact().value();
 
-          _shouldEntityURIBeEnabled(queryIds).then(function (value) {
+          _shouldEntityURIBeEnabled(queryIds, null, true).then(function (results) {
+            let value = false;
+
+            _.each($scope.vis.params.queryIds, (snippet, index) => {
+              snippet.isEntityDependent = results[index];
+              if (results[index]) {
+                value = true;
+              }
+            });
+            $scope.vis.params.hasEntityDependentQuery = value;
+
             if ($scope.vis.params.enableQueryFields === true) {
               $rootScope.$emit('kibi:entityURIEnabled:kibitable', value);
             } else {

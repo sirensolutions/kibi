@@ -51,8 +51,7 @@ define(function (require) {
 
       var queryHelper =  Private(require('ui/kibi/helpers/query_helper'));
       var setEntityUri = Private(require('ui/kibi/components/commons/_set_entity_uri'));
-      var shouldEntityURIBeEnabled = Private(require('ui/kibi/components/commons/_should_entity_uri_be_enabled'));
-
+      var doesQueryDependsOnEntity = Private(require('ui/kibi/components/commons/_does_query_depends_on_entity'));
 
       // we have to wrap the value into object - this prevents weird thing related to transclusion
       // see http://stackoverflow.com/questions/25180613/angularjs-transclusion-creates-new-scope
@@ -98,14 +97,13 @@ define(function (require) {
         $scope.query._previewTemplateId = 'kibi-table-jade';
       }
 
-      var _enableEntityUri = function () {
-        return shouldEntityURIBeEnabled(null, [$scope.query]).then(function (value) {
-          $scope.holder.entityURIEnabled = value;
-        }).catch(function (err) {
-          notify.warning('Could not determine that widget need entityURI' + JSON.stringify(err, null, ' '));
-        });
+      const _enableEntityUri = function () {
+        $scope.holder.entityURIEnabled = false;
+        if ($scope.query.id && $scope.query.id.charAt(0) === '1') {
+          $scope.holder.entityURIEnabled = true;
+        }
       };
-
+      _enableEntityUri();
 
       // for headers and params $watch with true as normal watch fail to detect the change in the arrays
       $scope.$watch('query.rest_headers', function () {
@@ -119,14 +117,13 @@ define(function (require) {
       });
 
       $scope.$watchMulti(['query.st_activationQuery', 'query.st_resultQuery', 'query.rest_body'], function () {
-        _enableEntityUri().then(() => {
-          if ($scope.datasourceType !== 'rest') {
-            var starRegex = /\*/g;
-            // test for a star in a query
-            // TODO why test st_activationQuery ?
-            $scope.starDetectedInAQuery = starRegex.test($scope.query.st_activationQuery) || starRegex.test($scope.query.st_resultQuery);
-          }
-        });
+        _enableEntityUri();
+        if ($scope.datasourceType !== 'rest') {
+          var starRegex = /\*/g;
+          // test for a star in a query
+          // TODO why test st_activationQuery ?
+          $scope.starDetectedInAQuery = starRegex.test($scope.query.st_activationQuery) || starRegex.test($scope.query.st_resultQuery);
+        }
       });
 
       $scope.$watch('query.st_datasourceId', function () {
@@ -137,16 +134,14 @@ define(function (require) {
           savedDatasources.get($scope.query.st_datasourceId).then(function (savedDatasource) {
             $scope.datasourceType = savedDatasource.datasourceType;
 
-            _enableEntityUri().then(() => {
-              if (savedDatasource.datasourceType === 'rest') {
-                $scope.query._previewTemplateId = 'kibi-json-jade';
-              } else {
-                $scope.query._previewTemplateId = 'kibi-table-jade';
-              }
-              $scope.preview();
-            });
-
-          });
+            _enableEntityUri();
+            if (savedDatasource.datasourceType === 'rest') {
+              $scope.query._previewTemplateId = 'kibi-json-jade';
+            } else {
+              $scope.query._previewTemplateId = 'kibi-table-jade';
+            }
+            return $scope.preview();
+          }).catch(notify.error);
         }
       }, true);
 
@@ -172,7 +167,13 @@ define(function (require) {
           return;
         }
         var titleChanged = $scope.$queryTitle !== $scope.query.title;
-        $scope.query.id = $scope.query.title;
+        if (doesQueryDependsOnEntity([ $scope.query ])) {
+          $scope.holder.entityURIEnabled = true;
+          $scope.query.id = '1' + $scope.query.title;
+        } else {
+          $scope.holder.entityURIEnabled = false;
+          $scope.query.id = '0' + $scope.query.title;
+        }
         return $scope.query.save().then(function (savedQueryId) {
           notify.info('Query ' + $scope.query.title + ' successfuly saved');
           if (titleChanged) {
@@ -228,7 +229,6 @@ define(function (require) {
         if ($scope.query.id && (!$scope.holder.entityURIEnabled || $scope.holder.entityURI)) {
           $scope.spinIt = true;
           return queryEngineClient.clearCache().then(function () {
-
             return queryEngineClient.getQueriesHtmlFromServer(
               [
                 {
@@ -246,35 +246,33 @@ define(function (require) {
                 selectedDocuments: [$scope.holder.entityURI]
               },
               true
-            ).then(function (resp) {
-              if (resp && resp.data && resp.data.error) {
-                var msg = '';
-                if (resp.data.error.message) {
-                  msg = resp.data.error.message;
-                } else if (resp.data.error && (typeof resp.data.error === 'string')) {
-                  msg = resp.data.error;
-                } else if (resp.data.error.error && (typeof resp.data.error.error === 'string')) {
-                  msg = resp.data.error.error;
-                } else {
-                  msg = JSON.stringify(resp.data.error, null, ' ');
-                }
-                notify.warning(msg);
-                $scope.holder.jsonPreview = JSON.stringify(resp.data.error, null, ' ');
-                $scope.holder.jsonPreviewActive = true;
-                $scope.holder.htmlPreviewActive = false;
-                $scope.holder.htmlPreview = 'Error. For details look at the "Preview Json" tab.';
-
-              } else if (resp && resp.data && resp.data.snippets && resp.data.snippets.length === 1) {
-                $scope.holder.jsonPreview = JSON.stringify(resp.data.snippets[0], null, ' ');
-                $scope.holder.htmlPreview = resp.data.snippets[0].html;
+            );
+          }).then(function (resp) {
+            if (resp && resp.data && resp.data.error) {
+              var msg = '';
+              if (resp.data.error.message) {
+                msg = resp.data.error.message;
+              } else if (resp.data.error && (typeof resp.data.error === 'string')) {
+                msg = resp.data.error;
+              } else if (resp.data.error.error && (typeof resp.data.error.error === 'string')) {
+                msg = resp.data.error.error;
+              } else {
+                msg = JSON.stringify(resp.data.error, null, ' ');
               }
-              $scope.spinIt = false;
-            });
-          });
+              notify.warning(msg);
+              $scope.holder.jsonPreview = JSON.stringify(resp.data.error, null, ' ');
+              $scope.holder.jsonPreviewActive = true;
+              $scope.holder.htmlPreviewActive = false;
+              $scope.holder.htmlPreview = 'Error. For details look at the "Preview Json" tab.';
 
+            } else if (resp && resp.data && resp.data.snippets && resp.data.snippets.length === 1) {
+              $scope.holder.jsonPreview = JSON.stringify(resp.data.snippets[0], null, ' ');
+              $scope.holder.htmlPreview = resp.data.snippets[0].html;
+            }
+            $scope.spinIt = false;
+          }).catch(notify.error);
         }
       };
-
 
       //TODO understand how the validation was done in object editor
       $scope.aceLoaded = function (editor) {
@@ -296,6 +294,6 @@ define(function (require) {
         });
       };
 
-      _enableEntityUri().then($scope.preview);
+      $scope.preview();
     });
 });

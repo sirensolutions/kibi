@@ -76,6 +76,7 @@ describe('Kibi Controllers', function () {
 
     it('should enable the entity URI', function () {
       var query = {
+        id: '1ahah', // starts with 1 to indicate it is dependent on an entity
         title: 'ahah',
         _previewTemplateId: 'mytmpl',
         st_activationQuery: '@doc[id]@'

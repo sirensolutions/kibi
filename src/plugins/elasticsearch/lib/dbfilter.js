@@ -42,11 +42,13 @@ module.exports = function (queryEngine, json) {
               if (queries[0].queryActivated === true) {
                 // empty bool
                 // GH-117: need to put here a filter that will match nothing
-                filter[negate ? 'must_not' : 'should'] = [{
-                  term: {
-                    snxrcngu: 'tevfuxnvfpbzcyrgrylpenfl'
+                filter[negate ? 'must_not' : 'should'] = [
+                  {
+                    term: {
+                      snxrcngu: 'tevfuxnvfpbzcyrgrylpenfl'
+                    }
                   }
-                }];
+                ];
                 fulfill(filter);
               } else {
                 // delete the entry

@@ -10,9 +10,19 @@ define(function (require) {
     function QueryEngineClient() {}
 
     QueryEngineClient.prototype._makeRequestToServer = function (url, queryDefs, options, async) {
-      if (queryDefs && !(queryDefs instanceof Array) && (typeof queryDefs === 'object') && queryDefs !== null) {
+      options = options || {};
+      options.selectedDocuments = _.compact(options.selectedDocuments);
+
+      if (queryDefs && !(queryDefs instanceof Array) && (typeof queryDefs === 'object')) {
         queryDefs = [queryDefs];
       }
+
+      queryDefs = _.filter(queryDefs, (queryDef) => !queryDef.isEntityDependent || options.selectedDocuments.length);
+
+      if (!queryDefs.length) {
+        return Promise.resolve();
+      }
+
       var params = {
         options: JSON.stringify(options),
         queryDefs: JSON.stringify(queryDefs)

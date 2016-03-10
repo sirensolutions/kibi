@@ -109,7 +109,7 @@ describe('Kibi Components', function () {
         globalState.entityDisabled = false;
 
         markFiltersBySelectedEntities(filters).catch(function (err) {
-          expect(err.message).to.equal('Could not find query [does-not-exists]');
+          expect(err.message).to.equal('Unable to find queries: ["does-not-exists"]');
           done();
         });
 

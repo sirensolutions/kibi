@@ -107,7 +107,7 @@ module.exports = class ClusterManager {
 
     rl.on('SIGINT', () => {
       rl.pause();
-      this.server.shutdown();
+      this.server.shutdown(); // Kibi: added to send a SIGTERM signal and trigger the cleanup chain
       process.kill(process.pid, 'SIGINT');
     });
   }

@@ -20,7 +20,7 @@ GremlinServerHandler.prototype.start = function () {
   }
 
   return new Promise(function (fulfill, reject) {
-    self.server.log(['gremlin', 'info'], 'Starting kibi gremlin server');
+    self.server.log(['gremlin', 'info'], 'Starting the Kibi gremlin server');
 
     var config = self.server.config();
 
@@ -29,29 +29,41 @@ GremlinServerHandler.prototype.start = function () {
     var esClusterName = config.get('kibi_core.es_cluster_name');
 
     self.gremlinServer = childProcess.spawn('java',
-      ['-jar', 'gremlin-es2-server-0.1.0.jar', '--elasticNodeHost="' + esHost
-      + '" --elasticNodePort="' + esTransportPort + '" --elasticClusterName="' + esClusterName + '"']);
+      [
+        '-jar', 'gremlin-es2-server-0.1.0.jar',
+        '--elasticNodeHost="' + esHost + '" --elasticNodePort="' + esTransportPort + '" --elasticClusterName="' + esClusterName + '"'
+      ]
+    );
 
     var counter = 15;
     var timeout = 5000;
     var serverLoaded = false;
     self.ping = function (counter) {
-      setTimeout(function () {
-        var pingResponse = self._ping();
-        if (pingResponse === true) {
-          self.server.log(['gremlin', 'info'], 'Kibi gremlin-server running at http://localhost:8080');
-          self.initialized = true;
-          fulfill({ message: 'Kibi gremlin-server started successfully.' });
-        } else if (counter === 0) {
-          self.server.log(['gremlin', 'error'], 'The kibi gremlin-server did not start correctly');
-          reject(new Error('The kibi gremlin-server did not start correctly'));
-          return false;
-        } else {
-          self.server.log(['gremlin', 'warning'], 'Waiting the kibi gremlin-server');
-          counter--;
-          setTimeout(self.ping(counter), timeout);
-        }
-      }, timeout);
+      if (counter > 0) {
+        setTimeout(function () {
+          self._ping()
+          .then(function (resp) {
+            var jsonResp = JSON.parse(resp.toString());
+            if (jsonResp.status === 'ok') {
+              self.server.log(['gremlin', 'info'], 'Kibi gremlin server running at http://localhost:8080');
+              self.initialized = true;
+              fulfill({ message: 'The Kibi gremlin server started successfully.' });
+            } else {
+              self.server.log(['gremlin', 'warning'], 'Waiting for the Kibi gremlin server');
+              counter--;
+              setTimeout(self.ping(counter), timeout);
+            }
+          })
+          .catch(function (err) {
+            self.server.log(['gremlin', 'warning'], 'Waiting for the Kibi gremlin server');
+            counter--;
+            setTimeout(self.ping(counter), timeout);
+          });
+        }, timeout);
+      } else {
+        self.server.log(['gremlin', 'error'], 'The Kibi gremlin server did not start correctly');
+        reject(new Error('The Kibi gremlin server did not start correctly'));
+      }
     };
     self.ping(counter);
 
@@ -62,43 +74,24 @@ GremlinServerHandler.prototype.stop = function () {
   var self = this;
 
   return new Promise(function (fulfill, reject) {
-    self.server.log(['gremlin', 'info'], 'Stopping kibi gremlin server');
+    self.server.log(['gremlin', 'info'], 'Stopping the Kibi gremlin server');
 
-    var exit = self.gremlinServer.kill('SIGINT');
-    if (exit) {
-      self.server.log(['gremlin', 'info'], 'gremlin-server exited successfully');
+    var exitCode = self.gremlinServer.kill('SIGINT');
+    if (exitCode) {
+      self.server.log(['gremlin', 'info'], 'The Kibi gremlin server exited successfully');
       fulfill(true);
     } else {
-      self.server.log(['gremlin', 'error'], 'gremlin-server got an error while shutting down');
-      reject(new Error('gremlin-server got an error while shutting down'));
+      self.server.log(['gremlin', 'error'], 'The Kibi gremlin server exited with non zero status: ' + exitCode);
+      reject(new Error('The Kibi gremlin server exited with non zero status: ' + exitCode));
     }
   });
 };
 
 GremlinServerHandler.prototype._ping = function () {
-  var self = this;
-
-  self.pingResponse;
-  http.get(
-    {
-      host: '127.0.0.1',
-      port: 8080,
-      path: '/ping'
-    },
-    function (res) {
-      res.on('data', function (data) {
-        var jsonResp = JSON.parse(data.toString());
-        if (jsonResp.status === 'ok') {
-          self.pingResponse = true;
-        } else {
-          self.pingResponse = false;
-        }
-      });
-    }
-  ).on('error', function (e) {
-    self.pingResponse = false;
+  return rp({
+    method: 'GET',
+    uri: 'http://127.0.0.1:8080/ping'
   });
-  return self.pingResponse;
 };
 
 module.exports = GremlinServerHandler;

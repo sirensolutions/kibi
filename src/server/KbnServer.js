@@ -71,7 +71,7 @@ module.exports = class KbnServer {
    */
   async listen() {
     let { server, config } = this;
-    this.cleaningArray = [];
+    this.cleaningArray = []; // Kibi: added to manage cleanup functions through shutdown_manager
 
     await this.ready();
     await fromNode(cb => server.start(cb));

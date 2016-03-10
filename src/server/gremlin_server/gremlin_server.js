@@ -27,13 +27,16 @@ GremlinServerHandler.prototype.start = function () {
     var esHost = config.get('elasticsearch.url').split(':')[1].substring(2);
     var esTransportPort = config.get('kibi_core.es_transport_port');
     var esClusterName = config.get('kibi_core.es_cluster_name');
+    var gremlinServerPath = config.get('kibi_core.gremlin_server_path');
+    var loggingFilePath = gremlinServerPath.replace(/-[^-]*$/, '') + '/';
 
     self.gremlinServer = childProcess.spawn('java',
       [
-        '-jar', 'gremlin-es2-server-0.1.0.jar',
+        '-jar', gremlinServerPath,
         '--elasticNodeHost=' + esHost,
         '--elasticNodePort=' + esTransportPort,
-        '--elasticClusterName=' + esClusterName
+        '--elasticClusterName=' + esClusterName,
+        '-Dlogging.config='+loggingFilePath+'gremlin-es2-server-log.properties'
       ]
     );
 

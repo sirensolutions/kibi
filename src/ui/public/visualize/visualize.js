@@ -64,8 +64,9 @@ define(function (require) {
           $visEl.toggleClass('spy-only', Boolean(fullSpy));
 
           // kibi: skip checking that vis it is too small
-          if ($scope.vis.type.name === 'kibiqueryviewervis' ||
-              $scope.vis.type.name === 'kibi_sequential_join_vis'
+          if (
+            $scope.vis &&
+            ($scope.vis.type.name === 'kibiqueryviewervis' || $scope.vis.type.name === 'kibi_sequential_join_vis')
           ) {
             // for these 2 visualisations
             // buttons are small and query viewer dynamically inject html so at the begining

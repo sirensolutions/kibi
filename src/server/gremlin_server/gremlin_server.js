@@ -31,7 +31,9 @@ GremlinServerHandler.prototype.start = function () {
     self.gremlinServer = childProcess.spawn('java',
       [
         '-jar', 'gremlin-es2-server-0.1.0.jar',
-        '--elasticNodeHost="' + esHost + '" --elasticNodePort="' + esTransportPort + '" --elasticClusterName="' + esClusterName + '"'
+        '--elasticNodeHost=' + esHost,
+        '--elasticNodePort=' + esTransportPort,
+        '--elasticClusterName=' + esClusterName
       ]
     );
 

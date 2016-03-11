@@ -78,6 +78,8 @@ module.exports = function (kibana) {
 
         enterprise_enabled: Joi.boolean().default(false),
 
+        gremlin_server_path: Joi.string().allow('').default(''),
+
         es_cluster_name: Joi.string().default('elasticsearch'),
         es_transport_port: Joi.number().default(9330),
 

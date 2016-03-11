@@ -3,6 +3,7 @@ var fs = require('fs');
 var Promise = require('bluebird');
 var rp = require('request-promise');
 var http = require('http');
+var path = require('path');
 
 function GremlinServerHandler(server) {
   this.gremlinServer = null;
@@ -27,13 +28,23 @@ GremlinServerHandler.prototype.start = function () {
     var esHost = config.get('elasticsearch.url').split(':')[1].substring(2);
     var esTransportPort = config.get('kibi_core.es_transport_port');
     var esClusterName = config.get('kibi_core.es_cluster_name');
+    var gremlinServerPath = config.get('kibi_core.gremlin_server_path');
+
+    if (!path.isAbsolute(gremlinServerPath)) {
+      var rootDir = path.normalize(__dirname + path.sep + '..' + path.sep + '..' + path.sep + '..' + path.sep);
+      var gremlinDirtyDir = path.join(rootDir, gremlinServerPath);
+      gremlinServerPath = path.resolve(path.normalize(gremlinDirtyDir));
+    }
+
+    var loggingFilePath = path.parse(gremlinServerPath).dir + path.sep + 'gremlin-es2-server-log.properties';
 
     self.gremlinServer = childProcess.spawn('java',
       [
-        '-jar', 'gremlin-es2-server-0.1.0.jar',
+        '-jar', gremlinServerPath,
         '--elasticNodeHost=' + esHost,
         '--elasticNodePort=' + esTransportPort,
-        '--elasticClusterName=' + esClusterName
+        '--elasticClusterName=' + esClusterName,
+        '-Dlogging.config=' + loggingFilePath
       ]
     );
 

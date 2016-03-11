@@ -7,8 +7,9 @@ define(function (require) {
   });
 
   require('ui/modules').get('apps/settings')
-  .controller('settingsAbout', function ($scope, kbnVersion, buildNum, buildSha) {
+  .controller('settingsAbout', function ($scope, kbnVersion, kibiVersion, buildNum, buildSha) {
     $scope.kbnVersion = kbnVersion;
+    $scope.kibiVersion = kibiVersion; // kibi: added to manage kibi version
     $scope.buildNum = buildNum;
     $scope.buildSha = buildSha;
   });

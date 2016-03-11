@@ -9,6 +9,7 @@ var QueryHelper = require('../query_helper');
 function TinkerPop3Query(server, queryDefinition, cache) {
   AbstractQuery.call(this, server, queryDefinition, cache);
   this.queryHelper = new QueryHelper(server);
+  this.server = server;
 }
 
 TinkerPop3Query.prototype = _.create(AbstractQuery.prototype, {
@@ -70,20 +71,25 @@ TinkerPop3Query.prototype.fetchResults = function (options, onlyIds, idVariableN
       self.queryHelper.fetchDocuments('index-pattern'),
       self.queryHelper.fetchDocuments('config')
     ]).then(function (results) {
-      var patterns = results[0];
-      var config = results[1];
+      var patternHits = results[0];
+      var configHits = results[1];
 
       var indices = null;
-      if (patterns.hits.total > 0) {
-        indices = _.map(patterns.hits.hits, function (hit) {
+      if (patternHits.hits.total > 0) {
+        indices = _.map(patternHits.hits.hits, function (hit) {
           return hit._id;
         });
       }
 
       var kibiRelations = null;
-      var configDocs = _.filter(config.hits.hits, function (doc) {
-        return doc._id === self.config.get('pkg').version;
-      });
+      var serverVersion = self.server.config().get('pkg').version;
+      var configDocs = [];
+      if (configHits.hits.total > 0) {
+        configDocs = _.filter(configHits.hits.hits, function (doc) {
+          return doc._id === serverVersion;
+        });
+      }
+
       if (configDocs.length === 0) {
         Promise.reject(new Error('No config documents found'));
       } else if (configDocs.length > 1) {

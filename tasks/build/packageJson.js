@@ -13,6 +13,7 @@ module.exports = function (grunt) {
         description: pkg.description,
         keywords: pkg.keywords,
         version: pkg.version,
+        kibi_version: pkg.kibi_version, // kibi: added to manage kibi version
         build: {
           number: grunt.config.get('buildNum'),
           sha: grunt.config.get('buildSha')

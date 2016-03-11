@@ -49,6 +49,7 @@ src/plugins/kibana/public/kibana.js
 
 src/plugins/kibana/public/settings/app.html
 src/plugins/kibana/public/settings/index.js
+src/plugins/kibana/public/settings/sections/about/index.js
 src/plugins/kibana/public/settings/sections/about/index.html
 src/plugins/kibana/public/settings/sections/advanced/lib/to_editable_config.js
 src/plugins/kibana/public/settings/sections/index.js
@@ -78,8 +79,9 @@ src/server/pid/index.js
 
 src/testUtils/stub_index_pattern.js
 
+src/ui/index.js
 src/ui/UiBundlerEnv.js
-
+src/ui/public/chrome/api/angular.js
 src/ui/public/Vis/VisType.js
 
 src/ui/public/agg_table/agg_table.js
@@ -168,6 +170,7 @@ tasks/build/installNpmDeps.js
 tasks/build/pleaserun.js
 tasks/build/run.js
 tasks/build/versionedLinks.js
+tasks/build/packageJson.js
 
 tasks/config/copy.js
 tasks/config/platforms.js

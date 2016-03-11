@@ -81,8 +81,8 @@ TinkerPop3Query.prototype.fetchResults = function (options, onlyIds, idVariableN
       }
 
       var kibiRelations = null;
-      var configDocs = _.drop(config.hits.hits, function (doc) {
-        return doc._id !== self.config.get('pkg').version;
+      var configDocs = _.filter(config.hits.hits, function (doc) {
+        return doc._id === self.config.get('pkg').version;
       });
       if (configDocs.length === 0) {
         Promise.reject(new Error('No config documents found'));

@@ -30,10 +30,10 @@ GremlinServerHandler.prototype.start = function () {
     var esClusterName = config.get('kibi_core.es_cluster_name');
     var gremlinServerPath = config.get('kibi_core.gremlin_server_path');
 
-    if(!path.isAbsolute(gremlinServerPath)){
+    if (!path.isAbsolute(gremlinServerPath)) {
       var rootDir = path.normalize(__dirname + path.sep + '..' + path.sep + '..' + path.sep + '..' + path.sep);
       var gremlinDirtyDir = path.join(rootDir, gremlinServerPath);
-      var gremlinServerPath = path.resolve(path.normalize(gremlinDirtyDir));
+      gremlinServerPath = path.resolve(path.normalize(gremlinDirtyDir));
     }
 
     var loggingFilePath = path.parse(gremlinServerPath).dir + path.sep + 'gremlin-es2-server-log.properties';

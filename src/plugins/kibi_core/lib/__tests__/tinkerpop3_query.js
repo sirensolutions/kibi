@@ -19,62 +19,70 @@ var fakeServer = {
         }
       }
     };
-  }
-};
-
-
-var fakeConfigs = {
-  took : 1,
-  timed_out : false,
-  _shards : {
-    total : 5,
-    successful : 5,
-    failed : 0
   },
-  hits : {
-    total : 2,
-    max_score : 1.0,
-    hits :
-      [
-        {
-          _index: '.kibi',
-          _type: 'config',
-          _id: '0.3.2',
-          _score: 1,
-          _source: {
-            'kibi:relations': '{\"relationsIndices\":[],\"relationsDashboards\":[],'
-            + '\"relationsIndicesSerialized\":{},\"relationsDashboardsSerialized\":{}}',
-            'kibi:relationalPanel': true,
-            defaultIndex: 'company',
-            buildNum: 8467
+  plugins: {
+    elasticsearch: {
+      client: {
+        search: function (options) {
+          switch (options.type) {
+            case 'index-pattern':
+              return Promise.resolve({
+                hits: {
+                  hits: [
+                    { _id: 'investment' },
+                    { _id: 'article' },
+                    { _id: 'investor' },
+                    { _id: 'company' }
+                  ]
+                }
+              });
+            case 'config':
+              return Promise.resolve({
+                took : 1,
+                timed_out : false,
+                _shards : {
+                  total : 5,
+                  successful : 5,
+                  failed : 0
+                },
+                hits : {
+                  total : 2,
+                  max_score : 1.0,
+                  hits : [
+                    {
+                      _index: '.kibi',
+                      _type: 'config',
+                      _id: '0.3.2',
+                      _score: 1,
+                      _source: {
+                        'kibi:relations': '{\"relationsIndices\":[],\"relationsDashboards\":[],'
+                          + '\"relationsIndicesSerialized\":{},\"relationsDashboardsSerialized\":{}}',
+                        'kibi:relationalPanel': true,
+                        defaultIndex: 'company',
+                        buildNum: 8467
+                      }
+                    },
+                    {
+                      _index: '.kibi',
+                      _type: 'config',
+                      _id: '0.1.1',
+                      _score: 1,
+                      _source: {
+                        'kibi:relations': '{\"relationsIndices\":[],\"relationsDashboards\":[],'
+                          + '\"relationsIndicesSerialized\":{},\"relationsDashboardsSerialized\":{}}',
+                        'kibi:relationalPanel': true,
+                        defaultIndex: 'company',
+                        buildNum: 8467
+                      }
+                    }
+                  ]
+                }
+              });
           }
-        },
-        {
-          _index: '.kibi',
-          _type: 'config',
-          _id: '0.1.1',
-          _score: 1,
-          _source: {
-            'kibi:relations': '{\"relationsIndices\":[],\"relationsDashboards\":[],'
-            + '\"relationsIndicesSerialized\":{},\"relationsDashboardsSerialized\":{}}',
-            'kibi:relationalPanel': true,
-            defaultIndex: 'company',
-            buildNum: 8467
-          }
+          return Promise.reject(new Error('No documents to return for ' + options));
         }
-      ]
-  }
-};
-
-var fakeIndexPatterns = {
-  hits: {
-    total: 4,
-    hits: [
-      {_id: 'investment'},
-      {_id: 'article'},
-      {_id: 'investor'},
-      {_id: 'company'}
-    ]
+      }
+    }
   }
 };
 
@@ -238,11 +246,7 @@ describe('TinkerPop3Query', function () {
     mockery.registerMock('request-promise', function (rpOptions) {
 
       // here return different resp depends on rpOptions.href
-      if (rpOptions.uri.href && rpOptions.uri.href.indexOf('/config/_search') !== -1) {
-        return Promise.resolve(fakeConfigs);
-      } else if (rpOptions.uri.href && rpOptions.uri.href.indexOf('/index-pattern/_search') !== -1) {
-        return Promise.resolve(fakeIndexPatterns);
-      } else if (rpOptions.uri.indexOf('http://localhost:3000/graph/query') !== -1) {
+      if (rpOptions.uri.indexOf('http://localhost:3000/graph/query') !== -1) {
         return Promise.resolve(fakeGraphResponse);
       } else {
         return Promise.reject(new Error('Document does not exists'));

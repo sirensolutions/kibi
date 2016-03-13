@@ -275,7 +275,8 @@ QueryEngine.prototype.reloadQueries = function () {
     if (queryDefinitions.length > 0) {
       return self.client.search({
         index: self.config.get('kibana.index'),
-        type: 'datasource'
+        type: 'datasource',
+        size: 100
       })
       .then(function (datasources) {
         // now as we have all datasources

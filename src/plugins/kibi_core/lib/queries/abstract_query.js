@@ -1,7 +1,6 @@
 var _ = require('lodash');
 var crypto = require('crypto');
 var Promise = require('bluebird');
-var rp = require('request-promise');
 var url = require('url');
 var http = require('http');
 var handlebars = require('handlebars');
@@ -26,6 +25,7 @@ function Query(server, snippetDefinition, cache) {
   this.server = server;
   this.serverConfig = server.config();
   this.log = require('../logger')(server, 'abstract_query');
+  this.client = server.plugins.elasticsearch.client;
 
   this.id = snippetDefinition.id;
 
@@ -121,7 +121,7 @@ Query.prototype._returnAnEmptyQueryResultsPromise = function (message) {
   return Promise.resolve(data);
 };
 
-Query.prototype._fetchTemplate  = function (templateId) {
+Query.prototype._fetchTemplate = function (templateId) {
   var self = this;
 
   // here make sure to turn spaces into dashes
@@ -134,20 +134,18 @@ Query.prototype._fetchTemplate  = function (templateId) {
     }
   }
 
-  return rp({
-    method: 'GET',
-    uri: url.parse(self.serverConfig.get('elasticsearch.url') + '/' +
-                   self.serverConfig.get('kibana.index') + '/template/' + templateId + '/_source'),
-    transform: function (resp) {
-      var data = JSON.parse(resp);
-      if (self.cache) {
-        self.cache.set(templateId, data);
-      }
-      return data;
+  return self.client.search({
+    index: self.serverConfig.get('kibana.index'),
+    type: 'template',
+    q: '_id:' + templateId
+  }).then(function (result) {
+    const template = result.hits.hits[0];
+    if (self.cache) {
+      self.cache.set(templateId, template._source);
     }
+    return template._source;
   });
 };
-
 
 Query.prototype.getHtml = function (queryDef, options) {
   var that = this;
@@ -180,51 +178,51 @@ Query.prototype.getHtml = function (queryDef, options) {
 
     // here fetch template via $http and cache it
     return that._fetchTemplate(queryDef.templateId)
-      .then(function (template) {
+    .then(function (template) {
 
-        var templateSource = template.st_templateSource;
-        var templateEngine = template.st_templateEngine;
+      var templateSource = template.st_templateSource;
+      var templateEngine = template.st_templateEngine;
 
-        if (templateSource) {
+      if (templateSource) {
 
-          var html = 'Could not compile the template into html';
+        var html = 'Could not compile the template into html';
 
-          if (templateEngine === 'handlebars') {
+        if (templateEngine === 'handlebars') {
 
-            var hbTemplate = handlebars.compile(templateSource);
-            html = hbTemplate(data);
+          var hbTemplate = handlebars.compile(templateSource);
+          html = hbTemplate(data);
 
-          } else if (templateEngine === 'jade') {
+        } else if (templateEngine === 'jade') {
 
-            var jadeFn = jade.compile(templateSource, { compileDebug: true, filename: queryDef.templateId });
-            html = jadeFn(data);
-
-          } else {
-
-            html = 'Unsupported template engine. Try handlebars or jade';
-
-          }
-
-          return Promise.resolve({
-            queryActivated: true,
-            data: data,
-            html: html
-          });
+          var jadeFn = jade.compile(templateSource, { compileDebug: true, filename: queryDef.templateId });
+          html = jadeFn(data);
 
         } else {
-          return Promise.reject('unknown template source');
+
+          html = 'Unsupported template engine. Try handlebars or jade';
+
         }
 
-      }).catch(function (err) {
-        // here DO NOT reject
-        // as we want to still show the json data even if
-        // template compiled with errors
-        that.log.error(err);
         return Promise.resolve({
-          error: err.toString(),
-          data: data
+          queryActivated: true,
+          data: data,
+          html: html
         });
+
+      } else {
+        return Promise.reject('unknown template source');
+      }
+
+    }).catch(function (err) {
+      // here DO NOT reject
+      // as we want to still show the json data even if
+      // template compiled with errors
+      that.log.error(err);
+      return Promise.resolve({
+        error: err.toString(),
+        data: data
       });
+    });
   });
 };
 

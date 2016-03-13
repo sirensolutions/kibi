@@ -17,6 +17,15 @@ var fakeServer = {
         }
       }
     };
+  },
+  plugins: {
+    elasticsearch: {
+      client: {
+        search: function () {
+          return Promise.reject(new Error('Document does not exists'));
+        }
+      }
+    }
   }
 };
 
@@ -47,8 +56,6 @@ describe('RestQuery', function () {
         return Promise.resolve(fakeDoc1);
       } else if (rpOptions.uri.href === 'http://localhost:3000/user/1') {
         return Promise.resolve(fakeDoc2);
-      } else {
-        return Promise.reject(new Error('Document does not exists'));
       }
     });
 

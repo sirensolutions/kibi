@@ -1,13 +1,13 @@
-var url    = require('url');
-var rp     = require('request-promise');
+var url = require('url');
 var Promise = require('bluebird');
-var _      = require('lodash');
+var _ = require('lodash');
 var logger = require('./logger');
 
 function QueryHelper(server) {
   this.server = server;
   this.config = server.config();
   this.log = logger(server, 'query_helper');
+  this.client = server.plugins.elasticsearch.client;
 }
 
 
@@ -97,22 +97,15 @@ QueryHelper.prototype.replaceVariablesUsingEsDocument = function (s, uri) {
 
 QueryHelper.prototype.fetchDocument = function (index, type, id) {
   var self = this;
-  return new Promise(function (fulfill, reject) {
-    rp({
-      method: 'GET',
-      uri: url.parse(self.config.get('elasticsearch.url') + '/' + index + '/' + type + '/' + id),
-      transform: function (resp) {
-        var data = JSON.parse(resp);
-        fulfill(data);
-        return data;
-      }
-    })
-    .catch(function (err) {
-      var msg = 'Could not fetch document [/' + index + '/' + type + '/' + id + '].';
-      self.log.warn(msg, err);
-      reject(new Error(msg + ' Check logs for details'));
-    });
-
+  return self.client.search({
+    index: index,
+    type: type,
+    q: '_id:' + id
+  })
+  .catch(function (err) {
+    var msg = 'Could not fetch document [/' + index + '/' + type + '/' + id + '].';
+    self.log.warn(msg, err);
+    return Promise.reject(new Error(msg + ' Check logs for details'));
   });
 };
 
@@ -172,16 +165,10 @@ QueryHelper.prototype._getValue = function (doc, group) {
 
 QueryHelper.prototype.fetchDocuments = function (type) {
   var self = this;
-  return rp({
-    method: 'GET',
-    uri: url.parse(self.config.get('elasticsearch.url') + '/' + self.config.get('kibana.index') + '/' + type + '/_search'),
-    qs: {
-      size: 100
-    },
-    transform: function (resp) {
-      var data = JSON.parse(resp);
-      return data;
-    }
+  return self.client.search({
+    index: self.config.get('kibana.index'),
+    type: type,
+    size: 100
   });
 };
 

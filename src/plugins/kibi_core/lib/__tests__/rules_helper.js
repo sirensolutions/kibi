@@ -18,6 +18,12 @@ var fakeServer = {
         }
       }
     };
+  },
+  plugins: {
+    elasticsearch: {
+      client: {
+      }
+    }
   }
 };
 

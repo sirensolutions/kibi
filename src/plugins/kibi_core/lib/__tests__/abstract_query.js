@@ -1,8 +1,13 @@
 var AbstractQuery = require('../queries/abstract_query');
 var Promise = require('bluebird');
 var expect = require('expect.js');
-var mockery = require('mockery');
 var sinon = require('sinon');
+
+/**
+ * Stores the number of calls to mocked elasticsearch client functions
+ */
+var rpCalls = 0;
+
 var fakeServer = {
   log: function (tags, data) {},
   config: function () {
@@ -15,9 +20,81 @@ var fakeServer = {
         }
       }
     };
+  },
+  plugins: {
+    elasticsearch: {
+      client: {
+        search: function (options) {
+          rpCalls++;
+
+          switch (options.q) {
+            case '_id:kibi-table-handlebars':
+              return Promise.resolve({
+                hits: {
+                  hits: [
+                    {
+                      _source: {
+                        title: 'kibi-table-handlebars',
+                        description: '',
+                        st_templateEngine: 'handlebars',
+                        st_templateSource: 'Results: ({{results.bindings.length}})'
+                      }
+                    }
+                  ]
+                }
+              });
+            case '_id:kibi-table-handlebars-invalid':
+              return Promise.resolve({
+                hits: {
+                  hits: [
+                    {
+                      _source: {
+                        title: 'kibi-table-handlebars-invalid',
+                        description: '',
+                        st_templateEngine: 'handlebars',
+                        st_templateSource: 'Results: ({{{results.bindings.length}})'
+                      }
+                    }
+                  ]
+                }
+              });
+            case '_id:kibi-lodash':
+              return Promise.resolve({
+                hits: {
+                  hits: [
+                    {
+                      _source: {
+                        title: 'kibi-lodash',
+                        description: '',
+                        st_templateEngine: 'lodash',
+                        st_templateSource: '<%=doe%>'
+                      }
+                    }
+                  ]
+                }
+              });
+            case '_id:kibi-empty':
+              return Promise.resolve({
+                hits: {
+                  hits: [
+                    {
+                      _source: {
+                        title: 'kibi-lodash',
+                        description: '',
+                        st_templateEngine: 'lodash',
+                        st_templateSource: ''
+                      }
+                    }
+                  ]
+                }
+              });
+          }
+          return Promise.reject();
+        }
+      }
+    }
   }
 };
-
 
 /**
  * Cache mock.
@@ -31,82 +108,6 @@ Cache.prototype.set = function (key, value) {
 Cache.prototype.get = function (key) {
   return this.data[key];
 };
-
-
-/**
- * Stores the number of calls to mocked request-promise functions.
- */
-var rpCalls = 0;
-
-/**
- * Mocks the templates endpoint response.
- */
-function mockTemplatesResponse() {
-  rpCalls = 0;
-
-  mockery.enable({
-    warnOnReplace: false,
-    warnOnUnregistered: false,
-    useCleanCache: true
-  });
-
-  var processRequest = function (rpOptions, responseObject) {
-    if (rpOptions.transform) {
-      rpOptions.transform(JSON.stringify(responseObject));
-    }
-    return Promise.resolve(responseObject);
-  };
-
-  mockery.registerMock('request-promise', function (rpOptions) {
-    rpCalls++;
-
-    if (rpOptions.uri.href.match(/.+kibi-table-handlebars\/_source$/)) {
-      return processRequest(rpOptions, {
-        title: 'kibi-table-handlebars',
-        description: '',
-        st_templateEngine: 'handlebars',
-        st_templateSource: 'Results: ({{results.bindings.length}})'
-      });
-    }
-
-    if (rpOptions.uri.href.match(/.+kibi-table-handlebars-invalid\/_source$/)) {
-      return processRequest(rpOptions, {
-        title: 'kibi-table-handlebars-invalid',
-        description: '',
-        st_templateEngine: 'handlebars',
-        st_templateSource: 'Results: ({{{results.bindings.length}})'
-      });
-    }
-
-    if (rpOptions.uri.href.match(/.+kibi-lodash\/_source$/)) {
-      return processRequest(rpOptions, {
-        title: 'kibi-lodash',
-        description: '',
-        st_templateEngine: 'lodash',
-        st_templateSource: '<%=doe%>'
-      });
-    }
-
-    if (rpOptions.uri.href.match(/.+kibi-empty\/_source$/)) {
-      return processRequest(rpOptions, {
-        title: 'kibi-lodash',
-        description: '',
-        st_templateEngine: 'lodash',
-        st_templateSource: ''
-      });
-    }
-
-    return Promise.reject();
-
-  });
-}
-
-function disableMockery() {
-  rpCalls = 0;
-  mockery.disable();
-  mockery.deregisterAll();
-}
-
 
 describe('AbstractQuery', function () {
 
@@ -136,16 +137,13 @@ describe('AbstractQuery', function () {
 
   describe('._fetchTemplate', function () {
 
-    before(mockTemplatesResponse);
-
-    after(disableMockery);
+    after(function () {
+      rpCalls = 0;
+    });
 
     it('should cache the template according to the query configuration', function (done) {
-      var MockedAbstractQuery = require('../queries/abstract_query');
-
       var cache = new Cache();
-
-      var query = new MockedAbstractQuery(fakeServer, '', cache);
+      var query = new AbstractQuery(fakeServer, '', cache);
 
       query._fetchTemplate('kibi-table handlebars').then(function (template) {
         expect(template.st_templateSource).to.be('Results: ({{results.bindings.length}})');
@@ -167,8 +165,6 @@ describe('AbstractQuery', function () {
   });
 
   describe('.getHtml', function () {
-
-    var MockedAbstractQuery;
     var results = {
       head: {
         vars: []
@@ -204,15 +200,8 @@ describe('AbstractQuery', function () {
       }
     };
 
-    before(function () {
-      mockTemplatesResponse();
-      MockedAbstractQuery = require('../queries/abstract_query');
-    });
-
-    after(disableMockery);
-
     it('should render a valid handlebars template', function (done) {
-      var query = new MockedAbstractQuery(fakeServer, '', null);
+      var query = new AbstractQuery(fakeServer, '', null);
       var queryDef = {
         templateId: 'kibi-table-handlebars'
       };
@@ -227,7 +216,7 @@ describe('AbstractQuery', function () {
     });
 
     it('should display a warning then rendering an invalid handlebars template', function (done) {
-      var query = new MockedAbstractQuery(fakeServer, '', null);
+      var query = new AbstractQuery(fakeServer, '', null);
       var queryDef = {
         templateId: 'kibi-table-handlebars-invalid'
       };
@@ -243,7 +232,7 @@ describe('AbstractQuery', function () {
     });
 
     it('should render a warning for an unsupported template engine', function (done) {
-      var query = new MockedAbstractQuery(fakeServer, '', null);
+      var query = new AbstractQuery(fakeServer, '', null);
       var queryDef = {
         templateId: 'kibi-lodash'
       };

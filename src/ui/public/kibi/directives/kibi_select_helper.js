@@ -251,17 +251,11 @@ define(function (require) {
           value: 'fontawesome'
         },
         {
-          label:'Parametrized Relative Path',
+          label:'Parameterized Relative Path',
           value: 'relpath'
         }];
 
-      var labels = _.map(types, function (type) {
-        return {
-          label: type.label,
-          value: type.value
-        };
-      });
-      return Promise.resolve(labels);
+      return Promise.resolve(types);
     };
 
     KibiSelectHelper.prototype.getFontAwesomeIcon = function () {
@@ -370,17 +364,11 @@ define(function (require) {
           value: 'docField'
         },
         {
-          label:'Parametrized Field',
+          label:'Parameterized Field',
           value: 'paramField'
         }];
 
-      var labels = _.map(types, function (type) {
-        return {
-          label: type.label,
-          value: type.value
-        };
-      });
-      return Promise.resolve(labels);
+      return Promise.resolve(types);
     };
 
     return new KibiSelectHelper();

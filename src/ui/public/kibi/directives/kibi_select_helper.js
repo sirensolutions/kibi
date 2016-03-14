@@ -200,7 +200,7 @@ define(function (require) {
         return Promise.reject(new Error('No queryId'));
       }
       // first fetch the query
-      return savedQueries.find(queryId).then(function (queries) {
+      return savedQueries.find().then(function (queries) {
         const savedQuery = _.find(queries.hits, 'id', queryId);
         if (!savedQuery) {
           return Promise.reject(new Error('Query with id [' + queryId + '] was not found'));

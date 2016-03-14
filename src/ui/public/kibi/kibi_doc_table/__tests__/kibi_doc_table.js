@@ -154,7 +154,8 @@ describe('Kibi doc table', function () {
               _score: 1,
               _source: {},
               fields: {
-                cthulhu: [ 'high priest', 'low priest' ]
+                // 0/1 flag for entity dependent entity
+                cthulhu: [ '0high priest', '1low priest' ]
               }
             },
             {

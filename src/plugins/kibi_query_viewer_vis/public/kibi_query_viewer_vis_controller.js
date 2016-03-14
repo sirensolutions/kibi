@@ -22,12 +22,9 @@ define(function (require) {
       // generate random id to avoid collisions if there are multiple widgets on one dashboard
       $scope.snippetContainerId = kibiUtils.getUuid4();
 
-      // we have to wrap the value into object - this prevents weird thing related to transclusion
-      // see http://stackoverflow.com/questions/25180613/angularjs-transclusion-creates-new-scope
+      const configMode = $location.path().indexOf('/visualize/') !== -1;
       $scope.holder = {
         entityURI: '',
-        entityURIEnabled: false,
-        visible: $location.path().indexOf('/visualize/') === 0,
         html: '',
         htmlEvents:[]
       };
@@ -38,23 +35,17 @@ define(function (require) {
         $scope.holder.entityURI = '';
       }
 
-      var removeEntityURIEnabledHandler = $rootScope.$on('kibi:entityURIEnabled:entityinfo', function (event, enabled) {
-        $scope.holder.entityURIEnabled = enabled;
-      });
-
-      var removeEntityURIChangedHandler = $rootScope.$on('kibi:selectedEntities:changed', function (event, se) {
-        $scope.holder.entityURI = se[0];
-      });
-
-      $scope.$watchMulti(['holder.entityURI', 'vis.params.queryOptions'], function () {
+      $scope.$watch(['holder.entityURI', 'vis.params.queryOptions'], function () {
         if ($scope.vis && $scope.vis.params.queryOptions) {
           $scope.renderTemplates();
         }
       });
 
       var saveWithChangesHandler = function (diff) {
-        if (diff.indexOf('entityDisabled') !== -1 || diff.indexOf('se') !== -1) {
-          if (globalState.se && globalState.se.length > 0 && globalState.entityDisabled === false) {
+        if (diff.indexOf('entityDisabled') !== -1 || diff.indexOf('se') !== -1 || diff.indexOf('se_temp') !== -1) {
+          if (configMode && globalState.se_temp && globalState.se_temp.length > 0) {
+            $scope.holder.entityURI = globalState.se_temp[0];
+          } else if (!configMode && globalState.se && globalState.se.length > 0) {
             $scope.holder.entityURI = globalState.se[0];
           } else {
             $scope.holder.entityURI = '';
@@ -70,8 +61,6 @@ define(function (require) {
       });
 
       $scope.$on('$destroy', function () {
-        removeEntityURIEnabledHandler();
-        removeEntityURIChangedHandler();
         removeAutorefreshHandler();
         globalState.off('save_with_changes', saveWithChangesHandler);
       });
@@ -83,17 +72,19 @@ define(function (require) {
           return;
         }
 
-        $scope.holder.html = 'Loading ...';
         $scope.holder.activeFetch = true;
-
         return queryEngineClient.getQueriesHtmlFromServer(
           $scope.vis.params.queryOptions,
           {
             selectedDocuments: [$scope.holder.entityURI]
-          },
-          true
+          }
         ).then(function (resp) {
           $scope.holder.activeFetch = false;
+
+          if (!resp) {
+            return;
+          }
+
           $scope.emptyResults = !resp.data.snippets || resp.data.snippets.length === 0;
           $scope.noSelectedDocument = resp.data.error === 'Empty selected document uri';
 

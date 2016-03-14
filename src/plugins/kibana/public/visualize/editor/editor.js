@@ -91,6 +91,9 @@ define(function (require) {
     var off3 = $rootScope.$on('kibi:entityURIEnabled:kibigraph', function (event, enabled) {
       $scope.holder.entityURIEnabled = !!enabled;
     });
+    var off4 = $rootScope.$on('kibi:entityURIEnabled:kibiqueryviewer', function (event, enabled) {
+      $scope.holder.entityURIEnabled = !!enabled;
+    });
 
     var notify = new Notifier({
       location: 'Visualization Editor'
@@ -241,6 +244,7 @@ define(function (require) {
         off1();
         off2();
         off3();
+        off4();
       });
     }
 

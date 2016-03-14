@@ -4,6 +4,7 @@ var queryEngineClient;
 
 describe('Kibi Components', function () {
   describe('Query engine client', function () {
+
     beforeEach(function () {
       ngMock.module('kibana');
 
@@ -13,34 +14,28 @@ describe('Kibi Components', function () {
       });
     });
 
-    it('gets the queries html from the server synchronously', function () {
-      var queryDef = encodeURIComponent('[{}]');
-      var options = encodeURIComponent('{}');
-      $httpBackend.expectGET('/getQueriesHtml?options=' + options + '&queryDefs=' + queryDef).respond();
-      queryEngineClient.getQueriesHtmlFromServer({}, {}, true);
+    afterEach(function () {
+      $httpBackend.verifyNoOutstandingExpectation();
+      $httpBackend.verifyNoOutstandingRequest();
+    });
+
+    it('should not fire query if there is no selected entity for an entity-dependent query', function () {
+      var queryDef = {
+        isEntityDependent: true
+      };
+      queryEngineClient.getQueriesHtmlFromServer(queryDef, { selectedDocuments: [] });
+    });
+
+    it('gets the queries html from the server', function () {
+      $httpBackend.expectGET(/\/getQueriesHtml?.*/).respond();
+      queryEngineClient.getQueriesHtmlFromServer({}, {});
       $httpBackend.flush();
     });
 
-    it('gets the queries html from the server asynchronously', function () {
-      var queryDef = encodeURIComponent('[{}]');
-      var options = encodeURIComponent('{}');
-      $httpBackend.expectGET('/getQueriesHtml?options=' + options + '&queryDefs=' + queryDef).respond();
-      queryEngineClient.getQueriesHtmlFromServer({}, {}, false);
-    });
-
-    it('gets the queries data from the server synchronously', function () {
-      var queryDef = encodeURIComponent('[{}]');
-      var options = encodeURIComponent('{}');
-      $httpBackend.expectGET('/getQueriesData?options=' + options + '&queryDefs=' + queryDef).respond();
-      queryEngineClient.getQueriesDataFromServer({}, {}, true);
+    it('gets the queries data from the server', function () {
+      $httpBackend.expectGET(/\/getQueriesData?.*/).respond();
+      queryEngineClient.getQueriesDataFromServer({}, {});
       $httpBackend.flush();
-    });
-
-    it('gets the queries data from the server asynchronously', function () {
-      var queryDef = encodeURIComponent('[{}]');
-      var options = encodeURIComponent('{}');
-      $httpBackend.expectGET('/getQueriesData?options=' + options + '&queryDefs=' + queryDef).respond();
-      queryEngineClient.getQueriesDataFromServer({}, {}, false);
     });
   });
 });

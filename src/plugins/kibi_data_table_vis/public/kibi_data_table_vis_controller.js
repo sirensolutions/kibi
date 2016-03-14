@@ -13,19 +13,27 @@ define(function (require) {
       var filterManager = Private(require('ui/filter_manager'));
       var fieldFormats = Private(require('ui/registry/field_formats'));
       var VirtualIndexPattern = Private(require('ui/kibi/components/commons/virtual_index_pattern'));
+      var _shouldEntityURIBeEnabled = Private(require('ui/kibi/components/commons/_should_entity_uri_be_enabled'));
 
       $scope.queryColumn = {};
       $scope.cellClickHandlers = {};
 
+      $scope.entityURI = '';
 
-      $scope.refresh = function () {
-        fetchResults($scope.savedVis);
+      const configMode = $location.path().indexOf('/visualize/') !== -1;
+      var saveWithChangesHandler = function (diff) {
+        if (diff.indexOf('se') !== -1 || diff.indexOf('se_temp') !== -1) {
+          if (configMode && globalState.se_temp && globalState.se_temp.length > 0) {
+            $scope.entityURI = globalState.se_temp[0];
+          } else if (!configMode && globalState.se && globalState.se.length > 0) {
+            $scope.entityURI = globalState.se[0];
+          } else {
+            $scope.entityURI = '';
+          }
+          fetchResults($scope.savedVis);
+        }
       };
-
-      var configMode = $location.path().indexOf('/visualize/') !== -1;
-      if (configMode) {
-        globalState.on('save_with_changes', $scope.refresh);
-      }
+      globalState.on('save_with_changes', saveWithChangesHandler);
 
       // Set to true in editing mode
       var editing = false;
@@ -38,7 +46,6 @@ define(function (require) {
         // which would otherwise be unavailable by design
         savedVisualizations.get($scope.vis.id)
         .then(function (savedVis) {
-          $scope.vis = savedVis.vis;
           $scope.savedVis = savedVis;
         });
       }
@@ -89,27 +96,18 @@ define(function (require) {
         searchSource._id = _id;
         searchSource.index(indexPattern);
 
+        const queryIds = _.filter($scope.vis.params.queryIds, (snippet) => !snippet.isEntityDependent || $scope.entityURI);
         // validate here and do not inject if all require values are not set
-        if ($scope.vis.params.enableQueryFields === true &&
-          $scope.vis.params.queryIds && $scope.vis.params.queryIds.length > 0 &&
+        if ($scope.vis.params.enableQueryFields === true && queryIds.length > 0 &&
           $scope.vis.params.joinElasticsearchField && $scope.vis.params.joinElasticsearchField !== '' &&
-          $scope.vis.params.queryFieldName && $scope.vis.params.queryFieldName !== ''
-        ) {
-
+          $scope.vis.params.queryFieldName && $scope.vis.params.queryFieldName !== '') {
           var virtualIndexPattern = new VirtualIndexPattern(indexPattern);
           searchSource.index(virtualIndexPattern);
 
-          var entityURI = '';
-          if (configMode && globalState.se_temp && globalState.se_temp.length > 0) {
-            entityURI = globalState.se_temp[0];
-          } else if (globalState.se && globalState.se.length > 0) {
-            entityURI = globalState.se[0];
-          }
-
           searchSource.inject([
             {
-              entityURI: entityURI,
-              queryDefs: $scope.vis.params.queryIds, //TODO: rename to queryDefs
+              entityURI: $scope.entityURI,
+              queryDefs: queryIds, //TODO: rename to queryDefs
               sourcePath: $scope.vis.params.joinElasticsearchField, // it is the field from table to do the comparison
               fieldName: $scope.vis.params.queryFieldName
             }
@@ -148,7 +146,7 @@ define(function (require) {
         courier.fetch();
       }
 
-      $scope.$watch('vis', function () {
+      $scope.$watch('savedVis', function () {
         if ($scope.savedVis) {
           fetchResults($scope.savedVis);
         }
@@ -177,6 +175,7 @@ define(function (require) {
         $scope.$on('$destroy', function () {
           removeVisStateChangedHandler();
           removeVisColumnsChangedHandler();
+          globalState.off('save_with_changes', saveWithChangesHandler);
         });
 
         $scope.$watch('savedObj.columns', function () {

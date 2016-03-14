@@ -6,61 +6,40 @@ define(function (require) {
     var _shouldEntityURIBeEnabled = Private(require('ui/kibi/components/commons/_should_entity_uri_be_enabled'));
 
     return function (vis) {
-      return new Promise(function (fulfill, reject) {
-
-        var queryIds;
-        if (vis.type.name === 'kibi-data-table') {
-          queryIds = _.map(vis.params.queryIds, function (snippet) {
-            return snippet.queryId;
-          });
-          _shouldEntityURIBeEnabled(queryIds).then(function (value) {
-            fulfill(value);
-          }).catch(function (err) {
-            reject(err);
-          });
-        } else if (vis.type.name === 'sindicetechentityinfo') {
-          queryIds = _.map(vis.params.queryOptions, function (snippet) {
-            return snippet.queryId;
-          });
-          _shouldEntityURIBeEnabled(queryIds).then(function (value) {
-            fulfill(value);
-          }).catch(function (err) {
-            reject(err);
-          });
-        } else if (vis.type.name === 'table' ||
-                   vis.type.name === 'pie' ||
-                   vis.type.name === 'area' ||
-                   vis.type.name === 'line' ||
-                   vis.type.name === 'histogram'
-        ) {
-          // check agregations and if any of them has param queryIds use it to test
-          var index;
-          _.each(vis.aggs, function (agg, i) {
-            if (agg.params && agg.params.queryIds) {
-              index = i;
-              return false;
-            }
-          });
-
-          if (index !== undefined) {
-            queryIds = _.map(vis.aggs[index].params.queryIds, function (snippet) {
-              return snippet.id;
-            });
-
-            _shouldEntityURIBeEnabled(queryIds).then(function (value) {
-              fulfill(value);
-            }).catch(function (err) {
-              reject(err);
-            });
-          } else {
-            fulfill(false);
+      const name = vis.type.name;
+      var queryIds;
+      if (name === 'kibi-data-table') {
+        queryIds = _.map(vis.params.queryIds, function (snippet) {
+          return snippet.queryId;
+        });
+        return _shouldEntityURIBeEnabled(queryIds);
+      } else if (name === 'kibiqueryviewervis') {
+        queryIds = _.map(vis.params.queryOptions, function (snippet) {
+          return snippet.queryId;
+        });
+        return _shouldEntityURIBeEnabled(queryIds);
+      } else if (name === 'table' || name === 'pie' || name === 'area' || name === 'line' || name === 'histogram') {
+        // check agregations and if any of them has param queryIds use it to test
+        var index;
+        _.each(vis.aggs, function (agg, i) {
+          if (agg.params && agg.params.queryIds) {
+            index = i;
+            return false;
           }
+        });
 
+        if (index !== undefined) {
+          queryIds = _.map(vis.aggs[index].params.queryIds, function (snippet) {
+            return snippet.id;
+          });
+
+          return _shouldEntityURIBeEnabled(queryIds);
         } else {
-          fulfill(false);
+          return Promise.resolve(false);
         }
-
-      });
+      } else {
+        return Promise.resolve(false);
+      }
     };
   };
 });

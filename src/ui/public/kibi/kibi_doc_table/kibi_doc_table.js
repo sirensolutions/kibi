@@ -145,13 +145,17 @@ define(function (require) {
 
             if ($scope.queryColumn && $scope.queryColumn.name) {
               _.each(searchResp.hits.hits, function (hit) {
-                hit._source[$scope.queryColumn.name] = '-';
-                if (hit.fields[$scope.queryColumn.name] &&
-                    hit.fields[$scope.queryColumn.name] instanceof Array &&
-                    hit.fields[$scope.queryColumn.name].length > 0) {
-                  hit._source[$scope.queryColumn.name] = hit.fields[$scope.queryColumn.name].join(', ');
+                const name = $scope.queryColumn.name;
+                hit._source[name] = '-';
+                if (hit.fields) {
+                  if (hit.fields[name] &&
+                      hit.fields[name] instanceof Array &&
+                      hit.fields[name].length > 0) {
+                    // remove the 0/1 entity dependent flag
+                    hit._source[name] = _(hit.fields[name]).map((column) => column.substring(1)).join(', ');
+                  }
+                  delete hit.fields[name];
                 }
-                delete hit.fields[$scope.queryColumn.name];
               });
             }
             $scope.hits = searchResp.hits.hits;

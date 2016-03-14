@@ -85,13 +85,13 @@ define(function (require) {
 	// default values
     var i = 0;
     var key = 0;
-    var defValues = {'orderBy': 'default', 'maxTermsPerShard': 'all terms', 'termsEncoding': 'bloom'};
+    var defValues = {orderBy: 'default', maxTermsPerShard: 'all terms', termsEncoding: 'bloom'};
 
     // lists of values to display
     $scope.values = {
-      'orderByValues': ['default', 'doc_score'],
-      'maxTermsPerShardValues': ['all items'],
-      'termsEncodingValues': ['long', 'integer', 'bloom']
+      orderByValues: ['default', 'doc_score'],
+      maxTermsPerShardValues: ['all items'],
+      termsEncodingValues: ['long', 'integer', 'bloom']
     };
 
     // set default object properties

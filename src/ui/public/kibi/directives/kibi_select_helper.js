@@ -251,7 +251,7 @@ define(function (require) {
           value: 'fontawesome'
         },
         {
-          label:'Relative Path',
+          label:'Parametrized Relative Path',
           value: 'relpath'
         }];
 
@@ -358,6 +358,26 @@ define(function (require) {
         return {
           label: icon,
           value: icon
+        };
+      });
+      return Promise.resolve(labels);
+    };
+
+    KibiSelectHelper.prototype.getLabelType = function () {
+      var types = [
+        {
+          label:'Document Field',
+          value: 'docField'
+        },
+        {
+          label:'Parametrized Field',
+          value: 'paramField'
+        }];
+
+      var labels = _.map(types, function (type) {
+        return {
+          label: type.label,
+          value: type.value
         };
       });
       return Promise.resolve(labels);

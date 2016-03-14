@@ -4,7 +4,6 @@ define(function (require) {
   require('plugins/kibana/settings/sections/relations/styles/relations.less');
 
   var _ = require('lodash');
-  var $ = require('jquery');
 
   var app = require('ui/modules').get('apps/settings', ['kibana']);
 

@@ -25,3 +25,6 @@ selenium
 *.swo
 
 /crunchbase.db
+
+config/kibi.yml
+gremlin

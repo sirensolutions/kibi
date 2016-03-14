@@ -91,6 +91,9 @@ SQLiteQuery.prototype.checkIfItIsRelevant = function (options) {
   var dbfile = this.config.datasource.datasourceClazz.datasource.datasourceParams.db_file_path;
   var maxAge = this.config.datasource.datasourceClazz.datasource.datasourceParams.maxAge;
 
+  if (!this.config.activationQuery) {
+    return Promise.resolve(true);
+  }
   return self.queryHelper.replaceVariablesUsingEsDocument(this.config.activationQuery, uri).then(function (query) {
 
     if (query.trim() === '') {

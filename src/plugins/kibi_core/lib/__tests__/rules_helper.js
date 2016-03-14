@@ -2,7 +2,6 @@ var expect = require('expect.js');
 var Promise = require('bluebird');
 var RulesHelper = require('../rules_helper');
 var selectedDocuments = ['index/type/1'];
-var sinon = require('sinon');
 
 var fakeServer = {
   log: function (tags, data) {},
@@ -22,6 +21,27 @@ var fakeServer = {
   plugins: {
     elasticsearch: {
       client: {
+        search: function (options) {
+          return Promise.resolve({
+            hits: {
+              hits: [
+                {
+                  _id: '_id1',
+                  _source: {
+                    id: 'id1',
+                    ids: ['id1', 'id2'],
+                    empty_id: '',
+                    empty_ids: [],
+                    age: 37,
+                    zero: 0,
+                    null_field: null,
+                    undefined_field: undefined
+                  }
+                }
+              ]
+            }
+          });
+        }
       }
     }
   }
@@ -31,31 +51,6 @@ var stub;
 var rulesHelper = new RulesHelper(fakeServer);
 
 describe('Rule Helper', function () {
-
-  before(function () {
-
-    stub = sinon.stub(rulesHelper.queryHelper, 'fetchDocument').returns(
-      Promise.resolve({
-        _id: '_id1',
-        _source: {
-          id: 'id1',
-          ids: ['id1', 'id2'],
-          empty_id: '',
-          empty_ids: [],
-          age: 37,
-          zero: 0,
-          null_field: null,
-          undefined_field: undefined
-        }
-      })
-    );
-  });
-
-  after(function () {
-    if (stub) {
-      stub.restore();
-    }
-  });
 
   describe('Evaluating rules', function () {
 

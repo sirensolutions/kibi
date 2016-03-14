@@ -101,6 +101,11 @@ QueryHelper.prototype.fetchDocument = function (index, type, id) {
     index: index,
     type: type,
     q: '_id:' + id
+  }).then(function (doc) {
+    if (doc.hits && doc.hits.hits) {
+      return doc.hits.hits[0];
+    }
+    return Promise.reject(new Error('No document matching _id=' + id + ' was found'));
   })
   .catch(function (err) {
     var msg = 'Could not fetch document [/' + index + '/' + type + '/' + id + '].';

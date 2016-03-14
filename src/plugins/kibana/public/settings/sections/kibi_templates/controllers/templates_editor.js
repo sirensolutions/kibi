@@ -128,19 +128,21 @@ define(function (require) {
 
 
       $scope.$watch('template._previewQueryId', function () {
-        _shouldEntityURIBeEnabled([$scope.template._previewQueryId])
-        .then(function (entityURIEnabled) {
-          $scope.holder.entityURIEnabled = entityURIEnabled;
-        }).then(savedQueries.get($scope.template._previewQueryId))
-        .then((savedQuery) => savedQuery && savedDatasources.get(savedQuery.st_datasourceId))
-        .then((savedDatasource) => {
-          // set datasourceType
-          if (savedDatasource) {
-            $scope.datasourceType = savedDatasource.type;
-          }
-        }).catch(notify.error);
+        if ($scope.template._previewQueryId) {
+          _shouldEntityURIBeEnabled([$scope.template._previewQueryId])
+            .then(function (entityURIEnabled) {
+              $scope.holder.entityURIEnabled = entityURIEnabled;
+            }).then(savedQueries.get($scope.template._previewQueryId))
+          .then((savedQuery) => savedQuery && savedDatasources.get(savedQuery.st_datasourceId))
+            .then((savedDatasource) => {
+              // set datasourceType
+              if (savedDatasource) {
+                $scope.datasourceType = savedDatasource.type;
+              }
+            }).catch(notify.error);
 
-        refreshPreview();
+          refreshPreview();
+        }
       });
 
       $scope.submit = function () {

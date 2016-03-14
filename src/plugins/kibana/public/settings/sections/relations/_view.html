@@ -1,0 +1,83 @@
+<kbn-settings-app section="relations">
+
+	<div ng-controller="RelationsAdvancedController" class="app-container dashboard_groups_editor ng-scope">
+      <div class="container ng-scope">
+      	<div class="config-section">
+      	  <div>
+      	    <div class="header">
+              <h2 class="title">Forward direction</h2>
+            </div>
+      	    <form name="forwardForm" novalidate>
+
+      	      <div class="form-group">
+      	        <label>Order By</label>
+      	        <select ng-model="relationService[0].orderBy" class="form-control small-input">
+      	          <option ng-repeat="value in values.orderByValues" value="{{value}}">{{value}}</option>
+      	        </select>
+				<p class="field-description"> The ordering to use to lookup the maximum number of terms.
+				</p>
+      	      </div>
+      	      <div class="form-group">
+      	        <label>Number of Terms per Shard</label>
+      	        <input kibi-positive-integer validate required
+      	          ng-model="relationService[0].maxTermsPerShard"
+      	          kibi-debounce="350"
+      	          class="form-control small-input"
+      	          type="text"
+                  name="numofterms"
+      	          kibi-stop-enter-key-down />
+				<p class="field-description"> The maximum number of terms per shard to lookup.
+				</p>
+      	      </div>
+      	      <div class="form-group">
+      	        <label>Terms Encoding</label>
+      	        <select ng-model="relationService[0].termsEncoding" class="form-control small-input">
+      	          <option ng-repeat="value in values.termsEncodingValues" value="{{value}}">{{value}}</option>
+      	        </select>
+				<p class="field-description"> The encoding to use when transferring terms across the network.
+				</p>
+      	      </div>
+
+      	    </form>
+	  	  </div>
+
+      	  <div>
+      	    <div class="header">
+              <h2 class="title">Back direction</h2>
+            </div>
+      	    <form name="forwardForm" novalidate>
+
+      	      <div class="form-group">
+      	        <label>Order By</label>
+      	        <select ng-model="relationService[1].orderBy" class="form-control small-input">
+      	          <option ng-repeat="value in values.orderByValues" value="{{value}}">{{value}}</option>
+      	        </select>
+      	      </div>
+      	      <div class="form-group">
+      	        <label>Number of Terms per Shard</label>
+      	        <input required
+      	          ng-model="relationService[1].maxTermsPerShard"
+      	          kibi-debounce="350"
+      	          class="form-control small-input"
+      	          type="text"
+      	          kibi-stop-enter-key-down />
+      	      </div>
+      	      <div class="form-group">
+      	        <label>Terms Encoding</label>
+      	        <select ng-model="relationService[1].termsEncoding" class="form-control small-input">
+      	          <option ng-repeat="value in values.termsEncodingValues" value="{{value}}">{{value}}</option>
+      	        </select>
+      	      </div>
+
+      	    </form>
+	  	  </div>
+
+	  	  <div class="form-group">
+	  	  	<button aria-label="Cancel" class="btn btn-primary" ng-click="cancel()">Cancel</button>
+	  	  	<button aria-label="Save" class="btn btn-success ng-binding" ng-click="submit()">Save</button>
+	  	  </div>
+
+	  	</div>
+	  </div>
+	</div>
+</kbn-settings-app>

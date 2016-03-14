@@ -49,19 +49,60 @@ define(function (require) {
     };
   });
 
+  // test if value is a positive integer
+  app.directive('kibiPositiveInteger', function () {
+    return {
+      restrict: 'A',
+      require: 'ngModel',
+      link: function (scope, element, attrs, ctrl) {
+        ctrl.$parsers.unshift(function (value) {
+          var INTREGEXP = /^\d+$/;
+          if (INTREGEXP.test(value) || value === 'all terms') {
+            ctrl.$setValidity('kibiPositiveInteger', true);
+            return value;
+          } else {
+            ctrl.$setValidity('kibiPositiveInteger', false);
+            return 'all terms';
+          }
+        });
+      }
+    };
+  });
+
   require('ui/routes')
   .when('/settings/relations', {
     template: require('plugins/kibana/settings/sections/relations/index.html'),
     reloadOnSearch: false
   });
 
-  app.controller('RelationsController', function ($rootScope, $scope, config, Private, $element, $timeout, createNotifier) {
+  app.controller('RelationsController', function ($rootScope, $scope, config, Private, $element, $timeout, kbnUrl, createNotifier) {
     var notify = createNotifier({
       location: 'Relations Editor'
     });
 
     var urlHelper = Private(require('ui/kibi/helpers/url_helper'));
     var color = Private(require('ui/vislib/components/color/color'));
+
+    // tabs
+    $scope.tab = {
+      indexRel: true,
+      dashboardRel: false
+    };
+
+    $scope.tabClick = function () {
+      $scope.tab.indexRel = !$scope.tab.indexRel;
+      $scope.tab.dashboardRel = !$scope.tab.dashboardRel;
+    };
+
+    // advanced options button
+    $scope.edit = function (item, index) {
+      var params = {
+        service: 'indices' in item ? 'indices' : 'dashboards',
+        id: index
+      };
+
+      kbnUrl.change('/settings/relations/{{ service }}/{{ id }}', params);
+    };
 
     $scope.relations = config.get('kibi:relations');
     $scope.relationalPanel = config.get('kibi:relationalPanel');

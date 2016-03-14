@@ -433,8 +433,21 @@ describe('Kibi Directives', function () {
           expect(types).to.have.length(2);
           expect(types[0].label).to.be('Font Awesome');
           expect(types[0].value).to.be('fontawesome');
-          expect(types[1].label).to.be('Relative Path');
+          expect(types[1].label).to.be('Parameterized Relative Path');
           expect(types[1].value).to.be('relpath');
+          done();
+        }).catch(done);
+      });
+    });
+
+    describe('getLabelType', function () {
+      it('should return available icon types', function (done) {
+        stSelectHelper.getLabelType().then(function (types) {
+          expect(types).to.have.length(2);
+          expect(types[0].label).to.be('Document Field');
+          expect(types[0].value).to.be('docField');
+          expect(types[1].label).to.be('Parameterized Field');
+          expect(types[1].value).to.be('paramField');
           done();
         }).catch(done);
       });

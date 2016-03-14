@@ -1,7 +1,6 @@
-var _            = require('lodash');
-var fs           = require('fs');
-var rp           = require('request-promise');
-var url          = require('url');
+var _ = require('lodash');
+var fs = require('fs');
+var url = require('url');
 var yaml = require('js-yaml');
 var cryptoHelper = require('./crypto_helper');
 var datasourcesSchema = require('./datasources_schema');
@@ -11,6 +10,7 @@ function IndexHelper(server) {
   this.server = server;
   this.config = server.config();
   this.log = logger(server, 'index_helper');
+  this.client = server.plugins.elasticsearch.client;
 }
 
 
@@ -42,74 +42,75 @@ IndexHelper.prototype.rencryptAllValuesInKibiIndex = function (oldkey, algorithm
 
   var self = this;
   var report = [];
-  return new Promise(function (fulfill, reject) {
     // get all datasources
-    self.getDatasources().then(function (res1) {
+  return self.getDatasources().then(function (res1) {
 
-      report.push('Got ' + res1.length + ' datasources.');
-      // now assemble the bulk api request body
-      var body = '';
-      _.each(res1, function (datasource) {
-        body += JSON.stringify({index: {_index: datasource._index, _type: datasource._type, _id: datasource._id} }) + '\n';
+    report.push('Got ' + res1.length + ' datasources.');
+    // now assemble the bulk api request body
+    var body = '';
+    var error = null;
+    _.each(res1, function (datasource) {
+      body += JSON.stringify({index: {_index: datasource._index, _type: datasource._type, _id: datasource._id} }) + '\n';
 
-        // here get the properties which should be encrypted according to the shema
-        var type = datasource._source.datasourceType;
-        if (type === 'sql_jdbc' || type === 'sparql_jdbc') {
-          type = 'jdbc';
-        }
-        var schema = datasourcesSchema[type].concat(datasourcesSchema.base);
-        var params = {};
-        try {
-          params = JSON.parse(datasource._source.datasourceParams);
-        } catch (e) {
-          reject(e);
-        }
+      // here get the properties which should be encrypted according to the shema
+      var type = datasource._source.datasourceType;
+      if (type === 'sql_jdbc' || type === 'sparql_jdbc') {
+        type = 'jdbc';
+      }
+      var schema = datasourcesSchema[type].concat(datasourcesSchema.base);
+      var params = {};
+      try {
+        params = JSON.parse(datasource._source.datasourceParams);
+      } catch (e) {
+        error = e;
+        return false;
+      }
 
-        for (var name in params) {
-          if (params.hasOwnProperty(name)) {
-            var s = self._getDefinitionFromSchema(schema, name);
-            if (s.encrypted === true) {
-              report.push('param: ' + name + ' value: ' + params[name]);
-              // first check that the value match the encrypted pattern
-              var parts = params[name].split(':');
-              if (parts.length >= 4) {
-                if (cryptoHelper.supportsAlgorithm(parts[0])) {
-                  var plaintext = cryptoHelper.decrypt(oldkey, params[name]);
-                  report.push('decrypted value');
-                  params[name] = cryptoHelper.encrypt(algorithm, key, plaintext);
-                  report.push('encrypted the value');
-                } else {
-                  report.push('unsupported algorithm [' + parts[0] + '] for [' + name + ' ' + params[name] + ']');
-                }
-              } else {
-                report.push('Param value [' + params[name] + '] should be encrypted but it seems NOT');
-                params[name] = cryptoHelper.encrypt(algorithm, key, params[name]);
+      for (var name in params) {
+        if (params.hasOwnProperty(name)) {
+          var s = self._getDefinitionFromSchema(schema, name);
+          if (s.encrypted === true) {
+            report.push('param: ' + name + ' value: ' + params[name]);
+            // first check that the value match the encrypted pattern
+            var parts = params[name].split(':');
+            if (parts.length >= 4) {
+              if (cryptoHelper.supportsAlgorithm(parts[0])) {
+                var plaintext = cryptoHelper.decrypt(oldkey, params[name]);
+                report.push('decrypted value');
+                params[name] = cryptoHelper.encrypt(algorithm, key, plaintext);
                 report.push('encrypted the value');
+              } else {
+                report.push('unsupported algorithm [' + parts[0] + '] for [' + name + ' ' + params[name] + ']');
               }
+            } else {
+              report.push('Param value [' + params[name] + '] should be encrypted but it seems NOT');
+              params[name] = cryptoHelper.encrypt(algorithm, key, params[name]);
+              report.push('encrypted the value');
             }
           }
         }
+      }
 
-        try {
-          datasource._source.datasourceParams = JSON.stringify(params);
-        } catch (e) {
-          reject(e);
-        }
-        body += JSON.stringify(datasource._source) + '\n';
+      try {
+        datasource._source.datasourceParams = JSON.stringify(params);
+      } catch (e) {
+        error = e;
+        return false;
+      }
+      body += JSON.stringify(datasource._source) + '\n';
+    });
+    if (error) {
+      return Promise.reject(error);
+    }
+
+    return self.setDatasources(body).then(function (res2) {
+      report.push('Saving new kibi.yml');
+      return self.swapKibiYml(path, algorithm, key).then(function () {
+        report.push('New kibi.yml saved. Old kibi.yml moved to kibi.yml.bak');
+        report.push('DONE');
+        return report;
       });
-
-      self.setDatasources(body).then(function (res2) {
-        report.push('Saving new kibi.yml');
-        self.swapKibiYml(path, algorithm, key).then(function () {
-          report.push('New kibi.yml saved. Old kibi.yml moved to kibi.yml.bak');
-          report.push('DONE');
-          fulfill(report);
-        });
-
-      })
-      .catch(reject);
-    })
-    .catch(reject);
+    });
   });
 };
 
@@ -149,26 +150,22 @@ IndexHelper.prototype.swapKibiYml = function (path, algorithm, key) {
 
 IndexHelper.prototype.setDatasources = function (body) {
   var self = this;
-  return rp({
-    method: 'POST',
-    uri: url.parse(self.config.get('elasticsearch.url') + '/' + self.config.get('kibana.index') + '/_bulk'),
+  return self.client.bulk({
     body: body
   });
 };
 
 IndexHelper.prototype.getDatasources = function () {
   var self = this;
-  return rp({
-    method: 'GET',
-    uri: url.parse(self.config.get('elasticsearch.url') + '/' + self.config.get('kibana.index')  + '/datasource/_search?size=100'),
-    transform: function (resp) {
-      var data = JSON.parse(resp);
-      if (data.hits && data.hits.hits) {
-        return data.hits.hits;
-      } else {
-        throw new Error('Could not get datasources');
-      }
+  return self.client.search({
+    index: self.config.get('kibana.index'),
+    type: 'datasource',
+    size: 100
+  }).then((results) => {
+    if (!results.hits || !results.hits.total) {
+      return Promise.reject(new Error('Could not get datasources'));
     }
+    return results.hits.hits;
   });
 };
 

@@ -3,7 +3,6 @@ var _ = require('lodash');
 var fs = require('fs');
 var path = require('path');
 var lru = require('lru-cache');
-var rp = require('request-promise');
 var url = require('url');
 var logger = require('./logger');
 var setDatasourceClazz = require('./datasources/set_datasource_clazz');
@@ -23,9 +22,10 @@ function QueryEngine(server) {
   this.queries = [];
   this.initialized = false;
   this.log = logger(server, 'query_engine');
+  this.client = server.plugins.elasticsearch.client;
 }
 
-QueryEngine.prototype._init =  function (enableCache = false, cacheSize = 500, cacheMaxAge = 1000 * 60 * 60) {
+QueryEngine.prototype._init = function (enableCache = false, cacheSize = 500, cacheMaxAge = 1000 * 60 * 60) {
   // populate an array templatesDefinitions which contain templatesdefinition objects
   var self = this;
 
@@ -86,65 +86,49 @@ QueryEngine.prototype.loadTemplates = function () {
   var self = this;
   self._isKibiIndexPresent().then(function () {
     self.log.info('Found kibi index');
-    self._loadTemplates();
+    return self._loadTemplates();
   }).catch(function (err) {
-    self.log.warn('Kibi index NOT found');
+    self.log.warn('Could not retrieve Kibi index: ' + err);
     setTimeout(self.loadTemplates, 500);
   });
 };
 
 
-QueryEngine.prototype._isKibiIndexPresent =  function () {
+QueryEngine.prototype._isKibiIndexPresent = function () {
   var self = this;
-  return rp({
-    method: 'GET',
-    uri: url.parse(self.config.get('elasticsearch.url') + '/_cat/indices'),
-    json: true,
-    headers: {
-      'content-type': 'application/json'
-    },
-    timeout: 1000
-  }).then(function (indexes) {
-    var kibiIndex = _.find(indexes, function (index) {
-      return index.index === self.config.get('kibana.index');
-    });
-    if (kibiIndex !== undefined) {
-      return true;
-    } else {
-      return Promise.reject(new Error('Kibi index does not exists'));
-    }
+  return self.client.cat.indices({
+    index: self.config.get('kibana.index'),
+    timeout: '1000ms'
+  })
+  .then(function (kibiIndex) {
+    return !!kibiIndex || Promise.reject(new Error('Kibi index does not exists'));
   });
-
-
 };
 
-QueryEngine.prototype._loadTemplatesMapping =  function () {
+QueryEngine.prototype._loadTemplatesMapping = function () {
   var self = this;
 
   // here prevent an issue where by default version field was mapped to type long
   // https://github.com/sirensolutions/kibi-internal/issues/775
   var mapping = {
-    properties: {
-      version: {
-        type: 'integer'
+    template: {
+      properties: {
+        version: {
+          type: 'integer'
+        }
       }
     }
   };
 
-  return rp({
-    method: 'PUT',
-    uri: url.parse(self.config.get('elasticsearch.url') + '/' +
-                   self.config.get('kibana.index') + '/_mapping/template'),
-    headers: {
-      'content-type': 'application/json'
-    },
-    body: JSON.stringify(mapping),
-    timeout: 1000
+  return self.client.indices.putMapping({
+    timeout: '1000ms',
+    index: self.config.get('kibana.index'),
+    type: 'template',
+    body: mapping
   });
 };
 
-
-QueryEngine.prototype._loadTemplates =  function () {
+QueryEngine.prototype._loadTemplates = function () {
   var self = this;
   // load default template examples
   var templatesToLoad = [
@@ -153,25 +137,18 @@ QueryEngine.prototype._loadTemplates =  function () {
     'kibi-table-handlebars'
   ];
 
-  self._loadTemplatesMapping().then(function () {
+  return self._loadTemplatesMapping().then(function () {
     _.each(templatesToLoad, function (templateId) {
       fs.readFile(path.join(__dirname, 'templates', templateId + '.json'), function (err, data) {
         if (err) {
           throw err;
         }
-        var body = JSON.parse(data.toString());
-        rp({
-          method: 'POST',
-          //op_type=create create templates documents only if they do not exist
-          uri: url.parse(self.config.get('elasticsearch.url') + '/' +
-                         self.config.get('kibana.index') + '/template/' +
-                         templateId + '?op_type=create'
-          ),
-          headers: {
-            'content-type': 'application/json'
-          },
-          body: JSON.stringify(body),
-          timeout: 1000
+        self.client.index({
+          timeout: '1000ms',
+          index: self.config.get('kibana.index'),
+          type: 'template',
+          id: templateId,
+          body: data.toString()
         })
         .then(function (resp) {
           self.log.info('Template [' + templateId + '] successfully loaded');
@@ -216,34 +193,26 @@ QueryEngine.prototype.setupJDBC = function () {
 
 QueryEngine.prototype._fetchQueriesFromEs = function () {
   var self = this;
-  return rp({
-    method: 'GET',
-    uri: url.parse(self.config.get('elasticsearch.url') + '/' + self.config.get('kibana.index') + '/query/_search'),
-    qs: {
-      size: 100
-    },
-    transform: function (resp) {
-      var data = JSON.parse(resp);
-      return data;
-    }
+  return self.client.search({
+    index: self.config.get('kibana.index'),
+    type: 'query',
+    size: 100
   });
 };
 
 QueryEngine.prototype._getDatasourceFromEs = function (datasourceId) {
   var self = this;
-  return rp({
-    method: 'GET',
-    uri: url.parse(self.config.get('elasticsearch.url') + '/' + self.config.get('kibana.index') + '/datasource/' +  datasourceId),
-    transform: function (resp) {
-      var data = JSON.parse(resp);
-      if (data._source) {
-        var o = data._source;
-        o.id = data._id;
-        return o;
-      } else {
-        throw new Error('datasource object for [' + datasourceId + '] has no _source field');
-      }
+  return self.client.search({
+    index: self.config.get('kibana.index'),
+    type: 'datasource',
+    q: '_id:' + datasourceId
+  }).then(function (result) {
+    const datasource = result.hits.hits[0];
+    if (!datasource) {
+      return Promise.reject(new Error(`Datasource with id ${datasourceId} was not found.`));
     }
+    datasource._source.id = datasource._id;
+    return datasource._source;
   });
 };
 
@@ -304,17 +273,27 @@ QueryEngine.prototype.reloadQueries = function () {
     }
 
     if (queryDefinitions.length > 0) {
-      var promises = _.map(datasourcesIds, (datasourceId) => self._getDatasourceFromEs(datasourceId));
-      return Promise.all(promises).then(function (datasources) {
+      return self.client.search({
+        index: self.config.get('kibana.index'),
+        type: 'datasource',
+        size: 100
+      })
+      .then(function (datasources) {
         // now as we have all datasources
         // iterate over them and set the clazz
-        _.each(datasources, (datasource) => setDatasourceClazz(self.server, datasource));
+        for (let i = 0; i < datasources.hits.total; i++) {
+          const hit = datasources.hits.hits[i];
+          if (datasourcesIds.indexOf(hit._id) !== -1) {
+            setDatasourceClazz(self.server, hit._source);
+          }
+        }
 
         self.queries = _(queryDefinitions).filter(function (queryDef) {
           //filter out queries for which datasources does not exists
-          var datasource = _.find(datasources, (datasource) => datasource.id === queryDef.datasourceId);
+          var datasource = _.find(datasources.hits.hits, (datasource) => datasource._id === queryDef.datasourceId);
           if (datasource) {
-            queryDef.datasource = datasource;
+            datasource._source.id = datasource._id;
+            queryDef.datasource = datasource._source;
             return true;
           }
           return false;
@@ -340,7 +319,7 @@ QueryEngine.prototype.reloadQueries = function () {
               return new TinkerPop3Query(self.server, queryDef, self.cache);
             }
           } else {
-            logger.error('Unknown datasource type[' + queryDef.datasource.datasourceType + '] - could NOT create query object');
+            logger.error('Unknown datasource type [' + queryDef.datasource.datasourceType + '] - could NOT create query object');
             return false;
           }
         }).value();
@@ -439,7 +418,6 @@ QueryEngine.prototype._getQueries = function (queryIds, options) {
   var promises = _.map(fromRightFolder, function (query) {
     return query.checkIfItIsRelevant(options);
   });
-
 
   return Promise.all(promises).then(function (sparqlResponses) {
     // order the list prepare the list
@@ -566,5 +544,3 @@ QueryEngine.prototype.getIdsFromQueries = function (queryDefs, options) {
 };
 
 module.exports = QueryEngine;
-
-

@@ -229,7 +229,7 @@ define(function (require) {
           $scope.spinIt = true;
           return queryEngineClient.clearCache().then(function () {
 
-            queryEngineClient.getQueriesHtmlFromServer(
+            return queryEngineClient.getQueriesHtmlFromServer(
               [
                 {
                   open: true,

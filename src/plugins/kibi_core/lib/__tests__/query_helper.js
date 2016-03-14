@@ -16,6 +16,12 @@ var fakeServer = {
         }
       }
     };
+  },
+  plugins: {
+    elasticsearch: {
+      client: {
+      }
+    }
   }
 };
 var QueryHelper = require('../query_helper');

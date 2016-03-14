@@ -137,8 +137,8 @@ define(function (require) {
 
     // tabs
     $scope.tab = {
-      'indexRel': true,
-      'dashboardRel': false
+      indexRel: true,
+      dashboardRel: false
     };
 
     $scope.tabClick = function () {

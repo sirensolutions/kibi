@@ -75,7 +75,9 @@ define(function (require) {
     reloadOnSearch: false
   });
 
-  app.controller('RelationsController', function ($rootScope, $scope, config, Private, $element, $timeout, kbnUrl, createNotifier, enterpriseEnabled) {
+  app.controller('RelationsController',
+  function ($rootScope, $scope, config, Private, $element, $timeout, kbnUrl, createNotifier, enterpriseEnabled) {
+
     var notify = createNotifier({
       location: 'Relations Editor'
     });
@@ -83,7 +85,7 @@ define(function (require) {
     var urlHelper = Private(require('ui/kibi/helpers/url_helper'));
     var color = Private(require('ui/vislib/components/color/color'));
 
-	$scope.enterpriseEnabled = enterpriseEnabled;
+    $scope.enterpriseEnabled = enterpriseEnabled;
 
     // tabs
     $scope.tab = {

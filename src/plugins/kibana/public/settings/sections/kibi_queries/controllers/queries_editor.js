@@ -244,8 +244,7 @@ define(function (require) {
               ],
               {
                 selectedDocuments: [$scope.holder.entityURI]
-              },
-              true
+              }
             );
           }).then(function (resp) {
             if (resp && resp.data && resp.data.error) {

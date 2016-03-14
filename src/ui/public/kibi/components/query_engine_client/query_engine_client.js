@@ -1,6 +1,5 @@
 define(function (require) {
 
-  var $ = require('jquery');
   var chrome = require('ui/chrome');
   var _ = require('lodash');
 
@@ -9,7 +8,7 @@ define(function (require) {
 
     function QueryEngineClient() {}
 
-    QueryEngineClient.prototype._makeRequestToServer = function (url, queryDefs, options, async) {
+    QueryEngineClient.prototype._makeRequestToServer = function (url, queryDefs, options) {
       options = options || {};
       options.selectedDocuments = _.compact(options.selectedDocuments);
 
@@ -28,50 +27,19 @@ define(function (require) {
         queryDefs: JSON.stringify(queryDefs)
       };
 
-      if (async === false) {
-        // here we use jquery to make a sync call as it is not supported in $http
-        var p =  $.ajax({
-          url: chrome.getBasePath() + url,
-          async: false,
-          dataType: 'json',
-          data: params,
-          dataFilter: function (data, type) {
-            if (type === 'json') {
-              var json = JSON.parse(data);
-              // wrap it so the response is in the same form as returned from $http
-              return JSON.stringify({
-                data: json
-              });
-            } else {
-              return data;
-            }
-          }
-        });
-        // here make an alias so we can use catch as with Promises
-        p.catch = p.fail;
-        return p;
-      } else {
-        return $http({
-          method: 'GET',
-          url: chrome.getBasePath() + url,
-          params: params
-        });
-      }
+      return $http.get(chrome.getBasePath() + url, { params: params });
     };
 
-    QueryEngineClient.prototype.getQueriesDataFromServer = function (queryDefs, options, async) {
-      return this._makeRequestToServer('/getQueriesData', queryDefs, options, async);
+    QueryEngineClient.prototype.getQueriesDataFromServer = function (queryDefs, options) {
+      return this._makeRequestToServer('/getQueriesData', queryDefs, options);
     };
 
-    QueryEngineClient.prototype.getQueriesHtmlFromServer = function (queryDefs, options, async) {
-      return this._makeRequestToServer('/getQueriesHtml', queryDefs, options, async);
+    QueryEngineClient.prototype.getQueriesHtmlFromServer = function (queryDefs, options) {
+      return this._makeRequestToServer('/getQueriesHtml', queryDefs, options);
     };
 
     QueryEngineClient.prototype.clearCache = function () {
-      return $http({
-        method: 'GET',
-        url: chrome.getBasePath() + '/clearCache'
-      });
+      return $http.get(chrome.getBasePath() + '/clearCache');
     };
 
     QueryEngineClient.prototype.proxy = function (datasourceId, options) {

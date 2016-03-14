@@ -110,8 +110,7 @@ define(function (require) {
             ],
             {
               selectedDocuments: [$scope.holder.entityURI]
-            },
-            true
+            }
           ).then(function (resp) {
             if (resp && resp.data && resp.data.snippets && resp.data.snippets.length === 1) {
               var snippet = resp.data.snippets[0];

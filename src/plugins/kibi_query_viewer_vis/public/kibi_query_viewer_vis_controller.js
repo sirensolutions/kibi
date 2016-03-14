@@ -77,8 +77,7 @@ define(function (require) {
           $scope.vis.params.queryOptions,
           {
             selectedDocuments: [$scope.holder.entityURI]
-          },
-          true
+          }
         ).then(function (resp) {
           $scope.holder.activeFetch = false;
 

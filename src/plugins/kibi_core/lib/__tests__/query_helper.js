@@ -1,6 +1,5 @@
 var expect = require('expect.js');
 var Promise = require('bluebird');
-var sinon = require('sinon');
 
 var fakeServer = {
   log: function (tags, data) {},
@@ -20,6 +19,20 @@ var fakeServer = {
   plugins: {
     elasticsearch: {
       client: {
+        search: function (options) {
+          return Promise.resolve({
+            hits: {
+              hits: [
+                {
+                  _id: '_id1',
+                  _source: {
+                    id: 'id1'
+                  }
+                }
+              ]
+            }
+          });
+        }
       }
     }
   }
@@ -44,27 +57,7 @@ var doc = {
   }
 };
 
-
-var stub;
-
 describe('Query Helper', function () {
-
-  before(function () {
-    stub = sinon.stub(queryHelper, 'fetchDocument').returns(
-      Promise.resolve({
-        _id: '_id1',
-        _source: {
-          id: 'id1'
-        }
-      })
-    );
-  });
-
-  after(function () {
-    if (stub) {
-      stub.restore();
-    }
-  });
 
   describe('replaceVariablesForREST', function () {
 

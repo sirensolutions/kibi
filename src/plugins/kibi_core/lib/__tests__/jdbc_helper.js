@@ -20,6 +20,47 @@ var fakeServer = {
   plugins: {
     elasticsearch: {
       client: {
+        search: function (options) {
+          if (options.type === 'datasource') {
+            const datasources = [
+              {
+                _id: 'pg',
+                _source: {
+                  datasourceType: 'sql_jdbc',
+                  datasourceParams: '{"libpath": "/opt/libs1/", "libs": "a.jar"}'
+                }
+              },
+              {
+                _id: 'mysql',
+                _source: {
+                  datasourceType: 'sql_jdbc',
+                  datasourceParams: '{"libpath": "/opt/libs2/", "libs": "b.jar"}'
+                }
+              },
+              {
+                _id: 'mysql2',
+                _source: {
+                  datasourceType: 'mysql',
+                  datasourceParams: '{"libpath": "/opt/libs2/", "libs": "b.jar"}'
+                }
+              },
+              {
+                _id: 'corrupted',
+                _source: {
+                  datasourceType: 'sql_jdbc',
+                  datasourceParams: '{bpath": "/opt/libs3/", "libs": "c.jar"}'
+                }
+              }
+            ];
+            return Promise.resolve({
+              hits: {
+                hits: datasources,
+                total: datasources.length
+              }
+            });
+          }
+          return Promise.reject(new Error('Unexpected search: ' + options));
+        }
       }
     }
   }
@@ -363,36 +404,6 @@ describe('Jdbc Helper', function () {
         sinon.stub(jdbcHelper, 'getAbsolutePathToSindicetechFolder').returns(
           '/opt/libs/'
         );
-        sinon.stub(jdbcHelper.indexHelper, 'getDatasources').returns(Promise.resolve([
-          {
-            id: 'pg',
-            _source: {
-              datasourceType: 'sql_jdbc',
-              datasourceParams: '{"libpath": "/opt/libs1/", "libs": "a.jar"}'
-            }
-          },
-          {
-            id: 'mysql',
-            _source: {
-              datasourceType: 'sql_jdbc',
-              datasourceParams: '{"libpath": "/opt/libs2/", "libs": "b.jar"}'
-            }
-          },
-          {
-            id: 'mysql2',
-            _source: {
-              datasourceType: 'mysql'
-            }
-          },
-          {
-            id: 'corrupted',
-            _source: {
-              datasourceType: 'sql_jdbc',
-              datasourceParams: '{bpath": "/opt/libs3/", "libs": "c.jar"}'
-            }
-          }
-        ]));
-
 
         jdbcHelper.prepareJdbcPaths().then(function (paths) {
           expect(paths.libs).to.eql(['/opt/libs1/a.jar','/opt/libs2/b.jar']);
@@ -411,37 +422,6 @@ describe('Jdbc Helper', function () {
         sinon.stub(jdbcHelper, 'getAbsolutePathToSindicetechFolder').returns(
           '/opt/libs/'
         );
-        sinon.stub(jdbcHelper.indexHelper, 'getDatasources').returns(Promise.resolve([
-          {
-            id: 'pg',
-            _source: {
-              datasourceType: 'sql_jdbc',
-              datasourceParams: '{"libpath": "/opt/libs1/", "libs": "a.jar"}'
-            }
-          },
-          {
-            id: 'mysql',
-            _source: {
-              datasourceType: 'sql_jdbc',
-              datasourceParams: '{"libpath": "/opt/libs2/", "libs": "b.jar"}'
-            }
-          },
-          {
-            id: 'mysql2',
-            _source: {
-              datasourceType: 'mysql',
-              datasourceParams: '{"libpath": "/opt/libs2/", "libs": "b.jar"}'
-            }
-          },
-          {
-            id: 'corrupted',
-            _source: {
-              datasourceType: 'sql_jdbc',
-              datasourceParams: '{bpath": "/opt/libs3/", "libs": "c.jar"}'
-            }
-          }
-        ]));
-
 
         jdbcHelper.prepareJdbcPaths().then(function (paths) {
           expect(paths.libs).to.eql(['/opt/libs1/a.jar','/opt/libs2/b.jar']);

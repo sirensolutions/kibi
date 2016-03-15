@@ -19,7 +19,11 @@ define(function (require) {
       queryDefs = _.filter(queryDefs, (queryDef) => !queryDef.isEntityDependent || options.selectedDocuments.length);
 
       if (!queryDefs.length) {
-        return Promise.resolve();
+        return Promise.resolve({
+          data: {
+            error: 'Empty selected document uri'
+          }
+        });
       }
 
       var params = {

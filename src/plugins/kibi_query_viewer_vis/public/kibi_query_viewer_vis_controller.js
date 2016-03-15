@@ -81,10 +81,6 @@ define(function (require) {
         ).then(function (resp) {
           $scope.holder.activeFetch = false;
 
-          if (!resp) {
-            return;
-          }
-
           $scope.emptyResults = !resp.data.snippets || resp.data.snippets.length === 0;
           $scope.noSelectedDocument = resp.data.error === 'Empty selected document uri';
 

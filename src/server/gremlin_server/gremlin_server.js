@@ -24,16 +24,15 @@ GremlinServerHandler.prototype.start = function () {
 
   self.server.log(['gremlin', 'info'], 'Starting the Kibi gremlin server');
   return self.client.nodes.info({ nodeId: '_local' }).then(function (response) {
-    var esTransportPort = null;
+    var esTransportAddress = null;
     _.each(response.nodes, (node) => {
-      esTransportPort = node.transport_address;
+      esTransportAddress = node.transport_address;
     });
-    if (!esTransportPort) {
+    if (!esTransportAddress) {
       return Promise.reject(new Error('Unable to get the transport address'));
     }
 
     var config = self.server.config();
-    var esHost = config.get('elasticsearch.url').split(':')[1].substring(2);
     var esClusterName = response.cluster_name;
     var gremlinServerPath = config.get('kibi_core.gremlin_server_path');
 
@@ -48,10 +47,10 @@ GremlinServerHandler.prototype.start = function () {
     self.gremlinServer = childProcess.spawn('java',
       [
         '-jar', gremlinServerPath,
-        '--elasticNodeHost=' + esHost,
-        '--elasticNodePort=' + esTransportPort,
+        '--elasticNodeHost=' + esTransportAddress.split(':')[0],
+        '--elasticNodePort=' + esTransportAddress.split(':')[1],
         '--elasticClusterName=' + esClusterName,
-        '-Dlogging.config=' + loggingFilePath
+        '--logging.config=' + loggingFilePath
       ]
     );
 

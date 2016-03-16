@@ -46,12 +46,18 @@ describe('FilterJoin querying', function () {
                   {
                     indices: [ 'i1' ],
                     types: [ 'cafard' ],
-                    path: 'id1'
+                    path: 'id1',
+                    termsEncoding: 'id1',
+                    orderBy: 'id1',
+                    maxTermsPerShard: 'id1'
                   },
                   {
                     indices: [ 'i2' ],
                     types: [ 'cafard' ],
-                    path: 'id2'
+                    path: 'id2',
+                    termsEncoding: 'id2',
+                    orderBy: 'id2',
+                    maxTermsPerShard: 'id2'
                   }
                 ]
               ]
@@ -82,7 +88,10 @@ describe('FilterJoin querying', function () {
                 },
                 indices: ['i2'],
                 path: 'id2',
-                types: ['cafard']
+                types: ['cafard'],
+                termsEncoding: 'id2',
+                orderBy: 'id2',
+                maxTermsPerShard: 'id2'
               }
             }
           }

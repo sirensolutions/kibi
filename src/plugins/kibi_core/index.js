@@ -80,9 +80,6 @@ module.exports = function (kibana) {
 
         gremlin_server_path: Joi.string().allow('').default(''),
 
-        es_cluster_name: Joi.string().default('elasticsearch'),
-        es_transport_port: Joi.number().default(9330),
-
         datasource_encryption_algorithm: Joi.string().default('AES-GCM'),
         datasource_encryption_key: Joi.string().default('iSxvZRYisyUW33FreTBSyJJ34KpEquWznUPDvn+ka14='),
 

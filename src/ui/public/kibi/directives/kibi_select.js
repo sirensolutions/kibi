@@ -215,6 +215,9 @@ define(function (require) {
             case 'iconType':
               promise = selectHelper.getIconType();
               break;
+            case 'labelType':
+              promise = selectHelper.getLabelType();
+              break;
           }
 
           scope.retrieveError = '';

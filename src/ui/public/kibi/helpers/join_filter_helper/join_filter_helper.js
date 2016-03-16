@@ -27,6 +27,10 @@ define(function (require) {
         if (!relations || !relations.relationsDashboards) {
           return Promise.reject(new Error('Could not get kibi:relations'));
         }
+
+        // get indices relations
+        window.relationsIndices = relations.relationsIndices;
+
         relations = relations.relationsDashboards;
         // grab only enabled relations based on kibiState
         var enabledRelations = _.filter(relations, function (relation) {
@@ -66,16 +70,57 @@ define(function (require) {
             var relations = _.map(enabledRelations, function (r) {
               var parts = r.relation.split('/');
 
-              return [
-                {
-                  indices: [ parts[0].replace('-slash-', '/') ],
-                  path: parts[1].replace('-slash-', '/')
-                },
-                {
-                  indices: [ parts[2].replace('-slash-', '/') ],
-                  path: parts[3].replace('-slash-', '/')
+              var forwardPath = parts[1].replace('-slash-', '/');
+              var backPath =	parts[3].replace('-slash-', '/');
+
+              var advKeys = ['termsEncoding', 'orderBy', 'maxTermsPerShard'];
+              var advOptions = {};
+
+              // get related advanced options
+              for (var i in window.relationsIndices) {
+                if (window.relationsIndices[i].id === r.relation) {
+                  for (var j = 0; j < 2; j++) {
+                    var pathname = window.relationsIndices[i].indices[j].path;
+                    advOptions[pathname] = {};
+
+                    for (var k in advKeys) {
+                      if (advKeys.hasOwnProperty(k)) {
+                        advOptions[pathname][advKeys[k]] = window.relationsIndices[i].indices[j][advKeys[k]];
+                      }
+                    }
+                  }
                 }
-              ];
+              }
+
+              if (advOptions.hasOwnProperty(forwardPath) && advOptions.hasOwnProperty(backPath)) {
+                return [
+                  {
+                    indices: [ parts[0].replace('-slash-', '/') ],
+                    path: forwardPath,
+                    termsEncoding: advOptions[forwardPath].termsEncoding,
+                    orderBy: advOptions[forwardPath].orderBy,
+                    maxTermsPerShard: advOptions[forwardPath].maxTermsPerShard
+                  },
+                  {
+                    indices: [ parts[2].replace('-slash-', '/') ],
+                    path: backPath,
+                    termsEncoding: advOptions[backPath].termsEncoding,
+                    orderBy: advOptions[backPath].orderBy,
+                    maxTermsPerShard: advOptions[backPath].maxTermsPerShard
+                  }
+                ];
+              } else {
+                return [
+                  {
+                    indices: [ parts[0].replace('-slash-', '/') ],
+                    path: forwardPath
+                  },
+                  {
+                    indices: [ parts[2].replace('-slash-', '/') ],
+                    path: backPath
+                  }
+                ];
+              }
             });
 
             var labels = queryHelper.getLabelOfIndexPatternsInConnectedComponent(focusIndex, relations);

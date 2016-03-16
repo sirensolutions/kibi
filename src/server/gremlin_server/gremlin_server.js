@@ -98,7 +98,7 @@ GremlinServerHandler.prototype.start = function () {
             }
           };
           self.ping(counter);
-        })
+        });
       }
     });
   });

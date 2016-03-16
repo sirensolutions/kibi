@@ -99,14 +99,14 @@ define(function (require) {
                     path: forwardPath,
                     termsEncoding: advOptions[forwardPath].termsEncoding,
                     orderBy: advOptions[forwardPath].orderBy,
-                    maxTermsPerShard: advOptions[forwardPath].maxTermsPerShard
+                    maxTermsPerShard: Number(advOptions[forwardPath].maxTermsPerShard)
                   },
                   {
                     indices: [ parts[2].replace('-slash-', '/') ],
                     path: backPath,
                     termsEncoding: advOptions[backPath].termsEncoding,
                     orderBy: advOptions[backPath].orderBy,
-                    maxTermsPerShard: advOptions[backPath].maxTermsPerShard
+                    maxTermsPerShard: Number(advOptions[backPath].maxTermsPerShard)
                   }
                 ];
               } else {

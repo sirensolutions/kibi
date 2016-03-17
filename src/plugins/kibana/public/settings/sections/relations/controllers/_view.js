@@ -23,7 +23,6 @@ define(function (require) {
     // lists of values to display
     $scope.values = {
       orderByValues: ['default', 'doc_score'],
-      maxTermsPerShardValues: ['all terms'],
       termsEncodingValues: ['long', 'integer', 'bloom']
     };
 

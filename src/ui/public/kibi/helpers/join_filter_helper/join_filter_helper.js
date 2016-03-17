@@ -1,3 +1,5 @@
+/*global window*/
+/*global define*/
 define(function (require) {
   return function JoinFilterHelperFactory(config, Private, savedDashboards, savedSearches, Promise, elasticsearchPlugins) {
     var _ = require('lodash');
@@ -76,14 +78,18 @@ define(function (require) {
               var advKeys = ['termsEncoding', 'orderBy', 'maxTermsPerShard'];
               var advOptions = {};
 
+              var i;
+              var j;
+              var k;
+
               // get related advanced options
-              for (var i in window.relationsIndices) {
+              for (i in window.relationsIndices) {
                 if (window.relationsIndices[i].id === r.relation) {
-                  for (var j = 0; j < 2; j++) {
+                  for (j = 0; j < 2; j++) {
                     var pathname = window.relationsIndices[i].indices[j].path;
                     advOptions[pathname] = {};
 
-                    for (var k in advKeys) {
+                    for (k in advKeys) {
                       if (advKeys.hasOwnProperty(k)) {
                         advOptions[pathname][advKeys[k]] = window.relationsIndices[i].indices[j][advKeys[k]];
                       }

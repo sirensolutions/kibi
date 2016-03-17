@@ -46,18 +46,78 @@ describe('FilterJoin querying', function () {
                   {
                     indices: [ 'i1' ],
                     types: [ 'cafard' ],
+                    path: 'id1'
+                  },
+                  {
+                    indices: [ 'i2' ],
+                    types: [ 'cafard' ],
+                    path: 'id2'
+                  }
+                ]
+              ]
+            }
+          }
+        ]
+      }
+    };
+    const expected = {
+      bool: {
+        must: [
+          {
+            filterjoin: {
+              id1: {
+                query: {
+                  bool: {
+                    must: [
+                      {
+                        match_all: {}
+                      }
+                    ],
+                    filter: {
+                      bool: {
+                        must: []
+                      }
+                    }
+                  }
+                },
+                indices: ['i2'],
+                path: 'id2',
+                types: ['cafard']
+              }
+            }
+          }
+        ]
+      }
+    };
+    const actual = filterJoinSet(query);
+    expect(actual).to.eql(expected);
+  });
+
+
+  it('in a bool clause, adv join options', function () {
+    const query = {
+      bool: {
+        must: [
+          {
+            join_set: {
+              focus: 'i1',
+              relations: [
+                [
+                  {
+                    indices: [ 'i1' ],
+                    types: [ 'cafard' ],
                     path: 'id1',
-                    termsEncoding: 'id1',
-                    orderBy: 'id1',
-                    maxTermsPerShard: 'id1'
+                    termsEncoding: [ 'long', 'integer', 'bloom' ],
+                    orderBy: [ 'default', 'doc_score' ],
+                    maxTermsPerShard: [ 'integer', 'all_terms' ]
                   },
                   {
                     indices: [ 'i2' ],
                     types: [ 'cafard' ],
                     path: 'id2',
-                    termsEncoding: 'id2',
-                    orderBy: 'id2',
-                    maxTermsPerShard: 'id2'
+                    termsEncoding: [ 'long', 'integer', 'bloom' ],
+                    orderBy: [ 'default', 'doc_score' ],
+                    maxTermsPerShard: [ 'integer', 'all_terms' ]
                   }
                 ]
               ]
@@ -89,9 +149,9 @@ describe('FilterJoin querying', function () {
                 indices: ['i2'],
                 path: 'id2',
                 types: ['cafard'],
-                termsEncoding: 'id2',
-                orderBy: 'id2',
-                maxTermsPerShard: 'id2'
+                termsEncoding: [ 'long', 'integer', 'bloom' ],
+                orderBy: [ 'default', 'doc_score' ],
+                maxTermsPerShard: [ 'integer', 'all_terms' ]
               }
             }
           }

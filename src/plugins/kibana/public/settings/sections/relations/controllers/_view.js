@@ -15,7 +15,7 @@ define(function (require) {
 
     $scope.relations = config.get('kibi:relations');
 
-	// default values
+	  // default values
     var i = 0;
     var key = 0;
     var defValues = {orderBy: 'default', maxTermsPerShard: 'all terms', termsEncoding: 'bloom'};

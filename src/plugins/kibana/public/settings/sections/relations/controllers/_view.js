@@ -1,5 +1,5 @@
+/*global define*/
 define(function (require) {
-  var angular = require('angular');
 
   // path to view template
   var relAdvViewHTML = require('plugins/kibana/settings/sections/relations/_view.html');
@@ -11,7 +11,7 @@ define(function (require) {
 
   // relation edit button controller
   app.controller('RelationsAdvancedController', function (
-		$rootScope, $scope, $routeParams, $window, config, kbnUrl, kbnIndex, es, queryEngineClient) {
+		$scope, $routeParams, config, kbnUrl) {
 
     $scope.relations = config.get('kibi:relations');
 
@@ -23,7 +23,7 @@ define(function (require) {
     // lists of values to display
     $scope.values = {
       orderByValues: ['default', 'doc_score'],
-      maxTermsPerShardValues: ['all items'],
+      maxTermsPerShardValues: ['all terms'],
       termsEncodingValues: ['long', 'integer', 'bloom']
     };
 
@@ -32,17 +32,19 @@ define(function (require) {
       $scope.relationService = $scope.relations.relationsIndices[$routeParams.id][$routeParams.service];
 
       for (i = 0; i <= 1; i++) {
-        if (typeof $scope.relationService[i] === 'object' && $scope.relationService[i] != null) {
+        if (typeof $scope.relationService[i] === 'object' && $scope.relationService[i] !== null) {
           for (key in defValues) {
-            if (!$scope.relationService[i][key] || $scope.relationService[i][key] === 'undefined') {
-              $scope.relationService[i][key] = defValues[key];
+            if (defValues.hasOwnProperty(key)) {
+              if (!$scope.relationService[i][key] || $scope.relationService[i][key] === 'undefined') {
+                $scope.relationService[i][key] = defValues[key];
+              }
             }
           }
         }
       }
     }
 
-    // cancel button
+    // cancel buttono
     $scope.cancel = function () {
       kbnUrl.change('/settings/relations');
     };

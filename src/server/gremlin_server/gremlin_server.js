@@ -23,70 +23,75 @@ GremlinServerHandler.prototype.start = function () {
   }
 
   self.server.log(['gremlin', 'info'], 'Starting the Kibi gremlin server');
-  return self.client.nodes.info({ nodeId: '_local' }).then(function (response) {
-    var esTransportAddress = null;
-    _.each(response.nodes, (node) => {
-      esTransportAddress = node.transport_address;
-    });
-    if (!esTransportAddress) {
-      return Promise.reject(new Error('Unable to get the transport address'));
-    }
+  return new Promise((fulfill, reject) => {
+    var elasticsearchStatus = self.server.plugins.elasticsearch.status;
 
-    var config = self.server.config();
-    var esClusterName = response.cluster_name;
-    var gremlinServerPath = config.get('kibi_core.gremlin_server_path');
+    elasticsearchStatus.on('change', function (prev, prevmsg) {
+      if (elasticsearchStatus.state === 'green') {
+        self.client.nodes.info({ nodeId: '_local' }).then(function (response) {
+          var esTransportAddress = null;
+          _.each(response.nodes, (node) => {
+            esTransportAddress = node.transport_address;
+          });
+          if (!esTransportAddress) {
+            reject(new Error('Unable to get the transport address'));
+            return;
+          }
 
-    if (!path.isAbsolute(gremlinServerPath)) {
-      var rootDir = path.normalize(__dirname + path.sep + '..' + path.sep + '..' + path.sep + '..' + path.sep);
-      var gremlinDirtyDir = path.join(rootDir, gremlinServerPath);
-      gremlinServerPath = path.resolve(path.normalize(gremlinDirtyDir));
-    }
+          var config = self.server.config();
+          var esClusterName = response.cluster_name;
+          var gremlinServerPath = config.get('kibi_core.gremlin_server_path');
 
-    var loggingFilePath = path.parse(gremlinServerPath).dir + path.sep + 'gremlin-es2-server-log.properties';
+          if (!path.isAbsolute(gremlinServerPath)) {
+            var rootDir = path.normalize(__dirname + path.sep + '..' + path.sep + '..' + path.sep + '..' + path.sep);
+            var gremlinDirtyDir = path.join(rootDir, gremlinServerPath);
+            gremlinServerPath = path.resolve(path.normalize(gremlinDirtyDir));
+          }
 
-    self.gremlinServer = childProcess.spawn('java',
-      [
-        '-jar', gremlinServerPath,
-        '--elasticNodeHost=' + esTransportAddress.split(':')[0],
-        '--elasticNodePort=' + esTransportAddress.split(':')[1],
-        '--elasticClusterName=' + esClusterName,
-        '--logging.config=' + loggingFilePath
-      ]
-    );
+          var loggingFilePath = path.parse(gremlinServerPath).dir + path.sep + 'gremlin-es2-server-log.properties';
 
-    var counter = 15;
-    var timeout = 5000;
-    var serverLoaded = false;
+          self.gremlinServer = childProcess.spawn('java', [
+            '-jar', gremlinServerPath,
+            '--elasticNodeHost=' + esTransportAddress.split(':')[0],
+            '--elasticNodePort=' + esTransportAddress.split(':')[1],
+            '--elasticClusterName=' + esClusterName,
+            '--logging.config=' + loggingFilePath
+          ]);
 
-    return new Promise(function (fulfill, reject) {
-      self.ping = function (counter) {
-        if (counter > 0) {
-          setTimeout(function () {
-            self._ping()
-            .then(function (resp) {
-              var jsonResp = JSON.parse(resp.toString());
-              if (jsonResp.status === 'ok') {
-                self.server.log(['gremlin', 'info'], 'Kibi gremlin server running at http://localhost:8080');
-                self.initialized = true;
-                fulfill({ message: 'The Kibi gremlin server started successfully.' });
-              } else {
-                self.server.log(['gremlin', 'warning'], 'Waiting for the Kibi gremlin server');
-                counter--;
-                setTimeout(self.ping(counter), timeout);
-              }
-            })
-            .catch(function (err) {
-              self.server.log(['gremlin', 'warning'], 'Waiting for the Kibi gremlin server');
-              counter--;
-              setTimeout(self.ping(counter), timeout);
-            });
-          }, timeout);
-        } else {
-          self.server.log(['gremlin', 'error'], 'The Kibi gremlin server did not start correctly');
-          reject(new Error('The Kibi gremlin server did not start correctly'));
-        }
-      };
-      self.ping(counter);
+          var counter = 15;
+          var timeout = 5000;
+          var serverLoaded = false;
+
+          self.ping = function (counter) {
+            if (counter > 0) {
+              setTimeout(function () {
+                self._ping()
+                  .then(function (resp) {
+                    var jsonResp = JSON.parse(resp.toString());
+                    if (jsonResp.status === 'ok') {
+                      self.server.log(['gremlin', 'info'], 'Kibi gremlin server running at http://localhost:8080');
+                      self.initialized = true;
+                      fulfill({ message: 'The Kibi gremlin server started successfully.' });
+                    } else {
+                      self.server.log(['gremlin', 'warning'], 'Waiting for the Kibi gremlin server');
+                      counter--;
+                      setTimeout(self.ping(counter), timeout);
+                    }
+                  })
+                .catch(function (err) {
+                  self.server.log(['gremlin', 'warning'], 'Waiting for the Kibi gremlin server');
+                  counter--;
+                  setTimeout(self.ping(counter), timeout);
+                });
+              }, timeout);
+            } else {
+              self.server.log(['gremlin', 'error'], 'The Kibi gremlin server did not start correctly');
+              reject(new Error('The Kibi gremlin server did not start correctly'));
+            }
+          };
+          self.ping(counter);
+        }).catch(reject);
+      }
     });
   });
 };

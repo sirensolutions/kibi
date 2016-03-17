@@ -11,11 +11,11 @@ define(function (require) {
 
   // relation edit button controller
   app.controller('RelationsAdvancedController', function (
-		$scope, $routeParams, config, kbnUrl) {
+    $scope, $routeParams, config, kbnUrl) {
 
     $scope.relations = config.get('kibi:relations');
 
-	  // default values
+    // default values
     var i = 0;
     var key = 0;
     var defValues = {orderBy: 'default', maxTermsPerShard: 'all terms', termsEncoding: 'bloom'};

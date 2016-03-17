@@ -1,0 +1,12 @@
+[[graph-browser]]
+=== Graph Browser
+
+The Kibi Graph Browser http://todo[introduced in] displays the currently selected Elasticsearch documents as a node of a graph.
+
+[float]
+==== Pre-Requisites
+
+To use the Kibi Graph Browser you first need to:
+
+ * Set up a Tinkerpop3 datasource
+ * Set up a Gremlin query

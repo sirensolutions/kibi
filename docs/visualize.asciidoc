@@ -188,3 +188,5 @@ include::wordcloud.asciidoc[]
 include::timeline.asciidoc[]
 
 include::radar-chart.asciidoc[]
+
+include::graph-browser.asciidoc[]

@@ -58,6 +58,12 @@ to `true`; the cache size and max age (in milliseconds) can be set through the
 
 A Kibi restart is required to apply configuration changes.
 
+*Kibi Tinkerpop3*
+
+* url - url of the Kibi Gremlin Server e.g.
+* timeout - the server may take more than 1 seconds to load big graphs. eg: 10000
+
+
 [NOTE]
 ====
 Sensitive datasource configuration elements like passwords are encrypted.

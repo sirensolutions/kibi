@@ -135,7 +135,7 @@ define(function (require) {
               });
             }
             // if the select is NOT required, the user is able to choose an empty element
-            if (scope.items.length > 0 && _.first(scope.items).value !== null) {
+            if (!scope.required && scope.items.length > 0 && _.first(scope.items).value !== null) {
               scope.items.splice(0, 0, {
                 label: '',
                 value: null

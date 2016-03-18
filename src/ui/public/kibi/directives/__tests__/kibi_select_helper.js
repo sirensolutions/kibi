@@ -140,6 +140,11 @@ describe('Kibi Directives', function () {
           expect(queries[2].group).to.be('No tag');
           expect(queries[3].group).to.be('No tag');
           expect(queries[4].group).to.be('tag2,42');
+          expect(queries[0].datasourceType).to.be('sparql_http');
+          expect(queries[1].datasourceType).to.be('mysql');
+          expect(queries[2].datasourceType).to.be('rest');
+          expect(queries[3].datasourceType).to.be(null);
+          expect(queries[4].datasourceType).to.be(null);
           done();
         }).catch(done);
       });

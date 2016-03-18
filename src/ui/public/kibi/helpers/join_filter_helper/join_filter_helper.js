@@ -1,4 +1,3 @@
-/*global window*/
 /*global define*/
 define(function (require) {
   return function JoinFilterHelperFactory(config, Private, savedDashboards, savedSearches, Promise, elasticsearchPlugins) {
@@ -31,7 +30,7 @@ define(function (require) {
         }
 
         // get indices relations
-        window.relationsIndices = relations.relationsIndices;
+        var relationsIndices = relations.relationsIndices;
 
         relations = relations.relationsDashboards;
         // grab only enabled relations based on kibiState
@@ -72,61 +71,36 @@ define(function (require) {
             var relations = _.map(enabledRelations, function (r) {
               var parts = r.relation.split('/');
 
-              var forwardPath = parts[1].replace('-slash-', '/');
-              var backPath =	parts[3].replace('-slash-', '/');
+              var ret = [
+                {
+                  indices: [ parts[0].replace('-slash-', '/') ],
+                  path: parts[1].replace('-slash-', '/')
+                },
+                {
+                  indices: [ parts[2].replace('-slash-', '/') ],
+                  path: parts[3].replace('-slash-', '/')
+                }
+              ];
+
+              // copying advanced options from corresponding index relation
+              var indexRelation = _.find(relationsIndices, function (indexR) {
+                return r.relation === indexR.id;
+              });
 
               var advKeys = ['termsEncoding', 'orderBy', 'maxTermsPerShard'];
-              var advOptions = {};
 
-              var i;
-              var j;
-              var k;
+              _.each(indexRelation.indices[0], function (value, key) {
+                if (advKeys.indexOf(key) !== -1) {
+                  ret[0][key] = value;
+                };
+              });
+              _.each(indexRelation.indices[1], function (value, key) {
+                if (advKeys.indexOf(key) !== -1) {
+                  ret[1][key] = value;
+                };
+              });
 
-              // get related advanced options
-              for (i in window.relationsIndices) {
-                if (window.relationsIndices[i].id === r.relation) {
-                  for (j = 0; j < 2; j++) {
-                    var pathname = window.relationsIndices[i].indices[j].path;
-                    advOptions[pathname] = {};
-
-                    for (k in advKeys) {
-                      if (advKeys.hasOwnProperty(k)) {
-                        advOptions[pathname][advKeys[k]] = window.relationsIndices[i].indices[j][advKeys[k]];
-                      }
-                    }
-                  }
-                }
-              }
-
-              if (advOptions.hasOwnProperty(forwardPath) && advOptions.hasOwnProperty(backPath)) {
-                return [
-                  {
-                    indices: [ parts[0].replace('-slash-', '/') ],
-                    path: forwardPath,
-                    termsEncoding: advOptions[forwardPath].termsEncoding,
-                    orderBy: advOptions[forwardPath].orderBy,
-                    maxTermsPerShard: Number(advOptions[forwardPath].maxTermsPerShard)
-                  },
-                  {
-                    indices: [ parts[2].replace('-slash-', '/') ],
-                    path: backPath,
-                    termsEncoding: advOptions[backPath].termsEncoding,
-                    orderBy: advOptions[backPath].orderBy,
-                    maxTermsPerShard: Number(advOptions[backPath].maxTermsPerShard)
-                  }
-                ];
-              } else {
-                return [
-                  {
-                    indices: [ parts[0].replace('-slash-', '/') ],
-                    path: forwardPath
-                  },
-                  {
-                    indices: [ parts[2].replace('-slash-', '/') ],
-                    path: backPath
-                  }
-                ];
-              }
+              return ret;
             });
 
             var labels = queryHelper.getLabelOfIndexPatternsInConnectedComponent(focusIndex, relations);

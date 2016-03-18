@@ -121,7 +121,8 @@ define(function (require) {
     /**
      * Filters out the dashboards that are not relevant in the row with the given id
      */
-    $scope.filterDashboards = function (id, value) {
+    $scope.filterDashboards = function (id, item) {
+      var value = item.value;
       var relDash = $scope.relations.relationsDashboards[id];
 
       if (!value) {
@@ -205,8 +206,9 @@ define(function (require) {
     /**
      * Filters out the relations that are not relevant in the row with the given id
      */
-    $scope.filterRelations = function (id, relationId) {
+    $scope.filterRelations = function (id, item) {
       // here for anything about indices relations - we take them from config as they are already saved
+      var relationId = item.value;
       var relations = config.get('kibi:relations');
 
       //for anything about the dashboards relations - we take them from the scope

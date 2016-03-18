@@ -19,14 +19,28 @@ define(function (require) {
     KibiSelectHelper.prototype.getQueries = function () {
       return savedQueries.find().then(function (queries) {
         if (queries.hits) {
-          var items = _.map(queries.hits, function (hit) {
-            return {
-              group: hit.st_tags.length ? hit.st_tags.join() : 'No tag',
-              label: hit.title,
-              value: hit.id
-            };
+          var promises = _.map(queries.hits, function (hit) {
+            var dataId = hit.st_datasourceId;
+            if (dataId && dataId != '' && dataId != null) {
+              return savedDatasources.get(hit.st_datasourceId);
+            } else {
+              return null;
+            }
           });
-          return items;
+
+          return Promise.all(promises).then(function(queryDatasources) {
+            var items = [];
+            for (var i=0; i < queryDatasources.length; i++) {
+              var datasourceType = queryDatasources[i] === null ? null : queryDatasources[i].datasourceType;
+              items.push({
+                group: queries.hits[i].st_tags.length ? queries.hits[i].st_tags.join() : 'No tag',
+                datasourceType: datasourceType,
+                label: queries.hits[i].title,
+                value: queries.hits[i].id
+              });
+            }
+            return items;
+          });
         }
       });
     };
@@ -79,7 +93,8 @@ define(function (require) {
           var items = _.map(data.hits, function (hit) {
             return {
               label: hit.title,
-              value: hit.id
+              value: hit.id,
+              type: hit.datasourceType
             };
           });
           return items;

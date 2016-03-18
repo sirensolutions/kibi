@@ -50,9 +50,19 @@ define(function (require) {
 
     // save button
     $scope.submit = function () {
-      // make sure maxTermsPerShard is either "all terms" or a number
-      // if it is a number it should NOT be stored as string
       _.each($scope.relationService, function (relationEl) {
+        // do NOT save properties with default values
+        if (relationEl.maxTermsPerShard && relationEl.maxTermsPerShard === defValues.maxTermsPerShard) {
+          delete relationEl.orderBy;
+        }
+        if (relationEl.orderBy && relationEl.orderBy === defValues.orderBy) {
+          delete relationEl.orderBy;
+        }
+        if (relationEl.termsEncoding && relationEl.termsEncoding === defValues.termsEncoding) {
+          delete relationEl.termsEncoding;
+        }
+
+        // if it is a number it should NOT be stored as string
         if (relationEl.maxTermsPerShard && relationEl.maxTermsPerShard !== defValues.maxTermsPerShard) {
           relationEl.maxTermsPerShard = Number(relationEl.maxTermsPerShard);
         }

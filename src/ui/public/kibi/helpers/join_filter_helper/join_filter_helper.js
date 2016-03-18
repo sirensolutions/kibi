@@ -1,6 +1,7 @@
 /*global define*/
 define(function (require) {
-  return function JoinFilterHelperFactory(config, Private, savedDashboards, savedSearches, Promise, elasticsearchPlugins) {
+  return function JoinFilterHelperFactory(
+    config, Private, savedDashboards, savedSearches, Promise, elasticsearchPlugins, enterpriseEnabled) {
     var _ = require('lodash');
     var replaceOrAddJoinSetFilter = require('ui/kibi/helpers/join_filter_helper/lib/replace_or_add_join_set_filter');
 
@@ -21,6 +22,70 @@ define(function (require) {
 
     function JoinFilterHelper() {}
 
+
+    JoinFilterHelper.prototype.addAdvancedJoinSettingsToRelation = function (sourcePartOfTheRelationId, targetPartOfTheRelationId, rel) {
+      if (enterpriseEnabled) {
+        var advKeys = ['termsEncoding', 'orderBy', 'maxTermsPerShard'];
+
+        var relations = config.get('kibi:relations');
+        // get indices relations
+        var relationsIndices = relations.relationsIndices;
+
+        // copying advanced options from corresponding index relation
+        var forvard;
+        var backward;
+        var indexRelation = _.find(relationsIndices, function (indexR) {
+          return (sourcePartOfTheRelationId + '/' + targetPartOfTheRelationId) === indexR.id;
+        });
+        if (indexRelation) {
+          forvard = true;
+        } else {
+          // try to find the relation in other direction
+          indexRelation = _.find(relationsIndices, function (indexR) {
+            return (targetPartOfTheRelationId + '/' + sourcePartOfTheRelationId) === indexR.id;
+          });
+          if (indexRelation) {
+            backward = true;
+          } else {
+            throw new Error(
+              'Could not find index relation corresponding to relation between: ' +
+              sourcePartOfTheRelationId + ' and ' + targetPartOfTheRelationId);
+          }
+        }
+
+        // TODO verify which advanced settings could be skipped
+        // e.g.
+        // for join_set we need advanced settings only for the index which is not the focused one
+        // for sequencial join we also only need settings for one
+
+        if (forvard === true) {
+          _.each(indexRelation.indices[0], function (value, key) {
+            if (advKeys.indexOf(key) !== -1) {
+              rel[0][key] = value;
+            };
+          });
+          _.each(indexRelation.indices[1], function (value, key) {
+            if (advKeys.indexOf(key) !== -1) {
+              rel[1][key] = value;
+            };
+          });
+        }
+
+        if (backward === true) {
+          _.each(indexRelation.indices[1], function (value, key) {
+            if (advKeys.indexOf(key) !== -1) {
+              rel[0][key] = value;
+            };
+          });
+          _.each(indexRelation.indices[0], function (value, key) {
+            if (advKeys.indexOf(key) !== -1) {
+              rel[1][key] = value;
+            };
+          });
+        }
+      }
+    };
+
     JoinFilterHelper.prototype.getJoinFilter = function (focusDashboardId) {
       var self = this;
       if (focusDashboardId) {
@@ -29,12 +94,8 @@ define(function (require) {
           return Promise.reject(new Error('Could not get kibi:relations'));
         }
 
-        // get indices relations
-        var relationsIndices = relations.relationsIndices;
-
-        relations = relations.relationsDashboards;
         // grab only enabled relations based on kibiState
-        var enabledRelations = _.filter(relations, function (relation) {
+        var enabledRelations = _.filter(relations.relationsDashboards, function (relation) {
           return kibiStateHelper.isRelationEnabled(relation);
         });
 
@@ -70,35 +131,23 @@ define(function (require) {
 
             var relations = _.map(enabledRelations, function (r) {
               var parts = r.relation.split('/');
+              var sourceIndex = parts[0].replace('-slash-', '/');
+              var sourcePath = parts[1].replace('-slash-', '/');
+              var targetIndex = parts[2].replace('-slash-', '/');
+              var targetPath = parts[3].replace('-slash-', '/');
 
               var ret = [
                 {
-                  indices: [ parts[0].replace('-slash-', '/') ],
-                  path: parts[1].replace('-slash-', '/')
+                  indices: [ sourceIndex ],
+                  path: sourcePath
                 },
                 {
-                  indices: [ parts[2].replace('-slash-', '/') ],
-                  path: parts[3].replace('-slash-', '/')
+                  indices: [ targetIndex ],
+                  path: targetPath
                 }
               ];
 
-              // copying advanced options from corresponding index relation
-              var indexRelation = _.find(relationsIndices, function (indexR) {
-                return r.relation === indexR.id;
-              });
-
-              var advKeys = ['termsEncoding', 'orderBy', 'maxTermsPerShard'];
-
-              _.each(indexRelation.indices[0], function (value, key) {
-                if (advKeys.indexOf(key) !== -1) {
-                  ret[0][key] = value;
-                };
-              });
-              _.each(indexRelation.indices[1], function (value, key) {
-                if (advKeys.indexOf(key) !== -1) {
-                  ret[1][key] = value;
-                };
-              });
+              self.addAdvancedJoinSettingsToRelation(sourceIndex + '/' + sourcePath, targetIndex + '/' + targetPath , ret);
 
               return ret;
             });

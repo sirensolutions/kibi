@@ -15,6 +15,7 @@ var urlHelper;
 function init(timefilterImpl, savedDashboardsImpl, savedSearchesImpl) {
   return function () {
 
+
     if (timefilterImpl) {
       ngMock.module('kibana', function ($provide) {
         $provide.service('timefilter', timefilterImpl);
@@ -98,6 +99,7 @@ function init(timefilterImpl, savedDashboardsImpl, savedSearchesImpl) {
 
     ngMock.module('kibana', function ($provide) {
 
+      $provide.constant('enterpriseEnabled', false);
       $provide.constant('elasticsearchPlugins', ['siren-join']);
       $provide.constant('kbnDefaultAppId', '');
       $provide.constant('kibiDefaultDashboardId', '');

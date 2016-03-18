@@ -1,7 +1,7 @@
 define(function (require) {
   var _ = require('lodash');
 
-  return function RelationVisHelperFactory(Private, indexPatterns, timefilter, Promise) {
+  return function RelationVisHelperFactory(Private, indexPatterns, timefilter, Promise, config) {
 
     var kibiTimeHelper   = Private(require('ui/kibi/helpers/kibi_time_helper'));
     var kibiStateHelper  = Private(require('ui/kibi/helpers/kibi_state_helper'));
@@ -179,6 +179,12 @@ define(function (require) {
           }
         ]
       };
+
+      joinFilterHelper.addAdvancedJoinSettingsToRelation(
+        button.sourceIndexPatternId + '/' + button.sourceField,
+        button.targetIndexPatternId + '/' + button.targetField,
+        ret.relation
+      );
 
       var sourceFilters = _.filter(urlHelper.getCurrentDashboardFilters(), function (f) {
         // all except join_sequence

@@ -1,10 +1,10 @@
 <kbn-settings-app section="relations">
-  <div ng-controller="RelationsAdvancedController" class="app-container dashboard_groups_editor ng-scope">
+  <div ng-controller="RelationsAdvancedController" class="app-container advanced_relation_settings_editor ng-scope">
     <div class="container ng-scope">
       <div class="config-section">
         <div>
           <div class="header">
-            <h2 class="title">Forward direction</h2>
+            <h2 class="title">Settings for {{from}} -> {{to}} join direction</h2>
           </div>
           <form name="forwardForm" novalidate>
             <div class="form-group">
@@ -20,7 +20,7 @@
               <input kibi-positive-integer validate required
                 ng-model="relationService[0].maxTermsPerShard"
                 kibi-debounce="350"
-                class="form-control small-input"
+                class="form-control"
                 type="text"
                 name="numofterms"
                 kibi-stop-enter-key-down />
@@ -39,7 +39,7 @@
         </div>
         <div>
           <div class="header">
-            <h2 class="title">Back direction</h2>
+            <h2 class="title">Settings for {{to}} -> {{from}} join direction</h2>
           </div>
           <form name="forwardForm" novalidate>
             <div class="form-group">
@@ -53,7 +53,7 @@
               <input required
                 ng-model="relationService[1].maxTermsPerShard"
                 kibi-debounce="350"
-                class="form-control small-input"
+                class="form-control"
                 type="text"
                 kibi-stop-enter-key-down />
             </div>

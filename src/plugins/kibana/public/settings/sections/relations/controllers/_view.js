@@ -28,7 +28,10 @@ define(function (require) {
 
     // set default object properties
     if ($routeParams.service === 'indices') {
+
       $scope.relationService = $scope.relations.relationsIndices[$routeParams.id][$routeParams.service];
+      $scope.from = $scope.relationService[0].indexPatternId;
+      $scope.to = $scope.relationService[1].indexPatternId;
 
       for (var i = 0; i <= 1; i++) {
         if (typeof $scope.relationService[i] === 'object' && $scope.relationService[i] !== null) {

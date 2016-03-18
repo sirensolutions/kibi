@@ -21,16 +21,16 @@ define(function (require) {
         if (queries.hits) {
           var promises = _.map(queries.hits, function (hit) {
             var dataId = hit.st_datasourceId;
-            if (dataId && dataId != '' && dataId != null) {
+            if (dataId && dataId !== '' && dataId !== null) {
               return savedDatasources.get(hit.st_datasourceId);
             } else {
               return null;
             }
           });
 
-          return Promise.all(promises).then(function(queryDatasources) {
+          return Promise.all(promises).then(function (queryDatasources) {
             var items = [];
-            for (var i=0; i < queryDatasources.length; i++) {
+            for (var i = 0; i < queryDatasources.length; i++) {
               var datasourceType = queryDatasources[i] === null ? null : queryDatasources[i].datasourceType;
               items.push({
                 group: queries.hits[i].st_tags.length ? queries.hits[i].st_tags.join() : 'No tag',

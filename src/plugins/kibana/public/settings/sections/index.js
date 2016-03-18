@@ -3,7 +3,7 @@ define(function (require) {
   // are used to create the nav bar
   return [
     require('plugins/kibana/settings/sections/indices/index'),
-    require('plugins/kibana/settings/sections/relations/index'), //kibi: added by kibi
+    require('plugins/kibana/settings/sections/kibi_relations/index'), //kibi: added by kibi
     require('plugins/kibana/settings/sections/kibi_datasources/index'), //kibi: added by kibi
     require('plugins/kibana/settings/sections/kibi_queries/index'), //kibi: added by kibi
     require('plugins/kibana/settings/sections/kibi_templates/index'), //kibi: added by kibi

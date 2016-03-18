@@ -2,8 +2,8 @@ define(function (require) {
 
   var angular = require('angular');
 
-  require('plugins/kibana/settings/sections/relations/controllers/relations');
-  require('plugins/kibana/settings/sections/relations/controllers/_view');
+  require('plugins/kibana/settings/sections/kibi_relations/controllers/relations');
+  require('plugins/kibana/settings/sections/kibi_relations/controllers/_view');
   require('ui/modules').get('apps/settings', ['monospaced.elastic']);
 
   return {

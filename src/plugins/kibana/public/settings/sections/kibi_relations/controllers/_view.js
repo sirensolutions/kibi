@@ -4,7 +4,8 @@ define(function (require) {
   var _ = require('lodash');
 
   // path to view template
-  var relAdvViewHTML = require('plugins/kibana/settings/sections/relations/_view.html');
+  var relAdvViewHTML = require('plugins/kibana/settings/sections/kibi_relations/_view.html');
+
   require('ui/routes').when('/settings/relations/:service/:id', {
     template: relAdvViewHTML
   });

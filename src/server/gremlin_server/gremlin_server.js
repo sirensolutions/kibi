@@ -19,8 +19,7 @@ function startServer(self, fulfill, reject) {
       esTransportAddress = node.transport_address;
     });
     if (!esTransportAddress) {
-      reject(new Error('Unable to get the transport address'));
-      return;
+      return Promise.reject(new Error('Unable to get the transport address'));
     }
 
     var config = self.server.config();
@@ -29,8 +28,7 @@ function startServer(self, fulfill, reject) {
 
     if (path.parse(gremlinServerPath).ext !== '.jar') {
       self.server.log(['gremlin', 'error'], 'The configuration property kibi_core.gremlin_server_path does not point to a jar file');
-      reject(new Error('The configuration property kibi_core.gremlin_server_path does not point to a jar file'));
-      return;
+      return Promise.reject(new Error('The configuration property kibi_core.gremlin_server_path does not point to a jar file'));
     }
 
     if (!path.isAbsolute(gremlinServerPath)) {
@@ -42,8 +40,7 @@ function startServer(self, fulfill, reject) {
     return fs.access(gremlinServerPath, fs.F_OK, (error) => {
       if (error !== null) {
         self.server.log(['gremlin', 'error'], 'The Kibi Gremlin Server jar file was not found. Please check the configuration');
-        reject(new Error('The Kibi Gremlin Server jar file was not found. Please check the configuration'));
-        return;
+        return Promise.reject(new Error('The Kibi Gremlin Server jar file was not found. Please check the configuration'));
       }
       var loggingFilePath = path.parse(gremlinServerPath).dir + path.sep + 'gremlin-es2-server-log.properties';
 

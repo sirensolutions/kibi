@@ -177,8 +177,12 @@ describe('Kibi Directives', function () {
 
     it('should exclude items from the select', function () {
       var items = [ { value: 1, label: 'joe' }, { value: 2, label: 'toto' } ];
-      var filter = function (id, value) {
-        return value === 1;
+      var filter = function (id, item) {
+        if (item) {
+          return item.value === 1;
+        } else {
+          return false;
+        }
       };
 
       init(null, items, null, null, null, null, filter);
@@ -196,8 +200,12 @@ describe('Kibi Directives', function () {
 
     it('should exclude some items and include others from the select options', function () {
       var items = [ { value: 1, label: 'joe' }, { value: 2, label: 'toto' } ];
-      var filter = function (id, value) {
-        return value === 1;
+      var filter = function (id, item) {
+        if (item) {
+          return item.value === 1;
+        } else {
+          return false;
+        }
       };
       var include = [ { value: 3, label: 'tata' } ];
 
@@ -220,8 +228,12 @@ describe('Kibi Directives', function () {
 
     it('should exclude items that were explicitly included', function () {
       var items = [ { value: 2, label: 'toto' } ];
-      var filter = function (id, value) {
-        return value === 1;
+      var filter = function (id, item) {
+        if (item) {
+          return item.value === 1;
+        } else {
+          return false;
+        }
       };
       var include = [ { value: 1, label: 'joe' } ];
 

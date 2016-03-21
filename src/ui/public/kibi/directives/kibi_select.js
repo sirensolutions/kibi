@@ -16,12 +16,12 @@ define(function (require) {
         // Filter function which returns true for items to be removed.
         // There are two arguments:
         // - id: the id of the kibi-select
-        // - value: the value of the item
+        // - item: the item
         // Since the filter function is called with arguments, a function named "myfunc" should be passed
         // as 'filter="myfunc"'.
         // See http://weblogs.asp.net/dwahlin/creating-custom-angularjs-directives-part-3-isolate-scope-and-function-parameters
         //
-        // If the value is **undefined**, the function may return an object that is used in the angular watcher.
+        // If the item is **undefined**, the function may return an object that is used in the angular watcher.
         filter: '&?',
         objectType:       '@',  // text
         indexPatternId:   '=?', // optional only for objectType === field | indexPatternType | documentIds
@@ -130,7 +130,7 @@ define(function (require) {
               _.remove(scope.items, function (item) {
                 var selected = !!ngModelCtrl.$viewValue && !!ngModelCtrl.$viewValue.value &&
                   ngModelCtrl.$viewValue.value === item.value;
-                var toRemove = scope.filter()(scope.id, item.value);
+                var toRemove = scope.filter()(scope.id, item);
                 return toRemove && !selected;
               });
             }

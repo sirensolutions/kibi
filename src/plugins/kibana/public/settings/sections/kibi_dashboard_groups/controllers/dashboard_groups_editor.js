@@ -59,7 +59,8 @@ define(function (require) {
 
       var dashboardGroup = $scope.dashboardGroup = $route.current.locals.dashboardGroup;
 
-      $scope.filter = function (id, dashboard) {
+      $scope.filter = function (id, item) {
+        var dashboard = item.value;
         var allDashboards = _($scope.dashboardGroup.dashboards).pluck('id');
 
         if (!dashboard) {

@@ -17,18 +17,28 @@ define(function (require) {
     var datasourceHelper = Private(require('ui/kibi/helpers/datasource_helper'));
 
     KibiSelectHelper.prototype.getQueries = function () {
-      return savedQueries.find().then(function (queries) {
-        if (queries.hits) {
-          var items = _.map(queries.hits, function (hit) {
-            return {
-              group: hit.st_tags.length ? hit.st_tags.join() : 'No tag',
-              label: hit.title,
-              value: hit.id
-            };
+      return Promise.all([ savedQueries.find(), savedDatasources.find() ]).then(function (results) {
+        var queries = results[0].hits;
+        var datasources = results[1].hits;
+        var items = [];
+        for (var i = 0; i < queries.length; i++) {
+          var queryDatasource = queries[i].st_datasourceId;
+          var datasource = getDatasource(datasources, queryDatasource);
+          items.push({
+            group: queries[i].st_tags.length ? queries[i].st_tags.join() : 'No tag',
+            datasourceType: datasource.length > 0 ? datasource[0].datasourceType : null,
+            label: queries[i].title,
+            value: queries[i].id
           });
-          return items;
         }
+        return items;
       });
+
+      function getDatasource(datasources, reference) {
+        return _.filter(datasources, function (o) {
+          return o.id === reference;
+        });
+      }
     };
 
     KibiSelectHelper.prototype.getSavedSearches = function () {
@@ -79,7 +89,8 @@ define(function (require) {
           var items = _.map(data.hits, function (hit) {
             return {
               label: hit.title,
-              value: hit.id
+              value: hit.id,
+              type: hit.datasourceType
             };
           });
           return items;

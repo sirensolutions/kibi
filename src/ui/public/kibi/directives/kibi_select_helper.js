@@ -26,7 +26,7 @@ define(function (require) {
           var datasource = getDatasource(datasources, queryDatasource);
           items.push({
             group: queries[i].st_tags.length ? queries[i].st_tags.join() : 'No tag',
-            datasourceType: datasource[0].datasourceType,
+            datasourceType: datasource.length > 0 ? datasource[0].datasourceType : null,
             label: queries[i].title,
             value: queries[i].id
           });

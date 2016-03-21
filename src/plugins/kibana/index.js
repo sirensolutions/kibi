@@ -46,10 +46,9 @@ module.exports = function (kibana) {
           if (config.has('kibi_core')) {
             ret.kibiDatasourcesSchema  = config.get('kibi_core.datasources_schema');
             ret.kibiDefaultDashboardId = config.get('kibi_core.default_dashboard_id');
+            ret.kibiWarnings = {};
             if (config.get('kibi_core.datasource_encryption_key') === 'iSxvZRYisyUW33FreTBSyJJ34KpEquWznUPDvn+ka14=') {
-              ret.kibiWarnings = {
-                datasource_encryption_warning: true
-              };
+              ret.kibiWarnings.datasource_encryption_warning = true;
             }
             ret.enterpriseEnabled = config.get('kibi_core.enterprise_enabled');
           }

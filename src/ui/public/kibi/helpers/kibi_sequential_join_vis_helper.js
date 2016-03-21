@@ -1,7 +1,7 @@
 define(function (require) {
   var _ = require('lodash');
 
-  return function RelationVisHelperFactory(Private, indexPatterns, timefilter, Promise, config) {
+  return function RelationVisHelperFactory(Private, indexPatterns, timefilter, Promise) {
 
     var kibiTimeHelper   = Private(require('ui/kibi/helpers/kibi_time_helper'));
     var kibiStateHelper  = Private(require('ui/kibi/helpers/kibi_state_helper'));

@@ -17,31 +17,23 @@ define(function (require) {
     var datasourceHelper = Private(require('ui/kibi/helpers/datasource_helper'));
 
     KibiSelectHelper.prototype.getQueries = function () {
-      return savedQueries.find().then(function (queries) {
-        if (queries.hits) {
-          var promises = _.map(queries.hits, function (hit) {
-            var dataId = hit.st_datasourceId;
-            if (dataId && dataId !== '' && dataId !== null) {
-              return savedDatasources.get(hit.st_datasourceId);
-            } else {
-              return null;
-            }
+      return Promise.all([ savedQueries.find(), savedDatasources.find() ]).then(function (results) {
+        var queries = results[0].hits;
+        var datasources = results[1].hits;
+        var items = [];
+        for (var i = 0; i < queries.length; i++) {
+          var queryDatasource = queries[i].st_datasourceId;
+          var datasource = _.filter(datasources, function(o) {
+            return o.id === queryDatasource;
           });
-
-          return Promise.all(promises).then(function (queryDatasources) {
-            var items = [];
-            for (var i = 0; i < queryDatasources.length; i++) {
-              var datasourceType = queryDatasources[i] === null ? null : queryDatasources[i].datasourceType;
-              items.push({
-                group: queries.hits[i].st_tags.length ? queries.hits[i].st_tags.join() : 'No tag',
-                datasourceType: datasourceType,
-                label: queries.hits[i].title,
-                value: queries.hits[i].id
-              });
-            }
-            return items;
+          items.push({
+            group: queries[i].st_tags.length ? queries[i].st_tags.join() : 'No tag',
+            datasourceType: datasource[0].datasourceType,
+            label: queries[i].title,
+            value: queries[i].id
           });
         }
+        return items;
       });
     };
 

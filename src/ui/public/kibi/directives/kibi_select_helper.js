@@ -23,9 +23,7 @@ define(function (require) {
         var items = [];
         for (var i = 0; i < queries.length; i++) {
           var queryDatasource = queries[i].st_datasourceId;
-          var datasource = _.filter(datasources, function(o) {
-            return o.id === queryDatasource;
-          });
+          var datasource = getDatasource(datasources, queryDatasource);
           items.push({
             group: queries[i].st_tags.length ? queries[i].st_tags.join() : 'No tag',
             datasourceType: datasource[0].datasourceType,
@@ -35,6 +33,12 @@ define(function (require) {
         }
         return items;
       });
+
+      function getDatasource(datasources, reference) {
+        return _.filter(datasources, function (o) {
+          return o.id === reference;
+        });
+      }
     };
 
     KibiSelectHelper.prototype.getSavedSearches = function () {

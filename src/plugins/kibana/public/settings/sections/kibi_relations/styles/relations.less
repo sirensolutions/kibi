@@ -1,16 +1,28 @@
 @import (reference) "~ui/kibi/styles/kibi_variables.less";
+@import "~ui/kibi/styles/kibi_config_sections.less";
 
 .relations-settings {
 
-  .header {
-    margin-top: 4px;
+
+  .dashboards-section {
+    border: 2px #fff solid;
+
+    &.highlight {
+      border-color: #dedede;
+    }
+  }
+
+  .indices-section {
+    border: 2px #fff solid;
+    &.highlight {
+      border-color: #dedede;
+    }
   }
 
   .btn {
     margin-top: 5px;
     margin-bottom: 5px;
   }
-
 
   .indices-relations-config {
     width: 50%;
@@ -89,20 +101,17 @@
     font-size: 24px;
   }
 
-  .highlight {
-    border-color: grey;
-    border-weight: 5px;
-    border-style: solid;
-  }
-
   .graphs-section {
-  	margin-bottom: 370px;
+    margin-bottom: 370px;
   }
 
   .field-description {
     color: grey;
-	font-size: 12px;
+    font-size: 12px;
   }
 
+  .second-panel {
+    margin-top: 32px;
+  }
 }
 

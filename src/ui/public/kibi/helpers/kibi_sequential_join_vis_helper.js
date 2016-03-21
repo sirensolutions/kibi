@@ -180,6 +180,12 @@ define(function (require) {
         ]
       };
 
+      joinFilterHelper.addAdvancedJoinSettingsToRelation(
+        button.sourceIndexPatternId + '/' + button.sourceField,
+        button.targetIndexPatternId + '/' + button.targetField,
+        ret.relation
+      );
+
       var sourceFilters = _.filter(urlHelper.getCurrentDashboardFilters(), function (f) {
         // all except join_sequence
         return !f.join_sequence;

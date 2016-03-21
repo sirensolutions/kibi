@@ -20,6 +20,8 @@ describe('Kibi Components', function () {
             set: function (key, value) { keys[key] = value; }
           };
         });
+
+        $provide.constant('enterpriseEnabled', false);
         $provide.constant('kbnDefaultAppId', '');
         $provide.constant('kibiDefaultDashboardId', '');
         $provide.constant('elasticsearchPlugins', ['siren-join']);

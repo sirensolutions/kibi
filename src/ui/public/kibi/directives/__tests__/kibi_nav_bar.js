@@ -23,6 +23,8 @@ describe('Kibi Components', function () {
             reload: _.noop
           };
         });
+
+        $provide.constant('enterpriseEnabled', false);
         $provide.constant('kbnDefaultAppId', 'dashboard');
         $provide.constant('kibiDefaultDashboardId', '');
         $provide.constant('elasticsearchPlugins', ['siren-join']);

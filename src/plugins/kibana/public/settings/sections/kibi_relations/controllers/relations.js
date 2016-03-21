@@ -1,7 +1,7 @@
 define(function (require) {
 
   require('ui/kibi/directives/eeg');
-  require('plugins/kibana/settings/sections/relations/styles/relations.less');
+  require('plugins/kibana/settings/sections/kibi_relations/styles/relations.less');
 
   var _ = require('lodash');
 
@@ -71,7 +71,7 @@ define(function (require) {
 
   require('ui/routes')
   .when('/settings/relations', {
-    template: require('plugins/kibana/settings/sections/relations/index.html'),
+    template: require('plugins/kibana/settings/sections/kibi_relations/index.html'),
     reloadOnSearch: false
   });
 

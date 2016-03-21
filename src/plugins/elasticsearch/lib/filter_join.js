@@ -130,7 +130,7 @@ function _verifySequence(sequence) {
         _verifySequence(seq);
       });
     } else if (element.relation) {
-      _checkRelation(element.relation, [ 'queries', 'path', 'indices', 'types', 'orderBy', 'maxTermsPerShard' ]);
+      _checkRelation(element.relation, [ 'queries', 'path', 'indices', 'types', 'orderBy', 'maxTermsPerShard', 'termsEncoding' ]);
     } else {
       throw new Error('Unknown element: ' + JSON.stringify(element, null, ' '));
     }
@@ -214,7 +214,7 @@ function _process(query, focus, relations, filters, visitedIndices) {
     _addFilters(query, focusFilters);
   }
   for (var i = 0; i < relations.length; i++) {
-    _checkRelation(relations[i], [ 'path', 'indices', 'types', 'orderBy', 'maxTermsPerShard' ], 1);
+    _checkRelation(relations[i], [ 'path', 'indices', 'types', 'orderBy', 'maxTermsPerShard', 'termsEncoding' ], 1);
     if (relations[i][0].indices[0] === relations[i][1].indices[0]) {
       throw new Error('Loops in the join_set are not supported!\n' + JSON.stringify(relations[i], null, ' '));
     }
@@ -238,12 +238,14 @@ function _process(query, focus, relations, filters, visitedIndices) {
 function _addFilterJoin(query, sourcePath, targetPath, targetIndex, negate) {
   var orderBy;
   var maxTermsPerShard;
+  var termsEncoding;
 
   if (!targetIndex) {
     throw new Error('The target index must be defined');
   }
   orderBy = targetIndex.orderBy;
   maxTermsPerShard = targetIndex.maxTermsPerShard;
+  termsEncoding = targetIndex.termsEncoding;
 
   var filterJoin = {
     indices: targetIndex.indices,
@@ -271,6 +273,9 @@ function _addFilterJoin(query, sourcePath, targetPath, targetIndex, negate) {
   }
   if (maxTermsPerShard) {
     filterJoin.maxTermsPerShard = maxTermsPerShard;
+  }
+  if (termsEncoding) {
+    filterJoin.termsEncoding = termsEncoding;
   }
   var fjObject = {
     filterjoin: {}

@@ -14,8 +14,7 @@
               <select ng-model="relationService[0].orderBy" class="form-control small-input">
                 <option ng-repeat="value in values.orderByValues" value="{{value}}">{{value}}</option>
               </select>
-              <p class="field-description"> The ordering to use to lookup the maximum number of terms.
-              </p>
+              <p class="field-description"> The ordering to use to lookup the maximum number of terms.</p>
             </div>
             <div class="form-group">
               <label>Number of Terms per Shard</label>
@@ -26,8 +25,7 @@
                 type="text"
                 name="numofterms"
                 kibi-stop-enter-key-down />
-              <p class="field-description"> The maximum number of terms per shard to lookup.
-              </p>
+              <p class="field-description"> The maximum number of terms per shard to lookup.</p>
             </div>
             <div class="form-group">
               <label>Terms Encoding</label>
@@ -51,6 +49,7 @@
               <select ng-model="relationService[1].orderBy" class="form-control small-input">
                 <option ng-repeat="value in values.orderByValues" value="{{value}}">{{value}}</option>
               </select>
+              <p class="field-description"> The ordering to use to lookup the maximum number of terms.</p>
             </div>
             <div class="form-group">
               <label>Number of Terms per Shard</label>
@@ -60,12 +59,14 @@
                 class="form-control"
                 type="text"
                 kibi-stop-enter-key-down />
+              <p class="field-description"> The maximum number of terms per shard to lookup.</p>
             </div>
             <div class="form-group">
               <label>Terms Encoding</label>
               <select ng-model="relationService[1].termsEncoding" class="form-control small-input">
                 <option ng-repeat="value in values.termsEncodingValues" value="{{value}}">{{value}}</option>
               </select>
+              <p class="field-description"> The encoding to use when transferring terms across the network.
             </div>
           </form>
         </div>

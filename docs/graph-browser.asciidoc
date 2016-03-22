@@ -1,5 +1,5 @@
 [[graph-browser]]
-=== Graph Browser
+=== Kibi Graph Browser
 
 The Kibi Graph Browser http://todo[introduced in TODO] displays the currently selected Elasticsearch documents as a node of a graph.
 
@@ -51,4 +51,20 @@ To configure a label, add a new *Label* and select:
 
 image::images/graph-browser/graph-browser-config-label.png["Node Label configuration",align="center"]
 
+[float]
+==== Navigating the Graph
 
+Once your Kibi Graph Browser visualization is ready, you can start exploring the graph. You have several operations available:
+
+ * *Select Nodes* - you can select nodes by clicking and dragging a selection rectangle or by ctrl+click on elements to add them to the selection
+ * *Add Filter* - a new filter will be added to Kibi representing the currently selected nodes
+ * *Expand* - fetches new nodes and relations of the selected nodes
+ * *Crop* - crops only the selected nodes, by removing all the other nodes
+ * *Remove* - removes only the selected nodes, leaving all the others
+
+You can choose two different layouts for your graph:
+
+ * *Standard* - This is the standard visualization. The Kibi Graph Browser will choose automatically the position of elements
+ * *Hierarchy* - The graph will be displayed using a hierarchical structure, starting from the selected nodes
+
+At any time you can reset your Kibi Graph Browser to the initial state by pressing the reload button

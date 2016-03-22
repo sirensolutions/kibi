@@ -30,7 +30,7 @@ define(function (require) {
   });
 
 
-  var app = require('ui/modules').get('apps/settings', ['kibana', 'ngSanitize']);
+  var app = require('ui/modules').get('apps/settings', ['kibana']);
   var angular = require('angular');
 
   app.controller(

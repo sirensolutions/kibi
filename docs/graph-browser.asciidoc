@@ -62,6 +62,10 @@ Once your Kibi Graph Browser visualization is ready, you can start exploring the
  * *Crop* - crops only the selected nodes, by removing all the other nodes
  * *Remove* - removes only the selected nodes, leaving all the others
 
+To make a filter available to other dashboards, you can pin it and it will remain active during your dashboard navigation
+
+image::images/graph-browser/graph-filter-pin.gif["Graph Filter Pin",align="center"]
+
 You can choose two different layouts for your graph:
 
  * *Standard* - This is the standard visualization. The Kibi Graph Browser will choose automatically the position of elements

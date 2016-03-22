@@ -18,6 +18,7 @@ Kibi supports following datasource types:
 * Sparql over http - any SPARQL HTTP endpoint (tested with Openlink Virtuoso and Joseki)
 * SQL JDBC - *experimental* JDBC support for SQL (tested with http://www.h2database.com/html/main.html[H2]).
 * SPARQL JDBC - *experimental* JDBC support for SPARQL
+* Kibi Tinkerpop3 - *experimental* support for Kibi Gremlin Server
 
 After selecting the datasource type additional parameters will appear.
 Below list of additional mandatory parameters for each datasource type:
@@ -57,6 +58,12 @@ to `true`; the cache size and max age (in milliseconds) can be set through the
 `datasource_cache_size` and `datasource_cache_max_age` parameters.
 
 A Kibi restart is required to apply configuration changes.
+
+*Kibi Tinkerpop3*
+
+* url - url of the Kibi Gremlin Server e.g.: http://localhost:8080/graph/query
+* timeout - the server may take more than 1 seconds to load big graphs e.g.: 10000
+
 
 [NOTE]
 ====

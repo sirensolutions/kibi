@@ -1,0 +1,77 @@
+[[graph-browser]]
+=== Kibi Graph Browser
+
+The Kibi Graph Browser http://todo[introduced in TODO] displays the currently selected Elasticsearch documents as a node of a graph.
+
+image::images/graph-browser/graph-browser-example.png["Graph Browser Visualization",align="center"]
+
+[float]
+==== Pre-Requisites
+
+To use the Kibi Graph Browser you first need to:
+
+ * Set up a Kibi Tinkerpop3 datasource
+ * Set up a query using the Kibi Tinkerpop3 datasource
+
+[float]
+==== Configuration
+To configure the visualization, add a new *Script* and select:
+
+ * *Query* - the query that will fetch the first node.
+ * *Datasource* - the Kibi Tinkerpop3 datasource to be used.
+
+image::images/graph-browser/graph-browser-config-script.png["Graph Browser Script configuration",align="center"]
+
+By default every node is assigned with an icon and a label. It is possible to customize the style of both of them.
+
+[float]
+===== Custom Icon
+
+To configure an icon, add a new *Icon* and select:
+
+ * *Index Pattern* - the index pattern containing the type of documents you want to configure
+ * *Icon Type* - the type of icon you want to use
+ ** *Font awesome* - the icon will be selected using the vector icons from https://fortawesome.github.io/Font-Awesome/[Font Awesome]
+ ** *Parameterized Relative Path* - the icon will be selected from the configured relative path. The relative path points to `<kibi_root>/installedPlugins/kibi_graph_browser_vis-0.1.0/public/icons/`. You can create subfolders to better organize your custom icons. If the icon filename is stored inside your document, you can use a parameterized relative path. Eg: `/set1/@[_doc][iconType]@.png` will be evaluated using the iconType field of the document.
+
+image::images/graph-browser/graph-browser-config-icon.png["Node Icon configuration",align="center"]
+
+
+[float]
+===== Custom Label
+
+To configure a label, add a new *Label* and select:
+
+ * *Index Pattern* - the index pattern containing the documents you want to configure
+ * *Document type* - the type of documents you want to configure
+ * *Label type* - the type of label you want to use
+ ** *Document Field* - the label will be a document field. You can select one of the available fields from the dropdown
+ ** *Parameterized Field* - the label will be the evaluation of this parameterized field. e.g.: `Company: @doc[_source][companyName]@`
+
+
+image::images/graph-browser/graph-browser-config-label.png["Node Label configuration",align="center"]
+
+[float]
+==== Navigating the Graph
+
+Once your Kibi Graph Browser visualization is ready, you can start exploring the graph. You have several operations available:
+
+ * *Select Nodes* - you can select nodes by clicking and dragging a selection rectangle or by ctrl+click on elements to add them to the selection
+ * *Add Filter* - a new filter will be added to Kibi representing the currently selected nodes
+ * *Expand* - fetches new nodes and relations of the selected nodes
+ * *Crop* - crops only the selected nodes, by removing all the other nodes
+ * *Remove* - removes only the selected nodes, leaving all the others
+
+To make a filter available to other dashboards, you can pin it and it will remain active during your dashboard navigation
+
+image::images/graph-browser/graph-filter-pin.gif["Graph Filter Pin",align="center"]
+
+You can choose two different layouts for your graph:
+
+ * *Standard* - This is the standard visualization. The Kibi Graph Browser will choose automatically the position of elements
+ * *Hierarchy* - The graph will be displayed using a hierarchical structure, starting from the selected nodes
+
+image::images/graph-browser/graph-layouts.gif["Graph Layouts Example",align="center"]
+
+
+At any time you can reset your Kibi Graph Browser to the initial state by pressing the reload button

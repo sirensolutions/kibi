@@ -67,4 +67,7 @@ You can choose two different layouts for your graph:
  * *Standard* - This is the standard visualization. The Kibi Graph Browser will choose automatically the position of elements
  * *Hierarchy* - The graph will be displayed using a hierarchical structure, starting from the selected nodes
 
+image::images/graph-browser/graph-layouts.gif["Graph Layouts Example",align="center"]
+
+
 At any time you can reset your Kibi Graph Browser to the initial state by pressing the reload button

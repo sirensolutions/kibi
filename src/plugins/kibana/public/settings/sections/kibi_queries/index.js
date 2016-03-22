@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import angular from 'angular';
 import settingsSectionRegistry from 'ui/registry/settings_sections';
 import savedObjectRegistry from 'ui/saved_objects/saved_object_registry';
 import savedQueriesRegister from 'plugins/kibana/settings/sections/kibi_queries/services/saved_query_register';

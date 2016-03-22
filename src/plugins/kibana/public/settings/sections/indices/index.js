@@ -8,7 +8,7 @@ import uiModules from 'ui/modules';
 import indexTemplate from 'plugins/kibana/settings/sections/indices/index.html';
 
 // add a dependency to all of the subsection routes
- uiRoutes
+uiRoutes
 .defaults(/settings\/indices/, {
   resolve: {
     indexPatternIds: function (courier) {

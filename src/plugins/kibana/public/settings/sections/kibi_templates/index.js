@@ -1,25 +1,29 @@
-define(function (require) {
+import _ from 'lodash';
+import angular from 'angular';
+import settingsSectionRegistry from 'ui/registry/settings_sections';
+import savedObjectRegistry from 'ui/saved_objects/saved_object_registry';
+import savedTemplatesRegister from 'plugins/kibana/settings/sections/kibi_templates/services/saved_templates_register';
+import 'plugins/kibana/settings/sections/kibi_templates/controllers/templates_editor';
+import uiModules from 'ui/modules';
 
-  var angular = require('angular');
+uiModules.get('apps/settings', ['ui.ace', 'monospaced.elastic']);
 
-  require('ace');
-  require('plugins/kibana/settings/sections/kibi_templates/controllers/templates_editor');
-  require('ui/modules').get('apps/settings', ['ui.ace', 'monospaced.elastic']);
+savedObjectRegistry.register(savedTemplatesRegister);
 
-  return {
-    name: 'templates',
-    buttonLabel: 'Template',
-    display: 'Query templates',
-    url: '#/settings/templates',
-    openObjectFinder: function () {
-      angular.element(document.getElementById('templates_editor')).scope().openTemplateFinder();
-    },
-    newObject: function () {
-      angular.element(document.getElementById('templates_editor')).scope().newTemplate();
-    },
-    saveObject: function () {
-      angular.element(document.getElementById('templates_editor')).scope().submit();
-    }
+settingsSectionRegistry.register(_.constant({
+  order: 13,
+  name: 'templates',
+  buttonLabel: 'Template',
+  display: 'Query templates',
+  url: '#/settings/templates',
+  openObjectFinder: function () {
+    angular.element(document.getElementById('templates_editor')).scope().openTemplateFinder();
+  },
+  newObject: function () {
+    angular.element(document.getElementById('templates_editor')).scope().newTemplate();
+  },
+  saveObject: function () {
+    angular.element(document.getElementById('templates_editor')).scope().submit();
+  }
+}));
 
-  };
-});

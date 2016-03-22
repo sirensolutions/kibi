@@ -1,15 +1,14 @@
-define(function (require) {
+import _ from 'lodash';
+import settingsSectionRegistry from 'ui/registry/settings_sections';
+import uiModules from 'ui/modules';
+import 'plugins/kibana/settings/sections/kibi_relations/controllers/relations';
 
-  var angular = require('angular');
+uiModules.get('apps/settings', ['monospaced.elastic']);
 
-  require('plugins/kibana/settings/sections/kibi_relations/controllers/relations');
-  require('plugins/kibana/settings/sections/kibi_relations/controllers/_view');
-  require('ui/modules').get('apps/settings', ['monospaced.elastic']);
-
-  return {
-    name: 'relations',
-    buttonLabel: 'Relation',
-    display: 'Relations',
-    url: '#/settings/relations'
-  };
-});
+settingsSectionRegistry.register(_.constant({
+  order: 10,
+  name: 'relations',
+  buttonLabel: 'Relation',
+  display: 'Relations',
+  url: '#/settings/relations'
+}));

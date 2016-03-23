@@ -79,6 +79,7 @@ module.exports = function (kibana) {
         enterprise_enabled: Joi.boolean().default(false),
 
         gremlin_server_path: Joi.string().allow('').default(''),
+        gremlin_server_port: Joi.number().default(8080),
 
         datasource_encryption_algorithm: Joi.string().default('AES-GCM'),
         datasource_encryption_key: Joi.string().default('iSxvZRYisyUW33FreTBSyJJ34KpEquWznUPDvn+ka14='),

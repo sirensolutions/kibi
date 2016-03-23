@@ -25,6 +25,7 @@ function startServer(self, fulfill, reject) {
     var config = self.server.config();
     var esClusterName = response.cluster_name;
     var gremlinServerPath = config.get('kibi_core.gremlin_server_path');
+    self.gremlinServerPort = config.get('kibi_core.gremlin_server_port');
 
     if (path.parse(gremlinServerPath).ext !== '.jar') {
       self.server.log(['gremlin', 'error'], 'The configuration property kibi_core.gremlin_server_path does not point to a jar file');
@@ -51,6 +52,7 @@ function startServer(self, fulfill, reject) {
           '--elasticNodeHost=' + esTransportAddress.split(':')[0],
           '--elasticNodePort=' + esTransportAddress.split(':')[1],
           '--elasticClusterName=' + esClusterName,
+          '--server.port=' + self.gremlinServerPort,
           '--logging.config=' + loggingFilePath
         ]
       );
@@ -66,7 +68,7 @@ function startServer(self, fulfill, reject) {
             .then(function (resp) {
               var jsonResp = JSON.parse(resp.toString());
               if (jsonResp.status === 'ok') {
-                self.server.log(['gremlin', 'info'], 'Kibi gremlin server running at http://localhost:8080');
+                self.server.log(['gremlin', 'info'], 'Kibi gremlin server running at http://localhost:' + self.gremlinServerPort);
                 self.initialized = true;
                 fulfill({ message: 'The Kibi gremlin server started successfully.' });
               } else {
@@ -137,9 +139,10 @@ GremlinServerHandler.prototype.stop = function () {
 };
 
 GremlinServerHandler.prototype._ping = function () {
+  var self = this;
   return rp({
     method: 'GET',
-    uri: 'http://127.0.0.1:8080/ping'
+    uri: 'http://127.0.0.1:' + self.gremlinServerPort + '/ping'
   });
 };
 

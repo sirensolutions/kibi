@@ -313,7 +313,7 @@ A relationship is defined as a **join** operation between two indices with the f
 
 The image below displays a graph of four index patterns, where three relationships have defined. You can add a new relationship by clicking on the "_Add relation_" button.
 
-image::images/relations-settings/indices-graph.png["Graph of Index Patterns",align="center"]
+image::images/relations-settings/indices-settings.png["Graph of Index Patterns",align="center"]
 
 A relation is also indicated on the <<kbn-settings-indices,Indices>> tab thanks to the icon image:images/relations-settings/index-relation-icon.png["Index relation icon"].
 If you hover the mouse over it, a tooltip message is displayed indicating the index pattern and field that field is joined with.
@@ -321,6 +321,29 @@ If you hover the mouse over it, a tooltip message is displayed indicating the in
 For example, in the image below, that icon is displayed next to the field "id" of the "investor" index, which is join with the field "investorid" of the "investment" index.
 
 image::images/relations-settings/investor-index.png["Investor Index",align="center"]
+
+===== Advanced settings for index relations [Enterprise Edition only]
+
+In most cases the default index relation settings are sufficient.
+However, for scenarios involving very large joins or when precision is critical,
+it is necessary to manually specify the settings.
+One can do it by clicking on the button marked below.
+
+image::images/relations-settings/indices-settings-advanced-switch.png["Advanced index relation settings switch",align="center"]
+
+An additional settings panel will open
+
+image::images/relations-settings/indices-settings-advanced.png["Advanced index relation settings switch",align="center"]
+
+On this panel, the user can manually configure the following parameters for each relation:
+
+- Order By - the ordering to use to lookup the maximum number of terms
+- Number of Terms per Shard - the maximum number of terms per shard to lookup
+- Terms Encoding - the encoding to use when transferring terms across the network
+
+By setting the above parameters, one can optimise the precision and the performance of the join operation.
+
+NOTE: Free Kibi version always use the default values for all advanced parameters.
 
 ==== Graph of Dashboards
 
@@ -352,7 +375,7 @@ For example, the image below shows a graph of five dashboards:
 
 Such relationships between dashboards are defined on the right side of the panel, as shown in the image below.
 
-image::images/relations-settings/dashboards-graph.png["Graph of Dashboards",align="center"]
+image::images/relations-settings/dashboards-settings.png["Graph of Dashboards",align="center"]
 
 ===== Enabling Relations
 

@@ -82,7 +82,7 @@ describe('Kibi Directives', function () {
     it('should populate the select options with required on', function () {
       var items = [ { value: 1, label: 'joe' } ];
 
-      init(null, items, true);
+      init(1, items, true);
 
       expect($rootScope.action.called).to.be.ok();
 
@@ -90,13 +90,11 @@ describe('Kibi Directives', function () {
       expect(select[0].required).to.be(true);
 
       var options = $elem.find('option');
-      expect(options).to.have.length(2);
+      expect(options).to.have.length(1);
 
-      firstElementIsEmpty(options);
-
-      expect(options[1]).to.be.ok();
-      expect(options[1].value).to.be('1');
-      expect(options[1].text).to.be('joe');
+      expect(options[0]).to.be.ok();
+      expect(options[0].value).to.be('1');
+      expect(options[0].text).to.be('joe');
     });
 
     it('should require an option to be selected 1', function () {
@@ -253,15 +251,13 @@ describe('Kibi Directives', function () {
     it('should automatically select the element if it is the only one and the select is required', function () {
       var items = [ { value: 2, label: 'toto' } ];
 
-      init(null, items, true);
+      init(2, items, true);
 
       var options = $elem.find('option');
-      expect(options).to.have.length(2);
+      expect(options).to.have.length(1);
 
-      expect(options[0].defaultSelected).to.be(false);
-      expect(options[0].value).to.be('null'); // after porting to 4.4 it changed from '' to 'null'
-      expect(options[1].defaultSelected).to.be(true);
-      expect(options[1].value).to.be('2');
+      expect(options[0].defaultSelected).to.be(true);
+      expect(options[0].value).to.be('2');
     });
 
     xit('should NOT automatically select the element if it is the only one and the select is optional', function () {

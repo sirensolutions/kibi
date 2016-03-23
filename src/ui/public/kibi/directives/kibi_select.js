@@ -107,7 +107,7 @@ define(function (require) {
 
         function autoSelect(items) {
           if (scope.required) {
-            return items.length === 2; // first element is the empty one
+            return items.length === 1;
           }
           return false;
         }
@@ -135,7 +135,7 @@ define(function (require) {
               });
             }
             // if the select is NOT required, the user is able to choose an empty element
-            if (scope.items.length > 0 && _.first(scope.items).value !== null) {
+            if (!scope.required && scope.items.length > 0 && _.first(scope.items).value !== null) {
               scope.items.splice(0, 0, {
                 label: '',
                 value: null
@@ -151,7 +151,7 @@ define(function (require) {
             scope.analyzedField = true;
           } else if (autoSelect(scope.items)) {
             // select automatically if only 1 option is available and the select is required
-            scope.modelObject = scope.items[1];
+            scope.modelObject = scope.items[0];
           } else if (scope.items && scope.items.length > 0 && !item) {
             // object saved in the model is not in the list of items
             scope.modelObject = {

@@ -88,7 +88,11 @@ define(function (require) {
                     // get the coresponding groupIndex from results
                     var tab = $scope.dashboardGroups[results[indexesToUpdate[i]].groupIndex];
                     try {
-                      tab.count = hit.hits.total;
+                      if (!_.contains(Object.keys(hit),'error')) {
+                        tab.count = hit.hits.total;
+                      } else {
+                        tab.count = 'Unauthorized';
+                      }
                     } catch (e) {
                       notify.warning('An error occurred while getting counts for tab ' + tab.title + ': ' + e);
                     }

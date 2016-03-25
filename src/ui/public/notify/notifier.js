@@ -244,20 +244,24 @@ define(function (require) {
     var msg = formatMsg(err, this.from);
     if (_.contains(Object.keys(err),'data')) {
       if (_.contains(Object.keys(err.data),'error')) {
-        if (err.data.status === 403 && err.data.error.type === 'security_exception'
-         || err.data.status === 500 && err.data.error.type === 'exception') {
+        if ((err.data.status === 403 && err.data.error.type === 'security_exception'
+         || err.data.status === 500 && err.data.error.type === 'exception') && this.from === 'Kibi Relational filter') {
           msg = 'Could not load Relational filter visualization: one or more join relations refers to unauthorized data';
         }
       }
     } else {
-      if (err.status === 403 && (this.from === 'Visualize' || this.from === 'Enhanced search results')) {
-        msg = 'One or more visualizations refers to unauthorized data';
+      var message;
+      if (_.contains(Object.keys(err),'message')) {
+        message = err.message;
       } else {
-        if (this.from === 'Kibi Relational filter') {
-          msg = 'Kibi Relational filter: there are relations with no-authorized data!';
-        } else if (this.from === 'Visualize') {
+        message = err;
+      }
+      if (message.search('unauthorized') !== -1) {
+        if (this.from === 'Visualize' || this.from === 'Enhanced search results') {
           msg = 'One or more visualizations refers to unauthorized data';
-        } else {
+        } else if (this.from === 'Kibi Relational filter') {
+          msg = 'Kibi Relational filter: there are relations with no-authorized data!';
+        } else if (message.search('[indices:data/read/search]' !== -1)) {
           msg = 'One or more saved search refers to unauthorized data';
         }
       }

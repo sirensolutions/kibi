@@ -31,7 +31,7 @@ define(function (require) {
     function ($location, config, $rootScope, Private, createNotifier) {
 
       var joinFilterHelper = Private(require('ui/kibi/helpers/join_filter_helper/join_filter_helper'));
-      var kibiStateHelper  = Private(require('ui/kibi/helpers/kibi_state_helper'));
+      var kibiStateHelper  = Private(require('ui/kibi/helpers/kibi_state_helper/kibi_state_helper'));
       var urlHelper        = Private(require('ui/kibi/helpers/url_helper'));
       var notify = createNotifier({
         location: 'Relational Filter Panel'

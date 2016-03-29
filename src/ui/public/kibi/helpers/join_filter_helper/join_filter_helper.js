@@ -7,7 +7,7 @@ define(function (require) {
 
     var queryHelper = Private(require('ui/kibi/helpers/query_helper'));
     var urlHelper   = Private(require('ui/kibi/helpers/url_helper'));
-    var kibiStateHelper = Private(require('ui/kibi/helpers/kibi_state_helper'));
+    var kibiStateHelper = Private(require('ui/kibi/helpers/kibi_state_helper/kibi_state_helper'));
 
     var _invert = function (obj) {
       var newObj = {};

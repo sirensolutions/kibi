@@ -133,7 +133,7 @@ function _initInject() {
 
     chromeStub = sinon.stub(chrome, 'getTabs');
     urlHelper = Private(require('ui/kibi/helpers/url_helper'));
-    kibiStateHelper = Private(require('ui/kibi/helpers/kibi_state_helper'));
+    kibiStateHelper = Private(require('ui/kibi/helpers/kibi_state_helper/kibi_state_helper'));
   });
 }
 

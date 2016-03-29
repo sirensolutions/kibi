@@ -23,7 +23,7 @@ define(function (require) {
       var queryHelper      = Private(require('ui/kibi/helpers/query_helper'));
       var urlHelper        = Private(require('ui/kibi/helpers/url_helper'));
       var joinFilterHelper = Private(require('ui/kibi/helpers/join_filter_helper/join_filter_helper'));
-      var kibiStateHelper  = Private(require('ui/kibi/helpers/kibi_state_helper'));
+      var kibiStateHelper  = Private(require('ui/kibi/helpers/kibi_state_helper/kibi_state_helper'));
       var kibiTimeHelper   = Private(require('ui/kibi/helpers/kibi_time_helper'));
       var countHelper      = Private(require('ui/kibi/helpers/count_helper/count_helper'));
       var relVisHelper     = Private(require('ui/kibi/helpers/kibi_sequential_join_vis_helper'));

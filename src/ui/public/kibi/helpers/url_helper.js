@@ -9,7 +9,7 @@ define(function (require) {
     Private, $location, $route, sessionStorage, savedDashboards,
     savedSearches, Promise, config, kbnDefaultAppId, kibiDefaultDashboardId, timefilter
   ) {
-    var kibiStateHelper = Private(require('ui/kibi/helpers/kibi_state_helper'));
+    var kibiStateHelper = Private(require('ui/kibi/helpers/kibi_state_helper/kibi_state_helper'));
     var kibiTimeHelper = Private(require('ui/kibi/helpers/kibi_time_helper'));
 
 

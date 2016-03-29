@@ -267,6 +267,15 @@
       "inputType": "text",
       "defaultValue": "",
       "placeholder": "Gremlin Server URL"
+    },
+    {
+      "name": "timeout",
+      "inputType": "text",
+      "required": false,
+      "multivalued": false,
+      "encrypted": false,
+      "defaultValue": 5000,
+      "placeholder": "Timeout in ms"
     }
   ]
 }

@@ -177,6 +177,11 @@ TinkerPop3Query.prototype.fetchResults = function (options, onlyIds, idVariableN
         };
 
         return data;
+      }).catch(function (error) {
+        if (error.error.code === 'ETIMEDOUT') {
+          error.message = 'Connection timeout. Please check that the Kibi Gremlin Server is up and running';
+        }
+        return error;
       });
     });
 

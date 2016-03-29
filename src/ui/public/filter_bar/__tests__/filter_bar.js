@@ -38,6 +38,10 @@ describe('Filter Bar Directive', function () {
       });
     });
 
+    ngMock.module('ui/kibi/helpers/kibi_state_helper/services/saved_sessions', function ($provide) {
+      $provide.service('savedSessions', require('fixtures/kibi/empty_saved_sessions'));
+    });
+
     ngMock.module('queries_editor/services/saved_queries', function ($provide) {
       $provide.service('savedQueries', require('fixtures/empty_saved_queries'));
     });

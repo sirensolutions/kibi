@@ -1,8 +1,9 @@
 define(function (require) {
+  var _ = require('lodash');
 
 
   return function KibiStateHelperFactory($rootScope, globalState, savedDashboards, $location, $timeout, Private) {
-    var _ = require('lodash');
+
     var kibiSessionHelper = Private(require('ui/kibi/helpers/kibi_state_helper/kibi_session_helper'));
 
     /*

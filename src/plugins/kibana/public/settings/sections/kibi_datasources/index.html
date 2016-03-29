@@ -47,7 +47,7 @@
           </div>
 
           <div ng-repeat="param in datasource.schema" >
-            <ng-form name="innerForm">
+            <ng-form name="innerForm" ng-if="!(param.name === 'timeout' && datasource.datasourceType === 'tinkerpop3')">
               <div class="form-group">
                 <label>{{param.name}}</label> <span ng-if="!param.required">(Optional. Default={{param.defaultValue || param.defaultValues || 'undefined'}})</span>
 

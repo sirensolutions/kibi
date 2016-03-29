@@ -38,8 +38,11 @@ TinkerPop3Query.prototype.fetchResults = function (options, onlyIds, idVariableN
 
   var gremlinUrl = this.config.datasource.datasourceClazz.datasource.datasourceParams.url;
   var maxAge = this.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
+  var timeout = this.config.datasource.datasourceClazz.datasource.datasourceParams.timeout;
 
-  var timeout = 30000;
+  if (timeout === null || typeof timeout === 'undefined') {
+    timeout = 5000;
+  }
 
   var parsedTimeout = parseInt(timeout);
   if (isNaN(parsedTimeout)) {

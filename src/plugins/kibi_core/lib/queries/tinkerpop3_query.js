@@ -91,16 +91,16 @@ TinkerPop3Query.prototype.fetchResults = function (options, onlyIds, idVariableN
       }
 
       if (configDocs.length === 0) {
-        Promise.reject(new Error('No config documents found'));
+        return Promise.reject(new Error('No config documents found'));
       } else if (configDocs.length > 1) {
-        Promise.reject(new Error('Multiple config documents found'));
+        return Promise.reject(new Error('Multiple config documents found'));
       } else {
         kibiRelations = configDocs[0]._source['kibi:relations'];
       }
 
       var kibiRelationsJson = JSON.parse(kibiRelations);
 
-      var options = {
+      var gremlinOptions = {
         method: 'POST',
         uri: gremlinUrl,
         headers: {
@@ -110,12 +110,13 @@ TinkerPop3Query.prototype.fetchResults = function (options, onlyIds, idVariableN
         json: {
           query: query,
           relationsIndices: kibiRelationsJson.relationsIndices,
-          indices: indices
+          indices: indices,
+          credentials: options.credentials
         },
         timeout: timeout
       };
 
-      return rp(options).then(function (parsed) {
+      return rp(gremlinOptions).then(function (parsed) {
         var data = {
           result: parsed
         };

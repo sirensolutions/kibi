@@ -226,29 +226,6 @@ Query.prototype.getHtml = function (queryDef, options) {
   });
 };
 
-
-Query.prototype._handleError = function (error) {
-  if (error.message) {
-    var message = error.message;
-    if (error.response && error.response.body) {
-      try {
-        message = JSON.parse(error.response.body).message;
-      } catch (e) {
-        message = null;
-      }
-      if (message === null) {
-        message = error.response.body;
-      }
-    }
-    error = {
-      error: error.name,
-      message: message
-    };
-  }
-  return error;
-};
-
-
 /**
  * Return a promise which when resolved should return true or false
  */

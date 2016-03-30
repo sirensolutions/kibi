@@ -107,6 +107,8 @@ define(function (require) {
     // kibi: display more information when error has body object
     if (err.body && err.body.err) {
       stackMsg = err.body.err + '\n\n' + stackMsg;
+    } else if (err.error && err.error.stack) {
+      stackMsg = err.error.stack;
     }
     // kibi: end
 

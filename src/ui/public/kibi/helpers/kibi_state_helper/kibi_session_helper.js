@@ -32,9 +32,7 @@ define(function (require) {
             self.updateOrCreate(savedSession).then(function () {
               self.initialized = true;
               fulfill(self.id);
-            }).catch(function (err) {
-              reject(err);
-            });
+            }).catch(reject);
           });
         });
       });
@@ -98,12 +96,10 @@ define(function (require) {
     KibiSessionHelper.prototype.copySessionFrom = function (idFrom) {
       var self = this;
       self.destroy();
-      return self.getId().then(function (toId) {
-        return savedSessions.get(toId).then(function (savedSession) {
-          return savedSessions.get(idFrom).then(function (savedSessionFrom) {
-            savedSession.session_data = savedSessionFrom.session_data;
-            return self.updateOrCreate(savedSession);
-          });
+      return self.getId().then((toId) => {
+        return Promise.all([savedSessions.get(toId), savedSessions.get(idFrom)]).then(([toSavedSession, fromSavedSession]) => {
+          toSavedSession.session_data = fromSavedSession.session_data;
+          return self.updateOrCreate(toSavedSession);
         });
       });
     };

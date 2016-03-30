@@ -11,10 +11,9 @@ define(function (require) {
     title: 'sessions'
   });
 
-  // This is the only thing that gets injected into controllers
   module.service('savedSessions', function (Promise, SavedSession, kbnIndex, es, kbnUrl, Private) {
 
-    var cache = Private(require('ui/kibi/helpers/cache_helper')); // kibi: added to cache requests for saved searches
+    var cache = Private(require('ui/kibi/helpers/cache_helper')); // kibi: added to cache requests for saved sessions
 
     var scanner = new Scanner(es, {
       index: kbnIndex,
@@ -31,7 +30,6 @@ define(function (require) {
       nouns: 'sessions'
     };
 
-    // Returns a single dashboard by ID, should be the name of the dashboard
     this.get = function (id) {
       return (new SavedSession(id)).init();
     };
@@ -92,7 +90,7 @@ define(function (require) {
       .then((resp) => {
         var ret = {
           total: resp.hits.total,
-          hits: resp.hits.hits.map((hit) => this.mapHits(hit))
+          hits: resp.hits.hits.map(this.mapHits)
         };
 
         // kibi: put into cache

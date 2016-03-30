@@ -24,10 +24,8 @@ define(function (require) {
       });
     }
 
-    // save these objects with the 'dashboard' type
     SavedSession.type = 'session';
 
-    // if type:dashboard has no mapping, we push this mapping into ES
     SavedSession.mapping = {
       title: 'string',
       description: 'string',

@@ -2,7 +2,11 @@ define(function (require) {
   var _ = require('lodash');
 
 
-  return function KibiStateHelperFactory($rootScope, globalState, savedDashboards, $location, $timeout, Private) {
+  return function KibiStateHelperFactory($rootScope, globalState, savedDashboards, $location, $timeout, Private, createNotifier) {
+
+    var notify = createNotifier({
+      location: 'KibiStateHelper'
+    });
 
     var kibiSessionHelper = Private(require('ui/kibi/helpers/kibi_state_helper/kibi_session_helper'));
 
@@ -28,6 +32,7 @@ define(function (require) {
           d: {},
           // will hold ids of enabled relations for relational panel and join_set filter
           j: [],
+          // will hold the kibi session id
           s: undefined
         };
         globalState.save();
@@ -70,15 +75,10 @@ define(function (require) {
               kibiSessionHelper.copySessionFrom(globalState.k.s).then(function (savedSession) {
                 globalState.k.s = savedSession.id;
                 globalState.save();
-              }).catch(function (err) {
-                console.log('Error while copying kibi session data');
-                console.log(err);
-              });
+              }).catch(notify.error);
             }
-          }).catch(function (err) {
-            console.log('Error while getting session id');
-            console.log(err);
-          });
+          }).catch(notify.error);
+
           off();
         });
       });

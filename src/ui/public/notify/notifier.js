@@ -3,7 +3,7 @@ define(function (require) {
   var $ = require('jquery');
 
   var metadata = require('ui/metadata');
-  var formatMsg = require('ui/notify/lib/_format_msg');
+  var formatMsg = require('kibie/notify/lib/_format_msg');
 
   var notifs = [];
   var setTO = setTimeout;
@@ -242,21 +242,16 @@ define(function (require) {
    */
   Notifier.prototype.error = function (err, cb) {
     var msg = formatMsg(err, this.from);
-    if (_.contains(Object.keys(err),'data')) {
-      if (_.contains(Object.keys(err.data),'error')) {
+    if (_.contains(Object.keys(err), 'data')) {
+      if (_.contains(Object.keys(err.data), 'error')) {
         if ((err.data.status === 403 && err.data.error.type === 'security_exception'
          || err.data.status === 500 && err.data.error.type === 'exception') && this.from === 'Kibi Relational filter') {
           msg = 'Could not load Relational filter visualization: one or more join relations refers to unauthorized data';
         }
       }
     } else {
-      var message;
-      if (_.contains(Object.keys(err),'message')) {
-        message = err.message;
-      } else {
-        message = err;
-      }
-      if (message.search('unauthorized') !== -1) {
+
+      if (err.message && err.message.search('unauthorized') !== -1) {
         if (this.from === 'Visualize' || this.from === 'Enhanced search results') {
           msg = 'One or more visualizations refers to unauthorized data';
         } else if (this.from === 'Kibi Relational filter') {

@@ -241,29 +241,9 @@ define(function (require) {
    * @param  {Error|String} err
    */
   Notifier.prototype.error = function (err, cb) {
-    var msg = formatMsg(err, this.from);
-    if (_.contains(Object.keys(err), 'data')) {
-      if (_.contains(Object.keys(err.data), 'error')) {
-        if ((err.data.status === 403 && err.data.error.type === 'security_exception'
-         || err.data.status === 500 && err.data.error.type === 'exception') && this.from === 'Kibi Relational filter') {
-          msg = 'Could not load Relational filter visualization: one or more join relations refers to unauthorized data';
-        }
-      }
-    } else {
-
-      if (err.message && err.message.search('unauthorized') !== -1) {
-        if (this.from === 'Visualize' || this.from === 'Enhanced search results') {
-          msg = 'One or more visualizations refers to unauthorized data';
-        } else if (this.from === 'Kibi Relational filter') {
-          msg = 'Kibi Relational filter: there are relations with no-authorized data!';
-        } else if (message.search('[indices:data/read/search]' !== -1)) {
-          msg = 'One or more saved search refers to unauthorized data';
-        }
-      }
-    }
     return add({
       type: 'danger',
-      content: msg,
+      content: formatMsg(err, this.from),
       icon: 'warning',
       title: 'Error',
       lifetime: Infinity,

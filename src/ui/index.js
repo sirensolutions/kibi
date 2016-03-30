@@ -21,7 +21,8 @@ module.exports = async (kbnServer, server, config) => {
   bundlerEnv.addContext('urlBasePath', config.get('server.basePath'));
   bundlerEnv.addContext('sourceMaps', config.get('optimize.sourceMaps'));
   bundlerEnv.addContext('kbnVersion', config.get('pkg.version'));
-  bundlerEnv.addContext('kibiVersion', config.get('pkg.kibi_version')); // kibi: added to manage kibi version
+  bundlerEnv.addContext('kibiVersion', config.get('pkg.kibiVersion')); // kibi: added to manage kibi version
+  bundlerEnv.addContext('kibiEnterpriseEnabled', config.get('pkg.kibiEnterpriseEnabled')); // kibi: set to true for kibi enterprise
   bundlerEnv.addContext('buildNum', config.get('pkg.buildNum'));
   uiExports.addConsumer(bundlerEnv);
 
@@ -74,7 +75,8 @@ module.exports = async (kbnServer, server, config) => {
       app: app,
       nav: uiExports.apps,
       version: kbnServer.version,
-      kibi_version: kbnServer.kibi_version, // kibi: added to manage kibi version
+      kibiVersion: config.get('pkg.kibiVersion'), // kibi: added to manage kibi version
+      kibiEnterpriseEnabled: config.get('pkg.kibiEnterpriseEnabled'),
       buildNum: config.get('pkg.buildNum'),
       buildSha: config.get('pkg.buildSha'),
       basePath: config.get('server.basePath'),

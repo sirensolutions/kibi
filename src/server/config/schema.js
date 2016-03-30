@@ -10,7 +10,8 @@ const randomBytes = require('crypto').randomBytes;
 module.exports = () => Joi.object({
   pkg: Joi.object({
     version: Joi.string().default(Joi.ref('$version')),
-    kibi_version: Joi.string().default(Joi.ref('$kibi_version')), // kibi: added to manage kibi version
+    kibiVersion: Joi.string().default(Joi.ref('$kibiVersion')), // kibi: added to manage kibi version
+    kibiEnterpriseEnabled: Joi.boolean().default(Joi.ref('$kibiEnterpriseEnabled')), // kibi: added to manage kibi version
     buildNum: Joi.number().default(Joi.ref('$buildNum')),
     buildSha: Joi.string().default(Joi.ref('$buildSha')),
   }).default(),

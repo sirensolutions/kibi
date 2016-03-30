@@ -13,6 +13,7 @@ define(function (require) {
     return function (opts) {
       // kibi: set the awesomeDemoMode flag
       opts.awesomeDemoMode = config.get('kibi:awesomeDemoMode');
+      // kibi: end
       return new Notifier(opts);
     };
   });

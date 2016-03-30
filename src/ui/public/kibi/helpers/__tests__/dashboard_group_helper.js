@@ -27,7 +27,7 @@ function init(savedDashboardsImpl, savedDashboardGroupsImpl, savedSearchesImpl) 
 
     if (savedSearchesImpl) {
       ngMock.module('kibana', function ($provide) {
-        $provide.constant('enterpriseEnabled', false);
+        $provide.constant('kibiEnterpriseEnabled', false);
         $provide.constant('kbnDefaultAppId', 'dashboard');
         $provide.constant('kibiDefaultDashboardId', 'Articles');
         $provide.constant('elasticsearchPlugins', ['siren-join']);
@@ -35,7 +35,7 @@ function init(savedDashboardsImpl, savedDashboardGroupsImpl, savedSearchesImpl) 
       });
     } else {
       ngMock.module('kibana', function ($provide) {
-        $provide.constant('enterpriseEnabled', false);
+        $provide.constant('kibiEnterpriseEnabled', false);
         $provide.constant('kbnDefaultAppId', 'dashboard');
         $provide.constant('kibiDefaultDashboardId', 'Articles');
         $provide.constant('elasticsearchPlugins', ['siren-join']);

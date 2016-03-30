@@ -76,7 +76,7 @@ define(function (require) {
   });
 
   app.controller('RelationsController',
-  function ($rootScope, $scope, config, Private, $element, $timeout, kbnUrl, createNotifier, enterpriseEnabled) {
+  function ($rootScope, $scope, config, Private, $element, $timeout, kbnUrl, createNotifier, kibiEnterpriseEnabled) {
 
     var notify = createNotifier({
       location: 'Relations Editor'
@@ -85,7 +85,7 @@ define(function (require) {
     var urlHelper = Private(require('ui/kibi/helpers/url_helper'));
     var color = Private(require('ui/vislib/components/color/color'));
 
-    $scope.enterpriseEnabled = enterpriseEnabled;
+    $scope.kibiEnterpriseEnabled = kibiEnterpriseEnabled;
 
     // tabs
     $scope.tab = {

@@ -95,6 +95,8 @@ module.exports = class Config {
       notDev: !dev,
       version: _.get(pkg, 'version'),
       buildNum: dev ? Math.pow(2, 53) - 1 : _.get(pkg, 'build.number', NaN),
+      kibiVersion: _.get(pkg, 'kibi_version', ''),
+      kibiEnterpriseEnabled: _.get(pkg, 'kibi_enterprise_enabled', false),
       buildSha: dev ? 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX' : _.get(pkg, 'build.sha', '')
     };
 

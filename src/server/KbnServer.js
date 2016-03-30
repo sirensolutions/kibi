@@ -10,7 +10,8 @@ module.exports = class KbnServer {
   constructor(settings) {
     this.name = pkg.name;
     this.version = pkg.version;
-    this.kibi_version = pkg.kibi_version; // kibi: added to manage kibi version
+    this.kibiVersion = pkg.kibiVersion; // kibi: added to manage kibi version
+    this.kibiEnterpriseEnabled = pkg.kibiEnterpriseEnabled;
     this.build = pkg.build || false;
     this.rootDir = rootDir;
     this.settings = settings || {};

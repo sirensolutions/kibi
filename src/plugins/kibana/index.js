@@ -18,7 +18,8 @@ module.exports = function (kibana) {
         uses: [
           'visTypes',
           'spyModes',
-          'settingsSections'
+          'settingsSections',
+          'hacks'
         ],
 
         autoload: kibana.autoload.require.concat(

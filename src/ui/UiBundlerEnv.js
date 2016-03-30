@@ -96,10 +96,13 @@ module.exports = class UiBundlerEnv {
 
   addContext(key, val) {
     this.context[key] = val;
-    // kibi: switch the kibie alias for enterprise version
+    // kibi: switch the kibie alias,
+    // for enterprise edition it will point to kibi_enterprise_components
+    // which comes as a enterprise plugin
     if (key === 'kibiEnterpriseEnabled' && val === true) {
-      this.aliases.kibie = fromRoot('src/ui/public/kibi/enterprise_components');
+      this.aliases.kibie = 'plugins/kibi_enterprise_components';
     }
+    // kibi: end
   }
 
   addLoader(loader) {

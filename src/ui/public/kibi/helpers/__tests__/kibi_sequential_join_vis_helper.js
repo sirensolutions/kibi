@@ -16,7 +16,7 @@ function init() {
     ngMock.inject(function ($injector, Private, _$rootScope_) {
       sequentialJoinVisHelper = Private(require('ui/kibi/helpers/kibi_sequential_join_vis_helper'));
 
-      var kibiStateHelper  = Private(require('ui/kibi/helpers/kibi_state_helper'));
+      var kibiStateHelper  = Private(require('ui/kibi/helpers/kibi_state_helper/kibi_state_helper'));
       var urlHelper        = Private(require('ui/kibi/helpers/url_helper'));
       sinon.stub(urlHelper, 'getCurrentDashboardId').returns('dashboard 1');
     });

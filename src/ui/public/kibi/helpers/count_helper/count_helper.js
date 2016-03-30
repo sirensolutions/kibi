@@ -6,7 +6,7 @@ define(function (require) {
 
   return function CountHelperFactory(Private, Promise, timefilter, indexPatterns, savedSearches, savedDashboards) {
 
-    var kibiStateHelper  = Private(require('ui/kibi/helpers/kibi_state_helper'));
+    var kibiStateHelper  = Private(require('ui/kibi/helpers/kibi_state_helper/kibi_state_helper'));
     var kibiTimeHelper   = Private(require('ui/kibi/helpers/kibi_time_helper'));
     var joinFilterHelper = Private(require('ui/kibi/helpers/join_filter_helper/join_filter_helper'));
     var urlHelper        = Private(require('ui/kibi/helpers/url_helper'));

@@ -46,7 +46,7 @@ function init(savedDashboardsImpl, savedDashboardGroupsImpl, savedSearchesImpl) 
     ngMock.inject(function ($injector, Private, _$rootScope_) {
       $rootScope = _$rootScope_;
       dashboardGroupHelper = Private(require('ui/kibi/helpers/dashboard_group_helper'));
-      kibiStateHelper = Private(require('ui/kibi/helpers/kibi_state_helper'));
+      kibiStateHelper = Private(require('ui/kibi/helpers/kibi_state_helper/kibi_state_helper'));
     });
   };
 }

@@ -66,8 +66,8 @@ describe('Kibi Components', function () {
       kibiTimeHelper.updateTimeFilterForDashboard(dashboardId, timeRangeFilter).then(function (updatedTimeRangeFilter) {
         var gteDiff = updatedTimeRangeFilter.range.time_field.gte - expected.range.time_field.gte;
         var lteDiff = updatedTimeRangeFilter.range.time_field.lte - expected.range.time_field.lte;
-        expect(gteDiff).to.be.within(0, 5);
-        expect(lteDiff).to.be.within(0, 5);
+        expect(gteDiff).to.be.within(0, 10);
+        expect(lteDiff).to.be.within(0, 10);
         done();
       });
       $rootScope.$apply();

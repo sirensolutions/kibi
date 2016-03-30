@@ -120,7 +120,7 @@ function init(timefilterImpl, savedDashboardsImpl, savedSearchesImpl) {
     ngMock.inject(function ($injector, Private, _$rootScope_) {
       $rootScope = _$rootScope_;
       countHelper = Private(require('ui/kibi/helpers/count_helper/count_helper'));
-      kibiStateHelper = Private(require('ui/kibi/helpers/kibi_state_helper'));
+      kibiStateHelper = Private(require('ui/kibi/helpers/kibi_state_helper/kibi_state_helper'));
       urlHelper = Private(require('ui/kibi/helpers/url_helper'));
     });
   };

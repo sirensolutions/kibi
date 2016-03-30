@@ -3,7 +3,7 @@ define(function (require) {
 
   return function KibiTimeHelperFactory($rootScope, Private, Promise, savedDashboards) {
     var _ = require('lodash');
-    var kibiStateHelper  = Private(require('ui/kibi/helpers/kibi_state_helper'));
+    var kibiStateHelper  = Private(require('ui/kibi/helpers/kibi_state_helper/kibi_state_helper'));
 
     /*
      * Helper class to obtain correct time filter per dashboard

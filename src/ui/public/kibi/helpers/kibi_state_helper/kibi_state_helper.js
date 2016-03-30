@@ -1,6 +1,14 @@
 define(function (require) {
-  return function KibiStateHelperFactory($rootScope, globalState, savedDashboards, $location, $timeout) {
-    var _ = require('lodash');
+  var _ = require('lodash');
+
+
+  return function KibiStateHelperFactory($rootScope, globalState, savedDashboards, $location, $timeout, Private, createNotifier) {
+
+    var notify = createNotifier({
+      location: 'KibiStateHelper'
+    });
+
+    var kibiSessionHelper = Private(require('ui/kibi/helpers/kibi_state_helper/kibi_session_helper'));
 
     /*
      * Helper class to manage the kibi state using globalState.k object
@@ -23,10 +31,12 @@ define(function (require) {
           //   t:  // time
           d: {},
           // will hold ids of enabled relations for relational panel and join_set filter
-          j: []
+          j: [],
+          // will hold the kibi session id
+          s: undefined
         };
         globalState.save();
-      }
+      };
 
       $rootScope.$on('kibi:dashboard:changed', function (event, dashboardId) {
         savedDashboards.get(dashboardId).then(function (savedDashboard) {
@@ -56,6 +66,19 @@ define(function (require) {
           if (globalState.time) {
             self._setTimeFromGlobalState();
           }
+          // here check for session id
+          kibiSessionHelper.getId().then(function (sessionId) {
+            if (globalState.k && !globalState.k.s) {
+              globalState.k.s = sessionId;
+              globalState.save();
+            } else if (globalState.k && globalState.k.s && globalState.k.s !== sessionId) {
+              kibiSessionHelper.copySessionFrom(globalState.k.s).then(function (savedSession) {
+                globalState.k.s = savedSession.id;
+                globalState.save();
+              }).catch(notify.error);
+            }
+          }).catch(notify.error);
+
           off();
         });
       });
@@ -124,7 +147,6 @@ define(function (require) {
 
     KibiStateHelper.prototype.destroyHandlers = function () {
       globalState.off('save_with_changes', this.save_with_changes_handler);
-
     };
 
     KibiStateHelper.prototype.saveSelectedDashboardId = function (groupId, dashboardId) {

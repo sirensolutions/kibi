@@ -187,7 +187,7 @@ describe('Kibi Components', function () {
       ngMock.inject(function (Private, _config_) {
         config = _config_;
         joinFilterHelper = Private(require('ui/kibi/helpers/join_filter_helper/join_filter_helper'));
-        kibiStateHelper = Private(require('ui/kibi/helpers/kibi_state_helper'));
+        kibiStateHelper = Private(require('ui/kibi/helpers/kibi_state_helper/kibi_state_helper'));
       });
     });
 

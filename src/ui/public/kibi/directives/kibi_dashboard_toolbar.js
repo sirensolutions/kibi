@@ -6,7 +6,7 @@ define(function (require) {
 
   app.directive('kibiDashboardToolbar', function (getAppState, Private, $rootScope) {
 
-    var kibiStateHelper  = Private(require('ui/kibi/helpers/kibi_state_helper'));
+    var kibiStateHelper  = Private(require('ui/kibi/helpers/kibi_state_helper/kibi_state_helper'));
 
     return {
       restrict: 'E',

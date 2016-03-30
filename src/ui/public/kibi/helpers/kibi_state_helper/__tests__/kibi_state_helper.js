@@ -1,7 +1,7 @@
 var expect = require('expect.js');
 var ngMock = require('ngMock');
 
-var savedDashboards = require('../../../../../fixtures/kibi/saved_dashboards');
+var savedDashboards = require('../../../../../../fixtures/kibi/saved_dashboards');
 var $rootScope;
 var kibiStateHelper;
 var globalState;
@@ -21,7 +21,7 @@ function init(savedDashboardsImpl, locationImpl) {
       globalState = _globalState_;
       $location = _$location_;
       $timeout = _$timeout_;
-      kibiStateHelper = Private(require('ui/kibi/helpers/kibi_state_helper'));
+      kibiStateHelper = Private(require('ui/kibi/helpers/kibi_state_helper/kibi_state_helper'));
     });
   };
 }
@@ -30,6 +30,47 @@ describe('Kibi Components', function () {
   describe('KibiStateHelper', function () {
 
     beforeEach(init(savedDashboards));
+
+    it('is time for current dashboard is NOT updated when globalState time changed but we called destroy on the helper', function (done) {
+      // first call destroy to make sure
+      // state is not updated on save_with_changes
+      kibiStateHelper.destroyHandlers();
+
+      var dashboardWithTimeId = 'time-testing-2';
+      var expected = {
+        from: 'now-15y',
+        to: 'now'
+      };
+
+      // now listen on save_with_changes which should be called only once
+      var counter = 0;
+      globalState.on('save_with_changes', function (diff) {
+        if (diff.indexOf('k') !== -1) {
+          counter++;
+          expect(kibiStateHelper.getTimeForDashboardId(dashboardWithTimeId)).to.eql(expected);
+        }
+      });
+
+      // now update global time
+      globalState.time = {
+        from: 'now-123',
+        to: 'now-97'
+      };
+      globalState.save();
+
+      $timeout.flush(); // kibiStateHelper uses the $timeout flush the queue of the $timeout service
+      $rootScope.$apply();
+
+      // after 250 ms check that save_with_changes was called only once and the time for dashboard did not changed
+      setTimeout(function () {
+        expect(counter).to.equal(2); // the second call comes from updating kibi_session
+        expect(kibiStateHelper.getTimeForDashboardId(dashboardWithTimeId)).to.eql(expected);
+        done();
+      }, 100);
+    });
+
+
+
     var dashboardId = 'Articles'; // existing one from fixtures/saved_dashboards
 
     it('save the selected dashboard in a group', function () {
@@ -214,43 +255,6 @@ describe('Kibi Components', function () {
     });
 
 
-    it('is time for current dashboard is NOT updated when globalState time changed but we called destroy on the helper', function (done) {
-      // first call destroy to make sure
-      // state is not updated on save_with_changes
-      kibiStateHelper.destroyHandlers();
-
-      var dashboardWithTimeId = 'time-testing-2';
-      var expected = {
-        from: 'now-15y',
-        to: 'now'
-      };
-
-      // now listen on save_with_changes which should be called only once
-      var counter = 0;
-      globalState.on('save_with_changes', function (diff) {
-        if (diff.indexOf('k') !== -1) {
-          counter++;
-          expect(kibiStateHelper.getTimeForDashboardId(dashboardWithTimeId)).to.eql(expected);
-        }
-      });
-
-      // now update global time
-      globalState.time = {
-        from: 'now-123',
-        to: 'now-97'
-      };
-      globalState.save();
-
-      $timeout.flush(); // kibiStateHelper uses the $timeout flush the queue of the $timeout service
-      $rootScope.$apply();
-
-      // after 250 ms check that save_with_changes was called only once and the time for dashboard did not changed
-      setTimeout(function () {
-        expect(counter).to.equal(1);
-        expect(kibiStateHelper.getTimeForDashboardId(dashboardWithTimeId)).to.eql(expected);
-        done();
-      }, 100);
-    });
 
 
     it('should remove all filters', function () {
@@ -380,6 +384,7 @@ describe('Kibi Components', function () {
       expect(kibiStateHelper.isRelationEnabled({ dashboards: [ 'd1', 'd2' ], relation: 'i1/a/i2/b' })).to.equal(false);
       expect(kibiStateHelper.isRelationEnabled({ dashboards: [ 'd1', 'd3' ], relation: 'i1/a/i2/b' })).to.equal(false);
     });
+
 
   });
 });

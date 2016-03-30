@@ -35,7 +35,7 @@ QueryEngine.prototype._init = function (enableCache = false, cacheSize = 500, ca
     });
   }
 
-  if (self.config.get('kibi_core.enterprise_enabled')) {
+  if (self.config.get('pkg.kibiEnterpriseEnabled')) {
     self.log.info('Loading enterprise components');
     TinkerPop3Query = require('./queries/tinkerpop3_query');
   }
@@ -315,7 +315,7 @@ QueryEngine.prototype.reloadQueries = function () {
           } else if (queryDef.datasource.datasourceType === 'sqlite') {
             return new SQLiteQuery(self.server, queryDef, self.cache);
           } else if (queryDef.datasource.datasourceType === 'tinkerpop3') {
-            if (self.config.get('kibi_core.enterprise_enabled')) {
+            if (self.config.get('pkg.kibiEnterpriseEnabled')) {
               return new TinkerPop3Query(self.server, queryDef, self.cache);
             }
           } else {

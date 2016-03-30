@@ -6,9 +6,6 @@ define(function (require) {
     return function (datasource) {
 
       var base = kibiDatasourcesSchema.base;
-      console.log('BASE');
-      console.log(base);
-      console.log(kibiDatasourcesSchema.tinkerpop3);
 
       switch (datasource.datasourceType.toLowerCase()) {
         case 'rest':

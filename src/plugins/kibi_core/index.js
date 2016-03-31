@@ -65,7 +65,6 @@ module.exports = function (kibana) {
   };
 
   return new kibana.Plugin({
-    // During the enterprise build this line has to be swapped, to add the 'kibi_graph_browser_vis' requirement
     require: ['kibana'],
 
     id: 'kibi_core',

@@ -144,6 +144,8 @@ define(function (require) {
               query.query.bool.must_not.push({query: filter.query});
             } else if (filter.dbfilter) {
               query.query.bool.must_not.push({dbfilter: filter.dbfilter});
+            } else if (filter.or) {
+              query.query.bool.must_not.push({or: filter.or});
             } else if (filter.exists) {
               query.query.bool.must_not.push({exists: filter.exists});
             } else if (filter.geo_bounding_box) {
@@ -166,6 +168,8 @@ define(function (require) {
               query.query.bool.filter.bool.must.push({query: filter.query});
             } else if (filter.dbfilter) {
               query.query.bool.filter.bool.must.push({dbfilter: filter.dbfilter});
+            } else if (filter.or) {
+              query.query.bool.filter.bool.must.push({or: filter.or});
             } else if (filter.exists) {
               query.query.bool.filter.bool.must.push({exists: filter.exists});
             } else if (filter.geo_bounding_box) {

@@ -45,8 +45,13 @@ define(function (require) {
             $scope.savedObj = panelConfig.savedObj;
 
             // kibi: added visualisation id and handle the entity selection events
+            $scope.dependsOnSelectedEntities = false;
             if ($scope.savedObj && $scope.savedObj.vis) {
+              // there could be no vis object if we visualise saved search
               $scope.savedObj.vis.id = panelConfig.savedObj.id;
+              doesVisDependsOnSelectedEntities($scope.savedObj.vis).then(function (does) {
+                $scope.dependsOnSelectedEntities = does;
+              });
             }
             $scope.markDependOnSelectedEntities = globalState.se && globalState.se.length > 0;
             $scope.selectedEntitiesDisabled = globalState.entityDisabled;
@@ -57,10 +62,6 @@ define(function (require) {
             var off2 = $rootScope.$on('kibi:selectedEntities:changed', function (event, se) {
               $scope.markDependOnSelectedEntities = globalState.se && globalState.se.length > 0;
               $scope.selectedEntitiesDisabled = globalState.entityDisabled;
-            });
-
-            doesVisDependsOnSelectedEntities($scope.savedObj.vis).then(function (does) {
-              $scope.dependsOnSelectedEntities = does;
             });
             // kibi: end
 

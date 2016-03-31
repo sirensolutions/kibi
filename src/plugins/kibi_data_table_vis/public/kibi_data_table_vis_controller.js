@@ -13,7 +13,6 @@ define(function (require) {
       var filterManager = Private(require('ui/filter_manager'));
       var fieldFormats = Private(require('ui/registry/field_formats'));
       var VirtualIndexPattern = Private(require('ui/kibi/components/commons/virtual_index_pattern'));
-      var _shouldEntityURIBeEnabled = Private(require('ui/kibi/components/commons/_should_entity_uri_be_enabled'));
 
       $scope.queryColumn = {};
       $scope.cellClickHandlers = {};

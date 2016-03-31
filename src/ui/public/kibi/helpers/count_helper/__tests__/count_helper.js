@@ -353,6 +353,9 @@ describe('Kibi Components', function () {
             dbfilter: {}
           },
           {
+            or: {}
+          },
+          {
             exists: {}
           },
           {
@@ -412,6 +415,10 @@ describe('Kibi Components', function () {
           {
             meta:{negate:true},
             dbfilter: {}
+          },
+          {
+            meta:{negate:true},
+            or: {}
           },
           {
             meta:{negate:true},

@@ -81,6 +81,7 @@ src/testUtils/stub_index_pattern.js
 
 src/ui/index.js
 src/ui/UiBundlerEnv.js
+src/ui/UiExports.js
 src/ui/public/chrome/api/angular.js
 src/ui/public/Vis/VisType.js
 

@@ -99,7 +99,7 @@ function init(timefilterImpl, savedDashboardsImpl, savedSearchesImpl) {
 
     ngMock.module('kibana', function ($provide) {
 
-      $provide.constant('enterpriseEnabled', false);
+      $provide.constant('kibiEnterpriseEnabled', false);
       $provide.constant('elasticsearchPlugins', ['siren-join']);
       $provide.constant('kbnDefaultAppId', '');
       $provide.constant('kibiDefaultDashboardId', '');

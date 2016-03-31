@@ -24,7 +24,7 @@ describe('Kibi Components', function () {
           };
         });
 
-        $provide.constant('enterpriseEnabled', false);
+        $provide.constant('kibiEnterpriseEnabled', false);
         $provide.constant('kbnDefaultAppId', 'dashboard');
         $provide.constant('kibiDefaultDashboardId', '');
         $provide.constant('elasticsearchPlugins', ['siren-join']);

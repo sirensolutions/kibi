@@ -15,7 +15,7 @@ describe('Kibi Settings', function () {
     ngMock.module('kibana', function ($provide) {
       $provide.constant('kbnDefaultAppId', 'dashboard');
       $provide.constant('kibiDefaultDashboardId', '');
-      $provide.constant('enterpriseEnabled', false);
+      $provide.constant('kibiEnterpriseEnabled', false);
       $provide.constant('elasticsearchPlugins', ['siren-join']);
     });
 

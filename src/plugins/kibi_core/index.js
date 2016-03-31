@@ -76,8 +76,6 @@ module.exports = function (kibana) {
 
         load_jdbc: Joi.boolean().default(false),
 
-        enterprise_enabled: Joi.boolean().default(false),
-
         gremlin_server_path: Joi.string().allow('').default(''),
         gremlin_server_port: Joi.number().default(8080),
 

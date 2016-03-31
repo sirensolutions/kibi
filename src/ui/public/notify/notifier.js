@@ -3,7 +3,7 @@ define(function (require) {
   var $ = require('jquery');
 
   var metadata = require('ui/metadata');
-  var formatMsg = require('ui/notify/lib/_format_msg');
+  var formatMsg = require('kibie/notify/lib/_format_msg');
 
   var notifs = [];
   var setTO = setTimeout;

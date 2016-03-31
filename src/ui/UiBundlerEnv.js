@@ -46,7 +46,9 @@ module.exports = class UiBundlerEnv {
     // webpack aliases, like require paths, mapping a prefix to a directory
     this.aliases = {
       ui: fromRoot('src/ui/public'),
-      test_harness: fromRoot('src/test_harness/public')
+      test_harness: fromRoot('src/test_harness/public'),
+      // this alias should be use only for components which have special implementation in kibi enterprise version
+      kibie: fromRoot('src/ui/public')
     };
 
     // map of which plugins created which aliases
@@ -94,6 +96,13 @@ module.exports = class UiBundlerEnv {
 
   addContext(key, val) {
     this.context[key] = val;
+    // kibi: switch the kibie alias,
+    // for enterprise edition it will point to kibi_enterprise_components
+    // which comes as a enterprise plugin
+    if (key === 'kibiEnterpriseEnabled' && val === true) {
+      this.aliases.kibie = 'plugins/kibi_enterprise_components';
+    }
+    // kibi: end
   }
 
   addLoader(loader) {

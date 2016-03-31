@@ -1,7 +1,7 @@
 /*global define*/
 define(function (require) {
   return function JoinFilterHelperFactory(
-    config, Private, savedDashboards, savedSearches, Promise, elasticsearchPlugins, enterpriseEnabled) {
+    config, Private, savedDashboards, savedSearches, Promise, elasticsearchPlugins, kibiEnterpriseEnabled) {
     var _ = require('lodash');
     var replaceOrAddJoinSetFilter = require('ui/kibi/helpers/join_filter_helper/lib/replace_or_add_join_set_filter');
 
@@ -24,7 +24,7 @@ define(function (require) {
 
 
     JoinFilterHelper.prototype.addAdvancedJoinSettingsToRelation = function (sourcePartOfTheRelationId, targetPartOfTheRelationId, rel) {
-      if (enterpriseEnabled) {
+      if (kibiEnterpriseEnabled) {
         var advKeys = ['termsEncoding', 'orderBy', 'maxTermsPerShard'];
 
         var relations = config.get('kibi:relations');

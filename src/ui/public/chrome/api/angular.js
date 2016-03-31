@@ -12,7 +12,8 @@ module.exports = function (chrome, internals) {
 
     kibana
     .value('kbnVersion', internals.version)
-    .value('kibiVersion', internals.kibi_version) // kibi: added to manage kibi version
+    .value('kibiVersion', internals.kibiVersion) // kibi: added to manage kibi version
+    .value('kibiEnterpriseEnabled', internals.kibiEnterpriseEnabled) // kibi:
     .value('buildNum', internals.buildNum)
     .value('buildSha', internals.buildSha)
     .value('sessionId', Date.now())

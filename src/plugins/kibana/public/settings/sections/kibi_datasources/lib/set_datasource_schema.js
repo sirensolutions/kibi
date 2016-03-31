@@ -9,28 +9,28 @@ define(function (require) {
 
       switch (datasource.datasourceType.toLowerCase()) {
         case 'rest':
-          datasource.schema = kibiDatasourcesSchema.rest.concat(base);
+          datasource.schema = mergeByName(base, kibiDatasourcesSchema.rest);
           break;
         case 'sqlite':
-          datasource.schema = kibiDatasourcesSchema.sqlite.concat(base);
+          datasource.schema = mergeByName(base, kibiDatasourcesSchema.sqlite);
           break;
         case 'mysql':
-          datasource.schema = kibiDatasourcesSchema.mysql.concat(base);
+          datasource.schema = mergeByName(base, kibiDatasourcesSchema.mysql);
           break;
         case 'postgresql':
-          datasource.schema = kibiDatasourcesSchema.postgresql.concat(base);
+          datasource.schema = mergeByName(base, kibiDatasourcesSchema.postgresql);
           break;
         case 'sparql_http':
-          datasource.schema = kibiDatasourcesSchema.sparql_http.concat(base);
+          datasource.schema = mergeByName(base, kibiDatasourcesSchema.sparql_http);
           break;
         case 'sql_jdbc':
-          datasource.schema = kibiDatasourcesSchema.jdbc.concat(base);
+          datasource.schema = mergeByName(base, kibiDatasourcesSchema.jdbc);
           break;
         case 'sparql_jdbc':
-          datasource.schema = kibiDatasourcesSchema.jdbc.concat(base);
+          datasource.schema = mergeByName(base, kibiDatasourcesSchema.jdbc);
           break;
         case 'tinkerpop3':
-          datasource.schema = kibiDatasourcesSchema.tinkerpop3.concat(base);
+          datasource.schema = mergeByName(base, kibiDatasourcesSchema.tinkerpop3);
           break;
         default:
           datasource.datasourceDef = null;
@@ -49,6 +49,18 @@ define(function (require) {
       }
 
     };
+
+    function mergeByName(base, additionalProps) {
+      _.each(additionalProps, function (arr2obj) {
+        var arr1obj = _.find(base, function (arr1obj) {
+          return arr1obj.name === arr2obj.name;
+        });
+
+        arr1obj ? _.extend(arr1obj, arr2obj) : base.push(arr2obj);
+      });
+
+      return base;
+    }
   };
 
 });

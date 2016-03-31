@@ -317,9 +317,12 @@ QueryEngine.prototype.reloadQueries = function () {
           } else if (queryDef.datasource.datasourceType === 'tinkerpop3') {
             if (self.config.get('pkg.kibiEnterpriseEnabled')) {
               return new TinkerPop3Query(self.server, queryDef, self.cache);
+            } else {
+              self.log.error('This datasource type [tinkerpop3] - requires Kibi Enterprise Edition');
+              return false;
             }
           } else {
-            logger.error('Unknown datasource type [' + queryDef.datasource.datasourceType + '] - could NOT create query object');
+            self.log.error('Unknown datasource type [' + queryDef.datasource.datasourceType + '] - could NOT create query object');
             return false;
           }
         }).value();

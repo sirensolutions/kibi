@@ -81,13 +81,13 @@ function startServer(self, fulfill, reject) {
                 self.initialized = true;
                 fulfill({ message: 'The Kibi gremlin server started successfully.' });
               } else {
-                self.server.log(['gremlin', 'info'], 'Waiting for the Kibi gremlin server');
+                self.server.log(['gremlin', 'warning'], 'Waiting for the Kibi gremlin server');
                 counter--;
                 setTimeout(self.ping(counter), timeout);
               }
             })
             .catch(function (err) {
-              self.server.log(['gremlin', 'info'], 'Waiting for the Kibi gremlin server');
+              self.server.log(['gremlin', 'warning'], 'Waiting for the Kibi gremlin server');
               counter--;
               setTimeout(self.ping(counter), timeout);
             });

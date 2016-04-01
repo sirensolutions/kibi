@@ -90,7 +90,7 @@ define(function (require) {
       .then((resp) => {
         var ret = {
           total: resp.hits.total,
-          hits: resp.hits.hits.map(this.mapHits)
+          hits: resp.hits.hits.map((hit) => this.mapHits(hit))
         };
 
         // kibi: put into cache

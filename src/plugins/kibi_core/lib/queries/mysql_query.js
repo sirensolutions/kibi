@@ -37,7 +37,7 @@ MysqlQuery.prototype.checkIfItIsRelevant = function (options) {
   var maxAge = this.config.datasource.datasourceClazz.datasource.datasourceParams.maxAge;
 
 
-  return self.queryHelper.replaceVariablesUsingEsDocument(this.config.activationQuery, uri).then(function (query) {
+  return self.queryHelper.replaceVariablesUsingEsDocument(this.config.activationQuery, uri, options.credentials).then(function (query) {
 
     if (query.trim() === '') {
       return Promise.resolve(true);
@@ -131,7 +131,7 @@ MysqlQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) 
   var timeout = this.config.datasource.datasourceClazz.datasource.datasourceParams.timeout;
   var maxAge = this.config.datasource.datasourceClazz.datasource.datasourceParams.maxAge;
 
-  return self.queryHelper.replaceVariablesUsingEsDocument(this.config.resultQuery, uri).then(function (query) {
+  return self.queryHelper.replaceVariablesUsingEsDocument(this.config.resultQuery, uri, options.credentials).then(function (query) {
 
     var cacheKey = null;
 

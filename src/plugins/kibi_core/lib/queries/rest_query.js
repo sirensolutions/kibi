@@ -34,7 +34,7 @@ RestQuery.prototype.checkIfItIsRelevant = function (options) {
   }
 
   // evaluate the rules
-  return this.rulesHelper.evaluate(this.config.activation_rules, options.selectedDocuments);
+  return this.rulesHelper.evaluate(this.config.activation_rules, options.selectedDocuments, options.credentials);
 };
 
 
@@ -91,7 +91,8 @@ RestQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) {
       self.config.rest_params,
       self.config.rest_body,
       self.config.rest_path,
-      uri, availableVariables)
+      uri, availableVariables,
+      options.credentials)
     .then(function (results) {
       // here convert the params and headers from array to map
       var headers = _.zipObject(_.pluck(results.headers, 'name'), _.pluck(results.headers, 'value'));

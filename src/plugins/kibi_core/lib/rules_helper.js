@@ -8,7 +8,7 @@ function RulesHelper(server) {
 }
 
 
-RulesHelper.prototype.evaluate = function (rules, selectedDocuments) {
+RulesHelper.prototype.evaluate = function (rules, selectedDocuments, credentials) {
   var self = this;
   // for now there should be only 1 selectedDocument
   if (selectedDocuments.length !== 1) {
@@ -30,7 +30,7 @@ RulesHelper.prototype.evaluate = function (rules, selectedDocuments) {
   var id = parts[2];
 
 
-  return self.queryHelper.fetchDocument(index, type, id).then(function (doc) {
+  return self.queryHelper.fetchDocument(index, type, id, credentials).then(function (doc) {
 
     for (var i = 0; i < rules.length; i++) {
 

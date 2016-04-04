@@ -41,8 +41,10 @@ module.exports = function createProxy(server, method, route, config) {
                 // Remove the custom queries from the body
                 dataToPass.savedQueries = inject.save(query);
                 return query;
-              }).map((query) => dbfilter(server.plugins.kibi_core.getQueryEngine(), query))
-              .map((query) => {
+              }).map((query) => {
+                var shieldCredentials = serverConfig.has('shield.cookieName') ? request.state[serverConfig.get('shield.cookieName')] : null;
+                return dbfilter(server.plugins.kibi_core.getQueryEngine(), query, shieldCredentials);
+              }).map((query) => {
                 // here detect if it a request to save datasource
                 if (req.url.indexOf('/elasticsearch/' + serverConfig.get('kibana.index') + '/datasource/') === 0 &&
                     query.datasourceParams &&

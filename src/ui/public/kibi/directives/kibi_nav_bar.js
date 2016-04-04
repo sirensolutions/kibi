@@ -90,8 +90,11 @@ define(function (require) {
                     try {
                       if (!_.contains(Object.keys(hit),'error')) {
                         tab.count = hit.hits.total;
-                      } else {
+                      } else if (_.contains(Object.keys(hit),'error') &&
+                      _.contains(hit.error,'ElasticsearchSecurityException')) {
                         tab.count = 'Unauthorized';
+                      } else {
+                        tab.count = 'Error';
                       }
                     } catch (e) {
                       notify.warning('An error occurred while getting counts for tab ' + tab.title + ': ' + e);

@@ -248,17 +248,7 @@ define(function (require) {
             );
           }).then(function (resp) {
             if (resp && resp.data && resp.data.error) {
-              var msg = '';
-              if (resp.data.error.message) {
-                msg = resp.data.error.message;
-              } else if (resp.data.error && (typeof resp.data.error === 'string')) {
-                msg = resp.data.error;
-              } else if (resp.data.error.error && (typeof resp.data.error.error === 'string')) {
-                msg = resp.data.error.error;
-              } else {
-                msg = JSON.stringify(resp.data.error, null, ' ');
-              }
-              notify.warning(msg);
+              notify.warning(resp.data.error);
               $scope.holder.jsonPreview = JSON.stringify(resp.data.error, null, ' ');
               $scope.holder.jsonPreviewActive = true;
               $scope.holder.htmlPreviewActive = false;

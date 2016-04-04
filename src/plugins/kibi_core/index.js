@@ -42,6 +42,10 @@ module.exports = function (kibana) {
       });
     }
 
+    var config = server.config();
+    if (config.has('shield.cookieName')) {
+      options.credentials = req.state[config.get('shield.cookieName')];
+    }
     queryEngine[method](queryDefs, options)
     .then(function (queries) {
       return reply({
@@ -50,16 +54,9 @@ module.exports = function (kibana) {
       });
 
     }).catch(function (error) {
-      var message;
-      if (error.message) {
-        message = error.message;
-      } else {
-        message = JSON.stringify(error, null, ' ');
-      }
-
       return reply({
         query: params,
-        error: message
+        error: error
       });
     });
   };
@@ -75,6 +72,13 @@ module.exports = function (kibana) {
 
         load_jdbc: Joi.boolean().default(false),
 
+        enterprise_enabled: Joi.boolean().default(false),
+        elasticsearch: Joi.object({
+          transport_client: Joi.object({
+            username: Joi.string().default(''),
+            password: Joi.string().default('')
+          })
+        }),
         gremlin_server_path: Joi.string().allow('').default(''),
         gremlin_server_port: Joi.number().default(8080),
 
@@ -161,7 +165,23 @@ module.exports = function (kibana) {
         method: ['GET', 'POST'],
         path: '/datasource/{id}/proxy/',
         handler: {
-          proxy: {
+          kibi_proxy: {
+            modifyPayload: (request) => {
+              const req = request.raw.req;
+              return new Promise((fulfill, reject) => {
+                const chunks = [];
+                req.on('error', reject);
+                req.on('data', (chunk) => chunks.push(chunk));
+                req.on('end', () => {
+                  const body = JSON.parse(Buffer.concat(chunks));
+                  var config = server.config();
+                  if (config.has('shield.cookieName')) {
+                    body.credentials = request.state[config.get('shield.cookieName')];
+                  }
+                  fulfill({ payload: new Buffer(JSON.stringify(body)) });
+                });
+              });
+            },
             mapUri: function (req, callback) {
               queryEngine._getDatasourceFromEs(req.params.id).then(function (datasource) {
                 if (datasource === null) {
@@ -170,7 +190,7 @@ module.exports = function (kibana) {
                 if (datasource.datasourceType === 'tinkerpop3') {
                   callback(null, JSON.parse(datasource.datasourceParams).url);
                 } else {
-                  callback(new Error('Proxy not available for the specified datasource'));
+                  callback(new Error(`Proxy not available for the ${datasource.datasourceType} datasource`));
                 }
               });
             },

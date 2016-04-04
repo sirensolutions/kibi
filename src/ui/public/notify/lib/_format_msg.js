@@ -27,9 +27,23 @@ define(function (require) {
     } else if (has(err, 'status') && has(err, 'data')) {
       // is an Angular $http "error object"
       rtn += 'Error ' + err.status + ' ' + err.statusText + ': ' + err.data.message;
+    } else if (has(err, 'options') && has(err, 'response')) {
+      // kibi: added to handle request-promise errors
+      rtn += formatMsg.describeRequestPromiseError(err);
     }
 
     return rtn;
+  };
+
+  formatMsg.describeRequestPromiseError = function (err) {
+    let msg = `Error ${err.statusCode}: `;
+
+    if (typeof err.response.body === 'string') {
+      msg += err.response.body;
+    } else if (err.response.body.message) {
+      msg += err.response.body.message;
+    }
+    return msg;
   };
 
   formatMsg.describeError = function (err) {

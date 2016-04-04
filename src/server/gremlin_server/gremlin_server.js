@@ -45,17 +45,26 @@ function startServer(self, fulfill, reject) {
       }
       var loggingFilePath = path.parse(gremlinServerPath).dir + path.sep + 'gremlin-es2-server-log.properties';
 
+      const [ host, port, ...rest ] = esTransportAddress.split(':');
+      const transportClientUsername = config.get('kibi_core.elasticsearch.transport_client.username');
+      const transportClientPassword = config.get('kibi_core.elasticsearch.transport_client.password');
+
+      const args = [
+        '-jar', gremlinServerPath,
+        '--elasticNodeHost=' + host,
+        '--elasticNodePort=' + port,
+        '--elasticClusterName=' + esClusterName,
+        '--server.port=' + self.gremlinServerPort,
+        '--logging.config=' + loggingFilePath
+      ];
+
+      if (transportClientUsername) {
+        args.push('--elasticTransportClientUserName=' + transportClientUsername);
+        args.push('--elasticTransportClientPassword=' + transportClientPassword);
+      }
+
       self.server.log(['gremlin', 'info'], 'Starting the Kibi gremlin server');
-      self.gremlinServer = childProcess.spawn('java',
-        [
-          '-jar', gremlinServerPath,
-          '--elasticNodeHost=' + esTransportAddress.split(':')[0],
-          '--elasticNodePort=' + esTransportAddress.split(':')[1],
-          '--elasticClusterName=' + esClusterName,
-          '--server.port=' + self.gremlinServerPort,
-          '--logging.config=' + loggingFilePath
-        ]
-      );
+      self.gremlinServer = childProcess.spawn('java', args);
 
       var counter = 15;
       var timeout = 5000;

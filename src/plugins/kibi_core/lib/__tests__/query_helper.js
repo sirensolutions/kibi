@@ -1,5 +1,7 @@
 var expect = require('expect.js');
 var Promise = require('bluebird');
+var clientSearchCounter;
+var createdClientSearchCounter;
 
 var fakeServer = {
   log: function (tags, data) {},
@@ -20,6 +22,7 @@ var fakeServer = {
     elasticsearch: {
       client: {
         search: function (options) {
+          clientSearchCounter++;
           return Promise.resolve({
             hits: {
               hits: [
@@ -33,6 +36,25 @@ var fakeServer = {
             }
           });
         }
+      },
+      createClient: function (credentials) {
+        return {
+          search: function (options) {
+            createdClientSearchCounter++;
+            return Promise.resolve({
+              hits: {
+                hits: [
+                  {
+                    _id: '_id1',
+                    _source: {
+                      id: 'id1'
+                    }
+                  }
+                ]
+              }
+            });
+          }
+        };
       }
     }
   }
@@ -57,11 +79,81 @@ var doc = {
   }
 };
 
+var credentials = {user: 'user', password: 'password'};
+
 describe('Query Helper', function () {
+
+  beforeEach(function () {
+    clientSearchCounter = 0;
+    createdClientSearchCounter = 0;
+  });
+
+  describe('fetchDocument test if correct client is used', function () {
+    it('no credentials', function (done) {
+      queryHelper.fetchDocument('index', 'type', 'id').then(function (doc) {
+        expect(clientSearchCounter).to.equal(1);
+        expect(createdClientSearchCounter).to.equal(0);
+        done();
+      });
+    });
+
+    it('with credentials', function (done) {
+      queryHelper.fetchDocument('index', 'type', 'id', credentials).then(function (doc) {
+        expect(clientSearchCounter).to.equal(0);
+        expect(createdClientSearchCounter).to.equal(1);
+        done();
+      });
+    });
+  });
 
   describe('replaceVariablesForREST', function () {
 
-    describe('with URI', function () {
+    describe('with URI with credentials', function () {
+
+      it('replace in single string', function (done) {
+        var uri = 'index1/type1/id1';
+        var s        = 'select * from table1 where id = \'@doc[_source][id]@\'';
+        var expected = 'select * from table1 where id = \'id1\'';
+
+        queryHelper.replaceVariablesUsingEsDocument(s, uri, credentials).then(function (ret) {
+          expect(clientSearchCounter).to.equal(0);
+          expect(createdClientSearchCounter).to.equal(1);
+          expect(ret).to.equal(expected);
+          done();
+        });
+      });
+
+      it('replace in an array of objects with name and value', function (done) {
+        var uri = 'index1/type1/id1';
+        var sA = [
+          {name: 'param1', value: 'select * from table1 where id = \'@doc[_source][id]@\''},
+          {name: 'param2', value: 'select * from table1 where id = \'@doc[_id]@\''}
+        ];
+        var expectedA = [
+          {name: 'param1', value: 'select * from table1 where id = \'id1\''},
+          {name: 'param2', value: 'select * from table1 where id = \'_id1\''}
+        ];
+
+        queryHelper.replaceVariablesUsingEsDocument(sA, uri, credentials).then(function (a) {
+          expect(clientSearchCounter).to.equal(0);
+          expect(createdClientSearchCounter).to.equal(1);
+          expect(a).to.eql(expectedA);
+          done();
+        });
+      });
+
+      it('malformed uri', function (done) {
+        queryHelper.replaceVariablesUsingEsDocument('s', 'index1/type1-and-no-id')
+        .catch(function (err) {
+          expect(clientSearchCounter).to.equal(0);
+          expect(createdClientSearchCounter).to.equal(0);
+          expect(err.message).to.equal('Malformed uri - should have at least 3 parts: index, type, id');
+          done();
+        });
+      });
+    });
+
+    describe('with URI  no credentials', function () {
 
       it('replace in single string', function (done) {
         var uri = 'index1/type1/id1';
@@ -69,6 +161,8 @@ describe('Query Helper', function () {
         var expected = 'select * from table1 where id = \'id1\'';
 
         queryHelper.replaceVariablesUsingEsDocument(s, uri).then(function (ret) {
+          expect(clientSearchCounter).to.equal(1);
+          expect(createdClientSearchCounter).to.equal(0);
           expect(ret).to.equal(expected);
           done();
         });
@@ -86,6 +180,8 @@ describe('Query Helper', function () {
         ];
 
         queryHelper.replaceVariablesUsingEsDocument(sA, uri).then(function (a) {
+          expect(clientSearchCounter).to.equal(1);
+          expect(createdClientSearchCounter).to.equal(0);
           expect(a).to.eql(expectedA);
           done();
         });
@@ -94,6 +190,8 @@ describe('Query Helper', function () {
       it('malformed uri', function (done) {
         queryHelper.replaceVariablesUsingEsDocument('s', 'index1/type1-and-no-id')
         .catch(function (err) {
+          expect(clientSearchCounter).to.equal(0);
+          expect(createdClientSearchCounter).to.equal(0);
           expect(err.message).to.equal('Malformed uri - should have at least 3 parts: index, type, id');
           done();
         });
@@ -102,7 +200,7 @@ describe('Query Helper', function () {
 
     describe('no URI', function () {
 
-      it('ignore the elastic document and varaibles', function (done) {
+      it('ignore the elastic document and variables', function (done) {
         var path = '';
         var headers = [
           { name: 'header1', value: 'header1value'}
@@ -120,7 +218,8 @@ describe('Query Helper', function () {
         };
 
         queryHelper.replaceVariablesForREST(headers, params, body, path, null, null).then(function (result) {
-
+          expect(clientSearchCounter).to.equal(0);
+          expect(createdClientSearchCounter).to.equal(0);
           expect(result).to.eql(expected);
           done();
         });
@@ -151,6 +250,8 @@ describe('Query Helper', function () {
 
         queryHelper.replaceVariablesForREST(headers, params, body, path, null, variables).then(function (result) {
           // after repalcement supplied params shoud NOT be modified
+          expect(clientSearchCounter).to.equal(0);
+          expect(createdClientSearchCounter).to.equal(0);
           expect(headers).to.eql(expHeaders);
           expect(params).to.eql(expParams);
           expect(body).to.eql(expBody);
@@ -186,7 +287,8 @@ describe('Query Helper', function () {
         };
 
         queryHelper.replaceVariablesForREST(headers, params, body, path, null, variables).then(function (result) {
-
+          expect(clientSearchCounter).to.equal(0);
+          expect(createdClientSearchCounter).to.equal(0);
           expect(result).to.eql(expected);
           done();
         });

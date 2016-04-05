@@ -11,7 +11,7 @@ function QueryHelper(server) {
 }
 
 
-QueryHelper.prototype.replaceVariablesForREST = function (headers, params, body, path, uri, variables) {
+QueryHelper.prototype.replaceVariablesForREST = function (headers, params, body, path, uri, variables, credentials) {
   // clone here !!! headers, params, body
   // so the original one in the config are not modified
   var h = _.cloneDeep(headers);
@@ -44,10 +44,10 @@ QueryHelper.prototype.replaceVariablesForREST = function (headers, params, body,
 
   // second replace placeholders based on selected entity uri
   var promises = [
-    self.replaceVariablesUsingEsDocument(h, uri),
-    self.replaceVariablesUsingEsDocument(p, uri),
-    self.replaceVariablesUsingEsDocument(b, uri),
-    self.replaceVariablesUsingEsDocument(pa, uri)
+    self.replaceVariablesUsingEsDocument(h, uri, credentials),
+    self.replaceVariablesUsingEsDocument(p, uri, credentials),
+    self.replaceVariablesUsingEsDocument(b, uri, credentials),
+    self.replaceVariablesUsingEsDocument(pa, uri, credentials)
   ];
 
   return Promise.all(promises).then(function (results) {
@@ -63,7 +63,7 @@ QueryHelper.prototype.replaceVariablesForREST = function (headers, params, body,
 /**
  * s can be either a string or (key, value) map
  */
-QueryHelper.prototype.replaceVariablesUsingEsDocument = function (s, uri) {
+QueryHelper.prototype.replaceVariablesUsingEsDocument = function (s, uri, credentials) {
   var self = this;
   if (!uri || uri.trim() === '') {
     return Promise.resolve(s);
@@ -80,7 +80,7 @@ QueryHelper.prototype.replaceVariablesUsingEsDocument = function (s, uri) {
 
   // TODO: add caching of documet
 
-  return self.fetchDocument(index, type, id).then(function (doc) {
+  return self.fetchDocument(index, type, id, credentials).then(function (doc) {
     //now parse the query and replace the placeholders
     if (typeof s === 'string' || s instanceof String) {
       return self._replaceVariablesInTheQuery(doc, s);
@@ -95,9 +95,14 @@ QueryHelper.prototype.replaceVariablesUsingEsDocument = function (s, uri) {
 };
 
 
-QueryHelper.prototype.fetchDocument = function (index, type, id) {
+QueryHelper.prototype.fetchDocument = function (index, type, id, credentials) {
   var self = this;
-  return self.client.search({
+  var client = self.client;
+  if (credentials) {
+    // Every time we fetch document for index different then .kibi one we need a client with logged in user credentials
+    client = self.server.plugins.elasticsearch.createClient(credentials);
+  }
+  return client.search({
     index: index,
     type: type,
     q: '_id:' + id
@@ -108,9 +113,10 @@ QueryHelper.prototype.fetchDocument = function (index, type, id) {
     return Promise.reject(new Error('No document matching _id=' + id + ' was found'));
   })
   .catch(function (err) {
-    var msg = 'Could not fetch document [/' + index + '/' + type + '/' + id + '].';
-    self.log.warn(msg, err);
-    return Promise.reject(new Error(msg + ' Check logs for details'));
+    var msg = 'Could not fetch document [/' + index + '/' + type + '/' + id + '], check logs for details please.';
+    self.log.warn(msg);
+    self.log.warn(err);
+    return Promise.reject(new Error(msg));
   });
 };
 

@@ -119,7 +119,7 @@ describe('RestQuery', function () {
       });
 
       restQuery.checkIfItIsRelevant({selectedDocuments: ['/company/company/id1']}).catch(function (err) {
-        expect(err.message).to.eql('Could not fetch document [//company/company]. Check logs for details');
+        expect(err.message).to.eql('Could not fetch document [//company/company], check logs for details please.');
         done();
       });
     });

@@ -7,7 +7,7 @@ var Promise = require('bluebird');
  * Evaluate the custom dbfilter query and replace it with the equivalent ElasticSearch query.
  * QueryEngine is the queryEngine object, JSON is the query to modify.
  */
-module.exports = function (queryEngine, json) {
+module.exports = function (queryEngine, json, credentials) {
   return Promise.try(function () {
     var label = 'dbfilter';
     // The modify callback must return a Promise.
@@ -33,7 +33,14 @@ module.exports = function (queryEngine, json) {
         throw new Error('Missing path field in the dbfilter object: ' + data);
       }
 
-      return queryEngine.getIdsFromQueries([{queryId:queryid, queryVariableName: queryVariableName}], {selectedDocuments: [entity]})
+      var options = {
+        selectedDocuments: [entity]
+      };
+      if (credentials) {
+        options.credentials = credentials;
+      }
+
+      return queryEngine.getIdsFromQueries([{queryId:queryid, queryVariableName: queryVariableName}], options)
         .then(function createObject(queries) {
           return new Promise(function (fulfill, reject) {
             var filter = {};

@@ -80,7 +80,7 @@ JdbcQuery.prototype.checkIfItIsRelevant = function (options) {
     var connectionString = self.config.datasource.datasourceClazz.datasource.datasourceParams.connectionString;
     var maxAge = self.config.datasource.datasourceClazz.datasource.datasourceParams.maxAge;
 
-    return self.queryHelper.replaceVariablesUsingEsDocument(self.config.activationQuery, uri).then(function (query) {
+    return self.queryHelper.replaceVariablesUsingEsDocument(self.config.activationQuery, uri, options.credentials).then(function (query) {
 
       if (query.trim() === '') {
         return Promise.resolve(true);
@@ -163,7 +163,7 @@ JdbcQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) {
     var connectionString = self.config.datasource.datasourceClazz.datasource.datasourceParams.connectionString;
     var maxAge = self.config.datasource.datasourceClazz.datasource.datasourceParams.maxAge;
 
-    return self.queryHelper.replaceVariablesUsingEsDocument(self.config.resultQuery, uri).then(function (query) {
+    return self.queryHelper.replaceVariablesUsingEsDocument(self.config.resultQuery, uri, options.credentials).then(function (query) {
 
       var cacheKey = null;
 

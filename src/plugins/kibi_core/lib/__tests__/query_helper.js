@@ -40,19 +40,19 @@ var fakeServer = {
       createClient: function (credentials) {
         return {
           search: function (options) {
-          createdClientSearchCounter++;
-          return Promise.resolve({
-            hits: {
-              hits: [
-                {
-                  _id: '_id1',
-                  _source: {
-                    id: 'id1'
+            createdClientSearchCounter++;
+            return Promise.resolve({
+              hits: {
+                hits: [
+                  {
+                    _id: '_id1',
+                    _source: {
+                      id: 'id1'
+                    }
                   }
-                }
-              ]
-            }
-          });
+                ]
+              }
+            });
           }
         };
       }
@@ -94,7 +94,7 @@ describe('Query Helper', function () {
         expect(clientSearchCounter).to.equal(1);
         expect(createdClientSearchCounter).to.equal(0);
         done();
-      })
+      });
     });
 
     it('with credentials', function (done) {
@@ -102,7 +102,7 @@ describe('Query Helper', function () {
         expect(clientSearchCounter).to.equal(0);
         expect(createdClientSearchCounter).to.equal(1);
         done();
-      })
+      });
     });
   });
 

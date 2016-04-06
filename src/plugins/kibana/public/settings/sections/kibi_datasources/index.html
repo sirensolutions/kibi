@@ -46,11 +46,12 @@
             </select>
           </div>
 
-          <div ng-repeat="param in datasource.schema" >
+          <div ng-repeat="param in datasource.schema | orderBy: 'required' : true" >
             <ng-form name="innerForm">
               <div class="form-group">
-                <label>{{param.name}}</label> <span ng-if="!param.required">(Optional. Default={{param.defaultValue || param.defaultValues || 'undefined'}})</span>
+                <label>{{param.name}}</label>
 
+                <span ng-if="param.inputType == 'text' && !param.required">(Optional. Default={{param.defaultValue || 'undefined'}})</span>
                 <input
                   ng-if="param.inputType == 'text'"
                   name="{{param.name}}"
@@ -60,6 +61,17 @@
                   placeholder="{{param.placeholder}}"
                   class="form-control span9"/>
 
+                <span ng-if="param.inputType == 'checkbox' && !param.required">(Optional. Default={{param.defaultValue === false ? 'false' : 'true'}})</span>
+                <input
+                  ng-if="param.inputType == 'checkbox'"
+                  name="{{param.name}}"
+                  type="checkbox"
+                  ng-required="{{ param.required }}"
+                  ng-checked="datasource.datasourceParams[param.name] || param.defaultValue"
+                  ng-model="datasource.datasourceParams[param.name]"
+                  class="form-control span9"/>
+
+                <span ng-if="param.inputType == 'password' && !param.required">(Optional. Default={{param.defaultValue || 'undefined'}})</span>
                 <input
                   ng-if="param.inputType == 'password'"
                   name="{{param.name}}"
@@ -69,6 +81,7 @@
                   placeholder="{{param.placeholder}}"
                   class="form-control span9"/>
 
+                <span ng-if="param.inputType == 'select' && param.multivalued && !param.required">(Optional. Default={{param.defaultValues ||'undefined'}})</span>
                 <select
                   ng-if="param.inputType == 'select' && param.multivalued"
                   name="{{param.name}}"
@@ -83,6 +96,7 @@
                   </option>
                 </select>
 
+                <span ng-if="param.inputType == 'select' && !param.multivalued && !param.required">(Optional. Default={{param.defaultValue ||'undefined'}})</span>
                 <select
                   ng-if="param.inputType == 'select' && !param.multivalued"
                   name="{{param.name}}"

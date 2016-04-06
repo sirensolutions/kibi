@@ -78,7 +78,8 @@ JdbcQuery.prototype.checkIfItIsRelevant = function (options) {
 
     // here do not use getConnectionString method as it might contain sensitive information like decrypted password
     var connectionString = self.config.datasource.datasourceClazz.datasource.datasourceParams.connectionString;
-    var maxAge = self.config.datasource.datasourceClazz.datasource.datasourceParams.maxAge;
+    var maxAge = self.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
+    var cacheEnabled = this.config.datasource.datasourceClazz.datasource.datasourceParams.cache_enabled;
 
     return self.queryHelper.replaceVariablesUsingEsDocument(self.config.activationQuery, uri, options.credentials).then(function (query) {
 
@@ -88,7 +89,7 @@ JdbcQuery.prototype.checkIfItIsRelevant = function (options) {
 
       var cacheKey = null;
 
-      if (self.cache) {
+      if (self.cache && cacheEnabled) {
         cacheKey = self.generateCacheKey(connectionString, query);
         var v = self.cache.get(cacheKey);
         if (v) {
@@ -124,7 +125,7 @@ JdbcQuery.prototype.checkIfItIsRelevant = function (options) {
                     reject(err);
                   }
                   var data = results.length > 0 ? true : false;
-                  if (self.cache) {
+                  if (self.cache && cacheEnabled) {
                     self.cache.set(cacheKey, data, maxAge);
                   }
                   fulfill(data);
@@ -161,13 +162,14 @@ JdbcQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) {
     var uri = options.selectedDocuments && options.selectedDocuments.length > 0 ? options.selectedDocuments[0] : '';
 
     var connectionString = self.config.datasource.datasourceClazz.datasource.datasourceParams.connectionString;
-    var maxAge = self.config.datasource.datasourceClazz.datasource.datasourceParams.maxAge;
+    var maxAge = self.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
+    var cacheEnabled = this.config.datasource.datasourceClazz.datasource.datasourceParams.cache_enabled;
 
     return self.queryHelper.replaceVariablesUsingEsDocument(self.config.resultQuery, uri, options.credentials).then(function (query) {
 
       var cacheKey = null;
 
-      if (self.cache) {
+      if (self.cache && cacheEnabled) {
         cacheKey = self.generateCacheKey(connectionString, query, onlyIds, idVariableName);
         var v =  self.cache.get(cacheKey);
         if (v) {
@@ -249,7 +251,7 @@ JdbcQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) {
                     data.ids = self._extractIdsFromSql(results, idVariableName);
                   }
 
-                  if (self.cache) {
+                  if (self.cache && cacheEnabled) {
                     self.cache.set(cacheKey, data, maxAge);
                   }
 

@@ -34,7 +34,8 @@ MysqlQuery.prototype.checkIfItIsRelevant = function (options) {
   var host = this.config.datasource.datasourceClazz.datasource.datasourceParams.host;
   var dbname = this.config.datasource.datasourceClazz.datasource.datasourceParams.dbname;
   var timeout = this.config.datasource.datasourceClazz.datasource.datasourceParams.timeout;
-  var maxAge = this.config.datasource.datasourceClazz.datasource.datasourceParams.maxAge;
+  var maxAge = this.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
+  var cacheEnabled = this.config.datasource.datasourceClazz.datasource.datasourceParams.cache_enabled;
 
 
   return self.queryHelper.replaceVariablesUsingEsDocument(this.config.activationQuery, uri, options.credentials).then(function (query) {
@@ -45,7 +46,7 @@ MysqlQuery.prototype.checkIfItIsRelevant = function (options) {
 
     var cacheKey = null;
 
-    if (self.cache) {
+    if (self.cache && cacheEnabled) {
       cacheKey = self.generateCacheKey(host + dbname, query);
       var v = self.cache.get(cacheKey);
       if (v) {
@@ -63,7 +64,7 @@ MysqlQuery.prototype.checkIfItIsRelevant = function (options) {
             reject(err);
           }
           var data = rows.length > 0 ? true : false;
-          if (self.cache) {
+          if (self.cache && cacheEnabled) {
             self.cache.set(cacheKey, data, maxAge);
           }
           fulfill(data);
@@ -129,13 +130,14 @@ MysqlQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) 
   var host = this.config.datasource.datasourceClazz.datasource.datasourceParams.host;
   var dbname = this.config.datasource.datasourceClazz.datasource.datasourceParams.dbname;
   var timeout = this.config.datasource.datasourceClazz.datasource.datasourceParams.timeout;
-  var maxAge = this.config.datasource.datasourceClazz.datasource.datasourceParams.maxAge;
+  var maxAge = this.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
+  var cacheEnabled = this.config.datasource.datasourceClazz.datasource.datasourceParams.cache_enabled;
 
   return self.queryHelper.replaceVariablesUsingEsDocument(this.config.resultQuery, uri, options.credentials).then(function (query) {
 
     var cacheKey = null;
 
-    if (self.cache) {
+    if (self.cache && cacheEnabled) {
       cacheKey = self.generateCacheKey(host + dbname, query, onlyIds, idVariableName);
       var v =  self.cache.get(cacheKey);
       if (v) {
@@ -202,7 +204,7 @@ MysqlQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) 
             data.ids = self._extractIdsFromSql(rows, idVariableName);
           }
 
-          if (self.cache) {
+          if (self.cache && cacheEnabled) {
             self.cache.set(cacheKey, data, maxAge);
           }
 

@@ -55,9 +55,10 @@ RestQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) {
 
   var urlS = this.config.datasource.datasourceClazz.datasource.datasourceParams.url;
   var timeout = this.config.datasource.datasourceClazz.datasource.datasourceParams.timeout;
-  var maxAge = this.config.datasource.datasourceClazz.datasource.datasourceParams.maxAge;
+  var maxAge = this.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
   var username = this.config.datasource.datasourceClazz.datasource.datasourceParams.username;
   var password = this.config.datasource.datasourceClazz.datasource.datasourceParams.password;
+  var cacheEnabled = this.config.datasource.datasourceClazz.datasource.datasourceParams.cache_enabled;
 
   return new Promise(function (fulfill, reject) {
     var start = new Date().getTime();
@@ -105,7 +106,7 @@ RestQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) {
         key = self.config.rest_method + urlS + path + JSON.stringify(headers) + JSON.stringify(params) + body;
       }
 
-      if (self.cache) {
+      if (self.cache && cacheEnabled) {
         var v = self.cache.get(key);
         if (v) {
           return fulfill(v);
@@ -153,7 +154,7 @@ RestQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) {
             data.results = json;
           }
 
-          if (self.cache) {
+          if (self.cache && cacheEnabled) {
             self.cache.set(key, data, maxAge);
           }
           return data;

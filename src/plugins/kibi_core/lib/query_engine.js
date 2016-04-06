@@ -25,7 +25,7 @@ function QueryEngine(server) {
   this.client = server.plugins.elasticsearch.client;
 }
 
-QueryEngine.prototype._init = function (enableCache = false, cacheSize = 500, cacheMaxAge = 1000 * 60 * 60) {
+QueryEngine.prototype._init = function (cacheSize = 500, enableCache = true, cacheMaxAge = 1000 * 60 * 60) {
   // populate an array templatesDefinitions which contain templatesdefinition objects
   var self = this;
 

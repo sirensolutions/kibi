@@ -31,7 +31,8 @@ SparqlQuery.prototype.checkIfItIsRelevant = function (options) {
 
   var endpointUrl = this.config.datasource.datasourceClazz.datasource.datasourceParams.endpoint_url;
   var timeout = this.config.datasource.datasourceClazz.datasource.datasourceParams.timeout;
-  var maxAge = this.config.datasource.datasourceClazz.datasource.datasourceParams.maxAge;
+  var maxAge = this.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
+  var cacheEnabled = this.config.datasource.datasourceClazz.datasource.datasourceParams.cache_enabled;
 
   return self.queryHelper.replaceVariablesUsingEsDocument(
     this.config.activationQuery, uri, options.credentials
@@ -44,7 +45,7 @@ SparqlQuery.prototype.checkIfItIsRelevant = function (options) {
     var query = self.config.prefixesString + ' ' + queryNoPrefixes;
     var cacheKey = null;
 
-    if (self.cache) {
+    if (self.cache && cacheEnabled) {
       cacheKey = self.generateCacheKey(endpointUrl, query);
       var v = self.cache.get(cacheKey);
       if (v) {
@@ -62,7 +63,7 @@ SparqlQuery.prototype.checkIfItIsRelevant = function (options) {
       timeout: timeout || 1000,
       transform: function (resp) {
         var data = JSON.parse(resp);
-        if (self.cache) {
+        if (self.cache && cacheEnabled) {
           self.cache.set(cacheKey, data.boolean, maxAge);
         }
         return data;
@@ -99,13 +100,14 @@ SparqlQuery.prototype.fetchResults = function (options, onlyIds, idVariableName)
 
   var endpointUrl = this.config.datasource.datasourceClazz.datasource.datasourceParams.endpoint_url;
   var timeout = this.config.datasource.datasourceClazz.datasource.datasourceParams.timeout;
-  var maxAge = this.config.datasource.datasourceClazz.datasource.datasourceParams.maxAge;
+  var maxAge = this.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
+  var cacheEnabled = this.config.datasource.datasourceClazz.datasource.datasourceParams.cache_enabled;
 
   return self.queryHelper.replaceVariablesUsingEsDocument(this.config.resultQuery, uri, options.credentials).then(function (query) {
 
     var cacheKey = null;
 
-    if (self.cache) {
+    if (self.cache && cacheEnabled) {
       cacheKey = self.generateCacheKey(endpointUrl, query, onlyIds, idVariableName);
       var v =  self.cache.get(cacheKey);
       if (v) {
@@ -146,7 +148,7 @@ SparqlQuery.prototype.fetchResults = function (options, onlyIds, idVariableName)
           delete data.results;
         }
 
-        if (self.cache) {
+        if (self.cache && cacheEnabled) {
           self.cache.set(cacheKey, data, maxAge);
         }
 

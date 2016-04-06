@@ -89,7 +89,8 @@ SQLiteQuery.prototype.checkIfItIsRelevant = function (options) {
   var uri = options.selectedDocuments && options.selectedDocuments.length > 0 ? options.selectedDocuments[0] : '';
 
   var dbfile = this.config.datasource.datasourceClazz.datasource.datasourceParams.db_file_path;
-  var maxAge = this.config.datasource.datasourceClazz.datasource.datasourceParams.maxAge;
+  var maxAge = this.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
+  var cacheEnabled = this.config.datasource.datasourceClazz.datasource.datasourceParams.cache_enabled;
 
   if (!this.config.activationQuery) {
     return Promise.resolve(true);
@@ -103,7 +104,7 @@ SQLiteQuery.prototype.checkIfItIsRelevant = function (options) {
 
     var cacheKey = null;
 
-    if (self.cache) {
+    if (self.cache && cacheEnabled) {
       cacheKey = self.generateCacheKey(dbfile, query);
       var v = self.cache.get(cacheKey);
       if (v) {
@@ -123,7 +124,7 @@ SQLiteQuery.prototype.checkIfItIsRelevant = function (options) {
 
           var data = row ? true : false;
 
-          if (self.cache) {
+          if (self.cache && cacheEnabled) {
             self.cache.set(cacheKey, data, maxAge);
           }
 
@@ -154,13 +155,14 @@ SQLiteQuery.prototype.fetchResults = function (options, onlyIds, idVariableName)
   var uri = options.selectedDocuments && options.selectedDocuments.length > 0 ? options.selectedDocuments[0] : '';
 
   var dbfile = this.config.datasource.datasourceClazz.datasource.datasourceParams.db_file_path;
-  var maxAge = this.config.datasource.datasourceClazz.datasource.datasourceParams.maxAge;
+  var maxAge = this.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
+  var cacheEnabled = this.config.datasource.datasourceClazz.datasource.datasourceParams.cache_enabled;
 
   return self.queryHelper.replaceVariablesUsingEsDocument(this.config.resultQuery, uri, options.credentials).then(function (query) {
 
     var cacheKey = null;
 
-    if (self.cache) {
+    if (self.cache && cacheEnabled) {
       cacheKey = self.generateCacheKey(dbfile, query, onlyIds, idVariableName);
       var v =  self.cache.get(cacheKey);
       if (v) {
@@ -221,7 +223,7 @@ SQLiteQuery.prototype.fetchResults = function (options, onlyIds, idVariableName)
               data.ids = self._extractIdsFromSql(rows, idVariableName);
             }
 
-            if (self.cache) {
+            if (self.cache && cacheEnabled) {
               self.cache.set(cacheKey, data, maxAge);
             }
 

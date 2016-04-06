@@ -4,6 +4,7 @@ define(function (require) {
   return function (Private, kibiDatasourcesSchema) {
 
     return function (datasource) {
+      datasource.schema = [];
 
       var base = kibiDatasourcesSchema.base;
 
@@ -46,20 +47,33 @@ define(function (require) {
             datasource.datasourceParams[param.name] = defaultValue;
           }
         });
-      }
+        // remove parameters not found in schema
+        _.each(datasource.datasourceParams, function (key, value) {
+          var found = _find(datasource.schema, function (s) {
+            return s.name === key;
+          });
+          if (!found) {
+            delete datasource.datasourceParams[key];
+          }
+        });
 
+      }
     };
 
-    function mergeByName(base, additionalProps) {
+    function mergeByName(baseObject, additionalProps) {
+      var result = [];
+      _.each(baseObject, function (o) {
+        result.push(o);
+      })
       _.each(additionalProps, function (arr2obj) {
-        var arr1obj = _.find(base, function (arr1obj) {
+        var arr1obj = _.find(baseObject, function (arr1obj) {
           return arr1obj.name === arr2obj.name;
         });
 
-        arr1obj ? _.extend(arr1obj, arr2obj) : base.push(arr2obj);
+        arr1obj ? _.extend(arr1obj, arr2obj) : result.push(arr2obj);
       });
 
-      return base;
+      return result;
     }
   };
 

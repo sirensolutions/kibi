@@ -39,6 +39,7 @@ TinkerPop3Query.prototype.fetchResults = function (options, onlyIds, idVariableN
   var gremlinUrl = this.config.datasource.datasourceClazz.datasource.datasourceParams.url;
   var maxAge = this.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
   var timeout = this.config.datasource.datasourceClazz.datasource.datasourceParams.timeout;
+  var cacheEnabled = this.config.datasource.datasourceClazz.datasource.datasourceParams.cache_enabled;
 
   if (timeout === null || typeof timeout === 'undefined') {
     timeout = 5000;
@@ -59,7 +60,7 @@ TinkerPop3Query.prototype.fetchResults = function (options, onlyIds, idVariableN
 
     var cacheKey = self.generateCacheKey(gremlinUrl, query, onlyIds, idVariableName);
 
-    if (self.cache) {
+    if (self.cache && cacheEnabled) {
       var v = self.cache.get(cacheKey);
       if (v) {
         v.queryExecutionTime = new Date().getTime() - start;
@@ -173,7 +174,7 @@ TinkerPop3Query.prototype.fetchResults = function (options, onlyIds, idVariableN
           delete data.results;
         }
 
-        if (self.cache) {
+        if (self.cache && cacheEnabled) {
           self.cache.set(cacheKey, data, maxAge);
         }
 

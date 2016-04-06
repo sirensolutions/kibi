@@ -33,8 +33,8 @@ PostgresQuery.prototype.checkIfItIsRelevant = function (options) {
   var host = this.config.datasource.datasourceClazz.datasource.datasourceParams.host;
   var dbname = this.config.datasource.datasourceClazz.datasource.datasourceParams.dbname;
   var timeout = this.config.datasource.datasourceClazz.datasource.datasourceParams.timeout;
-  var maxAge = this.config.datasource.datasourceClazz.datasource.datasourceParams.maxAge;
-
+  var maxAge = this.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
+  var cacheEnabled = this.config.datasource.datasourceClazz.datasource.datasourceParams.cache_enabled;
 
   return self.queryHelper.replaceVariablesUsingEsDocument(this.config.activationQuery, uri, options.credentials).then(function (query) {
 
@@ -44,7 +44,7 @@ PostgresQuery.prototype.checkIfItIsRelevant = function (options) {
 
     var cacheKey = null;
 
-    if (self.cache) {
+    if (self.cache && cacheEnabled) {
       cacheKey = self.generateCacheKey(host + dbname, query);
       var v = self.cache.get(cacheKey);
       if (v) {
@@ -70,7 +70,7 @@ PostgresQuery.prototype.checkIfItIsRelevant = function (options) {
             }
             var data = result.rows.length > 0 ? true : false;
 
-            if (self.cache) {
+            if (self.cache && cacheEnabled) {
               self.cache.set(cacheKey, data, maxAge);
             }
             fulfill(data);
@@ -194,7 +194,8 @@ PostgresQuery.prototype.fetchResults = function (options, onlyIds, idVariableNam
   var host = this.config.datasource.datasourceClazz.datasource.datasourceParams.host;
   var dbname = this.config.datasource.datasourceClazz.datasource.datasourceParams.dbname;
   var timeout = this.config.datasource.datasourceClazz.datasource.datasourceParams.timeout;
-  var maxAge = this.config.datasource.datasourceClazz.datasource.datasourceParams.maxAge;
+  var maxAge = this.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
+  var cacheEnabled = this.config.datasource.datasourceClazz.datasource.datasourceParams.cache_enabled;
 
   return self.queryHelper.replaceVariablesUsingEsDocument(this.config.resultQuery, uri, options.credentials).then(function (query) {
     // special case if the uri is required but it is empty
@@ -213,7 +214,7 @@ PostgresQuery.prototype.fetchResults = function (options, onlyIds, idVariableNam
 
     var cacheKey = null;
 
-    if (self.cache) {
+    if (self.cache && cacheEnabled) {
       cacheKey = self.generateCacheKey(host + dbname, query, onlyIds, idVariableName);
       var v =  self.cache.get(cacheKey);
       if (v) {
@@ -298,7 +299,7 @@ PostgresQuery.prototype.fetchResults = function (options, onlyIds, idVariableNam
               data.ids = self._extractIdsFromSql(result.rows, idVariableName);
             }
 
-            if (self.cache) {
+            if (self.cache && cacheEnabled) {
               self.cache.set(cacheKey, data, maxAge);
             }
 

@@ -61,7 +61,14 @@ function Query(server, snippetDefinition, cache) {
   this.cache = cache;
 }
 
-Query.prototype.generateCacheKey = function (prefix, query, onlyValues, valueVariableName) {
+Query.prototype._getUsername = function (options) {
+  if (options && options.credentials && options.credentials.username) {
+    return options.credentials.username;
+  }
+  return null;
+}
+
+Query.prototype.generateCacheKey = function (prefix, query, onlyValues, valueVariableName, username) {
   var hash = crypto.createHash('sha256');
   _.each(arguments, function (arg) {
     hash.update(arg && String(arg) || '-');

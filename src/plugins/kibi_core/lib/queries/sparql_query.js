@@ -46,7 +46,7 @@ SparqlQuery.prototype.checkIfItIsRelevant = function (options) {
     var cacheKey = null;
 
     if (self.cache && cacheEnabled) {
-      cacheKey = self.generateCacheKey(endpointUrl, query);
+      cacheKey = self.generateCacheKey(endpointUrl, query, self._getUsername(options));
       var v = self.cache.get(cacheKey);
       if (v) {
         return Promise.resolve(v);
@@ -108,7 +108,7 @@ SparqlQuery.prototype.fetchResults = function (options, onlyIds, idVariableName)
     var cacheKey = null;
 
     if (self.cache && cacheEnabled) {
-      cacheKey = self.generateCacheKey(endpointUrl, query, onlyIds, idVariableName);
+      cacheKey = self.generateCacheKey(endpointUrl, query, onlyIds, idVariableName, self._getUsername(options));
       var v =  self.cache.get(cacheKey);
       if (v) {
         v.queryExecutionTime = new Date().getTime() - start;

@@ -90,7 +90,7 @@ JdbcQuery.prototype.checkIfItIsRelevant = function (options) {
       var cacheKey = null;
 
       if (self.cache && cacheEnabled) {
-        cacheKey = self.generateCacheKey(connectionString, query);
+        cacheKey = self.generateCacheKey(connectionString, query, self._getUsername(options));
         var v = self.cache.get(cacheKey);
         if (v) {
           return Promise.resolve(v);
@@ -170,7 +170,7 @@ JdbcQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) {
       var cacheKey = null;
 
       if (self.cache && cacheEnabled) {
-        cacheKey = self.generateCacheKey(connectionString, query, onlyIds, idVariableName);
+        cacheKey = self.generateCacheKey(connectionString, query, onlyIds, idVariableName, self._getUsername(options));
         var v =  self.cache.get(cacheKey);
         if (v) {
           v.queryExecutionTime = new Date().getTime() - start;

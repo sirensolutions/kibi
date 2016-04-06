@@ -103,7 +103,14 @@ RestQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) {
 
       var key;
       if (self.cache) {
-        key = self.config.rest_method + urlS + path + JSON.stringify(headers) + JSON.stringify(params) + body;
+        key = self.generateCacheKey(
+          config.rest_method,
+          urlS,
+          path,
+          JSON.stringify(headers),
+          JSON.stringify(params),
+          body,
+          self._getUsername(options));
       }
 
       if (self.cache && cacheEnabled) {

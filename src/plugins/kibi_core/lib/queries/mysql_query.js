@@ -37,7 +37,6 @@ MysqlQuery.prototype.checkIfItIsRelevant = function (options) {
   var maxAge = this.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
   var cacheEnabled = this.config.datasource.datasourceClazz.datasource.datasourceParams.cache_enabled;
 
-
   return self.queryHelper.replaceVariablesUsingEsDocument(this.config.activationQuery, uri, options.credentials).then(function (query) {
 
     if (query.trim() === '') {
@@ -47,7 +46,7 @@ MysqlQuery.prototype.checkIfItIsRelevant = function (options) {
     var cacheKey = null;
 
     if (self.cache && cacheEnabled) {
-      cacheKey = self.generateCacheKey(host + dbname, query);
+      cacheKey = self.generateCacheKey(host + dbname, query, self._getUsername(options));
       var v = self.cache.get(cacheKey);
       if (v) {
         return Promise.resolve(v);
@@ -138,7 +137,7 @@ MysqlQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) 
     var cacheKey = null;
 
     if (self.cache && cacheEnabled) {
-      cacheKey = self.generateCacheKey(host + dbname, query, onlyIds, idVariableName);
+      cacheKey = self.generateCacheKey(host + dbname, query, onlyIds, idVariableName, self._getUsername(options));
       var v =  self.cache.get(cacheKey);
       if (v) {
         v.queryExecutionTime = new Date().getTime() - start;

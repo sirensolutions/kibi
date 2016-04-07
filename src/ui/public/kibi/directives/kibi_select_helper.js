@@ -229,7 +229,7 @@ define(function (require) {
               break;
             case 'sqlite':
             case 'mysql':
-            case 'pgsql':
+            case 'postgresql':
             case 'jdbc':
               variables = sqlHelper.getVariables(resultQuery);
               break;

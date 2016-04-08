@@ -58,9 +58,9 @@ TinkerPop3Query.prototype.fetchResults = function (options, onlyIds, idVariableN
 
   return self.queryHelper.replaceVariablesUsingEsDocument(self.config.resultQuery, uri, options.credentials).then(function (query) {
 
-    var cacheKey = self.generateCacheKey(gremlinUrl, query, onlyIds, idVariableName, self._getUsername(options));
-
+    var cacheKey;
     if (self.cache && cacheEnabled) {
+      cacheKey = self.generateCacheKey(gremlinUrl, query, onlyIds, idVariableName, self._getUsername(options));
       var v = self.cache.get(cacheKey);
       if (v) {
         v.queryExecutionTime = new Date().getTime() - start;

@@ -17,6 +17,69 @@ MysqlQuery.prototype = _.create(AbstractQuery.prototype, {
   'constructor': MysqlQuery
 });
 
+MysqlQuery.prototype._getType = function (typeNum) {
+  // Look here https://github.com/felixge/node-mysql/blob/6e87af8cdd40e9fac72d026b049cdd9a24829de5/lib/protocol/constants/types.js
+  var types = {
+    0: 'DECIMAL',
+    1: 'TINY',
+    2: 'SHORT',
+    3: 'LONG',
+    4: 'FLOAT',
+    5: 'DOUBLE',
+    6: 'NULL',
+    7: 'TIMESTAMP',
+    8: 'LONGLONG',
+    9: 'INT24',
+    10: 'DATE',
+    11: 'TIME',
+    12: 'DATETIME',
+    13: 'YEAR',
+    14: 'NEWDATE',
+    15: 'VARCHAR',
+    16: 'BIT',
+    246: 'NEWDECIMAL',
+    247: 'ENUM',
+    248: 'SET',
+    249: 'TINY_BLOB',
+    250: 'MEDIUM_BLOB',
+    251: 'LONG_BLOB',
+    252: 'BLOB',
+    253: 'VAR_STRING',
+    254: 'STRING',
+    255: 'GEOMETRY'
+  };
+  return types[typeNum] ? types[typeNum] : typeNum;
+};
+
+MysqlQuery.prototype._executeQuery = function (query, connectionString, timeout) {
+  return new Promise(function (fulfill, reject) {
+    var connection;
+    try {
+      connection = mysql.createConnection(connectionString);
+      connection.connect();
+      connection.query({sql: query, timeout: timeout || 1000}, function (err, rows, fields) {
+        if (err) {
+          if (err.message) {
+            err = {
+              error: err,
+              message: err.message
+            };
+          }
+
+          reject(err);
+          return;
+        }
+        fulfill({rows: rows, fields: fields});
+      });
+    } catch (err) {
+      reject(err);
+    } finally {
+      if (connection) {
+        connection.end();
+      }
+    }
+  });
+};
 
 /*
  * Return a promise which when resolved should return true or false
@@ -53,66 +116,17 @@ MysqlQuery.prototype.checkIfItIsRelevant = function (options) {
       }
     }
 
-    return new Promise(function (fulfill, reject) {
-      var connection;
-      try {
-        connection = mysql.createConnection(connectionString);
-        connection.connect();
-        connection.query({sql: query, timeout: timeout || 1000}, function (err, rows, fields) {
-          if (err) {
-            reject(err);
-          }
-          var data = rows.length > 0 ? true : false;
-          if (self.cache && cacheEnabled) {
-            self.cache.set(cacheKey, data, maxAge);
-          }
-          fulfill(data);
-        });
-      } catch (err) {
-        reject(err);
-      } finally {
-        if (connection) {
-          connection.end();
-        }
+    return self._executeQuery(query, connectionString, timeout).then(function (results) {
+      var data = results.rows.length > 0 ? true : false;
+      if (self.cache && cacheEnabled) {
+        self.cache.set(cacheKey, data, maxAge);
       }
+      return data;
     });
+
   });
 };
 
-
-MysqlQuery.prototype._getType = function (typeNum) {
-  // Look here https://github.com/felixge/node-mysql/blob/6e87af8cdd40e9fac72d026b049cdd9a24829de5/lib/protocol/constants/types.js
-  var types = {
-    0: 'DECIMAL',
-    1: 'TINY',
-    2: 'SHORT',
-    3: 'LONG',
-    4: 'FLOAT',
-    5: 'DOUBLE',
-    6: 'NULL',
-    7: 'TIMESTAMP',
-    8: 'LONGLONG',
-    9: 'INT24',
-    10: 'DATE',
-    11: 'TIME',
-    12: 'DATETIME',
-    13: 'YEAR',
-    14: 'NEWDATE',
-    15: 'VARCHAR',
-    16: 'BIT',
-    246: 'NEWDECIMAL',
-    247: 'ENUM',
-    248: 'SET',
-    249: 'TINY_BLOB',
-    250: 'MEDIUM_BLOB',
-    251: 'LONG_BLOB',
-    252: 'BLOB',
-    253: 'VAR_STRING',
-    254: 'STRING',
-    255: 'GEOMETRY'
-  };
-  return types[typeNum] ? types[typeNum] : typeNum;
-};
 
 MysqlQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) {
   var start = new Date().getTime();
@@ -145,83 +159,57 @@ MysqlQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) 
       }
     }
 
-
-    return new Promise(function (fulfill, reject) {
-      var connection;
-      try {
-        connection = mysql.createConnection(connectionString);
-        connection.connect();
-        connection.query({sql: query, timeout: timeout || 1000}, function (err, rows, fields) {
-          if (err) {
-            if (err.message) {
-              err = {
-                error: err,
-                message: err.message
-              };
-            }
-
-            reject(err);
-            return;
-          }
-
-          var data = {
-            ids: [],
-            queryActivated: true
-          };
-          if (!onlyIds) {
-            var _varTypes = {};
-            _.each(fields, function (field) {
-              _varTypes[field.name] = self._getType(field.type);
-            });
-
-            data.head = {
-              vars: _.map(fields, function (field) {
-                return field.name;
-              })
-            };
-            data.config = {
-              label: self.config.label,
-              esFieldName: self.config.esFieldName
-            };
-            data.results = {
-              bindings: _.map(rows, function (row) {
-                var res = {};
-                for (var v in row) {
-                  if (row.hasOwnProperty(v)) {
-                    res[v] = {
-                      type: _varTypes[v],
-                      value: row[v]
-                    };
-                  }
-                }
-                return res;
-              })
-            };
-          }
-
-          if (idVariableName) {
-            data.ids = self._extractIdsFromSql(rows, idVariableName);
-          }
-
-          if (self.cache && cacheEnabled) {
-            self.cache.set(cacheKey, data, maxAge);
-          }
-
-          data.debug = {
-            sentDatasourceId: self.config.datasourceId,
-            sentResultQuery: query,
-            queryExecutionTime: new Date().getTime() - start
-          };
-
-          fulfill(data);
+    return self._executeQuery(query, connectionString, timeout).then(function (results) {
+      var data = {
+        ids: [],
+        queryActivated: true
+      };
+      if (!onlyIds) {
+        var _varTypes = {};
+        _.each(results.fields, function (field) {
+          _varTypes[field.name] = self._getType(field.type);
         });
-      } catch (err) {
-        reject(err);
-      } finally {
-        if (connection) {
-          connection.end();
-        }
+
+        data.head = {
+          vars: _.map(results.fields, function (field) {
+            return field.name;
+          })
+        };
+        data.config = {
+          label: self.config.label,
+          esFieldName: self.config.esFieldName
+        };
+        data.results = {
+          bindings: _.map(results.rows, function (row) {
+            var res = {};
+            for (var v in row) {
+              if (row.hasOwnProperty(v)) {
+                res[v] = {
+                  type: _varTypes[v],
+                  value: row[v]
+                };
+              }
+            }
+            return res;
+          })
+        };
       }
+
+      if (idVariableName) {
+        data.ids = self._extractIdsFromSql(results.rows, idVariableName);
+      }
+
+      if (self.cache && cacheEnabled) {
+        self.cache.set(cacheKey, data, maxAge);
+      }
+
+      data.debug = {
+        sentDatasourceId: self.config.datasourceId,
+        sentResultQuery: query,
+        queryExecutionTime: new Date().getTime() - start
+      };
+
+      return data;
     });
   });
 };

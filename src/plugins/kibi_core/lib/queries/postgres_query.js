@@ -17,75 +17,6 @@ PostgresQuery.prototype = _.create(AbstractQuery.prototype, {
   'constructor': PostgresQuery
 });
 
-/*
- * Return a promise which when resolved should return true or false.
- */
-PostgresQuery.prototype.checkIfItIsRelevant = function (options) {
-  var self = this;
-
-  if (self._checkIfSelectedDocumentRequiredAndNotPresent(options)) {
-    self.logger.warn('No elasticsearch document selected while required by the posgres activation query. [' + self.config.id + ']');
-    return Promise.resolve(false);
-  }
-  var uri = options.selectedDocuments && options.selectedDocuments.length > 0 ? options.selectedDocuments[0] : '';
-
-  var connectionString = this.config.datasource.datasourceClazz.getConnectionString();
-  var host = this.config.datasource.datasourceClazz.datasource.datasourceParams.host;
-  var dbname = this.config.datasource.datasourceClazz.datasource.datasourceParams.dbname;
-  var timeout = this.config.datasource.datasourceClazz.datasource.datasourceParams.timeout;
-  var maxAge = this.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
-  var cacheEnabled = this.config.datasource.datasourceClazz.datasource.datasourceParams.cache_enabled;
-
-  return self.queryHelper.replaceVariablesUsingEsDocument(this.config.activationQuery, uri, options.credentials).then(function (query) {
-
-    if (query.trim() === '') {
-      return Promise.resolve(true);
-    }
-
-    var cacheKey = null;
-
-    if (self.cache && cacheEnabled) {
-      cacheKey = self.generateCacheKey(host + dbname, query, self._getUsername(options));
-      var v = self.cache.get(cacheKey);
-      if (v) {
-        return Promise.resolve(v);
-      }
-    }
-
-    return new Promise(function (fulfill, reject) {
-      try {
-        pg.connect(connectionString, function (err, client, done) {
-          if (err) {
-            reject(err);
-          }
-          client.query(query, function (err, result) {
-            if (err) {
-              reject(err);
-            }
-            // szydan 29-Apr-2015: we've seen an error where for some reason
-            // result was undefined. I was not able to reproduce this
-            // adding extra check to reject the Promise in such situation
-            if (result === undefined) {
-              reject(new Error('No rows property in results'));
-            }
-            var data = result.rows.length > 0 ? true : false;
-
-            if (self.cache && cacheEnabled) {
-              self.cache.set(cacheKey, data, maxAge);
-            }
-            fulfill(data);
-            client.end();
-            //done(); //TODO: investigate where exactly to call this method to release client to the pool
-          });
-        });
-      } catch (err) {
-        reject(err);
-      }
-    });
-  });
-};
-
-
 PostgresQuery.prototype._getType = function (typeNum) {
   // extracted from http://doxygen.postgresql.org/include_2catalog_2pg__type_8h_source.html
   var types = {
@@ -178,6 +109,102 @@ PostgresQuery.prototype._getType = function (typeNum) {
   return types[typeNum] ? types[typeNum] : typeNum;
 };
 
+PostgresQuery.prototype._executeQuery = function (query, connectionString) {
+  return new Promise(function (fulfill, reject) {
+    try {
+      pg.connect(connectionString, function (err, client, done) {
+        if (err) {
+          reject(err);
+        }
+        if (debug) {
+          console.log('got client');
+        }
+
+        client.query(query, function (err, result) {
+          if (err) {
+            if (err.message) {
+              err = {
+                error: err,
+                message: err.message
+              };
+            }
+
+            if (debug) {
+              console.log('got error instead of result');
+              console.log(err);
+            }
+
+            reject(err);
+            return;
+          }
+
+          if (debug) {
+            console.log('got result');
+          }
+          fulfill(result);
+          client.end();
+          //done(); //TODO: investigate where exactly to call this method to release client to the pool
+        });
+      });
+    } catch (err) {
+      reject(err);
+    }
+  });
+};
+
+/*
+ * Return a promise which when resolved should return true or false.
+ */
+PostgresQuery.prototype.checkIfItIsRelevant = function (options) {
+  var self = this;
+
+  if (self._checkIfSelectedDocumentRequiredAndNotPresent(options)) {
+    self.logger.warn('No elasticsearch document selected while required by the posgres activation query. [' + self.config.id + ']');
+    return Promise.resolve(false);
+  }
+  var uri = options.selectedDocuments && options.selectedDocuments.length > 0 ? options.selectedDocuments[0] : '';
+
+  var connectionString = this.config.datasource.datasourceClazz.getConnectionString();
+  var host = this.config.datasource.datasourceClazz.datasource.datasourceParams.host;
+  var dbname = this.config.datasource.datasourceClazz.datasource.datasourceParams.dbname;
+  var timeout = this.config.datasource.datasourceClazz.datasource.datasourceParams.timeout;
+  var maxAge = this.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
+  var cacheEnabled = this.config.datasource.datasourceClazz.datasource.datasourceParams.cache_enabled;
+
+  return self.queryHelper.replaceVariablesUsingEsDocument(this.config.activationQuery, uri, options.credentials).then(function (query) {
+
+    if (query.trim() === '') {
+      return Promise.resolve(true);
+    }
+
+    var cacheKey = null;
+
+    if (self.cache && cacheEnabled) {
+      cacheKey = self.generateCacheKey(host + dbname, query, self._getUsername(options));
+      var v = self.cache.get(cacheKey);
+      if (v) {
+        return Promise.resolve(v);
+      }
+    }
+
+    return self._executeQuery(query, connectionString).then(function (result) {
+      // szydan 29-Apr-2015: we've seen an error where for some reason
+      // result was undefined. I was not able to reproduce this
+      // adding extra check to reject the Promise in such situation
+      if (result === undefined) {
+        return Promise.reject(new Error('No rows property in results'));
+      }
+      var data = result.rows.length > 0 ? true : false;
+
+      if (self.cache && cacheEnabled) {
+        self.cache.set(cacheKey, data, maxAge);
+      }
+      return data;
+    });
+
+  });
+};
+
 
 PostgresQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) {
   var start = new Date().getTime();
@@ -223,102 +250,59 @@ PostgresQuery.prototype.fetchResults = function (options, onlyIds, idVariableNam
       }
     }
 
-
-    return new Promise(function (fulfill, reject) {
-      try {
-        pg.connect(connectionString, function (err, client, done) {
-          if (err) {
-            reject(err);
-            return;
-          }
-
-          if (debug) {
-            console.log('got client');
-          }
+    return self._executeQuery(query, connectionString).then(function (result) {
+      var data = {
+        ids: [],
+        queryActivated: true
+      };
+      if (!onlyIds) {
+        var _varTypes = {};
+        _.each(result.fields, function (field) {
+          _varTypes[field.name] = self._getType(field.dataTypeID);
+        });
 
 
-          client.query(query, function (err, result) {
-            if (err) {
-              if (err.message) {
-                err = {
-                  error: err,
-                  message: err.message
+        data.head = {
+          vars: _.map(result.fields, function (field) {
+            return field.name;
+          })
+        };
+        data.config = {
+          label: self.config.label,
+          esFieldName: self.config.esFieldName
+        };
+        data.results = {
+          bindings: _.map(result.rows, function (row) {
+            var res = {};
+            for (var v in row) {
+              if (row.hasOwnProperty(v)) {
+                res[v] = {
+                  type: _varTypes[v],
+                  value: row[v]
                 };
               }
-
-              if (debug) {
-                console.log('got error instead of result');
-                console.log(err);
-              }
-
-              reject(err);
-              return;
             }
-
-            if (debug) {
-              console.log('got result');
-            }
-
-            var data = {
-              ids: [],
-              queryActivated: true
-            };
-            if (!onlyIds) {
-              var _varTypes = {};
-              _.each(result.fields, function (field) {
-                _varTypes[field.name] = self._getType(field.dataTypeID);
-              });
-
-
-              data.head = {
-                vars: _.map(result.fields, function (field) {
-                  return field.name;
-                })
-              };
-              data.config = {
-                label: self.config.label,
-                esFieldName: self.config.esFieldName
-              };
-              data.results = {
-                bindings: _.map(result.rows, function (row) {
-                  var res = {};
-                  for (var v in row) {
-                    if (row.hasOwnProperty(v)) {
-                      res[v] = {
-                        type: _varTypes[v],
-                        value: row[v]
-                      };
-                    }
-                  }
-                  return res;
-                })
-              };
-            }
-
-            if (idVariableName) {
-              data.ids = self._extractIdsFromSql(result.rows, idVariableName);
-            }
-
-            if (self.cache && cacheEnabled) {
-              self.cache.set(cacheKey, data, maxAge);
-            }
-
-            data.debug = {
-              sentDatasourceId: self.config.datasourceId,
-              sentResultQuery: query,
-              queryExecutionTime: new Date().getTime() - start
-            };
-
-
-            fulfill(data);
-            client.end();
-            //done(); //TODO: investigate where exactly to call this method to release client to the pool
-          });
-        });
-      } catch (err) {
-        reject(err);
+            return res;
+          })
+        };
       }
+
+      if (idVariableName) {
+        data.ids = self._extractIdsFromSql(result.rows, idVariableName);
+      }
+
+      if (self.cache && cacheEnabled) {
+        self.cache.set(cacheKey, data, maxAge);
+      }
+
+      data.debug = {
+        sentDatasourceId: self.config.datasourceId,
+        sentResultQuery: query,
+        queryExecutionTime: new Date().getTime() - start
+      };
+      return data;
     });
+
   });
 };
 

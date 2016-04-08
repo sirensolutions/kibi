@@ -49,7 +49,7 @@ define(function (require) {
         });
         // remove parameters not found in schema
         _.each(datasource.datasourceParams, function (key, value) {
-          var found = _find(datasource.schema, function (s) {
+          var found = _.find(datasource.schema, function (s) {
             return s.name === key;
           });
           if (!found) {
@@ -64,7 +64,7 @@ define(function (require) {
       var result = [];
       _.each(baseObject, function (o) {
         result.push(o);
-      })
+      });
       _.each(additionalProps, function (arr2obj) {
         var arr1obj = _.find(baseObject, function (arr1obj) {
           return arr1obj.name === arr2obj.name;

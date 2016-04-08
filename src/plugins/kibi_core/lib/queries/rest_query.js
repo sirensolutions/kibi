@@ -111,9 +111,6 @@ RestQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) {
           JSON.stringify(params),
           body,
           self._getUsername(options));
-      }
-
-      if (self.cache && cacheEnabled) {
         var v = self.cache.get(key);
         if (v) {
           return fulfill(v);

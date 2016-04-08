@@ -66,7 +66,7 @@ Query.prototype._getUsername = function (options) {
     return options.credentials.username;
   }
   return null;
-}
+};
 
 Query.prototype.generateCacheKey = function (prefix, query, onlyValues, valueVariableName, username) {
   var hash = crypto.createHash('sha256');

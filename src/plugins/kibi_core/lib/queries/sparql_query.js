@@ -16,6 +16,20 @@ SparqlQuery.prototype = _.create(AbstractQuery.prototype, {
   'constructor': SparqlQuery
 });
 
+SparqlQuery.prototype._executeQuery = function (query, endpointUrl, timeout) {
+  return rp({
+    method: 'GET',
+    uri: url.parse(endpointUrl),
+    qs: {
+      format: 'application/sparql-results+json',
+      query: query
+    },
+    timeout: timeout || 1000,
+    transform: function (resp) {
+      return JSON.parse(resp);
+    }
+  });
+};
 
 /**
  * Return a promise which when resolved should return true or false
@@ -53,22 +67,13 @@ SparqlQuery.prototype.checkIfItIsRelevant = function (options) {
       }
     }
 
-    return rp({
-      method: 'GET',
-      uri: url.parse(endpointUrl),
-      qs: {
-        format: 'application/sparql-results+json',
-        query: query
-      },
-      timeout: timeout || 1000,
-      transform: function (resp) {
-        var data = JSON.parse(resp);
-        if (self.cache && cacheEnabled) {
-          self.cache.set(cacheKey, data.boolean, maxAge);
-        }
-        return data;
+    return self._executeQuery(query, endpointUrl, timeout).then(function (data) {
+      if (self.cache && cacheEnabled) {
+        self.cache.set(cacheKey, data.boolean, maxAge);
       }
+      return data.boolean;
     });
+
   });
 };
 
@@ -116,51 +121,41 @@ SparqlQuery.prototype.fetchResults = function (options, onlyIds, idVariableName)
       }
     }
 
-    return rp({
-      method: 'GET',
-      uri: url.parse(endpointUrl),
-      qs: {
-        format: 'application/sparql-results+json',
-        query: query
-      },
-      timeout: timeout || 1000,
-      transform: function (resp) {
-        var data = JSON.parse(resp);
-
-        if (idVariableName) {
-          data.ids = self._extractIds(data, idVariableName);
-        } else {
-          data.ids = [];
-        }
-        data.queryActivated = true;
-
-        // here do not be tempted to store the whole config object
-        // just pick the properties you need
-        // as this data object will be cached and we do not want the cached object
-        // to be bigger than needed
-        if (!onlyIds) {
-          data.config = {
-            label: self.config.label,
-            esFieldName: self.config.esFieldName
-          };
-        } else {
-          delete data.head;
-          delete data.results;
-        }
-
-        if (self.cache && cacheEnabled) {
-          self.cache.set(cacheKey, data, maxAge);
-        }
-
-        data.debug = {
-          sentDatasourceId: self.config.datasourceId,
-          sentResultQuery: query,
-          queryExecutionTime: new Date().getTime() - start
-        };
-
-        return data;
+    return self._executeQuery(query, endpointUrl, timeout).then(function (data) {
+      if (idVariableName) {
+        data.ids = self._extractIds(data, idVariableName);
+      } else {
+        data.ids = [];
       }
+      data.queryActivated = true;
+
+      // here do not be tempted to store the whole config object
+      // just pick the properties you need
+      // as this data object will be cached and we do not want the cached object
+      // to be bigger than needed
+      if (!onlyIds) {
+        data.config = {
+          label: self.config.label,
+          esFieldName: self.config.esFieldName
+        };
+      } else {
+        delete data.head;
+        delete data.results;
+      }
+
+      if (self.cache && cacheEnabled) {
+        self.cache.set(cacheKey, data, maxAge);
+      }
+
+      data.debug = {
+        sentDatasourceId: self.config.datasourceId,
+        sentResultQuery: query,
+        queryExecutionTime: new Date().getTime() - start
+      };
+
+      return data;
     });
+
   });
 };
 
@@ -192,7 +187,5 @@ SparqlQuery.prototype._postprocessResults = function (data) {
   }
   return data;
 };
-
-
 
 module.exports = SparqlQuery;

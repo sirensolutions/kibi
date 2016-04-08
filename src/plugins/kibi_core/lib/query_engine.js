@@ -89,7 +89,7 @@ QueryEngine.prototype.loadTemplates = function () {
     return self._loadTemplates();
   }).catch(function (err) {
     self.log.warn('Could not retrieve Kibi index: ' + err);
-    setTimeout(self.loadTemplates, 500);
+    setTimeout(self.loadTemplates.bind(self), 500);
   });
 };
 
@@ -98,7 +98,7 @@ QueryEngine.prototype._isKibiIndexPresent = function () {
   var self = this;
   return self.client.cat.indices({
     index: self.config.get('kibana.index'),
-    timeout: '1000ms'
+    timeout: '2000ms'
   })
   .then(function (kibiIndex) {
     return !!kibiIndex || Promise.reject(new Error('Kibi index does not exists'));

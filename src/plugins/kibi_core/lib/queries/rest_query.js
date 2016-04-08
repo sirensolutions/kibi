@@ -102,9 +102,9 @@ RestQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) {
       var path = results.path;
 
       var key;
-      if (self.cache) {
+      if (self.cache && cacheEnabled) {
         key = self.generateCacheKey(
-          config.rest_method,
+          self.config.rest_method,
           urlS,
           path,
           JSON.stringify(headers),

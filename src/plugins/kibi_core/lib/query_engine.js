@@ -89,7 +89,7 @@ QueryEngine.prototype.loadTemplates = function () {
     self._loadTemplates();
   }).catch(function (err) {
     self.log.warn('Kibi index NOT found');
-    setTimeout(self.loadTemplates, 500);
+    setTimeout(self.loadTemplates.bind(self), 500);
   });
 };
 

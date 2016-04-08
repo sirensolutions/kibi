@@ -47,8 +47,8 @@ TinkerPop3Query.prototype.fetchResults = function (options, onlyIds, idVariableN
   var parsedTimeout = parseInt(timeout);
   if (isNaN(parsedTimeout)) {
     return Promise.reject({
-      'error': 'Invalid timeout',
-      'message': 'Invalid timeout: ' + timeout
+      error: 'Invalid timeout',
+      message: 'Invalid timeout: ' + timeout
     });
   }
   timeout = parsedTimeout;
@@ -100,6 +100,11 @@ TinkerPop3Query.prototype.fetchResults = function (options, onlyIds, idVariableN
 
       var kibiRelationsJson = JSON.parse(kibiRelations);
 
+      const parts = uri.trim().split('/');
+      const indexName = parts[0];
+      const indexType = parts[1];
+      const id = parts[2];
+
       var gremlinOptions = {
         method: 'POST',
         uri: gremlinUrl,
@@ -111,7 +116,8 @@ TinkerPop3Query.prototype.fetchResults = function (options, onlyIds, idVariableN
           query: query,
           relationsIndices: kibiRelationsJson.relationsIndices,
           indices: indices,
-          credentials: options.credentials
+          credentials: options.credentials,
+          entities: [ { id, indexName, indexType } ]
         },
         timeout: timeout
       };

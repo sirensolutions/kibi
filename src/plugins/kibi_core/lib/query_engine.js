@@ -103,7 +103,7 @@ QueryEngine.prototype._isKibiIndexPresent =  function () {
     headers: {
       'content-type': 'application/json'
     },
-    timeout: 1000
+    timeout: 2000
   }).then(function (indexes) {
     var kibiIndex = _.find(indexes, function (index) {
       return index.index === self.config.get('kibana.index');

@@ -72,7 +72,7 @@ define(function (require) {
               globalState.k.s = sessionId;
               globalState.save();
             } else if (globalState.k && globalState.k.s && globalState.k.s !== sessionId) {
-              kibiSessionHelper.copySessionFrom(globalState.k.s).then(function (savedSession) {
+              kibiSessionHelper._copySessionFrom(globalState.k.s).then(function (savedSession) {
                 globalState.k.s = savedSession.id;
                 globalState.save();
               }).catch(notify.error);

@@ -68,7 +68,7 @@ SparqlQuery.prototype.checkIfItIsRelevant = function (options) {
     }
 
     return self._executeQuery(query, endpointUrl, timeout).then(function (data) {
-      var relevant = data.boolean === true ? true: false;
+      var relevant = data.boolean === true ? true : false;
       if (self.cache && cacheEnabled) {
         self.cache.set(cacheKey, relevant, maxAge);
       }

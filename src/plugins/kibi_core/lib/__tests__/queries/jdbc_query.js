@@ -1,6 +1,7 @@
 var Promise = require('bluebird');
 var expect = require('expect.js');
 var sinon = require('sinon');
+var JdbcQuery = require('../../queries/jdbc_query');
 
 var fakeServer = {
   log: function (tags, data) {},
@@ -28,36 +29,35 @@ var fakeServer = {
   }
 };
 
+var cacheMock = {
+  get: function (key) { return '';},
+  set: function (key, value, time) {}
+};
 
+var queryDefinition = {
+  activationQuery: 'select * from x LIMIT 1',
+  resultQuery: 'select * from x',
+  datasource: {
+    datasourceClazz: {
+      datasource: {
+        datasourceParams: {
+          connectionString: 'connectionString',
+          cache_enabled: true
+        }
+      },
+      populateParameters: function () {
+        return '';
+      }
+    }
+  }
+};
 
 describe('JdbcQuery', function () {
 
-  describe('fetchResults test if correct arguments are passed to generateCacheKey', function () {
-    it('simple query', function (done) {
+  describe('correct arguments are passed to generateCacheKey', function () {
 
-      var cacheMock = {
-        get: function (key) { return '';},
-        set: function (key, value, time) {}
-      };
-
-      var JdbcQuery = require('../../queries/jdbc_query');
-      var jdbcQuery = new JdbcQuery(fakeServer, {
-        activationQuery: '',
-        resultQuery: 'select * from x',
-        datasource: {
-          datasourceClazz: {
-            datasource: {
-              datasourceParams: {
-                connectionString: 'connectionString',
-                cache_enabled: true
-              }
-            },
-            populateParameters: function () {
-              return '';
-            }
-          }
-        }
-      }, cacheMock);
+    it('fetchResults', function (done) {
+      var jdbcQuery = new JdbcQuery(fakeServer, queryDefinition, cacheMock);
 
       // stub _init to skip initialization
       sinon.stub(jdbcQuery, '_init', function () {
@@ -81,8 +81,36 @@ describe('JdbcQuery', function () {
         jdbcQuery.generateCacheKey.restore();
         done();
       }).catch(done);
-
     });
+
+    it('checkIfItIsRelevant', function (done) {
+      var jdbcQuery = new JdbcQuery(fakeServer, queryDefinition, cacheMock);
+
+      // stub _init to skip initialization
+      sinon.stub(jdbcQuery, '_init', function () {
+        return Promise.resolve(true);
+      });
+      // stub _execute queryto skip query execution
+      sinon.stub(jdbcQuery, '_executeQuery', function () {
+        return Promise.resolve({result: []});
+      });
+
+      var spy = sinon.spy(jdbcQuery, 'generateCacheKey');
+
+      jdbcQuery.checkIfItIsRelevant({credentials: {username: 'fred'}}).then(function (res) {
+        expect(res).to.equal(false);
+        expect(spy.callCount).to.equal(1);
+
+        expect(spy.calledWithExactly('connectionString', 'select * from x LIMIT 1', 'fred')).to.be.ok();
+
+        jdbcQuery._init.restore();
+        jdbcQuery._executeQuery.restore();
+        jdbcQuery.generateCacheKey.restore();
+        done();
+      }).catch(done);
+    });
+
+
   });
 
 });

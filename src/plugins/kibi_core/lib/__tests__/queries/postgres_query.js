@@ -1,6 +1,7 @@
 var Promise = require('bluebird');
 var expect = require('expect.js');
 var sinon = require('sinon');
+var PostgresQuery = require('../../queries/postgres_query');
 
 var fakeServer = {
   log: function (tags, data) {},
@@ -28,43 +29,40 @@ var fakeServer = {
   }
 };
 
+var cacheMock = {
+  get: function (key) { return '';},
+  set: function (key, value, time) {}
+};
 
+var queryDefinition = {
+  activationQuery: 'select * from x LIMIT 1',
+  resultQuery: 'select * from x',
+  datasource: {
+    datasourceClazz: {
+      getConnectionString: function () { return 'connectionString';},
+      datasource: {
+        datasourceParams: {
+          cache_enabled: true,
+          host: 'localhost',
+          dbname: 'mydb'
+        }
+      },
+      populateParameters: function () {
+        return '';
+      }
+    }
+  }
+};
 
 describe('PostgresQuery', function () {
 
-  describe('fetchResults test if correct arguments are passed to generateCacheKey', function () {
-    it('simple query', function (done) {
+  describe('correct arguments are passed to generateCacheKey', function () {
 
-      var cacheMock = {
-        get: function (key) { return '';},
-        set: function (key, value, time) {}
-      };
-
-      var PostgresQuery = require('../../queries/postgres_query');
-      var postgresQuery = new PostgresQuery(fakeServer, {
-        resultQuery: 'select * from x',
-        activationQuery: '',
-        datasource: {
-          datasourceClazz: {
-            getConnectionString: function () { return 'connectionString';},
-            datasource: {
-              datasourceParams: {
-                cache_enabled: true,
-                host: 'localhost',
-                dbname: 'mydb'
-              }
-            },
-            populateParameters: function () {
-              return '';
-            }
-          }
-        }
-      }, cacheMock);
-
-      // stub _init to skip initialization
+    it('fetchResults', function (done) {
+      var postgresQuery = new PostgresQuery(fakeServer, queryDefinition, cacheMock);
       // stub _execute queryto skip query execution
       sinon.stub(postgresQuery, '_executeQuery', function () {
-        return Promise.resolve({result: {}});
+        return Promise.resolve({fields: [], rows: []});
       });
 
       var spy = sinon.spy(postgresQuery, 'generateCacheKey');
@@ -79,8 +77,29 @@ describe('PostgresQuery', function () {
         postgresQuery.generateCacheKey.restore();
         done();
       }).catch(done);
-
     });
+
+    it('checkIfItIsRelevant', function (done) {
+      var postgresQuery = new PostgresQuery(fakeServer, queryDefinition, cacheMock);
+      // stub _execute queryto skip query execution
+      sinon.stub(postgresQuery, '_executeQuery', function () {
+        return Promise.resolve({fields: [], rows: []});
+      });
+
+      var spy = sinon.spy(postgresQuery, 'generateCacheKey');
+
+      postgresQuery.checkIfItIsRelevant({credentials: {username: 'fred'}}).then(function (res) {
+        expect(res).to.equal(false);
+        expect(spy.callCount).to.equal(1);
+
+        expect(spy.calledWithExactly('localhostmydb', 'select * from x LIMIT 1', 'fred')).to.be.ok();
+
+        postgresQuery._executeQuery.restore();
+        postgresQuery.generateCacheKey.restore();
+        done();
+      }).catch(done);
+    });
+
   });
 
 });

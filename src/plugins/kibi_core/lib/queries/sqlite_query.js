@@ -75,9 +75,10 @@ SQLiteQuery.prototype.openConnection = function () {
 
 
 SQLiteQuery.prototype._executeQuery = function (query) {
+  var self = this;
   return new Promise(function (fulfill, reject) {
     self.openConnection().then(function (connection) {
-      connection.get(query, function (error, result) {
+      connection.all(query, function (error, result) {
 
         if (error) {
           reject(self._augmentError(error));
@@ -128,8 +129,8 @@ SQLiteQuery.prototype.checkIfItIsRelevant = function (options) {
       }
     }
 
-    return self._executeQuery(query).then(function (result) {
-      var data = result ? true : false;
+    return self._executeQuery(query).then(function (results) {
+      var data = results.length > 0;
 
       if (self.cache && cacheEnabled) {
         self.cache.set(cacheKey, data, maxAge);
@@ -163,7 +164,6 @@ SQLiteQuery.prototype.fetchResults = function (options, onlyIds, idVariableName)
   return self.queryHelper.replaceVariablesUsingEsDocument(this.config.resultQuery, uri, options.credentials).then(function (query) {
 
     var cacheKey = null;
-
     if (self.cache && cacheEnabled) {
       cacheKey = self.generateCacheKey(dbfile, query, onlyIds, idVariableName, self._getUsername(options));
       var v =  self.cache.get(cacheKey);
@@ -174,6 +174,7 @@ SQLiteQuery.prototype.fetchResults = function (options, onlyIds, idVariableName)
     }
 
     return self._executeQuery(query).then(function (rows) {
+
       var data = {
         ids: [],
         queryActivated: true

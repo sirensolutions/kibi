@@ -62,6 +62,52 @@ JdbcQuery.prototype._closeConnection = function (conn) {
   }, 100);
 };
 
+JdbcQuery.prototype._executeQuery = function (query) {
+  var self = this;
+  return new Promise(function (fulfill, reject) {
+    self.jdbc.reserve(function (err, connObj) {
+      if (err) {
+        reject(err);
+      }
+      if (connObj) {
+        // Grab the Connection for use.
+        var conn = connObj.conn;
+        conn.createStatement(function (err, statement) {
+          if (err) {
+            reject(err);
+          }
+          statement.executeQuery(query, function (err, resultset) {
+            if (err) {
+              if (err.message) {
+                err = {
+                  error: err,
+                  message: err.message
+                };
+              }
+              reject(err);
+            }
+
+            resultset.toObjArray(function (err, results) {
+              if (err) {
+                reject(err);
+              }
+              fulfill(results);
+              self.jdbc.release(connObj, function (err) {
+                if (err) {
+                  self.logger.erro(err);
+                }
+              });
+
+            });
+          });
+        });
+      } else {
+        reject(new Error ('No connection object'));
+      }
+    });
+  });
+};
+
 /*
  * Return a promise which when resolved should return true or false
  */
@@ -78,7 +124,8 @@ JdbcQuery.prototype.checkIfItIsRelevant = function (options) {
 
     // here do not use getConnectionString method as it might contain sensitive information like decrypted password
     var connectionString = self.config.datasource.datasourceClazz.datasource.datasourceParams.connectionString;
-    var maxAge = self.config.datasource.datasourceClazz.datasource.datasourceParams.maxAge;
+    var maxAge = self.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
+    var cacheEnabled = self.config.datasource.datasourceClazz.datasource.datasourceParams.cache_enabled;
 
     return self.queryHelper.replaceVariablesUsingEsDocument(self.config.activationQuery, uri, options.credentials).then(function (query) {
 
@@ -88,60 +135,20 @@ JdbcQuery.prototype.checkIfItIsRelevant = function (options) {
 
       var cacheKey = null;
 
-      if (self.cache) {
-        cacheKey = self.generateCacheKey(connectionString, query);
+      if (self.cache && cacheEnabled) {
+        cacheKey = self.generateCacheKey(connectionString, query, self._getUsername(options));
         var v = self.cache.get(cacheKey);
         if (v) {
           return Promise.resolve(v);
         }
       }
 
-      return new Promise(function (fulfill, reject) {
-        self.jdbc.reserve(function (err, connObj) {
-          if (err) {
-            reject(err);
-          }
-          if (connObj) {
-            // Grab the Connection for use.
-            var conn = connObj.conn;
-            conn.createStatement(function (err, statement) {
-              if (err) {
-                reject(err);
-              }
-              statement.executeQuery(query, function (err, resultset) {
-                if (err) {
-                  if (err.message) {
-                    err = {
-                      error: err,
-                      message: err.message
-                    };
-                  }
-                  reject(err);
-                }
-
-                resultset.toObjArray(function (err, results) {
-                  if (err) {
-                    reject(err);
-                  }
-                  var data = results.length > 0 ? true : false;
-                  if (self.cache) {
-                    self.cache.set(cacheKey, data, maxAge);
-                  }
-                  fulfill(data);
-                  self.jdbc.release(connObj, function (err) {
-                    if (err) {
-                      self.logger.error(err);
-                    }
-                  });
-
-                });
-              });
-            });
-
-          } else {
-            reject(new Error ('No connection object'));
-          }
-        });
+      return self._executeQuery(query).then(function (results) {
+        var data = results.length > 0 ? true : false;
+        if (self.cache && cacheEnabled) {
+          self.cache.set(cacheKey, data, maxAge);
+        }
+        return data;
       });
     });
   });
@@ -161,14 +168,13 @@ JdbcQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) {
     var uri = options.selectedDocuments && options.selectedDocuments.length > 0 ? options.selectedDocuments[0] : '';
 
     var connectionString = self.config.datasource.datasourceClazz.datasource.datasourceParams.connectionString;
-    var maxAge = self.config.datasource.datasourceClazz.datasource.datasourceParams.maxAge;
+    var maxAge = self.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
+    var cacheEnabled = self.config.datasource.datasourceClazz.datasource.datasourceParams.cache_enabled;
 
     return self.queryHelper.replaceVariablesUsingEsDocument(self.config.resultQuery, uri, options.credentials).then(function (query) {
-
       var cacheKey = null;
-
-      if (self.cache) {
-        cacheKey = self.generateCacheKey(connectionString, query, onlyIds, idVariableName);
+      if (self.cache && cacheEnabled) {
+        cacheKey = self.generateCacheKey(connectionString, query, onlyIds, idVariableName, self._getUsername(options));
         var v =  self.cache.get(cacheKey);
         if (v) {
           v.queryExecutionTime = new Date().getTime() - start;
@@ -176,106 +182,62 @@ JdbcQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) {
         }
       }
 
-      return new Promise(function (fulfill, reject) {
+      return self._executeQuery(query).then(function (results) {
+        // =============== here process the data ============
+        var data = {
+          ids: [],
+          queryActivated: true
+        };
 
-        self.jdbc.reserve(function (err, connObj) {
-          if (err) {
-            reject(err);
-          }
-          if (connObj) {
-            // Grab the Connection for use.
-            var conn = connObj.conn;
-            conn.createStatement(function (err, statement) {
-              if (err) {
-                reject(err);
+        if (!onlyIds) {
+          var fields;
+
+          data.head = {
+            vars: []
+          };
+          data.config = {
+            label: self.config.label,
+            esFieldName: self.config.esFieldName
+          };
+          data.results = {
+            bindings: _.map(results, function (row) {
+              var res = {};
+
+              if (!fields) {
+                fields = Object.keys(row);
               }
-              statement.executeQuery(query, function (err, resultset) {
-                if (err) {
-                  if (err.message) {
-                    err = {
-                      error: err,
-                      message: err.message
-                    };
-                  }
-                  reject(err);
+              for (var v in row) {
+                if (row.hasOwnProperty(v)) {
+                  res[v] = {
+                    type: 'unknown', // the driver does not return any information about the fields
+                    value: row[v]
+                  };
                 }
+              }
+              return res;
+            })
+          };
 
-                resultset.toObjArray(function (err, results) {
-                  if (err) {
-                    reject(err);
-                  }
-
-                  // =============== here process the data ============
-                  var data = {
-                    ids: [],
-                    queryActivated: true
-                  };
-
-                  if (!onlyIds) {
-                    var fields;
-
-                    data.head = {
-                      vars: []
-                    };
-                    data.config = {
-                      label: self.config.label,
-                      esFieldName: self.config.esFieldName
-                    };
-                    data.results = {
-                      bindings: _.map(results, function (row) {
-                        var res = {};
-
-                        if (!fields) {
-                          fields = Object.keys(row);
-                        }
-                        for (var v in row) {
-                          if (row.hasOwnProperty(v)) {
-                            res[v] = {
-                              type: 'unknown', // the driver does not return any information about the fields
-                              value: row[v]
-                            };
-                          }
-                        }
-                        return res;
-                      })
-                    };
-
-                    if (fields) {
-                      data.head.vars = fields;
-                    }
-                  }
-
-                  if (idVariableName) {
-                    data.ids = self._extractIdsFromSql(results, idVariableName);
-                  }
-
-                  if (self.cache) {
-                    self.cache.set(cacheKey, data, maxAge);
-                  }
-
-                  data.debug = {
-                    sentDatasourceId: self.config.datasourceId,
-                    sentResultQuery: query,
-                    queryExecutionTime: new Date().getTime() - start
-                  };
-
-                  fulfill(data);
-                  // =============== here process the data ============
-
-                  self.jdbc.release(connObj, function (err) {
-                    if (err) {
-                      self.logger.erro(err);
-                    }
-                  });
-
-                });
-              });
-            });
-
-          } else {
-            reject(new Error ('No connection object'));
+          if (fields) {
+            data.head.vars = fields;
           }
-        });
+        }
+
+        if (idVariableName) {
+          data.ids = self._extractIdsFromSql(results, idVariableName);
+        }
+
+        if (self.cache && cacheEnabled) {
+          self.cache.set(cacheKey, data, maxAge);
+        }
+
+        data.debug = {
+          sentDatasourceId: self.config.datasourceId,
+          sentResultQuery: query,
+          queryExecutionTime: new Date().getTime() - start
+        };
+        return data;
+        // =============== here process the data ============
       });
     });
   });

@@ -10,6 +10,15 @@
       "placeholder": "Timeout in ms"
     },
     {
+      "name": "cache_enabled",
+      "inputType": "checkbox",
+      "required": false,
+      "multivalued": false,
+      "encrypted": false,
+      "defaultValue": false,
+      "placeholder": "Enable server side cache for this datasource"
+    },
+    {
       "name": "max_age",
       "inputType": "text",
       "required": false,

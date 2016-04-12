@@ -16,6 +16,20 @@ SparqlQuery.prototype = _.create(AbstractQuery.prototype, {
   'constructor': SparqlQuery
 });
 
+SparqlQuery.prototype._executeQuery = function (query, endpointUrl, timeout) {
+  return rp({
+    method: 'GET',
+    uri: url.parse(endpointUrl),
+    qs: {
+      format: 'application/sparql-results+json',
+      query: query
+    },
+    timeout: timeout || 1000,
+    transform: function (resp) {
+      return JSON.parse(resp);
+    }
+  });
+};
 
 /**
  * Return a promise which when resolved should return true or false
@@ -31,7 +45,8 @@ SparqlQuery.prototype.checkIfItIsRelevant = function (options) {
 
   var endpointUrl = this.config.datasource.datasourceClazz.datasource.datasourceParams.endpoint_url;
   var timeout = this.config.datasource.datasourceClazz.datasource.datasourceParams.timeout;
-  var maxAge = this.config.datasource.datasourceClazz.datasource.datasourceParams.maxAge;
+  var maxAge = this.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
+  var cacheEnabled = this.config.datasource.datasourceClazz.datasource.datasourceParams.cache_enabled;
 
   return self.queryHelper.replaceVariablesUsingEsDocument(
     this.config.activationQuery, uri, options.credentials
@@ -44,30 +59,22 @@ SparqlQuery.prototype.checkIfItIsRelevant = function (options) {
     var query = self.config.prefixesString + ' ' + queryNoPrefixes;
     var cacheKey = null;
 
-    if (self.cache) {
-      cacheKey = self.generateCacheKey(endpointUrl, query);
+    if (self.cache && cacheEnabled) {
+      cacheKey = self.generateCacheKey(endpointUrl, query, self._getUsername(options));
       var v = self.cache.get(cacheKey);
       if (v) {
         return Promise.resolve(v);
       }
     }
 
-    return rp({
-      method: 'GET',
-      uri: url.parse(endpointUrl),
-      qs: {
-        format: 'application/sparql-results+json',
-        query: query
-      },
-      timeout: timeout || 1000,
-      transform: function (resp) {
-        var data = JSON.parse(resp);
-        if (self.cache) {
-          self.cache.set(cacheKey, data.boolean, maxAge);
-        }
-        return data;
+    return self._executeQuery(query, endpointUrl, timeout).then(function (data) {
+      var relevant = data.boolean === true ? true : false;
+      if (self.cache && cacheEnabled) {
+        self.cache.set(cacheKey, relevant, maxAge);
       }
+      return relevant;
     });
+
   });
 };
 
@@ -99,14 +106,15 @@ SparqlQuery.prototype.fetchResults = function (options, onlyIds, idVariableName)
 
   var endpointUrl = this.config.datasource.datasourceClazz.datasource.datasourceParams.endpoint_url;
   var timeout = this.config.datasource.datasourceClazz.datasource.datasourceParams.timeout;
-  var maxAge = this.config.datasource.datasourceClazz.datasource.datasourceParams.maxAge;
+  var maxAge = this.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
+  var cacheEnabled = this.config.datasource.datasourceClazz.datasource.datasourceParams.cache_enabled;
 
   return self.queryHelper.replaceVariablesUsingEsDocument(this.config.resultQuery, uri, options.credentials).then(function (query) {
 
     var cacheKey = null;
 
-    if (self.cache) {
-      cacheKey = self.generateCacheKey(endpointUrl, query, onlyIds, idVariableName);
+    if (self.cache && cacheEnabled) {
+      cacheKey = self.generateCacheKey(endpointUrl, query, onlyIds, idVariableName, self._getUsername(options));
       var v =  self.cache.get(cacheKey);
       if (v) {
         v.queryExecutionTime = new Date().getTime() - start;
@@ -114,51 +122,41 @@ SparqlQuery.prototype.fetchResults = function (options, onlyIds, idVariableName)
       }
     }
 
-    return rp({
-      method: 'GET',
-      uri: url.parse(endpointUrl),
-      qs: {
-        format: 'application/sparql-results+json',
-        query: query
-      },
-      timeout: timeout || 1000,
-      transform: function (resp) {
-        var data = JSON.parse(resp);
-
-        if (idVariableName) {
-          data.ids = self._extractIds(data, idVariableName);
-        } else {
-          data.ids = [];
-        }
-        data.queryActivated = true;
-
-        // here do not be tempted to store the whole config object
-        // just pick the properties you need
-        // as this data object will be cached and we do not want the cached object
-        // to be bigger than needed
-        if (!onlyIds) {
-          data.config = {
-            label: self.config.label,
-            esFieldName: self.config.esFieldName
-          };
-        } else {
-          delete data.head;
-          delete data.results;
-        }
-
-        if (self.cache) {
-          self.cache.set(cacheKey, data, maxAge);
-        }
-
-        data.debug = {
-          sentDatasourceId: self.config.datasourceId,
-          sentResultQuery: query,
-          queryExecutionTime: new Date().getTime() - start
-        };
-
-        return data;
+    return self._executeQuery(query, endpointUrl, timeout).then(function (data) {
+      if (idVariableName) {
+        data.ids = self._extractIds(data, idVariableName);
+      } else {
+        data.ids = [];
       }
+      data.queryActivated = true;
+
+      // here do not be tempted to store the whole config object
+      // just pick the properties you need
+      // as this data object will be cached and we do not want the cached object
+      // to be bigger than needed
+      if (!onlyIds) {
+        data.config = {
+          label: self.config.label,
+          esFieldName: self.config.esFieldName
+        };
+      } else {
+        delete data.head;
+        delete data.results;
+      }
+
+      if (self.cache && cacheEnabled) {
+        self.cache.set(cacheKey, data, maxAge);
+      }
+
+      data.debug = {
+        sentDatasourceId: self.config.datasourceId,
+        sentResultQuery: query,
+        queryExecutionTime: new Date().getTime() - start
+      };
+
+      return data;
     });
+
   });
 };
 
@@ -190,7 +188,5 @@ SparqlQuery.prototype._postprocessResults = function (data) {
   }
   return data;
 };
-
-
 
 module.exports = SparqlQuery;

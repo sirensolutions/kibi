@@ -25,7 +25,7 @@ function QueryEngine(server) {
   this.client = server.plugins.elasticsearch.client;
 }
 
-QueryEngine.prototype._init = function (enableCache = false, cacheSize = 500, cacheMaxAge = 1000 * 60 * 60) {
+QueryEngine.prototype._init = function (cacheSize = 500, enableCache = true, cacheMaxAge = 1000 * 60 * 60) {
   // populate an array templatesDefinitions which contain templatesdefinition objects
   var self = this;
 
@@ -89,7 +89,7 @@ QueryEngine.prototype.loadTemplates = function () {
     return self._loadTemplates();
   }).catch(function (err) {
     self.log.warn('Could not retrieve Kibi index: ' + err);
-    setTimeout(self.loadTemplates, 500);
+    setTimeout(self.loadTemplates.bind(self), 500);
   });
 };
 
@@ -98,7 +98,7 @@ QueryEngine.prototype._isKibiIndexPresent = function () {
   var self = this;
   return self.client.cat.indices({
     index: self.config.get('kibana.index'),
-    timeout: '1000ms'
+    timeout: '2000ms'
   })
   .then(function (kibiIndex) {
     return !!kibiIndex || Promise.reject(new Error('Kibi index does not exists'));

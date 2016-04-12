@@ -1,4 +1,4 @@
-var AbstractQuery = require('../queries/abstract_query');
+var AbstractQuery = require('../../queries/abstract_query');
 var Promise = require('bluebird');
 var expect = require('expect.js');
 var sinon = require('sinon');

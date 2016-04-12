@@ -1,7 +1,7 @@
 var mockery = require('mockery');
 var Promise = require('bluebird');
 var expect = require('expect.js');
-var restQuery;
+var sinon = require('sinon');
 
 var fakeServer = {
   log: function (tags, data) {},
@@ -234,6 +234,30 @@ var fakeTinkerpop3Result = {
   html: ''
 };
 
+var cacheMock = {
+  get: function (key) { return '';},
+  set: function (key, value, time) {}
+};
+
+var queryDefinition = {
+  activationQuery: '',
+  rest_method: 'GET',
+  datasource: {
+    datasourceClazz: {
+      datasource: {
+        datasourceParams: {
+          url: 'http://localhost:3000/graph/query',
+          cache_enabled: true
+        }
+      },
+      populateParameters: function () {
+        return '';
+      }
+    }
+  }
+};
+
+
 describe('TinkerPop3Query', function () {
 
   before(function (done) {
@@ -265,7 +289,7 @@ describe('TinkerPop3Query', function () {
   describe('fetchResults', function () {
 
     it('simple get request', function (done) {
-      var TinkerPop3Query = require('../queries/tinkerpop3_query');
+      var TinkerPop3Query = require('../../queries/tinkerpop3_query');
       var tinkerPop3Query = new TinkerPop3Query(fakeServer, {
         activationQuery: '',
         rest_method: 'GET',
@@ -289,4 +313,41 @@ describe('TinkerPop3Query', function () {
       });
     });
   });
+
+  describe('correct arguments are passed to generateCacheKey', function () {
+
+    it('fetchResults', function (done) {
+      var TinkerPop3Query = require('../../queries/tinkerpop3_query');
+      var tinkerPop3Query = new TinkerPop3Query(fakeServer, queryDefinition, cacheMock);
+
+      var spy = sinon.spy(tinkerPop3Query, 'generateCacheKey');
+
+      tinkerPop3Query.fetchResults({credentials: {username: 'fred'}}).then(function (res) {
+        expect(res.result).to.eql(fakeTinkerpop3Result);
+        expect(spy.callCount).to.equal(1);
+        expect(spy.calledWithExactly('http://localhost:3000/graph/query', '', undefined, undefined, 'fred')).to.be.ok();
+
+        tinkerPop3Query.generateCacheKey.restore();
+        done();
+      });
+    });
+
+    it('checkIfItIsRelevant', function (done) {
+      var TinkerPop3Query = require('../../queries/tinkerpop3_query');
+      var tinkerPop3Query = new TinkerPop3Query(fakeServer, queryDefinition, cacheMock);
+
+      var spy = sinon.spy(tinkerPop3Query, 'generateCacheKey');
+
+      tinkerPop3Query.checkIfItIsRelevant({credentials: {username: 'fred'}}).then(function (res) {
+
+        expect(res).to.eql(true);
+        expect(spy.callCount).to.equal(0);
+
+        tinkerPop3Query.generateCacheKey.restore();
+        done();
+      });
+    });
+
+  });
+
 });

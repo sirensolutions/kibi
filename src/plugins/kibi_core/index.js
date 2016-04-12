@@ -86,10 +86,7 @@ module.exports = function (kibana) {
         datasource_encryption_key: Joi.string().default('iSxvZRYisyUW33FreTBSyJJ34KpEquWznUPDvn+ka14='),
 
         datasources_schema: Joi.any().default(datasourcesSchema),
-
-        datasource_enable_cache: Joi.boolean().default(true),
         datasource_cache_size: Joi.number().default(500),
-        datasource_cache_max_age: Joi.number().default(3600),
 
         default_dashboard_id: Joi.string().allow('').default('')
       }).default();
@@ -97,17 +94,11 @@ module.exports = function (kibana) {
 
     init: function (server, options) {
       const config = server.config();
-      var datasourceEnableCache = config.get('kibi_core.datasource_enable_cache');
       var datasourceCacheSize   = config.get('kibi_core.datasource_cache_size');
-      var datasourceCacheMaxAge = config.get('kibi_core.datasource_cache_max_age');
 
       this.status.yellow('Initialising the query engine');
       queryEngine = new QueryEngine(server);
-      queryEngine._init(
-          datasourceEnableCache,
-          datasourceCacheSize,
-          datasourceCacheMaxAge
-      ).then((data) => {
+      queryEngine._init(datasourceCacheSize).then((data) => {
         this.status.green('Query engine initialized');
         server.log(['info','kibi_core'], data);
       }).catch((err) => {

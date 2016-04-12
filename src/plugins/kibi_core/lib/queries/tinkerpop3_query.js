@@ -68,20 +68,7 @@ TinkerPop3Query.prototype.fetchResults = function (options, onlyIds, idVariableN
       }
     }
 
-    return Promise.all([
-      self.queryHelper.fetchDocuments('index-pattern'),
-      self.queryHelper.fetchDocuments('config')
-    ]).then(function (results) {
-      var patternHits = results[0];
-      var configHits = results[1];
-
-      var indices = null;
-      if (patternHits.hits.total > 0) {
-        indices = _.map(patternHits.hits.hits, function (hit) {
-          return hit._id;
-        });
-      }
-
+    return self.queryHelper.fetchDocuments('config').then(function (configHits) {
       var kibiRelations = null;
       var serverVersion = self.server.config().get('pkg').version;
       var configDocs = [];
@@ -116,7 +103,6 @@ TinkerPop3Query.prototype.fetchResults = function (options, onlyIds, idVariableN
         json: {
           query: query,
           relationsIndices: kibiRelationsJson.relationsIndices,
-          indices: indices,
           credentials: options.credentials,
           entities: [ { id, indexName, indexType } ]
         },

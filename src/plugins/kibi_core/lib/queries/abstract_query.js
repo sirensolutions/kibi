@@ -226,7 +226,7 @@ Query.prototype.getHtml = function (queryDef, options) {
       // template compiled with errors
       that.log.error(err);
       return Promise.resolve({
-        error: err.toString(),
+        error: err,
         data: data
       });
     });

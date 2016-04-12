@@ -1,5 +1,6 @@
 var http = require('http');
 var path = require('path');
+var Boom = require('boom');
 
 module.exports = function (kibana) {
 
@@ -79,8 +80,15 @@ module.exports = function (kibana) {
             password: Joi.string().default('')
           })
         }),
-        gremlin_server_path: Joi.string().allow('').default(''),
-        gremlin_server_port: Joi.number().default(8080),
+        gremlin_server: Joi.object({
+          path: Joi.string().allow('').default(''),
+          url: Joi.string().default('http://127.0.0.1:8080'),
+          ssl: Joi.object({
+            key_store: Joi.string().default(''),
+            key_store_password: Joi.string().default(''),
+            ca: Joi.string().allow('').default('')
+          })
+        }),
 
         datasource_encryption_algorithm: Joi.string().default('AES-GCM'),
         datasource_encryption_key: Joi.string().default('iSxvZRYisyUW33FreTBSyJJ34KpEquWznUPDvn+ka14='),
@@ -141,6 +149,27 @@ module.exports = function (kibana) {
         }
       });
 
+      server.route({
+        method: 'GET',
+        path:'/gremlin',
+        handler: function (req, reply) {
+          queryEngine._getDatasourceFromEs(req.query.datasourceId)
+          .then((datasource) => {
+            const config = server.config();
+            const params = JSON.parse(datasource.datasourceParams);
+            params.credentials = null;
+            if (config.has('shield.cookieName')) {
+              const { username, password } = req.state[config.get('shield.cookieName')];
+              params.credentials = { username, password };
+            }
+
+            return queryEngine.gremlin(params, JSON.parse(req.query.options));
+          })
+          .then(reply)
+          .catch((err) => reply(Boom.create(err.statusCode, err.error.message, err.error.stack)));
+        }
+      });
+
       // Adding a route to serve static content for enterprise modules.
       server.route({
         method: 'GET',
@@ -148,46 +177,6 @@ module.exports = function (kibana) {
         handler: {
           directory: {
             path: path.normalize(__dirname + '../../../../installedPlugins/')
-          }
-        }
-      });
-
-      server.route({
-        method: ['GET', 'POST'],
-        path: '/datasource/{id}/proxy/',
-        handler: {
-          kibi_proxy: {
-            modifyPayload: (request) => {
-              const req = request.raw.req;
-              return new Promise((fulfill, reject) => {
-                const chunks = [];
-                req.on('error', reject);
-                req.on('data', (chunk) => chunks.push(chunk));
-                req.on('end', () => {
-                  const body = JSON.parse(Buffer.concat(chunks));
-                  var config = server.config();
-                  if (config.has('shield.cookieName')) {
-                    body.credentials = request.state[config.get('shield.cookieName')];
-                  }
-                  fulfill({ payload: new Buffer(JSON.stringify(body)) });
-                });
-              });
-            },
-            mapUri: function (req, callback) {
-              queryEngine._getDatasourceFromEs(req.params.id).then(function (datasource) {
-                if (datasource === null) {
-                  callback(new Error('Datasource not found'));
-                }
-                if (datasource.datasourceType === 'tinkerpop3') {
-                  callback(null, JSON.parse(datasource.datasourceParams).url);
-                } else {
-                  callback(new Error(`Proxy not available for the ${datasource.datasourceType} datasource`));
-                }
-              });
-            },
-            passThrough: true,
-            agent: new http.Agent(),
-            xforward: true
           }
         }
       });

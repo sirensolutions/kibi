@@ -139,7 +139,7 @@ describe('Kibi Components', function () {
         };
         $cookies.remove('ksid');
 
-        kibiSessionHelper.copySessionFrom('fromId').then(function (savedSession) {
+        kibiSessionHelper._copySessionFrom('fromId').then(function (savedSession) {
           expect(savedSession.session_data.secret).to.eql(42);
           expect(savedSession.id).to.eql(expectedId);
           expect($cookies.get('ksid')).to.eql(expectedId);

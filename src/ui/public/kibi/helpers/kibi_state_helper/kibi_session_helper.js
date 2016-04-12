@@ -29,7 +29,7 @@ define(function (require) {
             savedSession.id = self.id;
             savedSession.session_data = {};
             savedSession.timeCreated = new Date();
-            self.updateOrCreate(savedSession).then(function () {
+            self._updateOrCreate(savedSession).then(function () {
               self.initialized = true;
               fulfill(self.id);
             }).catch(reject);
@@ -65,11 +65,11 @@ define(function (require) {
       var self = this;
       return self.getId().then(savedSessions.get).then(function (savedSession) {
         savedSession.session_data = data;
-        return self.updateOrCreate(savedSession);
+        return self._updateOrCreate(savedSession);
       });
     };
 
-    KibiSessionHelper.prototype.updateOrCreate = function (savedSession) {
+    KibiSessionHelper.prototype._updateOrCreate = function (savedSession) {
       return new Promise(function (fulfill, reject) {
         savedSession.delete().then(function () {
           savedSession.save().then(function () {
@@ -93,13 +93,13 @@ define(function (require) {
       this.initialized = false;
     };
 
-    KibiSessionHelper.prototype.copySessionFrom = function (idFrom) {
+    KibiSessionHelper.prototype._copySessionFrom = function (idFrom) {
       var self = this;
       self.destroy();
       return self.getId().then((toId) => {
         return Promise.all([savedSessions.get(toId), savedSessions.get(idFrom)]).then(([toSavedSession, fromSavedSession]) => {
           toSavedSession.session_data = fromSavedSession.session_data;
-          return self.updateOrCreate(toSavedSession);
+          return self._updateOrCreate(toSavedSession);
         });
       });
     };

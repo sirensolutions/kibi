@@ -42,24 +42,14 @@ define(function (require) {
       return this._makeRequestToServer('/getQueriesHtml', queryDefs, options);
     };
 
+    QueryEngineClient.prototype.gremlin = function (datasourceId, options) {
+      return $http.get(chrome.getBasePath() + '/gremlin', { params: { options, datasourceId } });
+    };
+
     QueryEngineClient.prototype.clearCache = function () {
       return $http.get(chrome.getBasePath() + '/clearCache');
     };
 
-    QueryEngineClient.prototype.proxy = function (datasourceId, options) {
-      if (!options.path) {
-        options.path = '/';
-      }
-      if (options.path.substr(0, 1) !== '/') {
-        options.path = '/' + options.path;
-      }
-      var proxyOptions = {
-        method: options.method | 'GET',
-        url: chrome.getBasePath() + '/datasource/' + datasourceId + '/proxy' + options.path
-      };
-      _.assign(proxyOptions, options);
-      return $http(proxyOptions);
-    };
     return new QueryEngineClient();
   });
 });

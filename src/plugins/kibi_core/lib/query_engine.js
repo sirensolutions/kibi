@@ -1,3 +1,4 @@
+var rp = require('request-promise');
 var Promise = require('bluebird');
 var _ = require('lodash');
 var fs = require('fs');
@@ -126,6 +127,36 @@ QueryEngine.prototype._loadTemplatesMapping = function () {
     type: 'template',
     body: mapping
   });
+};
+
+QueryEngine.prototype.gremlin = function (datasourceParams, options) {
+  // TODO: remove when https://github.com/sirensolutions/kibi-internal/issues/906 is fixed
+  var parsedTimeout = parseInt(datasourceParams.timeout);
+  if (isNaN(parsedTimeout)) {
+    return Promise.reject({
+      error: 'Invalid timeout',
+      message: 'Invalid timeout: ' + datasourceParams.timeout
+    });
+  }
+
+  const gremlinOptions = {
+    method: options.method | 'GET',
+    uri: datasourceParams.url,
+    timeout: parsedTimeout
+  };
+  var ca = this.config.get('kibi_core.gremlin_server.ssl.ca');
+  if (ca) {
+    gremlinOptions.ca = fs.readFileSync(ca);
+  }
+  _.assign(gremlinOptions, options);
+  if (gremlinOptions.data) {
+    gremlinOptions.data.credentials = datasourceParams.credentials;
+  }
+  if (gremlinOptions.json) {
+    gremlinOptions.json.credentials = datasourceParams.credentials;
+  }
+
+  return rp(gremlinOptions);
 };
 
 QueryEngine.prototype._loadTemplates = function () {

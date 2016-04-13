@@ -1,4 +1,5 @@
 var _ = require('lodash');
+var fs = require('fs');
 var Promise = require('bluebird');
 var url = require('url');
 var rp = require('request-promise');
@@ -37,13 +38,10 @@ TinkerPop3Query.prototype.fetchResults = function (options, onlyIds, idVariableN
   }
 
   var gremlinUrl = this.config.datasource.datasourceClazz.datasource.datasourceParams.url;
+  var ca = this.server.config().get('kibi_core.gremlin_server.ssl.ca');
   var maxAge = this.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
   var timeout = this.config.datasource.datasourceClazz.datasource.datasourceParams.timeout;
   var cacheEnabled = this.config.datasource.datasourceClazz.datasource.datasourceParams.cache_enabled;
-
-  if (timeout === null || typeof timeout === 'undefined') {
-    timeout = 5000;
-  }
 
   var parsedTimeout = parseInt(timeout);
   if (isNaN(parsedTimeout)) {
@@ -108,6 +106,9 @@ TinkerPop3Query.prototype.fetchResults = function (options, onlyIds, idVariableN
         },
         timeout: timeout
       };
+      if (ca) {
+        gremlinOptions.ca = fs.readFileSync(ca);
+      }
 
       return rp(gremlinOptions).then(function (parsed) {
         var data = {

@@ -24,12 +24,16 @@ function startServer(self, fulfill, reject) {
 
     var config = self.server.config();
     var esClusterName = response.cluster_name;
-    var gremlinServerPath = config.get('kibi_core.gremlin_server_path');
-    self.gremlinServerPort = config.get('kibi_core.gremlin_server_port');
+    var gremlinServerPath = config.get('kibi_core.gremlin_server.path');
+    self.url = config.get('kibi_core.gremlin_server.url');
+
+    if (config.get('kibi_core.gremlin_server.ssl.ca')) {
+      self.ca = fs.readFileSync(config.get('kibi_core.gremlin_server.ssl.ca'));
+    }
 
     if (path.parse(gremlinServerPath).ext !== '.jar') {
-      self.server.log(['gremlin', 'error'], 'The configuration property kibi_core.gremlin_server_path does not point to a jar file');
-      return Promise.reject(new Error('The configuration property kibi_core.gremlin_server_path does not point to a jar file'));
+      self.server.log(['gremlin', 'error'], 'The configuration property kibi_core.gremlin_server.path does not point to a jar file');
+      return Promise.reject(new Error('The configuration property kibi_core.gremlin_server.path does not point to a jar file'));
     }
 
     if (!path.isAbsolute(gremlinServerPath)) {
@@ -54,7 +58,7 @@ function startServer(self, fulfill, reject) {
         '--elasticNodeHost=' + host,
         '--elasticNodePort=' + port,
         '--elasticClusterName=' + esClusterName,
-        '--server.port=' + self.gremlinServerPort,
+        '--server.port=' + self.url.split(':')[2],
         '--logging.config=' + loggingFilePath
       ];
 
@@ -63,8 +67,22 @@ function startServer(self, fulfill, reject) {
         args.push('--elasticTransportClientPassword=' + transportClientPassword);
       }
 
+      if (config.has('kibi_core.gremlin_server.ssl.key_store')) {
+        args.push('--server.ssl.enabled=true');
+        args.push('--server.ssl.key-store=' + config.get('kibi_core.gremlin_server.ssl.key_store'));
+        args.push('--server.ssl.key-store-password=' + config.get('kibi_core.gremlin_server.ssl.key_store_password'));
+      } else if (config.get('server.ssl.key') && config.get('server.ssl.cert')) {
+        const msg = 'Since you are using Elasticsearch Shield, you should configure the SSL ' +
+          'for the gremlin server by setting the key store at kibi_core.gremlin_server.ssl.key_store.';
+        self.server.log(['gremlin','error'], msg);
+        return Promise.reject(new Error(msg));
+      }
+
       self.server.log(['gremlin', 'info'], 'Starting the Kibi gremlin server');
       self.gremlinServer = childProcess.spawn('java', args);
+      self.gremlinServer.stderr.on('data', (data) => self.server.log(['gremlin', 'error'], ('' + data).trim()));
+      self.gremlinServer.stdout.on('data', (data) => self.server.log(['gremlin', 'info'], ('' + data).trim()));
+      self.gremlinServer.on('error', (err) => reject);
 
       var counter = 15;
       var timeout = 5000;
@@ -77,7 +95,7 @@ function startServer(self, fulfill, reject) {
             .then(function (resp) {
               var jsonResp = JSON.parse(resp.toString());
               if (jsonResp.status === 'ok') {
-                self.server.log(['gremlin', 'info'], 'Kibi gremlin server running at http://localhost:' + self.gremlinServerPort);
+                self.server.log(['gremlin', 'info'], 'Kibi gremlin server running at ' + self.url);
                 self.initialized = true;
                 fulfill({ message: 'The Kibi gremlin server started successfully.' });
               } else {
@@ -87,7 +105,11 @@ function startServer(self, fulfill, reject) {
               }
             })
             .catch(function (err) {
-              self.server.log(['gremlin', 'warning'], 'Waiting for the Kibi gremlin server');
+              if (err.error.code !== 'ECONNREFUSED') {
+                self.server.log(['gremlin', 'error'], 'Failed to ping the Kibi gremlin server: ' + err.message);
+              } else {
+                self.server.log(['gremlin', 'warning'], 'Waiting for the Kibi gremlin server');
+              }
               counter--;
               setTimeout(self.ping(counter), timeout);
             });
@@ -148,11 +170,14 @@ GremlinServerHandler.prototype.stop = function () {
 };
 
 GremlinServerHandler.prototype._ping = function () {
-  var self = this;
-  return rp({
+  const options = {
     method: 'GET',
-    uri: 'http://127.0.0.1:' + self.gremlinServerPort + '/ping'
-  });
+    uri: this.url + '/ping'
+  };
+  if (this.ca) {
+    options.ca = this.ca;
+  }
+  return rp(options);
 };
 
 module.exports = GremlinServerHandler;

@@ -247,7 +247,8 @@ var queryDefinition = {
       datasource: {
         datasourceParams: {
           url: 'http://localhost:3000/graph/query',
-          cache_enabled: true
+          cache_enabled: true,
+          timeout: 1000
         }
       },
       populateParameters: function () {
@@ -297,7 +298,8 @@ describe('TinkerPop3Query', function () {
           datasourceClazz: {
             datasource: {
               datasourceParams: {
-                url: 'http://localhost:3000/graph/query'
+                url: 'http://localhost:3000/graph/query',
+                timeout: '1000'
               }
             },
             populateParameters: function () {
@@ -310,7 +312,7 @@ describe('TinkerPop3Query', function () {
       tinkerPop3Query.fetchResults('').then(function (res) {
         expect(res.result).to.eql(fakeTinkerpop3Result);
         done();
-      });
+      }).catch(done);
     });
   });
 
@@ -329,7 +331,7 @@ describe('TinkerPop3Query', function () {
 
         tinkerPop3Query.generateCacheKey.restore();
         done();
-      });
+      }).catch(done);
     });
 
     it('checkIfItIsRelevant', function (done) {
@@ -345,7 +347,7 @@ describe('TinkerPop3Query', function () {
 
         tinkerPop3Query.generateCacheKey.restore();
         done();
-      });
+      }).catch(done);
     });
 
   });

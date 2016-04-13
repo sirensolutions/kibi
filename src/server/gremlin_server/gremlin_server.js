@@ -67,7 +67,7 @@ function startServer(self, fulfill, reject) {
         args.push('--elasticTransportClientPassword=' + transportClientPassword);
       }
 
-      if (config.has('kibi_core.gremlin_server.ssl.key_store')) {
+      if (config.get('kibi_core.gremlin_server.ssl.key_store')) {
         args.push('--server.ssl.enabled=true');
         args.push('--server.ssl.key-store=' + config.get('kibi_core.gremlin_server.ssl.key_store'));
         args.push('--server.ssl.key-store-password=' + config.get('kibi_core.gremlin_server.ssl.key_store_password'));

@@ -3,8 +3,8 @@ var Promise = require('bluebird');
 
 module.exports = Promise.method(function (kbnServer, server, config) {
   if (config.get('plugins.initialize') && config.get('pkg.kibiEnterpriseEnabled')) {
-    var config = server.config();
-    var gremlinServerPath = config.get('kibi_core.gremlin_server');
+    var _config = server.config();
+    var gremlinServerPath = _config.get('kibi_core.gremlin_server');
 
     if (gremlinServerPath) {
       var GremlinServerHandler = require('./gremlin_server');

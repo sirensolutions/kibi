@@ -126,7 +126,7 @@ function startServer(self, fulfill, reject) {
     }).catch(reject);
   } else {
     self.server.log(['gremlin', 'warning'], 'The configuration property kibi_core.gremlin_server.path is empty');
-    fulfill({ message: 'The Kibi gremlin server was not started.' });
+    fulfill({ message: 'The Kibi gremlin server was not started.', error: true });
   }
 }
 

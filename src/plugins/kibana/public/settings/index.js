@@ -38,6 +38,7 @@ uiModules
 .get('apps/settings')
 .directive('kbnSettingsApp', function (Private, $route, timefilter) {
   const sections = Private(registry);
+  const kibiLicenseHelper = Private(require('kibie/kibi/helpers/kibi_license_helper')); // kibi: added to verify kibi license
 
   return {
     restrict: 'E',
@@ -47,6 +48,8 @@ uiModules
       sectionName: '@section'
     },
     link: function ($scope, $el) {
+      kibiLicenseHelper.verifyLicense(); //kibi: added to verify kibi license
+
       timefilter.enabled = false;
       $scope.sections = sections;
       $scope.sections = sections.inOrder;

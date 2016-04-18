@@ -1,10 +1,10 @@
-var childProcess = require('child_process');
-var fs = require('fs');
-var Promise = require('bluebird');
-var rp = require('request-promise');
-var http = require('http');
-var path = require('path');
-var _ = require('lodash');
+const childProcess = require('child_process');
+const fs = require('fs');
+const Promise = require('bluebird');
+const rp = require('request-promise');
+const http = require('http');
+const path = require('path');
+const _ = require('lodash');
 
 function GremlinServerHandler(server) {
   this.gremlinServer = null;
@@ -13,12 +13,12 @@ function GremlinServerHandler(server) {
 }
 
 function startServer(self, fulfill, reject) {
-  var config = self.server.config();
-  var gremlinServerPath = config.get('kibi_core.gremlin_server.path');
+  const config = self.server.config();
+  let gremlinServerPath = config.get('kibi_core.gremlin_server.path');
 
   if (gremlinServerPath) {
     self.server.plugins.elasticsearch.client.nodes.info({ nodeId: '_local' }).then(function (response) {
-      var esTransportAddress = null;
+      let esTransportAddress = null;
       _.each(response.nodes, (node) => {
         esTransportAddress = node.transport_address;
       });
@@ -26,7 +26,7 @@ function startServer(self, fulfill, reject) {
         return Promise.reject(new Error('Unable to get the transport address'));
       }
 
-      var esClusterName = response.cluster_name;
+      const esClusterName = response.cluster_name;
       self.url = config.get('kibi_core.gremlin_server.url');
 
       if (config.get('kibi_core.gremlin_server.ssl.ca')) {
@@ -39,8 +39,8 @@ function startServer(self, fulfill, reject) {
       }
 
       if (!path.isAbsolute(gremlinServerPath)) {
-        var rootDir = path.normalize(__dirname + path.sep + '..' + path.sep + '..' + path.sep + '..' + path.sep);
-        var gremlinDirtyDir = path.join(rootDir, gremlinServerPath);
+        const rootDir = path.normalize(__dirname + path.sep + '..' + path.sep + '..' + path.sep + '..' + path.sep);
+        const gremlinDirtyDir = path.join(rootDir, gremlinServerPath);
         gremlinServerPath = path.resolve(path.normalize(gremlinDirtyDir));
       }
 
@@ -49,7 +49,7 @@ function startServer(self, fulfill, reject) {
           self.server.log(['gremlin', 'error'], 'The Kibi Gremlin Server jar file was not found. Please check the configuration');
           return Promise.reject(new Error('The Kibi Gremlin Server jar file was not found. Please check the configuration'));
         }
-        var loggingFilePath = path.parse(gremlinServerPath).dir + path.sep + 'gremlin-es2-server-log.properties';
+        const loggingFilePath = path.parse(gremlinServerPath).dir + path.sep + 'gremlin-es2-server-log.properties';
 
         const [ host, port, ...rest ] = esTransportAddress.split(':');
         const transportClientUsername = config.get('kibi_core.elasticsearch.transport_client.username');
@@ -86,16 +86,15 @@ function startServer(self, fulfill, reject) {
         self.gremlinServer.stdout.on('data', (data) => self.server.log(['gremlin', 'info'], ('' + data).trim()));
         self.gremlinServer.on('error', (err) => reject);
 
-        var counter = 15;
-        var timeout = 5000;
-        var serverLoaded = false;
+        const counter = 15;
+        const timeout = 5000;
 
         self.ping = function (counter) {
           if (counter > 0) {
             setTimeout(function () {
               self._ping()
               .then(function (resp) {
-                var jsonResp = JSON.parse(resp.toString());
+                const jsonResp = JSON.parse(resp.toString());
                 if (jsonResp.status === 'ok') {
                   self.server.log(['gremlin', 'info'], 'Kibi gremlin server running at ' + self.url);
                   self.initialized = true;
@@ -131,7 +130,7 @@ function startServer(self, fulfill, reject) {
 }
 
 GremlinServerHandler.prototype.start = function () {
-  var self = this;
+  const self = this;
 
   if (self.initialized) {
     return Promise.resolve({
@@ -140,7 +139,7 @@ GremlinServerHandler.prototype.start = function () {
   }
 
   return new Promise((fulfill, reject) => {
-    var elasticsearchStatus = self.server.plugins.elasticsearch.status;
+    let elasticsearchStatus = self.server.plugins.elasticsearch.status;
 
     if (elasticsearchStatus.state === 'green') {
       startServer(self, fulfill, reject);
@@ -158,19 +157,23 @@ GremlinServerHandler.prototype.start = function () {
 };
 
 GremlinServerHandler.prototype.stop = function () {
-  var self = this;
+  const self = this;
 
   self.initialized = false;
   return new Promise(function (fulfill, reject) {
     self.server.log(['gremlin', 'info'], 'Stopping the Kibi gremlin server');
 
-    var exitCode = self.gremlinServer.kill('SIGINT');
-    if (exitCode) {
-      self.server.log(['gremlin', 'info'], 'The Kibi gremlin server exited successfully');
-      fulfill(true);
+    if (self.gremlinServer) {
+      let exitCode = self.gremlinServer.kill('SIGINT');
+      if (exitCode) {
+        self.server.log(['gremlin', 'info'], 'The Kibi gremlin server exited successfully');
+        fulfill(true);
+      } else {
+        self.server.log(['gremlin', 'error'], 'The Kibi gremlin server exited with non zero status: ' + exitCode);
+        reject(new Error('The Kibi gremlin server exited with non zero status: ' + exitCode));
+      }
     } else {
-      self.server.log(['gremlin', 'error'], 'The Kibi gremlin server exited with non zero status: ' + exitCode);
-      reject(new Error('The Kibi gremlin server exited with non zero status: ' + exitCode));
+      fulfill(true);
     }
   });
 };

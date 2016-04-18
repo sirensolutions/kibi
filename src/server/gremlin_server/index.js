@@ -1,24 +1,22 @@
-var _ = require('lodash');
-var Promise = require('bluebird');
+const _ = require('lodash');
+const Promise = require('bluebird');
 
 module.exports = Promise.method(function (kbnServer, server, config) {
   if (config.get('plugins.initialize') && config.get('pkg.kibiEnterpriseEnabled')) {
-    var _config = server.config();
-    var gremlinServerPath = _config.get('kibi_core.gremlin_server');
+    const _config = server.config();
+    const gremlinServerPath = _config.get('kibi_core.gremlin_server');
 
     if (gremlinServerPath) {
-      var GremlinServerHandler = require('./gremlin_server');
-      var gremlin = new GremlinServerHandler(server);
+      const GremlinServerHandler = require('./gremlin_server');
+      const gremlin = new GremlinServerHandler(server);
 
-      return gremlin.start().then(function (message) {
-        if (!message.error) {
-          var clean = function (code) {
-            return gremlin.stop();
-          };
+      const clean = function (code) {
+        return gremlin.stop();
+      };
 
-          kbnServer.cleaningArray.push(clean);
-        }
-      });
+      kbnServer.cleaningArray.push(clean);
+
+      return gremlin.start();
     } else {
       return true;
     }

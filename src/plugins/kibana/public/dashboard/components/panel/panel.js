@@ -7,9 +7,7 @@ define(function (require) {
     var _ = require('lodash');
     var loadPanel = Private(require('plugins/kibana/dashboard/components/panel/lib/load_panel'));
     var filterManager = Private(require('ui/filter_manager'));
-    var notify = createNotifier({
-      location: 'Panel'
-    });
+    var notify = createNotifier();
     var doesVisDependsOnSelectedEntities = Private(require('ui/kibi/components/commons/_does_vis_depends_on_selected_entities'));
 
     var services = require('plugins/kibana/settings/saved_object_registry').all().map(function (serviceObj) {

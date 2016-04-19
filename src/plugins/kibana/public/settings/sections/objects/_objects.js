@@ -14,7 +14,7 @@ define(function (require) {
   });
 
   require('ui/modules').get('apps/settings')
-  .directive('kbnSettingsObjects', function (kbnIndex, Private, kbnUrl, Promise, queryEngineClient, createNotifier, config) {
+  .directive('kbnSettingsObjects', function (kbnIndex, Private, kbnUrl, Promise, queryEngineClient, createNotifier) {
 
     var cache = Private(require('ui/kibi/helpers/cache_helper')); // kibi: added by kibi
     var deleteHelper = Private(require('ui/kibi/helpers/delete_helper')); // kibi: added by kibi

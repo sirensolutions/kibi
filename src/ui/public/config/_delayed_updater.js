@@ -1,8 +1,6 @@
 define(function (require) {
   return function DelayedUpdaterFactory(Private, $rootScope, Promise, Notifier) {
-    var notify = new Notifier({
-      location: 'DelayedUpdaterFactory'
-    });
+    var notify = new Notifier();
     var _ = require('lodash');
     var angular = require('angular');
 

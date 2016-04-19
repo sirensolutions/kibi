@@ -11,7 +11,7 @@ define(function (require) {
   });
 
   require('ui/modules').get('apps/settings')
-  .directive('kbnSettingsObjectsView', function (kbnIndex, Notifier) {
+  .directive('kbnSettingsObjectsView', function (kbnIndex) {
     return {
       restrict: 'E',
       controller: function ($scope, $injector, $routeParams, $location, $window, $rootScope,

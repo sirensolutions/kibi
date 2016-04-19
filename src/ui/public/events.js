@@ -1,6 +1,5 @@
 define(function (require) {
   var _ = require('lodash');
-  var Notifier = require('kibie/notify/notifier');
 
   return function EventsProvider(Private, Promise, createNotifier) {
     var SimpleEmitter = require('ui/utils/SimpleEmitter');

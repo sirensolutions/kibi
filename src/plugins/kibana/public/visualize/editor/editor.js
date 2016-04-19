@@ -56,7 +56,6 @@ define(function (require) {
 
     var angular = require('angular');
     var ConfigTemplate = require('ui/ConfigTemplate');
-    var Notifier = require('kibie/notify/notifier');
     var docTitle = Private(require('ui/doc_title'));
     var brushEvent = Private(require('ui/utils/brush_event'));
     var queryFilter = Private(require('ui/filter_bar/query_filter'));

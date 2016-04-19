@@ -13,7 +13,7 @@ define(function (require) {
     title: 'queries'
   });
 
-  module.service('savedQueries', function (Private, Promise, kbnIndex, es, createNotifier, SavedQuery, kbnUrl, config) {
+  module.service('savedQueries', function (Private, Promise, kbnIndex, es, createNotifier, SavedQuery, kbnUrl) {
 
     var cache = Private(require('ui/kibi/helpers/cache_helper'));
     var notify = createNotifier({

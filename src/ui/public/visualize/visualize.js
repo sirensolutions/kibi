@@ -1,7 +1,7 @@
 define(function (require) {
   require('ui/modules')
   .get('kibana/directive')
-  .directive('visualize', function (savedDashboards, savedSearches, SavedVis, indexPatterns, Private, config, $timeout, Notifier) {
+  .directive('visualize', function (savedDashboards, savedSearches, SavedVis, indexPatterns, Private, config, $timeout, createNotifier) {
 
     require('ui/visualize/spy');
     require('ui/visualize/visualize.less');
@@ -11,10 +11,8 @@ define(function (require) {
     var _ = require('lodash');
     var visTypes = Private(require('ui/registry/vis_types'));
 
-    var notify = new Notifier({
-      location: 'Visualize',
-      awesomeDemoMode: config.get('kibi:awesomeDemoMode'),
-      shieldAuthorizationWarning: config.get('kibi:shieldAuthorizationWarning')
+    var notify = createNotifier({
+      location: 'Visualize'
     });
 
     return {

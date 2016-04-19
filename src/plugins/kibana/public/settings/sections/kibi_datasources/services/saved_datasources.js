@@ -15,7 +15,7 @@ define(function (require) {
     title: 'datasources'
   });
 
-  module.service('savedDatasources', function (Promise, kbnIndex, es, kbnUrl, SavedDatasource, createNotifier, Private, config) {
+  module.service('savedDatasources', function (Promise, kbnIndex, es, kbnUrl, SavedDatasource, createNotifier, Private) {
 
     var cache = Private(require('ui/kibi/helpers/cache_helper'));
 

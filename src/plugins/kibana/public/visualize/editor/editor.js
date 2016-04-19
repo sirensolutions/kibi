@@ -51,12 +51,11 @@ define(function (require) {
   ])
   .controller('VisEditor', function (
     $rootScope, globalState, $scope, $route, timefilter, AppState,
-    $location, kbnUrl, $timeout, courier, Private, Promise
+    $location, kbnUrl, $timeout, courier, Private, Promise, createNotifier
   ) {
 
     var angular = require('angular');
     var ConfigTemplate = require('ui/ConfigTemplate');
-    var Notifier = require('ui/notify/notifier');
     var docTitle = Private(require('ui/doc_title'));
     var brushEvent = Private(require('ui/utils/brush_event'));
     var queryFilter = Private(require('ui/filter_bar/query_filter'));
@@ -95,7 +94,7 @@ define(function (require) {
       $scope.holder.entityURIEnabled = !!enabled;
     });
 
-    var notify = new Notifier({
+    var notify = createNotifier({
       location: 'Visualization Editor'
     });
 

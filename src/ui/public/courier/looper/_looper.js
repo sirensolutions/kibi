@@ -1,7 +1,7 @@
 define(function (require) {
-  return function LooperFactory($timeout, Notifier, Promise) {
+  return function LooperFactory($timeout, createNotifier, Promise) {
     var _ = require('lodash');
-    var notify = new Notifier();
+    var notify = createNotifier();
 
     function Looper(ms, fn) {
       this._fn = fn;

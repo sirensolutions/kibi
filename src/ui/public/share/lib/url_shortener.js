@@ -1,5 +1,5 @@
-export default function createUrlShortener(Notifier, $http, $location) {
-  const notify = new Notifier({
+export default function createUrlShortener(createNotifier, $http, $location) {
+  const notify = createNotifier({
     location: 'Url Shortener'
   });
   const baseUrl = `${$location.protocol()}://${$location.host()}:${$location.port()}`;

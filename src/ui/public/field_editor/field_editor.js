@@ -21,9 +21,9 @@ define(function (require) {
         getField: '&field'
       },
       controllerAs: 'editor',
-      controller: function ($scope, Notifier, kbnUrl) {
+      controller: function ($scope, kbnUrl, createNotifier) {
         var self = this;
-        var notify = new Notifier({ location: 'Field Editor' });
+        var notify = createNotifier({ location: 'Field Editor' });
 
         self.scriptingInfo = scriptingInfo;
         self.scriptingWarning = scriptingWarning;

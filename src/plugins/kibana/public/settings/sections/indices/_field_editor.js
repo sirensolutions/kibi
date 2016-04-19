@@ -14,9 +14,9 @@ define(function (require) {
       }
     },
     controllerAs: 'fieldSettings',
-    controller: function FieldEditorPageController($route, Private, Notifier, docTitle) {
+    controller: function FieldEditorPageController($route, Private, docTitle, createNotifier) {
       var Field = Private(require('ui/index_patterns/_field'));
-      var notify = new Notifier({ location: 'Field Editor' });
+      var notify = createNotifier({ location: 'Field Editor' });
       var kbnUrl = Private(require('ui/url'));
 
 

@@ -1,5 +1,5 @@
 define(function (require) {
-  return function ResizeCheckerFactory(Private, Notifier, $rootScope) {
+  return function ResizeCheckerFactory(Private, $rootScope, createNotifier) {
     var $ = require('jquery');
     var _ = require('lodash');
 
@@ -29,7 +29,7 @@ define(function (require) {
       ResizeChecker.Super.call(this);
 
       this.$el = $(el);
-      this.notify = new Notifier({ location: 'Vislib ResizeChecker ' + _.uniqueId() });
+      this.notify = createNotifier({ location: 'Vislib ResizeChecker ' + _.uniqueId() });
 
       this.saveSize();
 

@@ -3,11 +3,11 @@ define(function (require) {
   var $ = require('jquery');
   require('ui/modules')
   .get('app/dashboard')
-  .directive('dashboardPanel', function ($rootScope, globalState, savedVisualizations, savedSearches, Notifier, Private, $injector) {
+  .directive('dashboardPanel', function ($rootScope, globalState, savedVisualizations, savedSearches, Private, $injector, createNotifier) {
     var _ = require('lodash');
     var loadPanel = Private(require('plugins/kibana/dashboard/components/panel/lib/load_panel'));
     var filterManager = Private(require('ui/filter_manager'));
-    var notify = new Notifier();
+    var notify = createNotifier();
     var doesVisDependsOnSelectedEntities = Private(require('ui/kibi/components/commons/_does_vis_depends_on_selected_entities'));
 
     var services = require('plugins/kibana/settings/saved_object_registry').all().map(function (serviceObj) {

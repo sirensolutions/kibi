@@ -200,22 +200,22 @@ define(function (require) {
       },
       'dashboard:defaultDarkTheme': {
         value: false,
-        description: 'New dashboards use dark theme by default',
+        description: 'New dashboards use dark theme by default'
       },
 
       // kibi: added by kibi
       'kibi:awesomeDemoMode' : {
         value: false,
-        description: 'Set to true to suppress all warnings and errors',
+        description: 'Set to true to suppress all warnings and errors'
       },
       'kibi:timePrecision' : {
         type: 'string',
         value: '',
-        description: 'Set to generate time filters with certain precision. Possible values are: s, m, h, d, w, M, y',
+        description: 'Set to generate time filters with certain precision. Possible values are: s, m, h, d, w, M, y'
       },
       'kibi:zoom' : {
         value: 1.0,
-        description: 'Set the zoom level for the whole page. Good if the default size is too big for you. Does not work in Firefox.',
+        description: 'Set the zoom level for the whole page. Good if the default size is too big for you. Does not work in Firefox.'
       },
       'kibi:relationalPanel': {
         value: false,
@@ -225,6 +225,10 @@ define(function (require) {
         type: 'json',
         value: '{ "relationsIndices": [], "relationsDashboards": [] }',
         description: 'Relations between index patterns and dashboards'
+      },
+      'kibi:shieldAuthorizationWarning': {
+        value: true,
+        description: 'Set to true to show all authorization warnings from Shield'
       }
       // kibi: end
 

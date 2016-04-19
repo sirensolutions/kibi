@@ -1,6 +1,6 @@
 define(function (require) {
-  return function FieldObjectProvider(Private, shortDotsFilter, $rootScope, Notifier) {
-    var notify = new Notifier({ location: 'IndexPattern Field' });
+  return function FieldObjectProvider(Private, shortDotsFilter, $rootScope, createNotifier) {
+    var notify = createNotifier({ location: 'IndexPattern Field' });
     var FieldFormat = Private(require('ui/index_patterns/_field_format/FieldFormat'));
     var fieldTypes = Private(require('ui/index_patterns/_field_types'));
     var fieldFormats = Private(require('ui/registry/field_formats'));

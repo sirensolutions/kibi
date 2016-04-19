@@ -1,8 +1,8 @@
 define(function (require) {
-  return function RootSearchSource(Private, $rootScope, timefilter, Notifier) {
+  return function RootSearchSource(Private, $rootScope, timefilter, createNotifier) {
     var SearchSource = Private(require('ui/courier/data_source/search_source'));
 
-    var notify = new Notifier({ location: 'Root Search Source' });
+    var notify = createNotifier({ location: 'Root Search Source' });
 
     var globalSource = new SearchSource();
     globalSource.inherits(false); // this is the final source, it has no parents

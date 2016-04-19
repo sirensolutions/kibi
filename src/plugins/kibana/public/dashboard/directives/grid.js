@@ -6,12 +6,12 @@ define(function (require) {
 
   var app = require('ui/modules').get('app/dashboard');
 
-  app.directive('dashboardGrid', function ($compile, Notifier) {
+  app.directive('dashboardGrid', function ($compile, createNotifier) {
     return {
       restrict: 'E',
       require: '^dashboardApp', // must inherit from the dashboardApp
       link: function ($scope, $el) {
-        var notify = new Notifier();
+        var notify = createNotifier();
         var $container = $el;
         $el = $('<ul>').appendTo($container);
 

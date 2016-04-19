@@ -1,13 +1,11 @@
 define(function (require) {
-  return function CourierSegmentedReqProvider(es, Private, Promise, Notifier, timefilter, config) {
+  return function CourierSegmentedReqProvider(es, Private, Promise, timefilter, config, createNotifier) {
     var _ = require('lodash');
     var isNumber = require('lodash').isNumber;
     var SearchReq = Private(require('ui/courier/fetch/request/search'));
     var SegmentedHandle = Private(require('ui/courier/fetch/request/_segmented_handle'));
 
-    var notify = new Notifier({
-      location: 'Segmented Fetch'
-    });
+    var notify = createNotifier();
 
     _.class(SegmentedReq).inherits(SearchReq);
     function SegmentedReq(source, defer, initFn) {

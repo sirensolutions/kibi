@@ -3,7 +3,7 @@ define(function (require) {
   require('ui/elastic_textarea');
 
   require('ui/modules').get('apps/settings')
-  .directive('advancedRow', function (config, Notifier, Private) {
+  .directive('advancedRow', function (config, Private, createNotifier) {
     return {
       restrict: 'A',
       replace: true,
@@ -14,7 +14,7 @@ define(function (require) {
       },
       link: function ($scope) {
         var configDefaults = Private(require('ui/config/defaults'));
-        var notify = new Notifier();
+        var notify = createNotifier();
         var keyCodes = {
           ESC: 27
         };

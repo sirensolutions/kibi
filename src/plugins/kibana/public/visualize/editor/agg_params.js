@@ -3,7 +3,7 @@ define(function (require) {
 
   require('ui/modules')
   .get('app/visualize')
-  .directive('visEditorAggParams', function ($compile, $parse, Private, Notifier, $filter) {
+  .directive('visEditorAggParams', function ($compile, $parse, Private, $filter, createNotifier) {
     var _ = require('lodash');
     var $ = require('jquery');
     var aggTypes = Private(require('ui/agg_types/index'));
@@ -12,7 +12,7 @@ define(function (require) {
     require('ui/filters/match_any');
     require('plugins/kibana/visualize/editor/agg_param');
 
-    var notify = new Notifier({
+    var notify = createNotifier({
       location: 'visAggGroup'
     });
 

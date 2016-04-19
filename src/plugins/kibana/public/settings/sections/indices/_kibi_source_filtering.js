@@ -1,7 +1,7 @@
 define(function (require) {
   require('ui/modules').get('apps/settings')
-  .directive('sourceFiltering', function (Notifier, $window) {
-    var notify = new Notifier();
+  .directive('sourceFiltering', function ($window, createNotifier) {
+    var notify = createNotifier();
     return {
       restrict: 'E',
       template: require('plugins/kibana/settings/sections/indices/_kibi_source_filtering.html'),

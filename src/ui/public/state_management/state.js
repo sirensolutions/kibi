@@ -5,7 +5,7 @@ define(function (require) {
   var applyDiff = require('ui/utils/diff_object');
   var qs = require('ui/utils/query_string');
 
-  return function StateProvider(Notifier, Private, $rootScope, $location) {
+  return function StateProvider(createNotifier, Private, $rootScope, $location) {
     var Events = Private(require('ui/events'));
 
     _.class(State).inherits(Events);
@@ -43,7 +43,7 @@ define(function (require) {
       try {
         return search[this._urlParam] ? rison.decode(search[this._urlParam]) : null;
       } catch (e) {
-        var notify = new Notifier();
+        var notify = createNotifier();
         notify.error('Unable to parse URL');
         search[this._urlParam] = rison.encode(this._defaults);
         $location.search(search).replace();

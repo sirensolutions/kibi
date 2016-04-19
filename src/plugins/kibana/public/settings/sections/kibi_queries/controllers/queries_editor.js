@@ -46,8 +46,7 @@ define(function (require) {
   app.controller(
     'QueriesEditor',
     function ($rootScope, $scope, $route, $window, kbnUrl, createNotifier, queryEngineClient,
-              savedDatasources, Private, $element
-  ) {
+              savedDatasources, Private, $element) {
 
       var queryHelper =  Private(require('ui/kibi/helpers/query_helper'));
       var setEntityUri = Private(require('ui/kibi/components/commons/_set_entity_uri'));

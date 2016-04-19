@@ -4,10 +4,10 @@ define(function (require) {
   var uniqFilters = require('./lib/uniqFilters');
   var findByParam = require('ui/utils/find_by_param');
 
-  return function (Notifier) {
+  return function (createNotifier) {
     return function ($state) {
       return function (event, simulate) {
-        var notify = new Notifier({
+        var notify = createNotifier({
           location: 'Filter bar'
         });
         var aggConfigResult;

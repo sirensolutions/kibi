@@ -12,8 +12,8 @@ define(function (require) {
   });
 
   require('ui/modules').get('apps/settings')
-  .controller('settingsIndicesCreate', function ($scope, kbnUrl, Private, Notifier, indexPatterns, es, config, Promise) {
-    var notify = new Notifier();
+  .controller('settingsIndicesCreate', function ($scope, kbnUrl, Private, indexPatterns, es, config, Promise, createNotifier) {
+    var notify = createNotifier();
     var refreshKibanaIndex = Private(require('plugins/kibana/settings/sections/indices/_refresh_kibana_index'));
     var intervals = indexPatterns.intervals;
     var samplePromise;

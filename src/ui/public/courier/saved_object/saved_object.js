@@ -236,7 +236,7 @@ define(function (require) {
        * @return {Promise}
        * @resolved {String} - The id of the doc
        */
-      self.save = function () {
+      self.save = function (force) { // kibi: add force flag
 
         var body = self.serialize();
 
@@ -247,10 +247,10 @@ define(function (require) {
         docSource.id(self.id);
 
         // index the document
-        return self.saveSource(body);
+        return self.saveSource(body, force);
       };
 
-      self.saveSource = function (source) {
+      self.saveSource = function (source, force) { // kibi: add force flag
         var finish = function (id) {
 
           cache.flush(); // kibi: flush the cache after object was saved
@@ -264,22 +264,26 @@ define(function (require) {
           });
         };
 
-        return docSource.doCreate(source)
-        .then(finish)
-        .catch(function (err) {
-          // record exists, confirm overwriting
-          if (_.get(err, 'origError.status') === 409) {
-            var confirmMessage = 'Are you sure you want to overwrite ' + self.title + '?';
+        if (force) { // kibi: if the force flag is true, silently updates the document
+          return docSource.doIndex(source).then(finish);
+        } else {
+          return docSource.doCreate(source)
+          .then(finish)
+          .catch(function (err) {
+            // record exists, confirm overwriting
+            if (_.get(err, 'origError.status') === 409) {
+              var confirmMessage = 'Are you sure you want to overwrite ' + self.title + '?';
 
-            return safeConfirm(confirmMessage).then(
-              function () {
-                return docSource.doIndex(source).then(finish);
-              },
-              _.noop // if the user doesn't overwrite record, just swallow the error
-            );
-          }
-          return Promise.reject(err);
-        });
+              return safeConfirm(confirmMessage).then(
+                function () {
+                  return docSource.doIndex(source).then(finish);
+                },
+                _.noop // if the user doesn't overwrite record, just swallow the error
+              );
+            }
+            return Promise.reject(err);
+          });
+        }
       };
 
       /**

@@ -236,16 +236,12 @@ function _process(query, focus, relations, filters, visitedIndices) {
  * Adds a filterjoin filter to the given query, from the source index to the target index
  */
 function _addFilterJoin(query, sourcePath, targetPath, targetIndex, negate) {
-  var orderBy;
-  var maxTermsPerShard;
-  var termsEncoding;
-
   if (!targetIndex) {
     throw new Error('The target index must be defined');
   }
-  orderBy = targetIndex.orderBy;
-  maxTermsPerShard = targetIndex.maxTermsPerShard;
-  termsEncoding = targetIndex.termsEncoding;
+  var orderBy = targetIndex.orderBy;
+  var maxTermsPerShard = targetIndex.maxTermsPerShard;
+  var termsEncoding = targetIndex.termsEncoding;
 
   var filterJoin = {
     indices: targetIndex.indices,
@@ -271,7 +267,7 @@ function _addFilterJoin(query, sourcePath, targetPath, targetIndex, negate) {
   if (orderBy) {
     filterJoin.orderBy = orderBy;
   }
-  if (maxTermsPerShard) {
+  if (maxTermsPerShard && maxTermsPerShard > -1) {
     filterJoin.maxTermsPerShard = maxTermsPerShard;
   }
   if (termsEncoding) {

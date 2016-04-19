@@ -236,7 +236,9 @@ define(function (require) {
        * @return {Promise}
        * @resolved {String} - The id of the doc
        */
-      self.save = function (force) { // kibi: add force flag
+      // kibi: add force flag
+      // issue: https://github.com/sirensolutions/kibi-internal/issues/918
+      self.save = function (force) {
 
         var body = self.serialize();
 
@@ -250,7 +252,9 @@ define(function (require) {
         return self.saveSource(body, force);
       };
 
-      self.saveSource = function (source, force) { // kibi: add force flag
+      // kibi: add force flag
+      // issue: https://github.com/sirensolutions/kibi-internal/issues/918
+      self.saveSource = function (source, force) {
         var finish = function (id) {
 
           cache.flush(); // kibi: flush the cache after object was saved

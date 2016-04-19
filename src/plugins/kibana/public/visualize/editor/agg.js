@@ -1,7 +1,7 @@
 define(function (require) {
   require('ui/modules')
   .get('app/visualize')
-  .directive('visEditorAgg', function ($compile, $parse, $filter, Private, Notifier) {
+  .directive('visEditorAgg', function ($compile, $parse, $filter, Private, createNotifier) {
     require('plugins/kibana/visualize/editor/agg_params');
     require('plugins/kibana/visualize/editor/agg_add');
 
@@ -10,7 +10,7 @@ define(function (require) {
     var aggTypes = Private(require('ui/agg_types/index'));
     var advancedToggleHtml = require('plugins/kibana/visualize/editor/advanced_toggle.html');
 
-    var notify = new Notifier({
+    var notify = createNotifier({
       location: 'visAggGroup'
     });
 

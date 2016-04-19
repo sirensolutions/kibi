@@ -1,5 +1,5 @@
 define(function (require) {
-  return function IndexPatternFactory(Private, timefilter, Notifier, config, kbnIndex, Promise, $rootScope, safeConfirm) {
+  return function IndexPatternFactory(Private, timefilter, createNotifier, config, kbnIndex, Promise, $rootScope, safeConfirm) {
     var _ = require('lodash');
     var errors = require('ui/errors');
     var angular = require('angular');
@@ -20,7 +20,7 @@ define(function (require) {
 
     var type = 'index-pattern';
 
-    var notify = new Notifier();
+    var notify = createNotifier();
 
     var mapping = mappingSetup.expandShorthand({
       title: 'string',

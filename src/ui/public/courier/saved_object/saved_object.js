@@ -1,5 +1,5 @@
 define(function (require) {
-  return function SavedObjectFactory(es, kbnIndex, Promise, Private, Notifier, safeConfirm, indexPatterns) {
+  return function SavedObjectFactory(es, kbnIndex, Promise, Private, safeConfirm, indexPatterns, createNotifier) {
     var angular = require('angular');
     var errors = require('ui/errors');
     var _ = require('lodash');
@@ -29,7 +29,7 @@ define(function (require) {
       var type = config.type;
 
       // Create a notifier for sending alerts
-      var notify = new Notifier({
+      var notify = createNotifier({
         location: 'Saved ' + type
       });
 

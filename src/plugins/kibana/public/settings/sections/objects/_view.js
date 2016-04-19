@@ -14,8 +14,8 @@ define(function (require) {
   .directive('kbnSettingsObjectsView', function (kbnIndex, Notifier) {
     return {
       restrict: 'E',
-      controller: function ($scope, $injector, $routeParams, $location, $window, $rootScope, es, Private, queryEngineClient) {
-        var notify = new Notifier({ location: 'SavedObject view' });
+      controller: function ($scope, $injector, $routeParams, $location, $window, $rootScope, es, Private, queryEngineClient, createNotifier) {
+        var notify = createNotifier({ location: 'SavedObject view' });
         var castMappingType = Private(require('ui/index_patterns/_cast_mapping_type'));
         var serviceObj = registry.get($routeParams.service);
         var service = $injector.get(serviceObj.service);

@@ -3,7 +3,7 @@ const Clipboard = require('clipboard');
 
 require('../styles/index.less');
 
-app.directive('shareObjectUrl', function (Private, Notifier) {
+app.directive('shareObjectUrl', function (Private, createNotifier) {
   const urlShortener = Private(require('../lib/url_shortener'));
 
   return {
@@ -14,7 +14,7 @@ app.directive('shareObjectUrl', function (Private, Notifier) {
     },
     template: require('ui/share/views/share_object_url.html'),
     link: function ($scope, $el) {
-      const notify = new Notifier({
+      const notify = createNotifier({
         location: `Share ${$scope.$parent.objectType}`
       });
 

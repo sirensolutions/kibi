@@ -1,7 +1,7 @@
 define(function (require) {
   require('ui/modules')
   .get('kibana/directive')
-  .directive('visualize', function (savedDashboards, savedSearches, Notifier, SavedVis, indexPatterns, Private, config, $timeout) {
+  .directive('visualize', function (savedDashboards, savedSearches, SavedVis, indexPatterns, Private, config, $timeout, Notifier) {
 
     require('ui/visualize/spy');
     require('ui/visualize/visualize.less');
@@ -12,7 +12,9 @@ define(function (require) {
     var visTypes = Private(require('ui/registry/vis_types'));
 
     var notify = new Notifier({
-      location: 'Visualize'
+      location: 'Visualize',
+      awesomeDemoMode: config.get('kibi:awesomeDemoMode'),
+      shieldAuthorizationWarning: config.get('kibi:shieldAuthorizationWarning')
     });
 
     return {

@@ -1,11 +1,11 @@
 define(function (require) {
-  return function FiltersAggDefinition(Private, Notifier) {
+  return function FiltersAggDefinition(Private, createNotifier) {
     var _ = require('lodash');
     var angular = require('angular');
     var BucketAggType = Private(require('ui/agg_types/buckets/_bucket_agg_type'));
     var createFilter = Private(require('ui/agg_types/buckets/create_filter/filters'));
     var decorateQuery = Private(require('ui/courier/data_source/_decorate_query'));
-    var notif = new Notifier({ location: 'Filters Agg' });
+    var notif = createNotifier({ location: 'Filters Agg' });
 
     return new BucketAggType({
       name: 'filters',

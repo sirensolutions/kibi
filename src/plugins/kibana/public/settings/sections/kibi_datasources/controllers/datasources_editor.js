@@ -35,7 +35,7 @@ define(function (require) {
 
   app.controller(
     'DatasourcesEditor',
-    function ($rootScope, $scope, $route, $window, kbnUrl, createNotifier,
+    function ($rootScope, $scope, $route, $window, kbnUrl, createNotifier, config,
               savedDatasources, Private, queryEngineClient, $element, kibiWarnings, kibiEnterpriseEnabled) {
 
       var setDatasourceSchema = Private(require('plugins/kibana/settings/sections/kibi_datasources/lib/set_datasource_schema'));

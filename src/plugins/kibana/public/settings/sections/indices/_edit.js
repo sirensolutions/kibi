@@ -18,9 +18,9 @@ define(function (require) {
   });
 
   require('ui/modules').get('apps/settings')
-  .controller('settingsIndicesEdit', function ($scope, $location, $route, config, courier, Notifier, Private, AppState, docTitle) {
+  .controller('settingsIndicesEdit', function ($scope, $location, $route, config, courier, Private, AppState, docTitle, createNotifier) {
 
-    var notify = new Notifier();
+    var notify = createNotifier();
     var $state = $scope.state = new AppState();
     var refreshKibanaIndex = Private(require('plugins/kibana/settings/sections/indices/_refresh_kibana_index'));
 

@@ -1,11 +1,11 @@
 define(function (require) {
   require('ui/modules')
   .get('app/visualize')
-  .factory('SavedVis', function (config, $injector, courier, Promise, savedSearches, Private, Notifier) {
+  .factory('SavedVis', function (config, $injector, courier, Promise, savedSearches, Private, createNotifier) {
     var _ = require('lodash');
     var Vis = Private(require('ui/Vis'));
 
-    var notify = new Notifier({
+    var notify = createNotifier({
       location: 'SavedVis'
     });
 

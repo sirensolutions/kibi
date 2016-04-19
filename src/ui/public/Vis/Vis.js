@@ -1,11 +1,11 @@
 define(function (require) {
-  return function VisFactory(Notifier, Private) {
+  return function VisFactory(Private, createNotifier) {
     var _ = require('lodash');
     var aggTypes = Private(require('ui/agg_types/index'));
     var visTypes = Private(require('ui/registry/vis_types'));
     var AggConfigs = Private(require('ui/Vis/AggConfigs'));
 
-    var notify = new Notifier({
+    var notify = createNotifier({
       location: 'Vis'
     });
 

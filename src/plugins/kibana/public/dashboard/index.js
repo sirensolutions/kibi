@@ -52,13 +52,13 @@ define(function (require) {
     }
   });
 
-  app.directive('dashboardApp', function (Notifier, courier, AppState, timefilter, kbnUrl) {
+  app.directive('dashboardApp', function (courier, AppState, timefilter, kbnUrl, createNotifier) {
     return {
       controller: function ($scope, $rootScope, $route, $routeParams, $location, Private, getAppState, config) {
 
         var queryFilter = Private(require('ui/filter_bar/query_filter'));
 
-        var notify = new Notifier({
+        var notify = createNotifier({
           location: 'Dashboard'
         });
 

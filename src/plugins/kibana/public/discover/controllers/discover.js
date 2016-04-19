@@ -63,8 +63,8 @@ define(function (require) {
     }
   });
 
-  app.controller('discover', function ($scope, config, courier, $route, $window, Notifier,
-    AppState, timefilter, Promise, Private, kbnUrl, highlightTags) {
+  app.controller('discover', function ($scope, config, courier, $route, $window,
+    AppState, timefilter, Promise, Private, kbnUrl, highlightTags, createNotifier) {
 
     var Vis = Private(require('ui/Vis'));
     var docTitle = Private(require('ui/doc_title'));
@@ -73,7 +73,7 @@ define(function (require) {
     var queryFilter = Private(require('ui/filter_bar/query_filter'));
     var filterManager = Private(require('ui/filter_manager'));
 
-    var notify = new Notifier({
+    var notify = createNotifier({
       location: 'Discover'
     });
 

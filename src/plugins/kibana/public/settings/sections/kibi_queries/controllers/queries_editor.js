@@ -46,7 +46,7 @@ define(function (require) {
   app.controller(
     'QueriesEditor',
     function ($rootScope, $scope, $route, $window, kbnUrl, createNotifier, queryEngineClient,
-              savedDatasources, Private, $element
+              savedDatasources, Private, $element, config
   ) {
 
       var queryHelper =  Private(require('ui/kibi/helpers/query_helper'));

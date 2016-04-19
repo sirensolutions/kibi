@@ -3,13 +3,13 @@ define(function (require) {
   require('ui/paginated_table');
 
   require('ui/modules').get('apps/settings')
-  .directive('scriptedFields', function (kbnUrl, Notifier, $filter) {
+  .directive('scriptedFields', function (kbnUrl, $filter, createNotifier) {
     var rowScopes = []; // track row scopes, so they can be destroyed as needed
     var popularityHtml = require('plugins/kibana/settings/sections/indices/_field_popularity.html');
     var controlsHtml = require('plugins/kibana/settings/sections/indices/_field_controls.html');
     var filter = $filter('filter');
 
-    var notify = new Notifier();
+    var notify = createNotifier();
 
     return {
       restrict: 'E',

@@ -1,5 +1,5 @@
 define(function (require) {
-  return function buildHierarchicalDataProvider(Private, Notifier) {
+  return function buildHierarchicalDataProvider(Private, createNotifier) {
     var _ = require('lodash');
     var buildSplit = Private(require('ui/agg_response/hierarchical/_build_split'));
     var extractBuckets = require('ui/agg_response/hierarchical/_extract_buckets');
@@ -9,7 +9,7 @@ define(function (require) {
 
     var AggConfigResult = require('ui/Vis/AggConfigResult');
 
-    var notify = new Notifier({
+    var notify = createNotifier({
       location: 'Pie chart response converter'
     });
 

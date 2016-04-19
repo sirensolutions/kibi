@@ -14,7 +14,7 @@ define(function (require) {
   });
 
   require('ui/modules').get('apps/settings')
-  .directive('kbnSettingsObjects', function (kbnIndex, Notifier, Private, kbnUrl, Promise, queryEngineClient) {
+  .directive('kbnSettingsObjects', function (kbnIndex, Private, kbnUrl, Promise, queryEngineClient, createNotifier, config) {
 
     var cache = Private(require('ui/kibi/helpers/cache_helper')); // kibi: added by kibi
     var deleteHelper = Private(require('ui/kibi/helpers/delete_helper')); // kibi: added by kibi
@@ -22,7 +22,7 @@ define(function (require) {
     return {
       restrict: 'E',
       controller: function ($scope, $injector, $q, AppState, es) {
-        var notify = new Notifier({ location: 'Saved Objects' });
+        var notify = createNotifier({ location: 'Saved Objects' });
 
         var $state = $scope.state = new AppState();
         $scope.currentTab = null;

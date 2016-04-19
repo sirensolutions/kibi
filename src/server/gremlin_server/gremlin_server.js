@@ -137,16 +137,17 @@ function isJavaVersionOk(self) {
   return new Promise((fulfill, reject) => {
     let spawn = require('child_process').spawn('java', ['-version']);
     spawn.on('error', function (err) {
-        self.server.log(['gremlin', 'error'], err);
-    })
-    spawn.stderr.on('data', function(data) {
+      self.server.log(['gremlin', 'error'], err);
+    });
+    spawn.stderr.on('data', function (data) {
       data = data.toString().split('\n')[0];
       let javaVersion = new RegExp('java version').test(data) ? data.split(' ')[2].replace(/"/g, '') : false;
       if (javaVersion) {
         if (javaVersion.startsWith('1.8')) {
           fulfill(true);
         } else {
-          self.server.log(['gremlin', 'error'], 'JAVA version is lower than the requested 1.8. The Kibi Gremlin Server needs JAVA 8 to run');
+          self.server.log(['gremlin', 'error'],
+            'JAVA version is lower than the requested 1.8. The Kibi Gremlin Server needs JAVA 8 to run');
           fulfill(false);
         }
       } else {

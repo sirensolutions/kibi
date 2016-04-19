@@ -71,18 +71,10 @@ define(function (require) {
 
     KibiSessionHelper.prototype._updateOrCreate = function (savedSession) {
       return new Promise(function (fulfill, reject) {
-        savedSession.delete().then(function () {
-          savedSession.save().then(function () {
-            fulfill(savedSession);
-          }).catch(function (err) {
-            reject(new Error('Could not save the session ' + savedSession.id));
-          });
-        }).catch(function () {
-          savedSession.save().then(function () {
-            fulfill(savedSession);
-          }).catch(function (err) {
-            reject(new Error('Could not save the session ' + savedSession.id));
-          });
+        savedSession.save(true).then(function () {
+          fulfill(savedSession);
+        }).catch(function (err) {
+          reject(new Error('Could not save the session ' + savedSession.id));
         });
       });
     };

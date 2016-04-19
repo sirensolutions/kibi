@@ -144,7 +144,6 @@ describe('Kibi Components', function () {
           expect(savedSession.id).to.eql(expectedId);
           expect($cookies.get('ksid')).to.eql(expectedId);
           expect(saveSessionCounter).to.be(1);
-          expect(deleteSessionCounter).to.be(1);
           expect(getSaveSessionCounter).to.be(3);
           done();
         }).catch(done);

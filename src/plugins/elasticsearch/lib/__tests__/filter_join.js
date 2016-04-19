@@ -107,17 +107,17 @@ describe('FilterJoin querying', function () {
                     indices: [ 'i1' ],
                     types: [ 'cafard' ],
                     path: 'id1',
-                    termsEncoding: [ 'long', 'integer', 'bloom' ],
-                    orderBy: [ 'default', 'doc_score' ],
-                    maxTermsPerShard: [ 'integer', 'all_terms' ]
+                    termsEncoding: 'long',
+                    orderBy: 'doc_score',
+                    maxTermsPerShard: 100
                   },
                   {
                     indices: [ 'i2' ],
                     types: [ 'cafard' ],
                     path: 'id2',
-                    termsEncoding: [ 'long', 'integer', 'bloom' ],
-                    orderBy: [ 'default', 'doc_score' ],
-                    maxTermsPerShard: [ 'integer', 'all_terms' ]
+                    termsEncoding: 'long',
+                    orderBy: 'doc_score',
+                    maxTermsPerShard: 100
                   }
                 ]
               ]
@@ -149,9 +149,9 @@ describe('FilterJoin querying', function () {
                 indices: ['i2'],
                 path: 'id2',
                 types: ['cafard'],
-                termsEncoding: [ 'long', 'integer', 'bloom' ],
-                orderBy: [ 'default', 'doc_score' ],
-                maxTermsPerShard: [ 'integer', 'all_terms' ]
+                termsEncoding: 'long',
+                orderBy: 'doc_score',
+                maxTermsPerShard: 100
               }
             }
           }
@@ -163,7 +163,7 @@ describe('FilterJoin querying', function () {
   });
 
 
-  it('in a bool clause, adv join options', function () {
+  it('in a bool clause, adv join options maxTermsPerShard should not be passed if === -1', function () {
     const query = {
       bool: {
         must: [
@@ -176,17 +176,17 @@ describe('FilterJoin querying', function () {
                     indices: [ 'i1' ],
                     types: [ 'cafard' ],
                     path: 'id1',
-                    termsEncoding: [ 'long', 'integer', 'bloom' ],
-                    orderBy: [ 'default', 'doc_score' ],
-                    maxTermsPerShard: [ 'integer', 'all_terms' ]
+                    termsEncoding: 'long',
+                    orderBy: 'doc_score',
+                    maxTermsPerShard: -1
                   },
                   {
                     indices: [ 'i2' ],
                     types: [ 'cafard' ],
                     path: 'id2',
-                    termsEncoding: [ 'long', 'integer', 'bloom' ],
-                    orderBy: [ 'default', 'doc_score' ],
-                    maxTermsPerShard: [ 'integer', 'all_terms' ]
+                    termsEncoding: 'long',
+                    orderBy: 'doc_score',
+                    maxTermsPerShard: -1
                   }
                 ]
               ]
@@ -218,9 +218,8 @@ describe('FilterJoin querying', function () {
                 indices: ['i2'],
                 path: 'id2',
                 types: ['cafard'],
-                termsEncoding: [ 'long', 'integer', 'bloom' ],
-                orderBy: [ 'default', 'doc_score' ],
-                maxTermsPerShard: [ 'integer', 'all_terms' ]
+                termsEncoding: 'long',
+                orderBy: 'doc_score'
               }
             }
           }

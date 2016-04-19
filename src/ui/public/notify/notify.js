@@ -13,7 +13,7 @@ define(function (require) {
     return function (opts) {
       // kibi: set the awesomeDemoMode and shieldAuthorizationWarning flag
       if (!opts) {
-        var opts = {};
+        opts = {};
       }
       opts.awesomeDemoMode = config.get('kibi:awesomeDemoMode');
       opts.shieldAuthorizationWarning = config.get('kibi:shieldAuthorizationWarning');

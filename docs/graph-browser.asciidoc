@@ -1,17 +1,11 @@
 [[graph-browser]]
 === Kibi Graph Browser
 
-The Kibi Graph Browser http://todo[introduced in TODO] displays the currently selected Elasticsearch documents as a node of a graph.
+The Kibi Graph Browser http://siren.solutions/kibi-enterprise-edition-is-here-sneak-peak-and-webinar-invitation-3/[introduced in Kibi Enterprise Edition] displays the currently selected Elasticsearch documents as a node of a graph.
 
 image::images/graph-browser/graph-browser-example.png["Graph Browser Visualization",align="center"]
 
-[float]
-==== Pre-Requisites
-
-To use the Kibi Graph Browser you first need to:
-
- * Set up a Kibi Tinkerpop3 datasource
- * Set up a query using the Kibi Tinkerpop3 datasource
+NOTE: Kibi Graph Browser is available only in Kibi Enterprise Edition.
 
 [float]
 ==== Configuration

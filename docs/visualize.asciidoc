@@ -50,6 +50,9 @@ dashboard.
 <<timeline,Kibi Timeline>>:: Displays series of data coming from different
 saved searches on a single timeline component.
 <<radar-chart, Radar Chart>>:: Display multivariate data with a two-dimensional chart.
+<<graph-browser, Kibi Graph Browser*>>:: Displays a graph visualization starting from a selected document
+
+NOTE: *: available only in Kibi Enterprise Edition.
 
 You can also load a saved visualization that you created earlier. The saved visualization selector includes a text
 field to filter by visualization name and a link to the Object Editor, accessible through *Settings > Edit Saved

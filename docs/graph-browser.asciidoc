@@ -5,7 +5,7 @@ The Kibi Graph Browser http://siren.solutions/kibi-enterprise-edition-is-here-sn
 
 image::images/graph-browser/graph-browser-example.png["Graph Browser Visualization",align="center"]
 
-NOTE: Kibi Graph Browser is available only in Kibi Enterprise.
+NOTE: Kibi Graph Browser is available only in Kibi Enterprise Edition.
 
 [float]
 ==== Configuration

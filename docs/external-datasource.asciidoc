@@ -61,6 +61,8 @@ A Kibi restart is required to apply configuration changes.
 
 *Kibi Tinkerpop3*
 
+NOTE: Kibi Tinkerpop3 datasource is available only in Kibi Enterprise.
+
 * url - url of the Kibi Gremlin Server e.g.: http://localhost:8080/graph/query
 * timeout - the server may take more than 1 seconds to load big graphs e.g.: 10000
 

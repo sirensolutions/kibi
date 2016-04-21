@@ -1,0 +1,34 @@
+[[shield-integration]]
+== Shield Integration
+
+
+Since the first version of Kibi Enterprise plugin, Shield is fully integrated
+and supported, with all its functionality and features. Kibi Enterprise plugin
+is also the only solution available to get the best possible integration between
+Kibi and Shield, ensuring better customer experience through a dedicated
+management of errors, specific for relationships between indices.
+Kibi Enterprise plugin lets you view the permission errors in a more humanly
+understandable way and with the affordable option to disable each message
+through the configuration of a specific parameter present in the advanced settings.
+During navigation and in the presence of special restrictions on data visualization
+inside indexes, you can meet the following errors:
+* "Kibi Relational Filter: Could not load filter Relational visualization: one
+or more join relations refers to unauthorized data": You can see this message when
+all relations available for a saved search are related to data which you do not
+have permission to view.
+* "One or more visualizations Refers to unauthorized data": This message is visible
+when inside the dashboard there are one or more views that require access to
+unauthorized data.
+* "Enhanced search results: Refers to unauthorized data": This message is visible
+when using a widget "Enhanced search results" which refers to unauthorized data.
+* "Kibi Relational Filter: there are relations with unauthorized data": This message
+is visible when there are the relationships between unauthorized data.
+* "One or more saved search Refers to unauthorized data": This message is visible
+when you have the saved search that refers to unauthorized data.
+All these error messages appear for five seconds as yellow toaster at the top of
+the screen. You can permanently hide these messages changing the
+kibi:shieldAuthorizationWarning variable: move under the tab "Advanced", in
+"Settings", and set to false the kibi:shieldAuthorizationWarning variable to hide
+the error messages (default to true, so all authorization messages are shown).
+Even if you set kibi:shieldAuthorizationWarning to false, all permission errors
+are reported as warnings in the console.

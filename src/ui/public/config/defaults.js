@@ -208,6 +208,10 @@ define(function (require) {
         value: false,
         description: 'Set to true to suppress all warnings and errors'
       },
+      'kibi:graphExpansionLimit' : {
+        value: 100,
+        description: 'Limit the number of elements to retrieve during the graph expansion'
+      },
       'kibi:timePrecision' : {
         type: 'string',
         value: '',

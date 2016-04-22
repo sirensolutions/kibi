@@ -1,6 +1,7 @@
-var http = require('http');
-var path = require('path');
-var Boom = require('boom');
+const http = require('http');
+const path = require('path');
+const Boom = require('boom');
+const errors = require('request-promise/errors');
 
 module.exports = function (kibana) {
 
@@ -166,7 +167,16 @@ module.exports = function (kibana) {
             return queryEngine.gremlin(params, JSON.parse(req.query.options));
           })
           .then(reply)
-          .catch((err) => reply(Boom.create(err.statusCode, err.error.message, err.error.stack)));
+          .catch(errors.StatusCodeError, function (err) {
+            reply(Boom.create(err.statusCode, err.error.message, err.error.stack));
+          })
+          .catch(errors.RequestError, function (err) {
+            if (err.error.code === 'ETIMEDOUT') {
+              reply(Boom.create(408, err.message, ''));
+            } else {
+              reply({ error: 'An error occurred while sending a gremlin query: ' + JSON.stringify(err) });
+            }
+          });
         }
       });
 

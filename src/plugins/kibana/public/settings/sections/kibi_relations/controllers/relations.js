@@ -122,27 +122,26 @@ define(function (require) {
      * Filters out the dashboards that are not relevant in the row with the given id
      */
     $scope.filterDashboards = function (id, item) {
-      var value = item.value;
       var relDash = $scope.relations.relationsDashboards[id];
 
-      if (!value) {
+      if (!item || !item.value) {
         // this is the watched value
         return _.pluck($scope.relations.relationsIndices, 'id').concat(relDash);
       }
-      if (!!value) {
+      if (item && item.value) {
         var remove = true;
 
         // do not remove if the dashboard is associated with an index
         if (!!indexToDashboardsMap) {
           _.each(indexToDashboardsMap, function (dashboards) {
-            if (dashboards.indexOf(value) !== -1) {
+            if (dashboards.indexOf(item.value) !== -1) {
               remove = false;
               return false;
             }
           });
         }
 
-        // remove if the dashboard is not in the list of dashboards that are directly connected to value
+        // remove if the dashboard is not in the list of dashboards that are directly connected to item.value
         var connectedDashboards = [];
         if (!!relDash.dashboards[0] && !relDash.dashboards[1]) {
           connectedDashboards = _getConnectedDashboards(relDash.dashboards[0], relDash.relation);
@@ -152,7 +151,7 @@ define(function (require) {
           // filter based on the selected relation
           connectedDashboards = _getConnectedDashboards(null, relDash.relation);
         }
-        if (connectedDashboards.length && connectedDashboards.indexOf(value) === -1) {
+        if (connectedDashboards.length && connectedDashboards.indexOf(item.value) === -1) {
           remove = true;
         }
 
@@ -208,7 +207,6 @@ define(function (require) {
      */
     $scope.filterRelations = function (id, item) {
       // here for anything about indices relations - we take them from config as they are already saved
-      var relationId = item.value;
       var relations = config.get('kibi:relations');
 
       //for anything about the dashboards relations - we take them from the scope
@@ -216,7 +214,7 @@ define(function (require) {
       var lIndex = '';
       var rIndex = '';
 
-      if (!relationId) {
+      if (!item || !item.value) {
         return _.pluck(relations.relationsIndices, 'id')
         .concat(_.pluck(relations.relationsIndices, 'label'))
         .concat(dashboards);
@@ -249,7 +247,7 @@ define(function (require) {
             return relInd.id;
           }
         }
-      }).compact().contains(relationId);
+      }).compact().contains(item.value);
     };
 
     /**

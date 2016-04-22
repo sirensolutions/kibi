@@ -274,6 +274,68 @@ describe('Kibi Settings', function () {
         });
       });
 
+      it('should test for the watched value of filterDashboards', function (done) {
+        var relations = {
+          relationsIndices: [
+            {
+              indices: [
+                {
+                  indexPatternId: 'index-a',
+                  path: 'path-a1'
+                },
+                {
+                  indexPatternId: 'index-a',
+                  path: 'path-a2'
+                }
+              ],
+              label: 'rel',
+              id: 'index-a/path-a1/index-a/path-a2'
+            },
+            {
+              indices: [
+                {
+                  indexPatternId: 'index-b',
+                  path: 'path-b'
+                },
+                {
+                  indexPatternId: 'index-c',
+                  path: 'path-c'
+                }
+              ],
+              label: 'rel',
+              id: 'index-b/path-b/index-c/path-c'
+            }
+          ],
+          relationsDashboards: [
+            {
+              dashboards: [ 'Da2', 'Da1' ],
+              relation: 'index-a/path-a1/index-a/path-a2'
+            },
+            {
+              dashboards: [ 'Db', 'Dc' ],
+              relation: 'index-b/path-b/index-c/path-c'
+            }
+          ]
+        };
+        var map = {
+          'index-a': [ 'Da1', 'Da2' ],
+          'index-b': [ 'Db' ],
+          'index-c': [ 'Dc' ]
+        };
+
+        init({ relations: relations, indexToDashboardsMap: map });
+        indexToDashboardMapPromise.then(function () {
+          expect($scope.relations.relationsDashboards).to.have.length(2);
+          const actual = $scope.filterDashboards(1);
+          expect(actual).to.have.length(3);
+          expect(actual[0]).to.be('index-a/path-a1/index-a/path-a2');
+          expect(actual[1]).to.be('index-b/path-b/index-c/path-c');
+          expect(actual[2].dashboards).to.eql([ 'Db', 'Dc' ]);
+          expect(actual[2].relation).to.be('index-b/path-b/index-c/path-c');
+          done();
+        }).catch(done);
+      });
+
       it('should support dashboards recommendation connected with a loop', function (done) {
         var relations = {
           relationsIndices: [
@@ -585,6 +647,85 @@ describe('Kibi Settings', function () {
           expect($scope.filterDashboards(0, { value: 'Db2' })).to.be(false);
           expect($scope.filterDashboards(0, { value: 'Dc' })).to.be(true);
           expect($scope.filterDashboards(0, { value: 'Dd' })).to.be(true);
+          done();
+        }).catch(done);
+      });
+
+      it('should test for the watched value of filterRelations', function (done) {
+        var relations = {
+          relationsIndices: [
+            {
+              indices: [
+                {
+                  indexPatternId: 'index-a',
+                  path: 'path-a'
+                },
+                {
+                  indexPatternId: 'index-b',
+                  path: 'path-b'
+                }
+              ],
+              label: 'rel1',
+              id: 'index-a/path-a/index-b/path-b'
+            },
+            {
+              indices: [
+                {
+                  indexPatternId: 'index-b',
+                  path: 'path-b'
+                },
+                {
+                  indexPatternId: 'index-c',
+                  path: 'path-c'
+                }
+              ],
+              label: 'rel2',
+              id: 'index-b/path-b/index-c/path-c'
+            },
+            {
+              indices: [
+                {
+                  indexPatternId: 'index-c',
+                  path: 'path-c'
+                },
+                {
+                  indexPatternId: 'index-d',
+                  path: 'path-d'
+                }
+              ],
+              label: 'rel3',
+              id: 'index-c/path-c/index-d/path-d'
+            }
+          ],
+          relationsDashboards: [
+            {
+              dashboards: [ '', '' ]
+            },
+            {
+              dashboards: [ 'Da', 'Db' ],
+              relation: 'index-a/path-a/index-b/path-b'
+            }
+          ]
+        };
+        var map = {
+          'index-a': [ 'Da' ],
+          'index-b': [ 'Db' ],
+          'index-c': [ 'Dc' ],
+          'index-d': [ 'Dd' ]
+        };
+
+        init({ relations: relations, indexToDashboardsMap: map });
+        indexToDashboardMapPromise.then(function () {
+          expect($scope.filterRelations(1)).to.eql([
+            'index-a/path-a/index-b/path-b',
+            'index-b/path-b/index-c/path-c',
+            'index-c/path-c/index-d/path-d',
+            'rel1',
+            'rel2',
+            'rel3',
+            'Da',
+            'Db'
+          ]);
           done();
         }).catch(done);
       });

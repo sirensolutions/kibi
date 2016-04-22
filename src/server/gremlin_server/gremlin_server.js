@@ -107,7 +107,6 @@ function startServer(self, fulfill, reject) {
                   }
                 })
                 .catch(function (err) {
-                  console.log('err=[%s]', JSON.stringify(err, null, ' '));
                   if (err.error.code !== 'ECONNREFUSED') {
                     self.server.log(['gremlin', 'error'], 'Failed to ping the Kibi gremlin server: ' + err.message);
                   } else {

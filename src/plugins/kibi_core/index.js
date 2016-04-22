@@ -1,6 +1,7 @@
 var http = require('http');
 var path = require('path');
 var Boom = require('boom');
+const errors = require('request-promise/errors');
 
 module.exports = function (kibana) {
 

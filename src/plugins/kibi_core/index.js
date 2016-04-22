@@ -174,7 +174,7 @@ module.exports = function (kibana) {
             if (err.error.code === 'ETIMEDOUT') {
               reply(Boom.create(408, err.message, ''));
             } else {
-              server.log(['error','kibi_core'], 'An error occurred while sending a gremlin query: ' + err);
+              reply({ error: 'An error occurred while sending a gremlin query: ' + err });
             }
           });
         }

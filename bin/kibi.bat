@@ -29,7 +29,7 @@ REM kibi: we need conditionally run script to set the correct java home
 set CONFIG_PATH=%DIR%\config\kibi.yml
 echo Checking jdbc_enabled flag in %CONFIG_PATH%
 
-for /f "tokens=2 delims=:" %%i in ('findstr /r /c:"load_jdbc:[ ]*" %CONFIG_PATH%') do set JDBC_ENABLED=%%i
+for /f "tokens=2 delims=:" %%i in ('findstr /r /c:"load_jdbc:[ ]*" "%CONFIG_PATH%"') do set JDBC_ENABLED=%%i
 rem trim the variable
 for /f "tokens=* delims= " %%a in ("%JDBC_ENABLED%") do set JDBC_ENABLED=%%a
 for /l %%a in (1,1,100) do if "!JDBC_ENABLED:~-1!"==" " set JDBC_ENABLED=!JDBC_ENABLED:~0,-1!

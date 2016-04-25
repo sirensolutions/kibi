@@ -177,7 +177,7 @@ describe('Kibi Components', function () {
         kibiSessionHelper.putData(testData).then(function () {
           return kibiSessionHelper.getData().then(function (data) {
             expect(saveSessionCounter).to.be(1);
-            expect(getSaveSessionCounter).to.be(3);
+            expect(getSaveSessionCounter).to.be(1);
             expect(data).to.eql(testData);
             done();
           });
@@ -192,7 +192,7 @@ describe('Kibi Components', function () {
         kibiSessionHelper.putData(testData).then(function () {
           return kibiSessionHelper.getData().then(function (data) {
             expect(saveSessionCounter).to.be(1);
-            expect(getSaveSessionCounter).to.be(3);
+            expect(getSaveSessionCounter).to.be(1);
             expect(data).to.eql(testData);
             done();
           });

@@ -269,7 +269,7 @@ define(function (require) {
         };
 
         if (force) { // kibi: if the force flag is true, silently updates the document
-          return docSource.doIndex(source).then(finish);
+          return docSource.doIndex(source);
         } else {
           return docSource.doCreate(source)
           .then(finish)

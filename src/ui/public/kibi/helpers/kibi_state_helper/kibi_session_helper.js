@@ -22,6 +22,7 @@ define(function (require) {
       return new Promise(function (fulfill, reject) {
         savedSessions.get(self.id).then(function (savedSession) {
           self.initialized = true;
+          self.savedSession = savedSession;
           fulfill(self.id);
         }).catch(function (err) {
           savedSessions.get().then(function (savedSession) {
@@ -29,7 +30,8 @@ define(function (require) {
             savedSession.id = self.id;
             savedSession.session_data = {};
             savedSession.timeCreated = new Date();
-            self._updateOrCreate(savedSession).then(function () {
+            self._updateOrCreate(savedSession).then(function (savedSession) {
+              self.savedSession = savedSession;
               self.initialized = true;
               fulfill(self.id);
             }).catch(reject);
@@ -56,16 +58,14 @@ define(function (require) {
     };
 
     KibiSessionHelper.prototype.getData = function () {
-      return this.getId().then(savedSessions.get).then(function (savedSession) {
-        return savedSession.session_data;
-      });
+      return this.getId().then(() => this.savedSession.session_data);
     };
 
     KibiSessionHelper.prototype.putData = function (data) {
       var self = this;
-      return self.getId().then(savedSessions.get).then(function (savedSession) {
-        savedSession.session_data = data;
-        return self._updateOrCreate(savedSession);
+      return self.getId().then(function () {
+        self.savedSession.session_data = data;
+        return self._updateOrCreate(self.savedSession);
       });
     };
 

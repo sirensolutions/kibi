@@ -1,7 +1,7 @@
 [[kibi-license]]
 == Kibi license [Enterprise Edition only]
 
-Kibi Enterprise Edition comes with **license-siren** plugin preinstalled
+Kibi Enterprise Edition comes with the **license-siren** plugin preinstalled
 and requires a valid license.
 Enterprise users should contact mailto:info@siren.solutions[siren.solution] to obtain required license file.
 

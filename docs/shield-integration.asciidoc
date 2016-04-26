@@ -1,5 +1,5 @@
 [[shield-integration]]
-== Shield Integration
+== Shield Integration  [Enterprise Edition only]
 
 === Behaviours and warning display messages
 
@@ -49,13 +49,13 @@ also see that query results counter in _Dashboard tab_ show the message *Unautho
 Otherwise, if we have only some restricted documents or fields, we should see all
 others data without any problem but, when we have a visualization that uses
 unauthorized fields or documents, we can see only data that we can access (if the
-visualization is based only on unauthorized data, we should see an error message
+visualizations is based only on unauthorized data, we should see an error message
 inside the widget).
 
-._Visualization that use unauthorized data_
+._Visualizations that use unauthorized data_
 image::images/authorization-visualization-error.png["Visualization that use unauthorized data",align="left"]
 
-._Visualization that refer to an unauthorized index_
+._Visualizations that refer to an unauthorized index_
 image::images/authorization-visualization-empty.png["Visualization that refer to an unauthorized index",align="left"]
 
 === Installation on Microsoft Windows
@@ -82,7 +82,7 @@ C:\Demo
 . Start a command-line prompt (_cmd.exe_) and go to the demo folder typing:
 +
 ----
-cd \demo
+cd \Demo
 ----
 
 . Before starting *OpenSSL*, set 2 environment variables:
@@ -203,14 +203,14 @@ restrictedfieldsinvestment:
       privileges: indices:data/read/coordinate-search, indices:admin/exists, indices:admin/mapping/put, indices:admin/mappings/fields/get, indices:admin/refresh, indices:admin/validate/query, indices:data/read/get, indices:data/read/mget, indices:data/read/search, indices:data/write/delete, indices:data/write/index, indices:data/write/update
 ----
 
-. in Elasticsearch root folder execute:
+. In Elasticsearch root folder execute (the first two users are used by Kibi):
 +
 ----
 bin\shield\esusers useradd kibana4-server -r kibana4_server -p password && ^
 bin\shield\esusers useradd transport_client -r transport_client -p password && ^
-bin\shield\esusers useradd valentina -r kibana4 -p password && ^
-bin\shield\esusers useradd valentina-index -r restrictedindex -p password && ^
-bin\shield\esusers useradd valentina-fields -r restrictedfieldsinvestment -p password
+bin\shield\esusers useradd usernames -r kibana4 -p password && ^
+bin\shield\esusers useradd usernames-index -r restrictedindex -p password && ^
+bin\shield\esusers useradd usernames-fields -r restrictedfieldsinvestment -p password
 ----
 
 . Go to _distribution/kibi_, download *Kibana Shield plugin* (http://download.elastic.co/kibana/shield/shield-2.2.0.tar.gz) into _Demo folder_:
@@ -429,16 +429,16 @@ openssl req -new -key server.key -out server.csr
 openssl x509 -req -days 366 -in server.csr -signkey server.key -out server.crt
 ----
 
-*In Elasticsearch root folder execute*
+*In Elasticsearch root folder execute (the first two users are used by Kibi):*
 
 Add my own user with _kibana4 role_ and _kibana4-server user_ with _kibana4-server role_:
 ----
 ./bin/shield/esusers useradd kibana4-server -r kibana4_server -p password
 ./bin/shield/esusers useradd transport_client -r transport_client -p password
 
-./bin/shield/esusers useradd simon -r kibana4 -p password
-./bin/shield/esusers useradd simon-index -r restrictedindex -p password
-./bin/shield/esusers useradd simon-fields -r restrictedfieldsinvestment -p password
+./bin/shield/esusers useradd usernames -r kibana4 -p password
+./bin/shield/esusers useradd usernames-index -r restrictedindex -p password
+./bin/shield/esusers useradd usernames-fields -r restrictedfieldsinvestment -p password
 ----
 
 To enable field and doc restriction for version 2.2.0 add this flag to _elasticsearch.yml_:
@@ -541,7 +541,7 @@ wget http://download.elastic.co/kibana/shield/shield-2.2.0.tar.gz
 
 *Modify kibi.yml*
 
-Edit _config/kibi.dev.yml_:
+Edit _config/kibi.yml_:
 ----
 elasticsearch.username: "kibana4-server"
 elasticsearch.password: "password"
@@ -569,9 +569,9 @@ kibi_core:
     path: ../gremlin_server/gremlin-es2-server-0.1.0.jar
     # uncomment this for gremlin behind ssl
     #ssl:
-    # key_store: '/Users/szydan/home/workspace-kibana/kibi-internal/ca/gremlin.jks'
+    # key_store: '/opt/kibi/ca/gremlin.jks'
     # key_store_password: 'password'
-    # ca: '/Users/szydan/home/workspace-kibana/kibi-internal/ca/certs/cacert.pem'
+    # ca: '/opt/kibi/certs/cacert.pem'
 ----
 
 ==== Configuring Gremlin Server
@@ -588,7 +588,7 @@ Paste below into _conf/caconfig.cnf_:
 default_ca = CA_default
 [ CA_default ]
 copy_extensions = copy
-dir = /Users/szydan/home/workspace-kibana/kibi-internal/ca
+dir = /opt/kibi/ca
 serial = $dir/serial
 database = $dir/index.txt
 new_certs_dir = $dir/certs
@@ -689,7 +689,7 @@ kibi_core:
     path: ../gremlin_server/gremlin-es2-server-0.1.0.jar
     # uncomment this for gremlin behind ssl
     ssl:
-     key_store: '/Users/szydan/home/workspace-kibana/kibi-internal/ca/gremlin.jks'
+     key_store: '/opt/kibi/ca/gremlin.jks'
      key_store_password: 'password'
-     ca: '/Users/szydan/home/workspace-kibana/kibi-internal/ca/certs/cacert.pem'
+     ca: '/opt/kibi/ca/certs/cacert.pem'
 ----

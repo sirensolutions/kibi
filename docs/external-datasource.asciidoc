@@ -18,10 +18,22 @@ Kibi supports following datasource types:
 * Sparql over http - any SPARQL HTTP endpoint (tested with Openlink Virtuoso and Joseki)
 * SQL JDBC - *experimental* JDBC support for SQL (tested with http://www.h2database.com/html/main.html[H2]).
 * SPARQL JDBC - *experimental* JDBC support for SPARQL
-* Kibi Tinkerpop3 - *experimental* support for Kibi Gremlin Server
+* Kibi Tinkerpop3 [Enterprise Edition only] - *experimental* support for Kibi Gremlin Server
 
 After selecting the datasource type additional parameters will appear.
 Below list of additional mandatory parameters for each datasource type:
+
+*Common parameters*
+
+* timeout - connection timeout in milliseconds
+* cache_enabled - enable server side cache for this datasource
+* max_age - the max age of an object in the cache, in milliseconds
+
+To control the maximum number of query results kept in cache, set the `kibi_core.datasource_cache_size` parameter in kibi.yml.
+
+[NOTE]
+A Kibi restart is required to apply changes to kibi.yml configuration file.
+
 
 *REST*
 
@@ -52,26 +64,19 @@ Below list of additional mandatory parameters for each datasource type:
 * libpath - absolute path to the driver jar file e.g.: "/otp/dbdrivers/postgresql-9.4-1201.jdbc41.jar"
 * connection_string - JDBC connection string without username and password e.g.: "jdbc:postgresql://localhost/mydatabase"
 
-
-To enable query results caching, set the `datasource_enable_cache` parameter
-to `true`; the cache size and max age (in milliseconds) can be set through the
-`datasource_cache_size` and `datasource_cache_max_age` parameters.
-
-A Kibi restart is required to apply configuration changes.
-
-*Kibi Tinkerpop3*
+*Kibi Tinkerpop3 [Enterprise Edition only]*
 
 NOTE: Kibi Tinkerpop3 datasource is available only in Kibi Enterprise Edition.
 
 * url - url of the Kibi Gremlin Server e.g.: http://localhost:8080/graph/query
-* timeout - the server may take more than 1 seconds to load big graphs e.g.: 10000
 
 
-[NOTE]
-====
-Sensitive datasource configuration elements like passwords are encrypted.
-Make sure to change *datasource_encryption_key* in kibi.yml. To do it use scripts
-provided in _bin/_ folder.
+=== Parameters encryption
+
+Sensitive datasource configuration elements like passwords
+are encrypted before they are stored in .kibi index.
+Make sure to change *datasource_encryption_key* in kibi.yml.
+To do it use scripts provided in **bin/** folder.
 
 Linux:
 ```
@@ -81,7 +86,23 @@ Windows:
 ```
 bin\replace_encryption_key.bat OLD_KEY ALGORITHM NEW_KEY PATH_TO_KIBI_YML
 ```
-====
+
+Where:
+
+* OLD_KEY and NEW_KEY - a base64encoded string which contain a key which is either 16, 24, or 32 bytes long
+E.g. if your key in plaintext is 32 bytes long string
+
+```
+changemechangemechangemechangeme
+```
+
+after base64 encoding
+
+```
+Y2hhbmdlbWVjaGFuZ2VtZWNoYW5nZW1lY2hhbmdlbWU=
+```
+* ALGORITHM - currently only AES-GCM is supported
+* PATH_TO_KIBI_YML - an absolute path to kibi.yml file
 
 NOTE: Make sure to set the configuration file as readable only to the user running
 the Kibi process as it contains the *datasource_encryption_key*.

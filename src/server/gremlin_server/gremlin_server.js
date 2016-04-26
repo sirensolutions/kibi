@@ -10,6 +10,7 @@ function GremlinServerHandler(server) {
   this.gremlinServer = null;
   this.initialized = false;
   this.server = server;
+  this.javaChecked = false;
 }
 
 function startServer(self, fulfill, reject) {
@@ -138,19 +139,22 @@ function isJavaVersionOk(self) {
       self.server.log(['gremlin', 'error'], err);
     });
     spawn.stderr.on('data', function (data) {
-      data = data.toString().split('\n')[0];
-      let javaVersion = new RegExp('java version').test(data) ? data.split(' ')[2].replace(/"/g, '') : false;
-      if (javaVersion) {
-        if (javaVersion.startsWith('1.8')) {
-          fulfill(true);
+      if (!self.javaChecked) {
+        data = data.toString().split('\n')[0];
+        let javaVersion = new RegExp('java version').test(data) ? data.split(' ')[2].replace(/"/g, '') : false;
+        if (javaVersion) {
+          if (javaVersion.startsWith('1.8')) {
+            fulfill(true);
+          } else {
+            self.server.log(['gremlin', 'error'],
+              'JAVA version is lower than the requested 1.8. The Kibi Gremlin Server needs JAVA 8 to run');
+            reject(new Error('JAVA version is lower than the requested 1.8. The Kibi Gremlin Server needs JAVA 8 to run'));
+          }
         } else {
-          self.server.log(['gremlin', 'error'],
-            'JAVA version is lower than the requested 1.8. The Kibi Gremlin Server needs JAVA 8 to run');
-          reject(new Error('JAVA version is lower than the requested 1.8. The Kibi Gremlin Server needs JAVA 8 to run'));
+          self.server.log(['gremlin', 'error'], 'JAVA not found. Please install JAVA 8 and restart Kibi');
+          reject(new Error('JAVA not found. Please install JAVA 8 and restart Kibi'));
         }
-      } else {
-        self.server.log(['gremlin', 'error'], 'JAVA not found. Please install JAVA 8 and restart Kibi');
-        reject(new Error('JAVA not found. Please install JAVA 8 and restart Kibi'));
+        self.javaChecked = true;
       }
     });
   });

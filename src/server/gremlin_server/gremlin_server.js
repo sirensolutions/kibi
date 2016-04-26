@@ -5,6 +5,7 @@ const rp = require('request-promise');
 const http = require('http');
 const path = require('path');
 const _ = require('lodash');
+const os = require('os');
 
 function GremlinServerHandler(server) {
   this.gremlinServer = null;
@@ -139,25 +140,40 @@ function isJavaVersionOk(self) {
       self.server.log(['gremlin', 'error'], err);
     });
     spawn.stderr.on('data', function (data) {
-      if (!self.javaChecked) {
-        data = data.toString().split('\n')[0];
-        let javaVersion = new RegExp('java version').test(data) ? data.split(' ')[2].replace(/"/g, '') : false;
-        if (javaVersion) {
-          if (javaVersion.startsWith('1.8')) {
-            fulfill(true);
-          } else {
-            self.server.log(['gremlin', 'error'],
-              'JAVA version is lower than the requested 1.8. The Kibi Gremlin Server needs JAVA 8 to run');
-            reject(new Error('JAVA version is lower than the requested 1.8. The Kibi Gremlin Server needs JAVA 8 to run'));
-          }
+      var result = _checkJavaVersionString(data);
+      if (result) {
+        if (result.v) {
+          fulfill(true);
         } else {
-          self.server.log(['gremlin', 'error'], 'JAVA not found. Please install JAVA 8 and restart Kibi');
-          reject(new Error('JAVA not found. Please install JAVA 8 and restart Kibi'));
+          self.server.log(['gremlin', 'error'], result.e);
+          reject(new Error(result.e));
         }
-        self.javaChecked = true;
       }
     });
   });
+}
+
+GremlinServerHandler.prototype._checkJavaVersionString = function (string) {
+  if (!this.javaChecked) {
+    let ret = {};
+    string = string.toString().split(JSON.stringify(os.EOL))[0];
+    let javaVersion = new RegExp('java version').test(string) ? string.split(' ')[2].replace(/"/g, '') : false;
+    if (javaVersion) {
+      if (javaVersion.startsWith('1.8')) {
+        ret.v = true;
+      } else {
+        ret.v = false;
+        ret.e = 'JAVA version is lower than the requested 1.8. The Kibi Gremlin Server needs JAVA 8 to run';
+      }
+    } else {
+      ret.v = false;
+      ret.e = 'JAVA not found. Please install JAVA 8 and restart Kibi';
+    }
+    this.javaChecked = true;
+    return ret;
+  } else {
+    return null;
+  }
 }
 
 GremlinServerHandler.prototype.start = function () {

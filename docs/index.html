@@ -2546,6 +2546,18 @@ to <code>true</code>; the cache size and max age (in milliseconds) can be set th
 <div class="paragraph">
 <p><strong>Kibi Tinkerpop3</strong></p>
 </div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+Kibi Tinkerpop3 datasource is available only in Kibi Enterprise Edition.
+</td>
+</tr>
+</table>
+</div>
 <div class="ulist">
 <ul>
 <li>
@@ -3119,6 +3131,26 @@ saved searches on a single timeline component.</p>
 </td>
 <td class="hdlist2">
 <p>Display multivariate data with a two-dimensional chart.</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<a href="#graph-browser">Kibi Graph Browser*</a>
+</td>
+<td class="hdlist2">
+<p>Displays a graph visualization starting from a selected document</p>
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+*: available only in Kibi Enterprise Edition.
 </td>
 </tr>
 </table>
@@ -5686,26 +5718,24 @@ suitable to install in both Kibi 0.3+ and Kibana 4.3+.</p>
 <div class="sect2">
 <h3 id="graph-browser">Kibi Graph Browser</h3>
 <div class="paragraph">
-<p>The Kibi Graph Browser <a href="http://todo">introduced in TODO</a> displays the currently selected Elasticsearch documents as a node of a graph.</p>
+<p>The Kibi Graph Browser <a href="http://siren.solutions/kibi-enterprise-edition-is-here-sneak-peak-and-webinar-invitation-3/">introduced in Kibi Enterprise Edition</a> displays the currently selected Elasticsearch documents as a node of a graph.</p>
 </div>
 <div class="imageblock" style="text-align: center">
 <div class="content">
 <img src="images/graph-browser/graph-browser-example.png" alt="Graph Browser Visualization">
 </div>
 </div>
-<h4 id="_pre_requisites" class="float">Pre-Requisites</h4>
-<div class="paragraph">
-<p>To use the Kibi Graph Browser you first need to:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>Set up a Kibi Tinkerpop3 datasource</p>
-</li>
-<li>
-<p>Set up a query using the Kibi Tinkerpop3 datasource</p>
-</li>
-</ul>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+Kibi Graph Browser is available only in Kibi Enterprise Edition.
+</td>
+</tr>
+</table>
 </div>
 <h4 id="_configuration_3" class="float">Configuration</h4>
 <div class="paragraph">
@@ -7698,13 +7728,16 @@ One can do it by clicking on the button marked below.</p>
 <div class="ulist">
 <ul>
 <li>
-<p>Order By - the ordering to use to lookup the maximum number of terms</p>
+<p><strong>Order By</strong> - (String: "default" or "doc_score", Default: default)
+The ordering to use to lookup the maximum number of terms</p>
 </li>
 <li>
-<p>Number of Terms per Shard - the maximum number of terms per shard to lookup</p>
+<p><strong>Number of Terms per Shard</strong> - (Integer: &gt;= -1, Default: -1)
+The maximum number of terms per shard to lookup, -1 means no limit.</p>
 </li>
 <li>
-<p>Terms Encoding - the encoding to use when transferring terms across the network</p>
+<p><strong>Terms Encoding</strong> - (String: "long" or "integer" or "bloom", Default: long)
+The encoding to use when transferring terms across the network</p>
 </li>
 </ul>
 </div>
@@ -7718,7 +7751,7 @@ One can do it by clicking on the button marked below.</p>
 <div class="title">Note</div>
 </td>
 <td class="content">
-Free Kibi version always use the default values for all advanced parameters.
+Advanced Join Settings are available only in Kibi Enterprise. Free Kibi version always use the default values for all advanced parameters.
 </td>
 </tr>
 </table>

@@ -140,7 +140,7 @@ function isJavaVersionOk(self) {
       self.server.log(['gremlin', 'error'], err);
     });
     spawn.stderr.on('data', function (data) {
-      var result = _checkJavaVersionString(data);
+      var result = self._checkJavaVersionString(data);
       if (result) {
         if (result.v) {
           fulfill(true);
@@ -174,7 +174,7 @@ GremlinServerHandler.prototype._checkJavaVersionString = function (string) {
   } else {
     return null;
   }
-}
+};
 
 GremlinServerHandler.prototype.start = function () {
   const self = this;

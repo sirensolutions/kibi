@@ -3,7 +3,7 @@
 
 Kibi Enterprise Edition comes with **license-siren** plugin preinstalled
 and requires a valid license.
-Enterprise users should contact siren.solutions to obtain required license file.
+Enterprise users should contact mailto:info@siren.solutions[siren.solution] to obtain required license file.
 
 To install the license
 

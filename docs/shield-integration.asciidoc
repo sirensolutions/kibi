@@ -36,6 +36,9 @@ the error messages (default to _true_, so all authorization messages are shown).
 Even if you set *kibi:shieldAuthorizationWarning* to _false_, all permission errors
 are reported as warnings in the console.
 
+._Two warning messages example_
+image::images/authorization-warning-messages.png["Two warning messages example",align="center"]
+
 All authorization errors are displayed as _"warning" messages_ in Kibi. There are
 many different cases for all possible authorization configurations but, essentially,
 Kibi with Shield reacts at only two possibilities: can or cannot see the index.
@@ -48,6 +51,12 @@ others data without any problem but, when we have a visualization that uses
 unauthorized fields or documents, we can see only data that we can access (if the
 visualization is based only on unauthorized data, we should see an error message
 inside the widget).
+
+._Visualization that use unauthorized data_
+image::images/authorization-visualization-error.png["Visualization that use unauthorized data",align="left"]
+
+._Visualization that refer to an unauthorized index_
+image::images/authorization-visualization-empty.png["Visualization that refer to an unauthorized index",align="left"]
 
 === Installation on Microsoft Windows
 You'll need to have *Java JDK* installed on your computer (you can check your installation: usually, Java is under _C:\Program Files\Java\jdk1.8.0_92\bin_ but it might differ on your version of Windows).

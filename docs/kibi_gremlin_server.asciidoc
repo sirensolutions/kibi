@@ -1,0 +1,49 @@
+[[kibi_graph_browser]]
+== Kibi Gremlin Server [Enterprise Edition only]
+
+**Kibi Gremlin Server** component shipped pre-configured in Kibi Enterprise Edition.
+It is required by Kibi Graph Browser visualisation.
+
+The following Gremlin Server configuration is required in kibi.yml.
+
+=== Configuration:
+
+```yml
+kibi_core:
+  gremlin_server:
+    url: http://127.0.0.1:8061
+    path: /opt/gremlin_server/gremlin-es2-server-0.1.0.jar
+```
+
+=== Configuration with Shield:
+
+```yml
+kibi_core:
+  elasticsearch:
+    transport_client:
+      username: 'transport_client'
+      password: 'password'
+  gremlin_server:
+    url: https://127.0.0.1:8061
+    path: /opt/gremlin_server/gremlin-es2-server-0.1.0.jar
+    ssl:
+      key_store: '/opt/ca/gremlin.jks'
+      key_store_password: 'password'
+      # cacert.pem - required only if you use self-signed certificate
+      ca: '/opt/ca/certs/cacert.pem'
+```
+
+The elasticsearch transport client user has to have the following shield role
+
+```yml
+transport_client:
+  cluster:
+      - cluster:monitor/nodes/liveness
+  indices:
+    '*':
+      privileges: indices:data/read/get, indices:data/read/mget, indices:data/read/search
+```
+
+NOTE: For detail instructions how to create the gremlin.jks and signed certificate
+please follow https://www.elastic.co/guide/en/shield/2.2/ssl-tls.html[elasticsearch documentation]
+or contact mailto:info@siren.solutions[siren.solution]

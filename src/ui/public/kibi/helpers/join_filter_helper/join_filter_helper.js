@@ -31,6 +31,10 @@ define(function (require) {
         // get indices relations
         var relationsIndices = relations.relationsIndices;
 
+        if (!relationsIndices.length) {
+          return;
+        }
+
         // copying advanced options from corresponding index relation
         var forvard;
         var backward;
@@ -49,7 +53,7 @@ define(function (require) {
           } else {
             throw new Error(
               'Could not find index relation corresponding to relation between: ' +
-              sourcePartOfTheRelationId + ' and ' + targetPartOfTheRelationId);
+              sourcePartOfTheRelationId + ' and ' + targetPartOfTheRelationId + '. Review the relations in the settings tab.');
           }
         }
 

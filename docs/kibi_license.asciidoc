@@ -8,7 +8,7 @@ Enterprise users should contact mailto:info@siren.solutions[siren.solution] to o
 To install the license
 
 ```
-curl -XPUT -T "license.sig" "http://localhost:9200/_siren/license"
+curl -XPUT -T "license.sig" "http://localhost:9220/_siren/license"
 ```
 
 To check your current license
@@ -20,5 +20,5 @@ curl -XGET "http://localhost:9220/_siren/license"
 To uninstall the license
 
 ```
-curl -XDELETE "http://localhost:9200/_siren/license"
+curl -XDELETE "http://localhost:9220/_siren/license"
 ```

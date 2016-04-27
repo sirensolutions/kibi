@@ -1,0 +1,24 @@
+[[kibi-license]]
+== Kibi license [Enterprise Edition only]
+
+Kibi Enterprise Edition comes with the **license-siren** plugin preinstalled
+and requires a valid license.
+Enterprise users should contact mailto:info@siren.solutions[siren.solution] to obtain required license file.
+
+To install the license
+
+```
+curl -XPUT -T "license.sig" "http://localhost:9200/_siren/license"
+```
+
+To check your current license
+
+```
+curl -XGET "http://localhost:9220/_siren/license"
+```
+
+To uninstall the license
+
+```
+curl -XDELETE "http://localhost:9200/_siren/license"
+```

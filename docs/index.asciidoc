@@ -29,6 +29,8 @@ include::discover.asciidoc[]
 
 include::external-datasource.asciidoc[]
 
+include::kibi_gremlin_server.asciidoc[]
+
 include::visualize.asciidoc[]
 
 include::relational-filter.asciidoc[]

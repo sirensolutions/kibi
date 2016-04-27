@@ -35,6 +35,8 @@ include::dashboard.asciidoc[]
 
 include::settings.asciidoc[]
 
+include::shield-integration.asciidoc[]
+
 include::production.asciidoc[]
 
 include::releasenotes.asciidoc[]

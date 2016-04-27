@@ -11,7 +11,7 @@ describe('Kibi Components', function () {
 
     var noDigestPromises = require('testUtils/noDigestPromises').activateForSuite();
 
-    beforeEach(function () {
+    function init(kibiEnterpriseEnabled) {
       ngMock.module('kibana', function ($provide) {
         $provide.service('config', function () {
           var keys = {};
@@ -21,7 +21,7 @@ describe('Kibi Components', function () {
           };
         });
 
-        $provide.constant('kibiEnterpriseEnabled', false);
+        $provide.constant('kibiEnterpriseEnabled', kibiEnterpriseEnabled);
         $provide.constant('kbnDefaultAppId', '');
         $provide.constant('kibiDefaultDashboardId', '');
         $provide.constant('elasticsearchPlugins', ['siren-join']);
@@ -189,9 +189,88 @@ describe('Kibi Components', function () {
         joinFilterHelper = Private(require('ui/kibi/helpers/join_filter_helper/join_filter_helper'));
         kibiStateHelper = Private(require('ui/kibi/helpers/kibi_state_helper/kibi_state_helper'));
       });
+    }
+
+    describe('addAdvancedJoinSettingsToRelation', function () {
+      beforeEach(() => init(true));
+
+      it('should not try to get advanced relations if there is no relation defined', function () {
+        config.set('kibi:relations', { relationsIndices: [] });
+        joinFilterHelper.addAdvancedJoinSettingsToRelation();
+      });
+
+      it('should fail if the relation is not present', function () {
+        config.set('kibi:relations', {
+          relationsIndices: [
+            {
+              indices: [
+                {
+                  indexPatternId: 'investor',
+                  path: 'id'
+                },
+                {
+                  indexPatternId: 'investment',
+                  path: 'investorid'
+                }
+              ],
+              label: 'by',
+              id: 'investment/investorid/investor/id'
+            }
+          ]
+        });
+        expect(joinFilterHelper.addAdvancedJoinSettingsToRelation).withArgs('company/id', 'article/companies')
+          .to.throwException(/Could not find index relation corresponding to relation between/);
+      });
+
+      it('should get advanced relation for the given relation', function () {
+        config.set('kibi:relations', {
+          relationsIndices: [
+            {
+              indices: [
+                {
+                  indexPatternId: 'investor',
+                  path: 'id',
+                  termsEncoding: 'enc1',
+                  orderBy: 'asc',
+                  maxTermsPerShard: 1
+                },
+                {
+                  indexPatternId: 'investment',
+                  path: 'investorid',
+                  termsEncoding: 'enc2',
+                  orderBy: 'desc',
+                  maxTermsPerShard: 2
+                }
+              ],
+              label: 'by',
+              id: 'investment/investorid/investor/id'
+            }
+          ]
+        });
+
+        const relation1 = [ {}, {} ];
+        joinFilterHelper.addAdvancedJoinSettingsToRelation('investment/investorid', 'investor/id', relation1);
+        expect(relation1[0].termsEncoding).to.be('enc1');
+        expect(relation1[0].orderBy).to.be('asc');
+        expect(relation1[0].maxTermsPerShard).to.be(1);
+        expect(relation1[1].termsEncoding).to.be('enc2');
+        expect(relation1[1].orderBy).to.be('desc');
+        expect(relation1[1].maxTermsPerShard).to.be(2);
+
+        const relation2 = [ {}, {} ];
+        joinFilterHelper.addAdvancedJoinSettingsToRelation('investor/id', 'investment/investorid', relation2);
+        expect(relation2[0].termsEncoding).to.be('enc2');
+        expect(relation2[0].orderBy).to.be('desc');
+        expect(relation2[0].maxTermsPerShard).to.be(2);
+        expect(relation2[1].termsEncoding).to.be('enc1');
+        expect(relation2[1].orderBy).to.be('asc');
+        expect(relation2[1].maxTermsPerShard).to.be(1);
+      });
     });
 
     describe('getJoinFilter', function () {
+      beforeEach(() => init(false));
+
       it('should be disabled/enabled according to relationalPanel', function () {
         expect(joinFilterHelper.isRelationalPanelEnabled()).to.not.be.ok();
         config.set('kibi:relationalPanel', true);
@@ -354,6 +433,8 @@ describe('Kibi Components', function () {
     describe('updateJoinSetFilter', function () {
       var urlHelper;
       var sinon = require('auto-release-sinon');
+
+      beforeEach(() => init(false));
 
       beforeEach(function () {
         ngMock.inject(function (Private) {

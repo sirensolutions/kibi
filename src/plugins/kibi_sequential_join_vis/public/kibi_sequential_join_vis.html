@@ -1,7 +1,5 @@
 <div ng-controller="KibiSequentialJoinVisController" class="kibi-sequential-join-vis" ng-class="{loading: holder.activeFetch}">
 
-  <div class="spinner large" ng-show="holder.activeFetch"></div>
-
   <button
     ng-repeat="button in buttons"
     ng-click="button.click()"

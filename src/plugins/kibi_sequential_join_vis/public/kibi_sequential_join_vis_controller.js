@@ -10,9 +10,6 @@ define(function (require) {
 
   module.controller('KibiSequentialJoinVisController',
     function ($scope, $rootScope, Private, $http, $location, createNotifier, Promise, savedDashboards, savedSearches) {
-      $scope.holder = {
-        activeFetch: false
-      };
 
       $scope.configMode = /\/visualize\/(create|edit).*/.test($location.path());
 
@@ -107,8 +104,6 @@ define(function (require) {
           });
         });
 
-        $scope.holder.activeFetch = countQueries.length > 0;
-
         return Promise.all(countQueries).then(function (results) {
           var query = '';
           _.each(results, function (result) {
@@ -141,7 +136,6 @@ define(function (require) {
                 }
               }
             });
-            $scope.holder.activeFetch = false;
           });
         }).catch(notify.error);
       };

@@ -83,6 +83,10 @@ TinkerPop3Query.prototype.fetchResults = function (options, onlyIds, idVariableN
       } else {
         kibiRelations = configDocs[0]._source['kibi:relations'];
       }
+      if (!kibiRelations) {
+        const msg = 'Missing the settings of relations between indices. Please add them via the Settings/Relations panel';
+        return Promise.reject(new Error(msg));
+      }
 
       var kibiRelationsJson = JSON.parse(kibiRelations);
 

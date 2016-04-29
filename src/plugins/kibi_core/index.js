@@ -54,12 +54,14 @@ module.exports = function (kibana) {
         query: params,
         snippets: queries
       });
-
     }).catch(function (error) {
-      return reply({
-        query: params,
-        error: error
-      });
+      let err;
+      if (error instanceof Error) {
+        err = Boom.wrap(error, 400);
+      } else {
+        err = Boom.badRequest('Failed to execute query on an external datasource', error);
+      }
+      return reply(err);
     });
   };
 

@@ -155,7 +155,7 @@
     "jdbc": "0.1.6",
     "jsonpath": "0.2.0",
     "handlebars": "2.0.0",
-    "kibi-h2o2": "sirensolutions/h2o2#5.0.0-kibi"
+    "kibi-h2o2": "sirensolutions/h2o2#5.0.0-kibi-1"
   },
   "devDependencies": {
     "Nonsense": "0.1.2",

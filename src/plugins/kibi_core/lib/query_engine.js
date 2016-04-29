@@ -70,6 +70,8 @@ QueryEngine.prototype._init = function (cacheSize = 500, enableCache = true, cac
       if (elasticsearchStatus.state === 'green') {
 
         self.loadTemplates();
+        self.loadDatasources();
+        self.loadQueries();
 
         self.setupJDBC()
         .then(self.reloadQueries())
@@ -91,6 +93,30 @@ QueryEngine.prototype.loadTemplates = function () {
   }).catch(function (err) {
     self.log.warn('Could not retrieve Kibi index: ' + err);
     setTimeout(self.loadTemplates.bind(self), 500);
+  });
+};
+
+
+QueryEngine.prototype.loadDatasources = function () {
+  var self = this;
+  self._isKibiIndexPresent().then(function () {
+    self.log.info('Found kibi index');
+    return self._loadDatasources();
+  }).catch(function (err) {
+    self.log.warn('Could not retrieve Kibi index: ' + err);
+    setTimeout(self.loadDatasources.bind(self), 500);
+  });
+};
+
+
+QueryEngine.prototype.loadQueries = function () {
+  var self = this;
+  self._isKibiIndexPresent().then(function () {
+    self.log.info('Found kibi index');
+    return self._loadQueries();
+  }).catch(function (err) {
+    self.log.warn('Could not retrieve Kibi index: ' + err);
+    setTimeout(self.loadQueries.bind(self), 500);
   });
 };
 
@@ -195,6 +221,80 @@ QueryEngine.prototype._loadTemplates = function () {
     });
   }).catch(function (err) {
     self.log.error('Could not load the mapping for template object', err);
+  });
+};
+
+QueryEngine.prototype._loadDatasources = function () {
+  var self = this;
+  // load default datasource examples
+  var datasourcesToLoad = [
+    'kibi_gremlin_server'
+  ];
+
+  return self._loadTemplatesMapping().then(function () {
+    _.each(datasourcesToLoad, function (datasourceId) {
+      fs.readFile(path.join(__dirname, 'datasources', datasourceId + '.json'), function (err, data) {
+        if (err) {
+          throw err;
+        }
+        self.client.index({
+          timeout: '1000ms',
+          index: self.config.get('kibana.index'),
+          type: 'datasource',
+          id: datasourceId,
+          body: data.toString()
+        })
+        .then(function (resp) {
+          self.log.info('Datasource [' + datasourceId + '] successfully loaded');
+        })
+        .catch(function (err) {
+          if (err.statusCode === 409) {
+            self.log.warn('Datasource [' + datasourceId + '] already exists');
+          } else {
+            self.log.error('Could not load datasource [' + datasourceId + ']', err);
+          }
+        });
+      });
+    });
+  }).catch(function (err) {
+    self.log.error('Could not load the mapping for datasource object', err);
+  });
+};
+
+QueryEngine.prototype._loadQueries = function () {
+  var self = this;
+  // load default query examples
+  var queriesToLoad = [
+    'kibi_graph_query'
+  ];
+
+  return self._loadTemplatesMapping().then(function () {
+    _.each(queriesToLoad, function (queryId) {
+      fs.readFile(path.join(__dirname, 'queries', queryId + '.json'), function (err, data) {
+        if (err) {
+          throw err;
+        }
+        self.client.index({
+          timeout: '1000ms',
+          index: self.config.get('kibana.index'),
+          type: 'query',
+          id: queryId,
+          body: data.toString()
+        })
+        .then(function (resp) {
+          self.log.info('Query [' + queryId + '] successfully loaded');
+        })
+        .catch(function (err) {
+          if (err.statusCode === 409) {
+            self.log.warn('Query [' + queryId + '] already exists');
+          } else {
+            self.log.error('Could not load query [' + queryId + ']', err);
+          }
+        });
+      });
+    });
+  }).catch(function (err) {
+    self.log.error('Could not load the mapping for query object', err);
   });
 };
 

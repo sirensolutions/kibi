@@ -162,8 +162,6 @@ src/ui/utils/dateMath.js
 
 src/ui/views/ui_app.jade
 
-src/ui/visualise/visualize.js
-
 tasks/build/archives.js
 tasks/build/downloadNodeBuilds.js
 tasks/build/index.js

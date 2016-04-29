@@ -170,7 +170,7 @@ module.exports = function (kibana) {
           })
           .then(reply)
           .catch(errors.StatusCodeError, function (err) {
-            reply(Boom.create(err.statusCode, err.error.message, err.error.stack));
+            reply(Boom.create(err.statusCode, err.error.message || err.message, err.error.stack));
           })
           .catch(errors.RequestError, function (err) {
             if (err.error.code === 'ETIMEDOUT') {

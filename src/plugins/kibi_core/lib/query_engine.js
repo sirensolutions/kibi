@@ -237,6 +237,22 @@ QueryEngine.prototype._loadDatasources = function () {
         if (err) {
           throw err;
         }
+        // check whether HTTP or HTTPS is used
+        if (self.config.has('kibi_core.gremlin_server.url')) {
+          var gremlinUrlProt = url.parse(self.config.get('kibi_core.gremlin_server.url')).protocol;
+          var gremlinDataFile = __dirname + '/datasources/' + datasourceId + '.json';
+
+          var datasourceObj = JSON.parse(data.toString());
+          var datasourceObjParam = JSON.parse(datasourceObj.datasourceParams);
+          var datasourceObjParamUrl = url.parse(datasourceObjParam.url);
+
+          datasourceObjParamUrl.protocol = gremlinUrlProt;
+          datasourceObjParam.url = url.format(datasourceObjParamUrl);
+          datasourceObj.datasourceParams = JSON.stringify(datasourceObjParam);
+
+          data = new Buffer(JSON.stringify(datasourceObj).length);
+          data.write(JSON.stringify(datasourceObj), 'utf-8');
+        }
         self.client.index({
           timeout: '1000ms',
           index: self.config.get('kibana.index'),

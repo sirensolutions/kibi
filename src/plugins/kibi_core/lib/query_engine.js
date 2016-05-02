@@ -242,14 +242,11 @@ QueryEngine.prototype._loadDatasources = function () {
         }
         // check whether HTTP or HTTPS is used
         if (self.config.has('kibi_core.gremlin_server.url')) {
-          var gremlinUrlProt = url.parse(self.config.get('kibi_core.gremlin_server.url')).protocol;
-
+          var gremlinUrl = self.config.get('kibi_core.gremlin_server.url');
           var datasourceObj = JSON.parse(data.toString());
           var datasourceObjParam = JSON.parse(datasourceObj.datasourceParams);
-          var datasourceObjParamUrl = url.parse(datasourceObjParam.url);
 
-          datasourceObjParamUrl.protocol = gremlinUrlProt;
-          datasourceObjParam.url = url.format(datasourceObjParamUrl);
+          datasourceObjParam.url = gremlinUrl + '/graph/query';
           datasourceObj.datasourceParams = JSON.stringify(datasourceObjParam);
 
           data = new Buffer(JSON.stringify(datasourceObj).length);

@@ -240,7 +240,6 @@ QueryEngine.prototype._loadDatasources = function () {
         // check whether HTTP or HTTPS is used
         if (self.config.has('kibi_core.gremlin_server.url')) {
           var gremlinUrlProt = url.parse(self.config.get('kibi_core.gremlin_server.url')).protocol;
-          var gremlinDataFile = __dirname + '/datasources/' + datasourceId + '.json';
 
           var datasourceObj = JSON.parse(data.toString());
           var datasourceObjParam = JSON.parse(datasourceObj.datasourceParams);

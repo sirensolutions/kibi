@@ -70,8 +70,11 @@ QueryEngine.prototype._init = function (cacheSize = 500, enableCache = true, cac
       if (elasticsearchStatus.state === 'green') {
 
         self.loadTemplates();
-        self.loadDatasources();
-        self.loadQueries();
+
+        if (self.config.get('pkg.kibiEnterpriseEnabled')) {
+          self.loadDatasources();
+          self.loadQueries();
+        }
 
         self.setupJDBC()
         .then(self.reloadQueries())

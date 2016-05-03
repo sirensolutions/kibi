@@ -69,12 +69,7 @@ QueryEngine.prototype._init = function (cacheSize = 500, enableCache = true, cac
     elasticsearchStatus.on('change', function (prev, prevmsg) {
       if (elasticsearchStatus.state === 'green') {
 
-        self.loadTemplates();
-
-        if (self.config.get('pkg.kibiEnterpriseEnabled')) {
-          self.loadDatasources();
-          self.loadQueries();
-        }
+        self.loadPredefinedData();
 
         self.setupJDBC()
         .then(self.reloadQueries())
@@ -87,42 +82,20 @@ QueryEngine.prototype._init = function (cacheSize = 500, enableCache = true, cac
   });
 };
 
-
-QueryEngine.prototype.loadTemplates = function () {
+QueryEngine.prototype.loadPredefinedData = function () {
   var self = this;
   self._isKibiIndexPresent().then(function () {
     self.log.info('Found kibi index');
-    return self._loadTemplates();
+    self._loadTemplates();
+    if (self.config.get('pkg.kibiEnterpriseEnabled')) {
+      self._loadDatasources();
+      self._loadQueries();
+    }
   }).catch(function (err) {
     self.log.warn('Could not retrieve Kibi index: ' + err);
-    setTimeout(self.loadTemplates.bind(self), 500);
+    setTimeout(self.loadPredefinedData.bind(self), 500);
   });
 };
-
-
-QueryEngine.prototype.loadDatasources = function () {
-  var self = this;
-  self._isKibiIndexPresent().then(function () {
-    self.log.info('Found kibi index');
-    return self._loadDatasources();
-  }).catch(function (err) {
-    self.log.warn('Could not retrieve Kibi index: ' + err);
-    setTimeout(self.loadDatasources.bind(self), 500);
-  });
-};
-
-
-QueryEngine.prototype.loadQueries = function () {
-  var self = this;
-  self._isKibiIndexPresent().then(function () {
-    self.log.info('Found kibi index');
-    return self._loadQueries();
-  }).catch(function (err) {
-    self.log.warn('Could not retrieve Kibi index: ' + err);
-    setTimeout(self.loadQueries.bind(self), 500);
-  });
-};
-
 
 QueryEngine.prototype._isKibiIndexPresent = function () {
   var self = this;

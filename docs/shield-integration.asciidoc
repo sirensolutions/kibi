@@ -111,7 +111,8 @@ req -new -x509 -days 366 -key server.key -out server.crt
 bin\plugin install license && ^
 bin\plugin install shield
 ----
-. Add the following line to the _distribution/elasticsearch/config/elasticsearch.yml_
+. To enable field and doc restriction for version 2.2.0 add this flag to
+_distribution/elasticsearch/config/elasticsearch.yml_ (it was fixed in 2.2.1):
 +
 ----
 shield.dls_fls.enabled: true
@@ -252,7 +253,8 @@ kibi_core:
     # ca: 'C:\Demo\ca\certs\cacert.pem'
 ----
 
-. Otherwise, you can edit _kibi.yml_ to enable ssl between Gremlin and Kibi:
+* Otherwise, if you want to use Gremlin with SSL connection: (kibi-distribution must
+be at the same directory level of kibi) *
 +
 ----
 kibi_core:
@@ -267,13 +269,14 @@ kibi_core:
       password: password
   gremlin_server:
     url: https://127.0.0.1:8061
-    path: ../gremlin_server/gremlin-es2-server-0.1.0.jar
+    path: ..\gremlin_server\gremlin-es2-server-0.1.0.jar
     # uncomment this for gremlin behind ssl
     ssl:
-     key_store: 'c:\Demo\ca\gremlin.jks'
+     key_store: '..\..\kibi-distribution\kibi-certificate\gremlin.jks'
      key_store_password: 'password'
-     ca: 'c:\Demo\ca\certs\cacert.pem'
+     ca: '..\..\kibi-distribution\kibi-certificate\cacert.pem'
 ----
+* If you want to use your own certificate, you only need to modify all SSL variable (key_store and ca) *
 
 === Installation on UNIX
 ==== Configuring Shield
@@ -294,24 +297,6 @@ openssl req -new -key server.key -out server.csr
 openssl x509 -req -days 366 -in server.csr -signkey server.key -out server.crt
 ----
 
-*In Elasticsearch root folder execute (the first two users are used by Kibi):*
-
-Add my own user with _kibana4 role_ and _kibana4-server user_ with _kibana4-server role_:
-----
-./bin/shield/esusers useradd kibana4-server -r kibana4_server -p password
-./bin/shield/esusers useradd transport_client -r transport_client -p password
-
-./bin/shield/esusers useradd usernames -r kibana4 -p password
-./bin/shield/esusers useradd usernames-index -r restrictedindex -p password
-./bin/shield/esusers useradd usernames-fields -r restrictedfieldsinvestment -p password
-----
-
-To enable field and doc restriction for version 2.2.0 add this flag to _elasticsearch.yml_:
-----
-shield.dls_fls.enabled: true
-----
-it was fixed in 2.2.1
-
 *Elasticsearch roles*
 
 Edit _config/shield/roles.yml_. I added some authorization for various actions performed in Kibi (listing plugins, getting stats, ...);
@@ -326,7 +311,6 @@ transport_client:
     '*':
       privileges: indices:data/read/get, indices:data/read/mget, indices:data/read/search
 
-# The required permissions for kibana 4 users.
 # The required permissions for kibana 4 users.
 kibana4:
   cluster:
@@ -398,7 +382,25 @@ restrictedfieldsinvestment:
     '.kibi':
       privileges: indices:data/read/coordinate-search, indices:admin/exists, indices:admin/mapping/put, indices:admin/mappings/fields/get, indices:admin/refresh, indices:admin/validate/query, indices:data/read/get, indices:data/read/mget, indices:data/read/search, indices:data/write/delete, indices:data/write/index, indices:data/write/update
 ----
-*Install Shield for Kibana !!! It has to be version 2.2.0 at the moment*
+
+*In Elasticsearch root folder execute (the first two users are used by Kibi):*
+
+Add my own user with _kibana4 role_ and _kibana4-server user_ with _kibana4-server role_:
+----
+./bin/shield/esusers useradd kibana4-server -r kibana4_server -p password
+./bin/shield/esusers useradd transport_client -r transport_client -p password
+
+./bin/shield/esusers useradd usernames -r kibana4 -p password
+./bin/shield/esusers useradd usernames-index -r restrictedindex -p password
+./bin/shield/esusers useradd usernames-fields -r restrictedfieldsinvestment -p password
+----
+
+To enable field and doc restriction for version 2.2.0 add this flag to _elasticsearch.yml_ (it was fixed in 2.2.1):
+----
+shield.dls_fls.enabled: true
+----
+
+*Install Shield for Kibana !!! It has to be version 2.2.0 at the moment (May 2016)*
 ----
 wget http://download.elastic.co/kibana/shield/shield-2.2.0.tar.gz
 ./bin/kibi plugin --install shield --url file://$PWD/shield-2.2.0.tar.gz
@@ -438,7 +440,8 @@ kibi_core:
     # key_store_password: 'password'
     # ca: '/opt/kibi/certs/cacert.pem'
 ----
-* Otherwise, if we want SSL between Kibi and Gremlin server, "kibi.yml" should look like*
+* Otherwise, if you want to use Gremlin with SSL connection: (kibi-distribution must
+be at the same directory level of kibi) *
 ----
 kibi_core:
   load_jdbc: true
@@ -455,7 +458,8 @@ kibi_core:
     path: ../gremlin_server/gremlin-es2-server-0.1.0.jar
     # uncomment this for gremlin behind ssl
     ssl:
-     key_store: '/opt/kibi/ca/gremlin.jks'
+     key_store: '../../kibi-distribution/kibi-certificate/gremlin.jks'
      key_store_password: 'password'
-     ca: '/opt/kibi/ca/certs/cacert.pem'
+     ca: '../../kibi-distribution/kibi-certificate/cacert.pem'
 ----
+* If you want to use your own certificate, you only need to modify all SSL variable (key_store and ca) *

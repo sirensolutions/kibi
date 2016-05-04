@@ -174,7 +174,9 @@ define(function (require) {
               id: $routeParams.id
             })
             .then(function (resp) {
+              // this should be emited also from other places
               $rootScope.$emit('kibi:' + service.type + ':changed', resp); // kibi: kibi event
+              $rootScope.$emit('kibi:' + service.type + ':changed:deleted', resp); // kibi: kibi event
               return redirectHandler('deleted');
             })
             .catch(notify.fatal);

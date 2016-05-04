@@ -71,19 +71,24 @@ define(function (require) {
           if (globalState.time) {
             self._setTimeFromGlobalState();
           }
-          // here check for session id
-          kibiSessionHelper.getId().then(function (sessionId) {
-            if (globalState.k && !globalState.k.s) {
+          if (globalState.k && !globalState.k.s) {
+            // no sesion id
+            kibiSessionHelper.destroy();
+            kibiSessionHelper.getId().then(function (sessionId) {
               globalState.k.s = sessionId;
               globalState.save();
-            } else if (globalState.k && globalState.k.s && globalState.k.s !== sessionId) {
-              kibiSessionHelper._copySessionFrom(globalState.k.s).then(function (savedSession) {
-                globalState.k.s = savedSession.id;
-                globalState.save();
-              }).catch(notify.error);
-            }
-          }).catch(notify.error);
-
+            }).catch(notify.error);
+          } else if (globalState.k && globalState.k.s) {
+            // there is a sesion id
+            kibiSessionHelper.getId().then(function (sessionId) {
+              if (globalState.k.s !== sessionId) {
+                kibiSessionHelper._copySessionFrom(globalState.k.s).then(function (savedSession) {
+                  globalState.k.s = savedSession.id;
+                  globalState.save();
+                }).catch(notify.error);
+              }
+            }).catch(notify.error);
+          }
           off();
         });
       });

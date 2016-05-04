@@ -111,7 +111,8 @@ req -new -x509 -days 366 -key server.key -out server.crt
 bin\plugin install license && ^
 bin\plugin install shield
 ----
-. Add the following line to the _distribution/elasticsearch/config/elasticsearch.yml_
+. To enable field and doc restriction for version 2.2.0 add this flag to
+_distribution/elasticsearch/config/elasticsearch.yml_ (it was fixed in 2.2.1):
 +
 ----
 shield.dls_fls.enabled: true
@@ -229,6 +230,7 @@ shield.sessionTimeout: 86400000
 server.ssl.key: C:\Demo\server.key
 server.ssl.cert: C:\Demo\server.crt
 ----
+. Edit _kibi.yml_ to enable only Gremlin server:
 +
 ----
 kibi_core:
@@ -251,143 +253,8 @@ kibi_core:
     # ca: 'C:\Demo\ca\certs\cacert.pem'
 ----
 
-==== Configuring Gremlin Server
-. Prepare the folders:
-+
-----
-mkdir ca\private ca\certs ca\conf
-cd ca
-echo 01 > serial
-type nul >> index.txt
-type nul >> conf\caconfig.cnf
-----
-
-. Open the _conf\caconfig.cnf_ in a text editor and paste the following_
-+
-----
-#..................................
-[ ca ]
-default_ca = CA_default
-[ CA_default ]
-copy_extensions = copy
-dir = c:\\Demo\\ca
-serial = $dir\\serial
-database = $dir\\index.txt
-new_certs_dir = $dir\\certs
-certificate = $dir\\certs\\cacert.pem
-private_key = $dir\\private\\cakey.pem
-default_days = 712
-default_md = sha256
-preserve = no
-email_in_dn = no
-x509_extensions = v3_ca
-name_opt = ca_default
-cert_opt = ca_default
-policy = policy_anything
-[ policy_anything ]
-countryName             = optional
-stateOrProvinceName     = optional
-localityName            = optional
-organizationName        = optional
-organizationalUnitName  = optional
-commonName              = supplied
-emailAddress            = optional
-[ req ]
-default_bits = 2048 # Size of keys
-default_keyfile = key.pem # name of generated keys
-default_md = sha256 # message digest algorithm
-string_mask = nombstr # permitted characters
-distinguished_name = req_distinguished_name
-req_extensions = v3_req
-[ req_distinguished_name ]
-# Variable name Prompt string
-#------------------------- ----------------------------------
-0.organizationName = Organization Name (company)
-organizationalUnitName = Organizational Unit Name (department, division)
-emailAddress = Email Address
-emailAddress_max = 40
-localityName = Locality Name (city, district)
-stateOrProvinceName = State or Province Name (full name)
-countryName = Country Name (2 letter code)
-countryName_min = 2
-countryName_max = 2
-commonName = Common Name (hostname, IP, or your name)
-commonName_max = 64
-# Default values for the above, for consistency and less typing.
-# Variable name Value
-#------------------------ ------------------------------
-0.organizationName_default = Elasticsearch Test Org
-localityName_default = Amsterdam
-stateOrProvinceName_default = Amsterdam
-countryName_default = NL
-emailAddress_default = cacerttest@YOUR.COMPANY.TLD
-[ v3_ca ]
-basicConstraints = CA:TRUE
-subjectKeyIdentifier = hash
-authorityKeyIdentifier = keyid:always,issuer:always
-[ v3_req ]
-basicConstraints = CA:FALSE
-subjectKeyIdentifier = hash
-----
-*!! Edit the line DIR=\PATH\TO\YOUR\DIR\ca*
-
-. Generate the cert:
-+
-----
-c:\OpenSSL-Win64\bin\openssl.exe
-----
-+
-----
-req -new -x509 -extensions v3_ca -keyout private/cakey.pem -out certs/cacert.pem -days 366  -config conf/caconfig.cnf
-----
-+
-----
-exit
-----
-+
-When asked to enter PEM pass phrase enter something (for example "password" but it should be more complicated)
-
-. Create *Keystore*:
-+
-----
-keytool -importcert -keystore gremlin.jks -file certs\cacert.pem -alias my_ca
-----
-+
-----
-Enter password: enter something (for example "password" but it should be more complicated)
-----
-+
-----
-Trust this certificate? [no]: type yes
-----
-
-. Generate all needed parts:
-+
-----
-keytool -genkey  -alias gremlin01 -keystore gremlin.jks -keyalg RSA -keysize 2048 -validity 366 -ext san=ip:127.0.0.1
-----
-+
-----
-keytool -certreq -alias gremlin01 -keystore gremlin.jks -file gremlin.csr -keyalg rsa -ext san=ip:127.0.0.1
-----
-+
-----
-C:\OpenSSL-Win64\bin\openssl.exe
-----
-+
-----
-ca -in gremlin.csr -notext -out gremlin-signed.crt -config conf\caconfig.cnf -extensions v3_req
-----
-+
-----
-exit
-----
-+
-----
-keytool -importcert -keystore gremlin.jks -file gremlin-signed.crt -alias gremlin01
-----
-
-. Edit _kibi.yml_ to enable ssl between Gremlin and Kibi:
+* Otherwise, if you want to use Gremlin with SSL connection: (kibi-distribution must
+be at the same directory level of kibi) *
 +
 ----
 kibi_core:
@@ -402,13 +269,14 @@ kibi_core:
       password: password
   gremlin_server:
     url: https://127.0.0.1:8061
-    path: ../gremlin_server/gremlin-es2-server-0.1.0.jar
+    path: ..\gremlin_server\gremlin-es2-server-0.1.0.jar
     # uncomment this for gremlin behind ssl
     ssl:
-     key_store: 'c:\Demo\ca\gremlin.jks'
+     key_store: '..\..\kibi-distribution\kibi-certificate\gremlin.jks'
      key_store_password: 'password'
-     ca: 'c:\Demo\ca\certs\cacert.pem'
+     ca: '..\..\kibi-distribution\kibi-certificate\cacert.pem'
 ----
+* If you want to use your own certificate, you only need to modify all SSL variable (key_store and ca) *
 
 === Installation on UNIX
 ==== Configuring Shield
@@ -429,24 +297,6 @@ openssl req -new -key server.key -out server.csr
 openssl x509 -req -days 366 -in server.csr -signkey server.key -out server.crt
 ----
 
-*In Elasticsearch root folder execute (the first two users are used by Kibi):*
-
-Add my own user with _kibana4 role_ and _kibana4-server user_ with _kibana4-server role_:
-----
-./bin/shield/esusers useradd kibana4-server -r kibana4_server -p password
-./bin/shield/esusers useradd transport_client -r transport_client -p password
-
-./bin/shield/esusers useradd usernames -r kibana4 -p password
-./bin/shield/esusers useradd usernames-index -r restrictedindex -p password
-./bin/shield/esusers useradd usernames-fields -r restrictedfieldsinvestment -p password
-----
-
-To enable field and doc restriction for version 2.2.0 add this flag to _elasticsearch.yml_:
-----
-shield.dls_fls.enabled: true
-----
-it was fixed in 2.2.1
-
 *Elasticsearch roles*
 
 Edit _config/shield/roles.yml_. I added some authorization for various actions performed in Kibi (listing plugins, getting stats, ...);
@@ -461,7 +311,6 @@ transport_client:
     '*':
       privileges: indices:data/read/get, indices:data/read/mget, indices:data/read/search
 
-# The required permissions for kibana 4 users.
 # The required permissions for kibana 4 users.
 kibana4:
   cluster:
@@ -533,7 +382,25 @@ restrictedfieldsinvestment:
     '.kibi':
       privileges: indices:data/read/coordinate-search, indices:admin/exists, indices:admin/mapping/put, indices:admin/mappings/fields/get, indices:admin/refresh, indices:admin/validate/query, indices:data/read/get, indices:data/read/mget, indices:data/read/search, indices:data/write/delete, indices:data/write/index, indices:data/write/update
 ----
-*Install Shield for Kibana !!! It has to be version 2.2.0 at the moment*
+
+*In Elasticsearch root folder execute (the first two users are used by Kibi):*
+
+Add my own user with _kibana4 role_ and _kibana4-server user_ with _kibana4-server role_:
+----
+./bin/shield/esusers useradd kibana4-server -r kibana4_server -p password
+./bin/shield/esusers useradd transport_client -r transport_client -p password
+
+./bin/shield/esusers useradd usernames -r kibana4 -p password
+./bin/shield/esusers useradd usernames-index -r restrictedindex -p password
+./bin/shield/esusers useradd usernames-fields -r restrictedfieldsinvestment -p password
+----
+
+To enable field and doc restriction for version 2.2.0 add this flag to _elasticsearch.yml_ (it was fixed in 2.2.1):
+----
+shield.dls_fls.enabled: true
+----
+
+*Install Shield for Kibana !!! It has to be version 2.2.0 at the moment (May 2016)*
 ----
 wget http://download.elastic.co/kibana/shield/shield-2.2.0.tar.gz
 ./bin/kibi plugin --install shield --url file://$PWD/shield-2.2.0.tar.gz
@@ -573,106 +440,8 @@ kibi_core:
     # key_store_password: 'password'
     # ca: '/opt/kibi/certs/cacert.pem'
 ----
-
-==== Configuring Gremlin Server
-----
-mkdir -p ca/private ca/certs ca/conf
-cd ca
-echo '01' > serial && touch index.txt
-vim conf/caconfig.cnf
-----
-Paste below into _conf/caconfig.cnf_:
-----
-#..................................
-[ ca ]
-default_ca = CA_default
-[ CA_default ]
-copy_extensions = copy
-dir = /opt/kibi/ca
-serial = $dir/serial
-database = $dir/index.txt
-new_certs_dir = $dir/certs
-certificate = $dir/certs/cacert.pem
-private_key = $dir/private/cakey.pem
-default_days = 712
-default_md = sha256
-preserve = no
-email_in_dn = no
-x509_extensions = v3_ca
-name_opt = ca_default
-cert_opt = ca_default
-policy = policy_anything
-[ policy_anything ]
-countryName             = optional
-stateOrProvinceName     = optional
-localityName            = optional
-organizationName        = optional
-organizationalUnitName  = optional
-commonName              = supplied
-emailAddress            = optional
-[ req ]
-default_bits = 2048 # Size of keys
-default_keyfile = key.pem # name of generated keys
-default_md = sha256 # message digest algorithm
-string_mask = nombstr # permitted characters
-distinguished_name = req_distinguished_name
-req_extensions = v3_req
-[ req_distinguished_name ]
-# Variable name Prompt string
-#------------------------- ----------------------------------
-0.organizationName = Organization Name (company)
-organizationalUnitName = Organizational Unit Name (department, division)
-emailAddress = Email Address
-emailAddress_max = 40
-localityName = Locality Name (city, district)
-stateOrProvinceName = State or Province Name (full name)
-countryName = Country Name (2 letter code)
-countryName_min = 2
-countryName_max = 2
-commonName = Common Name (hostname, IP, or your name)
-commonName_max = 64
-# Default values for the above, for consistency and less typing.
-# Variable name Value
-#------------------------ ------------------------------
-0.organizationName_default = Elasticsearch Test Org
-localityName_default = Amsterdam
-stateOrProvinceName_default = Amsterdam
-countryName_default = NL
-emailAddress_default = cacerttest@YOUR.COMPANY.TLD
-[ v3_ca ]
-basicConstraints = CA:TRUE
-subjectKeyIdentifier = hash
-authorityKeyIdentifier = keyid:always,issuer:always
-[ v3_req ]
-basicConstraints = CA:FALSE
-subjectKeyIdentifier = hash
-----
-*!! Edit the line dir = /PATH/TO/YOUR/DIR/ca*
-
-*Generate the cert*
-----
-openssl req -new -x509 -extensions v3_ca -keyout private/cakey.pem -out certs/cacert.pem -days 366  -config conf/caconfig.cnf
-----
-When asked to enter PEM pass phrase enter something (I've entered "password" - however something more complicated is recomended)
-
-*Create Keystore*
-----
-keytool -importcert -keystore gremlin.jks -file certs/cacert.pem -alias my_ca
-----
-Enter password: enter something (I've entered "password" - however something more complicated is recomended)
-
-Trust this certificate? [no]: yes Certificate was added to keystore
-
-*Generate all needed parts*
-----
-keytool -genkey  -alias gremlin01 -keystore gremlin.jks -keyalg RSA -keysize 2048 -validity 366 -ext san=ip:127.0.0.1
-keytool -certreq -alias gremlin01 -keystore gremlin.jks -file gremlin.csr -keyalg rsa -ext san=ip:127.0.0.1
-
-openssl ca -in gremlin.csr -notext -out gremlin-signed.crt -config conf/caconfig.cnf -extensions v3_req
-keytool -importcert -keystore gremlin.jks -file gremlin-signed.crt -alias gremlin01
-----
-
-*"kibi.yml" should look like*
+* Otherwise, if you want to use Gremlin with SSL connection: (kibi-distribution must
+be at the same directory level of kibi) *
 ----
 kibi_core:
   load_jdbc: true
@@ -689,7 +458,8 @@ kibi_core:
     path: ../gremlin_server/gremlin-es2-server-0.1.0.jar
     # uncomment this for gremlin behind ssl
     ssl:
-     key_store: '/opt/kibi/ca/gremlin.jks'
+     key_store: '../../kibi-distribution/kibi-certificate/gremlin.jks'
      key_store_password: 'password'
-     ca: '/opt/kibi/ca/certs/cacert.pem'
+     ca: '../../kibi-distribution/kibi-certificate/cacert.pem'
 ----
+* If you want to use your own certificate, you only need to modify all SSL variable (key_store and ca) *

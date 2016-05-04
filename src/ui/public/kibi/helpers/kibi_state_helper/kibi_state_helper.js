@@ -60,6 +60,11 @@ define(function (require) {
         $rootScope.$emit('kibi:update-relational-panel');
       });
 
+      $rootScope.$on('kibi:session:changed:deleted', function () {
+        kibiSessionHelper.destroy();
+        kibiSessionHelper.init();
+      });
+
       //NOTE: check if a timefilter has been set into the URL at startup
       var off = $rootScope.$on('$routeChangeSuccess', function () {
         $timeout(function () {

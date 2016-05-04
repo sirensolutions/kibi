@@ -11,7 +11,7 @@ define(function (require) {
     title: 'sessions'
   });
 
-  module.service('savedSessions', function (Promise, SavedSession, kbnIndex, es, kbnUrl, Private) {
+  module.service('savedSessions', function ($rootScope, Promise, SavedSession, kbnIndex, es, kbnUrl, Private) {
 
     var cache = Private(require('ui/kibi/helpers/cache_helper')); // kibi: added to cache requests for saved sessions
 
@@ -38,10 +38,13 @@ define(function (require) {
       return kbnUrl.eval('#/session/{{id}}', {id: id});
     };
 
+    // gets triggered when you select the checkbox in objects and press delete
     this.delete = function (ids) {
       ids = !_.isArray(ids) ? [ids] : ids;
       return Promise.map(ids, function (id) {
-        return (new SavedSession(id)).delete();
+        return (new SavedSession(id)).delete().then(function (id) {
+          $rootScope.$emit('kibi:session:changed:deleted', id);
+        });
       });
     };
 

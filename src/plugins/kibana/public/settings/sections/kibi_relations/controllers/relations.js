@@ -2,6 +2,7 @@ define(function (require) {
 
   require('ui/kibi/directives/eeg');
   require('plugins/kibana/settings/sections/kibi_relations/styles/relations.less');
+  require('ui/kibi/directives/kibi_positive_integer_or_minus_one');
 
   var _ = require('lodash');
 
@@ -49,25 +50,6 @@ define(function (require) {
     };
   });
 
-  // test if value is a positive integer
-  app.directive('kibiPositiveInteger', function () {
-    return {
-      restrict: 'A',
-      require: 'ngModel',
-      link: function (scope, element, attrs, ctrl) {
-        ctrl.$parsers.unshift(function (value) {
-          var INTREGEXP = /^\d+$/;
-          if (INTREGEXP.test(value) || value === 'all terms') {
-            ctrl.$setValidity('kibiPositiveInteger', true);
-            return value;
-          } else {
-            ctrl.$setValidity('kibiPositiveInteger', false);
-            return 'all terms';
-          }
-        });
-      }
-    };
-  });
 
   require('ui/routes')
   .when('/settings/relations', {

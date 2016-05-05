@@ -153,10 +153,10 @@ module.exports = function (kibana) {
       });
 
       server.route({
-        method: 'GET',
+        method: 'POST',
         path:'/gremlin',
         handler: function (req, reply) {
-          queryEngine._getDatasourceFromEs(req.query.datasourceId)
+          queryEngine._getDatasourceFromEs(req.payload.params.datasourceId)
           .then((datasource) => {
             const config = server.config();
             const params = JSON.parse(datasource.datasourceParams);
@@ -166,7 +166,7 @@ module.exports = function (kibana) {
               params.credentials = { username, password };
             }
 
-            return queryEngine.gremlin(params, JSON.parse(req.query.options));
+            return queryEngine.gremlin(params, req.payload.params.options);
           })
           .then(reply)
           .catch(errors.StatusCodeError, function (err) {

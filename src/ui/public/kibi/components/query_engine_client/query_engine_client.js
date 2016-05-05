@@ -43,7 +43,7 @@ define(function (require) {
     };
 
     QueryEngineClient.prototype.gremlin = function (datasourceId, options) {
-      return $http.get(chrome.getBasePath() + '/gremlin', { params: { options, datasourceId } });
+      return $http.post(chrome.getBasePath() + '/gremlin', { params: { options, datasourceId } });
     };
 
     QueryEngineClient.prototype.clearCache = function () {

@@ -1,4 +1,4 @@
-[[kibi_graph_browser]]
+[[kibi_gremlin_server]]
 == Kibi Gremlin Server [Enterprise Edition only]
 
 **Kibi Gremlin Server** component required by <<graph-browser,Kibi Graph Browser>> visualisation

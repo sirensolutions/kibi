@@ -68,10 +68,8 @@ QueryEngine.prototype._init = function (cacheSize = 500, enableCache = true, cac
 
     elasticsearchStatus.on('change', function (prev, prevmsg) {
       if (elasticsearchStatus.state === 'green') {
-
-        self.loadPredefinedData();
-
-        self.setupJDBC()
+        self.loadPredefinedData()
+        .then(self.setupJDBC())
         .then(self.reloadQueries())
         .then(() => {
           self.initialized = true;
@@ -84,16 +82,30 @@ QueryEngine.prototype._init = function (cacheSize = 500, enableCache = true, cac
 
 QueryEngine.prototype.loadPredefinedData = function () {
   var self = this;
-  self._isKibiIndexPresent().then(function () {
-    self.log.info('Found kibi index');
-    self._loadTemplates();
-    if (self.config.get('pkg.kibiEnterpriseEnabled')) {
-      self._loadDatasources();
-      self._loadQueries();
-    }
-  }).catch(function (err) {
-    self.log.warn('Could not retrieve Kibi index: ' + err);
-    setTimeout(self.loadPredefinedData.bind(self), 500);
+  return new Promise(function (fulfill, reject) {
+
+    var tryToLoad = function () {
+      self._isKibiIndexPresent().then(function () {
+        self.log.info('Found kibi index');
+        self._loadTemplates().then(function () {
+          if (self.config.get('pkg.kibiEnterpriseEnabled')) {
+            return self._loadDatasources().then(function () {
+              return self._loadQueries().then(function () {
+                fulfill(true);
+              });
+            });
+          } else {
+            fulfill(true);
+          }
+        }).catch(reject);
+      }).catch(function (err) {
+        self.log.warn('Could not retrieve Kibi index: ' + err);
+        setTimeout(tryToLoad.bind(self), 500);
+      });
+    };
+
+    tryToLoad();
+
   });
 };
 
@@ -170,13 +182,15 @@ QueryEngine.prototype._loadTemplates = function () {
     'kibi-table-handlebars'
   ];
 
+  self.log.info('Loading templates');
+
   return self._loadTemplatesMapping().then(function () {
     _.each(templatesToLoad, function (templateId) {
       fs.readFile(path.join(__dirname, 'templates', templateId + '.json'), function (err, data) {
         if (err) {
           throw err;
         }
-        self.client.index({
+        self.client.create({
           timeout: '1000ms',
           index: self.config.get('kibana.index'),
           type: 'template',
@@ -204,14 +218,18 @@ QueryEngine.prototype._loadDatasources = function () {
   var self = this;
   // load default datasource examples
   var datasourcesToLoad = [
-    'kibi_gremlin_server'
+    'Kibi-Gremlin-Server'
   ];
 
-  return self._loadTemplatesMapping().then(function () {
-    _.each(datasourcesToLoad, function (datasourceId) {
+  self.log.info('Loading datasources');
+
+  var promises = [];
+  _.each(datasourcesToLoad, function (datasourceId) {
+    promises.push(new Promise(function (fulfill, reject) {
+
       fs.readFile(path.join(__dirname, 'datasources', datasourceId + '.json'), function (err, data) {
         if (err) {
-          throw err;
+          reject(err);
         }
         // check whether HTTP or HTTPS is used
         if (self.config.has('kibi_core.gremlin_server.url')) {
@@ -225,7 +243,7 @@ QueryEngine.prototype._loadDatasources = function () {
           data = new Buffer(JSON.stringify(datasourceObj).length);
           data.write(JSON.stringify(datasourceObj), 'utf-8');
         }
-        self.client.index({
+        self.client.create({
           timeout: '1000ms',
           index: self.config.get('kibana.index'),
           type: 'datasource',
@@ -234,6 +252,7 @@ QueryEngine.prototype._loadDatasources = function () {
         })
         .then(function (resp) {
           self.log.info('Datasource [' + datasourceId + '] successfully loaded');
+          fulfill(true);
         })
         .catch(function (err) {
           if (err.statusCode === 409) {
@@ -241,28 +260,33 @@ QueryEngine.prototype._loadDatasources = function () {
           } else {
             self.log.error('Could not load datasource [' + datasourceId + ']', err);
           }
+          fulfill(true);
         });
       });
-    });
-  }).catch(function (err) {
-    self.log.error('Could not load the mapping for datasource object', err);
+    }));
   });
+
+  return Promise.all(promises);
 };
 
 QueryEngine.prototype._loadQueries = function () {
   var self = this;
   // load default query examples
   var queriesToLoad = [
-    'kibi_graph_query'
+    '1Kibi-Graph-Query'
   ];
 
-  return self._loadTemplatesMapping().then(function () {
-    _.each(queriesToLoad, function (queryId) {
+  self.log.info('Loading queries');
+
+  var promises = [];
+  _.each(queriesToLoad, function (queryId) {
+    promises.push(new Promise(function (fulfill, reject) {
+
       fs.readFile(path.join(__dirname, 'queries', queryId + '.json'), function (err, data) {
         if (err) {
-          throw err;
+          reject(err);
         }
-        self.client.index({
+        self.client.create({
           timeout: '1000ms',
           index: self.config.get('kibana.index'),
           type: 'query',
@@ -271,6 +295,7 @@ QueryEngine.prototype._loadQueries = function () {
         })
         .then(function (resp) {
           self.log.info('Query [' + queryId + '] successfully loaded');
+          fulfill(true);
         })
         .catch(function (err) {
           if (err.statusCode === 409) {
@@ -278,12 +303,13 @@ QueryEngine.prototype._loadQueries = function () {
           } else {
             self.log.error('Could not load query [' + queryId + ']', err);
           }
+          fulfill(true);
         });
       });
-    });
-  }).catch(function (err) {
-    self.log.error('Could not load the mapping for query object', err);
+    }));
   });
+
+  return Promise.all(promises);
 };
 
 QueryEngine.prototype.setupJDBC = function () {

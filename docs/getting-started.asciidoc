@@ -30,7 +30,7 @@ The current CrunchBase dataset is available at http://data.crunchbase.com/.
 [float]
 === Search
 After starting Elasticsearch and Kibi, as described in the <<setup, Setup chapter>>,
-start your web browser and navigate to http://localhost:5606 .
+start your web browser and navigate to {start-url} or for installation with Shield {start-url-shield}.
 
 By default, Kibi displays the _Articles_ dashboard; <<dashboard, dashboards>>
 can be configured to display multiple <<visualize, visualizations>> on the

@@ -82,7 +82,7 @@ C:\Demo
 . Start a command-line prompt (_cmd.exe_) and go to the demo folder typing:
 +
 ----
-cd \Demo
+cd C:\Demo
 ----
 
 . Before starting *OpenSSL*, set 2 environment variables:

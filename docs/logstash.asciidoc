@@ -236,8 +236,8 @@ documentation.
 [float]
 ==== Browsing the index in Kibi
 
-Open http://localhost:5606 in your browser, click on the _Settings_ tab then
-on _Indices_ .
+Open {start-url} or for installation with Shield open {start-url-shield} in your browser,
+click on the _Settings_ tab then on _Indices_ .
 
 Deselect _Index contains time-based events_, then write `company-minimal` in
 the _Index name or pattern_ field:

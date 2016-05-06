@@ -51,7 +51,7 @@ You can share dashboards with other users by sending a link or by embedding
 them into HTML pages; make sure that your Kibi installation is properly secured
 when sharing a dashboard on a public facing server.
 
-NOTE: to view shared dashboards users must be able to access Kibi; keep
+NOTE: To view shared dashboards users must be able to access Kibi; keep
 this in mind if your Kibi instance is protected by an authentication proxy.
 
 To share a dashboard, click the *Share* image:images/ShareVis.png[Share]
@@ -183,4 +183,3 @@ Dashboard groups can be managed by clicking on the
 [float]
 [[dash-autorefresh]]
 include::autorefresh.asciidoc[]
-

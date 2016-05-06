@@ -2,6 +2,7 @@
 = Kibi User Guide
 :toc: right
 
+:java-version: 1.8
 :siren-join-version: 2.2.0-1
 :siren-join-website: https://github.com/sirensolutions/siren-join/
 :kibana-version: 4.4.1
@@ -10,6 +11,9 @@
 :elastic-ref: https://www.elastic.co/guide/en/elasticsearch/reference/2.2/
 :elasticsearch-version: 2.2.0
 :ref: http://siren.solutions/kibi/docs/current/
+:start-url: http://localhost:5606
+:start-url-shield: https://localhost:5606
+
 
 include::introduction.asciidoc[]
 

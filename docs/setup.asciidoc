@@ -1,7 +1,7 @@
 [[setup]]
 == Setup
 
-Download and install Java 1.7 or greater from https://java.com/en/download/; if
+Download and install Java {java-version} or greater from https://java.com/en/download/; if
 you're on a GNU/Linux distribution, install Java through your package manager.
 
 After Java has been installed, make sure that the `java` command is available
@@ -52,9 +52,9 @@ check both check boxes (as shown below) and press the *Allow access* button.
 
 image::images/node-windows-firewall-warning.png["Windows firewall warning",align="center"]
 
-Kibi can be accessed by visiting http://localhost:5606/; an overview of the
-included demo dataset is available in <<getting-started, Getting started>>
-section.
+Kibi can be accessed by visiting {start-url} or for installation with Shield visiting {start-url-shield};
+an overview of the included demo dataset is available in
+<<getting-started, Getting started>> section.
 
 If you want to connect Kibi to a different Elasticsearch cluster, open
 the configuration file in `kibi/config/kibi.yml`, set the correct URL in

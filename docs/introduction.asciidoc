@@ -41,8 +41,8 @@ visualization of queries on external datasource through Jade or Handlebars
 templates.
 
 - The <<graph-browser,Kibi Graph Browser>>, which displays the currently
-selected Elasticsearch documents as a node of a graph and allow user to visually
-explore the connection between nodes.
+selected Elasticsearch documents as a node of a graph and allows the user to visually
+explore the connection between vertices.
 
 The Relational Filter visualization requires the {siren-join-website}[Siren Join plugin {siren-join-version}] for
 Elasticsearch. The plugin is compatible with Elasticsearch {siren-join-version}.

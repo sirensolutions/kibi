@@ -68,7 +68,6 @@ QueryEngine.prototype._init = function (cacheSize = 500, enableCache = true, cac
 
     elasticsearchStatus.on('change', function (prev, prevmsg) {
       if (elasticsearchStatus.state === 'green') {
-        debugger;
         self.loadPredefinedData()
         .then(self.setupJDBC())
         .then(self.reloadQueries())
@@ -92,11 +91,11 @@ QueryEngine.prototype.loadPredefinedData = function () {
           if (self.config.get('pkg.kibiEnterpriseEnabled')) {
             return self._loadDatasources().then(function () {
               return self._loadQueries().then(function () {
-                fulfill(true)
+                fulfill(true);
               });
             });
           } else {
-            fulfill(true)
+            fulfill(true);
           }
         }).catch(reject);
       }).catch(function (err) {
@@ -226,7 +225,7 @@ QueryEngine.prototype._loadDatasources = function () {
 
   var promises = [];
   _.each(datasourcesToLoad, function (datasourceId) {
-    promises.push(new Promise(function(fulfill, reject) {
+    promises.push(new Promise(function (fulfill, reject) {
 
       fs.readFile(path.join(__dirname, 'datasources', datasourceId + '.json'), function (err, data) {
         if (err) {
@@ -281,7 +280,7 @@ QueryEngine.prototype._loadQueries = function () {
 
   var promises = [];
   _.each(queriesToLoad, function (queryId) {
-    promises.push(new Promise(function(fulfill, reject) {
+    promises.push(new Promise(function (fulfill, reject) {
 
       fs.readFile(path.join(__dirname, 'queries', queryId + '.json'), function (err, data) {
         if (err) {

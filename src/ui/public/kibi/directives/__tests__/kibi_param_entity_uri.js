@@ -15,18 +15,6 @@ var init = function (entityUriHolder, mappings) {
   // Load the application
   ngMock.module('kibana');
 
-  ngMock.module('kibana/courier', function ($provide) {
-    $provide.service('courier', function (Promise) {
-      return {
-        indexPatterns: {
-          getIds: function () {
-            return Promise.resolve(_.pluck(mappings, 'index'));
-          }
-        }
-      };
-    });
-  });
-
   ngMock.module('queries_editor/services/saved_queries', function ($provide) {
     $provide.service('savedQueries', function (Promise) {
       return {

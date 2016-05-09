@@ -2943,9 +2943,9 @@
       "resolved": "https://registry.npmjs.org/jstimezonedetect/-/jstimezonedetect-1.0.5.tgz"
     },
     "kibi-h2o2": {
-      "version": "5.0.0-kibi",
-      "from": "git://github.com/sirensolutions/h2o2.git#0c611141c14742b6943fd371129b8b4910ed8b65",
-      "resolved": "git://github.com/sirensolutions/h2o2.git#0c611141c14742b6943fd371129b8b4910ed8b65",
+      "version": "5.0.0-kibi-1",
+      "from": "git://github.com/sirensolutions/h2o2.git#fff3e9105b03987de8d33e0b0a3faf7dbf8a3651",
+      "resolved": "git://github.com/sirensolutions/h2o2.git#fff3e9105b03987de8d33e0b0a3faf7dbf8a3651",
       "dependencies": {
         "hoek": {
           "version": "2.16.3",

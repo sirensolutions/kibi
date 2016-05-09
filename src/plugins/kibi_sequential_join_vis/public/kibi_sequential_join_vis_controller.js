@@ -193,12 +193,6 @@ define(function (require) {
       });
       $scope.$on('$destroy', off);
 
-      $scope.$watch('buttons', function () {
-        if ($scope.buttons && $scope.buttons.length) {
-          _updateCounts();
-        }
-      });
-
       // when autoupdate is on we detect the refresh here
       $scope.$watch('esResponse', function (resp) {
         if ($scope.buttons && $scope.buttons.length) {

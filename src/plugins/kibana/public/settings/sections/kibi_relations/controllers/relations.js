@@ -110,39 +110,36 @@ define(function (require) {
         // this is the watched value
         return _.pluck($scope.relations.relationsIndices, 'id').concat(relDash);
       }
-      if (item && item.value) {
-        var remove = true;
+      var remove = true;
 
-        // do not remove if the dashboard is associated with an index
-        if (!!indexToDashboardsMap) {
-          _.each(indexToDashboardsMap, function (dashboards) {
-            if (dashboards.indexOf(item.value) !== -1) {
-              remove = false;
-              return false;
-            }
-          });
-        }
-
-        // remove if the dashboard is not in the list of dashboards that are directly connected to item.value
-        var connectedDashboards = [];
-        if (!!relDash.dashboards[0] && !relDash.dashboards[1]) {
-          connectedDashboards = _getConnectedDashboards(relDash.dashboards[0], relDash.relation);
-        } else if (!!relDash.dashboards[1] && !relDash.dashboards[0]) {
-          connectedDashboards = _getConnectedDashboards(relDash.dashboards[1], relDash.relation);
-        } else if (!relDash.dashboards[0] && !relDash.dashboards[1] && !!relDash.relation) {
-          // filter based on the selected relation
-          connectedDashboards = _getConnectedDashboards(null, relDash.relation);
-        }
-        if (connectedDashboards.length && connectedDashboards.indexOf(item.value) === -1) {
-          remove = true;
-        }
-
-        if (!!relDash.dashboards[0] && !!relDash.dashboards[1] && !!relDash.relation) {
-          remove = true;
-        }
-        return remove;
+      // do not remove if the dashboard is associated with an index
+      if (!!indexToDashboardsMap) {
+        _.each(indexToDashboardsMap, function (dashboards) {
+          if (dashboards.indexOf(item.value) !== -1) {
+            remove = false;
+            return false;
+          }
+        });
       }
-      return false;
+
+      // remove if the dashboard is not in the list of dashboards that are directly connected to item.value
+      var connectedDashboards = [];
+      if (!!relDash.dashboards[0] && !relDash.dashboards[1]) {
+        connectedDashboards = _getConnectedDashboards(relDash.dashboards[0], relDash.relation);
+      } else if (!!relDash.dashboards[1] && !relDash.dashboards[0]) {
+        connectedDashboards = _getConnectedDashboards(relDash.dashboards[1], relDash.relation);
+      } else if (!relDash.dashboards[0] && !relDash.dashboards[1] && !!relDash.relation) {
+        // filter based on the selected relation
+        connectedDashboards = _getConnectedDashboards(null, relDash.relation);
+      }
+      if (connectedDashboards.length && connectedDashboards.indexOf(item.value) === -1) {
+        remove = true;
+      }
+
+      if (!!relDash.dashboards[0] && !!relDash.dashboards[1] && !!relDash.relation) {
+        remove = true;
+      }
+      return remove;
     };
 
     /**

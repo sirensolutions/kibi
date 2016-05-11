@@ -24,3 +24,7 @@ selenium
 *.swp
 *.swo
 /crunchbase.db
+
+# Gradle
+.gradle/
+build/

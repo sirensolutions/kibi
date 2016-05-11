@@ -2,6 +2,11 @@
   "name": "kibi",
   "version": "4.4.1",
   "dependencies": {
+    "kibi-icons": {
+      "version": "1.0.0",
+      "from": "sirensolutions/kibi-icons#1.0.0",
+      "resolved": "https://github.com/sirensolutions/kibi-icons/archive/1.0.0.tar.gz"
+    },
     "antlr4-javascript-sparql": {
       "version": "1.0.7",
       "from": "sirensolutions/antlr4-javascript-sparql#1.0.7",

@@ -144,6 +144,8 @@
     "qtip2": "3.0.2",
     "eeg": "1.0.26",
     "angular-animate": "1.4.7",
+    "kibi-fonts": "sirensolutions/kibi-icons#1.0.0",
+
 
     "lru-cache": "~2.6.4",
     "request-promise": "0.4.3",

@@ -17,7 +17,7 @@
   ],
   "private": false,
   "version": "4.4.1",
-  "kibi_version": "0.3.3",
+  "kibi_version": "0.3.3-SNAPSHOT",
   "kibi_enterprise_enabled": false,
   "build": {
     "number": 8467,
@@ -197,7 +197,7 @@
     "marked-text-renderer": "0.1.0",
     "mocha": "2.3.0",
     "nock": "2.10.0",
-    "npm": "2.11.0",
+    "npm": "2.14.9",
     "portscanner": "1.0.0",
     "simple-git": "1.8.0",
     "sinon": "1.17.2",
@@ -207,6 +207,6 @@
   },
   "engines": {
     "node": "0.12.10",
-    "npm": "2.14.3"
+    "npm": "2.14.9"
   }
 }

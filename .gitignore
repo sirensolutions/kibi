@@ -26,3 +26,7 @@ selenium
 
 /crunchbase.db
 
+# Gradle
+.gradle/
+build/
+

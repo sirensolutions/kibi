@@ -1,5 +1,5 @@
 define(function (require) {
-  return function KibiSessionHelperFactory($cookies, savedSessions, Promise) {
+  return function KibiSessionHelperFactory($cookies, savedSessions, Promise, config) {
 
     function KibiSessionHelper() {
       this.initialized = false;
@@ -42,7 +42,7 @@ define(function (require) {
 
     KibiSessionHelper.prototype._getExpiresDate = function () {
       var d = new Date();
-      d.setTime(d.getTime() + (365 * 24 * 60 * 60 * 1000));
+      d.setTime(d.getTime() + (config.get('kibi:session_cookie_expire') * 1000));
       return d;
     };
 

@@ -233,6 +233,10 @@ define(function (require) {
       'kibi:shieldAuthorizationWarning': {
         value: true,
         description: 'Set to true to show all authorization warnings from Shield'
+      },
+      'kibi:session_cookie_expire': {
+        value: 31536000,
+        description: 'Set duration of cookie session (in seconds)'
       }
       // kibi: end
 

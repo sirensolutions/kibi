@@ -3,7 +3,7 @@ module.exports = {
     timeout: 10000,
     slow: 5000,
     ignoreLeaks: false,
-    reporter: 'dot'
+    reporter: 'list'
   },
   all: {
     src: [

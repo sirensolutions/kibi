@@ -17,21 +17,22 @@
     <i aria-hidden="true" class="fa-link fa"></i>
   </a>
   of Elasticsearch, you can choose which fields are actually retrieved for different visualisations.
-  The value needs to be a JSON object. Two top level properties are visualisation types. Currently only following one are supported:
+  The value needs to be a JSON object. Top level properties are visualisation types.
+  Currently supported types:
   <ul>
-    <li>all - used for all supported visualisations (currently: table, kibi-data-table, kibi_graph_browser)</li>
-    <li>kibi_graph_browser - used only for kibi_graph_browser</li>
+    <li><b>all</b> - used for all supported visualisations: table, kibi-data-table<span ng-if="kibiEnterpriseEnabled">, kibi_graph_browser</span></li>
+    <li ng-if="kibiEnterpriseEnabled"><b>kibi_graph_browser</b> - used only for kibi_graph_browser</li>
   </ul>
   </p>
 
   <br/>
   <strong>Examples</strong>
-  <p>Below is an example where both options (all, kibi_graph_browser) or just one option is used</p>
+  <p ng-if="kibiEnterpriseEnabled">Below is an example where both options (all, kibi_graph_browser) or just one option is used</p>
 
   <strong>Exclusions of a single field</strong>
   <br/>
 
-  <div class="exclusion-examples"
+  <div ng-if="kibiEnterpriseEnabled" class="exclusion-examples"
     readonly
     ui-ace="{
       advanced: {
@@ -72,7 +73,7 @@
 
 
 </div>
-  <div class="exclusion-examples"
+  <div ng-if="kibiEnterpriseEnabled" class="exclusion-examples"
     readonly
     ui-ace="{
       advanced: {
@@ -97,7 +98,7 @@
   <strong>Exclusions with a path pattern</strong>
   <br/>
 
-  <div class="exclusion-examples"
+  <div ng-if="kibiEnterpriseEnabled" class="exclusion-examples"
     readonly
     ui-ace="{
       advanced: {
@@ -137,7 +138,7 @@
 
 
 </div>
-  <div class="exclusion-examples"
+  <div ng-if="kibiEnterpriseEnabled" class="exclusion-examples"
     readonly
     ui-ace="{
       advanced: {
@@ -162,7 +163,7 @@
   <strong>Complete control with exclusions and inclusion</strong>
   <br/>
 
-  <div class="exclusion-examples"
+  <div ng-if="kibiEnterpriseEnabled" class="exclusion-examples"
     readonly
     ui-ace="{
       advanced: {
@@ -206,7 +207,7 @@
 
 
 </div>
-  <div class="exclusion-examples"
+  <div ng-if="kibiEnterpriseEnabled" class="exclusion-examples"
     readonly
     ui-ace="{
       advanced: {

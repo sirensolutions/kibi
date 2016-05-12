@@ -1,12 +1,13 @@
 define(function (require) {
   require('ui/modules').get('apps/settings')
-  .directive('sourceFiltering', function ($window, createNotifier) {
+  .directive('sourceFiltering', function ($window, createNotifier, kibiEnterpriseEnabled) {
     var notify = createNotifier();
     return {
       restrict: 'E',
       template: require('plugins/kibana/settings/sections/indices/_kibi_source_filtering.html'),
       link: function ($scope) {
         $scope.showHelp = false;
+        $scope.kibiEnterpriseEnabled = kibiEnterpriseEnabled;
         $scope.sourceFiltering = JSON.stringify($scope.indexPattern.getSourceFiltering(), null, ' ');
         $scope.save = function () {
           try {

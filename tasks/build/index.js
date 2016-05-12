@@ -6,6 +6,7 @@ module.exports = function (grunt) {
     'clean:build',
     'clean:target',
     '_build:downloadNodeBuilds:start',
+    '_build:downloadNodeBuilds:finish', // kibi: move just after start, otherwise it will fails if performed concurrently with other tasks
     'copy:devSource',
     'babel:build',
     '_build:babelOptions',
@@ -20,7 +21,6 @@ module.exports = function (grunt) {
     'clean:deepModules',
     'run:optimizeBuild',
     'stop:optimizeBuild',
-    '_build:downloadNodeBuilds:finish',
     '_build:versionedLinks',
     '_build:archives',
     !grunt.option('os-packages') ? [] : [

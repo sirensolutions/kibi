@@ -1,12 +1,13 @@
 define(function (require) {
   require('ui/modules').get('apps/settings')
-  .directive('sourceFiltering', function ($window, createNotifier) {
+  .directive('sourceFiltering', function ($window, createNotifier, kibiEnterpriseEnabled) {
     var notify = createNotifier();
     return {
       restrict: 'E',
       template: require('plugins/kibana/settings/sections/indices/_kibi_source_filtering.html'),
       link: function ($scope) {
         $scope.showHelp = false;
+        $scope.kibiEnterpriseEnabled = kibiEnterpriseEnabled;
         $scope.sourceFiltering = JSON.stringify($scope.indexPattern.getSourceFiltering(), null, ' ');
         $scope.save = function () {
           try {
@@ -15,11 +16,20 @@ define(function (require) {
             if ($scope.sourceFiltering) {
               sourceFiltering = JSON.parse($scope.sourceFiltering);
               if (sourceFiltering.constructor !== Object) {
-                throw 'You must enter a JSON object with exclude/include field(s)';
+                throw new Error('You must enter a JSON object with "all" or an "kibi_graph_browser" field(s)');
               }
-              for (var att in sourceFiltering) {
-                if (sourceFiltering.hasOwnProperty(att) && att !== 'exclude' && att !== 'include') {
-                  throw 'The JSON object should have only either an exclude or an include field';
+              for (var att1 in sourceFiltering) {
+                if (sourceFiltering.hasOwnProperty(att1)) {
+                  if (att1 !== 'all' && att1 !== 'kibi_graph_browser') {
+                    throw new Error('The JSON object should have only either an "all" or a "kibi_graph_browser" attribute');
+                  } else {
+                    var value = sourceFiltering[att1];
+                    for (var att2 in value) {
+                      if (value.hasOwnProperty(att2) && att2 !== 'include' && att2 !== 'exclude') {
+                        throw new Error('The nested properties can be only either an "include" or an "exclude" attribute');
+                      }
+                    }
+                  }
                 }
               }
               $scope.indexPattern.setSourceFiltering(sourceFiltering);

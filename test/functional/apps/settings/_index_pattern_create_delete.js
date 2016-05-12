@@ -53,7 +53,7 @@ define(function (require) {
               'format',
               'analyzed',
               'indexed',
-              'retrieved', // kibi: source filtering column
+              'excluded', // kibi: source filtering column
               'controls'
             ];
 

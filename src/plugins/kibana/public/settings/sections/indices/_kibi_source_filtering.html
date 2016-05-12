@@ -1,13 +1,13 @@
-<h3>Retrieved fields
+<h3>Excluded fields
 
 <span class="pull-right text-info hintbox-label" ng-click="showHelp = !showHelp">
-  <h4><i class="fa fa-info"></i> Retrieved Fields Help</h4>
+  <h4><i class="fa fa-info"></i> Excluded Fields Help</h4>
 </span>
 </h3>
 
 <div class="hintbox" ng-if="showHelp">
   <h4 class="hintbox-heading">
-    <i class="fa fa-question-circle text-info"></i> Retrieved Fields Help
+    <i class="fa fa-question-circle text-info"></i> Excluded Fields Help
   </h4>
 
   <p>
@@ -16,15 +16,23 @@
     source filtering API
     <i aria-hidden="true" class="fa-link fa"></i>
   </a>
-  of Elasticsearch, you can choose which fields are actually retrieved. The value needs to be a JSON object.
+  of Elasticsearch, you can choose which fields are actually retrieved for different visualisations.
+  The value needs to be a JSON object. Top level properties are visualisation types.
+  Currently supported types:
+  <ul>
+    <li><b>all</b> - used for all supported visualisations: table, kibi-data-table<span ng-if="kibiEnterpriseEnabled">, kibi_graph_browser</span></li>
+    <li ng-if="kibiEnterpriseEnabled"><b>kibi_graph_browser</b> - used only for kibi_graph_browser</li>
+  </ul>
   </p>
 
   <br/>
   <strong>Examples</strong>
+  <p ng-if="kibiEnterpriseEnabled">Below is an example where both options (all, kibi_graph_browser) or just one option is used</p>
 
-  <p style="color: #b4bcc2;">Exclusion of a single field</p>
+  <strong>Exclusions of a single field</strong>
+  <br/>
 
-  <div
+  <div ng-if="kibiEnterpriseEnabled" class="exclusion-examples"
     readonly
     ui-ace="{
       advanced: {
@@ -37,11 +45,15 @@
       },
       mode: 'json'
       }">{
-  "exclude": "user"
+  "all": {
+    "exclude": "user"
+  },
+  "kibi_graph_browser": {
+    "exclude": "city"
+  }
 }</div>
 
-  <p style="color: #b4bcc2;">Exclusion with a path pattern</p>
-  <div
+  <div class="exclusion-examples" style="height: 130px;"
     readonly
     ui-ace="{
       advanced: {
@@ -54,14 +66,14 @@
       },
       mode: 'json'
       }">{
-  "exclude": [
-    "obj1.*",
-    "*.value"
-  ]
-}</div>
+  "all": {
+    "exclude": "user"
+  }
+}
 
-  <p style="color: #b4bcc2;">Complete control with exclusions and inclusion</p>
-  <div
+
+</div>
+  <div ng-if="kibiEnterpriseEnabled" class="exclusion-examples"
     readonly
     ui-ace="{
       advanced: {
@@ -74,9 +86,151 @@
       },
       mode: 'json'
       }">{
-  "exclude": "obj1.*",
-  "include": "obj2.*.val"
+  "kibi_graph_browser": {
+    "exclude": "city"
+  }
+}
+
+
+</div>
+  <div style="clear:both;" />
+
+  <strong>Exclusions with a path pattern</strong>
+  <br/>
+
+  <div ng-if="kibiEnterpriseEnabled" class="exclusion-examples"
+    readonly
+    ui-ace="{
+      advanced: {
+        highlightActiveLine: false
+      },
+      useWrapMode: true,
+      rendererOptions: {
+        showPrintMargin: false,
+        maxLines: 4294967296
+      },
+      mode: 'json'
+      }">{
+  "all": {
+    "exclude": ["obj1.*", "*.value"]
+  },
+  "kibi_graph_browser": {
+    "exclude": ["obj2.*", "*.value"]
+  }
 }</div>
+  <div class="exclusion-examples"
+    readonly
+    ui-ace="{
+      advanced: {
+        highlightActiveLine: false
+      },
+      useWrapMode: true,
+      rendererOptions: {
+        showPrintMargin: false,
+        maxLines: 4294967296
+      },
+      mode: 'json'
+      }">{
+  "all": {
+    "exclude": ["obj1.*", "*.value"]
+  }
+}
+
+
+</div>
+  <div ng-if="kibiEnterpriseEnabled" class="exclusion-examples"
+    readonly
+    ui-ace="{
+      advanced: {
+        highlightActiveLine: false
+      },
+      useWrapMode: true,
+      rendererOptions: {
+        showPrintMargin: false,
+        maxLines: 4294967296
+      },
+      mode: 'json'
+      }">{
+  "kibi_graph_browser": {
+    "exclude": [ "obj2.*", "*.value"]
+  }
+}
+
+
+</div>
+  <div style="clear:both;" />
+
+  <strong>Complete control with exclusions and inclusion</strong>
+  <br/>
+
+  <div ng-if="kibiEnterpriseEnabled" class="exclusion-examples"
+    readonly
+    ui-ace="{
+      advanced: {
+        highlightActiveLine: false
+      },
+      useWrapMode: true,
+      rendererOptions: {
+        showPrintMargin: false,
+        maxLines: 4294967296
+      },
+      mode: 'json'
+      }">{
+  "all": {
+    "exclude": "obj1.*",
+    "include": "obj2.*.val"
+  },
+  "kibi_graph_browser": {
+    "exclude": "obj2.*",
+    "include": "obj3.*.val"
+  }
+}</div>
+  <div class="exclusion-examples"
+    readonly
+    ui-ace="{
+      advanced: {
+        highlightActiveLine: false
+      },
+      useWrapMode: true,
+      rendererOptions: {
+        showPrintMargin: false,
+        maxLines: 4294967296
+      },
+      mode: 'json'
+      }">{
+  "all": {
+    "exclude": "obj1.*",
+    "include": "obj2.*.val"
+  }
+}
+
+
+
+</div>
+  <div ng-if="kibiEnterpriseEnabled" class="exclusion-examples"
+    readonly
+    ui-ace="{
+      advanced: {
+        highlightActiveLine: false
+      },
+      useWrapMode: true,
+      rendererOptions: {
+        showPrintMargin: false,
+        maxLines: 4294967296
+      },
+      mode: 'json'
+      }">{
+  "kibi_graph_browser": {
+    "exclude": "obj2.*",
+    "include": "obj3.*.val"
+  }
+}
+
+
+
+</div>
+  <div style="clear:both;" />
+
 </div>
 
 <p>

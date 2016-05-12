@@ -25,7 +25,7 @@ define(function (require) {
         },
         // kibi: added by kibi
         {
-          title: 'Retrieved Fields',
+          title: 'Excluded Fields',
           index: 'sourceFiltering'
         }
       ];

@@ -27,4 +27,4 @@ selenium
 
 # Gradle
 .gradle/
-build/
+build-gradle/

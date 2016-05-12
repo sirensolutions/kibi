@@ -95,7 +95,7 @@ define(function (require) {
         searchSource._id = _id;
         searchSource.index(indexPattern);
 
-        var sourceFiltering = $scope.indexPattern.getSourceFiltering();
+        var sourceFiltering = indexPattern.getSourceFiltering();
         if (sourceFiltering && sourceFiltering.all) {
           searchSource.source(sourceFiltering.all);
         }

@@ -112,8 +112,8 @@ define(function (require) {
 
           // kibi: source filtering
           var sourceFiltering = $scope.indexPattern.getSourceFiltering();
-          if (sourceFiltering) {
-            $scope.searchSource.source(sourceFiltering);
+          if (sourceFiltering && sourceFiltering.all) {
+            $scope.searchSource.source(sourceFiltering.all);
           }
           // kibi: end
 

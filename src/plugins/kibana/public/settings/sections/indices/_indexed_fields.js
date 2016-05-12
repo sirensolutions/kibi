@@ -1,11 +1,17 @@
 define(function (require) {
   var _ = require('lodash');
-  var isRetrieved = require('./kibi_retrieved_field');
+  var fieldExcludedFor = require('./kibi_field_excluded_for');
+
   var joinFields = require('ui/kibi/settings/sections/indices/join_fields');
   require('ui/paginated_table');
 
   require('ui/modules').get('apps/settings')
   .directive('indexedFields', function ($filter, config) {
+    var templates = {
+      all: '<i class="fa fa-globe" aria-label="excluded in any visualisation" title="excluded in any visualisation"></i> ',
+      kibi_graph_browser: '<i class="fa fak-graph" aria-label="excluded in graph browser" title="excluded in graph browser"></i>'
+    };
+
     var yesTemplate = '<i class="fa fa-check" aria-label="yes"></i>';
     var noTemplate = '';
     var nameHtml = require('plugins/kibana/settings/sections/indices/_field_name.html');
@@ -25,8 +31,8 @@ define(function (require) {
           { title: 'type' },
           { title: 'format' },
           { title: 'analyzed', info: 'Analyzed fields may require extra memory to visualize' },
-          { title: 'indexed', info: 'Fields that are not indexed are unavailable for search' },
-          { title: 'retrieved', info: 'Fields that are not retrieved as part of the _source object per hit' },
+          { title: 'indexed', info: 'Fields that are not indexed are unavailable for search' }, // kibi: added excluded field
+          { title: 'excluded', info: 'Fields that are not retrieved as part of the _source object per hit' },
           { title: 'controls', sortable: false }
         ];
 
@@ -69,9 +75,9 @@ define(function (require) {
                 markup: field.indexed ? yesTemplate : noTemplate,
                 value: field.indexed
               },
-              // kibi: added by kibi
+              // kibi: added excluded field
               {
-                markup: isRetrieved(sourceFiltering, field.displayName) ? yesTemplate : noTemplate
+                markup: _.map(fieldExcludedFor(sourceFiltering, field.displayName), function (visType) { return templates[visType]; })
               },
               {
                 markup: controlsHtml,

@@ -95,6 +95,11 @@ define(function (require) {
         searchSource._id = _id;
         searchSource.index(indexPattern);
 
+        var sourceFiltering = $scope.indexPattern.getSourceFiltering();
+        if (sourceFiltering && sourceFiltering.all) {
+          searchSource.source(sourceFiltering.all);
+        }
+
         const queryIds = _.filter($scope.vis.params.queryIds, (snippet) => !snippet.isEntityDependent || $scope.entityURI);
         // validate here and do not inject if all require values are not set
         if ($scope.vis.params.enableQueryFields === true && queryIds.length > 0 &&

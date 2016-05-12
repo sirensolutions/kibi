@@ -26,9 +26,8 @@ define(function (require) {
               exclude: 'john'
             }
           };
-          expect(fieldExcludedFor(sourceFiltering, 'john')).to.eql(['kibi_graph_browser']);
+          expect(fieldExcludedFor(sourceFiltering, 'john')).to.eql(['all']);
         });
-
 
         it('john should be excluded for graph (only kibi_graph_browser)', function () {
           var sourceFiltering = {
@@ -42,6 +41,18 @@ define(function (require) {
         it('john should be excluded for graph (all and kibi_graph_browser)', function () {
           var sourceFiltering = {
             all: {
+              exclude: 'john'
+            },
+            kibi_graph_browser: {
+              exclude: 'john'
+            }
+          };
+          expect(fieldExcludedFor(sourceFiltering, 'john')).to.eql(['all', 'kibi_graph_browser']);
+        });
+
+        it('john should be excluded only for graph', function () {
+          var sourceFiltering = {
+            all: {
               include: 'john'
             },
             kibi_graph_browser: {
@@ -50,7 +61,6 @@ define(function (require) {
           };
           expect(fieldExcludedFor(sourceFiltering, 'john')).to.eql(['kibi_graph_browser']);
         });
-
 
         it('connor should be excluded for all', function () {
           var sourceFiltering = {
@@ -74,7 +84,6 @@ define(function (require) {
 
           expect(fieldExcludedFor(sourceFiltering, 'connor')).to.eql(['all', 'kibi_graph_browser']);
         });
-
 
         it('connor should not be excluded', function () {
           var sourceFiltering = {

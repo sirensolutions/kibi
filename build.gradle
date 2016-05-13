@@ -83,35 +83,35 @@ publishing {
     darwinX64(MavenPublication) {
       artifact new File("${projectDir}/target", "kibi-${project.version}-darwin-x64.zip")
       groupId project.group
-      artifactId "kibi-community"
+      artifactId "kibi-core"
       version project.version
     }
 
     linuxX64(MavenPublication) {
       artifact new File("${projectDir}/target", "kibi-${project.version}-linux-x64.zip")
       groupId project.group
-      artifactId "kibi-community"
+      artifactId "kibi-core"
       version project.version
     }
 
     linuxX86(MavenPublication) {
       artifact new File("${projectDir}/target", "kibi-${project.version}-linux-x86.zip")
       groupId project.group
-      artifactId "kibi-community"
+      artifactId "kibi-core"
       version project.version
     }
 
     windows(MavenPublication) {
       artifact new File("${projectDir}/target", "kibi-${project.version}-windows.zip")
       groupId project.group
-      artifactId "kibi-community"
+      artifactId "kibi-core"
       version project.version
     }
 
     windows64(MavenPublication) {
       artifact new File("${projectDir}/target", "kibi-${project.version}-windows64.zip")
       groupId project.group
-      artifactId "kibi-community"
+      artifactId "kibi-core"
       version project.version
     }
 

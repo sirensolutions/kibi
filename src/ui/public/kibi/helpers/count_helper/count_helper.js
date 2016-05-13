@@ -4,7 +4,7 @@ define(function (require) {
   var uniqFilters = require('ui/filter_bar/lib/uniqFilters');
   var replaceOrAddJoinSetFilter   = require('ui/kibi/helpers/join_filter_helper/lib/replace_or_add_join_set_filter');
 
-  return function CountHelperFactory(Private, Promise, timefilter, indexPatterns, savedSearches, savedDashboards) {
+  return function CountHelperFactory(Private, Promise, timefilter, savedSearches, savedDashboards) {
 
     var kibiStateHelper  = Private(require('ui/kibi/helpers/kibi_state_helper/kibi_state_helper'));
     var kibiTimeHelper   = Private(require('ui/kibi/helpers/kibi_time_helper'));

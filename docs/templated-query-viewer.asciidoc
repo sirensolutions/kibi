@@ -1,5 +1,5 @@
-[[templated-query-viewer]]
-=== Templated query viewer
+[[kibi-query-viewer]]
+=== Kibi query viewer
 
 This visualization displays the results from multiple queries on external
 data sources using query templates.
@@ -19,7 +19,7 @@ template will not be rendered.
 The screenshots below show the configuration and output of a Templated query
 viewer visualization for a selected company:
 
-image::images/templated-query-viewer/templated-query-viewer-config.png["Configuration of a templated query viewer visualization",align="center"]
+image::images/templated-query-viewer/templated-query-viewer-config.png["Configuration of a Kibi query viewer visualization",align="center"]
 
 [float]
 [[templated-query-viewer-advanced]]

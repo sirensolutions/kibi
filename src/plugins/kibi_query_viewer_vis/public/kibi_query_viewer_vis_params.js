@@ -8,7 +8,7 @@ define(function (require) {
   .directive('kibiQueryViewerVisParams', function ($rootScope, kbnUrl, Private, createNotifier) {
 
     var notify = createNotifier({
-      location: 'Templated Query Viewer Params'
+      location: 'Kibi Query Viewer Params'
     });
 
     return {

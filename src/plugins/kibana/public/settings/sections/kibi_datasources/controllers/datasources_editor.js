@@ -104,10 +104,12 @@ define(function (require) {
         }
 
         datasource.save().then(function (datasourceId) {
-          notify.info('Datasource ' + datasource.title + ' successfully saved');
-          queryEngineClient.clearCache().then(function () {
-            kbnUrl.change('settings/datasources/' + datasourceId);
-          });
+          if (datasourceId) {
+            notify.info('Datasource ' + datasource.title + ' successfully saved');
+            queryEngineClient.clearCache().then(function () {
+              kbnUrl.change('settings/datasources/' + datasourceId);
+            });
+          }
         });
       };
 

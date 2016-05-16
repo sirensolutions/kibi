@@ -260,7 +260,7 @@ define(function (require) {
         }
 
         // here if there is a relational filter it should be replaced
-        if (filter.join_set) {
+        if (filter && filter.join_set) {
           // replace
           var index = -1;
           _.each(filters, function (f, i) {
@@ -276,9 +276,11 @@ define(function (require) {
             // do not exists so add
             filters.push(filter);
           }
-        } else {
+        } else if (filter) {
           // add
           filters.push(filter);
+        } else {
+          throw new Error('No filter');
         }
         this._setDashboardProperty(dashboardId, 'f', filters);
         globalState.save();

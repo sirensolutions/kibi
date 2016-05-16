@@ -324,23 +324,37 @@ describe('Kibi Components', function () {
       };
       globalState.save();
 
-
       kibiStateHelper.removeFilterOfTypeFromDashboard('join_set', 'dashboard_which_does_not_yet_exist_in_kibi_state');
 
       expect(globalState.k.d.dashboard_which_does_not_yet_exist_in_kibi_state).to.eql({f: []});
     });
 
-    it('addFilterToDashboard should not throw exception when dashboard does not yet exists in kibi state', function () {
+    it('addFilterToDashboard should not throw an exception when dashboard does not yet exists in kibi state', function () {
       globalState.k = {
         d: {}
       };
       globalState.save();
 
-
       kibiStateHelper.addFilterToDashboard('dashboard_which_does_not_yet_exist_in_kibi_state', {range:{}});
 
       expect(globalState.k.d.dashboard_which_does_not_yet_exist_in_kibi_state).to.eql({f: [{range:{}}]});
     });
+
+    it('addFilterToDashboard should throw an exception when filter is null', function () {
+      globalState.k = {
+        d: {
+          dashboardA: []
+        }
+      };
+      globalState.save();
+
+      try {
+        kibiStateHelper.addFilterToDashboard('dashboardA', null);
+      } catch (e) {
+        expect(e.message).to.equal('No filter');
+      }
+    });
+
 
     it('enableRelation', function () {
       globalState.k = {

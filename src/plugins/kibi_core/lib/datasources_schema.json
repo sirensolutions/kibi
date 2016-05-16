@@ -227,7 +227,7 @@
       "encrypted": false,
       "inputType": "text",
       "defaultValue": "",
-      "placeholder": "Absolute path to the JDBC driver jar file"
+      "placeholder": "Absolute path to the JDBC driver jar folder"
     },
     {
       "name": "connection_string",
@@ -245,7 +245,7 @@
       "encrypted": false,
       "inputType": "text",
       "defaultValue": "",
-      "placeholder": ""
+      "placeholder": "Comma separated list of jars (can be just filenames, if in libpath folder, or absolute paths otherwise)"
     },
     {
       "name": "username",

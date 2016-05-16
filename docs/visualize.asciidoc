@@ -32,7 +32,7 @@ Choose a visualization type when you start the New Visualization wizard:
 [horizontal]
 <<enhanced-search-results,Enhanced search results>>:: Display an interactive
 table of documents returned by an Elasticsearch query.
-<<templated-query-viewer,Templated Query Viewer>>:: Display the results of
+<<kibi-query-viewer,Kibi Query Viewer>>:: Display the results of
 queries on external datasources in Jade/Handlebards templates.
 <<relational-filter,Relational Filter>>:: Apply cross-dashboard filters
 based on the relations between different indices.

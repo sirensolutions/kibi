@@ -36,7 +36,7 @@ with multiple groups of data coming from different indices.
 - The <<enhanced-search-results,Enhanced search results>> visualization, which
 displays query results in a table.
 
-- The <<templated-query-viewer,Templated Query Viewer>>, which enables the
+- The <<kibi-query-viewer,Kibi Query Viewer>>, which enables the
 visualization of queries on external datasource through Jade or Handlebars
 templates.
 

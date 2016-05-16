@@ -168,7 +168,7 @@ visualization preview, clicking the *Refresh* button image:images/K4Refresh.png[
 
 include::enhanced-search-results.asciidoc[]
 
-include::templated-query-viewer.asciidoc[]
+include::kibi-query-viewer.asciidoc[]
 
 include::area.asciidoc[]
 

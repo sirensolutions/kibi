@@ -399,6 +399,38 @@ describe('Kibi Components', function () {
       expect(kibiStateHelper.isRelationEnabled({ dashboards: [ 'd1', 'd3' ], relation: 'i1/a/i2/b' })).to.equal(false);
     });
 
+    it('getEnabledRelations should return 3 pairs', function () {
+      globalState.k = {
+        j: [
+          'A/B/apath,bpath',
+          'B/C/bpath,cpath',
+          'C/D/cpath,dpath'
+        ]
+      };
+      globalState.save();
+
+      expect(kibiStateHelper.getEnabledRelations()).to.eql([
+        ['A','B'],
+        ['B','C'],
+        ['C','D']
+      ]);
+    });
+
+    it('getEnabledRelations should return an empty array if no j', function () {
+      globalState.k = {};
+      globalState.save();
+
+      expect(kibiStateHelper.getEnabledRelations()).to.eql([]);
+    });
+
+    it('getEnabledRelations should return an empty array if j is empty ', function () {
+      globalState.k = {
+        j: []
+      };
+      globalState.save();
+
+      expect(kibiStateHelper.getEnabledRelations()).to.eql([]);
+    });
 
   });
 });

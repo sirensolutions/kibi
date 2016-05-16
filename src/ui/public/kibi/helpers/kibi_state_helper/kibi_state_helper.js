@@ -343,6 +343,14 @@ define(function (require) {
       return false;
     };
 
+    KibiStateHelper.prototype.getEnabledRelations = function () {
+      var enabledRelations = globalState.k.j || [];
+      return _.map(enabledRelations, function (rel) {
+        var parts = rel.split('/');
+        return [parts[0], parts[1]];
+      });
+    };
+
     KibiStateHelper.prototype.enableRelation = function (relation) {
       if (!globalState.k.j) {
         globalState.k.j = [];

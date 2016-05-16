@@ -278,7 +278,7 @@ Once you've configured query templates and queries, you can use them
 in the following visualizations:
 
 - The <<enhanced-search-results>> visualization
-- The <<templated-query-viewer>> visualization
+- The <<kibi-query-viewer>> visualization
 
 It is also possible to use queries as aggregations as explained below.
 

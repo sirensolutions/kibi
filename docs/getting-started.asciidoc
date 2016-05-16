@@ -218,7 +218,7 @@ _Company Info_ visualization; by clicking on the _(show)_ links you can
 toggle the list of companies in the same domain and competitors; the data in
 the tables is fetched from queries on the SQLite database, using the selected
 company ID as a parameter. The queries are rendered using
-<<templated-query-viewer, customizable templates>>, which will be introduced
+<<kibi-query-viewer, customizable templates>>, which will be introduced
 later.
 
 The selected entity appears as a purple box on the right of the filter bar;
@@ -327,4 +327,4 @@ _Query templates_ tab.
 
 NOTE: you can find the documentation about templates in the
 <<external-datasources>> chapter; the visualization is documented in the
-<<templated-query-viewer>> chapter.
+<<kibi-query-viewer>> chapter.

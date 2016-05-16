@@ -19,10 +19,10 @@ template will not be rendered.
 The screenshots below show the configuration and output of a Templated query
 viewer visualization for a selected company:
 
-image::images/templated-query-viewer/templated-query-viewer-config.png["Configuration of a Kibi query viewer visualization",align="center"]
+image::images/kibi-query-viewer/kibi-query-viewer-config.png["Configuration of a Kibi query viewer visualization",align="center"]
 
 [float]
-[[templated-query-viewer-advanced]]
+[[kibi-query-viewer-advanced]]
 ==== Advanced options
 
 By clicking on the _Advanced_ link, you can set additional rendering options.
@@ -45,4 +45,4 @@ By default, template contents are hidden and can be displayed by clicking on
 the _show_ link in the heading; to make template contents visible by default,
 check _Render opened_ box.
 
-image::images/templated-query-viewer/templated-query-viewer-advanced.png["Advanced options",align="center"]
+image::images/kibi-query-viewer/kibi-query-viewer-advanced.png["Advanced options",align="center"]

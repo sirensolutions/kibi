@@ -324,23 +324,37 @@ describe('Kibi Components', function () {
       };
       globalState.save();
 
-
       kibiStateHelper.removeFilterOfTypeFromDashboard('join_set', 'dashboard_which_does_not_yet_exist_in_kibi_state');
 
       expect(globalState.k.d.dashboard_which_does_not_yet_exist_in_kibi_state).to.eql({f: []});
     });
 
-    it('addFilterToDashboard should not throw exception when dashboard does not yet exists in kibi state', function () {
+    it('addFilterToDashboard should not throw an exception when dashboard does not yet exists in kibi state', function () {
       globalState.k = {
         d: {}
       };
       globalState.save();
 
-
       kibiStateHelper.addFilterToDashboard('dashboard_which_does_not_yet_exist_in_kibi_state', {range:{}});
 
       expect(globalState.k.d.dashboard_which_does_not_yet_exist_in_kibi_state).to.eql({f: [{range:{}}]});
     });
+
+    it('addFilterToDashboard should throw an exception when filter is null', function () {
+      globalState.k = {
+        d: {
+          dashboardA: []
+        }
+      };
+      globalState.save();
+
+      try {
+        kibiStateHelper.addFilterToDashboard('dashboardA', null);
+      } catch (e) {
+        expect(e.message).to.equal('No filter');
+      }
+    });
+
 
     it('enableRelation', function () {
       globalState.k = {
@@ -385,6 +399,38 @@ describe('Kibi Components', function () {
       expect(kibiStateHelper.isRelationEnabled({ dashboards: [ 'd1', 'd3' ], relation: 'i1/a/i2/b' })).to.equal(false);
     });
 
+    it('getEnabledRelations should return 3 pairs', function () {
+      globalState.k = {
+        j: [
+          'A/B/apath,bpath',
+          'B/C/bpath,cpath',
+          'C/D/cpath,dpath'
+        ]
+      };
+      globalState.save();
+
+      expect(kibiStateHelper.getEnabledRelations()).to.eql([
+        ['A','B'],
+        ['B','C'],
+        ['C','D']
+      ]);
+    });
+
+    it('getEnabledRelations should return an empty array if no j', function () {
+      globalState.k = {};
+      globalState.save();
+
+      expect(kibiStateHelper.getEnabledRelations()).to.eql([]);
+    });
+
+    it('getEnabledRelations should return an empty array if j is empty ', function () {
+      globalState.k = {
+        j: []
+      };
+      globalState.save();
+
+      expect(kibiStateHelper.getEnabledRelations()).to.eql([]);
+    });
 
   });
 });

@@ -99,7 +99,7 @@ TinkerPop3Query.prototype.fetchResults = function (options, onlyIds, idVariableN
           excludedFields : []
         };
 
-        if (hit._source.sourceFiltering) {
+        if (hit._source && hit._source.sourceFiltering) {
           let sourceFiltering = JSON.parse(hit._source.sourceFiltering);
           let exFields = sourceFiltering.kibi_graph_browser.exclude;
           let inFields = sourceFiltering.kibi_graph_browser.include;

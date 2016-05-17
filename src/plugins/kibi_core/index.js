@@ -110,8 +110,8 @@ module.exports = function (kibana) {
       this.status.yellow('Initialising the query engine');
       queryEngine = new QueryEngine(server);
       queryEngine._init(datasourceCacheSize).then((data) => {
-        this.status.green('Query engine initialized');
         server.log(['info','kibi_core'], data);
+        this.status.green('Query engine initialized');
       }).catch((err) => {
         server.log(['error','kibi_core'], err);
         this.status.red('Query engine initializiation failed');

@@ -68,12 +68,13 @@ QueryEngine.prototype._init = function (cacheSize = 500, enableCache = true, cac
 
     elasticsearchStatus.on('change', function (prev, prevmsg) {
       if (elasticsearchStatus.state === 'green') {
-        self.loadPredefinedData()
-        .then(self.setupJDBC())
-        .then(self.reloadQueries())
-        .then(() => {
-          self.initialized = true;
-          fulfill({ message: 'QueryEngine initialized successfully.' });
+        self.loadPredefinedData().then(function () {
+          return self.setupJDBC().then(function () {
+            return self.reloadQueries().then(function () {
+              self.initialized = true;
+              fulfill({ message: 'QueryEngine initialized successfully.' });
+            });
+          });
         }).catch(reject);
       }
     });

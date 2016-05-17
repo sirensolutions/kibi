@@ -123,9 +123,9 @@ TinkerPop3Query.prototype.fetchResults = function (options, onlyIds, idVariableN
               indexPattern.includedFields.push(inFields);
             }
           }
+          indexPatterns[hit._source.title] = indexPattern;
         }
 
-        indexPatterns[hit._source.title] = indexPattern;
       });
 
       var kibiRelationsJson = JSON.parse(kibiRelations);

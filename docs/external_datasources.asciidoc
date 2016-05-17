@@ -1,4 +1,4 @@
-[[external-datasources]]
+[[external_datasources]]
 == External datasources
 
 Kibi provides visualizations and aggregations to integrate data from external
@@ -108,7 +108,7 @@ Y2hhbmdlbWVjaGFuZ2VtZWNoYW5nZW1lY2hhbmdlbWU=
 NOTE: Make sure to set the configuration file as readable only to the user running
 the Kibi process as it contains the *datasource_encryption_key*.
 
-[[entity-selection]]
+[[entity_selection]]
 === Datasource entity selection
 
 Selected Entities can be used to as source of parameters for queries
@@ -118,7 +118,7 @@ Each selected entity is uniquely identified by an URI:
 
 As explained in the following sections, queries on external datasources can
 extract variables from the selected entity URI; in order to allow the user
-to select an entity, you must add an <<enhanced-search-results>> visualization
+to select an entity, you must add an <<enhanced_search_results>> visualization
 to a dashboard and configure at least one <<click-handlers, click handler>>
 to select an entity.
 
@@ -130,15 +130,15 @@ The screenshot below shows the effect of clicking on a cell configured with an
 entity selection handler; after selecting an entity, the _Company Info_
 template viewer shows the information about the company fetched by a query.
 
-image::images/external-sources/entity-selection.png["Entity selection",align="center"]
+image::images/external_sources/entity_selection.png["Entity selection",align="center"]
 
-image::images/external-sources/entity-selection-config-sample.png["Entity selection configuration example",align="center"]
+image::images/external_sources/entity_selection_config_sample.png["Entity selection configuration example",align="center"]
 
 To disable or cancel the selection, click on the icons displayed inside the
 entity selection widget when the mouse is over it, as displayed in the
 screenshot below:
 
-image::images/external-sources/entity-selection-hover.png["Entity selection options", align="center"]
+image::images/external_sources/entity_selection_hover.png["Entity selection options", align="center"]
 
 [[datasource-templates]]
 === Query templates
@@ -168,7 +168,7 @@ click on the _save_ button and select a query from the list;
 depending on the query you selected, the <<query-variables,_EntityURI_>> may
 need to be set.
 
-image::images/external-sources/templates-editor.png["Query template editor",align="center"]
+image::images/external_sources/templates_editor.png["Query template editor",align="center"]
 
 [[datasource-queries]]
 === Queries
@@ -190,7 +190,7 @@ Below is an example configuration of a query on a SQL database
 called *Top 50 companies (HR count)* that returns the Top 50 companies by
 number of employees in a table called `company`.
 
-image::images/external-sources/queries-editor-sql1.png["Configuration of a SQL endpoint",align="center"]
+image::images/external_sources/queries_editor_sql1.png["Configuration of a SQL endpoint",align="center"]
 
 The preview section will display the results of the query as a table or as a
 JSON object.
@@ -204,7 +204,7 @@ NOTE: Template rendering is currently a blocking operation, therefore queries re
 One of the most useful features of queries is that it is possible to set some
 of their parameters before execution by using datasource specific variables,
 which can be set at runtime by configuring <<click-handlers, click handlers>>
-in the <<enhanced-search-results>> visualization to select an entity.
+in the <<enhanced_search_results>> visualization to select an entity.
 
 Variable values are taken from elasticsearch document selected via selected entity URI.
 
@@ -229,7 +229,7 @@ In the Selected Entity box we see that the selected company is
 from index: *company*, has a type: *Company* and has the id *AU9r0i2d0nSzQcsnt*
 
 
-image::images/external-sources/query-table-var.png["SQL query with variables",align="center"]
+image::images/external_sources/query_table_var.png["SQL query with variables",align="center"]
 
 [float]
 [[activation-query]]
@@ -278,8 +278,8 @@ ASK {
 Once you've configured query templates and queries, you can use them
 in the following visualizations:
 
-- The <<enhanced-search-results>> visualization
-- The <<kibi-query-viewer>> visualization
+- The <<enhanced_search_results>> visualization
+- The <<kibi_query_viewer>> visualization
 
 It is also possible to use queries as aggregations as explained below.
 
@@ -324,9 +324,9 @@ If a query requires a selected entity, and no entity is selected, the
 computed aggregation will return 0, also the controls to select *Selected entity*
 will indicate (red borders arround) that it is necessary to select one.
 
-image::images/external-sources/relational-filter-config.png["Configuration of an external query terms filter aggregation on a data table visualization",align="center"]
+image::images/external_sources/relational_filter_config.png["Configuration of an external query terms filter aggregation on a data table visualization",align="center"]
 
 The screenshot below shows the configuration of two external query terms
 filter aggregation on a pie chart visualization:
 
-image::images/external-sources/relational-filter-config-2.png["Configuration of an external query terms filter aggregation on a pie chart visualization",align="center"]
+image::images/external_sources/relational_filter_config_2.png["Configuration of an external query terms filter aggregation on a pie chart visualization",align="center"]

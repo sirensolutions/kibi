@@ -1,7 +1,7 @@
 [[kibi_gremlin_server]]
 == Kibi Gremlin Server [Enterprise Edition only]
 
-**Kibi Gremlin Server** component required by <<graph-browser,Kibi Graph Browser>> visualisation
+**Kibi Gremlin Server** component required by <<graph_browser,Kibi Graph Browser>> visualisation
 is shipped pre-configured in Kibi Enterprise Edition.
 
 The following Gremlin Server configuration is required in kibi.yml.

@@ -25,7 +25,7 @@ include::kibi_license.asciidoc[]
 
 include::setup.asciidoc[]
 
-include::getting-started.asciidoc[]
+include::getting_started.asciidoc[]
 
 include::logstash.asciidoc[]
 
@@ -35,19 +35,19 @@ include::access.asciidoc[]
 
 include::discover.asciidoc[]
 
-include::external-datasource.asciidoc[]
+include::external_datasources.asciidoc[]
 
 include::kibi_gremlin_server.asciidoc[]
 
 include::visualize.asciidoc[]
 
-include::relational-filter.asciidoc[]
+include::relational_filter.asciidoc[]
 
 include::dashboard.asciidoc[]
 
 include::settings.asciidoc[]
 
-include::shield-integration.asciidoc[]
+include::shield_integration.asciidoc[]
 
 include::production.asciidoc[]
 

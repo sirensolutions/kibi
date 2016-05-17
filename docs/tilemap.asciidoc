@@ -139,4 +139,4 @@ map, to create a filter for the box coordinates.
 [[tilemap-viewing-detailed-information]]
 ==== Viewing Detailed Information
 
-include::visualization-raw-data.asciidoc[]
+include::visualization_raw_data.asciidoc[]

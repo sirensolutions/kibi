@@ -158,14 +158,14 @@ the specified value in that field.
 
 [float]
 [[discover-filters]]
-include::filter-pinning.asciidoc[]
+include::filter_pinning.asciidoc[]
 
 [float]
 [[document-data]]
 === Viewing Document Data
 When you submit a search query, the 500 most recent documents that match the query are listed in the Documents table.
 You can configure the number of documents shown in the table by setting the `discover:sampleSize` property in
-<<advanced-settings,Advanced Settings>>. By default, the table shows the localized version of the time field specified
+<<advanced_settings,Advanced Settings>>. By default, the table shows the localized version of the time field specified
 in the selected index pattern and the document `_source`. You can <<adding-columns, add fields to the Documents table>>
 from the Fields list. You can <<sorting, sort the listed documents>> by any indexed field that's included in the table.
 

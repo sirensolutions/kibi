@@ -80,7 +80,7 @@ image::images/node-windows-firewall-warning.png["Windows firewall warning",align
 
 Kibi can be accessed by visiting {start-url} or for installation with Shield visiting {start-url-shield};
 an overview of the included demo dataset is available in
-<<getting-started, Getting started>> section.
+<<getting_started, Getting started>> section.
 
 If you want to connect Kibi to a different Elasticsearch cluster, open
 the configuration file in `kibi/config/kibi.yml`, set the correct URL in

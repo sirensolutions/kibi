@@ -122,7 +122,7 @@ To set a different pattern as the default index pattern:
 . Select the pattern you want to set as the default in the Index Patterns list.
 . Click the pattern's *Favorite* button.
 
-NOTE: You can also manually set the default index pattern in <<advanced-settings,advanced settings>>.
+NOTE: You can also manually set the default index pattern in <<advanced_settings,advanced settings>>.
 
 [float]
 [[reload-fields]]
@@ -167,9 +167,9 @@ Kibi has https://www.elastic.co/blog/kibana-4-1-field-formatters[field formatter
 
 String fields support the `String` and `Url` formatters.
 
-include::string-formatter.asciidoc[]
+include::string_formatter.asciidoc[]
 
-include::url-formatter.asciidoc[]
+include::url_formatter.asciidoc[]
 
 ==== Date Field Formatters
 
@@ -178,25 +178,25 @@ Date fields support the `Date`, `Url`, and `String` formatters.
 The `Date` formatter enables you to choose the display format of date stamps using the http://moment.js[moment.js]
 standard format definitions.
 
-include::string-formatter.asciidoc[]
+include::string_formatter.asciidoc[]
 
-include::url-formatter.asciidoc[]
+include::url_formatter.asciidoc[]
 
 ==== Geographic Point Field Formatters
 
 Geographic point fields support the `String` formatter.
 
-include::string-formatter.asciidoc[]
+include::string_formatter.asciidoc[]
 
 ==== Numeric Field Formatters
 
 Numeric fields support the `Url`, `String`, `Bytes`, `Number`, `Percentage`, and `Color` formatters.
 
-include::string-formatter.asciidoc[]
+include::string_formatter.asciidoc[]
 
-include::url-formatter.asciidoc[]
+include::url_formatter.asciidoc[]
 
-include::color-formatter.asciidoc[]
+include::color_formatter.asciidoc[]
 
 The `Bytes`, `Number`, and `Percentage` formatters enable you to choose the display formats of numbers in this field using
 the https://adamwdraper.github.io/Numeral-js/[numeral.js] standard format definitions.
@@ -266,7 +266,7 @@ To delete a scripted field:
 === Source Filtering
 
 Some index fields are useful for filtering or aggregation purposes,
-but are not used in visualizations like the <<enhanced-search-results>>.
+but are not used in visualizations like the <<enhanced_search_results>>.
 
 In addition, they can negatively impact on the performance of the application
 if they contain large amounts of data, creating additional network traffic.
@@ -277,7 +277,7 @@ allows to control which fields are included in the response.
 Source filtering can be configured in the index pattern page by clicking on
 the _Retrieved fields_ tab.
 
-image::images/source-filtering/index-view.png["Index view",align="center"]
+image::images/source_filtering/index_view.png["Index view",align="center"]
 
 Any visualisation based on the index pattern will receive a filtered response.
 
@@ -290,7 +290,7 @@ explained in the https://www.elastic.co/guide/en/elasticsearch/reference/master/
 The screenshot below displays a filtering configuration that excludes the
 `_snippet_` field from the `_source`.
 
-image::images/source-filtering/config.png["Source filtering configuration",align="center"]
+image::images/source_filtering/config.png["Source filtering configuration",align="center"]
 
 The column _retrieved_ in the _Fields_ tab specifies if the values associated
 with a field should be retrieved or not according to the filtering rules.
@@ -312,14 +312,14 @@ A relationship is defined as a **join** operation between two indices with the f
 
 The image below displays a graph of four index patterns, where three relationships have defined. You can add a new relationship by clicking on the "_Add relation_" button.
 
-image::images/relations-settings/indices-settings.png["Graph of Index Patterns",align="center"]
+image::images/relations_settings/indices_settings.png["Graph of Index Patterns",align="center"]
 
-A relation is also indicated on the <<kbn-settings-indices,Indices>> tab thanks to the icon image:images/relations-settings/index-relation-icon.png["Index relation icon"].
+A relation is also indicated on the <<kbn-settings-indices,Indices>> tab thanks to the icon image:images/relations_settings/index_relation_icon.png["Index relation icon"].
 If you hover the mouse over it, a tooltip message is displayed indicating the index pattern and field that field is joined with.
 
 For example, in the image below, that icon is displayed next to the field "id" of the "investor" index, which is join with the field "investorid" of the "investment" index.
 
-image::images/relations-settings/investor-index.png["Investor Index",align="center"]
+image::images/relations_settings/investor_index.png["Investor Index",align="center"]
 
 ===== Advanced settings for index relations [Enterprise Edition only]
 
@@ -328,11 +328,11 @@ However, for scenarios involving very large joins or when precision is critical,
 it is necessary to manually specify the settings.
 One can do it by clicking on the button marked below.
 
-image::images/relations-settings/indices-settings-advanced-switch.png["Advanced index relation settings switch",align="center"]
+image::images/relations_settings/indices_settings_advanced_switch.png["Advanced index relation settings switch",align="center"]
 
 An additional settings panel will open
 
-image::images/relations-settings/indices-settings-advanced.png["Advanced index relation settings switch",align="center"]
+image::images/relations_settings/indices_settings_advanced.png["Advanced index relation settings switch",align="center"]
 
 On this panel, the user can manually configure the following parameters for each relation:
 
@@ -377,7 +377,7 @@ For example, the image below shows a graph of five dashboards:
 
 Such relationships between dashboards are defined on the right side of the panel, as shown in the image below.
 
-image::images/relations-settings/dashboards-settings.png["Graph of Dashboards",align="center"]
+image::images/relations_settings/dashboards_settings.png["Graph of Dashboards",align="center"]
 
 ===== Enabling Relations
 
@@ -390,29 +390,29 @@ In the previous image, the AC and CI relations between the dashboards Articles, 
 ==== Enabling Relational Panel
 
 By checking the "Enable relational panel" checkbox, the relationships that you defined between dashboards will be made effective while browsing.
-The relational panel can be opened by clicking on the icon image:images/relations-settings/relational-panel-icon.png["Relational panel icon"] in the Dashboard tab.
+The relational panel can be opened by clicking on the icon image:images/relations_settings/relational_panel_icon.png["Relational panel icon"] in the Dashboard tab.
 
-With relations between dashboards enabled in the previous example, you will see the "relational" filter image:images/relations-settings/relational-filter.png["Relational filter"] displayed on the dashboards Articles, Companies, and Investments.
+With relations between dashboards enabled in the previous example, you will see the "relational" filter image:images/relations_settings/relational_filter.png["Relational filter"] displayed on the dashboards Articles, Companies, and Investments.
 
 
 [[kibi-settings-datasources]]
 === Datasources
 
-For an overview of datasources, please read the <<external-datasources>>
+For an overview of datasources, please read the <<external_datasources>>
 chapter.
 
 
-[[kibi-settings-queries]]
+[[kibi-settings_queries]]
 === Queries
 
-For an overview of queries, please read the <<external-datasources>>
+For an overview of queries, please read the <<external_datasources>>
 chapter.
 
 
 [[kibi-settings-templates]]
 === Query Templates
 
-For an overview of query templates, please read the <<external-datasources>>
+For an overview of query templates, please read the <<external_datasources>>
 chapter.
 
 
@@ -434,7 +434,7 @@ You can set the following parameters for a dashboard group:
 either as a PNG image or a CSS font class; Kibi includes the
 https://fortawesome.github.io/Font-Awesome/[Font Awesome] toolkit.
 
-[[advanced-settings]]
+[[advanced_settings]]
 === Advanced
 The Advanced Settings page enables you to directly edit settings that control
 the behavior of the Kibi application. For example, you can change the format
@@ -665,7 +665,7 @@ you'll need to update your `kibi.yml` file. You can also enable SSL and set a va
 
 include::kibi_yml.asciidoc[]
 
-External datasource configuration is documented in the <<external-datasources>> chapter.
+External datasource configuration is documented in the <<external_datasources>> chapter.
 
 deprecated[0.3, The names of several Kibi server properties changed in the 0.3 release of Kibana. The previous names remain as functional aliases, but are now deprecated and will be removed in a future release of Kibi]
 

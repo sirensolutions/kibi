@@ -66,7 +66,10 @@ TinkerPop3Query.prototype.fetchResults = function (options, onlyIds, idVariableN
       }
     }
 
-    return self.queryHelper.fetchDocuments('config').then(function (configHits) {
+    return Promise.all([self.queryHelper.fetchDocuments('config'),
+    self.queryHelper.fetchDocuments('index-pattern')]).then(function (results) {
+      let configHits = results[0];
+      let indexPatternHits = results[1];
       var kibiRelations = null;
       var serverVersion = self.server.config().get('pkg').version;
       var configDocs = [];
@@ -88,6 +91,43 @@ TinkerPop3Query.prototype.fetchResults = function (options, onlyIds, idVariableN
         return Promise.reject(new Error(msg));
       }
 
+      let indexPatterns = {};
+
+      _.each(indexPatternHits.hits.hits, function (hit) {
+        let indexPattern = {
+          includedFields : [],
+          excludedFields : []
+        };
+
+        if (hit._source.sourceFiltering) {
+          let sourceFiltering = JSON.parse(hit._source.sourceFiltering);
+          let exFields = sourceFiltering.kibi_graph_browser.exclude;
+          let inFields = sourceFiltering.kibi_graph_browser.include;
+
+          if (exFields) {
+            if (exFields.constructor === Array) {
+              _.each(exFields, function (field) {
+                indexPattern.excludedFields.push(field);
+              });
+            } else {
+              indexPattern.excludedFields.push(exFields);
+            }
+          }
+
+          if (inFields) {
+            if (inFields.constructor === Array) {
+              _.each(inFields, function (field) {
+                indexPattern.includedFields.push(field);
+              });
+            } else {
+              indexPattern.includedFields.push(inFields);
+            }
+          }
+        }
+
+        indexPatterns[hit._source.title] = indexPattern;
+      });
+
       var kibiRelationsJson = JSON.parse(kibiRelations);
 
       const parts = uri.trim().split('/');
@@ -106,7 +146,8 @@ TinkerPop3Query.prototype.fetchResults = function (options, onlyIds, idVariableN
           query: query,
           relationsIndices: kibiRelationsJson.relationsIndices,
           credentials: options.credentials,
-          entities: [ { id, indexName, indexType } ]
+          entities: [ { id, indexName, indexType } ],
+          indexPatterns: indexPatterns,
         },
         timeout: timeout
       };

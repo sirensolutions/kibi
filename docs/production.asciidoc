@@ -5,8 +5,8 @@ Please read the https://www.elastic.co/guide/en/kibana/4.4/production.html[Kiban
 section in the Kibana manual for production best practices, especially
 the *Controlling access* section.
 
-NOTE: From v0.3.3 Kibi Enterprise Edition comes with full Shield integration.
-Shield provides fine grained user access control at the index, document and field levels.  
+NOTE: From v4.4.1 Kibi Enterprise Edition comes with full Shield integration.
+Shield provides fine grained user access control at the index, document and field levels.
 
 Make sure to set the configuration file as readable only to the user running
 the Kibi process as it may contain credentials in the database connection

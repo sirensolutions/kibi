@@ -1,7 +1,7 @@
 [[releasenotes]]
 == Kibi Release Notes
 
-=== Kibi 0.3.3 Release Notes
+=== Kibi 4.4.1 Release Notes
 
 
 * Various bug fixes and stability improvements.

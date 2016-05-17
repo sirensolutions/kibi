@@ -101,8 +101,20 @@ TinkerPop3Query.prototype.fetchResults = function (options, onlyIds, idVariableN
 
         if (hit._source && hit._source.sourceFiltering) {
           let sourceFiltering = JSON.parse(hit._source.sourceFiltering);
-          let exFields = sourceFiltering.kibi_graph_browser.exclude;
-          let inFields = sourceFiltering.kibi_graph_browser.include;
+          let exFields;
+          let inFields;
+
+          if (sourceFiltering.kibi_graph_browser && sourceFiltering.kibi_graph_browser.exclude) {
+            exFields = sourceFiltering.kibi_graph_browser.exclude;
+          } else if (sourceFiltering.all && sourceFiltering.all.exclude) {
+            exFields = sourceFiltering.all.exclude;
+          }
+
+          if (sourceFiltering.kibi_graph_browser && sourceFiltering.kibi_graph_browser.include) {
+            inFields = sourceFiltering.kibi_graph_browser.include;
+          } else if (sourceFiltering.all && sourceFiltering.all.include) {
+            inFields = sourceFiltering.all.include;
+          }
 
           if (exFields) {
             if (exFields.constructor === Array) {
@@ -123,6 +135,7 @@ TinkerPop3Query.prototype.fetchResults = function (options, onlyIds, idVariableN
               indexPattern.includedFields.push(inFields);
             }
           }
+
           indexPatterns[hit._source.title] = indexPattern;
         }
 

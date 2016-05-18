@@ -68,12 +68,13 @@ QueryEngine.prototype._init = function (cacheSize = 500, enableCache = true, cac
 
     elasticsearchStatus.on('change', function (prev, prevmsg) {
       if (elasticsearchStatus.state === 'green') {
-        self.loadPredefinedData()
-        .then(self.setupJDBC())
-        .then(self.reloadQueries())
-        .then(() => {
-          self.initialized = true;
-          fulfill({ message: 'QueryEngine initialized successfully.' });
+        self.loadPredefinedData().then(function () {
+          return self.setupJDBC().then(function () {
+            return self.reloadQueries().then(function () {
+              self.initialized = true;
+              fulfill({ message: 'QueryEngine initialized successfully.' });
+            });
+          });
         }).catch(reject);
       }
     });
@@ -91,7 +92,9 @@ QueryEngine.prototype.loadPredefinedData = function () {
           if (self.config.get('pkg.kibiEnterpriseEnabled')) {
             return self._loadDatasources().then(function () {
               return self._loadQueries().then(function () {
-                fulfill(true);
+                return self._refreshKibiIndex().then(function () {
+                  fulfill(true);
+                });
               });
             });
           } else {
@@ -105,7 +108,6 @@ QueryEngine.prototype.loadPredefinedData = function () {
     };
 
     tryToLoad();
-
   });
 };
 
@@ -140,6 +142,14 @@ QueryEngine.prototype._loadTemplatesMapping = function () {
     index: self.config.get('kibana.index'),
     type: 'template',
     body: mapping
+  });
+};
+
+QueryEngine.prototype._refreshKibiIndex = function () {
+  var self = this;
+  return self.client.indices.refresh({
+    index: self.config.get('kibana.index'),
+    force: true
   });
 };
 
@@ -369,8 +379,9 @@ QueryEngine.prototype.reloadQueries = function () {
     var queryDefinitions = [];
     var datasourcesIds = [];
     if (resp.hits && resp.hits.hits && resp.hits.hits.length > 0) {
+      self.log.info('Reloading ' + resp.hits.hits.length + ' queries into memory:');
       _.each(resp.hits.hits, function (hit) {
-
+        self.log.info('Reloading [' + hit._id + ']');
         var queryDefinition = {
           id:                hit._id,
           label:             hit._source.title,
@@ -441,6 +452,7 @@ QueryEngine.prototype.reloadQueries = function () {
             queryDef.datasource = datasource._source;
             return true;
           }
+          self.log.error('Query [' + queryDef.id + '] not loaded because datasource [' + queryDef.datasourceId + '] not found');
           return false;
         }).map(function (queryDef) {
           // now once we have query definitions and datasources load queries

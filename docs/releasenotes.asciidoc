@@ -1,13 +1,13 @@
 [[releasenotes]]
 == Kibi Release Notes
 
-=== Kibi 0.3.3 Release Notes
+=== Kibi 4.4.1 Release Notes
 
 
 * Various bug fixes and stability improvements.
 * Various error handling improvements
 * Caching can now be enabled/disabled per datasource from UI configuration
-* New version of Kibi Timeline plugin 0.1.3
+* New version of Kibi Timeline plugin 0.1.4
 * Improved kibi.bat file for Windows
 * Improved documentation
 * Improved quality of the demo dataset

@@ -218,7 +218,7 @@ _Company Info_ visualization; by clicking on the _(show)_ links you can
 toggle the list of companies in the same domain and competitors; the data in
 the tables is fetched from queries on the SQLite database, using the selected
 company ID as a parameter. The queries are rendered using
-<<templated-query-viewer, customizable templates>>, which will be introduced
+<<kibi-query-viewer, customizable templates>>, which will be introduced
 later.
 
 The selected entity appears as a purple box on the right of the filter bar;
@@ -310,21 +310,21 @@ NOTE: for additional documentation about this visualization, please read the
 [float]
 === Query templates
 
-_Company Info_, which is an instance of a Templated query viewer visualization,
+_Company Info_, which is an instance of a Kibi query viewer visualization,
 displays the results of three SQL queries by rendering their results through
 templates; the queries take the selected entity ID as an input, thus the
 associated templates will be displayed only when an entity is selected.
 
-image::images/getting-started/templated-query-viewer.png["Templated query viewer example",align="center"]
+image::images/getting-started/templated-query-viewer.png["Kibi query viewer example",align="center"]
 
 The association between query and templates can be set in the visualization
 configuration:
 
-image::images/getting-started/templated-query-viewer-config.png["Templated query viewer configuration",align="center"]
+image::images/getting-started/templated-query-viewer-config.png["Kibi query viewer configuration",align="center"]
 
 Query templates can be managed by clicking on the _Settings_ tab, then on the
 _Query templates_ tab.
 
 NOTE: you can find the documentation about templates in the
 <<external-datasources>> chapter; the visualization is documented in the
-<<templated-query-viewer>> chapter.
+<<kibi-query-viewer>> chapter.

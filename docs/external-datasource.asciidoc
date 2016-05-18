@@ -60,9 +60,10 @@ A Kibi restart is required to apply changes to kibi.yml configuration file.
 
 *SQL JDBC, SPARQL JDBC*
 
-* drivername - e.g.: "org.postgresql.Driver"
-* libpath - absolute path to the driver jar file e.g.: "/otp/dbdrivers/postgresql-9.4-1201.jdbc41.jar"
 * connection_string - JDBC connection string without username and password e.g.: "jdbc:postgresql://localhost/mydatabase"
+* libpath - path to folder with your jars  e.g.: "/otp/dbdrivers"
+* drivername - e.g.: "org.postgresql.Driver"
+* libs - comma separated list of jars (they can be just filenames then it is asumend they are in libpath folder or they can have absolute paths to jars)
 
 *Kibi Tinkerpop3 [Enterprise Edition only]*
 
@@ -278,7 +279,7 @@ Once you've configured query templates and queries, you can use them
 in the following visualizations:
 
 - The <<enhanced-search-results>> visualization
-- The <<templated-query-viewer>> visualization
+- The <<kibi-query-viewer>> visualization
 
 It is also possible to use queries as aggregations as explained below.
 

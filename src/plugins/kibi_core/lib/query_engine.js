@@ -106,7 +106,6 @@ QueryEngine.prototype.loadPredefinedData = function () {
     };
 
     tryToLoad();
-
   });
 };
 

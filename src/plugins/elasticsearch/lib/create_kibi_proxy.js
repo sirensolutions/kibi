@@ -67,7 +67,11 @@ module.exports = function createProxy(server, method, route, config) {
                 });
               }).catch((err) => {
                 var errStr = err.toString();
-                if (typeof err === 'object') {
+                if (typeof err === 'object' && Object.keys(err).indexOf('stack') === -1) {
+                  if (errStr === 'Error: Invalid key length.') {
+                    errStr = 'Invalid key length - check the encryption key in configuration file';
+                  }
+                } else {
                   errStr = JSON.stringify(err, null, ' ');
                 }
                 server.log(['error','create_proxy'], 'Something went wrong while modifying request: ' + errStr);

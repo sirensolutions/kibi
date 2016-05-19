@@ -1,6 +1,10 @@
 [[releasenotes]]
 == Kibi Release Notes
 
+=== Kibi 4.4.2 and Kibana 4.4.2 Release Notes
+
+TODO:
+
 === Kibi 4.4.1 Release Notes
 
 

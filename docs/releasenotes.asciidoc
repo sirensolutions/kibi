@@ -5,6 +5,16 @@
 
 TODO:
 
+Below are the issues relevant to Kibana.
+
+* http://github.com/elastic/kibana/pull/6420[Issue 6420]: Bump node to v4.3.2
+* http://github.com/elastic/kibana/pull/6353[Issue 6353: Add basePath to short URLs
+* http://github.com/elastic/kibana/pull/6228[Issue 6228]: HTML unsafe characters in field names no longer break Kibana
+* http://github.com/elastic/kibana/pull/6083[Issue 6083]: Plugin installer support for .tgz file types
+* http://github.com/elastic/kibana/pull/5971[Issue 5971]: Fix active search source hover background issue
+* http://github.com/elastic/kibana/pull/5942[Issue 5942]: Fix for save button disabled when opening spy panel
+* http://github.com/elastic/kibana/pull/6133[Issue 6133] and http://github.com/elastic/kibana/pull/6103[6103]]: Distro packages now have a description, vendor, maintainer, url, license and priority metadata
+
 === Kibi 4.4.1 Release Notes
 
 

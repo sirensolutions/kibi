@@ -17,6 +17,7 @@
   ],
   "private": false,
   "version": "4.4.1",
+  "kibi_kibana_announcement": "https://www.elastic.co/blog/kibana-4-4-2-and-4-3-3-and-4-1-6",
   "kibi_version": "4.4.2-SNAPSHOT",
   "kibi_enterprise_enabled": false,
   "build": {

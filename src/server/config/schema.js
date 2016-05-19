@@ -11,6 +11,7 @@ module.exports = () => Joi.object({
   pkg: Joi.object({
     version: Joi.string().default(Joi.ref('$version')),
     kibiVersion: Joi.string().default(Joi.ref('$kibiVersion')), // kibi: added to manage kibi version
+    kibiKibanaAnnouncement: Joi.string().default(Joi.ref('$kibiKibanaAnnouncement')), // kibi: added by kibi
     kibiEnterpriseEnabled: Joi.boolean().default(Joi.ref('$kibiEnterpriseEnabled')), // kibi: added to manage kibi version
     buildNum: Joi.number().default(Joi.ref('$buildNum')),
     buildSha: Joi.string().default(Joi.ref('$buildSha')),

@@ -10,11 +10,12 @@ uiRoutes
 });
 
 uiModules.get('apps/settings')
-.controller('settingsAbout', function ($scope, kbnVersion, kibiVersion, buildNum, buildSha) {
+.controller('settingsAbout', function ($scope, kbnVersion, kibiVersion, kibiKibanaAnnouncement, buildNum, buildSha) {
   $scope.kbnVersion = kbnVersion;
-  $scope.kibiVersion = kibiVersion; // kibi: added to manage kibi version
   $scope.buildNum = buildNum;
   $scope.buildSha = buildSha;
+  $scope.kibiVersion = kibiVersion; // kibi: added to manage kibi version
+  $scope.kibiKibanaAnnouncement = kibiKibanaAnnouncement; // kibi: added by kibi
 });
 
 registry.register(_.constant({

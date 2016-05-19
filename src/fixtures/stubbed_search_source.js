@@ -19,8 +19,14 @@ define(function (require) {
             throw new Error('Param "' + param + '" is not implemented in the stubbed search source');
         }
       },
-      crankResults: function () {
-        deferedResult.resolve(searchResponse);
+      crankResults: function (mySearchResponse) {
+        // kibi: added mySearchResponse to be able to test our own results
+        if (mySearchResponse) {
+          deferedResult.resolve(mySearchResponse);
+        } else {
+          deferedResult.resolve(searchResponse);
+        }
+        // kibi: end
         deferedResult = $q.defer();
       },
       onResults: function () {

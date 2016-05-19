@@ -23,6 +23,4 @@ selenium
 .babelcache.json
 *.swp
 *.swo
-
 /crunchbase.db
-

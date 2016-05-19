@@ -11,7 +11,7 @@ define(function (require) {
       restrict: 'E',
       require: '^dashboardApp', // must inherit from the dashboardApp
       link: function ($scope, $el) {
-        var notify = createNotifier();
+        var notify = createNotifier(); //kibi: changed by kibi
         var $container = $el;
         $el = $('<ul>').appendTo($container);
 

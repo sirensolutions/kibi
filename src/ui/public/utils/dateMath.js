@@ -114,7 +114,6 @@ define(function (require) {
   }
   // kibi: end
 
-
   return {
     parse: parse,
     parseWithPrecision: parseWithPrecision,

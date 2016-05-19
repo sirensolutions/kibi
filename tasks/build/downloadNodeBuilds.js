@@ -82,4 +82,3 @@ module.exports = function (grunt) {
     .nodeify(this.async());
   });
 };
-

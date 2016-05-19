@@ -87,3 +87,4 @@ Plugin System Changes
 * http://github.com/elastic/kibana/pull/5704[Pull Request 5704]: Removes Github shortcuts from the plugin installer.
 * http://github.com/elastic/kibana/issues/5661[Issue 5661]: Fixes the plugin optimization path.
 * http://github.com/elastic/kibana/pull/5538[Pull Request 5538]: Apps can use empty export types.
+

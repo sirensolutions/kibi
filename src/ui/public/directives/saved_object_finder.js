@@ -5,6 +5,7 @@ define(function (require) {
   var keymap = require('ui/utils/key_map');
 
   require('ui/kibi/styles/saved_object_finder.less');
+
   module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Private) {
 
     var services = Private(require('ui/saved_objects/saved_object_registry')).byLoaderPropertiesName;

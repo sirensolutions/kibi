@@ -12,7 +12,7 @@ define(function (require) {
     title: 'visualizations'
   });
 
-  app.service('savedVisualizations', function (Promise, es, kbnIndex, SavedVis, Private, kbnUrl, createNotifier) {
+  app.service('savedVisualizations', function (Promise, es, kbnIndex, SavedVis, Private, createNotifier, kbnUrl) {
     var visTypes = Private(require('ui/registry/vis_types'));
 
     var scanner = new Scanner(es, {

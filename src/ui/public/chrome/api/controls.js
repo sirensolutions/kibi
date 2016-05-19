@@ -30,7 +30,6 @@ module.exports = function (chrome, internals) {
     return internals.visible;
   };
 
-
   // kibi: added to be able to share dashboards with visible kibi-nav-bar
   var kibiNavbarVisibleDefault = true;
   internals.setKibiNavbarVisibleDefault = (_def1) => kibiNavbarVisibleDefault = Boolean(_def1);
@@ -39,6 +38,5 @@ module.exports = function (chrome, internals) {
     return kibiNavbarVisibleDefault;
   };
   // kibi: added
-
 
 };

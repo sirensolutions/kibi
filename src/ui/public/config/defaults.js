@@ -239,7 +239,6 @@ define(function (require) {
         description: 'Set duration of cookie session (in seconds)'
       }
       // kibi: end
-
     };
   };
 });

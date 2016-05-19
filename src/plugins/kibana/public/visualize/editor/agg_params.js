@@ -3,7 +3,7 @@ define(function (require) {
 
   require('ui/modules')
   .get('app/visualize')
-  .directive('visEditorAggParams', function ($compile, $parse, Private, $filter, createNotifier) {
+  .directive('visEditorAggParams', function ($compile, $parse, Private, createNotifier, $filter) {
     var _ = require('lodash');
     var $ = require('jquery');
     var aggTypes = Private(require('ui/agg_types/index'));

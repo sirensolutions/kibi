@@ -6,8 +6,9 @@ module.exports = function mapUri(server, prefix, coordinateAction) {
     var path = request.path.replace('/elasticsearch', '');
     var url = config.get('elasticsearch.url');
     if (path) {
-      if (/\/$/.test(url)) url = url.substring(0, url.length - 1);
-
+      if (/\/$/.test(url)) {
+        url = url.substring(0, url.length - 1);
+      }
       // kibi: replace _search with _msearch to use siren-join when available
       const plugins = config.get('elasticsearch.plugins');
       if (coordinateAction && plugins && plugins.indexOf('siren-join') > -1) {

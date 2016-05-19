@@ -1,5 +1,5 @@
 define(function (require) {
-  return function SearchLooperService(Private, Promise, $rootScope, createNotifier) {
+  return function SearchLooperService(Private, Promise, createNotifier, $rootScope) {
     var fetch = Private(require('ui/courier/fetch/fetch'));
     var searchStrategy = Private(require('ui/courier/fetch/strategy/search'));
     var requestQueue = Private(require('ui/courier/_request_queue'));

@@ -63,6 +63,13 @@ Please make sure you have signed the [Contributor License Agreement](http://sire
 The `config/kibi.yml` file stores user configuration directives. Since this file is checked into source control, however, developer preferences can't be saved without the risk of accidentally committing the modified version. To make customizing configuration easier during development, the Kibi CLI will look for a `config/kibi.dev.yml` file if run with the `--dev` flag. This file behaves just like the non-dev version and accepts any of the [standard settings](https://www.elastic.co/guide/en/kibana/master/kibana-server-properties.html).
 
 The `config/kibi.dev.yml` file is very commonly used to store some opt-in/**unsafe** optimizer tweaks which can significantly increase build performance. Below is a commonly used `config/kibi.dev.yml` file, but additional options can be found [in #4611](https://github.com/elastic/kibana/pull/4611#issue-99706918).
+=======
+#### `config/kibana.dev.yml`
+
+The `config/kibana.yml` file stores user configuration directives. Since this file is checked into source control, however, developer preferences can't be saved without the risk of accidentally committing the modified version. To make customizing configuration easier during development, the Kibana CLI will look for a `config/kibana.dev.yml` file if run with the `--dev` flag. This file behaves just like the non-dev version and accepts any of the [standard settings](https://www.elastic.co/guide/en/kibana/master/kibana-server-properties.html).
+
+The `config/kibana.dev.yml` file is very commonly used to store some opt-in/**unsafe** optimizer tweaks which can significantly increase build performance. Below is a commonly used `config/kibana.dev.yml` file, but additional options can be found [in #4611](https://github.com/elastic/kibana/pull/4611#issue-99706918).
+>>>>>>> upstream/4.4
 
 ```yaml
 optimize:
@@ -91,6 +98,7 @@ Another tool we use for enforcing consistent coding style is Editorconfig, which
 To include a plugin in the build edit archives variable in  
 ```tasks/kibi_public_plugins.js```   
 
+Another tool we use for enforcing consistent coding style is Editorconfig, which can be set up by installing a plugin in your editor that dynamically updates its configuration. Take a look at the [Editorconfig](http://editorconfig.org/#download) site to find a plugin for your editor, and browse our [`.editorconfig`](https://github.com/elastic/kibana/blob/master/.editorconfig) file to see what config rules we set up.
 
 ### Testing and building
 
@@ -171,7 +179,7 @@ Once you've got the services running, execute the following:
 #### General notes:
 
 - Using Page Objects pattern (https://theintern.github.io/intern/#writing-functional-test)
-- At least the initial tests for the Settings, Discover, and Visualize tabs all depend on a very specific set of logstash-type data (generated with makelogs).  Since that is a static set of data, all the Discover and Visualize tests use a specific Absolute time range.  This gaurantees the same results each run.
+- At least the initial tests for the Settings, Discover, and Visualize tabs all depend on a very specific set of logstash-type data (generated with makelogs).  Since that is a static set of data, all the Discover and Visualize tests use a specific Absolute time range.  This guarantees the same results each run.
 - These tests have been developed and tested with Chrome and Firefox browser.  In theory, they should work on all browsers (that's the benefit of Intern using Leadfoot).
 - These tests should also work with an external testing service like https://saucelabs.com/ or https://www.browserstack.com/ but that has not been tested.
 

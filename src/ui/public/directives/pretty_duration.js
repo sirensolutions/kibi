@@ -68,6 +68,7 @@ define(function (require) {
                 display[time] = 'now';
               } else {
                 var tryParse = dateMath.parseWithPrecision($scope[time], time === 'to' ? true : false, $scope.kibiTimePrecision);
+
                 display[time] = moment.isMoment(tryParse) ? '~ ' + tryParse.fromNow() : $scope[time];
               }
             }
@@ -77,6 +78,7 @@ define(function (require) {
             separator: ' to ',
             to: display.to
           }));
+
         };
 
         $scope.$watch('from', stringify);

@@ -22,8 +22,9 @@ define(function (require) {
       },
       controllerAs: 'typeahead',
 
-      controller: function ($rootScope, $scope, $element, PersistedLog, config) {
+      controller: function ($rootScope, $scope, $element, $timeout, PersistedLog, config) {
         var self = this;
+        self.form = $element.closest('form');
         self.query = '';
         self.hidden = true;
         self.focused = false;
@@ -114,6 +115,15 @@ define(function (require) {
             // kibi: https://github.com/sirensolutions/kibi-internal/commit/0e4abf96933de5e854bc2534e8a71e2c6023d9f3
             // corrected click logic for typeahead
             $rootScope.$emit('kibi:dashboard:invoke-method', 'filterResults');
+            $timeout(function () {
+              self.submitForm();
+            });
+          }
+        };
+
+        self.submitForm = function () {
+          if (self.form.length) {
+            self.form.submit();
           }
         };
 

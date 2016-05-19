@@ -14,7 +14,7 @@ define(function (require) {
 
   var fatalSplashScreen = require('ui/notify/partials/fatal_splash_screen.html');
 
-  var awesomeDemoMode = false;
+  var awesomeDemoMode = false; // kibi: added by kibi
 
   var log = _.bindKey(console, 'log');
 

@@ -3,7 +3,7 @@ define(function (require) {
   require('ui/elastic_textarea');
 
   require('ui/modules').get('apps/settings')
-  .directive('advancedRow', function (config, Private, createNotifier) {
+  .directive('advancedRow', function (config, createNotifier, Private) {
     return {
       restrict: 'A',
       replace: true,

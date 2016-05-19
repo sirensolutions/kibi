@@ -3,7 +3,7 @@ define(function (require) {
   require('ui/paginated_table');
 
   require('ui/modules').get('apps/settings')
-  .directive('scriptedFields', function (kbnUrl, $filter, createNotifier) {
+  .directive('scriptedFields', function (kbnUrl, createNotifier, $filter) {
     var rowScopes = []; // track row scopes, so they can be destroyed as needed
     var popularityHtml = require('plugins/kibana/settings/sections/indices/_field_popularity.html');
     var controlsHtml = require('plugins/kibana/settings/sections/indices/_field_controls.html');

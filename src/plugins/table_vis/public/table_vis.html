@@ -1,5 +1,4 @@
 <div ng-controller="KbnTableVisController" class="table-vis">
-
   <div ng-if="!hasSomeRows && hasSomeRows !== null" class="table-vis-error">
     <h2 aria-hidden="true"><i aria-hidden="true" class="fa fa-meh-o"></i></h2>
     <h4>No results found</h4>
@@ -9,8 +8,8 @@
     <kbn-agg-table-group
       group="tableGroups"
       export-title="vis.title"
-      query-field-name="vis.params.queryFieldName"
-      per-page="vis.params.perPage">
+      per-page="vis.params.perPage"
+      query-field-name="vis.params.queryFieldName">
     </kbn-agg-table-group>
   </div>
 </div>

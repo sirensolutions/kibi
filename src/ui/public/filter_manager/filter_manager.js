@@ -23,8 +23,8 @@ define(function (require) {
             return filter.exists.field === value;
           }
 
-          // kibi: added because clicking on a cell of the data table with a filter aggregation
-          // creates a filter with query_string
+          // kibi: added "&& filter.query.match "because clicking on a cell of the data table
+          // with a filter aggregation creates a filter with query_string
           if (filter.query && filter.query.match) {
             return filter.query.match[fieldName] && filter.query.match[fieldName].query === value;
           }

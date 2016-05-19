@@ -27,6 +27,7 @@ module.exports = function (kibana) {
           'plugins/kibana/visualize',
           'plugins/kibana/dashboard',
           'plugins/kibana/settings',
+          'plugins/kibana/settings/sections',
           'plugins/kibana/doc',
           'ui/vislib',
           'ui/agg_response',

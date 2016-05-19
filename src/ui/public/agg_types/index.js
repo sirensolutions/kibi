@@ -25,8 +25,7 @@ define(function (require) {
         Private(require('ui/agg_types/buckets/filters')),
         Private(require('ui/agg_types/buckets/significant_terms')),
         Private(require('ui/agg_types/buckets/geo_hash')),
-        // kibi: external query aggregation
-        Private(require('ui/kibi/agg_types/buckets/external_query_terms_filter'))
+        Private(require('ui/kibi/agg_types/buckets/external_query_terms_filter')) // kibi: external query aggregation
       ]
     };
 

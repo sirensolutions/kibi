@@ -157,4 +157,5 @@ describe('Filter Manager', function () {
     expect(appState.filters[0].query_string).to.be.ok();
     expect(appState.filters[1].query).to.be.ok();
   });
+
 });

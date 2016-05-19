@@ -132,7 +132,6 @@ define(function (require) {
         // kibi: end
 
 
-
         $scope.$watchCollection('state.options', function (newVal, oldVal) {
           if (!angular.equals(newVal, oldVal)) $state.save();
         });
@@ -237,9 +236,7 @@ define(function (require) {
             $scope.configTemplate.close('save');
             if (id) {
               notify.info('Saved Dashboard as "' + dash.title + '"');
-
               $rootScope.$emit('kibi:dashboard:changed', id); // kibi: added by kibi
-
               if (dash.id !== $routeParams.id) {
                 kbnUrl.change('/dashboard/{{id}}', {id: dash.id});
               }

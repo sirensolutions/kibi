@@ -285,7 +285,7 @@ define(function (require) {
                 _.noop // if the user doesn't overwrite record, just swallow the error
               );
             } else {
-              notify.error(err);
+              notify.error(err); // kibi: added here so the errors are shown by notifier
             }
             return Promise.reject(err);
           });

@@ -67,9 +67,10 @@ module.exports = function createProxy(server, method, route, config) {
                 });
               }).catch((err) => {
                 var errStr = err.toString();
-                if (typeof err === 'object' && Object.keys(err).indexOf('stack') === -1) {
+                if (typeof err === 'object' && err.stack) {
                   if (errStr === 'Error: Invalid key length.') {
-                    errStr = 'Invalid key length - check the encryption key in configuration file';
+                    errStr = 'Invalid key length - check the encryption key in kibi.yml';
+                    err.message = errStr;
                   }
                 } else {
                   errStr = JSON.stringify(err, null, ' ');

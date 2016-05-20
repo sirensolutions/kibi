@@ -17,9 +17,9 @@ module.exports = function (grunt) {
 
     let nodeUrl;
     if (name === 'windows') {
-      nodeUrl = `${baseUri}/node.exe`;
+      nodeUrl = `${baseUri}/win-x86/node.exe`;
     } else if (name === 'windows64') {
-      nodeUrl = `${baseUri}/x64/node.exe`;
+      nodeUrl = `${baseUri}/win-x64/node.exe`;
     } else {
       nodeUrl = `${baseUri}/node-v${nodeVersion}-${name}.tar.gz`;
     }

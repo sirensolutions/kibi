@@ -455,9 +455,7 @@ To set advanced settings:
 
 You can set the default options used when performing a {elastic-ref}query-dsl-query-string-query.html[query_string] query thanks to the advanced option _query:queryString:options_.
 
-[float]
-=======
-include::advanced-settings.asciidoc[]
+include::advanced_settings.asciidoc[]
 
 [[kibana-server-properties]]
 === Setting Kibana Server Properties
@@ -466,7 +464,7 @@ The Kibana server reads properties from the `kibana.yml` file on startup. The de
 on `localhost:5601`. To change the host or port number, or connect to Elasticsearch running on a different machine,
 you'll need to update your `kibana.yml` file. You can also enable SSL and set a variety of other options.
 
-include::kibana-yml.asciidoc[]
+include::kibana_yml.asciidoc[]
 
 deprecated[4.2, The names of several Kibana server properties changed in the 4.2 release of Kibana. The previous names remain as functional aliases, but are now deprecated and will be removed in a future release of Kibana]
 

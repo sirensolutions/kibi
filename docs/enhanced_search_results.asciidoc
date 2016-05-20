@@ -1,4 +1,4 @@
-[[enhanced-search-results]]
+[[enhanced_search_results]]
 === Enhanced search results
 
 Enhanced search results is a visualisation that shows the documents matched by
@@ -13,7 +13,7 @@ result is matched by a query on an external datasource. This is described in
 - it is possible to define click handlers on the cells in a column, e.g.
 to open the URL displayed in a cell. This is described in <<click-handlers>>.
 
-image::images/enhanced-search-results/config.png["Configuration view of the Enhanced search results table",align="center"]
+image::images/enhanced_search_results/config.png["Configuration view of the Enhanced search results table",align="center"]
 
 [float]
 [[relational-column]]
@@ -30,9 +30,9 @@ _Top 50 companies (HR count)_: if the value of the _label_ *index field* of a
 document matches the value of the _label_ variable in at least one record
 returned by the query, the name of the query will be displayed inside the cell.
 
-image::images/enhanced-search-results/relational-column-config.png["Relational column configuration",align="center"]
+image::images/enhanced_search_results/relational_column_config.png["Relational column configuration",align="center"]
 
-image::images/enhanced-search-results/relational-column-sample.png["Relational column example",align="center"]
+image::images/enhanced_search_results/relational_column_sample.png["Relational column example",align="center"]
 
 In order to configure the relational column, you must set the following
 parameters:
@@ -64,7 +64,7 @@ For example, the following configuration defines an handler that opens the
 URL stored in the field _homepage_url_ when clicking on the cell
 displaying the _label_ field.
 
-image::images/enhanced-search-results/click-follow-url.png["Follow URL on click",align="center"]
+image::images/enhanced_search_results/click_follow_url.png["Follow URL on click",align="center"]
 
 To configure a click handler, you must set the following parameters:
 
@@ -81,14 +81,14 @@ used to define the path of an URL on example.org.
 With this configuration, if the _id_ field is set to 11 the resulting URL
 will be _http://example.org/11_ .
 
-image::images/enhanced-search-results/click-follow-url_custom-format.png["Follow URL with a custom format on click",align="center"]
+image::images/enhanced_search_results/click_follow_url_custom_format.png["Follow URL with a custom format on click",align="center"]
 
 [[click-handlers-select-entity]]
 ==== Select an entity
 
 Select the _Select an entity_ action if you want to select an entity stored
 in an external datasource matching the selected Elasticsearch document;
-for more information about entity selection, please read the <<entity-selection>>
+for more information about entity selection, please read the <<entity_selection>>
 section.
 
 To configure an entity selection action you must set the following parameters:
@@ -113,7 +113,7 @@ will set the value of the _@PKVALUE@_ variable, while the value of the
 _@TABLE@_ variable will not bet set (because the query doesn't make use of
 the variable).
 
-image::images/enhanced-search-results/click-select-entity_sql.png["Configuration of an entity selection handler on a SQL datasource",align="center"]
+image::images/enhanced_search_results/click_select_entity_sql.png["Configuration of an entity selection handler on a SQL datasource",align="center"]
 
 ===== SPARQL
 
@@ -123,5 +123,4 @@ _URI format_ field.
 
 In the screenshot below, _id_ is chosen.
 
-image::images/enhanced-search-results/click-select-entity_sparql.png["Configuration of an entity selection handler on a SPARQL datasource",align="center"]
-
+image::images/enhanced_search_results/click_select_entity_sparql.png["Configuration of an entity selection handler on a SPARQL datasource",align="center"]

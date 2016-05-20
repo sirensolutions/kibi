@@ -3,7 +3,7 @@
 
 A metric visualization displays a single number for each aggregation you select:
 
-include::y-axis-aggs.asciidoc[]
+include::y_axis_aggs.asciidoc[]
 You can click the *Advanced* link to display more customization options:
 
 *JSON Input*:: A text field where you can add specific JSON-formatted properties to merge with the aggregation
@@ -23,4 +23,4 @@ Click the *Options* tab to change the font used to display the metrics.
 [[metric-viewing-detailed-information]]
 ==== Viewing Detailed Information
 
-include::visualization-raw-data.asciidoc[]
+include::visualization_raw_data.asciidoc[]

@@ -18,7 +18,7 @@ external datasources can also be used as aggregations in visualizations.
 
 In addition to standard Kibana visualizations, Kibi provides:
 
-- The <<relational-filter, Relational Filter>> visualization, which allows
+- The <<relational_filter, Relational Filter>> visualization, which allows
 to configure relations between fields in different indices and apply
 cross-dashboard filters (pivoting).
 
@@ -30,17 +30,17 @@ high frequency terms from the documents returned by an Elasticsearch query.
 - The <<timeline,Kibi Timeline>> visualization, which displays a timeline
 with multiple groups of data coming from different indices.
 
-- The <<radar-chart,Radar Chart>> visualization, which is a https://en.wikipedia.org/wiki/Radar_chart[graphical method] for displaying multivarate data.
+- The <<radar_chart,Radar Chart>> visualization, which is a https://en.wikipedia.org/wiki/Radar_chart[graphical method] for displaying multivarate data.
 with multiple groups of data coming from different indices.
 
-- The <<enhanced-search-results,Enhanced search results>> visualization, which
+- The <<enhanced_search_results,Enhanced search results>> visualization, which
 displays query results in a table.
 
-- The <<kibi-query-viewer,Kibi Query Viewer>>, which enables the
+- The <<kibi_query_viewer,Kibi Query Viewer>>, which enables the
 visualization of queries on external datasource through Jade or Handlebars
 templates.
 
-- The <<graph-browser,Kibi Graph Browser>>, which displays the currently
+- The <<graph_browser,Kibi Graph Browser>>, which displays the currently
 selected Elasticsearch documents as a node of a graph and allows the user to visually
 explore the connection between vertices.
 
@@ -56,13 +56,13 @@ Kibi is currently developed as a fork of Kibana {kibana-version}. The plugin API
 
 This new version of Kibi provides many improvements and new features, the main one are listed below:
 
-* Caching can now be enabled/disabled per <<external-datasources, datasource>> from UI configuration
+* Caching can now be enabled/disabled per <<external_datasources, datasource>> from UI configuration
 * New version of <<timeline, Kibi Timeline>> plugin 0.1.3
 * Default <<kibi-settings-relation, terms encoding>> for Siren Join changed to long
 * New <<kibi-settings-relations, Advanced Join Settings>> plugin [Enterprise Edition only]
-* Full <<shield-integration, Shield integration>> [Enterprise Edition only]
-* New <<graph-browser, Graph Browser>> visualization [Enterprise Edition only]
-* New <<external-datasources, Kibi Thinkerpop3>> datasource [Enterprise Edition only]
+* Full <<shield_integration, Shield integration>> [Enterprise Edition only]
+* New <<graph_browser, Graph Browser>> visualization [Enterprise Edition only]
+* New <<external_datasources, Kibi Thinkerpop3>> datasource [Enterprise Edition only]
 * New <<kibi_gremlin_server, Kibi Gremlin Server>> component [Enterprise Edition only]
 * New Ansible/Vagrant deployment scripts for GCE and AWS [Enterprise Edition only]
 

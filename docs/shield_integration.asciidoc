@@ -1,4 +1,4 @@
-[[shield-integration]]
+[[shield_integration]]
 == Shield Integration  [Enterprise Edition only]
 
 === Behaviours and warning display messages
@@ -281,7 +281,7 @@ kibi_core:
 === Installation on UNIX
 ==== Configuring Shield
 Install *Shield* and *license* plugin for Elasticsearch:
-https://www.elastic.co/guide/en/shield/current/getting-started.html
+https://www.elastic.co/guide/en/shield/current/getting_started.html
 ----
 bin/plugin install license
 bin/plugin install shield

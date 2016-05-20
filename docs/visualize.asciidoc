@@ -30,11 +30,11 @@ button] in the toolbar to the right of the search bar. The wizard guides you thr
 Choose a visualization type when you start the New Visualization wizard:
 
 [horizontal]
-<<enhanced-search-results,Enhanced search results>>:: Display an interactive
+<<enhanced_search_results,Enhanced search results>>:: Display an interactive
 table of documents returned by an Elasticsearch query.
-<<kibi-query-viewer,Kibi Query Viewer>>:: Display the results of
+<<kibi_query_viewer,Kibi Query Viewer>>:: Display the results of
 queries on external datasources in Jade/Handlebards templates.
-<<relational-filter,Relational Filter>>:: Apply cross-dashboard filters
+<<relational_filter,Relational Filter>>:: Apply cross-dashboard filters
 based on the relations between different indices.
 <<area-chart,Area chart>>:: Use area charts to visualize the total contribution of several different series.
 <<data-table,Data table>>:: Use data tables to display the raw data of a composed aggregation. You can display the data
@@ -49,8 +49,8 @@ dashboard.
 <<wordcloud,Kibi Word Cloud>>:: Display a cloud of high frequency terms in a document collection.
 <<timeline,Kibi Timeline>>:: Displays series of data coming from different
 saved searches on a single timeline component.
-<<radar-chart, Radar Chart>>:: Display multivariate data with a two-dimensional chart.
-<<graph-browser, Kibi Graph Browser*>>:: Displays a graph visualization starting from a selected document
+<<radar_chart, Radar Chart>>:: Display multivariate data with a two-dimensional chart.
+<<graph_browser, Kibi Graph Browser*>>:: Displays a graph visualization starting from a selected document
 
 NOTE: *: available only in Kibi Enterprise Edition.
 
@@ -112,7 +112,7 @@ visualization. Buckets are analogous to SQL `GROUP BY` statements. For more info
 {elastic-ref}search-aggregations.html[Elasticsearch aggregations reference].
 
 In addition to standard Elasticsearch aggregations, Kibi adds the
-_External Query Terms Filter_ aggregation, which is described in the <<external-datasources>> chapter.
+_External Query Terms Filter_ aggregation, which is described in the <<external_datasources>> chapter.
 
 Bar, line, or area chart visualizations use _metrics_ for the y-axis and _buckets_ are used for the x-axis, segment bar
 colors, and row/column splits. For pie charts, use the metric for the slice size and the bucket for the number of
@@ -157,7 +157,7 @@ https://www.elastic.co/blog/kibana-aggregation-execution-order-and-you[here].
 
 [float]
 [[visualize-filters]]
-include::filter-pinning.asciidoc[]
+include::filter_pinning.asciidoc[]
 
 [float]
 [[preview-canvas]]
@@ -166,9 +166,9 @@ include::filter-pinning.asciidoc[]
 The preview canvas displays a preview of the visualization you've defined in the aggregation builder. To refresh the
 visualization preview, clicking the *Refresh* button image:images/K4Refresh.png[Refresh button] on the toolbar.
 
-include::enhanced-search-results.asciidoc[]
+include::enhanced_search_results.asciidoc[]
 
-include::kibi-query-viewer.asciidoc[]
+include::kibi_query_viewer.asciidoc[]
 
 include::area.asciidoc[]
 
@@ -190,6 +190,6 @@ include::wordcloud.asciidoc[]
 
 include::timeline.asciidoc[]
 
-include::radar-chart.asciidoc[]
+include::radar_chart.asciidoc[]
 
-include::graph-browser.asciidoc[]
+include::graph_browser.asciidoc[]

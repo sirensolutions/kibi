@@ -1,4 +1,4 @@
-[[radar-chart]]
+[[radar_chart]]
 === Radar Chart
 
 A radar chart http://siren.solutions/radar-or-spider-chart-for-kibana-4-3-and-kibi-0-3/[introduced in kibi-0.3.0]

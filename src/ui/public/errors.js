@@ -55,7 +55,7 @@ define(function (require) {
     err = err || false;
 
     KbnError.call(this,
-      'Request to Elasticsearch failed: ' + angular.toJson(resp || err.body.message || err.message),
+      'Request to Elasticsearch failed: ' + angular.toJson(resp || err.body.message || err.message), // kibi: added "err.body.message" to show original error instead of "Bad Request"
       errors.RequestFailure);
 
     this.origError = err;

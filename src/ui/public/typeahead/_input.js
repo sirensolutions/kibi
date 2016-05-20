@@ -34,13 +34,6 @@ define(function (require) {
         $el.on('blur', function () {
           typeaheadCtrl.setFocused(false);
           digest();
-          // kibi: still needed ?
-          // https://github.com/sirensolutions/kibi-private/issues/161
-          //$timeout(function () {
-            //// kibi: added timeout to avoid digest cycle conflict that appeared with kibiArrayParam* directives
-            //$scope.$apply();
-          //});
-          // kibi: end
         });
 
         // unbind event listeners

@@ -1,5 +1,5 @@
 define(function (require) {
-  return function ResizeCheckerFactory(Private, $rootScope, createNotifier) {
+  return function ResizeCheckerFactory(Private, createNotifier) {
     var $ = require('jquery');
     var _ = require('lodash');
 

@@ -1,5 +1,5 @@
 define(function (require) {
-  return function SavedObjectFactory(es, kbnIndex, Promise, Private, safeConfirm, indexPatterns, createNotifier) {
+  return function SavedObjectFactory(es, kbnIndex, Promise, Private, createNotifier, safeConfirm, indexPatterns) {
     var angular = require('angular');
     var errors = require('ui/errors');
     var _ = require('lodash');

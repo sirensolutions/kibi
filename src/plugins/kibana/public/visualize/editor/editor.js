@@ -10,7 +10,6 @@ define(function (require) {
 
   require('ui/kibi/directives/kibi_param_entity_uri');
 
-
   require('ui/routes')
   .when('/visualize/create', {
     template: require('plugins/kibana/visualize/editor/editor.html'),

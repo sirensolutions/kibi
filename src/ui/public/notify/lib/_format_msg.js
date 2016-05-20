@@ -35,6 +35,14 @@ define(function (require) {
     return rtn;
   };
 
+  formatMsg.describeError = function (err) {
+    if (!err) return undefined;
+    if (err.body && err.body.message) return err.body.message;
+    if (err.message) return err.message;
+    return '' + err;
+  };
+
+  // kibi: added by kibi
   formatMsg.describeRequestPromiseError = function (err) {
     let msg = `Error ${err.statusCode}: `;
 
@@ -45,13 +53,8 @@ define(function (require) {
     }
     return msg;
   };
+  // kibi: end
 
-  formatMsg.describeError = function (err) {
-    if (!err) return undefined;
-    if (err.body && err.body.message) return err.body.message;
-    if (err.message) return err.message;
-    return '' + err;
-  };
 
   return formatMsg;
 });

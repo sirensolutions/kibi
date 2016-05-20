@@ -20,11 +20,13 @@ define(function (require) {
         }
       },
       crankResults: function (mySearchResponse) {
+        // kibi: added mySearchResponse to be able to test our own results
         if (mySearchResponse) {
           deferedResult.resolve(mySearchResponse);
         } else {
           deferedResult.resolve(searchResponse);
         }
+        // kibi: end
         deferedResult = $q.defer();
       },
       onResults: function () {

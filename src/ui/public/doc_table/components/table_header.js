@@ -73,7 +73,6 @@ define(function (require) {
         });
         $scope.$on('$destroy', off);
 
-
         $scope.sort = function (column) {
           if (!column || !sortableField(column)) return;
 

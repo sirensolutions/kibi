@@ -3,7 +3,7 @@ define(function (require) {
     var mockLogstashFields = Private(require('fixtures/logstash_fields'));
 
     return function (id, index) {
-      index = index || '.kibi';
+      index = index || '.kibana';
       return {
         _id: id,
         _index: index,

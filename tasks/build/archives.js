@@ -27,7 +27,6 @@ module.exports = function createPackages(grunt) {
     }
   };
 
-
   // kibi: before building the archives we have to swap few native bindings
   // we already chnaged the versionedLinks.js task to copy node_modules instead of symlinking them
   // now lets swap the bindings

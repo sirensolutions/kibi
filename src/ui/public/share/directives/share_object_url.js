@@ -79,7 +79,6 @@ app.directive('shareObjectUrl', function (Private, createNotifier) {
           }
           // kibi: end
         }
-
         return url;
       };
 

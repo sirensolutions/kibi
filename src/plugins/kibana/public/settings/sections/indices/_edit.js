@@ -3,8 +3,7 @@ define(function (require) {
   require('plugins/kibana/settings/sections/indices/_indexed_fields');
   require('plugins/kibana/settings/sections/indices/_scripted_fields');
   require('plugins/kibana/settings/sections/indices/_index_header');
-  // kibi: added by kibi
-  require('plugins/kibana/settings/sections/indices/_kibi_source_filtering');
+  require('plugins/kibana/settings/sections/indices/_kibi_source_filtering'); // kibi: added by kibi
 
   require('ui/routes')
   .when('/settings/indices/:indexPatternId', {
@@ -18,7 +17,7 @@ define(function (require) {
   });
 
   require('ui/modules').get('apps/settings')
-  .controller('settingsIndicesEdit', function ($scope, $location, $route, config, courier, Private, AppState, docTitle, createNotifier) {
+  .controller('settingsIndicesEdit', function ($scope, $location, $route, config, courier, createNotifier, Private, AppState, docTitle) {
 
     var notify = createNotifier();
     var $state = $scope.state = new AppState();

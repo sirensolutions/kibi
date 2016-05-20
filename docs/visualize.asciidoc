@@ -13,7 +13,7 @@ data source types:
 * A saved search
 * An existing saved visualization
 
-Kibana visualizations are based on the {elastic-ref}search-aggregations.html[aggregation] feature introduced in Elasticsearch 1.x.
+Visualizations are based on the {ref}search-aggregations.html[aggregation] feature introduced in Elasticsearch 1.x.
 
 [float]
 [[createvis]]

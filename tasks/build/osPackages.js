@@ -21,14 +21,19 @@ module.exports = function (grunt) {
         '--force',
         '--package', targetDir,
         '-s', 'dir', // input type
-        '--name', 'kibana',
+        '--name', 'kibi',
+        '--description', 'Explore\ and\ visualize\ your\ Elasticsearch\ data.',
         '--version', version,
+        '--url', 'https://siren.solutions',
+        '--vendor', 'Siren Solutions',
+        '--maintainer', 'Kibi Team\ \<info@siren.solutions\>',
+        '--license', 'Apache\ 2.0',
         '--after-install', resolve(userScriptsDir, 'installer.sh'),
         '--after-remove', resolve(userScriptsDir, 'remover.sh'),
-        '--config-files', '/opt/kibana/config/kibana.yml'
+        '--config-files', '/opt/kibi/config/kibi.yml'
       ];
 
-      const files = buildDir + '/=/opt/kibana';
+      const files = buildDir + '/=/opt/kibi';
       const sysv = servicesByName.sysv.outputDir + '/etc/=/etc/';
       const systemd = servicesByName.systemd.outputDir + '/lib/=/lib/';
 
@@ -41,7 +46,7 @@ module.exports = function (grunt) {
 
       grunt.file.mkdir(targetDir);
       if (buildDeb || noneSpecified) {
-        fpm(args.concat('-t', 'deb', '-a', arch, files, sysv, systemd));
+        fpm(args.concat('-t', 'deb', '--deb-priority', 'optional', '-a', arch, files, sysv, systemd));
       }
       if (buildRpm || noneSpecified) {
         fpm(args.concat('-t', 'rpm', '-a', arch, '--rpm-os', 'linux', files, sysv, systemd));

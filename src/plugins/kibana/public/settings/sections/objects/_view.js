@@ -22,7 +22,6 @@ define(function (require) {
         var service = $injector.get(serviceObj.service);
 
         var deleteHelper = Private(require('ui/kibi/helpers/delete_helper')); // kibi: added by kibi
-
         /**
          * Creates a field definition and pushes it to the memo stack. This function
          * is designed to be used in conjunction with _.reduce(). If the

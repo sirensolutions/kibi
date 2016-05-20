@@ -1,7 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
   var fieldExcludedFor = require('./kibi_field_excluded_for');
-
   var joinFields = require('ui/kibi/settings/sections/indices/join_fields');
   require('ui/paginated_table');
 

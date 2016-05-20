@@ -16,7 +16,7 @@
     "SPARQL"
   ],
   "private": false,
-  "version": "4.4.1",
+  "version": "4.4.2",
   "kibi_kibana_announcement": "https://www.elastic.co/blog/kibana-4-4-2-and-4-3-3-and-4-1-6",
   "kibi_version": "4.4.2-SNAPSHOT",
   "kibi_enterprise_enabled": false,
@@ -87,7 +87,7 @@
     "boom": "2.8.0",
     "bootstrap": "3.3.5",
     "brace": "0.5.1",
-    "bunyan": "1.4.0",
+    "bunyan": "1.7.1",
     "clipboard": "1.5.5",
     "commander": "2.8.1",
     "css-loader": "0.17.0",
@@ -116,6 +116,7 @@
     "leaflet": "0.7.5",
     "less": "2.5.1",
     "less-loader": "2.2.0",
+    "loader-utils": "0.2.11",
     "lodash": "3.10.1",
     "marked": "0.3.3",
     "minimatch": "2.0.10",
@@ -140,8 +141,8 @@
     "angular-sanitize": "1.4.7",
     "ng-tags-input": "3.0.0",
     "antlr4": "^4.5.2",
-    "antlr4-sparql": "sirensolutions/antlr4-javascript-sparql#1.0.7",
-    "antlr4-sql": "sirensolutions/antlr4-javascript-sql#1.0.2",
+    "antlr4-javascript-sparql": "sirensolutions/antlr4-javascript-sparql#1.0.8",
+    "antlr4-javascript-sql": "sirensolutions/antlr4-javascript-sql#1.0.3",
     "qtip2": "3.0.2",
     "eeg": "1.0.26",
     "angular-animate": "1.4.7",
@@ -209,7 +210,7 @@
     "mockery": "1.4.0"
   },
   "engines": {
-    "node": "0.12.10",
-    "npm": "2.14.3"
+    "node": "4.3.2",
+    "npm": "2.14.21"
   }
 }

@@ -174,7 +174,7 @@ define(function (require) {
 
         // kibi: needed to recreate filter label.
         // as we do not want to store the meta info in filter join definition
-        // we have to reqreate it.
+        // we have to recreate it.
         // it should support the following filters:
         // .query
         // .dbfilter

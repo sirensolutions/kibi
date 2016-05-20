@@ -19,9 +19,14 @@ You need at least one saved <<visualize, visualization>> to use a dashboard.
 The first time you click the *Dashboard* tab, Kibi displays the first available
 dashboard or, if no dashboards have been defined, the dashboard creation screen.
 
-To create a new dashboard, click on the _New Dashboard_ button:
+image:images/NewDashboard.png[New Dashboard screen]
 
-image:images/NewDashboard.jpg[]
+Build your dashboard by adding visualizations. By default, Kibana dashboards use a light color theme. To use a dark color
+theme instead, click the *Settings* image:images/SettingsButton.jpg[Gear] button and check the *Use dark theme* box.
+
+image:images/darktheme.png[Dark Theme Example]
+
+NOTE: You can change the default theme in the *Advanced* section of the *Settings* tab.
 
 [float]
 [[saving-dashboards]]
@@ -57,10 +62,13 @@ this in mind if your Kibi instance is protected by an authentication proxy.
 To share a dashboard, click the *Share* image:images/ShareVis.png[Share]
 button:
 
-image::images/dashboard/share-dashboard.png["Dashboard sharing options",align="center"]
+To share a dashboard, click the *Share* button image:images/share-dashboard.png[] to display the _Sharing_ panel.
 
-Click on the button next to a sharing option to copy the corresponding
-code to your clipboard.
+image:images/sharing-panel.png[]
+
+Click the *Copy to Clipboard* button image:images/share-link.png[] to copy the native URL or embed HTML to the clipboard.
+Click the *Generate short URL* button image:images/share-short-link.png[] to create a shortened URL for sharing or
+embedding.
 
 [float]
 [[embedding-dashboards]]

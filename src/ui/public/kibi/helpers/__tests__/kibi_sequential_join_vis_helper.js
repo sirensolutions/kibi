@@ -135,11 +135,9 @@ describe('Kibi Components', function () {
           expect(rel.relation[0].indices).to.eql([ button.sourceIndexPatternId ]);
           expect(rel.relation[0].path).to.be(button.sourceField);
           expect(rel.relation[0].queries[1]).to.be.eql({ a: 123 });
-          expect(rel.relation[0].orderBy).to.be('default');
           expect(rel.relation[0].termsEncoding).to.be('long');
           expect(rel.relation[1].indices).to.eql([ button.targetIndexPatternId ]);
           expect(rel.relation[1].path).to.be(button.targetField);
-          expect(rel.relation[1].orderBy).to.be('default');
           expect(rel.relation[1].termsEncoding).to.be('long');
           done();
         }).catch(done);
@@ -162,11 +160,9 @@ describe('Kibi Components', function () {
           expect(rel.relation[0].indices).to.eql([ button.sourceIndexPatternId ]);
           expect(rel.relation[0].path).to.be(button.sourceField);
           expect(rel.relation[0].queries[0].query.bool.must).to.be.eql({ query: { term: { aaa: 'bbb' } } });
-          expect(rel.relation[0].orderBy).to.be('default');
           expect(rel.relation[0].termsEncoding).to.be('long');
           expect(rel.relation[1].indices).to.eql([ button.targetIndexPatternId ]);
           expect(rel.relation[1].path).to.be(button.targetField);
-          expect(rel.relation[1].orderBy).to.be('default');
           expect(rel.relation[1].termsEncoding).to.be('long');
           done();
         }).catch(done);
@@ -210,11 +206,9 @@ describe('Kibi Components', function () {
           expect(rel.relation[0].indices).to.eql([ button.sourceIndexPatternId ]);
           expect(rel.relation[0].path).to.be(button.sourceField);
           expect(rel.relation[0].queries[0].query.bool.must).to.be.eql({ query: { term: { aaa: 'bbb' } } });
-          expect(rel.relation[0].orderBy).to.be('asc');
           expect(rel.relation[0].termsEncoding).to.be('enc1');
           expect(rel.relation[1].indices).to.eql([ button.targetIndexPatternId ]);
           expect(rel.relation[1].path).to.be(button.targetField);
-          expect(rel.relation[1].orderBy).to.be('desc');
           expect(rel.relation[1].termsEncoding).to.be('enc2');
           done();
         }).catch(done);

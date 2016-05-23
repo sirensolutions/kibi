@@ -211,7 +211,7 @@ define(function (require) {
           .then(function (resp) {
 
             // kibi: flush the cache on the server side
-            if (service.type === 'query' || service.type === 'template') {
+            if (service.type === 'query' || service.type === 'template' || service.type === 'script') {
               queryEngineClient.clearCache().then(function () {
               });
             }

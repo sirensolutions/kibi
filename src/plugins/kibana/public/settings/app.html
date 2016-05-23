@@ -21,7 +21,8 @@
       </style>
 
       <div class="button-group navbar-button-group"
-           ng-show="section.name === 'datasources' || section.name === 'queries' || section.name === 'templates' || section.name === 'dashboardgroups'">
+        ng-show="section.name === 'datasources' || section.name === 'queries' || section.name === 'templates' ||
+        section.name === 'dashboardgroups' || section.name === 'scripts'">
         <kbn-tooltip text="New {{section.buttonLabel}}" placement="bottom">
           <button ng-click="section.newObject()" class="navbar-button"><i class="fa fa-file-new-o"></i></button>
         </kbn-tooltip>

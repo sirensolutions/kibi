@@ -173,13 +173,13 @@ define(function (require) {
               }
             ],
             // default siren-join parameters
-            orderBy: 'default'
+            termsEncoding: 'long'
           },
           {
             path: button.targetField,
             indices: [button.targetIndexPatternId],
             // default siren-join parameters
-            orderBy: 'default'
+            termsEncoding: 'long'
           }
         ]
       };

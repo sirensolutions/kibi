@@ -54,7 +54,8 @@ TinkerPop3Query.prototype.fetchResults = function (options, onlyIds, idVariableN
 
   var uri = options.selectedDocuments && options.selectedDocuments.length > 0 ? options.selectedDocuments[0] : '';
 
-  return self.queryHelper.replaceVariablesUsingEsDocument(self.config.resultQuery, uri, options.credentials).then(function (query) {
+  return self.queryHelper.replaceVariablesUsingEsDocument(self.config.resultQuery, uri, options.credentials, 'graph_browser')
+  .then(function (query) {
 
     var cacheKey;
     if (self.cache && cacheEnabled) {
@@ -143,11 +144,6 @@ TinkerPop3Query.prototype.fetchResults = function (options, onlyIds, idVariableN
 
       var kibiRelationsJson = JSON.parse(kibiRelations);
 
-      const parts = uri.trim().split('/');
-      const indexName = parts[0];
-      const indexType = parts[1];
-      const id = parts[2];
-
       var gremlinOptions = {
         method: 'POST',
         uri: gremlinUrl,
@@ -159,7 +155,6 @@ TinkerPop3Query.prototype.fetchResults = function (options, onlyIds, idVariableN
           query: query,
           relationsIndices: kibiRelationsJson.relationsIndices,
           credentials: options.credentials,
-          entities: [ { id, indexName, indexType } ],
           indexPatterns: indexPatterns,
         },
         timeout: timeout

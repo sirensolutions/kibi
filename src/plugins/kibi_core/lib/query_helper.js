@@ -63,7 +63,7 @@ QueryHelper.prototype.replaceVariablesForREST = function (headers, params, body,
 /**
  * s can be either a string or (key, value) map
  */
-QueryHelper.prototype.replaceVariablesUsingEsDocument = function (s, uri, credentials) {
+QueryHelper.prototype.replaceVariablesUsingEsDocument = function (s, uri, credentials, plugin) {
   var self = this;
   if (!uri || uri.trim() === '') {
     return Promise.resolve(s);
@@ -78,16 +78,16 @@ QueryHelper.prototype.replaceVariablesUsingEsDocument = function (s, uri, creden
   var type = parts[1];
   var id = parts[2];
 
-  // TODO: add caching of documet
+  // TODO: add caching of document
 
   return self.fetchDocument(index, type, id, credentials).then(function (doc) {
     //now parse the query and replace the placeholders
     if (typeof s === 'string' || s instanceof String) {
-      return self._replaceVariablesInTheQuery(doc, s);
+      return self._replaceVariablesInTheQuery(doc, s, plugin);
     } else {
       // array of objects with name value
       for (var i = 0; i < s.length; i++) {
-        s[i].value = self._replaceVariablesInTheQuery(doc, s[i].value);
+        s[i].value = self._replaceVariablesInTheQuery(doc, s[i].value, plugin);
       }
       return s;
     }
@@ -126,7 +126,7 @@ QueryHelper.prototype.fetchDocument = function (index, type, id, credentials) {
  *    @doc[_source][id]@
  *
  */
-QueryHelper.prototype._replaceVariablesInTheQuery = function (doc, query) {
+QueryHelper.prototype._replaceVariablesInTheQuery = function (doc, query, plugin) {
   var self = this;
   var ret = query;
   var regex = /(@doc\[.+?\]@)/g;
@@ -137,7 +137,16 @@ QueryHelper.prototype._replaceVariablesInTheQuery = function (doc, query) {
     group = group.replace('@doc', '');
     group = group.substring(0, group.length - 1);
 
-    var value = self._getValue(doc, group);
+    var value;
+    if (group === '[_id]' && plugin === 'graph_browser') {
+      let id = self._getValue(doc, group);
+      let index = self._getValue(doc, '[_index]');
+      let type = self._getValue(doc, '[_type]');
+      value = index + '/' + type + '/' + id;
+    } else {
+      value = self._getValue(doc, group);
+    }
+
     var reGroup = self._escapeRegexSpecialCharacters(match[1]);
     var re = new RegExp(reGroup, 'g');
     ret = ret.replace(re, value);

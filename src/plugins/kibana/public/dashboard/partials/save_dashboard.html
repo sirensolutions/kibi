@@ -1,6 +1,14 @@
 <form ng-submit="opts.save()" role="form">
   <div class="form-group">
-    <label for="dashboardTitle">Save As</label>
+    <!--kibi: dashboardgroup name tooltip-->
+    <label for="dashboardTitle">Save As
+      <i class="fa fa-info-circle ng-scope"
+         tooltip="The name of the dashboard will be shortened if you put it in a dashboard group with the same prefix, e.g., a 'People locations' dashboard will be displated as simply 'locations'
+         in the dropdown menu if placed in a 'People' dashboard group."
+         tooltip-placement="right"
+         tooltip-popup-delay="150">
+      </i>
+    </label>
     <input id="dashboardTitle" type="text" ng-model="opts.dashboard.title" class="form-control" placeholder="Dashboard title" input-focus="select">
   </div>
   <div class="form-group">
@@ -10,5 +18,14 @@
       <kbn-info info="Change the time filter to the currently selected time each time this dashboard is loaded"></kbn-info>
     </label>
   </div>
+  <!-- kibi: added to be able -->
+  <div class="form-group">
+    <label>Saved Search
+      <i class="fa fa-info-circle ng-scope" tooltip="For counts calculation on tabs" tooltip-placement="" tooltip-popup-delay="250">
+      </i>
+    </label>
+    <kibi-select object-type="search" ng-model="opts.dashboard.savedSearchId"></kibi-select>
+  </div>
+  <!-- kibi: end -->
   <button type="submit" ng-disabled="!opts.dashboard.title" class="btn btn-primary" aria-label="Save dashboard">Save</button>
 </form>

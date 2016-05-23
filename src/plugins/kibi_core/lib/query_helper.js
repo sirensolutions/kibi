@@ -63,7 +63,7 @@ QueryHelper.prototype.replaceVariablesForREST = function (headers, params, body,
 /**
  * s can be either a string or (key, value) map
  */
-QueryHelper.prototype.replaceVariablesUsingEsDocument = function (s, uri, credentials, plugin) {
+QueryHelper.prototype.replaceVariablesUsingEsDocument = function (s, uri, credentials, datasource) {
   var self = this;
   if (!uri || uri.trim() === '') {
     return Promise.resolve(s);
@@ -83,11 +83,11 @@ QueryHelper.prototype.replaceVariablesUsingEsDocument = function (s, uri, creden
   return self.fetchDocument(index, type, id, credentials).then(function (doc) {
     //now parse the query and replace the placeholders
     if (typeof s === 'string' || s instanceof String) {
-      return self._replaceVariablesInTheQuery(doc, s, plugin);
+      return self._replaceVariablesInTheQuery(doc, s, datasource);
     } else {
       // array of objects with name value
       for (var i = 0; i < s.length; i++) {
-        s[i].value = self._replaceVariablesInTheQuery(doc, s[i].value, plugin);
+        s[i].value = self._replaceVariablesInTheQuery(doc, s[i].value, datasource);
       }
       return s;
     }
@@ -126,7 +126,7 @@ QueryHelper.prototype.fetchDocument = function (index, type, id, credentials) {
  *    @doc[_source][id]@
  *
  */
-QueryHelper.prototype._replaceVariablesInTheQuery = function (doc, query, plugin) {
+QueryHelper.prototype._replaceVariablesInTheQuery = function (doc, query, datasource) {
   var self = this;
   var ret = query;
   var regex = /(@doc\[.+?\]@)/g;
@@ -138,7 +138,7 @@ QueryHelper.prototype._replaceVariablesInTheQuery = function (doc, query, plugin
     group = group.substring(0, group.length - 1);
 
     var value;
-    if (group === '[_id]' && plugin === 'graph_browser') {
+    if (group === '[_id]' && datasource === 'tinkerpop3_query') {
       let id = self._getValue(doc, group);
       let index = self._getValue(doc, '[_index]');
       let type = self._getValue(doc, '[_type]');

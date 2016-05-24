@@ -10,7 +10,7 @@
       <span ng-show="button.targetCount !== undefined"> ({{button.targetCount}})</span>
       <span
         class="warning"
-        ng-if="button.warning !== ''"
+        ng-if="!!button.warning"
         tooltip="{{button.warning}}"
         tooltip-placement="right"
         tooltip-append-to-body="true"

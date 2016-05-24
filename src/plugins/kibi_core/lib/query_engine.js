@@ -464,7 +464,8 @@ QueryEngine.prototype.reloadQueries = function () {
             return new MysqlQuery(self.server, queryDef, self.cache);
           } else if (queryDef.datasource.datasourceType === 'sparql_jdbc' || queryDef.datasource.datasourceType === 'sql_jdbc') {
             if (self.config.get('kibi_core.load_jdbc') === false) {
-              return new ErrorQuery(self.server, 'Please set the "load_jdbc" option to true in kibi.yml and restart the backend.');
+              const msg = 'Please set the "kibi_core.load_jdbc" option to true in kibi.yml and restart the backend.';
+              return new ErrorQuery(self.server, msg);
             }
             return new JdbcQuery(self.server, queryDef, self.cache);
           } else if (queryDef.datasource.datasourceType === 'rest') {

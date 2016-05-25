@@ -34,7 +34,9 @@ define(function (require) {
 
       // Update the counts on each button of the related filter
       var _updateCounts = function () {
-
+        if (!$scope.buttons || !$scope.buttons.length) {
+          return Promise.resolve('no buttons');
+        }
         if ($scope.configMode) {
           return Promise.resolve('configMode');
         }
@@ -145,7 +147,7 @@ define(function (require) {
         // here instead of relaying on others make a query and get the correct count for current dashboard
         var joinSequenceFilter = _.cloneDeep(urlHelper.getFiltersOfType('join_sequence'));
         return relVisHelper.buildCountQuery(currentDashboardId, joinSequenceFilter).then(function (query) {
-          var queryS  = '{"index" : "' + query.index + '"}\n';
+          var queryS = '{"index" : "' + query.index + '"}\n';
           queryS += JSON.stringify(query.query) + '\n';
           return $http.post(chrome.getBasePath() + '/elasticsearch/_msearch?getSourceCountForJoinSeqFilter', queryS)
           .then(function (response) {
@@ -169,7 +171,7 @@ define(function (require) {
         if (currentDashboardId) {
           // check that current dashboard has assigned indexPatternId
           // use find to minimize numner of requests
-          urlHelper.getDashboardAndSavedSearchMetas([ currentDashboardId ]).then(([ { savedDash, savedSearchMeta } ]) => {
+          return urlHelper.getDashboardAndSavedSearchMetas([ currentDashboardId ]).then(([ { savedDash, savedSearchMeta } ]) => {
             const index = savedSearchMeta.index;
             $scope.buttons = relVisHelper.constructButtonsArray($scope.vis.params.buttons, index);
             if (!$scope.buttons.length) {
@@ -187,21 +189,26 @@ define(function (require) {
       };
 
       var off = $rootScope.$on('kibi:dashboard:changed', function (event, dashId) {
-        if ($scope.buttons) {
-          _updateCounts();
-        }
+        _updateCounts();
       });
       $scope.$on('$destroy', off);
 
       // when autoupdate is on we detect the refresh here
       $scope.$watch('esResponse', function (resp) {
-        if ($scope.buttons && $scope.buttons.length) {
-          _updateCounts().then(_updateSourceCount()).catch(notify.error);
+        if ($scope.configMode) {
+          return;
+        }
+        if (!$scope.buttons || !$scope.buttons.length) {
+          _constructButtons().then(() => _updateCounts()).catch(notify.error);
+        } else {
+          _updateCounts().then(() => _updateSourceCount()).catch(notify.error);
         }
       });
 
       $scope.$watch('vis.params.buttons', function () {
-        _constructButtons();
+        if ($scope.configMode) {
+          _constructButtons();
+        }
       }, true);
     });
 });

@@ -171,11 +171,15 @@ define(function (require) {
                   }
                 }
               }
-            ]
+            ],
+            // default siren-join parameters
+            termsEncoding: 'long'
           },
           {
             path: button.targetField,
-            indices: [button.targetIndexPatternId]
+            indices: [button.targetIndexPatternId],
+            // default siren-join parameters
+            termsEncoding: 'long'
           }
         ]
       };

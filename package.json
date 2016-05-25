@@ -17,7 +17,7 @@
   ],
   "private": false,
   "version": "4.4.1",
-  "kibi_version": "4.4.1",
+  "kibi_version": "4.4.1-1",
   "kibi_enterprise_enabled": false,
   "build": {
     "number": 8467,

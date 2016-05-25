@@ -43,6 +43,7 @@ module.exports = function createPackages(grunt) {
 
   var toCopy = [];
   grunt.config.get('platforms').forEach(({ name, buildDir }) => {
+    var nodeVersion = 'v46';
     var sqliteBindingSrc;
     var sqliteBindingDestFolder;
     var sqliteBindingDest;
@@ -50,28 +51,33 @@ module.exports = function createPackages(grunt) {
     var nodejavaBindingDest = buildDir + '/node_modules/jdbc/node_modules/java/build/Release/nodejavabridge_bindings.node';
     switch (name) {
       case 'darwin-x64':
-        sqliteBindingSrc   = __dirname + '/../../resources/nodesqlite3bindings/' + name + '/node-v14-darwin-x64/node_sqlite3.node';
-        sqliteBindingDestFolder = buildDir + '/node_modules/sqlite3/lib/binding/node-v14-darwin-x64';
+        sqliteBindingSrc   = __dirname + '/../../resources/nodesqlite3bindings/' + name + '/node-' + nodeVersion +
+        '-darwin-x64/node_sqlite3.node';
+        sqliteBindingDestFolder = buildDir + '/node_modules/sqlite3/lib/binding/node-' + nodeVersion + '-darwin-x64';
         sqliteBindingDest = sqliteBindingDestFolder + '/node_sqlite3.node';
         break;
       case 'linux-x64':
-        sqliteBindingSrc   = __dirname + '/../../resources/nodesqlite3bindings/' + name + '/node-v14-linux-x64/node_sqlite3.node';
-        sqliteBindingDestFolder = buildDir + '/node_modules/sqlite3/lib/binding/node-v14-linux-x64';
+        sqliteBindingSrc   = __dirname + '/../../resources/nodesqlite3bindings/' + name + '/node-' + nodeVersion +
+        '-linux-x64/node_sqlite3.node';
+        sqliteBindingDestFolder = buildDir + '/node_modules/sqlite3/lib/binding/node-' + nodeVersion + '-linux-x64';
         sqliteBindingDest = sqliteBindingDestFolder + '/node_sqlite3.node';
         break;
       case 'linux-x86':
-        sqliteBindingSrc = __dirname + '/../../resources/nodesqlite3bindings/' + name + '/node-v14-linux-ia32/node_sqlite3.node';
-        sqliteBindingDestFolder = buildDir + '/node_modules/sqlite3/lib/binding/node-v14-linux-ia32';
+        sqliteBindingSrc = __dirname + '/../../resources/nodesqlite3bindings/' + name + '/node-' + nodeVersion +
+        '-linux-ia32/node_sqlite3.node';
+        sqliteBindingDestFolder = buildDir + '/node_modules/sqlite3/lib/binding/node-' + nodeVersion + '-linux-ia32';
         sqliteBindingDest = sqliteBindingDestFolder + '/node_sqlite3.node';
         break;
       case 'windows':
-        sqliteBindingSrc = __dirname + '/../../resources/nodesqlite3bindings/' + name + '/node-v14-win32-ia32/node_sqlite3.node';
-        sqliteBindingDestFolder = buildDir + '/node_modules/sqlite3/lib/binding/node-v14-win32-ia32';
+        sqliteBindingSrc = __dirname + '/../../resources/nodesqlite3bindings/' + name + '/node-' + nodeVersion +
+        '-win32-ia32/node_sqlite3.node';
+        sqliteBindingDestFolder = buildDir + '/node_modules/sqlite3/lib/binding/node-' + nodeVersion + '-win32-ia32';
         sqliteBindingDest = sqliteBindingDestFolder + '/node_sqlite3.node';
         break;
       case 'windows64':
-        sqliteBindingSrc = __dirname + '/../../resources/nodesqlite3bindings/' + name + '/node-v14-win32-x64/node_sqlite3.node';
-        sqliteBindingDestFolder = buildDir + '/node_modules/sqlite3/lib/binding/node-v14-win32-x64';
+        sqliteBindingSrc = __dirname + '/../../resources/nodesqlite3bindings/' + name + '/node-' + nodeVersion +
+        '-win32-x64/node_sqlite3.node';
+        sqliteBindingDestFolder = buildDir + '/node_modules/sqlite3/lib/binding/node-' + nodeVersion + '-win32-x64';
         sqliteBindingDest = sqliteBindingDestFolder + '/node_sqlite3.node';
         break;
       default:

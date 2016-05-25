@@ -1,6 +1,12 @@
 [[releasenotes]]
 == Kibi Release Notes
 
+=== Kibi 4.4.1-1 Release Notes
+
+
+* Fixed a bug - in community distribution the default join settings were incorrect
+* Fixed a bug - relational filter was not correctly refreshed
+
 === Kibi 4.4.1 Release Notes
 
 

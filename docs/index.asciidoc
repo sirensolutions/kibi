@@ -2,12 +2,12 @@
 = Kibi User Guide
 :toc: right
 
-:java-version: 1.8
+:kibi-version: 4.4.1-1
 :siren-join-version: 2.2.0-1
 :siren-join-website: https://github.com/sirensolutions/siren-join/
+:java-version: 1.8
 :kibana-version: 4.4.1
 :kibana-announcement: https://www.elastic.co/blog/kibana-4-4-1-and-4-3-2-and-4-1-5
-:kibi-version: 4.4.1
 :elastic-ref: https://www.elastic.co/guide/en/elasticsearch/reference/2.2/
 :elasticsearch-version: 2.2.0
 :ref: http://siren.solutions/kibi/docs/current/

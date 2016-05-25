@@ -24,46 +24,52 @@ define(function (require) {
           var button = _.clone(buttonDef);
 
           button.click = function () {
+            // click method should return a Promise for the tests
             if (!currentDashboardIndexId) {
-              return;
+              return Promise.resolve();
             }
-            kibiStateHelper.saveFiltersForDashboardId(urlHelper.getCurrentDashboardId(), urlHelper.getCurrentDashboardFilters());
-            kibiStateHelper.saveQueryForDashboardId(urlHelper.getCurrentDashboardId(), urlHelper.getCurrentDashboardQuery());
-
+            const currentDashboardId = urlHelper.getCurrentDashboardId();
+            kibiStateHelper.saveFiltersForDashboardId(currentDashboardId, urlHelper.getDashboardFilters(currentDashboardId));
+            kibiStateHelper.saveQueryForDashboardId(currentDashboardId, urlHelper.getDashboardQuery(currentDashboardId));
 
             // get filters from dashboard we would like to switch to
-            var targetDashboardQuery   = kibiStateHelper.getQueryForDashboardId(this.redirectToDashboard);
+            var targetDashboardQuery = kibiStateHelper.getQueryForDashboardId(this.redirectToDashboard);
             var targetDashboardFilters = kibiStateHelper.getFiltersForDashboardId(this.redirectToDashboard);
             var targetDashboardTimeFilter = kibiStateHelper.getTimeForDashboardId(this.redirectToDashboard);
 
 
             if (this.joinSeqFilter) {
-              if (button.filterLabel) {
-                this.joinSeqFilter.meta.alias = button.filterLabel
-                .replace(/\$COUNT/g, this.sourceCount)
-                .replace(/\$DASHBOARD/g, urlHelper.getCurrentDashboardId());
+              const switchToDashboard = function () {
+                // add or Filter and switch
+                if (!targetDashboardFilters) {
+                  targetDashboardFilters = [];
+                }
+                targetDashboardFilters.push(this.joinSeqFilter);
+
+                // switch to target dashboard
+                urlHelper.replaceFiltersAndQueryAndTime(targetDashboardFilters, targetDashboardQuery, targetDashboardTimeFilter);
+                urlHelper.switchDashboard(this.redirectToDashboard);
+              };
+
+              // create the alias for the filter
+              let alias = button.filterLabel || `... related to ($COUNT) from $DASHBOARD`;
+              alias = alias.replace(/\$DASHBOARD/g, currentDashboardId);
+              this.joinSeqFilter.meta.alias = alias;
+              if (alias.indexOf('$COUNT') !== -1) {
+                this.joinSeqFilter.meta.alias_tmpl = alias;
+                return this.getSourceCount(currentDashboardId).then((sourceCount) => {
+                  this.joinSeqFilter.meta.alias = alias.replace(/\$COUNT/g, sourceCount);
+                  switchToDashboard.apply(this);
+                });
               } else {
-                this.joinSeqFilter.meta.alias = '... related to (' + this.sourceCount + ') from ' + urlHelper.getCurrentDashboardId();
+                switchToDashboard.apply(this);
               }
-
-
-              // add or Filter and switch
-              if (!targetDashboardFilters) {
-                targetDashboardFilters = [];
-              }
-              targetDashboardFilters.push(this.joinSeqFilter);
-
-              // switch to target dashboard
-              urlHelper.replaceFiltersAndQueryAndTime(
-                targetDashboardFilters,
-                targetDashboardQuery,
-                targetDashboardTimeFilter);
-              urlHelper.switchDashboard(this.redirectToDashboard);
             } else {
+              this.joinSeqFilter.meta.alias_tmpl = '';
               // just redirect to the target dashboard
               urlHelper.switchDashboard(this.redirectToDashboard);
             }
-
+            return Promise.resolve();
           };
           return button;
         }).value();
@@ -103,8 +109,8 @@ define(function (require) {
     //     indices: [target]
     //   }
     // ]
-    RelationVisHelper.prototype.buildNewJoinSeqFilter = function (button, savedSearchMeta) {
-      return this._getRelation(button, savedSearchMeta).then(function (relation) {
+    RelationVisHelper.prototype.buildNewJoinSeqFilter = function ({ dashboardId, button, savedSearchMeta }) {
+      return this._getRelation({ dashboardId, button, savedSearchMeta }).then(function (relation) {
 
         var label = 'First join_seq filter ever';
         return {
@@ -118,11 +124,11 @@ define(function (require) {
     };
 
 
-    RelationVisHelper.prototype.addRelationToJoinSeqFilter = function (button, savedSearchMeta, joinSeqFilter) {
+    RelationVisHelper.prototype.addRelationToJoinSeqFilter = function ({ dashboardId, button, savedSearchMeta, joinSeqFilter }) {
       var self = this;
       var joinSeqFiltersCloned = _.cloneDeep(joinSeqFilter);
 
-      return this._getRelation(button, savedSearchMeta).then(function (relation) {
+      return this._getRelation({ dashboardId, button, savedSearchMeta }).then(function (relation) {
         self._negateLastElementOfTheSequenceIfFilterWasNegated(joinSeqFiltersCloned);
         joinSeqFiltersCloned.join_sequence.push(relation);
         // make sure that the new filter is not negated
@@ -150,7 +156,7 @@ define(function (require) {
     };
 
 
-    RelationVisHelper.prototype._getRelation = function (button, savedSearchMeta) {
+    RelationVisHelper.prototype._getRelation = function ({ dashboardId, button, savedSearchMeta }) {
       const ret = {
         relation: [
           {
@@ -160,7 +166,7 @@ define(function (require) {
               {
                 query: {
                   bool: {
-                    must: urlHelper.getCurrentDashboardQuery(),
+                    must: urlHelper.getDashboardQuery(dashboardId),
                     // will be created below if needed
                     must_not: [],
                     filter: {
@@ -190,7 +196,7 @@ define(function (require) {
         ret.relation
       );
 
-      var sourceFilters = _.filter(urlHelper.getCurrentDashboardFilters(), function (f) {
+      var sourceFilters = _.filter(urlHelper.getDashboardFilters(dashboardId), function (f) {
         // all except join_sequence
         return !f.join_sequence;
       });
@@ -221,8 +227,7 @@ define(function (require) {
       return indexPatterns.get(button.sourceIndexPatternId).then(function (indexPattern) {
         var sourceTimeFilter = timefilter.get(indexPattern);
         if (sourceTimeFilter) {
-          var sourceDashboardId = urlHelper.getCurrentDashboardId();
-          return kibiTimeHelper.updateTimeFilterForDashboard(sourceDashboardId, sourceTimeFilter).then(function (updatedTimeFilter) {
+          return kibiTimeHelper.updateTimeFilterForDashboard(dashboardId, sourceTimeFilter).then(function (updatedTimeFilter) {
             // add time filter
             ret.relation[0].queries[0].query.bool.filter.bool.must.push(updatedTimeFilter);
             return ret;

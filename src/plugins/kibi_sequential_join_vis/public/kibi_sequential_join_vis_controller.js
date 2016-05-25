@@ -2,7 +2,6 @@ define(function (require) {
 
   var module = require('ui/modules').get('kibana/kibi_sequential_join_vis', ['kibana']);
   var _ = require('lodash');
-  var getSavedSearchMeta =  require('ui/kibi/helpers/count_helper/lib/get_saved_search_meta');
   var chrome = require('ui/chrome');
 
   require('ui/kibi/directives/kibi_select');
@@ -33,16 +32,12 @@ define(function (require) {
       }
 
       // Update the counts on each button of the related filter
-      var _updateCounts = function () {
-        if (!$scope.buttons || !$scope.buttons.length) {
-          return Promise.resolve('no buttons');
+      var _updateCounts = function (buttons, currentDashboardId) {
+        if ($scope.configMode || !buttons || !buttons.length) {
+          return Promise.resolve([]);
         }
-        if ($scope.configMode) {
-          return Promise.resolve('configMode');
-        }
-        var currentDashboardId = urlHelper.getCurrentDashboardId();
 
-        var countQueries = _.map($scope.buttons, function (button) {
+        var countQueries = _.map(buttons, function (button) {
           return urlHelper.getDashboardAndSavedSearchMetas([ currentDashboardId ]).then(([ { savedDash, savedSearchMeta } ]) => {
             // check that there are any join_seq filters already on this dashboard
             //    if there is 0:
@@ -56,44 +51,43 @@ define(function (require) {
             //      - new relation from current dashboard to target dashboard
 
             var existingJoinFilters = _.cloneDeep(urlHelper.getFiltersOfType('join_sequence'));
+            const dashboardId = savedDash.id;
             if (existingJoinFilters.length === 0) {
 
-              return relVisHelper.buildNewJoinSeqFilter(button, savedSearchMeta)
-                .then(function (joinSeqFilter) {
-                  button.joinSeqFilter = joinSeqFilter;
-                  return relVisHelper.buildCountQuery(button.redirectToDashboard, joinSeqFilter)
-                    .then(function (query) {
-                      return Promise.resolve({
-                        query: query.query,
-                        button: button
-                      });
-                    });
+              return relVisHelper.buildNewJoinSeqFilter({ dashboardId, button, savedSearchMeta })
+              .then(function (joinSeqFilter) {
+                button.joinSeqFilter = joinSeqFilter;
+                return relVisHelper.buildCountQuery(button.redirectToDashboard, joinSeqFilter)
+                .then(function (query) {
+                  return Promise.resolve({
+                    query: query.query,
+                    button: button
+                  });
                 });
+              });
 
             } else if (existingJoinFilters.length === 1) {
-
-              return relVisHelper.addRelationToJoinSeqFilter(button, savedSearchMeta, existingJoinFilters[0])
-                .then(function (joinSeqFilter) {
-                  button.joinSeqFilter = joinSeqFilter;
-                  return relVisHelper.buildCountQuery(button.redirectToDashboard, joinSeqFilter)
-                    .then(function (query) {
-                      return Promise.resolve({
-                        query: query.query,
-                        button: button
-                      });
-                    });
+              const joinSeqFilter = existingJoinFilters[0];
+              return relVisHelper.addRelationToJoinSeqFilter({ dashboardId, button, savedSearchMeta, joinSeqFilter })
+              .then(function (joinSeqFilter) {
+                button.joinSeqFilter = joinSeqFilter;
+                return relVisHelper.buildCountQuery(button.redirectToDashboard, joinSeqFilter)
+                .then(function (query) {
+                  return Promise.resolve({
+                    query: query.query,
+                    button: button
+                  });
                 });
+              });
 
-            } else if (existingJoinFilters.length > 1) {
+            } else {
 
               // build join sequence + add a group of sequances to the top of the array
-              return relVisHelper.buildNewJoinSeqFilter(button, savedSearchMeta).then(function (joinSeqFilter) {
-
+              return relVisHelper.buildNewJoinSeqFilter({ dashboardId, button, savedSearchMeta })
+              .then(function (joinSeqFilter) {
                 // here create a group from existing ones and add it on the top
-
                 var group = relVisHelper.composeGroupFromExistingJoinFilters(existingJoinFilters);
                 joinSeqFilter.join_sequence.unshift(group);
-
                 button.joinSeqFilter = joinSeqFilter;
                 return relVisHelper.buildCountQuery(button.redirectToDashboard, joinSeqFilter).then(function (query) {
                   return Promise.resolve({
@@ -138,50 +132,28 @@ define(function (require) {
                 }
               }
             });
+            return _.map(results, (result) => result.button);
           });
         }).catch(notify.error);
       };
 
-
-      var _updateSourceCount = function () {
-        // here instead of relaying on others make a query and get the correct count for current dashboard
-        var joinSequenceFilter = _.cloneDeep(urlHelper.getFiltersOfType('join_sequence'));
-        return relVisHelper.buildCountQuery(currentDashboardId, joinSequenceFilter).then(function (query) {
-          var queryS = '{"index" : "' + query.index + '"}\n';
-          queryS += JSON.stringify(query.query) + '\n';
-          return $http.post(chrome.getBasePath() + '/elasticsearch/_msearch?getSourceCountForJoinSeqFilter', queryS)
-          .then(function (response) {
-            const data = response.data;
-            if (data.responses && data.responses.length === 1 && data.responses[0].hits) {
-              const hit = data.responses[0];
-              if (hit.error) {
-                notify.error(JSON.stringify(hit.error, null, ' '));
-                return;
-              }
-              _.each($scope.buttons, function (button) {
-                button.sourceCount = hit.hits.total;
-              });
-            }
-          });
-        });
-      };
-
       var _constructButtons = function () {
         $scope.vis.error = '';
-        if (currentDashboardId) {
-          // check that current dashboard has assigned indexPatternId
-          // use find to minimize numner of requests
+        if (!$scope.configMode) {
           return urlHelper.getDashboardAndSavedSearchMetas([ currentDashboardId ]).then(([ { savedDash, savedSearchMeta } ]) => {
             const index = savedSearchMeta.index;
-            $scope.buttons = relVisHelper.constructButtonsArray($scope.vis.params.buttons, index);
-            if (!$scope.buttons.length) {
+            const buttons = relVisHelper.constructButtonsArray($scope.vis.params.buttons, index);
+            // retain the buttons order
+            for (let i = 0; i < buttons.length; i++) {
+              buttons[i].btnIndex = i;
+            }
+            if (!buttons.length) {
               const msg = `The relational filter visualization "${$scope.vis.title}" is not configured for this dashboard. ` +
                 `No button has a source index set to ${index}.`;
               $scope.vis.error = msg;
               notify.error(msg);
-              return;
             }
-            return _updateSourceCount();
+            return buttons;
           }).catch(notify.error);
         } else {
           $scope.buttons = relVisHelper.constructButtonsArray($scope.vis.params.buttons);
@@ -189,7 +161,7 @@ define(function (require) {
       };
 
       var off = $rootScope.$on('kibi:dashboard:changed', function (event, dashId) {
-        _updateCounts();
+        _updateCounts($scope.buttons, currentDashboardId);
       });
       $scope.$on('$destroy', off);
 
@@ -198,17 +170,39 @@ define(function (require) {
         if ($scope.configMode) {
           return;
         }
+        let promise;
         if (!$scope.buttons || !$scope.buttons.length) {
-          _constructButtons().then(() => _updateCounts()).catch(notify.error);
+          promise = _constructButtons();
         } else {
-          _updateCounts().then(() => _updateSourceCount()).catch(notify.error);
+          promise = Promise.resolve($scope.buttons);
         }
+        promise
+        .then((buttons) => _updateCounts(buttons, currentDashboardId))
+        .then((buttons) => {
+          // http://stackoverflow.com/questions/20481327/data-is-not-getting-updated-in-the-view-after-promise-is-resolved
+          // assign data to $scope.buttons once the promises are done
+          $scope.buttons = new Array(buttons.length);
+          const getSourceCount = function (currentDashboardId) {
+            const virtualButton = {
+              sourceField: this.targetField,
+              sourceIndexPatternId: this.targetIndexPatternId,
+              targetField: this.sourceField,
+              targetIndexPatternId: this.sourceIndexPatternId,
+              redirectToDashboard: currentDashboardId
+            };
+            return _updateCounts([ virtualButton ], this.redirectToDashboard).then(() => virtualButton.targetCount).catch(notify.error);
+          };
+          for (let i = 0; i < buttons.length; i++) {
+            buttons[i].getSourceCount = getSourceCount;
+            // Returns the count of documents involved in the join
+            $scope.buttons[buttons[i].btnIndex] = buttons[i];
+          }
+        })
+        .catch(notify.error);
       });
 
       $scope.$watch('vis.params.buttons', function () {
-        if ($scope.configMode) {
-          _constructButtons();
-        }
+        _constructButtons();
       }, true);
     });
 });

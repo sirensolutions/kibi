@@ -137,8 +137,9 @@ define(function (require) {
             return;
           }
 
-          kibiStateHelper.saveFiltersForDashboardId(urlHelper.getCurrentDashboardId(), urlHelper.getCurrentDashboardFilters());
-          kibiStateHelper.saveQueryForDashboardId(urlHelper.getCurrentDashboardId(), urlHelper.getCurrentDashboardQuery());
+          const currentDashboardId = urlHelper.getCurrentDashboardId();
+          kibiStateHelper.saveFiltersForDashboardId(currentDashboardId, urlHelper.getDashboardFilters(currentDashboardId));
+          kibiStateHelper.saveQueryForDashboardId(currentDashboardId, urlHelper.getDashboardQuery(currentDashboardId));
 
           // check that changes on the same dashboard require counts update
           if (urlHelper.shouldUpdateCountsBasedOnLocation(oldUrl, newUrl)) {

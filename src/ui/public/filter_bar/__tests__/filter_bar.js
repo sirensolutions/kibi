@@ -72,16 +72,8 @@ describe('Filter Bar Directive', function () {
     });
   });
 
-  describe('Element rendering', function () {
-    beforeEach(function (done) {
-      var filters = [
-        { meta: { index: 'logstash-*' }, query: { match: { '_type': { query: 'apache' } } } },
-        { meta: { index: 'logstash-*' }, query: { match: { '_type': { query: 'nginx' } } } },
-        { meta: { index: 'logstash-*' }, exists: { field: '@timestamp' } },
-        { meta: { index: 'logstash-*' }, missing: { field: 'host' }, disabled: true },
-        { meta: { index: 'logstash-*', alias: 'foo' }, query: { match: { '_type': { query: 'nginx' } } } },
-      ];
-
+  function init(filters) {
+    return function (done) {
       Promise.map(filters, mapFilter).then(function (filters) {
         appState.filters = filters;
         $el = $compile('<filter-bar></filter-bar>')($rootScope);
@@ -96,7 +88,59 @@ describe('Filter Bar Directive', function () {
 
       // kick off the digest loop
       $rootScope.$digest();
+    };
+  }
+
+  describe('join sequence alias', function () {
+
+    beforeEach(() => init([
+      {
+        meta: {
+          index: 'logstash-*',
+          alias: '123 articles',
+          alias_tmpl: '$COUNT articles'
+        },
+        join_sequence: {
+          reverse: _.noop
+        }
+      },
+      {
+        meta: {
+          index: 'logstash-*'
+        },
+        exists: {
+          field: '@timestamp'
+        }
+      }
+    ])());
+
+    it('should leave the alias as is', function () {
+      expect($scope.state.filters[0].meta.alias).to.be('123 articles');
     });
+
+    it('should replace the count with dots if a filter is added', function () {
+      expect($scope.state.filters[0].meta.alias).to.be('123 articles');
+      $scope.state.filters.push({ meta: { index: 'logstash-*' }, query: { match: { '_type': { query: 'apache' } } } });
+      $scope.$digest();
+      expect($scope.state.filters[0].meta.alias).to.be('... articles');
+    });
+
+    it('should replace the count with dots if a filter is removed', function () {
+      expect($scope.state.filters[0].meta.alias).to.be('123 articles');
+      $scope.state.filters.pop();
+      $scope.$digest();
+      expect($scope.state.filters[0].meta.alias).to.be('... articles');
+    });
+  });
+
+  describe('Element rendering', function () {
+    beforeEach(() => init([
+      { meta: { index: 'logstash-*' }, query: { match: { '_type': { query: 'apache' } } } },
+      { meta: { index: 'logstash-*' }, query: { match: { '_type': { query: 'nginx' } } } },
+      { meta: { index: 'logstash-*' }, exists: { field: '@timestamp' } },
+      { meta: { index: 'logstash-*' }, missing: { field: 'host' }, disabled: true },
+      { meta: { index: 'logstash-*', alias: 'foo' }, query: { match: { '_type': { query: 'nginx' } } } },
+    ])());
 
     it('should render all the filters in state', function () {
       var filters = $el.find('.filter');

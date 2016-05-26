@@ -425,36 +425,61 @@ define(function (require) {
       return this._objectsFromDashboardsWithSameIndexInEnabledRelations(dashboardId, this._getQueriesFromDashboard);
     };
 
-    UrlHelper.prototype.getCurrentDashboardQuery = function () {
-      var currentDashboardId = this.getCurrentDashboardId();
-      if (!currentDashboardId) {
+    UrlHelper.prototype.getDashboardQuery = function (dashboardId) {
+      if (!dashboardId) {
         return;
       }
 
       var s = $location.search();
+      var g = s._g;
       var a = s._a;
 
-      if (a) {
+      if (this.getCurrentDashboardId() === dashboardId && a) {
         var decodedA = rison.decode(a);
         return decodedA.query;
+      } else if (g) {
+        var decodedG = rison.decode(g);
+        var q = decodedG.k.d[dashboardId] ? decodedG.k.d[dashboardId].q : null;
+        if (q) {
+          if (q !== '*') {
+            return q;
+          } else if (q === '*') {
+            // if '*' was stored make it again full query
+            return {
+              query_string: {
+                analyze_wildcard: true,
+                query: '*'
+              }
+            };
+          }
+        }
       }
       return null;
     };
 
-    UrlHelper.prototype.getCurrentDashboardFilters = function () {
-      var currentDashboardId = this.getCurrentDashboardId();
-      if (!currentDashboardId) {
+    UrlHelper.prototype.getDashboardFilters = function (dashboardId) {
+      if (!dashboardId) {
         return;
       }
       var s = $location.search();
+      var g = s._g;
       var a = s._a;
-      if (a) {
+
+      var filters;
+      if (this.getCurrentDashboardId() === dashboardId && a) {
         var decodedA = rison.decode(a);
-        if (decodedA.filters) {
-          return _.filter(decodedA.filters, function (f) {
-            return f.meta && f.meta.disabled !== true;
-          });
+        filters = decodedA.filters;
+      } else if (g) {
+        var decodedG = rison.decode(g);
+        if (decodedG.k.d[dashboardId] && decodedG.k.d[dashboardId].f) {
+          filters = decodedG.k.d[dashboardId].f;
         }
+      }
+
+      if (filters) {
+        return _.filter(filters, function (f) {
+          return f.meta && f.meta.disabled !== true;
+        });
       }
       return null;
     };

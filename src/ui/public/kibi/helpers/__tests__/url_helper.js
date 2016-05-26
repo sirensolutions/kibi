@@ -775,37 +775,26 @@ describe('Kibi Components', function () {
         expect(urlHelper.getCurrentDashboardId()).to.equal(undefined);
       });
 
-      it('getCurrentDashboardFilters', function () {
-        $location.url('/dashboard/dashboard1/?_a=(filters:!((meta:(),join_set:())))');
+      it('getDashboardFilters', function () {
+        $location.url('/dashboard/dashboard1?_a=(filters:!((meta:(),join_set:())))');
         var expected = [
           {
             meta:{},
             join_set: {}
           }
         ];
-        expect(urlHelper.getCurrentDashboardFilters()).to.eql(expected);
+        expect(urlHelper.getDashboardFilters('dashboard1')).to.eql(expected);
       });
 
-      it('getCurrentDashboardFilters when not on dasgboard', function () {
-        $location.url('/notdashboard/XXX/?_a=(filters:!((meta:(),join_set:())))');
-        expect(urlHelper.getCurrentDashboardFilters()).to.eql(undefined);
-      });
-
-      it('getCurrentDashboardQuery', function () {
-        $location.url('/dashboard/dashboard1/?_a=(query:(query_string:(query:\'AAA\')))');
+      it('getDashboardQuery', function () {
+        $location.url('/dashboard/dashboard1?_a=(query:(query_string:(query:\'AAA\')))');
         var expected = {
           query_string: {
             query: 'AAA'
           }
         };
-        expect(urlHelper.getCurrentDashboardQuery()).to.eql(expected);
+        expect(urlHelper.getDashboardQuery('dashboard1')).to.eql(expected);
       });
-
-      it('getCurrentDashboardQuery when not in dashboard', function () {
-        $location.url('/notdashboard/dashboard1/?_a=(query:(query_string:(query:\'AAA\')))');
-        expect(urlHelper.getCurrentDashboardQuery()).to.eql(undefined);
-      });
-
     });
 
     describe('methods which maps indexes to dashboards', function () {

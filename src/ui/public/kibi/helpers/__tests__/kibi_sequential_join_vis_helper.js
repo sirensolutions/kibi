@@ -1,6 +1,7 @@
 var sinon = require('auto-release-sinon');
 var expect = require('expect.js');
 var ngMock = require('ngMock');
+var Promise = require('bluebird');
 
 var sequentialJoinVisHelper;
 var config;
@@ -43,7 +44,7 @@ function init(enableEnterprise = false) {
       sequentialJoinVisHelper = Private(require('ui/kibi/helpers/kibi_sequential_join_vis_helper'));
       var urlHelper = Private(require('ui/kibi/helpers/url_helper'));
       sinon.stub(urlHelper, 'getCurrentDashboardId').returns('dashboard 1');
-      sinon.stub(urlHelper, 'getCurrentDashboardQuery').returns({ query: { term: { aaa: 'bbb' } } });
+      sinon.stub(urlHelper, 'getDashboardQuery').returns({ query: { term: { aaa: 'bbb' } } });
     });
   };
 }
@@ -62,56 +63,135 @@ describe('Kibi Components', function () {
         expect(buttons).to.eql(expected);
       });
 
-      it('test that on click filter label is constructed when filterLabel empty', function () {
-        var index = 'index1';
-        var buttonDefs = [{
-          sourceIndexPatternId: index,
-          label: 'button 1',
-          sourceCount: 123
-        }];
-        var buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, index);
-        expect(buttons.length).to.equal(1);
-        var button = buttons[0];
-        expect(button.label).to.equal('button 1');
-        expect(button.sourceIndexPatternId).to.equal('index1');
-        expect(typeof button.click).to.equal('function');
+      describe('custom filter label', function () {
+        var index;
+        var buttonDefs;
+        function init() {
+          index = 'index1';
+          buttonDefs = [
+            {
+              sourceIndexPatternId: index,
+              label: 'button 1',
+              getSourceCount: sinon.stub().returns(Promise.resolve(123))
+            }
+          ];
+        }
 
-        // now add fake join filter
-        button.joinSeqFilter = {
-          meta: {
-            alias: ''
-          }
-        };
+        beforeEach(init);
 
-        button.click();
-        expect(button.joinSeqFilter.meta.alias).to.eql('... related to (123) from dashboard 1');
-      });
+        it('should set the default filter label if no custom is set', function (done) {
+          var buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, index);
+          expect(buttons.length).to.equal(1);
+          var button = buttons[0];
+          expect(button.label).to.equal('button 1');
+          expect(button.sourceIndexPatternId).to.equal('index1');
+          expect(typeof button.click).to.equal('function');
 
-      it('test that on click filter label is constructed when filterLabel defined', function () {
-        var index = 'index1';
-        var buttonDefs = [{
-          sourceIndexPatternId: index,
-          label: 'button 1',
-          sourceCount: 123,
-          filterLabel: 'My custom label with placeholders $COUNT $DASHBOARD'
-        }];
-        var buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, index);
-        expect(buttons.length).to.equal(1);
-        var button = buttons[0];
-        expect(button.label).to.equal('button 1');
-        expect(button.sourceIndexPatternId).to.equal('index1');
-        expect(typeof button.click).to.equal('function');
+          // now add fake join filter
+          button.joinSeqFilter = {
+            meta: {
+              alias: ''
+            }
+          };
 
-        // now add fake join filter
-        button.joinSeqFilter = {
-          meta: {
-            alias: ''
-          }
-        };
+          button.click().then(() => {
+            expect(buttonDefs[0].getSourceCount.callCount).to.be(1);
+            expect(button.joinSeqFilter.meta.alias).to.eql('... related to (123) from dashboard 1');
+            done();
+          }).catch(done);
+        });
+
+        it('should replace both $COUNT and $DASHBOARD occurrences', function (done) {
+          buttonDefs[0].filterLabel = 'My custom label with placeholders $COUNT $DASHBOARD';
+          var buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, index);
+          expect(buttons.length).to.equal(1);
+          var button = buttons[0];
+          expect(button.label).to.equal('button 1');
+          expect(button.sourceIndexPatternId).to.equal('index1');
+          expect(typeof button.click).to.equal('function');
+
+          // now add fake join filter
+          button.joinSeqFilter = {
+            meta: {
+              alias: ''
+            }
+          };
 
 
-        button.click();
-        expect(button.joinSeqFilter.meta.alias).to.eql('My custom label with placeholders 123 dashboard 1');
+          button.click().then(() => {
+            expect(buttonDefs[0].getSourceCount.callCount).to.be(1);
+            expect(button.joinSeqFilter.meta.alias).to.eql('My custom label with placeholders 123 dashboard 1');
+            done();
+          }).catch(done);
+        });
+
+        it('should replace $DASHBOARD', function () {
+          buttonDefs[0].filterLabel = 'My custom label $DASHBOARD';
+          var buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, index);
+          expect(buttons.length).to.equal(1);
+          var button = buttons[0];
+          expect(button.label).to.equal('button 1');
+          expect(button.sourceIndexPatternId).to.equal('index1');
+          expect(typeof button.click).to.equal('function');
+
+          // now add fake join filter
+          button.joinSeqFilter = {
+            meta: {
+              alias: ''
+            }
+          };
+
+
+          button.click();
+          expect(buttonDefs[0].getSourceCount.callCount).to.be(0);
+          expect(button.joinSeqFilter.meta.alias).to.eql('My custom label dashboard 1');
+        });
+
+        it('should replace $COUNT', function (done) {
+          buttonDefs[0].filterLabel = 'My custom label $COUNT';
+          var buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, index);
+          expect(buttons.length).to.equal(1);
+          var button = buttons[0];
+          expect(button.label).to.equal('button 1');
+          expect(button.sourceIndexPatternId).to.equal('index1');
+          expect(typeof button.click).to.equal('function');
+
+          // now add fake join filter
+          button.joinSeqFilter = {
+            meta: {
+              alias: ''
+            }
+          };
+
+
+          button.click().then(() => {
+            expect(buttonDefs[0].getSourceCount.callCount).to.be(1);
+            expect(button.joinSeqFilter.meta.alias).to.eql('My custom label 123');
+            done();
+          }).catch(done);
+        });
+
+        it('should replace nothing', function () {
+          buttonDefs[0].filterLabel = 'My custom label';
+          var buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, index);
+          expect(buttons.length).to.equal(1);
+          var button = buttons[0];
+          expect(button.label).to.equal('button 1');
+          expect(button.sourceIndexPatternId).to.equal('index1');
+          expect(typeof button.click).to.equal('function');
+
+          // now add fake join filter
+          button.joinSeqFilter = {
+            meta: {
+              alias: ''
+            }
+          };
+
+
+          button.click();
+          expect(buttonDefs[0].getSourceCount.callCount).to.be(0);
+          expect(button.joinSeqFilter.meta.alias).to.eql('My custom label');
+        });
       });
 
     });
@@ -130,7 +210,8 @@ describe('Kibi Components', function () {
           query: { a: 123 },
           filter: []
         };
-        sequentialJoinVisHelper._getRelation(button, savedSearchMeta).then((rel) => {
+        const dashboardId = 'not-here';
+        sequentialJoinVisHelper._getRelation({ dashboardId, button, savedSearchMeta }).then((rel) => {
           expect(rel.relation).to.have.length(2);
           expect(rel.relation[0].indices).to.eql([ button.sourceIndexPatternId ]);
           expect(rel.relation[0].path).to.be(button.sourceField);
@@ -155,7 +236,8 @@ describe('Kibi Components', function () {
           query: '',
           filter: []
         };
-        sequentialJoinVisHelper._getRelation(button, savedSearchMeta).then((rel) => {
+        const dashboardId = 'not-here';
+        sequentialJoinVisHelper._getRelation({ dashboardId, button, savedSearchMeta }).then((rel) => {
           expect(rel.relation).to.have.length(2);
           expect(rel.relation[0].indices).to.eql([ button.sourceIndexPatternId ]);
           expect(rel.relation[0].path).to.be(button.sourceField);
@@ -201,7 +283,8 @@ describe('Kibi Components', function () {
           query: '',
           filter: []
         };
-        sequentialJoinVisHelper._getRelation(button, savedSearchMeta).then((rel) => {
+        const dashboardId = 'not-here';
+        sequentialJoinVisHelper._getRelation({ dashboardId, button, savedSearchMeta }).then((rel) => {
           expect(rel.relation).to.have.length(2);
           expect(rel.relation[0].indices).to.eql([ button.sourceIndexPatternId ]);
           expect(rel.relation[0].path).to.be(button.sourceField);

@@ -51,14 +51,9 @@ define(function (require) {
 
     DashboardGroupHelper.prototype._getOnClickForDashboardInGroup = function (dashboardId, groupId) {
       // here save which one was selected for
-      kibiStateHelper.saveFiltersForDashboardId(
-        urlHelper.getCurrentDashboardId(),
-        urlHelper.getCurrentDashboardFilters()
-      );
-      kibiStateHelper.saveQueryForDashboardId(
-        urlHelper.getCurrentDashboardId(),
-        urlHelper.getCurrentDashboardQuery()
-      );
+      const currentDashboardId = urlHelper.getCurrentDashboardId();
+      kibiStateHelper.saveFiltersForDashboardId(currentDashboardId, urlHelper.getDashboardFilters(currentDashboardId));
+      kibiStateHelper.saveQueryForDashboardId(currentDashboardId, urlHelper.getDashboardQuery(currentDashboardId));
 
       if (groupId) {
         kibiStateHelper.saveSelectedDashboardId(groupId, dashboardId);

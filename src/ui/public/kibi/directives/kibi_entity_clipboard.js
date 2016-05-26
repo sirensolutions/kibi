@@ -47,7 +47,8 @@ define(function (require) {
           globalState.save();
 
           // remove filters which depends on selected entities
-          var filters = _.filter(urlHelper.getCurrentDashboardFilters(), function (f) {
+          const currentDashboardId = urlHelper.getCurrentDashboardId();
+          var filters = _.filter(urlHelper.getDashboardFilters(currentDashboardId), function (f) {
             return f.meta.dependsOnSelectedEntities !== true;
           });
           urlHelper.replaceFiltersAndQueryAndTime(filters);

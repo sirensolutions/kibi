@@ -6,7 +6,10 @@ require('../kibi_entity_clipboard');
 describe('Kibi Components', function () {
   describe('Entity Clipboard', function () {
     var $rootScope;
+    var $location;
     var globalState;
+    var kibiStateHelper;
+    var urlHelper;
     var MockState = require('fixtures/mock_state');
     var _ = require('lodash');
 
@@ -29,9 +32,12 @@ describe('Kibi Components', function () {
           return globalState;
         });
       });
-      ngMock.inject(function (_$rootScope_, $compile) {
+      ngMock.inject(function (Private, _$location_, _$rootScope_, $compile) {
         $rootScope = _$rootScope_;
+        $location = _$location_;
         $compile('<kibi-entity-clipboard></kibi-entity-clipboard>')($rootScope);
+        kibiStateHelper = Private(require('ui/kibi/helpers/kibi_state_helper/kibi_state_helper'));
+        urlHelper = Private(require('ui/kibi/helpers/url_helper'));
       });
     }
 
@@ -73,6 +79,33 @@ describe('Kibi Components', function () {
       expect($rootScope.label).to.be(undefined);
       expect(globalState.entityDisabled).to.be(undefined);
       expect(globalState.se).to.be(undefined);
+    });
+
+    it('should remove the document and associated filters', function () {
+      init(false, ['index/type/id/column/label']);
+
+      $location.url('/dashboard/dashboard2?_a=(filters:!((filter:2,meta:()),(filter:3,meta:(dependsOnSelectedEntities:!t))))');
+      globalState.k = {
+        d: {
+          dashboard1: {
+            f: [ { filter: 1, meta: { dependsOnSelectedEntities: true } } ]
+          },
+          dashboard2: {
+            f: [ { filter: 2, meta: {} } ]
+          }
+        }
+      };
+      globalState.save();
+
+      $rootScope.removeAllEntities();
+
+      // appstate filters
+      const d2Filters = urlHelper.getDashboardFilters('dashboard2');
+      expect(d2Filters).to.eql([ { filter: 2, meta: {} } ]);
+      // globalstate filters
+      const allFilters = kibiStateHelper.getAllFilters();
+      expect(allFilters.dashboard1).to.have.length(0);
+      expect(allFilters.dashboard2).to.have.length(1);
     });
 
     it('should toggle the selected document', function () {

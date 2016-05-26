@@ -482,6 +482,25 @@ describe('Kibi Components', function () {
         $rootScope.$apply();
       });
 
+      it('replaceCurrentFilters', function (done) {
+        $location.url('/path/?_a=(query:(query_string:(query:AAA)),filters:!((join_set:())))');
+        urlHelper.replaceCurrentFilters([
+          {
+            term: {}
+          }
+        ]);
+
+        var expected = 'http://server/#/path/?_a=(filters:!((term:())),query:(query_string:(query:AAA)))&_g=(k:(d:(),g:(),j:!()))';
+
+        var off = $rootScope.$on('$locationChangeSuccess', function (event, newUrl, oldUrl) {
+          off();
+          expect(newUrl).to.equal(expected);
+          done();
+        });
+
+        $rootScope.$apply();
+      });
+
       it('replaceFiltersAndQueryAndTime _g not present', function (done) {
         $location.url('/path/?_a=(query:(query_string:(query:\'AAA\')),filters:!((join_set:())))');
         urlHelper.replaceFiltersAndQueryAndTime(

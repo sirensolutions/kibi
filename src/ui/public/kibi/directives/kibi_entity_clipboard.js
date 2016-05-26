@@ -9,6 +9,7 @@ define(function (require) {
   .directive('kibiEntityClipboard', function ($rootScope, $route, globalState, $http, Private) {
 
     var urlHelper = Private(require('ui/kibi/helpers/url_helper'));
+    var kibiStateHelper = Private(require('ui/kibi/helpers/kibi_state_helper/kibi_state_helper'));
 
     return {
       restrict: 'E',
@@ -48,10 +49,16 @@ define(function (require) {
 
           // remove filters which depends on selected entities
           const currentDashboardId = urlHelper.getCurrentDashboardId();
-          var filters = _.filter(urlHelper.getDashboardFilters(currentDashboardId), function (f) {
-            return f.meta.dependsOnSelectedEntities !== true;
+          const filters = kibiStateHelper.getAllFilters();
+          _.forOwn(filters, (dashFilters, dashboardId) => {
+            const filtersMinusEntities = _.filter(dashFilters, (f) => !f.meta.dependsOnSelectedEntities);
+            // update the appstate
+            if (currentDashboardId === dashboardId) {
+              urlHelper.replaceCurrentFilters(filtersMinusEntities);
+            }
+            // update the globalstate
+            kibiStateHelper.saveFiltersForDashboardId(dashboardId, filtersMinusEntities);
           });
-          urlHelper.replaceFiltersAndQueryAndTime(filters);
 
           // have to reload so all visualisations which might depend on selected entities
           // get refreshed

@@ -169,7 +169,7 @@ define(function (require) {
         var _render = function () {
           let promise;
 
-          if(ngModelCtrl.extendedObjectType) {
+          if (ngModelCtrl.extendedObjectType) {
             promise = ngModelCtrl.extendedObjectType(scope);
           }
 

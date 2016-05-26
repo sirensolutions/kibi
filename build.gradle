@@ -8,10 +8,24 @@ plugins {
   id "com.moowork.node" version "0.12"
 }
 
+apply plugin: 'distribution'
 apply plugin: 'maven-publish'
 apply plugin: 'groovy'
 
 import groovy.json.JsonSlurper
+
+///////////////////////////////////////////////////
+//                                               //
+//                Package Json                   //
+//                                               //
+///////////////////////////////////////////////////
+
+def loadPackageJson() {
+  File packageJson = new File(projectDir, "package.json")
+  return new JsonSlurper().parseText(packageJson.text)
+}
+
+def packageJson = loadPackageJson()
 
 ///////////////////////////////////////////////////
 //                                               //
@@ -20,13 +34,8 @@ import groovy.json.JsonSlurper
 ///////////////////////////////////////////////////
 
 allprojects {
-
-  // Read kibi version from the package.json file
-  File packageJson = new File(projectDir, "package.json")
-  def json = new JsonSlurper().parseText(packageJson.text)
-
   group = 'solutions.siren'
-  version = json.kibi_version
+  version = packageJson.kibi_version
 }
 
 ///////////////////////////////////////////////////
@@ -37,10 +46,10 @@ allprojects {
 
 node {
   // Version of node to use.
-  version = '0.12.10'
+  version = packageJson.engines.node
 
   // Version of npm to use.
-  npmVersion = '2.14.9'
+  npmVersion = packageJson.engines.npm
 
   // Base URL for fetching node distributions (change if you have a mirror).
   distBaseUrl = 'https://nodejs.org/dist'
@@ -69,6 +78,26 @@ npm_run_build.mustRunAfter npm_run_test
 
 ///////////////////////////////////////////////////
 //                                               //
+//                Distributions                  //
+//                                               //
+///////////////////////////////////////////////////
+
+distributions {
+
+  /**
+   * Distribution for the asiicdoc source of the documentation
+   */
+  srcDoc {
+    baseName = 'kibi-doc'
+    contents {
+      from { "docs" }
+    }
+  }
+
+}
+
+///////////////////////////////////////////////////
+//                                               //
 //                  Publishing                   //
 //                                               //
 ///////////////////////////////////////////////////
@@ -77,7 +106,7 @@ publishing {
   publications {
 
     /**
-     * Install Kibi distributions into maven local
+     * Install Kibi distribution for each platform into maven local
      */
 
     darwinX64(MavenPublication) {
@@ -113,6 +142,17 @@ publishing {
       groupId project.group
       artifactId "kibi-core"
       version "${project.version}-windows64"
+    }
+
+    /**
+     * Install source documentation into maven local
+     */
+
+    srcDoc(MavenPublication) {
+      artifact srcDocDistZip
+      groupId project.group
+      artifactId "kibi-doc"
+      version project.version
     }
 
   }

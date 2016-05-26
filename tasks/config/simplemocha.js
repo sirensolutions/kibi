@@ -3,7 +3,7 @@ module.exports = {
     timeout: 60000, // kibi: increased default timeout for jenkins build
     slow: 5000,
     ignoreLeaks: false,
-    reporter: 'list'
+    reporter: 'dot'
   },
   all: {
     src: [

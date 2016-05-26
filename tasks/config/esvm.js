@@ -3,10 +3,6 @@ module.exports = function (grunt) {
   var directory = resolve(__dirname, '../../esvm');
   var dataDir = resolve(directory, 'data_dir');
   var uiConfig = require('requirefrom')('test')('serverConfig');
-  var randomString = function () {
-    var crypto = require('crypto');
-    return crypto.randomBytes(4).toString('hex');
-  };
 
   return {
     options: {
@@ -34,7 +30,7 @@ module.exports = function (grunt) {
             data: dataDir
           },
           cluster: {
-            name: 'esvm-dev-' + randomString()
+            name: 'esvm-dev'
           }
         }
       }
@@ -48,7 +44,7 @@ module.exports = function (grunt) {
             port: 9210
           },
           cluster: {
-            name: 'esvm-test-' + randomString()
+            name: 'esvm-test'
           }
         }
       }
@@ -62,7 +58,7 @@ module.exports = function (grunt) {
             port: uiConfig.servers.elasticsearch.port
           },
           cluster: {
-            name: 'esvm-ui-' + randomString()
+            name: 'esvm-ui'
           }
         }
       }

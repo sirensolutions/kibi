@@ -34,6 +34,11 @@ define(function (require) {
         analyzedWarning:  '@'   // set to true or false to disable/enable analyzed field warning
       },
       template: require('ui/kibi/directives/kibi_select.html'),
+      controller: function () {
+        // One can use a decorator and override this method to add custom object types to the kibi-select
+        this.extendedObjectType = function (scope) {
+        };
+      },
       link: function (scope, element, attrs, ngModelCtrl) {
         scope.isValid = true;
         scope.required = scope.modelRequired;
@@ -162,62 +167,68 @@ define(function (require) {
         };
 
         var _render = function () {
-          var promise;
+          let promise;
 
-          switch (scope.objectType) {
-            case 'query':
-              promise = selectHelper.getQueries();
-              break;
-            case 'dashboard':
-              promise = selectHelper.getDashboards();
-              break;
-            case 'search':
-              promise = selectHelper.getSavedSearches();
-              break;
-            case 'template':
-              promise = selectHelper.getTemplates();
-              break;
-            case 'datasource':
-              promise = selectHelper.getDatasources();
-              break;
-            case 'indexPatternType':
-              promise = selectHelper.getIndexTypes(scope.indexPatternId);
-              break;
-            case 'field':
-              promise = selectHelper.getFields(scope.indexPatternId, scope.fieldTypes);
-              break;
-            case 'indexPattern':
-              promise = selectHelper.getIndexesId();
-              break;
-            case 'documentIds':
-              promise = selectHelper.getDocumentIds(scope.indexPatternId, scope.indexPatternType);
-              break;
-            case 'joinRelations':
-              promise = selectHelper.getJoinRelations();
-              break;
-            case 'queryVariable':
-              promise = selectHelper.getQueryVariables(scope.queryId);
+          if(ngModelCtrl.extendedObjectType) {
+            promise = ngModelCtrl.extendedObjectType(scope);
+          }
 
-              if (promise) {
-                promise = promise.then(function (data) {
-                  scope.getVariable = false;
-                  if (data.fields.length === 0 && data.datasourceType !== 'rest') { // either sparql or sql
-                    scope.linkToQuery = '#/settings/queries/' + scope.queryId;
-                    scope.getVariable = true;
-                  }
-                  return data.fields;
-                });
-              }
-              break;
-            case 'fontAwesomeIcon':
-              promise = selectHelper.getFontAwesomeIcon();
-              break;
-            case 'iconType':
-              promise = selectHelper.getIconType();
-              break;
-            case 'labelType':
-              promise = selectHelper.getLabelType();
-              break;
+          if (!promise) {
+            switch (scope.objectType) {
+              case 'query':
+                promise = selectHelper.getQueries();
+                break;
+              case 'dashboard':
+                promise = selectHelper.getDashboards();
+                break;
+              case 'search':
+                promise = selectHelper.getSavedSearches();
+                break;
+              case 'template':
+                promise = selectHelper.getTemplates();
+                break;
+              case 'datasource':
+                promise = selectHelper.getDatasources();
+                break;
+              case 'indexPatternType':
+                promise = selectHelper.getIndexTypes(scope.indexPatternId);
+                break;
+              case 'field':
+                promise = selectHelper.getFields(scope.indexPatternId, scope.fieldTypes);
+                break;
+              case 'indexPattern':
+                promise = selectHelper.getIndexesId();
+                break;
+              case 'documentIds':
+                promise = selectHelper.getDocumentIds(scope.indexPatternId, scope.indexPatternType);
+                break;
+              case 'joinRelations':
+                promise = selectHelper.getJoinRelations();
+                break;
+              case 'queryVariable':
+                promise = selectHelper.getQueryVariables(scope.queryId);
+
+                if (promise) {
+                  promise = promise.then(function (data) {
+                    scope.getVariable = false;
+                    if (data.fields.length === 0 && data.datasourceType !== 'rest') { // either sparql or sql
+                      scope.linkToQuery = '#/settings/queries/' + scope.queryId;
+                      scope.getVariable = true;
+                    }
+                    return data.fields;
+                  });
+                }
+                break;
+              case 'fontAwesomeIcon':
+                promise = selectHelper.getFontAwesomeIcon();
+                break;
+              case 'iconType':
+                promise = selectHelper.getIconType();
+                break;
+              case 'labelType':
+                promise = selectHelper.getLabelType();
+                break;
+            }
           }
 
           scope.retrieveError = '';

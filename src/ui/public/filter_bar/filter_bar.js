@@ -114,7 +114,7 @@ define(function (require) {
               // make sure the alias was unchanged
               if (filter.meta.alias_tmpl.replace('$COUNT', '') === base) {
                 filter.meta.alias = filter.meta.alias_tmpl.replace('$COUNT', '...');
-                filter.meta.alias_tmpl = '';
+                delete filter.meta.alias_tmpl;
               }
             }
           });

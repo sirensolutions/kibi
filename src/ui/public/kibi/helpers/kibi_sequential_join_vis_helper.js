@@ -157,6 +157,7 @@ define(function (require) {
 
 
     RelationVisHelper.prototype._getRelation = function ({ dashboardId, button, savedSearchMeta }) {
+      const sourceDashboardId = dashboardId;
       const ret = {
         relation: [
           {
@@ -166,7 +167,7 @@ define(function (require) {
               {
                 query: {
                   bool: {
-                    must: urlHelper.getDashboardQuery(dashboardId),
+                    must: urlHelper.getDashboardQuery(sourceDashboardId),
                     // will be created below if needed
                     must_not: [],
                     filter: {
@@ -196,7 +197,7 @@ define(function (require) {
         ret.relation
       );
 
-      var sourceFilters = _.filter(urlHelper.getDashboardFilters(dashboardId), function (f) {
+      var sourceFilters = _.filter(urlHelper.getDashboardFilters(sourceDashboardId), function (f) {
         // all except join_sequence
         return !f.join_sequence;
       });
@@ -227,7 +228,7 @@ define(function (require) {
       return indexPatterns.get(button.sourceIndexPatternId).then(function (indexPattern) {
         var sourceTimeFilter = timefilter.get(indexPattern);
         if (sourceTimeFilter) {
-          return kibiTimeHelper.updateTimeFilterForDashboard(dashboardId, sourceTimeFilter).then(function (updatedTimeFilter) {
+          return kibiTimeHelper.updateTimeFilterForDashboard(sourceDashboardId, sourceTimeFilter).then(function (updatedTimeFilter) {
             // add time filter
             ret.relation[0].queries[0].query.bool.filter.bool.must.push(updatedTimeFilter);
             return ret;

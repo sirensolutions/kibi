@@ -31,6 +31,8 @@ var init = function (entityUriHolder, mappings) {
     $provide.service('savedDashboards', function () {});
     $provide.service('savedSearches', function () {});
     $provide.service('savedTemplates', function () {});
+    // Needed to pass tests when Kibi Graph Browser is installed
+    $provide.service('savedScripts', function () {});
   });
 
   ngMock.module('kibana/courier', function ($provide) {

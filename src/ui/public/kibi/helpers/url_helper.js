@@ -102,22 +102,6 @@ define(function (require) {
       }
     };
 
-    UrlHelper.prototype.replaceCurrentFilters = function (filters) {
-      var s = $location.search();
-      var a = s._a;
-
-      if (a) {
-        var decodedA = rison.decode(a);
-        if (filters) {
-          decodedA.filters = filters;
-        } else {
-          decodedA.filters = [];
-        }
-        var encodedA = rison.encode(decodedA);
-        $location.search('_a', encodedA);
-      }
-    };
-
     UrlHelper.prototype.replaceFiltersAndQueryAndTime = function (filters, query, time) {
       var s = $location.search();
       var a = s._a;

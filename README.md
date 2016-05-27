@@ -23,6 +23,15 @@ a complete description of the demo is [available](http://siren.solutions/kibi/do
 Visit [siren.solutions](http://siren.solutions/kibi/docs) for the full Kibi
 documentation.
 
+## Compatibility Table Kibi / Elasticsearch
+
+Kibi | Elasticsearch
+--- | ---
+4.4.1 | 2.2.x, 2.3.x
+0.3.x | 2.2.x
+0.2.0 | 1.6, 1.7
+0.1.x | 1.6, 1.7
+
 ## License
 
 Copyright 2015–2016 SIREn Solutions

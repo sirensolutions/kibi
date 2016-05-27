@@ -1,0 +1,159 @@
+///////////////////////////////////////////////////
+//                                               //
+//             Dependency Details                //
+//                                               //
+///////////////////////////////////////////////////
+
+plugins {
+  id "com.moowork.node" version "0.12"
+}
+
+apply plugin: 'distribution'
+apply plugin: 'maven-publish'
+apply plugin: 'groovy'
+
+import groovy.json.JsonSlurper
+
+///////////////////////////////////////////////////
+//                                               //
+//                Package Json                   //
+//                                               //
+///////////////////////////////////////////////////
+
+def loadPackageJson() {
+  File packageJson = new File(projectDir, "package.json")
+  return new JsonSlurper().parseText(packageJson.text)
+}
+
+def packageJson = loadPackageJson()
+
+///////////////////////////////////////////////////
+//                                               //
+//               Project Details                 //
+//                                               //
+///////////////////////////////////////////////////
+
+allprojects {
+  group = 'solutions.siren'
+  version = packageJson.kibi_version
+}
+
+///////////////////////////////////////////////////
+//                                               //
+//                    NodeJS                     //
+//                                               //
+///////////////////////////////////////////////////
+
+node {
+  // Version of node to use.
+  version = packageJson.engines.node
+
+  // Version of npm to use.
+  npmVersion = packageJson.engines.npm
+
+  // Base URL for fetching node distributions (change if you have a mirror).
+  distBaseUrl = 'https://nodejs.org/dist'
+
+  // If true, it will download node using above parameters.
+  // If false, it will try to use globally installed node.
+  download = true
+
+  // Set the work directory for unpacking node
+  workDir = file("${buildDir}/nodejs")
+
+  // Set the work directory where node_modules should be located
+  nodeModulesDir = file("${projectDir}")
+}
+
+///////////////////////////////////////////////////
+//                                               //
+//                  Main Tasks                   //
+//                                               //
+///////////////////////////////////////////////////
+
+task build(dependsOn: [npmInstall, npm_run_test, npm_run_build]) << {}
+
+npm_run_test.mustRunAfter npmInstall
+npm_run_build.mustRunAfter npm_run_test
+
+///////////////////////////////////////////////////
+//                                               //
+//                Distributions                  //
+//                                               //
+///////////////////////////////////////////////////
+
+distributions {
+
+  /**
+   * Distribution for the asiicdoc source of the documentation
+   */
+  srcDoc {
+    baseName = 'kibi-doc'
+    contents {
+      from { "docs" }
+    }
+  }
+
+}
+
+///////////////////////////////////////////////////
+//                                               //
+//                  Publishing                   //
+//                                               //
+///////////////////////////////////////////////////
+
+publishing {
+  publications {
+
+    /**
+     * Install Kibi distribution for each platform into maven local
+     */
+
+    darwinX64(MavenPublication) {
+      artifact new File("${projectDir}/target", "kibi-${project.version}-darwin-x64.zip")
+      groupId project.group
+      artifactId "kibi-core"
+      version "${project.version}-darwin-x64"
+    }
+
+    linuxX64(MavenPublication) {
+      artifact new File("${projectDir}/target", "kibi-${project.version}-linux-x64.zip")
+      groupId project.group
+      artifactId "kibi-core"
+      version "${project.version}-linux-x64"
+    }
+
+    linuxX86(MavenPublication) {
+      artifact new File("${projectDir}/target", "kibi-${project.version}-linux-x86.zip")
+      groupId project.group
+      artifactId "kibi-core"
+      version "${project.version}-linux-x86"
+    }
+
+    windows(MavenPublication) {
+      artifact new File("${projectDir}/target", "kibi-${project.version}-windows.zip")
+      groupId project.group
+      artifactId "kibi-core"
+      version "${project.version}-windows"
+    }
+
+    windows64(MavenPublication) {
+      artifact new File("${projectDir}/target", "kibi-${project.version}-windows64.zip")
+      groupId project.group
+      artifactId "kibi-core"
+      version "${project.version}-windows64"
+    }
+
+    /**
+     * Install source documentation into maven local
+     */
+
+    srcDoc(MavenPublication) {
+      artifact srcDocDistZip
+      groupId project.group
+      artifactId "kibi-doc"
+      version project.version
+    }
+
+  }
+}

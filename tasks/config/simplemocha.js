@@ -1,6 +1,6 @@
 module.exports = {
   options: {
-    timeout: 10000,
+    timeout: 60000, // kibi: increased default timeout for jenkins build
     slow: 5000,
     ignoreLeaks: false,
     reporter: 'dot'

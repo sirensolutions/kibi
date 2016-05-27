@@ -5,10 +5,8 @@ define(function (require) {
   var rison = require('ui/utils/rison');
   var _ = require('lodash');
 
-  return function UrlHelperFactory(
-    Private, $location, $route, sessionStorage, savedDashboards,
-    savedSearches, Promise, config, kbnDefaultAppId, kibiDefaultDashboardId, timefilter
-  ) {
+  return function UrlHelperFactory(Private, $location, $route, savedDashboards,
+    savedSearches, Promise, config, kbnDefaultAppId, kibiDefaultDashboardId, timefilter) {
     var kibiStateHelper = Private(require('ui/kibi/helpers/kibi_state_helper/kibi_state_helper'));
     var kibiTimeHelper = Private(require('ui/kibi/helpers/kibi_time_helper'));
 
@@ -117,6 +115,7 @@ define(function (require) {
         }
 
         // replace only if the query object is present else remove it
+        // the reason is when I switch dashboards, the current query should not be applied in the dashboard I move to
         if (query === undefined) {
           delete decodedA.query;
         } else {

@@ -162,6 +162,12 @@ define(function (require) {
 
         function updateFilters() {
           var filters = queryFilter.getFilters();
+
+          var prevDependsOnSelectedEntitiesDisabled = new Promise((resolve, reject) => {
+            resolve(_.map(filters, (filter) => filter.meta.dependsOnSelectedEntitiesDisabled));
+          });
+          var markFilters = prevDependsOnSelectedEntitiesDisabled.then(() => markFiltersBySelectedEntities(filters));
+
           mapAndFlattenFilters(filters).then(function (results) {
             // used to display the current filters in the state
             $scope.filters = _.sortBy(results, function (filter) {
@@ -175,7 +181,19 @@ define(function (require) {
             return joinExplain.initQtip(explanations);
           })
           // kibi: added by kibi to mark filters which depends on selected entities
-          .then(markFiltersBySelectedEntities(filters))
+          .then(() => Promise.all([
+            prevDependsOnSelectedEntitiesDisabled,
+            markFilters
+          ]))
+          // kibi: disable/enable filters that are dependent on the selected entity
+          .then(([ prev, filters ]) => {
+            _.each(filters, (filter, i) => {
+              if (prev[i] !== filter.meta.dependsOnSelectedEntitiesDisabled &&
+                  !filter.meta.disabled === filter.meta.dependsOnSelectedEntitiesDisabled) {
+                $scope.toggleFilter(filter);
+              }
+            });
+          })
           .then(function () {
             $scope.$emit('filterbar:updated');
           });

@@ -8,36 +8,45 @@ describe('Kibi Components', function () {
     var $rootScope;
     var $location;
     var globalState;
+    var appState;
     var kibiStateHelper;
-    var urlHelper;
     var MockState = require('fixtures/mock_state');
     var _ = require('lodash');
 
     function init(entityDisabled, selectedEntities) {
-      ngMock.module('kibana', function ($provide) {
-        $provide.constant('kbnDefaultAppId', '');
-        $provide.constant('kibiDefaultDashboardId', '');
-        $provide.service('$route', function () {
-          return {
-            reload: _.noop
-          };
-        });
-      });
-      ngMock.module('kibana/global_state', function ($provide) {
-        $provide.service('globalState', function () {
+      ngMock.module(
+        'kibana',
+        'kibana/courier',
+        'kibana/global_state',
+        function ($provide) {
+          $provide.constant('kbnDefaultAppId', '');
+          $provide.constant('kibiDefaultDashboardId', '');
+          $provide.service('$route', function () {
+            return {
+              reload: _.noop
+            };
+          });
+
+          appState = new MockState({ filters: [] });
+          $provide.service('getAppState', function () {
+            return function () { return appState; };
+          });
+
           globalState = new MockState({
             se: selectedEntities,
             entityDisabled: entityDisabled,
           });
-          return globalState;
-        });
-      });
+          $provide.service('globalState', function () {
+            return globalState;
+          });
+        }
+      );
+
       ngMock.inject(function (Private, _$location_, _$rootScope_, $compile) {
         $rootScope = _$rootScope_;
         $location = _$location_;
         $compile('<kibi-entity-clipboard></kibi-entity-clipboard>')($rootScope);
         kibiStateHelper = Private(require('ui/kibi/helpers/kibi_state_helper/kibi_state_helper'));
-        urlHelper = Private(require('ui/kibi/helpers/url_helper'));
       });
     }
 
@@ -100,8 +109,7 @@ describe('Kibi Components', function () {
       $rootScope.removeAllEntities();
 
       // appstate filters
-      const d2Filters = urlHelper.getDashboardFilters('dashboard2');
-      expect(d2Filters).to.eql([ { filter: 2, meta: {} } ]);
+      expect(appState.filters).to.eql([ { filter: 2, meta: {} } ]);
       // globalstate filters
       const allFilters = kibiStateHelper.getAllFilters();
       expect(allFilters.dashboard1).to.have.length(0);

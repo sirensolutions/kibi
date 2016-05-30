@@ -5,6 +5,7 @@ var exposeClient = require('./expose_client');
 var migrateConfig = require('./migrate_config');
 var createKibanaIndex = require('./create_kibana_index');
 var checkEsVersion = require('./check_es_version');
+var pluginList = require('./wait_plugin_list');
 var NoConnections = elasticsearch.errors.NoConnections;
 var util = require('util');
 var format = util.format;
@@ -51,42 +52,12 @@ module.exports = function (plugin, server) {
     });
   }
 
-  // Kibi: get the list of plugins
-  function waitForPluginList() {
-    return Promise.all([ client.cat.nodes({'h': 'name'}), client.cat.plugins({'h': 'component'}) ])
-    .then((results) => {
-      let elasticsearchPlugins = [];
-
-      if (results && results[0] && results[1]) {
-        const nodes = results[0].split('\n').filter((node) => !!node);
-        const pluginCounts = results[1].split('\n')
-        .filter((plugin) => !!plugin)
-        .map((plugin) => plugin.trim())
-        .reduce((prev, curr, index, array) => {
-          if (prev[curr]) {
-            prev[curr] += 1;
-          } else {
-            prev[curr] = 1;
-          }
-          return prev;
-        }, {});
-
-        for (let pluginName in pluginCounts) {
-          if (pluginCounts[pluginName] === nodes.length) {
-            elasticsearchPlugins.push(pluginName);
-          }
-        }
-      }
-      config.set('elasticsearch.plugins', elasticsearchPlugins);
-    }).catch(server.log);
-  }
-
   function check() {
     return waitForPong()
     .then(_.partial(checkEsVersion, server))
     .then(waitForShards)
     .then(_.partial(migrateConfig, server))
-    .then(waitForPluginList)
+    .then(_.partial(pluginList, plugin, server))
     .catch(err => plugin.status.red(err));
   }
 

@@ -36,6 +36,8 @@ define(function (require) {
     template: require('plugins/kibana/dashboard/index.html'),
     resolve: {
       dash: function (timefilter, savedDashboards, config) {
+        // kibi: do not show the timepicker when no dashboard is selected
+        // Since tabs can show counts unrelated to the time shown in the timefilter, this would be misleading
         timefilter.enabled = false;
         return savedDashboards.get();
       }
@@ -45,6 +47,7 @@ define(function (require) {
     template: require('plugins/kibana/dashboard/index.html'),
     resolve: {
       dash: function (timefilter, savedDashboards, Notifier, $route, $location, courier) {
+        // kibi: show the timepicker when loading a dashboard
         timefilter.enabled = true;
         return savedDashboards.get($route.current.params.id)
         .catch(courier.redirectWhenMissing({
@@ -69,6 +72,9 @@ define(function (require) {
 
         var dashboardTimeFilter = kibiStateHelper.getTimeForDashboardId(dash.id);
         if (dashboardTimeFilter) {
+          // kibi: time from the kibi state.
+          // this allows to set a time (not save it with a dashboard), switch between dashboards, and
+          // still retain the time set until the app is reloaded
           timefilter.time.mode = dashboardTimeFilter.mode;
           timefilter.time.to = dashboardTimeFilter.to;
           timefilter.time.from = dashboardTimeFilter.from;
@@ -78,7 +84,7 @@ define(function (require) {
           timefilter.time.from = dash.timeFrom;
         }
 
-        // below listener on globalState is needed to react when the global time is changed by the user
+        // kibi: below listener on globalState is needed to react when the global time is changed by the user
         // either directly in time widget or by clicking on histogram chart etc
         var saveWithChangesHandler = function (diff) {
           if (dash.id && diff.indexOf('time') !== -1 && timefilter.time.from && timefilter.time.to) {
@@ -100,6 +106,7 @@ define(function (require) {
           if (filter) return filter.query;
         };
 
+        // kibi: get the filters and query from the kibi state
         var dashboardQuery = kibiStateHelper.getQueryForDashboardId(dash.id);
         var dashboardFilters = kibiStateHelper.getFiltersForDashboardId(dash.id);
         if (dashboardFilters && !dashboardFilters.length) {
@@ -111,7 +118,9 @@ define(function (require) {
           panels: dash.panelsJSON ? JSON.parse(dash.panelsJSON) : [],
           options: dash.optionsJSON ? JSON.parse(dash.optionsJSON) : {},
           uiState: dash.uiStateJSON ? JSON.parse(dash.uiStateJSON) : {},
+          // kibi: get the query from the kibi state, and if unset get the one the searchsource
           query: dashboardQuery || extractQueryFromFilters(dash.searchSource.getOwn('filter')) || {query_string: {query: '*'}},
+          // kibi: get the filters from the kibi state, and if unset get the one the searchsource
           filters: dashboardFilters || _.reject(dash.searchSource.getOwn('filter'), matchQueryFilter)
         };
 
@@ -152,6 +161,7 @@ define(function (require) {
         }, true);
 
         $scope.$on('$destroy', function () {
+          // kibi: remove the listener on globalstate
           globalState.off('save_with_changes', saveWithChangesHandler);
           dash.destroy();
           stDashboardInvokeMethodOff();
@@ -255,6 +265,7 @@ define(function (require) {
 
           dash.panelsJSON = angular.toJson($state.panels);
           dash.uiStateJSON = angular.toJson($uiState.getChanges());
+          // kibi: save the timepicker mode
           dash.timeMode = dash.timeRestore ? timefilter.time.mode : undefined;
           dash.timeFrom = dash.timeRestore ? timefilter.time.from : undefined;
           dash.timeTo = dash.timeRestore ? timefilter.time.to : undefined;

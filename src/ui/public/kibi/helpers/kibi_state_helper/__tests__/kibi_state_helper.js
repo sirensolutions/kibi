@@ -31,46 +31,6 @@ describe('Kibi Components', function () {
 
     beforeEach(init(savedDashboards));
 
-    it('is time for current dashboard is NOT updated when globalState time changed but we called destroy on the helper', function (done) {
-      // first call destroy to make sure
-      // state is not updated on save_with_changes
-      kibiStateHelper.destroyHandlers();
-
-      var dashboardWithTimeId = 'time-testing-2';
-      var expected = {
-        from: 'now-15y',
-        to: 'now'
-      };
-
-      // now listen on save_with_changes which should be called only once
-      var counter = 0;
-      globalState.on('save_with_changes', function (diff) {
-        if (diff.indexOf('k') !== -1) {
-          counter++;
-          expect(kibiStateHelper.getTimeForDashboardId(dashboardWithTimeId)).to.eql(expected);
-        }
-      });
-
-      // now update global time
-      globalState.time = {
-        from: 'now-123',
-        to: 'now-97'
-      };
-      globalState.save();
-
-      $timeout.flush(); // kibiStateHelper uses the $timeout flush the queue of the $timeout service
-      $rootScope.$apply();
-
-      // after 250 ms check that save_with_changes was called only once and the time for dashboard did not changed
-      setTimeout(function () {
-        expect(counter).to.equal(2); // the second call comes from updating kibi_session
-        expect(kibiStateHelper.getTimeForDashboardId(dashboardWithTimeId)).to.eql(expected);
-        done();
-      }, 100);
-    });
-
-
-
     var dashboardId = 'Articles'; // existing one from fixtures/saved_dashboards
 
     it('save the selected dashboard in a group', function () {
@@ -222,26 +182,22 @@ describe('Kibi Components', function () {
     it('save time filter for dashboard', function () {
       var from = 1;
       var to = 5;
+      var mode = 'absolute';
 
-      var expected = {
-        from: from,
-        to: to
-      };
+      var expected = { mode, from, to };
 
-      kibiStateHelper.saveTimeForDashboardId(dashboardId, from, to);
+      kibiStateHelper.saveTimeForDashboardId(dashboardId, mode, from, to);
       expect(kibiStateHelper.getTimeForDashboardId(dashboardId)).to.eql(expected);
     });
 
     it('remove time filter for dashboard', function () {
       var from = 1;
       var to = 5;
+      var mode = 'absolute';
 
-      var expected = {
-        from: from,
-        to: to
-      };
+      var expected = { mode, from, to };
 
-      kibiStateHelper.saveTimeForDashboardId(dashboardId, from, to);
+      kibiStateHelper.saveTimeForDashboardId(dashboardId, mode, from, to);
       expect(kibiStateHelper.getTimeForDashboardId(dashboardId)).to.eql(expected);
       kibiStateHelper.removeTimeForDashboardId(dashboardId);
       expect(kibiStateHelper.getTimeForDashboardId(dashboardId)).to.eql(null);
@@ -250,7 +206,8 @@ describe('Kibi Components', function () {
     it('is updated when dashboard get saved', function (done) {
       var dashboardWithTimeId = 'time-testing-2';
       var expectedTime = {
-        from: 'now-15y',   // taken from 'time-testing-2' saved dashboard
+        mode: 'quick', // taken from 'time-testing-2' saved dashboard
+        from: 'now-15y',
         to: 'now'
       };
 
@@ -266,37 +223,6 @@ describe('Kibi Components', function () {
 
       $rootScope.$apply();
     });
-
-
-    it('is time for current dashboard updated when globalState time changed', function (done) {
-      var dashboardWithTimeId = 'time-testing-2';
-      var expectedTime = {
-        from: 'now-123',
-        to: 'now-97'
-      };
-
-      var counter = 0;
-      globalState.on('save_with_changes', function (diff) {
-        if (diff.indexOf('k') !== -1) {
-          counter++;
-          // get the second 'k' event
-          if (counter === 2) {
-            expect(kibiStateHelper.getTimeForDashboardId(dashboardWithTimeId)).to.eql(expectedTime);
-            done();
-          }
-        }
-      });
-
-
-      $location.path('/dashboard/time-testing-2');
-      globalState.time = expectedTime;
-      globalState.save();
-
-      $timeout.flush(); // kibiStateHelper uses the $timeout flush the queue of the $timeout service
-      $rootScope.$apply();
-    });
-
-
 
 
     it('should remove all filters', function () {

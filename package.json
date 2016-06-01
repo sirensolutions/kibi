@@ -206,7 +206,8 @@
     "sinon": "1.17.2",
     "source-map": "0.4.4",
 
-    "mockery": "1.4.0"
+    "mockery": "1.4.0",
+    "npm": "2.14.21"
   },
   "engines": {
     "node": "4.3.2",

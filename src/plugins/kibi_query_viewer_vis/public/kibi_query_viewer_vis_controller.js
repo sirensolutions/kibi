@@ -25,8 +25,7 @@ define(function (require) {
       const configMode = $location.path().indexOf('/visualize/') !== -1;
       $scope.holder = {
         entityURI: '',
-        html: '',
-        htmlEvents:[]
+        html: ''
       };
 
       if (globalState.se && globalState.se.length > 0 && globalState.entityDisabled === false) {
@@ -168,15 +167,6 @@ define(function (require) {
                 return;
               }
 
-              var showFilterButton = false;
-              /* NOTE: disabled experimental feature https://github.com/sirensolutions/kibi-internal/issues/100
-              if (snippet.data && snippet.data.ids && snippet.data.ids.length !== 0 &&
-                 (snippet.data.config.showFilterButton === true || snippet.data.config.showFilterButton === 1)
-              ) {
-                showFilterButton = true;
-              }
-              */
-
               var queryOption = _.find($scope.vis.params.queryOptions, function (option) {
                 return option.queryId === snippet.data.config.id;
               });
@@ -210,28 +200,11 @@ define(function (require) {
               }
 
               $scope.holder.html +=
-                '<div class="snippetContainer">' +
-                  '<div class="snippet-' + index + '">' +
-                    '<div class="templateResult">' + snippet.html + '</div>' +
-                    '<div class="filterButton" style="display:' + (showFilterButton === true ? 'block' : 'none') + '">' +
-                      '<a class="filter" ng-click="holder.htmlEvents[' + index + '].filter()">' +
-                        'Filter by "' + snippet.data.config.id + '"' +
-                      '</a>' +
-                      '<a ng-click="holder.htmlEvents[' + index + '].showQuery()"> <small>(show query)</small></a>' +
-                    '</div>' +
-                  '</div>' +
-                '</div>';
-
-              // here push events for each snippet
-              $scope.holder.htmlEvents.push({
-                showQuery: function () {
-                  alert(snippet.data.debug.sentResultQuery);
-                },
-                filter: function () {
-                  urlHelper.addFilter(dbFilter);
-                  urlHelper.switchDashboard(queryOption.redirectToDashboard);
-                }
-              });
+                `<div class="snippetContainer">
+                  <div class="snippet-${index}">
+                    <div class="templateResult">${snippet.html}</div>
+                  </div>
+                </div>`;
             });
           }
 

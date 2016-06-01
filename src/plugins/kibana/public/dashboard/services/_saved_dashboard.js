@@ -31,6 +31,7 @@ define(function (require) {
           uiStateJSON: '{}',
           version: 1,
           timeRestore: false,
+          timeMode: undefined,
           timeTo: undefined,
           timeFrom: undefined,
           savedSearchId: undefined // kibi: added to be able to store savedSearchId
@@ -57,6 +58,7 @@ define(function (require) {
       uiStateJSON: 'string',
       version: 'integer',
       timeRestore: 'boolean',
+      timeMode: 'string',
       timeTo: 'string',
       timeFrom: 'string',
       savedSearchId: 'string'

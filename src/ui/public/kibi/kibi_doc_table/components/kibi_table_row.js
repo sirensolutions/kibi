@@ -233,7 +233,7 @@ define(function (require) {
                     // switch to different dashboard only if user gave one in settings
                     var targetDashboardId = clickHandler.targetDashboardId;
                     if (targetDashboardId && targetDashboardId !== '') {
-                      kbnUrl.change('dashboard/' + targetDashboardId);
+                      kbnUrl.change('/dashboard/{{id}}', {id:  targetDashboardId});
                       $route.reload();
                     } else {
                       // as there is no need for reload just broadcast the change

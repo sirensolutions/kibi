@@ -5,7 +5,7 @@ define(function (require) {
   var rison = require('ui/utils/rison');
   var _ = require('lodash');
 
-  return function UrlHelperFactory(Private, $location, $route, savedDashboards,
+  return function UrlHelperFactory(kbnUrl, Private, $location, savedDashboards,
     savedSearches, Promise, config, kbnDefaultAppId, kibiDefaultDashboardId, timefilter) {
     var kibiStateHelper = Private(require('ui/kibi/helpers/kibi_state_helper/kibi_state_helper'));
     var kibiTimeHelper = Private(require('ui/kibi/helpers/kibi_time_helper'));
@@ -97,8 +97,7 @@ define(function (require) {
 
     UrlHelper.prototype.switchDashboard = function (dashboardId) {
       if (dashboardId) {
-        $location.path('dashboard/' + dashboardId);
-        $route.reload();
+        kbnUrl.change('/dashboard/{{id}}', {id: dashboardId});
       }
     };
 

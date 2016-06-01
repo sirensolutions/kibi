@@ -35,7 +35,8 @@ define(function (require) {
   .when('/dashboard', {
     template: require('plugins/kibana/dashboard/index.html'),
     resolve: {
-      dash: function (savedDashboards, config) {
+      dash: function (timefilter, savedDashboards, config) {
+        timefilter.enabled = false;
         return savedDashboards.get();
       }
     }
@@ -43,10 +44,11 @@ define(function (require) {
   .when('/dashboard/:id', {
     template: require('plugins/kibana/dashboard/index.html'),
     resolve: {
-      dash: function (savedDashboards, Notifier, $route, $location, courier) {
+      dash: function (timefilter, savedDashboards, Notifier, $route, $location, courier) {
+        timefilter.enabled = true;
         return savedDashboards.get($route.current.params.id)
         .catch(courier.redirectWhenMissing({
-          'dashboard' : '/dashboard'
+          dashboard : '/dashboard'
         }));
       }
     }
@@ -54,9 +56,10 @@ define(function (require) {
 
   app.directive('dashboardApp', function (courier, AppState, timefilter, kbnUrl, createNotifier) {
     return {
-      controller: function ($scope, $rootScope, $route, $routeParams, $location, Private, getAppState, config) {
+      controller: function ($timeout, globalState, $scope, $rootScope, $route, $routeParams, $location, Private, getAppState, config) {
 
         var queryFilter = Private(require('ui/filter_bar/query_filter'));
+        var kibiStateHelper = Private(require('ui/kibi/helpers/kibi_state_helper/kibi_state_helper'));
 
         var notify = createNotifier({
           location: 'Dashboard'
@@ -64,10 +67,29 @@ define(function (require) {
 
         var dash = $scope.dash = $route.current.locals.dash;
 
-        if (dash.timeRestore && dash.timeTo && dash.timeFrom && !getAppState.previouslyStored()) {
+        var dashboardTimeFilter = kibiStateHelper.getTimeForDashboardId(dash.id);
+        if (dashboardTimeFilter) {
+          timefilter.time.mode = dashboardTimeFilter.mode;
+          timefilter.time.to = dashboardTimeFilter.to;
+          timefilter.time.from = dashboardTimeFilter.from;
+        } else if (dash.timeRestore && dash.timeTo && dash.timeFrom && !getAppState.previouslyStored()) {
+          timefilter.time.mode = dash.timeMode;
           timefilter.time.to = dash.timeTo;
           timefilter.time.from = dash.timeFrom;
         }
+
+        // below listener on globalState is needed to react when the global time is changed by the user
+        // either directly in time widget or by clicking on histogram chart etc
+        var saveWithChangesHandler = function (diff) {
+          if (dash.id && diff.indexOf('time') !== -1 && timefilter.time.from && timefilter.time.to) {
+            // kibiStateHelper.saveTimeForDashboardId calls globalState.save
+            // In order to avoid a loop of events on globalstate, call that function in the next tick
+            $timeout(function () {
+              kibiStateHelper.saveTimeForDashboardId(dash.id, timefilter.time.mode, timefilter.time.from, timefilter.time.to);
+            });
+          }
+        };
+        globalState.on('save_with_changes', saveWithChangesHandler);
 
         var matchQueryFilter = function (filter) {
           return filter.query && filter.query.query_string && !filter.meta;
@@ -78,13 +100,19 @@ define(function (require) {
           if (filter) return filter.query;
         };
 
+        var dashboardQuery = kibiStateHelper.getQueryForDashboardId(dash.id);
+        var dashboardFilters = kibiStateHelper.getFiltersForDashboardId(dash.id);
+        if (dashboardFilters && !dashboardFilters.length) {
+          dashboardFilters = undefined;
+        }
+
         var stateDefaults = {
           title: dash.title,
           panels: dash.panelsJSON ? JSON.parse(dash.panelsJSON) : [],
           options: dash.optionsJSON ? JSON.parse(dash.optionsJSON) : {},
           uiState: dash.uiStateJSON ? JSON.parse(dash.uiStateJSON) : {},
-          query: extractQueryFromFilters(dash.searchSource.getOwn('filter')) || {query_string: {query: '*'}},
-          filters: _.reject(dash.searchSource.getOwn('filter'), matchQueryFilter),
+          query: dashboardQuery || extractQueryFromFilters(dash.searchSource.getOwn('filter')) || {query_string: {query: '*'}},
+          filters: dashboardFilters || _.reject(dash.searchSource.getOwn('filter'), matchQueryFilter)
         };
 
         var $state = $scope.state = new AppState(stateDefaults);
@@ -124,6 +152,7 @@ define(function (require) {
         }, true);
 
         $scope.$on('$destroy', function () {
+          globalState.off('save_with_changes', saveWithChangesHandler);
           dash.destroy();
           stDashboardInvokeMethodOff();
           stDashboardSetProperty();
@@ -147,7 +176,6 @@ define(function (require) {
 
         $scope.refresh = _.bindKey(courier, 'fetch');
 
-        timefilter.enabled = true;
         $scope.timefilter = timefilter;
         $scope.$listen(timefilter, 'fetch', $scope.refresh);
 
@@ -227,6 +255,7 @@ define(function (require) {
 
           dash.panelsJSON = angular.toJson($state.panels);
           dash.uiStateJSON = angular.toJson($uiState.getChanges());
+          dash.timeMode = dash.timeRestore ? timefilter.time.mode : undefined;
           dash.timeFrom = dash.timeRestore ? timefilter.time.from : undefined;
           dash.timeTo = dash.timeRestore ? timefilter.time.to : undefined;
           dash.optionsJSON = angular.toJson($state.options);

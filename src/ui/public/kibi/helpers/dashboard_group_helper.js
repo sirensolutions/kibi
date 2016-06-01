@@ -59,25 +59,15 @@ define(function (require) {
         kibiStateHelper.saveSelectedDashboardId(groupId, dashboardId);
       }
 
-      var targetDashboardQuery   = kibiStateHelper.getQueryForDashboardId(dashboardId);
-      var targetDashboardFilters = kibiStateHelper.getFiltersForDashboardId(dashboardId);
-      var targetDashboardTimeFilter = kibiStateHelper.getTimeForDashboardId(dashboardId);
-
       if (joinFilterHelper.isRelationalPanelEnabled()) {
         joinFilterHelper.getJoinFilter(dashboardId).then(function (joinFilter) {
-          joinFilterHelper.replaceOrAddJoinFilter(targetDashboardFilters, joinFilter);
+          if (joinFilter) {
+            kibiStateHelper.addFilterToDashboard(dashboardId, joinFilter);
+          }
         }).finally(function () {
-          urlHelper.replaceFiltersAndQueryAndTime(
-            targetDashboardFilters,
-            targetDashboardQuery,
-            targetDashboardTimeFilter);
           urlHelper.switchDashboard(dashboardId);
         });
       } else {
-        urlHelper.replaceFiltersAndQueryAndTime(
-          targetDashboardFilters,
-          targetDashboardQuery,
-          targetDashboardTimeFilter);
         urlHelper.switchDashboard(dashboardId);
       }
     };

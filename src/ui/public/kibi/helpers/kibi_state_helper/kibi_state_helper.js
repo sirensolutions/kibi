@@ -1,7 +1,8 @@
 define(function (require) {
   var _ = require('lodash');
 
-  return function KibiStateHelperFactory($rootScope, globalState, savedDashboards, $location, $timeout, Private, createNotifier) {
+  return function KibiStateHelperFactory(timefilter, $rootScope, globalState, savedDashboards,
+                                         $location, $timeout, Private, createNotifier) {
 
     var notify = createNotifier({
       location: 'KibiStateHelper'
@@ -67,8 +68,15 @@ define(function (require) {
       //NOTE: check if a timefilter has been set into the URL at startup
       var off = $rootScope.$on('$routeChangeSuccess', function () {
         $timeout(function () {
-          if (globalState.time) {
-            self._setTimeFromGlobalState();
+          if (timefilter.time) {
+            var currentDashboardId;
+            var currentPath = $location.path();
+            if (currentPath && currentPath.indexOf('/dashboard/') === 0) {
+              currentDashboardId = currentPath.replace('/dashboard/', '');
+            }
+            if (currentDashboardId) {
+              self.saveTimeForDashboardId(currentDashboardId, timefilter.time.mode, timefilter.time.from, timefilter.time.to);
+            }
           }
           if (globalState.k && !globalState.k.s) {
             // no sesion id
@@ -81,10 +89,10 @@ define(function (require) {
             // there is a sesion id
             kibiSessionHelper.getId().then(function (sessionId) {
               if (globalState.k.s !== sessionId) {
-                kibiSessionHelper._copySessionFrom(globalState.k.s).then(function (savedSession) {
+                return kibiSessionHelper._copySessionFrom(globalState.k.s).then(function (savedSession) {
                   globalState.k.s = savedSession.id;
                   globalState.save();
-                }).catch(notify.error);
+                });
               }
             }).catch(notify.error);
           }
@@ -92,14 +100,6 @@ define(function (require) {
         });
       });
 
-      // below listener on globalState is needed to react when the global time is changed by the user
-      // either directly in time widget or by clicking on histogram chart etc
-      self.save_with_changes_handler = function (diff) {
-        if (diff.indexOf('time') !== -1) {
-          self._setTimeFromGlobalState();
-        }
-      };
-      globalState.on('save_with_changes', self.save_with_changes_handler);
 
       this._updateTimeForAllDashboards();
     };
@@ -121,7 +121,7 @@ define(function (require) {
     KibiStateHelper.prototype._updateTimeForOneDashboard = function (dashboard) {
       var skipGlobalStateSave = true;
       if (dashboard.timeRestore === true) {
-        this.saveTimeForDashboardId(dashboard.id, dashboard.timeFrom, dashboard.timeTo, skipGlobalStateSave);
+        this.saveTimeForDashboardId(dashboard.id, dashboard.timeMode, dashboard.timeFrom, dashboard.timeTo, skipGlobalStateSave);
       } else {
         this.removeTimeForDashboardId(dashboard.id, skipGlobalStateSave);
       }
@@ -139,24 +139,6 @@ define(function (require) {
       });
     };
 
-    KibiStateHelper.prototype._setTimeFromGlobalState = function () {
-      var self = this;
-      var currentDashboardId;
-      var currentPath = $location.path();
-      if (currentPath && currentPath.indexOf('/dashboard/') === 0) {
-        currentDashboardId = currentPath.replace('/dashboard/', '');
-      }
-      if (currentDashboardId) {
-        $timeout(function () {
-          self.saveTimeForDashboardId(currentDashboardId, globalState.time.from, globalState.time.to);
-        });
-      }
-    };
-
-
-    KibiStateHelper.prototype.destroyHandlers = function () {
-      globalState.off('save_with_changes', this.save_with_changes_handler);
-    };
 
     KibiStateHelper.prototype.saveSelectedDashboardId = function (groupId, dashboardId) {
       globalState.k.g[groupId] = dashboardId;
@@ -251,10 +233,20 @@ define(function (require) {
       }
     };
 
-    KibiStateHelper.prototype.saveTimeForDashboardId = function (dashboardId, from, to, skipGlobalStateSave) {
+    KibiStateHelper.prototype.saveTimeForDashboardId = function (dashboardId, mode, from, to, skipGlobalStateSave) {
+      let toStr = to;
+      let fromStr = from;
+
+      if (typeof from === 'object') {
+        fromStr = from.toISOString();
+      }
+      if (typeof to === 'object') {
+        toStr = to.toISOString();
+      }
       this._setDashboardProperty(dashboardId, 't', {
-        f: from,
-        t: to
+        m: mode,
+        f: fromStr,
+        t: toStr
       });
       if (!skipGlobalStateSave) {
         globalState.save();
@@ -265,6 +257,7 @@ define(function (require) {
       var t = this._getDashboardProperty(dashboardId, 't');
       if (t) {
         return {
+          mode: t.m,
           from: t.f,
           to: t.t
         };
@@ -431,3 +424,4 @@ define(function (require) {
     return new KibiStateHelper();
   };
 });
+

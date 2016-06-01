@@ -21,6 +21,7 @@ define(function (require) {
         id: 'time-testing-2',
         title: 'time testing 2',
         timeRestore: true,
+        timeMode: 'quick',
         timeFrom: 'now-15y',
         timeTo: 'now'
       },
@@ -28,6 +29,7 @@ define(function (require) {
         id: 'time-testing-3',
         title: 'time testing 3',
         timeRestore: true,
+        timeMode: 'absolute',
         timeFrom: '2005-09-01T12:00:00.000Z',
         timeTo: '2015-09-05T12:00:00.000Z'
       }

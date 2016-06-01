@@ -32,22 +32,11 @@ define(function (require) {
             kibiStateHelper.saveFiltersForDashboardId(currentDashboardId, urlHelper.getDashboardFilters(currentDashboardId));
             kibiStateHelper.saveQueryForDashboardId(currentDashboardId, urlHelper.getDashboardQuery(currentDashboardId));
 
-            // get filters from dashboard we would like to switch to
-            var targetDashboardQuery = kibiStateHelper.getQueryForDashboardId(this.redirectToDashboard);
-            var targetDashboardFilters = kibiStateHelper.getFiltersForDashboardId(this.redirectToDashboard);
-            var targetDashboardTimeFilter = kibiStateHelper.getTimeForDashboardId(this.redirectToDashboard);
-
-
             if (this.joinSeqFilter) {
               const switchToDashboard = function () {
-                // add or Filter and switch
-                if (!targetDashboardFilters) {
-                  targetDashboardFilters = [];
-                }
-                targetDashboardFilters.push(this.joinSeqFilter);
-
+                // add join_set Filter
+                kibiStateHelper.addFilterToDashboard(this.redirectToDashboard, this.joinSeqFilter);
                 // switch to target dashboard
-                urlHelper.replaceFiltersAndQueryAndTime(targetDashboardFilters, targetDashboardQuery, targetDashboardTimeFilter);
                 urlHelper.switchDashboard(this.redirectToDashboard);
               };
 

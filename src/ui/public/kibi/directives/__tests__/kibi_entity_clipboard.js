@@ -78,6 +78,26 @@ describe('Kibi Components', function () {
       $rootScope.$apply();
     });
 
+    it('selected document with label from meta field column', function (done) {
+      init(false, ['index/type/id/_type']);
+
+      $httpBackend.whenGET('/elasticsearch/index/type/id').respond(200, {
+        _type: 'TYPE'
+      });
+
+      $rootScope.$watch('label', function (label) {
+        if (label) {
+          expect(label).to.equal('TYPE');
+          done();
+        }
+      });
+
+      $rootScope.$emit('kibi:selectedEntities:changed', null);
+      $httpBackend.flush();
+      expect($rootScope.disabled).to.be(false);
+      expect($rootScope.entityURI).to.be('index/type/id/_type');
+      $rootScope.$apply();
+    });
 
     it('selected document with "nested" column with an array', function (done) {
       init(false, ['index/type/id/a.b.c with spaces']);

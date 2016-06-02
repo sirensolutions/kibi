@@ -31,7 +31,7 @@ define(function (require) {
           uiStateJSON: '{}',
           version: 1,
           timeRestore: false,
-          timeMode: undefined,
+          timeMode: undefined, // kibi: save the mode of the timepicker
           timeTo: undefined,
           timeFrom: undefined,
           savedSearchId: undefined // kibi: added to be able to store savedSearchId

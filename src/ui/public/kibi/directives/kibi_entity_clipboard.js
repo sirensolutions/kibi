@@ -6,7 +6,7 @@ define(function (require) {
   require('ui/kibi/directives/kibi_entity_clipboard.less');
 
   require('ui/modules').get('kibana')
-  .directive('kibiEntityClipboard', function ($rootScope, $route, globalState, $http, Private, createNotifier) {
+  .directive('kibiEntityClipboard', function ($rootScope, $route, globalState, $http, Private, createNotifier, config) {
 
     var notify = createNotifier({
       name: 'Kibi Entity Clipboard'
@@ -35,15 +35,23 @@ define(function (require) {
               delete $scope.label;
               // fetch document and grab the field value to populate the label
               $http.get(chrome.getBasePath() + '/elasticsearch/' +  index + '/' + type + '/' + id).then(function (doc) {
-                if (doc.data && doc.data._source) {
-                  var getProperty = _.property(column);
-                  var value = getProperty(doc.data._source);
-                  if (value !== null && typeof value === 'object') {
-                    notify.warning('Entity label taken from [' + $scope.entityURI + '] is an object');
-                  } else if (Object.prototype.toString.call(value) === '[object Array]') {
-                    notify.warning('Entity label taken from [' + $scope.entityURI + '] is an array');
+                if (doc.data) {
+                  if (config.get('metaFields').indexOf(column) !== -1 && doc.data[column]) {
+                    // check if column is in meta fields
+                    $scope.label = doc.data[column];
+                  } else if (doc.data._source) {
+                    // else try to find it in _source
+                    var getProperty = _.property(column);
+                    var value = getProperty(doc.data._source);
+                    if (value !== null && typeof value === 'object') {
+                      notify.warning('Entity label taken from [' + $scope.entityURI + '] is an object');
+                    } else if (Object.prototype.toString.call(value) === '[object Array]') {
+                      notify.warning('Entity label taken from [' + $scope.entityURI + '] is an array');
+                    } else {
+                      $scope.label = value;
+                    }
                   } else {
-                    $scope.label = value;
+                    notify.warning('Could not get entity label from [' + $scope.entityURI + ']');
                   }
                 }
               });

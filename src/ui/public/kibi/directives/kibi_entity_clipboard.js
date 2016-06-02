@@ -6,7 +6,11 @@ define(function (require) {
   require('ui/kibi/directives/kibi_entity_clipboard.less');
 
   require('ui/modules').get('kibana')
-  .directive('kibiEntityClipboard', function ($rootScope, $route, globalState, $http, Private) {
+  .directive('kibiEntityClipboard', function ($rootScope, $route, globalState, $http, Private, createNotifier) {
+
+    var notify = createNotifier({
+      name: 'Kibi Entity Clipboard'
+    });
 
     var urlHelper = Private(require('ui/kibi/helpers/url_helper'));
 
@@ -26,10 +30,21 @@ define(function (require) {
               var type = parts[1];
               var id = parts[2];
               var column = parts[3];
+
+              //delete the old label
+              delete $scope.label;
               // fetch document and grab the field value to populate the label
               $http.get(chrome.getBasePath() + '/elasticsearch/' +  index + '/' + type + '/' + id).then(function (doc) {
-                if (doc.data && doc.data._source && doc.data._source[column]) {
-                  $scope.label = doc.data._source[column];
+                if (doc.data && doc.data._source) {
+                  var getProperty = _.property(column);
+                  var value = getProperty(doc.data._source);
+                  if (value !== null && typeof value === 'object') {
+                    notify.warning('Entity label taken from [' + $scope.entityURI + '] is an object');
+                  } else if (Object.prototype.toString.call(value) === '[object Array]') {
+                    notify.warning('Entity label taken from [' + $scope.entityURI + '] is an array');
+                  } else {
+                    $scope.label = value;
+                  }
                 }
               });
             } else {

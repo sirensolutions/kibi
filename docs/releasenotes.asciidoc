@@ -1,6 +1,11 @@
 [[releasenotes]]
 == Kibi Release Notes
 
+=== Kibi 4.4.1-2 Release Notes
+
+
+* Fixed a bug - Label on Entity Clipboard missing
+
 === Kibi 4.4.1-1 Release Notes
 
 

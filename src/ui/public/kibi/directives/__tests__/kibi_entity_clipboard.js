@@ -7,6 +7,8 @@ describe('Kibi Components', function () {
   describe('Entity Clipboard', function () {
     var $rootScope;
     var globalState;
+    var $httpBackend;
+
     var MockState = require('fixtures/mock_state');
     var _ = require('lodash');
 
@@ -29,24 +31,125 @@ describe('Kibi Components', function () {
           return globalState;
         });
       });
-      ngMock.inject(function (_$rootScope_, $compile) {
+      ngMock.inject(function (_$rootScope_, $compile, $injector) {
         $rootScope = _$rootScope_;
+        $httpBackend = $injector.get('$httpBackend');
         $compile('<kibi-entity-clipboard></kibi-entity-clipboard>')($rootScope);
       });
     }
 
     it('selected document', function () {
       init(false, ['index/type/id/column']);
+      $httpBackend.whenGET('/elasticsearch/index/type/id').respond(200, {
+        _source: {
+          column: 'label'
+        }
+      });
       $rootScope.$emit('kibi:selectedEntities:changed', null);
+      $httpBackend.flush();
       expect($rootScope.disabled).to.be(false);
       expect($rootScope.entityURI).to.be('index/type/id/column');
     });
 
-    it('selected document but disabled', function () {
-      init(true, ['index/type/id/column']);
+    it('selected document with "nested" column', function (done) {
+      init(false, ['index/type/id/a.b.c with spaces']);
+
+      $httpBackend.whenGET('/elasticsearch/index/type/id').respond(200, {
+        _source: {
+          a: {
+            b: {
+              'c with spaces': 'correct label'
+            }
+          }
+        }
+      });
+
+      $rootScope.$watch('label', function (label) {
+        if (label) {
+          expect(label).to.equal('correct label');
+          done();
+        }
+      });
+
       $rootScope.$emit('kibi:selectedEntities:changed', null);
+      $httpBackend.flush();
+      expect($rootScope.disabled).to.be(false);
+      expect($rootScope.entityURI).to.be('index/type/id/a.b.c with spaces');
+      $rootScope.$apply();
+    });
+
+
+    it('selected document with "nested" column with an array', function (done) {
+      init(false, ['index/type/id/a.b.c with spaces']);
+
+      $httpBackend.whenGET('/elasticsearch/index/type/id').respond(200, {
+        _source: {
+          a: {
+            b: {
+              'c with spaces': []
+            }
+          }
+        }
+      });
+
+      $rootScope.$watch('label', function (label) {
+        expect(label).to.eql(undefined);
+        done();
+      });
+
+      $rootScope.$emit('kibi:selectedEntities:changed', null);
+      $httpBackend.flush();
+      expect($rootScope.disabled).to.be(false);
+      expect($rootScope.entityURI).to.be('index/type/id/a.b.c with spaces');
+      $rootScope.$apply();
+    });
+
+    it('selected document with "nested" column with an object', function (done) {
+      init(false, ['index/type/id/a.b.c with spaces']);
+
+      $httpBackend.whenGET('/elasticsearch/index/type/id').respond(200, {
+        _source: {
+          a: {
+            b: {
+              'c with spaces': {}
+            }
+          }
+        }
+      });
+
+      $rootScope.$watch('label', function (label) {
+        expect(label).to.eql(undefined);
+        done();
+      });
+
+      $rootScope.$emit('kibi:selectedEntities:changed', null);
+      $httpBackend.flush();
+      expect($rootScope.disabled).to.be(false);
+      expect($rootScope.entityURI).to.be('index/type/id/a.b.c with spaces');
+      $rootScope.$apply();
+    });
+
+
+    it('selected document but disabled', function (done) {
+      init(true, ['index/type/id/column']);
+      $httpBackend.whenGET('/elasticsearch/index/type/id').respond(200, {
+        _source: {
+          column: 'correct label'
+        }
+      });
+
+      $rootScope.$watch('label', function (label) {
+        if (label) {
+          expect(label).to.equal('correct label');
+          done();
+        }
+      });
+
+      $rootScope.$emit('kibi:selectedEntities:changed', null);
+      $httpBackend.flush();
       expect($rootScope.disabled).to.be(true);
       expect($rootScope.entityURI).to.be('index/type/id/column');
+      $rootScope.$apply();
     });
 
     it('an entity missing column takes the URI as label', function () {

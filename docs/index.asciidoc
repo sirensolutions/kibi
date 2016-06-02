@@ -2,7 +2,7 @@
 = Kibi User Guide
 :toc: right
 
-:kibi-version: 4.4.1-1
+:kibi-version: 4.4.1-2
 :siren-join-version: 2.2.0-1
 :siren-join-website: https://github.com/sirensolutions/siren-join/
 :java-version: 1.8

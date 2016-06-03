@@ -19,14 +19,40 @@ function startServer(self, fulfill, reject) {
   let gremlinServerPath = config.get('kibi_core.gremlin_server.path');
 
   if (gremlinServerPath) {
+    // regex for ipv4 ip+port
+    var re = /.*?([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}:[0-9]*).*/;
+
     isJavaVersionOk(self).then(function () {
       self.server.plugins.elasticsearch.client.nodes.info({ nodeId: '_local' }).then(function (response) {
         let esTransportAddress = null;
+        let esTransportAddressCollectedValues = [];
         _.each(response.nodes, (node) => {
-          esTransportAddress = node.transport_address;
+          if (node.transport_address) {
+            // transport_address can come in many different flavours
+            // currently we support this ones for ipv4:
+            // 127.0.0.1:9300
+            // demo.example.com/127.0.0.1:9300
+            // inet[/127.0.0.1:9303]
+            esTransportAddressCollectedValues.push(node.transport_address);
+            var matches = node.transport_address.match(re);
+            if (matches.length === 2 && matches[1].indexOf(node.ip) === 0) {
+              esTransportAddress = matches[1];
+              return false; // to break the loop
+            }
+          }
         });
         if (!esTransportAddress) {
-          return Promise.reject(new Error('Unable to get the transport address'));
+          return Promise.reject(
+            new Error(
+              'Unable to get the transport address.\n' +
+              'Currently supported values are:\n' +
+              '127.0.0.1:9300\n' +
+              'host.com/127.0.0.1:9300\n' +
+              'inet[/127.0.0.1:9303]\n' +
+              'While values returned by the cluster are:\n' +
+              JSON.stringify(esTransportAddressCollectedValues, null, '')
+            )
+          );
         }
 
         const esClusterName = response.cluster_name;

@@ -7,22 +7,20 @@
       "from": "sirensolutions/kibi-icons#1.0.0",
       "resolved": "https://github.com/sirensolutions/kibi-icons/archive/1.0.0.tar.gz"
     },
+    "antlr4": {
+      "version": "4.5.3",
+      "from": "antlr4@>=4.5.2 <5.0.0",
+      "resolved": "https://registry.npmjs.org/antlr4/-/antlr4-4.5.3.tgz"
+    },
     "antlr4-javascript-sparql": {
-      "version": "1.0.7",
-      "from": "sirensolutions/antlr4-javascript-sparql#1.0.7",
-      "resolved": "https://github.com/sirensolutions/antlr4-javascript-sparql/archive/1.0.7.tar.gz"
+      "version": "1.0.8",
+      "from": "git://github.com/sirensolutions/antlr4-javascript-sparql.git#acb7f149b55fb5ef135776c7137f3fad66ae108c",
+      "resolved": "git://github.com/sirensolutions/antlr4-javascript-sparql.git#acb7f149b55fb5ef135776c7137f3fad66ae108c"
     },
     "antlr4-javascript-sql": {
-      "version": "1.0.2",
-      "from": "sirensolutions/antlr4-javascript-sql#1.0.2",
-      "resolved": "https://github.com/sirensolutions/antlr4-javascript-sql/archive/1.0.2.tar.gz",
-      "dependencies": {
-        "antlr4": {
-          "version": "4.5.2",
-          "from": "antlr4@>=4.5.2 <5.0.0",
-          "resolved": "https://registry.npmjs.org/antlr4/-/antlr4-4.5.2.tgz"
-        }
-      }
+      "version": "1.0.3",
+      "from": "git://github.com/sirensolutions/antlr4-javascript-sql.git#d8f5f84c35f2b4a5fb70e41aedfd987f2d80458c",
+      "resolved": "git://github.com/sirensolutions/antlr4-javascript-sql.git#d8f5f84c35f2b4a5fb70e41aedfd987f2d80458c"
     },
     "@bigfunger/decompress-zip": {
       "version": "0.2.0-stripfix2",
@@ -202,11 +200,6 @@
       "version": "0.3.2",
       "from": "ansicolors@0.3.2",
       "resolved": "https://registry.npmjs.org/ansicolors/-/ansicolors-0.3.2.tgz"
-    },
-    "antlr4": {
-      "version": "4.5.2",
-      "from": "antlr4@>=4.5.2 <5.0.0",
-      "resolved": "https://registry.npmjs.org/antlr4/-/antlr4-4.5.2.tgz"
     },
     "autoprefixer": {
       "version": "5.1.1",
@@ -3537,55 +3530,19 @@
       }
     },
     "request-promise": {
-      "version": "0.4.3",
-      "from": "request-promise@0.4.3",
-      "resolved": "https://registry.npmjs.org/request-promise/-/request-promise-0.4.3.tgz",
+      "version": "3.0.0",
+      "from": "request-promise@3.0.0",
+      "resolved": "https://registry.npmjs.org/request-promise/-/request-promise-3.0.0.tgz",
       "dependencies": {
-        "chalk": {
-          "version": "1.1.1",
-          "from": "chalk@>=1.1.0 <2.0.0",
-          "resolved": "https://registry.npmjs.org/chalk/-/chalk-1.1.1.tgz",
-          "dependencies": {
-            "ansi-styles": {
-              "version": "2.1.0",
-              "from": "ansi-styles@>=2.1.0 <3.0.0",
-              "resolved": "https://registry.npmjs.org/ansi-styles/-/ansi-styles-2.1.0.tgz"
-            },
-            "escape-string-regexp": {
-              "version": "1.0.4",
-              "from": "escape-string-regexp@>=1.0.2 <2.0.0",
-              "resolved": "https://registry.npmjs.org/escape-string-regexp/-/escape-string-regexp-1.0.4.tgz"
-            },
-            "has-ansi": {
-              "version": "2.0.0",
-              "from": "has-ansi@>=2.0.0 <3.0.0",
-              "resolved": "https://registry.npmjs.org/has-ansi/-/has-ansi-2.0.0.tgz",
-              "dependencies": {
-                "ansi-regex": {
-                  "version": "2.0.0",
-                  "from": "ansi-regex@>=2.0.0 <3.0.0",
-                  "resolved": "https://registry.npmjs.org/ansi-regex/-/ansi-regex-2.0.0.tgz"
-                }
-              }
-            },
-            "strip-ansi": {
-              "version": "3.0.0",
-              "from": "strip-ansi@>=3.0.0 <4.0.0",
-              "resolved": "https://registry.npmjs.org/strip-ansi/-/strip-ansi-3.0.0.tgz",
-              "dependencies": {
-                "ansi-regex": {
-                  "version": "2.0.0",
-                  "from": "ansi-regex@>=2.0.0 <3.0.0",
-                  "resolved": "https://registry.npmjs.org/ansi-regex/-/ansi-regex-2.0.0.tgz"
-                }
-              }
-            },
-            "supports-color": {
-              "version": "2.0.0",
-              "from": "supports-color@>=2.0.0 <3.0.0",
-              "resolved": "https://registry.npmjs.org/supports-color/-/supports-color-2.0.0.tgz"
-            }
-          }
+        "bluebird": {
+          "version": "3.4.0",
+          "from": "bluebird@>=3.3.0 <4.0.0",
+          "resolved": "https://registry.npmjs.org/bluebird/-/bluebird-3.4.0.tgz"
+        },
+        "lodash": {
+          "version": "4.13.1",
+          "from": "lodash@>=4.6.1 <5.0.0",
+          "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.13.1.tgz"
         }
       }
     },

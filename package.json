@@ -139,8 +139,8 @@
     "angular-sanitize": "1.4.7",
     "ng-tags-input": "3.0.0",
     "antlr4": "^4.5.2",
-    "antlr4-sparql": "sirensolutions/antlr4-javascript-sparql#1.0.7",
-    "antlr4-sql": "sirensolutions/antlr4-javascript-sql#1.0.2",
+    "antlr4-javascript-sparql": "sirensolutions/antlr4-javascript-sparql#1.0.8",
+    "antlr4-javascript-sql": "sirensolutions/antlr4-javascript-sql#1.0.3",
     "qtip2": "3.0.2",
     "eeg": "1.0.26",
     "angular-animate": "1.4.7",
@@ -148,7 +148,7 @@
 
 
     "lru-cache": "~2.6.4",
-    "request-promise": "0.4.3",
+    "request-promise": "3.0.0",
     "node-forge": "^0.6.37",
     "kibiutils": "sirensolutions/kibiutils#1.1.0",
     "sqlite3": "3.1.1",

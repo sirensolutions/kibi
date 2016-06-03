@@ -95,9 +95,10 @@ NOTE: If you see a message about the container's height or width being too
 small, <<resizing-containers,resize the container>>.
 
 [float]
-==== Removing filters and queries on all dashboards
+==== Reset all dashboards to their default state
 
-To remove filters and queries on **all** dashboards, click the *Remove filters and queries from all dashboards* image:images/remove-all-filters.png[Minus] button in the toolbar panel.
+One can save with dashboard some specific filters, a custom query or a certain time range.
+If you click on the *Reset the time, filters, and queries from all dashboards to their default saved state* image:images/remove-all-filters.png[Minus] button in the toolbar panel, the temporary filters/queries/time set on **all** dashboards would be removed, reverted to a dashboard's default state with the saved filters/query/time.
 
 NOTE: If the <<relational-panel,relational panel>> is <<relations-settings-enable,enabled>>, clicking this button does not remove the <<relational-panel-browsing,filter>>. If you want to do so, you need to disable the relational panel in the <<kibi-settings-relations,Relations settings>>.
 

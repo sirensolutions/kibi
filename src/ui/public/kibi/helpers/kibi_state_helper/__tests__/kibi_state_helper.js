@@ -5,7 +5,25 @@ var mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
 var savedDashboards = [
   {
     id: 'Articles',
-    title: 'Articles'
+    title: 'Articles',
+    kibanaSavedObjectMeta: {
+      searchSourceJSON: JSON.stringify({
+        filter: [
+          {
+            query: {
+              query_string: {
+                query: 'torrent'
+              }
+            }
+          },
+          {
+            term: {
+              fielda: 'aaa'
+            }
+          }
+        ]
+      })
+    }
   },
   {
     id: 'Companies',
@@ -22,15 +40,10 @@ var savedDashboards = [
     timeRestore: true,
     timeMode: 'quick',
     timeFrom: 'now-15y',
-    timeTo: 'now'
-  },
-  {
-    id: 'time-testing-3',
-    title: 'time testing 3',
-    timeRestore: true,
-    timeMode: 'absolute',
-    timeFrom: '2005-09-01T12:00:00.000Z',
-    timeTo: '2015-09-05T12:00:00.000Z'
+    timeTo: 'now',
+    kibanaSavedObjectMeta: {
+      searchSourceJSON: JSON.stringify({filter:[]})
+    }
   }
 ];
 var $rootScope;
@@ -38,6 +51,7 @@ var kibiStateHelper;
 var globalState;
 var $location;
 var $timeout;
+var config;
 
 function init(savedDashboards) {
   return function () {
@@ -45,9 +59,12 @@ function init(savedDashboards) {
       $provide.service('savedDashboards', (Promise) => mockSavedObjects(Promise)('savedDashboards', savedDashboards));
     });
 
-    ngMock.module('kibana');
+    ngMock.module('kibana', function ($provide) {
+      $provide.service('config', require('fixtures/kibi/config'));
+    });
 
-    ngMock.inject(function ($injector, Private, _$rootScope_, _globalState_, _$location_, _$timeout_) {
+    ngMock.inject(function (_config_, $injector, Private, _$rootScope_, _globalState_, _$location_, _$timeout_) {
+      config = _config_;
       $rootScope = _$rootScope_;
       globalState = _globalState_;
       $location = _$location_;
@@ -60,6 +77,7 @@ function init(savedDashboards) {
 describe('Kibi Components', function () {
   describe('KibiStateHelper', function () {
 
+    require('testUtils/noDigestPromises').activateForSuite();
     beforeEach(init(savedDashboards));
 
     var dashboardId = 'Articles'; // existing one from savedDashboards
@@ -255,46 +273,88 @@ describe('Kibi Components', function () {
       $rootScope.$apply();
     });
 
-
-    it('should remove all filters', function () {
-      var filters = [{filter: 1}, {filter: 2}];
+    it('should reset times, filters and queries to their default state on all dashboards', function (done) {
       globalState.k = {
         d: {
-          dashboard1: {
-            f: filters
+          Articles: {
+            f: [
+              {
+                term: {
+                  fieldb: 'bbb'
+                }
+              }
+            ],
+            q: {
+              query: {
+                query_string: {
+                  query: 'web'
+                }
+              }
+            },
+            t: {
+              m: 'quick',
+              f: 'now-15m',
+              t: 'now'
+            }
           },
-          dashboard2: {
-            f: filters
+          'time-testing-2': {
+            f: [
+              {
+                term: {
+                  fieldc: 'ccc'
+                }
+              }
+            ],
+            q: {
+              query: {
+                query_string: {
+                  query: 'ibm'
+                }
+              }
+            },
+            t: {
+              m: 'quick',
+              f: 'now-15m',
+              t: 'now'
+            }
           }
         }
       };
       globalState.save();
 
-      kibiStateHelper.removeAllFilters();
+      config.set('timepicker:timeDefaults', {
+        mode: 'relative',
+        from: 'datea',
+        to: 'dateb'
+      });
 
-      expect(globalState.k.d.dashboard1.f).to.eql([]);
-      expect(globalState.k.d.dashboard2.f).to.eql([]);
-    });
-
-
-    it('should remove all queries', function () {
-      var query = {string_match: {}};
-      globalState.k = {
-        d: {
-          dashboard1: {
-            q: query
-          },
-          dashboard2: {
-            q: query
+      kibiStateHelper.resetFiltersQueriesTimes().then(() => {
+        expect(globalState.k.d.Articles.f).to.eql([
+          {
+            term: {
+              fielda: 'aaa'
+            }
           }
-        }
-      };
-      globalState.save();
-
-      kibiStateHelper.removeAllQueries();
-
-      expect(globalState.k.d.dashboard1.q).to.eql('*');
-      expect(globalState.k.d.dashboard2.q).to.eql('*');
+        ]);
+        expect(globalState.k.d.Articles.q).to.eql({
+          query_string: {
+            query: 'torrent'
+          }
+        });
+        expect(globalState.k.d.Articles.t).to.eql({
+          m: 'relative',
+          f: 'datea',
+          t: 'dateb'
+        });
+        expect(globalState.k.d['time-testing-2'].f).to.have.length(0);
+        expect(globalState.k.d['time-testing-2'].q).to.eql('*');
+        expect(globalState.k.d['time-testing-2'].t).to.eql({
+          m: 'quick',
+          f: 'now-15y',
+          t: 'now',
+        });
+        done();
+      }).catch(done);
     });
 
     it('should remove all filters of type', function () {
@@ -433,5 +493,3 @@ describe('Kibi Components', function () {
 
   });
 });
-
-

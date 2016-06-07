@@ -1,7 +1,20 @@
 var doesVisDependsOnSelectedEntities;
 var globalState;
 var $rootScope;
-var fakeSavedQueries = require('../../../../../../fixtures/kibi/fake_saved_queries');
+
+var mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
+var fakeSavedQueries = [
+  {
+    id: 'query1',
+    title: '',
+    st_resultQuery: 'SELECT * FROM mytable WHERE id = \'@doc[_source][id]@\''
+  },
+  {
+    id: 'query2',
+    title: '',
+    st_resultQuery: 'SELECT * FROM mytable WHERE id = \'123\''
+  }
+];
 var ngMock = require('ngMock');
 var expect = require('expect.js');
 
@@ -14,7 +27,7 @@ describe('Kibi Components', function () {
         ngMock.module('kibana');
 
         ngMock.module('queries_editor/services/saved_queries', function ($provide) {
-          $provide.service('savedQueries', fakeSavedQueries);
+          $provide.service('savedQueries', (Promise) => mockSavedObjects(Promise)('savedQueries', fakeSavedQueries));
         });
 
         ngMock.inject(function ($injector, Private, _globalState_, _$rootScope_) {

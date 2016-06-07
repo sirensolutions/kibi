@@ -3,27 +3,40 @@ var sinon = require('auto-release-sinon');
 var ngMock = require('ngMock');
 var jQuery = require('jquery');
 var Promise = require('bluebird');
+var noDigestPromises = require('testUtils/noDigestPromises');
 var globalState;
 var $scope;
 
+var mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
+var fakeSavedDatasources = [
+  {
+    id: 'ds1',
+    title: 'ds1 datasource',
+    datasourceType: 'sparql_http'
+  },
+  {
+    id: 'ds2',
+    title: 'ds2 datasource',
+    datasourceType: 'mysql'
+  },
+  {
+    id: 'ds3',
+    title: 'ds3 datasource',
+    datasourceType: 'rest'
+  }
+];
 
 describe('Kibi Controllers', function () {
 
   function init(options) {
-    ngMock.module('apps/settings');
+    ngMock.module('kibana');
 
-    ngMock.module('kibana', function ($provide) {
-      $provide.service('savedDatasources', require('fixtures/kibi/fake_saved_datasources'));
+    ngMock.module('kibi_datasources/services/saved_datasources', function ($provide) {
+      $provide.service('savedDatasources', (Promise) => mockSavedObjects(Promise)('savedDatasources', fakeSavedDatasources));
     });
 
     ngMock.module('app/visualize', function ($provide) {
-      $provide.service('savedVisualizations', function () {
-        return {
-          find: function () {
-            return Promise.resolve({ hits: options.hits });
-          }
-        };
-      });
+      $provide.service('savedVisualizations', (Promise) => mockSavedObjects(Promise)('savedVisualizations', options.hits));
     });
 
     ngMock.module('kibana/query_engine_client', function ($provide) {
@@ -66,6 +79,9 @@ describe('Kibi Controllers', function () {
   }
 
   describe('queries editor', function () {
+
+    noDigestPromises.activateForSuite();
+
     it('should set kibi-table-jade as the default template if not set', function () {
       var query = {
         title: 'ahah'
@@ -165,7 +181,7 @@ describe('Kibi Controllers', function () {
       $scope.delete().then(function () {
         expect(query.delete.callCount).to.be(1);
         done();
-      });
+      }).catch(done);
     });
 
     it('should delete the query even if the query id is in the visualisation title', function (done) {
@@ -197,7 +213,7 @@ describe('Kibi Controllers', function () {
       $scope.delete().then(function () {
         expect(query.delete.callCount).to.be(1);
         done();
-      });
+      }).catch(done);
     });
 
     it('should not delete the query if some visualisations still depend on it', function (done) {
@@ -229,7 +245,7 @@ describe('Kibi Controllers', function () {
         expect(stub.callCount).to.be(1);
         expect(stub.getCall(0).args[0]).to.match(/myvis/);
         done();
-      });
+      }).catch(done);
     });
 
     it('should grab the selected document', function () {
@@ -243,6 +259,7 @@ describe('Kibi Controllers', function () {
     });
 
     it('should update the REST datasource', function () {
+      noDigestPromises.deactivate();
       var query = {};
       init({ query: query, datasourceType: '123' });
 
@@ -256,6 +273,7 @@ describe('Kibi Controllers', function () {
     });
 
     it('should update the datasource type along with the datasource ID', function () {
+      noDigestPromises.deactivate();
       var query = {};
       init({ query: query, datasourceType: '123' });
 

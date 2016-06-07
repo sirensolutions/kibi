@@ -2,15 +2,225 @@ var _ = require('lodash');
 var expect = require('expect.js');
 var ngMock = require('ngMock');
 
+var mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
+var savedDashboards = [
+  {
+    id: 'Articles',
+    title: 'Articles'
+  },
+  {
+    id: 'Companies',
+    title: 'Companies'
+  },
+  {
+    id: 'time-testing-1',
+    title: 'time testing 1',
+    timeRestore: false
+  },
+  {
+    id: 'time-testing-2',
+    title: 'time testing 2',
+    timeRestore: true,
+    timeMode: 'quick',
+    timeFrom: 'now-15y',
+    timeTo: 'now'
+  },
+  {
+    id: 'time-testing-3',
+    title: 'time testing 3',
+    timeRestore: true,
+    timeMode: 'absolute',
+    timeFrom: '2005-09-01T12:00:00.000Z',
+    timeTo: '2015-09-05T12:00:00.000Z'
+  }
+];
+var fakeSavedDashboards = [
+  {
+    id: 'Articles',
+    title: 'Articles'
+  },
+  {
+    id: 'search-ste',
+    title: 'search-ste',
+    savedSearchId: 'search-ste'
+  },
+  {
+    id: 'time-testing-4',
+    title: 'time-testing-4',
+    timeRestore: true,
+    timeFrom: '2005-09-01T12:00:00.000Z',
+    timeTo: '2015-09-05T12:00:00.000Z',
+    savedSearchId: 'time-testing-4'
+  }
+];
+var fakeSavedSearches = [
+  {
+    id: 'search-ste',
+    kibanaSavedObjectMeta: {
+      searchSourceJSON: JSON.stringify(
+        {
+          index: 'search-ste',
+          filter: [],
+          query: {}
+        }
+      )
+    }
+  },
+  {
+    id: 'time-testing-4',
+    kibanaSavedObjectMeta: {
+      searchSourceJSON: JSON.stringify(
+        {
+          index: 'time-testing-4', // here put this id to make sure fakeTimeFilter will supply the timfilter for it
+          filter: [],
+          query: {}
+        }
+      )
+    }
+  }
+];
 
-var savedDashboards = require('fixtures/kibi/saved_dashboards');
-var emptySavedDashboards = require('fixtures/kibi/empty_saved_dashboards');
-
-var fakeSavedDashboards = require('fixtures/kibi/fake_saved_dashboards_for_counts');
-var fakeSavedSearches = require('fixtures/kibi/fake_saved_searches');
-
-var fakeSavedDashboards2 = require('fixtures/kibi/fake_saved_dashboards_connected');
-var fakeSavedSearches2 = require('fixtures/kibi/fake_saved_searches_connected');
+var fakeSavedDashboards2 = [
+  {
+    id: 'Persons',
+    title: 'Persons',
+    savedSearchId: 'saved-search-person'
+  },
+  {
+    id: 'Articles0',
+    title: 'Articles0',
+    savedSearchId: 'saved-search-articles0'
+  },
+  {
+    id: 'Articles1',
+    title: 'Articles1',
+    savedSearchId: 'saved-search-articles1'
+  },
+  {
+    id: 'Articles2',
+    title: 'Articles2',
+    savedSearchId: 'saved-search-articles2'
+  },
+  {
+    id: 'Companies',
+    title: 'Companies',
+    savedSearchId: 'saved-search-companies'
+  },
+  {
+    id: 'No Saved Search',
+    title: 'No Saved Search'
+  }
+];
+var fakeSavedSearches2 = [
+  {
+    id: 'saved-search-articles0',
+    kibanaSavedObjectMeta: {
+      searchSourceJSON: JSON.stringify(
+        {
+          index: 'articles',
+          filter: [
+            {
+              term: {
+                user: 'filter0'
+              }
+            }
+          ],
+          query: {
+            query: {
+              query_string: {
+                query: 'query0'
+              }
+            }
+          }
+        }
+      )
+    }
+  },
+  {
+    id: 'saved-search-articles1',
+    kibanaSavedObjectMeta: {
+      searchSourceJSON: JSON.stringify(
+        {
+          index: 'articles',
+          filter: [],
+          query: {}
+        }
+      )
+    }
+  },
+  {
+    id: 'saved-search-articles2',
+    kibanaSavedObjectMeta: {
+      searchSourceJSON: JSON.stringify(
+        {
+          index: 'articles',
+          filter: [
+            {
+              term: {
+                user: 'BAR_FILTER'
+              }
+            }
+          ],
+          query: {
+            query: {
+              query_string: {
+                query: 'BAR_QUERY'
+              }
+            }
+          }
+        }
+      )
+    }
+  },
+  {
+    id: 'saved-search-person',
+    kibanaSavedObjectMeta: {
+      searchSourceJSON: JSON.stringify(
+        {
+          index: 'person',
+          filter: [
+            {
+              term: {
+                user: 'person'
+              }
+            }
+          ],
+          query: {
+            query: {
+              query_string: {
+                query: 'person'
+              }
+            }
+          }
+        }
+      )
+    }
+  },
+  {
+    id: 'saved-search-companies',
+    kibanaSavedObjectMeta: {
+      searchSourceJSON: JSON.stringify(
+        {
+          index: 'company',
+          filter: [
+            {
+              term: {
+                user: 'company'
+              }
+            }
+          ],
+          query: {
+            query: {
+              query_string: {
+                query: 'company'
+              }
+            }
+          }
+        }
+      )
+    }
+  }
+];
 var fakeTimeFilter2 = require('fixtures/kibi/fake_time_filter_connected');
 
 var $rootScope;
@@ -53,14 +263,14 @@ function customConfigFile($provide, kbnDefaultAppId, defaultDashboardId) {
   $provide.constant('kibiDefaultDashboardId', defaultDashboardId);
 }
 
-function init(kbnDefaultAppId, defaultDashboardId, savedDashboardsImpl) {
+function init(kbnDefaultAppId, defaultDashboardId, savedDashboards) {
   return function () {
     ngMock.module('kibana', function ($provide) {
       customConfigFile($provide, kbnDefaultAppId, defaultDashboardId);
     });
 
     ngMock.module('app/dashboard', function ($provide) {
-      $provide.service('savedDashboards', savedDashboardsImpl);
+      $provide.service('savedDashboards', (Promise) => mockSavedObjects(Promise)('savedDashboards', savedDashboards));
     });
 
     _initInject();
@@ -78,14 +288,14 @@ function minimalInit() {
 }
 
 
-function init2(savedDashboardsImpl, savedSearchesImpl) {
+function init2(savedDashboards, savedSearches) {
   return function () {
     ngMock.module('app/dashboard', function ($provide) {
-      $provide.service('savedDashboards', savedDashboardsImpl);
+      $provide.service('savedDashboards', (Promise) => mockSavedObjects(Promise)('savedDashboards', savedDashboards));
     });
 
     ngMock.module('discover/saved_searches', function ($provide) {
-      $provide.service('savedSearches', savedSearchesImpl);
+      $provide.service('savedSearches', (Promise) => mockSavedObjects(Promise)('savedSearches', savedSearches));
     });
 
     ngMock.module('kibana', function ($provide) {
@@ -96,14 +306,14 @@ function init2(savedDashboardsImpl, savedSearchesImpl) {
   };
 }
 
-function init3(savedDashboardsImpl, savedSearchesImpl, timefilterImpl) {
+function init3(savedDashboards, savedSearches, timefilterImpl) {
   return function () {
     ngMock.module('app/dashboard', function ($provide) {
-      $provide.service('savedDashboards', savedDashboardsImpl);
+      $provide.service('savedDashboards', (Promise) => mockSavedObjects(Promise)('savedDashboards', savedDashboards));
     });
 
     ngMock.module('discover/saved_searches', function ($provide) {
-      $provide.service('savedSearches', savedSearchesImpl);
+      $provide.service('savedSearches', (Promise) => mockSavedObjects(Promise)('savedSearches', savedSearches));
     });
 
     ngMock.module('kibana', function ($provide) {
@@ -252,7 +462,7 @@ describe('Kibi Components', function () {
 
       describe('defaultDashboardId == Articles, and kbnDefaultAppId == dashboard and no dashboard defined', function () {
 
-        beforeEach(init('dashboard', 'Articles', emptySavedDashboards));
+        beforeEach(init('dashboard', 'Articles', []));
 
         it('1 should return the path to the dashboard creation form', function (done) {
 
@@ -269,7 +479,7 @@ describe('Kibi Components', function () {
 
       describe('defaultDashboardId not set, kbnDefaultAppId == dashboard and no dashboard defined', function () {
 
-        beforeEach(init('dashboard', '', emptySavedDashboards));
+        beforeEach(init('dashboard', '', []));
 
         it('2 should return the path to the dashboard creation form /dashboard', function (done) {
 

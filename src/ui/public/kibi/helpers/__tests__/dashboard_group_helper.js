@@ -1,37 +1,129 @@
 var expect = require('expect.js');
 var ngMock = require('ngMock');
 
-var fakeSavedDashboards           = require('fixtures/kibi/saved_dashboards');
-var fakeEmptySavedDashboards      = require('fixtures/kibi/empty_saved_dashboards');
-var fakeSavedDashboardGroups      = require('fixtures/kibi/fake_saved_dashboard_groups');
-var fakeEmptySavedDashboardGroups = require('fixtures/kibi/fake_empty_saved_dashboard_groups');
-
-
-var fakeSavedDashboardsForCounts  = require('fixtures/kibi/fake_saved_dashboards_for_counts');
-var fakeSavedSearches             = require('fixtures/kibi/fake_saved_searches');
+var mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
+var fakeSavedDashboards = [
+  {
+    id: 'Articles',
+    title: 'Articles'
+  },
+  {
+    id: 'Companies',
+    title: 'Companies'
+  },
+  {
+    id: 'time-testing-1',
+    title: 'time testing 1',
+    timeRestore: false
+  },
+  {
+    id: 'time-testing-2',
+    title: 'time testing 2',
+    timeRestore: true,
+    timeMode: 'quick',
+    timeFrom: 'now-15y',
+    timeTo: 'now'
+  },
+  {
+    id: 'time-testing-3',
+    title: 'time testing 3',
+    timeRestore: true,
+    timeMode: 'absolute',
+    timeFrom: '2005-09-01T12:00:00.000Z',
+    timeTo: '2015-09-05T12:00:00.000Z'
+  }
+];
+var fakeSavedDashboardGroups = [
+  {
+    id: 'group-1',
+    title: 'Group 1',
+    priority: 1,
+    dashboards: [
+      {
+        title: 'Companies',
+        id: 'Companies'
+      },
+      {
+        id: 'Articles',
+        title: 'Articles'
+      }
+    ]
+  },
+  {
+    id: 'group-2',
+    title: 'Group 2',
+    priority: 2,
+    dashboards: []
+  }
+];
+var fakeSavedDashboardsForCounts = [
+  {
+    id: 'Articles',
+    title: 'Articles'
+  },
+  {
+    id: 'search-ste',
+    title: 'search-ste',
+    savedSearchId: 'search-ste'
+  },
+  {
+    id: 'time-testing-4',
+    title: 'time-testing-4',
+    timeRestore: true,
+    timeFrom: '2005-09-01T12:00:00.000Z',
+    timeTo: '2015-09-05T12:00:00.000Z',
+    savedSearchId: 'time-testing-4'
+  }
+];
+var fakeSavedSearches = [
+  {
+    id: 'search-ste',
+    kibanaSavedObjectMeta: {
+      searchSourceJSON: JSON.stringify(
+        {
+          index: 'search-ste',
+          filter: [],
+          query: {}
+        }
+      )
+    }
+  },
+  {
+    id: 'time-testing-4',
+    kibanaSavedObjectMeta: {
+      searchSourceJSON: JSON.stringify(
+        {
+          index: 'time-testing-4', // here put this id to make sure fakeTimeFilter will supply the timfilter for it
+          filter: [],
+          query: {}
+        }
+      )
+    }
+  }
+];
 
 var $rootScope;
 var dashboardGroupHelper;
 var kibiStateHelper;
 
-function init(savedDashboardsImpl, savedDashboardGroupsImpl, savedSearchesImpl) {
+function init(savedDashboards, savedDashboardGroups, savedSearches) {
   return function () {
 
     ngMock.module('app/dashboard', function ($provide) {
-      $provide.service('savedDashboards', savedDashboardsImpl);
+      $provide.service('savedDashboards', (Promise) => mockSavedObjects(Promise)('savedDashboard', savedDashboards));
     });
 
     ngMock.module('dashboard_groups_editor/services/saved_dashboard_groups', function ($provide) {
-      $provide.service('savedDashboardGroups', savedDashboardGroupsImpl);
+      $provide.service('savedDashboardGroups', (Promise) => mockSavedObjects(Promise)('savedDashboardGroups', savedDashboardGroups));
     });
 
-    if (savedSearchesImpl) {
+    if (savedSearches) {
       ngMock.module('kibana', function ($provide) {
         $provide.constant('kibiEnterpriseEnabled', false);
         $provide.constant('kbnDefaultAppId', 'dashboard');
         $provide.constant('kibiDefaultDashboardId', 'Articles');
         $provide.constant('elasticsearchPlugins', ['siren-join']);
-        $provide.service('savedSearches', savedSearchesImpl);
+        $provide.service('savedSearches', (Promise) => mockSavedObjects(Promise)('savedSearches', savedSearches));
       });
     } else {
       ngMock.module('kibana', function ($provide) {
@@ -94,7 +186,7 @@ describe('Kibi Components', function () {
         dashboardGroupHelper.getIdsOfDashboardGroupsTheseDashboardsBelongTo(dashboardIds).then(function (groupIds) {
           expect(groupIds).to.eql(expected);
           done();
-        });
+        }).catch(done);
 
         $rootScope.$apply();
       });
@@ -150,7 +242,7 @@ describe('Kibi Components', function () {
     });
 
     describe('no dashboards', function () {
-      beforeEach(init(fakeEmptySavedDashboards, fakeSavedDashboardGroups));
+      beforeEach(init([], fakeSavedDashboardGroups));
 
       it('computeGroups 2', function (done) {
         dashboardGroupHelper.computeGroups().catch(function (err) {
@@ -166,7 +258,7 @@ describe('Kibi Components', function () {
     });
 
     describe('no dashboards groups', function () {
-      beforeEach(init(fakeSavedDashboards, fakeEmptySavedDashboardGroups, fakeSavedSearches));
+      beforeEach(init(fakeSavedDashboards, [], fakeSavedSearches));
 
       it('computeGroups 3', function (done) {
         dashboardGroupHelper.computeGroups().then(function (groups) {
@@ -180,7 +272,7 @@ describe('Kibi Components', function () {
     });
 
     describe('no dashboards groups, no dashboards', function () {
-      beforeEach(init(fakeEmptySavedDashboards, fakeEmptySavedDashboardGroups, fakeSavedSearches));
+      beforeEach(init([], [], fakeSavedSearches));
 
       it('computeGroups 4', function (done) {
         dashboardGroupHelper.computeGroups().then(function (groups) {
@@ -195,7 +287,7 @@ describe('Kibi Components', function () {
 
 
     describe('updateDashboardGroups', function () {
-      beforeEach(init(fakeEmptySavedDashboards, fakeEmptySavedDashboardGroups));
+      beforeEach(init([], []));
 
       describe('when there is a delta on group level', function () {
 
@@ -518,7 +610,7 @@ describe('Kibi Components', function () {
 
     describe('getCountQueryForSelectedDashboard', function () {
 
-      beforeEach(init(fakeSavedDashboardsForCounts, fakeEmptySavedDashboardGroups, fakeSavedSearches));
+      beforeEach(init(fakeSavedDashboardsForCounts, [], fakeSavedSearches));
 
       it('selected dashboard does NOT exist', function (done) {
         var groups = [

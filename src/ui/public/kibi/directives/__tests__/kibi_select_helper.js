@@ -1,7 +1,82 @@
 var _ = require('lodash');
 var ngMock = require('ngMock');
 var expect = require('expect.js');
-var fakeSavedDatasources = require('fixtures/kibi/fake_saved_datasources');
+
+var mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
+var fakeSavedDashboards = [
+  {
+    id: 'Articles',
+    title: 'Articles'
+  },
+  {
+    id: 'Companies',
+    title: 'Companies'
+  },
+  {
+    id: 'time-testing-1',
+    title: 'time testing 1',
+    timeRestore: false
+  },
+  {
+    id: 'time-testing-2',
+    title: 'time testing 2',
+    timeRestore: true,
+    timeMode: 'quick',
+    timeFrom: 'now-15y',
+    timeTo: 'now'
+  },
+  {
+    id: 'time-testing-3',
+    title: 'time testing 3',
+    timeRestore: true,
+    timeMode: 'absolute',
+    timeFrom: '2005-09-01T12:00:00.000Z',
+    timeTo: '2015-09-05T12:00:00.000Z'
+  }
+];
+var fakeSavedDatasources = [
+  {
+    id: 'ds1',
+    title: 'ds1 datasource',
+    datasourceType: 'sparql_http'
+  },
+  {
+    id: 'ds2',
+    title: 'ds2 datasource',
+    datasourceType: 'mysql'
+  },
+  {
+    id: 'ds3',
+    title: 'ds3 datasource',
+    datasourceType: 'rest'
+  }
+];
+var fakeSavedSearches = [
+  {
+    id: 'search-ste',
+    kibanaSavedObjectMeta: {
+      searchSourceJSON: JSON.stringify(
+        {
+          index: 'search-ste',
+          filter: [],
+          query: {}
+        }
+      )
+    }
+  },
+  {
+    id: 'time-testing-4',
+    kibanaSavedObjectMeta: {
+      searchSourceJSON: JSON.stringify(
+        {
+          index: 'time-testing-4', // here put this id to make sure fakeTimeFilter will supply the timfilter for it
+          filter: [],
+          query: {}
+        }
+      )
+    }
+  }
+];
 
 var stSelectHelper;
 var config;
@@ -16,8 +91,8 @@ describe('Kibi Directives', function () {
     beforeEach(function () {
 
       ngMock.module('kibana', function ($provide) {
-        $provide.service('savedDatasources', fakeSavedDatasources);
-        $provide.service('savedSearches', require('fixtures/kibi/fake_saved_searches'));
+        $provide.service('savedDatasources', (Promise) => mockSavedObjects(Promise)('savedDatasources', fakeSavedDatasources));
+        $provide.service('savedSearches', (Promise) => mockSavedObjects(Promise)('savedSearches', fakeSavedSearches));
         $provide.constant('kbnIndex', '.kibi');
       });
 
@@ -34,69 +109,55 @@ describe('Kibi Directives', function () {
       });
 
       ngMock.module('templates_editor/services/saved_templates', function ($provide) {
-        $provide.service('savedTemplates', function (Promise) {
-          return {
-            find: function () {
-              const templates = [
-                {
-                  id: 'template-1',
-                  title: 'template 1',
-                  description: '',
-                  st_templateSource: '',
-                  st_templateEngine: 'jade',
-                  _previewQueryId: '',
-                  version: 1
-                }
-              ];
-              return Promise.resolve({ hits: templates });
-            }
-          };
-        });
+        $provide.service('savedTemplates', (Promise) => mockSavedObjects(Promise)('savedTemplates', [
+          {
+            id: 'template-1',
+            title: 'template 1',
+            description: '',
+            st_templateSource: '',
+            st_templateEngine: 'jade',
+            _previewQueryId: '',
+            version: 1
+          }
+        ]));
       });
 
       ngMock.module('queries_editor/services/saved_queries', function ($provide) {
-        $provide.service('savedQueries', function (Promise) {
-          return {
-            find: function () {
-              const queries = [
-                {
-                  id: 'sparql',
-                  st_resultQuery: 'select ?name { ?s ?p ?o }',
-                  st_datasourceId: 'ds1',
-                  st_tags: []
-                },
-                {
-                  id: 'sql',
-                  st_resultQuery: 'select name from person',
-                  st_datasourceId: 'ds2',
-                  st_tags: []
-                },
-                {
-                  id: 'rest',
-                  st_resultQuery: '',
-                  st_datasourceId: 'ds3',
-                  st_tags: []
-                },
-                {
-                  id: 'nodatasource',
-                  st_resultQuery: '',
-                  st_datasourceId: '',
-                  st_tags: []
-                },
-                {
-                  id: 'q2',
-                  title: 'q2',
-                  st_tags: [ 'tag2', '42' ]
-                }
-              ];
-              return Promise.resolve({ hits: queries, length: queries.length });
-            }
-          };
-        });
+        $provide.service('savedQueries', (Promise) => mockSavedObjects(Promise)('savedQueries', [
+          {
+            id: 'sparql',
+            st_resultQuery: 'select ?name { ?s ?p ?o }',
+            st_datasourceId: 'ds1',
+            st_tags: []
+          },
+          {
+            id: 'sql',
+            st_resultQuery: 'select name from person',
+            st_datasourceId: 'ds2',
+            st_tags: []
+          },
+          {
+            id: 'rest',
+            st_resultQuery: '',
+            st_datasourceId: 'ds3',
+            st_tags: []
+          },
+          {
+            id: 'nodatasource',
+            st_resultQuery: '',
+            st_datasourceId: '',
+            st_tags: []
+          },
+          {
+            id: 'q2',
+            title: 'q2',
+            st_tags: [ 'tag2', '42' ]
+          }
+        ]));
       });
 
       ngMock.module('app/dashboard', function ($provide) {
-        $provide.service('savedDashboards', require('fixtures/kibi/saved_dashboards'));
+        $provide.service('savedDashboards', (Promise) => mockSavedObjects(Promise)('savedDashboards', fakeSavedDashboards));
       });
 
       ngMock.module('kibana/index_patterns', function ($provide) {

@@ -2,9 +2,53 @@ var _ = require('lodash');
 var expect = require('expect.js');
 var ngMock = require('ngMock');
 
-var fakeTimeFilter      = require('fixtures/kibi/fake_time_filter');
-var fakeSavedDashboards = require('fixtures/kibi/fake_saved_dashboards_for_counts');
-var fakeSavedSearches   = require('fixtures/kibi/fake_saved_searches');
+var mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
+var fakeTimeFilter = require('fixtures/kibi/fake_time_filter');
+var fakeSavedDashboards = [
+  {
+    id: 'Articles',
+    title: 'Articles'
+  },
+  {
+    id: 'search-ste',
+    title: 'search-ste',
+    savedSearchId: 'search-ste'
+  },
+  {
+    id: 'time-testing-4',
+    title: 'time-testing-4',
+    timeRestore: true,
+    timeFrom: '2005-09-01T12:00:00.000Z',
+    timeTo: '2015-09-05T12:00:00.000Z',
+    savedSearchId: 'time-testing-4'
+  }
+];
+var fakeSavedSearches = [
+  {
+    id: 'search-ste',
+    kibanaSavedObjectMeta: {
+      searchSourceJSON: JSON.stringify(
+        {
+          index: 'search-ste',
+          filter: [],
+          query: {}
+        }
+      )
+    }
+  },
+  {
+    id: 'time-testing-4',
+    kibanaSavedObjectMeta: {
+      searchSourceJSON: JSON.stringify(
+        {
+          index: 'time-testing-4', // here put this id to make sure fakeTimeFilter will supply the timfilter for it
+          filter: [],
+          query: {}
+        }
+      )
+    }
+  }
+];
 var dateMath = require('ui/utils/dateMath');
 
 var $rootScope;
@@ -12,7 +56,7 @@ var countHelper;
 var kibiStateHelper;
 var urlHelper;
 
-function init(timefilterImpl, savedDashboardsImpl, savedSearchesImpl) {
+function init(timefilterImpl, savedDashboards, savedSearches) {
   return function () {
 
 
@@ -21,79 +65,78 @@ function init(timefilterImpl, savedDashboardsImpl, savedSearchesImpl) {
         $provide.service('timefilter', timefilterImpl);
       });
     }
-    if (savedDashboardsImpl) {
+    if (savedDashboards) {
       ngMock.module('app/dashboard', function ($provide) {
-        $provide.service('savedDashboards', function (Promise) {
-          const savedDashboards = savedDashboardsImpl(Promise);
-          savedDashboards.addExtra({
-            id: 'empty-dashboard',
-            title: 'empty-dashboard',
-            savedSearchId: 'empty saved search'
-          });
-          savedDashboards.addExtra({
-            id: 'empty-dashboard-with-time',
-            title: 'empty-dashboard-with-time',
-            savedSearchId: 'empty saved search with index with time'
-          });
-          savedDashboards.addExtra({
-            id: 'query-dashboard',
-            title: 'query-dashboard',
-            savedSearchId: 'saved search with query'
-          });
-          return savedDashboards;
-        });
+        $provide.service('savedDashboards', (Promise) => mockSavedObjects(Promise)('savedDashboards', fakeSavedDashboards.concat(
+          [
+            {
+              id: 'empty-dashboard',
+              title: 'empty-dashboard',
+              savedSearchId: 'empty saved search'
+            },
+            {
+              id: 'empty-dashboard-with-time',
+              title: 'empty-dashboard-with-time',
+              savedSearchId: 'empty saved search with index with time'
+            },
+            {
+              id: 'query-dashboard',
+              title: 'query-dashboard',
+              savedSearchId: 'saved search with query'
+            }
+          ]
+        )));
       });
     }
-    if (savedSearchesImpl) {
+    if (savedSearches) {
       ngMock.module('discover/saved_searches', function ($provide) {
-        $provide.service('savedSearches', function (Promise) {
-          const savedSearches = savedSearchesImpl(Promise);
-          savedSearches.addExtra({
-            id: 'empty saved search',
-            kibanaSavedObjectMeta: {
-              searchSourceJSON: JSON.stringify(
-                {
-                  index: 'fake',
-                  filter: [],
-                  query: {}
-                }
-              )
-            }
-          });
-          savedSearches.addExtra({
-            id: 'empty saved search with index with time',
-            kibanaSavedObjectMeta: {
-              searchSourceJSON: JSON.stringify(
-                {
-                  index: 'time-testing-4', // here put this id to make sure fakeTimeFilter will supply the timfilter for it
-                  filter: [],
-                  query: {}
-                }
-              )
-            }
-          });
-          savedSearches.addExtra({
-            id: 'saved search with query',
-            kibanaSavedObjectMeta: {
-              searchSourceJSON: JSON.stringify(
-                {
-                  index: 'fake',
-                  filter: [],
-                  query: {
-                    query_string: {
-                      query: 'funded_year:>2010',
-                      analyze_wildcard: true
+        $provide.service('savedSearches', (Promise) => mockSavedObjects(Promise)('savedSearches', fakeSavedSearches.concat(
+          [
+            {
+              id: 'empty saved search',
+              kibanaSavedObjectMeta: {
+                searchSourceJSON: JSON.stringify(
+                  {
+                    index: 'fake',
+                    filter: [],
+                    query: {}
+                  }
+                )
+              }
+            },
+            {
+              id: 'empty saved search with index with time',
+              kibanaSavedObjectMeta: {
+                searchSourceJSON: JSON.stringify(
+                  {
+                    index: 'time-testing-4', // here put this id to make sure fakeTimeFilter will supply the timfilter for it
+                    filter: [],
+                    query: {}
+                  }
+                )
+              }
+            },
+            {
+              id: 'saved search with query',
+              kibanaSavedObjectMeta: {
+                searchSourceJSON: JSON.stringify(
+                  {
+                    index: 'fake',
+                    filter: [],
+                    query: {
+                      query_string: {
+                        query: 'funded_year:>2010',
+                        analyze_wildcard: true
+                      }
                     }
                   }
-                }
-              )
+                )
+              }
             }
-          });
-          return savedSearches;
-        });
+          ])));
       });
     }
-    if (!savedDashboardsImpl && !timefilterImpl) {
+    if (!savedDashboards && !timefilterImpl) {
       ngMock.module('kibana');
     }
 

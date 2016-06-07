@@ -1,22 +1,102 @@
 var expect = require('expect.js');
 var ngMock = require('ngMock');
 
-var fakeIndexPatterns       = require('fixtures/kibi/fake_index_patterns');
-var fakeABCDEIndexPatterns  = require('fixtures/kibi/fake_abcde_index_patterns');
-var fakeTimeFilter          = require('fixtures/kibi/fake_time_filter');
-var fakeSavedDashboards     = require('fixtures/kibi/saved_dashboards');
-var fakeSavedVisualisations = require('fixtures/kibi/saved_visualisations');
+var mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
+var fakeIndexPatterns = [
+  {
+    id: 'article'
+  },
+  {
+    id: 'company'
+  },
+  {
+    id: 'time-testing-3'
+  }
+];
+var fakeABCDEIndexPatterns = [
+  {
+    id: 'a'
+  },
+  {
+    id: 'b'
+  },
+  {
+    id: 'c'
+  },
+  {
+    id: 'd'
+  },
+  {
+    id: 'e'
+  }
+];
+var fakeTimeFilter = require('fixtures/kibi/fake_time_filter');
+var fakeSavedDashboards = [
+  {
+    id: 'Articles',
+    title: 'Articles'
+  },
+  {
+    id: 'Companies',
+    title: 'Companies'
+  },
+  {
+    id: 'time-testing-1',
+    title: 'time testing 1',
+    timeRestore: false
+  },
+  {
+    id: 'time-testing-2',
+    title: 'time testing 2',
+    timeRestore: true,
+    timeMode: 'quick',
+    timeFrom: 'now-15y',
+    timeTo: 'now'
+  },
+  {
+    id: 'time-testing-3',
+    title: 'time testing 3',
+    timeRestore: true,
+    timeMode: 'absolute',
+    timeFrom: '2005-09-01T12:00:00.000Z',
+    timeTo: '2015-09-05T12:00:00.000Z'
+  }
+];
+var fakeSavedVisualisations = [
+  {
+    id: 'myvis1',
+    title: 'myvis1',
+    visState: '{"params":{"queryIds":[{"id":"","queryId":"123","queryVariableName":"competitor"}]}}',
+    description: '',
+    savedSearchId: 'Articles',
+    version: 1,
+    kibanaSavedObjectMeta: {
+      searchSourceJSON: '{"filter":[]}'
+    }
+  },
+  {
+    id: 'myvis2',
+    title: 'myvis2',
+    visState: '{"params":{"queryIds":[{"queryId":"123"},{"queryId":"456"}]}}',
+    description: '',
+    savedSearchId: 'Articles',
+    version: 1,
+    kibanaSavedObjectMeta: {
+      searchSourceJSON: '{"filter":[]}'
+    }
+  }
+];
 var $rootScope;
 var queryHelper;
 
-function init(timefilterImpl, savedDashboardsImpl, indexPatternsImpl, visualizationsImpl) {
+function init(timefilterImpl, savedDashboards, indexPatterns, visualizations) {
   return function () {
     ngMock.module('app/dashboard', function ($provide) {
-      $provide.service('savedDashboards', savedDashboardsImpl);
+      $provide.service('savedDashboards', (Promise) => mockSavedObjects(Promise)('savedDashboards', savedDashboards));
     });
 
     ngMock.module('kibana/index_patterns', function ($provide) {
-      $provide.service('indexPatterns', indexPatternsImpl);
+      $provide.service('indexPatterns', (Promise) => mockSavedObjects(Promise)('indexPatterns', indexPatterns));
     });
 
     ngMock.module('kibana', function ($provide) {
@@ -24,7 +104,7 @@ function init(timefilterImpl, savedDashboardsImpl, indexPatternsImpl, visualizat
     });
 
     ngMock.module('app/visualize', function ($provide) {
-      $provide.service('savedVisualizations', visualizationsImpl);
+      $provide.service('savedVisualizations', (Promise) => mockSavedObjects(Promise)('savedVisualizations', visualizations));
     });
 
     ngMock.inject(function ($injector, Private, _$rootScope_) {

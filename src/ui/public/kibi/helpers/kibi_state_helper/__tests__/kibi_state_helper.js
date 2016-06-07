@@ -1,17 +1,48 @@
 var expect = require('expect.js');
 var ngMock = require('ngMock');
 
-var savedDashboards = require('fixtures/kibi/saved_dashboards');
+var mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
+var savedDashboards = [
+  {
+    id: 'Articles',
+    title: 'Articles'
+  },
+  {
+    id: 'Companies',
+    title: 'Companies'
+  },
+  {
+    id: 'time-testing-1',
+    title: 'time testing 1',
+    timeRestore: false
+  },
+  {
+    id: 'time-testing-2',
+    title: 'time testing 2',
+    timeRestore: true,
+    timeMode: 'quick',
+    timeFrom: 'now-15y',
+    timeTo: 'now'
+  },
+  {
+    id: 'time-testing-3',
+    title: 'time testing 3',
+    timeRestore: true,
+    timeMode: 'absolute',
+    timeFrom: '2005-09-01T12:00:00.000Z',
+    timeTo: '2015-09-05T12:00:00.000Z'
+  }
+];
 var $rootScope;
 var kibiStateHelper;
 var globalState;
 var $location;
 var $timeout;
 
-function init(savedDashboardsImpl, locationImpl) {
+function init(savedDashboards) {
   return function () {
     ngMock.module('app/dashboard', function ($provide) {
-      $provide.service('savedDashboards', savedDashboardsImpl);
+      $provide.service('savedDashboards', (Promise) => mockSavedObjects(Promise)('savedDashboards', savedDashboards));
     });
 
     ngMock.module('kibana');
@@ -31,7 +62,7 @@ describe('Kibi Components', function () {
 
     beforeEach(init(savedDashboards));
 
-    var dashboardId = 'Articles'; // existing one from fixtures/saved_dashboards
+    var dashboardId = 'Articles'; // existing one from savedDashboards
 
     it('save the selected dashboard in a group', function () {
       var groupId = 'group1';

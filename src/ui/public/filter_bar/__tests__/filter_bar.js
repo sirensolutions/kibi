@@ -6,6 +6,7 @@ var expect = require('expect.js');
 var sinon = require('sinon');
 
 require('ui/filter_bar');
+var mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
 var MockState = require('fixtures/mock_state');
 
 describe('Filter Bar Directive', function () {
@@ -39,11 +40,11 @@ describe('Filter Bar Directive', function () {
     });
 
     ngMock.module('ui/kibi/helpers/kibi_state_helper/services/saved_sessions', function ($provide) {
-      $provide.service('savedSessions', require('fixtures/kibi/empty_saved_sessions'));
+      $provide.service('savedSessions', (Promise) => mockSavedObjects(Promise)('savedSession'));
     });
 
     ngMock.module('queries_editor/services/saved_queries', function ($provide) {
-      $provide.service('savedQueries', require('fixtures/empty_saved_queries'));
+      $provide.service('savedQueries', (Promise) => mockSavedObjects(Promise)('savedQueries'));
     });
 
     ngMock.module('kibana/courier', function ($provide) {
@@ -51,11 +52,11 @@ describe('Filter Bar Directive', function () {
     });
 
     ngMock.module('discover/saved_searches', function ($provide) {
-      $provide.service('savedSearches', require('fixtures/empty_saved_searches'));
+      $provide.service('savedSearches', (Promise) => mockSavedObjects(Promise)('savedSearch'));
     });
 
     ngMock.module('app/dashboard', function ($provide) {
-      $provide.service('savedDashboards', require('fixtures/empty_saved_dashboards'));
+      $provide.service('savedDashboards', (Promise) => mockSavedObjects(Promise)('savedDashboard'));
     });
 
     ngMock.inject(function (Private, $injector, _$rootScope_, _$compile_, _$timeout_) {

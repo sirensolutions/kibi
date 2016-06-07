@@ -3,8 +3,12 @@
 
 === Kibi 4.4.1-2 Release Notes
 
-
 * Fixed a bug - Label on Entity Clipboard missing
+* Fixed a bug - null pointer exception in gremlin server [Enterprise Edition only]
+* Fixed a bug - id instead of label on the graph [Enterprise Edition only]
+* Fixed a bug - 500 - [Object object] error [Enterprise Edition only]
+* Fixed a bug - incorectly parsed remote_address [Enterprise Edition only]
+* Fixed a bug - saving termsEncoding bloom [Enterprise Edition only]
 
 === Kibi 4.4.1-1 Release Notes
 

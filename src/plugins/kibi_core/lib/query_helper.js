@@ -105,7 +105,7 @@ QueryHelper.prototype.fetchDocument = function (index, type, id, credentials) {
   return client.search({
     index: index,
     type: type,
-    q: '_id:' + id
+    q: '_id: "' + id + '"'
   }).then(function (doc) {
     if (doc.hits && doc.hits.hits.length === 1) {
       return doc.hits.hits[0];

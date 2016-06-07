@@ -104,6 +104,14 @@ describe('Query Helper', function () {
         done();
       });
     });
+
+    it('id with colon', function (done) {
+      queryHelper.fetchDocument('index', 'type', 'id:test').then(function (doc) {
+        expect(clientSearchCounter).to.equal(1);
+        expect(createdClientSearchCounter).to.equal(0);
+        done();
+      });
+    });
   });
 
   describe('replaceVariablesForREST', function () {

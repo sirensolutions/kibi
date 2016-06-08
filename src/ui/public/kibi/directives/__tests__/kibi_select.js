@@ -9,7 +9,7 @@ require('../kibi_select');
 var $rootScope;
 var $elem;
 
-var init = function (initValue, items, required, modelDisabled, modelRequired, include, filter) {
+var init = function (initValue, items, required, modelDisabled, modelRequired, include, filter, filterOptions) {
   // Load the application
   ngMock.module('kibana');
 
@@ -38,6 +38,11 @@ var init = function (initValue, items, required, modelDisabled, modelRequired, i
     if (filter !== null && filter !== undefined) {
       $rootScope.filter = filter;
       select += ' filter="filter"';
+
+      if (filterOptions !== null && filterOptions !== undefined) {
+        $rootScope.filterOptions = filterOptions;
+        select += ' filter-options="' + filterOptions + '"';
+      }
     }
     $elem = angular.element(select + '></kibi-select>');
 
@@ -184,6 +189,29 @@ describe('Kibi Directives', function () {
       };
 
       init(null, items, null, null, null, null, filter);
+
+      expect($rootScope.action.called).to.be.ok();
+      var options = $elem.find('option');
+      expect(options).to.have.length(2);
+
+      firstElementIsEmpty(options);
+
+      expect(options[1]).to.be.ok();
+      expect(options[1].value).to.be('2');
+      expect(options[1].text).to.be('toto');
+    });
+
+    it('should exclude items from the select based on the filterOptions', function () {
+      var items = [ { value: 1, label: 'joe' }, { value: 2, label: 'toto' } ];
+      var filter = function (id, item, options) {
+        if (item) {
+          return item.label === options.name;
+        } else {
+          return false;
+        }
+      };
+
+      init(null, items, null, null, null, null, filter, '{name: \'joe\'}');
 
       expect($rootScope.action.called).to.be.ok();
       var options = $elem.find('option');

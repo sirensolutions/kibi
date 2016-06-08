@@ -23,6 +23,7 @@ define(function (require) {
         //
         // If the item is **undefined**, the function may return an object that is used in the angular watcher.
         filter: '&?',
+        filterOptions: '=?', // optional options map eg: { param: value }
         objectType:       '@',  // text
         indexPatternId:   '=?', // optional only for objectType === field | indexPatternType | documentIds
         indexPatternType: '=?', // optional only for objectType === documentIds
@@ -135,7 +136,9 @@ define(function (require) {
               _.remove(scope.items, function (item) {
                 var selected = !!ngModelCtrl.$viewValue && !!ngModelCtrl.$viewValue.value &&
                   ngModelCtrl.$viewValue.value === item.value;
-                var toRemove = scope.filter()(scope.id, item);
+
+                var toRemove = scope.filter()(scope.id, item, scope.filterOptions);
+
                 return toRemove && !selected;
               });
             }

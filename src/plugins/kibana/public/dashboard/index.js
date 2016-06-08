@@ -114,6 +114,7 @@ define(function (require) {
         }
 
         var stateDefaults = {
+          id: dash.id, // kibi: added to identity a dashboard in helper methods
           title: dash.title,
           panels: dash.panelsJSON ? JSON.parse(dash.panelsJSON) : [],
           options: dash.optionsJSON ? JSON.parse(dash.optionsJSON) : {},

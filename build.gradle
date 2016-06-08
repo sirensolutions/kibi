@@ -106,50 +106,62 @@ publishing {
   publications {
 
     /**
-     * Install Kibi distribution for each platform into maven local
+     * Prepare Kibi distribution artifact for each platform
      */
 
     darwinX64(MavenPublication) {
-      artifact new File("${projectDir}/target", "kibi-${project.version}-darwin-x64.zip")
+      artifact(new File("${projectDir}/target", "kibi-${project.version}-darwin-x64.zip")) {
+        classifier "darwin-x64"
+      }
       groupId project.group
       artifactId "kibi-core"
-      version "${project.version}-darwin-x64"
+      version project.version
     }
 
     linuxX64(MavenPublication) {
-      artifact new File("${projectDir}/target", "kibi-${project.version}-linux-x64.zip")
+      artifact(new File("${projectDir}/target", "kibi-${project.version}-linux-x64.zip")) {
+        classifier "linux-x64"
+      }
       groupId project.group
       artifactId "kibi-core"
-      version "${project.version}-linux-x64"
+      version project.version
     }
 
     linuxX86(MavenPublication) {
-      artifact new File("${projectDir}/target", "kibi-${project.version}-linux-x86.zip")
+      artifact(new File("${projectDir}/target", "kibi-${project.version}-linux-x86.zip")) {
+        classifier "linux-x86"
+      }
       groupId project.group
       artifactId "kibi-core"
-      version "${project.version}-linux-x86"
+      version project.version
     }
 
     windows(MavenPublication) {
-      artifact new File("${projectDir}/target", "kibi-${project.version}-windows.zip")
+      artifact(new File("${projectDir}/target", "kibi-${project.version}-windows.zip")) {
+        classifier "windows"
+      }
       groupId project.group
       artifactId "kibi-core"
-      version "${project.version}-windows"
+      version project.version
     }
 
     windows64(MavenPublication) {
-      artifact new File("${projectDir}/target", "kibi-${project.version}-windows64.zip")
+      artifact(new File("${projectDir}/target", "kibi-${project.version}-windows64.zip")) {
+        classifier "windows64"
+      }
       groupId project.group
       artifactId "kibi-core"
-      version "${project.version}-windows64"
+      version project.version
     }
 
     /**
-     * Install source documentation into maven local
+     * Prepare source documentation artifact
      */
 
     srcDoc(MavenPublication) {
-      artifact srcDocDistZip
+      artifact srcDocDistZip {
+        classifier "sources"
+      }
       groupId project.group
       artifactId "kibi-doc"
       version project.version

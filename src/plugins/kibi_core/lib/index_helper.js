@@ -1,3 +1,4 @@
+var kibiUtils = require('kibiutils');
 var _ = require('lodash');
 var fs = require('fs');
 var url = require('url');
@@ -54,7 +55,7 @@ IndexHelper.prototype.rencryptAllValuesInKibiIndex = function (oldkey, algorithm
 
       // here get the properties which should be encrypted according to the shema
       var type = datasource._source.datasourceType;
-      if (type === 'sql_jdbc' || type === 'sparql_jdbc') {
+      if (kibiUtils.isJDBC(type)) {
         type = 'jdbc';
       }
       var schema = datasourcesSchema[type].concat(datasourcesSchema.base);

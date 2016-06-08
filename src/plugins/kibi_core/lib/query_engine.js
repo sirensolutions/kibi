@@ -1,3 +1,4 @@
+var kibiUtils = require('kibiutils');
 var rp = require('request-promise');
 var Promise = require('bluebird');
 var _ = require('lodash');
@@ -456,27 +457,27 @@ QueryEngine.prototype.reloadQueries = function () {
           return false;
         }).map(function (queryDef) {
           // now once we have query definitions and datasources load queries
-          if (queryDef.datasource.datasourceType === 'sparql_http') {
+          if (queryDef.datasource.datasourceType === kibiUtils.DatasourceTypes.sparql_http) {
             return new SparqlQuery(self.server, queryDef, self.cache);
-          } else if (queryDef.datasource.datasourceType === 'postgresql') {
+          } else if (queryDef.datasource.datasourceType === kibiUtils.DatasourceTypes.postgresql) {
             return new PostgresQuery(self.server, queryDef, self.cache);
-          } else if (queryDef.datasource.datasourceType === 'mysql') {
+          } else if (queryDef.datasource.datasourceType === kibiUtils.DatasourceTypes.mysql) {
             return new MysqlQuery(self.server, queryDef, self.cache);
-          } else if (queryDef.datasource.datasourceType === 'sparql_jdbc' || queryDef.datasource.datasourceType === 'sql_jdbc') {
+          } else if (kibiUtils.isJDBC(queryDef.datasource.datasourceType)) {
             if (self.config.get('kibi_core.load_jdbc') === false) {
               const msg = 'Please set the "kibi_core.load_jdbc" option to true in kibi.yml and restart the backend.';
               return new ErrorQuery(self.server, msg);
             }
             return new JdbcQuery(self.server, queryDef, self.cache);
-          } else if (queryDef.datasource.datasourceType === 'rest') {
+          } else if (queryDef.datasource.datasourceType === kibiUtils.DatasourceTypes.rest) {
             return new RestQuery(self.server, queryDef, self.cache);
-          } else if (queryDef.datasource.datasourceType === 'sqlite') {
+          } else if (queryDef.datasource.datasourceType === kibiUtils.DatasourceTypes.sqlite) {
             return new SQLiteQuery(self.server, queryDef, self.cache);
-          } else if (queryDef.datasource.datasourceType === 'tinkerpop3') {
+          } else if (queryDef.datasource.datasourceType === kibiUtils.DatasourceTypes.tinkerpop3) {
             if (self.config.get('pkg.kibiEnterpriseEnabled')) {
               return new TinkerPop3Query(self.server, queryDef, self.cache);
             } else {
-              self.log.error('This datasource type [tinkerpop3] - requires Kibi Enterprise Edition');
+              self.log.error(`This datasource type [${kibiUtils.DatasourceTypes.tinkerpop3}] - requires Kibi Enterprise Edition`);
               return false;
             }
           } else {

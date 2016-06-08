@@ -32,6 +32,7 @@ define(function (require) {
 
   var app = require('ui/modules').get('apps/settings', ['kibana']);
   var angular = require('angular');
+  var kibiUtils = require('kibiutils');
 
   app.controller(
     'DatasourcesEditor',
@@ -80,8 +81,10 @@ define(function (require) {
           }
         }
 
-        if (datasource.datasourceType === 'sql_jdbc' || datasource.datasourceType === 'sparql_jdbc') {
-          notify.warning('Changes in jdbc datasource require application restart. Please restart kibi');
+        if (kibiUtils.isSQL(datasource.datasourceType)) {
+          const msg = 'Changes in jdbc datasource require application restart. ' +
+            'Please restart kibi and do not forget to set kibi_core.load_jdbc to true.';
+          notify.warning(msg);
         }
 
         datasource.id = datasource.title;

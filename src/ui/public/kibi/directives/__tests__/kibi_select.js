@@ -211,7 +211,7 @@ describe('Kibi Directives', function () {
         }
       };
 
-      init(null, items, null, null, null, null, filter, "{name: 'joe'}");
+      init(null, items, null, null, null, null, filter, '{name: \'joe\'}');
 
       expect($rootScope.action.called).to.be.ok();
       var options = $elem.find('option');

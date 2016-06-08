@@ -137,12 +137,8 @@ define(function (require) {
                 var selected = !!ngModelCtrl.$viewValue && !!ngModelCtrl.$viewValue.value &&
                   ngModelCtrl.$viewValue.value === item.value;
 
-                var toRemove;
-                if (scope.filterOptions) {
-                  toRemove = scope.filter()(scope.id, item, scope.filterOptions);
-                } else {
-                  toRemove = scope.filter()(scope.id, item);
-                }
+                var toRemove = scope.filter()(scope.id, item, scope.filterOptions);
+
                 return toRemove && !selected;
               });
             }

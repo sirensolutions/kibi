@@ -80,30 +80,24 @@ Make sure to change *datasource_encryption_key* in kibi.yml.
 To do it use scripts provided in **bin/** folder.
 
 Linux:
+
 ```
 bin/replace_encryption_key.sh OLD_KEY ALGORITHM NEW_KEY PATH_TO_KIBI_YML
 ```
+
 Windows:
+
 ```
 bin\replace_encryption_key.bat OLD_KEY ALGORITHM NEW_KEY PATH_TO_KIBI_YML
 ```
 
 Where:
 
-* OLD_KEY and NEW_KEY - a base64encoded string which contain a key which is either 16, 24, or 32 bytes long
-E.g. if your key in plaintext is 32 bytes long string
-
-```
-changemechangemechangemechangeme
-```
-
-after base64 encoding
-
-```
-Y2hhbmdlbWVjaGFuZ2VtZWNoYW5nZW1lY2hhbmdlbWU=
-```
-* ALGORITHM - currently only AES-GCM is supported
-* PATH_TO_KIBI_YML - an absolute path to kibi.yml file
+* **OLD_KEY** and **NEW_KEY** - a base64encoded string which contain a key which is either 16, 24, or 32 bytes long,
+e.g. if your key in plaintext is 32 bytes long string ```changemechangemechangemechangeme``` after base64 encoding
+it should be ```Y2hhbmdlbWVjaGFuZ2VtZWNoYW5nZW1lY2hhbmdlbWU=```
+* **ALGORITHM** - currently only AES-GCM is supported
+* **PATH_TO_KIBI_YML** - an absolute path to kibi.yml file
 
 NOTE: Make sure to set the configuration file as readable only to the user running
 the Kibi process as it contains the *datasource_encryption_key*.

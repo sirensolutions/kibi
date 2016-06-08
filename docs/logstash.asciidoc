@@ -114,14 +114,13 @@ by an analyzer to allow full-text queries.
 It is also possible to set the `index` attribute to `no` to make the search
 engine ignore the field.
 
-Save the file to `demo/sql/crunchbase/conf/logstash_sqlite/mappings/CompanyMinimal.mapping`
+Save the file to `demo/example/CompanyMinimal.mapping`
 inside the directory where you extracted the demo distribution.
 
-To apply the mapping, go to the `demo/sql/crunchbase/conf/logstash_sqlite`
-directory and execute the following command:
+To apply the mapping, execute the following command:
 
 [source,bash]
-curl -X PUT "http://localhost:9220/company-minimal/_mapping/CompanyMinimal" -d "@mappings/CompanyMinimal.mapping"
+curl -X PUT "http://localhost:9220/company-minimal/_mapping/CompanyMinimal" -d "@demo/example/CompanyMinimal.mapping"
 
 If the mapping is created correctly, Elasticsearch will return the following
 response:
@@ -154,7 +153,7 @@ SELECT id,
   LEFT JOIN company_geolocation ON company.id = company_geolocation.companyid
 ----
 
-Save the file to `demo/sql/crunchbase/conf/logstash_sqlite/company-minimal.sql`
+Save the file to `demo/example/company-minimal.sql`
 inside the directory where you extracted the demo distribution.
 
 [float]
@@ -163,9 +162,9 @@ inside the directory where you extracted the demo distribution.
 We now need to write a Logstash configuration to process the records returned
 by the query and populate the `company-minimal` index.
 
-NOTE: support for SQL databases is provided by the
+NOTE: Support for SQL databases is provided by the
 https://www.elastic.co/guide/en/logstash/current/plugins-inputs-jdbc.html[Logstash jdbc input plugin];
-the plugin comes pre-installed in the Logstash binary bundled in the demo.
+User must download logstash to `demo/example` directory and install the required plugin
 
 Open a text editor and paste the following:
 
@@ -214,16 +213,15 @@ The `output` section specifies the destination index; `manage_template` is
 set to `false` as the index mapping has been explicitly defined in the
 previous steps.
 
-Save the file to `demo/sql/crunchbase/conf/logstash_sqlite/company-minimal.conf`
-inside the directory where you extracted the demo distribution.
+Save the file to `demo/example/company-minimal.conf`
 
-Copy the SQLite database to `demo/sql/crunchbase/conf/logstash_sqlite/crunchbase.db`,
-then go to the `demo/sql/crunchbase/conf/logstash_sqlite` directory and run the
-following command:
+Copy the SQLite database to `demo/example/crunchbase.db`,
+then go to the `demo/example` directory and run the following command:
 
 [source,bash]
 ----
-../../../../../logstash/bin/logstash -f company-minimal.conf
+cd demo/example
+logstash/bin/logstash -f company-minimal.conf
 ----
 
 Logstash will execute the query and populate the index.

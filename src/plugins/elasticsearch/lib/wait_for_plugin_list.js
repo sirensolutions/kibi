@@ -57,7 +57,7 @@ module.exports = function (plugin, server) {
             });
             if (!foundCorrespondingNode) {
               plugin.status.red(
-                'SIREn Join plugin is missing at node [' + nodeIp + ']\n' +
+                'SIREn Join plugin is missing at data node:[' + nodeName + '] ip:[' + nodeIp + ']\n' +
                 'SIREn Join plugin should be installed on all data nodes.'
               );
             }

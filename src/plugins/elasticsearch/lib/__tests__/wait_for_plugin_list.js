@@ -146,7 +146,7 @@ describe('plugins/elasticsearch', function () {
       waitForPluginList(fakePlugin, fakeServer).then(function () {
         expect(fakeConfig['elasticsearch.plugins']).to.eql(['siren-join', 'missing-siren-join']);
         expect(fakePlugin.status.red()).to.eql(
-          'SIREn Join plugin is missing at node [127.0.0.1]\n' +
+          'SIREn Join plugin is missing at data node:[nodeB] ip:[127.0.0.1]\n' +
           'SIREn Join plugin should be installed on all data nodes.'
         );
         done();

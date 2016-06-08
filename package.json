@@ -150,7 +150,7 @@
 
 
     "lru-cache": "~2.6.4",
-    "request-promise": "0.4.3",
+    "request-promise": "3.0.0",
     "node-forge": "^0.6.37",
     "kibiutils": "sirensolutions/kibiutils#1.1.0",
     "sqlite3": "3.1.4",

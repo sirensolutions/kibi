@@ -16,6 +16,7 @@ define(function (require) {
 
   var _ = require('lodash');
   var angular = require('angular');
+  var kibiUtils = require('kibiutils');
 
   require('ui/routes')
   .when('/settings/queries', {
@@ -48,9 +49,14 @@ define(function (require) {
     function ($rootScope, $scope, $route, $window, kbnUrl, createNotifier, queryEngineClient,
               savedDatasources, Private, $element) {
 
-      var queryHelper =  Private(require('ui/kibi/helpers/query_helper'));
+      var queryHelper = Private(require('ui/kibi/helpers/query_helper'));
       var setEntityUri = Private(require('ui/kibi/components/commons/_set_entity_uri'));
       var doesQueryDependsOnEntity = Private(require('ui/kibi/components/commons/_does_query_depends_on_entity'));
+
+      $scope.isJDBC = kibiUtils.isJDBC;
+      $scope.isSPARQL = kibiUtils.isSPARQL;
+      $scope.isSQL = kibiUtils.isSQL;
+      $scope.DatasourceTypes = kibiUtils.DatasourceTypes;
 
       // we have to wrap the value into object - this prevents weird thing related to transclusion
       // see http://stackoverflow.com/questions/25180613/angularjs-transclusion-creates-new-scope
@@ -117,7 +123,7 @@ define(function (require) {
 
       $scope.$watchMulti(['query.st_activationQuery', 'query.st_resultQuery', 'query.rest_body'], function () {
         _enableEntityUri();
-        if ($scope.datasourceType !== 'rest') {
+        if ($scope.datasourceType !== kibiUtils.DatasourceTypes.rest) {
           var starRegex = /\*/g;
           // test for a star in a query
           // TODO why test st_activationQuery ?
@@ -134,7 +140,7 @@ define(function (require) {
             $scope.datasourceType = savedDatasource.datasourceType;
 
             _enableEntityUri();
-            if (savedDatasource.datasourceType === 'rest') {
+            if (savedDatasource.datasourceType === kibiUtils.DatasourceTypes.rest) {
               $scope.query._previewTemplateId = 'kibi-json-jade';
             } else {
               $scope.query._previewTemplateId = 'kibi-table-jade';

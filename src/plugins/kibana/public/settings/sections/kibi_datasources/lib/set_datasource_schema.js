@@ -1,5 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
+  var kibiUtils = require('kibiutils');
 
   return function (Private, kibiDatasourcesSchema) {
 
@@ -9,28 +10,28 @@ define(function (require) {
       var base = kibiDatasourcesSchema.base;
 
       switch (datasource.datasourceType.toLowerCase()) {
-        case 'rest':
+        case kibiUtils.DatasourceTypes.rest:
           datasource.schema = mergeByName(base, kibiDatasourcesSchema.rest);
           break;
-        case 'sqlite':
+        case kibiUtils.DatasourceTypes.sqlite:
           datasource.schema = mergeByName(base, kibiDatasourcesSchema.sqlite);
           break;
-        case 'mysql':
+        case kibiUtils.DatasourceTypes.mysql:
           datasource.schema = mergeByName(base, kibiDatasourcesSchema.mysql);
           break;
-        case 'postgresql':
+        case kibiUtils.DatasourceTypes.postgresql:
           datasource.schema = mergeByName(base, kibiDatasourcesSchema.postgresql);
           break;
-        case 'sparql_http':
+        case kibiUtils.DatasourceTypes.sparql_http:
           datasource.schema = mergeByName(base, kibiDatasourcesSchema.sparql_http);
           break;
-        case 'sql_jdbc':
+        case kibiUtils.DatasourceTypes.sql_jdbc:
           datasource.schema = mergeByName(base, kibiDatasourcesSchema.jdbc);
           break;
-        case 'sparql_jdbc':
+        case kibiUtils.DatasourceTypes.sparql_jdbc:
           datasource.schema = mergeByName(base, kibiDatasourcesSchema.jdbc);
           break;
-        case 'tinkerpop3':
+        case kibiUtils.DatasourceTypes.tinkerpop3:
           datasource.schema = mergeByName(base, kibiDatasourcesSchema.tinkerpop3);
           break;
         default:

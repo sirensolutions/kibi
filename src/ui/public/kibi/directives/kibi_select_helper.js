@@ -15,6 +15,7 @@ define(function (require) {
     var sqlHelper = Private(require('ui/kibi/helpers/sql_helper'));
     var indexPath = Private(require('ui/kibi/components/commons/_index_path'));
     var datasourceHelper = Private(require('ui/kibi/helpers/datasource_helper'));
+    var kibiUtils = require('kibiutils');
 
     KibiSelectHelper.prototype.getQueries = function () {
       return Promise.all([ savedQueries.find(), savedDatasources.find() ]).then(function (results) {
@@ -222,23 +223,12 @@ define(function (require) {
         return datasourceHelper.getDatasourceType(savedQuery.st_datasourceId).then(function (datasourceType) {
           var resultQuery = savedQuery.st_resultQuery;
           var variables = [];
-          switch (datasourceType) {
-            case 'sparql_http':
-            case 'jdbc-sparql':
-              variables = sparqlHelper.getVariables(resultQuery);
-              break;
-            case 'sqlite':
-            case 'mysql':
-            case 'postgresql':
-            case 'jdbc':
-              variables = sqlHelper.getVariables(resultQuery);
-              break;
-            case 'rest':
-            case 'tinkerpop3':
-              // do nothing if variables is empty a text box instead of select should be rendered
-              break;
-            default:
-              return Promise.reject('Unknown datasource type for query=' + queryId + ': ' + datasourceType);
+          if (kibiUtils.isSPARQL(datasourceType)) {
+            variables = sparqlHelper.getVariables(resultQuery);
+          } else if (kibiUtils.isSQL(datasourceType)) {
+            variables = sqlHelper.getVariables(resultQuery);
+          } else if (kibiUtils.DatasourceTypes.rest !== datasourceType && kibiUtils.DatasourceTypes.tinkerpop3 !== datasourceType) {
+            return Promise.reject('Unknown datasource type for query=' + queryId + ': ' + datasourceType);
           }
 
           var fields = _.map(variables, function (v) {

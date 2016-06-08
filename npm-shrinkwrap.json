@@ -2839,9 +2839,9 @@
       "resolved": "git://github.com/sirensolutions/kibi-icons.git#a2a4df8406bb1904cba8fef7d9b7d0931e855f22"
     },
     "kibiutils": {
-      "version": "1.0.0",
-      "from": "git://github.com/sirensolutions/kibiutils.git#d45ff0855715e01cf86ca799af2ce4b93b466f31",
-      "resolved": "git://github.com/sirensolutions/kibiutils.git#d45ff0855715e01cf86ca799af2ce4b93b466f31"
+      "version": "1.2.0",
+      "from": "git://github.com/sirensolutions/kibiutils#f4e5b090b3db03cc4c775c857675290cfd2226b9",
+      "resolved": "git://github.com/sirensolutions/kibiutils#f4e5b090b3db03cc4c775c857675290cfd2226b9"
     },
     "leaflet": {
       "version": "0.7.5",

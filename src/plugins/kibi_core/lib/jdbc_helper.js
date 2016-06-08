@@ -4,6 +4,7 @@ var path = require('path');
 var cryptoHelper = require('./crypto_helper');
 var IndexHelper = require('./index_helper');
 var logger = require('./logger');
+var kibiUtils = require('kibiutils');
 
 var _endsWith = function (s, suffix) {
   return s.indexOf(suffix, s.length - suffix.length) !== -1;
@@ -141,7 +142,7 @@ JdbcHelper.prototype.prepareJdbcPaths = function () {
     self.indexHelper.getDatasources().then(function (datasources) {
 
       _.each(datasources, function (datasource) {
-        if (datasource._source.datasourceType.indexOf('_jdbc') > 0) {
+        if (kibiUtils.isJDBC(datasource._source.datasourceType)) {
           if (datasource._source.datasourceParams) {
             var params = {};
             try {

@@ -41,15 +41,15 @@
           </div>
 
 
-          <div class="form-group" ng-if="datasourceType !== 'rest' && datasourceType !== 'tinkerpop3'">
+          <div class="form-group" ng-if="datasourceType !== DatasourceTypes.rest && datasourceType !== DatasourceTypes.tinkerpop3">
             <label>Activation query</label>
             <span ng-if="query.st_datasourceId">(Empty = always active)</span>
 
-            <div ng-if="datasourceType === 'sparql_http' || datasourceType === 'sparql_jdbc'" ui-ace="{ onLoad: aceLoaded, mode: 'sparql'}" msd-elastic id="st_templateVars" ng-model="query.st_activationQuery" class="form-control activationQueryEditor"></div>
-            <div ng-if="datasourceType === 'mysql' || datasourceType === 'sqlite' || datasourceType === 'postgresql' || datasourceType === 'sql_jdbc'" ui-ace="{ onLoad: aceLoaded, mode: 'sql'}" msd-elastic id="st_templateVars" ng-model="query.st_activationQuery" class="form-control activationQueryEditor"></div>
+            <div ng-if="isSPARQL(datasourceType)" ui-ace="{ onLoad: aceLoaded, mode: 'sparql'}" msd-elastic id="st_templateVars" ng-model="query.st_activationQuery" class="form-control activationQueryEditor"></div>
+            <div ng-if="isSQL(datasourceType)" ui-ace="{ onLoad: aceLoaded, mode: 'sql'}" msd-elastic id="st_templateVars" ng-model="query.st_activationQuery" class="form-control activationQueryEditor"></div>
           </div>
 
-          <div class="form-group table-responsive" ng-if="datasourceType === 'rest'">
+          <div class="form-group table-responsive" ng-if="datasourceType === DatasourceTypes.rest">
             <label>Activation rules</label>
 
             <table class="table table-condensed">
@@ -93,19 +93,19 @@
           </div>
 
 
-          <div class="form-group" ng-if="datasourceType !== 'rest'">
-            <label ng-if="query.st_datasourceId && datasourceType !== 'tinkerpop3'">Results query</label></br>
-            <label ng-if="query.st_datasourceId && datasourceType === 'tinkerpop3'">Graph traversal script</label></br>
-            <span ng-if="datasourceType === 'mysql' || datasourceType === 'sql_jdbc'">
+          <div class="form-group" ng-if="datasourceType !== DatasourceTypes.rest">
+            <label ng-if="query.st_datasourceId && datasourceType !== DatasourceTypes.tinkerpop3">Results query</label></br>
+            <label ng-if="query.st_datasourceId && datasourceType === DatasourceTypes.tinkerpop3">Graph traversal script</label></br>
+            <span ng-if="datasourceType === DatasourceTypes.mysql || datasourceType === DatasourceTypes.sql_jdbc">
               Hint: To start type <b>SHOW TABLES</b>
             </span>
-            <span ng-if="datasourceType === 'postgresql'">
+            <span ng-if="datasourceType === DatasourceTypes.postgresql">
               Hint: To start type <b>SELECT * FROM pg_catalog.pg_tables</b>
             </span>
-            <span ng-if="datasourceType === 'sparql'">
+            <span ng-if="isSPARQL(datasourceType)">
               Hint: To start type <b>SELECT * WHERE {?s ?p ?o} LIMIT 10</b>
             </span>
-            <span ng-if="datasourceType === 'tinkerpop3'">
+            <span ng-if="datasourceType === DatasourceTypes.tinkerpop3">
               <b>Note</b>: to use the script with the Graph Browser visualization it should return a list of
               vertices, edges or both.
             </span>
@@ -114,13 +114,13 @@
               Special variables <b>@doc[_source][property_name]@</b> will be replaced by values extracted
               from the documents matching the current selection
             </span>
-            <span ng-if="starDetectedInAQuery && (datasourceType === 'sparql_http' || datasourceType === 'sparql_jdbc')" style="color:orange;">
+            <span ng-if="starDetectedInAQuery && (isSPARQL(datasourceType))" style="color:orange;">
               <br/>
               Star symbol detected. Try to give an explicit list of variables to return
               - it is better performance wise and will simplify relational filters configuration.
             </span>
 
-            <div ng-if="datasourceType === 'tinkerpop3'"
+            <div ng-if="datasourceType === DatasourceTypes.tinkerpop3"
                  ui-ace="{ onLoad: aceLoaded, mode: 'text' }"
                  msd-elastic id="st_templateVars"
                  ng-model="query.st_resultQuery"
@@ -130,7 +130,7 @@
                  required>
             </div>
 
-            <div ng-if="datasourceType === 'sparql_http' || datasourceType === 'sparql_jdbc'"
+            <div ng-if="isSPARQL(datasourceType)"
                  ui-ace="{ onLoad: aceLoaded, mode: 'sparql' }"
                  msd-elastic id="st_templateVars"
                  ng-model="query.st_resultQuery"
@@ -140,7 +140,7 @@
                  required>
             </div>
 
-            <div ng-if="datasourceType === 'mysql' || datasourceType === 'sqlite' || datasourceType === 'postgresql' || datasourceType === 'sql_jdbc'"
+            <div ng-if="isSQL(datasourceType)"
                  ui-ace="{ onLoad: aceLoaded, mode: 'sql' }"
                  msd-elastic id="st_templateVars"
                  ng-model="query.st_resultQuery"
@@ -152,7 +152,7 @@
           </div>
 
 
-          <div class="form" ng-if="datasourceType === 'rest'">
+          <div class="form" ng-if="datasourceType === DatasourceTypes.rest">
             <div class="form-group">
               <label>Method</label><br/>
               <select ng-model="query.rest_method"  class="form-control">
@@ -166,7 +166,7 @@
             </div>
           </div>
 
-          <div ng-if="datasourceType === 'rest'">
+          <div ng-if="datasourceType === DatasourceTypes.rest">
             <p>
               Special placeholders for username, password and auth_token can be used in values of the headers, parameters and body. </br>
               They are respectively: <strong>${username}</strong>, <strong>${password}</strong>, <strong>${auth_token}</strong>
@@ -237,7 +237,7 @@
 
           </div>
 
-          <div class="form" ng-if="datasourceType === 'rest'">
+          <div class="form" ng-if="datasourceType === DatasourceTypes.rest">
 
             <div class="form-group">
               <label>Body</label><br/>

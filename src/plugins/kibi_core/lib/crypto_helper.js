@@ -1,3 +1,4 @@
+var kibiUtils = require('kibiutils');
 var crypto = require('crypto');
 var forge = require('node-forge');
 var datasourcesSchema = require('./datasources_schema');
@@ -145,7 +146,7 @@ CryptoHelper.prototype.encryptDatasourceParams = function (config, query) {
   if (query.datasourceParams && query.datasourceType) {
 
     var datasourceType = query.datasourceType;
-    if (datasourceType === 'sql_jdbc' || datasourceType === 'sparql_jdbc') {
+    if (kibiUtils.isJDBC(datasourceType)) {
       datasourceType = 'jdbc';
     }
 

@@ -1,5 +1,6 @@
 define(function (require) {
 
+  var kibiUtils = require('kibiutils');
   var _ = require('lodash');
   var module = require('ui/modules').get('kibana');
 
@@ -214,7 +215,7 @@ define(function (require) {
                 if (promise) {
                   promise = promise.then(function (data) {
                     scope.getVariable = false;
-                    if (data.fields.length === 0 && data.datasourceType !== 'rest') { // either sparql or sql
+                    if (data.fields.length === 0 && data.datasourceType !== kibiUtils.DatasourceTypes.rest) { // either sparql or sql
                       scope.linkToQuery = '#/settings/queries/' + scope.queryId;
                       scope.getVariable = true;
                     }

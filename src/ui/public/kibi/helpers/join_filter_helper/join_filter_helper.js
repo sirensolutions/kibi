@@ -210,7 +210,11 @@ define(function (require) {
           var dashboardId = dashboardsArray.pop();
 
           return self.getJoinFilter(dashboardId).then(function (joinFilter) {
-            kibiStateHelper.addFilterToDashboard(dashboardId, joinFilter);
+            if (joinFilter) {
+              kibiStateHelper.addFilterToDashboard(dashboardId, joinFilter);
+            } else {
+              kibiStateHelper.removeFilterOfTypeFromDashboard('join_set', dashboardId);
+            }
             return updateDashboards(dashboardsArray);
           }).catch(function (error) {
             kibiStateHelper.removeFilterOfTypeFromDashboard('join_set', dashboardId);

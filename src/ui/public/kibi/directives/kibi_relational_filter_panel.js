@@ -75,39 +75,35 @@ define(function (require) {
 
 
             relDashboards.options.onLinkClick = function (el, d, i) {
-              _.each($scope.relationalPanel.relations.relationsDashboards, function (relation) {
-                // find the relation
-                if (relation.dashboards.indexOf(d.source.label) !== -1 &&
-                    relation.dashboards.indexOf(d.target.label) !== -1) {
-
-                  // add or remove the relation id from kibi state
-                  var enabled = jQuery(el).find('input[type=\'checkbox\']').is(':checked');
-                  if (enabled) {
-                    kibiStateHelper.enableRelation(relation);
-                  } else {
-                    kibiStateHelper.disableRelation(relation);
-                  }
-                  if ($scope.relationalPanel.enabled) {
-                    // Note: here we have to update the JoinSetFilter for all dashboards from
-                    // all enabled relations and not only for these from clicked relation
-                    // This is needed as relational buttons takes filters from kibi state
-                    // and if the filter is missing the counts on buttons will be wrong
-
-                    // TODO: join_set should be stored as 1 another property in kibi state
-                    // and not per dashboard as join_set will be always one for all dashboards
-                    // issue: https://github.com/sirensolutions/kibi-internal/issues/1011
-                    var promises = [];
-                    _.each(kibiStateHelper.getEnabledRelations(), function (relDashboards) {
-                      promises.push(joinFilterHelper.updateJoinSetFilter(relDashboards));
-                    });
-                    Promise.all(promises).then(function () {
-                      $rootScope.$emit('kibi:update-tab-counts');
-                    });
-                  }
-
-                  return false; // break the loop
-                }
+              // find the relation
+              var relation = _.find($scope.relationalPanel.relations.relationsDashboards, function (r) {
+                return r.dashboards.indexOf(d.source.label) !== -1 && r.dashboards.indexOf(d.target.label) !== -1;
               });
+              if (relation) {
+                // add or remove the relation id from kibi state
+                var enabled = jQuery(el).find('input[type=\'checkbox\']').is(':checked');
+                var updateJoinSetOnPromises = [];
+                if (enabled) {
+                  kibiStateHelper.enableRelation(relation);
+                } else {
+                  kibiStateHelper.disableRelation(relation);
+                  updateJoinSetOnPromises.push(joinFilterHelper.updateJoinSetFilter(relation.dashboards));
+                }
+                // Note: here we have to update the JoinSetFilter for all dashboards from
+                // all enabled relations and not only for these from clicked relation
+                // This is needed as relational buttons takes filters from kibi state
+                // and if the filter is missing the counts on buttons will be wrong
+
+                // TODO: join_set should be stored as 1 another property in kibi state
+                // and not per dashboard as join_set will be always one for all dashboards
+                // issue: https://github.com/sirensolutions/kibi-internal/issues/1011
+                _.each(kibiStateHelper.getEnabledRelations(), function (relDashboards) {
+                  updateJoinSetOnPromises.push(joinFilterHelper.updateJoinSetFilter(relDashboards));
+                });
+                Promise.all(updateJoinSetOnPromises).then(function () {
+                  $rootScope.$emit('kibi:update-tab-counts');
+                });
+              }
             };
 
             $rootScope.$emit('egg:relationalPanel:run', 'importGraph', relDashboards);

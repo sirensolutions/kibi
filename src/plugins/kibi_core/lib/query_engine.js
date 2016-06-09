@@ -184,10 +184,10 @@ QueryEngine.prototype.gremlin = function (datasourceParams, options) {
   return rp(gremlinOptions);
 };
 
-QueryEngine.prototype.gremlinPing = function (url) {
+QueryEngine.prototype.gremlinPing = function (baseGraphAPIUrl) {
   const gremlinOptions = {
     method: 'GET',
-    uri: url + '/ping',
+    uri: baseGraphAPIUrl + '/ping',
     timeout: 5000
   };
 

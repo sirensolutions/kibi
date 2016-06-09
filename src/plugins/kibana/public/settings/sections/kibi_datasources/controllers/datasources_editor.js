@@ -87,7 +87,7 @@ define(function (require) {
           notify.warning(msg);
         }
 
-        if (datasource.datasourceType === kibiUtils.DatasourceType.tinkerpop3) {
+        if (datasource.datasourceType === kibiUtils.DatasourceTypes.tinkerpop3) {
           const baseUrl = datasource.datasourceParams.url.replace('/graph/query', '');
 
           queryEngineClient.gremlinPing(baseUrl).then(function (response) {

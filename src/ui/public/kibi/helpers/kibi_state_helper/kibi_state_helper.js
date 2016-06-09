@@ -193,13 +193,19 @@ define(function (require) {
       globalState.save();
     };
 
+    KibiStateHelper.prototype._cleanFilters = function (filters) {
+      return _.map(globalState.filters, function (f) {
+        return _.omit(f, ['$state', '$$hashKey']);
+      });
+    };
+
     KibiStateHelper.prototype.getFiltersForDashboardId = function (dashboardId) {
       var filters = this._getDashboardProperty(dashboardId, 'f');
       // add also pinned filters which are stored in global state
       if (filters && globalState.filters) {
-        return filters.concat(globalState.filters);
+        return filters.concat(this._cleanFilters(globalState.filters));
       } else if (globalState.filters && globalState.filters.length > 0) {
-        return globalState.filters;
+        return this._cleanFilters(globalState.filters);
       }
       return filters;
     };

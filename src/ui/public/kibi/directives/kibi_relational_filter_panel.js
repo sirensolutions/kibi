@@ -86,6 +86,7 @@ define(function (require) {
                     kibiStateHelper.enableRelation(relation);
                   } else {
                     kibiStateHelper.disableRelation(relation);
+                    joinFilterHelper.updateJoinSetFilter(relation.dashboards);
                   }
                   if ($scope.relationalPanel.enabled) {
                     // Note: here we have to update the JoinSetFilter for all dashboards from

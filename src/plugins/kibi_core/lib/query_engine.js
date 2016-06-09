@@ -340,7 +340,9 @@ QueryEngine.prototype._loadScripts = function () {
   // load default scripts examples
   var scriptsToLoad = [
     'select-all',
-    'select-by-type'
+    'select-by-type',
+    'select-extend',
+    'select-invert'
   ];
 
   self.log.info('Loading scripts');

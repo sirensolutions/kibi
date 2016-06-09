@@ -1,0 +1,9 @@
+{
+  "title": "Select - Invert",
+  "description": "Inverts the current selection",
+  "st_scriptSource": "function beforeAll(graphModel, graphSelection) {\n  let oldSelectionSet = new Set(graphSelection);\n  let newSelection = [];\n\n  _.each(graphModel.nodes, function (node) {\n    if (!oldSelectionSet.has(node.id)) {\n      newSelection.push(node.id);\n    }\n  });\n    \n  return {\n    model: null,\n    selection: newSelection\n  };\n}",
+  "version": 1,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{}"
+  }
+}

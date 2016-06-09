@@ -182,6 +182,25 @@ module.exports = function (kibana) {
         }
       });
 
+      server.route({
+        method: 'POST',
+        path:'/gremlin/ping',
+        handler: function (req, reply) {
+          queryEngine.gremlinPing(req.payload.url)
+          .then(reply)
+          .catch(errors.StatusCodeError, function (err) {
+            reply(Boom.create(err.statusCode, err.error.message || err.message, err.error.stack));
+          })
+          .catch(errors.RequestError, function (err) {
+            if (err.error.code === 'ETIMEDOUT') {
+              reply(Boom.create(408, err.message, ''));
+            } else {
+              reply({ error: 'An error occurred while sending a gremlin ping: ' + JSON.stringify(err) });
+            }
+          });
+        }
+      });
+
       // Adding a route to serve static content for enterprise modules.
       server.route({
         method: 'GET',

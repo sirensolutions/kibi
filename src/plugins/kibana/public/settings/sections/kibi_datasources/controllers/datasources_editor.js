@@ -87,6 +87,25 @@ define(function (require) {
           notify.warning(msg);
         }
 
+        if (datasource.datasourceType === kibiUtils.DatasourceTypes.tinkerpop3) {
+          const baseUrl = datasource.datasourceParams.url.replace('/graph/query', '');
+
+          queryEngineClient.gremlinPing(baseUrl).then(function (response) {
+            if (response.data.error) {
+              notify.warning('Kibi Gremlin Server not available at this address: ' + baseUrl + '. Please check the configuration');
+            } else {
+              _saveDatasource(datasource);
+            }
+          })
+          .catch(function (err) {
+            notify.warning('Kibi Gremlin Server not available at this address: ' + baseUrl + '. Please check the configuration');
+          });
+        } else {
+          _saveDatasource(datasource);
+        }
+      };
+
+      function _saveDatasource(datasource) {
         datasource.id = datasource.title;
 
         // make sure that any parameter which does not belong to the schema
@@ -114,7 +133,7 @@ define(function (require) {
             });
           }
         });
-      };
+      }
 
       $scope.delete = function () {
         if ($window.confirm('Are you sure you want to delete the datasource [' + datasource.title + ']')) {

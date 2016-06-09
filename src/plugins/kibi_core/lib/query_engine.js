@@ -184,6 +184,16 @@ QueryEngine.prototype.gremlin = function (datasourceParams, options) {
   return rp(gremlinOptions);
 };
 
+QueryEngine.prototype.gremlinPing = function (baseGraphAPIUrl) {
+  const gremlinOptions = {
+    method: 'GET',
+    uri: baseGraphAPIUrl + '/ping',
+    timeout: 5000
+  };
+
+  return rp(gremlinOptions);
+};
+
 QueryEngine.prototype._loadTemplates = function () {
   var self = this;
   // load default template examples

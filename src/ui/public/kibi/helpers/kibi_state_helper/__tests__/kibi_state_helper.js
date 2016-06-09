@@ -1,5 +1,6 @@
 var expect = require('expect.js');
 var ngMock = require('ngMock');
+var _ = require('lodash');
 
 var mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
 var savedDashboards = [
@@ -181,8 +182,12 @@ describe('Kibi Components', function () {
       kibiStateHelper.saveFiltersForDashboardId(dashboardId, [filter2]);
 
       var actual = kibiStateHelper.getFiltersForDashboardId(dashboardId);
-      expect(actual).to.contain(filter1);
-      expect(actual).to.contain(filter2);
+
+      var foundFilter1 = _.find(actual, filter1);
+      var foundFilter2 = _.find(actual, filter2);
+
+      expect(foundFilter1).not.to.equal(undefined);
+      expect(foundFilter2).not.to.equal(undefined);
     });
 
     describe('get all filters for every dashboards', function () {

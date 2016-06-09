@@ -194,7 +194,7 @@ define(function (require) {
     };
 
     KibiStateHelper.prototype._cleanFilters = function (filters) {
-      return _.map(globalState.filters, function (f) {
+      return _.map(filters, function (f) {
         return _.omit(f, ['$state', '$$hashKey']);
       });
     };

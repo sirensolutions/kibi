@@ -1,3 +1,4 @@
+var sinon = require('auto-release-sinon');
 var ngMock = require('ngMock');
 var expect = require('expect.js');
 
@@ -6,7 +7,6 @@ require('../kibi_entity_clipboard');
 describe('Kibi Components', function () {
   describe('Entity Clipboard', function () {
     var $rootScope;
-    var $location;
     var globalState;
     var appState;
     var kibiStateHelper;
@@ -15,7 +15,7 @@ describe('Kibi Components', function () {
     var MockState = require('fixtures/mock_state');
     var _ = require('lodash');
 
-    function init(entityDisabled, selectedEntities) {
+    function init(entityDisabled, selectedEntities, currentDashboardId) {
       ngMock.module(
         'kibana',
         'kibana/courier',
@@ -44,12 +44,13 @@ describe('Kibi Components', function () {
         }
       );
 
-      ngMock.inject(function (Private, _$location_, _$rootScope_, $compile, $injector) {
+      ngMock.inject(function (Private, _$rootScope_, $compile, $injector) {
         $rootScope = _$rootScope_;
-        $location = _$location_;
         $httpBackend = $injector.get('$httpBackend');
         $compile('<kibi-entity-clipboard></kibi-entity-clipboard>')($rootScope);
         kibiStateHelper = Private(require('ui/kibi/helpers/kibi_state_helper/kibi_state_helper'));
+        var urlHelper = Private(require('ui/kibi/helpers/url_helper'));
+        sinon.stub(urlHelper, 'getCurrentDashboardId').returns(currentDashboardId);
       });
     }
 
@@ -214,9 +215,20 @@ describe('Kibi Components', function () {
     });
 
     it('should remove the document and associated filters', function () {
-      init(false, ['index/type/id/column/label']);
+      init(false, ['index/type/id/column/label'], 'dashboard2');
 
-      $location.url('/dashboard/dashboard2?_a=(filters:!((filter:2,meta:()),(filter:3,meta:(dependsOnSelectedEntities:!t))))');
+      appState.filters = [
+        {
+          filter: 2,
+          meta: {}
+        },
+        {
+          filter: 3,
+          meta: {
+            dependsOnSelectedEntities: true
+          }
+        }
+      ];
       globalState.k = {
         d: {
           dashboard1: {
@@ -227,7 +239,6 @@ describe('Kibi Components', function () {
           }
         }
       };
-      globalState.save();
 
       $rootScope.removeAllEntities();
 

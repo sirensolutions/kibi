@@ -86,8 +86,6 @@ define(function (require) {
           appState.filters = [];
         }
         _addFilter(appState.filters, filter);
-        //// TODO: still needed?
-        //delete appState.panels;
         appState.save();
       }
       var filters = kibiStateHelper._getDashboardProperty(dashboardId, kibiStateHelper._properties.filters) || [];

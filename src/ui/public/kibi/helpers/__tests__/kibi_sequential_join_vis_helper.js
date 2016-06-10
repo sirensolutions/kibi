@@ -1,3 +1,4 @@
+var MockState = require('fixtures/mock_state');
 var sinon = require('auto-release-sinon');
 var expect = require('expect.js');
 var ngMock = require('ngMock');
@@ -26,6 +27,14 @@ function init(enableEnterprise = false) {
             return null;
           }
         };
+      });
+
+      $provide.service('getAppState', function () {
+        return function () { return new MockState({ filters: [] }); };
+      });
+
+      $provide.service('globalState', function () {
+        return new MockState({ filters: [] });
       });
     });
 

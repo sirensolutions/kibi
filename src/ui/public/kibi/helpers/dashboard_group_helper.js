@@ -62,7 +62,7 @@ define(function (require) {
       if (joinFilterHelper.isRelationalPanelEnabled()) {
         joinFilterHelper.getJoinFilter(dashboardId).then(function (joinFilter) {
           if (joinFilter) {
-            kibiStateHelper.addFilterToDashboard(dashboardId, joinFilter);
+            urlHelper.addFilter(dashboardId, joinFilter);
           }
         }).finally(function () {
           urlHelper.switchDashboard(dashboardId);

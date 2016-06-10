@@ -18,6 +18,12 @@ define(function (require) {
       this._init();
     }
 
+    KibiStateHelper.prototype._properties = {
+      filters: 'f',
+      query: 'q',
+      time: 't'
+    };
+
     KibiStateHelper.prototype._init = function () {
       var self = this;
       if (!globalState.k) {
@@ -152,19 +158,19 @@ define(function (require) {
     KibiStateHelper.prototype.saveQueryForDashboardId = function (dashboardId, query) {
       if (query) {
         if (!this.isAnalyzedWildcardQueryString(query)) {
-          this._setDashboardProperty(dashboardId, 'q', query);
+          this._setDashboardProperty(dashboardId, this._properties.query, query);
         } else {
           // store '*' instead the full query to make it more compact as this is very common query
-          this._setDashboardProperty(dashboardId, 'q', '*');
+          this._setDashboardProperty(dashboardId, this._properties.query, '*');
         }
       } else {
-        this._deleteDashboardProperty(dashboardId, 'q');
+        this._deleteDashboardProperty(dashboardId, this._properties.query);
       }
       globalState.save();
     };
 
     KibiStateHelper.prototype.getQueryForDashboardId = function (dashboardId) {
-      var q = this._getDashboardProperty(dashboardId, 'q');
+      var q = this._getDashboardProperty(dashboardId, this._properties.query);
 
       if (q && q !== '*') {
         return q;
@@ -184,11 +190,11 @@ define(function (require) {
         return;
       }
       if (filters && filters.length > 0) {
-        this._setDashboardProperty(dashboardId, 'f', filters);
+        this._setDashboardProperty(dashboardId, this._properties.filters, filters);
       } else {
         // do NOT delete - instead store empty array
         // in other case the previous filters will be restored
-        this._setDashboardProperty(dashboardId, 'f', []);
+        this._setDashboardProperty(dashboardId, this._properties.filters, []);
       }
       globalState.save();
     };
@@ -200,7 +206,7 @@ define(function (require) {
     };
 
     KibiStateHelper.prototype.getFiltersForDashboardId = function (dashboardId) {
-      var filters = this._getDashboardProperty(dashboardId, 'f');
+      var filters = this._getDashboardProperty(dashboardId, this._properties.filters);
       // add also pinned filters which are stored in global state
       if (filters && globalState.filters) {
         return filters.concat(this._cleanFilters(globalState.filters));
@@ -233,7 +239,7 @@ define(function (require) {
     };
 
     KibiStateHelper.prototype.removeTimeForDashboardId = function (dashboardId, skipGlobalStateSave) {
-      this._deleteDashboardProperty(dashboardId, 't');
+      this._deleteDashboardProperty(dashboardId, this._properties.time);
       if (!skipGlobalStateSave) {
         globalState.save();
       }
@@ -249,7 +255,7 @@ define(function (require) {
       if (typeof to === 'object') {
         toStr = to.toISOString();
       }
-      this._setDashboardProperty(dashboardId, 't', {
+      this._setDashboardProperty(dashboardId, this._properties.time, {
         m: mode,
         f: fromStr,
         t: toStr
@@ -260,7 +266,7 @@ define(function (require) {
     };
 
     KibiStateHelper.prototype.getTimeForDashboardId = function (dashboardId) {
-      var t = this._getDashboardProperty(dashboardId, 't');
+      var t = this._getDashboardProperty(dashboardId, this._properties.time);
       if (t) {
         return {
           mode: t.m,
@@ -301,7 +307,7 @@ define(function (require) {
         } else {
           throw new Error('No filter');
         }
-        this._setDashboardProperty(dashboardId, 'f', filters);
+        this._setDashboardProperty(dashboardId, this._properties.filters, filters);
         globalState.save();
       }
     };
@@ -315,7 +321,7 @@ define(function (require) {
         filters = _.filter(filters, function (filter) {
           return !filter[type];
         });
-        this._setDashboardProperty(dashboardId, 'f', filters);
+        this._setDashboardProperty(dashboardId, this._properties.filters, filters);
         globalState.save();
       }
     };

@@ -50,8 +50,8 @@ define(function (require) {
             //      - group from all existing join_seq filters and add this group at the top
             //      - new relation from current dashboard to target dashboard
 
-            var existingJoinFilters = _.cloneDeep(urlHelper.getFiltersOfType('join_sequence'));
             const dashboardId = savedDash.id;
+            var existingJoinFilters = _.cloneDeep(urlHelper.getFiltersOfType(dashboardId, 'join_sequence'));
             if (existingJoinFilters.length === 0) {
 
               return relVisHelper.buildNewJoinSeqFilter({ dashboardId, button, savedSearchMeta })

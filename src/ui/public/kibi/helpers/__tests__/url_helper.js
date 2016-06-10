@@ -1,4 +1,5 @@
 var _ = require('lodash');
+var MockState = require('fixtures/mock_state');
 var expect = require('expect.js');
 var ngMock = require('ngMock');
 
@@ -224,14 +225,14 @@ var fakeSavedSearches2 = [
 var fakeTimeFilter2 = require('fixtures/kibi/fake_time_filter_connected');
 
 var $rootScope;
-var $location;
-var $timeout;
 var config;
 var urlHelper;
 var kibiStateHelper;
 var configFile;
 var chrome = require('ui/chrome');
 var chromeStub;
+var appState;
+var globalState;
 
 var kibanaAppStub = {
   id: 'kibana',
@@ -258,100 +259,80 @@ var dashboardStub = [
 
 var sinon = require('auto-release-sinon');
 
-function customConfigFile($provide, kbnDefaultAppId, defaultDashboardId) {
-  $provide.constant('kbnDefaultAppId', kbnDefaultAppId);
-  $provide.constant('kibiDefaultDashboardId', defaultDashboardId);
-}
+function init(kbnDefaultAppId = '', defaultDashboardId = '', savedDashboards = [], savedSearches = [], timefilterImpl,
+              currentDashboardId = 'myDashboard', currentPath = '/dashboard') {
+  return () => {
+    ngMock.module(
+      'kibana',
+      'kibana/courier',
+      'kibana/global_state',
+      ($provide) => {
+        $provide.constant('kbnDefaultAppId', kbnDefaultAppId);
+        $provide.constant('kibiDefaultDashboardId', defaultDashboardId);
 
-function init(kbnDefaultAppId, defaultDashboardId, savedDashboards) {
-  return function () {
-    ngMock.module('kibana', function ($provide) {
-      customConfigFile($provide, kbnDefaultAppId, defaultDashboardId);
-    });
+        $provide.service('$route', () => {
+          var myRoute = {
+            current: {
+              $$route: {
+                originalPath: currentPath
+              },
+              locals: {
+                dash: {
+                  id: currentDashboardId
+                }
+              }
+            }
+          };
+          if (currentPath === null) {
+            delete myRoute.current.$$route;
+          } else if (currentDashboardId === null) {
+            delete myRoute.current.locals;
+          }
+          return myRoute;
+        });
 
-    ngMock.module('app/dashboard', function ($provide) {
-      $provide.service('savedDashboards', (Promise) => mockSavedObjects(Promise)('savedDashboards', savedDashboards));
-    });
+        appState = new MockState({ filters: [] });
+        $provide.service('getAppState', () => {
+          return function () { return appState; };
+        });
 
-    _initInject();
-  };
-}
+        globalState = new MockState({ filters: [] });
+        $provide.service('globalState', () => {
+          return globalState;
+        });
 
-function minimalInit() {
-  return function () {
-    ngMock.module('kibana', function ($provide) {
-      customConfigFile($provide, '', '');
-    });
+        if (timefilterImpl) {
+          $provide.service('timefilter', timefilterImpl);
+        }
 
-    _initInject();
-  };
-}
-
-
-function init2(savedDashboards, savedSearches) {
-  return function () {
-    ngMock.module('app/dashboard', function ($provide) {
-      $provide.service('savedDashboards', (Promise) => mockSavedObjects(Promise)('savedDashboards', savedDashboards));
-    });
-
-    ngMock.module('discover/saved_searches', function ($provide) {
-      $provide.service('savedSearches', (Promise) => mockSavedObjects(Promise)('savedSearches', savedSearches));
-    });
-
-    ngMock.module('kibana', function ($provide) {
-      customConfigFile($provide, '', '');
-    });
-
-    _initInject();
-  };
-}
-
-function init3(savedDashboards, savedSearches, timefilterImpl) {
-  return function () {
-    ngMock.module('app/dashboard', function ($provide) {
-      $provide.service('savedDashboards', (Promise) => mockSavedObjects(Promise)('savedDashboards', savedDashboards));
-    });
+        $provide.service('config', require('fixtures/kibi/config'));
+      }
+    );
 
     ngMock.module('discover/saved_searches', function ($provide) {
       $provide.service('savedSearches', (Promise) => mockSavedObjects(Promise)('savedSearches', savedSearches));
     });
 
-    ngMock.module('kibana', function ($provide) {
-      $provide.service('timefilter', timefilterImpl);
-      customConfigFile($provide, '', '');
-      $provide.service('config', function () {
-        var keys = {};
-        return {
-          get: function (key) { return keys[key]; },
-          set: function (key, value) { keys[key] = value; }
-        };
-      });
+    ngMock.module('app/dashboard', function ($provide) {
+      $provide.service('savedDashboards', (Promise) => mockSavedObjects(Promise)('savedDashboards', savedDashboards));
     });
 
-    _initInject();
+    ngMock.inject(function (Private, _$rootScope_, _config_) {
+      $rootScope = _$rootScope_;
+      config = _config_;
+
+      chromeStub = sinon.stub(chrome, 'getTabs');
+      urlHelper = Private(require('ui/kibi/helpers/url_helper'));
+      kibiStateHelper = Private(require('ui/kibi/helpers/kibi_state_helper/kibi_state_helper'));
+    });
   };
-}
-
-
-function _initInject() {
-  ngMock.inject(function ($injector, Private, _$rootScope_, _$location_, _$timeout_, _config_) {
-    $rootScope = _$rootScope_;
-    $location = _$location_;
-    $timeout = _$timeout_;
-    config = _config_;
-
-
-    chromeStub = sinon.stub(chrome, 'getTabs');
-    urlHelper = Private(require('ui/kibi/helpers/url_helper'));
-    kibiStateHelper = Private(require('ui/kibi/helpers/kibi_state_helper/kibi_state_helper'));
-  });
 }
 
 describe('Kibi Components', function () {
   describe('UrlHelper', function () {
 
     describe('util methods', function () {
-      beforeEach(minimalInit());
+      beforeEach(init());
 
       it('isDashboardInTheseRelations', function () {
         var relations = [
@@ -369,7 +350,7 @@ describe('Kibi Components', function () {
     });
 
     describe('getDashboardAndSavedSearchMetas', function () {
-      beforeEach(init2(fakeSavedDashboards, fakeSavedSearches));
+      beforeEach(init('', '', fakeSavedDashboards, fakeSavedSearches));
 
       require('testUtils/noDigestPromises').activateForSuite();
 
@@ -462,7 +443,7 @@ describe('Kibi Components', function () {
 
       describe('defaultDashboardId == Articles, and kbnDefaultAppId == dashboard and no dashboard defined', function () {
 
-        beforeEach(init('dashboard', 'Articles', []));
+        beforeEach(init('dashboard', 'Articles'));
 
         it('1 should return the path to the dashboard creation form', function (done) {
 
@@ -479,7 +460,7 @@ describe('Kibi Components', function () {
 
       describe('defaultDashboardId not set, kbnDefaultAppId == dashboard and no dashboard defined', function () {
 
-        beforeEach(init('dashboard', '', []));
+        beforeEach(init('dashboard', ''));
 
         it('2 should return the path to the dashboard creation form /dashboard', function (done) {
 
@@ -535,7 +516,7 @@ describe('Kibi Components', function () {
 
 
     describe('shouldUpdateCountsBasedOnLocation', function () {
-      beforeEach(minimalInit());
+      beforeEach(init());
 
       it('should because filter changed', function () {
         var oldUrl = '/?_a=(filters:!())';
@@ -568,7 +549,7 @@ describe('Kibi Components', function () {
       });
 
 
-      it('should because gloabal filter changed', function () {
+      it('should because global filter changed', function () {
         var oldUrl = '/?_g=(filters:!())';
         var newUrl = '/?_g=(filters:!((range:())))';
         expect(urlHelper.shouldUpdateCountsBasedOnLocation(oldUrl, newUrl)).to.equal(true);
@@ -580,7 +561,7 @@ describe('Kibi Components', function () {
       });
 
 
-      it('should because gloabal time changed', function () {
+      it('should because global time changed', function () {
         var oldUrl = '/?_g=(time:())';
         var newUrl = '/?_g=(time:(range:()))';
         expect(urlHelper.shouldUpdateCountsBasedOnLocation(oldUrl, newUrl)).to.equal(true);
@@ -592,29 +573,48 @@ describe('Kibi Components', function () {
       });
     });
 
-
-    describe('test methods', function () {
-      beforeEach(minimalInit());
-
-      it('removeJoinFilter', function () {
-        $location.url('/?_a=(filters:!((join_set:())))');
-        var expected = '/?_a=(filters:!())';
-        urlHelper.removeJoinFilter();
-        expect($location.url()).to.eql(expected);
-      });
-
+    describe('isItDashboardUrl', function () {
       it('isItDashboardUrl true', function () {
-        $location.path('/dashboard/dashboard1/');
+        init()();
         expect(urlHelper.isItDashboardUrl()).to.equal(true);
       });
 
       it('isItDashboardUrl false', function () {
-        $location.url('/xxx/dashboard1/');
+        init('', '', [], [], null, '', '/xxx/sss')();
         expect(urlHelper.isItDashboardUrl()).to.equal(false);
       });
+    });
 
-      it('addFilter', function (done) {
-        $location.url('/path/?_a=(filters:!())');
+    describe('removeJoinFilter', function () {
+      beforeEach(init());
+
+      it('removeJoinFilter', function () {
+        appState.filters = [
+          {
+            join_set: {}
+          }
+        ];
+
+        kibiStateHelper.saveFiltersForDashboardId('myDashboard', [
+          {
+            join_set: {}
+          }
+        ]);
+
+        expect(appState.filters).to.have.length(1);
+        expect(kibiStateHelper.getFiltersForDashboardId('myDashboard')).to.have.length(1);
+
+        urlHelper.removeJoinFilter('myDashboard');
+
+        expect(appState.filters).to.have.length(0);
+        expect(kibiStateHelper.getFiltersForDashboardId('myDashboard')).to.have.length(0);
+      });
+    });
+
+    describe('addFilter', function () {
+      beforeEach(init());
+
+      it('adds filter in appstate and kibistate', function () {
         var filter = {
           range: {
             field: {
@@ -624,223 +624,53 @@ describe('Kibi Components', function () {
           }
         };
 
-        var expected = 'http://server/#/path/?_a=(filters:!((range:(field:(gte:1,lte:3)))))&_g=(k:(d:(),g:(),j:!()))';
-        urlHelper.addFilter(filter);
+        urlHelper.addFilter('myDashboard', filter);
 
-        var off = $rootScope.$on('$locationChangeSuccess', function (event, newUrl, oldUrl) {
-          off();
-          expect(newUrl).to.equal(expected);
-          done();
-        });
-
-        $rootScope.$apply();
+        expect(appState.filters).to.eql([ filter ]);
+        expect(kibiStateHelper.getFiltersForDashboardId('myDashboard')).to.eql([ filter ]);
       });
 
-      it('addFilter when there was no filters in the  app state', function (done) {
-        $location.url('/path/?_a=()');
-        var filter = {
-          range: {
-            field: {
-              gte: 1,
-              lte: 3
-            }
+      it('make sure to replace join filter in the app state', function () {
+        var filter = { join_set: { a: 1 } };
+        appState.filters = [
+          {
+            join_set: {}
           }
-        };
-
-        var expected = 'http://server/#/path/?_a=(filters:!((range:(field:(gte:1,lte:3)))))&_g=(k:(d:(),g:(),j:!()))';
-        urlHelper.addFilter(filter);
-
-        var off = $rootScope.$on('$locationChangeSuccess', function (event, newUrl, oldUrl) {
-          off();
-          expect(newUrl).to.equal(expected);
-          done();
-        });
-
-        $rootScope.$apply();
-      });
-
-      it('addFilter make sure join filter the app state', function (done) {
-        $location.url('/path/?_a=(filters:!())');
-        var filter = { join_set: {} };
-
-        var expected = 'http://server/#/path/?_a=(filters:!((join_set:())))&_g=(k:(d:(),g:(),j:!()))';
-        urlHelper.addFilter(filter);
-
-        var off = $rootScope.$on('$locationChangeSuccess', function (event, newUrl, oldUrl) {
-          off();
-          expect(newUrl).to.equal(expected);
-          done();
-        });
-
-        $rootScope.$apply();
-      });
-
-
-      it('addFilter make sure join filter is replaced if present in the app state', function (done) {
-        $location.url('/path/?_a=(filters:!((join_set:())))');
-        var filter = { join_set: {} };
-
-        var expected = 'http://server/#/path/?_a=(filters:!((join_set:())))&_g=(k:(d:(),g:(),j:!()))';
-        urlHelper.addFilter(filter);
-
-        var off = $rootScope.$on('$locationChangeSuccess', function (event, newUrl, oldUrl) {
-          off();
-          expect(newUrl).to.equal(expected);
-          done();
-        });
-
-        $rootScope.$apply();
-      });
-
-      it('replaceFiltersAndQueryAndTime _g not present', function (done) {
-        $location.url('/path/?_a=(query:(query_string:(query:\'AAA\')),filters:!((join_set:())))');
-        urlHelper.replaceFiltersAndQueryAndTime(
-          [
-            {
-              join_set: {}
-            }
-          ],
+        ];
+        var expected = [
           {
-            query_string: {
-              query: 'BBB'
-            }
-          },
-          {
-            from: 'now-7',
-            to: 'now'
+            join_set: { a: 1 }
           }
-        );
+        ];
 
-        var expected = 'http://server/#/path/?_a=(filters:!((join_set:())),query:(query_string:(query:BBB)))&_g=(k:(d:(),g:(),j:!()))';
+        urlHelper.addFilter('myDashboard', filter);
 
-        var off = $rootScope.$on('$locationChangeSuccess', function (event, newUrl, oldUrl) {
-          off();
-          expect(newUrl).to.equal(expected);
-          done();
-        });
-
-        $rootScope.$apply();
+        expect(appState.filters).to.eql(expected);
+        expect(kibiStateHelper.getFiltersForDashboardId('myDashboard')).to.eql(expected);
       });
-
-      it('replaceFiltersAndQueryAndTime - delete query if undefined', function (done) {
-        $location.url('/path/?_a=(query:(query_string:(query:\'AAA\')),filters:!((join_set:())))');
-        urlHelper.replaceFiltersAndQueryAndTime(
-          [
-            {
-              join_set: {}
-            }
-          ],
-          undefined,
-          {
-            from: 'now-7',
-            to: 'now'
-          }
-        );
-
-        var expected = 'http://server/#/path/?_a=(filters:!((join_set:())))&_g=(k:(d:(),g:(),j:!()))';
-
-        var off = $rootScope.$on('$locationChangeSuccess', function (event, newUrl, oldUrl) {
-          off();
-          expect(newUrl).to.equal(expected);
-          done();
-        });
-
-        $rootScope.$apply();
-      });
-
-      it('replaceFiltersAndQueryAndTime _g present', function (done) {
-        $location.url('/path/?_g=(time:(from:\'now-1\',to:\'now\'))&' +
-                      '_a=(query:(query_string:(query:\'AAA\')),filters:!((join_set:())))');
-        urlHelper.replaceFiltersAndQueryAndTime(
-          [
-            {
-              join_set: {}
-            }
-          ],
-          {
-            query_string: {
-              query: 'BBB'
-            }
-          },
-          {
-            from: 'now-7',
-            to: 'now'
-          }
-        );
-
-        var expected = 'http://server/#/path/?_g=(time:(from:now-7,to:now))&' +
-                       '_a=(filters:!((join_set:())),query:(query_string:(query:BBB)))';
-
-        var off = $rootScope.$on('$locationChangeSuccess', function (event, newUrl, oldUrl) {
-          off();
-          expect(newUrl).to.equal(expected);
-          done();
-        });
-
-        $rootScope.$apply();
-      });
-
-      it('replaceFiltersAndQueryAndTime _g not present and _a not present', function (done) {
-        $location.url('/path/?');
-        urlHelper.replaceFiltersAndQueryAndTime(
-          [
-            {
-              join_set: {}
-            }
-          ],
-          {
-            query_string: {
-              query: 'BBB'
-            }
-          },
-          {
-            from: 'now-7',
-            to: 'now'
-          }
-        );
-
-        var expected = 'http://server/#/path/?_g=(k:(d:(),g:(),j:!()))';
-
-        var off = $rootScope.$on('$locationChangeSuccess', function (event, newUrl, oldUrl) {
-          off();
-          expect(newUrl).to.equal(expected);
-          done();
-        });
-
-        $rootScope.$apply();
-      });
-
     });
 
     describe('getter methods', function () {
-      beforeEach(minimalInit());
+      beforeEach(init());
 
       it('getFiltersOfType join_sequence', function () {
-
-        $location.url(
-          '/?_a=(filters:!(' +
-            '(join_sequence:(' +
-              'meta:(disabled:!f,negate:!f,value:\'button:label1\'),' +
-              'seq:!()' +
-            ')),' +
-            '(join_sequence:(' +
-              'meta:(disabled:!f,negate:!f,value:\'button:label2\'),' +
-              'seq:!()' +
-            '))' +
-          '))'
-        );
-
-        var expected = [
+        appState.filters = [
+          {
+            terms: {}
+          },
           {
             join_sequence: {
-              seq: [],
               meta: {
                 disabled: false,
                 negate: false,
-                value: 'button:label1'
-              }
+                value: 'button:label2'
+              },
+              seq: []
             }
-          },
+          }
+        ];
+
+        var expected = [
           {
             join_sequence: {
               seq: [],
@@ -853,16 +683,42 @@ describe('Kibi Components', function () {
           }
         ];
 
-        var actual = urlHelper.getFiltersOfType('join_sequence');
+        var actual = urlHelper.getFiltersOfType('myDashboard', 'join_sequence');
         expect(actual).to.eql(expected);
       });
 
-
       it('getJoinFilter', function () {
-        $location.url(
-          '/?_a=(filters:!((join_set:(queries:(),focus:company,relations:!(!((indices:!(article),types:!(Article),path:id),' +
-          '(indices:!(company),types:!(Company),path:articles)))),meta:(disabled:!f,negate:!f,value:\'button:label\'))))'
-        );
+        appState.filters = [
+          {
+            terms: {}
+          },
+          {
+            join_set: {
+              queries: {},
+              focus: 'company',
+              relations: [
+                [
+                  {
+                    indices: [ 'article' ],
+                    types: [ 'Article' ],
+                    path: 'id'
+                  },
+                  {
+                    indices: [ 'company' ],
+                    types: [ 'Company' ],
+                    path: 'articles'
+                  }
+                ]
+              ]
+            },
+            meta: {
+              disabled: false,
+              negate: false,
+              value: 'button:label'
+            }
+          }
+        ];
+
         var expected = {
           join_set: {
             focus: 'company',
@@ -889,7 +745,7 @@ describe('Kibi Components', function () {
           }
         };
 
-        var actual = urlHelper.getJoinFilter();
+        var actual = urlHelper.getJoinFilter('myDashboard');
         expect(actual).to.eql(expected);
       });
 
@@ -975,40 +831,91 @@ describe('Kibi Components', function () {
         expect(actual).to.eql(expected);
       });
 
-      it('getCurrentDashboardId', function () {
-        $location.path('/dashboard/dashboard1');
-        expect(urlHelper.getCurrentDashboardId()).to.equal('dashboard1');
-      });
+    });
 
-      it('getCurrentDashboardId when not on dashboard', function () {
-        $location.path('/notdashboard/xxx');
-        expect(urlHelper.getCurrentDashboardId()).to.equal(undefined);
-      });
+    describe('get dashboard filters or query', function () {
+      beforeEach(init());
 
-      it('getDashboardFilters', function () {
-        $location.url('/dashboard/dashboard1?_a=(filters:!((meta:(),join_set:())))');
+      it('getDashboardFilters from appState', function () {
         var expected = [
           {
             meta:{},
             join_set: {}
           }
         ];
-        expect(urlHelper.getDashboardFilters('dashboard1')).to.eql(expected);
+
+        appState.filters = [
+          {
+            meta: {},
+            join_set: {}
+          }
+        ];
+        expect(urlHelper.getDashboardFilters('myDashboard')).to.eql(expected);
       });
 
-      it('getDashboardQuery', function () {
-        $location.url('/dashboard/dashboard1?_a=(query:(query_string:(query:\'AAA\')))');
-        var expected = {
+      it('getDashboardFilters from kibi state', function () {
+        var expected = [
+          {
+            meta:{},
+            join_set: {}
+          }
+        ];
+
+        kibiStateHelper.saveFiltersForDashboardId('Persons', [
+          {
+            meta: {},
+            join_set: {}
+          }
+        ]);
+
+        expect(urlHelper.getDashboardFilters('Persons')).to.eql(expected);
+        expect(appState.filters).to.have.length(0);
+      });
+
+      it('getDashboardQuery from appState', function () {
+        var query = {
           query_string: {
             query: 'AAA'
           }
         };
-        expect(urlHelper.getDashboardQuery('dashboard1')).to.eql(expected);
+
+        appState.query = query;
+        expect(urlHelper.getDashboardQuery('myDashboard')).to.eql(query);
+      });
+
+      it('getDashboardQuery from kibi state', function () {
+        kibiStateHelper.saveQueryForDashboardId('something', {
+          query_string: {
+            query: 'BBB'
+          }
+        });
+        appState.query = {
+          query_string: {
+            query: 'AAA'
+          }
+        };
+        expect(urlHelper.getDashboardQuery('something')).to.eql({
+          query_string: {
+            query: 'BBB'
+          }
+        });
+      });
+    });
+
+    describe('getCurrentDashboardId', function () {
+      it('getCurrentDashboardId', function () {
+        init('', '', [], [], null, 'dashboard1')();
+        expect(urlHelper.getCurrentDashboardId()).to.equal('dashboard1');
+      });
+
+      it('getCurrentDashboardId when not on dashboard', function () {
+        init('', '', [], [], null, null, '/notdashboard/xxx')();
+        expect(urlHelper.getCurrentDashboardId()).to.equal(undefined);
       });
     });
 
     describe('methods which maps indexes to dashboards', function () {
-      beforeEach(init2(fakeSavedDashboards, fakeSavedSearches));
+      beforeEach(init('', '', fakeSavedDashboards, fakeSavedSearches));
 
       it(
         'getIndexToDashboardMap should fail because a dashboard does not have a saved search ' +
@@ -1057,8 +964,6 @@ describe('Kibi Components', function () {
         }
       );
 
-
-
       it('getIndexToDashboardMap pass ids of dashboards', function (done) {
         var expected = {
           'time-testing-4': ['time-testing-4']
@@ -1088,7 +993,7 @@ describe('Kibi Components', function () {
 
     describe('filters and queries per index from a set of dashboards', function () {
 
-      beforeEach(init3(fakeSavedDashboards2, fakeSavedSearches2, fakeTimeFilter2));
+      beforeEach(init('', '', fakeSavedDashboards2, fakeSavedSearches2, fakeTimeFilter2));
 
       function compareObjectsWithArrays(results, expected) {
         const cmp = function (a, b) {
@@ -1273,7 +1178,7 @@ describe('Kibi Components', function () {
     });
 
     describe('getFiltersFromDashboardsWithSameIndex', function () {
-      beforeEach(init3(fakeSavedDashboards2, fakeSavedSearches2, fakeTimeFilter2));
+      beforeEach(init('', '', fakeSavedDashboards2, fakeSavedSearches2, fakeTimeFilter2));
 
       it('should be empty as relational panel is disabled', function (done) {
         config.set('kibi:relationalPanel', false);
@@ -1383,7 +1288,7 @@ describe('Kibi Components', function () {
 
     describe('getQueriesFromDashboardsWithSameIndex', function () {
 
-      beforeEach(init3(fakeSavedDashboards2, fakeSavedSearches2, fakeTimeFilter2));
+      beforeEach(init('', '', fakeSavedDashboards2, fakeSavedSearches2, fakeTimeFilter2));
 
       it('should be empty as relational panel is disabled', function (done) {
         config.set('kibi:relationalPanel', false);

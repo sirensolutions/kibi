@@ -6,7 +6,7 @@ define(function (require) {
     var replaceOrAddJoinSetFilter = require('ui/kibi/helpers/join_filter_helper/lib/replace_or_add_join_set_filter');
 
     var queryHelper = Private(require('ui/kibi/helpers/query_helper'));
-    var urlHelper   = Private(require('ui/kibi/helpers/url_helper'));
+    var urlHelper = Private(require('ui/kibi/helpers/url_helper'));
     var kibiStateHelper = Private(require('ui/kibi/helpers/kibi_state_helper/kibi_state_helper'));
 
     var _invert = function (obj) {
@@ -211,13 +211,13 @@ define(function (require) {
 
           return self.getJoinFilter(dashboardId).then(function (joinFilter) {
             if (joinFilter) {
-              kibiStateHelper.addFilterToDashboard(dashboardId, joinFilter);
+              urlHelper.addFilter(dashboardId, joinFilter);
             } else {
-              kibiStateHelper.removeFilterOfTypeFromDashboard('join_set', dashboardId);
+              urlHelper.removeJoinFilter(dashboardId);
             }
             return updateDashboards(dashboardsArray);
           }).catch(function (error) {
-            kibiStateHelper.removeFilterOfTypeFromDashboard('join_set', dashboardId);
+            urlHelper.removeJoinFilter(dashboardId);
             return updateDashboards(dashboardsArray);
           });
         };
@@ -228,22 +228,22 @@ define(function (require) {
 
         return self.getJoinFilter(currentDashboardId).then(function (joinFilter) {
           if (!joinFilter) {
-            urlHelper.removeJoinFilter();
+            urlHelper.removeJoinFilter(currentDashboardId);
           } else {
-            urlHelper.addFilter(joinFilter);
+            urlHelper.addFilter(currentDashboardId, joinFilter);
           }
           if (updateDashboards) {
             return updateDashboards(dashboardsClone);
           }
         }).catch(function (error) {
-          urlHelper.removeJoinFilter();
+          urlHelper.removeJoinFilter(currentDashboardId);
           if (updateDashboards) {
             return updateDashboards(dashboardsClone);
           }
         });
 
       } else {
-        return Promise.resolve(urlHelper.removeJoinFilter()).then(function () {
+        return Promise.resolve(urlHelper.removeJoinFilter(currentDashboardId)).then(function () {
           if (updateDashboards) {
             return updateDashboards(dashboardsClone);
           }
@@ -266,3 +266,4 @@ define(function (require) {
     return new JoinFilterHelper();
   };
 });
+

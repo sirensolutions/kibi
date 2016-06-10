@@ -35,7 +35,7 @@ define(function (require) {
             if (this.joinSeqFilter) {
               const switchToDashboard = function () {
                 // add join_set Filter
-                kibiStateHelper.addFilterToDashboard(this.redirectToDashboard, this.joinSeqFilter);
+                urlHelper.addFilter(this.redirectToDashboard, this.joinSeqFilter);
                 // switch to target dashboard
                 urlHelper.switchDashboard(this.redirectToDashboard);
               };
@@ -201,14 +201,16 @@ define(function (require) {
 
       // check all filters - remove meta and push to must or must not depends on negate flag
       _.each(sourceFilters, function (f) {
-        if (f.meta && f.meta.negate === true) {
-          delete f.meta;
-          delete f.$state;
-          ret.relation[0].queries[0].query.bool.must_not.push(f);
-        } else if (f.meta) {
-          delete f.meta;
-          delete f.$state;
-          ret.relation[0].queries[0].query.bool.filter.bool.must.push(f);
+        if (f.meta) {
+          var filter = _.cloneDeep(f);
+          delete filter.$$hashKey;
+          delete filter.meta;
+          delete filter.$state;
+          if (f.meta.negate) {
+            ret.relation[0].queries[0].query.bool.must_not.push(filter);
+          } else {
+            ret.relation[0].queries[0].query.bool.filter.bool.must.push(filter);
+          }
         }
       });
 

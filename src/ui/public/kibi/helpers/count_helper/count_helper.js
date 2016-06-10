@@ -56,7 +56,7 @@ define(function (require) {
         } else if (!joinFilterHelper.isRelationalPanelEnabled() && joinFilterHelper.isSirenJoinPluginInstalled()) {
           // get the join filter if present on the dashboard
           // add it only for the dashboard where focus match
-          var joinFilter = urlHelper.getJoinFilter();
+          var joinFilter = urlHelper.getJoinFilter(dashboardId);
           return self.constructCountQuery(
             savedDash,
             savedSearchMeta,

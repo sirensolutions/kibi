@@ -19,7 +19,7 @@ define(function (require) {
     var changeTimeFilter = Private(require('ui/filter_bar/lib/changeTimeFilter'));
     var queryFilter = Private(require('ui/filter_bar/query_filter'));
     var privateFilterFieldRegex = /(^\$|meta)/;
-    var urlHelper   = Private(require('ui/kibi/helpers/url_helper'));
+    var urlHelper = Private(require('ui/kibi/helpers/url_helper'));
     var markFiltersBySelectedEntities = Private(require('ui/kibi/components/commons/_mark_filters_by_selected_entities'));
 
     return {

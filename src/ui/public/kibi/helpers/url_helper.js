@@ -5,73 +5,63 @@ define(function (require) {
   var rison = require('ui/utils/rison');
   var _ = require('lodash');
 
-  return function UrlHelperFactory(kbnUrl, Private, $location, savedDashboards,
+  return function UrlHelperFactory(getAppState, $route, kbnUrl, Private, savedDashboards,
     savedSearches, Promise, config, kbnDefaultAppId, kibiDefaultDashboardId, timefilter) {
     var kibiStateHelper = Private(require('ui/kibi/helpers/kibi_state_helper/kibi_state_helper'));
     var kibiTimeHelper = Private(require('ui/kibi/helpers/kibi_time_helper'));
 
-
     function UrlHelper() {
     }
 
-    UrlHelper.prototype.getFiltersOfType = function (type) {
-      var s = $location.search();
-      var a = s._a;
-      if (a) {
-        var decodedA = rison.decode(a);
-        if (decodedA.filters) {
-          return _.filter(decodedA.filters, function (f) {
-            return f[type];
-          });
-        }
+    UrlHelper.prototype.getFiltersOfType = function (dashboardId, type) {
+      let filters;
+
+      if (dashboardId === this.getCurrentDashboardId()) {
+        var appState = getAppState();
+        filters = appState.filters && appState.filters || [];
+      } else {
+        filters = kibiStateHelper.getFiltersForDashboardId(dashboardId) || [];
       }
-      return [];
+      return _.filter(filters, (f) => f[type]);
     };
 
-    UrlHelper.prototype.getJoinFilter = function () {
-      var joinFilters = this.getFiltersOfType('join_set');
+    UrlHelper.prototype.getJoinFilter = function (dashboardId) {
+      var joinFilters = this.getFiltersOfType(dashboardId, 'join_set');
       if (joinFilters.length > 0) {
         return joinFilters[0];
       }
       return null;
     };
 
-    UrlHelper.prototype.removeJoinFilter = function () {
-      var s = $location.search();
-      var a = s._a;
-      if (a) {
-        var decodedA = rison.decode(a);
-        if (decodedA.filters) {
+    UrlHelper.prototype.removeJoinFilter = function (dashboardId) {
+      // remove from appState
+      if (dashboardId === this.getCurrentDashboardId()) {
+        var appState = getAppState();
+        if (appState.filters) {
           var index = -1;
-          _.each(decodedA.filters, function (f, i) {
+          _.each(appState.filters, function (f, i) {
             if (f.join_set) {
               index = i;
               return false;
             }
           });
           if (index !== -1) {
-            decodedA.filters.splice(index, 1);
+            appState.filters.splice(index, 1);
           }
-          var encodedA = rison.encode(decodedA);
-          $location.search('_a', encodedA);
+          appState.save();
         }
       }
+      // remove from kibi state
+      kibiStateHelper.removeFilterOfTypeFromDashboard('join_set', dashboardId);
     };
 
-    UrlHelper.prototype.addFilter = function (filter) {
-      var s = $location.search();
-      var a = s._a;
-      if (a) {
-        var decodedA = rison.decode(a);
-        if (!decodedA.filters) {
-          decodedA.filters = [];
-        }
-
+    UrlHelper.prototype.addFilter = function (dashboardId, filter) {
+      var _addFilter = function (filters, filter) {
         // here if there is a relational filter it should be replaced
         if (filter.join_set) {
           // replace
           var index = -1;
-          _.each(decodedA.filters, function (f, i) {
+          _.each(filters, function (f, i) {
             if (f.join_set) {
               index = i;
               return false;
@@ -79,20 +69,30 @@ define(function (require) {
           });
           if (index !== -1) {
             // exists so replace
-            decodedA.filters[index] = filter;
+            filters[index] = filter;
           } else {
             // do not exists so add
-            decodedA.filters.push(filter);
+            filters.push(filter);
           }
         } else {
           // add
-          decodedA.filters.push(filter);
+          filters.push(filter);
         }
+      };
 
-        delete decodedA.panels;
-        var encodedA = rison.encode(decodedA);
-        $location.search('_a', encodedA);
+      if (dashboardId === this.getCurrentDashboardId()) {
+        var appState = getAppState();
+        if (!appState.filters) {
+          appState.filters = [];
+        }
+        _addFilter(appState.filters, filter);
+        //// TODO: still needed?
+        //delete appState.panels;
+        appState.save();
       }
+      var filters = kibiStateHelper._getDashboardProperty(dashboardId, kibiStateHelper._properties.filters) || [];
+      _addFilter(filters, filter);
+      kibiStateHelper.saveFiltersForDashboardId(dashboardId, filters);
     };
 
     UrlHelper.prototype.switchDashboard = function (dashboardId) {
@@ -101,58 +101,18 @@ define(function (require) {
       }
     };
 
-    UrlHelper.prototype.replaceFiltersAndQueryAndTime = function (filters, query, time) {
-      var s = $location.search();
-      var a = s._a;
-      var g = s._g;
-      if (a) {
-        var decodedA = rison.decode(a);
-        if (filters) {
-          decodedA.filters = filters;
-        } else {
-          decodedA.filters = [];
-        }
-
-        // replace only if the query object is present else remove it
-        // the reason is when I switch dashboards, the current query should not be applied in the dashboard I move to
-        if (query === undefined) {
-          delete decodedA.query;
-        } else {
-          decodedA.query = query;
-        }
-
-        delete decodedA.panels;
-        var encodedA = rison.encode(decodedA);
-        $location.search('_a', encodedA);
-      }
-
-      if (g) {
-        var decodedG = rison.decode(g);
-        if (time) {
-          if (!decodedG.time) {
-            decodedG.time = {};
-          }
-          decodedG.time.from = time.from;
-          decodedG.time.to = time.to;
-
-          var encodedG = rison.encode(decodedG);
-          $location.search('_g', encodedG);
-        }
-      }
-    };
-
-
     UrlHelper.prototype.isItDashboardUrl = function () {
-      return $location.path() && $location.path().indexOf('/dashboard') === 0;
+      var path = _.get($route, 'current.$$route.originalPath');
+      return Boolean(path && path.indexOf('/dashboard') === 0);
     };
 
     UrlHelper.prototype.getCurrentDashboardId = function () {
-      var currentDashboardId;
-      var currentPath = $location.path();
-      if (currentPath.indexOf('/dashboard/') === 0) {
-        currentDashboardId = currentPath.replace('/dashboard/', '');
+      var dash = _.get($route, 'current.locals.dash');
+
+      if (!dash) {
+        return;
       }
-      return currentDashboardId;
+      return dash.id;
     };
 
 
@@ -266,6 +226,8 @@ define(function (require) {
      * Return a promise with the set of filters associated with the dashboard, and in its saved search
      */
     UrlHelper.prototype._getFiltersFromDashboard = function (savedDash, savedSearchMeta) {
+      // TODO Check that every place where we get filters, filters from the associated savedsearch and meta are taken too
+      // See https://github.com/sirensolutions/kibi-internal/issues/1127
       // filters from kibiState
       const dashFilters = kibiStateHelper.getFiltersForDashboardId(savedDash.id) || [];
       let filters = _.filter(dashFilters, (df) => !df.join_set);
@@ -428,53 +390,30 @@ define(function (require) {
         return;
       }
 
-      var s = $location.search();
-      var g = s._g;
-      var a = s._a;
-
-      if (this.getCurrentDashboardId() === dashboardId && a) {
-        var decodedA = rison.decode(a);
-        return decodedA.query;
-      } else if (g) {
-        var decodedG = rison.decode(g);
-        var q = decodedG.k.d[dashboardId] ? decodedG.k.d[dashboardId].q : null;
-        if (q) {
-          if (q !== '*') {
-            return q;
-          } else if (q === '*') {
-            // if '*' was stored make it again full query
-            return {
-              query_string: {
-                analyze_wildcard: true,
-                query: '*'
-              }
-            };
-          }
-        }
+      if (this.getCurrentDashboardId() === dashboardId) {
+        var appState = getAppState();
+        return appState.query;
+      } else {
+        return kibiStateHelper.getQueryForDashboardId(dashboardId);
       }
-      return null;
     };
 
     UrlHelper.prototype.getDashboardFilters = function (dashboardId) {
       if (!dashboardId) {
         return;
       }
-      var s = $location.search();
-      var g = s._g;
-      var a = s._a;
 
       var filters;
-      if (this.getCurrentDashboardId() === dashboardId && a) {
-        var decodedA = rison.decode(a);
-        filters = decodedA.filters;
-      } else if (g) {
-        var decodedG = rison.decode(g);
-        if (decodedG.k.d[dashboardId] && decodedG.k.d[dashboardId].f) {
-          filters = decodedG.k.d[dashboardId].f;
-        }
+      if (this.getCurrentDashboardId() === dashboardId) {
+        var appState = getAppState();
+        filters = appState.filters;
+      } else {
+        filters = kibiStateHelper.getFiltersForDashboardId(dashboardId);
       }
 
       if (filters) {
+        // TODO shouldn't we do the same in all methods that returns filters ?
+        // See https://github.com/sirensolutions/kibi-internal/issues/1127
         return _.filter(filters, function (f) {
           return f.meta && f.meta.disabled !== true;
         });
@@ -510,7 +449,7 @@ define(function (require) {
       return this._getParamFromUrl(url, paramName, '_g');
     };
 
-    // tabs should be taken from chrome.getTabs();
+    // TODO tabs should be taken from chrome.getTabs();
     UrlHelper.prototype.getInitialPath = function (app, tabs) {
       var self = this;
       return new Promise(function (fulfill, reject) {
@@ -585,8 +524,6 @@ define(function (require) {
              !_.isEqual(newGlobalFilters, oldGlobalFilters, true) ||
              !_.isEqual(newGlobalTime, oldGlobalTime, true));
     };
-
-
 
     return new UrlHelper();
   };

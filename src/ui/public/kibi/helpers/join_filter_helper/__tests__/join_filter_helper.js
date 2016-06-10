@@ -1,3 +1,4 @@
+var MockState = require('fixtures/mock_state');
 var expect = require('expect.js');
 var ngMock = require('ngMock');
 var _ = require('lodash');
@@ -19,6 +20,14 @@ describe('Kibi Components', function () {
             get: function (key) { return keys[key]; },
             set: function (key, value) { keys[key] = value; }
           };
+        });
+
+        $provide.service('getAppState', function () {
+          return function () { return new MockState({ filters: [] }); };
+        });
+
+        $provide.service('globalState', function () {
+          return new MockState({ filters: [] });
         });
 
         $provide.constant('kibiEnterpriseEnabled', kibiEnterpriseEnabled);
@@ -438,7 +447,7 @@ describe('Kibi Components', function () {
 
       beforeEach(function () {
         ngMock.inject(function (Private) {
-          urlHelper   = Private(require('ui/kibi/helpers/url_helper'));
+          urlHelper = Private(require('ui/kibi/helpers/url_helper'));
         });
         sinon.spy(urlHelper, 'removeJoinFilter');
         sinon.spy(urlHelper, 'addFilter');

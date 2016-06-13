@@ -18,6 +18,7 @@ define(function (require) {
 
     var cache = Private(require('ui/kibi/helpers/cache_helper')); // kibi: added by kibi
     var deleteHelper = Private(require('ui/kibi/helpers/delete_helper')); // kibi: added by kibi
+    var kibiSessionHelper = Private(require('ui/kibi/helpers/kibi_state_helper/kibi_session_helper'));
 
     return {
       restrict: 'E',
@@ -84,6 +85,21 @@ define(function (require) {
 
           kbnUrl.change('/settings/objects/{{ service }}/{{ id }}', params);
         };
+
+        // kibi: added by kibi to be able to quickly show the current session
+        $scope.showOnlyCurrentSession = true; // by default show only the user session
+        $scope.filterItems = function (items) {
+          // filter out other sessions only if the checkbox checked
+          // and the current session initialized
+          if ($scope.showOnlyCurrentSession && kibiSessionHelper.initialized && kibiSessionHelper.id) {
+            return _.filter(items, function (session) {
+              return session.id === kibiSessionHelper.id;
+            });
+          }
+          return items;
+        };
+        // kibi: end
+
 
         $scope.bulkDelete = function () {
           // kibi: modified to do some checks before the delete

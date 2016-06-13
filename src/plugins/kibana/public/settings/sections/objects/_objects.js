@@ -91,7 +91,9 @@ define(function (require) {
         $scope.filterItems = function (items) {
           // filter out other sessions only if the checkbox checked
           // and the current session initialized
-          if ($scope.showOnlyCurrentSession && kibiSessionHelper.initialized && kibiSessionHelper.id) {
+          if ($scope.state && $scope.state.tab === 'sessions' &&
+              $scope.showOnlyCurrentSession && kibiSessionHelper.initialized && kibiSessionHelper.id
+          ) {
             return _.filter(items, function (session) {
               return session.id === kibiSessionHelper.id;
             });

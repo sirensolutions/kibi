@@ -205,12 +205,12 @@ define(function (require) {
       });
     };
 
-    KibiStateHelper.prototype.getFiltersForDashboardId = function (dashboardId) {
+    KibiStateHelper.prototype.getFiltersForDashboardId = function (dashboardId, includePinnedFilters = true) {
       var filters = this._getDashboardProperty(dashboardId, this._properties.filters);
       // add also pinned filters which are stored in global state
-      if (filters && globalState.filters) {
+      if (filters && globalState.filters && includePinnedFilters) {
         return filters.concat(this._cleanFilters(globalState.filters));
-      } else if (globalState.filters && globalState.filters.length > 0) {
+      } else if (globalState.filters && globalState.filters.length > 0 && includePinnedFilters) {
         return this._cleanFilters(globalState.filters);
       }
       return filters;

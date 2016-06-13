@@ -108,7 +108,10 @@ define(function (require) {
 
         // kibi: get the filters and query from the kibi state
         var dashboardQuery = kibiStateHelper.getQueryForDashboardId(dash.id);
-        var dashboardFilters = kibiStateHelper.getFiltersForDashboardId(dash.id);
+        // Note: important !!! we pass a flag includePinnedFilters = false
+        // as we do NOT want pinned filters to be copied to appState
+        // as pinned filters should always stay in kibana global state
+        var dashboardFilters = kibiStateHelper.getFiltersForDashboardId(dash.id, false);
         if (dashboardFilters && !dashboardFilters.length) {
           dashboardFilters = undefined;
         }

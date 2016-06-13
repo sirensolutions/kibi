@@ -71,6 +71,7 @@ define(function (require) {
 
     KibiSessionHelper.prototype._updateOrCreate = function (savedSession) {
       return new Promise(function (fulfill, reject) {
+        savedSession.timeUpdated = new Date();
         savedSession.save(true).then(function () {
           fulfill(savedSession);
         }).catch(function (err) {
@@ -82,6 +83,7 @@ define(function (require) {
     KibiSessionHelper.prototype.destroy = function () {
       $cookies.remove('ksid');
       delete this.id;
+      delete this.session_data;
       this.initialized = false;
     };
 

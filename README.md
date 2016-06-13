@@ -15,7 +15,7 @@ much more.
 * Start Elasticsearch by running `elasticsearch\bin\elasticsearch` on Linux/OS X or `elasticsearch\bin\elasticsearch.bat` on Windows.
 * Go to the `kibi` directory and run `bin/kibi` on Linux/OS X or `bin\kibi.bat` on Windows.
 
-A pre-configured Kibi is now running at [http://localhost:5606](http://localhost:5602);
+A pre-configured Kibi is now running at [http://localhost:5606](http://localhost:5606);
 a complete description of the demo is [available](http://siren.solutions/kibi/docs/current/getting-started.html) in the Kibi documentation.
 
 ## Documentation

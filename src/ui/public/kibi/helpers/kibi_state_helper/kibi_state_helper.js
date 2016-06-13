@@ -104,8 +104,8 @@ define(function (require) {
                   globalState.k.s = savedSession.id;
                   globalState.save();
                 }).catch(function (err) {
+                  notify.error(err);
                   if (err instanceof SavedObjectNotFound) {
-                    notify.error(err);
                     // something happen and the session object does not exists anymore
                     // override the non-existing sessionId from the url
                     // to prevent the error happenning again

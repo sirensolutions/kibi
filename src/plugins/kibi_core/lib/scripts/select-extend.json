@@ -1,0 +1,9 @@
+{
+  "title": "Select - Extend",
+  "description": "Extends the current selection to the neighbors.",
+  "st_scriptSource": "function beforeAll(graphModel, graphSelection) {\n  let newSelection = [];\n\n  _.each(graphSelection, function (selectedNode) {\n    _.each(graphModel.relations, function (relation) {\n      if (relation.in === selectedNode) {\n        newSelection.push(relation.out);\n      } \n        if (relation.out === selectedNode) {\n        newSelection.push(relation.in);\n      }\n    });\n    newSelection.push(selectedNode);\n  });\n\n  return { selection: newSelection};\n}",
+  "version": 1,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{}"
+  }
+}

@@ -1,9 +1,9 @@
-{ 
-  "title": "Select - All", 
-  "description": "Selects all the nodes", 
-  "st_scriptSource": "function beforeAll (graphModel, graphSelection) {\n  let selection = [];\n  _.each(graphModel.nodes, function (node) {\n    selection.push(node.id);\n  });\n\n  return { selection: selection};\n}", 
-  "version": 1, 
-  "kibanaSavedObjectMeta": { 
-    "searchSourceJSON": "{}" 
-  } 
-} 
+{
+  "title": "Select - All",
+  "description": "Selects all the nodes.",
+  "st_scriptSource": "function beforeAll (graphModel, graphSelection) {\n  let selection = [];\n  _.each(graphModel.nodes, function (node) {\n    selection.push(node.id);\n  });\n\n  return { selection: selection};\n}",
+  "version": 1,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{}"
+  }
+}

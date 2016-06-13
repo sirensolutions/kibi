@@ -343,6 +343,7 @@ QueryEngine.prototype._loadScripts = function () {
     'select-by-type',
     'select-extend',
     'select-invert',
+    'select-by-edge-count',
     'show-nodes-count-by-type',
     'replace-investment-nodes',
     'shortest-path'

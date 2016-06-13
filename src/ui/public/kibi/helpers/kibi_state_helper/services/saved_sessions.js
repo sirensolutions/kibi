@@ -42,7 +42,7 @@ define(function (require) {
     this.delete = function (ids) {
       ids = !_.isArray(ids) ? [ids] : ids;
       return Promise.map(ids, function (id) {
-        return (new SavedSession(id)).delete().then(function (id) {
+        return (new SavedSession(id)).delete().then(function (resp) {
           $rootScope.$emit('kibi:session:changed:deleted', id);
         });
       });

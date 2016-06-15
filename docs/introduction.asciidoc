@@ -56,14 +56,6 @@ Kibi is currently developed as a fork of Kibana {kibana-version}. The plugin API
 
 This new version of Kibi provides many improvements and new features, the main one are listed below:
 
-* Caching can now be enabled/disabled per <<external_datasources, datasource>> from UI configuration
-* New version of <<timeline, Kibi Timeline>> plugin 0.1.3
-* Default <<kibi-settings-relation, terms encoding>> for Siren Join changed to long
-* New <<kibi-settings-relations, Advanced Join Settings>> plugin [Enterprise Edition only]
-* Full <<shield_integration, Shield integration>> [Enterprise Edition only]
-* New <<graph_browser, Graph Browser>> visualization [Enterprise Edition only]
-* New <<external_datasources, Kibi Thinkerpop3>> datasource [Enterprise Edition only]
-* New <<kibi_gremlin_server, Kibi Gremlin Server>> component [Enterprise Edition only]
-* New Ansible/Vagrant deployment scripts for GCE and AWS [Enterprise Edition only]
+TODO:
 
 To see all changes check <<releasenotes,full release notes>>

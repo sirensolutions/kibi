@@ -2,7 +2,7 @@
   <kbn-settings-objects class="container">
     <div class="header">
       <h2 class="title">Edit Saved Objects</h2>
-      <!-- temporarily disabled by kibi
+      <!-- kibi: temporarily disabled by kibi
       <button class="btn btn-default controls" ng-click="exportAll()"><i aria-hidden="true" class="fa fa-download"></i> Export Everything</button>
       <button file-upload="importAll(fileContents)" class="btn btn-default controls" ng-click><i aria-hidden="true" class="fa fa-upload"></i> Import</button>
       -->
@@ -33,7 +33,7 @@
           confirm-click="bulkDelete()"
           confirmation="Are you sure you want to delete the selected {{currentTab.title}}? This action is irreversible!"
           class="btn btn-xs btn-danger" aria-label="Delete"><i aria-hidden="true" class="fa fa-trash"></i> Delete</a>
-        <!-- temporarily disabled by kibi
+        <!-- kibi: temporarily disabled by kibi
         <a ng-disabled="selectedItems.length == 0"
           ng-click="bulkExport()"
           class="btn btn-xs btn-default" aria-label="Export"><i aria-hidden="true" class="fa fa-download"></i> Export</a>

@@ -8,24 +8,6 @@
       "encrypted": false,
       "defaultValue": 1000,
       "placeholder": "Timeout in ms"
-    },
-    {
-      "name": "cache_enabled",
-      "inputType": "checkbox",
-      "required": false,
-      "multivalued": false,
-      "encrypted": false,
-      "defaultValue": false,
-      "placeholder": "Enable server side cache for this datasource"
-    },
-    {
-      "name": "max_age",
-      "inputType": "text",
-      "required": false,
-      "multivalued": false,
-      "encrypted": false,
-      "defaultValue": 3600000,
-      "placeholder": "The max age of an object in the cache, in milliseconds"
     }
   ],
 
@@ -48,6 +30,24 @@
       "possibleValues": ["OPEN_READONLY", "OPEN_READWRITE", "OPEN_CREATE"],
       "defaultValues": ["OPEN_READONLY"],
       "placeholder": ""
+    },
+    {
+      "name": "cache_enabled",
+      "inputType": "checkbox",
+      "required": false,
+      "multivalued": false,
+      "encrypted": false,
+      "defaultValue": false,
+      "placeholder": "Enable server side cache for this datasource"
+    },
+    {
+      "name": "max_age",
+      "inputType": "text",
+      "required": false,
+      "multivalued": false,
+      "encrypted": false,
+      "defaultValue": 3600000,
+      "placeholder": "The max age of an object in the cache, in milliseconds"
     }
   ],
 
@@ -88,6 +88,24 @@
       "encrypted": true,
       "defaultValue": "",
       "placeholder": "Password"
+    },
+    {
+      "name": "cache_enabled",
+      "inputType": "checkbox",
+      "required": false,
+      "multivalued": false,
+      "encrypted": false,
+      "defaultValue": false,
+      "placeholder": "Enable server side cache for this datasource"
+    },
+    {
+      "name": "max_age",
+      "inputType": "text",
+      "required": false,
+      "multivalued": false,
+      "encrypted": false,
+      "defaultValue": 3600000,
+      "placeholder": "The max age of an object in the cache, in milliseconds"
     }
   ],
 
@@ -127,6 +145,24 @@
       "encrypted": true,
       "defaultValue": "",
       "placeholder": "Password"
+    },
+    {
+      "name": "cache_enabled",
+      "inputType": "checkbox",
+      "required": false,
+      "multivalued": false,
+      "encrypted": false,
+      "defaultValue": false,
+      "placeholder": "Enable server side cache for this datasource"
+    },
+    {
+      "name": "max_age",
+      "inputType": "text",
+      "required": false,
+      "multivalued": false,
+      "encrypted": false,
+      "defaultValue": 3600000,
+      "placeholder": "The max age of an object in the cache, in milliseconds"
     }
   ],
 
@@ -177,6 +213,24 @@
       "encrypted": true,
       "defaultValue": "",
       "placeholder": "Long-lived token"
+    },
+    {
+      "name": "cache_enabled",
+      "inputType": "checkbox",
+      "required": false,
+      "multivalued": false,
+      "encrypted": false,
+      "defaultValue": false,
+      "placeholder": "Enable server side cache for this datasource"
+    },
+    {
+      "name": "max_age",
+      "inputType": "text",
+      "required": false,
+      "multivalued": false,
+      "encrypted": false,
+      "defaultValue": 3600000,
+      "placeholder": "The max age of an object in the cache, in milliseconds"
     }
   ],
 
@@ -207,6 +261,24 @@
       "encrypted": true,
       "defaultValue": "",
       "placeholder": "Password"
+    },
+    {
+      "name": "cache_enabled",
+      "inputType": "checkbox",
+      "required": false,
+      "multivalued": false,
+      "encrypted": false,
+      "defaultValue": false,
+      "placeholder": "Enable server side cache for this datasource"
+    },
+    {
+      "name": "max_age",
+      "inputType": "text",
+      "required": false,
+      "multivalued": false,
+      "encrypted": false,
+      "defaultValue": 3600000,
+      "placeholder": "The max age of an object in the cache, in milliseconds"
     }
   ],
 
@@ -264,6 +336,24 @@
       "encrypted": true,
       "defaultValue": "",
       "placeholder": "Password"
+    },
+    {
+      "name": "cache_enabled",
+      "inputType": "checkbox",
+      "required": false,
+      "multivalued": false,
+      "encrypted": false,
+      "defaultValue": false,
+      "placeholder": "Enable server side cache for this datasource"
+    },
+    {
+      "name": "max_age",
+      "inputType": "text",
+      "required": false,
+      "multivalued": false,
+      "encrypted": false,
+      "defaultValue": 3600000,
+      "placeholder": "The max age of an object in the cache, in milliseconds"
     }
   ],
 

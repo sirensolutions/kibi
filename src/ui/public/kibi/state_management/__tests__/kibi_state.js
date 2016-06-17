@@ -65,11 +65,13 @@ describe('State Management', function () {
         $location = _$location_;
         kibiState = _kibiState_;
         config = _config_;
-        config.set('timepicker:timeDefaults', {
+        const defaultTime = {
           mode: 'relative',
           from: 'datea',
           to: 'dateb'
-        });
+        };
+        config.set('timepicker:timeDefaults', defaultTime);
+        timefilter.time = defaultTime;
       });
     };
   };
@@ -192,10 +194,9 @@ describe('State Management', function () {
           }
         };
 
-        kibiState._setDashboardProperty('dashboard2', kibiState._properties.query, '*');
         kibiState.getState('dashboard2', options)
-        .then(({ query }) => {
-          expect(query).to.eql(defaultQuery);
+        .then(({ queries }) => {
+          expect(queries).to.eql([ defaultQuery ]);
           done();
         }).catch(done);
       });
@@ -221,8 +222,8 @@ describe('State Management', function () {
         kibiState._setDashboardProperty('dashboard2', kibiState._properties.query, query2);
         Promise.all([ kibiState.getState('dashboard1', options), kibiState.getState('dashboard2', options) ])
         .then(([ state1, state2 ]) => {
-          expect(state1.query).to.eql(query1);
-          expect(state2.query).to.eql(query2);
+          expect(state1.queries).to.eql([ query1 ]);
+          expect(state2.queries).to.eql([ query2 ]);
           done();
         }).catch(done);
       });
@@ -252,8 +253,32 @@ describe('State Management', function () {
         kibiState._setDashboardProperty('dashboard2', kibiState._properties.query, query2);
         Promise.all([ kibiState.getState('dashboard1', options), kibiState.getState('dashboard2', options) ])
         .then(([ state1, state2 ]) => {
-          expect(state1.query).to.eql([ query1, { query: { query_string: { query: 'torrent' } } } ]);
-          expect(state2.query).to.eql([ query2, { query: { query_string: { query: 'torrent' } } } ]);
+          expect(state1.queries).to.eql([ query1, { query: { query_string: { query: 'torrent' } } } ]);
+          expect(state2.queries).to.eql([ query2, { query: { query_string: { query: 'torrent' } } } ]);
+          done();
+        }).catch(done);
+      });
+
+      it('should remove duplicates', function (done) {
+        const options = {
+          join_set: false,
+          pinned: false,
+          searchMeta: true
+        };
+        const query = {
+          query: {
+            query_string: {
+              query: 'torrent'
+            }
+          }
+        };
+
+        appState.query = query;
+        kibiState._setDashboardProperty('dashboard2', kibiState._properties.query, query);
+        Promise.all([ kibiState.getState('dashboard1', options), kibiState.getState('dashboard2', options) ])
+        .then(([ state1, state2 ]) => {
+          expect(state1.queries).to.eql([ { query: { query_string: { query: 'torrent' } } } ]);
+          expect(state2.queries).to.eql([ { query: { query_string: { query: 'torrent' } } } ]);
           done();
         }).catch(done);
       });
@@ -357,6 +382,41 @@ describe('State Management', function () {
         }).catch(done);
       });
 
+      it('should remove duplicates', function (done) {
+        const options = {
+          join_set: false,
+          pinned: true,
+          searchMeta: true
+        };
+        const filters = [
+          {
+            term: { field1: 'bbb' },
+            meta: { disabled: false }
+          },
+          {
+            term: { field1: 'aaa' },
+            meta: { disabled: false }
+          },
+          {
+            term: {
+              field1: 'i am pinned'
+            },
+            meta: {
+              disabled: false
+            }
+          }
+        ];
+
+        appState.filters = filters;
+        kibiState._setDashboardProperty('dashboard2', kibiState._properties.filters, filters);
+        Promise.all([ kibiState.getState('dashboard1', options), kibiState.getState('dashboard2', options) ])
+        .then(([ state1, state2 ]) => {
+          expect(state1.filters).to.have.length(3);
+          expect(state2.filters).to.have.length(3);
+          done();
+        }).catch(done);
+      });
+
       it('should combine filters from kibistate/appstate with the pinned filters', function (done) {
         const options = {
           join_set: false,
@@ -437,6 +497,100 @@ describe('State Management', function () {
           ];
           expect(state1.filters).to.eql([ filter1, ...extras ]);
           expect(state2.filters).to.eql([ filter2, ...extras ]);
+          done();
+        }).catch(done);
+      });
+    });
+
+    describe('Save AppState', function () {
+      beforeEach(init({
+        pinned: [
+          {
+            term: { field1: 'i am pinned' },
+            meta: { disabled: false }
+          }
+        ],
+        savedSearches: [
+          {
+            id: 'search1',
+            kibanaSavedObjectMeta: {
+              searchSourceJSON: JSON.stringify(
+                {
+                  index: 'index1',
+                  filter: [
+                    {
+                      term: { field1: 'aaa' },
+                      meta: { disabled: false }
+                    }
+                  ],
+                  query: {
+                    query: {
+                      query_string: {
+                        query: 'torrent'
+                      }
+                    }
+                  }
+                }
+              )
+            }
+          }
+        ],
+        savedDashboards: [
+          {
+            id: 'dashboard1',
+            title: 'dashboard1',
+            savedSearchId: 'search1'
+          }
+        ]
+      }));
+
+      it('should not store in kibistate the default query/time', function (done) {
+        const filter1 = {
+          term: { field1: 'bbb' },
+          meta: { disabled: false }
+        };
+
+        appState.filters = [ filter1 ];
+        appState.query = {
+          query_string: {
+            query: '*',
+            analyze_wildcard: true
+          }
+        };
+        kibiState.saveAppState()
+        .then(() => {
+          expect(kibiState._getDashboardProperty('dashboard1', kibiState._properties.filters)).to.eql([ filter1 ]);
+          expect(kibiState._getDashboardProperty('dashboard1', kibiState._properties.query)).to.not.be.ok();
+          expect(kibiState._getDashboardProperty('dashboard1', kibiState._properties.time)).to.not.be.ok();
+          done();
+        }).catch(done);
+      });
+
+      it('should save appstate to kibistate', function (done) {
+        const filter1 = {
+          term: { field1: 'bbb' },
+          meta: { disabled: false }
+        };
+        const query = {
+          query_string: {
+            query: 'kibi',
+            analyze_wildcard: true
+          }
+        };
+        const time = {
+          mode: 'quick',
+          from: 'now-500y',
+          to: 'now'
+        };
+
+        appState.filters = [ filter1 ];
+        appState.query = query;
+        timefilter.time = time;
+        kibiState.saveAppState()
+        .then(() => {
+          expect(kibiState._getDashboardProperty('dashboard1', kibiState._properties.filters)).to.eql([ filter1 ]);
+          expect(kibiState._getDashboardProperty('dashboard1', kibiState._properties.query)).to.eql(query);
+          expect(kibiState._getDashboardProperty('dashboard1', kibiState._properties.time)).to.eql(time);
           done();
         }).catch(done);
       });

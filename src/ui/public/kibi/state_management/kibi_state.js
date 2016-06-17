@@ -1,6 +1,7 @@
 define(function (require) {
   const _ = require('lodash');
   const qs = require('ui/utils/query_string');
+  const uniqFilters = require('ui/filter_bar/lib/uniqFilters');
 
   require('ui/routes')
   .addSetupWork(function (kibiState) {
@@ -27,10 +28,8 @@ define(function (require) {
               const query = _.find(meta.filter, (filter) => filter.query && filter.query.query_string && !filter.meta);
 
               // query
-              if (this._isAnalyzedWildcardQueryString(query)) {
-                this._setDashboardProperty(dashboard.id, this._properties.query, '*');
-              } else {
-                this._setDashboardProperty(dashboard.id, this._properties.query, query && query.query || '*');
+              if (!this._isDefaultQuery(query) && query && query.query) {
+                this._setDashboardProperty(dashboard.id, this._properties.query, query.query);
               }
               // filters
               this._setDashboardProperty(dashboard.id, this._properties.filters, filters);
@@ -63,11 +62,16 @@ define(function (require) {
      * - a wildcard only
      * - analyze_wildcard is set to true
      */
-    KibiState.prototype._isAnalyzedWildcardQueryString = function (query) {
+    KibiState.prototype._isDefaultQuery = function (query) {
       return query &&
         query.query_string &&
         query.query_string.query === '*' &&
         query.query_string.analyze_wildcard === true;
+    };
+
+    KibiState.prototype._isDefaultTime = function (mode, from, to) {
+      const timeDefaults = config.get('timepicker:timeDefaults');
+      return mode === timeDefaults.mode && from === timeDefaults.from && to === timeDefaults.to;
     };
 
     KibiState.prototype._saveTimeForDashboardId = function (dashboardId, mode, from, to) {
@@ -91,7 +95,8 @@ define(function (require) {
       dashboards: 'd',
       filters: 'f',
       query: 'q',
-      time: 't'
+      time: 't',
+      enabled_relations: 'j'
     };
 
     KibiState.prototype._setDashboardProperty = function (dashboardId, prop, value) {
@@ -106,9 +111,21 @@ define(function (require) {
 
     KibiState.prototype._getDashboardProperty = function (dashboardId, prop) {
       if (!this[this._properties.dashboards] || !this[this._properties.dashboards][dashboardId]) {
-        return undefined;
+        return;
       }
       return this[this._properties.dashboards][dashboardId][prop];
+    };
+
+    KibiState.prototype._deleteDashboardProperty = function (dashboardId, prop) {
+      if (!this[this._properties.dashboards] || !this[this._properties.dashboards][dashboardId]) {
+        return;
+      }
+      delete this[this._properties.dashboards][dashboardId][prop];
+      // check if this was the last and only
+      // if yes delete the whole dashboard object
+      if (Object.keys(this[this._properties.dashboards][dashboardId]).length === 0) {
+        delete this[this._properties.dashboards][dashboardId];
+      }
     };
 
     KibiState.prototype._getCurrentDashboardId = function () {
@@ -185,10 +202,11 @@ define(function (require) {
       }
 
       // remove disabled filters
-      return Promise.resolve(_.filter(filters, (f) => f.meta && !f.meta.disabled));
+      filters = _.filter(filters, (f) => f.meta && !f.meta.disabled);
+      return Promise.resolve(uniqFilters(filters, { state: true, negate: true, disabled: true }));
     };
 
-    KibiState.prototype._getQuery = function (appState, dashboardId, metas) {
+    KibiState.prototype._getQueries = function (appState, dashboardId, metas) {
       let query;
 
       if (this._getCurrentDashboardId() === dashboardId) {
@@ -196,9 +214,10 @@ define(function (require) {
       } else {
         const q = this._getDashboardProperty(dashboardId, this._properties.query);
 
-        if (q === '*') { // if '*' was stored make it again a full query
+        if (!q) {
           query = {
             query_string: {
+              // TODO: https://github.com/sirensolutions/kibi-internal/issues/1153
               analyze_wildcard: true,
               query: '*'
             }
@@ -214,10 +233,10 @@ define(function (require) {
         return Promise.resolve(new Error(msg));
       }
       const smQuery = metas && metas.savedSearchMeta && metas.savedSearchMeta.query;
-      if (smQuery) {
+      if (smQuery && !_.isEqual(smQuery, query)) {
         return Promise.resolve([ query, smQuery ]);
       }
-      return Promise.resolve(query);
+      return Promise.resolve([ query ]);
     };
 
     KibiState.prototype._getTime = function (dashboardId) {
@@ -255,10 +274,10 @@ define(function (require) {
       return getMetas.then((metas) => {
         return Promise.all([
           this._getFilters(appState, dashboardId, metas[0], { pinned }),
-          this._getQuery(appState, dashboardId, metas[0]),
+          this._getQueries(appState, dashboardId, metas[0]),
           this._getTime(dashboardId)
-        ]).then(([ filters, query, time ]) => {
-          return { filters, query, time };
+        ]).then(([ filters, queries, time ]) => {
+          return { filters, queries, time };
         });
       });
     };
@@ -272,10 +291,21 @@ define(function (require) {
       };
 
       return this.getState(currentDashboardId, options)
-      .then(({ filters, query, time }) => {
+      .then(({ filters, queries, time }) => {
+        // save filters
         this._setDashboardProperty(currentDashboardId, this._properties.filters, filters);
-        this._setDashboardProperty(currentDashboardId, this._properties.query, query);
-        this._setDashboardProperty(currentDashboardId, this._properties.time, time);
+        // save queries
+        if (this._isDefaultQuery(queries[0])) {
+          this._deleteDashboardProperty(currentDashboardId, this._properties.query);
+        } else {
+          this._setDashboardProperty(currentDashboardId, this._properties.query, queries[0]);
+        }
+        // save time
+        if (this._isDefaultTime(time.mode, time.from, time.to)) {
+          this._deleteDashboardProperty(currentDashboardId, this._properties.time);
+        } else {
+          this._setDashboardProperty(currentDashboardId, this._properties.time, time);
+        }
         this.save();
       });
     };

@@ -14,7 +14,9 @@ define(function (require) {
   });
 
   require('ui/modules').get('apps/settings')
-  .directive('kbnSettingsObjects', function (kbnIndex, createNotifier, Private, kbnUrl, Promise, queryEngineClient) {
+  .directive('kbnSettingsObjects', function (
+    kbnIndex, createNotifier, Private, kbnUrl, Promise,
+    queryEngineClient, kbnVersion, es, config) {
 
     var cache = Private(require('ui/kibi/helpers/cache_helper')); // kibi: added by kibi
     var deleteHelper = Private(require('ui/kibi/helpers/delete_helper')); // kibi: added by kibi
@@ -128,7 +130,10 @@ define(function (require) {
             service.service.scanAll('').then((results) =>
               results.hits.map((hit) => _.extend(hit, {type: service.type}))
             )
-          ).then((results) => retrieveAndExportDocs(_.flattenDeep(results)));
+          ).then((results) => {
+            results.push([{id: kbnVersion, type: 'config'}]); // kibi: here we also want to export "config" type
+            retrieveAndExportDocs(_.flattenDeep(results));
+          });
         };
 
         function retrieveAndExportDocs(objs) {
@@ -160,25 +165,96 @@ define(function (require) {
             notify.error('The file could not be processed.');
           }
 
-          return Promise.map(docs, function (doc) {
-            var service = _.find($scope.services, {type: doc._type}).service;
-            return service.get().then(function (obj) {
-              obj.id = doc._id;
-              return obj.applyESResp(doc).then(function () {
-                return obj.save();
+          // kibi: cheange the import to sequential to solve the dependency problem between objects
+          // as visualisations could depend on searches
+          // lets order the export to make sure that searches comes before visualisations
+          // then also import object sequentially to avoid errors
+          var configDocument = _.find(docs, function (o) {
+            return o._type === 'config';
+          });
+
+          docs = _.filter(docs, function (doc) {
+            return doc._type !== 'config';
+          });
+
+          // kibi: added to sort the dosc by type
+          docs.sort(function (a, b) {
+            if (a._type === 'search' && b._type !== 'search') {
+              return -1;
+            } else if (a._type !== 'search' && b._type === 'search') {
+              return 1;
+            } else {
+              if (a._type < b._type) {
+                return -1;
+              } else if (a._type > b._type) {
+                return 1;
+              } else {
+                return 0;
+              }
+            }
+          });
+
+          // kibi: added to make sure that after an import queries are in sync
+          function reloadQueries() {
+            return queryEngineClient.clearCache();
+          }
+
+          // kibi: override config properties
+          var loadConfig = function (configDocument) {
+            if (configDocument) {
+              if (configDocument._id === kbnVersion) {
+                // ovveride existing config values
+                _.each(configDocument._source, function (value, key) {
+                  config.set(key, value);
+                });
+              } else {
+                notify.error(
+                  'Config object in the import does not much current version ' + kbnVersion +
+                  '\nWill NOT import any of the advanced settings parameters'
+                );
+              }
+            }
+            // return Promise so we can chain the other part
+            return Promise.resolve(true);
+          };
+
+
+
+          // kibi: now execute this sequentially
+          var executeSequentially = function (docs) {
+            var functionArray = [];
+            _.each(docs, function (doc) {
+              functionArray.push(function (previousOperationResult) {
+                // previously this part was done in Promise.map
+                var service = _.find($scope.services, {type: doc._type}).service;
+                return service.get().then(function (obj) {
+                  obj.id = doc._id;
+                  return obj.applyESResp(doc).then(function () {
+                    return obj.save();
+                  });
+                });
+                // end
               });
             });
+
+            return functionArray.reduce(
+              function (prev, curr, i) {
+                return prev.then(function (res) {
+                  return curr(res);
+                });
+              },
+              Promise.resolve(null)
+            );
+          };
+
+          return loadConfig(configDocument).then(function () {
+            return executeSequentially(docs);
           })
           .then(refreshIndex)
           .then(reloadQueries) // kibi: to clear backend cache
           .then(refreshData, notify.error);
         };
 
-        // kibi: added to make sure that after an import queries are in sync
-        function reloadQueries() {
-          return queryEngineClient.clearCache();
-        }
-        // kibi: end
 
         function refreshIndex() {
           return es.indices.refresh({

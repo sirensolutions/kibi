@@ -49,7 +49,7 @@
           <div ng-repeat="param in datasource.schema | orderBy: 'required' : true" >
             <ng-form name="innerForm">
               <div class="form-group">
-                <label>{{param.name}}</label>
+                <label>{{param.label}}</label>
 
                 <span ng-if="param.inputType == 'text' && !param.required">(Optional. Default={{param.defaultValue || 'undefined'}})</span>
                 <input

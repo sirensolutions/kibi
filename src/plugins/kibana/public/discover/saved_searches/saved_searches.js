@@ -47,13 +47,16 @@ define(function (require) {
 
 
     this.get = function (id) {
-      var cacheKey = 'savedSearches-id-' + id;
+      var cacheKey;
+      if (id) {
+        cacheKey = 'savedSearches-id-' + id;
+      }
       // kibi: get from cache
-      if (cache && cache.get(cacheKey)) {
+      if (cacheKey && cache && cache.get(cacheKey)) {
         return cache.get(cacheKey);
       }
       var promise = (new SavedSearch(id)).init();
-      if (cache) {
+      if (cacheKey && cache) {
         // kibi: put into cache
         cache.set(cacheKey, promise);
       }

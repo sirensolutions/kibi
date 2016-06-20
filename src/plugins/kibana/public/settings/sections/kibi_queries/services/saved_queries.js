@@ -35,12 +35,15 @@ define(function (require) {
     };
 
     this.get = function (id) {
-      var cacheKey = 'savedQueries-id-' + id;
-      if (cache && cache.get(cacheKey)) {
+      var cacheKey;
+      if (id) {
+        cacheKey = 'savedQueries-id-' + id;
+      }
+      if (cacheKey && cache && cache.get(cacheKey)) {
         return cache.get(cacheKey);
       }
       var promise = (new SavedQuery(id)).init();
-      if (cache) {
+      if (cacheKey && cache) {
         cache.set(cacheKey, promise);
       }
       return promise;

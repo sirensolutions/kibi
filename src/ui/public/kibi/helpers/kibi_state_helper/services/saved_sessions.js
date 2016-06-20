@@ -31,7 +31,19 @@ define(function (require) {
     };
 
     this.get = function (id) {
-      return (new SavedSession(id)).init();
+      var cacheKey;
+      if (id) {
+        cacheKey = 'savedSessions-id-' + id;
+      }
+      if (cacheKey && cache && cache.get(cacheKey)) {
+        return cache.get(cacheKey);
+      }
+      // Returns a promise that contains a dashboard which is a subclass of docSource
+      var promise = (new SavedSession(id)).init();
+      if (cacheKey && cache) {
+        cache.set(cacheKey, promise);
+      }
+      return promise;
     };
 
     this.urlFor = function (id) {

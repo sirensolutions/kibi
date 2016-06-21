@@ -1,5 +1,12 @@
 [[shield_integration]]
-== Shield Integration  [Enterprise Edition only]
+
+== Shield Integration [Enterprise Edition only]
+
+ifeval::[{enterprise_enabled} == false]
+  NOTE: Documentation for Shield Integration is available only in Kibi Enterprise Edition.
+endif::[]
+
+ifeval::[{enterprise_enabled} == true]
 
 === Behaviours and warning display messages
 
@@ -463,3 +470,5 @@ kibi_core:
      ca: '../../kibi-distribution/kibi-certificate/cacert.pem'
 ----
 * If you want to use your own certificate, you only need to modify all SSL variable (key_store and ca) *
+
+endif::[]

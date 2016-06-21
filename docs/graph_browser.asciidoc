@@ -1,5 +1,13 @@
 [[graph_browser]]
-=== Kibi Graph Browser
+=== Kibi Graph Browser [Enterprise Edition only]
+
+ifeval::[{enterprise_enabled} == false]
+  NOTE: Documentation for Kibi Graph Browser is available only in Kibi Enterprise Edition.
+endif::[]
+
+ifeval::[{enterprise_enabled} == true]
+
+Kibi Graph Browser
 
 The Kibi Graph Browser http://siren.solutions/kibi-enterprise-edition-is-here-sneak-peak-and-webinar-invitation-3/[introduced in Kibi Enterprise Edition] displays the currently selected Elasticsearch documents as a node of a graph.
 
@@ -69,3 +77,6 @@ image::images/graph_browser/graph_layouts.gif["Graph Layouts Example",align="cen
 
 
 At any time you can reset your Kibi Graph Browser to the initial state by pressing the reload button
+
+endif::[]
+

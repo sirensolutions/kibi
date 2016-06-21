@@ -323,6 +323,12 @@ image::images/relations_settings/investor_index.png["Investor Index",align="cent
 
 ===== Advanced settings for index relations [Enterprise Edition only]
 
+ifeval::[{enterprise_enabled} == false]
+  NOTE: Documentation for Advanced settings for index relations is available only in Kibi Enterprise Edition.
+endif::[]
+
+ifeval::[{enterprise_enabled} == true]
+
 In most cases the default index relation settings are sufficient.
 However, for scenarios involving very large joins or when precision is critical,
 it is necessary to manually specify the settings.
@@ -346,6 +352,8 @@ On this panel, the user can manually configure the following parameters for each
 By setting the above parameters, one can optimise the precision and the performance of the join operation.
 
 NOTE: Advanced Join Settings are available only in Kibi Enterprise. Free Kibi version always use the default values for all advanced parameters.
+
+endif::[]
 
 ==== Graph of Dashboards
 

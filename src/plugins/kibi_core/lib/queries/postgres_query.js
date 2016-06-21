@@ -224,7 +224,7 @@ PostgresQuery.prototype.fetchResults = function (options, onlyIds, idVariableNam
 
     self.logger.debug(
       '----------\n' +
-      'this.resultQueryRequireEntityURI: [' + this.resultQueryRequireEntityURI + ']\n' +
+      'this.resultQueryRequireEntityURI: [' + self.resultQueryRequireEntityURI + ']\n' +
       'uri: [' + uri + ']\n' +
       'query: [' + query + ']'
     );

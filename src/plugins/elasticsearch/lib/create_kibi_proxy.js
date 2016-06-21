@@ -33,6 +33,13 @@ module.exports = function createProxy(server, method, route, config) {
                 savedQueries: {} //TODO: Stephane I think this should be an array - for now it works as there is only one inject;
               };
 
+              server.log(
+                ['debug', 'kibi_proxy', 'raw kibi query'],
+                '\n-------------------------\n' +
+                Buffer.concat(chunks).toString() + '\n' +
+                '-------------------------'
+              );
+
               /* Manipulate a set of queries, at the end of which the resulting queries
                * must be concatenated back into a Buffer. The queries in the body are
                * separated by a newline.
@@ -60,7 +67,13 @@ module.exports = function createProxy(server, method, route, config) {
                   return new Buffer(JSON.stringify(query) + '\n');
                 });
 
-                // TODO add logging of the preprocessed query for debug
+                server.log(
+                  ['debug', 'kibi_proxy', 'translated elasticsearch query'],
+                  '\n-------------------------\n' +
+                  Buffer.concat(buffers).toString() + '\n' +
+                  '-------------------------'
+                );
+
                 fulfill({
                   payload: Buffer.concat(buffers),
                   data: dataToPass

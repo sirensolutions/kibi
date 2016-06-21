@@ -114,6 +114,15 @@ npm run test && npm run build
 
 Distributable packages can be found in `target/` after the build completes.
 
+#### Debugging custom kibi queries
+
+Kibi use custom filters which are then translated to elasticsearch queries on the backend.
+In order to see the queries before and after translations enable verbose logging by adding following line to kibi.dev.yml
+
+```
+logging.verbose: true
+```
+
 #### Debugging test failures
 
 The standard `npm run test` task runs several sub tasks and can take several minutes to complete, making debugging failures pretty painful. In order to ease the pain specialized tasks provide alternate methods for running the tests.

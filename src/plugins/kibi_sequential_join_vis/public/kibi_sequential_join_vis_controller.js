@@ -16,7 +16,6 @@ define(function (require) {
         location: 'Kibi Relational filter'
       });
 
-      var queryHelper      = Private(require('ui/kibi/helpers/query_helper'));
       var urlHelper        = Private(require('ui/kibi/helpers/url_helper'));
       var joinFilterHelper = Private(require('ui/kibi/helpers/join_filter_helper/join_filter_helper'));
       var kibiStateHelper  = Private(require('ui/kibi/helpers/kibi_state_helper/kibi_state_helper'));

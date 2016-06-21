@@ -386,48 +386,6 @@ define(function (require) {
       return Promise.resolve();
     };
 
-    function makeRelationId(relation) {
-      const parts = relation.relation.split('/');
-      return `${relation.dashboards[0]}/${relation.dashboards[1]}/${parts[1]}/${parts[3]}`;
-    }
-
-    KibiStateHelper.prototype.isRelationEnabled = function (relation) {
-      if (globalState.k.j instanceof Array) {
-        return globalState.k.j.indexOf(makeRelationId(relation)) !== -1;
-      }
-      return false;
-    };
-
-    KibiStateHelper.prototype.getEnabledRelations = function () {
-      var enabledRelations = globalState.k.j || [];
-      return _.map(enabledRelations, function (rel) {
-        var parts = rel.split('/');
-        return [parts[0], parts[1]];
-      });
-    };
-
-    KibiStateHelper.prototype.enableRelation = function (relation) {
-      if (!globalState.k.j) {
-        globalState.k.j = [];
-      }
-      const relationId = makeRelationId(relation);
-      if (globalState.k.j.indexOf(relationId) === -1) {
-        globalState.k.j.push(relationId);
-        globalState.save();
-      }
-    };
-
-    KibiStateHelper.prototype.disableRelation = function (relation) {
-      if (!globalState.k.j) {
-        globalState.k.j = [];
-      }
-      const relationId = makeRelationId(relation);
-      const index = globalState.k.j.indexOf(relationId);
-      if (index !== -1) {
-        globalState.k.j.splice(index, 1);
-        globalState.save();
-      }
-    };
 
     KibiStateHelper.prototype._disableAllRelations = function () {
       if (globalState.k.j) {

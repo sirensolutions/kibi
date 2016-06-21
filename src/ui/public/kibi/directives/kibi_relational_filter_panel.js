@@ -28,8 +28,7 @@ define(function (require) {
 
   app.directive(
     'kibiRelationalFilterPanel',
-    function ($location, config, $rootScope, Private, createNotifier) {
-
+    function (kibiState, $location, config, $rootScope, Private, createNotifier) {
       var joinFilterHelper = Private(require('ui/kibi/helpers/join_filter_helper/join_filter_helper'));
       var kibiStateHelper  = Private(require('ui/kibi/helpers/kibi_state_helper/kibi_state_helper'));
       var urlHelper        = Private(require('ui/kibi/helpers/url_helper'));
@@ -84,11 +83,12 @@ define(function (require) {
                 var enabled = jQuery(el).find('input[type=\'checkbox\']').is(':checked');
                 var updateJoinSetOnPromises = [];
                 if (enabled) {
-                  kibiStateHelper.enableRelation(relation);
+                  kibiState.enableRelation(relation);
                 } else {
-                  kibiStateHelper.disableRelation(relation);
+                  kibiState.disableRelation(relation);
                   updateJoinSetOnPromises.push(joinFilterHelper.updateJoinSetFilter(relation.dashboards));
                 }
+                kibiState.save();
                 // Note: here we have to update the JoinSetFilter for all dashboards from
                 // all enabled relations and not only for these from clicked relation
                 // This is needed as relational buttons takes filters from kibi state
@@ -97,7 +97,7 @@ define(function (require) {
                 // TODO: join_set should be stored as 1 another property in kibi state
                 // and not per dashboard as join_set will be always one for all dashboards
                 // issue: https://github.com/sirensolutions/kibi-internal/issues/1011
-                _.each(kibiStateHelper.getEnabledRelations(), function (relDashboards) {
+                _.each(kibiState.getEnabledRelations(), function (relDashboards) {
                   updateJoinSetOnPromises.push(joinFilterHelper.updateJoinSetFilter(relDashboards));
                 });
                 Promise.all(updateJoinSetOnPromises).then(function () {

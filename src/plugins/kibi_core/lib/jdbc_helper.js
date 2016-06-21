@@ -51,6 +51,7 @@ JdbcHelper.prototype.getAbsolutePathToSindicetechFolder = function () {
 
 
 JdbcHelper.prototype.prepareJdbcConfig = function (conf) {
+
   var self = this;
 
   // Note: here we have to convert a comma separated libs into array
@@ -67,7 +68,6 @@ JdbcHelper.prototype.prepareJdbcConfig = function (conf) {
   var libs = [];
 
   if (os.platform().indexOf('win') === 0) {
-
     //windows
     var winAbspathRegex = /^[A-Z]:\\/;
     libpath = winAbspathRegex.test(conf.libpath) ?
@@ -88,16 +88,18 @@ JdbcHelper.prototype.prepareJdbcConfig = function (conf) {
         return winAbspathRegex.test(lib) ?
           lib.replace(/\//g, '\\') :
           addBackslashToTheEnd(libpath) + lib;
+
       });
     }
 
   } else {
     //unix
-    libpath = conf.libpath.indexOf('/') === 0 ? conf.libpath : path.join(pathToSindicetechFolder, conf.libpath);
+
+    libpath = conf.libpath.indexOf('/') === 0 ? conf.libpath : path.posix.join(pathToSindicetechFolder, conf.libpath);
 
     if (conf.libs) {
       libs = _.map(conf.libs, function (lib) {
-        return lib.indexOf('/') === 0 ? lib  : path.join(libpath, lib);
+        return lib.indexOf('/') === 0 ? lib  : path.posix.join(libpath, lib);
       });
     }
   }
@@ -152,6 +154,7 @@ JdbcHelper.prototype.prepareJdbcPaths = function () {
               return;
             }
             var jdbcConfig = self.prepareJdbcConfig(params);
+
             ret.libpaths.push(jdbcConfig.libpath);
             ret.libs = ret.libs.concat(jdbcConfig.libs);
           }

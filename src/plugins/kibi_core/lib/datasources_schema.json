@@ -2,6 +2,7 @@
   "base": [
     {
       "name": "timeout",
+      "label": "Timeout",
       "inputType": "text",
       "required": false,
       "multivalued": false,
@@ -14,6 +15,7 @@
   "sqlite":[
     {
       "name": "db_file_path",
+      "label": "Database file path",
       "required": true,
       "multivalued": false,
       "encrypted": false,
@@ -23,6 +25,7 @@
     },
     {
       "name": "modes",
+      "label": "Database operation modes",
       "required": false,
       "multivalued": true,
       "encrypted": false,
@@ -33,6 +36,7 @@
     },
     {
       "name": "cache_enabled",
+      "label": "Cache enabled",
       "inputType": "checkbox",
       "required": false,
       "multivalued": false,
@@ -42,6 +46,7 @@
     },
     {
       "name": "max_age",
+      "label": "Max age of cache entries",
       "inputType": "text",
       "required": false,
       "multivalued": false,
@@ -55,6 +60,7 @@
   "mysql": [
     {
       "name": "host",
+      "label": "Database host",
       "inputType": "text",
       "required": true,
       "multivalued": false,
@@ -64,6 +70,7 @@
     },
     {
       "name": "dbname",
+      "label": "Database name",
       "inputType": "text",
       "required": true,
       "multivalued": false,
@@ -73,6 +80,7 @@
     },
     {
       "name": "username",
+      "label": "Username",
       "inputType": "text",
       "required": true,
       "multivalued": false,
@@ -82,6 +90,7 @@
     },
     {
       "name": "password",
+      "label": "Password",
       "inputType": "password",
       "required": false,
       "multivalued": false,
@@ -91,6 +100,7 @@
     },
     {
       "name": "cache_enabled",
+      "label": "Cache enabled",
       "inputType": "checkbox",
       "required": false,
       "multivalued": false,
@@ -100,6 +110,7 @@
     },
     {
       "name": "max_age",
+      "label": "Max age of cache entries",
       "inputType": "text",
       "required": false,
       "multivalued": false,
@@ -112,6 +123,7 @@
   "postgresql": [
     {
       "name": "host",
+      "label": "Database host",
       "inputType": "text",
       "required": true,
       "multivalued": false,
@@ -121,6 +133,7 @@
     },
     {
       "name": "dbname",
+      "label": "Database name",
       "inputType": "text",
       "required": true,
       "multivalued": false,
@@ -130,6 +143,7 @@
     },
     {
       "name": "username",
+      "label": "Username",
       "inputType": "text",
       "required": true,
       "multivalued": false,
@@ -139,6 +153,7 @@
     },
     {
       "name": "password",
+      "label": "Password",
       "inputType": "password",
       "required": false,
       "multivalued": false,
@@ -148,6 +163,7 @@
     },
     {
       "name": "cache_enabled",
+      "label": "Cache enabled",
       "inputType": "checkbox",
       "required": false,
       "multivalued": false,
@@ -157,6 +173,7 @@
     },
     {
       "name": "max_age",
+      "label": "Max age of cache entries",
       "inputType": "text",
       "required": false,
       "multivalued": false,
@@ -170,6 +187,7 @@
   "rest": [
     {
       "name": "url",
+      "label": "URL",
       "required": true,
       "multivalued": false,
       "encrypted": false,
@@ -179,6 +197,7 @@
     },
     {
       "name": "response_type",
+      "label": "Response type",
       "required": true,
       "multivalued": false,
       "encrypted": false,
@@ -189,6 +208,7 @@
     },
     {
       "name": "username",
+      "label": "Username",
       "inputType": "text",
       "required": false,
       "multivalued": false,
@@ -198,6 +218,7 @@
     },
     {
       "name": "password",
+      "label": "Password",
       "inputType": "password",
       "required": false,
       "multivalued": false,
@@ -207,6 +228,7 @@
     },
     {
       "name": "auth_token",
+      "label": "Authorization token",
       "inputType": "password",
       "required": false,
       "multivalued": false,
@@ -216,6 +238,7 @@
     },
     {
       "name": "cache_enabled",
+      "label": "Cache enabled",
       "inputType": "checkbox",
       "required": false,
       "multivalued": false,
@@ -225,6 +248,7 @@
     },
     {
       "name": "max_age",
+      "label": "Max age of cache entries",
       "inputType": "text",
       "required": false,
       "multivalued": false,
@@ -237,6 +261,7 @@
   "sparql_http":[
     {
       "name": "endpoint_url",
+      "label": "Endpoint URL",
       "required": true,
       "multivalued": false,
       "encrypted": false,
@@ -246,6 +271,7 @@
     },
     {
       "name": "username",
+      "label": "Username",
       "inputType": "text",
       "required": false,
       "multivalued": false,
@@ -255,6 +281,7 @@
     },
     {
       "name": "password",
+      "label": "Password",
       "inputType": "password",
       "required": false,
       "multivalued": false,
@@ -264,6 +291,7 @@
     },
     {
       "name": "cache_enabled",
+      "label": "Cache enabled",
       "inputType": "checkbox",
       "required": false,
       "multivalued": false,
@@ -273,6 +301,7 @@
     },
     {
       "name": "max_age",
+      "label": "Max age of cache entries",
       "inputType": "text",
       "required": false,
       "multivalued": false,
@@ -285,6 +314,7 @@
   "jdbc": [
     {
       "name": "drivername",
+      "label": "Driver name",
       "required": true,
       "multivalued": false,
       "encrypted": false,
@@ -294,6 +324,7 @@
     },
     {
       "name": "libpath",
+      "label": "Libraries path",
       "required": true,
       "multivalued": false,
       "encrypted": false,
@@ -303,6 +334,7 @@
     },
     {
       "name": "connection_string",
+      "label": "Connection string",
       "required": true,
       "multivalued": false,
       "encrypted": false,
@@ -312,6 +344,7 @@
     },
     {
       "name": "libs",
+      "label": "Libraries",
       "required": false,
       "multivalued": true,
       "encrypted": false,
@@ -321,6 +354,7 @@
     },
     {
       "name": "username",
+      "label": "Username",
       "inputType": "text",
       "required": false,
       "multivalued": false,
@@ -330,6 +364,7 @@
     },
     {
       "name": "password",
+      "label": "Password",
       "inputType": "password",
       "required": false,
       "multivalued": false,
@@ -339,6 +374,7 @@
     },
     {
       "name": "cache_enabled",
+      "label": "Cache enabled",
       "inputType": "checkbox",
       "required": false,
       "multivalued": false,
@@ -348,6 +384,7 @@
     },
     {
       "name": "max_age",
+      "label": "Max age of cache entries",
       "inputType": "text",
       "required": false,
       "multivalued": false,
@@ -360,6 +397,7 @@
   "tinkerpop3":[
     {
       "name": "url",
+      "label": "Gremlin Server URL",
       "required": true,
       "multivalued": false,
       "encrypted": false,
@@ -369,6 +407,7 @@
     },
     {
       "name": "timeout",
+      "label": "Timeout",
       "inputType": "text",
       "required": false,
       "multivalued": false,

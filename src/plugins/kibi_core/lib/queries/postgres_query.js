@@ -5,8 +5,6 @@ var pg      = require('pg');
 var AbstractQuery = require('./abstract_query');
 var QueryHelper = require('../query_helper');
 
-var debug = false;
-
 function PostgresQuery(server, queryDefinition, cache) {
   AbstractQuery.call(this, server, queryDefinition, cache);
   this.queryHelper = new QueryHelper(server);
@@ -110,15 +108,15 @@ PostgresQuery.prototype._getType = function (typeNum) {
 };
 
 PostgresQuery.prototype._executeQuery = function (query, connectionString) {
+  var self = this;
   return new Promise(function (fulfill, reject) {
     try {
       pg.connect(connectionString, function (err, client, done) {
         if (err) {
           reject(err);
         }
-        if (debug) {
-          console.log('got client');
-        }
+
+        self.logger.debug('got client');
 
         client.query(query, function (err, result) {
           if (err) {
@@ -129,18 +127,15 @@ PostgresQuery.prototype._executeQuery = function (query, connectionString) {
               };
             }
 
-            if (debug) {
-              console.log('got error instead of result');
-              console.log(err);
-            }
+            self.logger.debug('got error instead of result');
+            self.logger.debug(err);
 
             reject(err);
             return;
           }
 
-          if (debug) {
-            console.log('got result');
-          }
+          self.logger.debug('got result');
+
           fulfill(result);
           client.end();
           //done(); //TODO: investigate where exactly to call this method to release client to the pool
@@ -226,18 +221,17 @@ PostgresQuery.prototype.fetchResults = function (options, onlyIds, idVariableNam
 
   return self.queryHelper.replaceVariablesUsingEsDocument(this.config.resultQuery, uri, options.credentials).then(function (query) {
     // special case if the uri is required but it is empty
-    if (debug) {
-      console.log('----------');
-      console.log('this.resultQueryRequireEntityURI: [' + this.resultQueryRequireEntityURI + ']');
-      console.log('uri: [' + uri + ']');
-      console.log('query: [' + query + ']');
-    }
+
+    self.logger.debug(
+      '----------\n' +
+      'this.resultQueryRequireEntityURI: [' + this.resultQueryRequireEntityURI + ']\n' +
+      'uri: [' + uri + ']\n' +
+      'query: [' + query + ']'
+    );
 
 
-    if (debug) {
-      console.log('start to fetch results for');
-      console.log(query);
-    }
+    self.logger.debug('start to fetch results for query');
+    self.logger.debug(query);
 
     var cacheKey = null;
 

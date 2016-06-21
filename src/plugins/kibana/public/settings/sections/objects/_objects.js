@@ -165,7 +165,7 @@ define(function (require) {
             notify.error('The file could not be processed.');
           }
 
-          // kibi: cheange the import to sequential to solve the dependency problem between objects
+          // kibi: change the import to sequential to solve the dependency problem between objects
           // as visualisations could depend on searches
           // lets order the export to make sure that searches comes before visualisations
           // then also import object sequentially to avoid errors
@@ -177,7 +177,7 @@ define(function (require) {
             return doc._type !== 'config';
           });
 
-          // kibi: added to sort the dosc by type
+          // kibi: added to sort the docs by type
           docs.sort(function (a, b) {
             if (a._type === 'search' && b._type !== 'search') {
               return -1;
@@ -203,14 +203,15 @@ define(function (require) {
           var loadConfig = function (configDocument) {
             if (configDocument) {
               if (configDocument._id === kbnVersion) {
-                // ovveride existing config values
+                // override existing config values
                 _.each(configDocument._source, function (value, key) {
                   config.set(key, value);
                 });
               } else {
                 notify.error(
-                  'Config object in the import does not much current version ' + kbnVersion +
-                  '\nWill NOT import any of the advanced settings parameters'
+                  'Config object version [' + configDocument._id + '] in the import ' +
+                  'does not match current version [' + kbnVersion + ']\n' +
+                  'Will NOT import any of the advanced settings parameters'
                 );
               }
             }

@@ -88,7 +88,6 @@ JdbcHelper.prototype.prepareJdbcConfig = function (conf) {
         return winAbspathRegex.test(lib) ?
           lib.replace(/\//g, '\\') :
           addBackslashToTheEnd(libpath) + lib;
-
       });
     }
 
@@ -96,7 +95,6 @@ JdbcHelper.prototype.prepareJdbcConfig = function (conf) {
     //unix
 
     libpath = conf.libpath.indexOf('/') === 0 ? conf.libpath : path.posix.join(pathToSindicetechFolder, conf.libpath);
-
     if (conf.libs) {
       libs = _.map(conf.libs, function (lib) {
         return lib.indexOf('/') === 0 ? lib  : path.posix.join(libpath, lib);
@@ -154,7 +152,6 @@ JdbcHelper.prototype.prepareJdbcPaths = function () {
               return;
             }
             var jdbcConfig = self.prepareJdbcConfig(params);
-
             ret.libpaths.push(jdbcConfig.libpath);
             ret.libs = ret.libs.concat(jdbcConfig.libs);
           }

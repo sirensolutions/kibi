@@ -1,11 +1,11 @@
 [[kibi_gremlin_server]]
 == Kibi Gremlin Server [Enterprise Edition only]
 
-ifeval::[{enterprise_enabled} == false]
+ifeval::["{enterprise_enabled}" == "false"]
   NOTE: Documentation for Kibi Gremlin Server is available only in Kibi Enterprise Edition.
 endif::[]
 
-ifeval::[{enterprise_enabled} == true]
+ifeval::["{enterprise_enabled}" == "true"]
 
 **Kibi Gremlin Server** component required by <<graph_browser,Kibi Graph Browser>> visualisation
 is shipped pre-configured in Kibi Enterprise Edition.

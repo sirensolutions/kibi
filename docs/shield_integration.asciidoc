@@ -2,11 +2,11 @@
 
 == Shield Integration [Enterprise Edition only]
 
-ifeval::[{enterprise_enabled} == false]
+ifeval::["{enterprise_enabled}" == "false"]
   NOTE: Documentation for Shield Integration is available only in Kibi Enterprise Edition.
 endif::[]
 
-ifeval::[{enterprise_enabled} == true]
+ifeval::["{enterprise_enabled}" == "true"]
 
 === Behaviours and warning display messages
 

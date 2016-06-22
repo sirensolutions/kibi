@@ -323,11 +323,11 @@ image::images/relations_settings/investor_index.png["Investor Index",align="cent
 
 ===== Advanced settings for index relations [Enterprise Edition only]
 
-ifeval::[{enterprise_enabled} == false]
+ifeval::["{enterprise_enabled}" == "false"]
   NOTE: Documentation for Advanced settings for index relations is available only in Kibi Enterprise Edition.
 endif::[]
 
-ifeval::[{enterprise_enabled} == true]
+ifeval::["{enterprise_enabled}" == "true"]
 
 In most cases the default index relation settings are sufficient.
 However, for scenarios involving very large joins or when precision is critical,

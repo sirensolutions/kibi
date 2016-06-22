@@ -135,34 +135,8 @@ define(function (require) {
         });
       }
 
-      $scope.delete = function () {
-        if ($window.confirm('Are you sure you want to delete the datasource [' + datasource.title + ']')) {
-          datasource.delete().then(function (resp) {
-            queryEngineClient.clearCache().then(function () {
-              kbnUrl.change('settings/datasources', {});
-            });
-          });
-        }
-      };
-
       $scope.newDatasource = function () {
         kbnUrl.change('settings/datasources', {});
-      };
-
-      $scope.clone = function () {
-        savedDatasources.get().then(function (savedDatasourceClone) {
-          savedDatasourceClone.id = datasource.id + '-clone';
-          savedDatasourceClone.title = datasource.title + ' clone';
-          savedDatasourceClone.description = datasource.description;
-
-          savedDatasourceClone.save().then(function (resp) {
-            notify.info('Datasource ' + savedDatasourceClone.title + 'successfully saved');
-            queryEngineClient.clearCache().then(function () {
-              $rootScope.$emit('kibi:datasource:changed', resp);
-              kbnUrl.change('settings/datasources/' + resp);
-            });
-          });
-        });
       };
 
       $scope.$watch('datasource.datasourceType', function () {

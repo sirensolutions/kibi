@@ -121,22 +121,22 @@ define(function (require) {
         _enableEntityUri();
       });
 
-      $scope.$watchMulti(['query.st_activationQuery', 'query.st_resultQuery', 'query.rest_body'], function () {
+      $scope.$watchMulti(['query.activationQuery', 'query.resultQuery', 'query.rest_body'], function () {
         _enableEntityUri();
         if ($scope.datasourceType !== kibiUtils.DatasourceTypes.rest) {
           var starRegex = /\*/g;
           // test for a star in a query
-          // TODO why test st_activationQuery ?
-          $scope.starDetectedInAQuery = starRegex.test($scope.query.st_activationQuery) || starRegex.test($scope.query.st_resultQuery);
+          // TODO why test activationQuery ?
+          $scope.starDetectedInAQuery = starRegex.test($scope.query.activationQuery) || starRegex.test($scope.query.resultQuery);
         }
       });
 
-      $scope.$watch('query.st_datasourceId', function () {
-        if ($scope.query.st_datasourceId) {
+      $scope.$watch('query.datasourceId', function () {
+        if ($scope.query.datasourceId) {
           $scope.datasourceType = null;
 
           // now check the datasourceType
-          savedDatasources.get($scope.query.st_datasourceId).then(function (savedDatasource) {
+          savedDatasources.get($scope.query.datasourceId).then(function (savedDatasource) {
             $scope.datasourceType = savedDatasource.datasourceType;
 
             _enableEntityUri();
@@ -153,17 +153,17 @@ define(function (require) {
 
       // here we have to translate back and forth between tags array from query object
       // and array of tag objects required by tag widget
-      $scope.tags = _.map($scope.query.st_tags, function (tag) {
+      $scope.tags = _.map($scope.query.tags, function (tag) {
         return {
           text: tag
         };
       });
 
       $scope.$watch('tags', function (tags) {
-        $scope.query.st_tags = _.map(tags, function (tag) {
+        $scope.query.tags = _.map(tags, function (tag) {
           return tag.text;
         });
-        $scope.query.st_tags.sort();
+        $scope.query.tags.sort();
       }, true);
 
       $scope.submit = function () {
@@ -221,7 +221,7 @@ define(function (require) {
       };
 
       $scope.jumpToDatasource = function () {
-        kbnUrl.change('/settings/datasources/' + $scope.query.st_datasourceId);
+        kbnUrl.change('/settings/datasources/' + $scope.query.datasourceId);
       };
 
       $scope.preview = function () {

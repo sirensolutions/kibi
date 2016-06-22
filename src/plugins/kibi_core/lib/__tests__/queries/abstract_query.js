@@ -36,8 +36,8 @@ var fakeServer = {
                       _source: {
                         title: 'kibi-table-handlebars',
                         description: '',
-                        st_templateEngine: 'handlebars',
-                        st_templateSource: 'Results: ({{results.bindings.length}})'
+                        templateEngine: 'handlebars',
+                        templateSource: 'Results: ({{results.bindings.length}})'
                       }
                     }
                   ]
@@ -51,8 +51,8 @@ var fakeServer = {
                       _source: {
                         title: 'kibi-table-handlebars-invalid',
                         description: '',
-                        st_templateEngine: 'handlebars',
-                        st_templateSource: 'Results: ({{{results.bindings.length}})'
+                        templateEngine: 'handlebars',
+                        templateSource: 'Results: ({{{results.bindings.length}})'
                       }
                     }
                   ]
@@ -66,8 +66,8 @@ var fakeServer = {
                       _source: {
                         title: 'kibi-lodash',
                         description: '',
-                        st_templateEngine: 'lodash',
-                        st_templateSource: '<%=doe%>'
+                        templateEngine: 'lodash',
+                        templateSource: '<%=doe%>'
                       }
                     }
                   ]
@@ -81,8 +81,8 @@ var fakeServer = {
                       _source: {
                         title: 'kibi-lodash',
                         description: '',
-                        st_templateEngine: 'lodash',
-                        st_templateSource: ''
+                        templateEngine: 'lodash',
+                        templateSource: ''
                       }
                     }
                   ]
@@ -146,7 +146,7 @@ describe('AbstractQuery', function () {
       var query = new AbstractQuery(fakeServer, '', cache);
 
       query._fetchTemplate('kibi-table handlebars').then(function (template) {
-        expect(template.st_templateSource).to.be('Results: ({{results.bindings.length}})');
+        expect(template.templateSource).to.be('Results: ({{results.bindings.length}})');
         expect(query.cache.get('kibi-table-handlebars')).to.eql(template);
 
         sinon.spy(cache, 'get');

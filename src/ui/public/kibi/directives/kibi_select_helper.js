@@ -23,10 +23,10 @@ define(function (require) {
         var datasources = results[1].hits;
         var items = [];
         for (var i = 0; i < queries.length; i++) {
-          var queryDatasource = queries[i].st_datasourceId;
+          var queryDatasource = queries[i].datasourceId;
           var datasource = getDatasource(datasources, queryDatasource);
           items.push({
-            group: queries[i].st_tags.length ? queries[i].st_tags.join() : 'No tag',
+            group: queries[i].tags.length ? queries[i].tags.join() : 'No tag',
             datasourceType: datasource.length > 0 ? datasource[0].datasourceType : null,
             label: queries[i].title,
             value: queries[i].id
@@ -217,11 +217,11 @@ define(function (require) {
         if (!savedQuery) {
           return Promise.reject(new Error('Query with id [' + queryId + '] was not found'));
         }
-        if (!savedQuery.st_datasourceId) {
-          return Promise.reject(new Error('SavedQuery [' + queryId + '] does not have st_datasourceId parameter'));
+        if (!savedQuery.datasourceId) {
+          return Promise.reject(new Error('SavedQuery [' + queryId + '] does not have datasourceId parameter'));
         }
-        return datasourceHelper.getDatasourceType(savedQuery.st_datasourceId).then(function (datasourceType) {
-          var resultQuery = savedQuery.st_resultQuery;
+        return datasourceHelper.getDatasourceType(savedQuery.datasourceId).then(function (datasourceType) {
+          var resultQuery = savedQuery.resultQuery;
           var variables = [];
           if (kibiUtils.isSPARQL(datasourceType)) {
             variables = sparqlHelper.getVariables(resultQuery);

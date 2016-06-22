@@ -450,18 +450,18 @@ QueryEngine.prototype.reloadQueries = function () {
           id:                hit._id,
           label:             hit._source.title,
           description:       hit._source.description,
-          activationQuery:   hit._source.st_activationQuery,
-          resultQuery:       hit._source.st_resultQuery,
-          datasourceId:      hit._source.st_datasourceId,
+          activationQuery:   hit._source.activationQuery,
+          resultQuery:       hit._source.resultQuery,
+          datasourceId:      hit._source.datasourceId,
           rest_method:       hit._source.rest_method,
           rest_path:         hit._source.rest_path,
           rest_body:         hit._source.rest_body,
           rest_resp_restriction_path: hit._source.rest_resp_restriction_path,
-          tags:              hit._source.st_tags
+          tags:              hit._source.tags
         };
 
-        if (datasourcesIds.indexOf(hit._source.st_datasourceId) === -1) {
-          datasourcesIds.push(hit._source.st_datasourceId);
+        if (datasourcesIds.indexOf(hit._source.datasourceId) === -1) {
+          datasourcesIds.push(hit._source.datasourceId);
         }
         // here we are querying the elastic search
         // and rest_params, rest_headers

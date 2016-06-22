@@ -7,7 +7,7 @@ define(function (require) {
     var _checkSingleQuery = function (query) {
       var regex = /@doc\[.+?\]@/;
       // check for sparql and sql queries
-      if (regex.test(query.st_activationQuery) || regex.test(query.st_resultQuery)) {
+      if (regex.test(query.activationQuery) || regex.test(query.resultQuery)) {
         // requires entityURI
         return true;
       }

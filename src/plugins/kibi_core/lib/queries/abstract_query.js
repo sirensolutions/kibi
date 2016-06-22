@@ -187,27 +187,16 @@ Query.prototype.getHtml = function (queryDef, options) {
     return that._fetchTemplate(queryDef.templateId)
     .then(function (template) {
 
-      var templateSource = template.st_templateSource;
-      var templateEngine = template.st_templateEngine;
-
-      if (templateSource) {
-
+      if (template.templateSource) {
         var html = 'Could not compile the template into html';
-
-        if (templateEngine === 'handlebars') {
-
-          var hbTemplate = handlebars.compile(templateSource);
+        if (template.templateEngine === 'handlebars') {
+          var hbTemplate = handlebars.compile(template.templateSource);
           html = hbTemplate(data);
-
-        } else if (templateEngine === 'jade') {
-
-          var jadeFn = jade.compile(templateSource, { compileDebug: true, filename: queryDef.templateId });
+        } else if (template.templateEngine === 'jade') {
+          var jadeFn = jade.compile(template.templateSource, { compileDebug: true, filename: queryDef.templateId });
           html = jadeFn(data);
-
         } else {
-
           html = 'Unsupported template engine. Try handlebars or jade';
-
         }
 
         return Promise.resolve({

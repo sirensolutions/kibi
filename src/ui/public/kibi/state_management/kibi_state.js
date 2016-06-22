@@ -205,7 +205,7 @@ define(function (require) {
     /**
      * Returns the current set of filters for the given dashboard
      */
-    KibiState.prototype._getFilters = function (appState, dashboardId, metas, { pinned }) {
+    KibiState.prototype._getFilters = function (dashboardId, appState, metas, { pinned }) {
       let filters;
 
       if (this._getCurrentDashboardId() === dashboardId) {
@@ -236,7 +236,7 @@ define(function (require) {
     /**
      * Returns the current set of queries for the given dashboard
      */
-    KibiState.prototype._getQueries = function (appState, dashboardId, metas) {
+    KibiState.prototype._getQueries = function (dashboardId, appState, metas) {
       let query;
 
       if (this._getCurrentDashboardId() === dashboardId) {
@@ -320,8 +320,19 @@ define(function (require) {
       });
     };
 
-    KibiState.prototype._addAdvancedJoinSettingsToRelation = function (sourcePartOfTheRelationId, targetPartOfTheRelationId, rel) {
+    /**
+     * Adds advanced join parameters for the given relation.
+     * Rel is an array with the following format:
+     *     [
+     *       { indices: [ 'index1' ], path: 'id1' },
+     *       { indices: [ 'index2' ], path: 'id2' }
+     *     ]
+     */
+    KibiState.prototype._addAdvancedJoinSettingsToRelation = function (rel) {
       if (kibiEnterpriseEnabled) {
+        const sourcePartOfTheRelationId = rel[0].indices[0] + '/' + rel[0].path;
+        const targetPartOfTheRelationId = rel[1].indices[0] + '/' + rel[1].path;
+
         const advKeys = ['termsEncoding', 'orderBy', 'maxTermsPerShard'];
 
         const relations = config.get('kibi:relations');
@@ -383,7 +394,7 @@ define(function (require) {
     };
 
     /**
-     * Returns the set of dashboards ID which are connected to the focused dashboard, i.e., the connected component of the graph.
+     * Returns the set of dashboard IDs which are connected to the focused dashboard, i.e., the connected component of the graph.
      * Relations is the array of relations between dashboards.
      */
     KibiState.prototype._getDashboardsIdInConnectedComponent = function (focus, relations) {
@@ -435,7 +446,7 @@ define(function (require) {
       return _.uniq(labels);
     };
 
-    KibiState.prototype._getJoinFilter = function (focusIndex, filterAlias, filtersPerIndex, queriesPerIndex, timesPerIndex) {
+    KibiState.prototype._getJoinSetFilter = function (focusIndex, filterAlias, filtersPerIndex, queriesPerIndex, timesPerIndex) {
       // Build the relations for the join_set query
       let relations;
       try {
@@ -457,7 +468,7 @@ define(function (require) {
             }
           ];
 
-          this._addAdvancedJoinSettingsToRelation(sourceIndex + '/' + sourcePath, targetIndex + '/' + targetPath , ret);
+          this._addAdvancedJoinSettingsToRelation(ret);
 
           return ret;
         });
@@ -469,7 +480,7 @@ define(function (require) {
        * build the join_set filter
        */
 
-      const joinFilter = {
+      const joinSetFilter = {
         meta: {
           alias: filterAlias
         },
@@ -484,16 +495,16 @@ define(function (require) {
       if (queriesPerIndex) {
         _.each(queriesPerIndex, (queries, index) => {
           if (queries instanceof Array && queries.length) {
-            if (!joinFilter.join_set.queries[index]) {
-              joinFilter.join_set.queries[index] = [];
+            if (!joinSetFilter.join_set.queries[index]) {
+              joinSetFilter.join_set.queries[index] = [];
             }
             _.each(queries, (fQuery) => {
               // filter out default queries
               if (fQuery && !this._isDefaultQuery(fQuery)) {
-                if (!joinFilter.join_set.queries[index]) {
-                  joinFilter.join_set.queries[index] = [];
+                if (!joinSetFilter.join_set.queries[index]) {
+                  joinSetFilter.join_set.queries[index] = [];
                 }
-                joinFilter.join_set.queries[index].push({ query: fQuery });
+                joinSetFilter.join_set.queries[index].push({ query: fQuery });
               }
             });
           }
@@ -504,8 +515,8 @@ define(function (require) {
       if (filtersPerIndex) {
         _.each(filtersPerIndex, (filters, index) => {
           if (filters instanceof Array && filters.length) {
-            if (!joinFilter.join_set.queries[index]) {
-              joinFilter.join_set.queries[index] = [];
+            if (!joinSetFilter.join_set.queries[index]) {
+              joinSetFilter.join_set.queries[index] = [];
             }
             _.each(filters, (fFilter) => {
               // clone it first so when we remove meta the original object is not modified
@@ -520,7 +531,7 @@ define(function (require) {
                   };
                 }
               }
-              joinFilter.join_set.queries[index].push(filter);
+              joinSetFilter.join_set.queries[index].push(filter);
             });
           }
         });
@@ -529,14 +540,14 @@ define(function (require) {
       // get the times
       if (timesPerIndex) {
         _.each(timesPerIndex, (times, index) => {
-          if (!joinFilter.join_set.queries[index]) {
-            joinFilter.join_set.queries[index] = [];
+          if (!joinSetFilter.join_set.queries[index]) {
+            joinSetFilter.join_set.queries[index] = [];
           }
-          joinFilter.join_set.queries[index].push(...times);
+          joinSetFilter.join_set.queries[index].push(...times);
         });
       }
 
-      return joinFilter;
+      return joinSetFilter;
     };
 
     /**
@@ -555,14 +566,13 @@ define(function (require) {
       if (this.isRelationalPanelEnabled()) {
         // collect ids of dashboards from enabled relations and in the connected component to dashboardId
         const tmpDashboardIds = this._getDashboardsIdInConnectedComponent(dashboardId, this.getEnabledRelations());
-        const dashIndex = tmpDashboardIds.indexOf(dashboardId);
 
-        if (dashIndex !== -1) { // focused dashboard is part of enabled relation
-          // set the focus dashboard as the first element of the dashboards array
-          const zeroDashboard = tmpDashboardIds[0];
-          tmpDashboardIds[0] = dashboardId;
-          tmpDashboardIds[dashIndex] = zeroDashboard;
-          dashboardIds = tmpDashboardIds;
+        if (tmpDashboardIds.indexOf(dashboardId) !== -1) { // focused dashboard is part of enabled relation
+          _.each(tmpDashboardIds, (d) => {
+            if (d !== dashboardId) {
+              dashboardIds.push(d);
+            }
+          });
         }
       }
 
@@ -574,8 +584,8 @@ define(function (require) {
 
         for (let i = 0; i < metas.length; i++) {
           const meta = metas[i];
-          promises.push(this._getFilters(appState, meta.savedDash.id, meta, options));
-          promises.push(this._getQueries(appState, meta.savedDash.id, meta));
+          promises.push(this._getFilters(meta.savedDash.id, appState, meta, options));
+          promises.push(this._getQueries(meta.savedDash.id, appState, meta));
           promises.push(this._getTime(meta.savedDash.id, meta.savedSearchMeta.index));
         }
         return Promise.all(promises)
@@ -611,8 +621,8 @@ define(function (require) {
             _.forOwn(timesPerIndex, (times, index) => _(times).uniq().compact().value());
             const focusIndex = metas[0].savedSearchMeta.index;
             const filterAlias = _(dashboardIds).map((dashboardId, ind) => metas[ind].savedDash.title).sortBy().join(' <-> ');
-            const joinFilter = this._getJoinFilter(focusIndex, filterAlias, filtersPerIndex, queriesPerIndex, timesPerIndex);
-            filters.push(joinFilter);
+            const joinSetFilter = this._getJoinSetFilter(focusIndex, filterAlias, filtersPerIndex, queriesPerIndex, timesPerIndex);
+            filters.push(joinSetFilter);
           }
           return { filters, queries, time };
         });
@@ -630,8 +640,8 @@ define(function (require) {
       };
 
       return Promise.all([
-        this._getFilters(appState, currentDashboardId, null, options),
-        this._getQueries(appState, currentDashboardId, null)
+        this._getFilters(currentDashboardId, appState, null, options),
+        this._getQueries(currentDashboardId, appState, null)
       ])
       .then(([ filters, queries ]) => {
         // save filters

@@ -133,7 +133,7 @@ define(function (require) {
             .then(function (entityURIEnabled) {
               $scope.holder.entityURIEnabled = entityURIEnabled;
             }).then(savedQueries.get($scope.template._previewQueryId))
-          .then((savedQuery) => savedQuery && savedDatasources.get(savedQuery.st_datasourceId))
+          .then((savedQuery) => savedQuery && savedDatasources.get(savedQuery.datasourceId))
             .then((savedDatasource) => {
               // set datasourceType
               if (savedDatasource) {

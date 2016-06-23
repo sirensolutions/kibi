@@ -241,9 +241,9 @@ define(function (require) {
 
         // kibi: methods to identify our fields
         var kibiFields = [
-          {name: 'st_activationQuery', size: 1},
-          {name: 'st_resultQuery',     size: 4},
-          {name: 'st_templateVars',    size: 2}
+          {name: 'activationQuery', size: 1},
+          {name: 'resultQuery',     size: 4},
+          {name: 'templateVars',    size: 2}
         ];
 
         $scope.isItKibiField = function (field) {

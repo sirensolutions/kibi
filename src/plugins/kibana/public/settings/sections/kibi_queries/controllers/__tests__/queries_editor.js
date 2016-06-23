@@ -95,7 +95,7 @@ describe('Kibi Controllers', function () {
         id: '1ahah', // starts with 1 to indicate it is dependent on an entity
         title: 'ahah',
         _previewTemplateId: 'mytmpl',
-        st_activationQuery: '@doc[id]@'
+        activationQuery: '@doc[id]@'
       };
       init({ query: query });
       expect(query._previewTemplateId).to.be('mytmpl');
@@ -106,7 +106,7 @@ describe('Kibi Controllers', function () {
       var query = {
         title: 'ahah',
         _previewTemplateId: 'mytmpl',
-        st_activationQuery: 'select * { ?s :name ?o }'
+        activationQuery: 'select * { ?s :name ?o }'
       };
       init({ query: query });
       expect(query._previewTemplateId).to.be('mytmpl');
@@ -170,7 +170,7 @@ describe('Kibi Controllers', function () {
 
       var stub = sinon.spy($scope, 'preview');
       expect($scope.datasourceType).to.be('123');
-      query.st_datasourceId = 'ds3';
+      query.datasourceId = 'ds3';
       $scope.$digest();
       expect($scope.datasourceType).to.be('rest');
       expect(query._previewTemplateId).to.be('kibi-json-jade');
@@ -184,7 +184,7 @@ describe('Kibi Controllers', function () {
 
       var stub = sinon.spy($scope, 'preview');
       expect($scope.datasourceType).to.be('123');
-      query.st_datasourceId = 'ds1';
+      query.datasourceId = 'ds1';
       $scope.$digest();
       expect($scope.datasourceType).to.be('sparql_http');
       expect(query._previewTemplateId).to.be('kibi-table-jade');

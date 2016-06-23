@@ -20,24 +20,24 @@ describe('Kibi Components', function () {
               hits: [
                 {
                   id: 'goaway',
-                  st_resultQuery: 'select name from person',
-                  st_activationQuery: 'select name from person'
+                  resultQuery: 'select name from person',
+                  activationQuery: 'select name from person'
                 },
                 {
                   id: 'sql-result-query',
-                  st_resultQuery: 'select name from table where id = @doc[_source][id]@'
+                  resultQuery: 'select name from table where id = @doc[_source][id]@'
                 },
                 {
                   id: 'sparql-result-query',
-                  st_resultQuery: 'select ?name { <@doc[_source][id]@> :name ?name }'
+                  resultQuery: 'select ?name { <@doc[_source][id]@> :name ?name }'
                 },
                 {
                   id: 'sql-activation-query',
-                  st_activationQuery: 'select name from table where id = @doc[_source][id]@'
+                  activationQuery: 'select name from table where id = @doc[_source][id]@'
                 },
                 {
                   id: 'sparql-activation-query',
-                  st_resultQuery: 'ask { <@doc[_source][id]@> :name ?name }'
+                  resultQuery: 'ask { <@doc[_source][id]@> :name ?name }'
                 },
                 {
                   id: 'rest-body',

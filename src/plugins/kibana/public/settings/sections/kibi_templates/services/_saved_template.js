@@ -20,8 +20,8 @@ define(function (require) {
         mapping: {
           title: 'string',
           description: 'string',
-          st_templateSource: 'string',
-          st_templateEngine: 'string',
+          templateSource: 'string',
+          templateEngine: 'string',
           _previewQueryId: 'string', // used only to temporary store query id for preview
           version: 'integer'
         },
@@ -29,8 +29,8 @@ define(function (require) {
         defaults: {
           title: 'New Saved Template',
           description: '',
-          st_templateSource: '',
-          st_templateEngine: 'handlebars',
+          templateSource: '',
+          templateEngine: 'jade',
           _previewQueryId: '',
           version: 1
         },

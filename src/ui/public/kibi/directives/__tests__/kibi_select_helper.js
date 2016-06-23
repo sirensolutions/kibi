@@ -114,8 +114,8 @@ describe('Kibi Directives', function () {
             id: 'template-1',
             title: 'template 1',
             description: '',
-            st_templateSource: '',
-            st_templateEngine: 'jade',
+            templateSource: '',
+            templateEngine: 'jade',
             _previewQueryId: '',
             version: 1
           }
@@ -126,32 +126,32 @@ describe('Kibi Directives', function () {
         $provide.service('savedQueries', (Promise) => mockSavedObjects(Promise)('savedQueries', [
           {
             id: 'sparql',
-            st_resultQuery: 'select ?name { ?s ?p ?o }',
-            st_datasourceId: 'ds1',
-            st_tags: []
+            resultQuery: 'select ?name { ?s ?p ?o }',
+            datasourceId: 'ds1',
+            tags: []
           },
           {
             id: 'sql',
-            st_resultQuery: 'select name from person',
-            st_datasourceId: 'ds2',
-            st_tags: []
+            resultQuery: 'select name from person',
+            datasourceId: 'ds2',
+            tags: []
           },
           {
             id: 'rest',
-            st_resultQuery: '',
-            st_datasourceId: 'ds3',
-            st_tags: []
+            resultQuery: '',
+            datasourceId: 'ds3',
+            tags: []
           },
           {
             id: 'nodatasource',
-            st_resultQuery: '',
-            st_datasourceId: '',
-            st_tags: []
+            resultQuery: '',
+            datasourceId: '',
+            tags: []
           },
           {
             id: 'q2',
             title: 'q2',
-            st_tags: [ 'tag2', '42' ]
+            tags: [ 'tag2', '42' ]
           }
         ]));
       });
@@ -456,7 +456,7 @@ describe('Kibi Directives', function () {
       it('should return an error if query has no or unsupported datasource type', function (done) {
         stSelectHelper.getQueryVariables('nodatasource')
         .catch(function (err) {
-          expect(err.message).to.be('SavedQuery [nodatasource] does not have st_datasourceId parameter');
+          expect(err.message).to.be('SavedQuery [nodatasource] does not have datasourceId parameter');
           done();
         });
       });

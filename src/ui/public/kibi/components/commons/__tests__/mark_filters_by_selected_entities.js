@@ -9,12 +9,12 @@ var fakeSavedQueries = [
   {
     id: 'query1',
     title: '',
-    st_resultQuery: 'SELECT * FROM mytable WHERE id = \'@doc[_source][id]@\''
+    resultQuery: 'SELECT * FROM mytable WHERE id = \'@doc[_source][id]@\''
   },
   {
     id: 'query2',
     title: '',
-    st_resultQuery: 'SELECT * FROM mytable WHERE id = \'123\''
+    resultQuery: 'SELECT * FROM mytable WHERE id = \'123\''
   }
 ];
 

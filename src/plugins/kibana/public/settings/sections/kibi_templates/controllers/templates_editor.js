@@ -165,15 +165,6 @@ define(function (require) {
         });
       };
 
-      $scope.delete = function () {
-        if ($window.confirm('Are you sure about deleting [' + template.title + ']')) {
-          template.delete().then(function (resp) {
-            kbnUrl.change('/settings/templates', {});
-          });
-        }
-      };
-
-      //TODO understand how the validation was done in object editor
       $scope.aceLoaded = function (editor) {
         return;
       };
@@ -181,18 +172,5 @@ define(function (require) {
       $scope.newTemplate = function () {
         kbnUrl.change('/settings/templates', {});
       };
-
-      $scope.clone = function () {
-        template.id = template.title + '-clone';
-        template.title = template.title + ' clone';
-        template.save().then(function (resp) {
-          // here flush the cache and refresh preview
-          return queryEngineClient.clearCache().then(function () {
-            notify.info('Template ' + template.title + 'successfuly saved');
-            kbnUrl.change('/settings/templates/' + template.id);
-          });
-        }).catch(notify.error);
-      };
-
     });
 });

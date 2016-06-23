@@ -190,32 +190,6 @@ define(function (require) {
         });
       };
 
-      $scope.delete = function () {
-        if (!$scope.query.id) {
-          notify.error('The query [' + $scope.query.title + '] does not have an ID');
-          return;
-        }
-
-        // here check if this query is used in any visualisation
-        return queryHelper.getVisualisations([ $scope.query.id ]).then(function (visData) {
-          var vis = visData[1];
-          if (vis.length) {
-            $window.alert(
-              'This query [' + $scope.query.title + '] is used in the following' +
-              (vis.length === 1 ? ' visualization' : ' visualizations') + ': \n' +
-              JSON.stringify(_.pluck(vis, 'title'), null, ' ') +
-              '\n\nPlease edit or delete' + (vis.length === 1 ? ' it ' : ' them ') + 'first.\n\n'
-            );
-          } else {
-            if ($window.confirm('Are you sure about deleting [' + $scope.query.title + '] ?')) {
-              return $scope.query.delete().then(function (resp) {
-                kbnUrl.change('settings/queries', {});
-              });
-            }
-          }
-        });
-      };
-
       $scope.jumpToTemplate = function () {
         kbnUrl.change('/settings/templates/' + $scope.query._previewTemplateId);
       };
@@ -275,17 +249,6 @@ define(function (require) {
 
       $scope.newQuery = function () {
         kbnUrl.change('settings/queries', {});
-      };
-
-      $scope.clone = function () {
-        $scope.query.id = $scope.query.title + '-clone';
-        $scope.query.title = $scope.query.title + ' clone';
-
-        $scope.query.save().then(function (savedQueryid) {
-          $scope.preview();
-          notify.info('Query ' + $scope.query.title + 'successfuly saved');
-          kbnUrl.change('settings/queries/' + savedQueryid);
-        });
       };
 
       $scope.preview();

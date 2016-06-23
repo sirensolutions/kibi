@@ -44,7 +44,7 @@ WARNING: Modifying the following settings can signficantly affect Kibana's perfo
 `kibi:relationalPanel` :: Display the Relational Panel in the dashboard tab.
 `kibi:relations` :: Relations between index patterns and dashboards.
 `kibi:session_cookie_expire`:: Set duration of cookie session (in seconds).
-ifeval::[{enterprise_enabled} == true]
+ifeval::["{enterprise_enabled}" == "true"]
 `kibi:graphExpansionLimit` [Enterprise Edition only] :: Limit the number of elements to retrieve during the graph expansion.
 `kibi:shieldAuthorizationWarning` [Enterprise Edition only] :: Set to true to show all authorization warnings from Shield.
 endif::[]

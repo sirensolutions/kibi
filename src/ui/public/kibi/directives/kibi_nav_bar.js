@@ -194,7 +194,10 @@ define(function (require) {
         });
 
         const updateCountsOnSave = function (diff) {
-          if (diff.indexOf(kibiState._properties.filters) !== -1) {
+          if (diff.indexOf(kibiState._properties.enabled_relations) !== -1 ||
+              diff.indexOf(kibiState._properties.query) !== -1 ||
+              diff.indexOf(kibiState._properties.time) !== -1 ||
+              diff.indexOf(kibiState._properties.filters) !== -1) {
             updateCounts();
           }
         };

@@ -10,6 +10,7 @@ var $httpBackend;
 var $rootScope;
 var $timeout;
 var $elem;
+let kibiState;
 
 require('ui/kibi/directives/kibi_nav_bar');
 
@@ -30,7 +31,8 @@ describe('Kibi Components', function () {
         $provide.constant('elasticsearchPlugins', ['siren-join']);
       });
 
-      ngMock.inject(function (Private, $injector, _$timeout_, _$rootScope_, $compile, _Promise_) {
+      ngMock.inject(function (_kibiState_, Private, $injector, _$timeout_, _$rootScope_, $compile, _Promise_) {
+        kibiState = _kibiState_;
         Promise = _Promise_;
         $timeout = _$timeout_;
         $httpBackend = $injector.get('$httpBackend');
@@ -394,7 +396,8 @@ describe('Kibi Components', function () {
 
       initStubs(dashboardGroups, {});
       $httpBackend.whenPOST('/elasticsearch/_msearch?getCountsOnTabs').respond(200, countOnTabsResponse);
-      $rootScope.$broadcast('kibi:update-tab-counts');
+      kibiState.enableRelation({});
+      kibiState.save();
       $httpBackend.flush();
 
       expect($elem.isolateScope().dashboardGroups).to.have.length(1);

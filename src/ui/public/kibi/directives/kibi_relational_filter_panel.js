@@ -29,7 +29,6 @@ define(function (require) {
   app.directive('kibiRelationalFilterPanel', function (kibiState, $location, config, $rootScope, Private, createNotifier) {
     var kibiStateHelper  = Private(require('ui/kibi/helpers/kibi_state_helper/kibi_state_helper'));
     var urlHelper        = Private(require('ui/kibi/helpers/url_helper'));
-    var queryFilter = Private(require('ui/filter_bar/query_filter'));
 
     var notify = createNotifier({
       location: 'Relational Filter Panel'
@@ -129,20 +128,8 @@ define(function (require) {
           $scope.show = relationalFilterPanelOpened;
         });
 
-        var off4 = $rootScope.$on('$routeChangeSuccess', function (event, next, prev, err) {
-          $scope.show = false;
-          kibiState.getState(kibiState._getCurrentDashboardId()).then(({ filters }) => {
-            _.each(filters, (filter) => {
-              if (filter.join_set) {
-                queryFilter.addFilters(filter.join_set);
-                return false;
-              }
-            });
-          }).catch(notify.error);
-        });
-
         const updateRelationalPanelOnSave = function (diff) {
-          if (diff.indexOf(kibiState._properties.filters) !== -1) {
+          if (diff.indexOf(kibiState._properties.enabled_relations) !== -1) {
             if (!kibiState.getEnabledRelations().length) {
               _initScope();
               _initPanel();
@@ -155,7 +142,6 @@ define(function (require) {
           off1();
           off2();
           off3();
-          off4();
           kibiState.off('save_with_changes', updateRelationalPanelOnSave);
         });
       } // end of link function

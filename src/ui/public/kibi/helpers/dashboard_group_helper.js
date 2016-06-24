@@ -1,5 +1,5 @@
 define(function (require) {
-  return function DashboardGroupHelperFactory(Private, savedSearches, savedDashboards, savedDashboardGroups, Promise) {
+  return function DashboardGroupHelperFactory(Private, savedSearches, savedDashboards, savedDashboardGroups, Promise, kibiState) {
     var _ = require('lodash');
     var urlHelper        = Private(require('ui/kibi/helpers/url_helper'));
     var kibiStateHelper  = Private(require('ui/kibi/helpers/kibi_state_helper/kibi_state_helper'));
@@ -286,9 +286,14 @@ define(function (require) {
         });
       }
 
-      return countHelper.getCountQueryForDashboardId(dashboard.id).then(function (queryDef) {
-        queryDef.groupIndex = groupIndex;
-        return Promise.resolve(queryDef);
+      return kibiState.getState(dashboard.id)
+      .then(({ index, filters, queries, time }) => {
+        const query = countHelper.constructCountQuery(filters, queries, time);
+        return {
+          groupIndex: groupIndex,
+          query: query,
+          indexPatternId: index
+        };
       });
     };
 

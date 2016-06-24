@@ -102,41 +102,35 @@ var fakeSavedSearches = [
   }
 ];
 
-var $rootScope;
 var dashboardGroupHelper;
 var kibiStateHelper;
 
-function init(savedDashboards, savedDashboardGroups, savedSearches) {
+function init({ indexPatterns, savedDashboards, savedDashboardGroups, savedSearches }) {
   return function () {
+    ngMock.module('kibana', function ($provide) {
+      $provide.constant('kibiEnterpriseEnabled', false);
+      $provide.constant('kbnDefaultAppId', 'dashboard');
+      $provide.constant('kibiDefaultDashboardId', 'Articles');
+      $provide.constant('elasticsearchPlugins', ['siren-join']);
+    });
 
     ngMock.module('app/dashboard', function ($provide) {
-      $provide.service('savedDashboards', (Promise) => mockSavedObjects(Promise)('savedDashboard', savedDashboards));
+      $provide.service('savedDashboards', (Promise) => mockSavedObjects(Promise)('savedDashboard', savedDashboards || []));
+    });
+
+    ngMock.module('kibana/index_patterns', function ($provide) {
+      $provide.service('indexPatterns', (Promise) => mockSavedObjects(Promise)('indexPatterns', indexPatterns || []));
     });
 
     ngMock.module('dashboard_groups_editor/services/saved_dashboard_groups', function ($provide) {
-      $provide.service('savedDashboardGroups', (Promise) => mockSavedObjects(Promise)('savedDashboardGroups', savedDashboardGroups));
+      $provide.service('savedDashboardGroups', (Promise) => mockSavedObjects(Promise)('savedDashboardGroups', savedDashboardGroups || []));
     });
 
-    if (savedSearches) {
-      ngMock.module('kibana', function ($provide) {
-        $provide.constant('kibiEnterpriseEnabled', false);
-        $provide.constant('kbnDefaultAppId', 'dashboard');
-        $provide.constant('kibiDefaultDashboardId', 'Articles');
-        $provide.constant('elasticsearchPlugins', ['siren-join']);
-        $provide.service('savedSearches', (Promise) => mockSavedObjects(Promise)('savedSearches', savedSearches));
-      });
-    } else {
-      ngMock.module('kibana', function ($provide) {
-        $provide.constant('kibiEnterpriseEnabled', false);
-        $provide.constant('kbnDefaultAppId', 'dashboard');
-        $provide.constant('kibiDefaultDashboardId', 'Articles');
-        $provide.constant('elasticsearchPlugins', ['siren-join']);
-      });
-    }
+    ngMock.module('discover/saved_searches', function ($provide) {
+      $provide.service('savedSearches', (Promise) => mockSavedObjects(Promise)('savedSearches', savedSearches || []));
+    });
 
-
-    ngMock.inject(function ($injector, Private, _$rootScope_) {
-      $rootScope = _$rootScope_;
+    ngMock.inject(function ($injector, Private) {
       dashboardGroupHelper = Private(require('ui/kibi/helpers/dashboard_group_helper'));
       kibiStateHelper = Private(require('ui/kibi/helpers/kibi_state_helper/kibi_state_helper'));
     });
@@ -145,9 +139,16 @@ function init(savedDashboards, savedDashboardGroups, savedSearches) {
 
 describe('Kibi Components', function () {
   describe('DashboardGroupHelper', function () {
+
+    require('testUtils/noDigestPromises').activateForSuite();
+
     describe('Simple tests', function () {
 
-      beforeEach(init(fakeSavedDashboards, fakeSavedDashboardGroups, fakeSavedSearches));
+      beforeEach(init({
+        savedDashboards: fakeSavedDashboards,
+        savedDashboardGroups: fakeSavedDashboardGroups,
+        savedSearches: fakeSavedSearches
+      }));
 
       it('shortenDashboardName should shorten', function () {
         expect(dashboardGroupHelper.shortenDashboardName('TEST', 'TEST dashboard')).to.be('dashboard');
@@ -187,8 +188,6 @@ describe('Kibi Components', function () {
           expect(groupIds).to.eql(expected);
           done();
         }).catch(done);
-
-        $rootScope.$apply();
       });
 
 
@@ -198,9 +197,7 @@ describe('Kibi Components', function () {
         dashboardGroupHelper.getIdsOfDashboardGroupsTheseDashboardsBelongTo(dashboardIds).then(function (groupIds) {
           expect(groupIds).to.eql([]);
           done();
-        });
-
-        $rootScope.$apply();
+        }).catch(done);
       });
 
       it('computeGroups 1', function (done) {
@@ -234,15 +231,13 @@ describe('Kibi Components', function () {
 
           done();
         }).catch(done);
-
-        $rootScope.$apply();
       });
 
 
     });
 
     describe('no dashboards', function () {
-      beforeEach(init([], fakeSavedDashboardGroups));
+      beforeEach(init({ savedDashboardGroups: fakeSavedDashboardGroups }));
 
       it('computeGroups 2', function (done) {
         dashboardGroupHelper.computeGroups().catch(function (err) {
@@ -251,14 +246,12 @@ describe('Kibi Components', function () {
             '"Group 1" dashboard group contains non existing dashboard "Companies". Edit dashboard group to remove non existing dashboard'
           );
           done();
-        });
-
-        $rootScope.$apply();
+        }).catch(done);
       });
     });
 
     describe('no dashboards groups', function () {
-      beforeEach(init(fakeSavedDashboards, [], fakeSavedSearches));
+      beforeEach(init({ savedDashboards: fakeSavedDashboards, savedSearches: fakeSavedSearches }));
 
       it('computeGroups 3', function (done) {
         dashboardGroupHelper.computeGroups().then(function (groups) {
@@ -266,13 +259,11 @@ describe('Kibi Components', function () {
           expect(groups).to.have.length(5);
           done();
         }).catch(done);
-
-        $rootScope.$apply();
       });
     });
 
     describe('no dashboards groups, no dashboards', function () {
-      beforeEach(init([], [], fakeSavedSearches));
+      beforeEach(init({ savedSearches: fakeSavedSearches }));
 
       it('computeGroups 4', function (done) {
         dashboardGroupHelper.computeGroups().then(function (groups) {
@@ -280,14 +271,12 @@ describe('Kibi Components', function () {
           expect(groups).to.have.length(0);
           done();
         }).catch(done);
-
-        $rootScope.$apply();
       });
     });
 
 
     describe('updateDashboardGroups', function () {
-      beforeEach(init([], []));
+      beforeEach(init({}));
 
       describe('when there is a delta on group level', function () {
 
@@ -610,7 +599,21 @@ describe('Kibi Components', function () {
 
     describe('getCountQueryForSelectedDashboard', function () {
 
-      beforeEach(init(fakeSavedDashboardsForCounts, [], fakeSavedSearches));
+      beforeEach(init({
+        indexPatterns: [
+          {
+            id: 'time-testing-4',
+            timeFieldName: 'date',
+            fields: [
+              {
+                name: 'date'
+              }
+            ]
+          }
+        ],
+        savedDashboards: fakeSavedDashboardsForCounts,
+        savedSearches: fakeSavedSearches
+      }));
 
       it('selected dashboard does NOT exist', function (done) {
         var groups = [
@@ -629,9 +632,7 @@ describe('Kibi Components', function () {
         dashboardGroupHelper.getCountQueryForSelectedDashboard(groups, 0).then(function (countQueryDef) {
           expect(countQueryDef).to.eql(expected);
           done();
-        });
-
-        $rootScope.$apply();
+        }).catch(done);
       });
 
       it('selected dashboard exists but it does NOT have indexPatternId ', function (done) {
@@ -653,9 +654,7 @@ describe('Kibi Components', function () {
         dashboardGroupHelper.getCountQueryForSelectedDashboard(groups, 0).then(function (countQueryDef) {
           expect(countQueryDef).to.eql(expected);
           done();
-        });
-
-        $rootScope.$apply();
+        }).catch(done);
       });
 
       it('selected dashboard do exist and have indexPatternId ', function (done) {
@@ -677,8 +676,6 @@ describe('Kibi Components', function () {
           expect(countQueryDef.groupIndex).to.equal(0);
           done();
         }).catch(done);
-
-        $rootScope.$apply();
       });
 
 

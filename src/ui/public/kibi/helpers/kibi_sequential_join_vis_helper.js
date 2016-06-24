@@ -1,43 +1,39 @@
 define(function (require) {
   var _ = require('lodash');
 
-  return function RelationVisHelperFactory(Private, indexPatterns, timefilter, Promise) {
+  return function KibiSequentialJoinVisHelperFactory(kbnUrl, kibiState, Private) {
 
-    var kibiTimeHelper   = Private(require('ui/kibi/helpers/kibi_time_helper'));
-    var kibiStateHelper  = Private(require('ui/kibi/helpers/kibi_state_helper/kibi_state_helper'));
-    var urlHelper        = Private(require('ui/kibi/helpers/url_helper'));
-    var joinFilterHelper = Private(require('ui/kibi/helpers/join_filter_helper/join_filter_helper'));
-    var countHelper      = Private(require('ui/kibi/helpers/count_helper/count_helper'));
+    var countHelper = Private(require('ui/kibi/helpers/count_helper/count_helper'));
 
-    function RelationVisHelper() {
+    function KibiSequentialJoinVisHelper() {
     }
 
-    RelationVisHelper.prototype.constructButtonsArray = function (buttonDefs, currentDashboardIndexId) {
+    KibiSequentialJoinVisHelper.prototype.constructButtonsArray = function (buttonDefs, currentDashboardIndexId) {
       return _.chain(buttonDefs)
-        .filter(function (buttonDef) {
-          if (!currentDashboardIndexId) {
-            return buttonDef.sourceIndexPatternId && buttonDef.label;
-          }
-          return buttonDef.sourceIndexPatternId === currentDashboardIndexId && buttonDef.label;
-        })
-        .map(function (buttonDef) {
-          var button = _.clone(buttonDef);
+      .filter(function (buttonDef) {
+        if (!currentDashboardIndexId) {
+          return buttonDef.sourceIndexPatternId && buttonDef.label;
+        }
+        return buttonDef.sourceIndexPatternId === currentDashboardIndexId && buttonDef.label;
+      })
+      .map(function (buttonDef) {
+        var button = _.clone(buttonDef);
 
-          button.click = function () {
-            // click method should return a Promise for the tests
-            if (!currentDashboardIndexId) {
-              return Promise.resolve();
-            }
-            const currentDashboardId = urlHelper.getCurrentDashboardId();
-            kibiStateHelper.saveFiltersForDashboardId(currentDashboardId, urlHelper.getDashboardFilters(currentDashboardId));
-            kibiStateHelper.saveQueryForDashboardId(currentDashboardId, urlHelper.getDashboardQuery(currentDashboardId));
-
+        button.click = function () {
+          //// click method should return a Promise for the tests
+          //if (!currentDashboardIndexId) {
+          //return Promise.resolve();
+          //}
+          const currentDashboardId = kibiState._getCurrentDashboardId();
+          return kibiState.saveAppState().then(() => {
             if (this.joinSeqFilter) {
               const switchToDashboard = function () {
                 // add join_set Filter
-                urlHelper.addFilter(this.redirectToDashboard, this.joinSeqFilter);
+                kibiState.addFilter(this.redirectToDashboard, this.joinSeqFilter);
                 // switch to target dashboard
-                urlHelper.switchDashboard(this.redirectToDashboard);
+                if (this.redirectToDashboard) {
+                  kbnUrl.change('/dashboard/{{id}}', {id: this.redirectToDashboard});
+                }
               };
 
               // create the alias for the filter
@@ -56,15 +52,52 @@ define(function (require) {
             } else {
               this.joinSeqFilter.meta.alias_tmpl = '';
               // just redirect to the target dashboard
-              urlHelper.switchDashboard(this.redirectToDashboard);
+              if (this.redirectToDashboard) {
+                kbnUrl.change('/dashboard/{{id}}', {id: this.redirectToDashboard});
+              }
             }
-            return Promise.resolve();
-          };
-          return button;
-        }).value();
+          });
+        };
+        return button;
+      }).value();
     };
 
+    KibiSequentialJoinVisHelper.prototype.getJoinSequenceFilter = function (dashboardId, button) {
+      // check that there are any join_seq filters already on this dashboard
+      //    if there is 0:
+      //      create new join_seq filter with 1 relation from current dashboard to target dashboard
+      //    if there is only 1:
+      //      take the join_sequence filter and add to the sequence
+      //      - new relation from current dashboard to target dashboard
+      //    if there is more then 1:
+      //      create join_sequence filter with:
+      //      - group from all existing join_seq filters and add this group at the top
+      //      - new relation from current dashboard to target dashboard
 
+      return kibiState.getState(dashboardId).then(({ filters, queries, time }) => {
+        // join_sequence should not contain the join_set
+        const clonedFilters = _(filters).filter((filter) => !filter.join_set).cloneDeep();
+        const existingJoinSeqFilters = _.filter(clonedFilters, (filter) => filter.join_sequence);
+        const restFilters = _.filter(clonedFilters, (filter) => !filter.join_sequence && !filter.join_set);
+
+        if (existingJoinSeqFilters.length === 0) {
+          return this.buildNewJoinSeqFilter({ button, restFilters, queries, time });
+        } else if (existingJoinSeqFilters.length === 1) {
+          const joinSeqFilter = existingJoinSeqFilters[0];
+          return this.addRelationToJoinSeqFilter({ button, restFilters, queries, time, joinSeqFilter });
+        } else {
+          // build join sequence + add a group of sequances to the top of the array
+          const joinSeqFilter = this.buildNewJoinSeqFilter({ button, restFilters, queries, time });
+          // here create a group from existing ones and add it on the top
+          const group = this.composeGroupFromExistingJoinFilters(existingJoinSeqFilters);
+          joinSeqFilter.join_sequence.unshift(group);
+          return joinSeqFilter;
+        }
+      });
+    };
+
+    // The join_sequence should not contain the join_set. The join_set is supposed to be a singleton in Kibi.
+    //
     // Returns:
     //
     // join_sequence: {
@@ -98,36 +131,32 @@ define(function (require) {
     //     indices: [target]
     //   }
     // ]
-    RelationVisHelper.prototype.buildNewJoinSeqFilter = function ({ dashboardId, button, savedSearchMeta }) {
-      return this._getRelation({ dashboardId, button, savedSearchMeta }).then(function (relation) {
+    KibiSequentialJoinVisHelper.prototype.buildNewJoinSeqFilter = function ({ button, filters, queries, time }) {
+      const relation = this._getRelation({ button, filters, queries, time });
+      const label = 'First join_seq filter ever';
 
-        var label = 'First join_seq filter ever';
-        return {
-          meta: {
-            alias: label
-          },
-          join_sequence: [relation]
-        };
-
-      });
+      return {
+        meta: {
+          alias: label
+        },
+        join_sequence: [ relation ]
+      };
     };
 
 
-    RelationVisHelper.prototype.addRelationToJoinSeqFilter = function ({ dashboardId, button, savedSearchMeta, joinSeqFilter }) {
-      var self = this;
-      var joinSeqFiltersCloned = _.cloneDeep(joinSeqFilter);
+    KibiSequentialJoinVisHelper.prototype.addRelationToJoinSeqFilter = function ({ button, filters, queries, time, joinSeqFilter }) {
+      const joinSeqFiltersCloned = _.cloneDeep(joinSeqFilter);
+      const relation = this._getRelation({ button, filters, queries, time });
 
-      return this._getRelation({ dashboardId, button, savedSearchMeta }).then(function (relation) {
-        self._negateLastElementOfTheSequenceIfFilterWasNegated(joinSeqFiltersCloned);
-        joinSeqFiltersCloned.join_sequence.push(relation);
-        // make sure that the new filter is not negated
-        joinSeqFiltersCloned.meta.negate = false;
-        return joinSeqFiltersCloned;
-      });
+      this._negateLastElementOfTheSequenceIfFilterWasNegated(joinSeqFiltersCloned);
+      joinSeqFiltersCloned.join_sequence.push(relation);
+      // make sure that the new filter is not negated
+      joinSeqFiltersCloned.meta.negate = false;
+      return joinSeqFiltersCloned;
     };
 
 
-    RelationVisHelper.prototype.composeGroupFromExistingJoinFilters = function (joinSeqFilters) {
+    KibiSequentialJoinVisHelper.prototype.composeGroupFromExistingJoinFilters = function (joinSeqFilters) {
       var self = this;
       var groups = _.map(joinSeqFilters, function (f) {
         var joinSeqFiltersCloned = _.cloneDeep(f);
@@ -138,25 +167,24 @@ define(function (require) {
     };
 
 
-    RelationVisHelper.prototype._negateLastElementOfTheSequenceIfFilterWasNegated = function (joinSeqFilter) {
+    KibiSequentialJoinVisHelper.prototype._negateLastElementOfTheSequenceIfFilterWasNegated = function (joinSeqFilter) {
       if (joinSeqFilter.meta && joinSeqFilter.meta.negate === true) {
         joinSeqFilter.join_sequence[joinSeqFilter.join_sequence.length - 1].negate = true;
       }
     };
 
 
-    RelationVisHelper.prototype._getRelation = function ({ dashboardId, button, savedSearchMeta }) {
-      const sourceDashboardId = dashboardId;
+    KibiSequentialJoinVisHelper.prototype._getRelation = function ({ button, filters, queries, time }) {
       const ret = {
         relation: [
           {
             path: button.sourceField,
-            indices: [button.sourceIndexPatternId],
+            indices: [ button.sourceIndexPatternId ],
             queries: [
               {
                 query: {
                   bool: {
-                    must: urlHelper.getDashboardQuery(sourceDashboardId),
+                    must: queries,
                     // will be created below if needed
                     must_not: [],
                     filter: {
@@ -173,40 +201,23 @@ define(function (require) {
           },
           {
             path: button.targetField,
-            indices: [button.targetIndexPatternId],
+            indices: [ button.targetIndexPatternId ],
             // default siren-join parameters
             termsEncoding: 'long'
           }
         ]
       };
 
-      joinFilterHelper.addAdvancedJoinSettingsToRelation(
-        button.sourceIndexPatternId + '/' + button.sourceField,
-        button.targetIndexPatternId + '/' + button.targetField,
-        ret.relation
-      );
+      kibiState._addAdvancedJoinSettingsToRelation(ret.relation);
 
-      var sourceFilters = _.filter(urlHelper.getDashboardFilters(sourceDashboardId), function (f) {
-        // all except join_sequence
-        return !f.join_sequence;
-      });
-
-      // add filters and query from saved search
-      if (savedSearchMeta.query && !kibiStateHelper.isAnalyzedWildcardQueryString(savedSearchMeta.query)) {
-        ret.relation[0].queries.push(savedSearchMeta.query);
-      }
-      if (savedSearchMeta.filter && savedSearchMeta.filter.length > 0) {
-        sourceFilters = sourceFilters.concat(savedSearchMeta.filter);
-      }
-
-      // check all filters - remove meta and push to must or must not depends on negate flag
-      _.each(sourceFilters, function (f) {
-        if (f.meta) {
-          var filter = _.cloneDeep(f);
+      // add filters
+      _.each(filters, (filter) => {
+        if (filter.meta) {
+          const negate = filter.meta.negate;
           delete filter.$$hashKey;
           delete filter.meta;
           delete filter.$state;
-          if (f.meta.negate) {
+          if (negate) {
             ret.relation[0].queries[0].query.bool.must_not.push(filter);
           } else {
             ret.relation[0].queries[0].query.bool.filter.bool.must.push(filter);
@@ -214,57 +225,26 @@ define(function (require) {
         }
       });
 
+      // add time filter
+      ret.relation[0].queries[0].query.bool.filter.bool.must.push(time);
 
-      // update the timeFilter
-      return indexPatterns.get(button.sourceIndexPatternId).then(function (indexPattern) {
-        var sourceTimeFilter = timefilter.get(indexPattern);
-        if (sourceTimeFilter) {
-          return kibiTimeHelper.updateTimeFilterForDashboard(sourceDashboardId, sourceTimeFilter).then(function (updatedTimeFilter) {
-            // add time filter
-            ret.relation[0].queries[0].query.bool.filter.bool.must.push(updatedTimeFilter);
-            return ret;
-          });
-        } else {
-          return ret;
-        }
-      });
+      return ret;
     };
 
-
-    RelationVisHelper.prototype.buildCountQuery = function (targetDashboardId, joinSeqFilter) {
+    KibiSequentialJoinVisHelper.prototype.buildCountQuery = function (targetDashboardId, joinSeqFilter) {
       // in case relational panel is enabled at the same time
       // as buttons take care about extra filters and queries from
       // dashboards based on the same index
-      var promises = [
-        urlHelper.getDashboardAndSavedSearchMetas([ targetDashboardId ]),
-        urlHelper.getQueriesFromDashboardsWithSameIndex(targetDashboardId),
-        urlHelper.getFiltersFromDashboardsWithSameIndex(targetDashboardId)
-      ];
-      return Promise.all(promises).then(function (results) {
-        var [ { savedDash, savedSearchMeta } ] = results[0];
-        var queriesFromDashboardsWithSameIndex = results[1] || [];
-        var filtersFromDashboardsWithSameIndex = results[2] || [];
+      return kibiState.getState(targetDashboardId).then(function ({ filters, queries, time }) {
         if (joinSeqFilter) {
-          filtersFromDashboardsWithSameIndex = filtersFromDashboardsWithSameIndex.concat(joinSeqFilter);
+          filters.push(joinSeqFilter);
         }
-        return countHelper.constructCountQuery(
-          savedDash,
-          savedSearchMeta,
-          null,  // do not put joinSeqFilter here as this parameter is reserved to join_set only !!!
-          queriesFromDashboardsWithSameIndex,
-          filtersFromDashboardsWithSameIndex
-        )
-        .then(function (query) {
-          return {
-            query: query,
-            index: savedSearchMeta.index
-          };
-        });
+        return countHelper.constructCountQuery(filters, queries, time);
       });
     };
 
 
-    return new RelationVisHelper();
+    return new KibiSequentialJoinVisHelper();
   };
 
 });

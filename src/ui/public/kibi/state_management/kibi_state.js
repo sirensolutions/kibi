@@ -66,10 +66,7 @@ define(function (require) {
      * - analyze_wildcard is set to true
      */
     KibiState.prototype._isDefaultQuery = function (query) {
-      return query &&
-        query.query_string &&
-        query.query_string.query === '*' &&
-        query.query_string.analyze_wildcard === true;
+      return _.get(query, 'query.query_string.query') === '*' && _.get(query, 'query.query_string.analyze_wildcard') === true;
     };
 
     /**
@@ -109,6 +106,12 @@ define(function (require) {
       query: 'q',
       time: 't',
       enabled_relations: 'j'
+    };
+
+    KibiState.prototype.addFilter = function (dashboardId, filter) {
+      const filters = this._getDashboardProperty(dashboardId, this._properties.filters) || [];
+      filters.push(filter);
+      this._setDashboardProperty(dashboardId, this._properties.filters, uniqFilters(filters));
     };
 
     /**
@@ -237,22 +240,21 @@ define(function (require) {
      * Returns the current set of queries for the given dashboard
      */
     KibiState.prototype._getQueries = function (dashboardId, appState, metas) {
-      let query;
+      let query = {
+        query_string: {
+          // TODO: https://github.com/sirensolutions/kibi-internal/issues/1153
+          analyze_wildcard: true,
+          query: '*'
+        }
+      };
 
       if (this._getCurrentDashboardId() === dashboardId) {
-        query = appState.query;
+        if (appState.query) {
+          query = appState.query;
+        }
       } else {
         const q = this._getDashboardProperty(dashboardId, this._properties.query);
-
-        if (!q) {
-          query = {
-            query_string: {
-              // TODO: https://github.com/sirensolutions/kibi-internal/issues/1153
-              analyze_wildcard: true,
-              query: '*'
-            }
-          };
-        } else {
+        if (q) {
           query = q;
         }
       }
@@ -264,9 +266,9 @@ define(function (require) {
       }
       const smQuery = metas && metas.savedSearchMeta && metas.savedSearchMeta.query;
       if (smQuery && !_.isEqual(smQuery, query)) {
-        return Promise.resolve([ query, smQuery ]);
+        return Promise.resolve([ { query:  query }, { query: smQuery } ]);
       }
-      return Promise.resolve([ query ]);
+      return Promise.resolve([ { query: query } ]);
     };
 
     /**
@@ -398,6 +400,19 @@ define(function (require) {
      * Relations is the array of relations between dashboards.
      */
     KibiState.prototype._getDashboardsIdInConnectedComponent = function (focus, relations) {
+      // check in the focus dashbaord is in a relation
+      let isInARelation = false;
+      for (let i = 0; i < relations.length; i++) {
+        const relation = relations[i];
+        if (focus === relation.dashboards[0] || focus === relation.dashboards[1]) {
+          isInARelation = true;
+          break;
+        }
+      }
+      if (!isInARelation) {
+        return [];
+      }
+
       const labels = [];
 
       // the set of current nodes to visit
@@ -406,7 +421,6 @@ define(function (require) {
       const toVisit = [];
       // the set of visited nodes
       const visited = [];
-
 
       do {
 
@@ -424,7 +438,11 @@ define(function (require) {
             label = relation.dashboards[0];
           }
 
-          if (!!label && label !== current[ind] && visited.indexOf(label) === -1) {
+          // only visit that dashboard if
+          // - it is not part of a loop
+          // - if it was not already visited
+          // - if it will not be visited in the next iteration
+          if (label && label !== current[ind] && visited.indexOf(label) === -1 && toVisit.indexOf(label) === -1) {
             toVisit.push(label);
           }
         }
@@ -441,9 +459,7 @@ define(function (require) {
 
       } while (current.length !== 0);
 
-      // TODO:
-      // refactor see issue https://github.com/sirensolutions/kibi-internal/issues/500
-      return _.uniq(labels);
+      return labels;
     };
 
     KibiState.prototype._getJoinSetFilter = function (focusIndex, filterAlias, filtersPerIndex, queriesPerIndex, timesPerIndex) {
@@ -504,7 +520,7 @@ define(function (require) {
                 if (!joinSetFilter.join_set.queries[index]) {
                   joinSetFilter.join_set.queries[index] = [];
                 }
-                joinSetFilter.join_set.queries[index].push({ query: fQuery });
+                joinSetFilter.join_set.queries[index].push(fQuery);
               }
             });
           }
@@ -558,6 +574,13 @@ define(function (require) {
         return Promise.reject(new Error('Missing dashboard ID'));
       }
 
+      // check siren-join plugin
+      if (this.isRelationalPanelEnabled() && !this.isSirenJoinPluginInstalled()) {
+        const error = 'The SIREn Join plugin is enabled but not installed. Please install the plugin and restart Kibi, ' +
+          'or disable the relational panel in Settings -> Advanced -> kibi:relationalPanel';
+        return Promise.reject(new Error(error));
+      }
+
       const options = {
         pinned: true
       };
@@ -590,6 +613,8 @@ define(function (require) {
         }
         return Promise.all(promises)
         .then(([ filters, queries, time, ...rest ]) => {
+          const index = metas[0].savedSearchMeta.index;
+
           if (rest.length) { // Build the join_set filter
             const queriesPerIndex = {};
             const filtersPerIndex = {};
@@ -619,12 +644,17 @@ define(function (require) {
             _.forOwn(filtersPerIndex, (filters, index) => uniqFilters(_.compact(filters), { state: true, negate: true, disabled: true }));
             _.forOwn(queriesPerIndex, (queries, index) => _(queries).uniq().compact().value());
             _.forOwn(timesPerIndex, (times, index) => _(times).uniq().compact().value());
-            const focusIndex = metas[0].savedSearchMeta.index;
             const filterAlias = _(dashboardIds).map((dashboardId, ind) => metas[ind].savedDash.title).sortBy().join(' <-> ');
-            const joinSetFilter = this._getJoinSetFilter(focusIndex, filterAlias, filtersPerIndex, queriesPerIndex, timesPerIndex);
-            filters.push(joinSetFilter);
+            const joinSetFilter = this._getJoinSetFilter(index, filterAlias, filtersPerIndex, queriesPerIndex, timesPerIndex);
+
+            const existingJoinSetFilterIndex = _.findIndex(filters, (filter) => filter.join_set);
+            if (existingJoinSetFilterIndex !== -1) {
+              filters.splice(existingJoinSetFilterIndex, 1, joinSetFilter);
+            } else {
+              filters.push(joinSetFilter);
+            }
           }
-          return { filters, queries, time };
+          return { index, filters, queries, time };
         });
       });
     };
@@ -645,6 +675,10 @@ define(function (require) {
       ])
       .then(([ filters, queries ]) => {
         // save filters
+        const existingJoinSetFilterIndex = _.findIndex(filters, (filter) => filter.join_set);
+        if (existingJoinSetFilterIndex !== -1) {
+          filters.splice(existingJoinSetFilterIndex, 1);
+        }
         if (filters && filters.length) {
           this._setDashboardProperty(currentDashboardId, this._properties.filters, filters);
         }
@@ -652,7 +686,7 @@ define(function (require) {
         if (this._isDefaultQuery(queries[0])) {
           this._deleteDashboardProperty(currentDashboardId, this._properties.query);
         } else {
-          this._setDashboardProperty(currentDashboardId, this._properties.query, queries[0]);
+          this._setDashboardProperty(currentDashboardId, this._properties.query, queries[0].query);
         }
         // save time
         if (this._isDefaultTime(timefilter.time.mode, timefilter.time.from, timefilter.time.to)) {

@@ -1,68 +1,67 @@
-var MockState = require('fixtures/mock_state');
-var sinon = require('auto-release-sinon');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
-var Promise = require('bluebird');
+const MockState = require('fixtures/mock_state');
+const mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
+const sinon = require('auto-release-sinon');
+const expect = require('expect.js');
+const ngMock = require('ngMock');
+const Promise = require('bluebird');
 
-var sequentialJoinVisHelper;
-var config;
+let sequentialJoinVisHelper;
+let config;
+let kibiState;
 
-function init(enableEnterprise = false) {
-  return function () {
-    ngMock.module('kibana', function ($provide) {
-      $provide.constant('kibiEnterpriseEnabled', enableEnterprise);
-      $provide.constant('kbnDefaultAppId', '');
-      $provide.constant('kibiDefaultDashboardId', '');
-      $provide.constant('elasticsearchPlugins', []);
-      $provide.service('config', function () {
-        var keys = {};
-        return {
-          get: function (key) { return keys[key]; },
-          set: function (key, value) { keys[key] = value; }
-        };
-      });
-      $provide.service('timefilter', function () {
-        return {
-          get: function () {
-            return null;
-          }
-        };
-      });
+function init({ indexPatterns, savedSearches, savedDashboards, enableEnterprise = false }) {
+  ngMock.module('kibana', 'kibana/courier', 'kibana/global_state', ($provide) => {
+    $provide.constant('kibiEnterpriseEnabled', enableEnterprise);
+    $provide.constant('kbnDefaultAppId', '');
+    $provide.constant('kibiDefaultDashboardId', '');
+    $provide.constant('elasticsearchPlugins', []);
 
-      $provide.service('getAppState', function () {
-        return function () { return new MockState({ filters: [] }); };
-      });
+    $provide.service('config', require('fixtures/kibi/config'));
 
-      $provide.service('globalState', function () {
-        return new MockState({ filters: [] });
-      });
+    $provide.service('getAppState', function () {
+      return function () { return new MockState({ filters: [] }); };
     });
 
-    ngMock.module('kibana/index_patterns', function ($provide) {
-      $provide.service('indexPatterns', function (Promise) {
-        return {
-          get: function (id) {
-            return Promise.resolve('');
-          }
-        };
-      });
+    $provide.service('globalState', function () {
+      return new MockState({ filters: [] });
     });
+  });
 
-    ngMock.inject(function (_config_, $injector, Private, _$rootScope_) {
-      config = _config_;
-      sequentialJoinVisHelper = Private(require('ui/kibi/helpers/kibi_sequential_join_vis_helper'));
-      var urlHelper = Private(require('ui/kibi/helpers/url_helper'));
-      sinon.stub(urlHelper, 'getCurrentDashboardId').returns('dashboard 1');
-      sinon.stub(urlHelper, 'getDashboardQuery').returns({ query: { term: { aaa: 'bbb' } } });
-    });
-  };
+  ngMock.module('kibana/index_patterns', function ($provide) {
+    $provide.service('indexPatterns', (Promise) => mockSavedObjects(Promise)('indexPatterns', indexPatterns || []));
+  });
+
+  ngMock.module('discover/saved_searches', function ($provide) {
+    $provide.service('savedSearches', (Promise) => mockSavedObjects(Promise)('savedSearches', savedSearches || []));
+  });
+
+  ngMock.module('app/dashboard', function ($provide) {
+    $provide.service('savedDashboards', (Promise) => mockSavedObjects(Promise)('savedDashboards', savedDashboards || []));
+  });
+
+  ngMock.inject(function (timefilter, _config_, _kibiState_, Private) {
+    kibiState = _kibiState_;
+    config = _config_;
+    sequentialJoinVisHelper = Private(require('ui/kibi/helpers/kibi_sequential_join_vis_helper'));
+    sinon.stub(kibiState, '_getCurrentDashboardId').returns('dashboard 1');
+
+    const defaultTime = {
+      mode: 'absolute',
+      from: 'now-15m',
+      to: 'now'
+    };
+    config.set('timepicker:timeDefaults', defaultTime);
+    timefilter.time = defaultTime;
+  });
 }
 
 describe('Kibi Components', function () {
   describe('sequentialJoinVisHelper', function () {
 
+    require('testUtils/noDigestPromises').activateForSuite();
+
     describe('constructButtonArray', function () {
-      beforeEach(init());
+      beforeEach(() => init({}));
 
       it('empty buttonsDef array', function () {
         var buttonDefs = [];
@@ -75,7 +74,8 @@ describe('Kibi Components', function () {
       describe('custom filter label', function () {
         var index;
         var buttonDefs;
-        function init() {
+
+        beforeEach(function () {
           index = 'index1';
           buttonDefs = [
             {
@@ -84,9 +84,7 @@ describe('Kibi Components', function () {
               getSourceCount: sinon.stub().returns(Promise.resolve(123))
             }
           ];
-        }
-
-        beforeEach(init);
+        });
 
         it('should set the default filter label if no custom is set', function (done) {
           var buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, index);
@@ -134,7 +132,7 @@ describe('Kibi Components', function () {
           }).catch(done);
         });
 
-        it('should replace $DASHBOARD', function () {
+        it('should replace $DASHBOARD', function (done) {
           buttonDefs[0].filterLabel = 'My custom label $DASHBOARD';
           var buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, index);
           expect(buttons.length).to.equal(1);
@@ -150,10 +148,11 @@ describe('Kibi Components', function () {
             }
           };
 
-
-          button.click();
-          expect(buttonDefs[0].getSourceCount.callCount).to.be(0);
-          expect(button.joinSeqFilter.meta.alias).to.eql('My custom label dashboard 1');
+          button.click().then(() => {
+            expect(buttonDefs[0].getSourceCount.callCount).to.be(0);
+            expect(button.joinSeqFilter.meta.alias).to.eql('My custom label dashboard 1');
+            done();
+          }).catch(done);
         });
 
         it('should replace $COUNT', function (done) {
@@ -172,7 +171,6 @@ describe('Kibi Components', function () {
             }
           };
 
-
           button.click().then(() => {
             expect(buttonDefs[0].getSourceCount.callCount).to.be(1);
             expect(button.joinSeqFilter.meta.alias).to.eql('My custom label 123');
@@ -180,7 +178,7 @@ describe('Kibi Components', function () {
           }).catch(done);
         });
 
-        it('should replace nothing', function () {
+        it('should replace nothing', function (done) {
           buttonDefs[0].filterLabel = 'My custom label';
           var buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, index);
           expect(buttons.length).to.equal(1);
@@ -196,71 +194,108 @@ describe('Kibi Components', function () {
             }
           };
 
-
-          button.click();
-          expect(buttonDefs[0].getSourceCount.callCount).to.be(0);
-          expect(button.joinSeqFilter.meta.alias).to.eql('My custom label');
+          button.click().then(() => {
+            expect(buttonDefs[0].getSourceCount.callCount).to.be(0);
+            expect(button.joinSeqFilter.meta.alias).to.eql('My custom label');
+            done();
+          }).catch(done);
         });
       });
-
     });
 
-    describe('_getRelation', function () {
-      require('testUtils/noDigestPromises').activateForSuite();
-      it('should add the query from the search bar', function (done) {
-        init()();
+    describe('getJoinSequenceFilter', function () {
+      const indexPatterns = [
+        {
+          id: 'ia',
+          timeFieldName: 'date',
+          fields: [
+            {
+              name: 'date'
+            }
+          ]
+        }
+      ];
+      const savedDashboards = [
+        {
+          id: 'dashboardA',
+          title: 'dashboardA',
+          savedSearchId: 'searchA'
+        }
+      ];
+      const savedSearches = [
+        {
+          id: 'searchA',
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: JSON.stringify({
+              index: 'ia',
+              query: { a: 123 },
+              filter: []
+            })
+          }
+        }
+      ];
+
+      it('should get the query from the search meta', function (done) {
+        init({ indexPatterns, savedDashboards, savedSearches });
         const button = {
           sourceField: 'fa',
           sourceIndexPatternId: 'ia',
           targetField: 'fb',
           targetIndexPatternId: 'ib'
         };
-        const savedSearchMeta = {
-          query: { a: 123 },
-          filter: []
-        };
-        const dashboardId = 'not-here';
-        sequentialJoinVisHelper._getRelation({ dashboardId, button, savedSearchMeta }).then((rel) => {
-          expect(rel.relation).to.have.length(2);
-          expect(rel.relation[0].indices).to.eql([ button.sourceIndexPatternId ]);
-          expect(rel.relation[0].path).to.be(button.sourceField);
-          expect(rel.relation[0].queries[1]).to.be.eql({ a: 123 });
-          expect(rel.relation[0].termsEncoding).to.be('long');
-          expect(rel.relation[1].indices).to.eql([ button.targetIndexPatternId ]);
-          expect(rel.relation[1].path).to.be(button.targetField);
-          expect(rel.relation[1].termsEncoding).to.be('long');
+        sequentialJoinVisHelper.getJoinSequenceFilter('dashboardA', button).then((rel) => {
+          expect(rel.join_sequence).to.have.length(1);
+          expect(rel.join_sequence[0].relation).to.have.length(2);
+          expect(rel.join_sequence[0].relation[0].indices).to.eql([ button.sourceIndexPatternId ]);
+          expect(rel.join_sequence[0].relation[0].path).to.be(button.sourceField);
+          expect(rel.join_sequence[0].relation[0].queries[0].query.bool.must).to.have.length(2);
+          expect(rel.join_sequence[0].relation[0].queries[0].query.bool.must[0]).to.be.eql({
+            query: {
+              query_string: {
+                query: '*',
+                analyze_wildcard: true
+              }
+            }
+          });
+          expect(rel.join_sequence[0].relation[0].queries[0].query.bool.must[1]).to.be.eql({ query: { a: 123 } });
+          expect(rel.join_sequence[0].relation[0].termsEncoding).to.be('long');
+          expect(rel.join_sequence[0].relation[1].indices).to.eql([ button.targetIndexPatternId ]);
+          expect(rel.join_sequence[0].relation[1].path).to.be(button.targetField);
+          expect(rel.join_sequence[0].relation[1].termsEncoding).to.be('long');
           done();
         }).catch(done);
       });
 
       it('should set the default siren-join parameters', function (done) {
-        init()();
+        init({ indexPatterns, savedDashboards, savedSearches });
         const button = {
           sourceField: 'fa',
           sourceIndexPatternId: 'ia',
           targetField: 'fb',
           targetIndexPatternId: 'ib'
         };
-        const savedSearchMeta = {
-          query: '',
-          filter: []
-        };
-        const dashboardId = 'not-here';
-        sequentialJoinVisHelper._getRelation({ dashboardId, button, savedSearchMeta }).then((rel) => {
-          expect(rel.relation).to.have.length(2);
-          expect(rel.relation[0].indices).to.eql([ button.sourceIndexPatternId ]);
-          expect(rel.relation[0].path).to.be(button.sourceField);
-          expect(rel.relation[0].queries[0].query.bool.must).to.be.eql({ query: { term: { aaa: 'bbb' } } });
-          expect(rel.relation[0].termsEncoding).to.be('long');
-          expect(rel.relation[1].indices).to.eql([ button.targetIndexPatternId ]);
-          expect(rel.relation[1].path).to.be(button.targetField);
-          expect(rel.relation[1].termsEncoding).to.be('long');
+        sequentialJoinVisHelper.getJoinSequenceFilter('dashboardA', button).then((rel) => {
+          expect(rel.join_sequence).to.have.length(1);
+          expect(rel.join_sequence[0].relation).to.have.length(2);
+          expect(rel.join_sequence[0].relation[0].termsEncoding).to.be('long');
+          expect(rel.join_sequence[0].relation[1].termsEncoding).to.be('long');
           done();
         }).catch(done);
       });
 
       it('should set the advanced siren-join parameters', function (done) {
-        init(true)();
+        init({
+          enableEnterprise: true,
+          indexPatterns: indexPatterns,
+          savedSearches: savedSearches,
+          savedDashboards: savedDashboards
+        });
+
+
+        kibiState.enableRelation({
+          dashboards: [ 'dashboardA', 'dashboardB' ],
+          relation: 'ia/fa/ib/fb'
+        });
         config.set('kibi:relations', {
           relationsIndices: [
             {
@@ -288,27 +323,18 @@ describe('Kibi Components', function () {
           targetField: 'fb',
           targetIndexPatternId: 'ib'
         };
-        const savedSearchMeta = {
-          query: '',
-          filter: []
-        };
-        const dashboardId = 'not-here';
-        sequentialJoinVisHelper._getRelation({ dashboardId, button, savedSearchMeta }).then((rel) => {
-          expect(rel.relation).to.have.length(2);
-          expect(rel.relation[0].indices).to.eql([ button.sourceIndexPatternId ]);
-          expect(rel.relation[0].path).to.be(button.sourceField);
-          expect(rel.relation[0].queries[0].query.bool.must).to.be.eql({ query: { term: { aaa: 'bbb' } } });
-          expect(rel.relation[0].termsEncoding).to.be('enc1');
-          expect(rel.relation[1].indices).to.eql([ button.targetIndexPatternId ]);
-          expect(rel.relation[1].path).to.be(button.targetField);
-          expect(rel.relation[1].termsEncoding).to.be('enc2');
+        sequentialJoinVisHelper.getJoinSequenceFilter('dashboardA', button).then((rel) => {
+          expect(rel.join_sequence).to.have.length(1);
+          expect(rel.join_sequence[0].relation).to.have.length(2);
+          expect(rel.join_sequence[0].relation[0].termsEncoding).to.be('enc1');
+          expect(rel.join_sequence[0].relation[1].termsEncoding).to.be('enc2');
           done();
         }).catch(done);
       });
     });
 
     describe('composeGroupFromExistingJoinFilters', function () {
-      beforeEach(init());
+      beforeEach(() => init({}));
 
       it('should create a group and add it', function () {
         var existingFilters = [

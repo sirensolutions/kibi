@@ -134,11 +134,6 @@ describe('State Management', function () {
         kibiEnterpriseEnabled: true
       }));
 
-      it('should not try to get advanced relations if there is no relation defined', function () {
-        config.set('kibi:relations', { relationsIndices: [] });
-        kibiState._addAdvancedJoinSettingsToRelation();
-      });
-
       it('should fail if the relation is not present', function () {
         config.set('kibi:relations', {
           relationsIndices: [
@@ -158,7 +153,18 @@ describe('State Management', function () {
             }
           ]
         });
-        expect(kibiState._addAdvancedJoinSettingsToRelation).withArgs('company/id', 'article/companies')
+        const missingRelation = [
+          {
+            indices: [ 'company' ],
+            path: 'id'
+          },
+          {
+            indices: [ 'article' ],
+            path: 'companies'
+          }
+        ];
+
+        expect(kibiState._addAdvancedJoinSettingsToRelation).withArgs(missingRelation)
         .to.throwException(/Could not find index relation corresponding to relation between/);
       });
 
@@ -188,8 +194,17 @@ describe('State Management', function () {
           ]
         });
 
-        const relation1 = [ {}, {} ];
-        kibiState._addAdvancedJoinSettingsToRelation('investment/investorid', 'investor/id', relation1);
+        const relation1 = [
+          {
+            indices: [ 'investment' ],
+            path: 'investorid'
+          },
+          {
+            indices: [ 'investor' ],
+            path: 'id'
+          }
+        ];
+        kibiState._addAdvancedJoinSettingsToRelation(relation1);
         expect(relation1[0].termsEncoding).to.be('enc1');
         expect(relation1[0].orderBy).to.be('asc');
         expect(relation1[0].maxTermsPerShard).to.be(1);
@@ -197,8 +212,17 @@ describe('State Management', function () {
         expect(relation1[1].orderBy).to.be('desc');
         expect(relation1[1].maxTermsPerShard).to.be(2);
 
-        const relation2 = [ {}, {} ];
-        kibiState._addAdvancedJoinSettingsToRelation('investor/id', 'investment/investorid', relation2);
+        const relation2 = [
+          {
+            indices: [ 'investor' ],
+            path: 'id'
+          },
+          {
+            indices: [ 'investment' ],
+            path: 'investorid'
+          }
+        ];
+        kibiState._addAdvancedJoinSettingsToRelation(relation2);
         expect(relation2[0].termsEncoding).to.be('enc2');
         expect(relation2[0].orderBy).to.be('desc');
         expect(relation2[0].maxTermsPerShard).to.be(2);
@@ -313,10 +337,8 @@ describe('State Management', function () {
                   index: 'index1',
                   filter: [],
                   query: {
-                    query: {
-                      query_string: {
-                        query: 'torrent'
-                      }
+                    query_string: {
+                      query: 'torrent'
                     }
                   }
                 }
@@ -340,17 +362,13 @@ describe('State Management', function () {
 
       it('should combine queries from the appstate/kibistate with the one from the search meta', function (done) {
         const query1 = {
-          query: {
-            query_string: {
-              query: 'mobile'
-            }
+          query_string: {
+            query: 'mobile'
           }
         };
         const query2 = {
-          query: {
-            query_string: {
-              query: 'web'
-            }
+          query_string: {
+            query: 'web'
           }
         };
 
@@ -358,18 +376,16 @@ describe('State Management', function () {
         kibiState._setDashboardProperty('dashboard2', kibiState._properties.query, query2);
         Promise.all([ kibiState.getState('dashboard1'), kibiState.getState('dashboard2') ])
         .then(([ state1, state2 ]) => {
-          expect(state1.queries).to.eql([ query1, { query: { query_string: { query: 'torrent' } } } ]);
-          expect(state2.queries).to.eql([ query2, { query: { query_string: { query: 'torrent' } } } ]);
+          expect(state1.queries).to.eql([ { query: query1 }, { query: { query_string: { query: 'torrent' } } } ]);
+          expect(state2.queries).to.eql([ { query: query2 }, { query: { query_string: { query: 'torrent' } } } ]);
           done();
         }).catch(done);
       });
 
       it('should remove duplicates', function (done) {
         const query = {
-          query: {
-            query_string: {
-              query: 'torrent'
-            }
+          query_string: {
+            query: 'torrent'
           }
         };
 
@@ -588,10 +604,8 @@ describe('State Management', function () {
                     }
                   ],
                   query: {
-                    query: {
-                      query_string: {
-                        query: 'torrent'
-                      }
+                    query_string: {
+                      query: 'torrent'
                     }
                   }
                 }
@@ -610,6 +624,28 @@ describe('State Management', function () {
 
       it('should not store in kibistate an empty array for filters', function (done) {
         appState.filters = [];
+        appState.query = {
+          query_string: {
+            query: '*',
+            analyze_wildcard: true
+          }
+        };
+        kibiState.saveAppState()
+        .then(() => {
+          expect(kibiState._getDashboardProperty('dashboard1', kibiState._properties.filters)).to.not.be.ok();
+          expect(kibiState._getDashboardProperty('dashboard1', kibiState._properties.query)).to.not.be.ok();
+          expect(kibiState._getDashboardProperty('dashboard1', kibiState._properties.time)).to.not.be.ok();
+          done();
+        }).catch(done);
+      });
+
+      it('should not store in kibistate the join_set', function (done) {
+        const filter1 = {
+          join_set: { field1: 'bbb' },
+          meta: { disabled: false }
+        };
+
+        appState.filters = [ filter1 ];
         appState.query = {
           query_string: {
             query: '*',
@@ -671,7 +707,11 @@ describe('State Management', function () {
         .then(() => {
           expect(kibiState._getDashboardProperty('dashboard1', kibiState._properties.filters)).to.eql([ filter1 ]);
           expect(kibiState._getDashboardProperty('dashboard1', kibiState._properties.query)).to.eql(query);
-          expect(kibiState._getDashboardProperty('dashboard1', kibiState._properties.time)).to.eql(time);
+          expect(kibiState._getDashboardProperty('dashboard1', kibiState._properties.time)).to.eql({
+            m: time.mode,
+            f: time.from,
+            t: time.to
+          });
           done();
         }).catch(done);
       });
@@ -863,6 +903,83 @@ describe('State Management', function () {
             expect(filters[0].meta.alias).to.be('Dashboard A <-> Dashboard B');
             done();
           }).catch(done);
+        });
+      });
+
+      describe('Dashboard IDs in connected component', function () {
+        beforeEach(() => init({}));
+
+        it('should return a, b but not c and d', function () {
+          var relations = [
+            {
+              dashboards: [ 'a', 'b' ]
+            },
+            {
+              dashboards: [ 'c', 'd' ]
+            }
+          ];
+
+          const labels = kibiState._getDashboardsIdInConnectedComponent('a', relations);
+          expect(labels).to.have.length(2);
+          expect(labels).to.contain('a');
+          expect(labels).to.contain('b');
+        });
+
+        it('should not return anything', function () {
+          var relations = [
+            {
+              dashboards: [ 'a', 'b' ]
+            }
+          ];
+
+          const labels = kibiState._getDashboardsIdInConnectedComponent('c', relations);
+          expect(labels).to.have.length(0);
+        });
+
+        it('should return only a', function () {
+          var relations = [
+            {
+              dashboards: [ 'a', 'a' ]
+            }
+          ];
+
+          const labels = kibiState._getDashboardsIdInConnectedComponent('a', relations);
+          expect(labels).to.have.length(1);
+          expect(labels[0]).to.be('a');
+        });
+
+        it('should return a and b', function () {
+          var relations = [
+            {
+              dashboards: [ 'a', 'b' ]
+            },
+            {
+              dashboards: [ 'b', 'b' ]
+            }
+          ];
+
+          const labels = kibiState._getDashboardsIdInConnectedComponent('a', relations);
+          expect(labels).to.have.length(2);
+          expect(labels).to.contain('a');
+          expect(labels).to.contain('b');
+        });
+
+        it('should support multiple relations between two dashboards', function () {
+          var relations = [
+            {
+              dashboards: [ 'a', 'b' ],
+              relation: 'index-a/id1/index-b/id1'
+            },
+            {
+              dashboards: [ 'a', 'b' ],
+              relation: 'index-a/id2/index-b/id2'
+            }
+          ];
+
+          const labels = kibiState._getDashboardsIdInConnectedComponent('a', relations);
+          expect(labels).to.have.length(2);
+          expect(labels).to.contain('a');
+          expect(labels).to.contain('b');
         });
       });
 

@@ -227,7 +227,13 @@ define(function (require) {
             variables = sparqlHelper.getVariables(resultQuery);
           } else if (kibiUtils.isSQL(datasourceType)) {
             variables = sqlHelper.getVariables(resultQuery);
-          } else if (kibiUtils.DatasourceTypes.rest !== datasourceType && kibiUtils.DatasourceTypes.tinkerpop3 !== datasourceType) {
+          } else if (kibiUtils.DatasourceTypes.rest === datasourceType) {
+            if (savedQuery.rest_variables) {
+              variables = _.map(JSON.parse(savedQuery.rest_variables), (v) => v.name);
+            } else {
+              variables = [];
+            }
+          } else if (kibiUtils.DatasourceTypes.tinkerpop3 !== datasourceType) {
             return Promise.reject('Unknown datasource type for query=' + queryId + ': ' + datasourceType);
           }
 

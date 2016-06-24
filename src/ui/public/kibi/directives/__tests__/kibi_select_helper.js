@@ -143,6 +143,16 @@ describe('Kibi Directives', function () {
             tags: []
           },
           {
+            id: 'rest_with_query_variables',
+            resultQuery: '',
+            datasourceId: 'ds3',
+            rest_variables: '[' +
+              '{"name": "ids", "value": "$[*].id"},' +
+              '{"name": "names", "value": "$[*].name"}' +
+            ']',
+            tags: []
+          },
+          {
             id: 'nodatasource',
             resultQuery: '',
             datasourceId: '',
@@ -195,17 +205,19 @@ describe('Kibi Directives', function () {
     describe('GetQueries', function () {
       it('select queries', function (done) {
         stSelectHelper.getQueries().then(function (queries) {
-          expect(queries).to.have.length(5);
+          expect(queries).to.have.length(6);
           expect(queries[0].group).to.be('No tag');
           expect(queries[1].group).to.be('No tag');
           expect(queries[2].group).to.be('No tag');
           expect(queries[3].group).to.be('No tag');
-          expect(queries[4].group).to.be('tag2,42');
+          expect(queries[4].group).to.be('No tag');
+          expect(queries[5].group).to.be('tag2,42');
           expect(queries[0].datasourceType).to.be('sparql_http');
           expect(queries[1].datasourceType).to.be('mysql');
           expect(queries[2].datasourceType).to.be('rest');
-          expect(queries[3].datasourceType).to.be(null);
+          expect(queries[3].datasourceType).to.be('rest');
           expect(queries[4].datasourceType).to.be(null);
+          expect(queries[5].datasourceType).to.be(null);
           done();
         }).catch(done);
       });
@@ -417,10 +429,22 @@ describe('Kibi Directives', function () {
         });
       });
 
-      it('should return the variables of the REST query', function (done) {
+      it('should return empty variables of the REST query', function (done) {
         stSelectHelper.getQueryVariables('rest').then(function (variables) {
           expect(variables.fields).to.have.length(0);
           expect(variables.datasourceType).to.equal('rest');
+          done();
+        }).catch(done);
+      });
+
+      it('should return the variables of the REST query', function (done) {
+        stSelectHelper.getQueryVariables('rest_with_query_variables').then(function (variables) {
+          expect(variables.fields).to.have.length(2);
+          expect(variables.datasourceType).to.equal('rest');
+          expect(variables.fields).to.eql([
+            {label: 'ids', value: 'ids'},
+            {label: 'names', value: 'names'}
+          ]);
           done();
         }).catch(done);
       });

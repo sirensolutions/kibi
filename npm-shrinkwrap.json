@@ -2710,9 +2710,9 @@
       "resolved": "https://registry.npmjs.org/json-stringify-safe/-/json-stringify-safe-5.0.1.tgz"
     },
     "jsonpath": {
-      "version": "0.2.0",
-      "from": "jsonpath@0.2.0",
-      "resolved": "https://registry.npmjs.org/jsonpath/-/jsonpath-0.2.0.tgz",
+      "version": "0.2.5",
+      "from": "jsonpath@0.2.5",
+      "resolved": "https://registry.npmjs.org/jsonpath/-/jsonpath-0.2.5.tgz",
       "dependencies": {
         "esprima": {
           "version": "1.2.2",

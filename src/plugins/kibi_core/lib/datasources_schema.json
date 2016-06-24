@@ -3,7 +3,7 @@
     {
       "name": "timeout",
       "label": "Timeout",
-      "inputType": "text",
+      "inputType": "number",
       "required": false,
       "multivalued": false,
       "encrypted": false,
@@ -47,7 +47,7 @@
     {
       "name": "max_age",
       "label": "Max age of cache entries",
-      "inputType": "text",
+      "inputType": "number",
       "required": false,
       "multivalued": false,
       "encrypted": false,
@@ -111,7 +111,7 @@
     {
       "name": "max_age",
       "label": "Max age of cache entries",
-      "inputType": "text",
+      "inputType": "number",
       "required": false,
       "multivalued": false,
       "encrypted": false,
@@ -174,7 +174,7 @@
     {
       "name": "max_age",
       "label": "Max age of cache entries",
-      "inputType": "text",
+      "inputType": "number",
       "required": false,
       "multivalued": false,
       "encrypted": false,
@@ -249,7 +249,7 @@
     {
       "name": "max_age",
       "label": "Max age of cache entries",
-      "inputType": "text",
+      "inputType": "number",
       "required": false,
       "multivalued": false,
       "encrypted": false,
@@ -302,7 +302,7 @@
     {
       "name": "max_age",
       "label": "Max age of cache entries",
-      "inputType": "text",
+      "inputType": "number",
       "required": false,
       "multivalued": false,
       "encrypted": false,
@@ -385,7 +385,7 @@
     {
       "name": "max_age",
       "label": "Max age of cache entries",
-      "inputType": "text",
+      "inputType": "number",
       "required": false,
       "multivalued": false,
       "encrypted": false,

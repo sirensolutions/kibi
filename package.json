@@ -157,7 +157,7 @@
     "mysql": "2.10.2",
     "pg": "4.5.5",
     "jdbc": "0.3.1",
-    "jsonpath": "0.2.0",
+    "jsonpath": "0.2.5",
     "handlebars": "2.0.0",
     "kibi-h2o2": "sirensolutions/h2o2#5.0.0-kibi-1"
   },

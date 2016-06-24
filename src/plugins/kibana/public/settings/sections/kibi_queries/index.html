@@ -166,7 +166,7 @@
             </div>
           </div>
 
-          <div ng-if="datasourceType === DatasourceTypes.rest">
+          <div class="form" ng-if="datasourceType === DatasourceTypes.rest">
             <p>
               Special placeholders for username, password and auth_token can be used in values of the headers, parameters and body. </br>
               They are respectively: <strong>${username}</strong>, <strong>${password}</strong>, <strong>${auth_token}</strong>
@@ -235,9 +235,6 @@
               <kibi-array-param-add label="header" model="query.rest_headers"></kibi-array-param-add>
             </div>
 
-          </div>
-
-          <div class="form" ng-if="datasourceType === DatasourceTypes.rest">
 
             <div class="form-group">
               <label>Body</label><br/>
@@ -251,20 +248,151 @@
               <input type="text" ng-model="query.rest_resp_status_code"  class="form-control"/>
             </div>
 
-            <br/>
+            <div>
+              <label>Variables <span>(optional)</span>
+                <i class="fa fa-info" ng-click="showJSONPathHelp = !showJSONPathHelp"></i>
+              </label>
 
-            <div class="form-group">
-              <label>JsonPath to filter response</label>
-              <span class="small-note"
-                    tooltip="Optional JSONPath expression to restrict the results. Note: The expression always returns an array"
-                    tooltip-placement="top"
-                    tooltip-animation="false"
-                    tooltip-popup-delay="0"
-                    ><i class="fa fa-info"></i></span>
-              <br/>
-              <input type="text" ng-model="query.rest_resp_restriction_path"  class="form-control"/>
+              <div id="jsonpath-examples" class="jsonpath-examples" ng-if="showJSONPathHelp">
+                <p>Optional map of variable names to JSONPath expressions.
+                   Variables can be used in:</p>
+                <ul>
+                  <li>Kibi Data Table visualisation</li>
+                  <li>Kibi Query Viewer visualisation</li>
+                  <li>External Query Terms aggregations</li>
+                </ul>
+                <p>To know more about JSONPath operators and syntax, see <a href="https://github.com/dchester/jsonpath">here</a>,</br>
+                   Below some examples of jsonpath expressions that use the following sample data:</p>
+                <div class="help-section">
+                  <label>Array returned by rest API</label>
+                  <div readonly
+                    ui-ace="{advanced: {
+                        highlightActiveLine: false
+                      },
+                      useWrapMode: true,
+                      rendererOptions: {
+                        showGutter:false,
+                        showPrintMargin: false,
+                        maxLines: 4294967296
+                      },
+                      mode: 'json'
+                      }">[
+    {
+      "id": 1,
+      "name": "john"
+    },
+    {
+      "id": 2,
+      "name": "tom"
+    }
+  ]</div>
+                </div>
+                <div class="help-section">
+                  <table class="table">
+                    <thead>
+                      <tr>
+                        <th>JSONPath expression</th>
+                        <th>Returned data</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>$[*].name</td>
+                        <td>["john", "tom"]</td>
+                      </tr>
+                      <tr>
+                        <td>$[*].id</td>
+                        <td>[1,2]</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <div style="clear:both;"></div>
+
+                <div class="help-section">
+                  <label>Object returned by rest API</label>
+                  <div readonly
+                    ui-ace="{
+                      advanced: {
+                        highlightActiveLine: false
+                      },
+                      useWrapMode: true,
+                      rendererOptions: {
+                        showGutter:false,
+                        showPrintMargin: false,
+                        maxLines: 4294967296
+                      },
+                      mode: 'json'
+                      }">{
+    "data" :
+      [
+        {
+          "id": 1,
+          "name": "john"
+        },
+        {
+          "id": 2,
+          "name": "tom"
+        }
+      ]
+    }</div>
+                </div>
+                <div class="help-section">
+                  <table class="table">
+                    <thead>
+                      <tr>
+                        <th>JSONPath expression</th>
+                        <th>Returned data</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>$.data[*].name</td>
+                        <td>["john", "tom"]</td>
+                      </tr>
+                      <tr>
+                        <td>$.data[*].id</td>
+                        <td>[1,2]</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div style="clear:both;"></div>
+
+              </div><!-- end of help -->
+
+
+
+
+              <table class="table table-condensed">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Value</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr ng-repeat="var in query.rest_variables" class="queryOptionArea">
+                    <td>
+                      <input required type="text" ng-model="var.name" class="form-control"/>
+                    </td>
+                    <td>
+                      <input required type="text" ng-model="var.value"  class="form-control"/>
+                    </td>
+                    <td>
+                      <div class="btn-group rightCorner" style="width:60px;">
+                        <kibi-array-param-up index="{{ $index }}" model="query.rest_variables"></kibi-array-param-up>
+                        <kibi-array-param-down index="{{ $index }}" model="query.rest_variables"></kibi-array-param-down>
+                        <kibi-array-param-remove index="{{ $index }}" model="query.rest_variables"></kibi-array-param-remove>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <kibi-array-param-add label="variable" model="query.rest_variables"></kibi-array-param-add>
             </div>
-
           </div>
 
         </form>

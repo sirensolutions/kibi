@@ -1,3 +1,5 @@
+# For Kibi related questions see here https://siren.solutions/kibi/faqs
+
 # Frequently asked questions
 
 **Q:** I'm getting `bin/node/bin/node: not found` but I can see the node binary in the package?      

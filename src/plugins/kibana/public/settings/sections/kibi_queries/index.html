@@ -249,16 +249,22 @@
             </div>
 
             <div>
-              <label>Agregation variables <span>(optional)</span>
+              <label>Variables <span>(optional)</span>
                 <i class="fa fa-info" ng-click="showJSONPathHelp = !showJSONPathHelp"></i>
               </label>
 
               <div id="jsonpath-examples" class="jsonpath-examples" ng-if="showJSONPathHelp">
-                <p>Optional map of variable names to JSONPath expressions. These variables can be use for aggregations.
-                <p>More about JSONPath operators and syntax <a href="https://github.com/dchester/jsonpath">here</a>,
-                   below examples of jsonpath expressions for sample data:</p>
+                <p>Optional map of variable names to JSONPath expressions.
+                   Variables can be used in:</p>
+                <ul>
+                  <li>Kibi Data Table visualisation</li>
+                  <li>Kibi Query Viewer visualisation</li>
+                  <li>External Query Terms aggregations</li>
+                </ul>
+                <p>To know more about JSONPath operators and syntax, see <a href="https://github.com/dchester/jsonpath">here</a>,</br>
+                   Below some examples of jsonpath expressions that use the following sample data:</p>
                 <div class="help-section">
-                  <label>array returned by rest API</label>
+                  <label>Array returned by rest API</label>
                   <div readonly
                     ui-ace="{advanced: {
                         highlightActiveLine: false
@@ -285,8 +291,8 @@
                   <table class="table">
                     <thead>
                       <tr>
-                        <th>jsonpath expression</th>
-                        <th>returned data</th>
+                        <th>JSONPath expression</th>
+                        <th>Returned data</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -305,7 +311,7 @@
                 <div style="clear:both;"></div>
 
                 <div class="help-section">
-                  <label>object returned by rest API</label>
+                  <label>Object returned by rest API</label>
                   <div readonly
                     ui-ace="{
                       advanced: {
@@ -336,8 +342,8 @@
                   <table class="table">
                     <thead>
                       <tr>
-                        <th>jsonpath expression</th>
-                        <th>returned data</th>
+                        <th>JSONPath expression</th>
+                        <th>Returned data</th>
                       </tr>
                     </thead>
                     <tbody>

@@ -107,7 +107,9 @@ define(function (require) {
       });
 
       // add time
-      query.query.bool.filter.bool.must.push(time);
+      if (time) {
+        query.query.bool.filter.bool.must.push(time);
+      }
       return query;
     };
 

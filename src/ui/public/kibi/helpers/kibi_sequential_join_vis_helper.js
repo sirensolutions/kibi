@@ -78,16 +78,16 @@ define(function (require) {
         // join_sequence should not contain the join_set
         const clonedFilters = _(filters).filter((filter) => !filter.join_set).cloneDeep();
         const existingJoinSeqFilters = _.filter(clonedFilters, (filter) => filter.join_sequence);
-        const restFilters = _.filter(clonedFilters, (filter) => !filter.join_sequence && !filter.join_set);
+        const remainingFilters = _.filter(clonedFilters, (filter) => !filter.join_sequence);
 
         if (existingJoinSeqFilters.length === 0) {
-          return this.buildNewJoinSeqFilter({ button, restFilters, queries, time });
+          return this.buildNewJoinSeqFilter({ button, remainingFilters, queries, time });
         } else if (existingJoinSeqFilters.length === 1) {
           const joinSeqFilter = existingJoinSeqFilters[0];
-          return this.addRelationToJoinSeqFilter({ button, restFilters, queries, time, joinSeqFilter });
+          return this.addRelationToJoinSeqFilter({ button, remainingFilters, queries, time, joinSeqFilter });
         } else {
           // build join sequence + add a group of sequances to the top of the array
-          const joinSeqFilter = this.buildNewJoinSeqFilter({ button, restFilters, queries, time });
+          const joinSeqFilter = this.buildNewJoinSeqFilter({ button, remainingFilters, queries, time });
           // here create a group from existing ones and add it on the top
           const group = this.composeGroupFromExistingJoinFilters(existingJoinSeqFilters);
           joinSeqFilter.join_sequence.unshift(group);
@@ -226,7 +226,9 @@ define(function (require) {
       });
 
       // add time filter
-      ret.relation[0].queries[0].query.bool.filter.bool.must.push(time);
+      if (time) {
+        ret.relation[0].queries[0].query.bool.filter.bool.must.push(time);
+      }
 
       return ret;
     };

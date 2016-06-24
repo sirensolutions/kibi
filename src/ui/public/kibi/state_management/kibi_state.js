@@ -682,7 +682,10 @@ define(function (require) {
         if (filters && filters.length) {
           this._setDashboardProperty(currentDashboardId, this._properties.filters, filters);
         }
-        // save queries
+        // save the query
+        // queries contains only one query, the one from appState, since the meta argument is null
+        // in the call to _getQueries above.
+        // The query from the appState is always equal to the wildcard query if nothing was entered in the search bar by the user.
         if (this._isDefaultQuery(queries[0])) {
           this._deleteDashboardProperty(currentDashboardId, this._properties.query);
         } else {

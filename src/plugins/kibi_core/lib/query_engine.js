@@ -653,7 +653,7 @@ QueryEngine.prototype._getQueries = function (queryIds, options) {
       if (resp) {
         filteredQueries.push(fromRightFolder[i]); // here important to use fromRightFolder !!!
       } else {
-        filteredQueries.push(new InactivatedQuery(fromRightFolder[i].id));
+        filteredQueries.push(new InactivatedQuery(self.server, fromRightFolder[i].id));
       }
     });
 

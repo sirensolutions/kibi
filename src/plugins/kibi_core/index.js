@@ -59,7 +59,7 @@ module.exports = function (kibana) {
       if (error instanceof Error) {
         err = Boom.wrap(error, 400);
       } else {
-        err = Boom.badRequest('Failed to execute query on an external datasource', error);
+        err = Boom.badRequest('Failed to execute query on an external datasource ' + JSON.stringify(error));
       }
       return reply(err);
     });

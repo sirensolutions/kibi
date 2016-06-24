@@ -95,7 +95,7 @@ define(function (require) {
           }
 
           var emptyResultsTemplate = '';
-          if ($scope.holder.visible) {
+          if (configMode) {
             emptyResultsTemplate =
               '<div class="snippetContainer">' +
               '  <div class="snippet-@INDEX@">' +
@@ -138,7 +138,7 @@ define(function (require) {
               if (snippet.queryActivated === false) {
 
                 let message = '';
-                if (!$scope.holder.visible) {
+                if (!configMode) {
                   // if in view mode increase the counter
                   emptyResultsMsgCounter++;
                   // show only 1 message when in "view" mode
@@ -159,7 +159,7 @@ define(function (require) {
               if (snippet.error) {
                 $scope.holder.html += emptyResultsTemplate.replace(/@INDEX@/, 0);
                 let msg = `Error processing query <b>${snippet.data.config.id}</b>`;
-                if ($scope.holder.visible) {
+                if (configMode) {
                   const results = JSON.stringify(snippet.data.results, null, ' ');
                   msg += `:<br/><pre>${snippet.error}</pre><br/>Results property available in the template:<br/><pre>${results}</pre>`;
                 }
@@ -192,9 +192,9 @@ define(function (require) {
 
                 // here depends that we are in configuration mode or not
                 // use different selected entityURI
-                if ($scope.holder.visible) {
+                if (configMode) {
                   dbFilter.dbfilter.entity = $scope.holder.entityURI;
-                } else if (!$scope.holder.visible && globalState.se && globalState.se.length > 0) {
+                } else if (!configMode && globalState.se && globalState.se.length > 0) {
                   dbFilter.dbfilter.entity = globalState.se[0];
                 }
               }

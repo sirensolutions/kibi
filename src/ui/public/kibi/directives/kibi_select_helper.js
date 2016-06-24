@@ -228,8 +228,11 @@ define(function (require) {
           } else if (kibiUtils.isSQL(datasourceType)) {
             variables = sqlHelper.getVariables(resultQuery);
           } else if (kibiUtils.DatasourceTypes.rest === datasourceType) {
-            var restVariables = JSON.parse(savedQuery.rest_variables);
-            variables = _.map(restVariables, (v) => v.name);
+            if (savedQuery.rest_variables) {
+              variables = _.map(JSON.parse(savedQuery.rest_variables), (v) => v.name);
+            } else {
+              variables = [];
+            }
           } else if (kibiUtils.DatasourceTypes.tinkerpop3 !== datasourceType) {
             return Promise.reject('Unknown datasource type for query=' + queryId + ': ' + datasourceType);
           }

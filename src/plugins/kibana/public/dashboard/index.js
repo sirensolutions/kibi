@@ -46,7 +46,7 @@ define(function (require) {
   .when('/dashboard/:id', {
     template: require('plugins/kibana/dashboard/index.html'),
     resolve: {
-      dash: function (timefilter, savedDashboards, Notifier, $route, $location, courier) {
+      dash: function (timefilter, savedDashboards, Notifier, $route, courier) {
         // kibi: show the timepicker when loading a dashboard
         timefilter.enabled = true;
         return savedDashboards.get($route.current.params.id)
@@ -59,7 +59,7 @@ define(function (require) {
 
   app.directive('dashboardApp', function (courier, AppState, timefilter, kbnUrl, createNotifier) {
     return {
-      controller: function ($timeout, globalState, $scope, $rootScope, $route, $routeParams, $location, Private, getAppState, config) {
+      controller: function ($timeout, kibiState, globalState, $scope, $rootScope, $route, $routeParams, Private, getAppState, config) {
 
         var queryFilter = Private(require('ui/filter_bar/query_filter'));
         var kibiStateHelper = Private(require('ui/kibi/helpers/kibi_state_helper/kibi_state_helper'));
@@ -132,16 +132,19 @@ define(function (require) {
         var $uiState = $scope.uiState = $state.makeStateful('uiState');
 
         // kibi: added so the kibi-dashboard-toolbar which was moved out could comunicate with the main app
-        var cache = Private(require('ui/kibi/helpers/cache_helper'));
-        var joinFilterHelper = Private(require('ui/kibi/helpers/join_filter_helper/join_filter_helper'));
-
         var _addRemoveJoinSetFilter = function (panelEnabled) {
-          if (panelEnabled === false) {
-            $state.filters = _.filter($state.filters, function (f) {
-              return !f.join_set;
-            });
-          } else {
-            joinFilterHelper.updateJoinSetFilter();
+          $state.filters = _.filter($state.filters, function (f) {
+            return !f.join_set;
+          });
+          if (panelEnabled) {
+            kibiState.getState(dash.id).then(({ filters }) => {
+              _.each(filters, (filter) => {
+                if (filter.join_set) {
+                  $state.filters.push(filter.join_set);
+                  return false;
+                }
+              });
+            }).catch(notify.error);
           }
         };
 

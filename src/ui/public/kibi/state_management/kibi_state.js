@@ -105,7 +105,15 @@ define(function (require) {
       filters: 'f',
       query: 'q',
       time: 't',
-      enabled_relations: 'j'
+      enabled_relations: 'j',
+      groups: 'g'
+    };
+
+    KibiState.prototype.setSelectedDashboardId = function (groupId, dashboardId) {
+      if (!this[this._properties.groups]) {
+        this[this._properties.groups] = {};
+      }
+      this[this._properties.groups][groupId] = dashboardId;
     };
 
     KibiState.prototype.addFilter = function (dashboardId, filter) {
@@ -716,6 +724,10 @@ define(function (require) {
       if (!this.isRelationEnabled(relation)) {
         this[this._properties.enabled_relations].push(relation);
       }
+    };
+
+    KibiState.prototype.disableAllRelations = function () {
+      this[this._properties.enabled_relations] = [];
     };
 
     KibiState.prototype.disableRelation = function (relation) {

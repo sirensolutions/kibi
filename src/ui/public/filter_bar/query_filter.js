@@ -1,7 +1,7 @@
 define(function (require) {
   var _ = require('lodash');
 
-  return function (Private, $rootScope, getAppState, globalState) {
+  return function (kibiState, Private, $rootScope, getAppState, globalState) {
     var EventEmitter = Private(require('ui/events'));
     var onlyDisabled = require('ui/filter_bar/lib/onlyDisabled');
     var onlyStateChanged = require('ui/filter_bar/lib/onlyStateChanged');
@@ -90,11 +90,9 @@ define(function (require) {
 
       state.filters.splice(index, 1);
 
-      // kibi: if it was a join_set one
-      // emit event so others can react (kibiStateHelper, relationalPanel)
-      if (filter.join_set) {
-        $rootScope.$emit('kibi:join_set:removed');
-      }
+      // remove all enabled relations for the join_set
+      kibiState.disableAllRelations();
+      kibiState.save();
       // kibi: end
     };
 
@@ -132,13 +130,9 @@ define(function (require) {
       globalState.filters = [];
       appState.filters = [];
 
-      // if it was a join_set one
-      // emit event so others can react (kibiStateHelper, relationalPanel)
-      if (joinSetFound) {
-        $rootScope.$emit('kibi:join_set:removed');
-      } else {
-        $rootScope.$emit('kibi:update-tab-counts');
-      }
+      // remove all enabled relations for the join_set
+      kibiState.disableAllRelations();
+      kibiState.save();
       // kibi: end
     };
 

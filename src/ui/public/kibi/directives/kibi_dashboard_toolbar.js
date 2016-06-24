@@ -5,7 +5,7 @@ define(function (require) {
   var _ = require('lodash');
   var app = require('ui/modules').get('app/dashboard');
 
-  app.directive('kibiDashboardToolbar', function (config, timefilter, savedDashboards, getAppState, Private, $rootScope) {
+  app.directive('kibiDashboardToolbar', function (kibiState, config, timefilter, savedDashboards, getAppState, Private, $rootScope) {
 
     var kibiStateHelper = Private(require('ui/kibi/helpers/kibi_state_helper/kibi_state_helper'));
 
@@ -53,12 +53,8 @@ define(function (require) {
 
           Promise.all([ resetAppState, kibiStateHelper.resetFiltersQueriesTimes() ])
           .then(() => {
-            // if join_set was deleted
-            // emit event so others can react (kibiStateHelper, relationalPanel)
-
-            // here we would have to check that the join_set is either in app state or kibi state
-            // we skip the check and simply emit the event
-            $rootScope.$emit('kibi:join_set:removed');
+            kibiState.disableAllRelations();
+            kibiState.save();
           });
         };
 

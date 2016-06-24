@@ -10,7 +10,7 @@ define(function (require) {
 
   var app = require('ui/modules').get('app/dashboard');
 
-  app.directive('kibiNavBar', function ($rootScope, $http, Promise, config, Private, $timeout, createNotifier) {
+  app.directive('kibiNavBar', function (kibiState, $rootScope, $http, Promise, config, Private, $timeout, createNotifier) {
     var ResizeChecker        = Private(require('ui/vislib/lib/resize_checker'));
     var urlHelper            = Private(require('ui/kibi/helpers/url_helper'));
     var kibiStateHelper      = Private(require('ui/kibi/helpers/kibi_state_helper/kibi_state_helper'));
@@ -29,21 +29,6 @@ define(function (require) {
       },
       template: require('ui/kibi/directives/kibi_nav_bar.html'),
       link: function ($scope, $el) {
-
-
-        var _writeToScope = function (newDashboardGroups) {
-          if (!$scope.dashboardGroups) {
-            $scope.dashboardGroups = newDashboardGroups;
-            _updateAllCounts(null, [ 'oldDashboardsGroups was undefined' ]);
-          } else if ($scope.dashboardGroups.length !== newDashboardGroups.length) {
-            $scope.dashboardGroups = newDashboardGroups;
-            _updateAllCounts(null, [ 'dashboardsGroups length not the same' ]);
-          } else {
-            var changes = dashboardGroupHelper.updateDashboardGroups($scope.dashboardGroups, newDashboardGroups);
-            _updateAllCounts(changes.indexes, changes.reasons);
-          }
-        };
-
 
         var lastFiredMultiCountQuery;
         var _fireUpdateAllCounts = function (groupIndexesToUpdate, reason) {
@@ -127,6 +112,20 @@ define(function (require) {
           }
         };
 
+        const updateCounts = function () {
+          return dashboardGroupHelper.computeGroups().then(function (newDashboardGroups) {
+            if (!$scope.dashboardGroups) {
+              $scope.dashboardGroups = newDashboardGroups;
+              _updateAllCounts(null, [ 'oldDashboardsGroups was undefined' ]);
+            } else if ($scope.dashboardGroups.length !== newDashboardGroups.length) {
+              $scope.dashboardGroups = newDashboardGroups;
+              _updateAllCounts(null, [ 'dashboardsGroups length not the same' ]);
+            } else {
+              var changes = dashboardGroupHelper.updateDashboardGroups($scope.dashboardGroups, newDashboardGroups);
+              _updateAllCounts(changes.indexes, changes.reasons);
+            }
+          });
+        };
 
         var removeLocationChangeSuccessHandler = $rootScope.$on('$locationChangeSuccess', function (event, newUrl, oldUrl) {
           // only if we are on dashboards
@@ -144,17 +143,13 @@ define(function (require) {
           // check that changes on the same dashboard require counts update
           if (urlHelper.shouldUpdateCountsBasedOnLocation(oldUrl, newUrl)) {
             $timeout(function () {
-              dashboardGroupHelper.computeGroups().then(function (dashboardGroups) {
-                _writeToScope(dashboardGroups);
-              });
+              updateCounts();
             });
           }
         });
 
         $scope.$on('$routeChangeSuccess', function () {
-          dashboardGroupHelper.computeGroups().then(function (dashboardGroups) {
-            _writeToScope(dashboardGroups);
-          });
+          updateCounts();
         });
 
         $scope.relationalFilterVisible = false;
@@ -189,24 +184,21 @@ define(function (require) {
 
         // rerender tabs if any dashboard got saved
         var removeDashboardChangedHandler = $rootScope.$on('kibi:dashboard:changed', function (event, dashId) {
-          dashboardGroupHelper.computeGroups().then(function (dashboardGroups) {
-            _writeToScope(dashboardGroups);
-          });
+          updateCounts();
         });
         // everywhere use this event !!! to be consistent
         // make a comment that it was required because not all compononts can listen to
         // esResponse
         var removeAutorefreshHandler = $rootScope.$on('courier:searchRefresh', function (event) {
-          dashboardGroupHelper.computeGroups().then(function (dashboardGroups) {
-            _writeToScope(dashboardGroups);
-          });
+          updateCounts();
         });
 
-        var removeUpdateTabCounts = $rootScope.$on('kibi:update-tab-counts', function (event) {
-          dashboardGroupHelper.computeGroups().then(function (dashboardGroups) {
-            _writeToScope(dashboardGroups);
-          });
-        });
+        const updateCountsOnSave = function (diff) {
+          if (diff.indexOf(kibiState._properties.filters) !== -1) {
+            updateCounts();
+          }
+        };
+        kibiState.on('save_with_changes', updateCountsOnSave);
 
         // =============
         // Tab scrolling
@@ -277,7 +269,7 @@ define(function (require) {
           removeDashboardChangedHandler();
           removeTabDashboardChangedHandler();
           removeTabDashboardGroupChangedHandler();
-          removeUpdateTabCounts();
+          kibiState.off('save_with_changes', updateCountsOnSave);
 
           $scope.tabResizeChecker.off('resize', $scope.onTabContainerResize);
           $scope.tabResizeChecker.destroy();

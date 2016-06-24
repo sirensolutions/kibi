@@ -160,11 +160,6 @@ define(function (require) {
     };
 
 
-    KibiStateHelper.prototype.saveSelectedDashboardId = function (groupId, dashboardId) {
-      globalState.k.g[groupId] = dashboardId;
-      globalState.save();
-    };
-
     KibiStateHelper.prototype.getSelectedDashboardId = function (groupId) {
       return globalState.k.g[groupId];
     };

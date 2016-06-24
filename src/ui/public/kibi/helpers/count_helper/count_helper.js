@@ -2,7 +2,6 @@ define(function (require) {
 
   var _ = require('lodash');
   var uniqFilters = require('ui/filter_bar/lib/uniqFilters');
-  var replaceOrAddJoinSetFilter   = require('ui/kibi/helpers/join_filter_helper/lib/replace_or_add_join_set_filter');
 
   return function CountHelperFactory(createNotifier, kibiState) {
 

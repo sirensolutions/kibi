@@ -29,11 +29,11 @@ define(function (require) {
           tags: 'string',
           rest_params: 'json',
           rest_headers: 'json',
+          rest_variables: 'json',
           rest_body: 'string',
           rest_method: 'string',
           rest_path: 'string',
           rest_resp_status_code: 'long',
-          rest_resp_restriction_path: 'string',
           activation_rules: 'json',
           version: 'integer'
         },
@@ -48,11 +48,11 @@ define(function (require) {
           tags: '',
           rest_params: '[]',
           rest_headers: '[]',
+          rest_variables: '[]',
           rest_body: '',
           rest_method: 'GET',
           rest_path: '',
           rest_resp_status_code: 200,
-          rest_resp_restriction_path: '$',
           activation_rules: '[]',
           version: 1
         },
@@ -70,6 +70,13 @@ define(function (require) {
             }
           } catch (e) {
             throw new Error('Could not parse rest_headers for query [' + this.id + ']');
+          }
+          try {
+            if (this.rest_variables && typeof this.rest_variables === 'string') {
+              this.rest_variables = JSON.parse(this.rest_variables);
+            }
+          } catch (e) {
+            throw new Error('Could not parse rest_variables for query [' + this.id + ']');
           }
           try {
             if (this.activation_rules && typeof this.activation_rules === 'string') {

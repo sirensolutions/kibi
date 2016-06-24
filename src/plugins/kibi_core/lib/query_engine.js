@@ -456,7 +456,6 @@ QueryEngine.prototype.reloadQueries = function () {
           rest_method:       hit._source.rest_method,
           rest_path:         hit._source.rest_path,
           rest_body:         hit._source.rest_body,
-          rest_resp_restriction_path: hit._source.rest_resp_restriction_path,
           tags:              hit._source.tags
         };
 
@@ -475,6 +474,11 @@ QueryEngine.prototype.reloadQueries = function () {
           queryDefinition.rest_headers = JSON.parse(hit._source.rest_headers);
         } catch (e) {
           queryDefinition.rest_headers = [];
+        }
+        try {
+          queryDefinition.rest_variables = JSON.parse(hit._source.rest_variables);
+        } catch (e) {
+          queryDefinition.rest_variables = [];
         }
         try {
           queryDefinition.rest_resp_status_code = parseInt(hit._source.rest_resp_status_code);

@@ -145,17 +145,22 @@ RestQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) {
             throw new Error(msg);
           }
 
-          // extract subset of the data only if user specified jsonpath expression
-          if (self.config.rest_resp_restriction_path && self.config.rest_resp_restriction_path !== '') {
-            try {
-              data.results = jsonpath.query(json, self.config.rest_resp_restriction_path);
-            } catch (e) {
-              msg = 'Error while executing the JSONPath expression. Details: ' + e.message;
-              self._logFailedRequestDetails(msg, e, resp);
-              throw new Error(msg);
+          data.results = json;
+
+          if (idVariableName && self.config.rest_variables) {
+            var o = _.find(self.config.rest_variables, function (v) {
+              return v.name === idVariableName;
+            });
+
+            if (o) {
+              try {
+                data.ids = jsonpath.query(json, o.value);
+              } catch (e) {
+                msg = 'Error while executing the JSONPath expressionXX. Details: ' + e.message;
+                self._logFailedRequestDetails(msg, e, resp);
+                throw new Error(msg);
+              }
             }
-          } else {
-            data.results = json;
           }
 
           if (self.cache && cacheEnabled) {

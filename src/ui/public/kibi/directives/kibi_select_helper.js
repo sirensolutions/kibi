@@ -227,7 +227,10 @@ define(function (require) {
             variables = sparqlHelper.getVariables(resultQuery);
           } else if (kibiUtils.isSQL(datasourceType)) {
             variables = sqlHelper.getVariables(resultQuery);
-          } else if (kibiUtils.DatasourceTypes.rest !== datasourceType && kibiUtils.DatasourceTypes.tinkerpop3 !== datasourceType) {
+          } else if (kibiUtils.DatasourceTypes.rest === datasourceType) {
+            var restVariables = JSON.parse(savedQuery.rest_variables);
+            variables = _.map(restVariables, (v) => v.name);
+          } else if (kibiUtils.DatasourceTypes.tinkerpop3 !== datasourceType) {
             return Promise.reject('Unknown datasource type for query=' + queryId + ': ' + datasourceType);
           }
 

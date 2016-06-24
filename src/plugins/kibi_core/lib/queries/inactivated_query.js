@@ -10,7 +10,12 @@ InactivatedQuery.prototype.fetchResults = function (options, onlyIds) {
   return Promise.resolve({
     queryId: self.id,
     ids: [],
-    queryActivated: false
+    queryActivated: false,
+    data: {
+      config: {
+        id: self.id
+      }
+    }
   });
 };
 
@@ -19,7 +24,12 @@ InactivatedQuery.prototype.getHtml = function (queryDef, options) {
   var self = this;
   return Promise.resolve({
     queryId: self.id,
-    queryActivated: false
+    queryActivated: false,
+    data: {
+      config: {
+        id: self.id
+      }
+    }
   });
 };
 

@@ -584,7 +584,8 @@ define(function (require) {
     };
 
     /**
-     * Returns an array of dashboard IDs
+     * Returns an array of dashboard IDs.
+     * WARNING: this method returns only the ID of dashboards that have some state, e.g., some filters.
      */
     KibiState.prototype.getAllDashboardIDs = function () {
       return _.keys(this[this._properties.dashboards]);

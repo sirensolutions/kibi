@@ -158,7 +158,7 @@ define(function (require) {
             });
 
             _enableEntityUri();
-            
+
             if (savedDatasource.datasourceType === kibiUtils.DatasourceTypes.rest) {
               $scope.query._previewTemplateId = 'kibi-json-jade';
             } else {

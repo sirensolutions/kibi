@@ -59,7 +59,7 @@ define(function (require) {
 
   app.directive('dashboardApp', function (courier, AppState, timefilter, kbnUrl, createNotifier) {
     return {
-      controller: function ($timeout, kibiState, globalState, $scope, $rootScope, $route, $routeParams, Private, getAppState, config) {
+      controller: function (kibiState, globalState, $scope, $rootScope, $route, $routeParams, Private, getAppState, config) {
 
         var queryFilter = Private(require('ui/filter_bar/query_filter'));
 
@@ -88,10 +88,8 @@ define(function (require) {
         var saveWithChangesHandler = function (diff) {
           if (dash.id && diff.indexOf('time') !== -1 && timefilter.time.from && timefilter.time.to) {
             // kibiState.saveTimeForDashboardId calls globalState.save
-            // In order to avoid a loop of events on globalstate, call that function in the next tick
-            $timeout(function () {
-              kibiState._saveTimeForDashboardId(dash.id, timefilter.time.mode, timefilter.time.from, timefilter.time.to);
-            });
+            kibiState._saveTimeForDashboardId(dash.id, timefilter.time.mode, timefilter.time.from, timefilter.time.to);
+            kibiState.save();
           }
         };
         globalState.on('save_with_changes', saveWithChangesHandler);

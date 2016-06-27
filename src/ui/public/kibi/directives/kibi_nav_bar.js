@@ -13,7 +13,6 @@ define(function (require) {
   app.directive('kibiNavBar', function ($location, kibiState, $rootScope, $http, Promise, config, Private, $timeout, createNotifier) {
     var ResizeChecker        = Private(require('ui/vislib/lib/resize_checker'));
     var urlHelper            = Private(require('ui/kibi/helpers/url_helper'));
-    var kibiStateHelper      = Private(require('ui/kibi/helpers/kibi_state_helper/kibi_state_helper'));
     var dashboardGroupHelper = Private(require('ui/kibi/helpers/dashboard_group_helper'));
     var indexPath            = Private(require('ui/kibi/components/commons/_index_path'));
 

@@ -118,6 +118,70 @@ define(function (require) {
       return this[this._properties.session_id];
     };
 
+    /**
+     * Reset the filters, queries, and time for each dashboard to their saved state.
+     */
+    KibiState.prototype.resetFiltersQueriesTimes = function () {
+      if (this[this._properties.dashboards]) {
+        return savedDashboards.find().then((resp) => {
+          if (resp.hits) {
+            const appState = getAppState();
+            const timeDefaults = config.get('timepicker:timeDefaults');
+
+            _.each(resp.hits, (dashboard) => {
+              const meta = JSON.parse(dashboard.kibanaSavedObjectMeta.searchSourceJSON);
+              const filters = _.reject(meta.filter, (filter) => filter.query && filter.query.query_string && !filter.meta);
+              const query = _.find(meta.filter, (filter) => filter.query && filter.query.query_string && !filter.meta);
+
+              // reset appstate
+              if (dashboard.id === appState.id) {
+                // filters
+                appState.filters = filters;
+                // query
+                appState.query = query && query.query || {query_string: {analyze_wildcard: true, query: '*'}};
+                // time
+                if (dashboard.timeRestore && dashboard.timeFrom && dashboard.timeTo) {
+                  timefilter.time.mode = dashboard.timeMode;
+                  timefilter.time.to = dashboard.timeTo;
+                  timefilter.time.from = dashboard.timeFrom;
+                } else {
+                  // These can be date math strings or moments.
+                  timefilter.time = timeDefaults;
+                }
+                appState.save();
+              }
+              // reset kibistate
+              if (this[this._properties.dashboards][dashboard.id]) {
+                // query
+                if (!query || this._isDefaultQuery(query)) {
+                  this._deleteDashboardProperty(dashboard.id, this._properties.query);
+                } else {
+                  this._setDashboardProperty(dashboard.id, this._properties.query, query.query);
+                }
+                // filters
+                if (filters.length) {
+                  this._setDashboardProperty(dashboard.id, this._properties.filters, filters);
+                } else {
+                  this._deleteDashboardProperty(dashboard.id, this._properties.filters);
+                }
+                // time
+                if (dashboard.timeRestore && dashboard.timeFrom && dashboard.timeTo) {
+                  this._saveTimeForDashboardId(dashboard.id, dashboard.timeMode, dashboard.timeFrom, dashboard.timeTo, true);
+                } else {
+                  this._deleteDashboardProperty(dashboard.id, this._properties.time);
+                }
+              }
+            });
+          }
+        })
+        .then(() => {
+          this.disableAllRelations();
+          this.save();
+        });
+      }
+      return Promise.resolve();
+    };
+
     KibiState.prototype.setSelectedDashboardId = function (groupId, dashboardId) {
       if (!this[this._properties.groups]) {
         this[this._properties.groups] = {};

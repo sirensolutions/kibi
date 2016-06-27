@@ -787,6 +787,100 @@ describe('State Management', function () {
       });
     });
 
+    describe('Reset dashboards state', function () {
+      beforeEach(() => init({
+        savedDashboards: [
+          {
+            id: 'Articles',
+            title: 'Articles',
+            kibanaSavedObjectMeta: {
+              searchSourceJSON: JSON.stringify({
+                filter: [
+                  {
+                    query: {
+                      query_string: {
+                        query: 'torrent'
+                      }
+                    }
+                  },
+                  {
+                    term: {
+                      fielda: 'aaa'
+                    }
+                  }
+                ]
+              })
+            }
+          },
+          {
+            id: 'time-testing-2',
+            title: 'time testing 2',
+            timeRestore: true,
+            timeMode: 'quick',
+            timeFrom: 'now-15y',
+            timeTo: 'now',
+            kibanaSavedObjectMeta: {
+              searchSourceJSON: JSON.stringify({filter:[]})
+            }
+          }
+        ]
+      }));
+
+      it('should reset times, filters and queries to their default state on all dashboards', function (done) {
+        kibiState._setDashboardProperty('Articles', kibiState._properties.filters, [
+          {
+            term: {
+              fieldb: 'bbb'
+            }
+          }
+        ]);
+        kibiState._setDashboardProperty('Articles', kibiState._properties.query, {
+          query_string: {
+            query: 'web'
+          }
+        });
+        kibiState._saveTimeForDashboardId('Articles', 'quick', 'now-15m', 'now');
+
+        kibiState._setDashboardProperty('time-testing-2', kibiState._properties.filters, [
+          {
+            term: {
+              fieldb: 'ccc'
+            }
+          }
+        ]);
+        kibiState._setDashboardProperty('time-testing-2', kibiState._properties.query, {
+          query_string: {
+            query: 'ibm'
+          }
+        });
+        kibiState._saveTimeForDashboardId('time-testing-2', 'quick', 'now-15m', 'now');
+
+        kibiState.resetFiltersQueriesTimes().then(() => {
+          expect(kibiState._getDashboardProperty('Articles', kibiState._properties.filters)).to.eql([
+            {
+              term: {
+                fielda: 'aaa'
+              }
+            }
+          ]);
+          expect(kibiState._getDashboardProperty('Articles', kibiState._properties.query)).to.eql({
+            query_string: {
+              query: 'torrent'
+            }
+          });
+          expect(kibiState._getDashboardProperty('Articles', kibiState._properties.time)).to.not.be.ok();
+          expect(kibiState._getDashboardProperty('time-testing-2', kibiState._properties.filters)).to.not.be.ok();
+          expect(kibiState._getDashboardProperty('time-testing-2', kibiState._properties.query)).to.not.be.ok();
+          expect(kibiState._getDashboardProperty('time-testing-2', kibiState._properties.time)).to.eql({
+            m: 'quick',
+            f: 'now-15y',
+            t: 'now',
+          });
+          done();
+        }).catch(done);
+      });
+    });
+
     describe('Join Set', function () {
       describe('Join Set Label', function () {
         beforeEach(() => init({
@@ -1494,3 +1588,4 @@ describe('State Management', function () {
     });
   });
 });
+

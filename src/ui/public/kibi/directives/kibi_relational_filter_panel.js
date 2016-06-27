@@ -27,8 +27,6 @@ define(function (require) {
   });
 
   app.directive('kibiRelationalFilterPanel', function (kibiState, $location, config, $rootScope, Private, createNotifier) {
-    var kibiStateHelper  = Private(require('ui/kibi/helpers/kibi_state_helper/kibi_state_helper'));
-
     var notify = createNotifier({
       location: 'Relational Filter Panel'
     });
@@ -61,7 +59,7 @@ define(function (require) {
             }
 
             link.html = '<div>' +
-              '<input type="checkbox" ' + (kibiStateHelper.isRelationEnabled(relation) ? 'checked' : '') + '/>' +
+              '<input type="checkbox" ' + (kibiState.isRelationEnabled(relation) ? 'checked' : '') + '/>' +
               '&nbsp;<label>' + link.linkType + '</label>' +
               '</div>';
           });

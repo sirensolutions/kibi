@@ -285,40 +285,6 @@ define(function (require) {
     };
 
 
-    KibiStateHelper.prototype.resetFiltersQueriesTimes = function () {
-      if (globalState.k.d) {
-        return savedDashboards.find().then((resp) => {
-          if (resp.hits) {
-            var timeDefaults = config.get('timepicker:timeDefaults');
-            _.each(resp.hits, (dashboard) => {
-              if (globalState.k.d[dashboard.id]) {
-                const meta = JSON.parse(dashboard.kibanaSavedObjectMeta.searchSourceJSON);
-                const filters = _.reject(meta.filter, (filter) => filter.query && filter.query.query_string && !filter.meta);
-                const query = _.find(meta.filter, (filter) => filter.query && filter.query.query_string && !filter.meta);
-
-                // query
-                if (this.isAnalyzedWildcardQueryString(query)) {
-                  globalState.k.d[dashboard.id].q = '*';
-                } else {
-                  globalState.k.d[dashboard.id].q = query && query.query || '*';
-                }
-                // filters
-                globalState.k.d[dashboard.id].f = filters;
-                // time
-                if (dashboard.timeRestore && dashboard.timeFrom && dashboard.timeTo) {
-                  this.saveTimeForDashboardId(dashboard.id, dashboard.timeMode, dashboard.timeFrom, dashboard.timeTo, true);
-                } else {
-                  this.saveTimeForDashboardId(dashboard.id, timeDefaults.mode, timeDefaults.from, timeDefaults.to, true);
-                }
-              }
-            });
-            globalState.save();
-          }
-        });
-      }
-      return Promise.resolve();
-    };
-
 
     KibiStateHelper.prototype._disableAllRelations = function () {
       if (globalState.k.j) {

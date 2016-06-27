@@ -62,7 +62,6 @@ define(function (require) {
       controller: function ($timeout, kibiState, globalState, $scope, $rootScope, $route, $routeParams, Private, getAppState, config) {
 
         var queryFilter = Private(require('ui/filter_bar/query_filter'));
-        var kibiStateHelper = Private(require('ui/kibi/helpers/kibi_state_helper/kibi_state_helper'));
 
         var notify = createNotifier({
           location: 'Dashboard'
@@ -70,14 +69,14 @@ define(function (require) {
 
         var dash = $scope.dash = $route.current.locals.dash;
 
-        var dashboardTimeFilter = kibiStateHelper.getTimeForDashboardId(dash.id);
-        if (dashboardTimeFilter) {
+        var dashboardTime = kibiState._getDashboardProperty(dash.id, kibiState._properties.time);
+        if (dashboardTime) {
           // kibi: time from the kibi state.
           // this allows to set a time (not save it with a dashboard), switch between dashboards, and
           // still retain the time set until the app is reloaded
-          timefilter.time.mode = dashboardTimeFilter.mode;
-          timefilter.time.to = dashboardTimeFilter.to;
-          timefilter.time.from = dashboardTimeFilter.from;
+          timefilter.time.mode = dashboardTime.m;
+          timefilter.time.from = dashboardTime.f;
+          timefilter.time.to = dashboardTime.t;
         } else if (dash.timeRestore && dash.timeTo && dash.timeFrom && !getAppState.previouslyStored()) {
           timefilter.time.mode = dash.timeMode;
           timefilter.time.to = dash.timeTo;
@@ -88,10 +87,10 @@ define(function (require) {
         // either directly in time widget or by clicking on histogram chart etc
         var saveWithChangesHandler = function (diff) {
           if (dash.id && diff.indexOf('time') !== -1 && timefilter.time.from && timefilter.time.to) {
-            // kibiStateHelper.saveTimeForDashboardId calls globalState.save
+            // kibiState.saveTimeForDashboardId calls globalState.save
             // In order to avoid a loop of events on globalstate, call that function in the next tick
             $timeout(function () {
-              kibiStateHelper.saveTimeForDashboardId(dash.id, timefilter.time.mode, timefilter.time.from, timefilter.time.to);
+              kibiState._saveTimeForDashboardId(dash.id, timefilter.time.mode, timefilter.time.from, timefilter.time.to);
             });
           }
         };
@@ -107,14 +106,9 @@ define(function (require) {
         };
 
         // kibi: get the filters and query from the kibi state
-        var dashboardQuery = kibiStateHelper.getQueryForDashboardId(dash.id);
-        // Note: important !!! we pass a flag includePinnedFilters = false
-        // as we do NOT want pinned filters to be copied to appState
-        // as pinned filters should always stay in kibana global state
-        var dashboardFilters = kibiStateHelper.getFiltersForDashboardId(dash.id, false);
-        if (dashboardFilters && !dashboardFilters.length) {
-          dashboardFilters = undefined;
-        }
+        var dashboardQuery = kibiState._getDashboardProperty(dash.id, kibiState._properties.query);
+        // do not take pinned filters !
+        var dashboardFilters = kibiState._getDashboardProperty(dash.id, kibiState._properties.filters);
 
         var stateDefaults = {
           id: dash.id, // kibi: added to identity a dashboard in helper methods

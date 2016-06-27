@@ -106,7 +106,16 @@ define(function (require) {
       query: 'q',
       time: 't',
       enabled_relations: 'j',
-      groups: 'g'
+      groups: 'g',
+      session_id: 's'
+    };
+
+    KibiState.prototype.setSessionId = function (id) {
+      this[this._properties.session_id] = id;
+    };
+
+    KibiState.prototype.getSessionId = function () {
+      return this[this._properties.session_id];
     };
 
     KibiState.prototype.setSelectedDashboardId = function (groupId, dashboardId) {

@@ -1,6 +1,5 @@
 define(function (require) {
   var _ = require('lodash');
-  var SavedObjectNotFound = require('ui/errors').SavedObjectNotFound;
 
   return function KibiStateHelperFactory(timefilter, $rootScope, globalState, savedDashboards, Promise, config,
                                          $location, $timeout, Private, createNotifier) {
@@ -8,8 +7,6 @@ define(function (require) {
     var notify = createNotifier({
       location: 'KibiStateHelper'
     });
-
-    var kibiSessionHelper = Private(require('ui/kibi/helpers/kibi_state_helper/kibi_session_helper'));
 
     /*
      * Helper class to manage the kibi state using globalState.k object
@@ -38,9 +35,7 @@ define(function (require) {
           //   t:  // time
           d: {},
           // will hold ids of enabled relations for relational panel and join_set filter
-          j: [],
-          // will hold the kibi session id
-          s: undefined
+          j: []
         };
         globalState.save();
       };
@@ -67,15 +62,6 @@ define(function (require) {
         $rootScope.$emit('kibi:update-relational-panel');
       });
 
-      $rootScope.$on('kibi:session:changed:deleted', function (event, deletedId) {
-        // destroy and init the session only if current one was deleted from elasticsearch
-        kibiSessionHelper.getId().then(function (currentId) {
-          if (currentId === deletedId) {
-            kibiSessionHelper.destroy();
-            kibiSessionHelper.init();
-          }
-        });
-      });
 
       //NOTE: check if a timefilter has been set into the URL at startup
       var off = $rootScope.$on('$routeChangeSuccess', function () {
@@ -89,32 +75,6 @@ define(function (require) {
             if (currentDashboardId) {
               self.saveTimeForDashboardId(currentDashboardId, timefilter.time.mode, timefilter.time.from, timefilter.time.to);
             }
-          }
-          if (globalState.k && !globalState.k.s) {
-            // no sesion id
-            kibiSessionHelper.getId().then(function (sessionId) {
-              globalState.k.s = sessionId;
-              globalState.save();
-            }).catch(notify.error);
-          } else if (globalState.k && globalState.k.s) {
-            // there is a sesion id
-            kibiSessionHelper.getId().then(function (sessionId) {
-              if (globalState.k.s !== sessionId) {
-                return kibiSessionHelper._copySessionFrom(globalState.k.s).then(function (savedSession) {
-                  globalState.k.s = savedSession.id;
-                  globalState.save();
-                }).catch(function (err) {
-                  notify.error(err);
-                  if (err instanceof SavedObjectNotFound) {
-                    // something happen and the session object does not exists anymore
-                    // override the non-existing sessionId from the url
-                    // to prevent the error happenning again
-                    globalState.k.s = sessionId;
-                    globalState.save();
-                  }
-                });
-              }
-            }).catch(notify.error);
           }
           off();
         });

@@ -1,5 +1,12 @@
 define(function (require) {
-  return function KibiSessionHelperFactory($cookies, savedSessions, Promise, config) {
+  const _ = require('lodash');
+  const SavedObjectNotFound = require('ui/errors').SavedObjectNotFound;
+
+  return function KibiSessionHelperFactory($rootScope, $cookies, savedSessions, Promise, config, kibiState, createNotifier) {
+
+    var notify = createNotifier({
+      location: 'KibiSessionHelper'
+    });
 
     function KibiSessionHelper() {
       this.initialized = false;
@@ -10,6 +17,49 @@ define(function (require) {
       if (self.initialized) {
         return Promise.resolve(self.id);
       }
+
+      self.destroyListener1 = $rootScope.$on('kibi:session:changed:deleted', function (event, deletedId) {
+        // destroy and init the session only if current one was deleted from elasticsearch
+        self.getId().then(function (currentId) {
+          if (currentId === deletedId) {
+            self.destroy();
+            self.init();
+          }
+        });
+      });
+
+      self.destroyListener2 = $rootScope.$on('$routeChangeSuccess', function () {
+        var self = this;
+        var s = kibiState.getSessionId();
+
+        if (!s) {
+          // no sesion id
+          self.getId().then(function (sessionId) {
+            kibiState.setSessionId(sessionId);
+            kibiState.save();
+          }).catch(notify.error);
+
+        } else {
+          // there is a sesion id
+          self.getId().then(function (sessionId) {
+            if (s !== sessionId) {
+              return self._copySessionFrom(s).then(function (savedSession) {
+                kibiState.setSessionId(sessionId);
+                kibiState.save();
+              }).catch(function (err) {
+                notify.error(err);
+                if (err instanceof SavedObjectNotFound) {
+                  // something happen and the session object does not exists anymore
+                  // override the non-existing sessionId from the url
+                  // to prevent the error happenning again
+                  kibiState.setSessionId(sessionId);
+                  kibiState.save();
+                }
+              });
+            }
+          }).catch(notify.error);
+        }
+      });
 
       var cookieId = $cookies.get('ksid');
       if (cookieId) {
@@ -85,6 +135,12 @@ define(function (require) {
       delete this.id;
       delete this.session_data;
       this.initialized = false;
+      if (_.isFunction(this.destroyListener1)) {
+        this.destroyListener1();
+      }
+      if (_.isFunction(this.destroyListener2)) {
+        this.destroyListener2();
+      }
     };
 
     KibiSessionHelper.prototype._copySessionFrom = function (idFrom) {

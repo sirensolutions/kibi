@@ -185,6 +185,35 @@
 
 
   "rest": [
+
+    {
+      "name": "headers",
+      "label": "Headers",
+      "required": false,
+      "multivalued": false,
+      "encrypted": false,
+      "inputType": "list",
+      "listParameters": {
+        "name": "text",
+        "value": "text"
+      },
+      "defaultValue": [],
+      "placeholder": "Headers to be used for each request"
+    },
+    {
+      "name": "params",
+      "label": "Parameters",
+      "required": false,
+      "multivalued": false,
+      "encrypted": false,
+      "inputType": "list",
+      "listParameters": {
+        "name": "text",
+        "value": "text"
+      },
+      "defaultValue": [],
+      "placeholder": "Parameters to be used for each request"
+    },
     {
       "name": "url",
       "label": "URL",

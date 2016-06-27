@@ -139,23 +139,25 @@ define(function (require) {
           savedDatasources.get($scope.query.datasourceId).then(function (savedDatasource) {
             $scope.datasourceType = savedDatasource.datasourceType;
 
-            _.each(savedDatasource.datasourceParams.headers, function (headerFromDatasource) {
-              var header = _.find($scope.query.rest_headers, function (headerFromQuery) {
-                return headerFromQuery.name === headerFromDatasource.name;
+            if (savedDatasource.datasourceParams) {
+              _.each(savedDatasource.datasourceParams.headers, function (headerFromDatasource) {
+                var header = _.find($scope.query.rest_headers, function (headerFromQuery) {
+                  return headerFromQuery.name === headerFromDatasource.name;
+                });
+                if (!header) {
+                  $scope.query.rest_headers.push(headerFromDatasource);
+                }
               });
-              if (!header) {
-                $scope.query.rest_headers.push(headerFromDatasource);
-              }
-            });
 
-            _.each(savedDatasource.datasourceParams.params, function (paramFromDatasource) {
-              var param = _.find($scope.query.rest_params, function (paramFromQuery) {
-                return paramFromQuery.name === paramFromDatasource.name;
+              _.each(savedDatasource.datasourceParams.params, function (paramFromDatasource) {
+                var param = _.find($scope.query.rest_params, function (paramFromQuery) {
+                  return paramFromQuery.name === paramFromDatasource.name;
+                });
+                if (!param) {
+                  $scope.query.rest_params.push(paramFromDatasource);
+                }
               });
-              if (!param) {
-                $scope.query.rest_params.push(paramFromDatasource);
-              }
-            });
+            }
 
             _enableEntityUri();
 

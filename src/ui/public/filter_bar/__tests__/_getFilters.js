@@ -16,6 +16,10 @@ describe('get filters', function () {
     'kibana',
     'kibana/global_state',
     function ($provide) {
+      $provide.service('kibiState', function () {
+        return new MockState({ filters: [] });
+      });
+
       appState = new MockState({ filters: [] });
       $provide.service('getAppState', function () {
         return function () { return appState; };

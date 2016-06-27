@@ -6,14 +6,11 @@ define(function (require) {
   require('ui/kibi/directives/kibi_entity_clipboard.less');
 
   require('ui/modules').get('kibana')
-  .directive('kibiEntityClipboard', function (getAppState, $rootScope, $route, globalState, $http, Private, createNotifier, config) {
+  .directive('kibiEntityClipboard', function (kibiState, getAppState, $rootScope, $route, globalState, $http, createNotifier, config) {
 
     var notify = createNotifier({
       name: 'Kibi Entity Clipboard'
     });
-
-    var urlHelper = Private(require('ui/kibi/helpers/url_helper'));
-    var kibiStateHelper = Private(require('ui/kibi/helpers/kibi_state_helper/kibi_state_helper'));
 
     return {
       restrict: 'E',
@@ -72,21 +69,35 @@ define(function (require) {
           delete $scope.disabled;
           delete globalState.entityDisabled;
           delete globalState.se;
-          globalState.save();
 
-          // remove filters which depends on selected entities
-          const currentDashboardId = urlHelper.getCurrentDashboardId();
-          const filters = kibiStateHelper.getAllFilters();
+          /*
+           * remove filters which depends on selected entities
+           */
+          const currentDashboardId = kibiState._getCurrentDashboardId();
           const appState = getAppState();
-          _.forOwn(filters, (dashFilters, dashboardId) => {
-            const filtersMinusEntities = _.filter(dashFilters, (f) => !f.meta.dependsOnSelectedEntities);
+
+          // check the pinned filters
+          const pinnedFiltersMinusEntities = _.filter(globalState.filters, (f) => !f.meta.dependsOnSelectedEntities);
+          globalState.filters = pinnedFiltersMinusEntities;
+
+          // check the other filters from all dashboards
+          _.each(kibiState.getAllDashboardIDs(), (dashboardId) => {
+            let filtersMinusEntities = [];
+
             // update the appstate
             if (currentDashboardId === dashboardId) {
+              filtersMinusEntities = _.filter(appState.filters, (f) => !f.meta.dependsOnSelectedEntities);
               appState.filters = filtersMinusEntities;
+            } else {
+              const kibiStateFilters = kibiState._getDashboardProperty(dashboardId, kibiState._properties.filters) || [];
+              filtersMinusEntities = _.filter(kibiStateFilters, (f) => !f.meta.dependsOnSelectedEntities);
             }
-            // update the globalstate
-            kibiStateHelper.saveFiltersForDashboardId(dashboardId, filtersMinusEntities);
+            // update the kibistate
+            kibiState._setDashboardProperty(dashboardId, kibiState._properties.filters, filtersMinusEntities);
           });
+
+          globalState.save();
+          kibiState.save();
           appState.save();
 
           // have to reload so all visualisations which might depend on selected entities

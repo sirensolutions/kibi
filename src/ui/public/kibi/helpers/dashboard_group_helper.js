@@ -1,9 +1,8 @@
 define(function (require) {
   return function DashboardGroupHelperFactory(kbnUrl, kibiState, Private, savedDashboards, savedDashboardGroups, Promise) {
     var _ = require('lodash');
-    var urlHelper        = Private(require('ui/kibi/helpers/url_helper'));
-    var kibiStateHelper  = Private(require('ui/kibi/helpers/kibi_state_helper/kibi_state_helper'));
-    var countHelper      = Private(require('ui/kibi/helpers/count_helper/count_helper'));
+    var kibiStateHelper = Private(require('ui/kibi/helpers/kibi_state_helper/kibi_state_helper'));
+    var countHelper = Private(require('ui/kibi/helpers/count_helper/count_helper'));
 
     function DashboardGroupHelper() {
     }
@@ -178,7 +177,7 @@ define(function (require) {
       // first create array of dashboards already used in dashboardGroups1
       var dashboardsInGroups = self._getListOfDashboardsFromGroups(dashboardGroups1);
 
-      return urlHelper.getDashboardAndSavedSearchMetas(undefined, true).then(function (results) {
+      return kibiState._getDashboardAndSavedSearchMetas(undefined, true).then(function (results) {
         const dashboardDefs = _.map(results, function ({ savedDash, savedSearchMeta }) {
           if (savedSearchMeta) {
             return {
@@ -456,7 +455,7 @@ define(function (require) {
      */
     DashboardGroupHelper.prototype.computeGroups = function () {
       var self = this;
-      var currentDashboardId = urlHelper.getCurrentDashboardId();
+      var currentDashboardId = kibiState._getCurrentDashboardId();
       return self._computeGroupsFromSavedDashboardGroups(currentDashboardId).then(function (dashboardGroups1) {
         return self._addAdditionalGroupsFromSavedDashboards(currentDashboardId, dashboardGroups1);
       });

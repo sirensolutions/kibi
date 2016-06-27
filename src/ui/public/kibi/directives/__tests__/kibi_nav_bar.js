@@ -1,15 +1,17 @@
-var ngMock = require('ngMock');
-var expect = require('expect.js');
-var angular = require('angular');
-var _ = require('lodash');
-var sinon = require('auto-release-sinon');
-var dashboardGroupHelper;
-var Promise;
-var urlHelper;
-var $httpBackend;
-var $rootScope;
-var $timeout;
-var $elem;
+const MockState = require('fixtures/mock_state');
+const ngMock = require('ngMock');
+const expect = require('expect.js');
+const angular = require('angular');
+const _ = require('lodash');
+const sinon = require('auto-release-sinon');
+let dashboardGroupHelper;
+let Promise;
+let urlHelper;
+let $httpBackend;
+let $rootScope;
+let $timeout;
+let $elem;
+let $location;
 let kibiState;
 
 require('ui/kibi/directives/kibi_nav_bar');
@@ -18,11 +20,19 @@ describe('Kibi Components', function () {
   describe('Navigation Bar', function () {
 
     beforeEach(function () {
-      ngMock.module('kibana', function ($provide) {
+      ngMock.module('kibana', 'kibana/courier', 'kibana/global_state', ($provide) => {
         $provide.service('$route', function () {
           return {
             reload: _.noop
           };
+        });
+
+        $provide.service('getAppState', () => {
+          return function () { return new MockState({ filters: [] }); };
+        });
+
+        $provide.service('globalState', () => {
+          return new MockState({ filters: [] });
         });
 
         $provide.constant('kibiEnterpriseEnabled', false);
@@ -31,7 +41,9 @@ describe('Kibi Components', function () {
         $provide.constant('elasticsearchPlugins', ['siren-join']);
       });
 
-      ngMock.inject(function (_kibiState_, Private, $injector, _$timeout_, _$rootScope_, $compile, _Promise_) {
+
+      ngMock.inject(function (_$location_, _kibiState_, Private, $injector, _$timeout_, _$rootScope_, $compile, _Promise_) {
+        $location = _$location_;
         kibiState = _kibiState_;
         Promise = _Promise_;
         $timeout = _$timeout_;
@@ -165,7 +177,7 @@ describe('Kibi Components', function () {
         }
       ];
 
-      sinon.stub(urlHelper, 'isItDashboardUrl').returns(true);
+      $location.path('/dashboard/dashboard1');
 
       initStubs(dashboardGroups, {});
       var response = $httpBackend.whenPOST('/elasticsearch/_msearch?getCountsOnTabs');
@@ -275,7 +287,7 @@ describe('Kibi Components', function () {
         }
       ];
 
-      sinon.stub(urlHelper, 'isItDashboardUrl').returns(true);
+      $location.path('/dashboard/dashboard1');
 
       initStubs(dashboardGroups, {});
       var response = $httpBackend.whenPOST('/elasticsearch/_msearch?getCountsOnTabs');
@@ -335,7 +347,7 @@ describe('Kibi Components', function () {
         }
       ];
 
-      sinon.stub(urlHelper, 'isItDashboardUrl').returns(true);
+      $location.path('/dashboard/dashboard1');
       sinon.stub(urlHelper, 'shouldUpdateCountsBasedOnLocation').returns(true);
 
       initStubs(dashboardGroups, {});

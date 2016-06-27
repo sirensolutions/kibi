@@ -25,6 +25,10 @@ describe('Filter Manager', function () {
     'kibana/courier',
     'kibana/global_state',
     function ($provide) {
+      $provide.service('kibiState', function () {
+        return new MockState({ filters: [] });
+      });
+
       $provide.service('courier', require('fixtures/mock_courier'));
 
       appState = new MockState({ filters: [] });

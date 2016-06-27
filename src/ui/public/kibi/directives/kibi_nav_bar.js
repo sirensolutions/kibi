@@ -10,7 +10,7 @@ define(function (require) {
 
   var app = require('ui/modules').get('app/dashboard');
 
-  app.directive('kibiNavBar', function (kibiState, $rootScope, $http, Promise, config, Private, $timeout, createNotifier) {
+  app.directive('kibiNavBar', function ($location, kibiState, $rootScope, $http, Promise, config, Private, $timeout, createNotifier) {
     var ResizeChecker        = Private(require('ui/vislib/lib/resize_checker'));
     var urlHelper            = Private(require('ui/kibi/helpers/url_helper'));
     var kibiStateHelper      = Private(require('ui/kibi/helpers/kibi_state_helper/kibi_state_helper'));
@@ -129,16 +129,14 @@ define(function (require) {
 
         var removeLocationChangeSuccessHandler = $rootScope.$on('$locationChangeSuccess', function (event, newUrl, oldUrl) {
           // only if we are on dashboards
-          if (urlHelper.isItDashboardUrl()) {
+          if ($location.path().indexOf('/dashboard') !== -1) {
             $el.show();
           } else {
             $el.hide();
             return;
           }
 
-          const currentDashboardId = urlHelper.getCurrentDashboardId();
-          kibiStateHelper.saveFiltersForDashboardId(currentDashboardId, urlHelper.getDashboardFilters(currentDashboardId));
-          kibiStateHelper.saveQueryForDashboardId(currentDashboardId, urlHelper.getDashboardQuery(currentDashboardId));
+          kibiState.saveAppState();
 
           // check that changes on the same dashboard require counts update
           if (urlHelper.shouldUpdateCountsBasedOnLocation(oldUrl, newUrl)) {

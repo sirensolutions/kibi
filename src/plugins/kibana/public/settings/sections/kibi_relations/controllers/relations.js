@@ -58,13 +58,12 @@ define(function (require) {
   });
 
   app.controller('RelationsController',
-  function ($rootScope, $scope, config, Private, $element, $timeout, kbnUrl, createNotifier, kibiEnterpriseEnabled) {
+  function (kibiState, $rootScope, $scope, config, Private, $element, $timeout, kbnUrl, createNotifier, kibiEnterpriseEnabled) {
 
     var notify = createNotifier({
       location: 'Relations Editor'
     });
 
-    var urlHelper = Private(require('ui/kibi/helpers/url_helper'));
     var color = Private(require('ui/vislib/components/color/color'));
 
     $scope.kibiEnterpriseEnabled = kibiEnterpriseEnabled;
@@ -99,6 +98,34 @@ define(function (require) {
 
     var indexToDashboardsMap = null;
     var nodeTypes = [];
+
+    /**
+     * creates a map index -> dashboards
+     *  {
+     *    indexId: [dashboardId1, dashboardId2],
+     *    ...
+     *  }
+     */
+    $scope.getIndexToDashboardMap = function (dashboardIds, ignoreMissingSavedSearch = false) {
+      var _createMap = function (results) {
+        // postprocess the results to create the map
+        var indexToDashboardArrayMap = {};
+        _.each(results, function ({ savedDash, savedSearchMeta }) {
+          if (savedSearchMeta && !indexToDashboardArrayMap[savedSearchMeta.index]) {
+            indexToDashboardArrayMap[savedSearchMeta.index] = [savedDash.id];
+          } else {
+            if (savedSearchMeta && indexToDashboardArrayMap[savedSearchMeta.index].indexOf(savedDash.id) === -1) {
+              indexToDashboardArrayMap[savedSearchMeta.index].push(savedDash.id);
+            }
+          }
+        });
+        return indexToDashboardArrayMap;
+      };
+
+      return kibiState._getDashboardAndSavedSearchMetas(dashboardIds, ignoreMissingSavedSearch).then(function (results) {
+        return _createMap(results);
+      });
+    };
 
     /**
      * Filters out the dashboards that are not relevant in the row with the given id
@@ -370,7 +397,7 @@ define(function (require) {
       };
     }, function (newRelations, oldRelations) {
       if (indexToDashboardsMap === null) {
-        urlHelper.getIndexToDashboardMap(null, true).then(function (map) {
+        $scope.getIndexToDashboardMap(null, true).then(function (map) {
           indexToDashboardsMap = map;
           _updateRelationsDashboards(oldRelations);
         }).catch(function (err) {

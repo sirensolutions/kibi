@@ -32,6 +32,11 @@ describe('Filter Bar Directive', function () {
     ngMock.module('kibana', function ($provide) {
       $provide.constant('kbnDefaultAppId', '');
       $provide.constant('kibiDefaultDashboardId', '');
+
+      $provide.service('kibiState', function () {
+        return new MockState({ filters: [] });
+      });
+
       $provide.service('$route', function () {
         return {
           reload: _.noop

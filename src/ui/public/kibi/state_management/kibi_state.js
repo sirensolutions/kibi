@@ -584,6 +584,13 @@ define(function (require) {
     };
 
     /**
+     * Returns an array of dashboard IDs
+     */
+    KibiState.prototype.getAllDashboardIDs = function () {
+      return _.keys(this[this._properties.dashboards]);
+    };
+
+    /**
      * Returns the current state of the dashboard with given ID
      */
     KibiState.prototype.getState = function (dashboardId) {

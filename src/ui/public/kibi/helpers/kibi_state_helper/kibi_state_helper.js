@@ -185,28 +185,6 @@ define(function (require) {
       return filters;
     };
 
-    /**
-     * Returns a map of dashboardIds to filters
-     */
-    KibiStateHelper.prototype.getAllFilters = function () {
-      const filters = {};
-
-      for (const dashboardId in globalState.k.d) {
-        if (globalState.k.d.hasOwnProperty(dashboardId)) {
-          filters[dashboardId] = globalState.k.d[dashboardId].f || [];
-        }
-      }
-      // add also pinned filters which are stored in global state
-      if (globalState.filters && globalState.filters.length > 0) {
-        for (let dashboardId in filters) {
-          if (filters.hasOwnProperty(dashboardId)) {
-            filters[dashboardId] = filters[dashboardId].concat(globalState.filters);
-          }
-        }
-      }
-      return filters;
-    };
-
     KibiStateHelper.prototype.removeTimeForDashboardId = function (dashboardId, skipGlobalStateSave) {
       this._deleteDashboardProperty(dashboardId, this._properties.time);
       if (!skipGlobalStateSave) {

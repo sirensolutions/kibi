@@ -17,8 +17,6 @@ define(function (require) {
         location: 'Kibi Query Viewer'
       });
 
-      var urlHelper = Private(require('ui/kibi/helpers/url_helper'));
-
       // generate random id to avoid collisions if there are multiple widgets on one dashboard
       $scope.snippetContainerId = kibiUtils.getUuid4();
 

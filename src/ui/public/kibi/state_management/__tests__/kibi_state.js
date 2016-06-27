@@ -96,6 +96,7 @@ describe('State Management', function () {
           }
         ]
       }));
+
       it('should have _urlParam of _k', function () {
         expect(kibiState).to.have.property('_urlParam');
         expect(kibiState._urlParam).to.equal('_k');
@@ -126,6 +127,75 @@ describe('State Management', function () {
       it('should fail when the dashboard is not associated to a search', function () {
         const msg = 'The dashboard [dashboard0] is expected to be associated with a saved search.';
         expect(kibiState.getState).withArgs('dashboard0').to.throwException(msg);
+      });
+    });
+
+    describe('getCurrentDashboardId', function () {
+      it('getCurrentDashboardId', function () {
+        init({ currentDashboardId: 'dashboard1' });
+        expect(kibiState._getCurrentDashboardId()).to.equal('dashboard1');
+      });
+
+      it('getCurrentDashboardId when not on dashboard', function () {
+        init({ currentDashboardId: null, currentPath: '/notdashboard/xxx' });
+        expect(kibiState._getCurrentDashboardId()).to.equal(undefined);
+      });
+    });
+
+    describe('getDashboardAndSavedSearchMetas', function () {
+      beforeEach(() => init({
+        savedDashboards: [
+          {
+            id: 'Articles',
+            title: 'Articles'
+          },
+          {
+            id: 'search-ste',
+            title: 'search-ste',
+            savedSearchId: 'search-ste'
+          }
+        ],
+        savedSearches: [
+          {
+            id: 'search-ste',
+            kibanaSavedObjectMeta: {
+              searchSourceJSON: JSON.stringify(
+                {
+                  index: 'search-ste',
+                  filter: [],
+                  query: {}
+                }
+              )
+            }
+          }
+        ]
+      }));
+
+      it('get saved dashboard and saved search', function (done) {
+        kibiState._getDashboardAndSavedSearchMetas([ 'search-ste' ]).then(function (results) {
+          expect(results).to.have.length(1);
+          expect(results[0].savedDash.id).to.be('search-ste');
+          expect(results[0].savedSearchMeta.index).to.be('search-ste');
+          done();
+        }).catch(done);
+      });
+
+      it('should reject promise if saved search is missing for dashboard', function (done) {
+        kibiState._getDashboardAndSavedSearchMetas([ 'Articles' ]).then(function (results) {
+          done('should fail');
+        }).catch(function (err) {
+          expect(err.message).to.be('The dashboard [Articles] is expected to be associated with a saved search.');
+          done();
+        });
+      });
+
+      it('should reject promise if an unknown dashboard is requested', function (done) {
+        kibiState._getDashboardAndSavedSearchMetas([ 'search-ste', 'unknown dashboard' ]).then(function (results) {
+          done('should fail');
+        }).catch(function (err) {
+          expect(err.message).to.be('Unable to retrieve dashboards: ["unknown dashboard"].');
+          done();
+        });
       });
     });
 

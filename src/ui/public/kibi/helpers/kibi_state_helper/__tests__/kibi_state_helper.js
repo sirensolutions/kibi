@@ -190,49 +190,6 @@ describe('Kibi Components', function () {
       expect(foundFilter2).not.to.equal(undefined);
     });
 
-    describe('get all filters for every dashboards', function () {
-      it('should get all filters', function () {
-        globalState.k = {
-          d: {
-            dashboard1: {
-              f: [ { filter: 1 } ]
-            },
-            dashboard2: {
-              f: [ { filter: 2 } ]
-            }
-          }
-        };
-        globalState.save();
-        const expected = {
-          dashboard1: [ { filter: 1 } ],
-          dashboard2: [ { filter: 2 } ]
-        };
-
-        expect(kibiStateHelper.getAllFilters()).to.eql(expected);
-      });
-
-      it('should get all filters including pinned filters', function () {
-        globalState.k = {
-          d: {
-            dashboard1: {
-              f: [ { filter: 1 } ]
-            },
-            dashboard2: {
-              f: [ { filter: 2 } ]
-            }
-          }
-        };
-        globalState.filters = [ { filter: 3 } ];
-        globalState.save();
-        const expected = {
-          dashboard1: [ { filter: 1 }, { filter: 3 } ],
-          dashboard2: [ { filter: 2 }, { filter: 3 } ]
-        };
-
-        expect(kibiStateHelper.getAllFilters()).to.eql(expected);
-      });
-    });
-
     it('save time filter for dashboard', function () {
       var from = 1;
       var to = 5;

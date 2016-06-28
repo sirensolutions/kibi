@@ -113,6 +113,8 @@ define(function (require) {
 
         const updateCounts = function () {
           return dashboardGroupHelper.computeGroups().then(function (newDashboardGroups) {
+            _updateAllCounts(null, [ 'for now update all always' ]);
+            /* TODO - to be refatored soon
             if (!$scope.dashboardGroups) {
               $scope.dashboardGroups = newDashboardGroups;
               _updateAllCounts(null, [ 'oldDashboardsGroups was undefined' ]);
@@ -123,6 +125,7 @@ define(function (require) {
               var changes = dashboardGroupHelper.updateDashboardGroups($scope.dashboardGroups, newDashboardGroups);
               _updateAllCounts(changes.indexes, changes.reasons);
             }
+            */
           });
         };
 

@@ -182,6 +182,13 @@ define(function (require) {
       return Promise.resolve();
     };
 
+    KibiState.prototype.getSelectedDashboardId = function (groupId) {
+      if (this[this._properties.groups]) {
+        return this[this._properties.groups][groupId];
+      }
+      return null;
+    };
+
     KibiState.prototype.setSelectedDashboardId = function (groupId, dashboardId) {
       if (!this[this._properties.groups]) {
         this[this._properties.groups] = {};

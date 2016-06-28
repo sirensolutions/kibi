@@ -1,7 +1,6 @@
 define(function (require) {
   return function DashboardGroupHelperFactory(kbnUrl, kibiState, Private, savedDashboards, savedDashboardGroups, Promise) {
     var _ = require('lodash');
-    var kibiStateHelper = Private(require('ui/kibi/helpers/kibi_state_helper/kibi_state_helper'));
     var countHelper = Private(require('ui/kibi/helpers/count_helper/count_helper'));
 
     function DashboardGroupHelper() {
@@ -102,8 +101,9 @@ define(function (require) {
                 title: self.shortenDashboardName(group.title, d.title),
                 onClick: function () {
                   self._getOnClickForDashboardInGroup(d.id, group.id);
-                },
-                filters: kibiStateHelper.getFiltersForDashboardId(d.id)
+                }
+                // TODO: commented - to be solved soon
+                //filters: kibiStateHelper.getFiltersForDashboardId(d.id)
               };
               if (currentDashboardId === d.id) {
                 selected = dashboard;
@@ -114,7 +114,7 @@ define(function (require) {
 
             // try to get the last selected one for this group
             if (!selected && dashboards.length > 0) {
-              var lastSelectedId = kibiStateHelper.getSelectedDashboardId(group.id);
+              var lastSelectedId = kibiState.getSelectedDashboardId(group.id);
               _.each(dashboards, function (dashboard) {
                 if (dashboard.id === lastSelectedId) {
                   selected = dashboard;
@@ -213,8 +213,9 @@ define(function (require) {
               id: dashboardDef.id,
               title: dashboardDef.title,
               indexPatternId: dashboardDef.indexPatternId,
-              savedSearchId: dashboardDef.savedSearchId,
-              filters: kibiStateHelper.getFiltersForDashboardId(dashboardDef.id)
+              savedSearchId: dashboardDef.savedSearchId
+              // TODO: commented - to be solved soon
+              //filters: kibiStateHelper.getFiltersForDashboardId(dashboardDef.id)
             };
 
             dashboardGroups1.push({
@@ -279,6 +280,7 @@ define(function (require) {
       });
     };
 
+    /*
     DashboardGroupHelper.prototype.detectJoinSetFilterInGroups = function (newDashboardGroups) {
       for (var gIndex = 0; gIndex < newDashboardGroups.length; gIndex++) {
         var g = newDashboardGroups[gIndex];
@@ -310,6 +312,7 @@ define(function (require) {
       }
       return false;
     };
+    */
 
     /**
      * when possible update just the different properties
@@ -375,6 +378,7 @@ define(function (require) {
             var d = newDashboardGroups[gIndex].dashboards[dIndex];
 
             // first check that the number of filters changed on selected dashboard
+            /* TODO: commented - to be solved soon
             if (oldDashboardGroups[gIndex].selected.id === d.id &&
                 !_.isEqual(oldDashboardGroups[gIndex].dashboards[dIndex].filters, d.filters, true)
             ) {
@@ -382,6 +386,7 @@ define(function (require) {
               reasons.push('different number of filters for dashboard ' + dIndex + ' for group ' + gIndex);
               updateCount = true;
             }
+            */
 
             if (oldDashboardGroups[gIndex].selected.id === d.id &&
                 oldDashboardGroups[gIndex].dashboards[dIndex].indexPatternId !== d.indexPatternId
@@ -417,6 +422,7 @@ define(function (require) {
       // if there is a join_set filter on any dashboard just update all groups
       // this can not go at the top as the code above if modifying the oldDashboardGroups
       // e.g updating the selected one etc...
+      /* TODO: commented - to be solved soon
       if (this.detectJoinSetFilterInGroups(newDashboardGroups)) {
         for (var i = 0; i < newDashboardGroups.length; i++) {
           groupIndexesToUpdateCountsOn.push(i);
@@ -426,6 +432,7 @@ define(function (require) {
           reasons: ['There is a join_set filter so lets update all groups']
         };
       }
+      */
 
       return {
         indexes: groupIndexesToUpdateCountsOn,

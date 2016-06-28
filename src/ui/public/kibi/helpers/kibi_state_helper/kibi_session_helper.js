@@ -29,9 +29,7 @@ define(function (require) {
       });
 
       self.destroyListener2 = $rootScope.$on('$routeChangeSuccess', function () {
-        var self = this;
         var s = kibiState.getSessionId();
-
         if (!s) {
           // no sesion id
           self.getId().then(function (sessionId) {

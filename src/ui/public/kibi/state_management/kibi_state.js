@@ -300,7 +300,7 @@ define(function (require) {
               if (hit) {
                 ordered.push(hit);
               } else {
-                throw new Error('Could not found dashboard [' + id + '] in savedDashboards');
+                return Promise.reject(new Error('Could not find dashboard [' + id + '] in savedDashboards'));
               }
             });
             return ordered;

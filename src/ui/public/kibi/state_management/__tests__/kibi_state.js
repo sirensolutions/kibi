@@ -171,6 +171,34 @@ describe('State Management', function () {
         ]
       }));
 
+      it('get saved dashboard and saved search the order of dashboardIds should be preserved' , function (done) {
+        var ignoreMissingSavedSearch = true;
+        // this tests checks that although the savedDashboard order is
+        // 'Articles', 'search-ste'
+        // when we provide the ids in reverse order like 'search-ste', 'Articles'
+        // we get the meta in the same order as the ids were provided
+        kibiState._getDashboardAndSavedSearchMetas([ 'search-ste', 'Articles'], ignoreMissingSavedSearch).then(function (results) {
+          expect(results).to.have.length(2);
+          expect(results[0].savedDash.id).to.be('search-ste');
+          expect(results[0].savedSearchMeta.index).to.be('search-ste');
+          expect(results[1].savedDash.id).to.be('Articles');
+          expect(results[1].savedSearchMeta).to.be(null);
+          done();
+        }).catch(done);
+      });
+
+      it('get saved dashboard and saved search the order of dashboardIds should be preserved 2' , function (done) {
+        var ignoreMissingSavedSearch = true;
+        kibiState._getDashboardAndSavedSearchMetas([ 'Articles', 'search-ste'], ignoreMissingSavedSearch).then(function (results) {
+          expect(results).to.have.length(2);
+          expect(results[0].savedDash.id).to.be('Articles');
+          expect(results[0].savedSearchMeta).to.be(null);
+          expect(results[1].savedDash.id).to.be('search-ste');
+          expect(results[1].savedSearchMeta.index).to.be('search-ste');
+          done();
+        }).catch(done);
+      });
+
       it('get saved dashboard and saved search', function (done) {
         kibiState._getDashboardAndSavedSearchMetas([ 'search-ste' ]).then(function (results) {
           expect(results).to.have.length(1);

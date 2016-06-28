@@ -128,7 +128,7 @@ define(function (require) {
           $state.filters = _.filter($state.filters, function (f) {
             return !f.join_set;
           });
-          if (panelEnabled) {
+          if (dash.id && panelEnabled) {
             kibiState.getState(dash.id).then(({ filters }) => {
               _.each(filters, (filter) => {
                 if (filter.join_set) {

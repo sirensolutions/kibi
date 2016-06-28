@@ -113,6 +113,7 @@ define(function (require) {
 
         const updateCounts = function () {
           return dashboardGroupHelper.computeGroups().then(function (newDashboardGroups) {
+            $scope.dashboardGroups = newDashboardGroups;
             _updateAllCounts(null, [ 'for now update all always' ]);
             /* TODO - to be refatored soon
             if (!$scope.dashboardGroups) {

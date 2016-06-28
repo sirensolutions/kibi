@@ -134,7 +134,7 @@ define(function (require) {
               const query = _.find(meta.filter, (filter) => filter.query && filter.query.query_string && !filter.meta);
 
               // reset appstate
-              if (dashboard.id === appState.id) {
+              if (appState && dashboard.id === appState.id) {
                 // filters
                 appState.filters = filters;
                 // query
@@ -696,6 +696,11 @@ define(function (require) {
       }
 
       const appState = getAppState();
+
+      if (!appState) {
+        return Promise.resolve(false);
+      }
+
       const getMetas = this._getDashboardAndSavedSearchMetas(dashboardIds);
 
       return getMetas.then((metas) => {
@@ -765,6 +770,9 @@ define(function (require) {
         pinned: false
       };
 
+      if (!appState) {
+        return Promise.resolve(false);
+      }
       return Promise.all([
         this._getFilters(currentDashboardId, appState, null, options),
         this._getQueries(currentDashboardId, appState, null)

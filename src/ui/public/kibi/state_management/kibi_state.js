@@ -761,7 +761,10 @@ define(function (require) {
               if (!timesPerIndex[thatIndex]) {
                 timesPerIndex[thatIndex] = [];
               }
-              timesPerIndex[thatIndex].push(rest[i + 2]);
+              // add time filter only if it exists
+              if (rest[i + 2]) {
+                timesPerIndex[thatIndex].push(rest[i + 2]);
+              }
             }
 
             _.forOwn(filtersPerIndex, (filters, index) => uniqFilters(_.compact(filters), { state: true, negate: true, disabled: true }));

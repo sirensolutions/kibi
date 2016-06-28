@@ -293,6 +293,7 @@ define(function (require) {
           // here we need to sort the results based on dashboardIds order
           if (dashboardIds && dashboardIds.length > 0) {
             var ordered = [];
+            var error;
             _.each(dashboardIds, (id) => {
               var hit = _.find(savedDashboardsAndsavedMetas, (dashAndMeta) => {
                 return id === dashAndMeta.savedDash.id;
@@ -300,9 +301,13 @@ define(function (require) {
               if (hit) {
                 ordered.push(hit);
               } else {
-                return Promise.reject(new Error('Could not find dashboard [' + id + '] in savedDashboards'));
+                error = new Error('Could not find dashboard [' + id + '] in savedDashboards');
+                return false; // to break the loop
               }
             });
+            if (error) {
+              return Promise.reject(error);
+            }
             return ordered;
           }
           return savedDashboardsAndsavedMetas;

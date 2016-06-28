@@ -289,7 +289,24 @@ define(function (require) {
           const found = _(promises).filter((arg) => typeof arg === 'object').map(({ savedDash, savedSearchMeta }) => savedDash.id).value();
           return Promise.reject(new Error(`Unable to retrieve dashboards: ${JSON.stringify(_.difference(dashboardIds, found))}.`));
         }
-        return Promise.all(promises);
+        return Promise.all(promises).then((savedDashboardsAndsavedMetas) => {
+          // here we need to sort the results based on dashboardIds order
+          if (dashboardIds && dashboardIds.length > 0) {
+            var ordered = [];
+            _.each(dashboardIds, (id) => {
+              var hit = _.find(savedDashboardsAndsavedMetas, (dashAndMeta) => {
+                return id === dashAndMeta.savedDash.id;
+              });
+              if (hit) {
+                ordered.push(hit);
+              } else {
+                throw new Error('Could not found dashboard [' + id + '] in savedDashboards');
+              }
+            });
+            return ordered;
+          }
+          return savedDashboardsAndsavedMetas;
+        });
       });
     };
 

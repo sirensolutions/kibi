@@ -322,7 +322,7 @@ define(function (require) {
       let filters;
 
       if (this._getCurrentDashboardId() === dashboardId) {
-        filters = appState.filters || [];
+        filters = appState.filters && _.cloneDeep(appState.filters) || [];
       } else {
         filters = this._getDashboardProperty(dashboardId, this._properties.filters) || [];
       }
@@ -360,7 +360,7 @@ define(function (require) {
 
       if (this._getCurrentDashboardId() === dashboardId) {
         if (appState.query) {
-          query = appState.query;
+          query = _.cloneDeep(appState.query);
         }
       } else {
         const q = this._getDashboardProperty(dashboardId, this._properties.query);
@@ -795,7 +795,7 @@ define(function (require) {
         pinned: false
       };
 
-      if (!appState) {
+      if (!appState || !currentDashboardId) {
         return Promise.resolve(false);
       }
       return Promise.all([

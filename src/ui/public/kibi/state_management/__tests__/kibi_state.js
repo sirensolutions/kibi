@@ -458,6 +458,24 @@ describe('State Management', function () {
         ]
       }));
 
+      it('should not alter the appstate query', function (done) {
+        const query1 = {
+          query_string: {
+            query: 'mobile'
+          }
+        };
+
+        appState.query = query1;
+        kibiState.getState('dashboard1')
+        .then(({ queries }) => {
+          expect(queries).to.have.length(2);
+          queries[0].query.query_string.query = 'toto';
+          queries[1].query.query_string.query = 'tata';
+          expect(appState.query.query_string.query).to.be('mobile');
+          done();
+        }).catch(done);
+      });
+
       it('should combine queries from the appstate/kibistate with the one from the search meta', function (done) {
         const query1 = {
           query_string: {
@@ -556,6 +574,23 @@ describe('State Management', function () {
           }
         ]
       }));
+
+      it('should not alter the appstate filters', function (done) {
+        const filters = [
+          {
+            term: { field1: 'bbb' },
+            meta: { disabled: false }
+          }
+        ];
+
+        appState.filters = filters;
+        kibiState.getState('dashboard1')
+        .then(({ filters }) => {
+          expect(filters).to.have.length(3);
+          expect(appState.filters).to.have.length(1);
+          done();
+        }).catch(done);
+      });
 
       it('should remove duplicates', function (done) {
         const filters = [
@@ -1616,5 +1651,6 @@ describe('State Management', function () {
     });
   });
 });
+
 
 

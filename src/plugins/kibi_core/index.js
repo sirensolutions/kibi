@@ -59,10 +59,9 @@ module.exports = function (kibana) {
       if (error instanceof Error) {
         err = Boom.wrap(error, 400);
       } else {
-        err = Boom.badRequest('Failed to execute query on an external datasource ' + JSON.stringify(error));
-        // TODO: review and check that the line below works after migrating to new Boom version
-        // https://github.com/sirensolutions/kibi-internal/issues/1180
-        //err = Boom.badRequest('Failed to execute query on an external datasource', error);
+        //When put additional data in badRequest() it's not be used. So we need to add error.message manually
+        const msg = 'Failed to execute query on an external datasource' + (error.message ? ': ' + error.message : '');
+        err = Boom.badRequest(msg);
       }
       return reply(err);
     });

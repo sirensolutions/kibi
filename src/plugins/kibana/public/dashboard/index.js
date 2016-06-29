@@ -35,7 +35,7 @@ define(function (require) {
   .when('/dashboard', {
     template: require('plugins/kibana/dashboard/index.html'),
     resolve: {
-      dash: function (timefilter, savedDashboards, config) {
+      dash: function (timefilter, savedDashboards) {
         // kibi: do not show the timepicker when no dashboard is selected
         // Since tabs can show counts unrelated to the time shown in the timefilter, this would be misleading
         timefilter.enabled = false;
@@ -59,7 +59,7 @@ define(function (require) {
 
   app.directive('dashboardApp', function (courier, AppState, timefilter, kbnUrl, createNotifier) {
     return {
-      controller: function (kibiState, globalState, $scope, $rootScope, $route, $routeParams, Private, getAppState, config) {
+      controller: function (kibiState, globalState, $scope, $rootScope, $route, $routeParams, Private, getAppState) {
 
         var queryFilter = Private(require('ui/filter_bar/query_filter'));
 
@@ -124,27 +124,6 @@ define(function (require) {
         var $uiState = $scope.uiState = $state.makeStateful('uiState');
 
         // kibi: added so the kibi-dashboard-toolbar which was moved out could comunicate with the main app
-        var _addRemoveJoinSetFilter = function (panelEnabled) {
-          $state.filters = _.filter($state.filters, function (f) {
-            return !f.join_set;
-          });
-          if (dash.id && panelEnabled) {
-            kibiState.getState(dash.id).then(({ filters }) => {
-              _.each(filters, (filter) => {
-                if (filter.join_set) {
-                  $state.filters.push(filter.join_set);
-                  return false;
-                }
-              });
-            }).catch(notify.error);
-          }
-        };
-
-        var relationalPanelListenerOff = $rootScope.$on('change:config.kibi:relationalPanel', function (event, panelEnabled) {
-          _addRemoveJoinSetFilter(panelEnabled);
-        });
-        _addRemoveJoinSetFilter(config.get('kibi:relationalPanel'));
-
         var stDashboardInvokeMethodOff = $rootScope.$on('kibi:dashboard:invoke-method', function (event, methodName) {
           $scope[methodName]();
         });
@@ -165,7 +144,6 @@ define(function (require) {
           dash.destroy();
           stDashboardInvokeMethodOff();
           stDashboardSetProperty();
-          relationalPanelListenerOff();
         });
         // kibi: end
 

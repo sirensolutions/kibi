@@ -9,7 +9,8 @@ define(function (require) {
 
   require('ui/kibi/directives/kibi_entity_clipboard');
 
-  module.directive('filterBar', function ($location, $rootScope, Private, Promise, getAppState, globalState) {
+  module.directive('filterBar', function (createNotifier, kibiState, $location, $rootScope, Private,
+                                          Promise, getAppState, globalState, config) {
     var joinExplain = Private(require('ui/filter_bar/join_explanation'));
     var mapAndFlattenFilters = Private(require('ui/filter_bar/lib/mapAndFlattenFilters'));
     var mapFlattenAndWrapFilters = Private(require('ui/filter_bar/lib/mapFlattenAndWrapFilters'));
@@ -20,6 +21,10 @@ define(function (require) {
     var queryFilter = Private(require('ui/filter_bar/query_filter'));
     var privateFilterFieldRegex = /(^\$|meta)/;
     var markFiltersBySelectedEntities = Private(require('ui/kibi/components/commons/_mark_filters_by_selected_entities'));
+
+    var notify = createNotifier({
+      name: 'Kibi Navigation Bar'
+    });
 
     return {
       restrict: 'E',
@@ -225,6 +230,42 @@ define(function (require) {
         // .script
         $scope.recreateFilterLabel = joinExplain.createLabel;
 
+        var _addRemoveJoinSetFilter = function (panelEnabled) {
+          const currentDashboardId = kibiState._getCurrentDashboardId();
+          if (currentDashboardId && panelEnabled) {
+            $scope.state.filters = _.filter($scope.state.filters, (f) => !f.join_set);
+            kibiState.getState(currentDashboardId).then(({ filters }) => {
+              _.each(filters, (filter) => {
+                if (filter.join_set) {
+                  queryFilter.addFilters(filter);
+                  return false;
+                }
+              });
+            }).catch(notify.error);
+          }
+        };
+
+        var relationalPanelListenerOff = $rootScope.$on('change:config.kibi:relationalPanel', function (event, panelEnabled) {
+          _addRemoveJoinSetFilter(panelEnabled);
+        });
+        _addRemoveJoinSetFilter(config.get('kibi:relationalPanel'));
+
+        const addJoinSetFilterOnSave = function (diff) {
+          const currentDashboardId = kibiState._getCurrentDashboardId();
+          if (diff.indexOf(kibiState._properties.enabled_relations) !== -1 && currentDashboardId) {
+            kibiState.getState(currentDashboardId).then(function ({ filters }) {
+              $scope.state.filters = _.filter($scope.state.filters, (f) => !f.join_set);
+              _.each(filters, function (filter) {
+                if (filter.join_set) {
+                  queryFilter.addFilters(filter);
+                  return false;
+                }
+              });
+            }).catch(notify.error);
+          }
+        };
+        kibiState.on('save_with_changes', addJoinSetFilterOnSave);
+
         var off1 = $rootScope.$on('kibi:entityURIEnabled', function (event, entityURIEnabled) {
           updateFilters();
         });
@@ -235,6 +276,8 @@ define(function (require) {
           off1();
           off2();
           globalState.off('save_with_changes', saveWithChangesHandler);
+          kibiState.off('save_with_changes', addJoinSetFilterOnSave);
+          relationalPanelListenerOff();
         });
 
       }

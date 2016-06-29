@@ -2,6 +2,7 @@ define(function (require) {
 
   const module = require('ui/modules').get('kibana/kibi_sequential_join_vis', ['kibana']);
   const _ = require('lodash');
+  const angular = require('angular');
   const chrome = require('ui/chrome');
 
   require('ui/kibi/directives/kibi_select');
@@ -43,7 +44,7 @@ define(function (require) {
         })).then((results) => {
           let query = '';
           _.each(results, function (result) {
-            query += `{"index": "${result.button.targetIndexPatternId}"}\n${JSON.stringify(result.query)}\n`;
+            query += `{"index": "${result.button.targetIndexPatternId}"}\n${angular.toJson(result.query)}\n`;
           });
 
           // ?getCountsOnButton has no meanning it is just usefull to filter when inspecting requests

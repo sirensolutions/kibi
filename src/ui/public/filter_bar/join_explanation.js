@@ -1,6 +1,6 @@
 /*eslint no-use-before-define: 1*/
 define(function (require) {
-  return function JoinExplanationFactory(Private, indexPatterns, Promise, $timeout) {
+  return function JoinExplanationFactory(Private, indexPatterns, Promise, $timeout, kibiState) {
 
     var jQuery = require('jquery');
     var qtip = require('kibi-qtip2');
@@ -172,13 +172,17 @@ define(function (require) {
         var promises = [];
         _.each(queries, function (query) {
           // in our case we have filtered query for now
-          if (query.query && query.query.bool && query.query.bool.must &&
-             !(query.query.bool.must.query_string &&
-               query.query.bool.must.query_string.query === '*' &&
-               query.query.bool.must.query_string.analyze_wildcard === true)
-          ) {
-            // only if the query is different than star query
-            promises.push(explainFilter({query: query.query.bool.must}, indexId));
+          if (query.query && query.query.bool && query.query.bool.must) {
+            let queryStrings = query.query.bool.must;
+            if (!(query.query.bool.must instanceof Array)) {
+              queryStrings = [ query.query.bool.must ];
+            }
+            _.each(queryStrings, (queryString) => {
+              // only if the query is different than star query
+              if (!kibiState._isDefaultQuery(queryString)) {
+                promises.push(explainFilter(queryString, indexId));
+              }
+            });
           }
 
           if (query.query && query.query.bool && query.query.bool.filter && query.query.bool.filter.bool) {

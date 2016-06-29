@@ -11,7 +11,9 @@ describe('Kibi Components', function () {
     require('testUtils/noDigestPromises').activateForSuite();
 
     beforeEach(function () {
-      ngMock.module('kibana');
+      ngMock.module('kibana', function ($provide) {
+        $provide.constant('elasticsearchPlugins', ['siren-join']);
+      });
 
       ngMock.module('kibana/index_patterns', function ($provide) {
         $provide.service('indexPatterns', function (Private, Promise) {

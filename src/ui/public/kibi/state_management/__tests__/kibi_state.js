@@ -465,6 +465,24 @@ describe('State Management', function () {
         ]
       }));
 
+      it('should not alter the kibistate query', function (done) {
+        const query = {
+          query_string: {
+            query: 'mobile'
+          }
+        };
+
+        kibiState._setDashboardProperty('dashboard2', kibiState._properties.query, query);
+        kibiState.getState('dashboard2')
+        .then(({ queries }) => {
+          expect(queries).to.have.length(2);
+          queries[0].query.query_string.query = 'toto';
+          queries[1].query.query_string.query = 'tata';
+          expect(kibiState._getDashboardProperty('dashboard2', kibiState._properties.query).query_string.query).to.be('mobile');
+          done();
+        }).catch(done);
+      });
+
       it('should not alter the appstate query', function (done) {
         const query1 = {
           query_string: {
@@ -581,6 +599,31 @@ describe('State Management', function () {
           }
         ]
       }));
+
+      it('should not alter the kibistate filters', function (done) {
+        const filters = [
+          {
+            term: { field1: 'bbb' },
+            meta: { disabled: false }
+          }
+        ];
+
+        kibiState._setDashboardProperty('dashboard2', kibiState._properties.filters, filters);
+        kibiState.getState('dashboard2')
+        .then(({ filters }) => {
+          expect(filters).to.have.length(3);
+          // kibistate
+          expect(filters[0].term.field1).to.be('bbb');
+          // pinned filter
+          expect(filters[1].term.field1).to.be('i am pinned');
+          // search meta
+          expect(filters[2].term.field1).to.be('aaa');
+          const kibiStateFilters = kibiState._getDashboardProperty('dashboard2', kibiState._properties.filters);
+          expect(kibiStateFilters).to.have.length(1);
+          expect(kibiStateFilters[0].term.field1).to.be('bbb');
+          done();
+        }).catch(done);
+      });
 
       it('should not alter the appstate filters', function (done) {
         const filters = [

@@ -324,7 +324,8 @@ define(function (require) {
       if (this._getCurrentDashboardId() === dashboardId) {
         filters = appState.filters && _.cloneDeep(appState.filters) || [];
       } else {
-        filters = this._getDashboardProperty(dashboardId, this._properties.filters) || [];
+        const kibiStateFilters = this._getDashboardProperty(dashboardId, this._properties.filters);
+        filters = kibiStateFilters && _.cloneDeep(kibiStateFilters) || [];
       }
 
       if (pinned) {
@@ -368,7 +369,7 @@ define(function (require) {
       } else {
         const q = this._getDashboardProperty(dashboardId, this._properties.query);
         if (q) {
-          query = q;
+          query = _.cloneDeep(q);
         }
       }
 

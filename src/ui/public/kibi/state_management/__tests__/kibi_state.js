@@ -779,6 +779,25 @@ describe('State Management', function () {
         }).catch(done);
       });
 
+      it('should delete filters from kibi state if appState has an empty array for filters', function (done) {
+        appState.filters = [];
+        appState.query = {
+          query_string: {
+            query: '*',
+            analyze_wildcard: true
+          }
+        };
+        kibiState._setDashboardProperty('dashboard1', kibiState._properties.filters, {term: 'should be removed'});
+
+        kibiState.saveAppState()
+        .then(() => {
+          expect(kibiState._getDashboardProperty('dashboard1', kibiState._properties.filters)).to.not.be.ok();
+          expect(kibiState._getDashboardProperty('dashboard1', kibiState._properties.query)).to.not.be.ok();
+          expect(kibiState._getDashboardProperty('dashboard1', kibiState._properties.time)).to.not.be.ok();
+          done();
+        }).catch(done);
+      });
+
       it('should not store in kibistate the join_set', function (done) {
         const filter1 = {
           join_set: { field1: 'bbb' },

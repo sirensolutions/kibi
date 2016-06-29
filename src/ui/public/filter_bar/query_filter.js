@@ -90,9 +90,11 @@ define(function (require) {
 
       state.filters.splice(index, 1);
 
-      // remove all enabled relations for the join_set
-      kibiState.disableAllRelations();
-      kibiState.save();
+      // kibi: if it was a join_set one
+      if (filter.join_set) {
+        kibiState.disableAllRelations();
+        kibiState.save();
+      }
       // kibi: end
     };
 

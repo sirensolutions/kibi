@@ -831,6 +831,8 @@ define(function (require) {
         }
         if (filters && filters.length) {
           this._setDashboardProperty(currentDashboardId, this._properties.filters, filters);
+        } else {
+          this._deleteDashboardProperty(currentDashboardId, this._properties.filters);
         }
         // save the query
         // queries contains only one query, the one from appState, since the meta argument is null

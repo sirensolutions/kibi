@@ -7,6 +7,7 @@ define(function (require) {
   require('ui/kibi/directives/kibi_stop_click_event');
 
   var _ = require('lodash');
+  const angular = require('angular');
 
   var app = require('ui/modules').get('app/dashboard');
 
@@ -54,7 +55,7 @@ define(function (require) {
             _.each(results, function (result, index) {
               if (result.query && result.indexPatternId) {
                 query += '{"index" : "' + indexPath(result.indexPatternId) + '"}\n';
-                query += JSON.stringify(result.query) + '\n';
+                query += angular.toJson(result.query) + '\n';
                 indexesToUpdate.push(index);
               }
             });

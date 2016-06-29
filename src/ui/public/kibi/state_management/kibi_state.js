@@ -344,7 +344,7 @@ define(function (require) {
       // remove disabled filters
       filters = _.filter(filters, (f) => f.meta && !f.meta.disabled);
       // remove join_set filter since it is computed only if needed.
-      // It is available through the appState.filters
+      // It may be available through the appState.filters
       _.remove(filters, (filter) => filter.join_set);
       return Promise.resolve(uniqFilters(filters, { state: true, negate: true, disabled: true }));
     };

@@ -69,7 +69,6 @@ describe('Kibi Components', function () {
 
       if (init) {
         dashboardGroupHelper.computeGroups.returns(Promise.resolve(groups));
-        dashboardGroupHelper.updateDashboardGroups.returns(changes);
         _.each(dashboardGroups, function (group, i) {
           var query = {
             query: group.query ? {} : undefined,
@@ -81,7 +80,6 @@ describe('Kibi Components', function () {
         });
       } else {
         sinon.stub(dashboardGroupHelper, 'computeGroups').returns(Promise.resolve(groups));
-        sinon.stub(dashboardGroupHelper, 'updateDashboardGroups').returns(changes);
         var stub = sinon.stub(dashboardGroupHelper, 'getCountQueryForSelectedDashboard');
         _.each(dashboardGroups, function (group, i) {
           var query = {

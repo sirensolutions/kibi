@@ -1,7 +1,8 @@
-var expect = require('expect.js');
-var ngMock = require('ngMock');
+const expect = require('expect.js');
+const ngMock = require('ngMock');
+const MockState = require('fixtures/mock_state');
+const mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
 
-var mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
 var fakeSavedDashboards = [
   {
     id: 'Articles',
@@ -103,7 +104,7 @@ var fakeSavedSearches = [
 ];
 
 var dashboardGroupHelper;
-var kibiStateHelper;
+var appState;
 
 function init({ indexPatterns, savedDashboards, savedDashboardGroups, savedSearches }) {
   return function () {
@@ -112,6 +113,10 @@ function init({ indexPatterns, savedDashboards, savedDashboardGroups, savedSearc
       $provide.constant('kbnDefaultAppId', 'dashboard');
       $provide.constant('kibiDefaultDashboardId', 'Articles');
       $provide.constant('elasticsearchPlugins', ['siren-join']);
+      appState = new MockState({ filters: [] });
+      $provide.service('getAppState', () => {
+        return function () { return appState; };
+      });
     });
 
     ngMock.module('app/dashboard', function ($provide) {
@@ -132,7 +137,6 @@ function init({ indexPatterns, savedDashboards, savedDashboardGroups, savedSearc
 
     ngMock.inject(function ($injector, Private) {
       dashboardGroupHelper = Private(require('ui/kibi/helpers/dashboard_group_helper'));
-      kibiStateHelper = Private(require('ui/kibi/helpers/kibi_state_helper/kibi_state_helper'));
     });
   };
 }
@@ -274,7 +278,7 @@ describe('Kibi Components', function () {
       });
     });
 
-
+    /*
     describe('updateDashboardGroups', function () {
       beforeEach(init({}));
 
@@ -596,6 +600,7 @@ describe('Kibi Components', function () {
       });
 
     });
+    */
 
     describe('getCountQueryForSelectedDashboard', function () {
 

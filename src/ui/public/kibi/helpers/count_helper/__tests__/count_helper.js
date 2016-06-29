@@ -388,10 +388,6 @@ describe('Kibi Components', function () {
           },
           {
             meta:{ disabled: false },
-            join_set: {}
-          },
-          {
-            meta:{ disabled: false },
             join_sequence: {}
           }
         ];
@@ -467,10 +463,6 @@ describe('Kibi Components', function () {
           {
             meta:{negate:true},
             script: {}
-          },
-          {
-            meta:{negate:true},
-            join_set: {}
           }
         ];
         appState.filters = differentKindOfNegatedFilters;
@@ -539,7 +531,7 @@ describe('Kibi Components', function () {
                   must: [
                     {
                       join_set: {
-                        focus: 'index1',
+                        focus: 'index2',
                         relations: [
                           [
                             {
@@ -557,15 +549,7 @@ describe('Kibi Components', function () {
                           ]
                         ],
                         queries: {
-                          index2: [
-                            {
-                              query: {
-                                query_string: {
-                                  query: 'funded_year:>2010',
-                                  analyze_wildcard: true
-                                }
-                              }
-                            },
+                          index1: [
                             {
                               range: {
                                 date: {
@@ -576,6 +560,14 @@ describe('Kibi Components', function () {
                               }
                             }
                           ]
+                        }
+                      }
+                    },
+                    {
+                      query: {
+                        query_string: {
+                          query: 'funded_year:>2010',
+                          analyze_wildcard: true
                         }
                       }
                     },

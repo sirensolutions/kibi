@@ -11,7 +11,10 @@ define(function (require) {
 
   var app = require('ui/modules').get('app/dashboard');
 
-  app.directive('kibiNavBar', function ($location, kibiState, $rootScope, $http, Promise, config, Private, $timeout, createNotifier) {
+  app.directive('kibiNavBar', function (
+    $location, $rootScope, $http, $timeout, getAppState, globalState, kibiState,
+    Promise, config, Private, createNotifier, savedDashboards
+  ) {
     var ResizeChecker        = Private(require('ui/vislib/lib/resize_checker'));
     var urlHelper            = Private(require('ui/kibi/helpers/url_helper'));
     var dashboardGroupHelper = Private(require('ui/kibi/helpers/dashboard_group_helper'));
@@ -92,56 +95,8 @@ define(function (require) {
           }).catch(notify.warning);
         };
 
-
-        // debounce count queries
-        var lastEventTimer;
-        var _updateAllCounts = function (groupIndexesToUpdate, reason) {
-          if ($el.css('display') === 'none') {
-            return;
-          }
-
-          $timeout.cancel(lastEventTimer);
-          if (!groupIndexesToUpdate) {
-            // there are no indexes so it means we have to update all counts
-            // in this case fire the query immediately
-            _fireUpdateAllCounts(groupIndexesToUpdate, reason);
-          } else {
-            lastEventTimer = $timeout(function () {
-              _fireUpdateAllCounts(groupIndexesToUpdate, reason);
-            }, 750);
-          }
-        };
-
-        const updateCounts = function () {
-          return dashboardGroupHelper.computeGroups().then(function (newDashboardGroups) {
-            $scope.dashboardGroups = newDashboardGroups;
-            _updateAllCounts(null, [ 'for now update all always' ]);
-            /* TODO - to be refatored soon
-            if (!$scope.dashboardGroups) {
-              $scope.dashboardGroups = newDashboardGroups;
-              _updateAllCounts(null, [ 'oldDashboardsGroups was undefined' ]);
-            } else if ($scope.dashboardGroups.length !== newDashboardGroups.length) {
-              $scope.dashboardGroups = newDashboardGroups;
-              _updateAllCounts(null, [ 'dashboardsGroups length not the same' ]);
-            } else {
-              var changes = dashboardGroupHelper.updateDashboardGroups($scope.dashboardGroups, newDashboardGroups);
-              _updateAllCounts(changes.indexes, changes.reasons);
-            }
-            */
-          });
-        };
-
-        var removeLocationChangeSuccessHandler = $rootScope.$on('$locationChangeSuccess', function (event, newUrl, oldUrl) {
-          // only if we are on dashboards
-          if ($location.path().indexOf('/dashboard') === 0) {
-            $el.show();
-          } else {
-            $el.hide();
-          }
-        });
-
-        $scope.$on('$routeChangeSuccess', function () {
-          updateCounts();
+        var removeLocationChangeSuccessHandler = $rootScope.$on('$locationChangeSuccess', function () {
+          $location.path().indexOf('/dashboard') !== -1 ? $el.show() : $el.hide();
         });
 
         $scope.relationalFilterVisible = false;
@@ -151,12 +106,6 @@ define(function (require) {
         var removeRelationalPanelHandler = $rootScope.$on('change:config.kibi:relationalPanel', function () {
           $scope.relationalFilterVisible = config.get('kibi:relationalPanel');
         });
-
-
-        var removeDashboardGroupChangedHandler = $rootScope.$on('kibi:dashboardgroup:changed', function () {
-          delete $scope.dashboardGroups;
-        });
-
 
         $scope.relationalFilterPanelOpened = false;
 
@@ -174,26 +123,6 @@ define(function (require) {
           $scope.relationalFilterPanelOpened = false;
         });
 
-        // rerender tabs if any dashboard got saved
-        var removeDashboardChangedHandler = $rootScope.$on('kibi:dashboard:changed', function (event, dashId) {
-          updateCounts();
-        });
-        // everywhere use this event !!! to be consistent
-        // make a comment that it was required because not all compononts can listen to
-        // esResponse
-        var removeAutorefreshHandler = $rootScope.$on('courier:searchRefresh', function (event) {
-          updateCounts();
-        });
-
-        const updateCountsOnSave = function (diff) {
-          if (diff.indexOf(kibiState._properties.enabled_relations) !== -1 ||
-              diff.indexOf(kibiState._properties.query) !== -1 ||
-              diff.indexOf(kibiState._properties.time) !== -1 ||
-              diff.indexOf(kibiState._properties.filters) !== -1) {
-            updateCounts();
-          }
-        };
-        kibiState.on('save_with_changes', updateCountsOnSave);
 
         // =============
         // Tab scrolling
@@ -253,7 +182,163 @@ define(function (require) {
           updateTabScroller();
         };
 
-        $el.on('$destroy', function () {
+        // =================
+        // New group computation and counts updates
+        // =================
+
+        const getAllDashboards = function () {
+          return savedDashboards.find().then(function (hits) {
+            return _(hits).filter(function (d) {
+              return !!d.savedSearchId;
+            }).value();
+          });
+        };
+
+        const addAllConnected = function (dashboardId) {
+          var connected = kibiState._getDashboardsIdInConnectedComponent(dashboardId, kibiState.getEnabledRelations());
+          return [dashboardId].concat(connected);
+        };
+
+        const filterSelectedDashboards = function (dashboardsIds) {
+          var onlySelectedIds = [];
+          _.each(dashboardsIds, function (dashId) {
+            _.each($scope.dashboardGroups, function (group) {
+              if (group.selected.id === dashId && onlySelectedIds.indexOf(dashId) === -1) {
+                onlySelectedIds.push(dashId);
+              }
+            });
+          });
+          return onlySelectedIds;
+        };
+
+        const getGroupIds = function (dashboardsIds) {
+          var groupIds = [];
+          _.each(dashboardsIds, function (dashId) {
+            _.each($scope.dashboardGroups, function (group) {
+              if (group.selected.id === dashId && groupIds.indexOf(group.id) === -1) {
+                groupIds.push(group.id);
+              }
+            });
+          });
+        };
+
+        const xxxUpdateCounts = function (groupIds) {
+          _fireUpdateAllCounts(groupIds, 'state changed');
+        };
+
+        const updateAllCounts = function (dashId) {
+          var curentDashboard = kibiState._getCurrentDashboardId();
+          if (curentDashboard) {
+            if (dashId) {
+              xxxUpdateCounts(
+                getGroupIds(
+                  filterSelectedDashboards(
+                    [dashId]
+                  )
+                )
+              );
+            } else {
+              xxxUpdateCounts(
+                getGroupIds(
+                  filterSelectedDashboards(
+                    getAllDashboards()
+                  )
+                )
+              );
+            }
+          }
+        };
+
+        const computeDashbordsGroups = function () {
+          dashboardGroupHelper.computeGroups().then(function (dashboardGroups) {
+            $scope.dashboardGroups = dashboardGroups;
+          });
+        };
+
+        const updateCountsOnAppStateChange = function (diff) {
+          // when appState changed get connected and selected dashboards
+          var curentDashboard = kibiState._getCurrentDashboardId();
+          if (curentDashboard) {
+            xxxUpdateCounts(
+              getGroupIds(
+                filterSelectedDashboards(
+                  addAllConnected(curentDashboard)
+                )
+              )
+            );
+          }
+        };
+
+        const updateCountsOnGlobalStateChange = function (diff) {
+          // global state keeps pinned filters and default time
+          // if any change there update counts on all selected dashboards
+          var curentDashboard = kibiState._getCurrentDashboardId();
+          if (curentDashboard) {
+            xxxUpdateCounts(
+              getGroupIds(
+                filterSelectedDashboards(
+                  getAllDashboards()
+                )
+              )
+            );
+          }
+        };
+
+        const updateCountsOnKibiStateChange = function (diff) {
+          // when kibiState changes get connected and selected dashboards
+          var curentDashboard = kibiState._getCurrentDashboardId();
+          if (
+            curentDashboard &&
+            (
+              diff.indexOf(kibiState._properties.enabled_relations) !== -1 ||
+              diff.indexOf(kibiState._properties.query) !== -1 ||
+              diff.indexOf(kibiState._properties.time) !== -1 ||
+              diff.indexOf(kibiState._properties.filters) !== -1
+            )
+          ) {
+            xxxUpdateCounts(
+              getGroupIds(
+                filterSelectedDashboards(
+                  addAllConnected(curentDashboard)
+                )
+              )
+            );
+          } else if (curentDashboard && diff.indexOf(kibiState._properties.groups) !== -1) {
+            console.log(diff);
+            // now different dashboard is selected lets recompute the groups
+            computeDashbordsGroups();
+          }
+        };
+
+
+        globalState.on('save_with_changes', updateCountsOnGlobalStateChange);
+        $scope.$watch(getAppState, function (appState) {
+          if (appState) {
+            $scope.appState = appState;
+            appState.on('save_with_changes', updateCountsOnAppStateChange);
+          }
+        });
+        kibiState.on('save_with_changes', updateCountsOnKibiStateChange);
+
+        computeDashbordsGroups();
+
+        var removeDashboardGroupChangedHandler = $rootScope.$on('kibi:dashboardgroup:changed', function () {
+          computeDashbordsGroups();
+        });
+
+        // everywhere use this event !!! to be consistent
+        // make a comment that it was required because not all components can listen to
+        // esResponse
+        var removeAutorefreshHandler = $rootScope.$on('courier:searchRefresh', function (event) {
+          updateAllCounts();
+        });
+
+        // rerender tabs if any dashboard got saved
+        var removeDashboardChangedHandler = $rootScope.$on('kibi:dashboard:changed', function (event, dashId) {
+          updateAllCounts(dashId);
+        });
+
+        $scope.$on('$destroy', function () {
           removeAutorefreshHandler();
           removeInitConfigHandler();
           removeDashboardGroupChangedHandler();
@@ -264,14 +349,19 @@ define(function (require) {
           removeDashboardChangedHandler();
           removeTabDashboardChangedHandler();
           removeTabDashboardGroupChangedHandler();
-          kibiState.off('save_with_changes', updateCountsOnSave);
 
+          kibiState.off('save_with_changes', updateCountsOnKibiStateChange);
+          globalState.off('save_with_changes', updateCountsOnGlobalStateChange);
+          if ($scope.appState) {
+            $scope.appState.off('save_with_changes', updateCountsOnAppStateChange);
+            $scope.appState = null;
+          }
           $scope.tabResizeChecker.off('resize', $scope.onTabContainerResize);
           $scope.tabResizeChecker.destroy();
           tabContainer = null;
         });
-
       }
+
     };
   });
 

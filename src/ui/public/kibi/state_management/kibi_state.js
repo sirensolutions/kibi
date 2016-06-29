@@ -385,6 +385,12 @@ define(function (require) {
      * Returns the current time for the given dashboard
      */
     KibiState.prototype._getTime = function (dashboardId, index) {
+      if (!index) {
+        // do not reject - just return null
+        // rejecting in this method would brake the Promise.all
+        return null;
+      }
+
       const timeDefaults = config.get('timepicker:timeDefaults');
       let time = {
         mode: timeDefaults.mode,
@@ -409,9 +415,6 @@ define(function (require) {
         }
       }
 
-      if (!index) {
-        return Promise.reject(new Error(`Missing index name when computing the time for dashboard ${dashboardId}`));
-      }
       return indexPatterns.get(index).then((indexPattern) => {
         var filter;
         var timefield = indexPattern.timeFieldName && _.find(indexPattern.fields, {name: indexPattern.timeFieldName});
@@ -723,20 +726,38 @@ define(function (require) {
         return Promise.resolve(false);
       }
 
-      const getMetas = this._getDashboardAndSavedSearchMetas(dashboardIds);
+      // here ignore the missing meta as getState can be called
+      // on a dashboard without assosiated savedSearch
+      const getMetas = this._getDashboardAndSavedSearchMetas(dashboardIds, true);
 
       return getMetas.then((metas) => {
         const promises = [];
+
+        // extra check for metas
+        // if dashboardIds is empty or contains only 1 element
+        //   - the meta can be missing
+        // else
+        //   - each dashboard must have coresponding meta as these mean that we are passing
+        //   set of relationally connected dashboards
+        if (dashboardIds.length > 1) {
+          for (let i = 0; i < metas.length; i++) {
+            if (!metas[i].savedSearchMeta) {
+              const error = 'The dashboard [' + metas[i].savedDash.id + '] is expected to be associated with a saved search.';
+              return Promise.reject(new Error(error));
+            }
+          }
+        }
+
 
         for (let i = 0; i < metas.length; i++) {
           const meta = metas[i];
           promises.push(this._getFilters(meta.savedDash.id, appState, meta, options));
           promises.push(this._getQueries(meta.savedDash.id, appState, meta));
-          promises.push(this._getTime(meta.savedDash.id, meta.savedSearchMeta.index));
+          promises.push(this._getTime(meta.savedDash.id, meta.savedSearchMeta ? meta.savedSearchMeta.index : null));
         }
         return Promise.all(promises)
         .then(([ filters, queries, time, ...rest ]) => {
-          const index = metas[0].savedSearchMeta.index;
+          const index = metas[0].savedSearchMeta ? metas[0].savedSearchMeta.index : null;
 
           if (rest.length) { // Build the join_set filter
             const queriesPerIndex = {};

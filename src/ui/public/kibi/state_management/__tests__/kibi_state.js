@@ -217,6 +217,13 @@ describe('State Management', function () {
         });
       });
 
+      it('should NOT reject if saved search is missing for dashboard but ignoreMissingSavedSearch=true', function (done) {
+        var ignoreMissingSavedSearch = true;
+        kibiState._getDashboardAndSavedSearchMetas([ 'Articles', 'search-ste' ], ignoreMissingSavedSearch).then(function (results) {
+          done();
+        }).catch(done);
+      });
+
       it('should reject promise if an unknown dashboard is requested', function (done) {
         kibiState._getDashboardAndSavedSearchMetas([ 'search-ste', 'unknown dashboard' ]).then(function (results) {
           done('should fail');

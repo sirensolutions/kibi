@@ -240,12 +240,12 @@
               <label>Body</label><br/>
               <textarea ng-model="query.rest_body"  class="form-control">{{query.rest_body}}</textarea>
             </div>
-
             <br/>
 
             <div class="form-group">
               <label>Expected HTTP response code</label>
-              <i class="fa fa-info-circle ng-scope" tooltip-placement="" tooltip-popup-delay="250" tooltip="Will return results only if HTTP response code returned by REST API matches the expected one"></i><br/>
+              <kbn-info placement="right" info="Will return results only if HTTP response code returned by REST API matches the expected one">
+              </kbn-info><br/>
               <input type="text" ng-model="query.rest_resp_status_code"  class="form-control"/>
             </div>
 

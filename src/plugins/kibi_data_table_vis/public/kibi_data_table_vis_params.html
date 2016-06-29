@@ -30,16 +30,11 @@
             </div>
 
             <div class="form-group">
-              <label>On click I want to</label>
+              <label>On click I want to
               <a href="http://siren.solutions/kibi/docs/current/external-datasources.html" target="_blank">
-                <i class="fa fa-info-circle help-icon"
-                   tooltip="Click to see the relevant documentation"
-                   tooltip-placement="right"
-                   tooltip-animation="false"
-                   tooltip-popup-delay="0"
-                   tooltip-append-to-body="true">
-                </i>
+                <kbn-info info="Click to see the relevant documentation"></kbn-info>
               </a>
+              </label>
               </br>
               <select required ng-model="clickOption.type" class="form-control">
                 <option value="link">Follow the URL</option>

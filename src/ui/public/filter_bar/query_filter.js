@@ -88,7 +88,7 @@ define(function (require) {
         else return; // not found in either state, do nothing
       }
 
-      const removedFilter = state.filters.splice(index, 1);
+      state.filters.splice(index, 1);
 
       // kibi: if it was a join_set one
       if (filter.join_set) {

@@ -230,38 +230,36 @@ define(function (require) {
         // .script
         $scope.recreateFilterLabel = joinExplain.createLabel;
 
-        var _addRemoveJoinSetFilter = function (panelEnabled) {
-          const currentDashboardId = kibiState._getCurrentDashboardId();
-          if (currentDashboardId && panelEnabled) {
-            $scope.state.filters = _.filter($scope.state.filters, (f) => !f.join_set);
-            kibiState.getState(currentDashboardId).then(({ filters }) => {
-              _.each(filters, (filter) => {
-                if (filter.join_set) {
-                  queryFilter.addFilters(filter);
-                  return false;
-                }
-              });
-            }).catch(notify.error);
-          }
+        // kibi: Get the state for the dashboard ID and add the join_set filter to the appState if it exists
+        const addJoinSetFilter = function (dashboardId) {
+          $scope.state.filters = _.filter($scope.state.filters, (f) => !f.join_set);
+          kibiState.getState(dashboardId).then(({ filters }) => {
+            _.each(filters, (filter) => {
+              if (filter.join_set) {
+                queryFilter.addFilters(filter);
+                return false;
+              }
+            });
+          }).catch(notify.error);
         };
 
+        // kibi: add join_set on relationPanel event
+        var addJoinSetFilterOnRelationalPanel = function (panelEnabled) {
+          const currentDashboardId = kibiState._getCurrentDashboardId();
+          if (currentDashboardId && panelEnabled) {
+            addJoinSetFilter(currentDashboardId);
+          }
+        };
         var relationalPanelListenerOff = $rootScope.$on('change:config.kibi:relationalPanel', function (event, panelEnabled) {
-          _addRemoveJoinSetFilter(panelEnabled);
+          addJoinSetFilterOnRelationalPanel(panelEnabled);
         });
-        _addRemoveJoinSetFilter(config.get('kibi:relationalPanel'));
+        addJoinSetFilterOnRelationalPanel(config.get('kibi:relationalPanel'));
 
+        // kibi: add join_set on kibiState save event
         const addJoinSetFilterOnSave = function (diff) {
           const currentDashboardId = kibiState._getCurrentDashboardId();
           if (diff.indexOf(kibiState._properties.enabled_relations) !== -1 && currentDashboardId) {
-            kibiState.getState(currentDashboardId).then(function ({ filters }) {
-              $scope.state.filters = _.filter($scope.state.filters, (f) => !f.join_set);
-              _.each(filters, function (filter) {
-                if (filter.join_set) {
-                  queryFilter.addFilters(filter);
-                  return false;
-                }
-              });
-            }).catch(notify.error);
+            addJoinSetFilter(currentDashboardId);
           }
         };
         kibiState.on('save_with_changes', addJoinSetFilterOnSave);

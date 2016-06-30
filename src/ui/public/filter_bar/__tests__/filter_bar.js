@@ -12,7 +12,6 @@ var MockState = require('fixtures/mock_state');
 describe('Filter Bar Directive', function () {
   var $rootScope;
   var $compile;
-  var $timeout;
   var Promise;
   var appState;
   var queryFilter;
@@ -34,7 +33,9 @@ describe('Filter Bar Directive', function () {
       $provide.constant('kibiDefaultDashboardId', '');
 
       $provide.service('kibiState', function () {
-        return new MockState({ filters: [] });
+        return new MockState({
+          _getCurrentDashboardId: _.noop
+        });
       });
 
       $provide.service('$route', function () {
@@ -64,10 +65,9 @@ describe('Filter Bar Directive', function () {
       $provide.service('savedDashboards', (Promise) => mockSavedObjects(Promise)('savedDashboard'));
     });
 
-    ngMock.inject(function (Private, $injector, _$rootScope_, _$compile_, _$timeout_) {
+    ngMock.inject(function (Private, $injector, _$rootScope_, _$compile_) {
       $rootScope = _$rootScope_;
       $compile = _$compile_;
-      $timeout = _$timeout_;
       Promise = $injector.get('Promise');
       mapFilter = Private(require('ui/filter_bar/lib/mapFilter'));
 

@@ -81,13 +81,13 @@ define(function (require) {
         const remainingFilters = _.filter(clonedFilters, (filter) => !filter.join_sequence);
 
         if (existingJoinSeqFilters.length === 0) {
-          return this.buildNewJoinSeqFilter({ button, remainingFilters, queries, time });
+          return this.buildNewJoinSeqFilter({ button, filters: remainingFilters, queries, time });
         } else if (existingJoinSeqFilters.length === 1) {
           const joinSeqFilter = existingJoinSeqFilters[0];
-          return this.addRelationToJoinSeqFilter({ button, remainingFilters, queries, time, joinSeqFilter });
+          return this.addRelationToJoinSeqFilter({ button, filters: remainingFilters, queries, time, joinSeqFilter });
         } else {
           // build join sequence + add a group of sequances to the top of the array
-          const joinSeqFilter = this.buildNewJoinSeqFilter({ button, remainingFilters, queries, time });
+          const joinSeqFilter = this.buildNewJoinSeqFilter({ button, filters: remainingFilters, queries, time });
           // here create a group from existing ones and add it on the top
           const group = this.composeGroupFromExistingJoinFilters(existingJoinSeqFilters);
           joinSeqFilter.join_sequence.unshift(group);

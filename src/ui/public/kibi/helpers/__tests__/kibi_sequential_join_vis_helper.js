@@ -4,12 +4,17 @@ const sinon = require('auto-release-sinon');
 const expect = require('expect.js');
 const ngMock = require('ngMock');
 const Promise = require('bluebird');
+const dateMath = require('ui/utils/dateMath');
 
 let sequentialJoinVisHelper;
 let config;
 let kibiState;
+let appState;
 
-function init({ indexPatterns, savedSearches, savedDashboards, enableEnterprise = false }) {
+const defaultTimeStart = '2006-09-01T12:00:00.000Z';
+const defaultTimeEnd = '2009-09-01T12:00:00.000Z';
+
+function init({ currentDashboardId = 'dashboard 1', indexPatterns, savedSearches, savedDashboards, enableEnterprise = false }) {
   ngMock.module('kibana', 'kibana/courier', 'kibana/global_state', ($provide) => {
     $provide.constant('kibiEnterpriseEnabled', enableEnterprise);
     $provide.constant('kbnDefaultAppId', '');
@@ -18,8 +23,9 @@ function init({ indexPatterns, savedSearches, savedDashboards, enableEnterprise 
 
     $provide.service('config', require('fixtures/kibi/config'));
 
+    appState = new MockState({ filters: [] });
     $provide.service('getAppState', function () {
-      return function () { return new MockState({ filters: [] }); };
+      return function () { return appState; };
     });
 
     $provide.service('globalState', function () {
@@ -43,12 +49,12 @@ function init({ indexPatterns, savedSearches, savedDashboards, enableEnterprise 
     kibiState = _kibiState_;
     config = _config_;
     sequentialJoinVisHelper = Private(require('ui/kibi/helpers/kibi_sequential_join_vis_helper'));
-    sinon.stub(kibiState, '_getCurrentDashboardId').returns('dashboard 1');
+    sinon.stub(kibiState, '_getCurrentDashboardId').returns(currentDashboardId);
 
     const defaultTime = {
       mode: 'absolute',
-      from: 'now-15m',
-      to: 'now'
+      from: defaultTimeStart,
+      to: defaultTimeEnd
     };
     config.set('timepicker:timeDefaults', defaultTime);
     timefilter.time = defaultTime;
@@ -234,6 +240,65 @@ describe('Kibi Components', function () {
           }
         }
       ];
+
+      it('should build the join_sequence', function (done) {
+        const currentDashboardId = 'dashboardA';
+        const button = {
+          sourceField: 'fa',
+          sourceIndexPatternId: 'ia',
+          targetField: 'fb',
+          targetIndexPatternId: 'ib'
+        };
+
+        init({ currentDashboardId, indexPatterns, savedDashboards, savedSearches });
+        appState.filters = [
+          {
+            term: {
+              field: 'aaa'
+            },
+            meta: {
+              disabled: false
+            }
+          }
+        ];
+
+        sequentialJoinVisHelper.getJoinSequenceFilter('dashboardA', button).then((rel) => {
+          expect(rel.join_sequence).to.have.length(1);
+          expect(rel.join_sequence[0].relation).to.have.length(2);
+          expect(rel.join_sequence[0].relation[0].indices).to.eql([ button.sourceIndexPatternId ]);
+          expect(rel.join_sequence[0].relation[0].path).to.be(button.sourceField);
+          expect(rel.join_sequence[0].relation[0].queries[0].query.bool.must).to.have.length(2);
+          expect(rel.join_sequence[0].relation[0].queries[0].query.bool.must[0]).to.be.eql({
+            query: {
+              query_string: {
+                query: '*',
+                analyze_wildcard: true
+              }
+            }
+          });
+          expect(rel.join_sequence[0].relation[0].queries[0].query.bool.must[1]).to.be.eql({ query: { a: 123 } });
+          expect(rel.join_sequence[0].relation[0].queries[0].query.bool.filter.bool.must).to.have.length(2);
+          expect(rel.join_sequence[0].relation[0].queries[0].query.bool.filter.bool.must[0]).to.be.eql({
+            term: {
+              field: 'aaa'
+            }
+          });
+          expect(rel.join_sequence[0].relation[0].queries[0].query.bool.filter.bool.must[1]).to.be.eql({
+            range: {
+              date: {
+                gte: dateMath.parseWithPrecision(defaultTimeStart, false).valueOf(),
+                lte: dateMath.parseWithPrecision(defaultTimeEnd, true).valueOf(),
+                format: 'epoch_millis'
+              }
+            }
+          });
+          expect(rel.join_sequence[0].relation[0].termsEncoding).to.be('long');
+          expect(rel.join_sequence[0].relation[1].indices).to.eql([ button.targetIndexPatternId ]);
+          expect(rel.join_sequence[0].relation[1].path).to.be(button.targetField);
+          expect(rel.join_sequence[0].relation[1].termsEncoding).to.be('long');
+          done();
+        }).catch(done);
+      });
 
       it('should get the query from the search meta', function (done) {
         init({ indexPatterns, savedDashboards, savedSearches });

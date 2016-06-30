@@ -15,7 +15,7 @@ define(function (require) {
 
         $scope.$on('$routeChangeSuccess', function () {
           // check that it should be visible or not
-          $scope.showSearch = $location.path().indexOf('/dashboard') !== -1 ? true : false;
+          $scope.showSearch = $location.path().indexOf('/dashboard') === 0 ? true : false;
         });
 
         $scope.filterResults = function () {

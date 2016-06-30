@@ -207,7 +207,7 @@ define(function (require) {
 
         //needed by kibi to show filterbar when kibiEntityClipboard contains an entity
         var getShowKibiEntityClipboard = function () {
-          return globalState.se && globalState.se.length > 0 && $location.path().indexOf('/dashboard') !== -1;
+          return globalState.se && globalState.se.length > 0 && $location.path().indexOf('/dashboard') === 0;
         };
         $scope.showKibiEntityClipboard = getShowKibiEntityClipboard();
         var saveWithChangesHandler = function () {

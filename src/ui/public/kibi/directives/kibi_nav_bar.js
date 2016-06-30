@@ -133,7 +133,7 @@ define(function (require) {
 
         var removeLocationChangeSuccessHandler = $rootScope.$on('$locationChangeSuccess', function (event, newUrl, oldUrl) {
           // only if we are on dashboards
-          if ($location.path().indexOf('/dashboard') !== -1) {
+          if ($location.path().indexOf('/dashboard') === 0) {
             $el.show();
           } else {
             $el.hide();

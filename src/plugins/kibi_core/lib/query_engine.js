@@ -347,7 +347,8 @@ QueryEngine.prototype._loadScripts = function () {
     'show-nodes-count-by-type',
     'replace-investment-nodes',
     'shortest-path',
-    'expand-by-relation'
+    'expand-by-relation',
+    'default-expansion'
   ];
 
   self.log.info('Loading scripts');

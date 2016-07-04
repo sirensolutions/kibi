@@ -271,12 +271,12 @@ define(function (require) {
 
         const updateCountsOnAppStateChange = function (diff) {
           // when appState changed get connected and selected dashboards
-          var curentDashboard = kibiState._getCurrentDashboardId();
-          if (curentDashboard) {
+          var currentDashboard = kibiState._getCurrentDashboardId();
+          if (currentDashboard) {
             updateCounts(
               getGroupIds(
                 filterSelectedDashboards(
-                  addAllConnected(curentDashboard)
+                  addAllConnected(currentDashboard)
                 )
               ),
               'AppState change ' + angular.toJson(diff)
@@ -287,8 +287,8 @@ define(function (require) {
         const updateCountsOnGlobalStateChange = function (diff) {
           // global state keeps pinned filters and default time
           // if any change there update counts on all selected dashboards
-          var curentDashboard = kibiState._getCurrentDashboardId();
-          if (curentDashboard) {
+          var currentDashboard = kibiState._getCurrentDashboardId();
+          if (currentDashboard) {
             updateCounts(
               getGroupIds(
                 filterSelectedDashboards(
@@ -302,9 +302,9 @@ define(function (require) {
 
         const updateCountsOnKibiStateChange = function (diff) {
           // when kibiState changes get connected and selected dashboards
-          var curentDashboard = kibiState._getCurrentDashboardId();
+          var currentDashboard = kibiState._getCurrentDashboardId();
           if (
-            curentDashboard &&
+            currentDashboard &&
             (
               diff.indexOf(kibiState._properties.enabled_relations) !== -1 ||
               diff.indexOf(kibiState._properties.query) !== -1 ||
@@ -316,7 +316,7 @@ define(function (require) {
             updateCounts(
               getGroupIds(
                 filterSelectedDashboards(
-                  addAllConnected(curentDashboard)
+                  addAllConnected(currentDashboard)
                 )
               ),
               'KibiState change ' + angular.toJson(diff)

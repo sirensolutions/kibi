@@ -86,7 +86,8 @@ define(function (require) {
         // kibi: below listener on globalState is needed to react when the global time is changed by the user
         // either directly in time widget or by clicking on histogram chart etc
         var saveWithChangesHandler = function (diff) {
-          if (dash.id && diff.indexOf('time') !== -1 && timefilter.time.from && timefilter.time.to) {
+          if (dash.id && diff.indexOf('time') !== -1 && timefilter.time.from && timefilter.time.to &&
+              !kibiState._isDefaultTime(timefilter.time.mode, timefilter.time.from, timefilter.time.to)) {
             // kibiState.saveTimeForDashboardId calls globalState.save
             kibiState._saveTimeForDashboardId(dash.id, timefilter.time.mode, timefilter.time.from, timefilter.time.to);
             kibiState.save();

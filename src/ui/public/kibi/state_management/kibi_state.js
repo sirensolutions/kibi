@@ -3,6 +3,8 @@ define(function (require) {
   const qs = require('ui/utils/query_string');
   const dateMath = require('ui/utils/dateMath');
   const uniqFilters = require('ui/filter_bar/lib/uniqFilters');
+  const toJson = require('ui/utils/aggressive_parse').toJson;
+  const angular = require('angular');
 
   require('ui/routes')
   .addSetupWork(function (kibiState) {
@@ -25,7 +27,7 @@ define(function (require) {
           if (resp.hits) {
             _.each(resp.hits, (dashboard) => {
               const meta = JSON.parse(dashboard.kibanaSavedObjectMeta.searchSourceJSON);
-              const filters = _.reject(meta.filter, (filter) => filter.query && filter.query.query_string && !filter.meta);
+              let filters = _.reject(meta.filter, (filter) => filter.query && filter.query.query_string && !filter.meta);
               const query = _.find(meta.filter, (filter) => filter.query && filter.query.query_string && !filter.meta);
 
               // query
@@ -33,6 +35,8 @@ define(function (require) {
                 this._setDashboardProperty(dashboard.id, this._properties.query, query.query);
               }
               // filters
+              // remove private fields like $state
+              filters = JSON.parse(toJson(filters, angular.toJson));
               if (filters && filters.length) {
                 this._setDashboardProperty(dashboard.id, this._properties.filters, filters);
               }
@@ -825,30 +829,48 @@ define(function (require) {
       }
       return Promise.all([
         this._getFilters(currentDashboardId, appState, null, options),
-        this._getQueries(currentDashboardId, appState, null)
+        this._getQueries(currentDashboardId, appState, null),
+        savedDashboards.find()
       ])
-      .then(([ filters, queries ]) => {
+      .then(([ filters, queries, savedDashboardsRes ]) => {
+        const savedDash = _.find(savedDashboardsRes.hits, (hit) => hit.id === currentDashboardId);
+        if (!savedDash) {
+          return Promise.reject(new Error(`Unable to get saved dashboard [${currentDashboardId}]`));
+        }
+        const meta = JSON.parse(savedDash.kibanaSavedObjectMeta.searchSourceJSON);
+        const dashFilters = _.reject(meta.filter, (filter) => filter.query && filter.query.query_string && !filter.meta);
+        const dashQuery = _.find(meta.filter, (filter) => filter.query && filter.query.query_string && !filter.meta);
+
         // save filters
         const existingJoinSetFilterIndex = _.findIndex(filters, (filter) => filter.join_set);
         if (existingJoinSetFilterIndex !== -1) {
           filters.splice(existingJoinSetFilterIndex, 1);
         }
-        if (filters && filters.length) {
-          this._setDashboardProperty(currentDashboardId, this._properties.filters, filters);
-        } else {
+        // remove private fields like $state
+        filters = JSON.parse(toJson(filters, angular.toJson));
+        if (!_.size(filters) && !_.size(dashFilters)) {
+          // do not save filters
+          // - if there are none; and
+          // - if there are no filters but the dashboard is saved with some filters
           this._deleteDashboardProperty(currentDashboardId, this._properties.filters);
+        } else {
+          this._setDashboardProperty(currentDashboardId, this._properties.filters, filters);
         }
         // save the query
         // queries contains only one query, the one from appState, since the meta argument is null
         // in the call to _getQueries above.
         // The query from the appState is always equal to the wildcard query if nothing was entered in the search bar by the user.
-        if (this._isDefaultQuery(queries[0])) {
+        if (this._isDefaultQuery(queries[0]) && this._isDefaultQuery(dashQuery)) {
+          // do not save the query:
+          // - if it is the default query; and
+          // - if the dashboard query is also the default one
           this._deleteDashboardProperty(currentDashboardId, this._properties.query);
         } else {
           this._setDashboardProperty(currentDashboardId, this._properties.query, queries[0].query);
         }
         // save time
-        if (this._isDefaultTime(timefilter.time.mode, timefilter.time.from, timefilter.time.to)) {
+        if (this._isDefaultTime(timefilter.time.mode, timefilter.time.from, timefilter.time.to) &&
+            (!savedDash.timeRestore || this._isDefaultTime(savedDash.timeMode, savedDash.timeFrom, savedDash.timeTo, true))) {
           this._deleteDashboardProperty(currentDashboardId, this._properties.time);
         } else {
           this._saveTimeForDashboardId(currentDashboardId, timefilter.time.mode, timefilter.time.from, timefilter.time.to);

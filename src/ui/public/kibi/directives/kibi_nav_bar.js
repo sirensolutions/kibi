@@ -33,11 +33,11 @@ define(function (require) {
       template: require('ui/kibi/directives/kibi_nav_bar.html'),
       link: function ($scope, $el) {
 
-        const computeDashbordsGroups = function (reason) {
+        const computeDashboardsGroups = function (reason) {
           if (console) {
             console.log('Dashboard Groups will be recomputed because: [' + reason + ']');
           }
-          dashboardGroupHelper.computeGroups().then(function (dashboardGroups) {
+          return dashboardGroupHelper.computeGroups().then(function (dashboardGroups) {
             $scope.dashboardGroups = dashboardGroups;
           });
         };
@@ -131,11 +131,15 @@ define(function (require) {
         // close panel when user navigates to a different route
         var removeRouteChangeSuccessHandler = $rootScope.$on('$routeChangeSuccess', function (event, next, prev, err) {
           $scope.relationalFilterPanelOpened = false;
-          if (!$scope.dashboardGroups) {
-            computeDashbordsGroups('Initial group computation');
-          }
         });
 
+        $scope.$watch(function (scope) {
+          return kibiState._getCurrentDashboardId();
+        }, (currentDashboardId, oldCurrentDashboardId) => {
+          if (currentDashboardId && oldCurrentDashboardId !== currentDashboardId) {
+            computeDashboardsGroups('current dashboard changed');
+          }
+        });
 
         // =============
         // Tab scrolling
@@ -334,7 +338,7 @@ define(function (require) {
         kibiState.on('save_with_changes', updateCountsOnKibiStateChange);
 
         var removeDashboardGroupChangedHandler = $rootScope.$on('kibi:dashboardgroup:changed', function () {
-          computeDashbordsGroups('Dashboard group changed');
+          computeDashboardsGroups('Dashboard group changed');
         });
 
         // everywhere use this event !!! to be consistent
@@ -346,7 +350,7 @@ define(function (require) {
 
         // rerender tabs if any dashboard got saved
         var removeDashboardChangedHandler = $rootScope.$on('kibi:dashboard:changed', function (event, dashId) {
-          updateAllCounts(dashId, 'kibi:dashboard:changed event');
+          computeDashboardsGroups('Dashboard changed').then(() => updateAllCounts(dashId, 'kibi:dashboard:changed event'));
         });
 
         $scope.$on('$destroy', function () {

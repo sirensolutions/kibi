@@ -30,6 +30,7 @@ define(function (require) {
               const switchToDashboard = function () {
                 // add join_set Filter
                 kibiState.addFilter(this.redirectToDashboard, this.joinSeqFilter);
+                kibiState.save();
                 // switch to target dashboard
                 if (this.redirectToDashboard) {
                   kbnUrl.change('/dashboard/{{id}}', {id: this.redirectToDashboard});

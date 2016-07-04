@@ -315,11 +315,12 @@ define(function (require) {
      *
      */
     DashboardGroupHelper.prototype.computeGroups = function () {
-      var self = this;
       var currentDashboardId = kibiState._getCurrentDashboardId();
-      return self._computeGroupsFromSavedDashboardGroups(currentDashboardId).then(function (dashboardGroups1) {
-        return self._addAdditionalGroupsFromSavedDashboards(currentDashboardId, dashboardGroups1);
-      });
+      if (!currentDashboardId) {
+        return Promise.resolve([]);
+      }
+      return this._computeGroupsFromSavedDashboardGroups(currentDashboardId)
+      .then((dashboardGroups1) => this._addAdditionalGroupsFromSavedDashboards(currentDashboardId, dashboardGroups1));
     };
 
 

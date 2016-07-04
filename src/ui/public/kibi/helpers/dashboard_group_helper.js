@@ -66,14 +66,16 @@ define(function (require) {
       // here save which one was selected for
       if (groupId) {
         this.setSelectedDashboardAndActiveGroup(dashboardGroups, dashboardId, groupId);
+        kibiState.setSelectedDashboardId(groupId, dashboardId);
+        kibiState.save();
       }
 
       return kibiState.saveAppState()
       .then(() => {
-        if (groupId) {
-          kibiState.setSelectedDashboardId(groupId, dashboardId);
-          kibiState.save();
-        }
+        // if (groupId) {
+        //   kibiState.setSelectedDashboardId(groupId, dashboardId);
+        //   kibiState.save();
+        // }
         kbnUrl.change('/dashboard/{{id}}', {id: dashboardId});
       });
     };

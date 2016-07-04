@@ -3,6 +3,7 @@
   "description": "Selects all the nodes.",
   "scriptSource": "function beforeAll (graphModel, graphSelection) {\n  let selection = [];\n  _.each(graphModel.nodes, function (node) {\n    selection.push(node.id);\n  });\n\n  return { selection: selection};\n}",
   "version": 1,
+  "type": "contextual",
   "kibanaSavedObjectMeta": {
     "searchSourceJSON": "{}"
   }

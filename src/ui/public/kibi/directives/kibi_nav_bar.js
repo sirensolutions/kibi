@@ -106,7 +106,7 @@ define(function (require) {
         };
 
         var removeLocationChangeSuccessHandler = $rootScope.$on('$locationChangeSuccess', function () {
-          $location.path().indexOf('/dashboard') !== -1 ? $el.show() : $el.hide();
+          $location.path().indexOf('/dashboard') === 0 ? $el.show() : $el.hide();
         });
 
         $scope.relationalFilterVisible = false;
@@ -131,7 +131,9 @@ define(function (require) {
         // close panel when user navigates to a different route
         var removeRouteChangeSuccessHandler = $rootScope.$on('$routeChangeSuccess', function (event, next, prev, err) {
           $scope.relationalFilterPanelOpened = false;
-          computeDashbordsGroups('Initial group computation');
+          if (!$scope.dashboardGroups) {
+            computeDashbordsGroups('Initial group computation');
+          }
         });
 
 
@@ -199,15 +201,15 @@ define(function (require) {
 
         const getAllDashboards = function () {
           return savedDashboards.find().then(function (hits) {
-            return _(hits).filter(function (d) {
+            return _.filter(hits, function (d) {
               return !!d.savedSearchId;
-            }).value();
+            });
           });
         };
 
         const addAllConnected = function (dashboardId) {
           var connected = kibiState._getDashboardsIdInConnectedComponent(dashboardId, kibiState.getEnabledRelations());
-          return [dashboardId].concat(connected);
+          return connected.length > 0 ? connected : [dashboardId];
         };
 
         const filterSelectedDashboards = function (dashboardsIds) {
@@ -243,8 +245,8 @@ define(function (require) {
         };
 
         const updateAllCounts = function (dashId, reason) {
-          var curentDashboard = kibiState._getCurrentDashboardId();
-          if (curentDashboard) {
+          var currentDashboard = kibiState._getCurrentDashboardId();
+          if (currentDashboard) {
             if (dashId) {
               updateCounts(
                 getGroupIds(
@@ -307,7 +309,8 @@ define(function (require) {
               diff.indexOf(kibiState._properties.enabled_relations) !== -1 ||
               diff.indexOf(kibiState._properties.query) !== -1 ||
               diff.indexOf(kibiState._properties.time) !== -1 ||
-              diff.indexOf(kibiState._properties.filters) !== -1
+              diff.indexOf(kibiState._properties.filters) !== -1 ||
+              diff.indexOf(kibiState._properties.groups) !== -1
             )
           ) {
             updateCounts(
@@ -318,12 +321,8 @@ define(function (require) {
               ),
               'KibiState change ' + angular.toJson(diff)
             );
-          } else if (curentDashboard && diff.indexOf(kibiState._properties.groups) !== -1) {
-            // now different dashboard is selected lets recompute the groups
-            computeDashbordsGroups('Active group changed');
           }
         };
-
 
         globalState.on('save_with_changes', updateCountsOnGlobalStateChange);
         $scope.$watch(getAppState, function (appState) {

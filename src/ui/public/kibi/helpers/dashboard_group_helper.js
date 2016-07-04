@@ -54,6 +54,7 @@ define(function (require) {
           _.each(group.dashboards, function (dashboard) {
             if (dashboard.id === dashboardId) {
               group.selected = dashboard;
+              return false; // to break the loop
             }
           });
         } else {
@@ -72,10 +73,6 @@ define(function (require) {
 
       return kibiState.saveAppState()
       .then(() => {
-        // if (groupId) {
-        //   kibiState.setSelectedDashboardId(groupId, dashboardId);
-        //   kibiState.save();
-        // }
         kbnUrl.change('/dashboard/{{id}}', {id: dashboardId});
       });
     };

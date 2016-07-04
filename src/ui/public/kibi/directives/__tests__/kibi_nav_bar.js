@@ -13,10 +13,15 @@ let $timeout;
 let $elem;
 let $location;
 let kibiState;
+let appState;
+let globalState;
 
 require('ui/kibi/directives/kibi_nav_bar');
 
 describe('Kibi Components', function () {
+
+  require('testUtils/noDigestPromises').activateForSuite();
+
   describe('Navigation Bar', function () {
 
     beforeEach(function () {
@@ -27,12 +32,16 @@ describe('Kibi Components', function () {
           };
         });
 
+        appState = new MockState({ filters: [] });
         $provide.service('getAppState', () => {
-          return function () { return new MockState({ filters: [] }); };
+          return function () {
+            return appState;
+          };
         });
 
-        $provide.service('globalState', () => {
-          return new MockState({ filters: [] });
+        globalState = new MockState({ filters: [] });
+        $provide.service('globalState', function () {
+          return globalState;
         });
 
         $provide.constant('kibiEnterpriseEnabled', false);

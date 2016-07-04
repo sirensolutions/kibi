@@ -355,7 +355,6 @@ describe('Kibi Components', function () {
       ];
 
       $location.path('/dashboard/dashboard1');
-      sinon.stub(urlHelper, 'shouldUpdateCountsBasedOnLocation').returns(true);
 
       initStubs(dashboardGroups, {});
       $httpBackend.whenPOST('/elasticsearch/_msearch?getCountsOnTabs').respond(200, countOnTabsResponse);

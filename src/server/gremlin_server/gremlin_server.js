@@ -165,19 +165,17 @@ function startServer(self, fulfill, reject) {
 
 function isJavaVersionOk(self) {
   return new Promise((fulfill, reject) => {
-    let spawn = require('child_process').spawn('java', ['-version']);
+    const spawn = require('child_process').spawn('java', ['-version']);
     spawn.on('error', function (err) {
       self.server.log(['gremlin', 'error'], err);
     });
     spawn.stderr.on('data', function (data) {
-      var result = self._checkJavaVersionString(data);
+      const result = self._checkJavaVersionString(data);
       if (result) {
-        if (result.v) {
-          fulfill(true);
-        } else {
+        if (!result.v) {
           self.server.log(['gremlin', 'error'], result.e);
-          reject(new Error(result.e));
         }
+        fulfill(true);
       }
     });
   });
@@ -187,7 +185,7 @@ GremlinServerHandler.prototype._checkJavaVersionString = function (string) {
   if (!this.javaChecked) {
     let ret = {};
     string = string.toString().split(JSON.stringify(os.EOL))[0];
-    let javaVersion = new RegExp('java version').test(string) ? string.split(' ')[2].replace(/"/g, '') : false;
+    const javaVersion = new RegExp('java version').test(string) ? string.split(' ')[2].replace(/"/g, '') : false;
     if (javaVersion) {
       if (javaVersion.startsWith('1.8')) {
         ret.v = true;

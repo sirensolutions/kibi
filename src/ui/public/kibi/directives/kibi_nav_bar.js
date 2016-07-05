@@ -159,10 +159,6 @@ define(function (require) {
           updateTabScroller();
         });
 
-        var removeTabDashboardChangedHandler = $rootScope.$on('kibi:dashboard:changed', function (event, id) {
-          updateTabScroller();
-        });
-
         $scope.onTabContainerResize = function () {
           if (tabContainer[0].offsetWidth < tabContainer[0].scrollWidth) {
             $el.find('.tab-scroller').addClass('visible');
@@ -350,6 +346,7 @@ define(function (require) {
 
         // rerender tabs if any dashboard got saved
         var removeDashboardChangedHandler = $rootScope.$on('kibi:dashboard:changed', function (event, dashId) {
+          updateTabScroller();
           computeDashboardsGroups('Dashboard changed').then(() => updateAllCounts(dashId, 'kibi:dashboard:changed event'));
         });
 
@@ -362,7 +359,6 @@ define(function (require) {
           removeRouteChangeSuccessHandler();
           removeLocationChangeSuccessHandler();
           removeDashboardChangedHandler();
-          removeTabDashboardChangedHandler();
           removeTabDashboardGroupChangedHandler();
 
           kibiState.off('save_with_changes', updateCountsOnKibiStateChange);
@@ -381,3 +377,4 @@ define(function (require) {
   });
 
 });
+

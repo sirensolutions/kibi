@@ -20,10 +20,6 @@ define(function (require) {
         var button = _.clone(buttonDef);
 
         button.click = function () {
-          //// click method should return a Promise for the tests
-          //if (!currentDashboardIndexId) {
-          //return Promise.resolve();
-          //}
           const currentDashboardId = kibiState._getCurrentDashboardId();
           return kibiState.saveAppState().then(() => {
             if (this.joinSeqFilter) {

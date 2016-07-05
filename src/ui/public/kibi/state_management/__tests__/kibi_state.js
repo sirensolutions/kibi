@@ -87,6 +87,39 @@ describe('State Management', function () {
 
     require('testUtils/noDigestPromises').activateForSuite();
 
+    describe('Relations', function () {
+      beforeEach(() => init({}));
+
+      it('getEnabledRelations should return an empty array if no j', function () {
+        expect(kibiState.getEnabledRelations()).to.eql([]);
+      });
+
+      it('isRelationEnabled', function () {
+        const relation1 = {
+          dashboards: [ 'a', 'b' ],
+          relation: 'index-a/id/index-b/id'
+        };
+        const relation2 = {
+          dashboards: [ 'c', 'b' ],
+          relation: 'index-b/id/index-c/id'
+        };
+
+        kibiState.enableRelation(relation1);
+
+        expect(kibiState.isRelationEnabled(relation1)).to.equal(true);
+        expect(kibiState.isRelationEnabled(relation2)).to.equal(false);
+      });
+
+      it('isRelationEnabled should return false if j not initialized', function () {
+        const relation1 = {
+          dashboards: [ 'a', 'b' ],
+          relation: 'index-a/id/index-b/id'
+        };
+
+        expect(kibiState.isRelationEnabled(relation1)).to.equal(false);
+      });
+    });
+
     describe('General Helpers', function () {
       beforeEach(() => init({
         savedDashboards: [
@@ -96,6 +129,14 @@ describe('State Management', function () {
           }
         ]
       }));
+
+      it('set the selected dashboard in a group', function () {
+        const groupId = 'group1';
+        const dashboardId = 'Articles';
+
+        kibiState.setSelectedDashboardId(groupId, dashboardId);
+        expect(kibiState.getSelectedDashboardId(groupId)).to.equal(dashboardId);
+      });
 
       it('should have _urlParam of _k', function () {
         expect(kibiState).to.have.property('_urlParam');
@@ -1921,6 +1962,7 @@ describe('State Management', function () {
     });
   });
 });
+
 
 
 

@@ -74,7 +74,7 @@ describe('Kibi Components', function () {
         $rootScope = _$rootScope_;
         $cookies = _$cookies_;
         globalState = _globalState_;
-        kibiSessionHelper = Private(require('ui/kibi/helpers/kibi_state_helper/kibi_session_helper'));
+        kibiSessionHelper = Private(require('ui/kibi/helpers/kibi_session_helper/kibi_session_helper'));
       });
 
       saveSessionCounter = 0;

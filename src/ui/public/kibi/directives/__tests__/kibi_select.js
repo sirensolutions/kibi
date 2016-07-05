@@ -133,8 +133,8 @@ describe('Kibi Directives', function () {
     });
 
     it('should add the include to the select options XXX', function () {
-      var items = [ { value: 1, label: 'joe' } ];
-      var include = [ { value: 2, label: 'toto' } ];
+      var items = [ { value: 2, label: 'joe' } ];
+      var include = [ { value: 1, label: 'toto' } ];
 
       init(null, items, null, null, null, include);
 
@@ -146,11 +146,11 @@ describe('Kibi Directives', function () {
 
       expect(options[1]).to.be.ok();
       expect(options[1].value).to.be('2');
-      expect(options[1].text).to.be('toto');
+      expect(options[1].text).to.be('joe');
 
       expect(options[2]).to.be.ok();
       expect(options[2].value).to.be('1');
-      expect(options[2].text).to.be('joe');
+      expect(options[2].text).to.be('toto');
     });
 
     it('should add the include to the select options and take care of duplicates', function () {
@@ -170,12 +170,12 @@ describe('Kibi Directives', function () {
       expect(options[1].text).to.be('joe');
 
       expect(options[2]).to.be.ok();
-      expect(options[2].value).to.be('2');
-      expect(options[2].text).to.be('toto');
+      expect(options[2].value).to.be('3');
+      expect(options[2].text).to.be('tata');
 
       expect(options[3]).to.be.ok();
-      expect(options[3].value).to.be('3');
-      expect(options[3].text).to.be('tata');
+      expect(options[3].value).to.be('2');
+      expect(options[3].text).to.be('toto');
     });
 
     it('should exclude items from the select', function () {
@@ -330,6 +330,47 @@ describe('Kibi Directives', function () {
 
       var ngModel = $elem.controller('ngModel');
       expect(ngModel.$valid).to.be(false);
+    });
+
+    it('should sort the items by label', function () {
+      var items = [ { value: 1, label: 'bbb' }, {value: 2, label: 'aaa' } ];
+
+      init(null, items);
+
+      expect($rootScope.action.called).to.be.ok();
+
+      var options = $elem.find('option');
+      expect(options).to.have.length(3); // the joe element plus the null one
+
+      firstElementIsEmpty(options);
+
+      expect(options[1]).to.be.ok();
+      expect(options[1].value).to.be('2');
+      expect(options[1].text).to.be('aaa');
+      expect(options[2]).to.be.ok();
+      expect(options[2].value).to.be('1');
+      expect(options[2].text).to.be('bbb');
+    });
+
+    it('should sort the included items too', function () {
+      var items = [ { value: 2, label: 'aaa' } ];
+      var include = [ { value: 1, label: 'bbb' } ];
+
+      init(null,items,null,null,null,include);
+
+      expect($rootScope.action.called).to.be.ok();
+      var options = $elem.find('option');
+      expect(options).to.have.length(3);
+
+      firstElementIsEmpty(options);
+
+      expect(options[1]).to.be.ok();
+      expect(options[1].value).to.be('2');
+      expect(options[1].text).to.be('aaa');
+
+      expect(options[2]).to.be.ok();
+      expect(options[2].value).to.be('1');
+      expect(options[2].text).to.be('bbb');
     });
   });
 });

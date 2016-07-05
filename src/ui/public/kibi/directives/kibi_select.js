@@ -133,6 +133,10 @@ define(function (require) {
               });
               scope.items = scope.include.concat(scope.items);
             }
+
+            // sort by label
+            scope.items = _.sortBy(scope.items, 'label');
+
             if (scope.filter && _.isFunction(scope.filter())) {
               _.remove(scope.items, function (item) {
                 var selected = !!ngModelCtrl.$viewValue && !!ngModelCtrl.$viewValue.value &&

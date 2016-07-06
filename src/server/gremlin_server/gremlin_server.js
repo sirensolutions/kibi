@@ -184,10 +184,11 @@ function isJavaVersionOk(self) {
 GremlinServerHandler.prototype._checkJavaVersionString = function (string) {
   if (!this.javaChecked) {
     let ret = {};
-    string = string.toString().split(JSON.stringify(os.EOL))[0];
-    const javaVersion = new RegExp('java version').test(string) ? string.split(' ')[2].replace(/"/g, '') : false;
-    if (javaVersion) {
-      if (javaVersion.startsWith('1.8')) {
+    const versionLine = string.toString().split(os.EOL)[0];
+    //[string, major, minor, patch, update, ...]
+    const matches = versionLine.match(/(\d+?)\.(\d+?)\.(\d+?)(?:_(\d+))?/);
+    if (matches) {
+      if (matches.length >= 2 && matches[2] === '8') {
         ret.v = true;
       } else {
         ret.v = false;

@@ -46,6 +46,7 @@ module.exports = function (kibana) {
       createKibiProxy(server, 'GET', '/{paths*}');
       createKibiProxy(server, 'POST', '/_mget');
       createKibiProxy(server, 'POST', '/{index}/_search');
+      createKibiProxy(server, 'POST', '/{index}/{type}/_search');
       createKibiProxy(server, 'POST', '/{index}/_field_stats');
       createKibiProxy(server, 'POST', '/_msearch');
       createKibanaProxy(server, 'POST', '/_search/scroll');

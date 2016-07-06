@@ -35,7 +35,6 @@ define(function (require) {
       });
     };
 
-
     DashboardGroupHelper.prototype.shortenDashboardName = function (groupTitle, dashboardTitle) {
       var g = groupTitle.toLowerCase();
       var d = dashboardTitle.toLowerCase();
@@ -129,7 +128,6 @@ define(function (require) {
               return dashboard;
             });
 
-
             // try to get the last selected one for this group
             if (!selected && dashboards.length > 0) {
               var lastSelectedId = kibiState.getSelectedDashboardId(group.id);
@@ -188,7 +186,6 @@ define(function (require) {
       });
       return dashboardsInGroups;
     };
-
 
     DashboardGroupHelper.prototype._addAdditionalGroupsFromSavedDashboards = function (currentDashboardId, dashboardGroups1) {
       var self = this;
@@ -270,8 +267,6 @@ define(function (require) {
       });
     };
 
-
-
     DashboardGroupHelper.prototype.getCountQueryForSelectedDashboard = function (groups, groupIndex) {
       var dashboard = groups[groupIndex].selected;
 
@@ -322,7 +317,6 @@ define(function (require) {
       return this._computeGroupsFromSavedDashboardGroups(currentDashboardId)
       .then((dashboardGroups1) => this._addAdditionalGroupsFromSavedDashboards(currentDashboardId, dashboardGroups1));
     };
-
 
     return new DashboardGroupHelper();
   };

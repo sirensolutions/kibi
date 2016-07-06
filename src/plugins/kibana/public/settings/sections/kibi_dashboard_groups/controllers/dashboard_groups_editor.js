@@ -59,6 +59,12 @@ define(function (require) {
 
       var dashboardGroup = $scope.dashboardGroup = $route.current.locals.dashboardGroup;
 
+      var allDashboardsGroups = [];
+
+      savedDashboardGroups.find().then(function (data) {
+        allDashboardsGroups = data;
+      });
+
       $scope.filter = function (id, item) {
         var dashboard = item && item.value;
         var allDashboards = _($scope.dashboardGroup.dashboards).pluck('id');
@@ -66,7 +72,22 @@ define(function (require) {
         if (!dashboard) {
           return allDashboards.value();
         }
-        return allDashboards.compact().contains(dashboard);
+
+        var toRemove = false;
+        _.each(allDashboardsGroups.hits,function (hits) {
+          _.each(hits.dashboards,function (hitDashboard) {
+            hitDashboard.id = (hitDashboard.id).replace(/-/g, ' ');
+            if ((hitDashboard.id).indexOf(item.label) !== -1) {
+              toRemove = true;
+              return false;
+            }
+          });
+          if (toRemove) {
+            return false;
+          }
+        });
+
+        return toRemove || allDashboards.compact().contains(dashboard);
       };
 
       $scope.submit = function () {

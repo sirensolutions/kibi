@@ -49,6 +49,10 @@ define(function (require) {
                     } else if (Object.prototype.toString.call(value) === '[object Array]') {
                       notify.warning('Entity label taken from [' + $scope.entityURI + '] is an array');
                     } else {
+                      value = _.trunc(value,{
+                        'length':65,
+                        'separator': ' '
+                      });
                       $scope.label = value;
                     }
                   } else {

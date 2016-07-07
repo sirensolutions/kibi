@@ -1,7 +1,7 @@
 {
   "title": "Default Expansion Policy",
   "description": "Expands the selected nodes using the selected relations",
-  "scriptSource": "function expandOverride(selectionIds) {\n    defaultExpansion(selectionIds).then(function (results) {\n        addResultsToGraph(results);\n    });\n}",
+  "scriptSource": "function expandOverride(selectionIds) {\n    f.defaultExpansion(selectionIds).then(function (results) {\n        f.addResultsToGraph(results);\n    });\n}",
   "version": 1,
   "type": "expansion",
   "kibanaSavedObjectMeta": {

@@ -62,22 +62,21 @@ define(function (require) {
       var allDashboardsGroups = [];
 
       savedDashboardGroups.find().then(function (data) {
-        allDashboardsGroups = data;
+        allDashboardsGroups = data.hits;
       });
 
       $scope.filter = function (id, item) {
         var dashboard = item && item.value;
-        var allDashboards = _($scope.dashboardGroup.dashboards).pluck('id');
+        var allDashboardIds = _($scope.dashboardGroup.dashboards).pluck('id');
 
         if (!dashboard) {
-          return allDashboards.value();
+          return allDashboardIds.value();
         }
 
         var toRemove = false;
-        _.each(allDashboardsGroups.hits,function (hits) {
-          _.each(hits.dashboards,function (hitDashboard) {
-            hitDashboard.id = (hitDashboard.id).replace(/-/g, ' ');
-            if ((hitDashboard.id).indexOf(item.label) !== -1) {
+        _.each(allDashboardsGroups, function (group) {
+          _.each(group.dashboards,function (dash) {
+            if (dash.id === dashboard) {
               toRemove = true;
               return false;
             }
@@ -87,7 +86,7 @@ define(function (require) {
           }
         });
 
-        return toRemove || allDashboards.compact().contains(dashboard);
+        return toRemove || allDashboardIds.compact().contains(dashboard);
       };
 
       $scope.submit = function () {

@@ -59,14 +59,34 @@ define(function (require) {
 
       var dashboardGroup = $scope.dashboardGroup = $route.current.locals.dashboardGroup;
 
+      var allDashboardsGroups = [];
+
+      savedDashboardGroups.find().then(function (data) {
+        allDashboardsGroups = data.hits;
+      });
+
       $scope.filter = function (id, item) {
-        var dashboard = item.value;
-        var allDashboards = _($scope.dashboardGroup.dashboards).pluck('id');
+        var dashboard = item && item.value;
+        var allDashboardIds = _($scope.dashboardGroup.dashboards).pluck('id');
 
         if (!dashboard) {
-          return allDashboards.value();
+          return allDashboardIds.value();
         }
-        return allDashboards.compact().contains(dashboard);
+
+        var toRemove = false;
+        _.each(allDashboardsGroups, function (group) {
+          _.each(group.dashboards,function (dash) {
+            if (dash.id === dashboard) {
+              toRemove = true;
+              return false;
+            }
+          });
+          if (toRemove) {
+            return false;
+          }
+        });
+
+        return toRemove || allDashboardIds.compact().contains(dashboard);
       };
 
       $scope.submit = function () {

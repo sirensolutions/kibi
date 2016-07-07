@@ -14,7 +14,8 @@ let appState;
 const defaultTimeStart = '2006-09-01T12:00:00.000Z';
 const defaultTimeEnd = '2009-09-01T12:00:00.000Z';
 
-function init({ currentDashboardId = 'dashboard 1', indexPatterns, savedSearches, savedDashboards, enableEnterprise = false }) {
+function init({ currentDashboardId = 'dashboard 1', indexPatterns = [], savedSearches = [],
+              savedDashboards = [], enableEnterprise = false }) {
   ngMock.module('kibana', 'kibana/courier', 'kibana/global_state', ($provide) => {
     $provide.constant('kibiEnterpriseEnabled', enableEnterprise);
     $provide.constant('kbnDefaultAppId', '');
@@ -34,22 +35,23 @@ function init({ currentDashboardId = 'dashboard 1', indexPatterns, savedSearches
   });
 
   ngMock.module('kibana/index_patterns', function ($provide) {
-    $provide.service('indexPatterns', (Promise) => mockSavedObjects(Promise)('indexPatterns', indexPatterns || []));
+    $provide.service('indexPatterns', (Promise) => mockSavedObjects(Promise)('indexPatterns', indexPatterns));
   });
 
   ngMock.module('discover/saved_searches', function ($provide) {
-    $provide.service('savedSearches', (Promise) => mockSavedObjects(Promise)('savedSearches', savedSearches || []));
+    $provide.service('savedSearches', (Promise) => mockSavedObjects(Promise)('savedSearches', savedSearches));
   });
 
   ngMock.module('app/dashboard', function ($provide) {
-    $provide.service('savedDashboards', (Promise) => mockSavedObjects(Promise)('savedDashboards', savedDashboards || []));
+    $provide.service('savedDashboards', (Promise) => mockSavedObjects(Promise)('savedDashboards', savedDashboards));
   });
 
-  ngMock.inject(function (timefilter, _config_, _kibiState_, Private) {
+  ngMock.inject(function (timefilter, _config_, _kibiState_, Private, Promise) {
     kibiState = _kibiState_;
     config = _config_;
     sequentialJoinVisHelper = Private(require('ui/kibi/helpers/kibi_sequential_join_vis_helper'));
     sinon.stub(kibiState, '_getCurrentDashboardId').returns(currentDashboardId);
+    sinon.stub(kibiState, 'saveAppState').returns(Promise.resolve());
 
     const defaultTime = {
       mode: 'absolute',
@@ -210,36 +212,42 @@ describe('Kibi Components', function () {
     });
 
     describe('getJoinSequenceFilter', function () {
-      const indexPatterns = [
-        {
-          id: 'ia',
-          timeFieldName: 'date',
-          fields: [
-            {
-              name: 'date'
-            }
-          ]
-        }
-      ];
-      const savedDashboards = [
-        {
-          id: 'dashboardA',
-          title: 'dashboardA',
-          savedSearchId: 'searchA'
-        }
-      ];
-      const savedSearches = [
-        {
-          id: 'searchA',
-          kibanaSavedObjectMeta: {
-            searchSourceJSON: JSON.stringify({
-              index: 'ia',
-              query: { a: 123 },
-              filter: []
-            })
+      let indexPatterns;
+      let savedDashboards;
+      let savedSearches;
+
+      beforeEach(function () {
+        indexPatterns = [
+          {
+            id: 'ia',
+            timeFieldName: 'date',
+            fields: [
+              {
+                name: 'date'
+              }
+            ]
           }
-        }
-      ];
+        ];
+        savedDashboards = [
+          {
+            id: 'dashboardA',
+            title: 'dashboardA',
+            savedSearchId: 'searchA'
+          }
+        ];
+        savedSearches = [
+          {
+            id: 'searchA',
+            kibanaSavedObjectMeta: {
+              searchSourceJSON: JSON.stringify({
+                index: 'ia',
+                query: { a: 123 },
+                filter: []
+              })
+            }
+          }
+        ];
+      });
 
       it('should build the join_sequence', function (done) {
         const currentDashboardId = 'dashboardA';

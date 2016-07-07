@@ -18,7 +18,6 @@ describe('Filter Bar Directive', function () {
   var mapFilter;
   var $el;
   var $scope;
-  // require('testUtils/noDigestPromises').activateForSuite();
 
   beforeEach(ngMock.module('kibana/global_state', function ($provide) {
     $provide.service('getAppState', _.constant(_.constant(
@@ -45,7 +44,7 @@ describe('Filter Bar Directive', function () {
       });
     });
 
-    ngMock.module('ui/kibi/helpers/kibi_state_helper/services/saved_sessions', function ($provide) {
+    ngMock.module('ui/kibi/helpers/kibi_session_helper/services/saved_sessions', function ($provide) {
       $provide.service('savedSessions', (Promise) => mockSavedObjects(Promise)('savedSession'));
     });
 

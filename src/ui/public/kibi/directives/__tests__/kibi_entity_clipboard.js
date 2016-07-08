@@ -42,7 +42,7 @@ describe('Kibi Components', function () {
             return globalState;
           });
         }
-      );
+        );
 
       ngMock.inject(function (Private, _$rootScope_, $compile, $injector) {
         $rootScope = _$rootScope_;
@@ -91,6 +91,31 @@ describe('Kibi Components', function () {
       $httpBackend.flush();
       expect($rootScope.disabled).to.be(false);
       expect($rootScope.entityURI).to.be('index/type/id/a.b.c with spaces');
+      $rootScope.$apply();
+    });
+
+    it('should truncate long document label', function (done) {
+      init(false, ['index/type/id/a.b.c with spaces']);
+
+      $httpBackend.whenGET('/elasticsearch/index/type/id').respond(200, {
+        _source: {
+          a: {
+            b: {
+              'c with spaces': 'Previous  |  Next Image 1 of 5 Beam me up, Scotty... Videoconferencing has'
+            }
+          }
+        }
+      });
+
+      $rootScope.$watch('label', function (label) {
+        if (label) {
+          expect(label).to.equal('Previous  |  Next Image 1 of 5 Beam me up, Scotty......');
+          done();
+        }
+      });
+
+      $rootScope.$emit('kibi:selectedEntities:changed', null);
+      $httpBackend.flush();
       $rootScope.$apply();
     });
 

@@ -133,8 +133,10 @@ define(function (require) {
       appState.filters = [];
 
       // remove all enabled relations for the join_set
-      kibiState.disableAllRelations();
-      kibiState.save();
+      if (kibiState.getEnabledRelations().length) {
+        kibiState.disableAllRelations();
+        kibiState.save();
+      }
       // kibi: end
     };
 

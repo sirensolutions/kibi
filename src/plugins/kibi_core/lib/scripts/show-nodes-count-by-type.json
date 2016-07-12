@@ -3,8 +3,5 @@
   "description": "Opens a popup showing the node types followed by their count.",
   "scriptSource": "function beforeAll(graphModel, graphSelection) {\n  let typeCounter = {};\n  \n  _.each(graphModel.nodes, function (node) {\n    if (typeCounter[node.type]) {\n      typeCounter[node.type] = typeCounter[node.type] + 1;\n    } else {\n      typeCounter[node.type] = 1;\n    }\n  });\n  \n  let prettyString = '<ul>';\n  for (var key in typeCounter) {\n    if (typeCounter.hasOwnProperty(key)) {\n      prettyString = prettyString + '<li>';\n      prettyString = prettyString + key + ': ' + typeCounter[key];\n      prettyString = prettyString + '</li>';\n    }\n  }\n  prettyString = prettyString + '</ul>';\n\n  f.openModal('Number of nodes in the current graph', prettyString);\n  return null;\n}",
   "version": 1,
-  "type": "contextual",
-  "kibanaSavedObjectMeta": {
-    "searchSourceJSON": "{}"
-  }
+  "type": "contextual"
 }

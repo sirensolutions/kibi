@@ -39,7 +39,8 @@ module.exports = function (kibana) {
           let config = server.config();
 
           var ret = {
-            kbnDefaultAppId: config.get('kibana.defaultAppId')
+            kbnDefaultAppId: config.get('kibana.defaultAppId'),
+            tilemap: config.get('tilemap')
           };
 
           // kibi: list of elasticsearch plugins, schema, default_dashboard_id and warnings

@@ -24,7 +24,10 @@ describe('remove filters', function () {
       $provide.service('kibiState', function () {
         return new MockState({
           filters: [],
-          disableAllRelations: sinon.spy()
+          disableAllRelations: sinon.spy(),
+          getEnabledRelations: function () {
+            return [];
+          }
         });
       });
 

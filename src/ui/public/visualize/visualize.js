@@ -1,7 +1,7 @@
 define(function (require) {
   require('ui/modules')
   .get('kibana/directive')
-  .directive('visualize', function (savedDashboards, savedSearches, SavedVis, indexPatterns, Private, config, $timeout, createNotifier) {
+  .directive('visualize', function (kibiState, savedDashboards, savedSearches, Private, config, $timeout, createNotifier) {
 
     require('ui/visualize/spy');
     require('ui/visualize/visualize.less');
@@ -148,9 +148,9 @@ define(function (require) {
           // kibi: get the saved search associated with the current dashboard, in order to have the corrent search_source
           if (searchSource && !$scope.vis.type.requiresSearch) {
             $scope.searchSource.disable();
-            var urlHelper = Private(require('ui/kibi/helpers/url_helper'));
-            savedDashboards.get(urlHelper.getCurrentDashboardId()).then(function (savedCurrentDashboard) {
-              if (savedCurrentDashboard.savedSearchId) {
+            savedDashboards.find().then(function (resp) {
+              const savedCurrentDashboard = _.find(resp.hits, 'id', kibiState._getCurrentDashboardId());
+              if (savedCurrentDashboard && savedCurrentDashboard.savedSearchId) {
                 return savedSearches.get(savedCurrentDashboard.savedSearchId).then(function (savedSearch) {
                   $scope.searchSource.inherits(savedSearch.searchSource);
                   $scope.searchSource.enable();

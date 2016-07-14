@@ -21,6 +21,16 @@ describe('remove filters', function () {
     function ($provide) {
       $provide.service('courier', require('fixtures/mock_courier'));
 
+      $provide.service('kibiState', function () {
+        return new MockState({
+          filters: [],
+          disableAllRelations: sinon.spy(),
+          getEnabledRelations: function () {
+            return [];
+          }
+        });
+      });
+
       appState = new MockState({ filters: [] });
       $provide.service('getAppState', function () {
         return function () { return appState; };

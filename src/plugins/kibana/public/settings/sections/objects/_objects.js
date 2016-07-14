@@ -20,7 +20,7 @@ define(function (require) {
 
     var cache = Private(require('ui/kibi/helpers/cache_helper')); // kibi: added by kibi
     var deleteHelper = Private(require('ui/kibi/helpers/delete_helper')); // kibi: added by kibi
-    var kibiSessionHelper = Private(require('ui/kibi/helpers/kibi_state_helper/kibi_session_helper'));
+    var kibiSessionHelper = Private(require('ui/kibi/helpers/kibi_session_helper/kibi_session_helper'));
 
     return {
       restrict: 'E',

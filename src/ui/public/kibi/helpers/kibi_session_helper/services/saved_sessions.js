@@ -1,8 +1,8 @@
 define(function (require) {
 
-  require('ui/kibi/helpers/kibi_state_helper/services/_saved_session');
+  require('ui/kibi/helpers/kibi_session_helper/services/_saved_session');
 
-  var module = require('ui/modules').get('ui/kibi/helpers/kibi_state_helper/services/saved_sessions', []);
+  var module = require('ui/modules').get('ui/kibi/helpers/kibi_session_helper/services/saved_sessions', []);
   var _ = require('lodash');
   var Scanner = require('ui/utils/scanner');
 

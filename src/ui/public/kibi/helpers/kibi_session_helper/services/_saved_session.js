@@ -1,6 +1,6 @@
 define(function (require) {
 
-  var module = require('ui/modules').get('ui/kibi/helpers/kibi_state_helper/services/saved_sessions', []);
+  var module = require('ui/modules').get('ui/kibi/helpers/kibi_session_helper/services/saved_sessions', []);
   var angular = require('angular');
   var _ = require('lodash');
 

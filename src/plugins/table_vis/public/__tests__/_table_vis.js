@@ -14,7 +14,10 @@ describe('Integration', function () {
   var indexPattern;
   var fixtures;
 
-  beforeEach(ngMock.module('kibana', 'kibana/table_vis'));
+  beforeEach(ngMock.module('kibana', 'kibana/table_vis', function ($provide) {
+    $provide.constant('elasticsearchPlugins', []);
+  }));
+
   beforeEach(ngMock.inject(function (Private, $injector) {
     $rootScope = $injector.get('$rootScope');
     $compile = $injector.get('$compile');

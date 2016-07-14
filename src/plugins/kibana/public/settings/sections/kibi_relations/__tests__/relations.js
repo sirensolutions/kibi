@@ -2,8 +2,8 @@ describe('Kibi Settings', function () {
   var ngMock = require('ngMock');
   var expect = require('expect.js');
   var _ = require('lodash');
-  var sinon = require('auto-release-sinon');
   var Promise = require('bluebird');
+  var mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
   var $scope;
   var $timeout;
   var config;
@@ -11,7 +11,7 @@ describe('Kibi Settings', function () {
   var indexToDashboardMapPromise;
   var unbind = [];
 
-  function init(options) {
+  function init({ savedDashboards, savedSearches, indexToDashboardsMap, relations, events }) {
     ngMock.module('kibana', function ($provide) {
       $provide.constant('kbnDefaultAppId', 'dashboard');
       $provide.constant('kibiDefaultDashboardId', '');
@@ -19,15 +19,20 @@ describe('Kibi Settings', function () {
       $provide.constant('elasticsearchPlugins', ['siren-join']);
     });
 
+    ngMock.module('discover/saved_searches', function ($provide) {
+      $provide.service('savedSearches', (Promise) => mockSavedObjects(Promise)('savedSearches', savedSearches || []));
+    });
+
+    ngMock.module('app/dashboard', function ($provide) {
+      $provide.service('savedDashboards', (Promise) => mockSavedObjects(Promise)('savedDashboards', savedDashboards || []));
+    });
+
     ngMock.inject(function (_$timeout_, $injector, $rootScope, $controller, Private) {
-      var urlHelper = Private(require('ui/kibi/helpers/url_helper'));
-      indexToDashboardMapPromise = Promise.resolve(options.indexToDashboardsMap);
-      var getIndexToDashboardMapStub = sinon.stub(urlHelper, 'getIndexToDashboardMap')
-      .returns(indexToDashboardMapPromise);
+      indexToDashboardMapPromise = Promise.resolve(indexToDashboardsMap);
 
       $timeout = _$timeout_;
       config = $injector.get('config');
-      config.set('kibi:relations', options.relations);
+      config.set('kibi:relations', relations);
 
       $scope = $rootScope;
       var el = '<div><form name="dashboardsForm" class="ng-valid"/><form name="indicesForm" class="ng-valid"/></div>';
@@ -35,8 +40,13 @@ describe('Kibi Settings', function () {
         $scope: $scope,
         $element: jQuery(el)
       });
-      if (options.events) {
-        _.each(options.events, function (func, e) {
+      if (indexToDashboardsMap) {
+        $scope.getIndexToDashboardMap = function () {
+          return indexToDashboardMapPromise;
+        };
+      }
+      if (events) {
+        _.each(events, function (func, e) {
           unbind.push($scope.$on(e, func));
         });
       }
@@ -52,6 +62,115 @@ describe('Kibi Settings', function () {
   }
 
   describe('Relations Section', function () {
+    describe('create an index to dashboards map', function () {
+      require('testUtils/noDigestPromises').activateForSuite();
+      beforeEach(() => init({
+        savedDashboards: [
+          {
+            id: 'Articles',
+            title: 'Articles'
+          },
+          {
+            id: 'search-ste',
+            title: 'search-ste',
+            savedSearchId: 'search-ste'
+          },
+          {
+            id: 'time-testing-4',
+            title: 'time-testing-4',
+            timeRestore: true,
+            timeFrom: '2005-09-01T12:00:00.000Z',
+            timeTo: '2015-09-05T12:00:00.000Z',
+            savedSearchId: 'time-testing-4'
+          }
+        ],
+        savedSearches: [
+          {
+            id: 'search-ste',
+            kibanaSavedObjectMeta: {
+              searchSourceJSON: JSON.stringify(
+                {
+                  index: 'search-ste',
+                  filter: [],
+                  query: {}
+                }
+              )
+            }
+          },
+          {
+            id: 'time-testing-4',
+            kibanaSavedObjectMeta: {
+              searchSourceJSON: JSON.stringify(
+                {
+                  index: 'time-testing-4', // here put this id to make sure fakeTimeFilter will supply the timfilter for it
+                  filter: [],
+                  query: {}
+                }
+              )
+            }
+          }
+        ]
+      }));
+
+      it('should fail because a dashboard does not have a saved search and ignoreMissingSavedSearch not set', function (done) {
+        $scope.getIndexToDashboardMap().then(function (results) {
+          done('should fail');
+        }).catch(function (err) {
+          expect(err.message).to.be('The dashboard [Articles] is expected to be associated with a saved search.');
+          done();
+        });
+      });
+
+      it('should NOT fail with dashboard missing a saved search when ignoreMissingSavedSearch set to true and first parameter empty',
+        function (done) {
+          var expected = {
+            'search-ste': ['search-ste'],
+            'time-testing-4': ['time-testing-4']
+          };
+
+          $scope.getIndexToDashboardMap(null, true).then(function (results) {
+            expect(results, expected);
+            done();
+          }).catch(done);
+        }
+      );
+
+      it('should NOT fail with dashboard missing a saved search when ignoreMissingSavedSearch is true and first parameter is array of ids',
+        function (done) {
+          var expected = {
+            'time-testing-4': ['time-testing-4']
+          };
+
+          $scope.getIndexToDashboardMap(['time-testing-4'], true).then(function (results) {
+            expect(results, expected);
+            done();
+          }).catch(done);
+        }
+      );
+
+      it('getIndexToDashboardMap pass ids of dashboards', function (done) {
+        var expected = {
+          'time-testing-4': ['time-testing-4']
+        };
+
+        $scope.getIndexToDashboardMap(['time-testing-4']).then(function (results) {
+          expect(results).to.eql(expected);
+          done();
+        }).catch(done);
+      });
+
+      it('dashboard is not selected but has a savedsearch', function (done) {
+        var expected = {
+          'search-ste': ['search-ste']
+        };
+
+        $scope.getIndexToDashboardMap(['search-ste']).then(function (results) {
+          expect(results).to.eql(expected);
+          done();
+        }).catch(done);
+      });
+    });
+
     describe('index patterns graph', function () {
 
       afterEach(after);
@@ -386,7 +505,7 @@ describe('Kibi Settings', function () {
           expect($scope.filterDashboards(0, { value: 'Db' })).to.be(true);
           expect($scope.filterDashboards(0, { value: 'Dc' })).to.be(true);
           done();
-        });
+        }).catch(done);
       });
 
       it('should only recommend connected dashboards', function (done) {
@@ -439,7 +558,7 @@ describe('Kibi Settings', function () {
           expect($scope.filterDashboards(0, { value: 'Db' })).to.be(false);
           expect($scope.filterDashboards(0, { value: 'Dc' })).to.be(true);
           done();
-        });
+        }).catch(done);
       });
 
       it('should filter dashboards based on the selected relation', function (done) {

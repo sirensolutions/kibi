@@ -12,14 +12,12 @@ var MockState = require('fixtures/mock_state');
 describe('Filter Bar Directive', function () {
   var $rootScope;
   var $compile;
-  var $timeout;
   var Promise;
   var appState;
   var queryFilter;
   var mapFilter;
   var $el;
   var $scope;
-  // require('testUtils/noDigestPromises').activateForSuite();
 
   beforeEach(ngMock.module('kibana/global_state', function ($provide) {
     $provide.service('getAppState', _.constant(_.constant(
@@ -32,6 +30,13 @@ describe('Filter Bar Directive', function () {
     ngMock.module('kibana', function ($provide) {
       $provide.constant('kbnDefaultAppId', '');
       $provide.constant('kibiDefaultDashboardId', '');
+
+      $provide.service('kibiState', function () {
+        return new MockState({
+          _getCurrentDashboardId: _.noop
+        });
+      });
+
       $provide.service('$route', function () {
         return {
           reload: _.noop
@@ -39,7 +44,7 @@ describe('Filter Bar Directive', function () {
       });
     });
 
-    ngMock.module('ui/kibi/helpers/kibi_state_helper/services/saved_sessions', function ($provide) {
+    ngMock.module('ui/kibi/helpers/kibi_session_helper/services/saved_sessions', function ($provide) {
       $provide.service('savedSessions', (Promise) => mockSavedObjects(Promise)('savedSession'));
     });
 
@@ -59,10 +64,9 @@ describe('Filter Bar Directive', function () {
       $provide.service('savedDashboards', (Promise) => mockSavedObjects(Promise)('savedDashboard'));
     });
 
-    ngMock.inject(function (Private, $injector, _$rootScope_, _$compile_, _$timeout_) {
+    ngMock.inject(function (Private, $injector, _$rootScope_, _$compile_) {
       $rootScope = _$rootScope_;
       $compile = _$compile_;
-      $timeout = _$timeout_;
       Promise = $injector.get('Promise');
       mapFilter = Private(require('ui/filter_bar/lib/mapFilter'));
 

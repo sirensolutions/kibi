@@ -9,7 +9,7 @@ describe('Kibi Components', function () {
     var $rootScope;
     var globalState;
     var appState;
-    var kibiStateHelper;
+    var kibiState;
     var $httpBackend;
 
     var MockState = require('fixtures/mock_state');
@@ -23,6 +23,7 @@ describe('Kibi Components', function () {
         function ($provide) {
           $provide.constant('kbnDefaultAppId', '');
           $provide.constant('kibiDefaultDashboardId', '');
+          $provide.constant('elasticsearchPlugins', ['siren-join']);
           $provide.service('$route', function () {
             return {
               reload: _.noop
@@ -44,13 +45,12 @@ describe('Kibi Components', function () {
         }
         );
 
-      ngMock.inject(function (Private, _$rootScope_, $compile, $injector) {
+      ngMock.inject(function (_kibiState_, _$rootScope_, $compile, $injector) {
+        kibiState = _kibiState_;
         $rootScope = _$rootScope_;
         $httpBackend = $injector.get('$httpBackend');
         $compile('<kibi-entity-clipboard></kibi-entity-clipboard>')($rootScope);
-        kibiStateHelper = Private(require('ui/kibi/helpers/kibi_state_helper/kibi_state_helper'));
-        var urlHelper = Private(require('ui/kibi/helpers/url_helper'));
-        sinon.stub(urlHelper, 'getCurrentDashboardId').returns(currentDashboardId);
+        sinon.stub(kibiState, '_getCurrentDashboardId').returns(currentDashboardId);
       });
     }
 
@@ -242,6 +242,14 @@ describe('Kibi Components', function () {
     it('should remove the document and associated filters', function () {
       init(false, ['index/type/id/column/label'], 'dashboard2');
 
+      globalState.filters = [
+        {
+          filter: 4,
+          meta: {
+            dependsOnSelectedEntities: true
+          }
+        }
+      ];
       appState.filters = [
         {
           filter: 2,
@@ -254,25 +262,36 @@ describe('Kibi Components', function () {
           }
         }
       ];
-      globalState.k = {
-        d: {
-          dashboard1: {
-            f: [ { filter: 1, meta: { dependsOnSelectedEntities: true } } ]
-          },
-          dashboard2: {
-            f: [ { filter: 2, meta: {} } ]
+      kibiState._setDashboardProperty('dashboard1', kibiState._properties.filters, [
+        {
+          filter: 1,
+          meta: {
+            dependsOnSelectedEntities: true
           }
         }
-      };
+      ]);
+      kibiState._setDashboardProperty('dashboard2', kibiState._properties.filters, [
+        {
+          filter: 2,
+          meta: {}
+        },
+        {
+          filter: 3,
+          meta: {
+            dependsOnSelectedEntities: true
+          }
+        }
+      ]);
 
       $rootScope.removeAllEntities();
 
       // appstate filters
       expect(appState.filters).to.eql([ { filter: 2, meta: {} } ]);
-      // globalstate filters
-      const allFilters = kibiStateHelper.getAllFilters();
-      expect(allFilters.dashboard1).to.have.length(0);
-      expect(allFilters.dashboard2).to.have.length(1);
+      // kibistate filters
+      expect(kibiState._getDashboardProperty('dashboard1', kibiState._properties.filters)).to.have.length(0);
+      expect(kibiState._getDashboardProperty('dashboard2', kibiState._properties.filters)).to.eql([ { filter: 2, meta: {} } ]);
+      // pinned filters
+      expect(globalState.filters).to.have.length(0);
     });
 
     it('should toggle the selected document', function () {

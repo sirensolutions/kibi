@@ -35,7 +35,7 @@ define(function (require) {
   .when('/dashboard', {
     template: require('plugins/kibana/dashboard/index.html'),
     resolve: {
-      dash: function (timefilter, savedDashboards, config) {
+      dash: function (timefilter, savedDashboards) {
         // kibi: do not show the timepicker when no dashboard is selected
         // Since tabs can show counts unrelated to the time shown in the timefilter, this would be misleading
         timefilter.enabled = false;
@@ -46,7 +46,7 @@ define(function (require) {
   .when('/dashboard/:id', {
     template: require('plugins/kibana/dashboard/index.html'),
     resolve: {
-      dash: function (timefilter, savedDashboards, Notifier, $route, $location, courier) {
+      dash: function (timefilter, savedDashboards, Notifier, $route, courier) {
         // kibi: show the timepicker when loading a dashboard
         timefilter.enabled = true;
         return savedDashboards.get($route.current.params.id)
@@ -59,10 +59,9 @@ define(function (require) {
 
   app.directive('dashboardApp', function (courier, AppState, timefilter, kbnUrl, createNotifier) {
     return {
-      controller: function ($timeout, globalState, $scope, $rootScope, $route, $routeParams, $location, Private, getAppState, config) {
+      controller: function (kibiState, globalState, $scope, $rootScope, $route, $routeParams, Private, getAppState) {
 
         var queryFilter = Private(require('ui/filter_bar/query_filter'));
-        var kibiStateHelper = Private(require('ui/kibi/helpers/kibi_state_helper/kibi_state_helper'));
 
         var notify = createNotifier({
           location: 'Dashboard'
@@ -70,14 +69,14 @@ define(function (require) {
 
         var dash = $scope.dash = $route.current.locals.dash;
 
-        var dashboardTimeFilter = kibiStateHelper.getTimeForDashboardId(dash.id);
-        if (dashboardTimeFilter) {
+        var dashboardTime = kibiState._getDashboardProperty(dash.id, kibiState._properties.time);
+        if (dashboardTime) {
           // kibi: time from the kibi state.
           // this allows to set a time (not save it with a dashboard), switch between dashboards, and
           // still retain the time set until the app is reloaded
-          timefilter.time.mode = dashboardTimeFilter.mode;
-          timefilter.time.to = dashboardTimeFilter.to;
-          timefilter.time.from = dashboardTimeFilter.from;
+          timefilter.time.mode = dashboardTime.m;
+          timefilter.time.from = dashboardTime.f;
+          timefilter.time.to = dashboardTime.t;
         } else if (dash.timeRestore && dash.timeTo && dash.timeFrom && !getAppState.previouslyStored()) {
           timefilter.time.mode = dash.timeMode;
           timefilter.time.to = dash.timeTo;
@@ -87,12 +86,10 @@ define(function (require) {
         // kibi: below listener on globalState is needed to react when the global time is changed by the user
         // either directly in time widget or by clicking on histogram chart etc
         var saveWithChangesHandler = function (diff) {
-          if (dash.id && diff.indexOf('time') !== -1 && timefilter.time.from && timefilter.time.to) {
-            // kibiStateHelper.saveTimeForDashboardId calls globalState.save
-            // In order to avoid a loop of events on globalstate, call that function in the next tick
-            $timeout(function () {
-              kibiStateHelper.saveTimeForDashboardId(dash.id, timefilter.time.mode, timefilter.time.from, timefilter.time.to);
-            });
+          if (dash.id && diff.indexOf('time') !== -1 && timefilter.time.from && timefilter.time.to &&
+              !kibiState._isDefaultTime(timefilter.time.mode, timefilter.time.from, timefilter.time.to)) {
+            kibiState._saveTimeForDashboardId(dash.id, timefilter.time.mode, timefilter.time.from, timefilter.time.to);
+            kibiState.save();
           }
         };
         globalState.on('save_with_changes', saveWithChangesHandler);
@@ -107,14 +104,9 @@ define(function (require) {
         };
 
         // kibi: get the filters and query from the kibi state
-        var dashboardQuery = kibiStateHelper.getQueryForDashboardId(dash.id);
-        // Note: important !!! we pass a flag includePinnedFilters = false
-        // as we do NOT want pinned filters to be copied to appState
-        // as pinned filters should always stay in kibana global state
-        var dashboardFilters = kibiStateHelper.getFiltersForDashboardId(dash.id, false);
-        if (dashboardFilters && !dashboardFilters.length) {
-          dashboardFilters = undefined;
-        }
+        var dashboardQuery = kibiState._getDashboardProperty(dash.id, kibiState._properties.query);
+        // do not take pinned filters !
+        var dashboardFilters = kibiState._getDashboardProperty(dash.id, kibiState._properties.filters);
 
         var stateDefaults = {
           id: dash.id, // kibi: added to identity a dashboard in helper methods
@@ -132,24 +124,6 @@ define(function (require) {
         var $uiState = $scope.uiState = $state.makeStateful('uiState');
 
         // kibi: added so the kibi-dashboard-toolbar which was moved out could comunicate with the main app
-        var cache = Private(require('ui/kibi/helpers/cache_helper'));
-        var joinFilterHelper = Private(require('ui/kibi/helpers/join_filter_helper/join_filter_helper'));
-
-        var _addRemoveJoinSetFilter = function (panelEnabled) {
-          if (panelEnabled === false) {
-            $state.filters = _.filter($state.filters, function (f) {
-              return !f.join_set;
-            });
-          } else {
-            joinFilterHelper.updateJoinSetFilter();
-          }
-        };
-
-        var relationalPanelListenerOff = $rootScope.$on('change:config.kibi:relationalPanel', function (event, panelEnabled) {
-          _addRemoveJoinSetFilter(panelEnabled);
-        });
-        _addRemoveJoinSetFilter(config.get('kibi:relationalPanel'));
-
         var stDashboardInvokeMethodOff = $rootScope.$on('kibi:dashboard:invoke-method', function (event, methodName) {
           $scope[methodName]();
         });
@@ -170,7 +144,6 @@ define(function (require) {
           dash.destroy();
           stDashboardInvokeMethodOff();
           stDashboardSetProperty();
-          relationalPanelListenerOff();
         });
         // kibi: end
 

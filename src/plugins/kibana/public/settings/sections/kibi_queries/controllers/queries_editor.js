@@ -49,7 +49,6 @@ define(function (require) {
     function ($rootScope, $scope, $route, $window, kbnUrl, createNotifier, queryEngineClient,
               savedDatasources, Private, $element) {
 
-      var queryHelper = Private(require('ui/kibi/helpers/query_helper'));
       var setEntityUri = Private(require('ui/kibi/components/commons/_set_entity_uri'));
       var doesQueryDependsOnEntity = Private(require('ui/kibi/components/commons/_does_query_depends_on_entity'));
 

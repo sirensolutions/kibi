@@ -59,6 +59,7 @@ exports.reload = function () {
     'ui/safe_confirm',
     'ui/state_management/app_state',
     'ui/state_management/global_state',
+    'ui/kibi/state_management/kibi_state', // kibi: added by kibi for our state
     'ui/storage',
     'ui/stringify/register',
     'ui/styleCompile',

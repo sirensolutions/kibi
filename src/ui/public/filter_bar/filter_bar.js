@@ -9,7 +9,8 @@ define(function (require) {
 
   require('ui/kibi/directives/kibi_entity_clipboard');
 
-  module.directive('filterBar', function ($rootScope, Private, Promise, getAppState, globalState) {
+  module.directive('filterBar', function (createNotifier, kibiState, $location, $rootScope, Private,
+                                          Promise, getAppState, globalState, config) {
     var joinExplain = Private(require('ui/filter_bar/join_explanation'));
     var mapAndFlattenFilters = Private(require('ui/filter_bar/lib/mapAndFlattenFilters'));
     var mapFlattenAndWrapFilters = Private(require('ui/filter_bar/lib/mapFlattenAndWrapFilters'));
@@ -19,8 +20,11 @@ define(function (require) {
     var changeTimeFilter = Private(require('ui/filter_bar/lib/changeTimeFilter'));
     var queryFilter = Private(require('ui/filter_bar/query_filter'));
     var privateFilterFieldRegex = /(^\$|meta)/;
-    var urlHelper = Private(require('ui/kibi/helpers/url_helper'));
     var markFiltersBySelectedEntities = Private(require('ui/kibi/components/commons/_mark_filters_by_selected_entities'));
+
+    var notify = createNotifier({
+      name: 'Kibi Navigation Bar'
+    });
 
     return {
       restrict: 'E',
@@ -203,7 +207,7 @@ define(function (require) {
 
         //needed by kibi to show filterbar when kibiEntityClipboard contains an entity
         var getShowKibiEntityClipboard = function () {
-          return globalState.se && globalState.se.length > 0 && urlHelper.isItDashboardUrl();
+          return globalState.se && globalState.se.length > 0 && $location.path().indexOf('/dashboard') === 0;
         };
         $scope.showKibiEntityClipboard = getShowKibiEntityClipboard();
         var saveWithChangesHandler = function () {
@@ -226,6 +230,40 @@ define(function (require) {
         // .script
         $scope.recreateFilterLabel = joinExplain.createLabel;
 
+        // kibi: Get the state for the dashboard ID and add the join_set filter to the appState if it exists
+        const addJoinSetFilter = function (dashboardId) {
+          $scope.state.filters = _.filter($scope.state.filters, (f) => !f.join_set);
+          kibiState.getState(dashboardId).then(({ filters }) => {
+            _.each(filters, (filter) => {
+              if (filter.join_set) {
+                queryFilter.addFilters(filter);
+                return false;
+              }
+            });
+          }).catch(notify.error);
+        };
+
+        // kibi: add join_set on relationPanel event
+        var addJoinSetFilterOnRelationalPanel = function (panelEnabled) {
+          const currentDashboardId = kibiState._getCurrentDashboardId();
+          if (currentDashboardId && panelEnabled) {
+            addJoinSetFilter(currentDashboardId);
+          }
+        };
+        var relationalPanelListenerOff = $rootScope.$on('change:config.kibi:relationalPanel', function (event, panelEnabled) {
+          addJoinSetFilterOnRelationalPanel(panelEnabled);
+        });
+        addJoinSetFilterOnRelationalPanel(config.get('kibi:relationalPanel'));
+
+        // kibi: add join_set on kibiState save event
+        const addJoinSetFilterOnSave = function (diff) {
+          const currentDashboardId = kibiState._getCurrentDashboardId();
+          if (diff.indexOf(kibiState._properties.enabled_relations) !== -1 && currentDashboardId) {
+            addJoinSetFilter(currentDashboardId);
+          }
+        };
+        kibiState.on('save_with_changes', addJoinSetFilterOnSave);
+
         var off1 = $rootScope.$on('kibi:entityURIEnabled', function (event, entityURIEnabled) {
           updateFilters();
         });
@@ -236,6 +274,8 @@ define(function (require) {
           off1();
           off2();
           globalState.off('save_with_changes', saveWithChangesHandler);
+          kibiState.off('save_with_changes', addJoinSetFilterOnSave);
+          relationalPanelListenerOff();
         });
 
       }

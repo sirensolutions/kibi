@@ -1,115 +1,55 @@
 define(function (require) {
 
-  var module = require('ui/modules').get('kibana/kibi_sequential_join_vis', ['kibana']);
-  var _ = require('lodash');
-  var chrome = require('ui/chrome');
+  const module = require('ui/modules').get('kibana/kibi_sequential_join_vis', ['kibana']);
+  const _ = require('lodash');
+  const angular = require('angular');
+  const chrome = require('ui/chrome');
 
   require('ui/kibi/directives/kibi_select');
   require('ui/kibi/directives/kibi_array_param');
 
   module.controller('KibiSequentialJoinVisController',
-    function ($scope, $rootScope, Private, $http, $location, createNotifier, Promise, savedDashboards, savedSearches) {
+    function (kibiState, $scope, $rootScope, Private, $http, $location, createNotifier, Promise) {
 
       $scope.configMode = /\/visualize\/(create|edit).*/.test($location.path());
 
-      var notify = createNotifier({
+      const notify = createNotifier({
         location: 'Kibi Relational filter'
       });
 
-      var queryHelper      = Private(require('ui/kibi/helpers/query_helper'));
-      var urlHelper        = Private(require('ui/kibi/helpers/url_helper'));
-      var joinFilterHelper = Private(require('ui/kibi/helpers/join_filter_helper/join_filter_helper'));
-      var kibiStateHelper  = Private(require('ui/kibi/helpers/kibi_state_helper/kibi_state_helper'));
-      var kibiTimeHelper   = Private(require('ui/kibi/helpers/kibi_time_helper'));
-      var countHelper      = Private(require('ui/kibi/helpers/count_helper/count_helper'));
-      var relVisHelper     = Private(require('ui/kibi/helpers/kibi_sequential_join_vis_helper'));
+      const kibiSequentialJoinVisHelper = Private(require('ui/kibi/helpers/kibi_sequential_join_vis_helper'));
+      const currentDashboardId = kibiState._getCurrentDashboardId();
 
-
-      var currentDashboardId = urlHelper.getCurrentDashboardId();
-
-      if (!joinFilterHelper.isSirenJoinPluginInstalled()) {
+      if (!kibiState.isSirenJoinPluginInstalled()) {
         notify.error('This version of Kibi Relational filter requires the SIREn Join plugin. Please install it and restart Kibi.');
       }
 
       // Update the counts on each button of the related filter
-      var _updateCounts = function (buttons, currentDashboardId) {
+      var _updateCounts = function (buttons, dashboardId) {
         if ($scope.configMode || !buttons || !buttons.length) {
           return Promise.resolve([]);
         }
 
-        var countQueries = _.map(buttons, function (button) {
-          return urlHelper.getDashboardAndSavedSearchMetas([ currentDashboardId ]).then(([ { savedDash, savedSearchMeta } ]) => {
-            // check that there are any join_seq filters already on this dashboard
-            //    if there is 0:
-            //      create new join_seq filter with 1 relation from current dashboard to target dashboard
-            //    if there is only 1:
-            //      take the join_sequence filter and add to the sequence
-            //      - new relation from current dashboard to target dashboard
-            //    if there is more then 1:
-            //      create join_sequence filter with:
-            //      - group from all existing join_seq filters and add this group at the top
-            //      - new relation from current dashboard to target dashboard
-
-            const dashboardId = savedDash.id;
-            var existingJoinFilters = _.cloneDeep(urlHelper.getFiltersOfType(dashboardId, 'join_sequence'));
-            if (existingJoinFilters.length === 0) {
-
-              return relVisHelper.buildNewJoinSeqFilter({ dashboardId, button, savedSearchMeta })
-              .then(function (joinSeqFilter) {
-                button.joinSeqFilter = joinSeqFilter;
-                return relVisHelper.buildCountQuery(button.redirectToDashboard, joinSeqFilter)
-                .then(function (query) {
-                  return Promise.resolve({
-                    query: query.query,
-                    button: button
-                  });
-                });
-              });
-
-            } else if (existingJoinFilters.length === 1) {
-              const joinSeqFilter = existingJoinFilters[0];
-              return relVisHelper.addRelationToJoinSeqFilter({ dashboardId, button, savedSearchMeta, joinSeqFilter })
-              .then(function (joinSeqFilter) {
-                button.joinSeqFilter = joinSeqFilter;
-                return relVisHelper.buildCountQuery(button.redirectToDashboard, joinSeqFilter)
-                .then(function (query) {
-                  return Promise.resolve({
-                    query: query.query,
-                    button: button
-                  });
-                });
-              });
-
-            } else {
-
-              // build join sequence + add a group of sequances to the top of the array
-              return relVisHelper.buildNewJoinSeqFilter({ dashboardId, button, savedSearchMeta })
-              .then(function (joinSeqFilter) {
-                // here create a group from existing ones and add it on the top
-                var group = relVisHelper.composeGroupFromExistingJoinFilters(existingJoinFilters);
-                joinSeqFilter.join_sequence.unshift(group);
-                button.joinSeqFilter = joinSeqFilter;
-                return relVisHelper.buildCountQuery(button.redirectToDashboard, joinSeqFilter).then(function (query) {
-                  return Promise.resolve({
-                    query: query.query,
-                    button: button
-                  });
-                });
-              });
-            }
+        return Promise.all(_.map(buttons, (button) => {
+          return kibiSequentialJoinVisHelper.getJoinSequenceFilter(dashboardId, button).then((joinSeqFilter) => {
+            button.joinSeqFilter = joinSeqFilter;
+            return kibiSequentialJoinVisHelper.buildCountQuery(button.redirectToDashboard, joinSeqFilter)
+            .then((query) => {
+              return {
+                query: query,
+                button: button
+              };
+            });
           });
-        });
-
-        return Promise.all(countQueries).then(function (results) {
-          var query = '';
+        })).then((results) => {
+          let query = '';
           _.each(results, function (result) {
-            query += '{"index" : "' + result.button.targetIndexPatternId + '"}\n';
-            query += JSON.stringify(result.query) + '\n';
+            query += `{"index": "${result.button.targetIndexPatternId}"}\n${angular.toJson(result.query)}\n`;
           });
 
           // ?getCountsOnButton has no meanning it is just usefull to filter when inspecting requests
           return $http.post(chrome.getBasePath() + '/elasticsearch/_msearch?getCountsOnButton', query)
-          .then(function (response) {
+          .then((response) => {
             const data = response.data;
             _.each(data.responses, function (hit, i) {
               if (hit.error) {
@@ -119,9 +59,9 @@ define(function (require) {
               results[i].button.targetCount = hit.hits.total;
               results[i].button.warning = '';
               if (hit.coordinate_search) {
-                var isPruned = false;
-                var actions = hit.coordinate_search.actions;
-                for (var j = 0; j < actions.length; j++) {
+                let isPruned = false;
+                const actions = hit.coordinate_search.actions;
+                for (let j = 0; j < actions.length; j++) {
                   if (actions[j].is_pruned) {
                     isPruned = true;
                     break;
@@ -140,9 +80,9 @@ define(function (require) {
       var _constructButtons = function () {
         $scope.vis.error = '';
         if (!$scope.configMode) {
-          return urlHelper.getDashboardAndSavedSearchMetas([ currentDashboardId ]).then(([ { savedDash, savedSearchMeta } ]) => {
+          return kibiState._getDashboardAndSavedSearchMetas([ currentDashboardId ]).then(([ { savedDash, savedSearchMeta } ]) => {
             const index = savedSearchMeta.index;
-            const buttons = relVisHelper.constructButtonsArray($scope.vis.params.buttons, index);
+            const buttons = kibiSequentialJoinVisHelper.constructButtonsArray($scope.vis.params.buttons, index);
             // retain the buttons order
             for (let i = 0; i < buttons.length; i++) {
               buttons[i].btnIndex = i;
@@ -156,7 +96,7 @@ define(function (require) {
             return buttons;
           }).catch(notify.error);
         } else {
-          $scope.buttons = relVisHelper.constructButtonsArray($scope.vis.params.buttons);
+          $scope.buttons = kibiSequentialJoinVisHelper.constructButtonsArray($scope.vis.params.buttons);
         }
       };
 
@@ -167,7 +107,7 @@ define(function (require) {
 
       // when autoupdate is on we detect the refresh here
       $scope.$watch('esResponse', function (resp) {
-        if ($scope.configMode) {
+        if (!resp || $scope.configMode) {
           return;
         }
         let promise;

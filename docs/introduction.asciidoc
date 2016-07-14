@@ -56,9 +56,13 @@ Kibi is currently developed as a fork of Kibana {kibana-version}. The plugin API
 
 This new version of Kibi provides many improvements and new features, the main one are listed below:
 
+* Backport fix for broken tiles in map widget
+* Backport fix for broken import export of objects
 * Caching can now be enabled/disabled per <<external_datasources, datasource>> from UI configuration
-* New version of <<timeline, Kibi Timeline>> plugin 0.1.3
+* New version of <<timeline, Kibi Timeline>> plugin 4.4.2
 * Default <<kibi-settings-relation, terms encoding>> for Siren Join changed to long
+* Backport fix for openjdk version check [Enterprise Edition only]
+* Backport fix support for nested fields label (Graph Browser) [Enterprise Edition only]
 * New <<kibi-settings-relations, Advanced Join Settings>> plugin [Enterprise Edition only]
 * Full <<shield_integration, Shield integration>> [Enterprise Edition only]
 * New <<graph_browser, Graph Browser>> visualization [Enterprise Edition only]

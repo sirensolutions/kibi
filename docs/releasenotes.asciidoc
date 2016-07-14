@@ -7,6 +7,7 @@
 * Backport fix for broken tiles in map widget
 * Backport fix for broken import export of objects
 * Backport fix for openjdk version check [Enterprise Edition only]
+* Backport fix support for nested fields label (Graph Browser) [Enterprise Edition only]
 
 === Kibi 4.4.2 and Kibana 4.4.2 Release Notes
 

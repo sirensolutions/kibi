@@ -62,6 +62,7 @@ This new version of Kibi provides many improvements and new features, the main o
 * New version of <<timeline, Kibi Timeline>> plugin 4.4.2
 * Default <<kibi-settings-relation, terms encoding>> for Siren Join changed to long
 * Backport fix for openjdk version check [Enterprise Edition only]
+* Backport fix support for nested fields label (Graph Browser) [Enterprise Edition only]
 * New <<kibi-settings-relations, Advanced Join Settings>> plugin [Enterprise Edition only]
 * Full <<shield_integration, Shield integration>> [Enterprise Edition only]
 * New <<graph_browser, Graph Browser>> visualization [Enterprise Edition only]

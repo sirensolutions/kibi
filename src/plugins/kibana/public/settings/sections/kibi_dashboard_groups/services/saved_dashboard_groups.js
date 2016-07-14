@@ -37,15 +37,17 @@ define(function (require) {
     };
 
 
-
     this.get = function (id) {
-      var cacheKey = 'savedDashboardgroups-id-' + id;
-      if (cache && cache.get(cacheKey)) {
+      var cacheKey;
+      if (id) {
+        cacheKey = 'savedDashboardgroups-id-' + id;
+      }
+      if (cacheKey && cache && cache.get(cacheKey)) {
         return cache.get(cacheKey);
       }
       // Returns a promise that contains a dashboard which is a subclass of docSource
       var promise = (new SavedDashboardGroup(id)).init();
-      if (cache) {
+      if (cacheKey && cache) {
         cache.set(cacheKey, promise);
       }
       return promise;

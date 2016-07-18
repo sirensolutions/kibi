@@ -49,6 +49,8 @@ define(function (require) {
         // close panel when user navigates to a different route
         var removeRouteChangeSuccessHandler = $rootScope.$on('$routeChangeSuccess', function (event, next, prev, err) {
           $scope.relationalFilterPanelOpened = false;
+          kibiNavBarHelper.computeDashboardsGroups('routeChangeSuccess')
+          .then((groups) => $scope.dashboardGroups = groups);
         });
 
         // =============
@@ -113,8 +115,8 @@ define(function (require) {
 
         $scope.$watch(function (scope) {
           return kibiState._getCurrentDashboardId();
-        }, (currentDashboardId, oldCurrentDashboardId) => {
-          if (currentDashboardId && oldCurrentDashboardId !== currentDashboardId) {
+        }, (currentDashboardId) => {
+          if (currentDashboardId) {
             kibiNavBarHelper.computeDashboardsGroups('current dashboard changed')
             .then((groups) => {
               if (!$scope.dashboardGroups) {

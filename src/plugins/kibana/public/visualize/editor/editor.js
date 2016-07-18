@@ -1,5 +1,5 @@
 define(function (require) {
-  var _ = require('lodash');
+  const _ = require('lodash');
   require('plugins/kibana/visualize/saved_visualizations/saved_visualizations');
   require('plugins/kibana/visualize/editor/sidebar');
   require('plugins/kibana/visualize/editor/agg_filter');
@@ -15,8 +15,8 @@ define(function (require) {
     template: require('plugins/kibana/visualize/editor/editor.html'),
     resolve: {
       savedVis: function (savedVisualizations, courier, $route, Private) {
-        var visTypes = Private(require('ui/registry/vis_types'));
-        var visType = _.find(visTypes, {name: $route.current.params.type});
+        const visTypes = Private(require('ui/registry/vis_types'));
+        const visType = _.find(visTypes, {name: $route.current.params.type});
         if (visType.requiresSearch && !$route.current.params.indexPattern && !$route.current.params.savedSearchId) {
           throw new Error('You must provide either an indexPattern or a savedSearchId');
         }
@@ -53,14 +53,15 @@ define(function (require) {
     $location, kbnUrl, $timeout, courier, Private, Promise, createNotifier
   ) {
 
-    var angular = require('angular');
-    var ConfigTemplate = require('ui/ConfigTemplate');
-    var docTitle = Private(require('ui/doc_title'));
-    var brushEvent = Private(require('ui/utils/brush_event'));
-    var queryFilter = Private(require('ui/filter_bar/query_filter'));
-    var filterBarClickHandler = Private(require('ui/filter_bar/filter_bar_click_handler'));
+    const angular = require('angular');
+    const ConfigTemplate = require('ui/ConfigTemplate');
+    const Notifier = require('ui/notify/notifier');
+    const docTitle = Private(require('ui/doc_title'));
+    const brushEvent = Private(require('ui/utils/brush_event'));
+    const queryFilter = Private(require('ui/filter_bar/query_filter'));
+    const filterBarClickHandler = Private(require('ui/filter_bar/filter_bar_click_handler'));
 
-    var setEntityURI = Private(require('ui/kibi/components/commons/_set_entity_uri'));
+    const setEntityURI = Private(require('ui/kibi/components/commons/_set_entity_uri'));
 
     $scope.holder = {
       entityURI: '',
@@ -76,41 +77,41 @@ define(function (require) {
     });
 
     setEntityURI($scope.holder);
-    var removeSetEntityUriHandler = $rootScope.$on('kibi:selectedEntities:changed', function (event, se) {
+    const removeSetEntityUriHandler = $rootScope.$on('kibi:selectedEntities:changed', function (event, se) {
       setEntityURI($scope.holder);
     });
 
-    var off1 = $rootScope.$on('kibi:entityURIEnabled:kibitable', function (event, enabled) {
+    const off1 = $rootScope.$on('kibi:entityURIEnabled:kibitable', function (event, enabled) {
       $scope.holder.entityURIEnabled = !!enabled;
     });
-    var off2 = $rootScope.$on('kibi:entityURIEnabled:external_query_terms_filter', function (event, enabled) {
+    const off2 = $rootScope.$on('kibi:entityURIEnabled:external_query_terms_filter', function (event, enabled) {
       $scope.holder.entityURIEnabled = !!enabled;
     });
-    var off3 = $rootScope.$on('kibi:entityURIEnabled:kibigraph', function (event, enabled) {
+    const off3 = $rootScope.$on('kibi:entityURIEnabled:kibigraph', function (event, enabled) {
       $scope.holder.entityURIEnabled = !!enabled;
     });
-    var off4 = $rootScope.$on('kibi:entityURIEnabled:kibiqueryviewer', function (event, enabled) {
+    const off4 = $rootScope.$on('kibi:entityURIEnabled:kibiqueryviewer', function (event, enabled) {
       $scope.holder.entityURIEnabled = !!enabled;
     });
 
-    var notify = createNotifier({
+    const notify = createNotifier({
       location: 'Visualization Editor'
     });
 
-    var savedVis = $route.current.locals.savedVis;
+    const savedVis = $route.current.locals.savedVis;
 
-    var vis = savedVis.vis;
-    var editableVis = vis.createEditableVis();
+    const vis = savedVis.vis;
+    const editableVis = vis.createEditableVis();
     vis.requesting = function () {
-      var requesting = editableVis.requesting;
+      const requesting = editableVis.requesting;
       requesting.call(vis);
       requesting.call(editableVis);
     };
 
-    var searchSource = savedVis.searchSource;
+    const searchSource = savedVis.searchSource;
 
     // config panel templates
-    var configTemplate = new ConfigTemplate({
+    const configTemplate = new ConfigTemplate({
       save: require('plugins/kibana/visualize/editor/panels/save.html'),
       load: require('plugins/kibana/visualize/editor/panels/load.html'),
       share: require('plugins/kibana/visualize/editor/panels/share.html'),
@@ -120,9 +121,9 @@ define(function (require) {
       docTitle.change(savedVis.title);
     }
 
-    var $state = $scope.$state = (function initState() {
-      var savedVisState = vis.getState();
-      var stateDefaults = {
+    let $state = $scope.$state = (function initState() {
+      const savedVisState = vis.getState();
+      const stateDefaults = {
         uiState: savedVis.uiStateJSON ? JSON.parse(savedVis.uiStateJSON) : {},
         linked: !!savedVis.savedSearchId,
         query: searchSource.getOwn('query') || {query_string: {query: '*'}},
@@ -280,8 +281,8 @@ define(function (require) {
       if (!$state.linked) return;
 
       $state.linked = false;
-      var parent = searchSource.getParent(true);
-      var parentsParent = parent.getParent(true);
+      const parent = searchSource.getParent(true);
+      const parentsParent = parent.getParent(true);
 
       // display unlinking for 2 seconds, unless it is double clicked
       $scope.unlinking = $timeout($scope.clearUnlinking, 2000);

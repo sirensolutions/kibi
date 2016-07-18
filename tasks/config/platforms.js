@@ -11,9 +11,9 @@ module.exports = function (grunt) {
     'linux-x64',
     'linux-x86',
     'windows',
-    'windows64' // kibi: we distinguish between windowses as we ship the native bindings for sqlite and nodejave
+    'windows64' // kibi: we distinguish between windowses as we ship the native bindings for sqlite and node java
   ].map(function (name) {
-    let win = (name === 'windows' || name === 'windows64');
+    const win = name === 'windows' || name === 'windows64';
 
     let nodeUrl;
     if (name === 'windows') {

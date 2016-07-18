@@ -1,7 +1,7 @@
 define(function (require) {
-  var module = require('ui/modules').get('app/dashboard');
-  var _ = require('lodash');
-  var Scanner = require('ui/utils/scanner');
+  const module = require('ui/modules').get('app/dashboard');
+  const _ = require('lodash');
+  const Scanner = require('ui/utils/scanner');
 
   // bring in the factory
   require('plugins/kibana/dashboard/services/_saved_dashboard');
@@ -16,10 +16,8 @@ define(function (require) {
 
   // This is the only thing that gets injected into controllers
   module.service('savedDashboards', function (Promise, SavedDashboard, kbnIndex, es, kbnUrl, Private) {
-
-    var cache = Private(require('ui/kibi/helpers/cache_helper')); // kibi: added to cache requests for saved searches
-
-    var scanner = new Scanner(es, {
+    const cache = Private(require('ui/kibi/helpers/cache_helper')); // kibi: added to cache requests for saved searches
+    const scanner = new Scanner(es, {
       index: kbnIndex,
       type: 'dashboard'
     });
@@ -59,14 +57,14 @@ define(function (require) {
     };
 
     this.mapHits = function (hit) {
-      var source = hit._source;
+      const source = hit._source;
       source.id = hit._id;
       source.url = this.urlFor(hit._id);
       return source;
     };
 
     this.find = function (searchString, size = 100) {
-      var body;
+      let body;
       if (searchString) {
         body = {
           query: {

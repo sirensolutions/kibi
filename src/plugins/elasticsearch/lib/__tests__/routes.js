@@ -1,61 +1,45 @@
-var src = require('requirefrom')('src');
-var expect = require('expect.js');
-var util = require('util');
-var format = util.format;
+const expect = require('expect.js');
+const util = require('util');
+const requireFromTest = require('requirefrom')('test');
+const kbnTestServer = requireFromTest('utils/kbn_server');
 
-var KbnServer = src('server/KbnServer');
-var fromRoot = src('utils/fromRoot');
+const format = util.format;
 var rp = require('request-promise'); // kibi: added by kibi
 var url = require('url');  // kibi: added by kibi
 
 describe('plugins/elasticsearch', function () {
   describe('routes', function () {
 
-    var kbnServer;
+    let kbnServer;
 
     before(function () {
-      kbnServer = new KbnServer({
-        server: {
-          autoListen: false,
-          xsrf: {
-            disableProtection: true
-          }
-        },
-        logging: { quiet: true },
-        plugins: {
-          scanDirs: [
-            fromRoot('src/plugins')
-          ]
-        },
-        optimize: {
-          enabled: false
-        },
-        elasticsearch: {
-          url: 'http://localhost:9210'
-        }
-      });
+      this.timeout(15000); // sometimes waiting for server takes longer than 10
 
-      return kbnServer.ready().then(function () {
-        // kibi: added by kibi to make sure that there is no kibi index when this tests are run
-        // here make sure that .kibi index does not exists
-        return new Promise(function (fulfill, reject) {
-          rp({
-            method: 'DELETE',
-            uri: url.parse('http://localhost:9210/' + kbnServer.server.config().get('kibana.index') + '/'),
-            json: true,
-            headers: {
-              'content-type': 'application/json'
-            },
-            timeout: 1000
-          }).then(function () {
-            fulfill(true);
-          }).catch(function (err) {
-            // error here means that there was not kibi index - so all fine
-            fulfill(true);
-          });
-        });
-        // kibi: end
-      });
+      // TODO: @scampi check if still needed
+      //return kbnServer.ready().then(function () {
+        //// kibi: added by kibi to make sure that there is no kibi index when this tests are run
+        //// here make sure that .kibi index does not exists
+        //return new Promise(function (fulfill, reject) {
+          //rp({
+            //method: 'DELETE',
+            //uri: url.parse('http://localhost:9210/' + kbnServer.server.config().get('kibana.index') + '/'),
+            //json: true,
+            //headers: {
+              //'content-type': 'application/json'
+            //},
+            //timeout: 1000
+          //}).then(function () {
+            //fulfill(true);
+          //}).catch(function (err) {
+            //// error here means that there was not kibi index - so all fine
+            //fulfill(true);
+          //});
+        //});
+        //// kibi: end
+      //});
+      kbnServer = kbnTestServer.createServer();
+      return kbnServer.ready()
+      .then(() => kbnServer.server.plugins.elasticsearch.waitUntilReady());
     });
 
 
@@ -69,10 +53,10 @@ describe('plugins/elasticsearch', function () {
         options.payload = JSON.stringify(options.payload);
       }
 
-      var statusCode = options.statusCode || 200;
+      const statusCode = options.statusCode || 200;
       describe(format('%s %s', options.method, options.url), function () {
         it('should return ' + statusCode, function (done) {
-          kbnServer.server.inject(options, function (res) {
+          kbnTestServer.makeRequest(kbnServer, options, function (res) {
             try {
               expect(res.statusCode).to.be(statusCode);
               done();
@@ -98,8 +82,19 @@ describe('plugins/elasticsearch', function () {
     testRoute({
       method: 'POST',
       url: '/elasticsearch/.kibi',
-      payload: {settings: { number_of_shards: 1 }},
-      statusCode: 200
+      statusCode: 405
+    });
+
+    testRoute({
+      method: 'PUT',
+      url: '/elasticsearch/.kibi',
+      statusCode: 405
+    });
+
+    testRoute({
+      method: 'DELETE',
+      url: '/elasticsearch/.kibi',
+      statusCode: 405
     });
 
     testRoute({

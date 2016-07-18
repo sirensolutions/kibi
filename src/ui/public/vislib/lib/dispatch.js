@@ -238,7 +238,9 @@ define(function (require) {
       if (!label) return;
       //Opacity 1 is needed to avoid the css application
       $('[data-label]', element.parentNode).css('opacity', 1).not(
-        function (els, el) { return `${$(el).data('label')}` === label;}
+        function (els, el) {
+          return `${$(el).data('label')}` === label;
+        }
       ).css('opacity', 0.5);
     };
 

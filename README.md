@@ -1,4 +1,4 @@
-# Kibi 4.5.1
+# Kibi 4.5.3
 
 Kibi extends Kibana 4.5.1 with data intelligence features; the core feature of
 Kibi is the capability to join and filter data from multiple Elasticsearch
@@ -8,6 +8,12 @@ In addition, Kibi provides UI features and visualizations like dashboard
 groups, tabs, cross entity relational navigation buttons, an enhanced search
 results table, analytical aggregators, HTML templates on query results, and
 much more.
+
+## Upgrade from previous version
+
+* Move any custom configurations in your old kibi.yml to your new one
+* Reinstall plugins
+* Start or restart Kibi
 
 ## Quick start
 

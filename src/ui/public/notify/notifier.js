@@ -248,7 +248,7 @@ define(function (require) {
       content: formatMsg(err, this.from),
       icon: 'warning',
       title: 'Error',
-      lifetime: Infinity,
+      lifetime: 300000,
       actions: ['report', 'accept'],
       stack: formatStack(err)
     }, cb);

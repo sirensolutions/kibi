@@ -33,7 +33,7 @@ define(function (require) {
         type: 'json',
         value:
           '[\n' +
-          '  ["", "hh:mm:ss.SSS"],\n' +
+          '  ["", "HH:mm:ss.SSS"],\n' +
           '  ["PT1S", "HH:mm:ss"],\n' +
           '  ["PT1M", "HH:mm"],\n' +
           '  ["PT1H",\n' +
@@ -175,6 +175,11 @@ define(function (require) {
         type: 'string',
         value: '($0,0.[00])',
         description: 'Default numeral format for the "currency" format'
+      },
+      'savedObjects:perPage': {
+        type: 'number',
+        value: 5,
+        description: 'Number of objects to show per page in the load dialog'
       },
       'timepicker:timeDefaults': {
         type: 'json',

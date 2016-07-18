@@ -18,7 +18,7 @@ uiModules.get('apps/settings')
     restrict: 'E',
     link: function ($scope) {
       const configDefaults = Private(ConfigDefaultsProvider);
-      var keyCodes = {
+      const keyCodes = {
         ESC: 27
       };
 
@@ -31,9 +31,9 @@ uiModules.get('apps/settings')
       }
 
       function readConfigVals() {
-        var configVals = config._vals();
+        const configVals = config._vals();
 
-        var customConfig = Object.keys(configVals)
+        const customConfig = Object.keys(configVals)
         .filter(notDefaultConfig)
         .map(name => toEditableConfig(false, name, configVals[name]));
 
@@ -45,7 +45,7 @@ uiModules.get('apps/settings')
       }
 
       // react to changes of the config values
-      var unhook = $rootScope.$on('change:config', readConfigVals);
+      const unhook = $rootScope.$on('change:config', readConfigVals);
       $scope.$on('$destroy', unhook);
 
       // initial config setup

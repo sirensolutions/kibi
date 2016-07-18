@@ -1,37 +1,42 @@
-module.exports = function (kibana) {
-  var healthCheck = require('./lib/health_check');
-  var exposeClient = require('./lib/expose_client');
-  var createKibanaProxy = require('./lib/create_kibana_proxy');
-  var createKibiProxy = require('./lib/create_kibi_proxy');
+import { trim, trimRight } from 'lodash';
+import { methodNotAllowed } from 'boom';
 
-  return new kibana.Plugin({
+import healthCheck from './lib/health_check';
+import exposeClient from './lib/expose_client';
+import createKibanaProxy, { createPath } from './lib/create_kibana_proxy';
+import createKibiProxy from './lib/create_kibi_proxy';
+
+module.exports = function ({ Plugin }) {
+  return new Plugin({
     require: ['kibana'],
 
-    config: function (Joi) {
-      return Joi.object({
-        enabled: Joi.boolean().default(true),
-        url: Joi.string().uri({ scheme: ['http', 'https'] }).default('http://localhost:9200'),
-        preserveHost: Joi.boolean().default(true),
-        username: Joi.string(),
-        password: Joi.string(),
-        shardTimeout: Joi.number().default(0),
-        requestTimeout: Joi.number().default(30000),
-        pingTimeout: Joi.number().default(30000),
-        startupTimeout: Joi.number().default(5000),
-        ssl: Joi.object({
-          verify: Joi.boolean().default(true),
-          ca: Joi.array().single().items(Joi.string()),
-          cert: Joi.string(),
-          key: Joi.string()
+    config(Joi) {
+      const { array, boolean, number, object, string } = Joi;
+
+      return object({
+        enabled: boolean().default(true),
+        url: string().uri({ scheme: ['http', 'https'] }).default('http://localhost:9200'),
+        preserveHost: boolean().default(true),
+        username: string(),
+        password: string(),
+        shardTimeout: number().default(0),
+        requestTimeout: number().default(30000),
+        pingTimeout: number().default(30000),
+        startupTimeout: number().default(5000),
+        ssl: object({
+          verify: boolean().default(true),
+          ca: array().single().items(string()),
+          cert: string(),
+          key: string()
         }).default(),
-        apiVersion: Joi.string().default('2.0'),
-        engineVersion: Joi.string().valid('^2.2.0').default('^2.2.0'),
+        apiVersion: string().default('2.0'),
+        engineVersion: string().valid('^2.3.0').default('^2.3.0'),
         plugins: Joi.array().default([])
       }).default();
     },
 
-    init: function (server, options) {
-      var config = server.config();
+    init(server, options) {
+      const kibanaIndex = server.config().get('kibana.index');
 
       // kibi: register our proxy implementation so that the request can be modified
       server.register(require('kibi-h2o2'), (err) => {
@@ -51,8 +56,8 @@ module.exports = function (kibana) {
       createKibiProxy(server, 'POST', '/_msearch');
       createKibanaProxy(server, 'POST', '/_search/scroll');
 
-      function noBulkCheck(request, reply) {
-        if (/\/_bulk/.test(request.path)) {
+      function noBulkCheck({ path }, reply) {
+        if (/\/_bulk/.test(path)) {
           return reply({
             error: 'You can not send _bulk requests to this interface.'
           }).code(400).takeover();
@@ -60,17 +65,35 @@ module.exports = function (kibana) {
         return reply.continue();
       }
 
+      function noDirectIndex({ path }, reply) {
+        const requestPath = trimRight(trim(path), '/');
+        const matchPath = createPath(kibanaIndex);
+
+        if (requestPath === matchPath) {
+          return reply(methodNotAllowed('You cannot modify the primary kibana index through this interface.'));
+        }
+
+        reply.continue();
+      }
+
+      // These routes are actually used to deal with things such as managing
+      // index patterns and advanced settings, but since hapi treats route
+      // wildcards as zero-or-more, the routes also match the kibana index
+      // itself. The client-side kibana code does not deal with creating nor
+      // destroying the kibana index, so we limit that ability here.
       createKibiProxy(
         server,
         ['PUT', 'POST', 'DELETE'],
-        '/' + config.get('kibana.index') + '/{paths*}',
+        `/${kibanaIndex}/{paths*}`,
         {
-          pre: [ noBulkCheck ]
+          pre: [ noDirectIndex, noBulkCheck ]
         }
       );
 
       // Set up the health check service and start it.
-      healthCheck(this, server).start();
+      const { start, waitUntilReady } = healthCheck(this, server);
+      server.expose('waitUntilReady', waitUntilReady);
+      start();
     }
   });
 

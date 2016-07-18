@@ -71,13 +71,7 @@ app.directive('shareObjectUrl', function (Private, createNotifier) {
       $scope.getUrl = function () {
         let url = $location.absUrl();
         if ($scope.shareAsEmbed) {
-          // kibi: added to control when to show hide kibi-nav-bar
-          if ($scope.kibiNavbarVisible) {
-            url = url.replace('?', '?embed=true&kibiNavbarVisible=true&');
-          } else {
-            url = url.replace('?', '?embed=true&');
-          }
-          // kibi: end
+          url = url.replace('?', '?embed=true&');
         }
         return url;
       };

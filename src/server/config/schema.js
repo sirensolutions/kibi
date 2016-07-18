@@ -3,6 +3,8 @@ let Joi = require('joi');
 let fs = require('fs');
 let path = require('path');
 
+let pkg = require('../../../src/utils/packageJson');
+
 let utils = require('requirefrom')('src/utils');
 let fromRoot = utils('fromRoot');
 const randomBytes = require('crypto').randomBytes;
@@ -116,10 +118,10 @@ module.exports = () => Joi.object({
   }).default(),
 
   tilemap: Joi.object({
-    url: Joi.string().default('https://tiles.elastic.co/v1/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana'),
+    url: Joi.string().default(`https://tiles.elastic.co/v1/default/{z}/{x}/{y}.png?my_app_name=kibana&my_app_version=${pkg.version}&elastic_tile_service_tos=agree`),
     options: Joi.object({
-      attribution: Joi.string().default('© [Elastic Tile Service](https://www.elastic.co/elastic_tile_service)'),
-      minZoom: Joi.number().default(0),
+      attribution: Joi.string().default('© [Elastic Tile Service](https://www.elastic.co/elastic-tile-service)'),
+      minZoom: Joi.number().min(1, 'Must not be less than 1').default(1),
       maxZoom: Joi.number().default(7),
       tileSize: Joi.number().optional(),
       subdomains: Joi.array().items(Joi.string()).single().optional(),

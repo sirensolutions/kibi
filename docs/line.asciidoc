@@ -13,6 +13,8 @@ include::x_axis_aggs.asciidoc[]
 
 include::color_picker.asciidoc[]
 
+include::color-picker.asciidoc[]
+
 You can click the *Advanced* link to display more customization options for your metrics or bucket aggregation:
 
 *Exclude Pattern*:: Specify a pattern in this field to exclude from the results.

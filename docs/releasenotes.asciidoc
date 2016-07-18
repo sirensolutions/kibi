@@ -1,9 +1,10 @@
 [[releasenotes]]
 == Kibi Release Notes
 
-=== Kibi 4.5.1 and Kibana 4.5.1 Release Notes
+=== Kibi 4.5.3 and Kibana 4.5.3 Release Notes
 
 TODO:
+
 
 === Kibi 4.4.2 and Kibana 4.4.2 Release Notes
 
@@ -110,3 +111,20 @@ Plugin System Changes
 * http://github.com/elastic/kibana/issues/5661[Issue 5661]: Fixes the plugin optimization path.
 * http://github.com/elastic/kibana/pull/5538[Pull Request 5538]: Apps can use empty export types.
 
+* {k4issue}5896[Issue 5896]: Bookmarked URLs to saved filtered searches from a previous version of Kibana display
+correctly.
+* {k4issue}5191[Issue 5191]: Timepicker is now available for dashboards that contain a chart based on an index that is not
+time-based.
+* {k4issue}5744[Issue 5744]: Fixes bug that caused incorrect display of "No results found" in some cases.
+* {k4issue}5824[Issue 5284]: Corrects a fatal error when Kibana starts with node x86 on Windows x64 systems.
+
+[float]
+[[plugin-system]]
+== Plugin System Changes
+
+* {k4issue}5226[Issue 5226]: Plugins are explicit when they start to route.
+* {k4pull}5725[Pull Request 5725]: Plugins can extend Chrome navigation.
+* {k4issue}4720[Issue 4720]: Adds support for zip compression.
+* {k4pull}5704[Pull Request 5704]: Removes Github shortcuts from the plugin installer.
+* {k4issue}5661[Issue 5661]: Fixes the plugin optimization path.
+* {k4pull}5538[Pull Request 5538]: Apps can use empty export types.

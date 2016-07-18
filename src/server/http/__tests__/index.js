@@ -1,27 +1,20 @@
 import expect from 'expect.js';
-import KbnServer from '../../KbnServer';
-import requirefrom from 'requirefrom';
+
+import * as kbnTestServer from '../../../../test/utils/kbn_server';
+import fromRoot from '../../../utils/fromRoot';
 
 describe('routes', function () {
   this.slow(10000);
   this.timeout(60000);
 
-  const fromRoot = requirefrom('src/utils')('fromRoot');
   let kbnServer;
 
   beforeEach(function () {
-    kbnServer = new KbnServer({
-      server: {
-        autoListen: false,
-        xsrf: {
-          disableProtection: true
-        }
-      },
-      plugins: { scanDirs: [ fromRoot('src/plugins') ] },
-      logging: { quiet: true },
-      optimize: { enabled: false },
-      elasticsearch: {
-        url: 'http://localhost:9210'
+    kbnServer = kbnTestServer.createServer({
+      plugins: {
+        scanDirs: [
+          fromRoot('src/plugins')
+        ]
       }
     });
     return kbnServer.ready();
@@ -39,7 +32,7 @@ describe('routes', function () {
           cookie: 'test:80=value;test_80=value'
         }
       };
-      kbnServer.server.inject(options, (res) => {
+      kbnTestServer.makeRequest(kbnServer, options, (res) => {
         expect(res.payload).not.to.contain('Invalid cookie header');
         done();
       });
@@ -53,7 +46,7 @@ describe('routes', function () {
           cookie: 'a'
         }
       };
-      kbnServer.server.inject(options, (res) =>  {
+      kbnTestServer.makeRequest(kbnServer, options, (res) =>  {
         expect(res.payload).to.contain('Invalid cookie header');
         done();
       });
@@ -70,7 +63,7 @@ describe('routes', function () {
     };
 
     it('generates shortened urls', (done) => {
-      kbnServer.server.inject(shortenOptions, (res) => {
+      kbnTestServer.makeRequest(kbnServer, shortenOptions, (res) => {
         expect(typeof res.payload).to.be('string');
         expect(res.payload.length > 0).to.be(true);
         done();
@@ -78,12 +71,12 @@ describe('routes', function () {
     });
 
     it('redirects shortened urls', (done) => {
-      kbnServer.server.inject(shortenOptions, (res) => {
+      kbnTestServer.makeRequest(kbnServer, shortenOptions, (res) => {
         const gotoOptions = {
           method: 'GET',
           url: '/goto/' + res.payload
         };
-        kbnServer.server.inject(gotoOptions, (res) => {
+        kbnTestServer.makeRequest(kbnServer, gotoOptions, (res) => {
           expect(res.statusCode).to.be(302);
           expect(res.headers.location).to.be(shortenOptions.payload.url);
           done();

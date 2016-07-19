@@ -41,6 +41,9 @@ the *Add* button in the Index Patterns list.
 contains time-based events* option and select the index field that contains the timestamp. Kibi reads the index
 mapping to list all of the fields that contain a timestamp.
 
+. By default, Kibi restricts wildcard expansion of time-based index patterns to indices with data within the currently
+selected time range. Click *Do not expand index pattern when search* to disable this behavior.
+
 . Click *Create* to add the index pattern.
 
 . To designate the new pattern as the default pattern to load when you view the Discover tab, click the *favorite*
@@ -211,7 +214,7 @@ Scripted field values are computed at query time so they aren't indexed and cann
 NOTE: Kibana cannot query scripted fields.
 
 WARNING: Computing data on the fly with scripted fields can be very resource intensive and can have a direct impact on
-Kibana's performance. Keep in mind that there's no built-in validation of a scripted field. If your scripts are
+Kibi's performance. Keep in mind that there's no built-in validation of a scripted field. If your scripts are
 buggy, you'll get exceptions whenever you try to view the dynamically generated data.
 
 Scripted fields use the Lucene expression syntax. For more information,
@@ -472,7 +475,7 @@ The Kibana server reads properties from the `kibana.yml` file on startup. The de
 on `localhost:5601`. To change the host or port number, or connect to Elasticsearch running on a different machine,
 you'll need to update your `kibana.yml` file. You can also enable SSL and set a variety of other options.
 
-include::kibana_yml.asciidoc[]
+include::kibana-yml.asciidoc[]
 
 deprecated[4.2, The names of several Kibana server properties changed in the 4.2 release of Kibana. The previous names remain as functional aliases, but are now deprecated and will be removed in a future release of Kibana]
 

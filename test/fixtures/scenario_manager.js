@@ -6,6 +6,7 @@ var config = require('./config').scenarios;
 function ScenarioManager(server) {
   if (!server) throw new Error('No server defined');
 
+  // NOTE: some large sets of test data can take several minutes to load
   this.client = new elasticsearch.Client({
     host: server,
     requestTimeout: 300000
@@ -40,6 +41,18 @@ ScenarioManager.prototype.load = function (id) {
       return self.client.bulk({
         body: body
       });
+    })
+    .then(function (response) {
+      if (response.errors) {
+        throw new Error(
+          'bulk failed\n' +
+            response.items
+            .map(i => i[Object.keys(i)[0]].error)
+            .filter(Boolean)
+            .map(err => '  ' + JSON.stringify(err))
+            .join('\n')
+        );
+      }
     })
     .catch(function (err) {
       if (bulk.haltOnFailure === false) return;

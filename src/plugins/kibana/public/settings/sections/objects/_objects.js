@@ -1,9 +1,9 @@
 define(function (require) {
-  var _ = require('lodash');
-  var angular = require('angular');
-  var saveAs = require('@spalger/filesaver').saveAs;
-  var registry = require('plugins/kibana/settings/saved_object_registry');
-  var objectIndexHTML = require('plugins/kibana/settings/sections/objects/_objects.html');
+  const _ = require('lodash');
+  const angular = require('angular');
+  const saveAs = require('@spalger/filesaver').saveAs;
+  const registry = require('plugins/kibana/settings/saved_object_registry');
+  const objectIndexHTML = require('plugins/kibana/settings/sections/objects/_objects.html');
   const MAX_SIZE = Math.pow(2, 31) - 1;
 
   require('ui/directives/file_upload');
@@ -25,15 +25,15 @@ define(function (require) {
     return {
       restrict: 'E',
       controller: function ($scope, $injector, $q, AppState, es) {
-        var notify = createNotifier({ location: 'Saved Objects' });
+        const notify = createNotifier({ location: 'Saved Objects' });
 
-        var $state = $scope.state = new AppState();
+        const $state = $scope.state = new AppState();
         $scope.currentTab = null;
         $scope.selectedItems = [];
 
-        var getData = function (filter) {
-          var services = registry.all().map(function (obj) {
-            var service = $injector.get(obj.service);
+        const getData = function (filter) {
+          const services = registry.all().map(function (obj) {
+            const service = $injector.get(obj.service);
             return service.find(filter).then(function (data) {
               return {
                 service: service,
@@ -48,7 +48,7 @@ define(function (require) {
 
           $q.all(services).then(function (data) {
             $scope.services = _.sortBy(data, 'title');
-            var tab = $scope.services[0];
+            let tab = $scope.services[0];
             if ($state.tab) $scope.currentTab = tab = _.find($scope.services, {title: $state.tab});
 
             $scope.$watch('state.tab', function (tab) {
@@ -67,7 +67,7 @@ define(function (require) {
         };
 
         $scope.toggleItem = function (item) {
-          var i = $scope.selectedItems.indexOf(item);
+          const i = $scope.selectedItems.indexOf(item);
           if (i >= 0) {
             $scope.selectedItems.splice(i, 1);
           } else {
@@ -80,7 +80,7 @@ define(function (require) {
         };
 
         $scope.edit = function (service, item) {
-          var params = {
+          const params = {
             service: service.serviceName,
             id: item.id
           };
@@ -121,7 +121,7 @@ define(function (require) {
         };
 
         $scope.bulkExport = function () {
-          var objs = $scope.selectedItems.map(_.partialRight(_.extend, {type: $scope.currentTab.type}));
+          const objs = $scope.selectedItems.map(_.partialRight(_.extend, {type: $scope.currentTab.type}));
           retrieveAndExportDocs(objs);
         };
 
@@ -153,12 +153,12 @@ define(function (require) {
         }
 
         function saveToFile(results) {
-          var blob = new Blob([angular.toJson(results, true)], {type: 'application/json'});
+          const blob = new Blob([angular.toJson(results, true)], {type: 'application/json'});
           saveAs(blob, 'export.json');
         }
 
         $scope.importAll = function (fileContents) {
-          var docs;
+          let docs;
           try {
             docs = JSON.parse(fileContents);
           } catch (e) {
@@ -169,7 +169,7 @@ define(function (require) {
           // as visualisations could depend on searches
           // lets order the export to make sure that searches comes before visualisations
           // then also import object sequentially to avoid errors
-          var configDocument = _.find(docs, function (o) {
+          const configDocument = _.find(docs, function (o) {
             return o._type === 'config';
           });
 
@@ -200,7 +200,7 @@ define(function (require) {
           }
 
           // kibi: override config properties
-          var loadConfig = function (configDocument) {
+          const loadConfig = function (configDocument) {
             if (configDocument) {
               if (configDocument._id === kbnVersion) {
                 // override existing config values
@@ -219,11 +219,9 @@ define(function (require) {
             return Promise.resolve(true);
           };
 
-
-
           // kibi: now execute this sequentially
-          var executeSequentially = function (docs) {
-            var functionArray = [];
+          const executeSequentially = function (docs) {
+            const functionArray = [];
             _.each(docs, function (doc) {
               functionArray.push(function (previousOperationResult) {
                 // previously this part was done in Promise.map
@@ -255,7 +253,6 @@ define(function (require) {
           .then(reloadQueries) // kibi: to clear backend cache
           .then(refreshData, notify.error);
         };
-
 
         function refreshIndex() {
           return es.indices.refresh({

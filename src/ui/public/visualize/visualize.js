@@ -63,7 +63,7 @@ define(function (require) {
 
           $visEl.toggleClass('spy-only', Boolean(fullSpy));
 
-          // kibi: skip checking that vis it is too small
+          // kibi: skip checking that vis is too small
           if (
             $scope.vis &&
             ($scope.vis.type.name === 'kibiqueryviewervis' || $scope.vis.type.name === 'kibi_sequential_join_vis')

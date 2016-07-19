@@ -4,9 +4,7 @@ define(function (require) {
   var rison = require('ui/utils/rison');
   var keymap = require('ui/utils/key_map');
 
-  require('ui/kibi/styles/saved_object_finder.less');
-
-  module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Private) {
+  module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Private, config) {
 
     var services = Private(require('ui/saved_objects/saved_object_registry')).byLoaderPropertiesName;
 
@@ -38,6 +36,9 @@ define(function (require) {
         // kibi: end
 
         var self = this;
+
+        // The number of items to show in the list
+        $scope.perPage = config.get('savedObjects:perPage');
 
         // the text input element
         var $input = $element.find('input[ng-model=filter]');

@@ -29,8 +29,7 @@ define(function (require) {
           queryIds: []
         },
         editor: '<kibi-data-table-vis-params></kibi-data-table-vis-params>'
-      },
-      defaultSection: 'options'
+      }
     });
   }
 

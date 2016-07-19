@@ -8,7 +8,10 @@ After Java has been installed, make sure that the `java` command is available
 in the system path by opening a terminal window and running `java -version`;
 the command should display the version of Java installed on your system.
 
-* Elasticsearch 2.2 or later
+You can set up Kibana and start exploring your Elasticsearch indices in minutes.
+All you need is:
+
+* Elasticsearch 2.3 or later
 * A modern web browser - http://www.elastic.co/subscriptions/matrix#matrix_browsers[Supported Browsers].
 * Information about your Elasticsearch installation:
 ** URL of the Elasticsearch instance you want to connect to.
@@ -44,7 +47,7 @@ extracted Kibi and run the following command:
 [float]
 [[kibana-dynamic-mapping]]
 ==== Kibi and Elasticsearch Dynamic Mapping
-By default, Elasticsearch enables {ref}dynamic-mapping.html[dynamic mapping] for fields. Kibi needs dynamic mapping
+By default, Elasticsearch enables {elastic-ref}dynamic-mapping.html[dynamic mapping] for fields. Kibi needs dynamic mapping
 to use fields in visualizations correctly, as well as to manage the `.kibana` index where saved searches,
 visualizations, and dashboards are stored.
 

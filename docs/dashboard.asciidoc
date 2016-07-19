@@ -59,10 +59,8 @@ when sharing a dashboard on a public facing server.
 NOTE: To view shared dashboards users must be able to access Kibi; keep
 this in mind if your Kibi instance is protected by an authentication proxy.
 
-To share a dashboard, click the *Share* image:images/ShareVis.png[Share]
-button:
-
 To share a dashboard, click the *Share* button image:images/share-dashboard.png[] to display the _Sharing_ panel.
+
 
 image:images/sharing-panel.png[]
 

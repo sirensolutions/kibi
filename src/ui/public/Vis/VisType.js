@@ -14,7 +14,6 @@ define(function (require) {
       this.schemas = opts.schemas || new VisTypeSchemas();
       this.params = opts.params || {};
       this.requiresSearch = opts.requiresSearch == null ? true : opts.requiresSearch; // Default to true unless otherwise specified
-      this.defaultSection = opts.defaultSection; // kibi: the visualisation configuration default section
     }
 
     return VisType;

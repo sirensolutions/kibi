@@ -3,24 +3,24 @@
 
 This chart's Y axis is the _metrics_ axis. The following aggregations are available for this axis:
 
-*Count*:: The {elastic-ref}/search-aggregations-metrics-valuecount-aggregation.html[_count_] aggregation returns a raw count of 
+*Count*:: The {elastic-ref}/search-aggregations-metrics-valuecount-aggregation.html[_count_] aggregation returns a raw count of
 the elements in the selected index pattern.
-*Average*:: This aggregation returns the {elastic-ref}/search-aggregations-metrics-avg-aggregation.html[_average_] of a numeric 
+*Average*:: This aggregation returns the {elastic-ref}/search-aggregations-metrics-avg-aggregation.html[_average_] of a numeric
 field. Select a field from the drop-down.
-*Sum*:: The {elastic-ref}/search-aggregations-metrics-sum-aggregation.html[_sum_] aggregation returns the total sum of a numeric 
+*Sum*:: The {elastic-ref}/search-aggregations-metrics-sum-aggregation.html[_sum_] aggregation returns the total sum of a numeric
 field. Select a field from the drop-down.
-*Min*:: The {elastic-ref}/search-aggregations-metrics-min-aggregation.html[_min_] aggregation returns the minimum value of a 
+*Min*:: The {elastic-ref}/search-aggregations-metrics-min-aggregation.html[_min_] aggregation returns the minimum value of a
 numeric field. Select a field from the drop-down.
-*Max*:: The {elastic-ref}/search-aggregations-metrics-max-aggregation.html[_max_] aggregation returns the maximum value of a 
+*Max*:: The {elastic-ref}/search-aggregations-metrics-max-aggregation.html[_max_] aggregation returns the maximum value of a
 numeric field. Select a field from the drop-down.
-*Unique Count*:: The {elastic-ref}/search-aggregations-metrics-cardinality-aggregation.html[_cardinality_] aggregation returns 
+*Unique Count*:: The {elastic-ref}/search-aggregations-metrics-cardinality-aggregation.html[_cardinality_] aggregation returns
 the number of unique values in a field. Select a field from the drop-down.
-*Percentiles*:: The {elastic-ref}/search-aggregations-metrics-percentile-aggregation.html[_percentile_] aggregation divides the 
-values in a numeric field into percentile bands that you specify. Select a field from the drop-down, then specify one 
-or more ranges in the *Percentiles* fields. Click the *X* to remove a percentile field. Click *+ Add* to add a 
+*Percentiles*:: The {elastic-ref}/search-aggregations-metrics-percentile-aggregation.html[_percentile_] aggregation divides the
+values in a numeric field into percentile bands that you specify. Select a field from the drop-down, then specify one
+or more ranges in the *Percentiles* fields. Click the *X* to remove a percentile field. Click *+ Add* to add a
 percentile field.
-*Percentile Rank*:: The {elastic-ref}/search-aggregations-metrics-percentile-rank-aggregation.html[_percentile ranks_] 
-aggregation returns the percentile rankings for the values in the numeric field you specify. Select a numeric field 
+*Percentile Rank*:: The {elastic-ref}/search-aggregations-metrics-percentile-rank-aggregation.html[_percentile ranks_]
+aggregation returns the percentile rankings for the values in the numeric field you specify. Select a numeric field
 from the drop-down, then specify one or more percentile rank values in the *Values* fields. Click the *X* to remove a
 values field. Click *+Add* to add a values field.
 
@@ -33,8 +33,6 @@ multiple charts. A multiple chart split must run before any other aggregations. 
 if the splits are displayed in a row or a column by clicking the *Rows | Columns* selector.
 
 include::x_axis_aggs.asciidoc[]
-
-include::color_picker.asciidoc[]
 
 include::color-picker.asciidoc[]
 

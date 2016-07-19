@@ -11,8 +11,6 @@ if the splits are displayed in a row or a column by clicking the *Rows | Columns
 
 include::x_axis_aggs.asciidoc[]
 
-include::color_picker.asciidoc[]
-
 include::color-picker.asciidoc[]
 
 You can click the *Advanced* link to display more customization options for your metrics or bucket aggregation:

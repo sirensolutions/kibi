@@ -346,7 +346,7 @@ define(function (require) {
         filters.push(...smFilters);
       }
       // remove disabled filters
-      if (disabled) {
+      if (!disabled) {
         filters = _.filter(filters, (f) => f.meta && !f.meta.disabled);
       }
       // remove join_set filter since it is computed only if needed.
@@ -713,7 +713,7 @@ define(function (require) {
 
       const options = {
         pinned: true,
-        disabled: true
+        disabled: false
       };
 
       let dashboardIds = [ dashboardId ];
@@ -824,7 +824,7 @@ define(function (require) {
       const appState = getAppState();
       const options = {
         pinned: false,
-        disabled:false
+        disabled: true
       };
 
       if (!appState || !currentDashboardId) {

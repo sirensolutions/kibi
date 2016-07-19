@@ -947,6 +947,20 @@ describe('State Management', function () {
             done();
           }).catch(done);
         });
+
+        it('should save disabled filter to kibistate', function (done) {
+          const filter1 = {
+            term: { field1: 'bbb' },
+            meta: { disabled: true }
+          };
+
+          appState.filters = [ filter1 ];
+          kibiState.saveAppState()
+          .then(() => {
+            expect(kibiState._getDashboardProperty('dashboard1', kibiState._properties.filters)).to.eql([ filter1 ]);
+            done();
+          }).catch(done);
+        });
       });
 
       describe('Dashboard saved with filters and query', function () {

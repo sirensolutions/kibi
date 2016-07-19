@@ -36,9 +36,19 @@ define(function (require) {
 
         bdd.it('should show the correct chart types', function pageHeader() {
 
+          // kibi: added kibi visualizations
           var expectedChartTypes = [
-            'Area chart', 'Data table', 'Line chart', 'Markdown widget',
-            'Metric', 'Pie chart', 'Tile map', 'Vertical bar chart'
+            'Area chart',
+            'Data table',
+            'Enhanced search results', // kibi visualization
+            'Kibi Query Viewer', // kibi visualization
+            'Kibi Relational filter', // kibi visualization
+            'Line chart',
+            'Markdown widget',
+            'Metric',
+            'Pie chart',
+            'Tile map',
+            'Vertical bar chart'
           ];
           // find all the chart types and make sure there all there
           return visualizePage.getChartTypes()

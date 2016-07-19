@@ -454,7 +454,22 @@ define(function (require) {
         });
       })
       .then(function (chartData) {
-        return chartData[1]; // MAGIC NUMBER - we find multiple 'path's and only one of them is the right one.
+        // kibi: do not use the magic number. Instead try to find the data
+        var index = -1;
+        chartData.forEach(function (data, i) {
+          if (data) {
+            if (index !== -1) {
+              throw new Error('Expected only one element with data, but got more: ' + JSON.stringify(chartData, null, ' '));
+            }
+            index = i;
+          }
+        });
+        if (index === -1) {
+          throw new Error('Unable to retrieve area count chart data');
+        }
+        return chartData[index];
+        //return chartData[1]; // MAGIC NUMBER - we find multiple 'path's and only one of them is the right one.
+        // kibi: end
       });
     },
 

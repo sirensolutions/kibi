@@ -254,15 +254,14 @@ define(function (require) {
         bdd.it('should show Percentiles', function pageHeader() {
           // This SHOULD be the expected result but the top item is cut off.
           //  See https://github.com/elastic/kibana/issues/5721
-          // var percentileMachineRam = ['2,147,483,648', '1st percentile of machine.ram', '3,221,225,472',
-          //   '5th percentile of machine.ram', '7,516,192,768', '25th percentile of machine.ram', '12,884,901,888',
-          //   '50th percentile of machine.ram', '18,253,611,008', '75th percentile of machine.ram',
-          //   '32,212,254,720', '95th percentile of machine.ram', '32,212,254,720', '99th percentile of machine.ram'
-          // ];
-          var percentileMachineRam = ['3,221,225,472',
-            '5th percentile of machine.ram', '7,516,192,768', '25th percentile of machine.ram', '12,884,901,888',
-            '50th percentile of machine.ram', '18,253,611,008', '75th percentile of machine.ram',
-            '32,212,254,720', '95th percentile of machine.ram', '32,212,254,720', '99th percentile of machine.ram'
+          var percentileMachineRam = [
+            '2,147,483,648', '1st percentile of machine.ram',
+            '3,221,225,472', '5th percentile of machine.ram',
+            '7,516,192,768', '25th percentile of machine.ram',
+            '12,884,901,888', '50th percentile of machine.ram',
+            '18,253,611,008', '75th percentile of machine.ram',
+            '32,212,254,720', '95th percentile of machine.ram',
+            '32,212,254,720', '99th percentile of machine.ram'
           ];
           common.debug('Aggregation = Percentiles');
           return visualizePage.selectAggregation('Percentiles')
@@ -277,7 +276,15 @@ define(function (require) {
             return common.tryForTime(2000, function () {
               return visualizePage.getMetric()
                 .then(function (metricValue) {
-                  expect(percentileMachineRam).to.eql(metricValue.split('\n'));
+                  // kibi: changed expected value since the chart might be cut off
+                  var actualPercentileMachineRam = metricValue.split('\n');
+                  // check that there is one at least
+                  expect(actualPercentileMachineRam.length).to.be.ok();
+                  // check from the end, as the top might be cropped
+                  for (var i = actualPercentileMachineRam.length - 1, j = percentileMachineRam.length - 1; i >= 0; i--, j--) {
+                    expect(actualPercentileMachineRam[i]).to.be(percentileMachineRam[j]);
+                  }
+                  // kibi: end
                 });
             });
           })

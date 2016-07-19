@@ -320,7 +320,9 @@ define(function (require) {
     };
 
     /**
-     * Returns the current set of filters for the given dashboard
+     * Returns the current set of filters for the given dashboard.
+     * If pinned is true, then the pinned filters are added to the returned array.
+     * If disabled is true, then the disabled filters are added to the returned array.
      */
     KibiState.prototype._getFilters = function (dashboardId, appState, metas, { pinned, disabled }) {
       let filters;

@@ -122,7 +122,7 @@ define(function (require) {
                   self._getOnClickForDashboardInGroup(dashboardGroups, d.id, group.id);
                 }
               };
-              if (currentDashboardId === d.id) {
+              if (currentDashboardId && currentDashboardId === d.id) {
                 selected = dashboard;
               }
               return dashboard;
@@ -246,7 +246,7 @@ define(function (require) {
         var activeSelected = false;
         _.each(dashboardGroups1, function (group) {
           _.each(group.dashboards, function (dashboard) {
-            if (currentDashboardId === dashboard.id) {
+            if (currentDashboardId && currentDashboardId === dashboard.id) {
               group.active = true;
               activeSelected = true;
               return false;
@@ -311,9 +311,6 @@ define(function (require) {
      */
     DashboardGroupHelper.prototype.computeGroups = function () {
       var currentDashboardId = kibiState._getCurrentDashboardId();
-      if (!currentDashboardId) {
-        return Promise.resolve([]);
-      }
       return this._computeGroupsFromSavedDashboardGroups(currentDashboardId)
       .then((dashboardGroups1) => this._addAdditionalGroupsFromSavedDashboards(currentDashboardId, dashboardGroups1));
     };

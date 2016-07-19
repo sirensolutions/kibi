@@ -220,7 +220,8 @@ describe('Kibi Components', function () {
 
         it('no current dashboard', function (done) {
           dashboardGroupHelper.computeGroups().then(function (groups) {
-            expect(groups).to.have.length(0);
+            // computeGroups should return all 5 groups, even when no dashboard is selected
+            expect(groups).to.have.length(5);
             done();
           }).catch(done);
         });

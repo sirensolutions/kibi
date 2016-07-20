@@ -320,9 +320,11 @@ define(function (require) {
     };
 
     /**
-     * Returns the current set of filters for the given dashboard
+     * Returns the current set of filters for the given dashboard.
+     * If pinned is true, then the pinned filters are added to the returned array.
+     * If disabled is true, then the disabled filters are added to the returned array.
      */
-    KibiState.prototype._getFilters = function (dashboardId, appState, metas, { pinned }) {
+    KibiState.prototype._getFilters = function (dashboardId, appState, metas, { pinned, disabled }) {
       let filters;
 
       if (this._getCurrentDashboardId() === dashboardId) {
@@ -345,9 +347,10 @@ define(function (require) {
       if (smFilters) {
         filters.push(...smFilters);
       }
-
       // remove disabled filters
-      filters = _.filter(filters, (f) => f.meta && !f.meta.disabled);
+      if (!disabled) {
+        filters = _.filter(filters, (f) => f.meta && !f.meta.disabled);
+      }
       // remove join_set filter since it is computed only if needed.
       // It may be available through the appState.filters
       _.remove(filters, (filter) => filter.join_set);
@@ -711,7 +714,8 @@ define(function (require) {
       }
 
       const options = {
-        pinned: true
+        pinned: true,
+        disabled: false
       };
 
       let dashboardIds = [ dashboardId ];
@@ -821,7 +825,8 @@ define(function (require) {
       const currentDashboardId = this._getCurrentDashboardId();
       const appState = getAppState();
       const options = {
-        pinned: false
+        pinned: false,
+        disabled: true
       };
 
       if (!appState || !currentDashboardId) {

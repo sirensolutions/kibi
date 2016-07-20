@@ -233,7 +233,7 @@ define(function (require) {
       }
     };
 
-    KibiNavBarHelper.prototype._getDashboardGroups = function () {
+    KibiNavBarHelper.prototype.getDashboardGroups = function () {
       return this.dashboardGroups;
     };
 

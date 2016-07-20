@@ -26,7 +26,7 @@ define(function (require) {
       link: function ($scope, $el) {
 
         kibiNavBarHelper.setChrome($scope.chrome);
-        $scope.dashboardGroups = kibiNavBarHelper._getDashboardGroups();
+        $scope.dashboardGroups = kibiNavBarHelper.getDashboardGroups();
 
         var removeLocationChangeSuccessHandler = $rootScope.$on('$locationChangeSuccess', function () {
           $location.path().indexOf('/dashboard') === 0 ? $el.show() : $el.hide();

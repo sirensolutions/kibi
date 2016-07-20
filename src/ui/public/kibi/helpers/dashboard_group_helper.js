@@ -2,6 +2,7 @@ define(function (require) {
   return function DashboardGroupHelperFactory(kbnUrl, kibiState, Private, savedDashboards, savedDashboardGroups, Promise) {
     var _ = require('lodash');
     var countHelper = Private(require('ui/kibi/helpers/count_helper/count_helper'));
+    var kibiUtils = require('kibiutils');
 
     function DashboardGroupHelper() {
     }
@@ -191,6 +192,7 @@ define(function (require) {
       var self = this;
       // first create array of dashboards already used in dashboardGroups1
       var dashboardsInGroups = self._getListOfDashboardsFromGroups(dashboardGroups1);
+      let highestPriority = dashboardGroups1.length ? dashboardGroups1[dashboardGroups1.length - 1].priority : 0;
 
       return kibiState._getDashboardAndSavedSearchMetas(undefined, true).then(function (results) {
         const dashboardDefs = _.map(results, function ({ savedDash, savedSearchMeta }) {
@@ -232,12 +234,14 @@ define(function (require) {
             };
 
             dashboardGroups1.push({
+              id: kibiUtils.slugifyId(dashboardDef.title),
               title: dashboardDef.title,
               dashboards: [onlyOneDashboard],
               selected: onlyOneDashboard,
               onClick: function (dashboardGroups) {
                 self._getOnClickForDashboardInGroup(dashboardGroups, dashboardDef.id, null);
-              }
+              },
+              priority: ++highestPriority
             });
           }
         });
@@ -265,6 +269,40 @@ define(function (require) {
         // only here we can fulfill the promise
         return dashboardGroups1;
       });
+    };
+
+    /**
+     * Copies dashboards groups from src to dest.
+     * Modifies the dest object.
+     */
+    DashboardGroupHelper.prototype.copy = function (src, dest) {
+      if (!dest) {
+        throw new Error('Dest object should be defined');
+      }
+
+      _.each(src, (group) => {
+        const previousGroup = _.find(dest, { id: group.id });
+        if (previousGroup) {
+          previousGroup.active = group.active;
+          previousGroup.dashboards = group.dashboards;
+          previousGroup.hide = group.hide;
+          previousGroup.iconCss = group.iconCss;
+          previousGroup.iconUrl = group.iconUrl;
+          previousGroup.onClick = group.onClick;
+          previousGroup.priority = group.priority;
+          previousGroup.selected = group.selected;
+          previousGroup.title = group.title;
+        } else {
+          // new group
+          dest.push(group);
+        }
+      });
+      for (let destIndex = dest.length - 1; destIndex >= 0; destIndex--) {
+        const srcIndex = _.findIndex(src, { id: dest[destIndex].id });
+        if (srcIndex === -1) {
+          dest.splice(destIndex, 1);
+        }
+      }
     };
 
     DashboardGroupHelper.prototype.getCountQueryForSelectedDashboard = function (groups, groupIndex) {

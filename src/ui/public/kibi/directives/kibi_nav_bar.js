@@ -1,9 +1,14 @@
 /*eslint no-use-before-define: 1*/
 define(function (require) {
-
   require('ui/kibi/directives/kibi_nav_bar.less');
   require('ui/kibi/directives/kibi_dashboard_toolbar');
   require('ui/kibi/directives/kibi_stop_click_event');
+
+  require('ui/routes')
+  .addSetupWork(function (Private) {
+    const kibiNavBarHelper = Private(require('ui/kibi/directives/kibi_nav_bar_helper'));
+    return kibiNavBarHelper.init();
+  });
 
   require('ui/modules')
   .get('app/dashboard')
@@ -21,6 +26,7 @@ define(function (require) {
       link: function ($scope, $el) {
 
         kibiNavBarHelper.setChrome($scope.chrome);
+        $scope.dashboardGroups = kibiNavBarHelper._getDashboardGroups();
 
         var removeLocationChangeSuccessHandler = $rootScope.$on('$locationChangeSuccess', function () {
           $location.path().indexOf('/dashboard') === 0 ? $el.show() : $el.hide();
@@ -49,8 +55,6 @@ define(function (require) {
         // close panel when user navigates to a different route
         var removeRouteChangeSuccessHandler = $rootScope.$on('$routeChangeSuccess', function (event, next, prev, err) {
           $scope.relationalFilterPanelOpened = false;
-          kibiNavBarHelper.computeDashboardsGroups('routeChangeSuccess')
-          .then((groups) => $scope.dashboardGroups = groups);
         });
 
         // =============
@@ -107,32 +111,20 @@ define(function (require) {
         var removeDashboardChangedHandler = $rootScope.$on('kibi:dashboard:changed', function (event, dashId) {
           updateTabScroller();
           kibiNavBarHelper.computeDashboardsGroups('Dashboard changed')
-          .then((groups) => {
-            $scope.dashboardGroups = groups;
-            kibiNavBarHelper.updateAllCounts([ dashId ], 'kibi:dashboard:changed event');
-          });
+          .then(() => kibiNavBarHelper.updateAllCounts([ dashId ], 'kibi:dashboard:changed event'));
         });
 
         $scope.$watch(function (scope) {
           return kibiState._getCurrentDashboardId();
         }, (currentDashboardId) => {
           if (currentDashboardId) {
-            kibiNavBarHelper.computeDashboardsGroups('current dashboard changed')
-            .then((groups) => {
-              if (!$scope.dashboardGroups) {
-                // initialize the counts
-                return kibiNavBarHelper.updateAllCounts(null, 'init').then(() => $scope.dashboardGroups = groups);
-              } else {
-                $scope.dashboardGroups = groups;
-              }
-            });
+            kibiNavBarHelper.computeDashboardsGroups('current dashboard changed');
           }
         });
 
         var removeDashboardGroupChangedHandler = $rootScope.$on('kibi:dashboardgroup:changed', function () {
           updateTabScroller();
-          kibiNavBarHelper.computeDashboardsGroups('Dashboard group changed')
-          .then((groups) => $scope.dashboardGroups = groups);
+          kibiNavBarHelper.computeDashboardsGroups('Dashboard group changed');
         });
 
         $scope.$on('$destroy', function () {

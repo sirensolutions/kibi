@@ -10,7 +10,11 @@ define(function (require) {
     function KibiNavBarHelper() {
       this.appState = null;
       this.chrome = null;
-      this.dashboardGroups = null;
+      this.dashboardGroups = [];
+      this.init = _.once(() => {
+        return this.computeDashboardsGroups('init')
+        .then(() => this.updateAllCounts(null, 'init'));
+      });
 
       globalState.on('save_with_changes', (diff) => updateCountsOnGlobalStateChange.call(this, diff));
       this.removeGetAppStateHandler = $rootScope.$watch(getAppState, (as) => {
@@ -149,20 +153,15 @@ define(function (require) {
     };
 
     KibiNavBarHelper.prototype.updateAllCounts = function (dashboardsIds, reason) {
-      const currentDashboard = kibiState._getCurrentDashboardId();
-
-      if (currentDashboard) {
-        if (!dashboardsIds) {
-          return savedDashboards.find().then(function (dashboards) {
-            return _(dashboards.hits).filter((d) => !!d.savedSearchId).map((d) => d.id).value();
-          })
-          .then((ids) => updateCounts.call(this, ids, reason))
-          .catch(notify.error);
-        } else {
-          return updateCounts.call(this, dashboardsIds, reason);
-        }
+      if (!dashboardsIds) {
+        return savedDashboards.find().then(function (dashboards) {
+          return _(dashboards.hits).filter((d) => !!d.savedSearchId).map((d) => d.id).value();
+        })
+        .then((ids) => updateCounts.call(this, ids, reason))
+        .catch(notify.error);
+      } else {
+        return updateCounts.call(this, dashboardsIds, reason);
       }
-      return Promise.resolve([]);
     };
 
     KibiNavBarHelper.prototype.computeDashboardsGroups = function (reason) {
@@ -171,15 +170,8 @@ define(function (require) {
       }
       return dashboardGroupHelper.computeGroups()
       .then((groups) => {
-        // keep the already computed counts
-        _.each(groups, (group) => {
-          const previousGroup = _.find(this.dashboardGroups, 'id', group.id);
-          if (previousGroup) {
-            group.count = previousGroup.count;
-          }
-        });
-        this.dashboardGroups = groups;
-        return groups;
+        dashboardGroupHelper.copy(groups, this.dashboardGroups);
+        return this.dashboardGroups;
       });
     };
 
@@ -239,6 +231,10 @@ define(function (require) {
         this.appState.off('save_with_changes', (diff) => updateCountsOnAppStateChange.call(this, diff));
         this.appState = null;
       }
+    };
+
+    KibiNavBarHelper.prototype._getDashboardGroups = function () {
+      return this.dashboardGroups;
     };
 
     KibiNavBarHelper.prototype._setDashboardGroups = function (groups) {

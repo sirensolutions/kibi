@@ -327,7 +327,7 @@ define(function (require) {
     KibiState.prototype._getFilters = function (dashboardId, appState, metas, { pinned, disabled }) {
       let filters;
 
-      if (this._getCurrentDashboardId() === dashboardId) {
+      if (appState && this._getCurrentDashboardId() === dashboardId) {
         filters = appState.filters && _.cloneDeep(appState.filters) || [];
       } else {
         const kibiStateFilters = this._getDashboardProperty(dashboardId, this._properties.filters);
@@ -369,7 +369,7 @@ define(function (require) {
         }
       };
 
-      if (this._getCurrentDashboardId() === dashboardId) {
+      if (appState && this._getCurrentDashboardId() === dashboardId) {
         if (appState.query) {
           query = _.cloneDeep(appState.query);
         }
@@ -734,10 +734,6 @@ define(function (require) {
 
       const appState = getAppState();
 
-      if (!appState) {
-        return Promise.resolve(false);
-      }
-
       // here ignore the missing meta as getState can be called
       // on a dashboard without assosiated savedSearch
       const getMetas = this._getDashboardAndSavedSearchMetas(dashboardIds, true);
@@ -759,7 +755,6 @@ define(function (require) {
             }
           }
         }
-
 
         for (let i = 0; i < metas.length; i++) {
           const meta = metas[i];

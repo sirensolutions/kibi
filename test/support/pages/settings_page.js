@@ -20,30 +20,10 @@ define(function (require) {
       return common.findTestSubject('settingsNav advanced').click();
     },
 
-    setAdvancedSettings: function setAdvancedSettings(propertyName, propertyValue) {
-      var self = this;
-      return common.findTestSubject('advancedSetting&' + propertyName + ' editButton')
-      .click()
-      .then(function setAdvancedSettingsClickPropertyValue(selectList) {
-        return self.remote.findByCssSelector('option[label="' + propertyValue + '"]')
-        .click();
-      })
-      .then(function setAdvancedSettingsClickSaveButton() {
-        return common.findTestSubject('advancedSetting&' + propertyName + ' saveButton')
-        .click();
-      });
-    },
-
     getAdvancedSettings: function getAdvancedSettings(propertyName) {
-      common.debug('in setAdvancedSettings');
+      common.debug('in getAdvancedSettings');
       return common.findTestSubject('advancedSetting&' + propertyName + ' currentValue')
       .getVisibleText();
-    },
-
-
-    clickAdvancedTab: function () {
-      common.debug('in clickAdvancedTab');
-      return common.findTestSubject('settingsNav advanced').click();
     },
 
     setAdvancedSettings: function setAdvancedSettings(propertyName, propertyValue) {
@@ -62,14 +42,6 @@ define(function (require) {
         .click();
       });
     },
-
-    getAdvancedSettings: function getAdvancedSettings(propertyName) {
-      var self = this;
-      common.debug('in setAdvancedSettings');
-      return common.findTestSubject('advancedSetting&' + propertyName + ' currentValue')
-      .getVisibleText();
-    },
-
 
     navigateTo: function () {
       return common.navigateToApp('settings');
@@ -137,7 +109,7 @@ define(function (require) {
 
     clickDefaultIndexButton: function () {
       return this.remote.setFindTimeout(defaultTimeout)
-      .findByCssSelector('button.btn.btn-warning.ng-scope').click();
+      .findByCssSelector('button.btn.btn-success.ng-scope').click();
     },
 
     clickDeletePattern: function () {

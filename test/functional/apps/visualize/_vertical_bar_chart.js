@@ -37,6 +37,10 @@ define(function (require) {
           return settingsPage.createIndexPattern();
         })
         .then(function () {
+          common.debug('click on the default index button');
+          return settingsPage.clickDefaultIndexButton();
+        })
+        .then(function () {
           return settingsPage.clickAdvancedTab();
         })
         .then(function GetAdvancedSetting() {

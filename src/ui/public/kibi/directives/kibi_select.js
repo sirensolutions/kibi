@@ -227,9 +227,6 @@ define(function (require) {
                   });
                 }
                 break;
-              case 'fontAwesomeIcon':
-                promise = selectHelper.getFontAwesomeIcon();
-                break;
               case 'iconType':
                 promise = selectHelper.getIconType();
                 break;

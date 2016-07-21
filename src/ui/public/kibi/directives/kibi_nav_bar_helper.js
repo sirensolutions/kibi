@@ -176,6 +176,9 @@ define(function (require) {
     };
 
     const updateCountsOnAppStateChange = function (diff) {
+      if (diff.indexOf('query') === -1 && diff.indexOf('filters') === -1) {
+        return;
+      }
       // when appState changed get connected and selected dashboards
       const currentDashboard = kibiState._getCurrentDashboardId();
       if (!currentDashboard) {

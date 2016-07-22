@@ -42,7 +42,7 @@ define(function (require) {
               }
               // time
               if (dashboard.timeRestore && dashboard.timeFrom && dashboard.timeTo) {
-                this._saveTimeForDashboardId(dashboard.id, dashboard.timeMode, dashboard.timeFrom, dashboard.timeTo, true);
+                this._saveTimeForDashboardId(dashboard.id, dashboard.timeMode, dashboard.timeFrom, dashboard.timeTo);
               }
             });
 
@@ -94,7 +94,7 @@ define(function (require) {
       if (typeof to === 'object') {
         toStr = to.toISOString();
       }
-      this._setDashboardProperty(dashboardId, this._properties.time, {
+      return this._setDashboardProperty(dashboardId, this._properties.time, {
         m: mode,
         f: fromStr,
         t: toStr
@@ -105,10 +105,11 @@ define(function (require) {
      * Shortcuts for properties in the kibistate
      */
     KibiState.prototype._properties = {
-      dashboards: 'd',
       filters: 'f',
       query: 'q',
       time: 't',
+      // properties available in the diff array with the save_with_changes event
+      dashboards: 'd',
       enabled_relations: 'j',
       groups: 'g',
       session_id: 's'
@@ -129,6 +130,7 @@ define(function (require) {
       if (this[this._properties.dashboards]) {
         return savedDashboards.find().then((resp) => {
           if (resp.hits) {
+            const dashboardIdsToUpdate = [];
             const appState = getAppState();
             const timeDefaults = config.get('timepicker:timeDefaults');
 
@@ -155,32 +157,67 @@ define(function (require) {
                 appState.save();
               }
               // reset kibistate
+              let modified = false;
               if (this[this._properties.dashboards][dashboard.id]) {
                 // query
                 if (!query || this._isDefaultQuery(query)) {
+                  if (this._getDashboardProperty(dashboard.id, this._properties.query)) {
+                    // kibistate has a query that will be removed with the reset
+                    modified = true;
+                  }
                   this._deleteDashboardProperty(dashboard.id, this._properties.query);
                 } else {
-                  this._setDashboardProperty(dashboard.id, this._properties.query, query.query);
+                  if (this._setDashboardProperty(dashboard.id, this._properties.query, query.query)) {
+                    modified = true;
+                  }
                 }
+
                 // filters
                 if (filters.length) {
-                  this._setDashboardProperty(dashboard.id, this._properties.filters, filters);
+                  if (this._setDashboardProperty(dashboard.id, this._properties.filters, filters)) {
+                    modified = true;
+                  }
                 } else {
+                  if (this._getDashboardProperty(dashboard.id, this._properties.filters)) {
+                    // kibistate has filters that will be removed with the reset
+                    modified = true;
+                  }
                   this._deleteDashboardProperty(dashboard.id, this._properties.filters);
                 }
+
                 // time
                 if (dashboard.timeRestore && dashboard.timeFrom && dashboard.timeTo) {
-                  this._saveTimeForDashboardId(dashboard.id, dashboard.timeMode, dashboard.timeFrom, dashboard.timeTo, true);
+                  if (this._saveTimeForDashboardId(dashboard.id, dashboard.timeMode, dashboard.timeFrom, dashboard.timeTo)) {
+                    modified = true;
+                  }
                 } else {
+                  if (this._getDashboardProperty(dashboard.id, this._properties.time)) {
+                    // kibistate has a time that will be removed with the reset
+                    modified = true;
+                  }
                   this._deleteDashboardProperty(dashboard.id, this._properties.time);
                 }
               }
+              if (modified) {
+                dashboardIdsToUpdate.push(dashboard.id);
+              }
             });
+
+            // add the ID of dashboards that are joined
+            _.each(this.getEnabledRelations(), (relation) => {
+              _.each(relation.dashboards, (dashboardId) => {
+                if (dashboardIdsToUpdate.indexOf(dashboardId) === -1) {
+                  dashboardIdsToUpdate.push(dashboardId);
+                }
+              });
+            });
+            this.disableAllRelations();
+
+            if (dashboardIdsToUpdate.length) {
+              this.emit('reset', dashboardIdsToUpdate);
+            }
+            this.save();
           }
-        })
-        .then(() => {
-          this.disableAllRelations();
-          this.save();
         });
       }
       return Promise.resolve();
@@ -216,7 +253,9 @@ define(function (require) {
       if (!this[this._properties.dashboards][dashboardId]) {
         this[this._properties.dashboards][dashboardId] = {};
       }
+      const changed = !angular.equals(this[this._properties.dashboards][dashboardId][prop], value);
       this[this._properties.dashboards][dashboardId][prop] = value;
+      return changed;
     };
 
     /**

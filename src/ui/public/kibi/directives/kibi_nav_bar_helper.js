@@ -24,6 +24,7 @@ define(function (require) {
         }
       });
       kibiState.on('save_with_changes', (diff) => updateCountsOnKibiStateChange.call(this, diff));
+      kibiState.on('reset', (dashboardsIds) => updateCountsOnKibiStateReset.call(this, dashboardsIds));
 
       // everywhere use this event !!! to be consistent
       // make a comment that it was required because not all components can listen to
@@ -200,17 +201,17 @@ define(function (require) {
       }
     };
 
+    const updateCountsOnKibiStateReset = function (dashboardsIds) {
+      this.updateAllCounts(dashboardsIds, 'KibiState reset');
+    };
+
     const updateCountsOnKibiStateChange = function (diff) {
       // when kibiState changes get connected and selected dashboards
       const currentDashboard = kibiState._getCurrentDashboardId();
       if (!currentDashboard) {
         return;
       }
-      if (diff.indexOf(kibiState._properties.enabled_relations) !== -1 ||
-          diff.indexOf(kibiState._properties.query) !== -1 ||
-          diff.indexOf(kibiState._properties.time) !== -1 ||
-          diff.indexOf(kibiState._properties.filters) !== -1 ||
-          diff.indexOf(kibiState._properties.groups) !== -1) {
+      if (diff.indexOf(kibiState._properties.enabled_relations) !== -1 || diff.indexOf(kibiState._properties.groups) !== -1) {
         const dashboardsIds = addAllConnected.call(this, currentDashboard);
         this.updateAllCounts(dashboardsIds, 'KibiState change ' + angular.toJson(diff));
       }
@@ -226,6 +227,7 @@ define(function (require) {
       $timeout.cancel(lastEventTimer);
 
       kibiState.off('save_with_changes', (diff) => updateCountsOnKibiStateChange.call(this, diff));
+      kibiState.off('reset', (dashboardsIds) => updateCountsOnKibiStateReset.call(this, dashboardsIds));
       globalState.off('save_with_changes', (diff) => updateCountsOnGlobalStateChange.call(this, diff));
       if (this.appState) {
         this.appState.off('save_with_changes', (diff) => updateCountsOnAppStateChange.call(this, diff));

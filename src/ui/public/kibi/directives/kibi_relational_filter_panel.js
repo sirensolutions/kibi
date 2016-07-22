@@ -126,11 +126,9 @@ define(function (require) {
         });
 
         const updateRelationalPanelOnSave = function (diff) {
-          if (diff.indexOf(kibiState._properties.enabled_relations) !== -1) {
-            if (!kibiState.getEnabledRelations().length) {
-              _initScope();
-              _initPanel();
-            }
+          if (diff.indexOf(kibiState._properties.enabled_relations) !== -1 && !kibiState.getEnabledRelations()) {
+            _initScope();
+            _initPanel();
           }
         };
         kibiState.on('save_with_changes', updateRelationalPanelOnSave);

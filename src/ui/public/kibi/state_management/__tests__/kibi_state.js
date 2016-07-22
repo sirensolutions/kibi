@@ -1,3 +1,4 @@
+const sinon = require('auto-release-sinon');
 const _ = require('lodash');
 const MockState = require('fixtures/mock_state');
 const mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
@@ -1264,6 +1265,71 @@ describe('State Management', function () {
             f: 'now-15y',
             t: 'now',
           });
+          done();
+        }).catch(done);
+      });
+
+      it('should emit a reset event with the IDs of dashboards which query got changed', function (done) {
+        kibiState._setDashboardProperty('Articles', kibiState._properties.query, {
+          query_string: {
+            query: 'web'
+          }
+        });
+
+        kibiState.on('reset', function (ids) {
+          expect(ids).to.eql([ 'Articles' ]);
+          done();
+        });
+        kibiState.resetFiltersQueriesTimes();
+      });
+
+      it('should emit a reset event with the IDs of dashboards which filters got changed', function (done) {
+        kibiState._setDashboardProperty('Articles', kibiState._properties.filters, [
+          {
+            term: {
+              fieldb: 'bbb'
+            }
+          }
+        ]);
+        kibiState._saveTimeForDashboardId('Articles', 'quick', 'now-15m', 'now');
+
+        kibiState.on('reset', function (ids) {
+          expect(ids).to.eql([ 'Articles' ]);
+          done();
+        });
+        kibiState.resetFiltersQueriesTimes();
+      });
+
+      it('should emit a reset event with the IDs of dashboards which time got changed', function (done) {
+        kibiState._saveTimeForDashboardId('Articles', 'quick', 'now-15m', 'now');
+
+        kibiState.on('reset', function (ids) {
+          expect(ids).to.eql([ 'Articles' ]);
+          done();
+        });
+        kibiState.resetFiltersQueriesTimes();
+      });
+
+      it('should emit a reset event with the IDs of dashboards that were joined', function (done) {
+        kibiState._saveTimeForDashboardId('Articles', 'quick', 'now-15m', 'now');
+
+        kibiState.enableRelation({
+          dashboards: [ 'Articles', 'Companies' ],
+          relation: 'index-a/id/index-b/id'
+        });
+
+        kibiState.on('reset', function (ids) {
+          expect(ids).to.eql([ 'Articles', 'Companies' ]);
+          done();
+        });
+        kibiState.resetFiltersQueriesTimes();
+      });
+
+      it('should not emit a reset event if no dashboard got changed', function (done) {
+        const stub = sinon.spy(kibiState, 'emit');
+        kibiState.resetFiltersQueriesTimes()
+        .then(() => {
+          expect(stub.called).to.not.be.ok();
           done();
         }).catch(done);
       });

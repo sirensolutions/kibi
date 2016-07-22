@@ -95,6 +95,64 @@ describe('State Management', function () {
         expect(kibiState.getEnabledRelations()).to.eql([]);
       });
 
+      it('should emit a relation event when enabling a relation', function (done) {
+        const relation = {
+          dashboards: [ 'a', 'b' ],
+          relation: 'index-a/id/index-b/id'
+        };
+
+        kibiState.on('relation', function (dashboardIds) {
+          expect(dashboardIds).to.eql([ 'a', 'b' ]);
+          done();
+        });
+
+        kibiState.enableRelation(relation);
+      });
+
+      it('should emit a relation event when disabling a relation', function (done) {
+        const relation1 = {
+          dashboards: [ 'a', 'b' ],
+          relation: 'index-a/id/index-b/id'
+        };
+        const relation2 = {
+          dashboards: [ 'c', 'b' ],
+          relation: 'index-b/id/index-c/id'
+        };
+
+        kibiState.enableRelation(relation1);
+        kibiState.enableRelation(relation2);
+
+        kibiState.on('relation', function (dashboardIds) {
+          expect(dashboardIds).to.eql([ 'a', 'b' ]);
+          done();
+        });
+
+        kibiState.disableRelation(relation1);
+      });
+
+      it('should emit a relation event when disabling all relations', function (done) {
+        const relation1 = {
+          dashboards: [ 'a', 'b' ],
+          relation: 'index-a/id/index-b/id'
+        };
+        const relation2 = {
+          dashboards: [ 'c', 'b' ],
+          relation: 'index-b/id/index-c/id'
+        };
+
+        kibiState.enableRelation(relation1);
+        kibiState.enableRelation(relation2);
+
+        kibiState.on('relation', function (dashboardIds) {
+          expect(dashboardIds).to.have.length(3);
+          expect(dashboardIds).to.contain('a');
+          expect(dashboardIds).to.contain('b');
+          expect(dashboardIds).to.contain('c');
+          done();
+        });
+        kibiState.disableAllRelations();
+      });
+
       it('isRelationEnabled', function () {
         const relation1 = {
           dashboards: [ 'a', 'b' ],

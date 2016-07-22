@@ -1,10 +1,11 @@
 define(function (require) {
-  return function RelatedEntitiesAggDefinition(Private, createNotifier, globalState, $rootScope, $timeout, $location) {
+  return function RelatedEntitiesAggDefinition(Private, createNotifier, globalState, $rootScope, $timeout) {
 
     // a bit of css
     require('ui/kibi/styles/external_query_terms_filter.less');
 
     var _ = require('lodash');
+    var urlHelper = Private(require('ui/kibi/helpers/url_helper'));
     var BucketAggType = Private(require('ui/agg_types/buckets/_bucket_agg_type'));
     var createFilter = Private(require('ui/agg_types/buckets/create_filter/filters'));
     var notify = createNotifier({ location: 'External Query Terms Filter Aggregation' });
@@ -29,7 +30,7 @@ define(function (require) {
               return;
             }
 
-            const configurationMode = $location.path().indexOf('/visualize/') === 0;
+            const configurationMode = urlHelper.onVisualizeTab();
             let entityURI;
             // here depends that we are in configuration mode or not
             // pick selected entityURI from different places

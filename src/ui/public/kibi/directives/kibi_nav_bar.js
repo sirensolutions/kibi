@@ -12,7 +12,8 @@ define(function (require) {
 
   require('ui/modules')
   .get('app/dashboard')
-  .directive('kibiNavBar', function ($location, $rootScope, kibiState, config, Private) {
+  .directive('kibiNavBar', function ($rootScope, kibiState, config, Private) {
+    const urlHelper = Private(require('ui/kibi/helpers/url_helper'));
     const ResizeChecker = Private(require('ui/vislib/lib/resize_checker'));
     const kibiNavBarHelper = Private(require('ui/kibi/directives/kibi_nav_bar_helper'));
 
@@ -29,7 +30,7 @@ define(function (require) {
         $scope.dashboardGroups = kibiNavBarHelper.getDashboardGroups();
 
         var removeLocationChangeSuccessHandler = $rootScope.$on('$locationChangeSuccess', function () {
-          $location.path().indexOf('/dashboard') === 0 ? $el.show() : $el.hide();
+          urlHelper.onDashboardTab() ? $el.show() : $el.hide();
         });
 
         $scope.relationalFilterVisible = false;

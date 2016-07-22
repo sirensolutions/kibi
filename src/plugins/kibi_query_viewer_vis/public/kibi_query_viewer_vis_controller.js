@@ -11,8 +11,8 @@ define(function (require) {
 
   module.controller(
     'KibiQueryViewerVisController',
-    function ($rootScope, $scope, $location, globalState, Private, queryEngineClient, createNotifier) {
-
+    function ($rootScope, $scope, globalState, Private, queryEngineClient, createNotifier) {
+      var urlHelper = Private(require('ui/kibi/helpers/url_helper'));
       var notify = createNotifier({
         location: 'Kibi Query Viewer'
       });
@@ -20,7 +20,7 @@ define(function (require) {
       // generate random id to avoid collisions if there are multiple widgets on one dashboard
       $scope.snippetContainerId = kibiUtils.getUuid4();
 
-      const configMode = $location.path().indexOf('/visualize/') !== -1;
+      const configMode = urlHelper.onVisualizeTab();
       $scope.holder = {
         entityURI: '',
         html: ''

@@ -2,9 +2,17 @@ define(function (require) {
   var rison = require('ui/utils/rison');
   var _ = require('lodash');
 
-  return function UrlHelperFactory(savedDashboards, Promise, kbnDefaultAppId, kibiDefaultDashboardId) {
+  return function UrlHelperFactory($location, savedDashboards, Promise, kbnDefaultAppId, kibiDefaultDashboardId) {
     function UrlHelper() {
     }
+
+    UrlHelper.prototype.onVisualizeTab = function () {
+      return $location.path().indexOf('/visualize/') === 0;
+    };
+
+    UrlHelper.prototype.onDashboardTab = function () {
+      return $location.path().indexOf('/dashboard/') === 0;
+    };
 
     // TODO tabs should be taken from chrome.getTabs();
     UrlHelper.prototype.getInitialPath = function (app, tabs) {

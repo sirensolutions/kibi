@@ -154,8 +154,10 @@ describe('Kibi Components', function () {
       });
 
       $rootScope.$watch('label', function (label) {
-        expect(label).to.eql(JSON.stringify([ 'aaa' ]));
-        done();
+        if (label) {
+          expect(label).to.eql(JSON.stringify([ 'aaa' ]));
+          done();
+        }
       });
 
       $rootScope.$emit('kibi:selectedEntities:changed', null);
@@ -179,8 +181,10 @@ describe('Kibi Components', function () {
       });
 
       $rootScope.$watch('label', function (label) {
-        expect(label).to.eql(JSON.stringify({ a: 'b' }));
-        done();
+        if (label) {
+          expect(label).to.eql(JSON.stringify({ a: 'b' }));
+          done();
+        }
       });
 
       $rootScope.$emit('kibi:selectedEntities:changed', null);

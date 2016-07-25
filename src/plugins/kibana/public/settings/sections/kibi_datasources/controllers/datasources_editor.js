@@ -81,9 +81,9 @@ define(function (require) {
           }
         }
 
-        if (kibiUtils.isSQL(datasource.datasourceType)) {
-          const msg = 'Changes in jdbc datasource require application restart. ' +
-            'Please restart kibi and do not forget to set kibi_core.load_jdbc to true.';
+        if (kibiUtils.isJDBC(datasource.datasourceType)) {
+          const msg = 'Changes in a JDBC datasource requires the application to be restarted. ' +
+            'Please restart Kibi and do not forget to set kibi_core.load_jdbc to true.';
           notify.warning(msg);
         }
 

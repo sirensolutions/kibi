@@ -9,8 +9,8 @@ define(function (require) {
 
   require('ui/kibi/directives/kibi_entity_clipboard');
 
-  module.directive('filterBar', function (createNotifier, kibiState, $location, $rootScope, Private,
-                                          Promise, getAppState, globalState, config) {
+  module.directive('filterBar', function (createNotifier, kibiState, $rootScope, Private, Promise, getAppState, globalState, config) {
+    var urlHelper = Private(require('ui/kibi/helpers/url_helper'));
     var joinExplain = Private(require('ui/filter_bar/join_explanation'));
     var mapAndFlattenFilters = Private(require('ui/filter_bar/lib/mapAndFlattenFilters'));
     var mapFlattenAndWrapFilters = Private(require('ui/filter_bar/lib/mapFlattenAndWrapFilters'));
@@ -207,7 +207,7 @@ define(function (require) {
 
         //needed by kibi to show filterbar when kibiEntityClipboard contains an entity
         var getShowKibiEntityClipboard = function () {
-          return globalState.se && globalState.se.length > 0 && $location.path().indexOf('/dashboard') === 0;
+          return globalState.se && globalState.se.length > 0 && urlHelper.onDashboardTab();
         };
         $scope.showKibiEntityClipboard = getShowKibiEntityClipboard();
         var saveWithChangesHandler = function () {

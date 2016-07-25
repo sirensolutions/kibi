@@ -7,7 +7,8 @@ define(function (require) {
 
   module.controller(
     'KibiDataTableVisController',
-    function ($rootScope, $scope, $location, $route, globalState, savedVisualizations, Private, courier) {
+    function ($rootScope, $scope, $route, globalState, savedVisualizations, Private, courier) {
+      var urlHelper = Private(require('ui/kibi/helpers/url_helper'));
       var requestQueue = Private(require('ui/kibi/components/courier/_request_queue_wrapped'));
       var SearchSource = Private(require('ui/courier/data_source/search_source'));
       var filterManager = Private(require('ui/filter_manager'));
@@ -19,7 +20,7 @@ define(function (require) {
 
       $scope.entityURI = '';
 
-      const configMode = $location.path().indexOf('/visualize/') !== -1;
+      const configMode = urlHelper.onVisualizeTab();
       var saveWithChangesHandler = function (diff) {
         if (diff.indexOf('se') !== -1 || diff.indexOf('se_temp') !== -1) {
           if (configMode && globalState.se_temp && globalState.se_temp.length > 0) {

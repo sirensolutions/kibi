@@ -10,7 +10,10 @@ describe('GeoJson Agg Response Converter', function () {
   var esResponse;
   var aggs;
 
-  beforeEach(ngMock.module('kibana'));
+  beforeEach(ngMock.module('kibana', function ($provide) {
+    $provide.constant('kbnDefaultAppId', '');
+    $provide.constant('kibiDefaultDashboardId', '');
+  }));
   beforeEach(ngMock.inject(function (Private) {
     var Vis = Private(require('ui/Vis'));
     var indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));

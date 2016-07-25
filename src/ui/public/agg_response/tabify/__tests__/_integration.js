@@ -9,7 +9,10 @@ describe('tabifyAggResponse Integration', function () {
   var indexPattern;
   var tabifyAggResponse;
 
-  beforeEach(ngMock.module('kibana'));
+  beforeEach(ngMock.module('kibana', function ($provide) {
+    $provide.constant('kbnDefaultAppId', '');
+    $provide.constant('kibiDefaultDashboardId', '');
+  }));
   beforeEach(ngMock.inject(function (Private, $injector) {
     tabifyAggResponse = Private(require('ui/agg_response/tabify/tabify'));
     Vis = Private(require('ui/Vis'));

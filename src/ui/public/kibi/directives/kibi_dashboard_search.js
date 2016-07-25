@@ -5,7 +5,8 @@ define(function (require) {
 
   var app = require('ui/modules').get('app/dashboard');
 
-  app.directive('kibiDashboardSearch', function (Private, $rootScope, $location) {
+  app.directive('kibiDashboardSearch', function ($rootScope, Private) {
+    var urlHelper = Private(require('ui/kibi/helpers/url_helper'));
 
     return {
       restrict: 'E',
@@ -15,7 +16,7 @@ define(function (require) {
 
         $scope.$on('$routeChangeSuccess', function () {
           // check that it should be visible or not
-          $scope.showSearch = $location.path().indexOf('/dashboard') === 0 ? true : false;
+          $scope.showSearch = urlHelper.onDashboardTab();
         });
 
         $scope.filterResults = function () {

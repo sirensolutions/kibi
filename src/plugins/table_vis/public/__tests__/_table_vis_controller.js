@@ -14,7 +14,10 @@ describe('Controller', function () {
   let Vis;
   let fixtures;
 
-  beforeEach(ngMock.module('kibana', 'kibana/table_vis'));
+  beforeEach(ngMock.module('kibana', 'kibana/table_vis', function ($provide) {
+    $provide.constant('kbnDefaultAppId', '');
+    $provide.constant('kibiDefaultDashboardId', '');
+  }));
   beforeEach(ngMock.inject(function ($injector) {
     Private = $injector.get('Private');
     $rootScope = $injector.get('$rootScope');

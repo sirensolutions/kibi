@@ -12,7 +12,10 @@ describe('pointSeriesChartDataFromTable', function () {
   var Table;
   var Vis;
 
-  beforeEach(ngMock.module('kibana'));
+  beforeEach(ngMock.module('kibana', function ($provide) {
+    $provide.constant('kbnDefaultAppId', '');
+    $provide.constant('kibiDefaultDashboardId', '');
+  }));
   beforeEach(ngMock.inject(function (Private) {
     Vis = Private(require('ui/Vis'));
     Table = Private(require('ui/agg_response/tabify/_table'));

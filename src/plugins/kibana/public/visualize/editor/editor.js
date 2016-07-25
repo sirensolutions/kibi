@@ -48,11 +48,9 @@ define(function (require) {
     'kibana/notify',
     'kibana/courier'
   ])
-  .controller('VisEditor', function (
-    $rootScope, globalState, $scope, $route, timefilter, AppState,
-    $location, kbnUrl, $timeout, courier, Private, Promise, createNotifier
-  ) {
-
+  .controller('VisEditor', function ($rootScope, globalState, $scope, $route, timefilter, AppState, kbnUrl, $timeout, courier,
+                                     Private, Promise, createNotifier) {
+    const urlHelper = Private(require('ui/kibi/helpers/url_helper'));
     const angular = require('angular');
     const ConfigTemplate = require('ui/ConfigTemplate');
     const Notifier = require('ui/notify/notifier');
@@ -66,7 +64,7 @@ define(function (require) {
     $scope.holder = {
       entityURI: '',
       entityURIEnabled: false,
-      visible: $location.path().indexOf('/visualize/') !== -1
+      visible: urlHelper.onVisualizeTab()
     };
     $scope.$watch('holder.entityURI', function (entityURI) {
       if (entityURI && $scope.holder.visible) {

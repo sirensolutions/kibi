@@ -5,7 +5,10 @@ describe('get columns', function () {
   var expect = require('expect.js');
   var ngMock = require('ngMock');
 
-  beforeEach(ngMock.module('kibana'));
+  beforeEach(ngMock.module('kibana', function ($provide) {
+    $provide.constant('kbnDefaultAppId', '');
+    $provide.constant('kibiDefaultDashboardId', '');
+  }));
   beforeEach(ngMock.inject(function (Private, $injector) {
     getColumns = Private(require('ui/agg_response/tabify/_get_columns'));
     Vis = Private(require('ui/Vis'));

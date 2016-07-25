@@ -15,7 +15,10 @@ describe('buildHierarchicalData()', function () {
     var vis;
     var results;
 
-    beforeEach(ngMock.module('kibana'));
+    beforeEach(ngMock.module('kibana', function ($provide) {
+      $provide.constant('kbnDefaultAppId', '');
+      $provide.constant('kibiDefaultDashboardId', '');
+    }));
 
     beforeEach(ngMock.inject(function (Private) {
       Vis = Private(require('ui/Vis'));

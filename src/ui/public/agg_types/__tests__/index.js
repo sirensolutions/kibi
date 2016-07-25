@@ -12,7 +12,10 @@ describe('AggTypesComponent', function () {
     var bucketAggs;
     var BucketAggType;
 
-    beforeEach(ngMock.module('kibana'));
+    beforeEach(ngMock.module('kibana', function ($provide) {
+      $provide.constant('kbnDefaultAppId', '');
+      $provide.constant('kibiDefaultDashboardId', '');
+    }));
     beforeEach(ngMock.inject(function (Private) {
       bucketAggs = Private(require('ui/agg_types/index')).byType.buckets;
       BucketAggType = Private(require('ui/agg_types/buckets/_bucket_agg_type'));
@@ -29,7 +32,10 @@ describe('AggTypesComponent', function () {
     var metricAggs;
     var MetricAggType;
 
-    beforeEach(ngMock.module('kibana'));
+    beforeEach(ngMock.module('kibana', function ($provide) {
+      $provide.constant('kbnDefaultAppId', '');
+      $provide.constant('kibiDefaultDashboardId', '');
+    }));
     beforeEach(ngMock.inject(function (Private) {
       metricAggs = Private(require('ui/agg_types/index')).byType.metrics;
       MetricAggType = Private(require('ui/agg_types/metrics/MetricAggType'));

@@ -6,7 +6,10 @@ describe('Histogram Agg', function () {
   describe('ordered', function () {
     var histogram;
 
-    beforeEach(ngMock.module('kibana'));
+    beforeEach(ngMock.module('kibana', function ($provide) {
+      $provide.constant('kbnDefaultAppId', '');
+      $provide.constant('kibiDefaultDashboardId', '');
+    }));
     beforeEach(ngMock.inject(function (Private) {
       histogram = Private(require('ui/agg_types/index')).byName.histogram;
     }));
@@ -24,7 +27,10 @@ describe('Histogram Agg', function () {
   describe('params', function () {
     var paramWriter;
 
-    beforeEach(ngMock.module('kibana'));
+    beforeEach(ngMock.module('kibana', function ($provide) {
+      $provide.constant('kbnDefaultAppId', '');
+      $provide.constant('kibiDefaultDashboardId', '');
+    }));
     beforeEach(ngMock.inject(function (Private) {
       var AggParamWriter = Private(require('../AggParamWriter'));
       paramWriter = new AggParamWriter({ aggType: 'histogram' });

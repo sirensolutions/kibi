@@ -8,7 +8,10 @@ describe('makeFakeXAspect', function () {
   var expect = require('expect.js');
   var ngMock = require('ngMock');
 
-  beforeEach(ngMock.module('kibana'));
+  beforeEach(ngMock.module('kibana', function ($provide) {
+    $provide.constant('kbnDefaultAppId', '');
+    $provide.constant('kibiDefaultDashboardId', '');
+  }));
   beforeEach(ngMock.inject(function (Private) {
     Vis = Private(require('ui/Vis'));
     AggConfig = Private(require('ui/Vis/AggConfig'));

@@ -15,7 +15,10 @@ describe('bucketCountBetween util', function () {
     return ((n = +n) || 1 / n) < 0;
   }
 
-  beforeEach(ngMock.module('kibana'));
+  beforeEach(ngMock.module('kibana', function ($provide) {
+    $provide.constant('kbnDefaultAppId', '');
+    $provide.constant('kibiDefaultDashboardId', '');
+  }));
   beforeEach(ngMock.inject(function (Private) {
     indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
     Vis = Private(require('ui/Vis'));

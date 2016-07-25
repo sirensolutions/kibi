@@ -9,7 +9,10 @@ describe('AggConfig', function () {
   var indexPattern;
   var fieldFormat;
 
-  beforeEach(ngMock.module('kibana'));
+  beforeEach(ngMock.module('kibana', function ($provide) {
+    $provide.constant('kbnDefaultAppId', '');
+    $provide.constant('kibiDefaultDashboardId', '');
+  }));
   beforeEach(ngMock.inject(function (Private) {
     Vis = Private(require('ui/Vis'));
     AggType = Private(require('ui/agg_types/AggType'));

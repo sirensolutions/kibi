@@ -12,7 +12,10 @@ describe('AggConfigs', function () {
   var indexPattern;
   var Schemas;
 
-  beforeEach(ngMock.module('kibana'));
+  beforeEach(ngMock.module('kibana', function ($provide) {
+    $provide.constant('kbnDefaultAppId', '');
+    $provide.constant('kibiDefaultDashboardId', '');
+  }));
   beforeEach(ngMock.inject(function (Private) {
     // replace the AggConfig module with a spy
     var RealAggConfigPM = require('ui/Vis/AggConfig');

@@ -8,7 +8,10 @@ describe('Regex', function () {
   var Vis;
   var indexPattern;
 
-  beforeEach(ngMock.module('kibana'));
+  beforeEach(ngMock.module('kibana', function ($provide) {
+    $provide.constant('kbnDefaultAppId', '');
+    $provide.constant('kibiDefaultDashboardId', '');
+  }));
   // fetch out deps
   beforeEach(ngMock.inject(function (Private) {
     BaseAggParam = Private(require('ui/agg_types/param_types/base'));

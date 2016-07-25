@@ -1,5 +1,5 @@
 define(function (require) {
-  return function DashboardGroupHelperFactory(kbnUrl, kibiState, Private, savedDashboards, savedDashboardGroups, Promise) {
+  return function DashboardGroupHelperFactory($timeout, kbnUrl, kibiState, Private, savedDashboards, savedDashboardGroups, Promise) {
     var _ = require('lodash');
     var countHelper = Private(require('ui/kibi/helpers/count_helper/count_helper'));
     var kibiUtils = require('kibiutils');
@@ -63,18 +63,23 @@ define(function (require) {
       });
     };
 
+    let lastEventTimer;
     DashboardGroupHelper.prototype._getOnClickForDashboardInGroup = function (dashboardGroups, dashboardId, groupId) {
-      // here save which one was selected for
-      if (groupId) {
-        this.setSelectedDashboardAndActiveGroup(dashboardGroups, dashboardId, groupId);
-        kibiState.setSelectedDashboardId(groupId, dashboardId);
-        kibiState.save();
-      }
+      $timeout.cancel(lastEventTimer);
+      lastEventTimer = $timeout(() => {
+        // here save which one was selected for
+        if (groupId) {
+          this.setSelectedDashboardAndActiveGroup(dashboardGroups, dashboardId, groupId);
+          kibiState.setSelectedDashboardId(groupId, dashboardId);
+          kibiState.save();
+        }
 
-      return kibiState.saveAppState()
-      .then(() => {
-        kbnUrl.change('/dashboard/{{id}}', {id: dashboardId});
-      });
+        return kibiState.saveAppState()
+        .then(() => {
+          kbnUrl.change('/dashboard/{{id}}', {id: dashboardId});
+        });
+      }, 750);
+      return lastEventTimer;
     };
 
     DashboardGroupHelper.prototype._computeGroupsFromSavedDashboardGroups = function (currentDashboardId) {

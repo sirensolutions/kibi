@@ -933,10 +933,19 @@ define(function (require) {
       if (!this.isRelationEnabled(relation)) {
         this[this._properties.enabled_relations].push(relation);
       }
+      this.emit('relation', relation.dashboards);
     };
 
     KibiState.prototype.disableAllRelations = function () {
+      const dashboardIds = _(this.getEnabledRelations())
+      .map((relation) => relation.dashboards)
+      .flatten()
+      .uniq()
+      .value();
       this[this._properties.enabled_relations] = [];
+      if (dashboardIds.length) {
+        this.emit('relation', dashboardIds);
+      }
     };
 
     KibiState.prototype.disableRelation = function (relation) {
@@ -946,6 +955,7 @@ define(function (require) {
       const index = _.findIndex(this[this._properties.enabled_relations], relation);
       if (index !== -1) {
         this[this._properties.enabled_relations].splice(index, 1);
+        this.emit('relation', relation.dashboards);
       }
     };
 

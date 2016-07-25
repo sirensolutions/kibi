@@ -168,7 +168,6 @@ describe('Kibi Directives', function () {
         const stub = sinon.stub(kibiNavBarHelper, 'updateAllCounts');
 
         [
-          kibiState._properties.enabled_relations,
           kibiState._properties.groups
         ].forEach(function (property) {
           kibiState.emit('save_with_changes', [ property ]);
@@ -185,6 +184,15 @@ describe('Kibi Directives', function () {
         $rootScope.$digest();
 
         expect(stub.calledWith([ 'dashboard2' ], 'KibiState reset')).to.be(true);
+      });
+
+      it('should update counts of dashboards that got changed on kibiState relation event', function () {
+        const stub = sinon.stub(kibiNavBarHelper, 'updateAllCounts');
+
+        kibiState.emit('relation', [ 'dashboard2' ]);
+        $rootScope.$digest();
+
+        expect(stub.calledWith([ 'dashboard2' ], 'KibiState enabled relations changed')).to.be(true);
       });
 
       it('should update all counts on globalState changes', function () {
@@ -269,7 +277,6 @@ describe('Kibi Directives', function () {
         const stub = sinon.stub(kibiNavBarHelper, 'updateAllCounts');
 
         [
-          kibiState._properties.enabled_relations,
           kibiState._properties.groups
         ].forEach(function (property) {
           kibiState.emit('save_with_changes', [ property ]);

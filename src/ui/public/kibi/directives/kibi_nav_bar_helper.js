@@ -4,7 +4,7 @@ define(function (require) {
   const angular = require('angular');
   const _ = require('lodash');
 
-  return function KibiNavBarHelperFactory($timeout, kibiState, globalState, getAppState, createNotifier, Private, $http, Promise,
+  return function KibiNavBarHelperFactory(kibiState, globalState, getAppState, createNotifier, Private, $http, Promise,
                                           $rootScope, savedDashboards) {
 
     function KibiNavBarHelper() {
@@ -25,6 +25,7 @@ define(function (require) {
       });
       kibiState.on('save_with_changes', (diff) => updateCountsOnKibiStateChange.call(this, diff));
       kibiState.on('reset', (dashboardsIds) => updateCountsOnKibiStateReset.call(this, dashboardsIds));
+      kibiState.on('relation', (dashboardsIds) => updateCountsOnKibiStateRelation.call(this, dashboardsIds));
 
       // everywhere use this event !!! to be consistent
       // make a comment that it was required because not all components can listen to
@@ -143,14 +144,16 @@ define(function (require) {
     };
 
     // debounce count queries
-    let lastEventTimer;
+    //let lastEventTimer;
     const updateCounts = function (dashboardsIds, reason) {
       if (console) {
         console.log(`Counts will be updated on dashboards ${JSON.stringify(dashboardsIds, null, ' ')} because: [${reason}]`);
       }
-      $timeout.cancel(lastEventTimer);
-      lastEventTimer = $timeout(() => _fireUpdateAllCounts.call(this, getGroupIndexes.call(this, dashboardsIds), reason), 750);
-      return lastEventTimer;
+      // TODO: https://github.com/sirensolutions/kibi-internal/issues/1273
+      //$timeout.cancel(lastEventTimer);
+      //lastEventTimer = $timeout(() => _fireUpdateAllCounts.call(this, getGroupIndexes.call(this, dashboardsIds), reason), 750);
+      //return lastEventTimer;
+      return _fireUpdateAllCounts.call(this, getGroupIndexes.call(this, dashboardsIds), reason);
     };
 
     KibiNavBarHelper.prototype.updateAllCounts = function (dashboardsIds, reason) {
@@ -204,6 +207,11 @@ define(function (require) {
       }
     };
 
+    const updateCountsOnKibiStateRelation = function (ids) {
+      const dashboardsIds = _(ids).map((dashboardId) => addAllConnected.call(this, dashboardId)).flatten().uniq().value();
+      this.updateAllCounts(dashboardsIds, 'KibiState enabled relations changed');
+    };
+
     const updateCountsOnKibiStateReset = function (dashboardsIds) {
       this.updateAllCounts(dashboardsIds, 'KibiState reset');
     };
@@ -214,9 +222,9 @@ define(function (require) {
       if (!currentDashboard) {
         return;
       }
-      if (diff.indexOf(kibiState._properties.enabled_relations) !== -1 || diff.indexOf(kibiState._properties.groups) !== -1) {
+      if (diff.indexOf(kibiState._properties.groups) !== -1) {
         const dashboardsIds = addAllConnected.call(this, currentDashboard);
-        this.updateAllCounts(dashboardsIds, 'KibiState change ' + angular.toJson(diff));
+        this.updateAllCounts(dashboardsIds, `KibiState change ["${kibiState._properties.groups}"]`);
       }
     };
 
@@ -227,10 +235,11 @@ define(function (require) {
       if (this.removeAutorefreshHandler) {
         this.removeAutorefreshHandler();
       }
-      $timeout.cancel(lastEventTimer);
+      //$timeout.cancel(lastEventTimer);
 
       kibiState.off('save_with_changes', (diff) => updateCountsOnKibiStateChange.call(this, diff));
       kibiState.off('reset', (dashboardsIds) => updateCountsOnKibiStateReset.call(this, dashboardsIds));
+      kibiState.off('relation', (dashboardsIds) => updateCountsOnKibiStateRelation.call(this, dashboardsIds));
       globalState.off('save_with_changes', (diff) => updateCountsOnGlobalStateChange.call(this, diff));
       if (this.appState) {
         this.appState.off('save_with_changes', (diff) => updateCountsOnAppStateChange.call(this, diff));

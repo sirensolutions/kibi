@@ -43,18 +43,15 @@ define(function (require) {
                   } else if (doc.data._source) {
                     // else try to find it in _source
                     var getProperty = _.property(column);
-                    var value = getProperty(doc.data._source);
-                    if (value !== null && typeof value === 'object') {
-                      notify.warning('Entity label taken from [' + $scope.entityURI + '] is an object');
-                    } else if (Object.prototype.toString.call(value) === '[object Array]') {
-                      notify.warning('Entity label taken from [' + $scope.entityURI + '] is an array');
-                    } else {
-                      value = _.trunc(value, {
-                        length: 65,
-                        separator: ' '
-                      });
-                      $scope.label = value;
+                    var value = getProperty(doc.data._source) || ' - ';
+                    if (value.constructor === Object || value.constructor === Array) {
+                      value = JSON.stringify(value);
                     }
+                    value = _.trunc(value, {
+                      length: 65,
+                      separator: ' '
+                    });
+                    $scope.label = value;
                   } else {
                     notify.warning('Could not get entity label from [' + $scope.entityURI + ']');
                   }

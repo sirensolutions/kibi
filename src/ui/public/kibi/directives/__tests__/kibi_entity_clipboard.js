@@ -147,14 +147,14 @@ describe('Kibi Components', function () {
         _source: {
           a: {
             b: {
-              'c with spaces': []
+              'c with spaces': [ 'aaa' ]
             }
           }
         }
       });
 
       $rootScope.$watch('label', function (label) {
-        expect(label).to.eql(undefined);
+        expect(label).to.eql(JSON.stringify([ 'aaa' ]));
         done();
       });
 
@@ -172,14 +172,14 @@ describe('Kibi Components', function () {
         _source: {
           a: {
             b: {
-              'c with spaces': {}
+              'c with spaces': { a: 'b' }
             }
           }
         }
       });
 
       $rootScope.$watch('label', function (label) {
-        expect(label).to.eql(undefined);
+        expect(label).to.eql(JSON.stringify({ a: 'b' }));
         done();
       });
 

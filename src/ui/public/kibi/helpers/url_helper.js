@@ -11,7 +11,7 @@ define(function (require) {
     };
 
     UrlHelper.prototype.onDashboardTab = function () {
-      return $location.path().indexOf('/dashboard/') === 0;
+      return $location.path().indexOf('/dashboard') === 0;
     };
 
     // TODO tabs should be taken from chrome.getTabs();

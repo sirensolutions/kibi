@@ -6,7 +6,7 @@
       <ul class="nav nav-tabs" style="border-bottom: none;">
         <li role="presentation"
             ng-class="{active: group.active === true}"
-            ng-repeat="group in dashboardGroups" ng-show="!group.hide">
+            ng-repeat="group in dashboardGroups | orderBy: 'priority'" ng-show="!group.hide">
           <a ng-click="group.onClick(dashboardGroups)">
             <i  ng-if="group.iconCss" class="icon {{group.iconCss}}"></i>
             <img class="icon" ng-if="group.iconUrl" ng-src="{{group.iconUrl}}"/>

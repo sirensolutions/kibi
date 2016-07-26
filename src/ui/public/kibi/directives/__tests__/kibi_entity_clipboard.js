@@ -147,15 +147,17 @@ describe('Kibi Components', function () {
         _source: {
           a: {
             b: {
-              'c with spaces': []
+              'c with spaces': [ 'aaa' ]
             }
           }
         }
       });
 
       $rootScope.$watch('label', function (label) {
-        expect(label).to.eql(undefined);
-        done();
+        if (label) {
+          expect(label).to.eql(JSON.stringify([ 'aaa' ]));
+          done();
+        }
       });
 
       $rootScope.$emit('kibi:selectedEntities:changed', null);
@@ -172,15 +174,17 @@ describe('Kibi Components', function () {
         _source: {
           a: {
             b: {
-              'c with spaces': {}
+              'c with spaces': { a: 'b' }
             }
           }
         }
       });
 
       $rootScope.$watch('label', function (label) {
-        expect(label).to.eql(undefined);
-        done();
+        if (label) {
+          expect(label).to.eql(JSON.stringify({ a: 'b' }));
+          done();
+        }
       });
 
       $rootScope.$emit('kibi:selectedEntities:changed', null);

@@ -42,7 +42,7 @@ describe('Kibi Components', function () {
             return globalState;
           });
         }
-      );
+        );
 
       ngMock.inject(function (Private, _$rootScope_, $compile, $injector) {
         $rootScope = _$rootScope_;
@@ -94,6 +94,31 @@ describe('Kibi Components', function () {
       $rootScope.$apply();
     });
 
+    it('should truncate long document label', function (done) {
+      init(false, ['index/type/id/a.b.c with spaces']);
+
+      $httpBackend.whenGET('/elasticsearch/index/type/id').respond(200, {
+        _source: {
+          a: {
+            b: {
+              'c with spaces': 'Previous  |  Next Image 1 of 5 Beam me up, Scotty... Videoconferencing has'
+            }
+          }
+        }
+      });
+
+      $rootScope.$watch('label', function (label) {
+        if (label) {
+          expect(label).to.equal('Previous  |  Next Image 1 of 5 Beam me up, Scotty......');
+          done();
+        }
+      });
+
+      $rootScope.$emit('kibi:selectedEntities:changed', null);
+      $httpBackend.flush();
+      $rootScope.$apply();
+    });
+
     it('selected document with label from meta field column', function (done) {
       init(false, ['index/type/id/_type']);
 
@@ -122,15 +147,17 @@ describe('Kibi Components', function () {
         _source: {
           a: {
             b: {
-              'c with spaces': []
+              'c with spaces': [ 'aaa' ]
             }
           }
         }
       });
 
       $rootScope.$watch('label', function (label) {
-        expect(label).to.eql(undefined);
-        done();
+        if (label) {
+          expect(label).to.eql(JSON.stringify([ 'aaa' ]));
+          done();
+        }
       });
 
       $rootScope.$emit('kibi:selectedEntities:changed', null);
@@ -147,15 +174,17 @@ describe('Kibi Components', function () {
         _source: {
           a: {
             b: {
-              'c with spaces': {}
+              'c with spaces': { a: 'b' }
             }
           }
         }
       });
 
       $rootScope.$watch('label', function (label) {
-        expect(label).to.eql(undefined);
-        done();
+        if (label) {
+          expect(label).to.eql(JSON.stringify({ a: 'b' }));
+          done();
+        }
       });
 
       $rootScope.$emit('kibi:selectedEntities:changed', null);

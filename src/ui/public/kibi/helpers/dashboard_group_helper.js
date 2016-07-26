@@ -27,15 +27,6 @@ define(function (require) {
       });
     };
 
-    var sortByPriority = function (dashboardGroups) {
-      dashboardGroups.sort(function (a, b) {
-        if (a.priority && b.priority) {
-          return a.priority - b.priority;
-        }
-        return 0;
-      });
-    };
-
     DashboardGroupHelper.prototype.shortenDashboardName = function (groupTitle, dashboardTitle) {
       var g = groupTitle.toLowerCase();
       var d = dashboardTitle.toLowerCase();
@@ -170,8 +161,6 @@ define(function (require) {
             return Promise.reject(new Error(fail));
           }
 
-          sortByPriority(dashboardGroups1);
-
           return dashboardGroups1;
         });
       });
@@ -197,7 +186,8 @@ define(function (require) {
       var self = this;
       // first create array of dashboards already used in dashboardGroups1
       var dashboardsInGroups = self._getListOfDashboardsFromGroups(dashboardGroups1);
-      let highestPriority = dashboardGroups1.length ? dashboardGroups1[dashboardGroups1.length - 1].priority : 0;
+      let highestGroup = _.max(dashboardGroups1, 'priority');
+      let highestPriority = highestGroup && highestGroup.priority || 0;
 
       return kibiState._getDashboardAndSavedSearchMetas(undefined, true).then(function (results) {
         const dashboardDefs = _.map(results, function ({ savedDash, savedSearchMeta }) {

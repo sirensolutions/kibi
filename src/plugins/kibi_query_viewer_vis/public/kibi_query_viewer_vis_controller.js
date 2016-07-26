@@ -32,11 +32,18 @@ define(function (require) {
         $scope.holder.entityURI = '';
       }
 
-      $scope.$watch(['holder.entityURI', 'vis.params.queryOptions'], function () {
-        if ($scope.vis && $scope.vis.params.queryOptions) {
+      $scope.$watch(function (myscope) {
+        return [
+          _.map(myscope.vis.params.queryOptions, 'templateId'),
+          _.map(myscope.vis.params.queryOptions, '_label'),
+          _.map(myscope.vis.params.queryOptions, 'queryId'),
+          myscope.holder.entityURI
+        ];
+      }, function () {
+        if ($scope.vis && $scope.vis.params.queryOptions && $scope.vis.params.queryOptions.length) {
           $scope.renderTemplates();
         }
-      });
+      }, true);
 
       var saveWithChangesHandler = function (diff) {
         if (diff.indexOf('entityDisabled') !== -1 || diff.indexOf('se') !== -1 || diff.indexOf('se_temp') !== -1) {

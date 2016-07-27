@@ -145,7 +145,7 @@ define(function (require) {
         }));
 
         $scope.$watch('searchSource', prereq(function (searchSource) {
-          // kibi: get the saved search associated with the current dashboard, in order to have the corrent search_source
+          // kibi: get the saved search associated with the current dashboard, in order to have the correct search_source
           if (searchSource && !$scope.vis.type.requiresSearch) {
             $scope.searchSource.disable();
             savedDashboards.find().then(function (resp) {

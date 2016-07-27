@@ -1260,6 +1260,13 @@ describe('State Management', function () {
             }
           },
           {
+            id: 'dashboard1',
+            title: 'dashboard1',
+            kibanaSavedObjectMeta: {
+              searchSourceJSON: JSON.stringify({filter:[]})
+            }
+          },
+          {
             id: 'time-testing-2',
             title: 'time testing 2',
             timeRestore: true,
@@ -1325,6 +1332,25 @@ describe('State Management', function () {
           });
           done();
         }).catch(done);
+      });
+
+      it('should emit a reset_app_state_query event if the query got changed', function (done) {
+        appState.id = 'dashboard1';
+        appState.query = {
+          query_string: {
+            query: 'web'
+          }
+        };
+        kibiState._setDashboardProperty('Articles', kibiState._properties.query, {
+          query_string: {
+            query: 'web'
+          }
+        });
+
+        kibiState.on('reset_app_state_query', function () {
+          done();
+        });
+        kibiState.resetFiltersQueriesTimes();
       });
 
       it('should emit a reset event with the IDs of dashboards which query got changed', function (done) {

@@ -13,8 +13,8 @@ define(function (require) {
 
   require('ui/modules')
   .get('kibana/kibi_state')
-  .service('kibiState', function (savedSearches, globalState, timefilter, $route, Promise, getAppState, savedDashboards, $rootScope,
-                                  indexPatterns, elasticsearchPlugins, kibiEnterpriseEnabled, $location, config, Private, createNotifier) {
+  .service('kibiState', function (savedSearches, timefilter, $route, Promise, getAppState, savedDashboards, $rootScope, indexPatterns,
+                                  globalState, elasticsearchPlugins, kibiEnterpriseEnabled, $location, config, Private, createNotifier) {
     const State = Private(require('ui/state_management/state'));
     const notify = createNotifier({ location: 'Kibi State'});
 
@@ -141,10 +141,17 @@ define(function (require) {
 
               // reset appstate
               if (appState && dashboard.id === appState.id) {
+                let queryChanged = false;
                 // filters
                 appState.filters = filters;
+
                 // query
-                appState.query = query && query.query || {query_string: {analyze_wildcard: true, query: '*'}};
+                const origQuery = query && query.query || {query_string: {analyze_wildcard: true, query: '*'}};
+                if (!angular.equals(origQuery, appState.query)) {
+                  queryChanged = true;
+                }
+                appState.query = origQuery;
+
                 // time
                 if (dashboard.timeRestore && dashboard.timeFrom && dashboard.timeTo) {
                   timefilter.time.mode = dashboard.timeMode;
@@ -154,7 +161,13 @@ define(function (require) {
                   // These can be date math strings or moments.
                   timefilter.time = timeDefaults;
                 }
-                appState.save();
+                if (queryChanged) {
+                  // this will save the appstate and update the current searchsource
+                  // This is only needed for changes on query, since the query needs to be added to the searchsource
+                  this.emit('reset_app_state_query');
+                } else {
+                  appState.save();
+                }
               }
               // reset kibistate
               let modified = false;
@@ -359,6 +372,23 @@ define(function (require) {
     };
 
     /**
+     * Copied from 'ui/filter_bar/query_filter'.
+     * Rids filter list of null values and replaces state if any nulls are found.
+     * Work around for https://github.com/elastic/kibana/issues/5896.
+     */
+    function validateStateFilters(state) {
+      if (!state.filters) {
+        return [];
+      }
+      var compacted = _.compact(state.filters);
+      if (state.filters.length !== compacted.length) {
+        state.filters = compacted;
+        state.replace();
+      }
+      return state.filters;
+    }
+
+    /**
      * Returns the current set of filters for the given dashboard.
      * If pinned is true, then the pinned filters are added to the returned array.
      * If disabled is true, then the disabled filters are added to the returned array.
@@ -367,14 +397,14 @@ define(function (require) {
       let filters;
 
       if (appState && this._getCurrentDashboardId() === dashboardId) {
-        filters = appState.filters && _.cloneDeep(appState.filters) || [];
+        filters = _.cloneDeep(validateStateFilters(appState));
       } else {
         const kibiStateFilters = this._getDashboardProperty(dashboardId, this._properties.filters);
         filters = kibiStateFilters && _.cloneDeep(kibiStateFilters) || [];
       }
 
       if (pinned) {
-        filters.push(..._.map(globalState.filters, (f) => _.omit(f, ['$state', '$$hashKey'])));
+        filters.push(..._.map(validateStateFilters(globalState), (f) => _.omit(f, ['$state', '$$hashKey'])));
       }
 
       // get the filters from the search meta

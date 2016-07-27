@@ -16,6 +16,7 @@ define(function (require) {
     const notify = createNotifier({
       location: 'Kibi Relational filter'
     });
+    const appState = getAppState();
 
     const kibiSequentialJoinVisHelper = Private(require('ui/kibi/helpers/kibi_sequential_join_vis_helper'));
     const currentDashboardId = kibiState._getCurrentDashboardId();
@@ -145,19 +146,13 @@ define(function (require) {
 
     var off = $rootScope.$on('kibi:dashboard:changed', updateButtons.bind(this));
 
-    var appState;
     var updateCountsOnAppStateChange = function (diff) {
       if (diff.indexOf('query') === -1 && diff.indexOf('filters') === -1) {
         return;
       }
       updateButtons.call(this);
     };
-    var removeGetAppStateHandler = $rootScope.$watch(getAppState, (as) => {
-      if (as) {
-        appState = as;
-        appState.on('save_with_changes', updateCountsOnAppStateChange.bind(this));
-      }
-    });
+    appState.on('save_with_changes', updateCountsOnAppStateChange.bind(this));
 
     $scope.$on('$destroy', function () {
       off();

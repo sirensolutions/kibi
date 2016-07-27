@@ -126,7 +126,7 @@ define(function (require) {
         });
 
         const updateRelationalPanelOnSave = function (diff) {
-          if (diff.indexOf(kibiState._properties.enabled_relations) !== -1 && !kibiState.getEnabledRelations()) {
+          if (diff.indexOf(kibiState._properties.enabled_relations) !== -1 && !kibiState.getEnabledRelations().length) {
             _initScope();
             _initPanel();
           }

@@ -1,6 +1,5 @@
 define(function (require) {
 
-  const module = require('ui/modules').get('kibana/kibi_sequential_join_vis', ['kibana']);
   const _ = require('lodash');
   const angular = require('angular');
   const chrome = require('ui/chrome');
@@ -8,14 +7,16 @@ define(function (require) {
   require('ui/kibi/directives/kibi_select');
   require('ui/kibi/directives/kibi_array_param');
 
-  module.controller('KibiSequentialJoinVisController', function (kibiState, $scope, $rootScope, Private, $http, createNotifier, Promise) {
+  require('ui/modules')
+  .get('kibana/kibi_sequential_join_vis', ['kibana'])
+  .controller('KibiSequentialJoinVisController', function (getAppState, kibiState, $scope, $rootScope, Private, $http, createNotifier,
+                                                           Promise) {
     const urlHelper = Private(require('ui/kibi/helpers/url_helper'));
-
-    $scope.configMode = urlHelper.onVisualizeTab();
 
     const notify = createNotifier({
       location: 'Kibi Relational filter'
     });
+    const appState = getAppState();
 
     const kibiSequentialJoinVisHelper = Private(require('ui/kibi/helpers/kibi_sequential_join_vis_helper'));
     const currentDashboardId = kibiState._getCurrentDashboardId();
@@ -26,7 +27,7 @@ define(function (require) {
 
     // Update the counts on each button of the related filter
     var _updateCounts = function (buttons, dashboardId) {
-      if ($scope.configMode || !buttons || !buttons.length) {
+      if (urlHelper.onVisualizeTab() || !buttons || !buttons.length) {
         return Promise.resolve([]);
       }
 
@@ -79,7 +80,7 @@ define(function (require) {
 
     var _constructButtons = function () {
       $scope.vis.error = '';
-      if (!$scope.configMode) {
+      if (!urlHelper.onVisualizeTab()) {
         return kibiState._getDashboardAndSavedSearchMetas([ currentDashboardId ]).then(([ { savedDash, savedSearchMeta } ]) => {
           const index = savedSearchMeta.index;
           const buttons = kibiSequentialJoinVisHelper.constructButtonsArray($scope.vis.params.buttons, index);
@@ -100,24 +101,24 @@ define(function (require) {
       }
     };
 
-    var off = $rootScope.$on('kibi:dashboard:changed', function (event, dashId) {
-      _updateCounts($scope.buttons, currentDashboardId);
-    });
-    $scope.$on('$destroy', off);
+    /*
+     * Update counts in reaction to events
+     */
 
-    // when autoupdate is on we detect the refresh here
-    $scope.$watch('esResponse', function (resp) {
-      if (!resp || $scope.configMode) {
+    var updateButtons = function () {
+      if (urlHelper.onVisualizeTab()) {
         return;
       }
+
+      const self = this;
       let promise;
       if (!$scope.buttons || !$scope.buttons.length) {
-        promise = _constructButtons();
+        promise = _constructButtons.call(self);
       } else {
         promise = Promise.resolve($scope.buttons);
       }
       promise
-      .then((buttons) => _updateCounts(buttons, currentDashboardId))
+      .then((buttons) => _updateCounts.call(self, buttons, currentDashboardId))
       .then((buttons) => {
         // http://stackoverflow.com/questions/20481327/data-is-not-getting-updated-in-the-view-after-promise-is-resolved
         // assign data to $scope.buttons once the promises are done
@@ -130,7 +131,9 @@ define(function (require) {
             targetIndexPatternId: this.sourceIndexPatternId,
             redirectToDashboard: currentDashboardId
           };
-          return _updateCounts([ virtualButton ], this.redirectToDashboard).then(() => virtualButton.targetCount).catch(notify.error);
+          return _updateCounts.call(self, [ virtualButton ], this.redirectToDashboard)
+          .then(() => virtualButton.targetCount)
+          .catch(notify.error);
         };
         for (let i = 0; i < buttons.length; i++) {
           buttons[i].getSourceCount = getSourceCount;
@@ -139,10 +142,36 @@ define(function (require) {
         }
       })
       .catch(notify.error);
+    };
+
+    var off = $rootScope.$on('kibi:dashboard:changed', updateButtons.bind(this));
+
+    var updateCountsOnAppStateChange = function (diff) {
+      if (diff.indexOf('query') === -1 && diff.indexOf('filters') === -1) {
+        return;
+      }
+      updateButtons.call(this);
+    };
+    appState.on('save_with_changes', updateCountsOnAppStateChange.bind(this));
+
+    $scope.$on('$destroy', function () {
+      off();
+      appState.off('save_with_changes', updateCountsOnAppStateChange.bind(this));
+    });
+
+    // when autoupdate is on we detect the refresh here
+    $scope.$watch('esResponse', function (resp) {
+      if (!resp) {
+        return;
+      }
+      updateButtons();
     });
 
     $scope.$watch('vis.params.buttons', function () {
       _constructButtons();
     }, true);
+
+    // init
+    updateButtons();
   });
 });

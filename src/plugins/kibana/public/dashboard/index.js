@@ -217,6 +217,13 @@ define(function (require) {
           chrome.addApplicationClass(theme);
         }
 
+        // update root source on kibiState reset
+        $scope.$listen(kibiState, 'reset_app_state_query', function () {
+          updateQueryOnRootSource();
+          $state.save();
+          $scope.refresh();
+        });
+
         // update root source when filters update
         $scope.$listen(queryFilter, 'update', function () {
           updateQueryOnRootSource();

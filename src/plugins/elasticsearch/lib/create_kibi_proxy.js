@@ -35,9 +35,7 @@ module.exports = function createProxy(server, method, route, config) {
 
               server.log(
                 ['debug', 'kibi_proxy', 'raw kibi query'],
-                '\n-------------------------\n' +
-                Buffer.concat(chunks).toString() + '\n' +
-                '-------------------------'
+                `\n-------------------------\n${req.url}\n${Buffer.concat(chunks).toString()}\n-------------------------`
               );
 
               /* Manipulate a set of queries, at the end of which the resulting queries

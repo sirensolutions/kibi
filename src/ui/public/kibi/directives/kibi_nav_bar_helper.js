@@ -36,8 +36,8 @@ define(function (require) {
           return;
         }
 
-        const dashboardsIds = addAllConnected.call(this, currentDashboard);
-        this.updateAllCounts(dashboardsIds, 'courier:searchRefresh event');
+        // refresh all tabs count
+        this.updateAllCounts(null, 'courier:searchRefresh event', true);
       });
     }
 
@@ -53,7 +53,7 @@ define(function (require) {
      */
 
     let lastFiredMultiCountQuery;
-    const _fireUpdateAllCounts = function (groupIndexesToUpdate, reason) {
+    const _fireUpdateAllCounts = function (groupIndexesToUpdate, reason, forceUpdate = false) {
       const self = this;
 
       let promises  = [];
@@ -82,7 +82,7 @@ define(function (require) {
           }
         });
 
-        if (query && lastFiredMultiCountQuery !== query) {
+        if (forceUpdate || (query && lastFiredMultiCountQuery !== query)) {
           lastFiredMultiCountQuery = query;
 
           //Note: ?getCountsOnTabs has no meaning, it is just useful to filter when inspecting requests
@@ -145,7 +145,7 @@ define(function (require) {
 
     // debounce count queries
     //let lastEventTimer;
-    const updateCounts = function (dashboardsIds, reason) {
+    const updateCounts = function (dashboardsIds, reason, forceUpdate = false) {
       if (console) {
         console.log(`Counts will be updated on dashboards ${JSON.stringify(dashboardsIds, null, ' ')} because: [${reason}]`);
       }
@@ -153,18 +153,18 @@ define(function (require) {
       //$timeout.cancel(lastEventTimer);
       //lastEventTimer = $timeout(() => _fireUpdateAllCounts.call(this, getGroupIndexes.call(this, dashboardsIds), reason), 750);
       //return lastEventTimer;
-      return _fireUpdateAllCounts.call(this, getGroupIndexes.call(this, dashboardsIds), reason);
+      return _fireUpdateAllCounts.call(this, getGroupIndexes.call(this, dashboardsIds), reason, forceUpdate);
     };
 
-    KibiNavBarHelper.prototype.updateAllCounts = function (dashboardsIds, reason) {
+    KibiNavBarHelper.prototype.updateAllCounts = function (dashboardsIds, reason, forceUpdate = false) {
       if (!dashboardsIds) {
         return savedDashboards.find().then(function (dashboards) {
           return _(dashboards.hits).filter((d) => !!d.savedSearchId).map((d) => d.id).value();
         })
-        .then((ids) => updateCounts.call(this, ids, reason))
+        .then((ids) => updateCounts.call(this, ids, reason, forceUpdate))
         .catch(notify.error);
       } else {
-        return updateCounts.call(this, dashboardsIds, reason);
+        return updateCounts.call(this, dashboardsIds, reason, forceUpdate);
       }
     };
 
@@ -198,12 +198,15 @@ define(function (require) {
         return;
       }
 
-      // global state keeps pinned filters and default time
-      // if any change there update counts on all selected dashboards
-      if (diff.indexOf('time') === -1) {
-        this.updateAllCounts(null, 'GlobalState change ' + angular.toJson(diff));
-      } else {
-        this.updateAllCounts([ currentDashboard ], 'GlobalState change ' + angular.toJson(diff));
+      if (diff.indexOf('filters') !== -1) {
+        // the pinned filters changed, update counts on all selected dashboards
+        this.updateAllCounts(null, 'GlobalState pinned filters change');
+      } else if (diff.indexOf('time') !== -1) {
+        const dashboardsIds = addAllConnected.call(this, currentDashboard);
+        this.updateAllCounts(dashboardsIds, 'GlobalState time changed');
+      } else if (diff.indexOf('refreshInterval') !== -1) {
+        // force the count update to refresh all tabs count
+        this.updateAllCounts(null, 'GlobalState refreshInterval changed', true);
       }
     };
 

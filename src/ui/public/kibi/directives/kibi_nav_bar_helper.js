@@ -203,10 +203,10 @@ define(function (require) {
         this.updateAllCounts(null, 'GlobalState pinned filters change');
       } else if (diff.indexOf('time') !== -1) {
         const dashboardsIds = addAllConnected.call(this, currentDashboard);
-        this.updateAllCounts(dashboardsIds, 'time changed');
+        this.updateAllCounts(dashboardsIds, 'GlobalState time changed');
       } else if (diff.indexOf('refreshInterval') !== -1) {
         // force the count update to refresh all tabs count
-        this.updateAllCounts(null, 'refreshInterval changed', true);
+        this.updateAllCounts(null, 'GlobalState refreshInterval changed', true);
       }
     };
 

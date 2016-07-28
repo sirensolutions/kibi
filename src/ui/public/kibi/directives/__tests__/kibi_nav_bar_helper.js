@@ -195,13 +195,22 @@ describe('Kibi Directives', function () {
         expect(stub.calledWith([ 'dashboard2' ], 'KibiState enabled relations changed')).to.be(true);
       });
 
-      it('should update all counts on globalState changes', function () {
+      it('should update all counts on globalState filters changes', function () {
         const stub = sinon.stub(kibiNavBarHelper, 'updateAllCounts');
 
-        globalState.emit('save_with_changes', [ 'aaa' ]);
+        globalState.emit('save_with_changes', [ 'filters' ]);
         $rootScope.$digest();
 
-        expect(stub.calledWith(null, 'GlobalState change ["aaa"]')).to.be(true);
+        expect(stub.calledWith(null, 'GlobalState pinned filters change')).to.be(true);
+      });
+
+      it('should update all counts on globalState time refreshInterval changes', function () {
+        const stub = sinon.stub(kibiNavBarHelper, 'updateAllCounts');
+
+        globalState.emit('save_with_changes', [ 'refreshInterval' ]);
+        $rootScope.$digest();
+
+        expect(stub.calledWith(null, 'GlobalState refreshInterval changed')).to.be(true);
       });
 
       it('should update count of current dashboard on globalState time change', function () {
@@ -210,7 +219,7 @@ describe('Kibi Directives', function () {
         globalState.emit('save_with_changes', [ 'time' ]);
         $rootScope.$digest();
 
-        expect(stub.calledWith([ 'dashboard1' ], 'GlobalState change ["time"]')).to.be(true);
+        expect(stub.calledWith([ 'dashboard1' ], 'GlobalState time changed')).to.be(true);
       });
     });
 
@@ -265,12 +274,12 @@ describe('Kibi Directives', function () {
         dashboardsIdsInConnectedComponents: [ 'dashboard1', 'dashboard2' ]
       }));
 
-      it('should update counts of current dashboard and those connected on courier:searchRefresh', function () {
+      it('should update counts of all dashboards on courier:searchRefresh', function () {
         const stub = sinon.stub(kibiNavBarHelper, 'updateAllCounts');
 
         $rootScope.$broadcast('courier:searchRefresh');
         $rootScope.$digest();
-        expect(stub.calledWith([ 'dashboard1', 'dashboard2' ], 'courier:searchRefresh event')).to.be(true);
+        expect(stub.calledWith(null, 'courier:searchRefresh event', true)).to.be(true);
       });
 
       it('should update counts of current dashboard and those connected on kibiState changes', function () {

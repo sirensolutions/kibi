@@ -21,19 +21,25 @@ define(function (require) {
       $scope.entityURI = '';
 
       const configMode = urlHelper.onVisualizeTab();
+
+      function setEntityURI() {
+        if (configMode && globalState.se_temp && globalState.se_temp.length > 0) {
+          $scope.entityURI = globalState.se_temp[0];
+        } else if (!configMode && globalState.se && globalState.se.length > 0) {
+          $scope.entityURI = globalState.se[0];
+        } else {
+          $scope.entityURI = '';
+        }
+      }
+      setEntityURI();
+
       var saveWithChangesHandler = function (diff) {
         if (diff.indexOf('se') !== -1 || diff.indexOf('se_temp') !== -1) {
-          if (configMode && globalState.se_temp && globalState.se_temp.length > 0) {
-            $scope.entityURI = globalState.se_temp[0];
-          } else if (!configMode && globalState.se && globalState.se.length > 0) {
-            $scope.entityURI = globalState.se[0];
-          } else {
-            $scope.entityURI = '';
-          }
+          setEntityURI();
           fetchResults($scope.savedVis);
         }
       };
-      globalState.on('save_with_changes', saveWithChangesHandler);
+      globalState.on('save_with_changes', saveWithChangesHandler.bind(this));
 
       // Set to true in editing mode
       var editing = false;
@@ -73,7 +79,7 @@ define(function (require) {
       var _constructQueryColumnObject = function () {
         if ($scope.vis.params.enableQueryFields === true && $scope.vis.params.queryFieldName) {
           $scope.queryColumn.name = $scope.vis.params.queryFieldName;
-          $scope.queryColumn.queryIds = $scope.vis.params.queryIds;
+          $scope.queryColumn.queryDefinitions = $scope.vis.params.queryDefinitions;
         } else {
           $scope.queryColumn = {};
         }
@@ -101,9 +107,16 @@ define(function (require) {
           searchSource.source(sourceFiltering.all);
         }
 
-        const queryIds = _.filter($scope.vis.params.queryIds, (snippet) => !snippet.isEntityDependent || $scope.entityURI);
+        const queryDefinitions = _($scope.vis.params.queryDefinitions)
+        .filter((def) => !_.get(def, 'query.is_entity_dependent') || $scope.entityURI)
+        .map((def) => {
+          def.queryId = def.query.id;
+          return def;
+        })
+        .value();
+
         // validate here and do not inject if all require values are not set
-        if ($scope.vis.params.enableQueryFields === true && queryIds.length > 0 &&
+        if ($scope.vis.params.enableQueryFields === true && queryDefinitions.length > 0 &&
           $scope.vis.params.joinElasticsearchField && $scope.vis.params.joinElasticsearchField !== '' &&
           $scope.vis.params.queryFieldName && $scope.vis.params.queryFieldName !== '') {
           var virtualIndexPattern = new VirtualIndexPattern(indexPattern);
@@ -112,7 +125,7 @@ define(function (require) {
           searchSource.inject([
             {
               entityURI: $scope.entityURI,
-              queryDefs: queryIds, //TODO: rename to queryDefs
+              queryDefs: queryDefinitions,
               sourcePath: $scope.vis.params.joinElasticsearchField, // it is the field from table to do the comparison
               fieldName: $scope.vis.params.queryFieldName
             }

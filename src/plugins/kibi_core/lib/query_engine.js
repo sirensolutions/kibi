@@ -296,7 +296,7 @@ QueryEngine.prototype._loadQueries = function () {
   var self = this;
   // load default query examples
   var queriesToLoad = [
-    '1Kibi-Graph-Query'
+    'Kibi-Graph-Query'
   ];
 
   self.log.info('Loading queries');

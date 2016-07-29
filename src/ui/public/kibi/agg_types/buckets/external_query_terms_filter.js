@@ -17,7 +17,7 @@ define(function (require) {
       createFilter: createFilter,
       params: [
         {
-          name: 'queryIds',
+          name: 'queryDefinitions',
           editor: require('ui/kibi/agg_types/controls/external_query_terms_filter.html'),
           default: [],
           write: function (aggConfig, output) {
@@ -25,8 +25,8 @@ define(function (require) {
             // initialy set filters to empty object
             params.filters = {};
 
-            const queryIdsObject = aggConfig.params.queryIds;
-            if (!_.size(queryIdsObject)) {
+            const queryDefinitions = aggConfig.params.queryDefinitions;
+            if (!_.size(queryDefinitions)) {
               return;
             }
 
@@ -40,37 +40,36 @@ define(function (require) {
               entityURI = globalState.se[0];
             }
 
-            if (!_(queryIdsObject).pluck('id').compact().size()) {
+            if (!_(queryDefinitions).pluck('query.id').compact().size()) {
               return;
             }
 
             const json = {};
             let hasEntityDependentQuery = false;
 
-            _.each(queryIdsObject, function (queryIdDef) {
-              const isEntityDependent = queryIdDef.id.charAt(0) === '1';
+            _.each(queryDefinitions, function (queryDef) {
+              const isEntityDependent = queryDef.query.is_entity_dependent;
               if (isEntityDependent) {
                 hasEntityDependentQuery = true;
               }
 
               // validate the definition and do not add any filter if e.g. id == ''
-              if (queryIdDef.id && queryIdDef.joinElasticsearchField && queryIdDef.queryVariableName) {
-                // stip the 0/1 entity dependent flag
-                const id = queryIdDef.id.substring(1);
+              if (queryDef.query.id && queryDef.joinElasticsearchField && queryDef.queryVariableName) {
+                const id = queryDef.query.id;
                 // here we need a label for each one for now it is queryid
-                const label = (queryIdDef.negate ? 'Not-' : '') + id;
+                const label = (queryDef.negate ? 'Not-' : '') + id;
 
                 json[label] = {};
                 if (!isEntityDependent || entityURI) {
                   json[label].dbfilter = {};
                   json[label].dbfilter.entity = entityURI;
-                  json[label].dbfilter.queryid = queryIdDef.id;
-                  json[label].dbfilter.negate = queryIdDef.negate ? true : false;
-                  json[label].dbfilter.queryVariableName = queryIdDef.queryVariableName;
-                  json[label].dbfilter.path = queryIdDef.joinElasticsearchField;
+                  json[label].dbfilter.queryid = id;
+                  json[label].dbfilter.negate = queryDef.negate ? true : false;
+                  json[label].dbfilter.queryVariableName = queryDef.queryVariableName;
+                  json[label].dbfilter.path = queryDef.joinElasticsearchField;
                 } else {
                   json[label].bool = {};
-                  json[label].bool[queryIdDef.negate ? 'must_not' : 'should'] = [
+                  json[label].bool[queryDef.negate ? 'must_not' : 'should'] = [
                     {
                       term: {
                         snxrcngu: 'tevfuxnvfpbzcyrgrylpenfl'

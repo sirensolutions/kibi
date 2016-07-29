@@ -25,66 +25,79 @@ define(function (require) {
         // If the item is **undefined**, the function may return an object that is used in the angular watcher.
         filter: '&?',
         filterOptions: '=?', // optional options map eg: { param: value }
-        objectType:       '@',  // text
-        indexPatternId:   '=?', // optional only for objectType === field | indexPatternType | documentIds
+        objectType: '@',  // text
+        indexPatternId: '=?', // optional only for objectType === field | indexPatternType | documentIds
         indexPatternType: '=?', // optional only for objectType === documentIds
-        fieldTypes:       '=?', // optional only for objectType === field, value should be array of strings
-        queryId:          '=?', // optional only for objectType === queryVariable
-        modelDisabled:    '=?', // use to disable the underlying select
-        modelRequired:    '=?', // use to disable the underlying select
-        include:          '=?', // extra values can be passed here
-        analyzedWarning:  '@'   // set to true or false to disable/enable analyzed field warning
+        fieldTypes: '=?', // optional only for objectType === field, value should be array of strings
+        queryId: '=?', // optional only for objectType === queryVariable
+        modelDisabled: '=?', // use to disable the underlying select
+        modelRequired: '=?', // use to disable the underlying select
+        include: '=?', // extra values can be passed here
+        analyzedWarning: '@'   // set to true or false to disable/enable analyzed field warning
       },
       template: require('ui/kibi/directives/kibi_select.html'),
       controller: function () {
         // One can use a decorator and override this method to add custom object types to the kibi-select
-        this.extendedObjectType = function (scope) {
-        };
+        this.extendedObjectType = function (scope) {};
       },
       link: function (scope, element, attrs, ngModelCtrl) {
-        scope.isValid = true;
-        scope.required = scope.modelRequired;
-        scope.disabled = scope.modelDisabled;
+        scope.required = Boolean(scope.modelRequired);
+        scope.disabled = Boolean(scope.modelDisabled);
         if (attrs.hasOwnProperty('required')) {
           scope.required = true;
         }
-        scope.modelObject = ngModelCtrl.$viewValue; //object
         scope.items = [];
+
+        scope.isInvalid = function () {
+          return ngModelCtrl.$invalid;
+        };
+
+        function setModelObject() {
+          scope.modelObject = ngModelCtrl.$viewValue; //object
+          if (scope.modelObject) {
+            if (_.get(scope, 'modelObject.value.id')) {
+              scope.modelObject.id = scope.modelObject.value.id;
+            } else {
+              scope.modelObject.id = scope.modelObject.value;
+            }
+          }
+        }
 
         scope.$watch(
           function () {
             return ngModelCtrl.$modelValue;
           },
-          function (newValue) {
-            scope.modelObject = ngModelCtrl.$viewValue; //object
-          }
+          setModelObject.bind(this)
         );
+        setModelObject();
 
-        var _setViewValue = function () {
-          if (scope.modelObject) {
-            ngModelCtrl.$setViewValue(scope.modelObject);
+        var _setViewValue = function (modelObject) {
+          if (modelObject) {
+            ngModelCtrl.$setViewValue(modelObject);
           } else {
             ngModelCtrl.$setViewValue(null);
           }
         };
 
-        scope.$watch('modelDisabled', function () {
-          scope.disabled = scope.modelDisabled;
-          if (scope.modelDisabled) {
-            scope.required = false;
-          }
-          _setViewValue();
-        });
-
-        scope.$watch('modelRequired', function () {
-          if (scope.modelRequired !== undefined) {
-            scope.required = scope.modelRequired;
-            _setViewValue();
+        scope.$watch('modelDisabled', function (newValue, oldValue, myScope) {
+          if (newValue !== undefined) {
+            myScope.disabled = newValue;
+            myScope.required = !newValue;
+            _setViewValue(myScope.modelObject);
           }
         });
 
-        scope.$watch('modelObject', function () {
-          _setViewValue();
+        scope.$watch('modelRequired', function (newValue, oldValue, myScope) {
+          if (newValue !== undefined) {
+            myScope.required = newValue;
+            _setViewValue(myScope.modelObject);
+          }
+        });
+
+        scope.$watch('modelObject', function (newValue, oldValue, myScope) {
+          if (newValue !== undefined) {
+            _setViewValue(newValue);
+          }
         }, true);
 
         ngModelCtrl.$formatters.push(function (modelValue) {
@@ -92,12 +105,17 @@ define(function (require) {
           var formatted;
           if (scope.items.length) {
             formatted = _.find(scope.items, function (item) {
-              return item.value === modelValue;
+              return _.isEqual(item.value, modelValue);
+            });
+          } else if (scope.include && scope.include.length) {
+            formatted = _.find(scope.include, function (item) {
+              return _.isEqual(item.value, modelValue);
             });
           }
 
           if (!formatted && modelValue) {
             formatted = {
+              id: modelValue,
               value: modelValue,
               label: ''
             };
@@ -106,11 +124,16 @@ define(function (require) {
         });
 
         ngModelCtrl.$parsers.push(function (viewValue) {
-          var ret = viewValue ? viewValue.value : null;
-          scope.isValid = scope.required ? !!ret : true;
-          ngModelCtrl.$setValidity('stSelect', scope.required ? !!ret : true);
-          return ret;
+          return viewValue ? viewValue.value : null;
         });
+
+        ngModelCtrl.$validators.validValue = function (modelValue, viewValue) {
+          return scope.required ? Boolean(modelValue) : true;
+        };
+
+        ngModelCtrl.$validators.retrieveError = function (modelValue, viewValue) {
+          return !scope.retrieveError;
+        };
 
         function autoSelect(items) {
           if (scope.required) {
@@ -119,45 +142,34 @@ define(function (require) {
           return false;
         }
 
-        var _renderSelect = function (items) {
+        var _renderSelect = function (scope, items) {
           scope.analyzedField = false;
           scope.items = items;
           if (scope.items) {
             if (scope.include && scope.include.length) {
-              // adds the extra items at the head
               // remove elements in items that appear in the extra items
               _.remove(scope.items, function (item) {
                 return !!_.find(scope.include, function (extraItem) {
-                  return item.value === extraItem.value;
+                  return _.isEqual(item.value, extraItem.value);
                 });
               });
-              scope.items = scope.include.concat(scope.items);
+              scope.items.push(...scope.include);
             }
-
-            // sort by label
-            scope.items = _.sortBy(scope.items, 'label');
 
             if (scope.filter && _.isFunction(scope.filter())) {
               _.remove(scope.items, function (item) {
                 var selected = !!ngModelCtrl.$viewValue && !!ngModelCtrl.$viewValue.value &&
-                  ngModelCtrl.$viewValue.value === item.value;
+                  _.isEqual(ngModelCtrl.$viewValue.value, item.value);
 
                 var toRemove = scope.filter()(scope.id, item, scope.filterOptions);
 
                 return toRemove && !selected;
               });
             }
-            // if the select is NOT required, the user is able to choose an empty element
-            if (!scope.required && scope.items.length > 0 && _.first(scope.items).value !== null) {
-              scope.items.splice(0, 0, {
-                label: '',
-                value: null
-              });
-            }
           }
 
           var item = _.find(scope.items, function (item) {
-            return ngModelCtrl.$viewValue && item.value === ngModelCtrl.$viewValue.value;
+            return ngModelCtrl.$viewValue && _.isEqual(item.value, ngModelCtrl.$viewValue.value);
           });
 
           if (item && item.options && item.options.analyzed) {
@@ -165,18 +177,24 @@ define(function (require) {
           } else if (autoSelect(scope.items)) {
             // select automatically if only 1 option is available and the select is required
             scope.modelObject = scope.items[0];
+            scope.analyzedField = _.get(scope.items[0], 'options.analyzed');
           } else if (scope.items && scope.items.length > 0 && !item) {
             // object saved in the model is not in the list of items
             scope.modelObject = {
               value: '',
+              id: '',
               label: ''
             };
           }
         };
 
-        var _render = function () {
+        var _render = function (scope) {
           let promise;
 
+          // if disabled, do not try to render anything
+          if (scope.disabled) {
+            return;
+          }
           if (ngModelCtrl.extendedObjectType) {
             promise = ngModelCtrl.extendedObjectType(scope);
           }
@@ -238,25 +256,26 @@ define(function (require) {
 
           scope.retrieveError = '';
           if (promise) {
-            promise.then(_renderSelect).catch(function (err) {
-              scope.retrieveError = _.isEmpty(err) ? '' : err;
-              ngModelCtrl.$setValidity('stSelect', false);
+            promise.then(_renderSelect.bind(this, scope)).catch(function (err) {
+              scope.retrieveError = err.message;
             });
           }
         };
 
         scope.$watchMulti(['indexPatternId', 'indexPatternType', 'queryId', 'include', 'modelDisabled', 'modelRequired'], function () {
-          _render();
+          _render(scope);
         });
 
         scope.$watch(function (scope) {
           if (scope.filter && _.isFunction(scope.filter())) {
             return scope.filter()(scope.id);
           }
-        }, function () {
-          _render();
+        }, function (newValue, oldValue, scope) {
+          _render(scope);
         }, true);
-        _render();
+
+        // init
+        _render(scope);
       }
 
     };

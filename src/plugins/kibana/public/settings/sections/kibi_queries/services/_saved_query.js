@@ -25,7 +25,6 @@ define(function (require) {
           activationQuery: 'string',
           resultQuery: 'string',
           datasourceId: 'string',
-          _previewTemplateId: 'string', // used only to temporary store template id for preview
           tags: 'string',
           rest_params: 'json',
           rest_headers: 'json',
@@ -35,7 +34,8 @@ define(function (require) {
           rest_path: 'string',
           rest_resp_status_code: 'long',
           activation_rules: 'json',
-          version: 'integer'
+          version: 'integer',
+          is_entity_dependent: 'boolean'
         },
 
         defaults: {
@@ -44,7 +44,6 @@ define(function (require) {
           activationQuery: '',
           resultQuery: '',
           datasourceId: '',
-          _previewTemplateId: '',
           tags: '',
           rest_params: '[]',
           rest_headers: '[]',
@@ -54,7 +53,8 @@ define(function (require) {
           rest_path: '',
           rest_resp_status_code: 200,
           activation_rules: '[]',
-          version: 1
+          version: 1,
+          is_entity_dependent: false
         },
         init: function () {
           try {

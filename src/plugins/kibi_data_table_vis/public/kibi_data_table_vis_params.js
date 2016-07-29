@@ -5,7 +5,7 @@ define(function (require) {
   require('ui/kibi/directives/kibi_array_param');
 
   require('ui/modules').get('kibana/kibi_data_table_vis')
-  .directive('kibiDataTableVisParams', function (savedDatasources, $rootScope, $route, Private, createNotifier, $window) {
+  .directive('kibiDataTableVisParams', function (savedDatasources, $rootScope, $route, createNotifier, $window) {
 
     var notify = createNotifier({
       location: 'Enhanced search results'
@@ -15,7 +15,6 @@ define(function (require) {
       restrict: 'E',
       template: require('plugins/kibi_data_table_vis/kibi_data_table_vis_params.html'),
       link: function ($scope) {
-        var _shouldEntityURIBeEnabled = Private(require('ui/kibi/components/commons/_should_entity_uri_be_enabled'));
         // Initialize columns
         $scope.savedVis = $route.current.locals.savedVis;
 
@@ -44,31 +43,22 @@ define(function (require) {
 
         var shouldEntityURIBeEnabled = function () {
           // examine all used queries in order to check if any of them require entityURI
-          var queryIds = _($scope.vis.params.queryIds).pluck('queryId').compact().value();
-
-          _shouldEntityURIBeEnabled(queryIds, null, true).then(function (results) {
-            let value = false;
-
-            _.each($scope.vis.params.queryIds, (snippet, index) => {
-              snippet.isEntityDependent = results[index];
-              if (results[index]) {
-                value = true;
-              }
-            });
-            $scope.vis.params.hasEntityDependentQuery = value;
-
-            if ($scope.vis.params.enableQueryFields === true) {
-              $rootScope.$emit('kibi:entityURIEnabled:kibitable', value);
-            } else {
-              $rootScope.$emit('kibi:entityURIEnabled:kibitable', false);
+          let value = false;
+          _.each($scope.vis.params.queryDefinitions, (queryDefinition, index) => {
+            queryDefinition.isEntityDependent = queryDefinition.query.is_entity_dependent;
+            if (queryDefinition.query.is_entity_dependent) {
+              value = true;
             }
-          }).catch(function (err) {
-            notify.warning('Could not determine whether the widget needs an entityURI' +
-                ' to be set: ' + JSON.stringify(err, null, ' '));
           });
+
+          if ($scope.vis.params.enableQueryFields) {
+            $rootScope.$emit('kibi:entityURIEnabled:kibitable', value);
+          } else {
+            $rootScope.$emit('kibi:entityURIEnabled:kibitable', false);
+          }
         };
 
-        $scope.$watch('vis.params.queryIds', function () {
+        $scope.$watch('vis.params.queryDefinitions', function () {
           shouldEntityURIBeEnabled();
         }, true);
 
@@ -166,8 +156,8 @@ define(function (require) {
             previousName = null;
             delete $scope.vis.params.enableQueryFields;
             delete $scope.vis.params.joinElasticsearchField;
-            if ($scope.vis.params.queryIds) {
-              $scope.vis.params.queryIds.length = 0;
+            if ($scope.vis.params.queryDefinitions) {
+              $scope.vis.params.queryDefinitions.length = 0;
             }
             delete $scope.vis.params.queryFieldName;
             $scope.vis.dirty = true;
@@ -178,9 +168,11 @@ define(function (require) {
         $scope.$watchMulti([
           'vis.params.showMeticsAtAllLevels',
           'vis.params.datasourceId',
-          'vis.params.queryIds'
+          'vis.params.queryDefinitions'
         ], function () {
-          if (!$scope.vis) return;
+          if (!$scope.vis) {
+            return;
+          }
           savedDatasources.get($scope.vis.params.datasourceId)
           .then((savedDatasource) => {
             $scope.datasourceType = savedDatasource.type;

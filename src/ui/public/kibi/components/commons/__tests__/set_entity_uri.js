@@ -16,16 +16,40 @@ describe('Kibi Components', function () {
         });
       });
 
-      it('Should set document uri if in globalScope.se contains items', function () {
+      it('should set document uri if in globalScope.se contains items', function () {
         globalState.se = ['uri1', 'uri2'];
-        var holder = {};
+        var holder = {
+          visible: true
+        };
         setEntityUri(holder);
         expect(holder.entityURI).to.equal('uri1');
       });
 
-      it('Should set document uri if globalScope.se empty', function () {
+      it('should set document uri if in globalScope.se_temp contains items', function () {
+        globalState.se = ['uri1', 'uri2'];
+        globalState.se_temp = ['uri3'];
+        var holder = {
+          visible: true
+        };
+        setEntityUri(holder);
+        expect(holder.entityURI).to.equal('uri3');
+      });
+
+      it('should set document uri to empty string if globalScope.se and globalScope.se_temp empty', function () {
         globalState.se = [];
-        var holder = {};
+        globalState.se_temp = [];
+        var holder = {
+          visible: true
+        };
+        setEntityUri(holder);
+        expect(holder.entityURI).to.equal('');
+      });
+
+      it('should set document uri to empty string if the entity is not visible', function () {
+        globalState.se = ['uri1', 'uri2'];
+        var holder = {
+          visible: false
+        };
         setEntityUri(holder);
         expect(holder.entityURI).to.equal('');
       });

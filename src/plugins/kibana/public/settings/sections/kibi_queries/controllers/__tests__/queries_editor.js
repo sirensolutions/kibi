@@ -82,34 +82,23 @@ describe('Kibi Controllers', function () {
 
     noDigestPromises.activateForSuite();
 
-    it('should set kibi-table-jade as the default template if not set', function () {
-      var query = {
-        title: 'ahah'
-      };
-      init({ query: query });
-      expect(query._previewTemplateId).to.be('kibi-table-jade');
-    });
-
     it('should enable the entity URI', function () {
       var query = {
-        id: '1ahah', // starts with 1 to indicate it is dependent on an entity
+        id: 'ahah',
+        is_entity_dependent: true,
         title: 'ahah',
-        _previewTemplateId: 'mytmpl',
         activationQuery: '@doc[id]@'
       };
       init({ query: query });
-      expect(query._previewTemplateId).to.be('mytmpl');
       expect($scope.holder.entityURIEnabled).to.be(true);
     });
 
     it('should detect the star', function () {
       var query = {
         title: 'ahah',
-        _previewTemplateId: 'mytmpl',
         activationQuery: 'select * { ?s :name ?o }'
       };
       init({ query: query });
-      expect(query._previewTemplateId).to.be('mytmpl');
       expect($scope.holder.entityURIEnabled).to.be(false);
       expect($scope.starDetectedInAQuery).to.be(true);
     });
@@ -132,7 +121,7 @@ describe('Kibi Controllers', function () {
         expect($scope.holder.htmlPreview).to.be('are you there');
         expect($scope.holder.jsonPreview).to.be.ok();
         done();
-      });
+      }).catch(done);
     });
 
     it('should display an error on submit if the query is not correct', function (done) {
@@ -149,18 +138,25 @@ describe('Kibi Controllers', function () {
         expect($scope.holder.jsonPreview).to.be.ok();
         expect($scope.holder.htmlPreview).to.match(/Error/);
         done();
-      });
+      }).catch(done);
     });
 
-
-    it('should grab the selected document', function () {
+    it('should grab the selected document', function (done) {
       var query = {
         id: '123'
       };
       init({ query: query });
 
+      $scope.$watch('holder.entityURI', function (entityURI) {
+        if (entityURI) {
+          expect(entityURI).to.be('grishka');
+          done();
+        }
+      });
+
       globalState.se = [ 'grishka' ];
       $scope.$emit('kibi:selectedEntities:changed', '');
+      $scope.$digest();
     });
 
     it('should update the REST datasource', function () {
@@ -173,7 +169,7 @@ describe('Kibi Controllers', function () {
       query.datasourceId = 'ds3';
       $scope.$digest();
       expect($scope.datasourceType).to.be('rest');
-      expect(query._previewTemplateId).to.be('kibi-json-jade');
+      expect($scope.preview.templateId).to.be('kibi-json-jade');
       expect(stub.called).to.be(true);
     });
 
@@ -187,7 +183,7 @@ describe('Kibi Controllers', function () {
       query.datasourceId = 'ds1';
       $scope.$digest();
       expect($scope.datasourceType).to.be('sparql_http');
-      expect(query._previewTemplateId).to.be('kibi-table-jade');
+      expect($scope.preview.templateId).to.be('kibi-table-jade');
       expect(stub.called).to.be(true);
     });
   });

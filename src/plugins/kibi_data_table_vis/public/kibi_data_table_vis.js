@@ -26,7 +26,7 @@ define(function (require) {
       params: {
         defaults: {
           clickOptions: [],
-          queryIds: []
+          queryDefinitions: []
         },
         editor: '<kibi-data-table-vis-params></kibi-data-table-vis-params>'
       }

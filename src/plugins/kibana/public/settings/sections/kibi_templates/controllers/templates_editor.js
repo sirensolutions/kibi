@@ -41,11 +41,8 @@ define(function (require) {
   var app = require('ui/modules').get('apps/settings', ['kibana', 'ui.ace', 'ngSanitize']);
   var angular = require('angular');
 
-  app.controller(
-    'TemplatesEditor',
-    function ($rootScope, $scope, $route, $window, kbnUrl, Private, SavedTemplate, savedQueries, savedDatasources,
-              savedTemplates, createNotifier, queryEngineClient, $element) {
-      var _shouldEntityURIBeEnabled = Private(require('ui/kibi/components/commons/_should_entity_uri_be_enabled'));
+  app.controller('TemplatesEditor', function ($rootScope, $scope, $route, $window, kbnUrl, Private, createNotifier, queryEngineClient,
+                                              $element) {
       var _setEntityURI =  Private(require('ui/kibi/components/commons/_set_entity_uri'));
 
       var notify = createNotifier({
@@ -57,13 +54,15 @@ define(function (require) {
         entityURIEnabled: false,
         visible: true
       };
+      $scope.preview = {
+        query: null
+      };
 
       _setEntityURI($scope.holder);
       var off = $rootScope.$on('kibi:selectedEntities:changed', function (event, se) {
         _setEntityURI($scope.holder);
       });
       $scope.$on('$destroy', off);
-
 
       $scope.jsonPreviewActive = false;
       $scope.htmlPreviewActive = true;
@@ -87,20 +86,19 @@ define(function (require) {
 
 
       $scope.jumpToQuery = function () {
-        kbnUrl.change('/settings/queries/' + $scope.template._previewQueryId);
+        kbnUrl.change('/settings/queries/' + _.get($scope, 'preview.query.id'));
       };
 
       var refreshPreview = function () {
         $scope.json_preview_content = 'Loading ...';
         $scope.html_preview_content = 'Loading ...';
 
-        if ($scope.template._previewQueryId && $scope.template._previewQueryId !== '') {
-
+        if (_.get($scope, 'preview.query.id')) {
           queryEngineClient.getQueriesHtmlFromServer(
             [
               {
                 open: true,
-                queryId: $scope.template._previewQueryId,
+                queryId: _.get($scope, 'preview.query.id'),
                 showFilterButton: false,
                 templateId: template.id,
                 templateVars: {
@@ -126,21 +124,15 @@ define(function (require) {
         }
       };
 
+      $scope.$watch('holder.entityURI', function (entityURI) {
+        if (entityURI) {
+          refreshPreview();
+        }
+      });
 
-      $scope.$watch('template._previewQueryId', function () {
-        if ($scope.template._previewQueryId) {
-          _shouldEntityURIBeEnabled([$scope.template._previewQueryId])
-            .then(function (entityURIEnabled) {
-              $scope.holder.entityURIEnabled = entityURIEnabled;
-            }).then(savedQueries.get($scope.template._previewQueryId))
-          .then((savedQuery) => savedQuery && savedDatasources.get(savedQuery.datasourceId))
-            .then((savedDatasource) => {
-              // set datasourceType
-              if (savedDatasource) {
-                $scope.datasourceType = savedDatasource.type;
-              }
-            }).catch(notify.error);
-
+      $scope.$watch('preview.query', function (query) {
+        if (query) {
+          $scope.holder.entityURIEnabled = query.is_entity_dependent;
           refreshPreview();
         }
       });

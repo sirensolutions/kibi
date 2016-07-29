@@ -22,7 +22,6 @@ define(function (require) {
           description: 'string',
           templateSource: 'string',
           templateEngine: 'string',
-          _previewQueryId: 'string', // used only to temporary store query id for preview
           version: 'integer'
         },
 
@@ -31,7 +30,6 @@ define(function (require) {
           description: '',
           templateSource: '',
           templateEngine: 'jade',
-          _previewQueryId: '',
           version: 1
         },
 

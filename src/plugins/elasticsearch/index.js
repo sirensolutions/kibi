@@ -50,6 +50,7 @@ module.exports = function ({ Plugin }) {
       exposeClient(server);
       createKibiProxy(server, 'GET', '/{paths*}');
       createKibiProxy(server, 'POST', '/_mget');
+      createKibiProxy(server, 'POST', '/_search');
       createKibiProxy(server, 'POST', '/{index}/_search');
       createKibiProxy(server, 'POST', '/{index}/{type}/_search');
       createKibiProxy(server, 'POST', '/{index}/_field_stats');

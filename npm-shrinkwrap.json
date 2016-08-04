@@ -142,14 +142,14 @@
       "resolved": "https://registry.npmjs.org/@spalger/ui-ace/-/ui-ace-0.2.3.tgz"
     },
     "angular": {
-      "version": "1.4.7",
-      "from": "angular@1.4.7",
-      "resolved": "https://registry.npmjs.org/angular/-/angular-1.4.7.tgz"
+      "version": "1.4.8",
+      "from": "angular@1.4.8",
+      "resolved": "https://registry.npmjs.org/angular/-/angular-1.4.8.tgz"
     },
     "angular-animate": {
-      "version": "1.4.7",
-      "from": "angular-animate@1.4.7",
-      "resolved": "https://registry.npmjs.org/angular-animate/-/angular-animate-1.4.7.tgz"
+      "version": "1.4.8",
+      "from": "angular-animate@1.4.8",
+      "resolved": "https://registry.npmjs.org/angular-animate/-/angular-animate-1.4.8.tgz"
     },
     "angular-bootstrap-colorpicker": {
       "version": "3.0.19",
@@ -157,9 +157,9 @@
       "resolved": "https://registry.npmjs.org/angular-bootstrap-colorpicker/-/angular-bootstrap-colorpicker-3.0.19.tgz"
     },
     "angular-cookies": {
-      "version": "1.4.7",
-      "from": "angular-cookies@1.4.7",
-      "resolved": "https://registry.npmjs.org/angular-cookies/-/angular-cookies-1.4.7.tgz"
+      "version": "1.4.8",
+      "from": "angular-cookies@1.4.8",
+      "resolved": "https://registry.npmjs.org/angular-cookies/-/angular-cookies-1.4.8.tgz"
     },
     "angular-elastic": {
       "version": "2.5.0",
@@ -167,14 +167,14 @@
       "resolved": "https://registry.npmjs.org/angular-elastic/-/angular-elastic-2.5.0.tgz"
     },
     "angular-route": {
-      "version": "1.4.7",
-      "from": "angular-route@1.4.7",
-      "resolved": "https://registry.npmjs.org/angular-route/-/angular-route-1.4.7.tgz"
+      "version": "1.4.8",
+      "from": "angular-route@1.4.8",
+      "resolved": "https://registry.npmjs.org/angular-route/-/angular-route-1.4.8.tgz"
     },
     "angular-sanitize": {
-      "version": "1.4.7",
-      "from": "angular-sanitize@1.4.7",
-      "resolved": "https://registry.npmjs.org/angular-sanitize/-/angular-sanitize-1.4.7.tgz"
+      "version": "1.4.8",
+      "from": "angular-sanitize@1.4.8",
+      "resolved": "https://registry.npmjs.org/angular-sanitize/-/angular-sanitize-1.4.8.tgz"
     },
     "ansicolors": {
       "version": "0.3.2",

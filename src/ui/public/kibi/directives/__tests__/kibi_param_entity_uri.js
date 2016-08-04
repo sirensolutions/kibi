@@ -160,7 +160,6 @@ describe('Kibi Directives', function () {
       ];
 
       init(holder, mappings);
-      $httpBackend.flush();
 
       expect(Notifier.prototype.warning.called).to.be(false);
       expect($scope.c).to.be.ok();
@@ -279,8 +278,6 @@ describe('Kibi Directives', function () {
 
       $scope.c.type = '';
       $scope.$digest();
-
-      $httpBackend.flush();
 
       expect($scope.c.indexPattern).to.be('a-1');
       expect($scope.c.type).to.be.empty;

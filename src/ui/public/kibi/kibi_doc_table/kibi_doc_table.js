@@ -151,8 +151,7 @@ define(function (require) {
                   if (hit.fields[name] &&
                       hit.fields[name] instanceof Array &&
                       hit.fields[name].length > 0) {
-                    // remove the 0/1 entity dependent flag
-                    hit._source[name] = _(hit.fields[name]).map((column) => column.substring(1)).join(', ');
+                    hit._source[name] = hit.fields[name].join(', ');
                   }
                   delete hit.fields[name];
                 }

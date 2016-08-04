@@ -4,7 +4,7 @@
 </div>
 
 <ul class="external-query-terms-filter">
-  <li ng-repeat="queryId in agg.params.queryIds" class="queryOptionArea" >
+  <li ng-repeat="queryDefinition in agg.params.queryDefinitions" class="queryOptionArea" >
 
     <div class="header">
       <h2>Filter {{$index +1}}</h2>
@@ -13,7 +13,7 @@
     <div class="content">
       <div class="form-group">
         <label>Source query id</label>
-        <kibi-select object-type="query" ng-model="queryId.id" required></kibi-select>
+        <kibi-select object-type="query" ng-model="queryDefinition.query" required></kibi-select>
       </div>
 
       <div class="form-group">
@@ -21,13 +21,14 @@
         <kibi-select
           required
           object-type="queryVariable"
-          query-id="queryId.id"
-          ng-model="queryId.queryVariableName">
+          model-disabled="!queryDefinition.query.id"
+          query-id="queryDefinition.query.id"
+          ng-model="queryDefinition.queryVariableName">
         </kibi-select>
       </div>
 
       <div class="form-group">
-        <label><input type="checkbox" ng-model="queryId.negate"/>Negate the query</label>
+        <label><input type="checkbox" ng-model="queryDefinition.negate"/>Negate the query</label>
       </div>
 
       <div class="form-group">
@@ -37,15 +38,15 @@
           object-type="field"
           analyzed-warning="true"
           index-pattern-id="vis.indexPattern.id"
-          ng-model="queryId.joinElasticsearchField" >
+          ng-model="queryDefinition.joinElasticsearchField" >
         </kibi-select>
       </div>
 
       <div class="rightCorner">
-        <kibi-array-param-remove index="{{ $index }}" model="agg.params.queryIds"></kibi-array-param-remove>
+        <kibi-array-param-remove index="{{ $index }}" model="agg.params.queryDefinitions"></kibi-array-param-remove>
       </div>
     </div>
 
   </li>
 </ul>
-<kibi-array-param-add required label="external query terms filter" model="agg.params.queryIds"></kibi-array-param-add>
+<kibi-array-param-add required label="external query terms filter" model="agg.params.queryDefinitions"></kibi-array-param-add>

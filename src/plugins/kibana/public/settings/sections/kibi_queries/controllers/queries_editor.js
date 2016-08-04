@@ -56,6 +56,9 @@ define(function (require) {
       $scope.isSPARQL = kibiUtils.isSPARQL;
       $scope.isSQL = kibiUtils.isSQL;
       $scope.DatasourceTypes = kibiUtils.DatasourceTypes;
+      $scope.preview = {
+        templateId: 'kibi-table-jade'
+      };
 
       // we have to wrap the value into object - this prevents weird thing related to transclusion
       // see http://stackoverflow.com/questions/25180613/angularjs-transclusion-creates-new-scope
@@ -84,7 +87,6 @@ define(function (require) {
         location: 'Queries Editor'
       });
 
-
       $scope.snippetFinderOpen = false;
       $scope.openQueryFinder = function () {
         $scope.queryFinderOpen = true;
@@ -97,17 +99,26 @@ define(function (require) {
       $scope.query = $route.current.locals.query;
       $scope.$queryTitle = $route.current.locals.query.title;
 
-      if (!$scope.query._previewTemplateId) {
-        $scope.query._previewTemplateId = 'kibi-table-jade';
-      }
-
       const _enableEntityUri = function () {
         $scope.holder.entityURIEnabled = false;
-        if ($scope.query.id && $scope.query.id.charAt(0) === '1') {
+        if ($scope.query.id && $scope.query.is_entity_dependent) {
           $scope.holder.entityURIEnabled = true;
         }
       };
       _enableEntityUri();
+
+      $scope.$watch('holder.entityURI', function (entityURI) {
+        if (entityURI && $scope.holder.entityURIEnabled) {
+          $scope.preview();
+        }
+      });
+
+      $scope.$watch('preview.templateId', function (templateId) {
+        if (templateId) {
+          $scope.preview.templateId = templateId;
+          $scope.preview();
+        }
+      });
 
       // for headers and params $watch with true as normal watch fail to detect the change in the arrays
       $scope.$watch('query.rest_headers', function () {
@@ -161,9 +172,9 @@ define(function (require) {
             _enableEntityUri();
 
             if (savedDatasource.datasourceType === kibiUtils.DatasourceTypes.rest) {
-              $scope.query._previewTemplateId = 'kibi-json-jade';
+              $scope.preview.templateId = 'kibi-json-jade';
             } else {
-              $scope.query._previewTemplateId = 'kibi-table-jade';
+              $scope.preview.templateId = 'kibi-table-jade';
             }
             return $scope.preview();
           }).catch(notify.error);
@@ -192,13 +203,10 @@ define(function (require) {
           return;
         }
         var titleChanged = $scope.$queryTitle !== $scope.query.title;
-        if (doesQueryDependsOnEntity([ $scope.query ])) {
-          $scope.holder.entityURIEnabled = true;
-          $scope.query.id = '1' + $scope.query.title;
-        } else {
-          $scope.holder.entityURIEnabled = false;
-          $scope.query.id = '0' + $scope.query.title;
-        }
+        $scope.query.id = $scope.query.title;
+        const isEntityDependent = doesQueryDependsOnEntity([ $scope.query ]);
+        $scope.holder.entityURIEnabled = isEntityDependent;
+        $scope.query.is_entity_dependent = isEntityDependent;
         return $scope.query.save().then(function (savedQueryId) {
           notify.info('Query ' + $scope.query.title + ' successfuly saved');
           if (titleChanged) {
@@ -211,7 +219,7 @@ define(function (require) {
       };
 
       $scope.jumpToTemplate = function () {
-        kbnUrl.change('/settings/templates/' + $scope.query._previewTemplateId);
+        kbnUrl.change('/settings/templates/' + $scope.preview.templateId);
       };
 
       $scope.jumpToDatasource = function () {
@@ -234,8 +242,7 @@ define(function (require) {
                   open: true,
                   queryId: $scope.query.id,
                   showFilterButton: false,
-                  // this is one of ours default templates and should always be loaded when queryEngine starts
-                  templateId: $scope.query._previewTemplateId,
+                  templateId: $scope.preview.templateId,
                   templateVars: {
                     label: 'Preview'
                   }

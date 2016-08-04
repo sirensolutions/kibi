@@ -183,8 +183,9 @@ Query.prototype.getHtml = function (queryDef, options) {
     // now override the original config
     data.config = safeConfig;
 
+    var templateId = queryDef.templateId || 'kibi-json-jade';
     // here fetch template via $http and cache it
-    return that._fetchTemplate(queryDef.templateId)
+    return that._fetchTemplate(templateId)
     .then(function (template) {
 
       if (template.templateSource) {
@@ -193,7 +194,7 @@ Query.prototype.getHtml = function (queryDef, options) {
           var hbTemplate = handlebars.compile(template.templateSource);
           html = hbTemplate(data);
         } else if (template.templateEngine === 'jade') {
-          var jadeFn = jade.compile(template.templateSource, { compileDebug: true, filename: queryDef.templateId });
+          var jadeFn = jade.compile(template.templateSource, { compileDebug: true, filename: templateId });
           html = jadeFn(data);
         } else {
           html = 'Unsupported template engine. Try handlebars or jade';

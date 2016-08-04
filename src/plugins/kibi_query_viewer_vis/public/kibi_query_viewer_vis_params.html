@@ -20,7 +20,7 @@
         <div class="form-group">
           <label>Source query</label>
           <a ng-if="queryOption.queryId && queryOption.queryId !== ''" ng-click="editQuery($index)" > Edit selected query</a></br>
-          <kibi-select required object-type="query" ng-model="queryOption.queryId"></kibi-select>
+          <kibi-select required object-type="query" ng-model="queryOption.query"></kibi-select>
         </div>
 
         <div class="form-group">
@@ -73,7 +73,7 @@
 
             <div class="form-group">
               <label>Source query variable</label></br>
-              <kibi-select required object-type="queryVariable" query-id="queryOption.queryId" ng-model="queryOption.queryVariableName"></kibi-select>
+              <kibi-select required object-type="queryVariable" query-id="queryOption.query.id" ng-model="queryOption.queryVariableName"></kibi-select>
             </div>
 
             <div class="form-group">

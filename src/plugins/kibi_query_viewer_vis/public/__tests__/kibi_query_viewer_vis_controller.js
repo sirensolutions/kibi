@@ -9,6 +9,7 @@ describe('Kibi Controllers', function () {
     ngMock.module('kibana', function ($provide) {
       $provide.constant('kbnDefaultAppId', '');
       $provide.constant('kibiDefaultDashboardId', '');
+      $provide.constant('elasticsearchPlugins', ['siren-join']);
     });
 
     ngMock.module('apps/settings');
@@ -63,14 +64,16 @@ describe('Kibi Controllers', function () {
         expect($scope.holder.html).to.be('No result');
         expect($scope.holder.activeFetch).to.be(false);
         done();
-      });
+      }).catch(done);
     });
 
     it('should display the template', function (done) {
       var params = {
         queryOptions: [
           {
-            queryId: 123
+            query: {
+              id: 123
+            }
           }
         ]
       };
@@ -88,14 +91,16 @@ describe('Kibi Controllers', function () {
         expect($scope.holder.html).to.contain('grishka');
         expect($scope.holder.activeFetch).to.be(false);
         done();
-      });
+      }).catch(done);
     });
 
     it('should warn that the query is not activated', function (done) {
       var params = {
         queryOptions: [
           {
-            queryId: 123
+            query: {
+              id: 123
+            }
           }
         ]
       };

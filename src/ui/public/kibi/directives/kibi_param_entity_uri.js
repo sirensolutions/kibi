@@ -30,32 +30,50 @@ define(function (require) {
             id: null,
             column: null,
             extraIndexPatternItems: [],
+            extraTypeItems: [],
             extraIdItems: []
           };
 
           $scope.$watch('entityUriHolder.entityURI', function () {
             if ($scope.entityUriHolder && $scope.entityUriHolder.entityURI) {
               var parts = $scope.entityUriHolder.entityURI.split('/');
+
+              if (parts[0]) {
+                $scope.c.extraIndexPatternItems = [
+                  {
+                    label: parts[0],
+                    id: parts[0],
+                    value: parts[0]
+                  }
+                ];
+              }
+              if (parts[1]) {
+                $scope.c.extraTypeItems = [
+                  {
+                    label: parts[1],
+                    id: parts[1],
+                    value: parts[1]
+                  }
+                ];
+              }
+              if (parts[2]) {
+                $scope.c.extraIdItems = [
+                  {
+                    label: parts[2],
+                    id: parts[2],
+                    value: parts[2]
+                  }
+                ];
+              }
+
               if (!$scope.c.indexPattern) {
                 $scope.c.indexPattern = parts[0];
-              } else {
-                $scope.c.extraIndexPatternItems = [];
               }
-              $scope.c.extraIndexPatternItems = [{
-                label: parts[0],
-                value: parts[0]
-              }];
               $scope.c.index = parts[0];
               $scope.c.type = parts[1];
               $scope.c.id = parts[2];
               if (parts.length > 3) {
                 $scope.c.column = parts[3];
-              }
-              if ($scope.c.id) {
-                $scope.c.extraIdItems = [{
-                  label: $scope.c.id,
-                  value: $scope.c.id
-                }];
               }
             } else {
               $scope.c.indexPattern = null;
@@ -65,13 +83,20 @@ define(function (require) {
           $scope.$watchMulti(['c.indexPattern', 'c.type', 'c.id'], function (newV, oldV) {
             var diff = _.difference(newV, oldV);
             if (diff.length !== 3) {
+              // index pattern changed
               if (oldV[0] !== newV[0]) {
                 $scope.c.index = $scope.c.indexPattern;
                 $scope.c.type = null;
-              }
-              if (oldV[0] !== newV[0] || oldV[1] !== newV[1]) {
                 $scope.c.id = null;
-                $scope.c.column =  null;
+                $scope.c.column = null;
+
+                $scope.c.extraIndexPatternItems = [];
+                $scope.c.extraTypeItems = [];
+                $scope.c.extraIdItems = [];
+              } else if (oldV[1] !== newV[1]) {
+                // type changed
+                $scope.c.id = null;
+                $scope.c.column = null;
                 $scope.c.extraIdItems = [];
               }
             }
@@ -92,21 +117,13 @@ define(function (require) {
                   if (response.data.hits.total > 1) {
                     notify.warning('Found more than one document for the specified selection, selected the first one.');
                   }
-                  $scope.entityUriHolder.entityURI =
-                    hit._index + '/' +
-                    hit._type + '/' +
-                    hit._id + '/' +
-                    $scope.c.column;
+                  $scope.entityUriHolder.entityURI = hit._index + '/' + hit._type + '/' + hit._id + '/' + $scope.c.column;
                 }).catch(function () {
                   notify.error('An error occurred while fetching the selected entity, please check if Elasticsearch is running.');
                   $scope.entityUriHolder.entityURI = null;
                 });
               } else {
-                $scope.entityUriHolder.entityURI =
-                  $scope.c.index + '/' +
-                  $scope.c.type + '/' +
-                  $scope.c.id + '/' +
-                  $scope.c.column;
+                $scope.entityUriHolder.entityURI = $scope.c.index + '/' + $scope.c.type + '/' + $scope.c.id + '/' + $scope.c.column;
               }
             }
           });

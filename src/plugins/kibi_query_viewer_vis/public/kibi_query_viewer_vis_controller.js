@@ -36,7 +36,7 @@ define(function (require) {
         return [
           _.map(myscope.vis.params.queryOptions, 'templateId'),
           _.map(myscope.vis.params.queryOptions, '_label'),
-          _.map(myscope.vis.params.queryOptions, 'queryId'),
+          _.map(myscope.vis.params.queryOptions, 'query.id'),
           myscope.holder.entityURI
         ];
       }, function () {
@@ -173,7 +173,7 @@ define(function (require) {
               }
 
               var queryOption = _.find($scope.vis.params.queryOptions, function (option) {
-                return option.queryId === snippet.data.config.id;
+                return option.query.id === snippet.data.config.id;
               });
 
               var dbFilter;
@@ -183,10 +183,10 @@ define(function (require) {
                 dbFilter = {
                   meta: {
                     key: 'Relational Filter',
-                    value: queryOption.queryId
+                    value: queryOption.query.id
                   },
                   dbfilter:{
-                    queryid: queryOption.queryId,
+                    queryid: queryOption.query.id,
                     queryVariableName: queryOption.queryVariableName,
                     path: queryOption.targetField
                   }

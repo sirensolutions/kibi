@@ -407,20 +407,11 @@
         <kibi-param-entity-uri entity-uri-holder="holder"></kibi-param-entity-uri>
 
         <div class="form-group">
-          <label>Template id</label>
-          <span class="small-note"> Pick the template id to see html preview, save query to refresh</span><br/>
-          <a ng-show="query._previewTemplateId" ng-click="jumpToTemplate()"> Edit template</a>
-          <kibi-select object-type="template" ng-model="query._previewTemplateId"></kibi-select>
+          <label>Template</label>
+          <span class="small-note"> Pick a template to see a HTML preview of the query's results</span><br/>
+          <a ng-show="preview.templateId" ng-click="jumpToTemplate()"> Edit template</a>
+          <kibi-select object-type="template" ng-model="preview.templateId"></kibi-select>
         </div>
-
-        <div class="form-group">
-          <!-- here we are accessing entityURI form inside kibi-param-entity-uri -->
-          <button ng-click="submit()" ng-disabled="previewForm.entityURI.$invalid" class="btn btn-success span3" >
-            Refresh
-          </button>
-        </div>
-
-
 
         <div role="tabpanel">
           <!-- Nav tabs -->

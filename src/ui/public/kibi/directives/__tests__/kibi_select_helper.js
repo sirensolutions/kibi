@@ -116,7 +116,6 @@ describe('Kibi Directives', function () {
             description: '',
             templateSource: '',
             templateEngine: 'jade',
-            _previewQueryId: '',
             version: 1
           }
         ]));
@@ -126,24 +125,28 @@ describe('Kibi Directives', function () {
         $provide.service('savedQueries', (Promise) => mockSavedObjects(Promise)('savedQueries', [
           {
             id: 'sparql',
+            title: 'sparql query',
             resultQuery: 'select ?name { ?s ?p ?o }',
             datasourceId: 'ds1',
             tags: []
           },
           {
             id: 'sql',
+            title: 'sql query',
             resultQuery: 'select name from person',
             datasourceId: 'ds2',
             tags: []
           },
           {
             id: 'rest',
+            title: 'rest query',
             resultQuery: '',
             datasourceId: 'ds3',
             tags: []
           },
           {
             id: 'rest_with_query_variables',
+            title: 'rest_with_query_variables query',
             resultQuery: '',
             datasourceId: 'ds3',
             rest_variables: '[' +
@@ -154,13 +157,14 @@ describe('Kibi Directives', function () {
           },
           {
             id: 'nodatasource',
+            title: 'nodatasource query',
             resultQuery: '',
             datasourceId: '',
             tags: []
           },
           {
             id: 'q2',
-            title: 'q2',
+            title: 'q2 query',
             tags: [ 'tag2', '42' ]
           }
         ]));
@@ -203,7 +207,7 @@ describe('Kibi Directives', function () {
     }
 
     describe('GetQueries', function () {
-      it('select queries', function (done) {
+      it('should set the group and datasourceType', function (done) {
         stSelectHelper.getQueries().then(function (queries) {
           expect(queries).to.have.length(6);
           expect(queries[0].group).to.be('No tag');
@@ -218,6 +222,75 @@ describe('Kibi Directives', function () {
           expect(queries[3].datasourceType).to.be('rest');
           expect(queries[4].datasourceType).to.be(null);
           expect(queries[5].datasourceType).to.be(null);
+          done();
+        }).catch(done);
+      });
+
+      it('should set the value to the query object and the ID to the query ID', function (done) {
+        stSelectHelper.getQueries().then(function (queries) {
+          expect(queries).to.have.length(6);
+
+          expect(queries[0].id).to.be('sparql');
+          expect(queries[0].label).to.be('sparql query');
+          expect(queries[0].value).to.eql({
+            id: 'sparql',
+            title: 'sparql query',
+            resultQuery: 'select ?name { ?s ?p ?o }',
+            datasourceId: 'ds1',
+            tags: []
+          });
+
+          expect(queries[1].id).to.be('sql');
+          expect(queries[1].label).to.be('sql query');
+          expect(queries[1].value).to.eql({
+            id: 'sql',
+            title: 'sql query',
+            resultQuery: 'select name from person',
+            datasourceId: 'ds2',
+            tags: []
+          });
+
+          expect(queries[2].id).to.be('rest');
+          expect(queries[2].label).to.be('rest query');
+          expect(queries[2].value).to.eql({
+            id: 'rest',
+            title: 'rest query',
+            resultQuery: '',
+            datasourceId: 'ds3',
+            tags: []
+          });
+
+          expect(queries[3].id).to.be('rest_with_query_variables');
+          expect(queries[3].label).to.be('rest_with_query_variables query');
+          expect(queries[3].value).to.eql({
+            id: 'rest_with_query_variables',
+            title: 'rest_with_query_variables query',
+            resultQuery: '',
+            datasourceId: 'ds3',
+            rest_variables: '[' +
+              '{"name": "ids", "value": "$[*].id"},' +
+              '{"name": "names", "value": "$[*].name"}' +
+            ']',
+            tags: []
+          });
+
+          expect(queries[4].id).to.be('nodatasource');
+          expect(queries[4].label).to.be('nodatasource query');
+          expect(queries[4].value).to.eql({
+            id: 'nodatasource',
+            title: 'nodatasource query',
+            resultQuery: '',
+            datasourceId: '',
+            tags: []
+          });
+
+          expect(queries[5].id).to.be('q2');
+          expect(queries[5].label).to.be('q2 query');
+          expect(queries[5].value).to.eql({
+            id: 'q2',
+            title: 'q2 query',
+            tags: [ 'tag2', '42' ]
+          });
           done();
         }).catch(done);
       });
@@ -237,8 +310,8 @@ describe('Kibi Directives', function () {
         $httpBackend.whenGET('/elasticsearch/a/A/_search?size=10').respond(200, ids);
         stSelectHelper.getDocumentIds('a', 'A').then(function (data) {
           expect(data).to.have.length(2);
-          expect(data[0]).to.eql({ label: 'id1', value: 'id1' });
-          expect(data[1]).to.eql({ label: 'id2', value: 'id2' });
+          expect(data[0]).to.eql({ label: 'id1', value: 'id1', id: 'id1' });
+          expect(data[1]).to.eql({ label: 'id2', value: 'id2', id: 'id2' });
           done();
         }).catch(done);
         $httpBackend.flush();
@@ -265,7 +338,8 @@ describe('Kibi Directives', function () {
           var expectedTemplates = [
             {
               value: 'template-1',
-              label: 'template 1'
+              label: 'template 1',
+              id: 'template-1'
             }
           ];
           expect(templates).to.be.eql(expectedTemplates);
@@ -279,10 +353,12 @@ describe('Kibi Directives', function () {
         stSelectHelper.getSavedSearches().then(function (savedSearches) {
           var expectedSavedSearches = [
             {
+              id: 'search-ste',
               value: 'search-ste',
               label: undefined
             },
             {
+              id: 'time-testing-4',
               value: 'time-testing-4',
               label: undefined
             }
@@ -299,22 +375,27 @@ describe('Kibi Directives', function () {
           var expectedDashboards = [
             {
               value: 'Articles',
+              id: 'Articles',
               label: 'Articles'
             },
             {
               value: 'Companies',
+              id: 'Companies',
               label: 'Companies'
             },
             {
               value: 'time-testing-1',
+              id: 'time-testing-1',
               label: 'time testing 1'
             },
             {
               value: 'time-testing-2',
+              id: 'time-testing-2',
               label: 'time testing 2'
             },
             {
               value: 'time-testing-3',
+              id: 'time-testing-3',
               label: 'time testing 3'
             }
           ];
@@ -328,6 +409,7 @@ describe('Kibi Directives', function () {
       it('select datasources', function (done) {
         stSelectHelper.getDatasources().then(function (datasources) {
           expect(datasources).to.have.length(3);
+          expect(datasources[0].id).to.be('ds1');
           expect(datasources[0].value).to.be('ds1');
           expect(datasources[0].label).to.be('ds1 datasource');
           done();
@@ -353,6 +435,7 @@ describe('Kibi Directives', function () {
         $httpBackend.whenGET('/elasticsearch/dog/_mappings').respond(200, data);
         stSelectHelper.getIndexTypes('dog').then(function (types) {
           expect(types).to.have.length(1);
+          expect(types[0].id).to.be('animal');
           expect(types[0].label).to.be('animal');
           expect(types[0].value).to.be('animal');
           done();
@@ -375,8 +458,10 @@ describe('Kibi Directives', function () {
           expect(types).to.have.length(2);
           expect(types[0].label).to.be('animal');
           expect(types[0].value).to.be('animal');
+          expect(types[0].id).to.be('animal');
           expect(types[1].label).to.be('hero');
           expect(types[1].value).to.be('hero');
+          expect(types[1].id).to.be('hero');
           done();
         }).catch(done);
         $httpBackend.flush();
@@ -413,8 +498,10 @@ describe('Kibi Directives', function () {
           expect(ids).to.have.length(2);
           expect(ids[0].label).to.be('aaa');
           expect(ids[0].value).to.be('aaa');
+          expect(ids[0].id).to.be('aaa');
           expect(ids[1].label).to.be('bbb');
           expect(ids[1].value).to.be('bbb');
+          expect(ids[1].id).to.be('bbb');
           done();
         }).catch(done);
       });
@@ -423,8 +510,11 @@ describe('Kibi Directives', function () {
     describe('GetQueryVariables', function () {
       it('should returned undefined if no query ID is passed', function (done) {
         stSelectHelper.getQueryVariables()
+        .then(function (variables) {
+          done('should fail! ' + variables);
+        })
         .catch(function (err) {
-          expect(err.message).to.equal('No queryId');
+          expect(err.message).to.equal('Unable to get variables of unknown query');
           done();
         });
       });
@@ -442,8 +532,16 @@ describe('Kibi Directives', function () {
           expect(variables.fields).to.have.length(2);
           expect(variables.datasourceType).to.equal('rest');
           expect(variables.fields).to.eql([
-            {label: 'ids', value: 'ids'},
-            {label: 'names', value: 'names'}
+            {
+              label: 'ids',
+              id: 'ids',
+              value: 'ids'
+            },
+            {
+              label: 'names',
+              id: 'names',
+              value: 'names'
+            }
           ]);
           done();
         }).catch(done);
@@ -454,6 +552,7 @@ describe('Kibi Directives', function () {
           expect(variables.fields).to.have.length(1);
           expect(variables.fields[0].label).to.equal('name');
           expect(variables.fields[0].value).to.equal('name');
+          expect(variables.fields[0].id).to.equal('name');
           expect(variables.datasourceType).to.equal('mysql');
           done();
         }).catch(done);
@@ -464,6 +563,7 @@ describe('Kibi Directives', function () {
           expect(variables.fields).to.have.length(1);
           expect(variables.fields[0].label).to.equal('?name');
           expect(variables.fields[0].value).to.equal('name');
+          expect(variables.fields[0].id).to.equal('name');
           expect(variables.datasourceType).to.equal('sparql_http');
           done();
         }).catch(done);
@@ -512,6 +612,7 @@ describe('Kibi Directives', function () {
           expect(relations).to.have.length(1);
           expect(relations[0].label).to.be('mylabel');
           expect(relations[0].value).to.be('myid');
+          expect(relations[0].id).to.be('myid');
           done();
         }).catch(done);
       });
@@ -523,8 +624,10 @@ describe('Kibi Directives', function () {
           expect(types).to.have.length(2);
           expect(types[0].label).to.be('Font Awesome');
           expect(types[0].value).to.be('fontawesome');
+          expect(types[0].id).to.be('fontawesome');
           expect(types[1].label).to.be('Parameterized Relative Path');
           expect(types[1].value).to.be('relpath');
+          expect(types[1].id).to.be('relpath');
           done();
         }).catch(done);
       });
@@ -536,8 +639,10 @@ describe('Kibi Directives', function () {
           expect(types).to.have.length(2);
           expect(types[0].label).to.be('Document Field');
           expect(types[0].value).to.be('docField');
+          expect(types[0].id).to.be('docField');
           expect(types[1].label).to.be('Parameterized Field');
           expect(types[1].value).to.be('paramField');
+          expect(types[1].id).to.be('paramField');
           done();
         }).catch(done);
       });

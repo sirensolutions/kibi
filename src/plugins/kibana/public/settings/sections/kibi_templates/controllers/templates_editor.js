@@ -43,126 +43,126 @@ define(function (require) {
 
   app.controller('TemplatesEditor', function ($rootScope, $scope, $route, $window, kbnUrl, Private, createNotifier, queryEngineClient,
                                               $element) {
-      var _setEntityURI =  Private(require('ui/kibi/components/commons/_set_entity_uri'));
+    var _setEntityURI = Private(require('ui/kibi/components/commons/_set_entity_uri'));
 
-      var notify = createNotifier({
-        location: 'Templates editor'
-      });
-
-      $scope.holder = {
-        entityURI: '',
-        entityURIEnabled: false,
-        visible: true
-      };
-      $scope.preview = {
-        query: null
-      };
-
-      _setEntityURI($scope.holder);
-      var off = $rootScope.$on('kibi:selectedEntities:changed', function (event, se) {
-        _setEntityURI($scope.holder);
-      });
-      $scope.$on('$destroy', off);
-
-      $scope.jsonPreviewActive = false;
-      $scope.htmlPreviewActive = true;
-      $scope.tabClick = function () {
-        $scope.jsonPreviewActive = !$scope.jsonPreviewActive;
-        $scope.htmlPreviewActive = !$scope.htmlPreviewActive;
-      };
-
-
-      $scope.templateFinderOpen = false;
-      $scope.openTemplateFinder = function () {
-        $scope.templateFinderOpen = true;
-      };
-      $scope.closeTemplateFinder = function (hit, event) {
-        $scope.templateFinderOpen = false;
-        kbnUrl.change('settings/templates/' + hit.id);
-      };
-
-      var template = $scope.template = $route.current.locals.template;
-      $scope.$templateTitle = $route.current.locals.template.title;
-
-
-      $scope.jumpToQuery = function () {
-        kbnUrl.change('/settings/queries/' + _.get($scope, 'preview.query.id'));
-      };
-
-      var refreshPreview = function () {
-        $scope.json_preview_content = 'Loading ...';
-        $scope.html_preview_content = 'Loading ...';
-
-        if (_.get($scope, 'preview.query.id')) {
-          queryEngineClient.getQueriesHtmlFromServer(
-            [
-              {
-                open: true,
-                queryId: _.get($scope, 'preview.query.id'),
-                showFilterButton: false,
-                templateId: template.id,
-                templateVars: {
-                  label: '{{config.templateVars.label}}'
-                }
-              }
-            ],
-            {
-              selectedDocuments: [$scope.holder.entityURI]
-            }
-          ).then(function (resp) {
-            if (resp && resp.data && resp.data.snippets && resp.data.snippets.length === 1) {
-              var snippet = resp.data.snippets[0];
-              $scope.json_preview_content = JSON.stringify(snippet, null, ' ');
-
-              if (snippet.queryActivated === true) {
-                $scope.html_preview_content = snippet.html;
-              } else {
-                $scope.html_preview_content = 'Query deactivated. Check activation query or change entity URI';
-              }
-            }
-          });
-        }
-      };
-
-      $scope.$watch('holder.entityURI', function (entityURI) {
-        if (entityURI) {
-          refreshPreview();
-        }
-      });
-
-      $scope.$watch('preview.query', function (query) {
-        if (query) {
-          $scope.holder.entityURIEnabled = query.is_entity_dependent;
-          refreshPreview();
-        }
-      });
-
-      $scope.submit = function () {
-        if (!$element.find('form[name="objectForm"]').hasClass('ng-valid')) {
-          $window.alert('Please fill in all the required parameters.');
-          return;
-        }
-        var titleChanged = $scope.$templateTitle !== $scope.template.title;
-        template.id = template.title;
-        template.save().then(function (resp) {
-          // here flush the cache and refresh preview
-          queryEngineClient.clearCache().then(function () {
-            notify.info('Template ' + template.title + 'successfuly saved');
-            if (titleChanged) {
-              kbnUrl.change('/settings/templates/' + template.id);
-            } else {
-              refreshPreview();
-            }
-          });
-        });
-      };
-
-      $scope.aceLoaded = function (editor) {
-        return;
-      };
-
-      $scope.newTemplate = function () {
-        kbnUrl.change('/settings/templates', {});
-      };
+    var notify = createNotifier({
+      location: 'Templates editor'
     });
+
+    $scope.holder = {
+      entityURI: '',
+      entityURIEnabled: false,
+      visible: true
+    };
+    $scope.preview = {
+      query: null
+    };
+
+    _setEntityURI($scope.holder);
+    var off = $rootScope.$on('kibi:selectedEntities:changed', function (event, se) {
+      _setEntityURI($scope.holder);
+    });
+    $scope.$on('$destroy', off);
+
+    $scope.jsonPreviewActive = false;
+    $scope.htmlPreviewActive = true;
+    $scope.tabClick = function () {
+      $scope.jsonPreviewActive = !$scope.jsonPreviewActive;
+      $scope.htmlPreviewActive = !$scope.htmlPreviewActive;
+    };
+
+
+    $scope.templateFinderOpen = false;
+    $scope.openTemplateFinder = function () {
+      $scope.templateFinderOpen = true;
+    };
+    $scope.closeTemplateFinder = function (hit, event) {
+      $scope.templateFinderOpen = false;
+      kbnUrl.change('settings/templates/' + hit.id);
+    };
+
+    var template = $scope.template = $route.current.locals.template;
+    $scope.$templateTitle = $route.current.locals.template.title;
+
+
+    $scope.jumpToQuery = function () {
+      kbnUrl.change('/settings/queries/' + _.get($scope, 'preview.query.id'));
+    };
+
+    var refreshPreview = function () {
+      $scope.json_preview_content = 'Loading ...';
+      $scope.html_preview_content = 'Loading ...';
+
+      if (_.get($scope, 'preview.query.id')) {
+        queryEngineClient.getQueriesHtmlFromServer(
+          [
+            {
+              open: true,
+              queryId: _.get($scope, 'preview.query.id'),
+              showFilterButton: false,
+              templateId: template.id,
+              templateVars: {
+                label: '{{config.templateVars.label}}'
+              }
+            }
+          ],
+          {
+            selectedDocuments: [$scope.holder.entityURI]
+          }
+        ).then(function (resp) {
+          if (resp && resp.data && resp.data.snippets && resp.data.snippets.length === 1) {
+            var snippet = resp.data.snippets[0];
+            $scope.json_preview_content = JSON.stringify(snippet, null, ' ');
+
+            if (snippet.queryActivated === true) {
+              $scope.html_preview_content = snippet.html;
+            } else {
+              $scope.html_preview_content = 'Query deactivated. Check activation query or change entity URI';
+            }
+          }
+        });
+      }
+    };
+
+    $scope.$watch('holder.entityURI', function (entityURI) {
+      if (entityURI) {
+        refreshPreview();
+      }
+    });
+
+    $scope.$watch('preview.query', function (query) {
+      if (query) {
+        $scope.holder.entityURIEnabled = query.is_entity_dependent;
+        refreshPreview();
+      }
+    });
+
+    $scope.submit = function () {
+      if (!$element.find('form[name="objectForm"]').hasClass('ng-valid')) {
+        $window.alert('Please fill in all the required parameters.');
+        return;
+      }
+      var titleChanged = $scope.$templateTitle !== $scope.template.title;
+      template.id = template.title;
+      template.save().then(function (resp) {
+        // here flush the cache and refresh preview
+        queryEngineClient.clearCache().then(function () {
+          notify.info('Template ' + template.title + 'successfuly saved');
+          if (titleChanged) {
+            kbnUrl.change('/settings/templates/' + template.id);
+          } else {
+            refreshPreview();
+          }
+        });
+      });
+    };
+
+    $scope.aceLoaded = function (editor) {
+      return;
+    };
+
+    $scope.newTemplate = function () {
+      kbnUrl.change('/settings/templates', {});
+    };
+  });
 });

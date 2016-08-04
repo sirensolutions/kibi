@@ -29,7 +29,7 @@
   <input ng-show="getVariable" type="text" ng-model="modelObject.value" class="form-control"/>
 
   <select
-    ng-class="{ 'form-control' : !isInvalid(), 'ng-invalid form-control' : isInvalid() }"
+    ng-class="{ 'form-control' : true, 'ng-invalid' : isInvalid() }"
     ng-show="!getVariable"
     ng-model="modelObject"
     ng-options="item.label group by item.group for item in items | orderBy: 'label' track by item.id"

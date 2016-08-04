@@ -149,12 +149,12 @@ describe('Kibi Controllers', function () {
 
       $scope.$watch('holder.entityURI', function (entityURI) {
         if (entityURI) {
-          expect(entityURI).to.be('grishka');
+          expect(entityURI).to.be('url');
           done();
         }
       });
 
-      globalState.se = [ 'grishka' ];
+      globalState.se = [ 'url' ];
       $scope.$emit('kibi:selectedEntities:changed', '');
       $scope.$digest();
     });

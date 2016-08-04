@@ -18,13 +18,17 @@ define(function (require) {
     kbnIndex, createNotifier, Private, kbnUrl, Promise,
     queryEngineClient, kbnVersion, es, config) {
 
-    var cache = Private(require('ui/kibi/helpers/cache_helper')); // kibi: added by kibi
-    var deleteHelper = Private(require('ui/kibi/helpers/delete_helper')); // kibi: added by kibi
-    var kibiSessionHelper = Private(require('ui/kibi/helpers/kibi_session_helper/kibi_session_helper'));
+    // kibi: all below dependencies added by kibi to improve import/export and delete operations
+    const cache = Private(require('ui/kibi/helpers/cache_helper'));
+    const deleteHelper = Private(require('ui/kibi/helpers/delete_helper'));
+    const kibiSessionHelper = Private(require('ui/kibi/helpers/kibi_session_helper/kibi_session_helper'));
+    const refreshKibanaIndex = Private(require('plugins/kibana/settings/sections/indices/_refresh_kibana_index'));
+    const getIds = Private(require('ui/index_patterns/_get_ids'));
+    // kibi: end
 
     return {
       restrict: 'E',
-      controller: function ($scope, $injector, $q, AppState, es) {
+      controller: function ($scope, $injector, $q, AppState, es, indexPatterns) {
         const notify = createNotifier({ location: 'Saved Objects' });
 
         const $state = $scope.state = new AppState();
@@ -131,8 +135,15 @@ define(function (require) {
               results.hits.map((hit) => _.extend(hit, {type: service.type}))
             )
           ).then((results) => {
+            // kibi: added by kibi
             results.push([{id: kbnVersion, type: 'config'}]); // kibi: here we also want to export "config" type
-            retrieveAndExportDocs(_.flattenDeep(results));
+            return indexPatterns.getIds().then(function (list) {
+              _.each(list, (id) => {
+                results.push([{id: id, type: 'index-pattern'}]); // kibi: here we also want to export all index patterns
+              });
+              retrieveAndExportDocs(_.flattenDeep(results));
+            });
+            // kibi: end
           });
         };
 
@@ -173,8 +184,13 @@ define(function (require) {
             return o._type === 'config';
           });
 
+          // kibi: added to manage index-patterns import
+          const indexPatternDocuments = _.filter(docs, function (o) {
+            return o._type === 'index-pattern';
+          });
+
           docs = _.filter(docs, function (doc) {
-            return doc._type !== 'config';
+            return doc._type !== 'config' && doc._type !== 'index-pattern';
           });
 
           // kibi: added to sort the docs by type
@@ -199,14 +215,42 @@ define(function (require) {
             return queryEngineClient.clearCache();
           }
 
+          // kibi: load index-patterns
+          const createIndexPattern = function (doc) {
+            return es.index({
+              index: kbnIndex,
+              type: 'index-pattern',
+              id: doc._id,
+              body: doc._source
+            });
+          };
+
+          const loadIndexPatterns = function (indexPatternDocuments) {
+            if (indexPatternDocuments && indexPatternDocuments.length > 0) {
+              var promises = [];
+              _.each(indexPatternDocuments, (doc) => {
+                promises.push(createIndexPattern(doc));
+              });
+              return Promise.all(promises).then(() => {
+                // very important !!! to clear the cached promise
+                // which returns list of index patterns
+                getIds.clearCache();
+              });
+            } else {
+              return Promise.resolve(true);
+            }
+          };
+
           // kibi: override config properties
           const loadConfig = function (configDocument) {
             if (configDocument) {
               if (configDocument._id === kbnVersion) {
                 // override existing config values
+                var promises = [];
                 _.each(configDocument._source, function (value, key) {
-                  config.set(key, value);
+                  promises.push(config.set(key, value));
                 });
+                return Promise.all(promises);
               } else {
                 notify.error(
                   'Config object version [' + configDocument._id + '] in the import ' +
@@ -214,9 +258,10 @@ define(function (require) {
                   'Will NOT import any of the advanced settings parameters'
                 );
               }
+            } else {
+              // return Promise so we can chain the other part
+              return Promise.resolve(true);
             }
-            // return Promise so we can chain the other part
-            return Promise.resolve(true);
           };
 
           // kibi: now execute this sequentially
@@ -246,19 +291,15 @@ define(function (require) {
             );
           };
 
-          return loadConfig(configDocument).then(function () {
-            return executeSequentially(docs);
+          return loadIndexPatterns(indexPatternDocuments).then(function () {
+            return loadConfig(configDocument).then(function () {
+              return executeSequentially(docs);
+            });
           })
-          .then(refreshIndex)
+          .then(refreshKibanaIndex)
           .then(reloadQueries) // kibi: to clear backend cache
           .then(refreshData, notify.error);
         };
-
-        function refreshIndex() {
-          return es.indices.refresh({
-            index: kbnIndex
-          });
-        }
 
         function refreshData() {
           return getData($scope.advancedFilter);

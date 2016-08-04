@@ -21,7 +21,7 @@ define(function (require) {
     // kibi: all below dependencies added by kibi to improve import/export and delete operations
     const cache = Private(require('ui/kibi/helpers/cache_helper'));
     const deleteHelper = Private(require('ui/kibi/helpers/delete_helper'));
-    const kibiSessionHelper = Private(require('ui/kibi/helpers/kibi_session_helper/kibi_session_helper'));
+    const kibiSessionHelper = Private(require('ui/kibi/helpers/kibi_state_helper/kibi_session_helper'));
     const refreshKibanaIndex = Private(require('plugins/kibana/settings/sections/indices/_refresh_kibana_index'));
     const getIds = Private(require('ui/index_patterns/_get_ids'));
     // kibi: end

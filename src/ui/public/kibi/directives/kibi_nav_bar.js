@@ -55,7 +55,11 @@ define(function (require) {
 
         // close panel when user navigates to a different route
         var removeRouteChangeSuccessHandler = $rootScope.$on('$routeChangeSuccess', function (event, next, prev, err) {
-          $scope.relationalFilterPanelOpened = false;
+          if (!next.locals.dash) {
+            // only if we switched to a non dashboard page
+            $rootScope.$emit('relationalFilterPanelOpened', false);
+            $scope.relationalFilterPanelOpened = false;
+          }
         });
 
         // =============

@@ -13,30 +13,8 @@ describe('plugins/elasticsearch', function () {
     let kbnServer;
 
     before(function () {
-      this.timeout(15000); // sometimes waiting for server takes longer than 10
+      this.timeout(60000); // kibi: increased timeout for slower machines
 
-      // TODO: @scampi check if still needed
-      //return kbnServer.ready().then(function () {
-        //// kibi: added by kibi to make sure that there is no kibi index when this tests are run
-        //// here make sure that .kibi index does not exists
-        //return new Promise(function (fulfill, reject) {
-          //rp({
-            //method: 'DELETE',
-            //uri: url.parse('http://localhost:9210/' + kbnServer.server.config().get('kibana.index') + '/'),
-            //json: true,
-            //headers: {
-              //'content-type': 'application/json'
-            //},
-            //timeout: 1000
-          //}).then(function () {
-            //fulfill(true);
-          //}).catch(function (err) {
-            //// error here means that there was not kibi index - so all fine
-            //fulfill(true);
-          //});
-        //});
-        //// kibi: end
-      //});
       kbnServer = kbnTestServer.createServer();
       return kbnServer.ready()
       .then(() => kbnServer.server.plugins.elasticsearch.waitUntilReady());

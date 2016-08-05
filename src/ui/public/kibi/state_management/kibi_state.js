@@ -127,6 +127,11 @@ define(function (require) {
      * Reset the filters, queries, and time for each dashboard to their saved state.
      */
     KibiState.prototype.resetFiltersQueriesTimes = function () {
+      if (globalState.filters && globalState.filters.length) {
+        // remove pinned filters
+        globalState.filters = [];
+        globalState.save();
+      }
       if (this[this._properties.dashboards]) {
         return savedDashboards.find().then((resp) => {
           if (resp.hits) {
@@ -456,9 +461,9 @@ define(function (require) {
       }
       const smQuery = metas && metas.savedSearchMeta && metas.savedSearchMeta.query;
       if (smQuery && !_.isEqual(smQuery, query)) {
-        return Promise.resolve([ { query:  query }, { query: smQuery } ]);
+        return Promise.resolve([ { query }, { query: smQuery } ]);
       }
-      return Promise.resolve([ { query: query } ]);
+      return Promise.resolve([ { query } ]);
     };
 
     /**

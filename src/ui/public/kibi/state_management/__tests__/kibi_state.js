@@ -217,11 +217,26 @@ describe('State Management', function () {
         expect(kibiState.toObject()).to.eql({ fizz: 'buzz' });
       });
 
-      it('should fail if dashboard is not passed', function (done) {
-        kibiState.getState().catch(function (err) {
-          expect(err.message).to.be('Missing dashboard ID');
+      it('should not have a dashboard entry if every dashboard has no filter, default query/time', function (done) {
+        kibiState.getState('dashboard0')
+        .then(({ filters, queries, time }) => {
+          expect(filters).to.have.length(0);
+          expect(queries).to.have.length(1);
+          expect(kibiState._isDefaultQuery(queries[0])).to.be(true);
+          expect(kibiState[kibiState._properties.dashboards]).to.not.be.ok();
+          expect(time).to.be(null);
           done();
         }).catch(done);
+      });
+
+      it('should fail if dashboard is not passed', function (done) {
+        kibiState.getState()
+        .then(() => {
+          done('should fail');
+        }).catch(function (err) {
+          expect(err.message).to.be('Missing dashboard ID');
+          done();
+        });
       });
 
       it('should fail when the dashboard is not associated to a search', function () {
@@ -1236,6 +1251,12 @@ describe('State Management', function () {
 
     describe('Reset dashboards state', function () {
       beforeEach(() => init({
+        pinned: [
+          {
+            term: { field1: 'i am pinned' },
+            meta: { disabled: false }
+          }
+        ],
         savedDashboards: [
           {
             id: 'Articles',
@@ -1279,6 +1300,14 @@ describe('State Management', function () {
           }
         ]
       }));
+
+      it('should remove pinned filters', function (done) {
+        expect(globalState.filters).to.have.length(1);
+        kibiState.resetFiltersQueriesTimes().then(() => {
+          expect(globalState.filters).to.have.length(0);
+          done();
+        }).catch(done);
+      });
 
       it('should reset times, filters and queries to their default state on all dashboards', function (done) {
         kibiState._setDashboardProperty('Articles', kibiState._properties.filters, [

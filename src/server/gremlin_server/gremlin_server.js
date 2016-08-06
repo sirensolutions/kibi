@@ -152,6 +152,7 @@ function startServer(self, fulfill, reject) {
               }, counter == maxCounter ? initialTimeout : timeout);
             } else {
               self.server.log(['gremlin', 'error'], 'The Kibi gremlin server did not start correctly');
+              self.gremlinServer.kill('SIGINT');
               reject(new Error('The Kibi gremlin server did not start correctly'));
             }
           };

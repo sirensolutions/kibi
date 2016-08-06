@@ -257,8 +257,6 @@ define(function (require) {
       self.saveSource = function (source, force) {
         var finish = function (id) {
 
-          cache.flush(); // kibi: flush the cache after object was saved
-
           self.id = id;
           return es.indices.refresh({
             index: kbnIndex
@@ -269,9 +267,14 @@ define(function (require) {
         };
 
         if (force) { // kibi: if the force flag is true, silently updates the document
-          return docSource.doIndex(source);
+          return docSource.doIndex(source).then(() => {
+            cache.flush(); // kibi: flush the cache after object was saved
+          });
         } else {
           return docSource.doCreate(source)
+          .then(() => {
+            cache.flush(); // kibi: flush the cache after object was saved
+          })
           .then(finish)
           .catch(function (err) {
             // record exists, confirm overwriting

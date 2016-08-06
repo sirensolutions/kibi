@@ -119,8 +119,10 @@ function startServer(self, fulfill, reject) {
           self.gremlinServer.stdout.on('data', (data) => self.server.log(['gremlin', 'info'], ('' + data).trim()));
           self.gremlinServer.on('error', (err) => reject);
 
-          const counter = 15;
+          const maxCounter = 20;
+          const initialTimeout = 10000;
           const timeout = 5000;
+          const counter = maxCounter;
 
           self.ping = function (counter) {
             if (counter > 0) {
@@ -147,7 +149,7 @@ function startServer(self, fulfill, reject) {
                   counter--;
                   setTimeout(self.ping(counter), timeout);
                 });
-              }, timeout);
+              }, counter == maxCounter ? initialTimeout : timeout);
             } else {
               self.server.log(['gremlin', 'error'], 'The Kibi gremlin server did not start correctly');
               reject(new Error('The Kibi gremlin server did not start correctly'));

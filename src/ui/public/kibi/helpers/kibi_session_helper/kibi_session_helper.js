@@ -1,7 +1,7 @@
 define(function (require) {
   const _ = require('lodash');
 
-  return function KibiSessionHelperFactory($rootScope, $cookies, savedSessions, Promise, config, kibiState, createNotifier, Private) {
+  return function KibiSessionHelperFactory($rootScope, $cookies, savedSessions, Promise, config, kibiState, createNotifier) {
 
     var notify = createNotifier({
       location: 'KibiSessionHelper'
@@ -55,7 +55,7 @@ define(function (require) {
               kibiState.save();
             }
             if (s !== self.id) {
-              self._copySessionFrom(s, self.id).catch(notify.warning);
+              self._copySessionFromTo(s, self.id).catch(notify.warning);
             }
           });
 
@@ -79,7 +79,7 @@ define(function (require) {
               // make sure to always sync it first
               self.savedSession = savedSession;
               if (s !== self.id) {
-                self._copySessionFrom(s, self.id).then(function () {
+                self._copySessionFromTo(s, self.id).then(function () {
                   _initDone.apply(self);
                   fulfill(self.id);
                 }).catch(function (err) {
@@ -101,7 +101,7 @@ define(function (require) {
                 self.savedSession = savedSession;
                 return self._syncToIndex(savedSession).then(function () {
                   if (s !== self.id) {
-                    self._copySessionFrom(s, self.id).then(function () {
+                    self._copySessionFromTo(s, self.id).then(function () {
                       _initDone.apply(self);
                       fulfill(self.id);
                     }).catch(function (err) {
@@ -175,7 +175,7 @@ define(function (require) {
       }
     };
 
-    KibiSessionHelper.prototype._copySessionFrom = function (fromId, toId) {
+    KibiSessionHelper.prototype._copySessionFromTo = function (fromId, toId) {
       var self = this;
       return Promise.all([savedSessions.get(toId), savedSessions.get(fromId)]).then(([toSavedSession, fromSavedSession]) => {
         toSavedSession.session_data = fromSavedSession.session_data;

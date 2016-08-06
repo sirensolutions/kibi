@@ -1,91 +1,124 @@
 define(function (require) {
   const _ = require('lodash');
-  const SavedObjectNotFound = require('ui/errors').SavedObjectNotFound;
 
-  return function KibiSessionHelperFactory($rootScope, $cookies, savedSessions, Promise, config, kibiState, createNotifier) {
+  return function KibiSessionHelperFactory($rootScope, $cookies, savedSessions, Promise, config, kibiState, createNotifier, Private) {
 
     var notify = createNotifier({
       location: 'KibiSessionHelper'
     });
 
-    function KibiSessionHelper() {
+    const _resetInitFlags = function () {
+      this.initializing = false;
       this.initialized = false;
+    };
+
+    const _initDone = function () {
+      this.initialized = true;
+      this.initializing = false;
+    };
+
+    function KibiSessionHelper() {
+      _resetInitFlags.apply(this);
+      this.init();
     }
 
     KibiSessionHelper.prototype.init = function () {
       var self = this;
       if (self.initialized) {
         return Promise.resolve(self.id);
-      }
-
-      self.destroyListener1 = $rootScope.$on('kibi:session:changed:deleted', function (event, deletedId) {
-        // destroy and init the session only if current one was deleted from elasticsearch
-        self.getId().then(function (currentId) {
-          if (currentId === deletedId) {
-            self.destroy();
-            self.init();
-          }
-        });
-      });
-
-      self.destroyListener2 = $rootScope.$on('$routeChangeSuccess', function () {
-        var s = kibiState.getSessionId();
-        if (!s) {
-          // no sesion id
-          self.getId().then(function (sessionId) {
-            kibiState.setSessionId(sessionId);
-            kibiState.save();
-          }).catch(notify.error);
-
-        } else {
-          // there is a sesion id
-          self.getId().then(function (sessionId) {
-            if (s !== sessionId) {
-              return self._copySessionFrom(s).then(function (savedSession) {
-                kibiState.setSessionId(sessionId);
-                kibiState.save();
-              }).catch(function (err) {
-                notify.error(err);
-                if (err instanceof SavedObjectNotFound) {
-                  // something happen and the session object does not exists anymore
-                  // override the non-existing sessionId from the url
-                  // to prevent the error happenning again
-                  kibiState.setSessionId(sessionId);
-                  kibiState.save();
-                }
-              });
-            }
-          }).catch(notify.error);
-        }
-      });
-
-      var cookieId = $cookies.get('ksid');
-      if (cookieId) {
-        self.id = cookieId;
       } else {
-        self.id = self._generateId();
-        $cookies.put('ksid', self.id, {expires: self._getExpiresDate()});
-      }
-
-      return new Promise(function (fulfill, reject) {
-        savedSessions.get(self.id).then(function (savedSession) {
-          self.initialized = true;
-          self.savedSession = savedSession;
-          fulfill(self.id);
-        }).catch(function (err) {
-          savedSessions.get().then(function (savedSession) {
-            savedSession.title = self.id;
-            savedSession.id = self.id;
-            savedSession.session_data = {};
-            savedSession.timeCreated = new Date();
-            self._updateOrCreate(savedSession).then(function (savedSession) {
-              self.savedSession = savedSession;
-              self.initialized = true;
-              fulfill(self.id);
-            }).catch(reject);
+        if (self.initializing) {
+          return new Promise(function (resolve, reject) {
+            setTimeout(function () {
+              self.init().then(function () {
+                resolve(self.id);
+              });
+            }, 100);
           });
-        });
-      });
+        } else {
+          self.initializing = true;
+          self.destroyListener1 = $rootScope.$on('kibi:session:changed:deleted', function (event, deletedId) {
+            // destroy and init the session only if current one was deleted from elasticsearch
+            self.getId().then(function (currentId) {
+              if (currentId === deletedId) {
+                self.destroy();
+                self.init();
+              }
+            });
+          });
+
+          self.destroyListener2 = $rootScope.$on('$routeChangeSuccess', function () {
+            var s = kibiState.getSessionId();
+            if (!s) {
+              // no sesion id
+              kibiState.setSessionId(self.id);
+              kibiState.save();
+            }
+            if (s !== self.id) {
+              self._copySessionFrom(s, self.id).catch(notify.warning);
+            }
+          });
+
+          var cookieId = $cookies.get('ksid');
+          if (cookieId) {
+            self.id = cookieId;
+          } else {
+            self.id = self._generateId();
+            $cookies.put('ksid', self.id, {expires: self._getExpiresDate()});
+          }
+
+          var s = kibiState.getSessionId();
+          if (!s || s !== self.id) {
+            // no sesion id
+            kibiState.setSessionId(self.id);
+            kibiState.save();
+          }
+
+          return new Promise(function (fulfill, reject) {
+            savedSessions.get(self.id).then(function (savedSession) {
+              // make sure to always sync it first
+              self.savedSession = savedSession;
+              if (s !== self.id) {
+                self._copySessionFrom(s, self.id).then(function () {
+                  _initDone.apply(self);
+                  fulfill(self.id);
+                }).catch(function (err) {
+                  notify.warning(err); // notify that was not able to copy
+                  _initDone.apply(self);
+                  fulfill(self.id);
+                });
+              } else {
+                _initDone.apply(self);
+                fulfill(self.id);
+              }
+            }).catch(function (err) {
+              // could not get the session with self.id lets create new one
+              savedSessions.get().then(function (savedSession) {
+                savedSession.title = self.id;
+                savedSession.id = self.id;
+                savedSession.session_data = {};
+                savedSession.timeCreated = new Date();
+                self.savedSession = savedSession;
+                return self._syncToIndex(savedSession).then(function () {
+                  if (s !== self.id) {
+                    self._copySessionFrom(s, self.id).then(function () {
+                      _initDone.apply(self);
+                      fulfill(self.id);
+                    }).catch(function (err) {
+                      notify.warning(err); // notify that was not able to copy
+                      _initDone.apply(self);
+                      fulfill(self.id);
+                    });
+                  } else {
+                    _initDone.apply(self);
+                    fulfill(self.id);
+                  }
+                });
+              }).catch(reject);
+            });
+          });
+        }
+      }
     };
 
     KibiSessionHelper.prototype._getExpiresDate = function () {
@@ -113,11 +146,12 @@ define(function (require) {
       var self = this;
       return self.getId().then(function () {
         self.savedSession.session_data = data;
-        return self._updateOrCreate(self.savedSession);
+        return self._syncToIndex(self.savedSession);
       });
     };
 
-    KibiSessionHelper.prototype._updateOrCreate = function (savedSession) {
+    KibiSessionHelper.prototype._syncToIndex = function (savedSession) {
+      var self = this;
       return new Promise(function (fulfill, reject) {
         savedSession.timeUpdated = new Date();
         savedSession.save(true).then(function () {
@@ -132,7 +166,7 @@ define(function (require) {
       $cookies.remove('ksid');
       delete this.id;
       delete this.session_data;
-      this.initialized = false;
+      _resetInitFlags.apply(this);
       if (_.isFunction(this.destroyListener1)) {
         this.destroyListener1();
       }
@@ -141,14 +175,12 @@ define(function (require) {
       }
     };
 
-    KibiSessionHelper.prototype._copySessionFrom = function (idFrom) {
+    KibiSessionHelper.prototype._copySessionFrom = function (fromId, toId) {
       var self = this;
-      self.destroy();
-      return self.getId().then((toId) => {
-        return Promise.all([savedSessions.get(toId), savedSessions.get(idFrom)]).then(([toSavedSession, fromSavedSession]) => {
-          toSavedSession.session_data = fromSavedSession.session_data;
-          return self._updateOrCreate(toSavedSession);
-        });
+      return Promise.all([savedSessions.get(toId), savedSessions.get(fromId)]).then(([toSavedSession, fromSavedSession]) => {
+        toSavedSession.session_data = fromSavedSession.session_data;
+        self.savedSession = toSavedSession;
+        return self._syncToIndex(toSavedSession);
       });
     };
 

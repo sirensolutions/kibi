@@ -173,7 +173,7 @@ describe('Kibi Components', function () {
           resetCounters();
           kibiSessionHelper.destroy();
 
-          return kibiSessionHelper._copySessionFrom('fromId', 'toId').then(function (savedSession) {
+          return kibiSessionHelper._copySessionFromTo('fromId', 'toId').then(function (savedSession) {
             expect(savedSession.session_data.secret).to.eql(42);
             expect(savedSession.id).to.eql(expectedId);
             expect(saveSessionCounter).to.be(1);

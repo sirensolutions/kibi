@@ -82,7 +82,7 @@ define(function (require) {
           }
         });
 
-        if (forceUpdate || (query && lastFiredMultiCountQuery !== query)) {
+        if (query && (forceUpdate || lastFiredMultiCountQuery !== query)) {
           lastFiredMultiCountQuery = query;
 
           //Note: ?getCountsOnTabs has no meaning, it is just useful to filter when inspecting requests

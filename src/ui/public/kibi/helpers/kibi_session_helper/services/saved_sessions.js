@@ -38,7 +38,6 @@ define(function (require) {
       if (cacheKey && cache && cache.get(cacheKey)) {
         return cache.get(cacheKey);
       }
-      // Returns a promise that contains a dashboard which is a subclass of docSource
       var promise = (new SavedSession(id)).init();
       if (cacheKey && cache) {
         cache.set(cacheKey, promise);

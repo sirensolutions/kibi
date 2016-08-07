@@ -269,10 +269,9 @@ define(function (require) {
         };
 
         if (force) { // kibi: if the force flag is true, silently updates the document
-          return docSource.doIndex(source);
+          return docSource.doIndex(source).then(finish);
         } else {
-          return docSource.doCreate(source)
-          .then(finish)
+          return docSource.doCreate(source).then(finish)
           .catch(function (err) {
             // record exists, confirm overwriting
             if (_.get(err, 'origError.status') === 409) {

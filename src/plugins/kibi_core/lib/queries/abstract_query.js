@@ -8,7 +8,6 @@ var jade = require('jade');
 var kibiUtils = require('kibiutils');
 var debug = false;
 
-
 handlebars.registerHelper('json', function (context) {
   return JSON.stringify(context);
 });
@@ -50,8 +49,8 @@ function Query(server, snippetDefinition, cache) {
     queryPrefixes     : snippetDefinition.queryPrefixes || {}
   };
 
-  this.activationQueryRequireEntityURI = this._checkIfQueryRequireEntityURI(config.activationQuery);
-  this.resultQueryRequireEntityURI = this._checkIfQueryRequireEntityURI(config.resultQuery);
+  this.activationQueryRequireEntityURI = kibiUtils.doesQueryDependsOnEntity([ { activationQuery: config.activationQuery } ]);
+  this.resultQueryRequireEntityURI = kibiUtils.doesQueryDependsOnEntity([ { resultQuery: config.resultQuery } ]);
 
   this.config = config;
   this.config.prefixesString = _.map(this.config.queryPrefixes, function (value, key) {
@@ -74,13 +73,6 @@ Query.prototype.generateCacheKey = function (prefix, query, onlyValues, valueVar
     hash.update(arg && String(arg) || '-');
   });
   return hash.digest('hex');
-};
-
-Query.prototype._checkIfQueryRequireEntityURI  = function (query) {
-  if (query) {
-    return /@doc\[.+?]@/.test(query);
-  }
-  return false;
 };
 
 Query.prototype._checkIfSelectedDocumentRequiredAndNotPresent = function (options) {

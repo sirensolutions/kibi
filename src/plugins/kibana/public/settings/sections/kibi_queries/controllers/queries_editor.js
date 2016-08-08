@@ -50,7 +50,7 @@ define(function (require) {
               savedDatasources, Private, $element) {
 
       var setEntityUri = Private(require('ui/kibi/components/commons/_set_entity_uri'));
-      var doesQueryDependsOnEntity = Private(require('ui/kibi/components/commons/_does_query_depends_on_entity'));
+      var doesQueryDependOnEntity = require('kibiutils').doesQueryDependOnEntity;
 
       $scope.isJDBC = kibiUtils.isJDBC;
       $scope.isSPARQL = kibiUtils.isSPARQL;
@@ -204,7 +204,7 @@ define(function (require) {
         }
         var titleChanged = $scope.$queryTitle !== $scope.query.title;
         $scope.query.id = $scope.query.title;
-        const isEntityDependent = doesQueryDependsOnEntity([ $scope.query ]);
+        const isEntityDependent = doesQueryDependOnEntity([ $scope.query ]);
         $scope.holder.entityURIEnabled = isEntityDependent;
         $scope.query.is_entity_dependent = isEntityDependent;
         return $scope.query.save().then(function (savedQueryId) {

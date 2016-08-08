@@ -103,6 +103,28 @@ describe('Kibi Controllers', function () {
       expect($scope.starDetectedInAQuery).to.be(true);
     });
 
+    it('should detect comment lines for activationQuery', function () {
+      var query = {
+        title: 'commented lines',
+        activationQuery: 'select * \n' +
+                         'from test \n' +
+                         '/* where name \n' + '= \'@doc[_source][github_id]@\' */'
+      };
+      init({ query: query });
+      expect($scope.holder.entityURIEnabled).to.be(false);
+    });
+
+    it('should detect comment lines for resultQuery', function () {
+      var query = {
+        title: 'commented lines',
+        resultQuery: 'select * \n' +
+                     'from test \n' +
+                     '/* where name \n' + '= \'@doc[_source][github_id]@\' */'
+      };
+      init({ query: query });
+      expect($scope.holder.entityURIEnabled).to.be(false);
+    });
+
     it('should submit the query', function (done) {
       var query = {
         title: '123',

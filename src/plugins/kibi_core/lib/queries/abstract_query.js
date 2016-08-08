@@ -49,8 +49,8 @@ function Query(server, snippetDefinition, cache) {
     queryPrefixes     : snippetDefinition.queryPrefixes || {}
   };
 
-  this.activationQueryRequireEntityURI = kibiUtils.doesQueryDependsOnEntity([ { activationQuery: config.activationQuery } ]);
-  this.resultQueryRequireEntityURI = kibiUtils.doesQueryDependsOnEntity([ { resultQuery: config.resultQuery } ]);
+  this.activationQueryRequireEntityURI = kibiUtils.doesQueryDependOnEntity([ { activationQuery: config.activationQuery } ]);
+  this.resultQueryRequireEntityURI = kibiUtils.doesQueryDependOnEntity([ { resultQuery: config.resultQuery } ]);
 
   this.config = config;
   this.config.prefixesString = _.map(this.config.queryPrefixes, function (value, key) {

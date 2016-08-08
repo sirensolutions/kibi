@@ -59,7 +59,7 @@ define(function (require) {
 
   app.directive('dashboardApp', function (courier, AppState, timefilter, kbnUrl, createNotifier) {
     return {
-      controller: function (kibiState, globalState, $scope, $rootScope, $route, $routeParams, Private, getAppState) {
+      controller: function (config, kibiState, globalState, $scope, $rootScope, $route, $routeParams, Private, getAppState) {
 
         const queryFilter = Private(require('ui/filter_bar/query_filter'));
 
@@ -78,9 +78,16 @@ define(function (require) {
           timefilter.time.from = dashboardTime.f;
           timefilter.time.to = dashboardTime.t;
         } else if (dash.timeRestore && dash.timeTo && dash.timeFrom && !getAppState.previouslyStored()) {
+          // time saved with the dashboard
           timefilter.time.mode = dash.timeMode;
           timefilter.time.to = dash.timeTo;
           timefilter.time.from = dash.timeFrom;
+        } else {
+          // default time
+          const timeDefaults = config.get('timepicker:timeDefaults');
+          timefilter.time.mode = timeDefaults.mode;
+          timefilter.time.to = timeDefaults.to;
+          timefilter.time.from = timeDefaults.from;
         }
 
         // kibi: below listener on globalState is needed to react when the global time is changed by the user

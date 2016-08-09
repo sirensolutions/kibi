@@ -18,7 +18,7 @@ define(function (require) {
       return Promise.all(promises).then(function (results) {
         _.each(results, function (res, index) {
           filters[index].meta.dependsOnSelectedEntities = res;
-          filters[index].meta.dependsOnSelectedEntitiesDisabled = globalState.entityDisabled;
+          filters[index].meta.dependsOnSelectedEntitiesDisabled = res && globalState.entityDisabled;
           filters[index].meta.markDependOnSelectedEntities = globalState.se && globalState.se.length > 0;
         });
         return filters;

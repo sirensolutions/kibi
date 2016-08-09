@@ -1842,11 +1842,11 @@ describe('State Management', function () {
         }));
 
         it('should be disabled/enabled according to relationalPanel', function () {
-          expect(kibiState.isRelationalPanelEnabled()).to.not.be.ok();
+          expect(kibiState.isRelationalPanelButtonEnabled()).to.not.be.ok();
           config.set('kibi:relationalPanel', true);
-          expect(kibiState.isRelationalPanelEnabled()).to.be.ok();
+          expect(kibiState.isRelationalPanelButtonEnabled()).to.be.ok();
           config.set('kibi:relationalPanel', false);
-          expect(kibiState.isRelationalPanelEnabled()).to.not.be.ok();
+          expect(kibiState.isRelationalPanelButtonEnabled()).to.not.be.ok();
         });
 
         it('should be enabled if the plugin is installed', function () {

@@ -35,15 +35,9 @@ define(function (require) {
       restrict: 'E',
       template: require('ui/kibi/directives/kibi_relational_filter_panel.html'),
       link: function ($scope, $el) {
-        var _initScope = function () {
-          $scope.relationalPanel = {
-            enabled: config.get('kibi:relationalPanel'),
-            relations: config.get('kibi:relations')
-          };
-        };
-
         var _initPanel = function () {
-          var relDashboards = _.cloneDeep($scope.relationalPanel.relations.relationsDashboardsSerialized);
+          $scope.relations = config.get('kibi:relations');
+          var relDashboards = _.cloneDeep($scope.relations.relationsDashboardsSerialized);
           if (!relDashboards) {
             return;
           }
@@ -51,23 +45,25 @@ define(function (require) {
 
           _.each(relDashboards.links, function (link) {
             var relation = _.find(
-              $scope.relationalPanel.relations.relationsDashboards,
+              $scope.relations.relationsDashboards,
               {relation: link.data.id, dashboards: [link.source.replace(/^eegid-/, ''), link.target.replace(/^eegid-/, '')]}
             );
             if (!relation) {
               return;
             }
 
-            link.html = '<div>' +
-              '<input type="checkbox" ' + (kibiState.isRelationEnabled(relation) ? 'checked' : '') + '/>' +
-              '&nbsp;<label>' + link.linkType + '</label>' +
-              '</div>';
+            link.html = `
+              <div>
+                <input type="checkbox"
+                      ${kibiState.isRelationalPanelEnabled() ? '' : 'disabled'}
+                      ${kibiState.isRelationEnabled(relation) ? 'checked' : ''}/>
+                &nbsp;<label>${link.linkType}</label>
+              </div>`;
           });
-
 
           relDashboards.options.onLinkClick = function (el, d, i) {
             // find the relation
-            var relation = _.find($scope.relationalPanel.relations.relationsDashboards, function (r) {
+            var relation = _.find($scope.relations.relationsDashboards, function (r) {
               return r.dashboards.indexOf(d.source.label) !== -1 && r.dashboards.indexOf(d.target.label) !== -1;
             });
             if (relation) {
@@ -80,6 +76,9 @@ define(function (require) {
                 kibiState.disableRelation(relation);
               }
               kibiState.save();
+              // there is no need to redraw the panel
+              // so set ignoreNextConfigurationChangedEvent to true
+              $scope.ignoreNextConfigurationChangedEvent = true;
             }
           };
 
@@ -92,7 +91,7 @@ define(function (require) {
         };
 
         var _checkFilterJoinPlugin = function () {
-          var enabled = kibiState.isRelationalPanelEnabled();
+          var enabled = kibiState.isRelationalPanelButtonEnabled();
           var installed = kibiState.isSirenJoinPluginInstalled();
           if (enabled && !installed) {
             notify.error(
@@ -103,19 +102,16 @@ define(function (require) {
         };
 
         var off1 = $rootScope.$on('init:config', function () {
-          _initScope();
           _checkFilterJoinPlugin();
           _initPanel();
         });
 
-
         // recreate it after user change configuration
         var off2 = $rootScope.$on('change:config.kibi:relations', function () {
-          _initScope();
-          _checkFilterJoinPlugin();
           if ($scope.ignoreNextConfigurationChangedEvent === true) {
             $scope.ignoreNextConfigurationChangedEvent = false;
           } else {
+            _checkFilterJoinPlugin();
             _initPanel();
           }
         });
@@ -127,7 +123,8 @@ define(function (require) {
 
         const updateRelationalPanelOnSave = function (diff) {
           if (diff.indexOf(kibiState._properties.enabled_relations) !== -1 && !kibiState.getEnabledRelations().length) {
-            _initScope();
+            _initPanel();
+          } else if (diff.indexOf(kibiState._properties.enabled_relational_panel) !== -1) {
             _initPanel();
           }
         };

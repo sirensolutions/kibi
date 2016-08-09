@@ -103,7 +103,6 @@ describe('Kibi Controllers', function () {
       expect($scope.starDetectedInAQuery).to.be(true);
     });
 
-
     it('should not detect the subselect star for SPARQL', function () {
       var query = {
         title: 'ahah',
@@ -133,7 +132,6 @@ describe('Kibi Controllers', function () {
       expect($scope.holder.entityURIEnabled).to.be(false);
       expect($scope.starDetectedInAQuery).to.be(false);
     });
-
 
     it('should detect comment lines for activationQuery', function () {
       var query = {

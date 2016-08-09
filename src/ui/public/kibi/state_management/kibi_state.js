@@ -697,7 +697,8 @@ define(function (require) {
 
       const joinSetFilter = {
         meta: {
-          alias: filterAlias
+          alias: filterAlias,
+          disabled: !this.isRelationalPanelEnabled()
         },
         join_set: {
           focus: focusIndex,
@@ -875,7 +876,6 @@ define(function (require) {
             _.forOwn(timesPerIndex, (times, index) => _(times).uniq().compact().value());
             const filterAlias = _(dashboardIds).map((dashboardId, ind) => metas[ind].savedDash.title).sortBy().join(' <-> ');
             const joinSetFilter = this._getJoinSetFilter(index, filterAlias, filtersPerIndex, queriesPerIndex, timesPerIndex);
-            joinSetFilter.meta.disabled = !this.isRelationalPanelEnabled();
 
             const existingJoinSetFilterIndex = _.findIndex(filters, (filter) => filter.join_set);
             if (existingJoinSetFilterIndex !== -1) {

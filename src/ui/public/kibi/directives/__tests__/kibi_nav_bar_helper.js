@@ -168,12 +168,13 @@ describe('Kibi Directives', function () {
         const stub = sinon.stub(kibiNavBarHelper, 'updateAllCounts');
 
         [
-          kibiState._properties.groups
+          kibiState._properties.groups,
+          kibiState._properties.enabled_relational_panel
         ].forEach(function (property) {
           kibiState.emit('save_with_changes', [ property ]);
           $rootScope.$digest();
 
-          expect(stub.calledWith([ 'dashboard1' ], `KibiState change ["${property}"]`)).to.be(true);
+          expect(stub.calledWith([ 'dashboard1' ], `KibiState change ${JSON.stringify([ property ], null, ' ')}`)).to.be(true);
         });
       });
 
@@ -286,12 +287,14 @@ describe('Kibi Directives', function () {
         const stub = sinon.stub(kibiNavBarHelper, 'updateAllCounts');
 
         [
-          kibiState._properties.groups
+          kibiState._properties.groups,
+          kibiState._properties.enabled_relational_panel
         ].forEach(function (property) {
           kibiState.emit('save_with_changes', [ property ]);
           $rootScope.$digest();
 
-          expect(stub.calledWith([ 'dashboard1', 'dashboard2' ], `KibiState change ["${property}"]`)).to.be(true);
+          const actual = stub.calledWith([ 'dashboard1', 'dashboard2' ], `KibiState change ${JSON.stringify([ property ], null, ' ')}`);
+          expect(actual).to.be(true);
         });
       });
     });

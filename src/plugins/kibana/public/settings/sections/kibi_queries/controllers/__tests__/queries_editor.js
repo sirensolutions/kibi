@@ -103,6 +103,38 @@ describe('Kibi Controllers', function () {
       expect($scope.starDetectedInAQuery).to.be(true);
     });
 
+
+    it('should not detect the subselect star for SPARQL', function () {
+      var query = {
+        title: 'ahah',
+        activationQuery: 'SELECT ?id { { SELECT * { ?s :name ?o } }}'
+      };
+      init({ query: query });
+      expect($scope.holder.entityURIEnabled).to.be(false);
+      expect($scope.starDetectedInAQuery).to.be(false);
+    });
+
+    it('should detect the star for SQL query', function () {
+      var query = {
+        title: 'ahah',
+        activationQuery: 'select * from company limit 10'
+      };
+      init({ query: query });
+      expect($scope.holder.entityURIEnabled).to.be(false);
+      expect($scope.starDetectedInAQuery).to.be(true);
+    });
+
+    it('should not detect the subselect star for SQL', function () {
+      var query = {
+        title: 'ahah',
+        activationQuery: 'select id from ( select * from company limit 100 ) limit 10'
+      };
+      init({ query: query });
+      expect($scope.holder.entityURIEnabled).to.be(false);
+      expect($scope.starDetectedInAQuery).to.be(false);
+    });
+
+
     it('should detect comment lines for activationQuery', function () {
       var query = {
         title: 'commented lines',

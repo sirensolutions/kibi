@@ -135,9 +135,18 @@ define(function (require) {
         _enableEntityUri();
         if ($scope.datasourceType !== kibiUtils.DatasourceTypes.rest) {
           var starRegex = /\*/g;
+          var checkStarActivationQuery = false;
+          var checkStarResultQuery = false;
+
+          if ($scope.query.activationQuery) {
+            checkStarActivationQuery = starRegex.test($scope.query.activationQuery.replace(/\([^\)]*\)|\{[^\)]*\}/g, ''));
+          }
+          if ($scope.query.resultQuery) {
+            checkStarResultQuery = starRegex.test($scope.query.resultQuery.replace(/\([^\)]*\)|\{[^\)]*\}/g, ''));
+          }
           // test for a star in a query
           // TODO why test activationQuery ?
-          $scope.starDetectedInAQuery = starRegex.test($scope.query.activationQuery) || starRegex.test($scope.query.resultQuery);
+          $scope.starDetectedInAQuery = checkStarActivationQuery || checkStarResultQuery;
         }
       });
 

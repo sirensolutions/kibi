@@ -56,6 +56,10 @@ Kibi is currently developed as a fork of Kibana {kibana-version}. The plugin API
 
 This new version of Kibi provides many improvements and new features, the main one are listed below:
 
-TODO:
+* Support for object migration from kibi 4.4.2
+* Improved Export and Import - kibi is now able to export and reimport all configuration and index patterns
+* Add headers and params to a REST datasource configuration
+* Add more graph scripts to Graph Browser [Enterprise Edition only]
+* Scalability improvements in Graph Browser [Enterprise Edition only]
 
 To see all changes check <<releasenotes,full release notes>>

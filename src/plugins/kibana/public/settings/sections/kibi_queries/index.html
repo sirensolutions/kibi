@@ -114,7 +114,7 @@
               Special variables <b>@doc[_source][property_name]@</b> will be replaced by values extracted
               from the documents matching the current selection
             </span>
-            <span ng-if="starDetectedInAQuery && (isSPARQL(datasourceType) || isSQL(datasourceType))" style="color:orange;">
+            <span class="star_detected" ng-if="starDetectedInAQuery && (isSPARQL(datasourceType) || isSQL(datasourceType))" >
               <br/>
               Star symbol detected. Try to give an explicit list of variables to return
               - it is better performance wise and will simplify relational filters configuration.

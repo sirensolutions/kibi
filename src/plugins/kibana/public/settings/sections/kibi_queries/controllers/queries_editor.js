@@ -135,14 +135,17 @@ define(function (require) {
         _enableEntityUri();
         if ($scope.datasourceType !== kibiUtils.DatasourceTypes.rest) {
           var starRegex = /\*/g;
+          //used for remove lines between parenthesis or curly brackets
+          //shouldn't detect subselect star which is between parenthesis or curly brackets
+          var parenthesisOrCurlyBracketsRegex = /\([^\)]*\)|\{[^\)]*\}/g;
           var checkStarActivationQuery = false;
           var checkStarResultQuery = false;
 
           if ($scope.query.activationQuery) {
-            checkStarActivationQuery = starRegex.test($scope.query.activationQuery.replace(/\([^\)]*\)|\{[^\)]*\}/g, ''));
+            checkStarActivationQuery = starRegex.test($scope.query.activationQuery.replace(parenthesisOrCurlyBracketsRegex, ''));
           }
           if ($scope.query.resultQuery) {
-            checkStarResultQuery = starRegex.test($scope.query.resultQuery.replace(/\([^\)]*\)|\{[^\)]*\}/g, ''));
+            checkStarResultQuery = starRegex.test($scope.query.resultQuery.replace(parenthesisOrCurlyBracketsRegex, ''));
           }
           // test for a star in a query
           // TODO why test activationQuery ?

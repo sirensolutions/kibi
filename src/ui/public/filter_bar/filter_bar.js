@@ -167,9 +167,9 @@ define(function (require) {
         function updateFilters() {
           var filters = queryFilter.getFilters();
 
-          var prevDependsOnSelectedEntitiesDisabled = new Promise((resolve, reject) => {
-            resolve(_.map(filters, (filter) => filter.meta.dependsOnSelectedEntitiesDisabled));
-          });
+          var prevDependsOnSelectedEntitiesDisabled = Promise.resolve(
+            _.map(filters, (filter) => filter.meta.dependsOnSelectedEntitiesDisabled)
+          );
           var markFilters = prevDependsOnSelectedEntitiesDisabled.then(() => markFiltersBySelectedEntities(filters));
 
           mapAndFlattenFilters(filters).then(function (results) {
@@ -192,7 +192,7 @@ define(function (require) {
           // kibi: disable/enable filters that are dependent on the selected entity
           .then(([ prev, filters ]) => {
             _.each(filters, (filter, i) => {
-              if (prev[i] !== filter.meta.dependsOnSelectedEntitiesDisabled &&
+              if (prev[i] !== undefined && prev[i] !== filter.meta.dependsOnSelectedEntitiesDisabled &&
                   !filter.meta.disabled === filter.meta.dependsOnSelectedEntitiesDisabled) {
                 $scope.toggleFilter(filter);
               }

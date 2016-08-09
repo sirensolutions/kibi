@@ -59,30 +59,58 @@ describe('Kibi Components', function () {
         $rootScope.$apply();
       });
 
-      it('should mark disabled dbfilter with query which ' +
-         'depends on selected document and selected document is NOT disabled',
-          function (done) {
-            var filters = [
-              {
-                dbfilter: {
-                  queryid: 'query1'
-                },
-                meta: {}
-              }
-            ];
+      it('should mark disabled dbfilter with query which depends on selected document and selected document is disabled', function (done) {
+        var filters = [
+          {
+            dbfilter: {
+              queryid: 'query1'
+            },
+            meta: {}
+          }
+        ];
 
-            globalState.se = ['uri1'];
-            globalState.entityDisabled = true;
+        globalState.se = ['uri1'];
+        globalState.entityDisabled = true;
 
-            markFiltersBySelectedEntities(filters).then(function (filters) {
-              expect(filters[0].meta.dependsOnSelectedEntities).to.equal(true);
-              expect(filters[0].meta.dependsOnSelectedEntitiesDisabled).to.equal(true);
-              expect(filters[0].meta.markDependOnSelectedEntities).to.equal(true);
-              done();
-            });
+        markFiltersBySelectedEntities(filters).then(function (filters) {
+          expect(filters[0].meta.dependsOnSelectedEntities).to.equal(true);
+          expect(filters[0].meta.dependsOnSelectedEntitiesDisabled).to.equal(true);
+          expect(filters[0].meta.markDependOnSelectedEntities).to.equal(true);
+          done();
+        });
 
-            $rootScope.$apply();
-          });
+        $rootScope.$apply();
+      });
+
+      it('should not set dependsOnSelectedEntitiesDisabled to true if filter does not depend on entities', function (done) {
+        var filters = [
+          {
+            dbfilter: {
+              queryid: 'query1'
+            },
+            meta: {}
+          },
+          {
+            join_set: {},
+            meta: {}
+          }
+        ];
+
+        globalState.se = ['uri1'];
+        globalState.entityDisabled = true;
+
+        markFiltersBySelectedEntities(filters).then(function (filters) {
+          expect(filters[0].meta.dependsOnSelectedEntities).to.equal(true);
+          expect(filters[0].meta.dependsOnSelectedEntitiesDisabled).to.equal(true);
+          expect(filters[0].meta.markDependOnSelectedEntities).to.equal(true);
+          expect(filters[1].meta.dependsOnSelectedEntities).to.equal(false);
+          expect(filters[1].meta.dependsOnSelectedEntitiesDisabled).to.equal(false);
+          expect(filters[1].meta.markDependOnSelectedEntities).to.equal(true);
+          done();
+        });
+
+        $rootScope.$apply();
+      });
 
       it('should NOT mark dbfilter with query which does NOT depends on selected document', function (done) {
         var filters = [

@@ -111,6 +111,7 @@ define(function (require) {
       // properties available in the diff array with the save_with_changes event
       dashboards: 'd',
       enabled_relations: 'j',
+      enabled_relational_panel: 'e',
       groups: 'g',
       session_id: 's'
     };
@@ -781,7 +782,7 @@ define(function (require) {
       }
 
       // check siren-join plugin
-      if (this.isRelationalPanelEnabled() && !this.isSirenJoinPluginInstalled()) {
+      if (this.isRelationalPanelButtonEnabled() && !this.isSirenJoinPluginInstalled()) {
         const error = 'The SIREn Join plugin is enabled but not installed. Please install the plugin and restart Kibi, ' +
           'or disable the relational panel in Settings -> Advanced -> kibi:relationalPanel';
         return Promise.reject(new Error(error));
@@ -793,7 +794,7 @@ define(function (require) {
       };
 
       let dashboardIds = [ dashboardId ];
-      if (this.isRelationalPanelEnabled()) {
+      if (this.isRelationalPanelButtonEnabled()) {
         // collect ids of dashboards from enabled relations and in the connected component to dashboardId
         const tmpDashboardIds = this._getDashboardsIdInConnectedComponent(dashboardId, this.getEnabledRelations());
 
@@ -874,6 +875,7 @@ define(function (require) {
             _.forOwn(timesPerIndex, (times, index) => _(times).uniq().compact().value());
             const filterAlias = _(dashboardIds).map((dashboardId, ind) => metas[ind].savedDash.title).sortBy().join(' <-> ');
             const joinSetFilter = this._getJoinSetFilter(index, filterAlias, filtersPerIndex, queriesPerIndex, timesPerIndex);
+            joinSetFilter.meta.disabled = !this.isRelationalPanelEnabled();
 
             const existingJoinSetFilterIndex = _.findIndex(filters, (filter) => filter.join_set);
             if (existingJoinSetFilterIndex !== -1) {
@@ -967,8 +969,8 @@ define(function (require) {
       }
       if (!this.isRelationEnabled(relation)) {
         this[this._properties.enabled_relations].push(relation);
+        this.emit('relation', relation.dashboards);
       }
-      this.emit('relation', relation.dashboards);
     };
 
     KibiState.prototype.disableAllRelations = function () {
@@ -1001,7 +1003,19 @@ define(function (require) {
       return false;
     };
 
+    KibiState.prototype.toggleRelationalPanel = function () {
+      this[this._properties.enabled_relational_panel] = !this[this._properties.enabled_relational_panel];
+    };
+
     KibiState.prototype.isRelationalPanelEnabled = function () {
+      if (this[this._properties.enabled_relational_panel] === undefined) {
+        // initialize the property
+        this[this._properties.enabled_relational_panel] = true;
+      }
+      return this[this._properties.enabled_relational_panel];
+    };
+
+    KibiState.prototype.isRelationalPanelButtonEnabled = function () {
       return !!config.get('kibi:relationalPanel');
     };
 

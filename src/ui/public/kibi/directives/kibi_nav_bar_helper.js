@@ -225,9 +225,9 @@ define(function (require) {
       if (!currentDashboard) {
         return;
       }
-      if (diff.indexOf(kibiState._properties.groups) !== -1) {
+      if (diff.indexOf(kibiState._properties.groups) !== -1 || diff.indexOf(kibiState._properties.enabled_relational_panel) !== -1) {
         const dashboardsIds = addAllConnected.call(this, currentDashboard);
-        this.updateAllCounts(dashboardsIds, `KibiState change ["${kibiState._properties.groups}"]`);
+        this.updateAllCounts(dashboardsIds, `KibiState change ${JSON.stringify(diff, null, ' ')}`);
       }
     };
 

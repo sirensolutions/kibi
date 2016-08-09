@@ -150,6 +150,11 @@ define(function (require) {
       // Toggle the disabled flag
       var disabled = _.isUndefined(force) ? !filter.meta.disabled : !!force;
       filter.meta.disabled = disabled;
+      if (filter.join_set) {
+        // kibi: toggle the relational panel when touching the relational filter
+        kibiState.toggleRelationalPanel();
+        kibiState.save();
+      }
       return filter;
     };
 

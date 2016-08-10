@@ -5,19 +5,14 @@ define(function (require) {
 
   require('ui/modules').get('kibana/kibi_query_viewer_vis')
 
-  .directive('kibiQueryViewerVisParams', function ($rootScope, kbnUrl, createNotifier) {
-
-    var notify = createNotifier({
-      location: 'Kibi Query Viewer Params'
-    });
-
+  .directive('kibiQueryViewerVisParams', function (kbnUrl) {
     return {
       restrict: 'E',
       template: require('plugins/kibi_query_viewer_vis/kibi_query_viewer_vis_params.html'),
       link: function ($scope) {
         var updateScope = function () {
           $scope.jsonError = [];
-          $scope.vis.params.queryOptions = _.map($scope.vis.params.queryOptions, function (option, index) {
+          $scope.vis.params.queryDefinitions = _.map($scope.vis.params.queryDefinitions, function (option, index) {
             $scope.jsonError.push({
               message: '',
               block: ''
@@ -47,28 +42,19 @@ define(function (require) {
 
         $scope.$watch(function (myscope) {
           // only triggers when the queryId, template vars or the _label change
-          return _.map(myscope.vis.params.queryOptions, function (option) {
-            return option._templateVarsString + option._label + option.query.id;
+          return _.map(myscope.vis.params.queryDefinitions, function (option) {
+            return option._templateVarsString + option._label + option.queryId;
           });
         }, function () {
           updateScope();
-
-          let value = false;
-          _.each($scope.vis.params.queryOptions, (queryOption, index) => {
-            queryOption.isEntityDependent = queryOption.query.is_entity_dependent;
-            if (queryOption.query.is_entity_dependent) {
-              value = true;
-            }
-          });
-          $rootScope.$emit('kibi:entityURIEnabled:kibiqueryviewer', value);
         }, true);
 
         $scope.editTemplate = function (index) {
-          kbnUrl.change('/settings/templates/' + $scope.vis.params.queryOptions[index].templateId);
+          kbnUrl.change('/settings/templates/' + $scope.vis.params.queryDefinitions[index].templateId);
         };
 
         $scope.editQuery = function (index) {
-          kbnUrl.change('/settings/queries/' + $scope.vis.params.queryOptions[index].query.id);
+          kbnUrl.change('/settings/queries/' + $scope.vis.params.queryDefinitions[index].queryId);
         };
 
       }

@@ -112,15 +112,15 @@
           <div class="content">
             <div class="form-group">
               <label>Target query</label>
-              <kibi-select required object-type="query" ng-model="queryDefinition.query"></kibi-select>
+              <kibi-select required object-type="query" ng-model="queryDefinition.queryId"></kibi-select>
             </div>
             <div class="form-group">
               <label>Target query variable name</label>
               <kibi-select
                 required
                 object-type="queryVariable"
-                query-id="queryDefinition.query.id"
-                model-disabled="!queryDefinition.query.id"
+                query-id="queryDefinition.queryId"
+                model-disabled="!queryDefinition.queryId"
                 ng-model="queryDefinition.queryVariableName">
               </kibi-select>
             </div>

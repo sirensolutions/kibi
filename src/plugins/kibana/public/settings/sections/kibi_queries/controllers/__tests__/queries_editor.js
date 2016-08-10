@@ -85,7 +85,6 @@ describe('Kibi Controllers', function () {
     it('should enable the entity URI', function () {
       var query = {
         id: 'ahah',
-        is_entity_dependent: true,
         title: 'ahah',
         activationQuery: '@doc[id]@'
       };

@@ -54,13 +54,6 @@ define(function (require) {
 
         function setModelObject() {
           scope.modelObject = ngModelCtrl.$viewValue; //object
-          if (scope.modelObject) {
-            if (_.get(scope, 'modelObject.value.id')) {
-              scope.modelObject.id = scope.modelObject.value.id;
-            } else {
-              scope.modelObject.id = scope.modelObject.value;
-            }
-          }
         }
 
         scope.$watch(
@@ -115,7 +108,6 @@ define(function (require) {
 
           if (!formatted && modelValue) {
             formatted = {
-              id: modelValue,
               value: modelValue,
               label: ''
             };
@@ -182,7 +174,6 @@ define(function (require) {
             // object saved in the model is not in the list of items
             scope.modelObject = {
               value: '',
-              id: '',
               label: ''
             };
           }

@@ -38,7 +38,7 @@ SparqlQuery.prototype.checkIfItIsRelevant = function (options) {
   var self = this;
 
   if (self._checkIfSelectedDocumentRequiredAndNotPresent(options)) {
-    self.logger.warn('No elasticsearch document selected while required by the sparql activation query. [' + self.config.id + ']');
+    self.logger.warn('No elasticsearch document selected while required by the sparql query. [' + self.config.id + ']');
     return Promise.resolve(false);
   }
   var uri = options.selectedDocuments && options.selectedDocuments.length > 0 ? options.selectedDocuments[0] : '';
@@ -96,11 +96,6 @@ SparqlQuery.prototype.fetchResults = function (options, onlyIds, idVariableName)
   var start = new Date().getTime();
   var self = this;
 
-  // special case - we can not simply reject the Promise
-  // bacause this will cause the whole group of promissses to be rejected
-  if (self._checkIfSelectedDocumentRequiredAndNotPresent(options)) {
-    return self._returnAnEmptyQueryResultsPromise('No data because the query require entityURI');
-  }
   // currently we use only single selected document
   var uri = options.selectedDocuments && options.selectedDocuments.length > 0 ? options.selectedDocuments[0] : '';
 

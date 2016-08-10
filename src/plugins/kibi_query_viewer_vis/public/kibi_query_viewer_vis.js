@@ -24,7 +24,7 @@ define(function (require) {
       template: require('plugins/kibi_query_viewer_vis/kibi_query_viewer_vis.html'),
       params: {
         defaults: {
-          queryOptions: []
+          queryDefinitions: []
         },
         editor: '<kibi-query-viewer-vis-params></kibi-query-viewer-vis-params>'
       },

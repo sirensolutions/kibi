@@ -44,7 +44,7 @@ describe('Kibi Components', function () {
             name: 'kibi-data-table'
           },
           params: {
-            queryIds: [
+            queryDefinitions: [
               {queryId: 'query1'} // this query depends on selected entity
             ]
           }
@@ -65,7 +65,7 @@ describe('Kibi Components', function () {
             name: 'kibi-data-table'
           },
           params: {
-            queryIds: [
+            queryDefinitions: [
               {queryId: 'query2'}
             ]
           }
@@ -86,7 +86,7 @@ describe('Kibi Components', function () {
             name: 'kibi-data-table'
           },
           params: {
-            queryIds: [
+            queryDefinitions: [
               {queryId: 'query-does-not-exists'}
             ]
           }
@@ -108,7 +108,7 @@ describe('Kibi Components', function () {
             name: 'kibiqueryviewervis'
           },
           params: {
-            queryOptions: [
+            queryDefinitions: [
               {queryId: 'query1'} // this query depends on selected entity
             ]
           }
@@ -128,7 +128,7 @@ describe('Kibi Components', function () {
             name: 'kibiqueryviewervis'
           },
           params: {
-            queryOptions: [
+            queryDefinitions: [
               {queryId: 'query2'} // this query does NOT depends on selected entity
             ]
           }
@@ -148,7 +148,7 @@ describe('Kibi Components', function () {
             name: 'kibiqueryviewervis'
           },
           params: {
-            queryOptions: [
+            queryDefinitions: [
               {queryId: 'query-does-not-exists'}
             ]
           }
@@ -172,7 +172,11 @@ describe('Kibi Components', function () {
           aggs:[
             {
               params: {
-                queryIds: [{id: 'query1'}]
+                queryDefinitions: [
+                  {
+                    queryId: 'query1'
+                  }
+                ]
               }
             }
           ]
@@ -195,7 +199,11 @@ describe('Kibi Components', function () {
           aggs:[
             {
               params: {
-                queryIds: [{id: 'query2'}]
+                queryDefinitions: [
+                  {
+                    queryId: 'query2'
+                  }
+                ]
               }
             }
           ]
@@ -218,7 +226,11 @@ describe('Kibi Components', function () {
           aggs:[
             {
               params: {
-                queryIds: [{id: 'query-does-not-exists'}]
+                queryDefinitions: [
+                  {
+                    queryId: 'query-does-not-exists'
+                  }
+                ]
               }
             }
           ]
@@ -236,15 +248,14 @@ describe('Kibi Components', function () {
       });
 
 
-      it('vis pie - aggs do not contain queryIds', function (done) {
+      it('vis pie - aggs do not contain queryDefinitions', function (done) {
         var vis = {
           type: {
             name: 'pie'
           },
           aggs:[
             {
-              params: {
-              }
+              params: {}
             }
           ]
         };
@@ -266,7 +277,11 @@ describe('Kibi Components', function () {
           aggs:[
             {
               params: {
-                queryIds: [{id: 'query2'}]
+                queryDefinitions: [
+                  {
+                    queryId: 'query2'
+                  }
+                ]
               }
             }
           ]

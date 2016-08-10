@@ -13,7 +13,7 @@
     <div class="content">
       <div class="form-group">
         <label>Source query id</label>
-        <kibi-select object-type="query" ng-model="queryDefinition.query" required></kibi-select>
+        <kibi-select object-type="query" ng-model="queryDefinition.queryId" required></kibi-select>
       </div>
 
       <div class="form-group">
@@ -21,8 +21,8 @@
         <kibi-select
           required
           object-type="queryVariable"
-          model-disabled="!queryDefinition.query.id"
-          query-id="queryDefinition.query.id"
+          model-disabled="!queryDefinition.queryId"
+          query-id="queryDefinition.queryId"
           ng-model="queryDefinition.queryVariableName">
         </kibi-select>
       </div>

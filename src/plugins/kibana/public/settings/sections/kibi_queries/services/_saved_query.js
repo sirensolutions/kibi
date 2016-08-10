@@ -34,8 +34,7 @@ define(function (require) {
           rest_path: 'string',
           rest_resp_status_code: 'long',
           activation_rules: 'json',
-          version: 'integer',
-          is_entity_dependent: 'boolean'
+          version: 'integer'
         },
 
         defaults: {
@@ -53,8 +52,7 @@ define(function (require) {
           rest_path: '',
           rest_resp_status_code: 200,
           activation_rules: '[]',
-          version: 1,
-          is_entity_dependent: false
+          version: 1
         },
         init: function () {
           try {

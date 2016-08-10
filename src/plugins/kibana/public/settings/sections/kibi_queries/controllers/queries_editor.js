@@ -100,10 +100,7 @@ define(function (require) {
       $scope.$queryTitle = $route.current.locals.query.title;
 
       const _enableEntityUri = function () {
-        $scope.holder.entityURIEnabled = false;
-        if ($scope.query.id && $scope.query.is_entity_dependent) {
-          $scope.holder.entityURIEnabled = true;
-        }
+        $scope.holder.entityURIEnabled = doesQueryDependOnEntity([ $scope.query ]);
       };
       _enableEntityUri();
 
@@ -216,9 +213,7 @@ define(function (require) {
         }
         var titleChanged = $scope.$queryTitle !== $scope.query.title;
         $scope.query.id = $scope.query.title;
-        const isEntityDependent = doesQueryDependOnEntity([ $scope.query ]);
-        $scope.holder.entityURIEnabled = isEntityDependent;
-        $scope.query.is_entity_dependent = isEntityDependent;
+        _enableEntityUri();
         return $scope.query.save().then(function (savedQueryId) {
           notify.info('Query ' + $scope.query.title + ' successfuly saved');
           if (titleChanged) {

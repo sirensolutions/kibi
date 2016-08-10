@@ -34,13 +34,13 @@ define(function (require) {
 
       $scope.$watch(function (myscope) {
         return [
-          _.map(myscope.vis.params.queryOptions, 'templateId'),
-          _.map(myscope.vis.params.queryOptions, '_label'),
-          _.map(myscope.vis.params.queryOptions, 'query.id'),
+          _.map(myscope.vis.params.queryDefinitions, 'templateId'),
+          _.map(myscope.vis.params.queryDefinitions, '_label'),
+          _.map(myscope.vis.params.queryDefinitions, 'queryId'),
           myscope.holder.entityURI
         ];
       }, function () {
-        if ($scope.vis && $scope.vis.params.queryOptions && $scope.vis.params.queryOptions.length) {
+        if ($scope.vis && $scope.vis.params.queryDefinitions && $scope.vis.params.queryDefinitions.length) {
           $scope.renderTemplates();
         }
       }, true);
@@ -70,7 +70,7 @@ define(function (require) {
       });
 
       $scope.renderTemplates = function () {
-        if (!$scope.vis.params.queryOptions || $scope.vis.params.queryOptions.length === 0) {
+        if (!$scope.vis.params.queryDefinitions || $scope.vis.params.queryDefinitions.length === 0) {
           $scope.holder.html = '';
           $scope.holder.activeFetch = false;
           return;
@@ -78,7 +78,7 @@ define(function (require) {
 
         $scope.holder.activeFetch = true;
         return queryEngineClient.getQueriesHtmlFromServer(
-          $scope.vis.params.queryOptions,
+          $scope.vis.params.queryDefinitions,
           {
             selectedDocuments: [$scope.holder.entityURI]
           }
@@ -172,23 +172,23 @@ define(function (require) {
                 return;
               }
 
-              var queryOption = _.find($scope.vis.params.queryOptions, function (option) {
-                return option.query.id === snippet.data.config.id;
+              var queryDefinition = _.find($scope.vis.params.queryDefinitions, function (queryDef) {
+                return queryDef.queryId === snippet.data.config.id;
               });
 
               var dbFilter;
-              if (queryOption.targetField && queryOption.targetField !== '' &&
-                 queryOption.queryVariableName && queryOption.queryVariableName !== ''
+              if (queryDefinition.targetField && queryDefinition.targetField !== '' &&
+                 queryDefinition.queryVariableName && queryDefinition.queryVariableName !== ''
               ) {
                 dbFilter = {
                   meta: {
                     key: 'Relational Filter',
-                    value: queryOption.query.id
+                    value: queryDefinition.queryId
                   },
                   dbfilter:{
-                    queryid: queryOption.query.id,
-                    queryVariableName: queryOption.queryVariableName,
-                    path: queryOption.targetField
+                    queryid: queryDefinition.queryId,
+                    queryVariableName: queryDefinition.queryVariableName,
+                    path: queryDefinition.targetField
                   }
                 };
                 // add entity only if present - prevent errors when comparing 2 filters

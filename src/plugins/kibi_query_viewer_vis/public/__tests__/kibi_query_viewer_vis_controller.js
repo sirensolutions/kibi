@@ -56,7 +56,7 @@ describe('Kibi Controllers', function () {
 
     it('should display no result', function (done) {
       var params = {
-        queryOptions: [ 123 ]
+        queryDefinitions: [ 123 ]
       };
 
       init({ params: params });
@@ -69,11 +69,9 @@ describe('Kibi Controllers', function () {
 
     it('should display the template', function (done) {
       var params = {
-        queryOptions: [
+        queryDefinitions: [
           {
-            query: {
-              id: 123
-            }
+            queryId: 123
           }
         ]
       };
@@ -96,11 +94,9 @@ describe('Kibi Controllers', function () {
 
     it('should warn that the query is not activated', function (done) {
       var params = {
-        queryOptions: [
+        queryDefinitions: [
           {
-            query: {
-              id: 123
-            }
+            queryId: 123
           }
         ]
       };

@@ -78,8 +78,6 @@ QueryHelper.prototype.replaceVariablesUsingEsDocument = function (s, uri, creden
   var type = parts[1];
   var id = parts[2];
 
-  // TODO: add caching of document
-
   return self.fetchDocument(index, type, id, credentials).then(function (doc) {
     //now parse the query and replace the placeholders
     if (typeof s === 'string' || s instanceof String) {
@@ -94,6 +92,7 @@ QueryHelper.prototype.replaceVariablesUsingEsDocument = function (s, uri, creden
   });
 };
 
+  // TODO: kibi: add caching of document
 
 QueryHelper.prototype.fetchDocument = function (index, type, id, credentials) {
   var self = this;

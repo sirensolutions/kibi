@@ -56,7 +56,7 @@ define(function (require) {
         description: 'Fields that exist outside of _source to merge into our document when displaying it',
       },
       'discover:sampleSize': {
-        value: 500,
+        value: 50, // kibi: in kibi the default is 50
         description: 'The number of rows to show in the table',
       },
       'doc_table:highlight': {

@@ -29,7 +29,6 @@ SQLiteQuery.prototype = _.create(AbstractQuery.prototype, {
 SQLiteQuery.prototype.openConnection = function () {
   var dbfile = this.config.datasource.datasourceClazz.datasource.datasourceParams.db_file_path;
   var modes  = this.config.datasource.datasourceClazz.datasource.datasourceParams.modes;
-  //TODO: how to pass one or more modes ??
 
   var timeout = this.config.datasource.datasourceClazz.datasource.datasourceParams.timeout;
   if (!timeout) {
@@ -53,7 +52,22 @@ SQLiteQuery.prototype.openConnection = function () {
       }
     }
 
-    var db = new sqlite3.Database(dbfile, sqlite3.OPEN_READONLY, function (error) {
+    var modeValue = 0;
+    _.each(modes, function (mode) {
+      switch (mode) {
+        case 'OPEN_READONLY':
+          modeValue = modeValue | sqlite3.OPEN_READONLY;
+          break;
+        case 'OPEN_READWRITE':
+          modeValue = modeValue | sqlite3.OPEN_READWRITE;
+          break;
+        case 'OPEN_CREATE':
+          modeValue = modeValue | sqlite3.OPEN_CREATE;
+          break;
+      }
+    });
+
+    var db = new sqlite3.Database(dbfile, modeValue, function (error) {
       if (error) {
         reject(self._augmentError(error));
         return;

@@ -309,7 +309,7 @@ describe('paginated table', function () {
       paginatedTable = $el.isolateScope().paginatedTable;
     });
 
-    // TODO: This is failing randomly
+    // TODO: / Kibi / This is failing randomly
     it('should allow custom sorting handler', function () {
       var columnIndex = 1;
       paginatedTable.sortColumn(columnIndex);

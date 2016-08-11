@@ -5,7 +5,7 @@ define(function (require) {
 
   require('ui/modules')
   .get('kibana')
-  // TODO: all of this really belongs in the timepicker
+  // TODO: / Kibi / all of this really belongs in the timepicker
   .directive('chromeContext', function (timefilter, globalState, $rootScope, createNotifier, config) {
 
     var listenForUpdates = _.once(function ($scope) {

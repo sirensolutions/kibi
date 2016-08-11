@@ -94,7 +94,7 @@ describe('kibana cli', function () {
           });
         });
 
-        // TODO correct test: fails only on jenkins
+        // TODO  / Kibi / correct test: fails only on jenkins
         // Error: Client request error: Parse Error
         xit('should throw an ENOTFOUND error for an invalid url', function () {
           const sourceUrl = 'i am an invalid url';
@@ -210,7 +210,7 @@ describe('kibana cli', function () {
           });
         });
 
-        // TODO correct test: fails only on jenkins
+        // TODO  / Kibi / correct test: fails only on jenkins
         // Error: Client request error: Parse Error
         xit('should copy a zip from a valid local file', function () {
           const filePath = join(__dirname, 'replies/test_plugin_master.zip');
@@ -228,7 +228,7 @@ describe('kibana cli', function () {
     });
 
     describe('download', function () {
-      // TODO correct test: fails only on jenkins
+      // TODO  / Kibi / correct test: fails only on jenkins
       // Error: Client request error: Parse Error
       xit('should loop through bad urls until it finds a good one.', function () {
         const filePath = join(__dirname, 'replies/test_plugin_master.tar.gz');

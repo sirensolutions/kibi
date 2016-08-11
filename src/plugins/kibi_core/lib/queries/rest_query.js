@@ -136,7 +136,7 @@ RestQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) {
             throw new Error(msg);
           }
 
-          // TODO: change this once we support xml resp or text resp
+          // TODO: / Kibi / change this once we support xml resp or text resp
           var json;
           try {
             json = JSON.parse(body);

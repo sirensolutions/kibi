@@ -17,6 +17,7 @@ program
 // attach commands
 require('./serve/serve')(program);
 require('./plugin/plugin')(program);
+require('./kibi/replace_encryption_key')(program);
 
 program
 .command('help <command>')

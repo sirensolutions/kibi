@@ -3,11 +3,21 @@ const path = require('path');
 const Boom = require('boom');
 const errors = require('request-promise/errors');
 
+/**
+ * The Kibi core plugin.
+ *
+ * The plugin exposes the following methods to other hapi plugins:
+ *
+ * - getQueryEngine: returns an instance of QueryEngine.
+ * - getIndexHelper: returns an instance of IndexHelper.
+ */
 module.exports = function (kibana) {
 
   var datasourcesSchema = require('./lib/datasources_schema');
   var QueryEngine = require('./lib/query_engine');
+  var IndexHelper = require('./lib/index_helper');
   var queryEngine;
+  var indexHelper;
 
   var _validateQueryDefs = function (queryDefs) {
     if (queryDefs && queryDefs instanceof Array) {
@@ -119,8 +129,10 @@ module.exports = function (kibana) {
         this.status.red('Query engine initializiation failed');
       });
 
-      // expose the queryengine to the other Hapi plugins
       server.expose('getQueryEngine', () => queryEngine);
+
+      indexHelper = new IndexHelper(server);
+      server.expose('getIndexHelper', () => indexHelper);
 
       server.route({
         method: 'GET',

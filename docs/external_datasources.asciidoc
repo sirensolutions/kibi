@@ -78,33 +78,33 @@ endif::[]
 
 === Parameters encryption
 
-Sensitive datasource configuration elements like passwords
-are encrypted before they are stored in .kibi index.
-Make sure to change *datasource_encryption_key* in kibi.yml.
-To do it use scripts provided in **bin/** folder.
+Sensitive datasource parameters like passwords are encrypted before being
+stored in the ```.kibi``` index.
 
-Linux:
-
-```
-bin/replace_encryption_key.sh OLD_KEY ALGORITHM NEW_KEY PATH_TO_KIBI_YML
-```
-
-Windows:
+Before creating datasources containing sensitive parameters, make sure to set
+a custom encryption key by running the ```replace_encryption_key``` command:
 
 ```
-bin\replace_encryption_key.bat OLD_KEY ALGORITHM NEW_KEY PATH_TO_KIBI_YML
+bin/kibi replace_encryption_key [options] <current_key> <new_key> <new_cipher>
 ```
 
-Where:
+* **<current_key>** a base64 encoded string containing the current encryption key.
+* **<new_key>** a base64 encoded string containing the new encryption key.
+* **<new_cipher>** the cipher algorithm to use (currently only AES-GCM is supported).
 
-* **OLD_KEY** and **NEW_KEY** - a base64encoded string which contain a key which is either 16, 24, or 32 bytes long,
-e.g. if your key in plaintext is 32 bytes long string ```changemechangemechangemechangeme``` after base64 encoding
-it should be ```Y2hhbmdlbWVjaGFuZ2VtZWNoYW5nZW1lY2hhbmdlbWU=```
-* **ALGORITHM** - currently only AES-GCM is supported
-* **PATH_TO_KIBI_YML** - an absolute path to kibi.yml file
+The current encryption key can be read from the ```kibi.yml``` file in the
+```datasource_encryption_key``` parameter.
 
-NOTE: Make sure to set the configuration file as readable only to the user running
-the Kibi process as it contains the *datasource_encryption_key*.
+Keys can have a length of 16, 24 or 32 bytes; a quick way to encode a plaintext
+string to base64 is to use the ```base64``` utility from the coreutils package:
+
+```
+$ echo -n changemechangemechangemechangeme | base64
+Y2hhbmdlbWVjaGFuZ2VtZWNoYW5nZW1lY2hhbmdlbWU=
+```
+
+NOTE: Make sure to set the configuration file as readable only by the user
+running the Kibi process.
 
 [[entity_selection]]
 === Datasource entity selection

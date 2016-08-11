@@ -2,6 +2,8 @@
 var expect = require('expect.js');
 var Promise = require('bluebird');
 var fs = require('fs');
+var sinon = require('sinon');
+var mockery = require('mockery');
 
 var kibiIndex = '.kibi';
 var fakeServer = {
@@ -56,14 +58,105 @@ var fakeServer = {
 var fakeKibiYmlPath    = __dirname + '/../../../../fixtures/fake_kibi.yml';
 var fakeKibiYmlBakPath = __dirname + '/../../../../fixtures/fake_kibi.yml.bak';
 
+var IndexHelper;
+var indexHelper;
 
 describe('Index Helper', function () {
 
+  describe('swapKibiYml', function () {
+
+    beforeEach(function () {
+      sinon.stub(fs, 'readFile', (path, enc, cb) => {
+        if (path === 'nofile') {
+          cb(new Error('File not found'));
+        } else {
+          cb(undefined, 'datasource_encryption_algorithm: olga\n' +
+            'datasource_encryption_key: yek\n' +
+            'unchanged: unchanged');
+        }
+      });
+      sinon.stub(fs, 'rename', (curPath, newPath, cb) => {
+        if (curPath === 'norename') {
+          cb(new Error(''));
+        } else {
+          cb();
+        }
+      });
+      sinon.stub(fs, 'writeFile', (path, enc, cb) => cb(new Error('')));
+
+      mockery.enable({
+        warnOnReplace: true,
+        warnOnUnregistered: false,
+        useCleanCache: true
+      });
+      mockery.registerMock('fs', fs);
+      IndexHelper = require('../index_helper');
+      indexHelper = new IndexHelper(fakeServer);
+    });
+
+    it('should fail when the file can\'t be read', function (done) {
+      indexHelper.swapKibiYml('nofile', 'algo', 'key')
+        .then(function () {
+          done(new Error('Unexpected success.'));
+        })
+        .catch(function () {
+          done();
+        });
+    });
+
+    it('should fail when the file can\'t be backed up', function (done) {
+      indexHelper.swapKibiYml('norename', 'algo', 'key')
+        .then(() => {
+          done(new Error('Unexpected success.'));
+        })
+        .catch((error) => {
+          try {
+            expect(error.message)
+              .to.equal('Could not rename file "norename", please replace its contents ' +
+              'with the following:\n\n' +
+              `datasource_encryption_algorithm: 'algo'\n` +
+              `datasource_encryption_key: 'key'\n` +
+              'unchanged: unchanged');
+            done();
+          } catch (error) {
+            done(error);
+          }
+        });
+    });
+
+    it('should fail when the file can\'t be written', function (done) {
+      indexHelper.swapKibiYml('somefile', 'algo', 'key')
+        .then(() => done(new Error('Unexpected success.')))
+        .catch((error) => {
+          try {
+            expect(error.message)
+              .to.equal('Could not write file "somefile", please check the permissions of the directory and write ' +
+              'the following configuration to the file:\n\n' +
+              `datasource_encryption_algorithm: 'algo'\n` +
+              `datasource_encryption_key: 'key'\n` +
+              'unchanged: unchanged');
+            done();
+          } catch (error) {
+            done(error);
+          }
+        });
+    });
+
+    afterEach(function (done) {
+      fs.readFile.restore();
+      fs.rename.restore();
+      fs.writeFile.restore();
+      mockery.disable();
+      mockery.deregisterAll();
+      done();
+    });
+
+  });
 
   describe('rencryptAllValuesInKibiIndex should fail', function () {
 
-    var IndexHelper = require('../index_helper');
-    var indexHelper = new IndexHelper(fakeServer);
+    IndexHelper = require('../index_helper');
+    indexHelper = new IndexHelper(fakeServer);
 
     it('when no old key', function (done) {
       indexHelper.rencryptAllValuesInKibiIndex().catch(function (err) {
@@ -103,6 +196,9 @@ describe('Index Helper', function () {
   });
 
   describe('rencryptAllValuesInKibiIndex should work', function () {
+    IndexHelper = require('../index_helper');
+    indexHelper = new IndexHelper(fakeServer);
+
     after(function (done) {
       // if there is fake_kibi.yml.bak in fixtures
       // rename it back to fake_kibi.yml
@@ -119,24 +215,10 @@ describe('Index Helper', function () {
     });
 
     it('reencrypt with the same key to check that file was created', function (done) {
-      var IndexHelper = require('../index_helper');
-      var indexHelper = new IndexHelper(fakeServer);
-
-      var expected = [
-        'Got 1 datasources.',
-        'param: password value: AES-GCM:NhxjhWFkEf8wrxfAA1oHo644:CgMFVVVQAAMAoAAA:FaPn/SPOXfqYMWNysdOkVw==',
-        'decrypted value',
-        'encrypted the value',
-        'Saving new kibi.yml',
-        'New kibi.yml saved. Old kibi.yml moved to kibi.yml.bak',
-        'DONE'
-      ];
-
       indexHelper.rencryptAllValuesInKibiIndex(
         'iSxvZRYisyUW33FreTBSyJJ34KpEquWznUPDvn+ka14=', 'AES-GCM',
         'JhWzsL2ZrgiaPjv+sHtMIPSDxu3yfPvNqMSQoEectxo=', fakeKibiYmlPath)
-      .then(function (report) {
-        expect(report).to.eql(expected);
+      .then(function () {
         expect(fs.existsSync(fakeKibiYmlPath)).to.equal(true);
         expect(fs.existsSync(fakeKibiYmlBakPath)).to.equal(true);
         done();

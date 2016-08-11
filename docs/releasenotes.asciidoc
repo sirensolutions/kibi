@@ -1,8 +1,14 @@
 [[releasenotes]]
 == Kibi Release Notes
 
-=== Kibi 4.4.2-1 Release Notes
+=== Kibi 4.4.2-2 Release Notes
 
+* Backport fix for Truncate document label if too long
+* Backport fix for Error when label is used for a purple filter is an array
+* Backport fix for Export/Import takes care about index patterns too
+* Bumped timeline version to 4.4.2-2
+
+=== Kibi 4.4.2-1 Release Notes
 
 * Backport fix for broken tiles in map widget
 * Backport fix for broken import export of objects

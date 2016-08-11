@@ -7,7 +7,9 @@ module.exports = {
     webdriver: {
       protocol: process.env.TEST_UI_WEBDRIVER_PROTOCOL || 'http',
       hostname: process.env.TEST_UI_WEBDRIVER_HOSTNAME || 'localhost',
-      port: parseInt(process.env.TEST_UI_WEBDRIVER_PORT, 10) || 4444
+      port: parseInt(process.env.TEST_UI_WEBDRIVER_PORT, 10) || 4444,
+      // kibi: by passing TEST_UI_PROXY_PORT we can run 2 test:ui processes on the same box
+      proxyPort: parseInt(process.env.TEST_UI_PROXY_PORT, 10) || 9000
     },
     kibana: {
       protocol: process.env.TEST_UI_KIBANA_PROTOCOL || 'http',

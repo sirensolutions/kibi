@@ -13,6 +13,7 @@ src/cli/cluster/ClusterManager.js
 src/cli/plugin/__tests__/plugin_downloader.js
 src/cli/plugin/plugin.js
 src/cli/serve/serve.js
++src/cli/kibi
 
 src/fixtures/mock_state.js
 src/fixtures/stubbed_doc_source_response.js

@@ -10,7 +10,7 @@ var logger = require('./logger');
 function IndexHelper(server) {
   this.server = server;
   this.config = server.config();
-  this.log = logger(server, 'index_helper');
+  this.logger = logger(server, 'kibi_core/index_helper');
   this.client = server.plugins.elasticsearch.client;
 }
 
@@ -24,7 +24,21 @@ IndexHelper.prototype._getDefinitionFromSchema = function (schema, name) {
   return null;
 };
 
-IndexHelper.prototype.rencryptAllValuesInKibiIndex = function (oldkey, algorithm, key, path) {
+/**
+ * Re-encrypts the encrypted parameters in datasource objects and updates the
+ * value of the following parameters in the configuration file:
+ *
+ * - kibi_core -> datasource_encryption_algorithm.
+ * - kibi_core -> datasource_encryption_key.
+ *
+ * The original configuration file is renamed by appending the `.bak` extension.
+ *
+ * @param oldkey - The current encryption key.
+ * @param algorithm - The cipher algorithm.
+ * @param key - The new key.
+ * @param path - The path to the configuration file.
+ */
+IndexHelper.prototype.rencryptAllValuesInKibiIndex = async function (oldkey, algorithm, key, path) {
   if (!oldkey) {
     return Promise.reject(new Error('oldkey not defined'));
   }
@@ -42,85 +56,81 @@ IndexHelper.prototype.rencryptAllValuesInKibiIndex = function (oldkey, algorithm
   }
 
   var self = this;
-  var report = [];
-    // get all datasources
-  return self.getDatasources().then(function (res1) {
 
-    report.push('Got ' + res1.length + ' datasources.');
-    // now assemble the bulk api request body
-    var body = '';
-    var error = null;
-    _.each(res1, function (datasource) {
-      body += JSON.stringify({index: {_index: datasource._index, _type: datasource._type, _id: datasource._id} }) + '\n';
+  let datasourcesResponse = await self.getDatasources();
+  var body = '';
 
-      // here get the properties which should be encrypted according to the shema
-      var type = datasource._source.datasourceType;
-      if (kibiUtils.isJDBC(type)) {
-        type = 'jdbc';
-      }
-      var schema = datasourcesSchema[type].concat(datasourcesSchema.base);
-      var params = {};
-      try {
-        params = JSON.parse(datasource._source.datasourceParams);
-      } catch (e) {
-        error = e;
-        return false;
-      }
+  if (datasourcesResponse.length === 0) {
+    return;
+  }
 
-      for (var name in params) {
-        if (params.hasOwnProperty(name)) {
-          var s = self._getDefinitionFromSchema(schema, name);
-          if (s.encrypted === true) {
-            report.push('param: ' + name + ' value: ' + params[name]);
-            // first check that the value match the encrypted pattern
-            var parts = params[name].split(':');
-            if (parts.length >= 4) {
-              if (cryptoHelper.supportsAlgorithm(parts[0])) {
-                var plaintext = cryptoHelper.decrypt(oldkey, params[name]);
-                report.push('decrypted value');
-                params[name] = cryptoHelper.encrypt(algorithm, key, plaintext);
-                report.push('encrypted the value');
-              } else {
-                report.push('unsupported algorithm [' + parts[0] + '] for [' + name + ' ' + params[name] + ']');
-              }
+  for (let datasource of datasourcesResponse) {
+    this.logger.info(`Processing datasource "${datasource._id}".`);
+
+    body += JSON.stringify({
+      index: {
+        _index: datasource._index,
+        _type: datasource._type,
+        _id: datasource._id}
+    }) + '\n';
+
+    // Get the properties which should be encrypted according to the schema
+    var type = datasource._source.datasourceType;
+    if (kibiUtils.isJDBC(type)) {
+      type = 'jdbc';
+    }
+    var schema = datasourcesSchema[type].concat(datasourcesSchema.base);
+    var params = {};
+    params = JSON.parse(datasource._source.datasourceParams);
+
+    for (var name in params) {
+      if (params.hasOwnProperty(name)) {
+        var s = this._getDefinitionFromSchema(schema, name);
+        if (s.encrypted === true) {
+          this.logger.info(`Found encrypted parameter "${name}".`);
+
+          // first check that the value match the encrypted pattern
+          var parts = params[name].split(':');
+          if (parts.length >= 4) {
+            if (cryptoHelper.supportsAlgorithm(parts[0])) {
+              var plaintext = cryptoHelper.decrypt(oldkey, params[name]);
+              this.logger.info('Decrypted value.');
+              params[name] = cryptoHelper.encrypt(algorithm, key, plaintext);
+              this.logger.info('Encrypted value.');
             } else {
-              report.push('Param value [' + params[name] + '] should be encrypted but it seems NOT');
-              params[name] = cryptoHelper.encrypt(algorithm, key, params[name]);
-              report.push('encrypted the value');
+              return Promise.reject(new Error(`Can't decrypt value of parameter "${params[name]}" in datasource "${datasource._id}":` +
+                ` unsupported cipher "${parts[0]}"`));
             }
+          } else {
+            this.logger.info(`Value ${params[name]} was not previously encrypted.`);
+            params[name] = cryptoHelper.encrypt(algorithm, key, params[name]);
+            this.logger.info('Encrypted value.');
           }
         }
       }
-
-      try {
-        datasource._source.datasourceParams = JSON.stringify(params);
-      } catch (e) {
-        error = e;
-        return false;
-      }
-      body += JSON.stringify(datasource._source) + '\n';
-    });
-    if (error) {
-      return Promise.reject(error);
     }
 
-    return self.setDatasources(body).then(function (res2) {
-      report.push('Saving new kibi.yml');
-      return self.swapKibiYml(path, algorithm, key).then(function () {
-        report.push('New kibi.yml saved. Old kibi.yml moved to kibi.yml.bak');
-        report.push('DONE');
-        return report;
-      });
-    });
-  });
+    datasource._source.datasourceParams = JSON.stringify(params);
+    body += JSON.stringify(datasource._source) + '\n';
+    this.logger.info(`Processed datasource "${datasource._id}".`);
+  }
+
+  this.logger.info('Bulk updating datasources.');
+  await this.setDatasources(body);
+  this.logger.info('Bulk updated datasources successfully.');
+
+  this.logger.info(`Updating file "${path}"`);
+  await this.swapKibiYml(path, algorithm, key);
+  self.logger.info(`Updated file "${path}"; a backup of the previous version has been saved to "${path}.bak ."`);
 };
 
 IndexHelper.prototype.swapKibiYml = function (path, algorithm, key) {
+  var self = this;
   return new Promise(function (fulfill, reject) {
 
     fs.readFile(path, 'utf8', function (err, data) {
       if (err) {
-        reject(err);
+        return reject(err);
       }
 
       var c = data
@@ -129,17 +139,16 @@ IndexHelper.prototype.swapKibiYml = function (path, algorithm, key) {
 
       fs.rename(path, path + '.bak', function (err) {
         if (err) {
-          console.log('Could not rename kibi.yml to kibi.yml.bak');
-          reject(err);
+          self.logger.error(`Could not save a backup of file "${path}"; error details:\n${err}`);
+          return reject(new Error(`Could not rename file "${path}", please replace its contents ` +
+            `with the following:\n\n${c}`));
         }
 
         fs.writeFile(path, c, function (err) {
           if (err) {
-            console.log('Could not save new kibi.yml');
-            console.log('===== NEW CONFIG =====');
-            console.log(c);
-            console.log('======================');
-            reject(err);
+            self.logger.error(`Could not write file "${path}"; error details:\n${err}`);
+            return reject(new Error(`Could not write file "${path}", please check the permissions of the directory and write ` +
+                                    `the following configuration to the file:\n\n${c}`));
           }
 
           fulfill(true);

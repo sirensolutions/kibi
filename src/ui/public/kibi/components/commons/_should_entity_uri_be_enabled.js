@@ -4,6 +4,13 @@ define(function (require) {
     const doesQueryDependOnEntity = require('kibiutils').doesQueryDependOnEntity;
 
     return function (queryIds) {
+      if (!queryIds) {
+        return Promise.resolve(false);
+      }
+      queryIds = _.compact(queryIds);
+      if (!queryIds.length) {
+        return Promise.resolve(false);
+      }
       return savedQueries.find().then((results) => {
         const missingQueries = _.filter(queryIds, (queryId) => !_.find(results.hits, 'id', queryId));
         if (missingQueries.length) {

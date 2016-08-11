@@ -1,6 +1,4 @@
 var doesVisDependsOnSelectedEntities;
-var globalState;
-var $rootScope;
 
 var mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
 var fakeSavedQueries = [
@@ -18,7 +16,6 @@ var fakeSavedQueries = [
 var ngMock = require('ngMock');
 var expect = require('expect.js');
 
-
 describe('Kibi Components', function () {
   describe('Commons', function () {
     describe('_does_vis_depends_on_selected_entities', function () {
@@ -30,246 +27,219 @@ describe('Kibi Components', function () {
           $provide.service('savedQueries', (Promise) => mockSavedObjects(Promise)('savedQueries', fakeSavedQueries));
         });
 
-        ngMock.inject(function ($injector, Private, _globalState_, _$rootScope_) {
-          $rootScope = _$rootScope_;
-          globalState = _globalState_;
+        ngMock.inject(function (Private) {
           doesVisDependsOnSelectedEntities = Private(require('ui/kibi/components/commons/_does_vis_depends_on_selected_entities'));
         });
       });
 
+      require('testUtils/noDigestPromises').activateForSuite();
 
-      it('vis kibi-data-table', function (done) {
-        var vis = {
-          type: {
-            name: 'kibi-data-table'
-          },
-          params: {
-            queryDefinitions: [
-              {queryId: 'query1'} // this query depends on selected entity
-            ]
-          }
-        };
-
-        doesVisDependsOnSelectedEntities(vis).then(function (res) {
-          expect(res).to.equal(true);
-          done();
-        }).catch(done);
-
-        $rootScope.$apply();
-      });
-
-
-      it('vis kibi-data-table - query does not depends on selected entity', function (done) {
-        var vis = {
-          type: {
-            name: 'kibi-data-table'
-          },
-          params: {
-            queryDefinitions: [
-              {queryId: 'query2'}
-            ]
-          }
-        };
-
-        doesVisDependsOnSelectedEntities(vis).then(function (res) {
-          expect(res).to.equal(false);
-          done();
-        }).catch(done);
-
-        $rootScope.$apply();
-      });
-
-
-      it('vis kibi-data-table - query does not exists', function (done) {
-        var vis = {
-          type: {
-            name: 'kibi-data-table'
-          },
-          params: {
-            queryDefinitions: [
-              {queryId: 'query-does-not-exists'}
-            ]
-          }
-        };
-
-        doesVisDependsOnSelectedEntities(vis).then(function () {
-          done('should fail');
-        }).catch(function (err) {
-          expect(err.message).to.equal('Unable to find queries: ["query-does-not-exists"]');
-          done();
-        });
-
-        $rootScope.$apply();
-      });
-
-      it('vis sindicetechentityinfo', function (done) {
-        var vis = {
-          type: {
-            name: 'kibiqueryviewervis'
-          },
-          params: {
-            queryDefinitions: [
-              {queryId: 'query1'} // this query depends on selected entity
-            ]
-          }
-        };
-
-        doesVisDependsOnSelectedEntities(vis).then(function (res) {
-          expect(res).to.equal(true);
-          done();
-        }).catch(done);
-
-        $rootScope.$apply();
-      });
-
-      it('vis sindicetechentityinfo - query does not depend on selected entity', function (done) {
-        var vis = {
-          type: {
-            name: 'kibiqueryviewervis'
-          },
-          params: {
-            queryDefinitions: [
-              {queryId: 'query2'} // this query does NOT depends on selected entity
-            ]
-          }
-        };
-
-        doesVisDependsOnSelectedEntities(vis).then(function (res) {
-          expect(res).to.equal(false);
-          done();
-        }).catch(done);
-
-        $rootScope.$apply();
-      });
-
-      it('vis sindicetechentityinfo - query does not exists', function (done) {
-        var vis = {
-          type: {
-            name: 'kibiqueryviewervis'
-          },
-          params: {
-            queryDefinitions: [
-              {queryId: 'query-does-not-exists'}
-            ]
-          }
-        };
-
-        doesVisDependsOnSelectedEntities(vis).then(function () {
-          done('should fail');
-        }).catch(function (err) {
-          expect(err.message).to.equal('Unable to find queries: ["query-does-not-exists"]');
-          done();
-        });
-
-        $rootScope.$apply();
-      });
-
-      it('vis pie', function (done) {
-        var vis = {
-          type: {
-            name: 'pie'
-          },
-          aggs:[
-            {
+      [
+        'kibiqueryviewervis',
+        'kibi-data-table'
+      ].forEach(function (visName) {
+        describe(`vis ${visName}`, function () {
+          it('should depend on the entity', function (done) {
+            var vis = {
+              type: {
+                name: visName
+              },
               params: {
                 queryDefinitions: [
-                  {
-                    queryId: 'query1'
-                  }
+                  {queryId: 'query1'} // this query depends on selected entity
                 ]
               }
-            }
-          ]
+            };
 
-        };
+            doesVisDependsOnSelectedEntities(vis).then(function (res) {
+              expect(res).to.equal(true);
+              done();
+            }).catch(done);
+          });
 
-        doesVisDependsOnSelectedEntities(vis).then(function (res) {
-          expect(res).to.equal(true);
-          done();
-        }).catch(done);
-
-        $rootScope.$apply();
-      });
-
-      it('vis pie - query does not depends on selected entity', function (done) {
-        var vis = {
-          type: {
-            name: 'pie'
-          },
-          aggs:[
-            {
+          it('should not depend on the entity', function (done) {
+            var vis = {
+              type: {
+                name: visName
+              },
               params: {
                 queryDefinitions: [
-                  {
-                    queryId: 'query2'
-                  }
+                  {queryId: 'query2'}
                 ]
               }
-            }
-          ]
+            };
 
-        };
+            doesVisDependsOnSelectedEntities(vis).then(function (res) {
+              expect(res).to.equal(false);
+              done();
+            }).catch(done);
+          });
 
-        doesVisDependsOnSelectedEntities(vis).then(function (res) {
-          expect(res).to.equal(false);
-          done();
-        }).catch(done);
-
-        $rootScope.$apply();
-      });
-
-      it('vis pie - query does not exists', function (done) {
-        var vis = {
-          type: {
-            name: 'pie'
-          },
-          aggs:[
-            {
+          it('should fail if the query does not exist', function (done) {
+            var vis = {
+              type: {
+                name: visName
+              },
               params: {
                 queryDefinitions: [
-                  {
-                    queryId: 'query-does-not-exists'
-                  }
+                  {queryId: 'query-does-not-exist'}
                 ]
               }
+            };
+
+            doesVisDependsOnSelectedEntities(vis).then(function () {
+              done('should fail');
+            }).catch(function (err) {
+              expect(err.message).to.equal('Unable to find queries: ["query-does-not-exist"]');
+              done();
+            });
+          });
+        });
+      });
+
+      [
+        'pie',
+        'table',
+        'line',
+        'area',
+        'histogram'
+      ].forEach(function (visName) {
+        describe(`vis ${visName}`, function () {
+          it('should depend on the entity', function (done) {
+            var vis = {
+              type: {
+                name: visName
+              },
+              aggs:[
+                {
+                  params: {
+                    queryDefinitions: [
+                      {
+                        queryId: 'query1'
+                      }
+                    ]
+                  }
+                }
+              ]
+            };
+
+            doesVisDependsOnSelectedEntities(vis).then(function (res) {
+              expect(res).to.equal(true);
+              done();
+            }).catch(done);
+          });
+
+          it('should not depend on the entity', function (done) {
+            var vis = {
+              type: {
+                name: visName
+              },
+              aggs:[
+                {
+                  params: {
+                    queryDefinitions: [
+                      {
+                        queryId: 'query2'
+                      }
+                    ]
+                  }
+                }
+              ]
+            };
+
+            doesVisDependsOnSelectedEntities(vis).then(function (res) {
+              expect(res).to.equal(false);
+              done();
+            }).catch(done);
+          });
+
+          it('should fail if the query does not exist', function (done) {
+            var vis = {
+              type: {
+                name: visName
+              },
+              aggs:[
+                {
+                  params: {
+                    queryDefinitions: [
+                      {
+                        queryId: 'query-does-not-exist'
+                      }
+                    ]
+                  }
+                }
+              ]
+            };
+
+            doesVisDependsOnSelectedEntities(vis).then(function () {
+              done('should fail');
+            }).catch(function (err) {
+              expect(err.message).to.equal('Unable to find queries: ["query-does-not-exist"]');
+              done();
+            });
+          });
+        });
+      });
+
+      describe('vis kibi_graph_browser', function () {
+        it('should depend on the entity', function (done) {
+          var vis = {
+            type: {
+              name: 'kibi_graph_browser'
+            },
+            params: {
+              queryOption: {
+                queryId: 'query1' // this query depends on selected entity
+              }
             }
-          ]
+          };
 
-        };
-
-        doesVisDependsOnSelectedEntities(vis).then(function () {
-          done('should fail');
-        }).catch(function (err) {
-          expect(err.message).to.equal('Unable to find queries: ["query-does-not-exists"]');
-          done();
+          doesVisDependsOnSelectedEntities(vis).then(function (res) {
+            expect(res).to.equal(true);
+            done();
+          }).catch(done);
         });
 
-        $rootScope.$apply();
-      });
-
-
-      it('vis pie - aggs do not contain queryDefinitions', function (done) {
-        var vis = {
-          type: {
-            name: 'pie'
-          },
-          aggs:[
-            {
-              params: {}
+        it('should not depend on the entity', function (done) {
+          var vis = {
+            type: {
+              name: 'kibi_graph_browser'
+            },
+            params: {
+              queryOption: {
+                queryId: 'query2'
+              }
             }
-          ]
-        };
+          };
 
-        doesVisDependsOnSelectedEntities(vis).then(function (res) {
-          expect(res).to.equal(false);
-          done();
-        }).catch(done);
+          doesVisDependsOnSelectedEntities(vis).then(function (res) {
+            expect(res).to.equal(false);
+            done();
+          }).catch(done);
+        });
 
-        $rootScope.$apply();
+        it('should fail if the query does not exist', function (done) {
+          var vis = {
+            type: {
+              name: 'kibi_graph_browser'
+            },
+            params: {
+              queryOption: {
+                queryId: 'query-does-not-exist'
+              }
+            }
+          };
+
+          doesVisDependsOnSelectedEntities(vis).then(function () {
+            done('should fail');
+          }).catch(function (err) {
+            expect(err.message).to.equal('Unable to find queries: ["query-does-not-exist"]');
+            done();
+          });
+        });
       });
 
-
-      it('unknown vis', function (done) {
+      it('should not depend on entity for some unknown vis', function (done) {
         var vis = {
           type: {
             name: 'extra-pie'
@@ -292,8 +262,6 @@ describe('Kibi Components', function () {
           expect(res).to.equal(false);
           done();
         }).catch(done);
-
-        $rootScope.$apply();
       });
 
     });

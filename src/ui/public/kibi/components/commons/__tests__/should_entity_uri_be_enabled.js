@@ -75,6 +75,20 @@ describe('Kibi Components', function () {
         });
       });
 
+      it('should not require if no argument is passed', function (done) {
+        shouldEntityUriBeEnabled().then(function (required) {
+          expect(required).to.be(false);
+          done();
+        }).catch(done);
+      });
+
+      it('should not require if array has no defined queries', function (done) {
+        shouldEntityUriBeEnabled([ '' ]).then(function (required) {
+          expect(required).to.be(false);
+          done();
+        }).catch(done);
+      });
+
       it('should not require entity that is commented', function (done) {
         shouldEntityUriBeEnabled([ 'sql-query-comment-depends-not' ]).then(function (required) {
           expect(required).to.be(false);

@@ -92,8 +92,6 @@ QueryHelper.prototype.replaceVariablesUsingEsDocument = function (s, uri, creden
   });
 };
 
-  // TODO: kibi: add caching of document
-
 QueryHelper.prototype.fetchDocument = function (index, type, id, credentials) {
   var self = this;
   var client = self.client;

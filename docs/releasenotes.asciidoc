@@ -5,8 +5,8 @@
 
 * Various bug fixes and stability improvements
 * Various documentation improvements
-* Refactoring of the kibi state
-* Support for object migration from kibi 4.4.2
+* Refactoring of the Kibi state
+* Support for object migration from Kibi 4.4.2
 * Upgrade ElasticSearch version to 2.3.4
 * Improved Export and Import of all objects
 * JDBC warning message should only be displayed for JDBC datasources
@@ -16,7 +16,7 @@
 * Update Boom version
 * Remove the clone cancel ... buttons
 * Add headers and params to a REST datasource configuration
-* Improved kibi tests on Windows
+* Improved Kibi tests on Windows
 * Improved server logging
 * Added configurable label for datasource params
 * Relational buttons refreshing twice
@@ -55,7 +55,7 @@ Plugin System Changes
 * Fixed issue with wrong default value for siren.filterjoin.cache.size
 * Default join settings were incorrect
 * Improved datasourcetype conditions
-* Improves kibi session management
+* Improves Kibi session management
 * No error shown when the key has wrong length
 * Label on Entity Clipboard missing
 * Correct permission on executable files

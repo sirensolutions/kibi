@@ -148,7 +148,17 @@ describe('DB Filter test', function () {
         path: 'ahah'
       }
     };
-    const expected = {};
+    const expected = {
+      bool: {
+        should: [
+          {
+            term: {
+              snxrcngu: 'tevfuxnvfpbzcyrgrylpenfl'
+            }
+          }
+        ]
+      }
+    };
 
     dbFilter(queryEngine, query)
     .then(function (data) {
@@ -165,13 +175,6 @@ describe('DB Filter test', function () {
         queryid: 'noresult',
         queryVariableName: 'xxx',
         path: 'ahah'
-      },
-      notRelevantRemove: {
-        dbfilter: {
-          queryid: 'not relevant',
-          queryVariableName: 'xxx',
-          path: 'ahah'
-        }
       },
       nested: {
         notRelevantKeep: {
@@ -196,7 +199,16 @@ describe('DB Filter test', function () {
       },
       nested: {
         notRelevantKeep: {
-          foo: 'bar'
+          foo: 'bar',
+          bool: {
+            should: [
+              {
+                term: {
+                  snxrcngu: 'tevfuxnvfpbzcyrgrylpenfl'
+                }
+              }
+            ]
+          }
         }
       }
     };

@@ -29,8 +29,7 @@ define(function (require) {
             group: queries[i].tags.length ? queries[i].tags.join() : 'No tag',
             datasourceType: datasource.length > 0 ? datasource[0].datasourceType : null,
             label: queries[i].title,
-            id: queries[i].id,
-            value: queries[i]
+            value: queries[i].id
           });
         }
         return items;
@@ -49,7 +48,6 @@ define(function (require) {
           var items = _.map(data.hits, function (hit) {
             return {
               label: hit.title,
-              id: hit.id,
               value: hit.id
             };
           });
@@ -64,7 +62,6 @@ define(function (require) {
           var items = _.map(data.hits, function (hit) {
             return {
               label: hit.title,
-              id: hit.id,
               value: hit.id
             };
           });
@@ -79,7 +76,6 @@ define(function (require) {
           var items = _.map(data.hits, function (hit) {
             return {
               label: hit.title,
-              id: hit.id,
               value: hit.id
             };
           });
@@ -94,7 +90,6 @@ define(function (require) {
           var items = _.map(data.hits, function (hit) {
             return {
               label: hit.title,
-              id: hit.id,
               value: hit.id,
               type: hit.datasourceType
             };
@@ -117,7 +112,6 @@ define(function (require) {
         _.each(response.data.hits.hits, function (hit) {
           ids.push({
             label: hit._id,
-            id: hit._id,
             value: hit._id
           });
         });
@@ -149,7 +143,6 @@ define(function (require) {
         return _.map(types, function (type) {
           return {
             label: type,
-            id: type,
             value: type
           };
         });
@@ -163,7 +156,6 @@ define(function (require) {
         var labels = _.map(relations.relationsIndices, function (relInd) {
           return {
             label: relInd.label,
-            id: relInd.id,
             value: relInd.id
           };
         });
@@ -193,7 +185,6 @@ define(function (require) {
         }).map(function (field) {
           return {
             label: field.name,
-            id: field.name,
             value: field.name,
             options: {
               analyzed: field.analyzed
@@ -209,7 +200,6 @@ define(function (require) {
         var fields = _.map(ids, function (id) {
           return {
             label: id,
-            id: id,
             value: id
           };
         });
@@ -251,7 +241,6 @@ define(function (require) {
             const value = v.replace('?', '').replace(',', ''); // in case of sparql we have to remove the '?';
             return {
               label: v.replace(',', ''),
-              id: value,
               value: value
             };
           });
@@ -267,12 +256,10 @@ define(function (require) {
       var types = [
         {
           label:'Font Awesome',
-          id: 'fontawesome',
           value: 'fontawesome'
         },
         {
           label:'Parameterized Relative Path',
-          id: 'relpath',
           value: 'relpath'
         }
       ];
@@ -284,12 +271,10 @@ define(function (require) {
       var types = [
         {
           label:'Document Field',
-          id: 'docField',
           value: 'docField'
         },
         {
           label:'Parameterized Field',
-          id: 'paramField',
           value: 'paramField'
         }
       ];

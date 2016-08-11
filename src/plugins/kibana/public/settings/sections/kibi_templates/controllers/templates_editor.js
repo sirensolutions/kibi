@@ -44,6 +44,7 @@ define(function (require) {
   app.controller('TemplatesEditor', function ($rootScope, $scope, $route, $window, kbnUrl, Private, createNotifier, queryEngineClient,
                                               $element) {
     var _setEntityURI = Private(require('ui/kibi/components/commons/_set_entity_uri'));
+    const _shouldEntityURIBeEnabled = Private(require('ui/kibi/components/commons/_should_entity_uri_be_enabled'));
 
     var notify = createNotifier({
       location: 'Templates editor'
@@ -55,7 +56,7 @@ define(function (require) {
       visible: true
     };
     $scope.preview = {
-      query: null
+      queryId: null
     };
 
     _setEntityURI($scope.holder);
@@ -86,19 +87,19 @@ define(function (require) {
 
 
     $scope.jumpToQuery = function () {
-      kbnUrl.change('/settings/queries/' + _.get($scope, 'preview.query.id'));
+      kbnUrl.change('/settings/queries/' + _.get($scope, 'preview.queryId'));
     };
 
     var refreshPreview = function () {
       $scope.json_preview_content = 'Loading ...';
       $scope.html_preview_content = 'Loading ...';
 
-      if (_.get($scope, 'preview.query.id')) {
-        queryEngineClient.getQueriesHtmlFromServer(
+      if (_.get($scope, 'preview.queryId')) {
+        return queryEngineClient.getQueriesHtmlFromServer(
           [
             {
               open: true,
-              queryId: _.get($scope, 'preview.query.id'),
+              queryId: _.get($scope, 'preview.queryId'),
               showFilterButton: false,
               templateId: template.id,
               templateVars: {
@@ -130,10 +131,13 @@ define(function (require) {
       }
     });
 
-    $scope.$watch('preview.query', function (query) {
-      if (query) {
-        $scope.holder.entityURIEnabled = query.is_entity_dependent;
-        refreshPreview();
+    $scope.$watch('preview.queryId', function (queryId) {
+      if (queryId) {
+        _shouldEntityURIBeEnabled([ queryId ])
+        .then((isEntityDependent) => {
+          $scope.holder.entityURIEnabled = isEntityDependent;
+          return refreshPreview();
+        }).catch(notify.error);
       }
     });
 
@@ -151,9 +155,9 @@ define(function (require) {
           if (titleChanged) {
             kbnUrl.change('/settings/templates/' + template.id);
           } else {
-            refreshPreview();
+            return refreshPreview();
           }
-        });
+        }).catch(notify.error);
       });
     };
 

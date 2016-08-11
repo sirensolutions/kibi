@@ -2,12 +2,12 @@
 
   <div class="spinner large" ng-show="holder.activeFetch"></div>
 
-  <div ng-if="vis.params.queryIds.length === 0" class="table-vis-error ng-scope">
+  <div ng-if="vis.params.queryDefinitions.length === 0" class="table-vis-error ng-scope">
     <h2><i class="fa fa-meh-o"></i></h2>
     <h4>No queries - check configuration</h4>
   </div>
 
-  <div ng-if="vis.params.queryIds.length > 0 && emptyResults" class="table-vis-error ng-scope">
+  <div ng-if="vis.params.queryDefinitions.length > 0 && emptyResults" class="table-vis-error ng-scope">
     <h2><i class="fa fa-meh-o"></i></h2>
     <h4>No results</h4>
   </div>

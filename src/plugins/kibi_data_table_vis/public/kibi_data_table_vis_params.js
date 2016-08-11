@@ -41,27 +41,6 @@ define(function (require) {
         // Visualization controller integration
         // ====================================
 
-        var shouldEntityURIBeEnabled = function () {
-          // examine all used queries in order to check if any of them require entityURI
-          let value = false;
-          _.each($scope.vis.params.queryDefinitions, (queryDefinition, index) => {
-            queryDefinition.isEntityDependent = queryDefinition.query.is_entity_dependent;
-            if (queryDefinition.query.is_entity_dependent) {
-              value = true;
-            }
-          });
-
-          if ($scope.vis.params.enableQueryFields) {
-            $rootScope.$emit('kibi:entityURIEnabled:kibitable', value);
-          } else {
-            $rootScope.$emit('kibi:entityURIEnabled:kibitable', false);
-          }
-        };
-
-        $scope.$watch('vis.params.queryDefinitions', function () {
-          shouldEntityURIBeEnabled();
-        }, true);
-
         // check if there is any click actions / relational column definition
         // before removing a column of the table
         var removeRemoveColumnHandler = $rootScope.$on('kibi:remove:column', function (event, column) {
@@ -162,7 +141,6 @@ define(function (require) {
             delete $scope.vis.params.queryFieldName;
             $scope.vis.dirty = true;
           }
-          shouldEntityURIBeEnabled();
         });
 
         $scope.$watchMulti([

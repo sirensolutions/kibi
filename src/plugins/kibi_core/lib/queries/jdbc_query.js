@@ -117,7 +117,7 @@ JdbcQuery.prototype.checkIfItIsRelevant = function (options) {
   return self._init().then(function (data) {
 
     if (self._checkIfSelectedDocumentRequiredAndNotPresent(options)) {
-      self.logger.warn('No elasticsearch document selected while required by the jdbc activation query. [' + self.config.id + ']');
+      self.logger.warn('No elasticsearch document selected while required by the jdbc query. [' + self.config.id + ']');
       return Promise.resolve(false);
     }
     var uri = options.selectedDocuments && options.selectedDocuments.length > 0 ? options.selectedDocuments[0] : '';
@@ -159,11 +159,6 @@ JdbcQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) {
   return self._init().then(function (data) {
 
     var start = new Date().getTime();
-    // special case - we can not simply reject the Promise
-    // bacause it will cause the whole group of promissses to be rejected
-    if (self._checkIfSelectedDocumentRequiredAndNotPresent(options)) {
-      return self._returnAnEmptyQueryResultsPromise('No data because the query require entityURI');
-    }
     // currently we use only single selected document
     var uri = options.selectedDocuments && options.selectedDocuments.length > 0 ? options.selectedDocuments[0] : '';
 

@@ -107,16 +107,8 @@ define(function (require) {
           searchSource.source(sourceFiltering.all);
         }
 
-        const queryDefinitions = _($scope.vis.params.queryDefinitions)
-        .filter((def) => !_.get(def, 'query.is_entity_dependent') || $scope.entityURI)
-        .map((def) => {
-          def.queryId = def.query.id;
-          return def;
-        })
-        .value();
-
         // validate here and do not inject if all require values are not set
-        if ($scope.vis.params.enableQueryFields === true && queryDefinitions.length > 0 &&
+        if ($scope.vis.params.enableQueryFields === true && $scope.vis.params.queryDefinitions.length > 0 &&
           $scope.vis.params.joinElasticsearchField && $scope.vis.params.joinElasticsearchField !== '' &&
           $scope.vis.params.queryFieldName && $scope.vis.params.queryFieldName !== '') {
           var virtualIndexPattern = new VirtualIndexPattern(indexPattern);
@@ -125,7 +117,7 @@ define(function (require) {
           searchSource.inject([
             {
               entityURI: $scope.entityURI,
-              queryDefs: queryDefinitions,
+              queryDefs: $scope.vis.params.queryDefinitions,
               sourcePath: $scope.vis.params.joinElasticsearchField, // it is the field from table to do the comparison
               fieldName: $scope.vis.params.queryFieldName
             }

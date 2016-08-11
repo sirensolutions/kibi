@@ -17,16 +17,6 @@ define(function (require) {
         queryDefs = [queryDefs];
       }
 
-      queryDefs = _.filter(queryDefs, (queryDef) => !queryDef.isEntityDependent || options.selectedDocuments.length);
-
-      if (!queryDefs.length) {
-        return Promise.resolve({
-          data: {
-            error: 'Empty selected document uri'
-          }
-        });
-      }
-
       var params = {
         options: angular.toJson(options),
         queryDefs: angular.toJson(queryDefs)

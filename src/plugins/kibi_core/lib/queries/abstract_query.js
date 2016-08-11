@@ -29,28 +29,25 @@ function Query(server, snippetDefinition, cache) {
   this.id = snippetDefinition.id;
 
   var config = {
-    id                : snippetDefinition.id,
-    label             : snippetDefinition.label || '',
-    description       : snippetDefinition.description || '',
-    activationQuery   : snippetDefinition.activationQuery || '',
-    resultQuery       : snippetDefinition.resultQuery || '',
-    datasourceId      : snippetDefinition.datasourceId || null,
-    datasource        : snippetDefinition.datasource,
-    rest_params       : snippetDefinition.rest_params || [],
-    rest_headers      : snippetDefinition.rest_headers || [],
-    rest_variables    : snippetDefinition.rest_variables || [],
-    rest_body         : snippetDefinition.rest_body || '',
-    rest_method       : snippetDefinition.rest_method || 'GET',
-    rest_path         : snippetDefinition.rest_path || '',
+    id: snippetDefinition.id,
+    label: snippetDefinition.label || '',
+    description: snippetDefinition.description || '',
+    activationQuery: snippetDefinition.activationQuery || '',
+    resultQuery: snippetDefinition.resultQuery || '',
+    datasourceId: snippetDefinition.datasourceId || null,
+    datasource: snippetDefinition.datasource,
+    rest_params: snippetDefinition.rest_params || [],
+    rest_headers: snippetDefinition.rest_headers || [],
+    rest_variables: snippetDefinition.rest_variables || [],
+    rest_body: snippetDefinition.rest_body || '',
+    rest_method: snippetDefinition.rest_method || 'GET',
+    rest_path: snippetDefinition.rest_path || '',
     rest_resp_status_code: snippetDefinition.rest_resp_status_code || 200,
-    activation_rules  : snippetDefinition.activation_rules || [],
-    tags              : snippetDefinition.tags || [],
-    entityWeight      : snippetDefinition.entityWeight || 0.3,
-    queryPrefixes     : snippetDefinition.queryPrefixes || {}
+    activation_rules: snippetDefinition.activation_rules || [],
+    tags: snippetDefinition.tags || [],
+    entityWeight: snippetDefinition.entityWeight || 0.3,
+    queryPrefixes: snippetDefinition.queryPrefixes || {}
   };
-
-  this.activationQueryRequireEntityURI = kibiUtils.doesQueryDependOnEntity([ { activationQuery: config.activationQuery } ]);
-  this.resultQueryRequireEntityURI = kibiUtils.doesQueryDependOnEntity([ { resultQuery: config.resultQuery } ]);
 
   this.config = config;
   this.config.prefixesString = _.map(this.config.queryPrefixes, function (value, key) {
@@ -76,7 +73,9 @@ Query.prototype.generateCacheKey = function (prefix, query, onlyValues, valueVar
 };
 
 Query.prototype._checkIfSelectedDocumentRequiredAndNotPresent = function (options) {
-  return (this.activationQueryRequireEntityURI || this.resultQueryRequireEntityURI) &&
+  const isEntityDependent = kibiUtils.doesQueryDependOnEntity([ this.config ]);
+
+  return isEntityDependent &&
     (!options || !options.selectedDocuments || options.selectedDocuments.length === 0 || options.selectedDocuments[0] === '');
 };
 

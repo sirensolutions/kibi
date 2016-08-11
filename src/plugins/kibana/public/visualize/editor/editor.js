@@ -31,6 +31,12 @@ define(function (require) {
   .when('/visualize/edit/:id', {
     template: require('plugins/kibana/visualize/editor/editor.html'),
     resolve: {
+      isEntityDependent: function (Private, savedVisualizations, $route) {
+        const doesVisDependsOnSelectedEntities = Private(require('ui/kibi/components/commons/_does_vis_depends_on_selected_entities'));
+        return savedVisualizations.get($route.current.params.id)
+        .then((savedVis) => doesVisDependsOnSelectedEntities(savedVis.vis))
+        .catch(() => false);
+      },
       savedVis: function (savedVisualizations, courier, $route) {
         return savedVisualizations.get($route.current.params.id)
         .catch(courier.redirectWhenMissing({
@@ -50,6 +56,7 @@ define(function (require) {
   ])
   .controller('VisEditor', function ($rootScope, globalState, $scope, $route, timefilter, AppState, kbnUrl, $timeout, courier,
                                      Private, Promise, createNotifier) {
+    const doesVisDependsOnSelectedEntities = Private(require('ui/kibi/components/commons/_does_vis_depends_on_selected_entities'));
     const urlHelper = Private(require('ui/kibi/helpers/url_helper'));
     const angular = require('angular');
     const ConfigTemplate = require('ui/ConfigTemplate');
@@ -63,7 +70,7 @@ define(function (require) {
 
     $scope.holder = {
       entityURI: '',
-      entityURIEnabled: false,
+      entityURIEnabled: $route.current.locals.isEntityDependent,
       visible: urlHelper.onVisualizeTab()
     };
     $scope.$watch('holder.entityURI', function (entityURI) {
@@ -77,19 +84,6 @@ define(function (require) {
     setEntityURI($scope.holder);
     const removeSetEntityUriHandler = $rootScope.$on('kibi:selectedEntities:changed', function (event, se) {
       setEntityURI($scope.holder);
-    });
-
-    const off1 = $rootScope.$on('kibi:entityURIEnabled:kibitable', function (event, enabled) {
-      $scope.holder.entityURIEnabled = !!enabled;
-    });
-    const off2 = $rootScope.$on('kibi:entityURIEnabled:external_query_terms_filter', function (event, enabled) {
-      $scope.holder.entityURIEnabled = !!enabled;
-    });
-    const off3 = $rootScope.$on('kibi:entityURIEnabled:kibigraph', function (event, enabled) {
-      $scope.holder.entityURIEnabled = !!enabled;
-    });
-    const off4 = $rootScope.$on('kibi:entityURIEnabled:kibiqueryviewer', function (event, enabled) {
-      $scope.holder.entityURIEnabled = !!enabled;
     });
 
     const notify = createNotifier({
@@ -238,10 +232,7 @@ define(function (require) {
 
       $scope.$on('$destroy', function () {
         savedVis.destroy();
-        off1();
-        off2();
-        off3();
-        off4();
+        removeSetEntityUriHandler();
       });
     }
 
@@ -315,7 +306,13 @@ define(function (require) {
         $state.vis = vis.getState();
         $state.save();
 
-        if (fetch) $scope.fetch();
+        if (fetch) {
+          doesVisDependsOnSelectedEntities(toVis)
+          .then((isEntityDependent) => {
+            $scope.holder.entityURIEnabled = isEntityDependent;
+            $scope.fetch();
+          });
+        }
       };
     }
 

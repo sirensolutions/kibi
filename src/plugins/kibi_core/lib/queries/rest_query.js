@@ -33,6 +33,10 @@ RestQuery.prototype.checkIfItIsRelevant = function (options) {
     return Promise.resolve(true);
   }
 
+  if (this._checkIfSelectedDocumentRequiredAndNotPresent(options)) {
+    this.logger.warn('No elasticsearch document selected while required by the REST query. [' + this.config.id + ']');
+    return Promise.resolve(false);
+  }
   // evaluate the rules
   return this.rulesHelper.evaluate(this.config.activation_rules, options.selectedDocuments, options.credentials);
 };
@@ -47,9 +51,6 @@ RestQuery.prototype._logFailedRequestDetails = function (msg, originalError, res
 RestQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) {
   var self = this;
 
-  if (self._checkIfSelectedDocumentRequiredAndNotPresent(options)) {
-    return self._returnAnEmptyQueryResultsPromise('No data because the query require entityURI');
-  }
   // currently we use only single selected document
   var uri = options.selectedDocuments && options.selectedDocuments.length > 0 ? options.selectedDocuments[0] : '';
 

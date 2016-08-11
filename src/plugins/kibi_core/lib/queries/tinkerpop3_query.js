@@ -22,7 +22,7 @@ TinkerPop3Query.prototype = _.create(AbstractQuery.prototype, {
  */
 TinkerPop3Query.prototype.checkIfItIsRelevant = function (options) {
   if (this._checkIfSelectedDocumentRequiredAndNotPresent(options)) {
-    return Promise.reject('No elasticsearch document selected while required by the activation query. [' + this.config.id + ']');
+    return Promise.reject('No elasticsearch document selected while required by the tinkerpop query. [' + this.config.id + ']');
   }
 
   return Promise.resolve(true);
@@ -32,10 +32,6 @@ TinkerPop3Query.prototype.checkIfItIsRelevant = function (options) {
 TinkerPop3Query.prototype.fetchResults = function (options, onlyIds, idVariableName) {
   var self = this;
   var start = new Date().getTime();
-
-  if (self._checkIfSelectedDocumentRequiredAndNotPresent(options)) {
-    return self._returnAnEmptyQueryResultsPromise('No data because the query require entityURI');
-  }
 
   var gremlinUrl = this.config.datasource.datasourceClazz.datasource.datasourceParams.url;
   var ca = this.server.config().get('kibi_core.gremlin_server.ssl.ca');

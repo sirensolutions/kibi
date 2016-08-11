@@ -32,7 +32,7 @@
     ng-class="{ 'form-control' : true, 'ng-invalid' : isInvalid() }"
     ng-show="!getVariable"
     ng-model="modelObject"
-    ng-options="item.label group by item.group for item in items | orderBy: 'label' track by item.id"
+    ng-options="item.label group by item.group for item in items | orderBy: 'label' track by item.value"
     ng-disabled="disabled">
     <option value="" ng-if="!required"></option>
   </select>

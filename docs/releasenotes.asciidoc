@@ -3,7 +3,48 @@
 
 === Kibi 4.5.3 and Kibana 4.5.3 Release Notes
 
-TODO:
+* Various bug fixes and stability improvements
+* Various documentation improvements
+* Refactoring of the Kibi state
+* Support for object migration from Kibi 4.4.2
+* Upgraded ElasticSearch version to 2.3.4
+* Improved Export and Import of all objects
+* JDBC warning message should only be displayed for JDBC datasources
+* Fixed error while switching (fast) between tabs
+* Sort alphabetically saved objects in kibi_select
+* Fixed Huge URL, apparently with too much state
+* Updated Boom version
+* Removed the clone cancel ... buttons
+* Added headers and params to a REST datasource configuration
+* Improved Kibi tests on Windows
+* Improved server logging
+* Added configurable label for datasource params
+* Relational buttons refreshing twice
+* Empty widgets when the database file is missing
+* Removed the cache checkbox in Tinkerpop3 datasource [Enterprise Edition only]
+* Added advanced option: kibi:graphMaxConcurrentCalls [Enterprise Edition only]
+* Added more graph scripts to Graph Browser [Enterprise Edition only]
+* Scalability improvements in Graph Browser [Enterprise Edition only]
+
+Below are the issues relevant to Kibana.
+
+Enhancement
+
+* {k4issue}6150[Issue 6150]: Adds a timeout for the display of error notifications.
+* {k4issue}3682[Issue 3682]: Improved handling of empty result sets for the Metric visualization.
+* {k4issue}4065[Issue 4065]: Adds custom labels for visualization axes.
+* {k4issue}6128[Issue 6128]: Adds configurable length to saved object lists.
+
+Bug Fixes
+
+* {k4pull}5236[Pull Request 5236]: Fixes a heatmap intensity issue in tile maps.
+* {k4issue}6283[Issue 6283]: Corrects a date format error in millisecond intervals.
+* {k4issue}6049[Issue 6049]: Improvements to autocomplete handling.
+* {k4issue}6331[Issue 6331]: Improved handling of long-running queries.
+
+Plugin System Changes
+
+* {k4issue}5916[Issue 5916]: Adds the --list flag to list installed plugins.
 
 
 === Kibi 4.4.2 and Kibana 4.4.2 Release Notes
@@ -14,7 +55,7 @@ TODO:
 * Fixed issue with wrong default value for siren.filterjoin.cache.size
 * Default join settings were incorrect
 * Improved datasourcetype conditions
-* Improves kibi session management
+* Improves Kibi session management
 * No error shown when the key has wrong length
 * Label on Entity Clipboard missing
 * Correct permission on executable files
@@ -30,13 +71,13 @@ TODO:
 
 Below are the issues relevant to Kibana.
 
-* http://github.com/elastic/kibana/pull/6420[Issue 6420]: Bump node to v4.3.2
-* http://github.com/elastic/kibana/pull/6353[Issue 6353: Add basePath to short URLs
-* http://github.com/elastic/kibana/pull/6228[Issue 6228]: HTML unsafe characters in field names no longer break Kibana
-* http://github.com/elastic/kibana/pull/6083[Issue 6083]: Plugin installer support for .tgz file types
-* http://github.com/elastic/kibana/pull/5971[Issue 5971]: Fix active search source hover background issue
-* http://github.com/elastic/kibana/pull/5942[Issue 5942]: Fix for save button disabled when opening spy panel
-* http://github.com/elastic/kibana/pull/6133[Issue 6133] and http://github.com/elastic/kibana/pull/6103[6103]]: Distro packages now have a description, vendor, maintainer, url, license and priority metadata
+* {k4issue}6420[Issue 6420]: Bump node to v4.3.2
+* {k4issue}6353[Issue 6353]: Add basePath to short URLs
+* {k4issue}6228[Issue 6228]: HTML unsafe characters in field names no longer break Kibana
+* {k4issue}6083[Issue 6083]: Plugin installer support for .tgz file types
+* {k4issue}5971[Issue 5971]: Fix active search source hover background issue
+* {k4issue}5942[Issue 5942]: Fix for save button disabled when opening spy panel
+* {k4issue}6133[Issue 6133] and {k4pull}6103[6103]]: Distro packages now have a description, vendor, maintainer, url, license and priority metadata
 
 === Kibi 4.4.1 Release Notes
 
@@ -74,7 +115,7 @@ Below are the issues relevant to Kibana.
 
 
 * Bump node.js to 0.12.10 from 0.12.9
-* http://github.com/elastic/kibana/issues/6185[Issue 6185]:  Fixes a bug where the active HTTP spinner in the chrome bar is gone
+* {k4issue}6185[Issue 6185]:  Fixes a bug where the active HTTP spinner in the chrome bar is gone
 
 === Kibi 0.3 and Kibana 4.4 Release Notes
 
@@ -86,30 +127,30 @@ Below are the issues relevant to Kibana.
 
 Enhancements
 
-* http://github.com/elastic/kibana/issues/1362[Issue 1362]: Color palette selector added.
-* http://github.com/elastic/kibana/issues/1553[Issue 1553]: Kibana can shorten URLs for shared or embedded items.
-* http://github.com/elastic/kibana/issues/5733[Issue 5733]: Time-based index pattern expansion can be set at index pattern creation time.
-* http://github.com/elastic/kibana/issues/5775[Issue 5775]: Adds a configuration option to change the maximum payload size sent to the server.
-* http://github.com/elastic/kibana/issues/4966[Issue 4966]: Logo is now in SVG format.
-* http://github.com/elastic/kibana/issues/3625[Issue 3625]: Downloaded visualizations now use the visualization name as the filename.
-* http://github.com/elastic/kibana/issues/5279[Issue 5279]: Large strings are truncated with an ellipsis (...).
-* http://github.com/elastic/kibana/issues/5241[Issue 5241]: Truncated visualization names are displayed in full as tooltips.
+* {k4issue}1362[Issue 1362]: Color palette selector added.
+* {k4issue}1553[Issue 1553]: Kibana can shorten URLs for shared or embedded items.
+* {k4issue}5733[Issue 5733]: Time-based index pattern expansion can be set at index pattern creation time.
+* {k4issue}5775[Issue 5775]: Adds a configuration option to change the maximum payload size sent to the server.
+* {k4issue}4966[Issue 4966]: Logo is now in SVG format.
+* {k4issue}3625[Issue 3625]: Downloaded visualizations now use the visualization name as the filename.
+* {k4issue}5279[Issue 5279]: Large strings are truncated with an ellipsis (...).
+* {k4issue}5241[Issue 5241]: Truncated visualization names are displayed in full as tooltips.
 
 Bug Fixes
 
-* http://github.com/elastic/kibana/issues/5897[Issue 5897]: Embedding links no longer include navigation and search bars.
-* http://github.com/elastic/kibana/issues/5896[Issue 5896]: Bookmarked URLs to saved filtered searches from a previous version of Kibana display correctly.
-* http://github.com/elastic/kibana/issues/5744[Issue 5744]: Fixes bug that caused incorrect display of "No results found" in some cases.
-* http://github.com/elastic/kibana/issues/5824[Issue 5824]: Corrects a fatal error when Kibana starts with node x86 on Windows x64 systems.
+* {k4issue}5897[Issue 5897]: Embedding links no longer include navigation and search bars.
+* {k4issue}5896[Issue 5896]: Bookmarked URLs to saved filtered searches from a previous version of Kibana display correctly.
+* {k4issue}5744[Issue 5744]: Fixes bug that caused incorrect display of "No results found" in some cases.
+* {k4issue}5824[Issue 5824]: Corrects a fatal error when Kibana starts with node x86 on Windows x64 systems.
 
 Plugin System Changes
 
-* http://github.com/elastic/kibana/issues/5226[Issue 5226]: Plugins are explicit when they start to route.
-* http://github.com/elastic/kibana/pull/5725[Pull Request 5725]: Plugins can extend Chrome navigation.
-* http://github.com/elastic/kibana/issues/4720[Issue 4720]: Adds support for zip compression.
-* http://github.com/elastic/kibana/pull/5704[Pull Request 5704]: Removes Github shortcuts from the plugin installer.
-* http://github.com/elastic/kibana/issues/5661[Issue 5661]: Fixes the plugin optimization path.
-* http://github.com/elastic/kibana/pull/5538[Pull Request 5538]: Apps can use empty export types.
+* {k4issue}5226[Issue 5226]: Plugins are explicit when they start to route.
+* {k4pull}5725[Pull Request 5725]: Plugins can extend Chrome navigation.
+* {k4issue}4720[Issue 4720]: Adds support for zip compression.
+* {k4pull}5704[Pull Request 5704]: Removes Github shortcuts from the plugin installer.
+* {k4issue}5661[Issue 5661]: Fixes the plugin optimization path.
+* {k4pull}5538[Pull Request 5538]: Apps can use empty export types.
 
 * {k4issue}5896[Issue 5896]: Bookmarked URLs to saved filtered searches from a previous version of Kibana display
 correctly.

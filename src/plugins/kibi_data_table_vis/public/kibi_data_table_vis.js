@@ -29,7 +29,8 @@ define(function (require) {
           queryDefinitions: []
         },
         editor: '<kibi-data-table-vis-params></kibi-data-table-vis-params>'
-      }
+      },
+      version: 2
     });
   }
 

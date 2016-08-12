@@ -66,7 +66,8 @@ define(function (require) {
             params.filters = json;
           }
         }
-      ]
+      ],
+      version: 2
     });
   };
 });

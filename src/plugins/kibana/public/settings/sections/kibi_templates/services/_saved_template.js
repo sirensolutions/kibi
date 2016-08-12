@@ -30,7 +30,7 @@ define(function (require) {
           description: '',
           templateSource: '',
           templateEngine: 'jade',
-          version: 1
+          version: 2
         },
 
         searchSource: true

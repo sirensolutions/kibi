@@ -20,7 +20,8 @@ module.exports = function (kibana) {
   var indexHelper;
 
   let migrations = [
-    require('./lib/migrations/migration_1')
+    require('./lib/migrations/migration_1'),
+    require('./lib/migrations/migration_2')
   ];
 
   var _validateQueryDefs = function (queryDefs) {

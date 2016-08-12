@@ -234,7 +234,8 @@ define(function (require) {
         id: self.id,
         type: self.type && self.type.name,
         schema: self.schema && self.schema.name,
-        params: outParams
+        params: outParams,
+        version: self.type.version
       };
     };
 

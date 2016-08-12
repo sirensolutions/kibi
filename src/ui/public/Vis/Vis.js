@@ -68,7 +68,10 @@ define(function (require) {
     Vis.prototype.setState = function (state) {
       this.title = state.title || '';
       this.type = state.type || this.type;
+
       if (_.isString(this.type)) this.type = visTypes.byName[this.type];
+
+      this.version = this.type.version;
 
       this.listeners = _.assign({}, state.listeners, this.type.listeners);
       this.params = _.defaults({},
@@ -87,7 +90,8 @@ define(function (require) {
         aggs: this.aggs.map(function (agg) {
           return agg.toJSON();
         }).filter(Boolean),
-        listeners: this.listeners
+        listeners: this.listeners,
+        version: this.type.version
       };
     };
 

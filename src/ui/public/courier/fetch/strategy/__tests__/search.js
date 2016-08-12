@@ -52,11 +52,11 @@ describe('ui/courier/fetch/strategy/search', () => {
     context('when indexList is empty', () => {
       beforeEach(() => reqsFetchParams[0].index = []);
 
-      it('queries .kibana-devnull instead', () => {
+      it('queries .kibi-devnull instead', () => {
         let value;
         search.reqsFetchParamsToBody(reqsFetchParams).then(val => value = val);
         $rootScope.$apply();
-        expect(_.includes(value, '"index":[".kibana-devnull"]')).to.be(true);
+        expect(_.includes(value, '"index":[".kibi-devnull"]')).to.be(true);
       });
     });
   });

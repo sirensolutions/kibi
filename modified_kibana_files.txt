@@ -13,6 +13,7 @@ src/cli/cluster/ClusterManager.js
 src/cli/plugin/__tests__/plugin_downloader.js
 src/cli/plugin/plugin.js
 src/cli/serve/serve.js
++src/cli/upgrade/upgrade.js
 +src/cli/kibi
 
 src/fixtures/mock_state.js
@@ -77,18 +78,24 @@ src/server/http/short_url_lookup.js
 src/server/config/schema.js
 src/server/KbnServer.js
 src/server/pid/index.js
++src/migrations
 
 src/testUtils/stub_index_pattern.js
++src/testUtils/wrap_async.js
++src/testUtils/scenario_manager.js
 
 src/ui/index.js
 src/ui/UiBundlerEnv.js
 src/ui/UiExports.js
 src/ui/public/chrome/api/angular.js
 src/ui/public/Vis/VisType.js
+src/ui/public/Vis/Vis.js
+src/ui/public/Vis/AggConfig.js
 
 src/ui/public/agg_table/agg_table.js
 src/ui/public/agg_table/agg_table_group.html
 src/ui/public/agg_table/agg_table_group.js
+src/ui/public/agg_types/AggType.js
 
 src/ui/public/agg_types/buckets/create_filter/filters.js
 src/ui/public/agg_types/index.js

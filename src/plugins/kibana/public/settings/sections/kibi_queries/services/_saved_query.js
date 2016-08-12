@@ -10,7 +10,6 @@ define(function (require) {
 
   module.factory('SavedQuery', function (courier) {
 
-
     _.class(SavedQuery).inherits(courier.SavedObject);
 
     function SavedQuery(id) {
@@ -52,7 +51,7 @@ define(function (require) {
           rest_path: '',
           rest_resp_status_code: 200,
           activation_rules: '[]',
-          version: 1
+          version: 2
         },
         init: function () {
           try {
@@ -90,8 +89,6 @@ define(function (require) {
     }
 
     SavedQuery.type = 'query';
-
-
 
     return SavedQuery;
   });

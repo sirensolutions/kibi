@@ -19,6 +19,12 @@ module.exports = function (kibana) {
   var queryEngine;
   var indexHelper;
 
+  let migrations = [
+    require('./lib/migrations/migration_1'),
+    require('./lib/migrations/migration_2'),
+    require('./lib/migrations/migration_3')
+  ];
+
   var _validateQueryDefs = function (queryDefs) {
     if (queryDefs && queryDefs instanceof Array) {
       return true;
@@ -134,6 +140,9 @@ module.exports = function (kibana) {
       indexHelper = new IndexHelper(server);
       server.expose('getIndexHelper', () => indexHelper);
 
+      // Expose the migrations
+      server.expose('getMigrations', () => migrations);
+
       server.route({
         method: 'GET',
         path:'/clearCache',
@@ -226,6 +235,7 @@ module.exports = function (kibana) {
         }
       });
     }
+
   });
 
 };

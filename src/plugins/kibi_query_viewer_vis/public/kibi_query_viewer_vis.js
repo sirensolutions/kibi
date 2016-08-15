@@ -28,7 +28,8 @@ define(function (require) {
         },
         editor: '<kibi-query-viewer-vis-params></kibi-query-viewer-vis-params>'
       },
-      requiresSearch: false
+      requiresSearch: false,
+      version: 2
     });
   };
 

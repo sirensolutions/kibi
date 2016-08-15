@@ -13,6 +13,9 @@ define(function (require) {
       this.description = opts.description;
       this.schemas = opts.schemas || new VisTypeSchemas();
       this.params = opts.params || {};
+      if (opts.version) {
+        this.version = opts.version;
+      }
       this.requiresSearch = opts.requiresSearch == null ? true : opts.requiresSearch; // Default to true unless otherwise specified
     }
 

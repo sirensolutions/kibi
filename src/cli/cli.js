@@ -18,6 +18,7 @@ program
 require('./serve/serve')(program);
 require('./plugin/plugin')(program);
 require('./kibi/replace_encryption_key')(program);
+require('./kibi/upgrade')(program);
 
 program
 .command('help <command>')

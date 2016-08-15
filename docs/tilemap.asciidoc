@@ -3,6 +3,10 @@
 
 A tile map displays a geographic area overlaid with circles keyed to the data determined by the buckets you specify.
 
+NOTE: By default, Kibi uses the https://www.elastic.co/elastic-tile-service[Elastic Tile Service]
+to display map tiles. To use other tile service providers, configure the <<tilemap-settings,tilemap settings>>
+in `kibi.yml`.
+
 The default _metrics_ aggregation for a tile map is the *Count* aggregation. You can select any of the following
 aggregations as the metrics aggregation:
 
@@ -18,6 +22,8 @@ numeric field. Select a field from the drop-down.
 numeric field. Select a field from the drop-down.
 *Unique Count*:: The {elastic-ref}search-aggregations-metrics-cardinality-aggregation.html[_cardinality_] aggregation returns
 the number of unique values in a field. Select a field from the drop-down.
+
+Enter a string in the *Custom Label* field to change the display label.
 
 The _buckets_ aggregations determine what information is being retrieved from your data set.
 
@@ -70,6 +76,8 @@ in a name to display on the visualization.
 based on the geohash coordinates.
 
 NOTE: By default, the *Change precision on map zoom* box is checked. Uncheck the box to disable this behavior.
+
+Enter a string in the *Custom Label* field to change the display label.
 
 You can click the *Advanced* link to display more customization options for your metrics or bucket aggregation:
 

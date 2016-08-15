@@ -25,9 +25,8 @@ wget -qO - https://packages.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add 
 . Add the repository definition to your `/etc/apt/sources.list.d/kibana.list` file:
 +
 [source, sh]
---------------------------------------------------
-echo "deb http://packages.elastic.co/kibana/{branch}/debian stable main" | sudo tee -a /etc/apt/sources.list.d/kibana.list
---------------------------------------------------
+
+echo "deb http://packages.elastic.co/kibana/4.5/debian stable main" | sudo tee -a /etc/apt/sources.list
 +
 [WARNING]
 ==================================================
@@ -79,11 +78,11 @@ rpm --import https://packages.elastic.co/GPG-KEY-elasticsearch
 +
 . Create a file named `kibana.repo` in the `/etc/yum.repos.d/` directory with the following contents:
 +
-[source,sh]
+["source", "sh", subs="attributes"]
 --------------------------------------------------
-[kibana-4.4]
-name=Kibana repository for 4.4.x packages
-baseurl=http://packages.elastic.co/kibana/4.4/centos
+[kibana-{version}]
+name=Kibana repository for 4.5.x packages
+baseurl=http://packages.elastic.co/kibana/4.5/centos
 gpgcheck=1
 gpgkey=http://packages.elastic.co/GPG-KEY-elasticsearch
 enabled=1

@@ -1,5 +1,5 @@
 define(function (require) {
-  return function MapFactory(Private, tilemap, kbnVersion) {
+  return function MapFactory(Private, tilemap, $sanitize) {
     var _ = require('lodash');
     var $ = require('jquery');
     var L = require('leaflet');
@@ -9,11 +9,12 @@ define(function (require) {
       sanitize: true // Sanitize HTML tags
     });
 
+    var defaultMapZoom = 2;
     var defaultMapCenter = [15, 5];
     var defaultMarkerType = 'Scaled Circle Markers';
 
     var tilemapOptions = tilemap.options;
-    var attribution = marked(tilemapOptions.attribution);
+    var attribution = $sanitize(marked(tilemapOptions.attribution));
 
     var mapTiles = {
       url: tilemap.url,
@@ -263,7 +264,6 @@ define(function (require) {
     TileMapMap.prototype._createMap = function (mapOptions) {
       if (this.map) this.destroy();
 
-
       if (this._attr.wms && this._attr.wms.enabled) {
         _.assign(mapOptions, {
           minZoom: 1,
@@ -271,14 +271,12 @@ define(function (require) {
         });
       }
 
-      var savedZoom = _.get(this._geoJson, 'properties.zoom');
-      var boundedZoom = savedZoom
-        ? Math.max(Math.min(savedZoom, mapOptions.maxZoom), mapOptions.minZoom)
-        : mapOptions.minZoom;
+      const savedZoom = _.get(this._geoJson, 'properties.zoom');
 
       // get center and zoom from mapdata, or use defaults
       this._mapCenter = _.get(this._geoJson, 'properties.center') || defaultMapCenter;
-      this._mapZoom = boundedZoom;
+      this._mapZoom = Math.max(Math.min(savedZoom || defaultMapZoom, mapOptions.maxZoom), mapOptions.minZoom);
+
       // add map tiles layer, using the mapTiles object settings
       if (this._attr.wms && this._attr.wms.enabled) {
         this._tileLayer = L.tileLayer.wms(this._attr.wms.url, this._attr.wms.options);

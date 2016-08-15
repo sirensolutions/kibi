@@ -79,29 +79,31 @@ endif::[]
 === Parameters encryption
 
 Sensitive datasource parameters like passwords are encrypted before being
-stored in the ```.kibi``` index.
+stored in the `.kibi` index.
 
 Before creating datasources containing sensitive parameters, make sure to set
-a custom encryption key by running the ```replace_encryption_key``` command:
+a custom encryption key by running the `replace_encryption_key` command:
 
-```
+[source,sql]
+----
 bin/kibi replace_encryption_key [options] <current_key> <new_key> <new_cipher>
-```
+----
 
 * **<current_key>** a base64 encoded string containing the current encryption key.
 * **<new_key>** a base64 encoded string containing the new encryption key.
 * **<new_cipher>** the cipher algorithm to use (currently only AES-GCM is supported).
 
-The current encryption key can be read from the ```kibi.yml``` file in the
-```datasource_encryption_key``` parameter.
+The current encryption key can be read from the `kibi.yml` file in the
+`datasource_encryption_key` parameter.
 
 Keys can have a length of 16, 24 or 32 bytes; a quick way to encode a plaintext
-string to base64 is to use the ```base64``` utility from the coreutils package:
+string to base64 is to use the `base64` utility from the coreutils package:
 
-```
+[source,sql]
+----
 $ echo -n changemechangemechangemechangeme | base64
 Y2hhbmdlbWVjaGFuZ2VtZWNoYW5nZW1lY2hhbmdlbWU=
-```
+----
 
 NOTE: Make sure to set the configuration file as readable only by the user
 running the Kibi process.

@@ -34,6 +34,7 @@ documentation.
 Kibi | Elasticsearch
 --- | ---
 4.5.4 | 2.3.x
+4.5.3 | 2.3.x
 4.5.1 | 2.3.x
 4.4.2 | 2.2.x, 2.3.x
 4.4.1 | 2.2.x, 2.3.x

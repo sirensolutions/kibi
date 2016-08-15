@@ -6,7 +6,7 @@ const sinon = require('sinon');
 const EventEmitter = require('events').EventEmitter;
 
 var queryEngine;
-var counter;
+var stub;
 var expectedMsg = { message: 'QueryEngine initialized successfully.' };
 
 FakeStatus.prototype = new EventEmitter(); // inherit from EventEmitter
@@ -47,14 +47,12 @@ describe('Query Engine', function () {
       var server = fakeServer;
       server.plugins.elasticsearch.status = new FakeStatus('green');
       queryEngine = new QueryEngine(server);
-      counter = 0;
-      sinon.stub(queryEngine, '_onStatusGreen', function () {
-        counter++;
+      stub = sinon.stub(queryEngine, '_onStatusGreen', function () {
         return Promise.resolve(true);
       });
 
       queryEngine._init(500, false).then(function (ret) {
-        expect(counter).to.equal(1);
+        expect(stub.calledOnce).to.equal(true);
         expect(ret).eql(expectedMsg);
         done();
       }).catch(done);
@@ -65,14 +63,12 @@ describe('Query Engine', function () {
       server.plugins.elasticsearch.status = new FakeStatus('red');
 
       queryEngine = new QueryEngine(server);
-      counter = 0;
-      sinon.stub(queryEngine, '_onStatusGreen', function () {
-        counter++;
+      stub = sinon.stub(queryEngine, '_onStatusGreen', function () {
         return Promise.resolve(true);
       });
 
       queryEngine._init(500, false).then(function (ret) {
-        expect(counter).to.equal(1);
+        expect(stub.calledOnce).to.equal(true);
         expect(ret).eql(expectedMsg);
         done();
       }).catch(done);
@@ -86,14 +82,12 @@ describe('Query Engine', function () {
       server.plugins.elasticsearch.status = new FakeStatus('red');
 
       queryEngine = new QueryEngine(server);
-      counter = 0;
-      sinon.stub(queryEngine, '_onStatusGreen', function () {
-        counter++;
+      stub = sinon.stub(queryEngine, '_onStatusGreen', function () {
         return Promise.resolve(true);
       });
 
       queryEngine._init(500, false).then(function (ret) {
-        expect(counter).to.equal(1);
+        expect(stub.calledOnce).to.equal(true);
         expect(ret).eql(expectedMsg);
         done();
       }).catch(done);

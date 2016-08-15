@@ -6,6 +6,7 @@ const sinon = require('sinon');
 const EventEmitter = require('events').EventEmitter;
 
 var queryEngine;
+var counter;
 var expectedMsg = { message: 'QueryEngine initialized successfully.' };
 
 FakeStatus.prototype = new EventEmitter(); // inherit from EventEmitter
@@ -46,11 +47,14 @@ describe('Query Engine', function () {
       var server = fakeServer;
       server.plugins.elasticsearch.status = new FakeStatus('green');
       queryEngine = new QueryEngine(server);
+      counter = 0;
       sinon.stub(queryEngine, '_onStatusGreen', function () {
+        counter++;
         return Promise.resolve(true);
       });
 
       queryEngine._init(500, false).then(function (ret) {
+        expect(counter).to.equal(1);
         expect(ret).eql(expectedMsg);
         done();
       }).catch(done);
@@ -61,11 +65,14 @@ describe('Query Engine', function () {
       server.plugins.elasticsearch.status = new FakeStatus('red');
 
       queryEngine = new QueryEngine(server);
+      counter = 0;
       sinon.stub(queryEngine, '_onStatusGreen', function () {
+        counter++;
         return Promise.resolve(true);
       });
 
       queryEngine._init(500, false).then(function (ret) {
+        expect(counter).to.equal(1);
         expect(ret).eql(expectedMsg);
         done();
       }).catch(done);
@@ -73,6 +80,33 @@ describe('Query Engine', function () {
       fakeServer.plugins.elasticsearch.status.state = 'green';
       fakeServer.plugins.elasticsearch.status.emit('change');
     });
+
+    it('when elasticsearch status changes red-yellow-green', function (done) {
+      var server = fakeServer;
+      server.plugins.elasticsearch.status = new FakeStatus('red');
+
+      queryEngine = new QueryEngine(server);
+      counter = 0;
+      sinon.stub(queryEngine, '_onStatusGreen', function () {
+        counter++;
+        return Promise.resolve(true);
+      });
+
+      queryEngine._init(500, false).then(function (ret) {
+        expect(counter).to.equal(1);
+        expect(ret).eql(expectedMsg);
+        done();
+      }).catch(done);
+
+      // then change status to yellow
+      fakeServer.plugins.elasticsearch.status.state = 'yellow';
+      fakeServer.plugins.elasticsearch.status.emit('change');
+
+      // then change status to green
+      fakeServer.plugins.elasticsearch.status.state = 'green';
+      fakeServer.plugins.elasticsearch.status.emit('change');
+    });
+
 
   });
 });

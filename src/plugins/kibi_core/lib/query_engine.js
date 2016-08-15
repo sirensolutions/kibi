@@ -27,6 +27,26 @@ function QueryEngine(server) {
   this.client = server.plugins.elasticsearch.client;
 }
 
+QueryEngine.prototype._onStatusGreen = function () {
+  if (this.server.plugins.elasticsearch.status.state === 'green') {
+    return this.loadPredefinedData().then(() => {
+      return this.setupJDBC().then(() => {
+        return this.reloadQueries().then(() => {
+          this.initialized = true;
+          return true;
+        });
+      });
+    });
+  } else {
+    return Promise.reject(
+      new Error(
+        'Elasticsearch plugin status expected to be green but was: [' +
+        this.server.plugins.elasticsearch.status.state + ']'
+      )
+    );
+  }
+};
+
 QueryEngine.prototype._init = function (cacheSize = 500, enableCache = true, cacheMaxAge = 1000 * 60 * 60) {
   // populate an array templatesDefinitions which contain templatesdefinition objects
   var self = this;
@@ -65,20 +85,28 @@ QueryEngine.prototype._init = function (cacheSize = 500, enableCache = true, cac
   }
 
   return new Promise((fulfill, reject) => {
-    var elasticsearchStatus = self.server.plugins.elasticsearch.status;
-
-    elasticsearchStatus.on('change', function (prev, prevmsg) {
+    if (_.get(this, 'server.plugins.elasticsearch.status')) {
+      var elasticsearchStatus = self.server.plugins.elasticsearch.status;
+      var succesfullInitializationMsg = { message: 'QueryEngine initialized successfully.' };
       if (elasticsearchStatus.state === 'green') {
-        self.loadPredefinedData().then(function () {
-          return self.setupJDBC().then(function () {
-            return self.reloadQueries().then(function () {
-              self.initialized = true;
-              fulfill({ message: 'QueryEngine initialized successfully.' });
-            });
-          });
+        // already green - fire the _onStatusGreen
+        self._onStatusGreen().then(function () {
+          fulfill(succesfullInitializationMsg);
         }).catch(reject);
+      } else {
+        // not ready yet - bind _onStatusGreen to change event so it will fire immediatelly when it becomes green
+        elasticsearchStatus.on('change', function () {
+          // fire the _onStatusGreen only when elasticsearch status is green
+          if (self.server.plugins.elasticsearch.status.state === 'green') {
+            self._onStatusGreen().then(function () {
+              fulfill(succesfullInitializationMsg);
+            }).catch(reject);
+          }
+        });
       }
-    });
+    } else {
+      return Promise.reject(new Error('Could not get status of elasticsearch plugin'));
+    }
   });
 };
 

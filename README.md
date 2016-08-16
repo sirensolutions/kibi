@@ -1,4 +1,4 @@
-# Kibi 4.4.2-1
+# Kibi 4.4.2-2
 
 Kibi extends Kibana 4.4.2 with data intelligence features; the core feature of
 Kibi is the capability to join and filter data from multiple Elasticsearch
@@ -27,6 +27,7 @@ documentation.
 
 Kibi    | Elasticsearch
 ------- | ---
+4.4.2-2 | 2.2.x, 2.3.x
 4.4.2-1 | 2.2.x, 2.3.x
 4.4.2   | 2.2.x, 2.3.x
 4.4.1   | 2.2.x, 2.3.x

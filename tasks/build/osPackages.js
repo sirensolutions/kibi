@@ -6,7 +6,7 @@ module.exports = function (grunt) {
   const exec = require('../utils/exec');
   const targetDir = config.get('target');
   const version = config.get('pkg.version');
-  const userScriptsDir = config.get('userScriptsDir');
+  const packageScriptsDir = config.get('packageScriptsDir');
   const servicesByName = indexBy(config.get('services'), 'name');
 
   grunt.registerTask('_build:osPackages', function () {
@@ -28,9 +28,13 @@ module.exports = function (grunt) {
         '--vendor', 'Siren Solutions',
         '--maintainer', 'Kibi Team\ \<info@siren.solutions\>',
         '--license', 'Apache\ 2.0',
-        '--after-install', resolve(userScriptsDir, 'installer.sh'),
-        '--after-remove', resolve(userScriptsDir, 'remover.sh'),
-        '--config-files', '/opt/kibi/config/kibi.yml'
+        '--after-install', resolve(packageScriptsDir, 'post_install.sh'),
+        '--before-install', resolve(packageScriptsDir, 'pre_install.sh'),
+        '--before-remove', resolve(packageScriptsDir, 'pre_remove.sh'),
+        '--after-remove', resolve(packageScriptsDir, 'post_remove.sh'),
+        '--config-files', '/opt/kibi/config/kibi.yml',
+        '--template-value', 'user=kibi',
+        '--template-value', 'group=kibi'
       ];
 
       const files = buildDir + '/=/opt/kibi';

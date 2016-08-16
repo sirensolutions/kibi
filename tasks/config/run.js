@@ -5,6 +5,7 @@ module.exports = function (grunt) {
   let root = p => resolve(__dirname, '../../', p);
   let binScript =  /^win/.test(platform) ? '.\\bin\\kibi.bat' : './bin/kibi'; // kibi: replaced name to kibi
   let uiConfig = require(root('test/serverConfig'));
+  let chromedriver = require('chromedriver');
 
   return {
     testServer: {
@@ -31,7 +32,7 @@ module.exports = function (grunt) {
         quiet: false,
         failOnError: false
       },
-      cmd: /^win/.test(platform) ? '.\\bin\\kibi.bat' : './bin/kibi', // kibi: replaced name to kibi
+      cmd: binScript, // kibi: replaced name to kibi
       args: [
         '--server.port=' + uiConfig.servers.kibana.port,
         '--env.name=development',
@@ -78,35 +79,31 @@ module.exports = function (grunt) {
       ]
     },
 
-    seleniumServer: {
+    chromeDriver: {
       options: {
         wait: false,
-        ready: /Selenium Server is up and running/,
-        quiet: true,
-        failOnError: false
-      },
-      cmd: 'java',
-      args: [
-        '-jar',
-        'selenium/selenium-server-standalone-2.53.0.jar',
-        '-port',
-        uiConfig.servers.webdriver.port
-      ]
-    },
-
-    devSeleniumServer: {
-      options: {
-        wait: false,
-        ready: /Selenium Server is up and running/,
+        ready: /Starting ChromeDriver/,
         quiet: false,
         failOnError: false
       },
-      cmd: 'java',
+      cmd: chromedriver.path,
       args: [
-        '-jar',
-        'selenium/selenium-server-standalone-2.53.0.jar',
-        '-port',
-        uiConfig.servers.webdriver.port
+        `--port=${uiConfig.servers.webdriver.port}`,
+        '--url-base=wd/hub'
+      ]
+    },
+
+    devChromeDriver: {
+      options: {
+        wait: false,
+        ready: /Starting ChromeDriver/,
+        quiet: false,
+        failOnError: false
+      },
+      cmd: chromedriver.path,
+      args: [
+        `--port=${uiConfig.servers.webdriver.port}`,
+        '--url-base=wd/hub'
       ]
     },
 

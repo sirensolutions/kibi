@@ -214,7 +214,7 @@ define(function (require) {
         description: 'Set to true to suppress all warnings and errors'
       },
       'kibi:graphExpansionLimit' : {
-        value: 100,
+        value: 500,
         description: 'Limit the number of elements to retrieve during the graph expansion'
       },
       'kibi:graphMaxConcurrentCalls' : {

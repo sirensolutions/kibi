@@ -25,6 +25,8 @@ include::kibi_license.asciidoc[]
 
 include::setup.asciidoc[]
 
+include::upgrade.asciidoc[]
+
 include::getting_started.asciidoc[]
 
 include::logstash.asciidoc[]

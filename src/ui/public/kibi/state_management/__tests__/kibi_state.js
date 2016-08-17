@@ -1438,11 +1438,18 @@ describe('State Management', function () {
         kibiState.resetFiltersQueriesTimes();
       });
 
-      it('should not emit a reset event if no dashboard got changed', function (done) {
-        const stub = sinon.spy(kibiState, 'emit');
+      it('should not emit a reset events if no dashboard got changed', function (done) {
+        var counts = {
+          reset: 0,
+          reset_app_state_query: 0
+        };
+        const stub = sinon.stub(kibiState, 'emit', function (eventName) {
+          counts[eventName]++;
+        });
         kibiState.resetFiltersQueriesTimes()
         .then(() => {
-          expect(stub.called).to.not.be.ok();
+          expect(counts.reset).to.equal(0);
+          expect(counts.reset_app_state_query).to.equal(0);
           done();
         }).catch(done);
       });

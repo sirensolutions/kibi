@@ -251,6 +251,9 @@ define(function (require) {
         };
 
         $scope.save = function () {
+          // kibi: lock the dashboard so kibi_state._getCurrentDashboardId ignore the change for a moment
+          dash.locked = true;
+
           $state.title = dash.id = dash.title;
           $state.save();
 
@@ -264,6 +267,7 @@ define(function (require) {
 
           dash.save()
           .then(function (id) {
+            delete dash.locked;
             $scope.configTemplate.close('save');
             if (id) {
               notify.info('Saved Dashboard as "' + dash.title + '"');
@@ -273,7 +277,10 @@ define(function (require) {
               }
             }
           })
-          .catch(notify.fatal);
+          .catch((err) => {
+            delete dash.locked;
+            notify.fatal(err);
+          });
         };
 
         let pendingVis = _.size($state.panels);

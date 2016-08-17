@@ -308,7 +308,7 @@ define(function (require) {
     KibiState.prototype._getCurrentDashboardId = function () {
       const dash = _.get($route, 'current.locals.dash');
 
-      if (!dash) {
+      if (!dash || dash.locked) {
         return;
       }
       return dash.id;

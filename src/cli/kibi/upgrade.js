@@ -76,7 +76,7 @@ export default function (program) {
 
     await kbnServer.ready();
 
-    let logger = new MigrationLogger(kbnServer.server);
+    let logger = new MigrationLogger(kbnServer.server, 'migrations');
     let runner = new MigrationRunner(kbnServer.server, logger);
 
     try {

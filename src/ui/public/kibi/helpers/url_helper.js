@@ -10,6 +10,10 @@ define(function (require) {
       return $location.path().indexOf('/visualize/') === 0;
     };
 
+    UrlHelper.prototype.onSettingsTab = function () {
+      return $location.path().indexOf('/settings') === 0;
+    };
+
     UrlHelper.prototype.onDashboardTab = function () {
       return $location.path().indexOf('/dashboard') === 0;
     };

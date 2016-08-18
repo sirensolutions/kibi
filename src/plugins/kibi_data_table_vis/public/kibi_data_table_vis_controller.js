@@ -7,7 +7,7 @@ define(function (require) {
 
   module.controller(
     'KibiDataTableVisController',
-    function ($rootScope, $scope, $route, globalState, savedVisualizations, Private, courier) {
+    function ($rootScope, $scope, $route, kibiState, savedVisualizations, Private, courier) {
       var urlHelper = Private(require('ui/kibi/helpers/url_helper'));
       var requestQueue = Private(require('ui/kibi/components/courier/_request_queue_wrapped'));
       var SearchSource = Private(require('ui/courier/data_source/search_source'));
@@ -18,28 +18,15 @@ define(function (require) {
       $scope.queryColumn = {};
       $scope.cellClickHandlers = {};
 
-      $scope.entityURI = '';
-
       const configMode = urlHelper.onVisualizeTab();
 
-      function setEntityURI() {
-        if (configMode && globalState.se_temp && globalState.se_temp.length > 0) {
-          $scope.entityURI = globalState.se_temp[0];
-        } else if (!configMode && globalState.se && globalState.se.length > 0) {
-          $scope.entityURI = globalState.se[0];
-        } else {
-          $scope.entityURI = '';
-        }
-      }
-      setEntityURI();
-
-      var saveWithChangesHandler = function (diff) {
-        if (diff.indexOf('se') !== -1 || diff.indexOf('se_temp') !== -1) {
-          setEntityURI();
+      $scope.$listen(kibiState, 'save_with_changes', function (diff) {
+        if (diff.indexOf(kibiState._properties.selected_entity) !== -1 ||
+            diff.indexOf(kibiState._properties.selected_entity_disabled) !== -1 ||
+            diff.indexOf(kibiState._properties.test_selected_entity) !== -1) {
           fetchResults($scope.savedVis);
         }
-      };
-      globalState.on('save_with_changes', saveWithChangesHandler.bind(this));
+      });
 
       // Set to true in editing mode
       var editing = false;
@@ -116,7 +103,7 @@ define(function (require) {
 
           searchSource.inject([
             {
-              entityURI: $scope.entityURI,
+              entityURI: kibiState.getEntityURI(),
               queryDefs: $scope.vis.params.queryDefinitions,
               sourcePath: $scope.vis.params.joinElasticsearchField, // it is the field from table to do the comparison
               fieldName: $scope.vis.params.queryFieldName
@@ -185,7 +172,6 @@ define(function (require) {
         $scope.$on('$destroy', function () {
           removeVisStateChangedHandler();
           removeVisColumnsChangedHandler();
-          globalState.off('save_with_changes', saveWithChangesHandler);
         });
 
         $scope.$watch('savedObj.columns', function () {

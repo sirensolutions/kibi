@@ -88,6 +88,38 @@ describe('State Management', function () {
 
     require('testUtils/noDigestPromises').activateForSuite();
 
+    describe('selected entity', function () {
+      describe('isEntitySelected', function () {
+        it('should return true if entity is the one selected', function () {
+          const index = 'a';
+          const type = 'b';
+          const id = 'c';
+          const column = 'd';
+          kibiState.setEntityURI(`${index}/${type}/${id}/${column}`);
+          expect(kibiState.isEntitySelected(index, type, id, column)).to.be(true);
+        });
+
+        it('should return false if entity is not the one selected', function () {
+          kibiState.setEntityURI('a/b/c/d');
+          [
+            [ 'e', 'b', 'c', 'd' ],
+            [ 'a', 'e', 'c', 'd' ],
+            [ 'a', 'b', 'e', 'd' ],
+            [ 'a', 'b', 'c', 'e' ]
+          ].forEach(([ index, type, id, column ]) => {
+            expect(kibiState.isEntitySelected(index, type, id, column)).to.be(false);
+          });
+        });
+
+        it('should not fail if arguments are undefined', function () {
+          expect(kibiState.isEntitySelected()).to.be(false);
+          expect(kibiState.isEntitySelected('a')).to.be(false);
+          expect(kibiState.isEntitySelected('a', 'b')).to.be(false);
+          expect(kibiState.isEntitySelected('a', 'b', 'c')).to.be(false);
+        });
+      });
+    });
+
     describe('Relations', function () {
       beforeEach(() => init({}));
 

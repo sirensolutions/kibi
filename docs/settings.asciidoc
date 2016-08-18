@@ -471,9 +471,9 @@ include::advanced_settings.asciidoc[]
 [[kibana-server-properties]]
 === Setting Kibana Server Properties
 
-The Kibana server reads properties from the `kibana.yml` file on startup. The default settings configure Kibana to run
-on `localhost:5601`. To change the host or port number, or connect to Elasticsearch running on a different machine,
-you'll need to update your `kibana.yml` file. You can also enable SSL and set a variety of other options.
+The Kibana server reads properties from the `kibana.yml` file on startup. The default settings configure Kibana to listen on port
+`{kibi-default-port}` on all the IP addresses. To change the host or port number, or connect to Elasticsearch running on a different
+machine, you'll need to update your `kibana.yml` file. You can also enable SSL and set a variety of other options.
 
 include::kibana-yml.asciidoc[]
 
@@ -485,7 +485,7 @@ deprecated[4.2, The names of several Kibana server properties changed in the 4.2
 +
 *alias*: `port` deprecated[4.2]
 +
-*default*: `5601`
+*default*: `{kibi-default-port}`
 
 `server.host` added[4.2]:: The host to bind the Kibana server to.
 +
@@ -669,7 +669,7 @@ To import a set of objects:
 === Kibi server configuration
 
 The Kibi server reads its configuration from the `config/kibi.yml` file at startup.
-The default settings configure Kibi to run on `localhost:5606`. To change the host or port number, or connect to Elasticsearch running on a different machine,
+The default settings configure Kibi to run on `{start-url}`. To change the host or port number, or connect to Elasticsearch running on a different machine,
 you'll need to update your `kibi.yml` file. You can also enable SSL and set a variety of other options.
 
 include::kibi_yml.asciidoc[]
@@ -684,7 +684,7 @@ deprecated[0.3, The names of several Kibi server properties changed in the 0.3 r
 +
 *alias*: `port` deprecated[0.3]
 +
-*default*: `5606`
+*default*: `{kibi-default-port}`
 
 `server.host` added[0.3]:: The host to bind the Kibana server to.
 +

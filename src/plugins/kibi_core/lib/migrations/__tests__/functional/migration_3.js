@@ -42,7 +42,7 @@ describe('kibi_core/migrations/functional', function () {
     it('should count all upgradeable objects', wrapAsync(async () => {
       let migration = new Migration(configuration);
       let result = await migration.count();
-      expect(result).to.be(3);
+      expect(result).to.be(9);
     }));
 
     it('should upgrade all upgradeable objects', wrapAsync(async () => {
@@ -50,7 +50,7 @@ describe('kibi_core/migrations/functional', function () {
       let migration = new Migration(configuration);
 
       let result = await migration.upgrade();
-      expect(result).to.be(3);
+      expect(result).to.be(9);
 
       let after = await snapshot();
       expect(before.size).to.equal(after.size);
@@ -64,6 +64,8 @@ describe('kibi_core/migrations/functional', function () {
         'data-table-2',
         'query-viewer-2'
       ];
+
+      let upgradedDefinitions = 0;
 
       for (let [id, original] of before) {
         let upgraded = after.get(id);
@@ -85,22 +87,23 @@ describe('kibi_core/migrations/functional', function () {
               expect(upgradedAgg).not.to.be.an('undefined');
 
               if (upgradedAgg.type === 'external_query_terms_filter') {
-                expect(originalAgg.params.queryIds.length).to.be.greaterThan(0);
-
-                for (let q = 0; q < originalAgg.params.queryIds.length; q++) {
-                  let originalQueryDef = originalAgg.params.queryIds[q];
-                  let upgradedQueryDef = upgradedAgg.params.queryDefinitions[q];
-                  expect(upgradedQueryDef.queryId).to.equal(originalQueryDef.id);
-                  expect(upgradedQueryDef.joinElasticsearchField).to.equal(originalQueryDef.joinElasticsearchField);
-                  expect(upgradedQueryDef.queryVariableName).to.equal(originalQueryDef.queryVariableName);
-                  expect(Object.keys(upgradedQueryDef).length).to.be(3);
+                if (originalAgg.params && originalAgg.params.queryIds) {
+                  for (let q = 0; q < originalAgg.params.queryIds.length; q++) {
+                    upgradedDefinitions++;
+                    let originalQueryDef = originalAgg.params.queryIds[q];
+                    let upgradedQueryDef = upgradedAgg.params.queryDefinitions[q];
+                    expect(upgradedQueryDef.queryId).to.equal(originalQueryDef.id);
+                    expect(upgradedQueryDef.joinElasticsearchField).to.equal(originalQueryDef.joinElasticsearchField);
+                    expect(upgradedQueryDef.queryVariableName).to.equal(originalQueryDef.queryVariableName);
+                    expect(Object.keys(upgradedQueryDef).length).to.be(3);
+                  }
                 }
+                expect(upgradedAgg.params.queryIds).to.be.an('undefined');
+                expect(upgradedAgg.params.queryDefinitions).not.to.be.an('undefined');
                 expect(upgradedAgg.version).to.equal(2);
               } else {
                 expect(originalAgg).to.eql(upgradedAgg);
               }
-
-              expect(upgradedAgg.params.queryIds).to.be.an('undefined');
             }
             continue;
           }
@@ -108,6 +111,7 @@ describe('kibi_core/migrations/functional', function () {
           if (key === 'params' && upgradedVisState.type === 'kibi-data-table') {
 
             expect(upgradedVisState.params.queryIds).to.be.an('undefined');
+            expect(upgradedVisState.params.queryDefinitions).not.to.be.an('undefined');
 
             for (let param of Object.keys(originalVisState.params)) {
               let originalParam = originalVisState.params[param];
@@ -116,6 +120,7 @@ describe('kibi_core/migrations/functional', function () {
               if (param === 'queryIds') {
                 upgradedParam = upgradedVisState.params.queryDefinitions;
                 for (let q = 0; q < originalParam.length; q++) {
+                  upgradedDefinitions++;
                   let originalQueryDef = originalParam[q];
                   let upgradedQueryDef = upgradedParam[q];
                   expect(upgradedQueryDef.queryId).to.equal(originalQueryDef.id);
@@ -135,6 +140,7 @@ describe('kibi_core/migrations/functional', function () {
           if (key === 'params' && upgradedVisState.type === 'kibiqueryviewervis') {
 
             expect(upgradedVisState.params.queryOptions).to.be.an('undefined');
+            expect(upgradedVisState.params.queryDefinitions).not.to.be.an('undefined');
 
             for (let param of Object.keys(originalVisState.params)) {
               let originalParam = originalVisState.params[param];
@@ -142,10 +148,8 @@ describe('kibi_core/migrations/functional', function () {
               let upgradedParam = upgradedVisState.params[param];
               if (param === 'queryOptions') {
                 upgradedParam = upgradedVisState.params.queryDefinitions;
-              } else if (param === 'hasEntityDependentQuery') {
-                expect(upgradedParam).to.be.an('undefined');
-              } else if (param === 'queryIds') {
                 for (let q = 0; q < originalParam.length; q++) {
+                  upgradedDefinitions++;
                   let originalQueryDef = originalParam[q];
                   let upgradedQueryDef = upgradedParam[q];
 
@@ -157,6 +161,8 @@ describe('kibi_core/migrations/functional', function () {
                     expect(upgradedQueryDef[key]).to.eql(originalQueryDef[key]);
                   }
                 }
+              } else if (param === 'hasEntityDependentQuery') {
+                expect(upgradedParam).to.be.an('undefined');
               } else {
                 expect(upgradedParam).to.eql(originalParam);
               }
@@ -171,6 +177,8 @@ describe('kibi_core/migrations/functional', function () {
           expect(upgradedVisState.version).to.be(2);
         }
       }
+
+      expect(upgradedDefinitions).to.be(4);
 
       expect(warningSpy.called).to.be(false);
 

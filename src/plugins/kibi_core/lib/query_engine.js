@@ -108,10 +108,8 @@ QueryEngine.prototype.loadPredefinedData = function () {
           if (self.config.get('pkg.kibiEnterpriseEnabled')) {
             return self._loadDatasources().then(function () {
               return self._loadQueries().then(function () {
-                return self._loadScripts().then(function () {
-                  return self._refreshKibiIndex().then(function () {
-                    fulfill(true);
-                  });
+                return self._refreshKibiIndex().then(function () {
+                  fulfill(true);
                 });
               });
             });
@@ -340,59 +338,6 @@ QueryEngine.prototype._loadQueries = function () {
             self.log.warn('Query [' + queryId + '] already exists');
           } else {
             self.log.error('Could not load query [' + queryId + ']', err);
-          }
-          fulfill(true);
-        });
-      });
-    }));
-  });
-
-  return Promise.all(promises);
-};
-
-QueryEngine.prototype._loadScripts = function () {
-  var self = this;
-  // load default scripts examples
-  var scriptsToLoad = [
-    'select-all',
-    'select-by-type',
-    'select-extend',
-    'select-invert',
-    'select-by-edge-count',
-    'show-nodes-count-by-type',
-    'replace-investment-nodes',
-    'shortest-path',
-    'expand-by-relation',
-    'default-expansion',
-    'expand-top-comentioned'
-  ];
-
-  self.log.info('Loading scripts');
-
-  var promises = [];
-  _.each(scriptsToLoad, function (scriptId) {
-    promises.push(new Promise(function (fulfill, reject) {
-
-      fs.readFile(path.join(__dirname, 'scripts', scriptId + '.json'), function (err, data) {
-        if (err) {
-          reject(err);
-        }
-        self.client.create({
-          timeout: '1000ms',
-          index: self.config.get('kibana.index'),
-          type: 'script',
-          id: scriptId,
-          body: data.toString()
-        })
-        .then(function (resp) {
-          self.log.info('Script [' + scriptId + '] successfully loaded');
-          fulfill(true);
-        })
-        .catch(function (err) {
-          if (err.statusCode === 409) {
-            self.log.warn('Script [' + scriptId + '] already exists');
-          } else {
-            self.log.error('Could not load script [' + scriptId + ']', err);
           }
           fulfill(true);
         });

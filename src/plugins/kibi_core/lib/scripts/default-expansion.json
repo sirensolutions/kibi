@@ -1,7 +1,0 @@
-{
-  "title": "Default Expansion Policy",
-  "description": "Expands the selected nodes using the selected relations",
-  "scriptSource": "function expandFunction(selectionIds, graphModel) {\n    f.defaultExpansion(selectionIds).then(function (results) {\n        f.addResultsToGraph(selectionIds, results);\n    });\n}",
-  "version": 1,
-  "type": "expansion"
-}

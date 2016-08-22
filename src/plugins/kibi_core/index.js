@@ -132,7 +132,7 @@ module.exports = function (kibana) {
         this.status.green('Query engine initialized');
       }).catch((err) => {
         server.log(['error','kibi_core'], err);
-        this.status.red('Query engine initializiation failed');
+        this.status.red('Query engine initialization failed');
       });
 
       server.expose('getQueryEngine', () => queryEngine);

@@ -611,7 +611,7 @@ you are using a self-signed certificate so the certificate can be verified. Disa
 == Managing Saved Searches, Visualizations, and Dashboards
 
 You can view, edit, and delete saved searches, visualizations, and dashboards from *Settings > Objects*. You can also
-export or import sets of searches, visualizations, and dashboards.
+export or import sets of searches, visualizations, dashboards, objects, configuration, and index-patterns.
 Viewing a saved object displays the selected item in the *Discover*, *Visualize*, or *Dashboard* page. To view a saved
 object:
 
@@ -651,11 +651,13 @@ To delete a saved object:
 To export a set of objects:
 
 . Go to *Settings > Objects*.
-. Select the type of object you want to export. You can export a set of dashboards, searches, or visualizations.
+. Select the type of object you want to export. You can export a set of searches, visualizations, dashboards, objects, configuration, and index-patterns.
 . Click the selection box for the objects you want to export, or click the *Select All* box.
 . Click *Export* to select a location to write the exported JSON.
 
-WARNING: Exported dashboards do not include their associated index patterns. Re-create the index patterns manually before
+IMPORTANT: If you need to export every object you have in your Kibi installation, you can use button "Export Everything".
+
+WARNING: Exported dashboards do not include their associated index patterns (only without "Export Everything" function). Re-create the index patterns manually before
 importing saved dashboards to a Kibana instance running on another Elasticsearch cluster.
 
 To import a set of objects:

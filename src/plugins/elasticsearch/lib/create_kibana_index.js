@@ -10,7 +10,7 @@ module.exports = function (server) {
     };
   }
 
-  //kibi: we're defining an explicit mapping on version to avoid conflicts occurring when a plugin loads saved objects from JSON (which
+  // kibi: we're defining an explicit mapping on version to avoid conflicts occurring when a plugin loads saved objects from JSON (which
   // would create an implicit mapping of `version` to long).
   return client.indices.create({
     index: index,

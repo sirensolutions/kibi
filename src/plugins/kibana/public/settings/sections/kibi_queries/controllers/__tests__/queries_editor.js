@@ -4,7 +4,7 @@ var ngMock = require('ngMock');
 var jQuery = require('jquery');
 var Promise = require('bluebird');
 var noDigestPromises = require('testUtils/noDigestPromises');
-var globalState;
+var kibiState;
 var $scope;
 
 var mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
@@ -28,15 +28,19 @@ var fakeSavedDatasources = [
 
 describe('Kibi Controllers', function () {
 
-  function init(options) {
-    ngMock.module('kibana');
+  function init({ hits, snippet, snippetError, query, datasourceType }) {
+    ngMock.module('kibana', function ($provide) {
+      $provide.constant('kbnDefaultAppId', '');
+      $provide.constant('kibiDefaultDashboardId', '');
+      $provide.constant('elasticsearchPlugins', ['siren-join']);
+    });
 
     ngMock.module('kibi_datasources/services/saved_datasources', function ($provide) {
       $provide.service('savedDatasources', (Promise) => mockSavedObjects(Promise)('savedDatasources', fakeSavedDatasources));
     });
 
     ngMock.module('app/visualize', function ($provide) {
-      $provide.service('savedVisualizations', (Promise) => mockSavedObjects(Promise)('savedVisualizations', options.hits));
+      $provide.service('savedVisualizations', (Promise) => mockSavedObjects(Promise)('savedVisualizations', hits));
     });
 
     ngMock.module('kibana/query_engine_client', function ($provide) {
@@ -48,8 +52,8 @@ describe('Kibi Controllers', function () {
           getQueriesHtmlFromServer: function () {
             var resp = {
               data: {
-                snippets: options.snippet ? [ options.snippet ] : [],
-                error: options.snippetError
+                snippets: snippet ? [ snippet ] : [],
+                error: snippetError
               }
             };
             return Promise.resolve(resp);
@@ -58,20 +62,24 @@ describe('Kibi Controllers', function () {
       });
     });
 
-    ngMock.inject(function ($rootScope, $controller, _globalState_) {
-      var fakeRoute = {
-        current: {
-          locals: {}
-        }
-      };
-      fakeRoute.current.locals.query = options.query;
+    ngMock.inject(function (Private, $rootScope, $controller, _kibiState_) {
+      var urlHelper = Private(require('ui/kibi/helpers/url_helper'));
+      sinon.stub(urlHelper, 'onSettingsTab').returns(true);
 
-      globalState = _globalState_;
+      kibiState = _kibiState_;
+      sinon.stub(kibiState, 'getEntityURI').returns('entity1');
+
       $scope = $rootScope;
-      $scope.datasourceType = options.datasourceType;
+      $scope.datasourceType = datasourceType;
       $controller('QueriesEditor', {
         $scope: $scope,
-        $route: fakeRoute,
+        $route: {
+          current: {
+            locals: {
+              query: query
+            }
+          }
+        },
         $element: jQuery('<div><form name="objectForm" class="ng-valid"></div>')
       });
       $scope.$digest();
@@ -190,24 +198,6 @@ describe('Kibi Controllers', function () {
         expect($scope.holder.htmlPreview).to.match(/Error/);
         done();
       }).catch(done);
-    });
-
-    it('should grab the selected document', function (done) {
-      var query = {
-        id: '123'
-      };
-      init({ query: query });
-
-      $scope.$watch('holder.entityURI', function (entityURI) {
-        if (entityURI) {
-          expect(entityURI).to.be('url');
-          done();
-        }
-      });
-
-      globalState.se = [ 'url' ];
-      $scope.$emit('kibi:selectedEntities:changed', '');
-      $scope.$digest();
     });
 
     it('should update the REST datasource', function () {

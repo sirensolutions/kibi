@@ -15,6 +15,7 @@ describe('AggTypesComponent', function () {
     beforeEach(ngMock.module('kibana', function ($provide) {
       $provide.constant('kbnDefaultAppId', '');
       $provide.constant('kibiDefaultDashboardId', '');
+      $provide.constant('elasticsearchPlugins', ['siren-join']);
     }));
     beforeEach(ngMock.inject(function (Private) {
       bucketAggs = Private(require('ui/agg_types/index')).byType.buckets;
@@ -35,6 +36,7 @@ describe('AggTypesComponent', function () {
     beforeEach(ngMock.module('kibana', function ($provide) {
       $provide.constant('kbnDefaultAppId', '');
       $provide.constant('kibiDefaultDashboardId', '');
+      $provide.constant('elasticsearchPlugins', ['siren-join']);
     }));
     beforeEach(ngMock.inject(function (Private) {
       metricAggs = Private(require('ui/agg_types/index')).byType.metrics;

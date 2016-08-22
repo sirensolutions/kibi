@@ -28,15 +28,13 @@ define(function (require) {
           index: null,
           type: null,
           id: null,
-          column: null,
           extraIndexPatternItems: [],
           extraTypeItems: [],
           extraIdItems: []
         };
 
         $scope.$listen(kibiState, 'save_with_changes', function (diff) {
-          if (diff.indexOf(kibiState._properties.selected_entity) !== -1 ||
-              diff.indexOf(kibiState._properties.test_selected_entity) !== -1) {
+          if (diff.indexOf(kibiState._properties.test_selected_entity) !== -1) {
             const entityURI = kibiState.getEntityURI();
             if (entityURI) {
               var parts = entityURI.split('/');
@@ -75,9 +73,6 @@ define(function (require) {
               $scope.c.index = parts[0];
               $scope.c.type = parts[1];
               $scope.c.id = parts[2];
-              if (parts.length > 3) {
-                $scope.c.column = parts[3];
-              }
             } else {
               $scope.c.indexPattern = null;
             }
@@ -92,7 +87,6 @@ define(function (require) {
               $scope.c.index = $scope.c.indexPattern;
               $scope.c.type = null;
               $scope.c.id = null;
-              $scope.c.column = null;
 
               $scope.c.extraIndexPatternItems = [];
               $scope.c.extraTypeItems = [];
@@ -100,7 +94,6 @@ define(function (require) {
             } else if (oldV[1] !== newV[1]) {
               // type changed
               $scope.c.id = null;
-              $scope.c.column = null;
               $scope.c.extraIdItems = [];
             }
           }
@@ -122,7 +115,7 @@ define(function (require) {
                 if (response.data.hits.total > 1) {
                   notify.warning('Found more than one document for the specified selection, selected the first one.');
                 }
-                kibiState.setEntityURI(hit._index + '/' + hit._type + '/' + hit._id + '/' + $scope.c.column);
+                kibiState.setEntityURI(`${hit._index}/${hit._type}/${hit._id}/`);
                 kibiState.save();
               }).catch(function () {
                 notify.error('An error occurred while fetching the selected entity, please check if Elasticsearch is running.');
@@ -130,7 +123,7 @@ define(function (require) {
                 kibiState.save();
               });
             } else {
-              kibiState.setEntityURI($scope.c.index + '/' + $scope.c.type + '/' + $scope.c.id + '/' + $scope.c.column);
+              kibiState.setEntityURI(`${$scope.c.index}/${$scope.c.type}/${$scope.c.id}/`);
               kibiState.save();
             }
           }

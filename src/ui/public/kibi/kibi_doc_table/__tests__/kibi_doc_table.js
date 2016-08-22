@@ -10,16 +10,9 @@ var ngMock = require('ngMock');
 require('ui/private');
 require('ui/kibi/kibi_doc_table');
 
-
 var $parentScope;
-
-
 var $scope;
-
-
 var $timeout;
-
-
 var searchSource;
 
 var init = function ($elem, props) {
@@ -48,7 +41,11 @@ var destroy = function () {
 describe('Kibi doc table', function () {
   var $elem;
 
-  beforeEach(ngMock.module('kibana'));
+  beforeEach(ngMock.module('kibana', function ($provide) {
+    $provide.constant('kbnDefaultAppId', '');
+    $provide.constant('kibiDefaultDashboardId', '');
+    $provide.constant('elasticsearchPlugins', ['siren-join']);
+  }));
   beforeEach(function () {
     $elem = angular.element(`<kibi-doc-table query-column="queryColumn" search-source="searchSource" columns="columns"
                                              sorting="sorting"></kibi-doc-table>`);

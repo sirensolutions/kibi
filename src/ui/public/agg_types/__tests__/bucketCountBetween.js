@@ -18,6 +18,7 @@ describe('bucketCountBetween util', function () {
   beforeEach(ngMock.module('kibana', function ($provide) {
     $provide.constant('kbnDefaultAppId', '');
     $provide.constant('kibiDefaultDashboardId', '');
+    $provide.constant('elasticsearchPlugins', ['siren-join']);
   }));
   beforeEach(ngMock.inject(function (Private) {
     indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));

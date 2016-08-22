@@ -31,7 +31,8 @@ define(function (require) {
             delete $scope.label;
             // fetch document and grab the field value to populate the label
             $http.get(`${chrome.getBasePath()}/elasticsearch/${index}/${type}/${id}`).then(function (doc) {
-              if (doc.data) {
+              $scope.label = $scope.entityURI;
+              if (doc.data && column) {
                 if (config.get('metaFields').indexOf(column) !== -1 && doc.data[column]) {
                   // check if column is in meta fields
                   $scope.label = doc.data[column];

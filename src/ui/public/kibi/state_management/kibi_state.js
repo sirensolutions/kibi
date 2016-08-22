@@ -158,7 +158,7 @@ define(function (require) {
       } else if (urlHelper.onVisualizeTab() || urlHelper.onSettingsTab()) {
         return this[this._properties.test_selected_entity];
       }
-      throw new Error('Cannot get entity URI because you are not in dashboard/visualize');
+      throw new Error('Cannot get entity URI because you are not on dashboard/visualize/settings');
     };
 
     KibiState.prototype.isSelectedEntityDisabled = function () {

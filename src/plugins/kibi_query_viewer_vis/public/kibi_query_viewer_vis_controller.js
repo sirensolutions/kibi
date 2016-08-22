@@ -38,7 +38,7 @@ define(function (require) {
     $scope.$listen(kibiState, 'save_with_changes', function (diff) {
       if (diff.indexOf(kibiState._properties.selected_entity) !== -1 ||
           diff.indexOf(kibiState._properties.test_selected_entity) !== -1 ||
-            diff.indexOf(kibiState._properties.selected_entity_disabled) !== -1) {
+          diff.indexOf(kibiState._properties.selected_entity_disabled) !== -1) {
         $scope.renderTemplates();
       }
     });

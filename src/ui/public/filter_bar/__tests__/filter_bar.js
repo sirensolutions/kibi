@@ -30,10 +30,13 @@ describe('Filter Bar Directive', function () {
     ngMock.module('kibana', function ($provide) {
       $provide.constant('kbnDefaultAppId', '');
       $provide.constant('kibiDefaultDashboardId', '');
+      $provide.constant('elasticsearchPlugins', ['siren-join']);
 
       $provide.service('kibiState', function () {
         return new MockState({
-          _getCurrentDashboardId: _.noop
+          _getCurrentDashboardId: _.noop,
+          isSelectedEntityDisabled: _.constant(false),
+          getEntityURI: _.noop
         });
       });
 

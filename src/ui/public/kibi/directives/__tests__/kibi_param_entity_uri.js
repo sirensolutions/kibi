@@ -1,43 +1,37 @@
+var MockState = require('fixtures/mock_state');
 var sinon = require('auto-release-sinon');
 var angular = require('angular');
 var _ = require('lodash');
 var ngMock = require('ngMock');
 var expect = require('expect.js');
+var mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
 var $httpBackend;
 var Notifier;
 
 require('ui/kibi/directives/kibi_param_entity_uri');
 
-var $rootScope;
 var $scope;
 
-var init = function (entityUriHolder, mappings) {
-  // Load the application
-  ngMock.module('kibana');
+var init = function (entityURI, mappings) {
+  ngMock.module('kibana', function ($compileProvider, $provide) {
+    $provide.constant('kbnDefaultAppId', '');
+    $provide.constant('kibiDefaultDashboardId', '');
+    $provide.constant('elasticsearchPlugins', ['siren-join']);
 
-  ngMock.module('queries_editor/services/saved_queries', function ($provide) {
-    $provide.service('savedQueries', function (Promise) {
+    $compileProvider.directive('kibiSelect', function () {
       return {
-        get: function (id) {
-          return Promise.reject();
-        }
+        priority: 100,
+        terminal: true,
+        restrict:'E',
+        template:'<div></div>',
       };
     });
   });
 
-  ngMock.module('kibana', function ($provide) {
-    // these services were added because they are used by the kibi-select directive
-    $provide.service('savedDatasources', function () {});
-    $provide.service('savedDashboards', function () {});
-    $provide.service('savedSearches', function () {});
-    $provide.service('savedTemplates', function () {});
-    // Needed to pass tests when Kibi Graph Browser is installed
-    $provide.service('savedScripts', function () {});
-  });
-
   ngMock.module('kibana/courier', function ($provide) {
-    $provide.service('courier', function (Promise) {
+    $provide.service('courier', function (Promise, Private) {
       return {
+        SavedObject: Private(require('ui/courier/saved_object/saved_object')),
         indexPatterns: {
           getIds: function () {
             return Promise.resolve(_.map(mappings, function (m) {
@@ -50,7 +44,10 @@ var init = function (entityUriHolder, mappings) {
   });
 
   // Create the scope
-  ngMock.inject(function ($injector, Private, _$rootScope_, $compile) {
+  ngMock.inject(function (Private, kibiState, $injector, $rootScope, $compile) {
+    var urlHelper = Private(require('ui/kibi/helpers/url_helper'));
+    sinon.stub(urlHelper, 'onVisualizeTab').returns(true);
+
     var entityParamUri = '<kibi-param-entity-uri entity-uri-holder="holder"></kibi-param-entity-uri>';
     var ids = { hits: { hits: [] } };
 
@@ -66,8 +63,8 @@ var init = function (entityUriHolder, mappings) {
       $httpBackend.whenGET('/elasticsearch/' + m.index + '/' + m.type + '/_search?size=10').respond(200, ids);
     });
 
-    var parts = entityUriHolder && entityUriHolder.entityURI && entityUriHolder.entityURI.split('/');
-    if (parts.length >= 2 && parts[0].indexOf('*') !== -1) {
+    var parts = entityURI.split('/');
+    if (parts.length && parts[0].indexOf('*') !== -1) {
       var indexPatterns = _.filter(mappings, 'pattern', parts[0]);
       var mappingsObject = _.zipObject(
         _.pluck(indexPatterns, 'index'),
@@ -85,7 +82,7 @@ var init = function (entityUriHolder, mappings) {
       $httpBackend.whenGET('/elasticsearch/' + parts[0] + '/' + parts[1] + '/_search?size=10').respond(200, ids);
 
       // responses to wildcard id queries
-      if (parts[0] === 'm*') {
+      if (parts[0] === 'two-and-more-*') {
         // more than one result
         $httpBackend.whenGET('/elasticsearch/' + parts[0] + '/' + parts[1] + '/_search?q=_id:' + parts[2]).respond(200, {
           hits: {
@@ -104,14 +101,14 @@ var init = function (entityUriHolder, mappings) {
             ]
           }
         });
-      } else if (parts[0] === 'n*') {
+      } else if (parts[0] === 'empty-*') {
         $httpBackend.whenGET('/elasticsearch/' + parts[0] + '/' + parts[1] + '/_search?q=_id:' + parts[2]).respond(200, {
           hits: {
             total: 0,
             hits: []
           }
         });
-      } else if (parts[0] === 'e*') {
+      } else if (parts[0] === 'error-*') {
         $httpBackend.whenGET('/elasticsearch/' + parts[0] + '/' + parts[1] + '/_search?q=_id:' + parts[2]).respond(500);
       } else {
         // one result
@@ -130,11 +127,12 @@ var init = function (entityUriHolder, mappings) {
       }
     }
 
-    $rootScope = _$rootScope_;
-    $rootScope.holder = entityUriHolder;
     var $elem = angular.element(entityParamUri);
     $compile($elem)($rootScope);
-    $elem.scope().$digest();
+    $rootScope.$digest();
+    kibiState.setEntityURI(entityURI);
+    kibiState.save();
+    $rootScope.$digest();
     $scope = $elem.isolateScope();
   });
 };
@@ -142,15 +140,7 @@ var init = function (entityUriHolder, mappings) {
 describe('Kibi Directives', function () {
   describe('kibi-param-entity-uri directive', function () {
 
-    afterEach(function () {
-      $httpBackend.verifyNoOutstandingExpectation();
-      $httpBackend.verifyNoOutstandingRequest();
-    });
-
     it('should set the scope object correctly', function () {
-      var holder = {
-        entityURI: 'a/b/c/area'
-      };
       var mappings = [
         {
           pattern: 'a',
@@ -159,7 +149,7 @@ describe('Kibi Directives', function () {
         }
       ];
 
-      init(holder, mappings);
+      init('a/b/c/area', mappings);
 
       expect(Notifier.prototype.warning.called).to.be(false);
       expect($scope.c).to.be.ok();
@@ -167,13 +157,9 @@ describe('Kibi Directives', function () {
       expect($scope.c.index).to.be('a');
       expect($scope.c.type).to.be('b');
       expect($scope.c.id).to.be('c');
-      expect($scope.c.column).to.be('area');
     });
 
     it('should handle a wildcard index pattern', function () {
-      var holder = {
-        entityURI: 'a*/b1/c/area'
-      };
       var mappings = [
         {
           pattern: 'a*',
@@ -187,7 +173,7 @@ describe('Kibi Directives', function () {
         }
       ];
 
-      init(holder, mappings);
+      init('a*/b1/c/area', mappings);
       $httpBackend.flush();
 
       expect(Notifier.prototype.warning.called).to.be(false);
@@ -196,13 +182,9 @@ describe('Kibi Directives', function () {
       expect($scope.c.index).to.be('a-1');
       expect($scope.c.type).to.be('b1');
       expect($scope.c.id).to.be('c');
-      expect($scope.c.column).to.be('area');
     });
 
     it('should unset the type and set the index when the index pattern is changed', function () {
-      var holder = {
-        entityURI: 'a*/b1/c/area'
-      };
       var mappings = [
         {
           pattern: 'a*',
@@ -216,10 +198,9 @@ describe('Kibi Directives', function () {
         }
       ];
 
-      init(holder, mappings);
+      init('a*/b1/c/area', mappings);
 
       $scope.c.indexPattern = 'a-1';
-      $scope.$digest();
 
       $httpBackend.flush();
 
@@ -227,10 +208,7 @@ describe('Kibi Directives', function () {
       expect($scope.c.type).to.be.null;
     });
 
-    it('should unset id related parameter and column when index pattern is changed', function () {
-      var holder = {
-        entityURI: 'a*/b1/c/area'
-      };
+    it('should unset id related parameter when index pattern is changed', function () {
       var mappings = [
         {
           pattern: 'a*',
@@ -244,10 +222,9 @@ describe('Kibi Directives', function () {
         }
       ];
 
-      init(holder, mappings);
+      init('a*/b1/c/area', mappings);
 
       $scope.c.indexPattern = 'a-1';
-      $scope.$digest();
 
       $httpBackend.flush();
 
@@ -257,10 +234,7 @@ describe('Kibi Directives', function () {
       expect($scope.c.extraIdItems.length).to.be(0);
     });
 
-    it('should unset id related parameter and column when type is changed', function () {
-      var holder = {
-        entityURI: 'a-1/b1/c/area'
-      };
+    it('should unset id related parameter when type is changed', function () {
       var mappings = [
         {
           pattern: 'a*',
@@ -274,7 +248,7 @@ describe('Kibi Directives', function () {
         }
       ];
 
-      init(holder, mappings);
+      init('a-1/b1/c/area', mappings);
 
       $scope.c.type = '';
       $scope.$digest();
@@ -286,52 +260,45 @@ describe('Kibi Directives', function () {
     });
 
     it('should handle a wildcard query returning more than one hit for the sample selection', function () {
-      var holder = {
-        entityURI: 'm*/t/c/area'
-      };
       var mappings = [
         {
-          pattern: 'm*',
+          pattern: 'two-and-more-*',
           index: 'm-1',
           type: 't'
         },
         {
-          pattern: 'm*',
+          pattern: 'two-and-more-*',
           index: 'm-2',
           type: 't'
         }
       ];
 
-      init(holder, mappings);
+      init('two-and-more-*/t/c/area', mappings);
       $httpBackend.flush();
 
       expect(Notifier.prototype.warning.called).to.be(true);
       expect($scope.c).to.be.ok();
-      expect($scope.c.indexPattern).to.be('m*');
+      expect($scope.c.indexPattern).to.be('two-and-more-*');
       expect($scope.c.index).to.be('m-1');
       expect($scope.c.type).to.be('t');
       expect($scope.c.id).to.be('c');
-      expect($scope.c.column).to.be('area');
     });
 
     it('should handle a wildcard query returning no hits for the sample selection', function () {
-      var holder = {
-        entityURI: 'n*/t/c/area'
-      };
       var mappings = [
         {
-          pattern: 'n*',
+          pattern: 'empty-*',
           index: 'n-1',
           type: 't'
         },
         {
-          pattern: 'n*',
+          pattern: 'empty-*',
           index: 'n-2',
           type: 't'
         }
       ];
 
-      init(holder, mappings);
+      init('empty-*/t/c/area', mappings);
       $httpBackend.flush();
 
       expect(Notifier.prototype.warning.called).to.be(true);
@@ -340,27 +307,23 @@ describe('Kibi Directives', function () {
       expect($scope.c.index).to.be.empty;
       expect($scope.c.type).to.be.empty;
       expect($scope.c.id).to.be.empty;
-      expect($scope.c.column).to.be.empty;
     });
 
     it('should handle an ES error', function () {
-      var holder = {
-        entityURI: 'e*/t/c/area'
-      };
       var mappings = [
         {
-          pattern: 'e*',
+          pattern: 'error-*',
           index: 'e-1',
           type: 't'
         },
         {
-          pattern: 'e*',
+          pattern: 'error-*',
           index: 'e-2',
           type: 't'
         }
       ];
 
-      init(holder, mappings);
+      init('error-*/t/c/area', mappings);
       $httpBackend.flush();
 
       expect(Notifier.prototype.error.called).to.be(true);
@@ -369,7 +332,6 @@ describe('Kibi Directives', function () {
       expect($scope.c.index).to.be.empty;
       expect($scope.c.type).to.be.empty;
       expect($scope.c.id).to.be.empty;
-      expect($scope.c.column).to.be.empty;
     });
 
   });

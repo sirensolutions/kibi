@@ -19,15 +19,12 @@ describe('State Management', function () {
   const defaultStartTime = '2006-09-01T12:00:00.000Z';
   const defaultEndTime = '2010-09-05T12:00:00.000Z';
 
-  const init = function ({ kibiEnterpriseEnabled = false, pinned, savedDashboards, savedSearches, indexPatterns,
+  const init = function ({ kibiEnterpriseEnabled = false, pinned, savedDashboards = [], savedSearches = [], indexPatterns = [],
                          currentPath = '/dashboard', currentDashboardId = 'dashboard1' }) {
     ngMock.module('kibana', 'kibana/courier', 'kibana/global_state', ($provide) => {
       $provide.service('$route', () => {
         var myRoute = {
           current: {
-            $$route: {
-              originalPath: currentPath
-            },
             locals: {
               dash: {
                 id: currentDashboardId
@@ -35,9 +32,7 @@ describe('State Management', function () {
             }
           }
         };
-        if (currentPath === null) {
-          delete myRoute.current.$$route;
-        } else if (currentDashboardId === null) {
+        if (currentDashboardId === null) {
           delete myRoute.current.locals;
         }
         return myRoute;
@@ -54,24 +49,27 @@ describe('State Management', function () {
       });
 
       $provide.constant('kibiEnterpriseEnabled', kibiEnterpriseEnabled);
+      $provide.constant('kbnDefaultAppId', '');
+      $provide.constant('kibiDefaultDashboardId', '');
       $provide.constant('elasticsearchPlugins', ['siren-join']);
     });
 
     ngMock.module('kibana/index_patterns', function ($provide) {
-      $provide.service('indexPatterns', (Promise) => mockSavedObjects(Promise)('indexPatterns', indexPatterns || []));
+      $provide.service('indexPatterns', (Promise) => mockSavedObjects(Promise)('indexPatterns', indexPatterns));
     });
 
     ngMock.module('discover/saved_searches', function ($provide) {
-      $provide.service('savedSearches', (Promise) => mockSavedObjects(Promise)('savedSearches', savedSearches || []));
+      $provide.service('savedSearches', (Promise) => mockSavedObjects(Promise)('savedSearches', savedSearches));
     });
 
     ngMock.module('app/dashboard', function ($provide) {
-      $provide.service('savedDashboards', (Promise) => mockSavedObjects(Promise)('savedDashboards', savedDashboards || []));
+      $provide.service('savedDashboards', (Promise) => mockSavedObjects(Promise)('savedDashboards', savedDashboards));
     });
 
     ngMock.inject(function (_timefilter_, _config_, _$location_, _kibiState_) {
       timefilter = _timefilter_;
       $location = _$location_;
+      $location.path(currentPath);
       kibiState = _kibiState_;
       config = _config_;
       const defaultTime = {
@@ -89,6 +87,8 @@ describe('State Management', function () {
     require('testUtils/noDigestPromises').activateForSuite();
 
     describe('selected entity', function () {
+      beforeEach(() => init({}));
+
       describe('isEntitySelected', function () {
         it('should return true if entity is the one selected', function () {
           const index = 'a';
@@ -2187,7 +2187,3 @@ describe('State Management', function () {
     });
   });
 });
-
-
-
-

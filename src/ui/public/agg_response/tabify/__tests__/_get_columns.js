@@ -8,6 +8,7 @@ describe('get columns', function () {
   beforeEach(ngMock.module('kibana', function ($provide) {
     $provide.constant('kbnDefaultAppId', '');
     $provide.constant('kibiDefaultDashboardId', '');
+    $provide.constant('elasticsearchPlugins', ['siren-join']);
   }));
   beforeEach(ngMock.inject(function (Private, $injector) {
     getColumns = Private(require('ui/agg_response/tabify/_get_columns'));

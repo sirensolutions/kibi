@@ -110,26 +110,36 @@ export default class Migration3 extends Migration {
     if (!visState.version) {
 
       if (visState.type === 'kibi-data-table') {
-        visState.params.queryDefinitions = [];
-        for (let queryDef of visState.params.queryIds) {
-          visState.params.queryDefinitions.push({
-            queryId: queryDef.id,
-            queryVariableName: queryDef.queryVariableName
-          });
+        if (!visState.params) {
+          visState.params = {};
         }
-        delete visState.params.queryIds;
+        visState.params.queryDefinitions = [];
+        if (visState.params.queryIds) {
+          for (let queryDef of visState.params.queryIds) {
+            visState.params.queryDefinitions.push({
+              queryId: queryDef.id,
+              queryVariableName: queryDef.queryVariableName
+            });
+          }
+          delete visState.params.queryIds;
+        }
         delete visState.params.hasEntityDependentQuery;
         visState.version = 2;
         modified = true;
       }
 
       if (visState.type === 'kibiqueryviewervis') {
-        visState.queryDefinitions = visState.params.queryOptions;
-        for (let queryDef of visState.queryDefinitions) {
-          delete queryDef.isEntityDependent;
+        if (!visState.params) {
+          visState.params = {};
         }
-
-        delete visState.params.queryOptions;
+        visState.params.queryDefinitions = [];
+        if (visState.params.queryOptions) {
+          for (let queryDef of visState.params.queryOptions) {
+            delete queryDef.isEntityDependent;
+            visState.params.queryDefinitions.push(queryDef);
+          }
+          delete visState.params.queryOptions;
+        }
         delete visState.params.hasEntityDependentQuery;
         visState.version = 2;
         modified = true;
@@ -140,15 +150,20 @@ export default class Migration3 extends Migration {
     if (visState.aggs) {
       for (let agg of visState.aggs) {
         if (agg.schema === 'bucket' && agg.type === 'external_query_terms_filter' && !agg.version) {
-          agg.params.queryDefinitions = [];
-          for (let queryDef of agg.params.queryIds) {
-            agg.params.queryDefinitions.push({
-              queryId: queryDef.id,
-              joinElasticsearchField: queryDef.joinElasticsearchField,
-              queryVariableName: queryDef.queryVariableName
-            });
+          if (!agg.params) {
+            agg.params = {};
           }
-          delete agg.params.queryIds;
+          agg.params.queryDefinitions = [];
+          if (agg.params.queryIds) {
+            for (let queryDef of agg.params.queryIds) {
+              agg.params.queryDefinitions.push({
+                queryId: queryDef.id,
+                joinElasticsearchField: queryDef.joinElasticsearchField,
+                queryVariableName: queryDef.queryVariableName
+              });
+            }
+            delete agg.params.queryIds;
+          }
           agg.version = 2;
           modified = true;
         }

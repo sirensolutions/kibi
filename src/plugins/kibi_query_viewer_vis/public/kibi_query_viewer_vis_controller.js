@@ -63,7 +63,7 @@ define(function (require) {
       return queryEngineClient.getQueriesHtmlFromServer(
         $scope.vis.params.queryDefinitions,
         {
-          selectedDocuments: [ kibiState.getEntityURI() ]
+          selectedDocuments: kibiState.isSelectedEntityDisabled() ? [] : [ kibiState.getEntityURI() ]
         }
       ).then(function (resp) {
         $scope.holder.activeFetch = false;

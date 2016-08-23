@@ -87,10 +87,10 @@ describe('State Management', function () {
     require('testUtils/noDigestPromises').activateForSuite();
 
     describe('selected entity', function () {
-      beforeEach(() => init({}));
-
       describe('isEntitySelected', function () {
-        it('should return true if entity is the one selected', function () {
+        beforeEach(() => init({}));
+
+        it('should return true if the given entity is the one selected', function () {
           const index = 'a';
           const type = 'b';
           const id = 'c';
@@ -116,6 +116,49 @@ describe('State Management', function () {
           expect(kibiState.isEntitySelected('a')).to.be(false);
           expect(kibiState.isEntitySelected('a', 'b')).to.be(false);
           expect(kibiState.isEntitySelected('a', 'b', 'c')).to.be(false);
+        });
+      });
+
+      describe('getEntityURI', function () {
+        it('should return the entity when on dashboard/settings/visualize tab', function () {
+          const entityURI = 'a/b/c/d';
+
+          init({});
+          [ '/dashboard', '/visualize/', '/settings' ].forEach((path) => {
+            $location.path(path);
+            kibiState.setEntityURI(entityURI);
+            expect(kibiState.getEntityURI()).to.be(entityURI);
+          });
+        });
+
+        it('should not return the entity when on discover tab', function () {
+          const entityURI = 'a/b/c/d';
+
+          init({});
+          kibiState.setEntityURI(entityURI);
+          expect(kibiState.getEntityURI()).to.be(entityURI);
+          $location.path('/discover');
+          expect(kibiState.getEntityURI).to.throwException(/Cannot get entity URI/);
+        });
+
+        it('should return the test entity when on settings/visualize tab', function () {
+          const entityURI1 = 'a/b/c/d';
+          const entityURI2 = 'e/f/g/h';
+
+          init({});
+
+          kibiState.setEntityURI(entityURI1);
+          expect(kibiState.getEntityURI()).to.be(entityURI1);
+
+          $location.path('/visualize/');
+          kibiState.setEntityURI(entityURI2);
+          expect(kibiState.getEntityURI()).to.be(entityURI2);
+
+          $location.path('/settings');
+          expect(kibiState.getEntityURI()).to.be(entityURI2);
+
+          $location.path('/dashboard');
+          expect(kibiState.getEntityURI()).to.be(entityURI1);
         });
       });
     });

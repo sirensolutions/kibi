@@ -19,7 +19,7 @@ define(function (require) {
         _.each(results, function (res, index) {
           filters[index].meta.dependsOnSelectedEntities = res;
           filters[index].meta.dependsOnSelectedEntitiesDisabled = res && kibiState.isSelectedEntityDisabled();
-          filters[index].meta.markDependOnSelectedEntities = Boolean(kibiState.getEntityURI(true));
+          filters[index].meta.markDependOnSelectedEntities = Boolean(kibiState.getEntityURI());
         });
         return filters;
       });

@@ -6,7 +6,7 @@ define(function (require) {
   require('ui/kibi/directives/kibi_entity_clipboard.less');
 
   require('ui/modules').get('kibana')
-  .directive('kibiEntityClipboard', function (kibiState, getAppState, $route, globalState, $http, createNotifier, config) {
+  .directive('kibiEntityClipboard', function (kibiState, $timeout, getAppState, $route, globalState, $http, createNotifier, config) {
 
     var notify = createNotifier({
       name: 'Kibi Entity Clipboard'
@@ -18,41 +18,45 @@ define(function (require) {
       replace: true,
       link: function ($scope, $el) {
         var updateSelectedEntity = function () {
-          $scope.disabled = Boolean(kibiState.isSelectedEntityDisabled());
-          $scope.entityURI = kibiState.getEntityURI(true);
-          if ($scope.entityURI) {
-            const parts = $scope.entityURI.split('/');
-            const index = parts[0];
-            const type = parts[1];
-            const id = parts[2];
-            const column = parts[3];
+          try {
+            $scope.disabled = Boolean(kibiState.isSelectedEntityDisabled());
+            $scope.entityURI = kibiState.getEntityURI();
+            if ($scope.entityURI) {
+              const parts = $scope.entityURI.split('/');
+              const index = parts[0];
+              const type = parts[1];
+              const id = parts[2];
+              const column = parts[3];
 
-            //delete the old label
-            delete $scope.label;
-            // fetch document and grab the field value to populate the label
-            $http.get(`${chrome.getBasePath()}/elasticsearch/${index}/${type}/${id}`).then(function (doc) {
-              $scope.label = $scope.entityURI;
-              if (doc.data && column) {
-                if (config.get('metaFields').indexOf(column) !== -1 && doc.data[column]) {
-                  // check if column is in meta fields
-                  $scope.label = doc.data[column];
-                } else if (doc.data._source) {
-                  // else try to find it in _source
-                  var getProperty = _.property(column);
-                  var value = getProperty(doc.data._source) || ' - ';
-                  if (value.constructor === Object || value.constructor === Array) {
-                    value = JSON.stringify(value);
+              //delete the old label
+              delete $scope.label;
+              // fetch document and grab the field value to populate the label
+              $http.get(`${chrome.getBasePath()}/elasticsearch/${index}/${type}/${id}`).then(function (doc) {
+                $scope.label = $scope.entityURI;
+                if (doc.data && column) {
+                  if (config.get('metaFields').indexOf(column) !== -1 && doc.data[column]) {
+                    // check if column is in meta fields
+                    $scope.label = doc.data[column];
+                  } else if (doc.data._source) {
+                    // else try to find it in _source
+                    var getProperty = _.property(column);
+                    var value = getProperty(doc.data._source) || ' - ';
+                    if (value.constructor === Object || value.constructor === Array) {
+                      value = JSON.stringify(value);
+                    }
+                    value = _.trunc(value, {
+                      length: 65,
+                      separator: ' '
+                    });
+                    $scope.label = value;
+                  } else {
+                    notify.warning('Could not get entity label from [' + $scope.entityURI + ']');
                   }
-                  value = _.trunc(value, {
-                    length: 65,
-                    separator: ' '
-                  });
-                  $scope.label = value;
-                } else {
-                  notify.warning('Could not get entity label from [' + $scope.entityURI + ']');
                 }
-              }
-            });
+              });
+            }
+          } catch (err) {
+            $timeout(updateSelectedEntity.bind(this), 10, false);
           }
         };
         $scope.$listen(kibiState, 'save_with_changes', function (diff) {

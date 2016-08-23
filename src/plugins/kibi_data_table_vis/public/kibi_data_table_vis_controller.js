@@ -95,15 +95,14 @@ define(function (require) {
         }
 
         // validate here and do not inject if all require values are not set
-        if ($scope.vis.params.enableQueryFields === true && $scope.vis.params.queryDefinitions.length > 0 &&
-          $scope.vis.params.joinElasticsearchField && $scope.vis.params.joinElasticsearchField !== '' &&
-          $scope.vis.params.queryFieldName && $scope.vis.params.queryFieldName !== '') {
+        if ($scope.vis.params.enableQueryFields && $scope.vis.params.queryDefinitions.length > 0 &&
+            $scope.vis.params.joinElasticsearchField && $scope.vis.params.queryFieldName) {
           var virtualIndexPattern = new VirtualIndexPattern(indexPattern);
           searchSource.index(virtualIndexPattern);
 
           searchSource.inject([
             {
-              entityURI: kibiState.getEntityURI(),
+              entityURI: kibiState.isSelectedEntityDisabled() ? '' : kibiState.getEntityURI(),
               queryDefs: $scope.vis.params.queryDefinitions,
               sourcePath: $scope.vis.params.joinElasticsearchField, // it is the field from table to do the comparison
               fieldName: $scope.vis.params.queryFieldName

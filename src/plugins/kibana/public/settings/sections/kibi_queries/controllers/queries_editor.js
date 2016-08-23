@@ -246,7 +246,7 @@ define(function (require) {
                 }
               ],
               {
-                selectedDocuments: [ kibiState.getEntityURI() ]
+                selectedDocuments: kibiState.isSelectedEntityDisabled() ? [] : [ kibiState.getEntityURI() ]
               }
             );
           }).then(function (resp) {

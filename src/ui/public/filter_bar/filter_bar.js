@@ -246,8 +246,7 @@ define(function (require) {
         addJoinSetFilterOnRelationalPanel(config.get('kibi:relationalPanel'));
 
         // kibi: needed to show filterbar when kibiEntityClipboard contains an entity
-        $scope.showKibiEntityClipboard = urlHelper.onDashboardTab() &&
-          (Boolean(kibiState.getEntityURI()) || kibiState.isSelectedEntityDisabled());
+        $scope.showKibiEntityClipboard = urlHelper.onDashboardTab() && Boolean(kibiState.getEntityURI());
 
         // kibi: listen to changes to the kibiState
         $scope.$listen(kibiState, 'save_with_changes', (diff) => {
@@ -267,7 +266,7 @@ define(function (require) {
           // the selected entity changed
           if (diff.indexOf(kibiState._properties.selected_entity) !== -1 ||
               diff.indexOf(kibiState._properties.selected_entity_disabled) !== -1) {
-            $scope.showKibiEntityClipboard = Boolean(kibiState.getEntityURI()) || kibiState.isSelectedEntityDisabled();
+            $scope.showKibiEntityClipboard = Boolean(kibiState.getEntityURI());
             promise.then(() => updateFilters.call(this)).catch(notify.error);
           }
         });

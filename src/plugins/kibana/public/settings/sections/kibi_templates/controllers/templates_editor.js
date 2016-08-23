@@ -104,7 +104,7 @@ define(function (require) {
             }
           ],
           {
-            selectedDocuments: [ kibiState.getEntityURI() ]
+            selectedDocuments: kibiState.isSelectedEntityDisabled() ? [] : [ kibiState.getEntityURI() ]
           }
         ).then(function (resp) {
           if (resp && resp.data && resp.data.snippets && resp.data.snippets.length === 1) {

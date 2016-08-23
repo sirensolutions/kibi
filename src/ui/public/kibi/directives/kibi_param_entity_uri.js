@@ -33,51 +33,56 @@ define(function (require) {
           extraIdItems: []
         };
 
+        function updateSelectedEntity() {
+          const entityURI = kibiState.getEntityURI();
+          if (entityURI) {
+            var parts = entityURI.split('/');
+
+            if (parts[0]) {
+              $scope.c.extraIndexPatternItems = [
+                {
+                  label: parts[0],
+                  id: parts[0],
+                  value: parts[0]
+                }
+              ];
+            }
+            if (parts[1]) {
+              $scope.c.extraTypeItems = [
+                {
+                  label: parts[1],
+                  id: parts[1],
+                  value: parts[1]
+                }
+              ];
+            }
+            if (parts[2]) {
+              $scope.c.extraIdItems = [
+                {
+                  label: parts[2],
+                  id: parts[2],
+                  value: parts[2]
+                }
+              ];
+            }
+
+            if (!$scope.c.indexPattern) {
+              $scope.c.indexPattern = parts[0];
+            }
+            $scope.c.index = parts[0];
+            $scope.c.type = parts[1];
+            $scope.c.id = parts[2];
+          } else {
+            $scope.c.indexPattern = null;
+          }
+        }
+
         $scope.$listen(kibiState, 'save_with_changes', function (diff) {
           if (diff.indexOf(kibiState._properties.test_selected_entity) !== -1) {
-            const entityURI = kibiState.getEntityURI();
-            if (entityURI) {
-              var parts = entityURI.split('/');
-
-              if (parts[0]) {
-                $scope.c.extraIndexPatternItems = [
-                  {
-                    label: parts[0],
-                    id: parts[0],
-                    value: parts[0]
-                  }
-                ];
-              }
-              if (parts[1]) {
-                $scope.c.extraTypeItems = [
-                  {
-                    label: parts[1],
-                    id: parts[1],
-                    value: parts[1]
-                  }
-                ];
-              }
-              if (parts[2]) {
-                $scope.c.extraIdItems = [
-                  {
-                    label: parts[2],
-                    id: parts[2],
-                    value: parts[2]
-                  }
-                ];
-              }
-
-              if (!$scope.c.indexPattern) {
-                $scope.c.indexPattern = parts[0];
-              }
-              $scope.c.index = parts[0];
-              $scope.c.type = parts[1];
-              $scope.c.id = parts[2];
-            } else {
-              $scope.c.indexPattern = null;
-            }
+            updateSelectedEntity();
           }
         });
+        updateSelectedEntity();
 
         $scope.$watchMulti(['c.indexPattern', 'c.type', 'c.id'], function (newV, oldV) {
           var diff = _.difference(newV, oldV);

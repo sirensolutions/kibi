@@ -123,7 +123,7 @@ define(function (require) {
     };
 
     KibiState.prototype.isEntitySelected = function (index, type, id, column) {
-      const entityURI = this.getEntityURI(true);
+      const entityURI = this.getEntityURI();
       if (!entityURI || !index || !type || !id || !column) {
         return false;
       }
@@ -145,14 +145,11 @@ define(function (require) {
           this[this._properties.test_selected_entity] = entityURI;
         }
       } else {
-        throw new Error('Cannot set entity URI because you are not in dashboard/visualize');
+        throw new Error('Cannot set entity URI because you are not in dashboard/visualize/settings');
       }
     };
 
-    KibiState.prototype.getEntityURI = function (ignoreDisabled = false) {
-      if (!ignoreDisabled && this[this._properties.selected_entity_disabled]) {
-        return;
-      }
+    KibiState.prototype.getEntityURI = function () {
       if (urlHelper.onDashboardTab()) {
         return this[this._properties.selected_entity];
       } else if (urlHelper.onVisualizeTab() || urlHelper.onSettingsTab()) {

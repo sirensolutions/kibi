@@ -31,7 +31,6 @@ define(function (require) {
             }
 
             const configurationMode = urlHelper.onVisualizeTab();
-            const entityURI = kibiState.getEntityURI();
 
             if (!_(queryDefinitions).pluck('queryId').compact().size()) {
               return;
@@ -47,7 +46,7 @@ define(function (require) {
 
                 json[label] = {
                   dbfilter: {
-                    entity: entityURI,
+                    entity: kibiState.isSelectedEntityDisabled() ? '' : kibiState.getEntityURI(),
                     queryid: id,
                     negate: queryDef.negate ? true : false,
                     queryVariableName: queryDef.queryVariableName,

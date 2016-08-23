@@ -657,7 +657,7 @@ To export a set of objects:
 . Click the selection box for the objects you want to export, or click the *Select All* box.
 . Click *Export* to select a location to write the exported JSON.
 
-IMPORTANT: If you need to export every object you have in your Kibi installation, you can use button "Export Everything".
+IMPORTANT: If you need to export every object you have in your Kibi installation, you can use "Export Everything" button.
 
 WARNING: Exported dashboards do not include their associated index patterns (not "Export Everything" button). Re-create the index patterns manually before
 importing saved dashboards to a Kibana instance running on another Elasticsearch cluster.

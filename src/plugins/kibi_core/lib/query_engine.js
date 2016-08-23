@@ -104,18 +104,20 @@ QueryEngine.prototype.loadPredefinedData = function () {
     var tryToLoad = function () {
       self._isKibiIndexPresent().then(function () {
         self.log.info('Found kibi index');
-        self._loadTemplates().then(function () {
-          if (self.config.get('pkg.kibiEnterpriseEnabled')) {
-            return self._loadDatasources().then(function () {
-              return self._loadQueries().then(function () {
-                return self._refreshKibiIndex().then(function () {
-                  fulfill(true);
+        self._loadTemplatesMapping().then(function () {
+          self._loadTemplates().then(function () {
+            if (self.config.get('pkg.kibiEnterpriseEnabled')) {
+              return self._loadDatasources().then(function () {
+                return self._loadQueries().then(function () {
+                  return self._refreshKibiIndex().then(function () {
+                    fulfill(true);
+                  });
                 });
               });
-            });
-          } else {
-            fulfill(true);
-          }
+            } else {
+              fulfill(true);
+            }
+          }).catch(reject);
         }).catch(reject);
       }).catch(function (err) {
         self.log.warn('Could not retrieve Kibi index: ' + err);
@@ -135,29 +137,6 @@ QueryEngine.prototype._isKibiIndexPresent = function () {
   })
   .then(function (kibiIndex) {
     return !!kibiIndex || Promise.reject(new Error('Kibi index does not exists'));
-  });
-};
-
-QueryEngine.prototype._loadTemplatesMapping = function () {
-  var self = this;
-
-  // here prevent an issue where by default version field was mapped to type long
-  // https://github.com/sirensolutions/kibi-internal/issues/775
-  var mapping = {
-    template: {
-      properties: {
-        version: {
-          type: 'integer'
-        }
-      }
-    }
-  };
-
-  return self.client.indices.putMapping({
-    timeout: '1000ms',
-    index: self.config.get('kibana.index'),
-    type: 'template',
-    body: mapping
   });
 };
 
@@ -209,9 +188,38 @@ QueryEngine.prototype.gremlinPing = function (baseGraphAPIUrl) {
   return rp(gremlinOptions);
 };
 
+/**
+ * Loads templates mapping.
+ *
+ * @return {Promise}
+ */
+QueryEngine.prototype._loadTemplatesMapping = function () {
+  var mapping = {
+    template: {
+      properties: {
+        version: {
+          type: 'integer'
+        }
+      }
+    }
+  };
+
+  return this.client.indices.putMapping({
+    timeout: '1000ms',
+    index: this.config.get('kibana.index'),
+    type: 'template',
+    body: mapping
+  });
+};
+
+/**
+ * Loads default templates.
+ *
+ * @return {Promise.<*>}
+ */
 QueryEngine.prototype._loadTemplates = function () {
   var self = this;
-  // load default template examples
+
   var templatesToLoad = [
     'kibi-json-jade',
     'kibi-table-jade',
@@ -220,34 +228,30 @@ QueryEngine.prototype._loadTemplates = function () {
 
   self.log.info('Loading templates');
 
-  return self._loadTemplatesMapping().then(function () {
-    _.each(templatesToLoad, function (templateId) {
-      fs.readFile(path.join(__dirname, 'templates', templateId + '.json'), function (err, data) {
-        if (err) {
-          throw err;
+  return Promise.all(templatesToLoad.map((templateId) => {
+    return fs.readFile(path.join(__dirname, 'templates', templateId + '.json'), function (err, data) {
+      if (err) {
+        throw err;
+      }
+      return self.client.create({
+        timeout: '1000ms',
+        index: self.config.get('kibana.index'),
+        type: 'template',
+        id: templateId,
+        body: data.toString()
+      })
+      .then(() => {
+        self.log.info('Template [' + templateId + '] successfully loaded');
+      })
+      .catch((err) => {
+        if (err.statusCode === 409) {
+          self.log.warn('Template [' + templateId + '] already exists');
+        } else {
+          self.log.error('Could not load template [' + templateId + ']', err);
         }
-        self.client.create({
-          timeout: '1000ms',
-          index: self.config.get('kibana.index'),
-          type: 'template',
-          id: templateId,
-          body: data.toString()
-        })
-        .then(function (resp) {
-          self.log.info('Template [' + templateId + '] successfully loaded');
-        })
-        .catch(function (err) {
-          if (err.statusCode === 409) {
-            self.log.warn('Template [' + templateId + '] already exists');
-          } else {
-            self.log.error('Could not load template [' + templateId + ']', err);
-          }
-        });
       });
     });
-  }).catch(function (err) {
-    self.log.error('Could not load the mapping for template object', err);
-  });
+  }));
 };
 
 QueryEngine.prototype._loadDatasources = function () {

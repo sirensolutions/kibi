@@ -104,18 +104,20 @@ QueryEngine.prototype.loadPredefinedData = function () {
     var tryToLoad = function () {
       self._isKibiIndexPresent().then(function () {
         self.log.info('Found kibi index');
-        self._loadTemplates().then(function () {
-          if (self.config.get('pkg.kibiEnterpriseEnabled')) {
-            return self._loadDatasources().then(function () {
-              return self._loadQueries().then(function () {
-                return self._refreshKibiIndex().then(function () {
-                  fulfill(true);
+        self._loadTemplatesMapping().then(function () {
+          self._loadTemplates().then(function () {
+            if (self.config.get('pkg.kibiEnterpriseEnabled')) {
+              return self._loadDatasources().then(function () {
+                return self._loadQueries().then(function () {
+                  return self._refreshKibiIndex().then(function () {
+                    fulfill(true);
+                  });
                 });
               });
-            });
-          } else {
-            fulfill(true);
-          }
+            } else {
+              fulfill(true);
+            }
+          }).catch(reject);
         }).catch(reject);
       }).catch(function (err) {
         self.log.warn('Could not retrieve Kibi index: ' + err);
@@ -184,6 +186,30 @@ QueryEngine.prototype.gremlinPing = function (baseGraphAPIUrl) {
   };
 
   return rp(gremlinOptions);
+};
+
+/**
+ * Loads templates mapping.
+ *
+ * @return {Promise}
+ */
+QueryEngine.prototype._loadTemplatesMapping = function () {
+  var mapping = {
+    template: {
+      properties: {
+        version: {
+          type: 'integer'
+        }
+      }
+    }
+  };
+
+  return this.client.indices.putMapping({
+    timeout: '1000ms',
+    index: this.config.get('kibana.index'),
+    type: 'template',
+    body: mapping
+  });
 };
 
 /**

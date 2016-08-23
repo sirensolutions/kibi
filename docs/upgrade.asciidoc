@@ -18,7 +18,7 @@ Elasticsearch indexes is through the {elastic-ref}modules-snapshots.html[snapsho
 A useful tool to take a one-off backup is https://www.npmjs.com/package/elasticdump[elasticdump]; once installed, it is possible to dump
 the `.kibi` index mappings and data on two separate files by running the following commands:
 
-[source]
+[source,shell]
 ----
 elasticdump --input=http://<cluster address>:<cluster port>/<kibi index> --type=mapping --output=<mappings_dump_file>
 
@@ -35,7 +35,7 @@ $ elasticdump --input=http://192.168.99.100:9200/.kibi --type=data --output=data
 
 If needed, you can restore the index from dumps by running the following commands:
 
-[source]
+[source,shell]
 ----
 elasticdump --input=<mappings_dump_file> --type=mapping --output=http://<cluster address>:<cluster port>/<kibi index>
 

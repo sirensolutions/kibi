@@ -147,7 +147,7 @@ define(function (require) {
     //let lastEventTimer;
     const updateCounts = function (dashboardsIds, reason, forceUpdate = false) {
       if (console) {
-        console.log(`Counts will be updated on dashboards ${JSON.stringify(dashboardsIds, null, ' ')} because: [${reason}]`);
+        console.log(`Count on tabs will be updated for dashboards ${JSON.stringify(dashboardsIds, null, ' ')} because: [${reason}]`);
       }
       // TODO: https://github.com/sirensolutions/kibi-internal/issues/1273
       //$timeout.cancel(lastEventTimer);

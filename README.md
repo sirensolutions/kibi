@@ -31,11 +31,20 @@ documentation.
 
 ## Compatibility Table Kibi / Elasticsearch
 
+<<<<<<< 88603a018727902aa100de44af164ab01f18c0dc
 Kibi  | Elasticsearch
 ----- | -------------
 4.6.x | 2.4.x
 4.5.x | 2.3.x
 4.4.x | 2.2.x, 2.3.x
+=======
+Kibi | Elasticsearch
+--- | ---
+4.5.3 | 2.3.x
+4.5.1 | 2.3.x
+4.4.2 | 2.2.x, 2.3.x
+4.4.1 | 2.2.x, 2.3.x
+>>>>>>> corrected the current version to 4.5.3
 0.3.x | 2.2.x
 0.2.0 | 1.6, 1.7
 0.1.x | 1.6, 1.7

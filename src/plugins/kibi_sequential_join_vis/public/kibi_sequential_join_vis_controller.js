@@ -105,11 +105,14 @@ define(function (require) {
      * Update counts in reaction to events
      */
 
-    var updateButtons = function () {
+    var updateButtons = function (reason) {
       if (urlHelper.onVisualizeTab()) {
         return;
       }
 
+      if (console) {
+        console.log(`Updating counts on the relational buttons on ${reason}`);
+      }
       const self = this;
       let promise;
       if (!$scope.buttons || !$scope.buttons.length) {
@@ -144,19 +147,24 @@ define(function (require) {
       .catch(notify.error);
     };
 
-    var off = $rootScope.$on('kibi:dashboard:changed', updateButtons.bind(this));
+    var off = $rootScope.$on('kibi:dashboard:changed', updateButtons.bind(this, 'kibi:dashboard:changed'));
 
-    var updateCountsOnAppStateChange = function (diff) {
+    $scope.$listen(kibiState, 'save_with_changes', function (diff) {
+      if (diff.indexOf(kibiState._properties.enabled_relations) !== -1 ||
+          diff.indexOf(kibiState._properties.enabled_relational_panel) !== -1) {
+        updateButtons.call(this, 'Relations changes');
+      }
+    });
+
+    $scope.$listen(appState, 'save_with_changes', function (diff) {
       if (diff.indexOf('query') === -1 && diff.indexOf('filters') === -1) {
         return;
       }
-      updateButtons.call(this);
-    };
-    appState.on('save_with_changes', updateCountsOnAppStateChange.bind(this));
+      updateButtons.call(this, 'AppState changes');
+    });
 
     $scope.$on('$destroy', function () {
       off();
-      appState.off('save_with_changes', updateCountsOnAppStateChange.bind(this));
     });
 
     // when autoupdate is on we detect the refresh here
@@ -164,7 +172,7 @@ define(function (require) {
       if (!resp) {
         return;
       }
-      updateButtons();
+      updateButtons('esResponse');
     });
 
     $scope.$watch('vis.params.buttons', function () {
@@ -172,6 +180,6 @@ define(function (require) {
     }, true);
 
     // init
-    updateButtons();
+    updateButtons('init');
   });
 });

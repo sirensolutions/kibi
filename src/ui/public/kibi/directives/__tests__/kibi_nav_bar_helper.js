@@ -16,6 +16,8 @@ describe('Kibi Directives', function () {
 
     function init({ dashboardsIdsInConnectedComponents = [], savedDashboards = [], dashboardGroups = [] }) {
       ngMock.module('kibana', ($provide) => {
+        $provide.constant('kbnDefaultAppId', '');
+        $provide.constant('kibiDefaultDashboardId', '');
         $provide.constant('elasticsearchPlugins', ['siren-join']);
       });
 

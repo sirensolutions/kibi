@@ -22,16 +22,13 @@ define(function (require) {
    * <tr ng-repeat="row in rows" kibi-table-row="row"></tr>
    * ```
    */
-  module.directive('kibiTableRow', function ($rootScope, $compile, globalState, kbnUrl, $route, $window, createNotifier,
-        Private, courier) {
+  module.directive('kibiTableRow', function ($compile, kibiState, kbnUrl, $route, $window, createNotifier, Private, courier) {
     var noWhiteSpace = require('ui/utils/no_white_space');
 
     var openRowHtml = require('ui/doc_table/components/table_row/open.html');
     var detailsHtml = require('ui/doc_table/components/table_row/details.html');
     var cellTemplate = _.template(noWhiteSpace(require('ui/kibi/kibi_doc_table/components/kibi_table_row/cell.html')));
     var truncateByHeightTemplate = _.template(noWhiteSpace(require('ui/partials/truncate_by_height.html')));
-
-    var _isInSelectedEntities = Private(require('ui/kibi/components/commons/_is_this_entity_in_selected_entities'));
 
     var notify = createNotifier({
       location: 'Enhanced search results'
@@ -97,13 +94,13 @@ define(function (require) {
           createSummaryRow($scope.row);
         }, true);
 
-        var saveWithChangesHandler = function (diff) {
-          if (diff.indexOf('entityDisabled') !== -1 || diff.indexOf('se') !== -1) {
+        $scope.$listen(kibiState, 'save_with_changes', function (diff) {
+          if (diff.indexOf(kibiState._properties.selected_entity) !== -1 ||
+              diff.indexOf(kibiState._properties.selected_entity_disabled) !== -1 ||
+              diff.indexOf(kibiState._properties.test_selected_entity) !== -1) {
             createSummaryRow($scope.row);
           }
-        };
-
-        globalState.on('save_with_changes', saveWithChangesHandler);
+        });
 
         $scope.$watch('row', function () {
           createSummaryRow($scope.row);
@@ -111,14 +108,6 @@ define(function (require) {
 
         $scope.$watchMulti(['indexPattern.timeFieldName', 'row.highlight'], function () {
           createSummaryRow($scope.row, $scope.row._id);
-        });
-
-        var off = $rootScope.$on('kibi:selectedEntities:changed', function () {
-          createSummaryRow($scope.row);
-        });
-        $scope.$on('$destroy', function () {
-          off();
-          globalState.off('save_with_changes', saveWithChangesHandler);
         });
 
         // create a tr element that lists the value for each *column*
@@ -167,10 +156,9 @@ define(function (require) {
                 // Style the cell value as a link
                 $cell.addClass('click');
 
-                if (globalState.se && globalState.se.length > 0 && type === 'select' &&
-                    _isInSelectedEntities(globalState.se, row.$$_flattened._id, column)
-                   ) {
-                  if (globalState.entityDisabled === true) {
+                if (type === 'select' &&
+                    kibiState.isEntitySelected(row.$$_flattened._index, row.$$_flattened._type, row.$$_flattened._id, column)) {
+                  if (kibiState.isSelectedEntityDisabled()) {
                     $cell.addClass('selectedEntityCell disabled');
                   } else {
                     $cell.addClass('selectedEntityCell');
@@ -216,29 +204,16 @@ define(function (require) {
                       row.$$_flattened._id + '/' +
                       column;
 
-                    if (!globalState.se) {
-                      globalState.se = [];
-                    }
-                    if (globalState.se.indexOf(entityId) === -1) {
-
-                      // this is to make sure only one gets selected for now
-                      // to allow multiple selection simpy remove the line below
-                      globalState.se = [];
-
-                      globalState.se.push(entityId);
-                      globalState.entityDisabled = false;
-                      globalState.save();
-                    }
+                    kibiState.disableSelectedEntity(false);
+                    kibiState.setEntityURI(entityId);
+                    kibiState.save();
 
                     // switch to different dashboard only if user gave one in settings
                     var targetDashboardId = clickHandler.targetDashboardId;
-                    if (targetDashboardId && targetDashboardId !== '') {
+                    if (targetDashboardId) {
                       kbnUrl.change('/dashboard/{{id}}', {id:  targetDashboardId});
                       $route.reload();
                     } else {
-                      // as there is no need for reload just broadcast the change
-                      $rootScope.$emit('kibi:selectedEntities:changed', globalState.se);
-
                       // Call courier.fetch to update visualizations
                       // This will update all the visualisations, not only the one
                       // which strictly depend on selected entityURI

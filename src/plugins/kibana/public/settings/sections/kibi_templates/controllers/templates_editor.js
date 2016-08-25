@@ -37,13 +37,11 @@ define(function (require) {
     }
   });
 
-
   var app = require('ui/modules').get('apps/settings', ['kibana', 'ui.ace', 'ngSanitize']);
   var angular = require('angular');
 
-  app.controller('TemplatesEditor', function ($rootScope, $scope, $route, $window, kbnUrl, Private, createNotifier, queryEngineClient,
+  app.controller('TemplatesEditor', function ($scope, $route, $window, kbnUrl, Private, createNotifier, queryEngineClient, kibiState,
                                               $element) {
-    var _setEntityURI = Private(require('ui/kibi/components/commons/_set_entity_uri'));
     const _shouldEntityURIBeEnabled = Private(require('ui/kibi/components/commons/_should_entity_uri_be_enabled'));
 
     var notify = createNotifier({
@@ -51,7 +49,6 @@ define(function (require) {
     });
 
     $scope.holder = {
-      entityURI: '',
       entityURIEnabled: false,
       visible: true
     };
@@ -59,11 +56,10 @@ define(function (require) {
       queryId: null
     };
 
-    _setEntityURI($scope.holder);
-    var off = $rootScope.$on('kibi:selectedEntities:changed', function (event, se) {
-      _setEntityURI($scope.holder);
+    $scope.$on('$destroy', function () {
+      kibiState.removeTestEntityURI();
+      kibiState.save();
     });
-    $scope.$on('$destroy', off);
 
     $scope.jsonPreviewActive = false;
     $scope.htmlPreviewActive = true;
@@ -108,7 +104,7 @@ define(function (require) {
             }
           ],
           {
-            selectedDocuments: [$scope.holder.entityURI]
+            selectedDocuments: kibiState.isSelectedEntityDisabled() ? [] : [ kibiState.getEntityURI() ]
           }
         ).then(function (resp) {
           if (resp && resp.data && resp.data.snippets && resp.data.snippets.length === 1) {
@@ -125,8 +121,8 @@ define(function (require) {
       }
     };
 
-    $scope.$watch('holder.entityURI', function (entityURI) {
-      if (entityURI) {
+    $scope.$listen(kibiState, 'save_with_changes', function (diff) {
+      if (diff.indexOf(kibiState._properties.test_selected_entity) !== -1 && $scope.holder.entityURIEnabled) {
         refreshPreview();
       }
     });

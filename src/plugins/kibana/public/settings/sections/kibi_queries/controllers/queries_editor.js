@@ -46,10 +46,7 @@ define(function (require) {
 
   app.controller(
     'QueriesEditor',
-    function ($rootScope, $scope, $route, $window, kbnUrl, createNotifier, queryEngineClient,
-              savedDatasources, Private, $element) {
-
-      var setEntityUri = Private(require('ui/kibi/components/commons/_set_entity_uri'));
+    function (kibiState, $scope, $route, $window, kbnUrl, createNotifier, queryEngineClient, savedDatasources, $element) {
       var doesQueryDependOnEntity = require('kibiutils').doesQueryDependOnEntity;
 
       $scope.isJDBC = kibiUtils.isJDBC;
@@ -63,7 +60,6 @@ define(function (require) {
       // we have to wrap the value into object - this prevents weird thing related to transclusion
       // see http://stackoverflow.com/questions/25180613/angularjs-transclusion-creates-new-scope
       $scope.holder = {
-        entityURI: '',
         entityURIEnabled: false,
         visible: true,
         jsonPreviewActive: false,
@@ -71,12 +67,6 @@ define(function (require) {
         jsonPreview: null
       };
       $scope.starDetectedInAQuery = false;
-
-      setEntityUri($scope.holder);
-      var off = $rootScope.$on('kibi:selectedEntities:changed', function (event, se) {
-        setEntityUri($scope.holder);
-      });
-      $scope.$on('$destroy', off);
 
       $scope.tabClick = function () {
         $scope.holder.jsonPreviewActive = !$scope.holder.jsonPreviewActive;
@@ -104,8 +94,8 @@ define(function (require) {
       };
       _enableEntityUri();
 
-      $scope.$watch('holder.entityURI', function (entityURI) {
-        if (entityURI && $scope.holder.entityURIEnabled) {
+      $scope.$listen(kibiState, 'save_with_changes', function (diff) {
+        if (diff.indexOf(kibiState._properties.test_selected_entity) !== -1 && $scope.holder.entityURIEnabled) {
           $scope.preview();
         }
       });
@@ -240,7 +230,7 @@ define(function (require) {
         $scope.holder.jsonPreview = '';
         $scope.holder.htmlPreview = '';
 
-        if ($scope.query.id && (!$scope.holder.entityURIEnabled || $scope.holder.entityURI)) {
+        if ($scope.query.id && (!$scope.holder.entityURIEnabled || kibiState.getEntityURI())) {
           $scope.spinIt = true;
           return queryEngineClient.clearCache().then(function () {
             return queryEngineClient.getQueriesHtmlFromServer(
@@ -256,7 +246,7 @@ define(function (require) {
                 }
               ],
               {
-                selectedDocuments: [$scope.holder.entityURI]
+                selectedDocuments: kibiState.isSelectedEntityDisabled() ? [] : [ kibiState.getEntityURI() ]
               }
             );
           }).then(function (resp) {
@@ -284,6 +274,11 @@ define(function (require) {
       $scope.newQuery = function () {
         kbnUrl.change('settings/queries', {});
       };
+
+      $scope.$on('$destroy', function () {
+        kibiState.removeTestEntityURI();
+        kibiState.save();
+      });
 
       $scope.preview();
     });

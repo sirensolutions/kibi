@@ -19,15 +19,12 @@ describe('State Management', function () {
   const defaultStartTime = '2006-09-01T12:00:00.000Z';
   const defaultEndTime = '2010-09-05T12:00:00.000Z';
 
-  const init = function ({ kibiEnterpriseEnabled = false, pinned, savedDashboards, savedSearches, indexPatterns,
+  const init = function ({ kibiEnterpriseEnabled = false, pinned, savedDashboards = [], savedSearches = [], indexPatterns = [],
                          currentPath = '/dashboard', currentDashboardId = 'dashboard1' }) {
     ngMock.module('kibana', 'kibana/courier', 'kibana/global_state', ($provide) => {
       $provide.service('$route', () => {
         var myRoute = {
           current: {
-            $$route: {
-              originalPath: currentPath
-            },
             locals: {
               dash: {
                 id: currentDashboardId
@@ -35,9 +32,7 @@ describe('State Management', function () {
             }
           }
         };
-        if (currentPath === null) {
-          delete myRoute.current.$$route;
-        } else if (currentDashboardId === null) {
+        if (currentDashboardId === null) {
           delete myRoute.current.locals;
         }
         return myRoute;
@@ -54,24 +49,27 @@ describe('State Management', function () {
       });
 
       $provide.constant('kibiEnterpriseEnabled', kibiEnterpriseEnabled);
+      $provide.constant('kbnDefaultAppId', '');
+      $provide.constant('kibiDefaultDashboardId', '');
       $provide.constant('elasticsearchPlugins', ['siren-join']);
     });
 
     ngMock.module('kibana/index_patterns', function ($provide) {
-      $provide.service('indexPatterns', (Promise) => mockSavedObjects(Promise)('indexPatterns', indexPatterns || []));
+      $provide.service('indexPatterns', (Promise) => mockSavedObjects(Promise)('indexPatterns', indexPatterns));
     });
 
     ngMock.module('discover/saved_searches', function ($provide) {
-      $provide.service('savedSearches', (Promise) => mockSavedObjects(Promise)('savedSearches', savedSearches || []));
+      $provide.service('savedSearches', (Promise) => mockSavedObjects(Promise)('savedSearches', savedSearches));
     });
 
     ngMock.module('app/dashboard', function ($provide) {
-      $provide.service('savedDashboards', (Promise) => mockSavedObjects(Promise)('savedDashboards', savedDashboards || []));
+      $provide.service('savedDashboards', (Promise) => mockSavedObjects(Promise)('savedDashboards', savedDashboards));
     });
 
     ngMock.inject(function (_timefilter_, _config_, _$location_, _kibiState_) {
       timefilter = _timefilter_;
       $location = _$location_;
+      $location.path(currentPath);
       kibiState = _kibiState_;
       config = _config_;
       const defaultTime = {
@@ -87,6 +85,83 @@ describe('State Management', function () {
   describe('Kibi State', function () {
 
     require('testUtils/noDigestPromises').activateForSuite();
+
+    describe('selected entity', function () {
+      describe('isEntitySelected', function () {
+        beforeEach(() => init({}));
+
+        it('should return true if the given entity is the one selected', function () {
+          const index = 'a';
+          const type = 'b';
+          const id = 'c';
+          const column = 'd';
+          kibiState.setEntityURI(`${index}/${type}/${id}/${column}`);
+          expect(kibiState.isEntitySelected(index, type, id, column)).to.be(true);
+        });
+
+        it('should return false if entity is not the one selected', function () {
+          kibiState.setEntityURI('a/b/c/d');
+          [
+            [ 'e', 'b', 'c', 'd' ],
+            [ 'a', 'e', 'c', 'd' ],
+            [ 'a', 'b', 'e', 'd' ],
+            [ 'a', 'b', 'c', 'e' ]
+          ].forEach(([ index, type, id, column ]) => {
+            expect(kibiState.isEntitySelected(index, type, id, column)).to.be(false);
+          });
+        });
+
+        it('should not fail if arguments are undefined', function () {
+          expect(kibiState.isEntitySelected()).to.be(false);
+          expect(kibiState.isEntitySelected('a')).to.be(false);
+          expect(kibiState.isEntitySelected('a', 'b')).to.be(false);
+          expect(kibiState.isEntitySelected('a', 'b', 'c')).to.be(false);
+        });
+      });
+
+      describe('getEntityURI', function () {
+        it('should return the entity when on dashboard/settings/visualize tab', function () {
+          const entityURI = 'a/b/c/d';
+
+          init({});
+          [ '/dashboard', '/visualize/', '/settings' ].forEach((path) => {
+            $location.path(path);
+            kibiState.setEntityURI(entityURI);
+            expect(kibiState.getEntityURI()).to.be(entityURI);
+          });
+        });
+
+        it('should not return the entity when on discover tab', function () {
+          const entityURI = 'a/b/c/d';
+
+          init({});
+          kibiState.setEntityURI(entityURI);
+          expect(kibiState.getEntityURI()).to.be(entityURI);
+          $location.path('/discover');
+          expect(kibiState.getEntityURI).to.throwException(/Cannot get entity URI/);
+        });
+
+        it('should return the test entity when on settings/visualize tab', function () {
+          const entityURI1 = 'a/b/c/d';
+          const entityURI2 = 'e/f/g/h';
+
+          init({});
+
+          kibiState.setEntityURI(entityURI1);
+          expect(kibiState.getEntityURI()).to.be(entityURI1);
+
+          $location.path('/visualize/');
+          kibiState.setEntityURI(entityURI2);
+          expect(kibiState.getEntityURI()).to.be(entityURI2);
+
+          $location.path('/settings');
+          expect(kibiState.getEntityURI()).to.be(entityURI2);
+
+          $location.path('/dashboard');
+          expect(kibiState.getEntityURI()).to.be(entityURI1);
+        });
+      });
+    });
 
     describe('Relations', function () {
       beforeEach(() => init({}));
@@ -2155,7 +2230,3 @@ describe('State Management', function () {
     });
   });
 });
-
-
-
-

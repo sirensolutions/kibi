@@ -1,4 +1,3 @@
-
 const angular = require('angular');
 const $ = require('jquery');
 const _ = require('lodash');
@@ -45,6 +44,7 @@ describe('Vis-Editor-Agg plugin directive', function () {
   beforeEach(ngMock.module('kibana', function ($provide) {
     $provide.constant('kbnDefaultAppId', '');
     $provide.constant('kibiDefaultDashboardId', '');
+    $provide.constant('elasticsearchPlugins', ['siren-join']);
   }));
   beforeEach(ngMock.inject(function ($rootScope, $compile) {
     $parentScope.agg = {

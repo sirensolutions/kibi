@@ -70,8 +70,10 @@ describe('No global chart settings', function () {
   var data2;
 
   beforeEach(ngMock.module('kibana', function ($provide) {
+    // kibi: for running kibi tests
     $provide.constant('kbnDefaultAppId', '');
     $provide.constant('kibiDefaultDashboardId', '');
+    $provide.constant('elasticsearchPlugins', ['siren-join']);
   }));
   beforeEach(ngMock.inject(function (Private) {
     chart1 = Private(require('fixtures/vislib/_vis_fixture'))(visLibParams1);
@@ -168,8 +170,10 @@ aggArray.forEach(function (dataAgg, i) {
     var data;
 
     beforeEach(ngMock.module('kibana', function ($provide) {
+      // kibi: for running kibi tests
       $provide.constant('kbnDefaultAppId', '');
       $provide.constant('kibiDefaultDashboardId', '');
+      $provide.constant('elasticsearchPlugins', ['siren-join']);
     }));
     beforeEach(ngMock.inject(function (Private) {
       vis = Private(require('fixtures/vislib/_vis_fixture'))(visLibParams);

@@ -1,9 +1,9 @@
 describe('Kibi Controllers', function () {
   var $scope;
+  var sinon = require('auto-release-sinon');
   var Promise = require('bluebird');
   var ngMock = require('ngMock');
   var expect = require('expect.js');
-  var globalState;
 
   function init(options) {
     ngMock.module('kibana', function ($provide) {
@@ -33,13 +33,13 @@ describe('Kibi Controllers', function () {
       });
     });
 
-    ngMock.inject(function ($rootScope, $controller, _globalState_) {
-      globalState = _globalState_;
+    ngMock.inject(function (kibiState, $rootScope, $controller) {
+      sinon.stub(kibiState, 'getEntityURI').returns('entity1');
       $scope = $rootScope;
       $scope.vis = {
         params: options.params
       };
-      $controller('KibiQueryViewerVisController', { $scope: $scope });
+      $controller('KibiQueryViewerVisController', { $scope });
       $scope.$digest();
     });
   }

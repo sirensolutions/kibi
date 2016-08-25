@@ -54,10 +54,9 @@ define(function (require) {
     'kibana/notify',
     'kibana/courier'
   ])
-  .controller('VisEditor', function ($rootScope, globalState, $scope, $route, timefilter, AppState, kbnUrl, $timeout, courier,
-                                     Private, Promise, createNotifier) {
+  .controller('VisEditor', function ($scope, $route, timefilter, AppState, kbnUrl, $timeout, courier, kibiState, Private,
+                                     Promise, createNotifier) {
     const doesVisDependsOnSelectedEntities = Private(require('ui/kibi/components/commons/_does_vis_depends_on_selected_entities'));
-    const urlHelper = Private(require('ui/kibi/helpers/url_helper'));
     const angular = require('angular');
     const ConfigTemplate = require('ui/ConfigTemplate');
     const Notifier = require('ui/notify/notifier');
@@ -66,24 +65,15 @@ define(function (require) {
     const queryFilter = Private(require('ui/filter_bar/query_filter'));
     const filterBarClickHandler = Private(require('ui/filter_bar/filter_bar_click_handler'));
 
-    const setEntityURI = Private(require('ui/kibi/components/commons/_set_entity_uri'));
-
     $scope.holder = {
-      entityURI: '',
       entityURIEnabled: $route.current.locals.isEntityDependent,
-      visible: urlHelper.onVisualizeTab()
+      visible: true
     };
-    $scope.$watch('holder.entityURI', function (entityURI) {
-      if (entityURI && $scope.holder.visible) {
-        globalState.se_temp = [entityURI];
-        globalState.save();
+
+    $scope.$listen(kibiState, 'save_with_changes', function (diff) {
+      if (diff.indexOf(kibiState._properties.test_selected_entity) !== -1) {
         $scope.fetch();
       }
-    });
-
-    setEntityURI($scope.holder);
-    const removeSetEntityUriHandler = $rootScope.$on('kibi:selectedEntities:changed', function (event, se) {
-      setEntityURI($scope.holder);
     });
 
     const notify = createNotifier({
@@ -232,7 +222,9 @@ define(function (require) {
 
       $scope.$on('$destroy', function () {
         savedVis.destroy();
-        removeSetEntityUriHandler();
+        // remove the test_selected_entity
+        kibiState.removeTestEntityURI();
+        kibiState.save();
       });
     }
 

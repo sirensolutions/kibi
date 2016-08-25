@@ -1,6 +1,6 @@
 define(function (require) {
 
-  return function MarkFiltersBySelectedEntitiesFactory(Promise, Private, globalState) {
+  return function MarkFiltersBySelectedEntitiesFactory(Promise, Private, kibiState) {
 
     var _ = require('lodash');
     var _shouldEntityURIBeEnabled = Private(require('ui/kibi/components/commons/_should_entity_uri_be_enabled'));
@@ -18,8 +18,8 @@ define(function (require) {
       return Promise.all(promises).then(function (results) {
         _.each(results, function (res, index) {
           filters[index].meta.dependsOnSelectedEntities = res;
-          filters[index].meta.dependsOnSelectedEntitiesDisabled = res && globalState.entityDisabled;
-          filters[index].meta.markDependOnSelectedEntities = globalState.se && globalState.se.length > 0;
+          filters[index].meta.dependsOnSelectedEntitiesDisabled = res && kibiState.isSelectedEntityDisabled();
+          filters[index].meta.markDependOnSelectedEntities = Boolean(kibiState.getEntityURI());
         });
         return filters;
       });

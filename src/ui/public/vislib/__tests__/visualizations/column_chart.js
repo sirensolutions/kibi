@@ -40,7 +40,12 @@ dataTypesArray.forEach(function (dataType, i) {
       mode: mode
     };
 
-    beforeEach(ngMock.module('kibana'));
+    beforeEach(ngMock.module('kibana', function ($provide) {
+      // kibi: for running kibi tests
+      $provide.constant('kbnDefaultAppId', '');
+      $provide.constant('kibiDefaultDashboardId', '');
+      $provide.constant('elasticsearchPlugins', ['siren-join']);
+    }));
     beforeEach(ngMock.inject(function (Private) {
       vis = Private(require('fixtures/vislib/_vis_fixture'))(visLibParams);
       persistedState = new (Private(require('ui/persisted_state/persisted_state')))();

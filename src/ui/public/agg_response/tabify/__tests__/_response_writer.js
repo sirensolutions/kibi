@@ -17,6 +17,7 @@ describe('ResponseWriter class', function () {
     beforeEach(ngMock.module('kibana', function ($provide) {
       $provide.constant('kbnDefaultAppId', '');
       $provide.constant('kibiDefaultDashboardId', '');
+      $provide.constant('elasticsearchPlugins', ['siren-join']);
     }));
     beforeEach(ngMock.inject(function ($injector) {
       Private = $injector.get('Private');

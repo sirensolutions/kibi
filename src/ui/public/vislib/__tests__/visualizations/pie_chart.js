@@ -70,6 +70,7 @@ describe('No global chart settings', function () {
   var data2;
 
   beforeEach(ngMock.module('kibana', function ($provide) {
+    // kibi: for running kibi tests
     $provide.constant('kbnDefaultAppId', '');
     $provide.constant('kibiDefaultDashboardId', '');
     $provide.constant('elasticsearchPlugins', ['siren-join']);
@@ -169,6 +170,7 @@ aggArray.forEach(function (dataAgg, i) {
     var data;
 
     beforeEach(ngMock.module('kibana', function ($provide) {
+      // kibi: for running kibi tests
       $provide.constant('kbnDefaultAppId', '');
       $provide.constant('kibiDefaultDashboardId', '');
       $provide.constant('elasticsearchPlugins', ['siren-join']);

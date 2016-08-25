@@ -41,6 +41,7 @@ dataTypesArray.forEach(function (dataType, i) {
     };
 
     beforeEach(ngMock.module('kibana', function ($provide) {
+      // kibi: for running kibi tests
       $provide.constant('kbnDefaultAppId', '');
       $provide.constant('kibiDefaultDashboardId', '');
       $provide.constant('elasticsearchPlugins', ['siren-join']);

@@ -32,6 +32,7 @@ describe('Vislib Line Chart', function () {
       var persistedState;
 
       beforeEach(ngMock.module('kibana', function ($provide) {
+        // kibi: for running kibi tests
         $provide.constant('kbnDefaultAppId', '');
         $provide.constant('kibiDefaultDashboardId', '');
         $provide.constant('elasticsearchPlugins', ['siren-join']);

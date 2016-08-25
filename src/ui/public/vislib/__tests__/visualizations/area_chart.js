@@ -29,6 +29,7 @@ _.forOwn(someOtherVariables, function (variablesAreCool, imaVariable) {
     var persistedState;
 
     beforeEach(ngMock.module('kibana', function ($provide) {
+      // kibi: for running kibi tests
       $provide.constant('kbnDefaultAppId', '');
       $provide.constant('kibiDefaultDashboardId', '');
       $provide.constant('elasticsearchPlugins', ['siren-join']);

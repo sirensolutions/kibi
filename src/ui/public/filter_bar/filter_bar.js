@@ -10,8 +10,6 @@ define(function (require) {
   require('ui/kibi/directives/kibi_entity_clipboard');
 
   module.directive('filterBar', function (createNotifier, kibiState, $rootScope, Private, Promise, getAppState, config) {
-    const urlHelper = Private(require('ui/kibi/helpers/url_helper'));
-    const joinExplain = Private(require('ui/filter_bar/join_explanation'));
     const mapAndFlattenFilters = Private(require('ui/filter_bar/lib/mapAndFlattenFilters'));
     const mapFlattenAndWrapFilters = Private(require('ui/filter_bar/lib/mapFlattenAndWrapFilters'));
     const extractTimeFilter = Private(require('ui/filter_bar/lib/extractTimeFilter'));
@@ -20,7 +18,10 @@ define(function (require) {
     const changeTimeFilter = Private(require('ui/filter_bar/lib/changeTimeFilter'));
     const queryFilter = Private(require('ui/filter_bar/query_filter'));
     const privateFilterFieldRegex = /(^\$|meta)/;
+    // kibi: added some helpers
+    const joinExplain = Private(require('ui/filter_bar/join_explanation'));
     const markFiltersBySelectedEntities = Private(require('ui/kibi/components/commons/_mark_filters_by_selected_entities'));
+    const urlHelper = Private(require('ui/kibi/helpers/url_helper'));
 
     const notify = createNotifier({
       name: 'Kibi Navigation Bar'

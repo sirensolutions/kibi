@@ -6,7 +6,6 @@ define(function (require) {
       var _ = require('lodash');
 
       var spyModes = Private(require('ui/registry/spy_modes'));
-      var defaultMode = spyModes.inOrder[0].name;
 
       return {
         restrict: 'E',
@@ -17,6 +16,13 @@ define(function (require) {
           var fullPageSpy = _.get($scope.spy, 'mode.fill', false);
           $scope.modes = spyModes;
           $scope.spy.params = $scope.spy.params || {};
+
+          $scope.isModeAllowed = function (mode) {
+            return !mode.visForbidden || mode.visForbidden.indexOf($scope.vis.type.name) === -1;
+          };
+
+          // there should be at least the Debug mode available
+          var defaultMode = _.filter(spyModes.inOrder, $scope.isModeAllowed)[0].name;
 
           function getSpyObject(name) {
             name = _.isUndefined(name) ? $scope.spy.mode.name : name;

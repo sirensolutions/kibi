@@ -12,6 +12,7 @@ define(function (require) {
       name: 'table',
       display: 'Table',
       order: 1,
+      visForbidden: [ 'kibi-data-table' ],
       template: require('plugins/spyModes/tableSpyMode.html'),
       link: function tableLinkFn($scope, $el) {
         $rootScope.$watchMulti.call($scope, [

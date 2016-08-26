@@ -41,6 +41,7 @@ Kibi | Elasticsearch
 0.3.x | 2.2.x
 0.2.0 | 1.6, 1.7
 0.1.x | 1.6, 1.7
+=======
 
 ## License
 

@@ -6,14 +6,15 @@
 :java-version: 1.8
 :siren-join-version: 2.3.4
 :siren-join-website: https://github.com/sirensolutions/siren-join/
-:kibana-version: 4.5.3
-:kibana-announcement: https://www.elastic.co/blog/kibana-4-5-3-and-4-1-10
-:kibi-version: 4.5.3
+:kibana-version: 4.5.4
+:kibana-announcement: https://www.elastic.co/blog/kibana-4-5-4-and-4-1-11
+:kibi-version: 4.5.4
 :elastic-ref: https://www.elastic.co/guide/en/elasticsearch/reference/2.3/
 :elasticsearch-version: 2.3.4
 :kibi-ref: http://siren.solutions/kibi/docs/current/
 :start-url: http://localhost:5606
 :start-url-shield: https://localhost:5606
+:kibi-default-port: 5606
 
 :shield: https://www.elastic.co/guide/en/shield/2.3/
 :k4issue: https://github.com/elastic/kibana/issues/
@@ -26,6 +27,8 @@ include::introduction.asciidoc[]
 include::kibi_license.asciidoc[]
 
 include::setup.asciidoc[]
+
+include::upgrade.asciidoc[]
 
 include::getting_started.asciidoc[]
 

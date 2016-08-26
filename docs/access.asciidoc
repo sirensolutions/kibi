@@ -1,9 +1,9 @@
 [[access]]
 == Accessing Kibi
 
-Kibi is a web application that you access through port 5606. All you need to do is point your web browser at the
-machine where Kibana is running and specify the port number. For example, `localhost:5606` or
-`http://YOURDOMAIN.com:5606`.
+Kibi is a web application that you access through port {kibi-default-port}. All you need to do is point your web browser at the
+machine where Kibana is running and specify the port number. For example, `{start-url}` or
+`http://YOURDOMAIN.com:{kibi-default-port}`.
 
 When you access Kibi, the <<discover,Discover>> page loads by default with the default index pattern selected. The
 time filter is set to the last 15 minutes and the search query is set to match-all (\*).
@@ -14,7 +14,7 @@ If you still don't see any results, it's possible that you don't *have* any docu
 [[status]]
 === Checking Kibi Status
 
-You can reach the Kibi server's status page by navigating to `localhost:5606/status`. The status page displays
+You can reach the Kibi server's status page by navigating to `{start-url}/status`. The status page displays
 information about the server's resource usage and lists the installed plugins.
 
 image::images/kibi-status-page.png[]

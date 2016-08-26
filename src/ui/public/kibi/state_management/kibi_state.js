@@ -191,112 +191,112 @@ define(function (require) {
         globalState.filters = [];
         globalState.save();
       }
-      if (this[this._properties.dashboards]) {
-        return savedDashboards.find().then((resp) => {
-          if (resp.hits) {
-            const dashboardIdsToUpdate = [];
-            const appState = getAppState();
-            const timeDefaults = config.get('timepicker:timeDefaults');
+      return savedDashboards.find().then((resp) => {
+        if (resp.hits) {
+          const dashboardIdsToUpdate = [];
+          const appState = getAppState();
+          const timeDefaults = config.get('timepicker:timeDefaults');
 
-            _.each(resp.hits, (dashboard) => {
-              const meta = JSON.parse(dashboard.kibanaSavedObjectMeta.searchSourceJSON);
-              const filters = _.reject(meta.filter, (filter) => filter.query && filter.query.query_string && !filter.meta);
-              const query = _.find(meta.filter, (filter) => filter.query && filter.query.query_string && !filter.meta);
+          _.each(resp.hits, (dashboard) => {
+            const meta = JSON.parse(dashboard.kibanaSavedObjectMeta.searchSourceJSON);
+            const filters = _.reject(meta.filter, (filter) => filter.query && filter.query.query_string && !filter.meta);
+            const query = _.find(meta.filter, (filter) => filter.query && filter.query.query_string && !filter.meta);
 
-              // reset appstate
-              if (appState && dashboard.id === appState.id) {
-                let queryChanged = false;
-                // filters
-                appState.filters = filters;
+            // reset appstate
+            if (appState && dashboard.id === appState.id) {
+              let queryChanged = false;
+              // filters
+              appState.filters = filters;
 
-                // query
-                const origQuery = query && query.query || {query_string: {analyze_wildcard: true, query: '*'}};
-                if (!angular.equals(origQuery, appState.query)) {
-                  queryChanged = true;
-                }
-                appState.query = origQuery;
-
-                // time
-                if (dashboard.timeRestore && dashboard.timeFrom && dashboard.timeTo) {
-                  timefilter.time.mode = dashboard.timeMode;
-                  timefilter.time.to = dashboard.timeTo;
-                  timefilter.time.from = dashboard.timeFrom;
-                } else {
-                  // These can be date math strings or moments.
-                  timefilter.time = timeDefaults;
-                }
-                if (queryChanged) {
-                  // this will save the appstate and update the current searchsource
-                  // This is only needed for changes on query, since the query needs to be added to the searchsource
-                  this.emit('reset_app_state_query');
-                } else {
-                  appState.save();
-                }
+              // query
+              const origQuery = query && query.query || {query_string: {analyze_wildcard: true, query: '*'}};
+              if (!angular.equals(origQuery, appState.query)) {
+                queryChanged = true;
               }
-              // reset kibistate
-              let modified = false;
-              if (this[this._properties.dashboards][dashboard.id]) {
-                // query
-                if (!query || this._isDefaultQuery(query)) {
-                  if (this._getDashboardProperty(dashboard.id, this._properties.query)) {
-                    // kibistate has a query that will be removed with the reset
-                    modified = true;
-                  }
-                  this._deleteDashboardProperty(dashboard.id, this._properties.query);
-                } else {
-                  if (this._setDashboardProperty(dashboard.id, this._properties.query, query.query)) {
-                    modified = true;
-                  }
-                }
+              appState.query = origQuery;
 
-                // filters
-                if (filters.length) {
-                  if (this._setDashboardProperty(dashboard.id, this._properties.filters, filters)) {
-                    modified = true;
-                  }
-                } else {
-                  if (this._getDashboardProperty(dashboard.id, this._properties.filters)) {
-                    // kibistate has filters that will be removed with the reset
-                    modified = true;
-                  }
-                  this._deleteDashboardProperty(dashboard.id, this._properties.filters);
-                }
-
-                // time
-                if (dashboard.timeRestore && dashboard.timeFrom && dashboard.timeTo) {
-                  if (this._saveTimeForDashboardId(dashboard.id, dashboard.timeMode, dashboard.timeFrom, dashboard.timeTo)) {
-                    modified = true;
-                  }
-                } else {
-                  if (this._getDashboardProperty(dashboard.id, this._properties.time)) {
-                    // kibistate has a time that will be removed with the reset
-                    modified = true;
-                  }
-                  this._deleteDashboardProperty(dashboard.id, this._properties.time);
-                }
+              // time
+              if (dashboard.timeRestore && dashboard.timeFrom && dashboard.timeTo) {
+                timefilter.time.mode = dashboard.timeMode;
+                timefilter.time.to = dashboard.timeTo;
+                timefilter.time.from = dashboard.timeFrom;
+              } else {
+                // These can be date math strings or moments.
+                timefilter.time = timeDefaults;
               }
-              if (modified) {
-                dashboardIdsToUpdate.push(dashboard.id);
+              if (queryChanged) {
+                // this will save the appstate and update the current searchsource
+                // This is only needed for changes on query, since the query needs to be added to the searchsource
+                this.emit('reset_app_state_query');
+              } else {
+                appState.save();
               }
-            });
-
-            // add the ID of dashboards that are joined
-            _.each(this.getEnabledRelations(), (relation) => {
-              _.each(relation.dashboards, (dashboardId) => {
-                if (dashboardIdsToUpdate.indexOf(dashboardId) === -1) {
-                  dashboardIdsToUpdate.push(dashboardId);
-                }
-              });
-            });
-            this.disableAllRelations();
-
-            if (dashboardIdsToUpdate.length) {
-              this.emit('reset', dashboardIdsToUpdate);
             }
-            this.save();
+
+            // reset kibistate
+            let modified = false;
+            if (this[this._properties.dashboards] && this[this._properties.dashboards][dashboard.id]) {
+              // query
+              if (!query || this._isDefaultQuery(query)) {
+                if (this._getDashboardProperty(dashboard.id, this._properties.query)) {
+                  // kibistate has a query that will be removed with the reset
+                  modified = true;
+                }
+                this._deleteDashboardProperty(dashboard.id, this._properties.query);
+              } else {
+                if (this._setDashboardProperty(dashboard.id, this._properties.query, query.query)) {
+                  modified = true;
+                }
+              }
+
+              // filters
+              if (filters.length) {
+                if (this._setDashboardProperty(dashboard.id, this._properties.filters, filters)) {
+                  modified = true;
+                }
+              } else {
+                if (this._getDashboardProperty(dashboard.id, this._properties.filters)) {
+                  // kibistate has filters that will be removed with the reset
+                  modified = true;
+                }
+                this._deleteDashboardProperty(dashboard.id, this._properties.filters);
+              }
+
+              // time
+              if (dashboard.timeRestore && dashboard.timeFrom && dashboard.timeTo) {
+                if (this._saveTimeForDashboardId(dashboard.id, dashboard.timeMode, dashboard.timeFrom, dashboard.timeTo)) {
+                  modified = true;
+                }
+              } else {
+                if (this._getDashboardProperty(dashboard.id, this._properties.time)) {
+                  // kibistate has a time that will be removed with the reset
+                  modified = true;
+                }
+                this._deleteDashboardProperty(dashboard.id, this._properties.time);
+              }
+            }
+            if (modified) {
+              dashboardIdsToUpdate.push(dashboard.id);
+            }
+          });
+
+          // add the ID of dashboards that are joined
+          _.each(this.getEnabledRelations(), (relation) => {
+            _.each(relation.dashboards, (dashboardId) => {
+              if (dashboardIdsToUpdate.indexOf(dashboardId) === -1) {
+                dashboardIdsToUpdate.push(dashboardId);
+              }
+            });
+          });
+          this.disableAllRelations();
+
+          if (dashboardIdsToUpdate.length) {
+            this.emit('reset', dashboardIdsToUpdate);
           }
-        });
-      }
+          this.save();
+        }
+      });
+
       return Promise.resolve();
     };
 
@@ -366,7 +366,7 @@ define(function (require) {
     KibiState.prototype._getCurrentDashboardId = function () {
       const dash = _.get($route, 'current.locals.dash');
 
-      if (!dash) {
+      if (!dash || dash.locked) {
         return;
       }
       return dash.id;

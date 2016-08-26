@@ -6,7 +6,7 @@ define(function (require) {
   require('ui/kibi/directives/kibi_entity_clipboard.less');
 
   require('ui/modules').get('kibana')
-  .directive('kibiEntityClipboard', function (kibiState, getAppState, $rootScope, $route, globalState, $http, createNotifier, config) {
+  .directive('kibiEntityClipboard', function (kibiState, $timeout, getAppState, $route, globalState, $http, createNotifier, config) {
 
     var notify = createNotifier({
       name: 'Kibi Entity Clipboard'
@@ -17,23 +17,27 @@ define(function (require) {
       template: require('ui/kibi/directives/kibi_entity_clipboard.html'),
       replace: true,
       link: function ($scope, $el) {
-        var updateSelectedEntity = function () {
-          $scope.disabled = !!globalState.entityDisabled;
-          if (globalState.se && globalState.se.length > 0) {
-            // for now we support a single entity
-            $scope.entityURI = globalState.se[0];
-            var parts = globalState.se[0].split('/');
-            if (parts.length === 4) {
-              var index = parts[0];
-              var type = parts[1];
-              var id = parts[2];
-              var column = parts[3];
+        const MAX_TRIES = 20;
+        const SLEEP_TRY = 10;
+
+        var updateSelectedEntity = function (tries) {
+          try {
+            tries++;
+            $scope.disabled = Boolean(kibiState.isSelectedEntityDisabled());
+            $scope.entityURI = kibiState.getEntityURI();
+            if ($scope.entityURI) {
+              const parts = $scope.entityURI.split('/');
+              const index = parts[0];
+              const type = parts[1];
+              const id = parts[2];
+              const column = parts[3];
 
               //delete the old label
               delete $scope.label;
               // fetch document and grab the field value to populate the label
-              $http.get(chrome.getBasePath() + '/elasticsearch/' +  index + '/' + type + '/' + id).then(function (doc) {
-                if (doc.data) {
+              $http.get(`${chrome.getBasePath()}/elasticsearch/${index}/${type}/${id}`).then(function (doc) {
+                $scope.label = $scope.entityURI;
+                if (doc.data && column) {
                   if (config.get('metaFields').indexOf(column) !== -1 && doc.data[column]) {
                     // check if column is in meta fields
                     $scope.label = doc.data[column];
@@ -54,18 +58,32 @@ define(function (require) {
                   }
                 }
               });
+            }
+          } catch (err) {
+            // the call to kibiState.getEntityURI might fail when switching between tabs, e.g., from dashboard to settings.
+            if (tries < MAX_TRIES) {
+              $timeout(updateSelectedEntity.bind(this, tries), SLEEP_TRY, false);
             } else {
-              $scope.label = globalState.se[0];
+              throw err;
             }
           }
         };
+
+        $scope.$listen(kibiState, 'save_with_changes', function (diff) {
+          if (diff.indexOf(kibiState._properties.selected_entity) !== -1 ||
+              diff.indexOf(kibiState._properties.selected_entity_disabled) !== -1) {
+            updateSelectedEntity.call(this, 0);
+          }
+        });
 
         $scope.removeAllEntities = function () {
           delete $scope.entityURI;
           delete $scope.label;
           delete $scope.disabled;
-          delete globalState.entityDisabled;
-          delete globalState.se;
+
+          // remove the selecte entity
+          kibiState.setEntityURI(null);
+          kibiState.disableSelectedEntity(false);
 
           /*
            * remove filters which depends on selected entities
@@ -104,20 +122,12 @@ define(function (require) {
 
         $scope.toggleClipboard = function () {
           $scope.disabled = !$scope.disabled;
-          globalState.entityDisabled = !globalState.entityDisabled;
-          globalState.save();
+          kibiState.disableSelectedEntity($scope.disabled);
+          kibiState.save();
           // have to reload so all visualisations which might depend on selected entities
           // get refreshed
           $route.reload();
         };
-
-        var removeHandler = $rootScope.$on('kibi:selectedEntities:changed', function (se) {
-          updateSelectedEntity();
-        });
-
-        $scope.$on('$destroy', function () {
-          removeHandler();
-        });
 
         updateSelectedEntity();
       }

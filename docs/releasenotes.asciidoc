@@ -1,6 +1,35 @@
 [[releasenotes]]
 == Kibi Release Notes
 
+=== Kibi 4.5.4 and Kibana 4.5.4 Release Notes
+
+The {version} release of Kibi requires Elasticsearch {esversion} or later.
+
+==== Kibana Changes
+
+[float]
+[[enhancements]]
+===== Enhancements
+* {k4issue}6150[Issue 6150]: Adds a timeout for the display of error notifications.
+* {k4issue}3682[Issue 3682]: Improved handling of empty result sets for the Metric visualization.
+* {k4issue}4065[Issue 4065]: Adds custom labels for visualization axes.
+* {k4issue}6128[Issue 6128]: Adds configurable length to saved object lists.
+
+[float]
+[[bugfixes]]
+===== Bug Fixes
+
+* {k4pull}5236[Pull Request 5236]: Fixes a heatmap intensity issue in tile maps.
+* {k4issue}6283[Issue 6283]: Corrects a date format error in millisecond intervals.
+* {k4issue}6049[Issue 6049]: Improvements to autocomplete handling.
+* {k4issue}6331[Issue 6331]: Improved handling of long-running queries.
+
+[float]
+[[plugin-system]]
+===== Plugin System Changes
+
+* {k4issue}5916[Issue 5916]: Adds the `--list` flag to list installed plugins.
+
 === Kibi 4.5.3 and Kibana 4.5.3 Release Notes
 
 * Various bug fixes and stability improvements
@@ -26,23 +55,29 @@
 * Added more graph scripts to Graph Browser [Enterprise Edition only]
 * Scalability improvements in Graph Browser [Enterprise Edition only]
 
-Below are the issues relevant to Kibana.
+==== Kibana Changes
 
-Enhancement
+[float]
+[[enhancements]]
+===== Enhancements
 
 * {k4issue}6150[Issue 6150]: Adds a timeout for the display of error notifications.
 * {k4issue}3682[Issue 3682]: Improved handling of empty result sets for the Metric visualization.
 * {k4issue}4065[Issue 4065]: Adds custom labels for visualization axes.
 * {k4issue}6128[Issue 6128]: Adds configurable length to saved object lists.
 
-Bug Fixes
+[float]
+[[bugfixes]]
+===== Bug Fixes
 
 * {k4pull}5236[Pull Request 5236]: Fixes a heatmap intensity issue in tile maps.
 * {k4issue}6283[Issue 6283]: Corrects a date format error in millisecond intervals.
 * {k4issue}6049[Issue 6049]: Improvements to autocomplete handling.
 * {k4issue}6331[Issue 6331]: Improved handling of long-running queries.
 
-Plugin System Changes
+[float]
+[[plugin-system]]
+===== Plugin System Changes
 
 * {k4issue}5916[Issue 5916]: Adds the --list flag to list installed plugins.
 
@@ -69,7 +104,7 @@ Plugin System Changes
 * Add more graph scripts [Enterprise Edition only]
 * Saving termsEncoding bloom [Enterprise Edition only]
 
-Below are the issues relevant to Kibana.
+==== Kibana Changes
 
 * {k4issue}6420[Issue 6420]: Bump node to v4.3.2
 * {k4issue}6353[Issue 6353]: Add basePath to short URLs
@@ -77,7 +112,7 @@ Below are the issues relevant to Kibana.
 * {k4issue}6083[Issue 6083]: Plugin installer support for .tgz file types
 * {k4issue}5971[Issue 5971]: Fix active search source hover background issue
 * {k4issue}5942[Issue 5942]: Fix for save button disabled when opening spy panel
-* {k4issue}6133[Issue 6133] and {k4pull}6103[6103]]: Distro packages now have a description, vendor, maintainer, url, license and priority metadata
+* {k4issue}6133[Issue 6133] and {k4pull}6103[6103]: Distro packages now have a description, vendor, maintainer, url, license and priority metadata
 
 === Kibi 4.4.1 Release Notes
 
@@ -111,8 +146,7 @@ Below are the issues relevant to Kibana.
 * The 0.3.1 release of Kibi requires Elasticsearch 2.2.0.
 * Siren join plugin version upgraded to https://github.com/sirensolutions/siren-join/tree/2.2.0[2.2.0].
 
-Below are the issues relevant to Kibana.
-
+==== Kibana Changes
 
 * Bump node.js to 0.12.10 from 0.12.9
 * {k4issue}6185[Issue 6185]:  Fixes a bug where the active HTTP spinner in the chrome bar is gone
@@ -123,9 +157,11 @@ Below are the issues relevant to Kibana.
 
 Using event times to create index names is no longer supported as of this release. Current versions of Elasticsearch include sophisticated date parsing APIs that Kibana uses to determine date information, removing the need to specify dates in the index pattern name.
 
-Below are the issues relevant to Kibana.
+==== Kibana Changes
 
-Enhancements
+[float]
+[[enhancements]]
+===== Enhancements
 
 * {k4issue}1362[Issue 1362]: Color palette selector added.
 * {k4issue}1553[Issue 1553]: Kibana can shorten URLs for shared or embedded items.
@@ -135,37 +171,3 @@ Enhancements
 * {k4issue}3625[Issue 3625]: Downloaded visualizations now use the visualization name as the filename.
 * {k4issue}5279[Issue 5279]: Large strings are truncated with an ellipsis (...).
 * {k4issue}5241[Issue 5241]: Truncated visualization names are displayed in full as tooltips.
-
-Bug Fixes
-
-* {k4issue}5897[Issue 5897]: Embedding links no longer include navigation and search bars.
-* {k4issue}5896[Issue 5896]: Bookmarked URLs to saved filtered searches from a previous version of Kibana display correctly.
-* {k4issue}5744[Issue 5744]: Fixes bug that caused incorrect display of "No results found" in some cases.
-* {k4issue}5824[Issue 5824]: Corrects a fatal error when Kibana starts with node x86 on Windows x64 systems.
-
-Plugin System Changes
-
-* {k4issue}5226[Issue 5226]: Plugins are explicit when they start to route.
-* {k4pull}5725[Pull Request 5725]: Plugins can extend Chrome navigation.
-* {k4issue}4720[Issue 4720]: Adds support for zip compression.
-* {k4pull}5704[Pull Request 5704]: Removes Github shortcuts from the plugin installer.
-* {k4issue}5661[Issue 5661]: Fixes the plugin optimization path.
-* {k4pull}5538[Pull Request 5538]: Apps can use empty export types.
-
-* {k4issue}5896[Issue 5896]: Bookmarked URLs to saved filtered searches from a previous version of Kibana display
-correctly.
-* {k4issue}5191[Issue 5191]: Timepicker is now available for dashboards that contain a chart based on an index that is not
-time-based.
-* {k4issue}5744[Issue 5744]: Fixes bug that caused incorrect display of "No results found" in some cases.
-* {k4issue}5824[Issue 5284]: Corrects a fatal error when Kibana starts with node x86 on Windows x64 systems.
-
-[float]
-[[plugin-system]]
-== Plugin System Changes
-
-* {k4issue}5226[Issue 5226]: Plugins are explicit when they start to route.
-* {k4pull}5725[Pull Request 5725]: Plugins can extend Chrome navigation.
-* {k4issue}4720[Issue 4720]: Adds support for zip compression.
-* {k4pull}5704[Pull Request 5704]: Removes Github shortcuts from the plugin installer.
-* {k4issue}5661[Issue 5661]: Fixes the plugin optimization path.
-* {k4pull}5538[Pull Request 5538]: Apps can use empty export types.

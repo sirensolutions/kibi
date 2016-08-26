@@ -17,6 +17,7 @@ define(function (require) {
                                   globalState, elasticsearchPlugins, kibiEnterpriseEnabled, $location, config, Private, createNotifier) {
     const State = Private(require('ui/state_management/state'));
     const notify = createNotifier({ location: 'Kibi State'});
+    const urlHelper = Private(require('ui/kibi/helpers/url_helper'));
 
     _.class(KibiState).inherits(State);
     function KibiState(defaults) {
@@ -105,6 +106,7 @@ define(function (require) {
      * Shortcuts for properties in the kibistate
      */
     KibiState.prototype._properties = {
+      // dashboards properties
       filters: 'f',
       query: 'q',
       time: 't',
@@ -113,7 +115,63 @@ define(function (require) {
       enabled_relations: 'j',
       enabled_relational_panel: 'e',
       groups: 'g',
-      session_id: 's'
+      session_id: 's',
+      // selected entity properties
+      selected_entity_disabled: 'x',
+      selected_entity: 'u',
+      test_selected_entity: 'v'
+    };
+
+    KibiState.prototype.isEntitySelected = function (index, type, id, column) {
+      const entityURI = this.getEntityURI();
+      if (!entityURI || !index || !type || !id || !column) {
+        return false;
+      }
+      const parts = entityURI.split('/') || [];
+      return parts[0] === index && parts[1] === type && parts[2] === id && parts[3] === column;
+    };
+
+    KibiState.prototype.setEntityURI = function (entityURI) {
+      if (urlHelper.onDashboardTab()) {
+        if (!entityURI) {
+          delete this[this._properties.selected_entity];
+        } else {
+          this[this._properties.selected_entity] = entityURI;
+        }
+      } else if (urlHelper.onVisualizeTab() || urlHelper.onSettingsTab()) {
+        if (!entityURI) {
+          delete this[this._properties.test_selected_entity];
+        } else {
+          this[this._properties.test_selected_entity] = entityURI;
+        }
+      } else {
+        throw new Error('Cannot set entity URI because you are not in dashboard/visualize/settings');
+      }
+    };
+
+    KibiState.prototype.getEntityURI = function () {
+      if (urlHelper.onDashboardTab()) {
+        return this[this._properties.selected_entity];
+      } else if (urlHelper.onVisualizeTab() || urlHelper.onSettingsTab()) {
+        return this[this._properties.test_selected_entity];
+      }
+      throw new Error('Cannot get entity URI because you are not on dashboard/visualize/settings');
+    };
+
+    KibiState.prototype.isSelectedEntityDisabled = function () {
+      return Boolean(this[this._properties.selected_entity_disabled]);
+    };
+
+    KibiState.prototype.disableSelectedEntity = function (disable) {
+      if (disable) {
+        this[this._properties.selected_entity_disabled] = disable;
+      } else {
+        delete this[this._properties.selected_entity_disabled];
+      }
+    };
+
+    KibiState.prototype.removeTestEntityURI = function () {
+      delete this[this._properties.test_selected_entity];
     };
 
     KibiState.prototype.setSessionId = function (id) {

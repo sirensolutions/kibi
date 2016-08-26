@@ -1,28 +1,29 @@
 define(function (require) {
-  var _ = require('lodash');
-  var module = require('ui/modules').get('kibana');
-  var template = require('ui/filter_bar/filter_bar.html');
-  var moment = require('moment');
-  var angular = require('angular');
+  const _ = require('lodash');
+  const module = require('ui/modules').get('kibana');
+  const template = require('ui/filter_bar/filter_bar.html');
+  const moment = require('moment');
+  const angular = require('angular');
 
   require('ui/directives/json_input');
 
   require('ui/kibi/directives/kibi_entity_clipboard');
 
-  module.directive('filterBar', function (createNotifier, kibiState, $rootScope, Private, Promise, getAppState, globalState, config) {
-    var urlHelper = Private(require('ui/kibi/helpers/url_helper'));
-    var joinExplain = Private(require('ui/filter_bar/join_explanation'));
-    var mapAndFlattenFilters = Private(require('ui/filter_bar/lib/mapAndFlattenFilters'));
-    var mapFlattenAndWrapFilters = Private(require('ui/filter_bar/lib/mapFlattenAndWrapFilters'));
-    var extractTimeFilter = Private(require('ui/filter_bar/lib/extractTimeFilter'));
-    var filterOutTimeBasedFilter = Private(require('ui/filter_bar/lib/filterOutTimeBasedFilter'));
-    var filterAppliedAndUnwrap = require('ui/filter_bar/lib/filterAppliedAndUnwrap');
-    var changeTimeFilter = Private(require('ui/filter_bar/lib/changeTimeFilter'));
-    var queryFilter = Private(require('ui/filter_bar/query_filter'));
-    var privateFilterFieldRegex = /(^\$|meta)/;
-    var markFiltersBySelectedEntities = Private(require('ui/kibi/components/commons/_mark_filters_by_selected_entities'));
+  module.directive('filterBar', function (createNotifier, kibiState, $rootScope, Private, Promise, getAppState, config) {
+    const mapAndFlattenFilters = Private(require('ui/filter_bar/lib/mapAndFlattenFilters'));
+    const mapFlattenAndWrapFilters = Private(require('ui/filter_bar/lib/mapFlattenAndWrapFilters'));
+    const extractTimeFilter = Private(require('ui/filter_bar/lib/extractTimeFilter'));
+    const filterOutTimeBasedFilter = Private(require('ui/filter_bar/lib/filterOutTimeBasedFilter'));
+    const filterAppliedAndUnwrap = require('ui/filter_bar/lib/filterAppliedAndUnwrap');
+    const changeTimeFilter = Private(require('ui/filter_bar/lib/changeTimeFilter'));
+    const queryFilter = Private(require('ui/filter_bar/query_filter'));
+    const privateFilterFieldRegex = /(^\$|meta)/;
+    // kibi: added some helpers
+    const joinExplain = Private(require('ui/filter_bar/join_explanation'));
+    const markFiltersBySelectedEntities = Private(require('ui/kibi/components/commons/_mark_filters_by_selected_entities'));
+    const urlHelper = Private(require('ui/kibi/helpers/url_helper'));
 
-    var notify = createNotifier({
+    const notify = createNotifier({
       name: 'Kibi Navigation Bar'
     });
 
@@ -51,7 +52,7 @@ define(function (require) {
 
         $scope.aceLoaded = function (editor) {
           editor.$blockScrolling = Infinity;
-          var session = editor.getSession();
+          const session = editor.getSession();
           session.setTabSize(2);
           session.setUseSoftTabs(true);
         };
@@ -165,14 +166,14 @@ define(function (require) {
         }
 
         function updateFilters() {
-          var filters = queryFilter.getFilters();
+          const filters = queryFilter.getFilters();
 
-          var prevDependsOnSelectedEntitiesDisabled = Promise.resolve(
+          const prevDependsOnSelectedEntitiesDisabled = Promise.resolve(
             _.map(filters, (filter) => filter.meta.dependsOnSelectedEntitiesDisabled)
           );
-          var markFilters = prevDependsOnSelectedEntitiesDisabled.then(() => markFiltersBySelectedEntities(filters));
+          const markFilters = prevDependsOnSelectedEntitiesDisabled.then(() => markFiltersBySelectedEntities(filters));
 
-          mapAndFlattenFilters(filters).then(function (results) {
+          return mapAndFlattenFilters(filters).then(function (results) {
             // used to display the current filters in the state
             $scope.filters = _.sortBy(results, function (filter) {
               return !filter.meta.pinned;
@@ -205,16 +206,6 @@ define(function (require) {
 
         updateFilters();
 
-        //needed by kibi to show filterbar when kibiEntityClipboard contains an entity
-        var getShowKibiEntityClipboard = function () {
-          return globalState.se && globalState.se.length > 0 && urlHelper.onDashboardTab();
-        };
-        $scope.showKibiEntityClipboard = getShowKibiEntityClipboard();
-        var saveWithChangesHandler = function () {
-          $scope.showKibiEntityClipboard = getShowKibiEntityClipboard();
-        };
-        globalState.on('save_with_changes', saveWithChangesHandler);
-
         // kibi: needed to recreate filter label.
         // as we do not want to store the meta info in filter join definition
         // we have to recreate it.
@@ -233,7 +224,7 @@ define(function (require) {
         // kibi: Get the state for the dashboard ID and add the join_set filter to the appState if it exists
         const addJoinSetFilter = function (dashboardId) {
           $scope.state.filters = _.filter($scope.state.filters, (f) => !f.join_set);
-          kibiState.getState(dashboardId).then(({ filters }) => {
+          return kibiState.getState(dashboardId).then(({ filters }) => {
             _.each(filters, (filter) => {
               if (filter.join_set) {
                 queryFilter.addFilters(filter);
@@ -244,37 +235,44 @@ define(function (require) {
         };
 
         // kibi: add join_set on relationPanel event
-        var addJoinSetFilterOnRelationalPanel = function (panelEnabled) {
+        const addJoinSetFilterOnRelationalPanel = function (panelEnabled) {
           const currentDashboardId = kibiState._getCurrentDashboardId();
           if (currentDashboardId && panelEnabled) {
             addJoinSetFilter(currentDashboardId);
           }
         };
-        var relationalPanelListenerOff = $rootScope.$on('change:config.kibi:relationalPanel', function (event, panelEnabled) {
+        const relationalPanelListenerOff = $rootScope.$on('change:config.kibi:relationalPanel', function (event, panelEnabled) {
           addJoinSetFilterOnRelationalPanel(panelEnabled);
         });
         addJoinSetFilterOnRelationalPanel(config.get('kibi:relationalPanel'));
 
-        // kibi: add join_set on kibiState save event
-        const addJoinSetFilterOnSave = function (diff) {
-          const currentDashboardId = kibiState._getCurrentDashboardId();
-          if (diff.indexOf(kibiState._properties.enabled_relations) !== -1 && currentDashboardId) {
-            addJoinSetFilter(currentDashboardId);
-          }
-        };
-        kibiState.on('save_with_changes', addJoinSetFilterOnSave);
+        // kibi: needed to show filterbar when kibiEntityClipboard contains an entity
+        $scope.showKibiEntityClipboard = urlHelper.onDashboardTab() && Boolean(kibiState.getEntityURI());
 
-        var off1 = $rootScope.$on('kibi:entityURIEnabled', function (event, entityURIEnabled) {
-          updateFilters();
+        // kibi: listen to changes to the kibiState
+        $scope.$listen(kibiState, 'save_with_changes', (diff) => {
+          const currentDashboardId = kibiState._getCurrentDashboardId();
+
+          if (!currentDashboardId) {
+            $scope.showKibiEntityClipboard = false;
+            return;
+          }
+
+          let promise = Promise.resolve();
+
+          // add join_set on kibiState save event
+          if (diff.indexOf(kibiState._properties.enabled_relations) !== -1) {
+            promise = addJoinSetFilter(currentDashboardId);
+          }
+          // the selected entity changed
+          if (diff.indexOf(kibiState._properties.selected_entity) !== -1 ||
+              diff.indexOf(kibiState._properties.selected_entity_disabled) !== -1) {
+            $scope.showKibiEntityClipboard = Boolean(kibiState.getEntityURI());
+            promise.then(() => updateFilters.call(this)).catch(notify.error);
+          }
         });
-        var off2 = $rootScope.$on('kibi:selectedEntities:changed', function (event, se) {
-          updateFilters();
-        });
+
         $scope.$on('$destroy', function () {
-          off1();
-          off2();
-          globalState.off('save_with_changes', saveWithChangesHandler);
-          kibiState.off('save_with_changes', addJoinSetFilterOnSave);
           relationalPanelListenerOff();
         });
 

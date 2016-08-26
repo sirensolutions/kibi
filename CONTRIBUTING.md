@@ -10,7 +10,7 @@ Please make sure you have signed the [Contributor License Agreement](http://sire
 
 ### Development Environment Setup
 
-- Clone the kibi repo and move into it
+- Clone the Kibi repo and move into it
 
   ```sh
   git clone https://github.com/sirensolutions/kibi.git kibi
@@ -135,20 +135,6 @@ The standard `npm run test` task runs several sub tasks and can take several min
   </dd>
 </dl>
 
-#### OS packages
-
-Packages are built using fpm, pleaserun, dpkg, and rpm.  fpm and pleaserun can be installed using gem.  Package building has only been tested on Linux and is not supported on any other platform.
-```sh
-gem install pleaserun
-gem install fpm
-npm run build:ospackages
-```
-
-To specify a package to build you can add `rpm` or `deb` as an argument.
-```sh
-npm run build:ospackages -- --rpm
-```
-
 ### Functional UI Testing
 
 #### Handy references
@@ -158,15 +144,15 @@ npm run build:ospackages -- --rpm
 
 #### Running tests using npm task:
 
-*The Selenium server that is started currently only runs the tests in Firefox*
+*The ChromeDriver that is started currently only runs the tests in Chrome browser*
 
-To runt the functional UI tests, execute the following command:
+To run the functional UI tests, execute the following command:
 
 `npm run test:ui`
 
 The task above takes a little time to start the servers.  You can also start the servers and leave them running, and then run the tests separately:
 
-`npm run test:ui:server` will start the server required to run the selenium tests, leave this open
+`npm run test:ui:server` will start the server required to run the UI tests, leave this open
 
 `npm run test:ui:runner` will run the frontend tests and close when complete
 
@@ -184,6 +170,25 @@ Once you've got the services running, execute the following:
 - At least the initial tests for the Settings, Discover, and Visualize tabs all depend on a very specific set of logstash-type data (generated with makelogs).  Since that is a static set of data, all the Discover and Visualize tests use a specific Absolute time range.  This guarantees the same results each run.
 - These tests have been developed and tested with Chrome and Firefox browser.  In theory, they should work on all browsers (that's the benefit of Intern using Leadfoot).
 - These tests should also work with an external testing service like https://saucelabs.com/ or https://www.browserstack.com/ but that has not been tested.
+- https://theintern.github.io/
+- https://theintern.github.io/leadfoot/module-leadfoot_Element.html
+
+#### Building OS packages
+
+Packages are built using fpm, pleaserun, dpkg, and rpm.  fpm and pleaserun can be installed using gem.  Package building has only been tested on Linux and is not supported on any other platform.
+```sh
+apt-get install ruby-dev rpm
+gem install fpm -v 1.5.0 # required by pleaserun 0.0.16
+gem install pleaserun -v 0.0.16 # higher versions fail at the moment
+npm run build:ospackages
+```
+
+To specify a package to build you can add `rpm` or `deb` as an argument.
+```sh
+npm run build:ospackages -- --rpm
+```
+
+Distributable packages can be found in `target/` after the build completes.
 
 ### Submit a pull request
 

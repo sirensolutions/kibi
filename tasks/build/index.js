@@ -15,6 +15,7 @@ module.exports = function (grunt) {
       'kibi_public_plugins', // kibi: task to fetch and unzip plugins to installedPlugins
       '_build:packageJson',
       '_build:readme',
+      '_build:babelCache',
       '_build:installNpmDeps',
       '_build:removePkgJsonDeps',
       'clean:testsFromModules',

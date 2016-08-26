@@ -7,7 +7,11 @@ var indexPattern;
 var expected;
 describe('Filter Manager', function () {
   describe('Range filter builder', function () {
-    beforeEach(ngMock.module('kibana'));
+    beforeEach(ngMock.module('kibana', function ($provide) {
+      $provide.constant('kbnDefaultAppId', '');
+      $provide.constant('kibiDefaultDashboardId', '');
+      $provide.constant('elasticsearchPlugins', ['siren-join']);
+    }));
     beforeEach(ngMock.inject(function (Private, _$rootScope_, Promise) {
       indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
       expected = _.cloneDeep(require('fixtures/filter_skeleton'));

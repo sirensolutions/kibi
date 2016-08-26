@@ -31,7 +31,12 @@ describe('Vislib Line Chart', function () {
       var vis;
       var persistedState;
 
-      beforeEach(ngMock.module('kibana'));
+      beforeEach(ngMock.module('kibana', function ($provide) {
+        // kibi: for running kibi tests
+        $provide.constant('kbnDefaultAppId', '');
+        $provide.constant('kibiDefaultDashboardId', '');
+        $provide.constant('elasticsearchPlugins', ['siren-join']);
+      }));
       beforeEach(ngMock.inject(function (Private) {
         var visLibParams = {
           type: 'line',

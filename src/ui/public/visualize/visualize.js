@@ -1,6 +1,8 @@
 define(function (require) {
+  require('angular-sanitize');
+
   require('ui/modules')
-  .get('kibana/directive')
+  .get('kibana/directive', ['ngSanitize'])
   .directive('visualize', function (kibiState, savedDashboards, savedSearches, Private, config, $timeout, createNotifier) {
 
     require('ui/visualize/spy');
@@ -75,8 +77,6 @@ define(function (require) {
           }
           // kibi: end
 
-          // Basically a magic number, chart must be at least this big or only the spy will show
-          var visTooSmall = 100;
           $timeout(function () {
             if (shouldHaveFullSpy()) {
               $visEl.addClass('spy-only');

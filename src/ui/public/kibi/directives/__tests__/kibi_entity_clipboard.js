@@ -15,7 +15,7 @@ describe('Kibi Components', function () {
     var MockState = require('fixtures/mock_state');
     var _ = require('lodash');
 
-    function init(entityDisabled, selectedEntities, currentDashboardId) {
+    function init(entityDisabled, selectedEntity, currentDashboardId) {
       ngMock.module(
         'kibana',
         'kibana/courier',
@@ -35,18 +35,20 @@ describe('Kibi Components', function () {
             return function () { return appState; };
           });
 
-          globalState = new MockState({
-            se: selectedEntities,
-            entityDisabled: entityDisabled,
-          });
+          globalState = new MockState();
           $provide.service('globalState', function () {
             return globalState;
           });
         }
         );
 
-      ngMock.inject(function (_kibiState_, _$rootScope_, $compile, $injector) {
+      ngMock.inject(function (Private, _kibiState_, _$rootScope_, $compile, $injector) {
+        var urlHelper = Private(require('ui/kibi/helpers/url_helper'));
+        sinon.stub(urlHelper, 'onDashboardTab').returns(true);
+
         kibiState = _kibiState_;
+        kibiState.setEntityURI(selectedEntity);
+
         $rootScope = _$rootScope_;
         $httpBackend = $injector.get('$httpBackend');
         $compile('<kibi-entity-clipboard></kibi-entity-clipboard>')($rootScope);
@@ -55,20 +57,19 @@ describe('Kibi Components', function () {
     }
 
     it('selected document', function () {
-      init(false, ['index/type/id/column']);
+      init(false, 'index/type/id/column');
       $httpBackend.whenGET('/elasticsearch/index/type/id').respond(200, {
         _source: {
           column: 'label'
         }
       });
-      $rootScope.$emit('kibi:selectedEntities:changed', null);
       $httpBackend.flush();
       expect($rootScope.disabled).to.be(false);
       expect($rootScope.entityURI).to.be('index/type/id/column');
     });
 
     it('selected document with "nested" column', function (done) {
-      init(false, ['index/type/id/a.b.c with spaces']);
+      init(false, 'index/type/id/a.b.c with spaces');
 
       $httpBackend.whenGET('/elasticsearch/index/type/id').respond(200, {
         _source: {
@@ -87,7 +88,6 @@ describe('Kibi Components', function () {
         }
       });
 
-      $rootScope.$emit('kibi:selectedEntities:changed', null);
       $httpBackend.flush();
       expect($rootScope.disabled).to.be(false);
       expect($rootScope.entityURI).to.be('index/type/id/a.b.c with spaces');
@@ -95,7 +95,7 @@ describe('Kibi Components', function () {
     });
 
     it('should truncate long document label', function (done) {
-      init(false, ['index/type/id/a.b.c with spaces']);
+      init(false, 'index/type/id/a.b.c with spaces');
 
       $httpBackend.whenGET('/elasticsearch/index/type/id').respond(200, {
         _source: {
@@ -114,13 +114,12 @@ describe('Kibi Components', function () {
         }
       });
 
-      $rootScope.$emit('kibi:selectedEntities:changed', null);
       $httpBackend.flush();
       $rootScope.$apply();
     });
 
     it('selected document with label from meta field column', function (done) {
-      init(false, ['index/type/id/_type']);
+      init(false, 'index/type/id/_type');
 
       $httpBackend.whenGET('/elasticsearch/index/type/id').respond(200, {
         _type: 'TYPE'
@@ -133,7 +132,6 @@ describe('Kibi Components', function () {
         }
       });
 
-      $rootScope.$emit('kibi:selectedEntities:changed', null);
       $httpBackend.flush();
       expect($rootScope.disabled).to.be(false);
       expect($rootScope.entityURI).to.be('index/type/id/_type');
@@ -141,7 +139,7 @@ describe('Kibi Components', function () {
     });
 
     it('selected document with "nested" column with an array', function (done) {
-      init(false, ['index/type/id/a.b.c with spaces']);
+      init(false, 'index/type/id/a.b.c with spaces');
 
       $httpBackend.whenGET('/elasticsearch/index/type/id').respond(200, {
         _source: {
@@ -160,7 +158,6 @@ describe('Kibi Components', function () {
         }
       });
 
-      $rootScope.$emit('kibi:selectedEntities:changed', null);
       $httpBackend.flush();
       expect($rootScope.disabled).to.be(false);
       expect($rootScope.entityURI).to.be('index/type/id/a.b.c with spaces');
@@ -168,7 +165,7 @@ describe('Kibi Components', function () {
     });
 
     it('selected document with "nested" column with an object', function (done) {
-      init(false, ['index/type/id/a.b.c with spaces']);
+      init(false, 'index/type/id/a.b.c with spaces');
 
       $httpBackend.whenGET('/elasticsearch/index/type/id').respond(200, {
         _source: {
@@ -187,7 +184,6 @@ describe('Kibi Components', function () {
         }
       });
 
-      $rootScope.$emit('kibi:selectedEntities:changed', null);
       $httpBackend.flush();
       expect($rootScope.disabled).to.be(false);
       expect($rootScope.entityURI).to.be('index/type/id/a.b.c with spaces');
@@ -196,7 +192,7 @@ describe('Kibi Components', function () {
 
 
     it('selected document but disabled', function (done) {
-      init(true, ['index/type/id/column']);
+      init(true, 'index/type/id/column');
       $httpBackend.whenGET('/elasticsearch/index/type/id').respond(200, {
         _source: {
           column: 'correct label'
@@ -210,41 +206,38 @@ describe('Kibi Components', function () {
         }
       });
 
-      $rootScope.$emit('kibi:selectedEntities:changed', null);
       $httpBackend.flush();
       expect($rootScope.disabled).to.be(true);
       expect($rootScope.entityURI).to.be('index/type/id/column');
       $rootScope.$apply();
     });
 
-    it('an entity missing column takes the URI as label', function () {
-      init(false, ['index/type/id']);
-      $rootScope.$emit('kibi:selectedEntities:changed', null);
+    it('an entity missing column does not set the label', function () {
+      init(false, 'index/type/id/');
       expect($rootScope.disabled).to.be(false);
-      expect($rootScope.entityURI).to.be('index/type/id');
-      expect($rootScope.label).to.be('index/type/id');
+      expect($rootScope.entityURI).to.be('index/type/id/');
+      expect($rootScope.label).to.not.be.ok();
     });
 
     it('an document missing the URI', function () {
-      init(false, []);
-      $rootScope.$emit('kibi:selectedEntities:changed', null);
+      init(false);
       expect($rootScope.disabled).to.be(false);
       expect($rootScope.entityURI).to.be(undefined);
       expect($rootScope.label).to.be(undefined);
     });
 
     it('should remove the document', function () {
-      init(false, ['index/type/id/column/label']);
+      init(false, 'index/type/id/column/label');
       $rootScope.removeAllEntities();
       expect($rootScope.disabled).to.be(undefined);
       expect($rootScope.entityURI).to.be(undefined);
       expect($rootScope.label).to.be(undefined);
-      expect(globalState.entityDisabled).to.be(undefined);
-      expect(globalState.se).to.be(undefined);
+      expect(kibiState.isSelectedEntityDisabled()).to.be(false);
+      expect(kibiState.getEntityURI()).to.not.be.ok();
     });
 
     it('should remove the document and associated filters', function () {
-      init(false, ['index/type/id/column/label'], 'dashboard2');
+      init(false, 'index/type/id/column/label', 'dashboard2');
 
       globalState.filters = [
         {
@@ -300,15 +293,14 @@ describe('Kibi Components', function () {
 
     it('should toggle the selected document', function () {
       init(false);
-      $rootScope.$emit('kibi:selectedEntities:changed', null);
       expect($rootScope.disabled).to.be(false);
-      expect(globalState.entityDisabled).to.be(false);
+      expect(kibiState.isSelectedEntityDisabled()).to.be(false);
       $rootScope.toggleClipboard();
       expect($rootScope.disabled).to.be(true);
-      expect(globalState.entityDisabled).to.be(true);
+      expect(kibiState.isSelectedEntityDisabled()).to.be(true);
       $rootScope.toggleClipboard();
       expect($rootScope.disabled).to.be(false);
-      expect(globalState.entityDisabled).to.be(false);
+      expect(kibiState.isSelectedEntityDisabled()).to.be(false);
     });
 
   });

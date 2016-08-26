@@ -84,7 +84,7 @@ stored in the `.kibi` index.
 Before creating datasources containing sensitive parameters, make sure to set
 a custom encryption key by running the `replace_encryption_key` command:
 
-[source,sql]
+[source,bash]
 ----
 bin/kibi replace_encryption_key [options] <current_key> <new_key> <new_cipher>
 ----
@@ -99,7 +99,7 @@ The current encryption key can be read from the `kibi.yml` file in the
 Keys can have a length of 16, 24 or 32 bytes; a quick way to encode a plaintext
 string to base64 is to use the `base64` utility from the coreutils package:
 
-[source,sql]
+[source,bash]
 ----
 $ echo -n changemechangemechangemechangeme | base64
 Y2hhbmdlbWVjaGFuZ2VtZWNoYW5nZW1lY2hhbmdlbWU=

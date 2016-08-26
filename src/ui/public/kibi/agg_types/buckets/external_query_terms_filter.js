@@ -1,5 +1,5 @@
 define(function (require) {
-  return function RelatedEntitiesAggDefinition(Private, createNotifier, globalState, $rootScope, $timeout) {
+  return function RelatedEntitiesAggDefinition(Private, createNotifier, kibiState, $rootScope, $timeout) {
 
     // a bit of css
     require('ui/kibi/styles/external_query_terms_filter.less');
@@ -31,14 +31,6 @@ define(function (require) {
             }
 
             const configurationMode = urlHelper.onVisualizeTab();
-            let entityURI;
-            // here depends that we are in configuration mode or not
-            // pick selected entityURI from different places
-            if (configurationMode && globalState.se_temp && globalState.se_temp.length > 0 && !globalState.entityDisabled) {
-              entityURI = globalState.se_temp[0];
-            } else if (!configurationMode && globalState.se && globalState.se.length > 0 && !globalState.entityDisabled) {
-              entityURI = globalState.se[0];
-            }
 
             if (!_(queryDefinitions).pluck('queryId').compact().size()) {
               return;
@@ -54,7 +46,7 @@ define(function (require) {
 
                 json[label] = {
                   dbfilter: {
-                    entity: entityURI,
+                    entity: kibiState.isSelectedEntityDisabled() ? '' : kibiState.getEntityURI(),
                     queryid: id,
                     negate: queryDef.negate ? true : false,
                     queryVariableName: queryDef.queryVariableName,

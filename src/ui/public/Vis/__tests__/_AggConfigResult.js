@@ -11,6 +11,7 @@ describe('AggConfigResult', function () {
   beforeEach(ngMock.module('kibana', function ($provide) {
     $provide.constant('kbnDefaultAppId', '');
     $provide.constant('kibiDefaultDashboardId', '');
+    $provide.constant('elasticsearchPlugins', ['siren-join']);
   }));
   beforeEach(ngMock.inject(function (Private) {
     Vis = Private(require('ui/Vis'));

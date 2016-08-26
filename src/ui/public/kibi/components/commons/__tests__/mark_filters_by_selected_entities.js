@@ -1,8 +1,8 @@
+var sinon = require('auto-release-sinon');
 var ngMock = require('ngMock');
 var expect = require('expect.js');
 var markFiltersBySelectedEntities;
-var globalState;
-var $rootScope;
+var kibiState;
 
 var mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
 var fakeSavedQueries = [
@@ -22,16 +22,25 @@ describe('Kibi Components', function () {
   describe('Commons', function () {
     describe('_mark_filters_by_selected_entities', function () {
 
+      require('testUtils/noDigestPromises').activateForSuite();
+
       beforeEach(function () {
-        ngMock.module('kibana');
+        ngMock.module('kibana', function ($provide) {
+          $provide.constant('kbnDefaultAppId', '');
+          $provide.constant('kibiDefaultDashboardId', '');
+          $provide.constant('elasticsearchPlugins', ['siren-join']);
+        });
 
         ngMock.module('queries_editor/services/saved_queries', function ($provide) {
           $provide.service('savedQueries', (Promise) => mockSavedObjects(Promise)('savedQueries', fakeSavedQueries));
         });
 
-        ngMock.inject(function ($injector, Private, _globalState_, _$rootScope_) {
-          $rootScope = _$rootScope_;
-          globalState = _globalState_;
+        ngMock.inject(function (Private, _kibiState_) {
+          kibiState = _kibiState_;
+
+          var urlHelper = Private(require('ui/kibi/helpers/url_helper'));
+          sinon.stub(urlHelper, 'onDashboardTab').returns(true);
+
           markFiltersBySelectedEntities = Private(require('ui/kibi/components/commons/_mark_filters_by_selected_entities'));
         });
       });
@@ -46,8 +55,8 @@ describe('Kibi Components', function () {
           }
         ];
 
-        globalState.se = ['uri1'];
-        globalState.entityDisabled = false;
+        kibiState.setEntityURI('uri1');
+        kibiState.disableSelectedEntity(false);
 
         markFiltersBySelectedEntities(filters).then(function (filters) {
           expect(filters[0].meta.dependsOnSelectedEntities).to.equal(true);
@@ -55,8 +64,6 @@ describe('Kibi Components', function () {
           expect(filters[0].meta.markDependOnSelectedEntities).to.equal(true);
           done();
         });
-
-        $rootScope.$apply();
       });
 
       it('should mark disabled dbfilter with query which depends on selected document and selected document is disabled', function (done) {
@@ -69,8 +76,8 @@ describe('Kibi Components', function () {
           }
         ];
 
-        globalState.se = ['uri1'];
-        globalState.entityDisabled = true;
+        kibiState.setEntityURI('uri1');
+        kibiState.disableSelectedEntity(true);
 
         markFiltersBySelectedEntities(filters).then(function (filters) {
           expect(filters[0].meta.dependsOnSelectedEntities).to.equal(true);
@@ -78,8 +85,6 @@ describe('Kibi Components', function () {
           expect(filters[0].meta.markDependOnSelectedEntities).to.equal(true);
           done();
         });
-
-        $rootScope.$apply();
       });
 
       it('should not set dependsOnSelectedEntitiesDisabled to true if filter does not depend on entities', function (done) {
@@ -96,8 +101,8 @@ describe('Kibi Components', function () {
           }
         ];
 
-        globalState.se = ['uri1'];
-        globalState.entityDisabled = true;
+        kibiState.setEntityURI('uri1');
+        kibiState.disableSelectedEntity(true);
 
         markFiltersBySelectedEntities(filters).then(function (filters) {
           expect(filters[0].meta.dependsOnSelectedEntities).to.equal(true);
@@ -108,8 +113,6 @@ describe('Kibi Components', function () {
           expect(filters[1].meta.markDependOnSelectedEntities).to.equal(true);
           done();
         });
-
-        $rootScope.$apply();
       });
 
       it('should NOT mark dbfilter with query which does NOT depends on selected document', function (done) {
@@ -122,8 +125,8 @@ describe('Kibi Components', function () {
           }
         ];
 
-        globalState.se = ['uri1'];
-        globalState.entityDisabled = false;
+        kibiState.setEntityURI('uri1');
+        kibiState.disableSelectedEntity(false);
 
         markFiltersBySelectedEntities(filters).then(function (filters) {
           expect(filters[0].meta.dependsOnSelectedEntities).to.equal(false);
@@ -131,8 +134,6 @@ describe('Kibi Components', function () {
           expect(filters[0].meta.markDependOnSelectedEntities).to.equal(true);
           done();
         });
-
-        $rootScope.$apply();
       });
 
       it('query does not exists', function (done) {
@@ -145,15 +146,13 @@ describe('Kibi Components', function () {
           }
         ];
 
-        globalState.se = ['uri1'];
-        globalState.entityDisabled = false;
+        kibiState.setEntityURI('uri1');
+        kibiState.disableSelectedEntity(false);
 
         markFiltersBySelectedEntities(filters).catch(function (err) {
           expect(err.message).to.equal('Unable to find queries: ["does-not-exists"]');
           done();
         });
-
-        $rootScope.$apply();
       });
 
     });

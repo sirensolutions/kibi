@@ -3,7 +3,7 @@ define(function (require) {
   const $ = require('jquery');
   require('ui/modules')
   .get('app/dashboard')
-  .directive('dashboardPanel', function ($rootScope, globalState, savedVisualizations, savedSearches, Private, $injector, createNotifier) {
+  .directive('dashboardPanel', function (kibiState, savedVisualizations, savedSearches, Private, $injector, createNotifier) {
     const _ = require('lodash');
     const loadPanel = Private(require('plugins/kibana/dashboard/components/panel/lib/load_panel'));
     const filterManager = Private(require('ui/filter_manager'));
@@ -53,15 +53,17 @@ define(function (require) {
                 $scope.dependsOnSelectedEntities = does;
               });
             }
-            $scope.markDependOnSelectedEntities = globalState.se && globalState.se.length > 0;
-            $scope.selectedEntitiesDisabled = globalState.entityDisabled;
-            var off1 = $rootScope.$on('kibi:entityURIEnabled', function (event, entityURIEnabled) {
-              $scope.markDependOnSelectedEntities = globalState.se && globalState.se.length > 0;
-              $scope.selectedEntitiesDisabled = globalState.entityDisabled;
-            });
-            var off2 = $rootScope.$on('kibi:selectedEntities:changed', function (event, se) {
-              $scope.markDependOnSelectedEntities = globalState.se && globalState.se.length > 0;
-              $scope.selectedEntitiesDisabled = globalState.entityDisabled;
+
+            $scope.markDependOnSelectedEntities = Boolean(kibiState.getEntityURI());
+            $scope.selectedEntitiesDisabled = kibiState.isSelectedEntityDisabled();
+
+            // react to changes about the selected entity
+            $scope.$listen(kibiState, 'save_with_changes', (diff) => {
+              if (diff.indexOf(kibiState._properties.selected_entity) !== -1 ||
+                  diff.indexOf(kibiState._properties.selected_entity_disabled) !== -1) {
+                $scope.markDependOnSelectedEntities = Boolean(kibiState.getEntityURI());
+                $scope.selectedEntitiesDisabled = kibiState.isSelectedEntityDisabled();
+              }
             });
             // kibi: end
 
@@ -69,8 +71,6 @@ define(function (require) {
             $scope.$on('$destroy', function () {
               panelConfig.savedObj.destroy();
               $scope.parentUiState.removeChild(getPanelId(panelConfig.panel));
-              off1();
-              off2();
             });
 
             // create child ui state from the savedObj

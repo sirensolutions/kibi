@@ -9,6 +9,7 @@ describe('Histogram Agg', function () {
     beforeEach(ngMock.module('kibana', function ($provide) {
       $provide.constant('kbnDefaultAppId', '');
       $provide.constant('kibiDefaultDashboardId', '');
+      $provide.constant('elasticsearchPlugins', ['siren-join']);
     }));
     beforeEach(ngMock.inject(function (Private) {
       histogram = Private(require('ui/agg_types/index')).byName.histogram;
@@ -30,6 +31,7 @@ describe('Histogram Agg', function () {
     beforeEach(ngMock.module('kibana', function ($provide) {
       $provide.constant('kbnDefaultAppId', '');
       $provide.constant('kibiDefaultDashboardId', '');
+      $provide.constant('elasticsearchPlugins', ['siren-join']);
     }));
     beforeEach(ngMock.inject(function (Private) {
       var AggParamWriter = Private(require('../AggParamWriter'));

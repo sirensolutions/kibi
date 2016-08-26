@@ -11,7 +11,7 @@ the command should display the version of Java installed on your system.
 You can set up Kibi and start exploring your Elasticsearch indices in minutes.
 All you need is:
 
-* Elasticsearch 2.3 or later
+* Elasticsearch {esversion} or later
 * A modern web browser - http://www.elastic.co/subscriptions/matrix#matrix_browsers[Supported Browsers].
 * Information about your Elasticsearch installation:
 ** URL of the Elasticsearch instance you want to connect to.

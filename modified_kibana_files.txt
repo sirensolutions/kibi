@@ -69,6 +69,8 @@ src/plugins/kibana/public/visualize/editor/sidebar.js
 src/plugins/kibana/public/visualize/saved_visualizations/_saved_vis.js
 src/plugins/kibana/public/visualize/styles/main.less
 
+src/plugins/spyModes/public/tableSpyMode.js
+
 src/plugins/table_vis/public/table_vis.html
 src/plugins/table_vis/public/table_vis_controller.js
 
@@ -163,6 +165,8 @@ src/ui/public/utils/dateMath.js
 
 src/ui/public/vislib/visualizations/time_marker.js
 
+src/ui/public/visualize/spy.html
+src/ui/public/visualize/spy.js
 src/ui/public/visualize/visualize.js
 src/ui/public/visualize/visualize_legend.html
 

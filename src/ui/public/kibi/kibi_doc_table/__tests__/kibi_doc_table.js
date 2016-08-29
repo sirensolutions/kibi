@@ -1,54 +1,55 @@
-var angular = require('angular');
-var expect = require('expect.js');
-var $ = require('jquery');
-var _ = require('lodash');
-var sinon = require('auto-release-sinon');
-var searchResponse = require('fixtures/search_response');
-var ngMock = require('ngMock');
+const angular = require('angular');
+const expect = require('expect.js');
+const $ = require('jquery');
+const _ = require('lodash');
+const sinon = require('auto-release-sinon');
+const searchResponse = require('fixtures/search_response');
+const ngMock = require('ngMock');
 
-// Load the kibana app dependencies.
-require('ui/private');
 require('ui/kibi/kibi_doc_table');
 
-var $parentScope;
-var $scope;
-var $timeout;
-var searchSource;
-
-var init = function ($elem, props) {
-  ngMock.inject(function ($rootScope, $compile, _$timeout_) {
-    $timeout = _$timeout_;
-    $parentScope = $rootScope;
-    _.assign($parentScope, props);
-
-    $compile($elem)($parentScope);
-
-    // I think the prereq requires this?
-    $timeout(function () {
-      $elem.scope().$digest();
-    }, 0);
-
-    $scope = $elem.isolateScope();
-
-  });
-};
-
-var destroy = function () {
-  $scope.$destroy();
-  $parentScope.$destroy();
-};
-
 describe('Kibi doc table', function () {
-  var $elem;
+  let $elem;
+  let $parentScope;
+  let $scope;
+  let $timeout;
+  let searchSource;
+
+  const init = function ($elem, props) {
+    ngMock.inject(function ($rootScope, $compile, _$timeout_) {
+      $timeout = _$timeout_;
+      $parentScope = $rootScope;
+      $rootScope.savedVis = props.savedVis;
+      const childScope = $parentScope.$new();
+      _.assign($parentScope, props);
+
+      $compile($elem)($parentScope);
+
+      // I think the prereq requires this?
+      $timeout(function () {
+        $elem.scope().$digest();
+      }, 0);
+
+      $scope = $elem.isolateScope();
+
+      $scope.$digest();
+    });
+  };
+
+  const destroy = function () {
+    $scope.$destroy();
+    $parentScope.$destroy();
+  };
 
   beforeEach(ngMock.module('kibana', function ($provide) {
     $provide.constant('kbnDefaultAppId', '');
     $provide.constant('kibiDefaultDashboardId', '');
     $provide.constant('elasticsearchPlugins', ['siren-join']);
   }));
+
   beforeEach(function () {
     $elem = angular.element(`<kibi-doc-table query-column="queryColumn" search-source="searchSource" columns="columns"
-                                             sorting="sorting"></kibi-doc-table>`);
+                            sorting="sorting"></kibi-doc-table>`);
     ngMock.inject(function (Private) {
       searchSource = Private(require('fixtures/stubbed_search_source'));
     });
@@ -58,8 +59,6 @@ describe('Kibi doc table', function () {
       sorting: ['@timestamp', 'desc'],
       queryColumn: {}
     });
-    $scope.$digest();
-
   });
 
   afterEach(function () {
@@ -121,68 +120,163 @@ describe('Kibi doc table', function () {
     expect($elem.find('table').length).to.be(1);
   });
 
-  describe('Kibi doc table tests', function () {
-    beforeEach(function () {
-      init($elem, {
-        searchSource: searchSource,
-        columns: [],
-        queryColumn: { name: 'cthulhu' }
+  describe('Kibi tests', function () {
+    describe('inject sql query column', function () {
+      beforeEach(function () {
+        init($elem, {
+          searchSource: searchSource,
+          columns: [],
+          queryColumn: { name: 'cthulhu' }
+        });
       });
-      $scope.$digest();
+
+      it('should have a query column match', function () {
+        searchSource.crankResults({
+          took: 73,
+          timed_out: false,
+          _shards: {
+            total: 144,
+            successful: 144,
+            failed: 0
+          },
+          hits: {
+            total : 49487,
+            max_score : 1.0,
+            hits: [
+              {
+                _index: 'aaa',
+                _type: 'AAA',
+                _id: '42',
+                _score: 1,
+                _source: {},
+                fields: {
+                  cthulhu: [ 'high priest', 'low priest' ]
+                }
+              },
+              {
+                _index: 'aaa',
+                _type: 'AAA',
+                _id: '43',
+                _score: 1,
+                _source: {},
+                fields: {
+                  cthulhu: []
+                }
+              }
+            ]
+          }
+        });
+        $scope.$digest();
+
+        expect($scope.hits).to.have.length(2);
+
+        let hit = _.find($scope.hits, function (hit) {
+          return hit._id === '42';
+        });
+        expect(hit._source.cthulhu).to.be('high priest, low priest');
+        expect(hit.fields.cthulhu).to.be(undefined);
+
+        hit = _.find($scope.hits, function (hit) {
+          return hit._id === '43';
+        });
+        expect(hit._source.cthulhu).to.be('-');
+        expect(hit.fields.cthulhu).to.be(undefined);
+      });
     });
 
-    it('should have a query column match', function () {
-      searchSource.crankResults({
-        took: 73,
-        timed_out: false,
-        _shards: {
-          total: 144,
-          successful: 144,
-          failed: 0
-        },
-        hits: {
-          total : 49487,
-          max_score : 1.0,
-          hits: [
-            {
-              _index: 'aaa',
-              _type: 'AAA',
-              _id: '42',
-              _score: 1,
-              _source: {},
-              fields: {
-                // 0/1 flag for entity dependent entity
-                cthulhu: [ 'high priest', 'low priest' ]
-              }
-            },
-            {
-              _index: 'aaa',
-              _type: 'AAA',
-              _id: '43',
-              _score: 1,
-              _source: {},
-              fields: {
-                cthulhu: []
-              }
+    describe('exportAsCsv', function () {
+      let origBlob;
+      function FakeBlob(slices, opts) {
+        this.slices = slices;
+        this.opts = opts;
+      }
+
+      beforeEach(function () {
+        origBlob = window.Blob;
+        window.Blob = FakeBlob;
+      });
+
+      afterEach(function () {
+        window.Blob = origBlob;
+      });
+
+      it('calls _saveAs properly', function () {
+        init($elem, {
+          searchSource: searchSource,
+          columns: [],
+          queryColumn: { name: 'cthulhu' }
+        });
+
+        const saveAs = sinon.stub($scope, '_saveAs');
+        $scope.columns = [
+          'one',
+          'two',
+          'with double-quotes(")'
+        ];
+        $scope.hits = [
+          {
+            _source: {
+              one: 1,
+              two: 2,
+              'with double-quotes(")': '"foobar"'
             }
-          ]
-        }
-      });
-      $scope.$digest();
+          }
+        ];
 
-      expect($scope.hits).to.have.length(2);
+        $scope.exportAsCsv();
 
-      var hit = _.find($scope.hits, function (hit) {
-        return hit._id === '42';
+        expect(saveAs.callCount).to.be(1);
+        const call = saveAs.getCall(0);
+        expect(call.args[0]).to.be.a(FakeBlob);
+        expect(call.args[0].slices).to.eql([
+          'time,one,two,"with double-quotes("")"' + '\r\n' +
+            // "-" this is the time column since the index pattern has a time field.
+            '"-",1,2,"""foobar"""' + '\r\n'
+        ]);
+        expect(call.args[0].opts).to.eql({
+          type: 'text/plain'
+        });
+        expect(call.args[1]).to.be('kibi-table.csv');
       });
-      expect(hit._source.cthulhu).to.be('high priest, low priest');
-      expect(hit.fields.cthulhu).to.be(undefined);
 
-      hit = _.find($scope.hits, function (hit) {
-        return hit._id === '43';
+      it('should use the vis ID as the filename', function () {
+        init($elem, {
+          savedVis: {
+            id: 'my-table'
+          },
+          searchSource: searchSource,
+          columns: [],
+          queryColumn: { name: 'cthulhu' }
+        });
+
+        const saveAs = sinon.stub($scope, '_saveAs');
+        $scope.columns = [
+          'one',
+          'two'
+        ];
+        $scope.hits = [
+          {
+            _source: {
+              one: 1,
+              two: 2,
+              time: '08/29/2016'
+            }
+          }
+        ];
+
+        $scope.exportAsCsv();
+
+        expect(saveAs.callCount).to.be(1);
+        const call = saveAs.getCall(0);
+        expect(call.args[0]).to.be.a(FakeBlob);
+        expect(call.args[0].slices).to.eql([
+          'time,one,two\r\n"August 29th 2016, 00:00:00.000",1,2\r\n'
+        ]);
+        expect(call.args[0].opts).to.eql({
+          type: 'text/plain'
+        });
+        expect(call.args[1]).to.be('my-table.csv');
       });
-      expect(hit._source.cthulhu).to.be('-');
-      expect(hit.fields.cthulhu).to.be(undefined);
     });
 
     it('should set the source filtering definition', function () {

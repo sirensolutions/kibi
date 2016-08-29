@@ -25,7 +25,7 @@ uiModules.get('apps/settings')
     transclude: true,
     template: indexTemplate,
     link: function ($scope) {
-      $scope.edittingId = $route.current.params.indexPatternId;
+      $scope.editingId = $route.current.params.indexPatternId;
       config.$bind($scope, 'defaultIndex');
 
       $scope.$watch('defaultIndex', function () {
@@ -34,7 +34,7 @@ uiModules.get('apps/settings')
           return {
             id: id,
             url: kbnUrl.eval('#/settings/indices/{{id}}', {id: id}),
-            class: 'sidebar-item-title ' + ($scope.edittingId === id ? 'active' : ''),
+            class: 'sidebar-item-title ' + ($scope.editingId === id ? 'active' : ''),
             default: $scope.defaultIndex === id
           };
         });

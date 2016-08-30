@@ -127,7 +127,7 @@ JdbcQuery.prototype.checkIfItIsRelevant = function (options) {
     var uri = options.selectedDocuments && options.selectedDocuments.length > 0 ? options.selectedDocuments[0] : '';
 
     // here do not use getConnectionString method as it might contain sensitive information like decrypted password
-    var connectionString = self.config.datasource.datasourceClazz.datasource.datasourceParams.connectionString;
+    var connectionString = self.config.datasource.datasourceClazz.datasource.datasourceParams.connection_string;
     var maxAge = self.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
     var cacheEnabled = self.config.datasource.datasourceClazz.datasource.datasourceParams.cache_enabled;
 
@@ -166,7 +166,7 @@ JdbcQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) {
     // currently we use only single selected document
     var uri = options.selectedDocuments && options.selectedDocuments.length > 0 ? options.selectedDocuments[0] : '';
 
-    var connectionString = self.config.datasource.datasourceClazz.datasource.datasourceParams.connectionString;
+    var connectionString = self.config.datasource.datasourceClazz.datasource.datasourceParams.connection_string;
     var maxAge = self.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
     var cacheEnabled = self.config.datasource.datasourceClazz.datasource.datasourceParams.cache_enabled;
 

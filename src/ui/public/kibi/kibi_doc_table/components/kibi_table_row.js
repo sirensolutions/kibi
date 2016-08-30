@@ -212,7 +212,6 @@ define(function (require) {
                     var targetDashboardId = clickHandler.targetDashboardId;
                     if (targetDashboardId) {
                       kbnUrl.change('/dashboard/{{id}}', {id:  targetDashboardId});
-                      $route.reload();
                     } else {
                       // Call courier.fetch to update visualizations
                       // This will update all the visualisations, not only the one

@@ -28,6 +28,7 @@ module.exports = function (grunt) {
       var request = wreck.request('GET', url, {redirects: 3}, function (err, res) {
         if (err) {
           reject(err);
+          return;
         }
 
         res.pipe(file);

@@ -67,14 +67,17 @@ RestQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) {
 
     if (!regex.test(self.config.rest_method)) {
       reject(new Error('Only GET|POST methods are supported at the moment'));
+      return;
     }
 
     if (!(self.config.rest_params instanceof Array)) {
       reject(new Error('rest_params should be an Array. Check the elasticsearch mapping'));
+      return;
     }
 
     if (!(self.config.rest_headers instanceof Array)) {
       reject(new Error('rest_headers should be an Array. Check the elasticsearch mapping'));
+      return;
     }
 
     // user can also use a special variables like $auth_token

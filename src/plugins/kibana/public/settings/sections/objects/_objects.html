@@ -8,8 +8,9 @@
     <p>
       From here you can delete saved objects, such as saved searches. You can also edit the raw data of saved objects. Typically objects are only modified via their associated application, which is probably what you should use instead of this screen. Each tab is limited to 100 results. You can use the filter to find objects not in the default list.
     </p>
-    <form role="form">
-      <input aria-label="Filter" ng-model="advancedFilter" class="form-control span12" type="text" placeholder="Filter"/>
+    <form class="input-group input-group-unstyled" role="form">
+      <input aria-label="Filter" ng-model="advancedFilter" class="form-control" type="text" placeholder="Filter" />
+      <kbn-info class="input-group-addon" placement="left" info="This filter query does not support these characters: +, |, -, *, ( and ). If you need to use them, surround all your query with quotes."></kbn-info>
     </form>
 
     <ul class="nav nav-tabs">

@@ -114,6 +114,7 @@ PostgresQuery.prototype._executeQuery = function (query, connectionString) {
       pg.connect(connectionString, function (err, client, done) {
         if (err) {
           reject(err);
+          return;
         }
 
         self.logger.debug('got client');

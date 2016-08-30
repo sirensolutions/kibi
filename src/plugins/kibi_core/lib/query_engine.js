@@ -270,6 +270,7 @@ QueryEngine.prototype._loadDatasources = function () {
       fs.readFile(path.join(__dirname, 'datasources', datasourceId + '.json'), function (err, data) {
         if (err) {
           reject(err);
+          return;
         }
         // check whether HTTP or HTTPS is used
         if (self.config.has('kibi_core.gremlin_server.url')) {
@@ -325,6 +326,7 @@ QueryEngine.prototype._loadQueries = function () {
       fs.readFile(path.join(__dirname, 'queries', queryId + '.json'), function (err, data) {
         if (err) {
           reject(err);
+          return;
         }
         self.client.create({
           timeout: '1000ms',

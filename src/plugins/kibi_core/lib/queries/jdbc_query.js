@@ -68,6 +68,7 @@ JdbcQuery.prototype._executeQuery = function (query) {
     self.jdbc.reserve(function (err, connObj) {
       if (err) {
         reject(err);
+        return;
       }
       if (connObj) {
         // Grab the Connection for use.
@@ -75,6 +76,7 @@ JdbcQuery.prototype._executeQuery = function (query) {
         conn.createStatement(function (err, statement) {
           if (err) {
             reject(err);
+            return;
           }
           statement.executeQuery(query, function (err, resultset) {
             if (err) {
@@ -85,11 +87,13 @@ JdbcQuery.prototype._executeQuery = function (query) {
                 };
               }
               reject(err);
+              return;
             }
 
             resultset.toObjArray(function (err, results) {
               if (err) {
                 reject(err);
+                return;
               }
               fulfill(results);
               self.jdbc.release(connObj, function (err) {

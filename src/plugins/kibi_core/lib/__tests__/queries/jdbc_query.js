@@ -41,7 +41,7 @@ var queryDefinition = {
     datasourceClazz: {
       datasource: {
         datasourceParams: {
-          connectionString: 'connectionString',
+          connection_string: 'connectionString',
           cache_enabled: true
         }
       },

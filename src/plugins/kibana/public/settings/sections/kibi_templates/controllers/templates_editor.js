@@ -63,9 +63,17 @@ define(function (require) {
 
     $scope.jsonPreviewActive = false;
     $scope.htmlPreviewActive = true;
-    $scope.tabClick = function () {
-      $scope.jsonPreviewActive = !$scope.jsonPreviewActive;
-      $scope.htmlPreviewActive = !$scope.htmlPreviewActive;
+    $scope.tabClick = function (preview) {
+      switch (preview) {
+        case 'json':
+          $scope.jsonPreviewActive = true;
+          $scope.htmlPreviewActive = false;
+          break;
+        case 'html':
+          $scope.jsonPreviewActive = false;
+          $scope.htmlPreviewActive = true;
+          break;
+      }
     };
 
 

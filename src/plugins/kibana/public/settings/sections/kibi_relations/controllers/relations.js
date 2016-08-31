@@ -74,9 +74,17 @@ define(function (require) {
       dashboardRel: false
     };
 
-    $scope.tabClick = function () {
-      $scope.tab.indexRel = !$scope.tab.indexRel;
-      $scope.tab.dashboardRel = !$scope.tab.dashboardRel;
+    $scope.tabClick = function (currentTab) {
+      switch (currentTab) {
+        case 'index':
+          $scope.tab.indexRel = true;
+          $scope.tab.dashboardRel = false;
+          break;
+        case 'dashboard':
+          $scope.tab.dashboardRel = true;
+          $scope.tab.indexRel = false;
+          break;
+      }
     };
 
     // advanced options button

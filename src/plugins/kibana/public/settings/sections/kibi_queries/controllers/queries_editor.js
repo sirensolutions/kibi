@@ -68,9 +68,17 @@ define(function (require) {
       };
       $scope.starDetectedInAQuery = false;
 
-      $scope.tabClick = function () {
-        $scope.holder.jsonPreviewActive = !$scope.holder.jsonPreviewActive;
-        $scope.holder.htmlPreviewActive = !$scope.holder.htmlPreviewActive;
+      $scope.tabClick = function (preview) {
+        switch (preview) {
+          case 'json':
+            $scope.holder.jsonPreviewActive = true;
+            $scope.holder.htmlPreviewActive = false;
+            break;
+          case 'html':
+            $scope.holder.jsonPreviewActive = false;
+            $scope.holder.htmlPreviewActive = true;
+            break;
+        }
       };
 
       var notify = createNotifier({

@@ -52,7 +52,7 @@
 
       <!-- Tab panes -->
       <div class="tab-content">
-        <div role="tabpanel" class="tab-pane active" ng-class="tab.indexRel ? 'active' : ''" style="">
+        <div role="tabpanel" class="tab-pane active" data-test="index-relations-tab" ng-class="tab.indexRel ? 'active' : ''" style="">
             <form name="indicesForm" novalidate>
               <div class="form-group table-responsive">
                 <table class="table table-condensed">
@@ -69,15 +69,18 @@
                     </tr>
                   </thead>
                   <!-- here we repeat tbody to be able to show row with the error properly -->
-                  <tbody ng-repeat="relation in relations.relationsIndices">
+                  <tbody ng-repeat="relation in relations.relationsIndices" data-test="row-{{$index}}">
                     <tr class="relation-row"
                         ng-class="{ 'red-border' : relation.error }">
                       <td>
-                        <kibi-select required object-type="indexPattern" ng-model="relation.indices[0].indexPatternId">
+                        <kibi-select data-test="index-relation-left-index"
+                          required object-type="indexPattern"
+                          ng-model="relation.indices[0].indexPatternId">
                       </td>
                       <td>
                         <kibi-select
                           required
+                          data-test="index-relation-left-field"
                           object-type="field"
                           analyzed-warning="true"
                           index-pattern-id="relation.indices[0].indexPatternId"
@@ -87,11 +90,14 @@
                         <i aria-hidden="true" class="fa fa-arrows-h"></i>
                       </td>
                       <td>
-                        <kibi-select required object-type="indexPattern" ng-model="relation.indices[1].indexPatternId">
+                        <kibi-select required object-type="indexPattern"
+                         data-test="index-relation-right-index"
+                         ng-model="relation.indices[1].indexPatternId">
                       </td>
                       <td>
                         <kibi-select
                           required
+                          data-test="index-relation-right-field"
                           object-type="field"
                           analyzed-warning="true"
                           index-pattern-id="relation.indices[1].indexPatternId"
@@ -100,6 +106,7 @@
                       <td>
                         <input required
                           ng-model="relation.label"
+                          data-test="index-relation-label"
                           kibi-debounce="350"
                           class="form-control small-input"
                           type="text"
@@ -136,7 +143,7 @@
               </div>
             </form>
         </div>
-        <div role="tabpanel" class="tab-pane" ng-class="tab.dashboardRel ? 'active' : ''" style="">
+        <div role="tabpanel" class="tab-pane" data-test="dashboard-relations-tab" ng-class="tab.dashboardRel ? 'active' : ''" style="">
             <form name="dashboardsForm" novalidate>
               <div class="form-group table-responsive">
                 <table class="table table-condensed">
@@ -150,20 +157,27 @@
                     </tr>
                   </thead>
                   <!-- here we repeat tbody to be able to show row with the error properly -->
-                  <tbody ng-repeat="relation in relations.relationsDashboards">
+                  <tbody ng-repeat="relation in relations.relationsDashboards" data-test="row-{{$index}}">
                     <tr class="relation-row"
                         ng-class="{ 'red-border' : relation.error }">
                       <td>
-                        <kibi-select required object-type="dashboard" ng-model="relation.dashboards[0]" id="$index" filter="filterDashboards"></kibi-select>
+                        <kibi-select required object-type="dashboard"
+                         data-test="dashboard-relation-left-dashboard"
+                         ng-model="relation.dashboards[0]" id="$index" filter="filterDashboards"></kibi-select>
                       </td>
                       <td>
                         <i aria-hidden="true" class="fa fa-arrows-h"></i>
                       </td>
                       <td>
-                        <kibi-select required object-type="dashboard" ng-model="relation.dashboards[1]" id="$index" filter="filterDashboards"></kibi-select>
+                        <kibi-select required object-type="dashboard"
+                         data-test="dashboard-relation-right-dashboard"
+                         ng-model="relation.dashboards[1]"
+                         id="$index" filter="filterDashboards"></kibi-select>
                       </td>
                       <td>
-                        <kibi-select required object-type="joinRelations" ng-model="relation.relation" id="$index" filter="filterRelations"></kibi-select>
+                        <kibi-select required object-type="joinRelations"
+                         data-test="relation"
+                         ng-model="relation.relation" id="$index" filter="filterRelations"></kibi-select>
                       </td>
                       <td>
                         <div class="btn-group rightCorner">

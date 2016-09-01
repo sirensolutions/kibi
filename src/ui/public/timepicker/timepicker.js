@@ -12,6 +12,9 @@ define(function (require) {
   require('ui/timepicker/time_units');
   require('ui/timepicker/toggle');
 
+  // kibi: added to allow syncing time to other dashboards
+  require('ui/kibi/directives/kibi_sync_time_to');
+
   module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshIntervals) {
     return {
       restrict: 'E',

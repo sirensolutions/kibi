@@ -68,6 +68,9 @@ export default function (program) {
         plugins: {
           initialize: true,
           scanDirs: options.pluginDir
+        },
+        migrations: {
+          enabled: false
         }
       }
     );
@@ -85,7 +88,7 @@ export default function (program) {
       if (count > 0) {
         process.stdout.write(`Performed ${count} upgrades.\n`);
       } else {
-        process.stdout.write('All objects are up to date.\n');
+        process.stdout.write('No objects upgraded.\n');
       }
     } catch (error) {
       process.stderr.write(`${error}\n`);

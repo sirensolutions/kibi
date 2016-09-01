@@ -51,7 +51,11 @@
                 </ul>
               </div>
 
-              <!-- TODO: Add a section for custom intervals -->
+              <div class="kbn-timepicker-section">
+                <kibi-sync-time-to kibi-function="applyQuick"></kibi-sync-time-to>
+              </div>
+
+
             </div>
 
             <div ng-switch-when="relative">
@@ -103,6 +107,7 @@
                   </div>
                 </div>
 
+                <!-- kibi: original button replaced by kibi-sync-time-to
                 <div class="kbn-timepicker-section">
                   <label>&nbsp;</label>
                   <br>
@@ -112,6 +117,12 @@
                     </button>
                   </div>
                 </div>
+                -->
+
+                <div class="kbn-timepicker-section">
+                  <kibi-sync-time-to kibi-function="applyRelative"></kibi-sync-time-to>
+                </div>
+
               </form>
             </div>
 
@@ -141,6 +152,7 @@
                   </div>
                 </div>
 
+                <!-- kibi: original button replaced by kibi-sync-time-to
                 <div class="kbn-timepicker-section kbn-timepicker-alert">
                   <label>&nbsp;</label>
                   <div class="form-group">
@@ -150,6 +162,11 @@
                     <span class="small" ng-show="absolute.from > absolute.to"><strong>From</strong> must occur before <strong>To</strong></span>
                   </div>
                 </div>
+                -->
+                <div class="kbn-timepicker-section">
+                  <kibi-sync-time-to kibi-function="applyAbsolute"></kibi-sync-time-to>
+                </div>
+
               </form>
             </div>
           </div>

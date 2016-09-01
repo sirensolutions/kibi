@@ -1,0 +1,49 @@
+.kibi-sync-time-to {
+  tr:nth-child(1) {
+    td {
+      text-align: left;
+      vertical-align: middle;
+      label {
+        font-weight: normal;
+      }
+      input {
+        margin-left: 6px;
+      }
+      button {
+        margin: 0 0 4px 4px;
+      }
+    }
+  }
+  tr:nth-child(2) {
+    div.dashboards-list {
+      padding: 4px;
+      width: 250px;
+      max-height: 250px;
+      border: 2px #ecf0f1 solid;
+      border-radius: 4px;
+      overflow: auto;
+      ul {
+        margin: 4px 0 0 0;
+        padding: 0;
+        li {
+          list-style-type: none;
+          span.smallText {
+            font-weight: normal;
+          }
+        }
+      }
+    }
+
+    div.dashboards-list::-webkit-scrollbar {
+      -webkit-appearance: none;
+    }
+    div.dashboards-list::-webkit-scrollbar:vertical {
+      width: 11px;
+    }
+    div.dashboards-list::-webkit-scrollbar-thumb {
+      border-radius: 8px;
+      border: 2px solid white; /* should match background, can't be transparent */
+      background-color: rgba(0, 0, 0, .5);
+    }
+  }
+}

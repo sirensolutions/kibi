@@ -1,0 +1,46 @@
+<label>Apply to dashboards:</label>
+<br>
+<div class="kibi-sync-time-to">
+  <table>
+    <tr>
+      <td>
+        <input type="checkbox"  ng-model="allSelected" ng-click="selectAll()"/>
+        <label>Select all</label>
+        <button
+          type="submit"
+          ng-if="kibiFunction == 'applyQuick'"
+          class="btn btn-primary"
+          ng-click="syncTimeTo()">Apply</button>
+        <!-- NOTE: do not remove kbn-timepicker-go class as it is used in tests -->
+        <button
+          type="submit"
+          ng-if="kibiFunction == 'applyAbsolute'"
+          class="btn btn-primary kbn-timepicker-go"
+          ng-disabled="absolute.from > absolute.to || !absolute.from || !absolute.to"
+          ng-click="syncTimeTo()">Apply</button>
+        <span class="small" ng-show="kibiFunction == 'applyAbsolute' && absolute.from > absolute.to">
+          <strong>From</strong> must occur before <strong>To</strong>
+        </span>
+        <!-- NOTE: do not remove kbn-timepicker-go class as it is used in tests -->
+        <button
+          type="submit"
+          ng-if="kibiFunction == 'applyRelative'"
+          class="btn btn-primary kbn-timepicker-go"
+          ng-disabled="!relative.preview"
+          ng-click="syncTimeTo()">Apply</button>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <div class="dashboards-list">
+          <ul>
+            <li ng-repeat="d in dashboards">
+              <input type="checkbox" ng-disabled="d.disabled" ng-model="d.selected"/>
+              <label>{{d.id}} <span ng-if="d.disabled" class="smallText"> (current)</span></label>
+            </li>
+          </ul>
+        </div>
+      </td>
+    </tr>
+  </table>
+</div>

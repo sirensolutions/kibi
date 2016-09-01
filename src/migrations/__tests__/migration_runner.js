@@ -100,6 +100,33 @@ describe('migrations', function () {
 
     });
 
+    describe('count', function () {
+      let runner = new MigrationRunner(server, logger);
+
+      before(function () {
+        sinon.spy(runner, 'getMigrations');
+      });
+
+      it('should execute migrations in the correct order', wrapAsync(async () => {
+        let result = await runner.count();
+
+        expect(result).to.be(10);
+
+        let migrations = await runner.getMigrations.returnValues[0];
+        expect(migrations.length).to.be(3);
+        let descriptions = migrations.map((migration) => migration.description);
+        expect(descriptions).to.contain('plugin1_1');
+        expect(descriptions).to.contain('plugin1_2');
+        expect(descriptions).to.contain('plugin3_1');
+        expect(descriptions.indexOf('plugin1_2')).to.be.greaterThan(descriptions.indexOf('plugin1_1'));
+      }));
+
+      after(function () {
+        runner.getMigrations.restore();
+      });
+
+    });
+
 
     describe('getMigrations', function () {
 

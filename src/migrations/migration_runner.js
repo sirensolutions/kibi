@@ -62,18 +62,36 @@ export default class MigrationRunner {
   }
 
   /**
-   * Performs an upgrade by executing the `upgrade` method of each migration
-   * returned by the installed plugins.
+   * Counts objects that can be upgraded by executing the `count` method of each migration returned by the installed plugins.
+   *
+   * @returns The number of objects that can be upgraded.
+   */
+  async count() {
+    let count = 0;
+    for (let migration of this.getMigrations()) {
+      count += await migration.count();
+    }
+    return count;
+  }
+
+  /**
+   * Performs an upgrade by executing the `upgrade` method of each migration returned by the installed plugins.
    *
    * @returns The number of objects upgraded.
    */
   async upgrade() {
-    let count = 0;
+    let upgraded = 0;
     for (let migration of this.getMigrations()) {
-      this._logger.info(`Executing migration "${migration.constructor.description}"`);
-      count += await migration.upgrade();
-      this._logger.info(`Executed migration "${migration.constructor.description}"`);
+      this._logger.info(`Processing migration "${migration.constructor.description}"`);
+      let count = await migration.upgrade();
+      upgraded += count;
+      if (count > 0) {
+        this._logger.info(`Upgraded ${count} objects.`);
+      } else {
+        this._logger.info('No objects upgraded.');
+      }
+      this._logger.info(`Processed migration "${migration.constructor.description}"`);
     }
-    return count;
+    return upgraded;
   }
 };

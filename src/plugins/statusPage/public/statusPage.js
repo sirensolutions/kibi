@@ -19,6 +19,7 @@ const chrome = require('ui/chrome')
   ui.loading = false;
 
   // kibi: added to be able to save diagnostics as json
+  $scope.esUrls = require('./lib/kibi_es_apis_calls');
   $scope.esDiagnostics = require('./lib/kibi_es_diagnostics')(ui, $http);
   // kibi: end
 

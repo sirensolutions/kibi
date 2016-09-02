@@ -29,13 +29,26 @@
 }
 
 /* kibi: start */
-.kibi-es-diagnostics{
+span.kibi-es-diagnostics{
   display: inline-block;
   float:right;
-  &:focus {
+  button:focus {
     outline:0;
   }
+  i.fa-info {
+    font-size: 24px;
+  }
 }
+
+div.kibi-diagnostics-info-box{
+  background-color: #fff;
+  border: 1px #dedede solid;
+  padding: 8px;
+  h2 {
+    margin-top:0;
+  }
+}
+
 /* kibi: end */
 
 // metrics section

@@ -1,6 +1,7 @@
 const _ = require('lodash');
 const angular = require('angular');
 const saveAs = require('@spalger/filesaver').saveAs;
+const esUrls = require('./kibi_es_apis_calls');
 
 module.exports = function (data, $http) {
   return function () {
@@ -12,13 +13,6 @@ module.exports = function (data, $http) {
              angular.toJson(results, true) + '\n';
     };
 
-    let esUrls = [
-      '_cluster/stats?human&pretty',
-      '_nodes/_all?human&pretty',
-      '_stats?human&pretty',
-      '_segments?human&pretty&verbose=true',
-      '_mapping?human&pretty'
-    ];
     let promises = _.map(esUrls, (urlPart) => {
       return $http.get('elasticsearch/' + urlPart).then((results) => {
         return formatResults(urlPart, results.data);

@@ -75,6 +75,10 @@ src/plugins/spyModes/public/tableSpyMode.js
 src/plugins/table_vis/public/table_vis.html
 src/plugins/table_vis/public/table_vis_controller.js
 
+src/plugins/statusPage/public/statusPage.js
+src/plugins/statusPage/public/statusPage.html
+src/plugins/statusPage/public/statusPage.less
+
 src/plugins/testsBundle/testsEntryTemplate.js
 
 src/server/http/short_url_lookup.js

@@ -3,8 +3,35 @@
     <h1>
       Status: <span class="state_color">{{ ui.serverStateMessage }}</span>
       <i class="fa state_color state_icon" />
+      <!-- kibi: added a button to download es diagnostics data -->
+      <span class="kibi-es-diagnostics">
+        <button class="btn btn-default" ng-click="esDiagnostics()">
+          <i aria-hidden="true" class="fa fa-download"></i>
+          Elasticsearch diagnostics
+        </button>
+        <i class="fa fa-info" ng-click="showInfo = !showInfo"></i>
+      </span>
+      <!-- kibi: end -->
     </h1>
   </header>
+
+  <!-- kibi: added a help about es diagnostics button -->
+  <div class="kibi-diagnostics-info-box" ng-show="showInfo">
+    <h2>Elasticsearch diagnostics</h2>
+    This button generates a single file by collecting different metrics about your elasticsearch cluster.
+    All collected information are saved to a local file and never transfered over a network.
+    Below is the full list of elasticsearch API calls:
+    <ul>
+      <li ng-repeat="url in esUrls">{{url}}</li>
+    </ul>
+    Documentation about the APIs can be found at:
+    <ul>
+      <li><a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/cluster.html">Cluster APIs</a></li>
+      <li><a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-segments.html">Indices Segments</a></li>
+      <li><a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping.html">Mapping</a></li>
+    </ul>
+  </div>
+  <!-- kibi: end -->
 
   <div class="row metrics_wrapper">
     <div ng-repeat="(name, data) in ui.metrics">

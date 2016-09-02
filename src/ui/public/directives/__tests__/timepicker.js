@@ -22,8 +22,12 @@ var clock;
 
 var init = function () {
   // Load the application
-  ngMock.module('kibana');
-
+  ngMock.module('kibana', function ($provide) {
+    // kibi: added as required after timepicker directive modification
+    $provide.constant('kbnDefaultAppId', '');
+    $provide.constant('kibiDefaultDashboardId', '');
+    $provide.constant('elasticsearchPlugins', ['siren-join']);
+  });
   // Stub out the clock so 'now' doesn't move
   clock = sinon.useFakeTimers(moment(anchor).valueOf());
 

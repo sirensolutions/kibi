@@ -6,7 +6,9 @@
       <ul class="nav nav-tabs" style="border-bottom: none;">
         <li role="presentation"
             ng-class="{active: group.active === true}"
-            ng-repeat="group in dashboardGroups | orderBy: 'priority'" ng-show="!group.hide">
+            ng-repeat="group in dashboardGroups | orderBy: 'priority'"
+            data-test-subj={{group.title}}
+            ng-show="!group.hide">
           <a ng-click="group.onClick(dashboardGroups)">
             <i  ng-if="group.iconCss" class="icon {{group.iconCss}}"></i>
             <img class="icon" ng-if="group.iconUrl" ng-src="{{group.iconUrl}}"/>
@@ -22,19 +24,6 @@
             <span ng-if="group.count != undefined">({{ group.count }})</span>
           </a>
         </li>
-
-        <li role="presentation"
-          ng-if="relationalFilterVisible"
-          ng-class="{active: relationalFilterPanelOpened === true}">
-          <a ng-click="openRelationalFilterPanel()"
-            style="padding: 4px 9px; margin: 7px 0 0 2px; border: none; border-radius: 4px;" >
-            <span class="fa-stack fa-lg">
-              <i class="fa fa-arrows-h fa-stack-1x"></i>
-              <i class="fa fa-map-o fa-stack-1x"></i>
-            </span>
-          </a>
-        </li>
-
       </ul>
     </div>
   </div>

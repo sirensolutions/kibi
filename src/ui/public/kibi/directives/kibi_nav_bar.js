@@ -42,26 +42,6 @@ define(function (require) {
           $scope.relationalFilterVisible = config.get('kibi:relationalPanel');
         });
 
-        $scope.relationalFilterPanelOpened = false;
-
-        $scope.openRelationalFilterPanel = function () {
-          $scope.relationalFilterPanelOpened = !$scope.relationalFilterPanelOpened;
-          $rootScope.$emit('relationalFilterPanelOpened', $scope.relationalFilterPanelOpened);
-        };
-
-        var removeRelationalFilterPanelClosedHandler = $rootScope.$on('relationalFilterPanelClosed', function () {
-          $scope.relationalFilterPanelOpened = false;
-        });
-
-        // close panel when user navigates to a different route
-        var removeRouteChangeSuccessHandler = $rootScope.$on('$routeChangeSuccess', function (event, next, prev, err) {
-          if (!next.locals.dash) {
-            // only if we switched to a non dashboard page
-            $rootScope.$emit('relationalFilterPanelOpened', false);
-            $scope.relationalFilterPanelOpened = false;
-          }
-        });
-
         // =============
         // Tab scrolling
         // =============
@@ -134,10 +114,8 @@ define(function (require) {
 
         $scope.$on('$destroy', function () {
           kibiNavBarHelper.destroy();
-          removeRouteChangeSuccessHandler();
           removeDashboardGroupChangedHandler();
           removeInitConfigHandler();
-          removeRelationalFilterPanelClosedHandler();
           removeDashboardChangedHandler();
           removeLocationChangeSuccessHandler();
           removeRelationalPanelHandler();

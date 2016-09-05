@@ -7,7 +7,7 @@
         <li role="presentation"
             ng-class="{active: group.active === true}"
             ng-repeat="group in dashboardGroups | orderBy: 'priority'"
-            data-test={{group.title}}
+            data-test-subj={{group.title}}
             ng-show="!group.hide">
           <a ng-click="group.onClick(dashboardGroups)">
             <i  ng-if="group.iconCss" class="icon {{group.iconCss}}"></i>
@@ -32,8 +32,6 @@
     <button ng-mouseup="scrollTabs(false)" ng-mousedown="scrollTabs(1)" ng-disabled="tabScrollerState[0]"><i class="fa fa-caret-left"></i></button>
     <button ng-mouseup="scrollTabs(false)" ng-mousedown="scrollTabs(-1)" ng-disabled="tabScrollerState[1]"><i class="fa fa-caret-right"></i></button>
   </div>
-
-
 
   <kibi-dashboard-toolbar ng-show="!appEmbedded"></kibi-dashboard-toolbar>
 

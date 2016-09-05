@@ -59,13 +59,9 @@
                   <thead>
                     <tr>
                       <th>Left Relation</th>
-
                       <th></th>
-
                       <th>Right Relation</th>
-
                       <th>Label</th>
-
                       <!--controls-->
                       <th ng-if="kibiEnterpriseEnabled"></th>
                       <th></th>
@@ -77,7 +73,7 @@
                         ng-class="{ 'red-border' : relation.error }">
                       <!--left relation-->
                       <td>
-                        <table>
+                        <table class="relationPart">
                           <tbody>
                             <tr>
                               <td>
@@ -133,7 +129,7 @@
                       <!--right relation-->
                       <td>
                         <table>
-                          <tbody>
+                          <tbody class="relationPart">
                             <tr>
                               <td>
                                 index pattern
@@ -192,7 +188,7 @@
                       </td>
 
                       <!--controls-->
-                      <td class="ng-scope" ng-if="kibiEnterpriseEnabled">
+                      <td class="ng-scope alignLeft" ng-if="kibiEnterpriseEnabled">
                         <div class="actions">
                             <button
                               ng-click="edit(relation, $index)"

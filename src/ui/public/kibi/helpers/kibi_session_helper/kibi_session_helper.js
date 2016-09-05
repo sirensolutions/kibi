@@ -144,33 +144,30 @@ define(function (require) {
     };
 
     KibiSessionHelper.prototype.putData = function (data, force) {
-      var self = this;
-      return self.getId().then(function () {
-        self.savedSession.session_data = data;
+      return this.getId().then(() => {
+        this.savedSession.session_data = data;
         if (!force) {
-          self.dirty = true;
-          return self.savedSession;
+          this.dirty = true;
+          return this.savedSession;
         } else {
-          return self._syncToIndex(self.savedSession);
+          return this._syncToIndex(this.savedSession);
         }
       });
     };
 
     KibiSessionHelper.prototype.flush = function () {
-      var self = this;
-      return self.getId().then(function () {
-        if (self.dirty) {
-          return self._syncToIndex(self.savedSession);
+      return this.getId().then(() => {
+        if (this.dirty) {
+          return this._syncToIndex(this.savedSession);
         } else {
-          return self.savedSession;
+          return this.savedSession;
         }
       });
     };
 
     KibiSessionHelper.prototype.isDirty = function () {
-      var self = this;
-      return self.getId().then(function () {
-        return self.dirty;
+      return this.getId().then(() => {
+        return this.dirty;
       });
     };
 

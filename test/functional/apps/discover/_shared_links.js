@@ -80,15 +80,15 @@ define(function (require) {
             + '/app/kibana?_t=1453775307251#'
             + '/discover?_g=(refreshInterval:(display:Off,pause:!f,value:0),time'
             + ':(from:\'2015-09-19T06:31:44.000Z\',mode:absolute,to:\'2015-09'
-            + '-23T18:31:44.000Z\'))&_k=(s:c46f29539d)&_a=(columns:!(_source),index:\'logstash-'
+            + '-23T18:31:44.000Z\'))&_k=(s:\'c46f29539d\')&_a=(columns:!(_source),index:\'logstash-'
             + '*\',interval:auto,query:(query_string:(analyze_wildcard:!t,query'
             + ':\'*\')),sort:!(\'@timestamp\',desc))';
           return discoverPage.getSharedUrl()
           .then(function (actualUrl) {
             // strip the timestamp out of each URL
-            expect(actualUrl.replace(/_t=\d{13}/,'_t=TIMESTAMP').replace(/s:\w{10}/,'s:SESSION_ID'))
+            expect(actualUrl.replace(/_t=\d{13}/,'_t=TIMESTAMP').replace(/s:'\w{10}'/,'s:SESSION_ID'))
 
-              .to.be(expectedUrl.replace(/_t=\d{13}/,'_t=TIMESTAMP').replace(/s:\w{10}/,'s:SESSION_ID'));
+              .to.be(expectedUrl.replace(/_t=\d{13}/,'_t=TIMESTAMP').replace(/s:'\w{10}'/,'s:SESSION_ID'));
           })
           .catch(common.handleError(this));
         });

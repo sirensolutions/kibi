@@ -246,7 +246,7 @@ define(function (require) {
         }
       });
 
-      return (!!lIndex || !!rIndex) && !_(relations.relationsIndices).map(function (relInd) {
+      const validRelations = _(relations.relationsIndices).map(function (relInd) {
         if (lIndex && rIndex) {
           if ((lIndex === relInd.indices[0].indexPatternId && rIndex === relInd.indices[1].indexPatternId) ||
               (lIndex === relInd.indices[1].indexPatternId && rIndex === relInd.indices[0].indexPatternId)) {
@@ -261,7 +261,20 @@ define(function (require) {
             return relInd.id;
           }
         }
-      }).compact().contains(item.value);
+      }).compact().value();
+      const usedRelations = _(relations.relationsDashboards).map(function (relDash, offset) {
+        if (offset !== id && dashboards[0] && dashboards[1]) {
+          if ((dashboards[0] === relDash.dashboards[0] && dashboards[1] === relDash.dashboards[1]) ||
+              (dashboards[0] === relDash.dashboards[1] && dashboards[1] === relDash.dashboards[0])) {
+            return relDash.relation;
+          }
+        }
+      }).compact().value();
+      return (Boolean(lIndex) || Boolean(rIndex)) &&
+      // remove item if it is not in any valid relation for the indices lIndex and rIndex
+      validRelations.indexOf(item.value) === -1 ||
+      // remove item if it is already used for the same dashboards
+      usedRelations.indexOf(item.value) !== -1;
     };
 
     /**

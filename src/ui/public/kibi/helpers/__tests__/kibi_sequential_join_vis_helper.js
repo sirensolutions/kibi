@@ -424,10 +424,9 @@ describe('Kibi Components', function () {
           savedDashboards: savedDashboards
         });
 
-
         kibiState.enableRelation({
           dashboards: [ 'dashboardA', 'dashboardB' ],
-          relation: 'ia/fa/ib/fb'
+          relation: 'ia//fa/ib//fb'
         });
         config.set('kibi:relations', {
           relationsIndices: [
@@ -445,7 +444,7 @@ describe('Kibi Components', function () {
                 }
               ],
               label: 'rel',
-              id: 'ia/fa/ib/fb'
+              id: 'ia//fa/ib//fb'
             }
           ]
         });

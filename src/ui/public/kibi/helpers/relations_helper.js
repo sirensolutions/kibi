@@ -62,6 +62,13 @@ define(function (require) {
 
         const advKeys = [ 'termsEncoding', 'orderBy', 'maxTermsPerShard' ];
 
+        if (!relations) {
+          // if relations is not defined during tests
+          relations = config.get('kibi:relations');
+          if (!relations) {
+            return;
+          }
+        }
         // get indices relations
         const relationsIndices = relations.relationsIndices;
 

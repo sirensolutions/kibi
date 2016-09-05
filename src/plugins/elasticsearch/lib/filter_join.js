@@ -224,7 +224,7 @@ function _sequenceJoins(query, sequence) {
 
   for (let i = sequence.length - 1; i > 0; i--) {
     const join = sequence[i].relation;
-    const { child, filterjoin } = _addFilterJoin(curQuery, join[1].path, join[1], join[0].path, join[0], sequence[i].negate);
+    const { child } = _addFilterJoin(curQuery, join[1].path, join[1], join[0].path, join[0], sequence[i].negate);
     curQuery = child;
     _addFilters(curQuery, join[0].queries);
   }
@@ -234,7 +234,7 @@ function _sequenceJoins(query, sequence) {
     });
   } else {
     const lastJoin = sequence[0].relation;
-    const { child, filterjoin } = _addFilterJoin(curQuery, lastJoin[1].path, lastJoin[1],
+    const { child } = _addFilterJoin(curQuery, lastJoin[1].path, lastJoin[1],
                                                  lastJoin[0].path, lastJoin[0], sequence[0].negate);
     curQuery = child;
     _addFilters(curQuery, lastJoin[0].queries);
@@ -246,6 +246,7 @@ function _superGraph(relations) {
 
   return _(relations)
   .each((relation) => {
+    // we currently support only 1 index in the indices array
     _checkRelation(relation, relationFields, 1);
     if (relation[0].indices[0] === relation[1].indices[0]) {
       throw new Error('Loops in the join_set are not supported!\n' + JSON.stringify(relation, null, ' '));

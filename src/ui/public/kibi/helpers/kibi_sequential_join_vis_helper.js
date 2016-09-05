@@ -247,7 +247,6 @@ define(function (require) {
       });
     };
 
-
     return new KibiSequentialJoinVisHelper();
   };
 

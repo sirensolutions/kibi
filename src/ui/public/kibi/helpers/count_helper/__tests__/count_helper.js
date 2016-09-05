@@ -515,7 +515,7 @@ describe('Kibi Components', function () {
         config.set('kibi:relationalPanel', true);
         kibiState.enableRelation({
           dashboards: [ 'empty-dashboard', 'query-dashboard' ],
-          relation: 'index1/f1/index2/f2'
+          relation: 'index1//f1/index2//f2'
         });
 
         var expected = {

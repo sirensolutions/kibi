@@ -155,6 +155,7 @@ src/ui/public/partials/saved_object_finder.html
 src/ui/public/share/directives/share.js
 src/ui/public/share/directives/share_object_url.js
 src/ui/public/share/views/share.html
+src/ui/public/share/views/share_object_url.html
 
 src/ui/public/timefilter/timefilter.js
 src/ui/public/timepicker/timepicker.js

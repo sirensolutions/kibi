@@ -10,6 +10,7 @@ define(function (require) {
     const _resetInitFlags = function () {
       this.initializing = false;
       this.initialized = false;
+      this.dirty = false;
     };
 
     const _initDone = function () {
@@ -142,11 +143,34 @@ define(function (require) {
       return this.getId().then(() => this.savedSession.session_data);
     };
 
-    KibiSessionHelper.prototype.putData = function (data) {
+    KibiSessionHelper.prototype.putData = function (data, force) {
       var self = this;
       return self.getId().then(function () {
         self.savedSession.session_data = data;
-        return self._syncToIndex(self.savedSession);
+        if (!force) {
+          self.dirty = true;
+          return self.savedSession;
+        } else {
+          return self._syncToIndex(self.savedSession);
+        }
+      });
+    };
+
+    KibiSessionHelper.prototype.flush = function () {
+      var self = this;
+      return self.getId().then(function () {
+        if (self.dirty) {
+          return self._syncToIndex(self.savedSession);
+        } else {
+          return self.savedSession;
+        }
+      });
+    };
+
+    KibiSessionHelper.prototype.isDirty = function () {
+      var self = this;
+      return self.getId().then(function () {
+        return self.dirty;
       });
     };
 
@@ -155,6 +179,7 @@ define(function (require) {
       return new Promise(function (fulfill, reject) {
         savedSession.timeUpdated = new Date();
         savedSession.save(true).then(function () {
+          self.dirty = false;
           fulfill(savedSession);
         }).catch(function (err) {
           reject(new Error('Could not save the session ' + savedSession.id));

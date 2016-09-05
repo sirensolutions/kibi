@@ -3,1236 +3,1041 @@ const filterJoinSeq = require('../filter_join').sequence;
 const expect = require('expect.js');
 const Promise = require('bluebird');
 const _ = require('lodash');
+const FilterJoinBuilder = require('./filterjoin_query_builder');
 
 describe('FilterJoin querying', function () {
-  it('join set loop', function () {
-    const query = {
-      bool: {
-        must: [
-          {
-            join_set: {
-              focus: 'i1',
-              relations: [
-                [
-                  {
-                    indices: [ 'i1' ],
-                    types: [ 'cafard' ],
-                    path: 'id1'
-                  },
-                  {
-                    indices: [ 'i1' ],
-                    types: [ 'cafard' ],
-                    path: 'id2'
-                  }
-                ]
+  describe('Join Set', function () {
+    describe('Multi-edge', function () {
+      it('should add two branches at the root', function () {
+        const query = {
+          join_set: {
+            focus: 'i1',
+            relations: [
+              [
+                { indices: [ 'i1' ], types: [ 't12' ], path: 'id1' },
+                { indices: [ 'i2' ], types: [ 't22' ], path: 'id2' }
+              ],
+              [
+                { indices: [ 'i1' ], types: [ 't1' ], path: 'id1' },
+                { indices: [ 'i2' ], types: [ 't2' ], path: 'id2' }
               ]
-            }
-          }
-        ]
-      }
-    };
-    expect(filterJoinSet).withArgs(query).to.throwError(/loops/i);
-  });
-
-  it('in a bool clause', function () {
-    const query = {
-      bool: {
-        must: [
-          {
-            join_set: {
-              focus: 'i1',
-              relations: [
-                [
-                  {
-                    indices: [ 'i1' ],
-                    types: [ 'cafard' ],
-                    path: 'id1'
-                  },
-                  {
-                    indices: [ 'i2' ],
-                    types: [ 'cafard' ],
-                    path: 'id2'
-                  }
-                ]
-              ]
-            }
-          }
-        ]
-      }
-    };
-    const expected = {
-      bool: {
-        must: [
-          {
-            filterjoin: {
-              id1: {
-                query: {
-                  bool: {
-                    must: [
-                      {
-                        match_all: {}
-                      }
-                    ],
-                    filter: {
-                      bool: {
-                        must: []
-                      }
-                    }
-                  }
-                },
-                indices: ['i2'],
-                path: 'id2',
-                types: ['cafard']
-              }
-            }
-          }
-        ]
-      }
-    };
-    const actual = filterJoinSet(query);
-    expect(actual).to.eql(expected);
-  });
-
-
-  it('in a bool clause, adv join options', function () {
-    const query = {
-      bool: {
-        must: [
-          {
-            join_set: {
-              focus: 'i1',
-              relations: [
-                [
-                  {
-                    indices: [ 'i1' ],
-                    types: [ 'cafard' ],
-                    path: 'id1',
-                    termsEncoding: 'long',
-                    orderBy: 'doc_score',
-                    maxTermsPerShard: 100
-                  },
-                  {
-                    indices: [ 'i2' ],
-                    types: [ 'cafard' ],
-                    path: 'id2',
-                    termsEncoding: 'long',
-                    orderBy: 'doc_score',
-                    maxTermsPerShard: 100
-                  }
-                ]
-              ]
-            }
-          }
-        ]
-      }
-    };
-    const expected = {
-      bool: {
-        must: [
-          {
-            filterjoin: {
-              id1: {
-                query: {
-                  bool: {
-                    must: [
-                      {
-                        match_all: {}
-                      }
-                    ],
-                    filter: {
-                      bool: {
-                        must: []
-                      }
-                    }
-                  }
-                },
-                indices: ['i2'],
-                path: 'id2',
-                types: ['cafard'],
-                termsEncoding: 'long',
-                orderBy: 'doc_score',
-                maxTermsPerShard: 100
-              }
-            }
-          }
-        ]
-      }
-    };
-    const actual = filterJoinSet(query);
-    expect(actual).to.eql(expected);
-  });
-
-
-  it('in a bool clause, adv join options maxTermsPerShard should not be passed if === -1', function () {
-    const query = {
-      bool: {
-        must: [
-          {
-            join_set: {
-              focus: 'i1',
-              relations: [
-                [
-                  {
-                    indices: [ 'i1' ],
-                    types: [ 'cafard' ],
-                    path: 'id1',
-                    termsEncoding: 'long',
-                    orderBy: 'doc_score',
-                    maxTermsPerShard: -1
-                  },
-                  {
-                    indices: [ 'i2' ],
-                    types: [ 'cafard' ],
-                    path: 'id2',
-                    termsEncoding: 'long',
-                    orderBy: 'doc_score',
-                    maxTermsPerShard: -1
-                  }
-                ]
-              ]
-            }
-          }
-        ]
-      }
-    };
-    const expected = {
-      bool: {
-        must: [
-          {
-            filterjoin: {
-              id1: {
-                query: {
-                  bool: {
-                    must: [
-                      {
-                        match_all: {}
-                      }
-                    ],
-                    filter: {
-                      bool: {
-                        must: []
-                      }
-                    }
-                  }
-                },
-                indices: ['i2'],
-                path: 'id2',
-                types: ['cafard'],
-                termsEncoding: 'long',
-                orderBy: 'doc_score'
-              }
-            }
-          }
-        ]
-      }
-    };
-    const actual = filterJoinSet(query);
-    expect(actual).to.eql(expected);
-  });
-
-  it('in a bool clause with no type specified for one of the indexes', function () {
-    const query = {
-      bool: {
-        must: [
-          {
-            join_set: {
-              focus: 'i1',
-              relations: [
-                [
-                  {
-                    indices: [ 'i1' ],
-                    types: [ 'cafard' ],
-                    path: 'id1'
-                  },
-                  {
-                    indices: [ 'i2' ],
-                    path: 'id2'
-                  }
-                ]
-              ]
-            }
-          }
-        ]
-      }
-    };
-    const expected = {
-      bool: {
-        must: [
-          {
-            filterjoin: {
-              id1: {
-                query: {
-                  bool: {
-                    must: [
-                      {
-                        match_all: {}
-                      }
-                    ],
-                    filter: {
-                      bool: {
-                        must: []
-                      }
-                    }
-                  }
-                },
-                indices: ['i2'],
-                path: 'id2'
-              }
-            }
-          }
-        ]
-      }
-    };
-    const actual = filterJoinSet(query);
-    expect(actual).to.eql(expected);
-  });
-
-  it('no filter', function () {
-    const query = [
-      {
-        join_set: {
-          focus: 'i1',
-          relations: [
-            [
-              {
-                indices: [ 'i1' ],
-                types: [ 'cafard' ],
-                path: 'id1'
-              },
-              {
-                indices: [ 'i2' ],
-                types: [ 'cafard' ],
-                path: 'id2'
-              }
             ]
+          }
+        };
+        const builder = new FilterJoinBuilder();
+        builder.addFilterJoin({
+          sourceTypes: 't12',
+          sourcePath: 'id1',
+          targetIndex: 'i2',
+          targetTypes: 't22',
+          targetPath: 'id2'
+        });
+        builder.addFilterJoin({
+          sourceTypes: 't1',
+          sourcePath: 'id1',
+          targetIndex: 'i2',
+          targetTypes: 't2',
+          targetPath: 'id2'
+        });
+        const expected = builder.toObject();
+        const actual = filterJoinSet([ query ]);
+        expect(actual).to.eql(expected);
+      });
+
+      it('should add two branches at the leaf', function () {
+        const query = {
+          join_set: {
+            focus: 'i0',
+            relations: [
+              [
+                { indices: [ 'i0' ], types: [ 't0' ], path: 'id0' },
+                { indices: [ 'i1' ], types: [ 't1' ], path: 'id1' }
+              ],
+              [
+                { indices: [ 'i1' ], types: [ 't12' ], path: 'id1' },
+                { indices: [ 'i2' ], types: [ 't22' ], path: 'id2' }
+              ],
+              [
+                { indices: [ 'i1' ], types: [ 't1' ], path: 'id1' },
+                { indices: [ 'i2' ], types: [ 't2' ], path: 'id2' }
+              ]
+            ]
+          }
+        };
+        const builder = new FilterJoinBuilder();
+        const fj0 = builder.addFilterJoin({
+          sourceTypes: 't0',
+          sourcePath: 'id0',
+          targetIndex: 'i1',
+          targetTypes: 't1',
+          targetPath: 'id1'
+        });
+        fj0.addFilterJoin({
+          sourceTypes: 't12',
+          sourcePath: 'id1',
+          targetIndex: 'i2',
+          targetTypes: 't22',
+          targetPath: 'id2'
+        });
+        fj0.addFilterJoin({
+          sourceTypes: 't1',
+          sourcePath: 'id1',
+          targetIndex: 'i2',
+          targetTypes: 't2',
+          targetPath: 'id2'
+        });
+        const expected = builder.toObject();
+        const actual = filterJoinSet([ query ]);
+        expect(actual).to.eql(expected);
+      });
+
+      it('should fully expand the graph 1', function () {
+        const query = {
+          join_set: {
+            focus: 'i1',
+            relations: [
+              [
+                { indices: [ 'i1' ], types: [ 't12' ], path: 'id1' },
+                { indices: [ 'i2' ], types: [ 't22' ], path: 'id2' }
+              ],
+              [
+                { indices: [ 'i1' ], types: [ 't1' ], path: 'id1' },
+                { indices: [ 'i2' ], types: [ 't2' ], path: 'id2' }
+              ],
+              [
+                { indices: [ 'i2' ], types: [ 't2' ], path: 'id2' },
+                { indices: [ 'i3' ], types: [ 't3' ], path: 'id3' }
+              ]
+            ]
+          }
+        };
+        const builder = new FilterJoinBuilder();
+        const fj0 = builder.addFilterJoin({
+          sourceTypes: 't12',
+          sourcePath: 'id1',
+          targetIndex: 'i2',
+          targetTypes: 't22',
+          targetPath: 'id2'
+        });
+        fj0.addFilterJoin({ sourceTypes: 't2', sourcePath: 'id2', targetIndex: 'i3', targetTypes: 't3', targetPath: 'id3' });
+        const fj1 = builder.addFilterJoin({
+          sourceTypes: 't1',
+          sourcePath: 'id1',
+          targetIndex: 'i2',
+          targetTypes: 't2',
+          targetPath: 'id2'
+        });
+        fj1.addFilterJoin({ sourceTypes: 't2', sourcePath: 'id2', targetIndex: 'i3', targetTypes: 't3', targetPath: 'id3' });
+
+        const expected = builder.toObject();
+        const actual = filterJoinSet([ query ]);
+        expect(actual).to.eql(expected);
+      });
+
+      it('should fully expand the graph 2', function () {
+        const query = {
+          join_set: {
+            focus: 'i1',
+            relations: [
+              // multiedge 1
+              [
+                { indices: [ 'i1' ], types: [ 't1' ], path: 'id1' },
+                { indices: [ 'i2' ], types: [ 't2' ], path: 'id2' }
+              ],
+              [
+                { indices: [ 'i1' ], types: [ 't1' ], path: 'id1' },
+                { indices: [ 'i2' ], types: [ 't22' ], path: 'id22' }
+              ],
+
+              // multiedge 2
+              [
+                { indices: [ 'i3' ], types: [ 't3' ], path: 'id3' },
+                { indices: [ 'i2' ], types: [ 't2' ], path: 'id2' }
+              ],
+              [
+                { indices: [ 'i3' ], types: [ 't3' ], path: 'id3' },
+                { indices: [ 'i2' ], types: [ 't22' ], path: 'id22' }
+              ],
+
+              // single edge 1
+              [
+                { indices: [ 'i4' ], types: [ 't4' ], path: 'id4' },
+                { indices: [ 'i2' ], types: [ 't22' ], path: 'id22' }
+              ],
+
+              // single edge 2
+              [
+                { indices: [ 'i4' ], types: [ 't4' ], path: 'id4' },
+                { indices: [ 'i3' ], types: [ 't3' ], path: 'id3' }
+              ]
+            ]
+          }
+        };
+        const b = new FilterJoinBuilder();
+
+        // multiedge 1
+        const fj0 = b.addFilterJoin({ sourceTypes: 't1', sourcePath: 'id1', targetIndex: 'i2', targetTypes: 't2', targetPath: 'id2' });
+        const fj1 = b.addFilterJoin({ sourceTypes: 't1', sourcePath: 'id1', targetIndex: 'i2', targetTypes: 't22', targetPath: 'id22' });
+
+        // multiedge 2
+        const fj00 = fj0.addFilterJoin({ sourceTypes: 't2', sourcePath: 'id2', targetIndex: 'i3', targetTypes: 't3', targetPath: 'id3' });
+        const fj01 = fj0.addFilterJoin({ sourceTypes: 't22', sourcePath: 'id22', targetIndex: 'i3', targetTypes: 't3', targetPath: 'id3' });
+        const fj10 = fj1.addFilterJoin({ sourceTypes: 't2', sourcePath: 'id2', targetIndex: 'i3', targetTypes: 't3', targetPath: 'id3' });
+        const fj11 = fj1.addFilterJoin({ sourceTypes: 't22', sourcePath: 'id22', targetIndex: 'i3', targetTypes: 't3', targetPath: 'id3' });
+
+        _.each([ fj00, fj01, fj10, fj11 ], (edge) => {
+          // single edge 2
+          const child = edge.addFilterJoin({
+            sourceTypes: 't3',
+            sourcePath: 'id3',
+            targetIndex: 'i4',
+            targetTypes: 't4',
+            targetPath: 'id4'
+          });
+          // single edge 1
+          child.addFilterJoin({ sourceTypes: 't4', sourcePath: 'id4', targetIndex: 'i2', targetTypes: 't22', targetPath: 'id22' });
+        });
+
+        const expected = b.toObject();
+        const actual = filterJoinSet([ query ]);
+        expect(actual).to.eql(expected);
+      });
+    });
+
+    it('join set loop', function () {
+      const query = {
+        bool: {
+          must: [
+            {
+              join_set: {
+                focus: 'i1',
+                relations: [
+                  [
+                    {
+                      indices: [ 'i1' ],
+                      types: [ 'cafard' ],
+                      path: 'id1'
+                    },
+                    {
+                      indices: [ 'i1' ],
+                      types: [ 'cafard' ],
+                      path: 'id2'
+                    }
+                  ]
+                ]
+              }
+            }
           ]
         }
-      }
-    ];
-    const expected = [
-      {
-        filterjoin: {
-          id1: {
-            query: {
-              bool: {
-                must: [
-                  {
-                    match_all: {}
-                  }
-                ],
-                filter: {
-                  bool: {
-                    must: []
-                  }
-                }
-              }
-            },
-            indices: ['i2'],
-            path: 'id2',
-            types: ['cafard']
-          }
-        }
-      }
-    ];
-    const actual = filterJoinSet(query);
-    expect(actual).to.eql(expected);
-  });
+      };
+      expect(filterJoinSet).withArgs(query).to.throwError(/loops/i);
+    });
 
-  it('no filter and no types', function () {
-    const query = [
-      {
-        join_set: {
-          focus: 'i1',
-          relations: [
-            [
-              {
-                indices: [ 'i1' ],
-                path: 'id1'
-              },
-              {
-                indices: [ 'i2' ],
-                path: 'id2'
+    it('in a bool clause', function () {
+      const query = {
+        bool: {
+          must: [
+            {
+              join_set: {
+                focus: 'i1',
+                relations: [
+                  [
+                    {
+                      indices: [ 'i1' ],
+                      types: [ 't1' ],
+                      path: 'id1'
+                    },
+                    {
+                      indices: [ 'i2' ],
+                      types: [ 't2' ],
+                      path: 'id2'
+                    }
+                  ]
+                ]
               }
-            ]
+            }
           ]
         }
-      }
-    ];
-    const expected = [
-      {
-        filterjoin: {
-          id1: {
-            query: {
-              bool: {
-                must: [
-                  {
-                    match_all: {}
-                  }
-                ],
-                filter: {
-                  bool: {
-                    must: []
-                  }
-                }
-              }
-            },
-            indices: ['i2'],
-            path: 'id2'
-          }
+      };
+      const builder = new FilterJoinBuilder();
+      builder.addFilterJoin({
+        sourceTypes: 't1',
+        sourcePath: 'id1',
+        targetIndex: 'i2',
+        targetTypes: 't2',
+        targetPath: 'id2'
+      });
+      const expected = {
+        bool: {
+          must: builder.toObject()
         }
-      }
-    ];
-    const actual = filterJoinSet(query);
-    expect(actual).to.eql(expected);
-  });
+      };
+      const actual = filterJoinSet(query);
+      expect(actual).to.eql(expected);
+    });
 
-  it('should fail if there are filters on focused index', function () {
-    const queries = {
-      i1: [
-        {
-          terms: {
-            tag: [ 'grishka' ]
-          }
-        }
-      ]
-    };
-    const query = [
-      {
-        join_set: {
-          focus: 'i1',
-          relations: [
-            [
-              {
-                indices: [ 'i1' ],
-                types: [ 'cafard' ],
-                path: 'id1'
-              },
-              {
-                indices: [ 'i2' ],
-                types: [ 'cafard' ],
-                path: 'id2'
-              }
-            ]
-          ],
-          queries: queries
-        }
-      }
-    ];
-    expect(filterJoinSet).withArgs(query).to.throwError(/There cannot be filters on the root of the filterjoin/);
-  });
-
-  it('focus filter array', function () {
-    const queries = {
-      i2: [
-        {
-          terms: {
-            tag: [ 'grishka' ]
-          }
-        },
-        {
-          yo: 'da'
-        }
-      ]
-    };
-    const query = [
-      {
-        join_set: {
-          focus: 'i1',
-          relations: [
-            [
-              {
-                indices: [ 'i1' ],
-                types: [ 'cafard' ],
-                path: 'id1'
-              },
-              {
-                indices: [ 'i2' ],
-                types: [ 'cafard' ],
-                path: 'id2'
-              }
-            ]
-          ],
-          queries: queries
-        }
-      }
-    ];
-    const expected = [
-      {
-        filterjoin: {
-          id1: {
-            indices: ['i2'],
-            types: ['cafard'],
-            path: 'id2',
-            query: {
-              bool: {
-                must: [
-                  {
-                    match_all: {}
-                  }
-                ],
-                filter: {
-                  bool: {
-                    must: [
-                      {
-                        terms: {
-                          tag: [ 'grishka' ]
-                        }
-                      },
-                      {
-                        yo: 'da'
-                      }
-                    ]
-                  }
-                }
+    it('should keep all the types specified', function () {
+      const query = {
+        bool: {
+          must: [
+            {
+              join_set: {
+                focus: 'i1',
+                relations: [
+                  [
+                    {
+                      indices: [ 'i1' ],
+                      types: [ 't1', 't12' ],
+                      path: 'id1'
+                    },
+                    {
+                      indices: [ 'i2' ],
+                      types: [ 't2', 't22' ],
+                      path: 'id2'
+                    }
+                  ]
+                ]
               }
             }
-          }
-        }
-      }
-    ];
-    const actual = filterJoinSet(query);
-    expect(actual).to.eql(expected);
-  });
-
-  it('filter on related index', function () {
-    const queries = {
-      i2: [
-        {
-          terms: {
-            tag: [ 'grishka' ]
-          }
-        }
-      ]
-    };
-    const query = [
-      {
-        join_set: {
-          focus: 'i1',
-          relations: [
-            [
-              {
-                indices: [ 'i1' ],
-                types: [ 'cafard' ],
-                path: 'id1'
-              },
-              {
-                indices: [ 'i2' ],
-                types: [ 'cafard' ],
-                path: 'id2'
-              }
-            ]
-          ],
-          queries: queries
-        }
-      }
-    ];
-    const expected = [
-      {
-        filterjoin: {
-          id1: {
-            indices: ['i2'],
-            types: ['cafard'],
-            path: 'id2',
-            query: {
-              bool: {
-                must: [
-                  {
-                    match_all: {}
-                  }
-                ],
-                filter: {
-                  bool: {
-                    must: [
-                      {
-                        terms: {
-                          tag: [ 'grishka' ]
-                        }
-                      }
-                    ]
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    ];
-    const actual = filterJoinSet(query);
-    expect(actual).to.eql(expected);
-  });
-
-  it('three related indices - line', function () {
-    const queries = {
-      i2: [
-        {
-          terms: {
-            tag: [ 'pluto' ]
-          }
-        }
-      ],
-      i3: [
-        {
-          terms: {
-            tag: [ 'grishka' ]
-          }
-        }
-      ]
-    };
-    const query = [
-      {
-        join_set: {
-          focus: 'i1',
-          relations: [
-            [
-              {
-                indices: [ 'i1' ],
-                types: [ 'cafard' ],
-                path: 'id1'
-              },
-              {
-                indices: [ 'i2' ],
-                types: [ 'cafard' ],
-                path: 'id2'
-              },
-            ],
-            [
-              {
-                indices: [ 'i2' ],
-                types: [ 'cafard' ],
-                path: 'id2'
-              },
-              {
-                indices: [ 'i3' ],
-                types: [ 'cafard' ],
-                path: 'id3'
-              }
-            ]
-          ],
-          queries: queries
-        }
-      }
-    ];
-    const expected = [
-      {
-        filterjoin: {
-          id1: {
-            indices: ['i2'],
-            types: ['cafard'],
-            path: 'id2',
-            query: {
-              bool: {
-                must: [
-                  {
-                    match_all: {}
-                  }
-                ],
-                filter: {
-                  bool: {
-                    must: [
-                      {
-                        terms: {
-                          tag: [ 'pluto' ]
-                        }
-                      },
-                      {
-                        filterjoin: {
-                          id2: {
-                            indices: ['i3'],
-                            types: ['cafard'],
-                            path: 'id3',
-                            query: {
-                              bool: {
-                                must: [
-                                  {
-                                    match_all: {}
-                                  }
-                                ],
-                                filter: {
-                                  bool: {
-                                    must: [
-                                      {
-                                        terms: {
-                                          tag: [ 'grishka' ]
-                                        }
-                                      }
-                                    ]
-                                  }
-                                }
-                              }
-                            }
-                          }
-                        }
-                      }
-                    ]
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    ];
-    const actual = filterJoinSet(query);
-    expect(actual).to.eql(expected);
-  });
-
-  it('three related indices - V', function () {
-    const queries = {
-      i2: [
-        {
-          terms: {
-            tag: [ 'pluto' ]
-          }
-        }
-      ],
-      i3: [
-        {
-          terms: {
-            tag: [ 'grishka' ]
-          }
-        }
-      ]
-    };
-    const query = [
-      {
-        join_set: {
-          focus: 'i1',
-          relations: [
-            [
-              {
-                indices: [ 'i1' ],
-                types: [ 'cafard' ],
-                path: 'aaa'
-              },
-              {
-                indices: [ 'i2' ],
-                types: [ 'cafard' ],
-                path: 'id2'
-              },
-            ],
-            [
-              {
-                indices: [ 'i1' ],
-                types: [ 'cafard' ],
-                path: 'bbb'
-              },
-              {
-                indices: [ 'i3' ],
-                types: [ 'cafard' ],
-                path: 'id3'
-              }
-            ]
-          ],
-          queries: queries
-        }
-      }
-    ];
-    const expected = [
-      {
-        filterjoin: {
-          aaa: {
-            indices: ['i2'],
-            types: ['cafard'],
-            path: 'id2',
-            query: {
-              bool: {
-                must: [
-                  {
-                    match_all: {}
-                  }
-                ],
-                filter: {
-                  bool: {
-                    must: [
-                      {
-                        terms: {
-                          tag: [ 'pluto' ]
-                        }
-                      }
-                    ]
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      {
-        filterjoin: {
-          bbb: {
-            indices: ['i3'],
-            types: ['cafard'],
-            path: 'id3',
-            query: {
-              bool: {
-                must: [
-                  {
-                    match_all: {}
-                  }
-                ],
-                filter: {
-                  bool: {
-                    must: [
-                      {
-                        terms: {
-                          tag: [ 'grishka' ]
-                        }
-                      }
-                    ]
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    ];
-    const actual = filterJoinSet(query);
-    expect(actual).to.eql(expected);
-  });
-
-  it('three related indices - spock', function () {
-    const queries = {
-      i4: [
-        {
-          terms: {
-            tag: [ 'pluto' ]
-          }
-        }
-      ],
-      i5: [
-        {
-          terms: {
-            tag: [ 'sylvester' ]
-          }
-        }
-      ],
-      i6: [
-        {
-          terms: {
-            tag: [ 'mickey' ]
-          }
-        }
-      ],
-      i7: [
-        {
-          terms: {
-            tag: [ 'donald' ]
-          }
-        }
-      ]
-    };
-    const query = [
-      {
-        join_set: {
-          focus: 'i1',
-          relations: [
-            [
-              {
-                indices: [ 'i1' ],
-                types: [ 'cafard' ],
-                path: 'aaa'
-              },
-              {
-                indices: [ 'i2' ],
-                types: [ 'cafard' ],
-                path: 'id2'
-              }
-            ],
-            [
-              {
-                indices: [ 'i2' ],
-                types: [ 'cafard' ],
-                path: 'a'
-              },
-              {
-                indices: [ 'i4' ],
-                types: [ 'cafard' ],
-                path: 'id'
-              }
-            ],
-            [
-              {
-                indices: [ 'i2' ],
-                types: [ 'cafard' ],
-                path: 'b'
-              },
-              {
-                indices: [ 'i5' ],
-                types: [ 'cafard' ],
-                path: 'id'
-              }
-            ],
-            [
-              {
-                indices: [ 'i1' ],
-                types: [ 'cafard' ],
-                path: 'bbb'
-              },
-              {
-                indices: [ 'i3' ],
-                types: [ 'cafard' ],
-                path: 'id3'
-              }
-            ],
-            [
-              {
-                indices: [ 'i6' ],
-                types: [ 'cafard' ],
-                path: 'id'
-              },
-              {
-                indices: [ 'i3' ],
-                types: [ 'cafard' ],
-                path: 'a'
-              }
-            ],
-            [
-              {
-                indices: [ 'i7' ],
-                types: [ 'cafard' ],
-                path: 'id'
-              },
-              {
-                indices: [ 'i3' ],
-                types: [ 'cafard' ],
-                path: 'b'
-              }
-            ]
-          ],
-          queries: queries
-        }
-      }
-    ];
-    const expected = [
-      {
-        filterjoin: {
-          aaa: {
-            indices: ['i2'],
-            types: ['cafard'],
-            path: 'id2',
-            query: {
-              bool: {
-                must: [
-                  {
-                    match_all: {}
-                  }
-                ],
-                filter: {
-                  bool: {
-                    must: [
-                      {
-                        filterjoin: {
-                          a: {
-                            indices: ['i4'],
-                            types: ['cafard'],
-                            path: 'id',
-                            query: {
-                              bool: {
-                                must: [
-                                  {
-                                    match_all: {}
-                                  }
-                                ],
-                                filter: {
-                                  bool: {
-                                    must: [
-                                      {
-                                        terms: {
-                                          tag: [ 'pluto' ]
-                                        }
-                                      }
-                                    ]
-                                  }
-                                }
-                              }
-                            }
-                          }
-                        }
-                      },
-                      {
-                        filterjoin: {
-                          b: {
-                            indices: ['i5'],
-                            types: ['cafard'],
-                            path: 'id',
-                            query: {
-                              bool: {
-                                must: [
-                                  {
-                                    match_all: {}
-                                  }
-                                ],
-                                filter: {
-                                  bool: {
-                                    must: [
-                                      {
-                                        terms: {
-                                          tag: [ 'sylvester' ]
-                                        }
-                                      }
-                                    ]
-                                  }
-                                }
-                              }
-                            }
-                          }
-                        }
-                      }
-                    ]
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      {
-        filterjoin: {
-          bbb: {
-            indices: ['i3'],
-            types: ['cafard'],
-            path: 'id3',
-            query: {
-              bool: {
-                must: [
-                  {
-                    match_all: {}
-                  }
-                ],
-                filter: {
-                  bool: {
-                    must: [
-                      {
-                        filterjoin: {
-                          a: {
-                            indices: ['i6'],
-                            types: ['cafard'],
-                            path: 'id',
-                            query: {
-                              bool: {
-                                must: [
-                                  {
-                                    match_all: {}
-                                  }
-                                ],
-                                filter: {
-                                  bool: {
-                                    must: [
-                                      {
-                                        terms: {
-                                          tag: [ 'mickey' ]
-                                        }
-                                      }
-                                    ]
-                                  }
-                                }
-                              }
-                            }
-                          }
-                        }
-                      },
-                      {
-                        filterjoin: {
-                          b: {
-                            indices: ['i7'],
-                            types: ['cafard'],
-                            path: 'id',
-                            query: {
-                              bool: {
-                                must: [
-                                  {
-                                    match_all: {}
-                                  }
-                                ],
-                                filter: {
-                                  bool: {
-                                    must: [
-                                      {
-                                        terms: {
-                                          tag: [ 'donald' ]
-                                        }
-                                      }
-                                    ]
-                                  }
-                                }
-                              }
-                            }
-                          }
-                        }
-                      }
-                    ]
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    ];
-    const actual = filterJoinSet(query);
-    expect(actual).to.eql(expected);
-  });
-
-  it('connected component 1', function () {
-    const query = [
-      {
-        join_set: {
-          focus: 'i1',
-          relations: [
-            [
-              {
-                indices: [ 'i1' ],
-                types: [ 'cafard' ],
-                path: 'id1'
-              },
-              {
-                indices: [ 'i2' ],
-                types: [ 'cafard' ],
-                path: 'id2'
-              }
-            ],
-            [
-              {
-                indices: [ 'i3' ],
-                types: [ 'cafard' ],
-                path: 'id3'
-              },
-              {
-                indices: [ 'i4' ],
-                types: [ 'cafard' ],
-                path: 'id4'
-              }
-            ]
           ]
         }
-      }
-    ];
-    const expected = [
-      {
-        filterjoin: {
-          id1: {
-            query: {
-              bool: {
-                must: [
-                  {
-                    match_all: {}
-                  }
-                ],
-                filter: {
-                  bool: {
-                    must: []
-                  }
-                }
-              }
-            },
-            indices: ['i2'],
-            path: 'id2',
-            types: ['cafard']
-          }
+      };
+      const builder = new FilterJoinBuilder();
+      builder.addFilterJoin({
+        sourceTypes: [ 't1', 't12' ],
+        sourcePath: 'id1',
+        targetIndex: 'i2',
+        targetTypes: [ 't2', 't22' ],
+        targetPath: 'id2'
+      });
+      const expected = {
+        bool: {
+          must: builder.toObject()
         }
-      }
-    ];
-    const actual = filterJoinSet(query);
-    expect(actual).to.eql(expected);
-  });
+      };
+      const actual = filterJoinSet(query);
+      expect(actual).to.eql(expected);
+    });
 
-  it('connected component 2', function () {
-    const query = [
-      {
-        join_set: {
-          focus: 'i1',
-          relations: [
-            [
-              {
-                indices: [ 'i1' ],
-                types: [ 'cafard' ],
-                path: 'id1'
-              },
-              {
-                indices: [ 'i2' ],
-                types: [ 'cafard' ],
-                path: 'id2'
+    it('in a bool clause, advanced join options', function () {
+      const query = {
+        bool: {
+          must: [
+            {
+              join_set: {
+                focus: 'i1',
+                relations: [
+                  [
+                    {
+                      indices: [ 'i1' ],
+                      types: [ 'cafard' ],
+                      path: 'id1',
+                      termsEncoding: 'long',
+                      orderBy: 'doc_score',
+                      maxTermsPerShard: 10
+                    },
+                    {
+                      indices: [ 'i2' ],
+                      types: [ 'cafard' ],
+                      path: 'id2',
+                      termsEncoding: 'long',
+                      orderBy: 'doc_score',
+                      maxTermsPerShard: 100
+                    }
+                  ]
+                ]
               }
-            ],
-            [
-              {
-                indices: [ 'i0' ],
-                types: [ 'cafard' ],
-                path: 'id0'
-              },
-              {
-                indices: [ 'i1' ],
-                types: [ 'cafard' ],
-                path: 'id0'
-              }
-            ],
-            [
-              {
-                indices: [ 'i3' ],
-                types: [ 'cafard' ],
-                path: 'id3'
-              },
-              {
-                indices: [ 'i4' ],
-                types: [ 'cafard' ],
-                path: 'id4'
-              }
-            ]
+            }
           ]
         }
-      }
-    ];
-    const expected = [
-      {
-        filterjoin: {
-          id1: {
-            query: {
-              bool: {
-                must: [
-                  {
-                    match_all: {}
-                  }
-                ],
-                filter: {
-                  bool: {
-                    must: []
-                  }
-                }
+      };
+      const builder = new FilterJoinBuilder();
+      builder.addFilterJoin({
+        sourceTypes: 'cafard',
+        sourcePath: 'id1',
+        targetIndex: 'i2',
+        targetTypes: 'cafard',
+        targetPath: 'id2',
+        termsEncoding: 'long',
+        orderBy: 'doc_score',
+        maxTermsPerShard: 100
+      });
+      const expected = {
+        bool: {
+          must: builder.toObject()
+        }
+      };
+      const actual = filterJoinSet(query);
+      expect(actual).to.eql(expected);
+    });
+
+    it('in a bool clause, advanced join options maxTermsPerShard should not be passed if === -1', function () {
+      const query = {
+        bool: {
+          must: [
+            {
+              join_set: {
+                focus: 'i1',
+                relations: [
+                  [
+                    {
+                      indices: [ 'i1' ],
+                      types: [ 'cafard' ],
+                      path: 'id1',
+                      termsEncoding: 'long',
+                      orderBy: 'doc_score',
+                      maxTermsPerShard: 100
+                    },
+                    {
+                      indices: [ 'i2' ],
+                      types: [ 'cafard' ],
+                      path: 'id2',
+                      termsEncoding: 'long',
+                      orderBy: 'doc_score',
+                      maxTermsPerShard: -1
+                    }
+                  ]
+                ]
               }
-            },
-            indices: ['i2'],
-            path: 'id2',
-            types: ['cafard']
+            }
+          ]
+        }
+      };
+      const builder = new FilterJoinBuilder();
+      builder.addFilterJoin({
+        sourceTypes: 'cafard',
+        sourcePath: 'id1',
+        targetIndex: 'i2',
+        targetTypes: 'cafard',
+        targetPath: 'id2',
+        termsEncoding: 'long',
+        orderBy: 'doc_score'
+      });
+      const expected = {
+        bool: {
+          must: builder.toObject()
+        }
+      };
+      const actual = filterJoinSet(query);
+      expect(actual).to.eql(expected);
+    });
+
+    it('in a bool clause with no type specified for one of the indexes', function () {
+      const query = {
+        bool: {
+          must: [
+            {
+              join_set: {
+                focus: 'i1',
+                relations: [
+                  [
+                    {
+                      indices: [ 'i1' ],
+                      types: [ 'cafard' ],
+                      path: 'id1'
+                    },
+                    {
+                      indices: [ 'i2' ],
+                      path: 'id2'
+                    }
+                  ]
+                ]
+              }
+            }
+          ]
+        }
+      };
+      const builder = new FilterJoinBuilder();
+      builder.addFilterJoin({
+        sourceTypes: 'cafard',
+        sourcePath: 'id1',
+        targetIndex: 'i2',
+        targetPath: 'id2'
+      });
+      const expected = {
+        bool: {
+          must: builder.toObject()
+        }
+      };
+      const actual = filterJoinSet(query);
+      expect(actual).to.eql(expected);
+    });
+
+    it('no filter', function () {
+      const query = [
+        {
+          join_set: {
+            focus: 'i1',
+            relations: [
+              [
+                { indices: [ 'i1' ], types: [ 'cafard' ], path: 'id1' },
+                { indices: [ 'i2' ], types: [ 'cafard' ], path: 'id2' }
+              ]
+            ]
           }
         }
-      },
-      {
-        filterjoin: {
-          id0: {
-            query: {
-              bool: {
-                must: [
-                  {
-                    match_all: {}
-                  }
-                ],
-                filter: {
-                  bool: {
-                    must: []
-                  }
-                }
-              }
-            },
-            indices: ['i0'],
-            path: 'id0',
-            types: ['cafard']
+      ];
+      const builder = new FilterJoinBuilder();
+      builder.addFilterJoin({
+        sourceTypes: 'cafard',
+        sourcePath: 'id1',
+        targetIndex: 'i2',
+        targetTypes: 'cafard',
+        targetPath: 'id2'
+      });
+      const actual = filterJoinSet(query);
+      expect(actual).to.eql(builder.toObject());
+    });
+
+    it('no filter and no types', function () {
+      const query = [
+        {
+          join_set: {
+            focus: 'i1',
+            relations: [
+              [
+                { indices: [ 'i1' ], path: 'id1' },
+                { indices: [ 'i2' ], path: 'id2' }
+              ]
+            ]
           }
         }
-      }
-    ];
-    const actual = filterJoinSet(query);
-    expect(actual).to.eql(expected);
+      ];
+      const builder = new FilterJoinBuilder();
+      builder.addFilterJoin({
+        sourcePath: 'id1',
+        targetIndex: 'i2',
+        targetPath: 'id2'
+      });
+      const actual = filterJoinSet(query);
+      expect(actual).to.eql(builder.toObject());
+    });
+
+    it('should fail if there are filters on focused index', function () {
+      const queries = {
+        i1: [
+          {
+            terms: {
+              tag: [ 'grishka' ]
+            }
+          }
+        ]
+      };
+      const query = [
+        {
+          join_set: {
+            focus: 'i1',
+            relations: [
+              [
+                { indices: [ 'i1' ], types: [ 'cafard' ], path: 'id1' },
+                { indices: [ 'i2' ], types: [ 'cafard' ], path: 'id2' }
+              ]
+            ],
+            queries: queries
+          }
+        }
+      ];
+      expect(filterJoinSet).withArgs(query).to.throwError(/There cannot be filters on the root of the filterjoin/);
+    });
+
+    it('focus filter array', function () {
+      const queries = {
+        i2: [
+          {
+            terms: {
+              tag: [ 'grishka' ]
+            }
+          },
+          {
+            yo: 'da'
+          }
+        ]
+      };
+      const query = [
+        {
+          join_set: {
+            focus: 'i1',
+            relations: [
+              [
+                { indices: [ 'i1' ], types: [ 'cafard' ], path: 'id1' },
+                { indices: [ 'i2' ], types: [ 'cafard' ], path: 'id2' }
+              ]
+            ],
+            queries: queries
+          }
+        }
+      ];
+      const builder = new FilterJoinBuilder();
+      builder.addFilterJoin({
+        sourceTypes: 'cafard',
+        sourcePath: 'id1',
+        targetIndex: 'i2',
+        targetTypes: 'cafard',
+        targetPath: 'id2'
+      })
+      .addQuery({
+        terms: {
+          tag: [ 'grishka' ]
+        }
+      })
+      .addQuery({
+        yo: 'da'
+      });
+      const actual = filterJoinSet(query);
+      expect(actual).to.eql(builder.toObject());
+    });
+
+    it('filter on related index', function () {
+      const queries = {
+        i2: [
+          {
+            terms: {
+              tag: [ 'grishka' ]
+            }
+          }
+        ]
+      };
+      const query = [
+        {
+          join_set: {
+            focus: 'i1',
+            relations: [
+              [
+                { indices: [ 'i1' ], types: [ 'cafard' ], path: 'id1' },
+                { indices: [ 'i2' ], types: [ 'cafard' ], path: 'id2' }
+              ]
+            ],
+            queries: queries
+          }
+        }
+      ];
+      const builder = new FilterJoinBuilder();
+      builder.addFilterJoin({
+        sourceTypes: 'cafard',
+        sourcePath: 'id1',
+        targetIndex: 'i2',
+        targetTypes: 'cafard',
+        targetPath: 'id2'
+      })
+      .addQuery({
+        terms: {
+          tag: [ 'grishka' ]
+        }
+      });
+      const actual = filterJoinSet(query);
+      expect(actual).to.eql(builder.toObject());
+    });
+
+    it('three related indices - line', function () {
+      const queries = {
+        i2: [
+          {
+            terms: {
+              tag: [ 'pluto' ]
+            }
+          }
+        ],
+        i3: [
+          {
+            terms: {
+              tag: [ 'grishka' ]
+            }
+          }
+        ]
+      };
+      const query = [
+        {
+          join_set: {
+            focus: 'i1',
+            relations: [
+              [
+                { indices: [ 'i1' ], types: [ 'cafard' ], path: 'id1' },
+                { indices: [ 'i2' ], types: [ 'cafard' ], path: 'id2' },
+              ],
+              [
+                { indices: [ 'i2' ], types: [ 'cafard' ], path: 'id2' },
+                { indices: [ 'i3' ], types: [ 'cafard' ], path: 'id3' }
+              ]
+            ],
+            queries: queries
+          }
+        }
+      ];
+      const builder = new FilterJoinBuilder();
+      builder.addFilterJoin({
+        sourceTypes: 'cafard',
+        sourcePath: 'id1',
+        targetIndex: 'i2',
+        targetTypes: 'cafard',
+        targetPath: 'id2'
+      })
+      .addQuery({
+        terms: {
+          tag: [ 'pluto' ]
+        }
+      })
+      .addFilterJoin({
+        sourceTypes: 'cafard',
+        sourcePath: 'id2',
+        targetIndex: 'i3',
+        targetTypes: 'cafard',
+        targetPath: 'id3'
+      })
+      .addQuery({
+        terms: {
+          tag: [ 'grishka' ]
+        }
+      });
+      const actual = filterJoinSet(query);
+      expect(actual).to.eql(builder.toObject());
+    });
+
+    it('three related indices - V', function () {
+      const queries = {
+        i2: [
+          {
+            terms: {
+              tag: [ 'pluto' ]
+            }
+          }
+        ],
+        i3: [
+          {
+            terms: {
+              tag: [ 'grishka' ]
+            }
+          }
+        ]
+      };
+      const query = [
+        {
+          join_set: {
+            focus: 'i1',
+            relations: [
+              [
+                { indices: [ 'i1' ], types: [ 'cafard' ], path: 'aaa' },
+                { indices: [ 'i2' ], types: [ 'cafard' ], path: 'id2' },
+              ],
+              [
+                { indices: [ 'i1' ], types: [ 'cafard' ], path: 'bbb' },
+                { indices: [ 'i3' ], types: [ 'cafard' ], path: 'id3' }
+              ]
+            ],
+            queries: queries
+          }
+        }
+      ];
+      const builder = new FilterJoinBuilder();
+      builder.addFilterJoin({
+        sourceTypes: 'cafard',
+        sourcePath: 'aaa',
+        targetIndex: 'i2',
+        targetTypes: 'cafard',
+        targetPath: 'id2'
+      })
+      .addQuery({
+        terms: {
+          tag: [ 'pluto' ]
+        }
+      });
+      builder.addFilterJoin({
+        sourceTypes: 'cafard',
+        sourcePath: 'bbb',
+        targetIndex: 'i3',
+        targetTypes: 'cafard',
+        targetPath: 'id3'
+      })
+      .addQuery({
+        terms: {
+          tag: [ 'grishka' ]
+        }
+      });
+      const actual = filterJoinSet(query);
+      expect(actual).to.eql(builder.toObject());
+    });
+
+    it('three related indices - spock', function () {
+      const queries = {
+        i4: [
+          {
+            terms: {
+              tag: [ 'pluto' ]
+            }
+          }
+        ],
+        i5: [
+          {
+            terms: {
+              tag: [ 'sylvester' ]
+            }
+          }
+        ],
+        i6: [
+          {
+            terms: {
+              tag: [ 'mickey' ]
+            }
+          }
+        ],
+        i7: [
+          {
+            terms: {
+              tag: [ 'donald' ]
+            }
+          }
+        ]
+      };
+      const query = [
+        {
+          join_set: {
+            focus: 'i1',
+            relations: [
+              [
+                { indices: [ 'i1' ], types: [ 'cafard' ], path: 'aaa' },
+                { indices: [ 'i2' ], types: [ 'cafard' ], path: 'id2' }
+              ],
+              [
+                { indices: [ 'i2' ], types: [ 'cafard' ], path: 'a' },
+                { indices: [ 'i4' ], types: [ 'cafard' ], path: 'id' }
+              ],
+              [
+                { indices: [ 'i2' ], types: [ 'cafard' ], path: 'b' },
+                { indices: [ 'i5' ], types: [ 'cafard' ], path: 'id' }
+              ],
+              [
+                { indices: [ 'i1' ], types: [ 'cafard' ], path: 'bbb' },
+                { indices: [ 'i3' ], types: [ 'cafard' ], path: 'id3' }
+              ],
+              [
+                { indices: [ 'i6' ], types: [ 'cafard' ], path: 'id' },
+                { indices: [ 'i3' ], types: [ 'cafard' ], path: 'a' }
+              ],
+              [
+                { indices: [ 'i7' ], types: [ 'cafard' ], path: 'id' },
+                { indices: [ 'i3' ], types: [ 'cafard' ], path: 'b' }
+              ]
+            ],
+            queries: queries
+          }
+        }
+      ];
+      const builder = new FilterJoinBuilder();
+      const fj1 = builder.addFilterJoin({
+        sourceTypes: 'cafard',
+        sourcePath: 'aaa',
+        targetIndex: 'i2',
+        targetTypes: 'cafard',
+        targetPath: 'id2'
+      });
+      fj1.addFilterJoin({
+        sourceTypes: 'cafard',
+        sourcePath: 'a',
+        targetIndex: 'i4',
+        targetTypes: 'cafard',
+        targetPath: 'id'
+      })
+      .addQuery({
+        terms: {
+          tag: [ 'pluto' ]
+        }
+      });
+      fj1.addFilterJoin({
+        sourceTypes: 'cafard',
+        sourcePath: 'b',
+        targetIndex: 'i5',
+        targetTypes: 'cafard',
+        targetPath: 'id'
+      })
+      .addQuery({
+        terms: {
+          tag: [ 'sylvester' ]
+        }
+      });
+      const fj2 = builder.addFilterJoin({
+        sourceTypes: 'cafard',
+        sourcePath: 'bbb',
+        targetIndex: 'i3',
+        targetTypes: 'cafard',
+        targetPath: 'id3'
+      });
+      fj2.addFilterJoin({
+        sourceTypes: 'cafard',
+        sourcePath: 'a',
+        targetIndex: 'i6',
+        targetTypes: 'cafard',
+        targetPath: 'id'
+      })
+      .addQuery({
+        terms: {
+          tag: [ 'mickey' ]
+        }
+      });
+      fj2.addFilterJoin({
+        sourceTypes: 'cafard',
+        sourcePath: 'b',
+        targetIndex: 'i7',
+        targetTypes: 'cafard',
+        targetPath: 'id'
+      })
+      .addQuery({
+        terms: {
+          tag: [ 'donald' ]
+        }
+      });
+      const actual = filterJoinSet(query);
+      expect(actual).to.eql(builder.toObject());
+    });
+
+    it('connected component 1', function () {
+      const query = [
+        {
+          join_set: {
+            focus: 'i1',
+            relations: [
+              [
+                { indices: [ 'i1' ], types: [ 'cafard' ], path: 'id1' },
+                { indices: [ 'i2' ], types: [ 'cafard' ], path: 'id2' }
+              ],
+              [
+                { indices: [ 'i3' ], types: [ 'cafard' ], path: 'id3' },
+                { indices: [ 'i4' ], types: [ 'cafard' ], path: 'id4' }
+              ]
+            ]
+          }
+        }
+      ];
+      const builder = new FilterJoinBuilder();
+      builder.addFilterJoin({
+        sourceTypes: 'cafard',
+        sourcePath: 'id1',
+        targetIndex: 'i2',
+        targetTypes: 'cafard',
+        targetPath: 'id2'
+      });
+      const actual = filterJoinSet(query);
+      expect(actual).to.eql(builder.toObject());
+    });
+
+    it('connected component 2', function () {
+      const query = [
+        {
+          join_set: {
+            focus: 'i1',
+            relations: [
+              [
+                { indices: [ 'i1' ], types: [ 'cafard' ], path: 'id1' },
+                { indices: [ 'i2' ], types: [ 'cafard' ], path: 'id2' }
+              ],
+              [
+                { indices: [ 'i0' ], types: [ 'cafard' ], path: 'id0' },
+                { indices: [ 'i1' ], types: [ 'cafard' ], path: 'id0' }
+              ],
+              [
+                { indices: [ 'i3' ], types: [ 'cafard' ], path: 'id3' },
+                { indices: [ 'i4' ], types: [ 'cafard' ], path: 'id4' }
+              ]
+            ]
+          }
+        }
+      ];
+      const builder = new FilterJoinBuilder();
+      builder.addFilterJoin({
+        sourceTypes: 'cafard',
+        sourcePath: 'id1',
+        targetIndex: 'i2',
+        targetTypes: 'cafard',
+        targetPath: 'id2'
+      });
+      builder.addFilterJoin({
+        sourceTypes: 'cafard',
+        sourcePath: 'id0',
+        targetIndex: 'i0',
+        targetTypes: 'cafard',
+        targetPath: 'id0'
+      });
+      const actual = filterJoinSet(query);
+      expect(actual).to.eql(builder.toObject());
+    });
+
+    it('accepts orderBy and maxTermsPerShard parameters', function () {
+      const query = [
+        {
+          join_set: {
+            focus: 'i1',
+            relations: [
+              [
+                { indices: [ 'i1' ], types: [ 'cafard' ], path: 'id1' },
+                {
+                  indices: [ 'i2' ],
+                  types: [ 'cafard' ],
+                  path: 'id2',
+                  orderBy: 'doc_score',
+                  maxTermsPerShard: '10'
+                }
+              ]
+            ]
+          }
+        }
+      ];
+      const builder = new FilterJoinBuilder();
+      builder.addFilterJoin({
+        sourceTypes: 'cafard',
+        sourcePath: 'id1',
+        targetIndex: 'i2',
+        targetTypes: 'cafard',
+        targetPath: 'id2',
+        orderBy: 'doc_score',
+        maxTermsPerShard: '10'
+      });
+      const actual = filterJoinSet(query);
+      expect(actual).to.eql(builder.toObject());
+    });
+
+    it('moves the query object to bool.must', function () {
+      const query = [
+        {
+          join_set: {
+            focus: 'i1',
+            relations: [
+              [
+                { indices: [ 'i1' ], types: [ 'cafard' ], path: 'id1' },
+                { indices: [ 'i2' ], types: [ 'cafard' ], path: 'id2' }
+              ]
+            ],
+            queries: {
+              i2: [
+                {
+                  query: {
+                    query_string: {
+                      analyze_wildcard: true,
+                      query: 'travel'
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      ];
+      const builder = new FilterJoinBuilder();
+      builder.addFilterJoin({
+        sourceTypes: 'cafard',
+        sourcePath: 'id1',
+        targetIndex: 'i2',
+        targetTypes: 'cafard',
+        targetPath: 'id2'
+      })
+      .addQuery({
+        query: {
+          query_string: {
+            analyze_wildcard: true,
+            query: 'travel'
+          }
+        }
+      });
+      const actual = filterJoinSet(query);
+      expect(actual).to.eql(builder.toObject());
+    });
   });
 
   describe('Filterjoin with nested join sequence', function () {
@@ -1265,19 +1070,12 @@ describe('FilterJoin querying', function () {
     });
 
     it('2 join sequences', function () {
-
       const joinSequence1 = {
         join_sequence: [
           {
             relation: [
-              {
-                path: 'aaa',
-                indices: [ 'A' ]
-              },
-              {
-                path: 'bbb',
-                indices: [ 'B' ]
-              }
+              { path: 'aaa', indices: [ 'A' ] },
+              { path: 'bbb', indices: [ 'B' ] }
             ]
           }
         ]
@@ -1286,97 +1084,60 @@ describe('FilterJoin querying', function () {
         join_sequence: [
           {
             relation: [
-              {
-                path: 'ccc',
-                indices: [ 'C' ]
-              },
-              {
-                path: 'ddd',
-                indices: [ 'D' ]
-              }
+              { path: 'ccc', indices: [ 'C' ] },
+              { path: 'ddd', indices: [ 'D' ] }
             ]
           }
         ]
       };
-
-      const query = [{
-        query: {
-          bool: {
-            must: [
-              {
-                match_all:{}
-              }
-            ],
-            filter: {
-              bool: {
-                must: [joinSequence1, joinSequence2]
-              }
-            }
-          }
-        }
-      }];
-
-      const expectedJoin1 = {
-        filterjoin: {
-          bbb: {
-            indices :['A'],
-            path : 'aaa',
-            query : {
-              bool: {
-                must: [
-                  {
-                    match_all: {}
-                  }
-                ],
-                filter: {
-                  bool: {
-                    must: []
-                  }
+      const query = [
+        {
+          query: {
+            bool: {
+              must: [
+                {
+                  match_all: {}
+                }
+              ],
+              filter: {
+                bool: {
+                  must: [ joinSequence1, joinSequence2 ]
                 }
               }
             }
           }
         }
-      };
-      const expectedJoin2 = {
-        filterjoin: {
-          ddd: {
-            indices :['C'],
-            path : 'ccc',
-            query : {
-              bool: {
-                must: [
-                  {
-                    match_all: {}
-                  }
-                ],
-                filter: {
-                  bool: {
-                    must: []
-                  }
+      ];
+      const builder = new FilterJoinBuilder();
+      builder.addFilterJoin({
+        sourcePath: 'bbb',
+        targetIndex: 'A',
+        targetPath: 'aaa'
+      });
+      builder.addFilterJoin({
+        sourcePath: 'ddd',
+        targetIndex: 'C',
+        targetPath: 'ccc'
+      });
+
+      const expected = [
+        {
+          query: {
+            bool: {
+              must: [
+                {
+                  match_all:{}
+                }
+              ],
+              filter: {
+                bool: {
+                  must: builder.toObject()
                 }
               }
             }
           }
         }
-      };
-
-      const expected = [{
-        query: {
-          bool: {
-            must: [
-              {
-                match_all:{}
-              }
-            ],
-            filter: {
-              bool: {
-                must:[expectedJoin1, expectedJoin2]
-              }
-            }
-          }
-        }
-      }];
+      ];
 
       const actual = filterJoinSeq(query);
       expect(actual).to.eql(expected);
@@ -1390,32 +1151,12 @@ describe('FilterJoin querying', function () {
               focus: 'company',
               relations: [
                 [
-                  {
-                    indices: [
-                      'company'
-                    ],
-                    path: 'id'
-                  },
-                  {
-                    indices: [
-                      'investment'
-                    ],
-                    path: 'companyid'
-                  }
+                  { indices: [ 'company' ], path: 'id' },
+                  { indices: [ 'investment' ], path: 'companyid' }
                 ],
                 [
-                  {
-                    indices: [
-                      'article'
-                    ],
-                    path: 'companyid'
-                  },
-                  {
-                    indices: [
-                      'company'
-                    ],
-                    path: 'id'
-                  }
+                  { indices: [ 'article' ], path: 'companyid' },
+                  { indices: [ 'company' ], path: 'id' }
                 ]
               ]
             }
@@ -1426,18 +1167,8 @@ describe('FilterJoin querying', function () {
                 focus: 'article',
                 relations: [
                   [
-                    {
-                      indices: [
-                        'article'
-                      ],
-                      path: 'companyid'
-                    },
-                    {
-                      indices: [
-                        'company'
-                      ],
-                      path: 'id'
-                    }
+                    { indices: [ 'article' ], path: 'companyid' },
+                    { indices: [ 'company' ], path: 'id' }
                   ]
                 ]
               }
@@ -1445,77 +1176,32 @@ describe('FilterJoin querying', function () {
           }
         ]
       };
+      const builder = new FilterJoinBuilder();
+      builder.addFilterJoin({
+        sourcePath: 'id',
+        targetIndex: 'investment',
+        targetPath: 'companyid'
+      });
+      builder.addFilterJoin({
+        sourcePath: 'id',
+        targetIndex: 'article',
+        targetPath: 'companyid'
+      });
+      const query1 = builder.toObject();
+
+      builder.clear();
+      builder.addFilterJoin({
+        sourcePath: 'companyid',
+        targetIndex: 'company',
+        targetPath: 'id'
+      });
+      const query2 = builder.toObject();
+
       const expected = {
         query: [
+          ...query1,
           {
-            filterjoin: {
-              id: {
-                query: {
-                  bool: {
-                    must: [
-                      {
-                        match_all: {}
-                      }
-                    ],
-                    filter: {
-                      bool: {
-                        must: []
-                      }
-                    }
-                  }
-                },
-                indices: ['investment'],
-                path: 'companyid'
-              }
-            }
-          },
-          {
-            filterjoin: {
-              id: {
-                query: {
-                  bool: {
-                    must: [
-                      {
-                        match_all: {}
-                      }
-                    ],
-                    filter: {
-                      bool: {
-                        must: []
-                      }
-                    }
-                  }
-                },
-                indices: ['article'],
-                path: 'companyid'
-              }
-            }
-          },
-          {
-            other: [
-              {
-                filterjoin: {
-                  companyid: {
-                    query: {
-                      bool: {
-                        must: [
-                          {
-                            match_all: {}
-                          }
-                        ],
-                        filter: {
-                          bool: {
-                            must: []
-                          }
-                        }
-                      }
-                    },
-                    indices: ['company'],
-                    path: 'id'
-                  }
-                }
-              }
-            ]
+            other: query2
           }
         ]
       };
@@ -1524,403 +1210,230 @@ describe('FilterJoin querying', function () {
     });
 
     it('join_sequence with a join_set', function () {
-      const query = [{
-        join_sequence: [
-          {
-            relation: [
-              {
-                path: 'id',
-                indices: [ 'company' ],
-                queries: [
-                  {
-                    join_set: {
-                      focus: 'i1',
-                      relations: [
-                        [
-                          {
-                            indices: [ 'i1' ],
-                            path: 'id2'
-                          },
-                          {
-                            indices: [ 'i2' ],
-                            path: 'id'
-                          }
+      const query = [
+        {
+          join_sequence: [
+            {
+              relation: [
+                {
+                  path: 'id',
+                  indices: [ 'company' ],
+                  queries: [
+                    {
+                      join_set: {
+                        focus: 'i1',
+                        relations: [
+                          [
+                            { indices: [ 'i1' ], path: 'id2' },
+                            { indices: [ 'i2' ], path: 'id' }
+                          ]
                         ]
-                      ]
-                    }
-                  }
-                ]
-              },
-              {
-                path: 'companyid',
-                indices: [ 'investment' ]
-              }
-            ]
-          }
-        ]
-      }];
-      const expected = [
-        {
-          filterjoin: {
-            companyid: {
-              path: 'id',
-              indices: ['company'],
-              query: {
-                bool: {
-                  must: [
-                    {
-                      match_all: {}
-                    }
-                  ],
-                  filter: {
-                    bool: {
-                      must: [
-                        {
-                          filterjoin: {
-                            id2: {
-                              query: {
-                                bool: {
-                                  must: [
-                                    {
-                                      match_all: {}
-                                    }
-                                  ],
-                                  filter: {
-                                    bool: {
-                                      must: []
-                                    }
-                                  }
-                                }
-                              },
-                              indices: ['i2'],
-                              path: 'id'
-                            }
-                          }
-                        }
-                      ]
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      ];
-      const actual = filterJoinSeq(filterJoinSet(query));
-      expect(actual).to.eql(expected);
-    });
-
-    it('nested sequence 1', function () {
-      const query = [{
-        join_sequence: [
-          {
-            group: [
-              [
-                {
-                  relation: [
-                    {
-                      path: 'companyid',
-                      indices: [ 'investment' ],
-                      queries: [
-                        {
-                          query: {
-                            query_string: {
-                              query: '360buy'
-                            }
-                          }
-                        }
-                      ]
-                    },
-                    {
-                      path: 'id',
-                      indices: [ 'company' ]
-                    }
-                  ]
-                }
-              ]
-            ]
-          },
-          {
-            relation: [
-              {
-                path: 'id',
-                indices: [ 'company' ]
-              },
-              {
-                path: 'companyid',
-                indices: [ 'investment' ]
-              }
-            ]
-          }
-        ]
-      }];
-      const expected = [
-        {
-          filterjoin: {
-            companyid: {
-              path: 'id',
-              indices: ['company'],
-              query: {
-                bool: {
-                  must: [
-                    {
-                      match_all: {}
-                    }
-                  ],
-                  filter: {
-                    bool: {
-                      must: [
-                        {
-                          filterjoin: {
-                            id: {
-                              path: 'companyid',
-                              indices: ['investment'],
-                              query: {
-                                bool: {
-                                  must: [
-                                    {
-                                      match_all: {}
-                                    },
-                                    {
-                                      query_string: {
-                                        query: '360buy'
-                                      }
-                                    }
-                                  ],
-                                  filter: {
-                                    bool: {
-                                      must: []
-                                    }
-                                  }
-                                }
-                              }
-                            }
-                          }
-                        }
-                      ]
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      ];
-      const actual = filterJoinSeq(query);
-      expect(actual).to.eql(expected);
-    });
-
-    it('nested sequence 2', function () {
-      const query = [{
-        join_sequence: [
-          {
-            group: [
-              [
-                {
-                  relation: [
-                    {
-                      path: 'id',
-                      indices: [ 'A' ],
-                      queries: [
-                        {
-                          query: {
-                            query_string: {
-                              query: 'aaa'
-                            }
-                          }
-                        }
-                      ]
-                    },
-                    {
-                      path: 'aid',
-                      indices: [ 'B' ]
-                    }
-                  ]
-                }
-              ],
-              [
-                {
-                  relation: [
-                    {
-                      path: 'did',
-                      indices: [ 'C' ],
-                      queries: [
-                        {
-                          query: {
-                            query_string: {
-                              query: 'ccc'
-                            }
-                          }
-                        }
-                      ]
-                    },
-                    {
-                      path: 'id',
-                      indices: [ 'D' ]
+                      }
                     }
                   ]
                 },
-                {
-                  relation: [
-                    {
-                      path: 'id',
-                      indices: [ 'D' ],
-                      queries: [
-                        {
-                          query: {
-                            query_string: {
-                              query: 'ddd'
-                            }
-                          }
-                        }
-                      ]
-                    },
-                    {
-                      path: 'did',
-                      indices: [ 'B' ]
-                    }
-                  ]
-                }
+                { path: 'companyid', indices: [ 'investment' ] }
               ]
-            ]
-          },
-          {
-            relation: [
-              {
-                path: 'id',
-                indices: [ 'B' ],
-                queries: [
-                  {
-                    query: {
-                      query_string: {
-                        query: 'bbb'
-                      }
-                    }
-                  }
-                ]
-              },
-              {
-                path: 'bid',
-                indices: [ 'A' ]
-              }
-            ]
-          }
-        ]
-      }];
-      const expected = [
-        {
-          filterjoin: {
-            bid: {
-              path: 'id',
-              indices: ['B'],
-              query: {
-                bool: {
-                  must: [
-                    {
-                      match_all: {}
-                    },
-                    {
-                      query_string: {
-                        query: 'bbb'
-                      }
-                    }
-                  ],
-                  filter: {
-                    bool: {
-                      must: [
-                        {
-                          filterjoin: {
-                            aid: {
-                              path: 'id',
-                              indices: ['A'],
-                              query: {
-                                bool: {
-                                  must: [
-                                    {
-                                      match_all: {}
-                                    },
-                                    {
-                                      query_string: {
-                                        query: 'aaa'
-                                      }
-                                    }
-                                  ],
-                                  filter: {
-                                    bool: {
-                                      must: []
-                                    }
-                                  }
-                                }
-                              }
-                            }
-                          }
-                        },
-                        {
-                          filterjoin: {
-                            did: {
-                              path: 'id',
-                              indices: ['D'],
-                              query: {
-                                bool: {
-                                  must: [
-                                    {
-                                      match_all: {}
-                                    },
-                                    {
-                                      query_string: {
-                                        query: 'ddd'
-                                      }
-                                    }
-                                  ],
-                                  filter: {
-                                    bool: {
-                                      must: [
-                                        {
-                                          filterjoin: {
-                                            id: {
-                                              path: 'did',
-                                              indices: ['C'],
-                                              query: {
-                                                bool: {
-                                                  must: [
-                                                    {
-                                                      match_all: {}
-                                                    },
-                                                    {
-                                                      query_string: {
-                                                        query: 'ccc'
-                                                      }
-                                                    }
-                                                  ],
-                                                  filter: {
-                                                    bool: {
-                                                      must: []
-                                                    }
-                                                  }
-                                                }
-                                              }
-                                            }
-                                          }
-                                        }
-                                      ]
-                                    }
-                                  }
-                                }
-                              }
-                            }
-                          }
-                        }
-                      ]
-                    }
-                  }
-                }
-              }
             }
-          }
+          ]
         }
       ];
+      const builder = new FilterJoinBuilder();
+      builder.addFilterJoin({
+        sourcePath: 'companyid',
+        targetIndex: 'company',
+        targetPath: 'id'
+      })
+      .addFilterJoin({
+        sourcePath: 'id2',
+        targetIndex: 'i2',
+        targetPath: 'id'
+      });
+      const actual = filterJoinSeq(filterJoinSet(query));
+      expect(actual).to.eql(builder.toObject());
+    });
+
+    it('nested sequence 1', function () {
+      const query = [
+        {
+          join_sequence: [
+            {
+              group: [
+                [
+                  {
+                    relation: [
+                      {
+                        path: 'companyid',
+                        indices: [ 'investment' ],
+                        queries: [
+                          {
+                            query: {
+                              query_string: {
+                                query: '360buy'
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      { path: 'id', indices: [ 'company' ] }
+                    ]
+                  }
+                ]
+              ]
+            },
+            {
+              relation: [
+                { path: 'id', indices: [ 'company' ] },
+                { path: 'companyid', indices: [ 'investment' ] }
+              ]
+            }
+          ]
+        }
+      ];
+      const builder = new FilterJoinBuilder();
+      builder.addFilterJoin({
+        sourcePath: 'companyid',
+        targetIndex: 'company',
+        targetPath: 'id'
+      })
+      .addFilterJoin({
+        sourcePath: 'id',
+        targetIndex: 'investment',
+        targetPath: 'companyid'
+      })
+      .addQuery({
+        query: {
+          query_string: {
+            query: '360buy'
+          }
+        }
+      });
       const actual = filterJoinSeq(query);
-      expect(actual).to.eql(expected);
+      expect(actual).to.eql(builder.toObject());
+    });
+
+    it('nested sequence 2', function () {
+      const query = [
+        {
+          join_sequence: [
+            {
+              group: [
+                [
+                  {
+                    relation: [
+                      {
+                        path: 'id',
+                        indices: [ 'A' ],
+                        queries: [
+                          {
+                            query: {
+                              query_string: {
+                                query: 'aaa'
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      { path: 'aid', indices: [ 'B' ] }
+                    ]
+                  }
+                ],
+                [
+                  {
+                    relation: [
+                      {
+                        path: 'did',
+                        indices: [ 'C' ],
+                        queries: [
+                          {
+                            query: {
+                              query_string: {
+                                query: 'ccc'
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      { path: 'id', indices: [ 'D' ] }
+                    ]
+                  },
+                  {
+                    relation: [
+                      {
+                        path: 'id',
+                        indices: [ 'D' ],
+                        queries: [
+                          {
+                            query: {
+                              query_string: {
+                                query: 'ddd'
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      { path: 'did', indices: [ 'B' ] }
+                    ]
+                  }
+                ]
+              ]
+            },
+            {
+              relation: [
+                {
+                  path: 'id',
+                  indices: [ 'B' ],
+                  queries: [
+                    {
+                      query: {
+                        query_string: {
+                          query: 'bbb'
+                        }
+                      }
+                    }
+                  ]
+                },
+                { path: 'bid', indices: [ 'A' ] }
+              ]
+            }
+          ]
+        }
+      ];
+      const builder = new FilterJoinBuilder();
+      const fj1 = builder.addFilterJoin({ sourcePath: 'bid', targetIndex: 'B', targetPath: 'id' })
+      .addQuery({
+        query: {
+          query_string: {
+            query: 'bbb'
+          }
+        }
+      });
+      fj1.addFilterJoin({ sourcePath: 'aid', targetIndex: 'A', targetPath: 'id' })
+      .addQuery({
+        query: {
+          query_string: {
+            query: 'aaa'
+          }
+        }
+      });
+      fj1.addFilterJoin({ sourcePath: 'did', targetIndex: 'D', targetPath: 'id' })
+      .addQuery({
+        query: {
+          query_string: {
+            query: 'ddd'
+          }
+        }
+      })
+      .addFilterJoin({ sourcePath: 'id', targetIndex: 'C', targetPath: 'did' })
+      .addQuery({
+        query: {
+          query_string: {
+            query: 'ccc'
+          }
+        }
+      });
+      const actual = filterJoinSeq(query);
+      expect(actual).to.eql(builder.toObject());
     });
   });
 
@@ -1943,487 +1456,240 @@ describe('FilterJoin querying', function () {
                   }
                 ]
               },
-              {
-                path: 'id',
-                indices: [ 'company' ]
-              }
+              { path: 'id', indices: [ 'company' ] }
             ]
           },
           {
             relation: [
-              {
-                path: 'id',
-                indices: [ 'company' ]
-              },
-              {
-                path: 'companyid',
-                indices: [ 'investment' ]
-              }
+              { path: 'id', indices: [ 'company' ] },
+              { path: 'companyid', indices: [ 'investment' ] }
             ]
           }
         ]
       }];
-      const expected = [
-        {
-          filterjoin: {
-            companyid: {
-              path: 'id',
-              indices: ['company'],
-              query: {
-                bool: {
-                  must: [
-                    {
-                      match_all: {}
-                    }
-                  ],
-                  filter: {
-                    bool: {
-                      must: [
-                        {
-                          filterjoin: {
-                            id: {
-                              path: 'companyid',
-                              indices: ['investment'],
-                              query: {
-                                bool: {
-                                  must: [
-                                    {
-                                      match_all: {}
-                                    },
-                                    {
-                                      query_string: {
-                                        query: '360buy'
-                                      }
-                                    }
-                                  ],
-                                  filter: {
-                                    bool: {
-                                      must: []
-                                    }
-                                  }
-                                }
-                              }
-                            }
-                          }
-                        }
-                      ]
-                    }
-                  }
-                }
-              }
-            }
+      const builder = new FilterJoinBuilder();
+      builder.addFilterJoin({ sourcePath: 'companyid', targetIndex: 'company', targetPath: 'id' })
+      .addFilterJoin({ sourcePath: 'id', targetIndex: 'investment', targetPath: 'companyid' })
+      .addQuery({
+        query: {
+          query_string: {
+            query: '360buy'
           }
         }
-      ];
+      });
       const actual = filterJoinSeq(query);
-      expect(actual).to.eql(expected);
+      expect(actual).to.eql(builder.toObject());
+    });
+
+    it('should keep the types specified for the source index', function () {
+      const query = [
+        {
+          join_sequence: [
+            {
+              relation: [
+                { path: 'id', indices: [ 'company' ], types: [ 'Company' ] },
+                { path: 'companyid', indices: [ 'investment' ], types: [ 'Investment' ] }
+              ]
+            }
+          ]
+        }
+      ];
+      const builder = new FilterJoinBuilder();
+      builder.addFilterJoin({
+        sourceTypes: 'Investment',
+        sourcePath: 'companyid',
+        targetIndex: 'company',
+        targetTypes: 'Company',
+        targetPath: 'id'
+      });
+      const actual = filterJoinSeq(query);
+      expect(actual).to.eql(builder.toObject());
     });
 
     it('negate relation', function () {
-      const query = [{
-        join_sequence: [
-          {
-            relation: [
-              {
-                path: 'companyid',
-                indices: [ 'investment' ]
-              },
-              {
-                path: 'id',
-                indices: [ 'company' ]
-              }
-            ],
-            negate: true
-          },
-          {
-            relation: [
-              {
-                path: 'id',
-                indices: [ 'company' ]
-              },
-              {
-                path: 'companyid',
-                indices: [ 'investment' ]
-              }
-            ]
-          }
-        ]
-      }];
-      const expected = [
+      const query = [
         {
-          filterjoin: {
-            companyid: {
-              path: 'id',
-              indices: ['company'],
-              query: {
-                bool: {
-                  must: [
-                    {
-                      match_all: {}
-                    }
-                  ],
-                  filter: {
-                    bool: {
-                      must: [],
-                      must_not: [
-                        {
-                          filterjoin: {
-                            id: {
-                              path: 'companyid',
-                              indices: ['investment'],
-                              query: {
-                                bool: {
-                                  must: [
-                                    {
-                                      match_all: {}
-                                    }
-                                  ],
-                                  filter: {
-                                    bool: {
-                                      must: []
-                                    }
-                                  }
-                                }
-                              }
-                            }
-                          }
-                        }
-                      ]
-                    }
-                  }
-                }
-              }
+          join_sequence: [
+            {
+              relation: [
+                { path: 'companyid', indices: [ 'investment' ] },
+                { path: 'id', indices: [ 'company' ] }
+              ],
+              negate: true
+            },
+            {
+              relation: [
+                { path: 'id', indices: [ 'company' ] },
+                { path: 'companyid', indices: [ 'investment' ] }
+              ]
             }
-          }
+          ]
         }
       ];
+      const builder = new FilterJoinBuilder();
+      builder.addFilterJoin({
+        sourcePath: 'companyid',
+        targetIndex: 'company',
+        targetPath: 'id'
+      })
+      .addFilterJoin({
+        sourcePath: 'id',
+        targetIndex: 'investment',
+        targetPath: 'companyid',
+        negate: true
+      });
       const actual = filterJoinSeq(query);
-      expect(actual).to.eql(expected);
+      expect(actual).to.eql(builder.toObject());
     });
 
     it('joins with two filters', function () {
-      const query = [{
-        join_sequence: [
-          {
-            relation: [
-              {
-                path: 'companyid',
-                indices: [ 'investment' ],
-                queries: [
-                  {
-                    query: {
-                      query_string: {
-                        query: '360buy'
-                      }
-                    }
-                  }
-                ]
-              },
-              {
-                path: 'id',
-                indices: [ 'company' ]
-              }
-            ]
-          },
-          {
-            relation: [
-              {
-                path: 'id',
-                indices: [ 'company' ],
-                queries: [
-                  {
-                    query: {
-                      query_string: {
-                        query: 'yoplait'
-                      }
-                    }
-                  }
-                ]
-              },
-              {
-                path: 'companyid',
-                indices: [ 'investment' ]
-              }
-            ]
-          }
-        ]
-      }];
-      const expected = [
+      const query = [
         {
-          filterjoin: {
-            companyid: {
-              path: 'id',
-              indices: ['company'],
-              query: {
-                bool: {
-                  must: [
+          join_sequence: [
+            {
+              relation: [
+                {
+                  path: 'companyid',
+                  indices: [ 'investment' ],
+                  queries: [
                     {
-                      match_all: {}
-                    },
-                    {
-                      query_string: {
-                        query: 'yoplait'
+                      query: {
+                        query_string: {
+                          query: '360buy'
+                        }
                       }
                     }
-                  ],
-                  filter: {
-                    bool: {
-                      must: [
-                        {
-                          filterjoin: {
-                            id: {
-                              path: 'companyid',
-                              indices: ['investment'],
-                              query: {
-                                bool: {
-                                  must: [
-                                    {
-                                      match_all: {}
-                                    },
-                                    {
-                                      query_string: {
-                                        query: '360buy'
-                                      }
-                                    }
-                                  ],
-                                  filter: {
-                                    bool: {
-                                      must: []
-                                    }
-                                  }
-                                }
-                              }
-                            }
-                          }
+                  ]
+                },
+                { path: 'id', indices: [ 'company' ] }
+              ]
+            },
+            {
+              relation: [
+                {
+                  path: 'id',
+                  indices: [ 'company' ],
+                  queries: [
+                    {
+                      query: {
+                        query_string: {
+                          query: 'yoplait'
                         }
-                      ]
+                      }
                     }
-                  }
-                }
-              }
+                  ]
+                },
+                { path: 'companyid', indices: [ 'investment' ] }
+              ]
             }
-          }
+          ]
         }
       ];
+      const builder = new FilterJoinBuilder();
+      builder.addFilterJoin({
+        sourcePath: 'companyid',
+        targetIndex: 'company',
+        targetPath: 'id'
+      })
+      .addQuery({
+        query: {
+          query_string: {
+            query: 'yoplait'
+          }
+        }
+      })
+      .addFilterJoin({
+        sourcePath: 'id',
+        targetIndex: 'investment',
+        targetPath: 'companyid'
+      })
+      .addQuery({
+        query: {
+          query_string: {
+            query: '360buy'
+          }
+        }
+      });
       const actual = filterJoinSeq(query);
-      expect(actual).to.eql(expected);
+      expect(actual).to.eql(builder.toObject());
     });
 
     it('loop', function () {
-      const query = [{
-        join_sequence: [
-          {
-            relation: [
-              {
-                path: 'here',
-                indices: [ 'aaa' ],
-                queries: [
-                  {
-                    query: {
-                      query_string: {
-                        query: '360buy'
-                      }
-                    }
-                  }
-                ]
-              },
-              {
-                path: 'there',
-                indices: [ 'aaa' ]
-              }
-            ]
-          }
-        ]
-      }];
-      const expected = [
+      const query = [
         {
-          filterjoin: {
-            there: {
-              path: 'here',
-              indices: ['aaa'],
-              query: {
-                bool: {
-                  must: [
+          join_sequence: [
+            {
+              relation: [
+                {
+                  path: 'here',
+                  indices: [ 'aaa' ],
+                  queries: [
                     {
-                      match_all: {}
-                    },
-                    {
-                      query_string: {
-                        query: '360buy'
+                      query: {
+                        query_string: {
+                          query: '360buy'
+                        }
                       }
                     }
-                  ],
-                  filter: {
-                    bool: {
-                      must: []
-                    }
-                  }
-                }
-              }
+                  ]
+                },
+                { path: 'there', indices: [ 'aaa' ] }
+              ]
             }
-          }
+          ]
         }
       ];
+      const builder = new FilterJoinBuilder();
+      builder.addFilterJoin({
+        sourcePath: 'there',
+        targetIndex: 'aaa',
+        targetPath: 'here'
+      })
+      .addQuery({
+        query: {
+          query_string: {
+            query: '360buy'
+          }
+        }
+      });
       const actual = filterJoinSeq(query);
-      expect(actual).to.eql(expected);
+      expect(actual).to.eql(builder.toObject());
     });
 
     it('joins with filters everywhere', function () {
-      const query = [{
-        join_sequence: [
-          {
-            path: 'id',
-            indices: [ 'company' ],
-            queries: [
-              {
-                query: {
-                  query_string: {
-                    query: 'yoplait'
-                  }
-                }
-              }
-            ]
-          },
-          {
-            path: 'companyid',
-            indices: [ 'investment' ],
-            queries: [
-              {
-                query: {
-                  query_string: {
-                    query: 'boom'
-                  }
-                }
-              }
-            ]
-          }
-        ]
-      }];
-      expect(filterJoinSeq).withArgs(query).to.throwError();
-    });
-  });
-
-  it('accepts orderby and maxtermspershard parameters', function () {
-    const query = [
-      {
-        join_set: {
-          focus: 'i1',
-          relations: [
-            [
-              {
-                indices: [ 'i1' ],
-                types: [ 'cafard' ],
-                path: 'id1'
-              },
-              {
-                indices: [ 'i2' ],
-                types: [ 'cafard' ],
-                path: 'id2',
-                orderBy: 'doc_score',
-                maxTermsPerShard: '10'
-              }
-            ]
-          ]
-        }
-      }
-    ];
-    const expected = [
-      {
-        filterjoin: {
-          id1: {
-            query: {
-              bool: {
-                must: [
-                  {
-                    match_all: {}
-                  }
-                ],
-                filter: {
-                  bool: {
-                    must: []
-                  }
-                }
-              }
-            },
-            indices: ['i2'],
-            path: 'id2',
-            types: ['cafard'],
-            orderBy: 'doc_score',
-            maxTermsPerShard: '10'
-          }
-        }
-      }
-    ];
-    const actual = filterJoinSet(query);
-    expect(actual).to.eql(expected);
-  });
-
-  it('moves the query object to bool.must', function () {
-    const query = [
-      {
-        join_set: {
-          focus: 'i1',
-          relations: [
-            [
-              {
-                indices: [ 'i1' ],
-                types: [ 'cafard' ],
-                path: 'id1'
-              },
-              {
-                indices: [ 'i2' ],
-                types: [ 'cafard' ],
-                path: 'id2'
-              }
-            ]
-          ],
-          queries: {
-            i2: [
-              {
-                query: {
-                  query_string: {
-                    analyze_wildcard: true,
-                    query: 'travel'
-                  }
-                }
-              }
-            ]
-          }
-        }
-      }
-    ];
-    const expected = [
-      {
-        filterjoin: {
-          id1: {
-            query: {
-              bool: {
-                must: [
-                  {
-                    match_all: {}
-                  },
-                  {
+      const query = [
+        {
+          join_sequence: [
+            {
+              path: 'id',
+              indices: [ 'company' ],
+              queries: [
+                {
+                  query: {
                     query_string: {
-                      analyze_wildcard: true,
-                      query: 'travel'
+                      query: 'yoplait'
                     }
                   }
-                ],
-                filter: {
-                  bool: {
-                    must: []
+                }
+              ]
+            },
+            {
+              path: 'companyid',
+              indices: [ 'investment' ],
+              queries: [
+                {
+                  query: {
+                    query_string: {
+                      query: 'boom'
+                    }
                   }
                 }
-              }
-            },
-            indices: ['i2'],
-            path: 'id2',
-            types: ['cafard']
-          }
+              ]
+            }
+          ]
         }
-      }
-    ];
-    const actual = filterJoinSet(query);
-    expect(actual).to.eql(expected);
+      ];
+      expect(filterJoinSeq).withArgs(query).to.throwError();
+    });
   });
 });

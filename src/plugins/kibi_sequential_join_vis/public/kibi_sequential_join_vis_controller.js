@@ -130,8 +130,10 @@ define(function (require) {
           const virtualButton = {
             sourceField: this.targetField,
             sourceIndexPatternId: this.targetIndexPatternId,
+            sourceIndexPatternType: this.targetIndexPatternType,
             targetField: this.sourceField,
             targetIndexPatternId: this.sourceIndexPatternId,
+            targetIndexPatternType: this.sourceIndexPatternType,
             redirectToDashboard: currentDashboardId
           };
           return _updateCounts.call(self, [ virtualButton ], this.redirectToDashboard)

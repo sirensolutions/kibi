@@ -186,8 +186,8 @@ define(function (require) {
       if (!dashboardId) {
         return '';
       }
-      _.each(indexToDashboardsMap, function (map, index) {
-        if (map.indexOf(dashboardId) !== -1) {
+      _.each(indexToDashboardsMap, function (dashboards, index) {
+        if (dashboards.indexOf(dashboardId) !== -1) {
           dIndex = index;
           return false;
         }
@@ -223,7 +223,7 @@ define(function (require) {
       // here for anything about indices relations - we take them from config as they are already saved
       var relations = config.get('kibi:relations');
 
-      //for anything about the dashboards relations - we take them from the scope
+      // for anything about the dashboards relations - we take them from the scope
       var dashboards = $scope.relations.relationsDashboards[id].dashboards;
       var lIndex = '';
       var rIndex = '';
@@ -268,8 +268,12 @@ define(function (require) {
      * Returns a unique identifier for the relation between the indices indexa and indexb
      */
     function _getJoinIndicesUniqueID(indexa, indexb) {
-      var ia = indexa.indexPatternId.replace(/\//, '-slash-') + '/' + indexa.path.replace(/\//, '-slash-');
-      var ib = indexb.indexPatternId.replace(/\//, '-slash-') + '/' + indexb.path.replace(/\//, '-slash-');
+      const clean = function (str) {
+        return str.replace(/\//, '-slash-');
+      };
+
+      var ia = `${clean(indexa.indexPatternId)}/${clean(indexa.indexPatternType || '')}/${clean(indexa.path)}`;
+      var ib = `${clean(indexb.indexPatternId)}/${clean(indexb.indexPatternType || '')}/${clean(indexb.path)}`;
       return ia < ib ? ia + '/' + ib : ib + '/' + ia;
     }
 
@@ -416,6 +420,7 @@ define(function (require) {
       }
     }, true);
 
+    // Listen to changes of relations between indices
     $scope.$watch(function ($scope) {
       return _.map($scope.relations.relationsIndices, function (relation) {
         return _.omit(relation, ['error', 'id']); // id is redundant
@@ -448,6 +453,15 @@ define(function (require) {
         return offset;
       });
 
+      const indexLabel = function (index) {
+        let label = index.indexPatternId;
+
+        if (index.indexPatternType) {
+          label += '.' + index.indexPatternType;
+        }
+        return label + '.' + index.path;
+      };
+
       $scope.invalid = false;
       _.each($scope.relations.relationsIndices, function (relation) {
 
@@ -458,9 +472,7 @@ define(function (require) {
 
           // automatically compute the label if not present
           if (!relation.label) {
-            relation.label = relation.indices[0].indexPatternId + '.' + relation.indices[0].path +
-                             ' -- ' +
-                             relation.indices[1].indexPatternId + '.' + relation.indices[1].path;
+            relation.label = indexLabel(relation.indices[0]) + ' -- ' + indexLabel(relation.indices[1]);
           }
 
           var key = _getJoinIndicesUniqueID(indices[0], indices[1]);
@@ -469,6 +481,7 @@ define(function (require) {
             error = 'These relationships are equivalent, please remove one';
           }
           if (indices[0].indexPatternId === indices[1].indexPatternId &&
+              indices[0].indexPatternType === indices[1].indexPatternType &&
               indices[0].path === indices[1].path) {
             error += 'Left and right sides of the relation cannot be the same.';
           }
@@ -523,7 +536,6 @@ define(function (require) {
       g.nodes = _.uniq(g.nodes, function (node) {
         return node.id;
       });
-
       if (!$scope.indicesGraph && $scope.relations.relationsIndicesSerialized) {
         // check the serialized one
         var graph = $scope.relations.relationsIndicesSerialized;
@@ -570,7 +582,9 @@ define(function (require) {
                     var newRelationId = relationsIndices[i].id.split('/');
                     var oldRelationId = oldRelations[i].id.split('/');
 
-                    if (newRelationId[0] !== oldRelationId[0] || newRelationId[2] !== oldRelationId[2]) {
+                    // check _getJoinIndicesUniqueID to see the ID format
+                    if (newRelationId[0] !== oldRelationId[0] || // left index changed
+                        newRelationId[3] !== oldRelationId[3]) { // right index changed
                       clearRelation(oldRelations[i].id);
                     }
                   }

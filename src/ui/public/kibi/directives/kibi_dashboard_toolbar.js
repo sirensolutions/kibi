@@ -21,6 +21,26 @@ define(function (require) {
           kibiState.resetFiltersQueriesTimes();
         };
 
+        $scope.relationalFilterPanelOpened = false;
+
+        $scope.openRelationalFilterPanel = function () {
+          $scope.relationalFilterPanelOpened = !$scope.relationalFilterPanelOpened;
+          $rootScope.$emit('relationalFilterPanelOpened', $scope.relationalFilterPanelOpened);
+        };
+
+        var removeRelationalFilterPanelClosedHandler = $rootScope.$on('relationalFilterPanelClosed', function () {
+          $scope.relationalFilterPanelOpened = false;
+        });
+
+        // close panel when user navigates to a different route
+        var removeRouteChangeSuccessHandler = $rootScope.$on('$routeChangeSuccess', function (event, next, prev, err) {
+          if (!next.locals.dash) {
+            // only if we switched to a non dashboard page
+            $rootScope.$emit('relationalFilterPanelOpened', false);
+            $scope.relationalFilterPanelOpened = false;
+          }
+        });
+
         $scope.$watch('configTemplate', function () {
           $rootScope.$emit('kibi:dashboard:set-property', 'configTemplate', $scope.configTemplate);
         }, true);
@@ -28,7 +48,10 @@ define(function (require) {
         var off = $rootScope.$on('stDashboardOnProperty', function (event, property, value) {
           $scope[property] = value;
         });
-        $scope.$on('$destroy', off);
+        $scope.$on('$destroy', function () {
+          removeRouteChangeSuccessHandler();
+          removeRelationalFilterPanelClosedHandler();
+        });
       }
     };
   });

@@ -1,4 +1,14 @@
 <div class="button-group" role="toolbar">
+  <kbn-tooltip text="Relation Tab" placement="bottom" append-to-body="1"  ng-if="relationalFilterVisible"
+       ng-class="{active: relationalFilterPanelOpened === true}" >
+    <a ng-click="openRelationalFilterPanel()">
+        <span class="fa-stack fa-lg">
+          <i class="fa fa-arrows-h fa-stack-1x"></i>
+          <i class="fa fa-map-o fa-stack-1x"></i>
+        </span>
+     </a>
+  </kbn-tooltip>
+
   <kbn-tooltip text="New Dashboard" placement="bottom" append-to-body="1">
     <button ng-click="newDashboard()" aria-label="New Dashboard"><i aria-hidden="true" class="fa fa-file-new-o"></i></button>
   </kbn-tooltip>

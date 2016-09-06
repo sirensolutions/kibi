@@ -10,6 +10,7 @@ define(function (require) {
     const _resetInitFlags = function () {
       this.initializing = false;
       this.initialized = false;
+      this.dirty = false;
     };
 
     const _initDone = function () {
@@ -142,11 +143,31 @@ define(function (require) {
       return this.getId().then(() => this.savedSession.session_data);
     };
 
-    KibiSessionHelper.prototype.putData = function (data) {
-      var self = this;
-      return self.getId().then(function () {
-        self.savedSession.session_data = data;
-        return self._syncToIndex(self.savedSession);
+    KibiSessionHelper.prototype.putData = function (data, force) {
+      return this.getId().then(() => {
+        this.savedSession.session_data = data;
+        if (!force) {
+          this.dirty = true;
+          return this.savedSession;
+        } else {
+          return this._syncToIndex(this.savedSession);
+        }
+      });
+    };
+
+    KibiSessionHelper.prototype.flush = function () {
+      return this.getId().then(() => {
+        if (this.dirty) {
+          return this._syncToIndex(this.savedSession);
+        } else {
+          return this.savedSession;
+        }
+      });
+    };
+
+    KibiSessionHelper.prototype.isDirty = function () {
+      return this.getId().then(() => {
+        return this.dirty;
       });
     };
 
@@ -155,6 +176,7 @@ define(function (require) {
       return new Promise(function (fulfill, reject) {
         savedSession.timeUpdated = new Date();
         savedSession.save(true).then(function () {
+          self.dirty = false;
           fulfill(savedSession);
         }).catch(function (err) {
           reject(new Error('Could not save the session ' + savedSession.id));

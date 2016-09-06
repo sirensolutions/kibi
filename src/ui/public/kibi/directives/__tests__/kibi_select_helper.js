@@ -409,6 +409,24 @@ describe('Kibi Directives', function () {
           done();
         }).catch(done);
       });
+
+      it('should return data without scripted fields if scriptedFields equals false ', function (done) {
+        stSelectHelper.getFields(null, null, false).then(function (fields) {
+          for (var i = 0; i < fields.length; i++) {
+            expect(fields[i].options.scripted).not.to.be(true);
+          }
+          done();
+        }).catch(done);
+      });
+
+      it('should return data with scripted fields if scriptedFields equals true ', function (done) {
+        stSelectHelper.getFields(null, null, true).then(function (fields) {
+          for (var i = 0; i < fields.length; i++) {
+            expect(fields[i].options.scripted).not.to.be(undefined);
+          }
+          done();
+        }).catch(done);
+      });
     });
 
     describe('GetIndexesId', function () {

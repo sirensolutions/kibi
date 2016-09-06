@@ -163,7 +163,7 @@ define(function (require) {
       }
     };
 
-    KibiSelectHelper.prototype.getFields = function (indexPatternId, fieldTypes) {
+    KibiSelectHelper.prototype.getFields = function (indexPatternId, fieldTypes, scriptedFields) {
       var defId;
       if (indexPatternId) {
         defId = indexPatternId;
@@ -178,7 +178,9 @@ define(function (require) {
           if (fieldTypes instanceof Array && fieldTypes.length > 0) {
             return fieldTypes.indexOf(field.type) !== -1 && field.name && field.name.indexOf('_') !== 0;
           } else {
-            return field.type !== 'boolean' && field.name && field.name.indexOf('_') !== 0;
+            return field.type !== 'boolean' && field.name && field.name.indexOf('_') !== 0 &&
+             ((scriptedFields === 'false' || scriptedFields === undefined) ?
+             !field.scripted : scriptedFields);
           }
         }).sortBy(function (field) {
           return field.name;
@@ -186,8 +188,10 @@ define(function (require) {
           return {
             label: field.name,
             value: field.name,
+            scripted: field.scripted,
             options: {
-              analyzed: field.analyzed
+              analyzed: field.analyzed,
+              scripted: field.scripted
             }
           };
         }).value();

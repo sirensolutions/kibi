@@ -52,6 +52,22 @@ define(function (require) {
      * Private Methods
      */
 
+    const addFiltersIconMessages = function (tab) {
+      return kibiState.getState(tab.selected.id).then(({ queries, filters }) => {
+        if (queries || filters) {
+          if (queries.length > 1 && filters.length !== 0) {
+            tab.selected.filterIconMessage = 'This dashboard has a query and ' + filters.length + ' filter(s) set.';
+          } else if (queries.length > 1) {
+            tab.selected.filterIconMessage = 'This dashboard has a query set.';
+          } else if (filters.length !== 0) {
+            tab.selected.filterIconMessage = 'This dashboard has ' + filters.length + ' filter(s) set.';
+          } else {
+            tab.selected.filterIconMessage = null;
+          }
+        }
+      });
+    };
+
     let lastFiredMultiCountQuery;
     const _fireUpdateAllCounts = function (groupIndexesToUpdate, reason, forceUpdate = false) {
       const self = this;
@@ -86,17 +102,19 @@ define(function (require) {
           lastFiredMultiCountQuery = query;
 
           //Note: ?getCountsOnTabs has no meaning, it is just useful to filter when inspecting requests
-          return $http.post(self.chrome.getBasePath() + '/elasticsearch/_msearch?getCountsOnTabs', query)
-          .then((response) => {
+          return $http.post(self.chrome.getBasePath() + '/elasticsearch/_msearch?getCountsOnTabs', query).then((response) => {
+            const filtersIconMessagesPromises = [];
             if (response.data.responses.length !== indexesToUpdate.length) {
               notify.warning('The number of counts responses does not match the dashboardGroups which should be updated');
             } else {
               _.each(response.data.responses, function (hit, i) {
-                // get the coresponding groupIndex from results
+                // get the corresponding groupIndex from results
                 const tab = self.dashboardGroups[results[indexesToUpdate[i]].groupIndex];
                 try {
                   if (!_.contains(Object.keys(hit),'error')) {
                     tab.count = hit.hits.total;
+                    tab.selected.filterIconMessage = null;
+                    filtersIconMessagesPromises.push(addFiltersIconMessages.call(this, tab));
                   } else if (_.contains(Object.keys(hit),'error') && _.contains(hit.error,'ElasticsearchSecurityException')) {
                     tab.count = 'Unauthorized';
                   } else {
@@ -107,9 +125,13 @@ define(function (require) {
                 }
               });
             }
-            return self.dashboardGroups;
+            return Promise.all(filtersIconMessagesPromises).then(() => {
+              return self.dashboardGroups;
+            });
+          })
+          .catch((err) => {
+            notify.error(`Couldn't get counts for tabs: ${err}`);
           });
-
         }
       }).catch(notify.warning);
     };

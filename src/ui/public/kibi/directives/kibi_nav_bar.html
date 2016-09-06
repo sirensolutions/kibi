@@ -8,7 +8,7 @@
             ng-class="{active: group.active === true}"
             ng-repeat="group in dashboardGroups | orderBy: 'priority'" ng-show="!group.hide">
           <a ng-click="group.onClick(dashboardGroups)">
-            <i  ng-if="group.iconCss" class="icon {{group.iconCss}}"></i>
+            <i ng-if="group.iconCss" class="icon {{group.iconCss}}"></i>
             <img class="icon" ng-if="group.iconUrl" ng-src="{{group.iconUrl}}"/>
             {{group.title}}
             <span ng-if="group.active && group.dashboards.length > 1">
@@ -20,6 +20,10 @@
               </select>
             </span>
             <span ng-if="group.count != undefined">({{ group.count }})</span>
+            <span ng-if="group.selected.filterIconMessage">
+              <i class="fa fa-filter" aria-hidden="true" data-toggle="tooltip"
+              data-placement="bottom" title="{{ group.selected.filterIconMessage }}"/>
+            </span>
           </a>
         </li>
 

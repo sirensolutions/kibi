@@ -647,6 +647,11 @@ define(function (require) {
       return labels;
     };
 
+    KibiState.prototype.destroy = function () {
+      KibiState.Super.prototype.destroy.call(this);
+      relationsHelper.destroy();
+    };
+
     KibiState.prototype._getJoinSetFilter = function (focusIndex, filterAlias, filtersPerIndex, queriesPerIndex, timesPerIndex) {
       // Build the relations for the join_set query
       let relations;

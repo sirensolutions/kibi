@@ -17,9 +17,30 @@ define(function (require) {
       }
     };
 
-    RelationsHelper.prototype.getRelationInfosFromRelationID = function (relationId) {
+    /**
+     * Returns a unique identifier for the relation between the indices indexa and indexb
+     */
+    RelationsHelper.prototype.getJoinIndicesUniqueID = function (indexPatternIda, indexPatternTypea, patha,
+                                                                 indexPatternIdb, indexPatternTypeb, pathb) {
       const clean = function (str) {
         return str.replace(/\//, '-slash-');
+      };
+
+      var ia = `${clean(indexPatternIda)}/${clean(indexPatternTypea || '')}/${clean(patha)}`;
+      var ib = `${clean(indexPatternIdb)}/${clean(indexPatternTypeb || '')}/${clean(pathb)}`;
+      return ia < ib ? ia + '/' + ib : ib + '/' + ia;
+    };
+
+    /**
+     * getRelationInfosFromRelationID returns the index, type, and path of the relation's source,
+     * and the index, type, and path of the relation's target, given its ID.
+     *
+     * @param relationId the ID of the relation as computed with RelationsHelper.getJoinIndicesUniqueID
+     * @returns an object with source and target fields.
+     */
+    RelationsHelper.prototype.getRelationInfosFromRelationID = function (relationId) {
+      const restore = function (str) {
+        return str.replace('-slash-', '/');
       };
 
       const parts = relationId.split('/');
@@ -28,14 +49,14 @@ define(function (require) {
       }
       return {
         source: {
-          index: clean(parts[0]),
-          type: clean(parts[1]),
-          path: clean(parts[2])
+          index: restore(parts[0]),
+          type: restore(parts[1]),
+          path: restore(parts[2])
         },
         target: {
-          index: clean(parts[3]),
-          type: clean(parts[4]),
-          path: clean(parts[5])
+          index: restore(parts[3]),
+          type: restore(parts[4]),
+          path: restore(parts[5])
         }
       };
     };

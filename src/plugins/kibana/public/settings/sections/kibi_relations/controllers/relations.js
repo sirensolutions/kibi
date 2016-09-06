@@ -59,12 +59,12 @@ define(function (require) {
 
   app.controller('RelationsController',
   function (kibiState, $rootScope, $scope, config, Private, $element, $timeout, kbnUrl, createNotifier, kibiEnterpriseEnabled) {
-
     var notify = createNotifier({
       location: 'Relations Editor'
     });
 
     var color = Private(require('ui/vislib/components/color/color'));
+    var relationsHelper = Private(require('ui/kibi/helpers/relations_helper'));
 
     $scope.kibiEnterpriseEnabled = kibiEnterpriseEnabled;
 
@@ -277,19 +277,6 @@ define(function (require) {
       usedRelations.indexOf(item.value) !== -1;
     };
 
-    /**
-     * Returns a unique identifier for the relation between the indices indexa and indexb
-     */
-    function _getJoinIndicesUniqueID(indexa, indexb) {
-      const clean = function (str) {
-        return str.replace(/\//, '-slash-');
-      };
-
-      var ia = `${clean(indexa.indexPatternId)}/${clean(indexa.indexPatternType || '')}/${clean(indexa.path)}`;
-      var ib = `${clean(indexb.indexPatternId)}/${clean(indexb.indexPatternType || '')}/${clean(indexb.path)}`;
-      return ia < ib ? ia + '/' + ib : ib + '/' + ia;
-    }
-
     function _getRelationLabel(relationId) {
       var label;
 
@@ -461,7 +448,8 @@ define(function (require) {
         var indexb = relation.indices[1];
 
         if (indexa.indexPatternId && indexa.path && indexb.indexPatternId && indexb.path) {
-          return _getJoinIndicesUniqueID(indexa, indexb);
+          return relationsHelper.getJoinIndicesUniqueID(indexa.indexPatternId, indexa.indexPatternType, indexa.path,
+                                                        indexb.indexPatternId, indexb.indexPatternType, indexb.path);
         }
         return offset;
       });
@@ -488,7 +476,8 @@ define(function (require) {
             relation.label = indexLabel(relation.indices[0]) + ' -- ' + indexLabel(relation.indices[1]);
           }
 
-          var key = _getJoinIndicesUniqueID(indices[0], indices[1]);
+          var key = relationsHelper.getJoinIndicesUniqueID(indices[0].indexPatternId, indices[0].indexPatternType, indices[0].path,
+                                                           indices[1].indexPatternId, indices[1].indexPatternType, indices[1].path);
 
           if (uniq[key].length !== 1) {
             error = 'These relationships are equivalent, please remove one';
@@ -592,12 +581,11 @@ define(function (require) {
 
                 for (var i = 0; i < relationsIndices.length; i++) {
                   if (relationsIndices[i].id && oldRelations[i].id) {
-                    var newRelationId = relationsIndices[i].id.split('/');
-                    var oldRelationId = oldRelations[i].id.split('/');
+                    const newRelation = relationsHelper.getRelationInfosFromRelationID(relationsIndices[i].id);
+                    const oldRelation = relationsHelper.getRelationInfosFromRelationID(oldRelations[i].id);
 
-                    // check _getJoinIndicesUniqueID to see the ID format
-                    if (newRelationId[0] !== oldRelationId[0] || // left index changed
-                        newRelationId[3] !== oldRelationId[3]) { // right index changed
+                    if (newRelation.source.index !== oldRelation.source.index || // left index changed
+                        newRelation.target.index !== oldRelation.target.index) { // right index changed
                       clearRelation(oldRelations[i].id);
                     }
                   }
@@ -624,6 +612,7 @@ define(function (require) {
       }
     });
     $scope.$on('$destroy', function () {
+      relationsHelper.destroy();
       indicesGraphExportOff();
       dashboardsGraphExportOff();
     });

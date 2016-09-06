@@ -1,6 +1,6 @@
-var expect = require('expect.js');
-var ngMock = require('ngMock');
-var relationsHelper;
+const expect = require('expect.js');
+const ngMock = require('ngMock');
+let relationsHelper;
 let config;
 
 function init({ kibiEnterpriseEnabled = false }) {
@@ -15,6 +15,86 @@ function init({ kibiEnterpriseEnabled = false }) {
 }
 
 describe('Kibi Components', function () {
+  describe('getJoinIndicesUniqueID', function () {
+    beforeEach(() => init({}));
+
+    it('should compute the relation unique ID', function () {
+      const indexa = 'ia';
+      const typea = 'ta';
+      const patha = 'pa';
+      const indexb = 'ib';
+      const typeb = 'tb';
+      const pathb = 'pb';
+      const id = `${indexa}/${typea}/${patha}/${indexb}/${typeb}/${pathb}`;
+
+      expect(relationsHelper.getJoinIndicesUniqueID(indexa, typea, patha, indexb, typeb, pathb)).to.be(id);
+    });
+
+    it('should escape special keywords', function () {
+      const id = 'i-slash-a/t-slash-a/p-slash-a/i-slash-b/t-slash-b/p-slash-b';
+
+      expect(relationsHelper.getJoinIndicesUniqueID('i/a', 't/a', 'p/a', 'i/b', 't/b', 'p/b')).to.be(id);
+    });
+  });
+
+  describe('getRelationInfosFromRelationID', function () {
+    beforeEach(() => init({}));
+
+    it('should get the correct relation details', function () {
+      const indexa = 'ia';
+      const typea = 'ta';
+      const patha = 'pa';
+      const indexb = 'ib';
+      const typeb = 'tb';
+      const pathb = 'pb';
+
+      const id = relationsHelper.getJoinIndicesUniqueID(indexa, typea, patha, indexb, typeb, pathb);
+      expect(relationsHelper.getRelationInfosFromRelationID(id))
+      .to.eql({
+        source: {
+          index: indexa,
+          type: typea,
+          path: patha
+        },
+        target: {
+          index: indexb,
+          type: typeb,
+          path: pathb
+        }
+      });
+    });
+
+    it('should manage the special keywords correctly', function () {
+      const indexa = 'i/a';
+      const typea = 't/a';
+      const patha = 'p/a';
+      const indexb = 'i/b';
+      const typeb = 't/b';
+      const pathb = 'p/b';
+
+      const id = relationsHelper.getJoinIndicesUniqueID(indexa, typea, patha, indexb, typeb, pathb);
+      expect(relationsHelper.getRelationInfosFromRelationID(id))
+      .to.eql({
+        source: {
+          index: indexa,
+          type: typea,
+          path: patha
+        },
+        target: {
+          index: indexb,
+          type: typeb,
+          path: pathb
+        }
+      });
+    });
+
+    it('should escape special keywords', function () {
+      const id = 'i-slash-a/t-slash-a/p-slash-a/i-slash-b/t-slash-b/p-slash-b';
+
+      expect(relationsHelper.getJoinIndicesUniqueID('i/a', 't/a', 'p/a', 'i/b', 't/b', 'p/b')).to.be(id);
+    });
+  });
+
   describe('addAdvancedJoinSettingsToRelation', function () {
     beforeEach(() => init({
       kibiEnterpriseEnabled: true

@@ -64,7 +64,7 @@ define(function (require) {
           relDashboards.options.onLinkClick = function (el, d, i) {
             // find the relation
             var relation = _.find($scope.relations.relationsDashboards, function (r) {
-              return r.dashboards.indexOf(d.source.label) !== -1 && r.dashboards.indexOf(d.target.label) !== -1;
+              return r.relation === d.data.id;
             });
             if (relation) {
               // add or remove the relation id from kibi state

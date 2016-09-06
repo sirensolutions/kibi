@@ -58,13 +58,12 @@
                 <table class="table table-condensed">
                   <thead>
                     <tr>
-                      <th>Left Index Pattern</th>
-                      <th>Left Field</th>
+                      <th>Left Relation</th>
                       <th></th>
-                      <th>Right Index Pattern</th>
-                      <th>Right Field</th>
+                      <th>Right Relation</th>
                       <th>Label</th>
-                      <th></th>
+                      <!--controls-->
+                      <th ng-if="kibiEnterpriseEnabled"></th>
                       <th></th>
                     </tr>
                   </thead>
@@ -72,37 +71,110 @@
                   <tbody ng-repeat="relation in relations.relationsIndices" data-test-subj="row-{{$index}}">
                     <tr class="relation-row"
                         ng-class="{ 'red-border' : relation.error }">
+                      <!--left relation-->
                       <td>
-                        <kibi-select data-test-subj="index-relation-left-index"
-                          required object-type="indexPattern"
-                          ng-model="relation.indices[0].indexPatternId">
+                        <table class="relationPart">
+                          <tbody>
+                            <tr>
+                              <td>
+                                index pattern
+                              </td>
+                              <td>
+                                <kibi-select
+                                  required
+                                  data-test-subj="index-relation-left-index"
+                                  object-type="indexPattern"
+                                  ng-model="relation.indices[0].indexPatternId"
+                                ></kibi-select>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                type
+                              </td>
+                              <td>
+                                <kibi-select
+                                  data-test-subj="index-relation-left-type"
+                                  object-type="indexPatternType"
+                                  model-disabled="!relation.indices[0].indexPatternId"
+                                  index-pattern-id="relation.indices[0].indexPatternId"
+                                  ng-model="relation.indices[0].indexPatternType"
+                                ></kibi-select>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                field
+                              </td>
+                              <td>
+                                <kibi-select
+                                  required
+                                  data-test-subj="index-relation-left-field"
+                                  object-type="field"
+                                  analyzed-warning="true"
+                                  index-pattern-id="relation.indices[0].indexPatternId"
+                                  ng-model="relation.indices[0].path"
+                                ></kibi-select>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
                       </td>
-                      <td>
-                        <kibi-select
-                          required
-                          data-test-subj="index-relation-left-field"
-                          object-type="field"
-                          analyzed-warning="true"
-                          index-pattern-id="relation.indices[0].indexPatternId"
-                          ng-model="relation.indices[0].path"/>
-                      </td>
+
                       <td>
                         <i aria-hidden="true" class="fa fa-arrows-h"></i>
                       </td>
+
+                      <!--right relation-->
                       <td>
-                        <kibi-select required object-type="indexPattern"
-                         data-test-subj="index-relation-right-index"
-                         ng-model="relation.indices[1].indexPatternId">
+                        <table class="relationPart">
+                          <tbody>
+                            <tr>
+                              <td>
+                                index pattern
+                              </td>
+                              <td>
+                                <kibi-select
+                                  required
+                                  data-test-subj="index-relation-right-index"
+                                  object-type="indexPattern"
+                                  ng-model="relation.indices[1].indexPatternId"
+                                ></kibi-select>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                type
+                              </td>
+                              <td>
+                                <kibi-select
+                                  data-test-subj="index-relation-right-type"
+                                  object-type="indexPatternType"
+                                  model-disabled="!relation.indices[1].indexPatternId"
+                                  index-pattern-id="relation.indices[1].indexPatternId"
+                                  ng-model="relation.indices[1].indexPatternType"
+                                ></kibi-select>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                field
+                              </td>
+                              <td>
+                                <kibi-select
+                                  required
+                                  data-test-subj="index-relation-right-type"
+                                  object-type="field"
+                                  analyzed-warning="true"
+                                  index-pattern-id="relation.indices[1].indexPatternId"
+                                  ng-model="relation.indices[1].path"
+                                ></kibi-select>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
                       </td>
-                      <td>
-                        <kibi-select
-                          required
-                          data-test-subj="index-relation-right-field"
-                          object-type="field"
-                          analyzed-warning="true"
-                          index-pattern-id="relation.indices[1].indexPatternId"
-                          ng-model="relation.indices[1].path"/>
-                      </td>
+
                       <td>
                         <input required
                           ng-model="relation.label"
@@ -112,7 +184,9 @@
                           type="text"
                           kibi-stop-enter-key-down />
                       </td>
-                      <td class="ng-scope" ng-if="kibiEnterpriseEnabled">
+
+                      <!--controls-->
+                      <td class="ng-scope alignLeft" ng-if="kibiEnterpriseEnabled">
                         <div class="actions">
                             <button
                               ng-click="edit(relation, $index)"

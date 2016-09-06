@@ -14,10 +14,11 @@ define(function (require) {
   require('ui/modules')
   .get('kibana/kibi_state')
   .service('kibiState', function (savedSearches, timefilter, $route, Promise, getAppState, savedDashboards, $rootScope, indexPatterns,
-                                  globalState, elasticsearchPlugins, kibiEnterpriseEnabled, $location, config, Private, createNotifier) {
+                                  globalState, elasticsearchPlugins, $location, config, Private, createNotifier) {
     const State = Private(require('ui/state_management/state'));
     const notify = createNotifier({ location: 'Kibi State'});
     const urlHelper = Private(require('ui/kibi/helpers/url_helper'));
+    const relationsHelper = Private(require('ui/kibi/helpers/relations_helper'));
 
     _.class(KibiState).inherits(State);
     function KibiState(defaults) {
@@ -580,79 +581,6 @@ define(function (require) {
     };
 
     /**
-     * Adds advanced join parameters for the given relation.
-     * Rel is an array with the following format:
-     *     [
-     *       { indices: [ 'index1' ], path: 'id1' },
-     *       { indices: [ 'index2' ], path: 'id2' }
-     *     ]
-     */
-    KibiState.prototype._addAdvancedJoinSettingsToRelation = function (rel) {
-      if (kibiEnterpriseEnabled) {
-        const sourcePartOfTheRelationId = rel[0].indices[0] + '/' + rel[0].path;
-        const targetPartOfTheRelationId = rel[1].indices[0] + '/' + rel[1].path;
-
-        const advKeys = ['termsEncoding', 'orderBy', 'maxTermsPerShard'];
-
-        const relations = config.get('kibi:relations');
-        // get indices relations
-        const relationsIndices = relations.relationsIndices;
-
-        if (!relationsIndices.length) {
-          return;
-        }
-
-        // copying advanced options from corresponding index relation
-        let forward;
-        let indexRelation = _.find(relationsIndices, (r) => (sourcePartOfTheRelationId + '/' + targetPartOfTheRelationId) === r.id);
-        if (indexRelation) {
-          forward = true;
-        } else {
-          forward = false;
-          // try to find the relation in other direction
-          indexRelation = _.find(relationsIndices, (r) => (targetPartOfTheRelationId + '/' + sourcePartOfTheRelationId) === r.id);
-          if (!indexRelation) {
-            throw new Error(
-              'Could not find index relation corresponding to relation between: ' +
-              sourcePartOfTheRelationId + ' and ' + targetPartOfTheRelationId + '. Review the relations in the settings tab.');
-          }
-        }
-
-        // TODO verify which advanced settings could be skipped
-        // https://github.com/sirensolutions/kibi-internal/issues/868
-        // e.g.
-        // for join_set we need advanced settings only for the index which is not the focused one
-        // for sequencial join we also only need settings for one
-
-        if (forward) {
-          _.each(indexRelation.indices[0], function (value, key) {
-            if (advKeys.indexOf(key) !== -1) {
-              rel[0][key] = value;
-            };
-          });
-          _.each(indexRelation.indices[1], function (value, key) {
-            if (advKeys.indexOf(key) !== -1) {
-              rel[1][key] = value;
-            };
-          });
-        }
-
-        if (!forward) {
-          _.each(indexRelation.indices[1], function (value, key) {
-            if (advKeys.indexOf(key) !== -1) {
-              rel[0][key] = value;
-            };
-          });
-          _.each(indexRelation.indices[0], function (value, key) {
-            if (advKeys.indexOf(key) !== -1) {
-              rel[1][key] = value;
-            };
-          });
-        }
-      }
-    };
-
-    /**
      * Returns the set of dashboard IDs which are connected to the focused dashboard, i.e., the connected component of the graph.
      * Relations is the array of relations between dashboards.
      */
@@ -719,29 +647,37 @@ define(function (require) {
       return labels;
     };
 
+    KibiState.prototype.destroy = function () {
+      KibiState.Super.prototype.destroy.call(this);
+      relationsHelper.destroy();
+    };
+
     KibiState.prototype._getJoinSetFilter = function (focusIndex, filterAlias, filtersPerIndex, queriesPerIndex, timesPerIndex) {
       // Build the relations for the join_set query
       let relations;
       try {
         relations = _.map(this.getEnabledRelations(), (r) => {
-          const parts = r.relation.split('/');
-          const sourceIndex = parts[0].replace('-slash-', '/');
-          const sourcePath = parts[1].replace('-slash-', '/');
-          const targetIndex = parts[2].replace('-slash-', '/');
-          const targetPath = parts[3].replace('-slash-', '/');
+          const relation = relationsHelper.getRelationInfosFromRelationID(r.relation);
 
           const ret = [
             {
-              indices: [ sourceIndex ],
-              path: sourcePath
+              indices: [ relation.source.index ],
+              path: relation.source.path
             },
             {
-              indices: [ targetIndex ],
-              path: targetPath
+              indices: [ relation.target.index ],
+              path: relation.target.path
             }
           ];
 
-          this._addAdvancedJoinSettingsToRelation(ret);
+          if (relation.source.type) {
+            ret[0].types = [ relation.source.type ];
+          }
+          if (relation.target.type) {
+            ret[1].types = [ relation.target.type ];
+          }
+
+          relationsHelper.addAdvancedJoinSettingsToRelation(ret);
 
           return ret;
         });
@@ -932,7 +868,7 @@ define(function (require) {
             _.forOwn(filtersPerIndex, (filters, index) => uniqFilters(_.compact(filters), { state: true, negate: true, disabled: true }));
             _.forOwn(queriesPerIndex, (queries, index) => _(queries).uniq().compact().value());
             _.forOwn(timesPerIndex, (times, index) => _(times).uniq().compact().value());
-            const filterAlias = _(dashboardIds).map((dashboardId, ind) => metas[ind].savedDash.title).sortBy().join(' <-> ');
+            const filterAlias = _(dashboardIds).map((dashboardId, ind) => metas[ind].savedDash.title).sortBy().join(' \u2194 ');
             const joinSetFilter = this._getJoinSetFilter(index, filterAlias, filtersPerIndex, queriesPerIndex, timesPerIndex);
 
             const existingJoinSetFilterIndex = _.findIndex(filters, (filter) => filter.join_set);
@@ -1014,7 +950,7 @@ define(function (require) {
     };
 
     /**
-     * Manage Relations
+     * Manage Relations from the relational panel
      */
 
     KibiState.prototype.getEnabledRelations = function () {

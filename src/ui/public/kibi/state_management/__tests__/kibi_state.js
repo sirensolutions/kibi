@@ -173,7 +173,7 @@ describe('State Management', function () {
       it('should emit a relation event when enabling a relation', function (done) {
         const relation = {
           dashboards: [ 'a', 'b' ],
-          relation: 'index-a/id/index-b/id'
+          relation: 'index-a//id/index-b//id'
         };
 
         kibiState.on('relation', function (dashboardIds) {
@@ -187,11 +187,11 @@ describe('State Management', function () {
       it('should emit a relation event when disabling a relation', function (done) {
         const relation1 = {
           dashboards: [ 'a', 'b' ],
-          relation: 'index-a/id/index-b/id'
+          relation: 'index-a//id/index-b/id'
         };
         const relation2 = {
           dashboards: [ 'c', 'b' ],
-          relation: 'index-b/id/index-c/id'
+          relation: 'index-b//id/index-c//id'
         };
 
         kibiState.enableRelation(relation1);
@@ -208,11 +208,11 @@ describe('State Management', function () {
       it('should emit a relation event when disabling all relations', function (done) {
         const relation1 = {
           dashboards: [ 'a', 'b' ],
-          relation: 'index-a/id/index-b/id'
+          relation: 'index-a//id/index-b//id'
         };
         const relation2 = {
           dashboards: [ 'c', 'b' ],
-          relation: 'index-b/id/index-c/id'
+          relation: 'index-b//id/index-c//id'
         };
 
         kibiState.enableRelation(relation1);
@@ -231,11 +231,11 @@ describe('State Management', function () {
       it('isRelationEnabled', function () {
         const relation1 = {
           dashboards: [ 'a', 'b' ],
-          relation: 'index-a/id/index-b/id'
+          relation: 'index-a//id/index-b//id'
         };
         const relation2 = {
           dashboards: [ 'c', 'b' ],
-          relation: 'index-b/id/index-c/id'
+          relation: 'index-b//id/index-c//id'
         };
 
         kibiState.enableRelation(relation1);
@@ -247,7 +247,7 @@ describe('State Management', function () {
       it('isRelationEnabled should return false if j not initialized', function () {
         const relation1 = {
           dashboards: [ 'a', 'b' ],
-          relation: 'index-a/id/index-b/id'
+          relation: 'index-a//id/index-b//id'
         };
 
         expect(kibiState.isRelationEnabled(relation1)).to.equal(false);
@@ -421,109 +421,6 @@ describe('State Management', function () {
           expect(err.message).to.be('Unable to retrieve dashboards: ["unknown dashboard"].');
           done();
         });
-      });
-    });
-
-    describe('addAdvancedJoinSettingsToRelation', function () {
-      beforeEach(() => init({
-        kibiEnterpriseEnabled: true
-      }));
-
-      it('should fail if the relation is not present', function () {
-        config.set('kibi:relations', {
-          relationsIndices: [
-            {
-              indices: [
-                {
-                  indexPatternId: 'investor',
-                  path: 'id'
-                },
-                {
-                  indexPatternId: 'investment',
-                  path: 'investorid'
-                }
-              ],
-              label: 'by',
-              id: 'investment/investorid/investor/id'
-            }
-          ]
-        });
-        const missingRelation = [
-          {
-            indices: [ 'company' ],
-            path: 'id'
-          },
-          {
-            indices: [ 'article' ],
-            path: 'companies'
-          }
-        ];
-
-        expect(kibiState._addAdvancedJoinSettingsToRelation).withArgs(missingRelation)
-        .to.throwException(/Could not find index relation corresponding to relation between/);
-      });
-
-      it('should get advanced relation for the given relation', function () {
-        config.set('kibi:relations', {
-          relationsIndices: [
-            {
-              indices: [
-                {
-                  indexPatternId: 'investor',
-                  path: 'id',
-                  termsEncoding: 'enc1',
-                  orderBy: 'asc',
-                  maxTermsPerShard: 1
-                },
-                {
-                  indexPatternId: 'investment',
-                  path: 'investorid',
-                  termsEncoding: 'enc2',
-                  orderBy: 'desc',
-                  maxTermsPerShard: 2
-                }
-              ],
-              label: 'by',
-              id: 'investment/investorid/investor/id'
-            }
-          ]
-        });
-
-        const relation1 = [
-          {
-            indices: [ 'investment' ],
-            path: 'investorid'
-          },
-          {
-            indices: [ 'investor' ],
-            path: 'id'
-          }
-        ];
-        kibiState._addAdvancedJoinSettingsToRelation(relation1);
-        expect(relation1[0].termsEncoding).to.be('enc1');
-        expect(relation1[0].orderBy).to.be('asc');
-        expect(relation1[0].maxTermsPerShard).to.be(1);
-        expect(relation1[1].termsEncoding).to.be('enc2');
-        expect(relation1[1].orderBy).to.be('desc');
-        expect(relation1[1].maxTermsPerShard).to.be(2);
-
-        const relation2 = [
-          {
-            indices: [ 'investor' ],
-            path: 'id'
-          },
-          {
-            indices: [ 'investment' ],
-            path: 'investorid'
-          }
-        ];
-        kibiState._addAdvancedJoinSettingsToRelation(relation2);
-        expect(relation2[0].termsEncoding).to.be('enc2');
-        expect(relation2[0].orderBy).to.be('desc');
-        expect(relation2[0].maxTermsPerShard).to.be(2);
-        expect(relation2[1].termsEncoding).to.be('enc1');
-        expect(relation2[1].orderBy).to.be('asc');
-        expect(relation2[1].maxTermsPerShard).to.be(1);
       });
     });
 
@@ -1503,7 +1400,7 @@ describe('State Management', function () {
 
         kibiState.enableRelation({
           dashboards: [ 'Articles', 'Companies' ],
-          relation: 'index-a/id/index-b/id'
+          relation: 'index-a//id/index-b//id'
         });
 
         kibiState.on('reset', function (ids) {
@@ -1648,15 +1545,15 @@ describe('State Management', function () {
           var relations = [
             {
               dashboards: [ 'a', 'b' ],
-              relation: 'index-a/id/index-b/id'
+              relation: 'index-a//id/index-b//id'
             },
             {
               dashboards: [ 'b', 'c' ],
-              relation: 'index-b/id/index-c/id'
+              relation: 'index-b//id/index-c//id'
             },
             {
               dashboards: [ 'd', 'e' ],
-              relation: 'index-d/id/index-e/id'
+              relation: 'index-d//id/index-e//id'
             }
           ];
 
@@ -1666,7 +1563,7 @@ describe('State Management', function () {
           kibiState.getState('a').then(function ({ filters }) {
             expect(filters).to.have.length(1);
             expect(filters[0].join_set).to.be.ok();
-            expect(filters[0].meta.alias).to.be('Dashboard A <-> Dashboard B <-> Dashboard C');
+            expect(filters[0].meta.alias).to.be('Dashboard A \u2194 Dashboard B \u2194 Dashboard C');
             done();
           }).catch(done);
         });
@@ -1675,15 +1572,15 @@ describe('State Management', function () {
           var relations = [
             {
               dashboards: [ 'a', 'b' ],
-              relation: 'index-a/id/index-b/id'
+              relation: 'index-a//id/index-b//id'
             },
             {
               dashboards: [ 'b', 'c' ],
-              relation: 'index-b/id/index-c/id'
+              relation: 'index-b//id/index-c//id'
             },
             {
               dashboards: [ 'c', 'd' ],
-              relation: 'index-c/id/index-d/id'
+              relation: 'index-c//id/index-d//id'
             }
           ];
 
@@ -1693,7 +1590,7 @@ describe('State Management', function () {
           kibiState.getState('a').then(function ({ filters }) {
             expect(filters).to.have.length(1);
             expect(filters[0].join_set).to.be.ok();
-            expect(filters[0].meta.alias).to.be('Dashboard A <-> Dashboard B <-> Dashboard C <-> Dashboard D');
+            expect(filters[0].meta.alias).to.be('Dashboard A \u2194 Dashboard B \u2194 Dashboard C \u2194 Dashboard D');
             done();
           }).catch(done);
         });
@@ -1702,11 +1599,11 @@ describe('State Management', function () {
           var relations = [
             {
               dashboards: [ 'a', 'b' ],
-              relation: 'index-a/id/index-b/id'
+              relation: 'index-a//id/index-b//id'
             },
             {
               dashboards: [ 'b', 'b' ],
-              relation: 'index-b/id1/index-b/id2'
+              relation: 'index-b//id1/index-b//id2'
             }
           ];
 
@@ -1716,7 +1613,7 @@ describe('State Management', function () {
           kibiState.getState('a').then(function ({ filters }) {
             expect(filters).to.have.length(1);
             expect(filters[0].join_set).to.be.ok();
-            expect(filters[0].meta.alias).to.be('Dashboard A <-> Dashboard B');
+            expect(filters[0].meta.alias).to.be('Dashboard A \u2194 Dashboard B');
             done();
           }).catch(done);
         });
@@ -1784,11 +1681,11 @@ describe('State Management', function () {
           var relations = [
             {
               dashboards: [ 'a', 'b' ],
-              relation: 'index-a/id1/index-b/id1'
+              relation: 'index-a//id1/index-b//id1'
             },
             {
               dashboards: [ 'a', 'b' ],
-              relation: 'index-a/id2/index-b/id2'
+              relation: 'index-a//id2/index-b//id2'
             }
           ];
 
@@ -1941,7 +1838,7 @@ describe('State Management', function () {
         it('should fail if the focused dashboard cannot be retrieved', function (done) {
           var relDash = {
             dashboards: [ 'dashboard-a', 'does-not-exist' ],
-            relation: 'index-a/id/index-b/id'
+            relation: 'index-a//id/index-b//id'
           };
           config.set('kibi:relationalPanel', true);
           kibiState.enableRelation(relDash);
@@ -1954,7 +1851,7 @@ describe('State Management', function () {
         it('should fail if the focused dashboard does not have a saved search', function (done) {
           var relDash = {
             dashboards: [ 'dashboard-a', 'dashboard-nossid' ],
-            relation: 'index-a/id/index-b/id'
+            relation: 'index-a//id/index-b//id'
           };
           config.set('kibi:relationalPanel', true);
           kibiState.enableRelation(relDash);
@@ -1976,7 +1873,7 @@ describe('State Management', function () {
           config.set('kibi:relationalPanel', true);
           var relDash = {
             dashboards: [ 'dashboard-a', 'dashboard-b' ],
-            relation: 'index-a/id/index-b/id'
+            relation: 'index-a//id/index-b//id'
           };
           kibiState.enableRelation(relDash);
 
@@ -1984,7 +1881,7 @@ describe('State Management', function () {
             expect(filters).to.have.length(1);
             expect(filters[0].join_set).to.be.ok();
             expect(filters[0].meta).to.be.ok();
-            expect(filters[0].meta.alias).to.equal('dashboard-a <-> dashboard-b');
+            expect(filters[0].meta.alias).to.equal('dashboard-a \u2194 dashboard-b');
             expect(filters[0].join_set.focus).to.be('index-a');
             expect(filters[0].join_set.queries['index-a']).to.not.be.ok();
             done();
@@ -2017,7 +1914,7 @@ describe('State Management', function () {
           config.set('kibi:relationalPanel', true);
           const relDash = {
             dashboards: [ 'dashboard-a', 'dashboard-b' ],
-            relation: 'index-a/id/index-b/id'
+            relation: 'index-a//id/index-b//id'
           };
           kibiState.enableRelation(relDash);
 
@@ -2026,7 +1923,7 @@ describe('State Management', function () {
             expect(filters[0]).to.be.eql({ meta: { disabled: false }, range: { gte: 20, lte: 40 } });
             expect(filters[1].join_set).to.be.ok();
             expect(filters[1].meta).to.be.ok();
-            expect(filters[1].meta.alias).to.equal('dashboard-a <-> dashboard-b');
+            expect(filters[1].meta.alias).to.equal('dashboard-a \u2194 dashboard-b');
             expect(filters[1].join_set.focus).to.be('index-a');
             expect(filters[1].join_set.queries['index-a']).to.not.be.ok();
             expect(filters[1].join_set.queries['index-b']).to.have.length(3);
@@ -2072,7 +1969,7 @@ describe('State Management', function () {
           config.set('kibi:relationalPanel', true);
           const relDash = {
             dashboards: [ 'dashboard-a', 'dashboard-b' ],
-            relation: 'index-a/id/index-b/id'
+            relation: 'index-a//id/index-b//id'
           };
           kibiState.enableRelation(relDash);
 
@@ -2081,7 +1978,7 @@ describe('State Management', function () {
             expect(filters[0]).to.be.eql({ meta: { disabled: false }, range: { gte: 20, lte: 40 } });
             expect(filters[1].join_set).to.be.ok();
             expect(filters[1].meta).to.be.ok();
-            expect(filters[1].meta.alias).to.equal('dashboard-a <-> dashboard-b');
+            expect(filters[1].meta.alias).to.equal('dashboard-a \u2194 dashboard-b');
             expect(filters[1].join_set.focus).to.be('index-a');
             expect(filters[1].join_set.queries['index-a']).to.not.be.ok();
             expect(filters[1].join_set.queries['index-b']).to.have.length(3);
@@ -2106,7 +2003,7 @@ describe('State Management', function () {
           config.set('kibi:relationalPanel', true);
           const relDash = {
             dashboards: [ 'dashboard-a', 'dashboard-b' ],
-            relation: 'index-a/id/index-b/id'
+            relation: 'index-a//id/index-b//id'
           };
           kibiState.enableRelation(relDash);
 
@@ -2114,7 +2011,7 @@ describe('State Management', function () {
             expect(filters).to.have.length(1);
             expect(filters[0].join_set).to.be.ok();
             expect(filters[0].meta).to.be.ok();
-            expect(filters[0].meta.alias).to.equal('dashboard-a <-> dashboard-b');
+            expect(filters[0].meta.alias).to.equal('dashboard-a \u2194 dashboard-b');
             expect(filters[0].join_set.focus).to.be('index-a');
             expect(filters[0].join_set.queries['index-a']).to.not.be.ok();
             expect(filters[0].join_set.queries['index-b']).to.have.length(3);
@@ -2156,7 +2053,7 @@ describe('State Management', function () {
           };
           const relDash = {
             dashboards: [ 'dashboard-a', 'dashboard-b' ],
-            relation: 'index-a/id/index-b/id'
+            relation: 'index-a//id/index-b//id'
           };
 
           kibiState._setDashboardProperty('dashboard-b', kibiState._properties.query, query);
@@ -2167,7 +2064,7 @@ describe('State Management', function () {
             expect(filters).to.have.length(1);
             expect(filters[0].join_set).to.be.ok();
             expect(filters[0].meta).to.be.ok();
-            expect(filters[0].meta.alias).to.equal('dashboard-a <-> dashboard-b');
+            expect(filters[0].meta.alias).to.equal('dashboard-a \u2194 dashboard-b');
             expect(filters[0].join_set.focus).to.be('index-a');
             expect(filters[0].join_set.queries['index-a']).to.not.be.ok();
             expect(filters[0].join_set.queries['index-b']).to.have.length(3);
@@ -2196,7 +2093,7 @@ describe('State Management', function () {
         it('should build the join filter with time from connected dashboards', function (done) {
           const relDash = {
             dashboards: [ 'dashboard-a', 'dashboard-b' ],
-            relation: 'index-a/id/index-b/id'
+            relation: 'index-a//id/index-b//id'
           };
           const time = {
             m: 'absolute',
@@ -2212,7 +2109,7 @@ describe('State Management', function () {
             expect(filters).to.have.length(1);
             expect(filters[0].join_set).to.be.ok();
             expect(filters[0].meta).to.be.ok();
-            expect(filters[0].meta.alias).to.equal('dashboard-a <-> dashboard-b');
+            expect(filters[0].meta.alias).to.equal('dashboard-a \u2194 dashboard-b');
             expect(filters[0].join_set.focus).to.be('index-a');
             expect(filters[0].join_set.queries['index-a']).to.not.be.ok();
             expect(filters[0].join_set.queries['index-b']).to.be.ok();

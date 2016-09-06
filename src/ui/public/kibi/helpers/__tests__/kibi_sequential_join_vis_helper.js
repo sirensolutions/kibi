@@ -308,6 +308,66 @@ describe('Kibi Components', function () {
         }).catch(done);
       });
 
+      it('should build the join_sequence with the appropriate index types', function (done) {
+        const currentDashboardId = 'dashboardA';
+        const button = {
+          sourceField: 'fa',
+          sourceIndexPatternId: 'ia',
+          sourceIndexPatternType: 'ta',
+          targetField: 'fb',
+          targetIndexPatternType: 'tb'
+        };
+
+        init({ currentDashboardId, indexPatterns, savedDashboards, savedSearches });
+        appState.filters = [
+          {
+            term: {
+              field: 'aaa'
+            },
+            meta: {
+              disabled: false
+            }
+          }
+        ];
+
+        sequentialJoinVisHelper.getJoinSequenceFilter('dashboardA', button).then((rel) => {
+          expect(rel.join_sequence).to.have.length(1);
+          expect(rel.join_sequence[0].relation).to.have.length(2);
+          expect(rel.join_sequence[0].relation[0].indices).to.eql([ button.sourceIndexPatternId ]);
+          expect(rel.join_sequence[0].relation[0].path).to.be(button.sourceField);
+          expect(rel.join_sequence[0].relation[0].queries[0].query.bool.must).to.have.length(2);
+          expect(rel.join_sequence[0].relation[0].queries[0].query.bool.must[0]).to.be.eql({
+            query: {
+              query_string: {
+                query: '*',
+                analyze_wildcard: true
+              }
+            }
+          });
+          expect(rel.join_sequence[0].relation[0].queries[0].query.bool.must[1]).to.be.eql({ query: { a: 123 } });
+          expect(rel.join_sequence[0].relation[0].queries[0].query.bool.filter.bool.must).to.have.length(2);
+          expect(rel.join_sequence[0].relation[0].queries[0].query.bool.filter.bool.must[0]).to.be.eql({
+            term: {
+              field: 'aaa'
+            }
+          });
+          expect(rel.join_sequence[0].relation[0].queries[0].query.bool.filter.bool.must[1]).to.be.eql({
+            range: {
+              date: {
+                gte: dateMath.parseWithPrecision(defaultTimeStart, false).valueOf(),
+                lte: dateMath.parseWithPrecision(defaultTimeEnd, true).valueOf(),
+                format: 'epoch_millis'
+              }
+            }
+          });
+          expect(rel.join_sequence[0].relation[0].termsEncoding).to.be('long');
+          expect(rel.join_sequence[0].relation[1].indices).to.eql([ button.targetIndexPatternId ]);
+          expect(rel.join_sequence[0].relation[1].path).to.be(button.targetField);
+          expect(rel.join_sequence[0].relation[1].termsEncoding).to.be('long');
+          done();
+        }).catch(done);
+      });
+
       it('should get the query from the search meta', function (done) {
         init({ indexPatterns, savedDashboards, savedSearches });
         const button = {
@@ -364,10 +424,9 @@ describe('Kibi Components', function () {
           savedDashboards: savedDashboards
         });
 
-
         kibiState.enableRelation({
           dashboards: [ 'dashboardA', 'dashboardB' ],
-          relation: 'ia/fa/ib/fb'
+          relation: 'ia//fa/ib//fb'
         });
         config.set('kibi:relations', {
           relationsIndices: [
@@ -385,7 +444,7 @@ describe('Kibi Components', function () {
                 }
               ],
               label: 'rel',
-              id: 'ia/fa/ib/fb'
+              id: 'ia//fa/ib//fb'
             }
           ]
         });

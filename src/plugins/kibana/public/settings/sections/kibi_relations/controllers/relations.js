@@ -59,12 +59,12 @@ define(function (require) {
 
   app.controller('RelationsController',
   function (kibiState, $rootScope, $scope, config, Private, $element, $timeout, kbnUrl, createNotifier, kibiEnterpriseEnabled) {
-
     var notify = createNotifier({
       location: 'Relations Editor'
     });
 
     var color = Private(require('ui/vislib/components/color/color'));
+    var relationsHelper = Private(require('ui/kibi/helpers/relations_helper'));
 
     $scope.kibiEnterpriseEnabled = kibiEnterpriseEnabled;
 
@@ -186,8 +186,8 @@ define(function (require) {
       if (!dashboardId) {
         return '';
       }
-      _.each(indexToDashboardsMap, function (map, index) {
-        if (map.indexOf(dashboardId) !== -1) {
+      _.each(indexToDashboardsMap, function (dashboards, index) {
+        if (dashboards.indexOf(dashboardId) !== -1) {
           dIndex = index;
           return false;
         }
@@ -223,7 +223,7 @@ define(function (require) {
       // here for anything about indices relations - we take them from config as they are already saved
       var relations = config.get('kibi:relations');
 
-      //for anything about the dashboards relations - we take them from the scope
+      // for anything about the dashboards relations - we take them from the scope
       var dashboards = $scope.relations.relationsDashboards[id].dashboards;
       var lIndex = '';
       var rIndex = '';
@@ -246,7 +246,7 @@ define(function (require) {
         }
       });
 
-      return (!!lIndex || !!rIndex) && !_(relations.relationsIndices).map(function (relInd) {
+      const validRelations = _(relations.relationsIndices).map(function (relInd) {
         if (lIndex && rIndex) {
           if ((lIndex === relInd.indices[0].indexPatternId && rIndex === relInd.indices[1].indexPatternId) ||
               (lIndex === relInd.indices[1].indexPatternId && rIndex === relInd.indices[0].indexPatternId)) {
@@ -261,17 +261,21 @@ define(function (require) {
             return relInd.id;
           }
         }
-      }).compact().contains(item.value);
+      }).compact().value();
+      const usedRelations = _(relations.relationsDashboards).map(function (relDash, offset) {
+        if (offset !== id && dashboards[0] && dashboards[1]) {
+          if ((dashboards[0] === relDash.dashboards[0] && dashboards[1] === relDash.dashboards[1]) ||
+              (dashboards[0] === relDash.dashboards[1] && dashboards[1] === relDash.dashboards[0])) {
+            return relDash.relation;
+          }
+        }
+      }).compact().value();
+      return (Boolean(lIndex) || Boolean(rIndex)) &&
+      // remove item if it is not in any valid relation for the indices lIndex and rIndex
+      validRelations.indexOf(item.value) === -1 ||
+      // remove item if it is already used for the same dashboards
+      usedRelations.indexOf(item.value) !== -1;
     };
-
-    /**
-     * Returns a unique identifier for the relation between the indices indexa and indexb
-     */
-    function _getJoinIndicesUniqueID(indexa, indexb) {
-      var ia = indexa.indexPatternId.replace(/\//, '-slash-') + '/' + indexa.path.replace(/\//, '-slash-');
-      var ib = indexb.indexPatternId.replace(/\//, '-slash-') + '/' + indexb.path.replace(/\//, '-slash-');
-      return ia < ib ? ia + '/' + ib : ib + '/' + ia;
-    }
 
     function _getRelationLabel(relationId) {
       var label;
@@ -416,6 +420,7 @@ define(function (require) {
       }
     }, true);
 
+    // Listen to changes of relations between indices
     $scope.$watch(function ($scope) {
       return _.map($scope.relations.relationsIndices, function (relation) {
         return _.omit(relation, ['error', 'id']); // id is redundant
@@ -443,10 +448,20 @@ define(function (require) {
         var indexb = relation.indices[1];
 
         if (indexa.indexPatternId && indexa.path && indexb.indexPatternId && indexb.path) {
-          return _getJoinIndicesUniqueID(indexa, indexb);
+          return relationsHelper.getJoinIndicesUniqueID(indexa.indexPatternId, indexa.indexPatternType, indexa.path,
+                                                        indexb.indexPatternId, indexb.indexPatternType, indexb.path);
         }
         return offset;
       });
+
+      const indexLabel = function (index) {
+        let label = index.indexPatternId;
+
+        if (index.indexPatternType) {
+          label += '.' + index.indexPatternType;
+        }
+        return label + '.' + index.path;
+      };
 
       $scope.invalid = false;
       _.each($scope.relations.relationsIndices, function (relation) {
@@ -458,17 +473,17 @@ define(function (require) {
 
           // automatically compute the label if not present
           if (!relation.label) {
-            relation.label = relation.indices[0].indexPatternId + '.' + relation.indices[0].path +
-                             ' -- ' +
-                             relation.indices[1].indexPatternId + '.' + relation.indices[1].path;
+            relation.label = indexLabel(relation.indices[0]) + ' -- ' + indexLabel(relation.indices[1]);
           }
 
-          var key = _getJoinIndicesUniqueID(indices[0], indices[1]);
+          var key = relationsHelper.getJoinIndicesUniqueID(indices[0].indexPatternId, indices[0].indexPatternType, indices[0].path,
+                                                           indices[1].indexPatternId, indices[1].indexPatternType, indices[1].path);
 
           if (uniq[key].length !== 1) {
             error = 'These relationships are equivalent, please remove one';
           }
           if (indices[0].indexPatternId === indices[1].indexPatternId &&
+              indices[0].indexPatternType === indices[1].indexPatternType &&
               indices[0].path === indices[1].path) {
             error += 'Left and right sides of the relation cannot be the same.';
           }
@@ -523,7 +538,6 @@ define(function (require) {
       g.nodes = _.uniq(g.nodes, function (node) {
         return node.id;
       });
-
       if (!$scope.indicesGraph && $scope.relations.relationsIndicesSerialized) {
         // check the serialized one
         var graph = $scope.relations.relationsIndicesSerialized;
@@ -567,10 +581,11 @@ define(function (require) {
 
                 for (var i = 0; i < relationsIndices.length; i++) {
                   if (relationsIndices[i].id && oldRelations[i].id) {
-                    var newRelationId = relationsIndices[i].id.split('/');
-                    var oldRelationId = oldRelations[i].id.split('/');
+                    const newRelation = relationsHelper.getRelationInfosFromRelationID(relationsIndices[i].id);
+                    const oldRelation = relationsHelper.getRelationInfosFromRelationID(oldRelations[i].id);
 
-                    if (newRelationId[0] !== oldRelationId[0] || newRelationId[2] !== oldRelationId[2]) {
+                    if (newRelation.source.index !== oldRelation.source.index || // left index changed
+                        newRelation.target.index !== oldRelation.target.index) { // right index changed
                       clearRelation(oldRelations[i].id);
                     }
                   }
@@ -597,6 +612,7 @@ define(function (require) {
       }
     });
     $scope.$on('$destroy', function () {
+      relationsHelper.destroy();
       indicesGraphExportOff();
       dashboardsGraphExportOff();
     });

@@ -2,11 +2,14 @@ define(function (require) {
   var _ = require('lodash');
 
   return function KibiSequentialJoinVisHelperFactory(kbnUrl, kibiState, Private) {
-
     var countHelper = Private(require('ui/kibi/helpers/count_helper/count_helper'));
+    const relationsHelper = Private(require('ui/kibi/helpers/relations_helper'));
 
-    function KibiSequentialJoinVisHelper() {
-    }
+    function KibiSequentialJoinVisHelper() {}
+
+    KibiSequentialJoinVisHelper.prototype.destroy = function () {
+      relationsHelper.destroy();
+    };
 
     KibiSequentialJoinVisHelper.prototype.constructButtonsArray = function (buttonDefs, currentDashboardIndexId) {
       return _.chain(buttonDefs)
@@ -204,8 +207,14 @@ define(function (require) {
           }
         ]
       };
+      if (button.sourceIndexPatternType) {
+        ret.relation[0].types = [ button.sourceIndexPatternType ];
+      }
+      if (button.targetIndexPatternType) {
+        ret.relation[1].types = [ button.targetIndexPatternType ];
+      }
 
-      kibiState._addAdvancedJoinSettingsToRelation(ret.relation);
+      relationsHelper.addAdvancedJoinSettingsToRelation(ret.relation);
 
       // add filters
       _.each(filters, (filter) => {
@@ -241,7 +250,6 @@ define(function (require) {
         return countHelper.constructCountQuery(filters, queries, time);
       });
     };
-
 
     return new KibiSequentialJoinVisHelper();
   };

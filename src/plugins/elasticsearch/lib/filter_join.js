@@ -1,5 +1,48 @@
-var util = require('./util');
-var _ = require('lodash');
+const util = require('./util');
+const _ = require('lodash');
+
+/**
+* Returns the index in relation of the element which is about the given index
+*/
+const _getFocusedRelationIndex = function (focus, relation) {
+  if (relation[0].indices[0] === focus) {
+    return 0;
+  }
+  return relation[1].indices[0] === focus ? 1 : -1;
+};
+
+// add types for the source index
+const addSourceTypes = function (query, types) {
+  if (types) {
+    for (let j = 0; j < types.length; j++) {
+      query.push({
+        type: {
+          value: types[j]
+        }
+      });
+    }
+  }
+};
+
+const addFilterJoinToParent = function (query, fjObject, types, negate) {
+  if (query.constructor === Array) {
+    // this filterjoin is the root
+    query.push(fjObject);
+    addSourceTypes(query, types);
+  } else {
+    // add to the parent filterjoin
+    if (negate) {
+      if (!query.filter.bool.must_not) {
+        query.filter.bool.must_not = [];
+      }
+      query.filter.bool.must_not.push(fjObject);
+      addSourceTypes(query.filter.bool.must_not, types);
+    } else {
+      query.filter.bool.must.push(fjObject);
+      addSourceTypes(query.filter.bool.must, types);
+    }
+  }
+};
 
 /**
  * Generate a SIREn filterjoin query where the sequence of joins is explicitly defined in the query.
@@ -35,13 +78,13 @@ var _ = require('lodash');
  * A relation can be negated by setting the field "negate" to true.
  */
 exports.sequence = function (json) {
-  var label = 'join_sequence';
-  var objects = util.traverse(json, label, function (err, sequence) {
+  const label = 'join_sequence';
+  const objects = util.traverse(json, label, function (err, sequence) {
     if (err) {
       throw err;
     }
 
-    var query = [];
+    const query = [];
     _verifySequence(sequence);
     _sequenceJoins(query, sequence);
     return query;
@@ -66,15 +109,15 @@ exports.sequence = function (json) {
  * - queries: the queries for each index as an object, which entries are the index names
  */
 exports.set = function (json) {
-  var label = 'join_set';
-  var objects = util.traverse(json, label, function (err, data) {
+  const label = 'join_set';
+  const objects = util.traverse(json, label, function (err, data) {
     if (err) {
       throw err;
     }
 
-    var focus = data.focus;
-    var relations = data.relations;
-    var queries = data.queries;
+    const focus = data.focus;
+    const relations = data.relations;
+    const queries = data.queries || {};
 
     if (focus === undefined) {
       throw new Error('Missing focus field in the join object: ' + JSON.stringify(data, null, ' '));
@@ -82,12 +125,12 @@ exports.set = function (json) {
     if (relations === undefined) {
       throw new Error('Missing relations field in the join object: ' + JSON.stringify(data, null, ' '));
     }
-    if (queries === undefined) {
-      queries = {};
-    }
 
-    var query = [];
-    _process(query, focus, relations, queries, {});
+    const query = [];
+    const superGraph = _superGraph(relations);
+    const toExpand = [];
+    _superGraphToSuperTree(toExpand, query, focus, superGraph, queries);
+    _expandSuperTree(toExpand);
     return query;
   });
   _replaceObjects(json, objects);
@@ -95,12 +138,12 @@ exports.set = function (json) {
 };
 
 function _replaceObjects(json, objects) {
-  for (var i = objects.length - 1; i >= 0; i--) {
-    var path = objects[i].path;
+  for (let i = objects.length - 1; i >= 0; i--) {
+    const path = objects[i].path;
     if (util.length(json, path) !== 1) {
       throw new Error('The object at ' + path.join('.') + ' must only contain the join filter\n' + JSON.stringify(json, null, ' '));
     }
-    var label = path[path.length - 1];
+    const label = path[path.length - 1];
     util.replace(json, path.slice(0, path.length - 1), label, label, objects[i].value);
   }
 }
@@ -144,8 +187,8 @@ function _checkRelation(relation, fields, maxIndices) {
   if (relation.constructor !== Array || relation.length !== 2) {
     throw new Error('Expecting a pair of dashboards to join, got: ' + JSON.stringify(relation, null, ' '));
   }
-  var _check = function (dashboard, isSource) {
-    var keys = _.keys(dashboard);
+  const _check = function (dashboard, isSource) {
+    const keys = _.keys(dashboard);
 
     if (!_.contains(keys, 'path')) {
       throw new Error('The join path is required');
@@ -177,11 +220,12 @@ function _checkRelation(relation, fields, maxIndices) {
  * Create the filterjoin from the sequence of relations
  */
 function _sequenceJoins(query, sequence) {
-  var curQuery = query;
+  let curQuery = query;
 
-  for (var i = sequence.length - 1; i > 0; i--) {
-    var join = sequence[i].relation;
-    curQuery = _addFilterJoin(curQuery, join[1].path, join[0].path, join[0], sequence[i].negate);
+  for (let i = sequence.length - 1; i > 0; i--) {
+    const join = sequence[i].relation;
+    const { child } = _addFilterJoin(curQuery, join[1].path, join[1], join[0].path, join[0], sequence[i].negate);
+    curQuery = child;
     _addFilters(curQuery, join[0].queries);
   }
   if (sequence[0].group) {
@@ -189,9 +233,69 @@ function _sequenceJoins(query, sequence) {
       _sequenceJoins(curQuery.filter.bool.must, seq);
     });
   } else {
-    var lastJoin = sequence[0].relation;
-    curQuery = _addFilterJoin(curQuery, lastJoin[1].path, lastJoin[0].path, lastJoin[0], sequence[0].negate);
+    const lastJoin = sequence[0].relation;
+    const { child } = _addFilterJoin(curQuery, lastJoin[1].path, lastJoin[1],
+                                                 lastJoin[0].path, lastJoin[0], sequence[0].negate);
+    curQuery = child;
     _addFilters(curQuery, lastJoin[0].queries);
+  }
+}
+
+function _superGraph(relations) {
+  const relationFields = [ 'path', 'indices', 'types', 'orderBy', 'maxTermsPerShard', 'termsEncoding' ];
+
+  return _(relations)
+  .each((relation) => {
+    // we currently support only 1 index in the indices array
+    _checkRelation(relation, relationFields, 1);
+    if (relation[0].indices[0] === relation[1].indices[0]) {
+      throw new Error('Loops in the join_set are not supported!\n' + JSON.stringify(relation, null, ' '));
+    }
+  })
+  .groupBy((relation) => {
+    const leftIndex = relation[0].indices[0];
+    const rightIndex = relation[1].indices[0];
+    return leftIndex < rightIndex ? leftIndex + rightIndex : rightIndex + leftIndex;
+  })
+  .value();
+}
+
+function _expandSuperTree(toExpand) {
+  for (let i = toExpand.length - 1; i >= 0; i--) {
+    const node = toExpand[i];
+    for (let j = 0; j < node.relations.length; j++) {
+      const relation = node.relations[j];
+      const ind = _getFocusedRelationIndex(node.focus, relation);
+      const targetInd = ind === 0 ? 1 : 0;
+      const sourceRel = relation[ind];
+      const targetRel = relation[targetInd];
+      const clone = _.cloneDeep(node.filterjoin);
+
+      clone.indices = targetRel.indices;
+      clone.path = targetRel.path;
+      clone.types = targetRel.types;
+      if (!clone.types) {
+        delete clone.types;
+      }
+      clone.orderBy = targetRel.orderBy;
+      if (!clone.orderBy) {
+        delete clone.orderBy;
+      }
+      clone.termsEncoding = targetRel.termsEncoding;
+      if (!clone.termsEncoding) {
+        delete clone.termsEncoding;
+      }
+      clone.maxTermsPerShard = targetRel.maxTermsPerShard;
+      if (!clone.maxTermsPerShard || clone.maxTermsPerShard === -1) {
+        delete clone.maxTermsPerShard;
+      }
+
+      const fjObject = {
+        filterjoin: {}
+      };
+      fjObject.filterjoin[sourceRel.path] = clone;
+      addFilterJoinToParent(node.parent, fjObject, sourceRel.types);
+    }
   }
 }
 
@@ -200,7 +304,7 @@ function _sequenceJoins(query, sequence) {
  * and the filterjoins as well, if it is connected to any of the other
  * indices.
  */
-function _process(query, focus, relations, filters, visitedIndices) {
+function _superGraphToSuperTree(toExpand, query, focus, superGraph, filters, visitedIndices = {}, visitedRelations = {}) {
   if (visitedIndices[focus] === true) {
     return;
   }
@@ -210,23 +314,32 @@ function _process(query, focus, relations, filters, visitedIndices) {
     if (query.constructor === Array) {
       throw new Error('There cannot be filters on the root of the filterjoin');
     }
-    var focusFilters = filters[focus];
+    const focusFilters = filters[focus];
     _addFilters(query, focusFilters);
   }
-  for (var i = 0; i < relations.length; i++) {
-    _checkRelation(relations[i], [ 'path', 'indices', 'types', 'orderBy', 'maxTermsPerShard', 'termsEncoding' ], 1);
-    if (relations[i][0].indices[0] === relations[i][1].indices[0]) {
-      throw new Error('Loops in the join_set are not supported!\n' + JSON.stringify(relations[i], null, ' '));
-    }
-    var ind = _getFocusedRelationIndex(focus, relations[i]);
-    if (ind !== -1) {
-      var targetInd = ind === 0 ? 1 : 0;
-      var sourceRel = relations[i][ind];
-      var targetRel = relations[i][targetInd];
 
-      if (!visitedIndices.hasOwnProperty(targetRel.indices[0])) {
-        var childFilters = _addFilterJoin(query, sourceRel.path, targetRel.path, targetRel);
-        _process(childFilters, targetRel.indices[0], relations, filters, visitedIndices);
+  for (const id in superGraph) {
+    if (superGraph.hasOwnProperty(id)) {
+      const relations = superGraph[id];
+      const ind = _getFocusedRelationIndex(focus, relations[0]);
+      if (ind !== -1) {
+        const targetInd = ind === 0 ? 1 : 0;
+        const sourceRel = relations[0][ind];
+        const targetRel = relations[0][targetInd];
+
+        if (!visitedRelations[id]) {
+          visitedRelations[id] = true;
+          const { child, filterjoin } = _addFilterJoin(query, sourceRel.path, sourceRel, targetRel.path, targetRel);
+          if (relations.length > 1) {
+            toExpand.push({
+              focus,
+              relations: relations.slice(1),
+              parent: query,
+              filterjoin
+            });
+          }
+          _superGraphToSuperTree(toExpand, child, targetRel.indices[0], superGraph, filters, visitedIndices, visitedRelations);
+        }
       }
     }
   }
@@ -235,15 +348,15 @@ function _process(query, focus, relations, filters, visitedIndices) {
 /**
  * Adds a filterjoin filter to the given query, from the source index to the target index
  */
-function _addFilterJoin(query, sourcePath, targetPath, targetIndex, negate) {
+function _addFilterJoin(query, sourcePath, sourceIndex, targetPath, targetIndex, negate) {
   if (!targetIndex) {
     throw new Error('The target index must be defined');
   }
-  var orderBy = targetIndex.orderBy;
-  var maxTermsPerShard = targetIndex.maxTermsPerShard;
-  var termsEncoding = targetIndex.termsEncoding;
+  const orderBy = targetIndex.orderBy;
+  const maxTermsPerShard = targetIndex.maxTermsPerShard;
+  const termsEncoding = targetIndex.termsEncoding;
 
-  var filterJoin = {
+  const filterJoin = {
     indices: targetIndex.indices,
     path: targetPath,
     query: {
@@ -273,35 +386,16 @@ function _addFilterJoin(query, sourcePath, targetPath, targetIndex, negate) {
   if (termsEncoding) {
     filterJoin.termsEncoding = termsEncoding;
   }
-  var fjObject = {
+  const fjObject = {
     filterjoin: {}
   };
   fjObject.filterjoin[sourcePath] = filterJoin;
-  if (query.constructor === Array) {
-    // this filterjoin is the root
-    query.push(fjObject);
-  } else {
-    // add to the parent filterjoin
-    if (negate) {
-      if (!query.filter.bool.must_not) {
-        query.filter.bool.must_not = [];
-      }
-      query.filter.bool.must_not.push(fjObject);
-    } else {
-      query.filter.bool.must.push(fjObject);
-    }
-  }
-  return filterJoin.query.bool;
-}
 
-/**
- * Returns the index in relation of the element which is about the given index
- */
-function _getFocusedRelationIndex(focus, relation) {
-  if (relation[0].indices[0] === focus) {
-    return 0;
-  }
-  return relation[1].indices[0] === focus ? 1 : -1;
+  addFilterJoinToParent(query, fjObject, sourceIndex.types, negate);
+  return {
+    filterjoin: filterJoin,
+    child: filterJoin.query.bool
+  };
 }
 
 /**
@@ -317,7 +411,7 @@ function _addFilters(query, focusFilters) {
   if (focusFilters.constructor !== Array) {
     throw new Error('The queries field must be an array');
   }
-  for (var i = 0; i < focusFilters.length; i++) {
+  for (let i = 0; i < focusFilters.length; i++) {
     // add the query object to bool.must so that the score is computed
     if (focusFilters[i].hasOwnProperty('query')) {
       query.must.push(focusFilters[i].query);

@@ -204,6 +204,46 @@ describe('Kibi Components', function () {
 
     describe('get put ', function () {
 
+      it('saved data should equal retrieved data - there is no cookie - forced save', function (done) {
+        var expectedId = 'putget';
+        var testData = {secret: 1};
+        sinon.stub(kibiSessionHelper, '_generateId', function () {
+          return expectedId;
+        });
+        makeSureKibiSessionHelperInitialized(kibiSessionHelper).then(function () {
+          resetCounters();
+          $cookies.remove('ksid');
+
+          return kibiSessionHelper.putData(testData, true).then(function () {
+            return kibiSessionHelper.getData().then(function (data) {
+              expect(saveSessionCounter).to.be(1);
+              expect(getSaveSessionCounter).to.be(0);
+              expect(data).to.eql(testData);
+              done();
+            });
+          });
+        }).catch(done);
+      });
+
+      it('saved data should equal retrieved data - there is cookie - forced save', function (done) {
+        var expectedId = 'putget';
+        var testData = {secret: 1};
+
+        makeSureKibiSessionHelperInitialized(kibiSessionHelper).then(function () {
+          resetCounters();
+          $cookies.put('ksid', expectedId);
+
+          return kibiSessionHelper.putData(testData, true).then(function () {
+            return kibiSessionHelper.getData().then(function (data) {
+              expect(saveSessionCounter).to.be(1);
+              expect(getSaveSessionCounter).to.be(0);
+              expect(data).to.eql(testData);
+              done();
+            });
+          });
+        }).catch(done);
+      });
+
       it('saved data should equal retrieved data - there is no cookie', function (done) {
         var expectedId = 'putget';
         var testData = {secret: 1};
@@ -216,7 +256,7 @@ describe('Kibi Components', function () {
 
           return kibiSessionHelper.putData(testData).then(function () {
             return kibiSessionHelper.getData().then(function (data) {
-              expect(saveSessionCounter).to.be(1);
+              expect(saveSessionCounter).to.be(0);
               expect(getSaveSessionCounter).to.be(0);
               expect(data).to.eql(testData);
               done();
@@ -235,7 +275,7 @@ describe('Kibi Components', function () {
 
           return kibiSessionHelper.putData(testData).then(function () {
             return kibiSessionHelper.getData().then(function (data) {
-              expect(saveSessionCounter).to.be(1);
+              expect(saveSessionCounter).to.be(0);
               expect(getSaveSessionCounter).to.be(0);
               expect(data).to.eql(testData);
               done();

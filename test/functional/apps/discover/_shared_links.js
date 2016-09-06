@@ -79,15 +79,14 @@ define(function (require) {
           var expectedUrl = baseUrl
             + '/app/kibana?_t=1453775307251#'
             + '/discover?_g=(refreshInterval:(display:Off,pause:!f,value:0),time'
-            + ':(from:\'2015-09-19T06:31:44.000Z\',mode:absolute,to:\'2015-09'
-            + '-23T18:31:44.000Z\'))&_k=(s:c46f29539d)&_a=(columns:!(_source),index:\'logstash-'
-            + '*\',interval:auto,query:(query_string:(analyze_wildcard:!t,query'
-            + ':\'*\')),sort:!(\'@timestamp\',desc))';
+            + ':(from:%272015-09-19T06:31:44.000Z%27,mode:absolute,to:%272015-09'
+            + '-23T18:31:44.000Z%27))&_k=(s:c46f29539d)&_a=(columns:!(_source),index:%27logstash-'
+            + '*%27,interval:auto,query:(query_string:(analyze_wildcard:!t,query'
+            + ':%27*%27)),sort:!(%27@timestamp%27,desc))';
           return discoverPage.getSharedUrl()
           .then(function (actualUrl) {
             // strip the timestamp out of each URL
             expect(actualUrl.replace(/_t=\d{13}/,'_t=TIMESTAMP').replace(/s:\w{10}/,'s:SESSION_ID'))
-
               .to.be(expectedUrl.replace(/_t=\d{13}/,'_t=TIMESTAMP').replace(/s:\w{10}/,'s:SESSION_ID'));
           })
           .catch(common.handleError(this));

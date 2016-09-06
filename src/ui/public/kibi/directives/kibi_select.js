@@ -33,7 +33,8 @@ define(function (require) {
         modelDisabled: '=?', // use to disable the underlying select
         modelRequired: '=?', // use to disable the underlying select
         include: '=?', // extra values can be passed here
-        analyzedWarning: '@'   // set to true or false to disable/enable analyzed field warning
+        analyzedWarning: '@',   // set to true or false to disable/enable analyzed field warning
+        scriptedFields: '@' // optional set to true or false to display or not scripted fields (default: true)
       },
       template: require('ui/kibi/directives/kibi_select.html'),
       controller: function () {
@@ -181,6 +182,7 @@ define(function (require) {
 
         var _render = function (scope) {
           let promise;
+          if (scope.scriptedFields === undefined || scope.scriptedFields === null) scope.scriptedFields = true;
 
           // if disabled, do not try to render anything
           if (scope.disabled) {
@@ -211,7 +213,7 @@ define(function (require) {
                 promise = selectHelper.getIndexTypes(scope.indexPatternId);
                 break;
               case 'field':
-                promise = selectHelper.getFields(scope.indexPatternId, scope.fieldTypes);
+                promise = selectHelper.getFields(scope.indexPatternId, scope.fieldTypes, scope.scriptedFields);
                 break;
               case 'indexPattern':
                 promise = selectHelper.getIndexesId();

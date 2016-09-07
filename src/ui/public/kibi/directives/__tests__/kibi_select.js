@@ -23,6 +23,8 @@ var init = function ({
   // Load the application
   ngMock.module('kibana', function ($provide) {
     $provide.constant('elasticsearchPlugins', ['siren-join']);
+    $provide.constant('kbnDefaultAppId', '');
+    $provide.constant('kibiDefaultDashboardId', '');
   });
 
   // Create the scope
@@ -170,6 +172,52 @@ describe('Kibi Directives', function () {
       expect($rootScope.action.called).to.not.be.ok();
       var select = $elem.find('select');
       expect(select[0].disabled).to.be(true);
+    });
+
+    describe('should keep the initial required parameter when enabling a disabled kibi-select', function () {
+      it('should be required', function () {
+        var items = [
+          {
+            value: 1,
+            id: 1,
+            label: 'joe'
+          }
+        ];
+
+        init({ items, required: true, modelDisabled: true });
+
+        // do not try to render anything
+        expect($rootScope.action.called).to.not.be.ok();
+        var select = $elem.find('select');
+        expect(select[0].disabled).to.be(true);
+
+        $scope.modelDisabled = false;
+        $scope.$digest();
+        expect($rootScope.action.called).to.be.ok();
+        expect($scope.required).to.be(true);
+      });
+
+      it('should not be required', function () {
+        var items = [
+          {
+            value: 1,
+            id: 1,
+            label: 'joe'
+          }
+        ];
+
+        init({ items, modelDisabled: true });
+
+        // do not try to render anything
+        expect($rootScope.action.called).to.not.be.ok();
+        var select = $elem.find('select');
+        expect(select[0].disabled).to.be(true);
+
+        $scope.modelDisabled = false;
+        $scope.$digest();
+        expect($rootScope.action.called).to.be.ok();
+        expect($scope.required).to.be(false);
+      });
     });
 
     it('should add the include to the select options XXX', function () {

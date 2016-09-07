@@ -42,11 +42,16 @@ define(function (require) {
         this.extendedObjectType = function (scope) {};
       },
       link: function (scope, element, attrs, ngModelCtrl) {
-        scope.required = Boolean(scope.modelRequired);
         scope.disabled = Boolean(scope.modelDisabled);
-        if (attrs.hasOwnProperty('required')) {
-          scope.required = true;
+
+        function initRequired(scope, attrs) {
+          scope.required = Boolean(scope.modelRequired);
+          if (attrs.hasOwnProperty('required')) {
+            scope.required = true;
+          }
         }
+        initRequired(scope, attrs);
+
         scope.items = [];
 
         scope.isInvalid = function () {
@@ -76,7 +81,11 @@ define(function (require) {
         scope.$watch('modelDisabled', function (newValue, oldValue, myScope) {
           if (newValue !== undefined) {
             myScope.disabled = newValue;
-            myScope.required = !newValue;
+            if (newValue) {
+              myScope.required = false;
+            } else {
+              initRequired(scope, attrs);
+            }
             _setViewValue(myScope.modelObject);
           }
         });

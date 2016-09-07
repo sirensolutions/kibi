@@ -1,6 +1,15 @@
 [[releasenotes]]
 == Kibi Release Notes
 
+=== Kibi 4.5.3-1 Release Notes
+
+* Fixed Do not allow to define relations for relational buttons on scripted fields
+* Fixed problem with jdbc datasource
+* Added a visual hint to identify dashboards which state differ from the default one
+* Added new ability to quickly set time for more than one dashboard
+* Disabled session automatic synching to ES
+
+
 === Kibi 4.5.3 and Kibana 4.5.3 Release Notes
 
 * Various bug fixes and stability improvements
@@ -45,6 +54,21 @@ Bug Fixes
 Plugin System Changes
 
 * {k4issue}5916[Issue 5916]: Adds the --list flag to list installed plugins.
+
+
+=== Kibi 4.4.2-2 Release Notes
+
+* Backport fix for Truncate document label if too long
+* Backport fix for Error when label is used for a purple filter is an array
+* Backport fix for Export/Import takes care about index patterns too
+* Bumped timeline version to 4.4.2-2
+
+=== Kibi 4.4.2-1 Release Notes
+
+* Backport fix for broken tiles in map widget
+* Backport fix for broken import export of objects
+* Backport fix for openjdk version check [Enterprise Edition only]
+* Backport fix support for nested fields label (Graph Browser) [Enterprise Edition only]
 
 
 === Kibi 4.4.2 and Kibana 4.4.2 Release Notes

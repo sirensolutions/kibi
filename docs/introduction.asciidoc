@@ -59,6 +59,8 @@ This new version of Kibi provides many improvements and new features, the main o
 * Support for object migration from Kibi 4.4.2
 * Improved Export and Import - Kibi is now able to export and reimport all configuration and index patterns
 * Added headers and parameters to a REST datasource configuration
+* Added a visual hint to identify dashboards which state differ from the default one
+* Added new ability to quickly set time for more than one dashboard
 * Added more graph scripts to Graph Browser [Enterprise Edition only]
 * Scalability improvements in Graph Browser [Enterprise Edition only]
 

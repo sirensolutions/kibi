@@ -88,7 +88,14 @@ define(function (require) {
         }
 
         if (datasource.datasourceType === kibiUtils.DatasourceTypes.tinkerpop3) {
-          const baseUrl = datasource.datasourceParams.url.replace('/graph/query', '');
+          const datasourceUrl = datasource.datasourceParams.url;
+          let baseUrl;
+          if (datasourceUrl.indexOf('/graph/queryBatch') >= 0) {
+            baseUrl = datasourceUrl.replace('/graph/queryBatch', '');
+          } else {
+            // for backward compatibility with an older graph browser plugin
+            baseUrl = datasourceUrl.replace('/graph/query', '');
+          }
 
           queryEngineClient.gremlinPing(baseUrl).then(function (response) {
             if (response.data.error) {

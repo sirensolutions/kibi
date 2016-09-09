@@ -17,6 +17,7 @@ function GremlinServerHandler(server) {
 function startServer(self, fulfill, reject) {
   const config = self.server.config();
   let gremlinServerPath = config.get('kibi_core.gremlin_server.path');
+  let gremlinServerRemoteDebug = config.get('kibi_core.gremlin_server.debug_remote');
 
   if (gremlinServerPath) {
     // regex for ipv4 ip+port
@@ -92,6 +93,9 @@ function startServer(self, fulfill, reject) {
             '--server.port=' + self.url.split(':')[2],
             '--logging.config=' + loggingFilePath
           ];
+          if (gremlinServerRemoteDebug) {
+            args.unshift(gremlinServerRemoteDebug);
+          }
 
           if (transportClientUsername) {
             args.push('--elasticTransportClientUserName=' + transportClientUsername);

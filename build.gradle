@@ -124,13 +124,13 @@ publishing {
   publications {
 
     /**
-     * Core Kibi distribution artifact for each platform
+     * Core Kibi distribution
      */
 
     coreDist(MavenPublication) {
 
       /**
-       * Distribution artifact for each platform
+       * Artifacts for each platform
        */
 
       artifact(new File("${projectDir}/target", "kibi-${project.version}-darwin-x64.zip")) {
@@ -154,7 +154,7 @@ publishing {
       }
 
       /**
-       * Source distribution artifact
+       * Source artifact
        */
 
       artifact srcDistZip {
@@ -168,7 +168,7 @@ publishing {
     }
 
     /**
-     * Prepare source documentation artifact
+     * Source artifact for documentation
      */
 
     srcDoc(MavenPublication) {

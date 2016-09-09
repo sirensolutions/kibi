@@ -88,7 +88,8 @@ define(function (require) {
         }
 
         if (datasource.datasourceType === kibiUtils.DatasourceTypes.tinkerpop3) {
-          const baseUrl = datasource.datasourceParams.url.replace('/graph/query', '');
+          const datasourceUrl = datasource.datasourceParams.url;
+          let baseUrl = datasourceUrl.replace(/\/graph\/query(Batch)?/, '');
 
           queryEngineClient.gremlinPing(baseUrl).then(function (response) {
             if (response.data.error) {

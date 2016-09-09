@@ -102,6 +102,7 @@ module.exports = function (kibana) {
           })
         }),
         gremlin_server: Joi.object({
+          debug_remote: Joi.string().allow('').default(''),
           path: Joi.string().allow('').default(''),
           url: Joi.string().default('http://127.0.0.1:8080'),
           ssl: Joi.object({

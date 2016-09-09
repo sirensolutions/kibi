@@ -73,8 +73,8 @@ node {
 //                                               //
 ///////////////////////////////////////////////////
 
-// Clones the local repository to generate a source snapshot artifact.
-task cloneSources {
+// Clones the local repository to generate a source artifact.
+task cloneSources << {
   delete("${buildDir}/sources")
   Grgit.clone(dir: file("${buildDir}/sources"), uri: "file://${projectDir}")
 }
@@ -102,6 +102,9 @@ distributions {
     }
   }
 
+  /**
+   * Distribution for the kibi sources
+   */
   src {
     baseName = 'kibi-src'
     contents {
@@ -121,23 +124,14 @@ publishing {
   publications {
 
     /**
-     * Prepare Kibi source snapshot artifact.
-     */
-    src(MavenPublication) {
-      artifact srcDistZip {
-        dependsOn cloneSources
-        classifier "sources"
-      }
-      groupId project.group
-      artifactId "kibi-src"
-      version project.version
-    }
-
-    /**
-     * Prepare Kibi distribution artifact for each platform
+     * Core Kibi distribution
      */
 
     coreDist(MavenPublication) {
+
+      /**
+       * Artifacts for each platform
+       */
 
       artifact(new File("${projectDir}/target", "kibi-${project.version}-darwin-x64.zip")) {
         classifier "darwin-x64"
@@ -159,13 +153,22 @@ publishing {
         classifier "windows64"
       }
 
+      /**
+       * Source artifact
+       */
+
+      artifact srcDistZip {
+        dependsOn cloneSources
+        classifier "sources"
+      }
+
       groupId project.group
       artifactId "kibi-core"
       version project.version
     }
 
     /**
-     * Prepare source documentation artifact
+     * Source artifact for documentation
      */
 
     srcDoc(MavenPublication) {

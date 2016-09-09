@@ -1,5 +1,5 @@
 define(function (require) {
-  return function AggTypeService(Private) {
+  return function AggTypeService(Private, $injector) {
     var IndexedArray = require('ui/IndexedArray');
 
     var aggs = {
@@ -25,9 +25,15 @@ define(function (require) {
         Private(require('ui/agg_types/buckets/filters')),
         Private(require('ui/agg_types/buckets/significant_terms')),
         Private(require('ui/agg_types/buckets/geo_hash')),
-        Private(require('ui/kibi/agg_types/buckets/external_query_terms_filter')) // kibi: external query aggregation
       ]
     };
+
+    // kibi: include the external_query_terms_filter bucket only if the kibiState service is available.
+    if ($injector.has('kibiState')) {
+      aggs.buckets.push(Private(require('ui/kibi/agg_types/buckets/external_query_terms_filter')));
+    } else {
+      console.log(`Can't enable the external_query_terms_filter bucket; kibiState not available.`);
+    }
 
     Object.keys(aggs).forEach(function (type) {
       aggs[type].forEach(function (agg) {

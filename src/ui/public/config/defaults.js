@@ -218,7 +218,7 @@ define(function (require) {
         description: 'Limit the number of elements to retrieve during the graph expansion'
       },
       'kibi:graphMaxConcurrentCalls' : {
-        value: 5,
+        value: 15,
         description: 'Limit the number of concurrent calls done by the Graph Browser'
       },
       'kibi:timePrecision' : {

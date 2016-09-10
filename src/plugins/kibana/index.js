@@ -23,6 +23,7 @@ module.exports = function (kibana) {
         ],
 
         autoload: kibana.autoload.require.concat(
+          'ui/kibi/state_management/kibi_state', // kibi: added by kibi for our state
           'plugins/kibana/discover',
           'plugins/kibana/visualize',
           'plugins/kibana/dashboard',

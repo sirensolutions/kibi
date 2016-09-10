@@ -1,6 +1,11 @@
 [[releasenotes]]
 == Kibi Release Notes
 
+=== Kibi 4.5.3-2 Release Notes
+
+* Fixed autoload issue when loading plugins
+
+
 === Kibi 4.5.3-1 Release Notes
 
 * Fixed Do not allow to define relations for relational buttons on scripted fields

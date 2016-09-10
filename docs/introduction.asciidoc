@@ -56,6 +56,7 @@ Kibi is currently developed as a fork of Kibana {kibana-version}. The plugin API
 
 This new version of Kibi provides many improvements and new features, the main ones are listed below:
 
+* Upgraded timeline plugin to 4.5.3-2 - support dateFormat:tz property
 * Fixed autoload issue when loading plugins
 * Support for object migration from Kibi 4.4.2
 * Improved Export and Import - Kibi is now able to export and reimport all configuration and index patterns

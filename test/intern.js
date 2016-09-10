@@ -27,7 +27,7 @@ define(function (require) {
     },
     timeouts: {
       // this is how long a test can run before timing out
-      default: 90000
+      default: 360000
     },
   }, serverConfig);
 });

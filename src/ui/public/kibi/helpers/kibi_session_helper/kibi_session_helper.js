@@ -128,8 +128,10 @@ define(function (require) {
       return d;
     };
 
+    // kibi: to make session ID quoting in the URL predictable, ensure that the ID
+    // starts with a letter.
     KibiSessionHelper.prototype._generateId = function () {
-      return 'xxxxxxxxxx'.replace(/[x]/g, function (c) {
+      return 'gxxxxxxxxxx'.replace(/[x]/g, function (c) {
         var r = Math.random() * 16 | 0;
         return r.toString(16);
       });

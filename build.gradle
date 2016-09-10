@@ -106,7 +106,7 @@ distributions {
    * Distribution for the kibi sources
    */
   src {
-    baseName = 'kibi-src'
+    baseName = 'kibi-core'
     contents {
       from { "${buildDir}/sources" }
     }

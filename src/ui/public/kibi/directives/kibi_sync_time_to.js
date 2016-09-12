@@ -16,6 +16,8 @@ define(function (require) {
         $scope.allSelected = false;
         $scope.kibiFunction = $attrs.kibiFunction;
         var populateDashboards = function () {
+          // reset the allSelected option
+          $scope.allSelected = false;
           $scope.dashboards = [];
           var currentDashId = kibiState._getCurrentDashboardId();
           if (currentDashId) {

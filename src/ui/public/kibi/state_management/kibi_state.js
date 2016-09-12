@@ -94,11 +94,18 @@ define(function (require) {
       if (typeof to === 'object') {
         toStr = to.toISOString();
       }
-      return this._setDashboardProperty(dashboardId, this._properties.time, {
+      const oldTime = this._getDashboardProperty(dashboardId, this._properties.time);
+      const changed = this._setDashboardProperty(dashboardId, this._properties.time, {
         m: mode,
         f: fromStr,
         t: toStr
       });
+      if (changed && this._getCurrentDashboardId() !== dashboardId) {
+        // do not emit the event if the time changed is for the current dashboard since this is taken care of by the globalState
+        const newTime = this._getDashboardProperty(dashboardId, this._properties.time);
+        this.emit('time', dashboardId, newTime, oldTime);
+      }
+      return changed;
     };
 
     /**
@@ -264,6 +271,11 @@ define(function (require) {
 
     /**
      * Sets a property-value pair for the given dashboard
+     *
+     * @param dashboardId the ID of the dashboard
+     * @param prop the property name
+     * @param value the value to set
+     * @returns boolean true if the property changed
      */
     KibiState.prototype._setDashboardProperty = function (dashboardId, prop, value) {
       if (!this[this._properties.dashboards]) {

@@ -10,7 +10,7 @@ define(function (require) {
   require('ui/modules')
   .get('kibana/kibi_sequential_join_vis', ['kibana'])
   .controller('KibiSequentialJoinVisController', function (getAppState, kibiState, $scope, $rootScope, Private, $http, createNotifier,
-                                                           Promise) {
+                                                           globalState, Promise) {
     const urlHelper = Private(require('ui/kibi/helpers/url_helper'));
 
     const notify = createNotifier({
@@ -111,7 +111,7 @@ define(function (require) {
       }
 
       if (console) {
-        console.log(`Updating counts on the relational buttons on ${reason}`);
+        console.log(`Updating counts on the relational buttons because: ${reason}`);
       }
       const self = this;
       let promise;
@@ -149,7 +149,7 @@ define(function (require) {
       .catch(notify.error);
     };
 
-    var off = $rootScope.$on('kibi:dashboard:changed', updateButtons.bind(this, 'kibi:dashboard:changed'));
+    var kibiDashboardChangedOff = $rootScope.$on('kibi:dashboard:changed', updateButtons.bind(this, 'kibi:dashboard:changed'));
 
     $scope.$listen(kibiState, 'save_with_changes', function (diff) {
       if (diff.indexOf(kibiState._properties.enabled_relations) !== -1 ||
@@ -165,17 +165,37 @@ define(function (require) {
       updateButtons.call(this, 'AppState changes');
     });
 
-    $scope.$on('$destroy', function () {
-      off();
-      kibiSequentialJoinVisHelper.destroy();
+    $scope.$listen(globalState, 'save_with_changes', function (diff) {
+      const currentDashboard = kibiState._getCurrentDashboardId();
+      if (!currentDashboard) {
+        return;
+      }
+
+      if (diff.indexOf('filters') !== -1) {
+        // the pinned filters changed, update counts on all selected dashboards
+        updateButtons.call(this, 'GlobalState pinned filters change');
+      } else if (diff.indexOf('time') !== -1) {
+        updateButtons.call(this, 'GlobalState time changed');
+      } else if (diff.indexOf('refreshInterval') !== -1) {
+        // force the count update to refresh all tabs count
+        updateButtons.call(this, 'GlobalState refreshInterval changed');
+      }
     });
 
     // when autoupdate is on we detect the refresh here
-    $scope.$watch('esResponse', function (resp) {
-      if (!resp) {
+    const removeAutorefreshHandler = $rootScope.$on('courier:searchRefresh', (event) => {
+      const currentDashboard = kibiState._getCurrentDashboardId();
+      if (!currentDashboard) {
         return;
       }
-      updateButtons('esResponse');
+
+      updateButtons('courier:searchRefresh');
+    });
+
+    $scope.$on('$destroy', function () {
+      kibiDashboardChangedOff();
+      kibiSequentialJoinVisHelper.destroy();
+      removeAutorefreshHandler();
     });
 
     $scope.$watch('vis.params.buttons', function () {

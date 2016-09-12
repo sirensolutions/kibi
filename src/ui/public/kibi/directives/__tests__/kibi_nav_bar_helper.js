@@ -212,6 +212,16 @@ describe('Kibi Directives', function () {
         kibiState.emit('reset', [ 'dashboard2' ]);
       });
 
+      it('should update the count of dashboard that got changed on kibiState time event', function (done) {
+        const stub = sinon.stub(kibiNavBarHelper, 'updateAllCounts');
+        kibiState.on('time', function (dashboardId) {
+          expect(stub.calledWith([ 'dashboard2' ], 'KibiState time changed on dashboard dashboard2')).to.be(true);
+          done();
+        });
+
+        kibiState.emit('time', 'dashboard2');
+      });
+
       it('should update counts of dashboards that got changed on kibiState relation event', function (done) {
         const stub = sinon.stub(kibiNavBarHelper, 'updateAllCounts');
         kibiState.on('relation', function (diff) {
@@ -349,6 +359,16 @@ describe('Kibi Directives', function () {
         $rootScope.$broadcast('courier:searchRefresh');
         expect(stub.calledWith(null, 'courier:searchRefresh event', true)).to.be(true);
         done();
+      });
+
+      it('should update the count of dashboard that got changed on kibiState time event and those connected', function (done) {
+        const stub = sinon.stub(kibiNavBarHelper, 'updateAllCounts');
+        kibiState.on('time', function (dashboardId) {
+          expect(stub.calledWith([ 'dashboard1', 'dashboard2' ], 'KibiState time changed on dashboard dashboard2')).to.be(true);
+          done();
+        });
+
+        kibiState.emit('time', 'dashboard2');
       });
 
       it('should update counts of current dashboard and those connected on kibiState changes', function (done) {

@@ -120,11 +120,13 @@ describe('Kibi Directives', function () {
       expect($scope.required).to.be(true);
 
       var options = $elem.find('option');
-      expect(options).to.have.length(1);
+      expect(options).to.have.length(2);
 
-      expect(options[0]).to.be.ok();
-      expect(options[0].value).to.be('1');
-      expect(options[0].text).to.be('joe');
+      firstElementIsEmpty(options);
+
+      expect(options[1]).to.be.ok();
+      expect(options[1].value).to.be('1');
+      expect(options[1].text).to.be('joe');
     });
 
     it('should require an option to be selected 1', function () {
@@ -461,10 +463,12 @@ describe('Kibi Directives', function () {
       init({ initValue: 2, items, required: true });
 
       var options = $elem.find('option');
-      expect(options).to.have.length(1);
+      expect(options).to.have.length(2);
 
-      expect(options[0].defaultSelected).to.be(true);
-      expect(options[0].value).to.be('2');
+      firstElementIsEmpty(options);
+
+      expect(options[1].defaultSelected).to.be(true);
+      expect(options[1].value).to.be('2');
     });
 
     it('should NOT automatically select the element if it is the only one and the select is optional', function () {
@@ -480,7 +484,7 @@ describe('Kibi Directives', function () {
 
       var options = $elem.find('option');
       expect(options).to.have.length(2);
-      expect(options[0].defaultSelected).to.be(false);
+      expect(options[0].defaultSelected).to.be(true);
       expect(options[0].value).to.be('');
       expect(options[1].defaultSelected).to.be(false);
       expect(options[1].value).to.be('2');

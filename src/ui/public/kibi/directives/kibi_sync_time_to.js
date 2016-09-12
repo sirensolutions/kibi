@@ -2,9 +2,9 @@ define(function (require) {
 
   require('ui/kibi/directives/kibi_sync_time_to.less');
 
-  var _ = require('lodash');
-  var moment = require('moment');
-  var module = require('ui/modules').get('ui/kibi/kibi_sync_time_to');
+  const _ = require('lodash');
+  const moment = require('moment');
+  const module = require('ui/modules').get('ui/kibi/kibi_sync_time_to');
 
   module.directive('kibiSyncTimeTo', function (kibiState, savedDashboards, timefilter) {
     return {
@@ -12,40 +12,45 @@ define(function (require) {
       transclude: true,
       template: require('ui/kibi/directives/kibi_sync_time_to.html'),
       link: function ($scope, $el, $attrs) {
+        let currentDashId = kibiState._getCurrentDashboardId();
 
         $scope.allSelected = false;
         $scope.kibiFunction = $attrs.kibiFunction;
-        var populateDashboards = function () {
+
+        const populateDashboards = function () {
           // reset the allSelected option
           $scope.allSelected = false;
           $scope.dashboards = [];
-          var currentDashId = kibiState._getCurrentDashboardId();
-          if (currentDashId) {
-            $scope.dashboards.push({
-              id: currentDashId,
-              selected: true,
-              disabled: true
-            });
-          }
-
           savedDashboards.find().then((res) => {
             _.each(res.hits, (hit) => {
-              if (currentDashId !== hit.id) {
-                $scope.dashboards.push({
-                  id: hit.id,
-                  selected: false,
-                  disabled: false
-                });
+              const dash = {
+                title: hit.title,
+                id: hit.id,
+                selected: false,
+                disabled: false
+              };
+              if (currentDashId === hit.id) {
+                dash.selected = true;
+                dash.disabled = true;
               }
+              $scope.dashboards.push(dash);
             });
           });
         };
 
+        $scope.orderByTitle = function (dashboard) {
+          // the current dashboard appears on top
+          if (currentDashId === dashboard.id) {
+            return '';
+          }
+          return dashboard.title;
+        };
 
         $scope.$watch(function () {
           return kibiState._getCurrentDashboardId();
         }, function () {
           populateDashboards();
+          currentDashId = kibiState._getCurrentDashboardId();
         });
 
         $scope.selectAll = function () {
@@ -60,7 +65,7 @@ define(function (require) {
           });
         };
 
-        var copyTimeToDashboards = function (dashboards) {
+        const copyTimeToDashboards = function (dashboards) {
           _.each(dashboards, (d) => {
             if (d.selected) {
               kibiState._saveTimeForDashboardId(d.id, $scope.mode, $scope.from, $scope.to);

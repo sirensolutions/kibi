@@ -19,6 +19,16 @@
           cell-click-handlers="cellClickHandlers"
           class="discover-table-row"></tr>
       </tbody>
+      <tfoot>
+        <tr>
+          <!--span all columns with the little white space at the start and the optional time column-->
+          <td colspan="{{ 1 + (indexPattern.timeFieldName ? 1 : 0) + columns.length}}">
+            <a class="small" ng-click="exportAsCsv()">
+              Export as CSV <i aria-hidden="true" class="fa fa-download"></i>
+            </a>
+          </td>
+        </tr>
+      </tfoot>
     </table>
   </paginate>
 

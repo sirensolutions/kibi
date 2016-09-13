@@ -4,11 +4,13 @@ define(function (require) {
     var Renderbot = Private(require('ui/Vis/Renderbot'));
 
     _.class(TemplateRenderbot).inherits(Renderbot);
-    function TemplateRenderbot(vis, $el, uiState) {
+    // kibi: added the multiSearch argument in order to pass msearch stats to the multisearch spy mode
+    function TemplateRenderbot(vis, $el, uiState, multiSearch) {
       TemplateRenderbot.Super.call(this, vis, $el, uiState);
 
       this.$scope = $rootScope.$new();
       this.$scope.vis = vis;
+      this.$scope.multiSearch = multiSearch;
 
       $el.html($compile(this.vis.type.template)(this.$scope));
     }

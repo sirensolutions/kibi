@@ -12,7 +12,10 @@ define(function (require) {
       name: 'table',
       display: 'Table',
       order: 1,
-      visForbidden: [ 'kibi-data-table' ],
+      // kibi: do not show if the vis is incompatible with this mode
+      allowSpyMode: function (visType) {
+        return !visType.requiresMultiSearch;
+      },
       template: require('plugins/spyModes/tableSpyMode.html'),
       link: function tableLinkFn($scope, $el) {
         $rootScope.$watchMulti.call($scope, [

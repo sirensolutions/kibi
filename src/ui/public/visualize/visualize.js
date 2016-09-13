@@ -12,6 +12,9 @@ define(function (require) {
     var $ = require('jquery');
     var _ = require('lodash');
     var visTypes = Private(require('ui/registry/vis_types'));
+    // kibi: to hold onto stats about msearch requests from visualizations like the relational filter
+    // This is then displayed in the multisearch spy mode
+    const KibiSpyData = Private(require('ui/kibi/spy/kibi_spy_data'));
 
     var notify = createNotifier({
       location: 'Visualize'
@@ -59,11 +62,20 @@ define(function (require) {
         $scope.spy = {};
         $scope.spy.mode = ($scope.uiState) ? $scope.uiState.get('spy.mode', {}) : {};
 
+        $scope.multiSearch = null;
+        if ($scope.vis.type.requiresMultiSearch) {
+          $scope.multiSearch = new KibiSpyData();
+        }
+
         var applyClassNames = function () {
           var $visEl = getVisContainer();
+          var $spyEl = getter('.visualize-spy-container')();
           var fullSpy = ($scope.spy.mode && ($scope.spy.mode.fill || $scope.fullScreenSpy));
 
           $visEl.toggleClass('spy-only', Boolean(fullSpy));
+          if ($spyEl) {
+            $spyEl.toggleClass('only', Boolean(fullSpy));
+          }
 
           // kibi: skip checking that vis is too small
           if (
@@ -80,6 +92,9 @@ define(function (require) {
           $timeout(function () {
             if (shouldHaveFullSpy()) {
               $visEl.addClass('spy-only');
+              if ($spyEl) {
+                $spyEl.toggleClass('only', Boolean(fullSpy));
+              }
             };
           }, 0);
         };
@@ -137,7 +152,7 @@ define(function (require) {
           }
 
           if (oldVis) $scope.renderbot = null;
-          if (vis) $scope.renderbot = vis.type.createRenderbot(vis, $visEl, $scope.uiState);
+          if (vis) $scope.renderbot = vis.type.createRenderbot(vis, $visEl, $scope.uiState, $scope.multiSearch);
         }));
 
         $scope.$watchCollection('vis.params', prereq(function () {

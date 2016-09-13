@@ -3,6 +3,7 @@ define(function (require) {
   const _ = require('lodash');
   const angular = require('angular');
   const chrome = require('ui/chrome');
+  const moment = require('moment');
 
   require('ui/kibi/directives/kibi_select');
   require('ui/kibi/directives/kibi_array_param');
@@ -12,6 +13,7 @@ define(function (require) {
   .controller('KibiSequentialJoinVisController', function (getAppState, kibiState, $scope, $rootScope, Private, $http, createNotifier,
                                                            globalState, Promise) {
     const urlHelper = Private(require('ui/kibi/helpers/url_helper'));
+    const onVisualizeTab = urlHelper.onVisualizeTab();
 
     const notify = createNotifier({
       location: 'Kibi Relational filter'
@@ -27,7 +29,11 @@ define(function (require) {
 
     // Update the counts on each button of the related filter
     var _updateCounts = function (buttons, dashboardId) {
-      if (urlHelper.onVisualizeTab() || !buttons || !buttons.length) {
+      if ($scope.multiSearch) {
+        $scope.multiSearch.clear();
+      }
+
+      if (onVisualizeTab || !buttons || !buttons.length) {
         return Promise.resolve([]);
       }
 
@@ -48,13 +54,27 @@ define(function (require) {
           query += `{"index": "${result.button.targetIndexPatternId}"}\n${angular.toJson(result.query)}\n`;
         });
 
+        const duration = moment();
         // ?getCountsOnButton has no meanning it is just usefull to filter when inspecting requests
         return $http.post(chrome.getBasePath() + '/elasticsearch/_msearch?getCountsOnButton', query)
         .then((response) => {
+          const ms = duration.diff() * -1;
           const data = response.data;
           _.each(data.responses, function (hit, i) {
+            const stats = {
+              index: results[i].button.targetIndexPatternId,
+              response: hit,
+              request: {
+                query: results[i].query,
+                duration: ms
+              }
+            };
+
             if (hit.error) {
               notify.error(JSON.stringify(hit.error, null, ' '));
+              if ($scope.multiSearch) {
+                $scope.multiSearch.add(stats);
+              }
               return;
             }
             results[i].button.targetCount = hit.hits.total;
@@ -71,6 +91,10 @@ define(function (require) {
               if (isPruned) {
                 results[i].button.warning = 'Results from this filter are pruned';
               }
+              stats.pruned = isPruned;
+            }
+            if ($scope.multiSearch) {
+              $scope.multiSearch.add(stats);
             }
           });
           return _.map(results, (result) => result.button);
@@ -80,7 +104,7 @@ define(function (require) {
 
     var _constructButtons = function () {
       $scope.vis.error = '';
-      if (!urlHelper.onVisualizeTab()) {
+      if (!onVisualizeTab) {
         return kibiState._getDashboardAndSavedSearchMetas([ currentDashboardId ]).then(([ { savedDash, savedSearchMeta } ]) => {
           const index = savedSearchMeta.index;
           const buttons = kibiSequentialJoinVisHelper.constructButtonsArray($scope.vis.params.buttons, index);
@@ -106,7 +130,7 @@ define(function (require) {
      */
 
     var updateButtons = function (reason) {
-      if (urlHelper.onVisualizeTab()) {
+      if (onVisualizeTab) {
         return;
       }
 

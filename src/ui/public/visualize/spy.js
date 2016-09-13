@@ -17,8 +17,9 @@ define(function (require) {
           $scope.modes = spyModes;
           $scope.spy.params = $scope.spy.params || {};
 
+          // kibi: hide incompatible spy modes
           $scope.isModeAllowed = function (mode) {
-            return !mode.visForbidden || mode.visForbidden.indexOf($scope.vis.type.name) === -1;
+            return !mode.allowSpyMode || mode.allowSpyMode($scope.vis.type);
           };
 
           // there should be at least the Debug mode available

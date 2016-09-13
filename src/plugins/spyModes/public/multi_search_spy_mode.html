@@ -1,0 +1,66 @@
+<div class="kibi-spy">
+  <div ng-repeat="item in multiSearch.getData()">
+    <h4>Index: {{item.index}}</h4>
+    <table class="table">
+      <tbody>
+        <tr>
+          <td>
+            Query Duration
+          </td>
+          <td>
+            {{ item.response.took }}ms
+          </td>
+        </tr>
+        <tr>
+          <td>
+            Request Duration
+          </td>
+          <td>
+            {{ item.request.duration }}ms
+          </td>
+        </tr>
+        <tr>
+          <td>
+            Hits
+          </td>
+          <td>
+            {{ item.response.hits.total }}
+          </td>
+        </tr>
+        <tr>
+          <td>
+            Pruned?
+            <span class="text-info hintbox-label" ng-click="showHelp = !showHelp">
+              <i class="fa fa-info"></i> Info
+            </span>
+          </td>
+          <td ng-if="pruned">
+            <i class="fa fa-check" aria-hidden="true"></i>
+          </td>
+          <td ng-if="!pruned">
+            <i class="fa fa-times" aria-hidden="true"></i>
+          </td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="2">
+            <div class="hintbox" ng-if="showHelp">
+              <p>
+              This indicates if the join computation has been pruned based on the maxTermsPerShard limit. See the <a href="https://github.com/sirensolutions/siren-join" target="_blank">siren-join</a> documentation for more details.
+              </p>
+            </div>
+          </td>
+        </tr>
+      </tfoot>
+    </table>
+    <p>
+    Request: <button class="btn btn-xs" ng-click="showRequest = !showRequest">Toggle</button>
+    <pre ng-show="showRequest">{{item.request.query | json}}</pre>
+    </p>
+    <p>
+    Response: <button class="btn btn-xs" ng-click="showResponse = !showResponse">Toggle</button>
+    <pre ng-show="showResponse">{{item.response | json}}</pre>
+    </p>
+  </div>
+</div>

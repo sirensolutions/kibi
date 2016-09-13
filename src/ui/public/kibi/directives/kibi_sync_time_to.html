@@ -34,9 +34,9 @@
       <td>
         <div class="dashboards-list">
           <ul>
-            <li ng-repeat="d in dashboards">
+            <li ng-repeat="d in dashboards | orderBy: orderByTitle">
               <input type="checkbox" ng-disabled="d.disabled" ng-model="d.selected"/>
-              <label>{{d.id}} <span ng-if="d.disabled" class="smallText"> (current)</span></label>
+              <label>{{d.title}} <span ng-if="d.disabled" class="smallText"> (current)</span></label>
             </li>
           </ul>
         </div>

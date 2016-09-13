@@ -14,15 +14,14 @@ Use the following command to install a plugin:
 bin/kibi plugin --install <org>/<package>/<version>
 
 [NOTE]
-----
+====
 Elasticsearch plugins follow the elasticsearch versionning,
 e.g. to installing Marvel plugin for this perticular Kibi version which comes by default
 with elasticsearch v{elasticsearch-version} use:
-[source,shell,subs="attributes"]
-----
-bin/kibi plugin -i elasticsearch/marvel/{elasticsearch-version}
-----
-----
+
+`bin/kibi plugin -i elasticsearch/marvel/{elasticsearch-version}`
+====
+
 You can also use `-i` instead of `--install`, as in the following example:
 
 [source,shell]

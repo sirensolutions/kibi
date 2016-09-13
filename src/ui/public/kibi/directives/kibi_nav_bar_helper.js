@@ -1,11 +1,15 @@
-/*eslint no-use-before-define: 1*/
 define(function (require) {
-
   const angular = require('angular');
   const _ = require('lodash');
 
   return function KibiNavBarHelperFactory(kibiState, globalState, getAppState, createNotifier, Private, $http, Promise,
                                           $rootScope, savedDashboards) {
+    const notify = createNotifier({
+      name: 'kibi_nav_bar directive'
+    });
+
+    const dashboardGroupHelper = Private(require('ui/kibi/helpers/dashboard_group_helper'));
+    const indexPath = Private(require('ui/kibi/components/commons/_index_path'));
 
     function KibiNavBarHelper() {
       this.appState = null;
@@ -16,16 +20,79 @@ define(function (require) {
         .then(() => this.updateAllCounts(null, 'init'));
       });
 
-      globalState.on('save_with_changes', (diff) => updateCountsOnGlobalStateChange.call(this, diff));
+      const addAllConnected = function (dashboardId) {
+        const connected = kibiState._getDashboardsIdInConnectedComponent(dashboardId, kibiState.getEnabledRelations());
+        return connected.length > 0 ? connected : [dashboardId];
+      };
+
+      const updateCountsOnAppStateChange = function (diff) {
+        if (diff.indexOf('query') === -1 && diff.indexOf('filters') === -1) {
+          return;
+        }
+        // when appState changed get connected and selected dashboards
+        const currentDashboard = kibiState._getCurrentDashboardId();
+        if (!currentDashboard) {
+          return;
+        }
+        const dashboardsIds = addAllConnected.call(this, currentDashboard);
+        this.updateAllCounts(dashboardsIds, 'AppState change ' + angular.toJson(diff));
+      };
+
+      const updateCountsOnGlobalStateChange = function (diff) {
+        const currentDashboard = kibiState._getCurrentDashboardId();
+        if (!currentDashboard) {
+          return;
+        }
+
+        if (diff.indexOf('filters') !== -1) {
+          // the pinned filters changed, update counts on all selected dashboards
+          this.updateAllCounts(null, 'GlobalState pinned filters change');
+        } else if (diff.indexOf('time') !== -1) {
+          const dashboardsIds = addAllConnected.call(this, currentDashboard);
+          this.updateAllCounts(dashboardsIds, 'GlobalState time changed');
+        } else if (diff.indexOf('refreshInterval') !== -1) {
+          // force the count update to refresh all tabs count
+          this.updateAllCounts(null, 'GlobalState refreshInterval changed', true);
+        }
+      };
+
+      const updateCountsOnKibiStateRelation = function (ids) {
+        const dashboardsIds = _(ids).map((dashboardId) => addAllConnected.call(this, dashboardId)).flatten().uniq().value();
+        this.updateAllCounts(dashboardsIds, 'KibiState enabled relations changed');
+      };
+
+      const updateCountsOnKibiStateReset = function (dashboardsIds) {
+        this.updateAllCounts(dashboardsIds, 'KibiState reset');
+      };
+
+      const updateCountsOnKibiStateTime = function (dashboardId, newTime, oldTime) {
+        const dashboardsIds = addAllConnected.call(this, dashboardId);
+        this.updateAllCounts(dashboardsIds, `KibiState time changed on dashboard ${dashboardId}`);
+      };
+
+      const updateCountsOnKibiStateChange = function (diff) {
+        // when kibiState changes get connected and selected dashboards
+        const currentDashboard = kibiState._getCurrentDashboardId();
+        if (!currentDashboard) {
+          return;
+        }
+        if (diff.indexOf(kibiState._properties.groups) !== -1 || diff.indexOf(kibiState._properties.enabled_relational_panel) !== -1) {
+          const dashboardsIds = addAllConnected.call(this, currentDashboard);
+          this.updateAllCounts(dashboardsIds, `KibiState change ${JSON.stringify(diff, null, ' ')}`);
+        }
+      };
+
+      $rootScope.$listen(globalState, 'save_with_changes', (diff) => updateCountsOnGlobalStateChange.call(this, diff));
       this.removeGetAppStateHandler = $rootScope.$watch(getAppState, (as) => {
         if (as) {
           this.appState = as;
-          this.appState.on('save_with_changes', (diff) => updateCountsOnAppStateChange.call(this, diff));
+          $rootScope.$listen(this.appState, 'save_with_changes', (diff) => updateCountsOnAppStateChange.call(this, diff));
         }
       });
-      kibiState.on('save_with_changes', (diff) => updateCountsOnKibiStateChange.call(this, diff));
-      kibiState.on('reset', (dashboardsIds) => updateCountsOnKibiStateReset.call(this, dashboardsIds));
-      kibiState.on('relation', (dashboardsIds) => updateCountsOnKibiStateRelation.call(this, dashboardsIds));
+      $rootScope.$listen(kibiState, 'save_with_changes', (diff) => updateCountsOnKibiStateChange.call(this, diff));
+      $rootScope.$listen(kibiState, 'reset', (dashboardsIds) => updateCountsOnKibiStateReset.call(this, dashboardsIds));
+      $rootScope.$listen(kibiState, 'relation', (dashboardsIds) => updateCountsOnKibiStateRelation.call(this, dashboardsIds));
+      $rootScope.$listen(kibiState, 'time', updateCountsOnKibiStateTime.bind(this));
 
       // everywhere use this event !!! to be consistent
       // make a comment that it was required because not all components can listen to
@@ -41,16 +108,9 @@ define(function (require) {
       });
     }
 
-    const notify = createNotifier({
-      name: 'kibi_nav_bar directive'
-    });
-
-    const dashboardGroupHelper = Private(require('ui/kibi/helpers/dashboard_group_helper'));
-    const indexPath = Private(require('ui/kibi/components/commons/_index_path'));
-
     /*
-     * Private Methods
-     */
+    * Private Methods
+    */
 
     const addFiltersIconMessages = function (tab) {
       return kibiState.getState(tab.selected.id).then(({ queries, filters }) => {
@@ -140,11 +200,6 @@ define(function (require) {
     // Group computation and counts updates
     // =================
 
-    const addAllConnected = function (dashboardId) {
-      const connected = kibiState._getDashboardsIdInConnectedComponent(dashboardId, kibiState.getEnabledRelations());
-      return connected.length > 0 ? connected : [dashboardId];
-    };
-
     const getGroupIndexes = function (dashboardsIds) {
       const groupIndexes = [];
 
@@ -158,8 +213,8 @@ define(function (require) {
     };
 
     /*
-     * Public Methods
-     */
+    * Public Methods
+    */
 
     KibiNavBarHelper.prototype.setChrome = function (c) {
       this.chrome = c;
@@ -201,58 +256,6 @@ define(function (require) {
       });
     };
 
-    const updateCountsOnAppStateChange = function (diff) {
-      if (diff.indexOf('query') === -1 && diff.indexOf('filters') === -1) {
-        return;
-      }
-      // when appState changed get connected and selected dashboards
-      const currentDashboard = kibiState._getCurrentDashboardId();
-      if (!currentDashboard) {
-        return;
-      }
-      const dashboardsIds = addAllConnected.call(this, currentDashboard);
-      this.updateAllCounts(dashboardsIds, 'AppState change ' + angular.toJson(diff));
-    };
-
-    const updateCountsOnGlobalStateChange = function (diff) {
-      const currentDashboard = kibiState._getCurrentDashboardId();
-      if (!currentDashboard) {
-        return;
-      }
-
-      if (diff.indexOf('filters') !== -1) {
-        // the pinned filters changed, update counts on all selected dashboards
-        this.updateAllCounts(null, 'GlobalState pinned filters change');
-      } else if (diff.indexOf('time') !== -1) {
-        const dashboardsIds = addAllConnected.call(this, currentDashboard);
-        this.updateAllCounts(dashboardsIds, 'GlobalState time changed');
-      } else if (diff.indexOf('refreshInterval') !== -1) {
-        // force the count update to refresh all tabs count
-        this.updateAllCounts(null, 'GlobalState refreshInterval changed', true);
-      }
-    };
-
-    const updateCountsOnKibiStateRelation = function (ids) {
-      const dashboardsIds = _(ids).map((dashboardId) => addAllConnected.call(this, dashboardId)).flatten().uniq().value();
-      this.updateAllCounts(dashboardsIds, 'KibiState enabled relations changed');
-    };
-
-    const updateCountsOnKibiStateReset = function (dashboardsIds) {
-      this.updateAllCounts(dashboardsIds, 'KibiState reset');
-    };
-
-    const updateCountsOnKibiStateChange = function (diff) {
-      // when kibiState changes get connected and selected dashboards
-      const currentDashboard = kibiState._getCurrentDashboardId();
-      if (!currentDashboard) {
-        return;
-      }
-      if (diff.indexOf(kibiState._properties.groups) !== -1 || diff.indexOf(kibiState._properties.enabled_relational_panel) !== -1) {
-        const dashboardsIds = addAllConnected.call(this, currentDashboard);
-        this.updateAllCounts(dashboardsIds, `KibiState change ${JSON.stringify(diff, null, ' ')}`);
-      }
-    };
-
     KibiNavBarHelper.prototype.destroy = function () {
       if (this.removeGetAppStateHandler) {
         this.removeGetAppStateHandler();
@@ -261,15 +264,7 @@ define(function (require) {
         this.removeAutorefreshHandler();
       }
       //$timeout.cancel(lastEventTimer);
-
-      kibiState.off('save_with_changes', (diff) => updateCountsOnKibiStateChange.call(this, diff));
-      kibiState.off('reset', (dashboardsIds) => updateCountsOnKibiStateReset.call(this, dashboardsIds));
-      kibiState.off('relation', (dashboardsIds) => updateCountsOnKibiStateRelation.call(this, dashboardsIds));
-      globalState.off('save_with_changes', (diff) => updateCountsOnGlobalStateChange.call(this, diff));
-      if (this.appState) {
-        this.appState.off('save_with_changes', (diff) => updateCountsOnAppStateChange.call(this, diff));
-        this.appState = null;
-      }
+      this.appState = null;
     };
 
     KibiNavBarHelper.prototype.getDashboardGroups = function () {

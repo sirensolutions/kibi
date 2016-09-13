@@ -535,6 +535,68 @@ describe('State Management', function () {
       });
     });
 
+    describe('Synchronize time across dashboard', function () {
+      beforeEach(() => init({
+        indexPatterns: [
+          {
+            id: 'index1',
+            timeFieldName: 'date',
+            fields: [
+              {
+                name: 'date'
+              }
+            ]
+          },
+          {
+            id: 'index2',
+            timeFieldName: 'date',
+            fields: [
+              {
+                name: 'date'
+              }
+            ]
+          }
+        ],
+        savedDashboards: [
+          {
+            id: 'dashboard1',
+            title: 'dashboard1'
+          },
+          {
+            id: 'dashboard2',
+            title: 'dashboard2'
+          }
+        ]
+      }));
+
+      it('should emit a time event when changing the time of dashboard that is not the current one', function (done) {
+        kibiState._saveTimeForDashboardId('dashboard2', 'absolute', '2014-09-01T12:00:00.000Z', '2020-09-01T12:00:00.000Z');
+
+        kibiState.on('time', function (dashboardId, newTime, oldTime) {
+          expect(dashboardId).to.be('dashboard2');
+          expect(oldTime).to.eql({
+            m: 'absolute',
+            f: '2014-09-01T12:00:00.000Z',
+            t: '2020-09-01T12:00:00.000Z'
+          });
+          expect(newTime).to.eql({
+            m: 'absolute',
+            f: '2004-09-01T12:00:00.000Z',
+            t: '2010-09-01T12:00:00.000Z'
+          });
+          done();
+        });
+
+        kibiState._saveTimeForDashboardId('dashboard2', 'absolute', '2004-09-01T12:00:00.000Z', '2010-09-01T12:00:00.000Z');
+      });
+
+      it('should not emit a time event when changing the time of the current dashboard', function () {
+        kibiState._saveTimeForDashboardId('dashboard1', 'absolute', '2014-09-01T12:00:00.000Z', '2020-09-01T12:00:00.000Z');
+        kibiState._saveTimeForDashboardId('dashboard1', 'absolute', '2004-09-01T12:00:00.000Z', '2010-09-01T12:00:00.000Z');
+        expect(kibiState._listeners.time).to.not.be.ok();
+      });
+    });
+
     describe('Query', function () {
       beforeEach(() => init({
         indexPatterns: [

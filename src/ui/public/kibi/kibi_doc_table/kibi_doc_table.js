@@ -1,8 +1,8 @@
 define(function (require) {
-  var _ = require('lodash');
+  const _ = require('lodash');
 
-  var html = require('ui/kibi/kibi_doc_table/kibi_doc_table.html');
-  var getSort = require('ui/doc_table/lib/get_sort');
+  const html = require('ui/kibi/kibi_doc_table/kibi_doc_table.html');
+  const getSort = require('ui/doc_table/lib/get_sort');
 
   require('ui/directives/truncated');
   require('ui/directives/infinite_scroll');
@@ -31,7 +31,7 @@ define(function (require) {
         queryColumn: '='
       },
       link: function ($scope) {
-        var notify = createNotifier({
+        const notify = createNotifier({
           location: 'Enhanced search results'
         });
         $scope.limit = 50;
@@ -40,8 +40,8 @@ define(function (require) {
           columns: $scope.columns
         };
 
-        var prereq = (function () {
-          var fns = [];
+        const prereq = (function () {
+          const fns = [];
 
           return function register(fn) {
             fns.push(fn);
@@ -58,6 +58,62 @@ define(function (require) {
             };
           };
         }());
+
+        // Export results as CSV
+        $scope._saveAs = require('@spalger/filesaver').saveAs;
+        $scope.csv = {
+          separator: config.get('csv:separator'),
+          quoteValues: config.get('csv:quoteValues')
+        };
+
+        $scope.exportAsCsv = function () {
+          const csv = new Blob([$scope.toCsv()], { type: 'text/plain' });
+          const filename = (_.get($scope, '$parent.savedVis.id') || 'kibi-table') + '.csv';
+          $scope._saveAs(csv, filename);
+        };
+
+        $scope.toCsv = function () {
+          const rows = $scope.hits;
+          const nonAlphaNumRE = /[^a-zA-Z0-9]/;
+          const allDoubleQuoteRE = /"/g;
+          let columns;
+
+          if ($scope.indexPattern.timeFieldName) {
+            columns = [ $scope.indexPattern.timeFieldName, ...$scope.columns ];
+          } else {
+            columns = $scope.columns;
+          }
+
+          function escape(val) {
+            if (_.isObject(val)) {
+              val = val.valueOf();
+            }
+            val = String(val);
+            if ($scope.csv.quoteValues && nonAlphaNumRE.test(val)) {
+              val = '"' + val.replace(allDoubleQuoteRE, '""') + '"';
+            }
+            return val;
+          }
+
+          // escape each cell in each row
+          const csvRows = rows.map(function (row) {
+            return _.map(columns, (column, i) => {
+              if (i === 0 && $scope.indexPattern.timeFieldName) {
+                const text = $scope.indexPattern.formatField(row, column);
+                return escape(text);
+              } else {
+                return escape(_.get(row._source, column));
+              }
+            });
+          });
+
+          // add the columns to the rows
+          csvRows.unshift(columns.map(escape));
+
+          return csvRows.map(function (row) {
+            return row.join($scope.csv.separator) + '\r\n';
+          }).join('');
+        };
 
         $scope.addRows = function () {
           $scope.limit += 50;
@@ -93,7 +149,7 @@ define(function (require) {
           $scope.searchSource.sort(getSort($scope.sorting, $scope.indexPattern));
 
           // kibi: source filtering
-          var sourceFiltering = $scope.indexPattern.getSourceFiltering();
+          const sourceFiltering = $scope.indexPattern.getSourceFiltering();
           if (sourceFiltering && sourceFiltering.all) {
             $scope.searchSource.source(sourceFiltering.all);
           }
@@ -111,7 +167,7 @@ define(function (require) {
             if ($scope.searchSource) $scope.searchSource.destroy();
           });
 
-          var previousSearchSource = $scope.searchSource;
+          const previousSearchSource = $scope.searchSource;
 
           // TODO: we need to have some way to clean up result requests
           $scope.searchSource.onResults().then(function onResults(searchResp) {

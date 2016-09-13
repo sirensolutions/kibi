@@ -4,9 +4,12 @@
 An existing Kibi installation can be upgraded as follows:
 
 - backup the `.kibi` index.
+- backup the Kibi configuration file (`config/kibi.yml`)
 - {elastic-ref}setup-upgrade.html[upgrade Elasticsearch]; before restarting each node, make sure to install a compatible version of the
   {siren-join-website}#compatibility[SIREn Join] plugin.
-- download and setup the new Kibi version, then upgrade third party Kibi/Kibana plugins.
+- download and extract the new Kibi version.
+- copy the previous configuration file to the `config` directory of the new Kibi version.
+- install the compatible versions of third party Kibi/Kibana plugins that you might need in addition to the bundled ones.
 - execute the <<kibi-upgrade-command, upgrade command>>.
 
 [float]

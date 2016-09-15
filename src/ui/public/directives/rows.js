@@ -59,7 +59,7 @@ define(function (require) {
             }
           } else {
             if (contents === '') {
-              $cell.html('&nbsp;');
+              $cell.html('-');
             } else {
               $cell.html(contents);
             }

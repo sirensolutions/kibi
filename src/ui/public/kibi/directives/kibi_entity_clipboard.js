@@ -19,12 +19,11 @@ define(function (require) {
       template: require('ui/kibi/directives/kibi_entity_clipboard.html'),
       replace: true,
       link: function ($scope, $el) {
-        const MAX_TRIES = 20;
-        const SLEEP_TRY = 10;
 
-        var updateSelectedEntity = function (tries) {
-          try {
-            tries++;
+        var updateSelectedEntity = function () {
+          if (!urlHelper.onDashboardTab()) {
+            return;
+          } else {
             $scope.disabled = Boolean(kibiState.isSelectedEntityDisabled());
             $scope.entityURI = kibiState.getEntityURI();
             if ($scope.entityURI) {
@@ -61,20 +60,13 @@ define(function (require) {
                 }
               });
             }
-          } catch (err) {
-            // the call to kibiState.getEntityURI might fail when switching between tabs, e.g., from dashboard to settings.
-            if (tries < MAX_TRIES) {
-              $timeout(updateSelectedEntity.bind(this, tries), SLEEP_TRY, false);
-            } else {
-              throw err;
-            }
           }
         };
 
         $scope.$listen(kibiState, 'save_with_changes', function (diff) {
           if (diff.indexOf(kibiState._properties.selected_entity) !== -1 ||
               diff.indexOf(kibiState._properties.selected_entity_disabled) !== -1) {
-            updateSelectedEntity.call(this, 0);
+            updateSelectedEntity();
           }
         });
 
@@ -131,9 +123,7 @@ define(function (require) {
           $route.reload();
         };
 
-        if (urlHelper.onDashboardTab()) {
-          updateSelectedEntity();
-        }
+        updateSelectedEntity();
       }
     };
   });

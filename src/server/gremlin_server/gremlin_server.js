@@ -95,8 +95,9 @@ function startServer(self, fulfill, reject) {
             args.unshift(gremlinServerRemoteDebug);
           }
 
-          if (config.get('kibi_core.gremlin_server.log_conf_path')) {
-            args.push('--logging.config=' + config.get('kibi_core.gremlin_server.log_conf_path'));
+          const logConfigPath = config.get('kibi_core.gremlin_server.log_conf_path');
+          if (logConfigPath) {
+            args.push('--logging.config=' + logConfigPath);
           }
 
           if (transportClientUsername) {

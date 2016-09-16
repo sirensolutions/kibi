@@ -10,6 +10,7 @@ let sequentialJoinVisHelper;
 let config;
 let kibiState;
 let appState;
+let $rootScope;
 
 const defaultTimeStart = '2006-09-01T12:00:00.000Z';
 const defaultTimeEnd = '2009-09-01T12:00:00.000Z';
@@ -46,7 +47,8 @@ function init({ currentDashboardId = 'dashboard 1', indexPatterns = [], savedSea
     $provide.service('savedDashboards', (Promise) => mockSavedObjects(Promise)('savedDashboards', savedDashboards));
   });
 
-  ngMock.inject(function (timefilter, _config_, _kibiState_, Private, Promise) {
+  ngMock.inject(function (_$rootScope_, timefilter, _config_, _kibiState_, Private, Promise) {
+    $rootScope = _$rootScope_;
     kibiState = _kibiState_;
     config = _config_;
     sequentialJoinVisHelper = Private(require('ui/kibi/helpers/kibi_sequential_join_vis_helper'));
@@ -428,7 +430,7 @@ describe('Kibi Components', function () {
           dashboards: [ 'dashboardA', 'dashboardB' ],
           relation: 'ia//fa/ib//fb'
         });
-        config.set('kibi:relations', {
+        const relations = {
           relationsIndices: [
             {
               indices: [
@@ -447,7 +449,11 @@ describe('Kibi Components', function () {
               id: 'ia//fa/ib//fb'
             }
           ]
-        });
+        };
+        config.set('kibi:relations', relations);
+
+        $rootScope.$emit('change:config.kibi:relations', relations);
+        $rootScope.$digest();
 
         const button = {
           sourceField: 'fa',

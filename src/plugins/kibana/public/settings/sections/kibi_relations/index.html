@@ -42,11 +42,15 @@
     <div class="tabpanel" id="tabpanel" role="tabpanel">
       <!-- Nav tabs -->
       <ul class="nav nav-tabs">
-        <li ng-click="tabClick('index')" ng-class="tab.indexRel ? 'active' : ''" class="active" style="">
-          <a href="" aria-controls="index_rel" role="tab">Index Relations</a>
+        <li ng-click="tabClick('index')" ng-class="{ 'active': tab.indexRel, 'bad-relations': !indicesRelationsAreValid }" class="active" style="">
+          <a href="" aria-controls="index_rel" role="tab">
+            <i ng-show="!indicesRelationsAreValid" aria-hidden="true" class="fa fa-exclamation-triangle"></i> Index Relations
+          </a>
         </li>
-        <li ng-click="tabClick('dashboard')" ng-class="tab.dashboardRel ? 'active' : ''" class="" style="">
-          <a href="" aria-controls="config_rel" role="tab">Dashboard Relations</a>
+        <li ng-click="tabClick('dashboard')" ng-class="{ 'active': tab.dashboardRel, 'bad-relations': !dashboardsRelationsAreValid }" class="" style="">
+          <a href="" aria-controls="config_rel" role="tab">
+            <i ng-show="!dashboardsRelationsAreValid" aria-hidden="true" class="fa fa-exclamation-triangle"></i> Dashboard Relations
+          </a>
         </li>
       </ul>
 

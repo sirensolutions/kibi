@@ -59,7 +59,13 @@ define(function (require) {
             }
           } else {
             if (contents === '') {
-              $cell.html('-');
+              // If we haven't $id, we are working with a completely empty line
+              // otherwise, at least one column has data
+              if ($cell.scope.$id === undefined) {
+                $cell.html('&nbsp');
+              } else {
+                $cell.html('-');
+              }
             } else {
               $cell.html(contents);
             }

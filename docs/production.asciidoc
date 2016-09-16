@@ -1,143 +1,35 @@
 [[production]]
 == Using Kibi in a Production Environment
 
-Please read the https://www.elastic.co/guide/en/kibana/4.4/production.html[Kibana in Production]
-section in the Kibana manual for production best practices, especially
-the *Controlling access* section.
-
-NOTE: From v4.4.1 Kibi Enterprise Edition comes with full Shield integration.
-Shield provides fine grained user access control at the index, document and field levels.
-
-Make sure to set the configuration file as readable only to the user running
-the Kibi process as it may contain credentials in the database connection
-strings.
-
-We also recommend to create a database user without write privileges
-as they are not required by the system.
-
-To prevent data loss it is a good practice to restrict access to the
-elasticsearch cluster. Below is a simple nginx configuration to do it.
-
-```
-events {
-  worker_connections  1024;
-}
-http {
-  upstream elasticsearch {
-    server 127.0.0.1:9200;
-  }
-  server {
-    listen 8080;
-    auth_basic "Protected Elasticsearch";
-    auth_basic_user_file passwords;
-    location / {
-      proxy_pass http://elasticsearch;
-      proxy_redirect off;
-    }
-  }
-}
-```
-
-For more information about nginx configuration visit https://www.elastic.co/blog/playing-http-tricks-nginx[Playing HTTP Tricks with Nginx]
-
-* <<configuring-kibana-shield, Configuring Kibana to Work with Shield>>
-* <<enabling-ssl, Enabling SSL>>
-* <<controlling-access, Controlling Access>>
-* <<load-balancing, Load Balancing Across Multiple Elasticsearch Nodes>>
-
 How you deploy Kibi largely depends on your use case. If you are the only user,
-you can run Kibana on your local machine and configure it to point to whatever
-Elasticsearch instance you want to interact with. Conversely, if you have a large
-number of heavy Kibana users, you might need to load balance across multiple
-Kibana instances that are all connected to the same Elasticsearch instance.
+you can run it on your local machine and configure it to point to whatever
+Elasticsearch instance you want to interact with. Conversely, if you have a
+large number of heavy users, you might need to load balance across multiple
+instances that are all connected to the same Elasticsearch cluster.
 
 While Kibi isn't terribly resource intensive, we still recommend running Kibi
-separate from  your Elasticsearch data or master nodes. To distribute Kibana
-traffic across the nodes in your Elasticsearch cluster, you can run Kibana
-and an Elasticsearch client node on the same machine. For more information, see
-<<load-balancing, Load Balancing Across Multiple Elasticsearch Nodes>>.
+separate from  your Elasticsearch data or master nodes.
+
+Make sure to set the configuration file as readable only to the user running
+the Kibi process as it contains encryption keys to protect configuration
+settings stored in Elasticsearch; if you are connecting Kibi to external
+datasources, we also recommend to user credentials with no write privileges as
+they are not required by the system.
 
 [float]
-[[configuring-kibana-shield]]
-=== Configuring Kibana to Work with Shield
-If you are using Shield to authenticate Elasticsearch users, you need to provide
-the Kibana server with credentials so it can access the `.kibana` index and monitor
-the cluster.
+[[access-control]]
+=== Access control
+Kibi is compatible with Elastic Shield and Search Guard to enable index
+level access control; the Kibi Enterprise Edition provides extended support
+for both products through configurable error handling.
 
-To configure credentials for the Kibana server:
+It is also possible to restrict access to Kibi and the Elasticsearch API by
+putting them behind an authenticated SSL reverse proxy, however configuring the
+proxy to HTTP methods based on the authenticated user can be very tricky and
+prone to configuration errors.
 
-. Assign the `kibana4_server` role to a user in Shield. For more information, see
-{shield}/kibana.html#kibana4-server-role[Configuring a Role for the Kibana 4 Server]
-in the Shield documentation.
-
- . Set the `kibana_elasticsearch_username` and
-`kibana_elasticsearch_password` properties in `kibana.yml` to specify the credentials
-of the user you assigned the `kibana4_server`
-role:
-+
-[source,text]
-----
-kibana_elasticsearch_username: kibana4-user
-kibana_elasticsearch_password: kibana4-password
-----
-
-Kibana 4 users also need access to the `.kibana` index so they can save and load searches, visualizations, and dashboards.
-For more information, see {shield}/kibana.html#kibana4-server-role[Configuring Roles for Kibana 4 Users] in
-the Shield documentation.
-
-TIP: See <<kibana-dynamic-mapping, Kibana and Elasticsearch Dynamic Mapping>> for important information on Kibana and
-the dynamic mapping feature in Elasticsearch.
-
-[float]
-[[enabling-ssl]]
-=== Enabling SSL
-Kibana supports SSL encryption for both client requests and the requests the Kibana server
-sends to Elasticsearch.
-
-To encrypt communications between the browser and the Kibana server, you configure the `ssl_key_file` and
-`ssl_cert_file` properties in `kibana.yml`:
-
-[source,text]
-----
-# SSL for outgoing requests from the Kibana Server (PEM formatted)
-server.ssl.key: /path/to/your/server.key
-server.ssl.cert: /path/to/your/server.crt
-----
-
-If you are using Shield or a proxy that provides an HTTPS endpoint for Elasticsearch,
-you can configure Kibana to access Elasticsearch via HTTPS so communications between
-the Kibana server and Elasticsearch are encrypted.
-
-To do this, you specify the HTTPS
-protocol when you configure the Elasticsearch URL in `kibana.yml`:
-
-[source,text]
-----
-elasticsearch: "https://<your_elasticsearch_host>.com:9200"
-----
-
-If you are using a self-signed certificate for Elasticsearch, set the `ca` property in
-`kibana.yml` to specify the location of the PEM file. Setting the `ca` property lets you  leave the `verify_ssl` option enabled.
-
-[source,text]
-----
-# If you need to provide a CA certificate for your Elasticsearch instance, put
-# the path of the pem file here.
-ca: /path/to/your/ca/cacert.pem
-----
-
-[float]
-[[controlling-access]]
-=== Controlling access
-You can use http://www.elastic.co/overview/shield/[Elasticsearch Shield]
-(Shield) to control what Elasticsearch data users can access through Kibana.
-Shield provides index-level access control. If a user isn't authorized to run
-the query that populates a Kibana visualization, the user just sees an empty
-visualization.
-
-To configure access to Kibana using Shield, you create Shield roles
-for Kibana using the `kibana4` default role as a starting point. For more
-information, see {shield}/kibana.html#using-kibana4-with-shield[Using Kibana 4 with Shield].
+For more information about the Enterprise Edition access control features
+please see the <<access_control>> section.
 
 [float]
 [[load-balancing]]

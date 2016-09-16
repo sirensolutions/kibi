@@ -79,7 +79,6 @@ function startServer(self, fulfill, reject) {
             self.server.log(['gremlin', 'error'], 'The Kibi Gremlin Server jar file was not found. Please check the configuration');
             return Promise.reject(new Error('The Kibi Gremlin Server jar file was not found. Please check the configuration'));
           }
-          const loggingFilePath = path.parse(gremlinServerPath).dir + path.sep + 'gremlin-es2-server-log.properties';
 
           const [ host, port, ...rest ] = esTransportAddress.split(':');
           const transportClientUsername = config.get('kibi_core.elasticsearch.transport_client.username');
@@ -90,11 +89,14 @@ function startServer(self, fulfill, reject) {
             '--elasticNodeHost=' + host,
             '--elasticNodePort=' + port,
             '--elasticClusterName=' + esClusterName,
-            '--server.port=' + self.url.split(':')[2],
-            '--logging.config=' + loggingFilePath
+            '--server.port=' + self.url.split(':')[2]
           ];
           if (gremlinServerRemoteDebug) {
             args.unshift(gremlinServerRemoteDebug);
+          }
+
+          if (config.get('kibi_core.gremlin_server.log_conf')) {
+            args.push('--logging.config=' + config.get('kibi_core.gremlin_server.log_conf'));
           }
 
           if (transportClientUsername) {

@@ -26,7 +26,8 @@ define(function (require) {
     };
   });
 
-  app.directive('kibiRelationalFilterPanel', function (kibiState, $location, config, $rootScope, Private, createNotifier) {
+  app.directive('kibiRelationalFilterPanel', function (kibiState, config, $rootScope, Private, createNotifier) {
+    const relationsHelper = Private(require('ui/kibi/helpers/relations_helper'));
     var notify = createNotifier({
       location: 'Relational Filter Panel'
     });
@@ -36,6 +37,7 @@ define(function (require) {
       template: require('ui/kibi/directives/kibi_relational_filter_panel.html'),
       link: function ($scope, $el) {
         var _initPanel = function () {
+          _checkIfRelationsAreValid();
           $scope.relations = config.get('kibi:relations');
           var relDashboards = _.cloneDeep($scope.relations.relationsDashboardsSerialized);
           if (!relDashboards) {
@@ -46,7 +48,7 @@ define(function (require) {
           _.each(relDashboards.links, function (link) {
             var relation = _.find(
               $scope.relations.relationsDashboards,
-              {relation: link.data.id, dashboards: [link.source.replace(/^eegid-/, ''), link.target.replace(/^eegid-/, '')]}
+              {relation: link.data.relation, dashboards: [link.source.replace(/^eegid-/, ''), link.target.replace(/^eegid-/, '')]}
             );
             if (!relation) {
               return;
@@ -63,9 +65,7 @@ define(function (require) {
 
           relDashboards.options.onLinkClick = function (el, d, i) {
             // find the relation
-            var relation = _.find($scope.relations.relationsDashboards, function (r) {
-              return r.relation === d.data.id;
-            });
+            var relation = _.find($scope.relations.relationsDashboards, d.data);
             if (relation) {
               // add or remove the relation id from kibi state
               var enabled = jQuery(el).find('input[type=\'checkbox\']').is(':checked');
@@ -79,11 +79,20 @@ define(function (require) {
               // there is no need to redraw the panel
               // so set ignoreNextConfigurationChangedEvent to true
               $scope.ignoreNextConfigurationChangedEvent = true;
+            } else {
+              notify.warning(`Unable to find relation between dashboards ${d.data.dashboards[0]} and ${d.data.dashboards[0]}`);
             }
           };
 
           $rootScope.$emit('egg:relationalPanel:run', 'importGraph', relDashboards);
         };
+
+        function _checkIfRelationsAreValid() {
+          const { validIndices, validDashboards } = relationsHelper.checkIfRelationsAreValid();
+          $scope.validRelations = validIndices && validDashboards;
+        };
+
+        _checkIfRelationsAreValid();
 
         $scope.close = function () {
           $scope.show = false;
@@ -128,13 +137,13 @@ define(function (require) {
             _initPanel();
           }
         };
-        kibiState.on('save_with_changes', updateRelationalPanelOnSave);
+        $scope.$listen(kibiState, 'save_with_changes', updateRelationalPanelOnSave.bind(this));
 
         $scope.$on('$destroy', function () {
           off1();
           off2();
           off3();
-          kibiState.off('save_with_changes', updateRelationalPanelOnSave);
+          relationsHelper.destroy();
         });
       } // end of link function
     };

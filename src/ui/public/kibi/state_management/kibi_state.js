@@ -664,38 +664,59 @@ define(function (require) {
       relationsHelper.destroy();
     };
 
-    KibiState.prototype._getJoinSetFilter = function (focusIndex, filterAlias, filtersPerIndex, queriesPerIndex, timesPerIndex) {
-      // Build the relations for the join_set query
-      let relations;
-      try {
-        relations = _.map(this.getEnabledRelations(), (r) => {
-          const relation = relationsHelper.getRelationInfosFromRelationID(r.relation);
+    KibiState.prototype._readFromURL = function () {
+      const stash = KibiState.Super.prototype._readFromURL.call(this);
 
-          const ret = [
-            {
-              indices: [ relation.source.index ],
-              path: relation.source.path
-            },
-            {
-              indices: [ relation.target.index ],
-              path: relation.target.path
-            }
-          ];
-
-          if (relation.source.type) {
-            ret[0].types = [ relation.source.type ];
+      // check the enabled relations
+      if (stash && stash[this._properties.enabled_relations] && stash[this._properties.enabled_relations].length) {
+        const enableRelations = stash[this._properties.enabled_relations];
+        for (let i = enableRelations.length - 1; i >= 0; i--) {
+          if (!relationsHelper.validateDashboardsRelation(enableRelations[i])) {
+            const [ deleted ] = enableRelations.splice(i, 1);
+            const msg = `Removed relation between dashboards ${deleted.dashboards[0]} and ${deleted.dashboards[1]} because it was invalid`;
+            notify.warning(msg);
           }
-          if (relation.target.type) {
-            ret[1].types = [ relation.target.type ];
-          }
-
-          relationsHelper.addAdvancedJoinSettingsToRelation(ret);
-
-          return ret;
-        });
-      } catch (e) {
-        return Promise.resolve(e);
+        }
       }
+      return stash;
+    };
+
+    /**
+     * Build the relations for the join_set query
+     *
+     * @param focusIndex the index ID at the root of the filterjoin query
+     * @param filterAlias the alias for the filter
+     * @param filtersPerIndex filters for every index
+     * @param queriesPerIndex queries for every index
+     * @param timesPerIndex times for every index
+     * @returns a join_set query
+     */
+    KibiState.prototype._getJoinSetFilter = function (focusIndex, filterAlias, filtersPerIndex, queriesPerIndex, timesPerIndex) {
+      const relations = _.map(this.getEnabledRelations(), (r) => {
+        const relation = relationsHelper.getRelationInfosFromRelationID(r.relation);
+
+        const ret = [
+          {
+            indices: [ relation.source.index ],
+            path: relation.source.path
+          },
+          {
+            indices: [ relation.target.index ],
+            path: relation.target.path
+          }
+        ];
+
+        if (relation.source.type) {
+          ret[0].types = [ relation.source.type ];
+        }
+        if (relation.target.type) {
+          ret[1].types = [ relation.target.type ];
+        }
+
+        relationsHelper.addAdvancedJoinSettingsToRelation(ret);
+
+        return ret;
+      });
 
       /*
        * build the join_set filter

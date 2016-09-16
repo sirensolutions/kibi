@@ -357,7 +357,10 @@ define(function (require) {
               source: relDash.dashboards[0],
               target: relDash.dashboards[1],
               linkType: _getRelationLabel(relDash.relation),
-              data: { id: relDash.relation },
+              data: {
+                relation: relDash.relation,
+                dashboards: relDash.dashboards
+              },
               undirected: true
             });
           }
@@ -617,6 +620,13 @@ define(function (require) {
       dashboardsGraphExportOff();
     });
 
+    function _areRelationsValid() {
+      const { validDashboards, validIndices } = relationsHelper.checkIfRelationsAreValid(true);
+      $scope.dashboardsRelationsAreValid = validDashboards;
+      $scope.indicesRelationsAreValid  = validIndices;
+    }
+    _areRelationsValid();
+
     function _isValid(graph) {
       if (graph === 'indices') {
         return $element.find('form[name="indicesForm"]').hasClass('ng-valid');
@@ -638,7 +648,8 @@ define(function (require) {
         });
       }
 
-      return config.set('kibi:relations', relations);
+      return config.set('kibi:relations', relations)
+      .then(_areRelationsValid.bind(this));
     }
   });
 });

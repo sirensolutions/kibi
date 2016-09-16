@@ -42,17 +42,21 @@
     <div class="tabpanel" id="tabpanel" role="tabpanel">
       <!-- Nav tabs -->
       <ul class="nav nav-tabs">
-        <li ng-click="tabClick('index')" ng-class="tab.indexRel ? 'active' : ''" class="active" style="">
-          <a href="" aria-controls="index_rel" role="tab">Index Relations</a>
+        <li ng-click="tabClick('index')" ng-class="{ 'active': tab.indexRel, 'bad-relations': !indicesRelationsAreValid }" class="active">
+          <a href="" aria-controls="index_rel" role="tab">
+            <i ng-show="!indicesRelationsAreValid" aria-hidden="true" class="fa fa-exclamation-triangle"></i> Index Relations
+          </a>
         </li>
-        <li ng-click="tabClick('dashboard')" ng-class="tab.dashboardRel ? 'active' : ''" class="" style="">
-          <a href="" aria-controls="config_rel" role="tab">Dashboard Relations</a>
+        <li ng-click="tabClick('dashboard')" ng-class="{ 'active': tab.dashboardRel, 'bad-relations': !dashboardsRelationsAreValid }" class="">
+          <a href="" aria-controls="config_rel" role="tab">
+            <i ng-show="!dashboardsRelationsAreValid" aria-hidden="true" class="fa fa-exclamation-triangle"></i> Dashboard Relations
+          </a>
         </li>
       </ul>
 
       <!-- Tab panes -->
       <div class="tab-content">
-        <div role="tabpanel" class="tab-pane active" data-test-subj="index-relations-tab" ng-class="tab.indexRel ? 'active' : ''" style="">
+        <div role="tabpanel" class="tab-pane active" data-test-subj="index-relations-tab" ng-class="tab.indexRel ? 'active' : ''">
             <form name="indicesForm" novalidate>
               <div class="form-group table-responsive">
                 <table class="table table-condensed">
@@ -217,7 +221,7 @@
               </div>
             </form>
         </div>
-        <div role="tabpanel" class="tab-pane" data-test-subj="dashboard-relations-tab" ng-class="tab.dashboardRel ? 'active' : ''" style="">
+        <div role="tabpanel" class="tab-pane" data-test-subj="dashboard-relations-tab" ng-class="tab.dashboardRel ? 'active' : ''">
             <form name="dashboardsForm" novalidate>
               <div class="form-group table-responsive">
                 <table class="table table-condensed">

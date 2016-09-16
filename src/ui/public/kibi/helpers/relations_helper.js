@@ -33,7 +33,7 @@ define(function (require) {
       }
     };
 
-    const checkIDformat = function (parts) {
+    const checkIdFormat = function (parts) {
       return parts && parts.length === 6;
     };
 
@@ -52,8 +52,11 @@ define(function (require) {
         }
       } else {
         // basic test of the id format
+        if (!relation.relation) {
+          return false;
+        }
         let parts = relation.relation.split(SEPARATOR);
-        if (!checkIDformat.call(this, parts)) {
+        if (!checkIdFormat.call(this, parts)) {
           return false;
         }
       }
@@ -75,8 +78,11 @@ define(function (require) {
      */
     RelationsHelper.prototype.validateIndicesRelation = function (relation) {
       // the id should have 6 parts
+      if (!relation.id) {
+        return false;
+      }
       let parts = relation.id.split(SEPARATOR);
-      if (!checkIDformat.call(this, parts)) {
+      if (!checkIdFormat.call(this, parts)) {
         return false;
       }
       // label should be defined
@@ -124,12 +130,6 @@ define(function (require) {
         // not initialized yet
         return { validIndices: true, validDashboards: true };
       }
-
-      let invalid = false;
-      const fail = function () {
-        invalid = true;
-        return false;
-      };
 
       // check that the indices relations are defined correctly
       const validIndices = _.reduce(relations.relationsIndices, (acc, rel) => acc && this.validateIndicesRelation(rel), true);

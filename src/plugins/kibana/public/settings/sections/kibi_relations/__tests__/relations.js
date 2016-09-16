@@ -353,6 +353,7 @@ describe('Kibi Settings', function () {
                   path: 'path-a2'
                 }
               ],
+              id: 'index-a//path-a1/index-a//path-a2',
               label: 'rel'
             },
             {
@@ -366,13 +367,14 @@ describe('Kibi Settings', function () {
                   path: 'path-c'
                 }
               ],
+              id: 'index-b//path-b/index-c//path-c',
               label: 'rel'
             }
           ],
           relationsDashboards: [
             {
               dashboards: [ 'Da2', 'Da1' ],
-              relation: 'index-a/path-a1/index-a/path-a2'
+              relation: 'index-a//path-a1/index-a//path-a2'
             }
           ]
         };
@@ -469,6 +471,7 @@ describe('Kibi Settings', function () {
                   path: 'path-a2'
                 }
               ],
+              id: 'index-a//path-a1/index-a//path-a2',
               label: 'rel'
             },
             {
@@ -482,6 +485,7 @@ describe('Kibi Settings', function () {
                   path: 'path-c'
                 }
               ],
+              id: 'index-b//path-b/index-c//path-c',
               label: 'rel'
             }
           ],
@@ -522,6 +526,7 @@ describe('Kibi Settings', function () {
                   path: 'path-b'
                 }
               ],
+              id: 'index-a//path-a/index-b//path-b',
               label: 'rel-a-b'
             },
             {
@@ -535,6 +540,7 @@ describe('Kibi Settings', function () {
                   path: 'path-c'
                 }
               ],
+              id: 'index-b//path-b/index-c//path-c',
               label: 'rel-b-c'
             }
           ],
@@ -575,6 +581,7 @@ describe('Kibi Settings', function () {
                   path: 'path-b'
                 }
               ],
+              id: 'index-a//path-a/index-b//path-b',
               label: 'rel'
             },
             {
@@ -588,6 +595,7 @@ describe('Kibi Settings', function () {
                   path: 'path-c'
                 }
               ],
+              id: 'index-b//path-b/index-c//path-c',
               label: 'rel'
             },
             {
@@ -601,6 +609,7 @@ describe('Kibi Settings', function () {
                   path: 'path-d'
                 }
               ],
+              id: 'index-c//path-c/index-d//path-d',
               label: 'rel'
             }
           ],
@@ -634,11 +643,13 @@ describe('Kibi Settings', function () {
           relationsIndices: [
             {
               indices: [ { indexPatternId: 'index-a', path: 'path-a1' }, { indexPatternId: 'index-b', path: 'path-b' } ],
-              label: 'index-a//path-a1/index-b//path-b'
+              id: 'index-a//path-a1/index-b//path-b',
+              label: 'rel'
             },
             {
               indices: [ { indexPatternId: 'index-a', path: 'path-a2' }, { indexPatternId: 'index-b', path: 'path-b' } ],
-              label: 'index-a//path-a2/index-b//path-b'
+              id: 'index-a//path-a2/index-b//path-b',
+              label: 'rel'
             }
           ],
           relationsDashboards: [
@@ -680,6 +691,7 @@ describe('Kibi Settings', function () {
                   path: 'path-b'
                 }
               ],
+              id: 'index-a//path-a/index-b//path-b',
               label: 'rel'
             },
             {
@@ -693,6 +705,7 @@ describe('Kibi Settings', function () {
                   path: 'path-c'
                 }
               ],
+              id: 'index-b//path-b/index-c//path-c',
               label: 'rel'
             },
             {
@@ -706,6 +719,7 @@ describe('Kibi Settings', function () {
                   path: 'path-d'
                 }
               ],
+              id: 'index-c//path-c/index-d//path-d',
               label: 'rel'
             }
           ],
@@ -752,6 +766,7 @@ describe('Kibi Settings', function () {
                   path: 'path-b'
                 }
               ],
+              id: 'index-a//path-a/index-b//path-b',
               label: 'rel'
             },
             {
@@ -765,6 +780,7 @@ describe('Kibi Settings', function () {
                   path: 'path-c'
                 }
               ],
+              id: 'index-b//path-b/index-c//path-c',
               label: 'rel'
             },
             {
@@ -778,6 +794,7 @@ describe('Kibi Settings', function () {
                   path: 'path-d'
                 }
               ],
+              id: 'index-c//path-c/index-d//path-d',
               label: 'rel'
             }
           ],
@@ -900,6 +917,7 @@ describe('Kibi Settings', function () {
                   path: 'path-b'
                 }
               ],
+              id: 'index-a//path-a/index-b//path-b',
               label: 'rel'
             },
             {
@@ -913,6 +931,7 @@ describe('Kibi Settings', function () {
                   path: 'path-c'
                 }
               ],
+              id: 'index-b//path-b/index-c//path-c',
               label: 'rel'
             },
             {
@@ -926,6 +945,7 @@ describe('Kibi Settings', function () {
                   path: 'path-d'
                 }
               ],
+              id: 'index-c//path-c/index-d//path-d',
               label: 'rel'
             }
           ],
@@ -944,9 +964,9 @@ describe('Kibi Settings', function () {
 
         init({ relations: relations, indexToDashboardsMap: map });
         indexToDashboardMapPromise.then(function () {
-          expect($scope.filterRelations(0, { value: 'index-a/path-a/index-b/path-b' })).to.be(false);
-          expect($scope.filterRelations(0, { value: 'index-b/path-b/index-c/path-c' })).to.be(false);
-          expect($scope.filterRelations(0, { value: 'index-c/path-c/index-d/path-d' })).to.be(false);
+          expect($scope.filterRelations(0, { value: 'index-a//path-a/index-b//path-b' })).to.be(false);
+          expect($scope.filterRelations(0, { value: 'index-b//path-b/index-c//path-c' })).to.be(false);
+          expect($scope.filterRelations(0, { value: 'index-c//path-c/index-d//path-d' })).to.be(false);
           done();
         }).catch(done);
       });
@@ -965,6 +985,7 @@ describe('Kibi Settings', function () {
                   path: 'path-b'
                 }
               ],
+              id: 'index-a//path-a/index-b//path-b',
               label: 'rel'
             },
             {
@@ -978,6 +999,7 @@ describe('Kibi Settings', function () {
                   path: 'path-c'
                 }
               ],
+              id: 'index-b//path-b/index-c//path-c',
               label: 'rel'
             },
             {
@@ -991,6 +1013,7 @@ describe('Kibi Settings', function () {
                   path: 'path-d'
                 }
               ],
+              id: 'index-c//path-c/index-d//path-d',
               label: 'rel'
             }
           ],
@@ -1031,6 +1054,7 @@ describe('Kibi Settings', function () {
                   path: 'path-b1'
                 }
               ],
+              id: 'index-a//path-a1/index-b//path-b1',
               label: 'rel'
             },
             {
@@ -1044,6 +1068,7 @@ describe('Kibi Settings', function () {
                   path: 'path-b2'
                 }
               ],
+              id: 'index-a//path-a2/index-b//path-b2',
               label: 'rel'
             },
             {
@@ -1057,6 +1082,7 @@ describe('Kibi Settings', function () {
                   path: 'path-d'
                 }
               ],
+              id: 'index-c//path-c/index-d//path-d',
               label: 'rel'
             }
           ],
@@ -1097,6 +1123,7 @@ describe('Kibi Settings', function () {
                   path: 'path-b1'
                 }
               ],
+              id: 'index-a//path-a1/index-b//path-b1',
               label: 'rel'
             },
             {
@@ -1110,17 +1137,18 @@ describe('Kibi Settings', function () {
                   path: 'path-b2'
                 }
               ],
+              id: 'index-a//path-a2/index-b//path-b2',
               label: 'rel'
             }
           ],
           relationsDashboards: [
             {
               dashboards: [ 'Da', 'Db' ],
-              relation: 'index-a/path-a1/index-a/path-b1'
+              relation: 'index-a//path-a1/index-a//path-b1'
             },
             {
               dashboards: [ 'Da', 'Db' ],
-              relation: 'index-a/path-a2/index-a/path-b2'
+              relation: 'index-a//path-a2/index-a//path-b2'
             }
           ]
         };
@@ -1152,17 +1180,18 @@ describe('Kibi Settings', function () {
                   path: 'path-b'
                 }
               ],
+              id: 'index-a//path-a/index-b//path-b',
               label: 'rel'
             }
           ],
           relationsDashboards: [
             {
               dashboards: [ 'Da', 'Db' ],
-              relation: 'index-a/path-a/index-a/path-b'
+              relation: 'index-a//path-a/index-a//path-b'
             },
             {
               dashboards: [ 'Da', 'Db' ],
-              relation: 'index-a/path-a/index-a/path-b'
+              relation: 'index-a//path-a/index-a//path-b'
             }
           ]
         };

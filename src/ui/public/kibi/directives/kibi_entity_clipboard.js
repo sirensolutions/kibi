@@ -6,8 +6,10 @@ define(function (require) {
   require('ui/kibi/directives/kibi_entity_clipboard.less');
 
   require('ui/modules').get('kibana')
-  .directive('kibiEntityClipboard', function (kibiState, $timeout, getAppState, $route, globalState, $http, createNotifier, config) {
+  .directive('kibiEntityClipboard', function (kibiState, $timeout, getAppState, $route,
+    globalState, $http, createNotifier, config, Private) {
 
+    const urlHelper = Private(require('ui/kibi/helpers/url_helper'));
     var notify = createNotifier({
       name: 'Kibi Entity Clipboard'
     });
@@ -129,7 +131,9 @@ define(function (require) {
           $route.reload();
         };
 
-        updateSelectedEntity();
+        if (urlHelper.onDashboardTab()) {
+          updateSelectedEntity();
+        }
       }
     };
   });

@@ -7,10 +7,12 @@ const indexSnapshot = requirefrom('src/testUtils')('index_snapshot');
 const ScenarioManager = requirefrom('src/testUtils')('scenario_manager');
 import Migration from '../../migration_1';
 import Scenario from './scenarios/migration_1/scenario';
+import serverConfig from '../../../../../../../test/serverConfig';
+import url from 'url';
 
 describe('kibi_core/migrations/functional', function () {
 
-  let clusterUrl = 'http://localhost:9210';
+  let clusterUrl =  url.format(serverConfig.servers.elasticsearch);
   let timeout = 60000;
   this.timeout(timeout);
 

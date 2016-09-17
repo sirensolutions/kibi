@@ -83,6 +83,13 @@ function startServer(self, fulfill, reject) {
           const [ host, port, ...rest ] = esTransportAddress.split(':');
           const transportClientUsername = config.get('kibi_core.elasticsearch.transport_client.username');
           const transportClientPassword = config.get('kibi_core.elasticsearch.transport_client.password');
+          const transportClient = config.get('kibi_core.elasticsearch.transport_client.password');
+          const elasticAuthPlugin = config.get('kibi_core.elasticsearch.auth_plugin');
+          const transportClientSSLCaKeyStore = config.get('kibi_core.elasticsearch.transport_client.ssl.ca');
+          const transportClientSSLCaKeyStorePassword = config.get('kibi_core.elasticsearch.transport_client.ssl.ca_password');
+          const transportClientSSLKeyStore = config.get('kibi_core.elasticsearch.transport_client.ssl.key_store');
+          const transportClientSSLKeyStorePassword = config.get('kibi_core.elasticsearch.transport_client.ssl.key_store_password');
+          const transportClientSSLHostNameVerification = config.get('kibi_core.elasticsearch.transport_client.ssl.verify_hostname');
 
           const args = [
             '-jar', gremlinServerPath,
@@ -103,6 +110,30 @@ function startServer(self, fulfill, reject) {
           if (transportClientUsername) {
             args.push('--elasticTransportClientUserName=' + transportClientUsername);
             args.push('--elasticTransportClientPassword=' + transportClientPassword);
+          }
+
+          if (elasticAuthPlugin) {
+            args.push('--elasticAuthPlugin=' + elasticAuthPlugin);
+          }
+
+          if (transportClientSSLCaKeyStore) {
+            args.push('--elasticTransportClientCAKeyStore=' + transportClientSSLCaKeyStore);
+          }
+
+          if (transportClientSSLCaKeyStorePassword) {
+            args.push('--elasticTransportClientCAKeyStorePassword=' + transportClientSSLCaKeyStorePassword);
+          }
+
+          if (transportClientSSLKeyStore) {
+            args.push('--elasticTransportClientKeyStore=' + transportClientSSLKeyStore);
+          }
+
+          if (transportClientSSLKeyStorePassword) {
+            args.push('--elasticTransportClientKeyStorePassword=' + transportClientSSLKeyStorePassword);
+          }
+
+          if (transportClientSSLHostNameVerification) {
+            args.push('--elasticTransportClientSSLHostNameVerification=' + transportClientSSLHostNameVerification);
           }
 
           if (config.get('kibi_core.gremlin_server.ssl.key_store')) {

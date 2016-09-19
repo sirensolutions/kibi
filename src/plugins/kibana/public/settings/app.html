@@ -24,13 +24,19 @@
         ng-show="section.name === 'datasources' || section.name === 'queries' || section.name === 'templates' ||
         section.name === 'dashboardgroups' || section.name === 'scripts'">
         <kbn-tooltip text="New {{section.buttonLabel}}" placement="bottom">
-          <button ng-click="section.newObject()" class="navbar-button"><i class="fa fa-file-new-o"></i></button>
+          <button ng-click="section.newObject()" data-test-subj="new-{{section.name}}-button" class="navbar-button">
+            <i class="fa fa-file-new-o"></i>
+          </button>
         </kbn-tooltip>
         <kbn-tooltip text="Save {{section.buttonLabel}}" placement="bottom">
-          <button ng-click="section.saveObject()" class="navbar-button"><i class="fa fa-save"></i></button>
+          <button ng-click="section.saveObject()" data-test-subj="save-{{section.name}}-button" class="navbar-button">
+            <i class="fa fa-save"></i>
+          </button>
         </kbn-tooltip>
         <kbn-tooltip text="Load Saved {{section.buttonLabel}}" placement="bottom">
-          <button ng-click="section.openObjectFinder()" class="navbar-button"><i class="fa fa-folder-open-o"></i></button>
+          <button ng-click="section.openObjectFinder()" data-test-subj="open-{{section.name}}-button" class="navbar-button">
+            <i class="fa fa-folder-open-o"></i>
+          </button>
         </kbn-tooltip>
       </div>
       <!-- kibi: added by kibi -->

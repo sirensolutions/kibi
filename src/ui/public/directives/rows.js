@@ -59,12 +59,12 @@ define(function (require) {
             }
           } else {
             if (contents === '') {
-              // If we haven't $id, we are working with a completely empty line
+              // kibi: If we haven't $id, we are working with a completely empty line
               // otherwise, at least one column has data
               if ($cell.scope.$id === undefined) {
                 $cell.html('&nbsp');
               } else {
-                $cell.html('-');
+                $cell.html(' - ');
               }
             } else {
               $cell.html(contents);

@@ -5,6 +5,7 @@ define(function (require) {
   require('plugins/kibana/settings/sections/kibi_datasources/services/saved_datasources');
 
   require('ui/kibi/components/query_engine_client/query_engine_client');
+  require('ui/kibi/directives/kibi_validate');
 
   require('ui/routes')
   .when('/settings/datasources', {

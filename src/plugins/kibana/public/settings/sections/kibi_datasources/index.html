@@ -17,7 +17,7 @@
 
       <div class="config-section">
 
-        <form ng-if="datasource" name="objectForm">
+        <form ng-if="datasource" name="objectForm" novalidate>
 
           <div class="form-group">
             <label>Title</label>
@@ -47,23 +47,38 @@
           </div>
 
           <div ng-repeat="param in datasource.schema | orderBy: 'required' : true" >
-            <ng-form name="innerForm">
+            <ng-form name="innerForm" novalidate>
               <div class="form-group">
                 <label>{{param.label}}</label>
-
                 <span ng-if="param.inputType=='list'">(Optional. Default={{param.defaultValue || 'undefined'}})</span>
+                <span ng-if="param.inputType == 'number' && !param.required">(Optional. Default={{param.defaultValue || 'undefined'}})</span>
+                <span ng-if="param.inputType == 'text' && !param.required">(Optional. Default={{param.defaultValue || 'undefined'}})</span>
+                <span ng-if="param.inputType == 'checkbox' && !param.required">(Optional. Default={{param.defaultValue === false ? 'false' : 'true'}})</span>
+                <span ng-if="param.inputType == 'password' && !param.required">(Optional. Default={{param.defaultValue || 'undefined'}})</span>
+                <span ng-if="param.inputType == 'select' && param.multivalued && !param.required">(Optional. Default={{param.defaultValues ||'undefined'}})</span>
+                <span ng-if="param.inputType == 'select' && !param.multivalued && !param.required">(Optional. Default={{param.defaultValue ||'undefined'}})</span>
+
+                <!-- kibi-validate messages -->
+                <span ng-if="innerForm[param.name].$error.required" class="invalid">This field is required</span>
+                <span ng-if="innerForm[param.name].$error.number" class="invalid">This field has to be a number</span>
+                <span ng-if="innerForm[param.name].$error.integer"class="invalid">This field has to be an integer</span>
+
                 <div ng-if="param.inputType=='list'">
                   <table class="table table-condensed">
                     <thead>
                       <tr>
-                        <th ng-repeat="(key, type) in param.listParameters">{{key}}</th>
+                        <th ng-repeat="(key, val) in param.listParameters">{{key}}</th>
                         <th></th>
                       </tr>
                     </thead>
                     <tbody>
                       <tr ng-repeat="item in datasource.datasourceParams[param.name]" class="queryOptionArea">
-                        <td ng-repeat="(key, type) in param.listParameters">
-                          <input type="{{type}}" ng-model="item[key]" class="form-control"/>
+                        <td ng-repeat="(key, val) in param.listParameters">
+                          <input
+                            type="{{val.inputType}}"
+                            kibi-validate="{{val.dataType}}"
+                            ng-model="item[key]"
+                            class="form-control"/>
                         </td>
                         <td>
                           <div class="btn-group rightCorner" style="width:60px;">
@@ -76,51 +91,49 @@
                   <kibi-array-param-add label="item" model="datasource.datasourceParams[param.name]"></kibi-array-param-add>
                 </div>
 
-                <span ng-if="param.inputType == 'number' && !param.required">(Optional. Default={{param.defaultValue || 'undefined'}})</span>
                 <input
                   ng-if="param.inputType == 'number'"
                   name="{{param.name}}"
                   type="number"
-                  ng-required="{{ param.required }}"
+                  ng-required="{{param.required}}"
+                  kibi-validate="{{param.dataType}}"
                   ng-model="datasource.datasourceParams[param.name]"
                   placeholder="{{param.placeholder}}"
                   class="form-control span9"/>
 
-                <span ng-if="param.inputType == 'text' && !param.required">(Optional. Default={{param.defaultValue || 'undefined'}})</span>
                 <input
                   ng-if="param.inputType == 'text'"
                   name="{{param.name}}"
                   type="text"
-                  ng-required="{{ param.required }}"
+                  ng-required="{{param.required}}"
+                  kibi-validate="{{param.dataType}}"
                   ng-model="datasource.datasourceParams[param.name]"
                   placeholder="{{param.placeholder}}"
                   class="form-control span9"/>
 
-                <span ng-if="param.inputType == 'checkbox' && !param.required">(Optional. Default={{param.defaultValue === false ? 'false' : 'true'}})</span>
                 <input
                   ng-if="param.inputType == 'checkbox'"
                   name="{{param.name}}"
                   type="checkbox"
-                  ng-required="{{ param.required }}"
+                  ng-required="{{param.required}}"
                   ng-checked="datasource.datasourceParams[param.name] || param.defaultValue"
                   ng-model="datasource.datasourceParams[param.name]"
                   class="form-control span9"/>
 
-                <span ng-if="param.inputType == 'password' && !param.required">(Optional. Default={{param.defaultValue || 'undefined'}})</span>
                 <input
                   ng-if="param.inputType == 'password'"
                   name="{{param.name}}"
                   type="password"
-                  ng-required="{{ param.required }}"
+                  ng-required="{{param.required}}"
+                  kibi-validate="{{param.dataType}}"
                   ng-model="datasource.datasourceParams[param.name]"
                   placeholder="{{param.placeholder}}"
                   class="form-control span9"/>
 
-                <span ng-if="param.inputType == 'select' && param.multivalued && !param.required">(Optional. Default={{param.defaultValues ||'undefined'}})</span>
                 <select
                   ng-if="param.inputType == 'select' && param.multivalued"
                   name="{{param.name}}"
-                  ng-required="{{ param.required }}"
+                  ng-required="{{param.required}}"
                   multiple
                   ng-model="datasource.datasourceParams[param.name]" class="form-control span9">
                   <option
@@ -131,7 +144,6 @@
                   </option>
                 </select>
 
-                <span ng-if="param.inputType == 'select' && !param.multivalued && !param.required">(Optional. Default={{param.defaultValue ||'undefined'}})</span>
                 <select
                   ng-if="param.inputType == 'select' && !param.multivalued"
                   name="{{param.name}}"

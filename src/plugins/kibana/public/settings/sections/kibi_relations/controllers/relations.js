@@ -2,7 +2,7 @@ define(function (require) {
 
   require('ui/kibi/directives/eeg');
   require('plugins/kibana/settings/sections/kibi_relations/styles/relations.less');
-  require('ui/kibi/directives/kibi_positive_integer_or_minus_one');
+  require('ui/kibi/directives/kibi_validate');
 
   var _ = require('lodash');
 

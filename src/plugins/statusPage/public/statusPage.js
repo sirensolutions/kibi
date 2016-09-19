@@ -14,13 +14,13 @@ const chrome = require('ui/chrome')
   }
 ])
 .setRootTemplate(require('plugins/statusPage/statusPage.html'))
-.setRootController('ui', function ($http, $scope) {
+.setRootController('ui', function ($http, $scope, kbnIndex, $window) {
   const ui = this;
   ui.loading = false;
 
   // kibi: added to be able to save diagnostics as json
   $scope.esUrls = require('./lib/kibi_es_apis_calls');
-  $scope.esDiagnostics = require('./lib/kibi_es_diagnostics')(ui, $http);
+  $scope.esDiagnostics = require('./lib/kibi_es_diagnostics')(ui, $http, kbnIndex, $window);
   // kibi: end
 
   ui.refresh = function () {

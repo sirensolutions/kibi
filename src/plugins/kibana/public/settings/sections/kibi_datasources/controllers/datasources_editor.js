@@ -34,6 +34,30 @@ define(function (require) {
   var angular = require('angular');
   var kibiUtils = require('kibiutils');
 
+  app.directive('kibiValidate', function () {
+    var INTEGER_REGEXP = /^\-?\d+$/;
+    return {
+      require: 'ngModel',
+      link: function (scope, elm, attrs, ctrl) {
+
+        if (attrs.kibiValidate === 'integer') {
+          ctrl.$validators.integer = function (modelValue, viewValue) {
+            if (ctrl.$isEmpty(modelValue)) {
+              // consider empty models to be valid
+              return true;
+            }
+            if (INTEGER_REGEXP.test(viewValue)) {
+              // it is valid
+              return true;
+            }
+            // it is invalid
+            return false;
+          };
+        }
+      }
+    };
+  });
+
   app.controller(
     'DatasourcesEditor',
     function ($rootScope, $scope, $route, $window, kbnUrl, createNotifier, savedDatasources,

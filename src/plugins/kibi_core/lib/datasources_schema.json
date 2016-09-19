@@ -4,6 +4,7 @@
       "name": "timeout",
       "label": "Timeout",
       "inputType": "number",
+      "dataType": "integer",
       "required": false,
       "multivalued": false,
       "encrypted": false,
@@ -48,6 +49,7 @@
       "name": "max_age",
       "label": "Max age of cache entries",
       "inputType": "number",
+      "dataType": "integer",
       "required": false,
       "multivalued": false,
       "encrypted": false,
@@ -112,6 +114,7 @@
       "name": "max_age",
       "label": "Max age of cache entries",
       "inputType": "number",
+      "dataType": "integer",
       "required": false,
       "multivalued": false,
       "encrypted": false,
@@ -175,6 +178,7 @@
       "name": "max_age",
       "label": "Max age of cache entries",
       "inputType": "number",
+      "dataType": "integer",
       "required": false,
       "multivalued": false,
       "encrypted": false,
@@ -193,8 +197,14 @@
       "encrypted": false,
       "inputType": "list",
       "listParameters": {
-        "name": "text",
-        "value": "text"
+        "name": {
+          "inputType": "text",
+          "dataType": "string"
+        },
+        "value": {
+          "inputType": "text",
+          "dataType": "string"
+        }
       },
       "defaultValue": [],
       "placeholder": "Headers to be used for each request"
@@ -207,8 +217,14 @@
       "encrypted": false,
       "inputType": "list",
       "listParameters": {
-        "name": "text",
-        "value": "text"
+        "name": {
+          "inputType": "text",
+          "dataType": "string"
+        },
+        "value": {
+          "inputType": "text",
+          "dataType": "string"
+        }
       },
       "defaultValue": [],
       "placeholder": "Parameters to be used for each request"
@@ -278,6 +294,7 @@
       "name": "max_age",
       "label": "Max age of cache entries",
       "inputType": "number",
+      "dataType": "integer",
       "required": false,
       "multivalued": false,
       "encrypted": false,
@@ -331,6 +348,7 @@
       "name": "max_age",
       "label": "Max age of cache entries",
       "inputType": "number",
+      "dataType": "integer",
       "required": false,
       "multivalued": false,
       "encrypted": false,
@@ -414,6 +432,7 @@
       "name": "max_age",
       "label": "Max age of cache entries",
       "inputType": "number",
+      "dataType": "integer",
       "required": false,
       "multivalued": false,
       "encrypted": false,

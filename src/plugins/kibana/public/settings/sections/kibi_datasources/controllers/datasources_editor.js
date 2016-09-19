@@ -5,6 +5,7 @@ define(function (require) {
   require('plugins/kibana/settings/sections/kibi_datasources/services/saved_datasources');
 
   require('ui/kibi/components/query_engine_client/query_engine_client');
+  require('ui/kibi/directives/kibi_validate');
 
   require('ui/routes')
   .when('/settings/datasources', {
@@ -33,30 +34,6 @@ define(function (require) {
   var app = require('ui/modules').get('apps/settings', ['kibana']);
   var angular = require('angular');
   var kibiUtils = require('kibiutils');
-
-  app.directive('kibiValidate', function () {
-    var INTEGER_REGEXP = /^\-?\d+$/;
-    return {
-      require: 'ngModel',
-      link: function (scope, elm, attrs, ctrl) {
-
-        if (attrs.kibiValidate === 'integer') {
-          ctrl.$validators.integer = function (modelValue, viewValue) {
-            if (ctrl.$isEmpty(modelValue)) {
-              // consider empty models to be valid
-              return true;
-            }
-            if (INTEGER_REGEXP.test(viewValue)) {
-              // it is valid
-              return true;
-            }
-            // it is invalid
-            return false;
-          };
-        }
-      }
-    };
-  });
 
   app.controller(
     'DatasourcesEditor',

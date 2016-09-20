@@ -29,8 +29,8 @@ define(function (require) {
 
     // Update the counts on each button of the related filter
     var _updateCounts = function (buttons, dashboardId) {
-      if ($scope.multiSearch) {
-        $scope.multiSearch.clear();
+      if ($scope.multiSearchData) {
+        $scope.multiSearchData.clear();
       }
 
       if (onVisualizeTab || !buttons || !buttons.length) {
@@ -58,22 +58,25 @@ define(function (require) {
         // ?getCountsOnButton has no meanning it is just usefull to filter when inspecting requests
         return $http.post(chrome.getBasePath() + '/elasticsearch/_msearch?getCountsOnButton', query)
         .then((response) => {
-          const ms = duration.diff() * -1;
+          if ($scope.multiSearchData) {
+            $scope.multiSearchData.setDuration(duration.diff() * -1);
+          }
           const data = response.data;
           _.each(data.responses, function (hit, i) {
             const stats = {
               index: results[i].button.targetIndexPatternId,
+              type: results[i].button.targetIndexPatternType,
+              meta: {
+                label: results[i].button.label
+              },
               response: hit,
-              request: {
-                query: results[i].query,
-                duration: ms
-              }
+              query: results[i].query
             };
 
             if (hit.error) {
               notify.error(JSON.stringify(hit.error, null, ' '));
-              if ($scope.multiSearch) {
-                $scope.multiSearch.add(stats);
+              if ($scope.multiSearchData) {
+                $scope.multiSearchData.add(stats);
               }
               return;
             }
@@ -93,8 +96,8 @@ define(function (require) {
               }
               stats.pruned = isPruned;
             }
-            if ($scope.multiSearch) {
-              $scope.multiSearch.add(stats);
+            if ($scope.multiSearchData) {
+              $scope.multiSearchData.add(stats);
             }
           });
           return _.map(results, (result) => result.button);

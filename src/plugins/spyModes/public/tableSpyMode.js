@@ -1,5 +1,5 @@
 define(function (require) {
-  function VisSpyTableProvider(Notifier, $filter, $rootScope, config, Private) {
+  function VisSpyTableProvider($rootScope, Private) {
     const _ = require('lodash');
     const saveAs = require('@spalger/filesaver').saveAs;
     const tabifyAggResponse = Private(require('ui/agg_response/tabify/tabify'));

@@ -1,7 +1,15 @@
+const _ = require('lodash');
 const http = require('http');
 const path = require('path');
 const Boom = require('boom');
 const errors = require('request-promise/errors');
+
+const util = require('../elasticsearch/lib/util');
+const filterJoinSet = require('../elasticsearch/lib/filter_join').set;
+const filterJoinSequence = require('../elasticsearch/lib/filter_join').sequence;
+
+const dbfilter = require('../elasticsearch/lib/dbfilter');
+const inject = require('../elasticsearch/lib/inject');
 
 /**
  * The Kibi core plugin.
@@ -203,6 +211,41 @@ module.exports = function (kibana) {
             } else {
               reply({ error: 'An error occurred while sending a gremlin query: ' + JSON.stringify(err) });
             }
+          });
+        }
+      });
+
+      /*
+       * Translate a query containing kibi-specific DSL into an Elasticsearch query
+       */
+      server.route({
+        method: 'POST',
+        path:'/translateToES',
+        handler: function (req, reply) {
+          var serverConfig = server.config();
+          util.getQueriesAsPromise(req.payload.query)
+          .map((query) => {
+            // Remove the custom queries from the body
+            inject.save(query);
+            return query;
+          }).map((query) => {
+            var shieldCredentials = serverConfig.has('shield.cookieName') ? req.state[serverConfig.get('shield.cookieName')] : null;
+            return dbfilter(server.plugins.kibi_core.getQueryEngine(), query, shieldCredentials);
+          }).map((query) => filterJoinSet(query))
+          .map((query) => filterJoinSequence(query))
+          .then((data) => {
+            reply({ translatedQuery: data[0] });
+          }).catch((err) => {
+            var errStr = err.toString();
+            if (typeof err === 'object' && err.stack) {
+              if (errStr === 'Error: Invalid key length.') {
+                errStr = 'Invalid key length - check the encryption key in kibi.yml';
+                err.message = errStr;
+              }
+            } else {
+              errStr = JSON.stringify(err, null, ' ');
+            }
+            reply(Boom.wrap(new Error(errStr, 400)));
           });
         }
       });

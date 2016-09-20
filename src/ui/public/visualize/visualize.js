@@ -62,9 +62,9 @@ define(function (require) {
         $scope.spy = {};
         $scope.spy.mode = ($scope.uiState) ? $scope.uiState.get('spy.mode', {}) : {};
 
-        $scope.multiSearch = null;
+        $scope.multiSearchData = null;
         if ($scope.vis.type.requiresMultiSearch) {
-          $scope.multiSearch = new KibiSpyData();
+          $scope.multiSearchData = new KibiSpyData();
         }
 
         var applyClassNames = function () {
@@ -152,7 +152,7 @@ define(function (require) {
           }
 
           if (oldVis) $scope.renderbot = null;
-          if (vis) $scope.renderbot = vis.type.createRenderbot(vis, $visEl, $scope.uiState, $scope.multiSearch);
+          if (vis) $scope.renderbot = vis.type.createRenderbot(vis, $visEl, $scope.uiState, $scope.multiSearchData);
         }));
 
         $scope.$watchCollection('vis.params', prereq(function () {

@@ -17,10 +17,10 @@ module.exports = function (data, $http, kibiIndexName, $window) {
     $http.get('elasticsearch/' + kibiIndexName + '/index-pattern/_search')
     .then(function (indexPatternRes) {
       if (_.get(indexPatternRes, 'data.hits.hits')) {
-        var indexes = _.map(indexPatternRes.data.hits.hits, (hit) => { return hit._id;});
+        let indexes = _.map(indexPatternRes.data.hits.hits, (hit) => hit._id).join(',');
         let promises = _.map(esUrls, (urlPart) => {
           // get list of index patterns
-          var url = urlPart.replace(/\$KIBI_INDICES_LIST/, indexes.join(','));
+          let url = urlPart.replace(/\$KIBI_INDICES_LIST/, indexes);
           return $http.get('elasticsearch/' + url).then((results) => {
             return formatResults(urlPart, results.data);
           });

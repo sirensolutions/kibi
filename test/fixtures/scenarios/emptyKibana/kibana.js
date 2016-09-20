@@ -3,7 +3,8 @@ module.exports = [
     'index': {
       '_index': '.kibi',
       '_type': 'config',
-      '_id': require('../../../../package.json').version
+      // kibi: use kibi version instead of kibana's
+      '_id': require('../../../../package.json').kibi_version
     }
   },
   {

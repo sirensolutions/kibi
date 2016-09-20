@@ -8,7 +8,7 @@ define(function (require) {
   });
 
   // service for delivering config variables to everywhere else
-  module.service('config', function (Private, Notifier, kbnVersion, kbnIndex, $rootScope, buildNum) {
+  module.service('config', function (Private, Notifier, kibiVersion, kbnIndex, $rootScope, buildNum) {
     var config = this;
 
     var angular = require('angular');
@@ -29,7 +29,7 @@ define(function (require) {
     var doc = (new DocSource())
       .index(kbnIndex)
       .type('config')
-      .id(kbnVersion);
+      .id(kibiVersion);
 
     /******
      * PUBLIC API

@@ -5,7 +5,7 @@ let sinon = require('sinon');
 let isUpgradeable = require('../is_upgradeable');
 let utils = require('requirefrom')('src/utils');
 let pkg = utils('packageJson');
-let version = pkg.version;
+let version = pkg.kibi_version;
 
 describe('plugins/elasticsearch', function () {
   describe('lib/isUpgradeable', function () {
@@ -13,7 +13,7 @@ describe('plugins/elasticsearch', function () {
       config: _.constant({
         get: function (key) {
           switch (key) {
-            case 'pkg.version': return version;
+            case 'pkg.kibiVersion': return version;
             default: throw new Error(`no stub for config key ${key}`);
           }
         }
@@ -28,12 +28,12 @@ describe('plugins/elasticsearch', function () {
           expect(isUpgradeable(server, { _id: _id })).to.be(bool);
         });
 
-        after(function () { version = pkg.version; });
+        after(function () { version = pkg.kibi_version; });
       });
     }
 
-    upgradeDoc('1.0.0-beta1', pkg.version, false);
-    upgradeDoc(pkg.version, pkg.version, false);
+    upgradeDoc('1.0.0-beta1', pkg.kibi_version, false);
+    upgradeDoc(pkg.kibi_version, pkg.kibi_version, false);
     upgradeDoc('4.0.0-RC1', '4.0.0-RC2', true);
     upgradeDoc('4.0.0-rc2', '4.0.0-rc1', false);
     upgradeDoc('4.0.0-rc2', '4.0.0', true);

@@ -26,6 +26,8 @@ src/plugins/elasticsearch/index.js
 src/plugins/elasticsearch/lib/__tests__/health_check.js
 src/plugins/elasticsearch/lib/__tests__/is_upgradeable.js
 src/plugins/elasticsearch/lib/__tests__/routes.js
+src/plugins/elasticsearch/lib/is_upgradeable.js
+src/plugins/elasticsearch/lib/upgrade_config.js
 src/plugins/elasticsearch/lib/create_proxy.js
 src/plugins/elasticsearch/lib/health_check.js
 src/plugins/elasticsearch/lib/map_uri.js

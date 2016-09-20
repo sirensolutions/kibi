@@ -77,9 +77,9 @@ module.exports = async (kbnServer, server, config) => {
       app: app,
       nav: uiExports.apps,
       version: kbnServer.version,
-      kibiVersion: config.get('pkg.kibiVersion'), // kibi: added to manage kibi version
-      kibiKibanaAnnouncement: config.get('pkg.kibiKibanaAnnouncement'),
-      kibiEnterpriseEnabled: config.get('pkg.kibiEnterpriseEnabled'),
+      kibiVersion: kbnServer.kibiVersion, // kibi: added to manage kibi version
+      kibiKibanaAnnouncement: kbnServer.kibiKibanaAnnouncement,
+      kibiEnterpriseEnabled: kbnServer.kibiEnterpriseEnabled,
       buildNum: config.get('pkg.buildNum'),
       buildSha: config.get('pkg.buildSha'),
       basePath: config.get('server.basePath'),

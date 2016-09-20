@@ -6,14 +6,14 @@ module.exports = function (server, doc) {
   const config = server.config();
   if (/beta|snapshot/i.test(doc._id)) return false;
   if (!doc._id) return false;
-  if (doc._id === config.get('pkg.version')) return false;
+  if (doc._id === config.get('pkg.kibiVersion')) return false;
 
   let packageRcRelease = Infinity;
   let rcRelease = Infinity;
-  let packageVersion = config.get('pkg.version');
+  let packageVersion = config.get('pkg.kibiVersion');
   let version = doc._id;
   const matches = doc._id.match(rcVersionRegex);
-  const packageMatches = config.get('pkg.version').match(rcVersionRegex);
+  const packageMatches = config.get('pkg.kibiVersion').match(rcVersionRegex);
 
   if (matches) {
     version = matches[1];

@@ -16,7 +16,7 @@ describe('plugins/elasticsearch', function () {
     beforeEach(function () {
       get = sinon.stub();
       get.withArgs('kibana.index').returns('.my-kibana');
-      get.withArgs('pkg.version').returns('4.0.1');
+      get.withArgs('pkg.kibiVersion').returns('4.0.1');
       get.withArgs('pkg.buildNum').returns(Math.random());
       client = { create: sinon.stub() };
       server = {
@@ -53,10 +53,10 @@ describe('plugins/elasticsearch', function () {
           });
         });
 
-        it('should resolve version to pkg.version config', function () {
+        it('should resolve version to pkg.kibiVersion config', function () {
           return upgrade(response).then(function (resp) {
             const params = client.create.args[0][0];
-            expect(params).to.have.property('id', get('pkg.version'));
+            expect(params).to.have.property('id', get('pkg.kibiVersion'));
           });
         });
       });
@@ -75,10 +75,10 @@ describe('plugins/elasticsearch', function () {
           });
         });
 
-        it('should resolve version to pkg.version config', function () {
+        it('should resolve version to pkg.kibiVersion config', function () {
           return upgrade(response).then(function (resp) {
             const params = client.create.args[0][0];
-            expect(params).to.have.property('id', get('pkg.version'));
+            expect(params).to.have.property('id', get('pkg.kibiVersion'));
           });
         });
       });

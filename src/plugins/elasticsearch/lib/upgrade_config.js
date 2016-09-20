@@ -20,13 +20,13 @@ module.exports = function (server) {
         index: config.get('kibana.index'),
         type: 'config',
         body: { buildNum: config.get('pkg.buildNum') },
-        id: config.get('pkg.kibiVersion')
+        id: config.get('pkg.kibiVersion') // kibi: use kibi version instead of kibana's
       });
     }
 
     // if we already have a the current version in the index then we need to stop
     const devConfig = _.find(response.hits.hits, function currentVersion(hit) {
-      return hit._id !== '@@version' && hit._id === config.get('pkg.kibiVersion');
+      return hit._id !== '@@version' && hit._id === config.get('pkg.kibiVersion'); // kibi: use kibi version instead of kibana's
     });
 
     if (devConfig) return Promise.resolve();
@@ -43,14 +43,14 @@ module.exports = function (server) {
     server.log(['plugin', 'elasticsearch'], {
       tmpl: 'Upgrade config from <%= prevVersion %> to <%= newVersion %>',
       prevVersion: body._id,
-      newVersion: config.get('pkg.kibiVersion')
+      newVersion: config.get('pkg.kibiVersion') // kibi: use kibi version instead of kibana's
     });
 
     return client.create({
       index: config.get('kibana.index'),
       type: 'config',
       body: body._source,
-      id: config.get('pkg.kibiVersion')
+      id: config.get('pkg.kibiVersion') // kibi: use kibi version instead of kibana's
     });
   };
 };

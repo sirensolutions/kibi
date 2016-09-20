@@ -6,7 +6,10 @@ define(function (require) {
   const moment = require('moment');
   const module = require('ui/modules').get('ui/kibi/kibi_sync_time_to');
 
-  module.directive('kibiSyncTimeTo', function (kibiState, savedDashboards, timefilter) {
+  module.directive('kibiSyncTimeTo', function (kibiState, timefilter, Private) {
+
+    var dashboardHelper = Private(require('ui/kibi/helpers/dashboard_helper'));
+
     return {
       restrict: 'E',
       transclude: true,
@@ -20,20 +23,14 @@ define(function (require) {
         const populateDashboards = function () {
           // reset the allSelected option
           $scope.allSelected = false;
-          $scope.dashboards = [];
-          savedDashboards.find().then((res) => {
-            _.each(res.hits, (hit) => {
-              const dash = {
-                title: hit.title,
-                id: hit.id,
-                selected: false,
-                disabled: false
+          dashboardHelper.getTimeDependentDashboards().then((dashboards) => {
+            $scope.dashboards = _.map(dashboards, (d) => {
+              return {
+                title: d.title,
+                id: d.id,
+                selected: currentDashId === d.id,
+                disabled: currentDashId === d.id
               };
-              if (currentDashId === hit.id) {
-                dash.selected = true;
-                dash.disabled = true;
-              }
-              $scope.dashboards.push(dash);
             });
           });
         };

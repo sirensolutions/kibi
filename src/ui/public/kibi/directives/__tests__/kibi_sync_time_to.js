@@ -7,8 +7,33 @@ const isChrome = !!window.chrome && !!window.chrome.webstore;
 
 require('../kibi_sync_time_to');
 
+
+function pool(f, maxTimeInMs, stepInMs, callback, stopTime) {
+  if (f()) {
+    if (callback) {
+      callback();
+    }
+    return;
+  }
+  var currentTime = new Date().getTime();
+  if (currentTime >= stopTime && callback) {
+    callback(new Error('Max time ' + maxTimeInMs + ' reached\nCurrent time ' + currentTime + ' '));
+    return;
+  }
+  setTimeout(function () {
+    pool(f, maxTimeInMs, stepInMs, callback, stopTime);
+  }, stepInMs);
+};
+
+function poolUntil(f, maxTimeInMs, stepInMs, callback) {
+  pool(f, maxTimeInMs, stepInMs, callback, new Date().getTime() + maxTimeInMs);
+};
+
 describe('Kibi Components', function () {
   describe('kibi_sync_time_to', function () {
+
+    require('testUtils/noDigestPromises').activateForSuite();
+
     var $timeout;
     var $rootScope;
     var kibiState;
@@ -37,17 +62,46 @@ describe('Kibi Components', function () {
       );
 
       ngMock.module('kibi_datasources/services/saved_datasources', function ($provide) {
-        var dashboards = [
+        var fakeSavedDashboards = [
           {
             id: 'dashA',
-            title: 'dashA'
+            title: 'dashA',
+            savedSearchId: 'savedSearchA'
           },
           {
             id: 'dashB',
-            title: 'dashB'
+            title: 'dashB',
+            savedSearchId: 'savedSearchB'
           }
         ];
-        $provide.service('savedDashboards', (Promise) => mockSavedObjects(Promise)('savedDashboards', dashboards));
+        var fakeSavedSearches = [
+          {
+            id: 'savedSearchA',
+            searchSource: {
+              index: function () {
+                return {
+                  hasTimeField: function () {
+                    return true;
+                  }
+                };
+              }
+            }
+          },
+          {
+            id: 'savedSearchB',
+            searchSource: {
+              index: function () {
+                return {
+                  hasTimeField: function () {
+                    return true;
+                  }
+                };
+              }
+            }
+          }
+        ];
+        $provide.service('savedDashboards', (Promise) => mockSavedObjects(Promise)('savedDashboards', fakeSavedDashboards));
+        $provide.service('savedSearches', (Promise) => mockSavedObjects(Promise)('savedSearches', fakeSavedSearches));
       });
 
       ngMock.inject(function (_kibiState_, _$rootScope_, $compile, $injector, _$timeout_) {
@@ -65,7 +119,7 @@ describe('Kibi Components', function () {
         spyApplyAbsolute = sinon.spy(directiveScope, 'applyAbsolute');
 
         $el = $compile('<kibi-sync-time-to kibi-function="' + kibiFunctionName + '"></kibi-sync-time-to>')(directiveScope);
-        $rootScope.$digest();
+        directiveScope.$apply();
       });
     }
 
@@ -126,8 +180,22 @@ describe('Kibi Components', function () {
           done();
         });
 
-        checkSelectAllCheckbox($el);
-        $el.find('button[type=\'submit\']').click();
+        poolUntil(
+          function () {
+            return directiveScope.dashboards && directiveScope.dashboards.length === 2;
+          }, 1000, 1,
+          function (err) {
+            if (err) {
+              done(err);
+            }
+            // now we know the scope has the dashboards
+            // call apply to modify html
+            directiveScope.$apply();
+
+            checkSelectAllCheckbox($el);
+            $el.find('button[type=\'submit\']').click();
+          }
+        );
       });
 
       it('should change the kibi state for all dashboards all individual checkboxes clicked', function (done) {
@@ -146,8 +214,23 @@ describe('Kibi Components', function () {
           done();
         });
 
-        checkAllIndividualCheckboxes($el);
-        $el.find('button[type=\'submit\']').click();
+
+        poolUntil(
+          function () {
+            return directiveScope.dashboards && directiveScope.dashboards.length === 2;
+          }, 1000, 1,
+          function (err) {
+            if (err) {
+              done(err);
+            }
+            // now we know the scope has the dashboards
+            // call apply to modify html
+            directiveScope.$apply();
+
+            checkAllIndividualCheckboxes($el);
+            $el.find('button[type=\'submit\']').click();
+          }
+        );
       });
 
       it('should change the kibi state for only 1 dashboards when 1 individual checkbox clicked', function (done) {
@@ -166,8 +249,23 @@ describe('Kibi Components', function () {
           done();
         });
 
-        checkFirstIndividualCheckbox($el);
-        $el.find('button[type=\'submit\']').click();
+
+        poolUntil(
+          function () {
+            return directiveScope.dashboards && directiveScope.dashboards.length === 2;
+          }, 1000, 1,
+          function (err) {
+            if (err) {
+              done(err);
+            }
+            // now we know the scope has the dashboards
+            // call apply to modify html
+            directiveScope.$apply();
+
+            checkFirstIndividualCheckbox($el);
+            $el.find('button[type=\'submit\']').click();
+          }
+        );
       });
 
       it('should NOT change the kibi state for all dashboards when no checkbox clicked', function (done) {
@@ -186,14 +284,28 @@ describe('Kibi Components', function () {
           done();
         });
 
-        $el.find('button[type=\'submit\']').click();
+        poolUntil(
+          function () {
+            return directiveScope.dashboards && directiveScope.dashboards.length === 2;
+          }, 1000, 1,
+          function (err) {
+            if (err) {
+              done(err);
+            }
+            // now we know the scope has the dashboards
+            // call apply to modify html
+            directiveScope.$apply();
 
-        // wait a bit and trigger kibiState.save with extra filter ourselves
-        $timeout(() => {
-          kibiState.enableRelation({});
-          kibiState.save();
-        }, 500);
-        $timeout.flush();
+            $el.find('button[type=\'submit\']').click();
+            // here lets wait a bit and
+            // trigger the save event ourselves as the click action will not do it
+            // because we did not select any dashboard
+            setTimeout(function () {
+              kibiState.enableRelation({});
+              kibiState.save();
+            }, 300);
+          }
+        );
       });
     });
 
@@ -225,8 +337,22 @@ describe('Kibi Components', function () {
           done();
         });
 
-        checkSelectAllCheckbox($el);
-        $el.find('button[type=\'submit\']').click();
+        poolUntil(
+          function () {
+            return directiveScope.dashboards && directiveScope.dashboards.length === 2;
+          }, 1000, 1,
+          function (err) {
+            if (err) {
+              done(err);
+            }
+            // now we know the scope has the dashboards
+            // call apply to modify html
+            directiveScope.$apply();
+
+            checkSelectAllCheckbox($el);
+            $el.find('button[type=\'submit\']').click();
+          }
+        );
       });
 
       it('should change the kibi state for all dashboards all individual checkboxes clicked', function (done) {
@@ -245,8 +371,21 @@ describe('Kibi Components', function () {
           done();
         });
 
-        checkAllIndividualCheckboxes($el);
-        $el.find('button[type=\'submit\']').click();
+        poolUntil(
+          function () {
+            return directiveScope.dashboards && directiveScope.dashboards.length === 2;
+          }, 1000, 1,
+          function (err) {
+            if (err) {
+              done(err);
+            }
+            // now we know the scope has the dashboards
+            // call apply to modify html
+            directiveScope.$apply();
+            checkAllIndividualCheckboxes($el);
+            $el.find('button[type=\'submit\']').click();
+          }
+        );
       });
 
       it('should change the kibi state for only 1 dashboards when 1 individual checkbox clicked', function (done) {
@@ -265,8 +404,21 @@ describe('Kibi Components', function () {
           done();
         });
 
-        checkFirstIndividualCheckbox($el);
-        $el.find('button[type=\'submit\']').click();
+        poolUntil(
+          function () {
+            return directiveScope.dashboards && directiveScope.dashboards.length === 2;
+          }, 1000, 1,
+          function (err) {
+            if (err) {
+              done(err);
+            }
+            // now we know the scope has the dashboards
+            // call apply to modify html
+            directiveScope.$apply();
+            checkFirstIndividualCheckbox($el);
+            $el.find('button[type=\'submit\']').click();
+          }
+        );
       });
 
       it('should NOT change the kibi state for all dashboards when no checkbox clicked', function (done) {
@@ -285,14 +437,28 @@ describe('Kibi Components', function () {
           done();
         });
 
-        $el.find('button[type=\'submit\']').click();
+        poolUntil(
+          function () {
+            return directiveScope.dashboards && directiveScope.dashboards.length === 2;
+          }, 1000, 1,
+          function (err) {
+            if (err) {
+              done(err);
+            }
+            // now we know the scope has the dashboards
+            // call apply to modify html
+            directiveScope.$apply();
 
-        // wait a bit and trigger kibiState.save with extra filter ourselves
-        $timeout(() => {
-          kibiState.enableRelation({});
-          kibiState.save();
-        }, 500);
-        $timeout.flush();
+            $el.find('button[type=\'submit\']').click();
+
+            // wait a bit and trigger kibiState.save with extra filter ourselves
+            setTimeout(function () {
+              kibiState.enableRelation({});
+              kibiState.save();
+            }, 300);
+          }
+        );
+
       });
     });
 
@@ -324,8 +490,22 @@ describe('Kibi Components', function () {
           done();
         });
 
-        checkSelectAllCheckbox($el);
-        $el.find('button[type=\'submit\']').click();
+        poolUntil(
+          function () {
+            return directiveScope.dashboards && directiveScope.dashboards.length === 2;
+          }, 1000, 1,
+          function (err) {
+            if (err) {
+              done(err);
+            }
+            // now we know the scope has the dashboards
+            // call apply to modify html
+            directiveScope.$apply();
+
+            checkSelectAllCheckbox($el);
+            $el.find('button[type=\'submit\']').click();
+          }
+        );
       });
 
       it('should change the kibi state for all dashboards all individual checkboxes clicked', function (done) {
@@ -344,8 +524,22 @@ describe('Kibi Components', function () {
           done();
         });
 
-        checkAllIndividualCheckboxes($el);
-        $el.find('button[type=\'submit\']').click();
+        poolUntil(
+          function () {
+            return directiveScope.dashboards && directiveScope.dashboards.length === 2;
+          }, 1000, 1,
+          function (err) {
+            if (err) {
+              done(err);
+            }
+            // now we know the scope has the dashboards
+            // call apply to modify html
+            directiveScope.$apply();
+
+            checkAllIndividualCheckboxes($el);
+            $el.find('button[type=\'submit\']').click();
+          }
+        );
       });
 
       it('should change the kibi state for only 1 dashboards when 1 individual checkbox clicked', function (done) {
@@ -364,8 +558,22 @@ describe('Kibi Components', function () {
           done();
         });
 
-        checkFirstIndividualCheckbox($el);
-        $el.find('button[type=\'submit\']').click();
+        poolUntil(
+          function () {
+            return directiveScope.dashboards && directiveScope.dashboards.length === 2;
+          }, 1000, 1,
+          function (err) {
+            if (err) {
+              done(err);
+            }
+            // now we know the scope has the dashboards
+            // call apply to modify html
+            directiveScope.$apply();
+
+            checkFirstIndividualCheckbox($el);
+            $el.find('button[type=\'submit\']').click();
+          }
+        );
       });
 
       it('should NOT change the kibi state for all dashboards when no checkbox clicked', function (done) {
@@ -384,17 +592,30 @@ describe('Kibi Components', function () {
           done();
         });
 
-        $el.find('button[type=\'submit\']').click();
+        poolUntil(
+          function () {
+            return directiveScope.dashboards && directiveScope.dashboards.length === 2;
+          }, 1000, 1,
+          function (err) {
+            if (err) {
+              done(err);
+            }
+            // now we know the scope has the dashboards
+            // call apply to modify html
+            directiveScope.$apply();
 
-        // wait a bit and trigger kibiState.save with extra filter ourselves
-        $timeout(() => {
-          kibiState.enableRelation({});
-          kibiState.save();
-        }, 500);
-        $timeout.flush();
+            $el.find('button[type=\'submit\']').click();
+
+            // wait a bit and trigger kibiState.save with extra filter ourselves
+            setTimeout(function () {
+              kibiState.enableRelation({});
+              kibiState.save();
+            }, 300);
+          }
+        );
+
       });
     });
-
 
   });
 });

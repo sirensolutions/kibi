@@ -28,6 +28,7 @@ define(function (require) {
         },
         editor: '<kibi-sequential-join-vis-params></kibi-sequential-join-vis-params>'
       },
+      requiresMultiSearch: true,
       requiresSearch: false
     });
   }

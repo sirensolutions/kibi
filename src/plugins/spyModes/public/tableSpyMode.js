@@ -1,5 +1,5 @@
 define(function (require) {
-  function VisSpyTableProvider(Notifier, $filter, $rootScope, config, Private) {
+  function VisSpyTableProvider($rootScope, Private) {
     const _ = require('lodash');
     const saveAs = require('@spalger/filesaver').saveAs;
     const tabifyAggResponse = Private(require('ui/agg_response/tabify/tabify'));
@@ -12,7 +12,10 @@ define(function (require) {
       name: 'table',
       display: 'Table',
       order: 1,
-      visForbidden: [ 'kibi-data-table' ],
+      // kibi: do not show if the vis is incompatible with this mode
+      allowSpyMode: function (visType) {
+        return !visType.requiresMultiSearch;
+      },
       template: require('plugins/spyModes/tableSpyMode.html'),
       link: function tableLinkFn($scope, $el) {
         $rootScope.$watchMulti.call($scope, [

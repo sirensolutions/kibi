@@ -65,12 +65,14 @@ module.exports = function createProxy(server, method, route, config) {
                   return new Buffer(JSON.stringify(query) + '\n');
                 });
 
-                server.log(
-                  ['debug', 'kibi_proxy', 'translated elasticsearch query'],
-                  '\n-------------------------\n' +
-                  Buffer.concat(buffers).toString() + '\n' +
-                  '-------------------------'
-                );
+                if (serverConfig.get('logging.verbose')) {
+                  server.log(
+                    ['debug', 'kibi_proxy', 'translated elasticsearch query'],
+                    '\n-------------------------\n' +
+                      Buffer.concat(buffers).toString() + '\n' +
+                      '-------------------------'
+                  );
+                }
 
                 fulfill({
                   payload: Buffer.concat(buffers),

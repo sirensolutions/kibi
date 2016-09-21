@@ -14,8 +14,9 @@ define(function (require) {
       }
     }
 
-    TemplateVisType.prototype.createRenderbot = function (vis, $el, uiState) {
-      return new TemplateRenderbot(vis, $el, uiState);
+    // kibi: added the multiSearch argument for the multi search spy mode
+    TemplateVisType.prototype.createRenderbot = function (vis, $el, uiState, multiSearchData) {
+      return new TemplateRenderbot(vis, $el, uiState, multiSearchData);
     };
 
     return TemplateVisType;

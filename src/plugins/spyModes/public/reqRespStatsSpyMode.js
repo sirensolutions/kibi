@@ -34,6 +34,10 @@ define(function (require) {
       name: 'request',
       display: 'Request',
       order: 2,
+      // kibi: do not show if the vis is incompatible with this mode
+      allowSpyMode: function (visType) {
+        return !visType.requiresMultiSearch;
+      },
       template: reqRespStatsHTML,
       link: linkReqRespStats
     };
@@ -43,6 +47,10 @@ define(function (require) {
       name: 'response',
       display: 'Response',
       order: 3,
+      // kibi: do not show if the vis is incompatible with this mode
+      allowSpyMode: function (visType) {
+        return !visType.requiresMultiSearch;
+      },
       template: reqRespStatsHTML,
       link: linkReqRespStats
     };
@@ -52,6 +60,10 @@ define(function (require) {
       name: 'stats',
       display: 'Statistics',
       order: 4,
+      // kibi: do not show if the vis is incompatible with this mode
+      allowSpyMode: function (visType) {
+        return !visType.requiresMultiSearch;
+      },
       template: reqRespStatsHTML,
       link: linkReqRespStats
     };

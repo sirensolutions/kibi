@@ -17,6 +17,8 @@ define(function (require) {
         this.version = opts.version;
       }
       this.requiresSearch = opts.requiresSearch == null ? true : opts.requiresSearch; // Default to true unless otherwise specified
+      // kibi: Default to false unless otherwise specified
+      this.requiresMultiSearch = opts.requiresMultiSearch == null ? false : opts.requiresMultiSearch;
     }
 
     return VisType;

@@ -52,7 +52,6 @@ describe('Kibi Components', function () {
         function ($provide) {
           $provide.constant('kbnDefaultAppId', '');
           $provide.constant('kibiDefaultDashboardId', '');
-          $provide.constant('kibiEnterpriseEnabled', false);
           $provide.constant('elasticsearchPlugins', ['siren-join']);
           $provide.service('$route', function () {
             return {
@@ -138,10 +137,6 @@ describe('Kibi Components', function () {
       }
     };
 
-    function getAllIndividualCheckboxes(el) {
-      return el.find('table tr:nth-child(2) input[type=\'checkbox\']');
-    }
-
     function checkAllIndividualCheckboxes(el) {
       if (isChrome) {
         el.find('table tr:nth-child(2) input[type=\'checkbox\']').click();
@@ -193,6 +188,8 @@ describe('Kibi Components', function () {
             if (err) {
               done(err);
             }
+            // now we know the scope has the dashboards
+            // call apply to modify html
             directiveScope.$apply();
 
             checkSelectAllCheckbox($el);
@@ -504,6 +501,7 @@ describe('Kibi Components', function () {
             // now we know the scope has the dashboards
             // call apply to modify html
             directiveScope.$apply();
+
             checkSelectAllCheckbox($el);
             $el.find('button[type=\'submit\']').click();
           }
@@ -537,6 +535,7 @@ describe('Kibi Components', function () {
             // now we know the scope has the dashboards
             // call apply to modify html
             directiveScope.$apply();
+
             checkAllIndividualCheckboxes($el);
             $el.find('button[type=\'submit\']').click();
           }
@@ -570,6 +569,7 @@ describe('Kibi Components', function () {
             // now we know the scope has the dashboards
             // call apply to modify html
             directiveScope.$apply();
+
             checkFirstIndividualCheckbox($el);
             $el.find('button[type=\'submit\']').click();
           }
@@ -616,7 +616,6 @@ describe('Kibi Components', function () {
 
       });
     });
-
 
   });
 });

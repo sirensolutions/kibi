@@ -42,6 +42,7 @@ module.exports = function (program) {
   .option('--verbose', 'Turns on verbose logging')
   .option('-H, --host <host>', 'The host to bind to')
   .option('-l, --log-file <path>', 'The file to log to')
+  .option('--quit-after-init', 'Quit the server after a successful initialization.')
   .option(
     '--plugin-dir <path>',
     'A path to scan for plugins, this can be specified multiple ' +
@@ -114,6 +115,9 @@ module.exports = function (program) {
     try {
       kbnServer = new KbnServer(_.merge(settings, this.getUnknownOptions()));
       await kbnServer.ready();
+      if (opts.quitAfterInit) {
+        process.exit(0);
+      }
     }
     catch (err) {
       let { server } = kbnServer;

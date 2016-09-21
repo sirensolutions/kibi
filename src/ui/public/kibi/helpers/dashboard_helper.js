@@ -1,5 +1,6 @@
 define(function (require) {
   const _ = require('lodash');
+  const Promise = require('bluebird');
 
   return function DashboardHelperFactory(savedDashboards, savedSearches) {
 

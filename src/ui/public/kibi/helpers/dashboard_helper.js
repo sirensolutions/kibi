@@ -5,23 +5,6 @@ define(function (require) {
 
     function DashboardHelper() {}
 
-    var filterDashboardsBasedOnSavedSearchId = function (dashboards, savedSearchId) {
-      return _.filter(dashboards, (d) => {
-        return d.savedSearchId === savedSearchId;
-      });
-    };
-
-    var addToResults = function (a, dashboards) {
-      _.each(dashboards, (dashCandidate) => {
-        let found = _.find(a, (d) => {
-          return dashCandidate.id === d.id;
-        });
-        if (!found) {
-          a.push(dashCandidate);
-        }
-      });
-    };
-
     DashboardHelper.prototype.getTimeDependentDashboards = function () {
       return savedDashboards.find()
       .then((savedDashboardsRes) => {
@@ -30,14 +13,12 @@ define(function (require) {
           return savedSearches.get(dash.savedSearchId);
         });
         return Promise.all(promisses).then((savedSearchesRes) => {
-          let ret = [];
           _.each(savedSearchesRes, (savedSearch) => {
-            if (savedSearch.searchSource.index().hasTimeField()) {
-              let dashboardSubset = filterDashboardsBasedOnSavedSearchId(dashboards, savedSearch.id);
-              addToResults(ret, dashboardSubset);
+            if (!savedSearch.searchSource.index().hasTimeField()) {
+              _.remove(dashboards, 'savedSearchId', savedSearch.id);
             }
           });
-          return ret;
+          return dashboards;
         });
       });
     };

@@ -103,7 +103,8 @@ describe('Filter Bar Directive', function () {
         meta: {
           index: 'logstash-*',
           alias: '123 articles',
-          alias_tmpl: '$COUNT articles'
+          alias_tmpl: '$COUNT articles',
+          buttons: []
         },
         join_sequence: {
           reverse: _.noop

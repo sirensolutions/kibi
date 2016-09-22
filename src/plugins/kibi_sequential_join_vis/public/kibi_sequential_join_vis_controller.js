@@ -33,7 +33,7 @@ define(function (require) {
 
       return Promise.all(_.map(buttons, (button) => {
         return Promise.all([
-          kibiSequentialJoinVisHelper.timeBasedIndices(button.targetIndexPatternId, button.redirectToDashboard),
+          kibiState.timeBasedIndices(button.targetIndexPatternId, button.redirectToDashboard),
           kibiSequentialJoinVisHelper.getJoinSequenceFilter(dashboardId, button)
         ])
         .then(([ indices, joinSeqFilter ]) => {

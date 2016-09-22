@@ -2,14 +2,13 @@ define(function (require) {
   const angular = require('angular');
   const _ = require('lodash');
 
-  return function KibiNavBarHelperFactory(kibiState, globalState, getAppState, createNotifier, Private, $http, Promise,
-                                          $rootScope, savedDashboards) {
+  return function KibiNavBarHelperFactory(kibiState, globalState, getAppState, createNotifier, Private, $http, Promise, $rootScope,
+                                          savedDashboards) {
     const notify = createNotifier({
       name: 'kibi_nav_bar directive'
     });
 
     const dashboardGroupHelper = Private(require('ui/kibi/helpers/dashboard_group_helper'));
-    const indexPath = Private(require('ui/kibi/components/commons/_index_path'));
 
     function KibiNavBarHelper() {
       this.appState = null;
@@ -132,15 +131,25 @@ define(function (require) {
     const _fireUpdateAllCounts = function (groupIndexesToUpdate, reason, forceUpdate = false) {
       const self = this;
 
-      let promises  = [];
+      const countForDashboard = function (dashboardGroups, index) {
+        const selectedDashboard = dashboardGroupHelper.getCountQueryForSelectedDashboard(dashboardGroups, index);
+        const timeBasedSelectedDashboard = selectedDashboard.then(({ indexPatternId, dashboardId }) => {
+          if (!indexPatternId || !dashboardId) {
+            return;
+          }
+          return kibiState.timeBasedIndices(indexPatternId, dashboardId);
+        });
+        return Promise.all([ selectedDashboard, timeBasedSelectedDashboard ])
+        .then(([ { groupIndex, query }, indices ]) => {
+          return { groupIndex, query, indices };
+        });
+      };
+
+      let promises;
       if (groupIndexesToUpdate && groupIndexesToUpdate.constructor === Array && groupIndexesToUpdate.length > 0) {
-        promises = _.map(groupIndexesToUpdate, (index) => {
-          return dashboardGroupHelper.getCountQueryForSelectedDashboard(self.dashboardGroups, index);
-        });
+        promises = _.map(groupIndexesToUpdate, (index) => countForDashboard(self.dashboardGroups, index));
       } else {
-        promises = _.map(self.dashboardGroups, (g, index) => {
-          return dashboardGroupHelper.getCountQueryForSelectedDashboard(self.dashboardGroups, index);
-        });
+        promises = _.map(self.dashboardGroups, (g, index) => countForDashboard(self.dashboardGroups, index));
       }
 
       return Promise.all(promises).then((results) => {
@@ -151,9 +160,8 @@ define(function (require) {
         let query = '';
 
         _.each(results, function (result, index) {
-          if (result.query && result.indexPatternId) {
-            query += '{"index" : "' + indexPath(result.indexPatternId) + '"}\n';
-            query += angular.toJson(result.query) + '\n';
+          if (result.query && result.indices) {
+            query += `{"index":${angular.toJson(result.indices)}}\n${angular.toJson(result.query)}\n`;
             indexesToUpdate.push(index);
           }
         });

@@ -1,5 +1,5 @@
 define(function (require) {
-  var _ = require('lodash');
+  const _ = require('lodash');
 
   return function KibiSequentialJoinVisHelperFactory(kbnUrl, kibiState, Private) {
 
@@ -17,7 +17,7 @@ define(function (require) {
         return buttonDef.sourceIndexPatternId === currentDashboardIndexId && buttonDef.label;
       })
       .map(function (buttonDef) {
-        var button = _.clone(buttonDef);
+        const button = _.clone(buttonDef);
 
         button.click = function () {
           const currentDashboardId = kibiState._getCurrentDashboardId();
@@ -72,8 +72,8 @@ define(function (require) {
       //      - new relation from current dashboard to target dashboard
 
       return Promise.all([
-        this.timeBasedIndices(button.sourceIndexPatternId, dashboardId),
-        this.timeBasedIndices(button.targetIndexPatternId, button.redirectToDashboard),
+        kibiState.timeBasedIndices(button.sourceIndexPatternId, dashboardId),
+        kibiState.timeBasedIndices(button.targetIndexPatternId, button.redirectToDashboard),
         kibiState.getState(dashboardId)
       ])
       .then(([ sourceIndices, targetIndices, { filters, queries, time } ]) => {
@@ -188,9 +188,9 @@ define(function (require) {
 
 
     KibiSequentialJoinVisHelper.prototype.composeGroupFromExistingJoinFilters = function (joinSeqFilters) {
-      var self = this;
-      var groups = _.map(joinSeqFilters, function (f) {
-        var joinSeqFiltersCloned = _.cloneDeep(f);
+      const self = this;
+      const groups = _.map(joinSeqFilters, function (f) {
+        const joinSeqFiltersCloned = _.cloneDeep(f);
         self._negateLastElementOfTheSequenceIfFilterWasNegated(joinSeqFiltersCloned);
         return joinSeqFiltersCloned.join_sequence;
       });

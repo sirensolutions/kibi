@@ -634,6 +634,22 @@ define(function (require) {
     };
 
     /**
+     * timeBasedIndices returns an array of time-expanded indices for the given pattern. The time range is the one taken from
+     * the kibi state. If the index is not time-based, then an array of the given pattern is returned.
+     *
+     * @param indexPatternId the pattern to expand
+     * @param dashboardId the id of the dashboard to take a time-range from
+     * @returns an array of indices name
+     */
+    KibiState.prototype.timeBasedIndices = function (indexPatternId, dashboardId) {
+      return indexPatterns.get(indexPatternId)
+      .then((pattern) => {
+        const { min, max } = this.getTimeBounds(dashboardId);
+        return pattern.toIndexList(min, max);
+      });
+    };
+
+    /**
      * Returns the set of dashboard IDs which are connected to the focused dashboard, i.e., the connected component of the graph.
      * Relations is the array of relations between dashboards.
      */

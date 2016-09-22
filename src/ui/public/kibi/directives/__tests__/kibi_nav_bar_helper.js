@@ -12,6 +12,8 @@ let $rootScope;
 let $httpBackend;
 let $timeout;
 
+let timeBasedIndicesStub;
+
 describe('Kibi Directives', function () {
   describe('KibiNavBar Helper', function () {
 
@@ -30,7 +32,7 @@ describe('Kibi Directives', function () {
         $provide.service('savedSearches', (Promise) => mockSavedObjects(Promise)('savedSearches', []));
       });
 
-      ngMock.inject(function (_globalState_, _kibiState_, _$httpBackend_, _$timeout_, _$rootScope_, Private) {
+      ngMock.inject(function (Promise, _globalState_, _kibiState_, _$httpBackend_, _$timeout_, _$rootScope_, Private) {
         globalState = _globalState_;
         kibiState = _kibiState_;
         $timeout = _$timeout_;
@@ -40,6 +42,7 @@ describe('Kibi Directives', function () {
 
         sinon.stub(kibiState, '_getDashboardsIdInConnectedComponent').returns(dashboardsIdsInConnectedComponents);
         sinon.stub(kibiState, '_getCurrentDashboardId').returns('dashboard1');
+        timeBasedIndicesStub = sinon.stub(kibiState, 'timeBasedIndices').returns(Promise.resolve([ 'id' ]));
 
         kibiNavBarHelper.setChrome({
           getBasePath: () => ''
@@ -51,13 +54,14 @@ describe('Kibi Directives', function () {
         const stub = sinon.stub(dashboardGroupHelper, 'getCountQueryForSelectedDashboard');
         _.each(dashboardGroups, function (group, i) {
           const query = {
+            dashboardId: 'dashboard1',
             query: group.query,
             indexPatternId: 'id',
             groupIndex: i
           };
           stub
           .withArgs(sinon.match.any, i)
-          .returns(query);
+          .returns(Promise.resolve(query));
         });
       });
     }
@@ -132,14 +136,15 @@ describe('Kibi Directives', function () {
 
           $httpBackend.whenPOST('/elasticsearch/_msearch?getCountsOnTabs').respond(200, countOnTabsResponse);
           kibiNavBarHelper.updateAllCounts([ 'dashboard1', 'dashboard2' ])
-            .then((dashboardGroups) => {
-              expect(dashboardGroups).to.have.length(2);
-              expect(dashboardGroups[0].id).to.be('group dashboard1');
-              expect(dashboardGroups[0].count).to.be(42);
-              expect(dashboardGroups[1].id).to.be('group dashboard2');
-              expect(dashboardGroups[1].count).to.be(24);
-              done();
-            }).catch(done);
+          .then((dashboardGroups) => {
+            expect(timeBasedIndicesStub.called).to.be(true);
+            expect(dashboardGroups).to.have.length(2);
+            expect(dashboardGroups[0].id).to.be('group dashboard1');
+            expect(dashboardGroups[0].count).to.be(42);
+            expect(dashboardGroups[1].id).to.be('group dashboard2');
+            expect(dashboardGroups[1].count).to.be(24);
+            done();
+          }).catch(done);
 
           $rootScope.$digest();
           $httpBackend.flush();
@@ -158,14 +163,15 @@ describe('Kibi Directives', function () {
 
           $httpBackend.whenPOST('/elasticsearch/_msearch?getCountsOnTabs').respond(200, countOnTabsResponse);
           kibiNavBarHelper.updateAllCounts([ 'dashboard1' ])
-            .then((dashboardGroups) => {
-              expect(dashboardGroups).to.have.length(2);
-              expect(dashboardGroups[0].id).to.be('group dashboard1');
-              expect(dashboardGroups[0].count).to.be(42);
-              expect(dashboardGroups[1].id).to.be('group dashboard2');
-              expect(dashboardGroups[1].count).to.not.be.ok();
-              done();
-            }).catch(done);
+          .then((dashboardGroups) => {
+            expect(timeBasedIndicesStub.called).to.be(true);
+            expect(dashboardGroups).to.have.length(2);
+            expect(dashboardGroups[0].id).to.be('group dashboard1');
+            expect(dashboardGroups[0].count).to.be(42);
+            expect(dashboardGroups[1].id).to.be('group dashboard2');
+            expect(dashboardGroups[1].count).to.not.be.ok();
+            done();
+          }).catch(done);
 
           $rootScope.$digest();
           $httpBackend.flush();
@@ -331,6 +337,7 @@ describe('Kibi Directives', function () {
         $httpBackend.whenPOST('/elasticsearch/_msearch?getCountsOnTabs').respond(200, countOnTabsResponse);
         kibiNavBarHelper.updateAllCounts([ 'dashboard1', 'dashboard2' ])
         .then((dashboardGroups) => {
+          expect(timeBasedIndicesStub.called).to.be(true);
           expect(dashboardGroups).to.have.length(2);
           expect(dashboardGroups[0].id).to.be('group dashboard1');
           expect(dashboardGroups[0].count).to.be(42);

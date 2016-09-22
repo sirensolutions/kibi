@@ -1,30 +1,14 @@
 define(function (require) {
-  var _ = require('lodash');
+  const _ = require('lodash');
 
-  return function KibiSequentialJoinVisHelperFactory(indexPatterns, kbnUrl, kibiState, Private) {
-    var countHelper = Private(require('ui/kibi/helpers/count_helper/count_helper'));
+  return function KibiSequentialJoinVisHelperFactory(kbnUrl, kibiState, Private) {
+    const countHelper = Private(require('ui/kibi/helpers/count_helper/count_helper'));
     const relationsHelper = Private(require('ui/kibi/helpers/relations_helper'));
 
     function KibiSequentialJoinVisHelper() {}
 
     KibiSequentialJoinVisHelper.prototype.destroy = function () {
       relationsHelper.destroy();
-    };
-
-    /**
-     * timeBasedIndices returns an array of time-expanded indices for the given pattern. The time range is the one taken from
-     * the kibi state. If the index is not time-based, then an array of the given pattern is returned.
-     *
-     * @param indexPatternId the pattern to expand
-     * @param dashboardId the id of the dashboard to take a time-range from
-     * @returns an array of indices name
-     */
-    KibiSequentialJoinVisHelper.prototype.timeBasedIndices = function (indexPatternId, dashboardId) {
-      return indexPatterns.get(indexPatternId)
-      .then((pattern) => {
-        const { min, max } = kibiState.getTimeBounds(dashboardId);
-        return pattern.toIndexList(min, max);
-      });
     };
 
     KibiSequentialJoinVisHelper.prototype.constructButtonsArray = function (buttonDefs, currentDashboardIndexId) {
@@ -36,7 +20,7 @@ define(function (require) {
         return buttonDef.sourceIndexPatternId === currentDashboardIndexId && buttonDef.label;
       })
       .map(function (buttonDef) {
-        var button = _.clone(buttonDef);
+        const button = _.clone(buttonDef);
 
         button.click = function () {
           const currentDashboardId = kibiState._getCurrentDashboardId();
@@ -91,8 +75,8 @@ define(function (require) {
       //      - new relation from current dashboard to target dashboard
 
       return Promise.all([
-        this.timeBasedIndices(button.sourceIndexPatternId, dashboardId),
-        this.timeBasedIndices(button.targetIndexPatternId, button.redirectToDashboard),
+        kibiState.timeBasedIndices(button.sourceIndexPatternId, dashboardId),
+        kibiState.timeBasedIndices(button.targetIndexPatternId, button.redirectToDashboard),
         kibiState.getState(dashboardId)
       ])
       .then(([ sourceIndices, targetIndices, { filters, queries, time } ]) => {
@@ -207,9 +191,9 @@ define(function (require) {
 
 
     KibiSequentialJoinVisHelper.prototype.composeGroupFromExistingJoinFilters = function (joinSeqFilters) {
-      var self = this;
-      var groups = _.map(joinSeqFilters, function (f) {
-        var joinSeqFiltersCloned = _.cloneDeep(f);
+      const self = this;
+      const groups = _.map(joinSeqFilters, function (f) {
+        const joinSeqFiltersCloned = _.cloneDeep(f);
         self._negateLastElementOfTheSequenceIfFilterWasNegated(joinSeqFiltersCloned);
         return joinSeqFiltersCloned.join_sequence;
       });

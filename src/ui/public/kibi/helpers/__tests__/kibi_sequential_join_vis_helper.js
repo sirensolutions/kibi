@@ -248,7 +248,7 @@ describe('Kibi Components', function () {
 
         init({ currentDashboardId, indexPatterns, savedDashboards });
 
-        const timeBasedIndicesStub = sinon.stub(sequentialJoinVisHelper, 'timeBasedIndices');
+        const timeBasedIndicesStub = sinon.stub(kibiState, 'timeBasedIndices');
         timeBasedIndicesStub.withArgs('ia-*').returns([ 'ia-1', 'ia-2' ]);
         timeBasedIndicesStub.withArgs('ib').returns([ 'ib' ]);
 
@@ -312,7 +312,7 @@ describe('Kibi Components', function () {
 
         init({ currentDashboardId, indexPatterns, savedDashboards, savedSearches });
 
-        const timeBasedIndicesStub = sinon.stub(sequentialJoinVisHelper, 'timeBasedIndices');
+        const timeBasedIndicesStub = sinon.stub(kibiState, 'timeBasedIndices');
         timeBasedIndicesStub.withArgs('ia').returns([ 'ia' ]);
         timeBasedIndicesStub.withArgs('ib').returns([ 'ib' ]);
 
@@ -379,7 +379,7 @@ describe('Kibi Components', function () {
 
         init({ currentDashboardId, indexPatterns, savedDashboards, savedSearches });
 
-        const timeBasedIndicesStub = sinon.stub(sequentialJoinVisHelper, 'timeBasedIndices');
+        const timeBasedIndicesStub = sinon.stub(kibiState, 'timeBasedIndices');
         timeBasedIndicesStub.withArgs('ia').returns([ 'ia' ]);
         timeBasedIndicesStub.withArgs('ib').returns([ 'ib' ]);
 
@@ -436,7 +436,7 @@ describe('Kibi Components', function () {
       it('should get the query from the search meta', function (done) {
         init({ indexPatterns, savedDashboards, savedSearches });
 
-        const timeBasedIndicesStub = sinon.stub(sequentialJoinVisHelper, 'timeBasedIndices');
+        const timeBasedIndicesStub = sinon.stub(kibiState, 'timeBasedIndices');
         timeBasedIndicesStub.withArgs('ia').returns([ 'ia' ]);
         timeBasedIndicesStub.withArgs('ib').returns([ 'ib' ]);
 
@@ -473,7 +473,7 @@ describe('Kibi Components', function () {
       it('should set the default siren-join parameters', function (done) {
         init({ indexPatterns, savedDashboards, savedSearches });
 
-        const timeBasedIndicesStub = sinon.stub(sequentialJoinVisHelper, 'timeBasedIndices');
+        const timeBasedIndicesStub = sinon.stub(kibiState, 'timeBasedIndices');
         timeBasedIndicesStub.withArgs('ia').returns([ 'ia' ]);
         timeBasedIndicesStub.withArgs('ib').returns([ 'ib' ]);
 
@@ -537,7 +537,7 @@ describe('Kibi Components', function () {
           targetIndexPatternId: 'ib'
         };
 
-        const timeBasedIndicesStub = sinon.stub(sequentialJoinVisHelper, 'timeBasedIndices');
+        const timeBasedIndicesStub = sinon.stub(kibiState, 'timeBasedIndices');
         timeBasedIndicesStub.withArgs('ia').returns([ 'ia' ]);
         timeBasedIndicesStub.withArgs('ib').returns([ 'ib' ]);
 

@@ -193,7 +193,6 @@ define(function (require) {
 
     $scope.$on('$destroy', function () {
       kibiDashboardChangedOff();
-      kibiSequentialJoinVisHelper.destroy();
       removeAutorefreshHandler();
     });
 

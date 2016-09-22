@@ -316,6 +316,7 @@ define(function (require) {
       .then(({ index, filters, queries, time }) => {
         const query = countHelper.constructCountQuery(filters, queries, time);
         return {
+          dashboardId: dashboard.id,
           groupIndex: groupIndex,
           query: query,
           indexPatternId: index

@@ -140,7 +140,7 @@ define(function (require) {
             return 'join_set: ' + html;
           });
         } else if (f.join_sequence) {
-          return explainJoinSequence(f.join_sequence).then(function (html) {
+          return explainJoinSequence(f.join_sequence, f.meta.buttons).then(function (html) {
             return 'join_sequence: ' + html;
           });
         } else {
@@ -211,19 +211,19 @@ define(function (require) {
       };
 
 
-      var explainRelation = function (el) {
+      var explainRelation = function (el, button) {
         var relation = el.relation;
 
         var promises = [];
         if (relation[0].queries instanceof Array && relation[0].queries.length > 0) {
-          promises.push(explainQueries(relation[0].queries, relation[0].indices[0]));
+          promises.push(explainQueries(relation[0].queries, button.sourceIndexPatternId));
         } else {
           promises.push(Promise.resolve(''));
         }
 
 
         if (relation[1].queries instanceof Array && relation[1].queries.length > 0) {
-          promises.push(explainQueries(relation[1].queries, relation[1].indices[0]));
+          promises.push(explainQueries(relation[1].queries, button.targetIndexPatternId));
         } else {
           promises.push(Promise.resolve(''));
         }
@@ -233,10 +233,10 @@ define(function (require) {
             '<b>' + (el.negate === true ? 'NOT ' : '') + 'Relation:</b></br>' +
             '<table class="relation">' +
             '<tr>' +
-            '<td>from: <b>' + relation[0].indices[0] + '.' + relation[0].path + '</b>' +
+            '<td>from: <b>' + JSON.stringify(relation[0].indices, null, ' ') + '.' + relation[0].path + '</b>' +
             (explanations[0] ? '</br>' + explanations[0] : '') +
             '</td>' +
-            '<td>to: <b>' + relation[1].indices[0] + '.' + relation[1].path + '</b>' +
+            '<td>to: <b>' + JSON.stringify(relation[1].indices, null, ' ') + '.' + relation[1].path + '</b>' +
             (explanations[1] ? '</br>' + explanations[1] : '') +
             '</td>' +
             '</tr></table>';
@@ -245,17 +245,18 @@ define(function (require) {
         });
       };
 
-      var explainJoinSequence = function (joinSequence) {
+      var explainJoinSequence = function (joinSequence, buttons) {
         // clone and reverse to iterate backwards to show the last step on top
         var sequence = _.cloneDeep(joinSequence);
         sequence.reverse();
 
         var promises = [];
-        _.each(sequence, function (el) {
+        _.each(sequence, function (el, i) {
+          const buttonIndex = buttons.length - 1 - i;
           if (el.relation) {
-            promises.push(explainRelation(el));
+            promises.push(explainRelation(el, buttons[buttonIndex]));
           } else if (el.group) {
-            promises.push(explainGroup(el));
+            promises.push(explainGroup(el, buttons[buttonIndex].group));
           }
         });
 
@@ -268,12 +269,12 @@ define(function (require) {
         });
       };
 
-      var explainGroup = function (el) {
+      var explainGroup = function (el, groupMeta) {
         var group = el.group;
 
         var promises = [];
-        _.each(group, function (sequence) {
-          promises.push(explainJoinSequence(sequence));
+        _.each(group, function (sequence, i) {
+          promises.push(explainJoinSequence(sequence, groupMeta[i]));
         });
 
         return Promise.all(promises).then(function (groupSequenceExplanations) {
@@ -291,7 +292,7 @@ define(function (require) {
         var promises = [];
         _.each(filters, function (f) {
           if (f.join_sequence) {
-            promises.push(explainJoinSequence(f.join_sequence));
+            promises.push(explainJoinSequence(f.join_sequence, f.meta.buttons));
           } else if (f.join_set) {
             promises.push(explainJoinSet(f.join_set));
           } else {

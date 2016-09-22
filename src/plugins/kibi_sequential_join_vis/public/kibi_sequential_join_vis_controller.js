@@ -38,20 +38,21 @@ define(function (require) {
       }
 
       return Promise.all(_.map(buttons, (button) => {
-        return kibiSequentialJoinVisHelper.getJoinSequenceFilter(dashboardId, button).then((joinSeqFilter) => {
+        return Promise.all([
+          kibiSequentialJoinVisHelper.timeBasedIndices(button.targetIndexPatternId, button.redirectToDashboard),
+          kibiSequentialJoinVisHelper.getJoinSequenceFilter(dashboardId, button)
+        ])
+        .then(([ indices, joinSeqFilter ]) => {
           button.joinSeqFilter = joinSeqFilter;
           return kibiSequentialJoinVisHelper.buildCountQuery(button.redirectToDashboard, joinSeqFilter)
           .then((query) => {
-            return {
-              query: query,
-              button: button
-            };
+            return { query, button, indices };
           });
         });
       })).then((results) => {
         let query = '';
         _.each(results, function (result) {
-          query += `{"index": "${result.button.targetIndexPatternId}"}\n${angular.toJson(result.query)}\n`;
+          query += `{"index":${angular.toJson(result.indices)}}\n${angular.toJson(result.query)}\n`;
         });
 
         const duration = moment();

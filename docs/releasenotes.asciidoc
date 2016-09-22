@@ -1,6 +1,10 @@
 [[releasenotes]]
 == Kibi Release Notes
 
+=== Kibi 4.5.3-4 Release Notes
+
+* Support time-based indices for relational filters and tab counts
+
 === Kibi 4.5.3-3 Release Notes
 
 * Added csv export for kibi data table

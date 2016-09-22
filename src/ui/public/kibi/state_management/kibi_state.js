@@ -549,32 +549,28 @@ define(function (require) {
       }
 
       const timeDefaults = config.get('timepicker:timeDefaults');
-      let time = {
+      const time = {
         mode: timeDefaults.mode,
         from: timeDefaults.from,
         to: timeDefaults.to
       };
 
       if (dashboardId === this._getCurrentDashboardId()) {
-        time = {
-          mode: timefilter.time.mode,
-          from: timefilter.time.from,
-          to: timefilter.time.to
-        };
+        time.mode = timefilter.time.mode;
+        time.from = timefilter.time.from;
+        time.to = timefilter.time.to;
       } else {
         const t = this._getDashboardProperty(dashboardId, this._properties.time);
         if (t) {
-          time = {
-            mode: t.m,
-            from: t.f,
-            to: t.t
-          };
+          time.mode = t.m;
+          time.from = t.f;
+          time.to = t.t;
         }
       }
 
       return indexPatterns.get(index).then((indexPattern) => {
         var filter;
-        var timefield = indexPattern.timeFieldName && _.find(indexPattern.fields, {name: indexPattern.timeFieldName});
+        var timefield = indexPattern.timeFieldName && _.find(indexPattern.fields, { name: indexPattern.timeFieldName });
 
         if (timefield) {
           filter = {
@@ -590,6 +586,37 @@ define(function (require) {
 
         return filter;
       });
+    };
+
+    /**
+     * Taken from timefilter.getBounds
+     */
+    KibiState.prototype.getTimeBounds = function (dashboardId) {
+      if (!dashboardId) {
+        throw new Error('KibiState.getTimeBounds cannot be called with missing dashboard ID');
+      }
+
+      const timeDefaults = config.get('timepicker:timeDefaults');
+      const time = {
+        from: timeDefaults.from,
+        to: timeDefaults.to
+      };
+
+      if (dashboardId === this._getCurrentDashboardId()) {
+        time.from = timefilter.time.from;
+        time.to = timefilter.time.to;
+      } else {
+        const t = this._getDashboardProperty(dashboardId, this._properties.time);
+        if (t) {
+          time.from = t.f;
+          time.to = t.t;
+        }
+      }
+
+      return {
+        min: dateMath.parseWithPrecision(time.from, false, $rootScope.kibiTimePrecision),
+        max: dateMath.parseWithPrecision(time.to, true, $rootScope.kibiTimePrecision)
+      };
     };
 
     /**

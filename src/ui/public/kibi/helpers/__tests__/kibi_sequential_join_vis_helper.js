@@ -213,6 +213,56 @@ describe('Kibi Components', function () {
       });
     });
 
+    describe('time-based indices', function () {
+      let indexPatterns;
+      let savedDashboards;
+
+      beforeEach(function () {
+        indexPatterns = [
+          {
+            id: 'ia-*',
+            timeFieldName: 'date',
+            fields: [
+              {
+                name: 'date'
+              }
+            ]
+          }
+        ];
+        savedDashboards = [
+          {
+            id: 'dashboardA',
+            title: 'dashboardA'
+          }
+        ];
+      });
+
+      it('should expand the time-based index pattern', function (done) {
+        const currentDashboardId = 'dashboardA';
+        const button = {
+          sourceField: 'fa',
+          sourceIndexPatternId: 'ia-*',
+          targetField: 'fb',
+          targetIndexPatternId: 'ib'
+        };
+
+        init({ currentDashboardId, indexPatterns, savedDashboards });
+
+        const timeBasedIndicesStub = sinon.stub(sequentialJoinVisHelper, 'timeBasedIndices');
+        timeBasedIndicesStub.withArgs('ia-*').returns([ 'ia-1', 'ia-2' ]);
+        timeBasedIndicesStub.withArgs('ib').returns([ 'ib' ]);
+
+        sequentialJoinVisHelper.getJoinSequenceFilter(currentDashboardId, button).then((rel) => {
+          expect(timeBasedIndicesStub.called).to.be(true);
+          expect(rel.join_sequence).to.have.length(1);
+          expect(rel.join_sequence[0].relation).to.have.length(2);
+          expect(rel.join_sequence[0].relation[0].indices).to.eql([ 'ia-1', 'ia-2' ]);
+          expect(rel.join_sequence[0].relation[1].indices).to.eql([ button.targetIndexPatternId ]);
+          done();
+        }).catch(done);
+      });
+    });
+
     describe('getJoinSequenceFilter', function () {
       let indexPatterns;
       let savedDashboards;
@@ -261,6 +311,11 @@ describe('Kibi Components', function () {
         };
 
         init({ currentDashboardId, indexPatterns, savedDashboards, savedSearches });
+
+        const timeBasedIndicesStub = sinon.stub(sequentialJoinVisHelper, 'timeBasedIndices');
+        timeBasedIndicesStub.withArgs('ia').returns([ 'ia' ]);
+        timeBasedIndicesStub.withArgs('ib').returns([ 'ib' ]);
+
         appState.filters = [
           {
             term: {
@@ -272,7 +327,8 @@ describe('Kibi Components', function () {
           }
         ];
 
-        sequentialJoinVisHelper.getJoinSequenceFilter('dashboardA', button).then((rel) => {
+        sequentialJoinVisHelper.getJoinSequenceFilter(currentDashboardId, button).then((rel) => {
+          expect(timeBasedIndicesStub.called).to.be(true);
           expect(rel.join_sequence).to.have.length(1);
           expect(rel.join_sequence[0].relation).to.have.length(2);
           expect(rel.join_sequence[0].relation[0].indices).to.eql([ button.sourceIndexPatternId ]);
@@ -317,10 +373,16 @@ describe('Kibi Components', function () {
           sourceIndexPatternId: 'ia',
           sourceIndexPatternType: 'ta',
           targetField: 'fb',
+          targetIndexPatternId: 'ib',
           targetIndexPatternType: 'tb'
         };
 
         init({ currentDashboardId, indexPatterns, savedDashboards, savedSearches });
+
+        const timeBasedIndicesStub = sinon.stub(sequentialJoinVisHelper, 'timeBasedIndices');
+        timeBasedIndicesStub.withArgs('ia').returns([ 'ia' ]);
+        timeBasedIndicesStub.withArgs('ib').returns([ 'ib' ]);
+
         appState.filters = [
           {
             term: {
@@ -332,7 +394,8 @@ describe('Kibi Components', function () {
           }
         ];
 
-        sequentialJoinVisHelper.getJoinSequenceFilter('dashboardA', button).then((rel) => {
+        sequentialJoinVisHelper.getJoinSequenceFilter(currentDashboardId, button).then((rel) => {
+          expect(timeBasedIndicesStub.called).to.be(true);
           expect(rel.join_sequence).to.have.length(1);
           expect(rel.join_sequence[0].relation).to.have.length(2);
           expect(rel.join_sequence[0].relation[0].indices).to.eql([ button.sourceIndexPatternId ]);
@@ -372,6 +435,11 @@ describe('Kibi Components', function () {
 
       it('should get the query from the search meta', function (done) {
         init({ indexPatterns, savedDashboards, savedSearches });
+
+        const timeBasedIndicesStub = sinon.stub(sequentialJoinVisHelper, 'timeBasedIndices');
+        timeBasedIndicesStub.withArgs('ia').returns([ 'ia' ]);
+        timeBasedIndicesStub.withArgs('ib').returns([ 'ib' ]);
+
         const button = {
           sourceField: 'fa',
           sourceIndexPatternId: 'ia',
@@ -379,6 +447,7 @@ describe('Kibi Components', function () {
           targetIndexPatternId: 'ib'
         };
         sequentialJoinVisHelper.getJoinSequenceFilter('dashboardA', button).then((rel) => {
+          expect(timeBasedIndicesStub.called).to.be(true);
           expect(rel.join_sequence).to.have.length(1);
           expect(rel.join_sequence[0].relation).to.have.length(2);
           expect(rel.join_sequence[0].relation[0].indices).to.eql([ button.sourceIndexPatternId ]);
@@ -403,6 +472,11 @@ describe('Kibi Components', function () {
 
       it('should set the default siren-join parameters', function (done) {
         init({ indexPatterns, savedDashboards, savedSearches });
+
+        const timeBasedIndicesStub = sinon.stub(sequentialJoinVisHelper, 'timeBasedIndices');
+        timeBasedIndicesStub.withArgs('ia').returns([ 'ia' ]);
+        timeBasedIndicesStub.withArgs('ib').returns([ 'ib' ]);
+
         const button = {
           sourceField: 'fa',
           sourceIndexPatternId: 'ia',
@@ -410,6 +484,7 @@ describe('Kibi Components', function () {
           targetIndexPatternId: 'ib'
         };
         sequentialJoinVisHelper.getJoinSequenceFilter('dashboardA', button).then((rel) => {
+          expect(timeBasedIndicesStub.called).to.be(true);
           expect(rel.join_sequence).to.have.length(1);
           expect(rel.join_sequence[0].relation).to.have.length(2);
           expect(rel.join_sequence[0].relation[0].termsEncoding).to.be('long');
@@ -461,7 +536,13 @@ describe('Kibi Components', function () {
           targetField: 'fb',
           targetIndexPatternId: 'ib'
         };
+
+        const timeBasedIndicesStub = sinon.stub(sequentialJoinVisHelper, 'timeBasedIndices');
+        timeBasedIndicesStub.withArgs('ia').returns([ 'ia' ]);
+        timeBasedIndicesStub.withArgs('ib').returns([ 'ib' ]);
+
         sequentialJoinVisHelper.getJoinSequenceFilter('dashboardA', button).then((rel) => {
+          expect(timeBasedIndicesStub.called).to.be(true);
           expect(rel.join_sequence).to.have.length(1);
           expect(rel.join_sequence[0].relation).to.have.length(2);
           expect(rel.join_sequence[0].relation[0].termsEncoding).to.be('enc1');

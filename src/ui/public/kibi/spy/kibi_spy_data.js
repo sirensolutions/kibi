@@ -132,8 +132,8 @@ define(function (require) {
               rootIndex,
               rootType,
               action.relations.to.field,
-              action.relations.from.indices[0],
-              action.relations.from.types.length ? action.relations.from.types[0] : '*',
+              JSON.stringify(action.relations.from.indices, null, ' '),
+              action.relations.from.types.length ? JSON.stringify(action.relations.from.types, null, ' ') : '*',
               action.relations.from.field,
               action.size,
               action.size_in_bytes,
@@ -146,8 +146,8 @@ define(function (require) {
             ];
 
             if (action.relations.to.indices) {
-              row[0] = action.relations.to.indices[0];
-              row[1] = action.relations.to.types.length ? action.relations.to.types[0] : '*';
+              row[0] = JSON.stringify(action.relations.to.indices, null, ' ');
+              row[1] = action.relations.to.types.length ? JSON.stringify(action.relations.to.types, null, ' ') : '*';
             }
 
             rows.push(row);

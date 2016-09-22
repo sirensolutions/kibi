@@ -3,6 +3,7 @@ define(function (require) {
   var kibiUtils = require('kibiutils');
   var _ = require('lodash');
   var module = require('ui/modules').get('kibana');
+  require('ui/kibi/directives/kibi_angular_qtip2');
 
   module.directive('kibiSelect', function (Private) {
     var selectHelper = Private(require('ui/kibi/directives/kibi_select_helper'));
@@ -44,6 +45,26 @@ define(function (require) {
       link: function (scope, element, attrs, ngModelCtrl) {
         scope.disabled = Boolean(scope.modelDisabled);
 
+        scope.analyzedWarningHtml =
+        '<p>' +
+        '<strong>Careful!</strong> The field selected contains analyzed strings. Values such as <i>foo-bar</i> ' +
+        'will be broken into <i>foo</i> and <i>bar</i>. See ' +
+        '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/2.3/mapping-types.html" target="_blank">Mapping Types</a>' +
+        ' for more information on setting this field as <i>not_analyzed</i>' +
+        '</p>';
+
+        scope.wildcardWarningHtml =
+        '<p>' +
+        'Unable to determine variable names from a wildcard query, please specify the variable name below. ' +
+        'You can review the list of columns in <strong><a href="{{linkToQuery}}">the query</a></strong> ' +
+        'or explicitly return the relevant columns in the SELECT clause.' +
+        '</p>';
+
+        scope.retrieveErrorHtml =
+        '<p>' +
+        'An error occured while retrieving this select\'s data.' +
+        '</p>';
+
         function initRequired(scope, attrs) {
           scope.required = Boolean(scope.modelRequired);
           if (attrs.hasOwnProperty('required')) {
@@ -60,6 +81,9 @@ define(function (require) {
 
         function setModelObject() {
           scope.modelObject = ngModelCtrl.$viewValue; //object
+          if (ngModelCtrl && ngModelCtrl.$viewValue && ngModelCtrl.$viewValue.options) {
+            scope.analyzedField = Boolean(ngModelCtrl.$viewValue.options.analyzed);
+          }
         }
 
         scope.$watch(
@@ -174,8 +198,8 @@ define(function (require) {
             return ngModelCtrl.$viewValue && _.isEqual(item.value, ngModelCtrl.$viewValue.value);
           });
 
-          if (item && item.options && item.options.analyzed) {
-            scope.analyzedField = true;
+          if (item && item.options) {
+            scope.analyzedField = Boolean(item.options.analyzed);
           } else if (autoSelect(scope.items)) {
             // select automatically if only 1 option is available and the select is required
             scope.modelObject = scope.items[0];

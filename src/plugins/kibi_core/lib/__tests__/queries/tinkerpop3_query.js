@@ -86,7 +86,7 @@ var fakeServer = {
   }
 };
 
-var fakeGraphResponse = {
+var fakeGraphResponse = [{
   queryActivated: true,
   data: {
     result: {
@@ -158,7 +158,7 @@ var fakeGraphResponse = {
     id: 'afbf795e-9b27-47f7-b945-41520e9f1aed'
   },
   html: ''
-};
+}];
 
 var fakeTinkerpop3Result = {
   queryActivated: true,

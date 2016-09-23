@@ -71,7 +71,7 @@ ifeval::["{enterprise_enabled}" == "true"]
 
 NOTE: Kibi Tinkerpop3 datasource is available only in Kibi Enterprise Edition.
 
-* url - url of the Kibi Gremlin Server e.g.: http://localhost:8080/graph/query
+* url - url of the Kibi Gremlin Server e.g.: http://localhost:8080/graph/queryBatch
 
 endif::[]
 

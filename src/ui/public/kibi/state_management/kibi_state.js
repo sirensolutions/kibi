@@ -630,8 +630,11 @@ define(function (require) {
     KibiState.prototype.timeBasedIndices = function (indexPatternId, dashboardId) {
       return indexPatterns.get(indexPatternId)
       .then((pattern) => {
-        const { min, max } = this.getTimeBounds(dashboardId);
-        return pattern.toIndexList(min, max);
+        if (pattern.hasTimeField()) {
+          const { min, max } = this.getTimeBounds(dashboardId);
+          return pattern.toIndexList(min, max);
+        }
+        return [ indexPatternId ];
       });
     };
 

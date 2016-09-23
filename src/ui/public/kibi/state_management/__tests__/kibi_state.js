@@ -354,7 +354,7 @@ describe('State Management', function () {
         kibiEnterpriseEnabled: true
       }));
 
-      it('should fail if the relation is not present', function () {
+      it('should not fail if the relation is missing', function () {
         config.set('kibi:relations', {
           relationsIndices: [
             {
@@ -384,8 +384,72 @@ describe('State Management', function () {
           }
         ];
 
-        expect(kibiState._addAdvancedJoinSettingsToRelation).withArgs(missingRelation)
-        .to.throwException(/Could not find index relation corresponding to relation between/);
+        expect(kibiState._addAdvancedJoinSettingsToRelation).withArgs(missingRelation).to.be.ok();
+      });
+
+      it('should get advanced relation with the specified patterns', function () {
+        const relations = {
+          relationsIndices: [
+            {
+              indices: [
+                {
+                  indexPatternId: 'weather-*',
+                  path: 'forecast',
+                  termsEncoding: 'enc1',
+                  orderBy: 'asc',
+                  maxTermsPerShard: 1
+                },
+                {
+                  indexPatternId: 'forecast',
+                  path: 'forecast',
+                  termsEncoding: 'enc2',
+                  orderBy: 'desc',
+                  maxTermsPerShard: 2
+                }
+              ],
+              label: 'label',
+              id: 'forecast/forecast/weather-*/forecast'
+            }
+          ]
+        };
+        const relation1 = [
+          {
+            indices: [ 'forecast' ],
+            path: 'forecast'
+          },
+          {
+            indices: [ 'weather-2015-01', 'weather-2015-02' ],
+            path: 'forecast'
+          }
+        ];
+
+        config.set('kibi:relations', relations);
+
+        kibiState._addAdvancedJoinSettingsToRelation(relation1, 'forecast', 'weather-*');
+        expect(relation1[0].termsEncoding).to.be('enc1');
+        expect(relation1[0].orderBy).to.be('asc');
+        expect(relation1[0].maxTermsPerShard).to.be(1);
+        expect(relation1[1].termsEncoding).to.be('enc2');
+        expect(relation1[1].orderBy).to.be('desc');
+        expect(relation1[1].maxTermsPerShard).to.be(2);
+
+        const relation2 = [
+          {
+            indices: [ 'weather-2015-01', 'weather-2015-02' ],
+            path: 'forecast'
+          },
+          {
+            indices: [ 'forecast' ],
+            path: 'forecast'
+          }
+        ];
+        kibiState._addAdvancedJoinSettingsToRelation(relation2, 'weather-*', 'forecast');
+        expect(relation2[0].termsEncoding).to.be('enc2');
+        expect(relation2[0].orderBy).to.be('desc');
+        expect(relation2[0].maxTermsPerShard).to.be(2);
+        expect(relation2[1].termsEncoding).to.be('enc1');
+        expect(relation2[1].orderBy).to.be('asc');
+        expect(relation2[1].maxTermsPerShard).to.be(1);
       });
 
       it('should get advanced relation for the given relation', function () {

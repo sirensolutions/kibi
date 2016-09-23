@@ -537,10 +537,10 @@ define(function (require) {
      *       { indices: [ 'index2' ], path: 'id2' }
      *     ]
      */
-    KibiState.prototype._addAdvancedJoinSettingsToRelation = function (rel) {
+    KibiState.prototype._addAdvancedJoinSettingsToRelation = function (rel, sourceIndexPatternId, targetIndexPatternId) {
       if (kibiEnterpriseEnabled) {
-        const sourcePartOfTheRelationId = rel[0].indices[0] + '/' + rel[0].path;
-        const targetPartOfTheRelationId = rel[1].indices[0] + '/' + rel[1].path;
+        const sourcePartOfTheRelationId = (sourceIndexPatternId || rel[0].indices[0]) + '/' + rel[0].path;
+        const targetPartOfTheRelationId = (targetIndexPatternId || rel[1].indices[0]) + '/' + rel[1].path;
 
         const advKeys = ['termsEncoding', 'orderBy', 'maxTermsPerShard'];
 
@@ -562,9 +562,9 @@ define(function (require) {
           // try to find the relation in other direction
           indexRelation = _.find(relationsIndices, (r) => (targetPartOfTheRelationId + '/' + sourcePartOfTheRelationId) === r.id);
           if (!indexRelation) {
-            throw new Error(
-              'Could not find index relation corresponding to relation between: ' +
-              sourcePartOfTheRelationId + ' and ' + targetPartOfTheRelationId + '. Review the relations in the settings tab.');
+            // at the moment, the relations settings are not mandatory to create a relational filter
+            // therefore, this is only optional
+            return;
           }
         }
 

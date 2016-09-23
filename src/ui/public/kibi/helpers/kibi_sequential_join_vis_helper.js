@@ -239,7 +239,7 @@ define(function (require) {
         ]
       };
 
-      kibiState._addAdvancedJoinSettingsToRelation(ret.relation);
+      kibiState._addAdvancedJoinSettingsToRelation(ret.relation, button.sourceIndexPatternId, button.targetIndexPatternId);
 
       // add filters
       _.each(filters, (filter) => {

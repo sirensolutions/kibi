@@ -148,7 +148,7 @@ TinkerPop3Query.prototype.fetchResults = function (options, onlyIds, idVariableN
           'Content-Type': 'application/json; charset=UTF-8'
         },
         json: {
-          query: query,
+          queries: [query],
           relationsIndices: kibiRelationsJson.relationsIndices,
           credentials: options.credentials,
           indexPatterns: indexPatterns,
@@ -161,7 +161,7 @@ TinkerPop3Query.prototype.fetchResults = function (options, onlyIds, idVariableN
 
       return rp(gremlinOptions).then(function (parsed) {
         var data = {
-          result: parsed
+          result: parsed[0]
         };
 
         if (idVariableName) {

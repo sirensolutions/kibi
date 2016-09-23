@@ -424,6 +424,42 @@ describe('State Management', function () {
       });
     });
 
+    describe('Time-based indices', function () {
+      beforeEach(() => init({
+        indexPatterns: [
+          {
+            id: 'forecast',
+            hasTimeField: _.constant(false)
+          },
+          {
+            id: 'weather-*',
+            hasTimeField: _.constant(true),
+            toIndexList: sinon.stub().returns([ 'weather-2015-01' ])
+          }
+        ]
+      }));
+
+      it('should get an array of indices for a time-based pattern', function (done) {
+        const stub = sinon.stub(kibiState, 'getTimeBounds').returns({ min: 0, max: 1 });
+        kibiState.timeBasedIndices('weather-*', 'dashboard1')
+        .then((indices) => {
+          expect(stub.called).to.be(true);
+          expect(indices).to.eql([ 'weather-2015-01' ]);
+          done();
+        }).catch(done);
+      });
+
+      it('should get an array of indices for a non time-based pattern', function (done) {
+        const stub = sinon.stub(kibiState, 'getTimeBounds').returns({ min: 0, max: 1 });
+        kibiState.timeBasedIndices('forecast', 'dashboard1')
+        .then((indices) => {
+          expect(stub.called).to.be(false);
+          expect(indices).to.eql([ 'forecast' ]);
+          done();
+        }).catch(done);
+      });
+    });
+
     describe('Time', function () {
       beforeEach(() => init({
         indexPatterns: [

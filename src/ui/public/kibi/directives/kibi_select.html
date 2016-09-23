@@ -1,33 +1,34 @@
 <div>
-
-  <span class="pull-right text-warning hintbox-label"
-        ng-show="modelObject.options.analyzed && analyzedWarning"
-        ng-click="showAnalyzedFieldWarning = !showAnalyzedFieldWarning">
-    <i class="fa fa-warning"></i> Analyzed Field
+  <span
+    ng-if="analyzedWarning && analyzedField"
+    class="pull-right text-warning hintbox-label"
+    qtip
+    qtip-classes="qtip-light qtip-rounded qtip-shadow"
+    qtip-html="analyzedWarningHtml">
+      <i class="fa fa-warning"></i> Analyzed Field
   </span>
 
-  <span class="pull-right text-warning hintbox-label"
-        ng-show="getVariable"
-        ng-click="showWildcardWarning = !showWildcardWarning">
+  <span
+    ng-if="getVariable"
+    class="pull-right text-warning hintbox-label"
+    qtip
+    qtip-classes="qtip-light qtip-rounded qtip-shadow"
+    qtip-html="wildcardWarningHtml">
     <i class="fa fa-warning"></i> Wildcard Query
+  </span>
+
+  <span
+    ng-if="retrieveError"
+    class="pull-right text-danger hintbox-label"
+    qtip
+    qtip-classes="qtip-light qtip-rounded qtip-shadow"
+    qtip-html="retrieveErrorHtml">
+    <i class="fa fa-danger text-danger"></i> Select error
   </span>
 
   <div style="clear: both;"></div>
 
-  <div class="hintbox" ng-show="showWildcardWarning">
-    <p>
-    Unable to determine variable names from a wildcard query, please specify the variable name below. You can You can review the list of columns in <strong><a href="{{linkToQuery}}">the query</a></strong> or explicitly return the relevant columns in the SELECT clause.
-    </p>
-  </div>
-
-  <div class="hintbox" ng-show="showAnalyzedFieldWarning">
-    <p>
-    <strong>Careful!</strong> The field selected contains analyzed strings. Values such as <i>foo-bar</i> will be broken into <i>foo</i> and <i>bar</i>. See <a href="https://www.elastic.co/guide/en/elasticsearch/reference/2.1/mapping-types.html" target="_blank">Mapping Types</a> for more information on setting this field as <i>not_analyzed</i>
-    </p>
-  </div>
-
   <input ng-show="getVariable" type="text" ng-model="modelObject.value" class="form-control"/>
-
   <select
     ng-class="{ 'form-control' : true, 'ng-invalid' : isInvalid() }"
     ng-show="!getVariable"
@@ -36,13 +37,4 @@
     ng-disabled="disabled">
     <option value="" ng-show="!required"></option>
   </select>
-
-  <div class="form-group hintbox" ng-if="retrieveError">
-    <h4 class="hintbox-heading">
-      <i class="fa fa-danger text-danger"></i> Select error
-    </h4>
-    <p>
-      <label data-toggle="tooltip" title="{{ retrieveError }}">An error occured while retrieving this select's data.</label>
-    </p>
-  </div>
 </div>

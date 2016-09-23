@@ -248,7 +248,7 @@ define(function (require) {
         ret.relation[1].types = [ button.targetIndexPatternType ];
       }
 
-      relationsHelper.addAdvancedJoinSettingsToRelation(ret.relation);
+      relationsHelper.addAdvancedJoinSettingsToRelation(ret.relation, button.sourceIndexPatternId, button.targetIndexPatternId);
 
       // add filters
       _.each(filters, (filter) => {

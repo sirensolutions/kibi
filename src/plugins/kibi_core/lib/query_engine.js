@@ -278,7 +278,7 @@ QueryEngine.prototype._loadDatasources = function () {
           var datasourceObj = JSON.parse(data.toString());
           var datasourceObjParam = JSON.parse(datasourceObj.datasourceParams);
 
-          datasourceObjParam.url = gremlinUrl + '/graph/query';
+          datasourceObjParam.url = gremlinUrl + '/graph/queryBatch';
           datasourceObj.datasourceParams = JSON.stringify(datasourceObjParam);
 
           data = new Buffer(JSON.stringify(datasourceObj).length);

@@ -191,14 +191,14 @@ define(function (require) {
      *     ]
      * The types field is optional.
      */
-    RelationsHelper.prototype.addAdvancedJoinSettingsToRelation = function (rel) {
+    RelationsHelper.prototype.addAdvancedJoinSettingsToRelation = function (rel, sourceIndexPatternId, targetIndexPatternId) {
       if (!relations || !relations.relationsIndices) {
         // not initialized yet
         return true;
       }
       if (kibiEnterpriseEnabled) {
-        const relationPart = function (relPart) {
-          let label = relPart.indices[0] + SEPARATOR;
+        const relationPart = function (indexPatternId, relPart) {
+          let label = (indexPatternId || relPart.indices[0]) + SEPARATOR;
 
           if (relPart.types) {
             label += relPart.types[0];
@@ -215,8 +215,8 @@ define(function (require) {
           return;
         }
 
-        const sourcePartOfTheRelationId = relationPart(rel[0]);
-        const targetPartOfTheRelationId = relationPart(rel[1]);
+        const sourcePartOfTheRelationId = relationPart(sourceIndexPatternId, rel[0]);
+        const targetPartOfTheRelationId = relationPart(targetIndexPatternId, rel[1]);
         // copying advanced options from corresponding index relation
         let forward = true;
         let relationId = sourcePartOfTheRelationId + SEPARATOR + targetPartOfTheRelationId;
@@ -227,9 +227,9 @@ define(function (require) {
           relationId = targetPartOfTheRelationId + SEPARATOR + sourcePartOfTheRelationId;
           indexRelation = _.find(relationsIndices, (r) => relationId === r.id);
           if (!indexRelation) {
-            throw new Error(
-              'Could not find index relation corresponding to relation between: ' +
-              sourcePartOfTheRelationId + ' and ' + targetPartOfTheRelationId + '. Review the relations in the settings tab.');
+            // at the moment, the relations settings are not mandatory to create a relational filter
+            // therefore, this is only optional
+            return;
           }
         }
 

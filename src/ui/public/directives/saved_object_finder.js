@@ -5,8 +5,8 @@ define(function (require) {
   var keymap = require('ui/utils/key_map');
 
   module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Private, config) {
-
     var services = Private(require('ui/saved_objects/saved_object_registry')).byLoaderPropertiesName;
+    var urlHelper = Private(require('ui/kibi/helpers/url_helper'));
 
     return {
       restrict: 'E',
@@ -26,6 +26,7 @@ define(function (require) {
 
         // kibi: variable to store the checkbox state
         $scope.kibi = {
+          onDashboardTab: urlHelper.onDashboardTab(),
           basedOnSameSavedSearch: false,
           _prevBasedOnSameSavedSearch: false
         };

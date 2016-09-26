@@ -507,7 +507,11 @@ describe('Kibi Components', function () {
           {
             meta:{ disabled: false },
             join_set: {
-              indexes: [{id: 'index2'}]
+              indexes: [
+                {
+                  id: 'index2'
+                }
+              ]
             }
           }
         ];
@@ -518,6 +522,7 @@ describe('Kibi Components', function () {
           relation: 'index1//f1/index2//f2'
         });
 
+        sinon.stub(kibiState, '_getJoinSetFilter ').returns(Promise.resolve({ join_set: 'new join set' }));
         var expected = {
           size: 0,
           query: {
@@ -530,38 +535,7 @@ describe('Kibi Components', function () {
                 bool: {
                   must: [
                     {
-                      join_set: {
-                        focus: 'index2',
-                        relations: [
-                          [
-                            {
-                              indices: [
-                                'index1'
-                              ],
-                              path: 'f1'
-                            },
-                            {
-                              indices: [
-                                'index2'
-                              ],
-                              path: 'f2'
-                            }
-                          ]
-                        ],
-                        queries: {
-                          index1: [
-                            {
-                              range: {
-                                date: {
-                                  gte: dateMath.parseWithPrecision(defaultStartTime, false).valueOf(),
-                                  lte: dateMath.parseWithPrecision(defaultEndTime, true).valueOf(),
-                                  format: 'epoch_millis'
-                                }
-                              }
-                            }
-                          ]
-                        }
-                      }
+                      join_set: 'new join set'
                     },
                     {
                       query: {

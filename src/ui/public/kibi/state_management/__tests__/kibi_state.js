@@ -1530,114 +1530,123 @@ describe('State Management', function () {
 
     describe('Join Set', function () {
       describe('Join Set Label', function () {
-        beforeEach(() => init({
-          indexPatterns: [
-            {
-              id: 'index-a',
-              timeFieldName: 'date',
-              fields: [
-                {
-                  name: 'date'
-                }
-              ]
-            },
-            {
-              id: 'index-b',
-              timeFieldName: 'date',
-              fields: [
-                {
-                  name: 'date'
-                }
-              ]
-            },
-            {
-              id: 'index-c',
-              timeFieldName: 'date',
-              fields: [
-                {
-                  name: 'date'
-                }
-              ]
-            },
-            {
-              id: 'index-d',
-              timeFieldName: 'date',
-              fields: [
-                {
-                  name: 'date'
-                }
-              ]
-            },
-            {
-              id: 'index-e',
-              timeFieldName: 'date',
-              fields: [
-                {
-                  name: 'date'
-                }
-              ]
-            }
-          ],
-          savedDashboards: [
-            {
-              id: 'a',
-              title: 'Dashboard A',
-              savedSearchId: 'savedsearch-a'
-            },
-            {
-              id: 'b',
-              title: 'Dashboard B',
-              savedSearchId: 'savedsearch-b'
-            },
-            {
-              id: 'c',
-              title: 'Dashboard C',
-              savedSearchId: 'savedsearch-c'
-            },
-            {
-              id: 'd',
-              title: 'Dashboard D',
-              savedSearchId: 'savedsearch-d'
-            },
-            {
-              id: 'e',
-              title: 'Dashboard E',
-              savedSearchId: 'savedsearch-e'
-            }
-          ],
-          savedSearches: [
-            {
-              id: 'savedsearch-a',
-              kibanaSavedObjectMeta: {
-                searchSourceJSON: JSON.stringify({ index: 'index-a' })
+        beforeEach(() => {
+          init({
+            indexPatterns: [
+              {
+                id: 'index-a',
+                timeFieldName: 'date',
+                fields: [
+                  {
+                    name: 'date'
+                  }
+                ]
+              },
+              {
+                id: 'index-b',
+                timeFieldName: 'date',
+                fields: [
+                  {
+                    name: 'date'
+                  }
+                ]
+              },
+              {
+                id: 'index-c',
+                timeFieldName: 'date',
+                fields: [
+                  {
+                    name: 'date'
+                  }
+                ]
+              },
+              {
+                id: 'index-d',
+                timeFieldName: 'date',
+                fields: [
+                  {
+                    name: 'date'
+                  }
+                ]
+              },
+              {
+                id: 'index-e',
+                timeFieldName: 'date',
+                fields: [
+                  {
+                    name: 'date'
+                  }
+                ]
               }
-            },
-            {
-              id: 'savedsearch-b',
-              kibanaSavedObjectMeta: {
-                searchSourceJSON: JSON.stringify({ index: 'index-b' })
+            ],
+            savedDashboards: [
+              {
+                id: 'a',
+                title: 'Dashboard A',
+                savedSearchId: 'savedsearch-a'
+              },
+              {
+                id: 'b',
+                title: 'Dashboard B',
+                savedSearchId: 'savedsearch-b'
+              },
+              {
+                id: 'c',
+                title: 'Dashboard C',
+                savedSearchId: 'savedsearch-c'
+              },
+              {
+                id: 'd',
+                title: 'Dashboard D',
+                savedSearchId: 'savedsearch-d'
+              },
+              {
+                id: 'e',
+                title: 'Dashboard E',
+                savedSearchId: 'savedsearch-e'
               }
-            },
-            {
-              id: 'savedsearch-c',
-              kibanaSavedObjectMeta: {
-                searchSourceJSON: JSON.stringify({ index: 'index-c' })
+            ],
+            savedSearches: [
+              {
+                id: 'savedsearch-a',
+                kibanaSavedObjectMeta: {
+                  searchSourceJSON: JSON.stringify({ index: 'index-a' })
+                }
+              },
+              {
+                id: 'savedsearch-b',
+                kibanaSavedObjectMeta: {
+                  searchSourceJSON: JSON.stringify({ index: 'index-b' })
+                }
+              },
+              {
+                id: 'savedsearch-c',
+                kibanaSavedObjectMeta: {
+                  searchSourceJSON: JSON.stringify({ index: 'index-c' })
+                }
+              },
+              {
+                id: 'savedsearch-d',
+                kibanaSavedObjectMeta: {
+                  searchSourceJSON: JSON.stringify({ index: 'index-d' })
+                }
+              },
+              {
+                id: 'savedsearch-e',
+                kibanaSavedObjectMeta: {
+                  searchSourceJSON: JSON.stringify({ index: 'index-e' })
+                }
               }
-            },
-            {
-              id: 'savedsearch-d',
-              kibanaSavedObjectMeta: {
-                searchSourceJSON: JSON.stringify({ index: 'index-d' })
-              }
-            },
-            {
-              id: 'savedsearch-e',
-              kibanaSavedObjectMeta: {
-                searchSourceJSON: JSON.stringify({ index: 'index-e' })
-              }
-            }
-          ]
-        }));
+            ]
+          });
+
+          const timeBasedIndicesStub = sinon.stub(kibiState, 'timeBasedIndices');
+          timeBasedIndicesStub.withArgs('index-a').returns(Promise.resolve([ 'index-a' ]));
+          timeBasedIndicesStub.withArgs('index-b').returns(Promise.resolve([ 'index-b' ]));
+          timeBasedIndicesStub.withArgs('index-c').returns(Promise.resolve([ 'index-c' ]));
+          timeBasedIndicesStub.withArgs('index-d').returns(Promise.resolve([ 'index-d' ]));
+          timeBasedIndicesStub.withArgs('index-e').returns(Promise.resolve([ 'index-e' ]));
+        });
 
         it('should output correct join label 1', function (done) {
           var relations = [
@@ -1795,131 +1804,139 @@ describe('State Management', function () {
       });
 
       describe('Join Set Filter', function () {
-        beforeEach(() => init({
-          kibiEnterpriseEnabled: false,
-          indexPatterns: [
-            {
-              id: 'index-a',
-              timeFieldName: 'date',
-              fields: [
-                {
-                  name: 'date'
-                }
-              ]
-            },
-            {
-              id: 'index-b',
-              timeFieldName: 'date',
-              fields: [
-                {
-                  name: 'date'
-                }
-              ]
-            },
-            {
-              id: 'index-c',
-              timeFieldName: 'date',
-              fields: [
-                {
-                  name: 'date'
-                }
-              ]
-            },
-            {
-              id: 'index-d',
-              timeFieldName: 'date',
-              fields: [
-                {
-                  name: 'date'
-                }
-              ]
-            }
-          ],
-          savedDashboards: [
-            {
-              id: 'dashboard-nossid',
-              title: 'dashboard-nossid'
-            },
-            {
-              id: 'dashboard-a',
-              title: 'dashboard-a',
-              savedSearchId: 'savedsearch-a'
-            },
-            {
-              id: 'dashboard-b',
-              title: 'dashboard-b',
-              savedSearchId: 'savedsearch-b'
-            },
-            {
-              id: 'dashboard-c',
-              title: 'dashboard-c',
-              savedSearchId: 'savedsearch-c'
-            },
-            {
-              id: 'dashboard-d',
-              title: 'dashboard-d',
-              savedSearchId: 'savedsearch-d'
-            }
-          ],
-          savedSearches: [
-            {
-              id: 'savedsearch-a',
-              kibanaSavedObjectMeta: {
-                searchSourceJSON: JSON.stringify({
-                  index: 'index-a',
-                  filter: [],
-                  query: {
-                    query_string: {
-                      query: 'aaa'
-                    }
+        beforeEach(() => {
+          init({
+            kibiEnterpriseEnabled: false,
+            indexPatterns: [
+              {
+                id: 'index-a',
+                timeFieldName: 'date',
+                fields: [
+                  {
+                    name: 'date'
                   }
-                })
-              }
-            },
-            {
-              id: 'savedsearch-b',
-              kibanaSavedObjectMeta: {
-                searchSourceJSON: JSON.stringify({
-                  index: 'index-b',
-                  filter: [],
-                  query: {
-                    query_string: {
-                      query: 'bbb'
-                    }
+                ]
+              },
+              {
+                id: 'index-b',
+                timeFieldName: 'date',
+                fields: [
+                  {
+                    name: 'date'
                   }
-                })
-              }
-            },
-            {
-              id: 'savedsearch-c',
-              kibanaSavedObjectMeta: {
-                searchSourceJSON: JSON.stringify({
-                  index: 'index-c',
-                  filter: [],
-                  query: {
-                    query_string: {
-                      query: 'ccc'
-                    }
+                ]
+              },
+              {
+                id: 'index-c',
+                timeFieldName: 'date',
+                fields: [
+                  {
+                    name: 'date'
                   }
-                })
-              }
-            },
-            {
-              id: 'savedsearch-d',
-              kibanaSavedObjectMeta: {
-                searchSourceJSON: JSON.stringify({
-                  index: 'index-d',
-                  filter: [],
-                  query: {
-                    query_string: {
-                      query: 'ddd'
-                    }
+                ]
+              },
+              {
+                id: 'index-d',
+                timeFieldName: 'date',
+                fields: [
+                  {
+                    name: 'date'
                   }
-                })
+                ]
               }
-            }
-          ]
-        }));
+            ],
+            savedDashboards: [
+              {
+                id: 'dashboard-nossid',
+                title: 'dashboard-nossid'
+              },
+              {
+                id: 'dashboard-a',
+                title: 'dashboard-a',
+                savedSearchId: 'savedsearch-a'
+              },
+              {
+                id: 'dashboard-b',
+                title: 'dashboard-b',
+                savedSearchId: 'savedsearch-b'
+              },
+              {
+                id: 'dashboard-c',
+                title: 'dashboard-c',
+                savedSearchId: 'savedsearch-c'
+              },
+              {
+                id: 'dashboard-d',
+                title: 'dashboard-d',
+                savedSearchId: 'savedsearch-d'
+              }
+            ],
+            savedSearches: [
+              {
+                id: 'savedsearch-a',
+                kibanaSavedObjectMeta: {
+                  searchSourceJSON: JSON.stringify({
+                    index: 'index-a',
+                    filter: [],
+                    query: {
+                      query_string: {
+                        query: 'aaa'
+                      }
+                    }
+                  })
+                }
+              },
+              {
+                id: 'savedsearch-b',
+                kibanaSavedObjectMeta: {
+                  searchSourceJSON: JSON.stringify({
+                    index: 'index-b',
+                    filter: [],
+                    query: {
+                      query_string: {
+                        query: 'bbb'
+                      }
+                    }
+                  })
+                }
+              },
+              {
+                id: 'savedsearch-c',
+                kibanaSavedObjectMeta: {
+                  searchSourceJSON: JSON.stringify({
+                    index: 'index-c',
+                    filter: [],
+                    query: {
+                      query_string: {
+                        query: 'ccc'
+                      }
+                    }
+                  })
+                }
+              },
+              {
+                id: 'savedsearch-d',
+                kibanaSavedObjectMeta: {
+                  searchSourceJSON: JSON.stringify({
+                    index: 'index-d',
+                    filter: [],
+                    query: {
+                      query_string: {
+                        query: 'ddd'
+                      }
+                    }
+                  })
+                }
+              }
+            ]
+          });
+
+          const timeBasedIndicesStub = sinon.stub(kibiState, 'timeBasedIndices');
+          timeBasedIndicesStub.withArgs('index-a').returns(Promise.resolve([ 'index-a' ]));
+          timeBasedIndicesStub.withArgs('index-b').returns(Promise.resolve([ 'index-b' ]));
+          timeBasedIndicesStub.withArgs('index-c').returns(Promise.resolve([ 'index-c' ]));
+          timeBasedIndicesStub.withArgs('index-d').returns(Promise.resolve([ 'index-d' ]));
+        });
 
         it('should be disabled/enabled according to relationalPanel', function () {
           expect(kibiState.isRelationalPanelButtonEnabled()).to.not.be.ok();

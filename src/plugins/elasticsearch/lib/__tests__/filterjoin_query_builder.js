@@ -48,14 +48,14 @@ Builder.prototype.addQuery = function (q) {
 /**
  * addFilterJoin adds a filterjoin query
  */
-Builder.prototype.addFilterJoin = function ({ orderBy, maxTermsPerShard, termsEncoding, sourceTypes, sourcePath, targetIndex, targetTypes,
+Builder.prototype.addFilterJoin = function ({ orderBy, maxTermsPerShard, termsEncoding, sourceTypes, sourcePath, targetIndices, targetTypes,
                                             targetPath }) {
   const filterJoinBuilder = new FilterJoinBuilder({
     orderBy,
     maxTermsPerShard,
     termsEncoding,
     sourcePath,
-    targetIndex,
+    targetIndices,
     targetTypes,
     targetPath
   });
@@ -64,9 +64,9 @@ Builder.prototype.addFilterJoin = function ({ orderBy, maxTermsPerShard, termsEn
   return filterJoinBuilder;
 };
 
-function FilterJoinBuilder({ orderBy, maxTermsPerShard, termsEncoding, sourcePath, targetIndex, targetTypes, targetPath }) {
+function FilterJoinBuilder({ orderBy, maxTermsPerShard, termsEncoding, sourcePath, targetIndices, targetTypes, targetPath }) {
   const filterJoin = {
-    indices: [ targetIndex ],
+    indices: targetIndices,
     path: targetPath,
     query: {
       bool: {
@@ -112,14 +112,14 @@ function FilterJoinBuilder({ orderBy, maxTermsPerShard, termsEncoding, sourcePat
 /**
  * Adds a filterjoin query to be nested in the parent one
  */
-FilterJoinBuilder.prototype.addFilterJoin = function ({ orderBy, maxTermsPerShard, termsEncoding, sourceTypes, sourcePath, targetIndex,
+FilterJoinBuilder.prototype.addFilterJoin = function ({ orderBy, maxTermsPerShard, termsEncoding, sourceTypes, sourcePath, targetIndices,
                                                       negate, targetTypes, targetPath }) {
   const filterJoinBuilder = new FilterJoinBuilder({
     orderBy,
     maxTermsPerShard,
     termsEncoding,
     sourcePath,
-    targetIndex,
+    targetIndices,
     targetTypes,
     targetPath
   });

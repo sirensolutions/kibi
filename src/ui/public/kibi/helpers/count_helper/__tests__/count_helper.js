@@ -522,7 +522,7 @@ describe('Kibi Components', function () {
           relation: 'index1//f1/index2//f2'
         });
 
-        sinon.stub(kibiState, '_getJoinSetFilter ').returns(Promise.resolve({ join_set: 'new join set' }));
+        sinon.stub(kibiState, '_getJoinSetFilter').returns(Promise.resolve({ join_set: 'new join set' }));
         var expected = {
           size: 0,
           query: {

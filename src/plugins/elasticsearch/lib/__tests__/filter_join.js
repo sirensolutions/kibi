@@ -529,16 +529,7 @@ describe('FilterJoin querying', function () {
       expect(actual).to.eql(builder.toObject());
     });
 
-    it('should fail if there are filters on focused index', function () {
-      const queries = {
-        i1: [
-          {
-            terms: {
-              tag: [ 'grishka' ]
-            }
-          }
-        ]
-      };
+    it('should allow filters on focused index', function () {
       const query = [
         {
           join_set: {
@@ -549,25 +540,51 @@ describe('FilterJoin querying', function () {
                 { pattern: 'i2', indices: [ 'i2' ], types: [ 'cafard' ], path: 'id2' }
               ]
             ],
-            queries: queries
+            queries: {
+              i1: {
+                dashboard1: [
+                  {
+                    terms: {
+                      tag: [ 'grishka' ]
+                    }
+                  }
+                ]
+              }
+            }
           }
         }
       ];
-      expect(filterJoinSet).withArgs(query).to.throwError(/There cannot be filters on the root of the filterjoin/);
+      const builder = new FilterJoinBuilder();
+      builder.addQuery({
+        terms: {
+          tag: [ 'grishka' ]
+        }
+      });
+      builder.addFilterJoin({
+        sourcePath: 'id1',
+        sourceTypes: 'cafard',
+        targetIndices: [ 'i2' ],
+        targetTypes: 'cafard',
+        targetPath: 'id2'
+      });
+      const actual = filterJoinSet(query);
+      expect(actual).to.eql(builder.toObject());
     });
 
     it('focus filter array', function () {
       const queries = {
-        i2: [
-          {
-            terms: {
-              tag: [ 'grishka' ]
+        i2: {
+          dashboard1: [
+            {
+              terms: {
+                tag: [ 'grishka' ]
+              }
+            },
+            {
+              yo: 'da'
             }
-          },
-          {
-            yo: 'da'
-          }
-        ]
+          ]
+        }
       };
       const query = [
         {
@@ -605,13 +622,15 @@ describe('FilterJoin querying', function () {
 
     it('filter on related index', function () {
       const queries = {
-        i2: [
-          {
-            terms: {
-              tag: [ 'grishka' ]
+        i2: {
+          dashboard1: [
+            {
+              terms: {
+                tag: [ 'grishka' ]
+              }
             }
-          }
-        ]
+          ]
+        }
       };
       const query = [
         {
@@ -646,20 +665,24 @@ describe('FilterJoin querying', function () {
 
     it('three related indices - line', function () {
       const queries = {
-        i2: [
-          {
-            terms: {
-              tag: [ 'pluto' ]
+        i2: {
+          dashboard1: [
+            {
+              terms: {
+                tag: [ 'pluto' ]
+              }
             }
-          }
-        ],
-        i3: [
-          {
-            terms: {
-              tag: [ 'grishka' ]
+          ],
+        },
+        i3: {
+          dashboard1: [
+            {
+              terms: {
+                tag: [ 'grishka' ]
+              }
             }
-          }
-        ]
+          ]
+        }
       };
       const query = [
         {
@@ -710,20 +733,24 @@ describe('FilterJoin querying', function () {
 
     it('three related indices - V', function () {
       const queries = {
-        i2: [
-          {
-            terms: {
-              tag: [ 'pluto' ]
+        i2: {
+          dashboard1: [
+            {
+              terms: {
+                tag: [ 'pluto' ]
+              }
             }
-          }
-        ],
-        i3: [
-          {
-            terms: {
-              tag: [ 'grishka' ]
+          ],
+        },
+        i3: {
+          dashboard1: [
+            {
+              terms: {
+                tag: [ 'grishka' ]
+              }
             }
-          }
-        ]
+          ]
+        }
       };
       const query = [
         {
@@ -774,34 +801,42 @@ describe('FilterJoin querying', function () {
 
     it('three related indices - spock', function () {
       const queries = {
-        i4: [
-          {
-            terms: {
-              tag: [ 'pluto' ]
+        i4: {
+          dashboard1: [
+            {
+              terms: {
+                tag: [ 'pluto' ]
+              }
             }
-          }
-        ],
-        i5: [
-          {
-            terms: {
-              tag: [ 'sylvester' ]
+          ],
+        },
+        i5: {
+          dashboard1: [
+            {
+              terms: {
+                tag: [ 'sylvester' ]
+              }
             }
-          }
-        ],
-        i6: [
-          {
-            terms: {
-              tag: [ 'mickey' ]
+          ],
+        },
+        i6: {
+          dashboard1: [
+            {
+              terms: {
+                tag: [ 'mickey' ]
+              }
             }
-          }
-        ],
-        i7: [
-          {
-            terms: {
-              tag: [ 'donald' ]
+          ],
+        },
+        i7: {
+          dashboard1: [
+            {
+              terms: {
+                tag: [ 'donald' ]
+              }
             }
-          }
-        ]
+          ]
+        }
       };
       const query = [
         {
@@ -1022,16 +1057,18 @@ describe('FilterJoin querying', function () {
               ]
             ],
             queries: {
-              i2: [
-                {
-                  query: {
-                    query_string: {
-                      analyze_wildcard: true,
-                      query: 'travel'
+              i2: {
+                dashboard1: [
+                  {
+                    query: {
+                      query_string: {
+                        analyze_wildcard: true,
+                        query: 'travel'
+                      }
                     }
                   }
-                }
-              ]
+                ]
+              }
             }
           }
         }

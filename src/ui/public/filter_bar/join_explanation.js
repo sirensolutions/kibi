@@ -12,33 +12,39 @@ define(function (require) {
       var fieldFormat = Private(require('ui/registry/field_formats'));
       var _ = require('lodash');
 
-      var explainFiltersForJoinSet = function (indexId, filters) {
-        var html = 'Index: <b>' + indexId + '</b></br>';
-        if (!filters) {
-          return Promise.resolve(html);
-        }
-
-        var promises = _.map(filters, function (filter) {
-          return explainFilter(filter, indexId);
+      var explainFiltersForJoinSet = function (queriesPerDashboard, indexId) {
+        var promises = [];
+        _.each(queriesPerDashboard, function (filters, dashboardId) {
+          _.each(filters, filter => {
+            promises.push(explainFilter(filter, indexId).then(filterLabel => {
+              return { filterLabel, dashboardId };
+            }));
+          });
         });
 
-        return Promise.all(promises).then(function (explanations) {
-          html += '<ul>';
-          _.each(explanations, function (expl) {
-            html += '<li>' + expl + '</li>';
-          });
-          html += '</ul>';
+        return Promise.all(promises)
+        .then(function (explanations) {
+          let html = '';
+
+          _(explanations)
+          .groupBy('dashboardId')
+          .each((values, dashboardId) => {
+            if (values.length) {
+              html += `From <b>${dashboardId}</b>:</br><ul>`;
+              html += _.map(values, ({ filterLabel }) => `<li>${filterLabel}</li>`).join('');
+              html += '</ul>';
+            }
+          })
+          .value();
           return html;
         });
       };
 
       var explainJoinSet = function (joinSet) {
-        var promises = _.map(joinSet.queries, function (query, index) {
-          return explainFiltersForJoinSet(index, query);
-        });
+        var promises = _.map(joinSet.queries, explainFiltersForJoinSet);
 
         return Promise.all(promises).then(function (explanations) {
-          var html = '<ul>';
+          var html = '<ul class="explanation join-set">';
           _.each(explanations, function (expl) {
             html += '<li>' + expl + '</li>';
           });

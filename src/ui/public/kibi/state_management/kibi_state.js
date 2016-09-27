@@ -640,7 +640,7 @@ define(function (require) {
             return acc;
           }, {});
           // empty intersection of time ranges
-          if (min > max) {
+          if (min.isAfter(max)) {
             return [ '.kibi-devnull' ];
           }
           return pattern.toIndexList(min, max);
@@ -743,13 +743,77 @@ define(function (require) {
      *
      * @param focusIndex the index ID at the root of the filterjoin query
      * @param filterAlias the alias for the filter
-     * @param filtersPerIndex filters for every index
-     * @param queriesPerIndex queries for every index
-     * @param timesPerIndex times for every index
+     * @param metas the saved objects (search + dashboard) for each dashboard
+     * @param rest the filters, queries and times for all dashboards but the focused one
      * @returns a join_set query
      */
-    KibiState.prototype._getJoinSetFilter = function (focusIndex, filterAlias, filtersPerIndex, queriesPerIndex, timesPerIndex,
-                                                      dashboardIdsAndIndexPattern) {
+    KibiState.prototype._getJoinSetFilter = function (focusIndex, filterAlias, metas, rest) {
+      const dashboardIdsAndIndexPattern = new Map();
+      const queriesPerIndexAndPerDashboard = {};
+
+      /*
+       * Get the filters/queries/times
+       */
+      const addObject = function (container, thatIndex, thatDashbaord, array) {
+        if (!container[thatIndex]) {
+          container[thatIndex] = {};
+        }
+        if (!container[thatIndex][thatDashbaord]) {
+          container[thatIndex][thatDashbaord] = [];
+        }
+        if (array) {
+          container[thatIndex][thatDashbaord].push(...array);
+        }
+      };
+
+      const cleanFilter = function (fFilter) {
+        // clone it first so when we remove meta the original object is not modified
+        let filter = _.cloneDeep(fFilter);
+        delete filter.$state;
+        if (filter.meta) {
+          const negate = filter.meta.negate;
+          delete filter.meta;
+          if (negate) {
+            filter = {
+              not: filter
+            };
+          }
+        }
+        return filter;
+      };
+
+      for (let i = 0, j = 1; i < rest.length; i += 3, j++) {
+        const thatIndex = metas[j].savedSearchMeta.index;
+        const thatDashboardId = metas[j].savedDash.id;
+        const thatDashboardTitle = metas[j].savedDash.title;
+
+        // ids of relevant dashboard
+        if (!dashboardIdsAndIndexPattern.has(thatIndex)) {
+          dashboardIdsAndIndexPattern.set(thatIndex, []);
+        }
+        dashboardIdsAndIndexPattern.get(thatIndex).push(thatDashboardId);
+
+        // filters
+        const filters = _.map(rest[i], cleanFilter.bind(this));
+        addObject(queriesPerIndexAndPerDashboard, thatIndex, thatDashboardTitle, filters);
+
+        // queries
+        const queries = _(rest[i + 1]).map(fQuery => {
+          // filter out default queries
+          if (fQuery && !this._isDefaultQuery(fQuery)) {
+            return fQuery;
+          }
+        }).compact().value();
+        addObject(queriesPerIndexAndPerDashboard, thatIndex, thatDashboardTitle, queries);
+
+        // times
+        const time = rest[i + 2];
+        addObject(queriesPerIndexAndPerDashboard, thatIndex, thatDashboardTitle, time && [ time ] || []);
+      }
+
+      /*
+       * get the relations
+       */
       const relations = _.map(this.getEnabledRelations(), (r) => {
         const relationMeta = relationsHelper.getRelationInfosFromRelationID(r.relation);
 
@@ -778,9 +842,9 @@ define(function (require) {
 
         return Promise.all([
           sourceIndex !== focusIndex && dashboardIdsAndIndexPattern.has(sourceIndex) &&
-            this.timeBasedIndices(sourceIndex, ...dashboardIdsAndIndexPattern.get(sourceIndex)),
+            this.timeBasedIndices(sourceIndex, ...dashboardIdsAndIndexPattern.get(sourceIndex)) || [],
           targetIndex !== focusIndex && dashboardIdsAndIndexPattern.has(targetIndex) &&
-            this.timeBasedIndices(targetIndex, ...dashboardIdsAndIndexPattern.get(targetIndex))
+            this.timeBasedIndices(targetIndex, ...dashboardIdsAndIndexPattern.get(targetIndex)) || []
         ]).then(([ sourceIndices, targetIndices ]) => {
           relation[0].indices = sourceIndices;
           relation[1].indices = targetIndices;
@@ -793,7 +857,7 @@ define(function (require) {
        */
       return Promise.all(relations)
       .then(relations => {
-        const joinSetFilter = {
+        return {
           meta: {
             alias: filterAlias,
             disabled: !this.isRelationalPanelEnabled()
@@ -801,67 +865,9 @@ define(function (require) {
           join_set: {
             focus: focusIndex,
             relations: relations,
-            queries: {}
+            queries: queriesPerIndexAndPerDashboard
           }
         };
-
-        // get the queries
-        if (queriesPerIndex) {
-          _.each(queriesPerIndex, (queries, index) => {
-            if (queries instanceof Array && queries.length) {
-              if (!joinSetFilter.join_set.queries[index]) {
-                joinSetFilter.join_set.queries[index] = [];
-              }
-              _.each(queries, (fQuery) => {
-                // filter out default queries
-                if (fQuery && !this._isDefaultQuery(fQuery)) {
-                  if (!joinSetFilter.join_set.queries[index]) {
-                    joinSetFilter.join_set.queries[index] = [];
-                  }
-                  joinSetFilter.join_set.queries[index].push(fQuery);
-                }
-              });
-            }
-          });
-        }
-
-        // get the filters
-        if (filtersPerIndex) {
-          _.each(filtersPerIndex, (filters, index) => {
-            if (filters instanceof Array && filters.length) {
-              if (!joinSetFilter.join_set.queries[index]) {
-                joinSetFilter.join_set.queries[index] = [];
-              }
-              _.each(filters, (fFilter) => {
-                // clone it first so when we remove meta the original object is not modified
-                let filter = _.cloneDeep(fFilter);
-                delete filter.$state;
-                if (filter.meta) {
-                  const negate = filter.meta.negate;
-                  delete filter.meta;
-                  if (negate) {
-                    filter = {
-                      not: filter
-                    };
-                  }
-                }
-                joinSetFilter.join_set.queries[index].push(filter);
-              });
-            }
-          });
-        }
-
-        // get the times
-        if (timesPerIndex) {
-          _.each(timesPerIndex, (times, index) => {
-            if (!joinSetFilter.join_set.queries[index]) {
-              joinSetFilter.join_set.queries[index] = [];
-            }
-            joinSetFilter.join_set.queries[index].push(...times);
-          });
-        }
-
-        return joinSetFilter;
       });
     };
 
@@ -942,46 +948,8 @@ define(function (require) {
           const index = metas[0].savedSearchMeta ? metas[0].savedSearchMeta.index : null;
 
           if (rest.length) { // Build the join_set filter
-            const queriesPerIndex = {};
-            const filtersPerIndex = {};
-            const timesPerIndex = {};
-            const dashboardIdsAndIndexPattern = new Map();
-            for (let i = 0, j = 1; i < rest.length; i += 3, j++) {
-              const thatIndex = metas[j].savedSearchMeta.index;
-
-              // ids of relevant dashboard
-              if (!dashboardIdsAndIndexPattern.has(thatIndex)) {
-                dashboardIdsAndIndexPattern.set(thatIndex, []);
-              }
-              dashboardIdsAndIndexPattern.get(thatIndex).push(metas[j].savedDash.id);
-
-              // filters
-              if (!filtersPerIndex[thatIndex]) {
-                filtersPerIndex[thatIndex] = [];
-              }
-              filtersPerIndex[thatIndex].push(...rest[i]);
-
-              // queries
-              if (!queriesPerIndex[thatIndex]) {
-                queriesPerIndex[thatIndex] = [];
-              }
-              queriesPerIndex[thatIndex].push(...rest[i + 1]);
-
-              // times
-              if (!timesPerIndex[thatIndex]) {
-                timesPerIndex[thatIndex] = [];
-              }
-              // add time filter only if it exists
-              if (rest[i + 2]) {
-                timesPerIndex[thatIndex].push(rest[i + 2]);
-              }
-            }
-
-            _.forOwn(filtersPerIndex, (filters, index) => uniqFilters(_.compact(filters), { state: true, negate: true, disabled: true }));
-            _.forOwn(queriesPerIndex, (queries, index) => _(queries).uniq().compact().value());
-            _.forOwn(timesPerIndex, (times, index) => _(times).uniq().compact().value());
             const filterAlias = _(dashboardIds).map((dashboardId, ind) => metas[ind].savedDash.title).sortBy().join(' \u2194 ');
-            return this._getJoinSetFilter(index, filterAlias, filtersPerIndex, queriesPerIndex, timesPerIndex, dashboardIdsAndIndexPattern)
+            return this._getJoinSetFilter(index, filterAlias, metas, rest)
             .then(joinSetFilter => {
               const existingJoinSetFilterIndex = _.findIndex(filters, (filter) => filter.join_set);
               if (existingJoinSetFilterIndex !== -1) {

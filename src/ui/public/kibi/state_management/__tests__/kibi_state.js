@@ -1,3 +1,4 @@
+const moment = require('moment');
 const sinon = require('auto-release-sinon');
 const _ = require('lodash');
 const MockState = require('fixtures/mock_state');
@@ -425,38 +426,112 @@ describe('State Management', function () {
     });
 
     describe('Time-based indices', function () {
-      beforeEach(() => init({
-        indexPatterns: [
-          {
-            id: 'forecast',
-            hasTimeField: _.constant(false)
-          },
-          {
-            id: 'weather-*',
-            hasTimeField: _.constant(true),
-            toIndexList: sinon.stub().returns([ 'weather-2015-01' ])
-          }
-        ]
-      }));
+      describe('should always return an array of indices', function () {
+        beforeEach(() => init({
+          indexPatterns: [
+            {
+              id: 'forecast',
+              hasTimeField: _.constant(false)
+            },
+            {
+              id: 'weather-*',
+              hasTimeField: _.constant(true),
+              toIndexList: sinon.stub().returns([ 'weather-2015-01' ])
+            }
+          ]
+        }));
 
-      it('should get an array of indices for a time-based pattern', function (done) {
-        const stub = sinon.stub(kibiState, 'getTimeBounds').returns({ min: 0, max: 1 });
-        kibiState.timeBasedIndices('weather-*', 'dashboard1')
-        .then((indices) => {
-          expect(stub.called).to.be(true);
-          expect(indices).to.eql([ 'weather-2015-01' ]);
-          done();
-        }).catch(done);
+        it('should get an array of indices for a time-based pattern', function (done) {
+          const stub = sinon.stub(kibiState, 'getTimeBounds').returns({
+            min: moment('25-01-1995', 'DD-MM-YYYY'),
+            max: moment('25-12-1995', 'DD-MM-YYYY')
+          });
+          kibiState.timeBasedIndices('weather-*', 'dashboard1')
+          .then((indices) => {
+            expect(stub.called).to.be(true);
+            expect(indices).to.eql([ 'weather-2015-01' ]);
+            done();
+          }).catch(done);
+        });
+
+        it('should get an array of indices for a non time-based pattern', function (done) {
+          const stub = sinon.stub(kibiState, 'getTimeBounds').returns({
+            min: moment('25-01-1995', 'DD-MM-YYYY'),
+            max: moment('25-12-1995', 'DD-MM-YYYY')
+          });
+          kibiState.timeBasedIndices('forecast', 'dashboard1')
+          .then((indices) => {
+            expect(stub.called).to.be(false);
+            expect(indices).to.eql([ 'forecast' ]);
+            done();
+          }).catch(done);
+        });
       });
 
-      it('should get an array of indices for a non time-based pattern', function (done) {
-        const stub = sinon.stub(kibiState, 'getTimeBounds').returns({ min: 0, max: 1 });
-        kibiState.timeBasedIndices('forecast', 'dashboard1')
-        .then((indices) => {
-          expect(stub.called).to.be(false);
-          expect(indices).to.eql([ 'forecast' ]);
-          done();
-        }).catch(done);
+      describe('should get the intersection of all time-ranges', function () {
+        let toIndexListStub;
+        beforeEach(() => {
+          toIndexListStub = sinon.stub();
+          init({
+            indexPatterns: [
+              {
+                id: 'weather-*',
+                hasTimeField: _.constant(true),
+                toIndexList: toIndexListStub.returns([ 'weather-2015-01' ])
+              }
+            ]
+          });
+        });
+
+        it('should get the intersection', function (done) {
+          const getTimeBoundsStub = sinon.stub(kibiState, 'getTimeBounds');
+
+          const dashboard1Time = {
+            min: moment('25-01-1995', 'DD-MM-YYYY'),
+            max: moment('25-12-1995', 'DD-MM-YYYY')
+          };
+          getTimeBoundsStub.withArgs('dashboard1').returns(dashboard1Time);
+
+          const dashboard2Time = {
+            min: moment('25-03-1995', 'DD-MM-YYYY'),
+            max: moment('25-12-1996', 'DD-MM-YYYY')
+          };
+          getTimeBoundsStub.withArgs('dashboard2').returns(dashboard2Time);
+
+          const dashboard3Time = {
+            min: moment('25-04-1995', 'DD-MM-YYYY'),
+            max: moment('25-12-2016', 'DD-MM-YYYY')
+          };
+          getTimeBoundsStub.withArgs('dashboard3').returns(dashboard3Time);
+
+          kibiState.timeBasedIndices('weather-*', 'dashboard1', 'dashboard2', 'dashboard3')
+          .then((indices) => {
+            expect(toIndexListStub.calledWith(dashboard3Time.min, dashboard1Time.max)).to.be(true);
+            done();
+          }).catch(done);
+        });
+
+        it('should return kibi-devnull on empty intersection', function (done) {
+          const getTimeBoundsStub = sinon.stub(kibiState, 'getTimeBounds');
+
+          const dashboard1Time = {
+            min: moment('25-01-1995', 'DD-MM-YYYY'),
+            max: moment('25-12-1995', 'DD-MM-YYYY')
+          };
+          const dashboard2Time = {
+            min: moment('25-03-1996', 'DD-MM-YYYY'),
+            max: moment('25-12-1996', 'DD-MM-YYYY')
+          };
+          getTimeBoundsStub.withArgs('dashboard1').returns(dashboard1Time);
+          getTimeBoundsStub.withArgs('dashboard2').returns(dashboard2Time);
+
+          kibiState.timeBasedIndices('weather-*', 'dashboard1', 'dashboard2')
+          .then((indices) => {
+            expect(toIndexListStub.called).to.be(false);
+            expect(indices).to.eql([ '.kibi-devnull' ]);
+            done();
+          }).catch(done);
+        });
       });
     });
 

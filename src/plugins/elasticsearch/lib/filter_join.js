@@ -118,7 +118,7 @@ exports.set = function (json) {
 
     const focus = data.focus;
     const relations = data.relations;
-    const queries = data.queries || {};
+    let queries = data.queries || {};
 
     if (focus === undefined) {
       throw new Error('Missing focus field in the join object: ' + JSON.stringify(data, null, ' '));
@@ -130,6 +130,7 @@ exports.set = function (json) {
     const query = [];
     const superGraph = _superGraph(relations);
     const toExpand = [];
+    queries = _.mapValues(queries, perDashboards => _(perDashboards).values().flatten().uniq().compact().value());
     _superGraphToSuperTree(toExpand, query, focus, superGraph, queries);
     _expandSuperTree(toExpand);
     return query;
@@ -303,11 +304,18 @@ function _superGraphToSuperTree(toExpand, query, focus, superGraph, filters, vis
   visitedIndices[focus] = true;
 
   if (filters.hasOwnProperty(focus)) {
-    if (query.constructor === Array) {
-      throw new Error('There cannot be filters on the root of the filterjoin');
-    }
     const focusFilters = filters[focus];
-    _addFilters(query, focusFilters);
+    if (query.constructor === Array) {
+      for (let i = 0; i < focusFilters.length; i++) {
+        if (focusFilters[i].hasOwnProperty('query')) {
+          query.push(focusFilters[i].query);
+        } else {
+          query.push(focusFilters[i]);
+        }
+      }
+    } else {
+      _addFilters(query, focusFilters);
+    }
   }
 
   for (const id in superGraph) {
@@ -395,7 +403,7 @@ function _addFilterJoin(query, sourcePath, sourceIndex, targetPath, targetIndex,
  */
 function _addFilters(query, focusFilters) {
   if (query.constructor !== Object) {
-    throw new Error('Query should be an object');
+    throw new Error('Query should be an object: ' + JSON.stringify(query, null, ' '));
   }
   if (!focusFilters) {
     return;
@@ -412,4 +420,3 @@ function _addFilters(query, focusFilters) {
     }
   }
 }
-

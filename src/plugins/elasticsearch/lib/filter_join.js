@@ -163,6 +163,7 @@ function _verifySequence(sequence) {
   }
 
   // check element of the sequence
+  const relationFields = [ 'pattern', 'queries', 'path', 'indices', 'types', 'orderBy', 'maxTermsPerShard', 'termsEncoding' ];
   _.each(sequence, function (element, index) {
     if (element.group) {
       if (index !== 0) {
@@ -175,7 +176,7 @@ function _verifySequence(sequence) {
         _verifySequence(seq);
       });
     } else if (element.relation) {
-      _checkRelation(element.relation, [ 'queries', 'path', 'indices', 'types', 'orderBy', 'maxTermsPerShard', 'termsEncoding' ]);
+      _checkRelation(element.relation, relationFields);
     } else {
       throw new Error('Unknown element: ' + JSON.stringify(element, null, ' '));
     }
@@ -228,8 +229,7 @@ function _sequenceJoins(query, sequence) {
     });
   } else {
     const lastJoin = sequence[0].relation;
-    const { child } = _addFilterJoin(curQuery, lastJoin[1].path, lastJoin[1],
-                                                 lastJoin[0].path, lastJoin[0], sequence[0].negate);
+    const { child } = _addFilterJoin(curQuery, lastJoin[1].path, lastJoin[1], lastJoin[0].path, lastJoin[0], sequence[0].negate);
     curQuery = child;
     _addFilters(curQuery, lastJoin[0].queries);
   }

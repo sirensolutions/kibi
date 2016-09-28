@@ -146,7 +146,7 @@ define(function (require) {
             return 'join_set: ' + html;
           });
         } else if (f.join_sequence) {
-          return explainJoinSequence(f.join_sequence, f.meta.buttons).then(function (html) {
+          return explainJoinSequence(f.join_sequence).then(function (html) {
             return 'join_sequence: ' + html;
           });
         } else {
@@ -217,19 +217,19 @@ define(function (require) {
       };
 
 
-      var explainRelation = function (el, button) {
+      var explainRelation = function (el) {
         var relation = el.relation;
 
         var promises = [];
         if (relation[0].queries instanceof Array && relation[0].queries.length > 0) {
-          promises.push(explainQueries(relation[0].queries, button.sourceIndexPatternId));
+          promises.push(explainQueries(relation[0].queries, relation[0].pattern));
         } else {
           promises.push(Promise.resolve(''));
         }
 
 
         if (relation[1].queries instanceof Array && relation[1].queries.length > 0) {
-          promises.push(explainQueries(relation[1].queries, button.targetIndexPatternId));
+          promises.push(explainQueries(relation[1].queries, relation[1].pattern));
         } else {
           promises.push(Promise.resolve(''));
         }
@@ -251,18 +251,17 @@ define(function (require) {
         });
       };
 
-      var explainJoinSequence = function (joinSequence, buttons) {
+      var explainJoinSequence = function (joinSequence) {
         // clone and reverse to iterate backwards to show the last step on top
         var sequence = _.cloneDeep(joinSequence);
         sequence.reverse();
 
         var promises = [];
         _.each(sequence, function (el, i) {
-          const buttonIndex = buttons.length - 1 - i;
           if (el.relation) {
-            promises.push(explainRelation(el, buttons[buttonIndex]));
+            promises.push(explainRelation(el));
           } else if (el.group) {
-            promises.push(explainGroup(el, buttons[buttonIndex].group));
+            promises.push(explainGroup(el));
           }
         });
 
@@ -275,12 +274,12 @@ define(function (require) {
         });
       };
 
-      var explainGroup = function (el, groupMeta) {
+      var explainGroup = function (el) {
         var group = el.group;
 
         var promises = [];
         _.each(group, function (sequence, i) {
-          promises.push(explainJoinSequence(sequence, groupMeta[i]));
+          promises.push(explainJoinSequence(sequence));
         });
 
         return Promise.all(promises).then(function (groupSequenceExplanations) {
@@ -298,7 +297,7 @@ define(function (require) {
         var promises = [];
         _.each(filters, function (f) {
           if (f.join_sequence) {
-            promises.push(explainJoinSequence(f.join_sequence, f.meta.buttons));
+            promises.push(explainJoinSequence(f.join_sequence));
           } else if (f.join_set) {
             promises.push(explainJoinSet(f.join_set));
           } else {

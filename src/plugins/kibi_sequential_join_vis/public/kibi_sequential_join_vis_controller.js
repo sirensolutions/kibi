@@ -3,6 +3,7 @@ define(function (require) {
   const _ = require('lodash');
   const angular = require('angular');
   const chrome = require('ui/chrome');
+  const DelayExecutionHelper = require('ui/kibi/helpers/delay_execution_helper');
 
   require('ui/kibi/directives/kibi_select');
   require('ui/kibi/directives/kibi_array_param');
@@ -12,6 +13,7 @@ define(function (require) {
   .controller('KibiSequentialJoinVisController', function (getAppState, kibiState, $scope, $rootScope, Private, $http, createNotifier,
                                                            globalState, Promise) {
     const urlHelper = Private(require('ui/kibi/helpers/url_helper'));
+    const onVisualizeTab = urlHelper.onVisualizeTab();
 
     const notify = createNotifier({
       location: 'Kibi Relational filter'
@@ -26,9 +28,9 @@ define(function (require) {
     }
 
     // Update the counts on each button of the related filter
-    var _updateCounts = function (buttons, dashboardId) {
-      if (urlHelper.onVisualizeTab() || !buttons || !buttons.length) {
-        return Promise.resolve([]);
+    var _fireUpdateCounts = function (buttons, dashboardId) {
+      if ($scope.multiSearchData) {
+        $scope.multiSearchData.clear();
       }
 
       return Promise.all(_.map(buttons, (button) => {
@@ -79,9 +81,32 @@ define(function (require) {
       }).catch(notify.error);
     };
 
+    const delayExecutionHelper = new DelayExecutionHelper(
+      (data, alreadyCollectedData) => {
+        alreadyCollectedData.dashboardId = data.dashboardId;
+        alreadyCollectedData.buttons = data.buttons;
+      },
+      (data) => {
+        _fireUpdateCounts(data.buttons, data.dashboardId);
+      },
+      750,
+      DelayExecutionHelper.DELAY_STRATEGY.RESET_COUNTER_ON_NEW_EVENT
+    );
+
+    var _updateCounts = function (buttons, dashboardId) {
+      if (onVisualizeTab || !buttons || !buttons.length) {
+        return Promise.resolve([]);
+      }
+      delayExecutionHelper.addEventData({
+        buttons: buttons,
+        dashboardId: dashboardId
+      });
+      return Promise.resolve(buttons);
+    };
+
     var _constructButtons = function () {
       $scope.vis.error = '';
-      if (!urlHelper.onVisualizeTab()) {
+      if (!onVisualizeTab) {
         return kibiState._getDashboardAndSavedSearchMetas([ currentDashboardId ]).then(([ { savedDash, savedSearchMeta } ]) => {
           const index = savedSearchMeta.index;
           const buttons = kibiSequentialJoinVisHelper.constructButtonsArray($scope.vis.params.buttons, index);
@@ -107,7 +132,7 @@ define(function (require) {
      */
 
     var updateButtons = function (reason) {
-      if (urlHelper.onVisualizeTab()) {
+      if (onVisualizeTab) {
         return;
       }
 
@@ -135,7 +160,7 @@ define(function (require) {
             targetIndexPatternId: this.sourceIndexPatternId,
             redirectToDashboard: currentDashboardId
           };
-          return _updateCounts.call(self, [ virtualButton ], this.redirectToDashboard)
+          return _fireUpdateCounts.call(self, [ virtualButton ], this.redirectToDashboard)
           .then(() => virtualButton.targetCount)
           .catch(notify.error);
         };
@@ -192,6 +217,7 @@ define(function (require) {
     });
 
     $scope.$on('$destroy', function () {
+      delayExecutionHelper.destroy();
       kibiDashboardChangedOff();
       removeAutorefreshHandler();
     });

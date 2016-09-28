@@ -2,11 +2,11 @@ define(function (require) {
   /*
    * Triggers the executeCallback callback after delay counted from first call to
    * addData method. After triggering executeCallback the collectedData are cleared and
-   * helper is ready to accept new calls to addData
+   * helper is ready to accept new calls to addEventData
    *
-   * - collectDataCallback - function which processed added data
+   * - collectDataCallback - function that collects and process new data
    * collectDataCallback(alreadyCollectedData, newData)
-   * - executeCallback - function which processed added data
+   * - executeCallback - function executed after delay with all collected data
    * executeCallback(alreadyCollectedData)
    * - delayTime - delay time in ms
    * - delayStrategy - strategy of the delay
@@ -38,7 +38,7 @@ define(function (require) {
     }, this.delayTime);
   };
 
-  DelayExecutionHelper.prototype.destroy = function (data) {
+  DelayExecutionHelper.prototype.destroy = function () {
     this.data = {};
     if (this.timeout) {
       clearTimeout(this.timeout);

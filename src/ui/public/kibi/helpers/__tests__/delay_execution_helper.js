@@ -107,7 +107,7 @@ describe('Kibi Components', function () {
       //  |__delay___|     |__delay___|
       it(
       '2 events triggered more than "delay" apart - should trigger the callback twice ' +
-      'a "dalay" after first event and a "delay" after second event', function (done) {
+      'a "delay" after first event and a "delay" after second event', function (done) {
         var actuallData = [];
         var executionCounter = 0;
         var helper = new DelayExecutionHelper(
@@ -247,7 +247,7 @@ describe('Kibi Components', function () {
       //  |__delay___|     |__delay___|
       it(
       '2 events triggered more than "delay" apart - should trigger the callback twice ' +
-      'a "dalay" after first event and a "delay" after second event', function (done) {
+      'a "delay" after first event and a "delay" after second event', function (done) {
         var actuallData = [];
         var executionCounter = 0;
         var helper = new DelayExecutionHelper(

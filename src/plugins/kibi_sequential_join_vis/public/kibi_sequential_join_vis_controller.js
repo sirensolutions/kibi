@@ -160,6 +160,12 @@ define(function (require) {
             targetIndexPatternId: this.sourceIndexPatternId,
             redirectToDashboard: currentDashboardId
           };
+          // NOTE:
+          // here we do not want to delay the count update
+          // this is why for now we call directly _fireUpdateCounts
+          // instead of _updateCounts
+          // This could be done in future to further reduce the number of calls but
+          // as it requires greater refactoring I postponed it for now
           return _fireUpdateCounts.call(self, [ virtualButton ], this.redirectToDashboard)
           .then(() => virtualButton.targetCount)
           .catch(notify.error);

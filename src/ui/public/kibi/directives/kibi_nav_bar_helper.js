@@ -114,7 +114,7 @@ define(function (require) {
             });
           })
           .catch((err) => {
-            notify.error(`Couldn\'t get counts for tabs: ${err}`);
+            notify.error(`Couldn't get counts for tabs: ${err}`);
           });
         }
       }).catch(notify.warning);

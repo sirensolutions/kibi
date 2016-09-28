@@ -115,7 +115,7 @@ define(function (require) {
       DelayExecutionHelper.DELAY_STRATEGY.RESET_COUNTER_ON_NEW_EVENT
     );
 
-    var _updateCounts = function (buttons, dashboardId) {
+    var _collectUpdateCountsRequest = function (buttons, dashboardId) {
       if (onVisualizeTab || !buttons || !buttons.length) {
         return Promise.resolve([]);
       }
@@ -169,7 +169,7 @@ define(function (require) {
         promise = Promise.resolve($scope.buttons);
       }
       promise
-      .then((buttons) => _updateCounts.call(self, buttons, currentDashboardId))
+      .then((buttons) => _collectUpdateCountsRequest.call(self, buttons, currentDashboardId))
       .then((buttons) => {
         // http://stackoverflow.com/questions/20481327/data-is-not-getting-updated-in-the-view-after-promise-is-resolved
         // assign data to $scope.buttons once the promises are done
@@ -187,7 +187,7 @@ define(function (require) {
           // NOTE:
           // here we do not want to delay the count update
           // this is why for now we call directly _fireUpdateCounts
-          // instead of _updateCounts
+          // instead of _collectUpdateCountsRequest
           // This could be done in future to further reduce the number of calls but
           // as it requires greater refactoring I postponed it for now
           return _fireUpdateCounts.call(self, [ virtualButton ], this.redirectToDashboard)

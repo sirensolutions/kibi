@@ -75,6 +75,7 @@ define(function (require) {
       //      - new relation from current dashboard to target dashboard
 
       return Promise.all([
+        // here timeBasedIndices cannot return devnull because there is only one dashboard passed to the function
         kibiState.timeBasedIndices(button.sourceIndexPatternId, dashboardId),
         kibiState.timeBasedIndices(button.targetIndexPatternId, button.redirectToDashboard),
         kibiState.getState(dashboardId)

@@ -14,7 +14,7 @@ define(function (require) {
   require('ui/modules')
   .get('kibana/kibi_state')
   .service('kibiState', function (savedSearches, timefilter, $route, Promise, getAppState, savedDashboards, $rootScope, indexPatterns,
-                                  globalState, elasticsearchPlugins, $location, config, Private, createNotifier) {
+                                  kbnIndex, globalState, elasticsearchPlugins, $location, config, Private, createNotifier) {
     const State = Private(require('ui/state_management/state'));
     const notify = createNotifier({ location: 'Kibi State'});
     const urlHelper = Private(require('ui/kibi/helpers/url_helper'));
@@ -620,6 +620,7 @@ define(function (require) {
     /**
      * timeBasedIndices returns an array of time-expanded indices for the given pattern. The time range is the one taken from
      * the kibi state. If the index is not time-based, then an array of the given pattern is returned.
+     * If the intersection of time-ranges from the given dashboards is empty, then ".kibi" is returned.
      *
      * @param indexPatternId the pattern to expand
      * @param dashboardIds the ids of dashboard to take a time-range from
@@ -639,9 +640,9 @@ define(function (require) {
             }
             return acc;
           }, {});
-          // empty intersection of time ranges
           if (min.isAfter(max)) {
-            return [ '.kibi-devnull' ];
+            // empty intersection of time ranges
+            return [ kbnIndex ];
           }
           return pattern.toIndexList(min, max);
         }
@@ -793,10 +794,6 @@ define(function (require) {
         }
         dashboardIdsAndIndexPattern.get(thatIndex).push(thatDashboardId);
 
-        // filters
-        const filters = _.map(rest[i], cleanFilter.bind(this));
-        addObject(queriesPerIndexAndPerDashboard, thatIndex, thatDashboardTitle, filters);
-
         // queries
         const queries = _(rest[i + 1]).map(fQuery => {
           // filter out default queries
@@ -805,6 +802,10 @@ define(function (require) {
           }
         }).compact().value();
         addObject(queriesPerIndexAndPerDashboard, thatIndex, thatDashboardTitle, queries);
+
+        // filters
+        const filters = _.map(rest[i], cleanFilter.bind(this));
+        addObject(queriesPerIndexAndPerDashboard, thatIndex, thatDashboardTitle, filters);
 
         // times
         const time = rest[i + 2];
@@ -852,11 +853,13 @@ define(function (require) {
         });
       });
 
+      relations.push(queriesPerIndexAndPerDashboard);
       /*
        * build the join_set filter
        */
       return Promise.all(relations)
-      .then(relations => {
+      .then(results => {
+        const [ queriesPerIndexAndPerDashboard ] = results.splice(results.length - 1, 1);
         return {
           meta: {
             alias: filterAlias,
@@ -864,12 +867,24 @@ define(function (require) {
           },
           join_set: {
             focus: focusIndex,
-            relations: relations,
+            relations: results,
             queries: queriesPerIndexAndPerDashboard
           }
         };
       });
     };
+
+    function emptySearch() {
+      return {
+        query: {
+          bool: {
+            must_not: [
+              { match_all: {} }
+            ]
+          }
+        }
+      };
+    }
 
     /**
      * Returns an array of dashboard IDs.

@@ -137,6 +137,7 @@ define(function (require) {
           if (!indexPatternId || !dashboardId) {
             return;
           }
+          // here timeBasedIndices cannot return devnull because there is only one dashboard passed to the function
           return kibiState.timeBasedIndices(indexPatternId, dashboardId);
         });
         return Promise.all([ selectedDashboard, timeBasedSelectedDashboard ])
@@ -155,16 +156,9 @@ define(function (require) {
       return Promise.all(promises).then((results) => {
         // if there is resolved promise with no query property
         // it means that this group has no index attached and should be skipped when updating the group counts
-        // so keep track of indexes to know which group counts should be updated
-        const indexesToUpdate = [];
-        let query = '';
+        _.remove(results, result => !result.query || !result.indices);
 
-        _.each(results, function (result, index) {
-          if (result.query && result.indices) {
-            query += `{"index":${angular.toJson(result.indices)}}\n${angular.toJson(result.query)}\n`;
-            indexesToUpdate.push(index);
-          }
-        });
+        const query = _.map(results, result => `{"index":${angular.toJson(result.indices)}}\n${angular.toJson(result.query)}\n`).join('');
 
         if (query && (forceUpdate || lastFiredMultiCountQuery !== query)) {
           lastFiredMultiCountQuery = query;
@@ -172,33 +166,27 @@ define(function (require) {
           //Note: ?getCountsOnTabs has no meaning, it is just useful to filter when inspecting requests
           return $http.post(self.chrome.getBasePath() + '/elasticsearch/_msearch?getCountsOnTabs', query).then((response) => {
             const filtersIconMessagesPromises = [];
-            if (response.data.responses.length !== indexesToUpdate.length) {
-              notify.warning('The number of counts responses does not match the dashboardGroups which should be updated');
-            } else {
-              _.each(response.data.responses, function (hit, i) {
-                // get the corresponding groupIndex from results
-                const tab = self.dashboardGroups[results[indexesToUpdate[i]].groupIndex];
-                try {
-                  if (!_.contains(Object.keys(hit),'error')) {
-                    tab.count = hit.hits.total;
-                    tab.selected.filterIconMessage = null;
-                    filtersIconMessagesPromises.push(addFiltersIconMessages.call(this, tab));
-                  } else if (_.contains(Object.keys(hit),'error') && _.contains(hit.error,'ElasticsearchSecurityException')) {
-                    tab.count = 'Unauthorized';
-                  } else {
-                    tab.count = 'Error';
-                  }
-                } catch (e) {
-                  notify.warning('An error occurred while getting counts for tab ' + tab.title + ': ' + e);
+            _.each(response.data.responses, function (hit, i) {
+              // get the corresponding groupIndex from results
+              const tab = self.dashboardGroups[results[i].groupIndex];
+              try {
+                if (!_.contains(Object.keys(hit), 'error')) {
+                  tab.count = hit.hits.total;
+                  tab.selected.filterIconMessage = null;
+                  filtersIconMessagesPromises.push(addFiltersIconMessages.call(this, tab));
+                } else if (_.contains(Object.keys(hit), 'error') && _.contains(hit.error, 'ElasticsearchSecurityException')) {
+                  tab.count = 'Unauthorized';
+                } else {
+                  tab.count = 'Error';
                 }
-              });
-            }
-            return Promise.all(filtersIconMessagesPromises).then(() => {
-              return self.dashboardGroups;
+              } catch (e) {
+                notify.warning('An error occurred while getting counts for tab ' + tab.title + ': ' + e);
+              }
             });
+            return Promise.all(filtersIconMessagesPromises).then(() => self.dashboardGroups);
           })
           .catch((err) => {
-            notify.error(`Couldn't get counts for tabs: ${err}`);
+            notify.error(`Couldn't get counts for tabs: ${JSON.stringify(err, null, ' ')}`);
           });
         }
       }).catch(notify.warning);

@@ -736,24 +736,26 @@ describe('Kibi Components', function () {
             focus: focus,
             relations: relations,
             queries: {
-              'time-testing-3': [
-                {
-                  range: {
-                    'fake_field': {
-                      'gte': 1125576000000, // these timestamps match the times in fakeSavedDashboards time-testing-3 dashboard
-                      'lte': 1441454400000
+              'time-testing-3': {
+                Time: [
+                  {
+                    range: {
+                      fake_field: {
+                        gte: 1125576000000, // these timestamps match the times in fakeSavedDashboards time-testing-3 dashboard
+                        lte: 1441454400000
+                      }
                     }
                   }
-                }
-              ]
+                ]
+              }
             }
           }
         }
       ];
 
       var expected =
-      '<ul>' +
-        '<li>Index: <b>time-testing-3</b></br>' +
+      '<ul class="explanation join-set">' +
+        '<li>From <b>Time</b>:</br>' +
           '<ul>' +
             '<li> fake_field: <b>1125576000000</b> to <b>1441454400000</b> </li>' +
           '</ul>' +

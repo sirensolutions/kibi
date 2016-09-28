@@ -39,6 +39,7 @@ define(function (require) {
 
       return Promise.all(_.map(buttons, (button) => {
         return Promise.all([
+          // here timeBasedIndices cannot return devnull because there is only one dashboard passed to the function
           kibiState.timeBasedIndices(button.targetIndexPatternId, button.redirectToDashboard),
           kibiSequentialJoinVisHelper.getJoinSequenceFilter(dashboardId, button)
         ])
@@ -50,12 +51,9 @@ define(function (require) {
           });
         });
       })).then((results) => {
-        let query = '';
-        _.each(results, function (result) {
-          query += `{"index":${angular.toJson(result.indices)}}\n${angular.toJson(result.query)}\n`;
-        });
-
+        const query = _.map(results, result => `{"index":${angular.toJson(result.indices)}}\n${angular.toJson(result.query)}\n`).join('');
         const duration = moment();
+
         // ?getCountsOnButton has no meanning it is just usefull to filter when inspecting requests
         return $http.post(chrome.getBasePath() + '/elasticsearch/_msearch?getCountsOnButton', query)
         .then((response) => {

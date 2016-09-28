@@ -49,6 +49,7 @@ describe('State Management', function () {
         return globalState;
       });
 
+      $provide.constant('kbnIndex', '.kibi');
       $provide.constant('kibiEnterpriseEnabled', kibiEnterpriseEnabled);
       $provide.constant('kbnDefaultAppId', '');
       $provide.constant('kibiDefaultDashboardId', '');
@@ -511,7 +512,7 @@ describe('State Management', function () {
           }).catch(done);
         });
 
-        it('should return kibi-devnull on empty intersection', function (done) {
+        it('should return devnull on empty intersection', function (done) {
           const getTimeBoundsStub = sinon.stub(kibiState, 'getTimeBounds');
 
           const dashboard1Time = {
@@ -528,7 +529,7 @@ describe('State Management', function () {
           kibiState.timeBasedIndices('weather-*', 'dashboard1', 'dashboard2')
           .then((indices) => {
             expect(toIndexListStub.called).to.be(false);
-            expect(indices).to.eql([ '.kibi-devnull' ]);
+            expect(indices).to.eql([ '.kibi' ]);
             done();
           }).catch(done);
         });
@@ -2116,10 +2117,12 @@ describe('State Management', function () {
             expect(filters[1].meta.alias).to.equal('dashboard-a \u2194 dashboard-b');
             expect(filters[1].join_set.focus).to.be('index-a');
             expect(filters[1].join_set.queries['index-a']).to.not.be.ok();
-            expect(filters[1].join_set.queries['index-b']).to.have.length(3);
-            expect(filters[1].join_set.queries['index-b'][0]).to.eql({ query: { query_string: { query: 'bbb' } } });
-            expect(filters[1].join_set.queries['index-b'][1]).to.eql({ exists: { field: 'aaa' } });
-            expect(filters[1].join_set.queries['index-b'][2]).to.eql({
+            expect(filters[1].join_set.queries['index-b']).to.be.ok();
+            expect(filters[1].join_set.queries['index-b']['dashboard-b']).to.be.ok();
+            expect(filters[1].join_set.queries['index-b']['dashboard-b']).to.have.length(3);
+            expect(filters[1].join_set.queries['index-b']['dashboard-b'][0]).to.eql({ query: { query_string: { query: 'bbb' } } });
+            expect(filters[1].join_set.queries['index-b']['dashboard-b'][1]).to.eql({ exists: { field: 'aaa' } });
+            expect(filters[1].join_set.queries['index-b']['dashboard-b'][2]).to.eql({
               range: {
                 date: {
                   gte: dateMath.parseWithPrecision(defaultStartTime, false).valueOf(),
@@ -2171,10 +2174,12 @@ describe('State Management', function () {
             expect(filters[1].meta.alias).to.equal('dashboard-a \u2194 dashboard-b');
             expect(filters[1].join_set.focus).to.be('index-a');
             expect(filters[1].join_set.queries['index-a']).to.not.be.ok();
-            expect(filters[1].join_set.queries['index-b']).to.have.length(3);
-            expect(filters[1].join_set.queries['index-b'][0]).to.eql({ query: { query_string: { query: 'bbb' } } });
-            expect(filters[1].join_set.queries['index-b'][1]).to.eql({ not: { exists: { field: 'aaa' } } });
-            expect(filters[1].join_set.queries['index-b'][2]).to.eql({
+            expect(filters[1].join_set.queries['index-b']).to.be.ok();
+            expect(filters[1].join_set.queries['index-b']['dashboard-b']).to.be.ok();
+            expect(filters[1].join_set.queries['index-b']['dashboard-b']).to.have.length(3);
+            expect(filters[1].join_set.queries['index-b']['dashboard-b'][0]).to.eql({ query: { query_string: { query: 'bbb' } } });
+            expect(filters[1].join_set.queries['index-b']['dashboard-b'][1]).to.eql({ not: { exists: { field: 'aaa' } } });
+            expect(filters[1].join_set.queries['index-b']['dashboard-b'][2]).to.eql({
               range: {
                 date: {
                   gte: dateMath.parseWithPrecision(defaultStartTime, false).valueOf(),
@@ -2204,21 +2209,23 @@ describe('State Management', function () {
             expect(filters[0].meta.alias).to.equal('dashboard-a \u2194 dashboard-b');
             expect(filters[0].join_set.focus).to.be('index-a');
             expect(filters[0].join_set.queries['index-a']).to.not.be.ok();
-            expect(filters[0].join_set.queries['index-b']).to.have.length(3);
+            expect(filters[0].join_set.queries['index-b']).to.be.ok();
+            expect(filters[0].join_set.queries['index-b']['dashboard-b']).to.be.ok();
+            expect(filters[0].join_set.queries['index-b']['dashboard-b']).to.have.length(3);
             // from the dashboard meta
-            expect(filters[0].join_set.queries['index-b'][0]).to.eql({
+            expect(filters[0].join_set.queries['index-b']['dashboard-b'][0]).to.eql({
               query: {
                 query_string: { query: 'ccc' }
               }
             });
             // from the search meta
-            expect(filters[0].join_set.queries['index-b'][1]).to.eql({
+            expect(filters[0].join_set.queries['index-b']['dashboard-b'][1]).to.eql({
               query: {
                 query_string: { query: 'bbb' }
               }
             });
             // time
-            expect(filters[0].join_set.queries['index-b'][2]).to.eql({
+            expect(filters[0].join_set.queries['index-b']['dashboard-b'][2]).to.eql({
               range: {
                 date: {
                   gte: dateMath.parseWithPrecision(defaultStartTime, false).valueOf(),
@@ -2257,17 +2264,19 @@ describe('State Management', function () {
             expect(filters[0].meta.alias).to.equal('dashboard-a \u2194 dashboard-b');
             expect(filters[0].join_set.focus).to.be('index-a');
             expect(filters[0].join_set.queries['index-a']).to.not.be.ok();
-            expect(filters[0].join_set.queries['index-b']).to.have.length(3);
+            expect(filters[0].join_set.queries['index-b']).to.be.ok();
+            expect(filters[0].join_set.queries['index-b']['dashboard-b']).to.be.ok();
+            expect(filters[0].join_set.queries['index-b']['dashboard-b']).to.have.length(3);
             // from the dashboard meta
-            expect(filters[0].join_set.queries['index-b'][0]).to.eql({ query: query });
+            expect(filters[0].join_set.queries['index-b']['dashboard-b'][0]).to.eql({ query: query });
             // from the search meta
-            expect(filters[0].join_set.queries['index-b'][1]).to.eql({
+            expect(filters[0].join_set.queries['index-b']['dashboard-b'][1]).to.eql({
               query: {
                 query_string: { query: 'bbb' }
               }
             });
             // time
-            expect(filters[0].join_set.queries['index-b'][2]).to.eql({
+            expect(filters[0].join_set.queries['index-b']['dashboard-b'][2]).to.eql({
               range: {
                 date: {
                   gte: dateMath.parseWithPrecision(defaultStartTime, false).valueOf(),
@@ -2303,15 +2312,16 @@ describe('State Management', function () {
             expect(filters[0].join_set.focus).to.be('index-a');
             expect(filters[0].join_set.queries['index-a']).to.not.be.ok();
             expect(filters[0].join_set.queries['index-b']).to.be.ok();
-            expect(filters[0].join_set.queries['index-b']).to.have.length(2);
-            expect(filters[0].join_set.queries['index-b'][0]).to.eql({
+            expect(filters[0].join_set.queries['index-b']['dashboard-b']).to.be.ok();
+            expect(filters[0].join_set.queries['index-b']['dashboard-b']).to.have.length(2);
+            expect(filters[0].join_set.queries['index-b']['dashboard-b'][0]).to.eql({
               query: {
                 query_string: {
                   query: 'bbb'
                 }
               }
             });
-            expect(filters[0].join_set.queries['index-b'][1]).to.eql({
+            expect(filters[0].join_set.queries['index-b']['dashboard-b'][1]).to.eql({
               range: {
                 date: {
                   gte: dateMath.parseWithPrecision('2005-09-01T12:00:00.000Z', false).valueOf(),

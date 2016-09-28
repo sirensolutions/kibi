@@ -135,8 +135,11 @@ describe('Kibi Directives', function () {
           };
 
           $httpBackend.whenPOST('/elasticsearch/_msearch?getCountsOnTabs').respond(200, countOnTabsResponse);
-          kibiNavBarHelper.updateAllCounts([ 'dashboard1', 'dashboard2' ])
-          .then((dashboardGroups) => {
+          kibiNavBarHelper.updateAllCounts([ 'dashboard1', 'dashboard2' ]);
+
+          setTimeout(function () {
+            $httpBackend.flush();
+            var dashboardGroups = kibiNavBarHelper.dashboardGroups;
             expect(timeBasedIndicesStub.called).to.be(true);
             expect(dashboardGroups).to.have.length(2);
             expect(dashboardGroups[0].id).to.be('group dashboard1');
@@ -144,10 +147,7 @@ describe('Kibi Directives', function () {
             expect(dashboardGroups[1].id).to.be('group dashboard2');
             expect(dashboardGroups[1].count).to.be(24);
             done();
-          }).catch(done);
-
-          $rootScope.$digest();
-          $httpBackend.flush();
+          }, 950); // more than default delay of 750 for dashboards count queries
         });
 
         it('for one dashboard', function (done) {
@@ -162,8 +162,11 @@ describe('Kibi Directives', function () {
           };
 
           $httpBackend.whenPOST('/elasticsearch/_msearch?getCountsOnTabs').respond(200, countOnTabsResponse);
-          kibiNavBarHelper.updateAllCounts([ 'dashboard1' ])
-          .then((dashboardGroups) => {
+          kibiNavBarHelper.updateAllCounts([ 'dashboard1' ]);
+
+          setTimeout(function () {
+            $httpBackend.flush();
+            var dashboardGroups = kibiNavBarHelper.dashboardGroups;
             expect(timeBasedIndicesStub.called).to.be(true);
             expect(dashboardGroups).to.have.length(2);
             expect(dashboardGroups[0].id).to.be('group dashboard1');
@@ -171,10 +174,7 @@ describe('Kibi Directives', function () {
             expect(dashboardGroups[1].id).to.be('group dashboard2');
             expect(dashboardGroups[1].count).to.not.be.ok();
             done();
-          }).catch(done);
-
-          $rootScope.$digest();
-          $httpBackend.flush();
+          }, 950); // more than default delay of 750 for dashboards count queries
         });
 
         after(noDigestPromises.deactivate);
@@ -335,8 +335,11 @@ describe('Kibi Directives', function () {
         });
 
         $httpBackend.whenPOST('/elasticsearch/_msearch?getCountsOnTabs').respond(200, countOnTabsResponse);
-        kibiNavBarHelper.updateAllCounts([ 'dashboard1', 'dashboard2' ])
-        .then((dashboardGroups) => {
+        kibiNavBarHelper.updateAllCounts([ 'dashboard1', 'dashboard2' ]);
+
+        setTimeout(function () {
+          $httpBackend.flush();
+          var dashboardGroups = kibiNavBarHelper.dashboardGroups;
           expect(timeBasedIndicesStub.called).to.be(true);
           expect(dashboardGroups).to.have.length(2);
           expect(dashboardGroups[0].id).to.be('group dashboard1');
@@ -344,10 +347,7 @@ describe('Kibi Directives', function () {
           expect(dashboardGroups[1].id).to.be('group dashboard2');
           expect(dashboardGroups[1].count).to.not.be.ok();
           done();
-        }).catch(done);
-
-        $rootScope.$digest();
-        $httpBackend.flush();
+        }, 950); // more than default delay of 750 for dashboards count queries
       });
 
       after(noDigestPromises.activate);

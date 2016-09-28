@@ -39,7 +39,6 @@ define(function (require) {
 
       return Promise.all(_.map(buttons, (button) => {
         return Promise.all([
-          // here timeBasedIndices cannot return devnull because there is only one dashboard passed to the function
           kibiState.timeBasedIndices(button.targetIndexPatternId, button.redirectToDashboard),
           kibiSequentialJoinVisHelper.getJoinSequenceFilter(dashboardId, button)
         ])

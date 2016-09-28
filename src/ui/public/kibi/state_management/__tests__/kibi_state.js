@@ -512,7 +512,7 @@ describe('State Management', function () {
           }).catch(done);
         });
 
-        it('should return devnull on empty intersection', function (done) {
+        it('should return kbnIndex on empty intersection', function (done) {
           const getTimeBoundsStub = sinon.stub(kibiState, 'getTimeBounds');
 
           const dashboard1Time = {

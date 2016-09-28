@@ -68,6 +68,7 @@ const addFilterJoinToParent = function (query, fjObject, types, negate) {
  * Each node of a sequence is a relation that connects two dashboards. The relation is directed: [ node1, node2 ] is
  * a join from node2 to node1.
  * A dashboard is an object that contains the following fields:
+ * - pattern: an index pattern from which indices are taken
  * - path: the path to the joined field
  * - indices: an array of indices to join on
  * - types: the corresponding array of types
@@ -107,7 +108,7 @@ exports.sequence = function (json) {
  *     - path: the path to the joined field
  *     - orderBy: the filterjoin ordering option
  *     - maxTermsPerShard: the maximum number of terms to consider in the filterjoin
- * - queries: the queries for each index as an object, which entries are the index names
+ * - queries: the queries for each index/dashboard as an object. The queries are within an array for each pair.
  */
 exports.set = function (json) {
   const label = 'join_set';

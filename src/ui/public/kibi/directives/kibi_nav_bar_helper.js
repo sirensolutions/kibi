@@ -137,7 +137,6 @@ define(function (require) {
           if (!indexPatternId || !dashboardId) {
             return;
           }
-          // here timeBasedIndices cannot return devnull because there is only one dashboard passed to the function
           return kibiState.timeBasedIndices(indexPatternId, dashboardId);
         });
         return Promise.all([ selectedDashboard, timeBasedSelectedDashboard ])

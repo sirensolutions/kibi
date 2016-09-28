@@ -620,7 +620,7 @@ define(function (require) {
     /**
      * timeBasedIndices returns an array of time-expanded indices for the given pattern. The time range is the one taken from
      * the kibi state. If the index is not time-based, then an array of the given pattern is returned.
-     * If the intersection of time-ranges from the given dashboards is empty, then ".kibi" is returned.
+     * If the intersection of time-ranges from the given dashboards is empty, then an array with kbnIndex is returned.
      *
      * @param indexPatternId the pattern to expand
      * @param dashboardIds the ids of dashboard to take a time-range from
@@ -853,13 +853,11 @@ define(function (require) {
         });
       });
 
-      relations.push(queriesPerIndexAndPerDashboard);
       /*
        * build the join_set filter
        */
       return Promise.all(relations)
-      .then(results => {
-        const [ queriesPerIndexAndPerDashboard ] = results.splice(results.length - 1, 1);
+      .then(relations => {
         return {
           meta: {
             alias: filterAlias,
@@ -867,7 +865,7 @@ define(function (require) {
           },
           join_set: {
             focus: focusIndex,
-            relations: results,
+            relations: relations,
             queries: queriesPerIndexAndPerDashboard
           }
         };

@@ -4,6 +4,7 @@ define(function (require) {
   const angular = require('angular');
   const chrome = require('ui/chrome');
   const moment = require('moment');
+  const DelayExecutionHelper = require('ui/kibi/helpers/delay_execution_helper');
 
   require('ui/kibi/directives/kibi_select');
   require('ui/kibi/directives/kibi_array_param');
@@ -28,13 +29,9 @@ define(function (require) {
     }
 
     // Update the counts on each button of the related filter
-    var _updateCounts = function (buttons, dashboardId) {
+    var _fireUpdateCounts = function (buttons, dashboardId) {
       if ($scope.multiSearchData) {
         $scope.multiSearchData.clear();
-      }
-
-      if (onVisualizeTab || !buttons || !buttons.length) {
-        return Promise.resolve([]);
       }
 
       return Promise.all(_.map(buttons, (button) => {
@@ -106,6 +103,29 @@ define(function (require) {
       }).catch(notify.error);
     };
 
+    const delayExecutionHelper = new DelayExecutionHelper(
+      (data, alreadyCollectedData) => {
+        alreadyCollectedData.dashboardId = data.dashboardId;
+        alreadyCollectedData.buttons = data.buttons;
+      },
+      (data) => {
+        _fireUpdateCounts(data.buttons, data.dashboardId);
+      },
+      750,
+      DelayExecutionHelper.DELAY_STRATEGY.RESET_COUNTER_ON_NEW_EVENT
+    );
+
+    var _updateCounts = function (buttons, dashboardId) {
+      if (onVisualizeTab || !buttons || !buttons.length) {
+        return Promise.resolve([]);
+      }
+      delayExecutionHelper.addEventData({
+        buttons: buttons,
+        dashboardId: dashboardId
+      });
+      return Promise.resolve(buttons);
+    };
+
     var _constructButtons = function () {
       $scope.vis.error = '';
       if (!onVisualizeTab) {
@@ -164,7 +184,7 @@ define(function (require) {
             targetIndexPatternType: this.sourceIndexPatternType,
             redirectToDashboard: currentDashboardId
           };
-          return _updateCounts.call(self, [ virtualButton ], this.redirectToDashboard)
+          return _fireUpdateCounts.call(self, [ virtualButton ], this.redirectToDashboard)
           .then(() => virtualButton.targetCount)
           .catch(notify.error);
         };
@@ -221,6 +241,7 @@ define(function (require) {
     });
 
     $scope.$on('$destroy', function () {
+      delayExecutionHelper.destroy();
       kibiDashboardChangedOff();
       kibiSequentialJoinVisHelper.destroy();
       removeAutorefreshHandler();

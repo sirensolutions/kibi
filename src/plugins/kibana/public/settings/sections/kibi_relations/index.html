@@ -241,7 +241,9 @@
                       <td>
                         <kibi-select required object-type="dashboard"
                          data-test-subj="dashboard-relation-left-dashboard"
-                         ng-model="relation.dashboards[0]" id="$index" filter="filterDashboards"></kibi-select>
+                         ng-model="relation.dashboards[0]"
+                         filter="filterDashboards"
+                         filter-options="{rowIndex: $index}"></kibi-select>
                       </td>
                       <td>
                         <i aria-hidden="true" class="fa fa-arrows-h"></i>
@@ -250,12 +252,15 @@
                         <kibi-select required object-type="dashboard"
                          data-test-subj="dashboard-relation-right-dashboard"
                          ng-model="relation.dashboards[1]"
-                         id="$index" filter="filterDashboards"></kibi-select>
+                         filter="filterDashboards"
+                         filter-options="{rowIndex: $index}"></kibi-select>
                       </td>
                       <td>
                         <kibi-select required object-type="joinRelations"
                          data-test-subj="relation"
-                         ng-model="relation.relation" id="$index" filter="filterRelations"></kibi-select>
+                         ng-model="relation.relation"
+                         filter="filterRelations"
+                         filter-options="{rowIndex: $index}"></kibi-select>
                       </td>
                       <td>
                         <div class="btn-group rightCorner">

@@ -387,10 +387,10 @@ describe('Kibi Settings', function () {
         init({ relations: relations, indexToDashboardsMap: map });
         indexToDashboardMapPromise.then(function () {
           expect($scope.relations.relationsDashboards).to.have.length(1);
-          expect($scope.filterDashboards(0, { value: 'Da1' })).to.be(true);
-          expect($scope.filterDashboards(0, { value: 'Da2' })).to.be(true);
-          expect($scope.filterDashboards(0, { value: 'Db' })).to.be(true);
-          expect($scope.filterDashboards(0, { value: 'Dc' })).to.be(true);
+          expect($scope.filterDashboards({ value: 'Da1' }, {rowIndex: 0})).to.be(true);
+          expect($scope.filterDashboards({ value: 'Da2' }, {rowIndex: 0})).to.be(true);
+          expect($scope.filterDashboards({ value: 'Db' }, {rowIndex: 0})).to.be(true);
+          expect($scope.filterDashboards({ value: 'Dc' }, {rowIndex: 0})).to.be(true);
           done();
         });
       });
@@ -447,7 +447,7 @@ describe('Kibi Settings', function () {
         init({ relations: relations, indexToDashboardsMap: map });
         indexToDashboardMapPromise.then(function () {
           expect($scope.relations.relationsDashboards).to.have.length(2);
-          const actual = $scope.filterDashboards(1);
+          const actual = $scope.filterDashboards(null, {rowIndex: 1});
           expect(actual).to.have.length(3);
           expect(actual[0]).to.be('index-a//path-a1/index-a//path-a2');
           expect(actual[1]).to.be('index-b//path-b/index-c//path-c');
@@ -504,10 +504,10 @@ describe('Kibi Settings', function () {
         init({ relations: relations, indexToDashboardsMap: map });
         indexToDashboardMapPromise.then(function () {
           expect($scope.relations.relationsDashboards).to.have.length(1);
-          expect($scope.filterDashboards(0, { value: 'Da1' })).to.be(false);
-          expect($scope.filterDashboards(0, { value: 'Da2' })).to.be(false);
-          expect($scope.filterDashboards(0, { value: 'Db' })).to.be(true);
-          expect($scope.filterDashboards(0, { value: 'Dc' })).to.be(true);
+          expect($scope.filterDashboards({ value: 'Da1' }, {rowIndex: 0})).to.be(false);
+          expect($scope.filterDashboards({ value: 'Da2' }, {rowIndex: 0})).to.be(false);
+          expect($scope.filterDashboards({ value: 'Db' }, {rowIndex: 0})).to.be(true);
+          expect($scope.filterDashboards({ value: 'Dc' }, {rowIndex: 0})).to.be(true);
           done();
         }).catch(done);
       });
@@ -559,10 +559,10 @@ describe('Kibi Settings', function () {
         init({ relations: relations, indexToDashboardsMap: map });
         indexToDashboardMapPromise.then(function () {
           expect($scope.relations.relationsDashboards).to.have.length(1);
-          expect($scope.filterDashboards(0, { value: 'Da1' })).to.be(true);
-          expect($scope.filterDashboards(0, { value: 'Da2' })).to.be(true);
-          expect($scope.filterDashboards(0, { value: 'Db' })).to.be(false);
-          expect($scope.filterDashboards(0, { value: 'Dc' })).to.be(true);
+          expect($scope.filterDashboards({ value: 'Da1' }, {rowIndex: 0})).to.be(true);
+          expect($scope.filterDashboards({ value: 'Da2' }, {rowIndex: 0})).to.be(true);
+          expect($scope.filterDashboards({ value: 'Db' }, {rowIndex: 0})).to.be(false);
+          expect($scope.filterDashboards({ value: 'Dc' }, {rowIndex: 0})).to.be(true);
           done();
         }).catch(done);
       });
@@ -629,11 +629,11 @@ describe('Kibi Settings', function () {
 
         init({ relations: relations, indexToDashboardsMap: map });
         indexToDashboardMapPromise.then(function () {
-          expect($scope.filterDashboards(0, { value: 'Da1' })).to.be(false);
-          expect($scope.filterDashboards(0, { value: 'Da2' })).to.be(false);
-          expect($scope.filterDashboards(0, { value: 'Db' })).to.be(true);
-          expect($scope.filterDashboards(0, { value: 'Dc' })).to.be(true);
-          expect($scope.filterDashboards(0, { value: 'Dd' })).to.be(true);
+          expect($scope.filterDashboards({ value: 'Da1' }, {rowIndex: 0})).to.be(false);
+          expect($scope.filterDashboards({ value: 'Da2' }, {rowIndex: 0})).to.be(false);
+          expect($scope.filterDashboards({ value: 'Db' }, {rowIndex: 0})).to.be(true);
+          expect($scope.filterDashboards({ value: 'Dc' }, {rowIndex: 0})).to.be(true);
+          expect($scope.filterDashboards({ value: 'Dd' }, {rowIndex: 0})).to.be(true);
           done();
         }).catch(done);
       });
@@ -669,9 +669,9 @@ describe('Kibi Settings', function () {
 
         init({ relations: relations, indexToDashboardsMap: map });
         indexToDashboardMapPromise.then(function () {
-          expect($scope.filterRelations(0, { value: 'index-a//path-a1/index-b//path-b' })).to.be(false);
-          expect($scope.filterRelations(1, { value: 'index-a//path-a1/index-b//path-b' })).to.be(true);
-          expect($scope.filterRelations(1, { value: 'index-a//path-a2/index-b//path-b' })).to.be(false);
+          expect($scope.filterRelations({ value: 'index-a//path-a1/index-b//path-b' }, {rowIndex: 0})).to.be(false);
+          expect($scope.filterRelations({ value: 'index-a//path-a1/index-b//path-b' }, {rowIndex: 1})).to.be(true);
+          expect($scope.filterRelations({ value: 'index-a//path-a2/index-b//path-b' }, {rowIndex: 1})).to.be(false);
           done();
         }).catch(done);
         $timeout.flush();
@@ -741,12 +741,12 @@ describe('Kibi Settings', function () {
 
         init({ relations: relations, indexToDashboardsMap: map });
         indexToDashboardMapPromise.then(function () {
-          expect($scope.filterRelations(0, { value: 'index-a//path-a/index-b//path-b' })).to.be(false);
-          expect($scope.filterRelations(0, { value: 'index-b//path-b/index-c//path-c' })).to.be(false);
-          expect($scope.filterRelations(0, { value: 'index-c//path-c/index-d//path-d' })).to.be(true);
-          expect($scope.filterRelations(1, { value: 'index-a//path-a/index-b//path-b' })).to.be(true);
-          expect($scope.filterRelations(1, { value: 'index-b//path-b/index-c//path-c' })).to.be(false);
-          expect($scope.filterRelations(1, { value: 'index-c//path-c/index-d//path-d' })).to.be(false);
+          expect($scope.filterRelations({ value: 'index-a//path-a/index-b//path-b' }, {rowIndex: 0})).to.be(false);
+          expect($scope.filterRelations({ value: 'index-b//path-b/index-c//path-c' }, {rowIndex: 0})).to.be(false);
+          expect($scope.filterRelations({ value: 'index-c//path-c/index-d//path-d' }, {rowIndex: 0})).to.be(true);
+          expect($scope.filterRelations({ value: 'index-a//path-a/index-b//path-b' }, {rowIndex: 1})).to.be(true);
+          expect($scope.filterRelations({ value: 'index-b//path-b/index-c//path-c' }, {rowIndex: 1})).to.be(false);
+          expect($scope.filterRelations({ value: 'index-c//path-c/index-d//path-d' }, {rowIndex: 1})).to.be(false);
           done();
         }).catch(done);
         $timeout.flush();
@@ -814,12 +814,12 @@ describe('Kibi Settings', function () {
 
         init({ relations: relations, indexToDashboardsMap: map });
         indexToDashboardMapPromise.then(function () {
-          expect($scope.filterDashboards(0, { value: 'Da1' })).to.be(false);
-          expect($scope.filterDashboards(0, { value: 'Da2' })).to.be(false);
-          expect($scope.filterDashboards(0, { value: 'Db1' })).to.be(false);
-          expect($scope.filterDashboards(0, { value: 'Db2' })).to.be(false);
-          expect($scope.filterDashboards(0, { value: 'Dc' })).to.be(true);
-          expect($scope.filterDashboards(0, { value: 'Dd' })).to.be(true);
+          expect($scope.filterDashboards({ value: 'Da1' }, {rowIndex: 0})).to.be(false);
+          expect($scope.filterDashboards({ value: 'Da2' }, {rowIndex: 0})).to.be(false);
+          expect($scope.filterDashboards({ value: 'Db1' }, {rowIndex: 0})).to.be(false);
+          expect($scope.filterDashboards({ value: 'Db2' }, {rowIndex: 0})).to.be(false);
+          expect($scope.filterDashboards({ value: 'Dc' }, {rowIndex: 0})).to.be(true);
+          expect($scope.filterDashboards({ value: 'Dd' }, {rowIndex: 0})).to.be(true);
           done();
         }).catch(done);
       });
@@ -889,7 +889,7 @@ describe('Kibi Settings', function () {
 
         init({ relations: relations, indexToDashboardsMap: map });
         indexToDashboardMapPromise.then(function () {
-          expect($scope.filterRelations(1)).to.eql([
+          expect($scope.filterRelations(null, {rowIndex: 1})).to.eql([
             'index-a/path-a/index-b/path-b',
             'index-b/path-b/index-c/path-c',
             'index-c/path-c/index-d/path-d',
@@ -964,9 +964,9 @@ describe('Kibi Settings', function () {
 
         init({ relations: relations, indexToDashboardsMap: map });
         indexToDashboardMapPromise.then(function () {
-          expect($scope.filterRelations(0, { value: 'index-a//path-a/index-b//path-b' })).to.be(false);
-          expect($scope.filterRelations(0, { value: 'index-b//path-b/index-c//path-c' })).to.be(false);
-          expect($scope.filterRelations(0, { value: 'index-c//path-c/index-d//path-d' })).to.be(false);
+          expect($scope.filterRelations({ value: 'index-a//path-a/index-b//path-b' }, {rowIndex: 0})).to.be(false);
+          expect($scope.filterRelations({ value: 'index-b//path-b/index-c//path-c' }, {rowIndex: 0})).to.be(false);
+          expect($scope.filterRelations({ value: 'index-c//path-c/index-d//path-d' }, {rowIndex: 0})).to.be(false);
           done();
         }).catch(done);
       });
@@ -1032,9 +1032,9 @@ describe('Kibi Settings', function () {
 
         init({ relations: relations, indexToDashboardsMap: map });
         indexToDashboardMapPromise.then(function () {
-          expect($scope.filterRelations(0, { value: 'index-a//path-a/index-b//path-b' })).to.be(true);
-          expect($scope.filterRelations(0, { value: 'index-b//path-b/index-c//path-c' })).to.be(false);
-          expect($scope.filterRelations(0, { value: 'index-c//path-c/index-d//path-d' })).to.be(false);
+          expect($scope.filterRelations({ value: 'index-a//path-a/index-b//path-b' }, {rowIndex: 0})).to.be(true);
+          expect($scope.filterRelations({ value: 'index-b//path-b/index-c//path-c' }, {rowIndex: 0})).to.be(false);
+          expect($scope.filterRelations({ value: 'index-c//path-c/index-d//path-d' }, {rowIndex: 0})).to.be(false);
           done();
         }).catch(done);
         $timeout.flush();
@@ -1101,9 +1101,9 @@ describe('Kibi Settings', function () {
 
         init({ relations: relations, indexToDashboardsMap: map });
         indexToDashboardMapPromise.then(function () {
-          expect($scope.filterRelations(0, { value: 'index-a//path-a1/index-b//path-b1' })).to.be(false);
-          expect($scope.filterRelations(0, { value: 'index-a//path-a2/index-b//path-b2' })).to.be(false);
-          expect($scope.filterRelations(0, { value: 'index-c//path-c/index-d//path-d' })).to.be(true);
+          expect($scope.filterRelations({ value: 'index-a//path-a1/index-b//path-b1' }, {rowIndex: 0})).to.be(false);
+          expect($scope.filterRelations({ value: 'index-a//path-a2/index-b//path-b2' }, {rowIndex: 0})).to.be(false);
+          expect($scope.filterRelations({ value: 'index-c//path-c/index-d//path-d' }, {rowIndex: 0})).to.be(true);
           done();
         }).catch(done);
         $timeout.flush();

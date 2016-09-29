@@ -187,7 +187,7 @@ define(function (require) {
                 var selected = !!ngModelCtrl.$viewValue && !!ngModelCtrl.$viewValue.value &&
                   _.isEqual(ngModelCtrl.$viewValue.value, item.value);
 
-                var toRemove = scope.filter()(scope.id, item, scope.filterOptions);
+                var toRemove = scope.filter()(item, scope.filterOptions);
 
                 return toRemove && !selected;
               });
@@ -294,7 +294,7 @@ define(function (require) {
 
         scope.$watch(function (scope) {
           if (scope.filter && _.isFunction(scope.filter())) {
-            return scope.filter()(scope.id);
+            return scope.filter()(null, scope.filterOptions);
           }
         }, function (newValue, oldValue, scope) {
           _render(scope);

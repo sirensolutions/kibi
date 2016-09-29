@@ -22,8 +22,8 @@ define(function (require) {
   }
 
   DelayExecutionHelper.DELAY_STRATEGY = {
-    RESET_COUNTER_ON_NEW_EVENT: 'RESET_COUNTER_ON_EVERY_NEW_EVENT',
-    DO_NOT_RESET_ON_NEW_EVENT: 'DO_NOT_RESET_ON_NEW_EVENT'
+    RESET_COUNTER_ON_NEW_EVENT: 'RESET_COUNTER_ON_NEW_EVENT',
+    DO_NOT_RESET_COUNTER_ON_NEW_EVENT: 'DO_NOT_RESET_COUNTER_ON_NEW_EVENT'
   };
 
   DelayExecutionHelper.prototype.addEventData = function (data) {

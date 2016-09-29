@@ -30,7 +30,8 @@ module.exports = function (kibana) {
   let migrations = [
     require('./lib/migrations/migration_1'),
     require('./lib/migrations/migration_2'),
-    require('./lib/migrations/migration_3')
+    require('./lib/migrations/migration_3'),
+    require('./lib/migrations/migration_4')
   ];
 
   var _validateQueryDefs = function (queryDefs) {

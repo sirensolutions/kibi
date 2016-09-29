@@ -18,6 +18,10 @@ module.exports = function (grunt) {
     {
       url: 'https://github.com/sirensolutions/kibi_timeline_vis/raw/4.5.3-2/target/kibi_timeline_vis-4.5.3-2.zip',
       dest: '/tmp/kibi_timeline_vis.zip'
+    },
+    {
+      url: 'https://github.com/stormpython/heatmap/archive/1.0.0.zip',
+      dest: '/tmp/heatmap_vis.zip'
     }
   ];
 

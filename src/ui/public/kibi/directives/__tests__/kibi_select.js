@@ -315,7 +315,7 @@ describe('Kibi Directives', function () {
           label: 'toto'
         }
       ];
-      var filter = function (id, item) {
+      var filter = function (item, options) {
         if (item) {
           return item.value === 1;
         } else {
@@ -349,7 +349,7 @@ describe('Kibi Directives', function () {
           label: 'toto'
         }
       ];
-      var filter = function (id, item, options) {
+      var filter = function (item, options) {
         if (item) {
           return item.label === options.name;
         } else {
@@ -383,7 +383,7 @@ describe('Kibi Directives', function () {
           label: 'toto'
         }
       ];
-      var filter = function (id, item) {
+      var filter = function (item, options) {
         if (item) {
           return item.value === 1;
         } else {
@@ -423,7 +423,7 @@ describe('Kibi Directives', function () {
           label: 'toto'
         }
       ];
-      var filter = function (id, item) {
+      var filter = function (item, options) {
         if (item) {
           return item.value === 1;
         } else {

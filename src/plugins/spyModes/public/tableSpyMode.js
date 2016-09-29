@@ -14,7 +14,7 @@ define(function (require) {
       order: 1,
       // kibi: do not show if the vis is incompatible with this mode
       allowSpyMode: function (visType) {
-        return !visType.requiresMultiSearch;
+        return !visType.requiresMultiSearch && visType.name !== 'kibi-data-table';
       },
       template: require('plugins/spyModes/tableSpyMode.html'),
       link: function tableLinkFn($scope, $el) {

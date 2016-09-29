@@ -1,6 +1,8 @@
 define(function (require) {
   const angular = require('angular');
   const _ = require('lodash');
+  const DelayExecutionHelper = require('ui/kibi/helpers/delay_execution_helper');
+
 
   return function KibiNavBarHelperFactory(kibiState, globalState, getAppState, createNotifier, Private, $http, Promise, $rootScope,
                                           savedDashboards) {
@@ -9,6 +11,116 @@ define(function (require) {
     });
 
     const dashboardGroupHelper = Private(require('ui/kibi/helpers/dashboard_group_helper'));
+
+    /*
+    * Private Methods
+    */
+    const getGroupIndexes = function (dashboardsIds) {
+      const groupIndexes = [];
+
+      _.each(dashboardsIds, (dashId) => {
+        const groupIndex = _.findIndex(this.dashboardGroups, (group) => group.selected.id === dashId);
+        if (groupIndex !== -1 && groupIndexes.indexOf(groupIndex) === -1) {
+          groupIndexes.push(groupIndex);
+        }
+      });
+      return groupIndexes;
+    };
+
+    const addFiltersIconMessages = function (tab) {
+      return kibiState.getState(tab.selected.id).then(({ queries, filters }) => {
+        if (queries || filters) {
+          if (queries.length > 1 && filters.length !== 0) {
+            tab.selected.filterIconMessage = 'This dashboard has a query and ' + filters.length + ' filter(s) set.';
+          } else if (queries.length > 1) {
+            tab.selected.filterIconMessage = 'This dashboard has a query set.';
+          } else if (filters.length !== 0) {
+            tab.selected.filterIconMessage = 'This dashboard has ' + filters.length + ' filter(s) set.';
+          } else {
+            tab.selected.filterIconMessage = null;
+          }
+        }
+      });
+    };
+
+    let lastFiredMultiCountQuery;
+    const _fireUpdateAllCounts = function (groupIndexesToUpdate, forceUpdate = false) {
+      const self = this;
+
+      const countForDashboard = function (dashboardGroups, index) {
+        const selectedDashboard = dashboardGroupHelper.getCountQueryForSelectedDashboard(dashboardGroups, index);
+        const timeBasedSelectedDashboard = selectedDashboard.then(({ indexPatternId, dashboardId }) => {
+          if (!indexPatternId || !dashboardId) {
+            return;
+          }
+          return kibiState.timeBasedIndices(indexPatternId, dashboardId);
+        });
+        return Promise.all([ selectedDashboard, timeBasedSelectedDashboard ])
+        .then(([ { groupIndex, query }, indices ]) => {
+          return { groupIndex, query, indices };
+        });
+      };
+
+      let promises;
+      if (groupIndexesToUpdate && groupIndexesToUpdate.constructor === Array && groupIndexesToUpdate.length > 0) {
+        promises = _.map(groupIndexesToUpdate, (index) => countForDashboard(self.dashboardGroups, index));
+      } else {
+        promises = _.map(self.dashboardGroups, (g, index) => countForDashboard(self.dashboardGroups, index));
+      }
+
+      return Promise.all(promises).then((results) => {
+        // if there is resolved promise with no query property
+        // it means that this group has no index attached and should be skipped when updating the group counts
+        _.remove(results, result => !result.query || !result.indices);
+
+        const query = _.map(results, result => `{"index":${angular.toJson(result.indices)}}\n${angular.toJson(result.query)}\n`).join('');
+
+        if (query && (forceUpdate || lastFiredMultiCountQuery !== query)) {
+          lastFiredMultiCountQuery = query;
+
+          //Note: ?getCountsOnTabs has no meaning, it is just useful to filter when inspecting requests
+          return $http.post(self.chrome.getBasePath() + '/elasticsearch/_msearch?getCountsOnTabs', query).then((response) => {
+            const filtersIconMessagesPromises = [];
+            _.each(response.data.responses, function (hit, i) {
+              // get the corresponding groupIndex from results
+              const tab = self.dashboardGroups[results[i].groupIndex];
+              try {
+                if (!_.contains(Object.keys(hit), 'error')) {
+                  tab.count = hit.hits.total;
+                  tab.selected.filterIconMessage = null;
+                  filtersIconMessagesPromises.push(addFiltersIconMessages.call(this, tab));
+                } else if (_.contains(Object.keys(hit), 'error') && _.contains(hit.error, 'ElasticsearchSecurityException')) {
+                  tab.count = 'Unauthorized';
+                } else {
+                  tab.count = 'Error';
+                }
+              } catch (e) {
+                notify.warning('An error occurred while getting counts for tab ' + tab.title + ': ' + e);
+              }
+            });
+            return Promise.all(filtersIconMessagesPromises).then(() => self.dashboardGroups);
+          })
+          .catch((err) => {
+            notify.error(`Couldn't get counts for tabs: ${JSON.stringify(err, null, ' ')}`);
+          });
+        }
+      }).catch(notify.warning);
+    };
+
+    const updateCounts = function (dashboardsIds, reason, forceUpdate = false) {
+      if (console) {
+        console.log(`Count on tabs will be updated for dashboards ${JSON.stringify(dashboardsIds, null, ' ')} because: [${reason}]`);
+      }
+      this.delayExecutionHelper.addEventData({
+        forceUpdate: forceUpdate,
+        ids: dashboardsIds
+      });
+    };
+
+
+    // =================
+    // Group computation and counts updates
+    // =================
 
     function KibiNavBarHelper() {
       this.appState = null;
@@ -105,107 +217,34 @@ define(function (require) {
         // refresh all tabs count
         this.updateAllCounts(null, 'courier:searchRefresh event', true);
       });
-    }
 
-    /*
-    * Private Methods
-    */
-
-    const addFiltersIconMessages = function (tab) {
-      return kibiState.getState(tab.selected.id).then(({ queries, filters }) => {
-        if (queries || filters) {
-          if (queries.length > 1 && filters.length !== 0) {
-            tab.selected.filterIconMessage = 'This dashboard has a query and ' + filters.length + ' filter(s) set.';
-          } else if (queries.length > 1) {
-            tab.selected.filterIconMessage = 'This dashboard has a query set.';
-          } else if (filters.length !== 0) {
-            tab.selected.filterIconMessage = 'This dashboard has ' + filters.length + ' filter(s) set.';
-          } else {
-            tab.selected.filterIconMessage = null;
+      var that = this;
+      this.delayExecutionHelper = new DelayExecutionHelper(
+        (data, alreadyCollectedData) => {
+          if (alreadyCollectedData.ids === undefined) {
+            alreadyCollectedData.ids = [];
           }
-        }
-      });
-    };
-
-    let lastFiredMultiCountQuery;
-    const _fireUpdateAllCounts = function (groupIndexesToUpdate, reason, forceUpdate = false) {
-      const self = this;
-
-      const countForDashboard = function (dashboardGroups, index) {
-        const selectedDashboard = dashboardGroupHelper.getCountQueryForSelectedDashboard(dashboardGroups, index);
-        const timeBasedSelectedDashboard = selectedDashboard.then(({ indexPatternId, dashboardId }) => {
-          if (!indexPatternId || !dashboardId) {
-            return;
+          if (alreadyCollectedData.forceUpdate === undefined) {
+            alreadyCollectedData.forceUpdate = false;
           }
-          return kibiState.timeBasedIndices(indexPatternId, dashboardId);
-        });
-        return Promise.all([ selectedDashboard, timeBasedSelectedDashboard ])
-        .then(([ { groupIndex, query }, indices ]) => {
-          return { groupIndex, query, indices };
-        });
-      };
-
-      let promises;
-      if (groupIndexesToUpdate && groupIndexesToUpdate.constructor === Array && groupIndexesToUpdate.length > 0) {
-        promises = _.map(groupIndexesToUpdate, (index) => countForDashboard(self.dashboardGroups, index));
-      } else {
-        promises = _.map(self.dashboardGroups, (g, index) => countForDashboard(self.dashboardGroups, index));
-      }
-
-      return Promise.all(promises).then((results) => {
-        // if there is resolved promise with no query property
-        // it means that this group has no index attached and should be skipped when updating the group counts
-        _.remove(results, result => !result.query || !result.indices);
-
-        const query = _.map(results, result => `{"index":${angular.toJson(result.indices)}}\n${angular.toJson(result.query)}\n`).join('');
-
-        if (query && (forceUpdate || lastFiredMultiCountQuery !== query)) {
-          lastFiredMultiCountQuery = query;
-
-          //Note: ?getCountsOnTabs has no meaning, it is just useful to filter when inspecting requests
-          return $http.post(self.chrome.getBasePath() + '/elasticsearch/_msearch?getCountsOnTabs', query).then((response) => {
-            const filtersIconMessagesPromises = [];
-            _.each(response.data.responses, function (hit, i) {
-              // get the corresponding groupIndex from results
-              const tab = self.dashboardGroups[results[i].groupIndex];
-              try {
-                if (!_.contains(Object.keys(hit), 'error')) {
-                  tab.count = hit.hits.total;
-                  tab.selected.filterIconMessage = null;
-                  filtersIconMessagesPromises.push(addFiltersIconMessages.call(this, tab));
-                } else if (_.contains(Object.keys(hit), 'error') && _.contains(hit.error, 'ElasticsearchSecurityException')) {
-                  tab.count = 'Unauthorized';
-                } else {
-                  tab.count = 'Error';
-                }
-              } catch (e) {
-                notify.warning('An error occurred while getting counts for tab ' + tab.title + ': ' + e);
-              }
-            });
-            return Promise.all(filtersIconMessagesPromises).then(() => self.dashboardGroups);
-          })
-          .catch((err) => {
-            notify.error(`Couldn't get counts for tabs: ${JSON.stringify(err, null, ' ')}`);
+          if (data.forceUpdate) {
+            alreadyCollectedData.forceUpdate = data.forceUpdate;
+          }
+          _.each(data.ids, (d) => {
+            if (alreadyCollectedData.ids.indexOf(d) === -1) {
+              alreadyCollectedData.ids.push(d);
+            }
           });
-        }
-      }).catch(notify.warning);
-    };
-
-    // =================
-    // Group computation and counts updates
-    // =================
-
-    const getGroupIndexes = function (dashboardsIds) {
-      const groupIndexes = [];
-
-      _.each(dashboardsIds, (dashId) => {
-        const groupIndex = _.findIndex(this.dashboardGroups, (group) => group.selected.id === dashId);
-        if (groupIndex !== -1 && groupIndexes.indexOf(groupIndex) === -1) {
-          groupIndexes.push(groupIndex);
-        }
-      });
-      return groupIndexes;
-    };
+        },
+        (data) => {
+          var forceUpdate = data.forceUpdate;
+          var groupIndexes = getGroupIndexes.call(that, data.ids);
+          _fireUpdateAllCounts.call(that, groupIndexes, forceUpdate);
+        },
+        750,
+        DelayExecutionHelper.DELAY_STRATEGY.RESET_COUNTER_ON_NEW_EVENT
+      );
+    }
 
     /*
     * Public Methods
@@ -213,19 +252,6 @@ define(function (require) {
 
     KibiNavBarHelper.prototype.setChrome = function (c) {
       this.chrome = c;
-    };
-
-    // debounce count queries
-    //let lastEventTimer;
-    const updateCounts = function (dashboardsIds, reason, forceUpdate = false) {
-      if (console) {
-        console.log(`Count on tabs will be updated for dashboards ${JSON.stringify(dashboardsIds, null, ' ')} because: [${reason}]`);
-      }
-      // TODO: https://github.com/sirensolutions/kibi-internal/issues/1273
-      //$timeout.cancel(lastEventTimer);
-      //lastEventTimer = $timeout(() => _fireUpdateAllCounts.call(this, getGroupIndexes.call(this, dashboardsIds), reason), 750);
-      //return lastEventTimer;
-      return _fireUpdateAllCounts.call(this, getGroupIndexes.call(this, dashboardsIds), reason, forceUpdate);
     };
 
     KibiNavBarHelper.prototype.updateAllCounts = function (dashboardsIds, reason, forceUpdate = false) {
@@ -252,6 +278,9 @@ define(function (require) {
     };
 
     KibiNavBarHelper.prototype.destroy = function () {
+      if (this.delayExecutionHelper) {
+        this.delayExecutionHelper.destroy();
+      }
       if (this.removeGetAppStateHandler) {
         this.removeGetAppStateHandler();
       }

@@ -50,12 +50,9 @@ define(function (require) {
           });
         });
       })).then((results) => {
-        let query = '';
-        _.each(results, function (result) {
-          query += `{"index":${angular.toJson(result.indices)}}\n${angular.toJson(result.query)}\n`;
-        });
-
+        const query = _.map(results, result => `{"index":${angular.toJson(result.indices)}}\n${angular.toJson(result.query)}\n`).join('');
         const duration = moment();
+
         // ?getCountsOnButton has no meanning it is just usefull to filter when inspecting requests
         return $http.post(chrome.getBasePath() + '/elasticsearch/_msearch?getCountsOnButton', query)
         .then((response) => {

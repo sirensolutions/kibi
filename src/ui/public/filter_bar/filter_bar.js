@@ -9,6 +9,8 @@ define(function (require) {
 
   require('ui/kibi/directives/kibi_entity_clipboard');
 
+  require('ui/kibi/styles/explanation');
+
   module.directive('filterBar', function (createNotifier, kibiState, $rootScope, Private, Promise, getAppState, config) {
     const mapAndFlattenFilters = Private(require('ui/filter_bar/lib/mapAndFlattenFilters'));
     const mapFlattenAndWrapFilters = Private(require('ui/filter_bar/lib/mapFlattenAndWrapFilters'));
@@ -223,8 +225,10 @@ define(function (require) {
 
         // kibi: Get the state for the dashboard ID and add the join_set filter to the appState if it exists
         const addJoinSetFilter = function (dashboardId) {
-          $scope.state.filters = _.filter($scope.state.filters, (f) => !f.join_set);
           return kibiState.getState(dashboardId).then(({ filters }) => {
+            if ($scope.state && $scope.state.filters) {
+              _.remove($scope.state.filters, (f) => f.join_set);
+            }
             _.each(filters, (filter) => {
               if (filter.join_set) {
                 queryFilter.addFilters(filter);

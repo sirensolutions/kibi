@@ -12,33 +12,39 @@ define(function (require) {
       var fieldFormat = Private(require('ui/registry/field_formats'));
       var _ = require('lodash');
 
-      var explainFiltersForJoinSet = function (indexId, filters) {
-        var html = 'Index: <b>' + indexId + '</b></br>';
-        if (!filters) {
-          return Promise.resolve(html);
-        }
-
-        var promises = _.map(filters, function (filter) {
-          return explainFilter(filter, indexId);
+      var explainFiltersForJoinSet = function (queriesPerDashboard, indexId) {
+        var promises = [];
+        _.each(queriesPerDashboard, function (filters, dashboardId) {
+          _.each(filters, filter => {
+            promises.push(explainFilter(filter, indexId).then(filterLabel => {
+              return { filterLabel, dashboardId };
+            }));
+          });
         });
 
-        return Promise.all(promises).then(function (explanations) {
-          html += '<ul>';
-          _.each(explanations, function (expl) {
-            html += '<li>' + expl + '</li>';
-          });
-          html += '</ul>';
+        return Promise.all(promises)
+        .then(function (explanations) {
+          let html = '';
+
+          _(explanations)
+          .groupBy('dashboardId')
+          .each((values, dashboardId) => {
+            if (values.length) {
+              html += `From <b>${dashboardId}</b>:</br><ul>`;
+              html += _.map(values, ({ filterLabel }) => `<li>${filterLabel}</li>`).join('');
+              html += '</ul>';
+            }
+          })
+          .value();
           return html;
         });
       };
 
       var explainJoinSet = function (joinSet) {
-        var promises = _.map(joinSet.queries, function (query, index) {
-          return explainFiltersForJoinSet(index, query);
-        });
+        var promises = _.map(joinSet.queries, explainFiltersForJoinSet);
 
         return Promise.all(promises).then(function (explanations) {
-          var html = '<ul>';
+          var html = '<ul class="explanation join-set">';
           _.each(explanations, function (expl) {
             html += '<li>' + expl + '</li>';
           });
@@ -140,7 +146,7 @@ define(function (require) {
             return 'join_set: ' + html;
           });
         } else if (f.join_sequence) {
-          return explainJoinSequence(f.join_sequence, f.meta.buttons).then(function (html) {
+          return explainJoinSequence(f.join_sequence).then(function (html) {
             return 'join_sequence: ' + html;
           });
         } else {
@@ -211,19 +217,19 @@ define(function (require) {
       };
 
 
-      var explainRelation = function (el, button) {
+      var explainRelation = function (el) {
         var relation = el.relation;
 
         var promises = [];
         if (relation[0].queries instanceof Array && relation[0].queries.length > 0) {
-          promises.push(explainQueries(relation[0].queries, button.sourceIndexPatternId));
+          promises.push(explainQueries(relation[0].queries, relation[0].pattern));
         } else {
           promises.push(Promise.resolve(''));
         }
 
 
         if (relation[1].queries instanceof Array && relation[1].queries.length > 0) {
-          promises.push(explainQueries(relation[1].queries, button.targetIndexPatternId));
+          promises.push(explainQueries(relation[1].queries, relation[1].pattern));
         } else {
           promises.push(Promise.resolve(''));
         }
@@ -245,18 +251,17 @@ define(function (require) {
         });
       };
 
-      var explainJoinSequence = function (joinSequence, buttons) {
+      var explainJoinSequence = function (joinSequence) {
         // clone and reverse to iterate backwards to show the last step on top
         var sequence = _.cloneDeep(joinSequence);
         sequence.reverse();
 
         var promises = [];
         _.each(sequence, function (el, i) {
-          const buttonIndex = buttons.length - 1 - i;
           if (el.relation) {
-            promises.push(explainRelation(el, buttons[buttonIndex]));
+            promises.push(explainRelation(el));
           } else if (el.group) {
-            promises.push(explainGroup(el, buttons[buttonIndex].group));
+            promises.push(explainGroup(el));
           }
         });
 
@@ -269,12 +274,12 @@ define(function (require) {
         });
       };
 
-      var explainGroup = function (el, groupMeta) {
+      var explainGroup = function (el) {
         var group = el.group;
 
         var promises = [];
         _.each(group, function (sequence, i) {
-          promises.push(explainJoinSequence(sequence, groupMeta[i]));
+          promises.push(explainJoinSequence(sequence));
         });
 
         return Promise.all(promises).then(function (groupSequenceExplanations) {
@@ -292,7 +297,7 @@ define(function (require) {
         var promises = [];
         _.each(filters, function (f) {
           if (f.join_sequence) {
-            promises.push(explainJoinSequence(f.join_sequence, f.meta.buttons));
+            promises.push(explainJoinSequence(f.join_sequence));
           } else if (f.join_set) {
             promises.push(explainJoinSet(f.join_set));
           } else {

@@ -24,7 +24,7 @@ describe('FilterJoin query builder', function () {
     builder.addFilterJoin({
       sourceTypes: 't1',
       sourcePath: 'id1',
-      targetIndex: 'i2',
+      targetIndices: [ 'i2' ],
       targetTypes: 't2',
       targetPath: 'id2'
     });
@@ -66,7 +66,7 @@ describe('FilterJoin query builder', function () {
     builder.addFilterJoin({
       sourceTypes: 't1',
       sourcePath: 'id1',
-      targetIndex: 'i2',
+      targetIndices: [ 'i2' ],
       targetTypes: 't2',
       targetPath: 'id2'
     })
@@ -116,7 +116,7 @@ describe('FilterJoin query builder', function () {
     const builder = new FilterJoinBuilder();
     builder.addFilterJoin({
       sourcePath: 'id1',
-      targetIndex: 'i2',
+      targetIndices: [ 'i2' ],
       targetPath: 'id2'
     });
     const expected = [
@@ -150,12 +150,12 @@ describe('FilterJoin query builder', function () {
     const builder = new FilterJoinBuilder();
     builder.addFilterJoin({
       sourcePath: 'id1',
-      targetIndex: 'i2',
+      targetIndices: [ 'i2' ],
       targetPath: 'id2'
     })
     .addFilterJoin({
       sourcePath: 'id21',
-      targetIndex: 'i3',
+      targetIndices: [ 'i3' ],
       targetPath: 'id3'
     });
     const expected = [
@@ -212,12 +212,12 @@ describe('FilterJoin query builder', function () {
     const builder = new FilterJoinBuilder();
     builder.addFilterJoin({
       sourcePath: 'id1',
-      targetIndex: 'i2',
+      targetIndices: [ 'i2' ],
       targetPath: 'id2'
     })
     .addFilterJoin({
       sourcePath: 'id21',
-      targetIndex: 'i3',
+      targetIndices: [ 'i3' ],
       targetPath: 'id3',
       negate: true
     });
@@ -276,7 +276,7 @@ describe('FilterJoin query builder', function () {
     const builder = new FilterJoinBuilder();
     builder.addFilterJoin({
       sourcePath: 'id1',
-      targetIndex: 'i2',
+      targetIndices: [ 'i2' ],
       targetPath: 'id2'
     })
     .addQuery({
@@ -284,7 +284,7 @@ describe('FilterJoin query builder', function () {
     })
     .addFilterJoin({
       sourcePath: 'id21',
-      targetIndex: 'i3',
+      targetIndices: [ 'i3' ],
       targetPath: 'id3'
     })
     .addQuery({
@@ -355,7 +355,7 @@ describe('FilterJoin query builder', function () {
     const builder = new FilterJoinBuilder();
     builder.addFilterJoin({
       sourcePath: 'id1',
-      targetIndex: 'i2',
+      targetIndices: [ 'i2' ],
       targetPath: 'id2'
     })
     .addQuery({
@@ -399,7 +399,7 @@ describe('FilterJoin query builder', function () {
     const builder = new FilterJoinBuilder();
     builder.addFilterJoin({
       sourcePath: 'id1',
-      targetIndex: 'i2',
+      targetIndices: [ 'i2' ],
       targetPath: 'id2',
       maxTermsPerShard: 10,
       orderBy: '_doc',
@@ -439,7 +439,7 @@ describe('FilterJoin query builder', function () {
     const builder = new FilterJoinBuilder();
     builder.addFilterJoin({
       sourcePath: 'id1',
-      targetIndex: 'i2',
+      targetIndices: [ 'i2' ],
       targetPath: 'id2',
       maxTermsPerShard: -1
     });

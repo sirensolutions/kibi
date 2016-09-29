@@ -117,9 +117,7 @@ define(function (require) {
           });
           // here create a group from existing ones and add it on the top
           const group = this.composeGroupFromExistingJoinFilters(existingJoinSeqFilters);
-          const groupMeta = _.map(existingJoinSeqFilters, f => f.meta.buttons);
           joinSeqFilter.join_sequence.unshift(group);
-          joinSeqFilter.meta.buttons.unshift({ group: groupMeta });
           return joinSeqFilter;
         }
       });
@@ -167,8 +165,6 @@ define(function (require) {
 
       return {
         meta: {
-          // the buttons array is used in the join explanation
-          buttons: [ _.pick(button, [ 'sourceIndexPatternId', 'targetIndexPatternId' ]) ],
           alias: label
         },
         join_sequence: [ relation ]
@@ -185,7 +181,6 @@ define(function (require) {
       joinSeqFiltersCloned.join_sequence.push(relation);
       // make sure that the new filter is not negated
       joinSeqFiltersCloned.meta.negate = false;
-      joinSeqFiltersCloned.meta.buttons.push(_.pick(button, [ 'sourceIndexPatternId', 'targetIndexPatternId' ]));
       return joinSeqFiltersCloned;
     };
 
@@ -212,6 +207,7 @@ define(function (require) {
       const ret = {
         relation: [
           {
+            pattern: button.sourceIndexPatternId,
             path: button.sourceField,
             indices: sourceIndices,
             queries: [
@@ -234,6 +230,7 @@ define(function (require) {
             termsEncoding: 'long'
           },
           {
+            pattern: button.targetIndexPatternId,
             path: button.targetField,
             indices: targetIndices,
             // default siren-join parameters

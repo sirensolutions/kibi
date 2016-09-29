@@ -39,24 +39,18 @@ describe('Kibi Components', function () {
           {
             relation: [
               {
+                pattern: 'article',
                 indices: ['article'],
                 path: 'id'
               },
               {
+                pattern: 'company',
                 indices: ['company'],
                 path: 'articleid'
               }
             ]
           }
-        ],
-        meta: {
-          buttons: [
-            {
-              sourceIndexPatternId: 'article',
-              targetIndexPatternId: 'company'
-            }
-          ]
-        }
+        ]
       };
     });
 
@@ -150,16 +144,16 @@ describe('Kibi Components', function () {
               [
                 {
                   relation: [
-                    { indices: [ 'weather-2015-03', 'weather-2015-02' ], path: 'forecast' },
-                    { indices: [ 'forecast' ], path: 'forecast' }
+                    { pattern: 'weather-*', indices: [ 'weather-2015-03', 'weather-2015-02' ], path: 'forecast' },
+                    { pattern: 'forecast', indices: [ 'forecast' ], path: 'forecast' }
                   ]
                 }
               ],
               [
                 {
                   relation: [
-                    { indices: [ 'weather-2015-03', 'weather-2015-02', 'weather-2015-01' ], path: 'forecast' },
-                    { indices: [ 'forecast' ], path: 'forecast' }
+                    { pattern: 'weather-*', indices: [ 'weather-2015-03', 'weather-2015-02', 'weather-2015-01' ], path: 'forecast' },
+                    { pattern: 'forecast', indices: [ 'forecast' ], path: 'forecast' }
                   ]
                 }
               ]
@@ -167,35 +161,11 @@ describe('Kibi Components', function () {
           },
           {
             relation: [
-              { indices: [ 'forecast' ], path: 'forecast' },
-              { indices: [ 'weather-2015-03', 'weather-2015-02' ], path: 'forecast' }
+              { pattern: 'forecast', indices: [ 'forecast' ], path: 'forecast' },
+              { pattern: 'weather-*', indices: [ 'weather-2015-03', 'weather-2015-02' ], path: 'forecast' }
             ]
           }
-        ],
-        meta: {
-          buttons: [
-            {
-              group: [
-                [
-                  {
-                    sourceIndexPatternId: 'weather-*',
-                    targetIndexPatternId: 'forecast'
-                  }
-                ],
-                [
-                  {
-                    sourceIndexPatternId: 'weather-*',
-                    targetIndexPatternId: 'forecast'
-                  }
-                ]
-              ]
-            },
-            {
-              sourceIndexPatternId: 'forecast',
-              targetIndexPatternId: 'weather-*'
-            }
-          ]
-        }
+        ]
       };
 
       var filter1 = {
@@ -736,24 +706,26 @@ describe('Kibi Components', function () {
             focus: focus,
             relations: relations,
             queries: {
-              'time-testing-3': [
-                {
-                  range: {
-                    'fake_field': {
-                      'gte': 1125576000000, // these timestamps match the times in fakeSavedDashboards time-testing-3 dashboard
-                      'lte': 1441454400000
+              'time-testing-3': {
+                Time: [
+                  {
+                    range: {
+                      fake_field: {
+                        gte: 1125576000000, // these timestamps match the times in fakeSavedDashboards time-testing-3 dashboard
+                        lte: 1441454400000
+                      }
                     }
                   }
-                }
-              ]
+                ]
+              }
             }
           }
         }
       ];
 
       var expected =
-      '<ul>' +
-        '<li>Index: <b>time-testing-3</b></br>' +
+      '<ul class="explanation join-set">' +
+        '<li>From <b>Time</b>:</br>' +
           '<ul>' +
             '<li> fake_field: <b>1125576000000</b> to <b>1441454400000</b> </li>' +
           '</ul>' +

@@ -7,6 +7,44 @@ const FilterJoinBuilder = require('./filterjoin_query_builder');
 
 describe('FilterJoin querying', function () {
   describe('Join Set', function () {
+    describe('time-based indices', function () {
+      it('should use the pattern field to drive the graph traversal', function () {
+        const query = {
+          join_set: {
+            focus: 'forecast',
+            relations: [
+              [
+                { pattern: 'weather-*', indices: [ 'weather-2015-01', 'weather-2015-02' ], types: [ 'type' ], path: 'id' },
+                { pattern: 'activity-*', indices: [ 'activity-2015-01', 'activity-2015-02' ], types: [ 'type' ], path: 'id' }
+              ],
+              [
+                { pattern: 'weather-*', indices: [ 'weather-2015-01', 'weather-2015-02' ], types: [ 'type' ], path: 'id' },
+                { pattern: 'forecast', indices: [ 'forecast' ], types: [ 'type' ], path: 'id' }
+              ]
+            ]
+          }
+        };
+        const builder = new FilterJoinBuilder();
+        builder.addFilterJoin({
+          sourceTypes: 'type',
+          sourcePath: 'id',
+          targetIndices: [ 'weather-2015-01', 'weather-2015-02' ],
+          targetTypes: 'type',
+          targetPath: 'id'
+        })
+        .addFilterJoin({
+          sourceTypes: 'type',
+          sourcePath: 'id',
+          targetIndices: [ 'activity-2015-01', 'activity-2015-02' ],
+          targetTypes: 'type',
+          targetPath: 'id'
+        });
+        const expected = builder.toObject();
+        const actual = filterJoinSet([ query ]);
+        expect(actual).to.eql(expected);
+      });
+    });
+
     describe('Multi-edge', function () {
       it('should add two branches at the root', function () {
         const query = {
@@ -14,12 +52,12 @@ describe('FilterJoin querying', function () {
             focus: 'i1',
             relations: [
               [
-                { indices: [ 'i1' ], types: [ 't12' ], path: 'id1' },
-                { indices: [ 'i2' ], types: [ 't22' ], path: 'id2' }
+                { pattern: 'i1', indices: [ 'i1' ], types: [ 't12' ], path: 'id1' },
+                { pattern: 'i2', indices: [ 'i2' ], types: [ 't22' ], path: 'id2' }
               ],
               [
-                { indices: [ 'i1' ], types: [ 't1' ], path: 'id1' },
-                { indices: [ 'i2' ], types: [ 't2' ], path: 'id2' }
+                { pattern: 'i1', indices: [ 'i1' ], types: [ 't1' ], path: 'id1' },
+                { pattern: 'i2', indices: [ 'i2' ], types: [ 't2' ], path: 'id2' }
               ]
             ]
           }
@@ -28,14 +66,14 @@ describe('FilterJoin querying', function () {
         builder.addFilterJoin({
           sourceTypes: 't12',
           sourcePath: 'id1',
-          targetIndex: 'i2',
+          targetIndices: [ 'i2' ],
           targetTypes: 't22',
           targetPath: 'id2'
         });
         builder.addFilterJoin({
           sourceTypes: 't1',
           sourcePath: 'id1',
-          targetIndex: 'i2',
+          targetIndices: [ 'i2' ],
           targetTypes: 't2',
           targetPath: 'id2'
         });
@@ -50,16 +88,16 @@ describe('FilterJoin querying', function () {
             focus: 'i0',
             relations: [
               [
-                { indices: [ 'i0' ], types: [ 't0' ], path: 'id0' },
-                { indices: [ 'i1' ], types: [ 't1' ], path: 'id1' }
+                { pattern: 'i0', indices: [ 'i0' ], types: [ 't0' ], path: 'id0' },
+                { pattern: 'i1', indices: [ 'i1' ], types: [ 't1' ], path: 'id1' }
               ],
               [
-                { indices: [ 'i1' ], types: [ 't12' ], path: 'id1' },
-                { indices: [ 'i2' ], types: [ 't22' ], path: 'id2' }
+                { pattern: 'i1', indices: [ 'i1' ], types: [ 't12' ], path: 'id1' },
+                { pattern: 'i2', indices: [ 'i2' ], types: [ 't22' ], path: 'id2' }
               ],
               [
-                { indices: [ 'i1' ], types: [ 't1' ], path: 'id1' },
-                { indices: [ 'i2' ], types: [ 't2' ], path: 'id2' }
+                { pattern: 'i1', indices: [ 'i1' ], types: [ 't1' ], path: 'id1' },
+                { pattern: 'i2', indices: [ 'i2' ], types: [ 't2' ], path: 'id2' }
               ]
             ]
           }
@@ -68,21 +106,21 @@ describe('FilterJoin querying', function () {
         const fj0 = builder.addFilterJoin({
           sourceTypes: 't0',
           sourcePath: 'id0',
-          targetIndex: 'i1',
+          targetIndices: [ 'i1' ],
           targetTypes: 't1',
           targetPath: 'id1'
         });
         fj0.addFilterJoin({
           sourceTypes: 't12',
           sourcePath: 'id1',
-          targetIndex: 'i2',
+          targetIndices: [ 'i2' ],
           targetTypes: 't22',
           targetPath: 'id2'
         });
         fj0.addFilterJoin({
           sourceTypes: 't1',
           sourcePath: 'id1',
-          targetIndex: 'i2',
+          targetIndices: [ 'i2' ],
           targetTypes: 't2',
           targetPath: 'id2'
         });
@@ -97,16 +135,16 @@ describe('FilterJoin querying', function () {
             focus: 'i1',
             relations: [
               [
-                { indices: [ 'i1' ], types: [ 't12' ], path: 'id1' },
-                { indices: [ 'i2' ], types: [ 't22' ], path: 'id2' }
+                { pattern: 'i1', indices: [ 'i1' ], types: [ 't12' ], path: 'id1' },
+                { pattern: 'i2', indices: [ 'i2' ], types: [ 't22' ], path: 'id2' }
               ],
               [
-                { indices: [ 'i1' ], types: [ 't1' ], path: 'id1' },
-                { indices: [ 'i2' ], types: [ 't2' ], path: 'id2' }
+                { pattern: 'i1', indices: [ 'i1' ], types: [ 't1' ], path: 'id1' },
+                { pattern: 'i2', indices: [ 'i2' ], types: [ 't2' ], path: 'id2' }
               ],
               [
-                { indices: [ 'i2' ], types: [ 't2' ], path: 'id2' },
-                { indices: [ 'i3' ], types: [ 't3' ], path: 'id3' }
+                { pattern: 'i2', indices: [ 'i2' ], types: [ 't2' ], path: 'id2' },
+                { pattern: 'i3', indices: [ 'i3' ], types: [ 't3' ], path: 'id3' }
               ]
             ]
           }
@@ -115,19 +153,19 @@ describe('FilterJoin querying', function () {
         const fj0 = builder.addFilterJoin({
           sourceTypes: 't12',
           sourcePath: 'id1',
-          targetIndex: 'i2',
+          targetIndices: [ 'i2' ],
           targetTypes: 't22',
           targetPath: 'id2'
         });
-        fj0.addFilterJoin({ sourceTypes: 't2', sourcePath: 'id2', targetIndex: 'i3', targetTypes: 't3', targetPath: 'id3' });
+        fj0.addFilterJoin({ sourceTypes: 't2', sourcePath: 'id2', targetIndices: [ 'i3' ], targetTypes: 't3', targetPath: 'id3' });
         const fj1 = builder.addFilterJoin({
           sourceTypes: 't1',
           sourcePath: 'id1',
-          targetIndex: 'i2',
+          targetIndices: [ 'i2' ],
           targetTypes: 't2',
           targetPath: 'id2'
         });
-        fj1.addFilterJoin({ sourceTypes: 't2', sourcePath: 'id2', targetIndex: 'i3', targetTypes: 't3', targetPath: 'id3' });
+        fj1.addFilterJoin({ sourceTypes: 't2', sourcePath: 'id2', targetIndices: [ 'i3' ], targetTypes: 't3', targetPath: 'id3' });
 
         const expected = builder.toObject();
         const actual = filterJoinSet([ query ]);
@@ -141,34 +179,34 @@ describe('FilterJoin querying', function () {
             relations: [
               // multiedge 1
               [
-                { indices: [ 'i1' ], types: [ 't1' ], path: 'id1' },
-                { indices: [ 'i2' ], types: [ 't2' ], path: 'id2' }
+                { pattern: 'i1', indices: [ 'i1' ], types: [ 't1' ], path: 'id1' },
+                { pattern: 'i2', indices: [ 'i2' ], types: [ 't2' ], path: 'id2' }
               ],
               [
-                { indices: [ 'i1' ], types: [ 't1' ], path: 'id1' },
-                { indices: [ 'i2' ], types: [ 't22' ], path: 'id22' }
+                { pattern: 'i1', indices: [ 'i1' ], types: [ 't1' ], path: 'id1' },
+                { pattern: 'i2', indices: [ 'i2' ], types: [ 't22' ], path: 'id22' }
               ],
 
               // multiedge 2
               [
-                { indices: [ 'i3' ], types: [ 't3' ], path: 'id3' },
-                { indices: [ 'i2' ], types: [ 't2' ], path: 'id2' }
+                { pattern: 'i3', indices: [ 'i3' ], types: [ 't3' ], path: 'id3' },
+                { pattern: 'i2', indices: [ 'i2' ], types: [ 't2' ], path: 'id2' }
               ],
               [
-                { indices: [ 'i3' ], types: [ 't3' ], path: 'id3' },
-                { indices: [ 'i2' ], types: [ 't22' ], path: 'id22' }
+                { pattern: 'i3', indices: [ 'i3' ], types: [ 't3' ], path: 'id3' },
+                { pattern: 'i2', indices: [ 'i2' ], types: [ 't22' ], path: 'id22' }
               ],
 
               // single edge 1
               [
-                { indices: [ 'i4' ], types: [ 't4' ], path: 'id4' },
-                { indices: [ 'i2' ], types: [ 't22' ], path: 'id22' }
+                { pattern: 'i4', indices: [ 'i4' ], types: [ 't4' ], path: 'id4' },
+                { pattern: 'i2', indices: [ 'i2' ], types: [ 't22' ], path: 'id22' }
               ],
 
               // single edge 2
               [
-                { indices: [ 'i4' ], types: [ 't4' ], path: 'id4' },
-                { indices: [ 'i3' ], types: [ 't3' ], path: 'id3' }
+                { pattern: 'i4', indices: [ 'i4' ], types: [ 't4' ], path: 'id4' },
+                { pattern: 'i3', indices: [ 'i3' ], types: [ 't3' ], path: 'id3' }
               ]
             ]
           }
@@ -176,26 +214,32 @@ describe('FilterJoin querying', function () {
         const b = new FilterJoinBuilder();
 
         // multiedge 1
-        const fj0 = b.addFilterJoin({ sourceTypes: 't1', sourcePath: 'id1', targetIndex: 'i2', targetTypes: 't2', targetPath: 'id2' });
-        const fj1 = b.addFilterJoin({ sourceTypes: 't1', sourcePath: 'id1', targetIndex: 'i2', targetTypes: 't22', targetPath: 'id22' });
+        const fj0 = b.addFilterJoin({ sourceTypes: 't1', sourcePath: 'id1',
+                                    targetIndices: [ 'i2' ], targetTypes: 't2', targetPath: 'id2' });
+        const fj1 = b.addFilterJoin({ sourceTypes: 't1', sourcePath: 'id1',
+                                    targetIndices: [ 'i2' ], targetTypes: 't22', targetPath: 'id22' });
 
         // multiedge 2
-        const fj00 = fj0.addFilterJoin({ sourceTypes: 't2', sourcePath: 'id2', targetIndex: 'i3', targetTypes: 't3', targetPath: 'id3' });
-        const fj01 = fj0.addFilterJoin({ sourceTypes: 't22', sourcePath: 'id22', targetIndex: 'i3', targetTypes: 't3', targetPath: 'id3' });
-        const fj10 = fj1.addFilterJoin({ sourceTypes: 't2', sourcePath: 'id2', targetIndex: 'i3', targetTypes: 't3', targetPath: 'id3' });
-        const fj11 = fj1.addFilterJoin({ sourceTypes: 't22', sourcePath: 'id22', targetIndex: 'i3', targetTypes: 't3', targetPath: 'id3' });
+        const fj00 = fj0.addFilterJoin({ sourceTypes: 't2', sourcePath: 'id2',
+                                       targetIndices: [ 'i3' ], targetTypes: 't3', targetPath: 'id3' });
+        const fj01 = fj0.addFilterJoin({ sourceTypes: 't22', sourcePath: 'id22',
+                                       targetIndices: [ 'i3' ], targetTypes: 't3', targetPath: 'id3' });
+        const fj10 = fj1.addFilterJoin({ sourceTypes: 't2', sourcePath: 'id2',
+                                       targetIndices: [ 'i3' ], targetTypes: 't3', targetPath: 'id3' });
+        const fj11 = fj1.addFilterJoin({ sourceTypes: 't22', sourcePath: 'id22',
+                                       targetIndices: [ 'i3' ], targetTypes: 't3', targetPath: 'id3' });
 
         _.each([ fj00, fj01, fj10, fj11 ], (edge) => {
           // single edge 2
           const child = edge.addFilterJoin({
             sourceTypes: 't3',
             sourcePath: 'id3',
-            targetIndex: 'i4',
+            targetIndices: [ 'i4' ],
             targetTypes: 't4',
             targetPath: 'id4'
           });
           // single edge 1
-          child.addFilterJoin({ sourceTypes: 't4', sourcePath: 'id4', targetIndex: 'i2', targetTypes: 't22', targetPath: 'id22' });
+          child.addFilterJoin({ sourceTypes: 't4', sourcePath: 'id4', targetIndices: [ 'i2' ], targetTypes: 't22', targetPath: 'id22' });
         });
 
         const expected = b.toObject();
@@ -213,16 +257,8 @@ describe('FilterJoin querying', function () {
                 focus: 'i1',
                 relations: [
                   [
-                    {
-                      indices: [ 'i1' ],
-                      types: [ 'cafard' ],
-                      path: 'id1'
-                    },
-                    {
-                      indices: [ 'i1' ],
-                      types: [ 'cafard' ],
-                      path: 'id2'
-                    }
+                    { pattern: 'i1', indices: [ 'i1' ], types: [ 'cafard' ], path: 'id1' },
+                    { pattern: 'i1', indices: [ 'i1' ], types: [ 'cafard' ], path: 'id2' }
                   ]
                 ]
               }
@@ -242,16 +278,8 @@ describe('FilterJoin querying', function () {
                 focus: 'i1',
                 relations: [
                   [
-                    {
-                      indices: [ 'i1' ],
-                      types: [ 't1' ],
-                      path: 'id1'
-                    },
-                    {
-                      indices: [ 'i2' ],
-                      types: [ 't2' ],
-                      path: 'id2'
-                    }
+                    { pattern: 'i1', indices: [ 'i1' ], types: [ 't1' ], path: 'id1' },
+                    { pattern: 'i2', indices: [ 'i2' ], types: [ 't2' ], path: 'id2' }
                   ]
                 ]
               }
@@ -263,7 +291,7 @@ describe('FilterJoin querying', function () {
       builder.addFilterJoin({
         sourceTypes: 't1',
         sourcePath: 'id1',
-        targetIndex: 'i2',
+        targetIndices: [ 'i2' ],
         targetTypes: 't2',
         targetPath: 'id2'
       });
@@ -285,16 +313,8 @@ describe('FilterJoin querying', function () {
                 focus: 'i1',
                 relations: [
                   [
-                    {
-                      indices: [ 'i1' ],
-                      types: [ 't1', 't12' ],
-                      path: 'id1'
-                    },
-                    {
-                      indices: [ 'i2' ],
-                      types: [ 't2', 't22' ],
-                      path: 'id2'
-                    }
+                    { pattern: 'i1', indices: [ 'i1' ], types: [ 't1', 't12' ], path: 'id1' },
+                    { pattern: 'i2', indices: [ 'i2' ], types: [ 't2', 't22' ], path: 'id2' }
                   ]
                 ]
               }
@@ -306,7 +326,7 @@ describe('FilterJoin querying', function () {
       builder.addFilterJoin({
         sourceTypes: [ 't1', 't12' ],
         sourcePath: 'id1',
-        targetIndex: 'i2',
+        targetIndices: [ 'i2' ],
         targetTypes: [ 't2', 't22' ],
         targetPath: 'id2'
       });
@@ -329,6 +349,7 @@ describe('FilterJoin querying', function () {
                 relations: [
                   [
                     {
+                      pattern: 'i1',
                       indices: [ 'i1' ],
                       types: [ 'cafard' ],
                       path: 'id1',
@@ -337,6 +358,7 @@ describe('FilterJoin querying', function () {
                       maxTermsPerShard: 10
                     },
                     {
+                      pattern: 'i2',
                       indices: [ 'i2' ],
                       types: [ 'cafard' ],
                       path: 'id2',
@@ -355,7 +377,7 @@ describe('FilterJoin querying', function () {
       builder.addFilterJoin({
         sourceTypes: 'cafard',
         sourcePath: 'id1',
-        targetIndex: 'i2',
+        targetIndices: [ 'i2' ],
         targetTypes: 'cafard',
         targetPath: 'id2',
         termsEncoding: 'long',
@@ -381,6 +403,7 @@ describe('FilterJoin querying', function () {
                 relations: [
                   [
                     {
+                      pattern: 'i1',
                       indices: [ 'i1' ],
                       types: [ 'cafard' ],
                       path: 'id1',
@@ -389,6 +412,7 @@ describe('FilterJoin querying', function () {
                       maxTermsPerShard: 100
                     },
                     {
+                      pattern: 'i2',
                       indices: [ 'i2' ],
                       types: [ 'cafard' ],
                       path: 'id2',
@@ -407,7 +431,7 @@ describe('FilterJoin querying', function () {
       builder.addFilterJoin({
         sourceTypes: 'cafard',
         sourcePath: 'id1',
-        targetIndex: 'i2',
+        targetIndices: [ 'i2' ],
         targetTypes: 'cafard',
         targetPath: 'id2',
         termsEncoding: 'long',
@@ -431,16 +455,8 @@ describe('FilterJoin querying', function () {
                 focus: 'i1',
                 relations: [
                   [
-                    {
-                      indices: [ 'i1' ],
-                      types: [ 'cafard' ],
-                      path: 'id1'
-                    },
-                    {
-                      indices: [ 'i2' ],
-                      path: 'id2'
-                    }
-                  ]
+                    { pattern: 'i1', indices: [ 'i1' ], types: [ 'cafard' ], path: 'id1' },
+                    { pattern: 'i2', indices: [ 'i2' ], path: 'id2' } ]
                 ]
               }
             }
@@ -451,7 +467,7 @@ describe('FilterJoin querying', function () {
       builder.addFilterJoin({
         sourceTypes: 'cafard',
         sourcePath: 'id1',
-        targetIndex: 'i2',
+        targetIndices: [ 'i2' ],
         targetPath: 'id2'
       });
       const expected = {
@@ -470,8 +486,8 @@ describe('FilterJoin querying', function () {
             focus: 'i1',
             relations: [
               [
-                { indices: [ 'i1' ], types: [ 'cafard' ], path: 'id1' },
-                { indices: [ 'i2' ], types: [ 'cafard' ], path: 'id2' }
+                { pattern: 'i1', indices: [ 'i1' ], types: [ 'cafard' ], path: 'id1' },
+                { pattern: 'i2', indices: [ 'i2' ], types: [ 'cafard' ], path: 'id2' }
               ]
             ]
           }
@@ -481,7 +497,7 @@ describe('FilterJoin querying', function () {
       builder.addFilterJoin({
         sourceTypes: 'cafard',
         sourcePath: 'id1',
-        targetIndex: 'i2',
+        targetIndices: [ 'i2' ],
         targetTypes: 'cafard',
         targetPath: 'id2'
       });
@@ -496,8 +512,8 @@ describe('FilterJoin querying', function () {
             focus: 'i1',
             relations: [
               [
-                { indices: [ 'i1' ], path: 'id1' },
-                { indices: [ 'i2' ], path: 'id2' }
+                { pattern: 'i1', indices: [ 'i1' ], path: 'id1' },
+                { pattern: 'i2', indices: [ 'i2' ], path: 'id2' }
               ]
             ]
           }
@@ -506,52 +522,69 @@ describe('FilterJoin querying', function () {
       const builder = new FilterJoinBuilder();
       builder.addFilterJoin({
         sourcePath: 'id1',
-        targetIndex: 'i2',
+        targetIndices: [ 'i2' ],
         targetPath: 'id2'
       });
       const actual = filterJoinSet(query);
       expect(actual).to.eql(builder.toObject());
     });
 
-    it('should fail if there are filters on focused index', function () {
-      const queries = {
-        i1: [
-          {
-            terms: {
-              tag: [ 'grishka' ]
-            }
-          }
-        ]
-      };
+    it('should allow filters on focused index', function () {
       const query = [
         {
           join_set: {
             focus: 'i1',
             relations: [
               [
-                { indices: [ 'i1' ], types: [ 'cafard' ], path: 'id1' },
-                { indices: [ 'i2' ], types: [ 'cafard' ], path: 'id2' }
+                { pattern: 'i1', indices: [ 'i1' ], types: [ 'cafard' ], path: 'id1' },
+                { pattern: 'i2', indices: [ 'i2' ], types: [ 'cafard' ], path: 'id2' }
               ]
             ],
-            queries: queries
+            queries: {
+              i1: {
+                dashboard1: [
+                  {
+                    terms: {
+                      tag: [ 'grishka' ]
+                    }
+                  }
+                ]
+              }
+            }
           }
         }
       ];
-      expect(filterJoinSet).withArgs(query).to.throwError(/There cannot be filters on the root of the filterjoin/);
+      const builder = new FilterJoinBuilder();
+      builder.addQuery({
+        terms: {
+          tag: [ 'grishka' ]
+        }
+      });
+      builder.addFilterJoin({
+        sourcePath: 'id1',
+        sourceTypes: 'cafard',
+        targetIndices: [ 'i2' ],
+        targetTypes: 'cafard',
+        targetPath: 'id2'
+      });
+      const actual = filterJoinSet(query);
+      expect(actual).to.eql(builder.toObject());
     });
 
     it('focus filter array', function () {
       const queries = {
-        i2: [
-          {
-            terms: {
-              tag: [ 'grishka' ]
+        i2: {
+          dashboard1: [
+            {
+              terms: {
+                tag: [ 'grishka' ]
+              }
+            },
+            {
+              yo: 'da'
             }
-          },
-          {
-            yo: 'da'
-          }
-        ]
+          ]
+        }
       };
       const query = [
         {
@@ -559,8 +592,8 @@ describe('FilterJoin querying', function () {
             focus: 'i1',
             relations: [
               [
-                { indices: [ 'i1' ], types: [ 'cafard' ], path: 'id1' },
-                { indices: [ 'i2' ], types: [ 'cafard' ], path: 'id2' }
+                { pattern: 'i1', indices: [ 'i1' ], types: [ 'cafard' ], path: 'id1' },
+                { pattern: 'i2', indices: [ 'i2' ], types: [ 'cafard' ], path: 'id2' }
               ]
             ],
             queries: queries
@@ -571,7 +604,7 @@ describe('FilterJoin querying', function () {
       builder.addFilterJoin({
         sourceTypes: 'cafard',
         sourcePath: 'id1',
-        targetIndex: 'i2',
+        targetIndices: [ 'i2' ],
         targetTypes: 'cafard',
         targetPath: 'id2'
       })
@@ -589,13 +622,15 @@ describe('FilterJoin querying', function () {
 
     it('filter on related index', function () {
       const queries = {
-        i2: [
-          {
-            terms: {
-              tag: [ 'grishka' ]
+        i2: {
+          dashboard1: [
+            {
+              terms: {
+                tag: [ 'grishka' ]
+              }
             }
-          }
-        ]
+          ]
+        }
       };
       const query = [
         {
@@ -603,8 +638,8 @@ describe('FilterJoin querying', function () {
             focus: 'i1',
             relations: [
               [
-                { indices: [ 'i1' ], types: [ 'cafard' ], path: 'id1' },
-                { indices: [ 'i2' ], types: [ 'cafard' ], path: 'id2' }
+                { pattern: 'i1', indices: [ 'i1' ], types: [ 'cafard' ], path: 'id1' },
+                { pattern: 'i2', indices: [ 'i2' ], types: [ 'cafard' ], path: 'id2' }
               ]
             ],
             queries: queries
@@ -615,7 +650,7 @@ describe('FilterJoin querying', function () {
       builder.addFilterJoin({
         sourceTypes: 'cafard',
         sourcePath: 'id1',
-        targetIndex: 'i2',
+        targetIndices: [ 'i2' ],
         targetTypes: 'cafard',
         targetPath: 'id2'
       })
@@ -630,20 +665,24 @@ describe('FilterJoin querying', function () {
 
     it('three related indices - line', function () {
       const queries = {
-        i2: [
-          {
-            terms: {
-              tag: [ 'pluto' ]
+        i2: {
+          dashboard1: [
+            {
+              terms: {
+                tag: [ 'pluto' ]
+              }
             }
-          }
-        ],
-        i3: [
-          {
-            terms: {
-              tag: [ 'grishka' ]
+          ],
+        },
+        i3: {
+          dashboard1: [
+            {
+              terms: {
+                tag: [ 'grishka' ]
+              }
             }
-          }
-        ]
+          ]
+        }
       };
       const query = [
         {
@@ -651,12 +690,12 @@ describe('FilterJoin querying', function () {
             focus: 'i1',
             relations: [
               [
-                { indices: [ 'i1' ], types: [ 'cafard' ], path: 'id1' },
-                { indices: [ 'i2' ], types: [ 'cafard' ], path: 'id2' },
+                { pattern: 'i1', indices: [ 'i1' ], types: [ 'cafard' ], path: 'id1' },
+                { pattern: 'i2', indices: [ 'i2' ], types: [ 'cafard' ], path: 'id2' },
               ],
               [
-                { indices: [ 'i2' ], types: [ 'cafard' ], path: 'id2' },
-                { indices: [ 'i3' ], types: [ 'cafard' ], path: 'id3' }
+                { pattern: 'i2', indices: [ 'i2' ], types: [ 'cafard' ], path: 'id2' },
+                { pattern: 'i3', indices: [ 'i3' ], types: [ 'cafard' ], path: 'id3' }
               ]
             ],
             queries: queries
@@ -667,7 +706,7 @@ describe('FilterJoin querying', function () {
       builder.addFilterJoin({
         sourceTypes: 'cafard',
         sourcePath: 'id1',
-        targetIndex: 'i2',
+        targetIndices: [ 'i2' ],
         targetTypes: 'cafard',
         targetPath: 'id2'
       })
@@ -679,7 +718,7 @@ describe('FilterJoin querying', function () {
       .addFilterJoin({
         sourceTypes: 'cafard',
         sourcePath: 'id2',
-        targetIndex: 'i3',
+        targetIndices: [ 'i3' ],
         targetTypes: 'cafard',
         targetPath: 'id3'
       })
@@ -694,20 +733,24 @@ describe('FilterJoin querying', function () {
 
     it('three related indices - V', function () {
       const queries = {
-        i2: [
-          {
-            terms: {
-              tag: [ 'pluto' ]
+        i2: {
+          dashboard1: [
+            {
+              terms: {
+                tag: [ 'pluto' ]
+              }
             }
-          }
-        ],
-        i3: [
-          {
-            terms: {
-              tag: [ 'grishka' ]
+          ],
+        },
+        i3: {
+          dashboard1: [
+            {
+              terms: {
+                tag: [ 'grishka' ]
+              }
             }
-          }
-        ]
+          ]
+        }
       };
       const query = [
         {
@@ -715,12 +758,12 @@ describe('FilterJoin querying', function () {
             focus: 'i1',
             relations: [
               [
-                { indices: [ 'i1' ], types: [ 'cafard' ], path: 'aaa' },
-                { indices: [ 'i2' ], types: [ 'cafard' ], path: 'id2' },
+                { pattern: 'i1', indices: [ 'i1' ], types: [ 'cafard' ], path: 'aaa' },
+                { pattern: 'i2', indices: [ 'i2' ], types: [ 'cafard' ], path: 'id2' },
               ],
               [
-                { indices: [ 'i1' ], types: [ 'cafard' ], path: 'bbb' },
-                { indices: [ 'i3' ], types: [ 'cafard' ], path: 'id3' }
+                { pattern: 'i1', indices: [ 'i1' ], types: [ 'cafard' ], path: 'bbb' },
+                { pattern: 'i3', indices: [ 'i3' ], types: [ 'cafard' ], path: 'id3' }
               ]
             ],
             queries: queries
@@ -731,7 +774,7 @@ describe('FilterJoin querying', function () {
       builder.addFilterJoin({
         sourceTypes: 'cafard',
         sourcePath: 'aaa',
-        targetIndex: 'i2',
+        targetIndices: [ 'i2' ],
         targetTypes: 'cafard',
         targetPath: 'id2'
       })
@@ -743,7 +786,7 @@ describe('FilterJoin querying', function () {
       builder.addFilterJoin({
         sourceTypes: 'cafard',
         sourcePath: 'bbb',
-        targetIndex: 'i3',
+        targetIndices: [ 'i3' ],
         targetTypes: 'cafard',
         targetPath: 'id3'
       })
@@ -758,34 +801,42 @@ describe('FilterJoin querying', function () {
 
     it('three related indices - spock', function () {
       const queries = {
-        i4: [
-          {
-            terms: {
-              tag: [ 'pluto' ]
+        i4: {
+          dashboard1: [
+            {
+              terms: {
+                tag: [ 'pluto' ]
+              }
             }
-          }
-        ],
-        i5: [
-          {
-            terms: {
-              tag: [ 'sylvester' ]
+          ],
+        },
+        i5: {
+          dashboard1: [
+            {
+              terms: {
+                tag: [ 'sylvester' ]
+              }
             }
-          }
-        ],
-        i6: [
-          {
-            terms: {
-              tag: [ 'mickey' ]
+          ],
+        },
+        i6: {
+          dashboard1: [
+            {
+              terms: {
+                tag: [ 'mickey' ]
+              }
             }
-          }
-        ],
-        i7: [
-          {
-            terms: {
-              tag: [ 'donald' ]
+          ],
+        },
+        i7: {
+          dashboard1: [
+            {
+              terms: {
+                tag: [ 'donald' ]
+              }
             }
-          }
-        ]
+          ]
+        }
       };
       const query = [
         {
@@ -793,28 +844,28 @@ describe('FilterJoin querying', function () {
             focus: 'i1',
             relations: [
               [
-                { indices: [ 'i1' ], types: [ 'cafard' ], path: 'aaa' },
-                { indices: [ 'i2' ], types: [ 'cafard' ], path: 'id2' }
+                { pattern: 'i1', indices: [ 'i1' ], types: [ 'cafard' ], path: 'aaa' },
+                { pattern: 'i2', indices: [ 'i2' ], types: [ 'cafard' ], path: 'id2' }
               ],
               [
-                { indices: [ 'i2' ], types: [ 'cafard' ], path: 'a' },
-                { indices: [ 'i4' ], types: [ 'cafard' ], path: 'id' }
+                { pattern: 'i2', indices: [ 'i2' ], types: [ 'cafard' ], path: 'a' },
+                { pattern: 'i4', indices: [ 'i4' ], types: [ 'cafard' ], path: 'id' }
               ],
               [
-                { indices: [ 'i2' ], types: [ 'cafard' ], path: 'b' },
-                { indices: [ 'i5' ], types: [ 'cafard' ], path: 'id' }
+                { pattern: 'i2', indices: [ 'i2' ], types: [ 'cafard' ], path: 'b' },
+                { pattern: 'i5', indices: [ 'i5' ], types: [ 'cafard' ], path: 'id' }
               ],
               [
-                { indices: [ 'i1' ], types: [ 'cafard' ], path: 'bbb' },
-                { indices: [ 'i3' ], types: [ 'cafard' ], path: 'id3' }
+                { pattern: 'i1', indices: [ 'i1' ], types: [ 'cafard' ], path: 'bbb' },
+                { pattern: 'i3', indices: [ 'i3' ], types: [ 'cafard' ], path: 'id3' }
               ],
               [
-                { indices: [ 'i6' ], types: [ 'cafard' ], path: 'id' },
-                { indices: [ 'i3' ], types: [ 'cafard' ], path: 'a' }
+                { pattern: 'i6', indices: [ 'i6' ], types: [ 'cafard' ], path: 'id' },
+                { pattern: 'i3', indices: [ 'i3' ], types: [ 'cafard' ], path: 'a' }
               ],
               [
-                { indices: [ 'i7' ], types: [ 'cafard' ], path: 'id' },
-                { indices: [ 'i3' ], types: [ 'cafard' ], path: 'b' }
+                { pattern: 'i7', indices: [ 'i7' ], types: [ 'cafard' ], path: 'id' },
+                { pattern: 'i3', indices: [ 'i3' ], types: [ 'cafard' ], path: 'b' }
               ]
             ],
             queries: queries
@@ -825,14 +876,14 @@ describe('FilterJoin querying', function () {
       const fj1 = builder.addFilterJoin({
         sourceTypes: 'cafard',
         sourcePath: 'aaa',
-        targetIndex: 'i2',
+        targetIndices: [ 'i2' ],
         targetTypes: 'cafard',
         targetPath: 'id2'
       });
       fj1.addFilterJoin({
         sourceTypes: 'cafard',
         sourcePath: 'a',
-        targetIndex: 'i4',
+        targetIndices: [ 'i4' ],
         targetTypes: 'cafard',
         targetPath: 'id'
       })
@@ -844,7 +895,7 @@ describe('FilterJoin querying', function () {
       fj1.addFilterJoin({
         sourceTypes: 'cafard',
         sourcePath: 'b',
-        targetIndex: 'i5',
+        targetIndices: [ 'i5' ],
         targetTypes: 'cafard',
         targetPath: 'id'
       })
@@ -856,14 +907,14 @@ describe('FilterJoin querying', function () {
       const fj2 = builder.addFilterJoin({
         sourceTypes: 'cafard',
         sourcePath: 'bbb',
-        targetIndex: 'i3',
+        targetIndices: [ 'i3' ],
         targetTypes: 'cafard',
         targetPath: 'id3'
       });
       fj2.addFilterJoin({
         sourceTypes: 'cafard',
         sourcePath: 'a',
-        targetIndex: 'i6',
+        targetIndices: [ 'i6' ],
         targetTypes: 'cafard',
         targetPath: 'id'
       })
@@ -875,7 +926,7 @@ describe('FilterJoin querying', function () {
       fj2.addFilterJoin({
         sourceTypes: 'cafard',
         sourcePath: 'b',
-        targetIndex: 'i7',
+        targetIndices: [ 'i7' ],
         targetTypes: 'cafard',
         targetPath: 'id'
       })
@@ -895,12 +946,12 @@ describe('FilterJoin querying', function () {
             focus: 'i1',
             relations: [
               [
-                { indices: [ 'i1' ], types: [ 'cafard' ], path: 'id1' },
-                { indices: [ 'i2' ], types: [ 'cafard' ], path: 'id2' }
+                { pattern: 'i1', indices: [ 'i1' ], types: [ 'cafard' ], path: 'id1' },
+                { pattern: 'i2', indices: [ 'i2' ], types: [ 'cafard' ], path: 'id2' }
               ],
               [
-                { indices: [ 'i3' ], types: [ 'cafard' ], path: 'id3' },
-                { indices: [ 'i4' ], types: [ 'cafard' ], path: 'id4' }
+                { pattern: 'i3', indices: [ 'i3' ], types: [ 'cafard' ], path: 'id3' },
+                { pattern: 'i4', indices: [ 'i4' ], types: [ 'cafard' ], path: 'id4' }
               ]
             ]
           }
@@ -910,7 +961,7 @@ describe('FilterJoin querying', function () {
       builder.addFilterJoin({
         sourceTypes: 'cafard',
         sourcePath: 'id1',
-        targetIndex: 'i2',
+        targetIndices: [ 'i2' ],
         targetTypes: 'cafard',
         targetPath: 'id2'
       });
@@ -925,16 +976,16 @@ describe('FilterJoin querying', function () {
             focus: 'i1',
             relations: [
               [
-                { indices: [ 'i1' ], types: [ 'cafard' ], path: 'id1' },
-                { indices: [ 'i2' ], types: [ 'cafard' ], path: 'id2' }
+                { pattern: 'i1', indices: [ 'i1' ], types: [ 'cafard' ], path: 'id1' },
+                { pattern: 'i2', indices: [ 'i2' ], types: [ 'cafard' ], path: 'id2' }
               ],
               [
-                { indices: [ 'i0' ], types: [ 'cafard' ], path: 'id0' },
-                { indices: [ 'i1' ], types: [ 'cafard' ], path: 'id0' }
+                { pattern: 'i0', indices: [ 'i0' ], types: [ 'cafard' ], path: 'id0' },
+                { pattern: 'i1', indices: [ 'i1' ], types: [ 'cafard' ], path: 'id0' }
               ],
               [
-                { indices: [ 'i3' ], types: [ 'cafard' ], path: 'id3' },
-                { indices: [ 'i4' ], types: [ 'cafard' ], path: 'id4' }
+                { pattern: 'i3', indices: [ 'i3' ], types: [ 'cafard' ], path: 'id3' },
+                { pattern: 'i4', indices: [ 'i4' ], types: [ 'cafard' ], path: 'id4' }
               ]
             ]
           }
@@ -944,14 +995,14 @@ describe('FilterJoin querying', function () {
       builder.addFilterJoin({
         sourceTypes: 'cafard',
         sourcePath: 'id1',
-        targetIndex: 'i2',
+        targetIndices: [ 'i2' ],
         targetTypes: 'cafard',
         targetPath: 'id2'
       });
       builder.addFilterJoin({
         sourceTypes: 'cafard',
         sourcePath: 'id0',
-        targetIndex: 'i0',
+        targetIndices: [ 'i0' ],
         targetTypes: 'cafard',
         targetPath: 'id0'
       });
@@ -966,8 +1017,9 @@ describe('FilterJoin querying', function () {
             focus: 'i1',
             relations: [
               [
-                { indices: [ 'i1' ], types: [ 'cafard' ], path: 'id1' },
+                { pattern: 'i1', indices: [ 'i1' ], types: [ 'cafard' ], path: 'id1' },
                 {
+                  pattern: 'i2',
                   indices: [ 'i2' ],
                   types: [ 'cafard' ],
                   path: 'id2',
@@ -983,7 +1035,7 @@ describe('FilterJoin querying', function () {
       builder.addFilterJoin({
         sourceTypes: 'cafard',
         sourcePath: 'id1',
-        targetIndex: 'i2',
+        targetIndices: [ 'i2' ],
         targetTypes: 'cafard',
         targetPath: 'id2',
         orderBy: 'doc_score',
@@ -1000,21 +1052,23 @@ describe('FilterJoin querying', function () {
             focus: 'i1',
             relations: [
               [
-                { indices: [ 'i1' ], types: [ 'cafard' ], path: 'id1' },
-                { indices: [ 'i2' ], types: [ 'cafard' ], path: 'id2' }
+                { pattern: 'i1', indices: [ 'i1' ], types: [ 'cafard' ], path: 'id1' },
+                { pattern: 'i2', indices: [ 'i2' ], types: [ 'cafard' ], path: 'id2' }
               ]
             ],
             queries: {
-              i2: [
-                {
-                  query: {
-                    query_string: {
-                      analyze_wildcard: true,
-                      query: 'travel'
+              i2: {
+                dashboard1: [
+                  {
+                    query: {
+                      query_string: {
+                        analyze_wildcard: true,
+                        query: 'travel'
+                      }
                     }
                   }
-                }
-              ]
+                ]
+              }
             }
           }
         }
@@ -1023,7 +1077,7 @@ describe('FilterJoin querying', function () {
       builder.addFilterJoin({
         sourceTypes: 'cafard',
         sourcePath: 'id1',
-        targetIndex: 'i2',
+        targetIndices: [ 'i2' ],
         targetTypes: 'cafard',
         targetPath: 'id2'
       })
@@ -1111,12 +1165,12 @@ describe('FilterJoin querying', function () {
       const builder = new FilterJoinBuilder();
       builder.addFilterJoin({
         sourcePath: 'bbb',
-        targetIndex: 'A',
+        targetIndices: [ 'A' ],
         targetPath: 'aaa'
       });
       builder.addFilterJoin({
         sourcePath: 'ddd',
-        targetIndex: 'C',
+        targetIndices: [ 'C' ],
         targetPath: 'ccc'
       });
 
@@ -1151,12 +1205,12 @@ describe('FilterJoin querying', function () {
               focus: 'company',
               relations: [
                 [
-                  { indices: [ 'company' ], path: 'id' },
-                  { indices: [ 'investment' ], path: 'companyid' }
+                  { pattern: 'company', indices: [ 'company' ], path: 'id' },
+                  { pattern: 'investment', indices: [ 'investment' ], path: 'companyid' }
                 ],
                 [
-                  { indices: [ 'article' ], path: 'companyid' },
-                  { indices: [ 'company' ], path: 'id' }
+                  { pattern: 'article', indices: [ 'article' ], path: 'companyid' },
+                  { pattern: 'company', indices: [ 'company' ], path: 'id' }
                 ]
               ]
             }
@@ -1167,8 +1221,8 @@ describe('FilterJoin querying', function () {
                 focus: 'article',
                 relations: [
                   [
-                    { indices: [ 'article' ], path: 'companyid' },
-                    { indices: [ 'company' ], path: 'id' }
+                    { pattern: 'article', indices: [ 'article' ], path: 'companyid' },
+                    { pattern: 'company', indices: [ 'company' ], path: 'id' }
                   ]
                 ]
               }
@@ -1179,12 +1233,12 @@ describe('FilterJoin querying', function () {
       const builder = new FilterJoinBuilder();
       builder.addFilterJoin({
         sourcePath: 'id',
-        targetIndex: 'investment',
+        targetIndices: [ 'investment' ],
         targetPath: 'companyid'
       });
       builder.addFilterJoin({
         sourcePath: 'id',
-        targetIndex: 'article',
+        targetIndices: [ 'article' ],
         targetPath: 'companyid'
       });
       const query1 = builder.toObject();
@@ -1192,7 +1246,7 @@ describe('FilterJoin querying', function () {
       builder.clear();
       builder.addFilterJoin({
         sourcePath: 'companyid',
-        targetIndex: 'company',
+        targetIndices: [ 'company' ],
         targetPath: 'id'
       });
       const query2 = builder.toObject();
@@ -1224,8 +1278,8 @@ describe('FilterJoin querying', function () {
                         focus: 'i1',
                         relations: [
                           [
-                            { indices: [ 'i1' ], path: 'id2' },
-                            { indices: [ 'i2' ], path: 'id' }
+                            { pattern: 'i1', indices: [ 'i1' ], path: 'id2' },
+                            { pattern: 'i2', indices: [ 'i2' ], path: 'id' }
                           ]
                         ]
                       }
@@ -1241,12 +1295,12 @@ describe('FilterJoin querying', function () {
       const builder = new FilterJoinBuilder();
       builder.addFilterJoin({
         sourcePath: 'companyid',
-        targetIndex: 'company',
+        targetIndices: [ 'company' ],
         targetPath: 'id'
       })
       .addFilterJoin({
         sourcePath: 'id2',
-        targetIndex: 'i2',
+        targetIndices: [ 'i2' ],
         targetPath: 'id'
       });
       const actual = filterJoinSeq(filterJoinSet(query));
@@ -1293,12 +1347,12 @@ describe('FilterJoin querying', function () {
       const builder = new FilterJoinBuilder();
       builder.addFilterJoin({
         sourcePath: 'companyid',
-        targetIndex: 'company',
+        targetIndices: [ 'company' ],
         targetPath: 'id'
       })
       .addFilterJoin({
         sourcePath: 'id',
-        targetIndex: 'investment',
+        targetIndices: [ 'investment' ],
         targetPath: 'companyid'
       })
       .addQuery({
@@ -1400,7 +1454,7 @@ describe('FilterJoin querying', function () {
         }
       ];
       const builder = new FilterJoinBuilder();
-      const fj1 = builder.addFilterJoin({ sourcePath: 'bid', targetIndex: 'B', targetPath: 'id' })
+      const fj1 = builder.addFilterJoin({ sourcePath: 'bid', targetIndices: [ 'B' ], targetPath: 'id' })
       .addQuery({
         query: {
           query_string: {
@@ -1408,7 +1462,7 @@ describe('FilterJoin querying', function () {
           }
         }
       });
-      fj1.addFilterJoin({ sourcePath: 'aid', targetIndex: 'A', targetPath: 'id' })
+      fj1.addFilterJoin({ sourcePath: 'aid', targetIndices: [ 'A' ], targetPath: 'id' })
       .addQuery({
         query: {
           query_string: {
@@ -1416,7 +1470,7 @@ describe('FilterJoin querying', function () {
           }
         }
       });
-      fj1.addFilterJoin({ sourcePath: 'did', targetIndex: 'D', targetPath: 'id' })
+      fj1.addFilterJoin({ sourcePath: 'did', targetIndices: [ 'D' ], targetPath: 'id' })
       .addQuery({
         query: {
           query_string: {
@@ -1424,7 +1478,7 @@ describe('FilterJoin querying', function () {
           }
         }
       })
-      .addFilterJoin({ sourcePath: 'id', targetIndex: 'C', targetPath: 'did' })
+      .addFilterJoin({ sourcePath: 'id', targetIndices: [ 'C' ], targetPath: 'did' })
       .addQuery({
         query: {
           query_string: {
@@ -1439,37 +1493,39 @@ describe('FilterJoin querying', function () {
 
   describe('Filterjoin with pre-defined join sequence', function () {
     it('joins with filters on leaf', function () {
-      const query = [{
-        join_sequence: [
-          {
-            relation: [
-              {
-                path: 'companyid',
-                indices: [ 'investment' ],
-                queries: [
-                  {
-                    query: {
-                      query_string: {
-                        query: '360buy'
+      const query = [
+        {
+          join_sequence: [
+            {
+              relation: [
+                {
+                  path: 'companyid',
+                  indices: [ 'investment' ],
+                  queries: [
+                    {
+                      query: {
+                        query_string: {
+                          query: '360buy'
+                        }
                       }
                     }
-                  }
-                ]
-              },
-              { path: 'id', indices: [ 'company' ] }
-            ]
-          },
-          {
-            relation: [
-              { path: 'id', indices: [ 'company' ] },
-              { path: 'companyid', indices: [ 'investment' ] }
-            ]
-          }
-        ]
-      }];
+                  ]
+                },
+                { path: 'id', indices: [ 'company' ] }
+              ]
+            },
+            {
+              relation: [
+                { path: 'id', indices: [ 'company' ] },
+                { path: 'companyid', indices: [ 'investment' ] }
+              ]
+            }
+          ]
+        }
+      ];
       const builder = new FilterJoinBuilder();
-      builder.addFilterJoin({ sourcePath: 'companyid', targetIndex: 'company', targetPath: 'id' })
-      .addFilterJoin({ sourcePath: 'id', targetIndex: 'investment', targetPath: 'companyid' })
+      builder.addFilterJoin({ sourcePath: 'companyid', targetIndices: [ 'company' ], targetPath: 'id' })
+      .addFilterJoin({ sourcePath: 'id', targetIndices: [ 'investment' ], targetPath: 'companyid' })
       .addQuery({
         query: {
           query_string: {
@@ -1498,7 +1554,7 @@ describe('FilterJoin querying', function () {
       builder.addFilterJoin({
         sourceTypes: 'Investment',
         sourcePath: 'companyid',
-        targetIndex: 'company',
+        targetIndices: [ 'company' ],
         targetTypes: 'Company',
         targetPath: 'id'
       });
@@ -1529,12 +1585,12 @@ describe('FilterJoin querying', function () {
       const builder = new FilterJoinBuilder();
       builder.addFilterJoin({
         sourcePath: 'companyid',
-        targetIndex: 'company',
+        targetIndices: [ 'company' ],
         targetPath: 'id'
       })
       .addFilterJoin({
         sourcePath: 'id',
-        targetIndex: 'investment',
+        targetIndices: [ 'investment' ],
         targetPath: 'companyid',
         negate: true
       });
@@ -1588,7 +1644,7 @@ describe('FilterJoin querying', function () {
       const builder = new FilterJoinBuilder();
       builder.addFilterJoin({
         sourcePath: 'companyid',
-        targetIndex: 'company',
+        targetIndices: [ 'company' ],
         targetPath: 'id'
       })
       .addQuery({
@@ -1600,7 +1656,7 @@ describe('FilterJoin querying', function () {
       })
       .addFilterJoin({
         sourcePath: 'id',
-        targetIndex: 'investment',
+        targetIndices: [ 'investment' ],
         targetPath: 'companyid'
       })
       .addQuery({
@@ -1642,7 +1698,7 @@ describe('FilterJoin querying', function () {
       const builder = new FilterJoinBuilder();
       builder.addFilterJoin({
         sourcePath: 'there',
-        targetIndex: 'aaa',
+        targetIndices: [ 'aaa' ],
         targetPath: 'here'
       })
       .addQuery({

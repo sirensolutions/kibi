@@ -5,10 +5,10 @@ const _ = require('lodash');
 * Returns the index in relation of the element which is about the given index
 */
 const _getFocusedRelationIndex = function (focus, relation) {
-  if (relation[0].indices[0] === focus) {
+  if (relation[0].pattern === focus) {
     return 0;
   }
-  return relation[1].indices[0] === focus ? 1 : -1;
+  return relation[1].pattern === focus ? 1 : -1;
 };
 
 // add types for the source index
@@ -68,6 +68,7 @@ const addFilterJoinToParent = function (query, fjObject, types, negate) {
  * Each node of a sequence is a relation that connects two dashboards. The relation is directed: [ node1, node2 ] is
  * a join from node2 to node1.
  * A dashboard is an object that contains the following fields:
+ * - pattern: an index pattern from which indices are taken
  * - path: the path to the joined field
  * - indices: an array of indices to join on
  * - types: the corresponding array of types
@@ -101,12 +102,13 @@ exports.sequence = function (json) {
  * - focus: the focused index as a string
  * - relations: an array of relations. A relation is an array with two objects, each describing one end of a join.
  *   This object contains the following fields:
- *     - path: the path to the joined field
+ *     - pattern: an index pattern
  *     - indices: an array of indices to join on
  *     - types: the corresponding array of types
+ *     - path: the path to the joined field
  *     - orderBy: the filterjoin ordering option
  *     - maxTermsPerShard: the maximum number of terms to consider in the filterjoin
- * - queries: the queries for each index as an object, which entries are the index names
+ * - queries: the queries for each index/dashboard as an object. The queries are within an array for each pair.
  */
 exports.set = function (json) {
   const label = 'join_set';
@@ -117,7 +119,7 @@ exports.set = function (json) {
 
     const focus = data.focus;
     const relations = data.relations;
-    const queries = data.queries || {};
+    let queries = data.queries || {};
 
     if (focus === undefined) {
       throw new Error('Missing focus field in the join object: ' + JSON.stringify(data, null, ' '));
@@ -129,6 +131,7 @@ exports.set = function (json) {
     const query = [];
     const superGraph = _superGraph(relations);
     const toExpand = [];
+    queries = _.mapValues(queries, perDashboards => _(perDashboards).values().flatten().uniq().compact().value());
     _superGraphToSuperTree(toExpand, query, focus, superGraph, queries);
     _expandSuperTree(toExpand);
     return query;
@@ -161,6 +164,7 @@ function _verifySequence(sequence) {
   }
 
   // check element of the sequence
+  const relationFields = [ 'pattern', 'queries', 'path', 'indices', 'types', 'orderBy', 'maxTermsPerShard', 'termsEncoding' ];
   _.each(sequence, function (element, index) {
     if (element.group) {
       if (index !== 0) {
@@ -173,7 +177,7 @@ function _verifySequence(sequence) {
         _verifySequence(seq);
       });
     } else if (element.relation) {
-      _checkRelation(element.relation, [ 'queries', 'path', 'indices', 'types', 'orderBy', 'maxTermsPerShard', 'termsEncoding' ]);
+      _checkRelation(element.relation, relationFields);
     } else {
       throw new Error('Unknown element: ' + JSON.stringify(element, null, ' '));
     }
@@ -183,7 +187,7 @@ function _verifySequence(sequence) {
 /**
  * Asserts the fields of a relation
  */
-function _checkRelation(relation, fields, maxIndices) {
+function _checkRelation(relation, fields) {
   if (relation.constructor !== Array || relation.length !== 2) {
     throw new Error('Expecting a pair of dashboards to join, got: ' + JSON.stringify(relation, null, ' '));
   }
@@ -206,14 +210,6 @@ function _checkRelation(relation, fields, maxIndices) {
   if (!!relation[1].queries) {
     throw new Error('Queries for the root node should be already set: ' + JSON.stringify(relation, null, ' '));
   }
-  if (maxIndices && relation[0].indices && maxIndices < relation[0].indices.length) {
-    throw new Error('Too many indices. Expected to have only ' + maxIndices + ' but got '
-      + JSON.stringify(relation[0].indices, null, ' '));
-  }
-  if (maxIndices && relation[1].indices && maxIndices < relation[1].indices.length) {
-    throw new Error('Too many indices. Expected to have only ' + maxIndices + ' but got '
-      + JSON.stringify(relation[1].indices, null, ' '));
-  }
 }
 
 /**
@@ -234,27 +230,25 @@ function _sequenceJoins(query, sequence) {
     });
   } else {
     const lastJoin = sequence[0].relation;
-    const { child } = _addFilterJoin(curQuery, lastJoin[1].path, lastJoin[1],
-                                                 lastJoin[0].path, lastJoin[0], sequence[0].negate);
+    const { child } = _addFilterJoin(curQuery, lastJoin[1].path, lastJoin[1], lastJoin[0].path, lastJoin[0], sequence[0].negate);
     curQuery = child;
     _addFilters(curQuery, lastJoin[0].queries);
   }
 }
 
 function _superGraph(relations) {
-  const relationFields = [ 'path', 'indices', 'types', 'orderBy', 'maxTermsPerShard', 'termsEncoding' ];
+  const relationFields = [ 'pattern', 'path', 'indices', 'types', 'orderBy', 'maxTermsPerShard', 'termsEncoding' ];
 
   return _(relations)
   .each((relation) => {
-    // we currently support only 1 index in the indices array
-    _checkRelation(relation, relationFields, 1);
-    if (relation[0].indices[0] === relation[1].indices[0]) {
+    _checkRelation(relation, relationFields);
+    if (relation[0].pattern === relation[1].pattern) {
       throw new Error('Loops in the join_set are not supported!\n' + JSON.stringify(relation, null, ' '));
     }
   })
   .groupBy((relation) => {
-    const leftIndex = relation[0].indices[0];
-    const rightIndex = relation[1].indices[0];
+    const leftIndex = relation[0].pattern;
+    const rightIndex = relation[1].pattern;
     return leftIndex < rightIndex ? leftIndex + rightIndex : rightIndex + leftIndex;
   })
   .value();
@@ -311,11 +305,18 @@ function _superGraphToSuperTree(toExpand, query, focus, superGraph, filters, vis
   visitedIndices[focus] = true;
 
   if (filters.hasOwnProperty(focus)) {
-    if (query.constructor === Array) {
-      throw new Error('There cannot be filters on the root of the filterjoin');
-    }
     const focusFilters = filters[focus];
-    _addFilters(query, focusFilters);
+    if (query.constructor === Array) {
+      for (let i = 0; i < focusFilters.length; i++) {
+        if (focusFilters[i].hasOwnProperty('query')) {
+          query.push(focusFilters[i].query);
+        } else {
+          query.push(focusFilters[i]);
+        }
+      }
+    } else {
+      _addFilters(query, focusFilters);
+    }
   }
 
   for (const id in superGraph) {
@@ -338,7 +339,7 @@ function _superGraphToSuperTree(toExpand, query, focus, superGraph, filters, vis
               filterjoin
             });
           }
-          _superGraphToSuperTree(toExpand, child, targetRel.indices[0], superGraph, filters, visitedIndices, visitedRelations);
+          _superGraphToSuperTree(toExpand, child, targetRel.pattern, superGraph, filters, visitedIndices, visitedRelations);
         }
       }
     }
@@ -403,7 +404,7 @@ function _addFilterJoin(query, sourcePath, sourceIndex, targetPath, targetIndex,
  */
 function _addFilters(query, focusFilters) {
   if (query.constructor !== Object) {
-    throw new Error('Query should be an object');
+    throw new Error('Query should be an object: ' + JSON.stringify(query, null, ' '));
   }
   if (!focusFilters) {
     return;

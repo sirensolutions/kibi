@@ -9,7 +9,11 @@ define(function (require) {
   var jQuery = require('jquery');
   var _ = require('lodash');
 
-  var app = require('ui/modules').get('kibana', ['ngAnimate']);
+  var app = require('ui/modules')
+    .get('kibana', ['ngAnimate'])
+    .config(['$animateProvider', ($animateProvider) => {
+      $animateProvider.classNameFilter(/animate-.*/);
+    }]);
 
   app.animation('.animate-kibi-relational-filter-panel', function () {
     return {

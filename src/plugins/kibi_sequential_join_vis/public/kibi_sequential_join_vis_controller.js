@@ -137,7 +137,6 @@ define(function (require) {
             const msg = `The relational filter visualization "${$scope.vis.title}" is not configured for this dashboard. ` +
                 `No button has a source index set to ${index}.`;
             $scope.vis.error = msg;
-            notify.error(msg);
           }
           return buttons;
         }).catch(notify.error);

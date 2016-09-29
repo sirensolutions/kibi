@@ -117,7 +117,7 @@ describe('Kibi Components', function () {
             actuallData = data.ids;
           },
           100,
-          DelayExecutionHelper.DELAY_STRATEGY.RESET_ON_NEW_EVENT
+          DelayExecutionHelper.DELAY_STRATEGY.RESET_COUNTER_ON_NEW_EVENT
         );
 
         helper.addEventData(['id1']);
@@ -212,7 +212,7 @@ describe('Kibi Components', function () {
             actuallData = data.ids;
           },
           100,
-          DelayExecutionHelper.DELAY_STRATEGY.DO_NOT_RESET_ON_NEW_EVENT
+          DelayExecutionHelper.DELAY_STRATEGY.DO_NOT_RESET_COUNTER_ON_NEW_EVENT
         );
 
         helper.addEventData(['id1']);
@@ -257,7 +257,7 @@ describe('Kibi Components', function () {
             actuallData = data.ids;
           },
           100,
-          DelayExecutionHelper.DELAY_STRATEGY.DO_NOT_RESET_ON_NEW_EVENT
+          DelayExecutionHelper.DELAY_STRATEGY.DO_NOT_RESET_COUNTER_ON_NEW_EVENT
         );
 
         helper.addEventData(['id1']);

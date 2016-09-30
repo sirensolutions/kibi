@@ -127,6 +127,9 @@ The standard `npm run test` task runs several sub tasks and can take several min
   <dt><code>npm run test:server</code> or <code>npm run test:browser</code></dt>
   <dd>Runs the tests for just the server or browser</dd>
 
+  <dt><code>npm run test:server -- --grep 'Migration'</code></dt>
+  <dd>Runs the server tests which match the grep expression</dd>
+
   <dt><code>npm run test:dev</code></dt>
   <dd>
     Initializes an environment for debugging the browser tests. Includes an dedicated instance of the kibi server for building the test bundle, and a karma server. When running this task the build is optimized for the first time and then a karma-owned instance of the browser is opened. Click the "debug" button to open a new tab that executes the unit tests.

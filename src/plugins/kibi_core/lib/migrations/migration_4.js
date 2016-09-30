@@ -25,8 +25,19 @@ export default class Migration4 extends Migration {
     this._type = 'config';
     this._query = {
       query: {
-        term: {
-          _id: pkg.kibi_version
+        bool: {
+          filter: [
+            {
+              term: {
+                _id: pkg.kibi_version
+              }
+            },
+            {
+              exists: {
+                field: 'kibi:relations'
+              }
+            }
+          ]
         }
       }
     };

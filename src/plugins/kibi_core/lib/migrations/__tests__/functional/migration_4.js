@@ -10,7 +10,7 @@ const indexSnapshot = requirefrom('src/testUtils')('index_snapshot');
 const ScenarioManager = requirefrom('src/testUtils')('scenario_manager');
 import Migration from '../../migration_4';
 import Scenario from './scenarios/migration_4/scenario';
-import serverConfig from '../../../../../../../test/serverConfig';
+const serverConfig = requirefrom('test')('serverConfig');
 import url from 'url';
 
 describe('kibi_core/migrations/functional', function () {

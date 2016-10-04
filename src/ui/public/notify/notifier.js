@@ -1,20 +1,15 @@
 define(function (require) {
   var _ = require('lodash');
   var $ = require('jquery');
-
   var metadata = require('ui/metadata');
   var formatMsg = require('kibie/notify/lib/_format_msg');
 
   var notifs = [];
-  var setTO = setTimeout;
-  var clearTO = clearTimeout;
   var version = metadata.version;
   var buildNum = metadata.buildNum;
   var consoleGroups = ('group' in window.console) && ('groupCollapsed' in window.console) && ('groupEnd' in window.console);
 
   var fatalSplashScreen = require('ui/notify/partials/fatal_splash_screen.html');
-
-  var awesomeDemoMode = false; // kibi: added by kibi
 
   var log = _.bindKey(console, 'log');
 
@@ -35,35 +30,80 @@ define(function (require) {
     return Date.now();
   }
 
-  function closeNotif(cb, key) {
+  function closeNotif(notif, cb = _.noop, key) {
     return function () {
       // this === notif
-      var i = notifs.indexOf(this);
+      var i = notifs.indexOf(notif);
       if (i !== -1) notifs.splice(i, 1);
-      if (this.timerId) this.timerId = clearTO(this.timerId);
-      if (typeof cb === 'function') cb(key);
+
+      cancelTimer(notif);
+      cb(key);
     };
   }
 
+  function cancelTimer(notif) {
+    if (notif.timerId) {
+      Notifier.config.clearInterval(notif.timerId);
+      notif.timerId = undefined;
+    }
+  }
+
+  function timerCanceler(notif, cb = _.noop, key) {
+    return function cancelNotifTimer() {
+      cancelTimer(notif);
+      cb(key);
+    };
+  }
+
+  /**
+   * Initiates a timer to update _timeRemaining_ on the notif at second
+   * intervals and clears the notif once the notif _lifetime_ has been reached.
+   */
+  function startNotifTimer(notif, cb) {
+    var interval = 1000;
+
+    if (notif.lifetime === Infinity) return;
+
+    notif.timeRemaining = Math.floor(notif.lifetime / interval);
+
+    notif.timerId = Notifier.config.setInterval(function () {
+      notif.timeRemaining -= 1;
+
+      if (notif.timeRemaining === 0) {
+        closeNotif(notif, cb, 'ignore')();
+      }
+    }, interval, notif.timeRemaining);
+
+    notif.cancelTimer = timerCanceler(notif, cb);
+  }
+
+  function restartNotifTimer(notif, cb) {
+    cancelTimer(notif);
+    startNotifTimer(notif, cb);
+  }
+
   function add(notif, cb) {
+    // kibi: with awesomeDemoMode we ignore errors
+    if (notif.type === 'danger' && Notifier.config.awesomeDemoMode) {
+      return;
+    }
+
     _.set(notif, 'info.version', version);
     _.set(notif, 'info.buildNum', buildNum);
 
-    // kibi: added awesomeDemoMode
-    if (notif.lifetime !== Infinity && awesomeDemoMode !== true) {
-      notif.timerId = setTO(function () {
-        closeNotif(cb, 'ignore').call(notif);
-      }, notif.lifetime);
-    }
+    notif.clear = closeNotif(notif);
 
-    notif.clear = closeNotif();
     if (notif.actions) {
       notif.actions.forEach(function (action) {
-        notif[action] = closeNotif(cb, action);
+        notif[action] = closeNotif(notif, cb, action);
       });
     }
 
     notif.count = (notif.count || 0) + 1;
+
+    notif.isTimed = function isTimed() {
+      return notif.timerId ? true : false;
+    };
 
     var dup = _.find(notifs, function (item) {
       return item.content === notif.content && item.lifetime === notif.lifetime;
@@ -72,8 +112,13 @@ define(function (require) {
     if (dup) {
       dup.count += 1;
       dup.stacks = _.union(dup.stacks, [notif.stack]);
+
+      restartNotifTimer(dup, cb);
+
       return dup;
     }
+
+    startNotifTimer(notif, cb);
 
     notif.stacks = [notif.stack];
     notifs.push(notif);
@@ -122,10 +167,6 @@ define(function (require) {
     var self = this;
     opts = opts || {};
 
-    if (opts.awesomeDemoMode) {
-      awesomeDemoMode = opts.awesomeDemoMode;
-    }
-
     // label type thing to say where notifications came from
     self.from = opts.location;
 
@@ -134,14 +175,30 @@ define(function (require) {
     });
   }
 
+  /**
+   * Log a major, important, event in the lifecycle of the application
+   * @param {string} name - The name of the lifecycle event
+   * @param {boolean} success - Simple flag stating whether the lifecycle event succeeded
+   */
+  Notifier.prototype.lifecycle = createGroupLogger('lifecycle', {
+    open: true
+  });
+
+  Notifier.config = {
+    awesomeDemoMode: false, // kibi: hide error messages
+    errorLifetime: 300000,
+    warningLifetime: 10000,
+    infoLifetime: 5000,
+    setInterval: window.setInterval,
+    clearInterval: window.clearInterval
+  };
+
+  Notifier.applyConfig = function (config) {
+    _.merge(Notifier.config, config);
+  };
+
   // to be notified when the first fatal error occurs, push a function into this array.
   Notifier.fatalCallbacks = [];
-
-  // set the timer functions that all notification managers will use
-  Notifier.setTimerFns = function (set, clear) {
-    setTO = set;
-    clearTO = clear;
-  };
 
   // simply a pointer to the global notif list
   Notifier.prototype._notifs = notifs;
@@ -152,15 +209,6 @@ define(function (require) {
    * @param {boolean} success - Simple flag stating whether the event succeeded
    */
   Notifier.prototype.event = createGroupLogger('event', {
-    open: true
-  });
-
-  /**
-   * Log a major, important, event in the lifecycle of the application
-   * @param {string} name - The name of the lifecycle event
-   * @param {boolean} success - Simple flag stating whether the lifecycle event succeeded
-   */
-  Notifier.prototype.lifecycle = createGroupLogger('lifecycle', {
     open: true
   });
 
@@ -227,7 +275,7 @@ define(function (require) {
 
     if (!$container.size()) {
       $(document.body)
-        // in case the app has not completed boot
+      // in case the app has not completed boot
       .removeAttr('ng-cloak')
       .html(fatalSplashScreen);
 
@@ -248,7 +296,7 @@ define(function (require) {
       content: formatMsg(err, this.from),
       icon: 'warning',
       title: 'Error',
-      lifetime: 300000,
+      lifetime: Notifier.config.errorLifetime,
       actions: ['report', 'accept'],
       stack: formatStack(err)
     }, cb);
@@ -265,7 +313,7 @@ define(function (require) {
       content: formatMsg(msg, this.from),
       icon: 'warning',
       title: 'Warning',
-      lifetime: 10000,
+      lifetime: Notifier.config.warningLifetime,
       actions: ['accept']
     }, cb);
   };
@@ -281,7 +329,7 @@ define(function (require) {
       content: formatMsg(msg, this.from),
       icon: 'info-circle',
       title: 'Debug',
-      lifetime: 5000,
+      lifetime: Notifier.config.infoLifetime,
       actions: ['accept']
     }, cb);
   };

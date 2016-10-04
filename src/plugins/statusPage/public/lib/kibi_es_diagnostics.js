@@ -1,9 +1,10 @@
 const _ = require('lodash');
 const angular = require('angular');
+const notify = require('ui/notify');
 const saveAs = require('@spalger/filesaver').saveAs;
 const esUrls = require('./kibi_es_apis_calls');
 
-module.exports = function (data, $http, kibiIndexName, $window) {
+module.exports = function (data, $http, kibiIndexName) {
   return function () {
 
     function formatResults(header, results) {
@@ -34,7 +35,9 @@ module.exports = function (data, $http, kibiIndexName, $window) {
         });
       }
     }).catch((err) => {
-      $window.alert('Could not collect diagnostics\n' + JSON.stringify(err, null, ' '));
+      const error = new Error('Could not collect diagnostics');
+      error.stack = err.data.message;
+      notify.error(error);
     });
 
   };

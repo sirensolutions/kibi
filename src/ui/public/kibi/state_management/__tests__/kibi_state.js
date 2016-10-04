@@ -316,9 +316,8 @@ describe('State Management', function () {
         });
       });
 
-      it('should fail when the dashboard is not associated to a search', function () {
-        const msg = 'The dashboard [dashboard0] is expected to be associated with a saved search.';
-        expect(kibiState.getState).withArgs('dashboard0').to.throwException(msg);
+      it('should not fail if the dashboard is not associated with a search', function () {
+        expect(kibiState.getState.bind(kibiState)).withArgs('dashboard0').to.not.throw;
       });
     });
 

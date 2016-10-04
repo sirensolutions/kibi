@@ -62,8 +62,7 @@ define(function (require) {
   function startNotifTimer(notif, cb) {
     var interval = 1000;
 
-    // kibi: added awesomeDemoMode
-    if (notif.lifetime === Infinity || Notifier.config.awesomeDemoMode) return;
+    if (notif.lifetime === Infinity) return;
 
     notif.timeRemaining = Math.floor(notif.lifetime / interval);
 
@@ -84,6 +83,11 @@ define(function (require) {
   }
 
   function add(notif, cb) {
+    // kibi: with awesomeDemoMode we ignore errors
+    if (notif.type === 'danger' && Notifier.config.awesomeDemoMode) {
+      return;
+    }
+
     _.set(notif, 'info.version', version);
     _.set(notif, 'info.buildNum', buildNum);
 

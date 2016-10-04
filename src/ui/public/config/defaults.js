@@ -207,10 +207,6 @@ define(function (require) {
         value: false,
         description: 'New dashboards use dark theme by default'
       },
-      'filters:pinnedByDefault': {
-        value: false,
-        description: 'Whether the filters should have a global state (be pinned) by default'
-      },
       'notifications:lifetime:error': {
         value: 300000,
         description: 'The time in milliseconds which an error notification ' +

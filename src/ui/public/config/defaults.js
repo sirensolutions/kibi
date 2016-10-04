@@ -109,7 +109,7 @@ define(function (require) {
       'visualization:colorMapping': {
         type: 'json',
         value: JSON.stringify({
-          'Count': '#6eadc1'
+          'Count': '#57c17b'
         }),
         description: 'Maps values to specified colors within visualizations'
       },

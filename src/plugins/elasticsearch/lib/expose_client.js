@@ -63,6 +63,41 @@ module.exports = function (server) {
     });
   }
 
+  // kibi: monkey pathing the elasticsearch prototype
+  // to expose two new methods for siren-join coordinate search api
+  // NOTE:
+  // At this moment client does not exist yes so there is no way to check
+  // that the siren-join plugin is actually installed
+  // The methods are exposed and if the plugin is not installed the calls will fail
+  // with an error from elasticsearch
+  const clientAction = require('../../../../node_modules/elasticsearch/src/lib/client_action');
+  const utils = require('../../../../node_modules/elasticsearch/src/lib/utils');
+
+  var ca = clientAction.makeFactoryWithModifier(function (spec) {
+    return utils.merge(spec, {
+      params: {
+        filterPath: {
+          type: 'list',
+          name: 'filter_path'
+        }
+      }
+    });
+  });
+  var apiVersion = config.get('elasticsearch.apiVersion');
+
+  var coordinateSearchSpec = _.cloneDeep(elasticsearch.Client.apis[apiVersion].search.spec);
+  coordinateSearchSpec.urls[0].fmt = '/<%=index%>/<%=type%>/_coordinate_search';
+  coordinateSearchSpec.urls[1].fmt = '/<%=index%>/_coordinate_search';
+  coordinateSearchSpec.urls[2].fmt = '/_coordinate_search';
+  elasticsearch.Client.apis[apiVersion].coordinate_search = ca(coordinateSearchSpec);
+
+  var coordinateMsearchSpec = _.cloneDeep(elasticsearch.Client.apis[apiVersion].msearch.spec);
+  coordinateMsearchSpec.urls[0].fmt = '/<%=index%>/<%=type%>/_coordinate_msearch';
+  coordinateMsearchSpec.urls[1].fmt = '/<%=index%>/_coordinate_msearch';
+  coordinateMsearchSpec.urls[2].fmt = '/_coordinate_msearch';
+  elasticsearch.Client.apis[apiVersion].coordinate_msearch = ca(coordinateMsearchSpec);
+  // kibi: end
+
   const client = createClient();
   server.on('close', _.bindKey(client, 'close'));
 

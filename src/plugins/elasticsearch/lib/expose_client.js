@@ -70,10 +70,11 @@ module.exports = function (server) {
   // that the siren-join plugin is actually installed
   // The methods are exposed and if the plugin is not installed the calls will fail
   // with an error from elasticsearch
-  const clientAction = require('../../../../node_modules/elasticsearch/src/lib/client_action');
-  const utils = require('../../../../node_modules/elasticsearch/src/lib/utils');
+  const clientAction = require('elasticsearch/src/lib/client_action');
+  const utils = require('elasticsearch/src/lib/utils');
+  const apiVersion = config.get('elasticsearch.apiVersion');
 
-  var ca = clientAction.makeFactoryWithModifier(function (spec) {
+  const ca = clientAction.makeFactoryWithModifier(function (spec) {
     return utils.merge(spec, {
       params: {
         filterPath: {
@@ -83,11 +84,12 @@ module.exports = function (server) {
       }
     });
   });
-  var apiVersion = config.get('elasticsearch.apiVersion');
 
-  var replacePathInUrls = function (urls, from, to) {
+  const replacePathInUrls = function (urls, from, to) {
     for (var i = 0; i < urls.length; i++) {
-      urls[i] = urls[i].replace(from, to);
+      if (urls[i].fmt) {
+        urls[i].fmt = urls[i].fmt.replace(from, to);
+      }
     }
   };
 

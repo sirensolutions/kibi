@@ -24,6 +24,7 @@ export default class Migration3 extends Migration {
     super(configuration);
 
     this._client = configuration.client;
+    this._logger = configuration.logger;
     this._index = configuration.index;
     this._type = 'visualization';
   }
@@ -113,15 +114,19 @@ export default class Migration3 extends Migration {
         if (!visState.params) {
           visState.params = {};
         }
-        visState.params.queryDefinitions = [];
-        if (visState.params.queryIds) {
-          for (let queryDef of visState.params.queryIds) {
-            visState.params.queryDefinitions.push({
-              queryId: queryDef.id,
-              queryVariableName: queryDef.queryVariableName
-            });
+        if (visState.params.queryDefinitions) {
+          this._logger.warning(`The visualization state already contains an attribute named queryDefinitions, skipping transformation.`);
+        } else {
+          visState.params.queryDefinitions = [];
+          if (visState.params.queryIds) {
+            for (let queryDef of visState.params.queryIds) {
+              visState.params.queryDefinitions.push({
+                queryId: queryDef.id,
+                queryVariableName: queryDef.queryVariableName
+              });
+            }
+            delete visState.params.queryIds;
           }
-          delete visState.params.queryIds;
         }
         delete visState.params.hasEntityDependentQuery;
         visState.version = 2;
@@ -132,13 +137,17 @@ export default class Migration3 extends Migration {
         if (!visState.params) {
           visState.params = {};
         }
-        visState.params.queryDefinitions = [];
-        if (visState.params.queryOptions) {
-          for (let queryDef of visState.params.queryOptions) {
-            delete queryDef.isEntityDependent;
-            visState.params.queryDefinitions.push(queryDef);
+        if (visState.params.queryDefinitions) {
+          this._logger.warning(`The visualization state already contains an attribute named queryDefinitions, skipping transformation.`);
+        } else {
+          visState.params.queryDefinitions = [];
+          if (visState.params.queryOptions) {
+            for (let queryDef of visState.params.queryOptions) {
+              delete queryDef.isEntityDependent;
+              visState.params.queryDefinitions.push(queryDef);
+            }
+            delete visState.params.queryOptions;
           }
-          delete visState.params.queryOptions;
         }
         delete visState.params.hasEntityDependentQuery;
         visState.version = 2;
@@ -153,16 +162,20 @@ export default class Migration3 extends Migration {
           if (!agg.params) {
             agg.params = {};
           }
-          agg.params.queryDefinitions = [];
-          if (agg.params.queryIds) {
-            for (let queryDef of agg.params.queryIds) {
-              agg.params.queryDefinitions.push({
-                queryId: queryDef.id,
-                joinElasticsearchField: queryDef.joinElasticsearchField,
-                queryVariableName: queryDef.queryVariableName
-              });
+          if (agg.params.queryDefinitions) {
+            this._logger.warning(`The aggregator already contains an attribute named queryDefinitions, skipping transformation.`);
+          } else {
+            agg.params.queryDefinitions = [];
+            if (agg.params.queryIds) {
+              for (let queryDef of agg.params.queryIds) {
+                agg.params.queryDefinitions.push({
+                  queryId: queryDef.id,
+                  joinElasticsearchField: queryDef.joinElasticsearchField,
+                  queryVariableName: queryDef.queryVariableName
+                });
+              }
+              delete agg.params.queryIds;
             }
-            delete agg.params.queryIds;
           }
           agg.version = 2;
           modified = true;

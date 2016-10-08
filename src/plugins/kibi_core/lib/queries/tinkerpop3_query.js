@@ -68,7 +68,7 @@ TinkerPop3Query.prototype.fetchResults = function (options, onlyIds, idVariableN
       let configHits = results[0];
       let indexPatternHits = results[1];
       var kibiRelations = null;
-      var serverVersion = self.server.config().get('pkg').version;
+      var serverVersion = self.server.config().get('pkg').kibi_version;
       var configDocs = [];
       if (configHits.hits.total > 0) {
         configDocs = _.filter(configHits.hits.hits, function (doc) {

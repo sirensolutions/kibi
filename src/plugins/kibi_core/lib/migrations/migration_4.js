@@ -50,6 +50,9 @@ export default class Migration4 extends Migration {
   async count() {
     let objects = await this.scrollSearch(this._index, this._type, this._query);
     return objects.reduce((count, obj) => {
+      if (!obj._source['kibi:relations']) {
+        return count;
+      }
       const relations = JSON.parse(obj._source['kibi:relations']);
       if (this._isUpgradeable(relations)) {
         return count + 1;
@@ -66,6 +69,9 @@ export default class Migration4 extends Migration {
     let body = '';
     let upgraded = 0;
     for (let obj of objects) {
+      if (!obj._source['kibi:relations']) {
+        continue;
+      }
       const relations = JSON.parse(obj._source['kibi:relations']);
       const modified = this._upgradeKibiRelations(relations);
 

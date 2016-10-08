@@ -45,10 +45,14 @@ define(function (require) {
 
         return Promise.all(promises).then(function (explanations) {
           var html = '<ul class="explanation join-set">';
+          let empty = true;
           _.each(explanations, function (expl) {
+            if (expl) {
+              empty = false;
+            }
             html += '<li>' + expl + '</li>';
           });
-          return html + '</ul>';
+          return empty ? '' : html + '</ul>';
         });
       };
 
@@ -86,7 +90,7 @@ define(function (require) {
 
           jQuery('.filter').each(function (index) {
             var $el = jQuery(this);
-            if ($el.hasClass('join')) {
+            if ($el.hasClass('join') && explanations[index]) {
               $el.qtip({
                 content: {
                   title: 'Steps - last one on top',

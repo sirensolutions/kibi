@@ -739,5 +739,37 @@ describe('Kibi Components', function () {
       }).catch(done);
     });
 
+    it('does not print anything if there are no filters or queries', function (done) {
+      const relations = [
+        [
+          {
+            indices: [ 'article' ],
+            types: [ 'article' ],
+            path: 'id'
+          },
+          {
+            indices: [ 'time-testing-3' ],
+            types: [ 'time-testing-3' ],
+            path: 'articleId'
+          }
+        ]
+      ];
+
+      const filters = [
+        {
+          join_set: {
+            focus: focus,
+            relations: relations
+          }
+        }
+      ];
+
+      joinExplanationHelper.getFilterExplanations(filters).then(function (expl) {
+        expect(expl.length).to.equal(1);
+        expect(expl[0]).to.equal('');
+        done();
+      }).catch(done);
+    });
+
   });
 });

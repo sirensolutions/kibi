@@ -16,7 +16,7 @@ export default [
     'index': {
       '_index': '.kibi',
       '_type': 'config',
-      '_id': packageJson.version
+      '_id': packageJson.kibi_version
     }
   },
   {

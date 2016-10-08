@@ -13,7 +13,10 @@ var fakeServer = {
         } else if (key === 'kibana.index') {
           return '.kibi';
         } else if (key === 'pkg') {
-          return { version : '0.3.2' };
+          return {
+            version : '0.3.2',
+            kibi_version: '0.3.2'
+          };
         } else {
           return '';
         }

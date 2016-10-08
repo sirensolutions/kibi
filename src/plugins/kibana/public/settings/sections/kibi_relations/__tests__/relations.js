@@ -62,6 +62,16 @@ describe('Kibi Settings', function () {
   }
 
   describe('Relations Section', function () {
+
+    it('relations should have version set to 2 by default', function (done) {
+      ngMock.module('kibana');
+      ngMock.inject(($injector) => {
+        config = $injector.get('config');
+        expect(config.get('kibi:relations').version).to.be(2);
+        done();
+      });
+    });
+
     describe('create an index to dashboards map', function () {
       require('testUtils/noDigestPromises').activateForSuite();
       beforeEach(() => init({

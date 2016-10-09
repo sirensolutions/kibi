@@ -157,9 +157,9 @@ describe('Kibi Controllers', function () {
 
       $scope.$digest();
 
-      expect($scope.filter(0, { value: 'About' })).to.be(true);
-      expect($scope.filter(0, { value: 'Companies' })).to.be(true);
-      expect($scope.filter(0, { value: 'Articles' })).to.be(false);
+      expect($scope.filter({ value: 'About' })).to.be(true);
+      expect($scope.filter({ value: 'Companies' })).to.be(true);
+      expect($scope.filter({ value: 'Articles' })).to.be(false);
     });
 
     it('forbid assigning a dashboard to more than one group for two dashboard groups', function () {
@@ -203,11 +203,11 @@ describe('Kibi Controllers', function () {
 
       $scope.$digest();
 
-      expect($scope.filter(0, { value: 'About' })).to.be(true);
-      expect($scope.filter(0, { value: 'Companies' })).to.be(true);
-      expect($scope.filter(0, { value: 'Articles' })).to.be(false);
-      expect($scope.filter(0, { value: 'Investors' })).to.be(true);
-      expect($scope.filter(0, { value: 'Articles detailed per source' })).to.be(true);
+      expect($scope.filter({ value: 'About' })).to.be(true);
+      expect($scope.filter({ value: 'Companies' })).to.be(true);
+      expect($scope.filter({ value: 'Articles' })).to.be(false);
+      expect($scope.filter({ value: 'Investors' })).to.be(true);
+      expect($scope.filter({ value: 'Articles detailed per source' })).to.be(true);
     });
   });
 });

@@ -14,7 +14,6 @@ var fakeServer = {
           return '.kibi';
         } else if (key === 'pkg') {
           return {
-            version : '0.3.2',
             kibi_version: '0.3.2'
           };
         } else {

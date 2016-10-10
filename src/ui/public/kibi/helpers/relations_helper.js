@@ -183,6 +183,29 @@ define(function (require) {
     };
 
     /**
+     * Create the human readable label from given relation id
+     * the targetIndexId parameter tells the direction of the label
+     * This method is used in sequential join filter visualisation configuration
+     */
+    RelationsHelper.prototype.createMoreDetailedLabel = function (relationId, targetIndexId) {
+      var rel = this.getRelationInfosFromRelationID(relationId);
+      if (targetIndexId === rel.target.index) {
+        return rel.source.index + '/' +
+               (rel.source.type ? rel.source.type + '/' : '') +
+               rel.source.path + ' <-> ' +
+               rel.target.index + '/' +
+               (rel.target.type ? rel.target.type + '/' : '') +
+               rel.target.path;
+      }
+      return rel.target.index + '/' +
+             (rel.target.type ? rel.target.type + '/' : '') +
+             rel.target.path + ' <-> ' +
+             rel.source.index + '/' +
+             (rel.source.type ? rel.source.type + '/' : '') +
+             rel.source.path;
+    };
+
+    /**
      * Adds advanced join parameters for the given relation.
      * Rel is an array with the following format:
      *     [

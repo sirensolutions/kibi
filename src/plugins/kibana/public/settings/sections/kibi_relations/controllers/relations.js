@@ -136,10 +136,16 @@ define(function (require) {
     };
 
     /**
-     * Filters out the dashboards that are not relevant in the row with the given id
+     * Filters out the dashboards that are not relevant in the given row
+     * The row index should be passed in options as **rowIndex**
+     * The selected flag is passed by the kibi-delect directive to indicate that the item is the selected one
      */
-    $scope.filterDashboards = function (item, filterOptions) {
-      var relDash = $scope.relations.relationsDashboards[filterOptions.rowIndex];
+    $scope.filterDashboards = function (item, options, selected) {
+      if (selected !== undefined && selected === true) {
+        return false;
+      }
+
+      var relDash = $scope.relations.relationsDashboards[options.rowIndex];
 
       if (!item || !item.value) {
         // this is the watched value
@@ -217,14 +223,19 @@ define(function (require) {
     }
 
     /**
-     * Filters out the relations that are not relevant in the row with the given id
+     * Filters out the relations that are not relevant in given row
+     * The row index should be passed in options as **rowIndex** property
+     * The selected flag is passed by the kibi-delect directive to indicate that the item is the selected one
      */
-    $scope.filterRelations = function (item, filterOptions) {
+    $scope.filterRelations = function (item, options, selected) {
+      if (selected !== undefined && selected === true) {
+        return false;
+      }
       // here for anything about indices relations - we take them from config as they are already saved
       var relations = config.get('kibi:relations');
 
       // for anything about the dashboards relations - we take them from the scope
-      var dashboards = $scope.relations.relationsDashboards[filterOptions.rowIndex].dashboards;
+      var dashboards = $scope.relations.relationsDashboards[options.rowIndex].dashboards;
       var lIndex = '';
       var rIndex = '';
 
@@ -263,7 +274,7 @@ define(function (require) {
         }
       }).compact().value();
       const usedRelations = _(relations.relationsDashboards).map(function (relDash, offset) {
-        if (offset !== filterOptions.rowIndex && dashboards[0] && dashboards[1]) {
+        if (offset !== options.rowIndex && dashboards[0] && dashboards[1]) {
           if ((dashboards[0] === relDash.dashboards[0] && dashboards[1] === relDash.dashboards[1]) ||
               (dashboards[0] === relDash.dashboards[1] && dashboards[1] === relDash.dashboards[0])) {
             return relDash.relation;

@@ -1,6 +1,14 @@
 [[releasenotes]]
 == Kibi Release Notes
 
+=== Kibi 4.5.3-5 Release Notes
+
+* Fixed issue where advanced relations settings were not taken after the time-based indices fix
+* Fixed issue where certain count queries were sent twice
+* Fixed typeahead position issue
+* Optimized ng-animate usage
+* Extended elasticsearch.js to support _coordinate_search and _coordinate_msearch queries
+
 === Kibi 4.5.3-4 Release Notes
 
 * Support time-based indices for relational filters and tab counts

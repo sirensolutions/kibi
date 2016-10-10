@@ -18,46 +18,39 @@
           <input type="text" ng-model="button.filterLabel" class="form-control"/>
         </div>
 
-
         <div class="form-group">
-          <label>Source index</label></br/>
-          <span>(this button will only work on a dashboard having this index as a search source)</span></br>
-          <kibi-select required object-type="indexPattern" ng-model="button.sourceIndexPatternId">
-          </kibi-select>
-        </div>
-        <div class="form-group">
-          <label>Source index type</label></br/>
-          <kibi-select object-type="indexPatternType" index-pattern-id="button.sourceIndexPatternId" ng-model="button.sourceIndexPatternType">
-          </kibi-select>
-        </div>
-        <div class="form-group">
-          <label>Source field</label></br/>
-          <kibi-select required object-type="field" analyzed-warning="true" scripted-fields="false"
-                     index-pattern-id="button.sourceIndexPatternId" ng-model="button.sourceField">
+          <label>Source dashboard</label></br/>
+          <span>The button will appear on this dashboard</span></br>
+          <kibi-select
+            object-type="dashboard"
+            filter="filterSourceDashboards"
+            options="{hasSavedSearch: true, targetDashboardId: button.targetDashboardId}"
+            ng-model="button.sourceDashboardId">
           </kibi-select>
         </div>
 
-
-        <div class="form-group">
-          <label>Target index</label></br/>
-          <kibi-select required object-type="indexPattern" ng-model="button.targetIndexPatternId">
-          </kibi-select>
-        </div>
-        <div class="form-group">
-          <label>Target index type</label></br/>
-          <kibi-select object-type="indexPatternType" index-pattern-id="button.targetIndexPatternId" ng-model="button.targetIndexPatternType">
-          </kibi-select>
-        </div>
-        <div class="form-group">
-          <label>Target field</label></br/>
-          <kibi-select required object-type="field" analyzed-warning="true" scripted-fields="false"
-                     index-pattern-id="button.targetIndexPatternId" ng-model="button.targetField">
-          </kibi-select>
-        </div>
         <div class="form-group">
           <label>Target dashboard</label></br/>
           <span>On click it will redirect to this dashboard</span></br>
-          <kibi-select required object-type="dashboard" ng-model="button.redirectToDashboard">
+          <kibi-select required
+            object-type="dashboard"
+            filter="filterTargetDashboards"
+            options="{hasSavedSearch: true, sourceDashboardId: button.sourceDashboardId}"
+            ng-model="button.targetDashboardId">
+          </kibi-select>
+        </div>
+
+        <div class="form-group">
+          <label>Relation</label></br/>
+          <span>Choose the way to do the join</span></br>
+          <!--
+          NOTE: here we pick an index relation here based on which
+          dasboards are selected
+          -->
+          <kibi-select required
+            object-type="indexrelation"
+            options="{sourceDashboardId: button.sourceDashboardId, targetDashboardId: button.targetDashboardId}"
+            ng-model="button.indexRelationId">
           </kibi-select>
         </div>
 

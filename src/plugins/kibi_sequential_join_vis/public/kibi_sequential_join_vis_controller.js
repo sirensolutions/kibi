@@ -36,12 +36,12 @@ define(function (require) {
 
       return Promise.all(_.map(buttons, (button) => {
         return Promise.all([
-          kibiState.timeBasedIndices(button.targetIndexPatternId, button.redirectToDashboard),
+          kibiState.timeBasedIndices(button.targetIndexPatternId, button.targetDashboardId),
           kibiSequentialJoinVisHelper.getJoinSequenceFilter(dashboardId, button)
         ])
         .then(([ indices, joinSeqFilter ]) => {
           button.joinSeqFilter = joinSeqFilter;
-          return kibiSequentialJoinVisHelper.buildCountQuery(button.redirectToDashboard, joinSeqFilter)
+          return kibiSequentialJoinVisHelper.buildCountQuery(button.targetDashboardId, joinSeqFilter)
           .then((query) => {
             return { query, button, indices };
           });
@@ -126,17 +126,22 @@ define(function (require) {
     var _constructButtons = function () {
       $scope.vis.error = '';
       if (!onVisualizeTab) {
-        return kibiState._getDashboardAndSavedSearchMetas([ currentDashboardId ]).then(([ { savedDash, savedSearchMeta } ]) => {
-          const index = savedSearchMeta.index;
-          const buttons = kibiSequentialJoinVisHelper.constructButtonsArray($scope.vis.params.buttons, index);
+        return kibiState._getDashboardAndSavedSearchMetas([currentDashboardId]).then(([ { savedDash, savedSearchMeta } ]) => {
+          const currentDashboardIndex = savedSearchMeta.index;
+          const currentDashboardId = savedDash.id;
+          const buttons = kibiSequentialJoinVisHelper.constructButtonsArray(
+            $scope.vis.params.buttons,
+            currentDashboardIndex,
+            currentDashboardId
+          );
           // retain the buttons order
           for (let i = 0; i < buttons.length; i++) {
             buttons[i].btnIndex = i;
           }
           if (!buttons.length) {
-            const msg = `The relational filter visualization "${$scope.vis.title}" is not configured for this dashboard. ` +
-                `No button has a source index set to ${index}.`;
-            $scope.vis.error = msg;
+            $scope.vis.error =
+              `The relational filter visualization "${$scope.vis.title}" is not configured for this dashboard. ` +
+              `No button has a source index matching the current dashboard index: ${currentDashboardIndex}.`;
           }
           return buttons;
         }).catch(notify.error);
@@ -178,7 +183,7 @@ define(function (require) {
             targetField: this.sourceField,
             targetIndexPatternId: this.sourceIndexPatternId,
             targetIndexPatternType: this.sourceIndexPatternType,
-            redirectToDashboard: currentDashboardId
+            targetDashboardId: currentDashboardId
           };
           // NOTE:
           // here we do not want to delay the count update
@@ -186,7 +191,7 @@ define(function (require) {
           // instead of _collectUpdateCountsRequest
           // This could be done in future to further reduce the number of calls but
           // as it requires greater refactoring I postponed it for now
-          return _fireUpdateCounts.call(self, [ virtualButton ], this.redirectToDashboard)
+          return _fireUpdateCounts.call(self, [ virtualButton ], this.targetDashboardId)
           .then(() => virtualButton.targetCount)
           .catch(notify.error);
         };

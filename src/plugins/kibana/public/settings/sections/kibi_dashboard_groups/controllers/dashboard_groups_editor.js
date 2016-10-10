@@ -65,7 +65,7 @@ define(function (require) {
         allDashboardsGroups = data.hits;
       });
 
-      $scope.filter = function (id, item) {
+      $scope.filter = function (item) {
         var dashboard = item && item.value;
         var allDashboardIds = _($scope.dashboardGroup.dashboards).pluck('id');
 

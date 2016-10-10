@@ -169,8 +169,6 @@ Query.prototype.getHtml = function (queryDef, options) {
     safeConfig.id = that.id;
     safeConfig.templateVars = queryDef.templateVars;
     safeConfig.open = queryDef.open;
-    safeConfig.showFilterButton = queryDef.showFilterButton;
-    safeConfig.redirectToDashboard = queryDef.redirectToDashboard;
     // now override the original config
     data.config = safeConfig;
 

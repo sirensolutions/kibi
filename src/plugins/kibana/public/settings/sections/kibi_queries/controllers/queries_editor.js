@@ -246,7 +246,6 @@ define(function (require) {
                 {
                   open: true,
                   queryId: $scope.query.id,
-                  showFilterButton: false,
                   templateId: $scope.preview.templateId,
                   templateVars: {
                     label: 'Preview'

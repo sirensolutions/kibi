@@ -144,8 +144,7 @@ var fakeGraphResponse = [{
       templateVars: {
         label: 'Preview'
       },
-      open: true,
-      showFilterButton: false
+      open: true
     },
     results: {
       bindings: []
@@ -218,8 +217,7 @@ var fakeTinkerpop3Result = {
       templateVars: {
         label: 'Preview'
       },
-      open: true,
-      showFilterButton: false
+      open: true
     },
     results: {
       bindings: []

@@ -18,6 +18,12 @@ export default {
       indexDefinition: 'index_definition.js',
       source: 'index_data3.js',
       haltOnFailure: true
+    },
+    {
+      indexName: '.kibi4',
+      indexDefinition: 'index_definition.js',
+      source: 'index_data4.js',
+      haltOnFailure: true
     }
   ]
 };

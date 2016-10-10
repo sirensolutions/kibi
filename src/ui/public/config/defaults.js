@@ -251,7 +251,7 @@ define(function (require) {
       },
       'kibi:relations': {
         type: 'json',
-        value: '{ "relationsIndices": [], "relationsDashboards": [] }',
+        value: '{ "relationsIndices": [], "relationsDashboards": [], "version": 2 }',
         description: 'Relations between index patterns and dashboards'
       },
       'kibi:shieldAuthorizationWarning': {

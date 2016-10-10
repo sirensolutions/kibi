@@ -188,6 +188,32 @@ describe('kibi_core/migrations/functional', function () {
       }));
     });
 
+    describe('should skip the migration if kibi:relations is empty', function () {
+      beforeEach(() => {
+        configuration = {
+          index: '.kibi4',
+          client: client,
+          logger: {
+            warning: sinon.spy(),
+            info: sinon.spy()
+          }
+        };
+        warningSpy = configuration.logger.warning;
+      });
+
+      it('should not find any object to upgrade', wrapAsync(async () => {
+        let migration = new Migration(configuration);
+        let result = await migration.count();
+        expect(result).to.be(0);
+      }));
+
+      it('should not upgrade', wrapAsync(async () => {
+        let migration = new Migration(configuration);
+        let result = await migration.upgrade();
+        expect(result).to.be(0);
+      }));
+    });
+
     afterEach(wrapAsync(async () => {
       await scenarioManager.unload(Scenario);
     }));

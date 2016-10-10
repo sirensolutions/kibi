@@ -94,6 +94,9 @@ describe('Kibi Directives', function () {
         $provide.service('savedDatasources', (Promise) => mockSavedObjects(Promise)('savedDatasources', fakeSavedDatasources));
         $provide.service('savedSearches', (Promise) => mockSavedObjects(Promise)('savedSearches', fakeSavedSearches));
         $provide.constant('kbnIndex', '.kibi');
+        $provide.constant('kbnDefaultAppId', '');
+        $provide.constant('kibiDefaultDashboardId', '');
+        $provide.constant('elasticsearchPlugins', ['siren-join']);
       });
 
       ngMock.module('kibana/courier', function ($provide) {

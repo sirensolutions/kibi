@@ -18,7 +18,7 @@ var init = function ({
   modelRequired = null,
   include = null,
   filter = null,
-  filterOptions = null
+  options = null
 }) {
   // Load the application
   ngMock.module('kibana', function ($provide) {
@@ -53,9 +53,9 @@ var init = function ({
       $rootScope.filter = filter;
       select += ' filter="filter"';
 
-      if (filterOptions !== null && filterOptions !== undefined) {
-        $rootScope.filterOptions = filterOptions;
-        select += ' filter-options="' + filterOptions + '"';
+      if (options !== null && options !== undefined) {
+        $rootScope.options = options;
+        select += ' options="' + options + '"';
       }
     }
 
@@ -255,7 +255,7 @@ describe('Kibi Directives', function () {
       expect(options[2].text).to.be('toto');
     });
 
-    it('should add the include to the select options and take care of duplicates', function () {
+    it('should remove duplicates when adding the include to the select options', function () {
       var items = [
         {
           value: 1,
@@ -302,7 +302,7 @@ describe('Kibi Directives', function () {
       expect(options[3].text).to.be('toto');
     });
 
-    it('should exclude items from the select', function () {
+    it('should exclude items from the select based on item value', function () {
       var items = [
         {
           value: 1,
@@ -315,7 +315,7 @@ describe('Kibi Directives', function () {
           label: 'toto'
         }
       ];
-      var filter = function (item, options) {
+      var filter = function (item, options, selected) {
         if (item) {
           return item.value === 1;
         } else {
@@ -336,7 +336,7 @@ describe('Kibi Directives', function () {
       expect(options[1].text).to.be('toto');
     });
 
-    it('should exclude items from the select based on the filterOptions', function () {
+    it('should exclude items from the select based on the filter options', function () {
       var items = [
         {
           value: 1,
@@ -357,7 +357,7 @@ describe('Kibi Directives', function () {
         }
       };
 
-      init({ items, filter, filterOptions: '{name: \'joe\'}' });
+      init({ items, filter, options: '{name: \'joe\'}' });
 
       expect($rootScope.action.called).to.be.ok();
       var options = $elem.find('option');
@@ -383,7 +383,7 @@ describe('Kibi Directives', function () {
           label: 'toto'
         }
       ];
-      var filter = function (item, options) {
+      var filter = function (item, options, selected) {
         if (item) {
           return item.value === 1;
         } else {
@@ -423,7 +423,7 @@ describe('Kibi Directives', function () {
           label: 'toto'
         }
       ];
-      var filter = function (item, options) {
+      var filter = function (item, options, selected) {
         if (item) {
           return item.value === 1;
         } else {

@@ -31,7 +31,9 @@ module.exports = function (kibana) {
     require('./lib/migrations/migration_1'),
     require('./lib/migrations/migration_2'),
     require('./lib/migrations/migration_3'),
-    require('./lib/migrations/migration_4')
+    require('./lib/migrations/migration_4'),
+    // migration_5 must be done after migration_4
+    require('./lib/migrations/migration_5')
   ];
 
   var _validateQueryDefs = function (queryDefs) {

@@ -3,84 +3,10 @@ var ngMock = require('ngMock');
 var expect = require('expect.js');
 
 var mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
-var fakeSavedDashboards = [
-  {
-    id: 'Articles',
-    title: 'Articles'
-  },
-  {
-    id: 'Companies',
-    title: 'Companies'
-  },
-  {
-    id: 'time-testing-1',
-    title: 'time testing 1',
-    timeRestore: false
-  },
-  {
-    id: 'time-testing-2',
-    title: 'time testing 2',
-    timeRestore: true,
-    timeMode: 'quick',
-    timeFrom: 'now-15y',
-    timeTo: 'now'
-  },
-  {
-    id: 'time-testing-3',
-    title: 'time testing 3',
-    timeRestore: true,
-    timeMode: 'absolute',
-    timeFrom: '2005-09-01T12:00:00.000Z',
-    timeTo: '2015-09-05T12:00:00.000Z'
-  }
-];
-var fakeSavedDatasources = [
-  {
-    id: 'ds1',
-    title: 'ds1 datasource',
-    datasourceType: 'sparql_http'
-  },
-  {
-    id: 'ds2',
-    title: 'ds2 datasource',
-    datasourceType: 'mysql'
-  },
-  {
-    id: 'ds3',
-    title: 'ds3 datasource',
-    datasourceType: 'rest'
-  }
-];
-var fakeSavedSearches = [
-  {
-    id: 'search-ste',
-    kibanaSavedObjectMeta: {
-      searchSourceJSON: JSON.stringify(
-        {
-          index: 'search-ste',
-          filter: [],
-          query: {}
-        }
-      )
-    }
-  },
-  {
-    id: 'time-testing-4',
-    kibanaSavedObjectMeta: {
-      searchSourceJSON: JSON.stringify(
-        {
-          index: 'time-testing-4', // here put this id to make sure fakeTimeFilter will supply the timfilter for it
-          filter: [],
-          query: {}
-        }
-      )
-    }
-  }
-];
-
 var stSelectHelper;
 var config;
 var $httpBackend;
+var indexPatterns;
 
 
 describe('Kibi Directives', function () {
@@ -88,128 +14,167 @@ describe('Kibi Directives', function () {
 
     require('testUtils/noDigestPromises').activateForSuite();
 
-    beforeEach(function () {
+    var init = function (opt) {
+      var defaultOptions =  {
+        savedDatasources: [],
+        savedSearches: [],
+        savedQueries: [],
+        savedTemplates: [],
+        savedDashboards: [],
+        stubIndexPatternsGetIds: false,
+        initIndexPattern: false,
+        stubConfig: false,
+        initHttpBackend: false
+      };
+
+      var options = {};
+      _.merge(options, defaultOptions, opt);
+
 
       ngMock.module('kibana', function ($provide) {
-        $provide.service('savedDatasources', (Promise) => mockSavedObjects(Promise)('savedDatasources', fakeSavedDatasources));
-        $provide.service('savedSearches', (Promise) => mockSavedObjects(Promise)('savedSearches', fakeSavedSearches));
         $provide.constant('kbnIndex', '.kibi');
         $provide.constant('kbnDefaultAppId', '');
         $provide.constant('kibiDefaultDashboardId', '');
         $provide.constant('elasticsearchPlugins', ['siren-join']);
+        if (options.savedDatasources) {
+          $provide.service('savedDatasources', (Promise) => mockSavedObjects(Promise)('savedDatasources', options.savedDatasources));
+        }
+        if (options.savedSearches) {
+          $provide.service('savedSearches', (Promise) => mockSavedObjects(Promise)('savedSearches', options.savedSearches));
+        }
       });
 
-      ngMock.module('kibana/courier', function ($provide) {
-        $provide.service('courier', function (Promise) {
-          return {
-            indexPatterns: {
-              getIds: function () {
-                return Promise.resolve([ 'aaa', 'bbb' ]);
+      if (options.stubIndexPatternsGetIds) {
+        ngMock.module('kibana/courier', function ($provide) {
+          $provide.service('courier', function (Promise) {
+            return {
+              indexPatterns: {
+                getIds: function () {
+                  return Promise.resolve([ 'aaa', 'bbb' ]);
+                }
               }
-            }
-          };
+            };
+          });
         });
-      });
+      }
 
-      ngMock.module('templates_editor/services/saved_templates', function ($provide) {
-        $provide.service('savedTemplates', (Promise) => mockSavedObjects(Promise)('savedTemplates', [
-          {
-            id: 'template-1',
-            title: 'template 1',
-            description: '',
-            templateSource: '',
-            templateEngine: 'jade',
-            version: 1
-          }
-        ]));
-      });
-
-      ngMock.module('queries_editor/services/saved_queries', function ($provide) {
-        $provide.service('savedQueries', (Promise) => mockSavedObjects(Promise)('savedQueries', [
-          {
-            id: 'sparql',
-            title: 'sparql query',
-            resultQuery: 'select ?name { ?s ?p ?o }',
-            datasourceId: 'ds1',
-            tags: []
-          },
-          {
-            id: 'sql',
-            title: 'sql query',
-            resultQuery: 'select name from person',
-            datasourceId: 'ds2',
-            tags: []
-          },
-          {
-            id: 'rest',
-            title: 'rest query',
-            resultQuery: '',
-            datasourceId: 'ds3',
-            tags: []
-          },
-          {
-            id: 'rest_with_query_variables',
-            title: 'rest_with_query_variables query',
-            resultQuery: '',
-            datasourceId: 'ds3',
-            rest_variables: '[' +
-              '{"name": "ids", "value": "$[*].id"},' +
-              '{"name": "names", "value": "$[*].name"}' +
-            ']',
-            tags: []
-          },
-          {
-            id: 'nodatasource',
-            title: 'nodatasource query',
-            resultQuery: '',
-            datasourceId: '',
-            tags: []
-          },
-          {
-            id: 'q2',
-            title: 'q2 query',
-            tags: [ 'tag2', '42' ]
-          }
-        ]));
-      });
-
-      ngMock.module('app/dashboard', function ($provide) {
-        $provide.service('savedDashboards', (Promise) => mockSavedObjects(Promise)('savedDashboards', fakeSavedDashboards));
-      });
-
-      ngMock.module('kibana/index_patterns', function ($provide) {
-        $provide.service('indexPatterns', function (Promise, Private) {
-          var indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
-          return {
-            get: function (id) {
-              return Promise.resolve(indexPattern);
-            }
-          };
+      if (options.savedQueries) {
+        ngMock.module('queries_editor/services/saved_queries', function ($provide) {
+          $provide.service('savedQueries', (Promise) => mockSavedObjects(Promise)('savedQueries', options.savedQueries));
         });
-      });
+      }
+
+      if (options.savedTemplates) {
+        ngMock.module('templates_editor/services/saved_templates', function ($provide) {
+          $provide.service('savedTemplates', (Promise) => mockSavedObjects(Promise)('savedTemplates', options.savedTemplates));
+        });
+      }
+
+
+      if (options.savedDashboards) {
+        ngMock.module('app/dashboard', function ($provide) {
+          $provide.service('savedDashboards', (Promise) => mockSavedObjects(Promise)('savedDashboards', options.savedDashboards));
+        });
+      }
+
+
+      if (options.initIndexPattern) {
+        ngMock.module('kibana/index_patterns', function ($provide) {
+          $provide.service('indexPatterns', function (Promise, Private) {
+            var indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+            return {
+              get: function (id) {
+                return Promise.resolve(indexPattern);
+              }
+            };
+          });
+        });
+      }
 
       ngMock.inject(function ($injector, Private) {
-        config = $injector.get('config');
         stSelectHelper = Private(require('ui/kibi/directives/kibi_select_helper'));
-        $httpBackend = $injector.get('$httpBackend');
+        if (options.stubConfig) {
+          config = $injector.get('config');
+        }
+        if (options.initHttpBackend) {
+          $httpBackend = $injector.get('$httpBackend');
+        }
       });
-    });
-
-    afterEach(function () {
-      $httpBackend.verifyNoOutstandingExpectation();
-      $httpBackend.verifyNoOutstandingRequest();
-    });
-
-    function fakeHits() {
-      var hits = { hits: { hits: [] } };
-
-      for (var i = 0; i < arguments.length; i++) {
-        hits.hits.hits.push(arguments[i]);
-      }
-      return hits;
-    }
+    };
 
     describe('GetQueries', function () {
+      var fakeSavedDatasources = [
+        {
+          id: 'ds1',
+          title: 'ds1 datasource',
+          datasourceType: 'sparql_http'
+        },
+        {
+          id: 'ds2',
+          title: 'ds2 datasource',
+          datasourceType: 'mysql'
+        },
+        {
+          id: 'ds3',
+          title: 'ds3 datasource',
+          datasourceType: 'rest'
+        }
+      ];
+
+      var fakeSavedQueries = [
+        {
+          id: 'sparql',
+          title: 'sparql query',
+          resultQuery: 'select ?name { ?s ?p ?o }',
+          datasourceId: 'ds1',
+          tags: []
+        },
+        {
+          id: 'sql',
+          title: 'sql query',
+          resultQuery: 'select name from person',
+          datasourceId: 'ds2',
+          tags: []
+        },
+        {
+          id: 'rest',
+          title: 'rest query',
+          resultQuery: '',
+          datasourceId: 'ds3',
+          tags: []
+        },
+        {
+          id: 'rest_with_query_variables',
+          title: 'rest_with_query_variables query',
+          resultQuery: '',
+          datasourceId: 'ds3',
+          rest_variables: '[' +
+            '{"name": "ids", "value": "$[*].id"},' +
+            '{"name": "names", "value": "$[*].name"}' +
+          ']',
+          tags: []
+        },
+        {
+          id: 'nodatasource',
+          title: 'nodatasource query',
+          resultQuery: '',
+          datasourceId: '',
+          tags: []
+        },
+        {
+          id: 'q2',
+          title: 'q2 query',
+          tags: [ 'tag2', '42' ]
+        }
+      ];
+
+      beforeEach(function () {
+        init({
+          savedQueries: fakeSavedQueries,
+          savedDatasources: fakeSavedDatasources
+        });
+      });
+
       it('should set the group and datasourceType', function (done) {
         stSelectHelper.getQueries().then(function (queries) {
           expect(queries).to.have.length(6);
@@ -231,6 +196,27 @@ describe('Kibi Directives', function () {
     });
 
     describe('GetDocumentIds', function () {
+
+      function fakeHits() {
+        var hits = { hits: { hits: [] } };
+        for (var i = 0; i < arguments.length; i++) {
+          hits.hits.hits.push(arguments[i]);
+        }
+        return hits;
+      }
+
+      beforeEach(function () {
+        init({
+          initHttpBackend: true
+        });
+      });
+
+      afterEach(function () {
+        $httpBackend.verifyNoOutstandingExpectation();
+        $httpBackend.verifyNoOutstandingRequest();
+      });
+
+
       it('should return the ids of the given index', function (done) {
         var ids = fakeHits(
           {
@@ -267,6 +253,23 @@ describe('Kibi Directives', function () {
     });
 
     describe('GetTemplates', function () {
+      var fakeSavedTemplates = [
+        {
+          id: 'template-1',
+          title: 'template 1',
+          description: '',
+          templateSource: '',
+          templateEngine: 'jade',
+          version: 1
+        }
+      ];
+
+      beforeEach(function () {
+        init({
+          savedTemplates: fakeSavedTemplates
+        });
+      });
+
       it('select saved templates', function (done) {
         stSelectHelper.getTemplates().then(function (templates) {
           var expectedTemplates = [
@@ -282,6 +285,40 @@ describe('Kibi Directives', function () {
     });
 
     describe('GetSavedSearches', function () {
+
+      var fakeSavedSearches = [
+        {
+          id: 'search-ste',
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: JSON.stringify(
+              {
+                index: 'search-ste',
+                filter: [],
+                query: {}
+              }
+            )
+          }
+        },
+        {
+          id: 'time-testing-4',
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: JSON.stringify(
+              {
+                index: 'time-testing-4', // here put this id to make sure fakeTimeFilter will supply the timfilter for it
+                filter: [],
+                query: {}
+              }
+            )
+          }
+        }
+      ];
+
+      beforeEach(function () {
+        init({
+          savedSearches: fakeSavedSearches
+        });
+      });
+
       it('select saved searches', function (done) {
         stSelectHelper.getSavedSearches().then(function (savedSearches) {
           var expectedSavedSearches = [
@@ -301,6 +338,45 @@ describe('Kibi Directives', function () {
     });
 
     describe('GetDashboards', function () {
+
+      var fakeSavedDashboards = [
+        {
+          id: 'Articles',
+          title: 'Articles'
+        },
+        {
+          id: 'Companies',
+          title: 'Companies'
+        },
+        {
+          id: 'time-testing-1',
+          title: 'time testing 1',
+          timeRestore: false
+        },
+        {
+          id: 'time-testing-2',
+          title: 'time testing 2',
+          timeRestore: true,
+          timeMode: 'quick',
+          timeFrom: 'now-15y',
+          timeTo: 'now'
+        },
+        {
+          id: 'time-testing-3',
+          title: 'time testing 3',
+          timeRestore: true,
+          timeMode: 'absolute',
+          timeFrom: '2005-09-01T12:00:00.000Z',
+          timeTo: '2015-09-05T12:00:00.000Z'
+        }
+      ];
+
+      beforeEach(function () {
+        init({
+          savedDashboards: fakeSavedDashboards
+        });
+      });
+
       it('select dashboards', function (done) {
         stSelectHelper.getDashboards().then(function (dashboards) {
           var expectedDashboards = [
@@ -332,17 +408,51 @@ describe('Kibi Directives', function () {
     });
 
     describe('GetDatasources', function () {
+
+      var fakeSavedDatasources = [
+        {
+          id: 'ds1',
+          title: 'ds1 datasource',
+          datasourceType: 'sparql_http'
+        },
+        {
+          id: 'ds2',
+          title: 'ds2 datasource',
+          datasourceType: 'mysql'
+        }
+      ];
+
+      beforeEach(function () {
+        init({
+          savedDatasources: fakeSavedDatasources
+        });
+      });
+
       it('select datasources', function (done) {
         stSelectHelper.getDatasources().then(function (datasources) {
-          expect(datasources).to.have.length(3);
+          expect(datasources).to.have.length(2);
           expect(datasources[0].value).to.be('ds1');
           expect(datasources[0].label).to.be('ds1 datasource');
+          expect(datasources[1].value).to.be('ds2');
+          expect(datasources[1].label).to.be('ds2 datasource');
           done();
         }).catch(done);
       });
     });
 
     describe('GetIndexTypes', function () {
+
+      beforeEach(function () {
+        init({
+          initHttpBackend: true
+        });
+      });
+
+      afterEach(function () {
+        $httpBackend.verifyNoOutstandingExpectation();
+        $httpBackend.verifyNoOutstandingRequest();
+      });
+
       it('no index pattern id specified', function (done) {
         stSelectHelper.getIndexTypes().then(function (types) {
           expect(types).to.eql([]);
@@ -391,6 +501,13 @@ describe('Kibi Directives', function () {
     });
 
     describe('GetFields', function () {
+
+      beforeEach(function () {
+        init({
+          initIndexPattern: true
+        });
+      });
+
       it('should return the fields', function (done) {
         stSelectHelper.getFields().then(function (fields) {
           expect(_.find(fields, { label: 'ssl' })).not.to.be.ok();
@@ -433,7 +550,17 @@ describe('Kibi Directives', function () {
     });
 
     describe('GetIndexesId', function () {
+
+      beforeEach(function () {
+        init({
+          stubIndexPatternsGetIds: true
+        });
+      });
+
       it('should return the ID of indices', function (done) {
+
+        console.log(indexPatterns);
+
         stSelectHelper.getIndexesId().then(function (ids) {
           expect(ids).to.have.length(2);
           expect(ids[0].label).to.be('aaa');
@@ -446,6 +573,80 @@ describe('Kibi Directives', function () {
     });
 
     describe('GetQueryVariables', function () {
+
+      var fakeSavedDatasources = [
+        {
+          id: 'ds1',
+          title: 'ds1 datasource',
+          datasourceType: 'sparql_http'
+        },
+        {
+          id: 'ds2',
+          title: 'ds2 datasource',
+          datasourceType: 'mysql'
+        },
+        {
+          id: 'ds3',
+          title: 'ds3 datasource',
+          datasourceType: 'rest'
+        }
+      ];
+
+      var fakeSavedQueries = [
+        {
+          id: 'sparql',
+          title: 'sparql query',
+          resultQuery: 'select ?name { ?s ?p ?o }',
+          datasourceId: 'ds1',
+          tags: []
+        },
+        {
+          id: 'sql',
+          title: 'sql query',
+          resultQuery: 'select name from person',
+          datasourceId: 'ds2',
+          tags: []
+        },
+        {
+          id: 'rest',
+          title: 'rest query',
+          resultQuery: '',
+          datasourceId: 'ds3',
+          tags: []
+        },
+        {
+          id: 'rest_with_query_variables',
+          title: 'rest_with_query_variables query',
+          resultQuery: '',
+          datasourceId: 'ds3',
+          rest_variables: '[' +
+            '{"name": "ids", "value": "$[*].id"},' +
+            '{"name": "names", "value": "$[*].name"}' +
+          ']',
+          tags: []
+        },
+        {
+          id: 'nodatasource',
+          title: 'nodatasource query',
+          resultQuery: '',
+          datasourceId: '',
+          tags: []
+        },
+        {
+          id: 'q2',
+          title: 'q2 query',
+          tags: [ 'tag2', '42' ]
+        }
+      ];
+
+      beforeEach(function () {
+        init({
+          savedDatasources: fakeSavedDatasources,
+          savedQueries: fakeSavedQueries
+        });
+      });
+
+
       it('should returned undefined if no query ID is passed', function (done) {
         stSelectHelper.getQueryVariables()
         .then(function (variables) {
@@ -520,7 +721,14 @@ describe('Kibi Directives', function () {
       });
     });
 
-    describe('GetJoinRelations', function () {
+    describe('getJoinRelations', function () {
+
+      beforeEach(function () {
+        init({
+          stubConfig: true
+        });
+      });
+
       it('should return the list of relations between index patterns', function (done) {
         var relations = {
           relationsIndices: [
@@ -577,5 +785,265 @@ describe('Kibi Directives', function () {
       });
     });
 
+    describe('getRelationsForButton', function () {
+
+      beforeEach(function () {
+        var fakedSavedDashboards = [
+          {
+            id: 'dash-a',
+            title: 'A',
+            savedSearchId: 'savedSearchA'
+          },
+          {
+            id: 'dash-b',
+            title: 'B',
+            savedSearchId: 'savedSearchB'
+          },
+          {
+            id: 'dash-c',
+            title: 'C',
+            savedSearchId: 'savedSearchC'
+          }
+        ];
+
+        var fakeSavedSearches = [
+          {
+            id: 'savedSearchA',
+            kibanaSavedObjectMeta: {
+              searchSourceJSON: JSON.stringify({index: 'index-a'})
+            }
+          },
+          {
+            id: 'savedSearchB',
+            kibanaSavedObjectMeta: {
+              searchSourceJSON: JSON.stringify({index: 'index-b'})
+            }
+          },
+          {
+            id: 'savedSearchC',
+            kibanaSavedObjectMeta: {
+              searchSourceJSON: JSON.stringify({index: 'index-c'})
+            }
+          }
+        ];
+
+        var relations = {
+          relationsIndices: [
+            {
+              indices: [
+                {
+                  indexPatternId: 'index-a',
+                  path: 'path-a'
+                },
+                {
+                  indexPatternId: 'index-b',
+                  path: 'path-b'
+                }
+              ],
+              label: 'label-a-b',
+              id: 'index-a//path-a/index-b//path-b'
+            },
+            {
+              indices: [
+                {
+                  indexPatternId: 'index-b',
+                  path: 'path-b'
+                },
+                {
+                  indexPatternId: 'index-c',
+                  path: 'path-c'
+                }
+              ],
+              label: 'label-b-c',
+              id: 'index-b//path-b/index-c//path-c'
+            },
+            {
+              indices: [
+                {
+                  indexPatternId: 'index-b',
+                  path: 'path-b1'
+                },
+                {
+                  indexPatternId: 'index-c',
+                  path: 'path-c1'
+                }
+              ],
+              label: 'label-b-c',
+              id: 'index-b//path-b1/index-c//path-c1'
+            }
+          ]
+        };
+
+        init({
+          savedDashboards: fakedSavedDashboards,
+          savedSearches: fakeSavedSearches,
+          stubConfig: true
+        });
+
+        config.set('kibi:relations', relations);
+      });
+
+
+      it('should return an empty set if no options set', function (done) {
+        stSelectHelper.getRelationsForButton().then(function (relations) {
+          expect(relations).to.have.length(0);
+          done();
+        }).catch(done);
+      });
+
+      describe('only options.sourceDashboardId set', function () {
+        it('should return all 3 if sourceDashboardId == dash-b', function (done) {
+          stSelectHelper.getRelationsForButton({
+            sourceDashboardId: 'dash-b'
+          }).then(function (relations) {
+            expect(relations).to.have.length(3);
+            expect(relations[0].label).to.equal('label-a-b');
+            expect(relations[1].label).to.equal('index-c/path-c <-> index-b/path-b');
+            expect(relations[2].label).to.equal('index-c/path-c1 <-> index-b/path-b1');
+            done();
+          }).catch(done);
+        });
+
+        it('should return only 1 if sourceDashboardId == dash-a', function (done) {
+          stSelectHelper.getRelationsForButton({
+            sourceDashboardId: 'dash-a'
+          }).then(function (relations) {
+            expect(relations).to.have.length(1);
+            expect(relations[0].label).to.equal('label-a-b');
+            done();
+          }).catch(done);
+        });
+
+        it('should return only 2 if sourceDashboardId == dash-c', function (done) {
+          stSelectHelper.getRelationsForButton({
+            sourceDashboardId: 'dash-c'
+          }).then(function (relations) {
+            expect(relations).to.have.length(2);
+            expect(relations[0].label).to.equal('index-c/path-c <-> index-b/path-b');
+            expect(relations[1].label).to.equal('index-c/path-c1 <-> index-b/path-b1');
+            done();
+          }).catch(done);
+        });
+
+        it('should reject if sourceDashboardId == dash-DO-NOT-EXIST', function (done) {
+          stSelectHelper.getRelationsForButton({
+            sourceDashboardId: 'dash-DO-NOT-EXIST'
+          }).then(function (relations) {
+            done(new Error('Should reject'));
+          }).catch(function () {
+            done();
+          });
+        });
+      });
+
+      describe('only options.targetDashboardId set', function () {
+        it('should return all 3 if targetDashboardId == dash-b', function (done) {
+          stSelectHelper.getRelationsForButton({
+            targetDashboardId: 'dash-b'
+          }).then(function (relations) {
+            expect(relations).to.have.length(3);
+            expect(relations[0].label).to.equal('label-a-b');
+            expect(relations[1].label).to.equal('index-c/path-c <-> index-b/path-b');
+            expect(relations[2].label).to.equal('index-c/path-c1 <-> index-b/path-b1');
+            done();
+          }).catch(done);
+        });
+
+        it('should return only 1 if targetDashboardId == dash-a', function (done) {
+          stSelectHelper.getRelationsForButton({
+            targetDashboardId: 'dash-a'
+          }).then(function (relations) {
+            expect(relations).to.have.length(1);
+            expect(relations[0].label).to.equal('label-a-b');
+            done();
+          }).catch(done);
+        });
+
+        it('should return only 2 if targetDashboardId == dash-c', function (done) {
+          stSelectHelper.getRelationsForButton({
+            targetDashboardId: 'dash-c'
+          }).then(function (relations) {
+            expect(relations).to.have.length(2);
+            expect(relations[0].label).to.equal('index-b/path-b <-> index-c/path-c');
+            expect(relations[1].label).to.equal('index-b/path-b1 <-> index-c/path-c1');
+            done();
+          }).catch(done);
+        });
+
+        it('should reject if targetDashboardId == dash-DO-NOT-EXIST', function (done) {
+          stSelectHelper.getRelationsForButton({
+            targetDashboardId: 'dash-DO-NOT-EXIST'
+          }).then(function (relations) {
+            done(new Error('Should reject'));
+          }).catch(function () {
+            done();
+          });
+        });
+
+      });
+
+      describe('both options.sourceDashboardId and options.targetDashboardId are set', function () {
+
+        it('should return 1 if sourceDashboardId == dash-a and targetDashboardId == dash-b', function (done) {
+          stSelectHelper.getRelationsForButton({
+            sourceDashboardId: 'dash-a',
+            targetDashboardId: 'dash-b'
+          }).then(function (relations) {
+            expect(relations).to.have.length(1);
+            expect(relations[0].label).to.equal('label-a-b');
+            done();
+          }).catch(done);
+        });
+
+        it('should return 1 if sourceDashboardId == dash-b and targetDashboardId == dash-a', function (done) {
+          stSelectHelper.getRelationsForButton({
+            sourceDashboardId: 'dash-b',
+            targetDashboardId: 'dash-a'
+          }).then(function (relations) {
+            expect(relations).to.have.length(1);
+            expect(relations[0].label).to.equal('label-a-b');
+            done();
+          }).catch(done);
+        });
+
+        it('should return 2 if sourceDashboardId == dash-b and targetDashboardId == dash-c', function (done) {
+          stSelectHelper.getRelationsForButton({
+            sourceDashboardId: 'dash-b',
+            targetDashboardId: 'dash-c'
+          }).then(function (relations) {
+            expect(relations).to.have.length(2);
+            expect(relations[0].label).to.equal('index-b/path-b <-> index-c/path-c');
+            expect(relations[1].label).to.equal('index-b/path-b1 <-> index-c/path-c1');
+            done();
+          }).catch(done);
+        });
+
+        it('should return 2 if sourceDashboardId == dash-c and targetDashboardId == dash-b', function (done) {
+          stSelectHelper.getRelationsForButton({
+            sourceDashboardId: 'dash-c',
+            targetDashboardId: 'dash-b'
+          }).then(function (relations) {
+            expect(relations).to.have.length(2);
+            expect(relations[0].label).to.equal('index-c/path-c <-> index-b/path-b');
+            expect(relations[1].label).to.equal('index-c/path-c1 <-> index-b/path-b1');
+            done();
+          }).catch(done);
+        });
+
+        it('should reject if sourceDashboardId == dash-a and targetDashboardId == dash-DO-NOT-EXIST', function (done) {
+          stSelectHelper.getRelationsForButton({
+            sourceDashboardId: 'dash-a',
+            targetDashboardId: 'dash-DO-NOT-EXIST'
+          })
+          .then(function (relations) {
+            done(new Error('Should reject'));
+          }).catch(function (e) {
+            // ok
+            done();
+          });
+        });
+      });
+
+    });
   });
 });

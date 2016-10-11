@@ -295,7 +295,7 @@ define(function (require) {
     };
 
 
-    KibiSelectHelper.prototype.getRelationsForButton = function (options) {
+    KibiSelectHelper.prototype.getRelationsForButton = function (options = {}) {
       // expect sourceDashboardId and/or targetDashboardId in options
       var relations = config.get('kibi:relations');
       var ids;

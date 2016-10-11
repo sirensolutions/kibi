@@ -44,9 +44,8 @@ define(function (require) {
                 }
               }
             }
-          }
-          // no second dashboard value to compare with
-          if (!secondDashValue) {
+          } else {
+            // no second dashboard value to compare with
             for (i = 0; i < dashboardRelations.length; i++) {
               if (dashboardRelations[i].dashboards.indexOf(firstDashValue) !== -1) {
                 return false;

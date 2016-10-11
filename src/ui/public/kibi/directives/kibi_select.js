@@ -13,6 +13,11 @@ define(function (require) {
       restrict: 'E',
       replace: true,
       scope: {
+        // objectType - text - possible values are:
+        // query, dashboard, search, template, datasource, indexPatternType,
+        // field, indexPattern, documentIds, joinRelations, queryVariable,
+        // iconType, labelType, relationsForSequentialJoinButton
+        objectType: '@',
         // Filter function which returns true for items to be removed.
         // There are three arguments:
         // - item: the item
@@ -32,7 +37,6 @@ define(function (require) {
         // }
         options: '=?',
         // TODO: move all the below options to options
-        objectType: '@',  // text
         indexPatternId: '=?', // optional only for objectType === field | indexPatternType | documentIds
         indexPatternType: '=?', // optional only for objectType === documentIds
         fieldTypes: '=?', // optional only for objectType === field, value should be array of strings
@@ -281,7 +285,7 @@ define(function (require) {
               case 'labelType':
                 promise = selectHelper.getLabelType();
                 break;
-              case 'indexrelation':
+              case 'relationsForSequentialJoinButton':
                 promise = selectHelper.getRelationsForButton(scope.options);
                 break;
             }
@@ -305,7 +309,7 @@ define(function (require) {
 
         scope.$watch(function (scope) {
           if (scope.filter && _.isFunction(scope.filter())) {
-            return scope.filter()(null, scope.options, undefined);
+            return scope.filter()(null, scope.options);
           }
         }, function (newValue, oldValue, scope) {
           _render(scope);

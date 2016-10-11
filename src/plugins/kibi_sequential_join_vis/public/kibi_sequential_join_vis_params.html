@@ -45,10 +45,10 @@
           <span>Choose the way to do the join</span></br>
           <!--
           NOTE: here we pick an index relation here based on which
-          dasboards are selected
+          dashboards are selected
           -->
           <kibi-select required
-            object-type="indexrelation"
+            object-type="relationsForSequentialJoinButton"
             options="{sourceDashboardId: button.sourceDashboardId, targetDashboardId: button.targetDashboardId}"
             ng-model="button.indexRelationId">
           </kibi-select>

@@ -58,7 +58,8 @@ define(function (require) {
   });
 
   app.controller('RelationsController',
-  function (kibiState, $rootScope, $scope, config, Private, $element, $timeout, kbnUrl, createNotifier, kibiEnterpriseEnabled) {
+  function (Promise, es, kibiState, $rootScope, $scope, config, Private, $element, $timeout, kbnUrl, createNotifier,
+            kibiEnterpriseEnabled) {
     var notify = createNotifier({
       location: 'Relations Editor'
     });
@@ -67,6 +68,8 @@ define(function (require) {
     var relationsHelper = Private(require('ui/kibi/helpers/relations_helper'));
 
     $scope.kibiEnterpriseEnabled = kibiEnterpriseEnabled;
+
+    $scope.unique = _.unique;
 
     // tabs
     $scope.tab = {
@@ -334,7 +337,7 @@ define(function (require) {
           if (relDash.relation) {
             var key = relationId(relDash);
             if (uniq[key].length !== 1) {
-              error = 'These relationships are equivalent, please remove one';
+              error = 'These relationships are equivalent, please remove one.';
             }
 
             // build the graph visualisation
@@ -365,7 +368,7 @@ define(function (require) {
             });
           }
         }
-        relDash.error = error;
+        relDash.errors = error && [ error ] || [];
         if (!!error) {
           $scope.invalid = true;
         }
@@ -391,7 +394,7 @@ define(function (require) {
       }
 
       var isEqual = _($scope.relations.relationsDashboards).map(function (relation) {
-        return _.omit(relation, [ '$$hashKey', 'error' ]);
+        return _.omit(relation, [ '$$hashKey', 'errors' ]);
       }).isEqual(oldRelations);
 
       // isValid checks that the DOM element contains the ng-valid class
@@ -407,7 +410,7 @@ define(function (require) {
       return {
         labelsFromIndices: _.pluck($scope.relations.relationsIndices, 'label'),
         dashboards: _.map($scope.relations.relationsDashboards, function (relation) {
-          return _.omit(relation, [ 'error' ]);
+          return _.omit(relation, [ 'errors' ]);
         })
       };
     }, function (newRelations, oldRelations) {
@@ -426,7 +429,7 @@ define(function (require) {
     // Listen to changes of relations between indices
     $scope.$watch(function ($scope) {
       return _.map($scope.relations.relationsIndices, function (relation) {
-        return _.omit(relation, ['error', 'id']); // id is redundant
+        return _.omit(relation, ['errors', 'id']); // id is redundant
       });
     }, function (newRelations, oldRelations) {
       // each node is an index
@@ -466,11 +469,12 @@ define(function (require) {
         return label + '.' + index.path;
       };
 
+      const checkMappings = [];
       $scope.invalid = false;
       _.each($scope.relations.relationsIndices, function (relation) {
 
         var indices = relation.indices;
-        var error = '';
+        var errors = [];
 
         if (indices[0].indexPatternId && indices[0].path && indices[1].indexPatternId && indices[1].path) {
 
@@ -483,13 +487,22 @@ define(function (require) {
                                                            indices[1].indexPatternId, indices[1].indexPatternType, indices[1].path);
 
           if (uniq[key].length !== 1) {
-            error = 'These relationships are equivalent, please remove one';
+            errors.push('These relationships are equivalent, please remove one.');
           }
           if (indices[0].indexPatternId === indices[1].indexPatternId &&
               indices[0].indexPatternType === indices[1].indexPatternType &&
               indices[0].path === indices[1].path) {
-            error += 'Left and right sides of the relation cannot be the same.';
+            errors.push('Left and right sides of the relation cannot be the same.');
           }
+          checkMappings.push(es.indices.getFieldMapping({
+            index: [ indices[0].indexPatternId, indices[1].indexPatternId ],
+            type: [ indices[0].indexPatternType, indices[1].indexPatternType ],
+            field: [ indices[0].path, indices[1].path ],
+            includeDefaults: true
+          })
+          .then(mapping => {
+            return { mapping, relation };
+          }));
           relation.id = key;
 
           if (relation.label) {
@@ -527,8 +540,8 @@ define(function (require) {
           }
         }
 
-        relation.error = error;
-        if (!!error) {
+        relation.errors = errors;
+        if (errors.length) {
           $scope.invalid = true;
         }
       });
@@ -538,9 +551,7 @@ define(function (require) {
         g.options.colors[nodeType] = $scope.typeToColor(nodeType);
       });
 
-      g.nodes = _.uniq(g.nodes, function (node) {
-        return node.id;
-      });
+      g.nodes = _.uniq(g.nodes, 'id');
       if (!$scope.indicesGraph && $scope.relations.relationsIndicesSerialized) {
         // check the serialized one
         var graph = $scope.relations.relationsIndicesSerialized;
@@ -553,14 +564,42 @@ define(function (require) {
       }
 
       var isEqual = _($scope.relations.relationsIndices).map(function (relation) {
-        return _.omit(relation, [ '$$hashKey', 'error' ]);
+        return _.omit(relation, [ '$$hashKey', 'errors' ]);
       }).isEqual(oldRelations);
       // isValid checks that the DOM element contains the ng-valid class
       // to be sure it is added, we do the following in the next tick.
       // If not, ng-valid is not present when the relation label is automatically created.
       $timeout(() => {
         if (_isValid('indices') && !isEqual) {
-          save('indices').then(function () {
+          Promise.all(checkMappings)
+          .then(mappings => {
+            const areMappingsCompatibleForSirenJoin = function (leftMapping, rightMapping) {
+              return leftMapping.index === rightMapping.index && leftMapping.type === rightMapping.type;
+            };
+
+            _.each(mappings, ({ mapping, relation }) => {
+              const indices = relation.indices;
+              const leftTypes = _.keys(mapping[indices[0].indexPatternId].mappings);
+              let leftType = indices[0].indexPatternType || leftTypes[0];
+              const rightTypes = _.keys(mapping[indices[1].indexPatternId].mappings);
+              let rightType = indices[1].indexPatternType || rightTypes[0];
+              const leftMapping = mapping[indices[0].indexPatternId].mappings[leftType][indices[0].path].mapping[indices[0].path];
+              const rightMapping = mapping[indices[1].indexPatternId].mappings[rightType][indices[1].path].mapping[indices[1].path];
+
+              if (!areMappingsCompatibleForSirenJoin(leftMapping, rightMapping)) {
+                if (!relation.errors) {
+                  relation.errors = [];
+                }
+                const left = `${indices[0].path} has mapping ${JSON.stringify(_.pick(leftMapping, [ 'index', 'type' ]), null, ' ')}`;
+                const right = `${indices[1].path} has mapping ${JSON.stringify(_.pick(rightMapping, [ 'index', 'type' ]), null, ' ')}`;
+                relation.errors.push(`Incompatible fields: ${left} while ${right}. They must be the same!`);
+                $scope.invalid = true;
+              }
+            });
+          })
+          .catch(notify.error)
+          .then(() => save('indices'))
+          .then(function () {
             if (oldRelations && oldRelations.length) {
               var relationsIndices = config.get('kibi:relations').relationsIndices;
 
@@ -640,11 +679,11 @@ define(function (require) {
 
       if (graph === 'indices') {
         relations.relationsIndices = _.map($scope.relations.relationsIndices, function (relation) {
-          return _.omit(relation, [ 'error' ]);
+          return _.omit(relation, [ 'errors' ]);
         });
       } else {
         relations.relationsDashboards = _.map($scope.relations.relationsDashboards, function (relation) {
-          return _.omit(relation, [ 'error' ]);
+          return _.omit(relation, [ 'errors' ]);
         });
       }
 

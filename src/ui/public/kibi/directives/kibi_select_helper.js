@@ -3,7 +3,7 @@ define(function (require) {
   var chrome = require('ui/chrome');
 
   return function KibiSelectHelperFactory(
-    config, $http, courier, indexPatterns, timefilter, Private, Promise,
+    config, $http, courier, indexPatterns, timefilter, Private, Promise, kibiState,
     savedSearches, savedTemplates, savedDashboards, savedQueries, savedDatasources, kbnIndex
     ) {
 
@@ -15,6 +15,7 @@ define(function (require) {
     var sqlHelper = Private(require('ui/kibi/helpers/sql_helper'));
     var indexPath = Private(require('ui/kibi/components/commons/_index_path'));
     var datasourceHelper = Private(require('ui/kibi/helpers/datasource_helper'));
+    var relationsHelper = Private(require('ui/kibi/helpers/relations_helper'));
     var kibiUtils = require('kibiutils');
 
     KibiSelectHelper.prototype.getQueries = function () {
@@ -70,16 +71,23 @@ define(function (require) {
       });
     };
 
-    KibiSelectHelper.prototype.getDashboards = function () {
+    KibiSelectHelper.prototype.getDashboards = function (dashboardOptions) {
       return savedDashboards.find().then(function (data) {
-        if (data.hits) {
-          var items = _.map(data.hits, function (hit) {
+        var hits;
+        if (dashboardOptions && dashboardOptions.hasSavedSearch) {
+          hits = _.filter(data.hits, (d) => {
+            return d.savedSearchId;
+          });
+        } else {
+          hits = data.hits;
+        }
+        if (hits) {
+          return _.map(hits, function (hit) {
             return {
               label: hit.title,
               value: hit.id
             };
           });
-          return items;
         }
       });
     };
@@ -284,6 +292,126 @@ define(function (require) {
       ];
 
       return Promise.resolve(types);
+    };
+
+
+    KibiSelectHelper.prototype.getRelationsForButton = function (options = {}) {
+      // expect sourceDashboardId and/or targetDashboardId in options
+      var relations = config.get('kibi:relations');
+      var ids;
+      if (options.sourceDashboardId && options.targetDashboardId && options.sourceDashboardId === options.targetDashboardId) {
+        ids = [options.sourceDashboardId];
+      } else if (options.sourceDashboardId && options.targetDashboardId) {
+        ids = [options.sourceDashboardId, options.targetDashboardId];
+      } else if (options.sourceDashboardId) {
+        ids = [options.sourceDashboardId];
+      } else if (options.targetDashboardId) {
+        ids = [options.targetDashboardId];
+      } else {
+        return Promise.resolve([]);
+      }
+
+      return kibiState._getDashboardAndSavedSearchMetas(ids)
+      .then((savedSearchesAndMetas) => {
+        var sourceDasboardMeta;
+        var sourceDasboard;
+        var sourceDasboardId;
+        var sourceDasboardIndex;
+        var targetDasboardMeta;
+        var targetDasboard;
+        var targetDasboaId;
+        var targetDasboardIndex;
+
+        if (options.sourceDashboardId && options.targetDashboardId && options.sourceDashboardId === options.targetDashboardId) {
+          sourceDasboardMeta = savedSearchesAndMetas[0].savedSearchMeta;
+          sourceDasboard = savedSearchesAndMetas[0].savedDash;
+          sourceDasboardId  = sourceDasboard.id;
+          sourceDasboardIndex  = sourceDasboardMeta.index;
+          targetDasboardMeta = savedSearchesAndMetas[0].savedSearchMeta;
+          targetDasboard = savedSearchesAndMetas[0].savedDash;
+          targetDasboaId = targetDasboard.id;
+          targetDasboardIndex  = targetDasboardMeta.index;
+        } else if (options.sourceDashboardId && options.targetDashboardId) {
+          sourceDasboardMeta = savedSearchesAndMetas[0].savedSearchMeta;
+          sourceDasboard = savedSearchesAndMetas[0].savedDash;
+          sourceDasboardId  = sourceDasboard.id;
+          sourceDasboardIndex  = sourceDasboardMeta.index;
+          targetDasboardMeta = savedSearchesAndMetas[1].savedSearchMeta;
+          targetDasboard = savedSearchesAndMetas[1].savedDash;
+          targetDasboaId = targetDasboard.id;
+          targetDasboardIndex  = targetDasboardMeta.index;
+        } else if (options.sourceDashboardId) {
+          sourceDasboardMeta = savedSearchesAndMetas[0].savedSearchMeta;
+          sourceDasboard = savedSearchesAndMetas[0].savedDash;
+          sourceDasboardId  = sourceDasboard.id;
+          sourceDasboardIndex  = sourceDasboardMeta.index;
+        } else if (options.targetDashboardId) {
+          targetDasboardMeta = savedSearchesAndMetas[0].savedSearchMeta;
+          targetDasboard = savedSearchesAndMetas[0].savedDash;
+          targetDasboaId = targetDasboard.id;
+          targetDasboardIndex  = targetDasboardMeta.index;
+        }
+        // now filter the relations
+        var filteredRelations = _(relations.relationsIndices)
+        .filter((rel) => {
+          var itemRelationDetails = relationsHelper.getRelationInfosFromRelationID(rel.id);
+
+          if (sourceDasboardIndex && targetDasboardIndex) {
+            if (
+              (
+                itemRelationDetails.source.index === sourceDasboardIndex &&
+                itemRelationDetails.target.index === targetDasboardIndex
+              )
+              ||
+              (
+                itemRelationDetails.source.index === targetDasboardIndex &&
+                itemRelationDetails.target.index === sourceDasboardIndex
+              )
+            ) {
+              return true;
+            }
+            // only source dashboard selected by the user
+          } else if (sourceDasboardIndex) {
+            if (itemRelationDetails.source.index === sourceDasboardIndex ||
+                itemRelationDetails.target.index === sourceDasboardIndex
+            ) {
+              return true;
+            }
+            // only target dashboard selected by the user
+          } else if (targetDasboardIndex) {
+            if (itemRelationDetails.source.index === targetDasboardIndex ||
+                itemRelationDetails.target.index === targetDasboardIndex
+            ) {
+              return true;
+            }
+          }
+          return false;
+        })
+        .sortBy((rel) => rel.label)
+        .value();
+
+        // before returning lets check for relations with the same name
+        // in such case compose a more detailed labels for them so they can be distinguished by the user
+        if (filteredRelations.length > 1) {
+          for (var i = 1; i < filteredRelations.length; i++) {
+            var prevRel = filteredRelations[i - 1];
+            var rel = filteredRelations[i];
+            if (prevRel.label === rel.label) {
+              prevRel.label = relationsHelper.createMoreDetailedLabel(prevRel.id, targetDasboardIndex);
+              rel.label = relationsHelper.createMoreDetailedLabel(rel.id, targetDasboardIndex);
+            }
+          }
+        }
+
+        var items = _.map(filteredRelations, (rel) => {
+          return {
+            label: rel.label,
+            value: rel.id
+          };
+        });
+
+        return Promise.resolve(items);
+      });
     };
 
     return new KibiSelectHelper();

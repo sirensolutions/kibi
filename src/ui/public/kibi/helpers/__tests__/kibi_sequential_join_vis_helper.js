@@ -15,8 +15,17 @@ let $rootScope;
 const defaultTimeStart = '2006-09-01T12:00:00.000Z';
 const defaultTimeEnd = '2009-09-01T12:00:00.000Z';
 
-function init({ currentDashboardId = 'dashboard 1', indexPatterns = [], savedSearches = [],
-              savedDashboards = [], enableEnterprise = false }) {
+function init({
+    currentDashboardId = 'dashboard 1',
+    indexPatterns = [],
+    savedSearches = [],
+    savedDashboards = [],
+    enableEnterprise = false,
+    relations = {
+      relationsIndices: [],
+      relationsDashboards: []
+    }
+  }) {
   ngMock.module('kibana', 'kibana/courier', 'kibana/global_state', ($provide) => {
     $provide.constant('kibiEnterpriseEnabled', enableEnterprise);
     $provide.constant('kbnDefaultAppId', '');
@@ -61,6 +70,7 @@ function init({ currentDashboardId = 'dashboard 1', indexPatterns = [], savedSea
       to: defaultTimeEnd
     };
     config.set('timepicker:timeDefaults', defaultTime);
+    config.set('kibi:relations', relations);
     timefilter.time = defaultTime;
   });
 }
@@ -69,6 +79,43 @@ describe('Kibi Components', function () {
   describe('sequentialJoinVisHelper', function () {
 
     require('testUtils/noDigestPromises').activateForSuite();
+
+
+    describe('constructButtonArray - buttons configured with sourceDashboard targetDashboard and indexRelationId', function () {
+
+      it('should correctly assign source and target index, type and field', function () {
+        init({
+          relations: {
+            relationsIndices: [
+              {
+                id: 'ia//fa/ib//fb'
+              }
+            ],
+            relationsDashboards: []
+          }
+        });
+        var buttonDefs = [
+          {
+            label: 'from A to B',
+            sourceDashboardId: 'dashboardA',
+            redirectToDashboard: 'dashboardB',
+            indexRelationId: 'ia//fa/ib//fb'
+          }
+        ];
+
+        var index = 'ia';
+
+        var buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, index);
+        expect(buttons.length).to.equal(1);
+        expect(buttons[0].sourceIndexPatternId).to.equal('ia');
+        expect(buttons[0].sourceIndexPatternType).to.equal('');
+        expect(buttons[0].sourceField).to.equal('fa');
+        expect(buttons[0].targetIndexPatternId).to.equal('ib');
+        expect(buttons[0].targetIndexPatternType).to.equal('');
+        expect(buttons[0].targetField).to.equal('fb');
+      });
+    });
+
 
     describe('constructButtonArray', function () {
       beforeEach(() => init({}));
@@ -89,7 +136,7 @@ describe('Kibi Components', function () {
           index = 'index1';
           buttonDefs = [
             {
-              sourceIndexPatternId: index,
+              indexRelationId: 'index1//f1/index2//f2',
               label: 'button 1',
               getSourceCount: sinon.stub().returns(Promise.resolve(123))
             }

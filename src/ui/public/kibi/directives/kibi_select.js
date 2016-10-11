@@ -13,20 +13,30 @@ define(function (require) {
       restrict: 'E',
       replace: true,
       scope: {
-        // the id of the kibi-select object
-        id: '=?',
+        // objectType - text - possible values are:
+        // query, dashboard, search, template, datasource, indexPatternType,
+        // field, indexPattern, documentIds, joinRelations, queryVariable,
+        // iconType, labelType, relationsForSequentialJoinButton
+        objectType: '@',
         // Filter function which returns true for items to be removed.
-        // There are two arguments:
-        // - id: the id of the kibi-select
+        // There are three arguments:
         // - item: the item
+        // - option: the optional options map
+        // - selected: true if the item is the currently selected one
         // Since the filter function is called with arguments, a function named "myfunc" should be passed
         // as 'filter="myfunc"'.
         // See http://weblogs.asp.net/dwahlin/creating-custom-angularjs-directives-part-3-isolate-scope-and-function-parameters
         //
         // If the item is **undefined**, the function may return an object that is used in the angular watcher.
         filter: '&?',
-        filterOptions: '=?', // optional options map eg: { param: value }
-        objectType: '@',  // text
+        // Options map
+        // optional, options map which are passed to getDashboard and getRelationsForButton
+        // also passed to filter function
+        // options: {
+        //   hasSavedSearch: false, // used when objectType==dashboard
+        // }
+        options: '=?',
+        // TODO: move all the below options to options
         indexPatternId: '=?', // optional only for objectType === field | indexPatternType | documentIds
         indexPatternType: '=?', // optional only for objectType === documentIds
         fieldTypes: '=?', // optional only for objectType === field, value should be array of strings
@@ -187,9 +197,7 @@ define(function (require) {
                 var selected = !!ngModelCtrl.$viewValue && !!ngModelCtrl.$viewValue.value &&
                   _.isEqual(ngModelCtrl.$viewValue.value, item.value);
 
-                var toRemove = scope.filter()(item, scope.filterOptions);
-
-                return toRemove && !selected;
+                return scope.filter()(item, scope.options, selected);
               });
             }
           }
@@ -231,7 +239,7 @@ define(function (require) {
                 promise = selectHelper.getQueries();
                 break;
               case 'dashboard':
-                promise = selectHelper.getDashboards();
+                promise = selectHelper.getDashboards(scope.options);
                 break;
               case 'search':
                 promise = selectHelper.getSavedSearches();
@@ -277,6 +285,9 @@ define(function (require) {
               case 'labelType':
                 promise = selectHelper.getLabelType();
                 break;
+              case 'relationsForSequentialJoinButton':
+                promise = selectHelper.getRelationsForButton(scope.options);
+                break;
             }
           }
 
@@ -288,13 +299,17 @@ define(function (require) {
           }
         };
 
-        scope.$watchMulti(['indexPatternId', 'indexPatternType', 'queryId', 'include', 'modelDisabled', 'modelRequired'], function () {
+        scope.$watchMulti([
+          'options', 'indexPatternId', 'indexPatternType',
+          'queryId', 'include', 'modelDisabled', 'modelRequired'
+        ],
+        function () {
           _render(scope);
         });
 
         scope.$watch(function (scope) {
           if (scope.filter && _.isFunction(scope.filter())) {
-            return scope.filter()(null, scope.filterOptions);
+            return scope.filter()(null, scope.options);
           }
         }, function (newValue, oldValue, scope) {
           _render(scope);

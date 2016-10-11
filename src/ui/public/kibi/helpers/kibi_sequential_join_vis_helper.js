@@ -11,13 +11,47 @@ define(function (require) {
       relationsHelper.destroy();
     };
 
-    KibiSequentialJoinVisHelper.prototype.constructButtonsArray = function (buttonDefs, currentDashboardIndexId) {
+    KibiSequentialJoinVisHelper.prototype.constructButtonsArray = function (buttonDefs, currentDashboardIndexId, currentDashboardId) {
       return _.chain(buttonDefs)
       .filter(function (buttonDef) {
-        if (!currentDashboardIndexId) {
-          return buttonDef.sourceIndexPatternId && buttonDef.label;
+        // if sourceDashboardId is defined keep only the one which match
+        if (buttonDef.sourceDashboardId && currentDashboardId) {
+          return buttonDef.sourceDashboardId === currentDashboardId;
         }
-        return buttonDef.sourceIndexPatternId === currentDashboardIndexId && buttonDef.label;
+        var relationInfo = relationsHelper.getRelationInfosFromRelationID(buttonDef.indexRelationId);
+        // filter it out if currentDashboardIndex is neither in source nor in target for the button relation
+        if (currentDashboardIndexId &&
+            currentDashboardIndexId !== relationInfo.source.index &&
+            currentDashboardIndexId !== relationInfo.target.index) {
+          return false;
+        }
+        // filter if targetDashboardId == currentDashboardId
+        // the button should be shown only if it is based on a self join relation
+        if (currentDashboardId && currentDashboardId === buttonDef.targetDashboardId) {
+          return relationInfo.source.index === relationInfo.target.index;
+        }
+        return true;
+      })
+      .map(function (button) {
+        if (button.indexRelationId && currentDashboardIndexId) {
+          var relationInfo = relationsHelper.getRelationInfosFromRelationID(button.indexRelationId);
+          if (relationInfo.source.index === currentDashboardIndexId) {
+            button.sourceIndexPatternId = relationInfo.source.index;
+            button.sourceIndexPatternType = relationInfo.source.type;
+            button.sourceField = relationInfo.source.path;
+            button.targetIndexPatternId = relationInfo.target.index;
+            button.targetIndexPatternType = relationInfo.target.type;
+            button.targetField = relationInfo.target.path;
+          } else {
+            button.sourceIndexPatternId = relationInfo.target.index;
+            button.sourceIndexPatternType = relationInfo.target.type;
+            button.sourceField = relationInfo.target.path;
+            button.targetIndexPatternId = relationInfo.source.index;
+            button.targetIndexPatternType = relationInfo.source.type;
+            button.targetField = relationInfo.source.path;
+          }
+        }
+        return button;
       })
       .map(function (buttonDef) {
         const button = _.clone(buttonDef);
@@ -28,11 +62,11 @@ define(function (require) {
             if (this.joinSeqFilter) {
               const switchToDashboard = function () {
                 // add join_set Filter
-                kibiState.addFilter(this.redirectToDashboard, this.joinSeqFilter);
+                kibiState.addFilter(this.targetDashboardId, this.joinSeqFilter);
                 kibiState.save();
                 // switch to target dashboard
-                if (this.redirectToDashboard) {
-                  kbnUrl.change('/dashboard/{{id}}', {id: this.redirectToDashboard});
+                if (this.targetDashboardId) {
+                  kbnUrl.change('/dashboard/{{id}}', {id: this.targetDashboardId});
                 }
               };
 
@@ -52,8 +86,8 @@ define(function (require) {
             } else {
               this.joinSeqFilter.meta.alias_tmpl = '';
               // just redirect to the target dashboard
-              if (this.redirectToDashboard) {
-                kbnUrl.change('/dashboard/{{id}}', {id: this.redirectToDashboard});
+              if (this.targetDashboardId) {
+                kbnUrl.change('/dashboard/{{id}}', {id: this.targetDashboardId});
               }
             }
           });
@@ -76,7 +110,7 @@ define(function (require) {
 
       return Promise.all([
         kibiState.timeBasedIndices(button.sourceIndexPatternId, dashboardId),
-        kibiState.timeBasedIndices(button.targetIndexPatternId, button.redirectToDashboard),
+        kibiState.timeBasedIndices(button.targetIndexPatternId, button.targetDashboardId),
         kibiState.getState(dashboardId)
       ])
       .then(([ sourceIndices, targetIndices, { filters, queries, time } ]) => {

@@ -62,36 +62,6 @@
             <label>Render opened</label>
           </div>
 
-          <!-- see issue https://github.com/sirensolutions/kibi-internal/issues/100 for details
-          <div class="form-group">
-            <input type="checkbox" ng-model="queryDefinition.showFilterButton" />
-            <label>Show relational filter button</label>
-          </div>
-          -->
-
-          <div ng-if="queryDefinition.showFilterButton" >
-
-            <div class="form-group">
-              <label>Source query variable</label></br>
-              <kibi-select required object-type="queryVariable" query-id="queryDefinition.queryId" ng-model="queryDefinition.queryVariableName"></kibi-select>
-            </div>
-
-            <div class="form-group">
-              <label>Target index</label>
-              <kibi-select required object-type="indexPattern" ng-model="queryDefinition.targetIndex"></kibi-select>
-            </div>
-            <div class="form-group">
-              <label>Target field</label>
-              <kibi-select required object-type="field" analyzed-warning="true"
-                         index-pattern-id="queryDefinition.targetIndex" ng-model="queryDefinition.targetField"></kibi-select>
-            </div>
-            <div class="form-group">
-              <label>Target dashboard</label>
-              <kibi-select object-type="dashboard" ng-model="queryDefinition.redirectToDashboard"></kibi-select>
-            </div>
-          </div>
-
-
         </div>
 
         <div class="btn-group rightCorner">

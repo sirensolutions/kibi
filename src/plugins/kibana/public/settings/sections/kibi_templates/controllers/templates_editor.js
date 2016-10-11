@@ -104,7 +104,6 @@ define(function (require) {
             {
               open: true,
               queryId: _.get($scope, 'preview.queryId'),
-              showFilterButton: false,
               templateId: template.id,
               templateVars: {
                 label: '{{config.templateVars.label}}'

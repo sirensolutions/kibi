@@ -44,7 +44,7 @@ describe('kibi_core/migrations/functional', function () {
     it('should count all upgradeable objects', wrapAsync(async () => {
       let migration = new Migration(configuration);
       let result = await migration.count();
-      expect(result).to.be(9);
+      expect(result).to.be(12);
     }));
 
     it('should upgrade all upgradeable objects', wrapAsync(async () => {
@@ -52,7 +52,7 @@ describe('kibi_core/migrations/functional', function () {
       let migration = new Migration(configuration);
 
       let result = await migration.upgrade();
-      expect(result).to.be(9);
+      expect(result).to.be(12);
 
       let after = await snapshot();
       expect(before.size).to.equal(after.size);
@@ -182,7 +182,7 @@ describe('kibi_core/migrations/functional', function () {
 
       expect(upgradedDefinitions).to.be(4);
 
-      expect(warningSpy.called).to.be(false);
+      expect(warningSpy.callCount).to.be(3);
 
       result = await migration.count();
       expect(result).to.be(0);

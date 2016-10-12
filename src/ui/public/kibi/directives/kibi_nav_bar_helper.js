@@ -2,15 +2,16 @@ define(function (require) {
   const angular = require('angular');
   const _ = require('lodash');
   const DelayExecutionHelper = require('ui/kibi/helpers/delay_execution_helper');
-
+  const SearchHelper = require('ui/kibi/helpers/search_helper');
 
   return function KibiNavBarHelperFactory(kibiState, globalState, getAppState, createNotifier, Private, $http, Promise, $rootScope,
-                                          savedDashboards) {
+                                          savedDashboards, kbnIndex) {
     const notify = createNotifier({
       name: 'kibi_nav_bar directive'
     });
 
     const dashboardGroupHelper = Private(require('ui/kibi/helpers/dashboard_group_helper'));
+    const searchHelper = new SearchHelper(kbnIndex);
 
     /*
     * Private Methods
@@ -73,7 +74,9 @@ define(function (require) {
         // it means that this group has no index attached and should be skipped when updating the group counts
         _.remove(results, result => !result.query || !result.indices);
 
-        const query = _.map(results, result => `{"index":${angular.toJson(result.indices)}}\n${angular.toJson(result.query)}\n`).join('');
+        const query = _.map(results, result => {
+          return searchHelper.optimize(result.indices, result.query);
+        }).join('');
 
         if (query && (forceUpdate || lastFiredMultiCountQuery !== query)) {
           lastFiredMultiCountQuery = query;

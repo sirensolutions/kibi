@@ -25,6 +25,10 @@ define(function (require) {
       KibiState.Super.call(this, '_k', defaults);
 
       this.init = _.once(function () {
+        // do not try to initialize the kibistate if it was already done via the URL
+        if (_.size(this.toObject())) {
+          return;
+        }
         return savedDashboards.find().then((resp) => {
           if (resp.hits) {
             _.each(resp.hits, (dashboard) => {

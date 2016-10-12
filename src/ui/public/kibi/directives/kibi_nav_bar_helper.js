@@ -2,15 +2,16 @@ define(function (require) {
   const angular = require('angular');
   const _ = require('lodash');
   const DelayExecutionHelper = require('ui/kibi/helpers/delay_execution_helper');
-
+  const SearchHelper = require('ui/kibi/helpers/search_helper');
 
   return function KibiNavBarHelperFactory(kibiState, globalState, getAppState, createNotifier, Private, $http, Promise, $rootScope,
-                                          savedDashboards) {
+                                          savedDashboards, kbnIndex) {
     const notify = createNotifier({
       name: 'kibi_nav_bar directive'
     });
 
     const dashboardGroupHelper = Private(require('ui/kibi/helpers/dashboard_group_helper'));
+    const searchHelper = new SearchHelper(kbnIndex);
 
     /*
     * Private Methods
@@ -77,7 +78,7 @@ define(function (require) {
 
         _.each(results, function (result, index) {
           if (result.query && result.indices) {
-            query += `{"index":${angular.toJson(result.indices)}}\n${angular.toJson(result.query)}\n`;
+            query += searchHelper.optimize(result.indices, result.query);
             indexesToUpdate.push(index);
           }
         });

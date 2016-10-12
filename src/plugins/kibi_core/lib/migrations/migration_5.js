@@ -165,6 +165,7 @@ export default class Migration5 extends Migration {
         if (_.find(relations.relationsIndices, 'id', relationId)) {
           this._upgradeButton(button, relationId);
         } else {
+          this._logger.info(`No relation for the button "${button.label}" was found`);
           const mapping = await this._client.indices.getMapping({
             index: [
               button.sourceIndexPatternId,
@@ -175,6 +176,8 @@ export default class Migration5 extends Migration {
           const targetTypes = _.keys(mapping[button.targetIndexPatternId].mappings);
 
           if (sourceTypes.length > 1 || targetTypes.length > 1) {
+            this._logger.info(`The ${button.sourceIndexPatternId} and/or ${button.targetIndexPatternId} have more than one type. A new ` +
+                              `relation with ID=${relationId} based on the configuration of the "${button.label}" button will be created.`);
             // since there are mulitple types per indices, it is necessary to create a new relation to select the desired types
             this._createIndicesRelation(relations, button, relationId);
             this._upgradeButton(button, relationId);
@@ -197,13 +200,16 @@ export default class Migration5 extends Migration {
             });
 
             if (!indicesRelations.length) {
+              this._logger.info(`No compatible relation was found, a new one with ID=${relationId} will be created based on the ` +
+                                `configuration of the "${button.label}" button.`);
               this._createIndicesRelation(relations, button, relationId);
               this._upgradeButton(button, relationId);
             } else if (indicesRelations.length === 1) {
+              this._logger.info(`A compatible relation with ID=${indicesRelations[0].id} will be used for the button "${button.label}"`);
               this._upgradeButton(button, indicesRelations[0].id);
             } else {
               const msg = `Found ${indicesRelations.length} relations from ${button.sourceIndexPatternId}.${button.sourceField}` +
-              ` to ${button.targetIndexPatternId}.${button.targetField}, taking the first one`;
+              ` to ${button.targetIndexPatternId}.${button.targetField}, taking the first one with ID=${indicesRelations[0].id}.`;
               this._logger.info(msg);
               this._upgradeButton(button, indicesRelations[0].id);
             }

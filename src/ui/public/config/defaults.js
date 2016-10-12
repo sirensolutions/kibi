@@ -238,7 +238,7 @@ define(function (require) {
       },
       'kibi:timePrecision' : {
         type: 'string',
-        value: '',
+        value: 's',
         description: 'Set to generate time filters with certain precision. Possible values are: s, m, h, d, w, M, y'
       },
       'kibi:zoom' : {

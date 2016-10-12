@@ -65,7 +65,11 @@ define(function (require) {
         allDashboardsGroups = data.hits;
       });
 
-      $scope.filter = function (item) {
+      $scope.filter = function (item, options, selected) {
+        if (selected) {
+          return false;
+        }
+
         var dashboard = item && item.value;
         var allDashboardIds = _($scope.dashboardGroup.dashboards).pluck('id');
 

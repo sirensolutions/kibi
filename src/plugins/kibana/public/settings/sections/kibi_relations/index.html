@@ -74,7 +74,7 @@
                   <!-- here we repeat tbody to be able to show row with the error properly -->
                   <tbody ng-repeat="relation in relations.relationsIndices" data-test-subj="row-{{$index}}">
                     <tr class="relation-row"
-                        ng-class="{ 'red-border' : relation.error }">
+                        ng-class="{ 'red-border' : relation.errors && relation.errors.length }">
                       <!--left relation-->
                       <td>
                         <table class="relationPart">
@@ -207,12 +207,14 @@
                         </div>
                       </td>
                     </tr>
-                    <tr ng-if="!!relation.error">
-                      <td colspan="7">
+                    <tr ng-if="relation.errors && relation.errors.length">
+                      <td colspan="{{ kibiEnterpriseEnabled ? 6 : 5 }}">
                         <h4 class="hintbox-heading">
                           <i class="fa fa-danger text-danger"></i> Warning
                         </h4>
-                        <p>{{relation.error}}</p>
+                        <ul>
+                          <li ng-repeat="error in unique(relation.errors)">{{ error }}</p>
+                        </ul>
                       </td>
                     </tr>
                   </tbody>
@@ -237,7 +239,7 @@
                   <!-- here we repeat tbody to be able to show row with the error properly -->
                   <tbody ng-repeat="relation in relations.relationsDashboards" data-test-subj="row-{{$index}}">
                     <tr class="relation-row"
-                        ng-class="{ 'red-border' : relation.error }">
+                        ng-class="{ 'red-border' : relation.errors && relation.errors.length }">
                       <td>
                         <kibi-select required object-type="dashboard"
                          data-test-subj="dashboard-relation-left-dashboard"
@@ -268,12 +270,14 @@
                         </div>
                       </td>
                     </tr>
-                    <tr ng-if="!!relation.error">
-                      <td colspan="7">
+                    <tr ng-if="relation.errors && relation.errors.length">
+                      <td colspan="5">
                         <h4 class="hintbox-heading">
                           <i class="fa fa-danger text-danger"></i> Warning
                         </h4>
-                        <p>{{relation.error}}</p>
+                        <ul>
+                          <li ng-repeat="error in unique(relation.errors)">{{ error }}</p>
+                        </ul>
                       </td>
                     </tr>
                   </tbody>

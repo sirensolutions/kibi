@@ -1,17 +1,19 @@
 describe('Kibi Settings', function () {
-  var ngMock = require('ngMock');
-  var expect = require('expect.js');
-  var _ = require('lodash');
-  var Promise = require('bluebird');
-  var mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
-  var $scope;
-  var $timeout;
-  var config;
-  var jQuery = require('jquery');
-  var indexToDashboardMapPromise;
-  var unbind = [];
+  const sinon = require('auto-release-sinon');
+  const ngMock = require('ngMock');
+  const expect = require('expect.js');
+  const _ = require('lodash');
+  const Promise = require('bluebird');
+  const mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
+  const jQuery = require('jquery');
 
-  function init({ savedDashboards, savedSearches, indexToDashboardsMap, relations, events }) {
+  let $scope;
+  let $timeout;
+  let config;
+  let indexToDashboardMapPromise;
+  let unbind = [];
+
+  function init({ mappings, savedDashboards, savedSearches, indexToDashboardsMap, relations, events }) {
     ngMock.module('kibana', function ($provide) {
       $provide.constant('kbnDefaultAppId', 'dashboard');
       $provide.constant('kibiDefaultDashboardId', '');
@@ -28,6 +30,11 @@ describe('Kibi Settings', function () {
     });
 
     ngMock.inject(function (_$timeout_, $injector, $rootScope, $controller, Private) {
+      if (mappings) {
+        const es = $injector.get('es');
+        sinon.stub(es.indices, 'getFieldMapping').returns(Promise.resolve(mappings));
+      }
+
       indexToDashboardMapPromise = Promise.resolve(indexToDashboardsMap);
 
       $timeout = _$timeout_;
@@ -35,7 +42,7 @@ describe('Kibi Settings', function () {
       config.set('kibi:relations', relations);
 
       $scope = $rootScope;
-      var el = '<div><form name="dashboardsForm" class="ng-valid"/><form name="indicesForm" class="ng-valid"/></div>';
+      const el = '<div><form name="dashboardsForm" class="ng-valid"/><form name="indicesForm" class="ng-valid"/></div>';
       $controller('RelationsController', {
         $scope: $scope,
         $element: jQuery(el)
@@ -133,7 +140,7 @@ describe('Kibi Settings', function () {
 
       it('should NOT fail with dashboard missing a saved search when ignoreMissingSavedSearch set to true and first parameter empty',
         function (done) {
-          var expected = {
+          const expected = {
             'search-ste': ['search-ste'],
             'time-testing-4': ['time-testing-4']
           };
@@ -147,7 +154,7 @@ describe('Kibi Settings', function () {
 
       it('should NOT fail with dashboard missing a saved search when ignoreMissingSavedSearch is true and first parameter is array of ids',
         function (done) {
-          var expected = {
+          const expected = {
             'time-testing-4': ['time-testing-4']
           };
 
@@ -159,7 +166,7 @@ describe('Kibi Settings', function () {
       );
 
       it('getIndexToDashboardMap pass ids of dashboards', function (done) {
-        var expected = {
+        const expected = {
           'time-testing-4': ['time-testing-4']
         };
 
@@ -170,7 +177,7 @@ describe('Kibi Settings', function () {
       });
 
       it('dashboard is not selected but has a savedsearch', function (done) {
-        var expected = {
+        const expected = {
           'search-ste': ['search-ste']
         };
 
@@ -186,7 +193,7 @@ describe('Kibi Settings', function () {
       afterEach(after);
 
       it('should create the graph of indices', function () {
-        var relations = {
+        const relations = {
           relationsIndices: [
             {
               indices: [
@@ -206,12 +213,12 @@ describe('Kibi Settings', function () {
 
         init({ relations: relations });
         _.each($scope.relations.relationsIndices, function (relation) {
-          expect(relation.error).to.be('');
+          expect(relation.errors).to.have.length(0);
         });
       });
 
       it('should throw an error if left and right sides of the join are the same', function () {
-        var relations = {
+        const relations = {
           relationsIndices: [
             {
               indices: [
@@ -231,12 +238,100 @@ describe('Kibi Settings', function () {
 
         init({ relations: relations });
         _.each($scope.relations.relationsIndices, function (relation) {
-          expect(relation.error).to.be('Left and right sides of the relation cannot be the same.');
+          expect(relation.errors).to.eql([ 'Left and right sides of the relation cannot be the same.' ]);
+        });
+      });
+
+      describe('check field mapping for the siren-join', function () {
+        require('testUtils/noDigestPromises').activateForSuite();
+        it('should throw an error if join fields do not have compatible mapping', function (done) {
+          init({
+            relations: {
+              relationsIndices: [
+                {
+                  indices: [
+                    { indexPatternId: 'index-a', path: 'path-a' },
+                    { indexPatternId: 'index-b', path: 'path-b' }
+                  ],
+                  label: 'rel 1'
+                },
+                {
+                  indices: [
+                    { indexPatternId: 'index-a', path: 'a1' },
+                    { indexPatternId: 'index-b', path: 'b1' }
+                  ],
+                  label: 'rel 2'
+                }
+              ]
+            },
+            mappings: {
+              'index-a': {
+                mappings: {
+                  'type-a': {
+                    'path-a': {
+                      full_name: 'path-a',
+                      mapping: {
+                        'path-a': {
+                          type: 'string',
+                          index: 'not_analyzed'
+                        }
+                      }
+                    },
+                    a1: {
+                      full_name: 'a1',
+                      mapping: {
+                        a1: {
+                          type: 'string',
+                          index: 'analyzed'
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              'index-b': {
+                mappings: {
+                  'type-b': {
+                    'path-b': {
+                      full_name: 'path-b',
+                      mapping: {
+                        'path-b': {
+                          type: 'long',
+                          index: 'not_analyzed'
+                        }
+                      }
+                    },
+                    b1: {
+                      full_name: 'b1',
+                      mapping: {
+                        b1: {
+                          type: 'string',
+                          index: 'not_analyzed'
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            events: {
+              'change:config.kibi:relations': function (event, relations) {
+                expect($scope.relations.relationsIndices).to.have.length(2);
+                _.each($scope.relations.relationsIndices, function (relation) {
+                  expect(relation.errors).to.have.length(1);
+                  expect(relation.errors[0]).to.match(/Incompatible/);
+                  done();
+                });
+                done();
+              }
+            }
+          });
+          $timeout.flush();
         });
       });
 
       it('should throw an error if there are duplicates', function () {
-        var relations = {
+        const relations = {
           relationsIndices: [
             {
               indices: [
@@ -269,12 +364,12 @@ describe('Kibi Settings', function () {
 
         init({ relations: relations });
         _.each($scope.relations.relationsIndices, function (relation) {
-          expect(relation.error).to.be('These relationships are equivalent, please remove one');
+          expect(relation.errors).to.eql([ 'These relationships are equivalent, please remove one.' ]);
         });
       });
 
       it('should create a unique ID for the relation', function () {
-        var relations = {
+        const relations = {
           relationsIndices: [
             {
               indices: [
@@ -310,7 +405,7 @@ describe('Kibi Settings', function () {
       });
 
       it('should save only the configuration fields', function (done) {
-        var relations = {
+        const relations = {
           relationsIndices: [
             {
               indices: [
@@ -324,17 +419,17 @@ describe('Kibi Settings', function () {
                 }
               ],
               label: 'rel-a-b',
-              error: ''
+              errors: []
             }
           ]
         };
 
-        var options = {
+        const options = {
           relations: relations,
           events: {
             'change:config.kibi:relations': function (event, relations) {
               _.each(relations.relationsIndices, function (relation) {
-                expect(relation.error).to.be(undefined);
+                expect(relation.errors).to.be(undefined);
                 expect(relation.label).not.to.be(undefined);
                 expect(relation.indices).not.to.be(undefined);
               });
@@ -350,7 +445,7 @@ describe('Kibi Settings', function () {
 
     describe('dashboards graph', function () {
       it('should remove all if all components are defined - what is retained is up to st-select', function (done) {
-        var relations = {
+        const relations = {
           relationsIndices: [
             {
               indices: [
@@ -388,7 +483,7 @@ describe('Kibi Settings', function () {
             }
           ]
         };
-        var map = {
+        const map = {
           'index-a': [ 'Da1', 'Da2' ],
           'index-b': [ 'Db' ],
           'index-c': [ 'Dc' ]
@@ -406,7 +501,7 @@ describe('Kibi Settings', function () {
       });
 
       it('should test for the watched value of filterDashboards', function (done) {
-        var relations = {
+        const relations = {
           relationsIndices: [
             {
               indices: [
@@ -448,7 +543,7 @@ describe('Kibi Settings', function () {
             }
           ]
         };
-        var map = {
+        const map = {
           'index-a': [ 'Da1', 'Da2' ],
           'index-b': [ 'Db' ],
           'index-c': [ 'Dc' ]
@@ -468,7 +563,7 @@ describe('Kibi Settings', function () {
       });
 
       it('should support dashboards recommendation connected with a loop', function (done) {
-        var relations = {
+        const relations = {
           relationsIndices: [
             {
               indices: [
@@ -505,7 +600,7 @@ describe('Kibi Settings', function () {
             }
           ]
         };
-        var map = {
+        const map = {
           'index-a': [ 'Da1', 'Da2' ],
           'index-b': [ 'Db' ],
           'index-c': [ 'Dc' ]
@@ -523,7 +618,7 @@ describe('Kibi Settings', function () {
       });
 
       it('should only recommend connected dashboards', function (done) {
-        var relations = {
+        const relations = {
           relationsIndices: [
             {
               indices: [
@@ -560,7 +655,7 @@ describe('Kibi Settings', function () {
             }
           ]
         };
-        var map = {
+        const map = {
           'index-a': [ 'Da1', 'Da2' ],
           'index-b': [ 'Db' ],
           'index-c': [ 'Dc' ]
@@ -632,7 +727,7 @@ describe('Kibi Settings', function () {
       });
 
       it('should filter dashboards based on the selected relation', function (done) {
-        var relations = {
+        const relations = {
           relationsIndices: [
             {
               indices: [
@@ -684,7 +779,7 @@ describe('Kibi Settings', function () {
             }
           ]
         };
-        var map = {
+        const map = {
           'index-a': [ 'Da1', 'Da2' ],
           'index-b': [ 'Db' ],
           'index-c': [ 'Dc' ],
@@ -763,7 +858,7 @@ describe('Kibi Settings', function () {
       });
 
       it('should filter relation that already appear between two dashboards in case of a multiedge graph', function (done) {
-        var relations = {
+        const relations = {
           relationsIndices: [
             {
               indices: [ { indexPatternId: 'index-a', path: 'path-a1' }, { indexPatternId: 'index-b', path: 'path-b' } ],
@@ -786,7 +881,7 @@ describe('Kibi Settings', function () {
             }
           ]
         };
-        var map = {
+        const map = {
           'index-a': [ 'Da' ],
           'index-b': [ 'Db' ]
         };
@@ -802,7 +897,7 @@ describe('Kibi Settings', function () {
       });
 
       it('should filter relation depending on the row', function (done) {
-        var relations = {
+        const relations = {
           relationsIndices: [
             {
               indices: [
@@ -856,7 +951,7 @@ describe('Kibi Settings', function () {
             }
           ]
         };
-        var map = {
+        const map = {
           'index-a': [ 'Da' ],
           'index-b': [ 'Db' ],
           'index-c': [ 'Dc' ],
@@ -877,7 +972,7 @@ describe('Kibi Settings', function () {
       });
 
       it('should filter possible dashboards based on the selected relation', function (done) {
-        var relations = {
+        const relations = {
           relationsIndices: [
             {
               indices: [
@@ -929,7 +1024,7 @@ describe('Kibi Settings', function () {
             }
           ]
         };
-        var map = {
+        const map = {
           'index-a': [ 'Da1', 'Da2' ],
           'index-b': [ 'Db1', 'Db2' ],
           'index-c': [ 'Dc' ],
@@ -949,7 +1044,7 @@ describe('Kibi Settings', function () {
       });
 
       it('should test for the watched value of filterRelations', function (done) {
-        var relations = {
+        const relations = {
           relationsIndices: [
             {
               indices: [
@@ -1004,7 +1099,7 @@ describe('Kibi Settings', function () {
             }
           ]
         };
-        var map = {
+        const map = {
           'index-a': [ 'Da' ],
           'index-b': [ 'Db' ],
           'index-c': [ 'Dc' ],
@@ -1028,7 +1123,7 @@ describe('Kibi Settings', function () {
       });
 
       it('should not filter if no dashboard is selected', function (done) {
-        var relations = {
+        const relations = {
           relationsIndices: [
             {
               indices: [
@@ -1079,7 +1174,7 @@ describe('Kibi Settings', function () {
             }
           ]
         };
-        var map = {
+        const map = {
           'index-a': [ 'Da' ],
           'index-b': [ 'Db' ],
           'index-c': [ 'Dc' ],
@@ -1096,7 +1191,7 @@ describe('Kibi Settings', function () {
       });
 
       it('should return only the relations adjacent to a dashboard', function (done) {
-        var relations = {
+        const relations = {
           relationsIndices: [
             {
               indices: [
@@ -1147,7 +1242,7 @@ describe('Kibi Settings', function () {
             }
           ]
         };
-        var map = {
+        const map = {
           'index-a': [ 'Da' ],
           'index-b': [ 'Db' ],
           'index-c': [ 'Dc' ],
@@ -1165,7 +1260,7 @@ describe('Kibi Settings', function () {
       });
 
       it('should support relations that have the same label 1', function (done) {
-        var relations = {
+        const relations = {
           relationsIndices: [
             {
               indices: [
@@ -1216,7 +1311,7 @@ describe('Kibi Settings', function () {
             }
           ]
         };
-        var map = {
+        const map = {
           'index-a': [ 'Da' ],
           'index-b': [ 'Db' ],
           'index-c': [ 'Dc' ],
@@ -1234,7 +1329,7 @@ describe('Kibi Settings', function () {
       });
 
       it('should support relations that have the same label 2', function (done) {
-        var relations = {
+        const relations = {
           relationsIndices: [
             {
               indices: [
@@ -1276,7 +1371,7 @@ describe('Kibi Settings', function () {
             }
           ]
         };
-        var map = {
+        const map = {
           'index-a': [ 'Da' ],
           'index-b': [ 'Db' ]
         };
@@ -1284,14 +1379,14 @@ describe('Kibi Settings', function () {
         init({ relations: relations, indexToDashboardsMap: map });
         indexToDashboardMapPromise.then(function () {
           expect($scope.relations.relationsDashboards).to.have.length(2);
-          expect($scope.relations.relationsDashboards[0].error).to.be('');
-          expect($scope.relations.relationsDashboards[1].error).to.be('');
+          expect($scope.relations.relationsDashboards[0].errors).to.have.length(0);
+          expect($scope.relations.relationsDashboards[1].errors).to.have.length(0);
           done();
         }).catch(done);
       });
 
       it('should throw an error if two dashboards are connected via a same relation', function (done) {
-        var relations = {
+        const relations = {
           relationsIndices: [
             {
               indices: [
@@ -1319,7 +1414,7 @@ describe('Kibi Settings', function () {
             }
           ]
         };
-        var map = {
+        const map = {
           'index-a': [ 'Da' ],
           'index-b': [ 'Db' ]
         };
@@ -1327,8 +1422,8 @@ describe('Kibi Settings', function () {
         init({ relations: relations, indexToDashboardsMap: map });
         indexToDashboardMapPromise.then(function () {
           expect($scope.relations.relationsDashboards).to.have.length(2);
-          expect($scope.relations.relationsDashboards[0].error).to.be('These relationships are equivalent, please remove one');
-          expect($scope.relations.relationsDashboards[1].error).to.be('These relationships are equivalent, please remove one');
+          expect($scope.relations.relationsDashboards[0].errors).to.eql([ 'These relationships are equivalent, please remove one.' ]);
+          expect($scope.relations.relationsDashboards[1].errors).to.eql([ 'These relationships are equivalent, please remove one.' ]);
           done();
         }).catch(done);
       });

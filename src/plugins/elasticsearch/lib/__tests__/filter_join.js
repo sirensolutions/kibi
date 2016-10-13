@@ -1113,12 +1113,65 @@ describe('FilterJoin querying', function () {
       });
 
       it('should fail on incorrect dashboard element', function () {
-        expect(filterJoinSeq).withArgs([ { join_sequence: [ { relation: [ {}, {} ] } ] } ]).to.throwError(/join path is required/i);
-        expect(filterJoinSeq).withArgs([ { join_sequence: [ { relation: [ { path: 'bbb' } ] } ] } ])
+        expect(filterJoinSeq).withArgs([
+          {
+            join_sequence: [
+              {
+                relation: [ {}, {} ]
+              }
+            ]
+          }
+        ]).to.throwError(/path is required/i);
+
+        expect(filterJoinSeq).withArgs([
+          {
+            join_sequence: [
+              {
+                relation: [ { path: 'aaa' }, { path: 'bbb' } ]
+              }
+            ]
+          }
+        ]).to.throwError(/pattern is required/i);
+
+        expect(filterJoinSeq).withArgs([
+          {
+            join_sequence: [
+              {
+                relation: [
+                  { pattern: 'ib', path: 'bbb' }
+                ]
+              }
+            ]
+          }
+        ])
         .to.throwError(/pair of dashboards/i);
-        expect(filterJoinSeq).withArgs([ { join_sequence: [ { relation: [ { path: 'bbb' }, { path: 'aaa', queries: [] } ] } ] } ])
+
+        expect(filterJoinSeq).withArgs([
+          {
+            join_sequence: [
+              {
+                relation: [
+                  { pattern: 'ib', path: 'bbb' },
+                  { pattern: 'ia', path: 'aaa', queries: [] }
+                ]
+              }
+            ]
+          }
+        ])
         .to.throwError(/already set/i);
-        expect(filterJoinSeq).withArgs([ { join_sequence: [ { relation: [ { path: 'bbb', dog: 'bbb' }, { path: 'aaa' } ] } ] } ])
+
+        expect(filterJoinSeq).withArgs([
+          {
+            join_sequence: [
+              {
+                relation: [
+                  { pattern: 'ib', path: 'bbb', dog: 'bbb' },
+                  { pattern: 'ia', path: 'aaa' }
+                ]
+              }
+            ]
+          }
+        ])
         .to.throwError(/unknown field \[dog\]/i);
       });
     });
@@ -1128,8 +1181,8 @@ describe('FilterJoin querying', function () {
         join_sequence: [
           {
             relation: [
-              { path: 'aaa', indices: [ 'A' ] },
-              { path: 'bbb', indices: [ 'B' ] }
+              { pattern: 'A', path: 'aaa', indices: [ 'A' ] },
+              { pattern: 'B', path: 'bbb', indices: [ 'B' ] }
             ]
           }
         ]
@@ -1138,8 +1191,8 @@ describe('FilterJoin querying', function () {
         join_sequence: [
           {
             relation: [
-              { path: 'ccc', indices: [ 'C' ] },
-              { path: 'ddd', indices: [ 'D' ] }
+              { pattern: 'C', path: 'ccc', indices: [ 'C' ] },
+              { pattern: 'D', path: 'ddd', indices: [ 'D' ] }
             ]
           }
         ]
@@ -1272,6 +1325,7 @@ describe('FilterJoin querying', function () {
                 {
                   path: 'id',
                   indices: [ 'company' ],
+                  pattern: 'company',
                   queries: [
                     {
                       join_set: {
@@ -1286,7 +1340,7 @@ describe('FilterJoin querying', function () {
                     }
                   ]
                 },
-                { path: 'companyid', indices: [ 'investment' ] }
+                { path: 'companyid', pattern: 'investment', indices: [ 'investment' ] }
               ]
             }
           ]
@@ -1318,6 +1372,7 @@ describe('FilterJoin querying', function () {
                     relation: [
                       {
                         path: 'companyid',
+                        pattern: 'investment',
                         indices: [ 'investment' ],
                         queries: [
                           {
@@ -1329,7 +1384,7 @@ describe('FilterJoin querying', function () {
                           }
                         ]
                       },
-                      { path: 'id', indices: [ 'company' ] }
+                      { path: 'id', pattern: 'company', indices: [ 'company' ] }
                     ]
                   }
                 ]
@@ -1337,8 +1392,8 @@ describe('FilterJoin querying', function () {
             },
             {
               relation: [
-                { path: 'id', indices: [ 'company' ] },
-                { path: 'companyid', indices: [ 'investment' ] }
+                { pattern: 'company', path: 'id', indices: [ 'company' ] },
+                { pattern: 'investment', path: 'companyid', indices: [ 'investment' ] }
               ]
             }
           ]
@@ -1377,6 +1432,7 @@ describe('FilterJoin querying', function () {
                     relation: [
                       {
                         path: 'id',
+                        pattern: 'A',
                         indices: [ 'A' ],
                         queries: [
                           {
@@ -1388,7 +1444,7 @@ describe('FilterJoin querying', function () {
                           }
                         ]
                       },
-                      { path: 'aid', indices: [ 'B' ] }
+                      { path: 'aid', pattern: 'B', indices: [ 'B' ] }
                     ]
                   }
                 ],
@@ -1397,6 +1453,7 @@ describe('FilterJoin querying', function () {
                     relation: [
                       {
                         path: 'did',
+                        pattern: 'C',
                         indices: [ 'C' ],
                         queries: [
                           {
@@ -1408,13 +1465,14 @@ describe('FilterJoin querying', function () {
                           }
                         ]
                       },
-                      { path: 'id', indices: [ 'D' ] }
+                      { path: 'id', pattern: 'D', indices: [ 'D' ] }
                     ]
                   },
                   {
                     relation: [
                       {
                         path: 'id',
+                        pattern: 'D',
                         indices: [ 'D' ],
                         queries: [
                           {
@@ -1426,7 +1484,7 @@ describe('FilterJoin querying', function () {
                           }
                         ]
                       },
-                      { path: 'did', indices: [ 'B' ] }
+                      { path: 'did', pattern: 'B', indices: [ 'B' ] }
                     ]
                   }
                 ]
@@ -1437,6 +1495,7 @@ describe('FilterJoin querying', function () {
                 {
                   path: 'id',
                   indices: [ 'B' ],
+                  pattern: 'B',
                   queries: [
                     {
                       query: {
@@ -1447,7 +1506,7 @@ describe('FilterJoin querying', function () {
                     }
                   ]
                 },
-                { path: 'bid', indices: [ 'A' ] }
+                { path: 'bid', pattern: 'A', indices: [ 'A' ] }
               ]
             }
           ]
@@ -1500,6 +1559,7 @@ describe('FilterJoin querying', function () {
               relation: [
                 {
                   path: 'companyid',
+                  pattern: 'investment',
                   indices: [ 'investment' ],
                   queries: [
                     {
@@ -1511,13 +1571,13 @@ describe('FilterJoin querying', function () {
                     }
                   ]
                 },
-                { path: 'id', indices: [ 'company' ] }
+                { path: 'id', pattern: 'company', indices: [ 'company' ] }
               ]
             },
             {
               relation: [
-                { path: 'id', indices: [ 'company' ] },
-                { path: 'companyid', indices: [ 'investment' ] }
+                { path: 'id', pattern: 'company', indices: [ 'company' ] },
+                { path: 'companyid', pattern: 'investment', indices: [ 'investment' ] }
               ]
             }
           ]
@@ -1543,8 +1603,8 @@ describe('FilterJoin querying', function () {
           join_sequence: [
             {
               relation: [
-                { path: 'id', indices: [ 'company' ], types: [ 'Company' ] },
-                { path: 'companyid', indices: [ 'investment' ], types: [ 'Investment' ] }
+                { pattern: 'company', path: 'id', indices: [ 'company' ], types: [ 'Company' ] },
+                { pattern: 'investment', path: 'companyid', indices: [ 'investment' ], types: [ 'Investment' ] }
               ]
             }
           ]
@@ -1568,15 +1628,15 @@ describe('FilterJoin querying', function () {
           join_sequence: [
             {
               relation: [
-                { path: 'companyid', indices: [ 'investment' ] },
-                { path: 'id', indices: [ 'company' ] }
+                { pattern: 'investment', path: 'companyid', indices: [ 'investment' ] },
+                { pattern: 'company', path: 'id', indices: [ 'company' ] }
               ],
               negate: true
             },
             {
               relation: [
-                { path: 'id', indices: [ 'company' ] },
-                { path: 'companyid', indices: [ 'investment' ] }
+                { pattern: 'company', path: 'id', indices: [ 'company' ] },
+                { pattern: 'investment', path: 'companyid', indices: [ 'investment' ] }
               ]
             }
           ]
@@ -1607,6 +1667,7 @@ describe('FilterJoin querying', function () {
                 {
                   path: 'companyid',
                   indices: [ 'investment' ],
+                  pattern: 'investment',
                   queries: [
                     {
                       query: {
@@ -1617,7 +1678,7 @@ describe('FilterJoin querying', function () {
                     }
                   ]
                 },
-                { path: 'id', indices: [ 'company' ] }
+                { path: 'id', pattern: 'company', indices: [ 'company' ] }
               ]
             },
             {
@@ -1625,6 +1686,7 @@ describe('FilterJoin querying', function () {
                 {
                   path: 'id',
                   indices: [ 'company' ],
+                  pattern: 'company',
                   queries: [
                     {
                       query: {
@@ -1635,7 +1697,7 @@ describe('FilterJoin querying', function () {
                     }
                   ]
                 },
-                { path: 'companyid', indices: [ 'investment' ] }
+                { path: 'companyid', pattern: 'investment', indices: [ 'investment' ] }
               ]
             }
           ]
@@ -1679,6 +1741,7 @@ describe('FilterJoin querying', function () {
                 {
                   path: 'here',
                   indices: [ 'aaa' ],
+                  pattern: 'aaa',
                   queries: [
                     {
                       query: {
@@ -1689,7 +1752,7 @@ describe('FilterJoin querying', function () {
                     }
                   ]
                 },
-                { path: 'there', indices: [ 'aaa' ] }
+                { path: 'there', pattern: 'aaa', indices: [ 'aaa' ] }
               ]
             }
           ]

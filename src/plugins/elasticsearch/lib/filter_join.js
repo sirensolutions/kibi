@@ -177,7 +177,7 @@ function _verifySequence(sequence) {
         _verifySequence(seq);
       });
     } else if (element.relation) {
-      _checkRelation(element.relation, relationFields);
+      _checkRelation(element.relation, relationFields, 'path', 'pattern');
     } else {
       throw new Error('Unknown element: ' + JSON.stringify(element, null, ' '));
     }
@@ -187,15 +187,17 @@ function _verifySequence(sequence) {
 /**
  * Asserts the fields of a relation
  */
-function _checkRelation(relation, fields) {
+function _checkRelation(relation, fields, ...mandatoryFields) {
   if (relation.constructor !== Array || relation.length !== 2) {
     throw new Error('Expecting a pair of dashboards to join, got: ' + JSON.stringify(relation, null, ' '));
   }
   const _check = function (dashboard, isSource) {
     const keys = _.keys(dashboard);
 
-    if (!_.contains(keys, 'path')) {
-      throw new Error('The join path is required');
+    for (let mandatoryField of mandatoryFields) {
+      if (!_.contains(keys, mandatoryField)) {
+        throw new Error(`The field ${mandatoryField} is required`);
+      }
     }
     _.each(keys, function (key) {
       if (fields.indexOf(key) === -1) {
@@ -241,7 +243,7 @@ function _superGraph(relations) {
 
   return _(relations)
   .each((relation) => {
-    _checkRelation(relation, relationFields);
+    _checkRelation(relation, relationFields, 'path', 'pattern');
     if (relation[0].pattern === relation[1].pattern) {
       throw new Error('Loops in the join_set are not supported!\n' + JSON.stringify(relation, null, ' '));
     }

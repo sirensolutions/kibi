@@ -4,6 +4,7 @@ const expect = require('expect.js');
 const mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
 const _ = require('lodash');
 const noDigestPromises = require('testUtils/noDigestPromises');
+const poolUntil = require('./_pool_until');
 
 let kibiState;
 let globalState;
@@ -68,7 +69,7 @@ describe('Kibi Directives', function () {
       });
     }
 
-    describe('dashboards count', function () {
+    describe('dashboards count and filter messages', function () {
       beforeEach(() => init({
         savedDashboards: [
           {
@@ -116,7 +117,193 @@ describe('Kibi Directives', function () {
         ]
       }));
 
-      describe('should update counts', function () {
+      describe('should update filterIconMessage on selected dashboards', function () {
+
+        const countOnTabsResponse = {
+          responses: [
+            {
+              hits: {
+                total: 42
+              }
+            },
+            {
+              hits: {
+                total: 24
+              }
+            }
+          ]
+        };
+
+        it('there should be filterIconMessage just for first dashboard when filter is set on it', function (done) {
+          var stab = sinon.stub(kibiState, 'getState');
+          stab.withArgs('dashboard1').returns(Promise.resolve({
+            queries: [],
+            filters: [{dummyFilter: {}}]
+          }));
+          stab.withArgs('dashboard2').returns(Promise.resolve({
+            queries: [],
+            filters: []
+          }));
+
+          $httpBackend.whenPOST('/elasticsearch/_msearch?getCountsOnTabs').respond(200, countOnTabsResponse);
+          kibiNavBarHelper.updateAllCounts([ 'dashboard1', 'dashboard2' ]);
+
+          setTimeout(function () {
+            $httpBackend.flush();
+            var dashboardGroups = kibiNavBarHelper.dashboardGroups;
+
+            // watch dashboardGroups untill the counts are set
+            poolUntil(
+              function () {
+                var poolRes = dashboardGroups.length === 2 && dashboardGroups[0].selected && dashboardGroups[1].selected &&
+                dashboardGroups[0].selected.filterIconMessage !== undefined && dashboardGroups[1].selected.filterIconMessage !== undefined;
+                return poolRes;
+              }, 5000, 1,
+              function (err) {
+                if (err) {
+                  done(err);
+                }
+                // now dashboardGroups are ready to inspect
+                expect(timeBasedIndicesStub.called).to.be(true);
+                expect(dashboardGroups).to.have.length(2);
+                expect(dashboardGroups[0].id).to.be('group dashboard1');
+                expect(dashboardGroups[0].selected.filterIconMessage).to.be('This dashboard has 1 filter set.');
+                expect(dashboardGroups[1].id).to.be('group dashboard2');
+                expect(dashboardGroups[1].selected.filterIconMessage).to.be(null);
+                done();
+              }
+            );
+          }, 950); // more than default delay of 750 for dashboards count queries
+        });
+
+        it('there should be filterIconMessage just for first dashboard when 2 filters are set on it', function (done) {
+          var stab = sinon.stub(kibiState, 'getState');
+          stab.withArgs('dashboard1').returns(Promise.resolve({
+            queries: [],
+            filters: [{dummyFilter1: {}}, {dummyFilter2: {}}]
+          }));
+          stab.withArgs('dashboard2').returns(Promise.resolve({
+            queries: [],
+            filters: []
+          }));
+
+          $httpBackend.whenPOST('/elasticsearch/_msearch?getCountsOnTabs').respond(200, countOnTabsResponse);
+          kibiNavBarHelper.updateAllCounts([ 'dashboard1', 'dashboard2' ]);
+
+          setTimeout(function () {
+            $httpBackend.flush();
+            var dashboardGroups = kibiNavBarHelper.dashboardGroups;
+
+            // watch dashboardGroups untill the counts are set
+            poolUntil(
+              function () {
+                var poolRes = dashboardGroups.length === 2 && dashboardGroups[0].selected && dashboardGroups[1].selected &&
+                dashboardGroups[0].selected.filterIconMessage !== undefined && dashboardGroups[1].selected.filterIconMessage !== undefined;
+                return poolRes;
+              }, 5000, 1,
+              function (err) {
+                if (err) {
+                  done(err);
+                }
+                // now dashboardGroups are ready to inspect
+                expect(timeBasedIndicesStub.called).to.be(true);
+                expect(dashboardGroups).to.have.length(2);
+                expect(dashboardGroups[0].id).to.be('group dashboard1');
+                expect(dashboardGroups[0].selected.filterIconMessage).to.be('This dashboard has 2 filters set.');
+                expect(dashboardGroups[1].id).to.be('group dashboard2');
+                expect(dashboardGroups[1].selected.filterIconMessage).to.be(null);
+                done();
+              }
+            );
+          }, 950); // more than default delay of 750 for dashboards count queries
+        });
+
+        it('there should be filterIconMessage just for first dashboard when there are two queries for it', function (done) {
+          var stab = sinon.stub(kibiState, 'getState');
+          stab.withArgs('dashboard1').returns(Promise.resolve({
+            queries: [{query: 'saved_with_dash'}, {query: 'set_on_search_bar'}],
+            filters: []
+          }));
+          stab.withArgs('dashboard2').returns(Promise.resolve({
+            queries: [],
+            filters: []
+          }));
+
+          $httpBackend.whenPOST('/elasticsearch/_msearch?getCountsOnTabs').respond(200, countOnTabsResponse);
+          kibiNavBarHelper.updateAllCounts([ 'dashboard1', 'dashboard2' ]);
+
+          setTimeout(function () {
+            $httpBackend.flush();
+            var dashboardGroups = kibiNavBarHelper.dashboardGroups;
+
+            // watch dashboardGroups untill the counts are set
+            poolUntil(
+              function () {
+                var poolRes = dashboardGroups.length === 2 && dashboardGroups[0].selected && dashboardGroups[1].selected &&
+                dashboardGroups[0].selected.filterIconMessage !== undefined && dashboardGroups[1].selected.filterIconMessage !== undefined;
+                return poolRes;
+              }, 5000, 1,
+              function (err) {
+                if (err) {
+                  done(err);
+                }
+                // now dashboardGroups are ready to inspect
+                expect(timeBasedIndicesStub.called).to.be(true);
+                expect(dashboardGroups).to.have.length(2);
+                expect(dashboardGroups[0].id).to.be('group dashboard1');
+                expect(dashboardGroups[0].selected.filterIconMessage).to.be('This dashboard has a query set.');
+                expect(dashboardGroups[1].id).to.be('group dashboard2');
+                expect(dashboardGroups[1].selected.filterIconMessage).to.be(null);
+                done();
+              }
+            );
+          }, 950); // more than default delay of 750 for dashboards count queries
+        });
+
+        it('there should be filterIconMessage just for first dashboard when there are two queries and a filter', function (done) {
+          var stab = sinon.stub(kibiState, 'getState');
+          stab.withArgs('dashboard1').returns(Promise.resolve({
+            queries: [{query: 'saved_with_dash'}, {query: 'set_on_search_bar'}],
+            filters: [{filter: 'set_on_filter_bar'}]
+          }));
+          stab.withArgs('dashboard2').returns(Promise.resolve({
+            queries: [],
+            filters: []
+          }));
+
+          $httpBackend.whenPOST('/elasticsearch/_msearch?getCountsOnTabs').respond(200, countOnTabsResponse);
+          kibiNavBarHelper.updateAllCounts([ 'dashboard1', 'dashboard2' ]);
+
+          setTimeout(function () {
+            $httpBackend.flush();
+            var dashboardGroups = kibiNavBarHelper.dashboardGroups;
+
+            // watch dashboardGroups untill the counts are set
+            poolUntil(
+              function () {
+                var poolRes = dashboardGroups.length === 2 && dashboardGroups[0].selected && dashboardGroups[1].selected &&
+                dashboardGroups[0].selected.filterIconMessage !== undefined && dashboardGroups[1].selected.filterIconMessage !== undefined;
+                return poolRes;
+              }, 5000, 1,
+              function (err) {
+                if (err) {
+                  done(err);
+                }
+                // now dashboardGroups are ready to inspect
+                expect(timeBasedIndicesStub.called).to.be(true);
+                expect(dashboardGroups).to.have.length(2);
+                expect(dashboardGroups[0].id).to.be('group dashboard1');
+                expect(dashboardGroups[0].selected.filterIconMessage).to.be('This dashboard has a query and 1 filter set.');
+                expect(dashboardGroups[1].id).to.be('group dashboard2');
+                expect(dashboardGroups[1].selected.filterIconMessage).to.be(null);
+                done();
+              }
+            );
+          }, 950); // more than default delay of 750 for dashboards count queries
+        });
+      });
+
+      describe('should update counts on selected dashboards', function () {
 
         before(noDigestPromises.deactivate);
 
@@ -145,9 +332,9 @@ describe('Kibi Directives', function () {
             expect(timeBasedIndicesStub.called).to.be(true);
             expect(dashboardGroups).to.have.length(2);
             expect(dashboardGroups[0].id).to.be('group dashboard1');
-            expect(dashboardGroups[0].count).to.be(42);
+            expect(dashboardGroups[0].selected.count).to.be(42);
             expect(dashboardGroups[1].id).to.be('group dashboard2');
-            expect(dashboardGroups[1].count).to.be(24);
+            expect(dashboardGroups[1].selected.count).to.be(24);
             done();
           }, 950); // more than default delay of 750 for dashboards count queries
         });
@@ -172,9 +359,9 @@ describe('Kibi Directives', function () {
             expect(timeBasedIndicesStub.called).to.be(true);
             expect(dashboardGroups).to.have.length(2);
             expect(dashboardGroups[0].id).to.be('group dashboard1');
-            expect(dashboardGroups[0].count).to.be(42);
+            expect(dashboardGroups[0].selected.count).to.be(42);
             expect(dashboardGroups[1].id).to.be('group dashboard2');
-            expect(dashboardGroups[1].count).to.not.be.ok();
+            expect(dashboardGroups[1].selected.count).to.not.be.ok();
             done();
           }, 950); // more than default delay of 750 for dashboards count queries
         });
@@ -345,9 +532,9 @@ describe('Kibi Directives', function () {
           expect(timeBasedIndicesStub.called).to.be(true);
           expect(dashboardGroups).to.have.length(2);
           expect(dashboardGroups[0].id).to.be('group dashboard1');
-          expect(dashboardGroups[0].count).to.be(42);
+          expect(dashboardGroups[0].selected.count).to.be(42);
           expect(dashboardGroups[1].id).to.be('group dashboard2');
-          expect(dashboardGroups[1].count).to.not.be.ok();
+          expect(dashboardGroups[1].selected.count).to.not.be.ok();
           done();
         }, 950); // more than default delay of 750 for dashboards count queries
       });

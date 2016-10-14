@@ -285,8 +285,14 @@ define(function (require) {
           previousGroup.iconUrl = group.iconUrl;
           previousGroup.onClick = group.onClick;
           previousGroup.priority = group.priority;
-          previousGroup.selected = group.selected;
           previousGroup.title = group.title;
+
+          // when copying selected by reference we keep the count and filterIconMessage
+          var filterIconMessage = previousGroup.selected.filterIconMessage;
+          var count = previousGroup.selected.count;
+          previousGroup.selected = group.selected;
+          previousGroup.selected.filterIconMessage = filterIconMessage;
+          previousGroup.selected.count = count;
         } else {
           // new group
           dest.push(group);

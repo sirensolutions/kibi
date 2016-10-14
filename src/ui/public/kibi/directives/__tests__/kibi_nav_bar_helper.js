@@ -152,7 +152,7 @@ describe('Kibi Directives', function () {
             $httpBackend.flush();
             var dashboardGroups = kibiNavBarHelper.dashboardGroups;
 
-            // watch dashboardGroups untill the counts are set
+            // watch dashboardGroups until the filterIconMessage is set on selected
             poolUntil(
               function () {
                 var poolRes = dashboardGroups.length === 2 && dashboardGroups[0].selected && dashboardGroups[1].selected &&
@@ -194,7 +194,7 @@ describe('Kibi Directives', function () {
             $httpBackend.flush();
             var dashboardGroups = kibiNavBarHelper.dashboardGroups;
 
-            // watch dashboardGroups untill the counts are set
+            // watch dashboardGroups until the filterIconMessage is set on selected
             poolUntil(
               function () {
                 var poolRes = dashboardGroups.length === 2 && dashboardGroups[0].selected && dashboardGroups[1].selected &&
@@ -236,7 +236,7 @@ describe('Kibi Directives', function () {
             $httpBackend.flush();
             var dashboardGroups = kibiNavBarHelper.dashboardGroups;
 
-            // watch dashboardGroups untill the counts are set
+            // watch dashboardGroups until the filterIconMessage is set on selected
             poolUntil(
               function () {
                 var poolRes = dashboardGroups.length === 2 && dashboardGroups[0].selected && dashboardGroups[1].selected &&
@@ -278,7 +278,7 @@ describe('Kibi Directives', function () {
             $httpBackend.flush();
             var dashboardGroups = kibiNavBarHelper.dashboardGroups;
 
-            // watch dashboardGroups untill the counts are set
+            // watch dashboardGroups until the filterIconMessage is set on selected
             poolUntil(
               function () {
                 var poolRes = dashboardGroups.length === 2 && dashboardGroups[0].selected && dashboardGroups[1].selected &&

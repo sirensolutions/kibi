@@ -74,8 +74,6 @@ define(function (require) {
                   return 'This dashboard has a query set.';
                 } else if (filters.length !== 0) {
                   return 'This dashboard has ' + filters.length + ' filter' + (filters.length > 1 ? 's' : '') + ' set.';
-                } else {
-                  return null;
                 }
               }
               return null;

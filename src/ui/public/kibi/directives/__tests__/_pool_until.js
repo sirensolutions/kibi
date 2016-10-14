@@ -15,6 +15,24 @@ function _pool(f, maxTimeInMs, stepInMs, callback, stopTime) {
   }, stepInMs);
 };
 
+/**
+ * Utility method to observe a function @f every @stepInMs ms for a maximum period of @maxTimeInMs ms
+ * When observed function return true a @calback function is immediatelly triggered
+ * When observed function do not return true within @maxTimeInMs time then a @callback function is triggered with an error
+ *
+ * This method is usefull to watch for a change of a property in an object:
+ *
+ * var o = {p: undefined};
+ * pooolUntil(
+ *   () => {
+ *     return o.p !== undefined;
+ *   },
+ *   150, 1,
+ *   () => {
+ *     alert('Property p finally set')
+ *   }
+ * );
+ */
 function poolUntil(f, maxTimeInMs, stepInMs, callback) {
   _pool(f, maxTimeInMs, stepInMs, callback, new Date().getTime() + maxTimeInMs);
 };

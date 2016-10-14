@@ -4,30 +4,9 @@ const expect = require('expect.js');
 const _ = require('lodash');
 const mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
 const isChrome = !!window.chrome && !!window.chrome.webstore;
+const poolUntil = require('./_pool_until');
 
 require('../kibi_sync_time_to');
-
-
-function pool(f, maxTimeInMs, stepInMs, callback, stopTime) {
-  if (f()) {
-    if (callback) {
-      callback();
-    }
-    return;
-  }
-  var currentTime = new Date().getTime();
-  if (currentTime >= stopTime && callback) {
-    callback(new Error('Max time ' + maxTimeInMs + ' reached\nCurrent time ' + currentTime + ' '));
-    return;
-  }
-  setTimeout(function () {
-    pool(f, maxTimeInMs, stepInMs, callback, stopTime);
-  }, stepInMs);
-};
-
-function poolUntil(f, maxTimeInMs, stepInMs, callback) {
-  pool(f, maxTimeInMs, stepInMs, callback, new Date().getTime() + maxTimeInMs);
-};
 
 describe('Kibi Components', function () {
   describe('kibi_sync_time_to', function () {

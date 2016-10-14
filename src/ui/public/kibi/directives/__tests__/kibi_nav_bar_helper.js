@@ -4,7 +4,7 @@ const expect = require('expect.js');
 const mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
 const _ = require('lodash');
 const noDigestPromises = require('testUtils/noDigestPromises');
-const poolUntil = require('./_pool_until');
+const pollUntil = require('./_poll_until');
 
 let kibiState;
 let globalState;
@@ -153,7 +153,7 @@ describe('Kibi Directives', function () {
             var dashboardGroups = kibiNavBarHelper.dashboardGroups;
 
             // watch dashboardGroups until the filterIconMessage is set on selected
-            poolUntil(
+            pollUntil(
               function () {
                 var poolRes = dashboardGroups.length === 2 && dashboardGroups[0].selected && dashboardGroups[1].selected &&
                 dashboardGroups[0].selected.filterIconMessage !== undefined && dashboardGroups[1].selected.filterIconMessage !== undefined;
@@ -195,7 +195,7 @@ describe('Kibi Directives', function () {
             var dashboardGroups = kibiNavBarHelper.dashboardGroups;
 
             // watch dashboardGroups until the filterIconMessage is set on selected
-            poolUntil(
+            pollUntil(
               function () {
                 var poolRes = dashboardGroups.length === 2 && dashboardGroups[0].selected && dashboardGroups[1].selected &&
                 dashboardGroups[0].selected.filterIconMessage !== undefined && dashboardGroups[1].selected.filterIconMessage !== undefined;
@@ -237,7 +237,7 @@ describe('Kibi Directives', function () {
             var dashboardGroups = kibiNavBarHelper.dashboardGroups;
 
             // watch dashboardGroups until the filterIconMessage is set on selected
-            poolUntil(
+            pollUntil(
               function () {
                 var poolRes = dashboardGroups.length === 2 && dashboardGroups[0].selected && dashboardGroups[1].selected &&
                 dashboardGroups[0].selected.filterIconMessage !== undefined && dashboardGroups[1].selected.filterIconMessage !== undefined;
@@ -279,7 +279,7 @@ describe('Kibi Directives', function () {
             var dashboardGroups = kibiNavBarHelper.dashboardGroups;
 
             // watch dashboardGroups until the filterIconMessage is set on selected
-            poolUntil(
+            pollUntil(
               function () {
                 var poolRes = dashboardGroups.length === 2 && dashboardGroups[0].selected && dashboardGroups[1].selected &&
                 dashboardGroups[0].selected.filterIconMessage !== undefined && dashboardGroups[1].selected.filterIconMessage !== undefined;

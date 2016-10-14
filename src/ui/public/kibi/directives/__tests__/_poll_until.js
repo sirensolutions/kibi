@@ -1,4 +1,4 @@
-function _pool(f, maxTimeInMs, stepInMs, callback, stopTime) {
+function _poll(f, maxTimeInMs, stepInMs, callback, stopTime) {
   if (f()) {
     if (callback) {
       callback();
@@ -11,7 +11,7 @@ function _pool(f, maxTimeInMs, stepInMs, callback, stopTime) {
     return;
   }
   setTimeout(function () {
-    _pool(f, maxTimeInMs, stepInMs, callback, stopTime);
+    _poll(f, maxTimeInMs, stepInMs, callback, stopTime);
   }, stepInMs);
 };
 
@@ -33,8 +33,8 @@ function _pool(f, maxTimeInMs, stepInMs, callback, stopTime) {
  *   }
  * );
  */
-function poolUntil(f, maxTimeInMs, stepInMs, callback) {
-  _pool(f, maxTimeInMs, stepInMs, callback, new Date().getTime() + maxTimeInMs);
+function pollUntil(f, maxTimeInMs, stepInMs, callback) {
+  _poll(f, maxTimeInMs, stepInMs, callback, new Date().getTime() + maxTimeInMs);
 };
 
-module.exports = poolUntil;
+module.exports = pollUntil;

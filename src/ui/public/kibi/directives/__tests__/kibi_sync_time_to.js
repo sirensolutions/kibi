@@ -4,7 +4,7 @@ const expect = require('expect.js');
 const _ = require('lodash');
 const mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
 const isChrome = !!window.chrome && !!window.chrome.webstore;
-const poolUntil = require('./_pool_until');
+const pollUntil = require('./_poll_until');
 
 require('../kibi_sync_time_to');
 
@@ -159,7 +159,7 @@ describe('Kibi Components', function () {
           done();
         });
 
-        poolUntil(
+        pollUntil(
           function () {
             return directiveScope.dashboards && directiveScope.dashboards.length === 2;
           }, 1000, 1,
@@ -194,7 +194,7 @@ describe('Kibi Components', function () {
         });
 
 
-        poolUntil(
+        pollUntil(
           function () {
             return directiveScope.dashboards && directiveScope.dashboards.length === 2;
           }, 1000, 1,
@@ -229,7 +229,7 @@ describe('Kibi Components', function () {
         });
 
 
-        poolUntil(
+        pollUntil(
           function () {
             return directiveScope.dashboards && directiveScope.dashboards.length === 2;
           }, 1000, 1,
@@ -263,7 +263,7 @@ describe('Kibi Components', function () {
           done();
         });
 
-        poolUntil(
+        pollUntil(
           function () {
             return directiveScope.dashboards && directiveScope.dashboards.length === 2;
           }, 1000, 1,
@@ -316,7 +316,7 @@ describe('Kibi Components', function () {
           done();
         });
 
-        poolUntil(
+        pollUntil(
           function () {
             return directiveScope.dashboards && directiveScope.dashboards.length === 2;
           }, 1000, 1,
@@ -350,7 +350,7 @@ describe('Kibi Components', function () {
           done();
         });
 
-        poolUntil(
+        pollUntil(
           function () {
             return directiveScope.dashboards && directiveScope.dashboards.length === 2;
           }, 1000, 1,
@@ -383,7 +383,7 @@ describe('Kibi Components', function () {
           done();
         });
 
-        poolUntil(
+        pollUntil(
           function () {
             return directiveScope.dashboards && directiveScope.dashboards.length === 2;
           }, 1000, 1,
@@ -416,7 +416,7 @@ describe('Kibi Components', function () {
           done();
         });
 
-        poolUntil(
+        pollUntil(
           function () {
             return directiveScope.dashboards && directiveScope.dashboards.length === 2;
           }, 1000, 1,
@@ -469,7 +469,7 @@ describe('Kibi Components', function () {
           done();
         });
 
-        poolUntil(
+        pollUntil(
           function () {
             return directiveScope.dashboards && directiveScope.dashboards.length === 2;
           }, 1000, 1,
@@ -503,7 +503,7 @@ describe('Kibi Components', function () {
           done();
         });
 
-        poolUntil(
+        pollUntil(
           function () {
             return directiveScope.dashboards && directiveScope.dashboards.length === 2;
           }, 1000, 1,
@@ -537,7 +537,7 @@ describe('Kibi Components', function () {
           done();
         });
 
-        poolUntil(
+        pollUntil(
           function () {
             return directiveScope.dashboards && directiveScope.dashboards.length === 2;
           }, 1000, 1,
@@ -571,7 +571,7 @@ describe('Kibi Components', function () {
           done();
         });
 
-        poolUntil(
+        pollUntil(
           function () {
             return directiveScope.dashboards && directiveScope.dashboards.length === 2;
           }, 1000, 1,

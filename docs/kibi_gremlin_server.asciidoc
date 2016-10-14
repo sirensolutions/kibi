@@ -55,4 +55,34 @@ NOTE: For detailed instructions on how to create the gremlin.jks and signed cert
 please follow the https://www.elastic.co/guide/en/shield/2.2/ssl-tls.html[Shield documentation]
 or contact us at mailto:info@siren.solutions[info@siren.solutions]
 
+
+=== Log4J File Configuration Path:
+
+Now **Log4J** configuration file is optional for Gremlin server. If you want to use your own custom configuration, you can specify path to your file by insert _kibi_core.gremlin_server.log_conf_path_ parameter inside your _kibi.yml_ file.
+Here an example of how to configure _log4j.properties_ file for your Gremlin server:
+```properties
+# For the general syntax of property based configuration files see
+# the documentation of org.apache.log4j.PropertyConfigurator.
+
+# The root category uses two appenders: A1 and FILE.
+# Both gather all log output starting with the priority INFO.
+log4j.rootLogger=INFO, A1, FILE
+
+log4j.appender.A1=org.apache.log4j.ConsoleAppender
+log4j.appender.A1.layout=org.apache.log4j.PatternLayout
+log4j.appender.A1.threshold=INFO
+# Print the date in ISO 8601 format
+log4j.appender.A1.layout.ConversionPattern=%d [%t] %-5p %c - %m%n
+
+log4j.appender.FILE=org.apache.log4j.FileAppender
+log4j.appender.FILE.append=true
+log4j.appender.FILE.file=log/gremlin-server.log
+log4j.appender.FILE.threshold=INFO
+log4j.appender.FILE.layout=org.apache.log4j.PatternLayout
+log4j.appender.FILE.layout.ConversionPattern=%-5p %c: %m%n
+
+
+# Print only messages of level WARN or above in the package org.springframework
+log4j.logger.org.springframework=WARN
+```
 endif::[]

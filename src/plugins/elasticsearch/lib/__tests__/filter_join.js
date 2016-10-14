@@ -1,11 +1,18 @@
-const filterJoinSet = require('../filter_join').set;
-const filterJoinSeq = require('../filter_join').sequence;
 const expect = require('expect.js');
-const Promise = require('bluebird');
 const _ = require('lodash');
 const FilterJoinBuilder = require('./filterjoin_query_builder');
 
 describe('FilterJoin querying', function () {
+
+  const server = {
+    config: () => ({
+      get: () => '.kibi'
+    })
+  };
+
+  const filterJoinSet = require('../filter_join')(server).set;
+  const filterJoinSeq = require('../filter_join')(server).sequence;
+
   describe('Join Set', function () {
     describe('time-based indices', function () {
       it('should use the pattern field to drive the graph traversal', function () {
@@ -43,6 +50,124 @@ describe('FilterJoin querying', function () {
         const actual = filterJoinSet([ query ]);
         expect(actual).to.eql(expected);
       });
+
+      it('should generate the expected query when no indices have been resolved - 1', function () {
+        const query = {
+          join_set: {
+            focus: 'forecast',
+            relations: [
+              [
+                { pattern: 'weather-*', indices: [], types: [ 'type' ], path: 'id' },
+                { pattern: 'activity-*', indices: [ 'activity-2015-01', 'activity-2015-02' ], types: [ 'type' ], path: 'id' }
+              ],
+              [
+                { pattern: 'weather-*', indices: [], types: [ 'type' ], path: 'id' },
+                { pattern: 'forecast', indices: [ 'forecast' ], types: [ 'type' ], path: 'id' }
+              ]
+            ]
+          }
+        };
+        const actual = filterJoinSet([ query ]);
+        expect(actual).to.eql([
+          {
+            filterjoin: {
+              id: {
+                indices: [
+                  '.kibi'
+                ],
+                types: [
+                  'type'
+                ],
+                path: 'id',
+                query: {
+                  bool: {
+                    must_not: [
+                      {
+                        match_all: {}
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }, {
+            type: {
+              value: 'type'
+            }
+          }
+        ]);
+      });
+
+      it('should generate the expected query when no indices have been resolved - 2', function () {
+        const query = {
+          join_set: {
+            focus: 'forecast',
+            relations: [
+              [
+                { pattern: 'weather-*', indices: [ 'weather-2015-01', 'weather-2015-02' ], types: [ 'type' ], path: 'id' },
+                { pattern: 'activity-*', indices: [ ], types: [ 'type' ], path: 'id' }
+              ],
+              [
+                { pattern: 'weather-*', indices: [ 'weather-2015-01', 'weather-2015-02' ], types: [ 'type' ], path: 'id' },
+                { pattern: 'forecast', indices: [ 'forecast' ], types: [ 'type' ], path: 'id' }
+              ]
+            ]
+          }
+        };
+        const actual = filterJoinSet([ query ]);
+        expect(actual).to.eql([
+          {
+            filterjoin: {
+              id: {
+                indices: [
+                  'weather-2015-01',
+                  'weather-2015-02'
+                ],
+                types: ['type'],
+                path: 'id',
+                query: {
+                  bool: {
+                    must: [{
+                      match_all: {}
+                    }],
+                    filter: {
+                      bool: {
+                        must: [{
+                          filterjoin: {
+                            id: {
+                              indices: ['.kibi'],
+                              path: 'id',
+                              types: ['type'],
+                              query: {
+                                bool: {
+                                  must_not: [
+                                    {
+                                      match_all: {}
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          },
+                        }, {
+                          type: {
+                            value: 'type'
+                          }
+                        }]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }, {
+            type: {
+              value: 'type'
+            }
+          }
+        ]);
+      });
+
     });
 
     describe('Multi-edge', function () {
@@ -1732,6 +1857,181 @@ describe('FilterJoin querying', function () {
       expect(actual).to.eql(builder.toObject());
     });
 
+    it('joins with two filters - the first with no indices', function () {
+      const query = [
+        {
+          join_sequence: [
+            {
+              relation: [
+                {
+                  path: 'companyid',
+                  pattern: 'investment*',
+                  indices: [ ],
+                  queries: [
+                    {
+                      query: {
+                        query_string: {
+                          query: '360buy'
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  path: 'id',
+                  pattern: 'company*',
+                  indices: [ 'company' ]
+                }
+              ]
+            },
+            {
+              relation: [
+                {
+                  path: 'id',
+                  indices: [ 'company' ],
+                  pattern: 'company*',
+                  queries: [
+                    {
+                      query: {
+                        query_string: {
+                          query: '*'
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  path: 'companyid',
+                  pattern: 'investment*',
+                  indices: [ 'investment' ]
+                }
+              ]
+            }
+          ]
+        }
+      ];
+      const actual = filterJoinSeq(query);
+      expect(actual).to.eql([
+        {
+          filterjoin: {
+            companyid: {
+              indices: ['company'],
+              path: 'id',
+              query: {
+                bool: {
+                  must: [
+                    {
+                      match_all: {}
+                    },
+                    {
+                      query_string: {
+                        query: '*'
+                      }
+                    }
+                  ],
+                  filter: {
+                    bool: {
+                      must: [{
+                        filterjoin: {
+                          id: {
+                            indices: [ '.kibi' ],
+                            path: 'companyid',
+                            query: {
+                              bool: {
+                                must_not: [
+                                  {
+                                    match_all: {}
+                                  }
+                                ]
+                              }}
+                          }
+                        }
+                      }]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]);
+    });
+
+    it('joins with two filters - the second with no indices', function () {
+      const query = [
+        {
+          join_sequence: [
+            {
+              relation: [
+                {
+                  path: 'companyid',
+                  pattern: 'investment*',
+                  indices: [ 'company' ],
+                  queries: [
+                    {
+                      query: {
+                        query_string: {
+                          query: '360buy'
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  path: 'id',
+                  pattern: 'company*',
+                  indices: [ 'company' ]
+                }
+              ]
+            },
+            {
+              relation: [
+                {
+                  path: 'id',
+                  pattern: 'investment*',
+                  indices: [],
+                  queries: [
+                    {
+                      query: {
+                        query_string: {
+                          query: '*'
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  path: 'companyid',
+                  pattern: 'investment*',
+                  indices: [ 'investment' ]
+                }
+              ]
+            }
+          ]
+        }
+      ];
+      const actual = filterJoinSeq(query);
+      expect(actual).to.eql([
+        {
+          filterjoin: {
+            companyid: {
+              indices: ['.kibi'],
+              path: 'id',
+              query: {
+                bool: {
+                  must_not: [
+                    {
+                      match_all: {}
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      ]);
+    });
+
     it('loop', function () {
       const query = [
         {
@@ -1773,6 +2073,62 @@ describe('FilterJoin querying', function () {
       });
       const actual = filterJoinSeq(query);
       expect(actual).to.eql(builder.toObject());
+    });
+
+    it('joins with empty indices - 1', function () {
+      const query = [
+        {
+          join_sequence: [
+            {
+              relation: [
+                {
+                  pattern: 'logstash-2016.09.*',
+                  path: 'ip',
+                  indices: [],
+                  queries: [
+                    {
+                      query: {
+                        bool: {
+                          must: [{
+                            query_string: {
+                              query: '*'
+                            }
+                          }]
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  indices: ['logstash-2016.10.12', 'logstash-2016.10.11'],
+                  path: 'ip',
+                  pattern: 'logstash-2016.10.*'
+                }
+              ]
+            }
+          ]
+        }
+      ];
+      const actual = filterJoinSeq(query);
+      expect(actual).to.eql([
+        {
+          filterjoin: {
+            ip: {
+              indices: [ '.kibi' ],
+              path: 'ip',
+              query: {
+                bool: {
+                  must_not: [
+                    {
+                      match_all: {}
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      ]);
     });
 
     it('joins with filters everywhere', function () {

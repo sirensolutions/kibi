@@ -5,6 +5,7 @@ define(function (require) {
   const chrome = require('ui/chrome');
   const moment = require('moment');
   const DelayExecutionHelper = require('ui/kibi/helpers/delay_execution_helper');
+  const SearchHelper = require('ui/kibi/helpers/search_helper');
 
   require('ui/kibi/directives/kibi_select');
   require('ui/kibi/directives/kibi_array_param');
@@ -12,7 +13,8 @@ define(function (require) {
   require('ui/modules')
   .get('kibana/kibi_sequential_join_vis', ['kibana'])
   .controller('KibiSequentialJoinVisController', function (getAppState, kibiState, $scope, $rootScope, Private, $http, createNotifier,
-                                                           globalState, Promise) {
+                                                           globalState, Promise, kbnIndex) {
+    const searchHelper = new SearchHelper(kbnIndex);
     const urlHelper = Private(require('ui/kibi/helpers/url_helper'));
     const onVisualizeTab = urlHelper.onVisualizeTab();
 
@@ -47,7 +49,9 @@ define(function (require) {
           });
         });
       })).then((results) => {
-        const query = _.map(results, result => `{"index":${angular.toJson(result.indices)}}\n${angular.toJson(result.query)}\n`).join('');
+        const query = _.map(results, result => {
+          return searchHelper.optimize(result.indices, result.query);
+        }).join('');
         const duration = moment();
 
         // ?getCountsOnButton has no meanning it is just usefull to filter when inspecting requests

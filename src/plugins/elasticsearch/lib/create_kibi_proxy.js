@@ -4,14 +4,15 @@ var { resolve } = require('url');
 var _ = require('lodash');
 
 var util = require('./util');
-var filterJoinSet = require('./filter_join').set;
-var filterJoinSequence = require('./filter_join').sequence;
 
 var dbfilter = require('./dbfilter');
 var inject = require('./inject');
 var cryptoHelper = require('../../kibi_core/lib/crypto_helper');
 
 module.exports = function createProxy(server, method, route, config) {
+  var filterJoinSet = require('./filter_join')(server).set;
+  var filterJoinSequence = require('./filter_join')(server).sequence;
+
   var serverConfig = server.config();
 
   var pre = '/elasticsearch';

@@ -436,7 +436,7 @@ describe('State Management', function () {
             {
               id: 'weather-*',
               hasTimeField: _.constant(true),
-              toIndexList: sinon.stub().returns([ 'weather-2015-01' ])
+              toIndexList: () => Promise.resolve([ 'weather-2015-01' ])
             }
           ]
         }));
@@ -477,7 +477,7 @@ describe('State Management', function () {
               {
                 id: 'weather-*',
                 hasTimeField: _.constant(true),
-                toIndexList: toIndexListStub.returns([ 'weather-2015-01' ])
+                toIndexList: toIndexListStub.returns(Promise.resolve([ 'weather-2015-01' ]))
               }
             ]
           });
@@ -511,7 +511,7 @@ describe('State Management', function () {
           }).catch(done);
         });
 
-        it('should return kbnIndex on empty intersection', function (done) {
+        it('should return an empty array on empty intersection', function (done) {
           const getTimeBoundsStub = sinon.stub(kibiState, 'getTimeBounds');
 
           const dashboard1Time = {
@@ -528,7 +528,7 @@ describe('State Management', function () {
           kibiState.timeBasedIndices('weather-*', 'dashboard1', 'dashboard2')
           .then((indices) => {
             expect(toIndexListStub.called).to.be(false);
-            expect(indices).to.eql([ '.kibi' ]);
+            expect(indices).to.eql([]);
             done();
           }).catch(done);
         });

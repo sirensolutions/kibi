@@ -646,7 +646,7 @@ define(function (require) {
           }, {});
           if (min.isAfter(max)) {
             // empty intersection of time ranges
-            return [ kbnIndex ];
+            return [];
           }
           return pattern.toIndexList(min, max);
         }

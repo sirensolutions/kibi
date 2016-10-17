@@ -528,18 +528,19 @@ QueryEngine.prototype.reloadQueries = function () {
   });
 };
 
-
 QueryEngine.prototype.clearCache =  function () {
   return this._init().then(() => {
     if (this.cache) {
       const promisedReset = Promise.method(this.cache.reset);
-      return promisedReset().then(this.reloadQueries()).return('Cache cleared, Queries reloaded');
+      return promisedReset()
+      .then(() => this.reloadQueries())
+      .then(() => 'Cache cleared, Queries reloaded');
     }
     // here we are reloading queries no matter that cache is enabled or not
-    return this.reloadQueries().return('The cache is disabled, Queries reloaded');
+    return this.reloadQueries()
+    .then(() => 'The cache is disabled, Queries reloaded');
   });
 };
-
 
 /**
  * return a ordered list of query objects which:

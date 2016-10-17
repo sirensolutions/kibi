@@ -1,10 +1,10 @@
-var _ = require('lodash');
-var MockState = require('fixtures/mock_state');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
-var queryFilter;
-var EventEmitter;
-var $rootScope;
+let MockState = require('fixtures/mock_state');
+let _ = require('lodash');
+let expect = require('expect.js');
+let ngMock = require('ngMock');
+let queryFilter;
+let EventEmitter;
+let $rootScope;
 
 describe('Query Filter', function () {
   describe('Module', function () {

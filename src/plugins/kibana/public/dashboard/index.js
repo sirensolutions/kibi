@@ -4,12 +4,14 @@ define(function (require) {
   const angular = require('angular');
   const ConfigTemplate = require('ui/ConfigTemplate');
   const chrome = require('ui/chrome');
+  const stateMonitorFactory = require('ui/state_management/state_monitor_factory');
 
   require('ui/directives/config');
   require('ui/courier');
   require('ui/config');
   require('ui/notify');
   require('ui/typeahead');
+  require('ui/navbar_extensions');
   require('ui/share');
 
   require('plugins/kibana/dashboard/directives/grid');
@@ -59,6 +61,7 @@ define(function (require) {
 
   app.directive('dashboardApp', function (courier, AppState, timefilter, kbnUrl, createNotifier) {
     return {
+      controllerAs: 'dashboardApp',
       controller: function (config, kibiState, globalState, $scope, $rootScope, $route, $routeParams, Private, getAppState) {
 
         const queryFilter = Private(require('ui/filter_bar/query_filter'));
@@ -127,6 +130,8 @@ define(function (require) {
           filters: dashboardFilters || _.reject(dash.searchSource.getOwn('filter'), matchQueryFilter)
         };
 
+        let stateMonitor;
+        const $appStatus = this.appStatus = $scope.appStatus = {};
         const $state = $scope.state = new AppState(stateDefaults);
         const $uiState = $scope.uiState = $state.makeStateful('uiState');
 
@@ -184,6 +189,14 @@ define(function (require) {
           }
 
           initPanelIndices();
+
+          // watch for state changes and update the appStatus.dirty value
+          stateMonitor = stateMonitorFactory.create($state, stateDefaults);
+          stateMonitor.onChange((status) => {
+            $appStatus.dirty = status.dirty;
+          });
+          $scope.$on('$destroy', () => stateMonitor.destroy());
+
           $scope.$emit('application.load');
         }
 
@@ -267,7 +280,8 @@ define(function (require) {
 
           dash.save()
           .then(function (id) {
-            delete dash.locked;
+            delete dash.locked; // kibi: our lock for the dashboard!
+            stateMonitor.setInitialState($state.toJSON());
             $scope.configTemplate.close('save');
             if (id) {
               notify.info('Saved Dashboard as "' + dash.title + '"');
@@ -278,7 +292,7 @@ define(function (require) {
             }
           })
           .catch((err) => {
-            delete dash.locked;
+            delete dash.locked; // kibi: our lock for the dashboard!
             notify.fatal(err);
           });
         };

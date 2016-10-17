@@ -19,7 +19,7 @@ as it's possible to set values that are incompatible with one another.
 === Creating an Index Pattern to Connect to Elasticsearch
 An _index pattern_ identifies one or more Elasticsearch indices that you want to explore with Kibi. Kibi looks for
 index names that match the specified pattern.
-An asterisk ({asterisk}) in the pattern matches zero or more characters. For example, the pattern `myindex-{asterisk}` matches all
+An asterisk (*) in the pattern matches zero or more characters. For example, the pattern `myindex-*` matches all
 indices whose names start with `myindex-`, such as `myindex-1` and `myindex-2`.
 
 An index pattern can also simply be the name of a single index.
@@ -469,13 +469,11 @@ You can set the default options used when performing a {elastic-ref}query-dsl-qu
 include::advanced_settings.asciidoc[]
 
 [[kibana-server-properties]]
-=== Setting Kibana Server Properties
+=== Setting Kibi Server Properties
 
-The Kibana server reads properties from the `kibana.yml` file on startup. The default settings configure Kibana to listen on port
+The Kibi server reads properties from the `kibi.yml` file on startup. The default settings configure Kibana to listen on port
 `{kibi-default-port}` on all the IP addresses. To change the host or port number, or connect to Elasticsearch running on a different
-machine, you'll need to update your `kibana.yml` file. You can also enable SSL and set a variety of other options.
-
-include::kibana-yml.asciidoc[]
+machine, you'll need to update your `kibi.yml` file. You can also enable SSL and set a variety of other options.
 
 deprecated[4.2, The names of several Kibana server properties changed in the 4.2 release of Kibana. The previous names remain as functional aliases, but are now deprecated and will be removed in a future release of Kibana]
 
@@ -613,6 +611,7 @@ you are using a self-signed certificate so the certificate can be verified. Disa
 You can view, edit, and delete saved searches, visualizations, and dashboards from *Settings > Objects*. You can also:
 * export or import sets of objects (searches, visualizations, dashboards, etc.) by using "Export" button
 * export all objects plus configuration, and index-patterns by using "Export Everything" button
+
 Viewing a saved object displays the selected item in the *Discover*, *Visualize*, or *Dashboard* page. To view a saved
 object:
 

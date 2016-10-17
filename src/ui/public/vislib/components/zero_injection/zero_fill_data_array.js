@@ -1,6 +1,6 @@
 define(function (require) {
   return function ZeroFillDataArrayUtilService(Private) {
-    var _ = require('lodash');
+    let _ = require('lodash');
 
     /*
      * Accepts an array of zero-filled y value objects (arr1)
@@ -13,12 +13,12 @@ define(function (require) {
         throw new TypeError('ZeroFillDataArrayUtilService expects 2 arrays');
       }
 
-      var i;
-      var val;
-      var index;
-      var max = arr2.length;
+      let i;
+      let val;
+      let index;
+      let max = arr2.length;
 
-      var getX = function (d) {
+      let getX = function (d) {
         return d.x === val.x;
       };
 

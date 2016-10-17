@@ -20,6 +20,11 @@ module.exports = function createProxy(server, method, route, config) {
   var options = {
     method: method,
     path: path,
+    config: {
+      timeout: {
+        socket: serverConfig.get('elasticsearch.requestTimeout')
+      }
+    },
     handler: {
       kibi_proxy: {
         modifyPayload: (request) => {
@@ -132,6 +137,10 @@ module.exports = function createProxy(server, method, route, config) {
             });
           });
         },
+        onResponse: function (err, responseFromUpstream, request, reply) {
+          reply(err, responseFromUpstream);
+        },
+        timeout: serverConfig.get('elasticsearch.requestTimeout'),
         mapUri: mapUri(server, null, true),
         passThrough: true,
         agent: createAgent(server),
@@ -140,7 +149,7 @@ module.exports = function createProxy(server, method, route, config) {
     }
   };
 
-  if (config) options.config = config;
+  _.assign(options.config, config);
 
   server.route(options);
 };

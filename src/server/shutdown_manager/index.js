@@ -11,7 +11,8 @@ module.exports = Promise.method(function (kbnServer, server) {
     }, Promise.resolve());
   });
 
-  process.once('SIGTERM', function () {
+  process.once('exit', clean) // for "natural" exits. Taken from 4.6.1 merge
+  .once('SIGTERM', function () {
 
     // for Ctrl-C exits
     clean().finally(function () {
@@ -19,7 +20,8 @@ module.exports = Promise.method(function (kbnServer, server) {
       // resend SIGINT
       process.kill(process.pid, 'SIGTERM');
     });
-  }).once('SIGINT', function () {
+  })
+  .once('SIGINT', function () {
 
     clean().finally(function () {
 

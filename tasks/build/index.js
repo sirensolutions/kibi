@@ -3,7 +3,6 @@ module.exports = function (grunt) {
 
   grunt.registerTask('build', 'Build packages', function () {
     grunt.task.run(flatten([
-      '_build:getProps',
       'clean:build',
       'clean:target',
       '_build:downloadNodeBuilds:start',
@@ -13,6 +12,7 @@ module.exports = function (grunt) {
       '_build:babelOptions',
       '_build:installedPlugins',
       'kibi_public_plugins', // kibi: task to fetch and unzip plugins to installedPlugins
+      '_build:data',
       '_build:packageJson',
       '_build:readme',
       '_build:babelCache',
@@ -24,11 +24,11 @@ module.exports = function (grunt) {
       'run:optimizeBuild',
       'stop:optimizeBuild',
       '_build:versionedLinks',
-      '_build:archives',
-      grunt.option('os-packages') ? [
+      grunt.option('skip-archives') ? [] : ['_build:archives'],
+      grunt.option('skip-os-packages') ? [] : [
         '_build:pleaseRun',
         '_build:osPackages',
-      ] : [],
+      ],
       '_build:shasums'
     ]));
   });

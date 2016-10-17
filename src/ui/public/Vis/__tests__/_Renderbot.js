@@ -1,7 +1,7 @@
 describe('renderbot', function () {
-  var Renderbot;
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
+  let Renderbot;
+  let expect = require('expect.js');
+  let ngMock = require('ngMock');
 
   function init() {
     ngMock.module('kibana');
@@ -12,10 +12,10 @@ describe('renderbot', function () {
   }
 
   describe('API', function () {
-    var vis;
-    var $el;
-    var renderbot;
-    var uiState;
+    let vis;
+    let $el;
+    let renderbot;
+    let uiState;
 
     beforeEach(init);
     beforeEach(function () {

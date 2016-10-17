@@ -1,3 +1,5 @@
+import { endsWith } from 'lodash';
+
 module.exports = function (grunt) {
   let { resolve } = require('path');
 

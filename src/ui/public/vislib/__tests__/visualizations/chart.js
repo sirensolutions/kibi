@@ -1,20 +1,20 @@
-var d3 = require('d3');
-var angular = require('angular');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
+let d3 = require('d3');
+let angular = require('angular');
+let expect = require('expect.js');
+let ngMock = require('ngMock');
 
 describe('Vislib _chart Test Suite', function () {
-  var ColumnChart;
-  var Chart;
-  var Data;
-  var persistedState;
-  var Vis;
-  var chartData = {};
-  var vis;
-  var el;
-  var myChart;
-  var config;
-  var data = {
+  let ColumnChart;
+  let Chart;
+  let Data;
+  let persistedState;
+  let Vis;
+  let chartData = {};
+  let vis;
+  let el;
+  let myChart;
+  let config;
+  let data = {
     hits      : 621,
     label     : '',
     ordered   : {

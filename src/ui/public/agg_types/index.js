@@ -1,8 +1,8 @@
 define(function (require) {
   return function AggTypeService(Private, $injector) {
-    var IndexedArray = require('ui/IndexedArray');
+    let IndexedArray = require('ui/IndexedArray');
 
-    var aggs = {
+    let aggs = {
       metrics: [
         Private(require('ui/agg_types/metrics/count')),
         Private(require('ui/agg_types/metrics/avg')),
@@ -24,7 +24,7 @@ define(function (require) {
         Private(require('ui/agg_types/buckets/terms')),
         Private(require('ui/agg_types/buckets/filters')),
         Private(require('ui/agg_types/buckets/significant_terms')),
-        Private(require('ui/agg_types/buckets/geo_hash')),
+        Private(require('ui/agg_types/buckets/geo_hash'))
       ]
     };
 

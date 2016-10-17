@@ -2,18 +2,19 @@ define(function (require) {
   require('ui/modules')
     .get('app/visualize')
     .directive('visualizeSpy', function (Private, $compile) {
-      var $ = require('jquery');
-      var _ = require('lodash');
+      let $ = require('jquery');
+      let _ = require('lodash');
 
-      var spyModes = Private(require('ui/registry/spy_modes'));
+      let spyModes = Private(require('ui/registry/spy_modes'));
+      let defaultMode = spyModes.inOrder[0].name;
 
       return {
         restrict: 'E',
         template: require('ui/visualize/spy.html'),
         link: function ($scope, $el) {
-          var currentSpy;
-          var $container = $el.find('.visualize-spy-container');
-          var fullPageSpy = _.get($scope.spy, 'mode.fill', false);
+          let currentSpy;
+          let $container = $el.find('.visualize-spy-container');
+          let fullPageSpy = _.get($scope.spy, 'mode.fill', false);
           $scope.modes = spyModes;
           $scope.spy.params = $scope.spy.params || {};
 
@@ -35,8 +36,8 @@ define(function (require) {
             };
           }
 
-          var renderSpy = function (spyName) {
-            var newMode = $scope.modes.byName[spyName];
+          let renderSpy = function (spyName) {
+            let newMode = $scope.modes.byName[spyName];
 
             // clear the current value
             if (currentSpy) {
@@ -62,7 +63,7 @@ define(function (require) {
           };
 
           $scope.toggleDisplay = function () {
-            var modeName = _.get($scope.spy, 'mode.name');
+            let modeName = _.get($scope.spy, 'mode.name');
             $scope.setSpyMode(modeName ? null : defaultMode);
           };
 
@@ -79,7 +80,7 @@ define(function (require) {
 
           if ($scope.uiState) {
             // sync external uiState changes
-            var syncUIState = () => $scope.spy.mode = $scope.uiState.get('spy.mode');
+            let syncUIState = () => $scope.spy.mode = $scope.uiState.get('spy.mode');
             $scope.uiState.on('change', syncUIState);
             $scope.$on('$destroy', () => $scope.uiState.off('change', syncUIState));
           }
@@ -90,7 +91,7 @@ define(function (require) {
             'spy.mode.fill'
           ], function (newVals, oldVals) {
             // update the ui state, but only if it really changes
-            var changedVals = newVals.filter((val) => !_.isUndefined(val)).length > 0;
+            let changedVals = newVals.filter((val) => !_.isUndefined(val)).length > 0;
             if (changedVals && !_.isEqual(newVals, oldVals)) {
               if ($scope.uiState) $scope.uiState.set('spy.mode', $scope.spy.mode);
             }

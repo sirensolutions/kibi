@@ -1,6 +1,5 @@
-<div ng-controller="VisEditor" class="vis-editor vis-type-{{ vis.type.name }}">
-
-  <navbar ng-if="chrome.getVisible()">
+<div visualize-app class="vis-editor vis-type-{{ vis.type.name }}">
+  <navbar ng-if="chrome.getVisible()" name="visualize">
     <div class="fill bitty-modal-container">
       <div ng-if="vis.type.requiresSearch && $state.linked && !unlinking"
         ng-dblclick="unlink()"
@@ -113,6 +112,7 @@
           <i aria-hidden="true" class="fa fa-refresh"></i>
         </button>
       </kbn-tooltip>
+      <navbar-extensions config-template="configTemplate" name="visualize"></navbar-extensions>
     </div>
   </navbar>
 
@@ -149,5 +149,4 @@
       </visualize>
     </div>
   </div>
-
 </div>

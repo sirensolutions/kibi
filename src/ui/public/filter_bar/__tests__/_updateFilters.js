@@ -1,17 +1,17 @@
 describe('update filters', function () {
-  var _ = require('lodash');
-  var sinon = require('auto-release-sinon');
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
-  var MockState = require('fixtures/mock_state');
-  var storeNames = {
+  let _ = require('lodash');
+  let sinon = require('auto-release-sinon');
+  let expect = require('expect.js');
+  let ngMock = require('ngMock');
+  let MockState = require('fixtures/mock_state');
+  let storeNames = {
     app: 'appState',
     global: 'globalState'
   };
-  var queryFilter;
-  var appState;
-  var globalState;
-  var $rootScope;
+  let queryFilter;
+  let appState;
+  let globalState;
+  let $rootScope;
 
   beforeEach(ngMock.module(
     'kibana',
@@ -42,8 +42,8 @@ describe('update filters', function () {
   }));
 
   describe('updating', function () {
-    var currentFilter;
-    var newFilter;
+    let currentFilter;
+    let newFilter;
 
     beforeEach(function () {
       newFilter = _.cloneDeep({

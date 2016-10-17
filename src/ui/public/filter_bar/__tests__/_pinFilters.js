@@ -1,18 +1,18 @@
 describe('pin filters', function () {
-  var _ = require('lodash');
-  var sinon = require('auto-release-sinon');
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
-  var MockState = require('fixtures/mock_state');
-  var storeNames = {
+  let _ = require('lodash');
+  let sinon = require('auto-release-sinon');
+  let expect = require('expect.js');
+  let ngMock = require('ngMock');
+  let MockState = require('fixtures/mock_state');
+  let storeNames = {
     app: 'appState',
     global: 'globalState'
   };
-  var filters;
-  var queryFilter;
-  var $rootScope;
-  var appState;
-  var globalState;
+  let filters;
+  let queryFilter;
+  let $rootScope;
+  let appState;
+  let globalState;
 
   beforeEach(ngMock.module(
     'kibana',
@@ -90,7 +90,7 @@ describe('pin filters', function () {
     });
 
     it('should move filter from appState to globalState', function () {
-      var filter = appState.filters[1];
+      let filter = appState.filters[1];
 
       queryFilter.pinFilter(filter);
       expect(globalState.filters).to.contain(filter);
@@ -99,7 +99,7 @@ describe('pin filters', function () {
     });
 
     it('should move filter from globalState to appState', function () {
-      var filter = globalState.filters[1];
+      let filter = globalState.filters[1];
 
       queryFilter.pinFilter(filter);
       expect(appState.filters).to.contain(filter);
@@ -109,8 +109,8 @@ describe('pin filters', function () {
 
 
     it('should only fire the update event', function () {
-      var emitSpy = sinon.spy(queryFilter, 'emit');
-      var filter = appState.filters[1];
+      let emitSpy = sinon.spy(queryFilter, 'emit');
+      let filter = appState.filters[1];
       $rootScope.$digest();
 
       queryFilter.pinFilter(filter);
@@ -134,8 +134,8 @@ describe('pin filters', function () {
     });
 
     it('should swap the filters in both states', function () {
-      var appSample = _.sample(appState.filters);
-      var globalSample = _.sample(globalState.filters);
+      let appSample = _.sample(appState.filters);
+      let globalSample = _.sample(globalState.filters);
 
       queryFilter.pinAll();
       expect(globalState.filters).to.have.length(5);

@@ -1,6 +1,6 @@
 define(function () {
   return function ChartSplitFactory() {
-    var d3 = require('d3');
+    let d3 = require('d3');
 
     /*
      * Adds div DOM elements to the `.chart-wrapper` element based on the data layout.
@@ -9,7 +9,7 @@ define(function () {
      */
     return function split(selection) {
       selection.each(function (data) {
-        var div = d3.select(this)
+        let div = d3.select(this)
         .attr('class', function () {
           if (data.rows) {
             return 'chart-wrapper-row';
@@ -19,9 +19,9 @@ define(function () {
             return 'chart-wrapper';
           }
         });
-        var divClass;
+        let divClass;
 
-        var charts = div.selectAll('charts')
+        let charts = div.selectAll('charts')
         .append('div')
         .data(function (d) {
           if (d.rows) {

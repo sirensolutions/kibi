@@ -1,6 +1,6 @@
-var _ = require('lodash');
+const _ = require('lodash');
 var { join } = require('path');
-var autoload = require('./autoload');
+const autoload = require('./autoload');
 
 class UiApp {
   constructor(uiExports, spec) {
@@ -32,7 +32,7 @@ class UiApp {
     return _.chain([
       this.autoloadOverrides || autoload.require,
       this.uiExports.find(_.get(this, 'spec.uses', [])),
-      this.uiExports.find(['chromeNavControls']),
+      this.uiExports.find(['chromeNavControls', 'hacks']),
     ])
     .flatten()
     .uniq()

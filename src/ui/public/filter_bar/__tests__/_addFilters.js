@@ -1,18 +1,18 @@
 describe('add filters', function () {
-  var _ = require('lodash');
-  var sinon = require('auto-release-sinon');
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
-  var MockState = require('fixtures/mock_state');
-  var storeNames = {
+  let _ = require('lodash');
+  let sinon = require('auto-release-sinon');
+  let expect = require('expect.js');
+  let ngMock = require('ngMock');
+  let MockState = require('fixtures/mock_state');
+  let storeNames = {
     app: 'appState',
     global: 'globalState'
   };
-  var filters;
-  var queryFilter;
-  var $rootScope;
-  var appState;
-  var globalState;
+  let filters;
+  let queryFilter;
+  let $rootScope;
+  let appState;
+  let globalState;
 
   beforeEach(ngMock.module(
     'kibana',
@@ -91,7 +91,7 @@ describe('add filters', function () {
     });
 
     it('should fire the update and fetch events', function () {
-      var emitSpy = sinon.spy(queryFilter, 'emit');
+      let emitSpy = sinon.spy(queryFilter, 'emit');
 
       // set up the watchers, add new filters, and crank the digest loop
       $rootScope.$digest();
@@ -112,7 +112,7 @@ describe('add filters', function () {
 
   describe('filter reconciliation', function () {
     it('should de-dupe appState filters being added', function () {
-      var newFilter = _.cloneDeep(filters[1]);
+      let newFilter = _.cloneDeep(filters[1]);
       appState.filters = filters;
       $rootScope.$digest();
       expect(appState.filters.length).to.be(3);
@@ -123,7 +123,7 @@ describe('add filters', function () {
     });
 
     it('should de-dupe globalState filters being added', function () {
-      var newFilter = _.cloneDeep(filters[1]);
+      let newFilter = _.cloneDeep(filters[1]);
       globalState.filters = filters;
       $rootScope.$digest();
       expect(globalState.filters.length).to.be(3);
@@ -134,16 +134,16 @@ describe('add filters', function () {
     });
 
     it('should mutate global filters on appState filter changes', function () {
-      var idx = 1;
+      let idx = 1;
       globalState.filters = filters;
       $rootScope.$digest();
 
-      var appFilter = _.cloneDeep(filters[idx]);
+      let appFilter = _.cloneDeep(filters[idx]);
       appFilter.meta.negate = true;
       queryFilter.addFilters(appFilter);
       $rootScope.$digest();
 
-      var res = queryFilter.getFilters();
+      let res = queryFilter.getFilters();
       expect(res).to.have.length(3);
       _.each(res, function (filter, i) {
         expect(filter.$state.store).to.be('globalState');

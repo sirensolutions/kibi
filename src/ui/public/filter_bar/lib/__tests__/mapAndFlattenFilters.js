@@ -1,11 +1,11 @@
 
 describe('Filter Bar Directive', function () {
   describe('mapAndFlattenFilters()', function () {
-    var expect = require('expect.js');
-    var ngMock = require('ngMock');
-    var sinon = require('auto-release-sinon');
-    var mapAndFlattenFilters;
-    var $rootScope;
+    let expect = require('expect.js');
+    let ngMock = require('ngMock');
+    let sinon = require('auto-release-sinon');
+    let mapAndFlattenFilters;
+    let $rootScope;
 
     beforeEach(ngMock.module(
       'kibana',
@@ -20,7 +20,7 @@ describe('Filter Bar Directive', function () {
       $rootScope = _$rootScope_;
     }));
 
-    var filters = [
+    let filters = [
       null,
       [
         { meta: { index: 'logstash-*' }, exists: { field: '_type' } },

@@ -1,14 +1,14 @@
 describe('getAspects', function () {
-  var _ = require('lodash');
-  var moment = require('moment');
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
+  let _ = require('lodash');
+  let moment = require('moment');
+  let expect = require('expect.js');
+  let ngMock = require('ngMock');
 
-  var Vis;
-  var Table;
-  var AggConfig;
-  var indexPattern;
-  var getAspects;
+  let Vis;
+  let Table;
+  let AggConfig;
+  let indexPattern;
+  let getAspects;
 
   beforeEach(ngMock.module('kibana', function ($provide) {
     $provide.constant('kbnDefaultAppId', '');
@@ -23,10 +23,10 @@ describe('getAspects', function () {
     indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
   }));
 
-  var vis;
-  var table;
+  let vis;
+  let table;
 
-  var date = _.memoize(function (n) {
+  let date = _.memoize(function (n) {
     return moment().startOf('day').add(n, 'hour').valueOf();
   });
 
@@ -49,7 +49,7 @@ describe('getAspects', function () {
 
   function init(group, x, y) {
     // map args to indicies that should be removed
-    var filter = filterByIndex([
+    let filter = filterByIndex([
       x > 0,
       x > 1,
       group > 0,
@@ -91,7 +91,7 @@ describe('getAspects', function () {
       ].map(filter)
     };
 
-    var aggs = vis.aggs.splice(0, vis.aggs.length);
+    let aggs = vis.aggs.splice(0, vis.aggs.length);
     filter(aggs).forEach(function (filter) {
       vis.aggs.push(filter);
     });
@@ -100,7 +100,7 @@ describe('getAspects', function () {
   it('produces an aspect object for each of the aspect types found in the columns', function () {
     init(1, 1, 1);
 
-    var aspects = getAspects(vis, table);
+    let aspects = getAspects(vis, table);
     validate(aspects.x, 0);
     validate(aspects.series, 1);
     validate(aspects.y, 2);
@@ -109,7 +109,7 @@ describe('getAspects', function () {
   it('uses arrays only when there are more than one aspect of a specific type', function () {
     init(0, 1, 2);
 
-    var aspects = getAspects(vis, table);
+    let aspects = getAspects(vis, table);
 
     validate(aspects.x, 0);
     expect(aspects.series == null).to.be(true);
@@ -138,7 +138,7 @@ describe('getAspects', function () {
   it('creates a fake x aspect if the column does not exist', function () {
     init(0, 0, 1);
 
-    var aspects = getAspects(vis, table);
+    let aspects = getAspects(vis, table);
 
     expect(aspects.x)
       .to.be.an('object')

@@ -9,8 +9,8 @@ module.exports = class ServerStatus {
     this._created = {};
   }
 
-  create(name) {
-    return (this._created[name] = new Status(name, this.server));
+  create(plugin) {
+    return (this._created[plugin.id] = new Status(plugin, this.server));
   }
 
   each(fn) {
@@ -31,15 +31,15 @@ module.exports = class ServerStatus {
   }
 
   overall() {
-    var state = _(this._created)
+    let state = _(this._created)
     .map(function (status) {
       return states.get(status.state);
     })
     .sortBy('severity')
     .pop();
 
-    var statuses = _.where(this._created, { state: state.id });
-    var since = _.get(_.sortBy(statuses, 'since'), [0, 'since']);
+    let statuses = _.where(this._created, { state: state.id });
+    let since = _.get(_.sortBy(statuses, 'since'), [0, 'since']);
 
     return {
       state: state.id,
@@ -59,7 +59,7 @@ module.exports = class ServerStatus {
   }
 
   toString() {
-    var overall = this.overall();
+    let overall = this.overall();
     return `${overall.title} – ${overall.nickname}`;
   }
 

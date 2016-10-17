@@ -1,12 +1,12 @@
 define(function (require) {
   return function SearchSourceFactory(Promise, Private) {
-    var _ = require('lodash');
-    var SourceAbstract = Private(require('ui/courier/data_source/_abstract'));
-    var SearchRequest = Private(require('ui/courier/fetch/request/search'));
-    var SegmentedRequest = Private(require('ui/courier/fetch/request/segmented'));
-    var searchStrategy = Private(require('ui/courier/fetch/strategy/search'));
-    var normalizeSortRequest = Private(require('ui/courier/data_source/_normalize_sort_request'));
-    var rootSearchSource = require('ui/courier/data_source/_root_search_source');
+    let _ = require('lodash');
+    let SourceAbstract = Private(require('ui/courier/data_source/_abstract'));
+    let SearchRequest = Private(require('ui/courier/fetch/request/search'));
+    let SegmentedRequest = Private(require('ui/courier/fetch/request/segmented'));
+    let searchStrategy = Private(require('ui/courier/fetch/strategy/search'));
+    let normalizeSortRequest = Private(require('ui/courier/data_source/_normalize_sort_request'));
+    let rootSearchSource = require('ui/courier/data_source/_root_search_source');
 
     _.class(SearchSource).inherits(SourceAbstract);
     function SearchSource(initialState) {
@@ -66,7 +66,7 @@ define(function (require) {
      * @return {undefined|searchSource}
      */
     SearchSource.prototype.getParent = function (onlyHardLinked) {
-      var self = this;
+      let self = this;
       if (self._parent === false) return;
       if (self._parent) return self._parent;
       return onlyHardLinked ? undefined : Private(rootSearchSource).get();
@@ -87,9 +87,9 @@ define(function (require) {
     };
 
     SearchSource.prototype.onBeginSegmentedFetch = function (initFunction) {
-      var self = this;
+      let self = this;
       return Promise.try(function addRequest() {
-        var req = new SegmentedRequest(self, Promise.defer(), initFunction);
+        let req = new SegmentedRequest(self, Promise.defer(), initFunction);
 
         // return promises created by the completion handler so that
         // errors will bubble properly
@@ -134,7 +134,7 @@ define(function (require) {
      */
     SearchSource.prototype._mergeProp = function (state, val, key) {
       if (typeof val === 'function') {
-        var source = this;
+        let source = this;
         return Promise.cast(val(this))
         .then(function (newVal) {
           return source._mergeProp(state, newVal, key);

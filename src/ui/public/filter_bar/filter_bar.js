@@ -170,6 +170,7 @@ define(function (require) {
         function updateFilters() {
           const filters = queryFilter.getFilters();
 
+          // kibi: this is mark the filter as entity dependent
           const prevDependsOnSelectedEntitiesDisabled = Promise.resolve(
             _.map(filters, (filter) => filter.meta.dependsOnSelectedEntitiesDisabled)
           );

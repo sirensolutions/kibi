@@ -1,5 +1,5 @@
-var expect = require('expect.js');
-var ngMock = require('ngMock');
+let expect = require('expect.js');
+let ngMock = require('ngMock');
 
 describe('AggTypesComponent', function () {
   require('./AggType');
@@ -9,8 +9,8 @@ describe('AggTypesComponent', function () {
   require('./buckets/_range');
 
   describe('bucket aggs', function () {
-    var bucketAggs;
-    var BucketAggType;
+    let bucketAggs;
+    let BucketAggType;
 
     beforeEach(ngMock.module('kibana', function ($provide) {
       $provide.constant('kbnDefaultAppId', '');
@@ -30,8 +30,8 @@ describe('AggTypesComponent', function () {
   });
 
   describe('metric aggs', function () {
-    var metricAggs;
-    var MetricAggType;
+    let metricAggs;
+    let MetricAggType;
 
     beforeEach(ngMock.module('kibana', function ($provide) {
       $provide.constant('kbnDefaultAppId', '');

@@ -3,9 +3,10 @@ import { defaultsDeep, set } from 'lodash';
 import requirefrom from 'requirefrom';
 import { header as basicAuthHeader } from './base_auth';
 import { kibanaUser, kibanaServer } from '../shield';
-import KbnServer from '../../src/server/KbnServer';
-import fromRoot from '../../src/utils/fromRoot';
 import serverConfig from '../serverConfig';
+
+const src = requirefrom('src');
+const KbnServer = src('server/KbnServer');
 
 const SERVER_DEFAULTS = {
   server: {
@@ -17,11 +18,7 @@ const SERVER_DEFAULTS = {
   logging: {
     quiet: true
   },
-  plugins: {
-    scanDirs: [
-      fromRoot('src/plugins')
-    ]
-  },
+  plugins: {},
   optimize: {
     enabled: false
   },

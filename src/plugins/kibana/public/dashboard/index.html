@@ -11,7 +11,7 @@
   This commented code will stay here for reference,
   or just in case we would like to change it back
 
-  <navbar ng-show="chrome.getVisible()">
+  <navbar ng-show="chrome.getVisible()" name="dashboard">
     <span class="name" ng-if="dash.id" ng-bind="::dash.title" tooltip="{{::dash.title}}"></span>
 
     <form name="queryInput"
@@ -96,6 +96,7 @@
           <i aria-hidden="true" class="fa fa-gear"></i>
         </button>
       </kbn-tooltip>
+      <navbar-extensions config-template="configTemplate" name="dashboard"></navbar-extensions>
     </div>
   </navbar>
   -->

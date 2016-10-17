@@ -1,12 +1,12 @@
 describe('makeFakeXAspect', function () {
 
-  var makeFakeXAspect;
-  var Vis;
-  var AggType;
-  var AggConfig;
-  var indexPattern;
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
+  let makeFakeXAspect;
+  let Vis;
+  let AggType;
+  let AggConfig;
+  let indexPattern;
+  let expect = require('expect.js');
+  let ngMock = require('ngMock');
 
   beforeEach(ngMock.module('kibana', function ($provide) {
     $provide.constant('kbnDefaultAppId', '');
@@ -22,8 +22,8 @@ describe('makeFakeXAspect', function () {
   }));
 
   it('creates an object that looks like an aspect', function () {
-    var vis = new Vis(indexPattern, { type: 'histogram' });
-    var aspect = makeFakeXAspect(vis);
+    let vis = new Vis(indexPattern, { type: 'histogram' });
+    let aspect = makeFakeXAspect(vis);
 
     expect(aspect)
       .to.have.property('i', -1)

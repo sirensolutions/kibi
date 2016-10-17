@@ -58,8 +58,8 @@ or contact us at mailto:info@siren.solutions[info@siren.solutions]
 
 === Log4J File Configuration Path:
 
-Now **Log4J** configuration file is optional for Gremlin server. If you want to use your own custom configuration, you can specify path to your file by insert _kibi_core.gremlin_server.log_conf_path_ parameter inside your _kibi.yml_ file.
-Here an example of how to configure _log4j.properties_ file for your Gremlin server:
+**Log4J** configuration file is optional for the Gremlin server. If you want to use your own custom configuration, you can specify the path to your file with the `kibi_core.gremlin_server.log_conf_path` parameter inside your _kibi.yml_ file.
+Here is an example of how to configure the _log4j.properties_ file for your Gremlin server:
 ```properties
 # For the general syntax of property based configuration files see
 # the documentation of org.apache.log4j.PropertyConfigurator.

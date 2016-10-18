@@ -14,6 +14,8 @@ describe('toggle filters', function () {
   var appState;
   var globalState;
 
+  let toggleRelationalPanelSpy;
+
   beforeEach(ngMock.module(
     'kibana',
     'kibana/courier',
@@ -22,7 +24,11 @@ describe('toggle filters', function () {
       $provide.service('courier', require('fixtures/mock_courier'));
 
       $provide.service('kibiState', function () {
-        return new MockState({ filters: [] });
+        toggleRelationalPanelSpy = sinon.spy();
+        return new MockState({
+          toggleRelationalPanel: toggleRelationalPanelSpy,
+          filters: []
+        });
       });
 
       appState = new MockState({ filters: [] });
@@ -57,6 +63,22 @@ describe('toggle filters', function () {
   }));
 
   describe('toggling a filter', function () {
+    describe('kibi', function () {
+      it('should toggle the relational panel if join filter is present', function () {
+        filters = [
+          {
+            join_set: {},
+            meta: { negate: false, disabled: false }
+          }
+        ];
+        appState.filters = filters;
+
+        queryFilter.toggleFilter(filters[0]);
+        expect(appState.filters[0].meta.disabled).to.be(true);
+        expect(toggleRelationalPanelSpy.calledWith()).to.be(true);
+      });
+    });
+
     it('should toggle the disabled property in appState', function () {
       _.each(filters, function (filter) {
         expect(filter.meta.disabled).to.be(false);

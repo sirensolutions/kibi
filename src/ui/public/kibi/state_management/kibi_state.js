@@ -1061,8 +1061,12 @@ define(function (require) {
       return false;
     };
 
-    KibiState.prototype.toggleRelationalPanel = function () {
-      this[this._properties.enabled_relational_panel] = !this[this._properties.enabled_relational_panel];
+    KibiState.prototype.toggleRelationalPanel = function (toggle) {
+      if (_.isUndefined(toggle)) {
+        this[this._properties.enabled_relational_panel] = !this[this._properties.enabled_relational_panel];
+      } else {
+        this[this._properties.enabled_relational_panel] = toggle;
+      }
     };
 
     KibiState.prototype.isRelationalPanelEnabled = function () {

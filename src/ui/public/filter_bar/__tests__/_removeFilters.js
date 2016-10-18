@@ -14,6 +14,9 @@ describe('remove filters', function () {
   var appState;
   var globalState;
 
+  let disableAllRelationsSpy;
+  let toggleRelationalPanelSpy;
+
   beforeEach(ngMock.module(
     'kibana',
     'kibana/courier',
@@ -22,12 +25,13 @@ describe('remove filters', function () {
       $provide.service('courier', require('fixtures/mock_courier'));
 
       $provide.service('kibiState', function () {
+        disableAllRelationsSpy = sinon.spy();
+        toggleRelationalPanelSpy = sinon.spy();
         return new MockState({
+          disableAllRelations: disableAllRelationsSpy,
+          toggleRelationalPanel: toggleRelationalPanelSpy,
           filters: [],
-          disableAllRelations: sinon.spy(),
-          getEnabledRelations: function () {
-            return [];
-          }
+          getEnabledRelations: () => []
         });
       });
 
@@ -63,6 +67,23 @@ describe('remove filters', function () {
   }));
 
   describe('removing a filter', function () {
+    describe('kibi', function () {
+      it('should disable all relations if the join filter is present', function () {
+        filters = [
+          {
+            join_set: {},
+            meta: { negate: false, disabled: true }
+          }
+        ];
+        appState.filters = filters;
+        expect(appState.filters).to.have.length(1);
+        queryFilter.removeFilter(filters[0]);
+        expect(appState.filters).to.have.length(0);
+        expect(disableAllRelationsSpy.called).to.be(true);
+        expect(toggleRelationalPanelSpy.calledWith(true)).to.be(true);
+      });
+    });
+
     it('should remove the filter from appState', function () {
       appState.filters = filters;
       expect(appState.filters).to.have.length(3);
@@ -142,12 +163,20 @@ describe('remove filters', function () {
       globalState.filters.push(filters[0]);
       globalState.filters.push(filters[1]);
       appState.filters.push(filters[2]);
+      // kibi: should remove the join filter too
+      appState.filters.push({
+        join_set: {},
+        meta: { negate: false, disabled: true }
+      });
       expect(globalState.filters).to.have.length(2);
-      expect(appState.filters).to.have.length(1);
+      expect(appState.filters).to.have.length(2);
 
       queryFilter.removeAll();
       expect(globalState.filters).to.have.length(0);
       expect(appState.filters).to.have.length(0);
+
+      expect(disableAllRelationsSpy.called).to.be(true);
+      expect(toggleRelationalPanelSpy.calledWith(true)).to.be(true);
     });
   });
 });

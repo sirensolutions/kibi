@@ -9,7 +9,7 @@
             ng-repeat="group in dashboardGroups | orderBy: 'priority'"
             data-test-subj={{group.title}}
             ng-show="!group.hide">
-          <a ng-click="group.onClick(dashboardGroups)">
+          <a ng-click="group.selected.onClick(dashboardGroups)">
             <i ng-if="group.iconCss" class="icon {{group.iconCss}}"></i>
             <img class="icon" ng-if="group.iconUrl" ng-src="{{group.iconUrl}}"/>
             {{group.title}}
@@ -17,8 +17,10 @@
               <select
                 ng-model="group.selected"
                 ng-change="group.selected.onClick(dashboardGroups)"
-                ng-options="dashboard.title for dashboard in group.dashboards track by dashboard.id"
-                kibi-stop-click-event>
+                ng-options="dashboard.title + (dashboard.count && dashboard.id != group.selected.id ? ' (' + dashboard.count + ')' : '') for dashboard in group.dashboards track by dashboard.id"
+                kibi-stop-click-event
+                ng-focus="group.selected.onFocus(dashboardGroups)"
+                >
               </select>
             </span>
             <span ng-if="group.selected.count != undefined">({{ group.selected.count }})</span>

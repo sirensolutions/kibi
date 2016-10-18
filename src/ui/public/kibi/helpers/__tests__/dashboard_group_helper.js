@@ -346,7 +346,7 @@ describe('Kibi Components', function () {
         }).catch(done);
       });
 
-      it('selected dashboard exists but it does NOT have indexPatternId', function (done) {
+      it('selected dashboard exists but it does NOT have savedSearchId', function (done) {
         var groups = [
           {
             title: 'Title A0',
@@ -367,10 +367,10 @@ describe('Kibi Components', function () {
         }).catch(done);
       });
 
-      it('selected dashboard does exist and has an indexPatternId', function (done) {
+      it('selected dashboard does exist and has an savedSearchId', function (done) {
 
         // this dashboard has to exist (the fakeDashboard should have it)
-        var selectedDashboard = {id: 'time-testing-4', indexPatternId: 'time-testing-4'};
+        var selectedDashboard = {id: 'time-testing-4', savedSearchId: 'time-testing-4'};
         var groups = [
           {
             title: 'Group 1',

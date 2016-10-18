@@ -73,6 +73,27 @@ define(function (require) {
       return lastEventTimer;
     };
 
+    DashboardGroupHelper.prototype._getDashboardForGroup = function (groupId, groupTitle, dashboardDef) {
+      var self = this;
+      return {
+        id: dashboardDef.id,
+        title: self.shortenDashboardName(groupTitle, dashboardDef.title),
+        savedSearchId: dashboardDef.savedSearchId,
+        onClick: function (dashboardGroups) {
+          var currentDashboardId = kibiState._getCurrentDashboardId();
+          if (currentDashboardId === dashboardDef.id) {
+            // do nothing as we are already at the corret dashboard
+            return;
+          }
+          self._getOnClickForDashboardInGroup(dashboardGroups, dashboardDef.id, groupId);
+        },
+        onFocus: function (dashboardGroups) {
+          // update counts for dashboards other than selected one
+          // TODO: implement it
+        }
+      };
+    };
+
     DashboardGroupHelper.prototype._computeGroupsFromSavedDashboardGroups = function (currentDashboardId) {
       var self = this;
 
@@ -111,15 +132,8 @@ define(function (require) {
             }
 
             dashboards = _.map(dashboardsArray, function (d) {
-
-              var dashboard = {
-                id: d.id,
-                title: self.shortenDashboardName(group.title, d.title),
-                onClick: function (dashboardGroups) {
-                  self._getOnClickForDashboardInGroup(dashboardGroups, d.id, group.id);
-                }
-              };
-              if (currentDashboardId && currentDashboardId === d.id) {
+              var dashboard = self._getDashboardForGroup(group.id, group.title, d);
+              if (currentDashboardId && currentDashboardId === dashboard.id) {
                 selected = dashboard;
               }
               return dashboard;
@@ -144,15 +158,12 @@ define(function (require) {
             dashboardGroups1.push({
               id: group.id,
               title: group.title,
-              priority: group.priority,
-              dashboards: dashboards,
-              selected: selected,
               hide: group.hide,
               iconCss: group.iconCss,
               iconUrl: group.iconUrl,
-              onClick: function (dashboardGroups) {
-                this.selected.onClick(dashboardGroups);
-              }
+              priority: group.priority,
+              dashboards: dashboards,
+              selected: selected
             });
 
           }); // end of each
@@ -189,29 +200,12 @@ define(function (require) {
       let highestGroup = _.max(dashboardGroups1, 'priority');
       let highestPriority = highestGroup && highestGroup.priority || 0;
 
-      return kibiState._getDashboardAndSavedSearchMetas(undefined, true).then(function (results) {
-        const dashboardDefs = _.map(results, function ({ savedDash, savedSearchMeta }) {
-          if (savedSearchMeta) {
-            return {
-              id: savedDash.id,
-              title: savedDash.title,
-              indexPatternId: savedSearchMeta.index,
-              savedSearchId: savedDash.savedSearchId
-            };
-          }
-          return {
-            id: savedDash.id,
-            title: savedDash.title,
-            indexPatternId: null,
-            savedSearchId: null
-          };
-        });
-
-        _.each(dashboardDefs, function (dashboardDef) {
+      return savedDashboards.find().then(function (savedDashboards) {
+        _.each(savedDashboards.hits, function (dashboardDef) {
           var isInGroups = false;
           _.each(dashboardsInGroups, function (dashboard) {
             if (dashboard.id === dashboardDef.id) {
-              dashboard.indexPatternId = dashboardDef.indexPatternId;
+              // here add savedSearchId property to all already existing dashboard objects
               dashboard.savedSearchId = dashboardDef.savedSearchId;
               isInGroups = true;
               return false;
@@ -221,21 +215,15 @@ define(function (require) {
           // so now we know that this dashboard is not in any group
           if (isInGroups === false) {
             // not in a group so add it as new group with single dashboard
-            var onlyOneDashboard = {
-              id: dashboardDef.id,
-              title: dashboardDef.title,
-              indexPatternId: dashboardDef.indexPatternId,
-              savedSearchId: dashboardDef.savedSearchId
-            };
+            var groupId = kibiUtils.slugifyId(dashboardDef.title);
+            var groupTitle = dashboardDef.title;
+            var onlyOneDashboard = self._getDashboardForGroup(groupId, groupTitle, dashboardDef);
 
             dashboardGroups1.push({
-              id: kibiUtils.slugifyId(dashboardDef.title),
-              title: dashboardDef.title,
+              id: groupId,
+              title: groupTitle,
               dashboards: [onlyOneDashboard],
               selected: onlyOneDashboard,
-              onClick: function (dashboardGroups) {
-                self._getOnClickForDashboardInGroup(dashboardGroups, dashboardDef.id, null);
-              },
               priority: ++highestPriority
             });
           }
@@ -283,7 +271,6 @@ define(function (require) {
           previousGroup.hide = group.hide;
           previousGroup.iconCss = group.iconCss;
           previousGroup.iconUrl = group.iconUrl;
-          previousGroup.onClick = group.onClick;
           previousGroup.priority = group.priority;
           previousGroup.title = group.title;
 
@@ -309,12 +296,14 @@ define(function (require) {
     DashboardGroupHelper.prototype.getCountQueryForSelectedDashboard = function (groups, groupIndex) {
       var dashboard = groups[groupIndex].selected;
 
-      if (!dashboard || !dashboard.indexPatternId) {
-        delete groups[groupIndex].count;
+      if (!dashboard || !dashboard.savedSearchId) {
+        if (groups[groupIndex].selected) {
+          delete groups[groupIndex].selected.count;
+        }
         return Promise.resolve({
+          groupIndex: groupIndex,
           query: undefined,
-          indexPatternId: undefined,
-          groupIndex: groupIndex
+          indexPatternId: undefined
         });
       }
 
@@ -337,11 +326,18 @@ define(function (require) {
           {
             title:
             priority:
-            dashboards:
-            selected:
+            dashboards: [
+              {
+                id:
+                title:
+                onClick:
+                onFocus:
+              },
+              ...
+            ]
             iconCss:
             iconUrl:
-            onClick:
+            selected: dashboard
           },
           ...
         ]

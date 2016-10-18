@@ -13,6 +13,7 @@ describe('Query Filter', function () {
         return new MockState({ filters: [] });
       });
     }));
+
     beforeEach(ngMock.inject(function (_$rootScope_, Private) {
       $rootScope = _$rootScope_;
       queryFilter = Private(require('ui/filter_bar/query_filter'));

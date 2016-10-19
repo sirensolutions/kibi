@@ -1,0 +1,28 @@
+=== Kibi 4.5.4 and Kibana 4.5.4 Release Notes
+
+The 4.5.4 release of Kibi requires Elasticsearch 2.3 or later.
+
+==== Kibana Changes
+
+[float]
+[[enhancements]]
+===== Enhancements
+* {k4issue}6150[Issue 6150]: Adds a timeout for the display of error notifications.
+* {k4issue}3682[Issue 3682]: Improved handling of empty result sets for the Metric visualization.
+* {k4issue}4065[Issue 4065]: Adds custom labels for visualization axes.
+* {k4issue}6128[Issue 6128]: Adds configurable length to saved object lists.
+
+[float]
+[[bugfixes]]
+===== Bug Fixes
+
+* {k4pull}5236[Pull Request 5236]: Fixes a heatmap intensity issue in tile maps.
+* {k4issue}6283[Issue 6283]: Corrects a date format error in millisecond intervals.
+* {k4issue}6049[Issue 6049]: Improvements to autocomplete handling.
+* {k4issue}6331[Issue 6331]: Improved handling of long-running queries.
+
+[float]
+[[plugin-system]]
+===== Plugin System Changes
+
+* {k4issue}5916[Issue 5916]: Adds the `--list` flag to list installed plugins.

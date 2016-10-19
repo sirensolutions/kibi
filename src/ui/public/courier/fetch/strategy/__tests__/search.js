@@ -52,12 +52,23 @@ describe('ui/courier/fetch/strategy/search', () => {
     context('when indexList is empty', () => {
       beforeEach(() => reqsFetchParams[0].index = []);
 
-      it('queries .kibi-devnull instead', () => {
+      it('queries the Kibi index with a must_not match_all boolean', () => {
+        const query = JSON.stringify({
+          query: {
+            bool: {
+              must_not: [
+                { match_all: {} }
+              ]
+            }
+          }
+        });
         let value;
         search.reqsFetchParamsToBody(reqsFetchParams).then(val => value = val);
         $rootScope.$apply();
-        expect(_.includes(value, '"index":[".kibi-devnull"]')).to.be(true);
+        expect(_.includes(value, '"index":[".kibi"]')).to.be(true);
+        expect(_.includes(value, query)).to.be(true);
       });
+
     });
   });
 

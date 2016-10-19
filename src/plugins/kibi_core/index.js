@@ -3,6 +3,11 @@ const path = require('path');
 const Boom = require('boom');
 const errors = require('request-promise/errors');
 
+const util = require('../elasticsearch/lib/util');
+
+const dbfilter = require('../elasticsearch/lib/dbfilter');
+const inject = require('../elasticsearch/lib/inject');
+
 /**
  * The Kibi core plugin.
  *
@@ -124,6 +129,9 @@ module.exports = function (kibana) {
     init: function (server, options) {
       const config = server.config();
       var datasourceCacheSize   = config.get('kibi_core.datasource_cache_size');
+
+      const filterJoinSet = require('../elasticsearch/lib/filter_join')(server).set;
+      const filterJoinSequence = require('../elasticsearch/lib/filter_join')(server).sequence;
 
       this.status.yellow('Initialising the query engine');
       queryEngine = new QueryEngine(server);

@@ -24,7 +24,7 @@ describe('plugins/elasticsearch', function () {
       describe('', function () {
         before(function () { version = _version; });
 
-        it(`should return ${bool} for ${_id} <= ${version}`, function () {
+        it(`should return ${bool} for ${_id} <= ${_version}`, function () {
           expect(isUpgradeable(server, { _id: _id })).to.be(bool);
         });
 
@@ -32,7 +32,7 @@ describe('plugins/elasticsearch', function () {
       });
     }
 
-    upgradeDoc('1.0.0-beta1', pkg.kibi_version, false);
+    upgradeDoc('1.0.0-beta1', pkg.kibi_version, true);
     upgradeDoc(pkg.kibi_version, pkg.kibi_version, false);
     upgradeDoc('4.0.0-RC1', '4.0.0-RC2', true);
     upgradeDoc('4.0.0-rc2', '4.0.0-rc1', false);
@@ -40,8 +40,17 @@ describe('plugins/elasticsearch', function () {
     upgradeDoc('4.0.0-rc2', '4.0.2', true);
     upgradeDoc('4.0.1', '4.1.0-rc', true);
     upgradeDoc('4.0.0-rc1', '4.0.0', true);
-    upgradeDoc('4.0.0-rc1-SNAPSHOT', '4.0.0', false);
-    upgradeDoc('4.1.0-rc1-SNAPSHOT', '4.1.0-rc1', false);
+    upgradeDoc('4.0.0-rc1-snapshot', '4.0.0', false);
+    upgradeDoc('4.1.0-rc1-snapshot', '4.1.0-rc1', false);
+    upgradeDoc('4.5.4-alpha-1', '4.5.4-alpha-2', true);
+    upgradeDoc('4.5.4-beta-1', '4.5.4-alpha-2', false);
+    upgradeDoc('4.5.4-alpha-1', '4.5.4-beta-2', true);
+    upgradeDoc('4.5.4', '4.5.4-alpha-2', false);
+    upgradeDoc('4.5.3-3', '4.5.4-alpha-1', true);
+    upgradeDoc('4.5.4-beta-2', '4.5.4', true);
+    upgradeDoc('4.5.4-beta2', '4.5.4', true);
+    upgradeDoc('4.5.4-beta2', '4.5.4-beta-3', true);
+    upgradeDoc('4.5.4-beta-4', '4.5.4-rc-1', true);
 
     it('should handle missing _id field', function () {
       let doc = {

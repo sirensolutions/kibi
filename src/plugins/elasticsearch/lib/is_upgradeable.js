@@ -1,33 +1,55 @@
 const semver = require('semver');
 const utils = require('requirefrom')('src/utils');
-const rcVersionRegex = /(\d+\.\d+\.\d+)\-rc(\d+)/i;
+const preReleaseRegex = /(\d+\.\d+\.\d+)-(rc|alpha|beta)-?(\d+)/i;
+
+function computePreReleaseIndex(matches) {
+  const version = matches[1];
+  const specifier = matches[2];
+  let index = parseInt(matches[3], 10);
+  switch (specifier.toLowerCase()) {
+    case 'alpha':
+      index = 100 + index;
+      break;
+    case 'beta':
+      index = 200 + index;
+      break;
+    case 'rc':
+      index = 300 + index;
+      break;
+  }
+  return [
+    version,
+    index
+  ];
+}
 
 module.exports = function (server, doc) {
   const config = server.config();
-  if (/beta|snapshot/i.test(doc._id)) return false;
+  if (/snapshot/i.test(doc._id)) return false;
   if (!doc._id) return false;
   // kibi: use kibi version instead of kibana's
   if (doc._id === config.get('pkg.kibiVersion')) return false;
 
-  let packageRcRelease = Infinity;
-  let rcRelease = Infinity;
+  let preReleaseIndex = Infinity;
+  let packagePreReleaseIndex = Infinity;
   let packageVersion = config.get('pkg.kibiVersion'); // kibi: use kibi version instead of kibana's
   let version = doc._id;
-  const matches = doc._id.match(rcVersionRegex);
-  const packageMatches = config.get('pkg.kibiVersion').match(rcVersionRegex); // kibi: use kibi version instead of kibana's
+  const preReleaseMatches = doc._id.match(preReleaseRegex);
+  const packagePreReleaseMatches = config.get('pkg.kibiVersion').match(preReleaseRegex); // kibi: use kibi version instead of kibana's
 
-  if (matches) {
-    version = matches[1];
-    rcRelease = parseInt(matches[2], 10);
+  if (preReleaseMatches) {
+    [version, preReleaseIndex] = computePreReleaseIndex(preReleaseMatches);
   }
 
-  if (packageMatches) {
-    packageVersion = packageMatches[1];
-    packageRcRelease = parseInt(packageMatches[2], 10);
+  if (packagePreReleaseMatches) {
+    [packageVersion, packagePreReleaseIndex] = computePreReleaseIndex(packagePreReleaseMatches);
   }
 
   try {
-    if (semver.gte(version, packageVersion) && rcRelease >= packageRcRelease) return false;
+    if (semver.eq(version, packageVersion)) {
+      return preReleaseIndex < packagePreReleaseIndex;
+    }
+    return semver.lt(version, packageVersion);
   } catch (e) {
     return false;
   }

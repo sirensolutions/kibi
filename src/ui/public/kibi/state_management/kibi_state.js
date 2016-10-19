@@ -876,18 +876,6 @@ define(function (require) {
       });
     };
 
-    function emptySearch() {
-      return {
-        query: {
-          bool: {
-            must_not: [
-              { match_all: {} }
-            ]
-          }
-        }
-      };
-    }
-
     /**
      * Returns an array of dashboard IDs.
      * WARNING: this method returns only the ID of dashboards that have some state, e.g., some filters.
@@ -1096,8 +1084,12 @@ define(function (require) {
       return false;
     };
 
-    KibiState.prototype.toggleRelationalPanel = function () {
-      this[this._properties.enabled_relational_panel] = !this[this._properties.enabled_relational_panel];
+    KibiState.prototype.toggleRelationalPanel = function (toggle) {
+      if (_.isUndefined(toggle)) {
+        this[this._properties.enabled_relational_panel] = !this[this._properties.enabled_relational_panel];
+      } else {
+        this[this._properties.enabled_relational_panel] = toggle;
+      }
     };
 
     KibiState.prototype.isRelationalPanelEnabled = function () {

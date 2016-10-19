@@ -92,11 +92,17 @@ define(function (require) {
 
       // kibi: if it was a join_set one
       if (filter.join_set) {
-        kibiState.disableAllRelations();
-        kibiState.save();
+        removeJoinSetFilter.call(this);
       }
       // kibi: end
     };
+
+    function removeJoinSetFilter() {
+      kibiState.disableAllRelations();
+      // if the panel was disabled
+      kibiState.toggleRelationalPanel(true);
+      kibiState.save();
+    }
 
     /**
     * Updates an existing filter
@@ -125,17 +131,14 @@ define(function (require) {
       let appState = getAppState();
 
       // kibi: find out if there was a join_set
-      var joinSetFound = _.find(appState.filters, function (f) {
-        return f.join_set;
-      });
+      let joinSetFound = _.find(appState.filters, f => f.join_set);
 
       globalState.filters = [];
       appState.filters = [];
 
       // remove all enabled relations for the join_set
-      if (kibiState.getEnabledRelations().length) {
-        kibiState.disableAllRelations();
-        kibiState.save();
+      if (joinSetFound) {
+        removeJoinSetFilter.call(this);
       }
       // kibi: end
     };

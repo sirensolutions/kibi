@@ -3,6 +3,7 @@ define(function (require) {
     var _ = require('lodash');
     var angular = require('angular');
     var toJson = require('ui/utils/aggressive_parse').toJson;
+    // kibi: require empty_search from ui/kibi (see explanation in reqsFetchParamsToBody)
     const emptySearch = require('ui/kibi/empty_search');
 
     return {
@@ -30,11 +31,10 @@ define(function (require) {
             // If we've reached this point and there are no indexes in the
             // index list at all, it means that we shouldn't expect any indexes
             // to contain the documents we're looking for, so we instead
-            // perform a request for an index pattern that we know will always
-            // return an empty result (ie. -*). If instead we had gone ahead
-            // with an msearch without any index patterns, elasticsearch would
-            // handle that request by querying *all* indexes, which is the
-            // opposite of what we want in this case.
+            // perform a search that doesn't return any result.
+            // If instead we had gone ahead with an msearch without any index
+            // patterns, elasticsearch would handle that request by querying
+            // *all* indexes, which is the opposite of what we want in this case.
             if (_.isArray(indexList) && indexList.length === 0) {
               indexList.push(kbnIndex);
               body = emptySearch();

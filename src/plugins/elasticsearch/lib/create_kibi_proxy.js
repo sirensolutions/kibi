@@ -138,9 +138,6 @@ module.exports = function createProxy(server, method, route, config) {
             });
           });
         },
-        onResponse: function (err, responseFromUpstream, request, reply) {
-          reply(err, responseFromUpstream);
-        },
         timeout: serverConfig.get('elasticsearch.requestTimeout'),
         mapUri: mapUri(server, null, true),
         passThrough: true,

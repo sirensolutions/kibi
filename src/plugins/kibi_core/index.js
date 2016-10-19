@@ -105,9 +105,17 @@ module.exports = function (kibana) {
 
         enterprise_enabled: Joi.boolean().default(false),
         elasticsearch: Joi.object({
+          auth_plugin: Joi.string().allow('').default(''),
           transport_client: Joi.object({
-            username: Joi.string().default(''),
-            password: Joi.string().default('')
+            username: Joi.string().allow('').default(''),
+            password: Joi.string().allow('').default(''),
+            ssl: Joi.object({
+              ca: Joi.string().allow('').default(''),
+              ca_password: Joi.string().allow('').default(''),
+              key_store: Joi.string().allow('').default(''),
+              key_store_password: Joi.string().allow('').default(''),
+              verify_hostname: Joi.boolean().default(true)
+            })
           })
         }),
         gremlin_server: Joi.object({

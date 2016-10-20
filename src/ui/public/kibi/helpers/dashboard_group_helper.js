@@ -1,10 +1,12 @@
 define(function (require) {
-  return function DashboardGroupHelperFactory($timeout, kbnUrl, kibiState, Private, savedDashboards, savedDashboardGroups, Promise) {
+  return function DashboardGroupHelperFactory($timeout, kbnUrl, kibiState, Private, savedDashboards, savedDashboardGroups, Promise, kbnIndex, $http) {
     var _ = require('lodash');
     var countHelper = Private(require('ui/kibi/helpers/count_helper/count_helper'));
     var kibiUtils = require('kibiutils');
+    const SearchHelper = require('ui/kibi/helpers/search_helper');
 
     function DashboardGroupHelper() {
+      this.searchHelper = new SearchHelper(kbnIndex);
     }
 
     DashboardGroupHelper.prototype.getIdsOfDashboardGroupsTheseDashboardsBelongTo = function (dashboardIds) {
@@ -79,7 +81,7 @@ define(function (require) {
         id: dashboardDef.id,
         title: self.shortenDashboardName(groupTitle, dashboardDef.title),
         savedSearchId: dashboardDef.savedSearchId,
-        onClick: function (dashboardGroups) {
+        onSelect: function (dashboardGroups) {
           var currentDashboardId = kibiState._getCurrentDashboardId();
           if (currentDashboardId === dashboardDef.id) {
             // do nothing as we are already at the corret dashboard
@@ -87,9 +89,29 @@ define(function (require) {
           }
           self._getOnClickForDashboardInGroup(dashboardGroups, dashboardDef.id, groupId);
         },
-        onFocus: function (dashboardGroups) {
-          // update counts for dashboards other than selected one
-          // TODO: implement it
+        onOpenClose: function (group) {
+          var queryPromises = [];
+          _.each(group.dashboards, (d, index) => {
+            if (d.id !== group.selected.id) {
+              delete d.count;
+              queryPromises.push(self.getCountQueryForDashboard(d, {dashboardIndex: index}));
+            }
+          });
+          Promise.all(queryPromises).then(function (res) {
+            const query = _.map(res, result => {
+              return self.searchHelper.optimize(result.indices, result.query);
+            }).join('');
+            // TODO: fix this one !!!
+            //$http.post(self.chrome.getBasePath() + '/elasticsearch/_msearch?getCountsOnTabs', query)
+            $http.post('/elasticsearch/_msearch?getCountsOnTabs', query)
+            .then(function (counts) {
+              if (counts.data.responses) {
+                for(var i = 0; i < res.length; i++) {
+                  group.dashboards[res[i].dashboardIndex].count = counts.data.responses[i].hits.total;
+                }
+              }
+            });
+          });
         }
       };
     };
@@ -293,29 +315,26 @@ define(function (require) {
       }
     };
 
-    DashboardGroupHelper.prototype.getCountQueryForSelectedDashboard = function (groups, groupIndex) {
-      var dashboard = groups[groupIndex].selected;
-
+    DashboardGroupHelper.prototype.getCountQueryForDashboard = function (dashboard, options) {
       if (!dashboard || !dashboard.savedSearchId) {
-        if (groups[groupIndex].selected) {
-          delete groups[groupIndex].selected.count;
-        }
-        return Promise.resolve({
-          groupIndex: groupIndex,
+        var o = {
           query: undefined,
-          indexPatternId: undefined
-        });
+          indices: undefined
+        };
+        return Promise.resolve(_.merge(o, options));
       }
 
       return kibiState.getState(dashboard.id)
       .then(({ index, filters, queries, time }) => {
         const query = countHelper.constructCountQuery(filters, queries, time);
-        return {
-          dashboardId: dashboard.id,
-          groupIndex: groupIndex,
-          query: query,
-          indexPatternId: index
-        };
+        // here take care about correctly expanding timebased indices
+        return kibiState.timeBasedIndices(index, dashboard.id).then(function (indices) {
+          var o = {
+            query: query,
+            indices: indices
+          }
+          return _.merge(o, options);
+        });
       });
     };
 

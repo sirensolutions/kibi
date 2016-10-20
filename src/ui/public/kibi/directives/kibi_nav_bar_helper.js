@@ -32,30 +32,32 @@ define(function (require) {
     const _fireUpdateAllCounts = function (groupIndexesToUpdate, forceUpdate = false) {
       const self = this;
 
-      const countForDashboard = function (dashboardGroups, index) {
-        const selectedDashboard = dashboardGroupHelper.getCountQueryForSelectedDashboard(dashboardGroups, index);
-        const timeBasedSelectedDashboard = selectedDashboard.then(({ indexPatternId, dashboardId }) => {
-          if (!indexPatternId || !dashboardId) {
-            return;
-          }
-          return kibiState.timeBasedIndices(indexPatternId, dashboardId);
-        });
-        return Promise.all([ selectedDashboard, timeBasedSelectedDashboard ])
-        .then(([ { groupIndex, query }, indices ]) => {
-          return { groupIndex, query, indices };
-        });
-      };
-
       let promises;
       if (groupIndexesToUpdate && groupIndexesToUpdate.constructor === Array && groupIndexesToUpdate.length > 0) {
-        promises = _.map(groupIndexesToUpdate, (index) => countForDashboard(self.dashboardGroups, index));
+        //promises = _.map(groupIndexesToUpdate, (index) => dashboardGroupHelper.getCountQueryForSelectedDashboard(self.dashboardGroups, index));
+        promises = _.map(groupIndexesToUpdate, (index) => {
+          var dashboard = self.dashboardGroups[index].selected;
+          if (!dashboard || !dashboard.savedSearchId) {
+            delete self.dashboardGroups[index].selected.count;
+          }
+          return dashboardGroupHelper.getCountQueryForDashboard(dashboard, {groupIndex: index});
+        });
       } else {
-        promises = _.map(self.dashboardGroups, (g, index) => countForDashboard(self.dashboardGroups, index));
+        //promises = _.map(self.dashboardGroups, (g, index) => dashboardGroupHelper.getCountQueryForSelectedDashboard(self.dashboardGroups, index));
+        promises = _.map(self.dashboardGroups, (g, index) => {
+          var dashboard = self.dashboardGroups[index].selected;
+          if (!dashboard || !dashboard.savedSearchId) {
+            delete self.dashboardGroups[index].selected.count;
+          }
+          return dashboardGroupHelper.getCountQueryForDashboard(dashboard, {groupIndexindex: index});
+        });
       }
 
       return Promise.all(promises).then((results) => {
         // if there is resolved promise with no query property
         // it means that this group has no index attached and should be skipped when updating the group counts
+
+        // Hmm this shold not happen ??
         _.remove(results, result => !result.query || !result.indices);
 
         const query = _.map(results, result => {

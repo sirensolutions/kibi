@@ -28,88 +28,43 @@ define(function (require) {
       return groupIndexes;
     };
 
-    let lastFiredMultiCountQuery;
-    const _fireUpdateAllCounts = function (groupIndexesToUpdate, forceUpdate = false) {
+    const _fireUpdateAllCounts = function (groupIndexesToUpdate, forceCountsUpdate = false) {
       const self = this;
 
-      let promises;
+      // only the selected dashboard from each group
+      var dashboardIds = [];
       if (groupIndexesToUpdate && groupIndexesToUpdate.constructor === Array && groupIndexesToUpdate.length > 0) {
-        //promises = _.map(groupIndexesToUpdate, (index) => dashboardGroupHelper.getCountQueryForSelectedDashboard(self.dashboardGroups, index));
-        promises = _.map(groupIndexesToUpdate, (index) => {
+        _.each(groupIndexesToUpdate, (index) => {
           var dashboard = self.dashboardGroups[index].selected;
-          if (!dashboard || !dashboard.savedSearchId) {
-            delete self.dashboardGroups[index].selected.count;
+          if (dashboard && dashboardIds.indexOf(dashboard.id) === -1) {
+            dashboardIds.push(dashboard.id);
           }
-          return dashboardGroupHelper.getCountQueryForDashboard(dashboard, {groupIndex: index});
         });
       } else {
-        //promises = _.map(self.dashboardGroups, (g, index) => dashboardGroupHelper.getCountQueryForSelectedDashboard(self.dashboardGroups, index));
-        promises = _.map(self.dashboardGroups, (g, index) => {
+        _.each(self.dashboardGroups, (g, index) => {
           var dashboard = self.dashboardGroups[index].selected;
-          if (!dashboard || !dashboard.savedSearchId) {
-            delete self.dashboardGroups[index].selected.count;
+          if (dashboard && dashboardIds.indexOf(dashboard.id) === -1) {
+            dashboardIds.push(dashboard.id);
           }
-          return dashboardGroupHelper.getCountQueryForDashboard(dashboard, {groupIndexindex: index});
         });
       }
 
-      return Promise.all(promises).then((results) => {
-        // if there is resolved promise with no query property
-        // it means that this group has no index attached and should be skipped when updating the group counts
-
-        // Hmm this shold not happen ??
-        _.remove(results, result => !result.query || !result.indices);
-
-        const query = _.map(results, result => {
-          return searchHelper.optimize(result.indices, result.query);
-        }).join('');
-
-        if (query && (forceUpdate || lastFiredMultiCountQuery !== query)) {
-          lastFiredMultiCountQuery = query;
-
-          //Note: ?getCountsOnTabs has no meaning, it is just useful to filter when inspecting requests
-          var promiseToGetCounts = $http.post(self.chrome.getBasePath() + '/elasticsearch/_msearch?getCountsOnTabs', query);
-          var promisesToGatherFilterMessage = _.map(results, (result, i) => {
-            var selectedDashboardId = self.dashboardGroups[result.groupIndex].selected.id;
-            return kibiState.getState(selectedDashboardId).then(({ queries, filters }) => {
-              if (queries || filters) {
-                if (queries.length > 1 && filters.length !== 0) {
-                  return 'This dashboard has a query and ' + filters.length + ' filter' + (filters.length > 1 ? 's' : '') + ' set.';
-                } else if (queries.length > 1) {
-                  return 'This dashboard has a query set.';
-                } else if (filters.length !== 0) {
-                  return 'This dashboard has ' + filters.length + ' filter' + (filters.length > 1 ? 's' : '') + ' set.';
-                }
-              }
-              return null;
+      return dashboardGroupHelper.getDashboardsMetadata(dashboardIds, forceCountsUpdate).then((metadata) => {
+        _.each(self.dashboardGroups, (g) => {
+          _.each(g.dashboards, (d) => {
+            var foundDashboardMetadata = _.find(metadata, (m) => {
+              return m.dashboardId === d.id;
             });
+            if (foundDashboardMetadata) {
+              d.count = foundDashboardMetadata.count;
+              d.isPruned = foundDashboardMetadata.isPruned;
+              d.filterIconMessage = dashboardGroupHelper.constructFilterIconMessage(
+                foundDashboardMetadata.filters,
+                foundDashboardMetadata.queries
+              );
+            }
           });
-
-          var promiseToGatherTheFilterMessages = Promise.all(promisesToGatherFilterMessage);
-
-          return Promise.all([promiseToGatherTheFilterMessages, promiseToGetCounts]).then(function (res) {
-            var messages = res[0];
-            var counts = res[1];
-            _.each(counts.data.responses, function (hit, i) {
-              const tab = self.dashboardGroups[results[i].groupIndex];
-              try {
-                if (!_.contains(Object.keys(hit), 'error')) {
-                  tab.selected.count = hit.hits.total;
-                  tab.selected.filterIconMessage = messages[i];
-                } else if (_.contains(Object.keys(hit), 'error') && _.contains(hit.error, 'ElasticsearchSecurityException')) {
-                  tab.selected.count = 'Unauthorized';
-                } else {
-                  tab.selected.count = 'Error';
-                }
-              } catch (e) {
-                notify.warning('An error occurred while getting counts for tab ' + tab.selected.title + ': ' + e);
-              }
-            });
-          })
-          .catch((err) => {
-            notify.error('Couldn\'t get counts for tabs: ' + JSON.stringify(err, null, ' '));
-          });
-        }
+        });
       }).catch((err) => {
         notify.warning(err);
       });
@@ -132,7 +87,6 @@ define(function (require) {
 
     function KibiNavBarHelper() {
       this.appState = null;
-      this.chrome = null;
       this.dashboardGroups = [];
       this.init = _.once(() => {
         return this.computeDashboardsGroups('init')
@@ -259,7 +213,7 @@ define(function (require) {
     */
 
     KibiNavBarHelper.prototype.setChrome = function (c) {
-      this.chrome = c;
+      dashboardGroupHelper.setChrome(c);
     };
 
     KibiNavBarHelper.prototype.updateAllCounts = function (dashboardsIds, reason, forceUpdate = false) {
@@ -295,7 +249,6 @@ define(function (require) {
       if (this.removeAutorefreshHandler) {
         this.removeAutorefreshHandler();
       }
-      //$timeout.cancel(lastEventTimer);
       this.appState = null;
     };
 

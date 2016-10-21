@@ -23,7 +23,14 @@
                 theme="bootstrap">
                 <ui-select-match>
                   <span ng-bind="$select.selected.title"></span>
-                  <span ng-if="$select.selected.count"> ({{$select.selected.count}})</span>
+                  <!-- compare count to undefined to show zero -->
+                  <span ng-if="$select.selected.count !== undefined"> ({{$select.selected.count}})</span>
+                  <span ng-if="$select.selected.filterIconMessage">
+                    <i class="fa fa-filter" aria-hidden="true" data-toggle="tooltip"
+                    data-placement="bottom" title="{{ $select.selected.filterIconMessage }}"/>
+                  </span>
+                  <span ng-if="$select.selected.isPruned" aria-hidden="true" data-toggle="tooltip"
+                    data-placement="bottom" title="Results from this filter were pruned"> *</span>
                 </ui-select-match>
                 <ui-select-choices
                   position='down'
@@ -31,18 +38,25 @@
                   <span ng-bind="dashboard.title"></span>
                   <span ng-if="dashboard.count !== undefined" class="smallNumber"> ({{dashboard.count}})</span>
                   <span ng-if="dashboard.count === undefined" class="spinner"/>
+                  <span ng-if="dashboard.filterIconMessage">
+                    <i class="fa fa-filter" aria-hidden="true" data-toggle="tooltip"
+                    data-placement="bottom" title="{{ dashboard.selected.filterIconMessage }}"/>
+                  </span>
+                  <span ng-if="dashboard.isPruned" aria-hidden="true" data-toggle="tooltip"
+                        data-placement="bottom" title="Results from this filter were pruned"> *</span>
                 </ui-select-choices>
               </ui-select>
             </span>
 
-            <span
-              ng-if="group.selected.count != undefined && (!group.active || (group.active && group.dashboards.length == 1))">
-              ({{ group.selected.count }})
-            </span>
-
-            <span ng-if="group.selected.filterIconMessage">
-              <i class="fa fa-filter" aria-hidden="true" data-toggle="tooltip"
-              data-placement="bottom" title="{{ group.selected.filterIconMessage }}"/>
+            <!-- compare count to undefined to show zero -->
+            <span ng-if="!group.active || (group.active && group.dashboards.length == 1)">
+              <span ng-if="group.selected.count !== undefined">
+                ({{ group.selected.count }})
+              </span>
+              <span ng-if="group.selected.filterIconMessage">
+                <i class="fa fa-filter" aria-hidden="true" data-toggle="tooltip"
+                data-placement="bottom" title="{{ group.selected.filterIconMessage }}"/>
+              </span>
             </span>
           </a>
         </li>

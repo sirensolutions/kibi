@@ -5,7 +5,7 @@ define(function (require) {
   require('ui/kibi/directives/kibi_stop_click_event');
   require('angular-sanitize');
   require('ui-select-shim');
-
+  const _ = require('lodash');
 
   require('ui/routes')
   .addSetupWork(function (Private) {
@@ -30,12 +30,12 @@ define(function (require) {
       link: function ($scope, $el) {
 
         $scope.uiSelect = {
-          onSelect: function(item, model) {
+          onSelect: function (item, model) {
             item.onSelect($scope.dashboardGroups);
           },
           onOpenClose: function (isOpen) {
             if (isOpen) {
-              var activeGroup = _.find($scope.dashboardGroups, (g) => {return g.active === true;})
+              var activeGroup = _.find($scope.dashboardGroups, g => g.active === true);
               activeGroup.selected.onOpenClose(activeGroup);
             }
           }

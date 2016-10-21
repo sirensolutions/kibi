@@ -1767,9 +1767,9 @@
       "resolved": "https://registry.npmjs.org/d3/-/d3-3.5.6.tgz"
     },
     "eeg": {
-      "version": "1.0.26",
-      "from": "eeg@1.0.26",
-      "resolved": "https://registry.npmjs.org/eeg/-/eeg-1.0.26.tgz",
+      "version": "1.0.28",
+      "from": "eeg@1.0.28",
+      "resolved": "https://registry.npmjs.org/eeg/-/eeg-1.0.28.tgz",
       "dependencies": {
         "jquery": {
           "version": "1.11.3",

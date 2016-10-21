@@ -18,11 +18,14 @@ function FakeStatus(status) {
 var fakeServer = {
   config: function () {
     return {
-      get: function (p) {
-        if (p === 'pkg.kibiEnterpriseEnabled') {
-          return false;
-        } else {
-          throw new Error('Not supported config property [' + p + ']');
+      get: function (property) {
+        switch (property) {
+          case 'kibi_core.gremlin_server.ssl.ca':
+            return null;
+          case 'pkg.kibiEnterpriseEnabled':
+            return false;
+          default:
+            throw new Error(`Unsupported config property: ${property}`);
         }
       }
     };

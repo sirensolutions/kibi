@@ -84,9 +84,15 @@ function startServer(self, fulfill, reject) {
           const transportClientUsername = config.get('kibi_core.elasticsearch.transport_client.username');
           const transportClientPassword = config.get('kibi_core.elasticsearch.transport_client.password');
           const elasticAuthPlugin = config.get('kibi_core.elasticsearch.auth_plugin');
-          const transportClientSSLCaKeyStore = path.resolve(config.get('kibi_core.elasticsearch.transport_client.ssl.ca'));
+          let transportClientSSLCaKeyStore = config.get('kibi_core.elasticsearch.transport_client.ssl.ca');
+          if (transportClientSSLCaKeyStore) {
+            transportClientSSLCaKeyStore = path.resolve(transportClientSSLCaKeyStore);
+          }
           const transportClientSSLCaKeyStorePassword = config.get('kibi_core.elasticsearch.transport_client.ssl.ca_password');
-          const transportClientSSLKeyStore = path.resolve(config.get('kibi_core.elasticsearch.transport_client.ssl.key_store'));
+          let transportClientSSLKeyStore = config.get('kibi_core.elasticsearch.transport_client.ssl.key_store');
+          if (transportClientSSLKeyStore) {
+            transportClientSSLKeyStore = path.resolve(transportClientSSLKeyStore);
+          }
           const transportClientSSLKeyStorePassword = config.get('kibi_core.elasticsearch.transport_client.ssl.key_store_password');
           const transportClientSSLHostNameVerification = config.get('kibi_core.elasticsearch.transport_client.ssl.verify_hostname');
 

@@ -128,7 +128,7 @@ define(function (require) {
 
           if (countsQuery && (lastFiredMultiCountsQuery !== countsQuery || forceCountsUpdate)) {
             lastFiredMultiCountsQuery = countsQuery;
-            return $http.post(self.chrome.getBasePath() + '/elasticsearch/_msearch?getCountsOnTabsOnSelect', countsQuery).then((counts) => {
+            return $http.post(self.chrome.getBasePath() + '/elasticsearch/_msearch?getCountsOnTabs', countsQuery).then((counts) => {
               if (counts.data.responses) {
                 for (var i = 0; i < counts.data.responses.length; i++) {
                   var hit = counts.data.responses[i];

@@ -16,32 +16,11 @@ define(function (require) {
     /*
     * Private Methods
     */
-    const getGroupIndexes = function (dashboardsIds) {
-      const groupIndexes = [];
-
-      _.each(dashboardsIds, (dashId) => {
-        const groupIndex = _.findIndex(this.dashboardGroups, (group) => group.selected.id === dashId);
-        if (groupIndex !== -1 && groupIndexes.indexOf(groupIndex) === -1) {
-          groupIndexes.push(groupIndex);
-        }
-      });
-      return groupIndexes;
-    };
-
-    const _fireUpdateAllCounts = function (groupIndexesToUpdate, forceCountsUpdate = false) {
-      const self = this;
-
-      // only the selected dashboard from each group
-      var dashboardIds = [];
-      if (groupIndexesToUpdate && groupIndexesToUpdate.constructor === Array && groupIndexesToUpdate.length > 0) {
-        _.each(groupIndexesToUpdate, (index) => {
-          var dashboard = self.dashboardGroups[index].selected;
-          if (dashboard && dashboardIds.indexOf(dashboard.id) === -1) {
-            dashboardIds.push(dashboard.id);
-          }
-        });
-      } else {
-        _.each(self.dashboardGroups, (g, index) => {
+    const _fireUpdateAllCounts = function (dashboardIds, forceCountsUpdate = false) {
+      if (!dashboardIds) {
+        // only the selected dashboard from each group
+        dashboardIds = [];
+        _.each(this.dashboardGroups, (g, index) => {
           var dashboard = self.dashboardGroups[index].selected;
           if (dashboard && dashboardIds.indexOf(dashboard.id) === -1) {
             dashboardIds.push(dashboard.id);
@@ -50,7 +29,7 @@ define(function (require) {
       }
 
       return dashboardGroupHelper.getDashboardsMetadata(dashboardIds, forceCountsUpdate).then((metadata) => {
-        _.each(self.dashboardGroups, (g) => {
+        _.each(this.dashboardGroups, (g) => {
           _.each(g.dashboards, (d) => {
             var foundDashboardMetadata = _.find(metadata, (m) => {
               return m.dashboardId === d.id;
@@ -200,8 +179,7 @@ define(function (require) {
         },
         (data) => {
           var forceUpdate = data.forceUpdate;
-          var groupIndexes = getGroupIndexes.call(that, data.ids);
-          _fireUpdateAllCounts.call(that, groupIndexes, forceUpdate);
+          _fireUpdateAllCounts.call(that, data.ids, forceUpdate);
         },
         750,
         DelayExecutionHelper.DELAY_STRATEGY.RESET_COUNTER_ON_NEW_EVENT
@@ -219,7 +197,9 @@ define(function (require) {
     KibiNavBarHelper.prototype.updateAllCounts = function (dashboardsIds, reason, forceUpdate = false) {
       if (!dashboardsIds) {
         return savedDashboards.find().then(function (dashboards) {
-          return _(dashboards.hits).filter((d) => !!d.savedSearchId).map((d) => d.id).value();
+          return _(dashboards.hits).filter((d) => {
+            return !!d.savedSearchId;
+          }).map((d) => d.id).value();
         })
         .then((ids) => updateCounts.call(this, ids, reason, forceUpdate))
         .catch(notify.error);

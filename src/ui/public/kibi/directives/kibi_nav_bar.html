@@ -25,11 +25,13 @@
                   <span ng-bind="$select.selected.title"></span>
                   <!-- compare count to undefined to show zero -->
                   <span ng-if="$select.selected.count !== undefined"> ({{$select.selected.count}})</span>
-                  <span ng-if="$select.selected.filterIconMessage">
-                    <i class="fa fa-filter" aria-hidden="true" data-toggle="tooltip"
-                    data-placement="bottom" title="{{ $select.selected.filterIconMessage }}"/>
+                  <span
+                    ng-if="$select.selected.filterIconMessage" aria-hidden="true" data-toggle="tooltip"
+                    data-placement="bottom" title="{{$select.selected.filterIconMessage}}">
+                    <i class="fa fa-filter"/>
                   </span>
-                  <span ng-if="$select.selected.isPruned" aria-hidden="true" data-toggle="tooltip"
+                  <span
+                    ng-if="$select.selected.isPruned" aria-hidden="true" data-toggle="tooltip"
                     data-placement="bottom" title="Results from this filter were pruned"> *</span>
                 </ui-select-match>
                 <ui-select-choices
@@ -38,12 +40,14 @@
                   <span ng-bind="dashboard.title"></span>
                   <span ng-if="dashboard.count !== undefined" class="smallNumber"> ({{dashboard.count}})</span>
                   <span ng-if="dashboard.count === undefined" class="spinner"/>
-                  <span ng-if="dashboard.filterIconMessage">
-                    <i class="fa fa-filter" aria-hidden="true" data-toggle="tooltip"
-                    data-placement="bottom" title="{{ dashboard.selected.filterIconMessage }}"/>
+                  <span
+                    ng-if="dashboard.filterIconMessage" aria-hidden="true" data-toggle="tooltip"
+                    data-placement="bottom" title="{{dashboard.filterIconMessage}}">
+                    <i class="fa fa-filter"/>
                   </span>
-                  <span ng-if="dashboard.isPruned" aria-hidden="true" data-toggle="tooltip"
-                        data-placement="bottom" title="Results from this filter were pruned"> *</span>
+                  <span
+                    ng-if="dashboard.isPruned" aria-hidden="true" data-toggle="tooltip"
+                    data-placement="bottom" title="Results from this filter were pruned"> *</span>
                 </ui-select-choices>
               </ui-select>
             </span>

@@ -1,3 +1,6 @@
+import placeholderSchema from './yaml/placeholder_schema';
+import { match, replace } from './yaml/placeholder';
+
 let _ = require('lodash');
 let fs = require('fs');
 let yaml = require('js-yaml');
@@ -47,7 +50,9 @@ const deprecatedSettings = {
 module.exports = function (path) {
   if (!path) return {};
 
-  let file = yaml.safeLoad(fs.readFileSync(path, 'utf8'));
+  let file = yaml.safeLoad(fs.readFileSync(path, 'utf8'), {
+    schema: placeholderSchema
+  });
 
   function apply(config, val, key) {
     if (_.isPlainObject(val)) {
@@ -62,7 +67,7 @@ module.exports = function (path) {
       });
     }
     else {
-      _.set(config, key, val);
+      _.set(config, key, replace(val));
     }
   }
 

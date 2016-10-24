@@ -1,5 +1,5 @@
 define(function (require) {
-  var isHitPruned = require('ui/kibi/helpers/is_pruned');
+  var isJoinPruned = require('ui/kibi/helpers/is_join_pruned');
 
   return function DashboardGroupHelperFactory(
       $timeout, kbnUrl, kibiState, Private, savedDashboards, savedDashboardGroups, Promise, kbnIndex, $http) {
@@ -139,7 +139,7 @@ define(function (require) {
                   } else {
                     metadata[i].count = 'Error';
                   }
-                  metadata[i].isPruned = isHitPruned(hit);
+                  metadata[i].isPruned = isJoinPruned(hit);
                 }
               }
               return metadata;
@@ -159,7 +159,7 @@ define(function (require) {
         onSelect: function (dashboardGroups) {
           var currentDashboardId = kibiState._getCurrentDashboardId();
           if (currentDashboardId === dashboardDef.id) {
-            // do nothing as we are already at the corret dashboard
+            // do nothing as we are already at the correct dashboard
             return;
           }
           self._getOnClickForDashboardInGroup(dashboardGroups, dashboardDef.id, groupId);

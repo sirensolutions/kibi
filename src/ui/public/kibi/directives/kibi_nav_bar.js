@@ -29,7 +29,7 @@ define(function (require) {
       template: require('ui/kibi/directives/kibi_nav_bar.html'),
       link: function ($scope, $el) {
 
-        $scope.uiSelect = {
+        $scope.dashboardTabSelect = {
           onSelect: function (item, model) {
             item.onSelect($scope.dashboardGroups);
           },

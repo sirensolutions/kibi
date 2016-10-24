@@ -16,8 +16,8 @@
             <span ng-if="group.active && group.dashboards.length > 1">
               <ui-select
                 ng-model="group.selected"
-                on-select="uiSelect.onSelect($item, $model)"
-                uis-open-close="uiSelect.onOpenClose(isOpen)"
+                on-select="dashboardTabSelect.onSelect($item, $model)"
+                uis-open-close="dashboardTabSelect.onOpenClose(isOpen)"
                 search-enabled="false"
                 append-to-body="true"
                 theme="bootstrap">
@@ -32,12 +32,13 @@
                   </span>
                   <span
                     ng-if="$select.selected.isPruned" aria-hidden="true" data-toggle="tooltip"
-                    data-placement="bottom" title="Results from this filter were pruned"> *</span>
+                    data-placement="bottom" title="Count may be lower that the actual value because a join operation was pruned"> *</span>
                 </ui-select-match>
                 <ui-select-choices
                   position='down'
                   repeat="dashboard.title as dashboard in group.dashboards track by dashboard.id">
                   <span ng-bind="dashboard.title"></span>
+                  <!-- compare count to undefined to show zero -->
                   <span ng-if="dashboard.count !== undefined" class="smallNumber"> ({{dashboard.count}})</span>
                   <span ng-if="dashboard.count === undefined" class="spinner"/>
                   <span
@@ -47,13 +48,13 @@
                   </span>
                   <span
                     ng-if="dashboard.isPruned" aria-hidden="true" data-toggle="tooltip"
-                    data-placement="bottom" title="Results from this filter were pruned"> *</span>
+                    data-placement="bottom" title="Count may be lower that the actual value because a join operation was pruned"> *</span>
                 </ui-select-choices>
               </ui-select>
             </span>
 
-            <!-- compare count to undefined to show zero -->
             <span ng-if="!group.active || (group.active && group.dashboards.length == 1)">
+              <!-- compare count to undefined to show zero -->
               <span ng-if="group.selected.count !== undefined">
                 ({{ group.selected.count }})
               </span>
@@ -61,6 +62,8 @@
                 <i class="fa fa-filter" aria-hidden="true" data-toggle="tooltip"
                 data-placement="bottom" title="{{ group.selected.filterIconMessage }}"/>
               </span>
+              <span ng-if="group.selected.isPruned" aria-hidden="true" data-toggle="tooltip"
+                data-placement="bottom" title="Count may be lower that the actual value because a join operation was pruned"> *</span>
             </span>
           </a>
         </li>

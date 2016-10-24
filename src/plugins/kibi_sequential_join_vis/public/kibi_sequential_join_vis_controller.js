@@ -6,7 +6,7 @@ define(function (require) {
   const moment = require('moment');
   const DelayExecutionHelper = require('ui/kibi/helpers/delay_execution_helper');
   const SearchHelper = require('ui/kibi/helpers/search_helper');
-  const isHitPruned = require('ui/kibi/helpers/is_pruned');
+  const isJoinPruned = require('ui/kibi/helpers/is_join_pruned');
 
   require('ui/kibi/directives/kibi_select');
   require('ui/kibi/directives/kibi_array_param');
@@ -82,10 +82,9 @@ define(function (require) {
             }
             results[i].button.targetCount = hit.hits.total;
             results[i].button.warning = '';
-            let isPruned = isHitPruned(hit);
-            if (isPruned) {
+            if (isJoinPruned(hit)) {
               results[i].button.warning = 'Results from this filter are pruned';
-              stats.pruned = isPruned;
+              stats.pruned = true;
             }
             if ($scope.multiSearchData) {
               $scope.multiSearchData.add(stats);

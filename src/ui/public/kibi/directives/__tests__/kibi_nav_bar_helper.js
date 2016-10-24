@@ -55,7 +55,6 @@ describe('Kibi Directives', function () {
         kibiNavBarHelper._setDashboardGroups(dashboardGroups);
 
         const dashboardGroupHelper = Private(require('ui/kibi/helpers/dashboard_group_helper'));
-        // here instead we have to stub the getDashboardsMetadata
         getDashboardsMetadataStub = sinon.stub(dashboardGroupHelper, 'getDashboardsMetadata');
       });
     }

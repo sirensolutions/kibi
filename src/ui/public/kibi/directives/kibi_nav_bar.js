@@ -3,6 +3,9 @@ define(function (require) {
   require('ui/kibi/directives/kibi_nav_bar.less');
   require('ui/kibi/directives/kibi_dashboard_toolbar');
   require('ui/kibi/directives/kibi_stop_click_event');
+  require('angular-sanitize');
+  require('ui-select-shim');
+  const _ = require('lodash');
 
   require('ui/routes')
   .addSetupWork(function (Private) {
@@ -11,7 +14,7 @@ define(function (require) {
   });
 
   require('ui/modules')
-  .get('app/dashboard')
+  .get('app/dashboard', ['ui.select', 'ngSanitize'])
   .directive('kibiNavBar', function ($rootScope, kibiState, config, Private) {
     const urlHelper = Private(require('ui/kibi/helpers/url_helper'));
     const ResizeChecker = Private(require('ui/vislib/lib/resize_checker'));
@@ -25,6 +28,18 @@ define(function (require) {
       },
       template: require('ui/kibi/directives/kibi_nav_bar.html'),
       link: function ($scope, $el) {
+
+        $scope.dashboardTabSelect = {
+          onSelect: function (item, model) {
+            item.onSelect($scope.dashboardGroups);
+          },
+          onOpenClose: function (isOpen) {
+            if (isOpen) {
+              var activeGroup = _.find($scope.dashboardGroups, g => g.active === true);
+              activeGroup.selected.onOpenClose(activeGroup);
+            }
+          }
+        };
 
         kibiNavBarHelper.setChrome($scope.chrome);
         $scope.dashboardGroups = kibiNavBarHelper.getDashboardGroups();

@@ -1,11 +1,21 @@
 define(function (require) {
-  return function DashboardGroupHelperFactory($timeout, kbnUrl, kibiState, Private, savedDashboards, savedDashboardGroups, Promise) {
+  var isJoinPruned = require('ui/kibi/helpers/is_join_pruned');
+
+  return function DashboardGroupHelperFactory(
+      $timeout, kbnUrl, kibiState, Private, savedDashboards, savedDashboardGroups, Promise, kbnIndex, $http) {
     var _ = require('lodash');
     var countHelper = Private(require('ui/kibi/helpers/count_helper/count_helper'));
     var kibiUtils = require('kibiutils');
+    const SearchHelper = require('ui/kibi/helpers/search_helper');
 
     function DashboardGroupHelper() {
+      this.chrome = null;
+      this.searchHelper = new SearchHelper(kbnIndex);
     }
+
+    DashboardGroupHelper.prototype.setChrome = function (c) {
+      this.chrome = c;
+    };
 
     DashboardGroupHelper.prototype.getIdsOfDashboardGroupsTheseDashboardsBelongTo = function (dashboardIds) {
       return savedDashboardGroups.find().then(function (resp) {
@@ -73,6 +83,106 @@ define(function (require) {
       return lastEventTimer;
     };
 
+    DashboardGroupHelper.prototype.constructFilterIconMessage = function (filters, queries) {
+      if (queries || filters) {
+        if (queries.length > 1 && filters.length !== 0) {
+          return 'This dashboard has a query and ' + filters.length + ' filter' + (filters.length > 1 ? 's' : '') + ' set.';
+        } else if (queries.length > 1) {
+          return 'This dashboard has a query set.';
+        } else if (filters.length !== 0) {
+          return 'This dashboard has ' + filters.length + ' filter' + (filters.length > 1 ? 's' : '') + ' set.';
+        }
+      }
+      return null;
+    };
+
+    var lastFiredMultiCountsQuery;
+    DashboardGroupHelper.prototype.getDashboardsMetadata = function (ids, forceCountsUpdate = false) {
+      var self = this;
+      return savedDashboards.find().then((resp) => {
+        var dashboards = _.filter(resp.hits, (dashboard) => {
+          return dashboard.savedSearchId && ids.indexOf(dashboard.id) !== -1;
+        });
+
+        let metadataPromises = _.map(dashboards, (dashboard) => {
+          return kibiState.getState(dashboard.id).then(({ index, filters, queries, time }) => {
+            const query = countHelper.constructCountQuery(filters, queries, time);
+            // here take care about correctly expanding timebased indices
+            return kibiState.timeBasedIndices(index, dashboard.id).then(function (indices) {
+              return {
+                dashboardId: dashboard.id,
+                filters: filters,
+                queries: queries,
+                query: query,
+                indices: indices
+              };
+            });
+          });
+        });
+
+        return Promise.all(metadataPromises).then((metadata) => {
+          // here fire the query to get counts
+          const countsQuery = _.map(metadata, result => {
+            return self.searchHelper.optimize(result.indices, result.query);
+          }).join('');
+
+          if (countsQuery && (lastFiredMultiCountsQuery !== countsQuery || forceCountsUpdate)) {
+            lastFiredMultiCountsQuery = countsQuery;
+            return $http.post(self.chrome.getBasePath() + '/elasticsearch/_msearch?getCountsOnTabs', countsQuery).then((counts) => {
+              if (counts.data.responses) {
+                for (var i = 0; i < counts.data.responses.length; i++) {
+                  var hit = counts.data.responses[i];
+                  if (!_.contains(Object.keys(hit), 'error')) {
+                    metadata[i].count = hit.hits.total;
+                  } else if (_.contains(Object.keys(hit), 'error') && _.contains(hit.error, 'ElasticsearchSecurityException')) {
+                    metadata[i].count = 'Unauthorized';
+                  } else {
+                    metadata[i].count = 'Error';
+                  }
+                  metadata[i].isPruned = isJoinPruned(hit);
+                }
+              }
+              return metadata;
+            });
+          }
+          return metadata;
+        });
+      });
+    };
+
+    DashboardGroupHelper.prototype._getDashboardForGroup = function (groupId, groupTitle, dashboardDef) {
+      var self = this;
+      return {
+        id: dashboardDef.id,
+        title: self.shortenDashboardName(groupTitle, dashboardDef.title),
+        savedSearchId: dashboardDef.savedSearchId,
+        onSelect: function (dashboardGroups) {
+          var currentDashboardId = kibiState._getCurrentDashboardId();
+          if (currentDashboardId === dashboardDef.id) {
+            // do nothing as we are already at the correct dashboard
+            return;
+          }
+          self._getOnClickForDashboardInGroup(dashboardGroups, dashboardDef.id, groupId);
+        },
+        onOpenClose: function (group) {
+          // take all dashboards except the selected one
+          var dashboardIds = _.filter(group.dashboards, d => d.id !== group.selected.id).map(d => d.id);
+          self.getDashboardsMetadata(dashboardIds).then((metadata) => {
+            _.each(group.dashboards, (d) => {
+              var foundDashboardMetadata = _.find(metadata, (m) => {
+                return m.dashboardId === d.id;
+              });
+              if (foundDashboardMetadata) {
+                d.count = foundDashboardMetadata.count;
+                d.isPruned = foundDashboardMetadata.isPruned;
+                d.filterIconMessage = self.constructFilterIconMessage(foundDashboardMetadata.filters, foundDashboardMetadata.queries);
+              }
+            });
+          });
+        }
+      };
+    };
+
     DashboardGroupHelper.prototype._computeGroupsFromSavedDashboardGroups = function (currentDashboardId) {
       var self = this;
 
@@ -111,15 +221,8 @@ define(function (require) {
             }
 
             dashboards = _.map(dashboardsArray, function (d) {
-
-              var dashboard = {
-                id: d.id,
-                title: self.shortenDashboardName(group.title, d.title),
-                onClick: function (dashboardGroups) {
-                  self._getOnClickForDashboardInGroup(dashboardGroups, d.id, group.id);
-                }
-              };
-              if (currentDashboardId && currentDashboardId === d.id) {
+              var dashboard = self._getDashboardForGroup(group.id, group.title, d);
+              if (currentDashboardId && currentDashboardId === dashboard.id) {
                 selected = dashboard;
               }
               return dashboard;
@@ -144,15 +247,12 @@ define(function (require) {
             dashboardGroups1.push({
               id: group.id,
               title: group.title,
-              priority: group.priority,
-              dashboards: dashboards,
-              selected: selected,
               hide: group.hide,
               iconCss: group.iconCss,
               iconUrl: group.iconUrl,
-              onClick: function (dashboardGroups) {
-                this.selected.onClick(dashboardGroups);
-              }
+              priority: group.priority,
+              dashboards: dashboards,
+              selected: selected
             });
 
           }); // end of each
@@ -189,29 +289,12 @@ define(function (require) {
       let highestGroup = _.max(dashboardGroups1, 'priority');
       let highestPriority = highestGroup && highestGroup.priority || 0;
 
-      return kibiState._getDashboardAndSavedSearchMetas(undefined, true).then(function (results) {
-        const dashboardDefs = _.map(results, function ({ savedDash, savedSearchMeta }) {
-          if (savedSearchMeta) {
-            return {
-              id: savedDash.id,
-              title: savedDash.title,
-              indexPatternId: savedSearchMeta.index,
-              savedSearchId: savedDash.savedSearchId
-            };
-          }
-          return {
-            id: savedDash.id,
-            title: savedDash.title,
-            indexPatternId: null,
-            savedSearchId: null
-          };
-        });
-
-        _.each(dashboardDefs, function (dashboardDef) {
+      return savedDashboards.find().then(function (savedDashboards) {
+        _.each(savedDashboards.hits, function (dashboardDef) {
           var isInGroups = false;
           _.each(dashboardsInGroups, function (dashboard) {
             if (dashboard.id === dashboardDef.id) {
-              dashboard.indexPatternId = dashboardDef.indexPatternId;
+              // here add savedSearchId property to all already existing dashboard objects
               dashboard.savedSearchId = dashboardDef.savedSearchId;
               isInGroups = true;
               return false;
@@ -221,21 +304,15 @@ define(function (require) {
           // so now we know that this dashboard is not in any group
           if (isInGroups === false) {
             // not in a group so add it as new group with single dashboard
-            var onlyOneDashboard = {
-              id: dashboardDef.id,
-              title: dashboardDef.title,
-              indexPatternId: dashboardDef.indexPatternId,
-              savedSearchId: dashboardDef.savedSearchId
-            };
+            var groupId = kibiUtils.slugifyId(dashboardDef.title);
+            var groupTitle = dashboardDef.title;
+            var onlyOneDashboard = self._getDashboardForGroup(groupId, groupTitle, dashboardDef);
 
             dashboardGroups1.push({
-              id: kibiUtils.slugifyId(dashboardDef.title),
-              title: dashboardDef.title,
+              id: groupId,
+              title: groupTitle,
               dashboards: [onlyOneDashboard],
               selected: onlyOneDashboard,
-              onClick: function (dashboardGroups) {
-                self._getOnClickForDashboardInGroup(dashboardGroups, dashboardDef.id, null);
-              },
               priority: ++highestPriority
             });
           }
@@ -283,16 +360,18 @@ define(function (require) {
           previousGroup.hide = group.hide;
           previousGroup.iconCss = group.iconCss;
           previousGroup.iconUrl = group.iconUrl;
-          previousGroup.onClick = group.onClick;
           previousGroup.priority = group.priority;
           previousGroup.title = group.title;
 
-          // when copying selected by reference we keep the count and filterIconMessage
+          // when copying selected reference we keep the count, filterIconMessage and isPruned
+          // properties from the previous group
           var filterIconMessage = previousGroup.selected.filterIconMessage;
           var count = previousGroup.selected.count;
+          var isPruned = previousGroup.selected.isPruned;
           previousGroup.selected = group.selected;
           previousGroup.selected.filterIconMessage = filterIconMessage;
           previousGroup.selected.count = count;
+          previousGroup.selected.isPruned = isPruned;
         } else {
           // new group
           dest.push(group);
@@ -306,30 +385,6 @@ define(function (require) {
       }
     };
 
-    DashboardGroupHelper.prototype.getCountQueryForSelectedDashboard = function (groups, groupIndex) {
-      var dashboard = groups[groupIndex].selected;
-
-      if (!dashboard || !dashboard.indexPatternId) {
-        delete groups[groupIndex].count;
-        return Promise.resolve({
-          query: undefined,
-          indexPatternId: undefined,
-          groupIndex: groupIndex
-        });
-      }
-
-      return kibiState.getState(dashboard.id)
-      .then(({ index, filters, queries, time }) => {
-        const query = countHelper.constructCountQuery(filters, queries, time);
-        return {
-          dashboardId: dashboard.id,
-          groupIndex: groupIndex,
-          query: query,
-          indexPatternId: index
-        };
-      });
-    };
-
     /*
      * Computes the dashboard groups array
      *
@@ -337,11 +392,18 @@ define(function (require) {
           {
             title:
             priority:
-            dashboards:
-            selected:
+            dashboards: [
+              {
+                id:
+                title:
+                onSelect:
+                onOpenClose:
+              },
+              ...
+            ]
             iconCss:
             iconUrl:
-            onClick:
+            selected: dashboard
           },
           ...
         ]

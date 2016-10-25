@@ -73,6 +73,9 @@ module.exports = function (kibana) {
     if (config.has('shield.cookieName')) {
       options.credentials = req.state[config.get('shield.cookieName')];
     }
+    if (req.auth && req.auth.credentials && req.auth.credentials.proxyCredentials) {
+      options.credentials = req.auth.credentials.proxyCredentials;
+    }
     queryEngine[method](queryDefs, options)
     .then(function (queries) {
       return reply({

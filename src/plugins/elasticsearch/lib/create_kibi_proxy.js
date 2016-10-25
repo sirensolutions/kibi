@@ -51,8 +51,11 @@ module.exports = function createProxy(server, method, route, config) {
                 dataToPass.savedQueries = inject.save(query);
                 return query;
               }).map((query) => {
-                var shieldCredentials = serverConfig.has('shield.cookieName') ? request.state[serverConfig.get('shield.cookieName')] : null;
-                return dbfilter(server.plugins.kibi_core.getQueryEngine(), query, shieldCredentials);
+                var credentials = serverConfig.has('shield.cookieName') ? request.state[serverConfig.get('shield.cookieName')] : null;
+                if (request.auth && request.auth.credentials && request.auth.credentials.proxyCredentials) {
+                  credentials = request.auth.credentials.proxyCredentials;
+                }
+                return dbfilter(server.plugins.kibi_core.getQueryEngine(), query, credentials);
               }).map((query) => {
                 // here detect if it a request to save datasource
                 if (req.url.indexOf('/elasticsearch/' + serverConfig.get('kibana.index') + '/datasource/') === 0 &&

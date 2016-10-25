@@ -10,18 +10,24 @@ const placeholderRegex = /\$\{(.+?)}/g;
  * @return {String} The value with replaced placeholders.
  */
 export function replace(value) {
-  return value.replace(placeholderRegex, (match, group) => {
-    const envValue = process.env[group];
-    if (envValue) {
-      return envValue;
-    }
-    return '';
-  });
+  if (value && value.replace) {
+    return value.replace(placeholderRegex, (match, group) => {
+      const envValue = process.env[group];
+      if (envValue) {
+        return envValue;
+      }
+      return '';
+    });
+  }
+  return value;
 }
 
 /**
  * @return {boolean} True if the given value contains one or more placeholders.
  */
 export function match(value) {
-  return value.match(placeholderRegex);
+  if (value && value.match) {
+    return value.match(placeholderRegex);
+  }
+  return false;
 }

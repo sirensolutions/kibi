@@ -44,7 +44,9 @@ describe('cli/serve/read_yaml_config', function () {
         ssl: {
           ca: 'ca'
         },
-        app: ''
+        app: '',
+        null: null,
+        num: 3
       });
     });
 

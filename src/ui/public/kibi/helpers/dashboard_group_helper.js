@@ -96,7 +96,28 @@ define(function (require) {
       return null;
     };
 
+    var updateCountOnMetadata = function (metadata, responses) {
+      if (responses && metadata) {
+        if (responses.length === metadata.length) {
+          for (var i = 0; i < responses.length; i++) {
+            var hit = responses[i];
+            if (!_.contains(Object.keys(hit), 'error')) {
+              metadata[i].count = hit.hits.total;
+            } else if (_.contains(Object.keys(hit), 'error') && _.contains(hit.error, 'ElasticsearchSecurityException')) {
+              metadata[i].count = 'Unauthorized';
+            } else {
+              metadata[i].count = 'Error';
+            }
+            metadata[i].isPruned = isJoinPruned(hit);
+          }
+        } else {
+          throw new Error('Metadata size different than responses size');
+        }
+      }
+    };
+
     var lastFiredMultiCountsQuery;
+    var lastMultiCountsQueryResults;
     DashboardGroupHelper.prototype.getDashboardsMetadata = function (ids, forceCountsUpdate = false) {
       var self = this;
       return savedDashboards.find().then((resp) => {
@@ -126,26 +147,19 @@ define(function (require) {
             return self.searchHelper.optimize(result.indices, result.query);
           }).join('');
 
-          if (countsQuery && (lastFiredMultiCountsQuery !== countsQuery || forceCountsUpdate)) {
-            lastFiredMultiCountsQuery = countsQuery;
+          if (!countsQuery) {
+            return metadata;
+          } else if (countsQuery && lastFiredMultiCountsQuery && lastFiredMultiCountsQuery === countsQuery && !forceCountsUpdate) {
+            updateCountOnMetadata(metadata, lastMultiCountsQueryResults);
+            return metadata;
+          } else {
             return $http.post(self.chrome.getBasePath() + '/elasticsearch/_msearch?getCountsOnTabs', countsQuery).then((counts) => {
-              if (counts.data.responses) {
-                for (var i = 0; i < counts.data.responses.length; i++) {
-                  var hit = counts.data.responses[i];
-                  if (!_.contains(Object.keys(hit), 'error')) {
-                    metadata[i].count = hit.hits.total;
-                  } else if (_.contains(Object.keys(hit), 'error') && _.contains(hit.error, 'ElasticsearchSecurityException')) {
-                    metadata[i].count = 'Unauthorized';
-                  } else {
-                    metadata[i].count = 'Error';
-                  }
-                  metadata[i].isPruned = isJoinPruned(hit);
-                }
-              }
+              lastFiredMultiCountsQuery = countsQuery;
+              lastMultiCountsQueryResults = counts.data.responses;
+              updateCountOnMetadata(metadata, lastMultiCountsQueryResults);
               return metadata;
             });
           }
-          return metadata;
         });
       });
     };

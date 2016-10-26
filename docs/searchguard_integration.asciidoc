@@ -1,0 +1,732 @@
+[[shield_integration]]
+
+== Search Guard Integration [Enterprise Edition only]
+
+ifeval::["{enterprise_enabled}" == "false"]
+  NOTE: Documentation for Search Guard Integration is available only in Kibi
+  Enterprise Edition.
+endif::[]
+
+ifeval::["{enterprise_enabled}" == "true"]
+
+This section offers an overview of how to integrate Search Guard with Kibi; for
+further reference and detailed options please consult the
+{searchguard-ref}[Search Guard documentation].
+
+=== SSL Certificates
+
+All the Elasticsearch nodes in a cluster secured by Search Guard are required
+to use SSL to encrypt all network traffic.
+
+In addition, changing the Search Guard configuration requires the use
+of a client SSL certificate to perform administrative actions.
+
+To setup a Search Guard cluster, you will need to generate the following files:
+
+- A **truststore** file, common to all nodes, containing the CA certificate
+  chain.
+- A **keystore** file, for each node, containing the certificate bundle for
+  the node.
+- A **keystore** file, for each administrative user, containing a certificate
+  bundle that identifies the user.
+- A **keystore** file containing a certificate bundle to identify the Kibi
+  transport client.
+- A **keystore** file containing an SSL certificate for the Elasticsearch HTTP
+  REST API.
+
+These files can be either Java KeyStore files or PKCS12 bundles, with the
+exception of the certificate for the Kibi transport client which must be
+a Java KeyStore file.
+
+==== Sample certificates
+
+The Kibi EE demo distribution includes the following sample certificates in the
+_elasticsearch/config_ directory:
+
+- **truststore.jks**: a sample CA certificate chain.
+- **node-localhost-keystore.jks**: a certificate for the bundled Elasticsearch
+  node, used for both transport and REST API encryption.
+
+In addition, the following certificates are included in the
+_kibi/pki/searchguard_ directory:
+
+- **admin-keystore.jks**: a certificate for the Search Guard administrative
+  user.
+- **truststore.jks**: a copy of the CA certificate chain truststore.
+- **kibitransport-keystore.jks**: a certificate for the _kibitransport_ user.
+- **ca.pem**: the certificate chain in the truststore converted to PEM
+  format.
+
+The password for all keystores is `password`.
+
+==== Issuing certificates in an existing PKI infrastructure
+
+If your organization has a PKI infrastructure in place, you can generate
+Java KeyStore files from a PEM bundle by using the _keytool_ command from
+the Java runtime, e.g.:
+
+[source,shell]
+----
+$ keytool  \
+  -importcert \
+  -file ca.pem  \
+  -keystore truststore.jks
+----
+
+The command will store the contents of the PEM bundle _ca.pem_ into a file
+named _truststore.jks_ in the current directory.
+
+The same command can be used to convert certificates signed by your CA for
+nodes, administrative users and the REST API.
+
+Node certificates must include _oid:1.2.3.4.5.5_ as a Subject Alternative Name
+entry to work correctly with Search Guard; if you want to enable hostname
+verification, make sure that at least one Subject Alternative Name is equal to
+the DNS name of the node.
+
+Client certificates for administrative users must contain a unique
+Distinguished Name to identify the user, e.g.:
+
+----
+CN=admin,DC=siren,DC=solutions
+----
+
+Certificates for the REST API can be shared across multiple nodes by setting
+multiple hostnames in the Subject Alternative Name attribute or by using a
+wildcard certificate.
+
+==== Creating a certification authority
+
+The Git repository of the _search-guard-ssl_ plugin provides a set of scripts
+to create a Certification Authority for evaluation purposes; the scripts
+can be run on OS X and Linux systems.
+
+In order to run them, you will need to install the following requirements:
+
+- A Java 8 runtime (either from Oracle or the OpenJDK project)
+- The OpenSSL package
+
+Once the requirements are installed, download the following file:
+
+https://github.com/floragunncom/search-guard-ssl/archive/v{searchguard-ssl-version}.zip
+
+Then, extract the contents of the file and change to the `example-pki-scripts`
+directory:
+
+[source,shell,subs="attributes"]
+----
+$ cd search-guard-ssl-{searchguard-ssl-version}/example-pki-scripts
+----
+
+Create the truststore file for the root CA by running the _gen_root_ca.sh_
+script:
+
+[source,shell]
+----
+$ ./gen_root_ca.sh
+----
+
+The script will ask to specify a password for the CA key and a password for the
+truststore file; if successful, you will see a file named _truststore.jks_ in
+the directory.
+
+For each node in the cluster, create a certificate signed by the root CA by
+running the _gen_node_cert.sh_ script; for example, the following command
+creates a certificate for the _localhost_ node:
+
+[source,shell]
+----
+$ ./gen_node_cert.sh localhost
+----
+
+The script will ask to specify the password for the CA key specified in the
+previous step and a password for the keystore file; if successful, you will see
+a file named _node-localhost-keystore.jks_ in the directory.
+
+This certificate can be used for both transport security and the REST API.
+
+Create a client certificate signed by the root CA for the administrative user
+by running the _gen_client_node_cert.sh_ script; for example, the following
+command creates a client certificate for a user named _admin_:
+
+[source,shell]
+----
+$ ./gen_client_node_cert.sh admin
+----
+
+The script will ask to specify the password for the CA key specified in the
+previous step and a password for the keystore file; if successful, you will see
+a file named _admin-keystore.jks_ in the directory.
+
+Use the same script to create a client certificate for the Kibi transport
+client:
+
+[source,shell]
+----
+$ ./gen_client_node_cert.sh kibitransport
+----
+
+If you need to recreate the sample CA from scratch, execute the _clean.sh_
+script.
+
+=== Search Guard installation
+
+Install the *search-guard-ssl* and *search-guard-2* plugins on every node in
+the Elasticsearch cluster by changing to the node directory and running the
+following commands:
+
+[source,shell,subs="attributes"]
+----
+$ bin/plugin install -b com.floragunn/search-guard-ssl/{searchguard-ssl-version}
+$ bin/plugin install -b com.floragunn/search-guard-2/{searchguard-version}
+----
+
+Then, copy the following files to the _config_ directory of each node:
+
+- The truststore file (e.g. _truststore.jks_).
+- The keystore file containing the node certificate (e.g.
+  _node-localhost-keystore.jks_)
+
+Open the _config/elasticsearch.yml_ file and add the Search Guard options as
+follows:
+
+[source,yaml]
+----
+searchguard.ssl.transport.enabled: true
+searchguard.ssl.transport.truststore_filepath: truststore.jks
+searchguard.ssl.transport.truststore_password: password
+searchguard.ssl.transport.keystore_filepath: node-localhost-keystore.jks
+searchguard.ssl.transport.keystore_password: password
+searchguard.ssl.transport.enforce_hostname_verification: false
+searchguard.ssl.http.enabled: true
+searchguard.ssl.http.keystore_filepath: node-localhost-keystore.jks
+searchguard.ssl.http.keystore_password: password
+searchguard.ssl.http.truststore_filepath: truststore.jks
+searchguard.ssl.http.truststore_password: password
+searchguard.authcz.admin_dn:
+  - CN=admin,OU=client,O=client,L=Test,C=DE
+----
+
+**Node to node transport options:**
+
+- **searchguard.ssl.transport.enabled**: needs to be set to **true** for Search
+  Guard to work.
+- **searchguard.ssl.transport.keystore_filepath**: the filename of the keystore
+  file that contains the node certificate.
+- **searchguard.ssl.transport.keystore_password**: the password of the keystore
+  file that contains the node certificate.
+- **searchguard.ssl.transport.truststore**: the filename of the truststore file
+  that contains the root certificate chain.
+- **searchguard.ssl.transport.truststore_password**: the password of the
+  truststore file that contains the root certificate chain.
+- **searchguard.ssl.transport.enforce_hostname_verification**: set to **true**
+  to enable hostname verification, **false** otherwise.
+
+**REST API options:**
+
+- **searchguard.ssl.http.enabled**: set to **true** to enable SSL on the HTTP
+  interface.
+- **searchguard.ssl.http.keystore_filepath**: the filename of the keystore
+  file that contains the certificate for the HTTP interface.
+- **searchguard.ssl.http.keystore_password**: the password of the keystore
+  file that contains the certificate for the HTTP interface.
+- **searchguard.ssl.http.truststore**: the filename of the truststore file
+  that contains the root certificate chain for the HTTP certificate.
+- **searchguard.ssl.http.truststore_password**: the password of the truststore file
+  that contains the root certificate chain for the HTTP certificate.
+
+**Administrative user options:**
+
+- **searchguard.authcz.admin_dn**: a list of Distinguished Names in SSL client
+  certificates which are authorized to submit administrative requests.
+
+NOTE: Make sure that all the files in the configuration directory and the
+certificate files are readable only by the user running Elasticsearch.
+
+Start Elasticsearch:
+
+[source,shell]
+----
+$ bin/elasticsearch
+----
+
+If either a certificate or a password is incorrect, Elasticsearch will not
+start.
+
+=== Access control configuration
+
+Access control configuration (users, roles and permissions) is stored in an
+Elasticsearch index which can be modified through the _sgadmin.sh_ script; the
+script is available in the _plugins/search-guard-2/tools_ directory in each
+Elasticsearch instance in which Search Guard has been installed.
+
+The script reads the configuration from a local directory containing YAML files
+and uploads it to the index; the request is authenticated through a client SSL
+certificate.
+
+Once the configuration has been uploaded, it will be available to all the nodes
+in the cluster, so it is not necessary to deploy the YAML files on all the
+Elasticsearch nodes.
+
+==== Search Guard configuration
+
+A Search Guard configuration directory contains the following files:
+
+- **sg_config.yml**: contains the general configuration.
+- **sg_action_groups.yml**: contains named groups of permissions.
+- **sg_roles.yml**: contains the definition of roles.
+- **sg_roles_mapping.yml**: contains the mapping between users and roles.
+- **sg_internal_users.yml**: the Search Guard internal users database.
+
+A sample configuration is available in the _config/sgconfig_ directory in the
+Elasticsearch instance included in the demo distribution; the contents of the
+files are explained in the next sections.
+
+**General configuration (sg_config.yml)**
+
+[source,yaml]
+----
+searchguard:
+  dynamic:
+    http:
+      anonymous_auth_enabled: false
+      xff:
+        enabled: false
+    authc:
+      transport_auth_domain:
+        enabled: true
+        order: 2
+        http_authenticator:
+          type: basic
+        authentication_backend:
+          type: internal
+      basic_internal_auth_domain:
+        enabled: true
+        http_authenticator:
+          type: basic
+          challenge: true
+        authentication_backend:
+          type: intern
+----
+
+The _sg_config.yml_ file contains the configuration of the authentication
+mechanisms and backends; the above configuration:
+
+- Disables the anonymous role (_anonymous_auth_enabled: false_)
+- Disables support for external proxies (_xff.enabled: false_)
+- Enables HTTP basic authentication on the internal Search Guard user database.
+
+**Action groups (sg_action_groups.yml)**
+
+[source,yaml]
+----
+ALL:
+  - "indices:*"
+MANAGE:
+  - "indices:monitor/*"
+  - "indices:admin/*"
+CREATE_INDEX:
+  - "indices:admin/create"
+MANAGE_ALIASES:
+  - "indices:admin/aliases*"
+MONITOR:
+  - "indices:monitor/*"
+DATA_ACCESS:
+  - "indices:data/*"
+WRITE:
+  - "indices:data/write*"
+READ:
+  - "indices:data/read*"
+DELETE:
+  - "indices:data/write/delete*"
+CRUD:
+  - READ
+  - WRITE
+SEARCH:
+  - "indices:data/read/search*"
+  - "indices:data/read/msearch*"
+  - SUGGEST
+SUGGEST:
+  - "indices:data/read/suggest*"
+INDEX:
+  - "indices:data/write/index*"
+  - "indices:data/write/update*"
+GET:
+  - "indices:data/read/get*"
+  - "indices:data/read/mget*"
+
+# CLUSTER
+CLUSTER_ALL:
+  - cluster:*
+CLUSTER_MONITOR:
+  - cluster:monitor/*
+
+KIBI_MSEARCH:
+  - indices:data/read/coordinate-msearch*
+  - indices:data/read/msearch*
+
+KIBI_READONLY:
+  - indices:data/read/field_stats*
+  - indices:data/read/get*
+  - indices:data/read/mget*
+  - indices:data/read/search*
+  - indices:data/read/coordinate-search*
+  - indices:admin/mappings/fields/get*
+  - indices:admin/validate/query*
+  - indices:admin/get*
+  - indices:admin/version/get*
+  - KIBI_MSEARCH
+
+KIBI_READWRITE:
+  - indices:admin/exists*
+  - indices:admin/mapping/put*
+  - indices:admin/mappings/fields/get*
+  - indices:admin/refresh*
+  - indices:admin/get*
+  - indices:admin/version/get*
+  - indices:admin/validate/query*
+  - indices:data/write/delete*
+  - indices:data/write/index*
+  - indices:data/write/update*
+  - KIBI_READONLY
+----
+
+This file contains named groups of permissions which can be used in the roles
+configuration file; the above configuration includes Search Guard default
+groups plus three Kibi specific groups:
+
+- **KIBI_READWRITE**: groups all the permissions needed to search and update
+  the main Kibi index (_.kibi_); the group has to be assigned on the main index
+  to all roles that can modify the Kibi configuration.
+- **KIBI_READONLY**: groups all the permissions needed to search any
+  Elasticsearch index from Kibi. The group has to be assigned on all indices
+  that a role has access to.
+- **KIBI_MSEARCH**: groups all the permissions to execute msearch requests; the
+  group has to be assigned on all indices to roles that have access only to a
+  subset of indices.
+
+**Roles (sg_roles.yml)**
+
+[source,yaml]
+----
+# Allows any action on the cluster.
+sg_all_access:
+  cluster:
+    - '*'
+  indices:
+    '*':
+      '*':
+        - '*'
+
+# Allows reading data from all indices.
+sg_readall:
+  indices:
+    '*':
+      '*':
+        - READ
+
+# Permissions for the Kibi transport client.
+kibitransport:
+  cluster:
+      - cluster:monitor/nodes/liveness
+
+# Permissions for the Kibi server process.
+# The permissions on watcher and watcher_alarms are required by the Kaae
+# plugin, and can be removed if the plugin is not used.
+kibiserver:
+  cluster:
+      - cluster:monitor/nodes/info
+      - cluster:monitor/health
+      - cluster:monitor/state
+      - cluster:monitor/nodes/stats
+  indices:
+    '?kibi':
+      '*':
+        - ALL
+    'watcher':
+      '*':
+        - ALL
+    'watcher_alarms':
+      '*':
+        - ALL
+
+# Permissions for a Kibi administrator (read-write access to the .kibi index).
+kibiadmin:
+  indices:
+    '*':
+      '*':
+        - KIBI_READONLY
+    '?kibi':
+      '*':
+        - KIBI_READWRITE
+
+# Permissions for a Kibi user (read only access to the .kibi index).
+kibiuser:
+  indices:
+    '*':
+      '*':
+        - KIBI_READONLY
+
+# Permissions for a Kibi user (read only), with no access to the investor index.
+kibinoinvestor:
+  indices:
+    '?kibi':
+      '*':
+        - KIBI_READONLY
+    '/(article|company|investment)/':
+      '*':
+        - KIBI_READONLY
+    '*':
+      '*':
+        - KIBI_MSEARCH
+----
+
+The file defines the following roles:
+
+- **sg_all_access**: allows every action on the cluster.
+- **sg_readall**: allows to search data on all the indices in the cluster.
+- **kibitransport**: defines the permissions for the Kibi transport client.
+- **kibiserver**: defines the permissions for the Kibi server process.
+- **kibiadmin**: defines the permissions for a Kibi user with read/write
+  access to the .kibi index.
+- **kibiuser**: defines the permissions for a Kibi user with readonly access
+  to all indices.
+- **kibinoinvestor**: defines the permissions for a Kibi user with readonly
+  access to all the indices excluding _investor_.
+
+A permission is defined by the following syntax:
+
+[source,yaml]
+----
+<username>:
+  <indices or cluster>:
+    '<index name or regular expression>':
+      '<type name or regular expression>':
+        - <list of permissions or action group names>
+----
+
+The index name can contain the simple expansion characters _*_ and _?_ to match
+any sequence of character/any single character; for further information about
+defining permissions, please refer to the
+{searchguard-ref}/blob/master/configuration.md[Search Guard configuration
+documentation].
+
+**Role mappings (sg_roles_mapping.yml)**
+
+[source,yaml]
+----
+sg_all_access:
+  users:
+    - admin
+
+kibiserver:
+  users:
+    - kibiserver
+
+kibiadmin:
+  users:
+    - kibiadmin
+
+kibiuser:
+  users:
+    - kibiuser
+
+kibinoinvestor:
+  users:
+    - kibinoinvestor
+
+kibitransport:
+  users:
+    - 'CN=kibitransport,OU=client,O=client,L=Test,C=DE'
+----
+
+The file defines the assignment of roles to users; users authenticating through
+a client certificate are identified by the Distinguished Name in the certificate.
+
+**Users (sg_internal_users.yml)**
+
+[source,yaml]
+----
+# Internal user database
+# The hash value is a bcrypt hash and can be generated with plugin/tools/hash.sh
+admin:
+  hash: $2a$12$zMeFc6Xi.pcgDVHsvtCV9ePNteVwTE5uGxcKdf7XQcKB9.VkD8iOy
+kibiserver:
+  hash: $2a$12$zMeFc6Xi.pcgDVHsvtCV9ePNteVwTE5uGxcKdf7XQcKB9.VkD8iOy
+kibiadmin:
+  hash: $2a$12$zMeFc6Xi.pcgDVHsvtCV9ePNteVwTE5uGxcKdf7XQcKB9.VkD8iOy
+kibiuser:
+  hash: $2a$12$zMeFc6Xi.pcgDVHsvtCV9ePNteVwTE5uGxcKdf7XQcKB9.VkD8iOy
+kibinoinvestor:
+  hash: $2a$12$zMeFc6Xi.pcgDVHsvtCV9ePNteVwTE5uGxcKdf7XQcKB9.VkD8iOy
+CN=kibitransport,OU=client,O=client,L=Test,C=DE:
+  hash: $2a$12$zMeFc6Xi.pcgDVHsvtCV9ePNteVwTE5uGxcKdf7XQcKB9.VkD8iOy
+----
+
+The file defines the credentials for Search Guard internal users; passwords are
+stored as hashes in the _hash_ attribute beneath each username.
+
+The password for all the accounts above is _password_.
+
+To change the password of a user, you will need to generate the corresponding
+hash; this can be done by executing the _plugins/search-guard-2/tools/hash.sh_
+script as follows:
+
+[source,bash]
+----
+$ bash plugins/search-guard-2/tools/hash.sh -p password
+----
+
+The script will output the hash for the password specified after the _-p_
+switch.
+
+===== Uploading the configuration to the cluster
+
+To upload the configuration defined in the previous steps, go to the
+Elasticsearch directory and execute the
+_plugins/search-guard-2/tools/sgadmin.sh_ script as follows:
+
+[source,bash]
+----
+$ bash plugins/search-guard-2/tools/sgadmin.sh \
+  -cd config/sgconfig \
+  -cn kibi-distribution \
+  -ts config/truststore.jks \
+  -tspass password \
+  -ks ../kibi/pki/searchguard/admin-keystore.jks \
+  -kspass password \
+  -h localhost \
+  -p 9320 \
+  -nhnv
+----
+
+Follows an explanation of the options set in the command above:
+
+- **-cd**: the path to the directory containing the Search Guard access control
+  configuration.
+- **-cn**: the name of the Elasticsearch cluster.
+- **-ts**: the path to the truststore file.
+- **-tspass**: the password of the truststore file.
+- **-ks**: the path to the administrative client certificate keystore.
+- **-kspass**: the password of the client certificate keystore file.
+- **-h**: the hostname of a node in the cluster.
+- **-p**: the transport port of the node specified in the **-h** option.
+- **-nhnv**: disables host name verification; remove this option if you installed
+  node certificates with the correct hostname (recommended in production).
+
+
+If the command executes successfully it will print a summary of the actions
+executed, e.g.:
+
+----
+Clustername: elasticsearch
+Clusterstate: YELLOW
+Number of nodes: 1
+Number of data nodes: 1
+searchguard index does not exists, attempt to create it ... done
+Populate config from /elasticsearch/sg_config
+Will update 'config' with sg_config/sg_config.yml
+   SUCC: Configuration for 'config' created or updated
+Will update 'roles' with sg_config/sg_roles.yml
+   SUCC: Configuration for 'roles' created or updated
+Will update 'rolesmapping' with sg_config/sg_roles_mapping.yml
+   SUCC: Configuration for 'rolesmapping' created or updated
+Will update 'internalusers' with sg_config/sg_internal_users.yml
+   SUCC: Configuration for 'internalusers' created or updated
+Will update 'actiongroups' with sg_config/sg_action_groups.yml
+   SUCC: Configuration for 'actiongroups' created or updated
+Done with success
+----
+
+You can then verify that SSL and authentication are enabled by making an
+authenticated request with curl, e.g.:
+
+[source,shell]
+----
+$ curl --cacert ../kibi/pki/searchguard/ca.pem -u admin:password https://localhost:9220
+----
+
+=== Kibi configuration
+
+Edit _config/kibi.yml_ and specify the credentials of the **kibiserver**
+user, e.g.:
+
+[source,yaml]
+----
+elasticsearch.username: "kibiserver"
+elasticsearch.password: "password"
+----
+
+If HTTPS is enabled for the Elasticsearch REST API, make sure that the
+_elasticsearch.url_ setting contains a URL starting with _https_, e.g.:
+
+[source,yaml]
+----
+elasticsearch.url: "https://localhost:9220"
+----
+
+If the certificate is not signed by a public authority, you will also need to
+set the `elasticsearch.ssl.ca` to the path of the CA chain bundle in PEM format,
+e.g.:
+
+[source,yaml]
+----
+elasticsearch.ssl.ca: "pki/searchguard/ca.pem"
+----
+
+If you need to convert the _truststore.jks_ file to PEM format, you can use the
+keytool command from the Java Runtime and OpenSSL as follows:
+
+[source,bash]
+----
+$ keytool -importkeystore \
+-srckeystore config/truststore.jks \
+-deststoretype pkcs12 \
+-destkeystore ca.p12
+
+$ openssl pkcs12 -in ca.p12 -out ca.pem
+----
+
+To enable certificate verification, set _elasticsearch.ssl.verify_ to true, e.g.:
+
+[source,yaml]
+----
+elasticsearch.ssl.verify: true
+----
+
+Set the **kibi_core.elasticsearch.auth_plugin** option to **searchguard**:
+
+----
+kibi_core:
+  elasticsearch:
+    auth_plugin: "searchguard"
+----
+
+Then, specify the the following configuration values for the Kibi transport
+client in the **kibi_core.elasticsearch.transport_client.ssl** section:
+
+- **ca**: the path to the Search Guard truststore file.
+- **key_store**: the path to the kibitransport user certificate keystore.
+- **key_store_password**: the password of the kibitransport user certificate
+  keystore.
+- **verify_hostname**: set to false to disable SSL hostname verification.
+
+E.g.:
+
+[source,yaml]
+----
+kibi_core:
+  elasticsearch:
+    auth_plugin: "searchguard"
+    transport_client:
+      ssl:
+        ca: "pki/searchguard/truststore.jks"
+        key_store: "pki/searchguard/kibitransport-keystore.jks"
+        key_store_password: "password"
+        verify_hostname: true
+----
+
+Restart Kibi after changing the configuration file; if the configuration is
+correct, you should see an authentication dialog when browsing to Kibi.
+
+endif::[]

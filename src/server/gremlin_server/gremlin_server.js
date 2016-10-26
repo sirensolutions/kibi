@@ -6,6 +6,7 @@ const http = require('http');
 const path = require('path');
 const _ = require('lodash');
 const os = require('os');
+const url = require('url');
 
 function GremlinServerHandler(server) {
   this.gremlinServer = null;
@@ -57,7 +58,6 @@ function startServer(self, fulfill, reject) {
         }
 
         const esClusterName = response.cluster_name;
-        self.url = config.get('kibi_core.gremlin_server.url');
 
         if (config.get('kibi_core.gremlin_server.ssl.ca')) {
           self.ca = fs.readFileSync(config.get('kibi_core.gremlin_server.ssl.ca'));
@@ -83,21 +83,33 @@ function startServer(self, fulfill, reject) {
           const [ host, port, ...rest ] = esTransportAddress.split(':');
           const transportClientUsername = config.get('kibi_core.elasticsearch.transport_client.username');
           const transportClientPassword = config.get('kibi_core.elasticsearch.transport_client.password');
-          const transportClient = config.get('kibi_core.elasticsearch.transport_client.password');
           const elasticAuthPlugin = config.get('kibi_core.elasticsearch.auth_plugin');
-          const transportClientSSLCaKeyStore = config.get('kibi_core.elasticsearch.transport_client.ssl.ca');
+          let transportClientSSLCaKeyStore = config.get('kibi_core.elasticsearch.transport_client.ssl.ca');
+          if (transportClientSSLCaKeyStore) {
+            transportClientSSLCaKeyStore = path.resolve(transportClientSSLCaKeyStore);
+          }
           const transportClientSSLCaKeyStorePassword = config.get('kibi_core.elasticsearch.transport_client.ssl.ca_password');
-          const transportClientSSLKeyStore = config.get('kibi_core.elasticsearch.transport_client.ssl.key_store');
+          let transportClientSSLKeyStore = config.get('kibi_core.elasticsearch.transport_client.ssl.key_store');
+          if (transportClientSSLKeyStore) {
+            transportClientSSLKeyStore = path.resolve(transportClientSSLKeyStore);
+          }
           const transportClientSSLKeyStorePassword = config.get('kibi_core.elasticsearch.transport_client.ssl.key_store_password');
           const transportClientSSLHostNameVerification = config.get('kibi_core.elasticsearch.transport_client.ssl.verify_hostname');
 
-          const args = [
+          self.url = config.get('kibi_core.gremlin_server.url');
+          const serverURL = url.parse(self.url);
+
+          let args = [
             '-jar', gremlinServerPath,
             '--elasticNodeHost=' + host,
             '--elasticNodePort=' + port,
             '--elasticClusterName=' + esClusterName,
-            '--server.port=' + self.url.split(':')[2]
+            '--server.port=' + serverURL.port
           ];
+          if (serverURL.hostname !== '0.0.0.0') {
+            args.push('--server.address=' + serverURL.hostname);
+          }
+
           if (gremlinServerRemoteDebug) {
             args.unshift(gremlinServerRemoteDebug);
           }

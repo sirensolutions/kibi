@@ -73,6 +73,9 @@ module.exports = function (kibana) {
     if (config.has('shield.cookieName')) {
       options.credentials = req.state[config.get('shield.cookieName')];
     }
+    if (req.auth && req.auth.credentials && req.auth.credentials.proxyCredentials) {
+      options.credentials = req.auth.credentials.proxyCredentials;
+    }
     queryEngine[method](queryDefs, options)
     .then(function (queries) {
       return reply({
@@ -122,7 +125,7 @@ module.exports = function (kibana) {
           log_conf_path: Joi.string().allow('').default(''),
           debug_remote: Joi.string().allow('').default(''),
           path: Joi.string().allow('').default(''),
-          url: Joi.string().default('http://127.0.0.1:8080'),
+          url: Joi.string().uri({ scheme: ['http', 'https'] }).default('http://127.0.0.1:8080'),
           ssl: Joi.object({
             key_store: Joi.string().default(''),
             key_store_password: Joi.string().default(''),

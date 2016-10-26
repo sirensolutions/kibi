@@ -55,7 +55,7 @@ define(function (require) {
         }).join('');
         const duration = moment();
 
-        // ?getCountsOnButton has no meanning it is just usefull to filter when inspecting requests
+        // ?getCountsOnButton has no meaning it is just useful to filter when inspecting requests
         return $http.post(chrome.getBasePath() + '/elasticsearch/_msearch?getCountsOnButton', query)
         .then((response) => {
           if ($scope.multiSearchData) {
@@ -74,7 +74,11 @@ define(function (require) {
             };
 
             if (hit.error) {
-              notify.error(JSON.stringify(hit.error, null, ' '));
+              const error = JSON.stringify(hit.error, null, ' ');
+              if (error.match(/ElasticsearchSecurityException/)) {
+                results[i].button.warning = 'Access to an index referred by this button is forbidden.';
+              }
+              notify.error(error);
               if ($scope.multiSearchData) {
                 $scope.multiSearchData.add(stats);
               }

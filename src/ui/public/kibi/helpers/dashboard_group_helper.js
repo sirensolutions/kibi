@@ -104,7 +104,7 @@ define(function (require) {
             if (!_.contains(Object.keys(hit), 'error')) {
               metadata[i].count = hit.hits.total;
             } else if (_.contains(Object.keys(hit), 'error') && _.contains(hit.error, 'ElasticsearchSecurityException')) {
-              metadata[i].count = 'Unauthorized';
+              metadata[i].count = 'Forbidden';
             } else {
               metadata[i].count = 'Error';
             }

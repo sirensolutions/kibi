@@ -72,11 +72,7 @@ define(function (require) {
         };
 
         $scope.onTabContainerResize = function () {
-          if (tabContainer[0].offsetWidth < tabContainer[0].scrollWidth) {
-            $el.find('.tab-scroller').addClass('visible');
-          } else {
-            $el.find('.tab-scroller').removeClass('visible');
-          }
+          $scope.tabScrollerVisible = tabContainer[0].offsetWidth < tabContainer[0].scrollWidth;
           updateTabScroller();
         };
 

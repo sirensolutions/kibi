@@ -80,9 +80,6 @@ define(function (require) {
                 kibiState.disableRelation(relation);
               }
               kibiState.save();
-              // there is no need to redraw the panel
-              // so set ignoreNextConfigurationChangedEvent to true
-              $scope.ignoreNextConfigurationChangedEvent = true;
             } else {
               notify.warning(`Unable to find relation between dashboards ${d.data.dashboards[0]} and ${d.data.dashboards[0]}`);
             }
@@ -114,24 +111,17 @@ define(function (require) {
           }
         };
 
-        var off1 = $rootScope.$on('init:config', function () {
+        var initConfigOff = $rootScope.$on('init:config', function () {
           _checkFilterJoinPlugin();
           _initPanel();
         });
 
-        // recreate it after user change configuration
-        var off2 = $rootScope.$on('change:config.kibi:relations', function () {
-          if ($scope.ignoreNextConfigurationChangedEvent === true) {
-            $scope.ignoreNextConfigurationChangedEvent = false;
-          } else {
-            _checkFilterJoinPlugin();
+        $scope.show = false;
+        var relationalFilterPanelOpenedOff = $rootScope.$on('relationalFilterPanelOpened', function (event, relationalFilterPanelOpened) {
+          $scope.show = relationalFilterPanelOpened;
+          if (relationalFilterPanelOpened) {
             _initPanel();
           }
-        });
-
-        $scope.show = false;
-        var off3 = $rootScope.$on('relationalFilterPanelOpened', function (event, relationalFilterPanelOpened) {
-          $scope.show = relationalFilterPanelOpened;
         });
 
         const updateRelationalPanelOnSave = function (diff) {
@@ -144,9 +134,8 @@ define(function (require) {
         $scope.$listen(kibiState, 'save_with_changes', updateRelationalPanelOnSave.bind(this));
 
         $scope.$on('$destroy', function () {
-          off1();
-          off2();
-          off3();
+          initConfigOff();
+          relationalFilterPanelOpenedOff();
           relationsHelper.destroy();
         });
       } // end of link function

@@ -213,7 +213,9 @@ module.exports = function (kibana) {
               const { username, password } = req.state[config.get('shield.cookieName')];
               params.credentials = { username, password };
             }
-
+            if (req.auth && req.auth.credentials && req.auth.credentials.proxyCredentials) {
+              params.credentials = req.auth.credentials.proxyCredentials;
+            }
             return queryEngine.gremlin(params, req.payload.params.options);
           })
           .then(reply)

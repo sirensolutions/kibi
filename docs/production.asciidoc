@@ -8,20 +8,20 @@ large number of heavy users, you might need to load balance across multiple
 instances that are all connected to the same Elasticsearch cluster.
 
 While Kibi isn't terribly resource intensive, we still recommend running Kibi
-separate from  your Elasticsearch data or master nodes.
+separate from your Elasticsearch data or master nodes.
 
 Make sure to set the configuration file as readable only to the user running
 the Kibi process as it contains encryption keys to protect configuration
 settings stored in Elasticsearch; if you are connecting Kibi to external
-datasources, we also recommend to user credentials with no write privileges as
+datasources, we also recommend to use credentials with no write privileges as
 they are not required by the system.
 
 [float]
 [[access-control]]
 === Access control
-Kibi is compatible with Elastic Shield and Search Guard to enable index
-level access control; the Kibi Enterprise Edition provides extended support
-for both products through configurable error handling.
+Kibi is compatible with Elastic Shield and Search Guard to enable index level
+access control; Kibi EE provides extended support for both products through
+configurable error handling.
 
 It is also possible to restrict access to Kibi and the Elasticsearch API by
 putting them behind an authenticated SSL reverse proxy, however configuring the

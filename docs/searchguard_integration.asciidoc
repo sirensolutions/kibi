@@ -18,7 +18,7 @@ further reference and detailed options please consult the
 All the Elasticsearch nodes in a cluster secured by Search Guard are required
 to use SSL to encrypt all network traffic.
 
-In addition, changing the SearchGuard configuration requires the use
+In addition, changing the Search Guard configuration requires the use
 of a client SSL certificate to perform administrative actions.
 
 To setup a Search Guard cluster, you will need to generate the following files:
@@ -139,9 +139,9 @@ creates a certificate for the _localhost_ node:
 $ ./gen_node_cert.sh localhost
 ----
 
-The script will ask specify the password for the CA key specified in the
-previous step and a password for the keystore file; if successful, you will
-see a file named _node-localhost-keystore.jks_ in the directory.
+The script will ask to specify the password for the CA key specified in the
+previous step and a password for the keystore file; if successful, you will see
+a file named _node-localhost-keystore.jks_ in the directory.
 
 This certificate can be used for both transport security and the REST API.
 
@@ -154,9 +154,9 @@ command creates a client certificate for a user named _admin_:
 $ ./gen_client_node_cert.sh admin
 ----
 
-The script will ask specify the password for the CA key specified in the
-previous step and a password for the keystore file; if successful, you will
-see a file named _admin-keystore.jks_ in the directory.
+The script will ask to specify the password for the CA key specified in the
+previous step and a password for the keystore file; if successful, you will see
+a file named _admin-keystore.jks_ in the directory.
 
 Use the same script to create a client certificate for the Kibi transport
 client:
@@ -250,7 +250,8 @@ Start Elasticsearch:
 $ bin/elasticsearch
 ----
 
-If either a certificate or password is incorrect, Elasticsearch will not start.
+If either a certificate or a password is incorrect, Elasticsearch will not
+start.
 
 === Access control configuration
 
@@ -587,7 +588,8 @@ _plugins/search-guard-2/tools/sgadmin.sh_ script as follows:
 
 [source,bash]
 ----
-$ bash plugins/search-guard-2/tools/sgadmin.sh -cd config/sgconfig \
+$ bash plugins/search-guard-2/tools/sgadmin.sh \
+  -cd config/sgconfig \
   -cn kibi-distribution \
   -ts config/truststore.jks \
   -tspass password \
@@ -663,7 +665,7 @@ _elasticsearch.url_ setting contains a URL starting with _https_, e.g.:
 elasticsearch.url: "https://localhost:9220"
 ----
 
-If the certificated is not signed by a public authority, you will also need to
+If the certificate is not signed by a public authority, you will also need to
 set the `elasticsearch.ssl.ca` to the path of the CA chain bundle in PEM format,
 e.g.:
 

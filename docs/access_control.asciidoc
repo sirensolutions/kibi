@@ -38,13 +38,13 @@ server.ssl.key: "pki/server.key"
 server.ssl.cert: "pki/server.crt"
 ----
 
-On Windows systems, make sure to use \ (backwards slash) as the path separator.
+On Windows systems, make sure to use \ (backslash) as the path separator.
 
 ==== Gremlin server
 
-To enable SSL support on the Gremlin API interface (used by the graph browser)
-set the following parameters in the `kibi_core.gremlin_server` section of the
-`config/kibi.yml` file:
+To enable SSL support on the Gremlin API interface (used by the
+<<graph_browser,graph browser>>), set the following parameters in the
+`kibi_core.gremlin_server` section of the `config/kibi.yml` file:
 
 - **url**: replace `http` with `https`.
 - **ssl.key_store**: set to the path to the Gremlin API interface keystore.
@@ -68,7 +68,7 @@ kibi_core:
       ca: "pki/cacert.pem"
 ----
 
-On Windows systems, make sure to use \ (backwards slash) as the path separator.
+On Windows systems, make sure to use \ (backslash) as the path separator.
 
 After restarting Kibi, click on **Settings**, then click on **Datasources**,
 and update the URL of the Kibi Gremlin Server datasource to start with _https_

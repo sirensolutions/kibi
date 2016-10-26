@@ -96,11 +96,11 @@ define(function (require) {
       return null;
     };
 
-    var updateCountOnMetadata = function (metadata, results) {
-      if (results.data.responses) {
-        if (results.data.responses.length === metadata.length) {
-          for (var i = 0; i < results.data.responses.length; i++) {
-            var hit = results.data.responses[i];
+    var updateCountOnMetadata = function (metadata, responses) {
+      if (responses && metadata) {
+        if (responses.length === metadata.length) {
+          for (var i = 0; i < responses.length; i++) {
+            var hit = responses[i];
             if (!_.contains(Object.keys(hit), 'error')) {
               metadata[i].count = hit.hits.total;
             } else if (_.contains(Object.keys(hit), 'error') && _.contains(hit.error, 'ElasticsearchSecurityException')) {
@@ -155,7 +155,7 @@ define(function (require) {
           } else {
             return $http.post(self.chrome.getBasePath() + '/elasticsearch/_msearch?getCountsOnTabs', countsQuery).then((counts) => {
               lastFiredMultiCountsQuery = countsQuery;
-              lastMultiCountsQueryResults = counts;
+              lastMultiCountsQueryResults = counts.data.responses;
               updateCountOnMetadata(metadata, lastMultiCountsQueryResults);
               return metadata;
             });

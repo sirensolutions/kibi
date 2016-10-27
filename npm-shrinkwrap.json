@@ -1767,9 +1767,9 @@
       "resolved": "https://registry.npmjs.org/d3/-/d3-3.5.6.tgz"
     },
     "eeg": {
-      "version": "1.0.26",
-      "from": "eeg@1.0.26",
-      "resolved": "https://registry.npmjs.org/eeg/-/eeg-1.0.26.tgz",
+      "version": "1.0.28",
+      "from": "eeg@1.0.28",
+      "resolved": "https://registry.npmjs.org/eeg/-/eeg-1.0.28.tgz",
       "dependencies": {
         "jquery": {
           "version": "1.11.3",
@@ -4115,6 +4115,11 @@
           "resolved": "https://registry.npmjs.org/inherits/-/inherits-2.0.1.tgz"
         }
       }
+    },
+    "ui-select": {
+      "version": "0.19.4",
+      "from": "ui-select@0.19.4",
+      "resolved": "https://registry.npmjs.org/ui-select/-/ui-select-0.19.4.tgz"
     },
     "url-loader": {
       "version": "0.5.6",

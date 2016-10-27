@@ -63,18 +63,14 @@ TinkerPop3Query.prototype.fetchResults = function (options, onlyIds, idVariableN
       }
     }
 
-    return Promise.all([self.queryHelper.fetchDocuments('config'),
-    self.queryHelper.fetchDocuments('index-pattern')]).then(function (results) {
-      let configHits = results[0];
-      let indexPatternHits = results[1];
+    return Promise.all([
+      self.queryHelper.fetchDocuments('config'),
+      self.queryHelper.fetchDocuments('index-pattern')
+    ])
+    .then(function ([ configHits, indexPatternHits ]) {
       var kibiRelations = null;
       var serverVersion = self.server.config().get('pkg').kibi_version;
-      var configDocs = [];
-      if (configHits.hits.total > 0) {
-        configDocs = _.filter(configHits.hits.hits, function (doc) {
-          return doc._id === serverVersion;
-        });
-      }
+      var configDocs = configHits.hits.total && _.filter(configHits.hits.hits, '_id', serverVersion) || [];
 
       if (configDocs.length === 0) {
         return Promise.reject(new Error('No config documents found'));

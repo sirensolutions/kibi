@@ -1,135 +1,36 @@
 [[shield_integration]]
 
-== Shield Integration [Enterprise Edition only]
+== Shield integration [Enterprise Edition only]
 
 ifeval::["{enterprise_enabled}" == "false"]
-  NOTE: Documentation for Shield Integration is available only in Kibi Enterprise Edition.
+  NOTE: Documentation for Shield integration is available only in Kibi Enterprise Edition.
 endif::[]
 
 ifeval::["{enterprise_enabled}" == "true"]
 
-=== Behaviours and warning display messages
+=== Installation
 
-Since the first version of _Kibi Enterprise plugin_, Shield is fully integrated
-and supported, with all its functionality and features. _Kibi Enterprise plugin_
-is also the only solution available to get the best possible integration between
-Kibi and Shield, ensuring better customer experience through a dedicated
-management of errors, specific for relationships between indices.
-_Kibi Enterprise plugin_ lets you view the permission errors in a more humanly
-understandable way and with the affordable option to disable each message
-through the configuration of a specific parameter present in the advanced settings.
-During navigation and in the presence of special restrictions on data visualization
-inside indexes, you can meet the following errors:
+For detailed instructions on Shield installation and configuration options,
+please refer to the {shield-ref}[Shield product documentation]; it is recommended
+to enable SSL on the Elasticsearch HTTP interface.
 
-* _"Kibi Relational Filter: Could not load filter Relational visualization: one
-or more join relations refers to unauthorized data"_: You can see this message when
-all relations available for a saved search are related to data which you do not
-have permission to view.
-* _"One or more visualizations Refers to unauthorized data"_: This message is visible
-when inside the dashboard there are one or more views that require access to
-unauthorized data.
-* _"Enhanced search results: Refers to unauthorized data"_: This message is visible
-when using a widget "Enhanced search results" which refers to unauthorized data.
-* _"Kibi Relational Filter: there are relations with unauthorized data"_: This message
-is visible when there are the relationships between unauthorized data.
-* _"One or more saved search Refers to unauthorized data"_: This message is visible
-when you have the saved search that refers to unauthorized data.
+=== Roles configuration
 
-All these error messages appear for five seconds as yellow toaster at the top of
-the screen. You can permanently hide these messages changing the
-*kibi:shieldAuthorizationWarning* variable: move under the tab _Advanced_, in
-_Settings_, and set to false the *kibi:shieldAuthorizationWarning* variable to hide
-the error messages (default to _true_, so all authorization messages are shown).
-Even if you set *kibi:shieldAuthorizationWarning* to _false_, all permission errors
-are reported as warnings in the console.
+Once Shield has been installed and enabled, you will need to create the
+following roles and map them to users:
 
-._Two warning messages example_
-image::images/authorization-warning-messages.png["Two warning messages example",align="center"]
+- A **kibitransport** role, which defines the permissions for the Kibi
+  transport client.
+- A **kibiserver** role, which defines the permissions for the Kibi process.
+- A **kibiadmin** role, which defines a user that has permissions to alter the
+  Kibi configuration.
+- A **kibiuser** role, which defines a user that as permission to use Kibi
+  but not alter its configuration.
 
-All authorization errors are displayed as _"warning" messages_ in Kibi. There are
-many different cases for all possible authorization configurations but, essentially,
-Kibi with Shield reacts at only two possibilities: can or cannot see the index.
-If we have a restriction permission on the index, we can see nothing of data inside
-it so, for example, if we have a dashboard related to a saved search on an unauthorized
-index, we should see only empty visualization (with all warning messages, we can
-also see that query results counter in _Dashboard tab_ show the message *Unauthorized*).
-Otherwise, if we have only some restricted documents or fields, we should see all
-others data without any problem but, when we have a visualization that uses
-unauthorized fields or documents, we can see only data that we can access (if the
-visualizations is based only on unauthorized data, we should see an error message
-inside the widget).
-
-._Visualizations that use unauthorized data_
-image::images/authorization-visualization-error.png["Visualization that use unauthorized data",align="left"]
-
-._Visualizations that refer to an unauthorized index_
-image::images/authorization-visualization-empty.png["Visualization that refer to an unauthorized index",align="left"]
-
-=== Installation on Microsoft Windows
-You'll need to have *Java JDK* installed on your computer (you can check your installation: usually, Java is under _C:\Program Files\Java\jdk1.8.0_92\bin_ but it might differ on your version of Windows).
-
-After you completed your installation (download Java JDK from Oracle websites), go to _Start > Computer > System Properties > Advanced System Properties > Environmental Variables_ under _Advanced_ find the *"Path" variable* and paste this
-----
-C:\Program Files\Java\jdk1.8.0_92\bin
-----
-after the value that is already written, separating the two with *;* (_semicolon_)
-
-You also need to configure *OpenSSL*:
-
-. Install the OpenSSL from these binaries: http://slproweb.com/products/Win32OpenSSL.html
-+
-(for example, choose _Win64 OpenSSL v1.0.2g_ for a _64 bit OS_)
-
-. Once installed, create the folder:
-+
-----
-C:\Demo
-----
-
-. Start a command-line prompt (_cmd.exe_) and go to the demo folder typing:
-+
-----
-cd C:\Demo
-----
-
-. Before starting *OpenSSL*, set 2 environment variables:
-+
-----
-set RANDFILE=c:\Demo\.rnd && ^
-set OPENSSL_CONF=C:\OpenSSL-Win64\bin\openssl.cfg
-----
-
-. Now you can start *OpenSSL*, typing:
-+
-----
-C:\OpenSSL-Win64\bin\openssl.exe
-----
-
-==== Configuring Shield
-. Create _server.{key,crt}_:
-+
-----
-genrsa -out server.key 1024
-req -new -x509 -days 366 -key server.key -out server.crt
-----
-. Then go to _distribution/elasticsearch_ and install plugin for Elasticsearch:
-+
-----
-bin\plugin install license && ^
-bin\plugin install shield
-----
-. To enable field and doc restriction for version 2.2.0 add this flag to
-_distribution/elasticsearch/config/elasticsearch.yml_ (it was fixed in 2.2.1):
-+
-----
-shield.dls_fls.enabled: true
-----
-+
-- Add these to _elasticsearch/config/shield/roles.yml_:
-+
+[source,yaml]
 ----
 # Defines the required permissions for transport clients
-transport_client:
+kibitransport:
   cluster:
       - cluster:monitor/nodes/liveness
       #uncomment the following for sniffing
@@ -138,26 +39,8 @@ transport_client:
     '*':
       privileges: indices:data/read/get, indices:data/read/mget, indices:data/read/search
 
-# The required permissions for kibana 4 users.
-# The required permissions for kibana 4 users.
-kibana4:
-  cluster:
-      - cluster:monitor/nodes/info
-      - cluster:monitor/health
-  indices:
-    'article':
-      privileges: indices:data/read/get, indices:admin/mappings/fields/get, indices:admin/validate/query, indices:data/read/search, indices:data/read/msearch, indices:data/read/field_stats, indices:admin/get, indices:data/read/coordinate-search, indices:data/read/coordinate-msearch
-    'company':
-      privileges: indices:data/read/get, indices:admin/mappings/fields/get, indices:admin/validate/query, indices:data/read/search, indices:data/read/msearch, indices:data/read/field_stats, indices:admin/get, indices:data/read/coordinate-search, indices:data/read/coordinate-msearch
-    'investment':
-      privileges: indices:data/read/get, indices:admin/mappings/fields/get, indices:admin/validate/query, indices:data/read/search, indices:data/read/msearch, indices:data/read/field_stats, indices:admin/get, indices:data/read/coordinate-search, indices:data/read/coordinate-msearch
-    'investor':
-      privileges: indices:data/read/get, indices:admin/mappings/fields/get, indices:admin/validate/query, indices:data/read/search, indices:data/read/msearch, indices:data/read/field_stats, indices:admin/get, indices:data/read/coordinate-search, indices:data/read/coordinate-msearch
-    '.kibi':
-      privileges: indices:data/read/coordinate-search, indices:admin/exists, indices:admin/mapping/put, indices:admin/mappings/fields/get, indices:admin/refresh, indices:admin/validate/query, indices:data/read/get, indices:data/read/mget, indices:data/read/search, indices:data/write/delete, indices:data/write/index, indices:data/write/update
-
-# The required permissions for the kibana 4 server
-kibana4_server:
+# The required permissions for the Kibi server
+kibiserver:
   cluster:
       - cluster:monitor/nodes/info
       - cluster:monitor/health
@@ -169,23 +52,43 @@ kibana4_server:
     '.kibi':
       privileges: indices:admin/create, indices:admin/exists, indices:admin/mapping/put, indices:admin/mappings/fields/get, indices:admin/refresh, indices:admin/validate/query, indices:data/read/get, indices:data/read/mget, indices:data/read/search, indices:data/write/delete, indices:data/write/index, indices:data/write/update
 
-# Role for grant access only to index "investment"
+# The required permissions for Kibi users
+kibiuser:
+  cluster:
+      - cluster:monitor/nodes/info
+      - cluster:monitor/health
+  indices:
+    '.kibi':
+      privileges: indices:data/read/coordinate-search, indices:admin/exists, indices:admin/mapping/put, indices:admin/mappings/fields/get, indices:admin/refresh, indices:admin/validate/query, indices:data/read/get, indices:data/read/mget, indices:data/read/search, indices:data/write/delete, indices:data/write/index, indices:data/write/update
+    # The permissions below are applicable only to the data included in the Kibi demo distribution
+    'article':
+      privileges: indices:data/read/get, indices:admin/mappings/fields/get, indices:admin/validate/query, indices:data/read/search, indices:data/read/msearch, indices:data/read/field_stats, indices:admin/get, indices:data/read/coordinate-search, indices:data/read/coordinate-msearch
+    'company':
+      privileges: indices:data/read/get, indices:admin/mappings/fields/get, indices:admin/validate/query, indices:data/read/search, indices:data/read/msearch, indices:data/read/field_stats, indices:admin/get, indices:data/read/coordinate-search, indices:data/read/coordinate-msearch
+    'investment':
+      privileges: indices:data/read/get, indices:admin/mappings/fields/get, indices:admin/validate/query, indices:data/read/search, indices:data/read/msearch, indices:data/read/field_stats, indices:admin/get, indices:data/read/coordinate-search, indices:data/read/coordinate-msearch
+    'investor':
+      privileges: indices:data/read/get, indices:admin/mappings/fields/get, indices:admin/validate/query, indices:data/read/search, indices:data/read/msearch, indices:data/read/field_stats, indices:admin/get, indices:data/read/coordinate-search, indices:data/read/coordinate-msearch
+
+# A role that grants only access to the investment index
 restrictedindex:
   indices:
     'investment':
-      privileges: all
+      privileges: indices:data/read/get, indices:admin/mappings/fields/get, indices:admin/validate/query, indices:data/read/search, indices:data/read/msearch, indices:data/read/field_stats, indices:admin/get, indices:data/read/coordinate-search, indices:data/read/coordinate-msearch
     '.kibi':
       privileges: indices:data/read/coordinate-search, indices:admin/exists, indices:admin/mapping/put, indices:admin/mappings/fields/get, indices:admin/refresh, indices:admin/validate/query, indices:data/read/get, indices:data/read/mget, indices:data/read/search, indices:data/write/delete, indices:data/write/index, indices:data/write/update
 
-# Role for restrict access to some fields of index "investment" (user can't see data referred to funded_date)
+# Role to prevent access to the funded_date field in the investment index.
 restrictedfieldsinvestment:
   cluster:
       - cluster:monitor/nodes/info
       - cluster:monitor/health
       - cluster:admin/plugin/siren/license/get
   indices:
+    '.kibi':
+      privileges: indices:data/read/coordinate-search, indices:admin/exists, indices:admin/mapping/put, indices:admin/mappings/fields/get, indices:admin/refresh, indices:admin/validate/query, indices:data/read/get, indices:data/read/mget, indices:data/read/search, indices:data/write/delete, indices:data/write/index, indices:data/write/update
     'investment':
-      privileges: all
+      privileges: indices:data/read/get, indices:admin/mappings/fields/get, indices:admin/validate/query, indices:data/read/search, indices:data/read/msearch, indices:data/read/field_stats, indices:admin/get, indices:data/read/coordinate-search, indices:data/read/coordinate-msearch
       fields:
         - hassourcedescription
         - localname
@@ -202,273 +105,84 @@ restrictedfieldsinvestment:
         - _source
         - _score
     'article':
-      privileges: all
+      privileges: indices:data/read/get, indices:admin/mappings/fields/get, indices:admin/validate/query, indices:data/read/search, indices:data/read/msearch, indices:data/read/field_stats, indices:admin/get, indices:data/read/coordinate-search, indices:data/read/coordinate-msearch
     'company':
-      privileges: all
+      privileges: indices:data/read/get, indices:admin/mappings/fields/get, indices:admin/validate/query, indices:data/read/search, indices:data/read/msearch, indices:data/read/field_stats, indices:admin/get, indices:data/read/coordinate-search, indices:data/read/coordinate-msearch
     'investor':
-      privileges: all
-    '.kibi':
-      privileges: indices:data/read/coordinate-search, indices:admin/exists, indices:admin/mapping/put, indices:admin/mappings/fields/get, indices:admin/refresh, indices:admin/validate/query, indices:data/read/get, indices:data/read/mget, indices:data/read/search, indices:data/write/delete, indices:data/write/index, indices:data/write/update
+      privileges: indices:data/read/get, indices:admin/mappings/fields/get, indices:admin/validate/query, indices:data/read/search, indices:data/read/msearch, indices:data/read/field_stats, indices:admin/get, indices:data/read/coordinate-search, indices:data/read/coordinate-msearch
 ----
 
-. In Elasticsearch root folder execute (the first two users are used by Kibi):
-+
-----
-bin\shield\esusers useradd kibana4-server -r kibana4_server -p password && ^
-bin\shield\esusers useradd transport_client -r transport_client -p password && ^
-bin\shield\esusers useradd usernames -r kibana4 -p password && ^
-bin\shield\esusers useradd usernames-index -r restrictedindex -p password && ^
-bin\shield\esusers useradd usernames-fields -r restrictedfieldsinvestment -p password
-----
+=== Integrating Shield with Kibi
 
-. Go to _distribution/kibi_, download *Kibana Shield plugin* (http://download.elastic.co/kibana/shield/shield-2.2.0.tar.gz) into _Demo folder_:
-+
+Edit _config/kibi.yml_ and specify the credentials of the **kibiserver**
+user, e.g.:
+
+[source,yaml]
 ----
-bin\kibi plugin --install shield --url file://C:\Demo\shield-2.2.0.tar.gz
-----
-. Edit _config/kibi.yml_:
-+
-----
-The server.key and server.crt files were generated above.
-elasticsearch.username: "kibana4-server"
+elasticsearch.username: "kibiserver"
 elasticsearch.password: "password"
+----
+
+If HTTPS is enabled on the Elasticsearch HTTP interface, make sure that the
+_elasticsearch.url_ setting is configured to use HTTPS, e.g.
+
+[source,yaml]
+----
+elasticsearch.url: "https://localhost:9200"
+----
+
+If you are using a certificate for the Elasticsearch HTTP interface that is not
+signed by a public authority, you will also need to set the
+`elasticsearch.ssl.ca` to the path of the CA certificate chain, e.g.:
+
+[source,yaml]
+----
+elasticsearch.ssl.ca: "pki/cacert.pem"
+----
+
+Specify the credentials of the **kibitransport** user in the
+**kibi_core.elasticsearch.kibitransport** section:
+
+----
+kibi_core:
+  elasticsearch:
+    transport_client:
+      username: kibitransport
+      password: password
+----
+
+Then, set the **kibi_core.elasticsearch.auth_plugin** option to **shield**:
+
+----
+kibi_core:
+  elasticsearch:
+    auth_plugin: "shield"
+----
+
+Restart Kibi after changing the configuration file; if the configuration is
+correct, you should see an authentication dialog when browsing to Kibi.
+
+==== Configurating the Kibana Shield plugin
+
+Kibi is compatible with the Kibana Shield plugin from Elastic; the plugin can
+be installed by changing to the Kibi directory and executing the following
+command:
+
+[source,shell,subs="attributes"]
+----
+bin/kibi plugin --install kibana/shield/{kibana-shield-version}
+----
+
+Once installed, edit _config/kibi.yml_ and specify an encryption key and a
+timeout for user sessions (in milliseconds), e.g.:
+
+[source,yaml]
+----
 shield.encryptionKey: "something_secret"
 shield.sessionTimeout: 86400000
-server.ssl.key: C:\Demo\server.key
-server.ssl.cert: C:\Demo\server.crt
-----
-. Edit _kibi.yml_ to enable only Gremlin server:
-+
-----
-kibi_core:
-  load_jdbc: false
-  datasource_encryption_algorithm: 'AES-GCM'
-  datasource_encryption_key: 'iSxvZRYisyUW33FreTBSyJJ34KpEquWznUPDvn+ka14='
-  datasource_cache_size: 501
-  default_dashboard_id: Articles
-  elasticsearch:
-    transport_client:
-      username: transport_client
-      password: password
-  gremlin_server:
-    url: https://127.0.0.1:8061
-    path: ./gremlin_server/gremlin-es2-server-0.1.0.jar
-    # uncomment this for gremlin behind ssl
-    #ssl:
-    # key_store: 'C:\Demo\ca\gremlin.jks'
-    # key_store_password: 'password'
-    # ca: 'C:\Demo\ca\certs\cacert.pem'
 ----
 
-* Otherwise, if you want to use Gremlin with SSL connection: (kibi-distribution must
-be at the same directory level of kibi) *
-+
-----
-kibi_core:
-  load_jdbc: true
-  datasource_encryption_algorithm: 'AES-GCM'
-  datasource_encryption_key: 'iSxvZRYisyUW33FreTBSyJJ34KpEquWznUPDvn+ka14='
-  datasource_cache_size: 501
-  default_dashboard_id: Articles
-  elasticsearch:
-    transport_client:
-      username: transport_client
-      password: password
-  gremlin_server:
-    url: https://127.0.0.1:8061
-    path: ..\gremlin_server\gremlin-es2-server-0.1.0.jar
-    # uncomment this for gremlin behind ssl
-    ssl:
-     key_store: '..\..\kibi-distribution\kibi-certificate\gremlin.jks'
-     key_store_password: 'password'
-     ca: '..\..\kibi-distribution\kibi-certificate\cacert.pem'
-----
-* If you want to use your own certificate, you only need to modify all SSL variable (key_store and ca) *
-
-=== Installation on UNIX
-==== Configuring Shield
-Install *Shield* and *license* plugin for Elasticsearch:
-https://www.elastic.co/guide/en/shield/current/getting_started.html
-----
-bin/plugin install license
-bin/plugin install shield
-----
-* Follow https://www.elastic.co/guide/en/shield/current/kibana.html to install the Shield plugin for Kibi
-- SSL in points (4 is not required for development) and (5) are not the same
-- Kibana does not support SSL with a passphrase
-
-Create _server.{key,crt}_ using http://blog.justin.kelly.org.au/how-to-create-a-self-sign-ssl-cert-with-no-pa/
-----
-openssl genrsa -out server.key 1024
-openssl req -new -key server.key -out server.csr
-openssl x509 -req -days 366 -in server.csr -signkey server.key -out server.crt
-----
-
-*Elasticsearch roles*
-
-Edit _config/shield/roles.yml_. I added some authorization for various actions performed in Kibi (listing plugins, getting stats, ...);
-----
-# Defines the required permissions for transport clients
-transport_client:
-  cluster:
-      - cluster:monitor/nodes/liveness
-      #uncomment the following for sniffing
-      #- cluster:monitor/state
-  indices:
-    '*':
-      privileges: indices:data/read/get, indices:data/read/mget, indices:data/read/search
-
-# The required permissions for kibana 4 users.
-kibana4:
-  cluster:
-      - cluster:monitor/nodes/info
-      - cluster:monitor/health
-  indices:
-    'article':
-      privileges: indices:data/read/get, indices:admin/mappings/fields/get, indices:admin/validate/query, indices:data/read/search, indices:data/read/msearch, indices:data/read/field_stats, indices:admin/get, indices:data/read/coordinate-search, indices:data/read/coordinate-msearch
-    'company':
-      privileges: indices:data/read/get, indices:admin/mappings/fields/get, indices:admin/validate/query, indices:data/read/search, indices:data/read/msearch, indices:data/read/field_stats, indices:admin/get, indices:data/read/coordinate-search, indices:data/read/coordinate-msearch
-    'investment':
-      privileges: indices:data/read/get, indices:admin/mappings/fields/get, indices:admin/validate/query, indices:data/read/search, indices:data/read/msearch, indices:data/read/field_stats, indices:admin/get, indices:data/read/coordinate-search, indices:data/read/coordinate-msearch
-    'investor':
-      privileges: indices:data/read/get, indices:admin/mappings/fields/get, indices:admin/validate/query, indices:data/read/search, indices:data/read/msearch, indices:data/read/field_stats, indices:admin/get, indices:data/read/coordinate-search, indices:data/read/coordinate-msearch
-    '.kibi':
-      privileges: indices:data/read/coordinate-search, indices:admin/exists, indices:admin/mapping/put, indices:admin/mappings/fields/get, indices:admin/refresh, indices:admin/validate/query, indices:data/read/get, indices:data/read/mget, indices:data/read/search, indices:data/write/delete, indices:data/write/index, indices:data/write/update
-
-# The required permissions for the kibana 4 server
-kibana4_server:
-  cluster:
-      - cluster:monitor/nodes/info
-      - cluster:monitor/health
-      - cluster:monitor/state
-      - cluster:monitor/nodes/stats
-  indices:
-    '*':
-      privileges: indices:monitor/stats
-    '.kibi':
-      privileges: indices:admin/create, indices:admin/exists, indices:admin/mapping/put, indices:admin/mappings/fields/get, indices:admin/refresh, indices:admin/validate/query, indices:data/read/get, indices:data/read/mget, indices:data/read/search, indices:data/write/delete, indices:data/write/index, indices:data/write/update
-
-# Role for grant access only to index "investment"
-restrictedindex:
-  indices:
-    'investment':
-      privileges: all
-    '.kibi':
-      privileges: indices:data/read/coordinate-search, indices:admin/exists, indices:admin/mapping/put, indices:admin/mappings/fields/get, indices:admin/refresh, indices:admin/validate/query, indices:data/read/get, indices:data/read/mget, indices:data/read/search, indices:data/write/delete, indices:data/write/index, indices:data/write/update
-
-# Role for restrict access to some fields of index "investment" (user can't see data referred to funded_date)
-restrictedfieldsinvestment:
-  cluster:
-      - cluster:monitor/nodes/info
-      - cluster:monitor/health
-      - cluster:admin/plugin/siren/license/get
-  indices:
-    'investment':
-      privileges: all
-      fields:
-        - hassourcedescription
-        - localname
-        - investorid
-        - hassourceurl
-        - companyid
-        - id
-        - label
-        - raised_amount
-        - round_code
-        - raised_currency_code
-        - funded_date
-        - funded_year
-        - _source
-        - _score
-    'article':
-      privileges: all
-    'company':
-      privileges: all
-    'investor':
-      privileges: all
-    '.kibi':
-      privileges: indices:data/read/coordinate-search, indices:admin/exists, indices:admin/mapping/put, indices:admin/mappings/fields/get, indices:admin/refresh, indices:admin/validate/query, indices:data/read/get, indices:data/read/mget, indices:data/read/search, indices:data/write/delete, indices:data/write/index, indices:data/write/update
-----
-
-*In Elasticsearch root folder execute (the first two users are used by Kibi):*
-
-Add my own user with _kibana4 role_ and _kibana4-server user_ with _kibana4-server role_:
-----
-./bin/shield/esusers useradd kibana4-server -r kibana4_server -p password
-./bin/shield/esusers useradd transport_client -r transport_client -p password
-
-./bin/shield/esusers useradd usernames -r kibana4 -p password
-./bin/shield/esusers useradd usernames-index -r restrictedindex -p password
-./bin/shield/esusers useradd usernames-fields -r restrictedfieldsinvestment -p password
-----
-
-To enable field and doc restriction for version 2.2.0 add this flag to _elasticsearch.yml_ (it was fixed in 2.2.1):
-----
-shield.dls_fls.enabled: true
-----
-
-*Install Shield for Kibana !!! It has to be version 2.2.0 at the moment (May 2016)*
-----
-wget http://download.elastic.co/kibana/shield/shield-2.2.0.tar.gz
-./bin/kibi plugin --install shield --url file://$PWD/shield-2.2.0.tar.gz
-----
-
-*Modify kibi.yml*
-
-Edit _config/kibi.yml_:
-----
-elasticsearch.username: "kibana4-server"
-elasticsearch.password: "password"
-shield.encryptionKey: "something_secret"
-shield.sessionTimeout: 86400000
-server.ssl.key: server.key
-server.ssl.cert: server.crt
-----
-The _server.key_ and _server.crt_ files were generated above.
-
-Then in the *kibi core* we need:
-----
-kibi_core:
-  load_jdbc: true
-  datasource_encryption_algorithm: 'AES-GCM'
-  datasource_encryption_key: 'iSxvZRYisyUW33FreTBSyJJ34KpEquWznUPDvn+ka14='
-  datasource_cache_size: 501
-  default_dashboard_id: Articles
-  elasticsearch:
-    transport_client:
-      username: transport_client
-      password: password
-  gremlin_server:
-    url: https://127.0.0.1:8061
-    path: ../gremlin_server/gremlin-es2-server-0.1.0.jar
-    # uncomment this for gremlin behind ssl
-    #ssl:
-    # key_store: '/opt/kibi/ca/gremlin.jks'
-    # key_store_password: 'password'
-    # ca: '/opt/kibi/certs/cacert.pem'
-----
-* Otherwise, if you want to use Gremlin with SSL connection: (kibi-distribution must
-be at the same directory level of kibi) *
-----
-kibi_core:
-  load_jdbc: true
-  datasource_encryption_algorithm: 'AES-GCM'
-  datasource_encryption_key: 'iSxvZRYisyUW33FreTBSyJJ34KpEquWznUPDvn+ka14='
-  datasource_cache_size: 501
-  default_dashboard_id: Articles
-  elasticsearch:
-    transport_client:
-      username: transport_client
-      password: password
-  gremlin_server:
-    url: https://127.0.0.1:8061
-    path: ../gremlin_server/gremlin-es2-server-0.1.0.jar
-    # uncomment this for gremlin behind ssl
-    ssl:
-     key_store: '../../kibi-distribution/kibi-certificate/gremlin.jks'
-     key_store_password: 'password'
-     ca: '../../kibi-distribution/kibi-certificate/cacert.pem'
-----
-* If you want to use your own certificate, you only need to modify all SSL variable (key_store and ca) *
+After restarting Kibi, you should see the Kibana Shield plugin login page
+instead of the browser native authentication dialog.
 
 endif::[]

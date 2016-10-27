@@ -73,6 +73,9 @@ module.exports = function (kibana) {
     if (config.has('shield.cookieName')) {
       options.credentials = req.state[config.get('shield.cookieName')];
     }
+    if (req.auth && req.auth.credentials && req.auth.credentials.proxyCredentials) {
+      options.credentials = req.auth.credentials.proxyCredentials;
+    }
     queryEngine[method](queryDefs, options)
     .then(function (queries) {
       return reply({
@@ -105,16 +108,24 @@ module.exports = function (kibana) {
 
         enterprise_enabled: Joi.boolean().default(false),
         elasticsearch: Joi.object({
+          auth_plugin: Joi.string().allow('').default(''),
           transport_client: Joi.object({
-            username: Joi.string().default(''),
-            password: Joi.string().default('')
+            username: Joi.string().allow('').default(''),
+            password: Joi.string().allow('').default(''),
+            ssl: Joi.object({
+              ca: Joi.string().allow('').default(''),
+              ca_password: Joi.string().allow('').default(''),
+              key_store: Joi.string().allow('').default(''),
+              key_store_password: Joi.string().allow('').default(''),
+              verify_hostname: Joi.boolean().default(true)
+            })
           })
         }),
         gremlin_server: Joi.object({
           log_conf_path: Joi.string().allow('').default(''),
           debug_remote: Joi.string().allow('').default(''),
           path: Joi.string().allow('').default(''),
-          url: Joi.string().default('http://127.0.0.1:8080'),
+          url: Joi.string().uri({ scheme: ['http', 'https'] }).default('http://127.0.0.1:8080'),
           ssl: Joi.object({
             key_store: Joi.string().default(''),
             key_store_password: Joi.string().default(''),
@@ -202,7 +213,9 @@ module.exports = function (kibana) {
               const { username, password } = req.state[config.get('shield.cookieName')];
               params.credentials = { username, password };
             }
-
+            if (req.auth && req.auth.credentials && req.auth.credentials.proxyCredentials) {
+              params.credentials = req.auth.credentials.proxyCredentials;
+            }
             return queryEngine.gremlin(params, req.payload.params.options);
           })
           .then(reply)

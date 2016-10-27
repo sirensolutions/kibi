@@ -21,6 +21,10 @@ var JdbcQuery;
 function QueryEngine(server) {
   this.server = server;
   this.config = server.config();
+  const sslCA = this.config.get('kibi_core.gremlin_server.ssl.ca');
+  if (sslCA) {
+    this.sslCA = fs.readFileSync(sslCA);
+  }
   this.queries = [];
   this.initialized = false;
   this.log = logger(server, 'query_engine');
@@ -163,10 +167,11 @@ QueryEngine.prototype.gremlin = function (datasourceParams, options) {
     uri: datasourceParams.url,
     timeout: parsedTimeout
   };
-  var ca = this.config.get('kibi_core.gremlin_server.ssl.ca');
-  if (ca) {
-    gremlinOptions.ca = fs.readFileSync(ca);
+
+  if (this.sslCA) {
+    gremlinOptions.ca = this.sslCA;
   }
+
   _.assign(gremlinOptions, options);
   if (gremlinOptions.data) {
     gremlinOptions.data.credentials = datasourceParams.credentials;
@@ -179,13 +184,16 @@ QueryEngine.prototype.gremlin = function (datasourceParams, options) {
 };
 
 QueryEngine.prototype.gremlinPing = function (baseGraphAPIUrl) {
-  const gremlinOptions = {
+  const options = {
     method: 'GET',
     uri: baseGraphAPIUrl + '/ping',
     timeout: 5000
   };
 
-  return rp(gremlinOptions);
+  if (this.sslCA) {
+    options.ca = this.sslCA;
+  }
+  return rp(options);
 };
 
 /**

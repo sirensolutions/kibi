@@ -6,6 +6,7 @@ define(function (require) {
   const moment = require('moment');
   const DelayExecutionHelper = require('ui/kibi/helpers/delay_execution_helper');
   const SearchHelper = require('ui/kibi/helpers/search_helper');
+  const isJoinPruned = require('ui/kibi/helpers/is_join_pruned');
 
   require('ui/kibi/directives/kibi_select');
   require('ui/kibi/directives/kibi_array_param');
@@ -54,7 +55,7 @@ define(function (require) {
         }).join('');
         const duration = moment();
 
-        // ?getCountsOnButton has no meanning it is just usefull to filter when inspecting requests
+        // ?getCountsOnButton has no meaning it is just useful to filter when inspecting requests
         return $http.post(chrome.getBasePath() + '/elasticsearch/_msearch?getCountsOnButton', query)
         .then((response) => {
           if ($scope.multiSearchData) {
@@ -73,7 +74,11 @@ define(function (require) {
             };
 
             if (hit.error) {
-              notify.error(JSON.stringify(hit.error, null, ' '));
+              const error = JSON.stringify(hit.error, null, ' ');
+              if (error.match(/ElasticsearchSecurityException/)) {
+                results[i].button.warning = 'Access to an index referred by this button is forbidden.';
+              }
+              notify.error(error);
               if ($scope.multiSearchData) {
                 $scope.multiSearchData.add(stats);
               }
@@ -81,19 +86,9 @@ define(function (require) {
             }
             results[i].button.targetCount = hit.hits.total;
             results[i].button.warning = '';
-            if (hit.coordinate_search) {
-              let isPruned = false;
-              const actions = hit.coordinate_search.actions;
-              for (let j = 0; j < actions.length; j++) {
-                if (actions[j].is_pruned) {
-                  isPruned = true;
-                  break;
-                }
-              }
-              if (isPruned) {
-                results[i].button.warning = 'Results from this filter are pruned';
-              }
-              stats.pruned = isPruned;
+            if (isJoinPruned(hit)) {
+              results[i].button.warning = 'Results from this filter are pruned';
+              stats.pruned = true;
             }
             if ($scope.multiSearchData) {
               $scope.multiSearchData.add(stats);

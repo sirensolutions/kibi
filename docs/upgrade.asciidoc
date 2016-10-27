@@ -9,8 +9,26 @@ An existing Kibi installation can be upgraded as follows:
   {siren-join-website}#compatibility[SIREn Join] plugin.
 - download and extract the new Kibi version.
 - copy the previous configuration file to the `config` directory of the new Kibi version.
+- check for breaking changes to the configuration described below.
 - install the compatible versions of third party Kibi/Kibana plugins that you might need in addition to the bundled ones.
 - execute the <<kibi-upgrade-command, upgrade command>>.
+
+=== Breaking changes
+
+==== 4.5.4
+
+===== Enterprise Edition
+
+If you are using Elastic Shield to secure the cluster that Kibi connects to,
+ensure that the `kibi_core.elasticsearch.auth_plugin` parameter is set to
+**shield**, e.g.:
+
+[source,yaml]
+----
+kibi_core:
+  elasticsearch:
+    auth_plugin: "shield"
+----
 
 [float]
 === Backing up the .kibi index.

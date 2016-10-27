@@ -106,6 +106,7 @@ var fakeSavedSearches = [
 
 var dashboardGroupHelper;
 var appState;
+var $httpBackend;
 
 function init({ currentDashboardId = 'Articles', indexPatterns, savedDashboards, savedDashboardGroups, savedSearches }) {
   return function () {
@@ -139,7 +140,13 @@ function init({ currentDashboardId = 'Articles', indexPatterns, savedDashboards,
 
     ngMock.inject(function ($injector, kibiState, Private) {
       dashboardGroupHelper = Private(require('ui/kibi/helpers/dashboard_group_helper'));
+      dashboardGroupHelper.setChrome({
+        getBasePath: function () {
+          return '';
+        }
+      });
       sinon.stub(kibiState, '_getCurrentDashboardId').returns(currentDashboardId);
+      $httpBackend = $injector.get('$httpBackend');
     });
   };
 }
@@ -308,13 +315,15 @@ describe('Kibi Components', function () {
       });
     });
 
-    describe('getCountQueryForSelectedDashboard', function () {
-
+    describe('getDashboardsMetadata', function () {
       beforeEach(init({
         indexPatterns: [
           {
             id: 'time-testing-4',
             timeFieldName: 'date',
+            hasTimeField: function () {
+              return false;
+            },
             fields: [
               {
                 name: 'date'
@@ -326,69 +335,88 @@ describe('Kibi Components', function () {
         savedSearches: fakeSavedSearches
       }));
 
-      it('selected dashboard does NOT exist', function (done) {
-        var groups = [
-          {
-            title: 'Title A0',
-            dashboards: [{id: 1}]
-          }
-        ];
-
-        var expected = {
-          query: undefined,
-          indexPatternId: undefined,
-          groupIndex: 0
-        };
-
-        dashboardGroupHelper.getCountQueryForSelectedDashboard(groups, 0).then(function (countQueryDef) {
-          expect(countQueryDef).to.eql(expected);
+      it('dashboard does NOT exist', function (done) {
+        dashboardGroupHelper.getDashboardsMetadata(['dash-do-not-exist']).then(function (meta) {
+          expect(meta).to.eql([]);
           done();
         }).catch(done);
       });
 
-      it('selected dashboard exists but it does NOT have indexPatternId', function (done) {
-        var groups = [
-          {
-            title: 'Title A0',
-            dashboards: [{id: 1}, {id: 2}],
-            selected: {id: 1}
-          }
-        ];
-
-        var expected = {
-          query: undefined,
-          indexPatternId: undefined,
-          groupIndex: 0
-        };
-
-        dashboardGroupHelper.getCountQueryForSelectedDashboard(groups, 0).then(function (countQueryDef) {
-          expect(countQueryDef).to.eql(expected);
+      it('dashboard exist but has no savedSearch', function (done) {
+        dashboardGroupHelper.getDashboardsMetadata(['Articles']).then(function (meta) {
+          expect(meta).to.eql([]);
           done();
         }).catch(done);
       });
 
-      it('selected dashboard does exist and has an indexPatternId', function (done) {
+      it('dashboard exist and it has savedSearch but index does not exists', function (done) {
+        dashboardGroupHelper.getDashboardsMetadata(['search-ste']).then(function (meta) {
+          done(new Error('Should fail'));
+        }).catch(function (err) {
+          expect(err.message).equal('Could not find object with id: search-ste');
+          done();
+        });
+      });
 
-        // this dashboard has to exist (the fakeDashboard should have it)
-        var selectedDashboard = {id: 'time-testing-4', indexPatternId: 'time-testing-4'};
-        var groups = [
-          {
-            title: 'Group 1',
-            dashboards: [selectedDashboard, {id: 2}],
-            selected: selectedDashboard
-          }
-        ];
+      it('dashboard exist and it has savedSearch and index exists', function (done) {
 
-        dashboardGroupHelper.getCountQueryForSelectedDashboard(groups, 0).then(function (countQueryDef) {
-          expect(countQueryDef).to.have.property('query');
-          expect(countQueryDef.indexPatternId).to.equal('time-testing-4');
-          expect(countQueryDef.groupIndex).to.equal(0);
+        $httpBackend.whenPOST('/elasticsearch/_msearch?getCountsOnTabs').respond(200, {
+          responses: [
+            {
+              hits: {
+                total: 42
+              }
+            }
+          ]
+        });
+
+        dashboardGroupHelper.getDashboardsMetadata(['time-testing-4']).then(function (metas) {
+          expect(metas.length).to.equal(1);
+          expect(metas[0].count).to.equal(42);
+          expect(metas[0].isPruned).to.equal(false);
+          expect(metas[0].dashboardId).to.equal('time-testing-4');
+          expect(metas[0].indices).to.eql(['time-testing-4']);
           done();
         }).catch(done);
+
+        setTimeout(function () {
+          $httpBackend.flush();
+        }, 500);
+      });
+
+      it('dashboard exist and it has savedSearch and index exists the results were pruned', function (done) {
+
+        $httpBackend.whenPOST('/elasticsearch/_msearch?getCountsOnTabs').respond(200, {
+          responses: [
+            {
+              coordinate_search: {
+                actions: [
+                  {
+                    is_pruned: true
+                  }
+                ]
+              },
+              hits: {
+                total: 42
+              }
+            }
+          ]
+        });
+
+        dashboardGroupHelper.getDashboardsMetadata(['time-testing-4']).then(function (metas) {
+          expect(metas.length).to.equal(1);
+          expect(metas[0].count).to.equal(42);
+          expect(metas[0].isPruned).to.equal(true);
+          expect(metas[0].dashboardId).to.equal('time-testing-4');
+          expect(metas[0].indices).to.eql(['time-testing-4']);
+          done();
+        }).catch(done);
+
+        setTimeout(function () {
+          $httpBackend.flush();
+        }, 500);
       });
 
     });
-
   });
-
 });

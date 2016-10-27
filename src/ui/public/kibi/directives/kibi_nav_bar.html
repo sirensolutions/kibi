@@ -9,22 +9,61 @@
             ng-repeat="group in dashboardGroups | orderBy: 'priority'"
             data-test-subj={{group.title}}
             ng-show="!group.hide">
-          <a ng-click="group.onClick(dashboardGroups)">
+          <a ng-click="group.selected.onSelect(dashboardGroups)">
             <i ng-if="group.iconCss" class="icon {{group.iconCss}}"></i>
             <img class="icon" ng-if="group.iconUrl" ng-src="{{group.iconUrl}}"/>
             {{group.title}}
             <span ng-if="group.active && group.dashboards.length > 1">
-              <select
+              <ui-select
                 ng-model="group.selected"
-                ng-change="group.selected.onClick(dashboardGroups)"
-                ng-options="dashboard.title for dashboard in group.dashboards track by dashboard.id"
-                kibi-stop-click-event>
-              </select>
+                on-select="dashboardTabSelect.onSelect($item, $model)"
+                uis-open-close="dashboardTabSelect.onOpenClose(isOpen)"
+                search-enabled="false"
+                append-to-body="true"
+                theme="bootstrap">
+                <ui-select-match>
+                  <span ng-bind="$select.selected.title"></span>
+                  <!-- compare count to undefined to show zero -->
+                  <span ng-if="$select.selected.count !== undefined"> ({{$select.selected.count}})</span>
+                  <span
+                    ng-if="$select.selected.filterIconMessage" aria-hidden="true" data-toggle="tooltip"
+                    data-placement="bottom" title="{{$select.selected.filterIconMessage}}">
+                    <i class="fa fa-filter"/>
+                  </span>
+                  <span
+                    ng-if="$select.selected.isPruned" aria-hidden="true" data-toggle="tooltip"
+                    data-placement="bottom" title="Count may be lower that the actual value because a join operation was pruned"> *</span>
+                </ui-select-match>
+                <ui-select-choices
+                  position='down'
+                  repeat="dashboard.title as dashboard in group.dashboards track by dashboard.id">
+                  <span ng-bind="dashboard.title"></span>
+                  <!-- compare count to undefined to show zero -->
+                  <span ng-if="dashboard.count !== undefined" class="smallNumber"> ({{dashboard.count}})</span>
+                  <span ng-if="dashboard.count === undefined" class="spinner"/>
+                  <span
+                    ng-if="dashboard.filterIconMessage" aria-hidden="true" data-toggle="tooltip"
+                    data-placement="bottom" title="{{dashboard.filterIconMessage}}">
+                    <i class="fa fa-filter"/>
+                  </span>
+                  <span
+                    ng-if="dashboard.isPruned" aria-hidden="true" data-toggle="tooltip"
+                    data-placement="bottom" title="Count may be lower that the actual value because a join operation was pruned"> *</span>
+                </ui-select-choices>
+              </ui-select>
             </span>
-            <span ng-if="group.selected.count != undefined">({{ group.selected.count }})</span>
-            <span ng-if="group.selected.filterIconMessage">
-              <i class="fa fa-filter" aria-hidden="true" data-toggle="tooltip"
-              data-placement="bottom" title="{{ group.selected.filterIconMessage }}"/>
+
+            <span ng-if="!group.active || (group.active && group.dashboards.length == 1)">
+              <!-- compare count to undefined to show zero -->
+              <span ng-if="group.selected.count !== undefined">
+                ({{ group.selected.count }})
+              </span>
+              <span ng-if="group.selected.filterIconMessage">
+                <i class="fa fa-filter" aria-hidden="true" data-toggle="tooltip"
+                data-placement="bottom" title="{{ group.selected.filterIconMessage }}"/>
+              </span>
+              <span ng-if="group.selected.isPruned" aria-hidden="true" data-toggle="tooltip"
+                data-placement="bottom" title="Count may be lower that the actual value because a join operation was pruned"> *</span>
             </span>
           </a>
         </li>
@@ -32,7 +71,7 @@
     </div>
   </div>
 
-  <div class="tab-scroller">
+  <div class="tab-scroller" ng-class="{visible: tabScrollerVisible}">
     <button ng-mouseup="scrollTabs(false)" ng-mousedown="scrollTabs(1)" ng-disabled="tabScrollerState[0]"><i class="fa fa-caret-left"></i></button>
     <button ng-mouseup="scrollTabs(false)" ng-mousedown="scrollTabs(-1)" ng-disabled="tabScrollerState[1]"><i class="fa fa-caret-right"></i></button>
   </div>

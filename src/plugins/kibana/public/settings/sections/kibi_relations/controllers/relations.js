@@ -505,14 +505,22 @@ define(function (require) {
               indices[0].path === indices[1].path) {
             errors.push('Left and right sides of the relation cannot be the same.');
           }
-          checkMappings.push(es.indices.getFieldMapping({
-            index: [ indices[0].indexPatternId, indices[1].indexPatternId ],
-            type: [ indices[0].indexPatternType, indices[1].indexPatternType ],
-            field: [ indices[0].path, indices[1].path ],
-            includeDefaults: true
-          })
-          .then(mapping => {
-            return { mapping, relation };
+          checkMappings.push(Promise.all([
+            es.indices.getFieldMapping({
+              index: [ indices[0].indexPatternId ],
+              type: indices[0].indexPatternType || [],
+              field: [ indices[0].path ],
+              includeDefaults: true
+            }),
+            es.indices.getFieldMapping({
+              index: [ indices[1].indexPatternId ],
+              type: indices[1].indexPatternType || [],
+              field: [ indices[1].path ],
+              includeDefaults: true
+            })
+          ])
+          .then(([ leftMapping, rightMapping ]) => {
+            return { leftMapping, rightMapping, relation };
           }));
           relation.id = key;
 
@@ -588,21 +596,26 @@ define(function (require) {
               return leftMapping.index === rightMapping.index && leftMapping.type === rightMapping.type;
             };
 
-            _.each(mappings, ({ mapping, relation }) => {
-              const indices = relation.indices;
-              const leftTypes = _.keys(mapping[indices[0].indexPatternId].mappings);
-              let leftType = indices[0].indexPatternType || leftTypes[0];
-              const rightTypes = _.keys(mapping[indices[1].indexPatternId].mappings);
-              let rightType = indices[1].indexPatternType || rightTypes[0];
-              const leftMapping = mapping[indices[0].indexPatternId].mappings[leftType][indices[0].path].mapping[indices[0].path];
-              const rightMapping = mapping[indices[1].indexPatternId].mappings[rightType][indices[1].path].mapping[indices[1].path];
+            const getFieldMapping = function (mapping, { indexPatternId, indexPatternType, path }) {
+              const type = indexPatternType || _.keys(mapping[indexPatternId].mappings)[0];
+              return _.values(mapping[indexPatternId].mappings[type][path].mapping)[0];
+            };
 
-              if (!areMappingsCompatibleForSirenJoin(leftMapping, rightMapping)) {
+            _.each(mappings, ({ leftMapping, rightMapping, relation }) => {
+              const indices = relation.indices;
+
+              const leftFieldMapping = getFieldMapping(leftMapping, indices[0]);
+              const rightFieldMapping = getFieldMapping(rightMapping, indices[1]);
+
+              if (!areMappingsCompatibleForSirenJoin(leftFieldMapping, rightFieldMapping)) {
                 if (!relation.errors) {
                   relation.errors = [];
                 }
-                const left = `${indices[0].path} has mapping ${JSON.stringify(_.pick(leftMapping, [ 'index', 'type' ]), null, ' ')}`;
-                const right = `${indices[1].path} has mapping ${JSON.stringify(_.pick(rightMapping, [ 'index', 'type' ]), null, ' ')}`;
+                const leftFieldPath = `${indices[0].indexPatternId}/${indices[0].indexPatternType}/${indices[0].path}`;
+                const rightFieldPath = `${indices[1].indexPatternId}/${indices[1].indexPatternType}/${indices[1].path}`;
+
+                const left = `${leftFieldPath} has mapping ${JSON.stringify(_.pick(leftFieldMapping, [ 'index', 'type' ]), null, ' ')}`;
+                const right = `${rightFieldPath} has mapping ${JSON.stringify(_.pick(rightFieldMapping, [ 'index', 'type' ]), null, ' ')}`;
                 relation.errors.push(`Incompatible fields: ${left} while ${right}. They must be the same!`);
                 $scope.invalid = true;
               }

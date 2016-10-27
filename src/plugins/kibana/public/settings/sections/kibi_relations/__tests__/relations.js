@@ -244,6 +244,7 @@ describe('Kibi Settings', function () {
 
       describe('check field mapping for the siren-join', function () {
         require('testUtils/noDigestPromises').activateForSuite();
+
         it('should throw an error if join fields do not have compatible mapping', function (done) {
           init({
             relations: {
@@ -294,6 +295,91 @@ describe('Kibi Settings', function () {
                   'type-b': {
                     'path-b': {
                       full_name: 'path-b',
+                      mapping: {
+                        'path-b': {
+                          type: 'long',
+                          index: 'not_analyzed'
+                        }
+                      }
+                    },
+                    b1: {
+                      full_name: 'b1',
+                      mapping: {
+                        b1: {
+                          type: 'string',
+                          index: 'not_analyzed'
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            events: {
+              'change:config.kibi:relations': function (event, relations) {
+                expect($scope.relations.relationsIndices).to.have.length(2);
+                _.each($scope.relations.relationsIndices, function (relation) {
+                  expect(relation.errors).to.have.length(1);
+                  expect(relation.errors[0]).to.match(/Incompatible/);
+                  done();
+                });
+                done();
+              }
+            }
+          });
+          $timeout.flush();
+        });
+
+        it('should support nested fields', function (done) {
+          init({
+            relations: {
+              relationsIndices: [
+                {
+                  indices: [
+                    { indexPatternId: 'index-a', path: 'nested.path-a' },
+                    { indexPatternId: 'index-b', path: 'nested.path-b' }
+                  ],
+                  label: 'rel 1'
+                },
+                {
+                  indices: [
+                    { indexPatternId: 'index-a', path: 'a1' },
+                    { indexPatternId: 'index-b', path: 'b1' }
+                  ],
+                  label: 'rel 2'
+                }
+              ]
+            },
+            mappings: {
+              'index-a': {
+                mappings: {
+                  'type-a': {
+                    'nested.path-a': {
+                      full_name: 'nested.path-a',
+                      mapping: {
+                        'path-a': {
+                          type: 'string',
+                          index: 'not_analyzed'
+                        }
+                      }
+                    },
+                    a1: {
+                      full_name: 'a1',
+                      mapping: {
+                        a1: {
+                          type: 'string',
+                          index: 'analyzed'
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              'index-b': {
+                mappings: {
+                  'type-b': {
+                    'nested.path-b': {
+                      full_name: 'nested.path-b',
                       mapping: {
                         'path-b': {
                           type: 'long',

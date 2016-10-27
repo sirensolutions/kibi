@@ -246,8 +246,11 @@ module.exports = function (kibana) {
             inject.save(query);
             return query;
           }).map((query) => {
-            var shieldCredentials = serverConfig.has('shield.cookieName') ? req.state[serverConfig.get('shield.cookieName')] : null;
-            return dbfilter(server.plugins.kibi_core.getQueryEngine(), query, shieldCredentials);
+            var credentials = serverConfig.has('shield.cookieName') ? req.state[serverConfig.get('shield.cookieName')] : null;
+            if (req.auth && req.auth.credentials && req.auth.credentials.proxyCredentials) {
+              credentials = req.auth.credentials.proxyCredentials;
+            }
+            return dbfilter(server.plugins.kibi_core.getQueryEngine(), query, credentials);
           }).map((query) => filterJoinSet(query))
           .map((query) => filterJoinSequence(query))
           .then((data) => {

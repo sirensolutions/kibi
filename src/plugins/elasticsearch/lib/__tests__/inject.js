@@ -43,468 +43,9 @@ const queryEngine = {
   }
 };
 
-
-describe('Error handling', function () {
-  it('value at sourcePath is null or undefined', function (done) {
-    const query = {
-      foo: 'bar',
-      inject: [
-        {
-          queryDefs: [ {queryId: 'ste', queryVariableName: 'variable1'} ],
-          sourcePath: 'po',
-          fieldName: 'bah'
-        },
-        {
-          queryDefs: [ {queryId: 'ste', queryVariableName: 'variable1'} ],
-          sourcePath: 'po.po',
-          fieldName: 'bah'
-        }
-      ]
-    };
-    const response = {
-      responses: [
-        {
-          hits: {
-            hits: [
-              {
-                _source: {
-                  pa: 'aaa',
-                  po: null
-                }
-              },
-              {
-                _source: {
-                  pa: 'bbb',
-                  po: undefined
-                }
-              }
-            ]
-          }
-        },
-        {
-          hits: {
-            hits: [
-              {
-                _source: {
-                  pa: 'aaa',
-                  po: null
-                }
-              },
-              {
-                _source: {
-                  pa: 'bbb',
-                  po: undefined
-                }
-              }
-            ]
-          }
-        }
-      ]
-    };
-
-    const savedQueries = inject.save(query);
-    inject.runSavedQueries(response, queryEngine, savedQueries)
-    .then(function (queries) {
-      expect(queries.responses[0].hits.hits[0].fields.bah.length).to.be(0);
-      expect(queries.responses[0].hits.hits[1].fields.bah.length).to.be(0);
-      expect(queries.responses[1].hits.hits[0].fields.bah.length).to.be(0);
-      expect(queries.responses[1].hits.hits[1].fields.bah.length).to.be(0);
-      done();
-    })
-    .catch(function (err) {
-      done(err);
-    });
-  });
-
-  it('query engine fail', function (done) {
-    const query = {
-      foo: 'bar',
-      inject: [{
-        queryDefs: [ {queryId: 'ste', queryVariableName: 'variable1'} ],
-        sourcePath: 'po',
-        fieldName: 'bah'
-      }]
-    };
-    const response = {
-      responses: [{
-        hits: {
-          hits: [{
-            _source: {
-              pa: 'ahah',
-              po: 'ddd'
-            }
-          }]
-        }
-      }]
-    };
-    const savedQueries = inject.save(query);
-    inject.runSavedQueries(response, queryEngineError, savedQueries)
-    .catch(function (err) {
-      expect(err).not.to.be(undefined);
-      expect(err.message).to.match(/this should fail/i);
-      done();
-    });
-  });
-});
-
-describe('Saved custom queries for post-processing', function () {
-  describe('save method', function () {
-    it('save on series of queries', function (done) {
-      const query1 = {
-        foo: 'bar',
-        inject: [{
-          ham: 'ste'
-        }]
-      };
-      const query2 = {
-        foo: 'rab',
-        inject: [{
-          ham: 'ste'
-        }]
-      };
-      const expected = [ { foo: 'bar' }, { foo: 'rab' } ];
-
-      const body = JSON.stringify(query1).concat('\n', JSON.stringify(query2), '\n');
-      util.getQueriesAsPromise(new buffer.Buffer(body)).map(function (query) {
-        inject.save(query);
-        return query;
-      }).then(function (queries) {
-        expect(queries).to.eql(expected);
-        done();
-      }).catch(function (err) {
-        done(err);
-      });
-    });
-
-    it('save and remove custom query from the ES query', function () {
-      const query = {
-        foo: 'bar',
-        inject: [{
-          ham: 'ste'
-        }]
-      };
-      const expected = { foo: 'bar' };
-
-      inject.save(query);
-      expect(query).to.eql(expected);
-    });
-
-    it('nothing to save', function (done) {
-      const query = {
-        foo: 'bar'
-      };
-
-      const body = JSON.stringify(query).concat('\n');
-      util.getQueriesAsPromise(new buffer.Buffer(body)).map(function (q) {
-        inject.save(q);
-        return q;
-      }).then(function (queries) {
-        expect(queries).to.eql([query]);
-        done();
-      }).catch(function (err) {
-        done(err);
-      });
-    });
-  });
-
-  describe('runInject method', function () {
-    it('array of objects', function (done) {
-      const query = {
-        queryDefs: [ {queryId: 'ste', queryVariableName: 'variable1'} ],
-        sourcePath: 'po.po',
-        fieldName: 'bah'
-      };
-      const source = {
-        pa: 'ahah',
-        po: [
-          {
-            po: 'booba'
-          },
-          {
-            po: 'aaa'
-          }
-        ]
-      };
-      const expected = {
-        key: 'bah',
-        value: [
-          'ste'
-        ]
-      };
-
-      inject._runInject(query, queryEngine)
-      .then(function (run) {
-        expect(run(source)).to.eql(expected);
-        done();
-      }).catch(function (err) {
-        done(err);
-      });
-    });
-
-    it('array value', function (done) {
-      const query = {
-        queryDefs: [ {queryId: 'ste', queryVariableName: 'variable1'} ],
-        sourcePath: 'po.po',
-        fieldName: 'bah'
-      };
-      const source = {
-        pa: 'ahah',
-        po: {
-          po: [
-            'aaa',
-            'booba'
-          ]
-        }
-      };
-      const expected = {
-        key: 'bah',
-        value: [
-          'ste'
-        ]
-      };
-
-      inject._runInject(query, queryEngine)
-      .then(function (run) {
-        expect(run(source)).to.eql(expected);
-        done();
-      }).catch(function (err) {
-        done(err);
-      });
-    });
-
-    it('nested source path 1', function (done) {
-      const query = {
-        queryDefs: [ {queryId: 'ste', queryVariableName: 'variable1'} ],
-        sourcePath: 'po.po',
-        fieldName: 'bah'
-      };
-      const source = {
-        pa: 'ahah',
-        po: {
-          po: 'aaa'
-        }
-      };
-      const expected = {
-        key: 'bah',
-        value: [
-          'ste'
-        ]
-      };
-
-      inject._runInject(query, queryEngine)
-        .then(function (run) {
-          expect(run(source)).to.eql(expected);
-          done();
-        }).catch(function (err) {
-          done(err);
-        });
-    });
-
-    it('nested source path 2', function (done) {
-      const query = {
-        queryDefs: [ {queryId: 'ste', queryVariableName: 'variable1'} ],
-        sourcePath: 'po.po.po',
-        fieldName: 'bah'
-      };
-      const source = {
-        pa: 'ahah',
-        po: {
-          po: {
-            po: 'aaa'
-          }
-        }
-      };
-      const expected = {
-        key: 'bah',
-        value: [
-          'ste'
-        ]
-      };
-
-      inject._runInject(query, queryEngine)
-      .then(function (run) {
-        expect(run(source)).to.eql(expected);
-        done();
-      }).catch(function (err) {
-        done(err);
-      });
-    });
-
-    it('injects a field value with match', function (done) {
-      const query = {
-        queryDefs: [ {queryId: 'ste', queryVariableName: 'variable1'} ],
-        sourcePath: 'po',
-        fieldName: 'bah'
-      };
-      const source = {
-        pa: 'ahah',
-        po: 'aaa'
-      };
-      const expected = {
-        key: 'bah',
-        value: [
-          'ste'
-        ]
-      };
-
-      inject._runInject(query, queryEngine)
-        .then(function (run) {
-          expect(run(source)).to.eql(expected);
-          done();
-        }).catch(function (err) {
-          done(err);
-        });
-    });
-
-    it('injects a field value without match', function (done) {
-      const query = {
-        queryDefs: [ {queryId: 'ste', queryVariableName: 'variable1'} ],
-        sourcePath: 'po',
-        fieldName: 'bah'
-      };
-      const source = {
-        pa: 'ahah',
-        po: 'ohoh'
-      };
-      const expected = {
-        key: 'bah',
-        value: []
-      };
-
-      inject._runInject(query, queryEngine)
-        .then(function (run) {
-          expect(run(source)).to.eql(expected);
-          done();
-        }).catch(function (err) {
-          done(err);
-        });
-    });
-  });
-
-  describe('run the saved queries', function () {
-    function run(query, response, expected, done) {
-      const savedQueries = inject.save(query);
-      inject.runSavedQueries(response, queryEngine, savedQueries)
-      .then(function (data) {
-        expect(data).to.eql(expected);
-        done();
-      }).catch(function (err) {
-        done(err);
-      });
-    }
-
-    it('bad source path 1', function (done) {
-      const query = {
-        foo: 'bar',
-        inject: [{
-          queryDefs: [ {queryId: 'ste', queryVariableName: 'variable1'} ],
-          sourcePath: 'op',
-          fieldName: 'bah'
-        }]
-      };
-      const response = {
-        responses: [{
-          hits: {
-            hits: [
-              {
-                _source: {
-                  pa: 'ahah',
-                  po: 'ccc'
-                }
-              }
-            ]
-          }
-        }]
-      };
-
-      const expected = {
-        responses: [{
-          hits: {
-            hits: [
-              {
-                fields: {
-                  bah: []
-                },
-                _source: {
-                  pa: 'ahah',
-                  po: 'ccc'
-                }
-              }
-            ]
-          }
-        }]
-      };
-      run(query, response, expected, done);
-    });
-
-    it('bad source path 2', function (done) {
-      const query = {
-        foo: 'bar',
-        inject: [{
-          queryDefs: [ {queryId: 'ste', queryVariableName: 'variable1'} ],
-          sourcePath: 'po.op',
-          fieldName: 'bah'
-        }]
-      };
-      const response = {
-        responses: [{
-          hits: {
-            hits: [
-              {
-                _source: {
-                  pa: 'ahah',
-                  po: {
-                    po: 'ddd'
-                  }
-                }
-              },
-              {
-                _source: {
-                  pa: 'ahah',
-                  po: {
-                    op: 'ddd'
-                  }
-                }
-              }
-            ]
-          }
-        }]
-      };
-
-      const expected = {
-        responses: [{
-          hits: {
-            hits: [
-              {
-                fields: {
-                  bah: []
-                },
-                _source: {
-                  pa: 'ahah',
-                  po: {
-                    po: 'ddd'
-                  }
-                }
-              },
-              {
-                fields: {
-                  bah: [ 'ste' ]
-                },
-                _source: {
-                  pa: 'ahah',
-                  po: {
-                    op: 'ddd'
-                  }
-                }
-              }
-            ]
-          }
-        }]
-      };
-      run(query, response, expected, done);
-    });
-
-    it('with two inject queries', function (done) {
+describe('Kibi - Inject', function () {
+  describe('Error handling', function () {
+    it('value at sourcePath is null or undefined', function (done) {
       const query = {
         foo: 'bar',
         inject: [
@@ -514,239 +55,719 @@ describe('Saved custom queries for post-processing', function () {
             fieldName: 'bah'
           },
           {
-            queryDefs: [ {queryId: 'ets', queryVariableName: 'variable1'} ],
-            sourcePath: 'po',
-            fieldName: 'hab'
+            queryDefs: [ {queryId: 'ste', queryVariableName: 'variable1'} ],
+            sourcePath: 'po.po',
+            fieldName: 'bah'
           }
         ]
       };
       const response = {
-        responses: [{
-          hits: {
-            hits: [{
-              _source: {
-                pa: 'ahah',
-                po: 'ddd'
-              }
-            }, {
-              _source: {
-                pa: 'ahah',
-                po: 'ccc'
-              }
-            }]
+        responses: [
+          {
+            hits: {
+              hits: [
+                {
+                  _source: {
+                    pa: 'aaa',
+                    po: null
+                  },
+                  fields: {
+                    po: []
+                  }
+                },
+                {
+                  _source: {
+                    pa: 'bbb',
+                    po: undefined
+                  },
+                  fields: {
+                    po: []
+                  }
+                }
+              ]
+            }
+          },
+          {
+            hits: {
+              hits: [
+                {
+                  _source: {
+                    pa: 'aaa',
+                    po: null
+                  },
+                  fields: {
+                    'po.po': []
+                  }
+                },
+                {
+                  _source: {
+                    pa: 'bbb',
+                    po: undefined
+                  },
+                  fields: {
+                    'po.po': []
+                  }
+                }
+              ]
+            }
           }
-        }]
+        ]
       };
-      const expected = {
-        responses: [{
-          hits: {
-            hits: [{
-              fields: {
-                hab: [
-                  'ets'
-                ],
-                bah: [
-                  'ste'
-                ]
-              },
-              _source: {
-                pa: 'ahah',
-                po: 'ddd'
-              }
-            }, {
-              fields: {
-                bah: [],
-                hab: [
-                  'ets'
-                ]
-              },
-              _source: {
-                pa: 'ahah',
-                po: 'ccc'
-              }
-            }]
-          }
-        }]
-      };
-      run(query, response, expected, done);
+
+      const savedQueries = inject.save(query);
+      inject.runSavedQueries(response, queryEngine, savedQueries)
+      .then(function (queries) {
+        expect(queries.responses[0].hits.hits[0].fields.bah.length).to.be(0);
+        expect(queries.responses[0].hits.hits[1].fields.bah.length).to.be(0);
+        expect(queries.responses[1].hits.hits[0].fields.bah.length).to.be(0);
+        expect(queries.responses[1].hits.hits[1].fields.bah.length).to.be(0);
+        done();
+      })
+      .catch(done);
     });
 
-    it('one query id', function (done) {
+    it('query engine fail', function (done) {
       const query = {
         foo: 'bar',
-        inject: [{
+        inject: [
+          {
+            queryDefs: [ {queryId: 'ste', queryVariableName: 'variable1'} ],
+            sourcePath: 'po',
+            fieldName: 'bah'
+          }
+        ]
+      };
+      const response = {
+        responses: [
+          {
+            hits: {
+              hits: [
+                {
+                  _source: {
+                    pa: 'ahah',
+                    po: 'ddd'
+                  },
+                  fields: {
+                    po: [ 'ddd' ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      };
+      const savedQueries = inject.save(query);
+      inject.runSavedQueries(response, queryEngineError, savedQueries)
+      .then(() => done('should fail'))
+      .catch(function (err) {
+        expect(err).not.to.be(undefined);
+        expect(err.message).to.match(/this should fail/i);
+        done();
+      });
+    });
+  });
+
+  describe('Saved custom queries for post-processing', function () {
+    describe('save method', function () {
+      it('save on series of queries', function (done) {
+        const query1 = {
+          foo: 'bar',
+          inject: [
+            {
+              queryDefs: [ 'query1' ],
+              sourcePath: 'one'
+            }
+          ]
+        };
+        const query2 = {
+          foo: 'rab',
+          inject: [
+            {
+              queryDefs: [ 'query2' ],
+              sourcePath: 'two'
+            }
+          ]
+        };
+        const expected = [ { fielddata_fields: [ 'one' ], foo: 'bar' }, { fielddata_fields: [ 'two' ], foo: 'rab' } ];
+
+        const body = JSON.stringify(query1).concat('\n', JSON.stringify(query2), '\n');
+        util.getQueriesAsPromise(new buffer.Buffer(body)).map(function (query) {
+          inject.save(query);
+          return query;
+        }).then(function (queries) {
+          expect(queries).to.eql(expected);
+          done();
+        }).catch(function (err) {
+          done(err);
+        });
+      });
+
+      it('save and remove custom query from the ES query', function () {
+        const query = {
+          foo: 'bar',
+          inject: [
+            {
+              queryDefs: [ 'query1' ],
+              sourcePath: 'ste'
+            }
+          ]
+        };
+        const expected = { fielddata_fields: [ 'ste' ], foo: 'bar' };
+
+        inject.save(query);
+        expect(query).to.eql(expected);
+      });
+
+      it('nothing to save', function (done) {
+        const query = {
+          foo: 'bar'
+        };
+
+        const body = JSON.stringify(query).concat('\n');
+        util.getQueriesAsPromise(new buffer.Buffer(body)).map(function (q) {
+          inject.save(q);
+          return q;
+        }).then(function (queries) {
+          expect(queries).to.eql([query]);
+          done();
+        }).catch(function (err) {
+          done(err);
+        });
+      });
+    });
+
+    describe('runInject method', function () {
+      it('nested path', function (done) {
+        const query = {
+          queryDefs: [ {queryId: 'ste', queryVariableName: 'variable1'} ],
+          sourcePath: 'po.po',
+          fieldName: 'bah'
+        };
+        const hit = {
+          fields: {
+            'po.po': [
+              'booba',
+              'aaa'
+            ]
+          }
+        };
+        const expected = {
+          key: 'bah',
+          value: [
+            'ste'
+          ]
+        };
+
+        inject._runInject(query, queryEngine)
+        .then(function (run) {
+          expect(run(hit)).to.eql(expected);
+          done();
+        })
+        .catch(done);
+      });
+
+      it('injects a field value with match', function (done) {
+        const query = {
           queryDefs: [ {queryId: 'ste', queryVariableName: 'variable1'} ],
           sourcePath: 'po',
           fieldName: 'bah'
-        }]
-      };
-      const response = {
-        responses: [{
-          hits: {
-            hits: [{
-              _source: {
-                pa: 'ahah',
-                po: 'ohoh'
-              }
-            }, {
-              _source: {
-                pa: 'ahah',
-                po: 'aaa'
-              }
-            }]
+        };
+        const hit = {
+          fields: {
+            pa: [ 'ahah' ],
+            po: [ 'aaa' ]
           }
-        }]
-      };
-      const expected = {
-        responses: [{
-          hits: {
-            hits: [{
-              fields: {
-                bah: []
-              },
-              _source: {
-                pa: 'ahah',
-                po: 'ohoh'
-              }
-            }, {
-              fields: {
-                bah: [
-                  'ste'
-                ]
-              },
-              _source: {
-                pa: 'ahah',
-                po: 'aaa'
-              }
-            }]
-          }
-        }]
-      };
-      run(query, response, expected, done);
-    });
+        };
+        const expected = {
+          key: 'bah',
+          value: [
+            'ste'
+          ]
+        };
 
-    it('two query ids', function (done) {
-      const query = {
-        foo: 'bar',
-        inject: [{
-          queryDefs: [ {queryId: 'ste', queryVariableName: 'variable1'}, {queryId: 'ets', queryVariableName: 'variable1'}  ],
+        inject._runInject(query, queryEngine)
+        .then(function (run) {
+          expect(run(hit)).to.eql(expected);
+          done();
+        })
+        .catch(done);
+      });
+
+      it('injects a field value without match', function (done) {
+        const query = {
+          queryDefs: [ {queryId: 'ste', queryVariableName: 'variable1'} ],
           sourcePath: 'po',
           fieldName: 'bah'
-        }]
-      };
-      const response = {
-        responses: [{
-          hits: {
-            hits: [{
-              _source: {
-                pa: 'ahah',
-                po: 'ddd'
-              }
-            }, {
-              _source: {
-                pa: 'ahah',
-                po: 'ccc'
-              }
-            }]
+        };
+        const hit = {
+          fields: {
+            pa: [ 'ahah' ],
+            po: [ 'ohoh' ]
           }
-        }]
-      };
-      const expected = {
-        responses: [{
-          hits: {
-            hits: [{
-              fields: {
-                bah: [
-                  'ste',
-                  'ets'
-                ]
-              },
-              _source: {
-                pa: 'ahah',
-                po: 'ddd'
-              }
-            }, {
-              fields: {
-                bah: [
-                  'ets'
-                ]
-              },
-              _source: {
-                pa: 'ahah',
-                po: 'ccc'
-              }
-            }]
-          }
-        }]
-      };
-      run(query, response, expected, done);
+        };
+        const expected = {
+          key: 'bah',
+          value: []
+        };
+
+        inject._runInject(query, queryEngine)
+        .then(function (run) {
+          expect(run(hit)).to.eql(expected);
+          done();
+        })
+        .catch(done);
+      });
     });
 
-    it('no query ids', function (done) {
-      const query = {
-        foo: 'bar',
-        inject: [{
-          queryDefs: [],
-          sourcePath: 'po',
-          fieldName: 'bah'
-        }]
-      };
-      const response = {
-        responses: [{
-          hits: {
-            hits: [{
-              _source: {
-                pa: 'ahah',
-                po: 'ddd'
-              }
-            }, {
-              _source: {
-                pa: 'ahah',
-                po: 'ccc'
-              }
-            }]
-          }
-        }]
-      };
-      const expected = {
-        responses: [{
-          hits: {
-            hits: [{
-              fields: {
-                bah: [
-                ]
-              },
-              _source: {
-                pa: 'ahah',
-                po: 'ddd'
-              }
-            }, {
-              fields: {
-                bah: [
-                ]
-              },
-              _source: {
-                pa: 'ahah',
-                po: 'ccc'
-              }
-            }]
-          }
-        }]
-      };
-      run(query, response, expected, done);
-    });
+    describe('run the saved queries', function () {
+      function run(query, response, expected, done) {
+        const savedQueries = inject.save(query);
+        inject.runSavedQueries(response, queryEngine, savedQueries)
+        .then(function (data) {
+          expect(data).to.eql(expected);
+          done();
+        }).catch(function (err) {
+          done(err);
+        });
+      }
 
-    it('no response', function (done) {
-      const query = {
-        foo: 'bar',
-        inject: [{
-          queryDefs: [],
-          sourcePath: 'po',
-          fieldName: 'bah'
-        }]
-      };
-      const response = {};
-      run(query, response, response, done);
+      it('bad source path 1', function (done) {
+        const query = {
+          foo: 'bar',
+          inject: [{
+            queryDefs: [ {queryId: 'ste', queryVariableName: 'variable1'} ],
+            sourcePath: 'op',
+            fieldName: 'bah'
+          }]
+        };
+        const response = {
+          responses: [{
+            hits: {
+              hits: [
+                {
+                  _source: {
+                    pa: 'ahah',
+                    po: 'ccc'
+                  }
+                }
+              ]
+            }
+          }]
+        };
+
+        const expected = {
+          responses: [{
+            hits: {
+              hits: [
+                {
+                  fields: {
+                    bah: []
+                  },
+                  _source: {
+                    pa: 'ahah',
+                    po: 'ccc'
+                  }
+                }
+              ]
+            }
+          }]
+        };
+        run(query, response, expected, done);
+      });
+
+      it('bad source path 2', function (done) {
+        const query = {
+          foo: 'bar',
+          inject: [
+            {
+              queryDefs: [ {queryId: 'ste', queryVariableName: 'variable1'} ],
+              sourcePath: 'po.op',
+              fieldName: 'bah'
+            }
+          ]
+        };
+        const response = {
+          responses: [
+            {
+              hits: {
+                hits: [
+                  {
+                    _source: {
+                      pa: 'ahah',
+                      po: {
+                        po: 'ddd'
+                      }
+                    },
+                    fields: {
+                      'po.op': []
+                    }
+                  },
+                  {
+                    _source: {
+                      pa: 'ahah',
+                      po: {
+                        op: 'ddd'
+                      }
+                    },
+                    fields: {
+                      'po.op': [
+                        'ddd'
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        };
+
+        const expected = {
+          responses: [
+            {
+              hits: {
+                hits: [
+                  {
+                    fields: {
+                      bah: [],
+                      'po.op': []
+                    },
+                    _source: {
+                      pa: 'ahah',
+                      po: {
+                        po: 'ddd'
+                      }
+                    }
+                  },
+                  {
+                    fields: {
+                      bah: [ 'ste' ],
+                      'po.op': [
+                        'ddd'
+                      ]
+                    },
+                    _source: {
+                      pa: 'ahah',
+                      po: {
+                        op: 'ddd'
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        };
+        run(query, response, expected, done);
+      });
+
+      it('with two inject queries', function (done) {
+        const query = {
+          foo: 'bar',
+          inject: [
+            {
+              queryDefs: [ {queryId: 'ste', queryVariableName: 'variable1'} ],
+              sourcePath: 'po',
+              fieldName: 'bah'
+            },
+            {
+              queryDefs: [ {queryId: 'ets', queryVariableName: 'variable1'} ],
+              sourcePath: 'po',
+              fieldName: 'hab'
+            }
+          ]
+        };
+        const response = {
+          responses: [
+            {
+              hits: {
+                hits: [
+                  {
+                    _source: {
+                      pa: 'ahah',
+                      po: 'ddd'
+                    },
+                    fields: {
+                      po: [ 'ddd' ]
+                    }
+                  },
+                  {
+                    _source: {
+                      pa: 'ahah',
+                      po: 'ccc'
+                    },
+                    fields: {
+                      po: [ 'ccc' ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        };
+        const expected = {
+          responses: [
+            {
+              hits: {
+                hits: [
+                  {
+                    fields: {
+                      hab: [
+                        'ets'
+                      ],
+                      bah: [
+                        'ste'
+                      ],
+                      po: [ 'ddd' ]
+                    },
+                    _source: {
+                      pa: 'ahah',
+                      po: 'ddd'
+                    }
+                  },
+                  {
+                    fields: {
+                      bah: [],
+                      hab: [
+                        'ets'
+                      ],
+                      po: [ 'ccc' ]
+                    },
+                    _source: {
+                      pa: 'ahah',
+                      po: 'ccc'
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        };
+        run(query, response, expected, done);
+      });
+
+      it('one query id', function (done) {
+        const query = {
+          foo: 'bar',
+          inject: [
+            {
+              queryDefs: [ {queryId: 'ste', queryVariableName: 'variable1'} ],
+              sourcePath: 'po',
+              fieldName: 'bah'
+            }
+          ]
+        };
+        const response = {
+          responses: [
+            {
+              hits: {
+                hits: [
+                  {
+                    _source: {
+                      pa: 'ahah',
+                      po: 'ohoh'
+                    },
+                    fields: {
+                      po: [ 'ohoh' ]
+                    }
+                  },
+                  {
+                    _source: {
+                      pa: 'ahah',
+                      po: 'aaa'
+                    },
+                    fields: {
+                      po: [ 'aaa' ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        };
+        const expected = {
+          responses: [
+            {
+              hits: {
+                hits: [
+                  {
+                    fields: {
+                      bah: [],
+                      po: [ 'ohoh' ]
+                    },
+                    _source: {
+                      pa: 'ahah',
+                      po: 'ohoh'
+                    }
+                  },
+                  {
+                    fields: {
+                      bah: [ 'ste' ],
+                      po: [ 'aaa' ]
+                    },
+                    _source: {
+                      pa: 'ahah',
+                      po: 'aaa'
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        };
+        run(query, response, expected, done);
+      });
+
+      it('two query ids', function (done) {
+        const query = {
+          foo: 'bar',
+          inject: [
+            {
+              queryDefs: [ {queryId: 'ste', queryVariableName: 'variable1'}, {queryId: 'ets', queryVariableName: 'variable1'}  ],
+              sourcePath: 'po',
+              fieldName: 'bah'
+            }
+          ]
+        };
+        const response = {
+          responses: [
+            {
+              hits: {
+                hits: [
+                  {
+                    _source: {
+                      pa: 'ahah',
+                      po: 'ddd'
+                    },
+                    fields: {
+                      po: [ 'ddd' ]
+                    }
+                  },
+                  {
+                    _source: {
+                      pa: 'ahah',
+                      po: 'ccc'
+                    },
+                    fields: {
+                      po: [ 'ccc' ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        };
+        const expected = {
+          responses: [
+            {
+              hits: {
+                hits: [
+                  {
+                    fields: {
+                      bah: [
+                        'ste',
+                        'ets'
+                      ],
+                      po: [ 'ddd' ]
+                    },
+                    _source: {
+                      pa: 'ahah',
+                      po: 'ddd'
+                    }
+                  },
+                  {
+                    fields: {
+                      bah: [
+                        'ets'
+                      ],
+                      po: [ 'ccc' ]
+                    },
+                    _source: {
+                      pa: 'ahah',
+                      po: 'ccc'
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        };
+        run(query, response, expected, done);
+      });
+
+      it('no query ids', function (done) {
+        const query = {
+          foo: 'bar',
+          inject: [
+            {
+              queryDefs: [],
+              sourcePath: 'po',
+              fieldName: 'bah'
+            }
+          ]
+        };
+        const response = {
+          responses: [
+            {
+              hits: {
+                hits: [
+                  {
+                    _source: {
+                      pa: 'ahah',
+                      po: 'ddd'
+                    }
+                  },
+                  {
+                    _source: {
+                      pa: 'ahah',
+                      po: 'ccc'
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        };
+        const expected = {
+          responses: [
+            {
+              hits: {
+                hits: [
+                  {
+                    fields: {},
+                    _source: {
+                      pa: 'ahah',
+                      po: 'ddd'
+                    }
+                  },
+                  {
+                    fields: {},
+                    _source: {
+                      pa: 'ahah',
+                      po: 'ccc'
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        };
+        run(query, response, expected, done);
+      });
+
+      it('no response', function (done) {
+        const query = {
+          foo: 'bar',
+          inject: [
+            {
+              queryDefs: [],
+              sourcePath: 'po',
+              fieldName: 'bah'
+            }
+          ]
+        };
+        const response = {};
+        run(query, response, response, done);
+      });
     });
   });
 });

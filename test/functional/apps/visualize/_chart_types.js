@@ -45,8 +45,8 @@ define(function (require) {
             'Area chart',
             'Data table',
             'Enhanced search results', // kibi visualization
-            'Kibi Query Viewer', // kibi visualization
-            'Kibi Relational filter', // kibi visualization
+            'Kibi query viewer', // kibi visualization
+            'Kibi relational filter', // kibi visualization
             'Line chart',
             'Markdown widget',
             'Metric',

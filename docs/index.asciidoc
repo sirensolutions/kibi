@@ -21,7 +21,6 @@
 :start-url-shield: https://localhost:5606
 :kibi-default-port: 5606
 
-:shield: https://www.elastic.co/guide/en/shield/2.3/
 :k4issue: https://github.com/elastic/kibana/issues/
 :k4pull: https://github.com/elastic/kibana/pull/
 :version: 4.5

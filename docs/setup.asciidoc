@@ -18,7 +18,7 @@ All you need is:
 ** Which Elasticsearch indices you want to search.
 
 NOTE: If your Elasticsearch installation is protected by http://www.elastic.co/overview/shield/[Shield] see
-{shield}/kibana.html#using-kibana4-with-shield[Shield with Kibana 4] for additional setup instructions.
+{shield-ref}/kibana.html#using-kibana4-with-shield[Shield with Kibana 4] for additional setup instructions.
 
 Download the Kibi binary distribution from http://siren.solutions/kibi and
 extract it to a local directory.

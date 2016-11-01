@@ -109,6 +109,7 @@ export default class Model {
    */
   async update(id, body) {
     try {
+      await this.createMappings();
       return await this._client.index({
         id: id,
         index: this._config.get('kibana.index'),

@@ -178,7 +178,7 @@ define(function (require) {
               $rootScope.$emit('kibi:' + service.type + ':changed:deleted', resp); // kibi: kibi event
               return redirectHandler('deleted');
             })
-            .catch(notify.fatal);
+            .catch(notify.error); // kibi: changed from fatal to error
           };
 
           deleteHelper.deleteByType(service.type, [$routeParams.id], _delete);
@@ -220,7 +220,11 @@ define(function (require) {
 
             return redirectHandler('updated');
           })
-          .catch(notify.fatal);
+          .catch((error) => {
+            // kibi: notify errors
+            notify.error(error);
+            throw error;
+          });
         };
 
         function redirectHandler(action) {

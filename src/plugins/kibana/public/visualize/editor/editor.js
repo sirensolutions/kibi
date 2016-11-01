@@ -255,7 +255,7 @@ define(function (require) {
           if (savedVis.id === $route.current.params.id) return;
           kbnUrl.change('/visualize/edit/{{id}}', {id: savedVis.id});
         }
-      }, notify.fatal);
+      }, notify.error); // kibi: changed from fatal to error
     };
 
     $scope.unlink = function () {

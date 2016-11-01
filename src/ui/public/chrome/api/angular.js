@@ -23,6 +23,13 @@ module.exports = function (chrome, internals) {
       a.href = chrome.addBasePath('/elasticsearch');
       return a.href;
     }()))
+    // kibi: saved objects API url
+    .value('savedObjectsAPIUrl', (function () {
+      var a = document.createElement('a');
+      a.href = chrome.addBasePath('/api/saved-objects/v1');
+      return a.href;
+    }()))
+    // kibi: end
     .config(chrome.$setupXsrfRequestInterceptor);
 
     require('../directives')(chrome, internals);

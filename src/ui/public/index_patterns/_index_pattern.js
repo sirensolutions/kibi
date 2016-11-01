@@ -277,6 +277,9 @@ define(function (require) {
               },
               _.constant(false) // if the user doesn't overwrite, resolve with false
             );
+          } else {
+            // kibi: notify errors
+            notify.error(err);
           }
           return Promise.resolve(false);
         });
@@ -284,7 +287,12 @@ define(function (require) {
 
       self.save = function () {
         var body = self.prepBody();
-        return docSource.doIndex(body).then(setId);
+        // kibi: notify errors
+        return docSource.doIndex(body).then(setId).catch((error) => {
+          notify.error(error);
+          throw error;
+        });
+        // kibi: end
       };
 
       self.refreshFields = function () {

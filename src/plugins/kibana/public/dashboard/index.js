@@ -254,6 +254,7 @@ define(function (require) {
           // kibi: lock the dashboard so kibi_state._getCurrentDashboardId ignore the change for a moment
           dash.locked = true;
 
+          const previousDashId = dash.id;
           $state.title = dash.id = dash.title;
           $state.save();
 
@@ -278,8 +279,12 @@ define(function (require) {
             }
           })
           .catch((err) => {
+            // kibi: if the dashboard can't be saved rollback the dashboard id
+            dash.id = previousDashId;
             delete dash.locked;
-            notify.fatal(err);
+            $scope.configTemplate.close('save');
+            notify.error(err);
+            // kibi: end
           });
         };
 

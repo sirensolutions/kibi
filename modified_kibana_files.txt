@@ -74,6 +74,8 @@ src/plugins/kibana/public/visualize/editor/editor.js
 src/plugins/kibana/public/visualize/saved_visualizations/_saved_vis.js
 src/plugins/kibana/public/visualize/styles/main.less
 
++src/plugins/kibana/saved_objects_api
+
 src/plugins/spyModes/index.js
 src/plugins/spyModes/public/multi_search_spy_mode.js
 src/plugins/spyModes/public/reqRespStatsSpyMode.js

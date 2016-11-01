@@ -62,7 +62,7 @@ define(function (require) {
       .then(function () {
         $location.url('/settings/indices');
       })
-      .catch(notify.fatal);
+      .catch(notify.error);
     };
 
     $scope.setDefaultPattern = function () {

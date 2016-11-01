@@ -93,8 +93,12 @@ function startServer(self, fulfill, reject) {
           if (transportClientSSLKeyStore) {
             transportClientSSLKeyStore = path.resolve(transportClientSSLKeyStore);
           }
+          const transportClientSSLKeyStoreAlias = config.get('kibi_core.elasticsearch.transport_client.ssl.key_store_alias');
+          const transportClientSSLCaKeyStoreAlias = config.get('kibi_core.elasticsearch.transport_client.ssl.ca_alias');
           const transportClientSSLKeyStorePassword = config.get('kibi_core.elasticsearch.transport_client.ssl.key_store_password');
           const transportClientSSLHostNameVerification = config.get('kibi_core.elasticsearch.transport_client.ssl.verify_hostname');
+          const transportClientSSLHostNameVerificationResolution = config.get('kibi_core.elasticsearch.transport_client.ssl' +
+                                                                              '.verify_hostname_resolve');
 
           self.url = config.get('kibi_core.gremlin_server.url');
           const serverURL = url.parse(self.url);
@@ -136,8 +140,16 @@ function startServer(self, fulfill, reject) {
             args.push('--elasticTransportClientCAKeyStorePassword=' + transportClientSSLCaKeyStorePassword);
           }
 
+          if (transportClientSSLCaKeyStoreAlias) {
+            args.push('--elasticTransportClientCACertAlias=' + transportClientSSLCaKeyStoreAlias);
+          }
+
           if (transportClientSSLKeyStore) {
             args.push('--elasticTransportClientKeyStore=' + transportClientSSLKeyStore);
+          }
+
+          if (transportClientSSLKeyStoreAlias) {
+            args.push('--elasticTransportClientCertAlias=' + transportClientSSLKeyStoreAlias);
           }
 
           if (transportClientSSLKeyStorePassword) {
@@ -145,7 +157,15 @@ function startServer(self, fulfill, reject) {
           }
 
           if (transportClientSSLHostNameVerification) {
-            args.push('--elasticTransportClientSSLHostNameVerification=' + transportClientSSLHostNameVerification);
+            args.push('--elasticTransportClientSSLHostNameVerification=true');
+          } else {
+            args.push('--elasticTransportClientSSLHostNameVerification=false');
+          }
+
+          if (transportClientSSLHostNameVerificationResolution) {
+            args.push('--elasticTransportClientSSLHostNameVerificationResolution=true');
+          } else {
+            args.push('--elasticTransportClientSSLHostNameVerificationResolution=false');
           }
 
           if (config.get('kibi_core.gremlin_server.ssl.key_store')) {

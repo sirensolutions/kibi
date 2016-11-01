@@ -115,9 +115,12 @@ module.exports = function (kibana) {
             ssl: Joi.object({
               ca: Joi.string().allow('').default(''),
               ca_password: Joi.string().allow('').default(''),
+              ca_alias: Joi.string().allow('').default(''),
               key_store: Joi.string().allow('').default(''),
               key_store_password: Joi.string().allow('').default(''),
-              verify_hostname: Joi.boolean().default(true)
+              key_store_alias: Joi.string().allow('').default(''),
+              verify_hostname: Joi.boolean().default(true),
+              verify_hostname_resolve: Joi.boolean().default(false)
             })
           })
         }),

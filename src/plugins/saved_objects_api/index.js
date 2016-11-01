@@ -2,6 +2,8 @@
  * Saved objects API plugin.
  *
  * This plugin provides an API to perform crud operations on saved objects.
+ *
+ * Might be superseded by https://github.com/elastic/kibana/issues/5480 at some point.
  */
 export default function (kibana) {
 

@@ -117,7 +117,8 @@ define(function (require) {
             .then(refreshData)
             .then(function () {
               $scope.selectedItems.length = 0;
-            });
+            })
+            .catch(notify.error);
           };
 
           deleteHelper.deleteByType($scope.currentTab.service.type, _.pluck($scope.selectedItems, 'id'), _delete);

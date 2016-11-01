@@ -1,5 +1,7 @@
 /**
+ * Saved objects API plugin.
  *
+ * This plugin provides an API to perform crud operations on saved objects.
  */
 export default function (kibana) {
 

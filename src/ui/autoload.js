@@ -45,6 +45,7 @@ exports.reload = function () {
     'ui/doc_title',
     'ui/elastic_textarea',
     'ui/es',
+    'ui/saved_objects_api',
     'ui/events',
     'ui/fancy_forms',
     'ui/filter_bar',

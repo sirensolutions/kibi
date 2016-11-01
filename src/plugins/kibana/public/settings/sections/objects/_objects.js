@@ -118,7 +118,7 @@ define(function (require) {
             .then(function () {
               $scope.selectedItems.length = 0;
             })
-            .catch(notify.error);
+            .catch(notify.error); // kibi: added by kibi
           };
 
           deleteHelper.deleteByType($scope.currentTab.service.type, _.pluck($scope.selectedItems, 'id'), _delete);

@@ -62,7 +62,7 @@ define(function (require) {
       .then(function () {
         $location.url('/settings/indices');
       })
-      .catch(notify.error);
+      .catch(notify.error); // kibi: changed from fatal to error
     };
 
     $scope.setDefaultPattern = function () {

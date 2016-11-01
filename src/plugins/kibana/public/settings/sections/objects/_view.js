@@ -178,7 +178,7 @@ define(function (require) {
               $rootScope.$emit('kibi:' + service.type + ':changed:deleted', resp); // kibi: kibi event
               return redirectHandler('deleted');
             })
-            .catch(notify.error);
+            .catch(notify.error); // kibi: changed from fatal to error
           };
 
           deleteHelper.deleteByType(service.type, [$routeParams.id], _delete);

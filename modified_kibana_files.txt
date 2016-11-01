@@ -57,6 +57,7 @@ src/plugins/kibana/public/settings/index.js
 src/plugins/kibana/public/settings/sections/about/index.js
 src/plugins/kibana/public/settings/sections/about/index.html
 src/plugins/kibana/public/settings/sections/advanced/lib/to_editable_config.js
+src/plugins/kibana/public/settings/sections/advanced/advanced_row.js
 src/plugins/kibana/public/settings/sections/index.js
 src/plugins/kibana/public/settings/sections/indices/_edit.html
 src/plugins/kibana/public/settings/sections/indices/_edit.js
@@ -69,6 +70,7 @@ src/plugins/kibana/public/settings/sections/objects/_view.html
 src/plugins/kibana/public/settings/sections/objects/_view.js
 
 src/plugins/kibana/public/visualize/editor/sidebar.js
+src/plugins/kibana/public/visualize/editor/editor.js
 src/plugins/kibana/public/visualize/saved_visualizations/_saved_vis.js
 src/plugins/kibana/public/visualize/styles/main.less
 

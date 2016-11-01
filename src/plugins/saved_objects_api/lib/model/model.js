@@ -74,10 +74,8 @@ export default class Model {
       index: this._config.get('kibana.index'),
       type: this._type
     });
-    if (Object.keys(mappings).length === 0) {
-      return false;
-    }
-    return true;
+
+    return Object.keys(mappings).length !== 0;
   }
 
   /**

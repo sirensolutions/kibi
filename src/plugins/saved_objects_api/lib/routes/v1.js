@@ -41,11 +41,10 @@ module.exports = (server, API_ROOT) => {
     method: 'POST',
     path: `${API_ROOT}/{index}/{type}/{id}`,
     handler: (request, reply) => {
-      let Model;
       let model;
       try {
-        Model = require(`../model/${request.params.type}`);
-        model = new Model(server);
+        const ModelClass = require(`../model/${request.params.type}`);
+        model = new ModelClass(server);
       } catch (error) {
         return reply(Boom.notFound(error));
       }

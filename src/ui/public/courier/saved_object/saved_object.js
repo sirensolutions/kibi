@@ -263,7 +263,12 @@ define(function (require) {
           return es.indices.refresh({
             index: kbnIndex
           })
+          // kibi: return the id regardless of the outcome of the refresh operation.
           .then(function () {
+            return self.id;
+          })
+          .catch(function (err) {
+            console.log(err);
             return self.id;
           });
         };

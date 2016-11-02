@@ -29,7 +29,12 @@ define(function (require) {
           .finally(function () {
             conf.loading = conf.editing = false;
           })
-          .catch(notify.fatal);
+          // kibi: cancel edit and notify error
+          .catch((error) => {
+            config.set(conf.name, conf.defVal);
+            notify.error(error);
+          });
+          // kibi: end
         };
 
         $scope.maybeCancel = function ($event, conf) {

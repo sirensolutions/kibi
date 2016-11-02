@@ -81,6 +81,12 @@ define(function () {
           properties: mapping
         };
 
+        // kibi: if the mapping for this type is managed by the saved objects api return true.
+        if (type === 'session') {
+          return true;
+        }
+        // kibi: end
+
         return es.indices.putMapping({
           index: kbnIndex,
           type: type,

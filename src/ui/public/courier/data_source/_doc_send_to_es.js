@@ -2,7 +2,7 @@ define(function (require) {
   let _ = require('lodash');
   let errors = require('ui/errors');
 
-  return function (Promise, Private, es) {
+  return function (Promise, Private, es, savedObjectsAPI, kbnIndex) {
     let requestQueue = Private(require('ui/courier/_request_queue'));
     let courierFetch = Private(require('ui/courier/fetch/fetch'));
 
@@ -24,7 +24,16 @@ define(function (require) {
         params.version = doc._getVersion();
       }
 
-      return es[method](params)
+      // kibi: if we are saving a session, perform the request using the saved objects API.
+      let client;
+      if (params.index === kbnIndex && params.type === 'session') {
+        client = savedObjectsAPI;
+      } else {
+        client = es;
+      }
+
+      return client[method](params)
+      // kibi: end
       .then(function (resp) {
         if (resp.status === 409) throw new errors.VersionConflict(resp);
 

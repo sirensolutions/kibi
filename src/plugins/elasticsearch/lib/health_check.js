@@ -77,9 +77,6 @@ module.exports = function (plugin, server) {
         plugin.status.red('Elasticsearch is still initializing the kibana index.');
         return Promise.delay(REQUEST_DELAY).then(waitForShards);
       }
-
-      // otherwise we are g2g
-      plugin.status.green('Kibana index ready');
     });
   }
 
@@ -89,6 +86,10 @@ module.exports = function (plugin, server) {
     .then(waitForShards)
     .then(_.partial(migrateConfig, server))
     .then(_.partial(pluginList, plugin, server)) // kibi: added by kibi to know the list of installed plugins
+    .then(() => {
+      // kibi: moved the green status after the config is migrated, as it may be needed by some of the migration tasks
+      plugin.status.green('Kibana index ready');
+    })
     .catch(err => plugin.status.red(err));
   }
 

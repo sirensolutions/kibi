@@ -264,7 +264,11 @@ define(function (require) {
             index: kbnIndex
           })
           // kibi: return the id regardless of the outcome of the refresh operation.
-          .finally(function () {
+          .then(function () {
+            return self.id;
+          })
+          .catch(function (err) {
+            console.log(err);
             return self.id;
           });
         };

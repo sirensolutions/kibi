@@ -67,6 +67,9 @@ define(function (require) {
       obj.comp('displayName', shortDotsFilter(spec.name));
       obj.comp('$$spec', spec);
 
+      // kibi: add path sequence
+      obj.comp('path', indexPattern.paths && indexPattern.paths[spec.name] || []);
+
       return obj.create();
     }
 

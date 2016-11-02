@@ -35,6 +35,16 @@ describe('index pattern', function () {
     sinon.stub(mapper, 'getFieldsForIndexPattern', function () {
       return Promise.resolve(_.filter(mockLogstashFields, { scripted: false }));
     });
+    // kibi: needed to support dotted field names
+    sinon.stub(mapper, 'getPathsSequenceForIndexPattern', function () {
+      const paths = _(mockLogstashFields)
+      .filter({ scripted: false })
+      .pluck('name')
+      .map(fieldName => [ fieldName, fieldName.split('.') ])
+      .zipObject()
+      .value();
+      return Promise.resolve(paths);
+    });
 
     // stub mappingSetup
     mappingSetup = Private(require('ui/utils/mapping_setup'));

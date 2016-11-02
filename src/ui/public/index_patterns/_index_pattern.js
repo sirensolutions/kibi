@@ -28,6 +28,7 @@ define(function (require) {
       notExpandable: 'boolean',
       intervalName: 'string',
       sourceFiltering: 'json',
+      paths: 'json',
       fields: 'json',
       fieldFormatMap: {
         type: 'string',
@@ -289,8 +290,17 @@ define(function (require) {
 
       self.refreshFields = function () {
         return mapper.clearCache(self)
+        .then(self._fetchFieldsPath)
         .then(self._fetchFields)
         .then(self.save);
+      };
+
+      // kibi: return the field paths sequence in order to support field names with dots
+      self._fetchFieldsPath = function () {
+        return mapper.getPathsSequenceForIndexPattern(self)
+        .then(paths => {
+          self.paths = paths;
+        });
       };
 
       self._fetchFields = function () {

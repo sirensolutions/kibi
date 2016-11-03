@@ -82,13 +82,13 @@ please read the <<visualize-filters, filters>> chapter.
 === Relational filters
 The <<relational_filter, Relational Filter>> visualization allows to
 create cross-dashboard filters; for example, by looking at the _Companies_
-button in the dashboard, you can see that there are 96 companies mentioned in
+button in the dashboard, you can see that there are 342 companies mentioned in
 the TechCrunch articles about _wireless_ or _wifi_.
 
 image::images/getting_started/demo_companies_relational_filter.png["A relational filter button",align="center"]
 
 By clicking on the button, you can switch to the _Companies_ dashboard and
-visualize the data about these 96 companies:
+visualize the data about these 342 companies:
 
 image::images/getting_started/demo_companies_dashboard_overview.png["Relational filter from Articles to Companies",align="center"]
 
@@ -100,8 +100,8 @@ filters:
 image::images/getting_started/relational_filter_explanation.png["Relational filter in the filter bar",align="center"]
 
 Relational filter can be accumulated; for example, if you click on the
-`Investment rounds -->` button, you will see data about the 24 investment
-rounds related to a subset of 96 companies mentioned in the TechCrunch articles
+`Investment rounds -->` button, you will see data about the 298 investment
+rounds related to a subset of 342 companies mentioned in the TechCrunch articles
 about _wireless_ or _wifi_.
 
 Click on the _Companies_ tab to go back to the Companies dashboard.

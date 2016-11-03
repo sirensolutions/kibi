@@ -7,6 +7,7 @@ data sources using query templates.
 To add a query to the visualization, click on the _Add query_ button, then
 set the following parameters:
 
+- _Label_: the caption for the table, in case of a table template like _kibi-table-jade_. This sets the variable **label** to the given value.
 - _Source query_: the query used by the template.
 - _Template_: the template used to render results returned by _Source query_.
 
@@ -30,7 +31,7 @@ By clicking on the _Advanced_ link, you can set additional rendering options.
 It is possible to set additional template variables by writing them as JSON
 object properties in the _Template variables_ textarea.
 
-For example, to customize the heading of the <<datasource-templates,generic table template>>,
+For example, to customize the heading of the <<datasource-templates,generic table template>> (this is done automatically by the _Label_ input field above),
 which is set by default to the id of the source query, you can customize the
 `label` variable as follows:
 

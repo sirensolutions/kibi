@@ -226,8 +226,7 @@ Below is an example of configuration for a query named *Company Info* using
 a variable to get the value of property called *id* of currently selected entity
 In the example, _@doc[_source][id]@_ is replaced with an id taken from selected company.
 In the Selected Entity box we see that the selected company is
-from index: *company*, has a type: *Company* and has the id *AU9r0i2d0nSzQcsnt*
-
+from index: *company*, has a type: *Company* and has the id *AVgfaYQ0Q2VQXwxDgyfY*
 
 image::images/external_sources/query_table_var.png["SQL query with variables",align="center"]
 

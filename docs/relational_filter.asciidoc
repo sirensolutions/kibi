@@ -30,10 +30,10 @@ image::images/relational_panel/panel.png["Relational panel",align="center"]
 [[relational-panel-browsing]]
 ==== Browsing
 
-Since a <<saving-dashboards,saved search>> is now associated with a dashboard, a count indicating the current number of documents in that dashboard is displayed on each tab. For example on the previous image, there are 3558 articles, 840 companies, and 840 investments rounds that are inter-connected. These numbers coupled with the relational panel allows to get a feeling of the current state of the joined dashboards.
+Since a <<saving-dashboards,saved search>> is now associated with a dashboard, a count indicating the current number of documents in that dashboard is displayed on each tab. For example on the previous image, there are 151714 articles, 6419 companies, and 13231 investments rounds that are inter-connected. These numbers coupled with the relational panel allows to get a feeling of the current state of the joined dashboards.
 The current set of connected dashboards are displayed in the label of the blue filter image:images/relational_panel/filter.png["relational panel filter"].
 
-Since all the dashboards in the set are connected to each other, adding a filter to a dashboard will also update the connected dashboards. If you select **TechCrunch** as the source for articles, there are now in total 653 articles. Being automatically updated, we observe that only 311 companies and investments out of 840 are actually connected to those articles from TechCrunch.
+Since all the dashboards in the set are connected to each other, adding a filter to a dashboard will also update the connected dashboards. If you select **TechCrunch** as the source for articles, there are now in total 27772 articles. Being automatically updated, we observe that only 3748 companies (out of 6419) and 8136 investments (out of 13231) are actually connected to those articles from TechCrunch.
 
 image::images/relational_panel/with_filter.png["Relational panel with a filter",align="center"]
 

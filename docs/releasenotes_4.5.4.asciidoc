@@ -12,12 +12,12 @@ The 4.5.4 release of Kibi requires Elasticsearch 2.3 or later.
 * Added methods for coordinated search on Elasticsearch client
 * Added support for time-based indices in join_set
 * Added support for time-based indices in join_sequential
-* Added a button to generate report for performance investigation
+* Added a button to generate a report for performance investigation
 * Added time synchronization feature to set the same time on multiple dashboards at once
 * Added a spy panel to relational button visualization
 * Added saved objects API for index patterns
 * Added possibility to export Enhanced search results as CSV
-* Added a warning about analyzed field in relational panel configuration
+* Added a check for compatible mappings of the joined fields in relational panel configuration
 * Added datasource parameters validation in the datasource editor
 * Kibi demo packages are shipped with heatmap visualization
 * Refactored entity URI selection mechanism - now kept in Kibi state
@@ -27,7 +27,7 @@ The 4.5.4 release of Kibi requires Elasticsearch 2.3 or later.
 * Fixed issue where return statement was missing after promise reject
 * Fixed issue where timeout error was shown during join calculation
 * Fixed issue where crypto helper should throw an invalid key length exception
-* Fixed issue where filter by saved search on the visualize open panel didn't work
+* Fixed issue where filtering by saved search did not work on the visualize panel
 * Fixed issue where kibistate was initialized from saved dashboard even if it was in the URL
 * Fixed issue where pinned relational filters would crash in some direction
 * Fixed dependency issues on status page and discovery page

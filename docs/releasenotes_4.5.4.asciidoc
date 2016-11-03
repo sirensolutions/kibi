@@ -8,7 +8,6 @@ The 4.5.4 release of Kibi requires Elasticsearch 2.3 or later.
 * Various documentation improvements
 * Redesigned dashboard groups UI to show the counts, state indicator and pruned join indicator
 * Improved configuration of relational buttons
-* Added support for environment variables placeholders in configuration
 * Added support for configuration upgrades during alpha/beta periods
 * Added methods for coordinated search on Elasticsearch client
 * Added support for time-based indices in join_set
@@ -29,7 +28,6 @@ The 4.5.4 release of Kibi requires Elasticsearch 2.3 or later.
 * Fixed issue where timeout error was shown during join calculation
 * Fixed issue where crypto helper should throw an invalid key length exception
 * Fixed issue where filter by saved search on the visualize open panel didn't work
-* Fixed issue where Kibi would not always open in the configured dashboard
 * Fixed issue where kibistate was initialized from saved dashboard even if it was in the URL
 * Fixed issue where pinned relational filters would crash in some direction
 * Fixed dependency issues on status page and discovery page

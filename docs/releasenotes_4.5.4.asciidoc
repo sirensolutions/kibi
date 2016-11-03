@@ -6,7 +6,7 @@ The 4.5.4 release of Kibi requires Elasticsearch 2.3 or later.
 
 * Various bug fixes and stability improvements
 * Various documentation improvements
-* Redesigned dashboard groups UI to show the counts, state indicator and pruned join indicator
+* Redesigned dashboard groups UI to show indicators for each dashboard in a group: the count, the queries/filters, and whether a join was pruned
 * Improved configuration of relational buttons
 * Added support for configuration upgrades during alpha/beta periods
 * Added methods for coordinated search on Elasticsearch client

@@ -42,7 +42,7 @@ The 4.5.4 release of Kibi requires Elasticsearch 2.3 or later.
 * Updated tinkerpop3 query to use the graph batch API [Enterprise Edition only]
 * Added preloaded query example for OnUpdate script [Enterprise Edition only]
 * Added support for Search Guard [Enterprise Edition only]
-* Added access control plugin for Search Guard [Enteprise Edition only]
+* Added access control plugin for Search Guard [Enterprise Edition only]
 
 ==== Kibana Changes
 

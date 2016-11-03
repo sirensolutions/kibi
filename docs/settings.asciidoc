@@ -308,8 +308,10 @@ In this panel, you can define relationships between index patterns. These relati
 A relationship is defined as a **join** operation between two indices with the following fields:
 
 - _Left Index Pattern_: the left index of the join;
+- _Left Type_: the type of the left index of the join;
 - _Left Field_: the field of the left index to join on;
 - _Right Index Pattern_: the right index of the join;
+- _Right Type_: the type of the right index of the join;
 - _Right Field_: the field of the right index to join with; and
 - _Label_: the label of the relation.
 

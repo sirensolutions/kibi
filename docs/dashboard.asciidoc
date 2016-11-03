@@ -140,20 +140,24 @@ information about the raw data replace the visualization, as in this example:
 .Table
 A representation of the underlying data, presented as a paginated data grid. You can sort the items
 in the table by clicking on the table headers at the top of each column.
+
 image:images/NYCTA-Table.jpg[]
 
 .Request
 The raw request used to query the server, presented in JSON format.
+
 image:images/NYCTA-Request.jpg[]
 
 .Response
 The raw response from the server, presented in JSON format.
+
 image:images/NYCTA-Response.jpg[]
 
 .Statistics
 A summary of the statistics related to the request and the response, presented as a data grid. The data
 grid includes the query duration, the request duration, the total number of records found on the server, and the
 index pattern used to make the query.
+
 image:images/NYCTA-Statistics.jpg[]
 
 To export the raw data behind the visualization as a comma-separated-values (CSV) file, click on either the

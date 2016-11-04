@@ -8,7 +8,7 @@ machine where Kibana is running and specify the port number. For example, `{star
 When you access Kibi, the <<discover,Discover>> page loads by default with the default index pattern selected. The
 time filter is set to the last 15 minutes and the search query is set to match-all (\*).
 
-If you don't see any documents, try setting the time filter to a wider time range.
+If you don't see any documents, try <<set-time-filter, setting the time filter>> to a wider time range.
 If you still don't see any results, it's possible that you don't *have* any documents.
 
 [[status]]

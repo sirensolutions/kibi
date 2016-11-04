@@ -188,6 +188,20 @@ dropdown menu embedded in the tab:
 
 image::images/dashboard/dashboardgroup_tab.png["A dashboard group tab",align="center"]
 
+If the dashboard is associated with a saved search the count of documents on the dashboard is displayed next to dashboard name.
+Two additional indicators that might be displayed are:
+
+* Filters/Queries indicator - the filter icon displayed if there are any filters or queries on the dashboard
+* Pruned joins indicator - a star symbol displayed if any of the join operations were pruned
+
+An example image below was taken on dashboard *detailed per source*.
+By opening the select dropdown, even before switching to *Articles* dashboard
+we see that there are 7225 documents there. We also know that there are some filters or queries on this dashboard
+and at least one of the join operations was pruned.
+
+image::images/dashboard/dashboard_counts_and_indicators.png["A dashboard counts and indicators",align="center"]
+
+
 Dashboard groups can be managed by clicking on the
 <<kibi-settings-dashboards-groups,Dashboard Groups Settings>> tab.
 

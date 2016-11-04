@@ -132,3 +132,49 @@ The explanation on that filter shows that the investment rounds are filtered as 
 image::images/relational_filter/example_4.png["Relational filter explanation",align="center"]
 
 NOTE: The sequence of the joins in the explanation are shown in reverse, i.e., the last join is on top.
+
+[float]
+[[relational-filter_viewing-detailed-information]]
+==== Viewing Detailed Information
+
+To display the raw data behind the visualization, click the bar at the bottom of the container. Tabs with detailed
+information about the raw data replace the visualization, as in this example:
+
+image::images/relational_filter/spy.png["Spy panel of the relational filter visualization",align="center"]
+
+This panel provides two kinds data: some information about the query behind the relational filter in the `Multi Search` tab, and details about the visualization object in the `Debug` tab.
+
+[float]
+===== Multi Search
+
+This pane presents information about the {elastic-ref}search-multi-search.html[msearch] request executed to perform the joins. A relational filter corresponds to one query of the msearch.
+
+On the top, the time reported in `Multi search request duration` informs on how long the msearch request took. There is also additional information about each query of the msearch:
+
+- _Query Duration_: The time spent for this particular query.
+- _Hits_: the total number of documents resulting from the query.
+- _Index_: the index pattern used to execute the query.
+- _Type_: the type of the indices matched by the index pattern.
+
+For a particular relational filter, you can get additional information about the query that got executed.
+
+.Filterjoin
+This displays a table that provides several statistics about each join.
+
+image::images/relational_filter/spy_filterjoin.png["Details about the filterjoin query",align="center"]
+
+.Raw Request
+The filterjoin query as sent by Kibi. This uses the internal API for defining the join.
+
+.Translated Request
+The filterjoin query as sent to the Elasticsearch cluster, presented in JSON format.
+
+.Response
+The raw response from the server, presented in JSON format.
+
+[float]
+===== Debug
+
+The Debug tab presents the JSON object that Kibi uses for this relational filter.
+
+image::images/relational_filter/spy_debug.png["Debug spy panel of the relational filter visualization",align="center"]

@@ -14,134 +14,23 @@ For detailed instructions on Shield installation and configuration options,
 please refer to the {shield-ref}[Shield product documentation]; it is recommended
 to enable SSL on the Elasticsearch HTTP interface.
 
-=== Roles configuration
-
-Once Shield has been installed and enabled, you will need to create the
-following roles and map them to users:
-
-- A **kibitransport** role, which defines the permissions for the Kibi
-  transport client.
-- A **kibiserver** role, which defines the permissions for the Kibi process.
-- A **kibiadmin** role, which defines a user that has permissions to alter the
-  Kibi configuration.
-- A **kibiuser** role, which defines a user that as permission to use Kibi
-  but not alter its configuration.
-
-[source,yaml]
-----
-# Defines the required permissions for transport clients
-kibitransport:
-  cluster:
-      - cluster:monitor/nodes/liveness
-      #uncomment the following for sniffing
-      #- cluster:monitor/state
-  indices:
-    '*':
-      privileges: indices:data/read/get, indices:data/read/mget, indices:data/read/search
-
-# The required permissions for the Kibi server
-kibiserver:
-  cluster:
-      - cluster:monitor/nodes/info
-      - cluster:monitor/health
-      - cluster:monitor/state
-      - cluster:monitor/nodes/stats
-  indices:
-    '*':
-      privileges: indices:monitor/stats
-    '.kibi':
-      privileges: indices:admin/create, indices:admin/exists, indices:admin/mapping/put, indices:admin/mappings/fields/get, indices:admin/refresh, indices:admin/validate/query, indices:data/read/get, indices:data/read/mget, indices:data/read/search, indices:data/write/delete, indices:data/write/index, indices:data/write/update
-
-# The required permissions for Kibi users
-kibiuser:
-  cluster:
-      - cluster:monitor/nodes/info
-      - cluster:monitor/health
-  indices:
-    '.kibi':
-      privileges: indices:data/read/coordinate-search, indices:admin/exists, indices:admin/mapping/put, indices:admin/mappings/fields/get, indices:admin/refresh, indices:admin/validate/query, indices:data/read/get, indices:data/read/mget, indices:data/read/search, indices:data/write/delete, indices:data/write/index, indices:data/write/update
-    # The permissions below are applicable only to the data included in the Kibi demo distribution
-    'article':
-      privileges: indices:data/read/get, indices:admin/mappings/fields/get, indices:admin/validate/query, indices:data/read/search, indices:data/read/msearch, indices:data/read/field_stats, indices:admin/get, indices:data/read/coordinate-search, indices:data/read/coordinate-msearch
-    'company':
-      privileges: indices:data/read/get, indices:admin/mappings/fields/get, indices:admin/validate/query, indices:data/read/search, indices:data/read/msearch, indices:data/read/field_stats, indices:admin/get, indices:data/read/coordinate-search, indices:data/read/coordinate-msearch
-    'investment':
-      privileges: indices:data/read/get, indices:admin/mappings/fields/get, indices:admin/validate/query, indices:data/read/search, indices:data/read/msearch, indices:data/read/field_stats, indices:admin/get, indices:data/read/coordinate-search, indices:data/read/coordinate-msearch
-    'investor':
-      privileges: indices:data/read/get, indices:admin/mappings/fields/get, indices:admin/validate/query, indices:data/read/search, indices:data/read/msearch, indices:data/read/field_stats, indices:admin/get, indices:data/read/coordinate-search, indices:data/read/coordinate-msearch
-
-# A role that grants only access to the investment index
-restrictedindex:
-  indices:
-    'investment':
-      privileges: indices:data/read/get, indices:admin/mappings/fields/get, indices:admin/validate/query, indices:data/read/search, indices:data/read/msearch, indices:data/read/field_stats, indices:admin/get, indices:data/read/coordinate-search, indices:data/read/coordinate-msearch
-    '.kibi':
-      privileges: indices:data/read/coordinate-search, indices:admin/exists, indices:admin/mapping/put, indices:admin/mappings/fields/get, indices:admin/refresh, indices:admin/validate/query, indices:data/read/get, indices:data/read/mget, indices:data/read/search, indices:data/write/delete, indices:data/write/index, indices:data/write/update
-
-# Role to prevent access to the funded_date field in the investment index.
-restrictedfieldsinvestment:
-  cluster:
-      - cluster:monitor/nodes/info
-      - cluster:monitor/health
-      - cluster:admin/plugin/siren/license/get
-  indices:
-    '.kibi':
-      privileges: indices:data/read/coordinate-search, indices:admin/exists, indices:admin/mapping/put, indices:admin/mappings/fields/get, indices:admin/refresh, indices:admin/validate/query, indices:data/read/get, indices:data/read/mget, indices:data/read/search, indices:data/write/delete, indices:data/write/index, indices:data/write/update
-    'investment':
-      privileges: indices:data/read/get, indices:admin/mappings/fields/get, indices:admin/validate/query, indices:data/read/search, indices:data/read/msearch, indices:data/read/field_stats, indices:admin/get, indices:data/read/coordinate-search, indices:data/read/coordinate-msearch
-      fields:
-        - hassourcedescription
-        - localname
-        - investorid
-        - hassourceurl
-        - companyid
-        - id
-        - label
-        - raised_amount
-        - round_code
-        - raised_currency_code
-        - funded_date
-        - funded_year
-        - _source
-        - _score
-    'article':
-      privileges: indices:data/read/get, indices:admin/mappings/fields/get, indices:admin/validate/query, indices:data/read/search, indices:data/read/msearch, indices:data/read/field_stats, indices:admin/get, indices:data/read/coordinate-search, indices:data/read/coordinate-msearch
-    'company':
-      privileges: indices:data/read/get, indices:admin/mappings/fields/get, indices:admin/validate/query, indices:data/read/search, indices:data/read/msearch, indices:data/read/field_stats, indices:admin/get, indices:data/read/coordinate-search, indices:data/read/coordinate-msearch
-    'investor':
-      privileges: indices:data/read/get, indices:admin/mappings/fields/get, indices:admin/validate/query, indices:data/read/search, indices:data/read/msearch, indices:data/read/field_stats, indices:admin/get, indices:data/read/coordinate-search, indices:data/read/coordinate-msearch
-----
-
 === Integrating Shield with Kibi
 
-Edit _config/kibi.yml_ and specify the credentials of the **kibiserver**
-user, e.g.:
+==== Installation
 
-[source,yaml]
-----
-elasticsearch.username: "kibiserver"
-elasticsearch.password: "password"
-----
+For detailed instruction on how to configure Shield with Kibi you can refer
+to the {shield-ref}kibana.html[Using Kibana with Shield] documentation; make
+sure to set the correct index name when configuring privileges for the
+`kibana4-server` user, which is `.kibi` by default.
 
-If HTTPS is enabled on the Elasticsearch HTTP interface, make sure that the
-_elasticsearch.url_ setting is configured to use HTTPS, e.g.
+==== Transport client configuration
 
-[source,yaml]
-----
-elasticsearch.url: "https://localhost:9200"
-----
+To allow the Kibi transport client to connect to an Elasticsearch cluster
+secured with Shield, it is required to grant the
+`cluster:monitor/nodes/liveness` to a specific user.
 
-If you are using a certificate for the Elasticsearch HTTP interface that is not
-signed by a public authority, you will also need to set the
-`elasticsearch.ssl.ca` to the path of the CA certificate chain, e.g.:
-
-[source,yaml]
-----
-elasticsearch.ssl.ca: "pki/cacert.pem"
-----
-
-Specify the credentials of the **kibitransport** user in the
-**kibi_core.elasticsearch.kibitransport** section:
+Once you created this user, specify its credentials in the
+**kibi_core.elasticsearch.transport_client** section:
 
 ----
 kibi_core:
@@ -158,31 +47,5 @@ kibi_core:
   elasticsearch:
     auth_plugin: "shield"
 ----
-
-Restart Kibi after changing the configuration file; if the configuration is
-correct, you should see an authentication dialog when browsing to Kibi.
-
-==== Configurating the Kibana Shield plugin
-
-Kibi is compatible with the Kibana Shield plugin from Elastic; the plugin can
-be installed by changing to the Kibi directory and executing the following
-command:
-
-[source,shell,subs="attributes"]
-----
-bin/kibi plugin --install kibana/shield/{kibana-shield-version}
-----
-
-Once installed, edit _config/kibi.yml_ and specify an encryption key and a
-timeout for user sessions (in milliseconds), e.g.:
-
-[source,yaml]
-----
-shield.encryptionKey: "something_secret"
-shield.sessionTimeout: 86400000
-----
-
-After restarting Kibi, you should see the Kibana Shield plugin login page
-instead of the browser native authentication dialog.
 
 endif::[]

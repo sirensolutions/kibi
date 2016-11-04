@@ -11,7 +11,6 @@
 :kibi-version: 4.5.4
 :elastic-ref: https://www.elastic.co/guide/en/elasticsearch/reference/2.3/
 :elasticsearch-version: 2.3.5
-:kibana-shield-version: 2.3.5
 :searchguard-ssl-version: 2.3.5.16
 :searchguard-version: 2.3.5.7
 :shield-ref: https://www.elastic.co/guide/en/shield/2.3/

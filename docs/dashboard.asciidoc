@@ -188,15 +188,15 @@ dropdown menu embedded in the tab:
 
 image::images/dashboard/dashboardgroup_tab.png["A dashboard group tab",align="center"]
 
-If the dashboard is associated with a saved search the count of documents on the dashboard is displayed next to dashboard name.
+If the dashboard is associated with a saved search the count of documents on the dashboard is displayed next to the dashboard name.
 Two additional indicators that might be displayed are:
 
-* Filters/Queries indicator - the filter icon displayed if there are any filters or queries on the dashboard
-* Pruned joins indicator - a star symbol displayed if any of the join operations were pruned
+* _Filters/Queries indicator_ - the filter icon is displayed if there are any filter or query on the dashboard
+* _Pruned joins indicator_ - a star symbol is displayed if any of the join operations was pruned
 
-An example image below was taken on dashboard *detailed per source*.
-By opening the select dropdown, even before switching to *Articles* dashboard
-we see that there are 7225 documents there. We also know that there are some filters or queries on this dashboard
+An example image below was taken on the *Articles detailed per source* dashboard.
+By opening the select dropdown, we see that there are 7225 documents on *Articles* dashboard.
+We also know that there are some filters or queries on this dashboard
 and at least one of the join operations was pruned.
 
 image::images/dashboard/dashboard_counts_and_indicators.png["A dashboard counts and indicators",align="center"]

@@ -1,8 +1,9 @@
 define(function (require) {
   var rison = require('ui/utils/rison');
   var _ = require('lodash');
+  var kibiUtils = require('kibiutils');
 
-  return function UrlHelperFactory($location, savedDashboards, Promise, kbnDefaultAppId, kibiDefaultDashboardId) {
+  return function UrlHelperFactory($location, savedDashboards, Promise, kbnDefaultAppId, kibiDefaultDashboardTitle) {
     function UrlHelper() {
     }
 
@@ -37,9 +38,9 @@ define(function (require) {
         }
 
         if (app && app.id === 'kibana' && defaultApp && defaultApp.id === 'dashboard') {
-          if (kibiDefaultDashboardId && kibiDefaultDashboardId !== '') {
+          if (kibiDefaultDashboardTitle && kibiDefaultDashboardTitle !== '') {
             // check that the dashboard exists
-            savedDashboards.get(kibiDefaultDashboardId).then(function (savedDashboard) {
+            savedDashboards.get(kibiUtils.slugifyId(kibiDefaultDashboardTitle)).then(function (savedDashboard) {
               fulfill('/' + defaultApp.id + '/' + savedDashboard.id);
             }).catch(function (err) {
               // could not find the specified dashboard, open the first available

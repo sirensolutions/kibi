@@ -592,18 +592,78 @@ define(function (require) {
         if (_isValid('indices') && !isEqual) {
           Promise.all(checkMappings)
           .then(mappings => {
+            /**
+             * Returns true if the index and type of the leftMapping are equal to those of the rightMapping
+             */
             const areMappingsCompatibleForSirenJoin = function (leftMapping, rightMapping) {
               return leftMapping.index === rightMapping.index && leftMapping.type === rightMapping.type;
             };
 
-            const getFieldMapping = function (mapping, { indexPatternId, indexPatternType, path }) {
-              const type = indexPatternType || _.keys(mapping[indexPatternId].mappings)[0];
-              return _.values(mapping[indexPatternId].mappings[type][path].mapping)[0];
+            /**
+             * Checks if all the fields in the indices matching the index pattern have the same mapping.
+             * Returns true if this is the case.
+             */
+            const doAllFieldsHaveTheSameMapping = function (relation, mapping, { indexPatternId, indexPatternType, path }) {
+              if (_.size(mapping) === 1) {
+                return true;
+              }
+
+              const indicesAndMapping = _.map(mapping, (value, indexName) => {
+                const type = indexPatternType || Object.keys(value.mappings)[0];
+                return {
+                  index: indexName,
+                  mapping: _.values(value.mappings[type][path].mapping)[0]
+                };
+              });
+
+              let compatible = true;
+              for (let i = 1; i < indicesAndMapping.length; i++) {
+                if (!areMappingsCompatibleForSirenJoin(indicesAndMapping[i - 1].mapping, indicesAndMapping[i].mapping)) {
+                  compatible = false;
+                  break;
+                }
+              }
+              if (!compatible) {
+                if (!relation.errors) {
+                  relation.errors = [];
+                }
+                const msg = _(indicesAndMapping)
+                // group the indices having the same index/type mapping together
+                .groupBy(({ mapping }) => JSON.stringify(_.pick(mapping, [ 'index', 'type' ]), null, ' '))
+                // indicate which indices have a certain index/type mapping
+                .map((values, indexAndType) => `<li>on indices ${_.pluck(values, 'index').join(', ')} the mapping is ${indexAndType}</li>`)
+                .value()
+                .join('');
+                relation.errors.push(`The mappings for the field ${path} differ on some indices matching the pattern ${indexPatternId}:<br/>
+                                     <ul>
+                                      ${msg}
+                                    </ul>`);
+                $scope.invalid = true;
+                return false;
+              }
+              return true;
+            };
+
+            /**
+             * Returns the mapping of a field
+             */
+            const getFieldMapping = function (mapping, { indexPatternType, path }) {
+              const index = Object.keys(mapping)[0];
+              const type = indexPatternType || Object.keys(mapping[index].mappings)[0];
+              return _.values(mapping[index].mappings[type][path].mapping)[0];
             };
 
             _.each(mappings, ({ leftMapping, rightMapping, relation }) => {
               const indices = relation.indices;
 
+              // check if all field mappings for a given index pattern are the same
+              if (!doAllFieldsHaveTheSameMapping(relation, leftMapping, indices[0]) ||
+                  !doAllFieldsHaveTheSameMapping(relation, rightMapping, indices[1])) {
+                // do not check any further since the indices in the current pattern are incompatible already
+                return;
+              }
+
+              // check if the field joined together are compatible
               const leftFieldMapping = getFieldMapping(leftMapping, indices[0]);
               const rightFieldMapping = getFieldMapping(rightMapping, indices[1]);
 
@@ -616,7 +676,7 @@ define(function (require) {
 
                 const left = `${leftFieldPath} has mapping ${JSON.stringify(_.pick(leftFieldMapping, [ 'index', 'type' ]), null, ' ')}`;
                 const right = `${rightFieldPath} has mapping ${JSON.stringify(_.pick(rightFieldMapping, [ 'index', 'type' ]), null, ' ')}`;
-                relation.errors.push(`Incompatible fields: ${left} while ${right}. They must be the same!`);
+                relation.errors.push(`<b>Incompatible fields:</b> ${left} while ${right}. They must be the same!`);
                 $scope.invalid = true;
               }
             });

@@ -44,16 +44,16 @@ The Kibi EE demo distribution includes the following sample certificates in the
 _elasticsearch/config_ directory:
 
 - **truststore.jks**: a sample CA certificate chain.
-- **node-localhost-keystore.jks**: a certificate for the bundled Elasticsearch
+- **CN=localhost-keystore.jks**: a certificate for the bundled Elasticsearch
   node, used for both transport and REST API encryption.
 
 In addition, the following certificates are included in the
 _kibi/pki/searchguard_ directory:
 
-- **admin-keystore.jks**: a certificate for the Search Guard administrative
+- **CN=sgadmin-keystore.jks**: a certificate for the Search Guard administrative
   user.
 - **truststore.jks**: a copy of the CA certificate chain truststore.
-- **kibitransport-keystore.jks**: a certificate for the _kibitransport_ user.
+- **CN=demouser-keystore.jks**: a certificate for the _kibitransport_ user.
 - **ca.pem**: the certificate chain in the truststore converted to PEM
   format.
 
@@ -95,117 +95,44 @@ Certificates for the REST API can be shared across multiple nodes by setting
 multiple hostnames in the Subject Alternative Name attribute or by using a
 wildcard certificate.
 
-==== Creating a certification authority
+==== Issuing certificates using the TLS certificate generator
 
-The Git repository of the _search-guard-ssl_ plugin provides a set of scripts
-to create a Certification Authority for evaluation purposes; the scripts
-can be run on OS X and Linux systems.
+Floragunn provides a TLS certificate generation service at
+https://floragunn.com/tls-certificate-generator/ which can be used to create
+a bundle of certificates for evaluation purposes.
 
-In order to run them, you will need to install the following requirements:
+To try the certificates in a single node setup, it is possible to just
+specify **localhost** as the first hostname and submit the form.
 
-- A Java 8 runtime (either from Oracle or the OpenJDK project)
-- The OpenSSL package
+The bundle has the following contents:
 
-Once the requirements are installed, download the following file:
-
-https://github.com/floragunncom/search-guard-ssl/archive/v{searchguard-ssl-version}.zip
-
-Then, extract the contents of the file and change to the `example-pki-scripts`
-directory:
-
-[source,shell,subs="attributes"]
-----
-$ cd search-guard-ssl-{searchguard-ssl-version}/example-pki-scripts
-----
-
-Create the truststore file for the root CA by running the _gen_root_ca.sh_
-script:
-
-[source,shell]
-----
-$ ./gen_root_ca.sh
-----
-
-The script will ask to specify a password for the CA key and a password for the
-truststore file; if successful, you will see a file named _truststore.jks_ in
-the directory.
-
-For each node in the cluster, create a certificate signed by the root CA by
-running the _gen_node_cert.sh_ script; for example, the following command
-creates a certificate for the _localhost_ node:
-
-[source,shell]
-----
-$ ./gen_node_cert.sh localhost
-----
-
-The script will ask to specify the password for the CA key specified in the
-previous step and a password for the keystore file; if successful, you will see
-a file named _node-localhost-keystore.jks_ in the directory.
-
-This certificate can be used for both transport security and the REST API.
-
-Create a client certificate signed by the root CA for the administrative user
-by running the _gen_client_node_cert.sh_ script; for example, the following
-command creates a client certificate for a user named _admin_:
-
-[source,shell]
-----
-$ ./gen_client_node_cert.sh admin
-----
-
-The script will ask to specify the password for the CA key specified in the
-previous step and a password for the keystore file; if successful, you will see
-a file named _admin-keystore.jks_ in the directory.
-
-Use the same script to create a client certificate for the Kibi transport
-client:
-
-[source,shell]
-----
-$ ./gen_client_node_cert.sh kibitransport
-----
-
-If you need to recreate the sample CA from scratch, execute the _clean.sh_
-script.
+- **README.txt**: provides an overview of the bundle and the passwords for all
+  the keystores.
+- **truststore.jks**: the CA certificate chain in Keystore format.
+- **node-certificates**: the transport certificates for the nodes in several formats;
+  these certificates can also be used for the Elasticsearch REST API.
+- **client-certificates**: client certificates.
+- **root-ca**: the root CA bundle in PEM format.
+- **signing-ca**: the signing CA bundle in PEM format.
 
 === Search Guard installation
 
-Install the *search-guard-ssl* and *search-guard-2* plugins on every node in
+Install the *search-guard-ssl* and *search-guard-2* plugins on every node
 the Elasticsearch cluster by changing to the node directory and running the
-following commands:
+installation commands explained at the following URL:
 
-[source,shell,subs="attributes"]
-----
-$ bin/plugin install -b com.floragunn/search-guard-ssl/{searchguard-ssl-version}
-$ bin/plugin install -b com.floragunn/search-guard-2/{searchguard-version}
-----
+{searchguard-setup-ref}#installation
 
 Then, copy the following files to the _config_ directory of each node:
 
 - The truststore file (e.g. _truststore.jks_).
 - The keystore file containing the node certificate (e.g.
-  _node-localhost-keystore.jks_)
+  _CN=localhost-keystore.jks_)
+- The keystore file containing the certificate for the Elasticsearch REST API
+  if different than the node certificate.
 
-Open the _config/elasticsearch.yml_ file and add the Search Guard options as
-follows:
-
-[source,yaml]
-----
-searchguard.ssl.transport.enabled: true
-searchguard.ssl.transport.truststore_filepath: truststore.jks
-searchguard.ssl.transport.truststore_password: password
-searchguard.ssl.transport.keystore_filepath: node-localhost-keystore.jks
-searchguard.ssl.transport.keystore_password: password
-searchguard.ssl.transport.enforce_hostname_verification: false
-searchguard.ssl.http.enabled: true
-searchguard.ssl.http.keystore_filepath: node-localhost-keystore.jks
-searchguard.ssl.http.keystore_password: password
-searchguard.ssl.http.truststore_filepath: truststore.jks
-searchguard.ssl.http.truststore_password: password
-searchguard.authcz.admin_dn:
-  - CN=admin,OU=client,O=client,L=Test,C=DE
-----
+Open the _config/elasticsearch.yml_ file and set the following Search Guard
+options:
 
 **Node to node transport options:**
 
@@ -240,6 +167,25 @@ searchguard.authcz.admin_dn:
 - **searchguard.authcz.admin_dn**: a list of Distinguished Names in SSL client
   certificates which are authorized to submit administrative requests.
 
+E.g.:
+
+[source,yaml]
+----
+searchguard.ssl.transport.enabled: true
+searchguard.ssl.transport.truststore_filepath: truststore.jks
+searchguard.ssl.transport.truststore_password: password
+searchguard.ssl.transport.keystore_filepath: CN=localhost-keystore.jks
+searchguard.ssl.transport.keystore_password: password
+searchguard.ssl.transport.enforce_hostname_verification: false
+searchguard.ssl.http.enabled: true
+searchguard.ssl.http.keystore_filepath: CN=localhost-keystore.jks
+searchguard.ssl.http.keystore_password: password
+searchguard.ssl.http.truststore_filepath: truststore.jks
+searchguard.ssl.http.truststore_password: password
+searchguard.authcz.admin_dn:
+  - CN=sgadmin
+----
+
 NOTE: Make sure that all the files in the configuration directory and the
 certificate files are readable only by the user running Elasticsearch.
 
@@ -255,7 +201,7 @@ start.
 
 === Access control configuration
 
-Access control configuration (users, roles and permissions) is stored in an
+Access control configuration (users, roles and privileges) is stored in an
 Elasticsearch index which can be modified through the _sgadmin.sh_ script; the
 script is available in the _plugins/search-guard-2/tools_ directory in each
 Elasticsearch instance in which Search Guard has been installed.
@@ -265,8 +211,9 @@ and uploads it to the index; the request is authenticated through a client SSL
 certificate.
 
 Once the configuration has been uploaded, it will be available to all the nodes
-in the cluster, so it is not necessary to deploy the YAML files on all the
-Elasticsearch nodes.
+in the cluster, so it is not necessary to copy the Search Guard configuration
+directory to all the Elasticsearch nodes, just on the node from where sgadmin
+is run.
 
 ==== Search Guard configuration
 
@@ -275,13 +222,16 @@ A Search Guard configuration directory contains the following files:
 - **sg_config.yml**: contains the general configuration.
 - **sg_action_groups.yml**: contains named groups of permissions.
 - **sg_roles.yml**: contains the definition of roles.
-- **sg_roles_mapping.yml**: contains the mapping between users and roles.
 - **sg_internal_users.yml**: the Search Guard internal users database.
+- **sg_roles_mapping.yml**: contains the mapping between users and roles.
 
 A sample configuration is available in the _config/sgconfig_ directory in the
 Elasticsearch instance included in the demo distribution; the contents of the
 files are explained in the next sections and can be used as a general
 guideline.
+
+For additional configuration options please refer to the official
+{searchguard-ref}[Search Guard documentation].
 
 **General configuration (sg_config.yml)**
 
@@ -428,6 +378,21 @@ sg_readall:
       '*':
         - READ
 
+# Permissions for a Logstash client.
+logstash:
+  cluster:
+    - indices:admin/template/get
+    - indices:admin/template/put
+  indices:
+    'logstash-*':
+      '*':
+        - CRUD
+        - CREATE_INDEX
+    '*beat*':
+      '*':
+        - CRUD
+        - CREATE_INDEX
+
 # Permissions for the Kibi transport client.
 kibitransport:
   cluster:
@@ -487,6 +452,9 @@ The file defines the following roles:
 
 - **sg_all_access**: allows every action on the cluster.
 - **sg_readall**: allows to search data on all the indices in the cluster.
+- **logstash**: defines the permission for a Logstash client with all write and
+  creation privileges enabled on Logstash and Elastic Beats templates and
+  indices.
 - **kibitransport**: defines the permissions for the Kibi transport client.
 - **kibiserver**: defines the permissions for the Kibi server process.
 - **kibiadmin**: defines the permissions for a Kibi user with read/write
@@ -512,6 +480,45 @@ any sequence of character/any single character; for further information about
 defining permissions, please refer to the
 {searchguard-ref}/blob/master/configuration.md[Search Guard configuration
 documentation].
+
+**Users (sg_internal_users.yml)**
+
+[source,yaml]
+----
+# Internal user database
+# The hash value is a bcrypt hash and can be generated with plugin/tools/hash.sh
+admin:
+  hash: $2a$12$zMeFc6Xi.pcgDVHsvtCV9ePNteVwTE5uGxcKdf7XQcKB9.VkD8iOy
+kibiserver:
+  hash: $2a$12$zMeFc6Xi.pcgDVHsvtCV9ePNteVwTE5uGxcKdf7XQcKB9.VkD8iOy
+kibiadmin:
+  hash: $2a$12$zMeFc6Xi.pcgDVHsvtCV9ePNteVwTE5uGxcKdf7XQcKB9.VkD8iOy
+kibiuser:
+  hash: $2a$12$zMeFc6Xi.pcgDVHsvtCV9ePNteVwTE5uGxcKdf7XQcKB9.VkD8iOy
+kibinoinvestor:
+  hash: $2a$12$zMeFc6Xi.pcgDVHsvtCV9ePNteVwTE5uGxcKdf7XQcKB9.VkD8iOy
+CN=demouser:
+  hash: $2a$12$zMeFc6Xi.pcgDVHsvtCV9ePNteVwTE5uGxcKdf7XQcKB9.VkD8iOy
+logstash:
+  hash: $2a$12$zMeFc6Xi.pcgDVHsvtCV9ePNteVwTE5uGxcKdf7XQcKB9.VkD8iOy
+----
+
+The file defines the credentials for Search Guard internal users; passwords are
+stored as hashes in the _hash_ attribute beneath each username.
+
+The password for all the accounts above is _password_.
+
+To change the password of a user, you will need to generate the corresponding
+hash; this can be done by executing the _plugins/search-guard-2/tools/hash.sh_
+script as follows:
+
+[source,bash]
+----
+$ bash plugins/search-guard-2/tools/hash.sh -p password
+----
+
+The script will output the hash for the password specified after the _-p_
+switch.
 
 **Role mappings (sg_roles_mapping.yml)**
 
@@ -539,48 +546,15 @@ kibinoinvestor:
 
 kibitransport:
   users:
-    - 'CN=kibitransport,OU=client,O=client,L=Test,C=DE'
+    - 'CN=demouser'
+
+logstash:
+  users:
+    - logstash
 ----
 
 The file defines the assignment of roles to users; users authenticating through
 a client certificate are identified by the Distinguished Name in the certificate.
-
-**Users (sg_internal_users.yml)**
-
-[source,yaml]
-----
-# Internal user database
-# The hash value is a bcrypt hash and can be generated with plugin/tools/hash.sh
-admin:
-  hash: $2a$12$zMeFc6Xi.pcgDVHsvtCV9ePNteVwTE5uGxcKdf7XQcKB9.VkD8iOy
-kibiserver:
-  hash: $2a$12$zMeFc6Xi.pcgDVHsvtCV9ePNteVwTE5uGxcKdf7XQcKB9.VkD8iOy
-kibiadmin:
-  hash: $2a$12$zMeFc6Xi.pcgDVHsvtCV9ePNteVwTE5uGxcKdf7XQcKB9.VkD8iOy
-kibiuser:
-  hash: $2a$12$zMeFc6Xi.pcgDVHsvtCV9ePNteVwTE5uGxcKdf7XQcKB9.VkD8iOy
-kibinoinvestor:
-  hash: $2a$12$zMeFc6Xi.pcgDVHsvtCV9ePNteVwTE5uGxcKdf7XQcKB9.VkD8iOy
-CN=kibitransport,OU=client,O=client,L=Test,C=DE:
-  hash: $2a$12$zMeFc6Xi.pcgDVHsvtCV9ePNteVwTE5uGxcKdf7XQcKB9.VkD8iOy
-----
-
-The file defines the credentials for Search Guard internal users; passwords are
-stored as hashes in the _hash_ attribute beneath each username.
-
-The password for all the accounts above is _password_.
-
-To change the password of a user, you will need to generate the corresponding
-hash; this can be done by executing the _plugins/search-guard-2/tools/hash.sh_
-script as follows:
-
-[source,bash]
-----
-$ bash plugins/search-guard-2/tools/hash.sh -p password
-----
-
-The script will output the hash for the password specified after the _-p_
-switch.
 
 ===== Uploading the configuration to the cluster
 
@@ -602,7 +576,8 @@ $ bash plugins/search-guard-2/tools/sgadmin.sh \
   -nhnv
 ----
 
-Follows an explanation of the options set in the command above:
+You will need to specify the following arguments based on your enviroment
+configuration:
 
 - **-cd**: the path to the directory containing the Search Guard access control
   configuration.
@@ -641,11 +616,19 @@ Done with success
 ----
 
 You can then verify that SSL and authentication are enabled by making an
-authenticated request with curl, e.g.:
+authenticated request with wget, e.g.:
 
 [source,shell]
 ----
-$ curl --cacert ../kibi/pki/searchguard/ca.pem -u admin:password https://localhost:9220
+$ wget --ca-certificate=../kibi/pki/searchguard/ca.pem --http-user=kibiserver --http-password=password -qO - https://localhost:9220
+----
+
+To display information about the certificate as seen by a client you can
+execute the following command:
+
+[source,shell]
+----
+$ echo | openssl s_client -servername localhost -connect localhost:9220 -showcerts | openssl x509 -text -inform pem -text -noout
 ----
 
 === Kibi configuration
@@ -668,28 +651,20 @@ elasticsearch.url: "https://localhost:9220"
 ----
 
 If the certificate is not signed by a public authority, you will also need to
-set the `elasticsearch.ssl.ca` to the path of the CA chain bundle in PEM format,
-e.g.:
+set the `elasticsearch.ssl.ca` to the path of the CA chain bundle in PEM
+format, e.g.:
 
 [source,yaml]
 ----
 elasticsearch.ssl.ca: "pki/searchguard/ca.pem"
 ----
 
-If you need to convert the _truststore.jks_ file to PEM format, you can use the
-keytool command from the Java Runtime and OpenSSL as follows:
+If you're using the certificates generated by the TLS generator service, the
+PEM file containing the certification bundles is available in
+**root-ca/root-ca.pem**.
 
-[source,bash]
-----
-$ keytool -importkeystore \
--srckeystore config/truststore.jks \
--deststoretype pkcs12 \
--destkeystore ca.p12
-
-$ openssl pkcs12 -in ca.p12 -out ca.pem
-----
-
-To enable certificate verification, set _elasticsearch.ssl.verify_ to true, e.g.:
+To enable certificate verification, set _elasticsearch.ssl.verify_ to true,
+e.g.:
 
 [source,yaml]
 ----
@@ -718,9 +693,9 @@ client in the **kibi_core.elasticsearch.transport_client.ssl** section:
   keystore.
 - **verify_hostname**: set to **false** to disable SSL hostname verification.
   Defaults to **true**.
-- **verify_hostname_resolve**: if set to **true** the transport client will resolve
-  Elasticsearch node names using DNS when performing host name verification.
-  Defaults to **false**.
+- **verify_hostname_resolve**: if set to **true** the transport client will
+  resolve Elasticsearch node names using DNS when performing host name
+  verification.  Defaults to **false**.
 
 E.g.:
 
@@ -770,5 +745,66 @@ correct, you should see an authentication dialog when browsing to Kibi.
 
 ._Authentication dialog_
 image::images/access_control/login.png["Authentication dialog",align="center"]
+
+=== Logstash configuration
+
+To enable authentication in Logstash, set the following parameters in the
+**output.elasticsearch** section:
+
+- **user**: the username of the user having the logstash role.
+- **password**: the password of the user having the logstash role.
+- **ssl**: set to true to enable SSL.
+- **truststore**: the path to the CA truststore file.
+- **truststore_password**: the password of the CA truststore file.
+
+E.g.:
+
+[source]
+----
+output {
+    elasticsearch {
+       hosts => ["localhost:9220"]
+       user => logstash
+       password => password
+       ssl => true
+       truststore => "/etc/pki/logstash/truststore.jks"
+       truststore_password => password
+    }
+}
+----
+
+The truststore file must be copied on all nodes running Logstash.
+
+=== Beats configuration
+
+To enable authentication in a beat which connects directly to Elasticsearch,
+set the following parameters in the **output.elasticsearch** section:
+
+- **protocol**: set to _https_.
+- **username**: the username of the user having the logstash role.
+- **password**: the password of the user having the logstash role.
+- **tls.certificate_authorities**: an array containing the path to the CA
+  truststore file in PEM format.
+
+E.g.:
+
+[source,yaml]
+----
+output:
+
+  elasticsearch:
+    hosts: ["localhost:9220"]
+
+    protocol: "https"
+    username: "logstash"
+    password: "password"
+
+    tls:
+      certificate_authorities: ["/etc/pki/filebeat/ca.pem"]
+
+----
+
+The root certification authority in PEM format must be copied to all nodes
+running one or more beats.
 
 endif::[]

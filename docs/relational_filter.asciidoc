@@ -142,7 +142,7 @@ information about the raw data replace the visualization, as in this example:
 
 image::images/relational_filter/spy.png["Spy panel of the relational filter visualization",align="center"]
 
-This panel provides two kinds data: some information about the query behind the relational filter in the `Multi Search` tab, and details about the visualization object in the `Debug` tab.
+This panel provides two kinds data: information about the query behind the relational filter in the `Multi Search` tab, and details about the visualization object in the `Debug` tab.
 
 [float]
 ===== Multi Search

@@ -20,7 +20,7 @@ define(function (require) {
       let fieldCache = self.cache = new LocalCache();
 
       /**
-       * getPathsSequenceForIndexPattern returns an object which keys are paths, and values the path as an array
+       * kibi: getPathsSequenceForIndexPattern returns an object which keys are paths, and values the path as an array
        * with each element being a field name.
        */
       self.getPathsSequenceForIndexPattern = function (indexPattern) {
@@ -45,6 +45,7 @@ define(function (require) {
         .catch(handleMissingIndexPattern)
         .then(_getPathsForIndexPattern);
       };
+      // kibi: end
 
       /**
        * Gets an object containing all fields with their mappings

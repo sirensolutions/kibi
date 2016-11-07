@@ -24,7 +24,8 @@ define(function (require) {
         .sortBy((mapping, typeName) => typeName === '_default_' ? 1 : 0)
         .each(mappings => {
           _.defaults(paths, mapProperties(mappings.properties));
-        });
+        })
+        .value();
       });
       return paths;
     };

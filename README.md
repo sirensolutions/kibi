@@ -1,6 +1,6 @@
-# Kibi 4.5.4
+# Kibi 4.6.1
 
-Kibi extends Kibana 4.5.4 with data intelligence features; the core feature of
+Kibi extends Kibana 4.6.1 with data intelligence features; the core feature of
 Kibi is the capability to join and filter data from multiple Elasticsearch
 indexes and from SQL/NOSQL data sources ("external queries").
 
@@ -33,6 +33,7 @@ documentation.
 
 Kibi | Elasticsearch
 --- | ---
+4.6.1 | 2.4.x
 4.5.4 | 2.3.x
 4.5.3 | 2.3.x
 4.5.1 | 2.3.x
@@ -41,7 +42,6 @@ Kibi | Elasticsearch
 0.3.x | 2.2.x
 0.2.0 | 1.6, 1.7
 0.1.x | 1.6, 1.7
-=======
 
 ## License
 
@@ -62,6 +62,3 @@ For more information see the licensing section on Kibi website
 
 Kibana is a trademark of Elasticsearch BV, registered in the U.S. and in other
 countries.
-
-Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in
-other countries.

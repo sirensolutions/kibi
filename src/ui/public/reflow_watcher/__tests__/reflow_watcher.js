@@ -1,24 +1,24 @@
 describe('Reflow watcher', function () {
   require('angular');
-  var $ = require('jquery');
-  var _ = require('lodash');
-  var expect = require('expect.js');
-  var sinon = require('auto-release-sinon');
-  var ngMock = require('ngMock');
+  let $ = require('jquery');
+  let _ = require('lodash');
+  let expect = require('expect.js');
+  let sinon = require('auto-release-sinon');
+  let ngMock = require('ngMock');
 
-  var $body = $(document.body);
-  var $window = $(window);
-  var expectStubbedEventAndEl = function (stub, event, $el) {
+  let $body = $(document.body);
+  let $window = $(window);
+  let expectStubbedEventAndEl = function (stub, event, $el) {
     expect(stub.getCalls().some(function (call) {
-      var events = call.args[0].split(' ');
+      let events = call.args[0].split(' ');
       return _.contains(events, event) && $el.is(call.thisValue);
     })).to.be(true);
   };
 
-  var EventEmitter;
-  var reflowWatcher;
-  var $rootScope;
-  var $onStub;
+  let EventEmitter;
+  let reflowWatcher;
+  let $rootScope;
+  let $onStub;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector) {
@@ -49,7 +49,7 @@ describe('Reflow watcher', function () {
   });
 
   describe('un-listens in #destroy()', function () {
-    var $offStub;
+    let $offStub;
 
     beforeEach(function () {
       $offStub = sinon.stub($.fn, 'off');
@@ -67,7 +67,7 @@ describe('Reflow watcher', function () {
   });
 
   it('triggers the "reflow" event within a new angular tick', function () {
-    var stub = sinon.stub();
+    let stub = sinon.stub();
     reflowWatcher.on('reflow', stub);
     reflowWatcher.trigger();
 

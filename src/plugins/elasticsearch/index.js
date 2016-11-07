@@ -21,6 +21,7 @@ module.exports = function ({ Plugin }) {
         password: string(),
         shardTimeout: number().default(0),
         requestTimeout: number().default(300000),
+        customHeaders: object().default({}),
         pingTimeout: number().default(30000),
         startupTimeout: number().default(5000),
         ssl: object({
@@ -30,9 +31,19 @@ module.exports = function ({ Plugin }) {
           key: string()
         }).default(),
         apiVersion: string().default('2.0'),
-        engineVersion: string().valid('^2.3.0').default('^2.3.0'),
+        engineVersion: string().valid('^2.4.0').default('^2.4.0'),
         plugins: Joi.array().default([])
       }).default();
+    },
+
+    uiExports: {
+      injectDefaultVars(server, options) {
+        return {
+          esRequestTimeout: options.requestTimeout,
+          esShardTimeout: options.shardTimeout,
+          esApiVersion: options.apiVersion,
+        };
+      }
     },
 
     init(server, options) {

@@ -1,10 +1,10 @@
 describe('styleCompile directive', function () {
-  var $ = require('jquery');
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
+  let $ = require('jquery');
+  let expect = require('expect.js');
+  let ngMock = require('ngMock');
 
-  var config;
-  var $rootScope;
+  let config;
+  let $rootScope;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function ($injector) {
@@ -13,7 +13,7 @@ describe('styleCompile directive', function () {
   }));
 
   it('exports a few config values as css', function () {
-    var $style = $('#style-compile');
+    let $style = $('#style-compile');
 
     config.set('truncate:maxHeight', 0);
     $rootScope.$apply();

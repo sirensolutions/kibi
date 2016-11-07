@@ -1,27 +1,27 @@
 define(function (require) {
   return function MapFactory(Private, tilemap, $sanitize) {
-    var _ = require('lodash');
-    var $ = require('jquery');
-    var L = require('leaflet');
-    var marked = require('marked');
+    let _ = require('lodash');
+    let $ = require('jquery');
+    let L = require('leaflet');
+    let marked = require('marked');
     marked.setOptions({
       gfm: true, // Github-flavored markdown
       sanitize: true // Sanitize HTML tags
     });
 
-    var defaultMapZoom = 2;
-    var defaultMapCenter = [15, 5];
-    var defaultMarkerType = 'Scaled Circle Markers';
+    let defaultMapZoom = 2;
+    let defaultMapCenter = [15, 5];
+    let defaultMarkerType = 'Scaled Circle Markers';
 
-    var tilemapOptions = tilemap.options;
-    var attribution = $sanitize(marked(tilemapOptions.attribution));
+    let tilemapOptions = tilemap.options;
+    let attribution = $sanitize(marked(tilemapOptions.attribution));
 
-    var mapTiles = {
+    let mapTiles = {
       url: tilemap.url,
       options: _.assign({}, tilemapOptions, { attribution })
     };
 
-    var markerTypes = {
+    let markerTypes = {
       'Scaled Circle Markers': Private(require('ui/vislib/visualizations/marker_types/scaled_circles')),
       'Shaded Circle Markers': Private(require('ui/vislib/visualizations/marker_types/shaded_circles')),
       'Shaded Geohash Grid': Private(require('ui/vislib/visualizations/marker_types/geohash_grid')),
@@ -49,7 +49,7 @@ define(function (require) {
       this._geoJson = _.get(this._chartData, 'geoJson');
       this._attr = params.attr || {};
 
-      var mapOptions = {
+      let mapOptions = {
         minZoom: tilemapOptions.minZoom,
         maxZoom: tilemapOptions.maxZoom,
         noWrap: true,
@@ -64,8 +64,8 @@ define(function (require) {
     TileMapMap.prototype.addBoundingControl = function () {
       if (this._boundingControl) return;
 
-      var self = this;
-      var drawOptions = { draw: {} };
+      let self = this;
+      let drawOptions = { draw: {} };
 
       _.each(['polyline', 'polygon', 'circle', 'marker', 'rectangle'], function (drawShape) {
         if (self._events && !self._events.listenerCount(drawShape)) {
@@ -87,11 +87,11 @@ define(function (require) {
     TileMapMap.prototype.addFitControl = function () {
       if (this._fitControl) return;
 
-      var self = this;
-      var fitContainer = L.DomUtil.create('div', 'leaflet-control leaflet-bar leaflet-control-fit');
+      let self = this;
+      let fitContainer = L.DomUtil.create('div', 'leaflet-control leaflet-bar leaflet-control-fit');
 
       // Add button to fit container to points
-      var FitControl = L.Control.extend({
+      let FitControl = L.Control.extend({
         options: {
           position: 'topleft'
         },
@@ -123,7 +123,7 @@ define(function (require) {
     TileMapMap.prototype.addTitle = function (mapLabel) {
       if (this._label) return;
 
-      var label = this._label = L.control();
+      let label = this._label = L.control();
 
       label.onAdd = function () {
         this._div = L.DomUtil.create('div', 'tilemap-info tilemap-label');
@@ -194,13 +194,13 @@ define(function (require) {
      * @return {Object} marker layer
      */
     TileMapMap.prototype._createMarkers = function (options) {
-      var MarkerType = markerTypes[this._markerType];
+      let MarkerType = markerTypes[this._markerType];
       return new MarkerType(this.map, this._geoJson, options);
     };
 
     TileMapMap.prototype._attachEvents = function () {
-      var self = this;
-      var saturateTiles = self.saturateTiles.bind(self);
+      let self = this;
+      let saturateTiles = self.saturateTiles.bind(self);
 
       this._tileLayer.on('tileload', saturateTiles);
 
@@ -226,11 +226,11 @@ define(function (require) {
       });
 
       this.map.on('draw:created', function (e) {
-        var drawType = e.layerType;
+        let drawType = e.layerType;
         if (!self._events || !self._events.listenerCount(drawType)) return;
 
         // TODO: Different drawTypes need differ info. Need a switch on the object creation
-        var bounds = e.layer.getBounds();
+        let bounds = e.layer.getBounds();
 
         self._events.emit(drawType, {
           e: e,

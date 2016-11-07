@@ -1,28 +1,28 @@
 define(function (require) {
   return function IndexPatternFactory(Private, timefilter, createNotifier, config, kbnIndex, Promise, $rootScope, safeConfirm) {
-    var _ = require('lodash');
-    var errors = require('ui/errors');
-    var angular = require('angular');
+    let _ = require('lodash');
+    let errors = require('ui/errors');
+    let angular = require('angular');
 
-    var fieldformats = Private(require('ui/registry/field_formats'));
-    var getIds = Private(require('ui/index_patterns/_get_ids'));
-    var mapper = Private(require('ui/index_patterns/_mapper'));
-    var intervals = Private(require('ui/index_patterns/_intervals'));
-    var getComputedFields = require('ui/index_patterns/_get_computed_fields');
-    var DocSource = Private(require('ui/courier/data_source/doc_source'));
-    var mappingSetup = Private(require('ui/utils/mapping_setup'));
-    var FieldList = Private(require('ui/index_patterns/_field_list'));
+    let fieldformats = Private(require('ui/registry/field_formats'));
+    let getIds = Private(require('ui/index_patterns/_get_ids'));
+    let mapper = Private(require('ui/index_patterns/_mapper'));
+    let intervals = Private(require('ui/index_patterns/_intervals'));
+    let getComputedFields = require('ui/index_patterns/_get_computed_fields');
+    let DocSource = Private(require('ui/courier/data_source/doc_source'));
+    let mappingSetup = Private(require('ui/utils/mapping_setup'));
+    let FieldList = Private(require('ui/index_patterns/_field_list'));
 
-    var flattenHit = Private(require('ui/index_patterns/_flatten_hit'));
-    var formatHit = require('ui/index_patterns/_format_hit');
-    var calculateIndices = Private(require('ui/index_patterns/_calculate_indices'));
-    var patternCache = Private(require('ui/index_patterns/_pattern_cache'));
+    let flattenHit = Private(require('ui/index_patterns/_flatten_hit'));
+    let formatHit = require('ui/index_patterns/_format_hit');
+    let calculateIndices = Private(require('ui/index_patterns/_calculate_indices'));
+    let patternCache = Private(require('ui/index_patterns/_pattern_cache'));
 
-    var type = 'index-pattern';
+    let type = 'index-pattern';
 
-    var notify = createNotifier();
+    let notify = createNotifier();
 
-    var mapping = mappingSetup.expandShorthand({
+    let mapping = mappingSetup.expandShorthand({
       title: 'string',
       timeFieldName: 'string',
       notExpandable: 'boolean',
@@ -34,8 +34,8 @@ define(function (require) {
         _serialize: function (map) {
           if (map == null) return;
 
-          var count = 0;
-          var serialized = _.transform(map, function (flat, format, field) {
+          let count = 0;
+          let serialized = _.transform(map, function (flat, format, field) {
             if (!format) return;
             count++;
             flat[field] = format;
@@ -46,7 +46,7 @@ define(function (require) {
         _deserialize: function (map) {
           if (map == null) return {};
           return _.mapValues(angular.fromJson(map), function (mapping) {
-            var FieldFormat = fieldformats.byId[mapping.id];
+            let FieldFormat = fieldformats.byId[mapping.id];
             return FieldFormat && new FieldFormat(mapping.params);
           });
         }
@@ -54,11 +54,11 @@ define(function (require) {
     });
 
     function IndexPattern(id) {
-      var self = this;
+      let self = this;
 
       setId(id);
 
-      var docSource = new DocSource();
+      let docSource = new DocSource();
 
       self.init = function () {
         // tell the docSource where to find the doc
@@ -137,7 +137,7 @@ define(function (require) {
       self.addScriptedField = function (name, script, type, lang) {
         type = type || 'string';
 
-        var scriptFields = _.pluck(self.getScriptedFields(), 'name');
+        let scriptFields = _.pluck(self.getScriptedFields(), 'name');
 
         if (_.contains(scriptFields, name)) {
           throw new errors.DuplicateField(name);
@@ -155,7 +155,7 @@ define(function (require) {
       };
 
       self.removeScriptedField = function (name) {
-        var fieldIndex = _.findIndex(self.fields, {
+        let fieldIndex = _.findIndex(self.fields, {
           name: name,
           scripted: true
         });
@@ -168,10 +168,10 @@ define(function (require) {
       self.popularizeField = function (fieldName, unit) {
         if (unit == null) unit = 1;
 
-        var field = _.get(self, ['fields', 'byName', fieldName]);
+        let field = _.get(self, ['fields', 'byName', fieldName]);
         if (!field) return;
 
-        var count = Math.max((field.count || 0) + unit, 0);
+        let count = Math.max((field.count || 0) + unit, 0);
         if (field.count !== count) {
           field.count = count;
           self.save();
@@ -203,7 +203,7 @@ define(function (require) {
       };
 
       self.toDetailedIndexList = Promise.method(function (start, stop, sortDirection) {
-        var interval = self.getInterval();
+        let interval = self.getInterval();
 
         if (interval) {
           return intervals.toIndexList(self.id, interval, start, stop, sortDirection);
@@ -233,7 +233,7 @@ define(function (require) {
       };
 
       self.prepBody = function () {
-        var body = {};
+        let body = {};
 
         // serialize json fields
         _.forOwn(mapping, function (fieldMapping, fieldName) {
@@ -257,12 +257,12 @@ define(function (require) {
       }
 
       self.create = function () {
-        var body = self.prepBody();
+        let body = self.prepBody();
         return docSource.doCreate(body)
         .then(setId)
         .catch(function (err) {
           if (_.get(err, 'origError.status') === 409) {
-            var confirmMessage = 'Are you sure you want to overwrite this?';
+            let confirmMessage = 'Are you sure you want to overwrite this?';
 
             return safeConfirm(confirmMessage).then(
               function () {
@@ -286,7 +286,7 @@ define(function (require) {
       };
 
       self.save = function () {
-        var body = self.prepBody();
+        let body = self.prepBody();
         // kibi: notify errors
         return docSource.doIndex(body).then(setId).catch((error) => {
           notify.error(error);

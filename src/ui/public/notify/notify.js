@@ -1,11 +1,11 @@
 define(function (require) {
-  var _ = require('lodash');
-  var $ = require('jquery');
-  var modules = require('ui/modules');
-  var module = modules.get('kibana/notify');
-  var errors = require('ui/notify/errors');
-  var Notifier = require('kibie/notify/notifier');
-  var rootNotifier = new Notifier();
+  let _ = require('lodash');
+  let $ = require('jquery');
+  let modules = require('ui/modules');
+  let module = modules.get('kibana/notify');
+  let errors = require('ui/notify/errors');
+  let Notifier = require('kibie/notify/notifier');
+  let rootNotifier = new Notifier();
 
   require('ui/notify/directives');
   require('ui/directives/truncated');
@@ -30,7 +30,7 @@ define(function (require) {
 
   module.run(function ($rootScope, $injector) {
     if ($injector.has('config')) {
-      var configInitListener = $rootScope.$on('init:config', function () {
+      let configInitListener = $rootScope.$on('init:config', function () {
         applyConfig();
         configInitListener();
       });

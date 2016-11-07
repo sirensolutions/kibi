@@ -1,5 +1,5 @@
-<div ng-controller="discover" class="app-container">
-  <navbar>
+<div discover-app class="app-container">
+  <navbar name="discover">
     <form role="form" class="fill inline-form" ng-submit="fetch()" name="discoverSearch">
       <div class="typeahead" kbn-typeahead="discover">
         <div class="input-group"
@@ -60,6 +60,7 @@
           <i aria-hidden="true" class="fa fa-external-link"></i>
         </button>
       </kbn-tooltip>
+      <navbar-extensions config-template="configTemplate" name="discover"></navbar-extensions>
     </div>
   </navbar>
 

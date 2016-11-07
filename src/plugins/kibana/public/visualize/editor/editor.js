@@ -4,6 +4,8 @@ define(function (require) {
   require('plugins/kibana/visualize/editor/sidebar');
   require('plugins/kibana/visualize/editor/agg_filter');
 
+  const stateMonitorFactory = require('ui/state_management/state_monitor_factory');
+  require('ui/navbar_extensions');
   require('ui/visualize');
   require('ui/collapsible_sidebar');
   require('ui/share');
@@ -54,8 +56,14 @@ define(function (require) {
     'kibana/notify',
     'kibana/courier'
   ])
-  .controller('VisEditor', function ($scope, $route, timefilter, AppState, kbnUrl, $timeout, courier, kibiState, Private,
-                                     Promise, createNotifier) {
+  .directive('visualizeApp', function () {
+    return {
+      controllerAs: 'visualizeApp',
+      controller: VisEditor,
+    };
+  });
+
+  function VisEditor($scope, $route, timefilter, AppState, kbnUrl, $timeout, courier, kibiState, Private, Promise, createNotifier) {
     const doesVisDependsOnSelectedEntities = Private(require('ui/kibi/components/commons/_does_vis_depends_on_selected_entities'));
     const angular = require('angular');
     const ConfigTemplate = require('ui/ConfigTemplate');
@@ -80,6 +88,9 @@ define(function (require) {
       location: 'Visualization Editor'
     });
 
+    let stateMonitor;
+    const $appStatus = this.appStatus = {};
+
     const savedVis = $route.current.locals.savedVis;
 
     const vis = savedVis.vis;
@@ -103,16 +114,16 @@ define(function (require) {
       docTitle.change(savedVis.title);
     }
 
-    let $state = $scope.$state = (function initState() {
-      const savedVisState = vis.getState();
-      const stateDefaults = {
-        uiState: savedVis.uiStateJSON ? JSON.parse(savedVis.uiStateJSON) : {},
-        linked: !!savedVis.savedSearchId,
-        query: searchSource.getOwn('query') || {query_string: {query: '*'}},
-        filters: searchSource.getOwn('filter') || [],
-        vis: savedVisState
-      };
+    const savedVisState = vis.getState();
+    const stateDefaults = {
+      uiState: savedVis.uiStateJSON ? JSON.parse(savedVis.uiStateJSON) : {},
+      linked: !!savedVis.savedSearchId,
+      query: searchSource.getOwn('query') || {query_string: {query: '*'}},
+      filters: searchSource.getOwn('filter') || [],
+      vis: savedVisState
+    };
 
+    let $state = $scope.$state = (function initState() {
       $state = new AppState(stateDefaults);
 
       if (!angular.equals($state.vis, savedVisState)) {
@@ -137,9 +148,16 @@ define(function (require) {
       $scope.editableVis = editableVis;
       $scope.state = $state;
       $scope.uiState = $state.makeStateful('uiState');
+      $scope.appStatus = $appStatus;
 
       $scope.conf = _.pick($scope, 'doSave', 'savedVis', 'shareData');
       $scope.configTemplate = configTemplate;
+
+      stateMonitor = stateMonitorFactory.create($state, stateDefaults);
+      stateMonitor.ignoreProps([ 'vis.listeners' ]).onChange((status) => {
+        $appStatus.dirty = status.dirty;
+      });
+      $scope.$on('$destroy', () => stateMonitor.destroy());
 
       editableVis.listeners.click = vis.listeners.click = filterBarClickHandler($state);
       editableVis.listeners.brush = vis.listeners.brush = brushEvent;
@@ -248,6 +266,7 @@ define(function (require) {
 
       savedVis.save()
       .then(function (id) {
+        stateMonitor.setInitialState($state.toJSON());
         configTemplate.close('save');
 
         if (id) {
@@ -309,5 +328,5 @@ define(function (require) {
     }
 
     init();
-  });
+  }
 });

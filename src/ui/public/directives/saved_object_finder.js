@@ -1,12 +1,12 @@
 define(function (require) {
-  var module = require('ui/modules').get('kibana');
-  var _ = require('lodash');
-  var rison = require('ui/utils/rison');
-  var keymap = require('ui/utils/key_map');
+  let module = require('ui/modules').get('kibana');
+  let _ = require('lodash');
+  let rison = require('ui/utils/rison');
+  let keymap = require('ui/utils/key_map');
 
   module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Private, config) {
-    var services = Private(require('ui/saved_objects/saved_object_registry')).byLoaderPropertiesName;
-    var urlHelper = Private(require('ui/kibi/helpers/url_helper'));
+    let services = Private(require('ui/saved_objects/saved_object_registry')).byLoaderPropertiesName;
+    let urlHelper = Private(require('ui/kibi/helpers/url_helper'));
 
     return {
       restrict: 'E',
@@ -36,22 +36,22 @@ define(function (require) {
         });
         // kibi: end
 
-        var self = this;
+        let self = this;
 
         // The number of items to show in the list
         $scope.perPage = config.get('savedObjects:perPage');
 
         // the text input element
-        var $input = $element.find('input[ng-model=filter]');
+        let $input = $element.find('input[ng-model=filter]');
 
         // the list that will hold the suggestions
-        var $list = $element.find('ul');
+        let $list = $element.find('ul');
 
         // the current filter string, used to check that returned results are still useful
-        var currentFilter = $scope.filter;
+        let currentFilter = $scope.filter;
 
         // the most recently entered search/filter
-        var prevSearch;
+        let prevSearch;
 
         // the list of hits, used to render display
         self.hits = [];
@@ -91,7 +91,7 @@ define(function (require) {
             $scope.userOnChoose(hit, $event);
           }
 
-          var url = self.makeUrl(hit);
+          let url = self.makeUrl(hit);
           if (!url || url === '#' || url.charAt(0) !== '#') return;
 
           $event.preventDefault();
@@ -133,7 +133,7 @@ define(function (require) {
             case 'enter':
               if (self.hitCount !== 1) return;
 
-              var hit = self.hits[0];
+              let hit = self.hits[0];
               if (!hit) return;
 
               self.onChoose(hit, $event);
@@ -206,8 +206,8 @@ define(function (require) {
             case 'enter':
               if (!self.selector.enabled) break;
 
-              var hitIndex = ((page.number - 1) * paginate.perPage) + self.selector.index;
-              var hit = self.hits[hitIndex];
+              let hitIndex = ((page.number - 1) * paginate.perPage) + self.selector.index;
+              let hit = self.hits[hitIndex];
               if (!hit) break;
 
               self.onChoose(hit, $event);
@@ -249,9 +249,9 @@ define(function (require) {
           // but ensure that we don't search for the same
           // thing twice. This is called from multiple places
           // and needs to be smart about when it actually searches
-          var filter = currentFilter;
+          let filter = currentFilter;
           // kibi: allow to filter visualizations based on the savedsearch associated to a dashboard
-          var basedOnSameSavedSearch = $scope.kibi.basedOnSameSavedSearch;
+          let basedOnSameSavedSearch = $scope.kibi.basedOnSameSavedSearch;
           if (prevSearch === filter && $scope.kibi._prevBasedOnSameSavedSearch === basedOnSameSavedSearch) return;
 
           prevSearch = filter;
@@ -277,7 +277,7 @@ define(function (require) {
         }
 
         function scrollIntoView($element, snapTop) {
-          var el = $element[0];
+          let el = $element[0];
 
           if (!el) return;
 

@@ -1,23 +1,23 @@
-var moment = require('moment');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
+let moment = require('moment');
+let expect = require('expect.js');
+let ngMock = require('ngMock');
 
 describe('Query decorator', function () {
 
-  var _ = require('lodash');
-  var config;
+  let _ = require('lodash');
+  let config;
 
-  var indexPattern;
+  let indexPattern;
 
-  var getComputedFields;
+  let getComputedFields;
 
-  var fn;
+  let fn;
   beforeEach(ngMock.module(
     'kibana',
     function ($provide) {
       // Super simple config stub
       $provide.service('config', function () {
-        var keys = {};
+        let keys = {};
         return {
           get: function (key) { return keys[key]; },
           set: function (key, value) { keys[key] = value; }

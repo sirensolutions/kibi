@@ -6,6 +6,7 @@ let path = require('path');
 let utils = require('requirefrom')('src/utils');
 let fromRoot = utils('fromRoot');
 const randomBytes = require('crypto').randomBytes;
+const getData = require('../path').getData;
 
 import pkg from '../../../src/utils/packageJson';
 
@@ -89,6 +90,10 @@ module.exports = () => Joi.object({
     initialize: Joi.boolean().default(true)
   }).default(),
 
+  path: Joi.object({
+    data: Joi.string().default(getData())
+  }).default(),
+
   optimize: Joi.object({
     enabled: Joi.boolean().default(true),
     bundleFilter: Joi.string().default('!tests'),
@@ -115,6 +120,10 @@ module.exports = () => Joi.object({
       )
       .default(Joi.ref('$dev')),
     profile: Joi.boolean().default(false)
+  }).default(),
+
+  status: Joi.object({
+    allowAnonymous: Joi.boolean().default(false)
   }).default(),
 
   tilemap: Joi.object({

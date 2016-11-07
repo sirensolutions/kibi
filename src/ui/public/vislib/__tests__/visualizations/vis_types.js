@@ -1,11 +1,11 @@
-var angular = require('angular');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
-var _ = require('lodash');
+let angular = require('angular');
+let expect = require('expect.js');
+let ngMock = require('ngMock');
+let _ = require('lodash');
 
 describe('Vislib Vis Types Test Suite', function () {
-  var visTypes;
-  var visFunc;
+  let visTypes;
+  let visFunc;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {

@@ -1,13 +1,13 @@
-var d3 = require('d3');
-var angular = require('angular');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
-var _ = require('lodash');
-var $ = require('jquery');
+let d3 = require('d3');
+let angular = require('angular');
+let expect = require('expect.js');
+let ngMock = require('ngMock');
+let _ = require('lodash');
+let $ = require('jquery');
 
-var woahLotsOfVariables = require('fixtures/vislib/mock_data/date_histogram/_series');
-var notQuiteEnoughVariables = require('fixtures/vislib/mock_data/not_enough_data/_one_point');
-var someOtherVariables = {
+let woahLotsOfVariables = require('fixtures/vislib/mock_data/date_histogram/_series');
+let notQuiteEnoughVariables = require('fixtures/vislib/mock_data/not_enough_data/_one_point');
+let someOtherVariables = {
   'series pos': require('fixtures/vislib/mock_data/date_histogram/_series'),
   'series pos neg': require('fixtures/vislib/mock_data/date_histogram/_series_pos_neg'),
   'series neg': require('fixtures/vislib/mock_data/date_histogram/_series_neg'),
@@ -16,7 +16,7 @@ var someOtherVariables = {
   'stackedSeries': require('fixtures/vislib/mock_data/date_histogram/_stacked_series')
 };
 
-var visLibParams = {
+let visLibParams = {
   type: 'area',
   addLegend: true,
   addTooltip: true
@@ -25,8 +25,8 @@ var visLibParams = {
 
 _.forOwn(someOtherVariables, function (variablesAreCool, imaVariable) {
   describe('Vislib Area Chart Test Suite for ' + imaVariable + ' Data', function () {
-    var vis;
-    var persistedState;
+    let vis;
+    let persistedState;
 
     beforeEach(ngMock.module('kibana', function ($provide) {
       // kibi: for running kibi tests
@@ -79,8 +79,8 @@ _.forOwn(someOtherVariables, function (variablesAreCool, imaVariable) {
     });
 
     describe('stackData method', function () {
-      var stackedData;
-      var isStacked;
+      let stackedData;
+      let isStacked;
 
       beforeEach(function () {
         vis.handler.charts.forEach(function (chart) {
@@ -108,12 +108,12 @@ _.forOwn(someOtherVariables, function (variablesAreCool, imaVariable) {
     });
 
     describe('addCircleEvents method', function () {
-      var circle;
-      var brush;
-      var d3selectedCircle;
-      var onBrush;
-      var onClick;
-      var onMouseOver;
+      let circle;
+      let brush;
+      let d3selectedCircle;
+      let onBrush;
+      let onClick;
+      let onMouseOver;
 
       beforeEach(ngMock.inject(function () {
         vis.handler.charts.forEach(function (chart) {
@@ -161,12 +161,12 @@ _.forOwn(someOtherVariables, function (variablesAreCool, imaVariable) {
 
       it('should not draw circles where d.y === 0', function () {
         vis.handler.charts.forEach(function (chart) {
-          var series = chart.chartData.series;
-          var isZero = series.some(function (d) {
+          let series = chart.chartData.series;
+          let isZero = series.some(function (d) {
             return d.y === 0;
           });
-          var circles = $.makeArray($(chart.chartEl).find('circle'));
-          var isNotDrawn = circles.some(function (d) {
+          let circles = $.makeArray($(chart.chartEl).find('circle'));
+          let isNotDrawn = circles.some(function (d) {
             return d.__data__.y === 0;
           });
 
@@ -186,7 +186,7 @@ _.forOwn(someOtherVariables, function (variablesAreCool, imaVariable) {
 
       it('should return a yMin and yMax', function () {
         vis.handler.charts.forEach(function (chart) {
-          var yAxis = chart.handler.yAxis;
+          let yAxis = chart.handler.yAxis;
 
           expect(yAxis.domain[0]).to.not.be(undefined);
           expect(yAxis.domain[1]).to.not.be(undefined);
@@ -195,7 +195,7 @@ _.forOwn(someOtherVariables, function (variablesAreCool, imaVariable) {
 
       it('should render a zero axis line', function () {
         vis.handler.charts.forEach(function (chart) {
-          var yAxis = chart.handler.yAxis;
+          let yAxis = chart.handler.yAxis;
 
           if (yAxis.yMin < 0 && yAxis.yMax > 0) {
             expect($(chart.chartEl).find('line.zero-line').length).to.be(1);
@@ -227,8 +227,8 @@ _.forOwn(someOtherVariables, function (variablesAreCool, imaVariable) {
 
       it('should return yAxis extents equal to data extents', function () {
         vis.handler.charts.forEach(function (chart) {
-          var yAxis = chart.handler.yAxis;
-          var yVals = [vis.handler.data.getYMin(), vis.handler.data.getYMax()];
+          let yAxis = chart.handler.yAxis;
+          let yVals = [vis.handler.data.getYMin(), vis.handler.data.getYMax()];
 
           expect(yAxis.domain[0]).to.equal(yVals[0]);
           expect(yAxis.domain[1]).to.equal(yVals[1]);

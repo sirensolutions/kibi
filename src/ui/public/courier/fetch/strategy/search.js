@@ -1,8 +1,8 @@
 define(function (require) {
   return function FetchStrategyForSearch(Private, Promise, timefilter, kbnIndex) {
-    var _ = require('lodash');
-    var angular = require('angular');
-    var toJson = require('ui/utils/aggressive_parse').toJson;
+    let _ = require('lodash');
+    let angular = require('angular');
+    let toJson = require('ui/utils/aggressive_parse').toJson;
     const emptySearch = require('ui/kibi/empty_search');
 
     return {
@@ -22,7 +22,7 @@ define(function (require) {
               return indexList;
             }
 
-            var timeBounds = timefilter.getBounds();
+            let timeBounds = timefilter.getBounds();
             return indexList.toIndexList(timeBounds.min, timeBounds.max);
           })
           .then(function (indexList) {

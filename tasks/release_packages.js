@@ -1,10 +1,8 @@
 import exec from './utils/exec';
-import SimpleGit from 'simple-git';
-import { promisify } from 'bluebird';
 import readline from 'readline';
 
 export default (grunt) => {
-  const packages = grunt.config.get('packages');
+  const publishConfig = grunt.config.get('packages').publish;
   const platforms = grunt.config.get('platforms');
 
   function debS3(deb) {
@@ -17,7 +15,8 @@ export default (grunt) => {
       '--sign', deb.signatureKeyId,
       '--arch', deb.arch,
       `--access-key-id=${deb.awsKey}`,
-      `--secret-access-key=${deb.awsSecret}`
+      `--secret-access-key=${deb.awsSecret}`,
+      '--gpg-options=--digest-algo SHA512'
     ]);
   }
 
@@ -76,38 +75,31 @@ export default (grunt) => {
   grunt.registerTask('_publishPackages:upload', function (environment) {
     const aws = grunt.file.readJSON('.aws-config.json');
     const signature = grunt.file.readJSON('.signing-config.json');
-    const done = this.async();
-    const simpleGit = new SimpleGit();
-    const revparse = promisify(simpleGit.revparse, simpleGit);
 
-    return revparse(['--short', 'HEAD'])
-    .then(hash => {
-      const trimmedHash = hash.trim();
-      platforms.forEach((platform) => {
-        if (platform.debPath) {
-          debS3({
-            filePath: platform.debPath,
-            bucket: packages[environment].bucket,
-            prefix: packages[environment].debPrefix.replace('XXXXXXX', trimmedHash),
-            signatureKeyId: signature.id,
-            arch: platform.name.match('x64') ? 'amd64' : 'i386',
-            awsKey: aws.key,
-            awsSecret: aws.secret
-          });
-        }
+    platforms.forEach((platform) => {
+      if (platform.debPath) {
+        debS3({
+          filePath: platform.debPath,
+          bucket: publishConfig[environment].bucket,
+          prefix: publishConfig[environment].debPrefix,
+          signatureKeyId: signature.id,
+          arch: platform.debArch,
+          awsKey: aws.key,
+          awsSecret: aws.secret
+        });
+      }
 
-        if (platform.rpmPath) {
-          rpmS3({
-            filePath: platform.rpmPath,
-            bucket: packages[environment].bucket,
-            prefix: packages[environment].rpmPrefix.replace('XXXXXXX', trimmedHash),
-            signingKeyName: signature.name,
-            awsKey: aws.key,
-            awsSecret: aws.secret
-          });
-        }
-      });
-      done();
+      if (platform.rpmPath) {
+        rpmS3({
+          filePath: platform.rpmPath,
+          bucket: publishConfig[environment].bucket,
+          prefix: publishConfig[environment].rpmPrefix,
+          signingKeyName: signature.name,
+          awsKey: aws.key,
+          awsSecret: aws.secret
+        });
+      }
     });
+
   });
 };

@@ -1,10 +1,10 @@
 describe('Field', function () {
-  var _ = require('lodash');
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
+  let _ = require('lodash');
+  let expect = require('expect.js');
+  let ngMock = require('ngMock');
 
-  var BaseAggParam;
-  var FieldAggParam;
+  let BaseAggParam;
+  let FieldAggParam;
 
   beforeEach(ngMock.module('kibana'));
   // fetch out deps
@@ -15,7 +15,7 @@ describe('Field', function () {
 
   describe('constructor', function () {
     it('it is an instance of BaseAggParam', function () {
-      var aggParam = new FieldAggParam({
+      let aggParam = new FieldAggParam({
         name: 'field'
       });
 

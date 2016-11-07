@@ -18,8 +18,9 @@ module.exports = function (kibana) {
         uses: [
           'visTypes',
           'spyModes',
+          'navbarExtensions',
           'settingsSections',
-          'hacks'
+          'hacks' // kibi: allow to insert our own version of some kibana components like the kibiee notifier
         ],
 
         autoload: kibana.autoload.require.concat(
@@ -28,7 +29,6 @@ module.exports = function (kibana) {
           'plugins/kibana/visualize',
           'plugins/kibana/dashboard',
           'plugins/kibana/settings',
-          'plugins/kibana/settings/sections',
           'plugins/kibana/doc',
           'ui/vislib',
           'ui/agg_response',
@@ -58,7 +58,13 @@ module.exports = function (kibana) {
 
           return ret;
         }
-      }
+      },
+
+      injectDefaultVars(server, options) {
+        return {
+          kbnIndex: options.index
+        };
+      },
     }
   });
 

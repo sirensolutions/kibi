@@ -1,18 +1,21 @@
-define(function (require) {
-  var _ = require('lodash');
-  var rison = require('ui/utils/rison');
+import KbnUrlProvider from 'ui/url';
 
-  var applyDiff = require('ui/utils/diff_object');
-  var qs = require('ui/utils/query_string');
+define(function (require) {
+  let _ = require('lodash');
+  let rison = require('ui/utils/rison');
+
+  let applyDiff = require('ui/utils/diff_object');
+  let qs = require('ui/utils/query_string');
 
   return function StateProvider(createNotifier, Private, $rootScope, $location) {
-    var Events = Private(require('ui/events'));
+    const notify = createNotifier();
+    const Events = Private(require('ui/events'));
 
     _.class(State).inherits(Events);
     function State(urlParam, defaults) {
       State.Super.call(this);
 
-      var self = this;
+      let self = this;
       self.setDefaults(defaults);
       self._urlParam = urlParam || '_s';
 
@@ -39,11 +42,10 @@ define(function (require) {
     }
 
     State.prototype._readFromURL = function () {
-      var search = $location.search();
+      let search = $location.search();
       try {
         return search[this._urlParam] ? rison.decode(search[this._urlParam]) : null;
       } catch (e) {
-        var notify = createNotifier();
         notify.error('Unable to parse URL');
         search[this._urlParam] = rison.encode(this._defaults);
         $location.search(search).replace();
@@ -56,7 +58,7 @@ define(function (require) {
      * @returns {void}
      */
     State.prototype.fetch = function () {
-      var stash = this._readFromURL();
+      let stash = this._readFromURL();
 
       // nothing to read from the url? save if ordered to persist
       if (stash === null) {
@@ -69,7 +71,7 @@ define(function (require) {
 
       _.defaults(stash, this._defaults);
       // apply diff to state from stash, will change state in place via side effect
-      var diffResults = applyDiff(this, stash);
+      let diffResults = applyDiff(this, stash);
 
       if (diffResults.keys.length) {
         this.emit('fetch_with_changes', diffResults.keys);
@@ -81,8 +83,8 @@ define(function (require) {
      * @returns {void}
      */
     State.prototype.save = function (replace) {
-      var stash = this._readFromURL();
-      var state = this.toObject();
+      let stash = this._readFromURL();
+      let state = this.toObject();
       replace = replace || false;
 
       if (!stash) {
@@ -92,14 +94,14 @@ define(function (require) {
 
       _.defaults(state, this._defaults);
       // apply diff to state from stash, will change state in place via side effect
-      var diffResults = applyDiff(stash, state);
+      let diffResults = applyDiff(stash, state);
 
       if (diffResults.keys.length) {
         this.emit('save_with_changes', diffResults.keys);
       }
 
       // persist the state in the URL
-      var search = $location.search();
+      let search = $location.search();
       search[this._urlParam] = this.toRISON();
       if (replace) {
         $location.search(search).replace();
@@ -124,7 +126,7 @@ define(function (require) {
     State.prototype.reset = function () {
       // apply diff to _attributes from defaults, this is side effecting so
       // it will change the state in place.
-      var diffResults = applyDiff(this, this._defaults);
+      let diffResults = applyDiff(this, this._defaults);
       if (diffResults.keys.length) {
         this.emit('reset_with_changes', diffResults.keys);
       }

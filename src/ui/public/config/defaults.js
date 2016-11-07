@@ -232,6 +232,10 @@ define(function (require) {
         value: 500,
         description: 'Limit the number of elements to retrieve during the graph expansion'
       },
+      'kibi:graphRelationFetchLimit' : {
+        value: 2500,
+        description: 'Limit the number of relations to retrieve after the graph expansion'
+      },
       'kibi:graphMaxConcurrentCalls' : {
         value: 15,
         description: 'Limit the number of concurrent calls done by the Graph Browser'

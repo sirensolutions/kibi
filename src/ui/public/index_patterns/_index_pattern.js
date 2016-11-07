@@ -27,7 +27,8 @@ define(function (require) {
       timeFieldName: 'string',
       notExpandable: 'boolean',
       intervalName: 'string',
-      sourceFiltering: 'json',
+      sourceFiltering: 'json', // kibi: store which fields are to be retrieved in the source
+      paths: 'json', // kibi: store the path of each field, in order to support dotted field names
       fields: 'json',
       fieldFormatMap: {
         type: 'string',
@@ -297,9 +298,19 @@ define(function (require) {
 
       self.refreshFields = function () {
         return mapper.clearCache(self)
+        .then(self._fetchFieldsPath) // kibi: retrieve the path of each field
         .then(self._fetchFields)
         .then(self.save);
       };
+
+      // kibi: return the field paths sequence in order to support field names with dots
+      self._fetchFieldsPath = function () {
+        return mapper.getPathsSequenceForIndexPattern(self)
+        .then(paths => {
+          self.paths = paths;
+        });
+      };
+      // kibi: end
 
       self._fetchFields = function () {
         return mapper.getFieldsForIndexPattern(self, true)

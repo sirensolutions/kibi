@@ -5,6 +5,7 @@ define(function (require) {
 
     let IndexPatternMissingIndices = require('ui/errors').IndexPatternMissingIndices;
     let transformMappingIntoFields = Private(require('ui/index_patterns/_transform_mapping_into_fields'));
+    let _getPathsForIndexPattern = Private(require('ui/kibi/index_patterns/_get_paths_for_index_pattern'));
     let intervals = Private(require('ui/index_patterns/_intervals'));
     let patternToWildcard = Private(require('ui/index_patterns/_pattern_to_wildcard'));
 
@@ -17,6 +18,34 @@ define(function (require) {
 
       // proper-ish cache, keeps a clean copy of the object, only returns copies of it's copy
       let fieldCache = self.cache = new LocalCache();
+
+      /**
+       * kibi: getPathsSequenceForIndexPattern returns an object which keys are paths, and values the path as an array
+       * with each element being a field name.
+       */
+      self.getPathsSequenceForIndexPattern = function (indexPattern) {
+        let promise = Promise.resolve(indexPattern.id);
+
+        if (indexPattern.intervalName) {
+          promise = self.getIndicesForIndexPattern(indexPattern)
+          .then(function (existing) {
+            if (existing.matches.length === 0) throw new IndexPatternMissingIndices();
+            return existing.matches.slice(-config.get('indexPattern:fieldMapping:lookBack')); // Grab the most recent
+          });
+        }
+
+        return promise.then(function (indexList) {
+          return es.indices.getMapping({
+            index: indexList,
+            ignoreUnavailable: _.isArray(indexList),
+            allowNoIndices: false,
+            includeDefaults: true
+          });
+        })
+        .catch(handleMissingIndexPattern)
+        .then(_getPathsForIndexPattern);
+      };
+      // kibi: end
 
       /**
        * Gets an object containing all fields with their mappings

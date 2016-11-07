@@ -45,9 +45,16 @@ module.exports = function (server, doc) {
     [packageVersion, packagePreReleaseIndex] = computePreReleaseIndex(packagePreReleaseMatches);
   }
 
+  // kibi: allow upgrade from a release to a snapshot
+  let isSnapshot = false;
+  if (packageVersion.endsWith('-SNAPSHOT')) {
+    isSnapshot = true;
+    packageVersion = packageVersion.substring(0, packageVersion.length - 9);
+  }
+
   try {
     if (semver.eq(version, packageVersion)) {
-      return preReleaseIndex < packagePreReleaseIndex;
+      return isSnapshot || preReleaseIndex < packagePreReleaseIndex;
     }
     return semver.lt(version, packageVersion);
   } catch (e) {

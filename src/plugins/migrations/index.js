@@ -25,6 +25,7 @@ module.exports = function (kibana) {
             this.status.green('All objects are up to date.');
           }
         }).catch ((err) => {
+          server.log(['error', 'migration'], err);
           this.status.red(`An error occurred while checking for out of date objects: ${err}`);
         });
       };

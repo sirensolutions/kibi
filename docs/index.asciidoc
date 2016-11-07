@@ -11,11 +11,9 @@
 :kibi-version: 4.6.1
 :elastic-ref: https://www.elastic.co/guide/en/elasticsearch/reference/2.3/
 :elasticsearch-version: 2.4.1
-:kibana-shield-version: 2.4.1
-:searchguard-ssl-version: 2.3.5.16
-:searchguard-version: 2.3.5.7
 :shield-ref: https://www.elastic.co/guide/en/shield/2.4/
 :searchguard-ref: https://github.com/floragunncom/search-guard-docs
+:searchguard-setup-ref: https://github.com/floragunncom/search-guard/tree/es-2.3.5
 :kibi-ref: http://siren.solutions/kibi/docs/current/
 :start-url: http://localhost:5606
 :start-url-shield: https://localhost:5606

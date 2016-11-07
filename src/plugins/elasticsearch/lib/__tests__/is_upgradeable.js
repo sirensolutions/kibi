@@ -42,6 +42,12 @@ describe('plugins/elasticsearch', function () {
     upgradeDoc('4.0.0-rc1', '4.0.0', true);
     upgradeDoc('4.0.0-rc1-snapshot', '4.0.0', false);
     upgradeDoc('4.1.0-rc1-snapshot', '4.1.0-rc1', false);
+
+    // kibi: support upgrade from a release to a snapshot
+    upgradeDoc('4.5.4', '4.5.4-SNAPSHOT', true);
+    upgradeDoc('4.1.0', '4.5.4-SNAPSHOT', true);
+
+    // kibi: support alpha/beta release cycle
     upgradeDoc('4.5.4-alpha-1', '4.5.4-alpha-2', true);
     upgradeDoc('4.5.4-beta-1', '4.5.4-alpha-2', false);
     upgradeDoc('4.5.4-alpha-1', '4.5.4-beta-2', true);

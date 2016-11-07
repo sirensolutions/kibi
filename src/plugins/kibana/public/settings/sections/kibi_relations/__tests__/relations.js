@@ -32,7 +32,14 @@ describe('Kibi Settings', function () {
     ngMock.inject(function (_$timeout_, $injector, $rootScope, $controller, Private) {
       if (mappings) {
         const es = $injector.get('es');
-        sinon.stub(es.indices, 'getFieldMapping').returns(Promise.resolve(mappings));
+        const stub = sinon.stub(es.indices, 'getFieldMapping');
+        _.each(mappings, ({ indices, type = [], path, mappings }) => {
+          stub.withArgs(
+            sinon.match.has('index', indices)
+            .and(sinon.match.has('type', type))
+            .and(sinon.match.has('field', [ path ]))
+          ).returns(Promise.resolve(mappings));
+        });
       }
 
       indexToDashboardMapPromise = Promise.resolve(indexToDashboardsMap);
@@ -265,63 +272,98 @@ describe('Kibi Settings', function () {
                 }
               ]
             },
-            mappings: {
-              'index-a': {
+            mappings: [
+              {
+                indices: [ 'index-a' ],
+                path: 'path-a',
                 mappings: {
-                  'type-a': {
-                    'path-a': {
-                      full_name: 'path-a',
-                      mapping: {
+                  'index-a': {
+                    mappings: {
+                      'type-a': {
                         'path-a': {
-                          type: 'string',
-                          index: 'not_analyzed'
-                        }
-                      }
-                    },
-                    a1: {
-                      full_name: 'a1',
-                      mapping: {
-                        a1: {
-                          type: 'string',
-                          index: 'analyzed'
+                          full_name: 'path-a',
+                          mapping: {
+                            'path-a': {
+                              type: 'string',
+                              index: 'not_analyzed'
+                            }
+                          }
                         }
                       }
                     }
                   }
                 }
               },
-              'index-b': {
+              {
+                indices: [ 'index-a' ],
+                path: 'a1',
                 mappings: {
-                  'type-b': {
-                    'path-b': {
-                      full_name: 'path-b',
-                      mapping: {
-                        'path-b': {
-                          type: 'long',
-                          index: 'not_analyzed'
+                  'index-a': {
+                    mappings: {
+                      'type-a': {
+                        a1: {
+                          full_name: 'a1',
+                          mapping: {
+                            a1: {
+                              type: 'string',
+                              index: 'analyzed'
+                            }
+                          }
                         }
                       }
-                    },
-                    b1: {
-                      full_name: 'b1',
-                      mapping: {
+                    }
+                  }
+                }
+              },
+              {
+                indices: [ 'index-b' ],
+                path: 'path-b',
+                mappings: {
+                  'index-b': {
+                    mappings: {
+                      'type-b': {
+                        'path-b': {
+                          full_name: 'path-b',
+                          mapping: {
+                            'path-b': {
+                              type: 'long',
+                              index: 'not_analyzed'
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                indices: [ 'index-b' ],
+                path: 'b1',
+                mappings: {
+                  'index-b': {
+                    mappings: {
+                      'type-b': {
                         b1: {
-                          type: 'string',
-                          index: 'not_analyzed'
+                          full_name: 'b1',
+                          mapping: {
+                            b1: {
+                              type: 'string',
+                              index: 'not_analyzed'
+                            }
+                          }
                         }
                       }
                     }
                   }
                 }
               }
-            },
+            ],
             events: {
               'change:config.kibi:relations': function (event, relations) {
                 expect($scope.relations.relationsIndices).to.have.length(2);
                 _.each($scope.relations.relationsIndices, function (relation) {
                   expect(relation.errors).to.have.length(1);
                   expect(relation.errors[0]).to.match(/Incompatible/);
-                  done();
                 });
                 done();
               }
@@ -350,63 +392,270 @@ describe('Kibi Settings', function () {
                 }
               ]
             },
-            mappings: {
-              'index-a': {
+            mappings: [
+              {
+                indices: [ 'index-a' ],
+                path: 'nested.path-a',
                 mappings: {
-                  'type-a': {
-                    'nested.path-a': {
-                      full_name: 'nested.path-a',
-                      mapping: {
-                        'path-a': {
-                          type: 'string',
-                          index: 'not_analyzed'
-                        }
-                      }
-                    },
-                    a1: {
-                      full_name: 'a1',
-                      mapping: {
-                        a1: {
-                          type: 'string',
-                          index: 'analyzed'
+                  'index-a': {
+                    mappings: {
+                      'type-a': {
+                        'nested.path-a': {
+                          full_name: 'nested.path-a',
+                          mapping: {
+                            'path-a': {
+                              type: 'string',
+                              index: 'not_analyzed'
+                            }
+                          }
                         }
                       }
                     }
                   }
                 }
               },
-              'index-b': {
+              {
+                indices: [ 'index-a' ],
+                path: 'a1',
                 mappings: {
-                  'type-b': {
-                    'nested.path-b': {
-                      full_name: 'nested.path-b',
-                      mapping: {
-                        'path-b': {
-                          type: 'long',
-                          index: 'not_analyzed'
+                  'index-a': {
+                    mappings: {
+                      'type-a': {
+                        a1: {
+                          full_name: 'a1',
+                          mapping: {
+                            a1: {
+                              type: 'string',
+                              index: 'analyzed'
+                            }
+                          }
                         }
                       }
-                    },
-                    b1: {
-                      full_name: 'b1',
-                      mapping: {
+                    }
+                  }
+                }
+              },
+              {
+                indices: [ 'index-b' ],
+                path: 'nested.path-b',
+                mappings: {
+                  'index-b': {
+                    mappings: {
+                      'type-b': {
+                        'nested.path-b': {
+                          full_name: 'nested.path-b',
+                          mapping: {
+                            'path-b': {
+                              type: 'long',
+                              index: 'not_analyzed'
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                indices: [ 'index-b' ],
+                path: 'b1',
+                mappings: {
+                  'index-b': {
+                    mappings: {
+                      'type-b': {
                         b1: {
-                          type: 'string',
-                          index: 'not_analyzed'
+                          full_name: 'b1',
+                          mapping: {
+                            b1: {
+                              type: 'string',
+                              index: 'not_analyzed'
+                            }
+                          }
                         }
                       }
                     }
                   }
                 }
               }
-            },
+            ],
             events: {
               'change:config.kibi:relations': function (event, relations) {
                 expect($scope.relations.relationsIndices).to.have.length(2);
                 _.each($scope.relations.relationsIndices, function (relation) {
                   expect(relation.errors).to.have.length(1);
                   expect(relation.errors[0]).to.match(/Incompatible/);
-                  done();
+                });
+                done();
+              }
+            }
+          });
+          $timeout.flush();
+        });
+
+        it('should support index patterns 1', function (done) {
+          init({
+            relations: {
+              relationsIndices: [
+                {
+                  indices: [
+                    { indexPatternId: 'a*', path: 'path-a' },
+                    { indexPatternId: 'b', path: 'path-b' }
+                  ],
+                  label: 'rel 1'
+                }
+              ]
+            },
+            mappings: [
+              {
+                indices: [ 'a*' ],
+                path: 'path-a',
+                mappings: {
+                  'a1': {
+                    mappings: {
+                      'type-a': {
+                        'path-a': {
+                          full_name: 'path-a',
+                          mapping: {
+                            'path-a': {
+                              type: 'string',
+                              index: 'not_analyzed'
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  'a2': {
+                    mappings: {
+                      'type-a': {
+                        'path-a': {
+                          full_name: 'path-a',
+                          mapping: {
+                            'path-a': {
+                              type: 'string',
+                              index: 'analyzed'
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                indices: [ 'b' ],
+                path: 'path-b',
+                mappings: {
+                  'b': {
+                    mappings: {
+                      'type-b': {
+                        'path-b': {
+                          full_name: 'path-b',
+                          mapping: {
+                            'path-b': {
+                              type: 'string',
+                              index: 'not_analyzed'
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            events: {
+              'change:config.kibi:relations': function (event, relations) {
+                expect($scope.relations.relationsIndices).to.have.length(1);
+                _.each($scope.relations.relationsIndices, function (relation) {
+                  expect(relation.errors).to.have.length(1);
+                  expect(relation.errors[0]).to.match(/differ on some indices matching the pattern a\*/);
+                });
+                done();
+              }
+            }
+          });
+          $timeout.flush();
+        });
+
+        it('should support index patterns 2', function (done) {
+          init({
+            relations: {
+              relationsIndices: [
+                {
+                  indices: [
+                    { indexPatternId: 'a', path: 'path-a' },
+                    { indexPatternId: 'b*', path: 'path-b' }
+                  ],
+                  label: 'rel 1'
+                }
+              ]
+            },
+            mappings: [
+              {
+                indices: [ 'a' ],
+                path: 'path-a',
+                mappings: {
+                  'a': {
+                    mappings: {
+                      'type-a': {
+                        'path-a': {
+                          full_name: 'path-a',
+                          mapping: {
+                            'path-a': {
+                              type: 'string',
+                              index: 'not_analyzed'
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                indices: [ 'b*' ],
+                path: 'path-b',
+                mappings: {
+                  'b1': {
+                    mappings: {
+                      'type-b': {
+                        'path-b': {
+                          full_name: 'path-b',
+                          mapping: {
+                            'path-b': {
+                              type: 'string',
+                              index: 'not_analyzed'
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  'b2': {
+                    mappings: {
+                      'type-b': {
+                        'path-b': {
+                          full_name: 'path-b',
+                          mapping: {
+                            'path-b': {
+                              type: 'string',
+                              index: 'analyzed'
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            events: {
+              'change:config.kibi:relations': function (event, relations) {
+                expect($scope.relations.relationsIndices).to.have.length(1);
+                _.each($scope.relations.relationsIndices, function (relation) {
+                  expect(relation.errors).to.have.length(1);
+                  expect(relation.errors[0]).to.match(/differ on some indices matching the pattern b\*/);
                 });
                 done();
               }

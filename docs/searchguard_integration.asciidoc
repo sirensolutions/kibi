@@ -393,6 +393,27 @@ logstash:
         - CRUD
         - CREATE_INDEX
 
+# Permissions for a Sentinl user.
+sentinl:
+  cluster:
+    - KIBI_CLUSTER
+  indices:
+    '*':
+      '*':
+        - KIBI_READONLY
+    'watcher_alarms*':
+      '*':
+        - KIBI_READWRITE
+        - indices:admin/template/get
+        - indices:admin/template/put
+        - CREATE_INDEX
+    '/(watcher|watcher_alarms)/':
+      '*':
+        - KIBI_READWRITE
+        - indices:admin/template/get
+        - indices:admin/template/put
+        - CREATE_INDEX
+
 # Permissions for the Kibi transport client.
 kibitransport:
   cluster:
@@ -407,6 +428,9 @@ kibiserver:
       - cluster:monitor/nodes/stats
       - KIBI_CLUSTER
   indices:
+    '*':
+      '*':
+        - indices:admin/get
     '?kibi':
       '*':
         - ALL
@@ -415,11 +439,15 @@ kibiserver:
 kibiadmin:
   cluster:
     - KIBI_CLUSTER
+    - cluster:admin/plugin/siren/license/put
   indices:
     '*':
       '*':
         - KIBI_READONLY
     '?kibi':
+      '*':
+        - KIBI_READWRITE
+    'watcher':
       '*':
         - KIBI_READWRITE
 
@@ -428,9 +456,21 @@ kibiuser:
   cluster:
     - KIBI_CLUSTER
   indices:
-    '*':
+    '?kibi':
       '*':
         - KIBI_READONLY
+    'watcher':
+      '*':
+        - KIBI_READONLY
+    'watcher_alarms*':
+      '*':
+        - KIBI_READONLY
+    '/(article|investment|company|investor)/':
+      '*':
+        - KIBI_READONLY
+    '*':
+      '*':
+        - KIBI_MSEARCH
 
 # Permissions for a Kibi user (read only), with no access to the investor index.
 kibinoinvestor:
@@ -455,6 +495,8 @@ The file defines the following roles:
 - **logstash**: defines the permission for a Logstash client with all write and
   creation privileges enabled on Logstash and Elastic Beats templates and
   indices.
+- **sentinl**: defines the permission for a Sentinl user; the role is
+  not required if the Sentinl plugin is not installed.
 - **kibitransport**: defines the permissions for the Kibi transport client.
 - **kibiserver**: defines the permissions for the Kibi server process.
 - **kibiadmin**: defines the permissions for a Kibi user with read/write
@@ -497,9 +539,11 @@ kibiuser:
   hash: $2a$12$zMeFc6Xi.pcgDVHsvtCV9ePNteVwTE5uGxcKdf7XQcKB9.VkD8iOy
 kibinoinvestor:
   hash: $2a$12$zMeFc6Xi.pcgDVHsvtCV9ePNteVwTE5uGxcKdf7XQcKB9.VkD8iOy
+logstash:
+  hash: $2a$12$zMeFc6Xi.pcgDVHsvtCV9ePNteVwTE5uGxcKdf7XQcKB9.VkD8iOy
 CN=demouser:
   hash: $2a$12$zMeFc6Xi.pcgDVHsvtCV9ePNteVwTE5uGxcKdf7XQcKB9.VkD8iOy
-logstash:
+sentinl:
   hash: $2a$12$zMeFc6Xi.pcgDVHsvtCV9ePNteVwTE5uGxcKdf7XQcKB9.VkD8iOy
 ----
 
@@ -551,6 +595,10 @@ kibitransport:
 logstash:
   users:
     - logstash
+
+sentinl:
+  users:
+    - sentinl
 ----
 
 The file defines the assignment of roles to users; users authenticating through
@@ -718,17 +766,23 @@ values in the **kibi_access_control** section:
 
 - **enabled**: set to **true** to enable the Kibi access control plugin.
   Defaults to **false**.
+- **session.ttl**: the lifetime of the session in milliseconds.
+  If not set, the session will last as long as the session cookie is valid.
+  Defaults to **3600000** (1 hour).
+- **session.keepAlive**: if set to **true**, every time a request is
+  received within the session lifetime, the session lifetime will be
+  extended by **session.ttl**.  Defaults to **true**.
 - **cookie.password**: a 32 characters long password used to derive
   the key used to encrypt and sign cookies.
 - **cookie.secure**: if set to **true**, the cookie will be transmitted
   only if the request is being served over HTTPS. It is possible to set this
   to false if Kibi is behind an SSL proxy. Defaults to **true**.
-- **cookie.ttl**: the lifetime of the session cookie in milliseconds.
-  If not set, the cookie will expire when the browser is closed, which is
-  the recommended setting. Defaults to **null**.
+- **cookie.ttl**: the lifetime of the session cookie in milliseconds.  If not
+  set, the cookie will expire when the browser is closed, which is the
+  recommended setting. Please note that browsers might not remove session
+  cookies when a tab is closed or even across restarts, so it is recommended to
+  set **session.ttl** for additional protection. Defaults to **null**.
 - **cookie.name**: the name of the session cookie. Defaults to **kac**.
-- **cookie.keepAlive**: if set to **true**, every time a request is
-  received, the expiration of the cookie will be set to **sessionCookieTTL**.
 
 E.g.:
 
@@ -738,6 +792,18 @@ kibi_access_control:
   enabled: true
   cookie:
     password: "12345678123456781234567812345678"
+----
+
+If you are using the Sentinl plugin, you can specify the Sentinl user
+credentials in the `kibi_access_control.sentinl` section, e.g.:
+
+[source,yaml]
+----
+kibi_access_control:
+  sentinl:
+    elasticsearch:
+      username: sentinl
+      password: password
 ----
 
 Restart Kibi after changing the configuration file; if the configuration is

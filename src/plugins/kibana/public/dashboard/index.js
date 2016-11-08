@@ -42,13 +42,15 @@ define(function (require) {
         // kibi: do not show the timepicker when no dashboard is selected
         // Since tabs can show counts unrelated to the time shown in the timefilter, this would be misleading
         timefilter.enabled = false;
-        if (savedDashboards.find().$$state.value.total !== 0) {
-          var dashboardId = kibiDefaultDashboardTitle ? kibiUtils.slugifyId(kibiDefaultDashboardTitle) :
-           kibiUtils.slugifyId(savedDashboards.find().$$state.value.hits[0].id);
-          timefilter.enabled = true;
-          return savedDashboards.get(dashboardId);
-        }
-        return savedDashboards.get();
+        return savedDashboards.find().then(function (resp) {
+          if (resp.hits.length > 0) {
+            timefilter.enabled = true;
+            var dashboardId = kibiDefaultDashboardTitle ? kibiDefaultDashboardTitle : resp.hits[0].id;
+            return savedDashboards.get(kibiUtils.slugifyId(dashboardId));
+          } else {
+            return savedDashboards.get();
+          }
+        });
       }
     }
   })

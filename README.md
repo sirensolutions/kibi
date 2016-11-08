@@ -1,6 +1,7 @@
 # Kibi 4.6.1
 
 Kibi extends Kibana 4.6.1 with data intelligence features; the core feature of
+
 Kibi is the capability to join and filter data from multiple Elasticsearch
 indexes and from SQL/NOSQL data sources ("external queries").
 
@@ -32,7 +33,6 @@ documentation.
 ## Compatibility Table Kibi / Elasticsearch
 
 Kibi | Elasticsearch
---- | ---
 4.6.1 | 2.4.x
 4.5.4 | 2.3.x
 4.5.3 | 2.3.x

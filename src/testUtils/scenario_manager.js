@@ -85,7 +85,8 @@ export default class ScenarioManager {
 
     try {
       await this.client.indices.delete({
-        index: indices
+        index: indices,
+        refresh: true
       });
     } catch (error) {
       // if the index never existed yet, or was already deleted it's OK

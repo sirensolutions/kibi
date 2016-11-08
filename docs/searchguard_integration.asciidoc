@@ -617,10 +617,10 @@ $ bash plugins/search-guard-2/tools/sgadmin.sh \
   -cn kibi-distribution \
   -ts config/truststore.jks \
   -tspass password \
-  -ks ../kibi/pki/searchguard/admin-keystore.jks \
+  -ks ../kibi/pki/searchguard/CN\=sgadmin-keystore.jks \
   -kspass password \
   -h localhost \
-  -p 9320 \
+  -p 9330 \
   -nhnv
 ----
 
@@ -756,7 +756,7 @@ kibi_core:
       ssl:
         ca: "pki/searchguard/truststore.jks"
         ca_password: "password"
-        key_store: "pki/searchguard/kibitransport-keystore.jks"
+        key_store: "pki/searchguard/CN=demouser-keystore.jks"
         key_store_password: "password"
         verify_hostname: true
 ----
@@ -792,6 +792,18 @@ kibi_access_control:
   enabled: true
   cookie:
     password: "12345678123456781234567812345678"
+----
+
+If Kibi is running behind a reverse SSL proxy like Nginx, remember to set
+**cookie.secure** to **false** otherwise the cookie will not be sent, e.g.:
+
+[source,yaml]
+----
+kibi_access_control:
+  enabled: true
+  cookie:
+    password: "12345678123456781234567812345678"
+    secure: false
 ----
 
 If you are using the Sentinl plugin, you can specify the Sentinl user

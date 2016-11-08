@@ -104,7 +104,8 @@ define(function (require) {
             {
               entityURI: kibiState.isSelectedEntityDisabled() ? '' : kibiState.getEntityURI(),
               queryDefs: $scope.vis.params.queryDefinitions,
-              sourcePath: $scope.vis.params.joinElasticsearchField, // it is the field from table to do the comparison
+              // it is the field from table to do the comparison
+              sourcePath: indexPattern.fields.byName[$scope.vis.params.joinElasticsearchField].path,
               fieldName: $scope.vis.params.queryFieldName
             }
           ]);

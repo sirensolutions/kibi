@@ -51,12 +51,12 @@ describe('Kibi - Inject', function () {
         inject: [
           {
             queryDefs: [ {queryId: 'ste', queryVariableName: 'variable1'} ],
-            sourcePath: 'po',
+            sourcePath: [ 'po' ],
             fieldName: 'bah'
           },
           {
             queryDefs: [ {queryId: 'ste', queryVariableName: 'variable1'} ],
-            sourcePath: 'po.po',
+            sourcePath: [ 'po', 'po' ],
             fieldName: 'bah'
           }
         ]
@@ -70,18 +70,12 @@ describe('Kibi - Inject', function () {
                   _source: {
                     pa: 'aaa',
                     po: null
-                  },
-                  fields: {
-                    po: []
                   }
                 },
                 {
                   _source: {
                     pa: 'bbb',
                     po: undefined
-                  },
-                  fields: {
-                    po: []
                   }
                 }
               ]
@@ -94,18 +88,12 @@ describe('Kibi - Inject', function () {
                   _source: {
                     pa: 'aaa',
                     po: null
-                  },
-                  fields: {
-                    'po.po': []
                   }
                 },
                 {
                   _source: {
                     pa: 'bbb',
                     po: undefined
-                  },
-                  fields: {
-                    'po.po': []
                   }
                 }
               ]
@@ -132,7 +120,7 @@ describe('Kibi - Inject', function () {
         inject: [
           {
             queryDefs: [ {queryId: 'ste', queryVariableName: 'variable1'} ],
-            sourcePath: 'po',
+            sourcePath: [ 'po' ],
             fieldName: 'bah'
           }
         ]
@@ -146,9 +134,6 @@ describe('Kibi - Inject', function () {
                   _source: {
                     pa: 'ahah',
                     po: 'ddd'
-                  },
-                  fields: {
-                    po: [ 'ddd' ]
                   }
                 }
               ]
@@ -175,7 +160,7 @@ describe('Kibi - Inject', function () {
           inject: [
             {
               queryDefs: [ 'query1' ],
-              sourcePath: 'one'
+              sourcePath: [ 'one' ]
             }
           ]
         };
@@ -184,11 +169,11 @@ describe('Kibi - Inject', function () {
           inject: [
             {
               queryDefs: [ 'query2' ],
-              sourcePath: 'two'
+              sourcePath: [ 'two' ]
             }
           ]
         };
-        const expected = [ { fielddata_fields: [ 'one' ], foo: 'bar' }, { fielddata_fields: [ 'two' ], foo: 'rab' } ];
+        const expected = [ { foo: 'bar' }, { foo: 'rab' } ];
 
         const body = JSON.stringify(query1).concat('\n', JSON.stringify(query2), '\n');
         util.getQueriesAsPromise(new buffer.Buffer(body)).map(function (query) {
@@ -208,11 +193,11 @@ describe('Kibi - Inject', function () {
           inject: [
             {
               queryDefs: [ 'query1' ],
-              sourcePath: 'ste'
+              sourcePath: [ 'ste' ]
             }
           ]
         };
-        const expected = { fielddata_fields: [ 'ste' ], foo: 'bar' };
+        const expected = { foo: 'bar' };
 
         inject.save(query);
         expect(query).to.eql(expected);
@@ -237,25 +222,48 @@ describe('Kibi - Inject', function () {
     });
 
     describe('runInject method', function () {
-      it('nested path', function (done) {
+      it('dotted field name', function (done) {
         const query = {
           queryDefs: [ {queryId: 'ste', queryVariableName: 'variable1'} ],
-          sourcePath: 'po.po',
+          sourcePath: [ 'aaa.bbb', 'ccc' ],
           fieldName: 'bah'
         };
         const hit = {
-          fields: {
-            'po.po': [
-              'booba',
-              'aaa'
-            ]
+          _source: {
+            'aaa.bbb': {
+              ccc: [ 'booba', 'aaa' ]
+            }
           }
         };
         const expected = {
           key: 'bah',
-          value: [
-            'ste'
-          ]
+          value: [ 'ste' ]
+        };
+
+        inject._runInject(query, queryEngine)
+        .then(function (run) {
+          expect(run(hit)).to.eql(expected);
+          done();
+        })
+        .catch(done);
+      });
+
+      it('nested path', function (done) {
+        const query = {
+          queryDefs: [ {queryId: 'ste', queryVariableName: 'variable1'} ],
+          sourcePath: [ 'po', 'po' ],
+          fieldName: 'bah'
+        };
+        const hit = {
+          _source: {
+            po: {
+              po: [ 'booba', 'aaa' ]
+            }
+          }
+        };
+        const expected = {
+          key: 'bah',
+          value: [ 'ste' ]
         };
 
         inject._runInject(query, queryEngine)
@@ -269,13 +277,13 @@ describe('Kibi - Inject', function () {
       it('injects a field value with match', function (done) {
         const query = {
           queryDefs: [ {queryId: 'ste', queryVariableName: 'variable1'} ],
-          sourcePath: 'po',
+          sourcePath: [ 'po' ],
           fieldName: 'bah'
         };
         const hit = {
-          fields: {
-            pa: [ 'ahah' ],
-            po: [ 'aaa' ]
+          _source: {
+            pa: 'ahah',
+            po: 'aaa'
           }
         };
         const expected = {
@@ -296,13 +304,13 @@ describe('Kibi - Inject', function () {
       it('injects a field value without match', function (done) {
         const query = {
           queryDefs: [ {queryId: 'ste', queryVariableName: 'variable1'} ],
-          sourcePath: 'po',
+          sourcePath: [ 'po' ],
           fieldName: 'bah'
         };
         const hit = {
-          fields: {
-            pa: [ 'ahah' ],
-            po: [ 'ohoh' ]
+          _source: {
+            pa: 'ahah',
+            po: 'ohoh'
           }
         };
         const expected = {
@@ -334,54 +342,10 @@ describe('Kibi - Inject', function () {
       it('bad source path 1', function (done) {
         const query = {
           foo: 'bar',
-          inject: [{
-            queryDefs: [ {queryId: 'ste', queryVariableName: 'variable1'} ],
-            sourcePath: 'op',
-            fieldName: 'bah'
-          }]
-        };
-        const response = {
-          responses: [{
-            hits: {
-              hits: [
-                {
-                  _source: {
-                    pa: 'ahah',
-                    po: 'ccc'
-                  }
-                }
-              ]
-            }
-          }]
-        };
-
-        const expected = {
-          responses: [{
-            hits: {
-              hits: [
-                {
-                  fields: {
-                    bah: []
-                  },
-                  _source: {
-                    pa: 'ahah',
-                    po: 'ccc'
-                  }
-                }
-              ]
-            }
-          }]
-        };
-        run(query, response, expected, done);
-      });
-
-      it('bad source path 2', function (done) {
-        const query = {
-          foo: 'bar',
           inject: [
             {
               queryDefs: [ {queryId: 'ste', queryVariableName: 'variable1'} ],
-              sourcePath: 'po.op',
+              sourcePath: [ 'op' ],
               fieldName: 'bah'
             }
           ]
@@ -394,25 +358,7 @@ describe('Kibi - Inject', function () {
                   {
                     _source: {
                       pa: 'ahah',
-                      po: {
-                        po: 'ddd'
-                      }
-                    },
-                    fields: {
-                      'po.op': []
-                    }
-                  },
-                  {
-                    _source: {
-                      pa: 'ahah',
-                      po: {
-                        op: 'ddd'
-                      }
-                    },
-                    fields: {
-                      'po.op': [
-                        'ddd'
-                      ]
+                      po: 'ccc'
                     }
                   }
                 ]
@@ -428,8 +374,67 @@ describe('Kibi - Inject', function () {
                 hits: [
                   {
                     fields: {
-                      bah: [],
-                      'po.op': []
+                      bah: []
+                    },
+                    _source: {
+                      pa: 'ahah',
+                      po: 'ccc'
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        };
+        run(query, response, expected, done);
+      });
+
+      it('bad source path 2', function (done) {
+        const query = {
+          foo: 'bar',
+          inject: [
+            {
+              queryDefs: [ {queryId: 'ste', queryVariableName: 'variable1'} ],
+              sourcePath: [ 'po', 'op' ],
+              fieldName: 'bah'
+            }
+          ]
+        };
+        const response = {
+          responses: [
+            {
+              hits: {
+                hits: [
+                  {
+                    _source: {
+                      pa: 'ahah',
+                      po: {
+                        po: 'ddd'
+                      }
+                    }
+                  },
+                  {
+                    _source: {
+                      pa: 'ahah',
+                      po: {
+                        op: 'ddd'
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        };
+
+        const expected = {
+          responses: [
+            {
+              hits: {
+                hits: [
+                  {
+                    fields: {
+                      bah: []
                     },
                     _source: {
                       pa: 'ahah',
@@ -440,10 +445,7 @@ describe('Kibi - Inject', function () {
                   },
                   {
                     fields: {
-                      bah: [ 'ste' ],
-                      'po.op': [
-                        'ddd'
-                      ]
+                      bah: [ 'ste' ]
                     },
                     _source: {
                       pa: 'ahah',
@@ -466,12 +468,12 @@ describe('Kibi - Inject', function () {
           inject: [
             {
               queryDefs: [ {queryId: 'ste', queryVariableName: 'variable1'} ],
-              sourcePath: 'po',
+              sourcePath: [ 'po' ],
               fieldName: 'bah'
             },
             {
               queryDefs: [ {queryId: 'ets', queryVariableName: 'variable1'} ],
-              sourcePath: 'po',
+              sourcePath: [ 'po' ],
               fieldName: 'hab'
             }
           ]
@@ -485,18 +487,12 @@ describe('Kibi - Inject', function () {
                     _source: {
                       pa: 'ahah',
                       po: 'ddd'
-                    },
-                    fields: {
-                      po: [ 'ddd' ]
                     }
                   },
                   {
                     _source: {
                       pa: 'ahah',
                       po: 'ccc'
-                    },
-                    fields: {
-                      po: [ 'ccc' ]
                     }
                   }
                 ]
@@ -516,8 +512,7 @@ describe('Kibi - Inject', function () {
                       ],
                       bah: [
                         'ste'
-                      ],
-                      po: [ 'ddd' ]
+                      ]
                     },
                     _source: {
                       pa: 'ahah',
@@ -529,8 +524,7 @@ describe('Kibi - Inject', function () {
                       bah: [],
                       hab: [
                         'ets'
-                      ],
-                      po: [ 'ccc' ]
+                      ]
                     },
                     _source: {
                       pa: 'ahah',
@@ -551,7 +545,7 @@ describe('Kibi - Inject', function () {
           inject: [
             {
               queryDefs: [ {queryId: 'ste', queryVariableName: 'variable1'} ],
-              sourcePath: 'po',
+              sourcePath: [ 'po' ],
               fieldName: 'bah'
             }
           ]
@@ -565,18 +559,12 @@ describe('Kibi - Inject', function () {
                     _source: {
                       pa: 'ahah',
                       po: 'ohoh'
-                    },
-                    fields: {
-                      po: [ 'ohoh' ]
                     }
                   },
                   {
                     _source: {
                       pa: 'ahah',
                       po: 'aaa'
-                    },
-                    fields: {
-                      po: [ 'aaa' ]
                     }
                   }
                 ]
@@ -591,8 +579,7 @@ describe('Kibi - Inject', function () {
                 hits: [
                   {
                     fields: {
-                      bah: [],
-                      po: [ 'ohoh' ]
+                      bah: []
                     },
                     _source: {
                       pa: 'ahah',
@@ -601,8 +588,7 @@ describe('Kibi - Inject', function () {
                   },
                   {
                     fields: {
-                      bah: [ 'ste' ],
-                      po: [ 'aaa' ]
+                      bah: [ 'ste' ]
                     },
                     _source: {
                       pa: 'ahah',
@@ -623,7 +609,7 @@ describe('Kibi - Inject', function () {
           inject: [
             {
               queryDefs: [ {queryId: 'ste', queryVariableName: 'variable1'}, {queryId: 'ets', queryVariableName: 'variable1'}  ],
-              sourcePath: 'po',
+              sourcePath: [ 'po' ],
               fieldName: 'bah'
             }
           ]
@@ -637,18 +623,12 @@ describe('Kibi - Inject', function () {
                     _source: {
                       pa: 'ahah',
                       po: 'ddd'
-                    },
-                    fields: {
-                      po: [ 'ddd' ]
                     }
                   },
                   {
                     _source: {
                       pa: 'ahah',
                       po: 'ccc'
-                    },
-                    fields: {
-                      po: [ 'ccc' ]
                     }
                   }
                 ]
@@ -666,8 +646,7 @@ describe('Kibi - Inject', function () {
                       bah: [
                         'ste',
                         'ets'
-                      ],
-                      po: [ 'ddd' ]
+                      ]
                     },
                     _source: {
                       pa: 'ahah',
@@ -678,8 +657,7 @@ describe('Kibi - Inject', function () {
                     fields: {
                       bah: [
                         'ets'
-                      ],
-                      po: [ 'ccc' ]
+                      ]
                     },
                     _source: {
                       pa: 'ahah',
@@ -700,7 +678,7 @@ describe('Kibi - Inject', function () {
           inject: [
             {
               queryDefs: [],
-              sourcePath: 'po',
+              sourcePath: [ 'po' ],
               fieldName: 'bah'
             }
           ]
@@ -760,7 +738,7 @@ describe('Kibi - Inject', function () {
           inject: [
             {
               queryDefs: [],
-              sourcePath: 'po',
+              sourcePath: [ 'po' ],
               fieldName: 'bah'
             }
           ]

@@ -30,7 +30,6 @@ exports.save = function (query) {
       const nbQueryDefs = _.reduce(injectQueries, (acc, injectQuery) => acc + injectQuery.queryDefs.length, 0);
       if (nbQueryDefs) {
         _savedQueries[label] = injectQueries;
-        query.fielddata_fields = _(injectQueries).pluck('sourcePath').uniq().value();
       }
     } else if (objects.length > 1) {
       throw new Error('Expected only one ' + label + ' query object');
@@ -128,7 +127,8 @@ exports._runInject = function (query, queryEngine) {
           // for each result in the set for that query
           for (let j = 0; j < setOfIds[i].ids.length; j++) {
             const id = setOfIds[i].ids[j];
-            if (_.contains(hit.fields[sourcePath], id)) {
+            const ids = kibiUtils.getValuesAtPath(hit._source, sourcePath);
+            if (_.contains(ids, id)) {
               res.value.push(queryDefs[i].queryId);
               break;
             }

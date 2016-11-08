@@ -5,6 +5,7 @@ define(function (require) {
   const ConfigTemplate = require('ui/ConfigTemplate');
   const chrome = require('ui/chrome');
   const stateMonitorFactory = require('ui/state_management/state_monitor_factory');
+  const kibiUtils = require('kibiutils');
 
   require('ui/directives/config');
   require('ui/courier');
@@ -37,7 +38,16 @@ define(function (require) {
   .when('/dashboard', {
     template: require('plugins/kibana/dashboard/index.html'),
     resolve: {
-      dash: function (timefilter, savedDashboards) {
+      dash: function (timefilter, savedDashboards, kibiDefaultDashboardTitle) {
+        // kibi: do not show the timepicker when no dashboard is selected
+        // Since tabs can show counts unrelated to the time shown in the timefilter, this would be misleading
+        timefilter.enabled = false;
+        if (savedDashboards.find().$$state.value.total !== 0) {
+          var dashboardId = kibiDefaultDashboardTitle ? kibiUtils.slugifyId(kibiDefaultDashboardTitle) :
+           kibiUtils.slugifyId(savedDashboards.find().$$state.value.hits[0].id);
+          timefilter.enabled = true;
+          return savedDashboards.get(dashboardId);
+        }
         return savedDashboards.get();
       }
     }

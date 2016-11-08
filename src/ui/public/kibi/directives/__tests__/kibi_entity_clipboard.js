@@ -22,7 +22,7 @@ describe('Kibi Components', function () {
         'kibana/global_state',
         function ($provide) {
           $provide.constant('kbnDefaultAppId', '');
-          $provide.constant('kibiDefaultDashboardId', '');
+          $provide.constant('kibiDefaultDashboardTitle', '');
           $provide.constant('elasticsearchPlugins', ['siren-join']);
           $provide.service('$route', function () {
             return {

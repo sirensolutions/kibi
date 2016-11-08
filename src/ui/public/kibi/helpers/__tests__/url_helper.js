@@ -60,7 +60,7 @@ function init(kbnDefaultAppId = '', defaultDashboardId = '', savedDashboards = [
   return () => {
     ngMock.module('kibana', ($provide) => {
       $provide.constant('kbnDefaultAppId', kbnDefaultAppId);
-      $provide.constant('kibiDefaultDashboardId', defaultDashboardId);
+      $provide.constant('kibiDefaultDashboardTitle', defaultDashboardId);
     });
 
     ngMock.module('app/dashboard', function ($provide) {

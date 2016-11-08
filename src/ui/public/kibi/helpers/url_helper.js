@@ -54,7 +54,7 @@ define(function (require) {
               });
             });
           } else {
-            // kibiDefaultDashboardId not set open the first dashboard
+            // kibiDefaultDashboardTitle not set open the first dashboard
             savedDashboards.find().then(function (resp) {
               if (resp.hits && resp.hits.length > 0) {
                 fulfill('/' + defaultApp.id + '/' + resp.hits[0].id);

@@ -1,6 +1,5 @@
 const ngMock = require('ngMock');
 const expect = require('expect.js');
-const mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
 const MockState = require('fixtures/mock_state');
 const angular = require('angular');
 const sinon = require('auto-release-sinon');
@@ -14,9 +13,7 @@ let $rootScope;
 let kibiNavBarHelper;
 
 describe('Kibi Components', function () {
-
   describe('Navigation Bar', function () {
-
     beforeEach(function () {
       ngMock.module('kibana', ($provide) => {
         $provide.constant('elasticsearchPlugins', ['siren-join']);

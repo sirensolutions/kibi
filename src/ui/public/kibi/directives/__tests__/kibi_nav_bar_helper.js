@@ -29,11 +29,11 @@ describe('Kibi Directives', function () {
       });
 
       ngMock.module('app/dashboard', function ($provide) {
-        $provide.service('savedDashboards', (Promise) => mockSavedObjects(Promise)('savedDashboards', savedDashboards));
+        $provide.service('savedDashboards', (Promise, Private) => mockSavedObjects(Promise, Private)('savedDashboards', savedDashboards));
       });
 
       ngMock.module('app/discover', function ($provide) {
-        $provide.service('savedSearches', (Promise) => mockSavedObjects(Promise)('savedSearches', []));
+        $provide.service('savedSearches', (Promise, Private) => mockSavedObjects(Promise, Private)('savedSearches', []));
       });
 
       ngMock.inject(function (Promise, _globalState_, _kibiState_, _$httpBackend_, _$timeout_, _$rootScope_, Private) {
@@ -355,10 +355,10 @@ describe('Kibi Directives', function () {
         var counter = 0;
         kibiState.on('save_with_changes', function (diff) {
           counter++;
-          if (diff[0] === 'g') {
+          if (diff[0] === kibiState._properties.groups) {
             expect(stub.calledWith([ 'dashboard1' ], `KibiState change ${JSON.stringify([ 'g' ], null, ' ')}`)).to.be(true);
           }
-          if (diff[0] === 'e') {
+          if (diff[0] === kibiState._properties.enabled_relational_panel) {
             expect(stub.calledWith([ 'dashboard1' ], `KibiState change ${JSON.stringify([ 'e' ], null, ' ')}`)).to.be(true);
           }
           if (counter === 2) {

@@ -123,19 +123,23 @@ function init({ currentDashboardId = 'Articles', indexPatterns, savedDashboards,
     });
 
     ngMock.module('app/dashboard', function ($provide) {
-      $provide.service('savedDashboards', (Promise) => mockSavedObjects(Promise)('savedDashboard', savedDashboards || []));
+      $provide.service('savedDashboards', (Promise, Private) => {
+        return mockSavedObjects(Promise, Private)('savedDashboard', savedDashboards || []);
+      });
     });
 
     ngMock.module('kibana/index_patterns', function ($provide) {
-      $provide.service('indexPatterns', (Promise) => mockSavedObjects(Promise)('indexPatterns', indexPatterns || []));
+      $provide.service('indexPatterns', (Promise, Private) => mockSavedObjects(Promise, Private)('indexPatterns', indexPatterns || []));
     });
 
     ngMock.module('dashboard_groups_editor/services/saved_dashboard_groups', function ($provide) {
-      $provide.service('savedDashboardGroups', (Promise) => mockSavedObjects(Promise)('savedDashboardGroups', savedDashboardGroups || []));
+      $provide.service('savedDashboardGroups', (Promise, Private) => {
+        return mockSavedObjects(Promise, Private)('savedDashboardGroups', savedDashboardGroups || []);
+      });
     });
 
     ngMock.module('discover/saved_searches', function ($provide) {
-      $provide.service('savedSearches', (Promise) => mockSavedObjects(Promise)('savedSearches', savedSearches || []));
+      $provide.service('savedSearches', (Promise, Private) => mockSavedObjects(Promise, Private)('savedSearches', savedSearches || []));
     });
 
     ngMock.inject(function ($injector, kibiState, Private) {
@@ -320,13 +324,11 @@ describe('Kibi Components', function () {
         indexPatterns: [
           {
             id: 'time-testing-4',
-            timeFieldName: 'date',
-            hasTimeField: function () {
-              return false;
-            },
+            timeField: 'date',
             fields: [
               {
-                name: 'date'
+                name: 'date',
+                type: 'date'
               }
             ]
           }

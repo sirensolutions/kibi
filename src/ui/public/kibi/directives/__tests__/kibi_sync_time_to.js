@@ -79,8 +79,10 @@ describe('Kibi Components', function () {
             }
           }
         ];
-        $provide.service('savedDashboards', (Promise) => mockSavedObjects(Promise)('savedDashboards', fakeSavedDashboards));
-        $provide.service('savedSearches', (Promise) => mockSavedObjects(Promise)('savedSearches', fakeSavedSearches));
+        $provide.service('savedDashboards', (Promise, Private) => {
+          return mockSavedObjects(Promise, Private)('savedDashboards', fakeSavedDashboards);
+        });
+        $provide.service('savedSearches', (Promise, Private) => mockSavedObjects(Promise, Private)('savedSearches', fakeSavedSearches));
       });
 
       ngMock.inject(function (_kibiState_, _$rootScope_, $compile, $injector, _$timeout_) {

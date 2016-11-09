@@ -4,7 +4,6 @@ var angular = require('angular');
 var _ = require('lodash');
 var ngMock = require('ngMock');
 var expect = require('expect.js');
-var mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
 var $httpBackend;
 var Notifier;
 

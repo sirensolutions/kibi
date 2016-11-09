@@ -10,10 +10,17 @@ var mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
 describe('Kibi Controllers', function () {
 
   function init({ dashboardGroup, savedDashboardGroups }) {
-    ngMock.module('apps/settings');
+    ngMock.module('kibana', function ($provide) {
+      $provide.constant('kbnDefaultAppId', '');
+      $provide.constant('kibiDefaultDashboardId', '');
+      $provide.constant('elasticsearchPlugins', ['siren-join']);
+    });
+
     ngMock.module('app/dashboard', function ($provide) {
 
-      $provide.service('savedDashboardGroups', (Promise) => mockSavedObjects(Promise)('savedDashboardGroups', savedDashboardGroups));
+      $provide.service('savedDashboardGroups', (Promise, Private) => {
+        return mockSavedObjects(Promise, Private)('savedDashboardGroups', savedDashboardGroups);
+      });
 
       $provide.service('savedDashboards', function (Promise) {
         return {

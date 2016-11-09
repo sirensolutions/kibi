@@ -33,22 +33,24 @@ describe('Kibi Components', function () {
       });
 
       ngMock.module('kibana/index_patterns', function ($provide) {
-        $provide.service('indexPatterns', (Promise) => mockSavedObjects(Promise)('indexPatterns', [
+        $provide.service('indexPatterns', (Promise, Private) => mockSavedObjects(Promise, Private)('indexPatterns', [
           {
             id: 'index1',
-            timeFieldName: 'date',
+            timeField: 'date',
             fields: [
               {
-                name: 'date'
+                name: 'date',
+                type: 'date'
               }
             ]
           },
           {
             id: 'index2',
-            timeFieldName: 'date',
+            timeField: 'date',
             fields: [
               {
-                name: 'date'
+                name: 'date',
+                type: 'date'
               }
             ]
           }
@@ -56,7 +58,7 @@ describe('Kibi Components', function () {
       });
 
       ngMock.module('app/dashboard', function ($provide) {
-        $provide.service('savedDashboards', (Promise) => mockSavedObjects(Promise)('savedDashboards', [
+        $provide.service('savedDashboards', (Promise, Private) => mockSavedObjects(Promise, Private)('savedDashboards', [
           {
             id: 'empty-dashboard',
             title: 'empty-dashboard',
@@ -71,7 +73,7 @@ describe('Kibi Components', function () {
       });
 
       ngMock.module('discover/saved_searches', function ($provide) {
-        $provide.service('savedSearches', (Promise) => mockSavedObjects(Promise)('savedSearches', [
+        $provide.service('savedSearches', (Promise, Private) => mockSavedObjects(Promise, Private)('savedSearches', [
           {
             id: 'empty saved search',
             kibanaSavedObjectMeta: {

@@ -433,11 +433,9 @@ describe('State Management', function () {
         beforeEach(() => init({
           indexPatterns: [
             {
-              _type: 'indexPattern',
               id: 'forecast'
             },
             {
-              _type: 'indexPattern',
               id: 'weather-*',
               timeField: 'date',
               indexList: [ 'weather-2015-01' ]
@@ -477,7 +475,6 @@ describe('State Management', function () {
           init({
             indexPatterns: [
               {
-                _type: 'indexPattern',
                 id: 'weather-*',
                 timeField: 'date',
                 indexList: [ 'weather-2015-01' ]
@@ -548,7 +545,6 @@ describe('State Management', function () {
       beforeEach(() => init({
         indexPatterns: [
           {
-            _type: 'indexPattern',
             id: 'index1',
             timeField: 'date',
             fields: [
@@ -633,7 +629,6 @@ describe('State Management', function () {
       beforeEach(() => init({
         indexPatterns: [
           {
-            _type: 'indexPattern',
             id: 'index1',
             timeField: 'date',
             fields: [
@@ -644,7 +639,6 @@ describe('State Management', function () {
             ]
           },
           {
-            _type: 'indexPattern',
             id: 'index2',
             timeField: 'date',
             fields: [
@@ -699,7 +693,6 @@ describe('State Management', function () {
       beforeEach(() => init({
         indexPatterns: [
           {
-            _type: 'indexPattern',
             id: 'index1',
             timeField: 'date',
             fields: [
@@ -822,7 +815,6 @@ describe('State Management', function () {
       beforeEach(() => init({
         indexPatterns: [
           {
-            _type: 'indexPattern',
             id: 'index1',
             timeField: 'date',
             fields: [
@@ -1628,7 +1620,6 @@ describe('State Management', function () {
           init({
             indexPatterns: [
               {
-                _type: 'indexPattern',
                 id: 'index-a',
                 timeField: 'date',
                 fields: [
@@ -1639,7 +1630,6 @@ describe('State Management', function () {
                 ]
               },
               {
-                _type: 'indexPattern',
                 id: 'index-b',
                 timeField: 'date',
                 fields: [
@@ -1650,7 +1640,6 @@ describe('State Management', function () {
                 ]
               },
               {
-                _type: 'indexPattern',
                 id: 'index-c',
                 timeField: 'date',
                 fields: [
@@ -1661,7 +1650,6 @@ describe('State Management', function () {
                 ]
               },
               {
-                _type: 'indexPattern',
                 id: 'index-d',
                 timeField: 'date',
                 fields: [
@@ -1672,7 +1660,6 @@ describe('State Management', function () {
                 ]
               },
               {
-                _type: 'indexPattern',
                 id: 'index-e',
                 timeField: 'date',
                 fields: [
@@ -1913,7 +1900,6 @@ describe('State Management', function () {
             kibiEnterpriseEnabled: false,
             indexPatterns: [
               {
-                _type: 'indexPattern',
                 id: 'index-a',
                 timeField: 'date',
                 fields: [
@@ -1924,7 +1910,6 @@ describe('State Management', function () {
                 ]
               },
               {
-                _type: 'indexPattern',
                 id: 'index-b',
                 timeField: 'date',
                 fields: [
@@ -1935,7 +1920,6 @@ describe('State Management', function () {
                 ]
               },
               {
-                _type: 'indexPattern',
                 id: 'index-c',
                 timeField: 'date',
                 fields: [
@@ -1946,7 +1930,6 @@ describe('State Management', function () {
                 ]
               },
               {
-                _type: 'indexPattern',
                 id: 'index-d',
                 timeField: 'date',
                 fields: [

@@ -28,7 +28,7 @@ define(function (require) {
           if (!object) {
             return Promise.reject(new Error(`Could not find object with id: ${id}`));
           }
-          if (object._type === 'indexPattern') {
+          if (name === 'indexPatterns') {
             return Promise.resolve(getIndex.call(this, object));
           } else if (object.kibanaSavedObjectMeta && object.kibanaSavedObjectMeta.searchSourceJSON) {
             // saved search

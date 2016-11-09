@@ -267,7 +267,6 @@ describe('Kibi Components', function () {
       beforeEach(function () {
         indexPatterns = [
           {
-            _type: 'indexPattern',
             id: 'ia-*',
             timeField: 'date',
             fields: [
@@ -320,7 +319,6 @@ describe('Kibi Components', function () {
       beforeEach(function () {
         indexPatterns = [
           {
-            _type: 'indexPattern',
             id: 'ia',
             timeField: 'date',
             fields: [

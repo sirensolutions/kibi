@@ -35,7 +35,6 @@ describe('Kibi Components', function () {
       ngMock.module('kibana/index_patterns', function ($provide) {
         $provide.service('indexPatterns', (Promise, Private) => mockSavedObjects(Promise, Private)('indexPatterns', [
           {
-            _type: 'indexPattern',
             id: 'index1',
             timeField: 'date',
             fields: [
@@ -46,7 +45,6 @@ describe('Kibi Components', function () {
             ]
           },
           {
-            _type: 'indexPattern',
             id: 'index2',
             timeField: 'date',
             fields: [

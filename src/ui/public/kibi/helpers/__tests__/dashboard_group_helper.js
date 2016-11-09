@@ -323,7 +323,6 @@ describe('Kibi Components', function () {
       beforeEach(init({
         indexPatterns: [
           {
-            _type: 'indexPattern',
             id: 'time-testing-4',
             timeField: 'date',
             fields: [

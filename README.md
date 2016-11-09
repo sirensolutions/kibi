@@ -33,6 +33,7 @@ documentation.
 ## Compatibility Table Kibi / Elasticsearch
 
 Kibi | Elasticsearch
+--- | ---
 4.6.1 | 2.4.x
 4.5.4 | 2.3.x
 4.5.3 | 2.3.x

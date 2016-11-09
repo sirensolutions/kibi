@@ -3,7 +3,7 @@
   <button
     ng-repeat="button in buttons"
     ng-click="button.click()"
-    ng-disabled="button.disabled || button.targetCount == 0"
+    ng-disabled="button.disabled"
     ng-class="button.targetCount == 0 ? 'btn disabled-btn-relational' : 'btn btn-relational'"
     >
       {{button.label}}

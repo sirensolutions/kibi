@@ -8,7 +8,7 @@ var kibiState;
 var $scope;
 
 var mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
-var fakeSavedDatasources = [
+var savedDatasources = [
   {
     id: 'ds1',
     title: 'ds1 datasource',
@@ -36,11 +36,11 @@ describe('Kibi Controllers', function () {
     });
 
     ngMock.module('kibi_datasources/services/saved_datasources', function ($provide) {
-      $provide.service('savedDatasources', (Promise) => mockSavedObjects(Promise)('savedDatasources', fakeSavedDatasources));
+      $provide.service('savedDatasources', (Promise, Private) => mockSavedObjects(Promise, Private)('savedDatasources', savedDatasources));
     });
 
     ngMock.module('app/visualize', function ($provide) {
-      $provide.service('savedVisualizations', (Promise) => mockSavedObjects(Promise)('savedVisualizations', hits));
+      $provide.service('savedVisualizations', (Promise, Private) => mockSavedObjects(Promise, Private)('savedVisualizations', hits));
     });
 
     ngMock.module('kibana/query_engine_client', function ($provide) {

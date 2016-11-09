@@ -17,6 +17,8 @@ describe('State Management', function () {
   let timefilter;
   let appState;
   let globalState;
+  let indexPatternsService;
+
   const defaultStartTime = '2006-09-01T12:00:00.000Z';
   const defaultEndTime = '2010-09-05T12:00:00.000Z';
 
@@ -57,18 +59,19 @@ describe('State Management', function () {
     });
 
     ngMock.module('kibana/index_patterns', function ($provide) {
-      $provide.service('indexPatterns', (Promise) => mockSavedObjects(Promise)('indexPatterns', indexPatterns));
+      $provide.service('indexPatterns', (Promise, Private) => mockSavedObjects(Promise, Private)('indexPatterns', indexPatterns, true));
     });
 
     ngMock.module('discover/saved_searches', function ($provide) {
-      $provide.service('savedSearches', (Promise) => mockSavedObjects(Promise)('savedSearches', savedSearches));
+      $provide.service('savedSearches', (Promise, Private) => mockSavedObjects(Promise, Private)('savedSearches', savedSearches));
     });
 
     ngMock.module('app/dashboard', function ($provide) {
-      $provide.service('savedDashboards', (Promise) => mockSavedObjects(Promise)('savedDashboards', savedDashboards));
+      $provide.service('savedDashboards', (Promise, Private) => mockSavedObjects(Promise, Private)('savedDashboards', savedDashboards));
     });
 
-    ngMock.inject(function (_timefilter_, _config_, _$location_, _kibiState_) {
+    ngMock.inject(function (_indexPatterns_, _timefilter_, _config_, _$location_, _kibiState_) {
+      indexPatternsService = _indexPatterns_;
       timefilter = _timefilter_;
       $location = _$location_;
       $location.path(currentPath);
@@ -430,13 +433,14 @@ describe('State Management', function () {
         beforeEach(() => init({
           indexPatterns: [
             {
-              id: 'forecast',
-              hasTimeField: _.constant(false)
+              _type: 'indexPattern',
+              id: 'forecast'
             },
             {
+              _type: 'indexPattern',
               id: 'weather-*',
-              hasTimeField: _.constant(true),
-              toIndexList: () => Promise.resolve([ 'weather-2015-01' ])
+              timeField: 'date',
+              indexList: [ 'weather-2015-01' ]
             }
           ]
         }));
@@ -469,15 +473,14 @@ describe('State Management', function () {
       });
 
       describe('should get the intersection of all time-ranges', function () {
-        let toIndexListStub;
         beforeEach(() => {
-          toIndexListStub = sinon.stub();
           init({
             indexPatterns: [
               {
+                _type: 'indexPattern',
                 id: 'weather-*',
-                hasTimeField: _.constant(true),
-                toIndexList: toIndexListStub.returns(Promise.resolve([ 'weather-2015-01' ]))
+                timeField: 'date',
+                indexList: [ 'weather-2015-01' ]
               }
             ]
           });
@@ -504,9 +507,12 @@ describe('State Management', function () {
           };
           getTimeBoundsStub.withArgs('dashboard3').returns(dashboard3Time);
 
-          kibiState.timeBasedIndices('weather-*', 'dashboard1', 'dashboard2', 'dashboard3')
-          .then((indices) => {
-            expect(toIndexListStub.calledWith(dashboard3Time.min, dashboard1Time.max)).to.be(true);
+          Promise.all([
+            indexPatternsService.get('weather-*'),
+            kibiState.timeBasedIndices('weather-*', 'dashboard1', 'dashboard2', 'dashboard3')
+          ])
+          .then(([ indexPattern, indices ]) => {
+            expect(indexPattern.toIndexList.calledWith(dashboard3Time.min, dashboard1Time.max)).to.be(true);
             done();
           }).catch(done);
         });
@@ -525,9 +531,12 @@ describe('State Management', function () {
           getTimeBoundsStub.withArgs('dashboard1').returns(dashboard1Time);
           getTimeBoundsStub.withArgs('dashboard2').returns(dashboard2Time);
 
-          kibiState.timeBasedIndices('weather-*', 'dashboard1', 'dashboard2')
-          .then((indices) => {
-            expect(toIndexListStub.called).to.be(false);
+          Promise.all([
+            indexPatternsService.get('weather-*'),
+            kibiState.timeBasedIndices('weather-*', 'dashboard1', 'dashboard2')
+          ])
+          .then(([ indexPattern, indices ]) => {
+            expect(indexPattern.toIndexList.called).to.be(false);
             expect(indices).to.eql([]);
             done();
           }).catch(done);
@@ -539,11 +548,13 @@ describe('State Management', function () {
       beforeEach(() => init({
         indexPatterns: [
           {
+            _type: 'indexPattern',
             id: 'index1',
-            timeFieldName: 'date',
+            timeField: 'date',
             fields: [
               {
-                name: 'date'
+                name: 'date',
+                type: 'date'
               }
             ]
           }
@@ -622,20 +633,24 @@ describe('State Management', function () {
       beforeEach(() => init({
         indexPatterns: [
           {
+            _type: 'indexPattern',
             id: 'index1',
-            timeFieldName: 'date',
+            timeField: 'date',
             fields: [
               {
-                name: 'date'
+                name: 'date',
+                type: 'date'
               }
             ]
           },
           {
+            _type: 'indexPattern',
             id: 'index2',
-            timeFieldName: 'date',
+            timeField: 'date',
             fields: [
               {
-                name: 'date'
+                name: 'date',
+                type: 'date'
               }
             ]
           }
@@ -684,11 +699,13 @@ describe('State Management', function () {
       beforeEach(() => init({
         indexPatterns: [
           {
+            _type: 'indexPattern',
             id: 'index1',
-            timeFieldName: 'date',
+            timeField: 'date',
             fields: [
               {
-                name: 'date'
+                name: 'date',
+                type: 'date'
               }
             ]
           }
@@ -805,11 +822,13 @@ describe('State Management', function () {
       beforeEach(() => init({
         indexPatterns: [
           {
+            _type: 'indexPattern',
             id: 'index1',
-            timeFieldName: 'date',
+            timeField: 'date',
             fields: [
               {
-                name: 'date'
+                name: 'date',
+                type: 'date'
               }
             ]
           }
@@ -1609,47 +1628,57 @@ describe('State Management', function () {
           init({
             indexPatterns: [
               {
+                _type: 'indexPattern',
                 id: 'index-a',
-                timeFieldName: 'date',
+                timeField: 'date',
                 fields: [
                   {
-                    name: 'date'
+                    name: 'date',
+                    type: 'date'
                   }
                 ]
               },
               {
+                _type: 'indexPattern',
                 id: 'index-b',
-                timeFieldName: 'date',
+                timeField: 'date',
                 fields: [
                   {
-                    name: 'date'
+                    name: 'date',
+                    type: 'date'
                   }
                 ]
               },
               {
+                _type: 'indexPattern',
                 id: 'index-c',
-                timeFieldName: 'date',
+                timeField: 'date',
                 fields: [
                   {
-                    name: 'date'
+                    name: 'date',
+                    type: 'date'
                   }
                 ]
               },
               {
+                _type: 'indexPattern',
                 id: 'index-d',
-                timeFieldName: 'date',
+                timeField: 'date',
                 fields: [
                   {
-                    name: 'date'
+                    name: 'date',
+                    type: 'date'
                   }
                 ]
               },
               {
+                _type: 'indexPattern',
                 id: 'index-e',
-                timeFieldName: 'date',
+                timeField: 'date',
                 fields: [
                   {
-                    name: 'date'
+                    name: 'date',
+                    type: 'date'
                   }
                 ]
               }
@@ -1884,38 +1913,46 @@ describe('State Management', function () {
             kibiEnterpriseEnabled: false,
             indexPatterns: [
               {
+                _type: 'indexPattern',
                 id: 'index-a',
-                timeFieldName: 'date',
+                timeField: 'date',
                 fields: [
                   {
-                    name: 'date'
+                    name: 'date',
+                    type: 'date'
                   }
                 ]
               },
               {
+                _type: 'indexPattern',
                 id: 'index-b',
-                timeFieldName: 'date',
+                timeField: 'date',
                 fields: [
                   {
-                    name: 'date'
+                    name: 'date',
+                    type: 'date'
                   }
                 ]
               },
               {
+                _type: 'indexPattern',
                 id: 'index-c',
-                timeFieldName: 'date',
+                timeField: 'date',
                 fields: [
                   {
-                    name: 'date'
+                    name: 'date',
+                    type: 'date'
                   }
                 ]
               },
               {
+                _type: 'indexPattern',
                 id: 'index-d',
-                timeFieldName: 'date',
+                timeField: 'date',
                 fields: [
                   {
-                    name: 'date'
+                    name: 'date',
+                    type: 'date'
                   }
                 ]
               }

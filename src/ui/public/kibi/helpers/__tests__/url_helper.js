@@ -64,7 +64,7 @@ function init(kbnDefaultAppId = '', defaultDashboardId = '', savedDashboards = [
     });
 
     ngMock.module('app/dashboard', function ($provide) {
-      $provide.service('savedDashboards', (Promise) => mockSavedObjects(Promise)('savedDashboards', savedDashboards));
+      $provide.service('savedDashboards', (Promise, Private) => mockSavedObjects(Promise, Private)('savedDashboards', savedDashboards));
     });
 
     ngMock.inject(function (Private) {

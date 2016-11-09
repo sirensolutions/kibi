@@ -63,18 +63,21 @@ describe('Kibi Components', function () {
       });
 
       ngMock.module('dashboard_groups_editor/services/saved_dashboard_groups', function ($provide) {
-        $provide.service('savedDashboardGroups', (Promise) => mockSavedObjects(Promise)('savedDashboardGroups', fakeSavedDashboardGroups));
+        $provide.service('savedDashboardGroups', (Promise, Private) => {
+          return mockSavedObjects(Promise, Private)('savedDashboardGroups', fakeSavedDashboardGroups);
+        });
       });
 
       ngMock.module('app/visualize', function ($provide) {
-        $provide.service('savedVisualizations', (Promise) => mockSavedObjects(Promise)('savedVisualizations', fakeSavedVisualisations));
+        $provide.service('savedVisualizations', (Promise, Private) => {
+          return mockSavedObjects(Promise, Private)('savedVisualizations', fakeSavedVisualisations);
+        });
       });
 
       ngMock.inject(function (Private) {
         deleteHelper = Private(require('ui/kibi/helpers/delete_helper'));
       });
     });
-
 
     require('testUtils/noDigestPromises').activateForSuite();
 

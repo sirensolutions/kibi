@@ -45,15 +45,15 @@ function init({
   });
 
   ngMock.module('kibana/index_patterns', function ($provide) {
-    $provide.service('indexPatterns', (Promise) => mockSavedObjects(Promise)('indexPatterns', indexPatterns));
+    $provide.service('indexPatterns', (Promise, Private) => mockSavedObjects(Promise, Private)('indexPatterns', indexPatterns));
   });
 
   ngMock.module('discover/saved_searches', function ($provide) {
-    $provide.service('savedSearches', (Promise) => mockSavedObjects(Promise)('savedSearches', savedSearches));
+    $provide.service('savedSearches', (Promise, Private) => mockSavedObjects(Promise, Private)('savedSearches', savedSearches));
   });
 
   ngMock.module('app/dashboard', function ($provide) {
-    $provide.service('savedDashboards', (Promise) => mockSavedObjects(Promise)('savedDashboards', savedDashboards));
+    $provide.service('savedDashboards', (Promise, Private) => mockSavedObjects(Promise, Private)('savedDashboards', savedDashboards));
   });
 
   ngMock.inject(function (_$rootScope_, timefilter, _config_, _kibiState_, Private, Promise) {
@@ -267,11 +267,13 @@ describe('Kibi Components', function () {
       beforeEach(function () {
         indexPatterns = [
           {
+            _type: 'indexPattern',
             id: 'ia-*',
-            timeFieldName: 'date',
+            timeField: 'date',
             fields: [
               {
-                name: 'date'
+                name: 'date',
+                type: 'string'
               }
             ]
           }
@@ -318,11 +320,13 @@ describe('Kibi Components', function () {
       beforeEach(function () {
         indexPatterns = [
           {
+            _type: 'indexPattern',
             id: 'ia',
-            timeFieldName: 'date',
+            timeField: 'date',
             fields: [
               {
-                name: 'date'
+                name: 'date',
+                type: 'string'
               }
             ]
           }

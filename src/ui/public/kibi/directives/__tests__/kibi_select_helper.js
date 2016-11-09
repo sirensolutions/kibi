@@ -37,10 +37,14 @@ describe('Kibi Directives', function () {
         $provide.constant('kibiDefaultDashboardId', '');
         $provide.constant('elasticsearchPlugins', ['siren-join']);
         if (options.savedDatasources) {
-          $provide.service('savedDatasources', (Promise) => mockSavedObjects(Promise)('savedDatasources', options.savedDatasources));
+          $provide.service('savedDatasources', (Promise, Private) => {
+            return mockSavedObjects(Promise, Private)('savedDatasources', options.savedDatasources);
+          });
         }
         if (options.savedSearches) {
-          $provide.service('savedSearches', (Promise) => mockSavedObjects(Promise)('savedSearches', options.savedSearches));
+          $provide.service('savedSearches', (Promise, Private) => {
+            return mockSavedObjects(Promise, Private)('savedSearches', options.savedSearches);
+          });
         }
       });
 
@@ -60,23 +64,25 @@ describe('Kibi Directives', function () {
 
       if (options.savedQueries) {
         ngMock.module('queries_editor/services/saved_queries', function ($provide) {
-          $provide.service('savedQueries', (Promise) => mockSavedObjects(Promise)('savedQueries', options.savedQueries));
+          $provide.service('savedQueries', (Promise, Private) => mockSavedObjects(Promise, Private)('savedQueries', options.savedQueries));
         });
       }
 
       if (options.savedTemplates) {
         ngMock.module('templates_editor/services/saved_templates', function ($provide) {
-          $provide.service('savedTemplates', (Promise) => mockSavedObjects(Promise)('savedTemplates', options.savedTemplates));
+          $provide.service('savedTemplates', (Promise, Private) => {
+            return mockSavedObjects(Promise, Private)('savedTemplates', options.savedTemplates);
+          });
         });
       }
-
 
       if (options.savedDashboards) {
         ngMock.module('app/dashboard', function ($provide) {
-          $provide.service('savedDashboards', (Promise) => mockSavedObjects(Promise)('savedDashboards', options.savedDashboards));
+          $provide.service('savedDashboards', (Promise, Private) => {
+            return mockSavedObjects(Promise, Private)('savedDashboards', options.savedDashboards);
+          });
         });
       }
-
 
       if (options.initIndexPattern) {
         ngMock.module('kibana/index_patterns', function ($provide) {
@@ -558,9 +564,6 @@ describe('Kibi Directives', function () {
       });
 
       it('should return the ID of indices', function (done) {
-
-        console.log(indexPatterns);
-
         stSelectHelper.getIndexesId().then(function (ids) {
           expect(ids).to.have.length(2);
           expect(ids[0].label).to.be('aaa');

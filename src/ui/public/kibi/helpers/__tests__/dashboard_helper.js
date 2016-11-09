@@ -56,8 +56,10 @@ describe('Kibi Components', function () {
         $provide.constant('kibiDefaultDashboardId', '');
         $provide.constant('kibiEnterpriseEnabled', false);
         $provide.constant('elasticsearchPlugins', ['siren-join']);
-        $provide.service('savedDashboards', (Promise) => mockSavedObjects(Promise)('savedDashboards', fakeSavedDashboards));
-        $provide.service('savedSearches', (Promise) => mockSavedObjects(Promise)('savedSearches', fakeSavedSearches));
+        $provide.service('savedDashboards', (Promise, Private) => {
+          return mockSavedObjects(Promise, Private)('savedDashboards', fakeSavedDashboards);
+        });
+        $provide.service('savedSearches', (Promise, Private) => mockSavedObjects(Promise, Private)('savedSearches', fakeSavedSearches));
       });
 
       ngMock.inject(function ($injector, Private, _$rootScope_) {

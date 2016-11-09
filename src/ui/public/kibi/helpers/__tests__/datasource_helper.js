@@ -29,7 +29,9 @@ describe('Kibi Components', function () {
     beforeEach(function () {
 
       ngMock.module('kibana', function ($provide) {
-        $provide.service('savedDatasources', (Promise) => mockSavedObjects(Promise)('savedDatasources', fakeSavedDatasources));
+        $provide.service('savedDatasources', (Promise, Private) => {
+          return mockSavedObjects(Promise, Private)('savedDatasources', fakeSavedDatasources);
+        });
       });
 
       ngMock.inject(function ($injector, Private, _$rootScope_) {
@@ -57,7 +59,6 @@ describe('Kibi Components', function () {
 
       $rootScope.$apply();
     });
-
 
   });
 });

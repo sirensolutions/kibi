@@ -12,7 +12,8 @@ define(function (require) {
 
     let Field = Private(require('ui/index_patterns/_field'));
 
-    function StubIndexPattern(pattern, timeField, fields) {
+    // kibi: added the indexList for testing time-based indices
+    function StubIndexPattern(pattern, timeField, fields, indexList) {
       this.id = pattern;
       this.popularizeField = sinon.spy();
       this.timeFieldName = timeField;
@@ -23,14 +24,25 @@ define(function (require) {
       this.fieldFormatMap = {};
       this.routes = IndexPattern.prototype.routes;
 
-      this.toIndexList = _.constant(Promise.resolve([pattern]));
+      // kibi: stub the paths array
+      this.paths = [];
+      _.each(fields, field => {
+        this.paths[field.name] = field.path;
+      });
+      // kibi: end
+
+      // kibi: allow to test time-based indices
+      this.hasTimeField = _.constant(Boolean(timeField));
+
+      this.toIndexList = sinon.stub().returns(Promise.resolve(indexList || [pattern]));
       this.toDetailedIndexList = _.constant(Promise.resolve([
         {
-          index: pattern,
+          index: indexList || pattern,
           min: 0,
           max: 1
         }
       ]));
+      // kibi: end
       this.getComputedFields = _.bind(getComputedFields, this);
       this.flattenHit = flattenHit(this);
       this.formatHit = formatHit(this, fieldFormats.getDefaultInstance('string'));

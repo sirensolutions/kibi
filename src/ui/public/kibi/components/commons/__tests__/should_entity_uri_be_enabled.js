@@ -15,7 +15,7 @@ describe('Kibi Components', function () {
         ngMock.module('kibana');
 
         ngMock.module('queries_editor/services/saved_queries', function ($provide) {
-          $provide.service('savedQueries', (Promise) => mockSavedObjects(Promise)('savedQueries', [
+          $provide.service('savedQueries', (Promise, Private) => mockSavedObjects(Promise, Private)('savedQueries', [
             {
               id: 'goaway',
               resultQuery: 'select name from person',

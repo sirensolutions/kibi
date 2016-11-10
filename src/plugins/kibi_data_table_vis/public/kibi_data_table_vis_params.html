@@ -91,7 +91,7 @@
       <label>Enable relational column</label>
     </div>
 
-    <div ng-if="vis.params.enableQueryFields">
+    <div ng-show="vis.params.enableQueryFields">
       <div class="form-group">
         <label>Column name</label></br>
         <input type="text" ng-model="vis.params.queryFieldName" class="form-control" required/>

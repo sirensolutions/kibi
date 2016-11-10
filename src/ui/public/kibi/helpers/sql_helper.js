@@ -99,7 +99,7 @@ define(function (require) {
 
           const chars = new antlr4.InputStream(queryCopy);
           const lexer = new antlr4SQL.SQLLexer(chars);
-          const tokens  = new antlr4.CommonTokenStream(lexer);
+          const tokens = new antlr4.CommonTokenStream(lexer);
           const parser = new antlr4SQL.SQLParser(tokens);
           parser.buildParseTrees = true;
 

@@ -6,10 +6,10 @@
 :java-version: 1.8
 :siren-join-version: 2.4.1
 :siren-join-website: https://github.com/sirensolutions/siren-join/
-:kibana-version: 4.6.1
-:kibana-announcement: https://www.elastic.co/blog/kibana-4-5-4-and-4-1-11
-:kibi-version: 4.6.1
-:elastic-ref: https://www.elastic.co/guide/en/elasticsearch/reference/2.3/
+:kibana-version: 4.6.2
+:kibana-announcement: https://www.elastic.co/blog/kibana-4-6-2
+:kibi-version: 4.6.2
+:elastic-ref: https://www.elastic.co/guide/en/elasticsearch/reference/2.4/
 :elasticsearch-version: 2.4.1
 :shield-ref: https://www.elastic.co/guide/en/shield/2.4/
 :searchguard-ref: https://github.com/floragunncom/search-guard-docs

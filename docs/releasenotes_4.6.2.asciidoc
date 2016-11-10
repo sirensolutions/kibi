@@ -1,6 +1,6 @@
-=== Kibi 4.6.1 and Kibana 4.6.1 Release Notes
+=== Kibi 4.6.2 and Kibana 4.6.2 Release Notes
 
-The 4.6.1 release of Kibi requires Elasticsearch 2.4 or later.
+The 4.6.2 release of Kibi requires Elasticsearch 2.4 or later.
 
 ==== Kibi Changes
 

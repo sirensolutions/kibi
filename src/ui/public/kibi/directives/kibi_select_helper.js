@@ -235,18 +235,23 @@ define(function (require) {
         return datasourceHelper.getDatasourceType(savedQuery.datasourceId).then(function (datasourceType) {
           var resultQuery = savedQuery.resultQuery;
           var variables = [];
-          if (kibiUtils.isSPARQL(datasourceType)) {
-            variables = sparqlHelper.getVariables(resultQuery);
-          } else if (kibiUtils.isSQL(datasourceType)) {
-            variables = sqlHelper.getVariables(resultQuery);
-          } else if (kibiUtils.DatasourceTypes.rest === datasourceType) {
-            if (savedQuery.rest_variables) {
-              variables = _.map(JSON.parse(savedQuery.rest_variables), (v) => v.name);
-            } else {
-              variables = [];
+
+          try {
+            if (kibiUtils.isSPARQL(datasourceType)) {
+              variables = sparqlHelper.getVariables(resultQuery);
+            } else if (kibiUtils.isSQL(datasourceType)) {
+              variables = sqlHelper.getVariables(resultQuery);
+            } else if (kibiUtils.DatasourceTypes.rest === datasourceType) {
+              if (savedQuery.rest_variables) {
+                variables = _.map(JSON.parse(savedQuery.rest_variables), (v) => v.name);
+              } else {
+                variables = [];
+              }
+            } else if (kibiUtils.DatasourceTypes.tinkerpop3 !== datasourceType) {
+              return Promise.reject(new Error('Unknown datasource type for query=' + queryId + ': ' + datasourceType));
             }
-          } else if (kibiUtils.DatasourceTypes.tinkerpop3 !== datasourceType) {
-            return Promise.reject(new Error('Unknown datasource type for query=' + queryId + ': ' + datasourceType));
+          } catch (err) {
+            return Promise.reject(new Error(`Failed to extract the variables from the query=${queryId}: ${err.message}`));
           }
 
           var fields = _.map(variables, function (v) {

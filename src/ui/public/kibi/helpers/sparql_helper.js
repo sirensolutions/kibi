@@ -1,8 +1,8 @@
 define(function (require) {
 
-  var _ = require('lodash');
-  var antlr4 = require('antlr4-base');
-  var antlr4Sparql = require('antlr4-sparql');
+  const _ = require('lodash');
+  const antlr4 = require('antlr4-base');
+  const antlr4Sparql = require('antlr4-sparql');
 
   return function SparqlHelperFactory() {
 
@@ -28,8 +28,8 @@ define(function (require) {
       VariableNamePrinter.prototype.constructor = VariableNamePrinter;
 
       VariableNamePrinter.prototype.exitVar = function (ctx) {
-        var start = ctx.start.start;
-        var stop  = ctx.start.stop;
+        const start = ctx.start.start;
+        const stop  = ctx.start.stop;
         if (this.inSelect) {
           this.selectRegister.push(this.query.substring(start, stop + 1));
         } else if (this.inWhere) {
@@ -42,26 +42,47 @@ define(function (require) {
       VariableNamePrinter.prototype.enterWhereClause = function (ctx) {this.inWhere = true;};
       VariableNamePrinter.prototype.exitWhereClause  = function (ctx) {this.inWhere = false;};
 
+      const ErrorListener = function () {};
+
+      ErrorListener.prototype = Object.create(antlr4.error.ErrorListener.prototype);
+      ErrorListener.prototype.syntaxError = function (rec, sym, line, col, msg, e) {
+        throw new Error(`Invalid SPARQL query: line ${line}:${col} ${msg}`);
+      };
+
       //
       // PUBLIC METHODS
       //
 
       return {
         getVariables: function (query) {
+          let queryCopy = query;
+
           // here replace any instance of @doc[]...[]@ with neutral string literal value like 'VALUE'
-          var queryCopy = query.replace(/(@doc\[.+?\]@)/g, '\'VALUE\'');
+          if (/['"](@doc\[.+?\]@)['"]/.test(query)) {
+            // literal
+            queryCopy = query.replace(/(@doc\[.+?\]@)/g, 'VALUE');
+          } else if (/<(@doc\[.+?\]@)>/.test(query)) {
+            // URI
+            queryCopy = query.replace(/(@doc\[.+?\]@)/g, 'VALUE');
+          } else if (/(@doc\[.+?\]@)/.test(query)) {
+            queryCopy = query.replace(/(@doc\[.+?\]@)/g, '\'VALUE\'');
+          }
 
-          var chars = new antlr4.InputStream(queryCopy);
-          var lexer = new antlr4Sparql.SparqlLexer(chars);
-          var tokens  = new antlr4.CommonTokenStream(lexer);
-          var parser = new antlr4Sparql.SparqlParser(tokens);
+          const chars = new antlr4.InputStream(queryCopy);
+          const lexer = new antlr4Sparql.SparqlLexer(chars);
+          const tokens  = new antlr4.CommonTokenStream(lexer);
+          const parser = new antlr4Sparql.SparqlParser(tokens);
           parser.buildParseTrees = true;
-          var tree = parser.query();
 
-          var printer = new VariableNamePrinter(queryCopy);
+          parser.removeErrorListeners();
+          parser.addErrorListener(new ErrorListener());
+
+          const tree = parser.query();
+
+          const printer = new VariableNamePrinter(queryCopy);
           antlr4.tree.ParseTreeWalker.DEFAULT.walk(printer, tree);
 
-          var varFromSelect = _.unique(printer.selectRegister);
+          const varFromSelect = _.unique(printer.selectRegister);
           if (varFromSelect.length > 0) {
             return varFromSelect;
           }

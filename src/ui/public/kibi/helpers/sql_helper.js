@@ -1,8 +1,6 @@
 define(function (require) {
-
-  var _ = require('lodash');
-  var antlr4 = require('antlr4-base');
-  var antlr4SQL = require('antlr4-sql');
+  const antlr4 = require('antlr4-base');
+  const antlr4SQL = require('antlr4-sql');
 
   return function SQLHelperFactory() {
 
@@ -52,8 +50,8 @@ define(function (require) {
         if (!this.inSelectClause || this.ignoreSelectClause) {
           return;
         }
-        var alias = ctx.column_alias();
-        var parameter;
+        const alias = ctx.column_alias();
+        let parameter;
         if (alias) {
           parameter = alias.getText();
         } else {
@@ -77,25 +75,40 @@ define(function (require) {
         }
       };
 
+      const ErrorListener = function () {};
+
+      ErrorListener.prototype = Object.create(antlr4.error.ErrorListener.prototype);
+      ErrorListener.prototype.syntaxError = function (rec, sym, line, col, msg, e) {
+        throw new Error(`Invalid SQL query: line ${line}:${col} ${msg}`);
+      };
+
       //
       // PUBLIC METHODS
       //
 
       return {
         getVariables: function (query) {
+          let queryCopy = query;
+
           // here replace any instance of @doc[]...[]@ with neutral string value like 'VALUE'
-          var queryCopy = query.replace(/(@doc\[.+?\]@)/g, '\'VALUE\'');
+          if (/'(@doc\[.+?\]@)'/.test(query)) {
+            queryCopy = query.replace(/(@doc\[.+?\]@)/g, 'VALUE');
+          } else if (/(@doc\[.+?\]@)/.test(query)) {
+            queryCopy = query.replace(/(@doc\[.+?\]@)/g, '\'VALUE\'');
+          }
 
-
-          var chars = new antlr4.InputStream(queryCopy);
-          var lexer = new antlr4SQL.SQLLexer(chars);
-          var tokens  = new antlr4.CommonTokenStream(lexer);
-          var parser = new antlr4SQL.SQLParser(tokens);
+          const chars = new antlr4.InputStream(queryCopy);
+          const lexer = new antlr4SQL.SQLLexer(chars);
+          const tokens  = new antlr4.CommonTokenStream(lexer);
+          const parser = new antlr4SQL.SQLParser(tokens);
           parser.buildParseTrees = true;
 
-          var context = parser.select_stmt();
+          parser.removeErrorListeners();
+          parser.addErrorListener(new ErrorListener());
 
-          var parametersParser = new SelectParametersParser(queryCopy);
+          const context = parser.select_stmt();
+
+          const parametersParser = new SelectParametersParser(queryCopy);
           antlr4.tree.ParseTreeWalker.DEFAULT.walk(parametersParser, context);
 
           return parametersParser.parameters;

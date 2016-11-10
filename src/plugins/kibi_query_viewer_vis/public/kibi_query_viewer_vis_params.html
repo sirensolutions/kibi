@@ -18,13 +18,13 @@
         </div>
 
         <div class="form-group">
-          <label>Source query <a ng-if="queryDefinition.queryId && queryDefinition.queryId !== ''" ng-click="editQuery($index)" class="normal-font-weight" > Edit selected query</a></label>
+          <label>Source query <a ng-if="queryDefinition.queryId && queryDefinition.queryId !== ''" ng-click="editQuery($index)" class="form-group label" > Edit selected query</a></label>
           </br>
           <kibi-select required object-type="query" ng-model="queryDefinition.queryId"></kibi-select>
         </div>
 
         <div class="form-group">
-          <label>Template <a ng-if="queryDefinition.templateId && queryDefinition.templateId !== ''" ng-click="editTemplate($index)" class="normal-font-weight" > Edit selected template</a></label>
+          <label>Template <a ng-if="queryDefinition.templateId && queryDefinition.templateId !== ''" ng-click="editTemplate($index)" class="form-group label" > Edit selected template</a></label>
           </br>
           <kibi-select required object-type="template" ng-model="queryDefinition.templateId"></kibi-select>
         </div>

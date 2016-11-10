@@ -38,9 +38,6 @@ define(function (require) {
     template: require('plugins/kibana/dashboard/index.html'),
     resolve: {
       dash: function (timefilter, savedDashboards) {
-        // kibi: do not show the timepicker when no dashboard is selected
-        // Since tabs can show counts unrelated to the time shown in the timefilter, this would be misleading
-        timefilter.enabled = false;
         return savedDashboards.get();
       }
     }

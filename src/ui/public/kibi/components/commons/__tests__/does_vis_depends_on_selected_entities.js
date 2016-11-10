@@ -51,6 +51,9 @@ describe('Kibi Components', function () {
               }
             };
 
+            if (visName === 'kibi-data-table') {
+              vis.params.enableQueryFields = true;
+            }
             doesVisDependsOnSelectedEntities(vis).then(function (res) {
               expect(res).to.equal(true);
               done();
@@ -69,6 +72,9 @@ describe('Kibi Components', function () {
               }
             };
 
+            if (visName === 'kibi-data-table') {
+              vis.params.enableQueryFields = true;
+            }
             doesVisDependsOnSelectedEntities(vis).then(function (res) {
               expect(res).to.equal(false);
               done();
@@ -82,11 +88,14 @@ describe('Kibi Components', function () {
               },
               params: {
                 queryDefinitions: [
-                  {queryId: 'query-does-not-exist'}
+                  { queryId: 'query-does-not-exist' }
                 ]
               }
             };
 
+            if (visName === 'kibi-data-table') {
+              vis.params.enableQueryFields = true;
+            }
             doesVisDependsOnSelectedEntities(vis).then(function () {
               done('should fail');
             }).catch(function (err) {

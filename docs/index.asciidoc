@@ -2,7 +2,7 @@
 = Kibi User Guide
 :toc: right
 
-:enterprise_enabled: true
+:enterprise_enabled: false
 :java-version: 1.8
 :siren-join-version: 2.4.1
 :siren-join-website: https://github.com/sirensolutions/siren-join/

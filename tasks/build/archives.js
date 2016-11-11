@@ -19,7 +19,7 @@ export default (grunt) => {
     if (/windows/.test(name)) {
       await exec('zip', ['-rq', '-ll', zipPath, buildName]);
     } else {
-      await exec('tar', ['-rq', zipPath, buildName]);
+      await exec('tar', ['-chzf', tarPath, buildName]);
     }
   };
 

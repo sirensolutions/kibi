@@ -91,6 +91,8 @@
       <label>Enable relational column</label>
     </div>
 
+    <!--kibi: here it must be ng-show. With ng-if, there was a noticeable delay when enabling
+        the relational column and some queries were already configured-->
     <div ng-show="vis.params.enableQueryFields">
       <div class="form-group">
         <label>Column name</label></br>

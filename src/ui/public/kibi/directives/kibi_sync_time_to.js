@@ -6,9 +6,8 @@ define(function (require) {
   const moment = require('moment');
   const module = require('ui/modules').get('ui/kibi/kibi_sync_time_to');
 
-  module.directive('kibiSyncTimeTo', function (kibiState, timefilter, Private) {
-
-    var dashboardHelper = Private(require('ui/kibi/helpers/dashboard_helper'));
+  module.directive('kibiSyncTimeTo', function (kibiState, Private) {
+    const dashboardHelper = Private(require('ui/kibi/helpers/dashboard_helper'));
 
     return {
       restrict: 'E',
@@ -24,11 +23,13 @@ define(function (require) {
           // reset the allSelected option
           $scope.allSelected = false;
           dashboardHelper.getTimeDependentDashboards().then((dashboards) => {
+            const dashboardsFromState = kibiState.getSyncedDashboards(kibiState._getCurrentDashboardId());
+
             $scope.dashboards = _.map(dashboards, (d) => {
               return {
                 title: d.title,
                 id: d.id,
-                selected: currentDashId === d.id,
+                selected: currentDashId === d.id || _.contains(dashboardsFromState, d.id),
                 disabled: currentDashId === d.id
               };
             });
@@ -68,7 +69,6 @@ define(function (require) {
               kibiState._saveTimeForDashboardId(d.id, $scope.mode, $scope.from, $scope.to);
             }
           });
-          kibiState.save();
         };
 
         $scope.syncTimeTo = function () {
@@ -76,6 +76,16 @@ define(function (require) {
             $scope[$attrs.kibiFunction]();
           }
           copyTimeToDashboards($scope.dashboards);
+
+          const dashboards = _($scope.dashboards)
+          .filter('selected', true)
+          .pluck('id')
+          .value();
+          _.each(dashboards, dashboardId => {
+            kibiState.setSyncedDashboards(dashboardId, _.without(dashboards, dashboardId));
+          });
+
+          kibiState.save();
         };
 
       }

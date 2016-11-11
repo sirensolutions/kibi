@@ -122,6 +122,7 @@ define(function (require) {
       filters: 'f',
       query: 'q',
       time: 't',
+      synced_dashboards: 's',
       // properties available in the diff array with the save_with_changes event
       dashboards: 'd',
       enabled_relations: 'j',
@@ -132,6 +133,22 @@ define(function (require) {
       selected_entity_disabled: 'x',
       selected_entity: 'u',
       test_selected_entity: 'v'
+    };
+
+    /**
+     * setSyncedDashboards sets the given dashboard IDs to sync the time with the given dashboard.
+     */
+    KibiState.prototype.setSyncedDashboards = function (dashboardId, dashboards) {
+      if (dashboards && dashboards.length) {
+        this._setDashboardProperty(dashboardId, this._properties.synced_dashboards, dashboards);
+      }
+    };
+
+    /**
+     * getSyncedDashboards returns the IDs of dashboards to sync the time with.
+     */
+    KibiState.prototype.getSyncedDashboards = function (dashboardId) {
+      return this._getDashboardProperty(dashboardId, this._properties.synced_dashboards);
     };
 
     KibiState.prototype.isEntitySelected = function (index, type, id, column) {

@@ -147,6 +147,9 @@ define(function (require) {
             var $cell = $cells.eq(i);
             var column = $cell.data('column');
 
+            // Remove click CSS style for every cell
+            $cell.removeClass('click');
+
             if ($scope.cellClickHandlers && $scope.cellClickHandlers[column]) {
 
               _.each($scope.cellClickHandlers[column], function (clickHandler) {

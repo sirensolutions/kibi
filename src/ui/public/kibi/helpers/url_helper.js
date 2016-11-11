@@ -7,7 +7,7 @@ define(function (require) {
     }
 
     UrlHelper.prototype.onVisualizeTab = function () {
-      return $location.path().indexOf('/visualize/') === 0;
+      return $location.path().indexOf('/visualize') === 0;
     };
 
     UrlHelper.prototype.onSettingsTab = function () {

@@ -43,13 +43,6 @@ describe('kibi_core/migrations/functional', function () {
 
       beforeEach(wrapAsync(async () => {
         await scenarioManager.reload(Scenario5);
-      }));
-
-      afterEach(wrapAsync(async () => {
-        await scenarioManager.unload(Scenario5);
-      }));
-
-      beforeEach(() => {
         configuration = {
           index: '.kibi',
           client: client,
@@ -59,7 +52,11 @@ describe('kibi_core/migrations/functional', function () {
           }
         };
         warningSpy = configuration.logger.warning;
-      });
+      }));
+
+      afterEach(wrapAsync(async () => {
+        await scenarioManager.unload(Scenario5);
+      }));
 
       it('should count all upgradeable objects', wrapAsync(async () => {
         let migration = new Migration(configuration);
@@ -95,13 +92,6 @@ describe('kibi_core/migrations/functional', function () {
 
         beforeEach(wrapAsync(async () => {
           await scenarioManager.reload(Scenario);
-        }));
-
-        afterEach(wrapAsync(async () => {
-          await scenarioManager.unload(Scenario);
-        }));
-
-        beforeEach(() => {
           configuration = {
             index: '.kibi',
             client: client,
@@ -111,7 +101,11 @@ describe('kibi_core/migrations/functional', function () {
             }
           };
           warningSpy = configuration.logger.warning;
-        });
+        }));
+
+        afterEach(wrapAsync(async () => {
+          await scenarioManager.unload(Scenario);
+        }));
 
         it('should count all upgradeable objects', wrapAsync(async () => {
           let migration = new Migration(configuration);

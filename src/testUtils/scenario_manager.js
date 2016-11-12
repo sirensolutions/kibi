@@ -4,6 +4,7 @@
  * /test/fixtures that can be used outside the native functional test suites.
  */
 import path from 'path';
+import Promise from 'bluebird';
 import elasticsearch from 'elasticsearch';
 
 export default class ScenarioManager {
@@ -83,17 +84,29 @@ export default class ScenarioManager {
       return bulk.indexName;
     });
 
-    try {
-      await this.client.indices.delete({
-        index: indices,
-        refresh: true
+    const start = Date.now();
+    while (true) {
+      const exists = await this.client.indices.exists({
+        index: indices
       });
-    } catch (error) {
-      // if the index never existed yet, or was already deleted it's OK
-      if (error.message.indexOf('index_not_found_exception') < 0) {
-        console.log('error.message: ' + error.message);
-        throw error;
+      if (exists) {
+        if (Date.now() - start > 10000) {
+          throw new Error('ScenarioManager timed out while waiting for indices to be deleted.');
+        }
+        try {
+          await this.client.indices.delete({
+            index: indices
+          });
+        } catch (error) {
+          if (error.message.indexOf('index_not_found_exception') < 0) {
+            console.log('error.message: ' + error.message);
+            throw error;
+          }
+        }
+        await Promise.delay(100);
+        continue;
       }
+      break;
     }
   };
 

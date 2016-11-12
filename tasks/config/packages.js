@@ -1,9 +1,10 @@
+// kibi: modified to build Kibi packages with the exception of S3 parameters (which we are not currently using).
 export default (grunt) => {
   const VERSION = grunt.config.get('build.version');
   const SHORT_SHA = grunt.config.get('build.sha').substr(0, 7);
 
-  const FOLDER_STAGING = `kibana/staging/${VERSION}-${SHORT_SHA}/repos/${VERSION.match(/\d\./)[0]}x`;
-  const FOLDER_PRODUCTION = `kibana/${VERSION.match(/\d\./)[0]}x`;
+  const FOLDER_STAGING = `kibi/staging/${VERSION}-${SHORT_SHA}/repos/${VERSION.match(/\d\./)[0]}x`;
+  const FOLDER_PRODUCTION = `kibi/${VERSION.match(/\d\./)[0]}x`;
 
   const FOLDERNAME_DEB = 'debian';
   const FOLDERNAME_RPM = 'centos';
@@ -13,14 +14,14 @@ export default (grunt) => {
   const PREFIX_PRODUCTION_DEB = `${FOLDER_PRODUCTION}/${FOLDERNAME_DEB}`;
   const PREFIX_PRODUCTION_RPM = `${FOLDER_PRODUCTION}/${FOLDERNAME_RPM}`;
 
-  const FOLDER_CONFIG = '/opt/kibana/config';
-  const FOLDER_HOME = '/opt/kibana';
-  const FOLDER_DATA = '/var/lib/kibana';
-  const FOLDER_LOGS = '/var/log/kibana';
+  const FOLDER_CONFIG = '/opt/kibi/config';
+  const FOLDER_HOME = '/opt/kibi';
+  const FOLDER_DATA = '/var/lib/kibi';
+  const FOLDER_LOGS = '/var/log/kibi';
   const FOLDER_PLUGINS = `${FOLDER_HOME}/installedPlugins`;
 
-  const FILE_KIBANA_CONF = `${FOLDER_CONFIG}/kibana.yml`;
-  const FILE_KIBANA_BINARY = `${FOLDER_HOME}/bin/kibana`;
+  const FILE_KIBANA_CONF = `${FOLDER_CONFIG}/kibi.yml`;
+  const FILE_KIBANA_BINARY = `${FOLDER_HOME}/bin/kibi`;
 
   return {
     publish: {
@@ -35,13 +36,13 @@ export default (grunt) => {
         rpmPrefix: PREFIX_PRODUCTION_RPM
       }
     },
-    user: 'kibana',
-    group: 'kibana',
-    name: 'kibana',
-    description: 'Explore\ and\ visualize\ your\ Elasticsearch\ data',
-    site: 'https://www.elastic.co',
-    vendor: 'Elasticsearch,\ Inc.',
-    maintainer: 'Kibana Team\ \<info@elastic.co\>',
+    user: 'kibi',
+    group: 'kibi',
+    name: 'kibi',
+    description: 'Kibi Community Edition',
+    site: 'http://siren.solutions',
+    vendor: 'Siren Solutions',
+    maintainer: 'Siren Solutions\ \<info@siren.solutions\>',
     license: 'Apache\ 2.0',
     version: VERSION,
     path: {

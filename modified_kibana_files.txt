@@ -206,6 +206,7 @@ tasks/build/packageJson.js
 
 tasks/config/copy.js
 tasks/config/platforms.js
+tasks/config/packages.js
 tasks/config/run.js
 
 test/fixtures/config.js

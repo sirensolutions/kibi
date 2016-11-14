@@ -14,7 +14,7 @@ export default function (server) {
    * - savedQueries: a list of saved queries to be processed when transforming the response.
    *
    * @param {object} search - A search request body.
-   * @return {object} - An object containing generated metadata.
+   * @return {object}
    */
   async function transformSearchRequest(search) {
 

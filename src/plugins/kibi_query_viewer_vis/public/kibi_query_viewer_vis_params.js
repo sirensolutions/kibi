@@ -30,10 +30,7 @@ define(function (require) {
 
               if (option._label) {
                 option.templateVars.label = option._label;
-              } else if (!option.templateVars.label) {
-                option.templateVars.label = '';
-              }
-              if ((option.templateVars.label !== option._label) && option._label === '') {
+              } else if (!option.templateVars.label || ((option.templateVars.label !== option._label) && option._label === '')) {
                 option.templateVars.label = '';
               }
               if (option.templateVars) {

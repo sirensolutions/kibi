@@ -33,12 +33,11 @@ define(function (require) {
               } else if (!option.templateVars.label) {
                 option.templateVars.label = '';
               }
-              if (option.templateVars.label) {
-                option._templateVarsString = JSON.stringify(option.templateVars);
-              }
               if ((option.templateVars.label !== option._label) && option._label === '') {
-                option._templateVarsString = '';
-                option.templateVars = '';
+                option.templateVars.label = '';
+              }
+              if (option.templateVars) {
+                option._templateVarsString = JSON.stringify(option.templateVars);
               }
             } catch (err) {
               $scope.jsonError[index].message = err.toString();

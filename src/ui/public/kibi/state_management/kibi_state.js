@@ -141,6 +141,8 @@ define(function (require) {
     KibiState.prototype.setSyncedDashboards = function (dashboardId, dashboards) {
       if (dashboards && dashboards.length) {
         this._setDashboardProperty(dashboardId, this._properties.synced_dashboards, dashboards);
+      } else {
+        this._deleteDashboardProperty(dashboardId, this._properties.synced_dashboards);
       }
     };
 

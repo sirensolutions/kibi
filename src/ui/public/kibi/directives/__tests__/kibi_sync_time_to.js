@@ -55,6 +55,35 @@ describe('Kibi Components', function () {
       }
     ];
 
+    const pollUntilDashboardsAreResolved = function (done, cb, syncedDashboards) {
+      if (!cb) {
+        throw new Error('provide a callback');
+      }
+
+      pollUntil(
+        function () {
+          return directiveScope.dashboards && directiveScope.dashboards.length === timeBasedDashboards.length;
+        }, 1000, 1,
+        function (err) {
+          if (err) {
+            done(err);
+          }
+          if (syncedDashboards) {
+            // check the box of all already synced dashboards
+            _.each(syncedDashboards, dashboardId => selectDashboardCheckbox($el, dashboardId));
+          }
+          // current dashboard is always selected
+          selectDashboardCheckbox($el, timeBasedDashboards[0].id);
+
+          // now we know the scope has the dashboards
+          // call apply to modify html
+          directiveScope.$apply();
+
+          cb();
+        }
+      );
+    };
+
     /**
      * Checks that the time on selected dashboards is correctly synced.
      *
@@ -159,6 +188,15 @@ describe('Kibi Components', function () {
       }
     };
 
+    function uncheckAllCheckboxes(el) {
+      // select all checkboxes but the first one
+      if (isChrome) {
+        el.find('table tr:nth-child(2) li:gt(0) input[type=\'checkbox\']').filter(':checked').click();
+      } else {
+        el.find('table tr:nth-child(2) li:gt(0) input[type=\'checkbox\']').filter(':checked').prop('checked', true).click();
+      }
+    };
+
     function checkAllIndividualCheckboxes(el) {
       if (isChrome) {
         el.find('table tr:nth-child(2) input[type=\'checkbox\']').click();
@@ -174,34 +212,11 @@ describe('Kibi Components', function () {
         throw new Error(`Unknown dashboard: ${dashboardId}`);
       }
       if (isChrome) {
-        el.find(`table tr:nth-child(2) li:nth-child(${n + 1}) input[type=\'checkbox\']`).click();
+        el.find(`table tr:nth-child(2) li:nth-child(${n + 1}) input[type='checkbox']`).click();
       } else {
-        el.find(`table tr:nth-child(2) li:nth-child(${n + 1}) input[type=\'checkbox\']`).prop('checked', true).click();
+        el.find(`table tr:nth-child(2) li:nth-child(${n + 1}) input[type='checkbox']`).prop('checked', true).click();
       }
     };
-
-    it('should retrieve already synced dashboards', function (done) {
-      init({ syncedDashboards: [ 'dashC' ] });
-
-      pollUntil(
-        function () {
-          return directiveScope.dashboards && directiveScope.dashboards.length === timeBasedDashboards.length;
-        }, 1000, 1,
-        function (err) {
-          if (err) {
-            done(err);
-          }
-          _.each(directiveScope.dashboards, (dashboard, i) => {
-            if (i === 0 || dashboard.id === 'dashC') { // current dashboard
-              expect(dashboard.selected).to.be(true);
-            } else {
-              expect(dashboard.selected).to.be(false);
-            }
-          });
-          done();
-        }
-      );
-    });
 
     _.each([
       'quick',
@@ -214,143 +229,130 @@ describe('Kibi Components', function () {
         m: mode
       };
 
-      describe(`apply ${mode} mode`, function () {
-        beforeEach(function () {
-          init({ kibiFunctionName: `apply${_.capitalize(mode)}`, expectedTime });
-        });
-
-        it('should change the kibi state for all dashboards when selectAll clicked', function (done) {
-          kibiState.on('save_with_changes', function (diff) {
-            expect(diff).to.eql([ kibiState._properties.dashboards ]);
-            assertDashboards(expectedTime, _.pluck(timeBasedDashboards, 'id'));
-            expect(spyApplyRelative.callCount).to.equal(mode === 'relative' ? 1 : 0);
-            expect(spyApplyAbsolute.callCount).to.equal(mode === 'absolute' ? 1 : 0);
-            done();
+      describe(`timepicker on ${mode} mode`, function () {
+        describe('already synced dashboards', function () {
+          beforeEach(function () {
+            init({
+              kibiFunctionName: `apply${_.capitalize(mode)}`,
+              syncedDashboards: [ 'dashC' ],
+              expectedTime
+            });
           });
 
-          pollUntil(
-            function () {
-              return directiveScope.dashboards && directiveScope.dashboards.length === timeBasedDashboards.length;
-            }, 1000, 1,
-            function (err) {
-              if (err) {
-                done(err);
-              }
-              // now we know the scope has the dashboards
-              // call apply to modify html
-              directiveScope.$apply();
+          it('should retrieve already synced dashboards', function (done) {
+            pollUntilDashboardsAreResolved(done, function () {
+              _.each(directiveScope.dashboards, (dashboard, i) => {
+                if (i === 0 || dashboard.id === 'dashC') { // current or selected dashboards
+                  expect(dashboard.selected).to.be(true);
+                } else {
+                  expect(dashboard.selected).to.be(false);
+                }
+              });
+              done();
+            });
+          });
 
+          it('should delete previously synced dashboards if everything is unselected', function (done) {
+            kibiState.on('save_with_changes', function (diff) {
+              expect(diff).to.eql([ kibiState._properties.dashboards ]);
+              assertDashboards(expectedTime);
+              expect(spyApplyRelative.callCount).to.equal(mode === 'relative' ? 1 : 0);
+              expect(spyApplyAbsolute.callCount).to.equal(mode === 'absolute' ? 1 : 0);
+              done();
+            });
+
+            pollUntilDashboardsAreResolved(done, function () {
+              _.each(directiveScope.dashboards, (dashboard, i) => {
+                if (i === 0 || dashboard.id === 'dashC') { // current or selected dashboards
+                  expect(dashboard.selected).to.be(true);
+                } else {
+                  expect(dashboard.selected).to.be(false);
+                }
+              });
+              uncheckAllCheckboxes($el);
+              $el.find('button[type=\'submit\']').click();
+            }, [ 'dashC' ]);
+          });
+        });
+
+        describe('choose a set of dashboards to sync the time on', function () {
+          beforeEach(function () {
+            init({ kibiFunctionName: `apply${_.capitalize(mode)}`, expectedTime });
+          });
+
+          it('should change the kibi state for all dashboards when selectAll clicked', function (done) {
+            kibiState.on('save_with_changes', function (diff) {
+              expect(diff).to.eql([ kibiState._properties.dashboards ]);
+              assertDashboards(expectedTime, _.pluck(timeBasedDashboards, 'id'));
+              expect(spyApplyRelative.callCount).to.equal(mode === 'relative' ? 1 : 0);
+              expect(spyApplyAbsolute.callCount).to.equal(mode === 'absolute' ? 1 : 0);
+              done();
+            });
+
+            pollUntilDashboardsAreResolved(done, function () {
               checkSelectAllCheckbox($el);
               $el.find('button[type=\'submit\']').click();
-            }
-          );
-        });
-
-        it('should change the kibi state for all dashboards all individual checkboxes clicked', function (done) {
-          kibiState.on('save_with_changes', function (diff) {
-            expect(diff).to.eql([ kibiState._properties.dashboards ]);
-            assertDashboards(expectedTime, _.pluck(timeBasedDashboards, 'id'));
-            expect(spyApplyRelative.callCount).to.equal(mode === 'relative' ? 1 : 0);
-            expect(spyApplyAbsolute.callCount).to.equal(mode === 'absolute' ? 1 : 0);
-            done();
+            });
           });
 
-          pollUntil(
-            function () {
-              return directiveScope.dashboards && directiveScope.dashboards.length === timeBasedDashboards.length;
-            }, 1000, 1,
-            function (err) {
-              if (err) {
-                done(err);
-              }
-              // now we know the scope has the dashboards
-              // call apply to modify html
-              directiveScope.$apply();
+          it('should change the kibi state for all dashboards all individual checkboxes clicked', function (done) {
+            kibiState.on('save_with_changes', function (diff) {
+              expect(diff).to.eql([ kibiState._properties.dashboards ]);
+              assertDashboards(expectedTime, _.pluck(timeBasedDashboards, 'id'));
+              expect(spyApplyRelative.callCount).to.equal(mode === 'relative' ? 1 : 0);
+              expect(spyApplyAbsolute.callCount).to.equal(mode === 'absolute' ? 1 : 0);
+              done();
+            });
 
+            pollUntilDashboardsAreResolved(done, function () {
               checkAllIndividualCheckboxes($el);
               $el.find('button[type=\'submit\']').click();
-            }
-          );
-        });
-
-        it('should save into kibistate the synced dashboards', function (done) {
-          kibiState.on('save_with_changes', function (diff) {
-            expect(diff).to.eql([ kibiState._properties.dashboards ]);
-            assertDashboards(expectedTime, [ 'dashC' ]);
-            expect(spyApplyRelative.callCount).to.equal(mode === 'relative' ? 1 : 0);
-            expect(spyApplyAbsolute.callCount).to.equal(mode === 'absolute' ? 1 : 0);
-            done();
+            });
           });
 
-          pollUntil(
-            function () {
-              return directiveScope.dashboards && directiveScope.dashboards.length === timeBasedDashboards.length;
-            }, 1000, 1,
-            function (err) {
-              if (err) {
-                done(err);
-              }
-              // now we know the scope has the dashboards
-              // call apply to modify html
-              directiveScope.$apply();
+          it('should save into kibistate the synced dashboards', function (done) {
+            kibiState.on('save_with_changes', function (diff) {
+              expect(diff).to.eql([ kibiState._properties.dashboards ]);
+              assertDashboards(expectedTime, [ 'dashC' ]);
+              expect(spyApplyRelative.callCount).to.equal(mode === 'relative' ? 1 : 0);
+              expect(spyApplyAbsolute.callCount).to.equal(mode === 'absolute' ? 1 : 0);
+              done();
+            });
 
+            pollUntilDashboardsAreResolved(done, function () {
               selectDashboardCheckbox($el, 'dashC');
               $el.find('button[type=\'submit\']').click();
-            }
-          );
-        });
-
-        it('should change the kibi state for only the selected dashboard when 1 individual checkbox clicked', function (done) {
-          kibiState.on('save_with_changes', function (diff) {
-            expect(diff).to.eql([ kibiState._properties.dashboards ]);
-            assertDashboards(expectedTime, [ 'dashB' ]);
-            expect(spyApplyRelative.callCount).to.equal(mode === 'relative' ? 1 : 0);
-            expect(spyApplyAbsolute.callCount).to.equal(mode === 'absolute' ? 1 : 0);
-            done();
+            });
           });
 
-          pollUntil(
-            function () {
-              return directiveScope.dashboards && directiveScope.dashboards.length === timeBasedDashboards.length;
-            }, 1000, 1,
-            function (err) {
-              if (err) {
-                done(err);
-              }
-              // now we know the scope has the dashboards
-              // call apply to modify html
-              directiveScope.$apply();
+          it('should change the kibi state for only the selected dashboard when 1 individual checkbox clicked', function (done) {
+            kibiState.on('save_with_changes', function (diff) {
+              expect(diff).to.eql([ kibiState._properties.dashboards ]);
+              assertDashboards(expectedTime, [ 'dashB' ]);
+              expect(spyApplyRelative.callCount).to.equal(mode === 'relative' ? 1 : 0);
+              expect(spyApplyAbsolute.callCount).to.equal(mode === 'absolute' ? 1 : 0);
+              done();
+            });
 
+            pollUntilDashboardsAreResolved(done, function () {
               selectDashboardCheckbox($el, 'dashB');
               $el.find('button[type=\'submit\']').click();
-            }
-          );
-        });
-
-        it('should not put the current dashboard into the synced_dashboards object if it is not synced with anithing', function (done) {
-          kibiState.on('save_with_changes', function (diff) {
-            expect(diff).to.eql([ kibiState._properties.dashboards ]);
-            assertDashboards(expectedTime);
-            expect(spyApplyRelative.callCount).to.equal(mode === 'relative' ? 1 : 0);
-            expect(spyApplyAbsolute.callCount).to.equal(mode === 'absolute' ? 1 : 0);
-            done();
+            });
           });
 
-          pollUntil(
-            function () {
-              return directiveScope.dashboards && directiveScope.dashboards.length === timeBasedDashboards.length;
-            }, 1000, 1,
-            function (err) {
-              if (err) {
-                done(err);
-              }
-              // now we know the scope has the dashboards
-              // call apply to modify html
-              directiveScope.$apply();
+          it('should not put the current dashboard into the synced_dashboards object if it is not synced with anything', function (done) {
+            kibiState.on('save_with_changes', function (diff) {
+              expect(diff).to.eql([ kibiState._properties.dashboards ]);
+              assertDashboards(expectedTime);
+              expect(spyApplyRelative.callCount).to.equal(mode === 'relative' ? 1 : 0);
+              expect(spyApplyAbsolute.callCount).to.equal(mode === 'absolute' ? 1 : 0);
+              done();
+            });
 
+            pollUntilDashboardsAreResolved(done, function () {
               $el.find('button[type=\'submit\']').click();
-            }
-          );
+            });
+          });
         });
       });
     });

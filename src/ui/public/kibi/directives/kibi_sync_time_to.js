@@ -81,9 +81,17 @@ define(function (require) {
           .filter('selected', true)
           .pluck('id')
           .value();
-          _.each(dashboards, dashboardId => {
-            kibiState.setSyncedDashboards(dashboardId, _.without(dashboards, dashboardId));
-          });
+
+          if (dashboards.length > 1) {
+            _.each(dashboards, dashboardId => {
+              kibiState.setSyncedDashboards(dashboardId, _.without(dashboards, dashboardId));
+            });
+          } else {
+            _.each(kibiState.getSyncedDashboards(currentDashId), dashboardId => {
+              kibiState.setSyncedDashboards(dashboardId);
+            });
+            kibiState.setSyncedDashboards(currentDashId);
+          }
 
           kibiState.save();
         };

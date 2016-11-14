@@ -16,10 +16,12 @@ export default (grunt) => {
   };
 
   async function archives({ name, buildName, zipPath, tarPath }) {
+    await exec('tar', ['-chzf', tarPath, buildName]);
+
     if (/windows/.test(name)) {
       await exec('zip', ['-rq', '-ll', zipPath, buildName]);
     } else {
-      await exec('tar', ['-chzf', tarPath, buildName]);
+      await exec('zip', ['-rq', zipPath, buildName]);
     }
   };
 

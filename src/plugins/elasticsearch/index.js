@@ -59,6 +59,13 @@ module.exports = function ({ Plugin }) {
 
       // Expose the client to the server
       exposeClient(server);
+
+      // kibi: expose transformations
+      const transforms = require('./lib/transforms')(server);
+      server.expose('transformSearchRequest', transforms.transformSearchRequest);
+      server.expose('transformSearchResponse', transforms.transformSearchResponse);
+      // kibi: end
+
       createKibiProxy(server, 'GET', '/{paths*}');
       createKibiProxy(server, 'POST', '/_mget');
       createKibiProxy(server, 'POST', '/_search');

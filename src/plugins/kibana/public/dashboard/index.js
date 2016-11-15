@@ -66,6 +66,14 @@ define(function (require) {
         }));
       }
     }
+  })
+  .when('/dashboard/new-dashboard/create/', {
+    template: require('plugins/kibana/dashboard/index.html'),
+    resolve: {
+      dash: function (savedDashboards) {
+        return savedDashboards.get();
+      }
+    }
   });
 
   app.directive('dashboardApp', function (courier, AppState, timefilter, kbnUrl, createNotifier) {
@@ -263,7 +271,7 @@ define(function (require) {
         $scope.$listen(queryFilter, 'fetch', $scope.refresh);
 
         $scope.newDashboard = function () {
-          kbnUrl.change('/dashboard', {});
+          kbnUrl.change('/dashboard/new-dashboard/create', {});
         };
 
         $scope.filterResults = function () {

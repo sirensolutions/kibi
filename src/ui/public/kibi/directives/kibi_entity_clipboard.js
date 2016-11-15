@@ -11,7 +11,7 @@ define(function (require) {
 
     const urlHelper = Private(require('ui/kibi/helpers/url_helper'));
     var notify = createNotifier({
-      name: 'Kibi Entity Clipboard'
+      location: 'Kibi Entity Clipboard'
     });
 
     return {

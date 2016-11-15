@@ -26,7 +26,7 @@ define(function (require) {
     const urlHelper = Private(require('ui/kibi/helpers/url_helper'));
 
     const notify = createNotifier({
-      name: 'Kibi Navigation Bar'
+      location: 'Kibi Navigation Bar'
     });
 
     return {

@@ -7,7 +7,7 @@ define(function (require) {
   return function KibiNavBarHelperFactory(kibiState, globalState, getAppState, createNotifier, Private, $http, Promise, $rootScope,
                                           savedDashboards, kbnIndex) {
     const notify = createNotifier({
-      location: 'kibi_nav_bar directive'
+      location: 'Kibi Navbar helper'
     });
 
     const dashboardGroupHelper = Private(require('ui/kibi/helpers/dashboard_group_helper'));

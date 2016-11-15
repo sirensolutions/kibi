@@ -82,15 +82,17 @@ define(function (require) {
           .pluck('id')
           .value();
 
+          // unset previous synced dashboards
+          _.each(kibiState.getSyncedDashboards(currentDashId), dashboardId => {
+            kibiState.setSyncedDashboards(dashboardId);
+          });
+          kibiState.setSyncedDashboards(currentDashId);
+
+          // set the new dashboards to sync
           if (dashboards.length > 1) {
             _.each(dashboards, dashboardId => {
               kibiState.setSyncedDashboards(dashboardId, _.without(dashboards, dashboardId));
             });
-          } else {
-            _.each(kibiState.getSyncedDashboards(currentDashId), dashboardId => {
-              kibiState.setSyncedDashboards(dashboardId);
-            });
-            kibiState.setSyncedDashboards(currentDashId);
           }
 
           kibiState.save();

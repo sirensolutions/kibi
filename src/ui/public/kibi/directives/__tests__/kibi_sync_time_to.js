@@ -100,9 +100,9 @@ describe('Kibi Components', function () {
 
         // save time of selected dashboard
         if (syncedDashboards) {
-          expect(spySaveTimeForDashboardId.calledWith(dashboardId)).to.be(true);
+          sinon.assert.calledWith(spySaveTimeForDashboardId, dashboardId);
         } else {
-          expect(spySaveTimeForDashboardId.calledWith(dashboardId)).to.be(false);
+          sinon.assert.neverCalledWith(spySaveTimeForDashboardId, dashboardId);
         }
 
         // time is synced
@@ -132,7 +132,7 @@ describe('Kibi Components', function () {
           checkDashboard(dashboard.id);
         }
       });
-      expect(spySaveTimeForDashboardId.callCount).to.be(selectedDashboards.length);
+      sinon.assert.callCount(spySaveTimeForDashboardId, selectedDashboards.length);
     }
 
     function init({ kibiFunctionName, expectedTime, syncedDashboards }) {
@@ -172,7 +172,9 @@ describe('Kibi Components', function () {
         spyApplyAbsolute = directiveScope.applyAbsolute = sinon.spy();
 
         sinon.stub(kibiState, '_getCurrentDashboardId').returns(timeBasedDashboards[0].id);
-        sinon.stub(kibiState, 'getSyncedDashboards').returns(syncedDashboards);
+        if (syncedDashboards) {
+          sinon.stub(kibiState, 'getSyncedDashboards').returns(syncedDashboards);
+        }
         spySaveTimeForDashboardId = sinon.spy(kibiState, '_saveTimeForDashboardId');
 
         $el = $compile('<kibi-sync-time-to kibi-function="' + kibiFunctionName + '"></kibi-sync-time-to>')(directiveScope);
@@ -278,6 +280,40 @@ describe('Kibi Components', function () {
         describe('choose a set of dashboards to sync the time on', function () {
           beforeEach(function () {
             init({ kibiFunctionName: `apply${_.capitalize(mode)}`, expectedTime });
+          });
+
+          it('should update the list of synced dashboards', function (done) {
+            let count = 0;
+
+            kibiState.on('save_with_changes', function (diff) {
+              expect(diff).to.eql([ kibiState._properties.dashboards ]);
+              expect(spyApplyRelative.callCount).to.equal(mode === 'relative' ? count + 1 : 0);
+              expect(spyApplyAbsolute.callCount).to.equal(mode === 'absolute' ? count + 1 : 0);
+
+              if (count === 0) {
+                assertDashboards(expectedTime, [ 'dashC' ]);
+
+                // prepare for the next assertion
+                spySaveTimeForDashboardId.reset();
+                kibiState._setDashboardProperty('dashC', kibiState._properties.time);
+
+                // unselect dashC and select dashB
+                selectDashboardCheckbox($el, 'dashB');
+                selectDashboardCheckbox($el, 'dashC');
+                $el.find('button[type=\'submit\']').click();
+              } else if (count === 1) {
+                assertDashboards(expectedTime, [ 'dashB' ]);
+                done();
+              } else {
+                expect.fail('should have only two save_with_changes events');
+              }
+              count++;
+            });
+
+            pollUntilDashboardsAreResolved(done, function () {
+              selectDashboardCheckbox($el, 'dashC');
+              $el.find('button[type=\'submit\']').click();
+            });
           });
 
           it('should change the kibi state for all dashboards when selectAll clicked', function (done) {

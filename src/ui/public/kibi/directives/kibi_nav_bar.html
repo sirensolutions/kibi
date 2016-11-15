@@ -40,7 +40,7 @@
                   <span ng-bind="dashboard.title"></span>
                   <!-- compare count to undefined to show zero -->
                   <span ng-if="dashboard.count !== undefined" class="smallNumber"> ({{dashboard.count}})</span>
-                  <span ng-if="dashboard.count === undefined" class="spinner"/>
+                  <span ng-if="dashboard.count === undefined && dashboard.savedSearchId" class="spinner"/>
                   <span
                     ng-if="dashboard.filterIconMessage" aria-hidden="true" data-toggle="tooltip"
                     data-placement="bottom" title="{{dashboard.filterIconMessage}}">

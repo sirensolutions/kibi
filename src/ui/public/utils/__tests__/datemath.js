@@ -140,27 +140,27 @@ describe('dateMath', function () {
 
   });
 
-  describe('precise parsing', function () {
+  describe('kibi - parse time with precision', function () {
 
-    it('parse time with precision', function () {
-
+    it('should round the time with the given precision', function () {
       _.each(spans, function (precision) {
-        var expected = moment(anchor).startOf(precision).format(format);
+        const expected = moment(anchor).startOf(precision).format(format);
         expect(dateMath.parseWithPrecision(anchor, null, precision).format(format)).to.equal(expected);
         expect(dateMath.parseWithPrecision(anchor, true, precision).format(format)).to.equal(expected);
       });
     });
 
-    it('parse time with precision - should throw error when wrong precision', function () {
+    it('should throw error when wrong precision', function () {
       try {
         dateMath.parseWithPrecision(anchor, null, 'WRONG');
+        expect.fail('should fail');
       } catch (e) {
         expect(e.message).to.equal('Wrong precision argument use one of y,M,w,d,h,m,s');
       }
     });
 
-    it('parse time with precision - should NOT throw error when precision false or undefined', function () {
-      var expected = moment(anchor).format(format);
+    it('should NOT throw an error when precision false or undefined', function () {
+      const expected = moment(anchor).format(format);
       expect(dateMath.parseWithPrecision(anchor).format(format)).to.equal(expected);
     });
 

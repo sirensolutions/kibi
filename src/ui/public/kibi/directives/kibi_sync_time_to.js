@@ -51,6 +51,19 @@ define(function (require) {
           currentDashId = kibiState._getCurrentDashboardId();
         });
 
+        $scope.$watch('dashboards', function (dashboards) {
+          if (dashboards) {
+            for (let i = 0; i < dashboards.length; i++) {
+              if (!dashboards[i].selected) {
+                $scope.allSelected = false;
+                return; // exit from function
+              }
+            }
+            $scope.allSelected = true;
+          }
+        }, true);
+
+
         $scope.selectAll = function () {
           _.each($scope.dashboards, (d) => {
             if ($scope.allSelected) {

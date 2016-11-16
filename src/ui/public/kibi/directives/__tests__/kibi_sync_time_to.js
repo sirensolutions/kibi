@@ -182,6 +182,10 @@ describe('Kibi Components', function () {
       });
     }
 
+    function isSelectAllChecked(el) {
+      return el.find('table tr:first-child input[type=\'checkbox\']')[0].checked;
+    };
+
     function checkSelectAllCheckbox(el) {
       if (isChrome) {
         el.find('table tr:first-child input[type=\'checkbox\']').click();
@@ -190,7 +194,7 @@ describe('Kibi Components', function () {
       }
     };
 
-    function uncheckAllCheckboxes(el) {
+    function uncheckAllDashboardCheckboxes(el) {
       // select all checkboxes but the first one
       if (isChrome) {
         el.find('table tr:nth-child(2) li:gt(0) input[type=\'checkbox\']').filter(':checked').click();
@@ -199,7 +203,7 @@ describe('Kibi Components', function () {
       }
     };
 
-    function checkAllIndividualCheckboxes(el) {
+    function checkAllDashboardCheckboxes(el) {
       if (isChrome) {
         el.find('table tr:nth-child(2) input[type=\'checkbox\']').click();
       } else {
@@ -232,6 +236,29 @@ describe('Kibi Components', function () {
       };
 
       describe(`timepicker on ${mode} mode`, function () {
+
+        describe('selectAll', function () {
+          beforeEach(function () {
+            init({
+              kibiFunctionName: `apply${_.capitalize(mode)}`
+            });
+          });
+
+          it('should select/deselect selectAll if all checkbox where checked/unchecked', function (done) {
+            pollUntilDashboardsAreResolved(done, function () {
+              expect(isSelectAllChecked($el)).to.equal(false);
+
+              checkAllDashboardCheckboxes($el);
+              expect(isSelectAllChecked($el)).to.equal(true);
+
+              uncheckAllDashboardCheckboxes($el);
+              expect(isSelectAllChecked($el)).to.equal(false);
+
+              done();
+            });
+          });
+        });
+
         describe('already synced dashboards', function () {
           beforeEach(function () {
             init({
@@ -271,7 +298,7 @@ describe('Kibi Components', function () {
                   expect(dashboard.selected).to.be(false);
                 }
               });
-              uncheckAllCheckboxes($el);
+              uncheckAllDashboardCheckboxes($el);
               $el.find('button[type=\'submit\']').click();
             }, [ 'dashC' ]);
           });
@@ -341,7 +368,7 @@ describe('Kibi Components', function () {
             });
 
             pollUntilDashboardsAreResolved(done, function () {
-              checkAllIndividualCheckboxes($el);
+              checkAllDashboardCheckboxes($el);
               $el.find('button[type=\'submit\']').click();
             });
           });

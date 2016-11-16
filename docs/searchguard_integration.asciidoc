@@ -314,6 +314,7 @@ CLUSTER_MONITOR:
 
 KIBI_CLUSTER:
   - indices:data/read/scroll
+  - cluster:admin/plugin/siren/license/get
 
 KIBI_MSEARCH:
   - indices:data/read/coordinate-msearch*
@@ -528,7 +529,7 @@ documentation].
 [source,yaml]
 ----
 # Internal user database
-# The hash value is a bcrypt hash and can be generated with plugin/tools/hash.sh
+# The hash value is a bcrypt hash and can be generated with plugins/searchguard-2/tools/hash.sh
 admin:
   hash: $2a$12$zMeFc6Xi.pcgDVHsvtCV9ePNteVwTE5uGxcKdf7XQcKB9.VkD8iOy
 kibiserver:

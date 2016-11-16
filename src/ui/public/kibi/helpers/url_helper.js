@@ -38,18 +38,18 @@ define(function (require) {
         }
 
         if (app && app.id === 'kibana' && defaultApp && defaultApp.id === 'dashboard') {
-          if (kibiDefaultDashboardTitle && kibiDefaultDashboardTitle !== '') {
+          if (kibiDefaultDashboardTitle) {
             // check that the dashboard exists
             savedDashboards.get(kibiUtils.slugifyId(kibiDefaultDashboardTitle)).then(function (savedDashboard) {
-              fulfill('/' + defaultApp.id + '/' + savedDashboard.id);
+              fulfill('/dashboard/' + savedDashboard.id);
             }).catch(function (err) {
               // could not find the specified dashboard, open the first available
               savedDashboards.find().then(function (resp) {
                 if (resp.hits && resp.hits.length > 0) {
-                  fulfill('/' + defaultApp.id + '/' + resp.hits[0].id);
+                  fulfill('/dashboard/' + resp.hits[0].id);
                 } else {
                   // no dashboards, display the creation form
-                  fulfill('/' + defaultApp.id);
+                  fulfill('/dashboard');
                 }
               });
             });
@@ -57,10 +57,10 @@ define(function (require) {
             // kibiDefaultDashboardTitle not set open the first dashboard
             savedDashboards.find().then(function (resp) {
               if (resp.hits && resp.hits.length > 0) {
-                fulfill('/' + defaultApp.id + '/' + resp.hits[0].id);
+                fulfill('/dashboard/' + resp.hits[0].id);
               } else {
                 // no dashboards, display the creation form
-                fulfill('/' + defaultApp.id);
+                fulfill('/dashboard');
               }
             });
           }

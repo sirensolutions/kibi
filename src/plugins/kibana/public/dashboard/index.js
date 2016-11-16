@@ -39,13 +39,11 @@ define(function (require) {
     template: require('plugins/kibana/dashboard/index.html'),
     resolve: {
       dash: function (timefilter, savedDashboards, kibiDefaultDashboardTitle) {
-        // kibi: do not show the timepicker when no dashboard is selected
-        // Since tabs can show counts unrelated to the time shown in the timefilter, this would be misleading
-        timefilter.enabled = false;
         return savedDashboards.find().then(function (resp) {
           if (resp.hits.length > 0) {
             timefilter.enabled = true;
-            var dashboardId = kibiDefaultDashboardTitle ? kibiDefaultDashboardTitle : resp.hits[0].id;
+            // kibi: select the first dashboard if default_dashboard_title is not set
+            const dashboardId = kibiDefaultDashboardTitle ? kibiDefaultDashboardTitle : resp.hits[0].id;
             return savedDashboards.get(kibiUtils.slugifyId(dashboardId));
           } else {
             return savedDashboards.get();
@@ -67,6 +65,7 @@ define(function (require) {
       }
     }
   })
+  // kibi: this path is used to show an empty dashboard when creating new one
   .when('/dashboard/new-dashboard/create/', {
     template: require('plugins/kibana/dashboard/index.html'),
     resolve: {

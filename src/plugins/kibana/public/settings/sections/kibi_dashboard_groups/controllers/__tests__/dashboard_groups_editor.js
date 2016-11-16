@@ -12,7 +12,7 @@ describe('Kibi Controllers', function () {
   function init({ dashboardGroup, savedDashboardGroups }) {
     ngMock.module('kibana', function ($provide) {
       $provide.constant('kbnDefaultAppId', '');
-      $provide.constant('kibiDefaultDashboardId', '');
+      $provide.constant('kibiDefaultDashboardTitle', '');
       $provide.constant('elasticsearchPlugins', ['siren-join']);
     });
 

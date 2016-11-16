@@ -71,7 +71,7 @@
     </div>
   </div>
 
-  <div class="tab-scroller" ng-class="{visible: tabScrollerVisible}">
+  <div class="tab-scroller" ng-class="{visible: tabScrollerVisible}" ng-show="tabScrollerVisible">
     <button ng-mouseup="scrollTabs(false)" ng-mousedown="scrollTabs(1)" ng-disabled="tabScrollerState[0]"><i class="fa fa-caret-left"></i></button>
     <button ng-mouseup="scrollTabs(false)" ng-mousedown="scrollTabs(-1)" ng-disabled="tabScrollerState[1]"><i class="fa fa-caret-right"></i></button>
   </div>

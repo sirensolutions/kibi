@@ -5,6 +5,7 @@ define(function (require) {
   const ConfigTemplate = require('ui/ConfigTemplate');
   const chrome = require('ui/chrome');
   const stateMonitorFactory = require('ui/state_management/state_monitor_factory');
+  const kibiUtils = require('kibiutils');
 
   require('ui/directives/config');
   require('ui/courier');
@@ -37,8 +38,17 @@ define(function (require) {
   .when('/dashboard', {
     template: require('plugins/kibana/dashboard/index.html'),
     resolve: {
-      dash: function (timefilter, savedDashboards) {
-        return savedDashboards.get();
+      dash: function (timefilter, savedDashboards, kibiDefaultDashboardTitle) {
+        return savedDashboards.find().then(function (resp) {
+          if (resp.hits.length > 0) {
+            timefilter.enabled = true;
+            // kibi: select the first dashboard if default_dashboard_title is not set
+            const dashboardId = kibiDefaultDashboardTitle ? kibiDefaultDashboardTitle : resp.hits[0].id;
+            return savedDashboards.get(kibiUtils.slugifyId(dashboardId));
+          } else {
+            return savedDashboards.get();
+          }
+        });
       }
     }
   })
@@ -52,6 +62,15 @@ define(function (require) {
         .catch(courier.redirectWhenMissing({
           dashboard : '/dashboard'
         }));
+      }
+    }
+  })
+  // kibi: this path is used to show an empty dashboard when creating a new one
+  .when('/dashboard/new-dashboard/create/', {
+    template: require('plugins/kibana/dashboard/index.html'),
+    resolve: {
+      dash: function (savedDashboards) {
+        return savedDashboards.get();
       }
     }
   });
@@ -251,7 +270,8 @@ define(function (require) {
         $scope.$listen(queryFilter, 'fetch', $scope.refresh);
 
         $scope.newDashboard = function () {
-          kbnUrl.change('/dashboard', {});
+          // kibi: changed from '/dashboard' because now there's a specific path for dashboard creation
+          kbnUrl.change('/dashboard/new-dashboard/create', {});
         };
 
         $scope.filterResults = function () {

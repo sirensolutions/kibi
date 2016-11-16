@@ -1,8 +1,9 @@
 define(function (require) {
   var rison = require('ui/utils/rison');
   var _ = require('lodash');
+  var kibiUtils = require('kibiutils');
 
-  return function UrlHelperFactory($location, savedDashboards, Promise, kbnDefaultAppId, kibiDefaultDashboardId) {
+  return function UrlHelperFactory($location, savedDashboards, Promise, kbnDefaultAppId, kibiDefaultDashboardTitle) {
     function UrlHelper() {
     }
 
@@ -37,29 +38,29 @@ define(function (require) {
         }
 
         if (app && app.id === 'kibana' && defaultApp && defaultApp.id === 'dashboard') {
-          if (kibiDefaultDashboardId && kibiDefaultDashboardId !== '') {
+          if (kibiDefaultDashboardTitle) {
             // check that the dashboard exists
-            savedDashboards.get(kibiDefaultDashboardId).then(function (savedDashboard) {
-              fulfill('/' + defaultApp.id + '/' + savedDashboard.id);
+            savedDashboards.get(kibiUtils.slugifyId(kibiDefaultDashboardTitle)).then(function (savedDashboard) {
+              fulfill('/dashboard/' + savedDashboard.id);
             }).catch(function (err) {
               // could not find the specified dashboard, open the first available
               savedDashboards.find().then(function (resp) {
                 if (resp.hits && resp.hits.length > 0) {
-                  fulfill('/' + defaultApp.id + '/' + resp.hits[0].id);
+                  fulfill('/dashboard/' + resp.hits[0].id);
                 } else {
                   // no dashboards, display the creation form
-                  fulfill('/' + defaultApp.id);
+                  fulfill('/dashboard');
                 }
               });
             });
           } else {
-            // kibiDefaultDashboardId not set open the first dashboard
+            // kibiDefaultDashboardTitle not set open the first dashboard
             savedDashboards.find().then(function (resp) {
               if (resp.hits && resp.hits.length > 0) {
-                fulfill('/' + defaultApp.id + '/' + resp.hits[0].id);
+                fulfill('/dashboard/' + resp.hits[0].id);
               } else {
                 // no dashboards, display the creation form
-                fulfill('/' + defaultApp.id);
+                fulfill('/dashboard');
               }
             });
           }

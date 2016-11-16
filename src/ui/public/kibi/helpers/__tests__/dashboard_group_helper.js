@@ -113,7 +113,7 @@ function init({ currentDashboardId = 'Articles', indexPatterns, savedDashboards,
     ngMock.module('kibana', function ($provide) {
       $provide.constant('kibiEnterpriseEnabled', false);
       $provide.constant('kbnDefaultAppId', 'dashboard');
-      $provide.constant('kibiDefaultDashboardId', 'Articles');
+      $provide.constant('kibiDefaultDashboardTitle', 'Articles');
       $provide.constant('elasticsearchPlugins', ['siren-join']);
 
       appState = new MockState({ filters: [] });

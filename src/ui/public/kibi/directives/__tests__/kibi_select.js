@@ -24,7 +24,7 @@ var init = function ({
   ngMock.module('kibana', function ($provide) {
     $provide.constant('elasticsearchPlugins', ['siren-join']);
     $provide.constant('kbnDefaultAppId', '');
-    $provide.constant('kibiDefaultDashboardId', '');
+    $provide.constant('kibiDefaultDashboardTitle', '');
   });
 
   // Create the scope

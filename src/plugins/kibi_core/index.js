@@ -142,7 +142,7 @@ module.exports = function (kibana) {
         datasources_schema: Joi.any().default(datasourcesSchema),
         datasource_cache_size: Joi.number().default(500),
 
-        default_dashboard_id: Joi.string().allow('').default('')
+        default_dashboard_title: Joi.string().allow('').default('')
       }).default();
     },
 

@@ -44,11 +44,11 @@ module.exports = function (kibana) {
             tilemap: config.get('tilemap')
           };
 
-          // kibi: list of elasticsearch plugins, schema, default_dashboard_id and warnings
+          // kibi: list of elasticsearch plugins, schema, default_dashboard_title and warnings
           ret.elasticsearchPlugins = config.get('elasticsearch.plugins');
           if (config.has('kibi_core')) {
             ret.kibiDatasourcesSchema  = config.get('kibi_core.datasources_schema');
-            ret.kibiDefaultDashboardId = config.get('kibi_core.default_dashboard_id');
+            ret.kibiDefaultDashboardTitle = config.get('kibi_core.default_dashboard_title');
             ret.kibiWarnings = {};
             if (config.get('kibi_core.datasource_encryption_key') === 'iSxvZRYisyUW33FreTBSyJJ34KpEquWznUPDvn+ka14=') {
               ret.kibiWarnings.datasource_encryption_warning = true;

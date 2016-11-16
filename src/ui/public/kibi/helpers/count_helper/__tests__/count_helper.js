@@ -23,7 +23,7 @@ describe('Kibi Components', function () {
         $provide.constant('kibiEnterpriseEnabled', false);
         $provide.constant('elasticsearchPlugins', ['siren-join']);
         $provide.constant('kbnDefaultAppId', '');
-        $provide.constant('kibiDefaultDashboardId', '');
+        $provide.constant('kibiDefaultDashboardTitle', '');
         $provide.service('config', require('fixtures/kibi/config'));
 
         appState = new MockState({ filters: [] });

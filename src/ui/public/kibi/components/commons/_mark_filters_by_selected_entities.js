@@ -17,7 +17,7 @@ define(function (require) {
           filters[index].meta.dependsOnSelectedEntities = res;
           filters[index].meta.dependsOnSelectedEntitiesDisabled = res && kibiState.isSelectedEntityDisabled();
           filters[index].meta.markDependOnSelectedEntities = false;
-          if (urlHelper.onVisualizeTab() || urlHelper.onSettingsTab()) {
+          if (urlHelper.onVisualizeTab() || urlHelper.onDashboardTab()) {
             filters[index].meta.markDependOnSelectedEntities = Boolean(kibiState.getEntityURI());
           }
         });

@@ -244,7 +244,7 @@ describe('Kibi Components', function () {
             });
           });
 
-          it('Should select/deselect selectAll if all checkbox where checked/unchecked', function (done) {
+          it('should select/deselect selectAll if all checkbox where checked/unchecked', function (done) {
             pollUntilDashboardsAreResolved(done, function () {
               expect(isSelectAllChecked($el)).to.equal(false);
 

@@ -270,6 +270,7 @@ define(function (require) {
         $scope.$listen(queryFilter, 'fetch', $scope.refresh);
 
         $scope.newDashboard = function () {
+          // kibi: changed from '/dashboard' because now there's a specific path for dashboard creation
           kbnUrl.change('/dashboard/new-dashboard/create', {});
         };
 

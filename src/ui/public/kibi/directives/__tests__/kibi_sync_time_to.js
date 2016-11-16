@@ -182,6 +182,10 @@ describe('Kibi Components', function () {
       });
     }
 
+    function isSelectAllChecked(el) {
+      return el.find('table tr:first-child input[type=\'checkbox\']')[0].checked;
+    };
+
     function checkSelectAllCheckbox(el) {
       if (isChrome) {
         el.find('table tr:first-child input[type=\'checkbox\']').click();
@@ -232,6 +236,29 @@ describe('Kibi Components', function () {
       };
 
       describe(`timepicker on ${mode} mode`, function () {
+
+        describe('selectAll', function () {
+          beforeEach(function () {
+            init({
+              kibiFunctionName: `apply${_.capitalize(mode)}`
+            });
+          });
+
+          it('Should select/deselect selectAll if all checkbox where checked/unchecked', function (done) {
+            pollUntilDashboardsAreResolved(done, function () {
+              expect(isSelectAllChecked($el)).to.equal(false);
+
+              checkAllIndividualCheckboxes($el);
+              expect(isSelectAllChecked($el)).to.equal(true);
+
+              uncheckAllCheckboxes($el);
+              expect(isSelectAllChecked($el)).to.equal(false);
+
+              done();
+            });
+          });
+        });
+
         describe('already synced dashboards', function () {
           beforeEach(function () {
             init({

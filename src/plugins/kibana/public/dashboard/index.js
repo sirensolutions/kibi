@@ -65,7 +65,7 @@ define(function (require) {
       }
     }
   })
-  // kibi: this path is used to show an empty dashboard when creating new one
+  // kibi: this path is used to show an empty dashboard when creating a new one
   .when('/dashboard/new-dashboard/create/', {
     template: require('plugins/kibana/dashboard/index.html'),
     resolve: {

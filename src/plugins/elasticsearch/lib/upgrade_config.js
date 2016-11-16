@@ -12,8 +12,6 @@ module.exports = function (server) {
   const config = server.config();
 
   return function (response) {
-    const newConfig = {};
-
     // Check to see if there are any doc. If not then we set the build number and id
     if (response.hits.hits.length === 0) {
       return client.create({
@@ -31,9 +29,20 @@ module.exports = function (server) {
 
     if (devConfig) return Promise.resolve();
 
+    // kibi: Sort upgradeable configs by numeric build number.
+    const hits = response.hits.hits.filter((hit) => {
+      const buildNum = parseInt(_.get(hit, '_source.buildNum', 0));
+      return buildNum > 0;
+    });
+
+    hits.sort((a, b) => {
+      return b._source.buildNum - a._source.buildNum;
+    });
+    // kibi: end
+
     // Look for upgradeable configs. If none of them are upgradeable
     // then resolve with null.
-    const body = _.find(response.hits.hits, isUpgradeable.bind(null, server));
+    const body = _.find(hits, isUpgradeable.bind(null, server));
     if (!body) return Promise.resolve();
 
     // if the build number is still the template string (which it wil be in development)

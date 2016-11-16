@@ -98,6 +98,59 @@ describe('plugins/elasticsearch', function () {
       });
     });
 
+    it('should sort configurations by buildNum descending', function () {
+      const response = {
+        hits: {
+          hits: [
+            {
+              _id: '3.4.1',
+              _source: {
+                buildNum: 8881
+              }
+            },
+            {
+              _id: '3.5.3',
+              _source: {
+                buildNum: 12059,
+                someSetting: true
+              }
+            },
+            {
+              _id: '3.4.2',
+              _source: {
+                buildNum: 11447
+              }
+            },
+            {
+              _id: 'foo',
+              _source: {}
+            },
+            {
+              _id: 'bar',
+              _source: {
+                buildNum: 'abcd'
+              }
+            }
+          ]
+        }
+      };
+
+      get.withArgs('pkg.buildNum').returns(20000);
+      client.create.returns(Promise.resolve());
+      return upgrade(response)
+      .then(() => {
+        sinon.assert.calledWith(client.create, {
+          index: '.my-kibana',
+          type: 'config',
+          id: '4.0.1',
+          body: {
+            buildNum: 20000,
+            someSetting: true
+          }
+        });
+      });
+    });
+
     it('should update the build number on the new config', function () {
       get.withArgs('pkg.buildNum').returns(5801);
       client.create.returns(Promise.resolve());

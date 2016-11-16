@@ -103,20 +103,32 @@ define(function (require) {
   // kibi: added by kibi
   function parseWithPrecision(text, roundUp, precision) {
     var t = parse(text, roundUp);
-    if (precision) {
+
+    roundWithPrecision(t, precision);
+    return t;
+  }
+
+  /**
+   * roundWithPrecision rounds the time to the given precision (seconds, minutes, ...).
+   *
+   * @param time a moment object
+   * @param precision the precision as a string
+   */
+  function roundWithPrecision(time, precision) {
+    if (precision && moment.isMoment(time)) {
       if (_.contains(units, precision)) {
-        return t.startOf(precision);
+        return time.startOf(precision);
       } else {
         throw new Error('Wrong precision argument use one of ' + units);
       }
     }
-    return t;
   }
   // kibi: end
 
   return {
-    parse: parse,
-    parseWithPrecision: parseWithPrecision,
+    parse,
+    parseWithPrecision,
+    roundWithPrecision,
 
     units: Object.freeze(units),
     unitsAsc: Object.freeze(unitsAsc),

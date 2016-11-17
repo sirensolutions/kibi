@@ -17,7 +17,6 @@ define(function (require) {
         let currentDashId = kibiState._getCurrentDashboardId();
 
         $scope.allSelected = false;
-        $scope.kibiFunction = $attrs.kibiFunction;
 
         const populateDashboards = function () {
           // reset the allSelected option
@@ -85,8 +84,11 @@ define(function (require) {
         };
 
         $scope.syncTimeTo = function () {
-          if ($scope[$attrs.kibiFunction]) {
-            $scope[$attrs.kibiFunction]();
+          if ($scope.mode) {
+            let syncFunctionName = 'apply' + _.capitalize($scope.mode);
+            if ($scope[syncFunctionName]) {
+              $scope[syncFunctionName]();
+            }
           }
           copyTimeToDashboards($scope.dashboards);
 

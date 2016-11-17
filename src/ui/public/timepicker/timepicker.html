@@ -1,23 +1,4 @@
 <div class="kbn-timepicker">
-  <style>
-    .kbn-timepicker [kbn-time-input] {
-      text-align: center;
-    }
-    .kbn-timepicker-modes {
-      text-transform: capitalize;
-    }
-    .kbn-timepicker-section {
-      float: left;
-      padding: 0px 15px;
-    }
-    .kbn-refresh-section {
-      float: left;
-      padding: 0px 15px;
-    }
-    .kbn-timepicket-alert {
-      width: 100px;
-    }
-  </style>
 
   <div class="tab-content">
 
@@ -40,7 +21,7 @@
         </div>
 
         <div class="col-md-10">
-          <div ng-switch on="mode" class="container-fluid">
+          <div ng-switch on="mode" class="container-fluid kibi-float-left">
             <div ng-switch-when="quick">
 
               <div ng-repeat="list in quickLists" class="kbn-timepicker-section">
@@ -50,12 +31,6 @@
                   </li>
                 </ul>
               </div>
-
-              <div class="kbn-timepicker-section">
-                <kibi-sync-time-to kibi-function="applyQuick"></kibi-sync-time-to>
-              </div>
-
-
             </div>
 
             <div ng-switch-when="relative">
@@ -119,10 +94,6 @@
                 </div>
                 -->
 
-                <div class="kbn-timepicker-section">
-                  <kibi-sync-time-to kibi-function="applyRelative"></kibi-sync-time-to>
-                </div>
-
               </form>
             </div>
 
@@ -163,17 +134,18 @@
                   </div>
                 </div>
                 -->
-                <div class="kbn-timepicker-section">
-                  <kibi-sync-time-to kibi-function="applyAbsolute"></kibi-sync-time-to>
-                </div>
 
               </form>
             </div>
           </div>
+
+          <div class="container-fluid kibi-float-left">
+            <kibi-sync-time-to class="kbn-timepicker-section"></kibi-sync-time-to>
+          </div>
+
         </div>
       </div>
     </div>
-
     <!-- Refresh Intervals -->
     <div ng-show="activeTab === 'interval'" role="tabpanel" class="tab-pane active">
       <br>

@@ -135,7 +135,7 @@ describe('Kibi Components', function () {
       sinon.assert.callCount(spySaveTimeForDashboardId, selectedDashboards.length);
     }
 
-    function init({ kibiFunctionName, expectedTime, syncedDashboards }) {
+    function init({ mode, expectedTime, syncedDashboards }) {
       ngMock.module(
         'kibana',
         'kibana/courier',
@@ -163,6 +163,7 @@ describe('Kibi Components', function () {
         $timeout = _$timeout_;
         $rootScope = _$rootScope_;
         directiveScope = $rootScope.$new();
+        directiveScope.mode = mode;
         if (expectedTime) {
           directiveScope.from = expectedTime.f;
           directiveScope.to = expectedTime.t;
@@ -177,7 +178,7 @@ describe('Kibi Components', function () {
         }
         spySaveTimeForDashboardId = sinon.spy(kibiState, '_saveTimeForDashboardId');
 
-        $el = $compile('<kibi-sync-time-to kibi-function="' + kibiFunctionName + '"></kibi-sync-time-to>')(directiveScope);
+        $el = $compile('<kibi-sync-time-to></kibi-sync-time-to>')(directiveScope);
         directiveScope.$apply();
       });
     }
@@ -240,7 +241,7 @@ describe('Kibi Components', function () {
         describe('selectAll', function () {
           beforeEach(function () {
             init({
-              kibiFunctionName: `apply${_.capitalize(mode)}`
+              mode
             });
           });
 
@@ -262,7 +263,7 @@ describe('Kibi Components', function () {
         describe('already synced dashboards', function () {
           beforeEach(function () {
             init({
-              kibiFunctionName: `apply${_.capitalize(mode)}`,
+              mode,
               syncedDashboards: [ 'dashC' ],
               expectedTime
             });
@@ -306,7 +307,7 @@ describe('Kibi Components', function () {
 
         describe('choose a set of dashboards to sync the time on', function () {
           beforeEach(function () {
-            init({ kibiFunctionName: `apply${_.capitalize(mode)}`, expectedTime });
+            init({ mode, expectedTime });
           });
 
           it('should update the list of synced dashboards', function (done) {

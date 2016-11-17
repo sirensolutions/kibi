@@ -5,6 +5,7 @@ define(function (require) {
   let dateMath = require('ui/utils/dateMath');
   let moment = require('moment');
 
+  require('ui/timepicker/timepicker.less');
   require('ui/directives/input_datetime');
   require('ui/directives/inequality');
   require('ui/timepicker/quick_ranges');

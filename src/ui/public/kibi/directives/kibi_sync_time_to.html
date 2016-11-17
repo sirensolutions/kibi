@@ -15,23 +15,23 @@
         <label><input type="checkbox"  ng-model="allSelected" ng-click="selectAll()"/> Select all</label>
         <button
           type="submit"
-          ng-if="kibiFunction == 'applyQuick'"
+          ng-if="mode == 'quick'"
           class="btn btn-primary"
           ng-click="syncTimeTo()">Apply</button>
         <!-- NOTE: do not remove kbn-timepicker-go class as it is used in tests -->
         <button
           type="submit"
-          ng-if="kibiFunction == 'applyAbsolute'"
+          ng-if="mode == 'absolute'"
           class="btn btn-primary kbn-timepicker-go"
           ng-disabled="absolute.from > absolute.to || !absolute.from || !absolute.to"
           ng-click="syncTimeTo()">Apply</button>
-        <span class="small" ng-show="kibiFunction == 'applyAbsolute' && absolute.from > absolute.to">
+        <span class="small" ng-show="mode == 'absolute' && absolute.from > absolute.to">
           <strong>From</strong> must occur before <strong>To</strong>
         </span>
         <!-- NOTE: do not remove kbn-timepicker-go class as it is used in tests -->
         <button
           type="submit"
-          ng-if="kibiFunction == 'applyRelative'"
+          ng-if="mode == 'relative'"
           class="btn btn-primary kbn-timepicker-go"
           ng-disabled="!relative.preview"
           ng-click="syncTimeTo()">Apply</button>

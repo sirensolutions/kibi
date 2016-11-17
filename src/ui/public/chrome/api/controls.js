@@ -34,7 +34,7 @@ module.exports = function (chrome, internals) {
   var kibiNavbarVisibleDefault = true;
   internals.setKibiNavbarVisibleDefault = (_def1) => kibiNavbarVisibleDefault = Boolean(_def1);
 
-  chrome.getKibiNavbarVisible = () => {
+  chrome.isKibiNavbarVisible = () => {
     return kibiNavbarVisibleDefault;
   };
   // kibi: added

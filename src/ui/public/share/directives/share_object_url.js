@@ -11,7 +11,7 @@ app.directive('shareObjectUrl', function (Private, createNotifier) {
     restrict: 'E',
     scope: {
       getShareAsEmbed: '&shareAsEmbed',
-      getKibiNavbarVisible:'&kibiNavbarVisible' // kibi: added to control when to show hide kibi-nav-bar
+      isKibiNavbarVisible:'&kibiNavbarVisible' // kibi: added to control when to show hide kibi-nav-bar
     },
     template: require('ui/share/views/share_object_url.html'),
     link: function ($scope, $el) {
@@ -61,7 +61,7 @@ app.directive('shareObjectUrl', function (Private, createNotifier) {
       }
 
       $scope.shareAsEmbed = $scope.getShareAsEmbed();
-      $scope.kibiNavbarVisible = $scope.getKibiNavbarVisible(); // kibi: added to control when to show hide kibi-nav-bar
+      $scope.kibiNavbarVisible = $scope.isKibiNavbarVisible(); // kibi: added to control when to show hide kibi-nav-bar
 
       // kibi: added for the save session button
       $scope.flushSession = function () {

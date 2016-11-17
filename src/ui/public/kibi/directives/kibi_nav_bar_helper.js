@@ -10,6 +10,7 @@ define(function (require) {
       location: 'Kibi Navbar helper'
     });
 
+    const chrome = require('ui/chrome');
     const dashboardGroupHelper = Private(require('ui/kibi/helpers/dashboard_group_helper'));
     const searchHelper = new SearchHelper(kbnIndex);
 
@@ -21,7 +22,7 @@ define(function (require) {
         // only the selected dashboard from each group
         dashboardIds = [];
         _.each(this.dashboardGroups, (g, index) => {
-          var dashboard = self.dashboardGroups[index].selected;
+          const dashboard = this.dashboardGroups[index].selected;
           if (dashboard && dashboardIds.indexOf(dashboard.id) === -1) {
             dashboardIds.push(dashboard.id);
           }
@@ -31,9 +32,7 @@ define(function (require) {
       return dashboardGroupHelper.getDashboardsMetadata(dashboardIds, forceCountsUpdate).then((metadata) => {
         _.each(this.dashboardGroups, (g) => {
           _.each(g.dashboards, (d) => {
-            var foundDashboardMetadata = _.find(metadata, (m) => {
-              return m.dashboardId === d.id;
-            });
+            const foundDashboardMetadata = _.find(metadata, 'dashboardId', d.id);
             if (foundDashboardMetadata) {
               d.count = foundDashboardMetadata.count;
               d.isPruned = foundDashboardMetadata.isPruned;
@@ -65,6 +64,7 @@ define(function (require) {
     // =================
 
     function KibiNavBarHelper() {
+      this.chrome = chrome;
       this.appState = null;
       this.dashboardGroups = [];
       this.init = _.once(() => {
@@ -159,7 +159,7 @@ define(function (require) {
         this.updateAllCounts(null, 'courier:searchRefresh event', true);
       });
 
-      var that = this;
+      const self = this;
       this.delayExecutionHelper = new DelayExecutionHelper(
         (data, alreadyCollectedData) => {
           if (alreadyCollectedData.ids === undefined) {
@@ -178,8 +178,10 @@ define(function (require) {
           });
         },
         (data) => {
-          var forceUpdate = data.forceUpdate;
-          _fireUpdateAllCounts.call(that, data.ids, forceUpdate);
+          if (self.chrome.getActiveTabId() === 'dashboard') {
+            const forceUpdate = data.forceUpdate;
+            _fireUpdateAllCounts.call(self, data.ids, forceUpdate);
+          }
         },
         750,
         DelayExecutionHelper.DELAY_STRATEGY.RESET_COUNTER_ON_NEW_EVENT
@@ -189,10 +191,6 @@ define(function (require) {
     /*
     * Public Methods
     */
-
-    KibiNavBarHelper.prototype.setChrome = function (c) {
-      dashboardGroupHelper.setChrome(c);
-    };
 
     KibiNavBarHelper.prototype.updateAllCounts = function (dashboardsIds, reason, forceUpdate = false) {
       if (!dashboardsIds) {

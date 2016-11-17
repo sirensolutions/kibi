@@ -5,6 +5,7 @@ const mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
 const _ = require('lodash');
 const noDigestPromises = require('testUtils/noDigestPromises');
 const pollUntil = require('./_poll_until');
+const chrome = require('ui/chrome');
 
 let kibiState;
 let globalState;
@@ -48,9 +49,8 @@ describe('Kibi Directives', function () {
         sinon.stub(kibiState, '_getCurrentDashboardId').returns('dashboard1');
         timeBasedIndicesStub = sinon.stub(kibiState, 'timeBasedIndices').returns(Promise.resolve([ 'id' ]));
 
-        kibiNavBarHelper.setChrome({
-          getBasePath: () => ''
-        });
+        sinon.stub(chrome, 'getBasePath').returns('');
+        sinon.stub(chrome, 'getActiveTabId').returns('dashboard');
 
         kibiNavBarHelper._setDashboardGroups(dashboardGroups);
 

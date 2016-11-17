@@ -1,27 +1,24 @@
 define(function (require) {
-  var isJoinPruned = require('ui/kibi/helpers/is_join_pruned');
+  let isJoinPruned = require('ui/kibi/helpers/is_join_pruned');
 
   return function DashboardGroupHelperFactory(
       $timeout, kbnUrl, kibiState, Private, savedDashboards, savedDashboardGroups, Promise, kbnIndex, $http) {
-    var _ = require('lodash');
-    var countHelper = Private(require('ui/kibi/helpers/count_helper/count_helper'));
-    var kibiUtils = require('kibiutils');
+    let _ = require('lodash');
+    let countHelper = Private(require('ui/kibi/helpers/count_helper/count_helper'));
+    let kibiUtils = require('kibiutils');
     const SearchHelper = require('ui/kibi/helpers/search_helper');
+    const chrome = require('ui/chrome');
 
     function DashboardGroupHelper() {
-      this.chrome = null;
+      this.chrome = chrome;
       this.searchHelper = new SearchHelper(kbnIndex);
     }
 
-    DashboardGroupHelper.prototype.setChrome = function (c) {
-      this.chrome = c;
-    };
-
     DashboardGroupHelper.prototype.getIdsOfDashboardGroupsTheseDashboardsBelongTo = function (dashboardIds) {
       return savedDashboardGroups.find().then(function (resp) {
-        var ret = [];
+        let ret = [];
         _.each(resp.hits, function (hit) {
-          var id = hit.id;
+          let id = hit.id;
           if (hit.dashboards instanceof Array) {
             _.each(hit.dashboards, function (d) {
               if (dashboardIds.indexOf(d.id) !== -1) {
@@ -38,8 +35,8 @@ define(function (require) {
     };
 
     DashboardGroupHelper.prototype.shortenDashboardName = function (groupTitle, dashboardTitle) {
-      var g = groupTitle.toLowerCase();
-      var d = dashboardTitle.toLowerCase();
+      let g = groupTitle.toLowerCase();
+      let d = dashboardTitle.toLowerCase();
       if (d.indexOf(g) === 0 && d.length > g.length) {
         return dashboardTitle.substring(groupTitle.length).replace(/^[\s-]{1,}/, '');  // replace any leading spaces or dashes
       }
@@ -96,11 +93,11 @@ define(function (require) {
       return null;
     };
 
-    var updateCountOnMetadata = function (metadata, responses) {
+    let updateCountOnMetadata = function (metadata, responses) {
       if (responses && metadata) {
         if (responses.length === metadata.length) {
-          for (var i = 0; i < responses.length; i++) {
-            var hit = responses[i];
+          for (let i = 0; i < responses.length; i++) {
+            let hit = responses[i];
             if (!_.contains(Object.keys(hit), 'error')) {
               metadata[i].count = hit.hits.total;
             } else if (_.contains(Object.keys(hit), 'error') && _.contains(hit.error, 'ElasticsearchSecurityException')) {
@@ -116,12 +113,12 @@ define(function (require) {
       }
     };
 
-    var lastFiredMultiCountsQuery;
-    var lastMultiCountsQueryResults;
+    let lastFiredMultiCountsQuery;
+    let lastMultiCountsQueryResults;
     DashboardGroupHelper.prototype.getDashboardsMetadata = function (ids, forceCountsUpdate = false) {
-      var self = this;
+      let self = this;
       return savedDashboards.find().then((resp) => {
-        var dashboards = _.filter(resp.hits, (dashboard) => {
+        let dashboards = _.filter(resp.hits, (dashboard) => {
           return dashboard.savedSearchId && ids.indexOf(dashboard.id) !== -1;
         });
 
@@ -165,13 +162,13 @@ define(function (require) {
     };
 
     DashboardGroupHelper.prototype._getDashboardForGroup = function (groupId, groupTitle, dashboardDef) {
-      var self = this;
+      let self = this;
       return {
         id: dashboardDef.id,
         title: self.shortenDashboardName(groupTitle, dashboardDef.title),
         savedSearchId: dashboardDef.savedSearchId,
         onSelect: function (dashboardGroups) {
-          var currentDashboardId = kibiState._getCurrentDashboardId();
+          let currentDashboardId = kibiState._getCurrentDashboardId();
           if (currentDashboardId === dashboardDef.id) {
             // do nothing as we are already at the correct dashboard
             return;
@@ -180,10 +177,10 @@ define(function (require) {
         },
         onOpenClose: function (group) {
           // take all dashboards except the selected one
-          var dashboardIds = _.filter(group.dashboards, d => d.id !== group.selected.id).map(d => d.id);
+          let dashboardIds = _.filter(group.dashboards, d => d.id !== group.selected.id).map(d => d.id);
           self.getDashboardsMetadata(dashboardIds).then((metadata) => {
             _.each(group.dashboards, (d) => {
-              var foundDashboardMetadata = _.find(metadata, (m) => {
+              let foundDashboardMetadata = _.find(metadata, (m) => {
                 return m.dashboardId === d.id;
               });
               if (foundDashboardMetadata) {
@@ -198,7 +195,7 @@ define(function (require) {
     };
 
     DashboardGroupHelper.prototype._computeGroupsFromSavedDashboardGroups = function (currentDashboardId) {
-      var self = this;
+      let self = this;
 
       // get all dashboard groups
       return savedDashboardGroups.find().then(function (respGroups) {
@@ -207,19 +204,19 @@ define(function (require) {
         }
         // here first fetch all dashboards to be able to verify that dashboards mentioned in the group still exists
         return savedDashboards.find().then(function (respDashboards) {
-          var listOfDashboards = _.map(respDashboards.hits, function (hit) {
+          let listOfDashboards = _.map(respDashboards.hits, function (hit) {
             return hit.id;
           });
 
-          var dashboardGroups1 = [];
-          var fail = '';
+          let dashboardGroups1 = [];
+          let fail = '';
           // first iterate over existing groups
           _.each(respGroups.hits, function (group) {
 
             // selected dashboard
-            var selected;
-            var dashboards = [];
-            var dashboardsArray = group.dashboards;
+            let selected;
+            let dashboards = [];
+            let dashboardsArray = group.dashboards;
             // check that all dashboards still exists
             // in case there is one which does not display a warning
             _.each(dashboardsArray, function (d) {
@@ -235,7 +232,7 @@ define(function (require) {
             }
 
             dashboards = _.map(dashboardsArray, function (d) {
-              var dashboard = self._getDashboardForGroup(group.id, group.title, d);
+              let dashboard = self._getDashboardForGroup(group.id, group.title, d);
               if (currentDashboardId && currentDashboardId === dashboard.id) {
                 selected = dashboard;
               }
@@ -244,7 +241,7 @@ define(function (require) {
 
             // try to get the last selected one for this group
             if (!selected && dashboards.length > 0) {
-              var lastSelectedId = kibiState.getSelectedDashboardId(group.id);
+              let lastSelectedId = kibiState.getSelectedDashboardId(group.id);
               _.each(dashboards, function (dashboard) {
                 if (dashboard.id === lastSelectedId) {
                   selected = dashboard;
@@ -281,7 +278,7 @@ define(function (require) {
     };
 
     DashboardGroupHelper.prototype._getListOfDashboardsFromGroups = function (dashboardGroups) {
-      var dashboardsInGroups = [];
+      let dashboardsInGroups = [];
       _.each(dashboardGroups, function (group) {
         if (group.dashboards) {
           _.each(group.dashboards, function (dashboard) {
@@ -297,15 +294,15 @@ define(function (require) {
     };
 
     DashboardGroupHelper.prototype._addAdditionalGroupsFromSavedDashboards = function (currentDashboardId, dashboardGroups1) {
-      var self = this;
+      let self = this;
       // first create array of dashboards already used in dashboardGroups1
-      var dashboardsInGroups = self._getListOfDashboardsFromGroups(dashboardGroups1);
+      let dashboardsInGroups = self._getListOfDashboardsFromGroups(dashboardGroups1);
       let highestGroup = _.max(dashboardGroups1, 'priority');
       let highestPriority = highestGroup && highestGroup.priority || 0;
 
       return savedDashboards.find().then(function (savedDashboards) {
         _.each(savedDashboards.hits, function (dashboardDef) {
-          var isInGroups = false;
+          let isInGroups = false;
           _.each(dashboardsInGroups, function (dashboard) {
             if (dashboard.id === dashboardDef.id) {
               // here add savedSearchId property to all already existing dashboard objects
@@ -318,9 +315,9 @@ define(function (require) {
           // so now we know that this dashboard is not in any group
           if (isInGroups === false) {
             // not in a group so add it as new group with single dashboard
-            var groupId = kibiUtils.slugifyId(dashboardDef.title);
-            var groupTitle = dashboardDef.title;
-            var onlyOneDashboard = self._getDashboardForGroup(groupId, groupTitle, dashboardDef);
+            let groupId = kibiUtils.slugifyId(dashboardDef.title);
+            let groupTitle = dashboardDef.title;
+            let onlyOneDashboard = self._getDashboardForGroup(groupId, groupTitle, dashboardDef);
 
             dashboardGroups1.push({
               id: groupId,
@@ -333,7 +330,7 @@ define(function (require) {
         });
 
         // mark the active group
-        var activeSelected = false;
+        let activeSelected = false;
         _.each(dashboardGroups1, function (group) {
           _.each(group.dashboards, function (dashboard) {
             if (currentDashboardId && currentDashboardId === dashboard.id) {
@@ -379,9 +376,9 @@ define(function (require) {
 
           // when copying selected reference we keep the count, filterIconMessage and isPruned
           // properties from the previous group
-          var filterIconMessage = previousGroup.selected.filterIconMessage;
-          var count = previousGroup.selected.count;
-          var isPruned = previousGroup.selected.isPruned;
+          let filterIconMessage = previousGroup.selected.filterIconMessage;
+          let count = previousGroup.selected.count;
+          let isPruned = previousGroup.selected.isPruned;
           previousGroup.selected = group.selected;
           previousGroup.selected.filterIconMessage = filterIconMessage;
           previousGroup.selected.count = count;
@@ -426,7 +423,7 @@ define(function (require) {
      *
      */
     DashboardGroupHelper.prototype.computeGroups = function () {
-      var currentDashboardId = kibiState._getCurrentDashboardId();
+      let currentDashboardId = kibiState._getCurrentDashboardId();
       return this._computeGroupsFromSavedDashboardGroups(currentDashboardId)
       .then((dashboardGroups1) => this._addAdditionalGroupsFromSavedDashboards(currentDashboardId, dashboardGroups1));
     };

@@ -44,6 +44,10 @@ app.directive('shareObjectUrl', function (Private, createNotifier) {
       $scope.clipboard = clipboard;
     },
     controller: function ($scope, $location) {
+      const notify = createNotifier({
+        location: `Share ${$scope.$parent.objectType}`
+      });
+
       function updateUrl(url) {
         $scope.url = url;
 
@@ -59,8 +63,11 @@ app.directive('shareObjectUrl', function (Private, createNotifier) {
       $scope.shareAsEmbed = $scope.getShareAsEmbed();
       $scope.kibiNavbarVisible = $scope.getKibiNavbarVisible(); // kibi: added to control when to show hide kibi-nav-bar
 
-      $scope.flushSession = function () { // kibi: added for the save session button
-        kibiSessionHelper.flush();
+      // kibi: added for the save session button
+      $scope.flushSession = function () {
+        kibiSessionHelper.flush()
+        .then(() => notify.info('Session data has been saved'))
+        .catch(notify.error);
       };
 
       $scope.generateShortUrl = function () {

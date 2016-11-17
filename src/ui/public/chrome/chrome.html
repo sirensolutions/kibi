@@ -73,8 +73,8 @@
     config-close="pickerTemplate.close">
   </config>
 
-  <kibi-nav-bar chrome="chrome" ng-if="chrome.getApp().id === 'kibana'" ng-show="chrome.getVisible() || chrome.getKibiNavbarVisible()"></kibi-nav-bar>
-  <kibi-relational-filter-panel ng-if="chrome.getApp().id === 'kibana'" ></kibi-relational-filter-panel>
+  <kibi-nav-bar ng-if="chrome.getApp().id === 'kibana' && chrome.getActiveTabId() === 'dashboard'" ng-show="chrome.getVisible() || chrome.isKibiNavbarVisible()"></kibi-nav-bar>
+  <kibi-relational-filter-panel ng-if="chrome.getApp().id === 'kibana' && chrome.getActiveTabId() === 'dashboard'" ></kibi-relational-filter-panel>
 
   <div class="application" ng-class="'tab-' + chrome.getActiveTabId('-none-') + ' ' + chrome.getApplicationClasses()" ng-view></div>
 </div>

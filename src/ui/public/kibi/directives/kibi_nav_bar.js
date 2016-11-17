@@ -23,9 +23,6 @@ define(function (require) {
     return {
       restrict: 'E',
       // Note: does not require dashboardApp as the st-nav-bar is placed outside of dashboardApp
-      scope: {
-        chrome: '='
-      },
       template: require('ui/kibi/directives/kibi_nav_bar.html'),
       link: function ($scope, $el) {
 
@@ -41,7 +38,6 @@ define(function (require) {
           }
         };
 
-        kibiNavBarHelper.setChrome($scope.chrome);
         $scope.dashboardGroups = kibiNavBarHelper.getDashboardGroups();
 
         var removeLocationChangeSuccessHandler = $rootScope.$on('$locationChangeSuccess', function () {

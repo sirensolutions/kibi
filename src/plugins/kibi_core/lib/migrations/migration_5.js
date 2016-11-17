@@ -148,6 +148,22 @@ export default class Migration5 extends Migration {
   }
 
   /**
+   * _getTypes returns the list of types that appear for the given indices
+   *
+   * @param indices an array of index patterns
+   * @returns an array with the types name, minus the default one
+   */
+  async _getTypes(indices) {
+    const mapping = await this._client.indices.getMapping({ index: indices });
+    return _(mapping)
+    .map(value => _.keys(value.mappings))
+    .flatten()
+    .unique()
+    .without('_default_')
+    .value();
+  }
+
+  /**
   * Upgrades the kibi relational filter visualization
   *
   * @param {Object} relations the kibi:relations object
@@ -166,16 +182,9 @@ export default class Migration5 extends Migration {
           this._upgradeButton(button, relationId);
         } else {
           this._logger.info(`No relation for the button "${button.label}" was found`);
-          const mapping = await this._client.indices.getMapping({
-            index: [
-              button.sourceIndexPatternId,
-              button.targetIndexPatternId
-            ]
-          });
-          const sourceTypes = _.keys(mapping[button.sourceIndexPatternId].mappings);
-          const targetTypes = _.keys(mapping[button.targetIndexPatternId].mappings);
 
-          if (sourceTypes.length > 1 || targetTypes.length > 1) {
+          const types = await this._getTypes([ button.sourceIndexPatternId, button.targetIndexPatternId ]);
+          if (types.length > 2) {
             this._logger.info(`The ${button.sourceIndexPatternId} and/or ${button.targetIndexPatternId} have more than one type. A new ` +
                               `relation with ID=${relationId} based on the configuration of the "${button.label}" button will be created.`);
             // since there are mulitple types per indices, it is necessary to create a new relation to select the desired types

@@ -15,6 +15,7 @@ import Scenario2 from './scenarios/migration_5/scenario2';
 import Scenario3 from './scenarios/migration_5/scenario3';
 import Scenario4 from './scenarios/migration_5/scenario4';
 import Scenario5 from './scenarios/migration_5/scenario5';
+import Scenario6 from './scenarios/migration_5/scenario6';
 
 const serverConfig = requirefrom('test')('serverConfig');
 import url from 'url';
@@ -89,6 +90,12 @@ describe('kibi_core/migrations/functional', function () {
         label: 'Scenario4',
         Scenario: Scenario4,
         expectedNewRelations: 3
+      },
+      {
+        // should support visualizations with index patterns
+        label: 'Scenario6',
+        Scenario: Scenario6,
+        expectedNewRelations: 0
       }
     ], ({ label, Scenario, expectedNewRelations }) => {
       describe(`should update the kibi sequential filter - ${label}`, function () {
@@ -153,14 +160,6 @@ describe('kibi_core/migrations/functional', function () {
             expect(upgradedButton.targetDashboardId).to.be(originalButton.redirectToDashboard);
             expect(upgradedButton.sourceDashboardId).to.not.be.ok();
 
-            const mapping = await client.indices.getMapping({
-              index: [
-                originalButton.sourceIndexPatternId,
-                originalButton.targetIndexPatternId
-              ]
-            });
-            const sourceTypes = _.keys(mapping[originalButton.sourceIndexPatternId].mappings);
-            const targetTypes = _.keys(mapping[originalButton.targetIndexPatternId].mappings);
             const [ leftIndex, leftType, leftPath, rightIndex, rightType, rightPath ] = upgradedButton.indexRelationId.split(SEPARATOR);
             let left = [
               originalButton.sourceIndexPatternId,
@@ -181,8 +180,10 @@ describe('kibi_core/migrations/functional', function () {
             expect(leftPath).to.be(left[2]);
             expect(rightIndex).to.be(right[0]);
             expect(rightPath).to.be(right[2]);
+
+            const types = await migration._getTypes([ originalButton.sourceIndexPatternId, originalButton.targetIndexPatternId ]);
             // only check the types if an index has more than one
-            if (sourceTypes.length > 1 || targetTypes.length > 1) {
+            if (types.length > 2) {
               expect(rightType).to.be(right[1]);
               expect(leftType).to.be(left[1]);
             }

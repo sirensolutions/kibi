@@ -30,11 +30,11 @@ define(function (require) {
 
               if (option._label) {
                 option.templateVars.label = option._label;
-              } else if (!option.templateVars.label || ((option.templateVars.label !== option._label) && option._label === '')) {
-                option.templateVars.label = '';
+              } else {
+                delete option.templateVars.label;
               }
               if (option.templateVars) {
-                option._templateVarsString = JSON.stringify(option.templateVars);
+                option._templateVarsString = JSON.stringify(option.templateVars, null, ' ');
               }
             } catch (err) {
               $scope.jsonError[index].message = err.toString();

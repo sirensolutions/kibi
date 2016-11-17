@@ -3,6 +3,7 @@ const ngMock = require('ngMock');
 const MockState = require('fixtures/mock_state');
 const mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
 const sinon = require('auto-release-sinon');
+const chrome = require('ui/chrome');
 
 var fakeSavedDashboards = [
   {
@@ -144,11 +145,7 @@ function init({ currentDashboardId = 'Articles', indexPatterns, savedDashboards,
 
     ngMock.inject(function ($injector, kibiState, Private) {
       dashboardGroupHelper = Private(require('ui/kibi/helpers/dashboard_group_helper'));
-      dashboardGroupHelper.setChrome({
-        getBasePath: function () {
-          return '';
-        }
-      });
+      sinon.stub(chrome, 'getBasePath').returns('');
       sinon.stub(kibiState, '_getCurrentDashboardId').returns(currentDashboardId);
       $httpBackend = $injector.get('$httpBackend');
     });

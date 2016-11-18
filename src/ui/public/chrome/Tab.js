@@ -38,13 +38,16 @@ export default class Tab {
     return this.lastUrl || this.rootUrl;
   }
 
-  updateLastUrlGlobalState(globalState) {
+  updateLastUrlGlobalState(globalState, kibiState) {
     let lastPath = this.getLastPath();
     let { pathname, query, hash } = parse(lastPath, true);
 
     query = query || {};
     if (!globalState) delete query._g;
     else query._g = globalState;
+
+    if (!kibiState) delete query._k;
+    else query._k = kibiState;
 
     this.setLastUrl(`${this.rootUrl}${format({ pathname, query, hash })}`);
   }

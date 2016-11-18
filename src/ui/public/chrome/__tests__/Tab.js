@@ -237,5 +237,62 @@ describe('Chrome Tab', function () {
         });
       });
     });
+
+
+    // kibi: added to test kibistate
+    context('with new state sets _g and _k properly', function () {
+      const paths = [
+        [ '/', '/?_g=newState&_k=newKibiState' ],
+        [ '/?first', '/?first=&_g=newState&_k=newKibiState' ],
+        [ '/path?first=1&_g=afterHash&_k=afterHash', '/path?first=1&_g=newState&_k=newKibiState' ],
+        [ '/?first=1&_g=second&_k=second', '/?first=1&_g=newState&_k=newKibiState' ],
+        [ '/?_k=first&_g=first', '/?_k=newKibiState&_g=newState' ],
+        [ '/a?first=1&_g=second&_k=second', '/a?first=1&_g=newState&_k=newKibiState' ],
+        [ '/?first=1&_g=second&_k=second', '/?first=1&_g=newState&_k=newKibiState' ],
+        [ '/?first&g=second&k=second', '/?first=&g=second&k=second&_g=newState&_k=newKibiState' ],
+      ];
+
+      bases.forEach(baseUrl => {
+        paths.forEach(([pathFrom, pathTo]) => {
+          const fromUrl = `${baseUrl}${pathFrom}`;
+          const toUrl = `${baseUrl}${pathTo}`;
+          it(`${fromUrl} => ${toUrl}`, function () {
+            const tab = new Tab({ baseUrl });
+            tab.setLastUrl(fromUrl);
+            tab.updateLastUrlGlobalState('newState', 'newKibiState');
+            expect(tab.getLastUrl()).to.equal(toUrl);
+          });
+        });
+      });
+    });
+
+
+    context('with new empty state removes _k', function () {
+      const paths = [
+        [ '/', '/' ],
+        [ '/?first', '/?first=' ],
+        [ '/path?first=1&_k=afterHash', '/path?first=1' ],
+        [ '/?first=1&_k=second', '/?first=1' ],
+        [ '/?g=first', '/?g=first' ],
+        [ '/a?first=1&_k=second', '/a?first=1' ],
+        [ '/?first=1&_k=second', '/?first=1' ],
+        [ '/?first&g=second', '/?first=&g=second' ],
+      ];
+
+      bases.forEach(baseUrl => {
+        paths.forEach(([pathFrom, pathTo]) => {
+          const fromUrl = `${baseUrl}${pathFrom}`;
+          const toUrl = `${baseUrl}${pathTo}`;
+          it(`${fromUrl}`, function () {
+            const tab = new Tab({ baseUrl });
+            tab.setLastUrl(fromUrl);
+            tab.updateLastUrlGlobalState();
+            expect(tab.getLastUrl()).to.equal(toUrl);
+          });
+        });
+      });
+    });
+
+    // kibi: end
   });
 });

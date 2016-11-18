@@ -46,7 +46,8 @@ function TabCollection(opts = {}) {
     if (!persist || !activeTab) return;
 
     let globalState = get(parse(activeTab.getLastPath(), true), 'query._g');
-    tabs.forEach(tab => tab.updateLastUrlGlobalState(globalState));
+    let kibiState = get(parse(activeTab.getLastPath(), true), 'query._k');
+    tabs.forEach(tab => tab.updateLastUrlGlobalState(globalState, kibiState));
   };
 }
 

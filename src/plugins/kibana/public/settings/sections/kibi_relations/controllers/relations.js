@@ -4,9 +4,9 @@ define(function (require) {
   require('plugins/kibana/settings/sections/kibi_relations/styles/relations.less');
   require('ui/kibi/directives/kibi_validate');
 
-  var _ = require('lodash');
+  const _ = require('lodash');
 
-  var app = require('ui/modules').get('apps/settings', ['kibana']);
+  const app = require('ui/modules').get('apps/settings', ['kibana']);
 
   app.directive('kibiDebounce', function ($timeout) {
     return {
@@ -18,7 +18,7 @@ define(function (require) {
 
         elm.unbind('input');
 
-        var debounce;
+        let debounce;
         elm.bind('input', function () {
           $timeout.cancel(debounce);
           debounce = $timeout(function () {
@@ -50,7 +50,6 @@ define(function (require) {
     };
   });
 
-
   require('ui/routes')
   .when('/settings/relations', {
     template: require('plugins/kibana/settings/sections/kibi_relations/index.html'),
@@ -58,14 +57,13 @@ define(function (require) {
   });
 
   app.controller('RelationsController',
-  function (Promise, es, kibiState, $rootScope, $scope, config, Private, $element, $timeout, kbnUrl, createNotifier,
-            kibiEnterpriseEnabled) {
-    var notify = createNotifier({
+  function (Promise, es, kibiState, $rootScope, $scope, config, Private, $element, kbnUrl, createNotifier, kibiEnterpriseEnabled) {
+    const notify = createNotifier({
       location: 'Relations Editor'
     });
 
-    var color = Private(require('ui/vislib/components/color/color'));
-    var relationsHelper = Private(require('ui/kibi/helpers/relations_helper'));
+    const color = Private(require('ui/vislib/components/color/color'));
+    const relationsHelper = Private(require('ui/kibi/helpers/relations_helper'));
 
     $scope.kibiEnterpriseEnabled = kibiEnterpriseEnabled;
 
@@ -75,6 +73,18 @@ define(function (require) {
     $scope.tab = {
       indexRel: true,
       dashboardRel: false
+    };
+
+    $scope.getIndicesRelationsLabel = function () {
+      if ($scope.relations && $scope.relations.relationsIndices) {
+        return _.map($scope.relations.relationsIndices, function (relInd) {
+          return {
+            label: relInd.label,
+            value: relInd.id
+          };
+        });
+      }
+      return [];
     };
 
     $scope.tabClick = function (currentTab) {
@@ -92,7 +102,7 @@ define(function (require) {
 
     // advanced options button
     $scope.edit = function (item, index) {
-      var params = {
+      const params = {
         service: 'indices' in item ? 'indices' : 'dashboards',
         id: index
       };
@@ -103,12 +113,8 @@ define(function (require) {
     $scope.relations = config.get('kibi:relations');
     $scope.relationalPanel = config.get('kibi:relationalPanel');
 
-    $scope.$watch('relationalPanel', function () {
-      config.set('kibi:relationalPanel', $scope.relationalPanel);
-    });
-
-    var indexToDashboardsMap = null;
-    var nodeTypes = [];
+    let indexToDashboardsMap = null;
+    const nodeTypes = [];
 
     /**
      * creates a map index -> dashboards
@@ -117,25 +123,22 @@ define(function (require) {
      *    ...
      *  }
      */
-    $scope.getIndexToDashboardMap = function (dashboardIds, ignoreMissingSavedSearch = false) {
-      var _createMap = function (results) {
+    $scope.getIndexToDashboardMap = function () {
+      const _createMap = function (results) {
         // postprocess the results to create the map
-        var indexToDashboardArrayMap = {};
+        const indexToDashboardArrayMap = {};
         _.each(results, function ({ savedDash, savedSearchMeta }) {
           if (savedSearchMeta && !indexToDashboardArrayMap[savedSearchMeta.index]) {
             indexToDashboardArrayMap[savedSearchMeta.index] = [savedDash.id];
-          } else {
-            if (savedSearchMeta && indexToDashboardArrayMap[savedSearchMeta.index].indexOf(savedDash.id) === -1) {
-              indexToDashboardArrayMap[savedSearchMeta.index].push(savedDash.id);
-            }
+          } else if (savedSearchMeta && indexToDashboardArrayMap[savedSearchMeta.index].indexOf(savedDash.id) === -1) {
+            indexToDashboardArrayMap[savedSearchMeta.index].push(savedDash.id);
           }
         });
         return indexToDashboardArrayMap;
       };
 
-      return kibiState._getDashboardAndSavedSearchMetas(dashboardIds, ignoreMissingSavedSearch).then(function (results) {
-        return _createMap(results);
-      });
+      return kibiState._getDashboardAndSavedSearchMetas(null, true)
+      .then(results => _createMap(results));
     };
 
     /**
@@ -148,26 +151,24 @@ define(function (require) {
         return false;
       }
 
-      var relDash = $scope.relations.relationsDashboards[options.rowIndex];
+      const relDash = $scope.relations.relationsDashboards[options.rowIndex];
 
       if (!item || !item.value) {
         // this is the watched value
-        return _.pluck($scope.relations.relationsIndices, 'id').concat(relDash);
+        return _.pluck($scope.relations.relationsIndices, 'id').concat(relDash).concat(indexToDashboardsMap);
       }
-      var remove = true;
+      let remove = true;
 
       // do not remove if the dashboard is associated with an index
-      if (!!indexToDashboardsMap) {
-        _.each(indexToDashboardsMap, function (dashboards) {
-          if (dashboards.indexOf(item.value) !== -1) {
-            remove = false;
-            return false;
-          }
-        });
-      }
+      _.each(indexToDashboardsMap, function (dashboards) {
+        if (dashboards.indexOf(item.value) !== -1) {
+          remove = false;
+          return false;
+        }
+      });
 
       // remove if the dashboard is not in the list of dashboards that are directly connected to item.value
-      var connectedDashboards = [];
+      let connectedDashboards;
       if (!!relDash.dashboards[0] && !relDash.dashboards[1]) {
         connectedDashboards = _getConnectedDashboards(relDash.dashboards[0], relDash.relation);
       } else if (!!relDash.dashboards[1] && !relDash.dashboards[0]) {
@@ -175,7 +176,10 @@ define(function (require) {
       } else if (!relDash.dashboards[0] && !relDash.dashboards[1] && !!relDash.relation) {
         // filter based on the selected relation
         connectedDashboards = _getConnectedDashboards(null, relDash.relation);
+      } else {
+        connectedDashboards = [];
       }
+
       if (connectedDashboards.length && connectedDashboards.indexOf(item.value) === -1) {
         remove = true;
       }
@@ -190,7 +194,7 @@ define(function (require) {
      * Returns the index associated with dashboardId
      */
     function _getIndexForDashboard(dashboardId) {
-      var dIndex = '';
+      let dIndex = '';
 
       if (!dashboardId) {
         return '';
@@ -208,11 +212,11 @@ define(function (require) {
      * Returns the list of dashboards that are directly connected to dashboardId
      */
     function _getConnectedDashboards(dashboardId, relDash) {
-      var index = _getIndexForDashboard(dashboardId);
+      const index = _getIndexForDashboard(dashboardId);
 
       return _($scope.relations.relationsIndices).map(function (relInd) {
         if (!relDash || relDash === relInd.id) {
-          var dashboards = [];
+          let dashboards = [];
 
           if ((!!relDash && !index) || index === relInd.indices[0].indexPatternId) {
             dashboards = dashboards.concat(indexToDashboardsMap[relInd.indices[1].indexPatternId]);
@@ -234,18 +238,16 @@ define(function (require) {
       if (selected !== undefined && selected === true) {
         return false;
       }
-      // here for anything about indices relations - we take them from config as they are already saved
-      var relations = config.get('kibi:relations');
-
       // for anything about the dashboards relations - we take them from the scope
-      var dashboards = $scope.relations.relationsDashboards[options.rowIndex].dashboards;
-      var lIndex = '';
-      var rIndex = '';
+      const dashboards = $scope.relations.relationsDashboards[options.rowIndex].dashboards;
+      let lIndex = '';
+      let rIndex = '';
 
       if (!item || !item.value) {
-        return _.pluck(relations.relationsIndices, 'id')
-        .concat(_.pluck(relations.relationsIndices, 'label'))
-        .concat(dashboards);
+        return _.pluck($scope.relations.relationsIndices, 'id')
+        .concat(..._.pluck($scope.relations.relationsIndices, 'label'))
+        .concat(...dashboards)
+        .concat(indexToDashboardsMap);
       }
       _.each(indexToDashboardsMap, function (map, index) {
         if (map.indexOf(dashboards[0]) !== -1) {
@@ -260,7 +262,7 @@ define(function (require) {
         }
       });
 
-      const validRelations = _(relations.relationsIndices).map(function (relInd) {
+      const validRelations = _($scope.relations.relationsIndices).map(function (relInd) {
         if (lIndex && rIndex) {
           if ((lIndex === relInd.indices[0].indexPatternId && rIndex === relInd.indices[1].indexPatternId) ||
               (lIndex === relInd.indices[1].indexPatternId && rIndex === relInd.indices[0].indexPatternId)) {
@@ -276,7 +278,7 @@ define(function (require) {
           }
         }
       }).compact().value();
-      const usedRelations = _(relations.relationsDashboards).map(function (relDash, offset) {
+      const usedRelations = _($scope.relations.relationsDashboards).map(function (relDash, offset) {
         if (offset !== options.rowIndex && dashboards[0] && dashboards[1]) {
           if ((dashboards[0] === relDash.dashboards[0] && dashboards[1] === relDash.dashboards[1]) ||
               (dashboards[0] === relDash.dashboards[1] && dashboards[1] === relDash.dashboards[0])) {
@@ -291,29 +293,149 @@ define(function (require) {
       usedRelations.indexOf(item.value) !== -1;
     };
 
-    function _getRelationLabel(relationId) {
-      var label;
-
-      _.each($scope.relations.relationsIndices, function (relation) {
-        if (relation.id === relationId) {
-          label = relation.label;
-          return false;
-        }
-      });
-      return label;
-    }
-
     function _addClickHandlers(name, options) {
       options.onNodeDragEnd = function () {
         $rootScope.$emit('egg:' + name + 'Graph:run', 'exportGraph');
       };
     }
 
+    const updateGraph = function ({ name, options, isRelationReady, assertions, onRelationReady, getSourceNode, getTargetNode, getLink }) {
+      const graphProperty = `${name}Graph`;
+      const relationsGraphProperty = `relations${_.capitalize(name)}`;
+      const serializedGraphProperty = `relations${_.capitalize(name)}Serialized`;
+
+      const firstLoad = !$scope[graphProperty];
+
+      if (firstLoad && $scope.relations[serializedGraphProperty]) {
+        // first load of the graph
+        $scope[graphProperty] = $scope.relations[serializedGraphProperty];
+        _addClickHandlers(name, $scope[graphProperty].options);
+        $rootScope.$emit(`egg:${graphProperty}:run`, 'importGraph', $scope[graphProperty]);
+        return;
+      } else if (!$scope[graphProperty]) {
+        $scope[graphProperty] = {
+          options: options,
+          nodes: [],
+          links: []
+        };
+        _addClickHandlers(name, $scope[graphProperty].options);
+      } else {
+        $scope[graphProperty] = $scope.relations[serializedGraphProperty];
+        _addClickHandlers(name, $scope[graphProperty].options);
+      }
+
+      const addNode = function (node) {
+        const id = node.id;
+
+        node.id = `eegid-${id}`; // eeg prefix the ID
+        const existingNode = _.findWhere($scope[graphProperty].nodes, node);
+        if (!existingNode) {
+          node.keep = true; // this is to tag the nodes to remove
+          node.id = id;
+          node.size = $scope[graphProperty].options.minNodeSize;
+          $scope[graphProperty].nodes.push(node);
+        } else {
+          existingNode.keep = true; // this is to tag the nodes to remove
+        }
+      };
+
+      $scope.invalid = false;
+      _.each($scope.relations[relationsGraphProperty], function (relation) {
+        const indices = relation.indices;
+        const errors = [];
+
+        if (isRelationReady(relation)) {
+          if (onRelationReady) {
+            onRelationReady(relation);
+          }
+
+          _.each(assertions, assertion => {
+            if (assertion.test(relation)) {
+              errors.push(assertion.message);
+            }
+          });
+
+          // build the graph visualisation
+          const sourceNode = getSourceNode(relation);
+          const targetNode = getTargetNode(relation);
+          const link = getLink(relation);
+
+          addNode(sourceNode);
+          addNode(targetNode);
+
+          const source = link.source;
+          const target = link.target;
+          link.source = `eegid-${link.source}`;
+          link.target = `eegid-${link.target}`;
+          const existingLink = _.findWhere($scope[graphProperty].links, link);
+          if (!existingLink) {
+            link.keep = true; // this is to tag the nodes to remove
+            $scope[graphProperty].links.push(link);
+          } else {
+            existingLink.keep = true; // this is to tag the nodes to remove
+          }
+
+          // build types array to build color map
+          if (nodeTypes.indexOf(sourceNode.id) === -1) {
+            nodeTypes.push(sourceNode.id);
+          }
+          if (nodeTypes.indexOf(targetNode.id) === -1) {
+            nodeTypes.push(targetNode.id);
+          }
+        }
+
+        relation.errors = errors;
+        if (errors.length) {
+          $scope.invalid = true;
+        }
+      });
+
+      $scope.typeToColor = color(nodeTypes);
+      _.each(nodeTypes, function (nodeType) {
+        $scope[graphProperty].options.colors[nodeType] = $scope.typeToColor(nodeType);
+      });
+
+      // remove deleted nodes and links
+      $scope[graphProperty].nodes = _($scope[graphProperty].nodes).filter('keep', true).map(n => _.omit(n, 'keep')).value();
+      $scope[graphProperty].links = _($scope[graphProperty].links).filter('keep', true).map(l => _.omit(l, 'keep')).value();
+
+      // save the graph layout
+      $scope.relations[`relations${_.capitalize(name)}Serialized`] = $scope[graphProperty];
+      // draw the graph
+      $rootScope.$emit(`egg:${graphProperty}:run`, 'importGraph', $scope[graphProperty]);
+    };
+
     /**
      * Updates the relationships between dashboards
      */
     function _updateRelationsDashboards(oldRelations) {
-      var g = {
+      const relationId = function (relation) {
+        const i0 = relation.dashboards[0];
+        const i1 = relation.dashboards[1];
+        return relation.relation + (i0 < i1 ? i0 + i1 : i1 + i0);
+      };
+
+      const _getRelationLabel = function (relationId) {
+        let label;
+
+        _.each($scope.relations.relationsIndices, function (relation) {
+          if (relation.id === relationId) {
+            label = relation.label;
+            return false;
+          }
+        });
+        return label;
+      };
+
+      // check for duplicates
+      const uniq = _.groupBy($scope.relations.relationsDashboards, function (relation) {
+        if (relation.relation) {
+          return relationId(relation);
+        }
+      });
+
+      updateGraph({
+        name: 'dashboards',
         options: {
           monitorContainerSize: true,
           alwaysShowLinksLabels: true,
@@ -323,100 +445,59 @@ define(function (require) {
           minNodeSize: 20,
           colors: {}
         },
-        nodes: [],
-        links: []
-      };
+        isRelationReady: function (relDash) {
+          return relDash.relation && relDash.dashboards[0] && relDash.dashboards[1];
+        },
+        getSourceNode: function (relDash) {
+          const sourceNodeIndexId = _getIndexForDashboard(relDash.dashboards[0]);
 
-      var relationId = function (relation) {
-        var i0 = relation.dashboards[0];
-        var i1 = relation.dashboards[1];
-        return relation.relation + (i0 < i1 ? i0 + i1 : i1 + i0);
-      };
+          return {
+            id: relDash.dashboards[0],
+            label: relDash.dashboards[0],
+            nodeType: sourceNodeIndexId
+          };
+        },
+        getTargetNode: function (relDash) {
+          const targetNodeIndexId = _getIndexForDashboard(relDash.dashboards[1]);
 
-      // check for duplicates
-      var uniq = _.groupBy($scope.relations.relationsDashboards, function (relation) {
-        if (relation.relation) {
-          return relationId(relation);
-        }
-      });
-
-      $scope.invalid = false;
-      _.each($scope.relations.relationsDashboards, function (relDash) {
-        var error = '';
-
-        if (!!relDash.dashboards[0] && !!relDash.dashboards[1]) {
-          if (relDash.relation) {
-            var key = relationId(relDash);
-            if (uniq[key].length !== 1) {
-              error = 'These relationships are equivalent, please remove one.';
-            }
-
-            // build the graph visualisation
-            var sourceNodeIndexId = _getIndexForDashboard(relDash.dashboards[0]);
-            var targetNodeIndexId = _getIndexForDashboard(relDash.dashboards[1]);
-
-            g.nodes.push({
-              id: relDash.dashboards[0],
-              label: relDash.dashboards[0],
-              nodeType: sourceNodeIndexId,
-              size: g.options.minNodeSize
-            });
-            g.nodes.push({
-              id: relDash.dashboards[1],
-              label: relDash.dashboards[1],
-              nodeType: targetNodeIndexId,
-              size: g.options.minNodeSize
-            });
-            g.links.push({
-              source: relDash.dashboards[0],
-              target: relDash.dashboards[1],
-              linkType: _getRelationLabel(relDash.relation),
-              data: {
-                relation: relDash.relation,
-                dashboards: relDash.dashboards
-              },
-              undirected: true
-            });
+          return {
+            id: relDash.dashboards[1],
+            label: relDash.dashboards[1],
+            nodeType: targetNodeIndexId
+          };
+        },
+        getLink: function (relDash) {
+          return {
+            source: relDash.dashboards[0],
+            target: relDash.dashboards[1],
+            linkType: _getRelationLabel(relDash.relation),
+            data: {
+              relation: relDash.relation,
+              dashboards: relDash.dashboards
+            },
+            undirected: true
+          };
+        },
+        assertions: [
+          {
+            test: function (relDash) {
+              return uniq[relationId(relDash)].length !== 1;
+            },
+            message: 'These relationships are equivalent, please remove one.'
           }
-        }
-        relDash.errors = error && [ error ] || [];
-        if (!!error) {
-          $scope.invalid = true;
-        }
+        ]
       });
 
-      _.each(nodeTypes, function (nodeType) {
-        g.options.colors[nodeType] = $scope.typeToColor(nodeType);
-      });
-
-      g.nodes = _.uniq(g.nodes, function (node) {
-        return node.id;
-      });
-
-      if (!$scope.dashboardsGraph && $scope.relations.relationsDashboardsSerialized) {
-        // check the serialized one
-        var graph = $scope.relations.relationsDashboardsSerialized;
-        _addClickHandlers('dashboards', graph.options);
-        $scope.dashboardsGraph = graph;
-
-      } else {
-        _addClickHandlers('dashboards', g.options);
-        $scope.dashboardsGraph = g;
-      }
-
-      var isEqual = _($scope.relations.relationsDashboards).map(function (relation) {
+      const isEqual = _($scope.relations.relationsDashboards).map(function (relation) {
         return _.omit(relation, [ '$$hashKey', 'errors' ]);
       }).isEqual(oldRelations);
 
-      // isValid checks that the DOM element contains the ng-valid class
-      // to be sure it is added, we do the following in the next tick
-      $timeout(() => {
-        if (_isValid('dashboards') && !isEqual) {
-          save('dashboards');
-        }
-      });
+      if (!isEqual) {
+        $scope.isObjectValid();
+      }
     }
 
+    // Listen to changes of relations between dashboards
     $scope.$watch(function ($scope) {
       return {
         labelsFromIndices: _.pluck($scope.relations.relationsIndices, 'label'),
@@ -437,32 +518,11 @@ define(function (require) {
       }
     }, true);
 
-    // Listen to changes of relations between indices
-    $scope.$watch(function ($scope) {
-      return _.map($scope.relations.relationsIndices, function (relation) {
-        return _.omit(relation, ['errors', 'id']); // id is redundant
-      });
-    }, function (newRelations, oldRelations) {
-      // each node is an index
-      var g = {
-        options: {
-          showLegend: false,
-          monitorContainerSize: true,
-          alwaysShowLinksLabels: true,
-          stopAfter: 2000,
-          groupingForce: {},
-          nodeIcons: {},
-          minNodeSize: 20,
-          colors: {}
-        },
-        nodes: [],
-        links: []
-      };
-
+    $scope.updateIndicesGraph = function (oldRelations) {
       // check for duplicates
-      var uniq = _.groupBy($scope.relations.relationsIndices, function (relation, offset) {
-        var indexa = relation.indices[0];
-        var indexb = relation.indices[1];
+      const uniq = _.groupBy($scope.relations.relationsIndices, function (relation, offset) {
+        const indexa = relation.indices[0];
+        const indexb = relation.indices[1];
 
         if (indexa.indexPatternId && indexa.path && indexb.indexPatternId && indexb.path) {
           return relationsHelper.getJoinIndicesUniqueID(indexa.indexPatternId, indexa.indexPatternType, indexa.path,
@@ -480,31 +540,39 @@ define(function (require) {
         return label + '.' + index.path;
       };
 
+      const getRelationId = function (indices) {
+        return relationsHelper.getJoinIndicesUniqueID(indices[0].indexPatternId, indices[0].indexPatternType, indices[0].path,
+                                                      indices[1].indexPatternId, indices[1].indexPatternType, indices[1].path);
+      };
+
       const checkMappings = [];
-      $scope.invalid = false;
-      _.each($scope.relations.relationsIndices, function (relation) {
 
-        var indices = relation.indices;
-        var errors = [];
+      // each node is an index
+      updateGraph({
+        name: 'indices',
+        options: {
+          showLegend: false,
+          monitorContainerSize: true,
+          alwaysShowLinksLabels: true,
+          stopAfter: 2000,
+          groupingForce: {},
+          nodeIcons: {},
+          minNodeSize: 20,
+          colors: {}
+        },
+        isRelationReady: function (relation) {
+          const indices = relation.indices;
+          return indices[0].indexPatternId && indices[0].path && indices[1].indexPatternId && indices[1].path;
+        },
+        onRelationReady: function (relation) {
+          const indices = relation.indices;
 
-        if (indices[0].indexPatternId && indices[0].path && indices[1].indexPatternId && indices[1].path) {
-
-          // automatically compute the label if not present
           if (!relation.label) {
-            relation.label = indexLabel(relation.indices[0]) + ' -- ' + indexLabel(relation.indices[1]);
+            relation.label = `${indexLabel(indices[0])} -- ${indexLabel(indices[1])}`;
           }
 
-          var key = relationsHelper.getJoinIndicesUniqueID(indices[0].indexPatternId, indices[0].indexPatternType, indices[0].path,
-                                                           indices[1].indexPatternId, indices[1].indexPatternType, indices[1].path);
+          relation.id = getRelationId(indices);
 
-          if (uniq[key].length !== 1) {
-            errors.push('These relationships are equivalent, please remove one.');
-          }
-          if (indices[0].indexPatternId === indices[1].indexPatternId &&
-              indices[0].indexPatternType === indices[1].indexPatternType &&
-              indices[0].path === indices[1].path) {
-            errors.push('Left and right sides of the relation cannot be the same.');
-          }
           checkMappings.push(Promise.all([
             es.indices.getFieldMapping({
               index: [ indices[0].indexPatternId ],
@@ -522,219 +590,215 @@ define(function (require) {
           .then(([ leftMapping, rightMapping ]) => {
             return { leftMapping, rightMapping, relation };
           }));
-          relation.id = key;
+        },
+        getSourceNode: function (relation) {
+          const nodeId = relation.indices[0].indexPatternId;
 
-          if (relation.label) {
-            // build the graph visualisation
-            var sourceNodeId = indices[0].indexPatternId;
-            var targetNodeId = indices[1].indexPatternId;
+          return {
+            id: nodeId,
+            label: nodeId,
+            nodeType: nodeId
+          };
+        },
+        getTargetNode: function (relation) {
+          const nodeId = relation.indices[1].indexPatternId;
 
-            g.nodes.push({
-              id: sourceNodeId,
-              label: sourceNodeId,
-              nodeType: sourceNodeId,
-              size: g.options.minNodeSize
-            });
-            g.nodes.push({
-              id: targetNodeId,
-              label: targetNodeId,
-              nodeType: targetNodeId,
-              size: g.options.minNodeSize
-            });
-            g.links.push({
-              source: sourceNodeId,
-              target: targetNodeId,
-              linkType: relation.label,
-              undirected: true
-            });
+          return {
+            id: nodeId,
+            label: nodeId,
+            nodeType: nodeId
+          };
+        },
+        getLink: function (relation) {
+          const sourceNodeId = relation.indices[0].indexPatternId;
+          const targetNodeId = relation.indices[1].indexPatternId;
 
-            // build types array to build color map
-            if (nodeTypes.indexOf(sourceNodeId) === -1) {
-              nodeTypes.push(sourceNodeId);
-            }
-            if (nodeTypes.indexOf(targetNodeId) === -1) {
-              nodeTypes.push(targetNodeId);
-            }
-
-          }
-        }
-
-        relation.errors = errors;
-        if (errors.length) {
-          $scope.invalid = true;
-        }
-      });
-
-      $scope.typeToColor = color(nodeTypes);
-      _.each(nodeTypes, function (nodeType) {
-        g.options.colors[nodeType] = $scope.typeToColor(nodeType);
-      });
-
-      g.nodes = _.uniq(g.nodes, 'id');
-      if (!$scope.indicesGraph && $scope.relations.relationsIndicesSerialized) {
-        // check the serialized one
-        var graph = $scope.relations.relationsIndicesSerialized;
-        _addClickHandlers('indices', graph.options);
-        $scope.indicesGraph = graph;
-
-      } else {
-        _addClickHandlers('indices', g.options);
-        $scope.indicesGraph = g;
-      }
-
-      var isEqual = _($scope.relations.relationsIndices).map(function (relation) {
-        return _.omit(relation, [ '$$hashKey', 'errors' ]);
-      }).isEqual(oldRelations);
-      // isValid checks that the DOM element contains the ng-valid class
-      // to be sure it is added, we do the following in the next tick.
-      // If not, ng-valid is not present when the relation label is automatically created.
-      $timeout(() => {
-        if (_isValid('indices') && !isEqual) {
-          Promise.all(checkMappings)
-          .then(mappings => {
-            /**
-             * Returns true if the index and type of the leftMapping are equal to those of the rightMapping
-             */
-            const areMappingsCompatibleForSirenJoin = function (leftMapping, rightMapping) {
-              return leftMapping.index === rightMapping.index && leftMapping.type === rightMapping.type;
-            };
-
-            /**
-             * Checks if all the fields in the indices matching the index pattern have the same mapping.
-             * Returns true if this is the case.
-             */
-            const doAllFieldsHaveTheSameMapping = function (relation, mapping, { indexPatternId, indexPatternType, path }) {
-              if (_.size(mapping) === 1) {
-                return true;
-              }
-
-              const indicesAndMapping = _.map(mapping, (value, indexName) => {
-                const type = indexPatternType || Object.keys(value.mappings)[0];
-                return {
-                  index: indexName,
-                  mapping: _.values(value.mappings[type][path].mapping)[0]
-                };
-              });
-
-              let compatible = true;
-              for (let i = 1; i < indicesAndMapping.length; i++) {
-                if (!areMappingsCompatibleForSirenJoin(indicesAndMapping[i - 1].mapping, indicesAndMapping[i].mapping)) {
-                  compatible = false;
-                  break;
-                }
-              }
-              if (!compatible) {
-                if (!relation.errors) {
-                  relation.errors = [];
-                }
-                const msg = _(indicesAndMapping)
-                // group the indices having the same index/type mapping together
-                .groupBy(({ mapping }) => JSON.stringify(_.pick(mapping, [ 'index', 'type' ]), null, ' '))
-                // indicate which indices have a certain index/type mapping
-                .map((values, indexAndType) => `<li>on indices ${_.pluck(values, 'index').join(', ')} the mapping is ${indexAndType}</li>`)
-                .value()
-                .join('');
-                relation.errors.push(`The mappings for the field ${path} differ on some indices matching the pattern ${indexPatternId}:<br/>
-                                     <ul>
-                                      ${msg}
-                                    </ul>`);
-                $scope.invalid = true;
-                return false;
-              }
-              return true;
-            };
-
-            /**
-             * Returns the mapping of a field
-             */
-            const getFieldMapping = function (mapping, { indexPatternType, path }) {
-              const index = Object.keys(mapping)[0];
-              const type = indexPatternType || Object.keys(mapping[index].mappings)[0];
-              return _.values(mapping[index].mappings[type][path].mapping)[0];
-            };
-
-            _.each(mappings, ({ leftMapping, rightMapping, relation }) => {
+          return {
+            source: sourceNodeId,
+            target: targetNodeId,
+            linkType: relation.label,
+            undirected: true
+          };
+        },
+        assertions: [
+          {
+            test: function (relation) {
               const indices = relation.indices;
+              return uniq[getRelationId(indices)].length !== 1;
+            },
+            message: 'These relationships are equivalent, please remove one.'
+          },
+          {
+            test: function (relation) {
+              const indices = relation.indices;
+              return indices[0].indexPatternId === indices[1].indexPatternId &&
+                indices[0].indexPatternType === indices[1].indexPatternType &&
+                indices[0].path === indices[1].path;
+            },
+            message: 'Left and right sides of the relation cannot be the same.'
+          }
+        ]
+      });
 
-              // check if all field mappings for a given index pattern are the same
-              if (!doAllFieldsHaveTheSameMapping(relation, leftMapping, indices[0]) ||
-                  !doAllFieldsHaveTheSameMapping(relation, rightMapping, indices[1])) {
-                // do not check any further since the indices in the current pattern are incompatible already
-                return;
-              }
+      const checkJoinMappings = function () {
+        return Promise.all(checkMappings)
+        .then(mappings => {
+          /**
+          * Returns true if the index and type of the leftMapping are equal to those of the rightMapping
+          */
+          const areMappingsCompatibleForSirenJoin = function (leftMapping, rightMapping) {
+            return leftMapping.index === rightMapping.index && leftMapping.type === rightMapping.type;
+          };
 
-              // check if the field joined together are compatible
-              const leftFieldMapping = getFieldMapping(leftMapping, indices[0]);
-              const rightFieldMapping = getFieldMapping(rightMapping, indices[1]);
+          /**
+          * Checks if all the fields in the indices matching the index pattern have the same mapping.
+          * Returns true if this is the case.
+          */
+          const doAllFieldsHaveTheSameMapping = function (relation, mapping, { indexPatternId, indexPatternType, path }) {
+            if (_.size(mapping) === 1) {
+              return true;
+            }
 
-              if (!areMappingsCompatibleForSirenJoin(leftFieldMapping, rightFieldMapping)) {
-                if (!relation.errors) {
-                  relation.errors = [];
-                }
-                const leftFieldPath = `${indices[0].indexPatternId}/${indices[0].indexPatternType}/${indices[0].path}`;
-                const rightFieldPath = `${indices[1].indexPatternId}/${indices[1].indexPatternType}/${indices[1].path}`;
-
-                const left = `${leftFieldPath} has mapping ${JSON.stringify(_.pick(leftFieldMapping, [ 'index', 'type' ]), null, ' ')}`;
-                const right = `${rightFieldPath} has mapping ${JSON.stringify(_.pick(rightFieldMapping, [ 'index', 'type' ]), null, ' ')}`;
-                relation.errors.push(`<b>Incompatible fields:</b> ${left} while ${right}. They must be the same!`);
-                $scope.invalid = true;
-              }
+            const indicesAndMapping = _.map(mapping, (value, indexName) => {
+              const type = indexPatternType || Object.keys(value.mappings)[0];
+              return {
+                index: indexName,
+                mapping: _.values(value.mappings[type][path].mapping)[0]
+              };
             });
-          })
-          .catch(notify.error)
-          .then(() => save('indices'))
-          .then(function () {
-            if (oldRelations && oldRelations.length) {
-              var relationsIndices = config.get('kibi:relations').relationsIndices;
 
-              if (relationsIndices.length < oldRelations.length) {
-                // a relation was deleted
-                var diff = _.difference(_.pluck(oldRelations, 'id'), _.pluck(relationsIndices, 'id'));
-                _.each($scope.relations.relationsDashboards, function (relation) {
-                  if (diff.indexOf(relation.relation) !== -1) {
-                    relation.relation = '';
-                  }
-                });
-              } else if (relationsIndices.length === oldRelations.length) {
-                // check if the definition of a relation was changed
-                var clearRelation = function (oldRelationId) {
-                  _.each($scope.relations.relationsDashboards, function (relation) {
-                    if (relation.relation === oldRelationId) {
-                      relation.relation = '';
-                    }
-                  });
-                };
-
-                for (var i = 0; i < relationsIndices.length; i++) {
-                  if (relationsIndices[i].id && oldRelations[i].id) {
-                    const newRelation = relationsHelper.getRelationInfosFromRelationID(relationsIndices[i].id);
-                    const oldRelation = relationsHelper.getRelationInfosFromRelationID(oldRelations[i].id);
-
-                    if (newRelation.source.index !== oldRelation.source.index || // left index changed
-                        newRelation.target.index !== oldRelation.target.index) { // right index changed
-                      clearRelation(oldRelations[i].id);
-                    }
-                  }
-                }
+            let compatible = true;
+            for (let i = 1; i < indicesAndMapping.length; i++) {
+              if (!areMappingsCompatibleForSirenJoin(indicesAndMapping[i - 1].mapping, indicesAndMapping[i].mapping)) {
+                compatible = false;
+                break;
               }
+            }
+            if (!compatible) {
+              if (!relation.errors) {
+                relation.errors = [];
+              }
+              const msg = _(indicesAndMapping)
+              // group the indices having the same index/type mapping together
+              .groupBy(({ mapping }) => JSON.stringify(_.pick(mapping, [ 'index', 'type' ]), null, ' '))
+              // indicate which indices have a certain index/type mapping
+              .map((values, indexAndType) => `<li>on indices ${_.pluck(values, 'index').join(', ')} the mapping is ${indexAndType}</li>`)
+              .value()
+              .join('');
+              relation.errors.push(`The mappings for the field ${path} differ on some indices matching the pattern ${indexPatternId}:<br/>
+                                   <ul>
+                                   ${msg}
+                                   </ul>`);
+              $scope.invalid = true;
+              return false;
+            }
+            return true;
+          };
+
+          /**
+          * Returns the mapping of a field
+          */
+          const getFieldMapping = function (mapping, { indexPatternType, path }) {
+            const index = Object.keys(mapping)[0];
+            const type = indexPatternType || Object.keys(mapping[index].mappings)[0];
+            return _.values(mapping[index].mappings[type][path].mapping)[0];
+          };
+
+          _.each(mappings, ({ leftMapping, rightMapping, relation }) => {
+            const indices = relation.indices;
+
+            // check if all field mappings for a given index pattern are the same
+            if (!doAllFieldsHaveTheSameMapping(relation, leftMapping, indices[0]) ||
+                !doAllFieldsHaveTheSameMapping(relation, rightMapping, indices[1])) {
+              // do not check any further since the indices in the current pattern are incompatible already
+              return;
+            }
+
+            // check if the field joined together are compatible
+            const leftFieldMapping = getFieldMapping(leftMapping, indices[0]);
+            const rightFieldMapping = getFieldMapping(rightMapping, indices[1]);
+
+            if (!areMappingsCompatibleForSirenJoin(leftFieldMapping, rightFieldMapping)) {
+              if (!relation.errors) {
+                relation.errors = [];
+              }
+              const leftFieldPath = `${indices[0].indexPatternId}/${indices[0].indexPatternType}/${indices[0].path}`;
+              const rightFieldPath = `${indices[1].indexPatternId}/${indices[1].indexPatternType}/${indices[1].path}`;
+
+              const left = `${leftFieldPath} has mapping ${JSON.stringify(_.pick(leftFieldMapping, [ 'index', 'type' ]), null, ' ')}`;
+              const right = `${rightFieldPath} has mapping ${JSON.stringify(_.pick(rightFieldMapping, [ 'index', 'type' ]), null, ' ')}`;
+              relation.errors.push(`<b>Incompatible fields:</b> ${left} while ${right}. They must be the same!`);
+              $scope.invalid = true;
             }
           });
+        })
+        .catch(notify.error);
+      };
+
+      const updateDashboardsRelationsBasedOnTheIndicesRelations = function () {
+        if (oldRelations && oldRelations.length) {
+          const relationsIndices = $scope.relations.relationsIndices;
+
+          if (relationsIndices.length < oldRelations.length) {
+            // a relation was deleted
+            const diff = _.difference(_.pluck(oldRelations, 'id'), _.pluck(relationsIndices, 'id'));
+            _.each($scope.relations.relationsDashboards, function (relation) {
+              if (diff.indexOf(relation.relation) !== -1) {
+                relation.relation = '';
+              }
+            });
+          } else if (relationsIndices.length === oldRelations.length) {
+            // check if the definition of a relation was changed
+            const clearRelation = function (oldRelationId) {
+              _.each($scope.relations.relationsDashboards, function (relation) {
+                if (relation.relation === oldRelationId) {
+                  relation.relation = '';
+                }
+              });
+            };
+
+            for (let i = 0; i < relationsIndices.length; i++) {
+              if (relationsIndices[i].id && oldRelations[i].id) {
+                const newRelation = relationsHelper.getRelationInfosFromRelationID(relationsIndices[i].id);
+                const oldRelation = relationsHelper.getRelationInfosFromRelationID(oldRelations[i].id);
+
+                if (newRelation.source.index !== oldRelation.source.index || // left index changed
+                    newRelation.target.index !== oldRelation.target.index) { // right index changed
+                  clearRelation(oldRelations[i].id);
+                }
+              }
+            }
+          }
         }
+      };
+
+      const isEqual = _($scope.relations.relationsIndices).map(function (relation) {
+        return _.omit(relation, [ '$$hashKey', 'errors' ]);
+      }).isEqual(oldRelations);
+      if (!isEqual) {
+        return checkJoinMappings()
+        .then(() => $scope.isObjectValid())
+        .then(() => updateDashboardsRelationsBasedOnTheIndicesRelations());
+      }
+    };
+
+    // Listen to changes of relations between indices
+    $scope.$watch(function ($scope) {
+      return _.map($scope.relations.relationsIndices, function (relation) {
+        return _.omit(relation, ['errors', 'id']); // id is redundant
       });
+    }, function (newRelations, oldRelations) {
+      $scope.updateIndicesGraph(oldRelations);
     }, true);
 
-    var indicesGraphExportOff = $rootScope.$on('egg:indicesGraph:results', function (event, method, results) {
+    const indicesGraphExportOff = $rootScope.$on('egg:indicesGraph:results', function (event, method, results) {
       if (method === 'exportGraph') {
-        var relations = config.get('kibi:relations');
-        relations.relationsIndicesSerialized = results;
-        config.set('kibi:relations', relations);
+        $scope.relations.relationsIndicesSerialized = results;
       }
     });
-    var dashboardsGraphExportOff = $rootScope.$on('egg:dashboardsGraph:results', function (event, method, results) {
+    const dashboardsGraphExportOff = $rootScope.$on('egg:dashboardsGraph:results', function (event, method, results) {
       if (method === 'exportGraph') {
-        var relations = config.get('kibi:relations');
-        relations.relationsDashboardsSerialized = results;
-        config.set('kibi:relations', relations);
+        $scope.relations.relationsDashboardsSerialized = results;
       }
     });
     $scope.$on('$destroy', function () {
@@ -743,36 +807,28 @@ define(function (require) {
       dashboardsGraphExportOff();
     });
 
-    function _areRelationsValid() {
-      const { validDashboards, validIndices } = relationsHelper.checkIfRelationsAreValid(true);
+    $scope.isObjectValid = function () {
+      const { validDashboards, validIndices } = relationsHelper.checkIfRelationsAreValid($scope.relations);
       $scope.dashboardsRelationsAreValid = validDashboards;
-      $scope.indicesRelationsAreValid  = validIndices;
-    }
-    _areRelationsValid();
+      $scope.indicesRelationsAreValid = validIndices;
+      return validIndices && validDashboards;
+    };
+    $scope.isObjectValid();
 
-    function _isValid(graph) {
-      if (graph === 'indices') {
-        return $element.find('form[name="indicesForm"]').hasClass('ng-valid');
-      } else {
-        return $element.find('form[name="dashboardsForm"]').hasClass('ng-valid');
-      }
-    }
+    $scope.submit = function () {
+      $scope.relations.relationsIndices = _.map($scope.relations.relationsIndices, function (relation) {
+        return _.omit(relation, [ 'errors' ]);
+      });
+      $scope.relations.relationsDashboards = _.map($scope.relations.relationsDashboards, function (relation) {
+        return _.omit(relation, [ 'errors' ]);
+      });
 
-    function save(graph) {
-      var relations = config.get('kibi:relations');
-
-      if (graph === 'indices') {
-        relations.relationsIndices = _.map($scope.relations.relationsIndices, function (relation) {
-          return _.omit(relation, [ 'errors' ]);
-        });
-      } else {
-        relations.relationsDashboards = _.map($scope.relations.relationsDashboards, function (relation) {
-          return _.omit(relation, [ 'errors' ]);
-        });
-      }
-
-      return config.set('kibi:relations', relations)
-      .then(_areRelationsValid.bind(this));
-    }
+      return config.set('kibi:relations', $scope.relations)
+      .then(() => config.set('kibi:relationalPanel', $scope.relationalPanel))
+      .then(() => {
+        notify.info('Relations saved');
+      })
+      .catch(notify.error);
+    };
   });
 });

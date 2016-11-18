@@ -8,12 +8,11 @@ describe('Kibi Settings', function () {
   const jQuery = require('jquery');
 
   let $scope;
-  let $timeout;
   let config;
   let indexToDashboardMapPromise;
   let unbind = [];
 
-  function init({ mappings, savedDashboards, savedSearches, indexToDashboardsMap, relations, events }) {
+  function init({ digest = true, mappings, savedDashboards, savedSearches, indexToDashboardsMap, relations, events }) {
     ngMock.module('kibana', function ($provide) {
       $provide.constant('kbnDefaultAppId', 'dashboard');
       $provide.constant('kibiDefaultDashboardTitle', '');
@@ -31,7 +30,7 @@ describe('Kibi Settings', function () {
       });
     });
 
-    ngMock.inject(function (_$timeout_, $injector, $rootScope, $controller, Private) {
+    ngMock.inject(function ($injector, $rootScope, $controller, Private) {
       if (mappings) {
         const es = $injector.get('es');
         const stub = sinon.stub(es.indices, 'getFieldMapping');
@@ -46,7 +45,6 @@ describe('Kibi Settings', function () {
 
       indexToDashboardMapPromise = Promise.resolve(indexToDashboardsMap);
 
-      $timeout = _$timeout_;
       config = $injector.get('config');
       config.set('kibi:relations', relations);
 
@@ -66,7 +64,9 @@ describe('Kibi Settings', function () {
           unbind.push($scope.$on(e, func));
         });
       }
-      $scope.$digest();
+      if (digest) {
+        $scope.$digest();
+      }
     });
   }
 
@@ -138,63 +138,19 @@ describe('Kibi Settings', function () {
         ]
       }));
 
-      it('should fail because a dashboard does not have a saved search and ignoreMissingSavedSearch not set', function (done) {
-        $scope.getIndexToDashboardMap().then(function (results) {
-          done('should fail');
-        }).catch(function (err) {
-          expect(err.message).to.be('The dashboard [Articles] is expected to be associated with a saved search.');
-          done();
-        });
-      });
-
-      it('should NOT fail with dashboard missing a saved search when ignoreMissingSavedSearch set to true and first parameter empty',
+      it('should return the expected dashboards/index associations',
         function (done) {
           const expected = {
             'search-ste': ['search-ste'],
             'time-testing-4': ['time-testing-4']
           };
 
-          $scope.getIndexToDashboardMap(null, true).then(function (results) {
+          $scope.getIndexToDashboardMap().then(function (results) {
             expect(results, expected);
             done();
           }).catch(done);
         }
       );
-
-      it('should NOT fail with dashboard missing a saved search when ignoreMissingSavedSearch is true and first parameter is array of ids',
-        function (done) {
-          const expected = {
-            'time-testing-4': ['time-testing-4']
-          };
-
-          $scope.getIndexToDashboardMap(['time-testing-4'], true).then(function (results) {
-            expect(results, expected);
-            done();
-          }).catch(done);
-        }
-      );
-
-      it('getIndexToDashboardMap pass ids of dashboards', function (done) {
-        const expected = {
-          'time-testing-4': ['time-testing-4']
-        };
-
-        $scope.getIndexToDashboardMap(['time-testing-4']).then(function (results) {
-          expect(results).to.eql(expected);
-          done();
-        }).catch(done);
-      });
-
-      it('dashboard is not selected but has a savedsearch', function (done) {
-        const expected = {
-          'search-ste': ['search-ste']
-        };
-
-        $scope.getIndexToDashboardMap(['search-ste']).then(function (results) {
-          expect(results).to.eql(expected);
-          done();
-        }).catch(done);
-      });
     });
 
     describe('index patterns graph', function () {
@@ -256,6 +212,7 @@ describe('Kibi Settings', function () {
 
         it('should throw an error if join fields do not have compatible mapping', function (done) {
           init({
+            digest: false,
             relations: {
               relationsIndices: [
                 {
@@ -359,23 +316,22 @@ describe('Kibi Settings', function () {
                   }
                 }
               }
-            ],
-            events: {
-              'change:config.kibi:relations': function (event, relations) {
-                expect($scope.relations.relationsIndices).to.have.length(2);
-                _.each($scope.relations.relationsIndices, function (relation) {
-                  expect(relation.errors).to.have.length(1);
-                  expect(relation.errors[0]).to.match(/Incompatible/);
-                });
-                done();
-              }
-            }
+            ]
           });
-          $timeout.flush();
+          $scope.updateIndicesGraph()
+          .then(function () {
+            expect($scope.relations.relationsIndices).to.have.length(2);
+            _.each($scope.relations.relationsIndices, function (relation) {
+              expect(relation.errors).to.have.length(1);
+              expect(relation.errors[0]).to.match(/Incompatible/);
+            });
+            done();
+          }).catch(done);
         });
 
         it('should support nested fields', function (done) {
           init({
+            digest: false,
             relations: {
               relationsIndices: [
                 {
@@ -479,23 +435,22 @@ describe('Kibi Settings', function () {
                   }
                 }
               }
-            ],
-            events: {
-              'change:config.kibi:relations': function (event, relations) {
-                expect($scope.relations.relationsIndices).to.have.length(2);
-                _.each($scope.relations.relationsIndices, function (relation) {
-                  expect(relation.errors).to.have.length(1);
-                  expect(relation.errors[0]).to.match(/Incompatible/);
-                });
-                done();
-              }
-            }
+            ]
           });
-          $timeout.flush();
+          $scope.updateIndicesGraph()
+          .then(function () {
+            expect($scope.relations.relationsIndices).to.have.length(2);
+            _.each($scope.relations.relationsIndices, function (relation) {
+              expect(relation.errors).to.have.length(1);
+              expect(relation.errors[0]).to.match(/Incompatible/);
+            });
+            done();
+          }).catch(done);
         });
 
         it('should support index patterns 1', function (done) {
           init({
+            digest: false,
             relations: {
               relationsIndices: [
                 {
@@ -565,23 +520,22 @@ describe('Kibi Settings', function () {
                   }
                 }
               }
-            ],
-            events: {
-              'change:config.kibi:relations': function (event, relations) {
-                expect($scope.relations.relationsIndices).to.have.length(1);
-                _.each($scope.relations.relationsIndices, function (relation) {
-                  expect(relation.errors).to.have.length(1);
-                  expect(relation.errors[0]).to.match(/differ on some indices matching the pattern a\*/);
-                });
-                done();
-              }
-            }
+            ]
           });
-          $timeout.flush();
+          $scope.updateIndicesGraph()
+          .then(function () {
+            expect($scope.relations.relationsIndices).to.have.length(1);
+            _.each($scope.relations.relationsIndices, function (relation) {
+              expect(relation.errors).to.have.length(1);
+              expect(relation.errors[0]).to.match(/differ on some indices matching the pattern a\*/);
+            });
+            done();
+          }).catch(done);
         });
 
         it('should support index patterns 2', function (done) {
           init({
+            digest: false,
             relations: {
               relationsIndices: [
                 {
@@ -651,19 +605,17 @@ describe('Kibi Settings', function () {
                   }
                 }
               }
-            ],
-            events: {
-              'change:config.kibi:relations': function (event, relations) {
-                expect($scope.relations.relationsIndices).to.have.length(1);
-                _.each($scope.relations.relationsIndices, function (relation) {
-                  expect(relation.errors).to.have.length(1);
-                  expect(relation.errors[0]).to.match(/differ on some indices matching the pattern b\*/);
-                });
-                done();
-              }
-            }
+            ]
           });
-          $timeout.flush();
+          $scope.updateIndicesGraph()
+          .then(function () {
+            expect($scope.relations.relationsIndices).to.have.length(1);
+            _.each($scope.relations.relationsIndices, function (relation) {
+              expect(relation.errors).to.have.length(1);
+              expect(relation.errors[0]).to.match(/differ on some indices matching the pattern b\*/);
+            });
+            done();
+          }).catch(done);
         });
       });
 
@@ -776,7 +728,7 @@ describe('Kibi Settings', function () {
         };
 
         init(options);
-        $timeout.flush();
+        $scope.submit();
       });
     });
 
@@ -890,11 +842,11 @@ describe('Kibi Settings', function () {
         indexToDashboardMapPromise.then(function () {
           expect($scope.relations.relationsDashboards).to.have.length(2);
           const actual = $scope.filterDashboards(null, {rowIndex: 1}, false);
-          expect(actual).to.have.length(3);
+          expect(actual).to.have.length(4);
           expect(actual[0]).to.be('index-a//path-a1/index-a//path-a2');
           expect(actual[1]).to.be('index-b//path-b/index-c//path-c');
           expect(actual[2].dashboards).to.eql([ 'Db', 'Dc' ]);
-          expect(actual[2].relation).to.be('index-b//path-b/index-c//path-c');
+          expect(actual[3]).to.be(map);
           done();
         }).catch(done);
       });
@@ -1191,7 +1143,6 @@ describe('Kibi Settings', function () {
           expect($scope.filterRelations({ value: 'index-b//path-b/index-c//path-c' }, { rowIndex: 0 }, true)).to.be(false);
           done();
         }).catch(done);
-        $timeout.flush();
       });
 
       it('should filter relation that already appear between two dashboards in case of a multiedge graph', function (done) {
@@ -1230,7 +1181,6 @@ describe('Kibi Settings', function () {
           expect($scope.filterRelations({ value: 'index-a//path-a2/index-b//path-b' }, {rowIndex: 1}, false)).to.be(false);
           done();
         }).catch(done);
-        $timeout.flush();
       });
 
       it('should filter relation depending on the row', function (done) {
@@ -1305,7 +1255,6 @@ describe('Kibi Settings', function () {
           expect($scope.filterRelations({ value: 'index-c//path-c/index-d//path-d' }, {rowIndex: 1}, false)).to.be(false);
           done();
         }).catch(done);
-        $timeout.flush();
       });
 
       it('should filter possible dashboards based on the selected relation', function (done) {
@@ -1395,7 +1344,7 @@ describe('Kibi Settings', function () {
                 }
               ],
               label: 'rel1',
-              id: 'index-a/path-a/index-b/path-b'
+              id: 'index-a//path-a/index-b//path-b'
             },
             {
               indices: [
@@ -1409,7 +1358,7 @@ describe('Kibi Settings', function () {
                 }
               ],
               label: 'rel2',
-              id: 'index-b/path-b/index-c/path-c'
+              id: 'index-b//path-b/index-c//path-c'
             },
             {
               indices: [
@@ -1423,7 +1372,7 @@ describe('Kibi Settings', function () {
                 }
               ],
               label: 'rel3',
-              id: 'index-c/path-c/index-d/path-d'
+              id: 'index-c//path-c/index-d//path-d'
             }
           ],
           relationsDashboards: [
@@ -1432,7 +1381,7 @@ describe('Kibi Settings', function () {
             },
             {
               dashboards: [ 'Da', 'Db' ],
-              relation: 'index-a/path-a/index-b/path-b'
+              relation: 'index-a//path-a/index-b//path-b'
             }
           ]
         };
@@ -1446,14 +1395,15 @@ describe('Kibi Settings', function () {
         init({ relations: relations, indexToDashboardsMap: map });
         indexToDashboardMapPromise.then(function () {
           expect($scope.filterRelations(null, {rowIndex: 1}, undefined)).to.eql([
-            'index-a/path-a/index-b/path-b',
-            'index-b/path-b/index-c/path-c',
-            'index-c/path-c/index-d/path-d',
+            'index-a//path-a/index-b//path-b',
+            'index-b//path-b/index-c//path-c',
+            'index-c//path-c/index-d//path-d',
             'rel1',
             'rel2',
             'rel3',
             'Da',
-            'Db'
+            'Db',
+            map
           ]);
           done();
         }).catch(done);
@@ -1593,7 +1543,6 @@ describe('Kibi Settings', function () {
           expect($scope.filterRelations({ value: 'index-c//path-c/index-d//path-d' }, {rowIndex: 0}, false)).to.be(false);
           done();
         }).catch(done);
-        $timeout.flush();
       });
 
       it('should support relations that have the same label 1', function (done) {
@@ -1662,7 +1611,6 @@ describe('Kibi Settings', function () {
           expect($scope.filterRelations({ value: 'index-c//path-c/index-d//path-d' }, {rowIndex: 0}, false)).to.be(true);
           done();
         }).catch(done);
-        $timeout.flush();
       });
 
       it('should support relations that have the same label 2', function (done) {

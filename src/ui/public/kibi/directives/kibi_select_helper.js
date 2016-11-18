@@ -157,20 +157,6 @@ define(function (require) {
       });
     };
 
-    KibiSelectHelper.prototype.getJoinRelations = function () {
-      var relations = config.get('kibi:relations');
-
-      if (!!relations && !!relations.relationsIndices) {
-        var labels = _.map(relations.relationsIndices, function (relInd) {
-          return {
-            label: relInd.label,
-            value: relInd.id
-          };
-        });
-        return Promise.resolve(labels);
-      }
-    };
-
     KibiSelectHelper.prototype.getFields = function (indexPatternId, fieldTypes, scriptedFields) {
       var defId;
       if (indexPatternId) {

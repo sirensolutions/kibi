@@ -13,9 +13,10 @@ define(function (require) {
       restrict: 'E',
       replace: true,
       scope: {
+        delegatedData: '&?',
         // objectType - text - possible values are:
         // query, dashboard, search, template, datasource, indexPatternType,
-        // field, indexPattern, documentIds, joinRelations, queryVariable,
+        // field, indexPattern, documentIds, queryVariable,
         // iconType, labelType, relationsForSequentialJoinButton
         objectType: '@',
         // Filter function which returns true for items to be removed.
@@ -235,6 +236,9 @@ define(function (require) {
 
           if (!promise) {
             switch (scope.objectType) {
+              case 'delegate':
+                promise = Promise.resolve(scope.delegatedData()() || []);
+                break;
               case 'query':
                 promise = selectHelper.getQueries();
                 break;
@@ -261,9 +265,6 @@ define(function (require) {
                 break;
               case 'documentIds':
                 promise = selectHelper.getDocumentIds(scope.indexPatternId, scope.indexPatternType);
-                break;
-              case 'joinRelations':
-                promise = selectHelper.getJoinRelations();
                 break;
               case 'queryVariable':
                 promise = selectHelper.getQueryVariables(scope.queryId);

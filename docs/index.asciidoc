@@ -12,6 +12,7 @@
 :elastic-ref: https://www.elastic.co/guide/en/elasticsearch/reference/2.4/
 :elasticsearch-version: 2.4.1
 :shield-ref: https://www.elastic.co/guide/en/shield/2.4/
+:sense-ref: https://www.elastic.co/guide/en/sense/current/
 :searchguard-ref: https://github.com/floragunncom/search-guard-docs
 :searchguard-setup-ref: https://github.com/floragunncom/search-guard/tree/es-2.3.5
 :kibi-ref: http://siren.solutions/kibi/docs/current/

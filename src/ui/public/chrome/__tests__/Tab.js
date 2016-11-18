@@ -239,7 +239,7 @@ describe('Chrome Tab', function () {
     });
 
 
-    // kibi: added to test _k
+    // kibi: added to test kibistate
     context('with new state sets _g and _k properly', function () {
       const paths = [
         [ '/', '/?_g=newState&_k=newKibiState' ],

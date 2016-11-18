@@ -880,10 +880,30 @@ output:
 
     tls:
       certificate_authorities: ["/etc/pki/filebeat/ca.pem"]
-
 ----
 
 The root certification authority in PEM format must be copied to all nodes
 running one or more beats.
+
+=== Sense configuration
+
+In order to successfully submit queries from Sense to a cluster secured by
+Search Guard set the following parameters in `config/kibi.yml`:
+
+[source,yaml]
+----
+sense.proxyConfig:
+  - match:
+      protocol: "https"
+
+    ssl:
+      ca: "pki/searchguard/ca.pem"
+----
+
+`sense.proxyConfig.ssl.ca` must point to the CA certificate bundle, so it can
+be set to the same value as the `elasticsearch.ssl.ca` parameter.
+
+For more details about proxy options please refer to the
+{sense-ref}/installing.html[Sense documentation].
 
 endif::[]

@@ -15,6 +15,8 @@ import Scenario2 from './scenarios/migration_5/scenario2';
 import Scenario3 from './scenarios/migration_5/scenario3';
 import Scenario4 from './scenarios/migration_5/scenario4';
 import Scenario5 from './scenarios/migration_5/scenario5';
+import Scenario6 from './scenarios/migration_5/scenario6';
+import Scenario7 from './scenarios/migration_5/scenario7';
 
 const serverConfig = requirefrom('test')('serverConfig');
 import url from 'url';
@@ -86,8 +88,21 @@ describe('kibi_core/migrations/functional', function () {
         label: 'Scenario4',
         Scenario: Scenario4,
         expectedNewRelations: 3
+      },
+      {
+        // should support visualizations with wildcard index patterns
+        label: 'Scenario6',
+        Scenario: Scenario6,
+        expectedNewRelations: 0
+      },
+      {
+        // should support visualizations which reference non-existing indices
+        label: 'Scenario7',
+        Scenario: Scenario7,
+        expectedNewRelations: 0,
+        expectedWarning: 'No concrete index matches the patterns art* and company'
       }
-    ], ({ label, Scenario, expectedNewRelations }) => {
+    ], ({ label, Scenario, expectedNewRelations, expectedWarning }) => {
       describe(`should update the kibi sequential filter - ${label}`, function () {
 
         beforeEach(wrapAsync(async () => {
@@ -147,14 +162,6 @@ describe('kibi_core/migrations/functional', function () {
             expect(upgradedButton.targetDashboardId).to.be(originalButton.redirectToDashboard);
             expect(upgradedButton.sourceDashboardId).to.not.be.ok();
 
-            const mapping = await client.indices.getMapping({
-              index: [
-                originalButton.sourceIndexPatternId,
-                originalButton.targetIndexPatternId
-              ]
-            });
-            const sourceTypes = _.keys(mapping[originalButton.sourceIndexPatternId].mappings);
-            const targetTypes = _.keys(mapping[originalButton.targetIndexPatternId].mappings);
             const [ leftIndex, leftType, leftPath, rightIndex, rightType, rightPath ] = upgradedButton.indexRelationId.split(SEPARATOR);
             let left = [
               originalButton.sourceIndexPatternId,
@@ -175,8 +182,10 @@ describe('kibi_core/migrations/functional', function () {
             expect(leftPath).to.be(left[2]);
             expect(rightIndex).to.be(right[0]);
             expect(rightPath).to.be(right[2]);
+
+            const types = await migration._getTypes([ originalButton.sourceIndexPatternId, originalButton.targetIndexPatternId ]);
             // only check the types if an index has more than one
-            if (sourceTypes.length > 1 || targetTypes.length > 1) {
+            if (types.length > 2) {
               expect(rightType).to.be(right[1]);
               expect(leftType).to.be(left[1]);
             }
@@ -192,7 +201,12 @@ describe('kibi_core/migrations/functional', function () {
 
           expect(upgradedVisState.version).to.equal(2);
 
-          expect(warningSpy.called).to.be(false);
+          if (expectedWarning) {
+            sinon.assert.calledOnce(warningSpy);
+            sinon.assert.calledWith(warningSpy, expectedWarning);
+          } else {
+            sinon.assert.notCalled(warningSpy);
+          }
 
           result = await migration.count();
           expect(result).to.be(0);

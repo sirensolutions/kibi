@@ -103,6 +103,12 @@ export default class Migration5 extends Migration {
     return !visState.version && visState.type === 'kibi_sequential_join_vis';
   }
 
+  /**
+   * _getRelationId returns the relation ID based on the configration of the relational filter visualization (version 1).
+   *
+   * @param button a configuration of the filter in version 1
+   * @returns an identitifier of the indices relation
+   */
   _getRelationId(button) {
     const clean = function (str) {
       return str.replace(/\//, '-slash-');
@@ -154,7 +160,11 @@ export default class Migration5 extends Migration {
    * @returns an array with the types name, minus the default one
    */
   async _getTypes(indices) {
-    const mapping = await this._client.indices.getMapping({ index: indices });
+    const mapping = await this._client.indices.getMapping({
+      index: indices,
+      ignoreUnavailable: true,
+      allowNoIndices: true
+    });
     return _(mapping)
     .map(value => _.keys(value.mappings))
     .flatten()
@@ -178,12 +188,18 @@ export default class Migration5 extends Migration {
       for (const button of visState.params.buttons) {
         const relationId = this._getRelationId(button);
 
+        // although types is used only in the else block, this is put here so that a warning
+        // about missing indices can be shown
+        const types = await this._getTypes([ button.sourceIndexPatternId, button.targetIndexPatternId ]);
+        if (types.length < 2) {
+          this._logger.warning(`No concrete index matches the patterns ${button.sourceIndexPatternId} and ${button.targetIndexPatternId}`);
+        }
+
         if (_.find(relations.relationsIndices, 'id', relationId)) {
           this._upgradeButton(button, relationId);
         } else {
           this._logger.info(`No relation for the button "${button.label}" was found`);
 
-          const types = await this._getTypes([ button.sourceIndexPatternId, button.targetIndexPatternId ]);
           if (types.length > 2) {
             this._logger.info(`The ${button.sourceIndexPatternId} and/or ${button.targetIndexPatternId} have more than one type. A new ` +
                               `relation with ID=${relationId} based on the configuration of the "${button.label}" button will be created.`);

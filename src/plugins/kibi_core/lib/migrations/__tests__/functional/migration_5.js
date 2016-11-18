@@ -16,6 +16,7 @@ import Scenario3 from './scenarios/migration_5/scenario3';
 import Scenario4 from './scenarios/migration_5/scenario4';
 import Scenario5 from './scenarios/migration_5/scenario5';
 import Scenario6 from './scenarios/migration_5/scenario6';
+import Scenario7 from './scenarios/migration_5/scenario7';
 
 const serverConfig = requirefrom('test')('serverConfig');
 import url from 'url';
@@ -92,12 +93,19 @@ describe('kibi_core/migrations/functional', function () {
         expectedNewRelations: 3
       },
       {
-        // should support visualizations with index patterns
+        // should support visualizations with wildcard index patterns
         label: 'Scenario6',
         Scenario: Scenario6,
         expectedNewRelations: 0
+      },
+      {
+        // should support visualizations which reference non-existing indices
+        label: 'Scenario7',
+        Scenario: Scenario7,
+        expectedNewRelations: 0,
+        expectedWarning: 'No concrete index matches the patterns art* and company'
       }
-    ], ({ label, Scenario, expectedNewRelations }) => {
+    ], ({ label, Scenario, expectedNewRelations, expectedWarning }) => {
       describe(`should update the kibi sequential filter - ${label}`, function () {
 
         beforeEach(wrapAsync(async () => {
@@ -199,7 +207,12 @@ describe('kibi_core/migrations/functional', function () {
 
           expect(upgradedVisState.version).to.equal(2);
 
-          expect(warningSpy.called).to.be(false);
+          if (expectedWarning) {
+            sinon.assert.calledOnce(warningSpy);
+            sinon.assert.calledWith(warningSpy, expectedWarning);
+          } else {
+            sinon.assert.notCalled(warningSpy);
+          }
 
           result = await migration.count();
           expect(result).to.be(0);

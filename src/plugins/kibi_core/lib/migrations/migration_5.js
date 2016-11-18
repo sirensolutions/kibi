@@ -107,7 +107,7 @@ export default class Migration5 extends Migration {
    * _getRelationId returns the relation ID based on the configration of the relational filter visualization (version 1).
    *
    * @param button a configuration of the filter in version 1
-   * @returns an identitifier of the indices relation
+   * @returns an identifier of the indices relation
    */
   _getRelationId(button) {
     const clean = function (str) {
@@ -157,7 +157,7 @@ export default class Migration5 extends Migration {
    * _getTypes returns the list of types that appear for the given indices
    *
    * @param indices an array of index patterns
-   * @returns an array with the types name, minus the default one
+   * @returns an array with the type names, minus the default one
    */
   async _getTypes(indices) {
     const mapping = await this._client.indices.getMapping({

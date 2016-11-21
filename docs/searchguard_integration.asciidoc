@@ -117,11 +117,17 @@ The bundle has the following contents:
 
 === Search Guard installation
 
-Install the *search-guard-ssl* and *search-guard-2* plugins on every node
-the Elasticsearch cluster by changing to the node directory and running the
-installation commands explained at the following URL:
+Install the *search-guard-ssl* and *search-guard-2* plugins on every node the
+Elasticsearch cluster by changing to the node directory and running the
+commands below; to find the most recent version of the plugins for your
+Elasticsearch version please consult the
+{searchguard-matrix-ref}[Search Guard version matrix].
 
-{searchguard-setup-ref}#installation
+[source,shell]
+----
+$ bin/plugin install -b com.floragunn/search-guard-ssl/<version>
+$ bin/plugin install -b com.floragunn/search-guard-2/<version>
+----
 
 Then, copy the following files to the _config_ directory of each node:
 

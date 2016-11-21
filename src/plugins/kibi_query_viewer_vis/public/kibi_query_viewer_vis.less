@@ -25,83 +25,86 @@
   .templateResult.results-not-ok-less-verbose {
     padding: 4px;
   }
-}
-.kibi-query-viewer span.snippetLabel {
-  font-size: 1.2em;
-}
-.kibi-query-viewer a.snippetShowHideButton {
-  font-size: 1.2em;
-  font-weight: bold;
-}
-.kibi-query-viewer .filterButton .filter {
-  cursor: pointer;
-}
-.kibi-query-viewer .filterButton .showQuery {
-  cursor: pointer;
-}
-.kibi-query-viewer-params ul {
-  margin: 0;
-  padding: 0;
-}
-.kibi-query-viewer-params ul li.queryOptionArea {
-  margin-bottom: 2px;
-  padding: 2px;
-  position: relative;
-}
-.kibi-query-viewer-params ul li.queryOptionArea div.rightCorner {
-  position: absolute;
-  right: 0px;
-  top: 0px;
-}
-.kibi-query-viewer-params ul li.queryOptionArea .header {
-  background-color: #fff;
-}
-.kibi-query-viewer-params ul li.queryOptionArea .header h2 {
-  font-size: 14px;
-  margin: 2px 0;
-  font-weight: bold;
-  padding: 0;
-}
-.kibi-query-viewer-params ul li .content {
-  background-color: #ecf0f1;
-  padding: 0 4px;
-}
-.kibi-query-viewer-params ul li .content .form-group:first-child {
-  margin-top:4px;
-}
-.kibi-query-viewer-params ul li.queryOptionArea .templateVariablesEditor {
-  height: 50px;
-}
-.kibi-query-viewer-params ul li.queryOptionArea table {
-  width: 100%;
-}
-.kibi-query-viewer-params ul li.queryOptionArea table td:first-child {
-  width: 15%;
-}
-.kibi-query-viewer-params ul li.queryOptionArea table td:nth-child(2) {
-  width: 35%;
-}
-.kibi-query-viewer-params .form-group textarea {
-  height: 80px;
+  span.snippetLabel {
+    font-size: 1.2em;
+  }
+  a.snippetShowHideButton {
+    font-size: 1.2em;
+    font-weight: bold;
+  }
+  .filterButton .filter {
+    cursor: pointer;
+  }
+  .filterButton .showQuery {
+    cursor: pointer;
+  }
 }
 
-/* here lets override the borders so they are visible on grey background */
-.kibi-query-viewer-params ul li .content .ace_editor {
-  border: 2px @st-darkgray-blured solid;
-}
-.kibi-query-viewer-params ul li .content .ace_focus {
-  border: 2px @st-darkgray-focused solid;
-}
+.kibi-query-viewer-params {
+  ul {
+    margin: 0;
+    padding: 0;
+  }
+  ul li.queryOptionArea {
+    margin-bottom: 2px;
+    padding: 2px;
+    position: relative;
+  }
+  ul li.queryOptionArea div.rightCorner {
+    position: absolute;
+    right: 0px;
+    top: 0px;
+  }
+  ul li.queryOptionArea .header {
+    background-color: #fff;
+  }
+  ul li.queryOptionArea .header h2 {
+    font-size: 14px;
+    margin: 2px 0;
+    font-weight: bold;
+    padding: 0;
+  }
+  ul li .content {
+    background-color: #ecf0f1;
+    padding: 0 4px;
+  }
+  ul li .content .form-group:first-child {
+    margin-top:4px;
+  }
+  ul li.queryOptionArea .templateVariablesEditor {
+    height: 50px;
+  }
+  ul li.queryOptionArea table {
+    width: 100%;
+  }
+  ul li.queryOptionArea table td:first-child {
+    width: 15%;
+  }
+  ul li.queryOptionArea table td:nth-child(2) {
+    width: 35%;
+  }
+  .form-group textarea {
+    height: 80px;
+  }
 
-.kibi-query-viewer-params ul li .content input[type='text'] {
-  border: 2px @st-darkgray-blured solid;
-}
-.kibi-query-viewer-params ul li .content input[type='text']:focus {
-  border: 2px @st-darkgray-focused solid;
-}
-.kibi-query-viewer-params ul li .content select {
-  border: 2px @st-darkgray-blured solid;
-}
-.kibi-query-viewer-params ul li .content select:focus {
-  border: 2px @st-darkgray-focused solid;
+  /* here lets override the borders so they are visible on grey background */
+  ul li .content .ace_editor {
+    border: 2px @st-darkgray-blured solid;
+  }
+  ul li .content .ace_focus {
+    border: 2px @st-darkgray-focused solid;
+  }
+
+  ul li .content input[type='text'] {
+    border: 2px @st-darkgray-blured solid;
+  }
+  ul li .content input[type='text']:focus {
+    border: 2px @st-darkgray-focused solid;
+  }
+  ul li .content select {
+    border: 2px @st-darkgray-blured solid;
+  }
+  ul li .content select:focus {
+    border: 2px @st-darkgray-focused solid;
+  }
 }

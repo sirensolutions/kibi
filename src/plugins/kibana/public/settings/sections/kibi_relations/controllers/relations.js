@@ -299,6 +299,19 @@ define(function (require) {
       };
     }
 
+    /**
+     * Update the graph visualization.
+     * - name: the name of the graph, indices or dashboards
+     * - options: the options for the eeg graph
+     * - isRelationReady: function that checks if a relation is complete
+     * - onRelationReady: function that is called once isRelationReady returns true. It is called before anything else.
+     * - assertions: array of assertions to be applied on a relation. An assertion is an object with two fields:
+     *   - a method "isInvalidRelation"" called on a relation. If it returns true the relation is not valid.
+     *   - a field message containing the error message
+     * - getSourceNode: function that returns the source node object for a given relation
+     * - getTargetNode: function that returns the target node object for a given relation
+     * - getLink: function that returns the link object connecting the two nodes
+     */
     const updateGraph = function ({ name, options, isRelationReady, assertions, onRelationReady, getSourceNode, getTargetNode, getLink }) {
       const graphProperty = `${name}Graph`;
       const relationsGraphProperty = `relations${_.capitalize(name)}`;
@@ -350,7 +363,7 @@ define(function (require) {
           }
 
           _.each(assertions, assertion => {
-            if (assertion.test(relation)) {
+            if (assertion.isInvalidRelation(relation)) {
               errors.push(assertion.message);
             }
           });
@@ -480,7 +493,7 @@ define(function (require) {
         },
         assertions: [
           {
-            test: function (relDash) {
+            isInvalidRelation: function (relDash) {
               return uniq[relationId(relDash)].length !== 1;
             },
             message: 'These relationships are equivalent, please remove one.'
@@ -622,14 +635,14 @@ define(function (require) {
         },
         assertions: [
           {
-            test: function (relation) {
+            isInvalidRelation: function (relation) {
               const indices = relation.indices;
               return uniq[getRelationId(indices)].length !== 1;
             },
             message: 'These relationships are equivalent, please remove one.'
           },
           {
-            test: function (relation) {
+            isInvalidRelation: function (relation) {
               const indices = relation.indices;
               return indices[0].indexPatternId === indices[1].indexPatternId &&
                 indices[0].indexPatternType === indices[1].indexPatternType &&

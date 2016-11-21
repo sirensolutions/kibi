@@ -133,15 +133,14 @@ define(function (require) {
               }
             }
             previousName = null;
-          } else if ($scope.vis.params.queryDefinitions || $scope.vis.params.joinElasticsearchField || $scope.vis.params.queryFieldName) {
-            const name = $scope.vis.params.queryFieldName;
-            const i = $scope.vis.params.columns.indexOf(name);
-            if (i === -1) {
-              $scope.vis.params.columns.push(name);
+            delete $scope.vis.params.enableQueryFields;
+            delete $scope.vis.params.joinElasticsearchField;
+            if ($scope.vis.params.queryDefinitions) {
+              $scope.vis.params.queryDefinitions.length = 0;
             }
-            previousName = name;
+            delete $scope.vis.params.queryFieldName;
+            $scope.vis.dirty = true;
           }
-          $scope.vis.dirty = true;
         });
 
         $scope.$watchMulti([

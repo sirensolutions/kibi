@@ -19,7 +19,7 @@ uiModules.get('apps/settings')
 });
 
 registry.register(_.constant({
-  order: 1001,
+  order: 1010, // kibi: change to 1010 to make sure it comes after license
   name: 'about',
   display: 'About',
   url: '#/settings/about'

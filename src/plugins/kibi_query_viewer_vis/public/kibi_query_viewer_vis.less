@@ -32,11 +32,11 @@
     font-size: 1.2em;
     font-weight: bold;
   }
-  .filterButton .filter {
-    cursor: pointer;
-  }
-  .filterButton .showQuery {
-    cursor: pointer;
+  .filterButton{
+    .filter,
+    .showQuery {
+      cursor: pointer;
+    }
   }
 }
 
@@ -95,15 +95,15 @@
       }
       input[type='text'] {
         border: 2px @st-darkgray-blured solid;
-      }
-      input[type='text']:focus {
-        border: 2px @st-darkgray-focused solid;
+        &:focus {
+          border: 2px @st-darkgray-focused solid;
+        }
       }
       select {
         border: 2px @st-darkgray-blured solid;
-      }
-      select:focus {
-        border: 2px @st-darkgray-focused solid;
+        &:focus {
+          border: 2px @st-darkgray-focused solid;
+        }
       }
     }
   }

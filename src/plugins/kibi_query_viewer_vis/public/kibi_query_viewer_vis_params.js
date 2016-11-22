@@ -10,13 +10,6 @@ define(function (require) {
       restrict: 'E',
       template: require('plugins/kibi_query_viewer_vis/kibi_query_viewer_vis_params.html'),
       link: function ($scope) {
-        var updateScope = function () {
-          $scope.jsonError = [];
-          $scope.jsonError.push({
-            message: '',
-            block: ''
-          });
-        };
 
         // Handle label textbox changes
         $scope.labelChanged = function () {
@@ -46,7 +39,12 @@ define(function (require) {
 
         // Handle template textarea changes
         $scope.templateChanged = function () {
+          $scope.jsonError = [];
           $scope.vis.params.queryDefinitions = _.map($scope.vis.params.queryDefinitions, function (option, index) {
+            $scope.jsonError.push({
+              message: '',
+              block: ''
+            });
             if (!option) {
               return option;
             }
@@ -71,9 +69,7 @@ define(function (require) {
           return _.map(myscope.vis.params.queryDefinitions, function (option) {
             return option._templateVarsString + option._label + option.queryId;
           });
-        }, function () {
-          updateScope();
-        }, true);
+        }, function () {}, true);
 
         $scope.editTemplate = function (index) {
           kbnUrl.change('/settings/templates/' + $scope.vis.params.queryDefinitions[index].templateId);

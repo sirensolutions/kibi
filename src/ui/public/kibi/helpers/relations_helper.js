@@ -43,10 +43,12 @@ define(function (require) {
      * @param relation the relation between dashboards
      * @returns true if the relation is ok
      */
-    RelationsHelper.prototype.validateDashboardsRelation = function (relations, relation) {
-      if (relations && relations.relationsIndices) {
+    RelationsHelper.prototype.validateDashboardsRelation = function (relation, relationsToCheck) {
+      relationsToCheck = relationsToCheck || relations;
+
+      if (relationsToCheck && relationsToCheck.relationsIndices) {
         // check if the relation exists and is unique
-        const relationIndices = _.filter(relations.relationsIndices, (relInd) => relInd.id === relation.relation);
+        const relationIndices = _.filter(relationsToCheck.relationsIndices, (relInd) => relInd.id === relation.relation);
         if (relationIndices.length !== 1) {
           return false;
         }
@@ -137,7 +139,7 @@ define(function (require) {
         }, true),
           // check the dashboard relations
         validDashboards: _.reduce(relationsToCheck.relationsDashboards, (acc, rel) => {
-          return acc && this.validateDashboardsRelation(relationsToCheck, rel);
+          return acc && this.validateDashboardsRelation(rel, relationsToCheck);
         }, true)
       };
     };

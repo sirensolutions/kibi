@@ -13,11 +13,23 @@ define(function (require) {
       restrict: 'E',
       replace: true,
       scope: {
+        // pass the data to populate the options with
         delegatedData: '&?',
         // objectType - text - possible values are:
-        // query, dashboard, search, template, datasource, indexPatternType,
-        // field, indexPattern, documentIds, queryVariable,
-        // iconType, labelType, relationsForSequentialJoinButton
+        // - query: returns external query IDs
+        // - dashboard: returns dashboard IDs
+        // - search: returns saved search IDs
+        // - template: returns query template IDs
+        // - datasource: returns datasource IDs
+        // - indexPatternType: returns index pattern Type
+        // - field: returns a list of field names
+        // - indexPattern: returns a list of index pattern IDs
+        // - documentIds: returns a list of document IDs
+        // - queryVariable: returns the projected variables of an external query
+        // - iconType: node icon
+        // - labelType: node label
+        // - relationsForSequentialJoinButton: returns a list of relations for the relational filter visualization
+        // - delegate: use the options from delegatedData
         objectType: '@',
         // Filter function which returns true for items to be removed.
         // There are three arguments:

@@ -15,6 +15,7 @@ describe('toggle filters', function () {
   var globalState;
 
   let toggleRelationalPanelSpy;
+  let isFilterOutdatedStub;
 
   beforeEach(ngMock.module(
     'kibana',
@@ -24,8 +25,10 @@ describe('toggle filters', function () {
       $provide.service('courier', require('fixtures/mock_courier'));
 
       $provide.service('kibiState', function () {
+        isFilterOutdatedStub = sinon.stub();
         toggleRelationalPanelSpy = sinon.spy();
         return new MockState({
+          isFilterOutdated: isFilterOutdatedStub,
           toggleRelationalPanel: toggleRelationalPanelSpy,
           filters: []
         });
@@ -76,6 +79,28 @@ describe('toggle filters', function () {
         queryFilter.toggleFilter(filters[0]);
         expect(appState.filters[0].meta.disabled).to.be(true);
         expect(toggleRelationalPanelSpy.calledWith()).to.be(true);
+      });
+
+      it('should not toggle the filter if it is outdated', function () {
+        const filter = {
+          join_sequence: [],
+          meta: { label: 'join', disabled: true }
+        };
+
+        isFilterOutdatedStub.returns(true);
+        queryFilter.toggleFilter(filter);
+        expect(filter.meta.disabled).to.be(true);
+      });
+
+      it('should toggle the filter if it is not outdated', function () {
+        const filter = {
+          join_sequence: [],
+          meta: { label: 'join', disabled: true, version: 2 }
+        };
+
+        isFilterOutdatedStub.returns(false);
+        queryFilter.toggleFilter(filter);
+        expect(filter.meta.disabled).to.be(false);
       });
     });
 

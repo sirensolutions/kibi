@@ -17,6 +17,9 @@ describe('State Management', function () {
   let timefilter;
   let appState;
   let globalState;
+
+  let disableFiltersIfOutdatedSpy;
+
   const defaultStartTime = '2006-09-01T12:00:00.000Z';
   const defaultEndTime = '2010-09-05T12:00:00.000Z';
 
@@ -73,6 +76,9 @@ describe('State Management', function () {
       $location = _$location_;
       $location.path(currentPath);
       kibiState = _kibiState_;
+
+      disableFiltersIfOutdatedSpy = sinon.spy(kibiState, 'disableFiltersIfOutdated');
+
       config = _config_;
       const defaultTime = {
         mode: 'absolute',
@@ -87,6 +93,37 @@ describe('State Management', function () {
   describe('Kibi State', function () {
 
     require('testUtils/noDigestPromises').activateForSuite();
+
+    describe('handle state with outdated filters', function () {
+      beforeEach(() => init({}));
+
+      it('should disable join_sequence filter if the version is not set', function () {
+        const filters = [
+          {
+            join_sequence: [],
+            meta: {
+              label: 'join1'
+            }
+          }
+        ];
+
+        kibiState.disableFiltersIfOutdated(filters, 'dashboard1');
+        expect(filters[0].meta.disabled).to.be(true);
+      });
+
+      it('should leave the join_sequence filter as is if the version is set', function () {
+        const filter = {
+          join_sequence: [],
+          meta: {
+            label: 'join1',
+            version: 2
+          }
+        };
+
+        kibiState.disableFiltersIfOutdated([ filter ], 'dashboard1');
+        expect(filter.meta.disabled).to.be(undefined);
+      });
+    });
 
     describe('selected entity', function () {
       describe('isEntitySelected', function () {
@@ -1449,6 +1486,7 @@ describe('State Management', function () {
       it('should remove pinned filters', function (done) {
         expect(globalState.filters).to.have.length(1);
         kibiState.resetFiltersQueriesTimes().then(() => {
+          sinon.assert.calledWith(disableFiltersIfOutdatedSpy, sinon.match.array, sinon.match.truthy.and(sinon.match.string));
           expect(globalState.filters).to.have.length(0);
           done();
         }).catch(done);
@@ -1484,6 +1522,7 @@ describe('State Management', function () {
         kibiState._saveTimeForDashboardId('time-testing-2', 'quick', 'now-15m', 'now');
 
         kibiState.resetFiltersQueriesTimes().then(() => {
+          sinon.assert.calledWith(disableFiltersIfOutdatedSpy, sinon.match.array, sinon.match.truthy.and(sinon.match.string));
           expect(kibiState._getDashboardProperty('Articles', kibiState._properties.filters)).to.eql([
             {
               term: {

@@ -199,7 +199,8 @@ define(function (require) {
 
       return {
         meta: {
-          alias: label
+          alias: label,
+          version: 2
         },
         join_sequence: [ relation ]
       };

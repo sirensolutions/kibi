@@ -151,8 +151,11 @@ define(function (require) {
      */
     queryFilter.toggleFilter = function (filter, force) {
       // Toggle the disabled flag
-      var disabled = _.isUndefined(force) ? !filter.meta.disabled : !!force;
-      filter.meta.disabled = disabled;
+      if (!kibiState.isFilterOutdated(filter)) {
+        // kibi: do not allow to disable outdated filter
+        let disabled = _.isUndefined(force) ? !filter.meta.disabled : !!force;
+        filter.meta.disabled = disabled;
+      }
       if (filter.join_set) {
         // kibi: toggle the relational panel when touching the relational filter
         kibiState.toggleRelationalPanel();

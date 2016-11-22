@@ -12,11 +12,41 @@ define(function (require) {
       link: function ($scope) {
         var updateScope = function () {
           $scope.jsonError = [];
+          $scope.jsonError.push({
+            message: '',
+            block: ''
+          });
+        };
+
+        // Handle label textbox changes
+        $scope.labelChanged = function () {
           $scope.vis.params.queryDefinitions = _.map($scope.vis.params.queryDefinitions, function (option, index) {
-            $scope.jsonError.push({
-              message: '',
-              block: ''
-            });
+            if (!option) {
+              return option;
+            }
+            if (!option.templateVars) {
+              option.templateVars = {};
+            }
+            try {
+              if (option._label) {
+                if (option._templateVarsString) {
+                  option.templateVars = JSON.parse(option._templateVarsString);
+                }
+                option.templateVars.label = option._label;
+                option._templateVarsString = JSON.stringify(option.templateVars, null, ' ');
+              } else if (!option.templateVars.label) {
+                option.templateVars.label = '';
+              }
+            } catch (err) {
+              $scope.jsonError[index].message = err.toString();
+            }
+            return option;
+          });
+        };
+
+        // Handle template textarea changes
+        $scope.templateChanged = function () {
+          $scope.vis.params.queryDefinitions = _.map($scope.vis.params.queryDefinitions, function (option, index) {
             if (!option) {
               return option;
             }
@@ -25,16 +55,9 @@ define(function (require) {
             }
             try {
               if (option._templateVarsString) {
-                option.templateVars = JSON.parse(option._templateVarsString);
-              }
-
-              if (option._label) {
-                option.templateVars.label = option._label;
-              } else {
-                delete option.templateVars.label;
-              }
-              if (option.templateVars) {
-                option._templateVarsString = JSON.stringify(option.templateVars, null, ' ');
+                let toJson = JSON.parse(option._templateVarsString);
+                option.templateVars.label = toJson.label;
+                option._label = toJson.label;
               }
             } catch (err) {
               $scope.jsonError[index].message = err.toString();

@@ -43,10 +43,12 @@ define(function (require) {
      * @param relation the relation between dashboards
      * @returns true if the relation is ok
      */
-    RelationsHelper.prototype.validateDashboardsRelation = function (relation) {
-      if (relations && relations.relationsIndices) {
+    RelationsHelper.prototype.validateDashboardsRelation = function (relation, relationsToCheck) {
+      relationsToCheck = relationsToCheck || relations;
+
+      if (relationsToCheck && relationsToCheck.relationsIndices) {
         // check if the relation exists and is unique
-        const relationIndices = _.filter(relations.relationsIndices, (relInd) => relInd.id === relation.relation);
+        const relationIndices = _.filter(relationsToCheck.relationsIndices, (relInd) => relInd.id === relation.relation);
         if (relationIndices.length !== 1) {
           return false;
         }
@@ -119,23 +121,27 @@ define(function (require) {
     /**
      * checkIfRelationsAreValid checks that the relations defined between dashboards and indices are ok
      *
-     * @param resetRelations = false if true this forces the kibi:relations object to be re-read from the config
+     * @param relationsToCheck the indices/dashboards relations to check. If not passed, the relations are taken from the config
      * @returns an object { validIndices, validDashboards } where the fields are boolean
      */
-    RelationsHelper.prototype.checkIfRelationsAreValid = function (resetRelations = false) {
-      if (resetRelations) {
-        relations = config.get('kibi:relations');
-      }
-      if (!relations || !relations.relationsIndices || !relations.relationsDashboards) {
+    RelationsHelper.prototype.checkIfRelationsAreValid = function (relationsToCheck) {
+      relationsToCheck = relationsToCheck || relations;
+
+      if (!relationsToCheck || !relationsToCheck.relationsIndices || !relationsToCheck.relationsDashboards) {
         // not initialized yet
         return { validIndices: true, validDashboards: true };
       }
 
-      // check that the indices relations are defined correctly
-      const validIndices = _.reduce(relations.relationsIndices, (acc, rel) => acc && this.validateIndicesRelation(rel), true);
-      // check the dashboard relations
-      const validDashboards = _.reduce(relations.relationsDashboards, (acc, rel) => acc && this.validateDashboardsRelation(rel), true);
-      return { validIndices, validDashboards };
+      return {
+        // check that the indices relations are defined correctly
+        validIndices: _.reduce(relationsToCheck.relationsIndices, (acc, rel) => {
+          return acc && this.validateIndicesRelation(rel);
+        }, true),
+          // check the dashboard relations
+        validDashboards: _.reduce(relationsToCheck.relationsDashboards, (acc, rel) => {
+          return acc && this.validateDashboardsRelation(rel, relationsToCheck);
+        }, true)
+      };
     };
 
     /**

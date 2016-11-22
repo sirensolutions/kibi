@@ -44,14 +44,7 @@ define(function (require) {
           urlHelper.onDashboardTab() ? $el.show() : $el.hide();
         });
 
-        $scope.relationalFilterVisible = false;
-        var removeInitConfigHandler = $rootScope.$on('init:config', function () {
-          $scope.relationalFilterVisible = config.get('kibi:relationalPanel');
-        });
-
-        var removeRelationalPanelHandler = $rootScope.$on('change:config.kibi:relationalPanel', function () {
-          $scope.relationalFilterVisible = config.get('kibi:relationalPanel');
-        });
+        $scope.relationalFilterVisible = config.get('kibi:relationalPanel');
 
         // =============
         // Tab scrolling
@@ -122,10 +115,8 @@ define(function (require) {
         $scope.$on('$destroy', function () {
           kibiNavBarHelper.destroy();
           removeDashboardGroupChangedHandler();
-          removeInitConfigHandler();
           removeDashboardChangedHandler();
           removeLocationChangeSuccessHandler();
-          removeRelationalPanelHandler();
 
           $scope.tabResizeChecker.off('resize', $scope.onTabContainerResize);
           $scope.tabResizeChecker.destroy();

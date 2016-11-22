@@ -724,44 +724,6 @@ describe('Kibi Directives', function () {
       });
     });
 
-    describe('getJoinRelations', function () {
-
-      beforeEach(function () {
-        init({
-          stubConfig: true
-        });
-      });
-
-      it('should return the list of relations between index patterns', function (done) {
-        var relations = {
-          relationsIndices: [
-            {
-              indices: [
-                {
-                  indexPatternId: 'index-a',
-                  path: 'path-a'
-                },
-                {
-                  indexPatternId: 'index-b',
-                  path: 'path-b'
-                }
-              ],
-              label: 'mylabel',
-              id: 'myid'
-            }
-          ]
-        };
-
-        config.set('kibi:relations', relations);
-        stSelectHelper.getJoinRelations().then(function (relations) {
-          expect(relations).to.have.length(1);
-          expect(relations[0].label).to.be('mylabel');
-          expect(relations[0].value).to.be('myid');
-          done();
-        }).catch(done);
-      });
-    });
-
     describe('GetIconType', function () {
       it('should return available icon types', function (done) {
         stSelectHelper.getIconType().then(function (types) {

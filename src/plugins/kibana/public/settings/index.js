@@ -56,6 +56,16 @@ uiModules
       $scope.sections.forEach(function (section) {
         section.class = (section === $scope.section) ? 'active' : void 0;
       });
+
+      // kibi: allow to disable the save button if the object is invalid
+      $scope.isObjectValid = true;
+      $scope.$watch(function (scope) {
+        return scope.section.isObjectValid && scope.section.isObjectValid();
+      }, function (isObjectValid) {
+        if (isObjectValid !== undefined) {
+          $scope.isObjectValid = isObjectValid;
+        }
+      });
     }
   };
 });

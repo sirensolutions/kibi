@@ -40,7 +40,15 @@ define(function (require) {
     };
 
     AbstractReq.prototype.getFetchParams = function () {
-      return this.source._flatten();
+      // kibi: add a getSource function to every request
+      const theSource = this.source;
+      return this.source._flatten().then(function (o) {
+        o.getSource = function () {
+          return theSource;
+        };
+        return o;
+      });
+      // kibi: end
     };
 
     AbstractReq.prototype.transformResponse = function (resp) {

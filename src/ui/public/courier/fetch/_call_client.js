@@ -82,6 +82,20 @@ define(function (require) {
         });
       })
       .then(function (reqsFetchParams) {
+        // kibi: call to requestAdapter function of the related visualization
+        reqsFetchParams.forEach(function (req) {
+          if (req.getSource) {
+            let source = req.getSource();
+            if (source && source.vis && source.vis.requestAdapter) {
+              let result = source.vis.requestAdapter(req);
+              if (result) {
+                req = result;
+              }
+            }
+          }
+        });
+        // kibi: end
+
         return strategy.reqsFetchParamsToBody(reqsFetchParams);
       })
       .then(function (body) {

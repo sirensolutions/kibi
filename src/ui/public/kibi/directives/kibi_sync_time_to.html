@@ -13,11 +13,6 @@
     <tr>
       <td>
         <label><input type="checkbox"  ng-model="allSelected" ng-click="selectAll()"/> Select all</label>
-        <button
-          type="submit"
-          ng-if="mode == 'quick'"
-          class="btn btn-primary"
-          ng-click="syncTimeTo()">Apply</button>
         <!-- NOTE: do not remove kbn-timepicker-go class as it is used in tests -->
         <button
           type="submit"

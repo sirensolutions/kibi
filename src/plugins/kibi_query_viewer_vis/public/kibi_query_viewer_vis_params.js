@@ -60,12 +60,12 @@ define(function (require) {
           });
         };
 
-        $scope.$watch(function (myscope) {
+        $scope.$watch('vis.params.queryDefinitions', function () {
           // only triggers when the queryId, template vars or the _label change
-          return _.map(myscope.vis.params.queryDefinitions, function (option) {
+          return _.map($scope.vis.params.queryDefinitions, function (option) {
             return option._templateVarsString + option._label + option.queryId;
           });
-        }, function () {}, true);
+        });
 
         $scope.editTemplate = function (index) {
           kbnUrl.change('/settings/templates/' + $scope.vis.params.queryDefinitions[index].templateId);

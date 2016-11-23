@@ -20,19 +20,15 @@ define(function (require) {
             if (!option.templateVars) {
               option.templateVars = {};
             }
-            try {
-              if (option._label) {
-                if (option._templateVarsString) {
-                  option.templateVars = JSON.parse(option._templateVarsString);
-                }
-                option.templateVars.label = option._label;
-                option._templateVarsString = JSON.stringify(option.templateVars, null, ' ');
-              } else if (!option.templateVars.label) {
-                option.templateVars.label = '';
+            if (option._label) {
+              if (option._templateVarsString) {
+                option.templateVars = JSON.parse(option._templateVarsString);
               }
-            } catch (err) {
-              $scope.jsonError[index].message = err.toString();
+              option.templateVars.label = option._label;
+            } else if (!option.templateVars.label || !option._label) {
+              option.templateVars.label = '';
             }
+            option._templateVarsString = JSON.stringify(option.templateVars, null, ' ');
             return option;
           });
         };

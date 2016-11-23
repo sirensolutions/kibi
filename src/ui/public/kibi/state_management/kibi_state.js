@@ -5,6 +5,7 @@ define(function (require) {
   const uniqFilters = require('ui/filter_bar/lib/uniqFilters');
   const toJson = require('ui/utils/aggressive_parse').toJson;
   const angular = require('angular');
+  const chrome = require('ui/chrome');
 
   require('ui/routes')
   .addSetupWork(function (kibiState) {
@@ -61,6 +62,45 @@ define(function (require) {
         }).catch(notify.error);
       });
     }
+
+    /**
+     * isFilterOutdated returns true if the given filter uses an outdated API
+     */
+    KibiState.prototype.isFilterOutdated = function (filter) {
+      return filter && filter.join_sequence && !filter.meta.version;
+    };
+
+    /**
+     * disableFiltersIfOutdated disables filters which rely on outdated API and warns the user about it.
+     *
+     * @param filters a list of filters
+     * @param dashboardId the dashboard ID on which the filters are
+     */
+    KibiState.prototype.disableFiltersIfOutdated = function (filters, dashboardId) {
+      const appState = getAppState();
+
+      if (!dashboardId) {
+        throw new Error('disableFiltersIfOutdated called without a dashboardId');
+      }
+      _.each(filters, filter => {
+        if (this.isFilterOutdated(filter)) {
+          let message;
+
+          if (dashboardId === this._getCurrentDashboardId() && appState && !_.findWhere(appState.filters, filter)) {
+            // the filter is not in the appState, the KibiState is then dirty
+            message = `The Kibi state contains filters that rely on outdated API. Please clean it, either by going to ${chrome.getAppUrl()},
+              or by switching to another dashboard.`;
+          } else {
+            message = `The join filter "${filter.meta.alias}" on dashboard with ID="${dashboardId}" is invalid ` +
+              'because it relies on outdated API. Please remove it.';
+          }
+          message += ` If the filter keeps on coming back, then it may be saved with the dashboard with ID="${dashboardId}"`;
+          notify.warning(message);
+
+          filter.meta.disabled = true;
+        }
+      });
+    };
 
     // if the url param is missing, write it back
     KibiState.prototype._persistAcrossApps = true;
@@ -233,6 +273,7 @@ define(function (require) {
             const filters = _.reject(meta.filter, (filter) => filter.query && filter.query.query_string && !filter.meta);
             const query = _.find(meta.filter, (filter) => filter.query && filter.query.query_string && !filter.meta);
 
+            this.disableFiltersIfOutdated(filters, dashboard.id);
             // reset appstate
             if (appState && dashboard.id === appState.id) {
               let queryChanged = false;
@@ -748,16 +789,23 @@ define(function (require) {
     KibiState.prototype._readFromURL = function () {
       const stash = KibiState.Super.prototype._readFromURL.call(this);
 
-      // check the enabled relations
-      if (stash && stash[this._properties.enabled_relations] && stash[this._properties.enabled_relations].length) {
-        const enableRelations = stash[this._properties.enabled_relations];
-        for (let i = enableRelations.length - 1; i >= 0; i--) {
-          if (!relationsHelper.validateDashboardsRelation(enableRelations[i])) {
-            const [ deleted ] = enableRelations.splice(i, 1);
-            const msg = `Removed relation between dashboards ${deleted.dashboards[0]} and ${deleted.dashboards[1]} because it was invalid`;
-            notify.warning(msg);
+      if (stash) {
+        // check the enabled relations
+        if (stash[this._properties.enabled_relations] && stash[this._properties.enabled_relations].length) {
+          const enableRelations = stash[this._properties.enabled_relations];
+          for (let i = enableRelations.length - 1; i >= 0; i--) {
+            if (!relationsHelper.validateDashboardsRelation(enableRelations[i])) {
+              const [ deleted ] = enableRelations.splice(i, 1);
+              notify.warning(
+                `Removed relation between dashboards ${deleted.dashboards[0]} and ${deleted.dashboards[1]} because it was invalid`
+              );
+            }
           }
         }
+        // check the join_sequence
+        _.each(stash[this._properties.dashboards], (meta, dashboardId) => {
+          this.disableFiltersIfOutdated(meta[this._properties.filters], dashboardId);
+        });
       }
       return stash;
     };

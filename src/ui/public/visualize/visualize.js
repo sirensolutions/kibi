@@ -153,6 +153,12 @@ define(function (require) {
 
           if (oldVis) $scope.renderbot = null;
           if (vis) $scope.renderbot = vis.type.createRenderbot(vis, $visEl, $scope.uiState, $scope.multiSearchData);
+
+          // kibi: associate the vis with the searchSource
+          if ($scope.searchSource) {
+            $scope.searchSource.vis = $scope.vis;
+          }
+          // kibi: end
         }));
 
         $scope.$watchCollection('vis.params', prereq(function () {

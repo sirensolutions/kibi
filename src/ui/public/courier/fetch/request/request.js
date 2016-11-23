@@ -41,7 +41,7 @@ define(function (require) {
 
     AbstractReq.prototype.getFetchParams = function () {
       // kibi: add a getSource function to every request
-      var theSource = this.source;
+      const theSource = this.source;
       return this.source._flatten().then(function (o) {
         o.getSource = function () {
           return theSource;

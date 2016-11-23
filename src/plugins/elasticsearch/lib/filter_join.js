@@ -233,7 +233,7 @@ export default function (server) {
     }
     if (sequence[0].group) {
       _.each(sequence[0].group, function (seq) {
-        _sequenceJoins(curQuery.filter.bool.must, seq);
+        _sequenceJoins(curQuery, seq);
       });
     } else {
       const lastJoin = sequence[0].relation;

@@ -226,7 +226,6 @@ describe('Kibi Components', function () {
     };
 
     _.each([
-      'quick',
       'relative',
       'absolute'
     ], mode => {

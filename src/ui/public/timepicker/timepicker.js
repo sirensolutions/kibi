@@ -15,6 +15,7 @@ define(function (require) {
 
   // kibi: added to allow syncing time to other dashboards
   require('ui/kibi/directives/kibi_sync_time_to');
+  // kibi: end
 
   module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshIntervals) {
     return {
@@ -123,6 +124,11 @@ define(function (require) {
         $scope.setQuick = function (from, to, description) {
           $scope.from = from;
           $scope.to = to;
+          // kibi: sync time to other dashboards
+          if ($scope.syncTimeTo) {
+            $scope.syncTimeTo();
+          }
+          // kibi: end
         };
 
         $scope.setToNow = function () {

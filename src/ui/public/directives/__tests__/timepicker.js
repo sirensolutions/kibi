@@ -203,9 +203,11 @@ describe('timepicker directive', function () {
     });
 
     it('should have a $scope.setQuick() that sets the to and from variables to strings', function (done) {
+      $scope.syncTimeTo = sinon.spy(); // kibi: added to test if syncTimeTo is called
       $scope.setQuick('now', 'now');
       expect($scope.from).to.be('now');
       expect($scope.to).to.be('now');
+      expect($scope.syncTimeTo.callCount).to.equal(1); // kibi: added to test if syncTimeTo is called
       done();
     });
   });

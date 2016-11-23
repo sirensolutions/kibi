@@ -19,6 +19,7 @@ let $scope;
 let $elem;
 let anchor = '2014-01-01T06:06:06.666Z';
 let clock;
+let syncTimeTo;
 
 let init = function () {
   // Load the application
@@ -70,6 +71,7 @@ let init = function () {
 
     // Grab the isolate scope so we can test it
     $scope = $elem.isolateScope();
+    syncTimeTo = $scope.syncTimeTo = sinon.spy(); // kibi: added to test if syncTimeTo is called
   });
 };
 
@@ -203,11 +205,10 @@ describe('timepicker directive', function () {
     });
 
     it('should have a $scope.setQuick() that sets the to and from variables to strings', function (done) {
-      let spy = $scope.syncTimeTo = sinon.spy(); // kibi: added to test if syncTimeTo is called
       $scope.setQuick('now', 'now');
+      sinon.assert.calledOnce(syncTimeTo); // kibi: added to test if syncTimeTo is called
       expect($scope.from).to.be('now');
       expect($scope.to).to.be('now');
-      sinon.assert.calledOnce(spy); // kibi: added to test if syncTimeTo is called
       done();
     });
   });
@@ -407,6 +408,7 @@ describe('timepicker directive', function () {
 
     it('should parse the time of scope.from and scope.to to set its own variables', function (done) {
       $scope.setQuick('now-30m', 'now');
+      sinon.assert.calledOnce(syncTimeTo); // kibi: added to test if syncTimeTo is called
       $scope.setMode('absolute');
       $scope.$digest();
 
@@ -430,6 +432,7 @@ describe('timepicker directive', function () {
 
     it('should only copy its input to scope.from and scope.to when scope.applyAbsolute() is called', function (done) {
       $scope.setQuick('now-30m', 'now');
+      sinon.assert.calledOnce(syncTimeTo); // kibi: added to test if syncTimeTo is called
       expect($scope.from).to.be('now-30m');
       expect($scope.to).to.be('now');
 

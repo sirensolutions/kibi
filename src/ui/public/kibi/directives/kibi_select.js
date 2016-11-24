@@ -14,9 +14,21 @@ define(function (require) {
       replace: true,
       scope: {
         // objectType - text - possible values are:
-        // query, dashboard, search, template, datasource, indexPatternType,
-        // field, indexPattern, documentIds, joinRelations, queryVariable,
-        // iconType, labelType, relationsForSequentialJoinButton
+        // - query: returns external query IDs
+        // - dashboard: returns dashboard IDs
+        // - search: returns saved search IDs
+        // - template: returns query template IDs
+        // - datasource: returns datasource IDs
+        // - indexPatternType: returns index pattern Type
+        // - field: returns a list of field names
+        // - indexPattern: returns a list of index pattern IDs
+        // - documentIds: returns a list of document IDs
+        // - queryVariable: returns the projected variables of an external query
+        // - iconType: node icon
+        // - labelType: node label
+        // - relationsForSequentialJoinButton: returns a list of relations for the relational filter visualization
+        // - dashboardsForSequentialJoinButton: returns filtered dashboards based on otherDashboardId and/or indexRelationId passed via options
+        // - delegate: use the options from delegatedData
         objectType: '@',
         // Filter function which returns true for items to be removed.
         // There are three arguments:
@@ -287,6 +299,9 @@ define(function (require) {
                 break;
               case 'relationsForSequentialJoinButton':
                 promise = selectHelper.getRelationsForButton(scope.options);
+                break;
+              case 'dashboardsForSequentialJoinButton':
+                promise = selectHelper.getDashboardsForButton(scope.options);
                 break;
             }
           }

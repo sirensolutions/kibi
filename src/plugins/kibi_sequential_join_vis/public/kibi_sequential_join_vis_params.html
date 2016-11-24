@@ -22,9 +22,8 @@
           <label>Source dashboard</label></br/>
           <span>The button will appear on this dashboard</span></br>
           <kibi-select
-            object-type="dashboard"
-            filter="filterSourceDashboards"
-            options="{hasSavedSearch: true, targetDashboardId: button.targetDashboardId}"
+            object-type="dashboardsForSequentialJoinButton"
+            options="{otherDashboardId: button.targetDashboardId, indexRelationId: button.indexRelationId}"
             ng-model="button.sourceDashboardId">
           </kibi-select>
         </div>
@@ -33,9 +32,8 @@
           <label>Target dashboard</label></br/>
           <span>On click it will redirect to this dashboard</span></br>
           <kibi-select required
-            object-type="dashboard"
-            filter="filterTargetDashboards"
-            options="{hasSavedSearch: true, sourceDashboardId: button.sourceDashboardId}"
+            object-type="dashboardsForSequentialJoinButton"
+            options="{otherDashboardId: button.sourceDashboardId, indexRelationId: button.indexRelationId}"
             ng-model="button.targetDashboardId">
           </kibi-select>
         </div>

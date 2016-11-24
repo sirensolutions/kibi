@@ -35,7 +35,7 @@ define(function (require) {
   ]);
 
   require('ui/routes')
-  .when('/dashboard', {
+  .when('/dashboard/?_g', {
     template: require('plugins/kibana/dashboard/index.html'),
     resolve: {
       dash: function (timefilter, savedDashboards, kibiDefaultDashboardTitle) {

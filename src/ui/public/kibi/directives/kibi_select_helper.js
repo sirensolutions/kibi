@@ -73,16 +73,8 @@ define(function (require) {
 
     KibiSelectHelper.prototype.getDashboards = function (dashboardOptions) {
       return savedDashboards.find().then(function (data) {
-        var hits;
-        if (dashboardOptions && dashboardOptions.hasSavedSearch) {
-          hits = _.filter(data.hits, (d) => {
-            return d.savedSearchId;
-          });
-        } else {
-          hits = data.hits;
-        }
-        if (hits) {
-          return _.map(hits, function (hit) {
+        if (data.hits) {
+          return _.map(data.hits, function (hit) {
             return {
               label: hit.title,
               value: hit.id
@@ -294,6 +286,54 @@ define(function (require) {
       return Promise.resolve(types);
     };
 
+    KibiSelectHelper.prototype.getDashboardsForButton = function (dashboardOptions) {
+      const otherDashboardId = dashboardOptions.otherDashboardId;
+      const indexRelationId = dashboardOptions.indexRelationId;
+      return kibiState._getDashboardAndSavedSearchMetas(null, true).then((metas) => {
+
+        const filteredMetas = _.filter(metas, (meta) => {
+          return meta.savedDash.savedSearchId;
+        });
+
+        if (!otherDashboardId) {
+          // just return all dashboards which have savedsearchId
+          return _.map(filteredMetas, function (hit) {
+            return {
+              label: hit.savedDash.title,
+              value: hit.savedDash.id
+            };
+          });
+        }
+        // find the meta of the otherDashboardId
+        const otherDashboardMeta = _.find(filteredMetas, (meta) => {
+          return meta.savedDash.id === otherDashboardId;
+        });
+        const otherIndexPattern = otherDashboardMeta.savedSearchMeta.index;
+
+        const indexRelations = config.get('kibi:relations').relationsIndices;
+        if (indexRelationId) {
+          _.remove(indexRelations, (rel) => {
+            return rel.id !== indexRelationId;
+          });
+        }
+
+        let dashboardsToReturn = [];
+        _.each(filteredMetas, (meta) => {
+          let indexPattern = meta.savedSearchMeta.index;
+          let dashboardId = meta.savedDash.id;
+          // here check if there is an indexRelation between otherIndexPattern and indexPattern
+          if (relationsHelper.indexRelationExists(indexRelations, indexPattern, otherIndexPattern) &&
+              !_.find(dashboardsToReturn, 'id', dashboardId)
+          ) {
+            dashboardsToReturn.push({
+              label: dashboardId,
+              value: dashboardId
+            });
+          }
+        });
+        return dashboardsToReturn;
+      });
+    };
 
     KibiSelectHelper.prototype.getRelationsForButton = function (options = {}) {
       // expect sourceDashboardId and/or targetDashboardId in options

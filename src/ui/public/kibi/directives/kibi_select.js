@@ -29,6 +29,7 @@ define(function (require) {
         // - iconType: node icon
         // - labelType: node label
         // - relationsForSequentialJoinButton: returns a list of relations for the relational filter visualization
+        // - dashboardsForSequentialJoinButton: returns filtered dashboards based on otherDashboardId and/or indexRelationId passed via options
         // - delegate: use the options from delegatedData
         objectType: '@',
         // Filter function which returns true for items to be removed.
@@ -300,6 +301,9 @@ define(function (require) {
                 break;
               case 'relationsForSequentialJoinButton':
                 promise = selectHelper.getRelationsForButton(scope.options);
+                break;
+              case 'dashboardsForSequentialJoinButton':
+                promise = selectHelper.getDashboardsForButton(scope.options);
                 break;
             }
           }

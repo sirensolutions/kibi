@@ -296,6 +296,22 @@ define(function (require) {
       }
     };
 
+    RelationsHelper.prototype.indexRelationExists = function (indexRelations, indexPatternId1, indexPatternId2) {
+      if (!indexRelations) {
+        return false;
+      }
+      for (let i = 0; i < indexRelations.length; i++) {
+        let rel = indexRelations[i];
+        if (
+          (rel.indices[0].indexPatternId === indexPatternId1 && rel.indices[1].indexPatternId === indexPatternId2) ||
+          (rel.indices[0].indexPatternId === indexPatternId2 && rel.indices[1].indexPatternId === indexPatternId1)
+        ) {
+          return true;
+        }
+      }
+      return false;
+    };
+
     return new RelationsHelper();
   };
 

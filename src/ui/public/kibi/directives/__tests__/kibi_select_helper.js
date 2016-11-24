@@ -750,6 +750,168 @@ describe('Kibi Directives', function () {
       });
     });
 
+    describe('getDashboardsForButton', function () {
+      var fakeSavedDashboards = [
+        {
+          id: 'Articles',
+          title: 'Articles',
+          savedSearchId: 'savedArticles'
+        },
+        {
+          id: 'Companies',
+          title: 'Companies',
+          savedSearchId: 'savedCompanies'
+        },
+        {
+          id: 'Investments',
+          title: 'Investments',
+          savedSearchId: 'savedInvestments'
+        },
+        {
+          id: 'NoSavedSearch',
+          title: 'NoSavedSearch'
+        }
+      ];
+      var fakeSavedSearches = [
+        {
+          id: 'savedArticles',
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: JSON.stringify(
+              {
+                index: 'art*',
+                filter: [],
+                query: {}
+              }
+            )
+          }
+        },
+        {
+          id: 'savedCompanies',
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: JSON.stringify(
+              {
+                index: 'comp*',
+                filter: [],
+                query: {}
+              }
+            )
+          }
+        },
+        {
+          id: 'savedInvestments',
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: JSON.stringify(
+              {
+                index: 'invest*',
+                filter: [],
+                query: {}
+              }
+            )
+          }
+        }
+      ];
+      let relations = {
+        relationsIndices: [
+          {
+            indices: [
+              {
+                indexPatternId: 'art*',
+                path: 'path-a'
+              },
+              {
+                indexPatternId: 'comp*',
+                path: 'path-c'
+              }
+            ],
+            label: 'label-a-c',
+            id: 'art*//path-a/comp*//path-c'
+          },
+          {
+            indices: [
+              {
+                indexPatternId: 'comp*',
+                path: 'path-c'
+              },
+              {
+                indexPatternId: 'invest*',
+                path: 'path-i'
+              }
+            ],
+            label: 'label-c-i',
+            id: 'comp*//path-c/invest*//path-i'
+          }
+        ]
+      };
+
+      beforeEach(function () {
+        init({
+          savedDashboards: fakeSavedDashboards,
+          savedSearches: fakeSavedSearches,
+          stubConfig: true
+        });
+        config.set('kibi:relations', relations);
+      });
+
+      it('no options should return all dashboards with savedSearchId set', function (done) {
+        let expectedDashboards = [
+          {
+            label: 'Articles',
+            value: 'Articles'
+          },
+          {
+            label: 'Companies',
+            value: 'Companies'
+          },
+          {
+            label: 'Investments',
+            value: 'Investments'
+          }
+        ];
+        let options = {};
+        stSelectHelper.getDashboardsForButton(options).then(function (dashboards) {
+          expect(dashboards).to.be.eql(expectedDashboards);
+          done();
+        });
+      });
+
+      it('pass the otherDashboardId in the option', function (done) {
+        let expectedDashboards = [
+          {
+            label: 'Articles',
+            value: 'Articles'
+          },
+          {
+            label: 'Investments',
+            value: 'Investments'
+          }
+        ];
+        let options = {
+          otherDashboardId: 'Companies'
+        };
+        stSelectHelper.getDashboardsForButton(options).then(function (dashboards) {
+          expect(dashboards).to.be.eql(expectedDashboards);
+          done();
+        });
+      });
+
+      it('pass the otherDashboardId and indexRelationId in the option', function (done) {
+        let expectedDashboards = [
+          {
+            label: 'Articles',
+            value: 'Articles'
+          }
+        ];
+        let options = {
+          otherDashboardId: 'Companies',
+          indexRelationId: 'art*//path-a/comp*//path-c'
+        };
+        stSelectHelper.getDashboardsForButton(options).then(function (dashboards) {
+          expect(dashboards).to.be.eql(expectedDashboards);
+          done();
+        });
+      });
+    });
+
     describe('getRelationsForButton', function () {
 
       beforeEach(function () {

@@ -35,10 +35,10 @@ define(function (require) {
   ]);
 
   require('ui/routes')
-  .when('/dashboard/?_g', {
+  .when('/dashboard', {
     template: require('plugins/kibana/dashboard/index.html'),
     resolve: {
-      dash: function (timefilter, savedDashboards, kibiDefaultDashboardTitle) {
+      dash: function (timefilter, savedDashboards, kibiDefaultDashboardTitle, courier) {
         return savedDashboards.find().then(function (resp) {
           if (resp.hits.length > 0) {
             timefilter.enabled = true;
@@ -48,7 +48,10 @@ define(function (require) {
           } else {
             return savedDashboards.get();
           }
-        });
+        })
+        .catch(courier.redirectWhenMissing({
+          dashboard : '/'
+        }));
       }
     }
   })
@@ -60,7 +63,7 @@ define(function (require) {
         timefilter.enabled = true;
         return savedDashboards.get($route.current.params.id)
         .catch(courier.redirectWhenMissing({
-          dashboard : '/dashboard/?_g'
+          dashboard : '/dashboard'
         }));
       }
     }

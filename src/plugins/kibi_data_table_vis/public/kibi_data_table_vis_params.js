@@ -15,17 +15,6 @@ define(function (require) {
       restrict: 'E',
       template: require('plugins/kibi_data_table_vis/kibi_data_table_vis_params.html'),
       link: function ($scope) {
-        // Initialize columns
-        $scope.savedVis = $route.current.locals.savedVis;
-
-        if (typeof $scope.vis.params.columns === 'undefined') {
-          if ($scope.savedVis.savedSearch) {
-            $scope.vis.params.columns = _.clone($scope.savedVis.savedSearch.columns);
-          } else {
-            $scope.vis.params.columns = ['_source'];
-          }
-        }
-
         // ======
         // Events
         // ======
@@ -93,8 +82,7 @@ define(function (require) {
           removeSavedObjectColumnsChangedHandler();
         });
 
-        // Need to emit an event to update table columns while visualization
-        // is dirty
+        // Need to emit an event to update table columns while visualization is dirty
         $scope.$watch('vis.params.columns', function () {
           $rootScope.$emit('kibi:vis:columns-changed', $scope.vis.params.columns);
         }, true);

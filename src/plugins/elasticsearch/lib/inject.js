@@ -122,12 +122,12 @@ exports._runInject = function (query, queryEngine) {
           value: []
         };
 
+        const ids = kibiUtils.getValuesAtPath(hit._source, sourcePath);
         // for each result set of a query
         for (let i = 0; i < setOfIds.length; i++) {
           // for each result in the set for that query
           for (let j = 0; j < setOfIds[i].ids.length; j++) {
             const id = setOfIds[i].ids[j];
-            const ids = kibiUtils.getValuesAtPath(hit._source, sourcePath);
             if (_.contains(ids, id)) {
               res.value.push(queryDefs[i].queryId);
               break;

@@ -21,7 +21,6 @@ const queryEngine = {
   getIdsFromQueries: function (queryDefs, options) {
     const results = [];
     _.each(queryDefs, function (queryDef) {
-
       switch (queryDef.queryId) {
         case 'SteQuery':
           results.push({ ids: [ 'aaa', 'bbb', 'ccc' ], queryActivated: true });
@@ -105,10 +104,10 @@ describe('Kibi - Inject', function () {
       const savedQueries = inject.save(query);
       inject.runSavedQueries(response, queryEngine, savedQueries)
       .then(function (queries) {
-        expect(queries.responses[0].hits.hits[0].fields.bah.length).to.be(0);
-        expect(queries.responses[0].hits.hits[1].fields.bah.length).to.be(0);
-        expect(queries.responses[1].hits.hits[0].fields.bah.length).to.be(0);
-        expect(queries.responses[1].hits.hits[1].fields.bah.length).to.be(0);
+        expect(queries.responses[0].hits.hits[0].fields.bah).to.have.length(0);
+        expect(queries.responses[0].hits.hits[1].fields.bah).to.have.length(0);
+        expect(queries.responses[1].hits.hits[0].fields.bah).to.have.length(0);
+        expect(queries.responses[1].hits.hits[1].fields.bah).to.have.length(0);
         done();
       })
       .catch(done);
@@ -222,6 +221,30 @@ describe('Kibi - Inject', function () {
     });
 
     describe('runInject method', function () {
+      it('match in array', function (done) {
+        const query = {
+          queryDefs: [ {queryId: 'ste', queryVariableName: 'variable1'} ],
+          sourcePath: [ 'aaa' ],
+          fieldName: 'bah'
+        };
+        const hit = {
+          _source: {
+            aaa: [ 'booba', 'aaa' ]
+          }
+        };
+        const expected = {
+          key: 'bah',
+          value: [ 'ste' ]
+        };
+
+        inject._runInject(query, queryEngine)
+        .then(function (run) {
+          expect(run(hit)).to.eql(expected);
+          done();
+        })
+        .catch(done);
+      });
+
       it('dotted field name', function (done) {
         const query = {
           queryDefs: [ {queryId: 'ste', queryVariableName: 'variable1'} ],
@@ -608,7 +631,10 @@ describe('Kibi - Inject', function () {
           foo: 'bar',
           inject: [
             {
-              queryDefs: [ {queryId: 'ste', queryVariableName: 'variable1'}, {queryId: 'ets', queryVariableName: 'variable1'}  ],
+              queryDefs: [
+                { queryId: 'ste', queryVariableName: 'variable1' },
+                { queryId: 'ets', queryVariableName: 'variable1' }
+              ],
               sourcePath: [ 'po' ],
               fieldName: 'bah'
             }

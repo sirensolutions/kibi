@@ -41,6 +41,7 @@ define(function (require) {
         filter: '=',
         indexPattern: '=',
         row: '=kibiTableRow',
+        // kibi: associate an action when clicking on a cell
         cellClickHandlers: '='
       },
       link: function ($scope, $el, attrs) {
@@ -86,10 +87,7 @@ define(function (require) {
           $compile($detailsTr)($detailsScope);
         };
 
-        $scope.$watchCollection('columns', function () {
-          createSummaryRow($scope.row, $scope.row._id);
-        });
-
+        // kibi: cell actions
         $scope.$watch('cellClickHandlers', function () {
           createSummaryRow($scope.row);
         }, true);
@@ -100,6 +98,11 @@ define(function (require) {
               diff.indexOf(kibiState._properties.test_selected_entity) !== -1) {
             createSummaryRow($scope.row);
           }
+        });
+        // kibi: end of cell actions
+
+        $scope.$watchCollection('columns', function () {
+          createSummaryRow($scope.row, $scope.row._id);
         });
 
         $scope.$watch('row', function () {
@@ -132,12 +135,14 @@ define(function (require) {
               timefield: false,
               sourcefield: (column === '_source'),
               formatted: _displayField(row, column, true),
+              // kibi: this is to retrieve the correct cell when applying click actions
               column: column
             }));
           });
 
           var $cells = $el.children();
 
+          // kibi: entity selection
           $el.children('[data-column]')
             .removeClass('selectedEntityCell disabled')
             .css('cursor', 'auto')
@@ -145,6 +150,7 @@ define(function (require) {
 
           newHtmls.forEach(function (html, i) {
             var $cell = $cells.eq(i);
+            // kibi: cell actions
             var column = $cell.data('column');
 
             // Remove click CSS style for every cell

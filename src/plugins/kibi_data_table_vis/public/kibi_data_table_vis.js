@@ -12,7 +12,8 @@ define(function (require) {
   require('ui/registry/vis_types').register(KibiDataTableVisTypeProvider);
 
   function KibiDataTableVisTypeProvider(Private) {
-    var TemplateVisType = Private(require('ui/template_vis_type/TemplateVisType'));
+    const TemplateVisType = Private(require('ui/template_vis_type/TemplateVisType'));
+    const _ = require('lodash');
 
     // return the visType object, which kibana will use to display and configure new
     // Vis object of this type.
@@ -29,6 +30,17 @@ define(function (require) {
           queryDefinitions: []
         },
         editor: '<kibi-data-table-vis-params></kibi-data-table-vis-params>'
+      },
+      delegateSearch: true,
+      init: function (vis, savedSearch) {
+        if (savedSearch) {
+          if (!vis.params.columns) {
+            vis.params.columns = _.clone(savedSearch.columns);
+          }
+          vis.params.sort = _.clone(savedSearch.sort);
+        } else {
+          vis.params.columns = ['_source'];
+        }
       },
       version: 2
     });

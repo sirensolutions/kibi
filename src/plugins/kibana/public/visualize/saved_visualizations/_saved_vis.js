@@ -63,6 +63,12 @@ define(function (require) {
         return self.vis ? self._updateVis() : self._createVis();
       })
       .then(function (vis) {
+
+        // kibi: allow the plugin to initialize some parameters based on the linked savedSearch
+        if (vis.type.init) {
+          vis.type.init(vis, self.savedSearch);
+        }
+
         self.searchSource.aggs(function () {
           self.vis.requesting();
           return self.vis.aggs.toDsl();

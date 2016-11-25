@@ -18,7 +18,12 @@ define(function (require) {
       }
       this.requiresSearch = opts.requiresSearch == null ? true : opts.requiresSearch; // Default to true unless otherwise specified
       // kibi: Default to false unless otherwise specified
+      // this is used for the spy panel of visualizations that query more than one index
       this.requiresMultiSearch = opts.requiresMultiSearch == null ? false : opts.requiresMultiSearch;
+      // kibi: allow a visualization to retrieve results by itself
+      this.delegateSearch = opts.delegateSearch == null ? false : opts.delegateSearch;
+      // kibi: initialize a visualization based on the linked saved search
+      this.init = opts.init;
     }
 
     return VisType;

@@ -167,23 +167,25 @@ define(function (require) {
           if ($scope.renderbot) $scope.renderbot.updateParams();
         }));
 
-        $scope.$watch('searchSource', prereq(function (searchSource) {
-          // kibi: if delegateSearch is true, the visualization takes care of retrieving the results.
-          if ($scope.vis.type.delegateSearch || !searchSource || attr.esResp) {
-            return;
-          }
+        // kibi: if delegateSearch is true, the visualization takes care of retrieving the results.
+        if (!$scope.vis.type.delegateSearch) {
+          $scope.$watch('searchSource', prereq(function (searchSource) {
+            if (!searchSource || attr.esResp) {
+              return;
+            }
 
-          // TODO: we need to have some way to clean up result requests
-          searchSource.onResults().then(function onResults(resp) {
-            if ($scope.searchSource !== searchSource) return;
+            // TODO: we need to have some way to clean up result requests
+            searchSource.onResults().then(function onResults(resp) {
+              if ($scope.searchSource !== searchSource) return;
 
-            $scope.esResp = resp;
+              $scope.esResp = resp;
 
-            return searchSource.onResults().then(onResults);
-          }).catch(notify.fatal);
+              return searchSource.onResults().then(onResults);
+            }).catch(notify.fatal);
 
-          searchSource.onError(notify.error).catch(notify.fatal);
-        }));
+            searchSource.onError(notify.error).catch(notify.fatal);
+          }));
+        }
 
         $scope.$watch('esResp', prereq(function (resp, prevResp) {
           if (!resp) return;

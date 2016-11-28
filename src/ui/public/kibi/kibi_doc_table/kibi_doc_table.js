@@ -144,20 +144,7 @@ define(function (require) {
         };
         // kibi: end
 
-        $scope.$watch('searchSource', prereq(function (searchSource) {
-          if (!$scope.searchSource) return;
-
-          $scope.indexPattern = $scope.searchSource.get('index');
-
-          $scope.searchSource.size($scope.size);
-          $scope.searchSource.sort(getSort($scope.sorting, $scope.indexPattern));
-
-          // kibi: source filtering
-          const sourceFiltering = $scope.indexPattern.getSourceFiltering();
-          if (sourceFiltering && sourceFiltering.all) {
-            $scope.searchSource.source(sourceFiltering.all);
-          }
-
+        function addRelationalColumn() {
           // validate here and do not inject if all require values are not set
           if ($scope.queryColumn && $scope.queryColumn.queryDefinitions && $scope.queryColumn.queryDefinitions.length &&
               $scope.queryColumn.joinElasticsearchField && $scope.queryColumn.name) {
@@ -187,6 +174,31 @@ define(function (require) {
             };
             virtualIndexPattern.addVirtualField(injectedField);
           }
+        }
+
+        $scope.$listen(kibiState, 'save_with_changes', function (diff) {
+          if (diff.indexOf(kibiState._properties.selected_entity) !== -1 ||
+              diff.indexOf(kibiState._properties.selected_entity_disabled) !== -1 ||
+              diff.indexOf(kibiState._properties.test_selected_entity) !== -1) {
+            addRelationalColumn();
+          }
+        });
+
+        $scope.$watch('searchSource', prereq(function (searchSource) {
+          if (!$scope.searchSource) return;
+
+          $scope.indexPattern = $scope.searchSource.get('index');
+
+          $scope.searchSource.size($scope.size);
+          $scope.searchSource.sort(getSort($scope.sorting, $scope.indexPattern));
+
+          // kibi: source filtering
+          const sourceFiltering = $scope.indexPattern.getSourceFiltering();
+          if (sourceFiltering && sourceFiltering.all) {
+            $scope.searchSource.source(sourceFiltering.all);
+          }
+          // relational column
+          addRelationalColumn();
           // kibi: end
 
           // Set the watcher after initialization

@@ -102,7 +102,8 @@ define(function (require) {
 
     getCreateButton: function () {
       return this.remote.setFindTimeout(defaultTimeout)
-      .findByCssSelector('.btn');
+      // kibi: taken fix from kibana as the wrong button was taken
+      .findDisplayedByCssSelector('[type="submit"]');
     },
 
     clickCreateButton: function () {

@@ -48,6 +48,18 @@ define(function (require) {
           .then((query) => {
             return { query, button, indices };
           });
+        })
+        .catch((error) => {
+          // If computing the indices failed because of an authorization error
+          // set indices to an empty array and mark the button as forbidden.
+          if (error.status !== 403) {
+            throw error;
+          }
+          button.forbidden = true;
+          return kibiSequentialJoinVisHelper.buildCountQuery(button.targetDashboardId)
+          .then((query) => {
+            return { query, button, indices: [] };
+          });
         });
       })).then((results) => {
         const query = _.map(results, result => {
@@ -73,6 +85,10 @@ define(function (require) {
               query: results[i].query
             };
 
+            if (results[i].button.forbidden) {
+              results[i].button.warning = 'Access to an index referred by this button is forbidden.';
+              return;
+            }
             if (hit.error) {
               const error = JSON.stringify(hit.error, null, ' ');
               if (error.match(/ElasticsearchSecurityException/)) {

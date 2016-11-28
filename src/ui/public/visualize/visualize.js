@@ -28,7 +28,7 @@ define(function (require) {
         uiState: '=?',
         searchSource: '=?',
         editableVis: '=?',
-        esResp: '=?',
+        esResp: '=?'
       },
       template: require('ui/visualize/visualize.html'),
       link: function ($scope, $el, attr) {
@@ -112,7 +112,9 @@ define(function (require) {
 
               if (fns.length) {
                 _.pull(fns, fn);
-                if (!fns.length) {
+                // kibi: let the visualization broadcast this event
+                // since it takes care of the searchSource
+                if (!fns.length && !$scope.vis.type.delegateSearch) {
                   $scope.$root.$broadcast('ready:vis');
                 }
               }
@@ -152,7 +154,7 @@ define(function (require) {
           }
 
           if (oldVis) $scope.renderbot = null;
-          if (vis) $scope.renderbot = vis.type.createRenderbot(vis, $visEl, $scope.uiState, $scope.multiSearchData);
+          if (vis) $scope.renderbot = vis.type.createRenderbot(vis, $visEl, $scope.uiState, $scope.multiSearchData, $scope.searchSource);
 
           // kibi: associate the vis with the searchSource
           if ($scope.searchSource) {
@@ -165,34 +167,25 @@ define(function (require) {
           if ($scope.renderbot) $scope.renderbot.updateParams();
         }));
 
-        $scope.$watch('searchSource', prereq(function (searchSource) {
-          // kibi: get the saved search associated with the current dashboard, in order to have the correct search_source
-          if (searchSource && !$scope.vis.type.requiresSearch) {
-            $scope.searchSource.disable();
-            savedDashboards.find().then(function (resp) {
-              const savedCurrentDashboard = _.find(resp.hits, 'id', kibiState._getCurrentDashboardId());
-              if (savedCurrentDashboard && savedCurrentDashboard.savedSearchId) {
-                return savedSearches.get(savedCurrentDashboard.savedSearchId).then(function (savedSearch) {
-                  $scope.searchSource.inherits(savedSearch.searchSource);
-                  $scope.searchSource.enable();
-                });
-              }
-            }).catch(notify.error);
-          }
-          // kibi: end
-          if (!searchSource || attr.esResp) return;
+        // kibi: if delegateSearch is true, the visualization takes care of retrieving the results.
+        if (!$scope.vis.type.delegateSearch) {
+          $scope.$watch('searchSource', prereq(function (searchSource) {
+            if (!searchSource || attr.esResp) {
+              return;
+            }
 
-          // TODO: we need to have some way to clean up result requests
-          searchSource.onResults().then(function onResults(resp) {
-            if ($scope.searchSource !== searchSource) return;
+            // TODO: we need to have some way to clean up result requests
+            searchSource.onResults().then(function onResults(resp) {
+              if ($scope.searchSource !== searchSource) return;
 
-            $scope.esResp = resp;
+              $scope.esResp = resp;
 
-            return searchSource.onResults().then(onResults);
-          }).catch(notify.fatal);
+              return searchSource.onResults().then(onResults);
+            }).catch(notify.fatal);
 
-          searchSource.onError(notify.error).catch(notify.fatal);
-        }));
+            searchSource.onError(notify.error).catch(notify.fatal);
+          }));
+        }
 
         $scope.$watch('esResp', prereq(function (resp, prevResp) {
           if (!resp) return;

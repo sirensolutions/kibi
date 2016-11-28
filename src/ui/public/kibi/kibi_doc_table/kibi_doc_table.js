@@ -10,10 +10,14 @@ define(function (require) {
 
   require('ui/kibi/kibi_doc_table/kibi_doc_table.less');
   require('ui/kibi/kibi_doc_table/components/kibi_table_row');
+  // kibi: allow to query external datasources for populating a column
   require('ui/kibi/components/query_engine_client/query_engine_client');
 
   require('ui/modules').get('kibana')
-  .directive('kibiDocTable', function (config, createNotifier, getAppState, queryEngineClient, savedQueries, Promise, Private, courier) {
+  .directive('kibiDocTable', function (kibiState, config, createNotifier, Private, courier) {
+    const VirtualIndexPattern = Private(require('ui/kibi/components/commons/virtual_index_pattern'));
+    const fieldFormats = Private(require('ui/registry/field_formats'));
+
     return {
       restrict: 'E',
       template: html,
@@ -140,6 +144,46 @@ define(function (require) {
         };
         // kibi: end
 
+        function addRelationalColumn() {
+          // validate here and do not inject if all require values are not set
+          if ($scope.queryColumn && $scope.queryColumn.queryDefinitions && $scope.queryColumn.queryDefinitions.length &&
+              $scope.queryColumn.joinElasticsearchField && $scope.queryColumn.name) {
+            const virtualIndexPattern = new VirtualIndexPattern($scope.indexPattern);
+            $scope.searchSource.index(virtualIndexPattern);
+
+            $scope.searchSource.inject([
+              {
+                entityURI: kibiState.isSelectedEntityDisabled() ? '' : kibiState.getEntityURI(),
+                queryDefs: $scope.queryColumn.queryDefinitions,
+                // it is the field from table to do the comparison
+                sourcePath: $scope.indexPattern.fields.byName[$scope.queryColumn.joinElasticsearchField].path,
+                fieldName: $scope.queryColumn.name
+              }
+            ]);
+
+            const injectedField = {
+              analyzed: false,
+              bucketable: true,
+              count: 0,
+              displayName: $scope.queryColumn.name,
+              name: $scope.queryColumn.name,
+              scripted: false,
+              sortable: false,
+              type: 'string',
+              format: fieldFormats.getDefaultInstance('string')
+            };
+            virtualIndexPattern.addVirtualField(injectedField);
+          }
+        }
+
+        $scope.$listen(kibiState, 'save_with_changes', function (diff) {
+          if (diff.indexOf(kibiState._properties.selected_entity) !== -1 ||
+              diff.indexOf(kibiState._properties.selected_entity_disabled) !== -1 ||
+              diff.indexOf(kibiState._properties.test_selected_entity) !== -1) {
+            addRelationalColumn();
+          }
+        });
+
         $scope.$watch('searchSource', prereq(function (searchSource) {
           if (!$scope.searchSource) return;
 
@@ -153,6 +197,8 @@ define(function (require) {
           if (sourceFiltering && sourceFiltering.all) {
             $scope.searchSource.source(sourceFiltering.all);
           }
+          // relational column
+          addRelationalColumn();
           // kibi: end
 
           // Set the watcher after initialization

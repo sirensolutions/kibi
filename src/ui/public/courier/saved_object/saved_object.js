@@ -220,6 +220,10 @@ define(function (require) {
               return !filter.join_set;
             });
           }
+          if (searchSourceJSON.inject) {
+            // do not serialize the inject queries
+            delete searchSourceJSON.inject;
+          }
           // kibi: end
 
           body.kibanaSavedObjectMeta = {

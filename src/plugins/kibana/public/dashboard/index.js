@@ -44,14 +44,13 @@ define(function (require) {
             timefilter.enabled = true;
             // kibi: select the first dashboard if default_dashboard_title is not set
             const dashboardId = kibiDefaultDashboardTitle ? kibiDefaultDashboardTitle : resp.hits[0].id;
-            return savedDashboards.get(kibiUtils.slugifyId(dashboardId));
+            return savedDashboards.get(kibiUtils.slugifyId(dashboardId)).catch(courier.redirectWhenMissing({
+              dashboard : '/'
+            }));
           } else {
             return savedDashboards.get();
           }
-        })
-        .catch(courier.redirectWhenMissing({
-          dashboard : '/'
-        }));
+        });
       }
     }
   })

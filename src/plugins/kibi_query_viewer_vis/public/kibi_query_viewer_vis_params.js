@@ -12,25 +12,23 @@ define(function (require) {
       link: function ($scope) {
 
         // Handle label textbox changes
-        $scope.labelChanged = function () {
-          $scope.vis.params.queryDefinitions = _.map($scope.vis.params.queryDefinitions, function (option, index) {
-            if (!option) {
-              return option;
-            }
-            if (!option.templateVars) {
-              option.templateVars = {};
-            }
-            if (option._label) {
-              if (option._templateVarsString) {
-                option.templateVars = JSON.parse(option._templateVarsString);
-              }
-              option.templateVars.label = option._label;
-            } else if (!option.templateVars.label || !option._label) {
-              option.templateVars.label = '';
-            }
-            option._templateVarsString = JSON.stringify(option.templateVars, null, ' ');
+        $scope.labelChanged = function (index) {
+          let option = $scope.vis.params.queryDefinitions[index];
+          if (!option) {
             return option;
-          });
+          }
+          if (!option.templateVars) {
+            option.templateVars = {};
+          }
+          if (option._label) {
+            if (option._templateVarsString) {
+              option.templateVars = JSON.parse(option._templateVarsString);
+            }
+            option.templateVars.label = option._label;
+          } else if (!option.templateVars.label || !option._label) {
+            option.templateVars.label = '';
+          }
+          option._templateVarsString = JSON.stringify(option.templateVars, null, ' ');
         };
 
         // Handle template textarea changes

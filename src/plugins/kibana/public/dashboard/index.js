@@ -43,10 +43,17 @@ define(function (require) {
           if (resp.hits.length > 0) {
             timefilter.enabled = true;
             // kibi: select the first dashboard if default_dashboard_title is not set
-            const dashboardId = kibiDefaultDashboardTitle ? kibiDefaultDashboardTitle : resp.hits[0].id;
-            return savedDashboards.get(kibiUtils.slugifyId(dashboardId)).catch(courier.redirectWhenMissing({
+            const dashboardId = kibiDefaultDashboardTitle ? kibiUtils.slugifyId(kibiDefaultDashboardTitle) : resp.hits[0].id;
+            const errFunction = courier.redirectWhenMissing({
               dashboard : '/'
-            }));
+            });
+            return savedDashboards.get(dashboardId).catch(err => {
+              if (kibiDefaultDashboardTitle) {
+                err.message = `The default dashboard with title "${kibiDefaultDashboardTitle}" does not exist.
+                  Please correct the "kibi_core.default_dashboard_title" parameter in kibi.yml`;
+              }
+              errFunction(err);
+            });
           } else {
             return savedDashboards.get();
           }

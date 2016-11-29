@@ -230,7 +230,7 @@ define(function (require) {
       },
       'kibi:graphUseWebGl' : {
         value: true,
-        description: 'Override the automatic WebGL support of the graph. Set true to force enable WebGL if available, set false to disable it.'
+        description: 'Set to false to disable WebGL rendering'
       },
       'kibi:graphExpansionLimit' : {
         value: 500,

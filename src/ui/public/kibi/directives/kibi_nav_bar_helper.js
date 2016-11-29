@@ -12,7 +12,6 @@ define(function (require) {
 
     const chrome = require('ui/chrome');
     const dashboardGroupHelper = Private(require('ui/kibi/helpers/dashboard_group_helper'));
-    const searchHelper = new SearchHelper(kbnIndex);
 
     /*
     * Private Methods

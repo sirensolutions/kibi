@@ -98,7 +98,9 @@ define(function (require) {
         if (responses.length === metadata.length) {
           for (let i = 0; i < responses.length; i++) {
             let hit = responses[i];
-            if (!_.contains(Object.keys(hit), 'error')) {
+            if (metadata[i].forbidden) {
+              metadata[i].count = 'Forbidden';
+            } else if (!_.contains(Object.keys(hit), 'error')) {
               metadata[i].count = hit.hits.total;
             } else if (_.contains(Object.keys(hit), 'error') && _.contains(hit.error, 'ElasticsearchSecurityException')) {
               metadata[i].count = 'Forbidden';
@@ -126,14 +128,28 @@ define(function (require) {
           return kibiState.getState(dashboard.id).then(({ index, filters, queries, time }) => {
             const query = countHelper.constructCountQuery(filters, queries, time);
             // here take care about correctly expanding timebased indices
-            return kibiState.timeBasedIndices(index, dashboard.id).then(function (indices) {
-              return {
-                dashboardId: dashboard.id,
-                filters: filters,
-                queries: queries,
-                query: query,
-                indices: indices
-              };
+            return kibiState.timeBasedIndices(index, dashboard.id)
+            .then((indices) => ({
+              dashboardId: dashboard.id,
+              filters: filters,
+              queries: queries,
+              query: query,
+              indices: indices
+            }))
+            .catch((error) => {
+              // If computing the indices failed because of an authorization error
+              // set indices to an empty array and mark the dashboard as forbidden.
+              if (error.status === 403) {
+                return {
+                  dashboardId: dashboard.id,
+                  filters: filters,
+                  queries: queries,
+                  query: query,
+                  forbidden: true,
+                  indices: []
+                };
+              }
+              throw error;
             });
           });
         });

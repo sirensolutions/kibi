@@ -1,3 +1,4 @@
+import Promise from 'bluebird';
 const expect = require('expect.js');
 const ngMock = require('ngMock');
 const MockState = require('fixtures/mock_state');
@@ -107,6 +108,7 @@ var fakeSavedSearches = [
 
 var dashboardGroupHelper;
 var appState;
+let kibiState;
 var $httpBackend;
 
 function init({ currentDashboardId = 'Articles', indexPatterns, savedDashboards, savedDashboardGroups, savedSearches }) {
@@ -143,7 +145,8 @@ function init({ currentDashboardId = 'Articles', indexPatterns, savedDashboards,
       $provide.service('savedSearches', (Promise, Private) => mockSavedObjects(Promise, Private)('savedSearches', savedSearches || []));
     });
 
-    ngMock.inject(function ($injector, kibiState, Private) {
+    ngMock.inject(function ($injector, _kibiState_, Private) {
+      kibiState = _kibiState_;
       dashboardGroupHelper = Private(require('ui/kibi/helpers/dashboard_group_helper'));
       sinon.stub(chrome, 'getBasePath').returns('');
       sinon.stub(kibiState, '_getCurrentDashboardId').returns(currentDashboardId);
@@ -414,6 +417,45 @@ describe('Kibi Components', function () {
         setTimeout(function () {
           $httpBackend.flush();
         }, 500);
+      });
+
+      it('dashboard exist and it has savedSearch and index exists but is not accessible', function (done) {
+
+        const authError = new Error();
+        authError.status = 403;
+
+        sinon.stub(kibiState, 'timeBasedIndices').returns(Promise.reject(authError));
+
+        $httpBackend.whenPOST('/elasticsearch/_msearch?getCountsOnTabs').respond(200, {
+          responses: [{
+            hits: {
+              total: 0
+            }
+          }]
+        });
+
+        dashboardGroupHelper.getDashboardsMetadata(['time-testing-4']).then(function (metas) {
+          expect(metas.length).to.equal(1);
+          expect(metas[0].count).to.equal('Forbidden');
+          expect(metas[0].forbidden).to.be(true);
+          expect(metas[0].dashboardId).to.equal('time-testing-4');
+          expect(metas[0].indices).to.eql([]);
+          done();
+        }).catch(done);
+
+        setTimeout(function () {
+          $httpBackend.flush();
+        }, 500);
+      });
+
+      it('dashboard exist and it has savedSearch and index exists but a non auth error occurs when resolving indices', function (done) {
+
+        sinon.stub(kibiState, 'timeBasedIndices').returns(Promise.reject(new Error()));
+
+        dashboardGroupHelper.getDashboardsMetadata(['time-testing-4'])
+        .then(() => done(new Error('timeBasedIndices error was not rethrown.')))
+        .catch(() => done());
+
       });
 
     });

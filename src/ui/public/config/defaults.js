@@ -228,6 +228,10 @@ define(function (require) {
         value: false,
         description: 'Set to true to suppress all warnings and errors'
       },
+      'kibi:graphUseWebGl' : {
+        value: true,
+        description: 'Override the automatic WebGL support of the graph. Set true to force enable WebGL if available, set false to disable it.'
+      },
       'kibi:graphExpansionLimit' : {
         value: 500,
         description: 'Limit the number of elements to retrieve during the graph expansion'

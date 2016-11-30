@@ -22,6 +22,9 @@ module.exports = (server, API_ROOT) => {
       case 'ConflictError':
         reply(Boom.conflict(error.message));
         break;
+      case 'AuthorizationError':
+        reply(Boom.forbidden(error.message));
+        break;
       default:
         reply(Boom.badImplementation(`An error occurred while indexing the object: ${error}`));
         break;
@@ -52,12 +55,31 @@ module.exports = (server, API_ROOT) => {
             return response;
           })
           .catch((error) => {
-            return Promise.resolve(merge({
-              error: {
-                type: 'backend_error',
-                reason: 'An error occurred while connecting to the backend.'
-              }
-            }, doc));
+            let errorBody;
+            switch (error.name) {
+              case 'NotFoundError':
+                errorBody = {
+                  type: 'not_found',
+                  reason: error.message,
+                  status: 404
+                };
+                break;
+              case 'AuthorizationError':
+                errorBody = {
+                  type: 'security_exception',
+                  reason: error.message,
+                  status: 403
+                };
+                break;
+              default:
+                errorBody = {
+                  type: 'backend_error',
+                  reason: 'An error occurred while connecting to the backend.',
+                  status: error.inner ? error.inner.status : 500
+                };
+                break;
+            }
+            return Promise.resolve(merge(errorBody), doc);
           });
         } catch (error) {
           return Promise.resolve(merge({

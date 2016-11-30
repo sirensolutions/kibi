@@ -123,6 +123,45 @@ export default class Model {
   }
 
   /**
+   * Returns all the objects of the type managed by this model.
+   *
+   * @param {Number} size - The number of results to return.
+   * @param {string} searchString - An optional search string.
+   * @return {Array} A list of objects of the specified type.
+   * @throws {NotFoundError} if the object does not exist.
+   */
+  async search(size, searchString) {
+    let body;
+    if (searchString) {
+      body = {
+        query: {
+          simple_query_string: {
+            query: `${searchString}*`,
+            fields: ['title^3', 'description'],
+            default_operator: 'AND'
+          }
+        }
+      };
+    } else {
+      body = {
+        query: {
+          match_all: {}
+        }
+      };
+    }
+    try {
+      return await this._client.search({
+        index: this._config.get('kibana.index'),
+        type: this._type,
+        body: body,
+        size: size || 100
+      });
+    } catch (error) {
+      this._wrapError(error);
+    }
+  }
+
+  /**
    * Returns the object with the specified id.
    *
    * @param {string} id - An id.
@@ -132,7 +171,7 @@ export default class Model {
   async get(id) {
     let hit;
     try {
-      hit = await this._client.get({
+      return await this._client.get({
         index: this._config.get('kibana.index'),
         type: this._type,
         id: id
@@ -141,9 +180,30 @@ export default class Model {
       if (error.statusCode === 404) {
         throw new NotFoundError(`${id} does not exist.`, error);
       }
-      throw new Error(error.message);
+      this._wrapError(error);
     }
-    return this._mapHit(hit);
+  }
+
+  /**
+   * Deletes the object with the specified id.
+   *
+   * @param {string} id - An id.
+   * @throws {NotFoundError} if the object does not exist.
+   */
+  async delete(id) {
+    try {
+      return await this._client.delete({
+        index: this._config.get('kibana.index'),
+        type: this._type,
+        id: id,
+        refresh: true
+      });
+    } catch (error) {
+      if (error.statusCode === 404) {
+        throw new NotFoundError(`${id} does not exist.`, error);
+      }
+      this._wrapError(error);
+    }
   }
 
 }

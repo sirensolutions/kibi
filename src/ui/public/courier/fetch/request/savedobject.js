@@ -9,7 +9,7 @@ define(function (require) {
     function SavedObjectRequest(source, defer) {
       SavedObjectRequest.Super.call(this, source, defer);
 
-      this.type = 'savedobject';
+      this.type = 'savedObject';
       this.strategy = strategy;
     }
 

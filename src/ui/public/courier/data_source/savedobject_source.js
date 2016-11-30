@@ -25,10 +25,10 @@ define(function (require) {
 
     /**
      * Get the type of this SourceAbstract
-     * @return {string} - 'savedobject'
+     * @return {string} - 'savedObject'
      */
     SavedObjectSource.prototype._getType = function () {
-      return 'savedobject';
+      return 'savedObject';
     };
 
     return SavedObjectSource;

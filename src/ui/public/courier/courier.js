@@ -109,7 +109,7 @@ define(function (require) {
           case 'doc':
             return new DocSource();
           // kibi: Saved Objects API
-          case 'savedobject':
+          case 'savedObject':
             return new SavedObjectSource();
           // kibi: end
           case 'search':

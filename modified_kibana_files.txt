@@ -128,9 +128,15 @@ src/ui/public/chrome/directives/kbn_chrome.js
 src/ui/public/config/defaults.js
 
 src/ui/public/courier/_request_queue.js
+src/ui/public/courier/courier.js
+src/ui/public/courier/fetch/_call_client.js
 src/ui/public/courier/data_source/search_source.js
++src/ui/public/courier/data_source/savedobject_source.js
 src/ui/public/courier/fetch/request/_error-handler.js
 src/ui/public/courier/fetch/request/_error_handler.js
++src/ui/public/courier/fetch/request/savedobject.js
++src/ui/public/courier/fetch/strategy/savedobject.js
++src/ui/public/courier/looper/savedobject.js
 src/ui/public/courier/saved_object/saved_object.js
 src/ui/public/courier/data_source/_doc_send_to_es.js
 

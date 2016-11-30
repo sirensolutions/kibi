@@ -1,5 +1,7 @@
 define(function (require) {
-  return function SavedObjectFactory(es, kbnIndex, Promise, Private, createNotifier, safeConfirm, indexPatterns) {
+  // kibi: include savedObjectsAPI dependencies
+  return function SavedObjectFactory(es, savedObjectsAPI, savedObjectsAPITypes, kbnIndex, Promise, Private, createNotifier, safeConfirm,
+                                     indexPatterns) {
     let angular = require('angular');
     let errors = require('ui/errors');
     let _ = require('lodash');
@@ -7,6 +9,9 @@ define(function (require) {
 
     let DocSource = Private(require('ui/courier/data_source/doc_source'));
     let SearchSource = Private(require('ui/courier/data_source/search_source'));
+    // kibi: use a custom source for objects managed by the Saved Objects API
+    let SavedObjectSource = Private(require('ui/courier/data_source/savedobject_source'));
+    // kibi: end
     let mappingSetup = Private(require('ui/utils/mapping_setup'));
 
     // kibi: added to clear the cache on object save
@@ -23,7 +28,14 @@ define(function (require) {
        * Initialize config vars
        ************/
       // the doc which is used to store this object
-      let docSource = new DocSource();
+      // kibi: set source based on type
+      let docSource;
+      if (savedObjectsAPITypes.indexOf(config.type) >= 0) {
+        docSource = new SavedObjectSource();
+      } else {
+        docSource = new DocSource();
+      }
+      // kibi: end
 
       // type name for this object, used as the ES-type
       let type = config.type;
@@ -318,7 +330,13 @@ define(function (require) {
        * @return {promise}
        */
       self.delete = function () {
-        return es.delete({
+        // kibi: use the Saved Objects API client if needed
+        let client = es;
+        if (savedObjectsAPITypes.indexOf(config.type) >= 0) {
+          client = savedObjectsAPI;
+        }
+        return client.delete({
+        // kibi: end
           index: kbnIndex,
           type: type,
           id: this.id

@@ -25,7 +25,7 @@ define(function (require) {
               option.templateVars = JSON.parse(option._templateVarsString);
             }
             option.templateVars.label = option._label;
-          } else if (!option.templateVars.label || !option._label) {
+          } else {
             option.templateVars.label = '';
           }
           option._templateVarsString = JSON.stringify(option.templateVars, null, ' ');

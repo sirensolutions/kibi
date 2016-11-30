@@ -49,9 +49,9 @@ define(function (require) {
     _constructQueryColumnObject();
 
     // when autoupdate is on we detect the refresh here for template visualization
-    $scope.$watch('esResponse', function () {
-      if ($scope.savedObj && $scope.savedObj.searchSource) {
-        $scope.savedObj.searchSource.fetchQueued();
+    $scope.$watch('esResponse', function (resp) {
+      if (resp && $scope.searchSource) {
+        $scope.searchSource.fetchQueued();
       }
     });
 

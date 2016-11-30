@@ -10,7 +10,29 @@ define(function (require) {
       restrict: 'E',
       template: require('plugins/kibi_query_viewer_vis/kibi_query_viewer_vis_params.html'),
       link: function ($scope) {
-        var updateScope = function () {
+
+        // Handle label textbox changes
+        $scope.labelChanged = function (index) {
+          let option = $scope.vis.params.queryDefinitions[index];
+          if (!option) {
+            return option;
+          }
+          if (!option.templateVars) {
+            option.templateVars = {};
+          }
+          if (option._label) {
+            if (option._templateVarsString) {
+              option.templateVars = JSON.parse(option._templateVarsString);
+            }
+            option.templateVars.label = option._label;
+          } else {
+            option.templateVars.label = '';
+          }
+          option._templateVarsString = JSON.stringify(option.templateVars, null, ' ');
+        };
+
+        // Handle template textarea changes
+        $scope.templateChanged = function () {
           $scope.jsonError = [];
           $scope.vis.params.queryDefinitions = _.map($scope.vis.params.queryDefinitions, function (option, index) {
             $scope.jsonError.push({
@@ -25,20 +47,9 @@ define(function (require) {
             }
             try {
               if (option._templateVarsString) {
-                option.templateVars = JSON.parse(option._templateVarsString);
-              }
-
-              if (option._label) {
-                option.templateVars.label = option._label;
-              } else if (!option.templateVars.label) {
-                option.templateVars.label = '';
-              }
-              if (option.templateVars.label) {
-                option._templateVarsString = JSON.stringify(option.templateVars);
-              }
-              if ((option.templateVars.label !== option._label) && option._label === '') {
-                option._templateVarsString = '';
-                option.templateVars = '';
+                let toJson = JSON.parse(option._templateVarsString);
+                option.templateVars.label = toJson.label;
+                option._label = toJson.label;
               }
             } catch (err) {
               $scope.jsonError[index].message = err.toString();
@@ -46,15 +57,6 @@ define(function (require) {
             return option;
           });
         };
-
-        $scope.$watch(function (myscope) {
-          // only triggers when the queryId, template vars or the _label change
-          return _.map(myscope.vis.params.queryDefinitions, function (option) {
-            return option._templateVarsString + option._label + option.queryId;
-          });
-        }, function () {
-          updateScope();
-        }, true);
 
         $scope.editTemplate = function (index) {
           kbnUrl.change('/settings/templates/' + $scope.vis.params.queryDefinitions[index].templateId);

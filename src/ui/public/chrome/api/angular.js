@@ -29,7 +29,11 @@ module.exports = function (chrome, internals) {
       a.href = chrome.addBasePath('/elasticsearch');
       return a.href;
     }()))
-    // kibi: saved objects API url
+    // kibi: Saved Objects API
+    .value('savedObjectsAPITypes', [
+      'session',
+      'visualization'
+    ])
     .value('savedObjectsAPIUrl', (function () {
       var a = document.createElement('a');
       a.href = chrome.addBasePath('/api/saved-objects/v1');

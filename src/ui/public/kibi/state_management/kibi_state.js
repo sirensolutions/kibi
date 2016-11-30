@@ -18,7 +18,6 @@ define(function (require) {
                                   kbnIndex, globalState, elasticsearchPlugins, $location, config, Private, createNotifier) {
     const State = Private(require('ui/state_management/state'));
     const notify = createNotifier({ location: 'Kibi State'});
-    const urlHelper = Private(require('ui/kibi/helpers/url_helper'));
     const relationsHelper = Private(require('ui/kibi/helpers/relations_helper'));
 
     _.class(KibiState).inherits(State);
@@ -203,13 +202,13 @@ define(function (require) {
     };
 
     KibiState.prototype.setEntityURI = function (entityURI) {
-      if (urlHelper.onDashboardTab()) {
+      if (chrome.onDashboardTab()) {
         if (!entityURI) {
           delete this[this._properties.selected_entity];
         } else {
           this[this._properties.selected_entity] = entityURI;
         }
-      } else if (urlHelper.onVisualizeTab() || urlHelper.onSettingsTab()) {
+      } else if (chrome.onVisualizeTab() || chrome.onSettingsTab()) {
         if (!entityURI) {
           delete this[this._properties.test_selected_entity];
         } else {
@@ -221,9 +220,9 @@ define(function (require) {
     };
 
     KibiState.prototype.getEntityURI = function () {
-      if (urlHelper.onDashboardTab()) {
+      if (chrome.onDashboardTab()) {
         return this[this._properties.selected_entity];
-      } else if (urlHelper.onVisualizeTab() || urlHelper.onSettingsTab()) {
+      } else if (chrome.onVisualizeTab() || chrome.onSettingsTab()) {
         return this[this._properties.test_selected_entity];
       }
       throw new Error('Cannot get entity URI because you are not on dashboard/visualize/settings');

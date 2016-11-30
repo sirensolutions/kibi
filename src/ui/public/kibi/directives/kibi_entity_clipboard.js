@@ -1,16 +1,12 @@
 define(function (require) {
-
-  var chrome = require('ui/chrome');
-  var _ = require('lodash');
+  const _ = require('lodash');
 
   require('ui/kibi/directives/kibi_entity_clipboard.less');
 
   require('ui/modules').get('kibana')
-  .directive('kibiEntityClipboard', function (kibiState, $timeout, getAppState, $route,
-    globalState, $http, createNotifier, config, Private) {
-
-    const urlHelper = Private(require('ui/kibi/helpers/url_helper'));
-    var notify = createNotifier({
+  .directive('kibiEntityClipboard', function (kibiState, getAppState, $route, globalState, $http, createNotifier, config) {
+    const chrome = require('ui/chrome');
+    const notify = createNotifier({
       location: 'Kibi Entity Clipboard'
     });
 
@@ -20,8 +16,8 @@ define(function (require) {
       replace: true,
       link: function ($scope, $el) {
 
-        var updateSelectedEntity = function () {
-          if (!urlHelper.onDashboardTab()) {
+        const updateSelectedEntity = function () {
+          if (!chrome.onDashboardTab()) {
             return;
           }
 
@@ -45,8 +41,8 @@ define(function (require) {
                   $scope.label = doc.data[column];
                 } else if (doc.data._source) {
                   // else try to find it in _source
-                  var getProperty = _.property(column);
-                  var value = getProperty(doc.data._source) || ' - ';
+                  const getProperty = _.property(column);
+                  let value = getProperty(doc.data._source) || ' - ';
                   if (value.constructor === Object || value.constructor === Array) {
                     value = JSON.stringify(value);
                   }
@@ -80,8 +76,8 @@ define(function (require) {
           kibiState.disableSelectedEntity(false);
 
           /*
-           * remove filters which depends on selected entities
-           */
+          * remove filters which depends on selected entities
+          */
           const currentDashboardId = kibiState._getCurrentDashboardId();
           const appState = getAppState();
 

@@ -88,6 +88,27 @@ module.exports = function (chrome, internals) {
    */
   chrome.getActiveTabTitle = activeGetter('title');
 
+  /**
+   * kibi: onDashboardTab returns true if the active tab is the dashboard
+   */
+  chrome.onDashboardTab = function () {
+    return this.getActiveTabId() === 'dashboard';
+  };
+
+  /**
+   * kibi: onVisualizeTab returns true if the active tab is the visualize
+   */
+  chrome.onVisualizeTab = function () {
+    return this.getActiveTabId() === 'visualize';
+  };
+
+  /**
+   * kibi: onSettingsTab returns true if the active tab is the settings
+   */
+  chrome.onSettingsTab = function () {
+    return this.getActiveTabId() === 'settings';
+  };
+
   // create a getter for properties of the active tab
   function activeGetter(prop) {
     return function (def) {

@@ -6,7 +6,7 @@ define(function (require) {
 
   module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Private, config) {
     let services = Private(require('ui/saved_objects/saved_object_registry')).byLoaderPropertiesName;
-    let urlHelper = Private(require('ui/kibi/helpers/url_helper'));
+    const chrome = require('ui/chrome');
 
     return {
       restrict: 'E',
@@ -26,7 +26,7 @@ define(function (require) {
 
         // kibi: variable to store the checkbox state
         $scope.kibi = {
-          onDashboardTab: urlHelper.onDashboardTab(),
+          onDashboardTab: chrome.onDashboardTab(),
           basedOnSameSavedSearch: false,
           _prevBasedOnSameSavedSearch: false
         };

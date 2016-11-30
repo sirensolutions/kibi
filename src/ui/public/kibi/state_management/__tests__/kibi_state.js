@@ -1,3 +1,4 @@
+const chrome = require('ui/chrome');
 const moment = require('moment');
 const sinon = require('auto-release-sinon');
 const _ = require('lodash');
@@ -20,6 +21,10 @@ describe('State Management', function () {
   let indexPatternsService;
 
   let disableFiltersIfOutdatedSpy;
+
+  let onDashboardTabSpy;
+  let onSettingsTabSpy;
+  let onVisualizeTabSpy;
 
   const defaultStartTime = '2006-09-01T12:00:00.000Z';
   const defaultEndTime = '2010-09-05T12:00:00.000Z';
@@ -73,10 +78,13 @@ describe('State Management', function () {
     });
 
     ngMock.inject(function (_indexPatterns_, _timefilter_, _config_, _$location_, _kibiState_) {
+      onDashboardTabSpy = sinon.stub(chrome, 'onDashboardTab').returns(currentPath.split('/')[1] === 'dashboard');
+      onVisualizeTabSpy = sinon.stub(chrome, 'onVisualizeTab').returns(currentPath.split('/')[1] === 'visualize');
+      onSettingsTabSpy = sinon.stub(chrome, 'onSettingsTab').returns(currentPath.split('/')[1] === 'settings');
+
       indexPatternsService = _indexPatterns_;
       timefilter = _timefilter_;
       $location = _$location_;
-      $location.path(currentPath);
       kibiState = _kibiState_;
 
       disableFiltersIfOutdatedSpy = sinon.spy(kibiState, 'disableFiltersIfOutdated');
@@ -161,24 +169,47 @@ describe('State Management', function () {
       });
 
       describe('getEntityURI', function () {
-        it('should return the entity when on dashboard/settings/visualize tab', function () {
+        it('should return the entity when on dashboard tab', function () {
           const entityURI = 'a/b/c/d';
 
-          init({});
-          [ '/dashboard', '/visualize/', '/settings' ].forEach((path) => {
-            $location.path(path);
-            kibiState.setEntityURI(entityURI);
-            expect(kibiState.getEntityURI()).to.be(entityURI);
+          init({
+            currentPath: '/dashboard'
           });
+          kibiState.setEntityURI(entityURI);
+          expect(kibiState.getEntityURI()).to.be(entityURI);
+        });
+
+        it('should return the entity when on settings tab', function () {
+          const entityURI = 'a/b/c/d';
+
+          init({
+            currentPath: '/settings'
+          });
+          kibiState.setEntityURI(entityURI);
+          expect(kibiState.getEntityURI()).to.be(entityURI);
+        });
+
+        it('should return the entity when on visualize tab', function () {
+          const entityURI = 'a/b/c/d';
+
+          init({
+            currentPath: '/visualize'
+          });
+          kibiState.setEntityURI(entityURI);
+          expect(kibiState.getEntityURI()).to.be(entityURI);
         });
 
         it('should not return the entity when on discover tab', function () {
           const entityURI = 'a/b/c/d';
 
           init({});
+
           kibiState.setEntityURI(entityURI);
           expect(kibiState.getEntityURI()).to.be(entityURI);
-          $location.path('/discover');
+
+          onVisualizeTabSpy.returns(false);
+          onSettingsTabSpy.returns(false);
+          onDashboardTabSpy.returns(false);
           expect(kibiState.getEntityURI).to.throwException(/Cannot get entity URI/);
         });
 
@@ -191,14 +222,20 @@ describe('State Management', function () {
           kibiState.setEntityURI(entityURI1);
           expect(kibiState.getEntityURI()).to.be(entityURI1);
 
-          $location.path('/visualize/');
+          onVisualizeTabSpy.returns(true);
+          onSettingsTabSpy.returns(false);
+          onDashboardTabSpy.returns(false);
           kibiState.setEntityURI(entityURI2);
           expect(kibiState.getEntityURI()).to.be(entityURI2);
 
-          $location.path('/settings');
+          onVisualizeTabSpy.returns(false);
+          onSettingsTabSpy.returns(true);
+          onDashboardTabSpy.returns(false);
           expect(kibiState.getEntityURI()).to.be(entityURI2);
 
-          $location.path('/dashboard');
+          onVisualizeTabSpy.returns(false);
+          onSettingsTabSpy.returns(false);
+          onDashboardTabSpy.returns(true);
           expect(kibiState.getEntityURI()).to.be(entityURI1);
         });
       });

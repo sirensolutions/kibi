@@ -23,7 +23,7 @@ define(function (require) {
     // kibi: added some helpers
     const joinExplain = Private(require('ui/filter_bar/join_explanation'));
     const markFiltersBySelectedEntities = Private(require('ui/kibi/components/commons/_mark_filters_by_selected_entities'));
-    const urlHelper = Private(require('ui/kibi/helpers/url_helper'));
+    const chrome = require('ui/chrome');
 
     const notify = createNotifier({
       location: 'Kibi Navigation Bar'
@@ -252,7 +252,7 @@ define(function (require) {
         addJoinSetFilterOnRelationalPanel(config.get('kibi:relationalPanel'));
 
         // kibi: needed to show filterbar when kibiEntityClipboard contains an entity
-        $scope.showKibiEntityClipboard = urlHelper.onDashboardTab() && Boolean(kibiState.getEntityURI());
+        $scope.showKibiEntityClipboard = chrome.onDashboardTab() && Boolean(kibiState.getEntityURI());
 
         // kibi: listen to changes to the kibiState
         $scope.$listen(kibiState, 'save_with_changes', (diff) => {

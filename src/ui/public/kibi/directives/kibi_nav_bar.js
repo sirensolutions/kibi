@@ -16,7 +16,7 @@ define(function (require) {
   require('ui/modules')
   .get('app/dashboard', ['ui.select', 'ngSanitize'])
   .directive('kibiNavBar', function ($rootScope, kibiState, config, Private) {
-    const urlHelper = Private(require('ui/kibi/helpers/url_helper'));
+    const chrome = require('ui/chrome');
     const ResizeChecker = Private(require('ui/vislib/lib/resize_checker'));
     const kibiNavBarHelper = Private(require('ui/kibi/directives/kibi_nav_bar_helper'));
 
@@ -41,7 +41,7 @@ define(function (require) {
         $scope.dashboardGroups = kibiNavBarHelper.getDashboardGroups();
 
         var removeLocationChangeSuccessHandler = $rootScope.$on('$locationChangeSuccess', function () {
-          urlHelper.onDashboardTab() ? $el.show() : $el.hide();
+          chrome.onDashboardTab() ? $el.show() : $el.hide();
         });
 
         $scope.relationalFilterVisible = config.get('kibi:relationalPanel');

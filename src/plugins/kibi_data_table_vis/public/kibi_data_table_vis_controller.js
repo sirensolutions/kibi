@@ -6,9 +6,9 @@ define(function (require) {
   require('ui/kibi/kibi_doc_table/kibi_doc_table');
 
   module.controller('KibiDataTableVisController', function ($rootScope, $scope, Private) {
-    const urlHelper = Private(require('ui/kibi/helpers/url_helper'));
+    const chrome = require('ui/chrome');
     const filterManager = Private(require('ui/filter_manager'));
-    const configMode = urlHelper.onVisualizeTab();
+    const configMode = chrome.onVisualizeTab();
 
     $scope.queryColumn = {};
     $scope.cellClickHandlers = {};

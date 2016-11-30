@@ -31,7 +31,6 @@ define(function (require) {
         }
 
         config.connectionClass = CustomAngularConnector;
-
       }]
     });
 

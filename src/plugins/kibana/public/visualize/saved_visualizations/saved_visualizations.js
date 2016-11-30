@@ -12,7 +12,7 @@ define(function (require) {
     title: 'visualizations'
   });
 
-  app.service('savedVisualizations', function (Promise, es, kbnIndex, SavedVis, Private, createNotifier, kbnUrl) {
+  app.service('savedVisualizations', function (Promise, es, savedObjectsAPI, kbnIndex, SavedVis, Private, createNotifier, kbnUrl) {
     const visTypes = Private(require('ui/registry/vis_types'));
 
     const scanner = new Scanner(es, {
@@ -77,26 +77,16 @@ define(function (require) {
       return source;
     };
 
+    // kibi: get visualizations from the Saved Object API.
     this.find = function (searchString, size = 100) {
-      let body;
-      if (searchString) {
-        body = {
-          query: {
-            simple_query_string: {
-              query: searchString + '*',
-              fields: ['title^3', 'description'],
-              default_operator: 'AND'
-            }
-          }
-        };
-      } else {
-        body = { query: {match_all: {}}};
+      if (!searchString) {
+        searchString = null;
       }
 
-      return es.search({
+      return savedObjectsAPI.search({
         index: kbnIndex,
-        type: 'visualization',
-        body: body,
+        type: this.type,
+        q: searchString,
         size: size
       })
       .then((resp) => {
@@ -106,5 +96,6 @@ define(function (require) {
         };
       });
     };
+    // kibi: end
   });
 });

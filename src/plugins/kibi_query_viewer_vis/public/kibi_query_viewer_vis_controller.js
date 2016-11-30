@@ -9,8 +9,8 @@ define(function (require) {
   var _ = require('lodash');
   var kibiUtils = require('kibiutils');
 
-  module.controller('KibiQueryViewerVisController', function ($rootScope, $scope, kibiState, Private, queryEngineClient, createNotifier) {
-    var urlHelper = Private(require('ui/kibi/helpers/url_helper'));
+  module.controller('KibiQueryViewerVisController', function ($rootScope, $scope, kibiState, queryEngineClient, createNotifier) {
+    const chrome = require('ui/chrome');
     var notify = createNotifier({
       location: 'Kibi Query Viewer'
     });
@@ -18,7 +18,7 @@ define(function (require) {
     // generate random id to avoid collisions if there are multiple widgets on one dashboard
     $scope.snippetContainerId = kibiUtils.getUuid4();
 
-    const configMode = urlHelper.onVisualizeTab();
+    const configMode = chrome.onVisualizeTab();
     $scope.holder = {
       html: ''
     };

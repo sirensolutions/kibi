@@ -16,8 +16,7 @@ define(function (require) {
   .controller('KibiSequentialJoinVisController', function (getAppState, kibiState, $scope, $rootScope, Private, $http, createNotifier,
                                                            globalState, Promise, kbnIndex) {
     const searchHelper = new SearchHelper(kbnIndex);
-    const urlHelper = Private(require('ui/kibi/helpers/url_helper'));
-    const onVisualizeTab = urlHelper.onVisualizeTab();
+    const onVisualizeTab = chrome.onVisualizeTab();
 
     const notify = createNotifier({
       location: 'Kibi Relational filter'

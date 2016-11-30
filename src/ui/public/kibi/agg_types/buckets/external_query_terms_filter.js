@@ -4,11 +4,11 @@ define(function (require) {
     // a bit of css
     require('ui/kibi/styles/external_query_terms_filter.less');
 
-    var _ = require('lodash');
-    var urlHelper = Private(require('ui/kibi/helpers/url_helper'));
-    var BucketAggType = Private(require('ui/agg_types/buckets/_bucket_agg_type'));
-    var createFilter = Private(require('ui/agg_types/buckets/create_filter/filters'));
-    var notify = createNotifier({ location: 'External Query Terms Filter Aggregation' });
+    const _ = require('lodash');
+    const chrome = require('ui/chrome');
+    const BucketAggType = Private(require('ui/agg_types/buckets/_bucket_agg_type'));
+    const createFilter = Private(require('ui/agg_types/buckets/create_filter/filters'));
+    const notify = createNotifier({ location: 'External Query Terms Filter Aggregation' });
 
     return new BucketAggType({
       name: 'external_query_terms_filter',
@@ -30,7 +30,7 @@ define(function (require) {
               return;
             }
 
-            const configurationMode = urlHelper.onVisualizeTab();
+            const configurationMode = chrome.onVisualizeTab();
 
             if (!_(queryDefinitions).pluck('queryId').compact().size()) {
               return;

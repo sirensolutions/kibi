@@ -3,21 +3,9 @@ define(function (require) {
   var _ = require('lodash');
   var kibiUtils = require('kibiutils');
 
-  return function UrlHelperFactory($location, savedDashboards, Promise, kbnDefaultAppId, kibiDefaultDashboardTitle) {
+  return function UrlHelperFactory(savedDashboards, Promise, kbnDefaultAppId, kibiDefaultDashboardTitle) {
     function UrlHelper() {
     }
-
-    UrlHelper.prototype.onVisualizeTab = function () {
-      return $location.path().indexOf('/visualize') === 0;
-    };
-
-    UrlHelper.prototype.onSettingsTab = function () {
-      return $location.path().indexOf('/settings') === 0;
-    };
-
-    UrlHelper.prototype.onDashboardTab = function () {
-      return $location.path().indexOf('/dashboard') === 0;
-    };
 
     // TODO tabs should be taken from chrome.getTabs();
     UrlHelper.prototype.getInitialPath = function (app, tabs) {

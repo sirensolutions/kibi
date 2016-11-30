@@ -1,19 +1,20 @@
-var sinon = require('auto-release-sinon');
-var ngMock = require('ngMock');
-var expect = require('expect.js');
+let sinon = require('auto-release-sinon');
+let ngMock = require('ngMock');
+let expect = require('expect.js');
+const chrome = require('ui/chrome');
 
 require('../kibi_entity_clipboard');
 
 describe('Kibi Components', function () {
   describe('Entity Clipboard', function () {
-    var $rootScope;
-    var globalState;
-    var appState;
-    var kibiState;
-    var $httpBackend;
+    let $rootScope;
+    let globalState;
+    let appState;
+    let kibiState;
+    let $httpBackend;
 
-    var MockState = require('fixtures/mock_state');
-    var _ = require('lodash');
+    let MockState = require('fixtures/mock_state');
+    let _ = require('lodash');
 
     function init(entityDisabled, selectedEntity, currentDashboardId) {
       ngMock.module(
@@ -42,9 +43,8 @@ describe('Kibi Components', function () {
         }
         );
 
-      ngMock.inject(function (Private, _kibiState_, _$rootScope_, $compile, $injector) {
-        var urlHelper = Private(require('ui/kibi/helpers/url_helper'));
-        sinon.stub(urlHelper, 'onDashboardTab').returns(true);
+      ngMock.inject(function (_kibiState_, _$rootScope_, $compile, $injector) {
+        sinon.stub(chrome, 'onDashboardTab').returns(true);
 
         kibiState = _kibiState_;
         kibiState.setEntityURI(selectedEntity);

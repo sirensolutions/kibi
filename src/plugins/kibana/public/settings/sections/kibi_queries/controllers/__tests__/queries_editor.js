@@ -1,14 +1,15 @@
-var expect = require('expect.js');
-var sinon = require('auto-release-sinon');
-var ngMock = require('ngMock');
-var jQuery = require('jquery');
-var Promise = require('bluebird');
-var noDigestPromises = require('testUtils/noDigestPromises');
-var kibiState;
-var $scope;
+const chrome = require('ui/chrome');
+let expect = require('expect.js');
+let sinon = require('auto-release-sinon');
+let ngMock = require('ngMock');
+let jQuery = require('jquery');
+let Promise = require('bluebird');
+let noDigestPromises = require('testUtils/noDigestPromises');
+let kibiState;
+let $scope;
 
-var mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
-var savedDatasources = [
+let mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
+let savedDatasources = [
   {
     id: 'ds1',
     title: 'ds1 datasource',
@@ -50,7 +51,7 @@ describe('Kibi Controllers', function () {
             return Promise.resolve();
           },
           getQueriesHtmlFromServer: function () {
-            var resp = {
+            let resp = {
               data: {
                 snippets: snippet ? [ snippet ] : [],
                 error: snippetError
@@ -62,9 +63,8 @@ describe('Kibi Controllers', function () {
       });
     });
 
-    ngMock.inject(function (Private, $rootScope, $controller, _kibiState_) {
-      var urlHelper = Private(require('ui/kibi/helpers/url_helper'));
-      sinon.stub(urlHelper, 'onSettingsTab').returns(true);
+    ngMock.inject(function ($rootScope, $controller, _kibiState_) {
+      sinon.stub(chrome, 'onSettingsTab').returns(true);
 
       kibiState = _kibiState_;
       sinon.stub(kibiState, 'getEntityURI').returns('entity1');
@@ -91,7 +91,7 @@ describe('Kibi Controllers', function () {
     noDigestPromises.activateForSuite();
 
     it('should enable the entity URI', function () {
-      var query = {
+      let query = {
         id: 'ahah',
         title: 'ahah',
         activationQuery: '@doc[id]@'
@@ -101,7 +101,7 @@ describe('Kibi Controllers', function () {
     });
 
     it('should detect the star', function () {
-      var query = {
+      let query = {
         title: 'ahah',
         activationQuery: 'select * { ?s :name ?o }'
       };
@@ -111,7 +111,7 @@ describe('Kibi Controllers', function () {
     });
 
     it('should not detect the subselect star for SPARQL', function () {
-      var query = {
+      let query = {
         title: 'ahah',
         activationQuery: 'SELECT ?id { { SELECT * { ?s :name ?o } }}'
       };
@@ -121,7 +121,7 @@ describe('Kibi Controllers', function () {
     });
 
     it('should detect the star for SQL query', function () {
-      var query = {
+      let query = {
         title: 'ahah',
         activationQuery: 'select * from company limit 10'
       };
@@ -131,7 +131,7 @@ describe('Kibi Controllers', function () {
     });
 
     it('should not detect the subselect star for SQL', function () {
-      var query = {
+      let query = {
         title: 'ahah',
         activationQuery: 'select id from ( select * from company limit 100 ) limit 10'
       };
@@ -141,7 +141,7 @@ describe('Kibi Controllers', function () {
     });
 
     it('should detect comment lines for activationQuery', function () {
-      var query = {
+      let query = {
         title: 'commented lines',
         activationQuery: 'select * \n' +
                          'from test \n' +
@@ -152,7 +152,7 @@ describe('Kibi Controllers', function () {
     });
 
     it('should detect comment lines for resultQuery', function () {
-      var query = {
+      let query = {
         title: 'commented lines',
         resultQuery: 'select * \n' +
                      'from test \n' +
@@ -163,11 +163,11 @@ describe('Kibi Controllers', function () {
     });
 
     it('should submit the query', function (done) {
-      var query = {
+      let query = {
         title: '123',
         save: sinon.stub().returns(Promise.resolve('queryid'))
       };
-      var snippet = {
+      let snippet = {
         john: 'connor',
         html: 'are you there'
       };
@@ -184,7 +184,7 @@ describe('Kibi Controllers', function () {
     });
 
     it('should display an error on submit if the query is not correct', function (done) {
-      var query = {
+      let query = {
         title: '123',
         save: sinon.stub().returns(Promise.resolve('queryid'))
       };
@@ -202,10 +202,10 @@ describe('Kibi Controllers', function () {
 
     it('should update the REST datasource', function () {
       noDigestPromises.deactivate();
-      var query = {};
+      let query = {};
       init({ query: query, datasourceType: '123' });
 
-      var stub = sinon.spy($scope, 'preview');
+      let stub = sinon.spy($scope, 'preview');
       expect($scope.datasourceType).to.be('123');
       query.datasourceId = 'ds3';
       $scope.$digest();
@@ -216,10 +216,10 @@ describe('Kibi Controllers', function () {
 
     it('should update the datasource type along with the datasource ID', function () {
       noDigestPromises.deactivate();
-      var query = {};
+      let query = {};
       init({ query: query, datasourceType: '123' });
 
-      var stub = sinon.spy($scope, 'preview');
+      let stub = sinon.spy($scope, 'preview');
       expect($scope.datasourceType).to.be('123');
       query.datasourceId = 'ds1';
       $scope.$digest();

@@ -33,6 +33,12 @@ define(function (require) {
       self.DocSource = DocSource;
       self.SearchSource = SearchSource;
 
+      // kibi: Saved Objects API imports
+      let SavedObjectSource = Private(require('ui/courier/data_source/savedobject_source'));
+      let savedObjectLooper = self.savedObjectLooper = Private(require('ui/courier/looper/savedobject'));
+      self.SavedObjectSource = SavedObjectSource;
+      // kibi: end
+
       let HastyRefresh = errors.HastyRefresh;
 
       /**
@@ -52,6 +58,9 @@ define(function (require) {
       self.start = function () {
         searchLooper.start();
         docLooper.start();
+        // kibi: start saved objects API looper
+        savedObjectLooper.start();
+        // kibi: end
         return this;
       };
 
@@ -68,7 +77,7 @@ define(function (require) {
 
 
       /**
-       * is the currior currently fetching search
+       * is the courier currently fetching search
        * results automatically?
        *
        * @return {boolean}
@@ -99,6 +108,10 @@ define(function (require) {
         switch (type) {
           case 'doc':
             return new DocSource();
+          // kibi: Saved Objects API
+          case 'savedobject':
+            return new SavedObjectSource();
+          // kibi: end
           case 'search':
             return new SearchSource();
         }

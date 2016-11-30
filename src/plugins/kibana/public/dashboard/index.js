@@ -69,7 +69,7 @@ define(function (require) {
         timefilter.enabled = true;
         return savedDashboards.get($route.current.params.id)
         .catch(courier.redirectWhenMissing({
-          dashboard : '/dashboard'
+          dashboard : '/'
         }));
       }
     }

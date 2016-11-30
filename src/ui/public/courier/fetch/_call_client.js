@@ -104,12 +104,18 @@ define(function (require) {
           throw ABORTED;
         }
 
-        return (esPromise = es[strategy.clientMethod]({
+        // kibi: if the strategy provides a client use it instead of the default one.
+        const client = strategy.client ? strategy.client : es;
+        let config = {
           timeout: esShardTimeout,
           ignore_unavailable: true,
-          preference: sessionId,
-          body: body
-        }));
+          preference: sessionId
+        };
+        if (strategy.setClientOptions) {
+          config = strategy.setClientOptions();
+        }
+        config.body = body;
+        return (esPromise = client[strategy.clientMethod](config));
       })
       .then(function (clientResp) {
         return strategy.getResponses(clientResp);

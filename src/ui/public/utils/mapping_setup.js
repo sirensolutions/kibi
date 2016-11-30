@@ -1,5 +1,5 @@
 define(function () {
-  return function MappingSetupService(kbnIndex, es) {
+  return function MappingSetupService(kbnIndex, es, savedObjectsAPITypes) {
     let angular = require('angular');
     let _ = require('lodash');
     let mappingSetup = this;
@@ -82,7 +82,7 @@ define(function () {
         };
 
         // kibi: if the mapping for this type is managed by the saved objects api return true.
-        if (type === 'session') {
+        if (savedObjectsAPITypes.indexOf(type) >= 0) {
           return true;
         }
         // kibi: end

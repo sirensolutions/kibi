@@ -318,7 +318,13 @@ define(function (require) {
        * @return {promise}
        */
       self.delete = function () {
-        return es.delete({
+        // kibi: use the Saved Objects API client if needed
+        let client = es;
+        if (savedObjectsAPITypes.indexOf(config.type) >= 0) {
+          client = savedObjectsAPI;
+        }
+        return client.delete({
+        // kibi: end
           index: kbnIndex,
           type: type,
           id: this.id

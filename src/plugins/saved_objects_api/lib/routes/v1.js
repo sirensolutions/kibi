@@ -61,7 +61,8 @@ module.exports = (server, API_ROOT) => {
                 errorBody = {
                   type: 'not_found',
                   reason: error.message,
-                  status: 404
+                  status: 404,
+                  found: false
                 };
                 break;
               case 'AuthorizationError':
@@ -79,7 +80,7 @@ module.exports = (server, API_ROOT) => {
                 };
                 break;
             }
-            return Promise.resolve(merge(errorBody), doc);
+            return Promise.resolve(merge(errorBody, doc));
           });
         } catch (error) {
           return Promise.resolve(merge({

@@ -46,7 +46,7 @@ define(function (require) {
         // - if the default dashboard is missing, load the first dashboard
         // - if the first dashboard is missing, create a new one
         return savedDashboards.find().then(function (resp) {
-          if (resp.hits.length > 0) {
+          if (resp.hits.length) {
             timefilter.enabled = true;
             // kibi: select the first dashboard if default_dashboard_title is not set
             let dashboardId = resp.hits[0].id;
@@ -55,19 +55,17 @@ define(function (require) {
               dashboardId = kibiUtils.slugifyId(kibiDefaultDashboardTitle);
               redirectToWhenMissing = `/dashboard/${resp.hits[0].id}`;
             }
-            const errFunction = courier.redirectWhenMissing({
-              dashboard : redirectToWhenMissing
-            });
             return savedDashboards.get(dashboardId).catch(err => {
               if (kibiDefaultDashboardTitle) {
                 err.message = `The default dashboard with title "${kibiDefaultDashboardTitle}" does not exist.
                   Please correct the "kibi_core.default_dashboard_title" parameter in kibi.yml`;
               }
-              return errFunction(err);
+              return courier.redirectWhenMissing({
+                dashboard : redirectToWhenMissing
+              })(err);
             });
-          } else {
-            return savedDashboards.get();
           }
+          return savedDashboards.get();
         });
       }
     }

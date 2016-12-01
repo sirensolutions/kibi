@@ -63,7 +63,7 @@ define(function (require) {
         $scope.spy.mode = ($scope.uiState) ? $scope.uiState.get('spy.mode', {}) : {};
 
         $scope.multiSearchData = null;
-        if ($scope.vis.type.requiresMultiSearch) {
+        if (_.get($scope, 'vis.type.requiresMultiSearch')) {
           $scope.multiSearchData = new KibiSpyData();
         }
 
@@ -114,7 +114,7 @@ define(function (require) {
                 _.pull(fns, fn);
                 // kibi: let the visualization broadcast this event
                 // since it takes care of the searchSource
-                if (!fns.length && !$scope.vis.type.delegateSearch) {
+                if (!fns.length && !_.get($scope.vis.type.delegateSearch)) {
                   $scope.$root.$broadcast('ready:vis');
                 }
               }
@@ -168,7 +168,7 @@ define(function (require) {
         }));
 
         // kibi: if delegateSearch is true, the visualization takes care of retrieving the results.
-        if (!$scope.vis.type.delegateSearch) {
+        if (!_.get($scope, 'vis.type.delegateSearch')) {
           $scope.$watch('searchSource', prereq(function (searchSource) {
             if (!searchSource || attr.esResp) {
               return;

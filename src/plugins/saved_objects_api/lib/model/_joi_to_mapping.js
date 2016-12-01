@@ -1,3 +1,5 @@
+import { each } from 'lodash';
+
 /**
  * Returns the Elasticsearch mapping type for a Joi instance.
  *
@@ -6,16 +8,29 @@
 function getElasticsearchMappingType(joi) {
   switch (joi.type) {
     case 'string':
+      return {type: 'string'};
     case 'object':
-      return 'string';
+      if (joi.children) {
+        let body = {
+          properties: {}
+        };
+        each(joi.children, (child, name) => {
+          body.properties[name] = getElasticsearchMappingType(child);
+        });
+        return body;
+      } else {
+        return {type: 'string'};
+      }
+      break;
     case 'date':
-      return 'date';
+      return {type: 'date'};
     case 'number':
       for (let rule of joi.rules) {
         if (rule.name === 'integer') {
-          return 'integer';
+          return {type: 'integer' };
         }
       }
+      throw new Error(`Can't map Joi type ${joi.type} to Elasticsearch mapping type.`);
     default:
       throw new Error(`Can't map Joi type ${joi.type} to Elasticsearch mapping type.`);
   }
@@ -26,9 +41,7 @@ export default function joiToMapping(schema) {
   let properties = {};
   let children = schema.describe().children;
   for (let key of Object.keys(children)) {
-    properties[key] = {
-      type: getElasticsearchMappingType(children[key])
-    };
+    properties[key] = getElasticsearchMappingType(children[key]);
   }
   return properties;
 }

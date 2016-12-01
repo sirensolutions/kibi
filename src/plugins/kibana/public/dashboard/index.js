@@ -39,24 +39,33 @@ define(function (require) {
     template: require('plugins/kibana/dashboard/index.html'),
     resolve: {
       dash: function (timefilter, savedDashboards, kibiDefaultDashboardTitle, courier) {
+        // kibi:
+        // - get all the dashboards
+        // - if none, just create a new one
+        // - if any try to load the default dashboard if set, otherwise load the first dashboard
+        // - if the default dashboard is missing, load the first dashboard
+        // - if the first dashboard is missing, create a new one
         return savedDashboards.find().then(function (resp) {
-          if (resp.hits.length > 0) {
+          if (resp.hits.length) {
             timefilter.enabled = true;
             // kibi: select the first dashboard if default_dashboard_title is not set
-            const dashboardId = kibiDefaultDashboardTitle ? kibiUtils.slugifyId(kibiDefaultDashboardTitle) : resp.hits[0].id;
-            const errFunction = courier.redirectWhenMissing({
-              dashboard : '/'
-            });
+            let dashboardId = resp.hits[0].id;
+            let redirectToWhenMissing = '/dashboard/new-dashboard/create/';
+            if (kibiDefaultDashboardTitle) {
+              dashboardId = kibiUtils.slugifyId(kibiDefaultDashboardTitle);
+              redirectToWhenMissing = `/dashboard/${resp.hits[0].id}`;
+            }
             return savedDashboards.get(dashboardId).catch(err => {
               if (kibiDefaultDashboardTitle) {
                 err.message = `The default dashboard with title "${kibiDefaultDashboardTitle}" does not exist.
                   Please correct the "kibi_core.default_dashboard_title" parameter in kibi.yml`;
               }
-              errFunction(err);
+              return courier.redirectWhenMissing({
+                dashboard : redirectToWhenMissing
+              })(err);
             });
-          } else {
-            return savedDashboards.get();
           }
+          return savedDashboards.get();
         });
       }
     }
@@ -69,7 +78,7 @@ define(function (require) {
         timefilter.enabled = true;
         return savedDashboards.get($route.current.params.id)
         .catch(courier.redirectWhenMissing({
-          dashboard : '/'
+          dashboard : '/dashboard'
         }));
       }
     }

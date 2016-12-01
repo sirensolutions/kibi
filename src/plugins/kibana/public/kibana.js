@@ -4,7 +4,6 @@ require('plugins/kibana/dashboard/index');
 require('plugins/kibana/settings/index');
 require('plugins/kibana/doc/index');
 require('ui/timepicker');
-require('ui/kibi/default_route');
 
 const moment = require('moment-timezone');
 
@@ -18,9 +17,7 @@ routes.enable();
 
 routes
 .otherwise({
-  // kibi: redirect to kibi default route handler which will compute kibi default path
-  // or fallback to what was here before
-  redirectTo: '/default'
+  redirectTo: `/${chrome.getInjected('kbnDefaultAppId', 'discover')}`
 });
 
 chrome

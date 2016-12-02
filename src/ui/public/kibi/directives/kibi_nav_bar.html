@@ -13,44 +13,24 @@
             <i ng-if="group.iconCss" class="icon {{group.iconCss}}"></i>
             <img class="icon" ng-if="group.iconUrl" ng-src="{{group.iconUrl}}"/>
             {{group.title}}
-            <span ng-if="group.active && group.dashboards.length > 1">
-              <ui-select
-                ng-model="group.selected"
-                on-select="dashboardTabSelect.onSelect($item, $model)"
-                uis-open-close="dashboardTabSelect.onOpenClose(isOpen)"
-                search-enabled="false"
-                append-to-body="true"
-                theme="bootstrap">
-                <ui-select-match>
-                  <span ng-bind="$select.selected.title"></span>
-                  <!-- compare count to undefined to show zero -->
-                  <span ng-if="$select.selected.count !== undefined"> ({{$select.selected.count}})</span>
-                  <span
-                    ng-if="$select.selected.filterIconMessage" aria-hidden="true" data-toggle="tooltip"
-                    data-placement="bottom" title="{{$select.selected.filterIconMessage}}">
-                    <i class="fa fa-filter"/>
-                  </span>
-                  <span
-                    ng-if="$select.selected.isPruned" aria-hidden="true" data-toggle="tooltip"
-                    data-placement="bottom" title="Count may be lower that the actual value because a join operation was pruned"> *</span>
-                </ui-select-match>
-                <ui-select-choices
-                  position='down'
-                  repeat="dashboard.title as dashboard in group.dashboards track by dashboard.id">
-                  <span ng-bind="dashboard.title"></span>
-                  <!-- compare count to undefined to show zero -->
-                  <span ng-if="dashboard.count !== undefined" class="smallNumber"> ({{dashboard.count}})</span>
-                  <span ng-if="dashboard.count === undefined && dashboard.savedSearchId" class="spinner"/>
-                  <span
-                    ng-if="dashboard.filterIconMessage" aria-hidden="true" data-toggle="tooltip"
-                    data-placement="bottom" title="{{dashboard.filterIconMessage}}">
-                    <i class="fa fa-filter"/>
-                  </span>
-                  <span
-                    ng-if="dashboard.isPruned" aria-hidden="true" data-toggle="tooltip"
-                    data-placement="bottom" title="Count may be lower that the actual value because a join operation was pruned"> *</span>
-                </ui-select-choices>
-              </ui-select>
+            <span class="dashboard-select"
+                  ng-if="group.active && group.dashboards.length > 1"
+                  kibi-menu-template="dashboardSelectData.template"
+                  kibi-menu-template-data="group.dashboards"
+                  kibi-menu-template-context="dashboardGroups"
+                  kibi-menu-template-on-show-fn="dashboardSelectData.onOpen()">
+              <span ng-bind="group.selected.title"></span>
+              <!-- compare count to undefined to show zero -->
+              <span ng-if="group.selected.count !== undefined"> ({{group.selected.count}})</span>
+              <span ng-if="group.selected.filterIconMessage" aria-hidden="true" data-toggle="tooltip"
+                    data-placement="bottom" title="{{group.selected.filterIconMessage}}">
+                <i class="fa fa-filter"/>
+              </span>
+              <span ng-if="group.selected.isPruned" aria-hidden="true" data-toggle="tooltip"
+                    data-placement="bottom"
+                    title="Count may be lower than the actual value because a join operation was pruned"> *
+              </span>
+              <i class="fa fa-sort"/>
             </span>
 
             <span ng-if="!group.active || (group.active && group.dashboards.length == 1)">
@@ -63,7 +43,7 @@
                 data-placement="bottom" title="{{ group.selected.filterIconMessage }}"/>
               </span>
               <span ng-if="group.selected.isPruned" aria-hidden="true" data-toggle="tooltip"
-                data-placement="bottom" title="Count may be lower that the actual value because a join operation was pruned"> *</span>
+                data-placement="bottom" title="Count may be lower than the actual value because a join operation was pruned"> *</span>
             </span>
           </a>
         </li>

@@ -1,8 +1,18 @@
 @import (reference) "~ui/styles/variables";
 
 /* kibi defined variables */
-@st-gray-blured:   #ECF0F1;
-@st-gray-focused:  #B4BCC2;
+@kibi-light-border: #dedede;
+
+/* colors for dashboards menu on tabs */
+@kibi-menu-template-bg:            @white;
+@kibi-menu-template-item-bg:       @gray-lighter;
+@kibi-menu-template-item-bg-hover: @kibi-light-border;
+@kibi-menu-template-border-light:  @kibi-light-border;
+@kibi-menu-template-border-dark:   @gray9;
+
+
+@st-gray-blured:   @gray-lighter;
+@st-gray-focused:  @gray-light;
 
 @st-darkgray-blured:   #B4BCC2;
 @st-darkgray-focused:  #444;
@@ -10,7 +20,7 @@
 @st-dark-gray:     #656A76;
 
 @brand-relational:      #048CC8;
-@btn-relational-color:           #fff;
+@btn-relational-color:           @white;
 @btn-relational-bg:              @brand-relational;
 @btn-disabled-relational-bg:     #656A76;
 @btn-relational-border:          darken(@btn-info-bg, 5%);

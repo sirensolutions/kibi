@@ -1,9 +1,8 @@
-var expect = require('expect.js');
-var ngMock = require('ngMock');
-var dashboardHelper;
+const expect = require('expect.js');
+const ngMock = require('ngMock');
+const mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
 
-var mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
-var fakeSavedDashboards = [
+const fakeSavedDashboards = [
   {
     id: 'ds1',
     savedSearchId: 'timebasedSavedSearch'
@@ -17,7 +16,7 @@ var fakeSavedDashboards = [
   }
 ];
 
-var fakeSavedSearches = [
+const fakeSavedSearches = [
   {
     id: 'timebasedSavedSearch',
     searchSource: {
@@ -49,8 +48,9 @@ describe('Kibi Components', function () {
 
     require('testUtils/noDigestPromises').activateForSuite();
 
-    beforeEach(function () {
+    let dashboardHelper;
 
+    beforeEach(function () {
       ngMock.module('kibana', function ($provide) {
         $provide.constant('kbnDefaultAppId', 'dashboard');
         $provide.constant('kibiDefaultDashboardTitle', '');
@@ -62,13 +62,13 @@ describe('Kibi Components', function () {
         $provide.service('savedSearches', (Promise, Private) => mockSavedObjects(Promise, Private)('savedSearches', fakeSavedSearches));
       });
 
-      ngMock.inject(function ($injector, Private, _$rootScope_) {
+      ngMock.inject(function (Private) {
         dashboardHelper = Private(require('ui/kibi/helpers/dashboard_helper'));
       });
     });
 
     it('getTimeDependentDashboards should return only 1', function (done) {
-      var expectedDashboards = [
+      const expectedDashboards = [
         {
           id: 'ds1',
           savedSearchId: 'timebasedSavedSearch'
@@ -79,8 +79,6 @@ describe('Kibi Components', function () {
         expect(dashboards).to.eql(expectedDashboards);
         done();
       }).catch(done);
-
     });
-
   });
 });

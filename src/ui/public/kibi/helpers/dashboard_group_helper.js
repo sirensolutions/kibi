@@ -2,10 +2,11 @@ define(function (require) {
   let isJoinPruned = require('ui/kibi/helpers/is_join_pruned');
 
   return function DashboardGroupHelperFactory(
-      $timeout, kbnUrl, kibiState, Private, savedDashboards, savedDashboardGroups, Promise, kbnIndex, $http) {
-    let _ = require('lodash');
-    let countHelper = Private(require('ui/kibi/helpers/count_helper/count_helper'));
-    let kibiUtils = require('kibiutils');
+      $timeout, kibiState, Private, savedDashboards, savedDashboardGroups, Promise, kbnIndex, $http) {
+    const _ = require('lodash');
+    const dashboardHelper = Private(require('ui/kibi/helpers/dashboard_helper'));
+    const countHelper = Private(require('ui/kibi/helpers/count_helper/count_helper'));
+    const kibiUtils = require('kibiutils');
     const SearchHelper = require('ui/kibi/helpers/search_helper');
     const chrome = require('ui/chrome');
 
@@ -71,11 +72,7 @@ define(function (require) {
           kibiState.setSelectedDashboardId(groupId, dashboardId);
           kibiState.save();
         }
-
-        return kibiState.saveAppState()
-        .then(() => {
-          kbnUrl.change('/dashboard/{{id}}', {id: dashboardId});
-        });
+        return dashboardHelper.switchDashboard(dashboardId);
       }, 750);
       return lastEventTimer;
     };

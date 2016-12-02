@@ -2,10 +2,13 @@ define(function (require) {
   const _ = require('lodash');
   const Promise = require('bluebird');
 
-  return function DashboardHelperFactory(savedDashboards, savedSearches) {
+  return function DashboardHelperFactory($timeout, kbnUrl, kibiState, savedDashboards, savedSearches) {
 
     function DashboardHelper() {}
 
+    /**
+     * getTimeDependentDashboards returns a list of dashboards which associated saved search is time-based.
+     */
     DashboardHelper.prototype.getTimeDependentDashboards = function () {
       return savedDashboards.find()
       .then((savedDashboardsRes) => {
@@ -20,6 +23,20 @@ define(function (require) {
             }
           });
           return dashboards;
+        });
+      });
+    };
+
+    /**
+     * switchDashboard switches the view to the dashboard with the given ID
+     */
+    DashboardHelper.prototype.switchDashboard = function (dashboardId) {
+      return kibiState.saveAppState()
+      .then(() => {
+        // switch dashboard in the next tick. If the state (e.g., appState) is being changed, this would
+        // invalidate the state of the new dashboard
+        return $timeout(() => {
+          kbnUrl.change('/dashboard/{{id}}', {id: dashboardId});
         });
       });
     };

@@ -7,7 +7,7 @@ define(function (require) {
     function DashboardHelper() {}
 
     /**
-     * getTimeDependentDashboards returns a list of dashboards which associated saved search is time-based.
+     * getTimeDependentDashboards returns a list of dashboards whose associated saved search is time-based.
      */
     DashboardHelper.prototype.getTimeDependentDashboards = function () {
       return savedDashboards.find()

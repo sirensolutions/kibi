@@ -65,8 +65,8 @@ define(function (require) {
       .then(function (vis) {
 
         // kibi: allow the plugin to initialize some parameters based on the linked savedSearch
-        if (vis.type.init) {
-          vis.type.init(vis, self.savedSearch);
+        if (self.vis.type.init) {
+          self.vis.type.init(self.vis, self.savedSearch);
         }
 
         self.searchSource.aggs(function () {

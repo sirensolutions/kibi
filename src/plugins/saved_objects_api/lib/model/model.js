@@ -1,5 +1,6 @@
 import Joi from 'joi';
 import joiToMapping from './_joi_to_mapping';
+import AuthorizationError from './errors/authorization';
 import NotFoundError from './errors/not_found';
 import ConflictError from './errors/conflict';
 
@@ -43,6 +44,8 @@ export default class Model {
         throw new ConflictError('An object with the same type and id already exists.', error);
       case 404:
         throw new NotFoundError('Object not found.', error);
+      case 403:
+        throw new AuthorizationError('Unauthorized', error);
       default:
         throw error;
     }

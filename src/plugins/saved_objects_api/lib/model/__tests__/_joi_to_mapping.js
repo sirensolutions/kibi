@@ -13,7 +13,13 @@ describe('saved_objects_api', function () {
           id: Joi.number().integer(),
           title: Joi.string(),
           created: Joi.date(),
-          json: Joi.object()
+          json: Joi.object(),
+          nested: Joi.object().keys({
+            id: Joi.number().integer(),
+            nested: Joi.object().keys({
+              nested: Joi.string()
+            })
+          })
         });
 
         expect(joiToMapping(schema)).to.eql({
@@ -28,6 +34,20 @@ describe('saved_objects_api', function () {
           },
           json: {
             type: 'string'
+          },
+          nested: {
+            properties: {
+              id: {
+                type: 'integer'
+              },
+              nested: {
+                properties: {
+                  nested: {
+                    type: 'string'
+                  }
+                }
+              }
+            }
           }
         });
       });

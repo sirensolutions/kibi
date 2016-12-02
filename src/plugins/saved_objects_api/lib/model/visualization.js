@@ -18,8 +18,11 @@ export default class VisualizationModel extends Model {
       description: Joi.string().default(null),
       visState: Joi.object().default({}),
       uiStateJSON: Joi.string().default(null),
-      savedSearchId: 'string',
-      version: Joi.number().integer()
+      savedSearchId: Joi.string(),
+      version: Joi.number().integer(),
+      kibanaSavedObjectMeta: Joi.object().keys({
+        searchSourceJSON: Joi.string()
+      })
     });
 
     super(server, 'visualization', schema);

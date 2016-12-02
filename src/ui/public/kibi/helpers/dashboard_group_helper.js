@@ -184,11 +184,10 @@ define(function (require) {
         title: self.shortenDashboardName(groupTitle, dashboardDef.title),
         savedSearchId: dashboardDef.savedSearchId,
         onSelect: function (dashboardGroups) {
-          let currentDashboardId = kibiState._getCurrentDashboardId();
-          if (currentDashboardId === dashboardDef.id) {
-            // do nothing as we are already at the correct dashboard
-            return;
-          }
+          // NOTE:
+          // do NOT return if currentDashboardId === dashboardDef.id
+          // previously we thought we should do nothing in such case but later
+          // we found that clicking on a dashboard to refresh it is very useful feature
           self._getOnClickForDashboardInGroup(dashboardGroups, dashboardDef.id, groupId);
         },
         onOpenClose: function (group) {

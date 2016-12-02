@@ -1,0 +1,40 @@
+@import (reference) "~ui/kibi/styles/kibi_variables.less";
+
+.kibi-menu-template {
+  display: none;
+  position: absolute;
+  &.visible {
+    display: block;
+  }
+}
+
+/* specyfic class dashboard tabs template */
+.dashboard-select-kibi-menu-template {
+  border-color: @kibi-menu-template-border-light @kibi-menu-template-border-dark @kibi-menu-template-border-dark @kibi-menu-template-border-dark;
+  border-style: solid;
+  border-width: 1px;
+  border-radius: 0 2px 2px 2px;
+  background-color: @kibi-menu-template-bg;
+  margin-top: -1px;
+  padding: 0 2px 2px 2px;
+
+  ul {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+
+    li {
+      margin-top: 2px;
+      padding: 4px;
+      cursor: pointer;
+      background-color: @kibi-menu-template-item-bg;
+      &:hover{
+        background-color: @kibi-menu-template-item-bg-hover;
+      }
+    }
+  }
+
+  span.smallNumber {
+    font-size: 90%;
+  }
+}

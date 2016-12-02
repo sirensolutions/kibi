@@ -3,9 +3,9 @@ define(function (require) {
   require('ui/kibi/directives/kibi_nav_bar.less');
   require('ui/kibi/directives/kibi_dashboard_toolbar');
   require('ui/kibi/directives/kibi_stop_click_event');
-  require('angular-sanitize');
-  require('ui-select-shim');
+  require('ui/kibi/directives/kibi_menu_template');
   const _ = require('lodash');
+  const menuTemplateHtml = require('ui/kibi/directives/kibi_nav_bar_kibi_menu_template.html');
 
   require('ui/routes')
   .addSetupWork(function (Private) {
@@ -14,7 +14,7 @@ define(function (require) {
   });
 
   require('ui/modules')
-  .get('app/dashboard', ['ui.select', 'ngSanitize'])
+  .get('app/dashboard')
   .directive('kibiNavBar', function ($rootScope, kibiState, config, Private) {
     const chrome = require('ui/chrome');
     const ResizeChecker = Private(require('ui/vislib/lib/resize_checker'));
@@ -26,15 +26,11 @@ define(function (require) {
       template: require('ui/kibi/directives/kibi_nav_bar.html'),
       link: function ($scope, $el) {
 
-        $scope.dashboardTabSelect = {
-          onSelect: function (item, model) {
-            item.onSelect($scope.dashboardGroups);
-          },
-          onOpenClose: function (isOpen) {
-            if (isOpen) {
-              var activeGroup = _.find($scope.dashboardGroups, g => g.active === true);
-              activeGroup.selected.onOpenClose(activeGroup);
-            }
+        $scope.dashboardSelectData = {
+          template: menuTemplateHtml,
+          onOpen: function () {
+            var activeGroup = _.find($scope.dashboardGroups, g => g.active === true);
+            activeGroup.selected.onOpenClose(activeGroup);
           }
         };
 

@@ -148,7 +148,6 @@
     "eeg": "1.0.28",
     "angular-animate": "1.4.8",
     "kibi-icons": "sirensolutions/kibi-icons#1.0.0",
-    "ui-select": "0.19.4",
 
     "lru-cache": "~2.6.4",
     "request-promise": "3.0.0",

@@ -1,65 +1,20 @@
-.ui-select-placeholder {
-  height: 18px;
-  display: inline-block;
-  vertical-align: text-bottom;
-}
-
-.ui-select-container {
-  height: 18px;
-  display: inline-block;
-  vertical-align: text-bottom;
-
-  .ui-select-dropdown {
-    width: auto!important;
-  }
-
-  .btn-default-focus {
-    outline: 0!important;
-    outline-offset: 0;
-    box-shadow: none;
-  }
-
-  .ui-select-match {
-    height: 18px;
-
-    .ui-select-match-text {
-      width: auto!important;
-      span {
-        width: auto!important;
-      }
-    }
-    span.ui-select-toggle {
-      padding: 0px 10px!important;
-    }
-  }
-
-  .ui-select-toggle {
-    width: auto!important;
-    border: none!important;
-    &.form-control {
-      height: 18px;
-    }
-  }
-
-  .ui-select-choices {
-    padding: 0!important;
-  }
-  .ui-select-choices-row-inner {
-    padding: 4px !important;
-  }
-
-  span.smallNumber {
-    font-size: 80%;
-  }
-
-}
-
+@import (reference) "~ui/kibi/styles/kibi_variables.less";
 
 kibi-nav-bar {
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+
+
+  .dashboard-select {
+    margin-left: 2px;
+    border-width: 1px;
+    border-color: @kibi-menu-template-border-dark;
+    border-style: solid;
+    padding: 2px 4px;
+    border-radius: 2px;
+  }
 
 
   background-color: #656a76;

@@ -208,6 +208,82 @@ describe('FilterJoin query builder', function () {
     expect(expected).to.eql(builder.toObject());
   });
 
+  it('should create a query with a nested filterjoin having a source type set that is negated', function () {
+    const builder = new FilterJoinBuilder();
+    builder.addFilterJoin({
+      sourcePath: 'id1',
+      targetIndices: [ 'i2' ],
+      targetPath: 'id2'
+    })
+    .addFilterJoin({
+      sourcePath: 'id21',
+      sourceTypes: [ 'ram' ],
+      targetIndices: [ 'i3' ],
+      targetPath: 'id3',
+      negate: true
+    });
+    const expected = [
+      {
+        filterjoin: {
+          id1: {
+            indices: [ 'i2' ],
+            path: 'id2',
+            query: {
+              bool: {
+                filter: {
+                  bool: {
+                    must: [],
+                    must_not: [
+                      {
+                        bool: {
+                          must: [
+                            {
+                              filterjoin: {
+                                id21: {
+                                  indices: [ 'i3' ],
+                                  path: 'id3',
+                                  query: {
+                                    bool: {
+                                      filter: {
+                                        bool: {
+                                          must: []
+                                        }
+                                      },
+                                      must: [
+                                        {
+                                          match_all: {}
+                                        }
+                                      ]
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            {
+                              type: {
+                                value: 'ram'
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                },
+                must: [
+                  {
+                    match_all: {}
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    ];
+    expect(expected).to.eql(builder.toObject());
+  });
+
   it('should create a query with a nested filterjoin that is negated', function () {
     const builder = new FilterJoinBuilder();
     builder.addFilterJoin({
@@ -234,25 +310,31 @@ describe('FilterJoin query builder', function () {
                     must: [],
                     must_not: [
                       {
-                        filterjoin: {
-                          id21: {
-                            indices: [ 'i3' ],
-                            path: 'id3',
-                            query: {
-                              bool: {
-                                filter: {
-                                  bool: {
-                                    must: []
+                        bool: {
+                          must: [
+                            {
+                              filterjoin: {
+                                id21: {
+                                  indices: [ 'i3' ],
+                                  path: 'id3',
+                                  query: {
+                                    bool: {
+                                      filter: {
+                                        bool: {
+                                          must: []
+                                        }
+                                      },
+                                      must: [
+                                        {
+                                          match_all: {}
+                                        }
+                                      ]
+                                    }
                                   }
-                                },
-                                must: [
-                                  {
-                                    match_all: {}
-                                  }
-                                ]
+                                }
                               }
                             }
-                          }
+                          ]
                         }
                       }
                     ]

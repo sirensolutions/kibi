@@ -373,6 +373,72 @@ describe('FilterJoin querying', function () {
       });
     });
 
+    it('should consider the position of queries before being replaced by their filterjoin equivalent', function () {
+      const query = {
+        query: [
+          {
+            join_set: {
+              focus: 'company',
+              relations: [
+                [
+                  { pattern: 'company', indices: [ 'company' ], path: 'id' },
+                  { pattern: 'investment', indices: [ 'investment' ], path: 'companyid' }
+                ],
+                [
+                  { pattern: 'article', indices: [ 'article' ], path: 'companyid' },
+                  { pattern: 'company', indices: [ 'company' ], path: 'id' }
+                ]
+              ]
+            }
+          },
+          {
+            other: {
+              join_set: {
+                focus: 'article',
+                relations: [
+                  [
+                    { pattern: 'article', indices: [ 'article' ], path: 'companyid' },
+                    { pattern: 'company', indices: [ 'company' ], path: 'id' }
+                  ]
+                ]
+              }
+            }
+          }
+        ]
+      };
+      const builder = new FilterJoinBuilder();
+      builder.addFilterJoin({
+        sourcePath: 'id',
+        targetIndices: [ 'investment' ],
+        targetPath: 'companyid'
+      });
+      builder.addFilterJoin({
+        sourcePath: 'id',
+        targetIndices: [ 'article' ],
+        targetPath: 'companyid'
+      });
+      const query1 = builder.toObject();
+
+      builder.clear();
+      builder.addFilterJoin({
+        sourcePath: 'companyid',
+        targetIndices: [ 'company' ],
+        targetPath: 'id'
+      });
+      const query2 = builder.toObject();
+
+      const expected = {
+        query: [
+          ...query1,
+          {
+            other: query2
+          }
+        ]
+      };
+      const actual = filterJoinSeq(filterJoinSet(query));
+      expect(actual).to.eql(expected);
+    });
+
     it('join set loop', function () {
       const query = {
         bool: {
@@ -1219,952 +1285,932 @@ describe('FilterJoin querying', function () {
     });
   });
 
-  describe('Filterjoin with nested join sequence', function () {
-    describe('Error handling', function () {
-      it('should fail on the sequence not being an array', function () {
-        expect(filterJoinSeq).withArgs([ { join_sequence: 123 } ]).to.throwError(/unexpected value/i);
-        expect(filterJoinSeq).withArgs([ { join_sequence: {} } ]).to.throwError(/must be an array/i);
-      });
+  describe('Join Sequence', function () {
+    describe('Filterjoin with nested join sequence', function () {
+      describe('Error handling', function () {
+        it('should fail on the sequence not being an array', function () {
+          expect(filterJoinSeq).withArgs([ { join_sequence: 123 } ]).to.throwError(/unexpected value/i);
+          expect(filterJoinSeq).withArgs([ { join_sequence: {} } ]).to.throwError(/must be an array/i);
+        });
 
-      it('should fail on empty sequence', function () {
-        expect(filterJoinSeq).withArgs([ { join_sequence: [] } ]).to.throwError(/specify the join sequence/i);
-      });
+        it('should fail on empty sequence', function () {
+          expect(filterJoinSeq).withArgs([ { join_sequence: [] } ]).to.throwError(/specify the join sequence/i);
+        });
 
-      it('should fail on incorrect nested sequence', function () {
-        expect(filterJoinSeq).withArgs([ { join_sequence: [ { group: [] } ] } ]).to.throwError(/missing elements/i);
-        // recurse on the nested sequence
-        expect(filterJoinSeq).withArgs([ { join_sequence: [ { group: [ 1, 2 ] }, { relation: [ 1, 2 ] } ] } ])
-        .to.throwError(/The join sequence must be an array. Got: 1/i);
-      });
+        it('should fail on incorrect nested sequence', function () {
+          expect(filterJoinSeq).withArgs([ { join_sequence: [ { group: [] } ] } ]).to.throwError(/missing elements/i);
+          // recurse on the nested sequence
+          expect(filterJoinSeq).withArgs([ { join_sequence: [ { group: [ 1, 2 ] }, { relation: [ 1, 2 ] } ] } ])
+          .to.throwError(/The join sequence must be an array. Got: 1/i);
+        });
 
-      it('should fail on incorrect dashboard element', function () {
-        expect(filterJoinSeq).withArgs([
-          {
-            join_sequence: [
-              {
-                relation: [ {}, {} ]
-              }
-            ]
-          }
-        ]).to.throwError(/path is required/i);
-
-        expect(filterJoinSeq).withArgs([
-          {
-            join_sequence: [
-              {
-                relation: [ { path: 'aaa' }, { path: 'bbb' } ]
-              }
-            ]
-          }
-        ]).to.throwError(/pattern is required/i);
-
-        expect(filterJoinSeq).withArgs([
-          {
-            join_sequence: [
-              {
-                relation: [
-                  { pattern: 'ib', path: 'bbb' }
-                ]
-              }
-            ]
-          }
-        ])
-        .to.throwError(/pair of dashboards/i);
-
-        expect(filterJoinSeq).withArgs([
-          {
-            join_sequence: [
-              {
-                relation: [
-                  { pattern: 'ib', path: 'bbb' },
-                  { pattern: 'ia', path: 'aaa', queries: [] }
-                ]
-              }
-            ]
-          }
-        ])
-        .to.throwError(/already set/i);
-
-        expect(filterJoinSeq).withArgs([
-          {
-            join_sequence: [
-              {
-                relation: [
-                  { pattern: 'ib', path: 'bbb', dog: 'bbb' },
-                  { pattern: 'ia', path: 'aaa' }
-                ]
-              }
-            ]
-          }
-        ])
-        .to.throwError(/unknown field \[dog\]/i);
-      });
-    });
-
-    it('2 join sequences', function () {
-      const joinSequence1 = {
-        join_sequence: [
-          {
-            relation: [
-              { pattern: 'A', path: 'aaa', indices: [ 'A' ] },
-              { pattern: 'B', path: 'bbb', indices: [ 'B' ] }
-            ]
-          }
-        ]
-      };
-      const joinSequence2 = {
-        join_sequence: [
-          {
-            relation: [
-              { pattern: 'C', path: 'ccc', indices: [ 'C' ] },
-              { pattern: 'D', path: 'ddd', indices: [ 'D' ] }
-            ]
-          }
-        ]
-      };
-      const query = [
-        {
-          query: {
-            bool: {
-              must: [
+        it('should fail on incorrect dashboard element', function () {
+          expect(filterJoinSeq).withArgs([
+            {
+              join_sequence: [
                 {
-                  match_all: {}
+                  relation: [ {}, {} ]
                 }
-              ],
-              filter: {
-                bool: {
-                  must: [ joinSequence1, joinSequence2 ]
-                }
-              }
-            }
-          }
-        }
-      ];
-      const builder = new FilterJoinBuilder();
-      builder.addFilterJoin({
-        sourcePath: 'bbb',
-        targetIndices: [ 'A' ],
-        targetPath: 'aaa'
-      });
-      builder.addFilterJoin({
-        sourcePath: 'ddd',
-        targetIndices: [ 'C' ],
-        targetPath: 'ccc'
-      });
-
-      const expected = [
-        {
-          query: {
-            bool: {
-              must: [
-                {
-                  match_all:{}
-                }
-              ],
-              filter: {
-                bool: {
-                  must: builder.toObject()
-                }
-              }
-            }
-          }
-        }
-      ];
-
-      const actual = filterJoinSeq(query);
-      expect(actual).to.eql(expected);
-    });
-
-    it('should consider the position of queries before being replaced by their filterjoin equivalent', function () {
-      const query = {
-        query: [
-          {
-            join_set: {
-              focus: 'company',
-              relations: [
-                [
-                  { pattern: 'company', indices: [ 'company' ], path: 'id' },
-                  { pattern: 'investment', indices: [ 'investment' ], path: 'companyid' }
-                ],
-                [
-                  { pattern: 'article', indices: [ 'article' ], path: 'companyid' },
-                  { pattern: 'company', indices: [ 'company' ], path: 'id' }
-                ]
               ]
             }
-          },
-          {
-            other: {
-              join_set: {
-                focus: 'article',
-                relations: [
-                  [
-                    { pattern: 'article', indices: [ 'article' ], path: 'companyid' },
-                    { pattern: 'company', indices: [ 'company' ], path: 'id' }
-                  ]
-                ]
-              }
-            }
-          }
-        ]
-      };
-      const builder = new FilterJoinBuilder();
-      builder.addFilterJoin({
-        sourcePath: 'id',
-        targetIndices: [ 'investment' ],
-        targetPath: 'companyid'
-      });
-      builder.addFilterJoin({
-        sourcePath: 'id',
-        targetIndices: [ 'article' ],
-        targetPath: 'companyid'
-      });
-      const query1 = builder.toObject();
+          ]).to.throwError(/path is required/i);
 
-      builder.clear();
-      builder.addFilterJoin({
-        sourcePath: 'companyid',
-        targetIndices: [ 'company' ],
-        targetPath: 'id'
-      });
-      const query2 = builder.toObject();
-
-      const expected = {
-        query: [
-          ...query1,
-          {
-            other: query2
-          }
-        ]
-      };
-      const actual = filterJoinSeq(filterJoinSet(query));
-      expect(actual).to.eql(expected);
-    });
-
-    it('join_sequence with a join_set', function () {
-      const query = [
-        {
-          join_sequence: [
+          expect(filterJoinSeq).withArgs([
             {
-              relation: [
+              join_sequence: [
                 {
-                  path: 'id',
-                  indices: [ 'company' ],
-                  pattern: 'company',
-                  queries: [
+                  relation: [ { path: 'aaa' }, { path: 'bbb' } ]
+                }
+              ]
+            }
+          ]).to.throwError(/pattern is required/i);
+
+          expect(filterJoinSeq).withArgs([
+            {
+              join_sequence: [
+                {
+                  relation: [
+                    { pattern: 'ib', path: 'bbb' }
+                  ]
+                }
+              ]
+            }
+          ])
+          .to.throwError(/pair of dashboards/i);
+
+          expect(filterJoinSeq).withArgs([
+            {
+              join_sequence: [
+                {
+                  relation: [
+                    { pattern: 'ib', path: 'bbb' },
+                    { pattern: 'ia', path: 'aaa', queries: [] }
+                  ]
+                }
+              ]
+            }
+          ])
+          .to.throwError(/already set/i);
+
+          expect(filterJoinSeq).withArgs([
+            {
+              join_sequence: [
+                {
+                  relation: [
+                    { pattern: 'ib', path: 'bbb', dog: 'bbb' },
+                    { pattern: 'ia', path: 'aaa' }
+                  ]
+                }
+              ]
+            }
+          ])
+          .to.throwError(/unknown field \[dog\]/i);
+        });
+      });
+
+      it('negated nested join filter', function () {
+        const query = [
+          {
+            join_sequence: [
+              {
+                group: [
+                  [
                     {
-                      join_set: {
-                        focus: 'i1',
-                        relations: [
-                          [
-                            { pattern: 'i1', indices: [ 'i1' ], path: 'id2' },
-                            { pattern: 'i2', indices: [ 'i2' ], path: 'id' }
-                          ]
-                        ]
-                      }
+                      relation: [
+                        { indices: [ 'bbb' ], path: 'path1', pattern: 'bbb' },
+                        { indices: [ 'aaa' ], path: 'id', pattern: 'aaa' }
+                      ],
+                      negate: true
+                    }
+                  ],
+                  [
+                    {
+                      relation: [
+                        { indices: [ 'bbb' ], path: 'path2', pattern: 'bbb' },
+                        { indices: [ 'aaa' ], path: 'id', pattern: 'aaa' }
+                      ]
                     }
                   ]
-                },
-                { path: 'companyid', pattern: 'investment', indices: [ 'investment' ] }
-              ]
-            }
-          ]
-        }
-      ];
-      const builder = new FilterJoinBuilder();
-      builder.addFilterJoin({
-        sourcePath: 'companyid',
-        targetIndices: [ 'company' ],
-        targetPath: 'id'
-      })
-      .addFilterJoin({
-        sourcePath: 'id2',
-        targetIndices: [ 'i2' ],
-        targetPath: 'id'
-      });
-      const actual = filterJoinSeq(filterJoinSet(query));
-      expect(actual).to.eql(builder.toObject());
-    });
-
-    it('nested sequence 1', function () {
-      const query = [
-        {
-          join_sequence: [
-            {
-              group: [
-                [
-                  {
-                    relation: [
-                      {
-                        path: 'companyid',
-                        pattern: 'investment',
-                        indices: [ 'investment' ],
-                        queries: [
-                          {
-                            query: {
-                              query_string: {
-                                query: '360buy'
-                              }
-                            }
-                          }
-                        ]
-                      },
-                      { path: 'id', pattern: 'company', indices: [ 'company' ] }
-                    ]
-                  }
                 ]
-              ]
-            },
+              },
+              {
+                relation: [
+                  { pattern: 'aaa', path: 'id', indices: [ 'aaa' ] },
+                  { pattern: 'ccc', path: 'path3', indices: [ 'ccc' ] }
+                ]
+              }
+            ]
+          }
+        ];
+
+        const builder = new FilterJoinBuilder();
+        const fj = builder.addFilterJoin({ sourcePath: 'path3', targetIndices: [ 'aaa' ], targetPath: 'id' });
+        fj.addFilterJoin({ negate: true, sourcePath: 'id', targetIndices: [ 'bbb' ], targetPath: 'path1' });
+        fj.addFilterJoin({ sourcePath: 'id', targetIndices: [ 'bbb' ], targetPath: 'path2' });
+
+        const actual = filterJoinSeq(query);
+        expect(actual).to.eql(builder.toObject());
+      });
+
+      it('2 join sequences', function () {
+        const joinSequence1 = {
+          join_sequence: [
             {
               relation: [
-                { pattern: 'company', path: 'id', indices: [ 'company' ] },
-                { pattern: 'investment', path: 'companyid', indices: [ 'investment' ] }
+                { pattern: 'A', path: 'aaa', indices: [ 'A' ] },
+                { pattern: 'B', path: 'bbb', indices: [ 'B' ] }
               ]
             }
           ]
-        }
-      ];
-      const builder = new FilterJoinBuilder();
-      builder.addFilterJoin({
-        sourcePath: 'companyid',
-        targetIndices: [ 'company' ],
-        targetPath: 'id'
-      })
-      .addFilterJoin({
-        sourcePath: 'id',
-        targetIndices: [ 'investment' ],
-        targetPath: 'companyid'
-      })
-      .addQuery({
-        query: {
-          query_string: {
-            query: '360buy'
-          }
-        }
-      });
-      const actual = filterJoinSeq(query);
-      expect(actual).to.eql(builder.toObject());
-    });
-
-    it('nested sequence 2', function () {
-      const query = [
-        {
+        };
+        const joinSequence2 = {
           join_sequence: [
             {
-              group: [
-                [
+              relation: [
+                { pattern: 'C', path: 'ccc', indices: [ 'C' ] },
+                { pattern: 'D', path: 'ddd', indices: [ 'D' ] }
+              ]
+            }
+          ]
+        };
+        const query = [
+          {
+            query: {
+              bool: {
+                must: [
                   {
-                    relation: [
-                      {
-                        path: 'id',
-                        pattern: 'A',
-                        indices: [ 'A' ],
-                        queries: [
-                          {
-                            query: {
-                              query_string: {
-                                query: 'aaa'
-                              }
-                            }
-                          }
-                        ]
-                      },
-                      { path: 'aid', pattern: 'B', indices: [ 'B' ] }
-                    ]
+                    match_all: {}
                   }
                 ],
-                [
+                filter: {
+                  bool: {
+                    must: [ joinSequence1, joinSequence2 ]
+                  }
+                }
+              }
+            }
+          }
+        ];
+        const builder = new FilterJoinBuilder();
+        builder.addFilterJoin({
+          sourcePath: 'bbb',
+          targetIndices: [ 'A' ],
+          targetPath: 'aaa'
+        });
+        builder.addFilterJoin({
+          sourcePath: 'ddd',
+          targetIndices: [ 'C' ],
+          targetPath: 'ccc'
+        });
+
+        const expected = [
+          {
+            query: {
+              bool: {
+                must: [
                   {
-                    relation: [
+                    match_all:{}
+                  }
+                ],
+                filter: {
+                  bool: {
+                    must: builder.toObject()
+                  }
+                }
+              }
+            }
+          }
+        ];
+
+        const actual = filterJoinSeq(query);
+        expect(actual).to.eql(expected);
+      });
+
+      it('join_sequence with a join_set', function () {
+        const query = [
+          {
+            join_sequence: [
+              {
+                relation: [
+                  {
+                    path: 'id',
+                    indices: [ 'company' ],
+                    pattern: 'company',
+                    queries: [
                       {
-                        path: 'did',
-                        pattern: 'C',
-                        indices: [ 'C' ],
-                        queries: [
-                          {
-                            query: {
-                              query_string: {
-                                query: 'ccc'
+                        join_set: {
+                          focus: 'i1',
+                          relations: [
+                            [
+                              { pattern: 'i1', indices: [ 'i1' ], path: 'id2' },
+                              { pattern: 'i2', indices: [ 'i2' ], path: 'id' }
+                            ]
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  { path: 'companyid', pattern: 'investment', indices: [ 'investment' ] }
+                ]
+              }
+            ]
+          }
+        ];
+        const builder = new FilterJoinBuilder();
+        builder.addFilterJoin({
+          sourcePath: 'companyid',
+          targetIndices: [ 'company' ],
+          targetPath: 'id'
+        })
+        .addFilterJoin({
+          sourcePath: 'id2',
+          targetIndices: [ 'i2' ],
+          targetPath: 'id'
+        });
+        const actual = filterJoinSeq(filterJoinSet(query));
+        expect(actual).to.eql(builder.toObject());
+      });
+
+      it('nested sequence 1', function () {
+        const query = [
+          {
+            join_sequence: [
+              {
+                group: [
+                  [
+                    {
+                      relation: [
+                        {
+                          path: 'companyid',
+                          pattern: 'investment',
+                          indices: [ 'investment' ],
+                          queries: [
+                            {
+                              query: {
+                                query_string: {
+                                  query: '360buy'
+                                }
                               }
                             }
+                          ]
+                        },
+                        { path: 'id', pattern: 'company', indices: [ 'company' ] }
+                      ]
+                    }
+                  ]
+                ]
+              },
+              {
+                relation: [
+                  { pattern: 'company', path: 'id', indices: [ 'company' ] },
+                  { pattern: 'investment', path: 'companyid', indices: [ 'investment' ] }
+                ]
+              }
+            ]
+          }
+        ];
+        const builder = new FilterJoinBuilder();
+        builder.addFilterJoin({
+          sourcePath: 'companyid',
+          targetIndices: [ 'company' ],
+          targetPath: 'id'
+        })
+        .addFilterJoin({
+          sourcePath: 'id',
+          targetIndices: [ 'investment' ],
+          targetPath: 'companyid'
+        })
+        .addQuery({
+          query: {
+            query_string: {
+              query: '360buy'
+            }
+          }
+        });
+        const actual = filterJoinSeq(query);
+        expect(actual).to.eql(builder.toObject());
+      });
+
+      it('nested sequence 2', function () {
+        const query = [
+          {
+            join_sequence: [
+              {
+                group: [
+                  [
+                    {
+                      relation: [
+                        {
+                          path: 'id',
+                          pattern: 'A',
+                          indices: [ 'A' ],
+                          queries: [
+                            {
+                              query: {
+                                query_string: {
+                                  query: 'aaa'
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        { path: 'aid', pattern: 'B', indices: [ 'B' ] }
+                      ]
+                    }
+                  ],
+                  [
+                    {
+                      relation: [
+                        {
+                          path: 'did',
+                          pattern: 'C',
+                          indices: [ 'C' ],
+                          queries: [
+                            {
+                              query: {
+                                query_string: {
+                                  query: 'ccc'
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        { path: 'id', pattern: 'D', indices: [ 'D' ] }
+                      ]
+                    },
+                    {
+                      relation: [
+                        {
+                          path: 'id',
+                          pattern: 'D',
+                          indices: [ 'D' ],
+                          queries: [
+                            {
+                              query: {
+                                query_string: {
+                                  query: 'ddd'
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        { path: 'did', pattern: 'B', indices: [ 'B' ] }
+                      ]
+                    }
+                  ]
+                ]
+              },
+              {
+                relation: [
+                  {
+                    path: 'id',
+                    indices: [ 'B' ],
+                    pattern: 'B',
+                    queries: [
+                      {
+                        query: {
+                          query_string: {
+                            query: 'bbb'
                           }
-                        ]
-                      },
-                      { path: 'id', pattern: 'D', indices: [ 'D' ] }
+                        }
+                      }
+                    ]
+                  },
+                  { path: 'bid', pattern: 'A', indices: [ 'A' ] }
+                ]
+              }
+            ]
+          }
+        ];
+        const builder = new FilterJoinBuilder();
+        const fj1 = builder.addFilterJoin({ sourcePath: 'bid', targetIndices: [ 'B' ], targetPath: 'id' })
+        .addQuery({
+          query: {
+            query_string: {
+              query: 'bbb'
+            }
+          }
+        });
+        fj1.addFilterJoin({ sourcePath: 'aid', targetIndices: [ 'A' ], targetPath: 'id' })
+        .addQuery({
+          query: {
+            query_string: {
+              query: 'aaa'
+            }
+          }
+        });
+        fj1.addFilterJoin({ sourcePath: 'did', targetIndices: [ 'D' ], targetPath: 'id' })
+        .addQuery({
+          query: {
+            query_string: {
+              query: 'ddd'
+            }
+          }
+        })
+        .addFilterJoin({ sourcePath: 'id', targetIndices: [ 'C' ], targetPath: 'did' })
+        .addQuery({
+          query: {
+            query_string: {
+              query: 'ccc'
+            }
+          }
+        });
+        const actual = filterJoinSeq(query);
+        expect(actual).to.eql(builder.toObject());
+      });
+    });
+
+    describe('Filterjoin with pre-defined join sequence', function () {
+      it('joins with filters on leaf', function () {
+        const query = [
+          {
+            join_sequence: [
+              {
+                relation: [
+                  {
+                    path: 'companyid',
+                    pattern: 'investment',
+                    indices: [ 'investment' ],
+                    queries: [
+                      {
+                        query: {
+                          query_string: {
+                            query: '360buy'
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  { path: 'id', pattern: 'company', indices: [ 'company' ] }
+                ]
+              },
+              {
+                relation: [
+                  { path: 'id', pattern: 'company', indices: [ 'company' ] },
+                  { path: 'companyid', pattern: 'investment', indices: [ 'investment' ] }
+                ]
+              }
+            ]
+          }
+        ];
+        const builder = new FilterJoinBuilder();
+        builder.addFilterJoin({ sourcePath: 'companyid', targetIndices: [ 'company' ], targetPath: 'id' })
+        .addFilterJoin({ sourcePath: 'id', targetIndices: [ 'investment' ], targetPath: 'companyid' })
+        .addQuery({
+          query: {
+            query_string: {
+              query: '360buy'
+            }
+          }
+        });
+        const actual = filterJoinSeq(query);
+        expect(actual).to.eql(builder.toObject());
+      });
+
+      it('should keep the types specified for the source index', function () {
+        const query = [
+          {
+            join_sequence: [
+              {
+                relation: [
+                  { pattern: 'company', path: 'id', indices: [ 'company' ], types: [ 'Company' ] },
+                  { pattern: 'investment', path: 'companyid', indices: [ 'investment' ], types: [ 'Investment' ] }
+                ]
+              }
+            ]
+          }
+        ];
+        const builder = new FilterJoinBuilder();
+        builder.addFilterJoin({
+          sourceTypes: 'Investment',
+          sourcePath: 'companyid',
+          targetIndices: [ 'company' ],
+          targetTypes: 'Company',
+          targetPath: 'id'
+        });
+        const actual = filterJoinSeq(query);
+        expect(actual).to.eql(builder.toObject());
+      });
+
+      it('negate relation', function () {
+        const query = [
+          {
+            join_sequence: [
+              {
+                relation: [
+                  { pattern: 'investment', path: 'companyid', indices: [ 'investment' ] },
+                  { pattern: 'company', path: 'id', indices: [ 'company' ] }
+                ],
+                negate: true
+              },
+              {
+                relation: [
+                  { pattern: 'company', path: 'id', indices: [ 'company' ] },
+                  { pattern: 'investment', path: 'companyid', indices: [ 'investment' ] }
+                ]
+              }
+            ]
+          }
+        ];
+        const builder = new FilterJoinBuilder();
+        builder.addFilterJoin({
+          sourcePath: 'companyid',
+          targetIndices: [ 'company' ],
+          targetPath: 'id'
+        })
+        .addFilterJoin({
+          sourcePath: 'id',
+          targetIndices: [ 'investment' ],
+          targetPath: 'companyid',
+          negate: true
+        });
+        const actual = filterJoinSeq(query);
+        expect(actual).to.eql(builder.toObject());
+      });
+
+      it('joins with two filters', function () {
+        const query = [
+          {
+            join_sequence: [
+              {
+                relation: [
+                  {
+                    path: 'companyid',
+                    indices: [ 'investment' ],
+                    pattern: 'investment',
+                    queries: [
+                      {
+                        query: {
+                          query_string: {
+                            query: '360buy'
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  { path: 'id', pattern: 'company', indices: [ 'company' ] }
+                ]
+              },
+              {
+                relation: [
+                  {
+                    path: 'id',
+                    indices: [ 'company' ],
+                    pattern: 'company',
+                    queries: [
+                      {
+                        query: {
+                          query_string: {
+                            query: 'yoplait'
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  { path: 'companyid', pattern: 'investment', indices: [ 'investment' ] }
+                ]
+              }
+            ]
+          }
+        ];
+        const builder = new FilterJoinBuilder();
+        builder.addFilterJoin({
+          sourcePath: 'companyid',
+          targetIndices: [ 'company' ],
+          targetPath: 'id'
+        })
+        .addQuery({
+          query: {
+            query_string: {
+              query: 'yoplait'
+            }
+          }
+        })
+        .addFilterJoin({
+          sourcePath: 'id',
+          targetIndices: [ 'investment' ],
+          targetPath: 'companyid'
+        })
+        .addQuery({
+          query: {
+            query_string: {
+              query: '360buy'
+            }
+          }
+        });
+        const actual = filterJoinSeq(query);
+        expect(actual).to.eql(builder.toObject());
+      });
+
+      it('joins with two filters - the first with no indices', function () {
+        const query = [
+          {
+            join_sequence: [
+              {
+                relation: [
+                  {
+                    path: 'companyid',
+                    pattern: 'investment*',
+                    indices: [ ],
+                    queries: [
+                      {
+                        query: {
+                          query_string: {
+                            query: '360buy'
+                          }
+                        }
+                      }
                     ]
                   },
                   {
-                    relation: [
-                      {
-                        path: 'id',
-                        pattern: 'D',
-                        indices: [ 'D' ],
-                        queries: [
-                          {
-                            query: {
-                              query_string: {
-                                query: 'ddd'
-                              }
-                            }
-                          }
-                        ]
-                      },
-                      { path: 'did', pattern: 'B', indices: [ 'B' ] }
-                    ]
+                    path: 'id',
+                    pattern: 'company*',
+                    indices: [ 'company' ]
                   }
                 ]
-              ]
-            },
-            {
-              relation: [
-                {
-                  path: 'id',
-                  indices: [ 'B' ],
-                  pattern: 'B',
-                  queries: [
-                    {
-                      query: {
-                        query_string: {
-                          query: 'bbb'
-                        }
-                      }
-                    }
-                  ]
-                },
-                { path: 'bid', pattern: 'A', indices: [ 'A' ] }
-              ]
-            }
-          ]
-        }
-      ];
-      const builder = new FilterJoinBuilder();
-      const fj1 = builder.addFilterJoin({ sourcePath: 'bid', targetIndices: [ 'B' ], targetPath: 'id' })
-      .addQuery({
-        query: {
-          query_string: {
-            query: 'bbb'
-          }
-        }
-      });
-      fj1.addFilterJoin({ sourcePath: 'aid', targetIndices: [ 'A' ], targetPath: 'id' })
-      .addQuery({
-        query: {
-          query_string: {
-            query: 'aaa'
-          }
-        }
-      });
-      fj1.addFilterJoin({ sourcePath: 'did', targetIndices: [ 'D' ], targetPath: 'id' })
-      .addQuery({
-        query: {
-          query_string: {
-            query: 'ddd'
-          }
-        }
-      })
-      .addFilterJoin({ sourcePath: 'id', targetIndices: [ 'C' ], targetPath: 'did' })
-      .addQuery({
-        query: {
-          query_string: {
-            query: 'ccc'
-          }
-        }
-      });
-      const actual = filterJoinSeq(query);
-      expect(actual).to.eql(builder.toObject());
-    });
-  });
-
-  describe('Filterjoin with pre-defined join sequence', function () {
-    it('joins with filters on leaf', function () {
-      const query = [
-        {
-          join_sequence: [
-            {
-              relation: [
-                {
-                  path: 'companyid',
-                  pattern: 'investment',
-                  indices: [ 'investment' ],
-                  queries: [
-                    {
-                      query: {
-                        query_string: {
-                          query: '360buy'
-                        }
-                      }
-                    }
-                  ]
-                },
-                { path: 'id', pattern: 'company', indices: [ 'company' ] }
-              ]
-            },
-            {
-              relation: [
-                { path: 'id', pattern: 'company', indices: [ 'company' ] },
-                { path: 'companyid', pattern: 'investment', indices: [ 'investment' ] }
-              ]
-            }
-          ]
-        }
-      ];
-      const builder = new FilterJoinBuilder();
-      builder.addFilterJoin({ sourcePath: 'companyid', targetIndices: [ 'company' ], targetPath: 'id' })
-      .addFilterJoin({ sourcePath: 'id', targetIndices: [ 'investment' ], targetPath: 'companyid' })
-      .addQuery({
-        query: {
-          query_string: {
-            query: '360buy'
-          }
-        }
-      });
-      const actual = filterJoinSeq(query);
-      expect(actual).to.eql(builder.toObject());
-    });
-
-    it('should keep the types specified for the source index', function () {
-      const query = [
-        {
-          join_sequence: [
-            {
-              relation: [
-                { pattern: 'company', path: 'id', indices: [ 'company' ], types: [ 'Company' ] },
-                { pattern: 'investment', path: 'companyid', indices: [ 'investment' ], types: [ 'Investment' ] }
-              ]
-            }
-          ]
-        }
-      ];
-      const builder = new FilterJoinBuilder();
-      builder.addFilterJoin({
-        sourceTypes: 'Investment',
-        sourcePath: 'companyid',
-        targetIndices: [ 'company' ],
-        targetTypes: 'Company',
-        targetPath: 'id'
-      });
-      const actual = filterJoinSeq(query);
-      expect(actual).to.eql(builder.toObject());
-    });
-
-    it('negate relation', function () {
-      const query = [
-        {
-          join_sequence: [
-            {
-              relation: [
-                { pattern: 'investment', path: 'companyid', indices: [ 'investment' ] },
-                { pattern: 'company', path: 'id', indices: [ 'company' ] }
-              ],
-              negate: true
-            },
-            {
-              relation: [
-                { pattern: 'company', path: 'id', indices: [ 'company' ] },
-                { pattern: 'investment', path: 'companyid', indices: [ 'investment' ] }
-              ]
-            }
-          ]
-        }
-      ];
-      const builder = new FilterJoinBuilder();
-      builder.addFilterJoin({
-        sourcePath: 'companyid',
-        targetIndices: [ 'company' ],
-        targetPath: 'id'
-      })
-      .addFilterJoin({
-        sourcePath: 'id',
-        targetIndices: [ 'investment' ],
-        targetPath: 'companyid',
-        negate: true
-      });
-      const actual = filterJoinSeq(query);
-      expect(actual).to.eql(builder.toObject());
-    });
-
-    it('joins with two filters', function () {
-      const query = [
-        {
-          join_sequence: [
-            {
-              relation: [
-                {
-                  path: 'companyid',
-                  indices: [ 'investment' ],
-                  pattern: 'investment',
-                  queries: [
-                    {
-                      query: {
-                        query_string: {
-                          query: '360buy'
-                        }
-                      }
-                    }
-                  ]
-                },
-                { path: 'id', pattern: 'company', indices: [ 'company' ] }
-              ]
-            },
-            {
-              relation: [
-                {
-                  path: 'id',
-                  indices: [ 'company' ],
-                  pattern: 'company',
-                  queries: [
-                    {
-                      query: {
-                        query_string: {
-                          query: 'yoplait'
-                        }
-                      }
-                    }
-                  ]
-                },
-                { path: 'companyid', pattern: 'investment', indices: [ 'investment' ] }
-              ]
-            }
-          ]
-        }
-      ];
-      const builder = new FilterJoinBuilder();
-      builder.addFilterJoin({
-        sourcePath: 'companyid',
-        targetIndices: [ 'company' ],
-        targetPath: 'id'
-      })
-      .addQuery({
-        query: {
-          query_string: {
-            query: 'yoplait'
-          }
-        }
-      })
-      .addFilterJoin({
-        sourcePath: 'id',
-        targetIndices: [ 'investment' ],
-        targetPath: 'companyid'
-      })
-      .addQuery({
-        query: {
-          query_string: {
-            query: '360buy'
-          }
-        }
-      });
-      const actual = filterJoinSeq(query);
-      expect(actual).to.eql(builder.toObject());
-    });
-
-    it('joins with two filters - the first with no indices', function () {
-      const query = [
-        {
-          join_sequence: [
-            {
-              relation: [
-                {
-                  path: 'companyid',
-                  pattern: 'investment*',
-                  indices: [ ],
-                  queries: [
-                    {
-                      query: {
-                        query_string: {
-                          query: '360buy'
-                        }
-                      }
-                    }
-                  ]
-                },
-                {
-                  path: 'id',
-                  pattern: 'company*',
-                  indices: [ 'company' ]
-                }
-              ]
-            },
-            {
-              relation: [
-                {
-                  path: 'id',
-                  indices: [ 'company' ],
-                  pattern: 'company*',
-                  queries: [
-                    {
-                      query: {
-                        query_string: {
-                          query: '*'
-                        }
-                      }
-                    }
-                  ]
-                },
-                {
-                  path: 'companyid',
-                  pattern: 'investment*',
-                  indices: [ 'investment' ]
-                }
-              ]
-            }
-          ]
-        }
-      ];
-      const actual = filterJoinSeq(query);
-      expect(actual).to.eql([
-        {
-          filterjoin: {
-            companyid: {
-              indices: ['company'],
-              path: 'id',
-              query: {
-                bool: {
-                  must: [
-                    {
-                      match_all: {}
-                    },
-                    {
-                      query_string: {
-                        query: '*'
-                      }
-                    }
-                  ],
-                  filter: {
-                    bool: {
-                      must: [{
-                        filterjoin: {
-                          id: {
-                            indices: [ '.kibi' ],
-                            path: 'companyid',
-                            query: {
-                              bool: {
-                                must_not: [
-                                  {
-                                    match_all: {}
-                                  }
-                                ]
-                              }}
+              },
+              {
+                relation: [
+                  {
+                    path: 'id',
+                    indices: [ 'company' ],
+                    pattern: 'company*',
+                    queries: [
+                      {
+                        query: {
+                          query_string: {
+                            query: '*'
                           }
                         }
-                      }]
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      ]);
-    });
-
-    it('joins with two filters - the second with no indices', function () {
-      const query = [
-        {
-          join_sequence: [
-            {
-              relation: [
-                {
-                  path: 'companyid',
-                  pattern: 'investment*',
-                  indices: [ 'company' ],
-                  queries: [
-                    {
-                      query: {
-                        query_string: {
-                          query: '360buy'
-                        }
                       }
-                    }
-                  ]
-                },
-                {
-                  path: 'id',
-                  pattern: 'company*',
-                  indices: [ 'company' ]
-                }
-              ]
-            },
-            {
-              relation: [
-                {
-                  path: 'id',
-                  pattern: 'investment*',
-                  indices: [],
-                  queries: [
-                    {
-                      query: {
+                    ]
+                  },
+                  {
+                    path: 'companyid',
+                    pattern: 'investment*',
+                    indices: [ 'investment' ]
+                  }
+                ]
+              }
+            ]
+          }
+        ];
+        const actual = filterJoinSeq(query);
+        expect(actual).to.eql([
+          {
+            filterjoin: {
+              companyid: {
+                indices: ['company'],
+                path: 'id',
+                query: {
+                  bool: {
+                    must: [
+                      {
+                        match_all: {}
+                      },
+                      {
                         query_string: {
                           query: '*'
                         }
                       }
-                    }
-                  ]
-                },
-                {
-                  path: 'companyid',
-                  pattern: 'investment*',
-                  indices: [ 'investment' ]
-                }
-              ]
-            }
-          ]
-        }
-      ];
-      const actual = filterJoinSeq(query);
-      expect(actual).to.eql([
-        {
-          filterjoin: {
-            companyid: {
-              indices: ['.kibi'],
-              path: 'id',
-              query: {
-                bool: {
-                  must_not: [
-                    {
-                      match_all: {}
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        }
-      ]);
-    });
-
-    it('loop', function () {
-      const query = [
-        {
-          join_sequence: [
-            {
-              relation: [
-                {
-                  path: 'here',
-                  indices: [ 'aaa' ],
-                  pattern: 'aaa',
-                  queries: [
-                    {
-                      query: {
-                        query_string: {
-                          query: '360buy'
-                        }
-                      }
-                    }
-                  ]
-                },
-                { path: 'there', pattern: 'aaa', indices: [ 'aaa' ] }
-              ]
-            }
-          ]
-        }
-      ];
-      const builder = new FilterJoinBuilder();
-      builder.addFilterJoin({
-        sourcePath: 'there',
-        targetIndices: [ 'aaa' ],
-        targetPath: 'here'
-      })
-      .addQuery({
-        query: {
-          query_string: {
-            query: '360buy'
-          }
-        }
-      });
-      const actual = filterJoinSeq(query);
-      expect(actual).to.eql(builder.toObject());
-    });
-
-    it('joins with empty indices - 1', function () {
-      const query = [
-        {
-          join_sequence: [
-            {
-              relation: [
-                {
-                  pattern: 'logstash-2016.09.*',
-                  path: 'ip',
-                  indices: [],
-                  queries: [
-                    {
-                      query: {
-                        bool: {
-                          must: [{
-                            query_string: {
-                              query: '*'
+                    ],
+                    filter: {
+                      bool: {
+                        must: [{
+                          filterjoin: {
+                            id: {
+                              indices: [ '.kibi' ],
+                              path: 'companyid',
+                              query: {
+                                bool: {
+                                  must_not: [
+                                    {
+                                      match_all: {}
+                                    }
+                                  ]
+                                }}
                             }
-                          }]
-                        }
+                          }
+                        }]
                       }
                     }
-                  ]
-                },
-                {
-                  indices: ['logstash-2016.10.12', 'logstash-2016.10.11'],
-                  path: 'ip',
-                  pattern: 'logstash-2016.10.*'
-                }
-              ]
-            }
-          ]
-        }
-      ];
-      const actual = filterJoinSeq(query);
-      expect(actual).to.eql([
-        {
-          filterjoin: {
-            ip: {
-              indices: [ '.kibi' ],
-              path: 'ip',
-              query: {
-                bool: {
-                  must_not: [
-                    {
-                      match_all: {}
-                    }
-                  ]
+                  }
                 }
               }
             }
           }
-        }
-      ]);
-    });
+        ]);
+      });
 
-    it('joins with filters everywhere', function () {
-      const query = [
-        {
-          join_sequence: [
-            {
-              path: 'id',
-              indices: [ 'company' ],
-              queries: [
-                {
-                  query: {
-                    query_string: {
-                      query: 'yoplait'
-                    }
+      it('joins with two filters - the second with no indices', function () {
+        const query = [
+          {
+            join_sequence: [
+              {
+                relation: [
+                  {
+                    path: 'companyid',
+                    pattern: 'investment*',
+                    indices: [ 'company' ],
+                    queries: [
+                      {
+                        query: {
+                          query_string: {
+                            query: '360buy'
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    path: 'id',
+                    pattern: 'company*',
+                    indices: [ 'company' ]
+                  }
+                ]
+              },
+              {
+                relation: [
+                  {
+                    path: 'id',
+                    pattern: 'investment*',
+                    indices: [],
+                    queries: [
+                      {
+                        query: {
+                          query_string: {
+                            query: '*'
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    path: 'companyid',
+                    pattern: 'investment*',
+                    indices: [ 'investment' ]
+                  }
+                ]
+              }
+            ]
+          }
+        ];
+        const actual = filterJoinSeq(query);
+        expect(actual).to.eql([
+          {
+            filterjoin: {
+              companyid: {
+                indices: ['.kibi'],
+                path: 'id',
+                query: {
+                  bool: {
+                    must_not: [
+                      {
+                        match_all: {}
+                      }
+                    ]
                   }
                 }
-              ]
-            },
-            {
-              path: 'companyid',
-              indices: [ 'investment' ],
-              queries: [
-                {
-                  query: {
-                    query_string: {
-                      query: 'boom'
-                    }
-                  }
-                }
-              ]
+              }
             }
-          ]
-        }
-      ];
-      expect(filterJoinSeq).withArgs(query).to.throwError();
+          }
+        ]);
+      });
+
+      it('loop', function () {
+        const query = [
+          {
+            join_sequence: [
+              {
+                relation: [
+                  {
+                    path: 'here',
+                    indices: [ 'aaa' ],
+                    pattern: 'aaa',
+                    queries: [
+                      {
+                        query: {
+                          query_string: {
+                            query: '360buy'
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  { path: 'there', pattern: 'aaa', indices: [ 'aaa' ] }
+                ]
+              }
+            ]
+          }
+        ];
+        const builder = new FilterJoinBuilder();
+        builder.addFilterJoin({
+          sourcePath: 'there',
+          targetIndices: [ 'aaa' ],
+          targetPath: 'here'
+        })
+        .addQuery({
+          query: {
+            query_string: {
+              query: '360buy'
+            }
+          }
+        });
+        const actual = filterJoinSeq(query);
+        expect(actual).to.eql(builder.toObject());
+      });
+
+      it('joins with empty indices - 1', function () {
+        const query = [
+          {
+            join_sequence: [
+              {
+                relation: [
+                  {
+                    pattern: 'logstash-2016.09.*',
+                    path: 'ip',
+                    indices: [],
+                    queries: [
+                      {
+                        query: {
+                          bool: {
+                            must: [{
+                              query_string: {
+                                query: '*'
+                              }
+                            }]
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    indices: ['logstash-2016.10.12', 'logstash-2016.10.11'],
+                    path: 'ip',
+                    pattern: 'logstash-2016.10.*'
+                  }
+                ]
+              }
+            ]
+          }
+        ];
+        const actual = filterJoinSeq(query);
+        expect(actual).to.eql([
+          {
+            filterjoin: {
+              ip: {
+                indices: [ '.kibi' ],
+                path: 'ip',
+                query: {
+                  bool: {
+                    must_not: [
+                      {
+                        match_all: {}
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        ]);
+      });
+
+      it('joins with filters everywhere', function () {
+        const query = [
+          {
+            join_sequence: [
+              {
+                path: 'id',
+                indices: [ 'company' ],
+                queries: [
+                  {
+                    query: {
+                      query_string: {
+                        query: 'yoplait'
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                path: 'companyid',
+                indices: [ 'investment' ],
+                queries: [
+                  {
+                    query: {
+                      query_string: {
+                        query: 'boom'
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ];
+        expect(filterJoinSeq).withArgs(query).to.throwError();
+      });
     });
   });
 });

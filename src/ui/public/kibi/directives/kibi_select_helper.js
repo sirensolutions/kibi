@@ -282,12 +282,14 @@ define(function (require) {
       const indexRelationId = dashboardOptions.indexRelationId;
       return kibiState._getDashboardAndSavedSearchMetas(null, true).then((metas) => {
 
-        const filteredMetas = _.filter(metas, (meta) => {
+        // first filter out dashboards without savedSearchId
+        let filteredMetas = _.filter(metas, (meta) => {
           return meta.savedDash.savedSearchId;
         });
 
-        if (!otherDashboardId) {
-          // just return all dashboards which have savedsearchId
+        // if no indexPattern just return all dashboards with savedSearchId
+        if (!indexRelationId) {
+          // just return all dashboards
           return _.map(filteredMetas, function (hit) {
             return {
               label: hit.savedDash.title,
@@ -295,26 +297,43 @@ define(function (require) {
             };
           });
         }
-        // find the meta of the otherDashboardId
-        const otherDashboardMeta = _.find(filteredMetas, (meta) => {
-          return meta.savedDash.id === otherDashboardId;
-        });
-        const otherIndexPattern = otherDashboardMeta.savedSearchMeta.index;
 
-        const indexRelations = config.get('kibi:relations').relationsIndices;
-        if (indexRelationId) {
-          _.remove(indexRelations, (rel) => {
-            return rel.id !== indexRelationId;
+        const indexRelation = _.find(config.get('kibi:relations').relationsIndices, (rel) => {
+          return rel.id === indexRelationId;
+        });
+
+        let otherIndexPattern;
+        // in case the otherDashboardId wes present find it
+        if (otherDashboardId) {
+          // find the meta and indexPatternId of the other dashboard
+          const otherDashboardMeta = _.find(filteredMetas, (meta) => {
+            return meta.savedDash.id === otherDashboardId;
           });
+          otherIndexPattern = otherDashboardMeta.savedSearchMeta.index;
+
+          // and filter out dashboard which matches by index pattern
+          // but only if it is not self join relation
+          if (indexRelation.indices[0].indexPatternId !== indexRelation.indices[1].indexPatternId) {
+            filteredMetas = _.filter(filteredMetas, (meta) => {
+              return meta.savedSearchMeta.index !== otherIndexPattern;
+            });
+          }
         }
+
 
         let dashboardsToReturn = [];
         _.each(filteredMetas, (meta) => {
           let indexPattern = meta.savedSearchMeta.index;
           let dashboardId = meta.savedDash.id;
-          // here check if there is an indexRelation between otherIndexPattern and indexPattern
-          if (relationsHelper.indexRelationExists(indexRelations, indexPattern, otherIndexPattern) &&
-              !_.find(dashboardsToReturn, 'id', dashboardId)
+
+
+          // check if indexPattern belongs to either side of the indexRelation
+          // and the dasboard is not already in
+          if (
+            indexRelation &&
+            (indexPattern === indexRelation.indices[0].indexPatternId || indexPattern === indexRelation.indices[1].indexPatternId)
+            &&
+            !_.find(dashboardsToReturn, 'id', dashboardId)
           ) {
             dashboardsToReturn.push({
               label: dashboardId,
@@ -323,125 +342,6 @@ define(function (require) {
           }
         });
         return dashboardsToReturn;
-      });
-    };
-
-    KibiSelectHelper.prototype.getRelationsForButton = function (options = {}) {
-      // expect sourceDashboardId and/or targetDashboardId in options
-      var relations = config.get('kibi:relations');
-      var ids;
-      if (options.sourceDashboardId && options.targetDashboardId && options.sourceDashboardId === options.targetDashboardId) {
-        ids = [options.sourceDashboardId];
-      } else if (options.sourceDashboardId && options.targetDashboardId) {
-        ids = [options.sourceDashboardId, options.targetDashboardId];
-      } else if (options.sourceDashboardId) {
-        ids = [options.sourceDashboardId];
-      } else if (options.targetDashboardId) {
-        ids = [options.targetDashboardId];
-      } else {
-        return Promise.resolve([]);
-      }
-
-      return kibiState._getDashboardAndSavedSearchMetas(ids)
-      .then((savedSearchesAndMetas) => {
-        var sourceDasboardMeta;
-        var sourceDasboard;
-        var sourceDasboardId;
-        var sourceDasboardIndex;
-        var targetDasboardMeta;
-        var targetDasboard;
-        var targetDasboaId;
-        var targetDasboardIndex;
-
-        if (options.sourceDashboardId && options.targetDashboardId && options.sourceDashboardId === options.targetDashboardId) {
-          sourceDasboardMeta = savedSearchesAndMetas[0].savedSearchMeta;
-          sourceDasboard = savedSearchesAndMetas[0].savedDash;
-          sourceDasboardId  = sourceDasboard.id;
-          sourceDasboardIndex  = sourceDasboardMeta.index;
-          targetDasboardMeta = savedSearchesAndMetas[0].savedSearchMeta;
-          targetDasboard = savedSearchesAndMetas[0].savedDash;
-          targetDasboaId = targetDasboard.id;
-          targetDasboardIndex  = targetDasboardMeta.index;
-        } else if (options.sourceDashboardId && options.targetDashboardId) {
-          sourceDasboardMeta = savedSearchesAndMetas[0].savedSearchMeta;
-          sourceDasboard = savedSearchesAndMetas[0].savedDash;
-          sourceDasboardId  = sourceDasboard.id;
-          sourceDasboardIndex  = sourceDasboardMeta.index;
-          targetDasboardMeta = savedSearchesAndMetas[1].savedSearchMeta;
-          targetDasboard = savedSearchesAndMetas[1].savedDash;
-          targetDasboaId = targetDasboard.id;
-          targetDasboardIndex  = targetDasboardMeta.index;
-        } else if (options.sourceDashboardId) {
-          sourceDasboardMeta = savedSearchesAndMetas[0].savedSearchMeta;
-          sourceDasboard = savedSearchesAndMetas[0].savedDash;
-          sourceDasboardId  = sourceDasboard.id;
-          sourceDasboardIndex  = sourceDasboardMeta.index;
-        } else if (options.targetDashboardId) {
-          targetDasboardMeta = savedSearchesAndMetas[0].savedSearchMeta;
-          targetDasboard = savedSearchesAndMetas[0].savedDash;
-          targetDasboaId = targetDasboard.id;
-          targetDasboardIndex  = targetDasboardMeta.index;
-        }
-        // now filter the relations
-        var filteredRelations = _(relations.relationsIndices)
-        .filter((rel) => {
-          var itemRelationDetails = relationsHelper.getRelationInfosFromRelationID(rel.id);
-
-          if (sourceDasboardIndex && targetDasboardIndex) {
-            if (
-              (
-                itemRelationDetails.source.index === sourceDasboardIndex &&
-                itemRelationDetails.target.index === targetDasboardIndex
-              )
-              ||
-              (
-                itemRelationDetails.source.index === targetDasboardIndex &&
-                itemRelationDetails.target.index === sourceDasboardIndex
-              )
-            ) {
-              return true;
-            }
-            // only source dashboard selected by the user
-          } else if (sourceDasboardIndex) {
-            if (itemRelationDetails.source.index === sourceDasboardIndex ||
-                itemRelationDetails.target.index === sourceDasboardIndex
-            ) {
-              return true;
-            }
-            // only target dashboard selected by the user
-          } else if (targetDasboardIndex) {
-            if (itemRelationDetails.source.index === targetDasboardIndex ||
-                itemRelationDetails.target.index === targetDasboardIndex
-            ) {
-              return true;
-            }
-          }
-          return false;
-        })
-        .sortBy((rel) => rel.label)
-        .value();
-
-        // before returning lets check for relations with the same name
-        // in such case compose a more detailed labels for them so they can be distinguished by the user
-        if (filteredRelations.length > 1) {
-          for (var i = 1; i < filteredRelations.length; i++) {
-            var prevRel = filteredRelations[i - 1];
-            var rel = filteredRelations[i];
-            if (prevRel.label === rel.label) {
-              prevRel.label = relationsHelper.createMoreDetailedLabel(prevRel.id, targetDasboardIndex);
-              rel.label = relationsHelper.createMoreDetailedLabel(rel.id, targetDasboardIndex);
-            }
-          }
-        }
-
-        var items = _.map(filteredRelations, (rel) => {
-          return {
-            label: rel.label,
-            value: rel.id
-          };
-        });
-
-        return Promise.resolve(items);
       });
     };
 

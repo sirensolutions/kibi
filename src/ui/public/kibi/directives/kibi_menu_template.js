@@ -63,6 +63,9 @@ define(function (require) {
 
       $el.on('click', function (event) {
         event.stopPropagation();
+        if ($scope.kibiMenuTemplateOnFocusFn) {
+          $scope.kibiMenuTemplateOnFocusFn();
+        }
         $scope.$apply(function () {
           $scope.data.showMenu = !$scope.data.showMenu;
         });
@@ -71,8 +74,14 @@ define(function (require) {
       const clickOutsideHandler = function (event) {
         const isChild = $el[0].contains(event.target);
         const isSelf = $el[0] === event.target;
-        const isInside = isChild || isSelf;
-        if (!isInside) {
+        const isMenu = container[0].contains(event.target);
+        const isInsideElement = isChild || isSelf;
+
+        if (!isInsideElement && !isMenu && $scope.kibiMenuTemplateOnBlurFn) {
+          $scope.kibiMenuTemplateOnBlurFn();
+        }
+
+        if (!isInsideElement) {
           $scope.$apply(function () {
             $scope.data.showMenu = false;
           });
@@ -126,6 +135,8 @@ define(function (require) {
         kibiMenuTemplateContext: '=',     // object - additional data required by the template
         kibiMenuTemplateOnShowFn: '&',    // function - executed when menu is shown
         kibiMenuTemplateOnHideFn: '&',    // function - executed when menu is closed
+        kibiMenuTemplateOnFocusFn: '&',   // function - executed when element is clicked
+        kibiMenuTemplateOnBlurFn: '&',    // function - executed when there is a click outside element and menu
         kibiMenuTemplateLeftOffset: '@',  // integer, default 0 - left offset in px, useful to move the displayed menu a bit left right
         kibiMenuTemplateHideDelay: '@',   // integer, default 250 - delay for the hide action in ms
         kibiMenuTemplateShowOnHover: '@'  // boolean, default false - when true menu is shown also on hover

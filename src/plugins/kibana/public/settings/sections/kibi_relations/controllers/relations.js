@@ -745,7 +745,14 @@ define(function (require) {
             }
           });
         })
-        .catch(notify.error);
+        .catch((error) => {
+          // it is ok to get a 404 when a type was set and the index pattern dropdown changes;
+          // do not warn the user about this error, just log to the console.
+          if (error.status === 404) {
+            return console.log('Got a 404 while retrieving field mappings for a relation.');
+          }
+          notify.error(error);
+        });
       };
 
       const updateDashboardsRelationsBasedOnTheIndicesRelations = function () {

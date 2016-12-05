@@ -1,12 +1,12 @@
 define(function (require) {
 
-  var kibiUtils = require('kibiutils');
-  var _ = require('lodash');
-  var module = require('ui/modules').get('kibana');
+  const kibiUtils = require('kibiutils');
+  const _ = require('lodash');
+  const module = require('ui/modules').get('kibana');
   require('ui/kibi/directives/kibi_angular_qtip2');
 
   module.directive('kibiSelect', function (Private) {
-    var selectHelper = Private(require('ui/kibi/directives/kibi_select_helper'));
+    const selectHelper = Private(require('ui/kibi/directives/kibi_select_helper'));
 
     return {
       require: 'ngModel',
@@ -72,7 +72,7 @@ define(function (require) {
         '<p>' +
         '<strong>Careful!</strong> The field selected contains analyzed strings. Values such as <i>foo-bar</i> ' +
         'will be broken into <i>foo</i> and <i>bar</i>. See ' +
-        '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/2.3/mapping-types.html" target="_blank">Mapping Types</a>' +
+        '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/2.4/mapping-types.html" target="_blank">Mapping Types</a>' +
         ' for more information on setting this field as <i>not_analyzed</i>' +
         '</p>';
 
@@ -117,7 +117,7 @@ define(function (require) {
         );
         setModelObject();
 
-        var _setViewValue = function (modelObject) {
+        const _setViewValue = function (modelObject) {
           if (modelObject) {
             ngModelCtrl.$setViewValue(modelObject);
           } else {
@@ -152,7 +152,7 @@ define(function (require) {
 
         ngModelCtrl.$formatters.push(function (modelValue) {
           // here what is passed to a formatter is just a string
-          var formatted;
+          let formatted;
           if (scope.items.length) {
             formatted = _.find(scope.items, function (item) {
               return _.isEqual(item.value, modelValue);
@@ -191,7 +191,7 @@ define(function (require) {
           return false;
         }
 
-        var _renderSelect = function (scope, items) {
+        const _renderSelect = function (scope, items) {
           scope.analyzedField = false;
           scope.items = items;
           if (scope.items) {
@@ -207,7 +207,7 @@ define(function (require) {
 
             if (scope.filter && _.isFunction(scope.filter())) {
               _.remove(scope.items, function (item) {
-                var selected = !!ngModelCtrl.$viewValue && !!ngModelCtrl.$viewValue.value &&
+                const selected = !!ngModelCtrl.$viewValue && !!ngModelCtrl.$viewValue.value &&
                   _.isEqual(ngModelCtrl.$viewValue.value, item.value);
 
                 return scope.filter()(item, scope.options, selected);
@@ -215,7 +215,7 @@ define(function (require) {
             }
           }
 
-          var item = _.find(scope.items, function (item) {
+          const item = _.find(scope.items, function (item) {
             return ngModelCtrl.$viewValue && _.isEqual(item.value, ngModelCtrl.$viewValue.value);
           });
 
@@ -234,7 +234,7 @@ define(function (require) {
           }
         };
 
-        var _render = function (scope) {
+        const _render = function (scope) {
           let promise;
           if (scope.scriptedFields === undefined || scope.scriptedFields === null) scope.scriptedFields = true;
 

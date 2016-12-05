@@ -26,3 +26,9 @@
   user-select: none;
   cursor:pointer;
 }
+
+.box-shadow(@x:0, @y:0, @blur:0, @spread:0, @color:rgba(0,0,0,.5)) {
+  -webkit-box-shadow: @x @y @blur @spread @color;
+  -moz-box-shadow: @x @y @blur @spread @color;
+  box-shadow: @x @y @blur @spread @color;
+}

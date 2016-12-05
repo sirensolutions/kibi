@@ -1,7 +1,7 @@
 [[releasenotes]]
 == Kibi Release Notes
 
-include::releasenotes_4.6.2.asciidoc[]
+include::releasenotes_4.6.3.asciidoc[]
 
 include::releasenotes_4.5.4.asciidoc[]
 

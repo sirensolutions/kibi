@@ -16,9 +16,9 @@
     "SPARQL"
   ],
   "private": false,
-  "version": "4.6.2",
-  "kibi_kibana_announcement": "https://www.elastic.co/blog/kibana-4-6-2",
-  "kibi_version": "4.6.2-SNAPSHOT",
+  "version": "4.6.3",
+  "kibi_kibana_announcement": "https://www.elastic.co/blog/kibana-5-0-1-and-4-6-3-released",
+  "kibi_version": "4.6.3-SNAPSHOT",
   "kibi_enterprise_enabled": false,
   "build": {
     "number": 8467,

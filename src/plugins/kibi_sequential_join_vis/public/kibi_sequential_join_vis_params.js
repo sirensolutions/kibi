@@ -18,7 +18,7 @@ define(function (require) {
           location: 'Kibi Relational filter params'
         });
 
-        var relations = config.get('kibi:relations');
+        const relations = config.get('kibi:relations');
 
         $scope.getLabel = function (relationId) {
           if (relationId) {
@@ -40,7 +40,7 @@ define(function (require) {
           }
         });
 
-        var filteredRelations = _(relations.relationsIndices)
+        const filteredRelations = _(relations.relationsIndices)
         .each((rel) => {
           if (!rel.onSelect) {
             rel.onSelect = function (button) {

@@ -1,8 +1,14 @@
 var _ = require('lodash');
 module.exports = function (grunt) {
   grunt.registerTask('test:server', [ 'esvm:test', 'simplemocha:all', 'esvm_shutdown:test' ]);
+  grunt.registerTask('test:serverCoverage', [ 'esvm:test', 'mocha_istanbul:all', 'esvm_shutdown:test' ]);
   grunt.registerTask('test:browser', [ 'run:testServer', 'karma:unit' ]);
-  grunt.registerTask('test:coverage', [ 'run:testCoverageServer', 'karma:coverage' ]);
+  grunt.registerTask('test:browserCoverage', [ 'run:testCoverageServer', 'karma:coverage' ]);
+
+  grunt.registerTask('test:coverage', [
+    'test:serverCoverage',
+    'test:browserCoverage'
+  ]);
 
   grunt.registerTask('test:quick', [
     'test:server',

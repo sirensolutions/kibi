@@ -3,7 +3,7 @@ define(function (require) {
 
   require('ui/kibi/directives/kibi_menu_template.less');
   require('ui/modules').get('app/dashboard')
-  .directive('kibiMenuTemplate', function ($timeout, $compile, $document) {
+  .directive('kibiMenuTemplate', function ($timeout, $window, $compile, $document) {
     const link = function ($scope, $el) {
       $scope.data = {
         showMenu: false,
@@ -26,6 +26,9 @@ define(function (require) {
           left += +$scope.kibiMenuTemplateLeftOffset;
         }
         let top = offset.top + $el.outerHeight();
+        if (top + container.outerHeight() > $($window).height()) {
+          top = offset.top - container.outerHeight();
+        }
         container.css({left, top});
       };
 
@@ -103,7 +106,6 @@ define(function (require) {
             $scope.data.showMenu = false;
           }, $scope.data.delay);
         });
-
         container.on('mouseover', function (event) {
           $timeout.cancel(timerPromise);
           $scope.$apply(function () {

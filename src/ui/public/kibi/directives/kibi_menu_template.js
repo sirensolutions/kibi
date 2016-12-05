@@ -32,8 +32,31 @@ define(function (require) {
         container.css({left, top});
       };
 
+      // track the scroll parent to hide upon scrolling
+      let scrollParent;
+      const scrollHandler = () => {
+        if ($scope.data.showMenu) {
+          $scope.data.showMenu = false;
+          $scope.$apply();
+        }
+      };
+
       const show = function () {
+
+        // find the current scroll parent and set it to hide the dropdown when
+        // the scroll position changes.
+        if (scrollParent) {
+          scrollParent.off('scroll', scrollHandler);
+        }
+        scrollParent = $el.parents().filter(function () {
+          return this.scrollHeight > $(this).height();
+        });
+        if (scrollParent) {
+          scrollParent.on('scroll', scrollHandler);
+        }
+
         $rootScope.$broadcast('kibiMenuTemplate:show', $el);
+
         if ($scope.kibiMenuTemplateOnShowFn) {
           $scope.kibiMenuTemplateOnShowFn();
         }
@@ -129,6 +152,9 @@ define(function (require) {
       });
 
       $scope.$on('$destroy', function () {
+        if (scrollParent) {
+          scrollParent.off('scroll', scrollHandler);
+        }
         cancelOnShow();
         $document.unbind('click', clickOutsideHandler);
         if (timerPromise) {

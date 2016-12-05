@@ -6,6 +6,7 @@ define(function (require) {
     _.class(TemplateRenderbot).inherits(Renderbot);
     // kibi: added the multiSearch argument in order to pass msearch stats to the multisearch spy mode
     // kibi: added searchSource so that the visualize directive may delegate the searchSource handling to the visualization
+    // kibi: added uiState in order to pass state to visualizations
     function TemplateRenderbot(vis, $el, uiState, multiSearchData, searchSource) {
       TemplateRenderbot.Super.call(this, vis, $el, uiState);
 
@@ -13,6 +14,7 @@ define(function (require) {
       this.$scope.vis = vis;
       this.$scope.multiSearchData = multiSearchData;
       this.$scope.searchSource = searchSource;
+      this.$scope.uiState = uiState;
 
       $el.html($compile(this.vis.type.template)(this.$scope));
     }

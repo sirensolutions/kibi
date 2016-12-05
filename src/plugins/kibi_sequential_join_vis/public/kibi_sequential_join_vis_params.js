@@ -36,7 +36,7 @@ define(function (require) {
             return rel.id === button.indexRelationId;
           });
           if (!found) {
-            notify.error('Could not found relation: ' + button.indexRelationId + '. Check relations config');
+            notify.error('Could not find relation: ' + button.indexRelationId + '. Check relations configuration.');
           }
         });
 

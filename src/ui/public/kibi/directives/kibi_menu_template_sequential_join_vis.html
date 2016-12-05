@@ -3,11 +3,11 @@
     <li ng-click="relation.onSelect(kibiMenuTemplateContext)" ng-repeat="relation in kibiMenuTemplateData">
       Name: <b>{{relation.label}}</b><br/>
 
-      index: <b>{{relation.indices[0].indexPatternId}}</b>
+      index pattern: <b>{{relation.indices[0].indexPatternId}}</b>
       <span ng-if="relation.indices[0].indexPatternType">type: <b>{{relation.indices[0].indexPatternType}}</b></span>
       field: <b>{{relation.indices[0].path}}</b>
       <i class="fa fa-arrows-h" aria-hidden="true"/>
-      index: <b>{{relation.indices[1].indexPatternId}}</b>
+      index pattern: <b>{{relation.indices[1].indexPatternId}}</b>
       <span ng-if="relation.indices[1].indexPatternType">type: <b>{{relation.indices[1].indexPatternType}}</b></span>
       field: <b>{{relation.indices[1].path}}</b>
     </li>

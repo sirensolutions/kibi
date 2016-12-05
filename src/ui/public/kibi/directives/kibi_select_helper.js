@@ -303,7 +303,7 @@ define(function (require) {
         });
 
         let otherIndexPattern;
-        // in case the otherDashboardId wes present find it
+        // in case the otherDashboardId was present, find it
         if (otherDashboardId) {
           // find the meta and indexPatternId of the other dashboard
           const otherDashboardMeta = _.find(filteredMetas, (meta) => {
@@ -311,7 +311,7 @@ define(function (require) {
           });
           otherIndexPattern = otherDashboardMeta.savedSearchMeta.index;
 
-          // and filter out dashboard which matches by index pattern
+          // and filter out dashboard matched by index pattern
           // but only if it is not self join relation
           if (indexRelation.indices[0].indexPatternId !== indexRelation.indices[1].indexPatternId) {
             filteredMetas = _.filter(filteredMetas, (meta) => {

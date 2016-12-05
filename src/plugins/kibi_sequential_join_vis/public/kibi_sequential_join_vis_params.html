@@ -43,7 +43,7 @@
 
         <div class="form-group" ng-if="button.indexRelationId">
           <label>Source dashboard</label> <span>(optional)</span>
-          <kbn-info placement="right" info="If set the button will appear ONLY on this single dashboard, otherwise it will apear on all dashboards matched by index used in selected relation"></kbn-info></br>
+          <kbn-info placement="right" info="If set the button will appear ONLY on this single dashboard, otherwise it will appear on all dashboards matched by index pattern used in the chosen relation"></kbn-info></br>
           <kibi-select
             object-type="dashboardsForSequentialJoinButton"
             options="{otherDashboardId: button.targetDashboardId, indexRelationId: button.indexRelationId}"

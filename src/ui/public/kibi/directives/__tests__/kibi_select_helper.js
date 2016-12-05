@@ -941,7 +941,6 @@ describe('Kibi Directives', function () {
           indexRelationId: 'comp*//path-c1/comp*//path-c2'
         };
         stSelectHelper.getDashboardsForButton(options).then(function (dashboards) {
-          console.log(dashboards);
           expect(dashboards).to.be.eql(expectedDashboards);
           done();
         });

@@ -3,7 +3,7 @@ define(function (require) {
 
   require('ui/kibi/directives/kibi_menu_template.less');
   require('ui/modules').get('app/dashboard')
-  .directive('kibiMenuTemplate', function ($timeout, $window, $compile, $document) {
+  .directive('kibiMenuTemplate', function ($rootScope, $timeout, $window, $compile, $document) {
     const link = function ($scope, $el) {
       $scope.data = {
         showMenu: false,
@@ -33,6 +33,7 @@ define(function (require) {
       };
 
       const show = function () {
+        $rootScope.$broadcast('kibiMenuTemplate:show', $el);
         if ($scope.kibiMenuTemplateOnShowFn) {
           $scope.kibiMenuTemplateOnShowFn();
         }
@@ -74,6 +75,7 @@ define(function (require) {
         });
       });
 
+      // hide when clicking elsewhere in the document
       const clickOutsideHandler = function (event) {
         const isChild = $el[0].contains(event.target);
         const isSelf = $el[0] === event.target;
@@ -115,17 +117,26 @@ define(function (require) {
         container.on('mouseout', function (event) {
           timerPromise = $timeout (function () {
             $scope.data.showMenu = false;
-          }, $scope.deta.delay);
+          }, $scope.data.delay);
         });
       }
 
+      // hide when clicking on another kibi dropdown
+      const cancelOnShow = $rootScope.$on('kibiMenuTemplate:show', (event, element) => {
+        if (element !== $el) {
+          $scope.data.showMenu = false;
+        }
+      });
+
       $scope.$on('$destroy', function () {
+        cancelOnShow();
         $document.unbind('click', clickOutsideHandler);
         if (timerPromise) {
           $timeout.cancel(timerPromise);
         }
         container.remove();
       });
+
     };
 
     return {

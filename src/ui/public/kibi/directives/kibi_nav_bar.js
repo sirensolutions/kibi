@@ -48,12 +48,12 @@ define(function (require) {
           urlHelper.onDashboardTab() ? $el.show() : $el.hide();
         });
 
-        $scope.relationalFilterVisible = false;
-        var removeInitConfigHandler = $rootScope.$on('init:config', function () {
+        $scope.relationalFilterVisible = config.get('kibi:relationalPanel');
+        const removeInitConfigHandler = $rootScope.$on('init:config', function () {
           $scope.relationalFilterVisible = config.get('kibi:relationalPanel');
         });
 
-        var removeRelationalPanelHandler = $rootScope.$on('change:config.kibi:relationalPanel', function () {
+        const removeRelationalPanelHandler = $rootScope.$on('change:config.kibi:relationalPanel', function () {
           $scope.relationalFilterVisible = config.get('kibi:relationalPanel');
         });
 
@@ -124,6 +124,8 @@ define(function (require) {
         });
 
         $scope.$on('$destroy', function () {
+          removeInitConfigHandler();
+          removeRelationalPanelHandler();
           kibiNavBarHelper.destroy();
           removeDashboardGroupChangedHandler();
           removeInitConfigHandler();

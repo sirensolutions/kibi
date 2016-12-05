@@ -57,7 +57,7 @@ define(function (require) {
         if (!relation.relation) {
           return false;
         }
-        let parts = relation.relation.split(SEPARATOR);
+        const parts = relation.relation.split(SEPARATOR);
         if (!checkIdFormat.call(this, parts)) {
           return false;
         }
@@ -83,7 +83,7 @@ define(function (require) {
       if (!relation.id) {
         return false;
       }
-      let parts = relation.id.split(SEPARATOR);
+      const parts = relation.id.split(SEPARATOR);
       if (!checkIdFormat.call(this, parts)) {
         return false;
       }
@@ -103,13 +103,20 @@ define(function (require) {
       if (!rightIndex.indexPatternId || !rightIndex.path) {
         return false;
       }
+
+      /**
+       * @retval true if @a and @b are strictly equal or are both empty
+       * @retval false if not.
+       */
+      const areEqual = (a, b) => a === b || _.isEmpty(a) && _.isEmpty(b);
+
       // test if the ID is correct
       const checkID = function (leftIndex, rightIndex, parts) {
         return leftIndex.indexPatternId === parts[0] &&
-          leftIndex.indexPatternType === parts[1] &&
+          areEqual(leftIndex.indexPatternType === parts[1]) &&
           leftIndex.path === parts[2] &&
           rightIndex.indexPatternId === parts[3] &&
-          rightIndex.indexPatternType === parts[4] &&
+          areEqual(rightIndex.indexPatternType === parts[4]) &&
           rightIndex.path === parts[5];
       };
       if (!checkID(leftIndex, rightIndex, parts) && !checkID(rightIndex, leftIndex, parts)) {
@@ -153,8 +160,8 @@ define(function (require) {
         return str.replace(/\//, '-slash-');
       };
 
-      var ia = `${clean(indexPatternIda)}/${clean(indexPatternTypea || '')}/${clean(patha)}`;
-      var ib = `${clean(indexPatternIdb)}/${clean(indexPatternTypeb || '')}/${clean(pathb)}`;
+      const ia = `${clean(indexPatternIda)}/${clean(indexPatternTypea || '')}/${clean(patha)}`;
+      const ib = `${clean(indexPatternIdb)}/${clean(indexPatternTypeb || '')}/${clean(pathb)}`;
       return ia < ib ? ia + SEPARATOR + ib : ib + SEPARATOR + ia;
     };
 
@@ -194,7 +201,7 @@ define(function (require) {
      * This method is used in sequential join filter visualisation configuration
      */
     RelationsHelper.prototype.createMoreDetailedLabel = function (relationId, targetIndexId) {
-      var rel = this.getRelationInfosFromRelationID(relationId);
+      const rel = this.getRelationInfosFromRelationID(relationId);
       if (targetIndexId === rel.target.index) {
         return rel.source.index + '/' +
                (rel.source.type ? rel.source.type + '/' : '') +

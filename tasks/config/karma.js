@@ -42,11 +42,30 @@ module.exports = function (grunt) {
     unit: { singleRun: true },
     coverage: {
       singleRun: true,
-      reporters: ['coverage'],
+      reporters: [
+        'coverage',
+        'progress'
+      ],
       coverageReporter: {
+        dir: 'coverage/browser',
         reporters: [
-          { type: 'html', dir: 'coverage' },
-          { type: 'text-summary' },
+          {
+            type: 'html',
+            subdir: 'html'
+          },
+          {
+            type: 'cobertura',
+            subdir: './',
+            file: 'cobertura.xml'
+          },
+          {
+            type: 'json',
+            subdir: './',
+            file: 'coverage.json'
+          },
+          {
+            type: 'text-summary'
+          }
         ]
       }
     }

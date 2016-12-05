@@ -1412,6 +1412,61 @@ describe('FilterJoin querying', function () {
         expect(actual).to.eql(builder.toObject());
       });
 
+      it('negated nested join filter with types', function () {
+        const query = [
+          {
+            join_sequence: [
+              {
+                group: [
+                  [
+                    {
+                      relation: [
+                        { indices: [ 'bbb' ], path: 'path1', pattern: 'bbb', types: [ 'B' ] },
+                        { indices: [ 'aaa' ], path: 'id', pattern: 'aaa', types: [ 'A' ] }
+                      ],
+                      negate: true
+                    }
+                  ],
+                  [
+                    {
+                      relation: [
+                        { indices: [ 'bbb' ], path: 'path2', pattern: 'bbb' },
+                        { indices: [ 'aaa' ], path: 'id', pattern: 'aaa' }
+                      ]
+                    }
+                  ]
+                ]
+              },
+              {
+                relation: [
+                  { pattern: 'aaa', path: 'id', indices: [ 'aaa' ] },
+                  { pattern: 'ccc', path: 'path3', indices: [ 'ccc' ] }
+                ]
+              }
+            ]
+          }
+        ];
+
+        const builder = new FilterJoinBuilder();
+        const fj = builder.addFilterJoin({ sourcePath: 'path3', targetIndices: [ 'aaa' ], targetPath: 'id' });
+        fj.addFilterJoin({
+          negate: true,
+          sourceTypes: [ 'A' ],
+          sourcePath: 'id',
+          targetIndices: [ 'bbb' ],
+          targetPath: 'path1',
+          targetTypes: [ 'B' ]
+        });
+        fj.addFilterJoin({
+          sourcePath: 'id',
+          targetIndices: [ 'bbb' ],
+          targetPath: 'path2'
+        });
+
+        const actual = filterJoinSeq(query);
+        expect(actual).to.eql(builder.toObject());
+      });
+
       it('2 join sequences', function () {
         const joinSequence1 = {
           join_sequence: [
@@ -1822,6 +1877,62 @@ describe('FilterJoin querying', function () {
           sourcePath: 'id',
           targetIndices: [ 'investment' ],
           targetPath: 'companyid',
+          negate: true
+        });
+        const actual = filterJoinSeq(query);
+        expect(actual).to.eql(builder.toObject());
+      });
+
+      it('negate a relation with types', function () {
+        const query = [
+          {
+            join_sequence: [
+              {
+                relation: [
+                  {
+                    pattern: 'investment',
+                    path: 'companyid',
+                    indices: [ 'investment' ],
+                    types: [ 'Investment' ]
+                  },
+                  {
+                    pattern: 'company',
+                    path: 'id',
+                    indices: [ 'company' ],
+                    types: [ 'Company' ]
+                  }
+                ],
+                negate: true
+              },
+              {
+                relation: [
+                  {
+                    pattern: 'company',
+                    path: 'id',
+                    indices: [ 'company' ]
+                  },
+                  {
+                    pattern: 'investment',
+                    path: 'companyid',
+                    indices: [ 'investment' ]
+                  }
+                ]
+              }
+            ]
+          }
+        ];
+        const builder = new FilterJoinBuilder();
+        builder.addFilterJoin({
+          sourcePath: 'companyid',
+          targetIndices: [ 'company' ],
+          targetPath: 'id'
+        })
+        .addFilterJoin({
+          sourcePath: 'id',
+          sourceTypes: [ 'Company' ],
+          targetIndices: [ 'investment' ],
+          targetPath: 'companyid',
+          targetTypes: [ 'Investment' ],
           negate: true
         });
         const actual = filterJoinSeq(query);

@@ -1,3 +1,5 @@
+import { get, set } from 'lodash';
+
 function Builder() {
   this.query = [];
   return this;
@@ -19,11 +21,13 @@ Builder.prototype.toObject = function () {
       if (query[i] instanceof FilterJoinBuilder) {
         // must branch of the child
         const must = query[i].filterjoin.query.bool.filter.bool.must;
-        query[i].filterjoin.query.bool.filter.bool.must = expand([], must);
+        if (must) {
+          query[i].filterjoin.query.bool.filter.bool.must = expand([], must);
+        }
         // must_not branch of the child
         const mustNot = query[i].filterjoin.query.bool.filter.bool.must_not;
-        if (mustNot) {
-          query[i].filterjoin.query.bool.filter.bool.must_not = expand([], mustNot);
+        if (mustNot && mustNot[0].bool) {
+          mustNot[0].bool.must = expand([], mustNot[0].bool.must);
         }
         // the current filterjoin query
         queryOut.push(...query[i].fjQuery);
@@ -123,16 +127,21 @@ FilterJoinBuilder.prototype.addFilterJoin = function ({ orderBy, maxTermsPerShar
     targetTypes,
     targetPath
   });
+  const query = this.filterjoin.query.bool;
   // add to the parent filterjoin
   if (negate) {
-    if (!this.filterjoin.query.bool.filter.bool.must_not) {
-      this.filterjoin.query.bool.filter.bool.must_not = [];
+    if (!get(query, 'filter.bool.must_not')) {
+      set(query, 'filter.bool.must_not', [{
+        bool: {
+          must: []
+        }
+      }]);
     }
-    this.filterjoin.query.bool.filter.bool.must_not.push(filterJoinBuilder);
-    addSourceTypes(this.filterjoin.query.bool.filter.bool.must_not, sourceTypes);
+    query.filter.bool.must_not[0].bool.must.push(filterJoinBuilder);
+    addSourceTypes(query.filter.bool.must_not[0].bool.must, sourceTypes);
   } else {
-    this.filterjoin.query.bool.filter.bool.must.push(filterJoinBuilder);
-    addSourceTypes(this.filterjoin.query.bool.filter.bool.must, sourceTypes);
+    query.filter.bool.must.push(filterJoinBuilder);
+    addSourceTypes(query.filter.bool.must, sourceTypes);
   }
   return filterJoinBuilder;
 };

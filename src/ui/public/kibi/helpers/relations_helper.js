@@ -113,10 +113,10 @@ define(function (require) {
       // test if the ID is correct
       const checkID = function (leftIndex, rightIndex, parts) {
         return leftIndex.indexPatternId === parts[0] &&
-          areEqual(leftIndex.indexPatternType === parts[1]) &&
+          areEqual(leftIndex.indexPatternType, parts[1]) &&
           leftIndex.path === parts[2] &&
           rightIndex.indexPatternId === parts[3] &&
-          areEqual(rightIndex.indexPatternType === parts[4]) &&
+          areEqual(rightIndex.indexPatternType, parts[4]) &&
           rightIndex.path === parts[5];
       };
       if (!checkID(leftIndex, rightIndex, parts) && !checkID(rightIndex, leftIndex, parts)) {

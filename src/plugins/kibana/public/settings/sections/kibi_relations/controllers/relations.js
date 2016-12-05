@@ -354,7 +354,6 @@ define(function (require) {
 
       $scope.invalid = false;
       _.each($scope.relations[relationsGraphProperty], function (relation) {
-        const indices = relation.indices;
         const errors = [];
 
         if (isRelationReady(relation)) {
@@ -714,7 +713,10 @@ define(function (require) {
           const getFieldMapping = function (mapping, { indexPatternType, path }) {
             const index = Object.keys(mapping)[0];
             const type = indexPatternType || Object.keys(mapping[index].mappings)[0];
-            return _.values(mapping[index].mappings[type][path].mapping)[0];
+
+            if (index && type) {
+              return _.values(mapping[index].mappings[type][path].mapping)[0];
+            }
           };
 
           _.each(mappings, ({ leftMapping, rightMapping, relation }) => {
@@ -730,6 +732,14 @@ define(function (require) {
             // check if the field joined together are compatible
             const leftFieldMapping = getFieldMapping(leftMapping, indices[0]);
             const rightFieldMapping = getFieldMapping(rightMapping, indices[1]);
+
+
+            // if either mapping is empty the field was not selected; set invalid to true
+            // but do not notify the user.
+            if (_.isEmpty(leftFieldMapping) || _.isEmpty(rightFieldMapping)) {
+              $scope.invalid = true;
+              return;
+            }
 
             if (!areMappingsCompatibleForSirenJoin(leftFieldMapping, rightFieldMapping)) {
               if (!relation.errors) {

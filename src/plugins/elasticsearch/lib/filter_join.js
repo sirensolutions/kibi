@@ -151,6 +151,13 @@ export default function (server) {
       if (util.length(json, path) !== 1) {
         throw new Error('The object at ' + path.join('.') + ' must only contain the join filter\n' + JSON.stringify(json, null, ' '));
       }
+      // if a relation contains a filter on the source type, the FilterJoin API will generate a list of two filters:
+      // - a filterjoin
+      // - a type filter
+      //
+      // To exclude documents for which match BOTH these filters, we need to enclose the filters in a must clause,
+      // otherwise must_not will filter out documents which match ANY of these filters.
+      //
       const occurrence = path[path.length - 2];
       if (occurrence === 'must_not') {
         objects[i].value = {

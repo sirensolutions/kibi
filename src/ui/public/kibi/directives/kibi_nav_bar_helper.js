@@ -17,19 +17,34 @@ define(function (require) {
     * Private Methods
     */
     const _fireUpdateAllCounts = function (dashboardIds, forceCountsUpdate = false) {
+      let filteredDashboardsIds = [];
       if (!dashboardIds) {
-        // only the selected dashboard from each group
-        dashboardIds = [];
-        _.each(this.dashboardGroups, (g, index) => {
-          const dashboard = this.dashboardGroups[index].selected;
-          if (dashboard && dashboardIds.indexOf(dashboard.id) === -1) {
-            dashboardIds.push(dashboard.id);
+        // only the selected/visible dashboard from each group
+        _.each(this.dashboardGroups, (g) => {
+          if (g.selected && g.selected.savedSearchId && filteredDashboardsIds.indexOf(g.selected.id) === -1) {
+            filteredDashboardsIds.push(g.selected.id);
           }
+        });
+      } else {
+        // filter the given dashboardIds
+        // to use only the selected/visible dashboard from each group
+        _.each(dashboardIds, (id) => {
+          _.each(this.dashboardGroups, (g) => {
+            if (g.selected && g.selected.savedSearchId && g.selected.id === id && filteredDashboardsIds.indexOf(id) === -1) {
+              filteredDashboardsIds.push(id);
+            }
+          });
         });
       }
 
-      return dashboardGroupHelper.getDashboardsMetadata(dashboardIds, forceCountsUpdate)
-      .then((metadata) => {
+      if (console) {
+        console.log(
+          'KibiNavBar will update the counts for following dashboards ' +
+          JSON.stringify(filteredDashboardsIds, null, ' ')
+        );
+      }
+
+      return dashboardGroupHelper.getDashboardsMetadata(filteredDashboardsIds, forceCountsUpdate).then((metadata) => {
         _.each(this.dashboardGroups, (g) => {
           _.each(g.dashboards, (d) => {
             const foundDashboardMetadata = _.find(metadata, 'dashboardId', d.id);
@@ -55,7 +70,11 @@ define(function (require) {
 
     const updateCounts = function (dashboardsIds, reason, forceUpdate = false) {
       if (console) {
-        console.log(`Count on tabs will be updated for dashboards ${JSON.stringify(dashboardsIds, null, ' ')} because: [${reason}]`);
+        console.log(
+          'KibiNavBar requested count update for following dashboards ' +
+          JSON.stringify(dashboardsIds, null, ' ') +
+          ' because: [' + reason + ']'
+        );
       }
       this.delayExecutionHelper.addEventData({
         forceUpdate: forceUpdate,
@@ -161,7 +180,8 @@ define(function (require) {
         }
 
         // refresh all tabs count
-        this.updateAllCounts(null, 'courier:searchRefresh event', true);
+        const dashboardsIds = addAllConnected.call(this, currentDashboard);
+        this.updateAllCounts(dashboardsIds, 'courier:searchRefresh event', true);
       });
 
       const self = this;

@@ -502,7 +502,7 @@ define(function (require) {
 
       const isEqual = _($scope.relations.relationsDashboards).map(function (relation) {
         return _.omit(relation, [ '$$hashKey', 'errors' ]);
-      }).isEqual(oldRelations);
+      }).isEqual(oldRelations.dashboards);
 
       if (!isEqual) {
         $scope.isObjectValid();

@@ -67,6 +67,28 @@
         }
       }
 
+      .relation-select {
+        .unselectable();
+
+        border-color: @st-darkgray-blured;
+        padding-right: 4px;
+        transition: none;
+
+        &.invalid {
+          border-color: @brand-danger;
+        }
+
+        &.focused {
+          border-color: #444;
+        }
+
+        i.fa {
+          float: right;
+          margin-top: 2px;
+          transform: scale(0.7, 1);
+        }
+      }
+
       .form-group label {
         overflow: visible;
       }

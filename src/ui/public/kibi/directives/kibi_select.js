@@ -28,7 +28,6 @@ define(function (require) {
         // - queryVariable: returns the projected variables of an external query
         // - iconType: node icon
         // - labelType: node label
-        // - relationsForSequentialJoinButton: returns a list of relations for the relational filter visualization
         // - dashboardsForSequentialJoinButton: returns filtered dashboards based on otherDashboardId and/or indexRelationId passed via options
         // - delegate: use the options from delegatedData
         objectType: '@',
@@ -44,7 +43,7 @@ define(function (require) {
         // If the item is **undefined**, the function may return an object that is used in the angular watcher.
         filter: '&?',
         // Options map
-        // optional, options map which are passed to getDashboard and getRelationsForButton
+        // optional, options map which are passed to getDashboard
         // also passed to filter function
         // options: {
         //   hasSavedSearch: false, // used when objectType==dashboard
@@ -298,9 +297,6 @@ define(function (require) {
                 break;
               case 'labelType':
                 promise = selectHelper.getLabelType();
-                break;
-              case 'relationsForSequentialJoinButton':
-                promise = selectHelper.getRelationsForButton(scope.options);
                 break;
               case 'dashboardsForSequentialJoinButton':
                 promise = selectHelper.getDashboardsForButton(scope.options);

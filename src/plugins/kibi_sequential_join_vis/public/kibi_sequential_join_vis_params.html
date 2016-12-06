@@ -9,18 +9,41 @@
 
         <div class="form-group">
           <label>Button label</label></br>
-          <input required="true" type="text" ng-model="button.label" class="form-control"/>
-        </div>
-        <div class="form-group">
-          <label>Custom filter label</label> <span>(optional)</span>
-           <kbn-info placement="right" info="A custom label for the filter created by pressing the button. The default label is: '... related to ($COUNT) from $DASHBOARD. If used variables $COUNT and $DASHBOARD will be replaced by correct values.'">
-           </kbn-info></br>
-          <input type="text" ng-model="button.filterLabel" class="form-control"/>
+          <input required type="text" ng-model="button.label" class="form-control"/>
         </div>
 
         <div class="form-group">
-          <label>Source dashboard</label></br/>
-          <span>The button will appear on this dashboard</span></br>
+          <label>Relation</label>
+          <kbn-info placement="right" info="Choose index relation to be used to do the join"></kbn-info></br>
+          <!-- hidden required input to invalidate the form properly -->
+          <input type="hidden" name="relationId" required ng-model="button.indexRelationId"/>
+          <span class="form-control relation-select"
+                ng-class="{invalid: !button.indexRelationId, focused: menu.focused}"
+                kibi-menu-template="menu.template"
+                kibi-menu-template-data="menu.relations"
+                kibi-menu-template-context="button"
+                kibi-menu-template-on-focus-fn="menu.onFocus()"
+                kibi-menu-template-on-blur-fn="menu.onBlur()"
+
+                >
+            <span ng-bind="getLabel(button.indexRelationId) || 'Choose relation'"/>
+            <i class="fa fa-sort"/>
+          </span>
+        </div>
+
+        <div class="form-group" ng-if="button.indexRelationId">
+          <label>Target dashboard</label>
+          <kbn-info placement="right" info="On click it will redirect to this dashboard"></kbn-info></br>
+          <kibi-select required
+            object-type="dashboardsForSequentialJoinButton"
+            options="{indexRelationId: button.indexRelationId}"
+            ng-model="button.targetDashboardId">
+          </kibi-select>
+        </div>
+
+        <div class="form-group" ng-if="button.indexRelationId">
+          <label>Source dashboard</label> <span>(optional)</span>
+          <kbn-info placement="right" info="If set the button will appear ONLY on this single dashboard, otherwise it will appear on all dashboards matched by index pattern used in the chosen relation"></kbn-info></br>
           <kibi-select
             object-type="dashboardsForSequentialJoinButton"
             options="{otherDashboardId: button.targetDashboardId, indexRelationId: button.indexRelationId}"
@@ -29,27 +52,10 @@
         </div>
 
         <div class="form-group">
-          <label>Target dashboard</label></br/>
-          <span>On click it will redirect to this dashboard</span></br>
-          <kibi-select required
-            object-type="dashboardsForSequentialJoinButton"
-            options="{otherDashboardId: button.sourceDashboardId, indexRelationId: button.indexRelationId}"
-            ng-model="button.targetDashboardId">
-          </kibi-select>
-        </div>
-
-        <div class="form-group">
-          <label>Relation</label></br/>
-          <span>Choose the way to do the join</span></br>
-          <!--
-          NOTE: here we pick an index relation here based on which
-          dashboards are selected
-          -->
-          <kibi-select required
-            object-type="relationsForSequentialJoinButton"
-            options="{sourceDashboardId: button.sourceDashboardId, targetDashboardId: button.targetDashboardId}"
-            ng-model="button.indexRelationId">
-          </kibi-select>
+          <label>Custom filter label</label> <span>(optional)</span>
+           <kbn-info placement="right" info="A custom label for the filter created by pressing the button. The default label is: '... related to ($COUNT) from $DASHBOARD. If used variables $COUNT and $DASHBOARD will be replaced by correct values.'">
+           </kbn-info></br>
+          <input type="text" ng-model="button.filterLabel" class="form-control"/>
         </div>
 
         <!-- positioned via css to be in right top corner (keep it the last element) -->

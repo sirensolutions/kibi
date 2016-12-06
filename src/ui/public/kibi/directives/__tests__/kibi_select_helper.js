@@ -839,6 +839,20 @@ describe('Kibi Directives', function () {
             ],
             label: 'label-c-i',
             id: 'comp*//path-c/invest*//path-i'
+          },
+          {
+            indices: [
+              {
+                indexPatternId: 'comp*',
+                path: 'path-c1'
+              },
+              {
+                indexPatternId: 'comp*',
+                path: 'path-c2'
+              }
+            ],
+            label: 'label-c-c',
+            id: 'comp*//path-c1/comp*//path-c2'
           }
         ]
       };
@@ -874,11 +888,15 @@ describe('Kibi Directives', function () {
         });
       });
 
-      it('pass the otherDashboardId in the option', function (done) {
+      it('pass only the otherDashboardId and NO indexRelationId should return all dashboards with savedSearchId set', function (done) {
         let expectedDashboards = [
           {
             label: 'Articles',
             value: 'Articles'
+          },
+          {
+            label: 'Companies',
+            value: 'Companies'
           },
           {
             label: 'Investments',
@@ -894,7 +912,7 @@ describe('Kibi Directives', function () {
         });
       });
 
-      it('pass the otherDashboardId and indexRelationId in the option', function (done) {
+      it('pass indexRelationId and otherDashboardId in the option should filter the dashboards', function (done) {
         let expectedDashboards = [
           {
             label: 'Articles',
@@ -910,267 +928,25 @@ describe('Kibi Directives', function () {
           done();
         });
       });
-    });
 
-    describe('getRelationsForButton', function () {
-
-      beforeEach(function () {
-        var fakedSavedDashboards = [
+      it('pass self join indexRelationId and otherDashboardId in the option should filter the dashboards', function (done) {
+        let expectedDashboards = [
           {
-            id: 'dash-a',
-            title: 'A',
-            savedSearchId: 'savedSearchA'
-          },
-          {
-            id: 'dash-b',
-            title: 'B',
-            savedSearchId: 'savedSearchB'
-          },
-          {
-            id: 'dash-c',
-            title: 'C',
-            savedSearchId: 'savedSearchC'
+            label: 'Companies',
+            value: 'Companies'
           }
         ];
-
-        var fakeSavedSearches = [
-          {
-            id: 'savedSearchA',
-            kibanaSavedObjectMeta: {
-              searchSourceJSON: JSON.stringify({index: 'index-a'})
-            }
-          },
-          {
-            id: 'savedSearchB',
-            kibanaSavedObjectMeta: {
-              searchSourceJSON: JSON.stringify({index: 'index-b'})
-            }
-          },
-          {
-            id: 'savedSearchC',
-            kibanaSavedObjectMeta: {
-              searchSourceJSON: JSON.stringify({index: 'index-c'})
-            }
-          }
-        ];
-
-        var relations = {
-          relationsIndices: [
-            {
-              indices: [
-                {
-                  indexPatternId: 'index-a',
-                  path: 'path-a'
-                },
-                {
-                  indexPatternId: 'index-b',
-                  path: 'path-b'
-                }
-              ],
-              label: 'label-a-b',
-              id: 'index-a//path-a/index-b//path-b'
-            },
-            {
-              indices: [
-                {
-                  indexPatternId: 'index-b',
-                  path: 'path-b'
-                },
-                {
-                  indexPatternId: 'index-c',
-                  path: 'path-c'
-                }
-              ],
-              label: 'label-b-c',
-              id: 'index-b//path-b/index-c//path-c'
-            },
-            {
-              indices: [
-                {
-                  indexPatternId: 'index-b',
-                  path: 'path-b1'
-                },
-                {
-                  indexPatternId: 'index-c',
-                  path: 'path-c1'
-                }
-              ],
-              label: 'label-b-c',
-              id: 'index-b//path-b1/index-c//path-c1'
-            }
-          ]
+        let options = {
+          otherDashboardId: 'Companies',
+          indexRelationId: 'comp*//path-c1/comp*//path-c2'
         };
-
-        init({
-          savedDashboards: fakedSavedDashboards,
-          savedSearches: fakeSavedSearches,
-          stubConfig: true
-        });
-
-        config.set('kibi:relations', relations);
-      });
-
-
-      it('should return an empty set if no options set', function (done) {
-        stSelectHelper.getRelationsForButton().then(function (relations) {
-          expect(relations).to.have.length(0);
+        stSelectHelper.getDashboardsForButton(options).then(function (dashboards) {
+          expect(dashboards).to.be.eql(expectedDashboards);
           done();
-        }).catch(done);
-      });
-
-      describe('only options.sourceDashboardId set', function () {
-        it('should return all 3 if sourceDashboardId == dash-b', function (done) {
-          stSelectHelper.getRelationsForButton({
-            sourceDashboardId: 'dash-b'
-          }).then(function (relations) {
-            expect(relations).to.have.length(3);
-            expect(relations[0].label).to.equal('label-a-b');
-            expect(relations[1].label).to.equal('index-c/path-c <-> index-b/path-b');
-            expect(relations[2].label).to.equal('index-c/path-c1 <-> index-b/path-b1');
-            done();
-          }).catch(done);
-        });
-
-        it('should return only 1 if sourceDashboardId == dash-a', function (done) {
-          stSelectHelper.getRelationsForButton({
-            sourceDashboardId: 'dash-a'
-          }).then(function (relations) {
-            expect(relations).to.have.length(1);
-            expect(relations[0].label).to.equal('label-a-b');
-            done();
-          }).catch(done);
-        });
-
-        it('should return only 2 if sourceDashboardId == dash-c', function (done) {
-          stSelectHelper.getRelationsForButton({
-            sourceDashboardId: 'dash-c'
-          }).then(function (relations) {
-            expect(relations).to.have.length(2);
-            expect(relations[0].label).to.equal('index-c/path-c <-> index-b/path-b');
-            expect(relations[1].label).to.equal('index-c/path-c1 <-> index-b/path-b1');
-            done();
-          }).catch(done);
-        });
-
-        it('should reject if sourceDashboardId == dash-DO-NOT-EXIST', function (done) {
-          stSelectHelper.getRelationsForButton({
-            sourceDashboardId: 'dash-DO-NOT-EXIST'
-          }).then(function (relations) {
-            done(new Error('Should reject'));
-          }).catch(function () {
-            done();
-          });
-        });
-      });
-
-      describe('only options.targetDashboardId set', function () {
-        it('should return all 3 if targetDashboardId == dash-b', function (done) {
-          stSelectHelper.getRelationsForButton({
-            targetDashboardId: 'dash-b'
-          }).then(function (relations) {
-            expect(relations).to.have.length(3);
-            expect(relations[0].label).to.equal('label-a-b');
-            expect(relations[1].label).to.equal('index-c/path-c <-> index-b/path-b');
-            expect(relations[2].label).to.equal('index-c/path-c1 <-> index-b/path-b1');
-            done();
-          }).catch(done);
-        });
-
-        it('should return only 1 if targetDashboardId == dash-a', function (done) {
-          stSelectHelper.getRelationsForButton({
-            targetDashboardId: 'dash-a'
-          }).then(function (relations) {
-            expect(relations).to.have.length(1);
-            expect(relations[0].label).to.equal('label-a-b');
-            done();
-          }).catch(done);
-        });
-
-        it('should return only 2 if targetDashboardId == dash-c', function (done) {
-          stSelectHelper.getRelationsForButton({
-            targetDashboardId: 'dash-c'
-          }).then(function (relations) {
-            expect(relations).to.have.length(2);
-            expect(relations[0].label).to.equal('index-b/path-b <-> index-c/path-c');
-            expect(relations[1].label).to.equal('index-b/path-b1 <-> index-c/path-c1');
-            done();
-          }).catch(done);
-        });
-
-        it('should reject if targetDashboardId == dash-DO-NOT-EXIST', function (done) {
-          stSelectHelper.getRelationsForButton({
-            targetDashboardId: 'dash-DO-NOT-EXIST'
-          }).then(function (relations) {
-            done(new Error('Should reject'));
-          }).catch(function () {
-            done();
-          });
-        });
-
-      });
-
-      describe('both options.sourceDashboardId and options.targetDashboardId are set', function () {
-
-        it('should return 1 if sourceDashboardId == dash-a and targetDashboardId == dash-b', function (done) {
-          stSelectHelper.getRelationsForButton({
-            sourceDashboardId: 'dash-a',
-            targetDashboardId: 'dash-b'
-          }).then(function (relations) {
-            expect(relations).to.have.length(1);
-            expect(relations[0].label).to.equal('label-a-b');
-            done();
-          }).catch(done);
-        });
-
-        it('should return 1 if sourceDashboardId == dash-b and targetDashboardId == dash-a', function (done) {
-          stSelectHelper.getRelationsForButton({
-            sourceDashboardId: 'dash-b',
-            targetDashboardId: 'dash-a'
-          }).then(function (relations) {
-            expect(relations).to.have.length(1);
-            expect(relations[0].label).to.equal('label-a-b');
-            done();
-          }).catch(done);
-        });
-
-        it('should return 2 if sourceDashboardId == dash-b and targetDashboardId == dash-c', function (done) {
-          stSelectHelper.getRelationsForButton({
-            sourceDashboardId: 'dash-b',
-            targetDashboardId: 'dash-c'
-          }).then(function (relations) {
-            expect(relations).to.have.length(2);
-            expect(relations[0].label).to.equal('index-b/path-b <-> index-c/path-c');
-            expect(relations[1].label).to.equal('index-b/path-b1 <-> index-c/path-c1');
-            done();
-          }).catch(done);
-        });
-
-        it('should return 2 if sourceDashboardId == dash-c and targetDashboardId == dash-b', function (done) {
-          stSelectHelper.getRelationsForButton({
-            sourceDashboardId: 'dash-c',
-            targetDashboardId: 'dash-b'
-          }).then(function (relations) {
-            expect(relations).to.have.length(2);
-            expect(relations[0].label).to.equal('index-c/path-c <-> index-b/path-b');
-            expect(relations[1].label).to.equal('index-c/path-c1 <-> index-b/path-b1');
-            done();
-          }).catch(done);
-        });
-
-        it('should reject if sourceDashboardId == dash-a and targetDashboardId == dash-DO-NOT-EXIST', function (done) {
-          stSelectHelper.getRelationsForButton({
-            sourceDashboardId: 'dash-a',
-            targetDashboardId: 'dash-DO-NOT-EXIST'
-          })
-          .then(function (relations) {
-            done(new Error('Should reject'));
-          }).catch(function (e) {
-            // ok
-            done();
-          });
         });
       });
 
     });
+
   });
 });

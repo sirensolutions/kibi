@@ -5,7 +5,7 @@ define(function (require) {
   require('ui/kibi/directives/kibi_stop_click_event');
   require('ui/kibi/directives/kibi_menu_template');
   const _ = require('lodash');
-  const menuTemplateHtml = require('ui/kibi/directives/kibi_nav_bar_kibi_menu_template.html');
+  const menuTemplateHtml = require('ui/kibi/directives/kibi_menu_template_kibi_nav_bar.html');
 
   require('ui/routes')
   .addSetupWork(function (Private) {

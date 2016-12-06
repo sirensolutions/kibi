@@ -815,7 +815,15 @@ define(function (require) {
     // Listen to changes of relations between indices
     $scope.$watch(function ($scope) {
       return _.map($scope.relations.relationsIndices, function (relation) {
-        return _.omit(relation, ['errors', 'id']); // id is redundant
+        // kibi_select can set the index pattern type to null, but it is stored as an empty string,
+        // so we need to normalize to properly detect changes.
+        for (const index of relation.indices) {
+          if (index.indexPatternType === null) {
+            index.indexPatternType = '';
+          }
+        }
+        const normalized = _.omit(relation, ['$$hashKey', 'errors', 'id']);
+        return normalized;
       });
     }, function (newRelations, oldRelations) {
       $scope.updateIndicesGraph(oldRelations);

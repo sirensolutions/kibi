@@ -178,8 +178,6 @@ define(function (require) {
         if (!currentDashboard) {
           return;
         }
-
-        // refresh all tabs count
         const dashboardsIds = addAllConnected.call(this, currentDashboard);
         this.updateAllCounts(dashboardsIds, 'courier:searchRefresh event', true);
       });

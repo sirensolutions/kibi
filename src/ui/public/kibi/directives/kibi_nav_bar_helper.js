@@ -21,7 +21,7 @@ define(function (require) {
       if (!dashboardIds) {
         // only the selected/visible dashboard from each group
         _.each(this.dashboardGroups, (g) => {
-          if (g.selected && g.selected.savedSearchId && filteredDashboardsIds.indexOf(g.selected.id) === -1) {
+          if (g.selected && filteredDashboardsIds.indexOf(g.selected.id) === -1) {
             filteredDashboardsIds.push(g.selected.id);
           }
         });
@@ -30,7 +30,7 @@ define(function (require) {
         // to use only the selected/visible dashboard from each group
         _.each(dashboardIds, (id) => {
           _.each(this.dashboardGroups, (g) => {
-            if (g.selected && g.selected.savedSearchId && g.selected.id === id && filteredDashboardsIds.indexOf(id) === -1) {
+            if (g.selected && g.selected.id === id && filteredDashboardsIds.indexOf(id) === -1) {
               filteredDashboardsIds.push(id);
             }
           });
@@ -55,11 +55,11 @@ define(function (require) {
                 foundDashboardMetadata.filters,
                 foundDashboardMetadata.queries
               );
-            } else if (_.contains(dashboardIds, d.id)) {
+            } else if (_.contains(filteredDashboardsIds, d.id)) {
               // count for that dashboard was requested but is not in the metadata, likely because it doesn't have a savedSearchId
               delete d.count;
-              d.isPruned = false;
-              d.filterIconMessage = '';
+              delete d.isPruned;
+              delete d.filterIconMessage;
             }
           });
         });

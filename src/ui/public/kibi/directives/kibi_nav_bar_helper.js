@@ -28,7 +28,8 @@ define(function (require) {
         });
       }
 
-      return dashboardGroupHelper.getDashboardsMetadata(dashboardIds, forceCountsUpdate).then((metadata) => {
+      return dashboardGroupHelper.getDashboardsMetadata(dashboardIds, forceCountsUpdate)
+      .then((metadata) => {
         _.each(this.dashboardGroups, (g) => {
           _.each(g.dashboards, (d) => {
             const foundDashboardMetadata = _.find(metadata, 'dashboardId', d.id);
@@ -39,6 +40,11 @@ define(function (require) {
                 foundDashboardMetadata.filters,
                 foundDashboardMetadata.queries
               );
+            } else if (_.contains(dashboardIds, d.id)) {
+              // count for that dashboard was requested but is not in the metadata, likely because it doesn't have a savedSearchId
+              delete d.count;
+              d.isPruned = false;
+              d.filterIconMessage = '';
             }
           });
         });

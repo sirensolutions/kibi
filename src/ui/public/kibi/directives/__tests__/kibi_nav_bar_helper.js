@@ -348,6 +348,22 @@ describe('Kibi Directives', function () {
           }, 950); // more than default delay of 750 for dashboards count queries
         });
 
+        it('should set count to undefined if there is no metadata for the requested dashboard', function (done) {
+          getDashboardsMetadataStub.returns(Promise.resolve([]));
+
+          kibiNavBarHelper.updateAllCounts([ 'dashboard1' ]);
+
+          setTimeout(function () {
+            var dashboardGroups = kibiNavBarHelper.dashboardGroups;
+            expect(dashboardGroups).to.have.length(2);
+            expect(dashboardGroups[0].id).to.be('group dashboard1');
+            expect(dashboardGroups[0].selected.count).to.not.be.ok();
+            expect(dashboardGroups[1].id).to.be('group dashboard2');
+            expect(dashboardGroups[1].selected.count).to.not.be.ok();
+            done();
+          }, 950); // more than default delay of 750 for dashboards count queries
+        });
+
       });
 
       it('should update counts of current dashboard on kibiState changes', function (done) {

@@ -46,8 +46,8 @@
             <i ng-show="!indicesRelationsAreValid" aria-hidden="true" class="fa fa-exclamation-triangle"></i> Index Relations
           </a>
         </li>
-        <li ng-click="tabClick('dashboard')"
-            ng-class="{ 'active': tab.dashboardRel, 'bad-relations': !dashboardsRelationsAreValid, disabled: relationalPanel }">
+        <li ng-click="relationalPanel && tabClick('dashboard')"
+            ng-class="{ 'active': tab.dashboardRel, 'bad-relations': !dashboardsRelationsAreValid, disabled: !relationalPanel }">
           <a href="" aria-controls="config_rel" role="tab">
             <i ng-show="!dashboardsRelationsAreValid" aria-hidden="true" class="fa fa-exclamation-triangle"></i> Relational Panel
           </a>

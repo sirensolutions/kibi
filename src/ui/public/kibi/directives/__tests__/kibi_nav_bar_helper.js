@@ -638,7 +638,6 @@ describe('Kibi Directives', function () {
         kibiNavBarHelper.updateAllCounts([ 'dashboard1', 'dashboard2', 'dashboard3', 'dashboard4' ]);
 
         setTimeout(function () {
-          var dashboardGroups = kibiNavBarHelper.dashboardGroups;
           getDashboardsMetadataStub.calledWith(['dashboard1', 'dashboard2']);
           done();
         }, 950); // more than default delay of 750 for dashboards count queries
@@ -654,7 +653,7 @@ describe('Kibi Directives', function () {
       it('should update the counts of current dashboard plus connected dashboards on courier:searchRefresh', function (done) {
         const stub = sinon.stub(kibiNavBarHelper, 'updateAllCounts');
         $rootScope.$broadcast('courier:searchRefresh');
-        expect(stub.calledWith([ 'dashboard1', 'dashboard2' ], 'courier:searchRefresh event', true)).to.be(true);
+        expect(stub.calledWith(null, 'courier:searchRefresh event', true)).to.be(true);
         done();
       });
 

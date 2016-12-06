@@ -17,23 +17,21 @@ define(function (require) {
     * Private Methods
     */
     const _fireUpdateAllCounts = function (dashboardIds, forceCountsUpdate = false) {
-      let filteredDashboardsIds = [];
+      const filteredDashboardsIds = new Set();
       if (!dashboardIds) {
         // only the selected/visible dashboard from each group
         _.each(this.dashboardGroups, (g) => {
-          if (g.selected && filteredDashboardsIds.indexOf(g.selected.id) === -1) {
-            filteredDashboardsIds.push(g.selected.id);
+          if (g.selected) {
+            filteredDashboardsIds.add(g.selected.id);
           }
         });
       } else {
         // filter the given dashboardIds
         // to use only the selected/visible dashboard from each group
-        _.each(dashboardIds, (id) => {
-          _.each(this.dashboardGroups, (g) => {
-            if (g.selected && g.selected.id === id && filteredDashboardsIds.indexOf(id) === -1) {
-              filteredDashboardsIds.push(id);
-            }
-          });
+        _.each(this.dashboardGroups, (g) => {
+          if (g.selected && _.contains(dashboardIds, g.selected.id)) {
+            filteredDashboardsIds.add(g.selected.id);
+          }
         });
       }
 
@@ -55,7 +53,7 @@ define(function (require) {
                 foundDashboardMetadata.filters,
                 foundDashboardMetadata.queries
               );
-            } else if (_.contains(filteredDashboardsIds, d.id)) {
+            } else if (filteredDashboardsIds.has(d.id)) {
               // count for that dashboard was requested but is not in the metadata, likely because it doesn't have a savedSearchId
               delete d.count;
               delete d.isPruned;
@@ -178,8 +176,7 @@ define(function (require) {
         if (!currentDashboard) {
           return;
         }
-        const dashboardsIds = addAllConnected.call(this, currentDashboard);
-        this.updateAllCounts(dashboardsIds, 'courier:searchRefresh event', true);
+        this.updateAllCounts(null, 'courier:searchRefresh event', true);
       });
 
       const self = this;

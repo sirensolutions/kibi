@@ -57,7 +57,8 @@ define(function (require) {
   });
 
   app.controller('RelationsController',
-  function (Promise, es, kibiState, $rootScope, $scope, config, Private, $element, kbnUrl, createNotifier, kibiEnterpriseEnabled) {
+  function (Promise, es, kibiState, $rootScope, $scope, $timeout, config, Private, $element, kbnUrl, createNotifier,
+            kibiEnterpriseEnabled) {
     const notify = createNotifier({
       location: 'Relations Editor'
     });
@@ -112,6 +113,14 @@ define(function (require) {
 
     $scope.relations = config.get('kibi:relations');
     $scope.relationalPanel = config.get('kibi:relationalPanel');
+
+    // track if the configuration has been changed
+    $scope.changed = false;
+    $scope.$watch('relationalPanel', function (newValue, oldValue) {
+      if (newValue !== oldValue) {
+        $scope.changed = true;
+      }
+    });
 
     let indexToDashboardsMap = null;
     const nodeTypes = [];
@@ -312,7 +321,8 @@ define(function (require) {
      * - getTargetNode: function that returns the target node object for a given relation
      * - getLink: function that returns the link object connecting the two nodes
      */
-    const updateGraph = function ({ name, options, isRelationReady, assertions, onRelationReady, getSourceNode, getTargetNode, getLink }) {
+    const updateGraph = function ({ name, options, isRelationReady, assertions, onRelationReady,
+                                               getSourceNode, getTargetNode, getLink }) {
       const graphProperty = `${name}Graph`;
       const relationsGraphProperty = `relations${_.capitalize(name)}`;
       const serializedGraphProperty = `relations${_.capitalize(name)}Serialized`;
@@ -505,6 +515,7 @@ define(function (require) {
       }).isEqual(oldRelations.dashboards);
 
       if (!isEqual) {
+        $scope.changed = true;
         $scope.isObjectValid();
       }
     }
@@ -806,6 +817,7 @@ define(function (require) {
         return _.omit(relation, [ '$$hashKey', 'errors' ]);
       }).isEqual(oldRelations);
       if (!isEqual) {
+        $scope.changed = true;
         return checkJoinMappings()
         .then(() => $scope.isObjectValid())
         .then(() => updateDashboardsRelationsBasedOnTheIndicesRelations());
@@ -839,7 +851,29 @@ define(function (require) {
         $scope.relations.relationsDashboardsSerialized = results;
       }
     });
+
+    // The State is listening for this event too, and modifies the location in the handler,
+    // which means that a second routeChangeStart event will be triggered when clicking on section links.
+    // To avoid displaying a double confirmation, we store the user choice for the whole cycle.
+    $scope.dialogResult = null;
+    const cancelRouteChangeHandler = $rootScope.$on('$routeChangeStart', function (event) {
+      if (!$scope.changed) {
+        return;
+      }
+      if ($scope.dialogResult === null) {
+        $scope.dialogResult = confirm('There are unsaved changes to the relational configuration,' +
+                                      ' are you sure you want to leave the page?');
+      }
+      if ($scope.dialogResult === false) {
+        event.preventDefault();
+        $timeout(function () {
+          $scope.dialogResult = null;
+        });
+      }
+    });
+
     $scope.$on('$destroy', function () {
+      cancelRouteChangeHandler();
       indicesGraphExportOff();
       dashboardsGraphExportOff();
     });
@@ -864,6 +898,7 @@ define(function (require) {
       .then(() => config.set('kibi:relationalPanel', $scope.relationalPanel))
       .then(() => {
         notify.info('Relations saved');
+        $scope.changed = false;
       })
       .catch(notify.error);
     };

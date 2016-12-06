@@ -5,6 +5,7 @@ define(function (require) {
   require('ui/kibi/directives/kibi_validate');
 
   const _ = require('lodash');
+  const $ = require('jquery');
 
   const app = require('ui/modules').get('apps/settings', ['kibana']);
 
@@ -58,7 +59,7 @@ define(function (require) {
 
   app.controller('RelationsController',
   function (Promise, es, kibiState, $rootScope, $scope, $timeout, config, Private, $element, kbnUrl, createNotifier,
-            kibiEnterpriseEnabled) {
+            kibiEnterpriseEnabled, $window) {
     const notify = createNotifier({
       location: 'Relations Editor'
     });
@@ -861,8 +862,8 @@ define(function (require) {
         return;
       }
       if ($scope.dialogResult === null) {
-        $scope.dialogResult = confirm('There are unsaved changes to the relational configuration,' +
-                                      ' are you sure you want to leave the page?');
+        $scope.dialogResult = $window.confirm('There are unsaved changes to the relational configuration,' +
+                                              ' are you sure you want to leave the page?');
       }
       if ($scope.dialogResult === false) {
         event.preventDefault();
@@ -872,7 +873,15 @@ define(function (require) {
       }
     });
 
+    const onBeforeUnload = function () {
+      if ($scope.changed) {
+        return 'There are unsaved changes to the relational configuration, are you sure you want to leave the page?';
+      }
+    };
+    $($window).on('beforeunload', onBeforeUnload);
+
     $scope.$on('$destroy', function () {
+      $($window).off('beforeunload', onBeforeUnload);
       cancelRouteChangeHandler();
       indicesGraphExportOff();
       dashboardsGraphExportOff();

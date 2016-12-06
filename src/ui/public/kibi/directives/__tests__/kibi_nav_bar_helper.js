@@ -59,7 +59,93 @@ describe('Kibi Directives', function () {
       });
     }
 
-    describe('dashboards count and filter messages', function () {
+    describe('remove dashboards properties (count, isPruned, filterIconMessage)', function () {
+
+      beforeEach(() => {
+        var dash1 = {
+          id: 'dashboard1',
+          title: 'dashboard1',
+          savedSearchId: 'search1',
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: JSON.stringify(
+              {
+                index: 'index1',
+                filter: []
+              }
+            )
+          },
+          count: 789,
+          isPruned: true,
+          filterIconMessage: 'there is so many filters :('
+        };
+        var dash2 = {
+          id: 'dashboard2',
+          title: 'dashboard2',
+          savedSearchId: 'search2',
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: JSON.stringify(
+              {
+                index: 'index2',
+                filter: []
+              }
+            )
+          },
+          count: 123,
+          isPruned: false,
+          filterIconMessage: 'there is 1 filter'
+        };
+
+        init({
+          savedDashboards: [dash1, dash2],
+          dashboardGroups: [
+            {
+              id: 'group dashboard1',
+              selected: dash1,
+              dashboards: [dash1]
+            },
+            {
+              id: 'group dashboard2',
+              selected: dash2,
+              dashboards: [dash2]
+            }
+          ]
+        });
+      });
+
+
+      it('should set count, isPruned and filterIconMessage to undefined if there is no metadata for the requested dashboard',
+        function (done) {
+          // return meta only for second dashboard
+          getDashboardsMetadataStub.returns(Promise.resolve([
+            {
+              dashboardId: 'dashboard2',
+              count: 24,
+              queries: [],
+              filters: [{}],
+              isPruned: true
+            }
+          ]));
+
+          kibiNavBarHelper.updateAllCounts([ 'dashboard1', 'dashboard2' ]);
+
+          setTimeout(function () {
+            var dashboardGroups = kibiNavBarHelper.dashboardGroups;
+
+            expect(dashboardGroups).to.have.length(2);
+            expect(dashboardGroups[0].id).to.be('group dashboard1');
+            expect(dashboardGroups[0].selected.count).to.not.be.ok();
+            expect(dashboardGroups[0].selected.filterIconMessage).to.not.be.ok();
+            expect(dashboardGroups[0].selected.isPruned).to.not.be.ok();
+            expect(dashboardGroups[1].id).to.be('group dashboard2');
+            expect(dashboardGroups[1].selected.count).to.equal(24);
+            expect(dashboardGroups[1].selected.isPruned).to.equal(true);
+            expect(dashboardGroups[1].selected.filterIconMessage).to.equal('This dashboard has 1 filter set.');
+            done();
+          }, 950); // more than default delay of 750 for dashboards count queries
+        });
+    });
+
+    describe('set dashboards properties (count, isPruned, filterIconMessage)', function () {
       beforeEach(() => {
         var dash1 = {
           id: 'dashboard1',
@@ -347,23 +433,6 @@ describe('Kibi Directives', function () {
             done();
           }, 950); // more than default delay of 750 for dashboards count queries
         });
-
-        it('should set count to undefined if there is no metadata for the requested dashboard', function (done) {
-          getDashboardsMetadataStub.returns(Promise.resolve([]));
-
-          kibiNavBarHelper.updateAllCounts([ 'dashboard1' ]);
-
-          setTimeout(function () {
-            var dashboardGroups = kibiNavBarHelper.dashboardGroups;
-            expect(dashboardGroups).to.have.length(2);
-            expect(dashboardGroups[0].id).to.be('group dashboard1');
-            expect(dashboardGroups[0].selected.count).to.not.be.ok();
-            expect(dashboardGroups[1].id).to.be('group dashboard2');
-            expect(dashboardGroups[1].selected.count).to.not.be.ok();
-            done();
-          }, 950); // more than default delay of 750 for dashboards count queries
-        });
-
       });
 
       it('should update counts of current dashboard on kibiState changes', function (done) {
@@ -461,7 +530,7 @@ describe('Kibi Directives', function () {
       });
     });
 
-    describe('groups with no queries', function () {
+    describe('groups with no queries and unvisible dashboards', function () {
 
       beforeEach(function () {
         var dash1 = {
@@ -490,19 +559,46 @@ describe('Kibi Directives', function () {
             )
           }
         };
+        var dash3 = {
+          id: 'invisibledashboard3',
+          title: 'dashboard3',
+          savedSearchId: 'search3',
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: JSON.stringify(
+              {
+                index: 'index3',
+                filter: []
+              }
+            )
+          }
+        };
+
+        var dash4 = {
+          id: 'invisibledashboard4',
+          title: 'dashboard4',
+          savedSearchId: 'search4',
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: JSON.stringify(
+              {
+                index: 'index4',
+                filter: []
+              }
+            )
+          }
+        };
 
         init({
           savedDashboards: [dash1, dash2],
           dashboardGroups: [
             {
-              id: 'group dashboard1',
+              id: 'group odd dashboards',
               selected: dash1,
-              dashboards: [dash1]
+              dashboards: [dash1, dash3]
             },
             {
-              id: 'group dashboard2',
+              id: 'group even dashboards',
               selected: dash2,
-              dashboards: [dash2]
+              dashboards: [dash2, dash4]
             }
           ]
         });
@@ -525,14 +621,27 @@ describe('Kibi Directives', function () {
         setTimeout(function () {
           var dashboardGroups = kibiNavBarHelper.dashboardGroups;
           expect(dashboardGroups).to.have.length(2);
-          expect(dashboardGroups[0].id).to.be('group dashboard1');
+          expect(dashboardGroups[0].id).to.be('group odd dashboards');
           expect(dashboardGroups[0].selected.count).to.be(42);
-          expect(dashboardGroups[1].id).to.be('group dashboard2');
+          expect(dashboardGroups[1].id).to.be('group even dashboards');
           expect(dashboardGroups[1].selected.count).to.not.be.ok();
           done();
         }, 950); // more than default delay of 750 for dashboards count queries
       });
 
+      it('update counts only on visible dashboards', function (done) {
+
+        // not important as in this tests we will not test the count values
+        // but we have to define that it returns somenthig to avoid undefined error
+        getDashboardsMetadataStub.returns(Promise.resolve([]));
+
+        kibiNavBarHelper.updateAllCounts([ 'dashboard1', 'dashboard2', 'dashboard3', 'dashboard4' ]);
+
+        setTimeout(function () {
+          getDashboardsMetadataStub.calledWith(['dashboard1', 'dashboard2']);
+          done();
+        }, 950); // more than default delay of 750 for dashboards count queries
+      });
     });
 
 
@@ -541,7 +650,7 @@ describe('Kibi Directives', function () {
         dashboardsIdsInConnectedComponents: [ 'dashboard1', 'dashboard2' ]
       }));
 
-      it('should update counts of all dashboards on courier:searchRefresh', function (done) {
+      it('should update the counts of current dashboard plus connected dashboards on courier:searchRefresh', function (done) {
         const stub = sinon.stub(kibiNavBarHelper, 'updateAllCounts');
         $rootScope.$broadcast('courier:searchRefresh');
         expect(stub.calledWith(null, 'courier:searchRefresh event', true)).to.be(true);

@@ -115,10 +115,11 @@ define(function (require) {
     let lastFiredMultiCountsQuery;
     let lastMultiCountsQueryResults;
     DashboardGroupHelper.prototype.getDashboardsMetadata = function (ids, forceCountsUpdate = false) {
-      let self = this;
+      const self = this;
+      const idsArray = Array.from(ids); // has to do it as it might be a set
       return savedDashboards.find().then((resp) => {
         let dashboards = _.filter(resp.hits, (dashboard) => {
-          return dashboard.savedSearchId && ids.indexOf(dashboard.id) !== -1;
+          return dashboard.savedSearchId && idsArray.indexOf(dashboard.id) !== -1;
         });
 
         let metadataPromises = _.map(dashboards, (dashboard) => {

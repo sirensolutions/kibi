@@ -17,19 +17,32 @@ define(function (require) {
     * Private Methods
     */
     const _fireUpdateAllCounts = function (dashboardIds, forceCountsUpdate = false) {
+      const filteredDashboardsIds = new Set();
       if (!dashboardIds) {
-        // only the selected dashboard from each group
-        dashboardIds = [];
-        _.each(this.dashboardGroups, (g, index) => {
-          const dashboard = this.dashboardGroups[index].selected;
-          if (dashboard && dashboardIds.indexOf(dashboard.id) === -1) {
-            dashboardIds.push(dashboard.id);
+        // only the selected/visible dashboard from each group
+        _.each(this.dashboardGroups, (g) => {
+          if (g.selected) {
+            filteredDashboardsIds.add(g.selected.id);
+          }
+        });
+      } else {
+        // filter the given dashboardIds
+        // to use only the selected/visible dashboard from each group
+        _.each(this.dashboardGroups, (g) => {
+          if (g.selected && _.contains(dashboardIds, g.selected.id)) {
+            filteredDashboardsIds.add(g.selected.id);
           }
         });
       }
 
-      return dashboardGroupHelper.getDashboardsMetadata(dashboardIds, forceCountsUpdate)
-      .then((metadata) => {
+      if (console) {
+        console.log(
+          'KibiNavBar will update the counts for following dashboards ' +
+          JSON.stringify(filteredDashboardsIds, null, ' ')
+        );
+      }
+
+      return dashboardGroupHelper.getDashboardsMetadata(filteredDashboardsIds, forceCountsUpdate).then((metadata) => {
         _.each(this.dashboardGroups, (g) => {
           _.each(g.dashboards, (d) => {
             const foundDashboardMetadata = _.find(metadata, 'dashboardId', d.id);
@@ -40,11 +53,11 @@ define(function (require) {
                 foundDashboardMetadata.filters,
                 foundDashboardMetadata.queries
               );
-            } else if (_.contains(dashboardIds, d.id)) {
+            } else if (filteredDashboardsIds.has(d.id)) {
               // count for that dashboard was requested but is not in the metadata, likely because it doesn't have a savedSearchId
               delete d.count;
-              d.isPruned = false;
-              d.filterIconMessage = '';
+              delete d.isPruned;
+              delete d.filterIconMessage;
             }
           });
         });
@@ -55,7 +68,11 @@ define(function (require) {
 
     const updateCounts = function (dashboardsIds, reason, forceUpdate = false) {
       if (console) {
-        console.log(`Count on tabs will be updated for dashboards ${JSON.stringify(dashboardsIds, null, ' ')} because: [${reason}]`);
+        console.log(
+          'KibiNavBar requested count update for following dashboards ' +
+          JSON.stringify(dashboardsIds, null, ' ') +
+          ' because: [' + reason + ']'
+        );
       }
       this.delayExecutionHelper.addEventData({
         forceUpdate: forceUpdate,
@@ -159,8 +176,6 @@ define(function (require) {
         if (!currentDashboard) {
           return;
         }
-
-        // refresh all tabs count
         this.updateAllCounts(null, 'courier:searchRefresh event', true);
       });
 

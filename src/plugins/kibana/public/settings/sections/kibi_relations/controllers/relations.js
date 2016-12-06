@@ -814,7 +814,7 @@ define(function (require) {
       };
 
       const isEqual = _($scope.relations.relationsIndices).map(function (relation) {
-        return _.omit(relation, [ '$$hashKey', 'errors' ]);
+        return _.omit(relation, [ '$$hashKey', 'errors', 'id' ]);
       }).isEqual(oldRelations);
       if (!isEqual) {
         $scope.changed = true;

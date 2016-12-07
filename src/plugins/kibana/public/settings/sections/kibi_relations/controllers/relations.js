@@ -5,6 +5,7 @@ define(function (require) {
   require('ui/kibi/directives/kibi_validate');
 
   const _ = require('lodash');
+  const $ = require('jquery');
 
   const app = require('ui/modules').get('apps/settings', ['kibana']);
 
@@ -57,7 +58,8 @@ define(function (require) {
   });
 
   app.controller('RelationsController',
-  function (Promise, es, kibiState, $rootScope, $scope, config, Private, $element, kbnUrl, createNotifier, kibiEnterpriseEnabled) {
+  function (Promise, es, kibiState, $rootScope, $scope, $timeout, config, Private, $element, kbnUrl, createNotifier,
+            kibiEnterpriseEnabled, $window) {
     const notify = createNotifier({
       location: 'Relations Editor'
     });
@@ -112,6 +114,14 @@ define(function (require) {
 
     $scope.relations = config.get('kibi:relations');
     $scope.relationalPanel = config.get('kibi:relationalPanel');
+
+    // track if the configuration has been changed
+    $scope.changed = false;
+    $scope.$watch('relationalPanel', function (newValue, oldValue) {
+      if (newValue !== oldValue) {
+        $scope.changed = true;
+      }
+    });
 
     let indexToDashboardsMap = null;
     const nodeTypes = [];
@@ -312,7 +322,8 @@ define(function (require) {
      * - getTargetNode: function that returns the target node object for a given relation
      * - getLink: function that returns the link object connecting the two nodes
      */
-    const updateGraph = function ({ name, options, isRelationReady, assertions, onRelationReady, getSourceNode, getTargetNode, getLink }) {
+    const updateGraph = function ({ name, options, isRelationReady, assertions, onRelationReady,
+                                               getSourceNode, getTargetNode, getLink }) {
       const graphProperty = `${name}Graph`;
       const relationsGraphProperty = `relations${_.capitalize(name)}`;
       const serializedGraphProperty = `relations${_.capitalize(name)}Serialized`;
@@ -502,9 +513,10 @@ define(function (require) {
 
       const isEqual = _($scope.relations.relationsDashboards).map(function (relation) {
         return _.omit(relation, [ '$$hashKey', 'errors' ]);
-      }).isEqual(oldRelations);
+      }).isEqual(oldRelations.dashboards);
 
       if (!isEqual) {
+        $scope.changed = true;
         $scope.isObjectValid();
       }
     }
@@ -803,9 +815,10 @@ define(function (require) {
       };
 
       const isEqual = _($scope.relations.relationsIndices).map(function (relation) {
-        return _.omit(relation, [ '$$hashKey', 'errors' ]);
+        return _.omit(relation, [ '$$hashKey', 'errors', 'id' ]);
       }).isEqual(oldRelations);
       if (!isEqual) {
+        $scope.changed = true;
         return checkJoinMappings()
         .then(() => $scope.isObjectValid())
         .then(() => updateDashboardsRelationsBasedOnTheIndicesRelations());
@@ -815,7 +828,15 @@ define(function (require) {
     // Listen to changes of relations between indices
     $scope.$watch(function ($scope) {
       return _.map($scope.relations.relationsIndices, function (relation) {
-        return _.omit(relation, ['errors', 'id']); // id is redundant
+        // kibi_select can set the index pattern type to null, but it is stored as an empty string,
+        // so we need to normalize to properly detect changes.
+        for (const index of relation.indices) {
+          if (index.indexPatternType === null) {
+            index.indexPatternType = '';
+          }
+        }
+        const normalized = _.omit(relation, ['$$hashKey', 'errors', 'id']);
+        return normalized;
       });
     }, function (newRelations, oldRelations) {
       $scope.updateIndicesGraph(oldRelations);
@@ -831,7 +852,37 @@ define(function (require) {
         $scope.relations.relationsDashboardsSerialized = results;
       }
     });
+
+    // The State is listening for this event too, and modifies the location in the handler,
+    // which means that a second routeChangeStart event will be triggered when clicking on section links.
+    // To avoid displaying a double confirmation, we store the user choice for the whole cycle.
+    $scope.dialogResult = null;
+    const cancelRouteChangeHandler = $rootScope.$on('$routeChangeStart', function (event) {
+      if (!$scope.changed) {
+        return;
+      }
+      if ($scope.dialogResult === null) {
+        $scope.dialogResult = $window.confirm('There are unsaved changes to the relational configuration,' +
+                                              ' are you sure you want to leave the page?');
+      }
+      if ($scope.dialogResult === false) {
+        event.preventDefault();
+        $timeout(function () {
+          $scope.dialogResult = null;
+        });
+      }
+    });
+
+    const onBeforeUnload = function () {
+      if ($scope.changed) {
+        return 'There are unsaved changes to the relational configuration, are you sure you want to leave the page?';
+      }
+    };
+    $($window).on('beforeunload', onBeforeUnload);
+
     $scope.$on('$destroy', function () {
+      $($window).off('beforeunload', onBeforeUnload);
+      cancelRouteChangeHandler();
       indicesGraphExportOff();
       dashboardsGraphExportOff();
     });
@@ -856,6 +907,7 @@ define(function (require) {
       .then(() => config.set('kibi:relationalPanel', $scope.relationalPanel))
       .then(() => {
         notify.info('Relations saved');
+        $scope.changed = false;
       })
       .catch(notify.error);
     };

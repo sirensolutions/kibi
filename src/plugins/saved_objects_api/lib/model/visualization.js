@@ -13,7 +13,7 @@ export default class VisualizationModel extends Model {
    */
   constructor(server) {
 
-    let schema = Joi.object().keys({
+    const schema = Joi.object().keys({
       title: Joi.string(),
       description: Joi.string().default(null),
       visState: Joi.object().default({}),

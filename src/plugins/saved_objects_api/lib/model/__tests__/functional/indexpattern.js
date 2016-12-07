@@ -1,5 +1,5 @@
 import requirefrom from 'requirefrom';
-import VisualizationModel from '../../visualization';
+import IndexPatternModel from '../../indexpattern';
 import Scenario from './scenarios/empty/scenario';
 const wrapAsync = requirefrom('src/testUtils')('wrap_async');
 const serverConfig = requirefrom('test')('serverConfig');
@@ -7,35 +7,34 @@ import ModelTestHelper from './helper';
 
 describe('saved_objects_api/functional', function () {
 
-  const helper = new ModelTestHelper(60000, VisualizationModel, 'visualization', 'title', 'sess');
+  const helper = new ModelTestHelper(60000, IndexPatternModel, 'index-pattern', 'title', 'idx');
 
-  describe('VisualizationModel', function () {
+  describe('IndexPatternModel', function () {
 
     const expectedMapping = {
-      description: {
-        type: 'string'
-      },
-      kibanaSavedObjectMeta: {
-        properties : {
-          searchSourceJSON : {
-            type : 'string'
-          }
-        }
-      },
       title: {
         type: 'string'
       },
-      savedSearchId: {
+      fieldFormatMap: {
         type: 'string'
       },
-      visState: {
+      fields: {
         type: 'string'
       },
-      uiStateJSON: {
+      intervalName: {
         type: 'string'
       },
-      version: {
-        type: 'integer'
+      notExpandable: {
+        type: 'boolean'
+      },
+      paths: {
+        type: 'string'
+      },
+      sourceFiltering: {
+        type: 'string'
+      },
+      timeFieldName: {
+        type: 'string'
       }
     };
 

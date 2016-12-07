@@ -9,9 +9,11 @@ function getElasticsearchMappingType(joi) {
   switch (joi.type) {
     case 'string':
       return {type: 'string'};
+    case 'boolean':
+      return {type: 'boolean'};
     case 'object':
       if (joi.children) {
-        let body = {
+        const body = {
           properties: {}
         };
         each(joi.children, (child, name) => {
@@ -25,7 +27,7 @@ function getElasticsearchMappingType(joi) {
     case 'date':
       return {type: 'date'};
     case 'number':
-      for (let rule of joi.rules) {
+      for (const rule of joi.rules) {
         if (rule.name === 'integer') {
           return {type: 'integer' };
         }
@@ -38,9 +40,9 @@ function getElasticsearchMappingType(joi) {
 }
 
 export default function joiToMapping(schema) {
-  let properties = {};
-  let children = schema.describe().children;
-  for (let key of Object.keys(children)) {
+  const properties = {};
+  const children = schema.describe().children;
+  for (const key of Object.keys(children)) {
     properties[key] = getElasticsearchMappingType(children[key]);
   }
   return properties;

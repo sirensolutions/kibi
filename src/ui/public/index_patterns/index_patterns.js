@@ -2,7 +2,9 @@ define(function (require) {
   let module = require('ui/modules').get('kibana/index_patterns');
   require('ui/filters/short_dots');
 
-  function IndexPatternsProvider(es, createNotifier, Private, Promise, kbnIndex) {
+  // kibi: removed unused dependencies
+  function IndexPatternsProvider(savedObjectsAPI, createNotifier, Private, kbnIndex) {
+  // kibi: end
     let self = this;
     let _ = require('lodash');
     let errors = require('ui/errors');
@@ -27,7 +29,9 @@ define(function (require) {
       self.getIds.clearCache();
       pattern.destroy();
 
-      return es.delete({
+      // kibi: use the Saved Objects API client
+      return savedObjectsAPI.delete({
+      // kibi: end
         index: kbnIndex,
         type: 'index-pattern',
         id: pattern.id

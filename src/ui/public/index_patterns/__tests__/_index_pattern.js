@@ -26,7 +26,9 @@ describe('index pattern', function () {
     mockLogstashFields = Private(require('fixtures/logstash_fields'));
     docSourceResponse = Private(require('fixtures/stubbed_doc_source_response'));
 
-    DocSource = Private(require('ui/courier/data_source/doc_source'));
+    // kibi: stub SavedObjectSource
+    DocSource = Private(require('ui/courier/data_source/savedobject_source'));
+    // kibi: end
     sinon.stub(DocSource.prototype, 'doIndex');
     sinon.stub(DocSource.prototype, 'fetch');
 

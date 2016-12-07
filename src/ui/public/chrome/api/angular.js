@@ -32,7 +32,8 @@ module.exports = function (chrome, internals) {
     // kibi: Saved Objects API
     .value('savedObjectsAPITypes', [
       'session',
-      'visualization'
+      'visualization',
+      'index-pattern'
     ])
     .value('savedObjectsAPIUrl', (function () {
       var a = document.createElement('a');

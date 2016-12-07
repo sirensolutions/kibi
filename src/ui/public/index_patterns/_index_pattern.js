@@ -9,7 +9,9 @@ define(function (require) {
     let mapper = Private(require('ui/index_patterns/_mapper'));
     let intervals = Private(require('ui/index_patterns/_intervals'));
     let getComputedFields = require('ui/index_patterns/_get_computed_fields');
-    let DocSource = Private(require('ui/courier/data_source/doc_source'));
+    // kibi: use the SavedObjectSource as DocSource
+    let DocSource = Private(require('ui/courier/data_source/savedobject_source'));
+    // kibi: end
     let mappingSetup = Private(require('ui/utils/mapping_setup'));
     let FieldList = Private(require('ui/index_patterns/_field_list'));
 

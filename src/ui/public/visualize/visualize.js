@@ -78,10 +78,7 @@ define(function (require) {
           }
 
           // kibi: skip checking that vis is too small
-          if (
-            $scope.vis &&
-            ($scope.vis.type.name === 'kibiqueryviewervis' || $scope.vis.type.name === 'kibi_sequential_join_vis')
-          ) {
+          if (_.get($scope, 'vis.type.name') === 'kibiqueryviewervis' || _.get($scope, 'vis.type.name') === 'kibi_sequential_join_vis') {
             // for these 2 visualisations
             // buttons are small and query viewer dynamically inject html so at the begining
             // its size is 0;
@@ -114,7 +111,7 @@ define(function (require) {
                 _.pull(fns, fn);
                 // kibi: let the visualization broadcast this event
                 // since it takes care of the searchSource
-                if (!fns.length && !_.get($scope.vis.type.delegateSearch)) {
+                if (!fns.length && !_.get($scope, 'vis.type.delegateSearch')) {
                   $scope.$root.$broadcast('ready:vis');
                 }
               }

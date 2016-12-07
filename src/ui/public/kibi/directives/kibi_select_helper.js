@@ -280,8 +280,8 @@ define(function (require) {
     KibiSelectHelper.prototype.getDashboardsForButton = function (dashboardOptions) {
       const otherDashboardId = dashboardOptions.otherDashboardId;
       const indexRelationId = dashboardOptions.indexRelationId;
-      return kibiState._getDashboardAndSavedSearchMetas(null, true).then((metas) => {
 
+      return kibiState._getDashboardAndSavedSearchMetas(null, true).then((metas) => {
         // first filter out dashboards without savedSearchId
         let filteredMetas = _.filter(metas, (meta) => {
           return meta.savedDash.savedSearchId;
@@ -302,14 +302,17 @@ define(function (require) {
           return rel.id === indexRelationId;
         });
 
-        let otherIndexPattern;
+        if (!indexRelation) {
+          return [];
+        }
+
         // in case the otherDashboardId was present, find it
         if (otherDashboardId) {
           // find the meta and indexPatternId of the other dashboard
           const otherDashboardMeta = _.find(filteredMetas, (meta) => {
             return meta.savedDash.id === otherDashboardId;
           });
-          otherIndexPattern = otherDashboardMeta.savedSearchMeta.index;
+          let otherIndexPattern = otherDashboardMeta.savedSearchMeta.index;
 
           // and filter out dashboard matched by index pattern
           // but only if it is not self join relation
@@ -320,28 +323,20 @@ define(function (require) {
           }
         }
 
-
-        let dashboardsToReturn = [];
-        _.each(filteredMetas, (meta) => {
-          let indexPattern = meta.savedSearchMeta.index;
-          let dashboardId = meta.savedDash.id;
-
-
+        return _(filteredMetas)
+        .filter(meta => {
           // check if indexPattern belongs to either side of the indexRelation
-          // and the dasboard is not already in
-          if (
-            indexRelation &&
-            (indexPattern === indexRelation.indices[0].indexPatternId || indexPattern === indexRelation.indices[1].indexPatternId)
-            &&
-            !_.find(dashboardsToReturn, 'id', dashboardId)
-          ) {
-            dashboardsToReturn.push({
-              label: dashboardId,
-              value: dashboardId
-            });
-          }
-        });
-        return dashboardsToReturn;
+          const indexPattern = meta.savedSearchMeta.index;
+          return indexPattern === indexRelation.indices[0].indexPatternId || indexPattern === indexRelation.indices[1].indexPatternId;
+        })
+        .unique(meta => meta.savedDash.id)
+        .map(meta => {
+          return {
+            label: meta.savedDash.title,
+            value: meta.savedDash.id
+          };
+        })
+        .value();
       });
     };
 

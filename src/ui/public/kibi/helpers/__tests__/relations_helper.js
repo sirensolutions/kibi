@@ -69,6 +69,47 @@ describe('Kibi Components', function () {
       });
     });
 
+    describe('validateIndicesRelationFromId', function () {
+      beforeEach(() => init({}));
+      beforeEach(function () {
+        const relations = {
+          relationsIndices: [
+            {
+              id: 'indexa/typea/patha/indexb//pathb',
+              label: 'funky relation',
+              indices: [
+                { indexPatternId: 'indexa', indexPatternType: 'typea', path: 'patha' },
+                { indexPatternId: 'indexb', indexPatternType: '', path: 'pathb' }
+              ]
+            },
+            {
+              id: 'bad relation',
+              label: 'funky relation',
+              indices: [
+                { indexPatternId: '', indexPatternType: '', path: '' },
+                { indexPatternId: 'indexb', indexPatternType: '', path: 'pathb' }
+              ]
+            }
+          ]
+        };
+
+        $rootScope.$emit('change:config.kibi:relations', relations);
+        $rootScope.$digest();
+      });
+
+      it('should pass if the relation is correct', function () {
+        expect(relationsHelper.validateIndicesRelationFromId('indexa/typea/patha/indexb//pathb')).to.be(true);
+      });
+
+      it('should fail if the relation is missing', function () {
+        expect(relationsHelper.validateIndicesRelationFromId('nope')).to.be(false);
+      });
+
+      it('should fail if the relation is incorrect', function () {
+        expect(relationsHelper.validateIndicesRelationFromId('bad relation')).to.be(false);
+      });
+    });
+
     describe('checkIfRelationsAreValid', function () {
       beforeEach(() => init({}));
 

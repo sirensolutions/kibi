@@ -3,7 +3,7 @@ var ngMock = require('ngMock');
 var expect = require('expect.js');
 
 var mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
-var stSelectHelper;
+var kibiSelectHelper;
 var config;
 var $httpBackend;
 var indexPatterns;
@@ -98,7 +98,7 @@ describe('Kibi Directives', function () {
       }
 
       ngMock.inject(function ($injector, Private) {
-        stSelectHelper = Private(require('ui/kibi/directives/kibi_select_helper'));
+        kibiSelectHelper = Private(require('ui/kibi/directives/kibi_select_helper'));
         if (options.stubConfig) {
           config = $injector.get('config');
         }
@@ -182,7 +182,7 @@ describe('Kibi Directives', function () {
       });
 
       it('should set the group and datasourceType', function (done) {
-        stSelectHelper.getQueries().then(function (queries) {
+        kibiSelectHelper.getQueries().then(function (queries) {
           expect(queries).to.have.length(6);
           expect(queries[0].group).to.be('No tag');
           expect(queries[1].group).to.be('No tag');
@@ -234,7 +234,7 @@ describe('Kibi Directives', function () {
         );
 
         $httpBackend.whenGET('/elasticsearch/a/A/_search?size=10').respond(200, ids);
-        stSelectHelper.getDocumentIds('a', 'A').then(function (data) {
+        kibiSelectHelper.getDocumentIds('a', 'A').then(function (data) {
           expect(data).to.have.length(2);
           expect(data[0]).to.eql({ label: 'id1', value: 'id1' });
           expect(data[1]).to.eql({ label: 'id2', value: 'id2' });
@@ -244,14 +244,14 @@ describe('Kibi Directives', function () {
       });
 
       it('should return empty set when the index is not passed', function (done) {
-        stSelectHelper.getDocumentIds('', 'A').then(function (data) {
+        kibiSelectHelper.getDocumentIds('', 'A').then(function (data) {
           expect(data).to.have.length(0);
           done();
         }).catch(done);
       });
 
       it('should return empty set when the type is not passed', function (done) {
-        stSelectHelper.getDocumentIds('a', '').then(function (data) {
+        kibiSelectHelper.getDocumentIds('a', '').then(function (data) {
           expect(data).to.have.length(0);
           done();
         }).catch(done);
@@ -277,7 +277,7 @@ describe('Kibi Directives', function () {
       });
 
       it('select saved templates', function (done) {
-        stSelectHelper.getTemplates().then(function (templates) {
+        kibiSelectHelper.getTemplates().then(function (templates) {
           var expectedTemplates = [
             {
               value: 'template-1',
@@ -326,7 +326,7 @@ describe('Kibi Directives', function () {
       });
 
       it('select saved searches', function (done) {
-        stSelectHelper.getSavedSearches().then(function (savedSearches) {
+        kibiSelectHelper.getSavedSearches().then(function (savedSearches) {
           var expectedSavedSearches = [
             {
               value: 'search-ste',
@@ -384,7 +384,7 @@ describe('Kibi Directives', function () {
       });
 
       it('select dashboards', function (done) {
-        stSelectHelper.getDashboards().then(function (dashboards) {
+        kibiSelectHelper.getDashboards().then(function (dashboards) {
           var expectedDashboards = [
             {
               value: 'Articles',
@@ -435,7 +435,7 @@ describe('Kibi Directives', function () {
       });
 
       it('select datasources', function (done) {
-        stSelectHelper.getDatasources().then(function (datasources) {
+        kibiSelectHelper.getDatasources().then(function (datasources) {
           expect(datasources).to.have.length(2);
           expect(datasources[0].value).to.be('ds1');
           expect(datasources[0].label).to.be('ds1 datasource');
@@ -460,7 +460,7 @@ describe('Kibi Directives', function () {
       });
 
       it('no index pattern id specified', function (done) {
-        stSelectHelper.getIndexTypes().then(function (types) {
+        kibiSelectHelper.getIndexTypes().then(function (types) {
           expect(types).to.eql([]);
           done();
         });
@@ -474,7 +474,7 @@ describe('Kibi Directives', function () {
         };
 
         $httpBackend.whenGET('/elasticsearch/dog/_mappings').respond(200, data);
-        stSelectHelper.getIndexTypes('dog').then(function (types) {
+        kibiSelectHelper.getIndexTypes('dog').then(function (types) {
           expect(types).to.have.length(1);
           expect(types[0].label).to.be('animal');
           expect(types[0].value).to.be('animal');
@@ -494,7 +494,7 @@ describe('Kibi Directives', function () {
         };
 
         $httpBackend.whenGET('/elasticsearch/dog*/_mappings').respond(200, data);
-        stSelectHelper.getIndexTypes('dog*').then(function (types) {
+        kibiSelectHelper.getIndexTypes('dog*').then(function (types) {
           expect(types).to.have.length(2);
           expect(types[0].label).to.be('animal');
           expect(types[0].value).to.be('animal');
@@ -515,7 +515,7 @@ describe('Kibi Directives', function () {
       });
 
       it('should return the fields', function (done) {
-        stSelectHelper.getFields().then(function (fields) {
+        kibiSelectHelper.getFields().then(function (fields) {
           expect(_.find(fields, { label: 'ssl' })).not.to.be.ok();
           expect(_.find(fields, { label: '_id' })).not.to.be.ok();
           expect(_.find(fields, { label: 'area' })).to.be.ok();
@@ -527,7 +527,7 @@ describe('Kibi Directives', function () {
       });
 
       it('should return only date fields ', function (done) {
-        stSelectHelper.getFields(null, ['date']).then(function (fields) {
+        kibiSelectHelper.getFields(null, ['date']).then(function (fields) {
           expect(fields.length).to.equal(3);
           expect(_.find(fields, { label: '@timestamp' })).to.be.ok();
           expect(_.find(fields, { label: 'time' })).to.be.ok();
@@ -537,7 +537,7 @@ describe('Kibi Directives', function () {
       });
 
       it('should return data without scripted fields if scriptedFields equals false ', function (done) {
-        stSelectHelper.getFields(null, null, false).then(function (fields) {
+        kibiSelectHelper.getFields(null, null, false).then(function (fields) {
           for (var i = 0; i < fields.length; i++) {
             expect(fields[i].options.scripted).not.to.be(true);
           }
@@ -546,7 +546,7 @@ describe('Kibi Directives', function () {
       });
 
       it('should return data with scripted fields if scriptedFields equals true ', function (done) {
-        stSelectHelper.getFields(null, null, true).then(function (fields) {
+        kibiSelectHelper.getFields(null, null, true).then(function (fields) {
           for (var i = 0; i < fields.length; i++) {
             expect(fields[i].options.scripted).not.to.be(undefined);
           }
@@ -564,7 +564,7 @@ describe('Kibi Directives', function () {
       });
 
       it('should return the ID of indices', function (done) {
-        stSelectHelper.getIndexesId().then(function (ids) {
+        kibiSelectHelper.getIndexesId().then(function (ids) {
           expect(ids).to.have.length(2);
           expect(ids[0].label).to.be('aaa');
           expect(ids[0].value).to.be('aaa');
@@ -651,7 +651,7 @@ describe('Kibi Directives', function () {
 
 
       it('should returned undefined if no query ID is passed', function (done) {
-        stSelectHelper.getQueryVariables()
+        kibiSelectHelper.getQueryVariables()
         .then(function (variables) {
           done('should fail! ' + variables);
         })
@@ -662,7 +662,7 @@ describe('Kibi Directives', function () {
       });
 
       it('should return empty variables of the REST query', function (done) {
-        stSelectHelper.getQueryVariables('rest').then(function (variables) {
+        kibiSelectHelper.getQueryVariables('rest').then(function (variables) {
           expect(variables.fields).to.have.length(0);
           expect(variables.datasourceType).to.equal('rest');
           done();
@@ -670,7 +670,7 @@ describe('Kibi Directives', function () {
       });
 
       it('should return the variables of the REST query', function (done) {
-        stSelectHelper.getQueryVariables('rest_with_query_variables').then(function (variables) {
+        kibiSelectHelper.getQueryVariables('rest_with_query_variables').then(function (variables) {
           expect(variables.fields).to.have.length(2);
           expect(variables.datasourceType).to.equal('rest');
           expect(variables.fields).to.eql([
@@ -688,7 +688,7 @@ describe('Kibi Directives', function () {
       });
 
       it('should return the variables of the SQL query', function (done) {
-        stSelectHelper.getQueryVariables('sql').then(function (variables) {
+        kibiSelectHelper.getQueryVariables('sql').then(function (variables) {
           expect(variables.fields).to.have.length(1);
           expect(variables.fields[0].label).to.equal('name');
           expect(variables.fields[0].value).to.equal('name');
@@ -698,7 +698,7 @@ describe('Kibi Directives', function () {
       });
 
       it('should return the variables of the SPARQL query', function (done) {
-        stSelectHelper.getQueryVariables('sparql').then(function (variables) {
+        kibiSelectHelper.getQueryVariables('sparql').then(function (variables) {
           expect(variables.fields).to.have.length(1);
           expect(variables.fields[0].label).to.equal('?name');
           expect(variables.fields[0].value).to.equal('name');
@@ -708,7 +708,7 @@ describe('Kibi Directives', function () {
       });
 
       it('should return an error if query is unknown', function (done) {
-        stSelectHelper.getQueryVariables('boo')
+        kibiSelectHelper.getQueryVariables('boo')
         .catch(function (err) {
           expect(err.message).to.be('Query with id [boo] was not found');
           done();
@@ -716,7 +716,7 @@ describe('Kibi Directives', function () {
       });
 
       it('should return an error if query has no or unsupported datasource type', function (done) {
-        stSelectHelper.getQueryVariables('nodatasource')
+        kibiSelectHelper.getQueryVariables('nodatasource')
         .catch(function (err) {
           expect(err.message).to.be('SavedQuery [nodatasource] does not have datasourceId parameter');
           done();
@@ -726,7 +726,7 @@ describe('Kibi Directives', function () {
 
     describe('GetIconType', function () {
       it('should return available icon types', function (done) {
-        stSelectHelper.getIconType().then(function (types) {
+        kibiSelectHelper.getIconType().then(function (types) {
           expect(types).to.have.length(2);
           expect(types[0].label).to.be('Font Awesome');
           expect(types[0].value).to.be('fontawesome');
@@ -739,7 +739,7 @@ describe('Kibi Directives', function () {
 
     describe('getLabelType', function () {
       it('should return available icon types', function (done) {
-        stSelectHelper.getLabelType().then(function (types) {
+        kibiSelectHelper.getLabelType().then(function (types) {
           expect(types).to.have.length(2);
           expect(types[0].label).to.be('Document Field');
           expect(types[0].value).to.be('docField');
@@ -756,6 +756,11 @@ describe('Kibi Directives', function () {
           id: 'Articles',
           title: 'Articles',
           savedSearchId: 'savedArticles'
+        },
+        {
+          id: 'Companies-Timeline',
+          title: 'Companies Timeline',
+          savedSearchId: 'savedCompanies'
         },
         {
           id: 'Companies',
@@ -866,8 +871,39 @@ describe('Kibi Directives', function () {
         config.set('kibi:relations', relations);
       });
 
+      it('should not propose any dashboard if the relation does not exist', function (done) {
+        const options = {
+          indexRelationId: 'art*//path-a/comp*//path-c'
+        };
+
+        config.set('kibi:relations', {
+          relationsIndices: []
+        });
+        kibiSelectHelper.getDashboardsForButton(options).then(function (dashboards) {
+          expect(dashboards).to.have.length(0);
+          done();
+        })
+        .catch(done);
+      });
+
+      it('should not propose any dashboard if the relation does not exist even if the paired dashboard is set', function (done) {
+        const options = {
+          indexRelationId: 'art*//path-a/comp*//path-c',
+          otherDashboardId: 'Companies'
+        };
+
+        config.set('kibi:relations', {
+          relationsIndices: []
+        });
+        kibiSelectHelper.getDashboardsForButton(options).then(function (dashboards) {
+          expect(dashboards).to.have.length(0);
+          done();
+        })
+        .catch(done);
+      });
+
       it('no options should return all dashboards with savedSearchId set', function (done) {
-        let expectedDashboards = [
+        const expectedDashboards = [
           {
             label: 'Articles',
             value: 'Articles'
@@ -877,19 +913,23 @@ describe('Kibi Directives', function () {
             value: 'Companies'
           },
           {
+            label: 'Companies Timeline',
+            value: 'Companies-Timeline'
+          },
+          {
             label: 'Investments',
             value: 'Investments'
           }
         ];
-        let options = {};
-        stSelectHelper.getDashboardsForButton(options).then(function (dashboards) {
-          expect(dashboards).to.be.eql(expectedDashboards);
+        kibiSelectHelper.getDashboardsForButton({}).then(function (dashboards) {
+          expect(_.sortBy(dashboards, 'value')).to.be.eql(_.sortBy(expectedDashboards, 'value'));
           done();
-        });
+        })
+        .catch(done);
       });
 
       it('pass only the otherDashboardId and NO indexRelationId should return all dashboards with savedSearchId set', function (done) {
-        let expectedDashboards = [
+        const expectedDashboards = [
           {
             label: 'Articles',
             value: 'Articles'
@@ -897,55 +937,65 @@ describe('Kibi Directives', function () {
           {
             label: 'Companies',
             value: 'Companies'
+          },
+          {
+            label: 'Companies Timeline',
+            value: 'Companies-Timeline'
           },
           {
             label: 'Investments',
             value: 'Investments'
           }
         ];
-        let options = {
+        const options = {
           otherDashboardId: 'Companies'
         };
-        stSelectHelper.getDashboardsForButton(options).then(function (dashboards) {
-          expect(dashboards).to.be.eql(expectedDashboards);
+        kibiSelectHelper.getDashboardsForButton(options).then(function (dashboards) {
+          expect(_.sortBy(dashboards, 'value')).to.be.eql(_.sortBy(expectedDashboards, 'value'));
           done();
-        });
+        })
+        .catch(done);
       });
 
       it('pass indexRelationId and otherDashboardId in the option should filter the dashboards', function (done) {
-        let expectedDashboards = [
+        const expectedDashboards = [
           {
             label: 'Articles',
             value: 'Articles'
           }
         ];
-        let options = {
+        const options = {
           otherDashboardId: 'Companies',
           indexRelationId: 'art*//path-a/comp*//path-c'
         };
-        stSelectHelper.getDashboardsForButton(options).then(function (dashboards) {
-          expect(dashboards).to.be.eql(expectedDashboards);
+        kibiSelectHelper.getDashboardsForButton(options).then(function (dashboards) {
+          expect(_.sortBy(dashboards, 'value')).to.be.eql(_.sortBy(expectedDashboards, 'value'));
           done();
-        });
+        })
+        .catch(done);
       });
 
       it('pass self join indexRelationId and otherDashboardId in the option should filter the dashboards', function (done) {
-        let expectedDashboards = [
+        const expectedDashboards = [
           {
             label: 'Companies',
             value: 'Companies'
+          },
+          {
+            label: 'Companies Timeline',
+            value: 'Companies-Timeline'
           }
         ];
-        let options = {
+        const options = {
           otherDashboardId: 'Companies',
           indexRelationId: 'comp*//path-c1/comp*//path-c2'
         };
-        stSelectHelper.getDashboardsForButton(options).then(function (dashboards) {
-          expect(dashboards).to.be.eql(expectedDashboards);
+        kibiSelectHelper.getDashboardsForButton(options).then(function (dashboards) {
+          expect(_.sortBy(dashboards, 'value')).to.be.eql(_.sortBy(expectedDashboards, 'value'));
           done();
-        });
+        })
+        .catch(done);
       });
-
     });
 
   });

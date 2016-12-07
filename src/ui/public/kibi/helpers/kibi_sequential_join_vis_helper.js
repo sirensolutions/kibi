@@ -7,10 +7,6 @@ define(function (require) {
 
     function KibiSequentialJoinVisHelper() {}
 
-    KibiSequentialJoinVisHelper.prototype.destroy = function () {
-      relationsHelper.destroy();
-    };
-
     KibiSequentialJoinVisHelper.prototype.constructButtonsArray = function (buttonDefs, currentDashboardIndexId, currentDashboardId) {
       return _.chain(buttonDefs)
       .filter(function (buttonDef) {

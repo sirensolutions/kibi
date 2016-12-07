@@ -24,7 +24,7 @@ define(function (require) {
         const dropdownPadding = 30;
         const windowHeight = $($window).height();
         const scrollTop = $($window).scrollTop();
-        let dropdownHeight = container.outerHeight();
+        const dropdownHeight = container.outerHeight();
 
         let left = offset.left;
         let maxHeight = (windowHeight - dropdownPadding * 2);
@@ -52,28 +52,7 @@ define(function (require) {
         container.css({left, top, 'max-height': maxHeight});
       };
 
-      // track the scroll parent to hide upon scrolling
-      let scrollParent;
-      const scrollHandler = () => {
-        if ($scope.data.showMenu) {
-          $scope.data.showMenu = false;
-          $scope.$apply();
-        }
-      };
-
       const show = function () {
-
-        // find the current scroll parent and set it to hide the dropdown when
-        // the scroll position changes.
-        if (scrollParent) {
-          scrollParent.off('scroll', scrollHandler);
-        }
-        scrollParent = $el.parents().filter(function () {
-          return this.scrollHeight > $(this).height();
-        });
-        if (scrollParent) {
-          scrollParent.on('scroll', scrollHandler);
-        }
 
         $rootScope.$broadcast('kibiMenuTemplate:show', $el);
 
@@ -172,9 +151,6 @@ define(function (require) {
       });
 
       $scope.$on('$destroy', function () {
-        if (scrollParent) {
-          scrollParent.off('scroll', scrollHandler);
-        }
         cancelOnShow();
         $document.unbind('click', clickOutsideHandler);
         if (timerPromise) {

@@ -21,39 +21,38 @@ define(function (require) {
 
       const updatePosition = function () {
         const offset = $el.offset();
+        const dropdownPadding = 30;
+        const windowHeight = $($window).height();
+        const scrollTop = $($window).scrollTop();
+        const dropdownHeight = container.outerHeight();
+
         let left = offset.left;
+        let maxHeight = (windowHeight - dropdownPadding * 2);
+
         if ($scope.kibiMenuTemplateLeftOffset) {
           left += +$scope.kibiMenuTemplateLeftOffset;
         }
         let top = offset.top + $el.outerHeight();
-        if (top + container.outerHeight() > $($window).height()) {
-          top = offset.top - container.outerHeight();
+        if (top + dropdownHeight - scrollTop > windowHeight) {
+          top = offset.top - dropdownHeight;
         }
-        container.css({left, top});
-      };
 
-      // track the scroll parent to hide upon scrolling
-      let scrollParent;
-      const scrollHandler = () => {
-        if ($scope.data.showMenu) {
-          $scope.data.showMenu = false;
-          $scope.$apply();
+        if (top - scrollTop < 0) {
+          if (dropdownHeight <= maxHeight) {
+            top = (windowHeight - dropdownHeight) / 2;
+          } else {
+            top = dropdownPadding;
+          }
+          top += scrollTop;
         }
+
+        left = `${Math.ceil(left)}px`;
+        top = `${Math.ceil(top)}px`;
+        maxHeight = `${Math.ceil(maxHeight)}px`;
+        container.css({left, top, 'max-height': maxHeight});
       };
 
       const show = function () {
-
-        // find the current scroll parent and set it to hide the dropdown when
-        // the scroll position changes.
-        if (scrollParent) {
-          scrollParent.off('scroll', scrollHandler);
-        }
-        scrollParent = $el.parents().filter(function () {
-          return this.scrollHeight > $(this).height();
-        });
-        if (scrollParent) {
-          scrollParent.on('scroll', scrollHandler);
-        }
 
         $rootScope.$broadcast('kibiMenuTemplate:show', $el);
 
@@ -152,9 +151,6 @@ define(function (require) {
       });
 
       $scope.$on('$destroy', function () {
-        if (scrollParent) {
-          scrollParent.off('scroll', scrollHandler);
-        }
         cancelOnShow();
         $document.unbind('click', clickOutsideHandler);
         if (timerPromise) {

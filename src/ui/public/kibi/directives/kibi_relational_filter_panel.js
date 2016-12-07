@@ -136,7 +136,6 @@ define(function (require) {
         $scope.$on('$destroy', function () {
           initConfigOff();
           relationalFilterPanelOpenedOff();
-          relationsHelper.destroy();
         });
       } // end of link function
     };

@@ -832,7 +832,6 @@ define(function (require) {
       }
     });
     $scope.$on('$destroy', function () {
-      relationsHelper.destroy();
       indicesGraphExportOff();
       dashboardsGraphExportOff();
     });

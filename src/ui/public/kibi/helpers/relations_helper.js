@@ -7,31 +7,19 @@ define(function (require) {
 
     function RelationsHelper() {}
 
-    const kibiRelationsOff = $rootScope.$on('change:config.kibi:relations', (event, newRelations) => {
+    $rootScope.$on('change:config.kibi:relations', (event, newRelations) => {
       if (newRelations) {
         relations = newRelations;
       }
     });
 
-    const initConfigOff = $rootScope.$on('init:config', () => {
+    $rootScope.$on('init:config', () => {
       relations = config.get('kibi:relations');
     });
 
-    const changeConfigOff = $rootScope.$on('change:config', () => {
+    $rootScope.$on('change:config', () => {
       relations = config.get('kibi:relations');
     });
-
-    RelationsHelper.prototype.destroy = function () {
-      if (kibiRelationsOff) {
-        kibiRelationsOff();
-      }
-      if (initConfigOff) {
-        initConfigOff();
-      }
-      if (changeConfigOff) {
-        changeConfigOff();
-      }
-    };
 
     const checkIdFormat = function (parts) {
       return parts && parts.length === 6;
@@ -70,6 +58,21 @@ define(function (require) {
         return false;
       }
       return true;
+    };
+
+    /**
+     * validateIndicesRelationFromId validates the given ID of a relation between indices
+     *
+     * @param relationId the ID of the relation
+     * @returns true if the relation exists and is ok
+     */
+    RelationsHelper.prototype.validateIndicesRelationFromId = function (relationId) {
+      if (!relationId) {
+        throw new Error('relationId cannot be undefined');
+      }
+
+      const relation = _.find(relations.relationsIndices, 'id', relationId);
+      return Boolean(relation && this.validateIndicesRelation(relation));
     };
 
     /**

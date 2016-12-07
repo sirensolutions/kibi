@@ -780,11 +780,6 @@ define(function (require) {
       return labels;
     };
 
-    KibiState.prototype.destroy = function () {
-      KibiState.Super.prototype.destroy.call(this);
-      relationsHelper.destroy();
-    };
-
     KibiState.prototype._readFromURL = function () {
       const stash = KibiState.Super.prototype._readFromURL.call(this);
 

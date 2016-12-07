@@ -23,6 +23,7 @@ define(function (require) {
     });
     const appState = getAppState();
 
+    const relationsHelper = Private(require('ui/kibi/helpers/relations_helper'));
     const kibiSequentialJoinVisHelper = Private(require('ui/kibi/helpers/kibi_sequential_join_vis_helper'));
     const currentDashboardId = kibiState._getCurrentDashboardId();
 
@@ -126,7 +127,7 @@ define(function (require) {
       DelayExecutionHelper.DELAY_STRATEGY.RESET_COUNTER_ON_NEW_EVENT
     );
 
-    var _collectUpdateCountsRequest = function (buttons, dashboardId) {
+    const _collectUpdateCountsRequest = function (buttons, dashboardId) {
       if (onVisualizeTab || !buttons || !buttons.length) {
         return Promise.resolve([]);
       }
@@ -137,17 +138,23 @@ define(function (require) {
       return Promise.resolve(buttons);
     };
 
-    var _constructButtons = function () {
+    const _constructButtons = function () {
+      const buttonsDefs = _.filter($scope.vis.params.buttons, btn => relationsHelper.validateIndicesRelationFromId(btn.indexRelationId));
+
       $scope.vis.error = '';
+
+      if (buttonsDefs.length !== $scope.vis.params.buttons.length) {
+        $scope.vis.error = 'Invalid configuration of the Kibi relational filter visualization';
+        if (!onVisualizeTab) {
+          return Promise.reject($scope.vis.error);
+        }
+      }
+
       if (!onVisualizeTab) {
         return kibiState._getDashboardAndSavedSearchMetas([currentDashboardId]).then(([ { savedDash, savedSearchMeta } ]) => {
           const currentDashboardIndex = savedSearchMeta.index;
           const currentDashboardId = savedDash.id;
-          const buttons = kibiSequentialJoinVisHelper.constructButtonsArray(
-            $scope.vis.params.buttons,
-            currentDashboardIndex,
-            currentDashboardId
-          );
+          const buttons = kibiSequentialJoinVisHelper.constructButtonsArray(buttonsDefs, currentDashboardIndex, currentDashboardId);
           // retain the buttons order
           for (let i = 0; i < buttons.length; i++) {
             buttons[i].btnIndex = i;
@@ -160,7 +167,7 @@ define(function (require) {
           return buttons;
         }).catch(notify.error);
       } else {
-        $scope.buttons = kibiSequentialJoinVisHelper.constructButtonsArray($scope.vis.params.buttons);
+        $scope.buttons = kibiSequentialJoinVisHelper.constructButtonsArray(buttonsDefs);
       }
     };
 
@@ -264,7 +271,6 @@ define(function (require) {
     $scope.$on('$destroy', function () {
       delayExecutionHelper.destroy();
       kibiDashboardChangedOff();
-      kibiSequentialJoinVisHelper.destroy();
       removeAutorefreshHandler();
     });
 

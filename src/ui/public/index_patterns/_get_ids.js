@@ -1,28 +1,28 @@
 define(function (require) {
-  return function GetIndexPatternIdsFn(es, kbnIndex) {
+  // kibi: require savedObjectsAPI
+  return function GetIndexPatternIdsFn(savedObjectsAPI, kbnIndex) {
+  // kibi: end
     let _ = require('lodash');
 
-    // many places may require the id list, so we will cache it seperately
-    // didn't incorportate with the indexPattern cache to prevent id collisions.
+    // many places may require the id list, so we will cache it separately.
+    // Didn't incorportate with the indexPattern cache to prevent id collisions.
     let cachedPromise;
 
     let getIds = function () {
       if (cachedPromise) {
-        // retrun a clone of the cached response
+        // return a clone of the cached response
         return cachedPromise.then(function (cachedResp) {
           return _.clone(cachedResp);
         });
       }
 
-      cachedPromise = es.search({
+      // kibi: use the savedObjectsAPI
+      cachedPromise = savedObjectsAPI.search({
         index: kbnIndex,
         type: 'index-pattern',
-        fields: [],
-        body: {
-          query: { match_all: {} },
-          size: 10000
-        }
+        size: 10000
       })
+      // kibi: end
       .then(function (resp) {
         return _.pluck(resp.hits.hits, '_id');
       });

@@ -165,6 +165,50 @@ module.exports = (server, API_ROOT) => {
   });
 
   /**
+   * Partially updates a saved object in the .kibi index.
+   *
+   * Works like the Elasticsearch update API but accepts only a body containing a "doc"
+   * object with the fields to update; scripting and upserts are not supported.
+   *
+   * Returns the same response as an Elasticsearch API update operation on success, a
+   * wrapped error with the same format as Elasticsearch errors on conflicts.
+   *
+   * Errors are formatted by a custom handler set in the init method of this plugin.
+   */
+  server.route({
+    method: 'POST',
+    path: `${API_ROOT}/{index}/{type}/{id}/_update`,
+    handler: (request, reply) => {
+      let model;
+      try {
+        const ModelClass = require(`../model/${request.params.type}`);
+        model = new ModelClass(server);
+      } catch (error) {
+        return reply(Boom.notFound(error));
+      }
+      model.patch(request.params.id, request.payload.doc)
+      .then((response) => {
+        reply(response);
+      })
+      .catch((error) => {
+        return replyError(error, reply);
+      });
+    },
+    config: {
+      validate: {
+        params: {
+          index: Joi.string().required(),
+          type: Joi.string().required(),
+          id: Joi.string()
+        },
+        payload: {
+          doc: Joi.object().required()
+        }
+      }
+    }
+  });
+
+  /**
    * Deletes a saved object in the .kibi index.
    */
   server.route({

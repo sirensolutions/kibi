@@ -13,8 +13,9 @@ export default class Model {
    * Creates a new Model.
    *
    * @param {Server} server - A Server instance.
-   * @param {string} type - The Elasticsearch type managed by this model.
+   * @param {String} type - The Elasticsearch type managed by this model.
    * @param {Joi} schema - A Joi schema describing the type.
+   *                       If null, mappings for the object will not be generated.
    */
   constructor(server, type, schema) {
     this._type = type;
@@ -73,6 +74,9 @@ export default class Model {
    * Checks if the mappings for the type have been defined.
    */
   async hasMappings() {
+    if (!this.schema) {
+      return;
+    }
     const mappings = await this._client.indices.getMapping({
       index: this._config.get('kibana.index'),
       type: this._type
@@ -84,9 +88,9 @@ export default class Model {
   /**
    * Creates a new object instance.
    *
-   * @param {string} id - The object id.
-   * @param {string} type - The object type.
-   * @param {object} body - The object body.
+   * @param {String} id - The object id.
+   * @param {String} type - The object type.
+   * @param {Object} body - The object body.
    */
   async create(id, body) {
     try {
@@ -106,9 +110,9 @@ export default class Model {
   /**
    * Updates an existing object.
    *
-   * @param {string} id - The object id.
-   * @param {string} type - The object type.
-   * @param {object} body - The object body.
+   * @param {String} id - The object id.
+   * @param {String} type - The object type.
+   * @param {Object} body - The object body.
    */
   async update(id, body) {
     try {
@@ -126,10 +130,33 @@ export default class Model {
   }
 
   /**
+   * Partially updates an existing object.
+   *
+   * @param {String} id - The object id.
+   * @param {String} type - The object type.
+   * @param {Object} fields - The changed fields.
+   */
+  async patch(id, fields) {
+    try {
+      return await this._client.update({
+        id: id,
+        index: this._config.get('kibana.index'),
+        type: this._type,
+        body: {
+          doc: fields
+        },
+        refresh: true
+      });
+    } catch (error) {
+      this._wrapError(error);
+    }
+  }
+
+  /**
    * Returns all the objects of the type managed by this model.
    *
    * @param {Number} size - The number of results to return.
-   * @param {string} searchString - An optional search string.
+   * @param {String} searchString - An optional search string.
    * @return {Array} A list of objects of the specified type.
    * @throws {NotFoundError} if the object does not exist.
    */
@@ -167,12 +194,11 @@ export default class Model {
   /**
    * Returns the object with the specified id.
    *
-   * @param {string} id - An id.
+   * @param {String} id - An id.
    * @return {Object} The object instance having the specified id.
    * @throws {NotFoundError} if the object does not exist.
    */
   async get(id) {
-    let hit;
     try {
       return await this._client.get({
         index: this._config.get('kibana.index'),
@@ -190,7 +216,7 @@ export default class Model {
   /**
    * Deletes the object with the specified id.
    *
-   * @param {string} id - An id.
+   * @param {String} id - An id.
    * @throws {NotFoundError} if the object does not exist.
    */
   async delete(id) {

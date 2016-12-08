@@ -14,7 +14,7 @@ define(function (require) {
         if (buttonDef.sourceDashboardId && currentDashboardId) {
           return buttonDef.sourceDashboardId === currentDashboardId;
         }
-        var relationInfo = relationsHelper.getRelationInfosFromRelationID(buttonDef.indexRelationId);
+        const relationInfo = relationsHelper.getRelationInfosFromRelationID(buttonDef.indexRelationId);
         // filter it out if currentDashboardIndex is neither in source nor in target for the button relation
         if (currentDashboardIndexId &&
             currentDashboardIndexId !== relationInfo.source.index &&
@@ -30,7 +30,7 @@ define(function (require) {
       })
       .map(function (button) {
         if (button.indexRelationId && currentDashboardIndexId) {
-          var relationInfo = relationsHelper.getRelationInfosFromRelationID(button.indexRelationId);
+          const relationInfo = relationsHelper.getRelationInfosFromRelationID(button.indexRelationId);
           if (relationInfo.source.index === currentDashboardIndexId) {
             button.sourceIndexPatternId = relationInfo.source.index;
             button.sourceIndexPatternType = relationInfo.source.type;

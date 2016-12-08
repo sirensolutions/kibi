@@ -95,7 +95,7 @@ describe('Kibi Components', function () {
             relationsDashboards: []
           }
         });
-        var buttonDefs = [
+        const buttonDefs = [
           {
             label: 'from A to B',
             sourceDashboardId: 'dashboardA',
@@ -104,9 +104,9 @@ describe('Kibi Components', function () {
           }
         ];
 
-        var index = 'ia';
+        const index = 'ia';
 
-        var buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, index);
+        const buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, index);
         expect(buttons.length).to.equal(1);
         expect(buttons[0].sourceIndexPatternId).to.equal('ia');
         expect(buttons[0].sourceIndexPatternType).to.equal('');
@@ -130,11 +130,11 @@ describe('Kibi Components', function () {
           getSourceCount: sinon.stub().returns(Promise.resolve(123))
         }
       ];
-      var buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, index);
+      const buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, index);
 
       expect(buttons.length).to.equal(1);
 
-      var button = buttons[0];
+      const button = buttons[0];
       expect(button.label).to.equal('button 1');
       expect(button.sourceIndexPatternId).to.equal('index1');
       expect(typeof button.click).to.equal('function');
@@ -149,16 +149,16 @@ describe('Kibi Components', function () {
       beforeEach(() => init({}));
 
       it('empty buttonsDef array', function () {
-        var buttonDefs = [];
-        var expected = [];
-        var buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs);
+        const buttonDefs = [];
+        const expected = [];
+        const buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs);
 
         expect(buttons).to.eql(expected);
       });
 
       describe('custom filter label', function () {
-        var index;
-        var buttonDefs;
+        let index;
+        let buttonDefs;
 
         beforeEach(function () {
           index = 'index1';
@@ -172,9 +172,9 @@ describe('Kibi Components', function () {
         });
 
         it('should set the default filter label if no custom is set', function (done) {
-          var buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, index);
+          const buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, index);
           expect(buttons.length).to.equal(1);
-          var button = buttons[0];
+          const button = buttons[0];
           expect(button.label).to.equal('button 1');
           expect(button.sourceIndexPatternId).to.equal('index1');
           expect(typeof button.click).to.equal('function');
@@ -195,9 +195,9 @@ describe('Kibi Components', function () {
 
         it('should replace both $COUNT and $DASHBOARD occurrences', function (done) {
           buttonDefs[0].filterLabel = 'My custom label with placeholders $COUNT $DASHBOARD';
-          var buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, index);
+          const buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, index);
           expect(buttons.length).to.equal(1);
-          var button = buttons[0];
+          const button = buttons[0];
           expect(button.label).to.equal('button 1');
           expect(button.sourceIndexPatternId).to.equal('index1');
           expect(typeof button.click).to.equal('function');
@@ -219,9 +219,9 @@ describe('Kibi Components', function () {
 
         it('should replace $DASHBOARD', function (done) {
           buttonDefs[0].filterLabel = 'My custom label $DASHBOARD';
-          var buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, index);
+          const buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, index);
           expect(buttons.length).to.equal(1);
-          var button = buttons[0];
+          const button = buttons[0];
           expect(button.label).to.equal('button 1');
           expect(button.sourceIndexPatternId).to.equal('index1');
           expect(typeof button.click).to.equal('function');
@@ -242,9 +242,9 @@ describe('Kibi Components', function () {
 
         it('should replace $COUNT', function (done) {
           buttonDefs[0].filterLabel = 'My custom label $COUNT';
-          var buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, index);
+          const buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, index);
           expect(buttons.length).to.equal(1);
-          var button = buttons[0];
+          const button = buttons[0];
           expect(button.label).to.equal('button 1');
           expect(button.sourceIndexPatternId).to.equal('index1');
           expect(typeof button.click).to.equal('function');
@@ -265,9 +265,9 @@ describe('Kibi Components', function () {
 
         it('should replace nothing', function (done) {
           buttonDefs[0].filterLabel = 'My custom label';
-          var buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, index);
+          const buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, index);
           expect(buttons.length).to.equal(1);
-          var button = buttons[0];
+          const button = buttons[0];
           expect(button.label).to.equal('button 1');
           expect(button.sourceIndexPatternId).to.equal('index1');
           expect(typeof button.click).to.equal('function');
@@ -633,7 +633,7 @@ describe('Kibi Components', function () {
       beforeEach(() => init({}));
 
       it('should create a group and add it', function () {
-        var existingFilters = [
+        const existingFilters = [
           {
             join_sequence: [{indices: ['index1']}, {indices: ['index2']}]
           },
@@ -642,14 +642,14 @@ describe('Kibi Components', function () {
           }
         ];
 
-        var expected = {
+        const expected = {
           group: [
             [{indices: ['index1']}, {indices: ['index2']}],
             [{indices: ['index3']}, {indices: ['index4']}]
           ]
         };
 
-        var actual = sequentialJoinVisHelper.composeGroupFromExistingJoinFilters(existingFilters);
+        const actual = sequentialJoinVisHelper.composeGroupFromExistingJoinFilters(existingFilters);
         expect(actual).to.eql(expected);
       });
     });

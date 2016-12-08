@@ -33,7 +33,8 @@ module.exports = function (chrome, internals) {
     .value('savedObjectsAPITypes', [
       'session',
       'visualization',
-      'index-pattern'
+      'index-pattern',
+      'config'
     ])
     .value('savedObjectsAPIUrl', (function () {
       var a = document.createElement('a');

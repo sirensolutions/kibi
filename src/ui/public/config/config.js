@@ -25,7 +25,9 @@ define(function (require) {
     // update once it is requested by calling #set() or #clear().
     let updater;
 
-    let DocSource = Private(require('ui/courier/data_source/doc_source'));
+    // kibi: use the Saved Objects API to manipulate the configuration
+    let DocSource = Private(require('ui/courier/data_source/savedobject_source'));
+    // kibi: end
     let doc = (new DocSource())
       .index(kbnIndex)
       .type('config')

@@ -1,5 +1,4 @@
 const SetupError = require('./setup_error');
-const format = require('util').format;
 module.exports = function (server) {
   const client = server.plugins.elasticsearch.client;
   const index = server.config().get('kibana.index');

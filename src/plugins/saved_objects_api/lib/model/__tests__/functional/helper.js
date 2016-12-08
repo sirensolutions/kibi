@@ -3,6 +3,8 @@ import expect from 'expect.js';
 import sinon from 'sinon';
 import requirefrom from 'requirefrom';
 import url from 'url';
+import Model from '../../model';
+import initRegistry from '../../../init_registry';
 import ConflictError from '../../errors/conflict';
 const indexSnapshot = requirefrom('src/testUtils')('index_snapshot');
 const ScenarioManager = requirefrom('src/testUtils')('scenario_manager');
@@ -17,17 +19,15 @@ export default class ModelTestHelper {
    * Creates a new ModelTestHelper.
    *
    * @param {Number} timeout - Timeout for all network operations.
-   * @param {Class} ModelClass - The model class being tested.
    * @param {String} typename - The name of the ES type managed the the model class being tested.
    * @param {String} stringField - The name of a stringField in the mapping that will be set during tests.
    * @param {String} prefix - The prefix for objects created by the helper.
    */
-  constructor(timeout, ModelClass, typename, stringField, prefix) {
+  constructor(timeout, typename, stringField, prefix) {
     const clusterUrl =  url.format(serverConfig.servers.elasticsearch);
     this._prefix = prefix;
     this._stringField = stringField;
 
-    this._modelClass = ModelClass;
     this._typename = typename;
 
     this._scenarioManager = new ScenarioManager(clusterUrl, timeout);
@@ -50,6 +50,7 @@ export default class ModelTestHelper {
         }
       })
     };
+    this._registry = initRegistry(this._server);
   }
 
   /**
@@ -89,7 +90,7 @@ export default class ModelTestHelper {
    * Returns an instance of the model class being tested.
    */
   getInstance() {
-    return new this._modelClass(this._server);
+    return this._registry.get(this._typename);
   }
 
   /**

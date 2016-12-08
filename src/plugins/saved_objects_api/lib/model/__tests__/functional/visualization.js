@@ -1,5 +1,4 @@
 import requirefrom from 'requirefrom';
-import VisualizationModel from '../../visualization';
 import Scenario from './scenarios/empty/scenario';
 const wrapAsync = requirefrom('src/testUtils')('wrap_async');
 const serverConfig = requirefrom('test')('serverConfig');
@@ -7,9 +6,9 @@ import ModelTestHelper from './helper';
 
 describe('saved_objects_api/functional', function () {
 
-  const helper = new ModelTestHelper(60000, VisualizationModel, 'visualization', 'title', 'sess');
+  const helper = new ModelTestHelper(60000, 'visualization', 'title', 'sess');
 
-  describe('VisualizationModel', function () {
+  describe('Visualization', function () {
 
     const expectedMapping = {
       description: {

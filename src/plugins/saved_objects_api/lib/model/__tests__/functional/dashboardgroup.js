@@ -1,5 +1,4 @@
 import requirefrom from 'requirefrom';
-import DashboardgroupModel from '../../dashboardgroup';
 import Scenario from './scenarios/empty/scenario';
 const wrapAsync = requirefrom('src/testUtils')('wrap_async');
 const serverConfig = requirefrom('test')('serverConfig');
@@ -7,9 +6,9 @@ import ModelTestHelper from './helper';
 
 describe('saved_objects_api/functional', function () {
 
-  const helper = new ModelTestHelper(60000, DashboardgroupModel, 'dashboardgroup', 'title', 'dag');
+  const helper = new ModelTestHelper(60000, 'dashboardgroup', 'title', 'dag');
 
-  describe('DashboardgroupModel', function () {
+  describe('Dashboardgroup', function () {
 
     const expectedMapping = {
       description: {

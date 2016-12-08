@@ -8,21 +8,10 @@ import { each, merge } from 'lodash';
  */
 module.exports = (server, API_ROOT) => {
 
-  const typeCache = {};
-
   /**
    * Returns a model instance for the specified @typename.
    */
-  const getModel = (typename) => {
-    typename = typename.replace(/-/g, '');
-    let model = typeCache[typename];
-    if (model) {
-      return model;
-    }
-    const ModelClass = require(`../model/${typename}`);
-    model = typeCache[typename] = new ModelClass(server);
-    return model;
-  };
+  const getModel = (typename) => server.plugins.saved_objects_api.getModel(typename);
 
   /**
    * Wraps model errors and sets the body of the reply.
@@ -181,8 +170,7 @@ module.exports = (server, API_ROOT) => {
     handler: (request, reply) => {
       let model;
       try {
-        const ModelClass = require(`../model/${request.params.type}`);
-        model = new ModelClass(server);
+        model = getModel(request.params.type);
       } catch (error) {
         return reply(Boom.notFound(error));
       }

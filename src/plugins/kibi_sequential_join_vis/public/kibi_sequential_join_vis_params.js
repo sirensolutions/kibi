@@ -32,9 +32,10 @@ define(function (require) {
         };
 
         _.each($scope.vis.params.buttons, (button) => {
-          let found = _.find(relations.relationsIndices, (rel) => {
-            return rel.id === button.indexRelationId;
-          });
+          if (!button.indexRelationId) {
+            return;
+          }
+          const found = _.find(relations.relationsIndices, 'id', button.indexRelationId);
           if (!found) {
             notify.error('Could not find relation: ' + button.indexRelationId + '. Check relations configuration.');
             delete button.indexRelationId;

@@ -54,6 +54,9 @@ define(function (require) {
 
         button.click = function () {
           const currentDashboardId = kibiState._getCurrentDashboardId();
+          if (!currentDashboardId) {
+            return Promise.resolve();
+          }
           return kibiState.saveAppState().then(() => {
             if (this.joinSeqFilter) {
               const switchToDashboard = function () {

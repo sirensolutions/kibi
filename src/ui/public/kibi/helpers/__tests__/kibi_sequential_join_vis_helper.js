@@ -11,6 +11,7 @@ let config;
 let kibiState;
 let appState;
 let $rootScope;
+let saveAppStateStub;
 
 const defaultTimeStart = '2006-09-01T12:00:00.000Z';
 const defaultTimeEnd = '2009-09-01T12:00:00.000Z';
@@ -62,7 +63,7 @@ function init({
     config = _config_;
     sequentialJoinVisHelper = Private(require('ui/kibi/helpers/kibi_sequential_join_vis_helper'));
     sinon.stub(kibiState, '_getCurrentDashboardId').returns(currentDashboardId);
-    sinon.stub(kibiState, 'saveAppState').returns(Promise.resolve());
+    saveAppStateStub = sinon.stub(kibiState, 'saveAppState').returns(Promise.resolve());
 
     const defaultTime = {
       mode: 'absolute',
@@ -116,6 +117,33 @@ describe('Kibi Components', function () {
       });
     });
 
+    it('should not do anything when a button is clicked in the config window', function (done) {
+      init({
+        currentDashboardId: ''
+      });
+
+      const index = 'index1';
+      const buttonDefs = [
+        {
+          indexRelationId: 'index1//f1/index2//f2',
+          label: 'button 1',
+          getSourceCount: sinon.stub().returns(Promise.resolve(123))
+        }
+      ];
+      var buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, index);
+
+      expect(buttons.length).to.equal(1);
+
+      var button = buttons[0];
+      expect(button.label).to.equal('button 1');
+      expect(button.sourceIndexPatternId).to.equal('index1');
+      expect(typeof button.click).to.equal('function');
+
+      button.click().then(() => {
+        sinon.assert.notCalled(saveAppStateStub);
+        done();
+      }).catch(done);
+    });
 
     describe('constructButtonArray', function () {
       beforeEach(() => init({}));
@@ -159,7 +187,7 @@ describe('Kibi Components', function () {
           };
 
           button.click().then(() => {
-            expect(buttonDefs[0].getSourceCount.callCount).to.be(1);
+            sinon.assert.calledOnce(buttonDefs[0].getSourceCount);
             expect(button.joinSeqFilter.meta.alias).to.eql('... related to (123) from dashboard 1');
             done();
           }).catch(done);
@@ -183,7 +211,7 @@ describe('Kibi Components', function () {
 
 
           button.click().then(() => {
-            expect(buttonDefs[0].getSourceCount.callCount).to.be(1);
+            sinon.assert.calledOnce(buttonDefs[0].getSourceCount);
             expect(button.joinSeqFilter.meta.alias).to.eql('My custom label with placeholders 123 dashboard 1');
             done();
           }).catch(done);
@@ -206,7 +234,7 @@ describe('Kibi Components', function () {
           };
 
           button.click().then(() => {
-            expect(buttonDefs[0].getSourceCount.callCount).to.be(0);
+            sinon.assert.notCalled(buttonDefs[0].getSourceCount);
             expect(button.joinSeqFilter.meta.alias).to.eql('My custom label dashboard 1');
             done();
           }).catch(done);
@@ -229,7 +257,7 @@ describe('Kibi Components', function () {
           };
 
           button.click().then(() => {
-            expect(buttonDefs[0].getSourceCount.callCount).to.be(1);
+            sinon.assert.calledOnce(buttonDefs[0].getSourceCount);
             expect(button.joinSeqFilter.meta.alias).to.eql('My custom label 123');
             done();
           }).catch(done);
@@ -252,7 +280,7 @@ describe('Kibi Components', function () {
           };
 
           button.click().then(() => {
-            expect(buttonDefs[0].getSourceCount.callCount).to.be(0);
+            sinon.assert.notCalled(buttonDefs[0].getSourceCount);
             expect(button.joinSeqFilter.meta.alias).to.eql('My custom label');
             done();
           }).catch(done);
@@ -301,7 +329,7 @@ describe('Kibi Components', function () {
         timeBasedIndicesStub.withArgs('ib').returns([ 'ib' ]);
 
         sequentialJoinVisHelper.getJoinSequenceFilter(currentDashboardId, button).then((rel) => {
-          expect(timeBasedIndicesStub.called).to.be(true);
+          sinon.assert.called(timeBasedIndicesStub);
           expect(rel.join_sequence).to.have.length(1);
           expect(rel.join_sequence[0].relation).to.have.length(2);
           expect(rel.join_sequence[0].relation[0].indices).to.eql([ 'ia-1', 'ia-2' ]);
@@ -377,7 +405,7 @@ describe('Kibi Components', function () {
         ];
 
         sequentialJoinVisHelper.getJoinSequenceFilter(currentDashboardId, button).then((rel) => {
-          expect(timeBasedIndicesStub.called).to.be(true);
+          sinon.assert.called(timeBasedIndicesStub);
           expect(rel.join_sequence).to.have.length(1);
           expect(rel.join_sequence[0].relation).to.have.length(2);
           expect(rel.join_sequence[0].relation[0].indices).to.eql([ button.sourceIndexPatternId ]);
@@ -444,7 +472,7 @@ describe('Kibi Components', function () {
         ];
 
         sequentialJoinVisHelper.getJoinSequenceFilter(currentDashboardId, button).then((rel) => {
-          expect(timeBasedIndicesStub.called).to.be(true);
+          sinon.assert.called(timeBasedIndicesStub);
           expect(rel.join_sequence).to.have.length(1);
           expect(rel.join_sequence[0].relation).to.have.length(2);
           expect(rel.join_sequence[0].relation[0].indices).to.eql([ button.sourceIndexPatternId ]);
@@ -496,7 +524,7 @@ describe('Kibi Components', function () {
           targetIndexPatternId: 'ib'
         };
         sequentialJoinVisHelper.getJoinSequenceFilter('dashboardA', button).then((rel) => {
-          expect(timeBasedIndicesStub.called).to.be(true);
+          sinon.assert.called(timeBasedIndicesStub);
           expect(rel.join_sequence).to.have.length(1);
           expect(rel.join_sequence[0].relation).to.have.length(2);
           expect(rel.join_sequence[0].relation[0].indices).to.eql([ button.sourceIndexPatternId ]);
@@ -533,7 +561,7 @@ describe('Kibi Components', function () {
           targetIndexPatternId: 'ib'
         };
         sequentialJoinVisHelper.getJoinSequenceFilter('dashboardA', button).then((rel) => {
-          expect(timeBasedIndicesStub.called).to.be(true);
+          sinon.assert.called(timeBasedIndicesStub);
           expect(rel.join_sequence).to.have.length(1);
           expect(rel.join_sequence[0].relation).to.have.length(2);
           expect(rel.join_sequence[0].relation[0].termsEncoding).to.be('long');
@@ -591,7 +619,7 @@ describe('Kibi Components', function () {
         timeBasedIndicesStub.withArgs('ib').returns([ 'ib' ]);
 
         sequentialJoinVisHelper.getJoinSequenceFilter('dashboardA', button).then((rel) => {
-          expect(timeBasedIndicesStub.called).to.be(true);
+          sinon.assert.called(timeBasedIndicesStub);
           expect(rel.join_sequence).to.have.length(1);
           expect(rel.join_sequence[0].relation).to.have.length(2);
           expect(rel.join_sequence[0].relation[0].termsEncoding).to.be('enc1');

@@ -360,6 +360,8 @@ define(function (require) {
             });
           });
           this.disableAllRelations();
+          // but enable the relational panel in case it was disabled by a filter
+          this.toggleRelationalPanel(true);
 
           if (dashboardIdsToUpdate.length) {
             this.emit('reset', dashboardIdsToUpdate);

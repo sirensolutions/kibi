@@ -1,4 +1,4 @@
-let _ = require('lodash');
+const _ = require('lodash');
 import { format as formatUrl, parse as parseUrl } from 'url';
 
 import Notifier from 'ui/notify/notifier';
@@ -9,8 +9,8 @@ const URL_LIMIT_WARN_WITHIN = 150;
 module.exports = function (chrome, internals) {
 
   chrome.setupAngular = function () {
-    let modules = require('ui/modules');
-    let kibana = modules.get('kibana');
+    const modules = require('ui/modules');
+    const kibana = modules.get('kibana');
 
     _.forOwn(chrome.getInjected(), function (val, name) {
       kibana.value(name, val);
@@ -25,7 +25,7 @@ module.exports = function (chrome, internals) {
     .value('buildSha', internals.buildSha)
     .value('sessionId', Date.now())
     .value('esUrl', (function () {
-      let a = document.createElement('a');
+      const a = document.createElement('a');
       a.href = chrome.addBasePath('/elasticsearch');
       return a.href;
     }()))
@@ -34,10 +34,12 @@ module.exports = function (chrome, internals) {
       'session',
       'visualization',
       'index-pattern',
-      'config'
+      'config',
+      'dashboard',
+      'dashboardgroup'
     ])
     .value('savedObjectsAPIUrl', (function () {
-      var a = document.createElement('a');
+      const a = document.createElement('a');
       a.href = chrome.addBasePath('/api/saved-objects/v1');
       return a.href;
     }()))

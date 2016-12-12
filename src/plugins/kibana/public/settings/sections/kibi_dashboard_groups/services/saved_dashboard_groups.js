@@ -1,11 +1,11 @@
 define(function (require) {
 
-  var _ = require('lodash');
-  var Scanner = require('ui/utils/scanner');
+  const _ = require('lodash');
+  const Scanner = require('ui/utils/scanner');
 
   require('plugins/kibana/settings/sections/kibi_dashboard_groups/services/_saved_dashboard_group');
 
-  var module = require('ui/modules').get('dashboard_groups_editor/services/saved_dashboard_groups');
+  const module = require('ui/modules').get('dashboard_groups_editor/services/saved_dashboard_groups');
 
   // Register this service with the saved object registry so it can be
   // edited by the object editor.
@@ -14,15 +14,16 @@ define(function (require) {
     title: 'dashboardgroups'
   });
 
-  module.service('savedDashboardGroups', function (Promise, config, kbnIndex, es, createNotifier, SavedDashboardGroup, kbnUrl, Private) {
+  module.service('savedDashboardGroups', function (Promise, config, kbnIndex, es, savedObjectsAPI, createNotifier, SavedDashboardGroup,
+                                                   kbnUrl, Private) {
 
-    var cache = Private(require('ui/kibi/helpers/cache_helper'));
+    const cache = Private(require('ui/kibi/helpers/cache_helper'));
 
-    var notify = createNotifier({
+    const notify = createNotifier({
       location: 'Saved Dashboard Groups'
     });
 
-    var scanner = new Scanner(es, {
+    const scanner = new Scanner(es, {
       index: kbnIndex,
       type: 'dashboardgroup'
     });
@@ -38,7 +39,7 @@ define(function (require) {
 
 
     this.get = function (id) {
-      var cacheKey;
+      let cacheKey;
       if (id) {
         cacheKey = 'savedDashboardgroups-id-' + id;
       }
@@ -46,7 +47,7 @@ define(function (require) {
         return cache.get(cacheKey);
       }
       // Returns a promise that contains a dashboard which is a subclass of docSource
-      var promise = (new SavedDashboardGroup(id)).init();
+      const promise = (new SavedDashboardGroup(id)).init();
       if (cacheKey && cache) {
         cache.set(cacheKey, promise);
       }
@@ -72,46 +73,43 @@ define(function (require) {
     };
 
     this.mapHits = function (hit) {
-      var source = hit._source;
+      const source = hit._source;
       source.id = hit._id;
       source.url = this.urlFor(hit._id);
       source.dashboards = JSON.parse(source.dashboards);
       return source;
     };
 
-    this.find = function (searchString) {
-      var self = this;
-      var body = searchString ? {
-        query: {
-          simple_query_string: {
-            query: searchString + '*',
-            fields: ['title^3', 'description'],
-            default_operator: 'AND'
-          }
-        }
-      } : { query: {match_all: {}}};
+    // kibi: get dashboardgroups from the Saved Object API.
+    this.find = function (searchString, size = 100) {
+      if (!searchString) {
+        searchString = null;
+      }
 
-      var cacheKey = 'savedDashboardGroups' + (searchString ? searchString : '');
+      const cacheKey = 'savedDashboardGroups' + (searchString ? searchString : '');
       if (cache && cache.get(cacheKey)) {
         return Promise.resolve(cache.get(cacheKey));
       }
 
-      return es.search({
+      return savedObjectsAPI.search({
         index: kbnIndex,
-        type: 'dashboardgroup',
-        body: body,
-        size: 100
+        type: this.type,
+        q: searchString,
+        size: size
       })
       .then((resp) => {
-        var ret = {
+        const result = {
           total: resp.hits.total,
           hits: resp.hits.hits.map((hit) => this.mapHits(hit))
         };
+
         if (cache) {
-          cache.set(cacheKey, ret);
+          cache.set(cacheKey, result);
         }
-        return ret;
+        return result;
       });
     };
+    // kibi: end
+
   });
 });

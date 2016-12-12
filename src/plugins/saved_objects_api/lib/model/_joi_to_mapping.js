@@ -27,12 +27,16 @@ function getElasticsearchMappingType(joi) {
     case 'date':
       return {type: 'date'};
     case 'number':
-      for (const rule of joi.rules) {
-        if (rule.name === 'integer') {
-          return {type: 'integer' };
+      if (joi.rules) {
+        for (const rule of joi.rules) {
+          if (rule.name === 'integer') {
+            return {type: 'integer' };
+          }
         }
       }
-      throw new Error(`Can't map Joi type ${joi.type} to Elasticsearch mapping type.`);
+      return {
+        type: 'long'
+      };
     default:
       throw new Error(`Can't map Joi type ${joi.type} to Elasticsearch mapping type.`);
   }

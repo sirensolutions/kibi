@@ -6,13 +6,16 @@ import ModelTestHelper from './helper';
 
 describe('saved_objects_api/functional', function () {
 
-  const helper = new ModelTestHelper(60000, 'visualization', 'title', 'sess');
+  const helper = new ModelTestHelper(60000, 'dashboard', 'title', 'dash');
 
-  describe('Visualization', function () {
+  describe('DashboardModel', function () {
 
     const expectedMapping = {
       description: {
         type: 'string'
+      },
+      hits: {
+        type: 'integer',
       },
       kibanaSavedObjectMeta: {
         properties : {
@@ -21,13 +24,28 @@ describe('saved_objects_api/functional', function () {
           }
         }
       },
-      title: {
+      optionsJSON: {
+        type: 'string'
+      },
+      panelsJSON: {
         type: 'string'
       },
       savedSearchId: {
         type: 'string'
       },
-      visState: {
+      timeFrom: {
+        type: 'string'
+      },
+      timeMode: {
+        type: 'string'
+      },
+      timeRestore: {
+        type: 'boolean'
+      },
+      timeTo: {
+        type: 'string'
+      },
+      title: {
         type: 'string'
       },
       uiStateJSON: {
@@ -46,19 +64,19 @@ describe('saved_objects_api/functional', function () {
       return helper.testCreation();
     }));
 
-    it('should index a visualization correctly.', wrapAsync(async () => {
+    it('should index a dashboard correctly.', wrapAsync(async () => {
       return helper.testIndexing();
     }));
 
-    it('should create mappings when creating a visualization if they do not exist.', wrapAsync(async () => {
+    it('should create mappings when creating a dashboard if they do not exist.', wrapAsync(async () => {
       return helper.testMappingsCreation(expectedMapping);
     }));
 
-    it('should create mappings when indexing a visualization if they do not exist.', wrapAsync(async () => {
+    it('should create mappings when indexing a dashboard if they do not exist.', wrapAsync(async () => {
       return helper.testMappingsIndexing(expectedMapping);
     }));
 
-    it('should not create mappings when creating a visualization if they already exist.', wrapAsync(async () => {
+    it('should not create mappings when creating a dashboard if they already exist.', wrapAsync(async () => {
       return helper.testSkipMappings();
     }));
 

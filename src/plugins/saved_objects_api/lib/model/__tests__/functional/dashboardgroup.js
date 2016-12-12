@@ -6,24 +6,38 @@ import ModelTestHelper from './helper';
 
 describe('saved_objects_api/functional', function () {
 
-  const helper = new ModelTestHelper(60000, 'session', 'description', 'sess');
+  const helper = new ModelTestHelper(60000, 'dashboardgroup', 'title', 'dag');
 
-  describe('Session', function () {
+  describe('Dashboardgroup', function () {
 
     const expectedMapping = {
       description: {
         type: 'string'
       },
-      session_data: {
+      dashboards: {
         type: 'string'
       },
-      timeCreated: {
-        type: 'date',
-        format: 'strict_date_optional_time||epoch_millis'
+      hide: {
+        type: 'boolean',
       },
-      timeUpdated: {
-        type: 'date',
-        format: 'strict_date_optional_time||epoch_millis'
+      kibanaSavedObjectMeta: {
+        properties : {
+          searchSourceJSON : {
+            type : 'string'
+          }
+        }
+      },
+      iconCss: {
+        type: 'string'
+      },
+      iconUrl: {
+        type: 'string'
+      },
+      title: {
+        type: 'string'
+      },
+      priority: {
+        type: 'long'
       },
       version: {
         type: 'integer'
@@ -38,19 +52,19 @@ describe('saved_objects_api/functional', function () {
       return helper.testCreation();
     }));
 
-    it('should index a session correctly.', wrapAsync(async () => {
+    it('should index a dashboardgroup correctly.', wrapAsync(async () => {
       return helper.testIndexing();
     }));
 
-    it('should create mappings when creating a session if they do not exist.', wrapAsync(async () => {
+    it('should create mappings when creating a dashboardgroup if they do not exist.', wrapAsync(async () => {
       return helper.testMappingsCreation(expectedMapping);
     }));
 
-    it('should create mappings when indexing a session if they do not exist.', wrapAsync(async () => {
+    it('should create mappings when indexing a dashboardgroup if they do not exist.', wrapAsync(async () => {
       return helper.testMappingsIndexing(expectedMapping);
     }));
 
-    it('should not create mappings when creating a session if they already exist.', wrapAsync(async () => {
+    it('should not create mappings when creating a dashboardgroup if they already exist.', wrapAsync(async () => {
       return helper.testSkipMappings();
     }));
 

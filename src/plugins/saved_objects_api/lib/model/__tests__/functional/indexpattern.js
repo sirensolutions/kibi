@@ -1,5 +1,4 @@
 import requirefrom from 'requirefrom';
-import IndexPatternModel from '../../indexpattern';
 import Scenario from './scenarios/empty/scenario';
 const wrapAsync = requirefrom('src/testUtils')('wrap_async');
 const serverConfig = requirefrom('test')('serverConfig');
@@ -7,7 +6,7 @@ import ModelTestHelper from './helper';
 
 describe('saved_objects_api/functional', function () {
 
-  const helper = new ModelTestHelper(60000, IndexPatternModel, 'index-pattern', 'title', 'idx');
+  const helper = new ModelTestHelper(60000, 'index-pattern', 'title', 'idx');
 
   describe('IndexPatternModel', function () {
 

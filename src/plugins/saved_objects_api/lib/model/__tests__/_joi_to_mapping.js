@@ -11,6 +11,7 @@ describe('saved_objects_api', function () {
       it('should convert a Joi schema to Elasticsearch mapping properties.', function () {
         const schema = Joi.object().keys({
           id: Joi.number().integer(),
+          johnson: Joi.number(),
           done: Joi.boolean(),
           title: Joi.string(),
           created: Joi.date(),
@@ -26,6 +27,9 @@ describe('saved_objects_api', function () {
         expect(joiToMapping(schema)).to.eql({
           id: {
             type: 'integer'
+          },
+          johnson: {
+            type: 'long'
           },
           done: {
             type: 'boolean'
@@ -58,7 +62,7 @@ describe('saved_objects_api', function () {
 
       it('should throw an error if a Joi type is not recognized.', function () {
         const schema = Joi.object().keys({
-          id: Joi.number()
+          id: Joi.any()
         });
 
         expect(() => {joiToMapping(schema);}).to.throwError();

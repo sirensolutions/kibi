@@ -59,7 +59,7 @@ export default class Model {
     if (await this.hasMappings()) {
       return;
     }
-    let body = {};
+    const body = {};
     body[this._type] = {
       properties: joiToMapping(this.schema)
     };
@@ -75,7 +75,7 @@ export default class Model {
    */
   async hasMappings() {
     if (!this.schema) {
-      return;
+      return true;
     }
     const mappings = await this._client.indices.getMapping({
       index: this._config.get('kibana.index'),

@@ -22,9 +22,9 @@ describe('Kibi Components', function () {
 
     describe('DELAY_STRATEGY.RESET_COUNTER_ON_NEW_EVENT', function () {
 
-      // e1   destroy    X
+      // e1   cancel     X
       //  |___delay______|
-      it('1 event and then destroy before "delay" - should not trigger any callback', function (done) {
+      it('1 event and then cancel before "delay" - should not trigger any callback', function (done) {
         var actuallData = [];
         var executionCounter = 0;
         var helper = new DelayExecutionHelper(
@@ -38,10 +38,10 @@ describe('Kibi Components', function () {
         );
 
         helper.addEventData(['id1']);
-        // trigger destroy
+        // trigger cancel
         // t < delay
         setTimeout(function () {
-          helper.destroy();
+          helper.cancel();
         }, 50);
 
         setTimeout(function () {
@@ -169,9 +169,9 @@ describe('Kibi Components', function () {
 
     describe('DELAY_STRATEGY.DO_NOT_RESET_COUNTER_ON_NEW_EVENT', function () {
 
-      // e1   destroy    X
+      // e1   cancel     X
       //  |___delay______|
-      it('1 event and then destroy before "delay" - should not trigger any callback', function (done) {
+      it('1 event and then cancel before "delay" - should not trigger any callback', function (done) {
         var actuallData = [];
         var executionCounter = 0;
         var helper = new DelayExecutionHelper(
@@ -185,10 +185,10 @@ describe('Kibi Components', function () {
         );
 
         helper.addEventData(['id1']);
-        // trigger destroy
+        // trigger cancel
         // t < delay
         setTimeout(function () {
-          helper.destroy();
+          helper.cancel();
         }, 50);
 
         setTimeout(function () {

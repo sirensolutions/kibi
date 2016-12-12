@@ -38,7 +38,7 @@ define(function (require) {
     }, this.delayTime);
   };
 
-  DelayExecutionHelper.prototype.destroy = function () {
+  DelayExecutionHelper.prototype.cancel = function () {
     this.data = {};
     if (this.timeout) {
       clearTimeout(this.timeout);

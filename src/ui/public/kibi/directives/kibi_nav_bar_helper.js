@@ -237,7 +237,7 @@ define(function (require) {
       });
     };
 
-    KibiNavBarHelper.prototype.cancelExecutorInProgress = function () {
+    KibiNavBarHelper.prototype.cancelExecutionInProgress = function () {
       if (this.delayExecutionHelper) {
         this.delayExecutionHelper.cancel();
       }

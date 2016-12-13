@@ -134,7 +134,7 @@ define(function (require) {
       };
 
       $rootScope.$listen(globalState, 'save_with_changes', (diff) => updateCountsOnGlobalStateChange.call(this, diff));
-      this.removeGetAppStateHandler = $rootScope.$watch(getAppState, (as) => {
+      $rootScope.$watch(getAppState, (as) => {
         if (as) {
           this.appState = as;
           $rootScope.$listen(this.appState, 'save_with_changes', (diff) => updateCountsOnAppStateChange.call(this, diff));
@@ -148,7 +148,7 @@ define(function (require) {
       // everywhere use this event !!! to be consistent
       // make a comment that it was required because not all components can listen to
       // esResponse
-      this.removeAutorefreshHandler = $rootScope.$on('courier:searchRefresh', (event) => {
+      $rootScope.$on('courier:searchRefresh', (event) => {
         const currentDashboard = kibiState._getCurrentDashboardId();
         if (!currentDashboard) {
           return;
@@ -218,17 +218,10 @@ define(function (require) {
       });
     };
 
-    KibiNavBarHelper.prototype.destroy = function () {
+    KibiNavBarHelper.prototype.cancelExecutionInProgress = function () {
       if (this.delayExecutionHelper) {
-        this.delayExecutionHelper.destroy();
+        this.delayExecutionHelper.cancel();
       }
-      if (this.removeGetAppStateHandler) {
-        this.removeGetAppStateHandler();
-      }
-      if (this.removeAutorefreshHandler) {
-        this.removeAutorefreshHandler();
-      }
-      this.appState = null;
     };
 
     KibiNavBarHelper.prototype.getDashboardGroups = function () {

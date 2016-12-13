@@ -124,9 +124,9 @@ define(function (require) {
         });
 
         $scope.$on('$destroy', function () {
+          kibiNavBarHelper.cancelExecutionInProgress();
           removeInitConfigHandler();
           removeRelationalPanelHandler();
-          kibiNavBarHelper.destroy();
           removeDashboardGroupChangedHandler();
           removeInitConfigHandler();
           removeDashboardChangedHandler();

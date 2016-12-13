@@ -100,6 +100,7 @@ define(function (require) {
 
         const queryFilter = Private(require('ui/filter_bar/query_filter'));
 
+        // kibi: const used for update tab count on filters changes
         const kibiNavBarHelper = Private(require('ui/kibi/directives/kibi_nav_bar_helper'));
 
         const notify = createNotifier({
@@ -282,9 +283,10 @@ define(function (require) {
 
         // update root source when filters update
         $scope.$listen(queryFilter, 'update', function () {
-          kibiNavBarHelper.updateAllCounts(null, 'filters change');
           updateQueryOnRootSource();
           $state.save();
+          // kibi: update tab count on filters changes
+          kibiNavBarHelper.updateAllCounts(null, 'filters change');
         });
 
         // update data when filters fire fetch event

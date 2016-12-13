@@ -198,3 +198,6 @@ include::graph_browser.asciidoc[]
 include::box_plot.asciidoc[]
 
 include::bubble_diagram.asciidoc[]
+
+include::scatter_plot.asciidoc[]
+

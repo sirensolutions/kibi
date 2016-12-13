@@ -26,7 +26,11 @@ define(function (require) {
       rtn += formatMsg.describeError(err);
     } else if (has(err, 'status') && has(err, 'data')) {
       // is an Angular $http "error object"
-      rtn += 'Error ' + err.status + ' ' + err.statusText + ': ' + err.data.message;
+      if (!err.data) {
+        rtn += 'An error occurred while performing a request, please check your connection.';
+      } else {
+        rtn += 'Error ' + err.status + ' ' + err.statusText + ': ' + err.data.message;
+      }
     } else if (has(err, 'options') && has(err, 'response')) {
       // kibi: added to handle request-promise errors
       rtn += formatMsg.describeRequestPromiseError(err);

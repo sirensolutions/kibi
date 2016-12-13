@@ -19,6 +19,7 @@ define(function (require) {
     const chrome = require('ui/chrome');
     const ResizeChecker = Private(require('ui/vislib/lib/resize_checker'));
     const kibiNavBarHelper = Private(require('ui/kibi/directives/kibi_nav_bar_helper'));
+    const queryFilter = Private(require('ui/filter_bar/query_filter'));
 
     return {
       restrict: 'E',
@@ -113,6 +114,10 @@ define(function (require) {
         var removeDashboardGroupChangedHandler = $rootScope.$on('kibi:dashboardgroup:changed', function () {
           updateTabScroller();
           kibiNavBarHelper.computeDashboardsGroups('Dashboard group changed');
+        });
+
+        $scope.$listen(queryFilter, 'update', function () {
+          kibiNavBarHelper.updateAllCounts(null, 'filters change');
         });
 
         $scope.$on('$destroy', function () {

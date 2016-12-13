@@ -100,6 +100,8 @@ define(function (require) {
 
         const queryFilter = Private(require('ui/filter_bar/query_filter'));
 
+        const kibiNavBarHelper = Private(require('ui/kibi/directives/kibi_nav_bar_helper'));
+
         const notify = createNotifier({
           location: 'Dashboard'
         });
@@ -280,6 +282,7 @@ define(function (require) {
 
         // update root source when filters update
         $scope.$listen(queryFilter, 'update', function () {
+          kibiNavBarHelper.updateAllCounts(null, 'filters change');
           updateQueryOnRootSource();
           $state.save();
         });

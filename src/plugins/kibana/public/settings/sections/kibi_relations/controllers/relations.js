@@ -880,9 +880,23 @@ define(function (require) {
     };
     $($window).on('beforeunload', onBeforeUnload);
 
+    const cancelLogoutHandler = $rootScope.$on('kibi_access_control:logout', function (event) {
+      if (!$scope.changed) {
+        return;
+      }
+      if ($window.confirm('There are unsaved changes to the relational configuration,' +
+                          ' are you sure you want to logout?') === false) {
+        event.preventDefault();
+        return;
+      }
+      $($window).off('beforeunload', onBeforeUnload);
+      cancelRouteChangeHandler();
+    });
+
     $scope.$on('$destroy', function () {
       $($window).off('beforeunload', onBeforeUnload);
       cancelRouteChangeHandler();
+      cancelLogoutHandler();
       indicesGraphExportOff();
       dashboardsGraphExportOff();
     });

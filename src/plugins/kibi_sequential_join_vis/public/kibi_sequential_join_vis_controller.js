@@ -26,6 +26,7 @@ define(function (require) {
     const relationsHelper = Private(require('ui/kibi/helpers/relations_helper'));
     const kibiSequentialJoinVisHelper = Private(require('ui/kibi/helpers/kibi_sequential_join_vis_helper'));
     const currentDashboardId = kibiState._getCurrentDashboardId();
+    const queryFilter = Private(require('ui/filter_bar/query_filter'));
 
     if (!kibiState.isSirenJoinPluginInstalled()) {
       notify.error('This version of Kibi Relational filter requires the SIREn Join plugin. Please install it and restart Kibi.');
@@ -239,6 +240,10 @@ define(function (require) {
         return;
       }
       updateButtons.call(this, 'AppState changes');
+    });
+
+    $scope.$listen(queryFilter, 'update', function () {
+      updateButtons.call(this, 'filters change');
     });
 
     $scope.$listen(globalState, 'save_with_changes', function (diff) {

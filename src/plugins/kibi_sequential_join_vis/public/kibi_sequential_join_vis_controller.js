@@ -269,7 +269,7 @@ define(function (require) {
     });
 
     $scope.$on('$destroy', function () {
-      delayExecutionHelper.destroy();
+      delayExecutionHelper.cancel();
       kibiDashboardChangedOff();
       removeAutorefreshHandler();
     });

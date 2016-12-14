@@ -83,3 +83,4 @@ The X and Y values are taken from _Filters_ aggregation results.
 After changing options, click the green *Apply changes* button to update your visualization, or the grey *Discard
 changes* button to keep your visualization in its current state.
 
+endif::[]

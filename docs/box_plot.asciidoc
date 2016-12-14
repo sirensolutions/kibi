@@ -1,0 +1,33 @@
+[[kibi_box_plot]]
+=== Kibi Box Plot [Enterprise Edition only]
+
+ifeval::["{enterprise_enabled}" == "false"]
+  NOTE: Documentation for Kibi Box Plot is available only in Kibi Enterprise Edition.
+endif::[]
+
+ifeval::["{enterprise_enabled}" == "true"]
+
+This visualization displays a box plot chart from the data in the current set of Elasticsearch documents.
+
+NOTE: Kibi Box Plot is available only in Kibi Enterprise Edition.
+
+[float]
+==== Usage
+
+Please make sure that you have:
+
+ * One *Percetiles* metric, with three Percentiles defined:
+ ** Bottom Percentile (Usually around 25%)
+ ** Mean (Usually around 50%)
+ ** Top Percentile (Usually around 75%)
+ * One *Max* metric
+ * One *Min* metric
+ * One *Count* metric (*Optional*)
+ * One *Aggregation* (*Optional*)
+
+Also check global filters and time filters.
+
+After changing options, click the green *Apply changes* button to update your visualization, or the grey *Discard
+changes* button to keep your visualization in its current state.
+
+endif::[]

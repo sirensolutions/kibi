@@ -1,0 +1,93 @@
+[[bubble_diagram]]
+
+=== Bubble Diagram [Enterprise Edition only]
+
+ifeval::["{enterprise_enabled}" == "false"]
+  NOTE: Documentation for Kibi Bubble Diagram is available only in Kibi
+  Enterprise Edition.
+endif::[]
+
+ifeval::["{enterprise_enabled}" == "true"]
+
+The Bubble Diagram visualization displays series of data grouped into balls.
+
+image::images/bubble_diagram/first_image.png["First",align="center"]
+
+[float]
+==== Metrics
+
+The radius of balls depends of the type of metric aggregations.
+
+*Count*:: The {elastic-ref}/search-aggregations-metrics-valuecount-aggregation.html[_count_] aggregation returns a raw count of
+the elements in the selected index pattern.
+*Average*:: This aggregation returns the {elastic-ref}/search-aggregations-metrics-avg-aggregation.html[_average_] of a numeric
+field. Select a field from the drop-down.
+*Sum*:: The {elastic-ref}/search-aggregations-metrics-sum-aggregation.html[_sum_] aggregation returns the total sum of a numeric
+field. Select a field from the drop-down.
+*Min*:: The {elastic-ref}/search-aggregations-metrics-min-aggregation.html[_min_] aggregation returns the minimum value of a
+numeric field. Select a field from the drop-down.
+*Max*:: The {elastic-ref}/search-aggregations-metrics-max-aggregation.html[_max_] aggregation returns the maximum value of a
+numeric field. Select a field from the drop-down.
+*Unique Count*:: The {elastic-ref}/search-aggregations-metrics-cardinality-aggregation.html[_cardinality_] aggregation returns
+the number of unique values in a field. Select a field from the drop-down.
+
+[float]
+===== Buckets Aggregations
+
+The _buckets_ aggregations determine what and how many information you want see.
+
+You can do two query in the same time.
+In the first aggregation it will create the parents,in the second aggregation it will create the children.
+
+The difference between parents and children lies in the style of the labels and in the balls.
+For the parents the labels are written in bold and the contour of the circles are more often.
+
+The parents bubbles are divide by colors.
+If you do a subquery (children) you will see a bubbles divide by family.
+Children with the same parent have the same colors and they are near.
+Families are united. If you drag a bubble, all family follow this.
+
+image::images/bubble_diagram/all_bubbles.png["Node Icon configuration",align="center"]
+
+
+[float]
+==== Options
+
+In the diagram there are three options
+
+image::images/bubble_diagram/options.png["Node Icon configuration",align="center"]
+
+*Show Parents*:: You can see the parents bubbles in the subquery and if you do a filters.
+
+*Hidden Label*:: You can hidden the labels in the circles.
+
+*Enable Zoom*:: You enable the zoom on the page to see better the circles and the labels.
+
+[float]
+==== Balls movements
+
+When you drag a ball, his family follow him.
+When you leave the ball, this and his family connected back to the center.
+
+image::images/bubble_diagram/move.png["Node Icon configuration",align="center"]
+
+If you pass across the bubble with the mouse, come out the information of the circle.
+
+image::images/bubble_diagram/table.png["Table",align="center"]
+
+[float]
+==== Filters
+
+You can do the filter on every ball.
+
+If you click twice on a bubble, the diagram filtered.
+
+In case the bubble is a child you will see the filtered single bubble.
+
+image::images/bubble_diagram/filter_child.png["Filter Child",align="center"]
+
+If the bubble is a parent you will see the filtered family.
+
+image::images/bubble_diagram/filter_parents.png["Filter Parents",align="center"]
+
+endif::[]

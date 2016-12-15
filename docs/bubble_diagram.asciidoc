@@ -42,7 +42,7 @@ In the first aggregation it will create the parents,in the second aggregation it
 The difference between parents and children lies in the style of the labels and in the balls.
 For the parents the labels are written in bold and the contour of the circles are more often.
 
-The parents bubbles are divide by colors.
+The parents bubbles are divided by colors.
 If you do a subquery (children) you will see a bubbles divide by family.
 Children with the same parent have the same colors and they are near.
 Families are united. If you drag a bubble, all family follow this.
@@ -71,7 +71,7 @@ When you leave the ball, this and his family connected back to the center.
 
 image::images/bubble_diagram/move.png["Node Icon configuration",align="center"]
 
-If you pass across the bubble with the mouse, come out the information of the circle.
+If you pass across the bubble with the mouse, come out his information.
 
 image::images/bubble_diagram/table.png["Table",align="center"]
 

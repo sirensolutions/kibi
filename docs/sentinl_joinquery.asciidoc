@@ -1,24 +1,28 @@
 [[sentinl_joinquery]]
 == Sentinl
 
-**SENTINL** extends Kibi/Kibana with Alerting and Reporting functionality to monitor, notify and report on data series changes using standard queries,
+**Sentinl** extends Kibi/Kibana with Alerting and Reporting functionality to monitor, notify and report on data series changes using standard queries,
 programmable validators and a variety of configurable actions.
 
-**SENTINL** is also designed to simplify the process of creating and managing alerts and reports in Kibi/Kibana via its integrated App and Spy integration.
+Sentinl is also designed to simplify the process of creating and managing alerts and reports in Kibi/Kibana via its integrated App and Spy integration.
 
-NOTE: Public documentation for Sentinl is available at this link: https://github.com/sirensolutions/sentinl/wiki.
+NOTE: Public documentation for Sentinl is available https://github.com/sirensolutions/sentinl/wiki[here].
 
 === Join query:
 
 ifeval::["{enterprise_enabled}" == "false"]
 Join Query in Sentinl are available only in the Enterprise Edition.
+
+NOTE: If you want to read more about join query, this is the https://github.com/sirensolutions/siren-join[documentation].
+
 endif::[]
 
 ifeval::["{enterprise_enabled}" == "true"]
 
-Kibi Enterprise extends Sentinl functions to support Join Queries. Here is an example of Join query:
+Kibi extends Sentinl functions to support Join Queries. Here is an example of a Join query:
 
-``` json
+[source,json]
+----
 "query": {
   "filtered": {
     "query": {
@@ -66,27 +70,29 @@ Kibi Enterprise extends Sentinl functions to support Join Queries. Here is an ex
     }
   }
 }
-```
+----
 
 With Join query you can match values from different indexes and return all the matches.
 The core of the query is the field "filterjoin", where you define which is the field to use in the join and which is the target index with its field.
 The source index is defined above, in the "request" field.
 
-``` json
+[source,json]
+----
 "search": {
   "request": {
     "index": [
       "source-index-name"
     ],
     ...
-```
+----
 
 Like normal watchers, when a join query is executed, a new alarm is generated.
 You can see its body in the alarm page.
 
 Here a generic anatomy of a response:
 
-``` json
+[source,json]
+----
 {
   "@timestamp": "2016-12-13T15:01:01.707Z",
   "level": "high",
@@ -132,6 +138,8 @@ Here a generic anatomy of a response:
       "hits": []
     },
     //the list of matches
-```
+----
+
+NOTE: If you want to read more about join query, this is the https://github.com/sirensolutions/siren-join[documentation].
 
 endif::[]

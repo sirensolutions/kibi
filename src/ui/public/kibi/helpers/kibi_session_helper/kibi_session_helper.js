@@ -3,7 +3,7 @@ define(function (require) {
 
   return function KibiSessionHelperFactory($rootScope, $cookies, savedSessions, Promise, config, kibiState, createNotifier) {
 
-    var notify = createNotifier({
+    const notify = createNotifier({
       location: 'KibiSessionHelper'
     });
 
@@ -24,7 +24,7 @@ define(function (require) {
     }
 
     KibiSessionHelper.prototype.init = function () {
-      var self = this;
+      const self = this;
       if (self.initialized) {
         return Promise.resolve(self.id);
       } else {
@@ -49,18 +49,18 @@ define(function (require) {
           });
 
           self.destroyListener2 = $rootScope.$on('$routeChangeSuccess', function () {
-            var s = kibiState.getSessionId();
-            if (!s) {
+            const sessionId = kibiState.getSessionId();
+            if (!sessionId) {
               // no sesion id
               kibiState.setSessionId(self.id);
               kibiState.save();
             }
-            if (s !== self.id) {
-              self._copySessionFromTo(s, self.id).catch(notify.warning);
+            if (sessionId !== self.id) {
+              self._copySessionFromTo(sessionId, self.id).catch(notify.warning);
             }
           });
 
-          var cookieId = $cookies.get('ksid');
+          const cookieId = $cookies.get('ksid');
           if (cookieId) {
             self.id = cookieId;
           } else {
@@ -68,8 +68,8 @@ define(function (require) {
             $cookies.put('ksid', self.id, {expires: self._getExpiresDate()});
           }
 
-          var s = kibiState.getSessionId();
-          if (!s || s !== self.id) {
+          const sessionId = kibiState.getSessionId();
+          if (!sessionId || sessionId !== self.id) {
             // no sesion id
             kibiState.setSessionId(self.id);
             kibiState.save();
@@ -79,8 +79,8 @@ define(function (require) {
             savedSessions.get(self.id).then(function (savedSession) {
               // make sure to always sync it first
               self.savedSession = savedSession;
-              if (s !== self.id) {
-                self._copySessionFromTo(s, self.id).then(function () {
+              if (sessionId !== self.id) {
+                self._copySessionFromTo(sessionId, self.id).then(function () {
                   _initDone.apply(self);
                   fulfill(self.id);
                 }).catch(function (err) {
@@ -101,8 +101,8 @@ define(function (require) {
                 savedSession.timeCreated = new Date();
                 self.savedSession = savedSession;
                 return self._syncToIndex(savedSession).then(function () {
-                  if (s !== self.id) {
-                    self._copySessionFromTo(s, self.id).then(function () {
+                  if (sessionId !== self.id) {
+                    self._copySessionFromTo(sessionId, self.id).then(function () {
                       _initDone.apply(self);
                       fulfill(self.id);
                     }).catch(function (err) {
@@ -123,7 +123,7 @@ define(function (require) {
     };
 
     KibiSessionHelper.prototype._getExpiresDate = function () {
-      var d = new Date();
+      const d = new Date();
       d.setTime(d.getTime() + (config.get('kibi:session_cookie_expire') * 1000));
       return d;
     };
@@ -132,7 +132,7 @@ define(function (require) {
     // starts with a letter.
     KibiSessionHelper.prototype._generateId = function () {
       return 'gxxxxxxxxxx'.replace(/[x]/g, function (c) {
-        var r = Math.random() * 16 | 0;
+        const r = Math.random() * 16 | 0;
         return r.toString(16);
       });
     };
@@ -174,7 +174,7 @@ define(function (require) {
     };
 
     KibiSessionHelper.prototype._syncToIndex = function (savedSession) {
-      var self = this;
+      const self = this;
       return new Promise(function (fulfill, reject) {
         savedSession.timeUpdated = new Date();
         savedSession.save(true).then(function () {
@@ -197,14 +197,19 @@ define(function (require) {
       if (_.isFunction(this.destroyListener2)) {
         this.destroyListener2();
       }
+      kibiState.deleteSessionId();
+      kibiState.save();
     };
 
     KibiSessionHelper.prototype._copySessionFromTo = function (fromId, toId) {
-      var self = this;
+      if (!fromId || !toId) {
+        return Promise.resolve();
+      }
+
       return Promise.all([savedSessions.get(toId), savedSessions.get(fromId)]).then(([toSavedSession, fromSavedSession]) => {
         toSavedSession.session_data = fromSavedSession.session_data;
-        self.savedSession = toSavedSession;
-        return self._syncToIndex(toSavedSession);
+        this.savedSession = toSavedSession;
+        return this._syncToIndex(toSavedSession);
       });
     };
 

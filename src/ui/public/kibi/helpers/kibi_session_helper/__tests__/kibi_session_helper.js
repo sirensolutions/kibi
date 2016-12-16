@@ -1,24 +1,25 @@
-var expect = require('expect.js');
-var ngMock = require('ngMock');
-var Promise = require('bluebird');
-var sinon = require('auto-release-sinon');
+const expect = require('expect.js');
+const ngMock = require('ngMock');
+const Promise = require('bluebird');
+const sinon = require('auto-release-sinon');
 
-var kibiSessionHelper;
-var globalState;
-var $cookies;
-var $rootScope;
+let kibiSessionHelper;
+let globalState;
+let $cookies;
+let $rootScope;
+let kibiState;
 
-var saveSessionCounter;
-var getSaveSessionCounter;
-var deleteSessionCounter;
+let saveSessionCounter;
+let getSaveSessionCounter;
+let deleteSessionCounter;
 
-var resetCounters = function () {
+const resetCounters = function () {
   saveSessionCounter = 0;
   getSaveSessionCounter = 0;
   deleteSessionCounter = 0;
 };
 
-var savedSessionsMocks = {
+const savedSessionsMocks = {
   putget: {
     id: 'putget'
   },
@@ -34,7 +35,7 @@ var savedSessionsMocks = {
   }
 };
 
-var makeSureKibiSessionHelperInitialized = function (kibiSessionHelper) {
+const makeSureKibiSessionHelperInitialized = function (kibiSessionHelper) {
   if (kibiSessionHelper.initialized) {
     return Promise.resolve(true);
   } else {
@@ -47,7 +48,6 @@ var makeSureKibiSessionHelperInitialized = function (kibiSessionHelper) {
     });
   }
 };
-
 
 describe('Kibi Components', function () {
   describe('KibiSessionHelper', function () {
@@ -64,7 +64,7 @@ describe('Kibi Components', function () {
           return {
             get: function (id) {
               getSaveSessionCounter++;
-              var mock;
+              let mock;
               if (id === undefined) {
                 mock = {
                   id: undefined
@@ -92,7 +92,8 @@ describe('Kibi Components', function () {
         });
       });
 
-      ngMock.inject(function ($injector, Private, _$cookies_,  _$rootScope_, _globalState_, _$location_) {
+      ngMock.inject(function (_kibiState_, Private, _$cookies_,  _$rootScope_, _globalState_) {
+        kibiState = _kibiState_;
         $rootScope = _$rootScope_;
         $cookies = _$cookies_;
         globalState = _globalState_;
@@ -103,7 +104,7 @@ describe('Kibi Components', function () {
     describe('getId', function () {
 
       it('getId when there is: no cookie, no session in es', function (done) {
-        var expectedId = 'does_not_exist';
+        const expectedId = 'does_not_exist';
         sinon.stub(kibiSessionHelper, '_generateId', function () {
           return expectedId;
         });
@@ -122,7 +123,7 @@ describe('Kibi Components', function () {
       });
 
       it('getId when there is: a cookie, no session in es', function (done) {
-        var expectedId = 'does_not_exist';
+        const expectedId = 'does_not_exist';
         sinon.stub(kibiSessionHelper, '_generateId', function () {
           return expectedId;
         });
@@ -142,7 +143,7 @@ describe('Kibi Components', function () {
       });
 
       it('getId when there is: a cookie and session exists in es', function (done) {
-        var expectedId = 'exists';
+        const expectedId = 'exists';
         sinon.stub(kibiSessionHelper, '_generateId', function () {
           return expectedId;
         });
@@ -165,8 +166,19 @@ describe('Kibi Components', function () {
 
     describe('copySessionFrom', function () {
 
+      it('should not copy anything if either session is undefined', function (done) {
+        return Promise.all([
+          kibiSessionHelper._copySessionFromTo('', 'toId'),
+          kibiSessionHelper._copySessionFromTo('fromId', '')
+        ])
+        .then(function () {
+          expect(saveSessionCounter).to.be(0);
+          done();
+        }).catch(done);
+      });
+
       it('copy', function (done) {
-        var expectedId = 'toId';
+        const expectedId = 'toId';
         sinon.stub(kibiSessionHelper, '_generateId', function () {
           return expectedId;
         });
@@ -186,12 +198,12 @@ describe('Kibi Components', function () {
       });
 
       it('destroy', function (done) {
-
         makeSureKibiSessionHelperInitialized(kibiSessionHelper).then(function () {
           kibiSessionHelper.id = 'A';
           $cookies.put('ksid', 'A');
           kibiSessionHelper.destroy();
 
+          expect(kibiState.getSessionId()).to.be(undefined);
           return kibiSessionHelper.getId().then(function (sessionId) {
             expect(sessionId).not.eql('A');
             expect($cookies.get('ksid')).not.eql('A');
@@ -205,8 +217,8 @@ describe('Kibi Components', function () {
     describe('get put ', function () {
 
       it('saved data should equal retrieved data - there is no cookie - forced save', function (done) {
-        var expectedId = 'putget';
-        var testData = {secret: 1};
+        const expectedId = 'putget';
+        const testData = {secret: 1};
         sinon.stub(kibiSessionHelper, '_generateId', function () {
           return expectedId;
         });
@@ -226,8 +238,8 @@ describe('Kibi Components', function () {
       });
 
       it('saved data should equal retrieved data - there is cookie - forced save', function (done) {
-        var expectedId = 'putget';
-        var testData = {secret: 1};
+        const expectedId = 'putget';
+        const testData = {secret: 1};
 
         makeSureKibiSessionHelperInitialized(kibiSessionHelper).then(function () {
           resetCounters();
@@ -245,8 +257,8 @@ describe('Kibi Components', function () {
       });
 
       it('saved data should equal retrieved data - there is no cookie', function (done) {
-        var expectedId = 'putget';
-        var testData = {secret: 1};
+        const expectedId = 'putget';
+        const testData = {secret: 1};
         sinon.stub(kibiSessionHelper, '_generateId', function () {
           return expectedId;
         });
@@ -266,8 +278,8 @@ describe('Kibi Components', function () {
       });
 
       it('saved data should equal retrieved data - there is cookie', function (done) {
-        var expectedId = 'putget';
-        var testData = {secret: 1};
+        const expectedId = 'putget';
+        const testData = {secret: 1};
 
         makeSureKibiSessionHelperInitialized(kibiSessionHelper).then(function () {
           resetCounters();
@@ -289,9 +301,9 @@ describe('Kibi Components', function () {
     describe('recreate session when deleted by', function () {
 
       it('emit kibi:session:changed:deleted', function (done) {
-        var expectedId1 = 'expectedId1';
-        var expectedId2 = 'expectedId2';
-        var counter = 1;
+        const expectedId1 = 'expectedId1';
+        const expectedId2 = 'expectedId2';
+        let counter = 1;
         sinon.stub(kibiSessionHelper, '_generateId', function () {
           if (counter === 1) {
             counter++;
@@ -310,8 +322,8 @@ describe('Kibi Components', function () {
           return kibiSessionHelper.getId().then(function (sessionId1) {
             expect(sessionId1).to.equal(expectedId1);
             // now set up spys and emit event
-            var destroySpy = sinon.spy(kibiSessionHelper, 'destroy');
-            var initSpy = sinon.spy(kibiSessionHelper, 'init');
+            const destroySpy = sinon.spy(kibiSessionHelper, 'destroy');
+            const initSpy = sinon.spy(kibiSessionHelper, 'init');
             $rootScope.$emit('kibi:session:changed:deleted', expectedId1);
 
             setTimeout(function () {

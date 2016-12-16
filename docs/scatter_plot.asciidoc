@@ -8,7 +8,7 @@ endif::[]
 ifeval::["{enterprise_enabled}" == "true"]
 
 This visualization displays a scatter plot chart
-in four different modes: _Straight_, _Significant terms_, _Any aggregator_, _Filtered aggregator_)
+in four different modes: _Straight_, _Significant terms_, _Any aggregator_, _Filtered aggregator_
 
 NOTE: Kibi Scatter Plot is available only in Kibi Enterprise Edition.
 
@@ -30,7 +30,7 @@ a data set of height versus weight has a relatively narrow range of variability 
 range at the taller end, the data set is heteroscedastic.
  * *Y axis scale* - You can select *linear*, *log*, or *square root* scales for the chart's Y axis.
  * *Jitter field* - Deterministic jitter to add pseudo random data distribution in the X axis data interval. Jitter is useful
-for distribute the values across x axis. Doing so allow to show the data distributed across the bucket, in that way the dot is more visible.
+for distributing the values across X axis. Doing so allows to show the data distributed across the bucket, in that way the dot is more visible.
  * *Jitter scale* - You can select *linear*, *log*, or *square root* scales for the Jitter.
  * *Label* - A label for the dot.
  ** *Display label* - Check this box to enable the display of a label next to the dot.
@@ -48,7 +48,7 @@ for distribute the values across x axis. Doing so allow to show the data distrib
 image::images/scatter_plot/significant_terms_mode.png["Significant term",align="center"]
 
 In this mode the chart is built from a _Significant terms_ aggregation query result.
-The X values is taken from the *bg_count* field and the Y values from *doc_count* field.
+The X values are taken from the *bg_count* field and the Y values from *doc_count* field.
 
  * *Field* - the field which will provide terms to be aggregated.
  * *Size* - the number of significant terms to be aggregated.

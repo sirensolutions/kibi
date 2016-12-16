@@ -8,7 +8,7 @@ Sentinl is also designed to simplify the process of creating and managing alerts
 
 NOTE: Public documentation for Sentinl is available https://github.com/sirensolutions/sentinl/wiki[here].
 
-=== Join query:
+=== Join query
 
 ifeval::["{enterprise_enabled}" == "false"]
 Join Query in Sentinl are available only in the Enterprise Edition.
@@ -89,7 +89,7 @@ The source index is defined above, in the "request" field.
 Like normal watchers, when a join query is executed, a new alarm is generated.
 You can see its body in the alarm page.
 
-Here a generic anatomy of a response:
+Here is a generic anatomy of a response:
 
 [source,json]
 ----
@@ -138,6 +138,8 @@ Here a generic anatomy of a response:
       "hits": []
     },
     //the list of matches
+  }
+}
 ----
 
 NOTE: If you want to read more about join query, this is the https://github.com/sirensolutions/siren-join[documentation].

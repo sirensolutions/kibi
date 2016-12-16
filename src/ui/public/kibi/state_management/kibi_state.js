@@ -244,6 +244,10 @@ define(function (require) {
       delete this[this._properties.test_selected_entity];
     };
 
+    KibiState.prototype.deleteSessionId = function (id) {
+      delete this[this._properties.session_id];
+    };
+
     KibiState.prototype.setSessionId = function (id) {
       this[this._properties.session_id] = id;
     };

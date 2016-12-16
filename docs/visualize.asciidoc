@@ -51,7 +51,7 @@ dashboard.
 saved searches on a single timeline component.
 <<radar_chart, Radar Chart>>:: Display multivariate data with a two-dimensional chart.
 <<graph_browser, Kibi Graph Browser*>>:: Displays a graph visualization starting from a selected document
-<<bubble_diagram, Kibi Bubble Diagram*>>:: The Bubble Diagram visualization displays series of data grouped into balls
+<<bubble_diagram, Kibi Bubble Diagram*>>:: The Bubble Diagram visualization displays series of data grouped into packed circles.
 
 NOTE: *: available only in Kibi Enterprise Edition.
 

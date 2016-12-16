@@ -9,7 +9,7 @@ endif::[]
 
 ifeval::["{enterprise_enabled}" == "true"]
 
-The Bubble Diagram visualization displays series of data grouped into balls.
+The Bubble Diagram visualization displays series of data grouped into packed circles.
 
 image::images/bubble_diagram/first_image.png["First",align="center"]
 
@@ -34,18 +34,18 @@ the number of unique values in a field. Select a field from the drop-down.
 [float]
 ===== Buckets Aggregations
 
-The _buckets_ aggregations determine what and how many information you want see.
+The _buckets_ aggregations determine what information will come out in the diagram.
 
 You can do two query in the same time.
-In the first aggregation it will create the parents,in the second aggregation it will create the children.
+The first aggregation will create the parent circles, while the second aggregation will create the children circles.
 
 The difference between parents and children lies in the style of the labels and in the balls.
 For the parents the labels are written in bold and the contour of the circles are more often.
 
 The parents bubbles are divided by colors.
 If you do a subquery (children) you will see a bubbles divide by family.
-Children with the same parent have the same colors and they are near.
-Families are united. If you drag a bubble, all family follow this.
+Children are located near the parent and all have same color.
+Families are united. If you drag a bubble,  all members of the family will drag along.
 
 image::images/bubble_diagram/all_bubbles.png["Node Icon configuration",align="center"]
 
@@ -59,28 +59,27 @@ image::images/bubble_diagram/options.png["Node Icon configuration",align="center
 
 *Show Parents*:: You can see the parents bubbles in the subquery and if you do a filters.
 
-*Hidden Label*:: You can hidden the labels in the circles.
+*Hidden Label*::  If checked hides the labels.
 
-*Enable Zoom*:: You enable the zoom on the page to see better the circles and the labels.
+*Enable Zoom*:: Enables zoom on the page. To use the zoom you have to use the mouse wheel.
 
 [float]
 ==== Balls movements
 
-When you drag a ball, his family follow him.
-When you leave the ball, this and his family connected back to the center.
+All balls gravitates towards the center of the visualisation.
+
+When you drag a ball, its family follows.
 
 image::images/bubble_diagram/move.png["Node Icon configuration",align="center"]
 
-If you pass across the bubble with the mouse, come out his information.
+When you hover over a ball a detail information is shown in a tooltip.
 
 image::images/bubble_diagram/table.png["Table",align="center"]
 
 [float]
 ==== Filters
 
-You can do the filter on every ball.
-
-If you click twice on a bubble, the diagram filtered.
+You can create filters by double-clicking on balls.
 
 In case the bubble is a child you will see the filtered single bubble.
 

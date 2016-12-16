@@ -8,7 +8,7 @@ endif::[]
 ifeval::["{enterprise_enabled}" == "true"]
 
 This visualization displays a scatter plot chart
-in four different modes: _Straight_, _Significant terms_, _Any aggregator_, _Filtered aggregator_
+in four different modes: _Straight_, _Significant terms_, _Any aggregator_, _Filtered aggregator_.
 
 NOTE: Kibi Scatter Plot is available only in Kibi Enterprise Edition.
 

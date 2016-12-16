@@ -193,3 +193,5 @@ include::timeline.asciidoc[]
 include::radar_chart.asciidoc[]
 
 include::graph_browser.asciidoc[]
+
+include::box_plot.asciidoc[]

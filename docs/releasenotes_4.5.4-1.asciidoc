@@ -1,4 +1,4 @@
-=== Kibi 4.5.4 Release Notes
+=== Kibi 4.5.4-1 Release Notes
 
 The 4.5.4-1 release of Kibi requires Elasticsearch 2.3 or later.
 
@@ -7,8 +7,8 @@ The 4.5.4-1 release of Kibi requires Elasticsearch 2.3 or later.
 * Fixed - upgradeable configurations were not correctly sorted
 * Fixed - outdated filters in the state were not correctly handled
 * Fixed - the relational panel tab was enabled even if relational panel was disabled
-* Fixed - source and target dashboards in relational button configuration where filtered incorrectly
-* Fixed - handling of an authorization errors when computing indices in navbar helper and relational sequence buttons
+* Fixed - source and target dashboards in relational button configuration were filtered incorrectly
+* Fixed - handling of authorization errors when computing indices in navbar helper and relational sequence buttons
 * Fixed - nested join_sequence creation
 * Fixed - negated joins creation by enclosing the complete query in a must clause
 * Fixed - listen to config events to correctly set the relational filter visible

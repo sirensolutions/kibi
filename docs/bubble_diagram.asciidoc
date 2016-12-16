@@ -3,8 +3,7 @@
 === Bubble Diagram [Enterprise Edition only]
 
 ifeval::["{enterprise_enabled}" == "false"]
-  NOTE: Documentation for Kibi Bubble Diagram is available only in Kibi
-  Enterprise Edition.
+  NOTE: Documentation for Kibi Bubble Diagram visualisation is available only in Kibi Enterprise Edition.
 endif::[]
 
 ifeval::["{enterprise_enabled}" == "true"]
@@ -16,7 +15,7 @@ image::images/bubble_diagram/first_image.png["First",align="center"]
 [float]
 ==== Metrics
 
-The radius of balls depends of the type of metric aggregations.
+The radius of circles depends of the type of metric aggregations.
 
 *Count*:: The {elastic-ref}/search-aggregations-metrics-valuecount-aggregation.html[_count_] aggregation returns a raw count of
 the elements in the selected index pattern.
@@ -36,16 +35,16 @@ the number of unique values in a field. Select a field from the drop-down.
 
 The _buckets_ aggregations determine what information will come out in the diagram.
 
-You can do two query in the same time.
+You can do maximum of two agregations at one time.
 The first aggregation will create the parent circles, while the second aggregation will create the children circles.
 
-The difference between parents and children lies in the style of the labels and in the balls.
-For the parents the labels are written in bold and the contour of the circles are more often.
+Parent circles looks slightly different than the children ones.
+Parent circles have thicker border and labels written in bold.
 
 The parents bubbles are divided by colors.
-If you do a subquery (children) you will see a bubbles divide by family.
-Children are located near the parent and all have same color.
-Families are united. If you drag a bubble,  all members of the family will drag along.
+If you do a subaggregation (children) you will see a bubbles divide by family.
+Children are located near the parent and all have the same color.
+Families are united. If you drag a bubble, all members of the family will drag along.
 
 image::images/bubble_diagram/all_bubbles.png["Node Icon configuration",align="center"]
 
@@ -57,29 +56,29 @@ In the diagram there are three options
 
 image::images/bubble_diagram/options.png["Node Icon configuration",align="center"]
 
-*Show Parents*:: You can see the parents bubbles in the subquery and if you do a filters.
+*Show Parents*:: You can see the parents bubbles in the subaggregation and if you do a filters.
 
 *Hidden Label*::  If checked hides the labels.
 
 *Enable Zoom*:: Enables zoom on the page. To use the zoom you have to use the mouse wheel.
 
 [float]
-==== Balls movements
+==== Circles movements
 
-All balls gravitates towards the center of the visualisation.
+All circles gravitates towards the center of the visualisation.
 
-When you drag a ball, its family follows.
+When you drag a circle, its family follows.
 
 image::images/bubble_diagram/move.png["Node Icon configuration",align="center"]
 
-When you hover over a ball a detail information is shown in a tooltip.
+When you hover over a circle a detail information is shown in a tooltip.
 
 image::images/bubble_diagram/table.png["Table",align="center"]
 
 [float]
 ==== Filters
 
-You can create filters by double-clicking on balls.
+You can create filters by double-clicking on the bubbles.
 
 In case the bubble is a child you will see the filtered single bubble.
 

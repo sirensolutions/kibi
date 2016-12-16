@@ -84,6 +84,8 @@ The source index is defined above, in the "request" field.
       "source-index-name"
     ],
     ...
+  }
+}
 ----
 
 Like normal watchers, when a join query is executed, a new alarm is generated.

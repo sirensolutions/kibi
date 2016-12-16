@@ -33,6 +33,8 @@ with multiple groups of data coming from different indices.
 - The <<radar_chart,Radar Chart>> visualization, which is a https://en.wikipedia.org/wiki/Radar_chart[graphical method] for displaying multivarate data.
 with multiple groups of data coming from different indices.
 
+- The <<bubble_diagram,Bubble Diagram>> visualization, which displays series of data grouped into packed circles.
+
 - The <<enhanced_search_results,Enhanced search results>> visualization, which
 displays query results in a table.
 

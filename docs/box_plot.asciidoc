@@ -23,7 +23,6 @@ Please make sure that you have:
  ** Top Percentile (Usually around 75%)
  * One *Max* metric
  * One *Min* metric
- * One *Count* metric (*Optional*)
  * One *Aggregation* (*Optional*)
 
 After changing options, click the green *Apply changes* button to update your visualization, or the grey *Discard

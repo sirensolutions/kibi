@@ -460,7 +460,7 @@ define(function (require) {
      * If dashboardIds is undefined, all dashboards are returned.
      */
     KibiState.prototype._getDashboardAndSavedSearchMetas = function (dashboardIds, ignoreMissingSavedSearch = false) {
-      let getAllDashboards = !dashboardIds;
+      const getAllDashboards = !dashboardIds;
 
       dashboardIds = _.compact(dashboardIds);
 
@@ -494,10 +494,10 @@ define(function (require) {
         return Promise.all(promises).then((savedDashboardsAndsavedMetas) => {
           // here we need to sort the results based on dashboardIds order
           if (dashboardIds && dashboardIds.length > 0) {
-            var ordered = [];
-            var error;
+            const ordered = [];
+            let error;
             _.each(dashboardIds, (id) => {
-              var hit = _.find(savedDashboardsAndsavedMetas, (dashAndMeta) => {
+              const hit = _.find(savedDashboardsAndsavedMetas, (dashAndMeta) => {
                 return id === dashAndMeta.savedDash.id;
               });
               if (hit) {
@@ -526,7 +526,7 @@ define(function (require) {
       if (!state.filters) {
         return [];
       }
-      var compacted = _.compact(state.filters);
+      const compacted = _.compact(state.filters);
       if (state.filters.length !== compacted.length) {
         state.filters = compacted;
         state.replace();
@@ -638,8 +638,8 @@ define(function (require) {
       }
 
       return indexPatterns.get(index).then((indexPattern) => {
-        var filter;
-        var timefield = indexPattern.timeFieldName && _.find(indexPattern.fields, { name: indexPattern.timeFieldName });
+        let filter;
+        const timefield = indexPattern.timeFieldName && _.find(indexPattern.fields, { name: indexPattern.timeFieldName });
 
         if (timefield) {
           filter = {
@@ -971,7 +971,7 @@ define(function (require) {
         disabled: false
       };
 
-      let dashboardIds = [ dashboardId ];
+      const dashboardIds = [ dashboardId ];
       if (this.isRelationalPanelButtonEnabled()) {
         // collect ids of dashboards from enabled relations and in the connected component to dashboardId
         const tmpDashboardIds = this._getDashboardsIdInConnectedComponent(dashboardId, this.getEnabledRelations());

@@ -13,10 +13,11 @@ NOTE: Kibi Box Plot is available only in Kibi Enterprise Edition.
 
 [float]
 ==== Usage
+image::images/box_plot/box_plot.png["Box plot",align="center"]
 
 Please make sure that you have:
 
- * One *Percetiles* metric, with three Percentiles defined:
+ * One *Percentiles* metric, with three Percentiles defined:
  ** Bottom Percentile (Usually around 25%)
  ** Mean (Usually around 50%)
  ** Top Percentile (Usually around 75%)
@@ -25,9 +26,7 @@ Please make sure that you have:
  * One *Count* metric (*Optional*)
  * One *Aggregation* (*Optional*)
 
-Also check global filters and time filters.
-
 After changing options, click the green *Apply changes* button to update your visualization, or the grey *Discard
-changes* button to keep your visualization in its current state.
+changes* button to return your visualization to its previous state.
 
 endif::[]

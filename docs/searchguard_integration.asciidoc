@@ -224,6 +224,15 @@ each Elasticsearch instance in which Search Guard has been installed; a
 standalone version (`sgadmin-standalone.zip`) can be downloaded from the
 {searchguard-central-ref}[Maven Central repository].
 
+Once a Search Guard enabled cluster has been initialized, `sgadmin` can be used
+to upload new configurations.
+
+NOTE: if you are using the {searchguard-management-api-ref}[Search Guard REST
+Management API addon], make sure that the sgadmin configuration directory
+contains only the `sg_config.yml` file, otherwise sgadmin will replace users,
+roles, action groups and mappings that might have been modified through the
+API.
+
 ==== Search Guard configuration
 
 A Search Guard configuration directory contains the following files:

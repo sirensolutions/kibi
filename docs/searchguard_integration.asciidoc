@@ -208,9 +208,7 @@ start.
 === Access control configuration
 
 Access control configuration (users, roles and privileges) is stored in an
-Elasticsearch index which can be modified through the _sgadmin.sh_ script; the
-script is available in the _plugins/search-guard-2/tools_ directory in each
-Elasticsearch instance in which Search Guard has been installed.
+Elasticsearch index which can be modified through the _sgadmin.sh_ script.
 
 The script reads the configuration from a local directory containing YAML files
 and uploads it to the index; the request is authenticated through a client SSL
@@ -220,6 +218,11 @@ Once the configuration has been uploaded, it will be available to all the nodes
 in the cluster, so it is not necessary to copy the Search Guard configuration
 directory to all the Elasticsearch nodes, just on the node from where sgadmin
 is run.
+
+`sgadmin.sh` is available in the _plugins/search-guard-2/tools_ directory in
+each Elasticsearch instance in which Search Guard has been installed; a
+standalone version (`sgadmin-standalone.zip`) can be downloaded from the
+{searchguard-central-ref}[Maven Central repository].
 
 ==== Search Guard configuration
 
@@ -663,6 +666,12 @@ configuration:
 - **-nhnv**: disables host name verification; remove this option if you installed
   node certificates with the correct hostname (recommended in production).
 
+By default the number of replicas for the `searchguard` index will be set at
+creation time to the number of data nodes - 1.
+
+For additional information on how to set replication settings and sgadmin in
+general please refer to the {searchguard-ref}/blob/master/sgadmin.md[sgadmin
+documentation].
 
 If the command executes successfully it will print a summary of the actions
 executed, e.g.:

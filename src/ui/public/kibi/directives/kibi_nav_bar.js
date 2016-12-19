@@ -117,7 +117,11 @@ define(function (require) {
         });
 
         $scope.$listen(queryFilter, 'update', function () {
-          kibiNavBarHelper.updateAllCounts(null, 'filters change');
+          let currentDashboardId = kibiState._getCurrentDashboardId();
+          if (currentDashboardId) {
+            const dashboardIds = kibiState.addAllConnected(currentDashboardId);
+            kibiNavBarHelper.updateAllCounts(dashboardIds, 'filters change');
+          }
         });
 
         $scope.$on('$destroy', function () {

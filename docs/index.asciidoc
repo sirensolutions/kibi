@@ -14,6 +14,8 @@
 :shield-ref: https://www.elastic.co/guide/en/shield/2.4/
 :sense-ref: https://www.elastic.co/guide/en/sense/current/
 :searchguard-ref: https://github.com/floragunncom/search-guard-docs
+:searchguard-management-api-ref: https://github.com/floragunncom/search-guard-rest-api/wiki
+:searchguard-central-ref: https://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22com.floragunn%22%20AND%20a%3A%22search-guard-2%22
 :searchguard-matrix-ref: https://github.com/floragunncom/search-guard/wiki#version-matrix
 :searchguard-setup-ref: https://github.com/floragunncom/search-guard/tree/es-2.3.5
 :kibi-ref: http://siren.solutions/kibi/docs/current/

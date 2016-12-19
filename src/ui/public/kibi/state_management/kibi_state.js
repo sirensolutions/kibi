@@ -720,6 +720,14 @@ define(function (require) {
     };
 
     /**
+     * Returns all dashboard ids which are connected to given dashboard id via relations enabled in relational panel
+     */
+    KibiState.prototype.addAllConnected = function (dashboardId) {
+      const connected = this._getDashboardsIdInConnectedComponent(dashboardId, this.getEnabledRelations());
+      return connected.length > 0 ? connected : [dashboardId];
+    };
+
+    /**
      * Returns the set of dashboard IDs which are connected to the focused dashboard, i.e., the connected component of the graph.
      * Relations is the array of relations between dashboards.
      */

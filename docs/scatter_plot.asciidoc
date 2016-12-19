@@ -89,5 +89,3 @@ After changing options, click the green *Apply changes* button to update your vi
 changes* button to return your visualization to its previous state.
 
 endif::[]
-
-endif::[]

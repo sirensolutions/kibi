@@ -21,6 +21,9 @@ define(function (require) {
       link: function ($scope, element, attrs) {
         if ($scope.graph === undefined) {
           element.empty();
+          if ($scope.g) {
+            $scope.g.destroy();
+          }
           $scope.g = new Eeg(element, {baseURL: ''});
         }
 
@@ -29,6 +32,9 @@ define(function (require) {
             element.empty();
 
             if ($scope.graph.options) {
+              if ($scope.g) {
+                $scope.g.destroy();
+              }
               $scope.graph.options.baseURL = '';
               $scope.g = new Eeg(element, $scope.graph.options);
             }
@@ -56,7 +62,10 @@ define(function (require) {
             $rootScope.$emit('egg:' + $scope.eegId + ':results', method, result);
           }
         });
-        $scope.$on('$destroy', off);
+        $scope.$on('$destroy', () => {
+          $scope.g.destroy();
+          off();
+        });
       }
     };
   });

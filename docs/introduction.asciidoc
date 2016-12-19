@@ -35,6 +35,10 @@ with multiple groups of data coming from different indices.
 
 - The <<bubble_diagram,Bubble Diagram>> visualization, which displays series of data grouped into packed circles.
 
+- The <<kibi_scatter_plot,Scatter plot>> visualization, which displays a scatter plot chart in different modes.
+
+- The <<kibi_box_plot,Box plot>> visualization, which displays a box plot chart from the data in the current set of Elasticsearch documents.
+
 - The <<enhanced_search_results,Enhanced search results>> visualization, which
 displays query results in a table.
 

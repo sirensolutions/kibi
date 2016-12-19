@@ -1,5 +1,7 @@
 === Kibi 4.4.2 and Kibana 4.4.2 Release Notes
 
+==== Kibi Changes
+
 * Various bug fixes and stability improvements
 * Various documentation improvements
 * Relational filter was not correctly refreshed

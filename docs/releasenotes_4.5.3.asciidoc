@@ -1,5 +1,7 @@
 === Kibi 4.5.3 and Kibana 4.5.3 Release Notes
 
+==== Kibi Changes
+
 * Various bug fixes and stability improvements
 * Various documentation improvements
 * Refactoring of the Kibi state

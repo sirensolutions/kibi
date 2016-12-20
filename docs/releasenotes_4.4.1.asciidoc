@@ -1,5 +1,7 @@
 === Kibi 4.4.1 Release Notes
 
+==== Kibi Changes
+
 * Various bug fixes and stability improvements.
 * Various error handling improvements
 * Caching can now be enabled/disabled per datasource from UI configuration

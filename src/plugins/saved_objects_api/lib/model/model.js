@@ -1,8 +1,10 @@
 import Joi from 'joi';
 import joiToMapping from './_joi_to_mapping';
 import AuthorizationError from './errors/authorization';
+import AuthenticationError from './errors/authentication';
 import NotFoundError from './errors/not_found';
 import ConflictError from './errors/conflict';
+import { get, set } from 'lodash';
 
 /**
  * A model that manages objects having a specific type.
@@ -18,10 +20,17 @@ export default class Model {
    *                       If null, mappings for the object will not be generated.
    */
   constructor(server, type, schema) {
+    this._server = server;
     this._type = type;
-    this._client = server.plugins.elasticsearch.client;
     this._config = server.config();
     this._schema = schema;
+    this._client = server.plugins.elasticsearch.createClient({
+      auth: false
+    });
+    //TODO: the current implementation of sessions requires them to be
+    // writeable by all users; this code must be removed as soon as
+    // owner tracking is available.
+    this._sessionClient = server.plugins.elasticsearch.client;
   }
 
   /**
@@ -47,40 +56,65 @@ export default class Model {
         throw new NotFoundError('Object not found.', error);
       case 403:
         throw new AuthorizationError('Unauthorized', error);
+      case 401:
+        throw new AuthenticationError('Authentication required', error);
       default:
         throw error;
     }
   }
 
   /**
-   * Creates the mappings for the type managed by this model.
+   * Sets the specified @credentials in client @parameters.
+   * @private
    */
-  async createMappings() {
-    if (await this.hasMappings()) {
+  _setCredentials(parameters, credentials) {
+    if (!credentials) {
+      return;
+    }
+    for (let key of Object.keys(credentials)) {
+      set(parameters, key, credentials[key]);
+    }
+  }
+
+  /**
+   * Creates the mappings for the type managed by this model.
+   *
+   * @param {Object} credentials - Optional user credentials.
+   */
+  async createMappings(credentials) {
+    if (await this.hasMappings(credentials)) {
       return;
     }
     const body = {};
     body[this._type] = {
       properties: joiToMapping(this.schema)
     };
-    await this._client.indices.putMapping({
+    const parameters = {
       index: this._config.get('kibana.index'),
       type: this._type,
       body: body
-    });
+    };
+    this._setCredentials(parameters, credentials);
+    //TODO: replace with this._client once owner tracking is available
+    const client = this._type === 'session' ? this._sessionClient : this._client;
+    await client.indices.putMapping(parameters);
   }
 
   /**
    * Checks if the mappings for the type have been defined.
+   *
+   * @param {Object} credentials - Optional user credentials.
    */
-  async hasMappings() {
+  async hasMappings(credentials) {
     if (!this.schema) {
       return true;
     }
-    const mappings = await this._client.indices.getMapping({
+    const parameters = {
       index: this._config.get('kibana.index'),
       type: this._type
-    });
+    };
+    this._setCredentials(parameters, credentials);
+    const mappings = await this._client.indices.getMapping(parameters);
 
     return Object.keys(mappings).length !== 0;
   }
@@ -89,19 +123,27 @@ export default class Model {
    * Creates a new object instance.
    *
    * @param {String} id - The object id.
-   * @param {String} type - The object type.
    * @param {Object} body - The object body.
+   * @param {Object} credentials - Optional user credentials.
    */
-  async create(id, body) {
+  async create(id, body, credentials) {
     try {
-      await this.createMappings();
-      return await this._client.create({
+      await this.createMappings(credentials);
+      const parameters = {
         id: id,
         index: this._config.get('kibana.index'),
         type: this._type,
         body: body,
         refresh: true
-      });
+      };
+
+      //TODO: remove once owner tracking is available
+      const client = this._type === 'session' ? this._sessionClient : this._client;
+      if (this._type !== 'session') {
+        this._setCredentials(parameters, credentials);
+      }
+
+      return await client.create(parameters);
     } catch (error) {
       this._wrapError(error);
     }
@@ -111,19 +153,27 @@ export default class Model {
    * Updates an existing object.
    *
    * @param {String} id - The object id.
-   * @param {String} type - The object type.
    * @param {Object} body - The object body.
+   * @param {Object} credentials - Optional user credentials.
    */
-  async update(id, body) {
+  async update(id, body, credentials) {
     try {
-      await this.createMappings();
-      return await this._client.index({
+      await this.createMappings(credentials);
+      const parameters = {
         id: id,
         index: this._config.get('kibana.index'),
         type: this._type,
         body: body,
         refresh: true
-      });
+      };
+
+      //TODO: remove once owner tracking is available
+      const client = this._type === 'session' ? this._sessionClient : this._client;
+      if (this._type !== 'session') {
+        this._setCredentials(parameters, credentials);
+      }
+
+      return await client.index(parameters);
     } catch (error) {
       this._wrapError(error);
     }
@@ -135,10 +185,11 @@ export default class Model {
    * @param {String} id - The object id.
    * @param {String} type - The object type.
    * @param {Object} fields - The changed fields.
+   * @param {Object} credentials - Optional user credentials.
    */
-  async patch(id, fields) {
+  async patch(id, fields, credentials) {
     try {
-      return await this._client.update({
+      const parameters = {
         id: id,
         index: this._config.get('kibana.index'),
         type: this._type,
@@ -146,7 +197,15 @@ export default class Model {
           doc: fields
         },
         refresh: true
-      });
+      };
+
+      //TODO: remove once owner tracking is available
+      const client = this._type === 'session' ? this._sessionClient : this._client;
+      if (this._type !== 'session') {
+        this._setCredentials(parameters, credentials);
+      }
+
+      return await client.update(parameters);
     } catch (error) {
       this._wrapError(error);
     }
@@ -157,10 +216,11 @@ export default class Model {
    *
    * @param {Number} size - The number of results to return.
    * @param {String} searchString - An optional search string.
+   * @param {Object} credentials - Optional user credentials.
    * @return {Array} A list of objects of the specified type.
    * @throws {NotFoundError} if the object does not exist.
    */
-  async search(size, searchString) {
+  async search(size, searchString, credentials) {
     let body;
     if (searchString) {
       body = {
@@ -180,12 +240,14 @@ export default class Model {
       };
     }
     try {
-      return await this._client.search({
+      const parameters = {
         index: this._config.get('kibana.index'),
         type: this._type,
         body: body,
         size: size || 100
-      });
+      };
+      this._setCredentials(parameters, credentials);
+      return await this._client.search(parameters);
     } catch (error) {
       this._wrapError(error);
     }
@@ -195,16 +257,19 @@ export default class Model {
    * Returns the object with the specified id.
    *
    * @param {String} id - An id.
+   * @param {Object} credentials - Optional user credentials.
    * @return {Object} The object instance having the specified id.
    * @throws {NotFoundError} if the object does not exist.
    */
-  async get(id) {
+  async get(id, credentials) {
     try {
-      return await this._client.get({
+      const parameters = {
         index: this._config.get('kibana.index'),
         type: this._type,
         id: id
-      });
+      };
+      this._setCredentials(parameters, credentials);
+      return await this._client.get(parameters);
     } catch (error) {
       if (error.statusCode === 404) {
         throw new NotFoundError(`${id} does not exist.`, error);
@@ -217,16 +282,19 @@ export default class Model {
    * Deletes the object with the specified id.
    *
    * @param {String} id - An id.
+   * @param {Object} credentials - Optional user credentials.
    * @throws {NotFoundError} if the object does not exist.
    */
-  async delete(id) {
+  async delete(id, credentials) {
     try {
-      return await this._client.delete({
+      const parameters = {
         index: this._config.get('kibana.index'),
         type: this._type,
         id: id,
         refresh: true
-      });
+      };
+      this._setCredentials(parameters, credentials);
+      return await this._client.delete(parameters);
     } catch (error) {
       if (error.statusCode === 404) {
         throw new NotFoundError(`${id} does not exist.`, error);

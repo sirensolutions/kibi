@@ -1,7 +1,7 @@
 import Promise from 'bluebird';
 import Boom from 'boom';
 import Joi from 'joi';
-import { each, merge } from 'lodash';
+import { each, merge, get } from 'lodash';
 
 /**
  * Saved object API routes.
@@ -12,6 +12,18 @@ module.exports = (server, API_ROOT) => {
    * Returns a model instance for the specified @typename.
    */
   const getModel = (typename) => server.plugins.saved_objects_api.getModel(typename);
+
+  /**
+   * Returns the user credentials from the @request if available.
+   */
+  const getCredentials = (request) => {
+    const authorizationHeader = get(request, 'headers.authorization');
+    if (authorizationHeader) {
+      return {
+        'headers.authorization': authorizationHeader
+      };
+    }
+  };
 
   /**
    * Wraps model errors and sets the body of the reply.
@@ -30,6 +42,10 @@ module.exports = (server, API_ROOT) => {
       case 'AuthorizationError':
         reply(Boom.forbidden(error.message));
         break;
+      case 'AuthenticationError':
+        reply(Boom.unauthorized('Unauthorized', 'Basic', {
+          realm: 'Authentication required.'
+        }));
       default:
         reply(Boom.badImplementation(`An error occurred while indexing the object: ${error}`));
         break;
@@ -47,9 +63,10 @@ module.exports = (server, API_ROOT) => {
     method: 'POST',
     path: `${API_ROOT}/_mget`,
     handler: (request, reply) => {
+      const credentials = getCredentials(request);
       const promises = request.payload.docs.map((doc) => {
         try {
-          return getModel(doc._type).get(doc._id)
+          return getModel(doc._type).get(doc._id, credentials)
           .then((response) => {
             return response;
           })
@@ -78,6 +95,11 @@ module.exports = (server, API_ROOT) => {
                   status: error.inner ? error.inner.status : 500
                 };
                 break;
+              case 'AuthenticationError':
+                reply(Boom.unauthorized('Unauthorized', 'Basic', {
+                  realm: 'Authentication required.'
+                }));
+                return;
             }
             return Promise.resolve(merge(errorBody, doc));
           });
@@ -121,6 +143,7 @@ module.exports = (server, API_ROOT) => {
     method: 'POST',
     path: `${API_ROOT}/{index}/{type}/{id}`,
     handler: (request, reply) => {
+      let credentials = getCredentials(request);
       let model;
       try {
         model = getModel(request.params.type);
@@ -131,7 +154,7 @@ module.exports = (server, API_ROOT) => {
       if (request.query.op_type === 'create') {
         method = 'create';
       }
-      model[method](request.params.id, request.payload)
+      model[method](request.params.id, request.payload, credentials)
       .then((response) => {
         reply(response);
       })
@@ -168,13 +191,14 @@ module.exports = (server, API_ROOT) => {
     method: 'POST',
     path: `${API_ROOT}/{index}/{type}/{id}/_update`,
     handler: (request, reply) => {
+      const credentials = getCredentials(request);
       let model;
       try {
         model = getModel(request.params.type);
       } catch (error) {
         return reply(Boom.notFound(error));
       }
-      model.patch(request.params.id, request.payload.doc)
+      model.patch(request.params.id, request.payload.doc, credentials)
       .then((response) => {
         reply(response);
       })
@@ -203,13 +227,14 @@ module.exports = (server, API_ROOT) => {
     method: 'DELETE',
     path: `${API_ROOT}/{index}/{type}/{id}`,
     handler: (request, reply) => {
+      const credentials = getCredentials(request);
       let model;
       try {
         model = getModel(request.params.type);
       } catch (error) {
         return reply(Boom.notFound(error));
       }
-      model.delete(request.params.id)
+      model.delete(request.params.id, credentials)
       .then((response) => {
         reply(response);
       })
@@ -245,13 +270,14 @@ module.exports = (server, API_ROOT) => {
     method: 'POST',
     path: `${API_ROOT}/{index}/{type}/_search`,
     handler: (request, reply) => {
+      const credentials = getCredentials(request);
       let model;
       try {
         model = getModel(request.params.type);
       } catch (error) {
         return reply(Boom.notFound(error));
       }
-      model.search(request.query.size, request.query.q)
+      model.search(request.query.size, request.query.q, credentials)
       .then((response) => {
         reply(response);
       })

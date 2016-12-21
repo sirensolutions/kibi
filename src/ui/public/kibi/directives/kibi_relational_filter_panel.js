@@ -19,12 +19,18 @@ define(function (require) {
     return {
       beforeAddClass: function (element, className, doneFn) {
         // close by adding ng-hide class
-        jQuery(element).slideUp(250, doneFn);
+        jQuery(element).slideUp(100, doneFn);
       },
 
       removeClass: function (element, className, doneFn) {
         // open by removing ng-hide class
-        jQuery(element).slideDown(250, doneFn);
+        jQuery(element).slideDown(100, () => {
+          // call update when animation is finished to redraw the legend
+          // as it could have been drawn incorrectly due to the fact the panel is not visible
+          // when initial import is done
+          $rootScope.$emit('egg:relationalPanel:run', 'update');
+          doneFn();
+        });
       }
     };
   });

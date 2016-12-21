@@ -1,10 +1,10 @@
 <!-- header -->
-<div class="vis-editor-agg-header">
+<div ng-show="!agg.disabled" class="vis-editor-agg-header">
 
   <!-- open/close editor -->
   <button
     aria-label="{{ editorOpen ? 'Close Editor' : 'Open Editor' }}"
-    ng-click="editorOpen = !editorOpen"
+    ng-click="editorOpen = (!editorOpen && !agg.disabled)"
     type="button"
     class="btn btn-default btn-xs vis-editor-agg-header-toggle">
     <i aria-hidden="true" ng-class="{ 'fa-caret-down': editorOpen, 'fa-caret-right': !editorOpen }" class="fa"></i>
@@ -73,7 +73,7 @@
 <vis-editor-agg-params
   agg="agg"
   group-name="groupName"
-  ng-show="editorOpen"
+  ng-show="editorOpen && !agg.disabled"
   class="vis-editor-agg-editor">
 </vis-editor-agg-params>
 

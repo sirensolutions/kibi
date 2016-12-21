@@ -37,7 +37,8 @@ module.exports = function (chrome, internals) {
       'config',
       'dashboard',
       'dashboardgroup',
-      'template'
+      'template',
+      'query'
     ])
     .value('savedObjectsAPIUrl', (function () {
       const a = document.createElement('a');

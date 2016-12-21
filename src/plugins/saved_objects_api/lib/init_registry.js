@@ -17,6 +17,7 @@ export default function initRegistry(server) {
     'config',
     'dashboard',
     'dashboardgroup',
+    'query',
     'template'
   ];
 

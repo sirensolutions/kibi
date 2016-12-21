@@ -1,6 +1,5 @@
 <!-- header -->
-<!-- kibi: added ability to show/hide aggregation by agg.disabled property -->
-<div ng-show="!agg.disabled" class="vis-editor-agg-header">
+<div class="vis-editor-agg-header">
 
   <!-- open/close editor -->
   <button
@@ -13,7 +12,14 @@
 
   <!-- title -->
   <span class="vis-editor-agg-header-title">
-    {{ agg.schema.title }}
+    <!-- kibi: added ability to show/hide aggregation by agg.disabled property -->
+    <span ng-show="agg.disabled" tooltip="Invalid aggregation" style='color:red;text-decoration:line-through'>
+      {{ agg.schema.title }}
+    </span>
+    <span ng-show="!agg.disabled">
+      {{ agg.schema.title }}
+    </span>
+    <!-- kibi: end -->
   </span>
 
   <!-- description -->
@@ -74,7 +80,7 @@
 <vis-editor-agg-params
   agg="agg"
   group-name="groupName"
-  ng-show="editorOpen && !agg.disabled"
+  ng-show="editorOpen"
   class="vis-editor-agg-editor">
 </vis-editor-agg-params>
 

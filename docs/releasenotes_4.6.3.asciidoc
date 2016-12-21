@@ -13,9 +13,49 @@ The 4.6.3 release of Kibi requires Elasticsearch 2.4 or later.
 * Fixed - negated joins creation by enclosing the complete query in a must clause
 * Fixed - listen to config events to correctly set the relational filter visible
 * Fixed - do not destroy handlers in cached helper modules to correctly refresh counts on tabs
+* Fixed - fail to access dashboard app if the previous dashboard was deleted
+* Fixed - creating a new dashboard timepicker disappear
+* Fixed - click handlers actions are not cleaned when staging the enhanced search vis
+* Fixed - cases when wrong property name was used in createNotifier
+* Fixed - diff_time now takes into account time precision
+* Fixed - kibi state was not properly propagated
+* Fixed - problems with JSON textarea and label textbox edit
+* Fixed - do not center content if there is data in Kibi Query Viewer
+* Fixed - do not make a relation invalid if type is set to null by kibi-select
+* Fixed - reset count/isPruned property of a dashboard if its count was requested but was not in the metadata object, due to the dashboard not having a savedsearch on save
+* Fixed - now queries for invisible dashboards are not added to count request
+* Fixed - counts not properly updated when using "undo via back button"
+* Fixed - destroy html created by eeg library
+
+* Improved - check if the state contains outdated filters
+* Improved - relations graph configuration has to be explicitly saved
+* Improved - documented Sense and Marvel integration with Search Guard
+* Improved - support relational filter visualizations which reference no concrete index
+* Improved - made relational button grey when there is no results
+* Improved - store the synced dashboards in the kibistate
+* Improved - various sync-time-to directive improvements
+* Improved - notify the user if the session data has been saved
+* Improved - prevent the Kibi Enhanced Search visualization to make two requests for retrieving the rows
+* Improved - handling of various authorization errors
+* Improved - replaced ui-select with kibi-menu-template
+* Improved - introduced kibi-menu-template for choosing relations in buttons configuration
+* Improved - Display confirmation dialog when leaving a modified relational configuration
+* Improved - check if the relation id is defined at config time for the relational filter visualization
+* Improved - big part of code ported to ES6
+* Improved - use version 4.6.3 of the Kibi Timeline
+* Improved - ported all release notes to master
 * Improved - Searchguard integration documentation
+
+* Added - merge upstream changes from Kibana 4.6.3
+* Added - Kibi now ships with Sentinl application
+* Added - Saved objects API
+* Added - support requiresMultiSearch in the visualize editor for refreshing the ES results
+* Added - renamed kibi_core.default_dashboard_id into kibi_core.default_dashboard_title
+* Added - kibi:graphUseWebGl advanced option
 * Added - migration for relational filter button
 * Added - test:coverage grunt task
+
+* Backported - Kibana fix to ensure dashboard panels appear in the correct order
 
 ==== Kibana Changes
 

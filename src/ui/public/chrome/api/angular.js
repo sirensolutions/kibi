@@ -36,7 +36,8 @@ module.exports = function (chrome, internals) {
       'index-pattern',
       'config',
       'dashboard',
-      'dashboardgroup'
+      'dashboardgroup',
+      'template'
     ])
     .value('savedObjectsAPIUrl', (function () {
       const a = document.createElement('a');

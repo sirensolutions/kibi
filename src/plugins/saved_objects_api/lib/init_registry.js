@@ -16,7 +16,8 @@ export default function initRegistry(server) {
     'index-pattern',
     'config',
     'dashboard',
-    'dashboardgroup'
+    'dashboardgroup',
+    'template'
   ];
 
   for (const typeName of builtin) {

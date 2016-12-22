@@ -97,10 +97,7 @@ module.exports = (server, API_ROOT) => {
                 };
                 break;
               case 'AuthenticationError':
-                reply(Boom.unauthorized('Unauthorized', 'Basic', {
-                  realm: 'Authentication required.'
-                }));
-                return;
+                return Promise.reject(error);
             }
             return Promise.resolve(merge(errorBody, doc));
           });
@@ -118,6 +115,14 @@ module.exports = (server, API_ROOT) => {
         reply({
           docs: results
         });
+      })
+      .catch((error) => {
+        if (error.name === 'AuthenticationError') {
+          return reply(Boom.unauthorized('Unauthorized', 'Basic', {
+            realm: 'Authentication required.'
+          }));
+        }
+        replyError(error);
       });
     },
     config: {

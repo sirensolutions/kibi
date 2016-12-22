@@ -6,12 +6,12 @@ import ModelTestHelper from './helper';
 
 describe('saved_objects_api/functional', function () {
 
-  const helper = new ModelTestHelper(60000, 'session', 'description', 'sess');
+  const helper = new ModelTestHelper(60000, 'template', 'description', 'tpl');
 
-  describe('Session', function () {
+  describe('Template', function () {
 
     const expectedMapping = {
-      description: {
+      title: {
         type: 'string'
       },
       kibanaSavedObjectMeta: {
@@ -21,16 +21,14 @@ describe('saved_objects_api/functional', function () {
           }
         }
       },
-      session_data: {
+      description: {
         type: 'string'
       },
-      timeCreated: {
-        type: 'date',
-        format: 'strict_date_optional_time||epoch_millis'
+      templateSource: {
+        type: 'string'
       },
-      timeUpdated: {
-        type: 'date',
-        format: 'strict_date_optional_time||epoch_millis'
+      templateEngine: {
+        type: 'string'
       },
       version: {
         type: 'integer'
@@ -45,19 +43,19 @@ describe('saved_objects_api/functional', function () {
       return helper.testCreation();
     }));
 
-    it('should index a session correctly.', wrapAsync(async () => {
+    it('should index a template correctly.', wrapAsync(async () => {
       return helper.testIndexing();
     }));
 
-    it('should create mappings when creating a session if they do not exist.', wrapAsync(async () => {
+    it('should create mappings when creating a template if they do not exist.', wrapAsync(async () => {
       return helper.testMappingsCreation(expectedMapping);
     }));
 
-    it('should create mappings when indexing a session if they do not exist.', wrapAsync(async () => {
+    it('should create mappings when indexing a template if they do not exist.', wrapAsync(async () => {
       return helper.testMappingsIndexing(expectedMapping);
     }));
 
-    it('should not create mappings when creating a session if they already exist.', wrapAsync(async () => {
+    it('should not create mappings when creating a template if they already exist.', wrapAsync(async () => {
       return helper.testSkipMappings();
     }));
 

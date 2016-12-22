@@ -89,6 +89,8 @@ module.exports = (server, API_ROOT) => {
                   status: 403
                 };
                 break;
+              case 'AuthenticationError':
+                return Promise.reject(error);
               default:
                 errorBody = {
                   type: 'backend_error',
@@ -96,8 +98,6 @@ module.exports = (server, API_ROOT) => {
                   status: error.inner ? error.inner.status : 500
                 };
                 break;
-              case 'AuthenticationError':
-                return Promise.reject(error);
             }
             return Promise.resolve(merge(errorBody, doc));
           });

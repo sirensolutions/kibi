@@ -46,6 +46,7 @@ module.exports = (server, API_ROOT) => {
         reply(Boom.unauthorized('Unauthorized', 'Basic', {
           realm: 'Authentication required.'
         }));
+        break;
       default:
         reply(Boom.badImplementation(`An error occurred while indexing the object: ${error}`));
         break;
@@ -143,7 +144,7 @@ module.exports = (server, API_ROOT) => {
     method: 'POST',
     path: `${API_ROOT}/{index}/{type}/{id}`,
     handler: (request, reply) => {
-      let credentials = getCredentials(request);
+      const credentials = getCredentials(request);
       let model;
       try {
         model = getModel(request.params.type);

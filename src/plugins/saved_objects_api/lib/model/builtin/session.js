@@ -8,7 +8,10 @@ const SessionSchema = Joi.object().keys({
   session_data: Joi.object().default({}),
   version: Joi.number().integer(),
   timeCreated: Joi.date(),
-  timeUpdated: Joi.date()
+  timeUpdated: Joi.date(),
+  kibanaSavedObjectMeta: Joi.object().keys({
+    searchSourceJSON: Joi.string()
+  })
 });
 
 export default SessionSchema;

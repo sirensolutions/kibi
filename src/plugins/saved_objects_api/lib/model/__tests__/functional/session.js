@@ -14,6 +14,13 @@ describe('saved_objects_api/functional', function () {
       description: {
         type: 'string'
       },
+      kibanaSavedObjectMeta: {
+        properties : {
+          searchSourceJSON : {
+            type : 'string'
+          }
+        }
+      },
       session_data: {
         type: 'string'
       },

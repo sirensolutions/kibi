@@ -56,6 +56,7 @@ The 4.6.3 release of Kibi requires Elasticsearch 2.4 or later.
 * Added - Kibi now ships with Sentinl application [Enterprise Edition only]
 * Added - Map view to Graph Browser [Enterprise Edition only]
 * Added - Timeline view to Graph Browser [Enterprise Edition only]
+* Added - live filter to Graph Browser [Enterprise Edition only]
 
 * Backported - Kibana fix to ensure dashboard panels appear in the correct order
 

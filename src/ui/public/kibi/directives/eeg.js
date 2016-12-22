@@ -1,6 +1,6 @@
 define(function (require) {
 
-  var Eeg = require('kibi-eeg');
+  const Eeg = require('kibi-eeg');
 
   require('ui/modules')
   .get('kibana')
@@ -51,16 +51,16 @@ define(function (require) {
           }
         });
 
-        var off = $rootScope.$on('egg:' + $scope.eegId + ':run', function (event, method) {
+        const off = $rootScope.$on('egg:' + $scope.eegId + ':run', function (event, method) {
           if ($scope.g) {
             if (method === 'importGraph') {
               element.empty();
             }
 
-            var args = Array.prototype.slice.apply(arguments);
+            const args = Array.prototype.slice.apply(arguments);
             args.shift();
             args.shift();
-            var result = $scope.g[method].apply($scope.g, args);
+            const result = $scope.g[method].apply($scope.g, args);
             $rootScope.$emit('egg:' + $scope.eegId + ':results', method, result);
           }
         });

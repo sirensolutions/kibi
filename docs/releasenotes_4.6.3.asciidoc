@@ -14,11 +14,11 @@ The 4.6.3 release of Kibi requires Elasticsearch 2.4 or later.
 * Fixed - listen to config events to correctly set the relational filter visible
 * Fixed - do not destroy handlers in cached helper modules to correctly refresh counts on tabs
 * Fixed - fail to access dashboard app if the previous dashboard was deleted
-* Fixed - creating a new dashboard timepicker disappear
+* Fixed - missing timepicker when creating a new dashboard
 * Fixed - click handlers actions are not cleaned when staging the enhanced search vis
 * Fixed - cases when wrong property name was used in createNotifier
 * Fixed - diff_time now takes into account time precision
-* Fixed - kibi state was not properly propagated
+* Fixed - kibi state was not properly propagated which caused an issue where time was not correctly set on a dashboard when done from discovery page
 * Fixed - problems with JSON textarea and label textbox edit
 * Fixed - do not center content if there is data in Kibi Query Viewer
 * Fixed - do not make a relation invalid if type is set to null by kibi-select
@@ -47,13 +47,15 @@ The 4.6.3 release of Kibi requires Elasticsearch 2.4 or later.
 * Improved - Searchguard integration documentation
 
 * Added - merge upstream changes from Kibana 4.6.3
-* Added - Kibi now ships with Sentinl application
 * Added - Saved objects API
 * Added - support requiresMultiSearch in the visualize editor for refreshing the ES results
 * Added - renamed kibi_core.default_dashboard_id into kibi_core.default_dashboard_title
 * Added - kibi:graphUseWebGl advanced option
 * Added - migration for relational filter button
 * Added - test:coverage grunt task
+* Added - Kibi now ships with Sentinl application [Enterprise Edition only]
+* Added - Map view to Graph Browser [Enterprise Edition only]
+* Added - Timeline view to Graph Browser [Enterprise Edition only]
 
 * Backported - Kibana fix to ensure dashboard panels appear in the correct order
 

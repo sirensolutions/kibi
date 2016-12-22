@@ -250,7 +250,7 @@ define(function (require) {
       $state.save();
       searchSource.set('filter', queryFilter.getFilters());
       if (!$state.linked) searchSource.set('query', $state.query);
-      if ($scope.vis.type.requiresSearch) {
+      if ($scope.vis.type.requiresMultiSearch || $scope.vis.type.requiresSearch) {
         courier.fetch();
       }
     };

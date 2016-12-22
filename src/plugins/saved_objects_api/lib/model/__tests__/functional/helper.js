@@ -3,7 +3,6 @@ import expect from 'expect.js';
 import sinon from 'sinon';
 import requirefrom from 'requirefrom';
 import url from 'url';
-import Model from '../../model';
 import initRegistry from '../../../init_registry';
 import ConflictError from '../../errors/conflict';
 const indexSnapshot = requirefrom('src/testUtils')('index_snapshot');
@@ -38,6 +37,9 @@ export default class ModelTestHelper {
     this._server = {
       plugins: {
         elasticsearch: {
+          createClient: () => {
+            return this._client;
+          },
           client: this._client
         }
       },

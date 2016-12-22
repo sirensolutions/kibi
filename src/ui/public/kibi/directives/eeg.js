@@ -22,6 +22,9 @@ define(function (require) {
         const layersOrderArray = ['legend', 'links','linksLabelsBack','nodes','linksLabels'];
         if ($scope.graph === undefined) {
           element.empty();
+          if ($scope.g) {
+            $scope.g.destroy();
+          }
           $scope.g = new Eeg(element, {baseURL: '', layersOrder: layersOrderArray});
         }
 
@@ -30,6 +33,9 @@ define(function (require) {
             element.empty();
 
             if ($scope.graph.options) {
+              if ($scope.g) {
+                $scope.g.destroy();
+              }
               $scope.graph.options.baseURL = '';
               $scope.graph.options.layersOrder = layersOrderArray;
               $scope.g = new Eeg(element, $scope.graph.options);
@@ -58,7 +64,10 @@ define(function (require) {
             $rootScope.$emit('egg:' + $scope.eegId + ':results', method, result);
           }
         });
-        $scope.$on('$destroy', off);
+        $scope.$on('$destroy', () => {
+          $scope.g.destroy();
+          off();
+        });
       }
     };
   });

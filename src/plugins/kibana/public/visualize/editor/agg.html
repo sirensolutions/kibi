@@ -12,7 +12,14 @@
 
   <!-- title -->
   <span class="vis-editor-agg-header-title">
-    {{ agg.schema.title }}
+    <!-- kibi: added ability to mark an aggregation as invalid by using agg.disabled property -->
+    <span ng-show="agg.disabled" tooltip="Invalid aggregation" style='color:red;text-decoration:line-through'>
+      {{ agg.schema.title }}
+    </span>
+    <span ng-show="!agg.disabled">
+      {{ agg.schema.title }}
+    </span>
+    <!-- kibi: end -->
   </span>
 
   <!-- description -->

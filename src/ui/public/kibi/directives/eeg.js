@@ -19,9 +19,10 @@ define(function (require) {
       },
       template: '<div></div>',
       link: function ($scope, element, attrs) {
+        const layersOrderArray = ['legend', 'links','linksLabelsBack','nodes','linksLabels'];
         if ($scope.graph === undefined) {
           element.empty();
-          $scope.g = new Eeg(element, {baseURL: ''});
+          $scope.g = new Eeg(element, {baseURL: '', layersOrder: layersOrderArray});
         }
 
         $scope.$watch('graph', function (graph) {
@@ -30,6 +31,7 @@ define(function (require) {
 
             if ($scope.graph.options) {
               $scope.graph.options.baseURL = '';
+              $scope.graph.options.layersOrder = layersOrderArray;
               $scope.g = new Eeg(element, $scope.graph.options);
             }
 

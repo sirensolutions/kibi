@@ -49,7 +49,7 @@
     "test:ui:runner": "grunt test:ui:runner",
     "test:server": "grunt test:server",
     "test:coverage": "grunt test:coverage",
-    "build": "grunt build --skip-os-packages",
+    "build": "grunt build --skip-os-packages=true",
     "release": "grunt release",
     "start": "./bin/kibi --dev",
     "precommit": "grunt precommit",

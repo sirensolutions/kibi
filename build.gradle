@@ -79,10 +79,20 @@ task cloneSources << {
   Grgit.clone(dir: file("${buildDir}/sources"), uri: "file://${projectDir}")
 }
 
-task build(dependsOn: [npmInstall, npm_run_test, npm_run_build]) << {}
+def getBuildArgs() {
+  if (project.version.endsWith("-SNAPSHOT")) {
+    return ["run", "build", "--", "--release=false", "--skip-os-packages=true"]
+  }
+  return ["run", "build", "--", "--release=true", "--skip-os-packages=true"]
+}
 
+task npmBuildWithOpts(type: NpmTask) {
+  args = getBuildArgs()
+}
+
+task build(dependsOn: [npmInstall, npm_run_test, npmBuildWithOpts])
 npm_run_test.mustRunAfter npmInstall
-npm_run_build.mustRunAfter npm_run_test
+npmBuildWithOpts.mustRunAfter npm_run_test
 
 ///////////////////////////////////////////////////
 //                                               //

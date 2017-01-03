@@ -225,3 +225,7 @@ Remember, someone is blocked by a pull awaiting review, make it count. Be thorou
 1. **Hand it back** If you found issues, re-assign the submitter to the pull to address them. Repeat until mergable.
 1. **Hand it off** If you're the first reviewer and everything looks good but the changes are more than a few lines, hand the pull to someone else to take a second look. Again, try to find the right person to assign it to.
 1. **Merge the code** When everything looks good, merge into the target branch. Check the labels on the pull to see if backporting is required, and perform the backport if so.
+
+### Possible Errors
+
+Sometimes after fresh plugin install, you get the following error `Invalid <name> plugin type`. The remedy for this is to delete all contents of the kibi optimize bundles folder, for example `rm -rf kibi-internal/optimize/bundles/*`, then reboot kibi.

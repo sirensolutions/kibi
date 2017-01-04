@@ -214,7 +214,7 @@ describe('index pattern', function () {
   });
 
   describe('add and remove scripted fields', function () {
-    it('should append the scripted field', function () {
+    it('should append the scripted field', function (done) {
       // keep a copy of the current scripted field count
       let saveSpy = sinon.spy(indexPattern, 'save');
       let oldCount = indexPattern.getScriptedFields().length;
@@ -226,12 +226,13 @@ describe('index pattern', function () {
         type: 'boolean'
       };
       indexPattern.addScriptedField(scriptedField.name, scriptedField.script, scriptedField.type);
-      indexPattern._indexFields(); // normally triggered by docSource.onUpdate()
-
-      let scriptedFields = indexPattern.getScriptedFields();
-      expect(saveSpy.callCount).to.equal(1);
-      expect(scriptedFields).to.have.length(oldCount + 1);
-      expect(indexPattern.fields.byName[scriptedField.name].displayName).to.equal(scriptedField.name);
+      indexPattern._indexFields().then(() => {
+        let scriptedFields = indexPattern.getScriptedFields();
+        expect(saveSpy.callCount).to.equal(1);
+        expect(scriptedFields).to.have.length(oldCount + 1);
+        expect(indexPattern.fields.byName[scriptedField.name].displayName).to.equal(scriptedField.name);
+        done();
+      }).catch(done); // normally triggered by docSource.onUpdate()
     });
 
     it('should remove scripted field, by name', function () {

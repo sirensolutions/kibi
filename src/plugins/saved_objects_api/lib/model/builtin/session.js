@@ -1,17 +1,23 @@
 import Joi from 'joi';
+import Model from '../model';
 
 /**
- * Schema for session objects.
+ * Model for session objects.
  */
-const SessionSchema = Joi.object().keys({
-  description: Joi.string().default(null),
-  session_data: Joi.object().default({}),
-  version: Joi.number().integer(),
-  timeCreated: Joi.date(),
-  timeUpdated: Joi.date(),
-  kibanaSavedObjectMeta: Joi.object().keys({
-    searchSourceJSON: Joi.string()
-  })
-});
+export default class SessionModel extends Model {
+  constructor(server) {
 
-export default SessionSchema;
+    const schema = Joi.object().keys({
+      description: Joi.string().default(null),
+      session_data: Joi.object().default({}),
+      version: Joi.number().integer(),
+      timeCreated: Joi.date(),
+      timeUpdated: Joi.date(),
+      kibanaSavedObjectMeta: Joi.object().keys({
+        searchSourceJSON: Joi.string()
+      })
+    });
+
+    super(server, 'session', schema);
+  }
+}

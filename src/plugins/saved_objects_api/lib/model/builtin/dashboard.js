@@ -1,24 +1,29 @@
 import Joi from 'joi';
+import Model from '../model';
 
 /**
- * Schema for dashboard objects.
+ * Model for dashboard objects.
  */
-const DashboardSchema = Joi.object().keys({
-  title: Joi.string(),
-  hits: Joi.number().integer(),
-  description: Joi.string(),
-  panelsJSON: Joi.string(),
-  optionsJSON: Joi.string(),
-  uiStateJSON: Joi.string(),
-  version: Joi.number().integer(),
-  timeRestore: Joi.boolean(),
-  timeMode: Joi.string(),
-  timeTo: Joi.string(),
-  timeFrom: Joi.string(),
-  savedSearchId: Joi.string(),
-  kibanaSavedObjectMeta: Joi.object().keys({
-    searchSourceJSON: Joi.string()
-  })
-});
+export default class DashboardModel extends Model {
+  constructor(server) {
+    const schema = Joi.object().keys({
+      title: Joi.string(),
+      hits: Joi.number().integer(),
+      description: Joi.string(),
+      panelsJSON: Joi.string(),
+      optionsJSON: Joi.string(),
+      uiStateJSON: Joi.string(),
+      version: Joi.number().integer(),
+      timeRestore: Joi.boolean(),
+      timeMode: Joi.string(),
+      timeTo: Joi.string(),
+      timeFrom: Joi.string(),
+      savedSearchId: Joi.string(),
+      kibanaSavedObjectMeta: Joi.object().keys({
+        searchSourceJSON: Joi.string()
+      })
+    });
 
-export default DashboardSchema;
+    super(server, 'dashboard', schema);
+  }
+}

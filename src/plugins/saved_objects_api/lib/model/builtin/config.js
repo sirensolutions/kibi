@@ -1,7 +1,10 @@
+import Model from '../model';
+
 /**
- * Schema for configuration objects.
+ * Model for configuration objects.
  */
-const ConfigSchema = null;
-
-export default ConfigSchema;
-
+export default class ConfigModel extends Model {
+  constructor(server) {
+    super(server, 'config', null);
+  }
+}

@@ -109,7 +109,7 @@ define(function (require) {
         .then(function () {
           // return our obj as the result of init()
           // kibi: but first make sure fields were initialized
-          if (self.fieldsIndexed) {
+          if (self.kibiFieldsIndexed) {
             return self;
           } else {
             return self._indexFields().then(() => self);
@@ -118,21 +118,27 @@ define(function (require) {
       };
 
       function initFields(fields) {
-        // kibi: retrieve the path of each field first
-        return self._fetchFieldsPath().then(() => {
-          self.fields = new FieldList(self, fields || self.fields || []);
-        });
+        // kibi: if paths not fetched yet do it first
+        if (!self.kibiPathsFetched) {
+          return self._fetchFieldsPath().then(() => {
+            self.fields = new FieldList(self, fields || self.fields || []);
+          });
+        }
+        self.fields = new FieldList(self, fields || self.fields || []);
+        return Promise.resolve(); // kibi: always return a promise
       }
 
       self._indexFields = function () {
         if (self.id) {
           if (!self.fields) {
+            // kibi: setting additional flags to prevent double execution of _indexFields and _fetchFieldsPath
             return self.refreshFields().then(() => {
-              self.fieldsIndexed = true;
+              self.kibiFieldsIndexed = true;
+              self.kibiPathsFetched = true;
             });
           } else {
             return initFields().then(() => {
-              self.fieldsIndexed = true;
+              self.kibiFieldsIndexed = true;
             });
           }
         }

@@ -378,7 +378,7 @@ define(function (require) {
         $rootScope.$on('$locationChangeSuccess', () => $rootScope.actualLocation = $location.url());
 
         $rootScope.$watch(() => { return $location.url(); }, function (newLocation, oldLocation) {
-          if($rootScope.actualLocation === newLocation) {
+          if ($rootScope.actualLocation === newLocation) {
             init();
           }
         });

@@ -226,6 +226,8 @@ describe('index pattern', function () {
         type: 'boolean'
       };
       indexPattern.addScriptedField(scriptedField.name, scriptedField.script, scriptedField.type);
+
+      // kibi: added then as in kibi _indexFields is fully async now
       indexPattern._indexFields().then(() => {
         const scriptedFields = indexPattern.getScriptedFields();
         expect(saveSpy.callCount).to.equal(1);

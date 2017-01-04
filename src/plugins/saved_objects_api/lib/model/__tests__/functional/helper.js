@@ -34,6 +34,16 @@ export default class ModelTestHelper {
       host: clusterUrl,
       requestTimeout: timeout
     });
+
+    const configMock = {
+      get: (key) => {
+        if (key === 'kibana.index') {
+          return '.kibi';
+        }
+        throw new Error(`Unknown configuration key: ${key}`);
+      }
+    };
+
     this._server = {
       plugins: {
         elasticsearch: {
@@ -41,16 +51,14 @@ export default class ModelTestHelper {
             return this._client;
           },
           client: this._client
+        },
+        kibi_core: {
+          getCryptoHelper: () => ({
+            encryptDatasourceParams: () => {}
+          })
         }
       },
-      config: () => ({
-        get: (key) => {
-          if (key === 'kibana.index') {
-            return '.kibi';
-          }
-          throw new Error(`Unknown configuration key: ${key}`);
-        }
-      })
+      config: () => configMock
     };
     this._registry = initRegistry(this._server);
   }
@@ -60,6 +68,13 @@ export default class ModelTestHelper {
    */
   get client() {
     return this._client;
+  }
+
+  /**
+   * Returns the Elasticsearch fake server used by the helper.
+   */
+  get server() {
+    return this._server;
   }
 
   /**

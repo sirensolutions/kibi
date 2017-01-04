@@ -1,13 +1,11 @@
 var createAgent = require('./create_agent');
 var mapUri = require('./map_uri');
-var { resolve } = require('url');
 var _ = require('lodash');
 
 var util = require('./util');
 
 var dbfilter = require('./dbfilter');
 var inject = require('./inject');
-var cryptoHelper = require('../../kibi_core/lib/crypto_helper');
 
 module.exports = function createProxy(server, method, route, config) {
   var filterJoinSet = require('./filter_join')(server).set;
@@ -61,15 +59,6 @@ module.exports = function createProxy(server, method, route, config) {
                   credentials = request.auth.credentials.proxyCredentials;
                 }
                 return dbfilter(server.plugins.kibi_core.getQueryEngine(), query, credentials);
-              }).map((query) => {
-                // here detect if it a request to save datasource
-                if (req.url.indexOf('/elasticsearch/' + serverConfig.get('kibana.index') + '/datasource/') === 0 &&
-                    query.datasourceParams &&
-                    query.datasourceType
-                ) {
-                  cryptoHelper.encryptDatasourceParams(serverConfig, query);
-                }
-                return query;
               }).map((query) => filterJoinSet(query))
               .map((query) => filterJoinSequence(query))
               .then((data) => {

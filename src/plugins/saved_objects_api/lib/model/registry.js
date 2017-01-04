@@ -1,5 +1,3 @@
-import Model from './model';
-
 const instanceMap = Symbol('instanceMap');
 
 /**
@@ -21,13 +19,13 @@ export default class TypeRegistry {
    * Adds a new type to the registry.
    *
    * @param {String} typeName - The type name.
-   * @param {Joi} schema - The type schema.
+   * @param {Class} ModelClass - The model class.
    */
-  set(typeName, schema) {
+  set(typeName, ModelClass) {
     if (this[instanceMap].has(typeName)) {
       throw new Error(`Another type with name ${typeName} has been already registered.`);
     }
-    this[instanceMap].set(typeName, new Model(this._server, typeName, schema));
+    this[instanceMap].set(typeName, new ModelClass(this._server));
   }
 
   /**

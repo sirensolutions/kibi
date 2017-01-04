@@ -1,19 +1,25 @@
 import Joi from 'joi';
+import Model from '../model';
 
 /**
- * Schema for visualization objects.
+ * Model for visualization objects.
  */
-const VisualizationSchema  = Joi.object().keys({
-  title: Joi.string(),
-  description: Joi.string().default(null),
-  visState: Joi.object().default({}),
-  uiStateJSON: Joi.string().default(null),
-  savedSearchId: Joi.string(),
-  version: Joi.number().integer(),
-  kibanaSavedObjectMeta: Joi.object().keys({
-    searchSourceJSON: Joi.string()
-  })
-});
+export default class VisualizationModel extends Model {
+  constructor(server) {
 
-export default VisualizationSchema;
+    const schema  = Joi.object().keys({
+      title: Joi.string(),
+      description: Joi.string().default(null),
+      visState: Joi.object().default({}),
+      uiStateJSON: Joi.string().default(null),
+      savedSearchId: Joi.string(),
+      version: Joi.number().integer(),
+      kibanaSavedObjectMeta: Joi.object().keys({
+        searchSourceJSON: Joi.string()
+      })
+    });
+
+    super(server, 'visualization', schema);
+  }
+}
 

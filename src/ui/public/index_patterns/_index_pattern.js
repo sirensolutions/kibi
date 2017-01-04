@@ -1,30 +1,30 @@
 define(function (require) {
   return function IndexPatternFactory(Private, timefilter, createNotifier, config, kbnIndex, Promise, $rootScope, safeConfirm) {
-    let _ = require('lodash');
-    let errors = require('ui/errors');
-    let angular = require('angular');
+    const _ = require('lodash');
+    const errors = require('ui/errors');
+    const angular = require('angular');
 
-    let fieldformats = Private(require('ui/registry/field_formats'));
-    let getIds = Private(require('ui/index_patterns/_get_ids'));
-    let mapper = Private(require('ui/index_patterns/_mapper'));
-    let intervals = Private(require('ui/index_patterns/_intervals'));
-    let getComputedFields = require('ui/index_patterns/_get_computed_fields');
+    const fieldformats = Private(require('ui/registry/field_formats'));
+    const getIds = Private(require('ui/index_patterns/_get_ids'));
+    const mapper = Private(require('ui/index_patterns/_mapper'));
+    const intervals = Private(require('ui/index_patterns/_intervals'));
+    const getComputedFields = require('ui/index_patterns/_get_computed_fields');
     // kibi: use the SavedObjectSource as DocSource
-    let DocSource = Private(require('ui/courier/data_source/savedobject_source'));
+    const DocSource = Private(require('ui/courier/data_source/savedobject_source'));
     // kibi: end
-    let mappingSetup = Private(require('ui/utils/mapping_setup'));
-    let FieldList = Private(require('ui/index_patterns/_field_list'));
+    const mappingSetup = Private(require('ui/utils/mapping_setup'));
+    const FieldList = Private(require('ui/index_patterns/_field_list'));
 
-    let flattenHit = Private(require('ui/index_patterns/_flatten_hit'));
-    let formatHit = require('ui/index_patterns/_format_hit');
-    let calculateIndices = Private(require('ui/index_patterns/_calculate_indices'));
-    let patternCache = Private(require('ui/index_patterns/_pattern_cache'));
+    const flattenHit = Private(require('ui/index_patterns/_flatten_hit'));
+    const formatHit = require('ui/index_patterns/_format_hit');
+    const calculateIndices = Private(require('ui/index_patterns/_calculate_indices'));
+    const patternCache = Private(require('ui/index_patterns/_pattern_cache'));
 
-    let type = 'index-pattern';
+    const type = 'index-pattern';
 
-    let notify = createNotifier();
+    const notify = createNotifier();
 
-    let mapping = mappingSetup.expandShorthand({
+    const mapping = mappingSetup.expandShorthand({
       title: 'string',
       timeFieldName: 'string',
       notExpandable: 'boolean',
@@ -38,7 +38,7 @@ define(function (require) {
           if (map == null) return;
 
           let count = 0;
-          let serialized = _.transform(map, function (flat, format, field) {
+          const serialized = _.transform(map, function (flat, format, field) {
             if (!format) return;
             count++;
             flat[field] = format;
@@ -49,7 +49,7 @@ define(function (require) {
         _deserialize: function (map) {
           if (map == null) return {};
           return _.mapValues(angular.fromJson(map), function (mapping) {
-            let FieldFormat = fieldformats.byId[mapping.id];
+            const FieldFormat = fieldformats.byId[mapping.id];
             return FieldFormat && new FieldFormat(mapping.params);
           });
         }
@@ -57,11 +57,11 @@ define(function (require) {
     });
 
     function IndexPattern(id) {
-      let self = this;
+      const self = this;
 
       setId(id);
 
-      let docSource = new DocSource();
+      const docSource = new DocSource();
 
       self.init = function () {
         // tell the docSource where to find the doc
@@ -108,22 +108,35 @@ define(function (require) {
         })
         .then(function () {
           // return our obj as the result of init()
-          return self;
+          // kibi: but first make sure fields were initialized
+          if (self.fieldsIndexed) {
+            return self;
+          } else {
+            return self._indexFields().then(() => self);
+          }
         });
       };
 
       function initFields(fields) {
-        self.fields = new FieldList(self, fields || self.fields || []);
+        // kibi: retrieve the path of each field first
+        return self._fetchFieldsPath().then(() => {
+          self.fields = new FieldList(self, fields || self.fields || []);
+        });
       }
 
       self._indexFields = function () {
         if (self.id) {
           if (!self.fields) {
-            return self.refreshFields();
+            return self.refreshFields().then(() => {
+              self.fieldsIndexed = true;
+            });
           } else {
-            initFields();
+            return initFields().then(() => {
+              self.fieldsIndexed = true;
+            });
           }
         }
+        return Promise.resolve();
       };
 
       // Set the source filtering configuration for that index
@@ -140,7 +153,7 @@ define(function (require) {
       self.addScriptedField = function (name, script, type, lang) {
         type = type || 'string';
 
-        let scriptFields = _.pluck(self.getScriptedFields(), 'name');
+        const scriptFields = _.pluck(self.getScriptedFields(), 'name');
 
         if (_.contains(scriptFields, name)) {
           throw new errors.DuplicateField(name);
@@ -158,7 +171,7 @@ define(function (require) {
       };
 
       self.removeScriptedField = function (name) {
-        let fieldIndex = _.findIndex(self.fields, {
+        const fieldIndex = _.findIndex(self.fields, {
           name: name,
           scripted: true
         });
@@ -171,10 +184,10 @@ define(function (require) {
       self.popularizeField = function (fieldName, unit) {
         if (unit == null) unit = 1;
 
-        let field = _.get(self, ['fields', 'byName', fieldName]);
+        const field = _.get(self, ['fields', 'byName', fieldName]);
         if (!field) return;
 
-        let count = Math.max((field.count || 0) + unit, 0);
+        const count = Math.max((field.count || 0) + unit, 0);
         if (field.count !== count) {
           field.count = count;
           self.save();
@@ -206,7 +219,7 @@ define(function (require) {
       };
 
       self.toDetailedIndexList = Promise.method(function (start, stop, sortDirection) {
-        let interval = self.getInterval();
+        const interval = self.getInterval();
 
         if (interval) {
           return intervals.toIndexList(self.id, interval, start, stop, sortDirection);
@@ -236,7 +249,7 @@ define(function (require) {
       };
 
       self.prepBody = function () {
-        let body = {};
+        const body = {};
 
         // serialize json fields
         _.forOwn(mapping, function (fieldMapping, fieldName) {
@@ -260,12 +273,12 @@ define(function (require) {
       }
 
       self.create = function () {
-        let body = self.prepBody();
+        const body = self.prepBody();
         return docSource.doCreate(body)
         .then(setId)
         .catch(function (err) {
           if (_.get(err, 'origError.status') === 409) {
-            let confirmMessage = 'Are you sure you want to overwrite this?';
+            const confirmMessage = 'Are you sure you want to overwrite this?';
 
             return safeConfirm(confirmMessage).then(
               function () {
@@ -289,7 +302,7 @@ define(function (require) {
       };
 
       self.save = function () {
-        let body = self.prepBody();
+        const body = self.prepBody();
         // kibi: notify errors
         return docSource.doIndex(body).then(setId).catch((error) => {
           notify.error(error);
@@ -319,9 +332,8 @@ define(function (require) {
         .then(function (fields) {
           // append existing scripted fields
           fields = fields.concat(self.getScriptedFields());
-
           // initialize self.field with this field list
-          initFields(fields);
+          return initFields(fields);
         });
       };
 

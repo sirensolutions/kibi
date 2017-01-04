@@ -1,12 +1,11 @@
-define(function (require) {
+import _ from 'lodash';
+import Scanner from 'ui/utils/scanner';
 
-  var _ = require('lodash');
-  var Scanner = require('ui/utils/scanner');
+define(function (require) {
 
   require('plugins/kibana/settings/sections/kibi_datasources/services/_saved_datasource');
 
-  var module = require('ui/modules').get('kibi_datasources/services/saved_datasources', []);
-
+  const module = require('ui/modules').get('kibi_datasources/services/saved_datasources', []);
 
   // Register this service with the saved object registry so it can be
   // edited by the object editor.
@@ -15,15 +14,15 @@ define(function (require) {
     title: 'datasources'
   });
 
-  module.service('savedDatasources', function (Promise, kbnIndex, es, kbnUrl, SavedDatasource, createNotifier, Private) {
+  module.service('savedDatasources', function (Promise, kbnIndex, es, savedObjectsAPI, kbnUrl, SavedDatasource, createNotifier, Private) {
 
-    var cache = Private(require('ui/kibi/helpers/cache_helper'));
+    const cache = Private(require('ui/kibi/helpers/cache_helper'));
 
-    var notify = createNotifier({
+    const notify = createNotifier({
       location: 'Saved Datasources'
     });
 
-    var scanner = new Scanner(es, {
+    const scanner = new Scanner(es, {
       index: kbnIndex,
       type: 'datasource'
     });
@@ -38,7 +37,7 @@ define(function (require) {
     };
 
     this.get = function (id) {
-      var cacheKey;
+      let cacheKey;
       if (id) {
         cacheKey = 'savedDatasources-id-' + id;
       }
@@ -46,7 +45,7 @@ define(function (require) {
         return cache.get(cacheKey);
       }
       // Returns a promise that contains a dashboard which is a subclass of docSource
-      var promise = (new SavedDatasource(id)).init();
+      const promise = (new SavedDatasource(id)).init();
       if (cacheKey && cache) {
         cache.set(cacheKey, promise);
       }
@@ -72,7 +71,7 @@ define(function (require) {
     };
 
     this.mapHits = function (hit) {
-      var source = hit._source;
+      const source = hit._source;
       source.id = hit._id;
       source.url = this.urlFor(hit._id);
       return source;
@@ -80,37 +79,32 @@ define(function (require) {
 
 
     this.find = function (searchString) {
-      var self = this;
-      var body = searchString ? {
-        query: {
-          simple_query_string: {
-            query: searchString + '*',
-            fields: ['title^3', 'description'],
-            default_operator: 'AND'
-          }
-        }
-      } : { query: {match_all: {}}};
+      if (!searchString) {
+        searchString = null;
+      }
 
-      var cacheKey = 'savedDatasources' + (searchString ? searchString : '');
+      const cacheKey = 'savedDatasources' + (searchString ? searchString : '');
       if (cache && cache.get(cacheKey)) {
         return Promise.resolve(cache.get(cacheKey));
       }
 
-      return es.search({
+      return savedObjectsAPI.search({
         index: kbnIndex,
-        type: 'datasource',
-        body: body,
+        type: this.type,
+        q: searchString,
         size: 100
       })
       .then((resp) => {
-        var ret = {
+        const result = {
           total: resp.hits.total,
           hits: resp.hits.hits.map((hit) => this.mapHits(hit))
         };
+
         if (cache) {
-          cache.set(cacheKey, ret);
+          cache.set(cacheKey, result);
         }
-        return ret;
+
+        return result;
       });
     };
   });

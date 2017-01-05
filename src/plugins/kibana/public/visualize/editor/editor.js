@@ -64,7 +64,11 @@ define(function (require) {
   });
 
   function VisEditor($scope, $route, timefilter, AppState, kbnUrl, $timeout, courier, kibiState, Private, Promise, createNotifier) {
+    // kibi: dependencies added by kibi
     const doesVisDependsOnSelectedEntities = Private(require('ui/kibi/components/commons/_does_vis_depends_on_selected_entities'));
+    const hasAnyOfVisSavedSearchesATimeField = Private(require('ui/kibi/components/commons/_has_any_of_vis_saved_searches_a_time_field'));
+    // kibi: end
+
     const angular = require('angular');
     const ConfigTemplate = require('ui/ConfigTemplate');
     const Notifier = require('ui/notify/notifier');
@@ -185,7 +189,10 @@ define(function (require) {
       $state.replace();
 
       $scope.$watch('searchSource.get("index").timeFieldName', function (timeField) {
-        timefilter.enabled = !!timeField;
+        // kibi: decide to show/hide timefilter in case requiresMultiSearch is true
+        hasAnyOfVisSavedSearchesATimeField($scope.vis, timeField).then((has) => {
+          timefilter.enabled = has;
+        });
       });
 
       // update the searchSource when filters update
@@ -318,10 +325,15 @@ define(function (require) {
         $state.save();
 
         if (fetch) {
+          // kibi: decide to show/hide entity picker
           doesVisDependsOnSelectedEntities(toVis)
           .then((isEntityDependent) => {
             $scope.holder.entityURIEnabled = isEntityDependent;
             $scope.fetch();
+          });
+          // kibi: decide to show/hide timefilter in case requiresMultiSearch is true
+          hasAnyOfVisSavedSearchesATimeField(toVis, $scope.searchSource.get('index').timeFieldName).then((has) => {
+            timefilter.enabled = has;
           });
         }
       };

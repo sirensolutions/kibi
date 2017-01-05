@@ -325,16 +325,12 @@ define(function (require) {
         $state.save();
 
         if (fetch) {
-          // kibi: decide to show/hide entity picker
-          doesVisDependsOnSelectedEntities(toVis)
-          .then((isEntityDependent) => {
-            $scope.holder.entityURIEnabled = isEntityDependent;
-            $scope.fetch();
-          });
-          // kibi: decide to show/hide timefilter in case requiresMultiSearch is true
-          hasAnyOfVisSavedSearchesATimeField(toVis, $scope.searchSource.get('index').timeFieldName).then((has) => {
-            timefilter.enabled = has;
-          });
+          // kibi: decide to show/hide entity picker and timefilter
+          hasAnyOfVisSavedSearchesATimeField(toVis, $scope.searchSource.get('index').timeFieldName)
+          .then((has) => timefilter.enabled = has)
+          .then(() => doesVisDependsOnSelectedEntities(toVis))
+          .then((isEntityDependent) => $scope.holder.entityURIEnabled = isEntityDependent)
+          .then($scope.fetch);
         }
       };
     }

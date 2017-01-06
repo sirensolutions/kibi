@@ -696,6 +696,9 @@ define(function (require) {
      * @returns an array of indices name
      */
     KibiState.prototype.timeBasedIndices = function (indexPatternId, ...dashboardIds) {
+      if (indexPatternId === null) {
+        return Promise.resolve([]);
+      }
       return indexPatterns.get(indexPatternId)
       .then((pattern) => {
         if (pattern.hasTimeField()) {

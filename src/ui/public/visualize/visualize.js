@@ -165,7 +165,8 @@ define(function (require) {
         }));
 
         // kibi: if delegateSearch is true, the visualization takes care of retrieving the results.
-        if (!_.get($scope, 'vis.type.delegateSearch')) {
+        // kibi: if the visualization does not require a search do not trigger a query
+        if (!_.get($scope, 'vis.type.delegateSearch') && _.get($scope, 'vis.type.requiresSearch')) {
           $scope.$watch('searchSource', prereq(function (searchSource) {
             if (!searchSource || attr.esResp) {
               return;

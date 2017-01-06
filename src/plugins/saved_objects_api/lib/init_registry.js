@@ -18,7 +18,9 @@ export default function initRegistry(server) {
     'dashboard',
     'dashboardgroup',
     'query',
-    'template'
+    'template',
+    'datasource',
+    'search'
   ];
 
   for (const typeName of builtin) {

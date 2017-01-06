@@ -1,6 +1,7 @@
+import _ from 'lodash';
+import Scanner from 'ui/utils/scanner';
+
 define(function (require) {
-  const _ = require('lodash');
-  const Scanner = require('ui/utils/scanner');
 
   require('plugins/kibana/discover/saved_searches/_saved_search');
   require('ui/notify');
@@ -16,7 +17,8 @@ define(function (require) {
     title: 'searches'
   });
 
-  module.service('savedSearches', function (Promise, config, kbnIndex, es, createNotifier, SavedSearch, kbnUrl, Private) {
+  // kibi: inject Saved Objects API
+  module.service('savedSearches', function (Promise, config, kbnIndex, es, savedObjectsAPI, createNotifier, SavedSearch, kbnUrl, Private) {
     const cache = Private(require('ui/kibi/helpers/cache_helper')); // kibi: added to cache requests for saved searches
     const scanner = new Scanner(es, {
       index: kbnIndex,
@@ -45,7 +47,7 @@ define(function (require) {
 
 
     this.get = function (id) {
-      var cacheKey;
+      let cacheKey;
       if (id) {
         cacheKey = 'savedSearches-id-' + id;
       }
@@ -53,7 +55,7 @@ define(function (require) {
       if (cacheKey && cache && cache.get(cacheKey)) {
         return cache.get(cacheKey);
       }
-      var promise = (new SavedSearch(id)).init();
+      const promise = (new SavedSearch(id)).init();
       if (cacheKey && cache) {
         // kibi: put into cache
         cache.set(cacheKey, promise);
@@ -80,46 +82,37 @@ define(function (require) {
     };
 
     this.find = function (searchString, size = 100) {
-      let body;
-      if (searchString) {
-        body = {
-          query: {
-            simple_query_string: {
-              query: searchString + '*',
-              fields: ['title^3', 'description'],
-              default_operator: 'AND'
-            }
-          }
-        };
-      } else {
-        body = { query: {match_all: {}}};
+      if (!searchString) {
+        searchString = null;
       }
 
       // kibi: get from cache
-      var cacheKey = 'savedSearches' + (searchString ? searchString : '');
+      const cacheKey = 'savedSearches' + (searchString ? searchString : '');
       if (cache && cache.get(cacheKey)) {
         return Promise.resolve(cache.get(cacheKey));
       }
 
-      return es.search({
+      // kibi: search using the Saved Objects API
+      return savedObjectsAPI.search({
         index: kbnIndex,
-        type: 'search',
-        body: body,
-        size: size
+        type: this.type,
+        q: searchString,
+        size: 100
       })
       .then((resp) => {
-        var ret = {
+        const result = {
           total: resp.hits.total,
           hits: resp.hits.hits.map((hit) => this.mapHits(hit))
         };
 
-        // kibi: put into cache
         if (cache) {
-          cache.set(cacheKey, ret);
+          cache.set(cacheKey, result);
         }
 
-        return ret;
+        return result;
       });
+      // kibi: end
+
     };
   });
 });

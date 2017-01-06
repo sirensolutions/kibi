@@ -9,6 +9,8 @@ const util = require('../elasticsearch/lib/util');
 const dbfilter = require('../elasticsearch/lib/dbfilter');
 const inject = require('../elasticsearch/lib/inject');
 
+import cryptoHelper from './lib/crypto_helper';
+
 /**
  * The Kibi core plugin.
  *
@@ -30,7 +32,6 @@ module.exports = function (kibana) {
     require('./lib/migrations/migration_2'),
     require('./lib/migrations/migration_3'),
     require('./lib/migrations/migration_4'),
-    // migration_5 must be done after migration_4
     require('./lib/migrations/migration_5')
   ];
 
@@ -164,6 +165,8 @@ module.exports = function (kibana) {
       });
 
       server.expose('getQueryEngine', () => queryEngine);
+
+      server.expose('getCryptoHelper', () => cryptoHelper);
 
       indexHelper = new IndexHelper(server);
       server.expose('getIndexHelper', () => indexHelper);

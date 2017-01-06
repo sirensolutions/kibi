@@ -6,6 +6,7 @@ import NotFoundError from './errors/not_found';
 import ConflictError from './errors/conflict';
 import { get, set } from 'lodash';
 
+
 /**
  * A model that manages objects having a specific type.
  */
@@ -24,6 +25,7 @@ export default class Model {
     this._type = type;
     this._config = server.config();
     this._schema = schema;
+
     this._client = server.plugins.elasticsearch.createClient({
       auth: false
     });
@@ -61,6 +63,14 @@ export default class Model {
       default:
         throw error;
     }
+  }
+
+  /**
+   * Prepares an object body before sending to the backend.
+   *
+   * @param {Object} body - An object.
+   */
+  _prepare(body) {
   }
 
   /**
@@ -127,6 +137,8 @@ export default class Model {
    * @param {Object} credentials - Optional user credentials.
    */
   async create(id, body, credentials) {
+    this._prepare(body);
+
     try {
       await this.createMappings(credentials);
       const parameters = {
@@ -157,6 +169,7 @@ export default class Model {
    * @param {Object} credentials - Optional user credentials.
    */
   async update(id, body, credentials) {
+    this._prepare(body);
     try {
       await this.createMappings(credentials);
       const parameters = {

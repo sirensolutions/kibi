@@ -4,10 +4,11 @@ define(function (require) {
 
   return function hasAnyOfVisSavedSearchesATimeFieldFactory(Private, Promise, savedSearches) {
     const TemplateVisType = Private(require('ui/template_vis_type/TemplateVisType'));
+    const VislibVisType = Private(require('ui/vislib_vis_type/VislibVisType'));
 
     return function (vis, timeFieldName) {
-      if (!(vis.type instanceof TemplateVisType)) {
-        return Promise.reject(new Error('vis.type should be an instance of TemplateVisType'));
+      if (!(vis.type instanceof TemplateVisType || vis.type instanceof VislibVisType)) {
+        return Promise.reject(new Error('vis.type should be an instance of TemplateVisType or VislibVisType'));
       }
       if (vis.type.requiresMultiSearch) {
         // here have to grab all indices from all searchSources and check if at least one has a time field

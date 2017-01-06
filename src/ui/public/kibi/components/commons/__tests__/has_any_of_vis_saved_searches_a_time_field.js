@@ -30,10 +30,10 @@ const fakeSavedSearches = [
 
 
 let hasAnyOfVisSavedSearchesATimeField;
-let TemplateVisType;
 let unsupportedType;
-let kibiTimelineType;
-let requiresMultiSearchFalse;
+let kibiTimelineType1;
+let kibiTimelineType2;
+let requiresMultiSearchFalseType;
 
 describe('Kibi Components', function () {
   describe('Commons', function () {
@@ -48,9 +48,16 @@ describe('Kibi Components', function () {
 
         ngMock.inject(function (Private) {
           hasAnyOfVisSavedSearchesATimeField = Private(require('ui/kibi/components/commons/_has_any_of_vis_saved_searches_a_time_field'));
-          TemplateVisType = Private(require('ui/template_vis_type/TemplateVisType'));
+          const TemplateVisType = Private(require('ui/template_vis_type/TemplateVisType'));
+          const VislibVisType = Private(require('ui/vislib_vis_type/VislibVisType'));
 
-          kibiTimelineType = new TemplateVisType({
+          kibiTimelineType1 = new TemplateVisType({
+            name: 'kibi_timeline',
+            template: '<div/>', // if not provided will throw an exception
+            requiresMultiSearch: true,
+          });
+
+          kibiTimelineType2 = new VislibVisType({
             name: 'kibi_timeline',
             template: '<div/>', // if not provided will throw an exception
             requiresMultiSearch: true,
@@ -62,7 +69,7 @@ describe('Kibi Components', function () {
             requiresMultiSearch: true,
           });
 
-          requiresMultiSearchFalse = new TemplateVisType({
+          requiresMultiSearchFalseType = new TemplateVisType({
             name: 'pie',
             template: '<div/>', // if not provided will throw an exception
             requiresMultiSearch: false,
@@ -86,7 +93,7 @@ describe('Kibi Components', function () {
           }).catch(done);
         });
 
-        it('should throw an error when type is not an instance of TemplateVisType', function (done) {
+        it('should throw an error when type is not an instance of TemplateVisType or VislibVisType', function (done) {
           const vis = {
             type: 'kibi_timeline' // valid vis but type should be a TemplateVisType
           };
@@ -94,18 +101,18 @@ describe('Kibi Components', function () {
           hasAnyOfVisSavedSearchesATimeField(vis).then(function (res) {
             done('Should throw an error');
           }).catch(function (err) {
-            expect(err.message).to.equal('vis.type should be an instance of TemplateVisType');
+            expect(err.message).to.equal('vis.type should be an instance of TemplateVisType or VislibVisType');
             done();
           });
         });
 
       });
 
-      describe('requiresMultiSearchFalse (pie)', function () {
+      describe('requiresMultiSearchFalseType (pie)', function () {
 
         it('should return false if no timeFieldName', function (done) {
           const vis = {
-            type: requiresMultiSearchFalse,
+            type: requiresMultiSearchFalseType,
           };
           hasAnyOfVisSavedSearchesATimeField(vis).then(function (res) {
             expect(res).to.equal(false);
@@ -115,7 +122,7 @@ describe('Kibi Components', function () {
 
         it('should return true if there is timeFieldName', function (done) {
           const vis = {
-            type: requiresMultiSearchFalse,
+            type: requiresMultiSearchFalseType,
           };
           hasAnyOfVisSavedSearchesATimeField(vis, 'myDate').then(function (res) {
             expect(res).to.equal(true);
@@ -128,9 +135,27 @@ describe('Kibi Components', function () {
 
       describe('kibi timeline', function () {
 
-        it('one group saved search has time field', function (done) {
+        it('one group saved search has time field (kibiTimelineType1)', function (done) {
           const vis = {
-            type: kibiTimelineType,
+            type: kibiTimelineType1,
+            params: {
+              groups: [
+                {
+                  savedSearchId: 'savedSearchWithTimeField'
+                }
+              ]
+            }
+          };
+
+          hasAnyOfVisSavedSearchesATimeField(vis).then(function (res) {
+            expect(res).to.equal(true);
+            done();
+          }).catch(done);
+        });
+
+        it('one group saved search has time field (kibiTimelineType2)', function (done) {
+          const vis = {
+            type: kibiTimelineType2,
             params: {
               groups: [
                 {
@@ -148,7 +173,7 @@ describe('Kibi Components', function () {
 
         it('two groups, one with saved search which has time field', function (done) {
           const vis = {
-            type: kibiTimelineType,
+            type: kibiTimelineType1,
             params: {
               groups: [
                 {
@@ -169,7 +194,7 @@ describe('Kibi Components', function () {
 
         it('one group saved search has no time field', function (done) {
           const vis = {
-            type: kibiTimelineType,
+            type: kibiTimelineType1,
             params: {
               groups: [
                 {

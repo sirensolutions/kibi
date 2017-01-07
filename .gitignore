@@ -32,3 +32,5 @@ selenium
 # Gradle
 .gradle/
 build-gradle/
+/pki
+/gremlin_server

@@ -4,7 +4,7 @@ import AuthorizationError from './errors/authorization';
 import AuthenticationError from './errors/authentication';
 import NotFoundError from './errors/not_found';
 import ConflictError from './errors/conflict';
-import { get, set } from 'lodash';
+import { get, set, isString } from 'lodash';
 
 
 /**
@@ -81,7 +81,7 @@ export default class Model {
     if (!credentials) {
       return;
     }
-    for (let key of Object.keys(credentials)) {
+    for (const key of Object.keys(credentials)) {
       set(parameters, key, credentials[key]);
     }
   }
@@ -228,23 +228,27 @@ export default class Model {
    * Returns all the objects of the type managed by this model.
    *
    * @param {Number} size - The number of results to return.
-   * @param {String} searchString - An optional search string.
+   * @param {String} search - An optional search string or query body.
    * @param {Object} credentials - Optional user credentials.
    * @return {Array} A list of objects of the specified type.
    * @throws {NotFoundError} if the object does not exist.
    */
-  async search(size, searchString, credentials) {
+  async search(size, search, credentials) {
     let body;
-    if (searchString) {
-      body = {
-        query: {
-          simple_query_string: {
-            query: `${searchString}*`,
-            fields: ['title^3', 'description'],
-            default_operator: 'AND'
+    if (search) {
+      if (isString(search)) {
+        body = {
+          query: {
+            simple_query_string: {
+              query: `${search}*`,
+              fields: ['title^3', 'description'],
+              default_operator: 'AND'
+            }
           }
-        }
-      };
+        };
+      } else {
+        body = search;
+      }
     } else {
       body = {
         query: {

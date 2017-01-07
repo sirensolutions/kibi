@@ -29,25 +29,6 @@ module.exports = function (chrome, internals) {
       a.href = chrome.addBasePath('/elasticsearch');
       return a.href;
     }()))
-    // kibi: Saved Objects API
-    .value('savedObjectsAPITypes', [
-      'session',
-      'datasource',
-      'visualization',
-      'index-pattern',
-      'config',
-      'dashboard',
-      'dashboardgroup',
-      'template',
-      'query',
-      'search'
-    ])
-    .value('savedObjectsAPIUrl', (function () {
-      const a = document.createElement('a');
-      a.href = chrome.addBasePath('/api/saved-objects/v1');
-      return a.href;
-    }()))
-    // kibi: end
     .config(chrome.$setupXsrfRequestInterceptor)
     .run(($location, $rootScope, Private) => {
       const notify = new Notifier();

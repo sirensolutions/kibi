@@ -30,7 +30,7 @@ define(function (require) {
       // the doc which is used to store this object
       // kibi: set source based on type
       let docSource;
-      if (savedObjectsAPITypes.indexOf(config.type) >= 0) {
+      if (savedObjectsAPITypes.has(config.type)) {
         docSource = new SavedObjectSource();
       } else {
         docSource = new DocSource();
@@ -332,7 +332,7 @@ define(function (require) {
       self.delete = function () {
         // kibi: use the Saved Objects API client if needed
         let client = es;
-        if (savedObjectsAPITypes.indexOf(config.type) >= 0) {
+        if (savedObjectsAPITypes.has(config.type)) {
           client = savedObjectsAPI;
         }
         return client.delete({

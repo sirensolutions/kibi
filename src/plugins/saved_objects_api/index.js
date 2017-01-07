@@ -1,5 +1,6 @@
 import initRegistry from './lib/init_registry';
 import Model from './lib/model/model';
+import builtin from './lib/model/builtin';
 
 /**
  * Saved objects API plugin.
@@ -68,7 +69,17 @@ export default function (kibana) {
           };
         }
       });
-    }
+    },
+
+    uiExports: {
+      hacks: [
+        'plugins/saved_objects_api/services/types',
+      ],
+      injectDefaultVars: () => ({
+        savedObjectsAPIBuiltin: builtin
+      })
+    },
+
   });
 
 }

@@ -26,7 +26,7 @@ define(function (require) {
 
       // kibi: some objects are saved through the Saved Objects API.
       let client;
-      if (params.index === kbnIndex && savedObjectsAPITypes.indexOf(params.type) >= 0) {
+      if (params.index === kbnIndex && savedObjectsAPITypes.has(params.type)) {
         client = savedObjectsAPI;
       } else {
         client = es;

@@ -1,4 +1,5 @@
 import initRegistry from './lib/init_registry';
+import Model from './lib/model/model';
 
 /**
  * Saved objects API plugin.
@@ -9,9 +10,10 @@ import initRegistry from './lib/init_registry';
  *
  * The plugin exposes the following methods:
  *
- * `registerType(typeName, schema)`: allows to register a new type with the specified schema.
- *                                   Currently the schema is expected to be a Joi instance but
- *                                   this is probably going to change.
+ * `registerType(configuration)`: allows to register a new type with the specified configuration.
+ *                                Configuration is expected to contain a `schema` attribute with
+ *                                a Joi instance containing the schema of the type and a `type`
+ *                                attribute with the type name.
  * `getModel(typeName)`: returns the model instance for the specified type name.
  */
 export default function (kibana) {
@@ -48,7 +50,9 @@ export default function (kibana) {
         return reply.continue();
       });
 
-      server.expose('registerType', (typeName, schema) => registry.set(typeName, schema));
+      server.expose('registerType', (configuration) => {
+        registry.set(configuration.type, new Model(server, configuration.type, configuration.schema));
+      });
       server.expose('getModel', (typeName) => registry.get(typeName));
     }
   });

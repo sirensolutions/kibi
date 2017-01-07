@@ -15,6 +15,7 @@ import Model from './lib/model/model';
  *                                a Joi instance containing the schema of the type and a `type`
  *                                attribute with the type name.
  * `getModel(typeName)`: returns the model instance for the specified type name.
+ * `getServerCredentials`: returns the server credentials.
  */
 export default function (kibana) {
 
@@ -26,6 +27,7 @@ export default function (kibana) {
 
     init(server, options) {
       const registry = initRegistry(server);
+      const config = server.config();
 
       require('./lib/routes/v1')(server, API_ROOT);
 
@@ -54,6 +56,18 @@ export default function (kibana) {
         registry.set(configuration.type, new Model(server, configuration.type, configuration.schema));
       });
       server.expose('getModel', (typeName) => registry.get(typeName));
+      server.expose('getServerCredentials', () => {
+        const username = config.get('elasticsearch.username');
+        const password = config.get('elasticsearch.password');
+        if (username && password) {
+          const authHeader = new Buffer(`${username}:${password}`).toString('base64');
+          return {
+            headers: {
+              authorization: `Basic ${authHeader}`
+            }
+          };
+        }
+      });
     }
   });
 

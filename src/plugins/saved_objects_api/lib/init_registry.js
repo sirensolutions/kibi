@@ -25,7 +25,8 @@ export default function initRegistry(server) {
 
   for (const typeName of builtin) {
     const filename = typeName.replace(/-/g, '');
-    registry.set(typeName, require(`./model/builtin/${filename}`));
+    const ModelClass = require(`./model/builtin/${filename}`);
+    registry.set(typeName, new ModelClass(server));
   }
 
   return registry;

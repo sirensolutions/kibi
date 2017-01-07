@@ -6,8 +6,19 @@ import uiModules from 'ui/modules';
  */
 uiModules
 .get('kibana')
-.service('savedObjectsAPITypes', function (savedObjectsAPIBuiltin) {
-  return new Set(savedObjectsAPIBuiltin);
+.service('savedObjectsAPITypes', function () {
+  return new Set([
+    'session',
+    'visualization',
+    'index-pattern',
+    'config',
+    'dashboard',
+    'dashboardgroup',
+    'query',
+    'template',
+    'datasource',
+    'search'
+  ]);
 })
 .value('savedObjectsAPIUrl', (function () {
   const a = document.createElement('a');

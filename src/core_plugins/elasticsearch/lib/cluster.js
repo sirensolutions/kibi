@@ -17,9 +17,6 @@ export class Cluster {
     return this;
   }
 
-  // kibi: added getPlugins method for getting the list of ES plugins
-  getPlugins = () => getClonedProperty(this._config, 'plugins');
-
   callWithRequest = (req = {}, endpoint, clientParams = {}, options = {}) => {
     if (req.headers) {
       const filteredHeaders = filterHeaders(req.headers, this.getRequestHeadersWhitelist());

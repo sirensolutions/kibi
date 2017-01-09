@@ -18,7 +18,7 @@ export default function MapperService(Private, Promise, es, esAdmin, config, kbn
   const patternToWildcard = Private(IndexPatternsPatternToWildcardProvider);
 
   // kibi: support dots in field name
-  const _getPathsForIndexPattern = Private(require());
+  const _getPathsForIndexPattern = Private(PathsProvider);
 
   const LocalCache = Private(IndexPatternsLocalCacheProvider);
 

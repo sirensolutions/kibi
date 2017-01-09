@@ -112,7 +112,7 @@ export default function IndexPatternFactory(Private, createNotifier, config, kbn
     if (!indexPattern.fields || !containsFieldCapabilities(indexPattern.fields)) {
       promise = indexPattern.refreshFields();
     }
-    return promise.then(() => {initFields(indexPattern);});
+    return promise.then(() => { initFields(indexPattern); });
   }
 
   function setId(indexPattern, id) {
@@ -141,9 +141,13 @@ export default function IndexPatternFactory(Private, createNotifier, config, kbn
   }
 
   function initFields(indexPattern, input) {
-    const oldValue = indexPattern.fields;
-    const newValue = input || oldValue || [];
-    indexPattern.fields = new FieldList(indexPattern, newValue);
+    // kibi: retrieve the path of each field first
+    return indexPattern._fetchFieldsPath()
+    .then(() => {
+      const oldValue = indexPattern.fields;
+      const newValue = input || oldValue || [];
+      indexPattern.fields = new FieldList(indexPattern, newValue);
+    });
   }
 
   function fetchFields(indexPattern) {

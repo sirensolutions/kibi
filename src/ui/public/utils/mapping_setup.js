@@ -84,7 +84,7 @@ define(function () {
         };
 
         // kibi: if the mapping for this type is managed by the saved objects api return true.
-        if (savedObjectsAPITypes.indexOf(type) >= 0) {
+        if (savedObjectsAPITypes.has(type)) {
           return true;
         }
         // kibi: end

@@ -43,3 +43,5 @@ src/ui_framework/doc_site/build/*.js*
 # Gradle
 .gradle/
 build-gradle/
+/pki
+/gremlin_server

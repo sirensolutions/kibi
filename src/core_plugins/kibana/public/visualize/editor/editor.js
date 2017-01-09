@@ -16,8 +16,10 @@ import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
 import editorTemplate from 'plugins/kibana/visualize/editor/editor.html';
 
+// kibi: imports
 import 'ui/kibi/directives/kibi_param_entity_uri';
-import doesVisDependsOnSelectedEntitiesProvider from 'ui/kibi/components/commons/_does_vis_depends_on_selected_entities';
+import DoesVisDependsOnSelectedEntitiesProvider from 'ui/kibi/components/commons/_does_vis_depends_on_selected_entities';
+import HasAnyOfVisSavedSearchesATimeField from 'ui/kibi/components/commons/_has_any_of_vis_saved_searches_a_time_field';
 
 uiRoutes
 .when('/visualize/create', {
@@ -41,7 +43,7 @@ uiRoutes
   template: editorTemplate,
   resolve: {
     isEntityDependent: function (Private, savedVisualizations, $route) {
-      const doesVisDependsOnSelectedEntities = Private(doesVisDependsOnSelectedEntitiesProvider);
+      const doesVisDependsOnSelectedEntities = Private(DoesVisDependsOnSelectedEntitiesProvider);
       return savedVisualizations.get($route.current.params.id)
       .then((savedVis) => doesVisDependsOnSelectedEntities(savedVis.vis))
       .catch(() => false);
@@ -77,7 +79,8 @@ function VisEditor(createNotifier, kibiState, $scope, $route, timefilter, AppSta
   const queryFilter = Private(FilterBarQueryFilterProvider);
   const filterBarClickHandler = Private(FilterBarFilterBarClickHandlerProvider);
 
-  const doesVisDependsOnSelectedEntities = Private(doesVisDependsOnSelectedEntitiesProvider);
+  const doesVisDependsOnSelectedEntities = Private(DoesVisDependsOnSelectedEntitiesProvider);
+  const hasAnyOfVisSavedSearchesATimeField = Private(HasAnyOfVisSavedSearchesATimeField);
 
   const notify = createNotifier({
     location: 'Visualization Editor'
@@ -243,7 +246,10 @@ function VisEditor(createNotifier, kibiState, $scope, $route, timefilter, AppSta
     $state.replace();
 
     $scope.$watch('searchSource.get("index").timeFieldName', function (timeField) {
-      timefilter.enabled = !!timeField;
+      // kibi: decide to show/hide timefilter in case requiresMultiSearch is true
+      hasAnyOfVisSavedSearchesATimeField($scope.vis, timeField).then((has) => {
+        timefilter.enabled = has;
+      });
     });
 
     // update the searchSource when filters update
@@ -385,11 +391,12 @@ function VisEditor(createNotifier, kibiState, $scope, $route, timefilter, AppSta
        * has been changes in the Data-tab.
        */
       if (stage && isAggregationsChanged) {
-        doesVisDependsOnSelectedEntities(toVis)
-        .then((isEntityDependent) => {
-          $scope.holder.entityURIEnabled = isEntityDependent;
-          $scope.fetch();
-        });
+        // kibi: decide to show/hide entity picker and timefilter
+        hasAnyOfVisSavedSearchesATimeField(toVis, $scope.searchSource.get('index').timeFieldName)
+        .then((has) => timefilter.enabled = has)
+        .then(() => doesVisDependsOnSelectedEntities(toVis))
+        .then((isEntityDependent) => $scope.holder.entityURIEnabled = isEntityDependent)
+        .then($scope.fetch);
       } else {
         $state.save();
       }

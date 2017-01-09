@@ -36,7 +36,7 @@ export default function (savedObjectsAPI, savedObjectsAPITypes, Promise, Private
     const onKbnIndex = [].concat(params.index).includes(kbnIndex);
     let client = onKbnIndex ? esAdmin : es;
     // kibi: some objects are saved through the Saved Objects API.
-    if (onKbnIndex && savedObjectsAPITypes.indexOf(params.type) >= 0) {
+    if (onKbnIndex && savedObjectsAPITypes.has(params.type)) {
       client = savedObjectsAPI;
     }
 

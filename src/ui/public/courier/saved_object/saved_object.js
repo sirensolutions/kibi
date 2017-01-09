@@ -46,7 +46,7 @@ export default function SavedObjectFactory(savedObjectsAPI, savedObjectsAPITypes
     // the doc which is used to store this object
     // kibi: set source based on type
     let docSource;
-    if (savedObjectsAPITypes.indexOf(config.type) >= 0) {
+    if (savedObjectsAPITypes.has(config.type)) {
       docSource = new SavedObjectSource();
     } else {
       docSource = new DocSource();
@@ -395,7 +395,7 @@ export default function SavedObjectFactory(savedObjectsAPI, savedObjectsAPITypes
     this.delete = () => {
       // kibi: use the Saved Objects API client if needed
       let client = esAdmin;
-      if (savedObjectsAPITypes.indexOf(config.type) >= 0) {
+      if (savedObjectsAPITypes.has(config.type)) {
         client = savedObjectsAPI;
       }
       return client.delete(

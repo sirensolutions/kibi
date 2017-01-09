@@ -283,7 +283,7 @@ module.exports = (server, API_ROOT) => {
       } catch (error) {
         return reply(Boom.notFound(error));
       }
-      model.search(request.query.size, request.query.q, credentials)
+      model.search(request.query.size, request.query.q || request.payload, credentials)
       .then((response) => {
         reply(response);
       })

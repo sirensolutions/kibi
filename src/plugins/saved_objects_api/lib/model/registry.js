@@ -19,13 +19,13 @@ export default class TypeRegistry {
    * Adds a new type to the registry.
    *
    * @param {String} typeName - The type name.
-   * @param {Class} ModelClass - The model class.
+   * @param {Model} model - The model instance.
    */
-  set(typeName, ModelClass) {
+  set(typeName, model) {
     if (this[instanceMap].has(typeName)) {
       throw new Error(`Another type with name ${typeName} has been already registered.`);
     }
-    this[instanceMap].set(typeName, new ModelClass(this._server));
+    this[instanceMap].set(typeName, model);
   }
 
   /**

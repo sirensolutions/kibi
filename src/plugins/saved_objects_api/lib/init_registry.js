@@ -1,4 +1,5 @@
 import TypeRegistry from './model/registry';
+import builtin from './model/builtin';
 
 /**
  * Adds builtin types to a new TypeRegistry and returns it.
@@ -10,22 +11,10 @@ export default function initRegistry(server) {
 
   const registry = new TypeRegistry(server);
 
-  const builtin = [
-    'session',
-    'visualization',
-    'index-pattern',
-    'config',
-    'dashboard',
-    'dashboardgroup',
-    'query',
-    'template',
-    'datasource',
-    'search'
-  ];
-
   for (const typeName of builtin) {
     const filename = typeName.replace(/-/g, '');
-    registry.set(typeName, require(`./model/builtin/${filename}`));
+    const ModelClass = require(`./model/builtin/${filename}`);
+    registry.set(typeName, new ModelClass(server));
   }
 
   return registry;

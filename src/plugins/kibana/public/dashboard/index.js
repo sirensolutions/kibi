@@ -178,11 +178,9 @@ define(function (require) {
         });
 
         $scope.$watch('configTemplate', function () {
-          //debugger;
           $rootScope.$emit('stDashboardOnProperty', 'configTemplate', $scope.configTemplate);
         }, true);
         $scope.$watch('state', function () {
-          //debugger;
           $rootScope.$emit('stDashboardOnProperty', 'state', $scope.state);
         }, true);
 
@@ -197,7 +195,6 @@ define(function (require) {
 
 
         $scope.$watchCollection('state.options', function (newVal, oldVal) {
-          //debugger;
           if (!angular.equals(newVal, oldVal)) $state.save();
         });
         $scope.$watch('state.options.darkTheme', setDarkTheme);

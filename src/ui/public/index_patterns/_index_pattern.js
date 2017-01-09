@@ -112,7 +112,10 @@ export default function IndexPatternFactory(Private, createNotifier, config, kbn
     if (!indexPattern.fields || !containsFieldCapabilities(indexPattern.fields)) {
       promise = indexPattern.refreshFields();
     }
-    return promise.then(() => { initFields(indexPattern); });
+    return promise.then(() => { initFields(indexPattern); })
+    .then(() => {
+      this.kibiPathsFetched = true;
+    });
   }
 
   function setId(indexPattern, id) {
@@ -141,9 +144,12 @@ export default function IndexPatternFactory(Private, createNotifier, config, kbn
   }
 
   function initFields(indexPattern, input) {
-    // kibi: retrieve the path of each field first
-    return indexPattern._fetchFieldsPath()
-    .then(() => {
+    // kibi: if paths not fetched yet do it first
+    let promise = Promise.resolve();
+    if (!this.kibiPathsFetched) {
+      promise = this._fetchFieldsPath();
+    }
+    return promise.then(() => {
       const oldValue = indexPattern.fields;
       const newValue = input || oldValue || [];
       indexPattern.fields = new FieldList(indexPattern, newValue);
@@ -382,9 +388,9 @@ export default function IndexPatternFactory(Private, createNotifier, config, kbn
 
     // kibi: return the field paths sequence in order to support field names with dots
     _fetchFieldsPath() {
-      return mapper.getPathsSequenceForIndexPattern(self)
+      return mapper.getPathsSequenceForIndexPattern(this)
       .then(paths => {
-        self.paths = paths;
+        this.paths = paths;
       });
     }
     // kibi: end

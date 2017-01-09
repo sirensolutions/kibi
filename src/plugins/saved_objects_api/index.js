@@ -1,4 +1,6 @@
 import initRegistry from './lib/init_registry';
+import Model from './lib/model/model';
+import builtin from './lib/model/builtin';
 
 /**
  * Saved objects API plugin.
@@ -9,10 +11,12 @@ import initRegistry from './lib/init_registry';
  *
  * The plugin exposes the following methods:
  *
- * `registerType(typeName, schema)`: allows to register a new type with the specified schema.
- *                                   Currently the schema is expected to be a Joi instance but
- *                                   this is probably going to change.
+ * `registerType(configuration)`: allows to register a new type with the specified configuration.
+ *                                Configuration is expected to contain a `schema` attribute with
+ *                                a Joi instance containing the schema of the type and a `type`
+ *                                attribute with the type name.
  * `getModel(typeName)`: returns the model instance for the specified type name.
+ * `getServerCredentials`: returns the server credentials.
  */
 export default function (kibana) {
 
@@ -24,6 +28,7 @@ export default function (kibana) {
 
     init(server, options) {
       const registry = initRegistry(server);
+      const config = server.config();
 
       require('./lib/routes/v1')(server, API_ROOT);
 
@@ -48,9 +53,33 @@ export default function (kibana) {
         return reply.continue();
       });
 
-      server.expose('registerType', (typeName, schema) => registry.set(typeName, schema));
+      server.expose('registerType', (configuration) => {
+        registry.set(configuration.type, new Model(server, configuration.type, configuration.schema));
+      });
       server.expose('getModel', (typeName) => registry.get(typeName));
-    }
+      server.expose('getServerCredentials', () => {
+        const username = config.get('elasticsearch.username');
+        const password = config.get('elasticsearch.password');
+        if (username && password) {
+          const authHeader = new Buffer(`${username}:${password}`).toString('base64');
+          return {
+            headers: {
+              authorization: `Basic ${authHeader}`
+            }
+          };
+        }
+      });
+    },
+
+    uiExports: {
+      hacks: [
+        'plugins/saved_objects_api/services/types',
+      ],
+      injectDefaultVars: () => ({
+        savedObjectsAPIBuiltin: builtin
+      })
+    },
+
   });
 
 }

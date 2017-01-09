@@ -130,7 +130,7 @@ describe('Kibi Components', function () {
 
     describe('constructCountQuery', function () {
       it('empty', function (done) {
-        var expected = {
+        const expected = {
           size: 0,
           query: {
             bool: {
@@ -166,7 +166,7 @@ describe('Kibi Components', function () {
       });
 
       it('saved search', function (done) {
-        var expected = {
+        const expected = {
           size: 0,
           query: {
             bool: {
@@ -210,7 +210,7 @@ describe('Kibi Components', function () {
       });
 
       it('check if filters are taken from kibiState', function (done) {
-        var filter = {
+        const filter = {
           meta:{
             disabled: false
           },
@@ -221,7 +221,7 @@ describe('Kibi Components', function () {
 
         appState.filters = [ filter ];
 
-        var expected = {
+        const expected = {
           size: 0,
           query: {
             bool: {
@@ -262,7 +262,7 @@ describe('Kibi Components', function () {
       });
 
       it('check if query is taken from kibiState', function (done) {
-        var query = {
+        const query = {
           query_string: {
             query: 'AAA'
           }
@@ -270,7 +270,7 @@ describe('Kibi Components', function () {
 
         appState.query = query;
 
-        var expected = {
+        const expected = {
           size: 0,
           query: {
             bool: {
@@ -309,7 +309,7 @@ describe('Kibi Components', function () {
       });
 
       it('do not take filter from kibi state when disabled', function (done) {
-        var negatedFilter = {
+        const negatedFilter = {
           meta:{
             disabled: true
           },
@@ -319,7 +319,7 @@ describe('Kibi Components', function () {
         };
         appState.filters = [ negatedFilter ];
 
-        var expected = {
+        const expected = {
           size: 0,
           query: {
             bool: {
@@ -355,7 +355,7 @@ describe('Kibi Components', function () {
       });
 
       it('different types of filters', function (done) {
-        var differentKindOfFilters = [
+        const differentKindOfFilters = [
           {
             meta:{ disabled: false },
             range: {}
@@ -396,7 +396,7 @@ describe('Kibi Components', function () {
 
         appState.filters = differentKindOfFilters;
 
-        var expected = {
+        const expected = {
           size: 0,
           query: {
             bool: {
@@ -433,7 +433,7 @@ describe('Kibi Components', function () {
       });
 
       it('different types of filters negated', function (done) {
-        var differentKindOfNegatedFilters = [
+        const differentKindOfNegatedFilters = [
           {
             meta:{negate:true},
             range: {}
@@ -469,7 +469,7 @@ describe('Kibi Components', function () {
         ];
         appState.filters = differentKindOfNegatedFilters;
 
-        var expected = {
+        const expected = {
           size: 0,
           query: {
             bool: {
@@ -525,7 +525,7 @@ describe('Kibi Components', function () {
         });
 
         sinon.stub(kibiState, '_getJoinSetFilter').returns(Promise.resolve({ join_set: 'new join set' }));
-        var expected = {
+        const expected = {
           size: 0,
           query: {
             bool: {

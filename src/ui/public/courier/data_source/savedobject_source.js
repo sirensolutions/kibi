@@ -1,10 +1,10 @@
 define(function (require) {
-  let _ = require('lodash');
+  const _ = require('lodash');
 
   return function SavedObjectSourceFactory(Private) {
-    let DocSource = Private(require('ui/courier/data_source/doc_source'));
-    let SavedObjectRequest = Private(require('ui/courier/fetch/request/savedobject'));
-    let SavedObjectStrategy = Private(require('ui/courier/fetch/strategy/savedobject'));
+    const DocSource = Private(require('ui/courier/data_source/doc_source'));
+    const SavedObjectRequest = Private(require('ui/courier/fetch/request/savedobject'));
+    const SavedObjectStrategy = Private(require('ui/courier/fetch/strategy/savedobject'));
 
     _.class(SavedObjectSource).inherits(DocSource);
     function SavedObjectSource(initialState) {

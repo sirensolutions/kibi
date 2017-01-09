@@ -1,6 +1,6 @@
-var ngMock = require('ngMock');
-var expect = require('expect.js');
-var indexPath;
+const ngMock = require('ngMock');
+const expect = require('expect.js');
+let indexPath;
 
 function init() {
   return function () {

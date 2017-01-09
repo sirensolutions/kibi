@@ -1,8 +1,8 @@
 define(function (require) {
 
-  var module = require('ui/modules').get('ui/kibi/helpers/kibi_session_helper/services/saved_sessions', []);
-  var angular = require('angular');
-  var _ = require('lodash');
+  const module = require('ui/modules').get('ui/kibi/helpers/kibi_session_helper/services/saved_sessions', []);
+  const angular = require('angular');
+  const _ = require('lodash');
 
   module.factory('SavedSession', function (courier) {
     _.class(SavedSession).inherits(courier.SavedObject);

@@ -1,13 +1,13 @@
 define(function (require) {
 
-  var _ = require('lodash');
+  const _ = require('lodash');
 
   return function DeleteHelperFactory(savedVisualizations, Private, $window) {
 
     function DeleteHelper() {
     }
 
-    var dashboardGroupHelper = Private(require('ui/kibi/helpers/dashboard_group_helper'));
+    const dashboardGroupHelper = Private(require('ui/kibi/helpers/dashboard_group_helper'));
 
     /**
      * GetVisualisations returns visualisations that are used by the list of queries
@@ -17,13 +17,13 @@ define(function (require) {
         return Promise.reject(new Error('Empty argument'));
       }
       return savedVisualizations.find('').then(function (resp) {
-        var selectedQueries = [];
+        const selectedQueries = [];
 
-        var queryIds2 = _.map(queryIds, function (id) {
+        const queryIds2 = _.map(queryIds, function (id) {
           return '"queryId":"' + id + '"';
         });
-        var vis = _.filter(resp.hits, function (hit) {
-          var list = _.filter(queryIds2, function (id, index) {
+        const vis = _.filter(resp.hits, function (hit) {
+          const list = _.filter(queryIds2, function (id, index) {
             if (hit.visState.indexOf(id) !== -1) {
               selectedQueries.push(queryIds[index]);
               return true;
@@ -45,8 +45,8 @@ define(function (require) {
           return dashboardGroupHelper.getIdsOfDashboardGroupsTheseDashboardsBelongTo(ids)
           .then(function (dashboardGroupNames) {
             if (dashboardGroupNames && dashboardGroupNames.length > 0) {
-              var plural = dashboardGroupNames.length > 1;
-              var msg =
+              const plural = dashboardGroupNames.length > 1;
+              const msg =
                 'Dashboard ' + JSON.stringify(ids, null, ' ') + ' is referred by the following dashboardGroup' +
                 (plural ? 's' : '') + ':\n' + dashboardGroupNames.join(', ') + '\n' +
                 'Please edit the group' + (plural ? 's' : '') +
@@ -63,8 +63,8 @@ define(function (require) {
         case 'query':
           return this._getVisualisations(ids).then(function (visData) {
             if (visData[0].length) {
-              var plural = visData[0].length > 1;
-              var msg = plural ? 'The queries ' : 'The query ';
+              const plural = visData[0].length > 1;
+              let msg = plural ? 'The queries ' : 'The query ';
               msg += JSON.stringify(visData[0], null, ' ') + (plural ? ' are' : ' is') + ' used in the following';
               msg += (visData[1].length === 1 ? ' visualization' : ' visualizations') + ': \n' +
                 JSON.stringify(_.pluck(visData[1], 'title'), null, ' ') + '\n\nPlease edit or delete' +

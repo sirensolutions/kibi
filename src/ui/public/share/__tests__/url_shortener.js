@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import sinon from 'sinon';
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import chrome from 'ui/chrome';
 import LibUrlShortenerProvider from 'ui/share/lib/url_shortener';
 

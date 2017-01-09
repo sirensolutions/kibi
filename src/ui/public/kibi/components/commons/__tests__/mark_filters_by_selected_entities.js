@@ -1,13 +1,13 @@
-let sinon = require('auto-release-sinon');
-let ngMock = require('ngMock');
-let expect = require('expect.js');
+const sinon = require('auto-release-sinon');
+const ngMock = require('ngMock');
+const expect = require('expect.js');
 const chrome = require('ui/chrome');
 
 let markFiltersBySelectedEntities;
 let kibiState;
 
-let mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
-let fakeSavedQueries = [
+const mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
+const fakeSavedQueries = [
   {
     id: 'query1',
     title: '',
@@ -47,7 +47,7 @@ describe('Kibi Components', function () {
       });
 
       it('should mark dbfilter with query which depends on selected entity and selected entity NOT disabled', function (done) {
-        let filters = [
+        const filters = [
           {
             dbfilter: {
               queryid: 'query1'
@@ -68,7 +68,7 @@ describe('Kibi Components', function () {
       });
 
       it('should mark disabled dbfilter with query which depends on selected document and selected document is disabled', function (done) {
-        let filters = [
+        const filters = [
           {
             dbfilter: {
               queryid: 'query1'
@@ -89,7 +89,7 @@ describe('Kibi Components', function () {
       });
 
       it('should not set dependsOnSelectedEntitiesDisabled to true if filter does not depend on entities', function (done) {
-        let filters = [
+        const filters = [
           {
             dbfilter: {
               queryid: 'query1'
@@ -117,7 +117,7 @@ describe('Kibi Components', function () {
       });
 
       it('should NOT mark dbfilter with query which does NOT depends on selected document', function (done) {
-        let filters = [
+        const filters = [
           {
             dbfilter: {
               queryid: 'query2'
@@ -138,7 +138,7 @@ describe('Kibi Components', function () {
       });
 
       it('query does not exists', function (done) {
-        let filters = [
+        const filters = [
           {
             dbfilter: {
               queryid: 'does-not-exists'

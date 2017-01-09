@@ -48,7 +48,7 @@ REM kibi: end
 
 
 REM do NOT add a space before && !!!
-set ROOT_DIR=%DIR%&& "%NODE%" %NODE_OPTIONS% "%DIR%\src\cli" %*
+set ROOT_DIR=%DIR%&& "%NODE%" %NODE_OPTIONS% --no-warnings "%DIR%\src\cli" %*
 
 :finally
 

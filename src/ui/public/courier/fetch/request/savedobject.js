@@ -1,9 +1,9 @@
 define(function (require) {
   return function SavedObjectRequestProvider(Private) {
-    let _ = require('lodash');
+    const _ = require('lodash');
 
-    let DocRequest = Private(require('ui/courier/fetch/request/doc'));
-    let strategy = Private(require('ui/courier/fetch/strategy/savedobject'));
+    const DocRequest = Private(require('ui/courier/fetch/request/doc'));
+    const strategy = Private(require('ui/courier/fetch/strategy/savedobject'));
 
     _.class(SavedObjectRequest).inherits(DocRequest);
     function SavedObjectRequest(source, defer) {

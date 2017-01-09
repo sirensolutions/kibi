@@ -36,10 +36,8 @@ define(function (require) {
       }
 
       if (console) {
-        console.log(
-          'KibiNavBar will update the counts for following dashboards ' +
-          JSON.stringify(filteredDashboardsIds, null, ' ')
-        );
+        const msg = 'KibiNavBar will update the counts for following dashboards ' + JSON.stringify(filteredDashboardsIds, null, ' ');
+        console.log(msg); // eslint-disable-line no-console
       }
 
       return dashboardGroupHelper.getDashboardsMetadata(filteredDashboardsIds, forceCountsUpdate).then((metadata) => {
@@ -68,11 +66,9 @@ define(function (require) {
 
     const updateCounts = function (dashboardsIds, reason, forceUpdate = false) {
       if (console) {
-        console.log(
-          'KibiNavBar requested count update for following dashboards ' +
-          JSON.stringify(dashboardsIds, null, ' ') +
-          ' because: [' + reason + ']'
-        );
+        const msg = `KibiNavBar requested count update for following dashboards
+          ${JSON.stringify(dashboardsIds, null, ' ')} because: [${reason}]`;
+        console.log(msg); // eslint-disable-line no-console
       }
       this.delayExecutionHelper.addEventData({
         forceUpdate: forceUpdate,
@@ -221,7 +217,7 @@ define(function (require) {
 
     KibiNavBarHelper.prototype.computeDashboardsGroups = function (reason) {
       if (console) {
-        console.log('Dashboard Groups will be recomputed because: [' + reason + ']');
+        console.log('Dashboard Groups will be recomputed because: [' + reason + ']'); // eslint-disable-line no-console
       }
       return dashboardGroupHelper.computeGroups()
       .then((groups) => {

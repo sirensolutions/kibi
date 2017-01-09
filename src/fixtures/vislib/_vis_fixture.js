@@ -1,9 +1,23 @@
-let $ = require('jquery');
-let _ = require('lodash');
+import _ from 'lodash';
+import $ from 'jquery';
+import VislibVisProvider from 'ui/vislib/vis';
 
-let $visCanvas = $('<div>').attr('id', 'vislib-vis-fixtures').appendTo('body');
+const $visCanvas = $('<div>')
+  .attr('id', 'vislib-vis-fixtures')
+  .css({
+    height: '500px',
+    width: '1024px',
+    display: 'flex',
+    position: 'fixed',
+    top: '0px',
+    left: '0px',
+    overflow: 'hidden',
+    'pointer-events': 'none', // Prevent element from blocking you from clicking a test
+  })
+  .appendTo('body');
+
 let count = 0;
-let visHeight = $visCanvas.height();
+const visHeight = $visCanvas.height();
 
 $visCanvas.new = function () {
   count += 1;
@@ -19,9 +33,8 @@ afterEach(function () {
 
 module.exports = function VislibFixtures(Private) {
   return function (visLibParams) {
-    let Vis = Private(require('ui/vislib/vis'));
+    const Vis = Private(VislibVisProvider);
     return new Vis($visCanvas.new(), _.defaults({}, visLibParams || {}, {
-      shareYAxis: true,
       addTooltip: true,
       addLegend: true,
       defaultYExtents: false,

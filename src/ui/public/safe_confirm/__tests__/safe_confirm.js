@@ -1,7 +1,7 @@
+import sinon from 'sinon';
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
 describe('ui/safe_confirm', function () {
-  let sinon = require('sinon');
-  let expect = require('expect.js');
-  let ngMock = require('ngMock');
 
   let $rootScope;
   let $window;

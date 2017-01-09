@@ -1,12 +1,12 @@
-var _ = require('lodash');
-var ngMock = require('ngMock');
-var expect = require('expect.js');
+const _ = require('lodash');
+const ngMock = require('ngMock');
+const expect = require('expect.js');
 
-var mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
-var kibiSelectHelper;
-var config;
-var $httpBackend;
-var indexPatterns;
+const mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
+let kibiSelectHelper;
+let config;
+let $httpBackend;
+let indexPatterns;
 
 
 describe('Kibi Directives', function () {
@@ -14,8 +14,8 @@ describe('Kibi Directives', function () {
 
     require('testUtils/noDigestPromises').activateForSuite();
 
-    var init = function (opt) {
-      var defaultOptions =  {
+    const init = function (opt) {
+      const defaultOptions =  {
         savedDatasources: [],
         savedSearches: [],
         savedQueries: [],
@@ -27,7 +27,7 @@ describe('Kibi Directives', function () {
         initHttpBackend: false
       };
 
-      var options = {};
+      const options = {};
       _.merge(options, defaultOptions, opt);
 
 
@@ -87,7 +87,7 @@ describe('Kibi Directives', function () {
       if (options.initIndexPattern) {
         ngMock.module('kibana/index_patterns', function ($provide) {
           $provide.service('indexPatterns', function (Promise, Private) {
-            var indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+            const indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
             return {
               get: function (id) {
                 return Promise.resolve(indexPattern);
@@ -109,7 +109,7 @@ describe('Kibi Directives', function () {
     };
 
     describe('GetQueries', function () {
-      var fakeSavedDatasources = [
+      const fakeSavedDatasources = [
         {
           id: 'ds1',
           title: 'ds1 datasource',
@@ -127,7 +127,7 @@ describe('Kibi Directives', function () {
         }
       ];
 
-      var fakeSavedQueries = [
+      const fakeSavedQueries = [
         {
           id: 'sparql',
           title: 'sparql query',
@@ -204,8 +204,8 @@ describe('Kibi Directives', function () {
     describe('GetDocumentIds', function () {
 
       function fakeHits() {
-        var hits = { hits: { hits: [] } };
-        for (var i = 0; i < arguments.length; i++) {
+        const hits = { hits: { hits: [] } };
+        for (let i = 0; i < arguments.length; i++) {
           hits.hits.hits.push(arguments[i]);
         }
         return hits;
@@ -224,7 +224,7 @@ describe('Kibi Directives', function () {
 
 
       it('should return the ids of the given index', function (done) {
-        var ids = fakeHits(
+        const ids = fakeHits(
           {
             _id: 'id1',
           },
@@ -259,7 +259,7 @@ describe('Kibi Directives', function () {
     });
 
     describe('GetTemplates', function () {
-      var fakeSavedTemplates = [
+      const fakeSavedTemplates = [
         {
           id: 'template-1',
           title: 'template 1',
@@ -278,7 +278,7 @@ describe('Kibi Directives', function () {
 
       it('select saved templates', function (done) {
         kibiSelectHelper.getTemplates().then(function (templates) {
-          var expectedTemplates = [
+          const expectedTemplates = [
             {
               value: 'template-1',
               label: 'template 1'
@@ -292,7 +292,7 @@ describe('Kibi Directives', function () {
 
     describe('GetSavedSearches', function () {
 
-      var fakeSavedSearches = [
+      const fakeSavedSearches = [
         {
           id: 'search-ste',
           kibanaSavedObjectMeta: {
@@ -327,7 +327,7 @@ describe('Kibi Directives', function () {
 
       it('select saved searches', function (done) {
         kibiSelectHelper.getSavedSearches().then(function (savedSearches) {
-          var expectedSavedSearches = [
+          const expectedSavedSearches = [
             {
               value: 'search-ste',
               label: undefined
@@ -345,7 +345,7 @@ describe('Kibi Directives', function () {
 
     describe('GetDashboards', function () {
 
-      var fakeSavedDashboards = [
+      const fakeSavedDashboards = [
         {
           id: 'Articles',
           title: 'Articles'
@@ -385,7 +385,7 @@ describe('Kibi Directives', function () {
 
       it('select dashboards', function (done) {
         kibiSelectHelper.getDashboards().then(function (dashboards) {
-          var expectedDashboards = [
+          const expectedDashboards = [
             {
               value: 'Articles',
               label: 'Articles'
@@ -415,7 +415,7 @@ describe('Kibi Directives', function () {
 
     describe('GetDatasources', function () {
 
-      var fakeSavedDatasources = [
+      const fakeSavedDatasources = [
         {
           id: 'ds1',
           title: 'ds1 datasource',
@@ -467,7 +467,7 @@ describe('Kibi Directives', function () {
       });
 
       it('should get the type of the dog index', function (done) {
-        var data = {
+        const data = {
           dog: {
             mappings: { animal: {} }
           }
@@ -484,7 +484,7 @@ describe('Kibi Directives', function () {
       });
 
       it('should get the type of all returned indices', function (done) {
-        var data = {
+        const data = {
           dog: {
             mappings: { animal: {} }
           },
@@ -538,7 +538,7 @@ describe('Kibi Directives', function () {
 
       it('should return data without scripted fields if scriptedFields equals false ', function (done) {
         kibiSelectHelper.getFields(null, null, false).then(function (fields) {
-          for (var i = 0; i < fields.length; i++) {
+          for (let i = 0; i < fields.length; i++) {
             expect(fields[i].options.scripted).not.to.be(true);
           }
           done();
@@ -547,7 +547,7 @@ describe('Kibi Directives', function () {
 
       it('should return data with scripted fields if scriptedFields equals true ', function (done) {
         kibiSelectHelper.getFields(null, null, true).then(function (fields) {
-          for (var i = 0; i < fields.length; i++) {
+          for (let i = 0; i < fields.length; i++) {
             expect(fields[i].options.scripted).not.to.be(undefined);
           }
           done();
@@ -577,7 +577,7 @@ describe('Kibi Directives', function () {
 
     describe('GetQueryVariables', function () {
 
-      var fakeSavedDatasources = [
+      const fakeSavedDatasources = [
         {
           id: 'ds1',
           title: 'ds1 datasource',
@@ -595,7 +595,7 @@ describe('Kibi Directives', function () {
         }
       ];
 
-      var fakeSavedQueries = [
+      const fakeSavedQueries = [
         {
           id: 'sparql',
           title: 'sparql query',
@@ -751,7 +751,7 @@ describe('Kibi Directives', function () {
     });
 
     describe('getDashboardsForButton', function () {
-      var fakeSavedDashboards = [
+      const fakeSavedDashboards = [
         {
           id: 'Articles',
           title: 'Articles',
@@ -777,7 +777,7 @@ describe('Kibi Directives', function () {
           title: 'NoSavedSearch'
         }
       ];
-      var fakeSavedSearches = [
+      const fakeSavedSearches = [
         {
           id: 'savedArticles',
           kibanaSavedObjectMeta: {
@@ -815,7 +815,7 @@ describe('Kibi Directives', function () {
           }
         }
       ];
-      let relations = {
+      const relations = {
         relationsIndices: [
           {
             indices: [

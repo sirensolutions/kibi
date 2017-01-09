@@ -1,10 +1,11 @@
 import { accessSync, R_OK} from 'fs';
 import { find } from 'lodash';
-import fromRoot from '../../utils/fromRoot';
+import { fromRoot } from '../../utils';
 
 const CONFIG_PATHS = [
   process.env.CONFIG_PATH,
-  fromRoot('config/kibi.yml')
+  fromRoot('config/kibi.yml') // kibi: use kibi configuration file
+  //'/etc/kibana/kibana.yml' kibi: no such config location in kibi
 ].filter(Boolean);
 
 const DATA_PATHS = [

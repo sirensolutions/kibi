@@ -1,5 +1,5 @@
 define(function (require) {
-  var _ = require('lodash');
+  const _ = require('lodash');
   return function mapTermsProvider(Promise, courier) {
     return function (filter) {
       if (filter.join_set || filter.join_sequence) {

@@ -1,7 +1,7 @@
-var doesVisDependsOnSelectedEntities;
+let doesVisDependsOnSelectedEntities;
 
-var mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
-var fakeSavedQueries = [
+const mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
+const fakeSavedQueries = [
   {
     id: 'query1',
     title: '',
@@ -13,8 +13,8 @@ var fakeSavedQueries = [
     resultQuery: 'SELECT * FROM mytable WHERE id = \'123\''
   }
 ];
-var ngMock = require('ngMock');
-var expect = require('expect.js');
+const ngMock = require('ngMock');
+const expect = require('expect.js');
 
 describe('Kibi Components', function () {
   describe('Commons', function () {
@@ -40,7 +40,7 @@ describe('Kibi Components', function () {
       ].forEach(function (visName) {
         describe(`vis ${visName}`, function () {
           it('should depend on the entity', function (done) {
-            var vis = {
+            const vis = {
               type: {
                 name: visName
               },
@@ -61,7 +61,7 @@ describe('Kibi Components', function () {
           });
 
           it('should not depend on the entity', function (done) {
-            var vis = {
+            const vis = {
               type: {
                 name: visName
               },
@@ -82,7 +82,7 @@ describe('Kibi Components', function () {
           });
 
           it('should fail if the query does not exist', function (done) {
-            var vis = {
+            const vis = {
               type: {
                 name: visName
               },
@@ -115,7 +115,7 @@ describe('Kibi Components', function () {
       ].forEach(function (visName) {
         describe(`vis ${visName}`, function () {
           it('should depend on the entity', function (done) {
-            var vis = {
+            const vis = {
               type: {
                 name: visName
               },
@@ -139,7 +139,7 @@ describe('Kibi Components', function () {
           });
 
           it('should not depend on the entity', function (done) {
-            var vis = {
+            const vis = {
               type: {
                 name: visName
               },
@@ -163,7 +163,7 @@ describe('Kibi Components', function () {
           });
 
           it('should fail if the query does not exist', function (done) {
-            var vis = {
+            const vis = {
               type: {
                 name: visName
               },
@@ -192,7 +192,7 @@ describe('Kibi Components', function () {
 
       describe('vis kibi_graph_browser', function () {
         it('should depend on the entity', function (done) {
-          var vis = {
+          const vis = {
             type: {
               name: 'kibi_graph_browser'
             },
@@ -210,7 +210,7 @@ describe('Kibi Components', function () {
         });
 
         it('should not depend on the entity', function (done) {
-          var vis = {
+          const vis = {
             type: {
               name: 'kibi_graph_browser'
             },
@@ -228,7 +228,7 @@ describe('Kibi Components', function () {
         });
 
         it('should fail if the query does not exist', function (done) {
-          var vis = {
+          const vis = {
             type: {
               name: 'kibi_graph_browser'
             },
@@ -249,7 +249,7 @@ describe('Kibi Components', function () {
       });
 
       it('should not depend on entity for some unknown vis', function (done) {
-        var vis = {
+        const vis = {
           type: {
             name: 'extra-pie'
           },

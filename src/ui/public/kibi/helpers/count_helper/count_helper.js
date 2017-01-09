@@ -1,7 +1,7 @@
 define(function (require) {
 
-  var _ = require('lodash');
-  var uniqFilters = require('ui/filter_bar/lib/uniqFilters');
+  const _ = require('lodash');
+  const uniqFilters = require('ui/filter_bar/lib/uniqFilters');
 
   return function CountHelperFactory(createNotifier, kibiState) {
 
@@ -17,7 +17,7 @@ define(function (require) {
      * instance, not a SavedSearch id
      */
     CountHelper.prototype.constructCountQuery = function (filters, queries, time) {
-      var query = {
+      const query = {
         size: 0, // we do not need hits just a count
         query: {
           bool: {

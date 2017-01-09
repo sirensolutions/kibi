@@ -1,8 +1,7 @@
 import expect from 'expect.js';
 import sinon from 'sinon';
 import MigrationRunner from '../migration_runner';
-import requirefrom from 'requirefrom';
-const wrapAsync = requirefrom('src/testUtils')('wrap_async');
+import wrapAsync from 'test_utils/wrap_async';
 
 describe('migrations', function () {
 
@@ -38,24 +37,24 @@ describe('migrations', function () {
     }
 
     //Create a fake server having three plugins with fake migrations.
-    let plugin1 = {
+    const plugin1 = {
       getMigrations: () => [
         fakeMigrationClass('plugin1_1', 2),
         fakeMigrationClass('plugin1_2', 5)
       ]
     };
 
-    let plugin2 = {
+    const plugin2 = {
       getMigrations: () => []
     };
 
-    let plugin3 = {
+    const plugin3 = {
       getMigrations: () => [
         fakeMigrationClass('plugin3_1', 3),
       ]
     };
 
-    let server = {
+    const server = {
       config: () => ({
         get: () => 'index'
       }),
@@ -69,25 +68,25 @@ describe('migrations', function () {
       }
     };
 
-    let logger = {
+    const logger = {
       info: () => {}
     };
 
     describe('upgrade', function () {
-      let runner = new MigrationRunner(server, logger);
+      const runner = new MigrationRunner(server, logger);
 
       before(function () {
         sinon.spy(runner, 'getMigrations');
       });
 
       it('should execute migrations in the correct order', wrapAsync(async () => {
-        let result = await runner.upgrade();
+        const result = await runner.upgrade();
 
         expect(result).to.be(10);
 
-        let migrations = await runner.getMigrations.returnValues[0];
+        const migrations = await runner.getMigrations.returnValues[0];
         expect(migrations.length).to.be(3);
-        let descriptions = migrations.map((migration) => migration.description);
+        const descriptions = migrations.map((migration) => migration.description);
         expect(descriptions).to.contain('plugin1_1');
         expect(descriptions).to.contain('plugin1_2');
         expect(descriptions).to.contain('plugin3_1');
@@ -101,20 +100,20 @@ describe('migrations', function () {
     });
 
     describe('count', function () {
-      let runner = new MigrationRunner(server, logger);
+      const runner = new MigrationRunner(server, logger);
 
       before(function () {
         sinon.spy(runner, 'getMigrations');
       });
 
       it('should execute migrations in the correct order', wrapAsync(async () => {
-        let result = await runner.count();
+        const result = await runner.count();
 
         expect(result).to.be(10);
 
-        let migrations = await runner.getMigrations.returnValues[0];
+        const migrations = await runner.getMigrations.returnValues[0];
         expect(migrations.length).to.be(3);
-        let descriptions = migrations.map((migration) => migration.description);
+        const descriptions = migrations.map((migration) => migration.description);
         expect(descriptions).to.contain('plugin1_1');
         expect(descriptions).to.contain('plugin1_2');
         expect(descriptions).to.contain('plugin3_1');
@@ -139,7 +138,7 @@ describe('migrations', function () {
         });
 
         it('cache migrations', wrapAsync(async () => {
-          let runner = new MigrationRunner(server);
+          const runner = new MigrationRunner(server);
           runner.getMigrations();
           runner.getMigrations();
 
@@ -165,7 +164,7 @@ describe('migrations', function () {
         });
 
         it('swallow exceptions thrown by migration constructors', function () {
-          let runner = new MigrationRunner(server);
+          const runner = new MigrationRunner(server);
           expect(() => runner.getMigrations()).to.throwError();
         });
 

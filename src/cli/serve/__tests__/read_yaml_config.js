@@ -1,58 +1,102 @@
 import expect from 'expect.js';
-import { resolve } from 'path';
+import { join, relative, resolve } from 'path';
+import readYamlConfig from '../read_yaml_config';
+import sinon from 'auto-release-sinon';
 
 function fixture(name) {
   return resolve(__dirname, 'fixtures', name);
 }
 
 describe('cli/serve/read_yaml_config', function () {
+  it('reads a single config file', function () {
+    const config = readYamlConfig(fixture('one.yml'));
 
-  let readYamlConfig;
+    expect(readYamlConfig(fixture('one.yml'))).to.eql({
+      foo: 1,
+      bar: true,
+    });
+  });
 
-  context('environment placeholders', function () {
-    let currEnv;
+  it('reads and merged mulitple config file', function () {
+    const config = readYamlConfig([
+      fixture('one.yml'),
+      fixture('two.yml')
+    ]);
+
+    expect(config).to.eql({
+      foo: 2,
+      bar: true,
+      baz: 'bonkers'
+    });
+  });
+
+  context('different cwd()', function () {
+    const oldCwd = process.cwd();
+    const newCwd = join(oldCwd, '..');
 
     before(function () {
-      currEnv = process.env;
-      process.env = {
-        URL: 'http://localhost',
-        BAR: 'bar',
-        CA: 'ca',
-        NODE: '1'
-      };
-
-      readYamlConfig = require('../read_yaml_config');
+      process.chdir(newCwd);
     });
 
-    it('resolves environment placeholders', function () {
-      const config = readYamlConfig(fixture('env.yml'));
+    it('resolves relative files based on the cwd', function () {
+      const relativePath = relative(newCwd, fixture('one.yml'));
+      const config = readYamlConfig(relativePath);
       expect(config).to.eql({
-        url: 'http://localhost',
-        server: {
-          node: 'node1',
-          url: 'http://localhost'
-        },
-        service: {
-          url: 'http://localhost'
-        },
-        users: [
-          'foo',
-          'bar',
-          'barbar',
-          ''
-        ],
-        ssl: {
-          ca: 'ca'
-        },
-        app: '',
-        null: null,
-        num: 3
+        foo: 1,
+        bar: true,
       });
     });
 
-    after(function () {
-      process.env = currEnv;
+    it('fails to load relative paths, not found because of the cwd', function () {
+      expect(function () {
+        readYamlConfig(relative(oldCwd, fixture('one.yml')));
+      }).to.throwException(/ENOENT/);
     });
 
+    after(function () {
+      process.chdir(oldCwd);
+    });
+  });
+
+  context('stubbed stdout', function () {
+    let stub;
+
+    beforeEach(function () {
+      stub = sinon.stub(process.stdout, 'write');
+    });
+
+    context('deprecated settings', function () {
+      it('warns about deprecated settings', function () {
+        readYamlConfig(fixture('deprecated.yml'));
+        sinon.assert.calledOnce(stub);
+        expect(stub.firstCall.args[0]).to.match(/deprecated/);
+        stub.restore();
+      });
+
+      it('only warns once about deprecated settings', function () {
+        readYamlConfig(fixture('deprecated.yml'));
+        readYamlConfig(fixture('deprecated.yml'));
+        readYamlConfig(fixture('deprecated.yml'));
+        sinon.assert.notCalled(stub); // already logged in previous test
+        stub.restore();
+      });
+    });
+
+    context('legacy settings', function () {
+      it('warns about deprecated settings', function () {
+        readYamlConfig(fixture('legacy.yml'));
+        sinon.assert.calledOnce(stub);
+        expect(stub.firstCall.args[0]).to.match(/has been replaced/);
+        stub.restore();
+      });
+
+      it('only warns once about legacy settings', function () {
+        readYamlConfig(fixture('legacy.yml'));
+        readYamlConfig(fixture('legacy.yml'));
+        readYamlConfig(fixture('legacy.yml'));
+        sinon.assert.notCalled(stub); // already logged in previous test
+        stub.restore();
+      });
+    });
   });
 });

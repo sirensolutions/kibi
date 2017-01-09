@@ -62,7 +62,7 @@ describe('Kibi Directives', function () {
     describe('remove dashboards properties (count, isPruned, filterIconMessage)', function () {
 
       beforeEach(() => {
-        var dash1 = {
+        const dash1 = {
           id: 'dashboard1',
           title: 'dashboard1',
           savedSearchId: 'search1',
@@ -78,7 +78,7 @@ describe('Kibi Directives', function () {
           isPruned: true,
           filterIconMessage: 'there is so many filters :('
         };
-        var dash2 = {
+        const dash2 = {
           id: 'dashboard2',
           title: 'dashboard2',
           savedSearchId: 'search2',
@@ -129,7 +129,7 @@ describe('Kibi Directives', function () {
           kibiNavBarHelper.updateAllCounts([ 'dashboard1', 'dashboard2' ]);
 
           setTimeout(function () {
-            var dashboardGroups = kibiNavBarHelper.dashboardGroups;
+            const dashboardGroups = kibiNavBarHelper.dashboardGroups;
 
             expect(dashboardGroups).to.have.length(2);
             expect(dashboardGroups[0].id).to.be('group dashboard1');
@@ -147,7 +147,7 @@ describe('Kibi Directives', function () {
 
     describe('set dashboards properties (count, isPruned, filterIconMessage)', function () {
       beforeEach(() => {
-        var dash1 = {
+        const dash1 = {
           id: 'dashboard1',
           title: 'dashboard1',
           savedSearchId: 'search1',
@@ -160,7 +160,7 @@ describe('Kibi Directives', function () {
             )
           }
         };
-        var dash2 = {
+        const dash2 = {
           id: 'dashboard2',
           title: 'dashboard2',
           savedSearchId: 'search2',
@@ -214,11 +214,11 @@ describe('Kibi Directives', function () {
           kibiNavBarHelper.updateAllCounts([ 'dashboard1', 'dashboard2' ]);
 
           setTimeout(function () {
-            var dashboardGroups = kibiNavBarHelper.dashboardGroups;
+            const dashboardGroups = kibiNavBarHelper.dashboardGroups;
             // watch dashboardGroups until the filterIconMessage is set on selected
             pollUntil(
               function () {
-                var poolRes = dashboardGroups.length === 2 && dashboardGroups[0].selected && dashboardGroups[1].selected &&
+                const poolRes = dashboardGroups.length === 2 && dashboardGroups[0].selected && dashboardGroups[1].selected &&
                 dashboardGroups[0].selected.filterIconMessage !== undefined && dashboardGroups[1].selected.filterIconMessage !== undefined;
                 return poolRes;
               }, 5000, 1,
@@ -259,12 +259,12 @@ describe('Kibi Directives', function () {
           kibiNavBarHelper.updateAllCounts([ 'dashboard1', 'dashboard2' ]);
 
           setTimeout(function () {
-            var dashboardGroups = kibiNavBarHelper.dashboardGroups;
+            const dashboardGroups = kibiNavBarHelper.dashboardGroups;
 
             // watch dashboardGroups until the filterIconMessage is set on selected
             pollUntil(
               function () {
-                var poolRes = dashboardGroups.length === 2 && dashboardGroups[0].selected && dashboardGroups[1].selected &&
+                const poolRes = dashboardGroups.length === 2 && dashboardGroups[0].selected && dashboardGroups[1].selected &&
                 dashboardGroups[0].selected.filterIconMessage !== undefined && dashboardGroups[1].selected.filterIconMessage !== undefined;
                 return poolRes;
               }, 5000, 1,
@@ -305,12 +305,12 @@ describe('Kibi Directives', function () {
           kibiNavBarHelper.updateAllCounts([ 'dashboard1', 'dashboard2' ]);
 
           setTimeout(function () {
-            var dashboardGroups = kibiNavBarHelper.dashboardGroups;
+            const dashboardGroups = kibiNavBarHelper.dashboardGroups;
 
             // watch dashboardGroups until the filterIconMessage is set on selected
             pollUntil(
               function () {
-                var poolRes = dashboardGroups.length === 2 && dashboardGroups[0].selected && dashboardGroups[1].selected &&
+                const poolRes = dashboardGroups.length === 2 && dashboardGroups[0].selected && dashboardGroups[1].selected &&
                 dashboardGroups[0].selected.filterIconMessage !== undefined && dashboardGroups[1].selected.filterIconMessage !== undefined;
                 return poolRes;
               }, 5000, 1,
@@ -351,12 +351,12 @@ describe('Kibi Directives', function () {
           kibiNavBarHelper.updateAllCounts([ 'dashboard1', 'dashboard2' ]);
 
           setTimeout(function () {
-            var dashboardGroups = kibiNavBarHelper.dashboardGroups;
+            const dashboardGroups = kibiNavBarHelper.dashboardGroups;
 
             // watch dashboardGroups until the filterIconMessage is set on selected
             pollUntil(
               function () {
-                var poolRes = dashboardGroups.length === 2 && dashboardGroups[0].selected && dashboardGroups[1].selected &&
+                const poolRes = dashboardGroups.length === 2 && dashboardGroups[0].selected && dashboardGroups[1].selected &&
                 dashboardGroups[0].selected.filterIconMessage !== undefined && dashboardGroups[1].selected.filterIconMessage !== undefined;
                 return poolRes;
               }, 5000, 1,
@@ -400,7 +400,7 @@ describe('Kibi Directives', function () {
           kibiNavBarHelper.updateAllCounts([ 'dashboard1', 'dashboard2' ]);
 
           setTimeout(function () {
-            var dashboardGroups = kibiNavBarHelper.dashboardGroups;
+            const dashboardGroups = kibiNavBarHelper.dashboardGroups;
             expect(dashboardGroups).to.have.length(2);
             expect(dashboardGroups[0].id).to.be('group dashboard1');
             expect(dashboardGroups[0].selected.count).to.be(42);
@@ -424,7 +424,7 @@ describe('Kibi Directives', function () {
           kibiNavBarHelper.updateAllCounts([ 'dashboard1' ]);
 
           setTimeout(function () {
-            var dashboardGroups = kibiNavBarHelper.dashboardGroups;
+            const dashboardGroups = kibiNavBarHelper.dashboardGroups;
             expect(dashboardGroups).to.have.length(2);
             expect(dashboardGroups[0].id).to.be('group dashboard1');
             expect(dashboardGroups[0].selected.count).to.be(42);
@@ -437,7 +437,7 @@ describe('Kibi Directives', function () {
 
       it('should update counts of current dashboard on kibiState changes', function (done) {
         const stub = sinon.stub(kibiNavBarHelper, 'updateAllCounts');
-        var counter = 0;
+        let counter = 0;
         kibiState.on('save_with_changes', function (diff) {
           counter++;
           if (diff[0] === kibiState._properties.groups) {
@@ -533,7 +533,7 @@ describe('Kibi Directives', function () {
     describe('groups with no queries and unvisible dashboards', function () {
 
       beforeEach(function () {
-        var dash1 = {
+        const dash1 = {
           id: 'dashboard1',
           title: 'dashboard1',
           savedSearchId: 'search1',
@@ -546,7 +546,7 @@ describe('Kibi Directives', function () {
             )
           }
         };
-        var dash2 = {
+        const dash2 = {
           id: 'dashboard2',
           title: 'dashboard2',
           savedSearchId: 'search2',
@@ -559,7 +559,7 @@ describe('Kibi Directives', function () {
             )
           }
         };
-        var dash3 = {
+        const dash3 = {
           id: 'invisibledashboard3',
           title: 'dashboard3',
           savedSearchId: 'search3',
@@ -573,7 +573,7 @@ describe('Kibi Directives', function () {
           }
         };
 
-        var dash4 = {
+        const dash4 = {
           id: 'invisibledashboard4',
           title: 'dashboard4',
           savedSearchId: 'search4',
@@ -619,7 +619,7 @@ describe('Kibi Directives', function () {
         kibiNavBarHelper.updateAllCounts([ 'dashboard1', 'dashboard2' ]);
 
         setTimeout(function () {
-          var dashboardGroups = kibiNavBarHelper.dashboardGroups;
+          const dashboardGroups = kibiNavBarHelper.dashboardGroups;
           expect(dashboardGroups).to.have.length(2);
           expect(dashboardGroups[0].id).to.be('group odd dashboards');
           expect(dashboardGroups[0].selected.count).to.be(42);
@@ -670,7 +670,7 @@ describe('Kibi Directives', function () {
       it('should update counts of current dashboard and those connected on kibiState changes', function (done) {
         const stub = sinon.stub(kibiNavBarHelper, 'updateAllCounts');
 
-        var counter = 0;
+        let counter = 0;
         kibiState.on('save_with_changes', function (diff) {
           counter++;
           if (diff[0] === 'g') {

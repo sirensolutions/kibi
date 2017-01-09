@@ -1,9 +1,9 @@
-var expect = require('expect.js');
-var ngMock = require('ngMock');
-var datasourceHelper;
+const expect = require('expect.js');
+const ngMock = require('ngMock');
+let datasourceHelper;
 
-var mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
-var fakeSavedDatasources = [
+const mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
+const fakeSavedDatasources = [
   {
     id: 'ds1',
     title: 'ds1 datasource',
@@ -20,7 +20,7 @@ var fakeSavedDatasources = [
     datasourceType: 'rest'
   }
 ];
-var $rootScope;
+let $rootScope;
 
 
 describe('Kibi Components', function () {

@@ -1,11 +1,35 @@
 module.exports = function (grunt) {
-  let platform = require('os').platform();
-  let {format} = require('url');
-  let {resolve} = require('path');
-  let root = p => resolve(__dirname, '../../', p);
-  let binScript =  /^win/.test(platform) ? '.\\bin\\kibi.bat' : './bin/kibi'; // kibi: replaced name to kibi
-  let uiConfig = require(root('test/serverConfig'));
-  let chromedriver = require('chromedriver');
+  const platform = require('os').platform();
+  const {format} = require('url');
+  const {resolve} = require('path');
+  const root = p => resolve(__dirname, '../../', p);
+
+  // kibi: replaced scrpit name with kibi
+  const binScript =  /^win/.test(platform) ? '.\\bin\\kibi.bat' : './bin/kibi';
+  const buildScript =  /^win/.test(platform) ? '.\\build\\kibana\\bin\\kibi.bat' : './build/kibana/bin/kibi';
+  // kibi: end
+
+  const uiConfig = require(root('test/server_config'));
+  const chromedriver = require('chromedriver');
+
+  const stdDevArgs = [
+    '--env.name=development',
+    '--logging.json=false',
+  ];
+
+  const buildTestsArgs = [
+    ...stdDevArgs,
+    '--plugins.initialize=false',
+    '--optimize.bundleFilter=tests',
+  ];
+
+  const kbnServerFlags = grunt.option.flags().reduce(function (flags, flag) {
+    if (flag.startsWith('--kbnServer.')) {
+      flags.push(`--${flag.slice(12)}`);
+    }
+
+    return flags;
+  }, []);
 
   return {
     testServer: {
@@ -17,11 +41,27 @@ module.exports = function (grunt) {
       },
       cmd: binScript,
       args: [
+        ...buildTestsArgs,
         '--server.port=5610',
-        '--env.name=development',
-        '--logging.json=false',
-        '--optimize.bundleFilter=tests',
-        '--plugins.initialize=false'
+        ...kbnServerFlags,
+      ]
+    },
+
+    apiTestServer: {
+      options: {
+        wait: false,
+        ready: /Server running/,
+        quiet: false,
+        failOnError: false
+      },
+      cmd: binScript,
+      args: [
+        ...stdDevArgs,
+        '--optimize.enabled=false',
+        '--elasticsearch.url=' + format(uiConfig.servers.elasticsearch),
+        '--server.port=' + uiConfig.servers.kibana.port,
+        '--server.xsrf.disableProtection=true',
+        ...kbnServerFlags,
       ]
     },
 
@@ -32,12 +72,34 @@ module.exports = function (grunt) {
         quiet: false,
         failOnError: false
       },
-      cmd: binScript, // kibi: replaced name to kibi
+      cmd: binScript,
       args: [
+        ...stdDevArgs,
         '--server.port=' + uiConfig.servers.kibana.port,
-        '--env.name=development',
         '--elasticsearch.url=' + format(uiConfig.servers.elasticsearch),
-        '--logging.json=false'
+        ...kbnServerFlags,
+      ]
+    },
+
+    testUIDevServer: {
+      options: {
+        wait: false,
+        ready: /Server running/,
+        quiet: false,
+        failOnError: false
+      },
+      cmd: binScript,
+      args: [
+        ...stdDevArgs,
+        '--server.port=' + uiConfig.servers.kibana.port,
+        '--elasticsearch.url=' + format(uiConfig.servers.elasticsearch),
+        '--dev',
+        '--no-base-path',
+        '--no-ssl',
+        '--optimize.lazyPort=5611',
+        '--optimize.lazyPrebuild=true',
+        '--optimize.bundleDir=optimize/testUiServer',
+        ...kbnServerFlags,
       ]
     },
 
@@ -50,12 +112,10 @@ module.exports = function (grunt) {
       },
       cmd: binScript,
       args: [
+        ...buildTestsArgs,
         '--server.port=5610',
-        '--env.name=development',
-        '--logging.json=false',
-        '--optimize.bundleFilter=tests',
-        '--plugins.initialize=false',
-        '--testsBundle.instrument=true'
+        '--tests_bundle.instrument=true',
+        ...kbnServerFlags,
       ]
     },
 
@@ -68,14 +128,16 @@ module.exports = function (grunt) {
       },
       cmd: binScript,
       args: [
+        ...buildTestsArgs,
         '--dev',
         '--no-watch',
+        '--no-ssl',
+        '--no-base-path',
         '--server.port=5610',
         '--optimize.lazyPort=5611',
         '--optimize.lazyPrebuild=true',
-        '--logging.json=false',
-        '--optimize.bundleFilter=tests',
-        '--plugins.initialize=false'
+        '--optimize.bundleDir=optimize/testdev',
+        ...kbnServerFlags,
       ]
     },
 
@@ -89,7 +151,7 @@ module.exports = function (grunt) {
       cmd: chromedriver.path,
       args: [
         `--port=${uiConfig.servers.webdriver.port}`,
-        '--url-base=wd/hub'
+        '--url-base=wd/hub',
       ]
     },
 
@@ -103,7 +165,7 @@ module.exports = function (grunt) {
       cmd: chromedriver.path,
       args: [
         `--port=${uiConfig.servers.webdriver.port}`,
-        '--url-base=wd/hub'
+        '--url-base=wd/hub',
       ]
     },
 
@@ -113,12 +175,13 @@ module.exports = function (grunt) {
         ready: /Optimization .+ complete/,
         quiet: true
       },
-      cmd: './build/kibana/bin/kibi', // kibi: replaced name to kibi
+      cmd: buildScript,
       args: [
         '--env.name=production',
         '--logging.json=false',
         '--plugins.initialize=false',
-        '--server.autoListen=false'
+        '--server.autoListen=false',
+        ...kbnServerFlags,
       ]
     }
   };

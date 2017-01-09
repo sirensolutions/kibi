@@ -2,7 +2,7 @@ define(function (require) {
 
   return function (Promise) {
 
-    var timeFilterMock = {
+    const timeFilterMock = {
       get: function (indexPattern) {
         if (indexPattern.id === 'articles') {
           return {

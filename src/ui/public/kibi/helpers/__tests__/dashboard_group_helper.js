@@ -6,7 +6,7 @@ const mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
 const sinon = require('auto-release-sinon');
 const chrome = require('ui/chrome');
 
-var fakeSavedDashboards = [
+const fakeSavedDashboards = [
   {
     id: 'Articles',
     title: 'Articles'
@@ -37,7 +37,7 @@ var fakeSavedDashboards = [
     timeTo: '2015-09-05T12:00:00.000Z'
   }
 ];
-var fakeSavedDashboardGroups = [
+const fakeSavedDashboardGroups = [
   {
     id: 'group-1',
     title: 'Group 1',
@@ -60,7 +60,7 @@ var fakeSavedDashboardGroups = [
     dashboards: []
   }
 ];
-var fakeSavedDashboardsForCounts = [
+const fakeSavedDashboardsForCounts = [
   {
     id: 'Articles',
     title: 'Articles'
@@ -79,7 +79,7 @@ var fakeSavedDashboardsForCounts = [
     savedSearchId: 'time-testing-4'
   }
 ];
-var fakeSavedSearches = [
+const fakeSavedSearches = [
   {
     id: 'search-ste',
     kibanaSavedObjectMeta: {
@@ -106,10 +106,10 @@ var fakeSavedSearches = [
   }
 ];
 
-var dashboardGroupHelper;
-var appState;
+let dashboardGroupHelper;
+let appState;
 let kibiState;
-var $httpBackend;
+let $httpBackend;
 
 function init({ currentDashboardId = 'Articles', indexPatterns, savedDashboards, savedDashboardGroups, savedSearches }) {
   return function () {
@@ -179,10 +179,10 @@ describe('Kibi Components', function () {
       });
 
       it('_getListOfDashboardsFromGroups', function () {
-        var dA = {id: 'A'};
-        var dB = {id: 'B'};
-        var dC = {id: 'C'};
-        var groups = [
+        const dA = {id: 'A'};
+        const dB = {id: 'B'};
+        const dC = {id: 'C'};
+        const groups = [
           {
             dashboards: [dA, dB]
           },
@@ -191,7 +191,7 @@ describe('Kibi Components', function () {
           }
         ];
 
-        var actual = dashboardGroupHelper._getListOfDashboardsFromGroups(groups);
+        const actual = dashboardGroupHelper._getListOfDashboardsFromGroups(groups);
         expect(actual.length).to.be(3);
         expect(actual[0]).to.be(dA);
         expect(actual[1]).to.be(dB);
@@ -199,8 +199,8 @@ describe('Kibi Components', function () {
       });
 
       it('getIdsOfDashboardGroupsTheseDashboardsBelongTo - there is a group with a dashboard', function (done) {
-        var dashboardIds = ['Articles'];
-        var expected = ['group-1'];
+        const dashboardIds = ['Articles'];
+        const expected = ['group-1'];
 
         dashboardGroupHelper.getIdsOfDashboardGroupsTheseDashboardsBelongTo(dashboardIds).then(function (groupIds) {
           expect(groupIds).to.eql(expected);
@@ -209,7 +209,7 @@ describe('Kibi Components', function () {
       });
 
       it('getIdsOfDashboardGroupsTheseDashboardsBelongTo - there is NOT a group with a dashboard', function (done) {
-        var dashboardIds = ['ArticlesXXX'];
+        const dashboardIds = ['ArticlesXXX'];
 
         dashboardGroupHelper.getIdsOfDashboardGroupsTheseDashboardsBelongTo(dashboardIds).then(function (groupIds) {
           expect(groupIds).to.eql([]);

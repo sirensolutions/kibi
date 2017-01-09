@@ -104,7 +104,7 @@ define(function (require) {
           $rootScope.$emit('relationalFilterPanelClosed', false);
         };
 
-        var _checkFilterJoinPlugin = function () {
+        const _checkFilterJoinPlugin = function () {
           const enabled = kibiState.isRelationalPanelButtonEnabled();
           const installed = kibiState.isSirenJoinPluginInstalled();
           if (enabled && !installed) {
@@ -115,13 +115,13 @@ define(function (require) {
           }
         };
 
-        var initConfigOff = $rootScope.$on('init:config', function () {
+        const initConfigOff = $rootScope.$on('init:config', function () {
           _checkFilterJoinPlugin();
           _initPanel();
         });
 
         $scope.show = false;
-        var relationalFilterPanelOpenedOff = $rootScope.$on('relationalFilterPanelOpened', function (event, relationalFilterPanelOpened) {
+        const relationalFilterPanelOpenedOff = $rootScope.$on('relationalFilterPanelOpened', function (event, relationalFilterPanelOpened) {
           $scope.show = relationalFilterPanelOpened;
           if (relationalFilterPanelOpened) {
             _initPanel();

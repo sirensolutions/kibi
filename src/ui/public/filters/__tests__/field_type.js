@@ -1,15 +1,15 @@
-let angular = require('angular');
-let expect = require('expect.js');
-let _ = require('lodash');
-let ngMock = require('ngMock');
-require('plugins/kibana/discover/index');
-require('ui/filters/field_type');
+import angular from 'angular';
+import expect from 'expect.js';
+import _ from 'lodash';
+import ngMock from 'ng_mock';
+import 'plugins/kibana/discover/index';
+import 'ui/filters/field_type';
 
 let filter;
 
 let types;
 
-let init = function (expandable) {
+const init = function (expandable) {
   // Load the application
   ngMock.module('kibana');
 
@@ -59,7 +59,7 @@ describe('fieldType array filter', function () {
   });
 
   it('should allow negation', function () {
-    let resultNames = _.pluck(filter(types, '!string'), 'name');
+    const resultNames = _.pluck(filter(types, '!string'), 'name');
     expect(resultNames).to.eql(['n1', 'n2', 'i1', 'd1']);
   });
 });

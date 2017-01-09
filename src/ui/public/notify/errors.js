@@ -1,29 +1,27 @@
-define(function (require) {
-  let errors = {};
-  let _ = require('lodash');
+import _ from 'lodash';
+const errors = {};
 
-  let canStack = (function () {
-    let err = new Error();
-    return !!err.stack;
-  }());
+const canStack = (function () {
+  const err = new Error();
+  return !!err.stack;
+}());
 
-  // abstract error class
-  _.class(KibanaError).inherits(Error);
-  function KibanaError(msg, constructor) {
-    this.message = msg;
+// abstract error class
+_.class(KibanaError).inherits(Error);
+function KibanaError(msg, constructor) {
+  this.message = msg;
 
-    Error.call(this, this.message);
-    if (!this.stack) {
-      if (Error.captureStackTrace) {
-        Error.captureStackTrace(this, constructor || KibanaError);
-      } else if (canStack) {
-        this.stack = (new Error()).stack;
-      } else {
-        this.stack = '';
-      }
+  Error.call(this, this.message);
+  if (!this.stack) {
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, constructor || KibanaError);
+    } else if (canStack) {
+      this.stack = (new Error()).stack;
+    } else {
+      this.stack = '';
     }
   }
-  errors.KibanaError = KibanaError;
+}
+errors.KibanaError = KibanaError;
 
-  return errors;
-});
+export default errors;

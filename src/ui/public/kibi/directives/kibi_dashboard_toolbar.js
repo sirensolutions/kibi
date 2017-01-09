@@ -2,8 +2,8 @@ define(function (require) {
 
   require('ui/kibi/directives/kibi_dashboard_toolbar.less');
 
-  var _ = require('lodash');
-  var app = require('ui/modules').get('app/dashboard');
+  const _ = require('lodash');
+  const app = require('ui/modules').get('app/dashboard');
 
   app.directive('kibiDashboardToolbar', function (kibiState, $rootScope) {
     return {
@@ -28,12 +28,12 @@ define(function (require) {
           $rootScope.$emit('relationalFilterPanelOpened', $scope.relationalFilterPanelOpened);
         };
 
-        var removeRelationalFilterPanelClosedHandler = $rootScope.$on('relationalFilterPanelClosed', function () {
+        const removeRelationalFilterPanelClosedHandler = $rootScope.$on('relationalFilterPanelClosed', function () {
           $scope.relationalFilterPanelOpened = false;
         });
 
         // close panel when user navigates to a different route
-        var removeRouteChangeSuccessHandler = $rootScope.$on('$routeChangeSuccess', function (event, next, prev, err) {
+        const removeRouteChangeSuccessHandler = $rootScope.$on('$routeChangeSuccess', function (event, next, prev, err) {
           if (!next.locals.dash) {
             // only if we switched to a non dashboard page
             $rootScope.$emit('relationalFilterPanelOpened', false);
@@ -45,7 +45,7 @@ define(function (require) {
           $rootScope.$emit('kibi:dashboard:set-property', 'configTemplate', $scope.configTemplate);
         }, true);
 
-        var off = $rootScope.$on('stDashboardOnProperty', function (event, property, value) {
+        const off = $rootScope.$on('stDashboardOnProperty', function (event, property, value) {
           $scope[property] = value;
         });
         $scope.$on('$destroy', function () {

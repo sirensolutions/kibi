@@ -1,6 +1,6 @@
-let sinon = require('auto-release-sinon');
-let ngMock = require('ngMock');
-let expect = require('expect.js');
+const sinon = require('auto-release-sinon');
+const ngMock = require('ngMock');
+const expect = require('expect.js');
 const chrome = require('ui/chrome');
 
 require('../kibi_entity_clipboard');
@@ -13,8 +13,8 @@ describe('Kibi Components', function () {
     let kibiState;
     let $httpBackend;
 
-    let MockState = require('fixtures/mock_state');
-    let _ = require('lodash');
+    const MockState = require('fixtures/mock_state');
+    const _ = require('lodash');
 
     function init(entityDisabled, selectedEntity, currentDashboardId) {
       ngMock.module(

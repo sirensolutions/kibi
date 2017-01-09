@@ -30,14 +30,14 @@ define(function (require) {
         $scope.dashboardSelectData = {
           template: menuTemplateHtml,
           onOpen: function () {
-            var activeGroup = _.find($scope.dashboardGroups, g => g.active === true);
+            const activeGroup = _.find($scope.dashboardGroups, g => g.active === true);
             activeGroup.selected.onOpenClose(activeGroup);
           }
         };
 
         $scope.dashboardGroups = kibiNavBarHelper.getDashboardGroups();
 
-        var removeLocationChangeSuccessHandler = $rootScope.$on('$locationChangeSuccess', function () {
+        const removeLocationChangeSuccessHandler = $rootScope.$on('$locationChangeSuccess', function () {
           chrome.onDashboardTab() ? $el.show() : $el.hide();
         });
 
@@ -54,12 +54,12 @@ define(function (require) {
         // Tab scrolling
         // =============
 
-        var tabContainer = $el.find('.tab-container');
+        let tabContainer = $el.find('.tab-container');
         $scope.tabResizeChecker = new ResizeChecker(tabContainer);
         $scope.tabScrollerState = [true, false];
 
-        var updateTabScroller = function () {
-          var sl = tabContainer.scrollLeft();
+        const updateTabScroller = function () {
+          const sl = tabContainer.scrollLeft();
           $scope.tabScrollerState[0] = sl === 0;
           $scope.tabScrollerState[1] = sl === tabContainer[0].scrollWidth - tabContainer[0].clientWidth;
         };
@@ -71,11 +71,11 @@ define(function (require) {
 
         $scope.tabResizeChecker.on('resize', $scope.onTabContainerResize);
 
-        var amount = 90;
-        var stopScrolling = false;
+        const amount = 90;
+        let stopScrolling = false;
 
         function scroll(direction, amount) {
-          var scrollLeft = tabContainer.scrollLeft() - direction * amount;
+          const scrollLeft = tabContainer.scrollLeft() - direction * amount;
           tabContainer.animate({scrollLeft: scrollLeft}, 250, 'linear', function () {
             if (!stopScrolling) {
               scroll(direction, amount * 1.75);
@@ -97,7 +97,7 @@ define(function (require) {
         };
 
         // rerender tabs if any dashboard got saved
-        var removeDashboardChangedHandler = $rootScope.$on('kibi:dashboard:changed', function (event, dashId) {
+        const removeDashboardChangedHandler = $rootScope.$on('kibi:dashboard:changed', function (event, dashId) {
           updateTabScroller();
           kibiNavBarHelper.computeDashboardsGroups('Dashboard changed')
           .then(() => kibiNavBarHelper.updateAllCounts([ dashId ], 'kibi:dashboard:changed event'));
@@ -111,13 +111,13 @@ define(function (require) {
           }
         });
 
-        var removeDashboardGroupChangedHandler = $rootScope.$on('kibi:dashboardgroup:changed', function () {
+        const removeDashboardGroupChangedHandler = $rootScope.$on('kibi:dashboardgroup:changed', function () {
           updateTabScroller();
           kibiNavBarHelper.computeDashboardsGroups('Dashboard group changed');
         });
 
         $scope.$listen(queryFilter, 'update', function () {
-          let currentDashboardId = kibiState._getCurrentDashboardId();
+          const currentDashboardId = kibiState._getCurrentDashboardId();
           if (currentDashboardId) {
             const dashboardIds = kibiState.addAllConnected(currentDashboardId);
             kibiNavBarHelper.updateAllCounts(dashboardIds, 'filters change');

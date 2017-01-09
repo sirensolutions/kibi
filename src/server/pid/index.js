@@ -1,20 +1,20 @@
-let _ = require('lodash');
-let Boom = require('boom');
-let Promise = require('bluebird');
-let writeFile = Promise.promisify(require('fs').writeFile);
-let unlink = Promise.promisify(require('fs').unlinkSync);
+import _ from 'lodash';
+import Boom from 'boom';
+import Promise from 'bluebird';
+const writeFile = Promise.promisify(require('fs').writeFile);
+const unlink = Promise.promisify(require('fs').unlinkSync); // kibi: unlink is promisified
 
 module.exports = Promise.method(function (kbnServer, server, config) {
-  let path = config.get('pid.file');
+  const path = config.get('pid.file');
   if (!path) return;
 
-  let pid = String(process.pid);
+  const pid = String(process.pid);
 
   return writeFile(path, pid, { flag: 'wx' })
   .catch(function (err) {
     if (err.code !== 'EEXIST') throw err;
 
-    let log = {
+    const log = {
       tmpl: 'pid file already exists at <%= path %>',
       path: path,
       pid: pid
@@ -36,10 +36,21 @@ module.exports = Promise.method(function (kbnServer, server, config) {
       pid: pid
     });
 
-    let clean = _.once(function (code) {
+    const clean = _.once(function (code) {
       return unlink(path); // kibi: unlink is promisified
     });
 
     kbnServer.cleaningArray.push(clean); // Kibi: added to manage the cleanup function
+    process.once('exit', clean); // for "natural" exits
+    process.once('SIGINT', function () { // for Ctrl-C exits
+      clean();
+
+      // resend SIGINT
+      process.kill(process.pid, 'SIGINT');
+    });
+
+    process.on('unhandledRejection', function (reason, promise) {
+      server.log(['warning'], `Detected an unhandled Promise rejection.\n${reason}`);
+    });
   });
 });

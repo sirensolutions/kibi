@@ -1,16 +1,16 @@
-var sinon = require('auto-release-sinon');
-var angular = require('angular');
-var _ = require('lodash');
-var ngMock = require('ngMock');
-var expect = require('expect.js');
+const sinon = require('auto-release-sinon');
+const angular = require('angular');
+const _ = require('lodash');
+const ngMock = require('ngMock');
+const expect = require('expect.js');
 
 require('../kibi_select');
 
-var $rootScope;
-var $scope;
-var $elem;
+let $rootScope;
+let $scope;
+let $elem;
 
-var init = function ({
+const init = function ({
   initValue = null,
   items,
   required = false,
@@ -32,10 +32,10 @@ var init = function ({
     $rootScope = _$rootScope_;
     $rootScope.model = initValue;
 
-    var selectHelper = Private(require('ui/kibi/directives/kibi_select_helper'));
+    const selectHelper = Private(require('ui/kibi/directives/kibi_select_helper'));
     $rootScope.action = sinon.stub(selectHelper, 'getSavedSearches').returns(Promise.resolve(items));
 
-    var select = '<kibi-select ng-model="model" object-type="search"';
+    let select = '<kibi-select ng-model="model" object-type="search"';
     if (required) {
       select += ' required';
     }
@@ -78,7 +78,7 @@ describe('Kibi Directives', function () {
     }
 
     it('should populate the select options with items returned from the object-type action', function () {
-      var items = [
+      const items = [
         {
           value: 1,
           id: 1,
@@ -90,11 +90,11 @@ describe('Kibi Directives', function () {
 
       expect($rootScope.action.called).to.be.ok();
 
-      var select = $elem.find('select');
+      const select = $elem.find('select');
       expect($scope.required).to.be(false);
       expect(select[0].disabled).to.be(false);
 
-      var options = $elem.find('option');
+      const options = $elem.find('option');
       expect(options).to.have.length(2); // the joe element plus the null one
 
       firstElementIsEmpty(options);
@@ -105,7 +105,7 @@ describe('Kibi Directives', function () {
     });
 
     it('should populate the select options with required on', function () {
-      var items = [
+      const items = [
         {
           value: 1,
           id: 1,
@@ -119,7 +119,7 @@ describe('Kibi Directives', function () {
 
       expect($scope.required).to.be(true);
 
-      var options = $elem.find('option');
+      const options = $elem.find('option');
       expect(options).to.have.length(2);
 
       firstElementIsEmpty(options);
@@ -130,7 +130,7 @@ describe('Kibi Directives', function () {
     });
 
     it('should require an option to be selected 1', function () {
-      var items = [
+      const items = [
         {
           value: 1,
           id: 1,
@@ -145,7 +145,7 @@ describe('Kibi Directives', function () {
     });
 
     it('should require an option to be selected 2', function () {
-      var items = [
+      const items = [
         {
           value: 1,
           id: 1,
@@ -160,7 +160,7 @@ describe('Kibi Directives', function () {
     });
 
     it('should disable the select menu', function () {
-      var items = [
+      const items = [
         {
           value: 1,
           id: 1,
@@ -172,13 +172,13 @@ describe('Kibi Directives', function () {
 
       // do not try to render anything
       expect($rootScope.action.called).to.not.be.ok();
-      var select = $elem.find('select');
+      const select = $elem.find('select');
       expect(select[0].disabled).to.be(true);
     });
 
     describe('should keep the initial required parameter when enabling a disabled kibi-select', function () {
       it('should be required', function () {
-        var items = [
+        const items = [
           {
             value: 1,
             id: 1,
@@ -190,7 +190,7 @@ describe('Kibi Directives', function () {
 
         // do not try to render anything
         expect($rootScope.action.called).to.not.be.ok();
-        var select = $elem.find('select');
+        const select = $elem.find('select');
         expect(select[0].disabled).to.be(true);
 
         $scope.modelDisabled = false;
@@ -200,7 +200,7 @@ describe('Kibi Directives', function () {
       });
 
       it('should not be required', function () {
-        var items = [
+        const items = [
           {
             value: 1,
             id: 1,
@@ -212,7 +212,7 @@ describe('Kibi Directives', function () {
 
         // do not try to render anything
         expect($rootScope.action.called).to.not.be.ok();
-        var select = $elem.find('select');
+        const select = $elem.find('select');
         expect(select[0].disabled).to.be(true);
 
         $scope.modelDisabled = false;
@@ -223,14 +223,14 @@ describe('Kibi Directives', function () {
     });
 
     it('should add the include to the select options XXX', function () {
-      var items = [
+      const items = [
         {
           value: 2,
           id: 2,
           label: 'joe'
         }
       ];
-      var include = [
+      const include = [
         {
           value: 1,
           id: 1,
@@ -241,7 +241,7 @@ describe('Kibi Directives', function () {
       init({ items, include });
 
       expect($rootScope.action.called).to.be.ok();
-      var options = $elem.find('option');
+      const options = $elem.find('option');
       expect(options).to.have.length(3);
 
       firstElementIsEmpty(options);
@@ -256,7 +256,7 @@ describe('Kibi Directives', function () {
     });
 
     it('should remove duplicates when adding the include to the select options', function () {
-      var items = [
+      const items = [
         {
           value: 1,
           id: 1,
@@ -268,7 +268,7 @@ describe('Kibi Directives', function () {
           label: 'tata'
         }
       ];
-      var include = [
+      const include = [
         {
           value: 1,
           id: 1,
@@ -284,7 +284,7 @@ describe('Kibi Directives', function () {
       init({ items, include });
 
       expect($rootScope.action.called).to.be.ok();
-      var options = $elem.find('option');
+      const options = $elem.find('option');
       expect(options).to.have.length(4);
 
       firstElementIsEmpty(options);
@@ -303,7 +303,7 @@ describe('Kibi Directives', function () {
     });
 
     it('should exclude items from the select based on item value', function () {
-      var items = [
+      const items = [
         {
           value: 1,
           id: 1,
@@ -315,7 +315,7 @@ describe('Kibi Directives', function () {
           label: 'toto'
         }
       ];
-      var filter = function (item, options, selected) {
+      const filter = function (item, options, selected) {
         if (item) {
           return item.value === 1;
         } else {
@@ -326,7 +326,7 @@ describe('Kibi Directives', function () {
       init({ items, filter });
 
       expect($rootScope.action.called).to.be.ok();
-      var options = $elem.find('option');
+      const options = $elem.find('option');
       expect(options).to.have.length(2);
 
       firstElementIsEmpty(options);
@@ -337,7 +337,7 @@ describe('Kibi Directives', function () {
     });
 
     it('should exclude items from the select based on the filter options', function () {
-      var items = [
+      const items = [
         {
           value: 1,
           id: 1,
@@ -349,7 +349,7 @@ describe('Kibi Directives', function () {
           label: 'toto'
         }
       ];
-      var filter = function (item, options) {
+      const filter = function (item, options) {
         if (item) {
           return item.label === options.name;
         } else {
@@ -360,7 +360,7 @@ describe('Kibi Directives', function () {
       init({ items, filter, options: '{name: \'joe\'}' });
 
       expect($rootScope.action.called).to.be.ok();
-      var options = $elem.find('option');
+      const options = $elem.find('option');
       expect(options).to.have.length(2);
 
       firstElementIsEmpty(options);
@@ -371,7 +371,7 @@ describe('Kibi Directives', function () {
     });
 
     it('should exclude some items and include others from the select options', function () {
-      var items = [
+      const items = [
         {
           value: 1,
           id: 1,
@@ -383,14 +383,14 @@ describe('Kibi Directives', function () {
           label: 'toto'
         }
       ];
-      var filter = function (item, options, selected) {
+      const filter = function (item, options, selected) {
         if (item) {
           return item.value === 1;
         } else {
           return false;
         }
       };
-      var include = [
+      const include = [
         {
           id: 3,
           value: 3,
@@ -401,7 +401,7 @@ describe('Kibi Directives', function () {
       init({ items, include, filter });
 
       expect($rootScope.action.called).to.be.ok();
-      var options = $elem.find('option');
+      const options = $elem.find('option');
       expect(options).to.have.length(3);
 
       firstElementIsEmpty(options);
@@ -416,21 +416,21 @@ describe('Kibi Directives', function () {
     });
 
     it('should exclude items that were explicitly included', function () {
-      var items = [
+      const items = [
         {
           value: 2,
           id: 2,
           label: 'toto'
         }
       ];
-      var filter = function (item, options, selected) {
+      const filter = function (item, options, selected) {
         if (item) {
           return item.value === 1;
         } else {
           return false;
         }
       };
-      var include = [
+      const include = [
         {
           value: 1,
           id: 1,
@@ -441,7 +441,7 @@ describe('Kibi Directives', function () {
       init({ items, include, filter });
 
       expect($rootScope.action.called).to.be.ok();
-      var options = $elem.find('option');
+      const options = $elem.find('option');
       expect(options).to.have.length(2);
 
       firstElementIsEmpty(options);
@@ -452,7 +452,7 @@ describe('Kibi Directives', function () {
     });
 
     it('should automatically select the element if it is the only one and the select is required', function () {
-      var items = [
+      const items = [
         {
           value: 2,
           id: 2,
@@ -462,7 +462,7 @@ describe('Kibi Directives', function () {
 
       init({ initValue: 2, items, required: true });
 
-      var options = $elem.find('option');
+      const options = $elem.find('option');
       expect(options).to.have.length(2);
 
       firstElementIsEmpty(options);
@@ -472,7 +472,7 @@ describe('Kibi Directives', function () {
     });
 
     it('should NOT automatically select the element if it is the only one and the select is optional', function () {
-      var items = [
+      const items = [
         {
           value: 2,
           id: 2,
@@ -482,7 +482,7 @@ describe('Kibi Directives', function () {
 
       init({ items });
 
-      var options = $elem.find('option');
+      const options = $elem.find('option');
       expect(options).to.have.length(2);
       expect(options[0].defaultSelected).to.be(true);
       expect(options[0].value).to.be('');
@@ -491,7 +491,7 @@ describe('Kibi Directives', function () {
     });
 
     it('should set analyzedField to true if the selected item is analyzed', function () {
-      var items = [
+      const items = [
         {
           value: 1,
           id: 1,
@@ -512,7 +512,7 @@ describe('Kibi Directives', function () {
     });
 
     it('should set analyzedField to true if the auto-selected item is analyzed', function () {
-      var items = [
+      const items = [
         {
           value: 2,
           id: 2,
@@ -528,7 +528,7 @@ describe('Kibi Directives', function () {
     });
 
     it('should select the option that is already in the ngModel controller', function () {
-      var items = [
+      const items = [
         {
           value: 2,
           id: 2,
@@ -543,7 +543,7 @@ describe('Kibi Directives', function () {
 
       expect($scope.isInvalid()).to.be(false);
 
-      var options = $elem.find('option');
+      const options = $elem.find('option');
       expect(options).to.have.length(2);
       expect(options[1].selected).to.be(true);
       expect(options[1].value).to.be('2');
@@ -551,7 +551,7 @@ describe('Kibi Directives', function () {
     });
 
     it('should set model as invalid if empty and select is required', function () {
-      var items = [
+      const items = [
         {
           value: 1,
           id: 1,
@@ -570,7 +570,7 @@ describe('Kibi Directives', function () {
     });
 
     it('should sort the items by label', function () {
-      var items = [
+      const items = [
         {
           value: 1,
           id: 1,
@@ -587,7 +587,7 @@ describe('Kibi Directives', function () {
 
       expect($rootScope.action.called).to.be.ok();
 
-      var options = $elem.find('option');
+      const options = $elem.find('option');
       expect(options).to.have.length(3); // the joe element plus the null one
 
       firstElementIsEmpty(options);
@@ -601,14 +601,14 @@ describe('Kibi Directives', function () {
     });
 
     it('should sort the included items too', function () {
-      var items = [
+      const items = [
         {
           value: 2,
           id: 2,
           label: 'aaa'
         }
       ];
-      var include = [
+      const include = [
         {
           value: 1,
           id: 1,
@@ -619,7 +619,7 @@ describe('Kibi Directives', function () {
       init({ items, include });
 
       expect($rootScope.action.called).to.be.ok();
-      var options = $elem.find('option');
+      const options = $elem.find('option');
       expect(options).to.have.length(3);
 
       firstElementIsEmpty(options);

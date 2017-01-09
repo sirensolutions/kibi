@@ -1,6 +1,6 @@
+import _ from 'lodash';
+import expect from 'expect.js';
 describe('_.pushAll', function () {
-  const _ = require('lodash');
-  const expect = require('expect.js');
 
   it('pushes an entire array into another', function () {
     const a = [1, 2, 3, 4];

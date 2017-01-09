@@ -1,8 +1,8 @@
 define(function (require) {
   require('elasticsearch-browser/elasticsearch.angular.js');
-  var _ = require('lodash');
+  const _ = require('lodash');
 
-  var client;
+  let client;
   require('ui/modules')
   .get('kibana', ['elasticsearch', 'kibana/config'])
   .service('savedObjectsAPI', function (esFactory, savedObjectsAPIUrl, $q, esApiVersion, esRequestTimeout) {

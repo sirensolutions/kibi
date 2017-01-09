@@ -1,17 +1,19 @@
-require('babel/polyfill');
+import _ from 'lodash';
+import angular from 'angular';
 
-let _ = require('lodash');
-let $ = require('jquery');
-let angular = require('angular');
+import metadata from 'ui/metadata';
+import 'babel/polyfill';
+import 'ui/timefilter';
+import 'ui/notify';
+import 'ui/private';
+import 'ui/promises';
+import 'ui/storage';
+import 'ui/directives/kbn_src';
+import 'ui/watch_multi';
+import './services';
 
-require('ui/timefilter');
-require('ui/private');
-require('ui/promises');
-
-let metadata = require('ui/metadata');
-
-let chrome = {};
-let internals = _.defaults(
+const chrome = {};
+const internals = _.defaults(
   _.cloneDeep(metadata),
   {
     basePath: '',
@@ -19,23 +21,24 @@ let internals = _.defaults(
     rootTemplate: null,
     showAppsLink: null,
     xsrfToken: null,
+    devMode: true,
     brand: null,
     nav: [],
     applicationClasses: []
   }
 );
 
-$('<link>').attr({
-  href: require('ui/kibi/images/favicon.ico'), // kibi: replaced kibana favicon
-  rel: 'shortcut icon'
-}).appendTo('head');
+// KIBI5: where is the icon set now ?
+//$('<link>').attr({
+  //href: require('ui/kibi/images/favicon.ico'), // kibi: replaced kibana favicon
+  //rel: 'shortcut icon'
+//}).appendTo('head');
 
 require('./api/apps')(chrome, internals);
 require('./api/xsrf')(chrome, internals);
 require('./api/nav')(chrome, internals);
 require('./api/angular')(chrome, internals);
 require('./api/controls')(chrome, internals);
-require('./api/tabs')(chrome, internals);
 require('./api/template')(chrome, internals);
 require('./api/theme')(chrome, internals);
 
@@ -44,6 +47,7 @@ chrome.bootstrap = function () {
   angular.bootstrap(document, ['kibana']);
 };
 
+// KIBI5: keep this ?
 if (chrome.getApp && chrome.getApp() && chrome.getApp().id === 'kibana') {
   require('ui/kibi/styles/kibi'); // kibi: added to style the logo
   require('ui/kibi/directives/kibi_nav_bar'); // kibi: added so we can inject our own kibi-nav-bar

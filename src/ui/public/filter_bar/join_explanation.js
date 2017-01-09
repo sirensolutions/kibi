@@ -2,18 +2,18 @@
 define(function (require) {
   return function JoinExplanationFactory(Private, indexPatterns, Promise, $timeout, kibiState) {
 
-    var jQuery = require('jquery');
-    var qtip = require('kibi-qtip2');
+    const jQuery = require('jquery');
+    const qtip = require('kibi-qtip2');
 
     function JoinExplanationHelper() {}
 
     JoinExplanationHelper.prototype = (function () {
 
-      var fieldFormat = Private(require('ui/registry/field_formats'));
-      var _ = require('lodash');
+      const fieldFormat = Private(require('ui/registry/field_formats'));
+      const _ = require('lodash');
 
-      var explainFiltersForJoinSet = function (queriesPerDashboard, indexId) {
-        var promises = [];
+      const explainFiltersForJoinSet = function (queriesPerDashboard, indexId) {
+        const promises = [];
         _.each(queriesPerDashboard, function (filters, dashboardId) {
           _.each(filters, filter => {
             promises.push(explainFilter(filter, indexId).then(filterLabel => {
@@ -40,11 +40,11 @@ define(function (require) {
         });
       };
 
-      var explainJoinSet = function (joinSet) {
-        var promises = _.map(joinSet.queries, explainFiltersForJoinSet);
+      const explainJoinSet = function (joinSet) {
+        const promises = _.map(joinSet.queries, explainFiltersForJoinSet);
 
         return Promise.all(promises).then(function (explanations) {
-          var html = '<ul class="explanation join-set">';
+          let html = '<ul class="explanation join-set">';
           let empty = true;
           _.each(explanations, function (expl) {
             if (expl) {
@@ -60,11 +60,11 @@ define(function (require) {
        * Format the value as a date if the field type is date
        */
       function formatDate(fields, fieldName, value) {
-        var field = _.find(fields, function (field) {
+        const field = _.find(fields, function (field) {
           return field.name === fieldName;
         });
         if (field && field.type === 'date') {
-          var format = field.format;
+          let format = field.format;
           if (!format) {
             format = fieldFormat.getDefaultInstance('date');
           }
@@ -74,8 +74,8 @@ define(function (require) {
       }
 
       function formatMatch(f, matchType) {
-        var match = Object.keys(f.query[matchType])[0];
-        var matchQuery = f.query[matchType][match];
+        const match = Object.keys(f.query[matchType])[0];
+        const matchQuery = f.query[matchType][match];
 
         if (matchQuery.constructor === Object) {
           return ' match on ' + match + ': <b>' + matchQuery.query + '</b> ';
@@ -84,12 +84,12 @@ define(function (require) {
         }
       }
 
-      var initQtip = function (explanations) {
+      const initQtip = function (explanations) {
         jQuery('.qtip').qtip('destroy', true);
         $timeout(function () {
 
           jQuery('.filter').each(function (index) {
-            var $el = jQuery(this);
+            const $el = jQuery(this);
             if ($el.hasClass('join') && explanations[index]) {
               $el.qtip({
                 content: {
@@ -113,8 +113,8 @@ define(function (require) {
         return Promise.resolve('done');
       };
 
-      var createFilterLabel = function (f, fields) {
-        var prop;
+      const createFilterLabel = function (f, fields) {
+        let prop;
         if (f.query && f.query.query_string && f.query.query_string.query) {
           return Promise.resolve(' query: <b>' + f.query.query_string.query + '</b> ');
         } else if (f.query && f.query.match) {
@@ -159,7 +159,7 @@ define(function (require) {
         }
       };
 
-      var explainFilter = function (filter, indexId) {
+      const explainFilter = function (filter, indexId) {
         if (filter.range || filter.not) {
           // fields might be needed
           return indexPatterns.get(indexId).then(function (index) {
@@ -170,16 +170,16 @@ define(function (require) {
         }
       };
 
-      var explainFilterInMustNot = function (filter, indexId) {
+      const explainFilterInMustNot = function (filter, indexId) {
         return explainFilter(filter, indexId).then(function (filterExplanation) {
           return 'NOT ' + filterExplanation;
         });
       };
 
 
-      var explainQueries = function (queries, indexId) {
+      const explainQueries = function (queries, indexId) {
 
-        var promises = [];
+        const promises = [];
         _.each(queries, function (query) {
           // in our case we have filtered query for now
           if (query.query && query.query.bool && query.query.bool.must) {
@@ -196,8 +196,8 @@ define(function (require) {
           }
 
           if (query.query && query.query.bool && query.query.bool.filter && query.query.bool.filter.bool) {
-            var must = query.query.bool.filter.bool.must;
-            var mustNot = query.query.bool.must_not;
+            const must = query.query.bool.filter.bool.must;
+            const mustNot = query.query.bool.must_not;
             if (must instanceof Array && must.length > 0) {
               _.each(must, function (filter) {
                 promises.push(explainFilter(filter, indexId));
@@ -212,7 +212,7 @@ define(function (require) {
         });
 
         return Promise.all(promises).then(function (filterExplanations) {
-          var html = '<ul>';
+          let html = '<ul>';
           _.each(filterExplanations, function (explanation) {
             html += '<li>' + explanation + '</li>';
           });
@@ -221,10 +221,10 @@ define(function (require) {
       };
 
 
-      var explainRelation = function (el) {
-        var relation = el.relation;
+      const explainRelation = function (el) {
+        const relation = el.relation;
 
-        var promises = [];
+        const promises = [];
         if (relation[0].queries instanceof Array && relation[0].queries.length > 0) {
           promises.push(explainQueries(relation[0].queries, relation[0].pattern));
         } else {
@@ -239,7 +239,7 @@ define(function (require) {
         }
 
         return Promise.all(promises).then(function (explanations) {
-          var html =
+          const html =
             '<b>' + (el.negate === true ? 'NOT ' : '') + 'Relation:</b></br>' +
             '<table class="relation">' +
             '<tr>' +
@@ -255,12 +255,12 @@ define(function (require) {
         });
       };
 
-      var explainJoinSequence = function (joinSequence) {
+      const explainJoinSequence = function (joinSequence) {
         // clone and reverse to iterate backwards to show the last step on top
-        var sequence = _.cloneDeep(joinSequence);
+        const sequence = _.cloneDeep(joinSequence);
         sequence.reverse();
 
-        var promises = [];
+        const promises = [];
         _.each(sequence, function (el, i) {
           if (el.relation) {
             promises.push(explainRelation(el));
@@ -270,24 +270,24 @@ define(function (require) {
         });
 
         return Promise.all(promises).then(function (sequenceElementExplanations) {
-          var html = '<table class="sequence">';
-          for (var i = 0; i < sequenceElementExplanations.length; i++) {
+          let html = '<table class="sequence">';
+          for (let i = 0; i < sequenceElementExplanations.length; i++) {
             html += '<tr' + (sequence[i].negate ? 'class="negated"' : '') + '><td>' + sequenceElementExplanations[i] + '</td></tr>';
           }
           return html + '</table>';
         });
       };
 
-      var explainGroup = function (el) {
-        var group = el.group;
+      const explainGroup = function (el) {
+        const group = el.group;
 
-        var promises = [];
+        const promises = [];
         _.each(group, function (sequence, i) {
           promises.push(explainJoinSequence(sequence));
         });
 
         return Promise.all(promises).then(function (groupSequenceExplanations) {
-          var html =
+          let html =
             '<b>Group of relations:</b></br>' +
             '<table class="group">';
           _.each(groupSequenceExplanations, function (sequenceExplanation) {
@@ -297,8 +297,8 @@ define(function (require) {
         });
       };
 
-      var getFilterExplanations = function (filters) {
-        var promises = [];
+      const getFilterExplanations = function (filters) {
+        const promises = [];
         _.each(filters, function (f) {
           if (f.join_sequence) {
             promises.push(explainJoinSequence(f.join_sequence));
@@ -311,7 +311,7 @@ define(function (require) {
         });
 
         return Promise.all(promises).then(function (results) {
-          var filterExplanations = [];
+          const filterExplanations = [];
           _.each(results, function (explanation) {
             filterExplanations.push(explanation);
           });

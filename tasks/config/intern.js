@@ -1,20 +1,28 @@
-let path = require('path');
-let {resolve} = require('path'); // kibi: added to be able to load uiConfig
-let root = p => resolve(__dirname, '../../', p);  // kibi: added to be able to load uiConfig
+const path = require('path');
 
 module.exports = function (grunt) {
-  let uiConfig = require(root('test/serverConfig'));
-
   return {
     options: {
       runType: 'runner',
       config: 'test/intern',
+      bail: true,
       reporters: ['Console'],
-      proxyPort: uiConfig.servers.webdriver.proxyPort,
-      proxyUrl: uiConfig.servers.webdriver.protocol + '://' +
-                uiConfig.servers.webdriver.hostname + ':' +
-                uiConfig.servers.webdriver.proxyPort + '/'
+      grep: grunt.option('grep'),
+      functionalSuites: grunt.option('functionalSuites'),
+      appSuites: grunt.option('appSuites')
     },
-    dev: {}
+    dev: {},
+    api: {
+      options: {
+        runType: 'client',
+        config: 'test/intern_api'
+      }
+    },
+    visualRegression: {
+      options: {
+        runType: 'runner',
+        config: 'test/intern_visual_regression'
+      }
+    }
   };
 };

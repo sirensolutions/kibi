@@ -1,7 +1,7 @@
-let sinon = require('sinon');
-let expect = require('expect.js');
-let ngMock = require('ngMock');
-require('ui/state_management/global_state');
+import sinon from 'sinon';
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import 'ui/state_management/global_state';
 
 describe('State Management', function () {
   let $rootScope;

@@ -2,9 +2,9 @@ import Joi from 'joi';
 import _ from 'lodash';
 import override from './override';
 import unset from './unset';
-
-let pkg = require('requirefrom')('src/utils')('packageJson');
-const clone = require('./deepCloneWithBuffers');
+import createDefaultSchema from './schema';
+import pkg from '../../utils/package_json';
+import clone from './deep_clone_with_buffers';
 
 const schema = Symbol('Joi Schema');
 const schemaExts = Symbol('Schema Extensions');
@@ -12,6 +12,10 @@ const vals = Symbol('config values');
 const pendingSets = Symbol('Pending Settings');
 
 module.exports = class Config {
+  static withDefaultSchema(settings = {}) {
+    return new Config(createDefaultSchema(), settings);
+  }
+
   constructor(initialSchema, initialSettings) {
     this[schemaExts] = Object.create(null);
     this[vals] = Object.create(null);
@@ -38,7 +42,7 @@ module.exports = class Config {
     _.set(this[schemaExts], key, extension);
     this[schema] = null;
 
-    let initialVals = _.get(this[pendingSets], key);
+    const initialVals = _.get(this[pendingSets], key);
     if (initialVals) {
       this.set(key, initialVals);
       unset(this[pendingSets], key);
@@ -82,11 +86,11 @@ module.exports = class Config {
     if (_.isObject(env)) env = env.name;
     if (!env) env = process.env.NODE_ENV || 'production';
 
-    let dev = env === 'development';
-    let prod = env === 'production';
+    const dev = env === 'development';
+    const prod = env === 'production';
 
     // pass the environment as context so that it can be refed in config
-    let context = {
+    const context = {
       env: env,
       prod: prod,
       dev: dev,
@@ -106,7 +110,7 @@ module.exports = class Config {
       );
     }
 
-    let results = Joi.validate(newVals, this.getSchema(), { context });
+    const results = Joi.validate(newVals, this.getSchema(), { context });
 
     if (results.error) {
       throw results.error;
@@ -120,7 +124,7 @@ module.exports = class Config {
       return clone(this[vals]);
     }
 
-    let value = _.get(this[vals], key);
+    const value = _.get(this[vals], key);
     if (value === undefined) {
       if (!this.has(key)) {
         throw new Error('Unknown config key: ' + key);
@@ -137,7 +141,7 @@ module.exports = class Config {
       // Only go deep on inner objects with children
       if (_.size(schema._inner.children)) {
         for (let i = 0; i < schema._inner.children.length; i++) {
-          let child = schema._inner.children[i];
+          const child = schema._inner.children[i];
           // If the child is an object recurse through it's children and return
           // true if there's a match
           if (child.schema._type === 'object') {

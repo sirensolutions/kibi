@@ -1,69 +1,45 @@
-define(function (require) {
-  var Common = require('../../../support/pages/common');
-  var SettingsPage = require('../../../support/pages/settings_page');
-  var VisualizePage = require('../../../support/pages/visualize_page');
-  var expect = require('intern/dojo/node!expect.js');
+import expect from 'expect.js';
 
-  return function (bdd, scenarioManager) {
-    bdd.describe('visualize app', function describeIndexTests() {
-      var common;
-      var settingsPage;
-      var visualizePage;
+import {
+  bdd
+} from '../../../support';
 
-      bdd.before(function () {
-        common = new Common(this.remote);
-        settingsPage = new SettingsPage(this.remote);
-        visualizePage = new VisualizePage(this.remote);
+import PageObjects from '../../../support/page_objects';
 
-        return scenarioManager.reload('emptyKibana')
-        .then(function () {
-          common.debug('navigateTo');
-          return settingsPage.navigateTo();
-        })
-        .then(function () {
-          common.debug('createIndexPattern');
-          return settingsPage.createIndexPattern();
-        })
-        .then(function () {
-          common.debug('click on the default index button');
-          return settingsPage.clickDefaultIndexButton();
-        })
-        .then(function () {
-          common.debug('navigateToApp visualize');
-          return common.navigateToApp('visualize');
-        })
-        .catch(common.handleError(this));
-      });
+bdd.describe('visualize app', function describeIndexTests() {
 
+  bdd.before(function () {
+    PageObjects.common.debug('navigateToApp visualize');
+    return PageObjects.common.navigateToApp('visualize');
+  });
 
-      bdd.describe('chart types', function indexPatternCreation() {
-
-        bdd.it('should show the correct chart types', function pageHeader() {
-
-          // kibi: added kibi visualizations
-          var expectedChartTypes = [
-            'Area chart',
-            'Data table',
-            'Enhanced search results', // kibi visualization
-            'Kibi query viewer', // kibi visualization
-            'Kibi relational filter', // kibi visualization
-            'Line chart',
-            'Markdown widget',
-            'Metric',
-            'Pie chart',
-            'Tile map',
-            'Vertical bar chart'
-          ];
-          // find all the chart types and make sure there all there
-          return visualizePage.getChartTypes()
-          .then(function testChartTypes(chartTypes) {
-            common.debug('returned chart types = ' + chartTypes);
-            common.debug('expected chart types = ' + expectedChartTypes);
-            expect(chartTypes).to.eql(expectedChartTypes);
-          })
-          .catch(common.handleError(this));
+  bdd.describe('chart types', function indexPatternCreation() {
+    bdd.it('should show the correct chart types', function () {
+      // kibi: added kibi visualizations
+      const expectedChartTypes = [
+        'Area chart',
+        'Data table',
+        'Enhanced search results', // kibi visualization
+        'Heatmap chart',
+        'Kibi query viewer', // kibi visualization
+        'Kibi relational filter', // kibi visualization
+        'Line chart',
+        'Markdown widget',
+        'Metric',
+        'Pie chart',
+        'Tag cloud',
+        'Tile map',
+        'Timeseries',
+        'Vertical bar chart'
+      ];
+      // find all the chart types and make sure there all there
+      return PageObjects.visualize.getChartTypes()
+        .then(function testChartTypes(chartTypes) {
+          PageObjects.common.debug('returned chart types = ' + chartTypes);
+          PageObjects.common.debug('expected chart types = ' + expectedChartTypes);
+          PageObjects.common.saveScreenshot('Visualize-chart-types');
+          expect(chartTypes).to.eql(expectedChartTypes);
         });
-      });
     });
-  };
+  });
 });

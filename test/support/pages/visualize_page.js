@@ -1,13 +1,13 @@
 define(function (require) {
 
-  var config = require('intern').config;
-  var registerSuite = require('intern!object');
-  var Common = require('./common');
-  var HeaderPage = require('./header_page');
+  const config = require('intern').config;
+  const registerSuite = require('intern!object');
+  const Common = require('./common');
+  const HeaderPage = require('./header_page');
 
-  var defaultTimeout = config.timeouts.default;
-  var common;
-  var headerPage;
+  const defaultTimeout = config.timeouts.default;
+  let common;
+  let headerPage;
 
   function VisualizePage(remote) {
     this.remote = remote;
@@ -82,7 +82,7 @@ define(function (require) {
     },
 
     getChartTypes: function getChartTypes() {
-      var types = [];
+      const types = [];
       return this.remote
       .setFindTimeout(defaultTimeout)
       .findAllByCssSelector('a.wizard-vis-type.ng-scope h4')
@@ -90,7 +90,7 @@ define(function (require) {
         function getChartType(chart) {
           return chart.getVisibleText();
         }
-        var getChartTypesPromises = chartTypes.map(getChartType);
+        const getChartTypesPromises = chartTypes.map(getChartType);
         return Promise.all(getChartTypesPromises);
       })
       .then(function (texts) {
@@ -164,7 +164,7 @@ define(function (require) {
     },
 
     setValue: function setValue(newValue) {
-      var self = this.remote;
+      const self = this.remote;
       return this.remote
       .setFindTimeout(defaultTimeout * 2)
       .findByCssSelector('button[ng-click="numberListCntr.add()"]')
@@ -226,7 +226,7 @@ define(function (require) {
             }
           });
         }
-        var getChartTypesPromises = chartTypes.map(getChartType);
+        const getChartTypesPromises = chartTypes.map(getChartType);
         return Promise.all(getChartTypesPromises);
       });
     },
@@ -263,7 +263,7 @@ define(function (require) {
     },
 
     getInterval: function getInterval() {
-      var self = this;
+      const self = this;
       return this.remote
       .setFindTimeout(defaultTimeout)
       .findByCssSelector('select[ng-model="agg.params.interval"]')
@@ -310,7 +310,7 @@ define(function (require) {
 
 
     saveVisualization: function saveVisualization(vizName) {
-      var self = this;
+      const self = this;
       return this.remote
       .setFindTimeout(defaultTimeout)
       .findByCssSelector('button.ng-scope[aria-label="Save Visualization"]')
@@ -344,7 +344,7 @@ define(function (require) {
 
     // saved visualizations are paginated 5 to a page!
     loadSavedVisualization: function loadSavedVisualization(vizName) {
-      var self = this;
+      const self = this;
       return this.remote
       .setFindTimeout(defaultTimeout)
       .findByCssSelector('button.ng-scope[aria-label="Load Saved Visualization"]')
@@ -367,7 +367,7 @@ define(function (require) {
           return chart
           .getVisibleText();
         }
-        var getChartTypesPromises = chartTypes.map(getChartType);
+        const getChartTypesPromises = chartTypes.map(getChartType);
         return Promise.all(getChartTypesPromises);
       })
       .then(function (texts) {
@@ -386,7 +386,7 @@ define(function (require) {
           return chart
           .getVisibleText();
         }
-        var getChartTypesPromises = chartTypes.map(getChartType);
+        const getChartTypesPromises = chartTypes.map(getChartType);
         return Promise.all(getChartTypesPromises);
       })
       .then(function (texts) {
@@ -402,14 +402,14 @@ define(function (require) {
      */
     getAreaChartData: function getAreaChartData() {
 
-      var self = this.remote;
-      var chartData = [];
-      var tempArray = [];
-      var chartSections = 0;
-      var chartMap = {};
-      var height = 0;
-      var yAxisLabel = 0;
-      var yAxisHeight = 0;
+      const self = this.remote;
+      const chartData = [];
+      let tempArray = [];
+      let chartSections = 0;
+      const chartMap = {};
+      const height = 0;
+      let yAxisLabel = 0;
+      let yAxisHeight = 0;
 
       // 1). get the maximim chart Y-Axis marker value
       return this.remote
@@ -455,7 +455,7 @@ define(function (require) {
                   common.debug('chartSections = ' + chartSections + ' height = ' + yAxisHeight + ' yAxisLabel = ' + yAxisLabel);
                   chartData[0] = Math.round((yAxisHeight - tempArray[0].split(',')[1]) / yAxisHeight * yAxisLabel);
                   common.debug('chartData[0] =' + chartData[0]);
-                  for (var i = 1; i < chartSections; i++) {
+                  for (let i = 1; i < chartSections; i++) {
                     chartData[i] = Math.round((yAxisHeight - tempArray[i].split(',')[1]) / yAxisHeight * yAxisLabel);
                     common.debug('chartData[i] =' + chartData[i]);
                   }
@@ -464,13 +464,13 @@ define(function (require) {
               }
             });
           }
-          var getChartTypesPromises = chartTypes.map(getChartType);
+          const getChartTypesPromises = chartTypes.map(getChartType);
           return Promise.all(getChartTypesPromises);
         });
       })
       .then(function (chartData) {
         // kibi: do not use the magic number. Instead try to find the data
-        var index = -1;
+        let index = -1;
         chartData.forEach(function (data, i) {
           if (data) {
             if (index !== -1) {
@@ -490,9 +490,9 @@ define(function (require) {
 
     // The current test shows dots, not a line.  This function gets the dots and normalizes their height.
     getLineChartData: function getLineChartData() {
-      var self = this.remote;
-      var yAxisLabel = 0;
-      var yAxisHeight;
+      const self = this.remote;
+      let yAxisLabel = 0;
+      let yAxisHeight;
 
       // 1). get the maximim chart Y-Axis marker value
       return this.remote
@@ -546,7 +546,7 @@ define(function (require) {
             }
 
             // 4). pass the chartTypes to the getChartType function
-            var getChartTypesPromises = chartTypes.map(getChartType);
+            const getChartTypesPromises = chartTypes.map(getChartType);
             return Promise.all(getChartTypesPromises);
           });
         })
@@ -559,9 +559,9 @@ define(function (require) {
 
     // this is ALMOST identical to DiscoverPage.getBarChartData
     getBarChartData: function getBarChartData() {
-      var self = this.remote;
-      var yAxisLabel = 0;
-      var yAxisHeight;
+      const self = this.remote;
+      let yAxisLabel = 0;
+      let yAxisHeight;
 
       // 1). get the maximim chart Y-Axis marker value
       return this.remote
@@ -612,7 +612,7 @@ define(function (require) {
               }
             });
           }
-          var getChartTypesPromises = chartTypes.map(getChartType);
+          const getChartTypesPromises = chartTypes.map(getChartType);
           return Promise.all(getChartTypesPromises);
         })
         .then(function (bars) {
@@ -622,7 +622,7 @@ define(function (require) {
     },
 
     getPieChartData: function getPieChartData() {
-      var self = this.remote;
+      const self = this.remote;
 
       // 1). get the maximim chart Y-Axis marker value
       return this.remote
@@ -637,7 +637,7 @@ define(function (require) {
             return slice;
           });
         }
-        var getChartTypesPromises = chartTypes.map(getChartType);
+        const getChartTypesPromises = chartTypes.map(getChartType);
         return Promise.all(getChartTypesPromises);
       })
       .then(function (slices) {
@@ -674,7 +674,7 @@ define(function (require) {
     },
 
     waitForToastMessageGone: function waitForToastMessageGone() {
-      var self = this;
+      const self = this;
       return common.tryForTime(defaultTimeout * 5, function tryingForTime() {
         return self.remote
         .setFindTimeout(100)

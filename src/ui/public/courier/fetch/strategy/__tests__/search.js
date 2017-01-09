@@ -1,8 +1,11 @@
+import _ from 'lodash';
+import sinon from 'auto-release-sinon';
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+
+import SearchStrategyProvider from '../search';
+
 describe('ui/courier/fetch/strategy/search', () => {
-  const _ = require('lodash');
-  const sinon = require('auto-release-sinon');
-  const expect = require('expect.js');
-  const ngMock = require('ngMock');
 
   let Promise;
   let $rootScope;
@@ -14,7 +17,7 @@ describe('ui/courier/fetch/strategy/search', () => {
   beforeEach(ngMock.inject((Private, $injector) => {
     Promise = $injector.get('Promise');
     $rootScope = $injector.get('$rootScope');
-    search = Private(require('ui/courier/fetch/strategy/search'));
+    search = Private(SearchStrategyProvider);
     reqsFetchParams = [
       {
         index: ['logstash-123'],
@@ -52,7 +55,7 @@ describe('ui/courier/fetch/strategy/search', () => {
     context('when indexList is empty', () => {
       beforeEach(() => reqsFetchParams[0].index = []);
 
-      it('queries the Kibi index with a must_not match_all boolean', () => {
+      it('queries the kibi index (.kibi) with a must_not match_all boolean', () => {
         const query = JSON.stringify({
           query: {
             bool: {

@@ -1,18 +1,22 @@
 import $ from 'jquery';
 import { remove } from 'lodash';
 
+import './kbn_chrome.less';
 import UiModules from 'ui/modules';
-import ConfigTemplate from 'ui/ConfigTemplate';
 import { isSystemApiRequest } from 'ui/system_api';
+import {
+  getUnhashableStatesProvider,
+  unhashUrl,
+} from 'ui/state_management/state_hashing';
 
 export default function (chrome, internals) {
 
   UiModules
   .get('kibana')
-  .directive('kbnChrome', function ($rootScope) {
+  .directive('kbnChrome', $rootScope => {
     return {
       template($el) {
-        const $content = $(require('ui/chrome/chrome.html'));
+        const $content = $(require('./kbn_chrome.html'));
         const $app = $content.find('.application');
 
         if (internals.rootController) {
@@ -28,7 +32,8 @@ export default function (chrome, internals) {
       },
 
       controllerAs: 'chrome',
-      controller($scope, $rootScope, $location, $http) {
+      controller($scope, $rootScope, $location, $http, Private) {
+        const getUnhashableStates = Private(getUnhashableStatesProvider);
 
         // are we showing the embedded version of the chrome?
         internals.setVisibleDefault(!$location.search().embed);
@@ -38,10 +43,9 @@ export default function (chrome, internals) {
 
         // listen for route changes, propogate to tabs
         const onRouteChange = function () {
-          let { href } = window.location;
-          let persist = chrome.getVisible();
-          internals.trackPossibleSubUrl(href);
-          internals.tabs.consumeRouteUpdate(href, persist);
+          const urlWithHashes = window.location.href;
+          const urlWithStates = unhashUrl(urlWithHashes, getUnhashableStates());
+          internals.trackPossibleSubUrl(urlWithStates);
         };
 
         $rootScope.$on('$routeChangeSuccess', onRouteChange);
@@ -55,9 +59,6 @@ export default function (chrome, internals) {
         // and some local values
         chrome.httpActive = $http.pendingRequests;
         $scope.notifList = require('ui/notify')._notifs;
-        $scope.appSwitcherTemplate = new ConfigTemplate({
-          switcher: '<app-switcher></app-switcher>'
-        });
 
         return chrome;
       }

@@ -1,9 +1,9 @@
 define(function (require) {
-  var _ = require('lodash');
+  const _ = require('lodash');
 
   return function joinFields(relations, indexPatternId, fieldName) {
     return _(relations).map(function (relation) {
-      var indices = relation.indices;
+      const indices = relation.indices;
 
       if (indices[0].indexPatternId === indexPatternId && indices[0].path === fieldName) {
         return {

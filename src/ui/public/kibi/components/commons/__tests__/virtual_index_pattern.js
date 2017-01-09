@@ -1,11 +1,11 @@
-var ngMock = require('ngMock');
-var expect = require('expect.js');
+const ngMock = require('ngMock');
+const expect = require('expect.js');
 
 describe('Kibi Components', function () {
   describe('Virtual Index Pattern', function () {
-    var _ = require('lodash');
-    var indexPattern;
-    var VirtualIndex;
+    const _ = require('lodash');
+    let indexPattern;
+    let VirtualIndex;
 
     beforeEach(function () {
       ngMock.module('kibana');
@@ -17,8 +17,8 @@ describe('Kibi Components', function () {
     });
 
     it('should be a virtual field', function () {
-      var vip = new VirtualIndex(indexPattern);
-      var field = {
+      const vip = new VirtualIndex(indexPattern);
+      const field = {
         analyzed: false,
         bucketable: true,
         count: 0,

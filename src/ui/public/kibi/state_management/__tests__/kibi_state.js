@@ -33,7 +33,7 @@ describe('State Management', function () {
                          currentPath = '/dashboard', currentDashboardId = 'dashboard1' }) {
     ngMock.module('kibana', 'kibana/courier', 'kibana/global_state', ($provide) => {
       $provide.service('$route', () => {
-        var myRoute = {
+        const myRoute = {
           current: {
             locals: {
               dash: {
@@ -439,7 +439,7 @@ describe('State Management', function () {
       }));
 
       it('get saved dashboard and saved search the order of dashboardIds should be preserved' , function (done) {
-        var ignoreMissingSavedSearch = true;
+        const ignoreMissingSavedSearch = true;
         // this tests checks that although the savedDashboard order is
         // 'Articles', 'search-ste'
         // when we provide the ids in reverse order like 'search-ste', 'Articles'
@@ -455,7 +455,7 @@ describe('State Management', function () {
       });
 
       it('get saved dashboard and saved search the order of dashboardIds should be preserved 2' , function (done) {
-        var ignoreMissingSavedSearch = true;
+        const ignoreMissingSavedSearch = true;
         kibiState._getDashboardAndSavedSearchMetas([ 'Articles', 'search-ste'], ignoreMissingSavedSearch).then(function (results) {
           expect(results).to.have.length(2);
           expect(results[0].savedDash.id).to.be('Articles');
@@ -485,7 +485,7 @@ describe('State Management', function () {
       });
 
       it('should NOT reject if saved search is missing for dashboard but ignoreMissingSavedSearch=true', function (done) {
-        var ignoreMissingSavedSearch = true;
+        const ignoreMissingSavedSearch = true;
         kibiState._getDashboardAndSavedSearchMetas([ 'Articles', 'search-ste' ], ignoreMissingSavedSearch).then(function (results) {
           done();
         }).catch(done);
@@ -1670,7 +1670,7 @@ describe('State Management', function () {
       });
 
       it('should not emit a reset events if no dashboard got changed', function (done) {
-        var counts = {
+        const counts = {
           reset: 0,
           reset_app_state_query: 0,
           save_with_changes: 0
@@ -1815,7 +1815,7 @@ describe('State Management', function () {
         });
 
         it('should output correct join label 1', function (done) {
-          var relations = [
+          const relations = [
             {
               dashboards: [ 'a', 'b' ],
               relation: 'index-a//id/index-b//id'
@@ -1842,7 +1842,7 @@ describe('State Management', function () {
         });
 
         it('should output correct join label 2', function (done) {
-          var relations = [
+          const relations = [
             {
               dashboards: [ 'a', 'b' ],
               relation: 'index-a//id/index-b//id'
@@ -1869,7 +1869,7 @@ describe('State Management', function () {
         });
 
         it('should output correct join label 3', function (done) {
-          var relations = [
+          const relations = [
             {
               dashboards: [ 'a', 'b' ],
               relation: 'index-a//id/index-b//id'
@@ -1896,7 +1896,7 @@ describe('State Management', function () {
         beforeEach(() => init({}));
 
         it('should return a, b but not c and d', function () {
-          var relations = [
+          const relations = [
             {
               dashboards: [ 'a', 'b' ]
             },
@@ -1912,7 +1912,7 @@ describe('State Management', function () {
         });
 
         it('should not return anything', function () {
-          var relations = [
+          const relations = [
             {
               dashboards: [ 'a', 'b' ]
             }
@@ -1923,7 +1923,7 @@ describe('State Management', function () {
         });
 
         it('should return only a', function () {
-          var relations = [
+          const relations = [
             {
               dashboards: [ 'a', 'a' ]
             }
@@ -1935,7 +1935,7 @@ describe('State Management', function () {
         });
 
         it('should return a and b', function () {
-          var relations = [
+          const relations = [
             {
               dashboards: [ 'a', 'b' ]
             },
@@ -1951,7 +1951,7 @@ describe('State Management', function () {
         });
 
         it('should support multiple relations between two dashboards', function () {
-          var relations = [
+          const relations = [
             {
               dashboards: [ 'a', 'b' ],
               relation: 'index-a//id1/index-b//id1'
@@ -2121,7 +2121,7 @@ describe('State Management', function () {
         });
 
         it('should fail if the focused dashboard cannot be retrieved', function (done) {
-          var relDash = {
+          const relDash = {
             dashboards: [ 'dashboard-a', 'does-not-exist' ],
             relation: 'index-a//id/index-b//id'
           };
@@ -2134,7 +2134,7 @@ describe('State Management', function () {
         });
 
         it('should fail if the focused dashboard does not have a saved search', function (done) {
-          var relDash = {
+          const relDash = {
             dashboards: [ 'dashboard-a', 'dashboard-nossid' ],
             relation: 'index-a//id/index-b//id'
           };
@@ -2156,7 +2156,7 @@ describe('State Management', function () {
 
         it('1 should build the join filter', function (done) {
           config.set('kibi:relationalPanel', true);
-          var relDash = {
+          const relDash = {
             dashboards: [ 'dashboard-a', 'dashboard-b' ],
             relation: 'index-a//id/index-b//id'
           };

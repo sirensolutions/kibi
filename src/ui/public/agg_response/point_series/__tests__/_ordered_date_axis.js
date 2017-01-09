@@ -1,11 +1,12 @@
+import moment from 'moment';
+import _ from 'lodash';
+import sinon from 'auto-release-sinon';
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import AggResponsePointSeriesOrderedDateAxisProvider from 'ui/agg_response/point_series/_ordered_date_axis';
 describe('orderedDateAxis', function () {
-  let moment = require('moment');
-  let _ = require('lodash');
-  let sinon = require('auto-release-sinon');
-  let expect = require('expect.js');
-  let ngMock = require('ngMock');
 
-  let baseArgs = {
+  const baseArgs = {
     vis: {
       indexPattern: {
         timeFieldName: '@timestamp'
@@ -31,12 +32,12 @@ describe('orderedDateAxis', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    orderedDateAxis = Private(require('ui/agg_response/point_series/_ordered_date_axis'));
+    orderedDateAxis = Private(AggResponsePointSeriesOrderedDateAxisProvider);
   }));
 
   describe('xAxisFormatter', function () {
     it('sets the xAxisFormatter', function () {
-      let args = _.cloneDeep(baseArgs);
+      const args = _.cloneDeep(baseArgs);
       orderedDateAxis(args.vis, args.chart);
 
       expect(args.chart).to.have.property('xAxisFormatter');
@@ -44,10 +45,10 @@ describe('orderedDateAxis', function () {
     });
 
     it('formats values using moment, and returns strings', function () {
-      let args = _.cloneDeep(baseArgs);
+      const args = _.cloneDeep(baseArgs);
       orderedDateAxis(args.vis, args.chart);
 
-      let val = '2014-08-06T12:34:01';
+      const val = '2014-08-06T12:34:01';
       expect(args.chart.xAxisFormatter(val))
         .to.be(moment(val).format('hh:mm:ss'));
     });
@@ -55,7 +56,7 @@ describe('orderedDateAxis', function () {
 
   describe('ordered object', function () {
     it('sets date: true', function () {
-      let args = _.cloneDeep(baseArgs);
+      const args = _.cloneDeep(baseArgs);
       orderedDateAxis(args.vis, args.chart);
 
       expect(args.chart)
@@ -66,21 +67,21 @@ describe('orderedDateAxis', function () {
     });
 
     it('relies on agg.buckets for the interval', function () {
-      let args = _.cloneDeep(baseArgs);
-      let spy = sinon.spy(args.chart.aspects.x.agg.buckets, 'getInterval');
+      const args = _.cloneDeep(baseArgs);
+      const spy = sinon.spy(args.chart.aspects.x.agg.buckets, 'getInterval');
       orderedDateAxis(args.vis, args.chart);
       expect(spy).to.have.property('callCount', 1);
     });
 
     it('sets the min/max when the buckets are bounded', function () {
-      let args = _.cloneDeep(baseArgs);
+      const args = _.cloneDeep(baseArgs);
       orderedDateAxis(args.vis, args.chart);
       expect(moment.isMoment(args.chart.ordered.min)).to.be(true);
       expect(moment.isMoment(args.chart.ordered.max)).to.be(true);
     });
 
     it('does not set the min/max when the buckets are unbounded', function () {
-      let args = _.cloneDeep(baseArgs);
+      const args = _.cloneDeep(baseArgs);
       args.chart.aspects.x.agg.buckets.getBounds = _.constant();
       orderedDateAxis(args.vis, args.chart);
       expect(args.chart.ordered).to.not.have.property('min');

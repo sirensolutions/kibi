@@ -1,0 +1,56 @@
+import { contains, defaults, omit, trimLeft, trimRight } from 'lodash';
+import { parse as parseUrl, format as formatUrl, resolve } from 'url';
+import filterHeaders from './filter_headers';
+import setHeaders from './set_headers';
+
+export default function mapUri(cluster, proxyPrefix, coordinateAction) {
+  function joinPaths(pathA, pathB) {
+    return trimRight(pathA, '/') + '/' + trimLeft(pathB, '/');
+  }
+
+  return function (request, done) {
+    const {
+      protocol: esUrlProtocol,
+      slashes: esUrlHasSlashes,
+      auth: esUrlAuth,
+      hostname: esUrlHostname,
+      port: esUrlPort,
+      pathname: esUrlBasePath,
+      query: esUrlQuery
+    } = parseUrl(cluster.getUrl(), true);
+
+    // copy most url components directly from the elasticsearch.url
+    const mappedUrlComponents = {
+      protocol: esUrlProtocol,
+      slashes: esUrlHasSlashes,
+      auth: esUrlAuth,
+      hostname: esUrlHostname,
+      port: esUrlPort
+    };
+
+    // pathname
+    const reqSubPath = request.path.replace(proxyPrefix, '');
+    mappedUrlComponents.pathname = joinPaths(esUrlBasePath, reqSubPath);
+    // kibi: replace _search with _msearch to use siren-join when available
+    const plugins = cluster.getPlugins();
+    if (coordinateAction && plugins && plugins.indexOf('siren-join') > -1) {
+      const searchInd = contains(reqSubPath, '_search') ? reqSubPath.indexOf('_search') : reqSubPath.indexOf('_msearch');
+      if (searchInd !== -1) {
+        const coordinateActionPath = reqSubPath.slice(0, searchInd) + '_coordinate' + reqSubPath.slice(searchInd);
+        mappedUrlComponents.pathname = joinPaths(esUrlBasePath, coordinateActionPath);
+      }
+    }
+    // kibi: end
+
+    // querystring
+    const mappedQuery = defaults(omit(request.query, '_'), esUrlQuery);
+    if (Object.keys(mappedQuery).length) {
+      mappedUrlComponents.query = mappedQuery;
+    }
+
+    const filteredHeaders = filterHeaders(request.headers, cluster.getRequestHeadersWhitelist());
+    const mappedHeaders = setHeaders(filteredHeaders, cluster.getCustomHeaders());
+    const mappedUrl = formatUrl(mappedUrlComponents);
+    done(null, mappedUrl, mappedHeaders);
+  };
+};

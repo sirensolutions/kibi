@@ -26,7 +26,7 @@ module.exports = function (kibana) {
 
 
       app: {
-        id: 'kibi', // kibi: renamed kibana to kibi
+        id: 'kibana',
         title: 'Kibi', // kibi: renamed kibana to kibi
         listed: false,
         description: 'the kibana you know and love',

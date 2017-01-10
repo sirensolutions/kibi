@@ -2,7 +2,6 @@ import _ from 'lodash';
 import angular from 'angular';
 import moment from 'moment';
 import getSort from 'ui/doc_table/lib/get_sort';
-import dateMath from '@elastic/datemath';
 import 'ui/doc_table';
 import 'ui/visualize';
 import 'ui/notify';
@@ -27,6 +26,9 @@ import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
 import indexTemplate from 'plugins/kibana/discover/index.html';
 import StateProvider from 'ui/state_management/state';
+
+// kibi: imports
+import { parseWithPrecision } from 'ui/kibi/utils/date_math_precision';
 
 const app = uiModules.get('apps/discover', [
   'kibana/notify',
@@ -462,8 +464,8 @@ function discoverController($scope, config, courier, $route, $window, createNoti
 
   $scope.updateTime = function () {
     $scope.timeRange = {
-      from: dateMath.parseWithPrecision(timefilter.time.from, false, $scope.kibiTimePrecision),
-      to: dateMath.parseWithPrecision(timefilter.time.to, true, $scope.kibiTimePrecision)
+      from: parseWithPrecision(timefilter.time.from, false, $scope.kibiTimePrecision),
+      to: parseWithPrecision(timefilter.time.to, true, $scope.kibiTimePrecision)
     };
   };
 

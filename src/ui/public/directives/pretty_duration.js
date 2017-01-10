@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import dateMath from '@elastic/datemath';
 import moment from 'moment';
 import 'ui/timepicker/quick_ranges';
 import 'ui/timepicker/time_units';
@@ -7,6 +6,8 @@ import 'ui/kibi/styles/kibi.less'; // kibi: added some styling
 import uiModules from 'ui/modules';
 const module = uiModules.get('kibana');
 
+// kibi: imports
+import { parseWithPrecision } from 'ui/kibi/utils/date_math_precision';
 
 module.directive('prettyDuration', function (config, quickRanges, timeUnits) {
   return {
@@ -63,7 +64,7 @@ module.directive('prettyDuration', function (config, quickRanges, timeUnits) {
             if ($scope[time] === 'now') {
               display[time] = 'now';
             } else {
-              const tryParse = dateMath.parseWithPrecision($scope[time], time === 'to' ? true : false, $scope.kibiTimePrecision);
+              const tryParse = parseWithPrecision($scope[time], time === 'to' ? true : false, $scope.kibiTimePrecision);
               display[time] = moment.isMoment(tryParse) ? '~ ' + tryParse.fromNow() : $scope[time];
             }
           }

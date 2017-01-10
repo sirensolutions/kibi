@@ -1,6 +1,9 @@
 import _ from 'lodash';
 import angular from 'angular';
-export default function DiffTimePickerValuesFn() {
+// kibi: imports
+import dateMath from 'ui/kibi/utils/date_math_precision';
+
+export default function DiffTimePickerValuesFn($rootScope) {
 
   const valueOf = function (o) {
     if (o) return o.valueOf();
@@ -9,11 +12,10 @@ export default function DiffTimePickerValuesFn() {
   return function (rangeA, rangeB) {
     if (_.isObject(rangeA) && _.isObject(rangeB)) {
       // kibi: support the time precision when comparing times
-      // KIBI5: dateMath doesn't contain anymore roundWithPrecision
-      //dateMath.roundWithPrecision(rangeA.to, $rootScope.kibiTimePrecision);
-      //dateMath.roundWithPrecision(rangeB.to, $rootScope.kibiTimePrecision);
-      //dateMath.roundWithPrecision(rangeA.from, $rootScope.kibiTimePrecision);
-      //dateMath.roundWithPrecision(rangeB.from, $rootScope.kibiTimePrecision);
+      dateMath.roundWithPrecision(rangeA.to, $rootScope.kibiTimePrecision);
+      dateMath.roundWithPrecision(rangeB.to, $rootScope.kibiTimePrecision);
+      dateMath.roundWithPrecision(rangeA.from, $rootScope.kibiTimePrecision);
+      dateMath.roundWithPrecision(rangeB.from, $rootScope.kibiTimePrecision);
       // kibi: end
 
       if (

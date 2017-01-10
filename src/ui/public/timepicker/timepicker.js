@@ -1,6 +1,5 @@
 import html from 'ui/timepicker/timepicker.html';
 import _ from 'lodash';
-import dateMath from '@elastic/datemath';
 import moment from 'moment';
 import Notifier from 'kibie/notify/notifier';
 import 'ui/timepicker/timepicker.less';
@@ -16,6 +15,8 @@ const notify = new Notifier({
   location: 'timepicker',
 });
 
+// kibi: imports
+import dateMath from 'ui/kibi/utils/date_math_precision';
 // kibi: added to allow syncing time to other dashboards
 import 'ui/kibi/directives/kibi_sync_time_to';
 // kibi: end

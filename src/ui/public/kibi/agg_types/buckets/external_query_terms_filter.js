@@ -1,3 +1,5 @@
+import onPage from 'ui/kibi/utils/on_page';
+
 define(function (require) {
   return function RelatedEntitiesAggDefinition(Private, createNotifier, kibiState, $rootScope, $timeout) {
 
@@ -5,7 +7,6 @@ define(function (require) {
     require('ui/kibi/styles/external_query_terms_filter.less');
 
     const _ = require('lodash');
-    const chrome = require('ui/chrome');
     const BucketAggType = Private(require('ui/agg_types/buckets/_bucket_agg_type'));
     const createFilter = Private(require('ui/agg_types/buckets/create_filter/filters'));
     const notify = createNotifier({ location: 'External Query Terms Filter Aggregation' });
@@ -30,7 +31,7 @@ define(function (require) {
               return;
             }
 
-            const configurationMode = chrome.onVisualizeTab();
+            const configurationMode = onPage.onVisualizePage();
 
             if (!_(queryDefinitions).pluck('queryId').compact().size()) {
               return;

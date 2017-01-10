@@ -1,3 +1,5 @@
+import onPage from 'ui/kibi/utils/on_page';
+
 /*global alert:false */
 define(function (require) {
   require('ui/kibi/directives/kibi_select');
@@ -10,7 +12,6 @@ define(function (require) {
   const kibiUtils = require('kibiutils');
 
   module.controller('KibiQueryViewerVisController', function ($rootScope, $scope, kibiState, queryEngineClient, createNotifier) {
-    const chrome = require('ui/chrome');
     const notify = createNotifier({
       location: 'Kibi Query Viewer'
     });
@@ -18,7 +19,7 @@ define(function (require) {
     // generate random id to avoid collisions if there are multiple widgets on one dashboard
     $scope.snippetContainerId = kibiUtils.getUuid4();
 
-    const configMode = chrome.onVisualizeTab();
+    const configMode = onPage.onVisualizePage();
     $scope.holder = {
       html: ''
     };

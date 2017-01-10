@@ -1,3 +1,5 @@
+import onPage from 'ui/kibi/utils/on_page';
+
 define(function (require) {
   const _ = require('lodash');
 
@@ -6,7 +8,6 @@ define(function (require) {
   const app = require('ui/modules').get('app/dashboard');
 
   app.directive('kibiDashboardSearch', function ($rootScope) {
-    const chrome = require('ui/chrome');
     return {
       restrict: 'E',
       //require: '^dashboardApp', // kibi: does not inherits from dashboardApp because we want to place it in different place
@@ -15,7 +16,7 @@ define(function (require) {
 
         $scope.$on('$routeChangeSuccess', function () {
           // check that it should be visible or not
-          $scope.showSearch = chrome.onDashboardTab();
+          $scope.showSearch = onPage.onDashboardPage();
         });
 
         $scope.filterResults = function () {

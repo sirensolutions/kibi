@@ -4,6 +4,10 @@ import keymap from 'ui/utils/key_map';
 import SavedObjectsSavedObjectRegistryProvider from 'ui/saved_objects/saved_object_registry';
 import uiModules from 'ui/modules';
 import savedObjectFinderTemplate from 'ui/partials/saved_object_finder.html';
+
+// kibi: imports
+import onPage from 'ui/kibi/utils/on_page';
+
 const module = uiModules.get('kibana');
 
 module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Private, config) {
@@ -31,9 +35,7 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
 
       // kibi: variable to store the checkbox state
       $scope.kibi = {
-        // KIBI5: onDashboardTab is no more defined due to the chrome refactoring
-        // onDashboardTab: chrome.onDashboardTab(),
-        onDashboardTab: false,
+        onDashboardPage: onPage.onDashboardPage(),
         basedOnSameSavedSearch: false,
         _prevBasedOnSameSavedSearch: false
       };

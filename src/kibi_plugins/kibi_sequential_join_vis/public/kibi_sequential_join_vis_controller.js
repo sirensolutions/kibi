@@ -1,3 +1,5 @@
+import onPage from 'ui/kibi/utils/on_page';
+
 define(function (require) {
 
   const _ = require('lodash');
@@ -16,7 +18,7 @@ define(function (require) {
   .controller('KibiSequentialJoinVisController', function (getAppState, kibiState, $scope, $rootScope, Private, $http, createNotifier,
                                                            globalState, Promise, kbnIndex) {
     const searchHelper = new SearchHelper(kbnIndex);
-    const onVisualizeTab = chrome.onVisualizeTab();
+    const onVisualizePage = onPage.onVisualizePage();
 
     const notify = createNotifier({
       location: 'Kibi Relational filter'
@@ -129,7 +131,7 @@ define(function (require) {
     );
 
     const _collectUpdateCountsRequest = function (buttons, dashboardId) {
-      if (onVisualizeTab || !buttons || !buttons.length) {
+      if (onVisualizePage || !buttons || !buttons.length) {
         return Promise.resolve([]);
       }
       delayExecutionHelper.addEventData({
@@ -146,12 +148,12 @@ define(function (require) {
 
       if (buttonsDefs.length !== $scope.vis.params.buttons.length) {
         $scope.vis.error = 'Invalid configuration of the Kibi relational filter visualization';
-        if (!onVisualizeTab) {
+        if (!onVisualizePage) {
           return Promise.reject($scope.vis.error);
         }
       }
 
-      if (!onVisualizeTab) {
+      if (!onVisualizePage) {
         return kibiState._getDashboardAndSavedSearchMetas([currentDashboardId]).then(([ { savedDash, savedSearchMeta } ]) => {
           const currentDashboardIndex = savedSearchMeta.index;
           const currentDashboardId = savedDash.id;
@@ -177,7 +179,7 @@ define(function (require) {
      */
 
     const updateButtons = function (reason) {
-      if (onVisualizeTab) {
+      if (onVisualizePage) {
         return;
       }
 

@@ -1,10 +1,10 @@
-const MockState = require('fixtures/mock_state');
-const sinon = require('auto-release-sinon');
-const angular = require('angular');
-const _ = require('lodash');
-const ngMock = require('ngMock');
-const expect = require('expect.js');
-const chrome = require('ui/chrome');
+import MockState from 'fixtures/mock_state';
+import sinon from 'auto-release-sinon';
+import angular from 'angular';
+import _ from 'lodash';
+import ngMock from 'ng_mock';
+import expect from 'expect.js';
+import onPage from 'ui/kibi/utils/on_page';
 
 let $httpBackend;
 let Notifier;
@@ -46,7 +46,7 @@ const init = function (entityURI, mappings) {
 
   // Create the scope
   ngMock.inject(function (kibiState, $injector, $rootScope, $compile) {
-    sinon.stub(chrome, 'onVisualizeTab').returns(true);
+    sinon.stub(onPage, 'onVisualizePage').returns(true);
 
     const entityParamUri = '<kibi-param-entity-uri entity-uri-holder="holder"></kibi-param-entity-uri>';
     const ids = { hits: { hits: [] } };

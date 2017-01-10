@@ -1,3 +1,5 @@
+import onPage from 'ui/kibi/utils/on_page';
+
 define(function (require) {
   const module = require('ui/modules').get('kibana/kibi_data_table_vis', ['kibana']);
   const _ = require('lodash');
@@ -6,9 +8,8 @@ define(function (require) {
   require('ui/kibi/kibi_doc_table/kibi_doc_table');
 
   module.controller('KibiDataTableVisController', function ($rootScope, $scope, Private) {
-    const chrome = require('ui/chrome');
     const filterManager = Private(require('ui/filter_manager'));
-    const configMode = chrome.onVisualizeTab();
+    const configMode = onPage.onVisualizePage();
 
     $scope.queryColumn = {};
     $scope.cellClickHandlers = {};

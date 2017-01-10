@@ -1,3 +1,5 @@
+import onPage from 'ui/kibi/utils/on_page';
+
 /*eslint no-use-before-define: 1*/
 define(function (require) {
   require('ui/kibi/directives/kibi_nav_bar.less');
@@ -16,7 +18,6 @@ define(function (require) {
   require('ui/modules')
   .get('app/dashboard')
   .directive('kibiNavBar', function ($rootScope, kibiState, config, Private) {
-    const chrome = require('ui/chrome');
     const ResizeChecker = Private(require('ui/vislib/lib/resize_checker'));
     const kibiNavBarHelper = Private(require('ui/kibi/directives/kibi_nav_bar_helper'));
     const queryFilter = Private(require('ui/filter_bar/query_filter'));
@@ -38,7 +39,7 @@ define(function (require) {
         $scope.dashboardGroups = kibiNavBarHelper.getDashboardGroups();
 
         const removeLocationChangeSuccessHandler = $rootScope.$on('$locationChangeSuccess', function () {
-          chrome.onDashboardTab() ? $el.show() : $el.hide();
+          onPage.onDashboardPage() ? $el.show() : $el.hide();
         });
 
         $scope.relationalFilterVisible = config.get('kibi:relationalPanel');

@@ -1,13 +1,15 @@
-const MockState = require('fixtures/mock_state');
-const mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
-const sinon = require('auto-release-sinon');
-const expect = require('expect.js');
-const ngMock = require('ngMock');
-const Promise = require('bluebird');
-const dateMath = require('ui/utils/dateMath');
+import noDigestPromises from 'testUtils/no_digest_promises';
+import SequentialJoinVisHelperProvider from 'ui/kibi/helpers/kibi_sequential_join_vis_helper';
+import MockState from 'fixtures/mock_state';
+import mockSavedObjects from 'fixtures/kibi/mock_saved_objects';
+import sinon from 'auto-release-sinon';
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import Promise from 'bluebird';
+import dateMath from 'ui/kibi/utils/date_math_precision';
+import config from 'fixtures/kibi/config';
 
 let sequentialJoinVisHelper;
-let config;
 let kibiState;
 let appState;
 let $rootScope;
@@ -33,7 +35,7 @@ function init({
     $provide.constant('kibiDefaultDashboardTitle', '');
     $provide.constant('elasticsearchPlugins', []);
 
-    $provide.service('config', require('fixtures/kibi/config'));
+    $provide.service('config', config);
 
     appState = new MockState({ filters: [] });
     $provide.service('getAppState', function () {
@@ -57,11 +59,10 @@ function init({
     $provide.service('savedDashboards', (Promise, Private) => mockSavedObjects(Promise, Private)('savedDashboards', savedDashboards));
   });
 
-  ngMock.inject(function (_$rootScope_, timefilter, _config_, _kibiState_, Private, Promise) {
+  ngMock.inject(function (_$rootScope_, timefilter, _kibiState_, Private, Promise) {
     $rootScope = _$rootScope_;
     kibiState = _kibiState_;
-    config = _config_;
-    sequentialJoinVisHelper = Private(require('ui/kibi/helpers/kibi_sequential_join_vis_helper'));
+    sequentialJoinVisHelper = Private(SequentialJoinVisHelperProvider);
     sinon.stub(kibiState, '_getCurrentDashboardId').returns(currentDashboardId);
     saveAppStateStub = sinon.stub(kibiState, 'saveAppState').returns(Promise.resolve());
 
@@ -79,8 +80,7 @@ function init({
 describe('Kibi Components', function () {
   describe('sequentialJoinVisHelper', function () {
 
-    require('testUtils/noDigestPromises').activateForSuite();
-
+    noDigestPromises.activateForSuite();
 
     describe('constructButtonArray - buttons configured with sourceDashboard targetDashboard and indexRelationId', function () {
 

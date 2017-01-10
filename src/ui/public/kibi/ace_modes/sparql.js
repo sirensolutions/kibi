@@ -1,3 +1,4 @@
+// KIBI5: port this
 /*global ace*/
 ace.define('ace/mode/sparql', function (require, exports, module) {
 

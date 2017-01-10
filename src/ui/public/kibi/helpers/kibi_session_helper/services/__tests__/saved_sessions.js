@@ -1,14 +1,16 @@
-const expect = require('expect.js');
-const ngMock = require('ngMock');
-const Promise = require('bluebird');
-const sinon = require('auto-release-sinon');
+import MappingSetupProvider from 'ui/utils/mapping_setup';
+import noDigestPromises from 'test_utils/no_digest_promises';
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import Promise from 'bluebird';
+import sinon from 'auto-release-sinon';
 
 let savedSessions;
 
 describe('Kibi Services', function () {
   describe('savedSessions', function () {
 
-    require('testUtils/noDigestPromises').activateForSuite();
+    noDigestPromises.activateForSuite();
 
     beforeEach(function () {
 
@@ -16,7 +18,7 @@ describe('Kibi Services', function () {
 
       ngMock.inject(function ($injector, Private, _$rootScope_) {
         savedSessions = $injector.get('savedSessions');
-        const mappingSetup = Private(require('ui/utils/mapping_setup'));
+        const mappingSetup = Private(MappingSetupProvider);
         // here we to stub a function from mappingSetup to avoid the call to private method
         // which requires access to elasticsearch
         sinon.stub(mappingSetup, 'isDefined').returns(Promise.resolve(true));

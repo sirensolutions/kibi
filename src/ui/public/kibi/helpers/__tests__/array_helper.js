@@ -1,22 +1,9 @@
-const expect = require('expect.js');
-const ngMock = require('ngMock');
-let arrayHelper;
-
-function init() {
-  return function () {
-    ngMock.module('kibana');
-    ngMock.inject(function ($injector, Private, _$rootScope_) {
-      arrayHelper = Private(require('ui/kibi/helpers/array_helper'));
-    });
-  };
-}
+import arrayHelper from 'ui/kibi/helpers/array_helper';
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
 
 describe('Kibi Components', function () {
-  beforeEach(init());
-
   describe('arrayHelper', function () {
-
-
     it('test add', function () {
       const input = [];
       const expected = [
@@ -83,10 +70,7 @@ describe('Kibi Components', function () {
       arrayHelper.remove(input, 0, callback);
       expect(counter).to.eql(6);
     });
-
-
   });
-
 });
 
 

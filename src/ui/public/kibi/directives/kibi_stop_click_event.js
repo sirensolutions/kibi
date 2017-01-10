@@ -1,14 +1,14 @@
-define(function (require) {
+import uiModules from 'ui/modules';
 
-  require('ui/modules').get('kibana').directive('kibiStopClickEvent', function () {
-    return {
-      restrict: 'A',
-      link: function (scope, element, attr) {
-        element.bind('click', function (e) {
-          e.stopPropagation();
-        });
-      }
-    };
-  });
-
+uiModules
+.get('kibana')
+.directive('kibiStopClickEvent', function () {
+  return {
+    restrict: 'A',
+    link: function (scope, element, attr) {
+      element.bind('click', function (e) {
+        e.stopPropagation();
+      });
+    }
+  };
 });

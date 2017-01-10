@@ -1,10 +1,12 @@
+import noDigestPromises from 'test_utils/no_digest_promises';
+import DashboardGroupHelperProvider from 'ui/kibi/helpers/dashboard_group_helper';
 import Promise from 'bluebird';
-const expect = require('expect.js');
-const ngMock = require('ngMock');
-const MockState = require('fixtures/mock_state');
-const mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
-const sinon = require('auto-release-sinon');
-const chrome = require('ui/chrome');
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import MockState from 'fixtures/mock_state';
+import mockSavedObjects from 'fixtures/kibi/mock_saved_objects';
+import sinon from 'auto-release-sinon';
+import chrome from 'ui/chrome';
 
 const fakeSavedDashboards = [
   {
@@ -147,7 +149,7 @@ function init({ currentDashboardId = 'Articles', indexPatterns, savedDashboards,
 
     ngMock.inject(function ($injector, _kibiState_, Private) {
       kibiState = _kibiState_;
-      dashboardGroupHelper = Private(require('ui/kibi/helpers/dashboard_group_helper'));
+      dashboardGroupHelper = Private(DashboardGroupHelperProvider);
       sinon.stub(chrome, 'getBasePath').returns('');
       sinon.stub(kibiState, '_getCurrentDashboardId').returns(currentDashboardId);
       $httpBackend = $injector.get('$httpBackend');
@@ -158,7 +160,7 @@ function init({ currentDashboardId = 'Articles', indexPatterns, savedDashboards,
 describe('Kibi Components', function () {
   describe('DashboardGroupHelper', function () {
 
-    require('testUtils/noDigestPromises').activateForSuite();
+    noDigestPromises.activateForSuite();
 
     describe('Simple tests', function () {
 

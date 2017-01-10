@@ -1,7 +1,9 @@
-const expect = require('expect.js');
-const ngMock = require('ngMock');
-const Promise = require('bluebird');
-const sinon = require('auto-release-sinon');
+import noDigestPromises from 'test_utils/no_digest_promises';
+import KibiSessionHelperProvider from 'ui/kibi/helpers/kibi_session_helper/kibi_session_helper';
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import Promise from 'bluebird';
+import sinon from 'auto-release-sinon';
 
 let kibiSessionHelper;
 let globalState;
@@ -52,7 +54,7 @@ const makeSureKibiSessionHelperInitialized = function (kibiSessionHelper) {
 describe('Kibi Components', function () {
   describe('KibiSessionHelper', function () {
 
-    require('testUtils/noDigestPromises').activateForSuite();
+    noDigestPromises.activateForSuite();
 
     beforeEach(function () {
       ngMock.module('kibana', function ($provide) {
@@ -97,7 +99,7 @@ describe('Kibi Components', function () {
         $rootScope = _$rootScope_;
         $cookies = _$cookies_;
         globalState = _globalState_;
-        kibiSessionHelper = Private(require('ui/kibi/helpers/kibi_session_helper/kibi_session_helper'));
+        kibiSessionHelper = Private(KibiSessionHelperProvider);
       });
     });
 

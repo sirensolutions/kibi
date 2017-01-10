@@ -1,5 +1,3 @@
-define(function (require) {
-  return function savedSessionFn(savedSessions) {
-    return savedSessions;
-  };
-});
+export default function savedSessionFn(savedSessions) {
+  return savedSessions;
+};

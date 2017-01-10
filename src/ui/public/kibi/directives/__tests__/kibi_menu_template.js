@@ -1,10 +1,9 @@
-const ngMock = require('ngMock');
-const expect = require('expect.js');
-const sinon = require('auto-release-sinon');
-const angular = require('angular');
-const _ = require('lodash');
-
-require('../kibi_menu_template');
+import ngMock from 'ng_mock';
+import expect from 'expect.js';
+import sinon from 'auto-release-sinon';
+import angular from 'angular';
+import _ from 'lodash';
+import '../kibi_menu_template';
 
 describe('Kibi Components', function () {
   describe('Kibi Menu Template', function () {

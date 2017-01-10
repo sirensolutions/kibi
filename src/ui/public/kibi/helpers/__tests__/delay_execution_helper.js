@@ -1,6 +1,6 @@
-const expect = require('expect.js');
-const _ = require('lodash');
-const DelayExecutionHelper = require('ui/kibi/helpers/delay_execution_helper');
+import expect from 'expect.js';
+import _ from 'lodash';
+import DelayExecutionHelper from 'ui/kibi/helpers/delay_execution_helper';
 
 let actuallData;
 let executionCounter;

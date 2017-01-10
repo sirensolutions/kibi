@@ -1,12 +1,14 @@
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import GetPathsForIndexPatternProvider from 'ui/kibi/index_patterns/_get_paths_for_index_pattern';
+
 describe('kibi indexpattern', function () {
   describe('getPathsForIndexPattern', function () {
-    const expect = require('expect.js');
-    const ngMock = require('ngMock');
     let getPathsForIndexPattern;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
-      getPathsForIndexPattern = Private(require('ui/kibi/index_patterns/_get_paths_for_index_pattern'));
+      getPathsForIndexPattern = Private(GetPathsForIndexPatternProvider);
     }));
 
     it('should return the path for every field in the index pattern', function () {

@@ -1,5 +1,7 @@
-const ngMock = require('ngMock');
-const expect = require('expect.js');
+import ngMock from 'ng_mock';
+import expect from 'expect.js';
+import IndexPathProvider from 'ui/kibi/components/commons/_index_path';
+
 let indexPath;
 
 function init() {
@@ -7,7 +9,7 @@ function init() {
     ngMock.module('kibana');
 
     ngMock.inject(function ($injector, Private) {
-      indexPath = Private(require('ui/kibi/components/commons/_index_path'));
+      indexPath = Private(IndexPathProvider);
     });
   };
 }

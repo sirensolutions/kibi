@@ -1,6 +1,11 @@
-const mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
-const ngMock = require('ngMock');
-const expect = require('expect.js');
+import HasAnyOfVisSavedSearchesATimeFieldProvider from 'ui/kibi/components/commons/_has_any_of_vis_saved_searches_a_time_field';
+import VislibVisTypeProvider from 'ui/vislib_vis_type/vislib_vis_type';
+import TemplateVisTypeProvider from 'ui/template_vis_type/template_vis_type';
+import mockSavedObjects from 'fixtures/kibi/mock_saved_objects';
+import ngMock from 'ng_mock';
+import expect from 'expect.js';
+import noDigestPromises from 'test_utils/no_digest_promises';
+
 const fakeSavedSearches = [
   {
     id: 'savedSearchWithTimeField',
@@ -47,9 +52,9 @@ describe('Kibi Components', function () {
         });
 
         ngMock.inject(function (Private) {
-          hasAnyOfVisSavedSearchesATimeField = Private(require('ui/kibi/components/commons/_has_any_of_vis_saved_searches_a_time_field'));
-          const TemplateVisType = Private(require('ui/template_vis_type/TemplateVisType'));
-          const VislibVisType = Private(require('ui/vislib_vis_type/VislibVisType'));
+          hasAnyOfVisSavedSearchesATimeField = Private(HasAnyOfVisSavedSearchesATimeFieldProvider);
+          const TemplateVisType = Private(TemplateVisTypeProvider);
+          const VislibVisType = Private(VislibVisTypeProvider);
 
           kibiTimelineType1 = new TemplateVisType({
             name: 'kibi_timeline',
@@ -78,7 +83,7 @@ describe('Kibi Components', function () {
         });
       });
 
-      require('testUtils/noDigestPromises').activateForSuite();
+      noDigestPromises.activateForSuite();
 
       describe('unsupported vis type', function () {
 

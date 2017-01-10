@@ -1,4 +1,5 @@
-const ngMock = require('ngMock');
+import ngMock from 'ng_mock';
+
 let $httpBackend;
 let queryEngineClient;
 
@@ -30,5 +31,6 @@ describe('Kibi Components', function () {
       queryEngineClient.getQueriesDataFromServer({}, {});
       $httpBackend.flush();
     });
+
   });
 });

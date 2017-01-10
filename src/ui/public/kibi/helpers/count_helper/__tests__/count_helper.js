@@ -1,22 +1,24 @@
-const sinon = require('auto-release-sinon');
-const _ = require('lodash');
-const MockState = require('fixtures/mock_state');
-const expect = require('expect.js');
-const ngMock = require('ngMock');
-const dateMath = require('ui/utils/dateMath');
-const mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
+import CountHelperProvider from 'ui/kibi/helpers/count_helper/count_helper';
+import sinon from 'auto-release-sinon';
+import _ from 'lodash';
+import MockState from 'fixtures/mock_state';
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import dateMath from 'ui/utils/dateMath';
+import mockSavedObjects from 'fixtures/kibi/mock_saved_objects';
+import noDigestPromises from 'test_utils/no_digest_promises';
+import config from 'fixtures/kibi/config';
 
 const defaultStartTime = '2006-09-01T12:00:00.000Z';
 const defaultEndTime = '2010-09-05T12:00:00.000Z';
 let countHelper;
 let kibiState;
 let appState;
-let config;
 
 describe('Kibi Components', function () {
   describe('CountHelper', function () {
 
-    require('testUtils/noDigestPromises').activateForSuite();
+    noDigestPromises.activateForSuite();
 
     beforeEach(function () {
       ngMock.module('kibana', function ($provide) {
@@ -24,7 +26,7 @@ describe('Kibi Components', function () {
         $provide.constant('elasticsearchPlugins', ['siren-join']);
         $provide.constant('kbnDefaultAppId', '');
         $provide.constant('kibiDefaultDashboardTitle', '');
-        $provide.service('config', require('fixtures/kibi/config'));
+        $provide.service('config', config);
 
         appState = new MockState({ filters: [] });
         $provide.service('getAppState', () => {
@@ -123,7 +125,7 @@ describe('Kibi Components', function () {
         timefilter.time = defaultTime;
         kibiState = _kibiState_;
         sinon.stub(kibiState, '_getCurrentDashboardId').returns('empty-dashboard');
-        countHelper = Private(require('ui/kibi/helpers/count_helper/count_helper'));
+        countHelper = Private(CountHelperProvider);
       });
     });
     beforeEach(() => config.set('kibi:relationalPanel', false));

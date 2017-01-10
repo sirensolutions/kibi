@@ -2,9 +2,9 @@ define(function (require) {
 
   require('ui/kibi/helpers/kibi_session_helper/services/_saved_session');
 
-  var module = require('ui/modules').get('ui/kibi/helpers/kibi_session_helper/services/saved_sessions', []);
-  var _ = require('lodash');
-  var Scanner = require('ui/utils/scanner');
+  const module = require('ui/modules').get('ui/kibi/helpers/kibi_session_helper/services/saved_sessions', []);
+  const _ = require('lodash');
+  const Scanner = require('ui/utils/scanner');
 
   require('plugins/kibana/settings/saved_object_registry').register({
     service: 'savedSessions',
@@ -13,9 +13,9 @@ define(function (require) {
 
   module.service('savedSessions', function ($rootScope, Promise, SavedSession, kbnIndex, es, kbnUrl, Private) {
 
-    var cache = Private(require('ui/kibi/helpers/cache_helper')); // kibi: added to cache requests for saved sessions
+    const cache = Private(require('ui/kibi/helpers/cache_helper')); // kibi: added to cache requests for saved sessions
 
-    var scanner = new Scanner(es, {
+    const scanner = new Scanner(es, {
       index: kbnIndex,
       type: 'session'
     });
@@ -31,14 +31,14 @@ define(function (require) {
     };
 
     this.get = function (id) {
-      var cacheKey;
+      let cacheKey;
       if (id) {
         cacheKey = 'savedSessions-id-' + id;
       }
       if (cacheKey && cache && cache.get(cacheKey)) {
         return cache.get(cacheKey);
       }
-      var promise = (new SavedSession(id)).init();
+      const promise = (new SavedSession(id)).init();
       if (cacheKey && cache) {
         cache.set(cacheKey, promise);
       }
@@ -67,14 +67,14 @@ define(function (require) {
     };
 
     this.mapHits = function (hit) {
-      var source = hit._source;
+      const source = hit._source;
       source.id = hit._id;
       source.url = this.urlFor(hit._id);
       return source;
     };
 
     this.find = function (searchString, size = 100) {
-      var body;
+      let body;
       if (searchString) {
         body = {
           query: {
@@ -90,7 +90,7 @@ define(function (require) {
       }
 
       // kibi: get from cahce
-      var cacheKey = 'savedSessions' + (searchString ? searchString : '');
+      const cacheKey = 'savedSessions' + (searchString ? searchString : '');
       if (cache && cache.get(cacheKey)) {
         return Promise.resolve(cache.get(cacheKey));
       }
@@ -102,7 +102,7 @@ define(function (require) {
         size: size
       })
       .then((resp) => {
-        var ret = {
+        const ret = {
           total: resp.hits.total,
           hits: resp.hits.hits.map((hit) => this.mapHits(hit))
         };

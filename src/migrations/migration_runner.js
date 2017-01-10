@@ -43,16 +43,16 @@ export default class MigrationRunner {
     if (this._migrations) {
       return this._migrations;
     }
-    let migrations = [];
+    const migrations = [];
     each(this._server.plugins, (plugin) => {
       if (has(plugin, 'getMigrations')) {
-        for (let Migration of plugin.getMigrations()) {
-          let configuration = {
+        for (const Migration of plugin.getMigrations()) {
+          const configuration = {
             index: this._server.config().get('kibana.index'),
             client: this._server.plugins.elasticsearch.client,
             logger: this._logger
           };
-          let migration = new Migration(configuration);
+          const migration = new Migration(configuration);
           migrations.push(migration);
         }
       }
@@ -68,7 +68,7 @@ export default class MigrationRunner {
    */
   async count() {
     let count = 0;
-    for (let migration of this.getMigrations()) {
+    for (const migration of this.getMigrations()) {
       count += await migration.count();
     }
     return count;
@@ -81,9 +81,9 @@ export default class MigrationRunner {
    */
   async upgrade() {
     let upgraded = 0;
-    for (let migration of this.getMigrations()) {
+    for (const migration of this.getMigrations()) {
       this._logger.info(`Processing migration "${migration.constructor.description}"`);
-      let count = await migration.upgrade();
+      const count = await migration.upgrade();
       upgraded += count;
       if (count > 0) {
         this._logger.info(`Upgraded ${count} objects.`);

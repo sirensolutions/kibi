@@ -1,11 +1,11 @@
 // in test/support/pages/discover_page.js
 define(function (require) {
-  var config = require('intern').config;
-  var Common = require('./common');
+  const config = require('intern').config;
+  const Common = require('./common');
 
-  var defaultTimeout = config.timeouts.default;
-  var common;
-  var thisTime;
+  const defaultTimeout = config.timeouts.default;
+  let common;
+  let thisTime;
 
   function DiscoverPage(remote) {
     this.remote = remote;
@@ -39,7 +39,7 @@ define(function (require) {
     },
 
     saveSearch: function saveSearch(searchName) {
-      var self = this;
+      const self = this;
       return self.clickSaveSearchButton()
       .then(function () {
         common.sleep(1000);
@@ -58,7 +58,7 @@ define(function (require) {
     },
 
     loadSavedSearch: function loadSavedSearch(searchName) {
-      var self = this;
+      const self = this;
       return self.clickLoadSavedSearchButton()
       .then(function () {
         thisTime.findByLinkText(searchName).click();
@@ -100,7 +100,7 @@ define(function (require) {
           .getAttribute('height');
         }
 
-        var getChartDataPromises = chartData.map(getChartData);
+        const getChartDataPromises = chartData.map(getChartData);
         return Promise.all(getChartDataPromises);
       })
       .then(function (bars) {

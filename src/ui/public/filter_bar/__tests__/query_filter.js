@@ -1,7 +1,17 @@
-let MockState = require('fixtures/mock_state');
-let _ = require('lodash');
-let expect = require('expect.js');
-let ngMock = require('ngMock');
+import _ from 'lodash';
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import './_get_filters';
+import './_add_filters';
+import './_remove_filters';
+import './_update_filters';
+import './_toggle_filters';
+import './_invert_filters';
+import './_pin_filters';
+import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
+import EventsProvider from 'ui/events';
+import MockState from 'fixtures/mock_state';
+
 let queryFilter;
 let EventEmitter;
 let $rootScope;
@@ -16,8 +26,8 @@ describe('Query Filter', function () {
 
     beforeEach(ngMock.inject(function (_$rootScope_, Private) {
       $rootScope = _$rootScope_;
-      queryFilter = Private(require('ui/filter_bar/query_filter'));
-      EventEmitter = Private(require('ui/events'));
+      queryFilter = Private(FilterBarQueryFilterProvider);
+      EventEmitter = Private(EventsProvider);
     }));
 
     describe('module instance', function () {
@@ -51,12 +61,5 @@ describe('Query Filter', function () {
   });
 
   describe('Actions', function () {
-    require('./_getFilters');
-    require('./_addFilters');
-    require('./_removeFilters');
-    require('./_updateFilters');
-    require('./_toggleFilters');
-    require('./_invertFilters');
-    require('./_pinFilters');
   });
 });

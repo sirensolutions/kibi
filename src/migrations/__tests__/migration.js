@@ -1,19 +1,18 @@
 import expect from 'expect.js';
 import sinon from 'sinon';
 import Migration from '../migration';
-import requirefrom from 'requirefrom';
-const wrapAsync = requirefrom('src/testUtils')('wrap_async');
+import wrapAsync from 'test_utils/wrap_async';
 
 describe('migrations', function () {
 
   describe('Migration', function () {
 
-    let client = {
+    const client = {
       search: () => {},
       scroll: () => {},
       count: () => ({count: 15})
     };
-    let configuration = {
+    const configuration = {
       index: 'index',
       client: client
     };
@@ -30,16 +29,16 @@ describe('migrations', function () {
       });
 
       it('should build the correct query and return the result', wrapAsync(async () => {
-        let migration = new Migration(configuration);
-        let index = 'index';
-        let type = 'type';
-        let query = {
+        const migration = new Migration(configuration);
+        const index = 'index';
+        const type = 'type';
+        const query = {
           query: {
             match_all: {}
           }
         };
 
-        let result = await migration.countHits(index, type, query);
+        const result = await migration.countHits(index, type, query);
 
         expect(result).to.be(15);
         expect(client.count.calledWith({
@@ -92,7 +91,7 @@ describe('migrations', function () {
       });
 
       it('should set default options if options have not been defined', wrapAsync(async () => {
-        let migration = new Migration(configuration);
+        const migration = new Migration(configuration);
         await migration.scrollSearch('empty', 'type', {});
 
         expect(search.calledOnce);
@@ -100,7 +99,7 @@ describe('migrations', function () {
       }));
 
       it('should set a default size if no size has been specified', wrapAsync(async () => {
-        let migration = new Migration(configuration);
+        const migration = new Migration(configuration);
         await migration.scrollSearch('empty', 'type', {}, {});
 
         expect(search.calledOnce);
@@ -108,7 +107,7 @@ describe('migrations', function () {
       }));
 
       it('should use the specified size', wrapAsync(async () => {
-        let migration = new Migration(configuration);
+        const migration = new Migration(configuration);
         await migration.scrollSearch('empty', 'type', {}, {size: 1000});
 
         expect(search.calledOnce);
@@ -116,19 +115,19 @@ describe('migrations', function () {
       }));
 
       it('should use the scroll API to fetch hits', wrapAsync(async () => {
-        let migration = new Migration(configuration);
-        let index = 'index';
-        let type = 'type';
-        let query = {
+        const migration = new Migration(configuration);
+        const index = 'index';
+        const type = 'type';
+        const query = {
           query: {
             match_all: {}
           }
         };
-        let options = {
+        const options = {
           size: 10
         };
 
-        let results = await migration.scrollSearch(index, type, query, options);
+        const results = await migration.scrollSearch(index, type, query, options);
 
         expect(search.calledOnce);
         expect(search.calledWith({

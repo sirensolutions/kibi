@@ -1,11 +1,12 @@
-let _ = require('lodash');
+import _ from 'lodash';
+import pkg from '../utils/package_json';
+import Command from './command';
+import serveCommand from './serve/serve';
+import replaceEncryptionKeyCommand from './kibi/replace_encryption_key';
+import upgradeCommand from './kibi/upgrade';
 
-let utils = require('requirefrom')('src/utils');
-let pkg = utils('packageJson');
-let Command = require('./Command');
-
-let argv = process.env.kbnWorkerArgv ? JSON.parse(process.env.kbnWorkerArgv) : process.argv.slice();
-let program = new Command('bin/kibi'); // kibi: renamed kibana to kibi
+const argv = process.env.kbnWorkerArgv ? JSON.parse(process.env.kbnWorkerArgv) : process.argv.slice();
+const program = new Command('bin/kibi'); // kibi: renamed kibana to kibi
 
 program
 .version(pkg.version)
@@ -15,17 +16,16 @@ program
 );
 
 // attach commands
-require('./serve/serve')(program);
-require('./plugin/plugin')(program);
-require('./kibi/replace_encryption_key')(program);
-require('./kibi/upgrade')(program);
+serveCommand(program);
+replaceEncryptionKeyCommand(program);
+upgradeCommand(program);
 
 program
 .command('help <command>')
 .description('Get the help for a specific command')
 .action(function (cmdName) {
-  let cmd = _.find(program.commands, { _name: cmdName });
-  if (!cmd) return this.error(`unknown command ${cmdName}`);
+  const cmd = _.find(program.commands, { _name: cmdName });
+  if (!cmd) return program.error(`unknown command ${cmdName}`);
   cmd.help();
 });
 
@@ -36,7 +36,7 @@ program
 });
 
 // check for no command name
-let subCommand = argv[2] && !String(argv[2][0]).match(/^-|^\.|\//);
+const subCommand = argv[2] && !String(argv[2][0]).match(/^-|^\.|\//);
 
 if (!subCommand) {
   if (_.intersection(argv.slice(2), ['-h', '--help']).length) {

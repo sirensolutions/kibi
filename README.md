@@ -1,6 +1,6 @@
-# Kibi 4.6.3
+# Kibi 5.2.0
 
-Kibi extends Kibana 4.6.3 with data intelligence features; the core feature of
+Kibi extends Kibana 5.2.0 with data intelligence features; the core feature of
 Kibi is the capability to join and filter data from multiple Elasticsearch
 indexes and from SQL/NOSQL data sources ("external queries").
 
@@ -31,6 +31,24 @@ documentation.
 
 ## Compatibility Table Kibi / Elasticsearch
 
+### Kibi 5
+
+Ideally, you should be running Elasticsearch and Kibana with matching version numbers. If your Elasticsearch has an older version number or a newer _major_ number than Kibana, then Kibana will fail to run. If Elasticsearch has a newer minor or patch number than Kibana, then the Kibana Server will log a warning.
+
+_Note: The version numbers below are only examples, meant to illustrate the relationships between different types of version numbers._
+
+| Situation                 | Example Kibana version     | Example ES version | Outcome |
+| ------------------------- | -------------------------- |------------------- | ------- |
+| Versions are the same.    | 5.1.2                      | 5.1.2              | 💚 OK      |
+| ES patch number is newer. | 5.1.__2__                  | 5.1.__5__          | ⚠️ Logged warning      |
+| ES minor number is newer. | 5.__1__.2                  | 5.__5__.0          | ⚠️ Logged warning      |
+| ES major number is newer. | __5__.1.2                  | __6__.0.0          | 🚫 Fatal error      |
+| ES patch number is older. | 5.1.__2__                  | 5.1.__0__          | ⚠️ Logged warning      |
+| ES minor number is older. | 5.__1__.2                  | 5.__0__.0          | 🚫 Fatal error      |
+| ES major number is older. | __5__.1.2                  | __4__.0.0          | 🚫 Fatal error      |
+
+### Kibi 4
+
 Kibi  | Elasticsearch
 ----- | -------------
 4.6.x | 2.4.x
@@ -42,7 +60,7 @@ Kibi  | Elasticsearch
 
 ## License
 
-Copyright 2015–2016 SIREn Solutions
+Copyright 2015–2017 SIREn Solutions
 
 Kibi is Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
 

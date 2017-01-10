@@ -1,8 +1,8 @@
-var _ = require('lodash');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
-var $rootScope;
-var cacheHelper;
+const _ = require('lodash');
+const expect = require('expect.js');
+const ngMock = require('ngMock');
+let $rootScope;
+let cacheHelper;
 
 describe('Kibi Components', function () {
   describe('Cache Helper', function () {

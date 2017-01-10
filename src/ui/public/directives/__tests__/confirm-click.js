@@ -1,11 +1,11 @@
-let angular = require('angular');
-let $ = require('jquery');
-let sinon = require('sinon');
-let expect = require('expect.js');
-let ngMock = require('ngMock');
+import angular from 'angular';
+import sinon from 'sinon';
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import $ from 'jquery';
+import 'ui/directives/confirm_click';
+import 'plugins/kibana/discover/index';
 
-require('ui/directives/confirm_click');
-require('plugins/kibana/discover/index');
 
 let $parentScope;
 
@@ -13,7 +13,7 @@ let $scope;
 
 let $elem;
 
-let init = function (text) {
+const init = function (text) {
   // Load the application
   ngMock.module('kibana');
 

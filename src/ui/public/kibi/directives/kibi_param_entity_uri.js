@@ -3,15 +3,15 @@ define(function (require) {
   require('ui/kibi/directives/kibi_param_entity_uri.less');
   require('ui/kibi/directives/kibi_select');
 
-  var _ = require('lodash');
-  var chrome = require('ui/chrome');
+  const _ = require('lodash');
+  const chrome = require('ui/chrome');
 
   require('ui/modules').get('kibana')
   .directive('kibiParamEntityUri', function (kibiState, $http, Private, createNotifier) {
 
-    var indexPath = Private(require('ui/kibi/components/commons/_index_path'));
+    const indexPath = Private(require('ui/kibi/components/commons/_index_path'));
 
-    var notify = createNotifier({
+    const notify = createNotifier({
       location: 'Selected Entity'
     });
 
@@ -36,7 +36,7 @@ define(function (require) {
         function updateSelectedEntity() {
           const entityURI = kibiState.getEntityURI();
           if (entityURI) {
-            var parts = entityURI.split('/');
+            const parts = entityURI.split('/');
 
             if (parts[0]) {
               $scope.c.extraIndexPatternItems = [
@@ -85,7 +85,7 @@ define(function (require) {
         updateSelectedEntity();
 
         $scope.$watchMulti(['c.indexPattern', 'c.type', 'c.id'], function (newV, oldV) {
-          var diff = _.difference(newV, oldV);
+          const diff = _.difference(newV, oldV);
           if (diff.length !== 3) {
             // index pattern changed
             if (oldV[0] !== newV[0]) {
@@ -105,7 +105,7 @@ define(function (require) {
 
           if ($scope.c.index && $scope.c.type && $scope.c.id) {
 
-            var path = indexPath($scope.c.index);
+            const path = indexPath($scope.c.index);
 
             if (path.indexOf('*') !== -1) {
               $http.get(chrome.getBasePath() + '/elasticsearch/' + path + '/' + $scope.c.type + '/_search?q=_id:' + $scope.c.id)
@@ -116,7 +116,7 @@ define(function (require) {
                   kibiState.save();
                   return;
                 }
-                var hit = response.data.hits.hits[0];
+                const hit = response.data.hits.hits[0];
                 if (response.data.hits.total > 1) {
                   notify.warning('Found more than one document for the specified selection, selected the first one.');
                 }

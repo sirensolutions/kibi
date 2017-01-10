@@ -8,7 +8,7 @@ let executionCounter;
 describe('Kibi Components', function () {
   describe('delayExecutionHelper', function () {
 
-    var collectUniqueIds = function (newData, data) {
+    const collectUniqueIds = function (newData, data) {
       if (data.ids === undefined) {
         data.ids = [];
       }
@@ -25,9 +25,9 @@ describe('Kibi Components', function () {
       // e1   cancel     X
       //  |___delay______|
       it('1 event and then cancel before "delay" - should not trigger any callback', function (done) {
-        var actuallData = [];
-        var executionCounter = 0;
-        var helper = new DelayExecutionHelper(
+        let actuallData = [];
+        let executionCounter = 0;
+        const helper = new DelayExecutionHelper(
           collectUniqueIds,
           function (data) {
             executionCounter++;
@@ -57,9 +57,9 @@ describe('Kibi Components', function () {
       //  |__delay___|___|         |
       //             |_____________|
       it('2 events triggered inside "delay" - callback should be triggered a "delay" after second event', function (done) {
-        var actuallData = [];
-        var executionCounter = 0;
-        var helper = new DelayExecutionHelper(
+        let actuallData = [];
+        let executionCounter = 0;
+        const helper = new DelayExecutionHelper(
           collectUniqueIds,
           function (data) {
             executionCounter++;
@@ -108,9 +108,9 @@ describe('Kibi Components', function () {
       it(
       '2 events triggered more than "delay" apart - should trigger the callback twice ' +
       'a "delay" after first event and a "delay" after second event', function (done) {
-        var actuallData = [];
-        var executionCounter = 0;
-        var helper = new DelayExecutionHelper(
+        let actuallData = [];
+        let executionCounter = 0;
+        const helper = new DelayExecutionHelper(
           collectUniqueIds,
           function (data) {
             executionCounter++;
@@ -172,9 +172,9 @@ describe('Kibi Components', function () {
       // e1   cancel     X
       //  |___delay______|
       it('1 event and then cancel before "delay" - should not trigger any callback', function (done) {
-        var actuallData = [];
-        var executionCounter = 0;
-        var helper = new DelayExecutionHelper(
+        let actuallData = [];
+        let executionCounter = 0;
+        const helper = new DelayExecutionHelper(
           collectUniqueIds,
           function (data) {
             executionCounter++;
@@ -203,9 +203,9 @@ describe('Kibi Components', function () {
       // e1   e2     C1
       //  |__delay___|
       it('2 events triggered inside "delay" - callback should be triggerd after a "delay" after first event', function (done) {
-        var actuallData = [];
-        var executionCounter = 0;
-        var helper = new DelayExecutionHelper(
+        let actuallData = [];
+        let executionCounter = 0;
+        const helper = new DelayExecutionHelper(
           collectUniqueIds,
           function (data) {
             executionCounter++;
@@ -248,9 +248,9 @@ describe('Kibi Components', function () {
       it(
       '2 events triggered more than "delay" apart - should trigger the callback twice ' +
       'a "delay" after first event and a "delay" after second event', function (done) {
-        var actuallData = [];
-        var executionCounter = 0;
-        var helper = new DelayExecutionHelper(
+        let actuallData = [];
+        let executionCounter = 0;
+        const helper = new DelayExecutionHelper(
           collectUniqueIds,
           function (data) {
             executionCounter++;

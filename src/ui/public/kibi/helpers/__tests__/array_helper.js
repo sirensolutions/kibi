@@ -1,6 +1,6 @@
-var expect = require('expect.js');
-var ngMock = require('ngMock');
-var arrayHelper;
+const expect = require('expect.js');
+const ngMock = require('ngMock');
+let arrayHelper;
 
 function init() {
   return function () {
@@ -18,8 +18,8 @@ describe('Kibi Components', function () {
 
 
     it('test add', function () {
-      var input = [];
-      var expected = [
+      const input = [];
+      const expected = [
         {id: 1}
       ];
       arrayHelper.add(input, {id: 1}, null);
@@ -28,16 +28,16 @@ describe('Kibi Components', function () {
     });
 
     it('test remove', function () {
-      var input = [{id: 1}];
-      var expected = [];
+      const input = [{id: 1}];
+      const expected = [];
       arrayHelper.remove(input, 0, null);
       expect(input).to.be.an('array');
       expect(input).to.eql(expected);
     });
 
     it('test up', function () {
-      var input = [{id: 1}, {id: 2}];
-      var expected = [{id: 2}, {id: 1}];
+      const input = [{id: 1}, {id: 2}];
+      const expected = [{id: 2}, {id: 1}];
       arrayHelper.up(input, 1, null);
       expect(input).to.be.an('array');
       expect(input).to.eql(expected);
@@ -49,8 +49,8 @@ describe('Kibi Components', function () {
     });
 
     it('test down', function () {
-      var input = [{id: 1}, {id: 2}];
-      var expected = [{id: 2}, {id: 1}];
+      const input = [{id: 1}, {id: 2}];
+      const expected = [{id: 2}, {id: 1}];
 
       arrayHelper.down(input, 0, null);
       expect(input).to.be.an('array');
@@ -63,9 +63,9 @@ describe('Kibi Components', function () {
     });
 
     it('test callback executed', function () {
-      var input = [];
-      var counter = 0;
-      var callback = function () {
+      const input = [];
+      let counter = 0;
+      const callback = function () {
         counter++;
       };
 

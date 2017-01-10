@@ -1,9 +1,9 @@
-var expect = require('expect.js');
-var ngMock = require('ngMock');
+const expect = require('expect.js');
+const ngMock = require('ngMock');
 
-var mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
-var sinon = require('auto-release-sinon');
-var fakeSavedVisualisations = [
+const mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
+const sinon = require('auto-release-sinon');
+const fakeSavedVisualisations = [
   {
     id: 'myvis1',
     title: 'myvis1',
@@ -27,7 +27,7 @@ var fakeSavedVisualisations = [
     }
   }
 ];
-var fakeSavedDashboardGroups = [
+const fakeSavedDashboardGroups = [
   {
     id: 'group-1',
     title: 'Group 1',
@@ -50,7 +50,7 @@ var fakeSavedDashboardGroups = [
     dashboards: []
   }
 ];
-var deleteHelper;
+let deleteHelper;
 
 describe('Kibi Components', function () {
   describe('deleteHelper', function () {
@@ -113,14 +113,14 @@ describe('Kibi Components', function () {
     });
 
     it('should call the delegated delete method method if the service is neither a query nor a dashboard', function () {
-      var spy = sinon.spy();
+      const spy = sinon.spy();
 
       deleteHelper.deleteByType('aaa', null, spy);
       expect(spy.called).to.be(true);
     });
 
     it('should call the delegated delete method method if the query is not used by any visualisations', function (done) {
-      var spy = sinon.spy();
+      const spy = sinon.spy();
 
       deleteHelper.deleteByType('query', [ '666' ], spy).then(function () {
         expect(spy.called).to.be(true);
@@ -129,8 +129,8 @@ describe('Kibi Components', function () {
     });
 
     it('should not delete query that is used by a visualisation', function (done) {
-      var spy = sinon.spy();
-      var stub = sinon.stub(window, 'alert', function () { return false; });
+      const spy = sinon.spy();
+      const stub = sinon.stub(window, 'alert', function () { return false; });
 
       deleteHelper.deleteByType('query', [ '123' ], spy).then(function () {
         expect(spy.called).to.be(false);
@@ -139,7 +139,7 @@ describe('Kibi Components', function () {
     });
 
     it('should call the delegated delete method method if the dashboard is not in any group', function (done) {
-      var spy = sinon.spy();
+      const spy = sinon.spy();
 
       deleteHelper.deleteByType('dashboard', [ 'dashboard 666' ], spy).then(function () {
         expect(spy.called).to.be(true);
@@ -148,8 +148,8 @@ describe('Kibi Components', function () {
     });
 
     it('should not delete dashboard that is in a group', function (done) {
-      var spy = sinon.spy();
-      var stub = sinon.stub(window, 'alert', function () { return false; });
+      const spy = sinon.spy();
+      const stub = sinon.stub(window, 'alert', function () { return false; });
 
       deleteHelper.deleteByType('dashboard', [ 'Companies' ], spy).then(function () {
         expect(spy.called).to.be(false);

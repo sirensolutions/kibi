@@ -1,13 +1,13 @@
+import _ from 'lodash';
+import ngMock from 'ng_mock';
+import expect from 'expect.js';
+import IndexPatternsCastMappingTypeProvider from 'ui/index_patterns/_cast_mapping_type';
 describe('type normalizer (castMappingType)', function () {
-  let _ = require('lodash');
-  let ngMock = require('ngMock');
-  let expect = require('expect.js');
-
   let fn;
   let fields;
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector) {
-    fn = Private(require('ui/index_patterns/_cast_mapping_type'));
+    fn = Private(IndexPatternsCastMappingTypeProvider);
   }));
 
   it('should be a function', function () {
@@ -19,7 +19,7 @@ describe('type normalizer (castMappingType)', function () {
   });
 
   it('should cast numeric types to "number"', function () {
-    let types = [
+    const types = [
       'float',
       'double',
       'integer',
@@ -35,7 +35,7 @@ describe('type normalizer (castMappingType)', function () {
   });
 
   it('should treat non-numeric known types as what they are', function () {
-    let types = [
+    const types = [
       'date',
       'boolean',
       'ip',
@@ -48,6 +48,17 @@ describe('type normalizer (castMappingType)', function () {
 
     _.each(types, function (type) {
       expect(fn(type)).to.be(type);
+    });
+  });
+
+  it('should cast text and keyword types to "string"', function () {
+    const types = [
+      'keyword',
+      'text'
+    ];
+
+    _.each(types, function (type) {
+      expect(fn(type)).to.be('string');
     });
   });
 

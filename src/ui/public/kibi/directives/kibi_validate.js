@@ -8,7 +8,7 @@ define(function (require) {
       require: 'ngModel',
       link: function (scope, elm, attrs, ctrl) {
         if (attrs.kibiValidate === 'integer') {
-          var INTEGER_REGEXP = /^\-?\d+$/;
+          const INTEGER_REGEXP = /^\-?\d+$/;
           ctrl.$validators.integer = function (modelValue, viewValue) {
             if (ctrl.$isEmpty(modelValue)) {
               // consider empty models to be valid
@@ -18,7 +18,7 @@ define(function (require) {
           };
         }
         if (attrs.kibiValidate === 'positive-integer-or-minus-one') {
-          var POSITIVE_INT_REGEXP = /^\d+$/;
+          const POSITIVE_INT_REGEXP = /^\d+$/;
           ctrl.$validators.positiveintegerorminusone = function (modelValue, viewValue) {
             if (ctrl.$isEmpty(modelValue)) {
               // consider empty models to be valid

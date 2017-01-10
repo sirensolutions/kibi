@@ -1,21 +1,22 @@
-let d3 = require('d3');
-let angular = require('angular');
-let expect = require('expect.js');
-let ngMock = require('ngMock');
-let _ = require('lodash');
-let $ = require('jquery');
-let fixtures = require('fixtures/fake_hierarchical_data');
-let series = require('fixtures/vislib/mock_data/date_histogram/_series');
-let terms = require('fixtures/vislib/mock_data/terms/_columns');
+import d3 from 'd3';
+import angular from 'angular';
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import _ from 'lodash';
+import fixtures from 'fixtures/fake_hierarchical_data';
+import series from 'fixtures/vislib/mock_data/date_histogram/_series';
+import terms from 'fixtures/vislib/mock_data/terms/_columns';
+import $ from 'jquery';
+import VislibVisualizationsTimeMarkerProvider from 'ui/vislib/visualizations/time_marker';
 
 describe('Vislib Time Marker Test Suite', function () {
-  let height = 50;
-  let color = '#ff0000';
-  let opacity = 0.5;
-  let width = 3;
-  let customClass = 'custom-time-marker';
-  let dateMathTimes = ['now-1m', 'now-5m', 'now-15m'];
-  let myTimes = dateMathTimes.map(function (dateMathString) {
+  const height = 50;
+  const color = '#ff0000';
+  const opacity = 0.5;
+  const width = 3;
+  const customClass = 'custom-time-marker';
+  const dateMathTimes = ['now-1m', 'now-5m', 'now-15m'];
+  const myTimes = dateMathTimes.map(function (dateMathString) {
     return {
       time: dateMathString,
       class: customClass,
@@ -24,14 +25,14 @@ describe('Vislib Time Marker Test Suite', function () {
       width: width
     };
   });
-  let getExtent = function (dataArray, func) {
+  const getExtent = function (dataArray, func) {
     return func(dataArray, function (obj) {
       return func(obj.values, function (d) {
         return d.x;
       });
     });
   };
-  let times = [];
+  const times = [];
   let TimeMarker;
   let defaultMarker;
   let customMarker;
@@ -43,7 +44,7 @@ describe('Vislib Time Marker Test Suite', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    TimeMarker = Private(require('ui/vislib/visualizations/time_marker'));
+    TimeMarker = Private(VislibVisualizationsTimeMarkerProvider);
     minDomain = getExtent(series.series, d3.min);
     maxDomain = getExtent(series.series, d3.max);
     domain = [minDomain, maxDomain];

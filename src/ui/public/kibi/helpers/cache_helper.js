@@ -2,7 +2,7 @@ define(function (require) {
   return function CacheHelperFactory($rootScope, Promise) {
 
     // we will store values in memory
-    var cache = {};
+    let cache = {};
 
 
     // We wrap cache library in simple helper
@@ -23,7 +23,7 @@ define(function (require) {
       cache = {};
     };
 
-    var cacheHelperInstance =  new CacheHelper();
+    const cacheHelperInstance =  new CacheHelper();
 
     // flush the cache on route change
     $rootScope.$on('$routeChangeSuccess', function () {

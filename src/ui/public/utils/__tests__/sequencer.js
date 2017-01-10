@@ -1,9 +1,9 @@
+import _ from 'lodash';
+import sequencer from 'ui/utils/sequencer';
+import expect from 'expect.js';
 describe('sequencer util', function () {
-  let _ = require('lodash');
-  let sequencer = require('ui/utils/sequencer');
-  let expect = require('expect.js');
 
-  let opts = [
+  const opts = [
     { min: 500, max: 7500, length: 1500 },
     { min: 50, max: 500, length: 1000 },
     { min: 5, max: 50, length: 100 }

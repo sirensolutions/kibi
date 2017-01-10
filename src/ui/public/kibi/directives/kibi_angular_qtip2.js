@@ -1,8 +1,8 @@
 define(function (require) {
   require('kibi-qtip2');
-  var $ = require('jquery');
+  const $ = require('jquery');
 
-  var module = require('ui/modules').get('kibana');
+  const module = require('ui/modules').get('kibana');
   module.directive('qtip', function () {
     return {
       restrict: 'A',
@@ -10,13 +10,13 @@ define(function (require) {
         qtipHtml: '='
       },
       link: function (scope, element, attrs) {
-        var my = attrs.qtipMy || 'bottom center';
-        var at = attrs.qtipAt || 'top center';
-        var qtipClasses = attrs.qtipClasses || 'qtip';
+        const my = attrs.qtipMy || 'bottom center';
+        const at = attrs.qtipAt || 'top center';
+        const qtipClasses = attrs.qtipClasses || 'qtip';
 
-        var init = false;
+        const init = false;
         scope.$watch('qtipHtml', function (newValue) {
-          var content;
+          let content;
           if (newValue) {
             if (attrs.qtipText) {
               if (attrs.qtipTitle) {
@@ -33,7 +33,7 @@ define(function (require) {
               }
             }
 
-            var options = {
+            const options = {
               content: content,
               position: {
                 my: my,

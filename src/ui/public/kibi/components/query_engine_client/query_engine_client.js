@@ -1,8 +1,8 @@
 define(function (require) {
 
-  var chrome = require('ui/chrome');
+  const chrome = require('ui/chrome');
   const angular = require('angular');
-  var _ = require('lodash');
+  const _ = require('lodash');
 
   require('ui/modules').get('kibana/query_engine_client')
   .service('queryEngineClient', function ($http) {
@@ -17,7 +17,7 @@ define(function (require) {
         queryDefs = [queryDefs];
       }
 
-      var params = {
+      const params = {
         options: angular.toJson(options),
         queryDefs: angular.toJson(queryDefs)
       };

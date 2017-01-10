@@ -4,7 +4,7 @@
 
     <!-- Filters -->
     <div ng-show="activeTab === 'filter'" role="tabpanel" class="tab-pane active">
-      <br>
+      <div class="kuiLocalDropdownTitle">Time Range</div>
       <div class="row">
         <div class="col-md-2">
           <ul class="nav nav-pills nav-stacked kbn-timepicker-modes">
@@ -48,6 +48,7 @@
                       ng-model="relative.count"
                       ng-change="formatRelative()"
                       greater-than="-1"
+                      min="0"
                       type="number"
                       class="form-control">
                   </div>
@@ -122,7 +123,7 @@
     </div>
     <!-- Refresh Intervals -->
     <div ng-show="activeTab === 'interval'" role="tabpanel" class="tab-pane active">
-      <br>
+      <div class="kuiLocalDropdownTitle">Refresh Interval</div>
       <div ng-repeat="list in refreshLists" class="kbn-refresh-section">
         <ul class="list-unstyled">
           <li ng-repeat="inter in list">

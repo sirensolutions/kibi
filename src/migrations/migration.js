@@ -48,13 +48,13 @@ export default class Migration {
    * @return The search hits.
    */
   async scrollSearch(index, type, query, options) {
-    let objects = [];
+    const objects = [];
 
     const opts = defaults(options || {}, {
       size: 100
     });
 
-    let searchOptions = {
+    const searchOptions = {
       index: index,
       type: type,
       scroll: '1m',
@@ -66,7 +66,7 @@ export default class Migration {
     }
 
     let response = await this._client.search(searchOptions);
-    let scrollId = response._scroll_id;
+    const scrollId = response._scroll_id;
 
     while (true) {
       objects.push(...response.hits.hits);
@@ -91,13 +91,13 @@ export default class Migration {
    * @return The number of search hits.
    */
   async countHits(index, type, query) {
-    let searchOptions = {
+    const searchOptions = {
       index: index,
       type: type,
       body: query
     };
 
-    let response = await this._client.count(searchOptions);
+    const response = await this._client.count(searchOptions);
     return response.count;
   }
 };

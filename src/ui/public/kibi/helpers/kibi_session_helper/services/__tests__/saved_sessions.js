@@ -1,9 +1,9 @@
-var expect = require('expect.js');
-var ngMock = require('ngMock');
-var Promise = require('bluebird');
-var sinon = require('auto-release-sinon');
+const expect = require('expect.js');
+const ngMock = require('ngMock');
+const Promise = require('bluebird');
+const sinon = require('auto-release-sinon');
 
-var savedSessions;
+let savedSessions;
 
 describe('Kibi Services', function () {
   describe('savedSessions', function () {
@@ -16,7 +16,7 @@ describe('Kibi Services', function () {
 
       ngMock.inject(function ($injector, Private, _$rootScope_) {
         savedSessions = $injector.get('savedSessions');
-        var mappingSetup = Private(require('ui/utils/mapping_setup'));
+        const mappingSetup = Private(require('ui/utils/mapping_setup'));
         // here we to stub a function from mappingSetup to avoid the call to private method
         // which requires access to elasticsearch
         sinon.stub(mappingSetup, 'isDefined').returns(Promise.resolve(true));

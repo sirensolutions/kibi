@@ -1,8 +1,8 @@
 define(function (require) {
   return function SavedObjectLooperService(Private) {
-    let fetch = Private(require('ui/courier/fetch/fetch'));
-    let Looper = Private(require('ui/courier/looper/_looper'));
-    let strategy = Private(require('ui/courier/fetch/strategy/savedobject'));
+    const fetch = Private(require('ui/courier/fetch/fetch'));
+    const Looper = Private(require('ui/courier/looper/_looper'));
+    const strategy = Private(require('ui/courier/fetch/strategy/savedobject'));
 
     /**
      * The Looper which will manage the saved objects fetch interval

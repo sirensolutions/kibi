@@ -1,13 +1,13 @@
 define(function (require) {
   return function VirtualIndexPatternFactory(Private) {
-    var FieldList = Private(require('ui/index_patterns/_field_list'));
+    const FieldList = Private(require('ui/index_patterns/_field_list'));
 
     /**
      * Adds support to virtual fields to an IndexPattern.
      */
 
     function VirtualIndexPattern(wrappedIndexPattern) {
-      var self = this;
+      const self = this;
       self.wrapped = wrappedIndexPattern;
       self.fieldList = self.wrapped.fields;
       self.virtualFields = [];
@@ -18,7 +18,7 @@ define(function (require) {
         };
       }
 
-      for (var attr in self.wrapped) {
+      for (const attr in self.wrapped) {
         if (typeof self.wrapped[attr] === 'function') {
           self[attr] = wrappedFunction(attr);
         } else {

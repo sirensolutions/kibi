@@ -1,16 +1,16 @@
-let d3 = require('d3');
-let angular = require('angular');
-let _ = require('lodash');
-let ngMock = require('ngMock');
-let expect = require('expect.js');
+import d3 from 'd3';
+import angular from 'angular';
+import _ from 'lodash';
+import ngMock from 'ng_mock';
+import expect from 'expect.js';
+import VislibLibLayoutLayoutTypesProvider from 'ui/vislib/lib/layout/layout_types';
 
 describe('Vislib Column Layout Test Suite', function () {
   let layoutType;
   let columnLayout;
   let el;
-  let data = {
+  const data = {
     hits: 621,
-    label: '',
     ordered: {
       date: true,
       interval: 30000,
@@ -19,6 +19,7 @@ describe('Vislib Column Layout Test Suite', function () {
     },
     series: [
       {
+        label: 'Count',
         values: [
           {
             x: 1408734060000,
@@ -69,9 +70,9 @@ describe('Vislib Column Layout Test Suite', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    layoutType = Private(require('ui/vislib/lib/layout/layout_types'));
+    layoutType = Private(VislibLibLayoutLayoutTypesProvider);
     el = d3.select('body').append('div').attr('class', 'visualization');
-    columnLayout = layoutType.histogram(el, data);
+    columnLayout = layoutType.point_series(el, data);
   }));
 
   afterEach(function () {
@@ -84,6 +85,6 @@ describe('Vislib Column Layout Test Suite', function () {
   });
 
   it('should throw an error when the wrong number or no arguments provided', function () {
-    expect(function () { layoutType.histogram(el); }).to.throwError();
+    expect(function () { layoutType.point_series(el); }).to.throwError();
   });
 });

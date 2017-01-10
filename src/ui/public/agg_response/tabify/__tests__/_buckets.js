@@ -1,23 +1,24 @@
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import AggResponseTabifyBucketsProvider from 'ui/agg_response/tabify/_buckets';
 describe('Buckets wrapper', function () {
   let Buckets;
-  let expect = require('expect.js');
-  let ngMock = require('ngMock');
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector) {
-    Buckets = Private(require('ui/agg_response/tabify/_buckets'));
+    Buckets = Private(AggResponseTabifyBucketsProvider);
   }));
 
 
   function test(aggResp, count, keys) {
     it('reads the length', function () {
-      let buckets = new Buckets(aggResp);
+      const buckets = new Buckets(aggResp);
       expect(buckets).to.have.length(count);
     });
 
     it('itterates properly, passing in the key', function () {
-      let buckets = new Buckets(aggResp);
-      let keysSent = [];
+      const buckets = new Buckets(aggResp);
+      const keysSent = [];
       buckets.forEach(function (bucket, key) {
         keysSent.push(key);
       });
@@ -28,7 +29,7 @@ describe('Buckets wrapper', function () {
   }
 
   describe('with object style buckets', function () {
-    let aggResp = {
+    const aggResp = {
       buckets: {
         '0-100': {},
         '100-200': {},
@@ -36,14 +37,14 @@ describe('Buckets wrapper', function () {
       }
     };
 
-    let count = 3;
-    let keys = ['0-100', '100-200', '200-300'];
+    const count = 3;
+    const keys = ['0-100', '100-200', '200-300'];
 
     test(aggResp, count, keys);
   });
 
   describe('with array style buckets', function () {
-    let aggResp = {
+    const aggResp = {
       buckets: [
         { key: '0-100', value: {} },
         { key: '100-200', value: {} },
@@ -51,8 +52,8 @@ describe('Buckets wrapper', function () {
       ]
     };
 
-    let count = 3;
-    let keys = ['0-100', '100-200', '200-300'];
+    const count = 3;
+    const keys = ['0-100', '100-200', '200-300'];
 
     test(aggResp, count, keys);
   });

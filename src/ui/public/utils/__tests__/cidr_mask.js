@@ -1,6 +1,5 @@
-
-let CidrMask = require('ui/utils/CidrMask');
-let expect = require('expect.js');
+import CidrMask from 'ui/utils/cidr_mask';
+import expect from 'expect.js';
 
 describe('CidrMask', function () {
   it('should throw errors with invalid CIDR masks', function () {

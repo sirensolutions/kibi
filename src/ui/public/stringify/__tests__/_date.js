@@ -1,7 +1,8 @@
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import moment from 'moment-timezone';
+import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
 describe('Date Format', function () {
-  let expect = require('expect.js');
-  let ngMock = require('ngMock');
-  let moment = require('moment-timezone');
   let fieldFormats;
   let settings;
   let convert;
@@ -13,9 +14,9 @@ describe('Date Format', function () {
     $scope = $rootScope;
     settings = config;
 
-    fieldFormats = Private(require('ui/registry/field_formats'));
-    let DateFormat = fieldFormats.getType('date');
-    let date = new DateFormat();
+    fieldFormats = Private(RegistryFieldFormatsProvider);
+    const DateFormat = fieldFormats.getType('date');
+    const date = new DateFormat();
 
     convert = date.convert.bind(date);
   }));
@@ -29,17 +30,17 @@ describe('Date Format', function () {
     function setDefaultTimezone() {
       moment.tz.setDefault(settings.get('dateFormat:tz'));
     }
-    let time = 1445027693942;
+    const time = 1445027693942;
 
     off = $scope.$on('change:config.dateFormat:tz', setDefaultTimezone);
 
     settings.set('dateFormat:tz', 'America/Chicago');
     $scope.$digest();
-    let chicagoTime = convert(time);
+    const chicagoTime = convert(time);
 
     settings.set('dateFormat:tz', 'America/Phoenix');
     $scope.$digest();
-    let phoenixTime = convert(time);
+    const phoenixTime = convert(time);
 
     expect(chicagoTime).not.to.equal(phoenixTime);
     off();

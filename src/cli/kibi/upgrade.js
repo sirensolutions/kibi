@@ -1,22 +1,21 @@
-import KbnServer from '../../server/KbnServer';
+import KbnServer from '../../server/kbn_server';
 import Promise from 'bluebird';
 import { merge } from 'lodash';
 import readYamlConfig from '../serve/read_yaml_config';
 import { resolve } from 'path';
-import requirefrom from 'requirefrom';
-const fromRoot = requirefrom('src/utils')('fromRoot');
+import fromRoot from '../../utils/from_root';
 import MigrationRunner from '../../migrations/migration_runner';
 import MigrationLogger from '../../migrations/migration_logger';
 
-let pathCollector = function () {
-  let paths = [];
+const pathCollector = function () {
+  const paths = [];
   return function (path) {
     paths.push(resolve(process.cwd(), path));
     return paths;
   };
 };
 
-let pluginDirCollector = pathCollector();
+const pluginDirCollector = pathCollector();
 
 /**
  * The command to upgrade saved objects.
@@ -42,7 +41,7 @@ export default function (program) {
 
   async function upgrade(options) {
 
-    let config = readYamlConfig(options.config);
+    const config = readYamlConfig(options.config);
 
     if (options.dev) {
       try { merge(config, readYamlConfig(fromRoot('config/kibi.dev.yml'))); }
@@ -79,12 +78,12 @@ export default function (program) {
 
     await kbnServer.ready();
 
-    let logger = new MigrationLogger(kbnServer.server, 'migrations');
-    let runner = new MigrationRunner(kbnServer.server, logger);
+    const logger = new MigrationLogger(kbnServer.server, 'migrations');
+    const runner = new MigrationRunner(kbnServer.server, logger);
 
     try {
       await waitForGreenStatus(kbnServer, 10);
-      let count = await runner.upgrade();
+      const count = await runner.upgrade();
       if (count > 0) {
         process.stdout.write(`Performed ${count} upgrades.\n`);
       } else {

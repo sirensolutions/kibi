@@ -12,8 +12,8 @@ define(function (require) {
     DashboardHelper.prototype.getTimeDependentDashboards = function () {
       return savedDashboards.find()
       .then((savedDashboardsRes) => {
-        let dashboards = _.filter(savedDashboardsRes.hits, (hit) => !!hit.savedSearchId);
-        let promisses = _.map(dashboards, (dash) => {
+        const dashboards = _.filter(savedDashboardsRes.hits, (hit) => !!hit.savedSearchId);
+        const promisses = _.map(dashboards, (dash) => {
           return savedSearches.get(dash.savedSearchId);
         });
         return Promise.all(promisses).then((savedSearchesRes) => {

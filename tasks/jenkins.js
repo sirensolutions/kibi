@@ -26,8 +26,10 @@ module.exports = function (grunt) {
     'rejectRejFiles',
 
     'eslint:source',
+    'licenses',
     'test:server',
-    'test:browser',
+    'test:browser-ci',
+    'test:api',
   ]);
 
   grunt.registerTask('jenkins:selenium', [

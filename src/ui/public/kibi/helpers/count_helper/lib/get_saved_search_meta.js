@@ -1,8 +1,8 @@
 define(function (require) {
-  var _ = require('lodash');
+  const _ = require('lodash');
 
   return function getSavedSearchMeta(savedSearch) {
-    var savedSearchMeta;
+    let savedSearchMeta;
     /*eslint-disable no-empty */
     try {
       return JSON.parse(savedSearch.kibanaSavedObjectMeta.searchSourceJSON);

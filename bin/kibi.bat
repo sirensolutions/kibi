@@ -48,7 +48,8 @@ REM kibi: end
 
 
 REM do NOT add a space before && !!!
-set ROOT_DIR=%DIR%&& "%NODE%" %NODE_OPTIONS% "%DIR%\src\cli" %*
+REM added kibi_plugins option
+set ROOT_DIR=%DIR%&& "%NODE%" %NODE_OPTIONS% --no-warnings "%DIR%\src\cli" --plugin-dir "%DIR%\src\kibi_plugins"  %*
 
 :finally
 

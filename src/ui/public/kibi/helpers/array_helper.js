@@ -1,6 +1,6 @@
 define(function (require) {
   return function ArrayHelperFactory() {
-    var _ = require('lodash');
+    const _ = require('lodash');
 
     function ArrayHelper() {
     }
@@ -21,8 +21,8 @@ define(function (require) {
 
     ArrayHelper.prototype.up = function (array, index, callback) {
       if (index > 0) {
-        var newIndex = index - 1;
-        var currentElement = _.clone(array[index], true);
+        const newIndex = index - 1;
+        const currentElement = _.clone(array[index], true);
         array.splice(index, 1);
         array.splice(newIndex, 0, currentElement);
         if (callback) {
@@ -33,8 +33,8 @@ define(function (require) {
 
     ArrayHelper.prototype.down = function (array, index, callback) {
       if (index < array.length - 1) {
-        var newIndex = index + 1;
-        var currentElement = _.clone(array[index], true);
+        const newIndex = index + 1;
+        const currentElement = _.clone(array[index], true);
         array.splice(index, 1);
         array.splice(newIndex, 0, currentElement);
         if (callback) {

@@ -20,7 +20,6 @@ import { savedDashboardRegister } from 'plugins/kibana/dashboard/services/saved_
 import { createPanelState } from 'plugins/kibana/dashboard/components/panel/lib/panel_state';
 require('ui/saved_objects/saved_object_registry').register(savedDashboardRegister);
 
-import { slugifyId } from 'kibiUtils';
 // kibi: added as it is needed by src/plugins/kibana/public/dashboard/partials/save_dashboard.html
 import 'ui/kibi/directives/kibi_select';
 // kibi: end
@@ -38,38 +37,47 @@ uiRoutes
 .defaults(/dashboard/, {
   requireDefaultIndex: true
 })
+// KIBI5: correct the logic since there is no more need for slugifyId
+//.when('/dashboard', {
+  //template: indexTemplate,
+  //resolve: {
+    //dash: function (timefilter, savedDashboards, kibiDefaultDashboardTitle, courier) {
+      //// kibi:
+      //// - get all the dashboards
+      //// - if none, just create a new one
+      //// - if any try to load the default dashboard if set, otherwise load the first dashboard
+      //// - if the default dashboard is missing, load the first dashboard
+      //// - if the first dashboard is missing, create a new one
+      //return savedDashboards.find().then(function (resp) {
+        //if (resp.hits.length) {
+          //timefilter.enabled = true;
+          //// kibi: select the first dashboard if default_dashboard_title is not set
+          //let dashboardId = resp.hits[0].id;
+          //let redirectToWhenMissing = '/dashboard/new-dashboard/create/';
+          //if (kibiDefaultDashboardTitle) {
+            //dashboardId = slugifyId(kibiDefaultDashboardTitle);
+            //redirectToWhenMissing = `/dashboard/${resp.hits[0].id}`;
+          //}
+          //return savedDashboards.get(dashboardId).catch(err => {
+            //if (kibiDefaultDashboardTitle) {
+              //err.message = `The default dashboard with title "${kibiDefaultDashboardTitle}" does not exist.
+                //Please correct the "kibi_core.default_dashboard_title" parameter in kibi.yml`;
+            //}
+            //return courier.redirectWhenMissing({
+              //dashboard : redirectToWhenMissing
+            //})(err);
+          //});
+        //}
+        //return savedDashboards.get();
+      //});
+    //}
+  //}
+//})
 .when('/dashboard', {
   template: indexTemplate,
   resolve: {
-    dash: function (timefilter, savedDashboards, kibiDefaultDashboardTitle, courier) {
-      // kibi:
-      // - get all the dashboards
-      // - if none, just create a new one
-      // - if any try to load the default dashboard if set, otherwise load the first dashboard
-      // - if the default dashboard is missing, load the first dashboard
-      // - if the first dashboard is missing, create a new one
-      return savedDashboards.find().then(function (resp) {
-        if (resp.hits.length) {
-          timefilter.enabled = true;
-          // kibi: select the first dashboard if default_dashboard_title is not set
-          let dashboardId = resp.hits[0].id;
-          let redirectToWhenMissing = '/dashboard/new-dashboard/create/';
-          if (kibiDefaultDashboardTitle) {
-            dashboardId = slugifyId(kibiDefaultDashboardTitle);
-            redirectToWhenMissing = `/dashboard/${resp.hits[0].id}`;
-          }
-          return savedDashboards.get(dashboardId).catch(err => {
-            if (kibiDefaultDashboardTitle) {
-              err.message = `The default dashboard with title "${kibiDefaultDashboardTitle}" does not exist.
-                Please correct the "kibi_core.default_dashboard_title" parameter in kibi.yml`;
-            }
-            return courier.redirectWhenMissing({
-              dashboard : redirectToWhenMissing
-            })(err);
-          });
-        }
-        return savedDashboards.get();
-      });
+    dash: function (savedDashboards, config) {
+      return savedDashboards.get();
     }
   }
 })

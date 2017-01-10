@@ -98,7 +98,8 @@ module.exports = function (plugin, server) {
       .then(ensureNotTribe.bind(this, callAdminAsKibanaUser))
       .then(waitForShards)
       .then(_.partial(migrateConfig, server))
-      .then(_.partial(pluginList, plugin, server)) // kibi: added by kibi to know the list of installed plugins
+      // KIBI5: correct this
+      //.then(_.partial(pluginList, plugin, server)) // kibi: added by kibi to know the list of installed plugins
       .then(() => {
         const tribeUrl = config.get('elasticsearch.tribe.url');
         if (tribeUrl) {

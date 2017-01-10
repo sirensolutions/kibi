@@ -372,18 +372,18 @@ define(function (require) {
           addSearch: $scope.addSearch
         };
 
-				// If you click the back/forward browser button:
+        // kibi: If you click the back/forward browser button:
         // 1. The $locationChangeSuccess event is fired when you click back/forward browser button.
         $rootScope.$on('$locationChangeSuccess', () => $rootScope.actualLocation = $location.url());
         // 2. The following watcher is fired.
         $rootScope.$watch(() => { return $location.url(); }, (newLocation, oldLocation) => {
           if ($rootScope.actualLocation === newLocation) {
-            // Here we execute init() if the newLocation is equal to the URL we saved during
-            // the $locationChangeSuccess event above.
+            /* kibi: Here we execute init() if the newLocation is equal to the URL we saved during
+               the $locationChangeSuccess event above. */
             init();
           }
         });
-        /* If you click an ordinary hyperlink, the above order is reversed.
+        /* kibi: If you click an ordinary hyperlink, the above order is reversed.
            First, you have the watcher fired, then the $locationChangeSuccess event.
            That's why the actualLocation and newLocation will never be equal inside the watcher callback
            if you click on an ordinary hyperlink. */

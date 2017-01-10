@@ -1,9 +1,9 @@
-const sinon = require('auto-release-sinon');
-const angular = require('angular');
-const ngMock = require('ngMock');
-const expect = require('expect.js');
+import sinon from 'auto-release-sinon';
+import angular from 'angular';
+import ngMock from 'ng_mock';
+import expect from 'expect.js';
 
-require('../kibi_array_param');
+import '../kibi_array_param';
 
 let $rootScope;
 const $elems = {};

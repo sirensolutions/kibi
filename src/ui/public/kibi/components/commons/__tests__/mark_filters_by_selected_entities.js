@@ -1,12 +1,14 @@
+import MarkFiltersBySelectedEntitiesProvider from 'ui/kibi/components/commons/_mark_filters_by_selected_entities';
+import noDigestPromises from 'testUtils/no_digest_promises';
 import sinon from 'auto-release-sinon';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import onPage from 'ui/kibi/utils/on_page';
+import mockSavedObjects from 'fixtures/kibi/mock_saved_objects';
 
 let markFiltersBySelectedEntities;
 let kibiState;
 
-const mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
 const fakeSavedQueries = [
   {
     id: 'query1',
@@ -24,7 +26,7 @@ describe('Kibi Components', function () {
   describe('Commons', function () {
     describe('_mark_filters_by_selected_entities', function () {
 
-      require('testUtils/noDigestPromises').activateForSuite();
+      noDigestPromises.activateForSuite();
 
       beforeEach(function () {
         ngMock.module('kibana', function ($provide) {
@@ -42,7 +44,7 @@ describe('Kibi Components', function () {
 
           sinon.stub(onPage, 'onDashboardPage').returns(true);
 
-          markFiltersBySelectedEntities = Private(require('ui/kibi/components/commons/_mark_filters_by_selected_entities'));
+          markFiltersBySelectedEntities = Private(MarkFiltersBySelectedEntitiesProvider);
         });
       });
 

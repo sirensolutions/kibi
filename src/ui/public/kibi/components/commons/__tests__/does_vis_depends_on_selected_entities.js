@@ -1,6 +1,10 @@
-let doesVisDependsOnSelectedEntities;
+import noDigestPromises from 'test_utils/no_digest_promises';
+import DoesVisDependsOnSelectedEntitiesProvider from 'ui/kibi/components/commons/_does_vis_depends_on_selected_entities';
+import ngMock from 'ng_mock';
+import expect from 'expect.js';
+import mockSavedObjects from 'fixtures/kibi/mock_saved_objects';
 
-const mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
+let doesVisDependsOnSelectedEntities;
 const fakeSavedQueries = [
   {
     id: 'query1',
@@ -13,8 +17,6 @@ const fakeSavedQueries = [
     resultQuery: 'SELECT * FROM mytable WHERE id = \'123\''
   }
 ];
-const ngMock = require('ngMock');
-const expect = require('expect.js');
 
 describe('Kibi Components', function () {
   describe('Commons', function () {
@@ -28,11 +30,11 @@ describe('Kibi Components', function () {
         });
 
         ngMock.inject(function (Private) {
-          doesVisDependsOnSelectedEntities = Private(require('ui/kibi/components/commons/_does_vis_depends_on_selected_entities'));
+          doesVisDependsOnSelectedEntities = Private(DoesVisDependsOnSelectedEntitiesProvider);
         });
       });
 
-      require('testUtils/noDigestPromises').activateForSuite();
+      noDigestPromises.activateForSuite();
 
       [
         'kibiqueryviewervis',

@@ -1,7 +1,7 @@
-const ngMock = require('ngMock');
-const expect = require('expect.js');
-const angular = require('angular');
-require('../kibi_validate');
+import '../kibi_validate';
+import ngMock from 'ng_mock';
+import expect from 'expect.js';
+import angular from 'angular';
 
 describe('Kibi Directives', function () {
   let $rootScope;

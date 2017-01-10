@@ -5,12 +5,11 @@ import _ from 'lodash';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import onPage from 'ui/kibi/utils/on_page';
+import 'ui/kibi/directives/kibi_param_entity_uri';
+import SavedObjectProvider from 'ui/courier/saved_object/saved_object';
 
 let $httpBackend;
 let Notifier;
-
-require('ui/kibi/directives/kibi_param_entity_uri');
-
 let $scope;
 
 const init = function (entityURI, mappings) {
@@ -32,7 +31,7 @@ const init = function (entityURI, mappings) {
   ngMock.module('kibana/courier', function ($provide) {
     $provide.service('courier', function (Promise, Private) {
       return {
-        SavedObject: Private(require('ui/courier/saved_object/saved_object')),
+        SavedObject: Private(SavedObjectProvider),
         indexPatterns: {
           getIds: function () {
             return Promise.resolve(_.map(mappings, function (m) {

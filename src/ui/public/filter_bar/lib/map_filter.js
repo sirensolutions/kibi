@@ -11,8 +11,8 @@ import MapScriptProvider from './map_script';
 import MapDefaultProvider from './map_default';
 
 // kibi: imports
-import DBFilterProvider from './map_db_filter';
-import SirenJoinProvider from './map_join_filter';
+import DBFilterProvider from 'ui/kibi/filter_bar/lib/map_db_filter';
+import SirenJoinProvider from 'ui/kibi/filter_bar/lib/map_join_filter';
 
 export default function mapFilterProvider(Promise, Private) {
 

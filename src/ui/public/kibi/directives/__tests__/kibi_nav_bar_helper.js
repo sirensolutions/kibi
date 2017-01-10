@@ -1,11 +1,13 @@
-const sinon = require('auto-release-sinon');
-const ngMock = require('ngMock');
-const expect = require('expect.js');
-const mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
-const _ = require('lodash');
-const noDigestPromises = require('testUtils/noDigestPromises');
-const pollUntil = require('./_poll_until');
-const chrome = require('ui/chrome');
+import DashboardGroupHelperProvider from 'ui/kibi/helpers/dashboard_group_helper';
+import KibiNavBarHelperProvider from 'ui/kibi/directives/kibi_nav_bar_helper';
+import sinon from 'auto-release-sinon';
+import ngMock from 'ng_mock';
+import expect from 'expect.js';
+import mockSavedObjects from 'fixtures/kibi/mock_saved_objects';
+import _ from 'lodash';
+import pollUntil from './_poll_until';
+import chrome from 'ui/chrome';
+import noDigestPromises from 'test_utils/no_digest_promises';
 
 let kibiState;
 let globalState;
@@ -42,7 +44,7 @@ describe('Kibi Directives', function () {
         kibiState = _kibiState_;
         $timeout = _$timeout_;
         $rootScope = _$rootScope_;
-        kibiNavBarHelper = Private(require('ui/kibi/directives/kibi_nav_bar_helper'));
+        kibiNavBarHelper = Private(KibiNavBarHelperProvider);
         $httpBackend = _$httpBackend_;
 
         sinon.stub(kibiState, '_getDashboardsIdInConnectedComponent').returns(dashboardsIdsInConnectedComponents);
@@ -54,7 +56,7 @@ describe('Kibi Directives', function () {
 
         kibiNavBarHelper._setDashboardGroups(dashboardGroups);
 
-        const dashboardGroupHelper = Private(require('ui/kibi/helpers/dashboard_group_helper'));
+        const dashboardGroupHelper = Private(DashboardGroupHelperProvider);
         getDashboardsMetadataStub = sinon.stub(dashboardGroupHelper, 'getDashboardsMetadata');
       });
     }

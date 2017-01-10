@@ -1,18 +1,19 @@
-const _ = require('lodash');
-const ngMock = require('ngMock');
-const expect = require('expect.js');
+import KibiSelectHelperProvider from 'ui/kibi/directives/kibi_select_helper';
+import IndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import _ from 'lodash';
+import ngMock from 'ng_mock';
+import expect from 'expect.js';
+import mockSavedObjects from 'fixtures/kibi/mock_saved_objects';
+import noDigestPromises from 'test_utils/no_digest_promises';
 
-const mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
 let kibiSelectHelper;
 let config;
 let $httpBackend;
 let indexPatterns;
 
-
 describe('Kibi Directives', function () {
   describe('KibiSelect Helper', function () {
-
-    require('testUtils/noDigestPromises').activateForSuite();
+    noDigestPromises.activateForSuite();
 
     const init = function (opt) {
       const defaultOptions =  {
@@ -29,7 +30,6 @@ describe('Kibi Directives', function () {
 
       const options = {};
       _.merge(options, defaultOptions, opt);
-
 
       ngMock.module('kibana', function ($provide) {
         $provide.constant('kbnIndex', '.kibi');
@@ -87,7 +87,7 @@ describe('Kibi Directives', function () {
       if (options.initIndexPattern) {
         ngMock.module('kibana/index_patterns', function ($provide) {
           $provide.service('indexPatterns', function (Promise, Private) {
-            const indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+            const indexPattern = Private(IndexPatternProvider);
             return {
               get: function (id) {
                 return Promise.resolve(indexPattern);
@@ -98,7 +98,7 @@ describe('Kibi Directives', function () {
       }
 
       ngMock.inject(function ($injector, Private) {
-        kibiSelectHelper = Private(require('ui/kibi/directives/kibi_select_helper'));
+        kibiSelectHelper = Private(KibiSelectHelperProvider);
         if (options.stubConfig) {
           config = $injector.get('config');
         }

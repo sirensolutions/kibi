@@ -4,10 +4,11 @@ import sinon from 'auto-release-sinon';
 import _ from 'lodash';
 import Promise from 'bluebird';
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import MockState from 'fixtures/mock_state';
 import mockSavedObjects from 'fixtures/kibi/mock_saved_objects';
 import dateMath from 'ui/kibi/utils/date_math_precision';
+import noDigestPromises from 'test_utils/no_digest_promises';
 
 import 'ui/kibi/state_management/kibi_state';
 
@@ -109,7 +110,7 @@ describe('State Management', function () {
 
   describe('Kibi State', function () {
 
-    require('testUtils/noDigestPromises').activateForSuite();
+    noDigestPromises.activateForSuite();
 
     describe('handle state with outdated filters', function () {
       beforeEach(() => init());

@@ -1,11 +1,11 @@
-const ngMock = require('ngMock');
-const expect = require('expect.js');
-const MockState = require('fixtures/mock_state');
-const angular = require('angular');
-const sinon = require('auto-release-sinon');
-const _ = require('lodash');
-
-require('ui/kibi/directives/kibi_nav_bar');
+import ngMock from 'ng_mock';
+import expect from 'expect.js';
+import MockState from 'fixtures/mock_state';
+import angular from 'angular';
+import sinon from 'auto-release-sinon';
+import _ from 'lodash';
+import KibiNavBarHelperProvider from 'ui/kibi/directives/kibi_nav_bar_helper';
+import 'ui/kibi/directives/kibi_nav_bar';
 
 let kibiState;
 let Promise;
@@ -37,7 +37,7 @@ describe('Kibi Components', function () {
 
       ngMock.inject(function (_Promise_, Private, _$rootScope_, $compile) {
         Promise = _Promise_;
-        kibiNavBarHelper = Private(require('ui/kibi/directives/kibi_nav_bar_helper'));
+        kibiNavBarHelper = Private(KibiNavBarHelperProvider);
         $rootScope = _$rootScope_;
         $rootScope.chrome = {
           getBasePath: () => ''

@@ -1,5 +1,5 @@
-const joinFields = require('../join_fields');
-const expect = require('expect.js');
+import joinFields from '../join_fields';
+import expect from 'expect.js';
 
 describe('Settings', function () {
   describe('Indices', function () {

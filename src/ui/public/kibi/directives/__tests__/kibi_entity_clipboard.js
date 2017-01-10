@@ -1,9 +1,10 @@
 import sinon from 'auto-release-sinon';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import onPage from 'ui/kibi/utils/on_page';
-
-require('../kibi_entity_clipboard');
+import MockState from 'fixtures/mock_state';
+import _ from 'lodash';
+import '../kibi_entity_clipboard';
 
 describe('Kibi Components', function () {
   describe('Entity Clipboard', function () {
@@ -13,8 +14,6 @@ describe('Kibi Components', function () {
     let kibiState;
     let $httpBackend;
 
-    const MockState = require('fixtures/mock_state');
-    const _ = require('lodash');
 
     function init(entityDisabled, selectedEntity, currentDashboardId) {
       ngMock.module(

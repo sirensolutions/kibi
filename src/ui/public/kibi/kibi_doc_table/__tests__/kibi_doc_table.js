@@ -1,12 +1,12 @@
-const angular = require('angular');
-const expect = require('expect.js');
-const $ = require('jquery');
-const _ = require('lodash');
-const sinon = require('auto-release-sinon');
-const searchResponse = require('fixtures/search_response');
-const ngMock = require('ngMock');
-
-require('ui/kibi/kibi_doc_table');
+import angular from 'angular';
+import expect from 'expect.js';
+import $ from 'jquery';
+import _ from 'lodash';
+import sinon from 'auto-release-sinon';
+import searchResponse from 'fixtures/search_response';
+import ngMock from 'ng_mock';
+import 'ui/kibi/kibi_doc_table';
+import StubbedSearchSourceProvider from 'fixtures/stubbed_search_source';
 
 describe('Kibi doc table', function () {
   let $elem;
@@ -51,7 +51,7 @@ describe('Kibi doc table', function () {
     $elem = angular.element(`<kibi-doc-table query-column="queryColumn" search-source="searchSource" columns="columns"
                             sorting="sorting"></kibi-doc-table>`);
     ngMock.inject(function (Private) {
-      searchSource = Private(require('fixtures/stubbed_search_source'));
+      searchSource = Private(StubbedSearchSourceProvider);
     });
     init($elem, {
       searchSource: searchSource,

@@ -1,8 +1,10 @@
-const expect = require('expect.js');
-const ngMock = require('ngMock');
+import noDigestPromises from 'test_utils/no_digest_promises';
+import DeleteHelperProvider from 'ui/kibi/helpers/delete_helper';
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import mockSavedObjects from 'fixtures/kibi/mock_saved_objects';
+import sinon from 'auto-release-sinon';
 
-const mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
-const sinon = require('auto-release-sinon');
 const fakeSavedVisualisations = [
   {
     id: 'myvis1',
@@ -75,11 +77,11 @@ describe('Kibi Components', function () {
       });
 
       ngMock.inject(function (Private) {
-        deleteHelper = Private(require('ui/kibi/helpers/delete_helper'));
+        deleteHelper = Private(DeleteHelperProvider);
       });
     });
 
-    require('testUtils/noDigestPromises').activateForSuite();
+    noDigestPromises.activateForSuite();
 
     describe('getVisualisations', function () {
       it('should return the visualisation that use query 456', function (done) {

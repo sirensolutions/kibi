@@ -29,8 +29,15 @@ describe('State Management', function () {
   const defaultStartTime = '2006-09-01T12:00:00.000Z';
   const defaultEndTime = '2010-09-05T12:00:00.000Z';
 
-  const init = function ({ kibiEnterpriseEnabled = false, pinned, savedDashboards = [], savedSearches = [], indexPatterns = [],
-                         currentPath = '/dashboard', currentDashboardId = 'dashboard1' }) {
+  const init = function ({
+      kibiEnterpriseEnabled = false,
+      pinned,
+      savedDashboards = [],
+      savedSearches = [],
+      indexPatterns = [],
+      currentPath = '/dashboard',
+      currentDashboardId = 'dashboard1'
+    } = {}) {
     ngMock.module('kibana', 'kibana/courier', 'kibana/global_state', ($provide) => {
       $provide.service('$route', () => {
         const myRoute = {
@@ -105,7 +112,7 @@ describe('State Management', function () {
     require('testUtils/noDigestPromises').activateForSuite();
 
     describe('handle state with outdated filters', function () {
-      beforeEach(() => init({}));
+      beforeEach(() => init());
 
       it('should disable join_sequence filter if the version is not set', function () {
         const filters = [
@@ -137,7 +144,7 @@ describe('State Management', function () {
 
     describe('selected entity', function () {
       describe('isEntitySelected', function () {
-        beforeEach(() => init({}));
+        beforeEach(() => init());
 
         it('should return true if the given entity is the one selected', function () {
           const index = 'a';
@@ -202,7 +209,7 @@ describe('State Management', function () {
         it('should not return the entity when on discover tab', function () {
           const entityURI = 'a/b/c/d';
 
-          init({});
+          init();
 
           kibiState.setEntityURI(entityURI);
           expect(kibiState.getEntityURI()).to.be(entityURI);
@@ -217,7 +224,7 @@ describe('State Management', function () {
           const entityURI1 = 'a/b/c/d';
           const entityURI2 = 'e/f/g/h';
 
-          init({});
+          init();
 
           kibiState.setEntityURI(entityURI1);
           expect(kibiState.getEntityURI()).to.be(entityURI1);
@@ -242,7 +249,7 @@ describe('State Management', function () {
     });
 
     describe('Relations', function () {
-      beforeEach(() => init({}));
+      beforeEach(() => init());
 
       it('getEnabledRelations should return an empty array if no j', function () {
         expect(kibiState.getEnabledRelations()).to.eql([]);
@@ -1893,7 +1900,7 @@ describe('State Management', function () {
       });
 
       describe('Dashboard IDs in connected component', function () {
-        beforeEach(() => init({}));
+        beforeEach(() => init());
 
         it('should return a, b but not c and d', function () {
           const relations = [

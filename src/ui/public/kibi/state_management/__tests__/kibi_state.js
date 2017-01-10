@@ -1,15 +1,15 @@
-const chrome = require('ui/chrome');
-const moment = require('moment');
-const sinon = require('auto-release-sinon');
-const _ = require('lodash');
-const MockState = require('fixtures/mock_state');
-const mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
-const Promise = require('bluebird');
-const expect = require('expect.js');
-const ngMock = require('ngMock');
-const dateMath = require('ui/utils/dateMath');
+import onPage from 'ui/kibi/utils/on_page';
+import moment from 'moment';
+import sinon from 'auto-release-sinon';
+import _ from 'lodash';
+import Promise from 'bluebird';
+import expect from 'expect.js';
+import ngMock from 'ngMock';
+import MockState from 'fixtures/mock_state';
+import mockSavedObjects from 'fixtures/kibi/mock_saved_objects';
+import dateMath from 'ui/kibi/utils/date_math_precision';
 
-require('ui/kibi/state_management/kibi_state');
+import 'ui/kibi/state_management/kibi_state';
 
 describe('State Management', function () {
   let $location;
@@ -22,9 +22,9 @@ describe('State Management', function () {
 
   let disableFiltersIfOutdatedSpy;
 
-  let onDashboardTabSpy;
-  let onSettingsTabSpy;
-  let onVisualizeTabSpy;
+  let onDashboardPageSpy;
+  let onManagementPageSpy;
+  let onVisualizePageSpy;
 
   const defaultStartTime = '2006-09-01T12:00:00.000Z';
   const defaultEndTime = '2010-09-05T12:00:00.000Z';
@@ -78,9 +78,9 @@ describe('State Management', function () {
     });
 
     ngMock.inject(function (_indexPatterns_, _timefilter_, _config_, _$location_, _kibiState_) {
-      onDashboardTabSpy = sinon.stub(chrome, 'onDashboardTab').returns(currentPath.split('/')[1] === 'dashboard');
-      onVisualizeTabSpy = sinon.stub(chrome, 'onVisualizeTab').returns(currentPath.split('/')[1] === 'visualize');
-      onSettingsTabSpy = sinon.stub(chrome, 'onSettingsTab').returns(currentPath.split('/')[1] === 'settings');
+      onDashboardPageSpy = sinon.stub(onPage, 'onDashboardPage').returns(currentPath.split('/')[1] === 'dashboard');
+      onVisualizePageSpy = sinon.stub(onPage, 'onVisualizePage').returns(currentPath.split('/')[1] === 'visualize');
+      onManagementPageSpy = sinon.stub(onPage, 'onManagementPage').returns(currentPath.split('/')[1] === 'settings');
 
       indexPatternsService = _indexPatterns_;
       timefilter = _timefilter_;
@@ -207,9 +207,9 @@ describe('State Management', function () {
           kibiState.setEntityURI(entityURI);
           expect(kibiState.getEntityURI()).to.be(entityURI);
 
-          onVisualizeTabSpy.returns(false);
-          onSettingsTabSpy.returns(false);
-          onDashboardTabSpy.returns(false);
+          onVisualizePageSpy.returns(false);
+          onManagementPageSpy.returns(false);
+          onDashboardPageSpy.returns(false);
           expect(kibiState.getEntityURI).to.throwException(/Cannot get entity URI/);
         });
 
@@ -222,20 +222,20 @@ describe('State Management', function () {
           kibiState.setEntityURI(entityURI1);
           expect(kibiState.getEntityURI()).to.be(entityURI1);
 
-          onVisualizeTabSpy.returns(true);
-          onSettingsTabSpy.returns(false);
-          onDashboardTabSpy.returns(false);
+          onVisualizePageSpy.returns(true);
+          onManagementPageSpy.returns(false);
+          onDashboardPageSpy.returns(false);
           kibiState.setEntityURI(entityURI2);
           expect(kibiState.getEntityURI()).to.be(entityURI2);
 
-          onVisualizeTabSpy.returns(false);
-          onSettingsTabSpy.returns(true);
-          onDashboardTabSpy.returns(false);
+          onVisualizePageSpy.returns(false);
+          onManagementPageSpy.returns(true);
+          onDashboardPageSpy.returns(false);
           expect(kibiState.getEntityURI()).to.be(entityURI2);
 
-          onVisualizeTabSpy.returns(false);
-          onSettingsTabSpy.returns(false);
-          onDashboardTabSpy.returns(true);
+          onVisualizePageSpy.returns(false);
+          onManagementPageSpy.returns(false);
+          onDashboardPageSpy.returns(true);
           expect(kibiState.getEntityURI()).to.be(entityURI1);
         });
       });

@@ -16,7 +16,7 @@ import 'ui/kibi/directives/kibi_entity_clipboard';
 import 'ui/kibi/styles/explanation';
 import JoinExplainProvider from 'ui/filter_bar/join_explanation';
 import MarkFilterBySelectedEntitiesProvider from 'ui/kibi/components/commons/_mark_filters_by_selected_entities';
-import chrome from 'ui/chrome';
+import onPage from 'ui/kibi/utils/on_page';
 
 module.directive('filterBar', function (config, $rootScope, kibiState, createNotifier, Private, Promise, getAppState) {
   const mapAndFlattenFilters = Private(FilterBarLibMapAndFlattenFiltersProvider);
@@ -237,7 +237,7 @@ module.directive('filterBar', function (config, $rootScope, kibiState, createNot
       addJoinSetFilterOnRelationalPanel(config.get('kibi:relationalPanel'));
 
       // kibi: needed to show filterbar when kibiEntityClipboard contains an entity
-      $scope.showKibiEntityClipboard = chrome.onDashboardTab() && Boolean(kibiState.getEntityURI());
+      $scope.showKibiEntityClipboard = onPage.onDashboardPage() && Boolean(kibiState.getEntityURI());
 
       // kibi: listen to changes to the kibiState
       $scope.$listen(kibiState, 'save_with_changes', (diff) => {

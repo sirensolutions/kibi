@@ -1,3 +1,5 @@
+import onPage from 'ui/kibi/utils/on_page';
+
 define(function (require) {
   const _ = require('lodash');
   const qs = require('ui/utils/query_string');
@@ -202,13 +204,13 @@ define(function (require) {
     };
 
     KibiState.prototype.setEntityURI = function (entityURI) {
-      if (chrome.onDashboardTab()) {
+      if (onPage.onDashboardPage()) {
         if (!entityURI) {
           delete this[this._properties.selected_entity];
         } else {
           this[this._properties.selected_entity] = entityURI;
         }
-      } else if (chrome.onVisualizeTab() || chrome.onSettingsTab()) {
+      } else if (onPage.onVisualizePage() || onPage.onManagementPage()) {
         if (!entityURI) {
           delete this[this._properties.test_selected_entity];
         } else {
@@ -220,9 +222,9 @@ define(function (require) {
     };
 
     KibiState.prototype.getEntityURI = function () {
-      if (chrome.onDashboardTab()) {
+      if (onPage.onDashboardPage()) {
         return this[this._properties.selected_entity];
-      } else if (chrome.onVisualizeTab() || chrome.onSettingsTab()) {
+      } else if (onPage.onVisualizePage() || onPage.onManagementPage()) {
         return this[this._properties.test_selected_entity];
       }
       throw new Error('Cannot get entity URI because you are not on dashboard/visualize/settings');

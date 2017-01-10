@@ -1,3 +1,5 @@
+import onPage from 'ui/kibi/utils/on_page';
+
 define(function (require) {
   const _ = require('lodash');
 
@@ -17,7 +19,7 @@ define(function (require) {
       link: function ($scope, $el) {
 
         const updateSelectedEntity = function () {
-          if (!chrome.onDashboardTab()) {
+          if (!onPage.onDashboardPage()) {
             return;
           }
 

@@ -1,10 +1,11 @@
-const chrome = require('ui/chrome');
-const expect = require('expect.js');
-const sinon = require('auto-release-sinon');
-const ngMock = require('ngMock');
-const jQuery = require('jquery');
-const Promise = require('bluebird');
-const noDigestPromises = require('testUtils/noDigestPromises');
+import onPage from 'ui/kibi/utils/on_page';
+import expect from 'expect.js';
+import sinon from 'auto-release-sinon';
+import ngMock from 'ngMock';
+import jQuery from 'jquery';
+import Promise from 'bluebird';
+import noDigestPromises from 'test_utils/no_digest_promises';
+
 let kibiState;
 let $scope;
 
@@ -64,7 +65,7 @@ describe('Kibi Controllers', function () {
     });
 
     ngMock.inject(function ($rootScope, $controller, _kibiState_) {
-      sinon.stub(chrome, 'onSettingsTab').returns(true);
+      sinon.stub(onPage, 'onManagementPage').returns(true);
 
       kibiState = _kibiState_;
       sinon.stub(kibiState, 'getEntityURI').returns('entity1');

@@ -1,6 +1,7 @@
+import onPage from 'ui/kibi/utils/on_page';
+
 define(function (require) {
   return function MarkFiltersBySelectedEntitiesFactory(Promise, Private, kibiState) {
-    const chrome = require('ui/chrome');
     const _ = require('lodash');
     const _shouldEntityURIBeEnabled = Private(require('ui/kibi/components/commons/_should_entity_uri_be_enabled'));
 
@@ -17,7 +18,7 @@ define(function (require) {
           filters[index].meta.dependsOnSelectedEntities = res;
           filters[index].meta.dependsOnSelectedEntitiesDisabled = res && kibiState.isSelectedEntityDisabled();
           filters[index].meta.markDependOnSelectedEntities = false;
-          if (chrome.onVisualizeTab() || chrome.onDashboardTab()) {
+          if (onPage.onVisualizePage() || onPage.onDashboardPage()) {
             filters[index].meta.markDependOnSelectedEntities = Boolean(kibiState.getEntityURI());
           }
         });

@@ -1,7 +1,7 @@
-const sinon = require('auto-release-sinon');
-const ngMock = require('ngMock');
-const expect = require('expect.js');
-const chrome = require('ui/chrome');
+import sinon from 'auto-release-sinon';
+import ngMock from 'ngMock';
+import expect from 'expect.js';
+import onPage from 'ui/kibi/utils/on_page';
 
 let markFiltersBySelectedEntities;
 let kibiState;
@@ -40,7 +40,7 @@ describe('Kibi Components', function () {
         ngMock.inject(function (Private, _kibiState_) {
           kibiState = _kibiState_;
 
-          sinon.stub(chrome, 'onDashboardTab').returns(true);
+          sinon.stub(onPage, 'onDashboardPage').returns(true);
 
           markFiltersBySelectedEntities = Private(require('ui/kibi/components/commons/_mark_filters_by_selected_entities'));
         });

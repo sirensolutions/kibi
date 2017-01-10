@@ -1,7 +1,7 @@
-const sinon = require('auto-release-sinon');
-const ngMock = require('ngMock');
-const expect = require('expect.js');
-const chrome = require('ui/chrome');
+import sinon from 'auto-release-sinon';
+import ngMock from 'ngMock';
+import expect from 'expect.js';
+import onPage from 'ui/kibi/utils/on_page';
 
 require('../kibi_entity_clipboard');
 
@@ -44,7 +44,7 @@ describe('Kibi Components', function () {
         );
 
       ngMock.inject(function (_kibiState_, _$rootScope_, $compile, $injector) {
-        sinon.stub(chrome, 'onDashboardTab').returns(true);
+        sinon.stub(onPage, 'onDashboardPage').returns(true);
 
         kibiState = _kibiState_;
         kibiState.setEntityURI(selectedEntity);

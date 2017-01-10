@@ -1,5 +1,8 @@
 import d3 from 'd3';
-import dateMath from '@elastic/datemath';
+
+// kibi: imports
+import { parseWithPrecision } from 'ui/kibi/utils/date_math_precision';
+
 export default function TimeMarkerFactory($rootScope) {
 
   class TimeMarker {
@@ -17,7 +20,7 @@ export default function TimeMarkerFactory($rootScope) {
       this.times = (times.length) ? times.map(function (d) {
         // kibi: add support for time precision
         return {
-          'time': dateMath.parseWithPrecision(d.time, false, $rootScope.kibiTimePrecision),
+          'time': parseWithPrecision(d.time, false, $rootScope.kibiTimePrecision),
           'class': d.class || 'time-marker',
           'color': d.color || '#c80000',
           'opacity': d.opacity || 0.3,

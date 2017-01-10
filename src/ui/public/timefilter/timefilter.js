@@ -1,7 +1,6 @@
 import _ from 'lodash';
 import angular from 'angular';
 import moment from 'moment';
-import dateMath from '@elastic/datemath';
 import 'ui/state_management/global_state';
 import 'ui/config';
 import EventsProvider from 'ui/events';
@@ -10,6 +9,9 @@ import TimefilterLibDiffTimeProvider from 'ui/timefilter/lib/diff_time';
 import TimefilterLibDiffIntervalProvider from 'ui/timefilter/lib/diff_interval';
 import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
+
+// kibi: imports
+import { parseWithPrecision } from 'ui/kibi/utils/date_math_precision';
 
 uiRoutes
 .addSetupWork(function (timefilter) {
@@ -95,8 +97,8 @@ uiModules
 
   Timefilter.prototype.getBounds = function (timefield) {
     return {
-      min: dateMath.parseWithPrecision(this.time.from, false, $rootScope.kibiTimePrecision),
-      max: dateMath.parseWithPrecision(this.time.to, true, $rootScope.kibiTimePrecision)
+      min: parseWithPrecision(this.time.from, false, $rootScope.kibiTimePrecision),
+      max: parseWithPrecision(this.time.to, true, $rootScope.kibiTimePrecision)
     };
   };
 

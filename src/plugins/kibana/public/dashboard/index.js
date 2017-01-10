@@ -372,10 +372,10 @@ define(function (require) {
           addSearch: $scope.addSearch
         };
 
-        $rootScope.$on('$locationChangeSuccess', () => $rootScope.actualLocation = $location.url());
+        $rootScope.$on('$locationChangeSuccess', () => $rootScope.oldLocation = $location.url());
 
         $rootScope.$watch(() => { return $location.url(); }, function (newLocation, oldLocation) {
-          if ($rootScope.actualLocation === newLocation) {
+          if ($rootScope.oldLocation === newLocation) {
             init();
           }
         });

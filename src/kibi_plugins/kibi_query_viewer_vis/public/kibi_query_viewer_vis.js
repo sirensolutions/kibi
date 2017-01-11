@@ -32,3 +32,6 @@ function KibiQueryViewerVisTypeProvider(Private) {
 }
 
 registry.register(KibiQueryViewerVisTypeProvider);
+
+// export the provider so that the visType can be required with Private()
+export default KibiQueryViewerVisTypeProvider;

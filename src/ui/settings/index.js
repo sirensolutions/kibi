@@ -147,7 +147,7 @@ function hydrateUserSettings(user) {
 
 function getClientSettings(config) {
   const index = config.get('kibana.index');
-  const id = config.get('pkg.kibi_version'); // kibi: take the kibi version instead of kibana's
+  const id = config.get('pkg.kibiVersion'); // kibi: take the kibi version instead of kibana's
   const type = 'config';
   return { index, type, id };
 }

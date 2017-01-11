@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import uniqFilters from 'ui/filter_bar/lib/uniqFilters';
+import uniqFilters from 'ui/filter_bar/lib/uniq_filters';
 
 export default function CountHelperFactory(createNotifier, kibiState) {
 

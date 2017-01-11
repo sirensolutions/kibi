@@ -1,11 +1,11 @@
-const kibiUtils = require('kibiutils');
-const _ = require('lodash');
-const fs = require('fs');
-const url = require('url');
-const yaml = require('js-yaml');
-const cryptoHelper = require('./crypto_helper');
-const datasourcesSchema = require('./datasources_schema');
-const logger = require('./logger');
+import kibiUtils from 'kibiutils';
+import _ from 'lodash';
+import fs from 'fs';
+import url from 'url';
+import yaml from 'js-yaml';
+import cryptoHelper from './crypto_helper';
+import datasourcesSchema from './datasources_schema';
+import logger from './logger';
 
 function IndexHelper(server) {
   this.server = server;
@@ -13,7 +13,6 @@ function IndexHelper(server) {
   this.logger = logger(server, 'kibi_core/index_helper');
   this.client = server.plugins.elasticsearch.client;
 }
-
 
 IndexHelper.prototype._getDefinitionFromSchema = function (schema, name) {
   for (let i = 0; i < schema.length; i++) {

@@ -1,7 +1,7 @@
-const AbstractQuery = require('../../queries/abstract_query');
-const Promise = require('bluebird');
-const expect = require('expect.js');
-const sinon = require('sinon');
+import AbstractQuery from '../../queries/abstract_query';
+import Promise from 'bluebird';
+import expect from 'expect.js';
+import sinon from 'sinon';
 
 /**
  * Stores the number of calls to mocked elasticsearch client functions

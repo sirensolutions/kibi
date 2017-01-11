@@ -1,7 +1,7 @@
-const Promise = require('bluebird');
-const expect = require('expect.js');
-const sinon = require('sinon');
-const JdbcQuery = require('../../queries/jdbc_query');
+import Promise from 'bluebird';
+import expect from 'expect.js';
+import sinon from 'sinon';
+import JdbcQuery from '../../queries/jdbc_query';
 
 const fakeServer = {
   log: function (tags, data) {},

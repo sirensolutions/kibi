@@ -1,8 +1,8 @@
-const expect = require('expect.js');
-const sinon = require('sinon');
-const forge = require('node-forge');
-const mockery = require('mockery');
-let cryptoHelper;
+import expect from 'expect.js';
+import sinon from 'sinon';
+import forge from 'node-forge';
+import mockery from 'mockery';
+import cryptoHelper from '../crypto_helper';
 
 describe('Crypto Helper', function () {
   const defaultKey = 'iSxvZRYisyUW33FreTBSyJJ34KpEquWznUPDvn+ka14=';
@@ -36,7 +36,6 @@ describe('Crypto Helper', function () {
         ]
       });
 
-      cryptoHelper = require('../crypto_helper');
       done();
     });
 
@@ -223,7 +222,6 @@ describe('Crypto Helper', function () {
 
       describe('getting a random IV', function () {
         it('should encrypt datasource parameters correctly using the default key', function () {
-
           const password = 'BONTEMPIàÀ的123';
 
           const query = {
@@ -252,8 +250,6 @@ describe('Crypto Helper', function () {
 
     describe('.encryptDatasourceParams', function () {
       it ('should throw an error if datasource type has no associated schema.', function () {
-        const cryptoHelper = require('../crypto_helper');
-
         const query = {
           datasourceType: 'type1',
           datasourceParams: JSON.stringify({
@@ -266,9 +262,5 @@ describe('Crypto Helper', function () {
       });
     });
   });
-
-
-
-
 });
 

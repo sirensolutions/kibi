@@ -1,11 +1,13 @@
-const _ = require('lodash');
-const crypto = require('crypto');
-const Promise = require('bluebird');
-const url = require('url');
-const http = require('http');
-const handlebars = require('handlebars');
-const jade = require('jade');
-const kibiUtils = require('kibiutils');
+import logger from '../logger';
+import _ from 'lodash';
+import crypto from 'crypto';
+import Promise from 'bluebird';
+import url from 'url';
+import http from 'http';
+import handlebars from 'handlebars';
+import jade from 'jade';
+import kibiUtils from 'kibiutils';
+
 const debug = false;
 
 handlebars.registerHelper('json', function (context) {
@@ -23,7 +25,7 @@ handlebars.registerHelper('getVariableValue', function (binding, name, type, opt
 function Query(server, snippetDefinition, cache) {
   this.server = server;
   this.serverConfig = server.config();
-  this.log = require('../logger')(server, 'abstract_query');
+  this.log = logger(server, 'abstract_query');
   this.client = server.plugins.elasticsearch.client;
 
   this.id = snippetDefinition.id;

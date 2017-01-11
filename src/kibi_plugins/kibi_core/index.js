@@ -1,15 +1,19 @@
-const _ = require('lodash');
-const http = require('http');
-const path = require('path');
-const Boom = require('boom');
-const errors = require('request-promise/errors');
-
-const util = require('../elasticsearch/lib/util');
-
-const dbfilter = require('../elasticsearch/lib/dbfilter');
-const inject = require('../elasticsearch/lib/inject');
+import _ from 'lodash';
+import http from 'http';
+import path from 'path';
+import Boom from 'boom';
+import errors from 'request-promise/errors';
 
 import cryptoHelper from './lib/crypto_helper';
+import datasourcesSchema from './lib/datasources_schema';
+import QueryEngine from './lib/query_engine';
+import IndexHelper from './lib/index_helper';
+
+import migration1 from './lib/migrations/migration_1';
+import migration2 from './lib/migrations/migration_2';
+import migration3 from './lib/migrations/migration_3';
+import migration4 from './lib/migrations/migration_4';
+import migration5 from './lib/migrations/migration_5';
 
 /**
  * The Kibi core plugin.
@@ -21,18 +25,15 @@ import cryptoHelper from './lib/crypto_helper';
  */
 module.exports = function (kibana) {
 
-  const datasourcesSchema = require('./lib/datasources_schema');
-  const QueryEngine = require('./lib/query_engine');
-  const IndexHelper = require('./lib/index_helper');
   let queryEngine;
   let indexHelper;
 
   const migrations = [
-    require('./lib/migrations/migration_1'),
-    require('./lib/migrations/migration_2'),
-    require('./lib/migrations/migration_3'),
-    require('./lib/migrations/migration_4'),
-    require('./lib/migrations/migration_5')
+    migration1,
+    migration2,
+    migration3,
+    migration4,
+    migration5
   ];
 
   const _validateQueryDefs = function (queryDefs) {
@@ -151,9 +152,6 @@ module.exports = function (kibana) {
       const config = server.config();
       const datasourceCacheSize   = config.get('kibi_core.datasource_cache_size');
 
-      const filterJoinSet = require('../elasticsearch/lib/filter_join')(server).set;
-      const filterJoinSequence = require('../elasticsearch/lib/filter_join')(server).sequence;
-
       this.status.yellow('Initialising the query engine');
       queryEngine = new QueryEngine(server);
       queryEngine._init(datasourceCacheSize).then((data) => {
@@ -246,19 +244,19 @@ module.exports = function (kibana) {
         path:'/translateToES',
         handler: function (req, reply) {
           const serverConfig = server.config();
-          util.getQueriesAsPromise(req.payload.query)
+          server.plugins.elasticsearch.getQueriesAsPromise(req.payload.query)
           .map((query) => {
             // Remove the custom queries from the body
-            inject.save(query);
+            server.plugins.elasticsearch.inject.save(query);
             return query;
           }).map((query) => {
             let credentials = serverConfig.has('shield.cookieName') ? req.state[serverConfig.get('shield.cookieName')] : null;
             if (req.auth && req.auth.credentials && req.auth.credentials.proxyCredentials) {
               credentials = req.auth.credentials.proxyCredentials;
             }
-            return dbfilter(server.plugins.kibi_core.getQueryEngine(), query, credentials);
-          }).map((query) => filterJoinSet(query))
-          .map((query) => filterJoinSequence(query))
+            return server.plugins.elasticsearch.dbfilter(server.plugins.kibi_core.getQueryEngine(), query, credentials);
+          }).map((query) => server.plugins.elasticsearch.filterJoinSet(query))
+          .map((query) => server.plugins.elasticsearch.filterJoinSequence(query))
           .then((data) => {
             reply({ translatedQuery: data[0] });
           }).catch((err) => {
@@ -298,7 +296,7 @@ module.exports = function (kibana) {
         path:'/static/{param*}',
         handler: {
           directory: {
-            path: path.normalize(__dirname + '../../../../installedPlugins/')
+            path: path.normalize(__dirname + '../../../plugins/')
           }
         }
       });

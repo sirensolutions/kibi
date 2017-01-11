@@ -1,5 +1,5 @@
-const _       = require('lodash');
-const AbstractQuery = require('./abstract_query');
+import _ from 'lodash';
+import AbstractQuery from './abstract_query';
 
 function ErrorQuery(server, message) {
   this.message = message;

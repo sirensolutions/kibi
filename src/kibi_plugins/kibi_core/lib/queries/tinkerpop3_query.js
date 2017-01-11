@@ -1,11 +1,11 @@
-const _ = require('lodash');
-const fs = require('fs');
-const Promise = require('bluebird');
-const url = require('url');
-const rp = require('request-promise');
-const logger = require('../logger');
-const AbstractQuery = require('./abstract_query');
-const QueryHelper = require('../query_helper');
+import _ from 'lodash';
+import fs from 'fs';
+import Promise from 'bluebird';
+import url from 'url';
+import rp from 'request-promise';
+import logger from '../logger';
+import AbstractQuery from './abstract_query';
+import QueryHelper from '../query_helper';
 
 function TinkerPop3Query(server, queryDefinition, cache) {
   AbstractQuery.call(this, server, queryDefinition, cache);

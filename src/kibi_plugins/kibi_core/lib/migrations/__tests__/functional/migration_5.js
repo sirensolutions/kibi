@@ -2,7 +2,7 @@ import elasticsearch from 'elasticsearch';
 import expect from 'expect.js';
 import _ from 'lodash';
 import sinon from 'sinon';
-import packageJson from 'utils_kibana/package.json';
+import packageJson from 'utils/package_json';
 import wrapAsync from 'test_utils/wrap_async';
 import indexSnapshot from 'test_utils/index_snapshot';
 

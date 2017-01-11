@@ -1,9 +1,9 @@
-const expect = require('expect.js');
-const _ = require('lodash');
-const Promise = require('bluebird');
-const QueryEngine = require('../query_engine');
-const sinon = require('sinon');
-const EventEmitter = require('events').EventEmitter;
+import expect from 'expect.js';
+import _ from 'lodash';
+import Promise from 'bluebird';
+import QueryEngine from '../query_engine';
+import sinon from 'sinon';
+import { EventEmitter } from 'events';
 
 let queryEngine;
 let stub;

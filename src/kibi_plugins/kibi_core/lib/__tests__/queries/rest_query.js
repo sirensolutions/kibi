@@ -1,8 +1,8 @@
-const mockery = require('mockery');
-const Promise = require('bluebird');
-const expect = require('expect.js');
-const sinon = require('sinon');
-let restQuery;
+import mockery from 'mockery';
+import Promise from 'bluebird';
+import expect from 'expect.js';
+import sinon from 'sinon';
+import RestQuery from '../../queries/rest_query';
 
 const fakeServer = {
   log: function (tags, data) {},
@@ -72,7 +72,6 @@ describe('RestQuery', function () {
   describe('checkIfItIsRelevant - should be active', function () {
 
     it('empty uri, empty activation_rules', function (done) {
-      const RestQuery = require('../../queries/rest_query');
       const restQuery = new RestQuery(fakeServer, {
         activation_rules: []
       });
@@ -84,7 +83,6 @@ describe('RestQuery', function () {
     });
 
     it('NOT empty uri, empty activation_rules', function (done) {
-      const RestQuery = require('../../queries/rest_query');
       const restQuery = new RestQuery(fakeServer, {
         activation_rules: []
       });
@@ -96,7 +94,6 @@ describe('RestQuery', function () {
     });
 
     it('NOT empty uri, activation_rules does not exists, ignored old activationQuery param', function (done) {
-      const RestQuery = require('../../queries/rest_query');
       const restQuery = new RestQuery(fakeServer, {
         activationQuery: '^/company'
       });
@@ -111,7 +108,6 @@ describe('RestQuery', function () {
   describe('checkIfItIsRelevant - should fail', function () {
 
     it('NOT empty uri, NOT empty activation_rules should reject as it is not able to fetch the document', function (done) {
-      const RestQuery = require('../../queries/rest_query');
       const restQuery = new RestQuery(fakeServer, {
         activation_rules: [{
           s: '@doc[_source][does_not_exist]@',
@@ -134,7 +130,6 @@ describe('RestQuery', function () {
         set: function (key, value, time) {}
       };
 
-      const RestQuery = require('../../queries/rest_query');
       const restQuery = new RestQuery(fakeServer, {
         activationQuery: '',
         rest_method: 'GET',
@@ -167,7 +162,6 @@ describe('RestQuery', function () {
   describe('fetchResults', function () {
 
     it('simple get request', function (done) {
-      const RestQuery = require('../../queries/rest_query');
       const restQuery = new RestQuery(fakeServer, {
         activationQuery: '',
         rest_method: 'GET',
@@ -192,7 +186,6 @@ describe('RestQuery', function () {
     });
 
     it('simple post request', function (done) {
-      const RestQuery = require('../../queries/rest_query');
       const restQuery = new RestQuery(fakeServer, {
         activationQuery: '',
         rest_method: 'POST',
@@ -217,7 +210,6 @@ describe('RestQuery', function () {
     });
 
     it('method different than GET or POST should fail', function (done) {
-      const RestQuery = require('../../queries/rest_query');
       const restQuery = new RestQuery(fakeServer, {
         activationQuery: '',
         rest_method: 'PUT',
@@ -242,7 +234,6 @@ describe('RestQuery', function () {
     });
 
     it('request with username and password', function (done) {
-      const RestQuery = require('../../queries/rest_query');
       const restQuery = new RestQuery(fakeServer , {
         activationQuery: '',
         rest_method: 'GET',

@@ -1,13 +1,14 @@
-const _       = require('lodash');
-const url     = require('url');
-const Jdbc    = require('jdbc');
-const AbstractQuery = require('./abstract_query');
-const JdbcHelper    = require('../jdbc_helper');
-const QueryHelper = require('../query_helper');
+import _ from 'lodash';
+import url from 'url';
+import Jdbc from 'jdbc';
+import AbstractQuery from './abstract_query';
+import JdbcHelper from '../jdbc_helper';
+import QueryHelper from '../query_helper';
+import logger from '../logger';
 
 function JdbcQuery(server, queryDefinition, cache) {
   AbstractQuery.call(this, server, queryDefinition, cache);
-  this.logger = require('../logger')(server, 'jdbc_query');
+  this.logger = logger(server, 'jdbc_query');
   this.initialized = false;
   this.jdbcHelper = new JdbcHelper(server);
   this.queryHelper = new QueryHelper(server);

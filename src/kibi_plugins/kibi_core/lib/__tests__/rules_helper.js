@@ -1,6 +1,7 @@
-const expect = require('expect.js');
-const Promise = require('bluebird');
-const RulesHelper = require('../rules_helper');
+import expect from 'expect.js';
+import Promise from 'bluebird';
+import RulesHelper from '../rules_helper';
+
 const selectedDocuments = ['index/type/1'];
 
 const fakeServer = {

@@ -1,16 +1,17 @@
-const _       = require('lodash');
-const Promise = require('bluebird');
-const url     = require('url');
-const mysql   = require('mysql');
-const AbstractQuery = require('./abstract_query');
-const QueryHelper = require('../query_helper');
+import logger from '../logger';
+import _ from 'lodash';
+import Promise from 'bluebird';
+import url from 'url';
+import mysql from 'mysql';
+import AbstractQuery from './abstract_query';
+import QueryHelper from '../query_helper';
 
 const debug = false;
 
 function MysqlQuery(server, queryDefinition, cache) {
   AbstractQuery.call(this, server, queryDefinition, cache);
   this.queryHelper = new QueryHelper(server);
-  this.logger = require('../logger')(server, 'mysql_query');
+  this.logger = logger(server, 'mysql_query');
 }
 
 MysqlQuery.prototype = _.create(AbstractQuery.prototype, {

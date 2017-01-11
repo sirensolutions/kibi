@@ -1,7 +1,7 @@
-const Promise = require('bluebird');
-const expect = require('expect.js');
-const sinon = require('sinon');
-const PostgresQuery = require('../../queries/postgres_query');
+import Promise from 'bluebird';
+import expect from 'expect.js';
+import sinon from 'sinon';
+import PostgresQuery from '../../queries/postgres_query';
 
 const fakeServer = {
   log: function (tags, data) {},

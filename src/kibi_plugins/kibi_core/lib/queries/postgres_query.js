@@ -1,14 +1,15 @@
-const _       = require('lodash');
-const Promise = require('bluebird');
-const url     = require('url');
-const pg      = require('pg');
-const AbstractQuery = require('./abstract_query');
-const QueryHelper = require('../query_helper');
+import _ from 'lodash';
+import Promise from 'bluebird';
+import url from 'url';
+import pg from 'pg';
+import AbstractQuery from './abstract_query';
+import QueryHelper from '../query_helper';
+import logger from '../logger';
 
 function PostgresQuery(server, queryDefinition, cache) {
   AbstractQuery.call(this, server, queryDefinition, cache);
   this.queryHelper = new QueryHelper(server);
-  this.logger = require('../logger')(server, 'postgres_query');
+  this.logger = logger(server, 'postgres_query');
 }
 
 PostgresQuery.prototype = _.create(AbstractQuery.prototype, {

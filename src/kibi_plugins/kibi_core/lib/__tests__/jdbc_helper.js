@@ -1,7 +1,10 @@
-const expect = require('expect.js');
-const mockery = require('mockery');
-const Promise = require('bluebird');
-const sinon = require('sinon');
+import expect from 'expect.js';
+import mockery from 'mockery';
+import Promise from 'bluebird';
+import sinon from 'sinon';
+import JdbcHelper from '../jdbc_helper';
+import cryptoHelper from '../crypto_helper';
+
 const fakeServer = {
   log: function (tags, data) {},
   config: function () {
@@ -84,7 +87,6 @@ const getOsMock = function (platformStr) {
 describe('Jdbc Helper', function () {
 
   it('should not set configure properties for null username and password', function () {
-    const JdbcHelper = require('../jdbc_helper');
     const jdbcHelper = new JdbcHelper(fakeServer);
     const conf = {
       libpath: '/'
@@ -96,7 +98,6 @@ describe('Jdbc Helper', function () {
   });
 
   it('should configure the username if specified', function () {
-    const JdbcHelper = require('../jdbc_helper');
     const jdbcHelper = new JdbcHelper(fakeServer);
     const conf = {
       libpath: '/',
@@ -109,10 +110,8 @@ describe('Jdbc Helper', function () {
   });
 
   it('should configure the password if specified', function () {
-    const cryptoHelper = require('../crypto_helper');
     sinon.stub(cryptoHelper, 'decrypt').returns('pass');
 
-    const JdbcHelper = require('../jdbc_helper');
     const jdbcHelper = new JdbcHelper(fakeServer);
     const conf = {
       libpath: '/',
@@ -127,10 +126,8 @@ describe('Jdbc Helper', function () {
   });
 
   it('should configure both credentials if specified', function () {
-    const cryptoHelper = require('../crypto_helper');
     sinon.stub(cryptoHelper, 'decrypt').returns('pass');
 
-    const JdbcHelper = require('../jdbc_helper');
     const jdbcHelper = new JdbcHelper(fakeServer);
     const conf = {
       libpath: '/',
@@ -168,7 +165,6 @@ describe('Jdbc Helper', function () {
     describe('getAbsolutePathToSindicetechFolder', function () {
 
       it('development', function () {
-        const JdbcHelper = require('../jdbc_helper');
         const jdbcHelper = new JdbcHelper(fakeServer);
         sinon.stub(jdbcHelper, '_getDirName').returns(
           'C:\\Users\\kibi\\src\\plugins\\kibi_core\\lib'
@@ -178,7 +174,6 @@ describe('Jdbc Helper', function () {
       });
 
       it('production', function () {
-        const JdbcHelper = require('../jdbc_helper');
         const jdbcHelper = new JdbcHelper(fakeServer);
         sinon.stub(jdbcHelper, '_getDirName').returns(
           'C:\\Users\\kibi\\src\\plugins\\kibi_core\\lib'
@@ -193,7 +188,6 @@ describe('Jdbc Helper', function () {
     describe('prepareJdbcConfig', function () {
 
       it('absolute libpath', function () {
-        const JdbcHelper = require('../jdbc_helper');
         const jdbcHelper = new JdbcHelper(fakeServer);
         const conf = {
           libpath: 'C:\\Users\\libs\\pg.jar'
@@ -204,7 +198,6 @@ describe('Jdbc Helper', function () {
       });
 
       it('relative libpath', function () {
-        const JdbcHelper = require('../jdbc_helper');
         const jdbcHelper = new JdbcHelper(fakeServer);
         sinon.stub(jdbcHelper, 'getAbsolutePathToSindicetechFolder').returns(
           'C:\\Users\\libs'
@@ -219,7 +212,6 @@ describe('Jdbc Helper', function () {
       });
 
       it('libs', function () {
-        const JdbcHelper = require('../jdbc_helper');
         const jdbcHelper = new JdbcHelper(fakeServer);
         sinon.stub(jdbcHelper, 'getAbsolutePathToSindicetechFolder').returns(
           'C:\\Users\\libs\\'
@@ -236,7 +228,6 @@ describe('Jdbc Helper', function () {
       });
 
       it('libs no slashes at the end of libpath', function () {
-        const JdbcHelper = require('../jdbc_helper');
         const jdbcHelper = new JdbcHelper(fakeServer);
         sinon.stub(jdbcHelper, 'getAbsolutePathToSindicetechFolder').returns(
           'C:\\Users\\libs'
@@ -253,7 +244,6 @@ describe('Jdbc Helper', function () {
       });
 
       it('libs with spaces', function () {
-        const JdbcHelper = require('../jdbc_helper');
         const jdbcHelper = new JdbcHelper(fakeServer);
         sinon.stub(jdbcHelper, 'getAbsolutePathToSindicetechFolder').returns(
           'C:\\Users\\libs\\'
@@ -297,7 +287,6 @@ describe('Jdbc Helper', function () {
     describe('getAbsolutePathToSindicetechFolder', function () {
 
       it('development', function () {
-        const JdbcHelper = require('../jdbc_helper');
         const jdbcHelper = new JdbcHelper(fakeServer);
         sinon.stub(jdbcHelper, '_getDirName').returns(
           '/opt/kibi/src/plugins/kibi_core/lib'
@@ -307,7 +296,6 @@ describe('Jdbc Helper', function () {
       });
 
       it('production', function () {
-        const JdbcHelper = require('../jdbc_helper');
         const jdbcHelper = new JdbcHelper(fakeServer);
         sinon.stub(jdbcHelper, '_getDirName').returns(
           '/opt/kibi/src/plugins/kibi_core/lib'
@@ -320,7 +308,6 @@ describe('Jdbc Helper', function () {
     describe('prepareJdbcConfig', function () {
 
       it('absolute libpath', function () {
-        const JdbcHelper = require('../jdbc_helper');
         const jdbcHelper = new JdbcHelper(fakeServer);
         const conf = {
           libpath: '/opt/libs'
@@ -331,7 +318,6 @@ describe('Jdbc Helper', function () {
       });
 
       it('relative libpath', function () {
-        const JdbcHelper = require('../jdbc_helper');
         const jdbcHelper = new JdbcHelper(fakeServer);
         sinon.stub(jdbcHelper, 'getAbsolutePathToSindicetechFolder').returns(
           '/opt/libs/'
@@ -346,7 +332,6 @@ describe('Jdbc Helper', function () {
       });
 
       it('libs', function () {
-        const JdbcHelper = require('../jdbc_helper');
         const jdbcHelper = new JdbcHelper(fakeServer);
         sinon.stub(jdbcHelper, 'getAbsolutePathToSindicetechFolder').returns(
           '/opt/libs/'
@@ -362,7 +347,6 @@ describe('Jdbc Helper', function () {
       });
 
       it('libs no slash at the end of libpath', function () {
-        const JdbcHelper = require('../jdbc_helper');
         const jdbcHelper = new JdbcHelper(fakeServer);
         sinon.stub(jdbcHelper, 'getAbsolutePathToSindicetechFolder').returns(
           '/opt/libs'
@@ -378,7 +362,6 @@ describe('Jdbc Helper', function () {
       });
 
       it('libs with spaces', function () {
-        const JdbcHelper = require('../jdbc_helper');
         const jdbcHelper = new JdbcHelper(fakeServer);
         sinon.stub(jdbcHelper, 'getAbsolutePathToSindicetechFolder').returns(
           '/opt/libs/'
@@ -398,7 +381,6 @@ describe('Jdbc Helper', function () {
     describe('prepareJdbcPaths', function () {
 
       it('should collect all the libs for existing datasources', function (done) {
-        const JdbcHelper = require('../jdbc_helper');
         const jdbcHelper = new JdbcHelper(fakeServer);
 
         sinon.stub(jdbcHelper, 'getAbsolutePathToSindicetechFolder').returns(
@@ -416,7 +398,6 @@ describe('Jdbc Helper', function () {
 
 
       it('there should be no duplicates', function (done) {
-        const JdbcHelper = require('../jdbc_helper');
         const jdbcHelper = new JdbcHelper(fakeServer);
 
         sinon.stub(jdbcHelper, 'getAbsolutePathToSindicetechFolder').returns(

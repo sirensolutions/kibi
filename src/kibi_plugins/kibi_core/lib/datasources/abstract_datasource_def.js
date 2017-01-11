@@ -1,5 +1,5 @@
-const cryptoHelper = require('../crypto_helper');
-const datasourcesSchema = require('../datasources_schema');
+import cryptoHelper from '../crypto_helper';
+import datasourcesSchema from '../datasources_schema';
 
 function AbstractDatasourceDef(server, datasource) {
   if (typeof datasource.datasourceParams === 'string' || datasource.datasourceParams instanceof String) {

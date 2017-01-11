@@ -1,5 +1,7 @@
-const expect = require('expect.js');
-const Promise = require('bluebird');
+import expect from 'expect.js';
+import Promise from 'bluebird';
+import QueryHelper from '../query_helper';
+
 let clientSearchCounter;
 let createdClientSearchCounter;
 
@@ -59,7 +61,6 @@ const fakeServer = {
     }
   }
 };
-const QueryHelper = require('../query_helper');
 const queryHelper = new QueryHelper(fakeServer);
 
 const doc = {

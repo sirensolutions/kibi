@@ -1,13 +1,12 @@
-const kibiUtils = require('kibiutils');
-const SqliteDatasourceDef = require('./sqlite_datasource_def');
-const MysqlDatasourceDef = require('./mysql_datasource_def');
-const PostgresqlDatasourceDef = require('./postgresql_datasource_def');
-const SparqlHttpDatasourceDef = require('./sparql_http_datasource_def');
-const RestDatasourceDef = require('./rest_datasource_def');
-const SqlJdbcDatasourceDef = require('./jdbc_datasource_def');
-const SparqlJdbcDatasourceDef = require('./jdbc_datasource_def');
-const TinkerPop3DatasourceDef = require('./tinkerpop3_datasource_def');
-
+import kibiUtils from 'kibiutils';
+import SqliteDatasourceDef from './sqlite_datasource_def';
+import MysqlDatasourceDef from './mysql_datasource_def';
+import PostgresqlDatasourceDef from './postgresql_datasource_def';
+import SparqlHttpDatasourceDef from './sparql_http_datasource_def';
+import RestDatasourceDef from './rest_datasource_def';
+import SqlJdbcDatasourceDef from './jdbc_datasource_def';
+import SparqlJdbcDatasourceDef from './jdbc_datasource_def';
+import TinkerPop3DatasourceDef from './tinkerpop3_datasource_def';
 
 module.exports = function (server, datasource) {
 

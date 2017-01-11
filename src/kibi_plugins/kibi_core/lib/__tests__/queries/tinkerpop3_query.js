@@ -1,7 +1,8 @@
-const mockery = require('mockery');
-const Promise = require('bluebird');
-const expect = require('expect.js');
-const sinon = require('sinon');
+import mockery from 'mockery';
+import Promise from 'bluebird';
+import expect from 'expect.js';
+import sinon from 'sinon';
+import TinkerPop3Query from '../../queries/tinkerpop3_query';
 
 const fakeServer = {
   log: function (tags, data) {},
@@ -290,7 +291,6 @@ describe('TinkerPop3Query', function () {
   describe('fetchResults', function () {
 
     it('simple get request', function (done) {
-      const TinkerPop3Query = require('../../queries/tinkerpop3_query');
       const tinkerPop3Query = new TinkerPop3Query(fakeServer, {
         activationQuery: '',
         rest_method: 'GET',
@@ -319,7 +319,6 @@ describe('TinkerPop3Query', function () {
   describe('correct arguments are passed to generateCacheKey', function () {
 
     it('fetchResults', function (done) {
-      const TinkerPop3Query = require('../../queries/tinkerpop3_query');
       const tinkerPop3Query = new TinkerPop3Query(fakeServer, queryDefinition, cacheMock);
 
       const spy = sinon.spy(tinkerPop3Query, 'generateCacheKey');
@@ -335,7 +334,6 @@ describe('TinkerPop3Query', function () {
     });
 
     it('checkIfItIsRelevant', function (done) {
-      const TinkerPop3Query = require('../../queries/tinkerpop3_query');
       const tinkerPop3Query = new TinkerPop3Query(fakeServer, queryDefinition, cacheMock);
 
       const spy = sinon.spy(tinkerPop3Query, 'generateCacheKey');

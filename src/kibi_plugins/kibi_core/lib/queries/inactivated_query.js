@@ -1,4 +1,4 @@
-const Promise = require('bluebird');
+import Promise from 'bluebird';
 
 function InactivatedQuery(server, id) {
   this.id = id;

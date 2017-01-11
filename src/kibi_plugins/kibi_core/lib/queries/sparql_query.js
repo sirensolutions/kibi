@@ -1,15 +1,16 @@
-const _       = require('lodash');
-const Promise = require('bluebird');
-const rp      = require('request-promise');
-const url     = require('url');
-const http    = require('http');
-const AbstractQuery = require('./abstract_query');
-const QueryHelper = require('../query_helper');
+import logger from '../logger';
+import _ from 'lodash';
+import Promise from 'bluebird';
+import rp from 'request-promise';
+import url from 'url';
+import http from 'http';
+import AbstractQuery from './abstract_query';
+import QueryHelper from '../query_helper';
 
 function SparqlQuery(server, queryDefinition, cache) {
   AbstractQuery.call(this, server, queryDefinition, cache);
   this.queryHelper = new QueryHelper(server);
-  this.logger = require('../logger')(server, 'sparql_query');
+  this.logger = logger(server, 'sparql_query');
 }
 
 SparqlQuery.prototype = _.create(AbstractQuery.prototype, {

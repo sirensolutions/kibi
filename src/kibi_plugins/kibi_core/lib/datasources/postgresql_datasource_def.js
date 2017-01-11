@@ -1,6 +1,6 @@
-const util = require('util');
-const AbstractDatasourceDef = require('./abstract_datasource_def');
-const datasourcesSchema = require('../datasources_schema');
+import util from 'util';
+import AbstractDatasourceDef from './abstract_datasource_def';
+import datasourcesSchema from '../datasources_schema';
 
 function PostgresqlDatasourceDef(server, datasource) {
   AbstractDatasourceDef.call(this, server, datasource);

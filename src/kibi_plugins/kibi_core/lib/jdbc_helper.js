@@ -1,10 +1,10 @@
-const _ = require('lodash');
-const os = require('os');
-const path = require('path');
-const cryptoHelper = require('./crypto_helper');
-const IndexHelper = require('./index_helper');
-const logger = require('./logger');
-const kibiUtils = require('kibiutils');
+import _ from 'lodash';
+import os from 'os';
+import path from 'path';
+import cryptoHelper from './crypto_helper';
+import IndexHelper from './index_helper';
+import logger from './logger';
+import kibiUtils from 'kibiutils';
 
 const _endsWith = function (s, suffix) {
   return s.indexOf(suffix, s.length - suffix.length) !== -1;

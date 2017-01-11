@@ -1,17 +1,18 @@
-const _ = require('lodash');
-const Promise = require('bluebird');
-const url = require('url');
-const sqlite3 = require('sqlite3');
-const AbstractQuery = require('./abstract_query');
-const QueryHelper = require('../query_helper');
+import logger from '../logger';
+import _ from 'lodash';
+import Promise from 'bluebird';
+import url from 'url';
+import sqlite3 from 'sqlite3';
+import AbstractQuery from './abstract_query';
+import QueryHelper from '../query_helper';
+import path from 'path';
 
 const debug = false;
-
 
 function SQLiteQuery(server, queryDefinition, cache) {
   AbstractQuery.call(this, server, queryDefinition, cache);
   this.queryHelper = new QueryHelper(server);
-  this.logger = require('../logger')(server, 'sqlite_query');
+  this.logger = logger(server, 'sqlite_query');
 }
 
 
@@ -42,8 +43,6 @@ SQLiteQuery.prototype.openConnection = function () {
       fulfill(self._connection);
       return;
     }
-    const path = require('path');
-
     if (dbfile && path.resolve(dbfile) !== path.normalize(dbfile)) {
       // if dbfile is not an absolute path
       const rootDir = process.env.ROOT_DIR;

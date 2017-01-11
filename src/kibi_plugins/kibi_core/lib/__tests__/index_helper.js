@@ -1,9 +1,10 @@
 /*global __dirname */
-const expect = require('expect.js');
-const Promise = require('bluebird');
-const fs = require('fs');
-const sinon = require('sinon');
-const mockery = require('mockery');
+import expect from 'expect.js';
+import Promise from 'bluebird';
+import fs from 'fs';
+import sinon from 'sinon';
+import mockery from 'mockery';
+import IndexHelper from '../index_helper';
 
 const kibiIndex = '.kibi';
 const fakeServer = {
@@ -58,7 +59,6 @@ const fakeServer = {
 const fakeKibiYmlPath    = __dirname + '/../../../../fixtures/fake_kibi.yml';
 const fakeKibiYmlBakPath = __dirname + '/../../../../fixtures/fake_kibi.yml.bak';
 
-let IndexHelper;
 let indexHelper;
 
 describe('Index Helper', function () {
@@ -90,7 +90,6 @@ describe('Index Helper', function () {
         useCleanCache: true
       });
       mockery.registerMock('fs', fs);
-      IndexHelper = require('../index_helper');
       indexHelper = new IndexHelper(fakeServer);
     });
 
@@ -155,7 +154,6 @@ describe('Index Helper', function () {
 
   describe('rencryptAllValuesInKibiIndex should fail', function () {
 
-    IndexHelper = require('../index_helper');
     indexHelper = new IndexHelper(fakeServer);
 
     it('when no old key', function (done) {
@@ -196,7 +194,6 @@ describe('Index Helper', function () {
   });
 
   describe('rencryptAllValuesInKibiIndex should work', function () {
-    IndexHelper = require('../index_helper');
     indexHelper = new IndexHelper(fakeServer);
 
     after(function (done) {

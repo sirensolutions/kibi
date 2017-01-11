@@ -1,7 +1,7 @@
-const kibiUtils = require('kibiutils');
-const crypto = require('crypto');
-const forge = require('node-forge');
-const datasourcesSchema = require('./datasources_schema');
+import kibiUtils from 'kibiutils';
+import crypto from 'crypto';
+import forge from 'node-forge';
+import datasourcesSchema from './datasources_schema';
 
 function CryptoHelper() {
   this.supportedAlgorithms = [
@@ -105,9 +105,6 @@ CryptoHelper.prototype.encrypt = function (algorithm, key, plaintext) {
  * @returns {string} - the plaintext
  */
 CryptoHelper.prototype.decrypt = function (key, encrypted) {
-  let algorithm;
-  let keyBuffer;
-
   if (!encrypted) {
     return null;
   }
@@ -117,12 +114,12 @@ CryptoHelper.prototype.decrypt = function (key, encrypted) {
     throw new Error('Invalid encrypted message.');
   }
 
-  algorithm = parts[0];
+  const algorithm = parts[0];
   if (!this.supportsAlgorithm(algorithm)) {
     throw new Error('Unsupported algorithm.');
   }
 
-  keyBuffer = this.decodeBase64Key(key);
+  const keyBuffer = this.decodeBase64Key(key);
   encrypted = this._decodeBase64(parts[1]);
 
   const decipher = forge.cipher.createDecipher(algorithm, keyBuffer);
@@ -189,6 +186,3 @@ CryptoHelper.prototype.encryptDatasourceParams = function (config, query) {
 
 
 module.exports = new CryptoHelper();
-
-
-

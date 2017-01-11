@@ -1,6 +1,6 @@
-const util = require('util');
-const AbstractDatasourceDef = require('./abstract_datasource_def');
-const datasourcesSchema = require('../datasources_schema');
+import util from 'util';
+import AbstractDatasourceDef from './abstract_datasource_def';
+import datasourcesSchema from '../datasources_schema';
 
 function JdbcDatasourceDef(server, datasource) {
   AbstractDatasourceDef.call(this, server, datasource);
@@ -13,6 +13,5 @@ JdbcDatasourceDef.prototype.getConnectionString = function () {
   //TODO: / Kibi / what the string will be?
   return this.populateParameters('jdbc://${username}:${password}@${host}/${dbname}');
 };
-
 
 module.exports = JdbcDatasourceDef;

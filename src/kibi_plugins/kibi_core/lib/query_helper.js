@@ -1,7 +1,7 @@
-const url = require('url');
-const Promise = require('bluebird');
-const _ = require('lodash');
-const logger = require('./logger');
+import url from 'url';
+import Promise from 'bluebird';
+import _ from 'lodash';
+import logger from './logger';
 
 function QueryHelper(server) {
   this.server = server;
@@ -9,7 +9,6 @@ function QueryHelper(server) {
   this.log = logger(server, 'query_helper');
   this.client = server.plugins.elasticsearch.client;
 }
-
 
 QueryHelper.prototype.replaceVariablesForREST = function (headers, params, body, path, uri, variables, credentials) {
   // clone here !!! headers, params, body
@@ -157,7 +156,6 @@ QueryHelper.prototype._replaceVariablesInTheQuery = function (doc, query, dataso
 QueryHelper.prototype._escapeRegexSpecialCharacters = function (s) {
   return s.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, '\\$1');
 };
-
 
 QueryHelper.prototype._getValue = function (doc, group) {
   // parse a group and get the value from doc

@@ -1,15 +1,16 @@
-const _ = require('lodash');
-const Promise = require('bluebird');
-const url = require('url');
-const rp = require('request-promise');
-const jsonpath = require('jsonpath');
-const AbstractQuery = require('./abstract_query');
-const QueryHelper = require('../query_helper');
-const RulesHelper = require('../rules_helper');
+import _ from 'lodash';
+import Promise from 'bluebird';
+import url from 'url';
+import rp from 'request-promise';
+import jsonpath from 'jsonpath';
+import AbstractQuery from './abstract_query';
+import QueryHelper from '../query_helper';
+import RulesHelper from '../rules_helper';
+import logger from '../logger';
 
 function RestQuery(server, queryDefinition, cache) {
   AbstractQuery.call(this, server, queryDefinition, cache);
-  this.logger = require('../logger')(server, 'rest_query');
+  this.logger = logger(server, 'rest_query');
   this.queryHelper = new QueryHelper(server);
   this.rulesHelper = new RulesHelper(server);
 }
@@ -17,7 +18,6 @@ function RestQuery(server, queryDefinition, cache) {
 RestQuery.prototype = _.create(AbstractQuery.prototype, {
   'constructor': RestQuery
 });
-
 
 /*
  * Return a promise which when resolved should return true or false.
@@ -40,7 +40,6 @@ RestQuery.prototype.checkIfItIsRelevant = function (options) {
   // evaluate the rules
   return this.rulesHelper.evaluate(this.config.activation_rules, options.selectedDocuments, options.credentials);
 };
-
 
 RestQuery.prototype._logFailedRequestDetails = function (msg, originalError, resp) {
   this.logger.error(msg, originalError);
@@ -206,6 +205,5 @@ RestQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) {
 RestQuery.prototype._postprocessResults = function (data) {
   return data;
 };
-
 
 module.exports = RestQuery;

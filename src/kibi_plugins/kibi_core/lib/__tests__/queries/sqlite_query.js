@@ -1,6 +1,7 @@
-const Promise = require('bluebird');
-const expect = require('expect.js');
-const sinon = require('sinon');
+import Promise from 'bluebird';
+import expect from 'expect.js';
+import sinon from 'sinon';
+import SqliteQuery from '../../queries/sqlite_query';
 
 const fakeServer = {
   log: function (tags, data) {},
@@ -40,7 +41,6 @@ describe('SqliteQuery', function () {
         set: function (key, value, time) {}
       };
 
-      const SqliteQuery = require('../../queries/sqlite_query');
       const sqliteQuery = new SqliteQuery(fakeServer, {
         resultQuery: 'select * from x',
         activationQuery: '',

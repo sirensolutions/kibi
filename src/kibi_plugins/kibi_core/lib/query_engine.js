@@ -1,22 +1,25 @@
-const kibiUtils = require('kibiutils');
-const rp = require('request-promise');
-const Promise = require('bluebird');
-const _ = require('lodash');
-const fs = require('fs');
-const path = require('path');
-const lru = require('lru-cache');
-const url = require('url');
-const logger = require('./logger');
-const setDatasourceClazz = require('./datasources/set_datasource_clazz');
-const SparqlQuery = require('./queries/sparql_query');
-const MysqlQuery = require('./queries/mysql_query');
-const PostgresQuery = require('./queries/postgres_query');
-const SQLiteQuery = require('./queries/sqlite_query');
-const RestQuery = require('./queries/rest_query');
-const ErrorQuery = require('./queries/error_query');
-const InactivatedQuery = require('./queries/inactivated_query');
-let TinkerPop3Query;
-let JdbcQuery;
+import kibiUtils from 'kibiutils';
+import rp from 'request-promise';
+import Promise from 'bluebird';
+import _ from 'lodash';
+import fs from 'fs';
+import path from 'path';
+import lru from 'lru-cache';
+import url from 'url';
+import logger from './logger';
+import setDatasourceClazz from './datasources/set_datasource_clazz';
+import SparqlQuery from './queries/sparql_query';
+import MysqlQuery from './queries/mysql_query';
+import PostgresQuery from './queries/postgres_query';
+import SQLiteQuery from './queries/sqlite_query';
+import RestQuery from './queries/rest_query';
+import ErrorQuery from './queries/error_query';
+import InactivatedQuery from './queries/inactivated_query';
+import TinkerPop3Query from './queries/tinkerpop3_query';
+import JDBC from 'jdbc';
+import jinst from 'jdbc/lib/jinst';
+import JdbcQuery  from './queries/jdbc_query';
+import JdbcHelper from './jdbc_helper';
 
 function QueryEngine(server) {
   this.server = server;
@@ -50,11 +53,6 @@ QueryEngine.prototype._init = function (cacheSize = 500, enableCache = true, cac
     return Promise.resolve({
       message: 'QueryEngine already initialized'
     });
-  }
-
-  if (self.config.get('pkg.kibiEnterpriseEnabled')) {
-    self.log.info('Loading enterprise components');
-    TinkerPop3Query = require('./queries/tinkerpop3_query');
   }
 
   self.cache = null;
@@ -364,11 +362,6 @@ QueryEngine.prototype._loadQueries = function () {
 
 QueryEngine.prototype.setupJDBC = function () {
   if (this.config.get('kibi_core.load_jdbc') === true) {
-    const JDBC = require('jdbc');
-    const jinst = require('jdbc/lib/jinst');
-
-    JdbcQuery  = require('./queries/jdbc_query');
-    const JdbcHelper = require('./jdbc_helper');
     const jdbcHelper = new JdbcHelper(this.server);
 
     return jdbcHelper.prepareJdbcPaths().then(function (paths) {

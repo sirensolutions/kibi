@@ -1,12 +1,10 @@
-const url    = require('url');
-const Promise = require('bluebird');
-const QueryHelper = require('./query_helper');
-
+import url    from 'url';
+import Promise from 'bluebird';
+import QueryHelper from './query_helper';
 
 function RulesHelper(server) {
   this.queryHelper = new QueryHelper(server);
 }
-
 
 RulesHelper.prototype.evaluate = function (rules, selectedDocuments, credentials) {
   const self = this;
@@ -28,7 +26,6 @@ RulesHelper.prototype.evaluate = function (rules, selectedDocuments, credentials
   const index = parts[0];
   const type = parts[1];
   const id = parts[2];
-
 
   return self.queryHelper.fetchDocument(index, type, id, credentials).then(function (doc) {
 
@@ -61,7 +58,7 @@ RulesHelper.prototype.evaluate = function (rules, selectedDocuments, credentials
           pass = self.queryHelper._getValue(doc, propertyGroup) instanceof Array;
           break;
         case 'length_greater_than':
-          var expected = parseInt(rule.v);
+          const expected = parseInt(rule.v);
           pass = value.length && value.length > expected;
           break;
         case 'matches':

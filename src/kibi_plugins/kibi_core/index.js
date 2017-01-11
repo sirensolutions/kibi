@@ -4,11 +4,6 @@ import path from 'path';
 import Boom from 'boom';
 import errors from 'request-promise/errors';
 
-import util from 'core_plugins/elasticsearch/lib/util';
-import dbfilter from 'core_plugins/elasticsearch/lib/dbfilter';
-import inject from 'core_plugins/elasticsearch/lib/inject';
-import filterJoin from 'core_plugins/elasticsearch/lib/filter_join';
-
 import cryptoHelper from './lib/crypto_helper';
 import datasourcesSchema from './lib/datasources_schema';
 import QueryEngine from './lib/query_engine';
@@ -252,17 +247,17 @@ module.exports = function (kibana) {
         path:'/translateToES',
         handler: function (req, reply) {
           const serverConfig = server.config();
-          util.getQueriesAsPromise(req.payload.query)
+          server.plugins.elasticsearch.getQueriesAsPromise(req.payload.query)
           .map((query) => {
             // Remove the custom queries from the body
-            inject.save(query);
+            server.plugins.elasticsearch.inject.save(query);
             return query;
           }).map((query) => {
             let credentials = serverConfig.has('shield.cookieName') ? req.state[serverConfig.get('shield.cookieName')] : null;
             if (req.auth && req.auth.credentials && req.auth.credentials.proxyCredentials) {
               credentials = req.auth.credentials.proxyCredentials;
             }
-            return dbfilter(server.plugins.kibi_core.getQueryEngine(), query, credentials);
+            return server.plugins.elasticsearch.dbfilter(server.plugins.kibi_core.getQueryEngine(), query, credentials);
           }).map((query) => filterJoinSet(query))
           .map((query) => filterJoinSequence(query))
           .then((data) => {

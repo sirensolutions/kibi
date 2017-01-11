@@ -151,7 +151,7 @@ module.exports = function createProxy(server, method, path, config) {
 
     assign(options.config, config);
     assign(options.handler.kibi_proxy, {
-      mapUri: mapUri(cluster, proxyPrefix, true),
+      mapUri: mapUri(server.config().get('elasticsearch.plugins'), cluster, proxyPrefix, true),
       agent: createAgent({
         url: cluster.getUrl(),
         ssl: cluster.getSsl()

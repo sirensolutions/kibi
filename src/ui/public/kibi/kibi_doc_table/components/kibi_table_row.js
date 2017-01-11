@@ -1,20 +1,20 @@
 import _ from 'lodash';
 import $ from 'jquery';
-import addWordBreaks from 'ui/utils/add_word_breaks';
-import uiModules from 'ui/modules';
-import noWhiteSpace from 'ui/utils/no_white_space';
-import openRowHtml from 'ui/doc_table/components/table_row/open.html';
-import detailsHtml from 'ui/doc_table/components/table_row/details.html';
-import cellTemplateHtml from 'ui/kibi/kibi_doc_table/components/kibi_table_row/cell.html';
-import truncateByHeightTemplateHtml from 'ui/partials/truncate_by_height.html';
-
 import 'ui/highlight';
 import 'ui/highlight/highlight_tags';
 import 'ui/doc_viewer';
 import 'ui/filters/trust_as_html';
 import 'ui/filters/short_dots';
+import noWhiteSpace from 'ui/utils/no_white_space';
+import openRowHtml from 'ui/doc_table/components/table_row/open.html';
+import detailsHtml from 'ui/doc_table/components/table_row/details.html';
+import truncateByHeightTemplateHtml from 'ui/partials/truncate_by_height.html';
+import uiModules from 'ui/modules';
 
+// kibi: imports
+import cellTemplateHtml from 'ui/kibi/kibi_doc_table/components/kibi_table_row/cell.html';
 import DashboardHelperProvider from 'ui/kibi/helpers/dashboard_helper';
+// kibi: end
 
 // guesstimate at the minimum number of chars wide cells in the table should be
 const MIN_LINE_LENGTH = 20;
@@ -48,13 +48,9 @@ uiModules
       // kibi: associate an action when clicking on a cell
       cellClickHandlers: '='
     },
-    link: function ($scope, $el, attrs) {
+    link: function ($scope, $el) {
       $el.after('<tr>');
       $el.empty();
-
-      const init = function () {
-        createSummaryRow($scope.row, $scope.row._id);
-      };
 
       // when we compile the details, we use this $scope
       let $detailsScope;
@@ -105,15 +101,11 @@ uiModules
       });
       // kibi: end of cell actions
 
-      $scope.$watchCollection('columns', function () {
-        createSummaryRow($scope.row, $scope.row._id);
-      });
-
-      $scope.$watch('row', function () {
-        createSummaryRow($scope.row);
-      }, true);
-
-      $scope.$watchMulti(['indexPattern.timeFieldName', 'row.highlight'], function () {
+      $scope.$watchMulti([
+        'indexPattern.timeFieldName',
+        'row.highlight',
+        '[]columns'
+      ], function () {
         createSummaryRow($scope.row, $scope.row._id);
       });
 
@@ -266,29 +258,24 @@ uiModules
 
         // trim off cells that were not used rest of the cells
         $cells.filter(':gt(' + (newHtmls.length - 1) + ')').remove();
+        $el.trigger('renderComplete');
       }
 
       /**
        * Fill an element with the value of a field
        */
-      function _displayField(row, fieldName, breakWords) {
+      function _displayField(row, fieldName, truncate) {
         const indexPattern = $scope.indexPattern;
-        let text = indexPattern.formatField(row, fieldName);
+        const text = indexPattern.formatField(row, fieldName);
 
-        if (breakWords) {
-          text = addWordBreaks(text, MIN_LINE_LENGTH);
-
-          if (text.length > MIN_LINE_LENGTH) {
-            return truncateByHeightTemplate({
-              body: text
-            });
-          }
+        if (truncate && text.length > MIN_LINE_LENGTH) {
+          return truncateByHeightTemplate({
+            body: text
+          });
         }
 
         return text;
       }
-
-      init();
     }
   };
 });

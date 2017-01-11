@@ -152,9 +152,6 @@ module.exports = function (kibana) {
       const config = server.config();
       const datasourceCacheSize   = config.get('kibi_core.datasource_cache_size');
 
-      const filterJoinSet = filterJoin(server).set;
-      const filterJoinSequence = filterJoin(server).sequence;
-
       this.status.yellow('Initialising the query engine');
       queryEngine = new QueryEngine(server);
       queryEngine._init(datasourceCacheSize).then((data) => {
@@ -258,8 +255,8 @@ module.exports = function (kibana) {
               credentials = req.auth.credentials.proxyCredentials;
             }
             return server.plugins.elasticsearch.dbfilter(server.plugins.kibi_core.getQueryEngine(), query, credentials);
-          }).map((query) => filterJoinSet(query))
-          .map((query) => filterJoinSequence(query))
+          }).map((query) => server.plugins.elasticsearch.filterJoinSet(query))
+          .map((query) => server.plugins.elasticsearch.filterJoinSequence(query))
           .then((data) => {
             reply({ translatedQuery: data[0] });
           }).catch((err) => {

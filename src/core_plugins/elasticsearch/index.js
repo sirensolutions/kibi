@@ -107,6 +107,8 @@ module.exports = function ({ Plugin }) {
       server.expose('getQueriesAsPromise', util.getQueriesAsPromise);
       server.expose('dbfilter', dbfilter);
       server.expose('inject', inject);
+      server.expose('filterJoinSequence', dbfilter);
+      server.expose('filterJoinSet', inject);
       // kibi: end
 
       createKibiProxy(server, 'GET', '/{paths*}');

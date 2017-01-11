@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import Migration from 'migrations/migration';
-import pkg from 'utils_kibana/package.json';
+import pkg from 'utils/package_json';
 
 /**
  * Kibi Core - Migration 5.

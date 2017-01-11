@@ -1,5 +1,5 @@
 /*eslint max-len: 0*/
-import packageJson from 'utils_kibana/package.json';
+import packageJson from 'utils/package_json';
 
 /**
  * Defines the following objects:

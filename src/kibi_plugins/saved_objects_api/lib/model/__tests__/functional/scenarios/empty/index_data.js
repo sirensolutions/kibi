@@ -1,4 +1,4 @@
-import packageJson from 'utils_kibana/package.json';
+import packageJson from 'utils/package_json';
 
 /**
  * An empty .kibi index.

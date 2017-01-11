@@ -99,6 +99,7 @@ define(function (require) {
       controller: function (config, kibiState, globalState, $scope, $rootScope, $route, $routeParams, Private, getAppState) {
 
         const queryFilter = Private(require('ui/filter_bar/query_filter'));
+        const getEmptyQueryOptionHelper = Private(require('ui/kibi/helpers/get_empty_query_with_options_helper'));
 
         const notify = createNotifier({
           location: 'Dashboard'
@@ -159,7 +160,7 @@ define(function (require) {
           options: dash.optionsJSON ? JSON.parse(dash.optionsJSON) : {},
           uiState: dash.uiStateJSON ? JSON.parse(dash.uiStateJSON) : {},
           // kibi: get the query from the kibi state, and if unset get the one the searchsource
-          query: dashboardQuery || extractQueryFromFilters(dash.searchSource.getOwn('filter')) || {query_string: {query: '*'}},
+          query: dashboardQuery || extractQueryFromFilters(dash.searchSource.getOwn('filter')) || getEmptyQueryOptionHelper.getQuery(),
           // kibi: get the filters from the kibi state, and if unset get the one the searchsource
           filters: dashboardFilters || _.reject(dash.searchSource.getOwn('filter'), matchQueryFilter)
         };

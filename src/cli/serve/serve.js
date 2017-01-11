@@ -95,7 +95,8 @@ module.exports = function (program) {
     pluginDirCollector,
     [
       fromRoot('plugins'),
-      fromRoot('src/core_plugins')
+      fromRoot('src/core_plugins'),
+      fromRoot('src/kibi_plugins')
     ]
   )
   .option(

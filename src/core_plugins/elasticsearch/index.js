@@ -16,6 +16,7 @@ import transformations from './lib/transforms';
 import util from './lib/util';
 import dbfilter from './lib/dbfilter';
 import inject from './lib/inject';
+import filterJoin from './lib/filter_join';
 // kibi: end
 
 const DEFAULT_REQUEST_HEADERS = [ 'authorization' ];
@@ -107,8 +108,8 @@ module.exports = function ({ Plugin }) {
       server.expose('getQueriesAsPromise', util.getQueriesAsPromise);
       server.expose('dbfilter', dbfilter);
       server.expose('inject', inject);
-      server.expose('filterJoinSequence', dbfilter);
-      server.expose('filterJoinSet', inject);
+      server.expose('filterJoinSequence', filterJoin(server).sequence);
+      server.expose('filterJoinSet', filterJoin(server).set);
       // kibi: end
 
       createKibiProxy(server, 'GET', '/{paths*}');

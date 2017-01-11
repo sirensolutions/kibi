@@ -1,18 +1,18 @@
-define(function (require) {
-  return function SavedObjectRequestProvider(Private) {
-    const _ = require('lodash');
+import StrategyProvider from 'ui/courier/fetch/strategy/savedobject';
+import DocRequestProvider from 'ui/courier/fetch/request/doc_admin';
+import _ from 'lodash';
 
-    const DocRequest = Private(require('ui/courier/fetch/request/doc'));
-    const strategy = Private(require('ui/courier/fetch/strategy/savedobject'));
+export default function SavedObjectRequestProvider(Private) {
+  const DocRequest = Private(DocRequestProvider);
+  const strategy = Private(StrategyProvider);
 
-    _.class(SavedObjectRequest).inherits(DocRequest);
-    function SavedObjectRequest(source, defer) {
-      SavedObjectRequest.Super.call(this, source, defer);
+  _.class(SavedObjectRequest).inherits(DocRequest);
+  function SavedObjectRequest(source, defer) {
+    SavedObjectRequest.Super.call(this, source, defer);
 
-      this.type = 'savedObject';
-      this.strategy = strategy;
-    }
+    this.type = 'savedObject';
+    this.strategy = strategy;
+  }
 
-    return SavedObjectRequest;
-  };
-});
+  return SavedObjectRequest;
+};

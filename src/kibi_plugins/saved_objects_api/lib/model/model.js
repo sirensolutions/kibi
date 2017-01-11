@@ -26,13 +26,7 @@ export default class Model {
     this._config = server.config();
     this._schema = schema;
 
-    this._client = server.plugins.elasticsearch.createClient({
-      auth: false
-    });
-    //TODO: the current implementation of sessions requires them to be
-    // writeable by all users; this code must be removed as soon as
-    // owner tracking is available.
-    this._sessionClient = server.plugins.elasticsearch.client;
+    this._cluster = server.plugins.elasticsearch.getCluster('admin');
   }
 
   /**
@@ -74,7 +68,7 @@ export default class Model {
   }
 
   /**
-   * Sets the specified @credentials in client @parameters.
+   * Sets the specified @credentials in cluster request @parameters.
    * @private
    */
   _setCredentials(parameters, credentials) {
@@ -105,9 +99,7 @@ export default class Model {
       body: body
     };
     this._setCredentials(parameters, credentials);
-    //TODO: replace with this._client once owner tracking is available
-    const client = this._type === 'session' ? this._sessionClient : this._client;
-    await client.indices.putMapping(parameters);
+    await this._cluster.callWithRequest({}, 'indices.putMapping', parameters);
   }
 
   /**
@@ -124,7 +116,7 @@ export default class Model {
       type: this._type
     };
     this._setCredentials(parameters, credentials);
-    const mappings = await this._client.indices.getMapping(parameters);
+    const mappings = await this._cluster.callWithRequest({}, 'indices.getMapping', parameters);
 
     return Object.keys(mappings).length !== 0;
   }
@@ -149,13 +141,9 @@ export default class Model {
         refresh: true
       };
 
-      //TODO: remove once owner tracking is available
-      const client = this._type === 'session' ? this._sessionClient : this._client;
-      if (this._type !== 'session') {
-        this._setCredentials(parameters, credentials);
-      }
+      this._setCredentials(parameters, credentials);
 
-      return await client.create(parameters);
+      return await this._cluster.callWithRequest({}, 'create', parameters);
     } catch (error) {
       this._wrapError(error);
     }
@@ -180,13 +168,9 @@ export default class Model {
         refresh: true
       };
 
-      //TODO: remove once owner tracking is available
-      const client = this._type === 'session' ? this._sessionClient : this._client;
-      if (this._type !== 'session') {
-        this._setCredentials(parameters, credentials);
-      }
+      this._setCredentials(parameters, credentials);
 
-      return await client.index(parameters);
+      return await this._cluster.callWithRequest({}, 'index', parameters);
     } catch (error) {
       this._wrapError(error);
     }
@@ -212,13 +196,9 @@ export default class Model {
         refresh: true
       };
 
-      //TODO: remove once owner tracking is available
-      const client = this._type === 'session' ? this._sessionClient : this._client;
-      if (this._type !== 'session') {
-        this._setCredentials(parameters, credentials);
-      }
+      this._setCredentials(parameters, credentials);
 
-      return await client.update(parameters);
+      return await this._cluster.callWithRequest({}, 'update', parameters);
     } catch (error) {
       this._wrapError(error);
     }
@@ -264,7 +244,8 @@ export default class Model {
         size: size || 100
       };
       this._setCredentials(parameters, credentials);
-      return await this._client.search(parameters);
+
+      return await this._cluster.callWithRequest({}, 'search', parameters);
     } catch (error) {
       this._wrapError(error);
     }
@@ -286,7 +267,7 @@ export default class Model {
         id: id
       };
       this._setCredentials(parameters, credentials);
-      return await this._client.get(parameters);
+      return await this._cluster.callWithRequest({}, 'get', parameters);
     } catch (error) {
       if (error.statusCode === 404) {
         throw new NotFoundError(`${id} does not exist.`, error);
@@ -311,7 +292,7 @@ export default class Model {
         refresh: true
       };
       this._setCredentials(parameters, credentials);
-      return await this._client.delete(parameters);
+      return await this._cluster.callWithRequest({}, 'delete', parameters);
     } catch (error) {
       if (error.statusCode === 404) {
         throw new NotFoundError(`${id} does not exist.`, error);

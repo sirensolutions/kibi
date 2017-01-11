@@ -48,7 +48,7 @@ module.exports = (server, API_ROOT) => {
         }));
         break;
       default:
-        reply(Boom.badImplementation(`An error occurred while indexing the object: ${error}`));
+        reply(Boom.badImplementation(`An error occurred processing your request: ${error}`));
         break;
     }
   }

@@ -4,11 +4,6 @@ const path = require('path');
 const Boom = require('boom');
 const errors = require('request-promise/errors');
 
-const util = require('../elasticsearch/lib/util');
-
-const dbfilter = require('../elasticsearch/lib/dbfilter');
-const inject = require('../elasticsearch/lib/inject');
-
 import cryptoHelper from './lib/crypto_helper';
 
 /**
@@ -246,17 +241,17 @@ module.exports = function (kibana) {
         path:'/translateToES',
         handler: function (req, reply) {
           const serverConfig = server.config();
-          util.getQueriesAsPromise(req.payload.query)
+          server.plugins.elasticsearch.getQueriesAsPromise(req.payload.query)
           .map((query) => {
             // Remove the custom queries from the body
-            inject.save(query);
+            server.plugins.elasticsearch.inject.save(query);
             return query;
           }).map((query) => {
             let credentials = serverConfig.has('shield.cookieName') ? req.state[serverConfig.get('shield.cookieName')] : null;
             if (req.auth && req.auth.credentials && req.auth.credentials.proxyCredentials) {
               credentials = req.auth.credentials.proxyCredentials;
             }
-            return dbfilter(server.plugins.kibi_core.getQueryEngine(), query, credentials);
+            return server.plugins.elasticsearch.dbfilter(server.plugins.kibi_core.getQueryEngine(), query, credentials);
           }).map((query) => filterJoinSet(query))
           .map((query) => filterJoinSequence(query))
           .then((data) => {

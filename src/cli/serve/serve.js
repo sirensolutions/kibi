@@ -96,6 +96,7 @@ module.exports = function (program) {
     [
       fromRoot('plugins'),
       fromRoot('src/core_plugins'),
+      // kibi: point to kibi core plugins
       fromRoot('src/kibi_plugins')
     ]
   )

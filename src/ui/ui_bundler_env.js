@@ -57,9 +57,7 @@ module.exports = class UiBundlerEnv {
       // kibi: added alias to utils folder to simplify imports
       utils_kibana: fromRoot('src/utils'),
       // kibi: added alias to migrations folder to simplify imports
-      migrations: fromRoot('src/migrations'),
-      // kibi: added alias to kibana core plugins folder to simplify imports
-      core_plugins: fromRoot('src/core_plugins')
+      migrations: fromRoot('src/migrations')
     };
 
     // map of which plugins created which aliases
@@ -101,6 +99,13 @@ module.exports = class UiBundlerEnv {
 
   addContext(key, val) {
     this.context[key] = val;
+    // kibi: switch the kibie alias,
+    // for enterprise edition it will point to kibi_enterprise_components
+    // which comes as a enterprise plugin
+    if (key === 'kibiEnterpriseEnabled' && val === true) {
+      this.aliases.kibie = 'plugins/kibi_enterprise_components';
+    }
+    // kibi: end<Paste>
   }
 
   addPostLoader(loader) {

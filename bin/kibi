@@ -31,8 +31,6 @@ fi
 export PATH="$PATH:${DIR}/node/bin"
 # kibi: end
 
-# kibi: use the "plugin-dir" option for pointing to the kibi core plugins
-# ROOT_DIR="$DIR" exec "${NODE}" $NODE_OPTIONS --no-warnings "${DIR}/src/cli" --plugin-dir "${DIR}/src/kibi_plugins" ${@}
 # kibi: add src/server_modules to NODE_PATH
 export NODE_PATH=$NODE_PATH:"${DIR}/src/server_modules"
 ROOT_DIR="$DIR" exec "${NODE}" $NODE_OPTIONS --no-warnings "${DIR}/src/cli" ${@}

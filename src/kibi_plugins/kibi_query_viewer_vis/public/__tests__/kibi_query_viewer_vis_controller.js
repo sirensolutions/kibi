@@ -1,9 +1,10 @@
+import sinon from 'auto-release-sinon';
+import Promise from 'bluebird';
+import ngMock from 'ng_mock';
+import expect from 'expect.js';
+
 describe('Kibi Controllers', function () {
   let $scope;
-  const sinon = require('auto-release-sinon');
-  const Promise = require('bluebird');
-  const ngMock = require('ngMock');
-  const expect = require('expect.js');
 
   function init(options) {
     ngMock.module('kibana', function ($provide) {

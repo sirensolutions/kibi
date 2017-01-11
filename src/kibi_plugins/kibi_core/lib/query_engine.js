@@ -22,6 +22,8 @@ import JdbcQuery  from './queries/jdbc_query';
 import JdbcHelper from './jdbc_helper';
 
 function QueryEngine(server) {
+
+
   this.server = server;
   this.config = server.config();
   const sslCA = this.config.get('kibi_core.gremlin_server.ssl.ca');
@@ -31,7 +33,8 @@ function QueryEngine(server) {
   this.queries = [];
   this.initialized = false;
   this.log = logger(server, 'query_engine');
-  this.client = server.plugins.elasticsearch.client;
+  this.cluster = server.plugins.elasticsearch.getCluster('admin');
+
 }
 
 QueryEngine.prototype._onStatusGreen = function () {
@@ -132,10 +135,8 @@ QueryEngine.prototype.loadPredefinedData = function () {
 };
 
 QueryEngine.prototype._isKibiIndexPresent = function () {
-  const self = this;
-  return self.client.cat.indices({
-    index: self.config.get('kibana.index'),
-    timeout: '2000ms'
+  return this.cluster.callWithInternalUser('cat.indices', {
+    index: this.config.get('kibana.index')
   })
   .then(function (kibiIndex) {
     return !!kibiIndex || Promise.reject(new Error('Kibi index does not exists'));
@@ -143,9 +144,8 @@ QueryEngine.prototype._isKibiIndexPresent = function () {
 };
 
 QueryEngine.prototype._refreshKibiIndex = function () {
-  const self = this;
-  return self.client.indices.refresh({
-    index: self.config.get('kibana.index'),
+  return this.cluster.callWithInternalUser('indices.refresh', {
+    index: this.config.get('kibana.index'),
     force: true
   });
 };
@@ -210,7 +210,7 @@ QueryEngine.prototype._loadTemplatesMapping = function () {
     }
   };
 
-  return this.client.indices.putMapping({
+  return this.cluster.callWithInternalUser('indices.putMapping', {
     timeout: '1000ms',
     index: this.config.get('kibana.index'),
     type: 'template',
@@ -239,7 +239,7 @@ QueryEngine.prototype._loadTemplates = function () {
       if (err) {
         throw err;
       }
-      return self.client.create({
+      return this.cluster.callWithInternalUser('create', {
         timeout: '1000ms',
         index: self.config.get('kibana.index'),
         type: 'template',
@@ -290,7 +290,7 @@ QueryEngine.prototype._loadDatasources = function () {
           data = new Buffer(JSON.stringify(datasourceObj).length);
           data.write(JSON.stringify(datasourceObj), 'utf-8');
         }
-        self.client.create({
+        self.cluster.callWithInternalUser('create', {
           timeout: '1000ms',
           index: self.config.get('kibana.index'),
           type: 'datasource',
@@ -334,7 +334,7 @@ QueryEngine.prototype._loadQueries = function () {
           reject(err);
           return;
         }
-        self.client.create({
+        self.cluster.callWithInternalUser('create', {
           timeout: '1000ms',
           index: self.config.get('kibana.index'),
           type: 'query',
@@ -380,8 +380,7 @@ QueryEngine.prototype.setupJDBC = function () {
 };
 
 QueryEngine.prototype._fetchQueriesFromEs = function () {
-  const self = this;
-  return self.client.search({
+  return this.cluster.callWithInternalUser('search', {
     index: self.config.get('kibana.index'),
     type: 'query',
     size: 100
@@ -389,9 +388,8 @@ QueryEngine.prototype._fetchQueriesFromEs = function () {
 };
 
 QueryEngine.prototype._getDatasourceFromEs = function (datasourceId) {
-  const self = this;
-  return self.client.search({
-    index: self.config.get('kibana.index'),
+  return this.cluster.callWithInternalUser('search', {
+    index: this.config.get('kibana.index'),
     type: 'datasource',
     q: '_id:' + datasourceId
   }).then(function (result) {
@@ -466,7 +464,7 @@ QueryEngine.prototype.reloadQueries = function () {
     }
 
     if (queryDefinitions.length > 0) {
-      return self.client.search({
+      return this.cluster.callWithInternalUser('search', {
         index: self.config.get('kibana.index'),
         type: 'datasource',
         size: 100

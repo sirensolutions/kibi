@@ -239,7 +239,7 @@ QueryEngine.prototype._loadTemplates = function () {
       if (err) {
         throw err;
       }
-      return this.cluster.callWithInternalUser('create', {
+      return self.cluster.callWithInternalUser('create', {
         timeout: '1000ms',
         index: self.config.get('kibana.index'),
         type: 'template',
@@ -381,7 +381,7 @@ QueryEngine.prototype.setupJDBC = function () {
 
 QueryEngine.prototype._fetchQueriesFromEs = function () {
   return this.cluster.callWithInternalUser('search', {
-    index: self.config.get('kibana.index'),
+    index: this.config.get('kibana.index'),
     type: 'query',
     size: 100
   });
@@ -464,7 +464,7 @@ QueryEngine.prototype.reloadQueries = function () {
     }
 
     if (queryDefinitions.length > 0) {
-      return this.cluster.callWithInternalUser('search', {
+      return self.cluster.callWithInternalUser('search', {
         index: self.config.get('kibana.index'),
         type: 'datasource',
         size: 100

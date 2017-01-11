@@ -10,9 +10,9 @@ define(function (require) {
           query: '*'
         }
       };
-      for (const i in queryOption) {
-        if (queryOption[i] !== null) {
-          query.query_string[i] = queryOption[i];
+      for (const prop in queryOption) {
+        if (queryOption[prop] !== null && queryOption.hasOwnProperty(prop)) {
+          query.query_string[prop] = queryOption[prop];
         }
       }
       return query;

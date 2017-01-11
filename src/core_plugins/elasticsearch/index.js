@@ -11,7 +11,12 @@ import filterHeaders from './lib/filter_headers';
 import createKibanaProxy, { createPath } from './lib/create_kibana_proxy';
 import createKibiProxy from './lib/create_kibi_proxy';
 
+// kibi: kibi imports
 import transformations from './lib/transforms';
+import util from './lib/util';
+import dbfilter from './lib/dbfilter';
+import inject from './lib/inject';
+// kibi: end
 
 const DEFAULT_REQUEST_HEADERS = [ 'authorization' ];
 
@@ -42,6 +47,9 @@ module.exports = function ({ Plugin }) {
           key: string()
         }).default(),
         apiVersion: Joi.string().default('master'),
+        // kibi: we set the list of plugins during health checks
+        plugins: Joi.array().default([]),
+        // kibi: end
         healthCheck: object({
           delay: number().default(2500)
         }).default(),
@@ -92,10 +100,13 @@ module.exports = function ({ Plugin }) {
       createDataCluster(server);
       createAdminCluster(server);
 
-      // kibi: expose transformations
+      // kibi: expose Kibi utility methods
       const transforms = transformations(server);
       server.expose('transformSearchRequest', transforms.transformSearchRequest);
       server.expose('transformSearchResponse', transforms.transformSearchResponse);
+      server.expose('getQueriesAsPromise', util.getQueriesAsPromise);
+      server.expose('dbfilter', dbfilter);
+      server.expose('inject', inject);
       // kibi: end
 
       createKibiProxy(server, 'GET', '/{paths*}');

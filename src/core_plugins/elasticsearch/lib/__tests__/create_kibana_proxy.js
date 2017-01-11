@@ -1,5 +1,5 @@
 import expect from 'expect.js';
-import createProxy from '../create_proxy';
+import createProxy from '../create_kibana_proxy';
 
 describe('plugins/elasticsearch', function () {
   describe('lib/create_proxy', function () {

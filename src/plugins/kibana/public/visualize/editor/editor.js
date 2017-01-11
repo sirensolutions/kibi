@@ -76,6 +76,7 @@ define(function (require) {
     const brushEvent = Private(require('ui/utils/brush_event'));
     const queryFilter = Private(require('ui/filter_bar/query_filter'));
     const filterBarClickHandler = Private(require('ui/filter_bar/filter_bar_click_handler'));
+    const getEmptyQueryOptionHelper = Private(require('ui/kibi/helpers/get_empty_query_with_options_helper'));
 
     $scope.holder = {
       entityURIEnabled: $route.current.locals.isEntityDependent,
@@ -122,7 +123,7 @@ define(function (require) {
     const stateDefaults = {
       uiState: savedVis.uiStateJSON ? JSON.parse(savedVis.uiStateJSON) : {},
       linked: !!savedVis.savedSearchId,
-      query: searchSource.getOwn('query') || {query_string: {query: '*'}},
+      query: searchSource.getOwn('query') || getEmptyQueryOptionHelper.getQuery(),
       filters: searchSource.getOwn('filter') || [],
       vis: savedVisState
     };

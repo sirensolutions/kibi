@@ -96,7 +96,7 @@ define(function (require) {
   app.directive('dashboardApp', function (courier, AppState, timefilter, kbnUrl, createNotifier) {
     return {
       controllerAs: 'dashboardApp',
-      controller: function (config, kibiState, globalState, $scope, $rootScope, $route, $routeParams, Private, getAppState) {
+      controller: function (config, kibiState, globalState, $scope, $rootScope, $route, $location, $routeParams, Private, getAppState) {
 
         const queryFilter = Private(require('ui/filter_bar/query_filter'));
 
@@ -106,7 +106,7 @@ define(function (require) {
 
         const dash = $scope.dash = $route.current.locals.dash;
 
-        var dashboardTime = kibiState._getDashboardProperty(dash.id, kibiState._properties.time);
+        const dashboardTime = kibiState._getDashboardProperty(dash.id, kibiState._properties.time);
         if (dashboardTime) {
           // kibi: time from the kibi state.
           // this allows to set a time (not save it with a dashboard), switch between dashboards, and
@@ -129,7 +129,7 @@ define(function (require) {
 
         // kibi: below listener on globalState is needed to react when the global time is changed by the user
         // either directly in time widget or by clicking on histogram chart etc
-        var saveWithChangesHandler = function (diff) {
+        const saveWithChangesHandler = function (diff) {
           if (dash.id && diff.indexOf('time') !== -1 && timefilter.time.from && timefilter.time.to &&
               !kibiState._isDefaultTime(timefilter.time.mode, timefilter.time.from, timefilter.time.to)) {
             kibiState._saveTimeForDashboardId(dash.id, timefilter.time.mode, timefilter.time.from, timefilter.time.to);
@@ -170,10 +170,10 @@ define(function (require) {
         const $uiState = $scope.uiState = $state.makeStateful('uiState');
 
         // kibi: added so the kibi-dashboard-toolbar which was moved out could comunicate with the main app
-        var stDashboardInvokeMethodOff = $rootScope.$on('kibi:dashboard:invoke-method', function (event, methodName) {
+        const stDashboardInvokeMethodOff = $rootScope.$on('kibi:dashboard:invoke-method', function (event, methodName) {
           $scope[methodName]();
         });
-        var stDashboardSetProperty = $rootScope.$on('kibi:dashboard:set-property', function (event, property, data) {
+        const stDashboardSetProperty = $rootScope.$on('kibi:dashboard:set-property', function (event, property, data) {
           $scope[property] = data;
         });
 
@@ -371,6 +371,22 @@ define(function (require) {
           addVis: $scope.addVis,
           addSearch: $scope.addSearch
         };
+
+        // kibi: If you click the back/forward browser button:
+        // 1. The $locationChangeSuccess event is fired when you click back/forward browser button.
+        $rootScope.$on('$locationChangeSuccess', () => $rootScope.actualLocation = $location.url());
+        // 2. The following watcher is fired.
+        $rootScope.$watch(() => { return $location.url(); }, (newLocation, oldLocation) => {
+          if ($rootScope.actualLocation === newLocation) {
+            /* kibi: Here we execute init() if the newLocation is equal to the URL we saved during
+               the $locationChangeSuccess event above. */
+            init();
+          }
+        });
+        /* kibi: If you click an ordinary hyperlink, the above order is reversed.
+           First, you have the watcher fired, then the $locationChangeSuccess event.
+           That's why the actualLocation and newLocation will never be equal inside the watcher callback
+           if you click on an ordinary hyperlink. */
 
         init();
       }

@@ -15,6 +15,20 @@ const createPath = function (prefix, path) {
   return `${prefix}${path}`;
 };
 
+const responseHandler = function (err, upstreamResponse, request, reply) {
+  if (err) {
+    reply(err);
+    return;
+  }
+
+  if (upstreamResponse.headers.location) {
+    // TODO: Workaround for #8705 until hapi has been updated to >= 15.0.0
+    upstreamResponse.headers.location = encodeURI(upstreamResponse.headers.location);
+  }
+
+  reply(null, upstreamResponse);
+};
+
 module.exports = function createProxy(server, method, path, config) {
 
   const filterJoin = filterJoinModule(server);
@@ -160,7 +174,9 @@ module.exports = function createProxy(server, method, path, config) {
         ssl: cluster.getSsl()
       }),
       xforward: true,
+      // required to pass through request headers
       timeout: cluster.getRequestTimeout(),
+      onResponse: responseHandler
     });
 
     server.route(options);

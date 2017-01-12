@@ -85,12 +85,12 @@ define(function (require) {
       }
 
       var initQtip = function (explanations) {
-        jQuery('.qtip').qtip('destroy', true);
         $timeout(function () {
 
           jQuery('.filter').each(function (index) {
             var $el = jQuery(this);
             if ($el.hasClass('join') && explanations[index]) {
+              $el.qtip('destroy', true);
               $el.qtip({
                 content: {
                   title: 'Steps - last one on top',

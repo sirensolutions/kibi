@@ -135,10 +135,7 @@ module.exports = (server, API_ROOT) => {
   });
 
   /**
-   * Creates a new saved object in the .kibi index.
-   *
-   * Works like a PUT by default, can be forced to work as a POST by setting the
-   * querystring parameter `op_type` to `create`.
+   * Updates a saved object in the .kibi index.
    *
    * Returns the same response as an Elasticsearch API index operation on success, a
    * wrapped error with the same format as Elasticsearch errors on conflicts.
@@ -156,11 +153,48 @@ module.exports = (server, API_ROOT) => {
       } catch (error) {
         return reply(Boom.notFound(error));
       }
-      let method = 'update';
-      if (request.query.op_type === 'create') {
-        method = 'create';
+      model.update(request.params.id, request.payload, credentials)
+      .then((response) => {
+        reply(response);
+      })
+      .catch((error) => {
+        return replyError(error, reply);
+      });
+    },
+    config: {
+      validate: {
+        params: {
+          index: Joi.string().required(),
+          type: Joi.string().required(),
+          id: Joi.string()
+        },
+        query: {
+          op_type: Joi.string().allow('').regex(/create/)
+        }
       }
-      model[method](request.params.id, request.payload, credentials)
+    }
+  });
+
+  /**
+   * Creates a saved object in the .kibi index.
+   *
+   * Returns the same response as an Elasticsearch API index operation on success, a
+   * wrapped error with the same format as Elasticsearch errors on conflicts.
+   *
+   * Errors are formatted by a custom handler set in the init method of this plugin.
+   */
+  server.route({
+    method: 'POST',
+    path: `${API_ROOT}/{index}/{type}/{id}/_create`,
+    handler: (request, reply) => {
+      const credentials = getCredentials(request);
+      let model;
+      try {
+        model = getModel(request.params.type);
+      } catch (error) {
+        return reply(Boom.notFound(error));
+      }
+      model.create(request.params.id, request.payload, credentials)
       .then((response) => {
         reply(response);
       })

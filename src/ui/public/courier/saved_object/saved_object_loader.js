@@ -3,14 +3,11 @@ import Scanner from 'ui/utils/scanner';
 import { StringUtils } from 'ui/utils/string_utils';
 
 export class SavedObjectLoader {
-  constructor(SavedObjectClass, kbnIndex, esAdmin, kbnUrl, savedObjectsAPI, cacheObject) {
-
+  constructor(SavedObjectClass, kbnIndex, esAdmin, kbnUrl, savedObjectsAPI, { cache, get, find } = {}) {
     this.savedObjectsAPI = savedObjectsAPI;
-    if (cacheObject) {
-      this.cache = cacheObject.cache;
-      this.cacheGet = cacheObject.get;
-      this.cacheFind = cacheObject.find;
-    }
+    this.cache = cache;
+    this.cacheGet = get;
+    this.cacheFind = find;
     this.type = SavedObjectClass.type;
     this.Class = SavedObjectClass;
     this.lowercaseType = this.type.toLowerCase();

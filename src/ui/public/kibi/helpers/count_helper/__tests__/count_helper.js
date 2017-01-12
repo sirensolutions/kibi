@@ -4,7 +4,7 @@ import _ from 'lodash';
 import MockState from 'fixtures/mock_state';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import dateMath from 'ui/utils/dateMath';
+import dateMath from 'ui/kibi/utils/date_math_precision';
 import mockSavedObjects from 'fixtures/kibi/mock_saved_objects';
 import noDigestPromises from 'test_utils/no_digest_promises';
 import config from 'fixtures/kibi/config';
@@ -113,14 +113,13 @@ describe('Kibi Components', function () {
         ]));
       });
 
-      ngMock.inject(function (timefilter, _config_, _kibiState_, Private) {
+      ngMock.inject(function (timefilter, _kibiState_, Private) {
         const defaultTime = {
           mode: 'absolute',
           from: defaultStartTime,
           to: defaultEndTime
         };
 
-        config = _config_;
         config.set('timepicker:timeDefaults', defaultTime);
         timefilter.time = defaultTime;
         kibiState = _kibiState_;

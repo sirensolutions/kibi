@@ -1,118 +1,18 @@
-define(function (require) {
+import { SavedObjectLoader } from 'ui/courier/saved_object/saved_object_loader';
+import CacheProvider from 'ui/kibi/helpers/cache_helper';
+import 'ui/kibi/helpers/kibi_session_helper/services/_saved_session';
+import uiModules from 'ui/modules';
+import registry from 'plugins/kibana/management/saved_object_registry';
 
-  require('ui/kibi/helpers/kibi_session_helper/services/_saved_session');
+registry.register({
+  service: 'savedSessions',
+  title: 'sessions'
+});
 
-  const module = require('ui/modules').get('ui/kibi/helpers/kibi_session_helper/services/saved_sessions', []);
-  const _ = require('lodash');
-  const Scanner = require('ui/utils/scanner');
-
-  require('plugins/kibana/settings/saved_object_registry').register({
-    service: 'savedSessions',
-    title: 'sessions'
-  });
-
-  module.service('savedSessions', function ($rootScope, Promise, SavedSession, kbnIndex, es, kbnUrl, Private) {
-
-    const cache = Private(require('ui/kibi/helpers/cache_helper')); // kibi: added to cache requests for saved sessions
-
-    const scanner = new Scanner(es, {
-      index: kbnIndex,
-      type: 'session'
-    });
-
-    this.type = SavedSession.type;
-    this.Class = SavedSession;
-
-
-    this.loaderProperties = {
-      name: 'sessions',
-      noun: 'Session',
-      nouns: 'sessions'
-    };
-
-    this.get = function (id) {
-      let cacheKey;
-      if (id) {
-        cacheKey = 'savedSessions-id-' + id;
-      }
-      if (cacheKey && cache && cache.get(cacheKey)) {
-        return cache.get(cacheKey);
-      }
-      const promise = (new SavedSession(id)).init();
-      if (cacheKey && cache) {
-        cache.set(cacheKey, promise);
-      }
-      return promise;
-    };
-
-    this.urlFor = function (id) {
-      return kbnUrl.eval('#/session/{{id}}', {id: id});
-    };
-
-    // gets triggered when you select the checkbox in objects and press delete
-    this.delete = function (ids) {
-      ids = !_.isArray(ids) ? [ids] : ids;
-      return Promise.map(ids, function (id) {
-        return (new SavedSession(id)).delete().then(function (resp) {
-          $rootScope.$emit('kibi:session:changed:deleted', id);
-        });
-      });
-    };
-
-    this.scanAll = function (queryString, pageSize = 1000) {
-      return scanner.scanAndMap(queryString, {
-        pageSize,
-        docCount: Infinity
-      }, (hit) => this.mapHits(hit));
-    };
-
-    this.mapHits = function (hit) {
-      const source = hit._source;
-      source.id = hit._id;
-      source.url = this.urlFor(hit._id);
-      return source;
-    };
-
-    this.find = function (searchString, size = 100) {
-      let body;
-      if (searchString) {
-        body = {
-          query: {
-            simple_query_string: {
-              query: searchString + '*',
-              fields: ['title^3'],
-              default_operator: 'AND'
-            }
-          }
-        };
-      } else {
-        body = { query: {match_all: {}}};
-      }
-
-      // kibi: get from cahce
-      const cacheKey = 'savedSessions' + (searchString ? searchString : '');
-      if (cache && cache.get(cacheKey)) {
-        return Promise.resolve(cache.get(cacheKey));
-      }
-
-      return es.search({
-        index: kbnIndex,
-        type: 'session',
-        body: body,
-        size: size
-      })
-      .then((resp) => {
-        const ret = {
-          total: resp.hits.total,
-          hits: resp.hits.hits.map((hit) => this.mapHits(hit))
-        };
-
-        // kibi: put into cache
-        if (cache) {
-          cache.set(cacheKey, ret);
-        }
-        return ret;
-      });
-    };
-  });
+// This is the only thing that gets injected into controllers
+uiModules
+.get('ui/kibi/helpers/kibi_session_helper/services/saved_sessions')
+.service('savedSessions', function (savedObjectsAPI, Private, SavedSession, kbnIndex, esAdmin, kbnUrl) {
+  const cache = Private(CacheProvider);
+  return new SavedObjectLoader(SavedSession, kbnIndex, esAdmin, kbnUrl, savedObjectsAPI, { find: true, get: true, cache });
 });

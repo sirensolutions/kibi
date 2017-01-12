@@ -1,12 +1,13 @@
-describe('Kibi Settings', function () {
-  const sinon = require('auto-release-sinon');
-  const ngMock = require('ngMock');
-  const expect = require('expect.js');
-  const _ = require('lodash');
-  const Promise = require('bluebird');
-  const mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
-  const jQuery = require('jquery');
+import noDigestPromises from 'test_utils/no_digest_promises';
+import sinon from 'auto-release-sinon';
+import ngMock from 'ng_mock';
+import expect from 'expect.js';
+import _ from 'lodash';
+import Promise from 'bluebird';
+import mockSavedObjects from 'fixtures/kibi/mock_saved_objects';
+import jQuery from 'jquery';
 
+describe('Kibi Settings', function () {
   let $scope;
   let config;
   let indexToDashboardMapPromise;
@@ -89,7 +90,7 @@ describe('Kibi Settings', function () {
     });
 
     describe('create an index to dashboards map', function () {
-      require('testUtils/noDigestPromises').activateForSuite();
+      noDigestPromises.activateForSuite();
       beforeEach(() => init({
         savedDashboards: [
           {
@@ -208,7 +209,7 @@ describe('Kibi Settings', function () {
       });
 
       describe('check field mapping for the siren-join', function () {
-        require('testUtils/noDigestPromises').activateForSuite();
+        noDigestPromises.activateForSuite();
 
         it('should throw an error if join fields do not have compatible mapping', function (done) {
           init({

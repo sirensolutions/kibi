@@ -49,8 +49,7 @@ export default function MapperService(Private, Promise, es, esAdmin, config, kbn
         return es.indices.getMapping({
           index: indexList,
           ignoreUnavailable: _.isArray(indexList),
-          allowNoIndices: false,
-          includeDefaults: true
+          allowNoIndices: false
         });
       })
       .catch(handleMissingIndexPattern)

@@ -1,11 +1,11 @@
-const expect = require('expect.js');
-const sinon = require('auto-release-sinon');
-const ngMock = require('ngMock');
-const $ = require('jquery');
+import expect from 'expect.js';
+import sinon from 'auto-release-sinon';
+import ngMock from 'ng_mock';
+import $ from 'jquery';
+import mockSavedObjects from 'fixtures/kibi/mock_saved_objects';
+
 let $scope;
 let $el;
-
-const mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
 
 describe('Kibi Controllers', function () {
 

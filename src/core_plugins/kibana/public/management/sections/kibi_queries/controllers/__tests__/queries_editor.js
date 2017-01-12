@@ -1,15 +1,15 @@
 import onPage from 'ui/kibi/utils/on_page';
 import expect from 'expect.js';
 import sinon from 'auto-release-sinon';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import jQuery from 'jquery';
 import Promise from 'bluebird';
 import noDigestPromises from 'test_utils/no_digest_promises';
+import mockSavedObjects from 'fixtures/kibi/mock_saved_objects';
 
 let kibiState;
 let $scope;
 
-const mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
 const savedDatasources = [
   {
     id: 'ds1',

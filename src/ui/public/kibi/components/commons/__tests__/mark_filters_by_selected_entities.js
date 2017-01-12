@@ -1,5 +1,5 @@
 import MarkFiltersBySelectedEntitiesProvider from 'ui/kibi/components/commons/_mark_filters_by_selected_entities';
-import noDigestPromises from 'testUtils/no_digest_promises';
+import noDigestPromises from 'test_utils/no_digest_promises';
 import sinon from 'auto-release-sinon';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';

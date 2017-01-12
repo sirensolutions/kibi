@@ -435,7 +435,6 @@ describe('index pattern', function () {
     });
 
     context('when index pattern is a time-base wildcard', function () {
-      require('testUtils/noDigestPromises').activateForSuite();
       beforeEach(function () {
         sinon.stub(indexPattern, 'getInterval').returns(false);
         sinon.stub(indexPattern, 'hasTimeField').returns(true);

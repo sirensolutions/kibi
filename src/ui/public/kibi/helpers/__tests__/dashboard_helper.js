@@ -1,4 +1,4 @@
-import noDigestPromises from 'testUtils/no_digest_promises';
+import noDigestPromises from 'test_utils/no_digest_promises';
 import DashboardHelperProvider from 'ui/kibi/helpers/dashboard_helper';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';

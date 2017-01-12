@@ -1,7 +1,12 @@
+import FieldFormatProvider from 'ui/registry/field_formats';
+import JoinExplanationHelperProvider from 'ui/filter_bar/join_explanation';
+import IndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import noDigestPromises from 'test_utils/no_digest_promises';
 /*eslint no-use-before-define: 1*/
-const _ = require('lodash');
-const ngMock = require('ngMock');
-const expect = require('expect.js');
+import _ from 'lodash';
+import ngMock from 'ng_mock';
+import expect from 'expect.js';
+
 let joinExplanationHelper;
 let joinSequenceFilters;
 let fieldFormat;
@@ -9,7 +14,7 @@ let fieldFormat;
 describe('Kibi Components', function () {
   describe('Join Explanation Helper', function () {
 
-    require('testUtils/noDigestPromises').activateForSuite();
+    noDigestPromises.activateForSuite();
 
     beforeEach(function () {
       ngMock.module('kibana', function ($provide) {
@@ -20,7 +25,7 @@ describe('Kibi Components', function () {
 
       ngMock.module('kibana/index_patterns', function ($provide) {
         $provide.service('indexPatterns', function (Private, Promise) {
-          const indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+          const indexPattern = Private(IndexPatternProvider);
           return {
             get: function (id) {
               return Promise.resolve(indexPattern);
@@ -30,8 +35,8 @@ describe('Kibi Components', function () {
       });
 
       ngMock.inject(function (Private) {
-        joinExplanationHelper = Private(require('ui/filter_bar/join_explanation'));
-        fieldFormat = Private(require('ui/registry/field_formats'));
+        joinExplanationHelper = Private(JoinExplanationHelperProvider);
+        fieldFormat = Private(FieldFormatProvider);
       });
 
       joinSequenceFilters = {
@@ -106,26 +111,26 @@ describe('Kibi Components', function () {
         </tr>`;
       };
 
-      const groupToHtml = function (relations) {
-        let html = `
-        <tr>
-          <td>
-            <b>Group of relations:</b></br>
-              <table class="group">`;
-        _.each(relations, relation => {
-          html += `
-                <tr>
-                  <td>${joinSequenceToHtml(relation)}</td>
-                </tr>`;
-        });
-        html += `
-            </table>
-          </td>
-        </tr>`;
-        return html;
-      };
-
       const joinSequenceToHtml = function (relations) {
+        const groupToHtml = function (relations) {
+          let html = `
+          <tr>
+            <td>
+              <b>Group of relations:</b></br>
+                <table class="group">`;
+          _.each(relations, relation => {
+            html += `
+                  <tr>
+                    <td>${joinSequenceToHtml(relation)}</td>
+                  </tr>`;
+          });
+          html += `
+              </table>
+            </td>
+          </tr>`;
+          return html;
+        };
+
         let html = '<table class="sequence">';
         _.each(relations, relation => {
           html += relation.group ? groupToHtml(relation.group) : relationToHtml(relation);

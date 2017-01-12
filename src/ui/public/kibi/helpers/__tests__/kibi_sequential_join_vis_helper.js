@@ -1,4 +1,4 @@
-import noDigestPromises from 'testUtils/no_digest_promises';
+import noDigestPromises from 'test_utils/no_digest_promises';
 import SequentialJoinVisHelperProvider from 'ui/kibi/helpers/kibi_sequential_join_vis_helper';
 import MockState from 'fixtures/mock_state';
 import mockSavedObjects from 'fixtures/kibi/mock_saved_objects';

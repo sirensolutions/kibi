@@ -113,9 +113,7 @@ export default function IndexPatternFactory(Private, createNotifier, config, kbn
       promise = indexPattern.refreshFields();
     }
     return promise.then(() => { initFields(indexPattern); })
-    .then(() => {
-      this.kibiPathsFetched = true;
-    });
+    .then(() => indexPattern.kibiPathsFetched = true);
   }
 
   function setId(indexPattern, id) {
@@ -146,8 +144,8 @@ export default function IndexPatternFactory(Private, createNotifier, config, kbn
   function initFields(indexPattern, input) {
     // kibi: if paths not fetched yet do it first
     let promise = Promise.resolve();
-    if (!this.kibiPathsFetched) {
-      promise = this._fetchFieldsPath();
+    if (!indexPattern.kibiPathsFetched) {
+      promise = indexPattern._fetchFieldsPath();
     }
     return promise.then(() => {
       const oldValue = indexPattern.fields;
@@ -381,7 +379,7 @@ export default function IndexPatternFactory(Private, createNotifier, config, kbn
     refreshFields() {
       return mapper
       .clearCache(this)
-      .then(this._fetchFieldsPath) // kibi: retrieve the path of each field
+      .then(() => this._fetchFieldsPath()) // kibi: retrieve the path of each field
       .then(() => fetchFields(this))
       .then(() => this.save());
     }

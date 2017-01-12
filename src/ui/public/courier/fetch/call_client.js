@@ -94,9 +94,13 @@ export default function CourierFetchCallClient(Private, Promise, esAdmin, es) {
         throw ABORTED;
       }
 
+      // kibi: if the strategy provides a client use it instead of the default one.
       const id = strategy.id;
-      const client = (id && id.includes('admin')) ? esAdmin : es;
+      let client = (id && id.includes('admin')) ? esAdmin : es;
+      client = strategy.client ? strategy.client : client;
       return (esPromise = client[strategy.clientMethod]({ body }));
+      // kibi: end
+
     })
     .then(function (clientResp) {
       return strategy.getResponses(clientResp);

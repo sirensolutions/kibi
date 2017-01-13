@@ -21,6 +21,7 @@ export class SavedObjectLoader {
       type: this.lowercaseType
     });
 
+    // kibi: added pluralize to make plurals
     this.loaderProperties = {
       name: pluralize(this.lowercaseType),
       noun: StringUtils.upperFirst(this.type),

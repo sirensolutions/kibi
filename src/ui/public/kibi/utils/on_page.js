@@ -13,14 +13,20 @@ function onActivePage(pageId) {
   return page.id === pageId;
 }
 
-export function onDashboardPage() {
+function onDashboardPage() {
   return onActivePage('kibana:dashboard');
 }
 
-export function onVisualizePage() {
+function onVisualizePage() {
   return onActivePage('kibana:visualize');
 }
 
-export function onManagementPage() {
+function onManagementPage() {
   return onActivePage('kibana:management');
 }
+
+export {
+  onManagementPage,
+  onVisualizePage,
+  onDashboardPage
+};

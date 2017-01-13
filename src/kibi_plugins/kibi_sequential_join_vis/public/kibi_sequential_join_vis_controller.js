@@ -1,7 +1,7 @@
 import QueryFilterProvider from 'ui/filter_bar/query_filter';
 import KibiSequentialJoinVisHelperProvider from 'ui/kibi/helpers/kibi_sequential_join_vis_helper';
 import RelationsHelperProvider from 'ui/kibi/helpers/relations_helper';
-import onPage from 'ui/kibi/utils/on_page';
+import { onVisualizePage } from 'ui/kibi/utils/on_page';
 import _ from 'lodash';
 import angular from 'angular';
 import chrome from 'ui/chrome';
@@ -15,7 +15,7 @@ import 'ui/kibi/directives/kibi_array_param';
 
 function controller(getAppState, kibiState, $scope, $rootScope, Private, $http, createNotifier, globalState, Promise, kbnIndex) {
   const searchHelper = new SearchHelper(kbnIndex);
-  const onVisualizePage = onPage.onVisualizePage();
+  const edit = onVisualizePage();
 
   const notify = createNotifier({
     location: 'Kibi Relational filter'
@@ -128,7 +128,7 @@ function controller(getAppState, kibiState, $scope, $rootScope, Private, $http, 
   );
 
   const _collectUpdateCountsRequest = function (buttons, dashboardId) {
-    if (onVisualizePage || !buttons || !buttons.length) {
+    if (edit || !buttons || !buttons.length) {
       return Promise.resolve([]);
     }
     delayExecutionHelper.addEventData({
@@ -145,12 +145,12 @@ function controller(getAppState, kibiState, $scope, $rootScope, Private, $http, 
 
     if (buttonsDefs.length !== $scope.vis.params.buttons.length) {
       $scope.vis.error = 'Invalid configuration of the Kibi relational filter visualization';
-      if (!onVisualizePage) {
+      if (!edit) {
         return Promise.reject($scope.vis.error);
       }
     }
 
-    if (!onVisualizePage) {
+    if (!edit) {
       return kibiState._getDashboardAndSavedSearchMetas([currentDashboardId]).then(([ { savedDash, savedSearchMeta } ]) => {
         const currentDashboardIndex = savedSearchMeta.index;
         const currentDashboardId = savedDash.id;
@@ -176,7 +176,7 @@ function controller(getAppState, kibiState, $scope, $rootScope, Private, $http, 
    */
 
   const updateButtons = function (reason) {
-    if (onVisualizePage) {
+    if (edit) {
       return;
     }
 

@@ -1,4 +1,4 @@
-import onPage from 'ui/kibi/utils/on_page';
+import { onVisualizePage } from 'ui/kibi/utils/on_page';
 import 'ui/kibi/directives/kibi_select';
 import 'ui/kibi/directives/kibi_array_param';
 import 'ui/kibi/directives/kibi_param_entity_uri';
@@ -18,7 +18,7 @@ uiModules
   // generate random id to avoid collisions if there are multiple widgets on one dashboard
   $scope.snippetContainerId = kibiUtils.getUuid4();
 
-  const configMode = onPage.onVisualizePage();
+  const configMode = onVisualizePage();
   $scope.holder = {
     html: ''
   };

@@ -1,5 +1,5 @@
 import uiModules from 'ui/modules';
-import arrayHelper from 'ui/kibi/helpers/array_helper';
+import ArrayHelper from 'ui/kibi/helpers/array_helper';
 import template from 'ui/kibi/directives/kibi_array_param_add.html';
 
 uiModules
@@ -42,7 +42,7 @@ uiModules
             el = $scope.default;
           }
         }
-        arrayHelper.add($scope.model, el, $scope.postAction);
+        ArrayHelper.add($scope.model, el, $scope.postAction);
       };
 
       // if it is required, add at least one element to the array
@@ -63,7 +63,7 @@ uiModules
     template: '<button class="btn btn-xs btn-default" ng-click="upParam()" > <i class="fa fa-caret-up"></i> </button>',
     link: function ($scope, element, attrs) {
       $scope.upParam = function () {
-        arrayHelper.up($scope.model, $scope.index, $scope.postAction);
+        ArrayHelper.up($scope.model, $scope.index, $scope.postAction);
       };
     }
   };
@@ -79,7 +79,7 @@ uiModules
     template: '<button class="btn btn-xs btn-default" ng-click="downParam()" > <i class="fa fa-caret-down"></i> </button>',
     link: function ($scope, element, attrs) {
       $scope.downParam = function () {
-        arrayHelper.down($scope.model, $scope.index, $scope.postAction);
+        ArrayHelper.down($scope.model, $scope.index, $scope.postAction);
       };
     }
   };
@@ -100,7 +100,7 @@ uiModules
     link: function ($scope, element, attrs) {
       $scope.removeParam = function () {
         if (!kibiArrayParamService.required || $scope.model.length > 1) {
-          arrayHelper.remove($scope.model, $scope.index, $scope.postAction);
+          ArrayHelper.remove($scope.model, $scope.index, $scope.postAction);
         } else if (kibiArrayParamService.required) {
           notify.warning('You need to add at least one ' + kibiArrayParamService.label + '.');
         }

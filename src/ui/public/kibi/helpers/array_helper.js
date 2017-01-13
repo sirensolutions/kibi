@@ -1,24 +1,21 @@
 import _ from 'lodash';
 
-export default function ArrayHelperFactory() {
-  function ArrayHelper() {
-  }
-
-  ArrayHelper.prototype.add = function (array, object, callback) {
+export default class ArrayHelper {
+  static add(array, object, callback) {
     array.push(object);
     if (callback) {
       callback();
     }
-  };
+  }
 
-  ArrayHelper.prototype.remove = function (array, index, callback) {
+  static remove(array, index, callback) {
     array.splice(index, 1);
     if (callback) {
       callback();
     }
-  };
+  }
 
-  ArrayHelper.prototype.up = function (array, index, callback) {
+  static up(array, index, callback) {
     if (index > 0) {
       const newIndex = index - 1;
       const currentElement = _.clone(array[index], true);
@@ -28,9 +25,9 @@ export default function ArrayHelperFactory() {
         callback();
       }
     }
-  };
+  }
 
-  ArrayHelper.prototype.down = function (array, index, callback) {
+  static down(array, index, callback) {
     if (index < array.length - 1) {
       const newIndex = index + 1;
       const currentElement = _.clone(array[index], true);
@@ -40,8 +37,5 @@ export default function ArrayHelperFactory() {
         callback();
       }
     }
-  };
-
-
-  return new ArrayHelper();
+  }
 };

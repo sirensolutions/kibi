@@ -3,7 +3,7 @@ import 'ui/kibi/directives/kibi_dashboard_toolbar';
 import 'ui/kibi/directives/kibi_stop_click_event';
 import 'ui/kibi/directives/kibi_menu_template';
 
-import onPage from 'ui/kibi/utils/on_page';
+import { onDashboardPage } from 'ui/kibi/utils/on_page';
 import uiModules from 'ui/modules';
 import uiRoutes from 'ui/routes';
 import _ from 'lodash';
@@ -44,7 +44,7 @@ uiModules
       $scope.dashboardGroups = kibiNavBarHelper.getDashboardGroups();
 
       const removeLocationChangeSuccessHandler = $rootScope.$on('$locationChangeSuccess', function () {
-        onPage.onDashboardPage() ? $el.show() : $el.hide();
+        onDashboardPage() ? $el.show() : $el.hide();
       });
 
       $scope.relationalFilterVisible = config.get('kibi:relationalPanel');

@@ -1,5 +1,5 @@
 import FilterManagerProvider from 'ui/filter_manager';
-import onPage from 'ui/kibi/utils/on_page';
+import { onVisualizePage } from 'ui/kibi/utils/on_page';
 import _ from 'lodash';
 import 'ui/kibi/directives/kibi_param_entity_uri';
 import 'ui/kibi/kibi_doc_table/kibi_doc_table';
@@ -9,7 +9,7 @@ uiModules
 .get('kibana/kibi_data_table_vis', ['kibana'])
 .controller('KibiDataTableVisController', function ($rootScope, $scope, Private) {
   const filterManager = Private(FilterManagerProvider);
-  const configMode = onPage.onVisualizePage();
+  const configMode = onVisualizePage();
 
   $scope.queryColumn = {};
   $scope.cellClickHandlers = {};

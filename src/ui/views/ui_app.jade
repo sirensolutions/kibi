@@ -93,7 +93,8 @@ block content
       .kibanaLoader__logo
         .kibanaWelcomeLogo
       .kibanaLoader__content
-        | Loading Kibana
+          // kibi: renamed to kibi
+        | Loading Kibi
 
   script.
     window.onload = function () {
@@ -125,7 +126,8 @@ block content
           err.style['text-align'] = 'center';
           err.style['background'] = '#F44336';
           err.style['padding'] = '25px';
-          err.innerText = 'Kibana did not load properly. Check the server output for more information.';
+          // kibi: renamed to kibi
+          err.innerText = 'Kibi did not load properly. Check the server output for more information.';
 
           document.body.innerHTML = err.outerHTML;
         }

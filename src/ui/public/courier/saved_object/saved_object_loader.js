@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import Scanner from 'ui/utils/scanner';
 import { StringUtils } from 'ui/utils/string_utils';
+import pluralize from 'pluralize';
 
 export class SavedObjectLoader {
   constructor(SavedObjectClass, kbnIndex, esAdmin, kbnUrl, savedObjectsAPI, { cache, get, find } = {}) {
@@ -20,10 +21,11 @@ export class SavedObjectLoader {
       type: this.lowercaseType
     });
 
+    // kibi: added pluralize to make plurals
     this.loaderProperties = {
-      name: `${ this.lowercaseType }s`,
+      name: pluralize(this.lowercaseType),
       noun: StringUtils.upperFirst(this.type),
-      nouns: `${ this.lowercaseType }s`,
+      nouns: pluralize(this.lowercaseType)
     };
   }
 

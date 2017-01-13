@@ -4,7 +4,7 @@ import dateMath from 'ui/kibi/utils/date_math_precision';
 import uniqFilters from 'ui/filter_bar/lib/uniq_filters';
 import { toJson } from 'ui/utils/aggressive_parse';
 import angular from 'angular';
-import onPage from 'ui/kibi/utils/on_page';
+import * as onPage from 'ui/kibi/utils/on_page';
 import uiModules from 'ui/modules';
 import uiRoutes from 'ui/routes';
 import StateManagementStateProvider from 'ui/state_management/state';

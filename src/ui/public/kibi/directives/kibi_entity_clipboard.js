@@ -1,5 +1,5 @@
 import 'ui/kibi/directives/kibi_entity_clipboard.less';
-import onPage from 'ui/kibi/utils/on_page';
+import { onDashboardPage } from 'ui/kibi/utils/on_page';
 import uiModules from 'ui/modules';
 import _ from 'lodash';
 import chrome from 'ui/chrome';
@@ -18,7 +18,7 @@ uiModules.get('kibana')
     link: function ($scope, $el) {
 
       const updateSelectedEntity = function () {
-        if (!onPage.onDashboardPage()) {
+        if (!onDashboardPage()) {
           return;
         }
 

@@ -1,4 +1,4 @@
-import onPage from 'ui/kibi/utils/on_page';
+import { onVisualizePage } from 'ui/kibi/utils/on_page';
 import 'ui/kibi/styles/external_query_terms_filter.less';
 import _ from 'lodash';
 import BucketAggTypeProvider from 'ui/agg_types/buckets/_bucket_agg_type';
@@ -30,7 +30,7 @@ export default function RelatedEntitiesAggDefinition(Private, createNotifier, ki
             return;
           }
 
-          const configurationMode = onPage.onVisualizePage();
+          const configurationMode = onVisualizePage();
 
           if (!_(queryDefinitions).pluck('queryId').compact().size()) {
             return;

@@ -6,7 +6,7 @@ import uiModules from 'ui/modules';
 import savedObjectFinderTemplate from 'ui/partials/saved_object_finder.html';
 
 // kibi: imports
-import onPage from 'ui/kibi/utils/on_page';
+import { onDashboardPage } from 'ui/kibi/utils/on_page';
 
 const module = uiModules.get('kibana');
 
@@ -35,7 +35,7 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
 
       // kibi: variable to store the checkbox state
       $scope.kibi = {
-        onDashboardPage: onPage.onDashboardPage(),
+        onDashboardPage: onDashboardPage(),
         basedOnSameSavedSearch: false,
         _prevBasedOnSameSavedSearch: false
       };

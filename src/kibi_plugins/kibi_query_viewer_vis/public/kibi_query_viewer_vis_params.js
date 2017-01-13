@@ -60,11 +60,11 @@ uiModules
       };
 
       $scope.editTemplate = function (index) {
-        kbnUrl.change('/settings/templates/' + $scope.vis.params.queryDefinitions[index].templateId);
+        kbnUrl.change('/management/templates/' + $scope.vis.params.queryDefinitions[index].templateId);
       };
 
       $scope.editQuery = function (index) {
-        kbnUrl.change('/settings/queries/' + $scope.vis.params.queryDefinitions[index].queryId);
+        kbnUrl.change('/management/queries/' + $scope.vis.params.queryDefinitions[index].queryId);
       };
 
     }

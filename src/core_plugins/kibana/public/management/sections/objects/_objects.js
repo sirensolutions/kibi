@@ -1,11 +1,18 @@
 import { saveAs } from '@spalger/filesaver';
-import { extend, find, flattenDeep, partialRight, pick, pluck, sortBy } from 'lodash';
+import { filter, each, extend, find, flattenDeep, partialRight, pick, pluck, sortBy } from 'lodash';
 import angular from 'angular';
 import registry from 'plugins/kibana/management/saved_object_registry';
 import objectIndexHTML from 'plugins/kibana/management/sections/objects/_objects.html';
 import 'ui/directives/file_upload';
 import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
+
+// kibi: imports
+import RefreshKibanaIndexProvider from 'plugins/kibana/management/sections/indices/_refresh_kibana_index';
+import LoadObjectsProvider from 'plugins/kibi_core/management/sections/objects/_sequential_import';
+import KibiSessionHelperProvider from 'ui/kibi/helpers/kibi_session_helper/kibi_session_helper';
+import DeleteHelperProvider from 'ui/kibi/helpers/delete_helper';
+import CacheProvider from 'ui/kibi/helpers/cache_helper';
 
 const MAX_SIZE = Math.pow(2, 31) - 1;
 
@@ -15,11 +22,19 @@ uiRoutes
 });
 
 uiModules.get('apps/management')
-.directive('kbnManagementObjects', function (queryEngineClient, kbnIndex, createNotifier, Private, kbnUrl, Promise) {
+.directive('kbnManagementObjects', function (kbnIndex, createNotifier, Private, kbnUrl, Promise) {
+  // kibi: all below dependencies added by kibi to improve import/export and delete operations
+  const cache = Private(CacheProvider);
+  const deleteHelper = Private(DeleteHelperProvider);
+  const kibiSessionHelper = Private(KibiSessionHelperProvider);
+  const refreshKibanaIndex = Private(RefreshKibanaIndexProvider);
+  const loadObjects = Private(LoadObjectsProvider);
+  // kibi: end
+
   return {
     restrict: 'E',
     controllerAs: 'managementObjectsController',
-    controller: function ($scope, $injector, $q, AppState, esAdmin) {
+    controller: function (kbnVersion, indexPatterns, queryEngineClient, $scope, $injector, $q, AppState, esAdmin) {
       const notify = createNotifier({ location: 'Saved Objects' });
 
       // TODO: Migrate all scope variables to the controller.
@@ -64,6 +79,29 @@ uiModules.get('apps/management')
         return getData(this.advancedFilter);
       };
 
+      // kibi: added by kibi to be able to quickly show the current session
+      $scope.kibi = {
+        showOnlyCurrentSession: true // by default show only the user session
+      };
+
+      $scope.$watch('kibi.showOnlyCurrentSession', function (showOnlyCurrentSession) {
+        if (showOnlyCurrentSession !== undefined) {
+          $scope.kibi.showOnlyCurrentSession = showOnlyCurrentSession;
+        }
+      });
+
+      $scope.filterItems = function (items) {
+        // filter out other sessions only if the checkbox checked
+        // and the current session initialized
+        if ($scope.state && $scope.state.tab === 'sessions' &&
+            $scope.kibi.showOnlyCurrentSession && kibiSessionHelper.initialized && kibiSessionHelper.id
+        ) {
+          return filter(items, 'id', kibiSessionHelper.id);
+        }
+        return items;
+      };
+      // kibi: end
+
       // TODO: Migrate all scope methods to the controller.
       $scope.toggleAll = function () {
         if ($scope.selectedItems.length === $scope.currentTab.data.length) {
@@ -100,12 +138,18 @@ uiModules.get('apps/management')
 
       // TODO: Migrate all scope methods to the controller.
       $scope.bulkDelete = function () {
-        $scope.currentTab.service.delete(pluck($scope.selectedItems, 'id'))
-        .then(refreshData)
-        .then(function () {
-          $scope.selectedItems.length = 0;
-        })
-        .catch(error => notify.error(error));
+        // kibi: modified to do some checks before the delete
+        const _delete = function () {
+          $scope.currentTab.service.delete(pluck($scope.selectedItems, 'id'))
+          .then(refreshData)
+          .then(function () {
+            $scope.selectedItems.length = 0;
+          })
+          .catch(error => notify.error(error));
+        };
+
+        deleteHelper.deleteByType($scope.currentTab.service.type, pluck($scope.selectedItems, 'id'), _delete);
+        // kibi: end
       };
 
       // TODO: Migrate all scope methods to the controller.
@@ -120,12 +164,22 @@ uiModules.get('apps/management')
           .scanAll('')
           .then(result => result.hits.map(hit => extend(hit, { type: service.type })))
         )
-        .then(results => retrieveAndExportDocs(flattenDeep(results)))
-        .catch(error => notify.error(error));
+        .then((results) => {
+          // kibi: export extra objects
+          results.push([ { id: kbnVersion, type: 'config' } ]); // kibi: here we also want to export "config" type
+          return indexPatterns.getIds().then(function (list) {
+            each(list, (id) => {
+              results.push([ { id, type: 'index-pattern' } ]); // kibi: here we also want to export all index patterns
+            });
+            return retrieveAndExportDocs(flattenDeep(results));
+          });
+          // kibi: end
+        })
+        .catch(notify.error);
 
       function retrieveAndExportDocs(objs) {
         if (!objs.length) return notify.error('No saved objects to export.');
-        esAdmin.mget({
+        return esAdmin.mget({
           index: kbnIndex,
           body: {docs: objs.map(transformToMget)}
         })
@@ -153,25 +207,17 @@ uiModules.get('apps/management')
           notify.error('The file could not be processed.');
         }
 
-        return Promise.map(docs, function (doc) {
-          const service = find($scope.services, {type: doc._type}).service;
-          return service.get().then(function (obj) {
-            obj.id = doc._id;
-            return obj.applyESResp(doc).then(function () {
-              return obj.save({ confirmOverwrite : true });
-            });
-          });
-        })
-        .then(refreshIndex)
+        // kibi: change the import to sequential to solve the dependency problem between objects
+        // as visualisations could depend on searches
+        // lets order the export to make sure that searches comes before visualisations
+        // then also import object sequentially to avoid errors
+        const configDocument = find(docs, '_type', 'config');
+        return loadObjects($scope.services, docs, configDocument)
+        .then(refreshKibanaIndex)
         .then(() => queryEngineClient.clearCache()) // kibi: to clear backend cache
-        .then(refreshData, notify.error);
+        .then(refreshData, notify.error)
+        .catch(notify.error); // kibi: log errors when loading objects
       };
-
-      function refreshIndex() {
-        return esAdmin.indices.refresh({
-          index: kbnIndex
-        });
-      }
 
       // TODO: Migrate all scope methods to the controller.
       $scope.changeTab = function (tab) {

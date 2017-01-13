@@ -34,22 +34,10 @@ uiRoutes
   }
 });
 
-function controller($rootScope, $scope, $route, $window, kbnUrl, createNotifier, savedDashboards, savedDashboardGroups, Promise, $element) {
+function controller($rootScope, $scope, $route, kbnUrl, createNotifier, savedDashboards, savedDashboardGroups, Promise, $element) {
   const notify = createNotifier({
     location: 'Dashboard Groups Editor'
   });
-
-
-  $scope.dashboardGroupsFinderOpen = false;
-
-  $scope.openDashboardGroupsFinder = function () {
-    $scope.dashboardGroupsFinderOpen = true;
-  };
-  $scope.closeDashboardGroupsFinder = function (hit, event) {
-    $scope.dashboardGroupsFinderOpen = false;
-    kbnUrl.change('management/kibana/dashboardgroups/' + hit.id);
-  };
-
   const dashboardGroup = $scope.dashboardGroup = $route.current.locals.dashboardGroup;
 
   let allDashboardsGroups = [];
@@ -86,11 +74,11 @@ function controller($rootScope, $scope, $route, $window, kbnUrl, createNotifier,
     return toRemove || allDashboardIds.compact().contains(dashboard);
   };
 
+  $scope.isValid = function () {
+    return $element.find('form[name="objectForm"]').hasClass('ng-valid');
+  };
+
   $scope.submit = function () {
-    if (!$element.find('form[name="objectForm"]').hasClass('ng-valid')) {
-      $window.alert('Please fill in all the required parameters.');
-      return;
-    }
     dashboardGroup.id = dashboardGroup.title;
     dashboardGroup.save().then(function (groupId) {
       notify.info('Dashboard Group ' + dashboardGroup.title + ' was successfuly saved');

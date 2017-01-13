@@ -75,15 +75,6 @@ function controller(kibiState, $scope, $route, $window, kbnUrl, createNotifier, 
     location: 'Queries Editor'
   });
 
-  $scope.snippetFinderOpen = false;
-  $scope.openQueryFinder = function () {
-    $scope.queryFinderOpen = true;
-  };
-  $scope.closeQueryFinder = function (hit, event) {
-    $scope.queryFinderOpen = false;
-    kbnUrl.change('management/kibana/queries/' + hit.id);
-  };
-
   $scope.query = $route.current.locals.query;
   $scope.$queryTitle = $route.current.locals.query.title;
 

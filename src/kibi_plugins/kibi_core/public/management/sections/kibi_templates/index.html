@@ -1,12 +1,7 @@
 <kbn-management-app section="kibana" class="kuiView">
   <div ng-controller="TemplatesEditor" class="kibana-settings-app templates_editor kibi-config-section" id="templates_editor">
 
-    <div ng-if="templateFinderOpen" style="padding:30px;">
-      <saved-object-finder title="Choose a template" type="templates" on-choose="closeTemplateFinder"></saved-object-finder>
-    </div>
-
-
-    <div ng-if="!templateFinderOpen" class="container">
+    <div class="container">
 
       <div class="header">
         <h2 class="title">Edit Query Result Templates</h2>

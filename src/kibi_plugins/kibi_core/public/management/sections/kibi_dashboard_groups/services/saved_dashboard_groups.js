@@ -2,6 +2,10 @@ import 'plugins/kibi_core/management/sections/kibi_dashboard_groups/services/_sa
 import uiModules from 'ui/modules';
 import { SavedObjectLoader } from 'ui/courier/saved_object/saved_object_loader';
 import CacheProvider from 'ui/kibi/helpers/cache_helper';
+import savedObjectRegistry from 'ui/saved_objects/saved_object_registry';
+import savedDashboardGroups from 'plugins/kibi_core/management/sections/kibi_dashboard_groups/services/saved_dashboard_groups_register';
+
+savedObjectRegistry.register(savedDashboardGroups);
 
 // Register this service with the saved object registry so it can be
 // edited by the object editor.

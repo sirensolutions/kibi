@@ -1,11 +1,7 @@
 <kbn-management-app section="kibana" class="kuiView">
   <div ng-controller="DatasourcesEditor" class="app-container datasources_editor kibi-config-section" id="datasources_editor">
 
-    <div ng-if="datasourcesFinderOpen" style="padding:30px;">
-      <saved-object-finder title="Choose a datasource" type="datasources" on-choose="closeDashboardGroupsFinder"></saved-object-finder>
-    </div>
-
-    <div ng-if="!datasourcesFinderOpen" class="container">
+    <div class="container">
 
       <div class="header">
         <h2 class="title">Edit Datasource</h2>

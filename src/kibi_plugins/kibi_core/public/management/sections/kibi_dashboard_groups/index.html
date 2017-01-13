@@ -1,11 +1,7 @@
 <kbn-management-app section="kibana" class="kuiView">
   <div ng-controller="DashboardGroupsEditor" class="app-container dashboard_groups_editor kibi-config-section" id="dashboard_groups_editor">
 
-    <div ng-if="dashboardGroupsFinderOpen" style="padding:30px;">
-      <saved-object-finder title="Choose a dashboard group" type="dashboardgroups" on-choose="closeDashboardGroupsFinder"></saved-object-finder>
-    </div>
-
-    <div ng-if="!dashboardGroupsFinderOpen" class="container">
+    <div class="container">
 
       <div class="header">
         <h2 class="title">Edit Dashboard Groups</h2>

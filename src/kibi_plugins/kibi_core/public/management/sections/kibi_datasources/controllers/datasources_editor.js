@@ -43,16 +43,6 @@ function controller($window, $scope, $route, kbnUrl, createNotifier, Private, qu
 
   $scope.kibiEnterpriseEnabled = kibiEnterpriseEnabled;
 
-  $scope.datasourcesFinderOpen = false;
-
-  $scope.openDatasourcesFinder = function () {
-    $scope.datasourcesFinderOpen = true;
-  };
-  $scope.closeDatasourcesFinder = function (hit, event) {
-    $scope.datasourcesFinderOpen = false;
-    kbnUrl.change('management/kibana/datasources/' + hit.id);
-  };
-
   $scope.isValid = function () {
     return $element.find('form[name="objectForm"]').hasClass('ng-valid');
   };

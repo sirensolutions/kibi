@@ -37,7 +37,7 @@ uiRoutes
   }
 });
 
-function controller($scope, $route, $window, kbnUrl, Private, createNotifier, queryEngineClient, kibiState, $element) {
+function controller($scope, $route, kbnUrl, Private, createNotifier, queryEngineClient, kibiState, $element) {
   const _shouldEntityURIBeEnabled = Private(ShouldEntityURIBeEnabledProvider);
   const notify = createNotifier({
     location: 'Templates editor'
@@ -71,19 +71,8 @@ function controller($scope, $route, $window, kbnUrl, Private, createNotifier, qu
     }
   };
 
-
-  $scope.templateFinderOpen = false;
-  $scope.openTemplateFinder = function () {
-    $scope.templateFinderOpen = true;
-  };
-  $scope.closeTemplateFinder = function (hit, event) {
-    $scope.templateFinderOpen = false;
-    kbnUrl.change('management/kibana/templates/' + hit.id);
-  };
-
   const template = $scope.template = $route.current.locals.template;
   $scope.$templateTitle = $route.current.locals.template.title;
-
 
   $scope.jumpToQuery = function () {
     kbnUrl.change('/management/kibana/queries/' + _.get($scope, 'preview.queryId'));
@@ -139,11 +128,11 @@ function controller($scope, $route, $window, kbnUrl, Private, createNotifier, qu
     }
   });
 
+  $scope.isValid = function () {
+    return $element.find('form[name="objectForm"]').hasClass('ng-valid');
+  };
+
   $scope.submit = function () {
-    if (!$element.find('form[name="objectForm"]').hasClass('ng-valid')) {
-      $window.alert('Please fill in all the required parameters.');
-      return;
-    }
     const titleChanged = $scope.$templateTitle !== $scope.template.title;
     template.id = template.title;
     template.save().then(function (resp) {

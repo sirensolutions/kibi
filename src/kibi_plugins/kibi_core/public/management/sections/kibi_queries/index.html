@@ -1,12 +1,7 @@
-<kby-management-app section="kibana" class="kuiView">
+<kbn-management-app section="kibana" class="kuiView">
   <div ng-controller="QueriesEditor" class="app-container query_editor kibi-config-section" id="queries_editor" >
 
-    <div ng-if="queryFinderOpen" style="padding:30px;">
-      <saved-object-finder title="Choose a query" type="queries" on-choose="closeQueryFinder"></saved-object-finder>
-    </div>
-
-
-    <div ng-if="!queryFinderOpen" class="container">
+    <div class="container">
 
       <div class="header">
         <h2 class="title">Edit Queries over External Datasources</h2>

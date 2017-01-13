@@ -1,9 +1,10 @@
 import _ from 'lodash';
 import Scanner from 'ui/utils/scanner';
 import { StringUtils } from 'ui/utils/string_utils';
+import pluralize from 'pluralize';
 
 export class SavedObjectLoader {
-  constructor(SavedObjectClass, kbnIndex, esAdmin, kbnUrl, savedObjectsAPI, { cache, get, find } = {}, { name, noun, nouns } = {}) {
+  constructor(SavedObjectClass, kbnIndex, esAdmin, kbnUrl, savedObjectsAPI, { cache, get, find } = {}) {
     this.savedObjectsAPI = savedObjectsAPI;
     this.cache = cache;
     this.cacheGet = get;
@@ -21,9 +22,9 @@ export class SavedObjectLoader {
     });
 
     this.loaderProperties = {
-      name: name || `${ this.lowercaseType }s`,
-      noun: noun || StringUtils.upperFirst(this.type),
-      nouns: nouns || `${ this.lowercaseType }s`,
+      name: pluralize(this.lowercaseType),
+      noun: StringUtils.upperFirst(this.type),
+      nouns: pluralize(this.lowercaseType)
     };
   }
 

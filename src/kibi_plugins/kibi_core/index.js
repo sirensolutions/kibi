@@ -102,6 +102,19 @@ module.exports = function (kibana) {
 
     id: 'kibi_core',
 
+    uiExports: {
+      managementSections: [
+        'plugins/kibi_core/management/sections/kibi_dashboard_groups',
+        'plugins/kibi_core/management/sections/kibi_datasources',
+        'plugins/kibi_core/management/sections/kibi_queries',
+        'plugins/kibi_core/management/sections/kibi_relations',
+        'plugins/kibi_core/management/sections/kibi_templates'
+      ],
+      navbarExtensions: [
+        'plugins/kibi_core/management/sections/kibi_queries/navbar'
+      ]
+    },
+
     config: function (Joi) {
       return Joi.object({
         enabled: Joi.boolean().default(true),

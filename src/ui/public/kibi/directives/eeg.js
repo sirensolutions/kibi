@@ -18,7 +18,7 @@ uiModules
     },
     template: '<div></div>',
     link: function ($scope, element, attrs) {
-      const layersOrderArray = ['legend', 'links','linksLabelsBack','nodes','linksLabels'];
+      const layersOrderArray = [ 'legend', 'links', 'linksLabelsBack', 'nodes', 'linksLabels' ];
       if ($scope.graph === undefined) {
         element.empty();
         if ($scope.g) {

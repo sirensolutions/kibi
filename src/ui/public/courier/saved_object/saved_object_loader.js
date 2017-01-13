@@ -3,7 +3,7 @@ import Scanner from 'ui/utils/scanner';
 import { StringUtils } from 'ui/utils/string_utils';
 
 export class SavedObjectLoader {
-  constructor(SavedObjectClass, kbnIndex, esAdmin, kbnUrl, savedObjectsAPI, { cache, get, find } = {}) {
+  constructor(SavedObjectClass, kbnIndex, esAdmin, kbnUrl, savedObjectsAPI, { cache, get, find } = {}, { name, noun, nouns } = {}) {
     this.savedObjectsAPI = savedObjectsAPI;
     this.cache = cache;
     this.cacheGet = get;
@@ -21,9 +21,9 @@ export class SavedObjectLoader {
     });
 
     this.loaderProperties = {
-      name: `${ this.lowercaseType }s`,
-      noun: StringUtils.upperFirst(this.type),
-      nouns: `${ this.lowercaseType }s`,
+      name: name || `${ this.lowercaseType }s`,
+      noun: noun || StringUtils.upperFirst(this.type),
+      nouns: nouns || `${ this.lowercaseType }s`,
     };
   }
 

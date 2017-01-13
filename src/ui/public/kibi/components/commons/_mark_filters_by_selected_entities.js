@@ -1,4 +1,4 @@
-import onPage from 'ui/kibi/utils/on_page';
+import { onVisualizePage, onDashboardPage } from 'ui/kibi/utils/on_page';
 import _ from 'lodash';
 import ShouldEntityURIBeEnabledProvider from 'ui/kibi/components/commons/_should_entity_uri_be_enabled';
 
@@ -18,7 +18,7 @@ export default function MarkFiltersBySelectedEntitiesFactory(Promise, Private, k
         filters[index].meta.dependsOnSelectedEntities = res;
         filters[index].meta.dependsOnSelectedEntitiesDisabled = res && kibiState.isSelectedEntityDisabled();
         filters[index].meta.markDependOnSelectedEntities = false;
-        if (onPage.onVisualizePage() || onPage.onDashboardPage()) {
+        if (onVisualizePage() || onDashboardPage()) {
           filters[index].meta.markDependOnSelectedEntities = Boolean(kibiState.getEntityURI());
         }
       });

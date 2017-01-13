@@ -287,7 +287,7 @@ uiModules
                 promise = promise.then(function (data) {
                   scope.getVariable = false;
                   if (data.fields.length === 0 && data.datasourceType !== kibiUtils.DatasourceTypes.rest) { // either sparql or sql
-                    scope.linkToQuery = '#/settings/queries/' + scope.queryId;
+                    scope.linkToQuery = '#/management/queries/' + scope.queryId;
                     scope.getVariable = true;
                   }
                   return data.fields;

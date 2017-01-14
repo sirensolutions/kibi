@@ -78,7 +78,7 @@ function controller($rootScope, $scope, $route, kbnUrl, createNotifier, savedDas
     return $element.find('form[name="objectForm"]').hasClass('ng-valid');
   };
 
-  $scope.submit = function () {
+  $scope.saveObject = function () {
     dashboardGroup.id = dashboardGroup.title;
     dashboardGroup.save().then(function (groupId) {
       notify.info('Dashboard Group ' + dashboardGroup.title + ' was successfuly saved');
@@ -87,7 +87,7 @@ function controller($rootScope, $scope, $route, kbnUrl, createNotifier, savedDas
     });
   };
 
-  $scope.newDashboardGroup = function () {
+  $scope.newObject = function () {
     kbnUrl.change('management/kibana/dashboardgroups', {});
   };
 

@@ -473,7 +473,7 @@ function controller(Promise, es, kibiState, $rootScope, $scope, $timeout, config
 
     if (!isEqual) {
       $scope.changed = true;
-      $scope.isObjectValid();
+      $scope.isValid();
     }
   }
 
@@ -776,7 +776,7 @@ function controller(Promise, es, kibiState, $rootScope, $scope, $timeout, config
     if (!isEqual) {
       $scope.changed = true;
       return checkJoinMappings()
-      .then(() => $scope.isObjectValid())
+      .then(() => $scope.isValid())
       .then(() => updateDashboardsRelationsBasedOnTheIndicesRelations());
     }
   };
@@ -857,15 +857,15 @@ function controller(Promise, es, kibiState, $rootScope, $scope, $timeout, config
     dashboardsGraphExportOff();
   });
 
-  $scope.isObjectValid = function () {
+  $scope.isValid = function () {
     const { validDashboards, validIndices } = relationsHelper.checkIfRelationsAreValid($scope.relations);
     $scope.dashboardsRelationsAreValid = validDashboards;
     $scope.indicesRelationsAreValid = validIndices;
     return validIndices && validDashboards;
   };
-  $scope.isObjectValid();
+  $scope.isValid();
 
-  $scope.submit = function () {
+  $scope.saveObject = function () {
     $scope.relations.relationsIndices = _.map($scope.relations.relationsIndices, function (relation) {
       return _.omit(relation, [ 'errors' ]);
     });

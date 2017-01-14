@@ -4,8 +4,7 @@ import chrome from 'ui/chrome';
 import filterTemplate from 'ui/chrome/config/filter.html';
 import intervalTemplate from 'ui/chrome/config/interval.html';
 
-// kibi: added location service
-export default function ($compile, $location) {
+export default function ($compile) {
   return class KbnTopNavController {
     constructor(opts = []) {
       if (opts instanceof KbnTopNavController) {
@@ -37,8 +36,7 @@ export default function ($compile, $location) {
         const opt = this._applyOptDefault(rawOpt);
         if (!opt.key) throw new TypeError('KbnTopNav: menu items must have a key');
         this.opts.push(opt);
-        // kibi: pass the current path to hide or not the button
-        if (!opt.hideButton($location.path())) this.menuItems.push(opt);
+        if (!opt.hideButton()) this.menuItems.push(opt);
         if (opt.template) this.templates[opt.key] = opt.template;
         // kibi: pass the controller
         if (opt.controller) this.controllers[opt.key] = opt.controller;

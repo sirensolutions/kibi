@@ -47,7 +47,7 @@ function controller($window, $scope, $route, kbnUrl, createNotifier, Private, qu
     return $element.find('form[name="objectForm"]').hasClass('ng-valid');
   };
 
-  $scope.submit = function () {
+  $scope.saveObject = function () {
     if (kibiWarnings.datasource_encryption_warning) {
       let encrypted = false;
       for (let s = 0; s < datasource.schema.length; s++) {
@@ -118,7 +118,7 @@ function controller($window, $scope, $route, kbnUrl, createNotifier, Private, qu
     });
   }
 
-  $scope.newDatasource = function () {
+  $scope.newObject = function () {
     kbnUrl.change('management/kibana/datasources', {});
   };
 

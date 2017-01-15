@@ -177,7 +177,7 @@ describe('Kibi Components', function () {
         }).catch(done);
       });
 
-      it('copy', function (done) {
+      it('should not save the session automatically', function (done) {
         const expectedId = 'toId';
         sinon.stub(kibiSessionHelper, '_generateId', function () {
           return expectedId;
@@ -190,8 +190,8 @@ describe('Kibi Components', function () {
           return kibiSessionHelper._copySessionFromTo('fromId', 'toId').then(function (savedSession) {
             expect(savedSession.session_data.secret).to.eql(42);
             expect(savedSession.id).to.eql(expectedId);
-            expect(saveSessionCounter).to.be(1);
-            expect(getSaveSessionCounter).to.be(2);
+            expect(saveSessionCounter).to.be(0);
+            expect(getSaveSessionCounter).to.be(1);
             done();
           });
         }).catch(done);

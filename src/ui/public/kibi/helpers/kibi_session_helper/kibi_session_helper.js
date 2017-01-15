@@ -209,7 +209,7 @@ define(function (require) {
       return Promise.all([savedSessions.get(toId), savedSessions.get(fromId)]).then(([toSavedSession, fromSavedSession]) => {
         toSavedSession.session_data = fromSavedSession.session_data;
         this.savedSession = toSavedSession;
-        return this._syncToIndex(toSavedSession);
+        return toSavedSession;
       });
     };
 

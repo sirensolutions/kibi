@@ -74,6 +74,9 @@ app.directive('shareObjectUrl', function (Private, createNotifier) {
 
       $scope.getUrl = function () {
         let url = $location.absUrl();
+        // kibi: add/replace session id with the detached one
+        url = url.replace(`s:${$scope.$parent.currentSessionId}`, `s:${$scope.$parent.sharedSessionId}`);
+
         if ($scope.shareAsEmbed) {
           // kibi: added to control when to show hide kibi-nav-bar
           if ($scope.kibiNavbarVisible) {

@@ -3,6 +3,8 @@ define(function (require) {
   var HeaderPage = require('../../../support/pages/header_page');
   var SettingsPage = require('../../../support/pages/settings_page');
   var DiscoverPage = require('../../../support/pages/discover_page');
+  // kibi: angularHelper
+  var AngularHelper = require('../../../support/angular');
   var expect = require('intern/dojo/node!expect.js');
 
   return function (bdd, scenarioManager) {
@@ -11,6 +13,8 @@ define(function (require) {
       var headerPage;
       var settingsPage;
       var discoverPage;
+      // kibi: angularHelper
+      var angularHelper;
       var baseUrl;
       // The message changes for Firefox < 41 and Firefox >= 41
       // var expectedToastMessage = 'Share search: URL selected. Press Ctrl+C to copy.';
@@ -23,6 +27,8 @@ define(function (require) {
         headerPage = new HeaderPage(this.remote);
         settingsPage = new SettingsPage(this.remote);
         discoverPage = new DiscoverPage(this.remote);
+        // kibi: angularHelper
+        angularHelper = new AngularHelper(this.remote);
 
         baseUrl = common.getHostPort();
 
@@ -64,6 +70,8 @@ define(function (require) {
         bdd.it('should show "Share a link" caption', function () {
           var expectedCaption = 'Share a link';
           return discoverPage.clickShare()
+          // kibi: wait for session to be flushed
+          .then(() => angularHelper.waitForPendingRequests())
           .then(function () {
             return discoverPage.getShareCaption();
           })

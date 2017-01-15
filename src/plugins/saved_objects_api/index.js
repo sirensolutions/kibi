@@ -74,6 +74,7 @@ export default function (kibana) {
     uiExports: {
       hacks: [
         'plugins/saved_objects_api/services/types',
+        'plugins/saved_objects_api/modals/service'
       ],
       injectDefaultVars: () => ({
         savedObjectsAPIBuiltin: builtin

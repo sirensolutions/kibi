@@ -5,7 +5,6 @@ require('../styles/index.less');
 
 app.directive('shareObjectUrl', function (Private, createNotifier) {
   const urlShortener = Private(require('../lib/url_shortener'));
-  const kibiSessionHelper = Private(require('ui/kibi/helpers/kibi_session_helper/kibi_session_helper')); // kibi: added to persist session object
 
   return {
     restrict: 'E',
@@ -62,13 +61,6 @@ app.directive('shareObjectUrl', function (Private, createNotifier) {
 
       $scope.shareAsEmbed = $scope.getShareAsEmbed();
       $scope.kibiNavbarVisible = $scope.isKibiNavbarVisible(); // kibi: added to control when to show hide kibi-nav-bar
-
-      // kibi: added for the save session button
-      $scope.flushSession = function () {
-        kibiSessionHelper.flush()
-        .then(() => notify.info('Session data has been saved'))
-        .catch(notify.error);
-      };
 
       $scope.generateShortUrl = function () {
         if ($scope.shortGenerated) return;

@@ -62,29 +62,24 @@ ul.kibi-fixed-size {
   height: 128px;
 }
 
-div#kibi-primary-navbar {
+.global-nav {
+  .logo-small,
   .logo {
-    background-image: url('../images/no_border@2x.png');
-    background-repeat: no-repeat;
-    background-size: auto 41px;
-    background-position: 2px center;
-    background-color: #222222;
-    width: 252px;
-  }
-  .logo-small {
-    background-image: url('../images/no_border_sm@2x.png');
-    background-repeat: no-repeat;
-    background-size: auto 41px;
-    background-position: 2px center;
-    background-color: #222222;
-    width: 42px;
+    &.kibi {
+      background-image: url('~ui/kibi/images/no_border@2x.png');
+      background-repeat: no-repeat;
+      background-size: auto 48px;
+      background-position: 4px center;
+      background-color: #222222;
+      width: 252px;
+    }
   }
 }
+
 
 .kibiTitle {
   font-weight: bold;
 }
-
 
 navbar button {
   padding: 5px @navbar-padding-horizontal!important;

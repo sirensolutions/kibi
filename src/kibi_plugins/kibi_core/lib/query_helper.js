@@ -7,7 +7,7 @@ function QueryHelper(server) {
   this.server = server;
   this.config = server.config();
   this.log = logger(server, 'query_helper');
-  this.client = server.plugins.elasticsearch.client;
+  this.callWithInternalUser = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
 }
 
 QueryHelper.prototype.replaceVariablesForREST = function (headers, params, body, path, uri, variables, credentials) {
@@ -92,13 +92,13 @@ QueryHelper.prototype.replaceVariablesUsingEsDocument = function (s, uri, creden
 };
 
 QueryHelper.prototype.fetchDocument = function (index, type, id, credentials) {
-  const self = this;
-  let client = self.client;
-  if (credentials) {
-    // Every time we fetch document for index different then .kibi one we need a client with logged in user credentials
-    client = self.server.plugins.elasticsearch.createClient(credentials);
-  }
-  return client.search({
+  // KIBI5: see how to pass credentials if still necessary
+  //let client = self.client;
+  //if (credentials) {
+    //// Every time we fetch document for index different then .kibi one we need a client with logged in user credentials
+    //client = self.server.plugins.elasticsearch.createClient(credentials);
+  //}
+  return this.callWithInternalUser('search', {
     index: index,
     type: type,
     q: '_id: "' + id + '"'
@@ -108,10 +108,10 @@ QueryHelper.prototype.fetchDocument = function (index, type, id, credentials) {
     }
     return Promise.reject(new Error('No document matching _id=' + id + ' was found'));
   })
-  .catch(function (err) {
+  .catch(err => {
     const msg = 'Could not fetch document [/' + index + '/' + type + '/' + id + '], check logs for details please.';
-    self.log.warn(msg);
-    self.log.warn(err);
+    this.log.warn(msg);
+    this.log.warn(err);
     return Promise.reject(new Error(msg));
   });
 };
@@ -179,9 +179,8 @@ QueryHelper.prototype._getValue = function (doc, group) {
 };
 
 QueryHelper.prototype.fetchDocuments = function (type) {
-  const self = this;
-  return self.client.search({
-    index: self.config.get('kibana.index'),
+  return this.callWithInternalUser('search', {
+    index: this.config.get('kibana.index'),
     type: type,
     size: 100
   });

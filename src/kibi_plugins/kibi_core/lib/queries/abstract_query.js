@@ -26,7 +26,7 @@ function Query(server, snippetDefinition, cache) {
   this.server = server;
   this.serverConfig = server.config();
   this.log = logger(server, 'abstract_query');
-  this.client = server.plugins.elasticsearch.client;
+  this.callWithInternalUser = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
 
   this.id = snippetDefinition.id;
 
@@ -134,7 +134,7 @@ Query.prototype._fetchTemplate = function (templateId) {
     }
   }
 
-  return self.client.search({
+  return self.callWithInternalUser('search', {
     index: self.serverConfig.get('kibana.index'),
     type: 'template',
     q: '_id:' + templateId

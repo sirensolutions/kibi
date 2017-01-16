@@ -13,6 +13,7 @@ function GremlinServerHandler(server) {
   this.initialized = false;
   this.server = server;
   this.javaChecked = false;
+  this.callWithInternalUser = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
 }
 
 function startServer(self, fulfill, reject) {
@@ -25,7 +26,7 @@ function startServer(self, fulfill, reject) {
     const re = /.*?([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}:[0-9]*).*/;
 
     isJavaVersionOk(self).then(function () {
-      self.server.plugins.elasticsearch.client.nodes.info({ nodeId: '_local' }).then(function (response) {
+      self.callWithInternalUser('nodes.info', { nodeId: '_local' }).then(function (response) {
         let esTransportAddress = null;
         const esTransportAddressCollectedValues = [];
         _.each(response.nodes, (node) => {

@@ -2,8 +2,7 @@ import _ from 'lodash';
 
 module.exports = function (plugin, server) {
   const config = server.config();
-  const cluster = server.plugins.elasticsearch.getCluster('admin');
-  const callWithRequest = cluster.callWithRequest;
+  const callWithRequest = server.plugins.elasticsearch.getCluster('admin').callWithRequest;
 
   return Promise.all(
     [

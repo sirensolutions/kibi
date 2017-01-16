@@ -3,11 +3,9 @@
     <h1>
       Status: <span class="overall_state_color">{{ ui.serverStateMessage }}</span>
       <i class="fa overall_state_color state_icon" />
-      <span class="pull-right">
-        {{ ui.name }}
-      </span>
+
       <!-- kibi: added a button to download es diagnostics data -->
-      <span class="kibi-es-diagnostics">
+      <span class="pull-right kibi-es-diagnostics">
         <button class="btn btn-default" ng-click="esDiagnostics()">
           <i aria-hidden="true" class="fa fa-download"></i>
           Elasticsearch diagnostics
@@ -15,6 +13,10 @@
         <i class="fa fa-info" ng-click="showInfo = !showInfo"></i>
       </span>
       <!-- kibi: end -->
+
+      <span class="pull-right">
+        {{ ui.name }}
+      </span>
     </h1>
   </header>
 

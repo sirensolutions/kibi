@@ -9,7 +9,7 @@
   .kuiTab {
     appearance: none; /* 1 */
     cursor: pointer;
-    padding: 10px 30px;
+    padding: 10px 10px; /* kibi: reduced left/right padding from 30 -> 10 */
     font-size: 14px;
     color: $subduedFontColor;
     background-color: #ffffff; /* 1 */

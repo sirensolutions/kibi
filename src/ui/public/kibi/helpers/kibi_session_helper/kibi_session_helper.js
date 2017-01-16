@@ -172,6 +172,50 @@ define(function (require) {
       });
     };
 
+    /**
+     * Flushes the current session and copies its contents
+     * to a new session.
+     *
+     * The new session is not automatically saved to the index.
+     *
+     * @returns {Promise} - A promise fulfilled with an object with the following members:
+     *                      - detachedSessionId: the detached session id.
+     *                      - currentSessionId: the current session id.
+     */
+    KibiSessionHelper.prototype.detach = function () {
+      return this.getData()
+      .then((data) => {
+        const sessionData = _.cloneDeep(data);
+
+        return this.getId()
+        .then((detachedSessionId) => {
+          return this.flush()
+          .then(() => {
+            this.destroy();
+
+            return this.getId()
+            .then((currentSessionId) => {
+              return this.putData(sessionData)
+              .then(() => ({
+                currentSessionId,
+                detachedSessionId
+              }));
+            });
+          });
+        });
+      });
+    };
+
+    KibiSessionHelper.prototype.share = function () {
+      return this.getId().then(() => {
+        if (this.dirty) {
+          return this._syncToIndex(this.savedSession);
+        } else {
+          return this.savedSession;
+        }
+      });
+    };
+
     KibiSessionHelper.prototype.isDirty = function () {
       return this.getId().then(() => {
         return this.dirty;

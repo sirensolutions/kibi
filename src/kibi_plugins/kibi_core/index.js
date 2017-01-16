@@ -112,11 +112,7 @@ module.exports = function (kibana) {
         'plugins/kibi_core/management/sections/sessions'
       ],
       navbarExtensions: [
-        'plugins/kibi_core/management/sections/kibi_dashboard_groups/navbar',
-        'plugins/kibi_core/management/sections/kibi_relations/navbar',
-        'plugins/kibi_core/management/sections/kibi_templates/navbar',
-        'plugins/kibi_core/management/sections/kibi_queries/navbar',
-        'plugins/kibi_core/management/sections/kibi_datasources/navbar'
+        'plugins/kibi_core/management/sections/navbar'
       ]
     },
 

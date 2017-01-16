@@ -189,7 +189,7 @@ function controller(kibiState, $scope, $route, $window, kbnUrl, createNotifier, 
     return $element.find('form[name="objectForm"]').hasClass('ng-valid');
   };
 
-  $scope.submit = function () {
+  $scope.saveObject = function () {
     const titleChanged = $scope.$queryTitle !== $scope.query.title;
 
     $scope.query.id = $scope.query.title;
@@ -260,7 +260,7 @@ function controller(kibiState, $scope, $route, $window, kbnUrl, createNotifier, 
     return;
   };
 
-  $scope.newQuery = function () {
+  $scope.newObject = function () {
     kbnUrl.change('management/kibana/queries', {});
   };
 

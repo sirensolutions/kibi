@@ -132,7 +132,7 @@ function controller($scope, $route, kbnUrl, Private, createNotifier, queryEngine
     return $element.find('form[name="objectForm"]').hasClass('ng-valid');
   };
 
-  $scope.submit = function () {
+  $scope.saveObject = function () {
     const titleChanged = $scope.$templateTitle !== $scope.template.title;
     template.id = template.title;
     template.save().then(function (resp) {
@@ -152,7 +152,7 @@ function controller($scope, $route, kbnUrl, Private, createNotifier, queryEngine
     return;
   };
 
-  $scope.newTemplate = function () {
+  $scope.newObject = function () {
     kbnUrl.change('/management/kibana/templates', {});
   };
 }

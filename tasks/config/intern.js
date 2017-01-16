@@ -9,6 +9,7 @@ module.exports = function (grunt) {
     options: {
       runType: 'runner',
       config: 'test/intern',
+      grep: grunt.option('grep'),
       reporters: ['Console'],
       proxyPort: uiConfig.servers.webdriver.proxyPort,
       proxyUrl: uiConfig.servers.webdriver.protocol + '://' +

@@ -164,20 +164,70 @@ describe('Kibi Components', function () {
 
     });
 
-    describe('copySessionFrom', function () {
+    describe('detach', function () {
 
-      it('should not copy anything if either session is undefined', function (done) {
-        return Promise.all([
-          kibiSessionHelper._copySessionFromTo('', 'toId'),
-          kibiSessionHelper._copySessionFromTo('fromId', '')
-        ])
-        .then(function () {
-          expect(saveSessionCounter).to.be(0);
-          done();
+      it('should detach a session correctly', function (done) {
+        const currentSessionId = 'current';
+        const detachedSessionId = 'detached';
+
+        const sessionData = {
+          x: true
+        };
+
+        let counter = 1;
+        sinon.stub(kibiSessionHelper, '_generateId', function () {
+          if (counter === 1) {
+            counter++;
+            return detachedSessionId;
+          } else if (counter === 2) {
+            counter++;
+            return currentSessionId;
+          }
+        });
+
+        makeSureKibiSessionHelperInitialized(kibiSessionHelper).then(function () {
+          resetCounters();
+          kibiSessionHelper.destroy();
+
+          return kibiSessionHelper.putData(sessionData, true)
+          .then(() => kibiSessionHelper.detach()
+            .then((currentSessionId, detachedSessionId) => {
+              expect(currentSessionId).to.be(currentSessionId);
+              expect(detachedSessionId).to.be(detachedSessionId);
+              kibiSessionHelper.getData().then((data) => {
+                expect(data.x).to.be(true);
+                expect(saveSessionCounter).to.be(3);
+                done();
+              })
+              .catch(done);
+            })
+          )
+          .catch(done);
         }).catch(done);
       });
 
-      it('copy', function (done) {
+    });
+
+    describe('copySessionFrom', function () {
+
+      it('should not copy anything if either session is undefined', function (done) {
+        makeSureKibiSessionHelperInitialized(kibiSessionHelper).then(function () {
+          resetCounters();
+          kibiSessionHelper.destroy();
+          return Promise.all([
+            kibiSessionHelper._copySessionFromTo('', 'toId'),
+            kibiSessionHelper._copySessionFromTo('fromId', '')
+          ])
+          .then(function () {
+            expect(saveSessionCounter).to.be(0);
+            done();
+          })
+          .catch(done);
+        })
+        .catch(done);
+      });
+
+      it('should not save the session automatically', function (done) {
         const expectedId = 'toId';
         sinon.stub(kibiSessionHelper, '_generateId', function () {
           return expectedId;
@@ -190,7 +240,7 @@ describe('Kibi Components', function () {
           return kibiSessionHelper._copySessionFromTo('fromId', 'toId').then(function (savedSession) {
             expect(savedSession.session_data.secret).to.eql(42);
             expect(savedSession.id).to.eql(expectedId);
-            expect(saveSessionCounter).to.be(1);
+            expect(saveSessionCounter).to.be(0);
             expect(getSaveSessionCounter).to.be(2);
             done();
           });

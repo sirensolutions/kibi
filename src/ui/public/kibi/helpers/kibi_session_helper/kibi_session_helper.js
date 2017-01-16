@@ -1,3 +1,5 @@
+import chrome from 'ui/chrome';
+
 define(function (require) {
   const _ = require('lodash');
 
@@ -65,7 +67,10 @@ define(function (require) {
             self.id = cookieId;
           } else {
             self.id = self._generateId();
-            $cookies.put('ksid', self.id, {expires: self._getExpiresDate()});
+            $cookies.put('ksid', self.id, {
+              path: `${chrome.getBasePath()}/`,
+              expires: self._getExpiresDate()}
+            );
           }
 
           const sessionId = kibiState.getSessionId();
@@ -187,7 +192,9 @@ define(function (require) {
     };
 
     KibiSessionHelper.prototype.destroy = function () {
-      $cookies.remove('ksid');
+      $cookies.remove('ksid', {
+        path: `${chrome.getBasePath()}/`,
+      });
       delete this.id;
       delete this.session_data;
       _resetInitFlags.apply(this);

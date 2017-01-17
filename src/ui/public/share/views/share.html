@@ -1,4 +1,10 @@
-<form role="form" class="vis-share">
+<div class="" ng-show="flushing && !showError">
+  <div class="spinner"></div> Saving session data...
+</div>
+<div class="" ng-show="showError">
+  <i class="fa fa-warning"></i> An error occurred while saving session data, please try again.
+</div>
+<form role="form" class="vis-share" ng-hide="flushing || showError">
   <div class="form-group" ng-if="allowEmbed">
     <label>
       Embed this {{objectType}}

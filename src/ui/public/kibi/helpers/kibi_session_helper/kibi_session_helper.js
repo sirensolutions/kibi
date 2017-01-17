@@ -1,3 +1,5 @@
+import chrome from 'ui/chrome';
+
 define(function (require) {
   const _ = require('lodash');
 
@@ -65,7 +67,10 @@ define(function (require) {
             self.id = cookieId;
           } else {
             self.id = self._generateId();
-            $cookies.put('ksid', self.id, {expires: self._getExpiresDate()});
+            $cookies.put('ksid', self.id, {
+              path: `${chrome.getBasePath()}/`,
+              expires: self._getExpiresDate()}
+            );
           }
 
           const sessionId = kibiState.getSessionId();
@@ -167,6 +172,50 @@ define(function (require) {
       });
     };
 
+    /**
+     * Flushes the current session and copies its contents
+     * to a new session.
+     *
+     * The new session is not automatically saved to the index.
+     *
+     * @returns {Promise} - A promise fulfilled with an object with the following members:
+     *                      - detachedSessionId: the detached session id.
+     *                      - currentSessionId: the current session id.
+     */
+    KibiSessionHelper.prototype.detach = function () {
+      return this.getData()
+      .then((data) => {
+        const sessionData = _.cloneDeep(data);
+
+        return this.getId()
+        .then((detachedSessionId) => {
+          return this.flush()
+          .then(() => {
+            this.destroy();
+
+            return this.getId()
+            .then((currentSessionId) => {
+              return this.putData(sessionData)
+              .then(() => ({
+                currentSessionId,
+                detachedSessionId
+              }));
+            });
+          });
+        });
+      });
+    };
+
+    KibiSessionHelper.prototype.share = function () {
+      return this.getId().then(() => {
+        if (this.dirty) {
+          return this._syncToIndex(this.savedSession);
+        } else {
+          return this.savedSession;
+        }
+      });
+    };
+
     KibiSessionHelper.prototype.isDirty = function () {
       return this.getId().then(() => {
         return this.dirty;
@@ -187,7 +236,9 @@ define(function (require) {
     };
 
     KibiSessionHelper.prototype.destroy = function () {
-      $cookies.remove('ksid');
+      $cookies.remove('ksid', {
+        path: `${chrome.getBasePath()}/`,
+      });
       delete this.id;
       delete this.session_data;
       _resetInitFlags.apply(this);
@@ -209,7 +260,7 @@ define(function (require) {
       return Promise.all([savedSessions.get(toId), savedSessions.get(fromId)]).then(([toSavedSession, fromSavedSession]) => {
         toSavedSession.session_data = fromSavedSession.session_data;
         this.savedSession = toSavedSession;
-        return this._syncToIndex(toSavedSession);
+        return toSavedSession;
       });
     };
 

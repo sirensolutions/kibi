@@ -18,7 +18,9 @@ define(function (require) {
         // optional on-choose attr, sets the userOnChoose in our scope
         userOnChoose: '=?onChoose',
         // kibi: optional needed for filtering visualizations based on dashboard savedSearchId
-        savedSearchId: '=?savedSearchId'
+        savedSearchId: '=?savedSearchId',
+        // kibi: allow to override the number of objects per page
+        perPage: '=?perPage'
       },
       template: require('ui/partials/saved_object_finder.html'),
       controllerAs: 'finder',
@@ -38,8 +40,11 @@ define(function (require) {
 
         let self = this;
 
-        // The number of items to show in the list
-        $scope.perPage = config.get('savedObjects:perPage');
+        // kibi: allow to override the number of objects per page
+        if (!$scope.perPage) {
+          // The number of items to show in the list
+          $scope.perPage = config.get('savedObjects:perPage');
+        }
 
         // the text input element
         let $input = $element.find('input[ng-model=filter]');

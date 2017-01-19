@@ -52,6 +52,9 @@ define(function (require) {
             };
           }
         })
+        .sortBy(function (rel) {
+          return rel.indices[0].indexPatternId;
+        })
         .sortBy((rel) => rel.label)
         .value();
 

@@ -1,14 +1,17 @@
 import _ from 'lodash';
 import Scanner from 'ui/utils/scanner';
 import { StringUtils } from 'ui/utils/string_utils';
-import pluralize from 'pluralize';
 
 export class SavedObjectLoader {
-  constructor(SavedObjectClass, kbnIndex, esAdmin, kbnUrl, savedObjectsAPI, { cache, get, find } = {}) {
+  constructor(SavedObjectClass, kbnIndex, esAdmin, kbnUrl, { savedObjectsAPI, caching: { cache, find, get } = {}, mapHit } = {}) {
+    // kibi: kibi properties
     this.savedObjectsAPI = savedObjectsAPI;
+    this.mapHit = mapHit;
     this.cache = cache;
     this.cacheGet = get;
     this.cacheFind = find;
+    // kibi: end
+
     this.type = SavedObjectClass.type;
     this.Class = SavedObjectClass;
     this.lowercaseType = this.type.toLowerCase();
@@ -21,11 +24,10 @@ export class SavedObjectLoader {
       type: this.lowercaseType
     });
 
-    // kibi: added pluralize to make plurals
     this.loaderProperties = {
-      name: pluralize(this.lowercaseType),
+      name: `${ this.lowercaseType }s`,
       noun: StringUtils.upperFirst(this.type),
-      nouns: pluralize(this.lowercaseType)
+      nouns: `${ this.lowercaseType }s`,
     };
   }
 
@@ -77,6 +79,9 @@ export class SavedObjectLoader {
     const source = hit._source;
     source.id = hit._id;
     source.url = this.urlFor(hit._id);
+    if (this.mapHit) {
+      this.mapHit(source);
+    }
     return source;
   }
 

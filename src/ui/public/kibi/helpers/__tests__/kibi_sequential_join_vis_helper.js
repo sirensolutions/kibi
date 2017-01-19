@@ -6,7 +6,7 @@ import sinon from 'auto-release-sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import Promise from 'bluebird';
-import dateMath from 'ui/kibi/utils/date_math_precision';
+import { parseWithPrecision } from 'ui/kibi/utils/date_math_precision';
 import config from 'fixtures/kibi/config';
 
 let sequentialJoinVisHelper;
@@ -429,8 +429,8 @@ describe('Kibi Components', function () {
           expect(rel.join_sequence[0].relation[0].queries[0].query.bool.filter.bool.must[1]).to.be.eql({
             range: {
               date: {
-                gte: dateMath.parseWithPrecision(defaultTimeStart, false).valueOf(),
-                lte: dateMath.parseWithPrecision(defaultTimeEnd, true).valueOf(),
+                gte: parseWithPrecision(defaultTimeStart, false).valueOf(),
+                lte: parseWithPrecision(defaultTimeEnd, true).valueOf(),
                 format: 'epoch_millis'
               }
             }
@@ -496,8 +496,8 @@ describe('Kibi Components', function () {
           expect(rel.join_sequence[0].relation[0].queries[0].query.bool.filter.bool.must[1]).to.be.eql({
             range: {
               date: {
-                gte: dateMath.parseWithPrecision(defaultTimeStart, false).valueOf(),
-                lte: dateMath.parseWithPrecision(defaultTimeEnd, true).valueOf(),
+                gte: parseWithPrecision(defaultTimeStart, false).valueOf(),
+                lte: parseWithPrecision(defaultTimeEnd, true).valueOf(),
                 format: 'epoch_millis'
               }
             }

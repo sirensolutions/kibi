@@ -4,6 +4,7 @@ import DelayExecutionHelper from 'ui/kibi/helpers/delay_execution_helper';
 import SearchHelper from 'ui/kibi/helpers/search_helper';
 import chrome from 'ui/chrome';
 import DashboardGroupHelperProvider from 'ui/kibi/helpers/dashboard_group_helper';
+import { onDashboardPage } from 'ui/kibi/utils/on_page';
 
 export default function KibiNavBarHelperFactory(kibiState, globalState, getAppState, createNotifier, Private, $http, Promise, $rootScope,
     savedDashboards, kbnIndex) {
@@ -187,7 +188,7 @@ export default function KibiNavBarHelperFactory(kibiState, globalState, getAppSt
         });
       },
       (data) => {
-        if (self.chrome.getActiveTabId() === 'dashboard') {
+        if (onDashboardPage()) {
           const forceUpdate = data.forceUpdate;
           _fireUpdateAllCounts.call(self, data.ids, forceUpdate);
         }

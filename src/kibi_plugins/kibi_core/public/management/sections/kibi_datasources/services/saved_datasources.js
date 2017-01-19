@@ -18,6 +18,13 @@ require('plugins/kibana/management/saved_object_registry').register({
 uiModules
 .get('kibi_datasources/services/saved_datasources')
 .service('savedDatasources', function (savedObjectsAPI, Private, SavedDatasource, kbnIndex, esAdmin, kbnUrl) {
-  const cache = Private(CacheProvider);
-  return new SavedObjectLoader(SavedDatasource, kbnIndex, esAdmin, kbnUrl, savedObjectsAPI, { find: true, get: true, cache });
+  const options = {
+    caching: {
+      find: true,
+      get: true,
+      cache: Private(CacheProvider)
+    },
+    savedObjectsAPI
+  };
+  return new SavedObjectLoader(SavedDatasource, kbnIndex, esAdmin, kbnUrl, options);
 });

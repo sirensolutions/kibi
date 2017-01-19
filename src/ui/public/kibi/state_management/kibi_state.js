@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import qs from 'ui/utils/query_string';
-import dateMath from 'ui/kibi/utils/date_math_precision';
+import { parseWithPrecision } from 'ui/kibi/utils/date_math_precision';
 import uniqFilters from 'ui/filter_bar/lib/uniq_filters';
 import { toJson } from 'ui/utils/aggressive_parse';
 import angular from 'angular';
@@ -642,8 +642,8 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
         filter = {
           range : {
             [timefield.name]: {
-              gte: dateMath.parseWithPrecision(time.from, false, $rootScope.kibiTimePrecision).valueOf(),
-              lte: dateMath.parseWithPrecision(time.to, true, $rootScope.kibiTimePrecision).valueOf(),
+              gte: parseWithPrecision(time.from, false, $rootScope.kibiTimePrecision).valueOf(),
+              lte: parseWithPrecision(time.to, true, $rootScope.kibiTimePrecision).valueOf(),
               format: 'epoch_millis'
             }
           }
@@ -678,8 +678,8 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
     }
 
     return {
-      min: dateMath.parseWithPrecision(timeFrom, false, $rootScope.kibiTimePrecision),
-      max: dateMath.parseWithPrecision(timeTo, true, $rootScope.kibiTimePrecision)
+      min: parseWithPrecision(timeFrom, false, $rootScope.kibiTimePrecision),
+      max: parseWithPrecision(timeTo, true, $rootScope.kibiTimePrecision)
     };
   };
 

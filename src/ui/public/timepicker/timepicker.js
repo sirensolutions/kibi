@@ -16,7 +16,7 @@ const notify = new Notifier({
 });
 
 // kibi: imports
-import dateMath from 'ui/kibi/utils/date_math_precision';
+import { parse, parseWithPrecision } from 'ui/kibi/utils/date_math_precision';
 // kibi: added to allow syncing time to other dashboards
 import 'ui/kibi/directives/kibi_sync_time_to';
 // kibi: end
@@ -103,7 +103,7 @@ module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshInter
               $scope.relative.unit = relativeParts[2];
             } else {
               // kibi: add support for time precision
-              const duration = moment.duration(moment().diff(dateMath.parseWithPrecision($scope.from, false, $scope.kibiTimePrecision)));
+              const duration = moment.duration(moment().diff(parseWithPrecision($scope.from, false, $scope.kibiTimePrecision)));
               const units = _.pluck(_.clone($scope.relativeOptions).reverse(), 'value');
               if ($scope.from.toString().split('/')[1]) $scope.relative.round = true;
               for (let i = 0; i < units.length; i++) {
@@ -122,12 +122,12 @@ module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshInter
             break;
           case 'absolute':
             // kibi: add support for time precision
-            $scope.absolute.from = dateMath.parseWithPrecision(
+            $scope.absolute.from = parseWithPrecision(
               $scope.from || moment().subtract('minutes', 15),
               false,
               $scope.kibiTimePrecision
             );
-            $scope.absolute.to = dateMath.parseWithPrecision($scope.to || moment(), true, $scope.kibiTimePrecision);
+            $scope.absolute.to = parseWithPrecision($scope.to || moment(), true, $scope.kibiTimePrecision);
             break;
         }
 
@@ -144,7 +144,7 @@ module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshInter
       };
 
       $scope.formatRelative = function () {
-        const parsed = dateMath.parse(getRelativeString());
+        const parsed = parse(getRelativeString());
         $scope.relative.preview =  parsed ? parsed.format($scope.format) : undefined;
         return parsed;
       };

@@ -193,6 +193,7 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
 
       $scope.$watch('state.options.darkTheme', setDarkTheme);
 
+      // kibi: removed open button
       $scope.topNavMenu = [{
         key: 'new',
         description: 'New Dashboard',
@@ -208,11 +209,6 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
         description: 'Save Dashboard',
         template: require('plugins/kibana/dashboard/partials/save_dashboard.html'),
         testId: 'dashboardSaveButton',
-      }, {
-        key: 'open',
-        description: 'Open Saved Dashboard',
-        template: require('plugins/kibana/dashboard/partials/load_dashboard.html'),
-        testId: 'dashboardOpenButton',
       }, {
         key: 'share',
         description: 'Share Dashboard',

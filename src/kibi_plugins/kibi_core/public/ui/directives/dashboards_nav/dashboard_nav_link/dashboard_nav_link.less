@@ -1,0 +1,86 @@
+@import (reference) "~ui/styles/variables";
+@import (reference) "../variables";
+
+.dashboards-nav-link {
+  background-color: @dashboard-inactive-background;
+  clear: both;
+
+  width: @dashboards-nav-closed-width;
+  .is-dashboards-nav-open & {
+    width: @dashboards-nav-open-width;
+  }
+
+  &.subnav {
+    width: calc(@dashboards-nav-open-width - @dashboards-nav-closed-width);
+    line-height: @dashboard-line-height;
+    height: @dashboard-height;
+    margin-left: @dashboards-nav-closed-width;
+    background-color: @dashboard-subnav;
+
+    .title {
+      width: calc(@dashboards-nav-open-width - @dashboards-nav-closed-width);
+    }
+
+  }
+
+  &:hover,
+  &.active {
+    background-color: @dashboard-active-background;
+    .anchor {
+      color: @white;
+      text-decoration: none;
+    }
+  }
+
+  .anchor {
+    float: left;
+    display: block;
+    height: 100%;
+    color: #ebf7fa;
+    &:focus {
+      color: @white;
+    }
+  }
+
+  .icon {
+    float: left;
+    display: inline-block;
+    width: @dashboards-nav-closed-width;
+    height: @dashboard-height;
+    text-align: center;
+    font-size: 1.7em;
+    color: @white;
+  }
+
+  /**
+   * This imgae is used to display the icon.
+   */
+  .icon-image {
+    height: 18px;
+    margin-top: 8px;
+  }
+
+  /**
+   * This placeholder text gets shown if there is no specified icon.
+   */
+  .icon-placeholder {
+    line-height: @dashboard-height;
+    background-position: center;
+    background-size: contain;
+    background-repeat: no-repeat;
+  }
+
+  .title {
+    display: none;
+    width: calc(@dashboards-nav-open-width - @dropdown-width - @dashboards-nav-closed-width);
+    font-size: 0.9em;
+    text-align: left;
+    padding-left: 3px;
+    line-height: @dashboard-height;
+    white-space: nowrap;
+
+    .is-dashboards-nav-open & {
+      display: inline-block;
+    }
+  }
+}

@@ -40,7 +40,6 @@ WARNING: Modifying the following settings can signficantly affect Kibana's perfo
 [horizontal]
 `kibi:awesomeDemoMode`:: Set to true to suppress all warnings and errors.
 `kibi:timePrecision` :: Set to generate time filters with certain precision. Possible values are: s, m, h, d, w, M, y.
-`kibi:zoom` :: Set the zoom level for the whole page. Good if the default size is too big for you. Does not work in Firefox.
 `kibi:relationalPanel` :: Display the Relational Panel in the dashboard tab.
 `kibi:relations` :: Relations between index patterns and dashboards.
 `kibi:session_cookie_expire`:: Set duration of cookie session (in seconds).

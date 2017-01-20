@@ -79,6 +79,7 @@ export class SavedObjectLoader {
     const source = hit._source;
     source.id = hit._id;
     source.url = this.urlFor(hit._id);
+    // kibi: alter the contents of a source
     if (this.mapHit) {
       this.mapHit(source);
     }

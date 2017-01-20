@@ -48,8 +48,10 @@ define(function (require) {
             try {
               if (option._templateVarsString) {
                 let toJson = JSON.parse(option._templateVarsString);
-                option.templateVars.label = toJson.label;
-                option._label = toJson.label;
+                option.templateVars = toJson;
+                if (toJson.label) {
+                  option._label = toJson.label;
+                }
               }
             } catch (err) {
               $scope.jsonError[index].message = err.toString();

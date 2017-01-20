@@ -17,6 +17,13 @@ require('plugins/kibana/management/saved_object_registry').register({
 uiModules
 .get('templates_editor/services/saved_templates')
 .service('savedTemplates', function (savedObjectsAPI, Private, SavedTemplate, kbnIndex, esAdmin, kbnUrl) {
-  const cache = Private(CacheProvider);
-  return new SavedObjectLoader(SavedTemplate, kbnIndex, esAdmin, kbnUrl, savedObjectsAPI, { find: true, get: true, cache });
+  const options = {
+    caching: {
+      find: true,
+      get: true,
+      cache: Private(CacheProvider)
+    },
+    savedObjectsAPI
+  };
+  return new SavedObjectLoader(SavedTemplate, kbnIndex, esAdmin, kbnUrl, options);
 });

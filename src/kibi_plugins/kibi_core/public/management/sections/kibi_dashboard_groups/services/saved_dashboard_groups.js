@@ -18,6 +18,16 @@ require('plugins/kibana/management/saved_object_registry').register({
 uiModules
 .get('dashboard_groups_editor/services/saved_dashboard_groups')
 .service('savedDashboardGroups', function (savedObjectsAPI, Private, SavedDashboardGroup, kbnIndex, esAdmin, kbnUrl) {
-  const cache = Private(CacheProvider);
-  return new SavedObjectLoader(SavedDashboardGroup, kbnIndex, esAdmin, kbnUrl, savedObjectsAPI, { find: true, get: true, cache });
+  const options = {
+    caching: {
+      find: true,
+      get: true,
+      cache: Private(CacheProvider)
+    },
+    savedObjectsAPI,
+    mapHit(source) {
+      source.dashboards = JSON.parse(source.dashboards);
+    }
+  };
+  return new SavedObjectLoader(SavedDashboardGroup, kbnIndex, esAdmin, kbnUrl, options);
 });

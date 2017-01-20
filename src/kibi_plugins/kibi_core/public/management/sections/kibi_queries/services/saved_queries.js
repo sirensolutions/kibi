@@ -17,10 +17,20 @@ require('plugins/kibana/management/saved_object_registry').register({
 uiModules
 .get('queries_editor/services/saved_queries')
 .service('savedQueries', function (savedObjectsAPI, Private, SavedQuery, kbnIndex, esAdmin, kbnUrl) {
-  const cache = {
-    cache: Private(CacheProvider),
-    find: true,
-    get: true
+  const options = {
+    caching: {
+      find: true,
+      get: true,
+      cache: Private(CacheProvider)
+    },
+    savedObjectsAPI
   };
-  return new SavedObjectLoader(SavedQuery, kbnIndex, esAdmin, kbnUrl, savedObjectsAPI, cache);
+  const savedQueryLoader = new SavedObjectLoader(SavedQuery, kbnIndex, esAdmin, kbnUrl, options);
+  // Customize loader properties since adding an 's' on type doesn't work for type 'query' .
+  savedQueryLoader.loaderProperties = {
+    name: 'queries',
+    noun: 'Query',
+    nouns: 'queries'
+  };
+  return savedQueryLoader;
 });

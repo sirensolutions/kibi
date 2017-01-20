@@ -19,7 +19,7 @@ app.service('savedVisualizations', function (savedObjectsAPI, Promise, esAdmin, 
     location: 'Saved Visualization Service'
   });
 
-  const saveVisualizationLoader = new SavedObjectLoader(SavedVis, kbnIndex, esAdmin, kbnUrl, savedObjectsAPI);
+  const saveVisualizationLoader = new SavedObjectLoader(SavedVis, kbnIndex, esAdmin, kbnUrl, { savedObjectsAPI });
   saveVisualizationLoader.mapHits = function (hit) {
     const source = hit._source;
     source.id = hit._id;

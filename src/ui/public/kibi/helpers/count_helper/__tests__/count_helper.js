@@ -4,7 +4,7 @@ import _ from 'lodash';
 import MockState from 'fixtures/mock_state';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import dateMath from 'ui/kibi/utils/date_math_precision';
+import { parseWithPrecision } from 'ui/kibi/utils/date_math_precision';
 import mockSavedObjects from 'fixtures/kibi/mock_saved_objects';
 import noDigestPromises from 'test_utils/no_digest_promises';
 import config from 'fixtures/kibi/config';
@@ -145,8 +145,8 @@ describe('Kibi Components', function () {
                     {
                       range: {
                         date: {
-                          gte: dateMath.parseWithPrecision(defaultStartTime, false).valueOf(),
-                          lte: dateMath.parseWithPrecision(defaultEndTime, true).valueOf(),
+                          gte: parseWithPrecision(defaultStartTime, false).valueOf(),
+                          lte: parseWithPrecision(defaultEndTime, true).valueOf(),
                           format: 'epoch_millis'
                         }
                       }
@@ -189,8 +189,8 @@ describe('Kibi Components', function () {
                     {
                       range: {
                         date: {
-                          gte: dateMath.parseWithPrecision(defaultStartTime, false).valueOf(),
-                          lte: dateMath.parseWithPrecision(defaultEndTime, true).valueOf(),
+                          gte: parseWithPrecision(defaultStartTime, false).valueOf(),
+                          lte: parseWithPrecision(defaultEndTime, true).valueOf(),
                           format: 'epoch_millis'
                         }
                       }
@@ -241,8 +241,8 @@ describe('Kibi Components', function () {
                     {
                       range: {
                         date: {
-                          gte: dateMath.parseWithPrecision(defaultStartTime, false).valueOf(),
-                          lte: dateMath.parseWithPrecision(defaultEndTime, true).valueOf(),
+                          gte: parseWithPrecision(defaultStartTime, false).valueOf(),
+                          lte: parseWithPrecision(defaultEndTime, true).valueOf(),
                           format: 'epoch_millis'
                         }
                       }
@@ -288,8 +288,8 @@ describe('Kibi Components', function () {
                     {
                       range: {
                         date: {
-                          gte: dateMath.parseWithPrecision(defaultStartTime, false).valueOf(),
-                          lte: dateMath.parseWithPrecision(defaultEndTime, true).valueOf(),
+                          gte: parseWithPrecision(defaultStartTime, false).valueOf(),
+                          lte: parseWithPrecision(defaultEndTime, true).valueOf(),
                           format: 'epoch_millis'
                         }
                       }
@@ -334,8 +334,8 @@ describe('Kibi Components', function () {
                     {
                       range: {
                         date: {
-                          gte: dateMath.parseWithPrecision(defaultStartTime, false).valueOf(),
-                          lte: dateMath.parseWithPrecision(defaultEndTime, true).valueOf(),
+                          gte: parseWithPrecision(defaultStartTime, false).valueOf(),
+                          lte: parseWithPrecision(defaultEndTime, true).valueOf(),
                           format: 'epoch_millis'
                         }
                       }
@@ -412,8 +412,8 @@ describe('Kibi Components', function () {
                     {
                       range: {
                         date: {
-                          gte: dateMath.parseWithPrecision(defaultStartTime, false).valueOf(),
-                          lte: dateMath.parseWithPrecision(defaultEndTime, true).valueOf(),
+                          gte: parseWithPrecision(defaultStartTime, false).valueOf(),
+                          lte: parseWithPrecision(defaultEndTime, true).valueOf(),
                           format: 'epoch_millis'
                         }
                       }
@@ -484,8 +484,8 @@ describe('Kibi Components', function () {
                     {
                       range: {
                         date: {
-                          gte: dateMath.parseWithPrecision(defaultStartTime, false).valueOf(),
-                          lte: dateMath.parseWithPrecision(defaultEndTime, true).valueOf(),
+                          gte: parseWithPrecision(defaultStartTime, false).valueOf(),
+                          lte: parseWithPrecision(defaultEndTime, true).valueOf(),
                           format: 'epoch_millis'
                         }
                       }
@@ -551,8 +551,8 @@ describe('Kibi Components', function () {
                     {
                       range: {
                         date: {
-                          gte: dateMath.parseWithPrecision(defaultStartTime, false).valueOf(),
-                          lte: dateMath.parseWithPrecision(defaultEndTime, true).valueOf(),
+                          gte: parseWithPrecision(defaultStartTime, false).valueOf(),
+                          lte: parseWithPrecision(defaultEndTime, true).valueOf(),
                           format: 'epoch_millis'
                         }
                       }

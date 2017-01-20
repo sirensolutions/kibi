@@ -218,10 +218,6 @@ export default function DashboardGroupHelperFactory($timeout, kibiState, Private
       }
       // here first fetch all dashboards to be able to verify that dashboards mentioned in the group still exists
       return savedDashboards.find().then(function (respDashboards) {
-        const listOfDashboards = _.map(respDashboards.hits, function (hit) {
-          return hit.id;
-        });
-
         const dashboardGroups1 = [];
         let fail = '';
         // first iterate over existing groups
@@ -229,12 +225,11 @@ export default function DashboardGroupHelperFactory($timeout, kibiState, Private
 
           // selected dashboard
           let selected;
-          let dashboards = [];
           const dashboardsArray = group.dashboards;
           // check that all dashboards still exists
           // in case there is one which does not display a warning
           _.each(dashboardsArray, function (d) {
-            if (listOfDashboards.indexOf(d.id) === -1) {
+            if (!_.find(respDashboards.hits, 'id', d.id)) {
               fail = '"' + group.title + '"' + ' dashboard group contains non existing dashboard "' + d.id + '". ' +
                 'Edit dashboard group to remove non existing dashboard';
               return false;
@@ -245,8 +240,8 @@ export default function DashboardGroupHelperFactory($timeout, kibiState, Private
             return false;
           }
 
-          dashboards = _.map(dashboardsArray, function (d) {
-            const dashboard = self._getDashboardForGroup(group.id, group.title, d);
+          const dashboards = _.map(dashboardsArray, function (d) {
+            const dashboard = self._getDashboardForGroup(group.id, group.title, _.find(respDashboards.hits, 'id', d.id));
             if (currentDashboardId && currentDashboardId === dashboard.id) {
               selected = dashboard;
             }

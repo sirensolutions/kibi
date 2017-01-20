@@ -13,6 +13,13 @@ registry.register({
 uiModules
 .get('ui/kibi/helpers/kibi_session_helper/services/saved_sessions')
 .service('savedSessions', function (savedObjectsAPI, Private, SavedSession, kbnIndex, esAdmin, kbnUrl) {
-  const cache = Private(CacheProvider);
-  return new SavedObjectLoader(SavedSession, kbnIndex, esAdmin, kbnUrl, savedObjectsAPI, { find: true, get: true, cache });
+  const options = {
+    caching: {
+      find: true,
+      get: true,
+      cache: Private(CacheProvider)
+    },
+    savedObjectsAPI
+  };
+  return new SavedObjectLoader(SavedSession, kbnIndex, esAdmin, kbnUrl, options);
 });

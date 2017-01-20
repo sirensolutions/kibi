@@ -7,7 +7,7 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import MockState from 'fixtures/mock_state';
 import mockSavedObjects from 'fixtures/kibi/mock_saved_objects';
-import dateMath from 'ui/kibi/utils/date_math_precision';
+import { parseWithPrecision } from 'ui/kibi/utils/date_math_precision';
 import noDigestPromises from 'test_utils/no_digest_promises';
 
 import 'ui/kibi/state_management/kibi_state';
@@ -670,8 +670,8 @@ describe('State Management', function () {
           expect(state1.time).to.eql({
             range: {
               date: {
-                gte: dateMath.parseWithPrecision('2006-09-01T12:00:00.000Z', false).valueOf(),
-                lte: dateMath.parseWithPrecision('2009-09-01T12:00:00.000Z', true).valueOf(),
+                gte: parseWithPrecision('2006-09-01T12:00:00.000Z', false).valueOf(),
+                lte: parseWithPrecision('2009-09-01T12:00:00.000Z', true).valueOf(),
                 format: 'epoch_millis'
               }
             }
@@ -679,8 +679,8 @@ describe('State Management', function () {
           expect(state2.time).to.eql({
             range: {
               date: {
-                gte: dateMath.parseWithPrecision('2004-09-01T12:00:00.000Z', false).valueOf(),
-                lte: dateMath.parseWithPrecision('2010-09-01T12:00:00.000Z', true).valueOf(),
+                gte: parseWithPrecision('2004-09-01T12:00:00.000Z', false).valueOf(),
+                lte: parseWithPrecision('2010-09-01T12:00:00.000Z', true).valueOf(),
                 format: 'epoch_millis'
               }
             }
@@ -695,8 +695,8 @@ describe('State Management', function () {
           expect(time).to.eql({
             range: {
               date: {
-                gte: dateMath.parseWithPrecision(defaultStartTime, false).valueOf(),
-                lte: dateMath.parseWithPrecision(defaultEndTime, true).valueOf(),
+                gte: parseWithPrecision(defaultStartTime, false).valueOf(),
+                lte: parseWithPrecision(defaultEndTime, true).valueOf(),
                 format: 'epoch_millis'
               }
             }
@@ -2227,8 +2227,8 @@ describe('State Management', function () {
             expect(filters[1].join_set.queries['index-b']['dashboard-b'][2]).to.eql({
               range: {
                 date: {
-                  gte: dateMath.parseWithPrecision(defaultStartTime, false).valueOf(),
-                  lte: dateMath.parseWithPrecision(defaultEndTime, true).valueOf(),
+                  gte: parseWithPrecision(defaultStartTime, false).valueOf(),
+                  lte: parseWithPrecision(defaultEndTime, true).valueOf(),
                   format: 'epoch_millis'
                 }
               }
@@ -2284,8 +2284,8 @@ describe('State Management', function () {
             expect(filters[1].join_set.queries['index-b']['dashboard-b'][2]).to.eql({
               range: {
                 date: {
-                  gte: dateMath.parseWithPrecision(defaultStartTime, false).valueOf(),
-                  lte: dateMath.parseWithPrecision(defaultEndTime, true).valueOf(),
+                  gte: parseWithPrecision(defaultStartTime, false).valueOf(),
+                  lte: parseWithPrecision(defaultEndTime, true).valueOf(),
                   format: 'epoch_millis'
                 }
               }
@@ -2330,8 +2330,8 @@ describe('State Management', function () {
             expect(filters[0].join_set.queries['index-b']['dashboard-b'][2]).to.eql({
               range: {
                 date: {
-                  gte: dateMath.parseWithPrecision(defaultStartTime, false).valueOf(),
-                  lte: dateMath.parseWithPrecision(defaultEndTime, true).valueOf(),
+                  gte: parseWithPrecision(defaultStartTime, false).valueOf(),
+                  lte: parseWithPrecision(defaultEndTime, true).valueOf(),
                   format: 'epoch_millis'
                 }
               }
@@ -2381,8 +2381,8 @@ describe('State Management', function () {
             expect(filters[0].join_set.queries['index-b']['dashboard-b'][2]).to.eql({
               range: {
                 date: {
-                  gte: dateMath.parseWithPrecision(defaultStartTime, false).valueOf(),
-                  lte: dateMath.parseWithPrecision(defaultEndTime, true).valueOf(),
+                  gte: parseWithPrecision(defaultStartTime, false).valueOf(),
+                  lte: parseWithPrecision(defaultEndTime, true).valueOf(),
                   format: 'epoch_millis'
                 }
               }
@@ -2426,8 +2426,8 @@ describe('State Management', function () {
             expect(filters[0].join_set.queries['index-b']['dashboard-b'][1]).to.eql({
               range: {
                 date: {
-                  gte: dateMath.parseWithPrecision('2005-09-01T12:00:00.000Z', false).valueOf(),
-                  lte: dateMath.parseWithPrecision('2015-09-05T12:00:00.000Z', true).valueOf(),
+                  gte: parseWithPrecision('2005-09-01T12:00:00.000Z', false).valueOf(),
+                  lte: parseWithPrecision('2015-09-05T12:00:00.000Z', true).valueOf(),
                   format: 'epoch_millis'
                 }
               }

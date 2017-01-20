@@ -124,9 +124,6 @@ Query.prototype._returnAnEmptyQueryResultsPromise = function (message) {
 Query.prototype._fetchTemplate = function (templateId) {
   const self = this;
 
-  // here make sure to turn spaces into dashes
-  templateId = kibiUtils.slugifyId(templateId);
-
   if (self.cache) {
     const v =  self.cache.get(templateId);
     if (v) {

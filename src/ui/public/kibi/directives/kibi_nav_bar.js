@@ -64,9 +64,19 @@ define(function (require) {
           $scope.tabScrollerState[1] = sl === tabContainer[0].scrollWidth - tabContainer[0].clientWidth;
         };
 
+        function isActiveTabVisible(activeTab) {
+          if (activeTab !== null) {
+            var tab = activeTab.getBoundingClientRect();
+            return !(tab.right < 0) && !(tab.left - tabContainer[0].offsetWidth >= 0);
+          }
+        };
+
         $scope.onTabContainerResize = function () {
           $scope.tabScrollerVisible = tabContainer[0].offsetWidth < tabContainer[0].scrollWidth;
           updateTabScroller();
+          if (!isActiveTabVisible(document.getElementsByClassName('active')[1])) {
+            $scope.scrollTabs(-1);
+          }
         };
 
         $scope.tabResizeChecker.on('resize', $scope.onTabContainerResize);

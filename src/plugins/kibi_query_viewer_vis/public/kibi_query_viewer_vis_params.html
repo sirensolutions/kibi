@@ -44,7 +44,17 @@
             <kbn-info info="Specify the JSON configuration passed to the template."></kbn-info>
           </label>
           <div ng-class="{ 'red-border': !!jsonError[$index].message }"
-               ui-ace="{ onLoad: aceLoaded, mode: 'json' }"
+               ui-ace="{
+                 onLoad: aceLoaded,
+                 advanced: {
+                   tabSize: 2
+                 },
+                 rendererOptions: {
+                   showPrintMargin: false,
+                   maxLines: 4294967296
+                 },
+                 mode: 'json'
+               }"
                msd-elastic id="templateVars-{{$index}}"
                ng-model="queryDefinition._templateVarsString"
                class="form-control templateVariablesEditor"

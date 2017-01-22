@@ -121,6 +121,9 @@ QueryHelper.prototype.fetchDocument = function (index, type, id, credentials) {
  * Replace variable placeholders
  * Currently supported syntax:
  *    @doc[_source][id]@
+ * Special variables @doc[_source][id]@
+ * will be replaced by values extracted from the documents
+ * matching the current selection
  *
  */
 QueryHelper.prototype._replaceVariablesInTheQuery = function (doc, query, datasource) {
@@ -142,6 +145,24 @@ QueryHelper.prototype._replaceVariablesInTheQuery = function (doc, query, dataso
       value = index + '/' + type + '/' + id;
     } else {
       value = self._getValue(doc, group);
+    }
+
+    if (value instanceof Array) {
+      ret = '[';
+      for (var i = 0; i < value.length; i++) {
+        var v = value[i];
+        if (i > 0) {
+          ret += ',';
+        }
+        if (typeof v === 'string' || v instanceof String) {
+          ret += '"' + v.replace(/"/, '\\"') + '"';
+        } else if (v !== null && typeof v === 'object') {
+          ret += JSON.stringify(v);
+        } else {
+          ret += v;
+        }
+      }
+      ret += ']';
     }
 
     var reGroup = self._escapeRegexSpecialCharacters(match[1]);

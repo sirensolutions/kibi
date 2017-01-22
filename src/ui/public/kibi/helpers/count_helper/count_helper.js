@@ -12,13 +12,8 @@ define(function (require) {
     function CountHelper() {
     }
 
-    /*
-     * The parameter savedSearch should be a reference to a SavedSearch
-     * instance, not a SavedSearch id
-     */
-    CountHelper.prototype.constructCountQuery = function (filters, queries, time) {
+    CountHelper.prototype.constructCountQuery = function (filters, queries, time, size = 0) {
       var query = {
-        size: 0, // we do not need hits just a count
         query: {
           bool: {
             must: {
@@ -33,6 +28,11 @@ define(function (require) {
           }
         }
       };
+
+      // special case when explicitely null do not add size parameter
+      if (size !== null) {
+        query.size = size;
+      }
 
       if (filters) {
         _.each(filters, function (filter) {
@@ -107,7 +107,15 @@ define(function (require) {
 
       // add time
       if (time) {
-        query.query.bool.filter.bool.must.push(time);
+        if (time.constructor === Array) {
+          _.each(time, (t) => {
+            if (t) {
+              query.query.bool.filter.bool.must.push(t);
+            }
+          });
+        } else if (time.range) {
+          query.query.bool.filter.bool.must.push(time);
+        }
       }
       return query;
     };

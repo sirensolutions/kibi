@@ -1,5 +1,4 @@
 describe('Kibi Controllers', function () {
-  const Promise = require('bluebird');
   const ngMock = require('ngMock');
   const expect = require('expect.js');
   const sinon = require('auto-release-sinon');

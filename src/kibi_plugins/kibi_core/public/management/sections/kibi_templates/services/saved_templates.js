@@ -25,5 +25,11 @@ uiModules
     },
     savedObjectsAPI
   };
-  return new SavedObjectLoader(SavedTemplate, kbnIndex, esAdmin, kbnUrl, options);
+  const savedTemplateLoader = new SavedObjectLoader(SavedTemplate, kbnIndex, esAdmin, kbnUrl, options);
+
+  savedTemplateLoader.urlFor = function (id) {
+    return kbnUrl.eval('#/management/kibana/templates/{{id}}', { id: id });
+  };
+
+  return savedTemplateLoader;
 });

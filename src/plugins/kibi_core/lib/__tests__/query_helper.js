@@ -29,8 +29,11 @@ var fakeServer = {
                 {
                   _id: '_id1',
                   _source: {
-                    id: 'id1'
-                  }
+                    id: 'id1',
+                    numerical_ids: [1,2],
+                    string_ids: ['a','b'],
+                    mixed_ids: [1,'a',2,'b']
+                  },
                 }
               ]
             }
@@ -47,7 +50,10 @@ var fakeServer = {
                   {
                     _id: '_id1',
                     _source: {
-                      id: 'id1'
+                      id: 'id1',
+                      numerical_ids: [1,2],
+                      string_ids: ['a','b'],
+                      mixed_ids: [1,'a',2,'b']
                     }
                   }
                 ]
@@ -130,6 +136,43 @@ describe('Query Helper', function () {
           done();
         });
       });
+
+      it('replace in single where value is an array of integers', function (done) {
+        var uri = 'index1/type1/id1';
+        var s = '[@doc[_source][numerical_ids]@]';
+        var expected = '[1,2]';
+        queryHelper.replaceVariablesUsingEsDocument(s, uri, credentials).then(function (ret) {
+          expect(clientSearchCounter).to.equal(0);
+          expect(createdClientSearchCounter).to.equal(1);
+          expect(ret).to.equal(expected);
+          done();
+        });
+      });
+
+      it('replace in single where value is an array strings', function (done) {
+        var uri = 'index1/type1/id1';
+        var s = '[@doc[_source][string_ids]@]';
+        var expected = '["a","b"]';
+        queryHelper.replaceVariablesUsingEsDocument(s, uri, credentials).then(function (ret) {
+          expect(clientSearchCounter).to.equal(0);
+          expect(createdClientSearchCounter).to.equal(1);
+          expect(ret).to.equal(expected);
+          done();
+        });
+      });
+
+      it('replace in single where value is an array of mixed strings and integers', function (done) {
+        var uri = 'index1/type1/id1';
+        var s = '[@doc[_source][mixed_ids]@]';
+        var expected = '[1,"a",2,"b"]';
+        queryHelper.replaceVariablesUsingEsDocument(s, uri, credentials).then(function (ret) {
+          expect(clientSearchCounter).to.equal(0);
+          expect(createdClientSearchCounter).to.equal(1);
+          expect(ret).to.equal(expected);
+          done();
+        });
+      });
+
 
       it('replace in an array of objects with name and value', function (done) {
         var uri = 'index1/type1/id1';

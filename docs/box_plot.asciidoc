@@ -1,5 +1,5 @@
 [[kibi_box_plot]]
-=== Kibi Box Plot [Enterprise Edition only]
+=== Kibi Box Plot [Enterprise Edition only][Coming Soon]
 
 ifeval::["{enterprise_enabled}" == "false"]
   NOTE: Documentation for Kibi Box Plot is available only in Kibi Enterprise Edition.

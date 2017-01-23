@@ -1,5 +1,5 @@
 [[kibi_scatter_plot]]
-=== Kibi Scatter Plot [Enterprise Edition only]
+=== Kibi Scatter Plot [Enterprise Edition only][Coming Soon]
 
 ifeval::["{enterprise_enabled}" == "false"]
   NOTE: Documentation for Kibi Scatter Plot is available only in Kibi Enterprise Edition.

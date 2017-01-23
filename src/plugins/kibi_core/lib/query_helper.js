@@ -117,6 +117,24 @@ QueryHelper.prototype.fetchDocument = function (index, type, id, credentials) {
   });
 };
 
+QueryHelper.prototype._arrayToCommaSeparatedList = function (a) {
+  let ret = '';
+  for (let i = 0; i < a.length; i++) {
+    let v = a[i];
+    if (i > 0) {
+      ret += ',';
+    }
+    if (typeof v === 'string' || v instanceof String) {
+      ret += '"' + v.replace(/"/, '\\"') + '"';
+    } else if (v !== null && typeof v === 'object') {
+      ret += JSON.stringify(v);
+    } else {
+      ret += v;
+    }
+  }
+  return ret;
+};
+
 /**
  * Replace variable placeholders
  * Currently supported syntax:
@@ -148,21 +166,7 @@ QueryHelper.prototype._replaceVariablesInTheQuery = function (doc, query, dataso
     }
 
     if (value instanceof Array) {
-      ret = '[';
-      for (var i = 0; i < value.length; i++) {
-        var v = value[i];
-        if (i > 0) {
-          ret += ',';
-        }
-        if (typeof v === 'string' || v instanceof String) {
-          ret += '"' + v.replace(/"/, '\\"') + '"';
-        } else if (v !== null && typeof v === 'object') {
-          ret += JSON.stringify(v);
-        } else {
-          ret += v;
-        }
-      }
-      ret += ']';
+      value = self._arrayToCommaSeparatedList(value);
     }
 
     var reGroup = self._escapeRegexSpecialCharacters(match[1]);

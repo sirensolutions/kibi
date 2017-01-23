@@ -37,7 +37,7 @@ uiRoutes
   }
 });
 
-function controller($scope, $route, kbnUrl, Private, createNotifier, queryEngineClient, kibiState, $element) {
+function controller($scope, $route, kbnUrl, Private, createNotifier, queryEngineClient, kibiState, $element, $routeParams) {
   const _shouldEntityURIBeEnabled = Private(ShouldEntityURIBeEnabledProvider);
   const notify = createNotifier({
     location: 'Templates editor'
@@ -72,7 +72,6 @@ function controller($scope, $route, kbnUrl, Private, createNotifier, queryEngine
   };
 
   const template = $scope.template = $route.current.locals.template;
-  $scope.$templateTitle = $route.current.locals.template.title;
 
   $scope.jumpToQuery = function () {
     kbnUrl.change('/management/kibana/queries/' + _.get($scope, 'preview.queryId'));
@@ -133,14 +132,14 @@ function controller($scope, $route, kbnUrl, Private, createNotifier, queryEngine
   };
 
   $scope.saveObject = function () {
-    const titleChanged = $scope.$templateTitle !== $scope.template.title;
-    template.id = template.title;
-    template.save().then(function (resp) {
+    template.save()
+    .then(function (id) {
       // here flush the cache and refresh preview
-      queryEngineClient.clearCache().then(function () {
-        notify.info('Template ' + template.title + 'successfuly saved');
-        if (titleChanged) {
-          kbnUrl.change('/management/kibana/templates/' + template.id);
+      return queryEngineClient.clearCache()
+      .then(function () {
+        notify.info(`Template ${template.title} successfuly saved`);
+        if (id !== $routeParams.id) {
+          kbnUrl.change(`/management/kibana/templates/${id}`);
         } else {
           return refreshPreview();
         }

@@ -37,66 +37,61 @@ uiRoutes
 .defaults(/dashboard/, {
   requireDefaultIndex: true
 })
-// KIBI5: correct the logic since there is no more need for slugifyId
-//.when('/dashboard', {
-  //template: indexTemplate,
-  //resolve: {
-    //dash: function (timefilter, savedDashboards, kibiDefaultDashboardTitle, courier) {
-      //// kibi:
-      //// - get all the dashboards
-      //// - if none, just create a new one
-      //// - if any try to load the default dashboard if set, otherwise load the first dashboard
-      //// - if the default dashboard is missing, load the first dashboard
-      //// - if the first dashboard is missing, create a new one
-      //return savedDashboards.find().then(function (resp) {
-        //if (resp.hits.length) {
-          //timefilter.enabled = true;
-          //// kibi: select the first dashboard if default_dashboard_title is not set
-          //let dashboardId = resp.hits[0].id;
-          //let redirectToWhenMissing = '/dashboard/new-dashboard/create/';
-          //if (kibiDefaultDashboardTitle) {
-            //dashboardId = slugifyId(kibiDefaultDashboardTitle);
-            //redirectToWhenMissing = `/dashboard/${resp.hits[0].id}`;
-          //}
-          //return savedDashboards.get(dashboardId).catch(err => {
-            //if (kibiDefaultDashboardTitle) {
-              //err.message = `The default dashboard with title "${kibiDefaultDashboardTitle}" does not exist.
-                //Please correct the "kibi_core.default_dashboard_title" parameter in kibi.yml`;
-            //}
-            //return courier.redirectWhenMissing({
-              //dashboard : redirectToWhenMissing
-            //})(err);
-          //});
-        //}
-        //return savedDashboards.get();
-      //});
-    //}
-  //}
-//})
 .when('/dashboard', {
   template: indexTemplate,
   resolve: {
-    dash: function (savedDashboards, config) {
-      return savedDashboards.get();
+    dash: function (createNotifier, Promise, savedDashboards, kibiDefaultDashboardTitle, kbnUrl) {
+      // kibi:
+      // - get all the dashboards
+      // - if none, just create a new one
+      // - if any try to load the default dashboard if set, otherwise load the first dashboard
+      // - if the default dashboard is missing, load the first dashboard
+      // - if the first dashboard is missing, create a new one
+      let getDefaultDashboard = Promise.resolve({ hits: [] });
+      const notify = createNotifier();
+
+      if (kibiDefaultDashboardTitle) {
+        getDefaultDashboard = savedDashboards.find(kibiDefaultDashboardTitle, 1);
+      }
+      return Promise.all([
+        savedDashboards.find('', 1),
+        getDefaultDashboard
+      ])
+      .then(([
+              { total: totalFirst, hits: [ firstDashboard ] },
+              { total: totalDefault, hits: [ defaultDashboard ] }
+            ]) => {
+        if (!totalFirst) {
+          return savedDashboards.get();
+        }
+        // kibi: select the first dashboard if default_dashboard_title is not set or does not exist
+        let dashboardId = firstDashboard.id;
+        if (totalDefault === 0) {
+          notify.error(`The default dashboard with title "${kibiDefaultDashboardTitle}" does not exist.
+            Please correct the "kibi_core.default_dashboard_title" parameter in kibi.yml`);
+        } else if (totalDefault > 0) {
+          dashboardId = defaultDashboard.id;
+        }
+        kbnUrl.redirect(`/dashboard/${dashboardId}`);
+        return Promise.halt();
+      });
     }
   }
 })
 .when('/dashboard/:id', {
   template: indexTemplate,
   resolve: {
-    dash: function (timefilter, savedDashboards, $route, courier) {
-      // kibi: show the timepicker when loading a dashboard
-      timefilter.enabled = true;
+    dash: function (savedDashboards, $route, courier) {
       return savedDashboards.get($route.current.params.id)
       .catch(courier.redirectWhenMissing({
-        dashboard : '/dashboard'
+        dashboard : '/dashboard/new-dashboard/create/'
       }));
     }
   }
 })
 // kibi: this path is used to show an empty dashboard when creating a new one
 .when('/dashboard/new-dashboard/create/', {
-  template: require('plugins/kibana/dashboard/index.html'),
+  template: indexTemplate,
   resolve: {
     dash: function (savedDashboards) {
       return savedDashboards.get();
@@ -196,7 +191,9 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
       $scope.topNavMenu = [{
         key: 'new',
         description: 'New Dashboard',
-        run: function () { kbnUrl.change('/dashboard', {}); },
+        run: function () {
+          kbnUrl.change('/dashboard/new-dashboard/create/', {});
+        },
         testId: 'dashboardNewButton',
       }, {
         key: 'add',

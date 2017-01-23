@@ -38,7 +38,7 @@ uiRoutes
   }
 });
 
-function controller(kibiState, $scope, $route, $window, kbnUrl, createNotifier, queryEngineClient, savedDatasources, $element) {
+function controller(kibiState, $scope, $route, kbnUrl, createNotifier, queryEngineClient, savedDatasources, $element, $routeParams) {
   $scope.isJDBC = kibiUtils.isJDBC;
   $scope.isSPARQL = kibiUtils.isSPARQL;
   $scope.isSQL = kibiUtils.isSQL;
@@ -76,7 +76,6 @@ function controller(kibiState, $scope, $route, $window, kbnUrl, createNotifier, 
   });
 
   $scope.query = $route.current.locals.query;
-  $scope.$queryTitle = $route.current.locals.query.title;
 
   const _enableEntityUri = function () {
     $scope.holder.entityURIEnabled = kibiUtils.doesQueryDependOnEntity([ $scope.query ]);
@@ -190,13 +189,11 @@ function controller(kibiState, $scope, $route, $window, kbnUrl, createNotifier, 
   };
 
   $scope.saveObject = function () {
-    const titleChanged = $scope.$queryTitle !== $scope.query.title;
-
-    $scope.query.id = $scope.query.title;
     _enableEntityUri();
-    return $scope.query.save().then(function (savedQueryId) {
+    return $scope.query.save()
+    .then(function (savedQueryId) {
       notify.info('Query ' + $scope.query.title + ' successfuly saved');
-      if (titleChanged) {
+      if (savedQueryId !== $routeParams.id) {
         // redirect only if query.id changed !!!
         kbnUrl.change('management/kibana/queries/' + savedQueryId);
       } else {

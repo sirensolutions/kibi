@@ -4,7 +4,6 @@ import 'ui/kibi/directives/kibi_param_entity_uri';
 import 'plugins/kibi_core/management/sections/kibi_dashboard_groups/styles/dashboard_groups_editor.less';
 import 'plugins/kibi_core/management/sections/kibi_dashboard_groups/services/_saved_dashboard_group';
 import 'plugins/kibi_core/management/sections/kibi_dashboard_groups/services/saved_dashboard_groups';
-import kibiUtils from 'kibiutils';
 import _ from 'lodash';
 import angular from 'angular';
 import uiModules from 'ui/modules';
@@ -79,11 +78,11 @@ function controller($rootScope, $scope, $route, kbnUrl, createNotifier, savedDas
   };
 
   $scope.saveObject = function () {
-    dashboardGroup.id = dashboardGroup.title;
-    dashboardGroup.save().then(function (groupId) {
+    dashboardGroup.save()
+    .then(function (groupId) {
       notify.info('Dashboard Group ' + dashboardGroup.title + ' was successfuly saved');
       $rootScope.$emit('kibi:dashboardgroup:changed', groupId);
-      kbnUrl.change('management/kibana/dashboardgroups/' + kibiUtils.slugifyId(dashboardGroup.id));
+      kbnUrl.change(`management/kibana/dashboardgroups/${groupId}`);
     });
   };
 

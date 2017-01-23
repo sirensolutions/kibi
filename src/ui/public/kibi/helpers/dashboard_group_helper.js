@@ -2,7 +2,6 @@ import CountHelperProvider from 'ui/kibi/helpers/count_helper/count_helper';
 import DashboardHelperProvider from 'ui/kibi/helpers/dashboard_helper';
 import isJoinPruned from 'ui/kibi/helpers/is_join_pruned';
 import _ from 'lodash';
-import kibiUtils from 'kibiutils';
 import SearchHelper from 'ui/kibi/helpers/search_helper';
 import chrome from 'ui/chrome';
 
@@ -324,15 +323,14 @@ export default function DashboardGroupHelperFactory($timeout, kibiState, Private
         // so now we know that this dashboard is not in any group
         if (isInGroups === false) {
           // not in a group so add it as new group with single dashboard
-          // KIBI5: no more slugifyId
-          const groupId = kibiUtils.slugifyId(dashboardDef.title);
+          const groupId = dashboardDef.id;
           const groupTitle = dashboardDef.title;
           const onlyOneDashboard = self._getDashboardForGroup(groupId, groupTitle, dashboardDef);
 
           dashboardGroups1.push({
             id: groupId,
             title: groupTitle,
-            dashboards: [onlyOneDashboard],
+            dashboards: [ onlyOneDashboard ],
             selected: onlyOneDashboard,
             priority: ++highestPriority
           });

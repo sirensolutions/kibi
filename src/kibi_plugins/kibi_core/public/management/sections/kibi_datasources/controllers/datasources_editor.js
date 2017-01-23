@@ -89,8 +89,6 @@ function controller($window, $scope, $route, kbnUrl, createNotifier, Private, qu
   };
 
   function _saveDatasource(datasource) {
-    datasource.id = datasource.title;
-
     // make sure that any parameter which does not belong to the schema
     // is removed from datasourceParams
     for (const prop in datasource.datasourceParams) {

@@ -43,7 +43,8 @@
             Template variables
             <kbn-info info="Specify the JSON configuration passed to the template."></kbn-info>
           </label>
-          <div ng-class="{ 'red-border': !!jsonError[$index].message }"
+          <div id="templateVars-{{$index}}"
+               ng-class="{ 'red-border': !!jsonError[$index].message }"
                ui-ace="{
                  onLoad: aceLoaded,
                  advanced: {
@@ -55,7 +56,7 @@
                  },
                  mode: 'json'
                }"
-               msd-elastic id="templateVars-{{$index}}"
+               msd-elastic
                ng-model="queryDefinition._templateVarsString"
                class="form-control templateVariablesEditor"
                ng-change="templateChanged()" >

@@ -16,39 +16,13 @@ define(function (require) {
       });
     });
 
-    // kibi: added so we can notify in case there is a problem with setting kibi:zoom
     var notify = createNotifier({
       location: 'Chrome component'
     });
-    // kibi: end
 
     return {
       link: function ($scope) {
         listenForUpdates($scope);
-
-        // kibi: set kibi_zoom_style and time precision
-        var updateZoom = function () {
-          var zoom = config.get('kibi:zoom');
-          var zoomNumber = 1;
-          try {
-            zoomNumber = parseFloat(zoom);
-          } catch (e) {
-            delete $scope.kibi_zoom_style;
-            notify.warning('Zoom set to [' + zoom + '] while it should be float in range (0, 1>');
-            return;
-          }
-
-          if (zoomNumber <= 1 && zoomNumber > 0) {
-            $scope.kibi_zoom_style = {
-              zoom: zoomNumber
-            };
-          } else {
-            delete $scope.kibi_zoom_style;
-            notify.warning('Zoom set to [' + zoom + '] while it should be float in range (0, 1>');
-          }
-        };
-        $rootScope.$on('init:config', updateZoom);
-        $rootScope.$on('change:config.kibi:zoom', updateZoom);
 
         var updateTimePrecision = function () {
           var p = config.get('kibi:timePrecision');

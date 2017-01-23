@@ -141,6 +141,7 @@ uiModules.get('apps/management')
         // kibi: modified to do some checks before the delete
         const _delete = function () {
           $scope.currentTab.service.delete(pluck($scope.selectedItems, 'id'))
+          .then(cache.invalidate) // kibi: invalidate the cache of saved objects
           .then(refreshData)
           .then(function () {
             $scope.selectedItems.length = 0;

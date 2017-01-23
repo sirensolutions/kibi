@@ -18,15 +18,15 @@ export default function CacheHelperFactory($rootScope, Promise) {
     return cache[key] ? cache[key] : null;
   };
 
-  CacheHelper.prototype.flush = function () {
+  CacheHelper.prototype.invalidate = function () {
     cache = {};
   };
 
-  const cacheHelperInstance =  new CacheHelper();
+  const cacheHelperInstance = new CacheHelper();
 
-  // flush the cache on route change
+  // invalidate the cache on route change
   $rootScope.$on('$routeChangeSuccess', function () {
-    cacheHelperInstance.flush();
+    cacheHelperInstance.invalidate();
   });
 
   return cacheHelperInstance;

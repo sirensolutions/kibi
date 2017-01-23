@@ -363,7 +363,7 @@ export default function SavedObjectFactory(savedObjectsAPI, savedObjectsAPITypes
       return doSave
         .then((id) => { this.id = id; })
         .then(() => {
-          cache.flush(); // kibi: flush the cache after object was saved
+          cache.invalidate(); // kibi: invalidate the cache after object was saved
         })
         .then(refreshIndex)
         .then(() => {

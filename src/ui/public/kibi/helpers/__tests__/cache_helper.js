@@ -26,7 +26,7 @@ describe('Kibi Components', function () {
     it('clearing the cache', function () {
       cacheHelper.set('aaa', 'bbb');
       expect(cacheHelper.get('aaa')).to.be('bbb');
-      cacheHelper.flush();
+      cacheHelper.invalidate();
       expect(cacheHelper.get('aaa')).to.be(null);
     });
 

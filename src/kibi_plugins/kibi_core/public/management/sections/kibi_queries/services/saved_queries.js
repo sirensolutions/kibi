@@ -26,11 +26,17 @@ uiModules
     savedObjectsAPI
   };
   const savedQueryLoader = new SavedObjectLoader(SavedQuery, kbnIndex, esAdmin, kbnUrl, options);
+
   // Customize loader properties since adding an 's' on type doesn't work for type 'query' .
   savedQueryLoader.loaderProperties = {
     name: 'queries',
     noun: 'Query',
     nouns: 'queries'
   };
+
+  savedQueryLoader.urlFor = function (id) {
+    return kbnUrl.eval('#/management/kibana/queries/{{id}}', { id: id });
+  };
+
   return savedQueryLoader;
 });

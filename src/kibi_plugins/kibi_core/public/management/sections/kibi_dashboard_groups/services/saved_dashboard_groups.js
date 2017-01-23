@@ -29,5 +29,11 @@ uiModules
       source.dashboards = JSON.parse(source.dashboards);
     }
   };
-  return new SavedObjectLoader(SavedDashboardGroup, kbnIndex, esAdmin, kbnUrl, options);
+  const savedDashboardGroupLoader = new SavedObjectLoader(SavedDashboardGroup, kbnIndex, esAdmin, kbnUrl, options);
+
+  savedDashboardGroupLoader.urlFor = function (id) {
+    return kbnUrl.eval('#/management/kibana/dashboardgroups/{{id}}', { id: id });
+  };
+
+  return savedDashboardGroupLoader;
 });

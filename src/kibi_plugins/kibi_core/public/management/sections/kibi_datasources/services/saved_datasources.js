@@ -26,5 +26,11 @@ uiModules
     },
     savedObjectsAPI
   };
-  return new SavedObjectLoader(SavedDatasource, kbnIndex, esAdmin, kbnUrl, options);
+  const SavedDatasourceLoader = new SavedObjectLoader(SavedDatasource, kbnIndex, esAdmin, kbnUrl, options);
+
+  SavedDatasourceLoader.urlFor = function (id) {
+    return kbnUrl.eval('#/management/kibana/datasources/{{id}}', { id: id });
+  };
+
+  return SavedDatasourceLoader;
 });

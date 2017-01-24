@@ -123,7 +123,8 @@ define(function (require) {
         });
 
         let metadataPromises = _.map(dashboards, (dashboard) => {
-          return kibiState.getState(dashboard.id).then(({ index, filters, queries, time }) => {
+          return kibiState.getState(dashboard.id)
+          .then(({ index, filters, queries, time }) => {
             const query = countHelper.constructCountQuery(filters, queries, time);
             // here take care about correctly expanding timebased indices
             return kibiState.timeBasedIndices(index, dashboard.id)

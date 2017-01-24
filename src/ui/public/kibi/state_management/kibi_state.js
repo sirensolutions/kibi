@@ -6,6 +6,7 @@ define(function (require) {
   const toJson = require('ui/utils/aggressive_parse').toJson;
   const angular = require('angular');
   const chrome = require('ui/chrome');
+  const { IndexPatternMissingIndices } = require('ui/errors');
 
   require('ui/routes')
   .addSetupWork(function (kibiState) {
@@ -613,7 +614,7 @@ define(function (require) {
     KibiState.prototype._getTime = function (dashboardId, index) {
       if (!index) {
         // do not reject - just return null
-        // rejecting in this method would brake the Promise.all
+        // rejecting in this method would break the Promise.all
         return null;
       }
 
@@ -637,7 +638,8 @@ define(function (require) {
         }
       }
 
-      return indexPatterns.get(index).then((indexPattern) => {
+      return indexPatterns.get(index)
+      .then((indexPattern) => {
         let filter;
         const timefield = indexPattern.timeFieldName && _.find(indexPattern.fields, { name: indexPattern.timeFieldName });
 
@@ -654,6 +656,13 @@ define(function (require) {
         }
 
         return filter;
+      })
+      .catch((error) => {
+        // if the pattern does not match any index, do not break Promise.all and return a null filter.
+        if (error instanceof IndexPatternMissingIndices) {
+          return null;
+        }
+        throw error;
       });
     };
 
@@ -719,6 +728,13 @@ define(function (require) {
           return pattern.toIndexList(min, max);
         }
         return [ indexPatternId ];
+      })
+      .catch((error) => {
+        // If computing the indices failed because the pattern does not match any index return an empty list.
+        if (error instanceof IndexPatternMissingIndices) {
+          return [];
+        }
+        throw error;
       });
     };
 
@@ -999,7 +1015,7 @@ define(function (require) {
       const appState = getAppState();
 
       // here ignore the missing meta as getState can be called
-      // on a dashboard without assosiated savedSearch
+      // on a dashboard without associated savedSearch
       const getMetas = this._getDashboardAndSavedSearchMetas(dashboardIds, true);
 
       return getMetas.then((metas) => {
@@ -1009,7 +1025,7 @@ define(function (require) {
         // if dashboardIds is empty or contains only 1 element
         //   - the meta can be missing
         // else
-        //   - each dashboard must have coresponding meta as these mean that we are passing
+        //   - each dashboard must have corresponding meta as these mean that we are passing
         //   set of relationally connected dashboards
         if (dashboardIds.length > 1) {
           for (let i = 0; i < metas.length; i++) {

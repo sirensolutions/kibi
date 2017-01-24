@@ -74,7 +74,8 @@ define(function (require) {
         $scope.onTabContainerResize = function () {
           $scope.tabScrollerVisible = tabContainer[0].offsetWidth < tabContainer[0].scrollWidth;
           updateTabScroller();
-          if (!isActiveTabVisible(document.getElementsByClassName('active')[1])) {
+          let test = $el.find('.nav-tabs li.active');
+          if (!isActiveTabVisible($el.find('.nav-tabs li.active')[0])) {
             $scope.scrollTabs(-1);
           }
         };

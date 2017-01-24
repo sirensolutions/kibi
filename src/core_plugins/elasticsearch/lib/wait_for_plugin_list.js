@@ -66,7 +66,6 @@ module.exports = function (plugin, server) {
     return elasticsearchPlugins;
   })
   .catch(err => {
-    // KIBI5: why do I get the error: child "elasticsearch" fails because ["plugins" is not allowed]
     config.set('elasticsearch.plugins', []);
     plugin.status.yellow(err);
   });

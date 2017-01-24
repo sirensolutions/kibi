@@ -1,5 +1,5 @@
-const util = require('./util');
-const _ = require('lodash');
+import util from './util';
+import _ from 'lodash';
 
 export default function (server) {
 
@@ -35,11 +35,13 @@ export default function (server) {
       // add to the parent filterjoin
       if (negate) {
         if (!_.get(query, 'filter.bool.must_not')) {
-          _.set(query, 'filter.bool.must_not', [{
-            bool: {
-              must: []
+          _.set(query, 'filter.bool.must_not', [
+            {
+              bool: {
+                must: []
+              }
             }
-          }]);
+          ]);
         }
         query.filter.bool.must_not[0].bool.must.push(fjObject);
         addSourceTypes(query.filter.bool.must_not[0].bool.must, types);
@@ -291,10 +293,10 @@ export default function (server) {
         const targetInd = ind === 0 ? 1 : 0;
         const sourceRel = relation[ind];
         const targetRel = relation[targetInd];
-        const clone = _.cloneDeep(node.filterjoin);
+        const clone = _.cloneDeep(node.join);
 
         clone.indices = targetRel.indices;
-        clone.path = targetRel.path;
+        clone.on = [ sourceRel.path, targetRel.path ];
         clone.types = targetRel.types;
         if (!clone.types) {
           delete clone.types;
@@ -312,11 +314,7 @@ export default function (server) {
           delete clone.maxTermsPerShard;
         }
 
-        const fjObject = {
-          filterjoin: {}
-        };
-        fjObject.filterjoin[sourceRel.path] = clone;
-        addFilterJoinToParent(node.parent, fjObject, sourceRel.types);
+        addFilterJoinToParent(node.parent, { join: clone }, sourceRel.types);
       }
     }
   }
@@ -358,13 +356,13 @@ export default function (server) {
 
           if (!visitedRelations[id]) {
             visitedRelations[id] = true;
-            const { child, filterjoin } = _addFilterJoin(query, sourceRel.path, sourceRel, targetRel.path, targetRel);
+            const { child, join } = _addFilterJoin(query, sourceRel.path, sourceRel, targetRel.path, targetRel);
             if (relations.length > 1) {
               toExpand.push({
                 focus,
                 relations: relations.slice(1),
                 parent: query,
-                filterjoin
+                join
               });
             }
             if (!child) {
@@ -378,7 +376,7 @@ export default function (server) {
   }
 
   /**
-   * Adds a filterjoin filter to the given query, from the source index to the target index
+   * Adds a join filter to the given query, from the source index to the target index
    */
   function _addFilterJoin(query, sourcePath, sourceIndex, targetPath, targetIndex, negate) {
     if (!targetIndex) {
@@ -388,46 +386,45 @@ export default function (server) {
     const maxTermsPerShard = targetIndex.maxTermsPerShard;
     const termsEncoding = targetIndex.termsEncoding;
 
-    const filterJoin = {
+    const join = {
       indices: targetIndex.indices,
-      path: targetPath,
-      query: {
-        bool: {
-          must: [
-            {
-              match_all: {}
-            }
-          ],
-          filter: {
-            bool: {
-              must: []
+      on: [ sourcePath, targetPath ],
+      request: {
+        query: {
+          bool: {
+            must: [
+              {
+                match_all: {}
+              }
+            ],
+            filter: {
+              bool: {
+                must: []
+              }
             }
           }
         }
       }
     };
     if (targetIndex.types && targetIndex.types.length > 0) {
-      filterJoin.types = targetIndex.types;
+      join.types = targetIndex.types;
     }
     if (orderBy) {
-      filterJoin.orderBy = orderBy;
+      join.orderBy = orderBy;
     }
     if (maxTermsPerShard && maxTermsPerShard > -1) {
-      filterJoin.maxTermsPerShard = maxTermsPerShard;
+      join.maxTermsPerShard = maxTermsPerShard;
     }
     if (termsEncoding) {
-      filterJoin.termsEncoding = termsEncoding;
+      join.termsEncoding = termsEncoding;
     }
-    const fjObject = {
-      filterjoin: {}
-    };
 
-    let child = filterJoin.query.bool;
+    let child = join.request.query.bool;
 
     // If there are no target indices, set the query to return no results.
     if (targetIndex.indices.length === 0) {
-      filterJoin.indices = [server.config().get('kibana.index')];
-      filterJoin.query = {
+      join.indices = [server.config().get('kibana.index')];
+      join.request.query = {
         bool: {
           must_not: [
             { match_all: {} }
@@ -437,13 +434,8 @@ export default function (server) {
       child = null;
     }
 
-    fjObject.filterjoin[sourcePath] = filterJoin;
-
-    addFilterJoinToParent(query, fjObject, sourceIndex.types, negate);
-    return {
-      filterjoin: filterJoin,
-      child: child
-    };
+    addFilterJoinToParent(query, { join }, sourceIndex.types, negate);
+    return { join, child };
   }
 
   /**

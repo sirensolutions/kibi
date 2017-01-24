@@ -4,10 +4,23 @@ define(function (require) {
   return function (Promise, Private) {
     const StubIndexPattern = Private(require('testUtils/stub_index_pattern'));
     const patternCache = Private(require('ui/index_patterns/_pattern_cache'));
+    // kibi: simulate missing indices and generic errors
+    const { IndexPatternMissingIndices } = require('ui/errors');
 
     return function (name, objects = [], cache = false) {
-      const getIndex = function ({ id, timeField, fields = [], indexList }) {
+      // kibi: simulate missing indices and generic errors
+      const getIndex = function ({ id, timeField, fields = [], indexList, missing, error }) {
         let index;
+
+        // kibi: simulate missing indices and generic errors
+        if (missing) {
+          return Promise.reject(new IndexPatternMissingIndices());
+        }
+
+        if (error) {
+          return Promise.reject(new Error());
+        }
+        // kibi: end
 
         if (cache) {
           index = patternCache.get(id);

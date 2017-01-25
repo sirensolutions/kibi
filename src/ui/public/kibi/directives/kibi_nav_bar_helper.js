@@ -36,6 +36,9 @@ export default function KibiNavBarHelperFactory(kibiState, globalState, getAppSt
       });
     }
 
+    if (!filteredDashboardsIds.length) {
+      return;
+    }
     if (console) {
       const msg = 'KibiNavBar will update the counts for following dashboards ' + JSON.stringify(filteredDashboardsIds, null, ' ');
       console.log(msg); // eslint-disable-line no-console
@@ -66,6 +69,9 @@ export default function KibiNavBarHelperFactory(kibiState, globalState, getAppSt
   };
 
   const updateCounts = function (dashboardsIds, reason, forceUpdate = false) {
+    if (!dashboardsIds.length) {
+      return;
+    }
     if (console) {
       const msg = `KibiNavBar requested count update for following dashboards
         ${JSON.stringify(dashboardsIds, null, ' ')} because: [${reason}]`;

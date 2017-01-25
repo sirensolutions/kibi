@@ -1,0 +1,24 @@
+@import (reference) "~ui/styles/variables";
+@import (reference) "../variables";
+
+.dropdown-icon {
+
+  display: none;
+  .is-dashboards-nav-open & {
+    display: inline-block;
+  }
+
+  width: @dropdown-width;
+  height: @dropdown-height;
+  text-align: center;
+  font-size: 1.7em;
+  position: relative;
+  color: @white;
+  &:hover {
+    color: @white;
+    background-color: @dropdown-color;
+  }
+  &.disabled {
+    color: gray;
+  }
+}

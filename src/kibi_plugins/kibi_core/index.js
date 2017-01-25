@@ -103,6 +103,10 @@ module.exports = function (kibana) {
     id: 'kibi_core',
 
     uiExports: {
+      hacks: [
+        'plugins/kibi_core/ui/directives/dashboards_nav/dashboards_nav',
+        'plugins/kibi_core/ui/chrome/services/dashboards_nav_state'
+      ],
       managementSections: [
         'plugins/kibi_core/management/sections/kibi_dashboard_groups',
         'plugins/kibi_core/management/sections/kibi_datasources',

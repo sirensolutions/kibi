@@ -1,0 +1,41 @@
+<div
+  class="dashboards-nav-link {{classes}}"
+  ng-class="{ active: isActive }"
+  tooltip="{{ tooltipContent }}"
+  tooltip-placement="right"
+  tooltip-popup-delay="0"
+  tooltip-append-to-body="1"
+>
+  <a
+    class="anchor"
+    ng-click="onClick({ $event: $event })"
+    title="{{ title }}"
+  >
+    <div ng-if="showIcon" class="icon">
+      <i
+         ng-if="iconCss"
+         class="icon-image {{iconCss}}"
+      ></i>
+
+      <img
+         ng-if="iconUrl"
+         class="icon-image"
+         ng-src="{{iconUrl}}"
+      />
+
+      <span
+         ng-if="!iconCss && !iconUrl"
+         class="icon-placeholder"
+      >
+         {{ title[0] }}
+      </span>
+    </div>
+
+    <div class="title">
+      {{ title }}
+    </div>
+  </a>
+
+  <!--subnav-->
+  <ng-transclude></ng-transclude>
+</div>

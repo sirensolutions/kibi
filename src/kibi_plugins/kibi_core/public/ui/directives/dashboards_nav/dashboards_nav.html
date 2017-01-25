@@ -1,0 +1,26 @@
+<nav
+  class="dashboards-nav"
+  ng-class="{'is-dashboards-nav-open': isDashboardsNavOpen, 'is-dashboards-nav-visible': isVisible, 'is-global-nav-open': isGlobalNavOpen}"
+  ng-show="isVisible"
+>
+  <div class="menu">
+    <!-- Open/close sidebar -->
+    <dashboards-nav-control
+      tooltip-content="{{ dashboardsNavToggleButton.tooltipContent }}"
+      on-click="toggleDashboardsNav($event)"
+      kbn-icon="{{ dashboardsNavToggleButton.icon }}"
+      title="{{ dashboardsNavToggleButton.title }}"
+    ></dashboards-nav-control>
+
+    <form role="form">
+      <input ng-disabled="!isDashboardsNavOpen" aria-label="Filter" ng-model="dashboardFilter" class="form-control span12" type="text" placeholder="Filter" />
+    </form>
+  </div>
+
+  <div class="links">
+    <!-- dashboards sidebar -->
+    <dashboard-switcher
+      filter="dashboardFilter"
+    ></dashboard-switcher>
+  </div>
+</nav>

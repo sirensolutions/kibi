@@ -9,6 +9,9 @@ import {
   unhashUrl,
 } from 'ui/state_management/state_hashing';
 
+// kibi: imports
+import { onDashboardPage } from 'ui/kibi/utils/on_page';
+
 export default function (chrome, internals) {
 
   UiModules
@@ -34,6 +37,15 @@ export default function (chrome, internals) {
       controllerAs: 'chrome',
       controller($scope, $rootScope, $location, $http, Private) {
         const getUnhashableStates = Private(getUnhashableStatesProvider);
+
+        // kibi: show only the bar when on the dashboard page
+        $scope.onDashboardPage = onDashboardPage();
+        $scope.$watch(onDashboardPage, onPage => {
+          if (onPage !== undefined) {
+            $scope.onDashboardPage = onPage;
+          }
+        });
+        // kibi: end
 
         // are we showing the embedded version of the chrome?
         internals.setVisibleDefault(!$location.search().embed);

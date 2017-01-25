@@ -967,7 +967,7 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
       return Promise.reject(new Error('Missing dashboard ID'));
     }
 
-    // check siren-join plugin
+    // check siren-platform plugin
     if (this.isRelationalPanelButtonEnabled() && !this.isSirenJoinPluginInstalled()) {
       const error = 'The SIREn Join plugin is enabled but not installed. Please install the plugin and restart Kibi, ' +
         'or disable the relational panel in Settings -> Advanced -> kibi:relationalPanel';
@@ -1180,7 +1180,7 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
   };
 
   KibiState.prototype.isSirenJoinPluginInstalled = function () {
-    return elasticsearchPlugins.indexOf('siren-join') !== -1;
+    return elasticsearchPlugins.indexOf('siren-platform') !== -1;
   };
 
   return new KibiState();

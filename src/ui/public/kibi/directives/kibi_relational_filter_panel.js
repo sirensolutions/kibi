@@ -106,7 +106,7 @@ uiModules
         const installed = kibiState.isSirenJoinPluginInstalled();
         if (enabled && !installed) {
           notify.error(
-            'The siren-join plugin is enabled but not installed. ' +
+            'The siren-platform plugin is enabled but not installed. ' +
               'Please install the plugin and restart Kibi, or ' +
               'disable the relational panel in Settings -> Advanced -> kibi:relationalPanel');
         }

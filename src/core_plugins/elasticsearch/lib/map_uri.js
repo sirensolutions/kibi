@@ -3,7 +3,7 @@ import { parse as parseUrl, format as formatUrl, resolve } from 'url';
 import filterHeaders from './filter_headers';
 import setHeaders from './set_headers';
 
-export default function mapUri(elasticsearchPlugins, cluster, proxyPrefix, coordinateAction) {
+export default function mapUri(elasticsearchPlugins, cluster, proxyPrefix, sirenAction) {
   function joinPaths(pathA, pathB) {
     return trimRight(pathA, '/') + '/' + trimLeft(pathB, '/');
   }
@@ -31,8 +31,8 @@ export default function mapUri(elasticsearchPlugins, cluster, proxyPrefix, coord
     // pathname
     const reqSubPath = request.path.replace(proxyPrefix, '');
     mappedUrlComponents.pathname = joinPaths(esUrlBasePath, reqSubPath);
-    // kibi: replace _search with _msearch to use siren-join when available
-    if (coordinateAction && elasticsearchPlugins && elasticsearchPlugins.indexOf('siren-join') > -1) {
+    // kibi: replace _search with _msearch to use siren-platform when available
+    if (sirenAction && elasticsearchPlugins && elasticsearchPlugins.indexOf('siren-platform') > -1) {
       const searchInd = contains(reqSubPath, '_search') ? reqSubPath.indexOf('_search') : reqSubPath.indexOf('_msearch');
       if (searchInd !== -1) {
         const coordinateActionPath = reqSubPath.slice(0, searchInd) + '_coordinate' + reqSubPath.slice(searchInd);

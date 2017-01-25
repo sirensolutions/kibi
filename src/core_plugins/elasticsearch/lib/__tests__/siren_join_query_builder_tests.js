@@ -1,5 +1,5 @@
 import expect from 'expect.js';
-import JoinBuilder from './filterjoin_query_builder';
+import JoinBuilder from './siren_join_query_builder';
 
 describe('Join query builder', function () {
   it('should create a query with a term clause', function () {

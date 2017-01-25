@@ -1,9 +1,9 @@
 import expect from 'expect.js';
 import _ from 'lodash';
-import JoinBuilder from './filterjoin_query_builder';
-import sirenJoin from '../filter_join';
+import JoinBuilder from './siren_join_query_builder';
+import sirenJoin from '../siren_join';
 
-describe('FilterJoin querying', function () {
+describe('Join querying', function () {
 
   const server = {
     config: () => ({
@@ -11,8 +11,8 @@ describe('FilterJoin querying', function () {
     })
   };
 
-  const filterJoinSet = sirenJoin(server).set;
-  const filterJoinSeq = sirenJoin(server).sequence;
+  const joinSet = sirenJoin(server).set;
+  const joinSequence = sirenJoin(server).sequence;
 
   describe('Join Set', function () {
     describe('time-based indices', function () {
@@ -48,7 +48,7 @@ describe('FilterJoin querying', function () {
           targetPath: 'id'
         });
         const expected = builder.toObject();
-        const actual = filterJoinSet([ query ]);
+        const actual = joinSet([ query ]);
         expect(actual).to.eql(expected);
       });
 
@@ -68,7 +68,7 @@ describe('FilterJoin querying', function () {
             ]
           }
         };
-        const actual = filterJoinSet([ query ]);
+        const actual = joinSet([ query ]);
         expect(actual).to.eql([
           {
             join: {
@@ -116,7 +116,7 @@ describe('FilterJoin querying', function () {
             ]
           }
         };
-        const actual = filterJoinSet([ query ]);
+        const actual = joinSet([ query ]);
         expect(actual).to.eql([
           {
             join: {
@@ -211,7 +211,7 @@ describe('FilterJoin querying', function () {
           targetPath: 'id2'
         });
         const expected = builder.toObject();
-        const actual = filterJoinSet([ query ]);
+        const actual = joinSet([ query ]);
         expect(actual).to.eql(expected);
       });
 
@@ -258,7 +258,7 @@ describe('FilterJoin querying', function () {
           targetPath: 'id2'
         });
         const expected = builder.toObject();
-        const actual = filterJoinSet([ query ]);
+        const actual = joinSet([ query ]);
         expect(actual).to.eql(expected);
       });
 
@@ -301,7 +301,7 @@ describe('FilterJoin querying', function () {
         fj1.addJoin({ sourceTypes: 't2', sourcePath: 'id2', targetIndices: [ 'i3' ], targetTypes: 't3', targetPath: 'id3' });
 
         const expected = builder.toObject();
-        const actual = filterJoinSet([ query ]);
+        const actual = joinSet([ query ]);
         expect(actual).to.eql(expected);
       });
 
@@ -376,12 +376,12 @@ describe('FilterJoin querying', function () {
         });
 
         const expected = b.toObject();
-        const actual = filterJoinSet([ query ]);
+        const actual = joinSet([ query ]);
         expect(actual).to.eql(expected);
       });
     });
 
-    it('should consider the position of queries before being replaced by their filterjoin equivalent', function () {
+    it('should consider the position of queries before being replaced by their join equivalent', function () {
       const query = {
         query: [
           {
@@ -443,7 +443,7 @@ describe('FilterJoin querying', function () {
           }
         ]
       };
-      const actual = filterJoinSeq(filterJoinSet(query));
+      const actual = joinSequence(joinSet(query));
       expect(actual).to.eql(expected);
     });
 
@@ -465,7 +465,7 @@ describe('FilterJoin querying', function () {
           ]
         }
       };
-      expect(filterJoinSet).withArgs(query).to.throwError(/loops/i);
+      expect(joinSet).withArgs(query).to.throwError(/loops/i);
     });
 
     it('in a bool clause', function () {
@@ -499,7 +499,7 @@ describe('FilterJoin querying', function () {
           must: builder.toObject()
         }
       };
-      const actual = filterJoinSet(query);
+      const actual = joinSet(query);
       expect(actual).to.eql(expected);
     });
 
@@ -534,7 +534,7 @@ describe('FilterJoin querying', function () {
           must: builder.toObject()
         }
       };
-      const actual = filterJoinSet(query);
+      const actual = joinSet(query);
       expect(actual).to.eql(expected);
     });
 
@@ -588,7 +588,7 @@ describe('FilterJoin querying', function () {
           must: builder.toObject()
         }
       };
-      const actual = filterJoinSet(query);
+      const actual = joinSet(query);
       expect(actual).to.eql(expected);
     });
 
@@ -641,7 +641,7 @@ describe('FilterJoin querying', function () {
           must: builder.toObject()
         }
       };
-      const actual = filterJoinSet(query);
+      const actual = joinSet(query);
       expect(actual).to.eql(expected);
     });
 
@@ -674,7 +674,7 @@ describe('FilterJoin querying', function () {
           must: builder.toObject()
         }
       };
-      const actual = filterJoinSet(query);
+      const actual = joinSet(query);
       expect(actual).to.eql(expected);
     });
 
@@ -700,7 +700,7 @@ describe('FilterJoin querying', function () {
         targetTypes: 'cafard',
         targetPath: 'id2'
       });
-      const actual = filterJoinSet(query);
+      const actual = joinSet(query);
       expect(actual).to.eql(builder.toObject());
     });
 
@@ -724,7 +724,7 @@ describe('FilterJoin querying', function () {
         targetIndices: [ 'i2' ],
         targetPath: 'id2'
       });
-      const actual = filterJoinSet(query);
+      const actual = joinSet(query);
       expect(actual).to.eql(builder.toObject());
     });
 
@@ -766,7 +766,7 @@ describe('FilterJoin querying', function () {
         targetTypes: 'cafard',
         targetPath: 'id2'
       });
-      const actual = filterJoinSet(query);
+      const actual = joinSet(query);
       expect(actual).to.eql(builder.toObject());
     });
 
@@ -815,7 +815,7 @@ describe('FilterJoin querying', function () {
       .addQuery({
         yo: 'da'
       });
-      const actual = filterJoinSet(query);
+      const actual = joinSet(query);
       expect(actual).to.eql(builder.toObject());
     });
 
@@ -858,7 +858,7 @@ describe('FilterJoin querying', function () {
           tag: [ 'grishka' ]
         }
       });
-      const actual = filterJoinSet(query);
+      const actual = joinSet(query);
       expect(actual).to.eql(builder.toObject());
     });
 
@@ -926,7 +926,7 @@ describe('FilterJoin querying', function () {
           tag: [ 'grishka' ]
         }
       });
-      const actual = filterJoinSet(query);
+      const actual = joinSet(query);
       expect(actual).to.eql(builder.toObject());
     });
 
@@ -994,7 +994,7 @@ describe('FilterJoin querying', function () {
           tag: [ 'grishka' ]
         }
       });
-      const actual = filterJoinSet(query);
+      const actual = joinSet(query);
       expect(actual).to.eql(builder.toObject());
     });
 
@@ -1134,7 +1134,7 @@ describe('FilterJoin querying', function () {
           tag: [ 'donald' ]
         }
       });
-      const actual = filterJoinSet(query);
+      const actual = joinSet(query);
       expect(actual).to.eql(builder.toObject());
     });
 
@@ -1164,7 +1164,7 @@ describe('FilterJoin querying', function () {
         targetTypes: 'cafard',
         targetPath: 'id2'
       });
-      const actual = filterJoinSet(query);
+      const actual = joinSet(query);
       expect(actual).to.eql(builder.toObject());
     });
 
@@ -1205,7 +1205,7 @@ describe('FilterJoin querying', function () {
         targetTypes: 'cafard',
         targetPath: 'id0'
       });
-      const actual = filterJoinSet(query);
+      const actual = joinSet(query);
       expect(actual).to.eql(builder.toObject());
     });
 
@@ -1240,7 +1240,7 @@ describe('FilterJoin querying', function () {
         orderBy: 'doc_score',
         maxTermsPerShard: '10'
       });
-      const actual = filterJoinSet(query);
+      const actual = joinSet(query);
       expect(actual).to.eql(builder.toObject());
     });
 
@@ -1288,32 +1288,32 @@ describe('FilterJoin querying', function () {
           }
         }
       });
-      const actual = filterJoinSet(query);
+      const actual = joinSet(query);
       expect(actual).to.eql(builder.toObject());
     });
   });
 
   describe('Join Sequence', function () {
-    describe('Filterjoin with nested join sequence', function () {
+    describe('Join with nested join sequence', function () {
       describe('Error handling', function () {
         it('should fail on the sequence not being an array', function () {
-          expect(filterJoinSeq).withArgs([ { join_sequence: 123 } ]).to.throwError(/unexpected value/i);
-          expect(filterJoinSeq).withArgs([ { join_sequence: {} } ]).to.throwError(/must be an array/i);
+          expect(joinSequence).withArgs([ { join_sequence: 123 } ]).to.throwError(/unexpected value/i);
+          expect(joinSequence).withArgs([ { join_sequence: {} } ]).to.throwError(/must be an array/i);
         });
 
         it('should fail on empty sequence', function () {
-          expect(filterJoinSeq).withArgs([ { join_sequence: [] } ]).to.throwError(/specify the join sequence/i);
+          expect(joinSequence).withArgs([ { join_sequence: [] } ]).to.throwError(/specify the join sequence/i);
         });
 
         it('should fail on incorrect nested sequence', function () {
-          expect(filterJoinSeq).withArgs([ { join_sequence: [ { group: [] } ] } ]).to.throwError(/missing elements/i);
+          expect(joinSequence).withArgs([ { join_sequence: [ { group: [] } ] } ]).to.throwError(/missing elements/i);
           // recurse on the nested sequence
-          expect(filterJoinSeq).withArgs([ { join_sequence: [ { group: [ 1, 2 ] }, { relation: [ 1, 2 ] } ] } ])
+          expect(joinSequence).withArgs([ { join_sequence: [ { group: [ 1, 2 ] }, { relation: [ 1, 2 ] } ] } ])
           .to.throwError(/The join sequence must be an array. Got: 1/i);
         });
 
         it('should fail on incorrect dashboard element', function () {
-          expect(filterJoinSeq).withArgs([
+          expect(joinSequence).withArgs([
             {
               join_sequence: [
                 {
@@ -1323,7 +1323,7 @@ describe('FilterJoin querying', function () {
             }
           ]).to.throwError(/path is required/i);
 
-          expect(filterJoinSeq).withArgs([
+          expect(joinSequence).withArgs([
             {
               join_sequence: [
                 {
@@ -1333,7 +1333,7 @@ describe('FilterJoin querying', function () {
             }
           ]).to.throwError(/pattern is required/i);
 
-          expect(filterJoinSeq).withArgs([
+          expect(joinSequence).withArgs([
             {
               join_sequence: [
                 {
@@ -1346,7 +1346,7 @@ describe('FilterJoin querying', function () {
           ])
           .to.throwError(/pair of dashboards/i);
 
-          expect(filterJoinSeq).withArgs([
+          expect(joinSequence).withArgs([
             {
               join_sequence: [
                 {
@@ -1360,7 +1360,7 @@ describe('FilterJoin querying', function () {
           ])
           .to.throwError(/already set/i);
 
-          expect(filterJoinSeq).withArgs([
+          expect(joinSequence).withArgs([
             {
               join_sequence: [
                 {
@@ -1416,7 +1416,7 @@ describe('FilterJoin querying', function () {
         fj.addJoin({ negate: true, sourcePath: 'id', targetIndices: [ 'bbb' ], targetPath: 'path1' });
         fj.addJoin({ sourcePath: 'id', targetIndices: [ 'bbb' ], targetPath: 'path2' });
 
-        const actual = filterJoinSeq(query);
+        const actual = joinSequence(query);
         expect(actual).to.eql(builder.toObject());
       });
 
@@ -1471,7 +1471,7 @@ describe('FilterJoin querying', function () {
           targetPath: 'path2'
         });
 
-        const actual = filterJoinSeq(query);
+        const actual = joinSequence(query);
         expect(actual).to.eql(builder.toObject());
       });
 
@@ -1545,7 +1545,7 @@ describe('FilterJoin querying', function () {
           }
         ];
 
-        const actual = filterJoinSeq(query);
+        const actual = joinSequence(query);
         expect(actual).to.eql(expected);
       });
 
@@ -1590,7 +1590,7 @@ describe('FilterJoin querying', function () {
           targetIndices: [ 'i2' ],
           targetPath: 'id'
         });
-        const actual = filterJoinSeq(filterJoinSet(query));
+        const actual = joinSequence(joinSet(query));
         expect(actual).to.eql(builder.toObject());
       });
 
@@ -1650,7 +1650,7 @@ describe('FilterJoin querying', function () {
             }
           }
         });
-        const actual = filterJoinSeq(query);
+        const actual = joinSequence(query);
         expect(actual).to.eql(builder.toObject());
       });
 
@@ -1778,12 +1778,12 @@ describe('FilterJoin querying', function () {
             }
           }
         });
-        const actual = filterJoinSeq(query);
+        const actual = joinSequence(query);
         expect(actual).to.eql(builder.toObject());
       });
     });
 
-    describe('Filterjoin with pre-defined join sequence', function () {
+    describe('Join with pre-defined join sequence', function () {
       it('joins with filters on leaf', function () {
         const query = [
           {
@@ -1826,7 +1826,7 @@ describe('FilterJoin querying', function () {
             }
           }
         });
-        const actual = filterJoinSeq(query);
+        const actual = joinSequence(query);
         expect(actual).to.eql(builder.toObject());
       });
 
@@ -1851,7 +1851,7 @@ describe('FilterJoin querying', function () {
           targetTypes: 'Company',
           targetPath: 'id'
         });
-        const actual = filterJoinSeq(query);
+        const actual = joinSequence(query);
         expect(actual).to.eql(builder.toObject());
       });
 
@@ -1887,7 +1887,7 @@ describe('FilterJoin querying', function () {
           targetPath: 'companyid',
           negate: true
         });
-        const actual = filterJoinSeq(query);
+        const actual = joinSequence(query);
         expect(actual).to.eql(builder.toObject());
       });
 
@@ -1943,7 +1943,7 @@ describe('FilterJoin querying', function () {
           targetTypes: [ 'Investment' ],
           negate: true
         });
-        const actual = filterJoinSeq(query);
+        const actual = joinSequence(query);
         expect(actual).to.eql(builder.toObject());
       });
 
@@ -2017,7 +2017,7 @@ describe('FilterJoin querying', function () {
             }
           }
         });
-        const actual = filterJoinSeq(query);
+        const actual = joinSequence(query);
         expect(actual).to.eql(builder.toObject());
       });
 
@@ -2074,7 +2074,7 @@ describe('FilterJoin querying', function () {
             ]
           }
         ];
-        const actual = filterJoinSeq(query);
+        const actual = joinSequence(query);
         expect(actual).to.eql([
           {
             join: {
@@ -2177,7 +2177,7 @@ describe('FilterJoin querying', function () {
             ]
           }
         ];
-        const actual = filterJoinSeq(query);
+        const actual = joinSequence(query);
         expect(actual).to.eql([
           {
             join: {
@@ -2238,7 +2238,7 @@ describe('FilterJoin querying', function () {
             }
           }
         });
-        const actual = filterJoinSeq(query);
+        const actual = joinSequence(query);
         expect(actual).to.eql(builder.toObject());
       });
 
@@ -2276,7 +2276,7 @@ describe('FilterJoin querying', function () {
             ]
           }
         ];
-        const actual = filterJoinSeq(query);
+        const actual = joinSequence(query);
         expect(actual).to.eql([
           {
             join: {
@@ -2331,7 +2331,7 @@ describe('FilterJoin querying', function () {
             ]
           }
         ];
-        expect(filterJoinSeq).withArgs(query).to.throwError();
+        expect(joinSequence).withArgs(query).to.throwError();
       });
     });
   });

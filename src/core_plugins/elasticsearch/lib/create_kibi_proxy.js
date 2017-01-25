@@ -4,7 +4,7 @@ import { resolve } from 'url';
 import { map, size, assign } from 'lodash';
 import util from './util';
 
-import filterJoinModule from './filter_join';
+import sirenJoinModule from './siren_join';
 import dbfilter from './dbfilter';
 import inject from './inject';
 
@@ -31,7 +31,7 @@ const responseHandler = function (err, upstreamResponse, request, reply) {
 
 module.exports = function createProxy(server, method, path, config) {
 
-  const filterJoin = filterJoinModule(server);
+  const sirenJoin = sirenJoinModule(server);
 
   const proxies = new Map([
     ['/elasticsearch', server.plugins.elasticsearch.getCluster('data')],
@@ -75,8 +75,8 @@ module.exports = function createProxy(server, method, path, config) {
                 credentials = request.auth.credentials.proxyCredentials;
               }
               return dbfilter(server.plugins.kibi_core.getQueryEngine(), query, credentials);
-            }).map((query) => filterJoin.set(query))
-            .map((query) => filterJoin.sequence(query))
+            }).map((query) => sirenJoin.set(query))
+            .map((query) => sirenJoin.sequence(query))
             .then((data) => {
               const buffers = map(data, function (query) {
                 return new Buffer(JSON.stringify(query) + '\n');

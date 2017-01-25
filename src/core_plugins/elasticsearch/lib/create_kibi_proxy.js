@@ -30,7 +30,6 @@ const responseHandler = function (err, upstreamResponse, request, reply) {
 };
 
 module.exports = function createProxy(server, method, path, config) {
-
   const sirenJoin = sirenJoinModule(server);
 
   const proxies = new Map([
@@ -168,7 +167,7 @@ module.exports = function createProxy(server, method, path, config) {
 
     assign(options.config, config);
     assign(options.handler.kibi_proxy, {
-      mapUri: mapUri(server.config().get('elasticsearch.plugins'), cluster, proxyPrefix, true),
+      mapUri: mapUri(cluster, proxyPrefix, server, true),
       agent: createAgent({
         url: cluster.getUrl(),
         ssl: cluster.getSsl()

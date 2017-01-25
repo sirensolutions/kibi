@@ -3,12 +3,15 @@ import { parse as parseUrl, format as formatUrl, resolve } from 'url';
 import filterHeaders from './filter_headers';
 import setHeaders from './set_headers';
 
-export default function mapUri(elasticsearchPlugins, cluster, proxyPrefix, sirenAction) {
+export default function mapUri(cluster, proxyPrefix, server, sirenAction) {
+  const serverConfig = server.config();
+
   function joinPaths(pathA, pathB) {
     return trimRight(pathA, '/') + '/' + trimLeft(pathB, '/');
   }
 
   return function (request, done) {
+    const elasticsearchPlugins = serverConfig.get('elasticsearch.plugins');
     const {
       protocol: esUrlProtocol,
       slashes: esUrlHasSlashes,
@@ -33,10 +36,8 @@ export default function mapUri(elasticsearchPlugins, cluster, proxyPrefix, siren
     mappedUrlComponents.pathname = joinPaths(esUrlBasePath, reqSubPath);
     // kibi: replace _search with _msearch to use siren-platform when available
     if (sirenAction && elasticsearchPlugins && elasticsearchPlugins.indexOf('siren-platform') > -1) {
-      const searchInd = contains(reqSubPath, '_search') ? reqSubPath.indexOf('_search') : reqSubPath.indexOf('_msearch');
-      if (searchInd !== -1) {
-        const coordinateActionPath = reqSubPath.slice(0, searchInd) + '_coordinate' + reqSubPath.slice(searchInd);
-        mappedUrlComponents.pathname = joinPaths(esUrlBasePath, coordinateActionPath);
+      if (reqSubPath.endsWith('_search') || reqSubPath.endsWith('_msearch')) {
+        mappedUrlComponents.pathname = joinPaths(esUrlBasePath, `siren/${trimLeft(reqSubPath, '/')}`);
       }
     }
     // kibi: end

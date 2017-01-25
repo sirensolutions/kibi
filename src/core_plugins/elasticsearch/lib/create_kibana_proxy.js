@@ -35,7 +35,7 @@ function createProxy(server, method, path, config) {
       handler: {
         proxy: {
           // kibi: pass elasticsearch plugins
-          mapUri: mapUri(server.config().get('elasticsearch.plugins'), cluster, proxyPrefix),
+          mapUri: mapUri(cluster, proxyPrefix, server),
           // kibi: end
           agent: createAgent({
             url: cluster.getUrl(),

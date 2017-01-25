@@ -1,24 +1,16 @@
 import _ from 'lodash';
 
-export default function RelationsHelperFactory(kibiEnterpriseEnabled, config, $rootScope) {
+export default function RelationsHelperFactory(kibiEnterpriseEnabled, config) {
   const SEPARATOR = '/';
 
   let relations;
 
   function RelationsHelper() {}
 
-  $rootScope.$on('change:config.kibi:relations', (event, newRelations) => {
+  config.watch('kibi:relations', newRelations => {
     if (newRelations) {
       relations = newRelations;
     }
-  });
-
-  $rootScope.$on('init:config', () => {
-    relations = config.get('kibi:relations');
-  });
-
-  $rootScope.$on('change:config', () => {
-    relations = config.get('kibi:relations');
   });
 
   const checkIdFormat = function (parts) {

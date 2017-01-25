@@ -6,7 +6,7 @@ module.exports = function (grunt) {
 
   return {
     options: {
-      version: 'v5.2.0',
+      branch: '5.2',
       fresh: !grunt.option('esvm-no-fresh'),
       config: {
         http: {
@@ -18,9 +18,6 @@ module.exports = function (grunt) {
     dev: {
       options: {
         directory: resolve(directory, 'dev'),
-        plugins: [
-          'file:/home/yfful/documents/sindice/code/siren-platform/target/releases/siren-platform-3.0.0-SNAPSHOT.zip'
-        ],
         config: {
           path: {
             data: dataDir

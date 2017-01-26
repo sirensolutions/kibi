@@ -1,9 +1,9 @@
-const expect = require('expect.js');
-const FilterJoinBuilder = require('./filterjoin_query_builder');
+import expect from 'expect.js';
+import JoinBuilder from './siren_join_query_builder';
 
-describe('FilterJoin query builder', function () {
+describe('Join query builder', function () {
   it('should create a query with a term clause', function () {
-    const builder = new FilterJoinBuilder();
+    const builder = new JoinBuilder();
     builder.addQuery({
       term: {
         age: 24
@@ -19,9 +19,9 @@ describe('FilterJoin query builder', function () {
     expect(expected).to.eql(builder.toObject());
   });
 
-  it('should create a query with a filterjoin', function () {
-    const builder = new FilterJoinBuilder();
-    builder.addFilterJoin({
+  it('should create a query with a join', function () {
+    const builder = new JoinBuilder();
+    builder.addJoin({
       sourceTypes: 't1',
       sourcePath: 'id1',
       targetIndices: [ 'i2' ],
@@ -30,11 +30,11 @@ describe('FilterJoin query builder', function () {
     });
     const expected = [
       {
-        filterjoin: {
-          id1: {
-            indices: [ 'i2' ],
-            types: [ 't2' ],
-            path: 'id2',
+        join: {
+          indices: [ 'i2' ],
+          types: [ 't2' ],
+          on: [ 'id1', 'id2' ],
+          request: {
             query: {
               bool: {
                 filter: {
@@ -61,9 +61,9 @@ describe('FilterJoin query builder', function () {
     expect(expected).to.eql(builder.toObject());
   });
 
-  it('should create a query with a filterjoin and a query', function () {
-    const builder = new FilterJoinBuilder();
-    builder.addFilterJoin({
+  it('should create a query with a join and a query', function () {
+    const builder = new JoinBuilder();
+    builder.addJoin({
       sourceTypes: 't1',
       sourcePath: 'id1',
       targetIndices: [ 'i2' ],
@@ -75,11 +75,11 @@ describe('FilterJoin query builder', function () {
     });
     const expected = [
       {
-        filterjoin: {
-          id1: {
-            indices: [ 'i2' ],
-            types: [ 't2' ],
-            path: 'id2',
+        join: {
+          indices: [ 'i2' ],
+          types: [ 't2' ],
+          on: [ 'id1', 'id2' ],
+          request: {
             query: {
               bool: {
                 filter: {
@@ -112,19 +112,19 @@ describe('FilterJoin query builder', function () {
     expect(expected).to.eql(builder.toObject());
   });
 
-  it('should create a query with a filterjoin without type clauses', function () {
-    const builder = new FilterJoinBuilder();
-    builder.addFilterJoin({
+  it('should create a query with a join without type clauses', function () {
+    const builder = new JoinBuilder();
+    builder.addJoin({
       sourcePath: 'id1',
       targetIndices: [ 'i2' ],
       targetPath: 'id2'
     });
     const expected = [
       {
-        filterjoin: {
-          id1: {
-            indices: [ 'i2' ],
-            path: 'id2',
+        join: {
+          indices: [ 'i2' ],
+          on: [ 'id1', 'id2' ],
+          request: {
             query: {
               bool: {
                 filter: {
@@ -146,34 +146,34 @@ describe('FilterJoin query builder', function () {
     expect(expected).to.eql(builder.toObject());
   });
 
-  it('should create a query with a nested filterjoin', function () {
-    const builder = new FilterJoinBuilder();
-    builder.addFilterJoin({
+  it('should create a query with a nested join', function () {
+    const builder = new JoinBuilder();
+    builder.addJoin({
       sourcePath: 'id1',
       targetIndices: [ 'i2' ],
       targetPath: 'id2'
     })
-    .addFilterJoin({
+    .addJoin({
       sourcePath: 'id21',
       targetIndices: [ 'i3' ],
       targetPath: 'id3'
     });
     const expected = [
       {
-        filterjoin: {
-          id1: {
-            indices: [ 'i2' ],
-            path: 'id2',
+        join: {
+          indices: [ 'i2' ],
+          on: [ 'id1', 'id2' ],
+          request: {
             query: {
               bool: {
                 filter: {
                   bool: {
                     must: [
                       {
-                        filterjoin: {
-                          id21: {
-                            indices: [ 'i3' ],
-                            path: 'id3',
+                        join: {
+                          indices: [ 'i3' ],
+                          on: [ 'id21', 'id3' ],
+                          request: {
                             query: {
                               bool: {
                                 filter: {
@@ -208,14 +208,14 @@ describe('FilterJoin query builder', function () {
     expect(expected).to.eql(builder.toObject());
   });
 
-  it('should create a query with a nested filterjoin having a source type set that is negated', function () {
-    const builder = new FilterJoinBuilder();
-    builder.addFilterJoin({
+  it('should create a query with a nested join having a source type set that is negated', function () {
+    const builder = new JoinBuilder();
+    builder.addJoin({
       sourcePath: 'id1',
       targetIndices: [ 'i2' ],
       targetPath: 'id2'
     })
-    .addFilterJoin({
+    .addJoin({
       sourcePath: 'id21',
       sourceTypes: [ 'ram' ],
       targetIndices: [ 'i3' ],
@@ -224,10 +224,10 @@ describe('FilterJoin query builder', function () {
     });
     const expected = [
       {
-        filterjoin: {
-          id1: {
-            indices: [ 'i2' ],
-            path: 'id2',
+        join: {
+          indices: [ 'i2' ],
+          on: [ 'id1', 'id2' ],
+          request: {
             query: {
               bool: {
                 filter: {
@@ -238,10 +238,10 @@ describe('FilterJoin query builder', function () {
                         bool: {
                           must: [
                             {
-                              filterjoin: {
-                                id21: {
-                                  indices: [ 'i3' ],
-                                  path: 'id3',
+                              join: {
+                                indices: [ 'i3' ],
+                                on: [ 'id21', 'id3' ],
+                                request: {
                                   query: {
                                     bool: {
                                       filter: {
@@ -284,14 +284,14 @@ describe('FilterJoin query builder', function () {
     expect(expected).to.eql(builder.toObject());
   });
 
-  it('should create a query with a nested filterjoin that is negated', function () {
-    const builder = new FilterJoinBuilder();
-    builder.addFilterJoin({
+  it('should create a query with a nested join that is negated', function () {
+    const builder = new JoinBuilder();
+    builder.addJoin({
       sourcePath: 'id1',
       targetIndices: [ 'i2' ],
       targetPath: 'id2'
     })
-    .addFilterJoin({
+    .addJoin({
       sourcePath: 'id21',
       targetIndices: [ 'i3' ],
       targetPath: 'id3',
@@ -299,10 +299,10 @@ describe('FilterJoin query builder', function () {
     });
     const expected = [
       {
-        filterjoin: {
-          id1: {
-            indices: [ 'i2' ],
-            path: 'id2',
+        join: {
+          indices: [ 'i2' ],
+          on: [ 'id1', 'id2' ],
+          request: {
             query: {
               bool: {
                 filter: {
@@ -313,10 +313,10 @@ describe('FilterJoin query builder', function () {
                         bool: {
                           must: [
                             {
-                              filterjoin: {
-                                id21: {
-                                  indices: [ 'i3' ],
-                                  path: 'id3',
+                              join: {
+                                indices: [ 'i3' ],
+                                on: [ 'id21', 'id3' ],
+                                request: {
                                   query: {
                                     bool: {
                                       filter: {
@@ -354,9 +354,9 @@ describe('FilterJoin query builder', function () {
     expect(expected).to.eql(builder.toObject());
   });
 
-  it('should create a query with a nested filterjoin and some queries', function () {
-    const builder = new FilterJoinBuilder();
-    builder.addFilterJoin({
+  it('should create a query with a nested join and some queries', function () {
+    const builder = new JoinBuilder();
+    builder.addJoin({
       sourcePath: 'id1',
       targetIndices: [ 'i2' ],
       targetPath: 'id2'
@@ -364,7 +364,7 @@ describe('FilterJoin query builder', function () {
     .addQuery({
       term: { age: 24 }
     })
-    .addFilterJoin({
+    .addJoin({
       sourcePath: 'id21',
       targetIndices: [ 'i3' ],
       targetPath: 'id3'
@@ -374,10 +374,10 @@ describe('FilterJoin query builder', function () {
     });
     const expected = [
       {
-        filterjoin: {
-          id1: {
-            indices: [ 'i2' ],
-            path: 'id2',
+        join: {
+          indices: [ 'i2' ],
+          on: [ 'id1', 'id2' ],
+          request: {
             query: {
               bool: {
                 filter: {
@@ -389,10 +389,10 @@ describe('FilterJoin query builder', function () {
                         }
                       },
                       {
-                        filterjoin: {
-                          id21: {
-                            indices: [ 'i3' ],
-                            path: 'id3',
+                        join: {
+                          indices: [ 'i3' ],
+                          on: [ 'id21', 'id3' ],
+                          request: {
                             query: {
                               bool: {
                                 filter: {
@@ -433,9 +433,9 @@ describe('FilterJoin query builder', function () {
     expect(expected).to.eql(builder.toObject());
   });
 
-  it('should create a query with a nested filterjoin and some negated query', function () {
-    const builder = new FilterJoinBuilder();
-    builder.addFilterJoin({
+  it('should create a query with a nested join and some negated query', function () {
+    const builder = new JoinBuilder();
+    builder.addJoin({
       sourcePath: 'id1',
       targetIndices: [ 'i2' ],
       targetPath: 'id2'
@@ -445,10 +445,10 @@ describe('FilterJoin query builder', function () {
     }, true);
     const expected = [
       {
-        filterjoin: {
-          id1: {
-            indices: [ 'i2' ],
-            path: 'id2',
+        join: {
+          indices: [ 'i2' ],
+          on: [ 'id1', 'id2' ],
+          request: {
             query: {
               bool: {
                 filter: {
@@ -477,9 +477,9 @@ describe('FilterJoin query builder', function () {
     expect(expected).to.eql(builder.toObject());
   });
 
-  it('should create a query with a filterjoin having advanced parameters', function () {
-    const builder = new FilterJoinBuilder();
-    builder.addFilterJoin({
+  it('should create a query with a join having advanced parameters', function () {
+    const builder = new JoinBuilder();
+    builder.addJoin({
       sourcePath: 'id1',
       targetIndices: [ 'i2' ],
       targetPath: 'id2',
@@ -489,13 +489,13 @@ describe('FilterJoin query builder', function () {
     });
     const expected = [
       {
-        filterjoin: {
-          id1: {
-            indices: [ 'i2' ],
-            path: 'id2',
-            maxTermsPerShard: 10,
-            orderBy: '_doc',
-            termsEncoding: 'integer',
+        join: {
+          indices: [ 'i2' ],
+          on: [ 'id1', 'id2' ],
+          maxTermsPerShard: 10,
+          orderBy: '_doc',
+          termsEncoding: 'integer',
+          request: {
             query: {
               bool: {
                 filter: {
@@ -518,8 +518,8 @@ describe('FilterJoin query builder', function () {
   });
 
   it('should not set maxTermsPerShard if === -1', function () {
-    const builder = new FilterJoinBuilder();
-    builder.addFilterJoin({
+    const builder = new JoinBuilder();
+    builder.addJoin({
       sourcePath: 'id1',
       targetIndices: [ 'i2' ],
       targetPath: 'id2',
@@ -527,10 +527,10 @@ describe('FilterJoin query builder', function () {
     });
     const expected = [
       {
-        filterjoin: {
-          id1: {
-            indices: [ 'i2' ],
-            path: 'id2',
+        join: {
+          indices: [ 'i2' ],
+          on: [ 'id1', 'id2' ],
+          request: {
             query: {
               bool: {
                 filter: {

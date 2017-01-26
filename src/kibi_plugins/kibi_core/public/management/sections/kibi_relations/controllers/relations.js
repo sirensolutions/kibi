@@ -557,13 +557,13 @@ function controller(Promise, es, kibiState, $rootScope, $scope, $timeout, config
           es.indices.getFieldMapping({
             index: [ indices[0].indexPatternId ],
             type: indices[0].indexPatternType || [],
-            field: [ indices[0].path ],
+            fields: [ indices[0].path ],
             includeDefaults: true
           }),
           es.indices.getFieldMapping({
             index: [ indices[1].indexPatternId ],
             type: indices[1].indexPatternType || [],
-            field: [ indices[1].path ],
+            fields: [ indices[1].path ],
             includeDefaults: true
           })
         ])

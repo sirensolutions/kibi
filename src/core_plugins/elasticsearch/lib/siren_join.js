@@ -1,11 +1,12 @@
-const util = require('./util');
-const _ = require('lodash');
+import util from './util';
+import _ from 'lodash';
 
-export default function (server) {
+export default function sirenJoin(server) {
+  const kibiIndex = server.config().get('kibana.index');
 
   /**
-  * Returns the index in relation of the element which is about the given index
-  */
+   * Returns the index in relation of the element which is about the given index
+   */
   const _getFocusedRelationIndex = function (focus, relation) {
     if (relation[0].pattern === focus) {
       return 0;
@@ -26,20 +27,22 @@ export default function (server) {
     }
   };
 
-  const addFilterJoinToParent = function (query, fjObject, types, negate) {
+  const addJoinToParent = function (query, fjObject, types, negate) {
     if (query.constructor === Array) {
-      // this filterjoin is the root
+      // this join is the root
       query.push(fjObject);
       addSourceTypes(query, types);
     } else {
-      // add to the parent filterjoin
+      // add to the parent join
       if (negate) {
         if (!_.get(query, 'filter.bool.must_not')) {
-          _.set(query, 'filter.bool.must_not', [{
-            bool: {
-              must: []
+          _.set(query, 'filter.bool.must_not', [
+            {
+              bool: {
+                must: []
+              }
             }
-          }]);
+          ]);
         }
         query.filter.bool.must_not[0].bool.must.push(fjObject);
         addSourceTypes(query.filter.bool.must_not[0].bool.must, types);
@@ -50,109 +53,14 @@ export default function (server) {
     }
   };
 
-  /**
-   * Generate a SIREn filterjoin query where the sequence of joins is explicitly defined in the query.
-   *
-   * A join_sequence is an array where each element is either:
-   * 1. a node of the join sequence; or
-   * 2. another sequence.
-   *
-   * A sequence can be nested by adding an object which field name is "group", and its value the sequence to nest.
-   * For example, the sequence [ node1, node2 ] can be nested in the sequence [ node3, node4 ] as follows:
-   *    {
-   *      join_sequence: [
-   *        {
-   *          group: [
-   *            [ node1, node2 ]
-   *          ]
-   *        },
-   *        node3,
-   *        node4
-   *      ]
-   *    }
-   *
-   * Each node of a sequence is a relation that connects two dashboards. The relation is directed: [ node1, node2 ] is
-   * a join from node2 to node1.
-   * A dashboard is an object that contains the following fields:
-   * - pattern: an index pattern from which indices are taken
-   * - path: the path to the joined field
-   * - indices: an array of indices to join on
-   * - types: the corresponding array of types
-   * - orderBy: the filterjoin ordering option
-   * - maxTermsPerShard: the maximum number of terms to consider in the filterjoin
-   * - queries: and array of queries that are applied on the set of indices
-   *
-   * A relation can be negated by setting the field "negate" to true.
-   */
-  const sequence = function (json) {
-    const label = 'join_sequence';
-    const objects = util.traverse(json, label, function (err, sequence) {
-      if (err) {
-        throw err;
-      }
-      const query = [];
-      _verifySequence(sequence);
-      _sequenceJoins(query, sequence);
-      return query;
-    });
-    _replaceObjects(json, objects);
-    return json;
-  };
-
-  /**
-   * Generate a SIREn filterjoin query based on the given relations with the focused index as the root of the query.
-   * The joins and their order is decided based on the given focus.
-   *
-   * A filterjoin is an object with the following fields:
-   * - focus: the focused index as a string
-   * - relations: an array of relations. A relation is an array with two objects, each describing one end of a join.
-   *   This object contains the following fields:
-   *     - pattern: an index pattern
-   *     - indices: an array of indices to join on
-   *     - types: the corresponding array of types
-   *     - path: the path to the joined field
-   *     - orderBy: the filterjoin ordering option
-   *     - maxTermsPerShard: the maximum number of terms to consider in the filterjoin
-   * - queries: the queries for each index/dashboard as an object. The queries are within an array for each pair.
-   */
-  const set = function (json) {
-    const label = 'join_set';
-    const objects = util.traverse(json, label, function (err, data) {
-      if (err) {
-        throw err;
-      }
-
-      const focus = data.focus;
-      const relations = data.relations;
-      let queries = data.queries || {};
-
-      if (focus === undefined) {
-        throw new Error('Missing focus field in the join object: ' + JSON.stringify(data, null, ' '));
-      }
-      if (relations === undefined) {
-        throw new Error('Missing relations field in the join object: ' + JSON.stringify(data, null, ' '));
-      }
-
-      const query = [];
-      const superGraph = _superGraph(relations);
-      const toExpand = [];
-      queries = _.mapValues(queries, perDashboards => _(perDashboards).values().flatten().uniq().compact().value());
-      _superGraphToSuperTree(toExpand, query, focus, superGraph, queries);
-      _expandSuperTree(toExpand);
-      return query;
-    });
-    _replaceObjects(json, objects);
-    return json;
-  };
-
   function _replaceObjects(json, objects) {
     for (let i = objects.length - 1; i >= 0; i--) {
       const path = objects[i].path;
       if (util.length(json, path) !== 1) {
         throw new Error('The object at ' + path.join('.') + ' must only contain the join filter\n' + JSON.stringify(json, null, ' '));
       }
-      // if a relation contains a filter on the source type, the FilterJoin API will generate a list of two filters:
-      // - a filterjoin
+      // if a relation contains a filter on the source type, the join API will generate a list of two filters:
+      // - a join
       // - a type filter
       //
       // To exclude documents for which match BOTH these filters, we need to enclose the filters in a must clause,
@@ -235,14 +143,14 @@ export default function (server) {
   }
 
   /**
-   * Create the filterjoin from the sequence of relations
+   * Create the join from the sequence of relations
    */
   function _sequenceJoins(query, sequence) {
     let curQuery = query;
 
     for (let i = sequence.length - 1; i > 0; i--) {
       const join = sequence[i].relation;
-      const { child } = _addFilterJoin(curQuery, join[1].path, join[1], join[0].path, join[0], sequence[i].negate);
+      const { child } = _addJoin(curQuery, join[1].path, join[1], join[0].path, join[0], sequence[i].negate);
       if (!child) {
         return;
       }
@@ -255,7 +163,7 @@ export default function (server) {
       });
     } else {
       const lastJoin = sequence[0].relation;
-      const { child } = _addFilterJoin(curQuery, lastJoin[1].path, lastJoin[1], lastJoin[0].path, lastJoin[0], sequence[0].negate);
+      const { child } = _addJoin(curQuery, lastJoin[1].path, lastJoin[1], lastJoin[0].path, lastJoin[0], sequence[0].negate);
       if (!child) {
         return;
       }
@@ -291,10 +199,10 @@ export default function (server) {
         const targetInd = ind === 0 ? 1 : 0;
         const sourceRel = relation[ind];
         const targetRel = relation[targetInd];
-        const clone = _.cloneDeep(node.filterjoin);
+        const clone = _.cloneDeep(node.join);
 
         clone.indices = targetRel.indices;
-        clone.path = targetRel.path;
+        clone.on = [ sourceRel.path, targetRel.path ];
         clone.types = targetRel.types;
         if (!clone.types) {
           delete clone.types;
@@ -312,18 +220,14 @@ export default function (server) {
           delete clone.maxTermsPerShard;
         }
 
-        const fjObject = {
-          filterjoin: {}
-        };
-        fjObject.filterjoin[sourceRel.path] = clone;
-        addFilterJoinToParent(node.parent, fjObject, sourceRel.types);
+        addJoinToParent(node.parent, { join: clone }, sourceRel.types);
       }
     }
   }
 
   /**
    * Processes the current focused indexed: adds its own direct filters
-   * and the filterjoins as well, if it is connected to any of the other
+   * and the joins as well, if it is connected to any of the other
    * indices.
    */
   function _superGraphToSuperTree(toExpand, query, focus, superGraph, filters, visitedIndices = {}, visitedRelations = {}) {
@@ -358,13 +262,13 @@ export default function (server) {
 
           if (!visitedRelations[id]) {
             visitedRelations[id] = true;
-            const { child, filterjoin } = _addFilterJoin(query, sourceRel.path, sourceRel, targetRel.path, targetRel);
+            const { child, join } = _addJoin(query, sourceRel.path, sourceRel, targetRel.path, targetRel);
             if (relations.length > 1) {
               toExpand.push({
                 focus,
                 relations: relations.slice(1),
                 parent: query,
-                filterjoin
+                join
               });
             }
             if (!child) {
@@ -375,75 +279,6 @@ export default function (server) {
         }
       }
     }
-  }
-
-  /**
-   * Adds a filterjoin filter to the given query, from the source index to the target index
-   */
-  function _addFilterJoin(query, sourcePath, sourceIndex, targetPath, targetIndex, negate) {
-    if (!targetIndex) {
-      throw new Error('The target index must be defined');
-    }
-    const orderBy = targetIndex.orderBy;
-    const maxTermsPerShard = targetIndex.maxTermsPerShard;
-    const termsEncoding = targetIndex.termsEncoding;
-
-    const filterJoin = {
-      indices: targetIndex.indices,
-      path: targetPath,
-      query: {
-        bool: {
-          must: [
-            {
-              match_all: {}
-            }
-          ],
-          filter: {
-            bool: {
-              must: []
-            }
-          }
-        }
-      }
-    };
-    if (targetIndex.types && targetIndex.types.length > 0) {
-      filterJoin.types = targetIndex.types;
-    }
-    if (orderBy) {
-      filterJoin.orderBy = orderBy;
-    }
-    if (maxTermsPerShard && maxTermsPerShard > -1) {
-      filterJoin.maxTermsPerShard = maxTermsPerShard;
-    }
-    if (termsEncoding) {
-      filterJoin.termsEncoding = termsEncoding;
-    }
-    const fjObject = {
-      filterjoin: {}
-    };
-
-    let child = filterJoin.query.bool;
-
-    // If there are no target indices, set the query to return no results.
-    if (targetIndex.indices.length === 0) {
-      filterJoin.indices = [server.config().get('kibana.index')];
-      filterJoin.query = {
-        bool: {
-          must_not: [
-            { match_all: {} }
-          ]
-        }
-      };
-      child = null;
-    }
-
-    fjObject.filterjoin[sourcePath] = filterJoin;
-
-    addFilterJoinToParent(query, fjObject, sourceIndex.types, negate);
-    return {
-      filterjoin: filterJoin,
-      child: child
-    };
   }
 
   /**
@@ -469,9 +304,166 @@ export default function (server) {
     }
   }
 
+  /**
+   * Adds a join to the given query, from the source index to the target index
+   */
+  function _addJoin(query, sourcePath, sourceIndex, targetPath, targetIndex, negate) {
+    if (!targetIndex) {
+      throw new Error('The target index must be defined');
+    }
+    const orderBy = targetIndex.orderBy;
+    const maxTermsPerShard = targetIndex.maxTermsPerShard;
+    const termsEncoding = targetIndex.termsEncoding;
+
+    const join = {
+      indices: targetIndex.indices,
+      on: [ sourcePath, targetPath ],
+      request: {
+        query: {
+          bool: {
+            must: [
+              {
+                match_all: {}
+              }
+            ],
+            filter: {
+              bool: {
+                must: []
+              }
+            }
+          }
+        }
+      }
+    };
+    if (targetIndex.types && targetIndex.types.length > 0) {
+      join.types = targetIndex.types;
+    }
+    if (orderBy) {
+      join.orderBy = orderBy;
+    }
+    if (maxTermsPerShard && maxTermsPerShard > -1) {
+      join.maxTermsPerShard = maxTermsPerShard;
+    }
+    if (termsEncoding) {
+      join.termsEncoding = termsEncoding;
+    }
+
+    let child = join.request.query.bool;
+
+    // If there are no target indices, set the query to return no results.
+    if (targetIndex.indices.length === 0) {
+      join.indices = [ kibiIndex ];
+      join.request.query = {
+        bool: {
+          must_not: [
+            { match_all: {} }
+          ]
+        }
+      };
+      child = null;
+    }
+
+    addJoinToParent(query, { join }, sourceIndex.types, negate);
+    return { join, child };
+  }
+
+  /**
+   * Generate a SIREn join query where the sequence of joins is explicitly defined in the query.
+   *
+   * A join_sequence is an array where each element is either:
+   * 1. a node of the join sequence; or
+   * 2. another sequence.
+   *
+   * A sequence can be nested by adding an object which field name is "group", and its value the sequence to nest.
+   * For example, the sequence [ node1, node2 ] can be nested in the sequence [ node3, node4 ] as follows:
+   *    {
+   *      join_sequence: [
+   *        {
+   *          group: [
+   *            [ node1, node2 ]
+   *          ]
+   *        },
+   *        node3,
+   *        node4
+   *      ]
+   *    }
+   *
+   * Each node of a sequence is a relation that connects two dashboards. The relation is directed: [ node1, node2 ] is
+   * a join from node2 to node1.
+   * A dashboard is an object that contains the following fields:
+   * - pattern: an index pattern from which indices are taken
+   * - path: the path to the joined field
+   * - indices: an array of indices to join on
+   * - types: the corresponding array of types
+   * - orderBy: the join ordering option
+   * - maxTermsPerShard: the maximum number of terms to consider in the join
+   * - queries: and array of queries that are applied on the set of indices
+   *
+   * A relation can be negated by setting the field "negate" to true.
+   */
+  const sequence = function (json) {
+    const label = 'join_sequence';
+    const objects = util.traverse(json, label, function (err, sequence) {
+      if (err) {
+        throw err;
+      }
+      const query = [];
+      _verifySequence(sequence);
+      _sequenceJoins(query, sequence);
+      return query;
+    });
+    _replaceObjects(json, objects);
+    return json;
+  };
+
+  /**
+   * Generate a SIREn join query based on the given relations with the focused index as the root of the query.
+   * The joins and their order is decided based on the given focus.
+   *
+   * A join_set is an object with the following fields:
+   * - focus: the focused index as a string
+   * - relations: an array of relations. A relation is an array with two objects, each describing one end of a join.
+   *   This object contains the following fields:
+   *     - pattern: an index pattern
+   *     - indices: an array of indices to join on
+   *     - types: the corresponding array of types
+   *     - path: the path to the joined field
+   *     - orderBy: the join ordering option
+   *     - maxTermsPerShard: the maximum number of terms to consider in the join
+   * - queries: the queries for each index/dashboard as an object. The queries are within an array for each pair.
+   */
+  const set = function (json) {
+    const label = 'join_set';
+    const objects = util.traverse(json, label, function (err, data) {
+      if (err) {
+        throw err;
+      }
+
+      const focus = data.focus;
+      const relations = data.relations;
+      let queries = data.queries || {};
+
+      if (focus === undefined) {
+        throw new Error('Missing focus field in the join object: ' + JSON.stringify(data, null, ' '));
+      }
+      if (relations === undefined) {
+        throw new Error('Missing relations field in the join object: ' + JSON.stringify(data, null, ' '));
+      }
+
+      const query = [];
+      const superGraph = _superGraph(relations);
+      const toExpand = [];
+      queries = _.mapValues(queries, perDashboards => _(perDashboards).values().flatten().uniq().compact().value());
+      _superGraphToSuperTree(toExpand, query, focus, superGraph, queries);
+      _expandSuperTree(toExpand);
+      return query;
+    });
+    _replaceObjects(json, objects);
+    return json;
+  };
+
   return {
     set,
     sequence
   };
-
 }

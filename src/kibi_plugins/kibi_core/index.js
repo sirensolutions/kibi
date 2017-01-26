@@ -273,8 +273,8 @@ module.exports = function (kibana) {
               credentials = req.auth.credentials.proxyCredentials;
             }
             return server.plugins.elasticsearch.dbfilter(server.plugins.kibi_core.getQueryEngine(), query, credentials);
-          }).map((query) => server.plugins.elasticsearch.filterJoinSet(query))
-          .map((query) => server.plugins.elasticsearch.filterJoinSequence(query))
+          }).map((query) => server.plugins.elasticsearch.sirenJoinSet(query))
+          .map((query) => server.plugins.elasticsearch.sirenJoinSequence(query))
           .then((data) => {
             reply({ translatedQuery: data[0] });
           }).catch((err) => {

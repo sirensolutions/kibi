@@ -261,14 +261,14 @@ export default function KibiSequentialJoinVisHelperFactory(kbnUrl, kibiState, Pr
               }
             }
           ],
-          // default siren-join parameters
+          // default siren-platform parameters
           termsEncoding: 'long'
         },
         {
           pattern: button.targetIndexPatternId,
           path: button.targetField,
           indices: targetIndices,
-          // default siren-join parameters
+          // default siren-platform parameters
           termsEncoding: 'long'
         }
       ]

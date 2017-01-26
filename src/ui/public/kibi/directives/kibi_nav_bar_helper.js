@@ -36,6 +36,9 @@ export default function KibiNavBarHelperFactory(kibiState, globalState, getAppSt
       });
     }
 
+    if (!filteredDashboardsIds.size) {
+      return;
+    }
     if (console) {
       const msg = 'KibiNavBar will update the counts for following dashboards ' + JSON.stringify(filteredDashboardsIds, null, ' ');
       console.log(msg); // eslint-disable-line no-console
@@ -66,6 +69,9 @@ export default function KibiNavBarHelperFactory(kibiState, globalState, getAppSt
   };
 
   const updateCounts = function (dashboardsIds, reason, forceUpdate = false) {
+    if (!dashboardsIds.length) {
+      return;
+    }
     if (console) {
       const msg = `KibiNavBar requested count update for following dashboards
         ${JSON.stringify(dashboardsIds, null, ' ')} because: [${reason}]`;
@@ -204,10 +210,9 @@ export default function KibiNavBarHelperFactory(kibiState, globalState, getAppSt
 
   KibiNavBarHelper.prototype.updateAllCounts = function (dashboardsIds, reason, forceUpdate = false) {
     if (!dashboardsIds) {
-      return savedDashboards.find().then(function (dashboards) {
-        return _(dashboards.hits).filter((d) => {
-          return !!d.savedSearchId;
-        }).map((d) => d.id).value();
+      return savedDashboards.find()
+      .then(function (dashboards) {
+        return _(dashboards.hits).filter('savedSearchId').map('id').value();
       })
       .then((ids) => updateCounts.call(this, ids, reason, forceUpdate))
       .catch(notify.error);

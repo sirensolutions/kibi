@@ -112,7 +112,7 @@ export default function IndexPatternFactory(Private, createNotifier, config, kbn
     if (!indexPattern.fields || !containsFieldCapabilities(indexPattern.fields)) {
       promise = indexPattern.refreshFields();
     }
-    return promise.then(() => { initFields(indexPattern); })
+    return promise.then(() => initFields(indexPattern))
     .then(() => indexPattern.kibiPathsFetched = true);
   }
 
@@ -160,7 +160,7 @@ export default function IndexPatternFactory(Private, createNotifier, config, kbn
     .then(fields => {
       const scripted = indexPattern.getScriptedFields();
       const all = fields.concat(scripted);
-      initFields(indexPattern, all);
+      return initFields(indexPattern, all);
     });
   }
 

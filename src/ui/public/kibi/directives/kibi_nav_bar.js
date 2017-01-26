@@ -41,13 +41,19 @@ define(function (require) {
           chrome.onDashboardTab() ? $el.show() : $el.hide();
         });
 
+        $scope.splitTabs = config.get('kibi:splitTabs');
         $scope.relationalFilterVisible = config.get('kibi:relationalPanel');
         const removeInitConfigHandler = $rootScope.$on('init:config', function () {
           $scope.relationalFilterVisible = config.get('kibi:relationalPanel');
+          $scope.splitTabs = config.get('kibi:splitTabs');
         });
 
         const removeRelationalPanelHandler = $rootScope.$on('change:config.kibi:relationalPanel', function () {
           $scope.relationalFilterVisible = config.get('kibi:relationalPanel');
+        });
+
+        const removeSplitTabsHandler = $rootScope.$on('change:config.kibi:splitTabs', function () {
+          $scope.splitTabs = config.get('kibi:splitTabs');
         });
 
         // =============
@@ -213,6 +219,7 @@ define(function (require) {
           kibiNavBarHelper.cancelExecutionInProgress();
           removeInitConfigHandler();
           removeRelationalPanelHandler();
+          removeSplitTabsHandler();
           removeDashboardGroupChangedHandler();
           removeDashboardChangedHandler();
           removeLocationChangeSuccessHandler();

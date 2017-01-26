@@ -1,4 +1,4 @@
-<nav>
+<nav ng-class="{splitTabs: splitTabs}">
 
   <div class="tab-cell">
     <div role="tabpanel" class="tab-container">
@@ -9,7 +9,8 @@
             ng-repeat="group in dashboardGroups | orderBy: 'priority'"
             data-test-subj={{group.title}}
             ng-show="!group.hide">
-          <a ng-click="group.selected.onSelect(dashboardGroups)">
+          <a ng-click="group.selected.onSelect(dashboardGroups)"
+             ng-class="{filter: group.selected.filterIconMessage, icon: group.iconCss}">
             <i ng-if="group.iconCss" class="icon {{group.iconCss}}"></i>
             <img class="icon" ng-if="group.iconUrl" ng-src="{{group.iconUrl}}"/>
             {{group.title}}
@@ -35,10 +36,11 @@
 
             <span ng-if="!group.active || (group.active && group.dashboards.length == 1)">
               <!-- compare count to undefined to show zero -->
-              <span ng-if="group.selected.count !== undefined">
+              <br ng-if="group.selected.count !== undefined && splitTabs"/>
+              <span ng-if="group.selected.count !== undefined" class="fischio">
                 ({{ group.selected.count }})
               </span>
-              <span ng-if="group.selected.filterIconMessage">
+              <span ng-if="group.selected.filterIconMessage" class="filter-icon">
                 <i class="fa fa-filter" aria-hidden="true" data-toggle="tooltip"
                 data-placement="bottom" title="{{ group.selected.filterIconMessage }}"/>
               </span>

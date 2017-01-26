@@ -36,7 +36,7 @@ export default function KibiNavBarHelperFactory(kibiState, globalState, getAppSt
       });
     }
 
-    if (!filteredDashboardsIds.length) {
+    if (!filteredDashboardsIds.size) {
       return;
     }
     if (console) {
@@ -210,10 +210,9 @@ export default function KibiNavBarHelperFactory(kibiState, globalState, getAppSt
 
   KibiNavBarHelper.prototype.updateAllCounts = function (dashboardsIds, reason, forceUpdate = false) {
     if (!dashboardsIds) {
-      return savedDashboards.find().then(function (dashboards) {
-        return _(dashboards.hits).filter((d) => {
-          return !!d.savedSearchId;
-        }).map((d) => d.id).value();
+      return savedDashboards.find()
+      .then(function (dashboards) {
+        return _(dashboards.hits).filter('savedSearchId').map('id').value();
       })
       .then((ids) => updateCounts.call(this, ids, reason, forceUpdate))
       .catch(notify.error);

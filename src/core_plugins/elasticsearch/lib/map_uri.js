@@ -34,16 +34,25 @@ export default function mapUri(cluster, proxyPrefix, server, sirenAction) {
     // pathname
     const reqSubPath = request.path.replace(proxyPrefix, '');
     mappedUrlComponents.pathname = joinPaths(esUrlBasePath, reqSubPath);
+
     // kibi: replace _search with _msearch to use siren-platform when available
-    if (sirenAction && elasticsearchPlugins && elasticsearchPlugins.indexOf('siren-platform') > -1) {
+    if (sirenAction && elasticsearchPlugins && contains(elasticsearchPlugins, 'siren-platform')) {
       if (reqSubPath.endsWith('_search') || reqSubPath.endsWith('_msearch')) {
         mappedUrlComponents.pathname = joinPaths(esUrlBasePath, `siren/${trimLeft(reqSubPath, '/')}`);
       }
     }
     // kibi: end
 
+    // kibi: remove request parameters used only for differentiating requests
+    const requestQuery = request.query;
+    if (requestQuery) {
+      delete requestQuery.getCountsOnButton;
+      delete requestQuery.getCountsOnTabs;
+    }
+    // kibi: end
+
     // querystring
-    const mappedQuery = defaults(omit(request.query, '_'), esUrlQuery);
+    const mappedQuery = defaults(omit(requestQuery, '_'), esUrlQuery);
     if (Object.keys(mappedQuery).length) {
       mappedUrlComponents.query = mappedQuery;
     }

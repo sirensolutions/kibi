@@ -25,7 +25,7 @@ define(function (require) {
           if ($scope.g) {
             $scope.g.destroy();
           }
-          $scope.g = new Eeg(element, {baseURL: '', layersOrder: layersOrderArray});
+          $scope.g = new Eeg(element, {baseURL: '', layersOrder: layersOrderArray, minNodeSize: 15});
         }
 
         $scope.$watch('graph', function (graph) {
@@ -38,6 +38,7 @@ define(function (require) {
               }
               $scope.graph.options.baseURL = '';
               $scope.graph.options.layersOrder = layersOrderArray;
+              $scope.graph.options.minNodeSize = 15;
               $scope.g = new Eeg(element, $scope.graph.options);
             }
 

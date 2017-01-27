@@ -356,7 +356,6 @@ define(function (require) {
         if (!existingNode) {
           node.keep = true; // this is to tag the nodes to remove
           node.id = id;
-          node.size = $scope[graphProperty].options.minNodeSize;
           $scope[graphProperty].nodes.push(node);
         } else {
           existingNode.keep = true; // this is to tag the nodes to remove
@@ -462,10 +461,8 @@ define(function (require) {
         options: {
           monitorContainerSize: true,
           alwaysShowLinksLabels: true,
-          stopAfter: 2000,
           groupingForce: {},
           nodeIcons: {},
-          minNodeSize: 20,
           colors: {}
         },
         isRelationReady: function (relDash) {
@@ -578,10 +575,8 @@ define(function (require) {
           showLegend: false,
           monitorContainerSize: true,
           alwaysShowLinksLabels: true,
-          stopAfter: 2000,
           groupingForce: {},
           nodeIcons: {},
-          minNodeSize: 20,
           colors: {}
         },
         isRelationReady: function (relation) {
@@ -843,13 +838,28 @@ define(function (require) {
     }, true);
 
     const indicesGraphExportOff = $rootScope.$on('egg:indicesGraph:results', function (event, method, results) {
-      if (method === 'exportGraph') {
-        $scope.relations.relationsIndicesSerialized = results;
+      switch (method) {
+        case 'exportGraph':
+          $scope.relations.relationsIndicesSerialized = results;
+          break;
+        case 'importGraph':
+          $timeout(() => {
+            $rootScope.$emit('egg:indicesGraph:run', 'stop');
+          }, 1000);
+          break;
+        default:
       }
     });
     const dashboardsGraphExportOff = $rootScope.$on('egg:dashboardsGraph:results', function (event, method, results) {
-      if (method === 'exportGraph') {
-        $scope.relations.relationsDashboardsSerialized = results;
+      switch (method) {
+        case 'exportGraph':
+          $scope.relations.relationsDashboardsSerialized = results;
+        case 'importGraph':
+          $timeout(() => {
+            $rootScope.$emit('egg:dashboardsGraph:run', 'stop');
+          }, 1000);
+          break;
+        default:
       }
     });
 

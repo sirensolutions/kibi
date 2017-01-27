@@ -228,6 +228,10 @@ define(function (require) {
         value: false,
         description: 'Set to true to suppress all warnings and errors'
       },
+      'kibi:splitTabs' : {
+        value: false,
+        description: 'Set to true to split dashboard tabs on two lines'
+      },
       'kibi:graphUseWebGl' : {
         value: true,
         description: 'Set to false to disable WebGL rendering'

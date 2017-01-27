@@ -15,7 +15,7 @@ define(function (require) {
 
   require('ui/modules')
   .get('app/dashboard')
-  .directive('kibiNavBar', function ($rootScope, kibiState, config, Private) {
+  .directive('kibiNavBar', function ($rootScope, kibiState, config, Private, $timeout) {
     const chrome = require('ui/chrome');
     const ResizeChecker = Private(require('ui/vislib/lib/resize_checker'));
     const kibiNavBarHelper = Private(require('ui/kibi/directives/kibi_nav_bar_helper'));
@@ -54,46 +54,131 @@ define(function (require) {
         // Tab scrolling
         // =============
 
-        var tabContainer = $el.find('.tab-container');
-        $scope.tabResizeChecker = new ResizeChecker(tabContainer);
-        $scope.tabScrollerState = [true, false];
+        var $tabContainer = $el.find('.tab-container');
+        var tabContainerElement = $el[0];
+
+        $scope.tabResizeChecker = new ResizeChecker($tabContainer);
+        $scope.tabScrollerState = {
+          leftArrow: true,
+          rightArrow: false
+        };
 
         var updateTabScroller = function () {
-          var sl = tabContainer.scrollLeft();
-          $scope.tabScrollerState[0] = sl === 0;
-          $scope.tabScrollerState[1] = sl === tabContainer[0].scrollWidth - tabContainer[0].clientWidth;
+          var sl = $tabContainer.scrollLeft();
+          const oldArrowLeft = $scope.tabScrollerState.leftArrow;
+          const oldArrowRight = $scope.tabScrollerState.rightArrow;
+          $scope.tabScrollerState.leftArrow = sl === 0;
+          $scope.tabScrollerState.rightArrow = sl === $tabContainer[0].scrollWidth - $tabContainer[0].clientWidth;
+          if (
+            pressedButtonDirection === 'left' &&
+            oldArrowLeft === true &&
+            $scope.tabScrollerState.leftArrow === false &&
+            $tabContainer.scrollLeft() !== 0
+          ) {
+            stopScrolling = true;
+          }
+          if (
+            pressedButtonDirection === 'right' &&
+            oldArrowRight === true &&
+            $scope.tabScrollerState.rightArrow === false
+          ) {
+            stopScrolling = true;
+          }
         };
+
+        function isActiveTabVisible(activeTab) {
+          if (activeTab !== null) {
+            const tab = activeTab.getBoundingClientRect();
+            return (tab.right > 0) && (tab.left + activeTab.offsetWidth - $tabContainer.width() <= 0);
+          }
+        };
+
+        function makeVisible() {
+          const $activeTab = $el.find('.nav-tabs li.active');
+          const activeTabElement = $activeTab[0];
+          if (!isActiveTabVisible(activeTabElement)) {
+            $tabContainer.stop(true);
+            var tabContainerWidth = $tabContainer.width();
+            var activeTabOffsetLeft = $activeTab.offset().left;
+            var activeTabWidth = $activeTab.width();
+            scroll(-1, activeTabOffsetLeft + activeTabWidth - tabContainerWidth);
+          } else {
+            updateTabScroller();
+          }
+        }
 
         $scope.onTabContainerResize = function () {
-          $scope.tabScrollerVisible = tabContainer[0].offsetWidth < tabContainer[0].scrollWidth;
-          updateTabScroller();
+          $scope.tabScrollerVisible = $tabContainer.width() < tabContainerElement.scrollWidth;
+          makeVisible();
         };
 
-        $scope.tabResizeChecker.on('resize', $scope.onTabContainerResize);
+        $scope.$watch(($scope) => {
+          const countsArray = _($scope.dashboardGroups)
+          .map(g => _.pluck(g.dashboards, 'count'))
+          .flatten()
+          .compact()
+          .value();
+          return countsArray.length === 0 ? null : countsArray.join();
+        }, (counts) => {
+          if (counts) {
+            $timeout(makeVisible, 250);
+          }
+        });
+
+        $scope.tabResizeChecker.on('resize', () => {
+          $scope.onTabContainerResize();
+        });
 
         var amount = 90;
         var stopScrolling = false;
+        var pressedButtonDirection;
 
-        function scroll(direction, amount) {
-          var scrollLeft = tabContainer.scrollLeft() - direction * amount;
-          tabContainer.animate({scrollLeft: scrollLeft}, 250, 'linear', function () {
+        function scrollByButton(direction, amount) {
+          pressedButtonDirection = direction === 1 ? 'left' : 'right';
+          scroll(direction, amount)
+          .then(() => {
             if (!stopScrolling) {
-              scroll(direction, amount * 1.75);
+              scrollByButton(direction, amount);
             }
-            updateTabScroller();
           });
         }
 
+        function scroll(direction, amount) {
+          if (!$tabContainer) {
+            return Promise.resolve();
+          }
+
+          return new Promise((fulfill, reject) => {
+            $tabContainer.stop(true);
+            var tabContainerScrollLeft = $tabContainer.scrollLeft();
+            var scrollLeft =  tabContainerScrollLeft - direction * amount;
+            $tabContainer.animate(
+              {scrollLeft: scrollLeft},
+              {
+                duration: 100,
+                easing: 'linear',
+                complete: () => {
+                  updateTabScroller();
+                  fulfill();
+                },
+                fail: (err) => {
+                  reject(err);
+                }
+              }
+            );
+          });
+        }
+
+        // used by the scrolling buttons
         $scope.scrollTabs = function (direction) {
           if (direction === false) {
             stopScrolling = true;
-            tabContainer.stop();
+            $tabContainer.stop();
             updateTabScroller();
             return;
           }
           stopScrolling = false;
-          scroll(direction, amount);
-          updateTabScroller();
+          scrollByButton(direction, amount);
         };
 
         // rerender tabs if any dashboard got saved
@@ -134,7 +219,7 @@ define(function (require) {
 
           $scope.tabResizeChecker.off('resize', $scope.onTabContainerResize);
           $scope.tabResizeChecker.destroy();
-          tabContainer = null;
+          $tabContainer = null;
         });
       }
 

@@ -52,8 +52,8 @@
   </div>
 
   <div class="tab-scroller" ng-show="tabScrollerVisible">
-    <button ng-mouseup="scrollTabs(false)" ng-mousedown="scrollTabs(1)" ng-disabled="tabScrollerState[0]"><i class="fa fa-caret-left"></i></button>
-    <button ng-mouseup="scrollTabs(false)" ng-mousedown="scrollTabs(-1)" ng-disabled="tabScrollerState[1]"><i class="fa fa-caret-right"></i></button>
+    <button ng-mouseup="scrollTabs(false)" ng-mousedown="scrollTabs(1)" ng-disabled="tabScrollerState.leftArrow"><i class="fa fa-caret-left"></i></button>
+    <button ng-mouseup="scrollTabs(false)" ng-mousedown="scrollTabs(-1)" ng-disabled="tabScrollerState.rightArrow"><i class="fa fa-caret-right"></i></button>
   </div>
 
   <kibi-dashboard-toolbar ng-show="!appEmbedded"></kibi-dashboard-toolbar>

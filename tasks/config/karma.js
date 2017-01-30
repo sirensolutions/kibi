@@ -1,4 +1,9 @@
 module.exports = function (grunt) {
+
+  const {resolve} = require('path');
+  const root = p => resolve(__dirname, '../../', p);
+  const uiConfig = require(root('test/serverConfig'));
+
   return {
     options: {
       // base path that will be used to resolve all patterns (eg. files, exclude)
@@ -7,7 +12,7 @@ module.exports = function (grunt) {
       captureTimeout: 30000,
       browserNoActivityTimeout: 120000,
       frameworks: ['mocha'],
-      port: 9876,
+      port: uiConfig.servers.karma.port,
       colors: true,
       logLevel: grunt.option('debug') || grunt.option('verbose') ? 'DEBUG' : 'INFO',
       autoWatch: false,
@@ -16,17 +21,19 @@ module.exports = function (grunt) {
       // available reporters: https://npmjs.org/browse/keyword/karma-reporter
       reporters: process.env.CI ? ['dots'] : ['progress'],
 
+      // kibi: use uiConfig.servers.testserver.port to pass the port
+      // important for running PRs on Jenkins
       // list of files / patterns to load in the browser
       files: [
-        'http://localhost:5610/bundles/commons.bundle.js',
-        'http://localhost:5610/bundles/tests.bundle.js',
-        'http://localhost:5610/bundles/commons.style.css',
-        'http://localhost:5610/bundles/tests.style.css'
+        'http://localhost:' + uiConfig.servers.testserver.port + '/bundles/commons.bundle.js',
+        'http://localhost:' + uiConfig.servers.testserver.port + '/bundles/tests.bundle.js',
+        'http://localhost:' + uiConfig.servers.testserver.port + '/bundles/commons.style.css',
+        'http://localhost:' + uiConfig.servers.testserver.port + '/bundles/tests.style.css'
       ],
 
       proxies: {
-        '/tests/': 'http://localhost:5610/tests/',
-        '/bundles/': 'http://localhost:5610/bundles/'
+        '/tests/': 'http://localhost:' + uiConfig.servers.testserver.port + '/tests/',
+        '/bundles/': 'http://localhost:' + uiConfig.servers.testserver.port + '/bundles/'
       },
 
       client: {

@@ -93,7 +93,7 @@ define(function (require) {
         };
 
         function isActiveTabVisible(activeTab) {
-          if (activeTab !== null) {
+          if (activeTab) {
             const tab = activeTab.getBoundingClientRect();
             return (tab.right > 0) && (tab.left + activeTab.offsetWidth - $tabContainer.width() <= 0);
           }
@@ -102,6 +102,9 @@ define(function (require) {
         function makeVisible() {
           const $activeTab = $el.find('.nav-tabs li.active');
           const activeTabElement = $activeTab[0];
+          if (!activeTabElement) {
+            return;
+          }
           if (!isActiveTabVisible(activeTabElement)) {
             $tabContainer.stop(true);
             var tabContainerWidth = $tabContainer.width();

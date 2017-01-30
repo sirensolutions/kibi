@@ -14,18 +14,6 @@ module.exports = (server, API_ROOT) => {
   const getModel = (typename) => server.plugins.saved_objects_api.getModel(typename);
 
   /**
-   * Returns the user credentials from the @request if available.
-   */
-  const getCredentials = (request) => {
-    const authorizationHeader = get(request, 'headers.authorization');
-    if (authorizationHeader) {
-      return {
-        'headers.authorization': authorizationHeader
-      };
-    }
-  };
-
-  /**
    * Wraps model errors and sets the body of the reply.
    *
    * @param {Error} error - The error to handle.
@@ -64,10 +52,9 @@ module.exports = (server, API_ROOT) => {
     method: 'POST',
     path: `${API_ROOT}/_mget`,
     handler: (request, reply) => {
-      const credentials = getCredentials(request);
       const promises = request.payload.docs.map((doc) => {
         try {
-          return getModel(doc._type).get(doc._id, credentials)
+          return getModel(doc._type).get(doc._id, request)
           .then((response) => {
             return response;
           })
@@ -149,7 +136,6 @@ module.exports = (server, API_ROOT) => {
     method: 'POST',
     path: `${API_ROOT}/{index}/{type}/{id}`,
     handler: (request, reply) => {
-      const credentials = getCredentials(request);
       let model;
       try {
         model = getModel(request.params.type);
@@ -160,7 +146,7 @@ module.exports = (server, API_ROOT) => {
       if (request.query.op_type === 'create') {
         method = 'create';
       }
-      model[method](request.params.id, request.payload, credentials)
+      model[method](request.params.id, request.payload, request)
       .then((response) => {
         reply(response);
       })
@@ -197,14 +183,13 @@ module.exports = (server, API_ROOT) => {
     method: 'POST',
     path: `${API_ROOT}/{index}/{type}/{id}/_update`,
     handler: (request, reply) => {
-      const credentials = getCredentials(request);
       let model;
       try {
         model = getModel(request.params.type);
       } catch (error) {
         return reply(Boom.notFound(error));
       }
-      model.patch(request.params.id, request.payload.doc, credentials)
+      model.patch(request.params.id, request.payload.doc, request)
       .then((response) => {
         reply(response);
       })
@@ -233,14 +218,13 @@ module.exports = (server, API_ROOT) => {
     method: 'DELETE',
     path: `${API_ROOT}/{index}/{type}/{id}`,
     handler: (request, reply) => {
-      const credentials = getCredentials(request);
       let model;
       try {
         model = getModel(request.params.type);
       } catch (error) {
         return reply(Boom.notFound(error));
       }
-      model.delete(request.params.id, credentials)
+      model.delete(request.params.id, request)
       .then((response) => {
         reply(response);
       })
@@ -276,14 +260,13 @@ module.exports = (server, API_ROOT) => {
     method: 'POST',
     path: `${API_ROOT}/{index}/{type}/_search`,
     handler: (request, reply) => {
-      const credentials = getCredentials(request);
       let model;
       try {
         model = getModel(request.params.type);
       } catch (error) {
         return reply(Boom.notFound(error));
       }
-      model.search(request.query.size, request.query.q || request.payload, credentials)
+      model.search(request.query.size, request.query.q || request.payload, request)
       .then((response) => {
         reply(response);
       })

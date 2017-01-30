@@ -22,36 +22,42 @@ const fakeServer = {
   },
   plugins: {
     elasticsearch: {
-      client: {
-        bulk: function () {
-          return Promise.resolve({});
-        },
-        search: function () {
-          return Promise.resolve({
-            hits: {
-              total: 1,
-              hits: [
-                {
-                  _index: '.kibi',
-                  _type: 'datasource',
-                  _id: 'mysql-test',
-                  _score: 1,
-                  _source: {
-                    title: 'mysql test datasource',
-                    description: '',
-                    datasourceType: 'mysql',
-                    datasourceParams: '{"host":"localhost","dbname":"test","username":"root",' +
-                      '"password":"AES-GCM:NhxjhWFkEf8wrxfAA1oHo644:CgMFVVVQAAMAoAAA:FaPn/SPOXfqYMWNysdOkVw=="}',
-                    version: 1,
-                    kibanaSavedObjectMeta: {
-                      searchSourceJSON: '{}'
-                    }
+      getCluster() {
+        return {
+          callWithInternalUser(method, params) {
+            switch (method) {
+              case 'bulk':
+                return Promise.resolve({});
+              case 'search':
+                return Promise.resolve({
+                  hits: {
+                    total: 1,
+                    hits: [
+                      {
+                        _index: '.kibi',
+                        _type: 'datasource',
+                        _id: 'mysql-test',
+                        _score: 1,
+                        _source: {
+                          title: 'mysql test datasource',
+                          description: '',
+                          datasourceType: 'mysql',
+                          datasourceParams: '{"host":"localhost","dbname":"test","username":"root",' +
+                          '"password":"AES-GCM:NhxjhWFkEf8wrxfAA1oHo644:CgMFVVVQAAMAoAAA:FaPn/SPOXfqYMWNysdOkVw=="}',
+                          version: 1,
+                          kibanaSavedObjectMeta: {
+                            searchSourceJSON: '{}'
+                          }
+                        }
+                      }
+                    ]
                   }
-                }
-              ]
+                });
+              default:
+                expect.fail(`Unknown method: ${method}`);
             }
-          });
-        }
+          }
+        };
       }
     }
   }

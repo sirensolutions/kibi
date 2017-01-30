@@ -105,7 +105,7 @@ module.exports = class UiBundlerEnv {
     if (key === 'kibiEnterpriseEnabled' && val === true) {
       this.aliases.kibie = 'plugins/kibi_enterprise_components';
     }
-    // kibi: end<Paste>
+    // kibi: end
   }
 
   addPostLoader(loader) {

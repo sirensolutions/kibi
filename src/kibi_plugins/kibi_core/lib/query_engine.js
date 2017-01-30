@@ -22,8 +22,6 @@ import JdbcQuery  from './queries/jdbc_query';
 import JdbcHelper from './jdbc_helper';
 
 function QueryEngine(server) {
-
-
   this.server = server;
   this.config = server.config();
   const sslCA = this.config.get('kibi_core.gremlin_server.ssl.ca');
@@ -34,7 +32,6 @@ function QueryEngine(server) {
   this.initialized = false;
   this.log = logger(server, 'query_engine');
   this.cluster = server.plugins.elasticsearch.getCluster('admin');
-
 }
 
 QueryEngine.prototype._onStatusGreen = function () {

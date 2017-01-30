@@ -1,12 +1,9 @@
 import AbstractQuery from '../../queries/abstract_query';
 import Promise from 'bluebird';
 import expect from 'expect.js';
-import sinon from 'sinon';
+import sinon from 'auto-release-sinon';
 
-/**
- * Stores the number of calls to mocked elasticsearch client functions
- */
-let rpCalls = 0;
+const searchStub = sinon.stub();
 
 const fakeServer = {
   log: function (tags, data) {},
@@ -23,74 +20,81 @@ const fakeServer = {
   },
   plugins: {
     elasticsearch: {
-      client: {
-        search: function (options) {
-          rpCalls++;
+      getCluster() {
+        return {
+          callWithInternalUser(method, params) {
+            switch (method) {
+              case 'search':
+                let ret = Promise.reject();
 
-          switch (options.q) {
-            case '_id:kibi-table-handlebars':
-              return Promise.resolve({
-                hits: {
-                  hits: [
-                    {
-                      _source: {
-                        title: 'kibi-table-handlebars',
-                        description: '',
-                        templateEngine: 'handlebars',
-                        templateSource: 'Results: ({{results.bindings.length}})'
+                switch (params.q) {
+                  case '_id:kibi-table-handlebars':
+                    ret = Promise.resolve({
+                      hits: {
+                        hits: [
+                          {
+                            _source: {
+                              title: 'kibi-table-handlebars',
+                              description: '',
+                              templateEngine: 'handlebars',
+                              templateSource: 'Results: ({{results.bindings.length}})'
+                            }
+                          }
+                        ]
                       }
-                    }
-                  ]
-                }
-              });
-            case '_id:kibi-table-handlebars-invalid':
-              return Promise.resolve({
-                hits: {
-                  hits: [
-                    {
-                      _source: {
-                        title: 'kibi-table-handlebars-invalid',
-                        description: '',
-                        templateEngine: 'handlebars',
-                        templateSource: 'Results: ({{{results.bindings.length}})'
+                    });
+                  case '_id:kibi-table-handlebars-invalid':
+                    ret = Promise.resolve({
+                      hits: {
+                        hits: [
+                          {
+                            _source: {
+                              title: 'kibi-table-handlebars-invalid',
+                              description: '',
+                              templateEngine: 'handlebars',
+                              templateSource: 'Results: ({{{results.bindings.length}})'
+                            }
+                          }
+                        ]
                       }
-                    }
-                  ]
-                }
-              });
-            case '_id:kibi-lodash':
-              return Promise.resolve({
-                hits: {
-                  hits: [
-                    {
-                      _source: {
-                        title: 'kibi-lodash',
-                        description: '',
-                        templateEngine: 'lodash',
-                        templateSource: '<%=doe%>'
+                    });
+                  case '_id:kibi-lodash':
+                    ret = Promise.resolve({
+                      hits: {
+                        hits: [
+                          {
+                            _source: {
+                              title: 'kibi-lodash',
+                              description: '',
+                              templateEngine: 'lodash',
+                              templateSource: '<%=doe%>'
+                            }
+                          }
+                        ]
                       }
-                    }
-                  ]
-                }
-              });
-            case '_id:kibi-empty':
-              return Promise.resolve({
-                hits: {
-                  hits: [
-                    {
-                      _source: {
-                        title: 'kibi-lodash',
-                        description: '',
-                        templateEngine: 'lodash',
-                        templateSource: ''
+                    });
+                  case '_id:kibi-empty':
+                    ret = Promise.resolve({
+                      hits: {
+                        hits: [
+                          {
+                            _source: {
+                              title: 'kibi-lodash',
+                              description: '',
+                              templateEngine: 'lodash',
+                              templateSource: ''
+                            }
+                          }
+                        ]
                       }
-                    }
-                  ]
+                    });
                 }
-              });
+                return searchStub.returns(ret);
+              default:
+                expect.fail(`Unknown method: ${method}`);
+            }
           }
-          return Promise.reject();
-        }
+        };
       }
     }
   }
@@ -137,10 +141,6 @@ describe('AbstractQuery', function () {
 
   describe('._fetchTemplate', function () {
 
-    after(function () {
-      rpCalls = 0;
-    });
-
     it('should cache the template according to the query configuration', function (done) {
       const cache = new Cache();
       const query = new AbstractQuery(fakeServer, '', cache);
@@ -150,12 +150,12 @@ describe('AbstractQuery', function () {
         expect(query.cache.get('kibi-table-handlebars')).to.eql(template);
 
         sinon.spy(cache, 'get');
-        query._fetchTemplate('kibi-table handlebars').then(function (template) {
+        return query._fetchTemplate('kibi-table handlebars').then(function (template) {
 
           expect(cache.get.calledOnce).to.be(true);
           expect(cache.get('kibi-table-handlebars')).to.eql(template);
 
-          expect(rpCalls).to.equal(1);
+          sinon.assert.calledOnce(searchStub);
 
           done();
         });

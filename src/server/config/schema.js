@@ -7,6 +7,7 @@ let utils = require('requirefrom')('src/utils');
 let fromRoot = utils('fromRoot');
 const randomBytes = require('crypto').randomBytes;
 const getData = require('../path').getData;
+const uiConfig = require('../../../test/serverConfig');
 
 import pkg from '../../../src/utils/packageJson';
 
@@ -45,7 +46,7 @@ module.exports = () => Joi.object({
     cors: Joi.when('$dev', {
       is: true,
       then: Joi.object().default({
-        origin: ['*://localhost:9876'] // karma test server
+        origin: ['*://localhost:' + uiConfig.servers.karma.port] // karma test server
       }),
       otherwise: Joi.boolean().default(false)
     }),

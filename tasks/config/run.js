@@ -17,7 +17,7 @@ module.exports = function (grunt) {
       },
       cmd: binScript,
       args: [
-        '--server.port=5610',
+        '--server.port=' + uiConfig.servers.testserver.port, //kibi: make the port configurable
         '--env.name=development',
         '--logging.json=false',
         '--optimize.bundleFilter=tests',
@@ -50,7 +50,7 @@ module.exports = function (grunt) {
       },
       cmd: binScript,
       args: [
-        '--server.port=5610',
+        '--server.port=' + uiConfig.servers.testserver.port, //kibi: make the port configurable
         '--env.name=development',
         '--logging.json=false',
         '--optimize.bundleFilter=tests',
@@ -70,7 +70,7 @@ module.exports = function (grunt) {
       args: [
         '--dev',
         '--no-watch',
-        '--server.port=5610',
+        '--server.port=' + uiConfig.servers.testserver.port, //kibi: make the port configurable
         '--optimize.lazyPort=5611',
         '--optimize.lazyPrebuild=true',
         '--logging.json=false',

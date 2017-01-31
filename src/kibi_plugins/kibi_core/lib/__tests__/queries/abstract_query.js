@@ -3,7 +3,7 @@ import Promise from 'bluebird';
 import expect from 'expect.js';
 import sinon from 'auto-release-sinon';
 
-const searchStub = sinon.stub();
+let searchCalls = 0;
 
 const fakeServer = {
   log: function (tags, data) {},
@@ -25,11 +25,10 @@ const fakeServer = {
           callWithInternalUser(method, params) {
             switch (method) {
               case 'search':
-                let ret = Promise.reject();
-
+                searchCalls++;
                 switch (params.q) {
                   case '_id:kibi-table-handlebars':
-                    ret = Promise.resolve({
+                    return Promise.resolve({
                       hits: {
                         hits: [
                           {
@@ -44,7 +43,7 @@ const fakeServer = {
                       }
                     });
                   case '_id:kibi-table-handlebars-invalid':
-                    ret = Promise.resolve({
+                    return Promise.resolve({
                       hits: {
                         hits: [
                           {
@@ -59,7 +58,7 @@ const fakeServer = {
                       }
                     });
                   case '_id:kibi-lodash':
-                    ret = Promise.resolve({
+                    return Promise.resolve({
                       hits: {
                         hits: [
                           {
@@ -74,7 +73,7 @@ const fakeServer = {
                       }
                     });
                   case '_id:kibi-empty':
-                    ret = Promise.resolve({
+                    return Promise.resolve({
                       hits: {
                         hits: [
                           {
@@ -88,10 +87,11 @@ const fakeServer = {
                         ]
                       }
                     });
+                  default:
+                    return Promise.reject(new Error(`Failed with params: ${JSON.stringify(params, null, ' ')}`));
                 }
-                return searchStub.returns(ret);
               default:
-                expect.fail(`Unknown method: ${method}`);
+                return Promise.reject(new Error(`Unknown method: ${method}`));
             }
           }
         };
@@ -114,6 +114,10 @@ Cache.prototype.get = function (key) {
 };
 
 describe('AbstractQuery', function () {
+
+  beforeEach(() => {
+    searchCalls = 0;
+  });
 
   it('throws an error when calling methods that must be implemented by subclasses', function () {
     const query = new AbstractQuery(fakeServer, {});
@@ -140,28 +144,26 @@ describe('AbstractQuery', function () {
   });
 
   describe('._fetchTemplate', function () {
-
     it('should cache the template according to the query configuration', function (done) {
       const cache = new Cache();
       const query = new AbstractQuery(fakeServer, '', cache);
 
-      query._fetchTemplate('kibi-table handlebars').then(function (template) {
+      query._fetchTemplate('kibi-table-handlebars').then(function (template) {
         expect(template.templateSource).to.be('Results: ({{results.bindings.length}})');
         expect(query.cache.get('kibi-table-handlebars')).to.eql(template);
 
         sinon.spy(cache, 'get');
-        return query._fetchTemplate('kibi-table handlebars').then(function (template) {
+        return query._fetchTemplate('kibi-table-handlebars').then(function (template) {
 
-          expect(cache.get.calledOnce).to.be(true);
+          sinon.assert.calledOnce(cache.get);
           expect(cache.get('kibi-table-handlebars')).to.eql(template);
 
-          sinon.assert.calledOnce(searchStub);
+          expect(searchCalls).to.be(1);
 
           done();
         });
       }).catch(done);
     });
-
   });
 
   describe('.getHtml', function () {
@@ -212,7 +214,6 @@ describe('AbstractQuery', function () {
         expect(result.html).to.eql('Results: (2)');
         done();
       }).catch(done);
-
     });
 
     it('should display a warning then rendering an invalid handlebars template', function (done) {

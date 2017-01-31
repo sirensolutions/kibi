@@ -140,48 +140,43 @@ CryptoHelper.prototype.decrypt = function (key, encrypted) {
  * Encrypts datasource parameters marked as encrypted in the schema.
  */
 CryptoHelper.prototype.encryptDatasourceParams = function (config, query) {
-  if (query.datasourceParams && query.datasourceType) {
+  if (!query.datasourceParams || !query.datasourceType) {
+    return;
+  }
 
-    let datasourceType = query.datasourceType;
-    if (kibiUtils.isJDBC(datasourceType)) {
-      datasourceType = 'jdbc';
-    }
+  let datasourceType = query.datasourceType;
+  if (kibiUtils.isJDBC(datasourceType)) {
+    datasourceType = 'jdbc';
+  }
 
+  const schema = datasourcesSchema.getSchema(datasourceType);
 
-    const schema = datasourcesSchema[datasourceType];
+  let params;
+  try {
+    params = JSON.parse(query.datasourceParams, null, ' ');
+  } catch (e) {
+    throw new Error('Could not parse datasourceParams: ' + query.datasourceParams + ' is not valid JSON.');
+  }
 
-    let params;
-    try {
-      params = JSON.parse(query.datasourceParams, null, ' ');
-    } catch (e) {
-      throw new Error('Could not parse datasourceParams: ' + query.datasourceParams + ' is not valid JSON.');
-    }
+  const algorithm = config.get('kibi_core.datasource_encryption_algorithm');
+  const password = config.get('kibi_core.datasource_encryption_key');
 
-    if (!schema) {
-      throw new Error('Could not get schema for datasource type: ' + datasourceType + ' .');
-    }
-
-    const algorithm = config.get('kibi_core.datasource_encryption_algorithm');
-    const password = config.get('kibi_core.datasource_encryption_key');
-
-
-    for (const paramName in params) {
-      if (params.hasOwnProperty(paramName)) {
-        for (let i = 0; i < schema.length; i++) {
-          if (schema[i].name === paramName && schema[i].encrypted === true) {
-            // encrypt it
-            if (params[paramName].indexOf(algorithm) !== 0) {
-              // encrypt only if it is not already encrypted
-              params[paramName] = this.encrypt(algorithm, password, params[paramName]);
-            }
-            break;
+  for (const paramName in params) {
+    if (params.hasOwnProperty(paramName)) {
+      for (let i = 0; i < schema.length; i++) {
+        if (schema[i].name === paramName && schema[i].encrypted === true) {
+          // encrypt it
+          if (params[paramName].indexOf(algorithm) !== 0) {
+            // encrypt only if it is not already encrypted
+            params[paramName] = this.encrypt(algorithm, password, params[paramName]);
           }
+          break;
         }
       }
     }
-
-    query.datasourceParams = JSON.stringify(params);
   }
+
+  query.datasourceParams = JSON.stringify(params);
 };
 
 

@@ -1,9 +1,26 @@
-import fs from 'fs';
-import path from 'path';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 
-const env = process.env.NODE_ENV || 'development';
-const datasourceSchemaPath =
-  process.env.KIBI_SCHEMA_PATH ?
-  process.env.KIBI_SCHEMA_PATH :
-  path.join(__dirname, 'datasources_schema.json');
-module.exports = JSON.parse(fs.readFileSync(datasourceSchemaPath, 'utf8'));
+class DatasourcesSchema {
+  constructor() {
+    const datasourceSchemaPath = process.env.KIBI_SCHEMA_PATH ?  process.env.KIBI_SCHEMA_PATH : join(__dirname, 'datasources_schema.json');
+    this._schemas = JSON.parse(readFileSync(datasourceSchemaPath, 'utf8'));
+  }
+
+  getSchema(type) {
+    console.log('this=[%s]', JSON.stringify(this, null, ' '));
+    const schema = this._schemas && this._schemas[type];
+
+    if (!schema) {
+      throw new Error(`Could not get schema for datasource type: ${type}.`);
+    }
+
+    return this._schemas.base ? schema.concat(this._schemas.base) : schema;
+  }
+
+  getBase() {
+    return this._schemas.base;
+  }
+}
+
+export default new DatasourcesSchema();

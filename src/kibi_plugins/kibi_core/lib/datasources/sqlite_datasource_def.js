@@ -4,7 +4,7 @@ import datasourcesSchema from '../datasources_schema';
 
 function SqliteDatasourceDef(server, datasource) {
   AbstractDatasourceDef.call(this, server, datasource);
-  this.schema = datasourcesSchema.sqlite.concat(datasourcesSchema.base);
+  this.schema = datasourcesSchema.getSchema('sqlite');
 }
 
 util.inherits(SqliteDatasourceDef, AbstractDatasourceDef);

@@ -1,5 +1,5 @@
 import cryptoHelper from '../crypto_helper';
-import datasourcesSchema from '../datasources_schema';
+import { getBase } from '../datasources_schema';
 
 function AbstractDatasourceDef(server, datasource) {
   if (typeof datasource.datasourceParams === 'string' || datasource.datasourceParams instanceof String) {
@@ -11,7 +11,7 @@ function AbstractDatasourceDef(server, datasource) {
   }
   this.datasource = datasource;
   this.config = server.config();
-  this.schema = datasourcesSchema.base;
+  this.schema = getBase();
 }
 
 AbstractDatasourceDef.prototype.getSchema = function () {

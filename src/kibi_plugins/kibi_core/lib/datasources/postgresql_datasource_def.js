@@ -4,7 +4,7 @@ import datasourcesSchema from '../datasources_schema';
 
 function PostgresqlDatasourceDef(server, datasource) {
   AbstractDatasourceDef.call(this, server, datasource);
-  this.schema = datasourcesSchema.postgresql.concat(datasourcesSchema.base);
+  this.schema = datasourcesSchema.getSchema('postgresql');
 }
 
 util.inherits(PostgresqlDatasourceDef, AbstractDatasourceDef);

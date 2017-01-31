@@ -62,6 +62,7 @@ export default class IndexHelper {
       return;
     }
 
+    console.log('datasourcesResponse=[%s]', JSON.stringify(datasourcesResponse, null, ' '));
     for (const datasource of datasourcesResponse) {
       this.logger.info(`Processing datasource "${datasource._id}".`);
 
@@ -78,7 +79,14 @@ export default class IndexHelper {
       if (kibiUtils.isJDBC(type)) {
         type = 'jdbc';
       }
-      const schema = datasourcesSchema[type].concat(datasourcesSchema.base);
+
+      let schema;
+      try {
+        schema = datasourcesSchema.getSchema(type);
+      } catch (err) {
+        return Promise.reject(err);
+      }
+
       let params = {};
       params = JSON.parse(datasource._source.datasourceParams);
 

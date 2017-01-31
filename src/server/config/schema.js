@@ -7,9 +7,25 @@ let utils = require('requirefrom')('src/utils');
 let fromRoot = utils('fromRoot');
 const randomBytes = require('crypto').randomBytes;
 const getData = require('../path').getData;
-const uiConfig = require('../../../test/serverConfig');
-
 import pkg from '../../../src/utils/packageJson';
+
+let uiConfig;
+try {
+  uiConfig = require('../../../test/serverConfig');
+} catch (err) {
+  if (err.code === 'MODULE_NOT_FOUND') {
+    // kibi: make sure karma.port is defined during optimize step
+    // as the "test" folder is no longer present during this step
+    uiConfig = {
+      servers: {
+        karma: {
+          port: 9876
+        }
+      }
+    };
+  }
+}
+
 
 module.exports = () => Joi.object({
   pkg: Joi.object({

@@ -37,7 +37,10 @@ describe('plugins/elasticsearch', () => {
       };
 
       cluster = { callWithInternalUser: sinon.stub() };
-      cluster.callWithInternalUser.withArgs('index', sinon.match.any).returns(Promise.resolve());
+      // kibi: added stubs for the cat methods
+      cluster.callWithInternalUser.withArgs('cat.nodes', sinon.match.any).returns(Promise.resolve());
+      cluster.callWithInternalUser.withArgs('cat.plugins', sinon.match.any).returns(Promise.resolve());
+      // kibi: end
       cluster.callWithInternalUser.withArgs('get', sinon.match.any).returns(Promise.resolve({ found: false }));
       cluster.callWithInternalUser.withArgs('search', sinon.match.any).returns(Promise.resolve({ hits: { hits: [] } }));
       cluster.callWithInternalUser.withArgs('nodes.info', sinon.match.any).returns(Promise.resolve({

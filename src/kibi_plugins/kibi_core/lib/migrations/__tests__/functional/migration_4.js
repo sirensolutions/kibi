@@ -4,13 +4,15 @@ import elasticsearch from 'elasticsearch';
 import expect from 'expect.js';
 import _ from 'lodash';
 import sinon from 'sinon';
-import wrapAsync from 'test_utils/wrap_async';
-import indexSnapshot from 'test_utils/index_snapshot';
-import ScenarioManager from 'test_utils/scenario_manager';
+import requirefrom from 'requirefrom';
 import Migration from '../../migration_4';
 import Scenario from './scenarios/migration_4/scenario';
-import serverConfig from 'test_kibana/server_config';
 import url from 'url';
+
+const serverConfig = requirefrom('test')('server_config');
+const wrapAsync = requirefrom('src/test_utils')('wrap_async');
+const indexSnapshot = requirefrom('src/test_utils')('index_snapshot');
+const ScenarioManager = requirefrom('src/test_utils')('scenario_manager');
 
 describe('kibi_core/migrations/functional', function () {
 

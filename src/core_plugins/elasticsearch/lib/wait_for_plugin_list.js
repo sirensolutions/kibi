@@ -2,16 +2,18 @@ import _ from 'lodash';
 
 module.exports = function (plugin, server) {
   const config = server.config();
-  const callWithRequest = server.plugins.elasticsearch.getCluster('admin').callWithRequest;
+  const callWithInternalUser = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
 
   return Promise.all(
     [
-      callWithRequest(undefined, 'cat.nodes', {h: 'name,node.role,ip', format:'json'}),
-      callWithRequest(undefined, 'cat.plugins', {h: 'name,component', format: 'json'})
+      callWithInternalUser('cat.nodes', {h: 'name,node.role,ip', format:'json'}),
+      callWithInternalUser('cat.plugins', {h: 'name,component', format: 'json'})
     ]
   ).then(([ nodeList, pluginList ]) => {
     const elasticsearchPlugins = [];
 
+    console.log('nodeList=[%s]', JSON.stringify(nodeList, null, ' '));
+    console.log('pluginList=[%s]', JSON.stringify(pluginList, null, ' '));
     if (nodeList && pluginList) {
       // each element of nodeList contains:
       // name - node name

@@ -7,7 +7,7 @@ import readYamlConfig from '../read_yaml_config';
 import expect from 'expect.js';
 
 const testConfigFile = follow(`fixtures/reload_logging_config/kibana.test.yml`);
-const cli = follow(`../../../../bin/kibana`);
+const cli = follow(`../../../../bin/kibi`); // kibi: renamed kibana binary to kibi
 
 function follow(file) {
   return relative(process.cwd(), resolve(__dirname, file));

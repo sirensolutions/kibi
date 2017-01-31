@@ -1,10 +1,11 @@
 import sinon from 'sinon';
 import expect from 'expect.js';
 import Scenario from './scenarios/empty/scenario';
-import wrapAsync from 'test_utils/wrap_async';
-import serverConfig from 'test_kibana/server_config';
 import ModelTestHelper from './helper';
 import DatasourceModel from '../../builtin/datasource';
+import requirefrom from 'requirefrom';
+
+const wrapAsync = requirefrom('src/test_utils')('wrap_async');
 
 describe('saved_objects_api/functional', function () {
 

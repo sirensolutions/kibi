@@ -1,13 +1,15 @@
 import elasticsearch from 'elasticsearch';
 import expect from 'expect.js';
 import sinon from 'sinon';
-import wrapAsync from 'test_utils/wrap_async';
-import indexSnapshot from 'test_utils/index_snapshot';
-import ScenarioManager from 'test_utils/scenario_manager';
+import requirefrom from 'requirefrom';
 import Migration from '../../migration_1';
 import Scenario from './scenarios/migration_1/scenario';
-import serverConfig from '../../../../../../../test/serverConfig';
 import url from 'url';
+
+const serverConfig = requirefrom('test')('server_config');
+const wrapAsync = requirefrom('src/test_utils')('wrap_async');
+const indexSnapshot = requirefrom('src/test_utils')('index_snapshot');
+const ScenarioManager = requirefrom('src/test_utils')('scenario_manager');
 
 describe('kibi_core/migrations/functional', function () {
 
@@ -79,7 +81,7 @@ describe('kibi_core/migrations/functional', function () {
 
       const removed = ['rest_resp_restriction_path'];
 
-      for (let [id, original] of before) {
+      for (const [id, original] of before) {
         const upgraded = after.get(id);
         if (original._type === 'config' || original._source.version === 2) {
           expect(original).to.eql(upgraded);
@@ -100,7 +102,7 @@ describe('kibi_core/migrations/functional', function () {
           expect(upgraded._source[key]).to.eql(original._source[key]);
         }
 
-        for (let [oldName, newName] of renamed) {
+        for (const [oldName, newName] of renamed) {
           expect(upgraded._source[newName]).to.eql(original._source[oldName]);
         }
 

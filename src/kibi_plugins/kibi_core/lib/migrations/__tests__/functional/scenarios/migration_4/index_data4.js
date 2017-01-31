@@ -1,4 +1,6 @@
-import packageJson from 'utils/package_json';
+import requirefrom from 'requirefrom';
+
+const packageJson = requirefrom('src/utils')('package_json');
 
 /**
  * Defines the following objects:

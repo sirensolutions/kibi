@@ -12,8 +12,6 @@ module.exports = function (plugin, server) {
   ).then(([ nodeList, pluginList ]) => {
     const elasticsearchPlugins = [];
 
-    console.log('nodeList=[%s]', JSON.stringify(nodeList, null, ' '));
-    console.log('pluginList=[%s]', JSON.stringify(pluginList, null, ' '));
     if (nodeList && pluginList) {
       // each element of nodeList contains:
       // name - node name

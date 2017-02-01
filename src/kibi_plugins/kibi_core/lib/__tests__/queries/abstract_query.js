@@ -3,18 +3,86 @@ import Promise from 'bluebird';
 import expect from 'expect.js';
 import sinon from 'auto-release-sinon';
 
-let searchCalls = 0;
+const searchStub = sinon.stub();
+
+searchStub.withArgs('search', sinon.match.hasOwn('q', '_id:kibi-table-handlebars'))
+.returns(
+  Promise.resolve({
+    hits: {
+      hits: [
+        {
+          _source: {
+            title: 'kibi-table-handlebars',
+            description: '',
+            templateEngine: 'handlebars',
+            templateSource: 'Results: ({{results.bindings.length}})'
+          }
+        }
+      ]
+    }
+  })
+);
+searchStub.withArgs('search', sinon.match.hasOwn('q', '_id:kibi-table-handlebars-invalid'))
+.returns(
+  Promise.resolve({
+    hits: {
+      hits: [
+        {
+          _source: {
+            title: 'kibi-table-handlebars-invalid',
+            description: '',
+            templateEngine: 'handlebars',
+            templateSource: 'Results: ({{{results.bindings.length}})'
+          }
+        }
+      ]
+    }
+  })
+);
+searchStub.withArgs('search', sinon.match.hasOwn('q', '_id:kibi-lodash'))
+.returns(
+  Promise.resolve({
+    hits: {
+      hits: [
+        {
+          _source: {
+            title: 'kibi-lodash',
+            description: '',
+            templateEngine: 'lodash',
+            templateSource: '<%=doe%>'
+          }
+        }
+      ]
+    }
+  })
+);
+searchStub.withArgs('search', sinon.match.hasOwn('q', '_id:kibi-empty'))
+.returns(
+  Promise.resolve({
+    hits: {
+      hits: [
+        {
+          _source: {
+            title: 'kibi-lodash',
+            description: '',
+            templateEngine: 'lodash',
+            templateSource: ''
+          }
+        }
+      ]
+    }
+  })
+);
 
 const fakeServer = {
   log: function (tags, data) {},
-  config: function () {
+  config() {
     return {
-      get: function (key) {
+      get(key) {
         if (key === 'kibana.index') {
           return '.kibi';
-        } else {
-          return '';
         }
+        return '';
       }
     };
   },
@@ -22,78 +90,7 @@ const fakeServer = {
     elasticsearch: {
       getCluster() {
         return {
-          callWithInternalUser(method, params) {
-            switch (method) {
-              case 'search':
-                searchCalls++;
-                switch (params.q) {
-                  case '_id:kibi-table-handlebars':
-                    return Promise.resolve({
-                      hits: {
-                        hits: [
-                          {
-                            _source: {
-                              title: 'kibi-table-handlebars',
-                              description: '',
-                              templateEngine: 'handlebars',
-                              templateSource: 'Results: ({{results.bindings.length}})'
-                            }
-                          }
-                        ]
-                      }
-                    });
-                  case '_id:kibi-table-handlebars-invalid':
-                    return Promise.resolve({
-                      hits: {
-                        hits: [
-                          {
-                            _source: {
-                              title: 'kibi-table-handlebars-invalid',
-                              description: '',
-                              templateEngine: 'handlebars',
-                              templateSource: 'Results: ({{{results.bindings.length}})'
-                            }
-                          }
-                        ]
-                      }
-                    });
-                  case '_id:kibi-lodash':
-                    return Promise.resolve({
-                      hits: {
-                        hits: [
-                          {
-                            _source: {
-                              title: 'kibi-lodash',
-                              description: '',
-                              templateEngine: 'lodash',
-                              templateSource: '<%=doe%>'
-                            }
-                          }
-                        ]
-                      }
-                    });
-                  case '_id:kibi-empty':
-                    return Promise.resolve({
-                      hits: {
-                        hits: [
-                          {
-                            _source: {
-                              title: 'kibi-lodash',
-                              description: '',
-                              templateEngine: 'lodash',
-                              templateSource: ''
-                            }
-                          }
-                        ]
-                      }
-                    });
-                  default:
-                    return Promise.reject(new Error(`Failed with params: ${JSON.stringify(params, null, ' ')}`));
-                }
-              default:
-                return Promise.reject(new Error(`Unknown method: ${method}`));
-            }
-          }
+          callWithInternalUser: searchStub
         };
       }
     }
@@ -114,11 +111,6 @@ Cache.prototype.get = function (key) {
 };
 
 describe('AbstractQuery', function () {
-
-  beforeEach(() => {
-    searchCalls = 0;
-  });
-
   it('throws an error when calling methods that must be implemented by subclasses', function () {
     const query = new AbstractQuery(fakeServer, {});
     expect(query.checkIfItIsRelevant).to.throwException(/Must be implemented by subclass/);
@@ -144,25 +136,24 @@ describe('AbstractQuery', function () {
   });
 
   describe('._fetchTemplate', function () {
-    it('should cache the template according to the query configuration', function (done) {
+    it('should cache the template according to the query configuration', function () {
       const cache = new Cache();
       const query = new AbstractQuery(fakeServer, '', cache);
 
-      query._fetchTemplate('kibi-table-handlebars').then(function (template) {
+      return query._fetchTemplate('kibi-table-handlebars')
+      .then(function (template) {
         expect(template.templateSource).to.be('Results: ({{results.bindings.length}})');
         expect(query.cache.get('kibi-table-handlebars')).to.eql(template);
 
         sinon.spy(cache, 'get');
-        return query._fetchTemplate('kibi-table-handlebars').then(function (template) {
-
+        return query._fetchTemplate('kibi-table-handlebars')
+        .then(function (template) {
           sinon.assert.calledOnce(cache.get);
           expect(cache.get('kibi-table-handlebars')).to.eql(template);
 
-          expect(searchCalls).to.be(1);
-
-          done();
+          sinon.assert.calledOnce(searchStub);
         });
-      }).catch(done);
+      });
     });
   });
 
@@ -202,7 +193,7 @@ describe('AbstractQuery', function () {
       }
     };
 
-    it('should render a valid handlebars template', function (done) {
+    it('should render a valid handlebars template', function () {
       const query = new AbstractQuery(fakeServer, '', null);
       const queryDef = {
         templateId: 'kibi-table-handlebars'
@@ -210,13 +201,12 @@ describe('AbstractQuery', function () {
 
       sinon.stub(query, 'fetchResults').returns(Promise.resolve(results));
 
-      query.getHtml(queryDef, {}).then(function (result) {
+      return query.getHtml(queryDef, {}).then(function (result) {
         expect(result.html).to.eql('Results: (2)');
-        done();
-      }).catch(done);
+      });
     });
 
-    it('should display a warning then rendering an invalid handlebars template', function (done) {
+    it('should display a warning then rendering an invalid handlebars template', function () {
       const query = new AbstractQuery(fakeServer, '', null);
       const queryDef = {
         templateId: 'kibi-table-handlebars-invalid'
@@ -224,15 +214,13 @@ describe('AbstractQuery', function () {
 
       sinon.stub(query, 'fetchResults').returns(Promise.resolve(results));
 
-      query.getHtml(queryDef, {}).then(function (result) {
+      return query.getHtml(queryDef, {}).then(function (result) {
         expect(typeof result.html).to.equal('undefined');
         expect(result.error).to.match(/Parse error/g);
-        done();
-      }).catch(done);
-
+      });
     });
 
-    it('should render a warning for an unsupported template engine', function (done) {
+    it('should render a warning for an unsupported template engine', function () {
       const query = new AbstractQuery(fakeServer, '', null);
       const queryDef = {
         templateId: 'kibi-lodash'
@@ -240,22 +228,19 @@ describe('AbstractQuery', function () {
 
       sinon.stub(query, 'fetchResults').returns(Promise.resolve(results));
 
-      query.getHtml(queryDef, {}).then(function (result) {
+      return query.getHtml(queryDef, {}).then(function (result) {
         expect(result.html).to.match(/Unsupported template engine/);
-        done();
-      }).catch(done);
-
+      });
     });
 
   });
 
   describe('._extractIdsFromSql', function () {
-
     const rows = [
-      {'id': 1, 'label': 'ab'},
-      {'id': 2, 'label': 'ab'},
-      {'id': 3, 'label': 'cd'},
-      {'ID': 4, 'label': 'cd'}
+      { id: 1, label: 'ab'},
+      { id: 2, label: 'ab'},
+      { id: 3, label: 'cd'},
+      { ID: 4, label: 'cd'}
     ];
 
     it('should return unique ids from the specified rows', function () {
@@ -295,9 +280,9 @@ describe('AbstractQuery', function () {
 
   describe('._returnAnEmptyQueryResultsPromise', function () {
 
-    it('should return a promise resolved with the given message', function (done) {
+    it('should return a promise resolved with the given message', function () {
       const query = new AbstractQuery(fakeServer, {});
-      query._returnAnEmptyQueryResultsPromise('test message').then(function (value) {
+      return query._returnAnEmptyQueryResultsPromise('test message').then(function (value) {
         expect(value).to.eql({
           head: {
             vars: []
@@ -312,8 +297,7 @@ describe('AbstractQuery', function () {
           },
           warning: 'test message'
         });
-        done();
-      }).catch(done);
+      });
     });
 
   });

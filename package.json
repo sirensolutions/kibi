@@ -180,7 +180,7 @@
     "kibi-icons": "sirensolutions/kibi-icons#1.0.0",
 
     "lru-cache": "~2.6.4",
-    "request-promise": "3.0.0",
+    "request-promise": "4.1.1",
     "node-forge": "^0.6.37",
     "kibiutils": "sirensolutions/kibiutils#1.4.0",
     "sqlite3": "3.1.4",

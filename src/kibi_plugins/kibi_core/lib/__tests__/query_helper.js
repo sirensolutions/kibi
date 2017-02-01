@@ -3,30 +3,30 @@ import Promise from 'bluebird';
 import QueryHelper from '../query_helper';
 import sinon from 'auto-release-sinon';
 
-const createClientStub = sinon.stub();
-const searchStub = sinon.stub();
+describe('Query Helper', function () {
+  const createClientStub = sinon.stub();
+  const searchStub = sinon.stub();
 
-const fakeServer = {
-  log: function (tags, data) {},
-  config() {
-    return {
-      get(key) {
-        if (key === 'elasticsearch.url') {
-          return 'http://localhost:12345';
-        } else if (key === 'kibana.index') {
-          return '.kibi';
-        } else {
-          return '';
+  const fakeServer = {
+    log: function (tags, data) {},
+    config() {
+      return {
+        get(key) {
+          if (key === 'elasticsearch.url') {
+            return 'http://localhost:12345';
+          } else if (key === 'kibana.index') {
+            return '.kibi';
+          } else {
+            return '';
+          }
         }
-      }
-    };
-  },
-  plugins: {
-    elasticsearch: {
-      getCluster() {
-        return {
-          callWithInternalUser: searchStub
-            .withArgs(sinon.match.any).returns(Promise.reject(new Error('Unexpected request')))
+      };
+    },
+    plugins: {
+      elasticsearch: {
+        getCluster() {
+          return {
+            callWithInternalUser: searchStub
             .withArgs('search').returns(
               Promise.resolve({
                 hits: {
@@ -41,74 +41,73 @@ const fakeServer = {
                 }
               })
             )
-        };
-      },
-      createClient(credentials) {
-        return {
-          search: createClientStub.returns(
-            Promise.resolve({
-              hits: {
-                hits: [
-                  {
-                    _id: '_id1',
-                    _source: {
-                      id: 'id1'
+          };
+        },
+        createClient(credentials) {
+          return {
+            search: createClientStub.returns(
+              Promise.resolve({
+                hits: {
+                  hits: [
+                    {
+                      _id: '_id1',
+                      _source: {
+                        id: 'id1'
+                      }
                     }
-                  }
-                ]
-              }
-            })
-          )
-        };
-      }
-    }
-  }
-};
-const queryHelper = new QueryHelper(fakeServer);
-
-const doc = {
-  _id: '_12345_',
-  _source: {
-    id: '12345',
-    title: 'title12345',
-    ids: ['id0', 'id1', 'id2'],
-    nested1: {
-      nested2: {
-        nested3: {
-          id: 'nested12345',
-          ids: ['nested_id0']
+                  ]
+                }
+              })
+            )
+          };
         }
       }
     }
-  }
-};
+  };
+  const queryHelper = new QueryHelper(fakeServer);
 
-const credentials = {user: 'user', password: 'password'};
+  const doc = {
+    _id: '_12345_',
+    _source: {
+      id: '12345',
+      title: 'title12345',
+      ids: ['id0', 'id1', 'id2'],
+      nested1: {
+        nested2: {
+          nested3: {
+            id: 'nested12345',
+            ids: ['nested_id0']
+          }
+        }
+      }
+    }
+  };
 
-describe('Query Helper', function () {
+  const credentials = {user: 'user', password: 'password'};
+
   describe('fetchDocument test if correct client is used', function () {
     it('no credentials', function () {
       return queryHelper.fetchDocument('index', 'type', 'id')
-      .then(function (doc) {
-        sinon.assert.calledOnce(searchStub);
-        sinon.assert.notCalled(createClientStub);
-      });
+        .then(function (doc) {
+          sinon.assert.calledOnce(searchStub);
+          sinon.assert.notCalled(createClientStub);
+        });
     });
 
     it('with credentials', function () {
       return queryHelper.fetchDocument('index', 'type', 'id', credentials)
-      .then(function (doc) {
-        sinon.assert.notCalled(searchStub);
-        sinon.assert.calledOnce(createClientStub);
-      });
+        .then(function (doc) {
+          sinon.assert.notCalled(searchStub);
+          sinon.assert.calledOnce(createClientStub);
+        });
     });
 
     it('id with colon', function () {
       return queryHelper.fetchDocument('index', 'type', 'id:test')
-      .then(function (doc) {
-        sinon.assert.calledOnce(searchStub);
-        sinon.assert.notCalled(createClientStub);
-      });
+        .then(function (doc) {
+          sinon.assert.calledOnce(searchStub);
+          sinon.assert.notCalled(createClientStub);
+        });
     });
   });
 
@@ -120,11 +119,11 @@ describe('Query Helper', function () {
         const expected = 'select * from table1 where id = \'id1\'';
 
         return queryHelper.replaceVariablesUsingEsDocument(s, uri, credentials)
-        .then(function (ret) {
-          sinon.assert.notCalled(searchStub);
-          sinon.assert.calledOnce(createClientStub);
-          expect(ret).to.equal(expected);
-        });
+          .then(function (ret) {
+            sinon.assert.notCalled(searchStub);
+            sinon.assert.calledOnce(createClientStub);
+            expect(ret).to.equal(expected);
+          });
       });
 
       it('replace in an array of objects with name and value', function () {
@@ -139,21 +138,21 @@ describe('Query Helper', function () {
         ];
 
         return queryHelper.replaceVariablesUsingEsDocument(sA, uri, credentials)
-        .then(function (a) {
-          sinon.assert.notCalled(searchStub);
-          sinon.assert.calledOnce(createClientStub);
-          expect(a).to.eql(expectedA);
-        });
+          .then(function (a) {
+            sinon.assert.notCalled(searchStub);
+            sinon.assert.calledOnce(createClientStub);
+            expect(a).to.eql(expectedA);
+          });
       });
 
       it('malformed uri', function () {
         return queryHelper.replaceVariablesUsingEsDocument('s', 'index1/type1-and-no-id')
-        .then(() => expect().fail('should fail'))
-        .catch(function (err) {
-          sinon.assert.notCalled(searchStub);
-          sinon.assert.notCalled(createClientStub);
-          expect(err.message).to.equal('Malformed uri - should have at least 3 parts: index, type, id');
-        });
+          .then(() => expect().fail('should fail'))
+          .catch(function (err) {
+            sinon.assert.notCalled(searchStub);
+            sinon.assert.notCalled(createClientStub);
+            expect(err.message).to.equal('Malformed uri - should have at least 3 parts: index, type, id');
+          });
       });
     });
 
@@ -164,11 +163,11 @@ describe('Query Helper', function () {
         const expected = 'select * from table1 where id = \'id1\'';
 
         return queryHelper.replaceVariablesUsingEsDocument(s, uri)
-        .then(function (ret) {
-          sinon.assert.calledOnce(searchStub);
-          sinon.assert.notCalled(createClientStub);
-          expect(ret).to.equal(expected);
-        });
+          .then(function (ret) {
+            sinon.assert.calledOnce(searchStub);
+            sinon.assert.notCalled(createClientStub);
+            expect(ret).to.equal(expected);
+          });
       });
 
       it('replace in an array of objects with name and value', function () {
@@ -183,21 +182,21 @@ describe('Query Helper', function () {
         ];
 
         return queryHelper.replaceVariablesUsingEsDocument(sA, uri)
-        .then(function (a) {
-          sinon.assert.calledOnce(searchStub);
-          sinon.assert.notCalled(createClientStub);
-          expect(a).to.eql(expectedA);
-        });
+          .then(function (a) {
+            sinon.assert.calledOnce(searchStub);
+            sinon.assert.notCalled(createClientStub);
+            expect(a).to.eql(expectedA);
+          });
       });
 
       it('malformed uri', function () {
         return queryHelper.replaceVariablesUsingEsDocument('s', 'index1/type1-and-no-id')
-        .then(() => expect().fail('should fail'))
-        .catch(function (err) {
-          sinon.assert.notCalled(searchStub);
-          sinon.assert.notCalled(createClientStub);
-          expect(err.message).to.equal('Malformed uri - should have at least 3 parts: index, type, id');
-        });
+          .then(() => expect().fail('should fail'))
+          .catch(function (err) {
+            sinon.assert.notCalled(searchStub);
+            sinon.assert.notCalled(createClientStub);
+            expect(err.message).to.equal('Malformed uri - should have at least 3 parts: index, type, id');
+          });
       });
     });
 
@@ -220,11 +219,11 @@ describe('Query Helper', function () {
         };
 
         return queryHelper.replaceVariablesForREST(headers, params, body, path, null, null)
-        .then(function (result) {
-          sinon.assert.notCalled(searchStub);
-          sinon.assert.notCalled(createClientStub);
-          expect(result).to.eql(expected);
-        });
+          .then(function (result) {
+            sinon.assert.notCalled(searchStub);
+            sinon.assert.notCalled(createClientStub);
+            expect(result).to.eql(expected);
+          });
       });
 
       it('should not modify supplied params, headers and body', function () {
@@ -250,15 +249,15 @@ describe('Query Helper', function () {
         const expPath = 'path/$auth_token';
 
         return queryHelper.replaceVariablesForREST(headers, params, body, path, null, variables)
-        .then(function (result) {
-          // after repalcement supplied params shoud NOT be modified
-          sinon.assert.notCalled(searchStub);
-          sinon.assert.notCalled(createClientStub);
-          expect(headers).to.eql(expHeaders);
-          expect(params).to.eql(expParams);
-          expect(body).to.eql(expBody);
-          expect(path).to.eql(expPath);
-        });
+          .then(function (result) {
+            // after repalcement supplied params shoud NOT be modified
+            sinon.assert.notCalled(searchStub);
+            sinon.assert.notCalled(createClientStub);
+            expect(headers).to.eql(expHeaders);
+            expect(params).to.eql(expParams);
+            expect(body).to.eql(expBody);
+            expect(path).to.eql(expPath);
+          });
       });
 
       it('ignore the elastic document but use variables', function () {
@@ -287,11 +286,11 @@ describe('Query Helper', function () {
         };
 
         return queryHelper.replaceVariablesForREST(headers, params, body, path, null, variables)
-        .then(function (result) {
-          sinon.assert.notCalled(searchStub);
-          sinon.assert.notCalled(createClientStub);
-          expect(result).to.eql(expected);
-        });
+          .then(function (result) {
+            sinon.assert.notCalled(searchStub);
+            sinon.assert.notCalled(createClientStub);
+            expect(result).to.eql(expected);
+          });
       });
     });
   });
@@ -317,13 +316,13 @@ describe('Query Helper', function () {
 
     it('replaceVariablesInTheQuery sql query', function () {
       const query = 'select label, description, category_code, url ' +
-                'from company ' +
-                'where id = \'@doc[_source][id]@\' ' +
-                'limit 100';
+        'from company ' +
+        'where id = \'@doc[_source][id]@\' ' +
+        'limit 100';
       const expected = 'select label, description, category_code, url ' +
-                'from company ' +
-                'where id = \'12345\' ' +
-                'limit 100';
+        'from company ' +
+        'where id = \'12345\' ' +
+        'limit 100';
       expect(queryHelper._replaceVariablesInTheQuery(doc, query)).to.eql(expected);
     });
   });

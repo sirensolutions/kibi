@@ -28,7 +28,7 @@ define(function (require) {
     });
   });
 
-  module.run(function ($rootScope, $injector) {
+  module.run(function ($rootScope, $injector, kibiEnterpriseEnabled) {
     if ($injector.has('config')) {
       let configInitListener = $rootScope.$on('init:config', function () {
         applyConfig();
@@ -42,7 +42,7 @@ define(function (require) {
         Notifier.applyConfig({
           // kibi: set the awesomeDemoMode and shieldAuthorizationWarning flag
           awesomeDemoMode: config.get('kibi:awesomeDemoMode'),
-          shieldAuthorizationWarning: config.get('kibi:shieldAuthorizationWarning'),
+          shieldAuthorizationWarning: kibiEnterpriseEnabled ? config.get('kibi:shieldAuthorizationWarning') : true,
           // kibi: end
           errorLifetime: config.get('notifications:lifetime:error'),
           warningLifetime: config.get('notifications:lifetime:warning'),

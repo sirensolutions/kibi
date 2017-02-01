@@ -39,11 +39,14 @@ WARNING: Modifying the following settings can signficantly affect Kibana's perfo
 .Kibi Specific Settings Reference
 [horizontal]
 `kibi:awesomeDemoMode`:: Set to true to suppress all warnings and errors.
+`kibi:splitTabs` :: Set to true to split dashboard tabs on two lines.
 `kibi:timePrecision` :: Set to generate time filters with certain precision. Possible values are: s, m, h, d, w, M, y.
 `kibi:relationalPanel` :: Display the Relational Panel in the dashboard tab.
 `kibi:relations` :: Relations between index patterns and dashboards.
 `kibi:session_cookie_expire`:: Set duration of cookie session (in seconds).
 ifeval::["{enterprise_enabled}" == "true"]
+`kibi:graphUseWebGl` [Enterprise Edition only] :: Set to false to disable WebGL rendering
+`kibi:graphUseFiltersFromDashboards` [Enterprise Edition only] :: Set to true to use filters from dashboards on expansion.
 `kibi:graphExpansionLimit` [Enterprise Edition only] :: Limit the number of elements to retrieve during the graph expansion.
 `kibi:graphMaxConcurrentCalls` [Enterprise Edition only] :: Limit the number of concurrent calls done by the Graph Browser.
 `kibi:graphRelationFetchLimit` [Enterprise Edition only] :: Limit the number of relations to retrieve after the graph expansion.

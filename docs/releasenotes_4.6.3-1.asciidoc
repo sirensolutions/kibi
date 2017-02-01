@@ -13,7 +13,7 @@
 * Fixed - Sort relations by name and index pattern when choosing relation in relational panel configuration
 * Fixed - Template vars other than "label" ignored in Kibi Query Viewer visualisation
 * Fixed - Currently selected tab not visible when navigating to Settings and back
-* Fixed - Once saved graph state once is staying for ever [Enterprise Edition only]
+* Fixed - Session persistence bug in graph browser [Enterprise Edition only]
 * Fixed - Match all Internet Explorer versions in URLOverflowService
 
 * Improved - Better handling of patterns not matching any index

@@ -1,14 +1,14 @@
-import mockery from 'mockery';
 import Promise from 'bluebird';
 import expect from 'expect.js';
-import sinon from 'sinon';
+import sinon from 'auto-release-sinon';
 import TinkerPop3Query from '../../queries/tinkerpop3_query';
+import rp from 'request-promise';
 
 const fakeServer = {
   log: function (tags, data) {},
-  config: function () {
+  config() {
     return {
-      get: function (key) {
+      get(key) {
         if (key === 'elasticsearch.url') {
           return 'http://localhost:12345';
         } else if (key === 'kibana.index') {
@@ -25,65 +25,70 @@ const fakeServer = {
   },
   plugins: {
     elasticsearch: {
-      client: {
-        search: function (options) {
-          switch (options.type) {
-            case 'index-pattern':
-              return Promise.resolve({
-                hits: {
-                  hits: [
-                    { _id: 'investment' },
-                    { _id: 'article' },
-                    { _id: 'investor' },
-                    { _id: 'company' }
-                  ]
-                }
-              });
-            case 'config':
-              return Promise.resolve({
-                took : 1,
-                timed_out : false,
-                _shards : {
-                  total : 5,
-                  successful : 5,
-                  failed : 0
-                },
-                hits : {
-                  total : 2,
-                  max_score : 1.0,
-                  hits : [
-                    {
-                      _index: '.kibi',
-                      _type: 'config',
-                      _id: '0.3.2',
-                      _score: 1,
-                      _source: {
-                        'kibi:relations': '{\"relationsIndices\":[],\"relationsDashboards\":[],'
-                          + '\"relationsIndicesSerialized\":{},\"relationsDashboardsSerialized\":{}}',
-                        'kibi:relationalPanel': true,
-                        defaultIndex: 'company',
-                        buildNum: 8467
-                      }
-                    },
-                    {
-                      _index: '.kibi',
-                      _type: 'config',
-                      _id: '0.1.1',
-                      _score: 1,
-                      _source: {
-                        'kibi:relations': '{\"relationsIndices\":[],\"relationsDashboards\":[],'
-                          + '\"relationsIndicesSerialized\":{},\"relationsDashboardsSerialized\":{}}',
-                        'kibi:relationalPanel': true,
-                        defaultIndex: 'company',
-                        buildNum: 8467
-                      }
+      getCluster() {
+        return {
+          callWithInternalUser(method, params) {
+            if (method === 'search') {
+              switch (params.type) {
+                case 'index-pattern':
+                  return Promise.resolve({
+                    hits: {
+                      hits: [
+                        { _id: 'investment' },
+                        { _id: 'article' },
+                        { _id: 'investor' },
+                        { _id: 'company' }
+                      ]
                     }
-                  ]
-                }
-              });
+                  });
+                case 'config':
+                  return Promise.resolve({
+                    hits : {
+                      total : 2,
+                      max_score : 1.0,
+                      hits : [
+                        {
+                          _index: '.kibi',
+                          _type: 'config',
+                          _id: '0.3.2',
+                          _source: {
+                            'kibi:relations': JSON.stringify({
+                              relationsIndices: [],
+                              relationsDashboards: [],
+                              relationsIndicesSerialized: {},
+                              relationsDashboardsSerialized: {}
+                            }),
+                            'kibi:relationalPanel': true,
+                            defaultIndex: 'company',
+                            buildNum: 8467
+                          }
+                        },
+                        {
+                          _index: '.kibi',
+                          _type: 'config',
+                          _id: '0.1.1',
+                          _source: {
+                            'kibi:relations': JSON.stringify({
+                              relationsIndices: [],
+                              relationsDashboards: [],
+                              relationsIndicesSerialized: {},
+                              relationsDashboardsSerialized: {}
+                            }),
+                            'kibi:relationalPanel': true,
+                            defaultIndex: 'company',
+                            buildNum: 8467
+                          }
+                        }
+                      ]
+                    }
+                  });
+                default:
+                  return Promise.reject(new Error(`No documents to return for ${JSON.stringify(params, null, ' ')}`));
+              }
+            }
+            return Promise.reject(new Error(`Unexpected method: ${method}`));
           }
-          return Promise.reject(new Error('No documents to return for ' + options));
-        }
+        };
       }
     }
   }
@@ -236,8 +241,10 @@ const fakeTinkerpop3Result = {
 };
 
 const cacheMock = {
-  get: function (key) { return '';},
-  set: function (key, value, time) {}
+  get(key) {
+    return '';
+  },
+  set(key, value, time) {}
 };
 
 const queryDefinition = {
@@ -259,38 +266,17 @@ const queryDefinition = {
   }
 };
 
-
 describe('TinkerPop3Query', function () {
 
-  before(function (done) {
-    mockery.enable({
-      warnOnReplace: false,
-      warnOnUnregistered: false,
-      useCleanCache: true
-    });
+  let rpStub;
 
-    mockery.registerMock('request-promise', function (rpOptions) {
-
-      // here return different resp depends on rpOptions.href
-      if (rpOptions.uri.indexOf('http://localhost:3000/graph/queryBatch') !== -1) {
-        return Promise.resolve(fakeGraphResponse);
-      } else {
-        return Promise.reject(new Error('Document does not exists'));
-      }
-    });
-
-    done();
-  });
-
-  after(function (done) {
-    mockery.disable();
-    mockery.deregisterAll();
-    done();
+  beforeEach(function () {
+    rpStub = sinon.stub(rp, 'Request').returns(Promise.resolve(new Error('Document does not exists')));
   });
 
   describe('fetchResults', function () {
 
-    it('simple get request', function (done) {
+    it('simple get request', function () {
       const tinkerPop3Query = new TinkerPop3Query(fakeServer, {
         activationQuery: '',
         rest_method: 'GET',
@@ -309,43 +295,42 @@ describe('TinkerPop3Query', function () {
         }
       });
 
-      tinkerPop3Query.fetchResults('').then(function (res) {
+      rpStub.returns(Promise.resolve(fakeGraphResponse));
+      return tinkerPop3Query.fetchResults('').then(function (res) {
         expect(res.result).to.eql(fakeTinkerpop3Result);
-        done();
-      }).catch(done);
+      });
     });
   });
 
   describe('correct arguments are passed to generateCacheKey', function () {
 
-    it('fetchResults', function (done) {
+    it('fetchResults', function () {
       const tinkerPop3Query = new TinkerPop3Query(fakeServer, queryDefinition, cacheMock);
 
       const spy = sinon.spy(tinkerPop3Query, 'generateCacheKey');
 
-      tinkerPop3Query.fetchResults({credentials: {username: 'fred'}}).then(function (res) {
+      rpStub.returns(Promise.resolve(fakeGraphResponse));
+      return tinkerPop3Query.fetchResults({credentials: {username: 'fred'}}).then(function (res) {
         expect(res.result).to.eql(fakeTinkerpop3Result);
         expect(spy.callCount).to.equal(1);
         expect(spy.calledWithExactly('http://localhost:3000/graph/queryBatch', '', undefined, undefined, 'fred')).to.be.ok();
 
         tinkerPop3Query.generateCacheKey.restore();
-        done();
-      }).catch(done);
+      });
     });
 
-    it('checkIfItIsRelevant', function (done) {
+    it('checkIfItIsRelevant', function () {
       const tinkerPop3Query = new TinkerPop3Query(fakeServer, queryDefinition, cacheMock);
 
       const spy = sinon.spy(tinkerPop3Query, 'generateCacheKey');
 
-      tinkerPop3Query.checkIfItIsRelevant({credentials: {username: 'fred'}}).then(function (res) {
+      return tinkerPop3Query.checkIfItIsRelevant({credentials: {username: 'fred'}}).then(function (res) {
 
         expect(res).to.eql(true);
         expect(spy.callCount).to.equal(0);
 
         tinkerPop3Query.generateCacheKey.restore();
-        done();
-      }).catch(done);
+      });
     });
 
   });

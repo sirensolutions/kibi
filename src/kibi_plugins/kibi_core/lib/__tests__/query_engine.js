@@ -2,7 +2,7 @@ import expect from 'expect.js';
 import _ from 'lodash';
 import Promise from 'bluebird';
 import QueryEngine from '../query_engine';
-import sinon from 'sinon';
+import sinon from 'auto-release-sinon';
 import { EventEmitter } from 'events';
 
 let queryEngine;
@@ -32,7 +32,8 @@ const fakeServer = {
   },
   plugins: {
     elasticsearch: {
-      status: null
+      status: null,
+      getCluster() {}
     }
   }
 };
@@ -41,18 +42,11 @@ const fakeServer = {
 describe('Query Engine', function () {
 
   describe('Should trigger _onStatusGreen correctly during init', function () {
-
-    afterEach(function () {
-      queryEngine._onStatusGreen.restore();
-    });
-
     it('when elasticsearch status is already green', function (done) {
       const server = fakeServer;
       server.plugins.elasticsearch.status = new FakeStatus('green');
       queryEngine = new QueryEngine(server);
-      stub = sinon.stub(queryEngine, '_onStatusGreen', function () {
-        return Promise.resolve(true);
-      });
+      stub = sinon.stub(queryEngine, '_onStatusGreen').returns(Promise.resolve(true));
 
       queryEngine._init(500, false).then(function (ret) {
         expect(stub.calledOnce).to.equal(true);
@@ -66,9 +60,7 @@ describe('Query Engine', function () {
       server.plugins.elasticsearch.status = new FakeStatus('red');
 
       queryEngine = new QueryEngine(server);
-      stub = sinon.stub(queryEngine, '_onStatusGreen', function () {
-        return Promise.resolve(true);
-      });
+      stub = sinon.stub(queryEngine, '_onStatusGreen').returns(Promise.resolve(true));
 
       queryEngine._init(500, false).then(function (ret) {
         expect(stub.calledOnce).to.equal(true);
@@ -85,9 +77,7 @@ describe('Query Engine', function () {
       server.plugins.elasticsearch.status = new FakeStatus('red');
 
       queryEngine = new QueryEngine(server);
-      stub = sinon.stub(queryEngine, '_onStatusGreen', function () {
-        return Promise.resolve(true);
-      });
+      stub = sinon.stub(queryEngine, '_onStatusGreen').returns(Promise.resolve(true));
 
       queryEngine._init(500, false).then(function (ret) {
         expect(stub.calledOnce).to.equal(true);
@@ -103,7 +93,5 @@ describe('Query Engine', function () {
       fakeServer.plugins.elasticsearch.status.state = 'green';
       fakeServer.plugins.elasticsearch.status.emit('change');
     });
-
-
   });
 });

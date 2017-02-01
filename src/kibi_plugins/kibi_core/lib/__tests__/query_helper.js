@@ -3,8 +3,8 @@ import Promise from 'bluebird';
 import QueryHelper from '../query_helper';
 import sinon from 'auto-release-sinon';
 
-const searchStub = sinon.stub();
 const createClientStub = sinon.stub();
+const searchStub = sinon.stub();
 
 const fakeServer = {
   log: function (tags, data) {},
@@ -25,33 +25,9 @@ const fakeServer = {
     elasticsearch: {
       getCluster() {
         return {
-          callWithInternalUser(method, params) {
-            switch (method) {
-              case 'search':
-                return searchStub.returns(
-                  Promise.resolve({
-                    hits: {
-                      hits: [
-                        {
-                          _id: '_id1',
-                          _source: {
-                            id: 'id1'
-                          }
-                        }
-                      ]
-                    }
-                  })
-                );
-              default:
-                expect.fail(`Unknown method: ${method}`);
-            }
-          }
-        };
-      },
-      createClient(credentials) {
-        return {
-          search(options) {
-            return createClientStub.returns(
+          callWithInternalUser: searchStub
+            .withArgs(sinon.match.any).returns(Promise.reject(new Error('Unexpected request')))
+            .withArgs('search').returns(
               Promise.resolve({
                 hits: {
                   hits: [
@@ -64,8 +40,25 @@ const fakeServer = {
                   ]
                 }
               })
-            );
-          }
+            )
+        };
+      },
+      createClient(credentials) {
+        return {
+          search: createClientStub.returns(
+            Promise.resolve({
+              hits: {
+                hits: [
+                  {
+                    _id: '_id1',
+                    _source: {
+                      id: 'id1'
+                    }
+                  }
+                ]
+              }
+            })
+          )
         };
       }
     }
@@ -93,59 +86,48 @@ const doc = {
 const credentials = {user: 'user', password: 'password'};
 
 describe('Query Helper', function () {
-
   describe('fetchDocument test if correct client is used', function () {
-    it('no credentials', function (done) {
-      queryHelper.fetchDocument('index', 'type', 'id')
+    it('no credentials', function () {
+      return queryHelper.fetchDocument('index', 'type', 'id')
       .then(function (doc) {
         sinon.assert.calledOnce(searchStub);
         sinon.assert.notCalled(createClientStub);
-        done();
-      })
-      .catch(done);
+      });
     });
 
-    it('with credentials', function (done) {
-      queryHelper.fetchDocument('index', 'type', 'id', credentials)
+    it('with credentials', function () {
+      return queryHelper.fetchDocument('index', 'type', 'id', credentials)
       .then(function (doc) {
         sinon.assert.notCalled(searchStub);
         sinon.assert.calledOnce(createClientStub);
-        done();
-      })
-      .catch(done);
+      });
     });
 
-    it('id with colon', function (done) {
-      queryHelper.fetchDocument('index', 'type', 'id:test')
+    it('id with colon', function () {
+      return queryHelper.fetchDocument('index', 'type', 'id:test')
       .then(function (doc) {
         sinon.assert.calledOnce(searchStub);
         sinon.assert.notCalled(createClientStub);
-        done();
-      })
-      .catch(done);
+      });
     });
   });
 
   describe('replaceVariablesForREST', function () {
-
     describe('with URI with credentials', function () {
-
-      it('replace in single string', function (done) {
+      it('replace in single string', function () {
         const uri = 'index1/type1/id1';
-        const s        = 'select * from table1 where id = \'@doc[_source][id]@\'';
+        const s = 'select * from table1 where id = \'@doc[_source][id]@\'';
         const expected = 'select * from table1 where id = \'id1\'';
 
-        queryHelper.replaceVariablesUsingEsDocument(s, uri, credentials)
+        return queryHelper.replaceVariablesUsingEsDocument(s, uri, credentials)
         .then(function (ret) {
           sinon.assert.notCalled(searchStub);
           sinon.assert.calledOnce(createClientStub);
           expect(ret).to.equal(expected);
-          done();
-        })
-        .catch(done);
+        });
       });
 
-      it('replace in an array of objects with name and value', function (done) {
+      it('replace in an array of objects with name and value', function () {
         const uri = 'index1/type1/id1';
         const sA = [
           {name: 'param1', value: 'select * from table1 where id = \'@doc[_source][id]@\''},
@@ -156,46 +138,40 @@ describe('Query Helper', function () {
           {name: 'param2', value: 'select * from table1 where id = \'_id1\''}
         ];
 
-        queryHelper.replaceVariablesUsingEsDocument(sA, uri, credentials)
+        return queryHelper.replaceVariablesUsingEsDocument(sA, uri, credentials)
         .then(function (a) {
           sinon.assert.notCalled(searchStub);
           sinon.assert.calledOnce(createClientStub);
           expect(a).to.eql(expectedA);
-          done();
-        })
-        .catch(done);
+        });
       });
 
-      it('malformed uri', function (done) {
-        queryHelper.replaceVariablesUsingEsDocument('s', 'index1/type1-and-no-id')
-        .then(done)
+      it('malformed uri', function () {
+        return queryHelper.replaceVariablesUsingEsDocument('s', 'index1/type1-and-no-id')
+        .then(() => expect().fail('should fail'))
         .catch(function (err) {
           sinon.assert.notCalled(searchStub);
           sinon.assert.notCalled(createClientStub);
           expect(err.message).to.equal('Malformed uri - should have at least 3 parts: index, type, id');
-          done();
         });
       });
     });
 
     describe('with URI  no credentials', function () {
-
-      it('replace in single string', function (done) {
+      it('replace in single string', function () {
         const uri = 'index1/type1/id1';
-        const s        = 'select * from table1 where id = \'@doc[_source][id]@\'';
+        const s = 'select * from table1 where id = \'@doc[_source][id]@\'';
         const expected = 'select * from table1 where id = \'id1\'';
 
-        queryHelper.replaceVariablesUsingEsDocument(s, uri)
+        return queryHelper.replaceVariablesUsingEsDocument(s, uri)
         .then(function (ret) {
           sinon.assert.calledOnce(searchStub);
           sinon.assert.notCalled(createClientStub);
           expect(ret).to.equal(expected);
-          done();
-        })
-        .catch(done);
+        });
       });
 
-      it('replace in an array of objects with name and value', function (done) {
+      it('replace in an array of objects with name and value', function () {
         const uri = 'index1/type1/id1';
         const sA = [
           {name: 'param1', value: 'select * from table1 where id = \'@doc[_source][id]@\''},
@@ -206,31 +182,27 @@ describe('Query Helper', function () {
           {name: 'param2', value: 'select * from table1 where id = \'_id1\''}
         ];
 
-        queryHelper.replaceVariablesUsingEsDocument(sA, uri)
+        return queryHelper.replaceVariablesUsingEsDocument(sA, uri)
         .then(function (a) {
           sinon.assert.calledOnce(searchStub);
           sinon.assert.notCalled(createClientStub);
           expect(a).to.eql(expectedA);
-          done();
-        })
-        .catch(done);
+        });
       });
 
-      it('malformed uri', function (done) {
-        queryHelper.replaceVariablesUsingEsDocument('s', 'index1/type1-and-no-id')
-        .then(done)
+      it('malformed uri', function () {
+        return queryHelper.replaceVariablesUsingEsDocument('s', 'index1/type1-and-no-id')
+        .then(() => expect().fail('should fail'))
         .catch(function (err) {
           sinon.assert.notCalled(searchStub);
           sinon.assert.notCalled(createClientStub);
           expect(err.message).to.equal('Malformed uri - should have at least 3 parts: index, type, id');
-          done();
         });
       });
     });
 
     describe('no URI', function () {
-
-      it('ignore the elastic document and variables', function (done) {
+      it('ignore the elastic document and variables', function () {
         const path = '';
         const headers = [
           { name: 'header1', value: 'header1value'}
@@ -247,17 +219,15 @@ describe('Query Helper', function () {
           path: path
         };
 
-        queryHelper.replaceVariablesForREST(headers, params, body, path, null, null)
+        return queryHelper.replaceVariablesForREST(headers, params, body, path, null, null)
         .then(function (result) {
           sinon.assert.notCalled(searchStub);
           sinon.assert.notCalled(createClientStub);
           expect(result).to.eql(expected);
-          done();
-        })
-        .catch(done);
+        });
       });
 
-      it('should not modify supplied params, headers and body', function (done) {
+      it('should not modify supplied params, headers and body', function () {
         const path = 'path/$auth_token';
         const headers = [
           { name: 'header1', value: 'header1value $auth_token'}
@@ -279,8 +249,7 @@ describe('Query Helper', function () {
         const expBody = 'body $auth_token';
         const expPath = 'path/$auth_token';
 
-
-        queryHelper.replaceVariablesForREST(headers, params, body, path, null, variables)
+        return queryHelper.replaceVariablesForREST(headers, params, body, path, null, variables)
         .then(function (result) {
           // after repalcement supplied params shoud NOT be modified
           sinon.assert.notCalled(searchStub);
@@ -289,13 +258,10 @@ describe('Query Helper', function () {
           expect(params).to.eql(expParams);
           expect(body).to.eql(expBody);
           expect(path).to.eql(expPath);
-          done();
-        })
-        .catch(done);
+        });
       });
 
-
-      it('ignore the elastic document but use variables', function (done) {
+      it('ignore the elastic document but use variables', function () {
         const path = 'path/$auth_token';
         const headers = [
           { name: 'header1', value: 'header1value $auth_token'}
@@ -320,17 +286,14 @@ describe('Query Helper', function () {
           path: 'path/123456'
         };
 
-        queryHelper.replaceVariablesForREST(headers, params, body, path, null, variables)
+        return queryHelper.replaceVariablesForREST(headers, params, body, path, null, variables)
         .then(function (result) {
           sinon.assert.notCalled(searchStub);
           sinon.assert.notCalled(createClientStub);
           expect(result).to.eql(expected);
-          done();
-        })
-        .catch(done);
+        });
       });
     });
-
   });
 
   describe('_replaceVariablesInTheQuery', function () {
@@ -351,7 +314,6 @@ describe('Query Helper', function () {
       const expected = '  12345  12345  ';
       expect(queryHelper._replaceVariablesInTheQuery(doc, query)).to.eql(expected);
     });
-
 
     it('replaceVariablesInTheQuery sql query', function () {
       const query = 'select label, description, category_code, url ' +
@@ -380,9 +342,7 @@ describe('Query Helper', function () {
     });
   });
 
-
   describe('_replaceVariablesInTheQuery multivalued', function () {
-
     it('first element of multivalued', function () {
       const query = '@doc[_source][ids][0]@';
       const expected = 'id0';
@@ -400,8 +360,5 @@ describe('Query Helper', function () {
       const expected = 'id2';
       expect(queryHelper._replaceVariablesInTheQuery(doc, query)).to.eql(expected);
     });
-
   });
-
-
 });

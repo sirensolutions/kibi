@@ -1,7 +1,9 @@
 import expect from 'expect.js';
 import sinon from 'sinon';
 import Migration from '../migration';
-import wrapAsync from 'test_utils/wrap_async';
+import requirefrom from 'requirefrom';
+
+const wrapAsync = requirefrom('src/test_utils')('wrap_async');
 
 describe('migrations', function () {
 

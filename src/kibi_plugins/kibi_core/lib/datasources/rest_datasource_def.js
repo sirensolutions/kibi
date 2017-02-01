@@ -4,7 +4,7 @@ import datasourcesSchema from '../datasources_schema';
 
 function RestDatasourceDef(server, datasource) {
   AbstractDatasourceDef.call(this, server, datasource);
-  this.schema = datasourcesSchema.rest.concat(datasourcesSchema.base);
+  this.schema = datasourcesSchema.getSchema('rest');
 }
 
 util.inherits(RestDatasourceDef, AbstractDatasourceDef);

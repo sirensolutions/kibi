@@ -4,7 +4,7 @@ import datasourcesSchema from '../datasources_schema';
 
 function MysqlDatasourceDef(server, datasource) {
   AbstractDatasourceDef.call(this, server, datasource);
-  this.schema = datasourcesSchema.mysql.concat(datasourcesSchema.base);
+  this.schema = datasourcesSchema.getSchema('mysql');
 }
 
 util.inherits(MysqlDatasourceDef, AbstractDatasourceDef);

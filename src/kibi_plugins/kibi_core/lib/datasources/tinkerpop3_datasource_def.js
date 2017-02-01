@@ -4,7 +4,7 @@ import datasourcesSchema from '../datasources_schema';
 
 function TinkerPop3DatasourceDef(server, datasource) {
   AbstractDatasourceDef.call(this, server, datasource);
-  this.schema = datasourcesSchema.tinkerpop3.concat(datasourcesSchema.base);
+  this.schema = datasourcesSchema.getSchema('tinkerpop3');
 }
 
 util.inherits(TinkerPop3DatasourceDef, AbstractDatasourceDef);

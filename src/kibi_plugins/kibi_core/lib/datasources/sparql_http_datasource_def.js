@@ -4,7 +4,7 @@ import datasourcesSchema from '../datasources_schema';
 
 function SparqlHttpDatasourceDef(server, datasource) {
   AbstractDatasourceDef.call(this, server, datasource);
-  this.schema = datasourcesSchema.sparql_http.concat(datasourcesSchema.base);
+  this.schema = datasourcesSchema.getSchema('sparql_http');
 }
 
 util.inherits(SparqlHttpDatasourceDef, AbstractDatasourceDef);

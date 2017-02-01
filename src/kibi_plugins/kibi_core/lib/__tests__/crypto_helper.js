@@ -1,13 +1,13 @@
 import expect from 'expect.js';
-import sinon from 'sinon';
+import sinon from 'auto-release-sinon';
 import forge from 'node-forge';
-import mockery from 'mockery';
+import datasourcesSchema from '../datasources_schema';
 import cryptoHelper from '../crypto_helper';
 
 describe('Crypto Helper', function () {
   const defaultKey = 'iSxvZRYisyUW33FreTBSyJJ34KpEquWznUPDvn+ka14=';
   const defaultConfig = {
-    get: function (key) {
+    get(key) {
       if (key === 'kibi_core.datasource_encryption_algorithm') {
         return 'AES-GCM';
       } else if (key === 'kibi_core.datasource_encryption_key') {
@@ -18,35 +18,15 @@ describe('Crypto Helper', function () {
     }
   };
 
-
   describe('fake schema', function () {
-    before(function (done) {
-      mockery.enable({
-        warnOnReplace: false,
-        warnOnUnregistered: false,
-        useCleanCache: true
-      });
-
-      mockery.registerMock('./datasources_schema', {
-        type1: [
-          {
-            name: 'password',
-            encrypted: true
-          }
-        ]
-      });
-
-      done();
+    beforeEach(function () {
+      sinon.stub(datasourcesSchema, 'getSchema').returns([
+        {
+          name: 'password',
+          encrypted: true
+        }
+      ]);
     });
-
-
-    after(function (done) {
-      mockery.disable();
-      mockery.deregisterAll();
-      done();
-    });
-
-
 
     describe('.encrypt', function () {
 
@@ -246,21 +226,22 @@ describe('Crypto Helper', function () {
 
   describe('empty schema', function () {
 
-    // here mock datasources_schema with empty schema
+    beforeEach(function () {
+      sinon.stub(datasourcesSchema, 'getSchema').throws(new Error('Could not get schema for datasource type: type2.'));
+    });
 
     describe('.encryptDatasourceParams', function () {
       it ('should throw an error if datasource type has no associated schema.', function () {
         const query = {
-          datasourceType: 'type1',
+          datasourceType: 'type2',
           datasourceParams: JSON.stringify({
             password: 'xxx'
           })
         };
 
         expect(cryptoHelper.encryptDatasourceParams).withArgs(defaultConfig, query)
-          .to.throwError(/Could not get schema for datasource type: type1 ./);
+          .to.throwError(/Could not get schema for datasource type: type2./);
       });
     });
   });
 });
-

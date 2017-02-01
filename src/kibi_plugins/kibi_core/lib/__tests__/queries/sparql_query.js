@@ -5,9 +5,9 @@ import SparqlQuery from '../../queries/sparql_query';
 
 const fakeServer = {
   log: function (tags, data) {},
-  config: function () {
+  config() {
     return {
-      get: function (key) {
+      get(key) {
         if (key === 'elasticsearch.url') {
           return 'http://localhost:12345';
         } else if (key === 'kibana.index') {
@@ -20,18 +20,23 @@ const fakeServer = {
   },
   plugins: {
     elasticsearch: {
-      client: {
-        search: function () {
-          return Promise.reject(new Error('Document does not exists'));
-        }
+      getCluster() {
+        return {
+          callWithInternalUser(method, params) {
+            if (method === 'search') {
+              return Promise.reject(new Error('Document does not exists'));
+            }
+            return Promise.reject(new Error(`Unexpected method: ${method}`));
+          }
+        };
       }
     }
   }
 };
 
 const cacheMock = {
-  get: function (key) { return '';},
-  set: function (key, value, time) {}
+  get(key) { return '';},
+  set(key, value, time) {}
 };
 
 const queryDefinition = {

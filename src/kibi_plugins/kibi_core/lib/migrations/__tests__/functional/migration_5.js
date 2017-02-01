@@ -2,11 +2,8 @@ import elasticsearch from 'elasticsearch';
 import expect from 'expect.js';
 import _ from 'lodash';
 import sinon from 'sinon';
-import packageJson from 'utils/package_json';
-import wrapAsync from 'test_utils/wrap_async';
-import indexSnapshot from 'test_utils/index_snapshot';
+import requirefrom from 'requirefrom';
 
-import ScenarioManager from 'test_utils/scenario_manager';
 import Migration from '../../migration_5';
 import Scenario1 from './scenarios/migration_5/scenario1';
 import Scenario2 from './scenarios/migration_5/scenario2';
@@ -16,8 +13,13 @@ import Scenario5 from './scenarios/migration_5/scenario5';
 import Scenario6 from './scenarios/migration_5/scenario6';
 import Scenario7 from './scenarios/migration_5/scenario7';
 
-import serverConfig from 'test_kibana/server_config';
 import url from 'url';
+
+const packageJson = requirefrom('src/utils')('package_json');
+const serverConfig = requirefrom('test')('server_config');
+const wrapAsync = requirefrom('src/test_utils')('wrap_async');
+const indexSnapshot = requirefrom('src/test_utils')('index_snapshot');
+const ScenarioManager = requirefrom('src/test_utils')('scenario_manager');
 
 describe('kibi_core/migrations/functional', function () {
 

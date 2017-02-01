@@ -4,9 +4,12 @@ import sinon from 'sinon';
 import url from 'url';
 import initRegistry from '../../../init_registry';
 import ConflictError from '../../errors/conflict';
-import indexSnapshot from 'test_utils/index_snapshot';
-import ScenarioManager from 'test_utils/scenario_manager';
-import serverConfig from 'test_kibana/server_config';
+import requirefrom from 'requirefrom';
+
+const { Cluster } = requirefrom('src/core_plugins/elasticsearch/lib')('cluster');
+const indexSnapshot = requirefrom('src/test_utils')('index_snapshot');
+const ScenarioManager = requirefrom('src/test_utils')('scenario_manager');
+const serverConfig = requirefrom('test')('server_config');
 
 /**
  * Provides common methods to test Model instances.
@@ -29,8 +32,8 @@ export default class ModelTestHelper {
     this._typename = typename;
 
     this._scenarioManager = new ScenarioManager(clusterUrl, timeout);
-    this._client = new elasticsearch.Client({
-      host: clusterUrl,
+    this._cluster = new Cluster({
+      url: clusterUrl,
       requestTimeout: timeout
     });
 
@@ -46,10 +49,9 @@ export default class ModelTestHelper {
     this._server = {
       plugins: {
         elasticsearch: {
-          createClient: () => {
-            return this._client;
-          },
-          client: this._client
+          getCluster() {
+            return this._cluster;
+          }
         },
         kibi_core: {
           getCryptoHelper: () => ({
@@ -60,13 +62,6 @@ export default class ModelTestHelper {
       config: () => configMock
     };
     this._registry = initRegistry(this._server);
-  }
-
-  /**
-   * Returns the Elasticsearch client used by the helper.
-   */
-  get client() {
-    return this._client;
   }
 
   /**
@@ -89,14 +84,14 @@ export default class ModelTestHelper {
    * Returns a snapshot of the .kibi index.
    */
   async snapshot() {
-    return await indexSnapshot(this._client, '.kibi');
+    return await indexSnapshot(this._cluster, '.kibi');
   }
 
   /**
    * Returns the mappings in the .kibi index for the specified.type.
    */
   async getMappings(type) {
-    return await this._client.indices.getMapping({
+    return await this._cluster.callWithInternalUser('indices.getMapping', {
       index: '.kibi',
       type: type
     });
@@ -192,10 +187,9 @@ export default class ModelTestHelper {
    * Tests that mappings are not created if they already exists for the type managed by the model class being tested.
    */
   async testSkipMappings() {
-    const putMappingSpy = sinon.spy(this._client.indices, 'putMapping');
+    const callWithInternalUserMapping = sinon.spy(this._cluster, 'callWithInternalUser');
     try {
-
-      await this._client.indices.putMapping({
+      await this._cluster.callWithInternalUser('indices.putMapping', {
         index: '.kibi',
         type: this._typename,
         body: {
@@ -216,7 +210,8 @@ export default class ModelTestHelper {
       const index = await this.snapshot();
       const mappingsAfter = await this.getMappings(this._typename);
 
-      expect(putMappingSpy.calledOnce).to.be(true);
+      sinon.assert.calledOnce(callWithInternalUserMapping);
+      sinon.assert.calledWith(callWithInternalUserMapping, 'indices.putMapping');
       expect(index.get(id)._source[this._stringField]).to.be('1');
 
       const expectedMapping = {
@@ -229,7 +224,7 @@ export default class ModelTestHelper {
       };
       expect(mappingsAfter['.kibi'].mappings[this._typename].properties).to.eql(expectedMapping);
     } finally {
-      putMappingSpy.restore();
+      callWithInternalUserMapping.restore();
     }
   }
 

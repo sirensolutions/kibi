@@ -1,7 +1,9 @@
 import Scenario from './scenarios/empty/scenario';
-import serverConfig from 'test_kibana/server_config';
-import wrapAsync from 'test_utils/wrap_async';
+import requirefrom from 'requirefrom';
 import ModelTestHelper from './helper';
+
+const serverConfig = requirefrom('test')('server_config');
+const wrapAsync = requirefrom('src/test_utils')('wrap_async');
 
 describe('saved_objects_api/functional', function () {
 

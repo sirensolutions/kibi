@@ -1,6 +1,6 @@
-const waitForPluginList = require('../wait_for_plugin_list');
-const expect = require('expect.js');
-const Promise = require('bluebird');
+import waitForPluginList from '../wait_for_plugin_list';
+import expect from 'expect.js';
+import Promise from 'bluebird';
 
 const getFakeConfig = function () {
   return {
@@ -12,20 +12,24 @@ const getFakeConfig = function () {
 
 const getFakeServer = function (fakeConfig, nodes, plugins) {
   return {
-    config: function () {
+    config() {
       return fakeConfig;
     },
     plugins: {
       elasticsearch: {
-        client: {
-          cat: {
-            nodes: function (options) {
-              return Promise.resolve(nodes);
-            },
-            plugins: function (options) {
-              return Promise.resolve(plugins);
+        getCluster() {
+          return {
+            callWithInternalUser(method, params) {
+              switch (method) {
+                case 'cat.nodes':
+                  return Promise.resolve(nodes);
+                case 'cat.plugins':
+                  return Promise.resolve(plugins);
+                default:
+                  expect().fail(`Unexpected method: ${method}`);
+              }
             }
-          }
+          };
         }
       }
     }
@@ -51,7 +55,7 @@ const getFakePlugin = function () {
 describe('plugins/elasticsearch', function () {
   describe('lib/wait_plugin_list', function () {
 
-    it('should contain array with siren-join', function (done) {
+    it('should contain array with siren-platform', function () {
       const fakePlugin = getFakePlugin();
       const fakeConfig = getFakeConfig();
       const fakeServer = getFakeServer(
@@ -66,19 +70,19 @@ describe('plugins/elasticsearch', function () {
         [
           {
             name: 'nodeA',
-            component: 'siren-join'
+            component: 'siren-platform'
           },
         ]
       );
 
-      waitForPluginList(fakePlugin, fakeServer).then(function () {
-        expect(fakeConfig['elasticsearch.plugins']).to.eql(['siren-join']);
+      return waitForPluginList(fakePlugin, fakeServer)
+      .then(function () {
+        expect(fakeConfig['elasticsearch.plugins']).to.eql(['siren-platform']);
         expect(fakePlugin.status.red()).to.eql(undefined);
-        done();
-      }).catch(done);
+      });
     });
 
-    it('should contain array with siren-join 2 nodes', function (done) {
+    it('should contain array with siren-platform 2 nodes', function () {
       const fakePlugin = getFakePlugin();
       const fakeConfig = getFakeConfig();
       const fakeServer = getFakeServer(
@@ -98,23 +102,22 @@ describe('plugins/elasticsearch', function () {
         [
           {
             name: 'nodeA',
-            component: 'siren-join'
+            component: 'siren-platform'
           },
           {
             name: 'nodeB',
-            component: 'siren-join'
+            component: 'siren-platform'
           },
         ]
       );
 
-      waitForPluginList(fakePlugin, fakeServer).then(function () {
-        expect(fakeConfig['elasticsearch.plugins']).to.eql(['siren-join']);
+      return waitForPluginList(fakePlugin, fakeServer).then(function () {
+        expect(fakeConfig['elasticsearch.plugins']).to.eql(['siren-platform']);
         expect(fakePlugin.status.red()).to.eql(undefined);
-        done();
-      }).catch(done);
+      });
     });
 
-    it('should contain array with siren-join 2 nodes but mark plugin status as red', function (done) {
+    it('should contain array with siren-platform 2 nodes but mark plugin status as red', function () {
       const fakePlugin = getFakePlugin();
       const fakeConfig = getFakeConfig();
       const fakeServer = getFakeServer(
@@ -134,27 +137,26 @@ describe('plugins/elasticsearch', function () {
         [
           {
             name: 'nodeA',
-            component: 'siren-join'
+            component: 'siren-platform'
           },
           {
             name: 'nodeB',
-            component: 'missing-siren-join'
+            component: 'missing-siren-platform'
           },
         ]
       );
 
-      waitForPluginList(fakePlugin, fakeServer).then(function () {
-        expect(fakeConfig['elasticsearch.plugins']).to.eql(['siren-join', 'missing-siren-join']);
+      return waitForPluginList(fakePlugin, fakeServer).then(function () {
+        expect(fakeConfig['elasticsearch.plugins']).to.eql(['siren-platform', 'missing-siren-platform']);
         expect(fakePlugin.status.red()).to.eql(
           'SIREn Join plugin is missing at data node:[nodeB] ip:[127.0.0.1]\n' +
           'SIREn Join plugin should be installed on all data nodes.'
         );
-        done();
-      }).catch(done);
+      });
     });
 
 
-    it('should contain array with other-plugin, should not change status to red as no siren-join detected', function (done) {
+    it('should contain array with other-plugin, should not change status to red as no siren-platform detected', function () {
       const fakePlugin = getFakePlugin();
       const fakeConfig = getFakeConfig();
       const fakeServer = getFakeServer(
@@ -183,11 +185,10 @@ describe('plugins/elasticsearch', function () {
         ]
       );
 
-      waitForPluginList(fakePlugin, fakeServer).then(function () {
+      return waitForPluginList(fakePlugin, fakeServer).then(function () {
         expect(fakeConfig['elasticsearch.plugins']).to.eql(['other-plugin']);
         expect(fakePlugin.status.red()).to.eql(undefined);
-        done();
-      }).catch(done);
+      });
     });
 
 

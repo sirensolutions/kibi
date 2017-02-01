@@ -21,28 +21,35 @@ const fakeServer = {
   },
   plugins: {
     elasticsearch: {
-      client: {
-        search: function (options) {
-          return Promise.resolve({
-            hits: {
-              hits: [
-                {
-                  _id: '_id1',
-                  _source: {
-                    id: 'id1',
-                    ids: ['id1', 'id2'],
-                    empty_id: '',
-                    empty_ids: [],
-                    age: 37,
-                    zero: 0,
-                    null_field: null,
-                    undefined_field: undefined
+      getCluster() {
+        return {
+          callWithInternalUser(method, params) {
+            switch (method) {
+              case 'search':
+                return Promise.resolve({
+                  hits: {
+                    hits: [
+                      {
+                        _id: '_id1',
+                        _source: {
+                          id: 'id1',
+                          ids: ['id1', 'id2'],
+                          empty_id: '',
+                          empty_ids: [],
+                          age: 37,
+                          zero: 0,
+                          null_field: null,
+                          undefined_field: undefined
+                        }
+                      }
+                    ]
                   }
-                }
-              ]
+                });
+              default:
+                expect.fail(`Unknown method: ${method}`);
             }
-          });
-        }
+          }
+        };
       }
     }
   }

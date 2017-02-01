@@ -1,13 +1,15 @@
 import expect from 'expect.js';
 import mockery from 'mockery';
 import Promise from 'bluebird';
-import sinon from 'sinon';
+import sinon from 'auto-release-sinon';
 import JdbcHelper from '../jdbc_helper';
 import cryptoHelper from '../crypto_helper';
 
+import os from 'os';
+
 const fakeServer = {
   log: function (tags, data) {},
-  config: function () {
+  config() {
     return {
       get: function (key) {
         if (key === 'elasticsearch.url') {
@@ -22,48 +24,55 @@ const fakeServer = {
   },
   plugins: {
     elasticsearch: {
-      client: {
-        search: function (options) {
-          if (options.type === 'datasource') {
-            const datasources = [
-              {
-                _id: 'pg',
-                _source: {
-                  datasourceType: 'sql_jdbc',
-                  datasourceParams: '{"libpath": "/opt/libs1/", "libs": "a.jar"}'
+      getCluster() {
+        return {
+          callWithInternalUser(method, params) {
+            switch (method) {
+              case 'search':
+                if (params.type === 'datasource') {
+                  const datasources = [
+                    {
+                      _id: 'pg',
+                      _source: {
+                        datasourceType: 'sql_jdbc',
+                        datasourceParams: '{"libpath": "/opt/libs1/", "libs": "a.jar"}'
+                      }
+                    },
+                    {
+                      _id: 'mysql',
+                      _source: {
+                        datasourceType: 'sql_jdbc',
+                        datasourceParams: '{"libpath": "/opt/libs2/", "libs": "b.jar"}'
+                      }
+                    },
+                    {
+                      _id: 'mysql2',
+                      _source: {
+                        datasourceType: 'mysql',
+                        datasourceParams: '{"libpath": "/opt/libs2/", "libs": "b.jar"}'
+                      }
+                    },
+                    {
+                      _id: 'corrupted',
+                      _source: {
+                        datasourceType: 'sql_jdbc',
+                        datasourceParams: '{bpath": "/opt/libs3/", "libs": "c.jar"}'
+                      }
+                    }
+                  ];
+                  return Promise.resolve({
+                    hits: {
+                      hits: datasources,
+                      total: datasources.length
+                    }
+                  });
                 }
-              },
-              {
-                _id: 'mysql',
-                _source: {
-                  datasourceType: 'sql_jdbc',
-                  datasourceParams: '{"libpath": "/opt/libs2/", "libs": "b.jar"}'
-                }
-              },
-              {
-                _id: 'mysql2',
-                _source: {
-                  datasourceType: 'mysql',
-                  datasourceParams: '{"libpath": "/opt/libs2/", "libs": "b.jar"}'
-                }
-              },
-              {
-                _id: 'corrupted',
-                _source: {
-                  datasourceType: 'sql_jdbc',
-                  datasourceParams: '{bpath": "/opt/libs3/", "libs": "c.jar"}'
-                }
-              }
-            ];
-            return Promise.resolve({
-              hits: {
-                hits: datasources,
-                total: datasources.length
-              }
-            });
+                return Promise.reject(new Error(`Unexpected search parameters: ${params}`));
+              default:
+                return Promise.reject(new Error(`Unexpected method: ${method}`));
+            }
           }
-          return Promise.reject(new Error('Unexpected search: ' + options));
-        }
+        };
       }
     }
   }
@@ -71,17 +80,6 @@ const fakeServer = {
 
 const endsWith = function (s, suffix) {
   return s.indexOf(suffix, s.length - suffix.length) !== -1;
-};
-
-const getOsMock = function (platformStr) {
-  return {
-    platform: function () {
-      return platformStr;
-    },
-    hostname: function () {
-      return 'localhost';
-    }
-  };
 };
 
 describe('Jdbc Helper', function () {
@@ -145,22 +143,10 @@ describe('Jdbc Helper', function () {
 
   describe('windows', function () {
 
-    before(function (done) {
-      mockery.enable({
-        warnOnReplace: true,
-        warnOnUnregistered: false,
-        useCleanCache: true
-      });
-      mockery.registerMock('os', getOsMock('windows'));
-      done();
+    beforeEach(function () {
+      sinon.stub(os, 'platform').returns('windows');
+      sinon.stub(os, 'hostname').returns('localhost');
     });
-
-    after(function (done) {
-      mockery.disable();
-      mockery.deregisterAll();
-      done();
-    });
-
 
     describe('getAbsolutePathToSindicetechFolder', function () {
 
@@ -259,30 +245,16 @@ describe('Jdbc Helper', function () {
         expect(actual.libs).to.eql(['C:\\lib\\a.jar', 'C:\\Users\\libs\\another.jar']);
       });
 
-
-
     });
   });
 
 
   describe('unix', function () {
 
-    before(function (done) {
-      mockery.enable({
-        warnOnReplace: true,
-        warnOnUnregistered: false,
-        useCleanCache: true
-      });
-      mockery.registerMock('os', getOsMock('linux'));
-      done();
+    beforeEach(function () {
+      sinon.stub(os, 'platform').returns('linux');
+      sinon.stub(os, 'hostname').returns('localhost');
     });
-
-    after(function (done) {
-      mockery.disable();
-      mockery.deregisterAll();
-      done();
-    });
-
 
     describe('getAbsolutePathToSindicetechFolder', function () {
 

@@ -190,7 +190,7 @@ RestQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) {
         // rather ask user to set correct Content-Type: application/json header
       }
 
-      rp(rpOptions).then(function (resp) {
+      return rp(rpOptions).then(function (resp) {
         fulfill(resp);
       }).catch(function (err) {
         const msg = 'Rest request failed: ' + JSON.stringify(rpOptions.uri, null, ' ') + '.\nDetails: ' + err.message;

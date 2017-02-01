@@ -102,7 +102,7 @@ module.exports = function createProxy(server, method, path, config) {
               } else {
                 errStr = JSON.stringify(err, null, ' ');
               }
-              server.log(['error','create_proxy'], 'Something went wrong while modifying request: ' + errStr);
+              server.log(['error','create_kibi_proxy'], 'Something went wrong while modifying request: ' + errStr);
               reject(err);
             });
           });
@@ -138,7 +138,7 @@ module.exports = function createProxy(server, method, path, config) {
                     data: dataPassed
                   });
                 }).catch((err) => {
-                  server.log(['error','create_proxy'], 'Something went wrong while modifying response: ' + err.stack);
+                  server.log(['error','create_kibi_proxy'], 'Something went wrong while modifying response: ' + err.stack);
                   reject(err);
                 });
             } else {

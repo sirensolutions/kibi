@@ -1,3 +1,5 @@
+import expect from 'expect.js';
+
 /**
  * Wraps a mocha test executing ES7 async code.
  *
@@ -14,9 +16,15 @@ export default function (wrapped) {
   return async function (callback) {
     try {
       await wrapped();
-      callback();
+      if (callback) {
+        callback();
+      }
     } catch (error) {
-      callback(error);
+      if (!callback) {
+        expect().fail(error);
+      } else {
+        callback(error);
+      }
     }
   };
 };

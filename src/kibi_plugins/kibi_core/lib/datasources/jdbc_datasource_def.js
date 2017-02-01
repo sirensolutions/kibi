@@ -4,7 +4,7 @@ import datasourcesSchema from '../datasources_schema';
 
 function JdbcDatasourceDef(server, datasource) {
   AbstractDatasourceDef.call(this, server, datasource);
-  this.schema = datasourcesSchema.jdbc.concat(datasourcesSchema.base);
+  this.schema = datasourcesSchema.getSchema('jdbc');
 }
 
 util.inherits(JdbcDatasourceDef, AbstractDatasourceDef);

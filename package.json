@@ -169,6 +169,7 @@
     "whatwg-fetch": "0.9.0",
     "wreck": "6.2.0",
 
+    "requirefrom": "0.2.1",
     "ng-tags-input": "3.0.0",
     "antlr4": "^4.5.2",
     "antlr4-javascript-sparql": "sirensolutions/antlr4-javascript-sparql#1.0.8",
@@ -179,7 +180,7 @@
     "kibi-icons": "sirensolutions/kibi-icons#1.0.0",
 
     "lru-cache": "~2.6.4",
-    "request-promise": "3.0.0",
+    "request-promise": "4.1.1",
     "node-forge": "^0.6.37",
     "kibiutils": "sirensolutions/kibiutils#1.4.0",
     "sqlite3": "3.1.4",

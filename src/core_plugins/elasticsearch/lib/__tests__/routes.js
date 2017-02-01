@@ -17,7 +17,8 @@ describe('plugins/elasticsearch', function () {
       kbnServer = kbnTestServer.createServer({
         plugins: {
           scanDirs: [
-            fromRoot('src/core_plugins')
+            fromRoot('src/core_plugins'),
+            fromRoot('src/kibi_plugins') // kibi: added path to the kibi plugins folder
           ]
         },
       });

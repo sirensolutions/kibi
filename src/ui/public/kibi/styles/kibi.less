@@ -3,12 +3,17 @@
 @import (reference) "~ui/kibi/styles/kibi_variables";
 
 // Buttons ================================================
-.btn-relational {
+.btn.btn-relational {
   .button-variant(@btn-relational-color; @btn-relational-bg; @btn-relational-border);
 }
 
-.disabled-btn-relational {
+.btn.disabled-btn-relational {
   .button-variant(@btn-relational-color; @btn-disabled-relational-bg; @btn-relational-border);
+}
+
+/* traditional bootstrap white btn-default which in kibana was overriten to grey */
+.btn.kibi-btn-default {
+  .button-variant(@kibi-btn-default-color; @kibi-btn-default-bg; @kibi-btn-default-border);
 }
 
 // Panel ================================================
@@ -131,3 +136,4 @@ navbar button {
     }
   }
 }
+

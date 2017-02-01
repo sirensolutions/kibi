@@ -2,10 +2,10 @@ define(function (require) {
   let moment = require('moment-timezone');
   let _ = require('lodash');
 
-  return function configDefaultsProvider() {
+  return function configDefaultsProvider(kibiEnterpriseEnabled) {
     // wrapped in provider so that a new instance is given to each app/test
 
-    return {
+    const options = {
       'buildNum': {
         readonly: true
       },
@@ -232,22 +232,6 @@ define(function (require) {
         value: false,
         description: 'Set to true to split dashboard tabs on two lines'
       },
-      'kibi:graphUseWebGl' : {
-        value: true,
-        description: 'Set to false to disable WebGL rendering'
-      },
-      'kibi:graphExpansionLimit' : {
-        value: 500,
-        description: 'Limit the number of elements to retrieve during the graph expansion'
-      },
-      'kibi:graphRelationFetchLimit' : {
-        value: 2500,
-        description: 'Limit the number of relations to retrieve after the graph expansion'
-      },
-      'kibi:graphMaxConcurrentCalls' : {
-        value: 15,
-        description: 'Limit the number of concurrent calls done by the Graph Browser'
-      },
       'kibi:timePrecision' : {
         type: 'string',
         value: 's',
@@ -262,15 +246,44 @@ define(function (require) {
         value: '{ "relationsIndices": [], "relationsDashboards": [], "version": 2 }',
         description: 'Relations between index patterns and dashboards'
       },
-      'kibi:shieldAuthorizationWarning': {
-        value: true,
-        description: 'Set to true to show all authorization warnings from Shield'
-      },
       'kibi:session_cookie_expire': {
         value: 31536000,
         description: 'Set duration of cookie session (in seconds)'
       }
       // kibi: end
     };
+
+    // kibi: enterprise options
+    const enterpriseOptions = {
+      'kibi:shieldAuthorizationWarning': {
+        value: true,
+        description: 'Set to true to show all authorization warnings from Shield'
+      },
+      'kibi:graphUseWebGl' : {
+        value: true,
+        description: 'Set to false to disable WebGL rendering'
+      },
+      'kibi:graphUseFiltersFromDashboards' : {
+        value: false,
+        description: 'Set to true to use filters from dashboards on expansion'
+      },
+      'kibi:graphExpansionLimit' : {
+        value: 500,
+        description: 'Limit the number of elements to retrieve during the graph expansion'
+      },
+      'kibi:graphRelationFetchLimit' : {
+        value: 2500,
+        description: 'Limit the number of relations to retrieve after the graph expansion'
+      },
+      'kibi:graphMaxConcurrentCalls' : {
+        value: 15,
+        description: 'Limit the number of concurrent calls done by the Graph Browser'
+      }
+    };
+
+    if (kibiEnterpriseEnabled) {
+      return _.merge({}, options, enterpriseOptions);
+    }
+    return options;
   };
 });

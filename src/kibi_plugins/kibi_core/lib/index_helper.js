@@ -62,7 +62,6 @@ export default class IndexHelper {
       return;
     }
 
-    console.log('datasourcesResponse=[%s]', JSON.stringify(datasourcesResponse, null, ' '));
     for (const datasource of datasourcesResponse) {
       this.logger.info(`Processing datasource "${datasource._id}".`);
 

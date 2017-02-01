@@ -8,7 +8,6 @@ class DatasourcesSchema {
   }
 
   getSchema(type) {
-    console.log('this=[%s]', JSON.stringify(this, null, ' '));
     const schema = this._schemas && this._schemas[type];
 
     if (!schema) {

@@ -4,6 +4,7 @@ module.exports = function (grunt) {
       options: { mode: true },
       src: [
         'src/**',
+        'ui_framework/dist/**',
         'bin/**',
         'webpackShims/**',
         'config/kibi.yml', // kibi: renamed kibana to kibi

@@ -22,9 +22,7 @@ module.exports = function (kibana) {
     },
 
     uiExports: {
-
-
-
+      hacks: ['plugins/kibana/dev_tools/hacks/hide_empty_tools'],
       app: {
         id: 'kibana',
         title: 'Kibi', // kibi: renamed kibana to kibi
@@ -42,7 +40,7 @@ module.exports = function (kibana) {
           'hacks' // kibi: allow to insert our own version of some kibana components like the kibiee notifier
         ],
 
-        injectVars: function (server, options) {
+        injectVars: function (server) {
           const serverConfig = server.config();
 
           //DEPRECATED SETTINGS

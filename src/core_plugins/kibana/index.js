@@ -49,7 +49,7 @@ module.exports = function (kibana) {
           const configuredUrl = server.config().get('tilemap.url');
           const isOverridden = typeof configuredUrl === 'string' && configuredUrl !== '';
           const tilemapConfig = serverConfig.get('tilemap');
-          const ret = {
+          return {
             kbnDefaultAppId: serverConfig.get('kibana.defaultAppId'),
             tilemapsConfig: {
               deprecated: {
@@ -59,20 +59,6 @@ module.exports = function (kibana) {
               manifestServiceUrl: serverConfig.get('tilemap.manifestServiceUrl')
             },
           };
-
-          // kibi: list of elasticsearch plugins, schema, default_dashboard_title and warnings
-          ret.elasticsearchPlugins = serverConfig.get('elasticsearch.plugins');
-          if (serverConfig.has('kibi_core')) {
-            ret.kibiDatasourcesSchema  = serverConfig.get('kibi_core.datasources_schema');
-            ret.kibiDefaultDashboardTitle = serverConfig.get('kibi_core.default_dashboard_title');
-            ret.kibiWarnings = {};
-            if (serverConfig.get('kibi_core.datasource_encryption_key') === 'iSxvZRYisyUW33FreTBSyJJ34KpEquWznUPDvn+ka14=') {
-              ret.kibiWarnings.datasource_encryption_warning = true;
-            }
-          }
-          // kibi:end
-
-          return ret;
         },
       },
 

@@ -117,7 +117,23 @@ module.exports = function (kibana) {
       ],
       navbarExtensions: [
         'plugins/kibi_core/management/sections/navbar'
-      ]
+      ],
+      injectDefaultVars: function (server) {
+        const serverConfig = server.config();
+        const vars = {};
+
+        vars.elasticsearchPlugins = serverConfig.get('elasticsearch.plugins');
+        if (serverConfig.has('kibi_core')) {
+          vars.kibiDatasourcesSchema = serverConfig.get('kibi_core.datasources_schema');
+          vars.kibiDefaultDashboardTitle = serverConfig.get('kibi_core.default_dashboard_title');
+          vars.kibiWarnings = {};
+          if (serverConfig.get('kibi_core.datasource_encryption_key') === 'iSxvZRYisyUW33FreTBSyJJ34KpEquWznUPDvn+ka14=') {
+            vars.kibiWarnings.datasource_encryption_warning = true;
+          }
+        }
+
+        return vars;
+      }
     },
 
     config: function (Joi) {

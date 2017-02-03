@@ -371,29 +371,42 @@ export default function DashboardGroupHelperFactory($timeout, kibiState, Private
       throw new Error('Dest object should be defined');
     }
 
-    _.each(src, (group) => {
-      const previousGroup = _.find(dest, { id: group.id });
-      if (previousGroup) {
-        previousGroup.active = group.active;
-        previousGroup.dashboards = group.dashboards;
-        previousGroup.hide = group.hide;
-        previousGroup.iconCss = group.iconCss;
-        previousGroup.iconUrl = group.iconUrl;
-        previousGroup.priority = group.priority;
-        previousGroup.title = group.title;
+    const _saveDashboardMeta = function (dash, fromDash) {
+      _.assign(dash, {
+        count: fromDash.count,
+        isPruned: fromDash.isPruned,
+        filterIconMessage: fromDash.filterIconMessage
+      });
+    };
 
-        // when copying selected reference we keep the count, filterIconMessage and isPruned
-        // properties from the previous group
-        const filterIconMessage = previousGroup.selected.filterIconMessage;
-        const count = previousGroup.selected.count;
-        const isPruned = previousGroup.selected.isPruned;
-        previousGroup.selected = group.selected;
-        previousGroup.selected.filterIconMessage = filterIconMessage;
-        previousGroup.selected.count = count;
-        previousGroup.selected.isPruned = isPruned;
+    _.each(src, srcGroup => {
+      const destGroup = _.find(dest, 'id', srcGroup.id);
+      if (destGroup) {
+        destGroup.active = srcGroup.active;
+        destGroup.hide = srcGroup.hide;
+        destGroup.iconCss = srcGroup.iconCss;
+        destGroup.iconUrl = srcGroup.iconUrl;
+        destGroup.priority = srcGroup.priority;
+        destGroup.title = srcGroup.title;
+
+        // when copying selected reference we keep the count, filterIconMessage and isPruned properties
+        // from the previously selected dashboard and all other dashboards in the group
+
+        _saveDashboardMeta(srcGroup.selected, destGroup.selected);
+        destGroup.selected = srcGroup.selected;
+
+        // now for all the other dashboards in the group
+        destGroup.dashboards = _.map(srcGroup.dashboards, srcDashboard => {
+          const destDashboard = _.find(destGroup.dashboards, 'id', srcDashboard.id);
+
+          if (destDashboard) {
+            _saveDashboardMeta(srcDashboard, destDashboard);
+          }
+          return srcDashboard;
+        });
       } else {
         // new group
-        dest.push(group);
+        dest.push(srcGroup);
       }
     });
     for (let destIndex = dest.length - 1; destIndex >= 0; destIndex--) {

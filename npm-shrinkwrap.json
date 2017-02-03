@@ -1,6 +1,6 @@
 {
   "name": "kibi",
-  "version": "4.6.3",
+  "version": "4.6.3-1",
   "dependencies": {
     "@bigfunger/decompress-zip": {
       "version": "0.2.0-stripfix2",

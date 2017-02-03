@@ -52,6 +52,11 @@ uiModules
         }
       };
 
+      $scope.toggleGroupNav = function (group) {
+        group.selected.onOpenClose(group);
+        return true;
+      };
+
       $scope.isActiveSubDashboard = function (group, dashboard) {
         return group.selected.id === dashboard.id;
       };

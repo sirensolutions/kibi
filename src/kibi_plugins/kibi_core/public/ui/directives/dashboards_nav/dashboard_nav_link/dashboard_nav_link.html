@@ -33,6 +33,26 @@
 
     <div class="title">
       {{ title }}
+      <span ng-if="count !== undefined">({{count}})</span>
+      <span ng-if="count === undefined && countSpinner" class="spinner"></span>
+      <span
+        ng-if="filterIconMessage"
+        aria-hidden="true"
+        data-toggle="tooltip"
+        data-placement="bottom"
+        title="{{filterIconMessage}}"
+      >
+        <i class="fa fa-filter"/>
+      </span>
+      <span
+        ng-if="isPruned"
+        aria-hidden="true"
+        data-toggle="tooltip"
+        data-placement="bottom"
+        title="Count may be lower than the actual value because a join operation was pruned"
+      >
+        <i class="fa fa-star"></i>
+      </span>
     </div>
   </a>
 

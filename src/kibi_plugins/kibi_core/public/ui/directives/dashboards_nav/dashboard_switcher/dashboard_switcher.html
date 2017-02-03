@@ -1,16 +1,19 @@
 <dashboard-nav-link
   ng-repeat="group in groups | orderBy: 'priority'"
   is-active="group.active"
+  on-click="group.selected.onSelect(groups)"
   tooltip-content="getTooltip(group.title)"
   title="group.title"
-  on-click="group.selected.onSelect(groups)"
+  count="group.selected.count"
+  is-pruned="group.selected.isPruned"
+  filter-icon-message="group.selected.filterIconMessage"
   icon-css="group.iconCss"
   icon-url="group.iconUrl"
   show-icon="true"
 >
   <a
      ng-disabled="group.dashboards.length <= 1"
-     ng-click="openSubNav = group.dashboards.length > 1 && !openSubNav"
+     ng-click="openSubNav = group.dashboards.length > 1 && !openSubNav && toggleGroupNav(group)"
      ng-class="{ disabled: group.dashboards.length <= 1 }"
      class="dropdown-icon"
      title="{{ group.title }}"
@@ -22,9 +25,13 @@
      ng-if="openSubNav"
      classes="subnav"
      ng-repeat="dashboard in group.dashboards | filter: filter : false : 'title'"
-     title="dashboard.title"
-     on-click="dashboard.onSelect(groups)"
      is-active="isActiveSubDashboard(group, dashboard)"
+     on-click="dashboard.onSelect(groups)"
+     title="dashboard.title"
+     count-spinner="true"
+     count="dashboard.count"
+     is-pruned="dashboard.isPruned"
+     filter-icon-message="dashboard.filterIconMessage"
      show-icon="false"
   ></dashboard-nav-link>
 </dashboard-nav-link>

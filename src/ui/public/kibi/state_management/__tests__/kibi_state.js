@@ -1,4 +1,5 @@
-import onPage from 'ui/kibi/utils/on_page';
+import Notifier from 'ui/notify/notifier';
+import * as onPage from 'ui/kibi/utils/on_page';
 import moment from 'moment';
 import sinon from 'auto-release-sinon';
 import _ from 'lodash';
@@ -62,15 +63,13 @@ describe('State Management', function () {
       });
 
       globalState = new MockState({ filters: pinned || [] });
-      $provide.service('globalState', () => {
-        return globalState;
-      });
+      $provide.service('globalState', () => globalState);
 
       $provide.constant('kbnIndex', '.kibi');
       $provide.constant('kibiEnterpriseEnabled', kibiEnterpriseEnabled);
       $provide.constant('kbnDefaultAppId', '');
       $provide.constant('kibiDefaultDashboardTitle', '');
-      $provide.constant('elasticsearchPlugins', ['siren-join']);
+      $provide.constant('elasticsearchPlugins', ['siren-platform']);
     });
 
     ngMock.module('kibana/index_patterns', function ($provide) {
@@ -111,6 +110,11 @@ describe('State Management', function () {
   describe('Kibi State', function () {
 
     noDigestPromises.activateForSuite();
+
+    // https://github.com/elastic/kibana/pull/8822 ensure that the notifier is emptied by each test
+    afterEach(() => {
+      Notifier.prototype._notifs.length = 0;
+    });
 
     describe('handle state with outdated filters', function () {
       beforeEach(() => init());
@@ -378,16 +382,15 @@ describe('State Management', function () {
         expect(kibiState.toObject()).to.eql({ fizz: 'buzz' });
       });
 
-      it('should not have a dashboard entry if every dashboard has no filter, default query/time', function (done) {
-        kibiState.getState('dashboard0')
+      it('should not have a dashboard entry if every dashboard has no filter, default query/time', function () {
+        return kibiState.getState('dashboard0')
         .then(({ filters, queries, time }) => {
           expect(filters).to.have.length(0);
           expect(queries).to.have.length(1);
           expect(kibiState._isDefaultQuery(queries[0])).to.be(true);
           expect(kibiState[kibiState._properties.dashboards]).to.not.be.ok();
           expect(time).to.be(null);
-          done();
-        }).catch(done);
+        });
       });
 
       it('should fail if dashboard is not passed', function (done) {
@@ -827,8 +830,8 @@ describe('State Management', function () {
         kibiState.getState('dashboard2')
         .then(({ queries }) => {
           expect(queries).to.have.length(2);
-          queries[0].query.query_string.query = 'toto';
-          queries[1].query.query_string.query = 'tata';
+          queries[0].query_string.query = 'toto';
+          queries[1].query_string.query = 'tata';
           expect(kibiState._getDashboardProperty('dashboard2', kibiState._properties.query).query_string.query).to.be('mobile');
           done();
         }).catch(done);
@@ -845,8 +848,8 @@ describe('State Management', function () {
         kibiState.getState('dashboard1')
         .then(({ queries }) => {
           expect(queries).to.have.length(2);
-          queries[0].query.query_string.query = 'toto';
-          queries[1].query.query_string.query = 'tata';
+          queries[0].query_string.query = 'toto';
+          queries[1].query_string.query = 'tata';
           expect(appState.query.query_string.query).to.be('mobile');
           done();
         }).catch(done);
@@ -868,8 +871,8 @@ describe('State Management', function () {
         kibiState._setDashboardProperty('dashboard2', kibiState._properties.query, query2);
         Promise.all([ kibiState.getState('dashboard1'), kibiState.getState('dashboard2') ])
         .then(([ state1, state2 ]) => {
-          expect(state1.queries).to.eql([ { query: query1 }, { query: { query_string: { query: 'torrent' } } } ]);
-          expect(state2.queries).to.eql([ { query: query2 }, { query: { query_string: { query: 'torrent' } } } ]);
+          expect(state1.queries).to.eql([ query1, { query_string: { query: 'torrent' } } ]);
+          expect(state2.queries).to.eql([ query2, { query_string: { query: 'torrent' } } ]);
           done();
         }).catch(done);
       });
@@ -885,8 +888,8 @@ describe('State Management', function () {
         kibiState._setDashboardProperty('dashboard2', kibiState._properties.query, query);
         Promise.all([ kibiState.getState('dashboard1'), kibiState.getState('dashboard2') ])
         .then(([ state1, state2 ]) => {
-          expect(state1.queries).to.eql([ { query: { query_string: { query: 'torrent' } } } ]);
-          expect(state2.queries).to.eql([ { query: { query_string: { query: 'torrent' } } } ]);
+          expect(state1.queries).to.eql([ { query_string: { query: 'torrent' } } ]);
+          expect(state2.queries).to.eql([ { query_string: { query: 'torrent' } } ]);
           done();
         }).catch(done);
       });
@@ -1226,7 +1229,7 @@ describe('State Management', function () {
           }).catch(done);
         });
 
-        it('should save appstate to kibistate', function (done) {
+        it('should save appstate to kibistate', function () {
           const filter1 = {
             term: { field1: 'bbb' },
             meta: { disabled: false }
@@ -1246,7 +1249,8 @@ describe('State Management', function () {
           appState.filters = [ filter1 ];
           appState.query = query;
           timefilter.time = time;
-          kibiState.saveAppState()
+
+          return kibiState.saveAppState()
           .then(() => {
             expect(kibiState._getDashboardProperty('dashboard1', kibiState._properties.filters)).to.eql([ filter1 ]);
             expect(kibiState._getDashboardProperty('dashboard1', kibiState._properties.query)).to.eql(query);
@@ -1255,8 +1259,7 @@ describe('State Management', function () {
               f: time.from,
               t: time.to
             });
-            done();
-          }).catch(done);
+          });
         });
 
         it('should save disabled filter to kibistate', function (done) {
@@ -2117,7 +2120,6 @@ describe('State Management', function () {
         });
 
         it('should be disabled/enabled according to relationalPanel', function () {
-          expect(kibiState.isRelationalPanelButtonEnabled()).to.not.be.ok();
           config.set('kibi:relationalPanel', true);
           expect(kibiState.isRelationalPanelButtonEnabled()).to.be.ok();
           config.set('kibi:relationalPanel', false);
@@ -2222,7 +2224,7 @@ describe('State Management', function () {
             expect(filters[1].join_set.queries['index-b']).to.be.ok();
             expect(filters[1].join_set.queries['index-b']['dashboard-b']).to.be.ok();
             expect(filters[1].join_set.queries['index-b']['dashboard-b']).to.have.length(3);
-            expect(filters[1].join_set.queries['index-b']['dashboard-b'][0]).to.eql({ query: { query_string: { query: 'bbb' } } });
+            expect(filters[1].join_set.queries['index-b']['dashboard-b'][0]).to.eql({ query_string: { query: 'bbb' } });
             expect(filters[1].join_set.queries['index-b']['dashboard-b'][1]).to.eql({ exists: { field: 'aaa' } });
             expect(filters[1].join_set.queries['index-b']['dashboard-b'][2]).to.eql({
               range: {
@@ -2279,7 +2281,7 @@ describe('State Management', function () {
             expect(filters[1].join_set.queries['index-b']).to.be.ok();
             expect(filters[1].join_set.queries['index-b']['dashboard-b']).to.be.ok();
             expect(filters[1].join_set.queries['index-b']['dashboard-b']).to.have.length(3);
-            expect(filters[1].join_set.queries['index-b']['dashboard-b'][0]).to.eql({ query: { query_string: { query: 'bbb' } } });
+            expect(filters[1].join_set.queries['index-b']['dashboard-b'][0]).to.eql({ query_string: { query: 'bbb' } });
             expect(filters[1].join_set.queries['index-b']['dashboard-b'][1]).to.eql({ not: { exists: { field: 'aaa' } } });
             expect(filters[1].join_set.queries['index-b']['dashboard-b'][2]).to.eql({
               range: {
@@ -2316,15 +2318,11 @@ describe('State Management', function () {
             expect(filters[0].join_set.queries['index-b']['dashboard-b']).to.have.length(3);
             // from the dashboard meta
             expect(filters[0].join_set.queries['index-b']['dashboard-b'][0]).to.eql({
-              query: {
-                query_string: { query: 'ccc' }
-              }
+              query_string: { query: 'ccc' }
             });
             // from the search meta
             expect(filters[0].join_set.queries['index-b']['dashboard-b'][1]).to.eql({
-              query: {
-                query_string: { query: 'bbb' }
-              }
+              query_string: { query: 'bbb' }
             });
             // time
             expect(filters[0].join_set.queries['index-b']['dashboard-b'][2]).to.eql({
@@ -2370,12 +2368,10 @@ describe('State Management', function () {
             expect(filters[0].join_set.queries['index-b']['dashboard-b']).to.be.ok();
             expect(filters[0].join_set.queries['index-b']['dashboard-b']).to.have.length(3);
             // from the dashboard meta
-            expect(filters[0].join_set.queries['index-b']['dashboard-b'][0]).to.eql({ query: query });
+            expect(filters[0].join_set.queries['index-b']['dashboard-b'][0]).to.eql(query);
             // from the search meta
             expect(filters[0].join_set.queries['index-b']['dashboard-b'][1]).to.eql({
-              query: {
-                query_string: { query: 'bbb' }
-              }
+              query_string: { query: 'bbb' }
             });
             // time
             expect(filters[0].join_set.queries['index-b']['dashboard-b'][2]).to.eql({
@@ -2417,10 +2413,8 @@ describe('State Management', function () {
             expect(filters[0].join_set.queries['index-b']['dashboard-b']).to.be.ok();
             expect(filters[0].join_set.queries['index-b']['dashboard-b']).to.have.length(2);
             expect(filters[0].join_set.queries['index-b']['dashboard-b'][0]).to.eql({
-              query: {
-                query_string: {
-                  query: 'bbb'
-                }
+              query_string: {
+                query: 'bbb'
               }
             });
             expect(filters[0].join_set.queries['index-b']['dashboard-b'][1]).to.eql({

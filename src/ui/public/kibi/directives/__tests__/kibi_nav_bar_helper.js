@@ -1,3 +1,4 @@
+import * as onPage from 'ui/kibi/utils/on_page';
 import DashboardGroupHelperProvider from 'ui/kibi/helpers/dashboard_group_helper';
 import KibiNavBarHelperProvider from 'ui/kibi/directives/kibi_nav_bar_helper';
 import sinon from 'auto-release-sinon';
@@ -13,8 +14,6 @@ let kibiState;
 let globalState;
 let kibiNavBarHelper;
 let $rootScope;
-let $httpBackend;
-let $timeout;
 
 let timeBasedIndicesStub;
 let getDashboardsMetadataStub;
@@ -28,7 +27,7 @@ describe('Kibi Directives', function () {
       ngMock.module('kibana', ($provide) => {
         $provide.constant('kbnDefaultAppId', '');
         $provide.constant('kibiDefaultDashboardTitle', '');
-        $provide.constant('elasticsearchPlugins', ['siren-join']);
+        $provide.constant('elasticsearchPlugins', ['siren-platform']);
       });
 
       ngMock.module('app/dashboard', function ($provide) {
@@ -39,20 +38,18 @@ describe('Kibi Directives', function () {
         $provide.service('savedSearches', (Promise, Private) => mockSavedObjects(Promise, Private)('savedSearches', []));
       });
 
-      ngMock.inject(function (Promise, _globalState_, _kibiState_, _$httpBackend_, _$timeout_, _$rootScope_, Private) {
+      ngMock.inject(function (Promise, _globalState_, _kibiState_, _$timeout_, _$rootScope_, Private) {
         globalState = _globalState_;
         kibiState = _kibiState_;
-        $timeout = _$timeout_;
         $rootScope = _$rootScope_;
         kibiNavBarHelper = Private(KibiNavBarHelperProvider);
-        $httpBackend = _$httpBackend_;
 
         sinon.stub(kibiState, '_getDashboardsIdInConnectedComponent').returns(dashboardsIdsInConnectedComponents);
         sinon.stub(kibiState, '_getCurrentDashboardId').returns('dashboard1');
         timeBasedIndicesStub = sinon.stub(kibiState, 'timeBasedIndices').returns(Promise.resolve([ 'id' ]));
 
         sinon.stub(chrome, 'getBasePath').returns('');
-        sinon.stub(chrome, 'getActiveTabId').returns('dashboard');
+        sinon.stub(onPage, 'onDashboardPage').returns(true);
 
         kibiNavBarHelper._setDashboardGroups(dashboardGroups);
 

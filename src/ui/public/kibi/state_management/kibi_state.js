@@ -112,7 +112,7 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
    * - analyze_wildcard is set to true
    */
   KibiState.prototype._isDefaultQuery = function (query) {
-    return _.get(query, 'query.query_string.query') === '*' && _.get(query, 'query.query_string.analyze_wildcard') === true;
+    return _.get(query, 'query_string.query') === '*' && _.get(query, 'query_string.analyze_wildcard') === true;
   };
 
   /**
@@ -599,9 +599,9 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
     }
     const smQuery = metas && metas.savedSearchMeta && metas.savedSearchMeta.query;
     if (smQuery && !_.isEqual(smQuery, query)) {
-      return Promise.resolve([ { query }, { query: smQuery } ]);
+      return Promise.resolve([ query, smQuery ]);
     }
-    return Promise.resolve([ { query } ]);
+    return Promise.resolve([ query ]);
   };
 
   /**
@@ -969,7 +969,7 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
 
     // check siren-platform plugin
     if (this.isRelationalPanelButtonEnabled() && !this.isSirenJoinPluginInstalled()) {
-      const error = 'The SIREn Join plugin is enabled but not installed. Please install the plugin and restart Kibi, ' +
+      const error = 'The Siren Platform plugin is enabled but not installed. Please install the plugin and restart Kibi, ' +
         'or disable the relational panel in Settings -> Advanced -> kibi:relationalPanel';
       return Promise.reject(new Error(error));
     }
@@ -1092,13 +1092,13 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
       // queries contains only one query, the one from appState, since the meta argument is null
       // in the call to _getQueries above.
       // The query from the appState is always equal to the wildcard query if nothing was entered in the search bar by the user.
-      if (this._isDefaultQuery(queries[0]) && this._isDefaultQuery(dashQuery)) {
+      if (this._isDefaultQuery(queries[0]) && (!dashQuery || this._isDefaultQuery(dashQuery.query))) {
         // do not save the query:
         // - if it is the default query; and
         // - if the dashboard query is also the default one
         this._deleteDashboardProperty(currentDashboardId, this._properties.query);
       } else {
-        this._setDashboardProperty(currentDashboardId, this._properties.query, queries[0].query);
+        this._setDashboardProperty(currentDashboardId, this._properties.query, queries[0]);
       }
       // save time
       if (this._isDefaultTime(timefilter.time.mode, timefilter.time.from, timefilter.time.to) &&

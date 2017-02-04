@@ -221,8 +221,8 @@ is run.
 
 `sgadmin.sh` is available in the _plugins/search-guard-2/tools_ directory in
 each Elasticsearch instance in which Search Guard has been installed; a
-standalone version (`sgadmin-standalone.zip`) can be downloaded from the
-{searchguard-central-ref}[Maven Central repository].
+standalone version (`sgadmin-standalone.zip`) can be downloaded from
+{searchguard-sgadmin-ref}[this page].
 
 Once a Search Guard enabled cluster has been initialized, `sgadmin` can be used
 to upload new configurations.

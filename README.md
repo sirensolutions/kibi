@@ -1,4 +1,4 @@
-# Kibi 4.6.3-1
+# Kibi 4.6.4-SNAPSHOT
 
 Kibi extends Kibana 4.6.3 with data intelligence features; the core feature of
 

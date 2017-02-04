@@ -181,9 +181,6 @@ define(function (require) {
         $scope.$watch('configTemplate', function () {
           $rootScope.$emit('stDashboardOnProperty', 'configTemplate', $scope.configTemplate);
         }, true);
-        $scope.$watch('state', function () {
-          $rootScope.$emit('stDashboardOnProperty', 'state', $scope.state);
-        }, true);
 
         $scope.$on('$destroy', function () {
           // kibi: remove the listener on globalstate
@@ -228,6 +225,7 @@ define(function (require) {
           // watch for state changes and update the appStatus.dirty value
           stateMonitor = stateMonitorFactory.create($state, stateDefaults);
           stateMonitor.onChange((status) => {
+            $rootScope.$emit('stDashboardOnProperty', 'state', $scope.state);
             $appStatus.dirty = status.dirty;
           });
           $scope.$on('$destroy', () => stateMonitor.destroy());

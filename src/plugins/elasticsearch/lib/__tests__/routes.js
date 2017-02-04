@@ -61,17 +61,17 @@ describe('plugins/elasticsearch', function () {
 
     testRoute({
       method: 'POST',
-      url: '/elasticsearch/.kibana'
+      url: '/elasticsearch/.kibi'
     }, 405);
 
     testRoute({
       method: 'PUT',
-      url: '/elasticsearch/.kibana'
+      url: '/elasticsearch/.kibi'
     }, 405);
 
     testRoute({
       method: 'DELETE',
-      url: '/elasticsearch/.kibana'
+      url: '/elasticsearch/.kibi'
     }, 405);
 
     testRoute({

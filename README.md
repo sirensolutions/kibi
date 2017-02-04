@@ -43,7 +43,7 @@ Kibi  | Elasticsearch
 
 ## License
 
-Copyright 2015–2016 SIREn Solutions
+Copyright 2015–2017 SIREn Solutions
 
 Kibi is Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
 

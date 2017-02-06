@@ -1,5 +1,6 @@
 define(function (require) {
   require('ui/notify');
+  require('ui/saved_objects_api');
 
   let module = require('ui/modules').get('kibana/config', [
     'kibana/notify'

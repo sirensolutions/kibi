@@ -6,7 +6,11 @@ describe('AggTypeMetricPercentilesProvider class', function () {
   let indexPattern;
   let aggTypeMetricPercentiles;
 
-  beforeEach(ngMock.module('kibana'));
+  beforeEach(ngMock.module('kibana', function ($provide) {
+    //kibi: provide elasticsearchPlugins constant
+    $provide.constant('elasticsearchPlugins', ['siren-join']);
+  }));
+
   beforeEach(ngMock.inject(function (Private) {
     Vis = Private(require('ui/Vis'));
     indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));

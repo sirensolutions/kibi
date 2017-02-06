@@ -80,7 +80,10 @@ describe('Kibi Settings', function () {
   describe('Relations Section', function () {
 
     it('relations should have version set to 2 by default', function (done) {
-      ngMock.module('kibana');
+      ngMock.module('kibana', function ($provide) {
+        $provide.constant('elasticsearchPlugins', ['siren-join']);
+      });
+
       ngMock.inject(($injector) => {
         config = $injector.get('config');
         expect(config.get('kibi:relations').version).to.be(2);

@@ -6,7 +6,11 @@ const expect = require('expect.js');
 describe('hit sort function', function () {
   let createHitSortFn;
 
-  beforeEach(ngMock.module('kibana'));
+  beforeEach(ngMock.module('kibana', function ($provide) {
+    //kibi: provide elasticsearchPlugins constant
+    $provide.constant('elasticsearchPlugins', ['siren-join']);
+  }));
+
   beforeEach(ngMock.inject(function (Private) {
     createHitSortFn = Private(require('plugins/kibana/discover/_hit_sort_fn'));
   }));

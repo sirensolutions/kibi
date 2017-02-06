@@ -118,7 +118,7 @@ function init({ currentDashboardId = 'Articles', indexPatterns, savedDashboards,
     $provide.constant('kibiEnterpriseEnabled', false);
     $provide.constant('kbnDefaultAppId', 'dashboard');
     $provide.constant('kibiDefaultDashboardTitle', 'Articles');
-    $provide.constant('elasticsearchPlugins', ['siren-join']);
+    $provide.constant('elasticsearchPlugins', ['siren-platform']);
 
     appState = new MockState({ filters: [] });
     $provide.service('getAppState', () => {

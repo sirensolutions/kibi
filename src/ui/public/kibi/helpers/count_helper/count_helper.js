@@ -42,7 +42,7 @@ export default function CountHelperFactory(createNotifier, kibiState) {
         if (filter.meta && filter.meta.negate === true) {
 
           if (filter.query) {
-            query.query.bool.must_not.push({query: filter.query});
+            query.query.bool.must_not.push(filter.query);
           } else if (filter.dbfilter) {
             query.query.bool.must_not.push({dbfilter: filter.dbfilter});
           } else if (filter.or) {
@@ -68,7 +68,7 @@ export default function CountHelperFactory(createNotifier, kibiState) {
 
           if (filter.query && !kibiState._isDefaultQuery(filter.query)) {
             // here add only if not "match *" as it would not add anything to the query anyway
-            query.query.bool.filter.bool.must.push({query: filter.query});
+            query.query.bool.filter.bool.must.push(filter.query);
           } else if (filter.dbfilter) {
             query.query.bool.filter.bool.must.push({dbfilter: filter.dbfilter});
           } else if (filter.or) {

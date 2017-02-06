@@ -9,6 +9,10 @@ uiModules
     restrict: 'E',
     transclude: true,
     scope: {
+      count: '=',
+      countSpinner: '=',
+      isPruned: '=',
+      filterIconMessage: '=',
       classes: '@',
       showIcon: '=',
       isActive: '=',

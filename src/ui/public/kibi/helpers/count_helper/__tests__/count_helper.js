@@ -7,13 +7,13 @@ import ngMock from 'ng_mock';
 import { parseWithPrecision } from 'ui/kibi/utils/date_math_precision';
 import mockSavedObjects from 'fixtures/kibi/mock_saved_objects';
 import noDigestPromises from 'test_utils/no_digest_promises';
-import config from 'fixtures/kibi/config';
 
 const defaultStartTime = '2006-09-01T12:00:00.000Z';
 const defaultEndTime = '2010-09-05T12:00:00.000Z';
 let countHelper;
 let kibiState;
 let appState;
+let config;
 
 describe('Kibi Components', function () {
   describe('CountHelper', function () {
@@ -23,10 +23,9 @@ describe('Kibi Components', function () {
     beforeEach(function () {
       ngMock.module('kibana', function ($provide) {
         $provide.constant('kibiEnterpriseEnabled', false);
-        $provide.constant('elasticsearchPlugins', ['siren-join']);
+        $provide.constant('elasticsearchPlugins', ['siren-platform']);
         $provide.constant('kbnDefaultAppId', '');
         $provide.constant('kibiDefaultDashboardTitle', '');
-        $provide.service('config', config);
 
         appState = new MockState({ filters: [] });
         $provide.service('getAppState', () => {
@@ -113,24 +112,25 @@ describe('Kibi Components', function () {
         ]));
       });
 
-      ngMock.inject(function (timefilter, _kibiState_, Private) {
+      ngMock.inject(function (_config_, timefilter, _kibiState_, Private) {
         const defaultTime = {
           mode: 'absolute',
           from: defaultStartTime,
           to: defaultEndTime
         };
 
+        config = _config_;
         config.set('timepicker:timeDefaults', defaultTime);
+        config.set('kibi:relationalPanel', false);
         timefilter.time = defaultTime;
         kibiState = _kibiState_;
         sinon.stub(kibiState, '_getCurrentDashboardId').returns('empty-dashboard');
         countHelper = Private(CountHelperProvider);
       });
     });
-    beforeEach(() => config.set('kibi:relationalPanel', false));
 
     describe('constructCountQuery', function () {
-      it('empty', function (done) {
+      it('empty', function () {
         const expected = {
           size: 0,
           query: {
@@ -158,15 +158,14 @@ describe('Kibi Components', function () {
           }
         };
 
-        kibiState.getState('empty-dashboard')
+        return kibiState.getState('empty-dashboard')
         .then(({ filters, queries, time }) => {
           const query = countHelper.constructCountQuery(filters, queries, time);
           expect(query).to.eql(expected);
-          done();
-        }).catch(done);
+        });
       });
 
-      it('saved search', function (done) {
+      it('saved search', function () {
         const expected = {
           size: 0,
           query: {
@@ -179,11 +178,9 @@ describe('Kibi Components', function () {
                 bool: {
                   must: [
                     {
-                      query: {
-                        query_string: {
-                          query: 'funded_year:>2010',
-                          analyze_wildcard: true
-                        }
+                      query_string: {
+                        query: 'funded_year:>2010',
+                        analyze_wildcard: true
                       }
                     },
                     {
@@ -202,15 +199,14 @@ describe('Kibi Components', function () {
           }
         };
 
-        kibiState.getState('query-dashboard')
+        return kibiState.getState('query-dashboard')
         .then(({ filters, queries, time }) => {
           const query = countHelper.constructCountQuery(filters, queries, time);
           expect(query).to.eql(expected);
-          done();
-        }).catch(done);
+        });
       });
 
-      it('check if filters are taken from kibiState', function (done) {
+      it('check if filters are taken from kibiState', function () {
         const filter = {
           meta:{
             disabled: false
@@ -254,15 +250,14 @@ describe('Kibi Components', function () {
           }
         };
 
-        kibiState.getState('empty-dashboard')
+        return kibiState.getState('empty-dashboard')
         .then(({ filters, queries, time }) => {
           const query = countHelper.constructCountQuery(filters, queries, time);
           expect(query).to.eql(expected);
-          done();
-        }).catch(done);
+        });
       });
 
-      it('check if query is taken from kibiState', function (done) {
+      it('check if query is taken from kibiState', function () {
         const query = {
           query_string: {
             query: 'AAA'
@@ -282,9 +277,7 @@ describe('Kibi Components', function () {
               filter: {
                 bool: {
                   must: [
-                    {
-                      query: query
-                    },
+                    query,
                     {
                       range: {
                         date: {
@@ -301,15 +294,14 @@ describe('Kibi Components', function () {
           }
         };
 
-        kibiState.getState('empty-dashboard')
+        return kibiState.getState('empty-dashboard')
         .then(({ filters, queries, time }) => {
           const query = countHelper.constructCountQuery(filters, queries, time);
           expect(query).to.eql(expected);
-          done();
-        }).catch(done);
+        });
       });
 
-      it('do not take filter from kibi state when disabled', function (done) {
+      it('do not take filter from kibi state when disabled', function () {
         const negatedFilter = {
           meta:{
             disabled: true
@@ -347,23 +339,109 @@ describe('Kibi Components', function () {
           }
         };
 
-        kibiState.getState('empty-dashboard')
+        return kibiState.getState('empty-dashboard')
         .then(({ filters, queries, time }) => {
           const query = countHelper.constructCountQuery(filters, queries, time);
           expect(query).to.eql(expected);
-          done();
-        }).catch(done);
+        });
       });
 
-      it('different types of filters', function (done) {
+      it('query filter', function () {
+        const query = {
+          meta: { disabled: false },
+          query: { query_string: { query: 'dog' } }
+        };
+        const expected = {
+          size: 0,
+          query: {
+            bool: {
+              must: {
+                match_all: {}
+              },
+              must_not: [],
+              filter: {
+                bool: {
+                  must: [
+                    {
+                      query_string: {
+                        query: 'dog'
+                      }
+                    },
+                    {
+                      range: {
+                        date: {
+                          gte: parseWithPrecision(defaultStartTime, false).valueOf(),
+                          lte: parseWithPrecision(defaultEndTime, true).valueOf(),
+                          format: 'epoch_millis'
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        };
+
+        appState.filters = [ query ];
+        return kibiState.getState('empty-dashboard')
+        .then(({ filters, queries, time }) => {
+          const query = countHelper.constructCountQuery(filters, queries, time);
+          expect(query).to.eql(expected);
+        });
+      });
+
+      it('query filter negated', function () {
+        const query = {
+          meta: { negate: true },
+          query: { query_string: { query: 'dog' } }
+        };
+        const expected = {
+          size: 0,
+          query: {
+            bool: {
+              must: {
+                match_all: {}
+              },
+              must_not: [
+                {
+                  query_string: {
+                    query: 'dog'
+                  }
+                }
+              ],
+              filter: {
+                bool: {
+                  must: [
+                    {
+                      range: {
+                        date: {
+                          gte: parseWithPrecision(defaultStartTime, false).valueOf(),
+                          lte: parseWithPrecision(defaultEndTime, true).valueOf(),
+                          format: 'epoch_millis'
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        };
+
+        appState.filters = [ query ];
+        return kibiState.getState('empty-dashboard')
+        .then(({ filters, queries, time }) => {
+          const query = countHelper.constructCountQuery(filters, queries, time);
+          expect(query).to.eql(expected);
+        });
+      });
+
+      it('different types of filters', function () {
         const differentKindOfFilters = [
           {
             meta:{ disabled: false },
             range: {}
-          },
-          {
-            meta:{ disabled: false },
-            query: {}
           },
           {
             meta:{ disabled: false },
@@ -408,7 +486,7 @@ describe('Kibi Components', function () {
               filter: {
                 bool: {
                   must: [
-                    ..._.map(differentKindOfFilters, (f) => _.omit(f, 'meta')),
+                    ..._.map(differentKindOfFilters, f => _.omit(f, 'meta')),
                     {
                       range: {
                         date: {
@@ -425,23 +503,18 @@ describe('Kibi Components', function () {
           }
         };
 
-        kibiState.getState('empty-dashboard')
+        return kibiState.getState('empty-dashboard')
         .then(({ filters, queries, time }) => {
           const query = countHelper.constructCountQuery(filters, queries, time);
           expect(query).to.eql(expected);
-          done();
-        }).catch(done);
+        });
       });
 
-      it('different types of filters negated', function (done) {
+      it('different types of filters negated', function () {
         const differentKindOfNegatedFilters = [
           {
             meta:{negate:true},
             range: {}
-          },
-          {
-            meta:{negate:true},
-            query: {}
           },
           {
             meta:{negate:true},
@@ -497,15 +570,14 @@ describe('Kibi Components', function () {
           }
         };
 
-        kibiState.getState('empty-dashboard')
+        return kibiState.getState('empty-dashboard')
         .then(({ filters, queries, time }) => {
           const query = countHelper.constructCountQuery(filters, queries, time);
           expect(query).to.eql(expected);
-          done();
-        }).catch(done);
+        });
       });
 
-      it('replace join filter if already present in appState', function (done) {
+      it('replace join filter if already present in appState', function () {
         appState.filters = [
           {
             meta:{ disabled: false },
@@ -541,11 +613,9 @@ describe('Kibi Components', function () {
                       join_set: 'new join set'
                     },
                     {
-                      query: {
-                        query_string: {
-                          query: 'funded_year:>2010',
-                          analyze_wildcard: true
-                        }
+                      query_string: {
+                        query: 'funded_year:>2010',
+                        analyze_wildcard: true
                       }
                     },
                     {
@@ -564,12 +634,11 @@ describe('Kibi Components', function () {
           }
         };
 
-        kibiState.getState('query-dashboard')
+        return kibiState.getState('query-dashboard')
         .then(({ filters, queries, time }) => {
           const query = countHelper.constructCountQuery(filters, queries, time);
           expect(query).to.eql(expected);
-          done();
-        }).catch(done);
+        });
       });
     });
   });

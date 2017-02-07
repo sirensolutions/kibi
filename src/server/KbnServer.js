@@ -21,6 +21,7 @@ module.exports = class KbnServer {
       require('./config/setup'), // sets this.config, reads this.settings
       require('./http'), // sets this.server
       require('./logging'),
+      require('./warnings'),
       require('./status'),
 
       // find plugins and set this.plugins

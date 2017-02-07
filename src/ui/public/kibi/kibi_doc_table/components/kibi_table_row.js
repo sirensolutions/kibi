@@ -1,7 +1,6 @@
 define(function (require) {
   const _ = require('lodash');
   const $ = require('jquery');
-  const addWordBreaks = require('ui/utils/add_word_breaks');
   const module = require('ui/modules').get('app/discover');
 
   require('ui/highlight');
@@ -268,18 +267,14 @@ define(function (require) {
         /**
          * Fill an element with the value of a field
          */
-        function _displayField(row, fieldName, breakWords) {
+        function _displayField(row, fieldName, truncate) {
           const indexPattern = $scope.indexPattern;
           let text = indexPattern.formatField(row, fieldName);
 
-          if (breakWords) {
-            text = addWordBreaks(text, MIN_LINE_LENGTH);
-
-            if (text.length > MIN_LINE_LENGTH) {
-              return truncateByHeightTemplate({
-                body: text
-              });
-            }
+          if (truncate && text.length > MIN_LINE_LENGTH) {
+            return truncateByHeightTemplate({
+              body: text
+            });
           }
 
           return text;

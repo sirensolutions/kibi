@@ -20,7 +20,8 @@ define(function (require) {
 
         return scenarioManager.reload('emptyKibana')
         .then(function () {
-          return settingsPage.navigateTo();
+          return settingsPage.navigateTo()
+          .then(() => angularHelper.waitForPendingRequests());
         });
       });
 

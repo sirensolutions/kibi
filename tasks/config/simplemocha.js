@@ -13,6 +13,7 @@ module.exports = (grunt) => ({
       'installedPlugins/**/lib/**/__tests__/**/*.js',
       'test/fixtures/__tests__/*.js',
       '!src/**/public/**',
+      '!**/_*.js',
       '!src/ui/**',
       '!installedPlugins/**/public/**',
       '!installedPlugins/**/node_modules/**',

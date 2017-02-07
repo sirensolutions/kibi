@@ -1,6 +1,6 @@
-# Kibi 4.6.3-1
+# Kibi 4.6.4-SNAPSHOT
 
-Kibi extends Kibana 4.6.3 with data intelligence features; the core feature of
+Kibi extends Kibana 4.6.4 with data intelligence features; the core feature of
 
 Kibi is the capability to join and filter data from multiple Elasticsearch
 indexes and from SQL/NOSQL data sources ("external queries").
@@ -43,7 +43,7 @@ Kibi  | Elasticsearch
 
 ## License
 
-Copyright 2015–2016 SIREn Solutions
+Copyright 2015–2017 SIREn Solutions
 
 Kibi is Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
 

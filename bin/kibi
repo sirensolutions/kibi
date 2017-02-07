@@ -32,4 +32,4 @@ export PATH="$PATH:${DIR}/node/bin"
 # kibi: end
 
 
-ROOT_DIR="$DIR" exec "${NODE}" $NODE_OPTIONS "${DIR}/src/cli" ${@}
+ROOT_DIR="$DIR" exec "${NODE}" $NODE_OPTIONS --no-warnings "${DIR}/src/cli" ${@}

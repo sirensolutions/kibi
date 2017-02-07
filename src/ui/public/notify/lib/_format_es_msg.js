@@ -6,7 +6,8 @@ import _ from 'lodash';
  * @returns {string}
  */
 export default function formatESMsg(err) {
-  const rootCause = _.get(err, 'resp.error.root_cause');
+  // kibi: $http store the response in data
+  const rootCause = _.get(err, 'resp.error.root_cause') || _.get(err, 'data.error.root_cause');
   if (!rootCause) {
     return; //undefined
   }

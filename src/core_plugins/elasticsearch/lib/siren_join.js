@@ -338,15 +338,16 @@ export default function sirenJoin(server) {
     if (targetIndex.types && targetIndex.types.length > 0) {
       join.types = targetIndex.types;
     }
-    if (orderBy) {
-      join.orderBy = orderBy;
-    }
-    if (maxTermsPerShard && maxTermsPerShard > -1) {
-      join.maxTermsPerShard = maxTermsPerShard;
-    }
-    if (termsEncoding) {
-      join.termsEncoding = termsEncoding;
-    }
+    // KIBI5: add those parameters when supported by siren-platform
+    //if (orderBy) {
+      //join.orderBy = orderBy;
+    //}
+    //if (maxTermsPerShard && maxTermsPerShard > -1) {
+      //join.maxTermsPerShard = maxTermsPerShard;
+    //}
+    //if (termsEncoding) {
+      //join.termsEncoding = termsEncoding;
+    //}
 
     let child = join.request.query.bool;
 

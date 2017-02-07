@@ -538,7 +538,7 @@ describe('Join querying', function () {
       expect(actual).to.eql(expected);
     });
 
-    it('in a bool clause, advanced join options', function () {
+    xit('in a bool clause, advanced join options', function () {
       const query = {
         bool: {
           must: [
@@ -592,7 +592,7 @@ describe('Join querying', function () {
       expect(actual).to.eql(expected);
     });
 
-    it('in a bool clause, advanced join options maxTermsPerShard should not be passed if === -1', function () {
+    xit('in a bool clause, advanced join options maxTermsPerShard should not be passed if === -1', function () {
       const query = {
         bool: {
           must: [
@@ -1209,7 +1209,7 @@ describe('Join querying', function () {
       expect(actual).to.eql(builder.toObject());
     });
 
-    it('accepts orderBy and maxTermsPerShard parameters', function () {
+    xit('accepts orderBy and maxTermsPerShard parameters', function () {
       const query = [
         {
           join_set: {

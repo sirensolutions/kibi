@@ -207,7 +207,7 @@ function startServer(self, fulfill, reject) {
                   } else {
                     self.server.log(['gremlin', 'warning'], 'Waiting for the Kibi gremlin server');
                     counter--;
-                    setTimeout(self.ping(counter), timeout);
+                    setTimeout(() => self.ping(counter), timeout);
                   }
                 })
                 .catch(function (err) {
@@ -217,7 +217,7 @@ function startServer(self, fulfill, reject) {
                     self.server.log(['gremlin', 'warning'], 'Waiting for the Kibi gremlin server');
                   }
                   counter--;
-                  setTimeout(self.ping(counter), timeout);
+                  setTimeout(() => self.ping(counter), timeout);
                 });
               }, counter === maxCounter ? initialTimeout : timeout);
             } else {

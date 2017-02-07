@@ -41,7 +41,7 @@ export default (grunt) => {
 
   let toCopy = [];
   config.get('platforms').forEach(({ name, buildDir }) => {
-    let nodeVersion = 'v46';
+    let nodeVersion = 'v48';
     let sqliteBindingSrc;
     let sqliteBindingDestFolder;
     let sqliteBindingDest;

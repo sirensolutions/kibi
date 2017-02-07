@@ -53,7 +53,10 @@ describe('discover field chooser directives', function () {
     '</disc-field-chooser>'
   );
 
-  beforeEach(ngMock.module('kibana'));
+  beforeEach(ngMock.module('kibana', function ($provide) {
+    //kibi: provide elasticsearchPlugins constant
+    $provide.constant('elasticsearchPlugins', ['siren-join']);
+  }));
   beforeEach(ngMock.inject(function (Private) {
     hits = Private(require('fixtures/hits'));
     indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));

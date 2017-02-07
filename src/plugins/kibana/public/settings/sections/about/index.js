@@ -16,6 +16,7 @@ uiModules.get('apps/settings')
   $scope.buildSha = buildSha;
   $scope.kibiVersion = kibiVersion; // kibi: added to manage kibi version
   $scope.kibiKibanaAnnouncement = kibiKibanaAnnouncement; // kibi: added by kibi
+  $scope.currentYear = new Date().getFullYear(); // kibi: added by kibi
 });
 
 registry.register(_.constant({

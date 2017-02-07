@@ -9,7 +9,11 @@ describe('getPoint', function () {
   let truthFormatted = { fieldFormatter: _.constant(_.constant(true)) };
   let identFormatted = { fieldFormatter: _.constant(_.identity) };
 
-  beforeEach(ngMock.module('kibana'));
+  beforeEach(ngMock.module('kibana', function ($provide) {
+    //kibi: provide elasticsearchPlugins constant
+    $provide.constant('elasticsearchPlugins', ['siren-join']);
+  }));
+
   beforeEach(ngMock.inject(function (Private) {
     getPoint = Private(require('ui/agg_response/point_series/_get_point'));
   }));

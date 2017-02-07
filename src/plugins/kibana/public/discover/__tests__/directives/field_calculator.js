@@ -10,7 +10,10 @@ require('ui/private');
 let indexPattern;
 
 describe('fieldCalculator', function () {
-  beforeEach(ngMock.module('kibana'));
+  beforeEach(ngMock.module('kibana', function ($provide) {
+    //kibi: provide elasticsearchPlugins constant
+    $provide.constant('elasticsearchPlugins', ['siren-join']);
+  }));
   beforeEach(ngMock.inject(function (Private) {
     indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
   }));

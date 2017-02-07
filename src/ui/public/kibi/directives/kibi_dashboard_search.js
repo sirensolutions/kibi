@@ -22,7 +22,7 @@ define(function (require) {
           $rootScope.$emit('kibi:dashboard:invoke-method', 'filterResults');
         };
 
-        $scope.$watch('state', function () {
+        $scope.$watch('state.query', function () {
           $rootScope.$emit('kibi:dashboard:set-property', 'state', $scope.state);
         }, true);
 

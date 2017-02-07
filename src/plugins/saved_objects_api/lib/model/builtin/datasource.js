@@ -19,13 +19,12 @@ export default class DatasourceModel extends Model {
     });
 
     super(server, 'datasource', schema);
-
-    this._cryptoHelper = server.plugins.kibi_core.getCryptoHelper();
   }
 
   _prepare(body) {
     super._prepare(body);
-    this._cryptoHelper.encryptDatasourceParams(this._config, body);
+    const cryptoHelper = this._server.plugins.kibi_core.getCryptoHelper();
+    cryptoHelper.encryptDatasourceParams(this._config, body);
   }
 
 }

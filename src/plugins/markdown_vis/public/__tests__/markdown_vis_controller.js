@@ -5,6 +5,11 @@ describe('markdown vis controller', function () {
   const ngMock = require('ngMock');
   const expect = require('expect.js');
 
+  beforeEach(ngMock.module('kibana', function ($provide) {
+    // kibi: provide elasticsearchPlugins constant
+    $provide.constant('elasticsearchPlugins', ['siren-join']);
+  }));
+
   beforeEach(ngMock.module('kibana/markdown_vis'));
   beforeEach(ngMock.inject(function ($rootScope, $controller) {
     $scope = $rootScope.$new();

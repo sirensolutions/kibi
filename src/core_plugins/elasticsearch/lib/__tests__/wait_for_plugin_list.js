@@ -149,8 +149,8 @@ describe('plugins/elasticsearch', function () {
       return waitForPluginList(fakePlugin, fakeServer).then(function () {
         expect(fakeConfig['elasticsearch.plugins']).to.eql(['siren-platform', 'missing-siren-platform']);
         expect(fakePlugin.status.red()).to.eql(
-          'SIREn Join plugin is missing at data node:[nodeB] ip:[127.0.0.1]\n' +
-          'SIREn Join plugin should be installed on all data nodes.'
+          'Siren Platform plugin is missing at data node:[nodeB] ip:[127.0.0.1]\n' +
+          'Siren Platform plugin should be installed on all data nodes.'
         );
       });
     });

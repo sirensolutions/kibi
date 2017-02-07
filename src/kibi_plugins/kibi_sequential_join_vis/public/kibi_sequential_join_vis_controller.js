@@ -28,7 +28,7 @@ function controller(getAppState, kibiState, $scope, $rootScope, Private, $http, 
   const queryFilter = Private(QueryFilterProvider);
 
   if (!kibiState.isSirenJoinPluginInstalled()) {
-    notify.error('This version of Kibi Relational filter requires the SIREn Join plugin. Please install it and restart Kibi.');
+    notify.error('This version of Kibi Relational filter requires the Siren Platform plugin. Please install it and restart Kibi.');
   }
 
   // Update the counts on each button of the related filter

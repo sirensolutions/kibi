@@ -118,6 +118,9 @@ module.exports = function (kibana) {
       navbarExtensions: [
         'plugins/kibi_core/management/sections/navbar'
       ],
+      spyModes: [
+        'plugins/kibi_core/ui/spy_modes/multi_search_spy_mode'
+      ],
       injectDefaultVars: function (server) {
         const serverConfig = server.config();
         const vars = {};

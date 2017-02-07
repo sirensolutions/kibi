@@ -3,6 +3,11 @@ import _ from 'lodash';
 import 'ui/agg_table';
 import AggResponseTabifyTabifyProvider from 'ui/agg_response/tabify/tabify';
 import tableSpyModeTemplate from 'plugins/spy_modes/table_spy_mode.html';
+
+const allowSpyMode = function (visType) {
+  return !visType.requiresMultiSearch && visType.name !== 'kibi-data-table';
+};
+
 function VisSpyTableProvider($rootScope, Private) {
   const tabifyAggResponse = Private(AggResponseTabifyTabifyProvider);
 
@@ -14,9 +19,7 @@ function VisSpyTableProvider($rootScope, Private) {
     display: 'Table',
     order: 1,
     // kibi: do not show if the vis is incompatible with this mode
-    allowSpyMode: function (visType) {
-      return !visType.requiresMultiSearch && visType.name !== 'kibi-data-table';
-    },
+    allowSpyMode,
     template: tableSpyModeTemplate,
     link: function tableLinkFn($scope, $el) {
       $rootScope.$watchMulti.call($scope, [
@@ -26,6 +29,11 @@ function VisSpyTableProvider($rootScope, Private) {
         if (!$scope.vis || !$scope.esResp) {
           $scope.table = null;
         } else {
+          // kibi: do not render the table if the mode is not supported by the vis
+          if (!allowSpyMode($scope.vis.type)) {
+            return;
+          }
+          // kibi: end
           if (!$scope.spy.params.spyPerPage) {
             $scope.spy.params.spyPerPage = PER_PAGE_DEFAULT;
           }

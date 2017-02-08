@@ -70,7 +70,7 @@ export default function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnU
         ]).then(([ title ]) => {
           if (this.joinSeqFilter) {
             const switchToDashboard = function () {
-              // add join_set Filter
+              // add join_seq Filter
               kibiState.addFilter(this.targetDashboardId, this.joinSeqFilter);
               kibiState.save();
               // switch to target dashboard
@@ -215,7 +215,6 @@ export default function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnU
     };
   };
 
-
   KibiSequentialJoinVisHelper.prototype.addRelationToJoinSeqFilter = function ({ sourceIndices, targetIndices, button, filters, queries,
                                                                                time, joinSeqFilter }) {
     const joinSeqFiltersCloned = _.cloneDeep(joinSeqFilter);
@@ -228,7 +227,6 @@ export default function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnU
     return joinSeqFiltersCloned;
   };
 
-
   KibiSequentialJoinVisHelper.prototype.composeGroupFromExistingJoinFilters = function (joinSeqFilters) {
     const self = this;
     const groups = _.map(joinSeqFilters, function (f) {
@@ -239,13 +237,11 @@ export default function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnU
     return { group: groups };
   };
 
-
   KibiSequentialJoinVisHelper.prototype._negateLastElementOfTheSequenceIfFilterWasNegated = function (joinSeqFilter) {
     if (joinSeqFilter.meta && joinSeqFilter.meta.negate === true) {
       joinSeqFilter.join_sequence[joinSeqFilter.join_sequence.length - 1].negate = true;
     }
   };
-
 
   KibiSequentialJoinVisHelper.prototype._getRelation = function ({ sourceIndices, targetIndices, button, filters, queries, time }) {
     const ret = {

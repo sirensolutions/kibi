@@ -598,7 +598,7 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
       return Promise.resolve(new Error(msg));
     }
     const smQuery = metas && metas.savedSearchMeta && metas.savedSearchMeta.query;
-    if (smQuery && !_.isEqual(smQuery, query)) {
+    if (smQuery && !_.isEqual(smQuery, query) && !this._isDefaultQuery(smQuery)) {
       return Promise.resolve([ query, smQuery ]);
     }
     return Promise.resolve([ query ]);

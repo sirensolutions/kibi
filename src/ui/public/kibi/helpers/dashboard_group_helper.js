@@ -1,4 +1,4 @@
-import CountHelperProvider from 'ui/kibi/helpers/count_helper/count_helper';
+import QueryBuilderProvider from 'ui/kibi/helpers/query_builder';
 import DashboardHelperProvider from 'ui/kibi/helpers/dashboard_helper';
 import isJoinPruned from 'ui/kibi/helpers/is_join_pruned';
 import _ from 'lodash';
@@ -8,7 +8,7 @@ import chrome from 'ui/chrome';
 export default function DashboardGroupHelperFactory($timeout, kibiState, Private, savedDashboards, savedDashboardGroups, Promise, kbnIndex,
     $http) {
   const dashboardHelper = Private(DashboardHelperProvider);
-  const countHelper = Private(CountHelperProvider);
+  const queryBuilder = Private(QueryBuilderProvider);
 
   function DashboardGroupHelper() {
     this.chrome = chrome;
@@ -124,7 +124,8 @@ export default function DashboardGroupHelperFactory($timeout, kibiState, Private
 
       const metadataPromises = _.map(dashboards, (dashboard) => {
         return kibiState.getState(dashboard.id).then(({ index, filters, queries, time }) => {
-          const query = countHelper.constructCountQuery(filters, queries, time);
+          const query = queryBuilder(filters, queries, time);
+          query.size = 0; // we do not need hits just a count
           // here take care about correctly expanding timebased indices
           return kibiState.timeBasedIndices(index, dashboard.id)
           .then((indices) => ({

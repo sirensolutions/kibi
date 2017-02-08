@@ -1,9 +1,9 @@
 import RelationsHelperProvider from 'ui/kibi/helpers/relations_helper';
-import CountHelperProvider from 'ui/kibi/helpers/count_helper/count_helper';
+import QueryBuilderProvider from 'ui/kibi/helpers/query_builder';
 import _ from 'lodash';
 
 export default function KibiSequentialJoinVisHelperFactory(kbnUrl, kibiState, Private) {
-  const countHelper = Private(CountHelperProvider);
+  const queryBuilder = Private(QueryBuilderProvider);
   const relationsHelper = Private(RelationsHelperProvider);
 
   function KibiSequentialJoinVisHelper() {}
@@ -245,22 +245,6 @@ export default function KibiSequentialJoinVisHelperFactory(kbnUrl, kibiState, Pr
           pattern: button.sourceIndexPatternId,
           path: button.sourceField,
           indices: sourceIndices,
-          queries: [
-            {
-              query: {
-                bool: {
-                  must: queries,
-                  // will be created below if needed
-                  must_not: [],
-                  filter: {
-                    bool: {
-                      must: []
-                    }
-                  }
-                }
-              }
-            }
-          ],
           // default siren-platform parameters
           termsEncoding: 'long'
         },
@@ -282,26 +266,7 @@ export default function KibiSequentialJoinVisHelperFactory(kbnUrl, kibiState, Pr
 
     relationsHelper.addAdvancedJoinSettingsToRelation(ret.relation, button.sourceIndexPatternId, button.targetIndexPatternId);
 
-    // add filters
-    _.each(filters, (filter) => {
-      if (filter.meta) {
-        const negate = filter.meta.negate;
-        delete filter.$$hashKey;
-        delete filter.meta;
-        delete filter.$state;
-        if (negate) {
-          ret.relation[0].queries[0].query.bool.must_not.push(filter);
-        } else {
-          ret.relation[0].queries[0].query.bool.filter.bool.must.push(filter);
-        }
-      }
-    });
-
-    // add time filter
-    if (time) {
-      ret.relation[0].queries[0].query.bool.filter.bool.must.push(time);
-    }
-
+    ret.relation[0].queries = [ queryBuilder(filters, queries, time) ];
     return ret;
   };
 
@@ -309,11 +274,14 @@ export default function KibiSequentialJoinVisHelperFactory(kbnUrl, kibiState, Pr
     // in case relational panel is enabled at the same time
     // as buttons take care about extra filters and queries from
     // dashboards based on the same index
-    return kibiState.getState(targetDashboardId).then(function ({ filters, queries, time }) {
+    return kibiState.getState(targetDashboardId)
+    .then(function ({ filters, queries, time }) {
       if (joinSeqFilter) {
         filters.push(joinSeqFilter);
       }
-      return countHelper.constructCountQuery(filters, queries, time);
+      const query = queryBuilder(filters, queries, time);
+      query.size = 0; // we do not need hits just a count
+      return query;
     });
   };
 

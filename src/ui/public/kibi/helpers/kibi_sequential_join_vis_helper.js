@@ -2,7 +2,7 @@ import RelationsHelperProvider from 'ui/kibi/helpers/relations_helper';
 import QueryBuilderProvider from 'ui/kibi/helpers/query_builder';
 import _ from 'lodash';
 
-export default function KibiSequentialJoinVisHelperFactory(kbnUrl, kibiState, Private) {
+export default function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnUrl, kibiState, Private) {
   const queryBuilder = Private(QueryBuilderProvider);
   const relationsHelper = Private(RelationsHelperProvider);
 
@@ -54,11 +54,20 @@ export default function KibiSequentialJoinVisHelperFactory(kbnUrl, kibiState, Pr
       const button = _.clone(buttonDef);
 
       button.click = function () {
+        let alias = button.filterLabel || '... related to ($COUNT) from $DASHBOARD';
         const currentDashboardId = kibiState._getCurrentDashboardId();
+
         if (!currentDashboardId) {
           return Promise.resolve();
         }
-        return kibiState.saveAppState().then(() => {
+        let dashboardTitle = Promise.resolve();
+        if (_.contains(alias, '$DASHBOARD')) {
+          dashboardTitle = savedDashboards.find().then(dashboards => _.get(_.find(dashboards.hits, 'id', currentDashboardId), 'title'));
+        }
+        return Promise.all([
+          dashboardTitle,
+          kibiState.saveAppState()
+        ]).then(([ title ]) => {
           if (this.joinSeqFilter) {
             const switchToDashboard = function () {
               // add join_set Filter
@@ -71,12 +80,12 @@ export default function KibiSequentialJoinVisHelperFactory(kbnUrl, kibiState, Pr
             };
 
             // create the alias for the filter
-            let alias = button.filterLabel || `... related to ($COUNT) from $DASHBOARD`;
-            alias = alias.replace(/\$DASHBOARD/g, currentDashboardId);
+            alias = alias.replace(/\$DASHBOARD/g, title);
             this.joinSeqFilter.meta.alias = alias;
             if (alias.indexOf('$COUNT') !== -1) {
               this.joinSeqFilter.meta.alias_tmpl = alias;
-              return this.getSourceCount(currentDashboardId).then((sourceCount) => {
+              return this.getSourceCount(currentDashboardId)
+              .then((sourceCount) => {
                 this.joinSeqFilter.meta.alias = alias.replace(/\$COUNT/g, sourceCount);
                 switchToDashboard.apply(this);
               });

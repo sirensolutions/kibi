@@ -46,7 +46,7 @@ export default (grunt) => {
     let sqliteBindingDestFolder;
     let sqliteBindingDest;
     let nodejavaBindingSrc = __dirname + '/../../resources/nodejavabridges/' + name + '/nodejavabridge_bindings.node';
-    let nodejavaBindingDest = buildDir + '/node_modules/jdbc/node_modules/java/build/Release/nodejavabridge_bindings.node';
+    let nodejavaBindingDest = buildDir + '/node_modules/java/build/Release/nodejavabridge_bindings.node';
     switch (name) {
       case 'darwin-x64':
         sqliteBindingSrc   = __dirname + '/../../resources/nodesqlite3bindings/' + name + '/node-' + nodeVersion +

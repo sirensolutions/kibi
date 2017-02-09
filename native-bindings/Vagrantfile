@@ -13,8 +13,8 @@ $installNodeScript = <<SCRIPT
   echo "source ~/.nvm/nvm.sh" >> /home/vagrant/.profile
   source /home/vagrant/.profile
 
-  nvm install 4.3.2
-  nvm alias default 4.3.2
+  nvm install 6.9.0
+  nvm alias default 6.9.0
 SCRIPT
 
 
@@ -29,33 +29,34 @@ SCRIPT
 
 $installNative = <<SCRIPT
   sudo apt-get install -y g++
-  npm install sqlite3@3.1.4 jdbc@0.3.1
+  npm install sqlite3@3.1.8 jdbc@0.3.1
 SCRIPT
 
 
 # node version to folder mapping
 # 0.12.10   node-v14-linux-ia32
 # 4.3.2  node-v46-linux-ia32
+# 4.6.4  node-v48-linux-ia32
 
 
 $copyNative32 = <<SCRIPT
-  mkdir -p native-bindings/linux32/sqlite3/lib/binding/node-v46-linux-ia32  
-  cp node_modules/sqlite3/lib/binding/node-v46-linux-ia32/node_sqlite3.node \
-  native-bindings/linux32/sqlite3/lib/binding/node-v46-linux-ia32/node_sqlite3.node
+  mkdir -p native-bindings/linux32/sqlite3/lib/binding/node-v48-linux-ia32
+  cp node_modules/sqlite3/lib/binding/node-v48-linux-ia32/node_sqlite3.node \
+  native-bindings/linux32/sqlite3/lib/binding/node-v48-linux-ia32/node_sqlite3.node
 
-  mkdir -p native-bindings/linux32/jdbc/node_modules/java/build/Release  
-  cp node_modules/jdbc/node_modules/java/build/Release/nodejavabridge_bindings.node \
+  mkdir -p native-bindings/linux32/jdbc/node_modules/java/build/Release
+  cp node_modules/java/build/Release/nodejavabridge_bindings.node \
   native-bindings/linux32/jdbc/node_modules/java/build/Release/nodejavabridge_bindings.node
 SCRIPT
 
 
 $copyNative64 = <<SCRIPT
-  mkdir -p native-bindings/linux64/sqlite3/lib/binding/node-v46-linux-x64  
-  cp node_modules/sqlite3/lib/binding/node-v46-linux-x64/node_sqlite3.node \
-  native-bindings/linux64/sqlite3/lib/binding/node-v46-linux-x64/node_sqlite3.node
+  mkdir -p native-bindings/linux64/sqlite3/lib/binding/node-v48-linux-x64
+  cp node_modules/sqlite3/lib/binding/node-v48-linux-x64/node_sqlite3.node \
+  native-bindings/linux64/sqlite3/lib/binding/node-v48-linux-x64/node_sqlite3.node
 
-  mkdir -p native-bindings/linux64/jdbc/node_modules/java/build/Release  
-  cp node_modules/jdbc/node_modules/java/build/Release/nodejavabridge_bindings.node \
+  mkdir -p native-bindings/linux64/jdbc/node_modules/java/build/Release
+  cp node_modules/java/build/Release/nodejavabridge_bindings.node \
   native-bindings/linux64/jdbc/node_modules/java/build/Release/nodejavabridge_bindings.node
 SCRIPT
 
@@ -86,7 +87,7 @@ Vagrant.configure(2) do |config|
 
   config.vm.define "ubuntu64" do |b|
     b.vm.box = "ubuntu/trusty64"
-    b.vm.hostname = "ubuntu32"
+    b.vm.hostname = "ubuntu64"
     b.vm.provider "virtualbox" do |v|
       v.memory = 2048
       v.cpus = 2

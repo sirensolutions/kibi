@@ -27,12 +27,13 @@ define(function (require) {
 
       bdd.describe('index pattern creation', function indexPatternCreation() {
         bdd.before(function () {
-          return settingsPage.createIndexPattern();
+          return settingsPage.createIndexPattern()
+          .then(() => angularHelper.waitForPendingRequests());
         });
 
         bdd.it('should allow setting advanced settings', function () {
-          return settingsPage.clickAdvancedTab()
-          .then(() => angularHelper.waitForPendingRequests())
+          return angularHelper.waitForPendingRequests()
+          .then(() => settingsPage.clickAdvancedTab())
           .then(function TestCallSetAdvancedSettingsForTimezone() {
             common.log('calling setAdvancedSetting');
             return settingsPage.setAdvancedSettings('dateFormat:tz', 'America/Phoenix');

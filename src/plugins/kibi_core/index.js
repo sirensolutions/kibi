@@ -302,7 +302,7 @@ module.exports = function (kibana) {
         path:'/static/{param*}',
         handler: {
           directory: {
-            path: path.normalize(__dirname + '../../../../installedPlugins/')
+            path: path.normalize(path.join(__dirname, '../../../installedPlugins/'))
           }
         }
       });

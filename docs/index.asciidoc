@@ -4,7 +4,7 @@
 
 :enterprise_enabled: false
 :java-version: 1.8
-:siren-join-version: 2.4.1
+:siren-join-version: 2.4.1-1
 :siren-join-website: https://github.com/sirensolutions/siren-join/
 :kibana-version: 4.6.3
 :kibana-announcement: https://www.elastic.co/blog/kibana-5-0-1-and-4-6-3-released

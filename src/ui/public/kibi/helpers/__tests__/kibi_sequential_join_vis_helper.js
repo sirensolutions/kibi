@@ -538,7 +538,7 @@ describe('Kibi Components', function () {
         });
       });
 
-      it('should set the default siren-join parameters', function () {
+      it('should set the default siren-platform parameters', function () {
         init({ indexPatterns, savedDashboards, savedSearches });
 
         const timeBasedIndicesStub = sinon.stub(kibiState, 'timeBasedIndices');
@@ -560,7 +560,7 @@ describe('Kibi Components', function () {
         });
       });
 
-      it('should set the advanced siren-join parameters', function () {
+      it('should set the advanced siren-platform parameters', function () {
         init({
           enableEnterprise: true,
           indexPatterns: indexPatterns,

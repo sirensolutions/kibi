@@ -338,15 +338,16 @@ export default function sirenJoin(server) {
     if (targetIndex.types && targetIndex.types.length > 0) {
       join.types = targetIndex.types;
     }
-    if (orderBy) {
-      join.orderBy = orderBy;
-    }
-    if (maxTermsPerShard && maxTermsPerShard > -1) {
-      join.maxTermsPerShard = maxTermsPerShard;
-    }
-    if (termsEncoding) {
-      join.termsEncoding = termsEncoding;
-    }
+    // KIBI5: add those parameters when supported by siren-platform
+    //if (orderBy) {
+      //join.orderBy = orderBy;
+    //}
+    //if (maxTermsPerShard && maxTermsPerShard > -1) {
+      //join.maxTermsPerShard = maxTermsPerShard;
+    //}
+    //if (termsEncoding) {
+      //join.termsEncoding = termsEncoding;
+    //}
 
     let child = join.request.query.bool;
 
@@ -368,7 +369,7 @@ export default function sirenJoin(server) {
   }
 
   /**
-   * Generate a SIREn join query where the sequence of joins is explicitly defined in the query.
+   * Generate a Siren join query where the sequence of joins is explicitly defined in the query.
    *
    * A join_sequence is an array where each element is either:
    * 1. a node of the join sequence; or
@@ -417,7 +418,7 @@ export default function sirenJoin(server) {
   };
 
   /**
-   * Generate a SIREn join query based on the given relations with the focused index as the root of the query.
+   * Generate a Siren join query based on the given relations with the focused index as the root of the query.
    * The joins and their order is decided based on the given focus.
    *
    * A join_set is an object with the following fields:

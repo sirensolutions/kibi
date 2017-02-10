@@ -1,9 +1,9 @@
 import RelationsHelperProvider from 'ui/kibi/helpers/relations_helper';
-import CountHelperProvider from 'ui/kibi/helpers/count_helper/count_helper';
+import QueryBuilderProvider from 'ui/kibi/helpers/query_builder';
 import _ from 'lodash';
 
-export default function KibiSequentialJoinVisHelperFactory(kbnUrl, kibiState, Private) {
-  const countHelper = Private(CountHelperProvider);
+export default function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnUrl, kibiState, Private) {
+  const queryBuilder = Private(QueryBuilderProvider);
   const relationsHelper = Private(RelationsHelperProvider);
 
   function KibiSequentialJoinVisHelper() {}
@@ -54,14 +54,23 @@ export default function KibiSequentialJoinVisHelperFactory(kbnUrl, kibiState, Pr
       const button = _.clone(buttonDef);
 
       button.click = function () {
+        let alias = button.filterLabel || '... related to ($COUNT) from $DASHBOARD';
         const currentDashboardId = kibiState._getCurrentDashboardId();
+
         if (!currentDashboardId) {
           return Promise.resolve();
         }
-        return kibiState.saveAppState().then(() => {
+        let dashboardTitle = Promise.resolve();
+        if (_.contains(alias, '$DASHBOARD')) {
+          dashboardTitle = savedDashboards.find().then(dashboards => _.get(_.find(dashboards.hits, 'id', currentDashboardId), 'title'));
+        }
+        return Promise.all([
+          dashboardTitle,
+          kibiState.saveAppState()
+        ]).then(([ title ]) => {
           if (this.joinSeqFilter) {
             const switchToDashboard = function () {
-              // add join_set Filter
+              // add join_seq Filter
               kibiState.addFilter(this.targetDashboardId, this.joinSeqFilter);
               kibiState.save();
               // switch to target dashboard
@@ -71,12 +80,12 @@ export default function KibiSequentialJoinVisHelperFactory(kbnUrl, kibiState, Pr
             };
 
             // create the alias for the filter
-            let alias = button.filterLabel || `... related to ($COUNT) from $DASHBOARD`;
-            alias = alias.replace(/\$DASHBOARD/g, currentDashboardId);
+            alias = alias.replace(/\$DASHBOARD/g, title);
             this.joinSeqFilter.meta.alias = alias;
             if (alias.indexOf('$COUNT') !== -1) {
               this.joinSeqFilter.meta.alias_tmpl = alias;
-              return this.getSourceCount(currentDashboardId).then((sourceCount) => {
+              return this.getSourceCount(currentDashboardId)
+              .then((sourceCount) => {
                 this.joinSeqFilter.meta.alias = alias.replace(/\$COUNT/g, sourceCount);
                 switchToDashboard.apply(this);
               });
@@ -206,7 +215,6 @@ export default function KibiSequentialJoinVisHelperFactory(kbnUrl, kibiState, Pr
     };
   };
 
-
   KibiSequentialJoinVisHelper.prototype.addRelationToJoinSeqFilter = function ({ sourceIndices, targetIndices, button, filters, queries,
                                                                                time, joinSeqFilter }) {
     const joinSeqFiltersCloned = _.cloneDeep(joinSeqFilter);
@@ -219,7 +227,6 @@ export default function KibiSequentialJoinVisHelperFactory(kbnUrl, kibiState, Pr
     return joinSeqFiltersCloned;
   };
 
-
   KibiSequentialJoinVisHelper.prototype.composeGroupFromExistingJoinFilters = function (joinSeqFilters) {
     const self = this;
     const groups = _.map(joinSeqFilters, function (f) {
@@ -230,13 +237,11 @@ export default function KibiSequentialJoinVisHelperFactory(kbnUrl, kibiState, Pr
     return { group: groups };
   };
 
-
   KibiSequentialJoinVisHelper.prototype._negateLastElementOfTheSequenceIfFilterWasNegated = function (joinSeqFilter) {
     if (joinSeqFilter.meta && joinSeqFilter.meta.negate === true) {
       joinSeqFilter.join_sequence[joinSeqFilter.join_sequence.length - 1].negate = true;
     }
   };
-
 
   KibiSequentialJoinVisHelper.prototype._getRelation = function ({ sourceIndices, targetIndices, button, filters, queries, time }) {
     const ret = {
@@ -245,22 +250,6 @@ export default function KibiSequentialJoinVisHelperFactory(kbnUrl, kibiState, Pr
           pattern: button.sourceIndexPatternId,
           path: button.sourceField,
           indices: sourceIndices,
-          queries: [
-            {
-              query: {
-                bool: {
-                  must: queries,
-                  // will be created below if needed
-                  must_not: [],
-                  filter: {
-                    bool: {
-                      must: []
-                    }
-                  }
-                }
-              }
-            }
-          ],
           // default siren-platform parameters
           termsEncoding: 'long'
         },
@@ -282,26 +271,7 @@ export default function KibiSequentialJoinVisHelperFactory(kbnUrl, kibiState, Pr
 
     relationsHelper.addAdvancedJoinSettingsToRelation(ret.relation, button.sourceIndexPatternId, button.targetIndexPatternId);
 
-    // add filters
-    _.each(filters, (filter) => {
-      if (filter.meta) {
-        const negate = filter.meta.negate;
-        delete filter.$$hashKey;
-        delete filter.meta;
-        delete filter.$state;
-        if (negate) {
-          ret.relation[0].queries[0].query.bool.must_not.push(filter);
-        } else {
-          ret.relation[0].queries[0].query.bool.filter.bool.must.push(filter);
-        }
-      }
-    });
-
-    // add time filter
-    if (time) {
-      ret.relation[0].queries[0].query.bool.filter.bool.must.push(time);
-    }
-
+    ret.relation[0].queries = [ queryBuilder(filters, queries, time) ];
     return ret;
   };
 
@@ -309,11 +279,14 @@ export default function KibiSequentialJoinVisHelperFactory(kbnUrl, kibiState, Pr
     // in case relational panel is enabled at the same time
     // as buttons take care about extra filters and queries from
     // dashboards based on the same index
-    return kibiState.getState(targetDashboardId).then(function ({ filters, queries, time }) {
+    return kibiState.getState(targetDashboardId)
+    .then(function ({ filters, queries, time }) {
       if (joinSeqFilter) {
         filters.push(joinSeqFilter);
       }
-      return countHelper.constructCountQuery(filters, queries, time);
+      const query = queryBuilder(filters, queries, time);
+      query.size = 0; // we do not need hits just a count
+      return query;
     });
   };
 

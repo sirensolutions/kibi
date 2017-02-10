@@ -6,8 +6,8 @@ import chrome from 'ui/chrome';
 import DashboardGroupHelperProvider from 'ui/kibi/helpers/dashboard_group_helper';
 import { onDashboardPage } from 'ui/kibi/utils/on_page';
 
-export default function KibiNavBarHelperFactory(kibiState, globalState, getAppState, createNotifier, Private, $http, Promise, $rootScope,
-    savedDashboards, kbnIndex) {
+export default function KibiNavBarHelperFactory(kibiState, globalState, getAppState, createNotifier, Private, $rootScope, savedDashboards,
+  kbnIndex) {
   const notify = createNotifier({
     location: 'Kibi Navbar helper'
   });
@@ -44,7 +44,8 @@ export default function KibiNavBarHelperFactory(kibiState, globalState, getAppSt
       console.log(msg); // eslint-disable-line no-console
     }
 
-    return dashboardGroupHelper.getDashboardsMetadata(filteredDashboardsIds, forceCountsUpdate).then((metadata) => {
+    return dashboardGroupHelper.getDashboardsMetadata(filteredDashboardsIds, forceCountsUpdate)
+    .then((metadata) => {
       _.each(this.dashboardGroups, (g) => {
         _.each(g.dashboards, (d) => {
           const foundDashboardMetadata = _.find(metadata, 'dashboardId', d.id);
@@ -63,9 +64,8 @@ export default function KibiNavBarHelperFactory(kibiState, globalState, getAppSt
           }
         });
       });
-    }).catch((err) => {
-      notify.warning(err);
-    });
+    })
+    .catch(notify.warning);
   };
 
   const updateCounts = function (dashboardsIds, reason, forceUpdate = false) {

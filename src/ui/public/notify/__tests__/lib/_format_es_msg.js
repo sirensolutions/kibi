@@ -18,6 +18,24 @@ describe('formatESMsg', function () {
     expect(actual).to.be(undefined);
   });
 
+  it('kibi - should return the root_cause if $http is used for making a request against Elasticsearch', function () {
+    const err = {
+      data: {
+        error : {
+          root_cause : [
+            {
+              reason : 'I am the detailed message'
+            }
+          ]
+        }
+      }
+    };
+
+    const actual = formatESMsg(err);
+
+    expect(actual).to.equal('I am the detailed message');
+  });
+
   it('should return the root_cause if passed an extended elasticsearch', function () {
     const err = new Error('This is an elasticsearch error');
     err.resp = {

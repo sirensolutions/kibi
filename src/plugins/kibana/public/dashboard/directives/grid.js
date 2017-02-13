@@ -31,6 +31,11 @@ define(function (require) {
         // pixels used by all of the spacers (gridster puts have a spacer on the ends)
         const spacerSize = SPACER * COLS;
 
+        // kibi: introduced instead of hardcoded value of 100
+        // to allow for grater vertical precission
+        const WIDGET_BASE_HEIGHT = 20;
+        // kibi: end
+
         // debounced layout function is safe to call as much as possible
         const safeLayout = _.debounce(layout, 200);
 
@@ -157,7 +162,7 @@ define(function (require) {
         function addPanel(panel) {
           _.defaults(panel, {
             size_x: 3,
-            size_y: 2
+            size_y: 10 // kibi: change 2 -> 10 as we made widget base_height 5 times smaller from 100 -> 20
           });
 
           // ignore panels that don't have vis id's
@@ -218,7 +223,7 @@ define(function (require) {
           const g = gridster;
 
           g.options.widget_margins = [SPACER / 2, SPACER / 2];
-          g.options.widget_base_dimensions = [($container.width() - spacerSize) / COLS, 100];
+          g.options.widget_base_dimensions = [($container.width() - spacerSize) / COLS, WIDGET_BASE_HEIGHT];
           g.min_widget_width  = (g.options.widget_margins[0] * 2) + g.options.widget_base_dimensions[0];
           g.min_widget_height = (g.options.widget_margins[1] * 2) + g.options.widget_base_dimensions[1];
 

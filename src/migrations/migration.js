@@ -66,7 +66,6 @@ export default class Migration {
     }
 
     let response = await this._client.search(searchOptions);
-    let scrollId = response._scroll_id;
 
     while (true) {
       objects.push(...response.hits.hits);
@@ -75,7 +74,7 @@ export default class Migration {
       }
       response = await this._client.scroll({
         scroll: '1m',
-        scroll_id: scrollId
+        scroll_id: response._scroll_id
       });
     }
 

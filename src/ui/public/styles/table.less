@@ -1,6 +1,12 @@
 @import "~ui/styles/variables";
 
 .table {
+  /* kibi:
+  Added this due to the table cell shifting bug in IE11
+  */
+  width: auto;
+  max-width: 85em;
+
   // Nesting
   .table {
     background-color: @table-nested-bg;

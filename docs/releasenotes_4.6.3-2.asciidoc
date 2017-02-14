@@ -1,0 +1,7 @@
+=== Kibi 4.6.3-2 Release Notes
+
+==== Kibi Changes
+
+* Added - Graphs can be saved
+
+* Fixed - Migrations from 4.6.3 to 4.6.3-2

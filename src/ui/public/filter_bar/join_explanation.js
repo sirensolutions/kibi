@@ -87,7 +87,7 @@ define(function (require) {
       const initQtip = function (explanations) {
         $timeout(function () {
 
-          jQuery('.filter').each(function (index) {
+          jQuery('filter-bar .filter').each(function (index) {
             const $el = jQuery(this);
             if ($el.hasClass('join') && explanations[index]) {
               $el.qtip('destroy', true);

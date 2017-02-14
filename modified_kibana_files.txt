@@ -177,6 +177,7 @@ src/ui/public/share/views/share.html
 src/ui/public/share/views/share_object_url.html
 
 src/ui/public/styles/mixins.less
+src/ui/public/styles/table.less
 
 src/ui/public/timefilter/timefilter.js
 src/ui/public/timepicker/timepicker.js

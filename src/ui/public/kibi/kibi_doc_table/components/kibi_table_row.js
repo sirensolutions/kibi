@@ -26,7 +26,7 @@ define(function (require) {
 
     const dashboardHelper = Private(require('ui/kibi/helpers/dashboard_helper'));
     const openRowHtml = require('ui/doc_table/components/table_row/open.html');
-    const detailsHtml = require('ui/doc_table/components/table_row/details.html');
+    const detailsHtml = require('ui/kibi/kibi_doc_table/components/kibi_table_row/details.html');
     const cellTemplate = _.template(noWhiteSpace(require('ui/kibi/kibi_doc_table/components/kibi_table_row/cell.html')));
     const truncateByHeightTemplate = _.template(noWhiteSpace(require('ui/partials/truncate_by_height.html')));
 
@@ -38,6 +38,7 @@ define(function (require) {
       restrict: 'A',
       scope: {
         columns: '=',
+        columnAliases: '=?',
         filter: '=',
         indexPattern: '=',
         row: '=kibiTableRow',
@@ -83,6 +84,9 @@ define(function (require) {
           $detailsTr.html(detailsHtml);
 
           $detailsScope.row = $scope.row;
+          // kibi: passing columns and columnAliases to details view
+          $detailsScope.columns = $scope.columns;
+          $detailsScope.columnAliases = $scope.columnAliases;
 
           $compile($detailsTr)($detailsScope);
         };
@@ -269,7 +273,7 @@ define(function (require) {
          */
         function _displayField(row, fieldName, truncate) {
           const indexPattern = $scope.indexPattern;
-          let text = indexPattern.formatField(row, fieldName);
+          const text = indexPattern.formatField(row, fieldName);
 
           if (truncate && text.length > MIN_LINE_LENGTH) {
             return truncateByHeightTemplate({

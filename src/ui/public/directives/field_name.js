@@ -6,9 +6,10 @@ define(function (require) {
     return {
       restrict: 'AE',
       scope: {
-        'field': '=',
-        'fieldName': '=',
-        'fieldType': '='
+        field: '=',
+        fieldName: '=',
+        fieldType: '=',
+        fieldAlias: '=?' // kibi: added fieldAlias to support column renaming in kibi-doc-table
       },
       link: function ($scope, $el) {
 
@@ -40,6 +41,7 @@ define(function (require) {
         $rootScope.$watchMulti.call($scope, [
           'field',
           'fieldName',
+          'fieldAlias',
           'fieldType',
           'field.rowCount'
         ], function () {
@@ -49,8 +51,12 @@ define(function (require) {
           let results = $scope.field ? !$scope.field.rowCount && !$scope.field.scripted : false;
           let scripted = $scope.field ? $scope.field.scripted : false;
 
-          let displayName = $filter('shortDots')(name);
-
+          let displayName;
+          if ($scope.fieldAlias) {
+            displayName = $filter('shortDots')($scope.fieldAlias);
+          } else {
+            displayName = $filter('shortDots')(name);
+          }
           $el
             .text(displayName)
             .attr('title', name)

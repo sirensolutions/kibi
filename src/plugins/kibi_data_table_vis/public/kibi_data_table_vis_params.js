@@ -87,6 +87,16 @@ define(function (require) {
           $rootScope.$emit('kibi:vis:columns-changed', $scope.vis.params.columns);
         }, true);
 
+        $scope.$watch('vis.params.enableColumnAliases', (enableColumnAliases) => {
+          if (!enableColumnAliases) {
+            // reset names to original one
+            _.each($scope.vis.params.columns, (columnName, index) => {
+              $scope.vis.params.columnAliases[index] = columnName;
+            });
+          }
+          $rootScope.$emit('kibi:vis:columnAliases-changed', $scope.vis.params.columnAliases);
+        }, true);
+
         // =======
         // Queries
         // =======

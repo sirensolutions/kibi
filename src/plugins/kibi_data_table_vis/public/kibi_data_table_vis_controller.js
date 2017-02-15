@@ -14,13 +14,14 @@ define(function (require) {
     $scope.cellClickHandlers = {};
     $scope.savedObj = {
       columns: $scope.vis.params.columns,
+      columnAliases: $scope.vis.params.columnAliases,
       sort: $scope.vis.params.sort
     };
 
     // NOTE: filter to enable little icons in doc-viewer to filter and add/remove columns
     $scope.filter = function (field, value, operator) {
       //here grab the index
-      var index = $scope.searchSource.get('index').id;
+      const index = $scope.searchSource.get('index').id;
       filterManager.add(field, value, operator, index);
     };
 
@@ -66,7 +67,13 @@ define(function (require) {
         if (columns) {
           $scope.savedObj.columns = columns;
         }
-      }, true);
+      });
+
+      const removeVisColumnAliasesChangedHandler = $rootScope.$on('kibi:vis:columnAliases-changed', function (event, columnAliases) {
+        if (columnAliases) {
+          $scope.savedObj.columnAliases = columnAliases;
+        }
+      });
 
       $scope.$on('$destroy', function () {
         removeVisStateChangedHandler();

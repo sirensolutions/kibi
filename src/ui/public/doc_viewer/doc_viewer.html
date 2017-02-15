@@ -8,7 +8,9 @@
     <table class="table table-condensed" ng-show="mode == 'table'">
       <tbody>
         <tr ng-repeat="field in fields">
-          <td field-name="field"
+          <!-- kibi: added field-alias parameter to support column aliases in kibi-doc-table -->
+          <td field-alias="aliases[field]"
+              field-name="field"
               field-type="mapping[field].type"
               width="1%"
               class="doc-viewer-field">

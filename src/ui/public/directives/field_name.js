@@ -52,8 +52,8 @@ define(function (require) {
           let scripted = $scope.field ? $scope.field.scripted : false;
 
           let displayName;
-          if ($scope.fieldAlias) {
-            displayName = $filter('shortDots')($scope.fieldAlias);
+          if ($scope.fieldAlias && $scope.fieldAlias !== name) {
+            displayName = $filter('shortDots')($scope.fieldAlias) + ' (' + $filter('shortDots')(name) + ')';
           } else {
             displayName = $filter('shortDots')(name);
           }

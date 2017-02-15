@@ -53,6 +53,9 @@ describe('saved_objects_api/functional', function () {
       },
       version: {
         type: 'integer'
+      },
+      priority: {
+        type: 'long'
       }
     };
 

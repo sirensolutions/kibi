@@ -62,7 +62,8 @@ define(function (require) {
       timeMode: 'string',
       timeTo: 'string',
       timeFrom: 'string',
-      savedSearchId: 'string'
+      savedSearchId: 'string',
+      priority: 0
     };
 
     SavedDashboard.searchsource = true;

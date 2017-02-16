@@ -10,7 +10,7 @@
             data-test-subj={{group.title}}
             ng-show="!group.hide">
           <a ng-click="group.selected.onSelect(dashboardGroups)"
-             ng-class="{filter: group.selected.filterIconMessage, icon: group.iconCss}">
+             ng-class="{filter: group.selected.filterIconMessage, icon: group.iconCss || group.iconUrl}">
             <i ng-if="group.iconCss" class="icon {{group.iconCss}}"></i>
             <img class="icon" ng-if="group.iconUrl" ng-src="{{group.iconUrl}}"/>
             {{group.title}}

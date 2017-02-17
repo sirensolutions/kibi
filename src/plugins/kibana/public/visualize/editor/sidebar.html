@@ -51,11 +51,19 @@
     </nav>
 
     <div class="vis-editor-config" ng-show="sidebar.section == 'data'">
+
+      <!-- kibi: allows multiple configurations for pivot data plugin -->
+      <div ng-if="vis.type.name == 'kibi_pivot_data_vis'">
+        <kibi-pivot-data-vis-config vis="vis" saved-vis="savedVis" save-Changes="stageEditableVis()"></kibi-pivot-data-vis-config>
+      </div>
+      <!-- kibi: end -->
+
       <!-- metrics -->
       <vis-editor-agg-group ng-if="vis.type.schemas.metrics" group-name="metrics"></vis-editor-agg-group>
 
       <!-- buckets -->
       <vis-editor-agg-group ng-if="vis.type.schemas.buckets" group-name="buckets"></vis-editor-agg-group>
+
     </div>
 
     <div class="vis-editor-config" ng-show="sidebar.section == 'options'">

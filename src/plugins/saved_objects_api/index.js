@@ -13,9 +13,11 @@ import builtin from './lib/model/builtin';
  *
  * `registerType(configuration)`: allows to register a new type with the specified configuration.
  *                                Configuration is expected to contain a `schema` attribute with
- *                                a Joi instance containing the schema of the type and a `type`
- *                                attribute with the type name.
+ *                                a Joi instance containing the schema of the type, a `type`
+ *                                attribute containing the type name and an optional `title`
+ *                                attribute containing the type title.
  * `getModel(typeName)`: returns the model instance for the specified type name.
+ * `getTypes()`: returns the registered type as `{type: 'name', title: 'title'}`.
  * `registerMiddleware(middleware)`: allows to register an API middleware.
  * `getMiddlewares()`: returns the list of registered API middlewares.
  * `getServerCredentials`: returns the server credentials.
@@ -58,11 +60,12 @@ export default function (kibana) {
       });
 
       server.expose('registerType', (configuration) => {
-        typeRegistry.set(configuration.type, new Model(server, configuration.type, configuration.schema));
+        typeRegistry.set(configuration.type, new Model(server, configuration.type, configuration.schema, configuration.title));
       });
       server.expose('registerMiddleware', (middleware) => middlewares.add(middleware));
       server.expose('getMiddlewares', () => middlewares);
       server.expose('getModel', (typeName) => typeRegistry.get(typeName));
+      server.expose('getTypes', () => typeRegistry.list());
       server.expose('getServerCredentials', () => {
         const username = config.get('elasticsearch.username');
         const password = config.get('elasticsearch.password');

@@ -18,6 +18,6 @@ export default class TemplateModel extends Model {
       })
     });
 
-    super(server, 'template', schema);
+    super(server, 'template', schema, 'Query template');
   }
 }

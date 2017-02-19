@@ -18,6 +18,6 @@ export default class SessionModel extends Model {
       })
     });
 
-    super(server, 'session', schema);
+    super(server, 'session', schema, 'Session');
   }
 }

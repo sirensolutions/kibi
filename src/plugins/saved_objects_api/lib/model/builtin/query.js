@@ -28,6 +28,6 @@ export default class QueryModel extends Model {
       })
     });
 
-    super(server, 'query', schema);
+    super(server, 'query', schema, 'Query');
   }
 }

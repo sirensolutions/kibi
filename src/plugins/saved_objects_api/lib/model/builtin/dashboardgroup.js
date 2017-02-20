@@ -20,6 +20,6 @@ export default class DashboardGroupModel extends Model {
       })
     });
 
-    super(server, 'dashboardgroup', schema);
+    super(server, 'dashboardgroup', schema, 'Dashboard group');
   }
 }

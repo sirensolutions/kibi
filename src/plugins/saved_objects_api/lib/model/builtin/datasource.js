@@ -18,7 +18,7 @@ export default class DatasourceModel extends Model {
       })
     });
 
-    super(server, 'datasource', schema);
+    super(server, 'datasource', schema, 'External datasource');
   }
 
   _prepare(body) {

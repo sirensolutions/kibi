@@ -19,11 +19,13 @@ export default class Model {
    * @param {String} type - The Elasticsearch type managed by this model.
    * @param {Joi} schema - A Joi schema describing the type.
    *                       If null, mappings for the object will not be generated.
+   * @param {String} title - Optional type title.
    */
-  constructor(server, type, schema) {
+  constructor(server, type, schema, title) {
     this._server = server;
     this._plugin = server.plugins.saved_objects_api;
     this._type = type;
+    this._title = title ? title : this._type;
     this._config = server.config();
     this._schema = schema;
 
@@ -52,6 +54,15 @@ export default class Model {
    */
   get type() {
     return this._type;
+  }
+
+  /**
+   * Returns the title of the type managed by this model.
+   *
+   * @return {String}
+   */
+  get title() {
+    return this._title;
   }
 
   /**

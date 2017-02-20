@@ -19,7 +19,7 @@ export default class SearchModel extends Model {
       })
     });
 
-    super(server, 'search', schema);
+    super(server, 'search', schema, 'Saved search');
   }
 
 }

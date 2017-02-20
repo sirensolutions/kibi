@@ -24,6 +24,6 @@ export default class DashboardModel extends Model {
       })
     });
 
-    super(server, 'dashboard', schema);
+    super(server, 'dashboard', schema, 'Dashboard');
   }
 }

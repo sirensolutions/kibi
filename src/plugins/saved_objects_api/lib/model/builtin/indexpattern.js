@@ -18,6 +18,6 @@ export default class IndexPatternModel extends Model {
       fieldFormatMap: Joi.string()
     });
 
-    super(server, 'index-pattern', schema);
+    super(server, 'index-pattern', schema, 'Index pattern');
   }
 }

@@ -33,7 +33,7 @@ define(function (require) {
     }
 
     // Update the counts on each button of the related filter
-    const _fireUpdateCounts = function (buttons, dashboardId) {
+    const _fireUpdateCounts = function (buttons, dashboardId, force) {
       if ($scope.multiSearchData) {
         $scope.multiSearchData.clear();
       }
@@ -46,7 +46,7 @@ define(function (require) {
         .then(([ indices, joinSeqFilter ]) => {
           button.joinSeqFilter = joinSeqFilter;
 
-          if (config.get('kibi:enableAllRelBtnCounts')) {
+          if (config.get('kibi:enableAllRelBtnCounts') && !force) {
             return kibiSequentialJoinVisHelper.buildCountQuery(button.targetDashboardId, joinSeqFilter)
             .then((query) => {
               return { query, button, indices };
@@ -62,7 +62,7 @@ define(function (require) {
             throw error;
           }
           button.forbidden = true;
-          if (config.get('kibi:enableAllRelBtnCounts')) {
+          if (config.get('kibi:enableAllRelBtnCounts') && !force) {
             return kibiSequentialJoinVisHelper.buildCountQuery(button.targetDashboardId)
             .then((query) => {
               return { query, button, indices: [] };
@@ -72,7 +72,7 @@ define(function (require) {
           }
         });
       })).then((results) => {
-        if (!config.get('kibi:enableAllRelBtnCounts')) {
+        if (!config.get('kibi:enableAllRelBtnCounts') && !force) {
           return Promise.resolve(_.map(results, (result) => result.button));
         }
 
@@ -127,6 +127,11 @@ define(function (require) {
           return _.map(results, (result) => result.button);
         });
       }).catch(notify.error);
+    };
+
+    $scope.getCounts = function () {
+      _fireUpdateCounts($scope.buttons, $scope.buttons[0].targetDashboardId, true)
+      .then((buttons) => $scope.buttons = buttons).catch(notify.error);
     };
 
     const delayExecutionHelper = new DelayExecutionHelper(

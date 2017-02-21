@@ -41,7 +41,6 @@
       ng-class="{ disabled: $first }"
       ng-click="moveUp(agg)"
       tooltip="Increase Priority"
-      tooltip-append-to-body="true"
       type="button"
       class="btn btn-xs btn-default">
       <i aria-hidden="true" class="fa fa-caret-up"></i>
@@ -54,7 +53,6 @@
       ng-class="{ disabled: $last }"
       ng-click="moveDown(agg)"
       tooltip="Decrease Priority"
-      tooltip-append-to-body="true"
       type="button"
       class="btn btn-xs btn-default">
       <i aria-hidden="true" class="fa fa-caret-down"></i>
@@ -67,7 +65,6 @@
       ng-if="stats.count > stats.min"
       ng-click="remove(agg)"
       tooltip="Remove Dimension"
-      tooltip-append-to-body="true"
       type="button"
       class="btn btn-xs btn-danger">
       <i aria-hidden="true" class="fa fa-times"></i>

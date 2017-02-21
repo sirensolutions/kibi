@@ -338,7 +338,7 @@ define(function (require) {
               title: groupTitle,
               dashboards: [onlyOneDashboard],
               selected: onlyOneDashboard,
-              priority: ++highestPriority
+              priority: dashboardDef.priority ? dashboardDef.priority : ++highestPriority
             });
           }
         });

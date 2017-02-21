@@ -19,6 +19,7 @@ export default class DashboardModel extends Model {
       timeTo: Joi.string(),
       timeFrom: Joi.string(),
       savedSearchId: Joi.string(),
+      priority: Joi.number(),
       kibanaSavedObjectMeta: Joi.object().keys({
         searchSourceJSON: Joi.string()
       })

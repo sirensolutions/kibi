@@ -1,9 +1,18 @@
 define(function (require) {
-  let moment = require('moment-timezone');
-  let _ = require('lodash');
+  const moment = require('moment-timezone');
+  const _ = require('lodash');
 
   return function configDefaultsProvider(kibiEnterpriseEnabled) {
     // wrapped in provider so that a new instance is given to each app/test
+
+    // kibi: added
+    const positiveIntegerValidator = function (val, name) {
+      if (!/^\+?(0|[1-9]\d*)$/.test(val)) {
+        return new Error('Wrong value set for: ' + name + '. Should be positive integer but was [' + val + '].');
+      }
+      return parseInt(val);
+    };
+    // kibi: end
 
     const options = {
       'buildNum': {
@@ -255,6 +264,22 @@ define(function (require) {
       'kibi:session_cookie_expire': {
         value: 31536000,
         description: 'Set duration of cookie session (in seconds)'
+      },
+      'kibi:panel_vertical_size': {
+        type: 'number',
+        value: 2,
+        description: 'Set to change the default vertical panel size.',
+        validator: function (val) {
+          return positiveIntegerValidator(val, 'kibi:panel_vertical_size');
+        }
+      },
+      'kibi:vertical_grid_resolution': {
+        type: 'number',
+        value: 100,
+        description: 'Set to change vertical grid resolution.',
+        validator: function (val) {
+          return positiveIntegerValidator(val, 'kibi:vertical_grid_resolution');
+        }
       }
       // kibi: end
     };

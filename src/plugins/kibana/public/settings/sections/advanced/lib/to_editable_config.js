@@ -21,7 +21,9 @@ define(function (require) {
       defVal: def.value,
       type: getValType(def, value),
       description: def.description,
-      options: def.options
+      options: def.options,
+      // kibi: added to allow for custom validation function
+      validator: def.validator
     };
 
     const editor = getEditorType(conf);

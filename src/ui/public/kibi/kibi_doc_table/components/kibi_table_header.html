@@ -4,6 +4,7 @@
     <span>Time <i ng-class="headerClass(indexPattern.timeFieldName)" ng-click="sort(indexPattern.timeFieldName)" tooltip="Sort by time"></i></span>
   </th>
   <th ng-repeat="name in columns">
+    <!-- kibi: added columnAliases[$index] to the condition -->
     <span class="table-header-name">
       {{(columnAliases[$index] || name) | shortDots}} <i ng-class="headerClass(name)" ng-click="sort(name)" tooltip="{{tooltip(name)}}" tooltip-append-to-body="1"></i>
     </span>

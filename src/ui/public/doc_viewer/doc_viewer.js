@@ -40,7 +40,7 @@ define(function (require) {
           $scope.aliases = {};
           _.each($scope.fields, (fieldName) =>{
             $scope.aliases[fieldName] = fieldName;
-            if ($scope.columns && $scope.columnAliases.length > 0) {
+            if ($scope.columns && $scope.columnAliases && $scope.columnAliases.length > 0) {
               const index = $scope.columns.indexOf(fieldName);
               if ($scope.columnAliases[index]) {
                 $scope.aliases[fieldName] = $scope.columnAliases[index];

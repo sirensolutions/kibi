@@ -14,7 +14,7 @@ define(function (require) {
   require('ui/modules')
   .get('kibana/kibi_sequential_join_vis', ['kibana'])
   .controller('KibiSequentialJoinVisController', function (getAppState, kibiState, $scope, $rootScope, Private, $http, createNotifier,
-                                                           globalState, Promise, kbnIndex) {
+                                                           globalState, Promise, kbnIndex, config) {
     const searchHelper = new SearchHelper(kbnIndex);
     const onVisualizeTab = chrome.onVisualizeTab();
 
@@ -33,7 +33,7 @@ define(function (require) {
     }
 
     // Update the counts on each button of the related filter
-    var _fireUpdateCounts = function (buttons, dashboardId) {
+    const _fireUpdateCounts = function (buttons, dashboardId) {
       if ($scope.multiSearchData) {
         $scope.multiSearchData.clear();
       }
@@ -45,10 +45,15 @@ define(function (require) {
         ])
         .then(([ indices, joinSeqFilter ]) => {
           button.joinSeqFilter = joinSeqFilter;
-          return kibiSequentialJoinVisHelper.buildCountQuery(button.targetDashboardId, joinSeqFilter)
-          .then((query) => {
-            return { query, button, indices };
-          });
+
+          if (config.get('kibi:enableAllRelBtnCounts')) {
+            return kibiSequentialJoinVisHelper.buildCountQuery(button.targetDashboardId, joinSeqFilter)
+            .then((query) => {
+              return { query, button, indices };
+            });
+          } else {
+            return { guery: undefined, button, indices };
+          }
         })
         .catch((error) => {
           // If computing the indices failed because of an authorization error
@@ -57,12 +62,20 @@ define(function (require) {
             throw error;
           }
           button.forbidden = true;
-          return kibiSequentialJoinVisHelper.buildCountQuery(button.targetDashboardId)
-          .then((query) => {
-            return { query, button, indices: [] };
-          });
+          if (config.get('kibi:enableAllRelBtnCounts')) {
+            return kibiSequentialJoinVisHelper.buildCountQuery(button.targetDashboardId)
+            .then((query) => {
+              return { query, button, indices: [] };
+            });
+          } else {
+            return { guery: undefined, button, indices: [] };
+          }
         });
       })).then((results) => {
+        if (!config.get('kibi:enableAllRelBtnCounts')) {
+          return Promise.resolve(_.map(results, (result) => result.button));
+        }
+
         const query = _.map(results, result => {
           return searchHelper.optimize(result.indices, result.query);
         }).join('');
@@ -176,7 +189,7 @@ define(function (require) {
      * Update counts in reaction to events
      */
 
-    var updateButtons = function (reason) {
+    const updateButtons = function (reason) {
       if (onVisualizeTab) {
         return;
       }
@@ -226,7 +239,7 @@ define(function (require) {
       .catch(notify.error);
     };
 
-    var kibiDashboardChangedOff = $rootScope.$on('kibi:dashboard:changed', updateButtons.bind(this, 'kibi:dashboard:changed'));
+    const kibiDashboardChangedOff = $rootScope.$on('kibi:dashboard:changed', updateButtons.bind(this, 'kibi:dashboard:changed'));
 
     $scope.$listen(kibiState, 'save_with_changes', function (diff) {
       if (diff.indexOf(kibiState._properties.enabled_relations) !== -1 ||

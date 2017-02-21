@@ -163,7 +163,7 @@ define(function (require) {
         function addPanel(panel) {
           _.defaults(panel, {
             size_x: 3,
-            size_y: 10 // kibi: change 2 -> 10 as we made widget base_height 5 times smaller from 100 -> 20
+            size_y: config.get('kibi:panel_vertical_size') // kibi: added possibility to change hardcoded value 2
           });
 
           // ignore panels that don't have vis id's

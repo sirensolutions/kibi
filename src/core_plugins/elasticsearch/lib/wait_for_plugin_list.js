@@ -54,8 +54,8 @@ module.exports = function (plugin, server) {
             });
             if (!foundCorrespondingNode) {
               plugin.status.red(
-                'Siren Plaform plugin is missing at data node:[' + nodeName + '] ip:[' + nodeIp + ']\n' +
-                'Siren Plaform plugin should be installed on all data nodes.'
+                'Siren Platform plugin is missing at data node:[' + nodeName + '] ip:[' + nodeIp + ']\n' +
+                'Siren Platform plugin should be installed on all data nodes.'
               );
             }
           }

@@ -1,77 +1,53 @@
-import _ from 'lodash';
-import kibiUtils from 'kibiutils';
+import { isUndefined, each, find } from 'lodash';
+import { DatasourceTypes } from 'kibiutils';
 
-export default function DatasourceSchema(kibiDatasourcesSchema) {
-  return function (datasource) {
-    datasource.schema = [];
-
-    const base = kibiDatasourcesSchema.base;
-
+export default function setDatasourceSchemaFactory(kibiDatasourcesSchema) {
+  return function setDatasourceSchema(datasource) {
     switch (datasource.datasourceType.toLowerCase()) {
-      case kibiUtils.DatasourceTypes.rest:
-        datasource.schema = mergeByName(base, kibiDatasourcesSchema.rest);
+      case DatasourceTypes.rest:
+        datasource.schema = kibiDatasourcesSchema.rest;
         break;
-      case kibiUtils.DatasourceTypes.sqlite:
-        datasource.schema = mergeByName(base, kibiDatasourcesSchema.sqlite);
+      case DatasourceTypes.sqlite:
+        datasource.schema = kibiDatasourcesSchema.sqlite;
         break;
-      case kibiUtils.DatasourceTypes.mysql:
-        datasource.schema = mergeByName(base, kibiDatasourcesSchema.mysql);
+      case DatasourceTypes.mysql:
+        datasource.schema = kibiDatasourcesSchema.mysql;
         break;
-      case kibiUtils.DatasourceTypes.postgresql:
-        datasource.schema = mergeByName(base, kibiDatasourcesSchema.postgresql);
+      case DatasourceTypes.postgresql:
+        datasource.schema = kibiDatasourcesSchema.postgresql;
         break;
-      case kibiUtils.DatasourceTypes.sparql_http:
-        datasource.schema = mergeByName(base, kibiDatasourcesSchema.sparql_http);
+      case DatasourceTypes.sparql_http:
+        datasource.schema = kibiDatasourcesSchema.sparql_http;
         break;
-      case kibiUtils.DatasourceTypes.sql_jdbc:
-        datasource.schema = mergeByName(base, kibiDatasourcesSchema.jdbc);
+      case DatasourceTypes.sql_jdbc:
+      case DatasourceTypes.sparql_jdbc:
+        datasource.schema = kibiDatasourcesSchema.jdbc;
         break;
-      case kibiUtils.DatasourceTypes.sparql_jdbc:
-        datasource.schema = mergeByName(base, kibiDatasourcesSchema.jdbc);
-        break;
-      case kibiUtils.DatasourceTypes.tinkerpop3:
-        datasource.schema = mergeByName(base, kibiDatasourcesSchema.tinkerpop3);
+      case DatasourceTypes.tinkerpop3:
+        datasource.schema = kibiDatasourcesSchema.tinkerpop3;
         break;
       default:
+        datasource.schema = [];
         datasource.datasourceDef = null;
     }
 
-    if (typeof datasource.id === 'undefined') {
-      _.each(datasource.schema, function (param) {
+    if (isUndefined(datasource.id)) {
+      each(datasource.schema, function (param) {
         let defaultValue = param.defaultValue;
-        if (typeof defaultValue === 'undefined') {
+        if (isUndefined(defaultValue)) {
           defaultValue = param.defaultValues;
         }
-        if (typeof datasource.datasourceParams[param.name] === 'undefined' && defaultValue) {
+        if (isUndefined(datasource.datasourceParams[param.name]) && defaultValue) {
           datasource.datasourceParams[param.name] = defaultValue;
         }
       });
       // remove parameters not found in schema
-      _.each(datasource.datasourceParams, function (key, value) {
-        const found = _.find(datasource.schema, function (s) {
-          return s.name === key;
-        });
+      each(datasource.datasourceParams, function (key, value) {
+        const found = find(datasource.schema, 'name', key);
         if (!found) {
           delete datasource.datasourceParams[key];
         }
       });
-
     }
   };
-
-  function mergeByName(baseObject, additionalProps) {
-    const result = [];
-    _.each(baseObject, function (o) {
-      result.push(o);
-    });
-    _.each(additionalProps, function (arr2obj) {
-      const arr1obj = _.find(baseObject, function (arr1obj) {
-        return arr1obj.name === arr2obj.name;
-      });
-
-      arr1obj ? _.extend(arr1obj, arr2obj) : result.push(arr2obj);
-    });
-
-    return result;
-  }
 };

@@ -1,11 +1,11 @@
 import _ from 'lodash';
-import DatasourceSchemaProvider from 'plugins/kibi_core/management/sections/kibi_datasources/lib/set_datasource_schema';
+import SetDatasourceSchemaProvider from '../lib/set_datasource_schema';
 import uiModules from 'ui/modules';
 
 uiModules
 .get('kibi_datasources/services/saved_datasources')
 .factory('SavedDatasource', function (courier, Private) {
-  const setDatasourceSchema = Private(DatasourceSchemaProvider);
+  const setDatasourceSchema = Private(SetDatasourceSchemaProvider);
 
   _.class(SavedDatasource).inherits(courier.SavedObject);
   function SavedDatasource(id) {

@@ -12,8 +12,7 @@
       "placeholder": "Timeout in ms"
     }
   ],
-
-  "sqlite":[
+  "sqlite": [
     {
       "name": "db_file_path",
       "label": "Database file path",
@@ -31,8 +30,14 @@
       "multivalued": true,
       "encrypted": false,
       "inputType": "select",
-      "possibleValues": ["OPEN_READONLY", "OPEN_READWRITE", "OPEN_CREATE"],
-      "defaultValues": ["OPEN_READONLY"],
+      "possibleValues": [
+        "OPEN_READONLY",
+        "OPEN_READWRITE",
+        "OPEN_CREATE"
+      ],
+      "defaultValues": [
+        "OPEN_READONLY"
+      ],
       "placeholder": ""
     },
     {
@@ -57,8 +62,6 @@
       "placeholder": "The max age of an object in the cache, in milliseconds"
     }
   ],
-
-
   "mysql": [
     {
       "name": "host",
@@ -122,7 +125,6 @@
       "placeholder": "The max age of an object in the cache, in milliseconds"
     }
   ],
-
   "postgresql": [
     {
       "name": "host",
@@ -186,8 +188,6 @@
       "placeholder": "The max age of an object in the cache, in milliseconds"
     }
   ],
-
-
   "rest": [
     {
       "name": "headers",
@@ -247,7 +247,9 @@
       "encrypted": false,
       "inputType": "select",
       "defaultValue": "json",
-      "possibleValues": ["json"],
+      "possibleValues": [
+        "json"
+      ],
       "placeholder": "Http response type"
     },
     {
@@ -302,8 +304,7 @@
       "placeholder": "The max age of an object in the cache, in milliseconds"
     }
   ],
-
-  "sparql_http":[
+  "sparql_http": [
     {
       "name": "endpoint_url",
       "label": "Endpoint URL",
@@ -356,7 +357,6 @@
       "placeholder": "The max age of an object in the cache, in milliseconds"
     }
   ],
-
   "jdbc": [
     {
       "name": "drivername",
@@ -440,8 +440,7 @@
       "placeholder": "The max age of an object in the cache, in milliseconds"
     }
   ],
-
-  "tinkerpop3":[
+  "tinkerpop3": [
     {
       "name": "url",
       "label": "Gremlin Server URL",

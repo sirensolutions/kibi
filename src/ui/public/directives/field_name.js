@@ -52,6 +52,8 @@ define(function (require) {
           let scripted = $scope.field ? $scope.field.scripted : false;
 
           let displayName;
+          // check if alias is different than original name to avoid showing
+          // the same name in parenthesis
           if ($scope.fieldAlias && $scope.fieldAlias !== name) {
             displayName = $filter('shortDots')($scope.fieldAlias) + ' (' + $filter('shortDots')(name) + ')';
           } else {

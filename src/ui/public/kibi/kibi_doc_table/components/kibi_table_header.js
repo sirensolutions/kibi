@@ -25,6 +25,10 @@ define(function (require) {
 
         $scope.tooltip = function (column) {
           if (!sortableField(column)) return '';
+          if ($scope.columnAliases.length > 0) {
+            const index = $scope.columns.indexOf(column);
+            return 'Sort by ' + shortDotsFilter($scope.columnAliases[index]);
+          }
           return 'Sort by ' + shortDotsFilter(column);
         };
 
@@ -81,6 +85,10 @@ define(function (require) {
 
         const off = $rootScope.$on('kibi:add:column', function (event, column) {
           if (column) {
+            // kibi: adding alias
+            if ($scope.columnAliases && $scope.columnAliases.length === $scope.columns.length) {
+              $scope.columnAliases.splice(column.index, 0, column.fieldName);
+            }
             $scope.columns.splice(column.index, 0, column.fieldName);
           }
         });

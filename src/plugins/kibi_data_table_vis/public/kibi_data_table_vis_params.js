@@ -89,9 +89,13 @@ define(function (require) {
 
         $scope.$watch('vis.params.enableColumnAliases', (enableColumnAliases) => {
           if (!enableColumnAliases) {
-            // reset names to original one
+            $scope.vis.params.columnAliases = [];
+          } else {
+            // prepopulate aliases to original names if not defined
             _.each($scope.vis.params.columns, (columnName, index) => {
-              $scope.vis.params.columnAliases[index] = columnName;
+              if (!$scope.vis.params.columnAliases[index]) {
+                $scope.vis.params.columnAliases[index] = columnName;
+              }
             });
           }
           $rootScope.$emit('kibi:vis:columnAliases-changed', $scope.vis.params.columnAliases);

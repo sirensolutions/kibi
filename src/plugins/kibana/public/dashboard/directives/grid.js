@@ -163,7 +163,7 @@ define(function (require) {
         function addPanel(panel) {
           _.defaults(panel, {
             size_x: 3,
-            size_y: config.get('kibi:panel_vertical_size') // kibi: added possibility to change hardcoded value 2
+            size_y: config.get('kibi:panel_vertical_size') // kibi: added possibility to change hardcoded value
           });
 
           // ignore panels that don't have vis id's

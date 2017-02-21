@@ -3,7 +3,7 @@ define(function (require) {
   require('ui/elastic_textarea');
 
   require('ui/modules').get('apps/settings')
-  .directive('advancedRow', function (config, createNotifier, Private) {
+  .directive('advancedRow', function (config, createNotifier, Private, Promise) {
     return {
       restrict: 'A',
       replace: true,
@@ -55,8 +55,16 @@ define(function (require) {
             if (conf.unsavedValue === conf.defVal) {
               return config.clear(conf.name);
             }
-
-            return config.set(conf.name, conf.unsavedValue);
+            // kibi: added to allow for custom validation step before saving the value
+            let value = conf.unsavedValue;
+            if (_.isFunction(conf.validator)) {
+              value = conf.validator(conf.unsavedValue);
+              if (value instanceof Error) {
+                return Promise.reject(value);
+              };
+            }
+            return config.set(conf.name, value);
+            // kibi: end
           });
         };
 

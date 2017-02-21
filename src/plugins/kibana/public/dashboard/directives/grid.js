@@ -6,7 +6,7 @@ define(function (require) {
 
   const app = require('ui/modules').get('app/dashboard');
 
-  app.directive('dashboardGrid', function ($compile, createNotifier) {
+  app.directive('dashboardGrid', function ($compile, createNotifier, config) {
     return {
       restrict: 'E',
       require: '^dashboardApp', // must inherit from the dashboardApp
@@ -32,8 +32,9 @@ define(function (require) {
         const spacerSize = SPACER * COLS;
 
         // kibi: introduced instead of hardcoded value of 100
-        // to allow for grater vertical precission
-        const WIDGET_BASE_HEIGHT = 20;
+        // to allow to increase vertical grid resolution
+        const WIDGET_BASE_HEIGHT = config.get('kibi:vertical_grid_resolution') ?
+          config.get('kibi:vertical_grid_resolution') : 100;
         // kibi: end
 
         // debounced layout function is safe to call as much as possible

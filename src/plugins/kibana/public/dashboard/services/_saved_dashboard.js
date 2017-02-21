@@ -34,7 +34,8 @@ define(function (require) {
           timeMode: undefined, // kibi: save the mode of the timepicker
           timeTo: undefined,
           timeFrom: undefined,
-          savedSearchId: undefined // kibi: added to be able to store savedSearchId
+          savedSearchId: undefined, // kibi: added to be able to store savedSearchId
+          priority: 0
           // TODO: investigate that instead we could use optionsJSON for it
           // https://github.com/sirensolutions/kibi-private/issues/67
         },
@@ -61,7 +62,8 @@ define(function (require) {
       timeMode: 'string',
       timeTo: 'string',
       timeFrom: 'string',
-      savedSearchId: 'string'
+      savedSearchId: 'string',
+      priority: 0
     };
 
     SavedDashboard.searchsource = true;

@@ -2,7 +2,7 @@ define(function (require) {
   let isJoinPruned = require('ui/kibi/helpers/is_join_pruned');
 
   return function DashboardGroupHelperFactory(
-      $timeout, kibiState, Private, savedDashboards, savedDashboardGroups, Promise, kbnIndex, $http) {
+      $timeout, kibiState, Private, savedDashboards, savedDashboardGroups, Promise, kbnIndex, $http, config) {
     const _ = require('lodash');
     const dashboardHelper = Private(require('ui/kibi/helpers/dashboard_helper'));
     const countHelper = Private(require('ui/kibi/helpers/count_helper/count_helper'));
@@ -119,7 +119,8 @@ define(function (require) {
       const idsArray = Array.from(ids); // has to do it as it might be a set
       return savedDashboards.find().then((resp) => {
         let dashboards = _.filter(resp.hits, (dashboard) => {
-          return dashboard.savedSearchId && idsArray.indexOf(dashboard.id) !== -1;
+          return dashboard.savedSearchId && idsArray.indexOf(dashboard.id) !== -1
+            && config.get('kibi:enableAllDashboardsCounts');
         });
 
         let metadataPromises = _.map(dashboards, (dashboard) => {

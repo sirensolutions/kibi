@@ -280,6 +280,13 @@ define(function (require) {
         validator: function (val) {
           return positiveIntegerValidator(val, 'kibi:vertical_grid_resolution');
         }
+      'kibi:enableAllDashboardsCounts' : {
+        value: true,
+        description: 'Enable counts on all dashboards.'
+      },
+      'kibi:enableAllRelBtnCounts' : {
+        value: true,
+        description: 'Enable counts on all relational buttons.'
       }
       // kibi: end
     };

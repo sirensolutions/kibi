@@ -29,6 +29,10 @@ define(function (require) {
     $scope.currentDashboardId = currentDashboardId;
     const queryFilter = Private(require('ui/filter_bar/query_filter'));
 
+    $scope.btnCountsEnabled = function () {
+      return config.get('kibi:enableAllRelBtnCounts');
+    };
+
     if (!kibiState.isSirenJoinPluginInstalled()) {
       notify.error('This version of Kibi Relational filter requires the SIREn Join plugin. Please install it and restart Kibi.');
     }
@@ -47,7 +51,7 @@ define(function (require) {
         .then(([ indices, joinSeqFilter ]) => {
           button.joinSeqFilter = joinSeqFilter;
 
-          if (config.get('kibi:enableAllRelBtnCounts') || updateOnClick) {
+          if ($scope.btnCountsEnabled() || updateOnClick) {
             return kibiSequentialJoinVisHelper.buildCountQuery(button.targetDashboardId, joinSeqFilter)
             .then((query) => {
               return { query, button, indices };
@@ -63,7 +67,7 @@ define(function (require) {
             throw error;
           }
           button.forbidden = true;
-          if (config.get('kibi:enableAllRelBtnCounts') || updateOnClick) {
+          if ($scope.btnCountsEnabled() || updateOnClick) {
             return kibiSequentialJoinVisHelper.buildCountQuery(button.targetDashboardId)
             .then((query) => {
               return { query, button, indices: [] };
@@ -73,7 +77,7 @@ define(function (require) {
           }
         });
       })).then((results) => {
-        if (!config.get('kibi:enableAllRelBtnCounts') && !updateOnClick) {
+        if (!$scope.btnCountsEnabled() && !updateOnClick) {
           return Promise.resolve(_.map(results, (result) => result.button));
         }
 
@@ -132,10 +136,6 @@ define(function (require) {
 
     $scope.getCurrentDashboardBtnCounts = function () {
       _fireUpdateCounts($scope.buttons, currentDashboardId, true);
-    };
-
-    $scope.btnCountsEnabled = function () {
-      return config.get('kibi:enableAllRelBtnCounts');
     };
 
     const delayExecutionHelper = new DelayExecutionHelper(

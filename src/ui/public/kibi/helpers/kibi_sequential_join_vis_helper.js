@@ -70,8 +70,7 @@ define(function (require) {
               };
 
               // create the alias for the filter
-              let alias = !button.targetCount ? '... related from $DASHBOARD'
-                : button.filterLabel || '... related to ($COUNT) from $DASHBOARD';
+              let alias = button.filterLabel || `... related to ($COUNT) from $DASHBOARD`;
               alias = alias.replace(/\$DASHBOARD/g, currentDashboardId);
               this.joinSeqFilter.meta.alias = alias;
               if (alias.indexOf('$COUNT') !== -1) {

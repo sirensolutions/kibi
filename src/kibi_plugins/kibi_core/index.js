@@ -121,16 +121,15 @@ module.exports = function (kibana) {
       spyModes: [
         'plugins/kibi_core/ui/spy_modes/multi_search_spy_mode'
       ],
-      injectDefaultVars: function (server) {
-        const serverConfig = server.config();
+      injectDefaultVars: function (server, options) {
         const vars = {};
 
-        vars.elasticsearchPlugins = serverConfig.get('elasticsearch.plugins');
-        if (serverConfig.has('kibi_core')) {
-          vars.kibiDatasourcesSchema = serverConfig.get('kibi_core.datasources_schema');
-          vars.kibiDefaultDashboardTitle = serverConfig.get('kibi_core.default_dashboard_title');
+        vars.elasticsearchPlugins = server.config().get('elasticsearch.plugins');
+        if (options) {
+          vars.kibiDatasourcesSchema = options.datasources_schema;
+          vars.kibiDefaultDashboardTitle = options.default_dashboard_title;
           vars.kibiWarnings = {};
-          if (serverConfig.get('kibi_core.datasource_encryption_key') === 'iSxvZRYisyUW33FreTBSyJJ34KpEquWznUPDvn+ka14=') {
+          if (options.datasource_encryption_key === 'iSxvZRYisyUW33FreTBSyJJ34KpEquWznUPDvn+ka14=') {
             vars.kibiWarnings.datasource_encryption_warning = true;
           }
         }
@@ -178,7 +177,7 @@ module.exports = function (kibana) {
         datasource_encryption_algorithm: Joi.string().default('AES-GCM'),
         datasource_encryption_key: Joi.string().default('iSxvZRYisyUW33FreTBSyJJ34KpEquWznUPDvn+ka14='),
 
-        datasources_schema: Joi.any().default(datasourcesSchema),
+        datasources_schema: Joi.any().default(datasourcesSchema.toInjectedVar()),
         datasource_cache_size: Joi.number().default(500),
 
         default_dashboard_title: Joi.string().allow('').default('')

@@ -316,7 +316,7 @@ export default function sirenJoin(server) {
     const termsEncoding = targetIndex.termsEncoding;
 
     const join = {
-      indices: targetIndex.indices,
+      indices: _.isArray(targetIndex.indices) ? targetIndex.indices : [ targetIndex.indices ],
       on: [ sourcePath, targetPath ],
       request: {
         query: {

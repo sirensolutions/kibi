@@ -229,7 +229,8 @@ export default function KibiNavBarHelperFactory(kibiState, globalState, getAppSt
     .then((groups) => {
       dashboardGroupHelper.copy(groups, this.dashboardGroups);
       return this.dashboardGroups;
-    });
+    })
+    .catch(notify.error);
   };
 
   KibiNavBarHelper.prototype.cancelExecutionInProgress = function () {

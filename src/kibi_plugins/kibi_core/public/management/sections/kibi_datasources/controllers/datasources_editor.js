@@ -3,7 +3,7 @@ import 'plugins/kibi_core/management/sections/kibi_datasources/services/_saved_d
 import 'plugins/kibi_core/management/sections/kibi_datasources/services/saved_datasources';
 import 'ui/kibi/components/query_engine_client/query_engine_client';
 import 'ui/kibi/directives/kibi_validate';
-import DatasourceSchemaProvider from 'plugins/kibi_core/management/sections/kibi_datasources/lib/set_datasource_schema';
+import SetDatasourceSchemaProvider from 'plugins/kibi_core/management/sections/kibi_datasources/lib/set_datasource_schema';
 import template from 'plugins/kibi_core/management/sections/kibi_datasources/index.html';
 import angular from 'angular';
 import kibiUtils from 'kibiutils';
@@ -33,9 +33,9 @@ uiRoutes
   }
 });
 
-function controller($window, $scope, $route, kbnUrl, createNotifier, Private, queryEngineClient, $element, kibiWarnings,
-    kibiEnterpriseEnabled) {
-  const setDatasourceSchema = Private(DatasourceSchemaProvider);
+function controller(Private, $window, $scope, $route, kbnUrl, createNotifier, queryEngineClient, $element, kibiWarnings,
+  kibiEnterpriseEnabled) {
+  const setDatasourceSchema = Private(SetDatasourceSchemaProvider);
   const notify = createNotifier({
     location: 'Datasources Configuration Editor'
   });

@@ -26,6 +26,7 @@ define(function (require) {
     const relationsHelper = Private(require('ui/kibi/helpers/relations_helper'));
     const kibiSequentialJoinVisHelper = Private(require('ui/kibi/helpers/kibi_sequential_join_vis_helper'));
     const currentDashboardId = kibiState._getCurrentDashboardId();
+    $scope.currentDashboardId = currentDashboardId;
     const queryFilter = Private(require('ui/filter_bar/query_filter'));
 
     if (!kibiState.isSirenJoinPluginInstalled()) {
@@ -131,6 +132,10 @@ define(function (require) {
 
     $scope.getCurrentDashboardBtnCounts = function () {
       _fireUpdateCounts($scope.buttons, currentDashboardId, true);
+    };
+
+    $scope.btnCountsEnabled = function () {
+      return config.get('kibi:enableAllRelBtnCounts');
     };
 
     const delayExecutionHelper = new DelayExecutionHelper(

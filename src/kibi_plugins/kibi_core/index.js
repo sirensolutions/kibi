@@ -124,9 +124,9 @@ module.exports = function (kibana) {
       injectDefaultVars: function (server, options) {
         const vars = {};
 
-        vars.kibiDatasourcesSchema = options.datasources_schema;
         vars.elasticsearchPlugins = server.config().get('elasticsearch.plugins');
         if (options) {
+          vars.kibiDatasourcesSchema = options.datasources_schema;
           vars.kibiDefaultDashboardTitle = options.default_dashboard_title;
           vars.kibiWarnings = {};
           if (options.datasource_encryption_key === 'iSxvZRYisyUW33FreTBSyJJ34KpEquWznUPDvn+ka14=') {

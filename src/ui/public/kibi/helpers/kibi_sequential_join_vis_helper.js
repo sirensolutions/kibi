@@ -52,7 +52,7 @@ define(function (require) {
       .map(function (buttonDef) {
         const button = _.clone(buttonDef);
 
-        button.click = function () {
+        button.click = function (updateOnClick = false) {
           const currentDashboardId = kibiState._getCurrentDashboardId();
           if (!currentDashboardId) {
             return Promise.resolve();
@@ -76,7 +76,7 @@ define(function (require) {
               this.joinSeqFilter.meta.alias = alias;
               if (alias.indexOf('$COUNT') !== -1) {
                 this.joinSeqFilter.meta.alias_tmpl = alias;
-                return this.getSourceCount(currentDashboardId).then((sourceCount) => {
+                return this.getSourceCount(currentDashboardId, updateOnClick).then((sourceCount) => {
                   this.joinSeqFilter.meta.alias = alias.replace(/\$COUNT/g, sourceCount);
                   switchToDashboard.apply(this);
                 });

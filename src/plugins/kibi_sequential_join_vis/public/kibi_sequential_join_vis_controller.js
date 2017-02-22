@@ -33,7 +33,7 @@ define(function (require) {
     }
 
     // Update the counts on each button of the related filter
-    const _fireUpdateCounts = function (buttons, dashboardId, force) {
+    const _fireUpdateCounts = function (buttons, dashboardId, updateOnClick = false) {
       if ($scope.multiSearchData) {
         $scope.multiSearchData.clear();
       }
@@ -46,7 +46,7 @@ define(function (require) {
         .then(([ indices, joinSeqFilter ]) => {
           button.joinSeqFilter = joinSeqFilter;
 
-          if (config.get('kibi:enableAllRelBtnCounts') && !force) {
+          if (config.get('kibi:enableAllRelBtnCounts') || updateOnClick) {
             return kibiSequentialJoinVisHelper.buildCountQuery(button.targetDashboardId, joinSeqFilter)
             .then((query) => {
               return { query, button, indices };
@@ -62,7 +62,7 @@ define(function (require) {
             throw error;
           }
           button.forbidden = true;
-          if (config.get('kibi:enableAllRelBtnCounts') && !force) {
+          if (config.get('kibi:enableAllRelBtnCounts') || updateOnClick) {
             return kibiSequentialJoinVisHelper.buildCountQuery(button.targetDashboardId)
             .then((query) => {
               return { query, button, indices: [] };
@@ -72,7 +72,7 @@ define(function (require) {
           }
         });
       })).then((results) => {
-        if (!config.get('kibi:enableAllRelBtnCounts') && !force) {
+        if (!config.get('kibi:enableAllRelBtnCounts') && !updateOnClick) {
           return Promise.resolve(_.map(results, (result) => result.button));
         }
 
@@ -129,9 +129,8 @@ define(function (require) {
       }).catch(notify.error);
     };
 
-    $scope.getCounts = function () {
-      _fireUpdateCounts($scope.buttons, $scope.buttons[0].targetDashboardId, true)
-      .then((buttons) => $scope.buttons = buttons).catch(notify.error);
+    $scope.getCurrentDashboardBtnCounts = function () {
+      _fireUpdateCounts($scope.buttons, currentDashboardId, true);
     };
 
     const delayExecutionHelper = new DelayExecutionHelper(
@@ -215,7 +214,7 @@ define(function (require) {
         // http://stackoverflow.com/questions/20481327/data-is-not-getting-updated-in-the-view-after-promise-is-resolved
         // assign data to $scope.buttons once the promises are done
         $scope.buttons = new Array(buttons.length);
-        const getSourceCount = function (currentDashboardId) {
+        const getSourceCount = function (currentDashboardId, updateOnClick = false) {
           const virtualButton = {
             sourceField: this.targetField,
             sourceIndexPatternId: this.targetIndexPatternId,
@@ -231,7 +230,7 @@ define(function (require) {
           // instead of _collectUpdateCountsRequest
           // This could be done in future to further reduce the number of calls but
           // as it requires greater refactoring I postponed it for now
-          return _fireUpdateCounts.call(self, [ virtualButton ], this.targetDashboardId)
+          return _fireUpdateCounts.call(self, [ virtualButton ], this.targetDashboardId, updateOnClick)
           .then(() => virtualButton.targetCount)
           .catch(notify.error);
         };

@@ -16,8 +16,10 @@
         title="{{button.warning}}">(*)</span>
   </button>
 
-  <button ng-click="getCurrentDashboardBtnCounts();">
-    <i aria-hidden="true" class="fa fa-calculator"></i>
-  </button>
+  <span ng-show="!btnCountsEnabled() && currentDashboardId">
+    <a ng-click="getCurrentDashboardBtnCounts();" class="btn-get-current-dashb-btn-counts">
+      <i aria-hidden="true" class="fa fa-refresh fa-lg"></i>
+    </a>
+  <div>
 
 </div>

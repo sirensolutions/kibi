@@ -2,7 +2,7 @@
 
   <button
     ng-repeat="button in buttons"
-    ng-click="button.click()"
+    ng-click="button.click(true)"
     ng-disabled="button.disabled"
     ng-class="button.targetCount == 0 ? 'btn disabled-btn-relational' : 'btn btn-relational'"
     >
@@ -16,7 +16,7 @@
         title="{{button.warning}}">(*)</span>
   </button>
 
-  <button ng-click="getCounts();">
+  <button ng-click="getCurrentDashboardBtnCounts();">
     <i aria-hidden="true" class="fa fa-calculator"></i>
   </button>
 

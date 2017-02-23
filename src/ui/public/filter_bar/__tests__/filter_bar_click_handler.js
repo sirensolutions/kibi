@@ -12,7 +12,11 @@ import FilterBarClickHandlerProvider from 'ui/filter_bar/filter_bar_click_handle
 describe('filterBarClickHandler', function () {
   let setup = null;
 
-  beforeEach(ngMock.module('kibana'));
+  beforeEach(ngMock.module('kibana', $provide => {
+    $provide.service('kibiState', function () {
+      return new MockState({ filters: [] });
+    });
+  }));
   beforeEach(ngMock.inject(function (Private) {
     setup = function () {
       const Vis = Private(VisProvider);

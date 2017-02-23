@@ -2,6 +2,13 @@
 @import (reference) "~ui/styles/variables.less";
 @import (reference) "~ui/kibi/styles/kibi_variables";
 
+// Used in document detail table view when an alias is defined for table column
+span.original-field-name {
+  font-style: italic;
+  margin-left: 4px;
+  color: @gray-light;
+}
+
 // Buttons ================================================
 .btn.btn-relational {
   .button-variant(@btn-relational-color; @btn-relational-bg; @btn-relational-border);

@@ -111,6 +111,27 @@ module.directive('filterBar', function (config, $rootScope, kibiState, createNot
         $scope.state = appState;
       });
 
+      /**
+       * kibi: Watch the filters and if anything is added/removed then the count from the join_sequence filter alias is removed.
+       * If left alone, the count would be misleading.
+       */
+      $scope.$watchCollection('state.filters', function (filters, oldFilters) {
+        if (!filters || filters.length === (oldFilters && oldFilters.length || 0)) {
+          return;
+        }
+
+        _.each($scope.state.filters, (filter) => {
+          if (filter.join_sequence && filter.meta.alias_tmpl) {
+            const base = filter.meta.alias.replace(/[0-9]+/, '');
+            // make sure the alias was unchanged
+            if (filter.meta.alias_tmpl.replace('$COUNT', '') === base) {
+              filter.meta.alias = filter.meta.alias_tmpl.replace('$COUNT', '...');
+              delete filter.meta.alias_tmpl;
+            }
+          }
+        });
+      });
+
       $scope.$watch('state.$newFilters', function (filters) {
         if (!filters) return;
 

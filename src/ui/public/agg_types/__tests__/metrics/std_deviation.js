@@ -3,6 +3,7 @@ import ngMock from 'ng_mock';
 import AggTypeMetricStandardDeviationProvider from 'ui/agg_types/metrics/std_deviation';
 import VisProvider from 'ui/vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import MockState from 'fixtures/mock_state';
 
 describe('AggTypeMetricStandardDeviationProvider class', function () {
 
@@ -10,7 +11,11 @@ describe('AggTypeMetricStandardDeviationProvider class', function () {
   let indexPattern;
   let aggTypeMetricStandardDeviation;
 
-  beforeEach(ngMock.module('kibana'));
+  beforeEach(ngMock.module('kibana', $provide => {
+    $provide.service('kibiState', function () {
+      return new MockState({ filters: [] });
+    });
+  }));
   beforeEach(ngMock.inject(function (Private) {
     Vis = Private(VisProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);

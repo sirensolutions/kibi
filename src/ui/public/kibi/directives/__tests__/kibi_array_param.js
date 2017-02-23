@@ -1,3 +1,4 @@
+import Notifier from 'ui/notify/notifier';
 import sinon from 'auto-release-sinon';
 import angular from 'angular';
 import ngMock from 'ng_mock';
@@ -53,6 +54,12 @@ const init = function (required, defaultElement, index, disable) {
 
 describe('Kibi Directives', function () {
   describe('kibi_array_param directive', function () {
+
+    // https://github.com/elastic/kibana/pull/8822 ensure that the notifier is emptied by each test
+    afterEach(() => {
+      Notifier.prototype._notifs.length = 0;
+    });
+
     afterEach(function () {
       'add remove up down'.split(' ').forEach(function (type) {
         $elems[type].remove();

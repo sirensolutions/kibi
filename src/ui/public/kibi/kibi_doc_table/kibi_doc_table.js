@@ -6,10 +6,11 @@ define(function (require) {
 
   require('ui/directives/truncated');
   require('ui/directives/infinite_scroll');
-  require('ui/doc_table/components/table_header');
 
   require('ui/kibi/kibi_doc_table/kibi_doc_table.less');
   require('ui/kibi/kibi_doc_table/components/kibi_table_row');
+  require('ui/kibi/kibi_doc_table/components/kibi_table_header');
+
   // kibi: allow to query external datasources for populating a column
   require('ui/kibi/components/query_engine_client/query_engine_client');
 
@@ -30,9 +31,12 @@ define(function (require) {
         infiniteScroll: '=?',
         filter: '=?',
 
-        // kibi: to make the cellClickHandlers available to the scope of kibiTableRow
+        // kibi:
+        // added cellClickHandlers, queryColumn and columnAliases
+        // to make them available to the scope of kibiTableRow and kibiTableHeader
         cellClickHandlers: '=',
-        queryColumn: '='
+        queryColumn: '=',
+        columnAliases: '=?',
       },
       link: function ($scope) {
         const notify = createNotifier({

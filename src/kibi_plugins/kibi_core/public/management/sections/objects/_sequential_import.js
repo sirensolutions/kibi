@@ -55,7 +55,7 @@ export default function loadObjectsFactory(kbnIndex, Private, esAdmin, Promise, 
         return service.get().then(function (obj) {
           obj.id = doc._id;
           return obj.applyESResp(doc).then(function () {
-            return obj.save({ confirmOverwrite : true });
+            return obj.save({ confirmOverwrite: true });
           });
         });
       };

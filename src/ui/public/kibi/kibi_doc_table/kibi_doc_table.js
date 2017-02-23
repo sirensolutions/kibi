@@ -171,7 +171,18 @@ uiModules
         // validate here and do not inject if all require values are not set
         if ($scope.queryColumn && $scope.queryColumn.queryDefinitions && $scope.queryColumn.queryDefinitions.length &&
             $scope.queryColumn.joinElasticsearchField && $scope.queryColumn.name) {
-          const virtualIndexPattern = new VirtualIndexPattern($scope.indexPattern);
+          const virtualField = {
+            analyzed: false,
+            bucketable: true,
+            count: 0,
+            displayName: $scope.queryColumn.name,
+            name: $scope.queryColumn.name,
+            scripted: false,
+            sortable: false,
+            type: 'string',
+            format: fieldFormats.getDefaultInstance('string')
+          };
+          const virtualIndexPattern = new VirtualIndexPattern($scope.indexPattern, virtualField);
           $scope.searchSource.index(virtualIndexPattern);
 
           $scope.searchSource.inject([
@@ -183,19 +194,6 @@ uiModules
               fieldName: $scope.queryColumn.name
             }
           ]);
-
-          const injectedField = {
-            analyzed: false,
-            bucketable: true,
-            count: 0,
-            displayName: $scope.queryColumn.name,
-            name: $scope.queryColumn.name,
-            scripted: false,
-            sortable: false,
-            type: 'string',
-            format: fieldFormats.getDefaultInstance('string')
-          };
-          virtualIndexPattern.addVirtualField(injectedField);
         }
       }
 

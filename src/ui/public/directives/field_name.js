@@ -53,6 +53,7 @@ define(function (require) {
           const results = $scope.field ? !$scope.field.rowCount && !$scope.field.scripted : false;
           const scripted = $scope.field ? $scope.field.scripted : false;
 
+          // kibi: support alias for column name
           // check if alias is different than original name to avoid showing
           // the same name in parenthesis
           if ($scope.fieldAlias && $scope.fieldAlias !== name) {

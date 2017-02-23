@@ -137,6 +137,11 @@ module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshInter
       $scope.setQuick = function (from, to) {
         $scope.from = from;
         $scope.to = to;
+        // kibi: sync time to other dashboards
+        if ($scope.syncTimeTo) {
+          $scope.syncTimeTo();
+        }
+        // kibi: end
       };
 
       $scope.setToNow = function () {

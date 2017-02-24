@@ -1,4 +1,4 @@
-import onPage from 'ui/kibi/utils/on_page';
+import * as onPage from 'ui/kibi/utils/on_page';
 import expect from 'expect.js';
 import sinon from 'auto-release-sinon';
 import ngMock from 'ng_mock';

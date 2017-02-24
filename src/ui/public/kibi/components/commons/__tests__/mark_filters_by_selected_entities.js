@@ -3,7 +3,7 @@ import noDigestPromises from 'test_utils/no_digest_promises';
 import sinon from 'auto-release-sinon';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import onPage from 'ui/kibi/utils/on_page';
+import * as onPage from 'ui/kibi/utils/on_page';
 import mockSavedObjects from 'fixtures/kibi/mock_saved_objects';
 
 let markFiltersBySelectedEntities;

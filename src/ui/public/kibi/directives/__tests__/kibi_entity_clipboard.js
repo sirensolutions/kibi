@@ -1,7 +1,7 @@
 import sinon from 'auto-release-sinon';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import onPage from 'ui/kibi/utils/on_page';
+import * as onPage from 'ui/kibi/utils/on_page';
 import MockState from 'fixtures/mock_state';
 import _ from 'lodash';
 import '../kibi_entity_clipboard';
@@ -23,7 +23,7 @@ describe('Kibi Components', function () {
         function ($provide) {
           $provide.constant('kbnDefaultAppId', '');
           $provide.constant('kibiDefaultDashboardTitle', '');
-          $provide.constant('elasticsearchPlugins', ['siren-join']);
+          $provide.constant('elasticsearchPlugins', ['siren-platform']);
           $provide.service('$route', function () {
             return {
               reload: _.noop
@@ -47,6 +47,7 @@ describe('Kibi Components', function () {
 
         kibiState = _kibiState_;
         kibiState.setEntityURI(selectedEntity);
+        kibiState.disableSelectedEntity(entityDisabled);
 
         $rootScope = _$rootScope_;
         $httpBackend = $injector.get('$httpBackend');
@@ -304,3 +305,4 @@ describe('Kibi Components', function () {
 
   });
 });
+

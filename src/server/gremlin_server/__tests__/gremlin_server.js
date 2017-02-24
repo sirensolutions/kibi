@@ -7,7 +7,17 @@ let gremlin;
 describe('Kibi Gremlin Server', function () {
 
   beforeEach(function () {
-    const server = { expose: sinon.stub(), log: sinon.stub() };
+    const server = {
+      expose: sinon.stub(),
+      log: sinon.stub(),
+      plugins: {
+        elasticsearch: {
+          getCluster() {
+            return sinon.stub();
+          }
+        }
+      }
+    };
     const GremlinServerHandler = require('../gremlin_server');
     gremlin = new GremlinServerHandler(server);
   });

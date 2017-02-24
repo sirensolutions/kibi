@@ -6,9 +6,9 @@ const selectedDocuments = ['index/type/1'];
 
 const fakeServer = {
   log: function (tags, data) {},
-  config: function () {
+  config() {
     return {
-      get: function (key) {
+      get(key) {
         if (key === 'elasticsearch.url') {
           return 'http://localhost:12345';
         } else if (key === 'kibana.index') {
@@ -23,9 +23,9 @@ const fakeServer = {
     elasticsearch: {
       getCluster() {
         return {
-          callWithInternalUser(method, params) {
-            switch (method) {
-              case 'search':
+          getClient() {
+            return {
+              search() {
                 return Promise.resolve({
                   hits: {
                     hits: [
@@ -45,17 +45,15 @@ const fakeServer = {
                     ]
                   }
                 });
-              default:
-                expect.fail(`Unknown method: ${method}`);
-            }
+              }
+            };
           }
         };
-      }
+      },
     }
   }
 };
 
-let stub;
 const rulesHelper = new RulesHelper(fakeServer);
 
 describe('Rule Helper', function () {

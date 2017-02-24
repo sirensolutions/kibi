@@ -10,6 +10,7 @@ const serverConfig = requirefrom('test')('server_config');
 const wrapAsync = requirefrom('src/test_utils')('wrap_async');
 const indexSnapshot = requirefrom('src/test_utils')('index_snapshot');
 const ScenarioManager = requirefrom('src/test_utils')('scenario_manager');
+const { Cluster } = requirefrom('src/core_plugins/elasticsearch/lib')('cluster');
 
 describe('kibi_core/migrations/functional', function () {
 
@@ -18,20 +19,20 @@ describe('kibi_core/migrations/functional', function () {
   this.timeout(timeout);
 
   const scenarioManager = new ScenarioManager(clusterUrl, timeout);
-  const client = new elasticsearch.Client({
-    host: clusterUrl,
+  const cluster = new Cluster({
+    url: clusterUrl,
     requestTimeout: timeout
   });
   const configuration = {
     index: '.kibi',
-    client: client,
+    client: cluster.getClient(),
     logger: {
-      warning: (message) => {}
+      warning: (message) => ''
     }
   };
 
   async function snapshot() {
-    return indexSnapshot(client, '.kibi');
+    return indexSnapshot(cluster, '.kibi');
   }
 
   describe('Migration 2 - Functional test', function () {

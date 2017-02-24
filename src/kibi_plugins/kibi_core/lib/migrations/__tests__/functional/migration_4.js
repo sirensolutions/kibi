@@ -1,6 +1,5 @@
 /*eslint no-loop-func: 1*/
 /*eslint-env es6*/
-import elasticsearch from 'elasticsearch';
 import expect from 'expect.js';
 import _ from 'lodash';
 import sinon from 'sinon';
@@ -13,6 +12,7 @@ const serverConfig = requirefrom('test')('server_config');
 const wrapAsync = requirefrom('src/test_utils')('wrap_async');
 const indexSnapshot = requirefrom('src/test_utils')('index_snapshot');
 const ScenarioManager = requirefrom('src/test_utils')('scenario_manager');
+const { Cluster } = requirefrom('src/core_plugins/elasticsearch/lib')('cluster');
 
 describe('kibi_core/migrations/functional', function () {
 
@@ -21,13 +21,13 @@ describe('kibi_core/migrations/functional', function () {
   this.timeout(timeout);
 
   const scenarioManager = new ScenarioManager(clusterUrl, timeout);
-  const client = new elasticsearch.Client({
-    host: clusterUrl,
+  const cluster = new Cluster({
+    url: clusterUrl,
     requestTimeout: timeout
   });
 
   async function snapshot(indexName) {
-    return indexSnapshot(client, indexName);
+    return indexSnapshot(cluster, indexName);
   }
 
   describe('Migration 4 - Functional test', function () {
@@ -43,7 +43,7 @@ describe('kibi_core/migrations/functional', function () {
         beforeEach(() => {
           configuration = {
             index: indexName,
-            client: client,
+            client: cluster.getClient(),
             logger: {
               warning: sinon.spy(),
               info: sinon.spy()
@@ -173,7 +173,7 @@ describe('kibi_core/migrations/functional', function () {
       beforeEach(() => {
         configuration = {
           index: '.kibi2',
-          client: client,
+          client: cluster.getClient(),
           logger: {
             warning: sinon.spy(),
             info: sinon.spy()
@@ -193,7 +193,7 @@ describe('kibi_core/migrations/functional', function () {
       beforeEach(() => {
         configuration = {
           index: '.kibi4',
-          client: client,
+          client: cluster.getClient(),
           logger: {
             warning: sinon.spy(),
             info: sinon.spy()

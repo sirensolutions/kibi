@@ -22,7 +22,7 @@ function init({
     currentDashboardId = 'dashboard 1',
     indexPatterns = [],
     savedSearches = [],
-    savedDashboards = [],
+    savedDashboards = [ { id: currentDashboardId, title: currentDashboardId } ],
     enableEnterprise = false,
     relations = {
       relationsIndices: [],

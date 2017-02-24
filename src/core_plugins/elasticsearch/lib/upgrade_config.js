@@ -48,7 +48,7 @@ module.exports = function (server) {
 
     // Look for upgradeable configs. If none of them are upgradeable
     // then create a new one.
-    const body = _.find(response.hits.hits, isUpgradeable.bind(null, server));
+    const body = _.find(hits, isUpgradeable.bind(null, server));
     if (!body) {
       return createNewConfig();
     }

@@ -12,28 +12,28 @@ describe('saved_objects_api/functional', function () {
 
     const expectedMapping = {
       title: {
-        type: 'string'
+        type: 'text'
       },
       fieldFormatMap: {
-        type: 'string'
+        type: 'text'
       },
       fields: {
-        type: 'string'
+        type: 'text'
       },
       intervalName: {
-        type: 'string'
+        type: 'text'
       },
       notExpandable: {
         type: 'boolean'
       },
       paths: {
-        type: 'string'
+        type: 'text'
       },
       sourceFiltering: {
-        type: 'string'
+        type: 'text'
       },
       timeFieldName: {
-        type: 'string'
+        type: 'text'
       }
     };
 

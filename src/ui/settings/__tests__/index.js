@@ -425,6 +425,9 @@ function instantiate({ getResult, callWithRequest, settingsStatusOverrides } = {
   const configGet = sinon.stub();
   configGet.withArgs('kibana.index').returns('.kibana');
   configGet.withArgs('pkg.version').returns('1.2.3-test');
+  // kibi: configuration id is taken from kibi_version
+  configGet.withArgs('pkg.kibiVersion').returns('1.2.3-test');
+
   configGet.withArgs('uiSettings.enabled').returns(true);
   const config = {
     get: configGet

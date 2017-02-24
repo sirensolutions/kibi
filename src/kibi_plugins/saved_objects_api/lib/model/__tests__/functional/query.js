@@ -12,51 +12,51 @@ describe('saved_objects_api/functional', function () {
 
     const expectedMapping = {
       title: {
-        type: 'string'
+        type: 'text'
       },
       description: {
-        type: 'string'
+        type: 'text'
       },
       activationQuery: {
-        type: 'string'
+        type: 'text'
       },
       resultQuery: {
-        type: 'string'
+        type: 'text'
       },
       datasourceId: {
-        type: 'string'
+        type: 'text'
       },
       tags: {
-        type: 'string'
+        type: 'text'
       },
       rest_params: {
-        type: 'string'
+        type: 'text'
       },
       rest_headers: {
-        type: 'string'
+        type: 'text'
       },
       rest_variables: {
-        type: 'string'
+        type: 'text'
       },
       rest_body: {
-        type: 'string'
+        type: 'text'
       },
       rest_method: {
-        type: 'string'
+        type: 'text'
       },
       rest_path: {
-        type: 'string'
+        type: 'text'
       },
       rest_resp_status_code: {
         type: 'long'
       },
       activation_rules: {
-        type: 'string'
+        type: 'text'
       },
       kibanaSavedObjectMeta: {
         properties : {
           searchSourceJSON : {
-            type : 'string'
+            type : 'text'
           }
         }
       },

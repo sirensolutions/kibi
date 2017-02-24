@@ -12,25 +12,23 @@ describe('saved_objects_api/functional', function () {
 
     const expectedMapping = {
       description: {
-        type: 'string'
+        type: 'text'
       },
       kibanaSavedObjectMeta: {
         properties : {
           searchSourceJSON : {
-            type : 'string'
+            type : 'text'
           }
         }
       },
       session_data: {
-        type: 'string'
+        type: 'text'
       },
       timeCreated: {
-        type: 'date',
-        format: 'strict_date_optional_time||epoch_millis'
+        type: 'date'
       },
       timeUpdated: {
-        type: 'date',
-        format: 'strict_date_optional_time||epoch_millis'
+        type: 'date'
       },
       version: {
         type: 'integer'

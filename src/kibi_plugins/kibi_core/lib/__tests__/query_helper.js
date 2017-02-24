@@ -4,67 +4,11 @@ import QueryHelper from '../query_helper';
 import sinon from 'auto-release-sinon';
 
 describe('Query Helper', function () {
-  const createClientStub = sinon.stub();
-  const searchStub = sinon.stub();
+  let createClientStub;
+  let searchStub;
+  let fakeServer;
+  let queryHelper;
 
-  const fakeServer = {
-    log: function (tags, data) {},
-    config() {
-      return {
-        get(key) {
-          if (key === 'elasticsearch.url') {
-            return 'http://localhost:12345';
-          } else if (key === 'kibana.index') {
-            return '.kibi';
-          } else {
-            return '';
-          }
-        }
-      };
-    },
-    plugins: {
-      elasticsearch: {
-        getCluster() {
-          return {
-            callWithInternalUser: searchStub
-            .withArgs('search').returns(
-              Promise.resolve({
-                hits: {
-                  hits: [
-                    {
-                      _id: '_id1',
-                      _source: {
-                        id: 'id1'
-                      }
-                    }
-                  ]
-                }
-              })
-            )
-          };
-        },
-        createClient(credentials) {
-          return {
-            search: createClientStub.returns(
-              Promise.resolve({
-                hits: {
-                  hits: [
-                    {
-                      _id: '_id1',
-                      _source: {
-                        id: 'id1'
-                      }
-                    }
-                  ]
-                }
-              })
-            )
-          };
-        }
-      }
-    }
-  };
-  const queryHelper = new QueryHelper(fakeServer);
 
   const doc = {
     _id: '_12345_',
@@ -84,6 +28,59 @@ describe('Query Helper', function () {
   };
 
   const credentials = {user: 'user', password: 'password'};
+
+  const searchResponse = {
+    hits: {
+      hits: [
+        {
+          _id: '_id1',
+          _source: {
+            id: 'id1'
+          }
+        }
+      ]
+    }
+  };
+
+  beforeEach(function () {
+    searchStub = sinon.stub().returns(Promise.resolve(searchResponse));
+    createClientStub = sinon.stub()
+    .returns({
+      search: sinon.stub().returns(Promise.resolve(searchResponse))
+    });
+
+    fakeServer = {
+      log: function (tags, data) {},
+      config() {
+        return {
+          get(key) {
+            if (key === 'elasticsearch.url') {
+              return 'http://localhost:12345';
+            } else if (key === 'kibana.index') {
+              return '.kibi';
+            } else {
+              return '';
+            }
+          }
+        };
+      },
+      plugins: {
+        elasticsearch: {
+          getCluster() {
+            return {
+              getClient() {
+                return {
+                  search: searchStub
+                };
+              },
+              createClient: createClientStub
+            };
+          },
+        }
+      }
+    };
+    queryHelper = new QueryHelper(fakeServer);
+  });
 
   describe('fetchDocument test if correct client is used', function () {
     it('no credentials', function () {

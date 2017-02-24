@@ -7,7 +7,7 @@ function QueryHelper(server) {
   this.server = server;
   this.config = server.config();
   this.log = logger(server, 'query_helper');
-  this.callWithInternalUser = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
+  this._cluster = server.plugins.elasticsearch.getCluster('data');
 }
 
 QueryHelper.prototype.replaceVariablesForREST = function (headers, params, body, path, uri, variables, credentials) {
@@ -92,13 +92,11 @@ QueryHelper.prototype.replaceVariablesUsingEsDocument = function (s, uri, creden
 };
 
 QueryHelper.prototype.fetchDocument = function (index, type, id, credentials) {
-  // KIBI5: see how to pass credentials if still necessary
-  //let client = self.client;
-  //if (credentials) {
-    //// Every time we fetch document for index different then .kibi one we need a client with logged in user credentials
-    //client = self.server.plugins.elasticsearch.createClient(credentials);
-  //}
-  return this.callWithInternalUser('search', {
+  let client = this._cluster.getClient();
+  if (credentials) {
+    client = this._cluster.createClient(credentials);
+  }
+  return client.search({
     index: index,
     type: type,
     q: '_id: "' + id + '"'
@@ -179,7 +177,7 @@ QueryHelper.prototype._getValue = function (doc, group) {
 };
 
 QueryHelper.prototype.fetchDocuments = function (type) {
-  return this.callWithInternalUser('search', {
+  return this._cluster.callWithInternalUser('search', {
     index: this.config.get('kibana.index'),
     type: type,
     size: 100

@@ -1,4 +1,3 @@
-import elasticsearch from 'elasticsearch';
 import expect from 'expect.js';
 import sinon from 'sinon';
 import url from 'url';
@@ -49,9 +48,7 @@ export default class ModelTestHelper {
     this._server = {
       plugins: {
         elasticsearch: {
-          getCluster() {
-            return this._cluster;
-          }
+          getCluster: () => this._cluster
         },
         kibi_core: {
           getCryptoHelper: () => ({
@@ -195,7 +192,7 @@ export default class ModelTestHelper {
         body: {
           properties: {
             string: {
-              type: 'string'
+              type: 'text'
             }
           }
         }
@@ -210,17 +207,22 @@ export default class ModelTestHelper {
       const index = await this.snapshot();
       const mappingsAfter = await this.getMappings(this._typename);
 
-      sinon.assert.calledOnce(callWithInternalUserMapping);
-      sinon.assert.calledWith(callWithInternalUserMapping, 'indices.putMapping');
+      expect(callWithInternalUserMapping.withArgs('indices.putMapping').calledOnce).to.be(true);
       expect(index.get(id)._source[this._stringField]).to.be('1');
 
       const expectedMapping = {
         string: {
-          type: 'string'
+          type: 'text'
         }
       };
       expectedMapping[this._stringField] = {
-        type: 'string'
+        type: 'text',
+        fields: {
+          keyword: {
+            type: 'keyword',
+            ignore_above: 256
+          }
+        }
       };
       expect(mappingsAfter['.kibi'].mappings[this._typename].properties).to.eql(expectedMapping);
     } finally {

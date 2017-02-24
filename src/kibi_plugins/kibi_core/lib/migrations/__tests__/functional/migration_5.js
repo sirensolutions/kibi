@@ -1,4 +1,3 @@
-import elasticsearch from 'elasticsearch';
 import expect from 'expect.js';
 import _ from 'lodash';
 import sinon from 'sinon';
@@ -20,6 +19,7 @@ const serverConfig = requirefrom('test')('server_config');
 const wrapAsync = requirefrom('src/test_utils')('wrap_async');
 const indexSnapshot = requirefrom('src/test_utils')('index_snapshot');
 const ScenarioManager = requirefrom('src/test_utils')('scenario_manager');
+const { Cluster } = requirefrom('src/core_plugins/elasticsearch/lib')('cluster');
 
 describe('kibi_core/migrations/functional', function () {
 
@@ -28,15 +28,14 @@ describe('kibi_core/migrations/functional', function () {
   this.timeout(timeout);
 
   const scenarioManager = new ScenarioManager(clusterUrl, timeout);
-  const client = new elasticsearch.Client({
-    host: clusterUrl,
+  const cluster = new Cluster({
+    url: clusterUrl,
     requestTimeout: timeout
   });
 
   async function snapshot() {
-    return indexSnapshot(client, '.kibi');
+    return indexSnapshot(cluster, '.kibi');
   }
-
   describe('Migration 5 - Functional test', function () {
     let warningSpy;
     let configuration;
@@ -47,7 +46,7 @@ describe('kibi_core/migrations/functional', function () {
         await scenarioManager.reload(Scenario5);
         configuration = {
           index: '.kibi',
-          client: client,
+          client: cluster.getClient(),
           logger: {
             warning: sinon.spy(),
             info: sinon.spy()
@@ -109,7 +108,7 @@ describe('kibi_core/migrations/functional', function () {
           await scenarioManager.reload(Scenario);
           configuration = {
             index: '.kibi',
-            client: client,
+            client: cluster.getClient(),
             logger: {
               warning: sinon.spy(),
               info: sinon.spy()

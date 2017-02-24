@@ -23,18 +23,18 @@ const fakeServer = {
     elasticsearch: {
       getCluster() {
         return {
-          callWithInternalUser(method, params) {
-            if (method === 'search') {
-              return Promise.reject(new Error('Document does not exists'));
-            }
-            return Promise.reject(new Error(`Unexpected method: ${method}`));
+          getClient() {
+            return {
+              search() {
+                return Promise.reject(new Error('Document does not exists'));
+              }
+            };
           }
         };
-      }
+      },
     }
   }
 };
-
 
 const fakeDoc1 = {
   id: 'post1',

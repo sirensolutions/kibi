@@ -13,7 +13,7 @@ describe('saved_objects_api/functional', function () {
 
     const expectedMapping = {
       description: {
-        type: 'string'
+        type: 'text'
       },
       hits: {
         type: 'integer',
@@ -21,36 +21,36 @@ describe('saved_objects_api/functional', function () {
       kibanaSavedObjectMeta: {
         properties : {
           searchSourceJSON : {
-            type : 'string'
+            type : 'text'
           }
         }
       },
       optionsJSON: {
-        type: 'string'
+        type: 'text'
       },
       panelsJSON: {
-        type: 'string'
+        type: 'text'
       },
       savedSearchId: {
-        type: 'string'
+        type: 'text'
       },
       timeFrom: {
-        type: 'string'
+        type: 'text'
       },
       timeMode: {
-        type: 'string'
+        type: 'text'
       },
       timeRestore: {
         type: 'boolean'
       },
       timeTo: {
-        type: 'string'
+        type: 'text'
       },
       title: {
-        type: 'string'
+        type: 'text'
       },
       uiStateJSON: {
-        type: 'string'
+        type: 'text'
       },
       version: {
         type: 'integer'

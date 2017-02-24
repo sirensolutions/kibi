@@ -12,23 +12,23 @@ describe('saved_objects_api/functional', function () {
 
     const expectedMapping = {
       title: {
-        type: 'string'
+        type: 'text'
       },
       kibanaSavedObjectMeta: {
         properties : {
           searchSourceJSON : {
-            type : 'string'
+            type : 'text'
           }
         }
       },
       description: {
-        type: 'string'
+        type: 'text'
       },
       templateSource: {
-        type: 'string'
+        type: 'text'
       },
       templateEngine: {
-        type: 'string'
+        type: 'text'
       },
       version: {
         type: 'integer'

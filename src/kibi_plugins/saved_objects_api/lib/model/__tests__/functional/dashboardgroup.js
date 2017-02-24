@@ -12,10 +12,10 @@ describe('saved_objects_api/functional', function () {
 
     const expectedMapping = {
       description: {
-        type: 'string'
+        type: 'text'
       },
       dashboards: {
-        type: 'string'
+        type: 'text'
       },
       hide: {
         type: 'boolean',
@@ -23,18 +23,18 @@ describe('saved_objects_api/functional', function () {
       kibanaSavedObjectMeta: {
         properties : {
           searchSourceJSON : {
-            type : 'string'
+            type : 'text'
           }
         }
       },
       iconCss: {
-        type: 'string'
+        type: 'text'
       },
       iconUrl: {
-        type: 'string'
+        type: 'text'
       },
       title: {
-        type: 'string'
+        type: 'text'
       },
       priority: {
         type: 'long'

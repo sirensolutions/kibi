@@ -12,16 +12,16 @@ describe('saved_objects_api/functional', function () {
 
     const expectedMapping = {
       title: {
-        type: 'string'
+        type: 'text'
       },
       description: {
-        type: 'string'
+        type: 'text'
       },
       columns: {
-        type: 'string'
+        type: 'text'
       },
       sort: {
-        type: 'string'
+        type: 'text'
       },
       hits: {
         type: 'integer'
@@ -29,7 +29,7 @@ describe('saved_objects_api/functional', function () {
       kibanaSavedObjectMeta: {
         properties : {
           searchSourceJSON : {
-            type : 'string'
+            type : 'text'
           }
         }
       },

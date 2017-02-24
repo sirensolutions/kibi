@@ -1,4 +1,3 @@
-import chrome from 'ui/chrome';
 import _ from 'lodash';
 import SparqlHelperProvider from 'ui/kibi/helpers/sparql_helper';
 import SqlHelperProvider from 'ui/kibi/helpers/sql_helper';
@@ -7,8 +6,8 @@ import DatasourceHelperProvider from 'ui/kibi/helpers/datasource_helper';
 import RelationsHelperProvider from 'ui/kibi/helpers/relations_helper';
 import kibiUtils from 'kibiutils';
 
-export default function KibiSelectHelperFactory(config, $http, courier, indexPatterns, timefilter, Private, Promise, kibiState,
-    savedSearches, savedTemplates, savedDashboards, savedQueries, savedDatasources, kbnIndex) {
+export default function KibiSelectHelperFactory(config, indexPatterns, Private, Promise, kibiState, es, savedSearches, savedTemplates,
+  savedDashboards, savedQueries, savedDatasources) {
 
   function KibiSelectHelper() {
   }
@@ -106,11 +105,13 @@ export default function KibiSelectHelperFactory(config, $http, courier, indexPat
       return Promise.resolve([]);
     }
 
-    return $http.get(
-      chrome.getBasePath() + '/elasticsearch/' + indexPath(indexPatternId) + '/' + indexPatternType + '/_search?size=10'
-    ).then(function (response) {
+    return es.search({
+      index: indexPath(indexPatternId),
+      type: indexPatternType,
+      size: 10
+    }).then(function (response) {
       const ids = [];
-      _.each(response.data.hits.hits, function (hit) {
+      _.each(response.hits.hits, function (hit) {
         ids.push({
           label: hit._id,
           value: hit._id
@@ -127,31 +128,33 @@ export default function KibiSelectHelperFactory(config, $http, courier, indexPat
       return Promise.resolve([]);
     }
 
-    return $http.get(chrome.getBasePath() + '/elasticsearch/' + indexPath(indexPatternId) + '/_mappings')
+    return es.indices.getMapping({
+      index: indexPath(indexPatternId)
+    })
     .then(function (response) {
-      const types = [];
+      const types = new Set();
 
-
-      for (const indexId in response.data) {
-        if (response.data[indexId].mappings) {
-          for (const type in response.data[indexId].mappings) {
-            if (response.data[indexId].mappings.hasOwnProperty(type) && types.indexOf(type) === -1) {
-              types.push(type);
-            }
-          }
+      _.each(response, (mapping, indexName) => {
+        for (const type of Object.keys(mapping.mappings)) {
+          types.add(type);
         }
-      }
-      return _.map(types, function (type) {
-        return {
+      });
+
+      const typesElements = [];
+      types.forEach(type => {
+        typesElements.push({
           label: type,
           value: type
-        };
+        });
       });
+      return typesElements;
     });
   };
 
-  KibiSelectHelper.prototype.getFields = function (indexPatternId, fieldTypes, scriptedFields) {
+  KibiSelectHelper.prototype.getFields = function (indexPatternId, fieldTypes, scriptedFields = false) {
+    const metaFields = config.get('metaFields');
     let defId;
+
     if (indexPatternId) {
       defId = indexPatternId;
     } else {
@@ -159,19 +162,21 @@ export default function KibiSelectHelperFactory(config, $http, courier, indexPat
     }
 
     return indexPatterns.get(defId).then(function (index) {
-      const fields = _.chain(index.fields)
+      return _.chain(index.fields)
       .filter(function (field) {
-        // filter some fields
-        if (fieldTypes instanceof Array && fieldTypes.length > 0) {
-          return fieldTypes.indexOf(field.type) !== -1 && field.name && field.name.indexOf('_') !== 0;
-        } else {
-          return field.type !== 'boolean' && field.name && field.name.indexOf('_') !== 0 &&
-           ((scriptedFields === 'false' || scriptedFields === undefined) ?
-           !field.scripted : scriptedFields);
+        if (!field.name || _.contains(metaFields, field.name)) {
+          return false;
         }
-      }).sortBy(function (field) {
-        return field.name;
-      }).map(function (field) {
+
+        // filter some fields
+        if (Array.isArray(fieldTypes) && fieldTypes.length > 0) {
+          return _.contains(fieldTypes, field.type) && (!scriptedFields ? !field.scripted : scriptedFields);
+        } else {
+          return field.type !== 'boolean' && (!scriptedFields ? !field.scripted : scriptedFields);
+        }
+      })
+      .sortBy('name')
+      .map(function (field) {
         return {
           label: field.name,
           value: field.name,
@@ -181,13 +186,13 @@ export default function KibiSelectHelperFactory(config, $http, courier, indexPat
             scripted: field.scripted
           }
         };
-      }).value();
-      return fields;
+      })
+      .value();
     });
   };
 
   KibiSelectHelper.prototype.getIndexesId = function () {
-    return courier.indexPatterns.getIds().then(function (ids) {
+    return indexPatterns.getIds().then(function (ids) {
       const fields = _.map(ids, function (id) {
         return {
           label: id,

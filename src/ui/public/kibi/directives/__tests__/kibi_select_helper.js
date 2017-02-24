@@ -1,3 +1,4 @@
+import sinon from 'auto-release-sinon';
 import KibiSelectHelperProvider from 'ui/kibi/directives/kibi_select_helper';
 import IndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import _ from 'lodash';
@@ -5,92 +6,76 @@ import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import mockSavedObjects from 'fixtures/kibi/mock_saved_objects';
 import noDigestPromises from 'test_utils/no_digest_promises';
-
-let kibiSelectHelper;
-let config;
-let $httpBackend;
-let indexPatterns;
+import Promise from 'bluebird';
 
 describe('Kibi Directives', function () {
   describe('KibiSelect Helper', function () {
+    let kibiSelectHelper;
+    let config;
+    let indexPatterns;
+    let stubMapping;
+    let stubSearch;
+
     noDigestPromises.activateForSuite();
 
-    const init = function (opt) {
-      const defaultOptions =  {
-        savedDatasources: [],
-        savedSearches: [],
-        savedQueries: [],
-        savedTemplates: [],
-        savedDashboards: [],
-        stubIndexPatternsGetIds: false,
-        initIndexPattern: false,
-        stubConfig: false,
-        initHttpBackend: false
-      };
-
-      const options = {};
-      _.merge(options, defaultOptions, opt);
-
+    const init = function ({
+        savedDatasources = [],
+        savedSearches = [],
+        savedQueries = [],
+        savedTemplates = [],
+        savedDashboards = [],
+        stubIndexPatterns = false,
+        stubConfig = false
+      } = {}) {
       ngMock.module('kibana', function ($provide) {
         $provide.constant('kbnIndex', '.kibi');
         $provide.constant('kbnDefaultAppId', '');
         $provide.constant('kibiDefaultDashboardTitle', '');
-        $provide.constant('elasticsearchPlugins', ['siren-join']);
-        if (options.savedDatasources) {
+        $provide.constant('elasticsearchPlugins', ['siren-platform']);
+        if (savedDatasources) {
           $provide.service('savedDatasources', (Promise, Private) => {
-            return mockSavedObjects(Promise, Private)('savedDatasources', options.savedDatasources);
+            return mockSavedObjects(Promise, Private)('savedDatasources', savedDatasources);
           });
         }
-        if (options.savedSearches) {
+        if (savedSearches) {
           $provide.service('savedSearches', (Promise, Private) => {
-            return mockSavedObjects(Promise, Private)('savedSearches', options.savedSearches);
+            return mockSavedObjects(Promise, Private)('savedSearches', savedSearches);
           });
         }
       });
 
-      if (options.stubIndexPatternsGetIds) {
-        ngMock.module('kibana/courier', function ($provide) {
-          $provide.service('courier', function (Promise) {
-            return {
-              indexPatterns: {
-                getIds: function () {
-                  return Promise.resolve([ 'aaa', 'bbb' ]);
-                }
-              }
-            };
-          });
-        });
-      }
-
-      if (options.savedQueries) {
+      if (savedQueries) {
         ngMock.module('queries_editor/services/saved_queries', function ($provide) {
-          $provide.service('savedQueries', (Promise, Private) => mockSavedObjects(Promise, Private)('savedQueries', options.savedQueries));
+          $provide.service('savedQueries', (Promise, Private) => mockSavedObjects(Promise, Private)('savedQueries', savedQueries));
         });
       }
 
-      if (options.savedTemplates) {
+      if (savedTemplates) {
         ngMock.module('templates_editor/services/saved_templates', function ($provide) {
           $provide.service('savedTemplates', (Promise, Private) => {
-            return mockSavedObjects(Promise, Private)('savedTemplates', options.savedTemplates);
+            return mockSavedObjects(Promise, Private)('savedTemplates', savedTemplates);
           });
         });
       }
 
-      if (options.savedDashboards) {
+      if (savedDashboards) {
         ngMock.module('app/dashboard', function ($provide) {
           $provide.service('savedDashboards', (Promise, Private) => {
-            return mockSavedObjects(Promise, Private)('savedDashboards', options.savedDashboards);
+            return mockSavedObjects(Promise, Private)('savedDashboards', savedDashboards);
           });
         });
       }
 
-      if (options.initIndexPattern) {
+      if (stubIndexPatterns) {
         ngMock.module('kibana/index_patterns', function ($provide) {
           $provide.service('indexPatterns', function (Promise, Private) {
             const indexPattern = Private(IndexPatternProvider);
             return {
               get: function (id) {
                 return Promise.resolve(indexPattern);
+              },
+              getIds: function () {
+                return Promise.resolve([ 'aaa', 'bbb' ]);
               }
             };
           });
@@ -99,12 +84,12 @@ describe('Kibi Directives', function () {
 
       ngMock.inject(function ($injector, Private) {
         kibiSelectHelper = Private(KibiSelectHelperProvider);
-        if (options.stubConfig) {
+        if (stubConfig) {
           config = $injector.get('config');
         }
-        if (options.initHttpBackend) {
-          $httpBackend = $injector.get('$httpBackend');
-        }
+        const es = $injector.get('es');
+        stubMapping = sinon.stub(es.indices, 'getMapping');
+        stubSearch = sinon.stub(es, 'search');
       });
     };
 
@@ -212,16 +197,8 @@ describe('Kibi Directives', function () {
       }
 
       beforeEach(function () {
-        init({
-          initHttpBackend: true
-        });
+        init();
       });
-
-      afterEach(function () {
-        $httpBackend.verifyNoOutstandingExpectation();
-        $httpBackend.verifyNoOutstandingRequest();
-      });
-
 
       it('should return the ids of the given index', function (done) {
         const ids = fakeHits(
@@ -233,14 +210,13 @@ describe('Kibi Directives', function () {
           }
         );
 
-        $httpBackend.whenGET('/elasticsearch/a/A/_search?size=10').respond(200, ids);
+        stubSearch.returns(Promise.resolve(ids));
         kibiSelectHelper.getDocumentIds('a', 'A').then(function (data) {
           expect(data).to.have.length(2);
           expect(data[0]).to.eql({ label: 'id1', value: 'id1' });
           expect(data[1]).to.eql({ label: 'id2', value: 'id2' });
           done();
         }).catch(done);
-        $httpBackend.flush();
       });
 
       it('should return empty set when the index is not passed', function (done) {
@@ -454,11 +430,6 @@ describe('Kibi Directives', function () {
         });
       });
 
-      afterEach(function () {
-        $httpBackend.verifyNoOutstandingExpectation();
-        $httpBackend.verifyNoOutstandingRequest();
-      });
-
       it('no index pattern id specified', function (done) {
         kibiSelectHelper.getIndexTypes().then(function (types) {
           expect(types).to.eql([]);
@@ -473,14 +444,13 @@ describe('Kibi Directives', function () {
           }
         };
 
-        $httpBackend.whenGET('/elasticsearch/dog/_mappings').respond(200, data);
+        stubMapping.returns(Promise.resolve(data));
         kibiSelectHelper.getIndexTypes('dog').then(function (types) {
           expect(types).to.have.length(1);
           expect(types[0].label).to.be('animal');
           expect(types[0].value).to.be('animal');
           done();
         }).catch(done);
-        $httpBackend.flush();
       });
 
       it('should get the type of all returned indices', function (done) {
@@ -493,7 +463,7 @@ describe('Kibi Directives', function () {
           }
         };
 
-        $httpBackend.whenGET('/elasticsearch/dog*/_mappings').respond(200, data);
+        stubMapping.returns(Promise.resolve(data));
         kibiSelectHelper.getIndexTypes('dog*').then(function (types) {
           expect(types).to.have.length(2);
           expect(types[0].label).to.be('animal');
@@ -502,7 +472,6 @@ describe('Kibi Directives', function () {
           expect(types[1].value).to.be('hero');
           done();
         }).catch(done);
-        $httpBackend.flush();
       });
     });
 
@@ -510,7 +479,7 @@ describe('Kibi Directives', function () {
 
       beforeEach(function () {
         init({
-          initIndexPattern: true
+          stubIndexPatterns: true
         });
       });
 
@@ -528,7 +497,7 @@ describe('Kibi Directives', function () {
 
       it('should return only date fields ', function (done) {
         kibiSelectHelper.getFields(null, ['date']).then(function (fields) {
-          expect(fields.length).to.equal(3);
+          expect(fields).to.have.length(3);
           expect(_.find(fields, { label: '@timestamp' })).to.be.ok();
           expect(_.find(fields, { label: 'time' })).to.be.ok();
           expect(_.find(fields, { label: 'utc_time' })).to.be.ok();
@@ -559,19 +528,18 @@ describe('Kibi Directives', function () {
 
       beforeEach(function () {
         init({
-          stubIndexPatternsGetIds: true
+          stubIndexPatterns: true
         });
       });
 
-      it('should return the ID of indices', function (done) {
-        kibiSelectHelper.getIndexesId().then(function (ids) {
+      it('should return the ID of indices', function () {
+        return kibiSelectHelper.getIndexesId().then(function (ids) {
           expect(ids).to.have.length(2);
           expect(ids[0].label).to.be('aaa');
           expect(ids[0].value).to.be('aaa');
           expect(ids[1].label).to.be('bbb');
           expect(ids[1].value).to.be('bbb');
-          done();
-        }).catch(done);
+        });
       });
     });
 
@@ -650,7 +618,7 @@ describe('Kibi Directives', function () {
       });
 
 
-      it('should returned undefined if no query ID is passed', function (done) {
+      it('should return undefined if no query ID is passed', function (done) {
         kibiSelectHelper.getQueryVariables()
         .then(function (variables) {
           done('should fail! ' + variables);

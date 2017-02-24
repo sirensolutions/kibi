@@ -14,7 +14,6 @@ describe('Kibi Components', function () {
     let kibiState;
     let $httpBackend;
 
-
     function init(entityDisabled, selectedEntity, currentDashboardId) {
       ngMock.module(
         'kibana',
@@ -42,7 +41,8 @@ describe('Kibi Components', function () {
         }
         );
 
-      ngMock.inject(function (_kibiState_, _$rootScope_, $compile, $injector) {
+      ngMock.inject(function (config, _kibiState_, _$rootScope_, $compile, $injector) {
+        config.set('metaFields', [ '_type' ]); // reset the metaFields value
         sinon.stub(onPage, 'onDashboardPage').returns(true);
 
         kibiState = _kibiState_;
@@ -305,4 +305,3 @@ describe('Kibi Components', function () {
 
   });
 });
-

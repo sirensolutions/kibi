@@ -49,7 +49,7 @@ export default class MigrationRunner {
         for (const Migration of plugin.getMigrations()) {
           const configuration = {
             index: this._server.config().get('kibana.index'),
-            client: this._server.plugins.elasticsearch.client,
+            client: this._server.plugins.elasticsearch.getCluster("admin").getClient(),
             logger: this._logger
           };
           const migration = new Migration(configuration);

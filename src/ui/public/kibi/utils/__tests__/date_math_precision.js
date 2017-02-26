@@ -22,7 +22,7 @@ describe('kibi - parse time with precision', function () {
       parseWithPrecision(anchor, null, 'WRONG');
       expect.fail('should fail');
     } catch (e) {
-      expect(e.message).to.equal('Wrong precision argument use one of y,M,w,d,h,m,s');
+      expect(e.message).to.equal('Wrong precision argument use one of y,M,w,d,h,m,s,ms');
     }
   });
 

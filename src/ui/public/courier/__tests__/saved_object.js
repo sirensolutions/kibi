@@ -13,6 +13,9 @@ import DocSourceProvider from '../data_source/admin_doc_source';
 
 import { stubMapper } from 'test_utils/stub_mapper';
 
+// kibi: imports
+import SavedObjectSourceProvider from 'ui/courier/data_source/savedobject_source';
+import Notifier from 'ui/notify/notifier';
 
 describe('Saved Object', function () {
   require('test_utils/no_digest_promises').activateForSuite();
@@ -23,6 +26,9 @@ describe('Saved Object', function () {
   let esDataStub;
   let DocSource;
   let window;
+
+  let savedObjectsAPIStub; // kibi: stub our saved objects service
+  let SavedObjectSource; // kibi: we don't use DocSource for some object types
 
   /**
    * Some default es stubbing to avoid timeouts and allow a default type of 'dashboard'.
@@ -38,6 +44,10 @@ describe('Saved Object', function () {
         }
       }
     }));
+
+    // kibi: stub getMapping for the getPathsSequenceForIndexPattern method in index_patterns/_mapper
+    sinon.stub(esDataStub.indices, 'getMapping').returns(BluebirdPromise.resolve({}));
+    // kibi: end
 
     // Necessary to avoid a timeout condition.
     sinon.stub(esAdminStub.indices, 'putMapping').returns(BluebirdPromise.resolve());
@@ -68,6 +78,8 @@ describe('Saved Object', function () {
    * @param {Object} mockDocResponse
    */
   function stubESResponse(mockDocResponse) {
+    sinon.stub(savedObjectsAPIStub, 'mget').returns(BluebirdPromise.resolve({ docs: [mockDocResponse] }));
+    sinon.stub(savedObjectsAPIStub, 'index').returns(BluebirdPromise.resolve(mockDocResponse));
     sinon.stub(esDataStub, 'mget').returns(BluebirdPromise.resolve({ docs: [mockDocResponse] }));
     sinon.stub(esDataStub, 'index').returns(BluebirdPromise.resolve(mockDocResponse));
     sinon.stub(esAdminStub, 'mget').returns(BluebirdPromise.resolve({ docs: [mockDocResponse] }));
@@ -96,13 +108,16 @@ describe('Saved Object', function () {
       $provide.decorator('safeConfirm', () => overrideSafeConfirm);
     })
   );
-  beforeEach(ngMock.inject(function (es, esAdmin, Private, $window) {
+  beforeEach(ngMock.inject(function (savedObjectsAPI, es, esAdmin, Private, $window) {
     SavedObject = Private(SavedObjectFactory);
     IndexPattern = Private(IndexPatternFactory);
     esAdminStub = esAdmin;
     esDataStub = es;
     DocSource = Private(DocSourceProvider);
+    SavedObjectSource = Private(SavedObjectSourceProvider);
     window = $window;
+
+    savedObjectsAPIStub = savedObjectsAPI;
 
     mockEsService();
     stubMapper(Private);
@@ -115,6 +130,7 @@ describe('Saved Object', function () {
         window.confirm = sinon.stub().returns(true);
         sinon.stub(esAdminStub, 'create').returns(BluebirdPromise.reject({ status : 409 }));
         sinon.stub(esDataStub, 'create').returns(BluebirdPromise.reject({ status : 409 }));
+        sinon.stub(savedObjectsAPIStub, 'create').returns(BluebirdPromise.reject({ status : 409 }));
       }
 
       describe('when true', function () {
@@ -142,6 +158,7 @@ describe('Saved Object', function () {
             window.confirm = sinon.stub().returns(false);
             sinon.stub(esAdminStub, 'create').returns(BluebirdPromise.reject({ status : 409 }));
             sinon.stub(esDataStub, 'create').returns(BluebirdPromise.reject({ status : 409 }));
+            sinon.stub(savedObjectsAPIStub, 'create').returns(BluebirdPromise.reject({ status : 409 }));
 
             savedObject.lastSavedTitle = 'original title';
             savedObject.title = 'new title';
@@ -161,9 +178,11 @@ describe('Saved Object', function () {
             stubConfirmOverwrite();
             esAdminStub.index.restore();
             esDataStub.index.restore();
+            savedObjectsAPIStub.index.restore();
 
             sinon.stub(esAdminStub, 'index').returns(BluebirdPromise.reject());
             sinon.stub(esDataStub, 'index').returns(BluebirdPromise.reject());
+            sinon.stub(savedObjectsAPIStub, 'index').returns(BluebirdPromise.reject());
 
             return savedObject.save({ confirmOverwrite : true })
               .then(() => {
@@ -177,12 +196,15 @@ describe('Saved Object', function () {
       });
 
       it('when false does not request overwrite', function () {
+        const _doCreate = function () {
+          return BluebirdPromise.reject({ 'origError' : { 'status' : 409 } });
+        };
+
         const mockDocResponse = getMockedDocResponse('myId');
         stubESResponse(mockDocResponse);
         return createInitializedSavedObject({ type: 'dashboard', id: 'myId' }).then(savedObject => {
-          sinon.stub(DocSource.prototype, 'doCreate', function () {
-            return BluebirdPromise.reject({ 'origError' : { 'status' : 409 } });
-          });
+          sinon.stub(DocSource.prototype, 'doCreate', _doCreate);
+          sinon.stub(SavedObjectSource.prototype, 'doCreate', _doCreate);
 
           stubConfirmOverwrite();
           return savedObject.save({ confirmOverwrite : false })
@@ -199,12 +221,15 @@ describe('Saved Object', function () {
         stubESResponse(mockDocResponse);
         let newUniqueId;
         return createInitializedSavedObject({type: 'dashboard', id: 'myId'}).then(savedObject => {
-          sinon.stub(DocSource.prototype, 'doIndex', function () {
+          const _doIndex = function () {
             newUniqueId = savedObject.id;
             expect(newUniqueId).to.not.be('myId');
             mockDocResponse._id = newUniqueId;
             return BluebirdPromise.resolve(newUniqueId);
-          });
+          };
+
+          sinon.stub(DocSource.prototype, 'doIndex', _doIndex);
+          sinon.stub(SavedObjectSource.prototype, 'doIndex', _doIndex);
           savedObject.copyOnSave = true;
           return savedObject.save()
             .then((id) => {
@@ -214,18 +239,22 @@ describe('Saved Object', function () {
       });
 
       it('as true does not create a copy when save fails', function () {
+        const _doIndex = function () {
+          return BluebirdPromise.reject('simulated error');
+        };
+
         const mockDocResponse = getMockedDocResponse('myId');
         stubESResponse(mockDocResponse);
         const originalId = 'id1';
         return createInitializedSavedObject({type: 'dashboard', id: originalId}).then(savedObject => {
-          sinon.stub(DocSource.prototype, 'doIndex', function () {
-            return BluebirdPromise.reject('simulated error');
-          });
+          sinon.stub(DocSource.prototype, 'doIndex', _doIndex);
+          sinon.stub(SavedObjectSource.prototype, 'doIndex', _doIndex);
           savedObject.copyOnSave = true;
           return savedObject.save().then(() => {
             throw new Error('Expected a rejection');
           }).catch(() => {
             expect(savedObject.id).to.be(originalId);
+            Notifier.prototype._notifs.length = 0; // kibi: clear notification of the reject
           });
         });
       });
@@ -235,10 +264,13 @@ describe('Saved Object', function () {
         stubESResponse(mockDocResponse);
         const id = 'myId';
         return createInitializedSavedObject({type: 'dashboard', id: id}).then(savedObject => {
-          sinon.stub(DocSource.prototype, 'doIndex', function () {
+          const _doIndex = function () {
             expect(savedObject.id).to.be(id);
             return BluebirdPromise.resolve(id);
-          });
+          };
+
+          sinon.stub(DocSource.prototype, 'doIndex', _doIndex);
+          sinon.stub(SavedObjectSource.prototype, 'doIndex', _doIndex);
           savedObject.copyOnSave = false;
           return savedObject.save()
             .then((id) => {
@@ -264,10 +296,13 @@ describe('Saved Object', function () {
         const id = 'id';
         stubESResponse(getMockedDocResponse(id));
         return createInitializedSavedObject({type: 'dashboard', id: id}).then(savedObject => {
-          sinon.stub(DocSource.prototype, 'doIndex', () => {
+          const _doIndex = function () {
             expect(savedObject.isSaving).to.be(true);
             return BluebirdPromise.resolve(id);
-          });
+          };
+
+          sinon.stub(DocSource.prototype, 'doIndex', _doIndex);
+          sinon.stub(SavedObjectSource.prototype, 'doIndex', _doIndex);
           expect(savedObject.isSaving).to.be(false);
           return savedObject.save()
             .then((id) => {
@@ -278,10 +313,13 @@ describe('Saved Object', function () {
 
       it('on failure', function () {
         return createInitializedSavedObject({type: 'dashboard'}).then(savedObject => {
-          sinon.stub(DocSource.prototype, 'doIndex', () => {
+          const _doIndex = function () {
             expect(savedObject.isSaving).to.be(true);
             return BluebirdPromise.reject();
-          });
+          };
+
+          sinon.stub(DocSource.prototype, 'doIndex', _doIndex);
+          sinon.stub(SavedObjectSource.prototype, 'doIndex', _doIndex);
           expect(savedObject.isSaving).to.be(false);
           return savedObject.save()
             .catch(() => {

@@ -10,10 +10,10 @@ describe('Kibi Controllers', function () {
     ngMock.module('kibana', function ($provide) {
       $provide.constant('kbnDefaultAppId', '');
       $provide.constant('kibiDefaultDashboardTitle', '');
-      $provide.constant('elasticsearchPlugins', ['siren-join']);
+      $provide.constant('elasticsearchPlugins', ['siren-platform']);
     });
 
-    ngMock.module('apps/settings');
+    ngMock.module('apps/management');
 
     ngMock.module('kibana/query_engine_client', function ($provide) {
       $provide.service('queryEngineClient', function () {

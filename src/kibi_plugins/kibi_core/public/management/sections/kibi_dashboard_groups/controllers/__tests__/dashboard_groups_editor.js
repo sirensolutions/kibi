@@ -3,6 +3,7 @@ import sinon from 'auto-release-sinon';
 import ngMock from 'ng_mock';
 import $ from 'jquery';
 import mockSavedObjects from 'fixtures/kibi/mock_saved_objects';
+import Notifier from 'ui/notify/notifier';
 
 let $scope;
 let $el;
@@ -13,7 +14,7 @@ describe('Kibi Controllers', function () {
     ngMock.module('kibana', function ($provide) {
       $provide.constant('kbnDefaultAppId', '');
       $provide.constant('kibiDefaultDashboardTitle', '');
-      $provide.constant('elasticsearchPlugins', ['siren-join']);
+      $provide.constant('elasticsearchPlugins', ['siren-platform']);
     });
 
     ngMock.module('app/dashboard', function ($provide) {
@@ -31,7 +32,7 @@ describe('Kibi Controllers', function () {
               case 'Dogs':
                 return Promise.resolve({ id: 'Dogs', title: 'Boiled' });
               default:
-                return Promise.reject(new Error('try again'));
+                return Promise.reject(new Error(`Unknown dashboard ID: ${id}`));
             }
           },
           find: function () {
@@ -41,7 +42,7 @@ describe('Kibi Controllers', function () {
                   id: 'Dogs'
                 }
               ]
-              );
+            );
           }
         };
       });
@@ -50,7 +51,7 @@ describe('Kibi Controllers', function () {
       const fakeRoute = {
         current: {
           locals: {
-            dashboardGroup: dashboardGroup
+            dashboardGroup
           }
         }
       };
@@ -113,7 +114,7 @@ describe('Kibi Controllers', function () {
       expect($scope.dashboardGroup.dashboards[1].title).to.be('Water');
     });
 
-    it('should save the dashboardGroup on submit', function (done) {
+    it('should save the dashboardGroup', function (done) {
       init({
         dashboardGroup: {
           dashboards: [
@@ -124,9 +125,10 @@ describe('Kibi Controllers', function () {
         }
       });
 
-      $scope.submit();
+      $scope.saveObject();
       $scope.$on('kibi:dashboardgroup:changed', function (event, groupId) {
         expect(groupId).to.be('123');
+        Notifier.prototype._notifs.length = 0; // clear notification of the newly created object
         done();
       });
 

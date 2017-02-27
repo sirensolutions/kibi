@@ -31,7 +31,10 @@ module.exports = function (grunt) {
         'Public domain',
         'Unlicense',
         'WTFPL',
-        'new BSD, and MIT'
+        'new BSD, and MIT',
+
+        // kibi: license for node-forge
+        '(BSD-3-Clause OR GPL-2.0)',
       ],
       overrides: {
         'assert-plus@0.1.5': ['MIT'],
@@ -49,6 +52,13 @@ module.exports = function (grunt) {
         'ripemd160@0.2.0': ['MIT'],
         'select@1.0.6': ['MIT'],
         'uglify-js@2.2.5': ['BSD'],
+
+        // kibi: add our licenses
+        'JSONSelect@0.4.0': ['MIT'],
+        'cycle@1.0.3': ['Public domain'],
+        'jison-lex@0.2.1': ['Unlicense'],
+        'jison@0.4.13': ['MIT'],
+        'nomnom@1.5.2': ['MIT'],
       }
     }
   };

@@ -76,6 +76,8 @@ module.exports = function (grunt) {
       args: [
         ...stdDevArgs,
         '--server.port=' + uiConfig.servers.kibana.port,
+        // kibi: use index from config
+        '--kibana.index=' + uiConfig.servers.kibana.index,
         '--elasticsearch.url=' + format(uiConfig.servers.elasticsearch),
         ...kbnServerFlags,
       ]
@@ -92,6 +94,8 @@ module.exports = function (grunt) {
       args: [
         ...stdDevArgs,
         '--server.port=' + uiConfig.servers.kibana.port,
+        // kibi: use index from config
+        '--kibana.index=' + uiConfig.servers.kibana.index,
         '--elasticsearch.url=' + format(uiConfig.servers.elasticsearch),
         '--dev',
         '--no-base-path',

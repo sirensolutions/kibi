@@ -192,10 +192,10 @@ function controller(kibiState, $scope, $route, kbnUrl, createNotifier, queryEngi
     _enableEntityUri();
     return $scope.query.save()
     .then(function (savedQueryId) {
-      notify.info('Query ' + $scope.query.title + ' successfuly saved');
+      notify.info(`Query ${$scope.query.title} successfuly saved`);
       if (savedQueryId !== $routeParams.id) {
-        // redirect only if query.id changed !!!
-        kbnUrl.change('management/kibana/queries/' + savedQueryId);
+        // redirect only if the query id changed !!!
+        kbnUrl.change('management/kibana/queries/{{id}}', { id: savedQueryId });
       } else {
         return $scope.preview();
       }

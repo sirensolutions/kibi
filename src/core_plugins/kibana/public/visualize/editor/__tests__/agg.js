@@ -44,7 +44,7 @@ describe('Vis-Editor-Agg plugin directive', function () {
   beforeEach(ngMock.module('kibana', function ($provide) {
     $provide.constant('kbnDefaultAppId', '');
     $provide.constant('kibiDefaultDashboardTitle', '');
-    $provide.constant('elasticsearchPlugins', ['siren-join']);
+    $provide.constant('elasticsearchPlugins', ['siren-platform']);
   }));
   beforeEach(ngMock.inject(function ($rootScope, $compile) {
     $parentScope.agg = {

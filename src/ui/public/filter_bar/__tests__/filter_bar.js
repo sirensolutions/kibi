@@ -34,7 +34,7 @@ describe('Filter Bar Directive', function () {
     ngMock.module('kibana', function ($provide) {
       $provide.constant('kbnDefaultAppId', '');
       $provide.constant('kibiDefaultDashboardTitle', '');
-      $provide.constant('elasticsearchPlugins', ['siren-join']);
+      $provide.constant('elasticsearchPlugins', ['siren-platform']);
 
       $provide.service('kibiState', function () {
         return new MockState({

@@ -32,7 +32,7 @@ describe('Kibi Components', function () {
         ngMock.module('kibana', function ($provide) {
           $provide.constant('kbnDefaultAppId', '');
           $provide.constant('kibiDefaultDashboardTitle', '');
-          $provide.constant('elasticsearchPlugins', ['siren-join']);
+          $provide.constant('elasticsearchPlugins', ['siren-platform']);
         });
 
         ngMock.module('queries_editor/services/saved_queries', function ($provide) {

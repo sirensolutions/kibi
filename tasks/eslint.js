@@ -33,12 +33,12 @@ export default grunt => {
     // log the formatted linting report
     const formatter = cli.getFormatter();
 
-    const errTypes = [];
-    if (report.errorCount > 0) errTypes.push('errors');
-    if (report.warningCount > 0) errTypes.push('warning');
-    if (!errTypes.length) return;
-
-    grunt.log.write(formatter(report.results));
-    grunt.fatal(`eslint ${errTypes.join(' & ')}`);
+    // kibi: do not fail if there are only warnings
+    if (report.warningCount || report.errorCount) {
+      grunt.log.write(formatter(report.results));
+    }
+    if (report.errorCount) {
+      grunt.fatal('eslint error');
+    }
   });
 };

@@ -6,6 +6,10 @@ import AggTypesAggTypeProvider from 'ui/agg_types/agg_type';
 import VisAggConfigProvider from 'ui/vis/agg_config';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
+
+// kibi: imports
+import MockState from 'fixtures/mock_state';
+
 describe('AggConfig', function () {
 
   let Vis;
@@ -14,7 +18,11 @@ describe('AggConfig', function () {
   let indexPattern;
   let fieldFormat;
 
-  beforeEach(ngMock.module('kibana'));
+  beforeEach(ngMock.module('kibana', $provide => {
+    $provide.service('kibiState', function () {
+      return new MockState({ filters: [] });
+    });
+  }));
   beforeEach(ngMock.inject(function (Private) {
     Vis = Private(VisProvider);
     AggType = Private(AggTypesAggTypeProvider);

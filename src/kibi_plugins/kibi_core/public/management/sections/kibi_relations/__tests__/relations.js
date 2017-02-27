@@ -18,7 +18,7 @@ describe('Kibi Management', function () {
       $provide.constant('kbnDefaultAppId', 'dashboard');
       $provide.constant('kibiDefaultDashboardTitle', '');
       $provide.constant('kibiEnterpriseEnabled', false);
-      $provide.constant('elasticsearchPlugins', ['siren-join']);
+      $provide.constant('elasticsearchPlugins', ['siren-platform']);
     });
 
     ngMock.module('discover/saved_searches', function ($provide) {
@@ -39,7 +39,7 @@ describe('Kibi Management', function () {
           stub.withArgs(
             sinon.match.has('index', indices)
             .and(sinon.match.has('type', type))
-            .and(sinon.match.has('field', [ path ]))
+            .and(sinon.match.has('fields', [ path ]))
           ).returns(Promise.resolve(mappings));
         });
       }
@@ -139,19 +139,16 @@ describe('Kibi Management', function () {
         ]
       }));
 
-      it('should return the expected dashboards/index associations',
-        function (done) {
-          const expected = {
-            'search-ste': ['search-ste'],
-            'time-testing-4': ['time-testing-4']
-          };
+      it('should return the expected dashboards/index associations', function () {
+        const expected = {
+          'search-ste': ['search-ste'],
+          'time-testing-4': ['time-testing-4']
+        };
 
-          $scope.getIndexToDashboardMap().then(function (results) {
-            expect(results, expected);
-            done();
-          }).catch(done);
-        }
-      );
+        return $scope.getIndexToDashboardMap().then(function (results) {
+          expect(results, expected);
+        });
+      });
     });
 
     describe('index patterns graph', function () {
@@ -177,7 +174,7 @@ describe('Kibi Management', function () {
           ]
         };
 
-        init({ relations: relations });
+        init({ relations });
         _.each($scope.relations.relationsIndices, function (relation) {
           expect(relation.errors).to.have.length(0);
         });
@@ -202,7 +199,7 @@ describe('Kibi Management', function () {
           ]
         };
 
-        init({ relations: relations });
+        init({ relations });
         _.each($scope.relations.relationsIndices, function (relation) {
           expect(relation.errors).to.eql([ 'Left and right sides of the relation cannot be the same.' ]);
         });
@@ -211,7 +208,7 @@ describe('Kibi Management', function () {
       describe('check field mapping for the siren-join', function () {
         noDigestPromises.activateForSuite();
 
-        it('should throw an error if join fields do not have compatible mapping', function (done) {
+        it('should throw an error if join fields do not have compatible mapping', function () {
           init({
             digest: false,
             relations: {
@@ -319,18 +316,18 @@ describe('Kibi Management', function () {
               }
             ]
           });
-          $scope.updateIndicesGraph()
+
+          return $scope.updateIndicesGraph()
           .then(function () {
             expect($scope.relations.relationsIndices).to.have.length(2);
             _.each($scope.relations.relationsIndices, function (relation) {
               expect(relation.errors).to.have.length(1);
               expect(relation.errors[0]).to.match(/Incompatible/);
             });
-            done();
-          }).catch(done);
+          });
         });
 
-        it('should support nested fields', function (done) {
+        it('should support nested fields', function () {
           init({
             digest: false,
             relations: {
@@ -438,18 +435,18 @@ describe('Kibi Management', function () {
               }
             ]
           });
-          $scope.updateIndicesGraph()
+
+          return $scope.updateIndicesGraph()
           .then(function () {
             expect($scope.relations.relationsIndices).to.have.length(2);
             _.each($scope.relations.relationsIndices, function (relation) {
               expect(relation.errors).to.have.length(1);
               expect(relation.errors[0]).to.match(/Incompatible/);
             });
-            done();
-          }).catch(done);
+          });
         });
 
-        it('should support index patterns 1', function (done) {
+        it('should support index patterns 1', function () {
           init({
             digest: false,
             relations: {
@@ -523,18 +520,18 @@ describe('Kibi Management', function () {
               }
             ]
           });
-          $scope.updateIndicesGraph()
+
+          return $scope.updateIndicesGraph()
           .then(function () {
             expect($scope.relations.relationsIndices).to.have.length(1);
             _.each($scope.relations.relationsIndices, function (relation) {
               expect(relation.errors).to.have.length(1);
               expect(relation.errors[0]).to.match(/differ on some indices matching the pattern a\*/);
             });
-            done();
-          }).catch(done);
+          });
         });
 
-        it('should support index patterns 2', function (done) {
+        it('should support index patterns 2', function () {
           init({
             digest: false,
             relations: {
@@ -608,15 +605,15 @@ describe('Kibi Management', function () {
               }
             ]
           });
-          $scope.updateIndicesGraph()
+
+          return $scope.updateIndicesGraph()
           .then(function () {
             expect($scope.relations.relationsIndices).to.have.length(1);
             _.each($scope.relations.relationsIndices, function (relation) {
               expect(relation.errors).to.have.length(1);
               expect(relation.errors[0]).to.match(/differ on some indices matching the pattern b\*/);
             });
-            done();
-          }).catch(done);
+          });
         });
       });
 
@@ -652,7 +649,7 @@ describe('Kibi Management', function () {
           ]
         };
 
-        init({ relations: relations });
+        init({ relations });
         _.each($scope.relations.relationsIndices, function (relation) {
           expect(relation.errors).to.eql([ 'These relationships are equivalent, please remove one.' ]);
         });
@@ -690,7 +687,7 @@ describe('Kibi Management', function () {
           ]
         };
 
-        init({ relations: relations });
+        init({ relations });
         expect(_($scope.relations.relationsIndices).pluck('id').uniq().compact().value()).to.have.length(2);
       });
 
@@ -729,12 +726,12 @@ describe('Kibi Management', function () {
         };
 
         init(options);
-        $scope.submit();
+        return $scope.saveObject();
       });
     });
 
     describe('dashboards graph', function () {
-      it('should remove all if all components are defined - what is retained is up to st-select', function (done) {
+      it('should remove all if all components are defined - what is retained is up to st-select', function () {
         const relations = {
           relationsIndices: [
             {
@@ -779,18 +776,17 @@ describe('Kibi Management', function () {
           'index-c': [ 'Dc' ]
         };
 
-        init({ relations: relations, indexToDashboardsMap: map });
-        indexToDashboardMapPromise.then(function () {
+        init({ relations, indexToDashboardsMap: map });
+        return indexToDashboardMapPromise.then(function () {
           expect($scope.relations.relationsDashboards).to.have.length(1);
           expect($scope.filterDashboards({ value: 'Da1' }, {rowIndex: 0}, false)).to.be(true);
           expect($scope.filterDashboards({ value: 'Da2' }, {rowIndex: 0}, false)).to.be(true);
           expect($scope.filterDashboards({ value: 'Db' }, {rowIndex: 0}, false)).to.be(true);
           expect($scope.filterDashboards({ value: 'Dc' }, {rowIndex: 0}, false)).to.be(true);
-          done();
         });
       });
 
-      it('should test for the watched value of filterDashboards', function (done) {
+      it('should test for the watched value of filterDashboards', function () {
         const relations = {
           relationsIndices: [
             {
@@ -839,8 +835,8 @@ describe('Kibi Management', function () {
           'index-c': [ 'Dc' ]
         };
 
-        init({ relations: relations, indexToDashboardsMap: map });
-        indexToDashboardMapPromise.then(function () {
+        init({ relations, indexToDashboardsMap: map });
+        return indexToDashboardMapPromise.then(function () {
           expect($scope.relations.relationsDashboards).to.have.length(2);
           const actual = $scope.filterDashboards(null, {rowIndex: 1}, false);
           expect(actual).to.have.length(4);
@@ -848,11 +844,10 @@ describe('Kibi Management', function () {
           expect(actual[1]).to.be('index-b//path-b/index-c//path-c');
           expect(actual[2].dashboards).to.eql([ 'Db', 'Dc' ]);
           expect(actual[3]).to.be(map);
-          done();
-        }).catch(done);
+        });
       });
 
-      it('should support dashboards recommendation connected with a loop', function (done) {
+      it('should support dashboards recommendation connected with a loop', function () {
         const relations = {
           relationsIndices: [
             {
@@ -896,18 +891,17 @@ describe('Kibi Management', function () {
           'index-c': [ 'Dc' ]
         };
 
-        init({ relations: relations, indexToDashboardsMap: map });
-        indexToDashboardMapPromise.then(function () {
+        init({ relations, indexToDashboardsMap: map });
+        return indexToDashboardMapPromise.then(function () {
           expect($scope.relations.relationsDashboards).to.have.length(1);
           expect($scope.filterDashboards({ value: 'Da1' }, {rowIndex: 0}, false)).to.be(false);
           expect($scope.filterDashboards({ value: 'Da2' }, {rowIndex: 0}, false)).to.be(false);
           expect($scope.filterDashboards({ value: 'Db' }, {rowIndex: 0}, false)).to.be(true);
           expect($scope.filterDashboards({ value: 'Dc' }, {rowIndex: 0}, false)).to.be(true);
-          done();
-        }).catch(done);
+        });
       });
 
-      it('should only recommend connected dashboards', function (done) {
+      it('should only recommend connected dashboards', function () {
         const relations = {
           relationsIndices: [
             {
@@ -951,18 +945,17 @@ describe('Kibi Management', function () {
           'index-c': [ 'Dc' ]
         };
 
-        init({ relations: relations, indexToDashboardsMap: map });
-        indexToDashboardMapPromise.then(function () {
+        init({ relations, indexToDashboardsMap: map });
+        return indexToDashboardMapPromise.then(function () {
           expect($scope.relations.relationsDashboards).to.have.length(1);
           expect($scope.filterDashboards({ value: 'Da1' }, {rowIndex: 0}, false)).to.be(true);
           expect($scope.filterDashboards({ value: 'Da2' }, {rowIndex: 0}, false)).to.be(true);
           expect($scope.filterDashboards({ value: 'Db' }, {rowIndex: 0}, false)).to.be(false);
           expect($scope.filterDashboards({ value: 'Dc' }, {rowIndex: 0}, false)).to.be(true);
-          done();
-        }).catch(done);
+        });
       });
 
-      it('should NOT filter dashboard when it is already selected', function (done) {
+      it('should NOT filter dashboard when it is already selected', function () {
         const relations = {
           relationsIndices: [
             {
@@ -1005,18 +998,16 @@ describe('Kibi Management', function () {
           'index-a': [ 'Da' ],
           'index-b': [ 'Db' ]
         };
-        init({ relations: relations, indexToDashboardsMap: map });
-        indexToDashboardMapPromise.then(function () {
+        init({ relations, indexToDashboardsMap: map });
+        return indexToDashboardMapPromise.then(function () {
           expect($scope.filterDashboards({ value: 'Da' }, {rowIndex: 0}, false)).to.be(true);
           expect($scope.filterDashboards({ value: 'Da' }, {rowIndex: 0}, undefined)).to.be(true);
           // but if already selected it should not be filter out
           expect($scope.filterDashboards({ value: 'Da' }, {rowIndex: 0}, true)).to.be(false);
-          done();
-        }).catch(done);
-
+        });
       });
 
-      it('should filter dashboards based on the selected relation', function (done) {
+      it('should filter dashboards based on the selected relation', function () {
         const relations = {
           relationsIndices: [
             {
@@ -1076,18 +1067,17 @@ describe('Kibi Management', function () {
           'index-d': [ 'Dd' ]
         };
 
-        init({ relations: relations, indexToDashboardsMap: map });
-        indexToDashboardMapPromise.then(function () {
+        init({ relations, indexToDashboardsMap: map });
+        return indexToDashboardMapPromise.then(function () {
           expect($scope.filterDashboards({ value: 'Da1' }, {rowIndex: 0}, false)).to.be(false);
           expect($scope.filterDashboards({ value: 'Da2' }, {rowIndex: 0}, false)).to.be(false);
           expect($scope.filterDashboards({ value: 'Db' }, {rowIndex: 0}, false)).to.be(true);
           expect($scope.filterDashboards({ value: 'Dc' }, {rowIndex: 0}, false)).to.be(true);
           expect($scope.filterDashboards({ value: 'Dd' }, {rowIndex: 0}, false)).to.be(true);
-          done();
-        }).catch(done);
+        });
       });
 
-      it('should NOT filter relation when it is already selected', function (done) {
+      it('should NOT filter relation when it is already selected', function () {
         const relations = {
           relationsIndices: [{
             indices: [{
@@ -1132,8 +1122,8 @@ describe('Kibi Management', function () {
           'index-c': ['Dc']
         };
 
-        init({ relations: relations, indexToDashboardsMap: map });
-        indexToDashboardMapPromise.then(function () {
+        init({ relations, indexToDashboardsMap: map });
+        return indexToDashboardMapPromise.then(function () {
           expect($scope.filterRelations({ value: 'index-a//path-a/index-b//path-b' }, { rowIndex: 0 }, false)).to.be(false);
           expect($scope.filterRelations({ value: 'index-a//path-a/index-b//path-b' }, { rowIndex: 0 }, undefined)).to.be(false);
           expect($scope.filterRelations({ value: 'index-a//path-a/index-b//path-b' }, { rowIndex: 0 }, true)).to.be(false);
@@ -1142,11 +1132,10 @@ describe('Kibi Management', function () {
           expect($scope.filterRelations({ value: 'index-b//path-b/index-c//path-c' }, { rowIndex: 0 }, undefined)).to.be(true);
           // here normally it should be filtered out but not when it was already selected
           expect($scope.filterRelations({ value: 'index-b//path-b/index-c//path-c' }, { rowIndex: 0 }, true)).to.be(false);
-          done();
-        }).catch(done);
+        });
       });
 
-      it('should filter relation that already appear between two dashboards in case of a multiedge graph', function (done) {
+      it('should filter relation that already appear between two dashboards in case of a multiedge graph', function () {
         const relations = {
           relationsIndices: [
             {
@@ -1175,16 +1164,15 @@ describe('Kibi Management', function () {
           'index-b': [ 'Db' ]
         };
 
-        init({ relations: relations, indexToDashboardsMap: map });
-        indexToDashboardMapPromise.then(function () {
+        init({ relations, indexToDashboardsMap: map });
+        return indexToDashboardMapPromise.then(function () {
           expect($scope.filterRelations({ value: 'index-a//path-a1/index-b//path-b' }, {rowIndex: 0}, false)).to.be(false);
           expect($scope.filterRelations({ value: 'index-a//path-a1/index-b//path-b' }, {rowIndex: 1}, false)).to.be(true);
           expect($scope.filterRelations({ value: 'index-a//path-a2/index-b//path-b' }, {rowIndex: 1}, false)).to.be(false);
-          done();
-        }).catch(done);
+        });
       });
 
-      it('should filter relation depending on the row', function (done) {
+      it('should filter relation depending on the row', function () {
         const relations = {
           relationsIndices: [
             {
@@ -1246,19 +1234,18 @@ describe('Kibi Management', function () {
           'index-d': [ 'Dd' ]
         };
 
-        init({ relations: relations, indexToDashboardsMap: map });
-        indexToDashboardMapPromise.then(function () {
+        init({ relations, indexToDashboardsMap: map });
+        return indexToDashboardMapPromise.then(function () {
           expect($scope.filterRelations({ value: 'index-a//path-a/index-b//path-b' }, {rowIndex: 0}, false)).to.be(false);
           expect($scope.filterRelations({ value: 'index-b//path-b/index-c//path-c' }, {rowIndex: 0}, false)).to.be(false);
           expect($scope.filterRelations({ value: 'index-c//path-c/index-d//path-d' }, {rowIndex: 0}, false)).to.be(true);
           expect($scope.filterRelations({ value: 'index-a//path-a/index-b//path-b' }, {rowIndex: 1}, false)).to.be(true);
           expect($scope.filterRelations({ value: 'index-b//path-b/index-c//path-c' }, {rowIndex: 1}, false)).to.be(false);
           expect($scope.filterRelations({ value: 'index-c//path-c/index-d//path-d' }, {rowIndex: 1}, false)).to.be(false);
-          done();
-        }).catch(done);
+        });
       });
 
-      it('should filter possible dashboards based on the selected relation', function (done) {
+      it('should filter possible dashboards based on the selected relation', function () {
         const relations = {
           relationsIndices: [
             {
@@ -1318,19 +1305,18 @@ describe('Kibi Management', function () {
           'index-d': [ 'Dd' ]
         };
 
-        init({ relations: relations, indexToDashboardsMap: map });
-        indexToDashboardMapPromise.then(function () {
+        init({ relations, indexToDashboardsMap: map });
+        return indexToDashboardMapPromise.then(function () {
           expect($scope.filterDashboards({ value: 'Da1' }, {rowIndex: 0}, false)).to.be(false);
           expect($scope.filterDashboards({ value: 'Da2' }, {rowIndex: 0}, false)).to.be(false);
           expect($scope.filterDashboards({ value: 'Db1' }, {rowIndex: 0}, false)).to.be(false);
           expect($scope.filterDashboards({ value: 'Db2' }, {rowIndex: 0}, false)).to.be(false);
           expect($scope.filterDashboards({ value: 'Dc' }, {rowIndex: 0}, false)).to.be(true);
           expect($scope.filterDashboards({ value: 'Dd' }, {rowIndex: 0}, false)).to.be(true);
-          done();
-        }).catch(done);
+        });
       });
 
-      it('should test for the watched value of filterRelations', function (done) {
+      it('should test for the watched value of filterRelations', function () {
         const relations = {
           relationsIndices: [
             {
@@ -1393,8 +1379,8 @@ describe('Kibi Management', function () {
           'index-d': [ 'Dd' ]
         };
 
-        init({ relations: relations, indexToDashboardsMap: map });
-        indexToDashboardMapPromise.then(function () {
+        init({ relations, indexToDashboardsMap: map });
+        return indexToDashboardMapPromise.then(function () {
           expect($scope.filterRelations(null, {rowIndex: 1}, undefined)).to.eql([
             'index-a//path-a/index-b//path-b',
             'index-b//path-b/index-c//path-c',
@@ -1406,11 +1392,10 @@ describe('Kibi Management', function () {
             'Db',
             map
           ]);
-          done();
-        }).catch(done);
+        });
       });
 
-      it('should not filter if no dashboard is selected', function (done) {
+      it('should not filter if no dashboard is selected', function () {
         const relations = {
           relationsIndices: [
             {
@@ -1469,16 +1454,15 @@ describe('Kibi Management', function () {
           'index-d': [ 'Dd' ]
         };
 
-        init({ relations: relations, indexToDashboardsMap: map });
-        indexToDashboardMapPromise.then(function () {
+        init({ relations, indexToDashboardsMap: map });
+        return indexToDashboardMapPromise.then(function () {
           expect($scope.filterRelations({ value: 'index-a//path-a/index-b//path-b' }, {rowIndex: 0})).to.be(false);
           expect($scope.filterRelations({ value: 'index-b//path-b/index-c//path-c' }, {rowIndex: 0})).to.be(false);
           expect($scope.filterRelations({ value: 'index-c//path-c/index-d//path-d' }, {rowIndex: 0})).to.be(false);
-          done();
-        }).catch(done);
+        });
       });
 
-      it('should return only the relations adjacent to a dashboard', function (done) {
+      it('should return only the relations adjacent to a dashboard', function () {
         const relations = {
           relationsIndices: [
             {
@@ -1537,16 +1521,15 @@ describe('Kibi Management', function () {
           'index-d': [ 'Dd' ]
         };
 
-        init({ relations: relations, indexToDashboardsMap: map });
-        indexToDashboardMapPromise.then(function () {
+        init({ relations, indexToDashboardsMap: map });
+        return indexToDashboardMapPromise.then(function () {
           expect($scope.filterRelations({ value: 'index-a//path-a/index-b//path-b' }, {rowIndex: 0}, false)).to.be(true);
           expect($scope.filterRelations({ value: 'index-b//path-b/index-c//path-c' }, {rowIndex: 0}, false)).to.be(false);
           expect($scope.filterRelations({ value: 'index-c//path-c/index-d//path-d' }, {rowIndex: 0}, false)).to.be(false);
-          done();
-        }).catch(done);
+        });
       });
 
-      it('should support relations that have the same label 1', function (done) {
+      it('should support relations that have the same label 1', function () {
         const relations = {
           relationsIndices: [
             {
@@ -1605,16 +1588,15 @@ describe('Kibi Management', function () {
           'index-d': [ 'Dd' ]
         };
 
-        init({ relations: relations, indexToDashboardsMap: map });
-        indexToDashboardMapPromise.then(function () {
+        init({ relations, indexToDashboardsMap: map });
+        return indexToDashboardMapPromise.then(function () {
           expect($scope.filterRelations({ value: 'index-a//path-a1/index-b//path-b1' }, {rowIndex: 0}, false)).to.be(false);
           expect($scope.filterRelations({ value: 'index-a//path-a2/index-b//path-b2' }, {rowIndex: 0}, false)).to.be(false);
           expect($scope.filterRelations({ value: 'index-c//path-c/index-d//path-d' }, {rowIndex: 0}, false)).to.be(true);
-          done();
-        }).catch(done);
+        });
       });
 
-      it('should support relations that have the same label 2', function (done) {
+      it('should support relations that have the same label 2', function () {
         const relations = {
           relationsIndices: [
             {
@@ -1662,16 +1644,15 @@ describe('Kibi Management', function () {
           'index-b': [ 'Db' ]
         };
 
-        init({ relations: relations, indexToDashboardsMap: map });
-        indexToDashboardMapPromise.then(function () {
+        init({ relations, indexToDashboardsMap: map });
+        return indexToDashboardMapPromise.then(function () {
           expect($scope.relations.relationsDashboards).to.have.length(2);
           expect($scope.relations.relationsDashboards[0].errors).to.have.length(0);
           expect($scope.relations.relationsDashboards[1].errors).to.have.length(0);
-          done();
-        }).catch(done);
+        });
       });
 
-      it('should throw an error if two dashboards are connected via a same relation', function (done) {
+      it('should throw an error if two dashboards are connected via a same relation', function () {
         const relations = {
           relationsIndices: [
             {
@@ -1705,13 +1686,12 @@ describe('Kibi Management', function () {
           'index-b': [ 'Db' ]
         };
 
-        init({ relations: relations, indexToDashboardsMap: map });
-        indexToDashboardMapPromise.then(function () {
+        init({ relations, indexToDashboardsMap: map });
+        return indexToDashboardMapPromise.then(function () {
           expect($scope.relations.relationsDashboards).to.have.length(2);
           expect($scope.relations.relationsDashboards[0].errors).to.eql([ 'These relationships are equivalent, please remove one.' ]);
           expect($scope.relations.relationsDashboards[1].errors).to.eql([ 'These relationships are equivalent, please remove one.' ]);
-          done();
-        }).catch(done);
+        });
       });
     });
   });

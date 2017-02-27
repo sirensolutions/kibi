@@ -24,7 +24,7 @@ window.__KBN__ = {
   version: '1.2.3',
   buildNum: 1234,
   vars: {
-    kbnIndex: '.kibana',
+    kbnIndex: '.kibi', // kibi: sets kbnIndex to the .kibi index
     esShardTimeout: 1500,
     esApiVersion: '5.x',
     esRequestTimeout: '300000',
@@ -38,7 +38,7 @@ window.__KBN__ = {
             maxZoom: 10,
             attribution: '© [Elastic Tile Service](https://www.elastic.co/elastic_tile_service)'
           }
-        }        
+        }
       },
       manifestServiceUrl: 'https://proxy-tiles.elastic.co/v1/manifest'
     }

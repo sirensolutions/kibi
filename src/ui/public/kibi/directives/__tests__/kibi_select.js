@@ -5,6 +5,7 @@ import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import '../kibi_select';
 import SelectHelperProvider from 'ui/kibi/directives/kibi_select_helper';
+import MockState from 'fixtures/mock_state';
 
 let $rootScope;
 let $scope;
@@ -21,15 +22,16 @@ const init = function ({
   options = null
 }) {
   // Load the application
-  ngMock.module('kibana', function ($provide) {
-    $provide.constant('elasticsearchPlugins', ['siren-join']);
-    $provide.constant('kbnDefaultAppId', '');
-    $provide.constant('kibiDefaultDashboardTitle', '');
+  ngMock.module('kibana', $provide => {
+    $provide.service('kibiState', function () {
+      return new MockState({ filters: [] });
+    });
+    $provide.constant('kibiDatasourcesSchema', {});
   });
 
   // Create the scope
   ngMock.inject(function (Private, _$rootScope_, $compile, Promise) {
-    $rootScope = _$rootScope_;
+    $rootScope = _$rootScope_.$new();
     $rootScope.model = initValue;
 
     const selectHelper = Private(SelectHelperProvider);

@@ -4,7 +4,7 @@ import { parseWithPrecision } from 'ui/kibi/utils/date_math_precision';
 import uniqFilters from 'ui/filter_bar/lib/uniq_filters';
 import { toJson } from 'ui/utils/aggressive_parse';
 import angular from 'angular';
-import * as onPage from 'ui/kibi/utils/on_page';
+import { onManagementPage, onDashboardPage, onVisualizePage } from 'ui/kibi/utils/on_page';
 import uiModules from 'ui/modules';
 import uiRoutes from 'ui/routes';
 import StateManagementStateProvider from 'ui/state_management/state';
@@ -199,13 +199,13 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
   };
 
   KibiState.prototype.setEntityURI = function (entityURI) {
-    if (onPage.onDashboardPage()) {
+    if (onDashboardPage()) {
       if (!entityURI) {
         delete this[this._properties.selected_entity];
       } else {
         this[this._properties.selected_entity] = entityURI;
       }
-    } else if (onPage.onVisualizePage() || onPage.onManagementPage()) {
+    } else if (onVisualizePage() || onManagementPage()) {
       if (!entityURI) {
         delete this[this._properties.test_selected_entity];
       } else {
@@ -217,9 +217,9 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
   };
 
   KibiState.prototype.getEntityURI = function () {
-    if (onPage.onDashboardPage()) {
+    if (onDashboardPage()) {
       return this[this._properties.selected_entity];
-    } else if (onPage.onVisualizePage() || onPage.onManagementPage()) {
+    } else if (onVisualizePage() || onManagementPage()) {
       return this[this._properties.test_selected_entity];
     }
     throw new Error('Cannot get entity URI because you are not on dashboard/visualize/settings');

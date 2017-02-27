@@ -21,7 +21,7 @@ describe('AggConfigs', function () {
   beforeEach(ngMock.module('kibana', function ($provide) {
     $provide.constant('kbnDefaultAppId', '');
     $provide.constant('kibiDefaultDashboardTitle', '');
-    $provide.constant('elasticsearchPlugins', ['siren-join']);
+    $provide.constant('elasticsearchPlugins', ['siren-platform']);
   }));
   beforeEach(ngMock.inject(function (Private) {
     // replace the AggConfig module with a spy

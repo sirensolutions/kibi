@@ -4,7 +4,7 @@ import angular from 'angular';
 import _ from 'lodash';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import onPage from 'ui/kibi/utils/on_page';
+import * as onPage from 'ui/kibi/utils/on_page';
 import 'ui/kibi/directives/kibi_param_entity_uri';
 import SavedObjectProvider from 'ui/courier/saved_object/saved_object';
 
@@ -16,7 +16,8 @@ const init = function (entityURI, mappings) {
   ngMock.module('kibana', function ($compileProvider, $provide) {
     $provide.constant('kbnDefaultAppId', '');
     $provide.constant('kibiDefaultDashboardTitle', '');
-    $provide.constant('elasticsearchPlugins', ['siren-join']);
+    $provide.constant('elasticsearchPlugins', ['siren-platform']);
+    $provide.constant('kibiDatasourcesSchema', {});
 
     $compileProvider.directive('kibiSelect', function () {
       return {

@@ -14,7 +14,9 @@ describe('Kibi Services', function () {
 
     beforeEach(function () {
 
-      ngMock.module('kibana');
+      ngMock.module('kibana', $provide => {
+        $provide.constant('kibiDatasourcesSchema', {});
+      });
 
       ngMock.inject(function ($injector, Private, _$rootScope_) {
         savedDatasources = $injector.get('savedDatasources');

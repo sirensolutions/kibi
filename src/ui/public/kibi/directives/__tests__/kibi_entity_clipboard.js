@@ -1,7 +1,7 @@
 import sinon from 'auto-release-sinon';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import onPage from 'ui/kibi/utils/on_page';
+import * as onPage from 'ui/kibi/utils/on_page';
 import MockState from 'fixtures/mock_state';
 import _ from 'lodash';
 import '../kibi_entity_clipboard';
@@ -14,7 +14,6 @@ describe('Kibi Components', function () {
     let kibiState;
     let $httpBackend;
 
-
     function init(entityDisabled, selectedEntity, currentDashboardId) {
       ngMock.module(
         'kibana',
@@ -23,7 +22,7 @@ describe('Kibi Components', function () {
         function ($provide) {
           $provide.constant('kbnDefaultAppId', '');
           $provide.constant('kibiDefaultDashboardTitle', '');
-          $provide.constant('elasticsearchPlugins', ['siren-join']);
+          $provide.constant('elasticsearchPlugins', ['siren-platform']);
           $provide.service('$route', function () {
             return {
               reload: _.noop
@@ -42,11 +41,13 @@ describe('Kibi Components', function () {
         }
         );
 
-      ngMock.inject(function (_kibiState_, _$rootScope_, $compile, $injector) {
+      ngMock.inject(function (config, _kibiState_, _$rootScope_, $compile, $injector) {
+        config.set('metaFields', [ '_type' ]); // reset the metaFields value
         sinon.stub(onPage, 'onDashboardPage').returns(true);
 
         kibiState = _kibiState_;
         kibiState.setEntityURI(selectedEntity);
+        kibiState.disableSelectedEntity(entityDisabled);
 
         $rootScope = _$rootScope_;
         $httpBackend = $injector.get('$httpBackend');

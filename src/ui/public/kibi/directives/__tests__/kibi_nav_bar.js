@@ -16,7 +16,7 @@ describe('Kibi Components', function () {
   describe('Navigation Bar', function () {
     beforeEach(function () {
       ngMock.module('kibana', ($provide) => {
-        $provide.constant('elasticsearchPlugins', ['siren-join']);
+        $provide.constant('elasticsearchPlugins', ['siren-platform']);
         $provide.constant('kbnDefaultAppId', '');
         $provide.constant('kibiDefaultDashboardTitle', '');
 

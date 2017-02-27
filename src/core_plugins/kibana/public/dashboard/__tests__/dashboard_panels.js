@@ -30,9 +30,10 @@ describe('dashboard panels', function () {
     return $scope.state.panels.find((panel) => { return panel.id === id; });
   }
 
-  beforeEach(() => {
-    ngMock.module('kibana');
-  });
+  beforeEach(ngMock.module('kibana', $provide => {
+    $provide.constant('elasticsearchPlugins', ['siren-platform']);
+    $provide.constant('kibiDatasourcesSchema', {});
+  }));
 
   afterEach(() => {
     $scope.$destroy();

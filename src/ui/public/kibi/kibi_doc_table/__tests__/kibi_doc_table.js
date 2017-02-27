@@ -44,7 +44,7 @@ describe('Kibi doc table', function () {
   beforeEach(ngMock.module('kibana', function ($provide) {
     $provide.constant('kbnDefaultAppId', '');
     $provide.constant('kibiDefaultDashboardTitle', '');
-    $provide.constant('elasticsearchPlugins', ['siren-join']);
+    $provide.constant('elasticsearchPlugins', ['siren-platform']);
   }));
 
   beforeEach(function () {
@@ -67,10 +67,6 @@ describe('Kibi doc table', function () {
 
   it('should compile', function () {
     expect($elem.text()).to.not.be.empty();
-  });
-
-  it('should set the source filtering defintion', function () {
-    expect($scope.indexPattern.getSourceFiltering.called).to.be(true);
   });
 
   it('should set the indexPattern to that of the searchSource', function () {
@@ -231,7 +227,7 @@ describe('Kibi doc table', function () {
         expect(call.args[0].slices).to.eql([
           'time,one,two,"with double-quotes("")"' + '\r\n' +
             // "-" this is the time column since the index pattern has a time field.
-            '"-",1,2,"""foobar"""' + '\r\n'
+            '" - ",1,2,"""foobar"""' + '\r\n'
         ]);
         expect(call.args[0].opts).to.eql({
           type: 'text/plain'
@@ -277,10 +273,6 @@ describe('Kibi doc table', function () {
         });
         expect(call.args[1]).to.be('my-table.csv');
       });
-    });
-
-    it('should set the source filtering definition', function () {
-      expect($scope.indexPattern.getSourceFiltering.called).to.be(true);
     });
   });
 });

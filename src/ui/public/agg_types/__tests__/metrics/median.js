@@ -3,6 +3,7 @@ import ngMock from 'ng_mock';
 import AggTypeMetricMedianProvider from 'ui/agg_types/metrics/median';
 import VisProvider from 'ui/vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import MockState from 'fixtures/mock_state';
 
 describe('AggTypeMetricMedianProvider class', function () {
 
@@ -11,7 +12,11 @@ describe('AggTypeMetricMedianProvider class', function () {
   let aggTypeMetricMedian;
   let aggDsl;
 
-  beforeEach(ngMock.module('kibana'));
+  beforeEach(ngMock.module('kibana', $provide => {
+    $provide.service('kibiState', function () {
+      return new MockState({ filters: [] });
+    });
+  }));
   beforeEach(ngMock.inject(function (Private) {
     const Vis = Private(VisProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);

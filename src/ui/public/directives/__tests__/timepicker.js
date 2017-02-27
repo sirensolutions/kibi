@@ -27,7 +27,7 @@ const init = function () {
     // kibi: added as required after timepicker directive modification
     $provide.constant('kbnDefaultAppId', '');
     $provide.constant('kibiDefaultDashboardTitle', '');
-    $provide.constant('elasticsearchPlugins', ['siren-join']);
+    $provide.constant('elasticsearchPlugins', ['siren-platform']);
   });
   // Stub out the clock so 'now' doesn't move
   clock = sinon.useFakeTimers(moment(anchor).valueOf());

@@ -57,7 +57,7 @@ describe('Kibi Components', function () {
         $provide.constant('kbnDefaultAppId', 'dashboard');
         $provide.constant('kibiDefaultDashboardTitle', '');
         $provide.constant('kibiEnterpriseEnabled', false);
-        $provide.constant('elasticsearchPlugins', ['siren-join']);
+        $provide.constant('elasticsearchPlugins', ['siren-platform']);
         $provide.service('savedDashboards', (Promise, Private) => {
           return mockSavedObjects(Promise, Private)('savedDashboards', fakeSavedDashboards);
         });

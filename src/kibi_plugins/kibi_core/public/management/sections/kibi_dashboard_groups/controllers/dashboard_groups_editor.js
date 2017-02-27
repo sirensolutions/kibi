@@ -110,7 +110,7 @@ function controller($rootScope, $scope, $route, kbnUrl, createNotifier, savedDas
     }
     Promise.all(promises).then(function (dashboards, index) {
       _.each(dashboards, function (dashboard) {
-        _.find(dashboards, 'id', dashboard.id).title = dashboard.title;
+        _.find($scope.dashboardGroup.dashboards, 'id', dashboard.id).title = dashboard.title;
       });
     });
   }

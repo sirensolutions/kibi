@@ -238,7 +238,9 @@ uiModules
 
       const _render = function (scope) {
         let promise;
-        if (scope.scriptedFields === undefined || scope.scriptedFields === null) scope.scriptedFields = true;
+        if (!scope.scriptedFields) {
+          scope.scriptedFields = true;
+        }
 
         // if disabled, do not try to render anything
         if (scope.disabled) {

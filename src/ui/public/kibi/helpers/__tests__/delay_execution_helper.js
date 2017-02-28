@@ -145,7 +145,6 @@ describe('Kibi Components', function () {
           // t < delay after second event
           expect(actuallData).to.eql(['id1']);
           expect(executionCounter).to.equal(1);
-          done();
         }, 350);
 
         setTimeout(function () {
@@ -153,7 +152,6 @@ describe('Kibi Components', function () {
           // t > delay after second event
           expect(actuallData).to.eql(['id2']);
           expect(executionCounter).to.equal(2);
-          done();
         }, 450);
 
         setTimeout(function () {
@@ -285,7 +283,6 @@ describe('Kibi Components', function () {
           // t < delay after second event
           expect(actuallData).to.eql(['id1']);
           expect(executionCounter).to.equal(1);
-          done();
         }, 350);
 
         setTimeout(function () {
@@ -293,7 +290,6 @@ describe('Kibi Components', function () {
           // t > delay after second event
           expect(actuallData).to.eql(['id2']);
           expect(executionCounter).to.equal(2);
-          done();
         }, 450);
 
         setTimeout(function () {

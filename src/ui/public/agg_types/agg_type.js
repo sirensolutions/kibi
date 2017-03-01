@@ -111,6 +111,11 @@ export default function AggTypeFactory(Private) {
     }
 
     /**
+     * kibi: The version of this aggregation type.
+     */
+    this.version = config.version;
+
+    /**
      * Designed for multi-value metric aggs, this method can return a
      * set of AggConfigs that should replace this aggConfig in result sets
      * that walk the AggConfig set.

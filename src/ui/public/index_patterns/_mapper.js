@@ -37,9 +37,8 @@ define(function (require) {
         return promise.then(function (indexList) {
           return es.indices.getMapping({
             index: indexList,
-            ignoreUnavailable: _.isArray(indexList),
-            allowNoIndices: false,
-            includeDefaults: true
+            ignoreUnavailable: true,
+            allowNoIndices: true
           });
         })
         .catch(handleMissingIndexPattern)

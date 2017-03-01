@@ -9,6 +9,45 @@ define(function (require) {
 
   const app = require('ui/modules').get('apps/settings', ['kibana']);
 
+  app.filter('searchFor', () => {
+    return function (relations, searchString) {
+
+      if (!searchString || searchString.length < 3) {
+        return relations;
+      }
+
+      const search = function (obj, searchString) {
+        for (const i in obj) {
+          if (obj.hasOwnProperty(i)) {
+            if (typeof obj[i] === 'object' && obj[i] !== null || _.isArray(obj[i]) && obj[i].length) {
+              return search(obj[i], searchString);
+            }
+
+            if (typeof obj[i] === 'string') {
+              const found = obj[i].match(new RegExp(searchString, 'gi'));
+              if (found && found.length) {
+                return true;
+              }
+            }
+          }
+        }
+      };
+
+      const result = [];
+
+      for (const i in relations) {
+        if (!relations.hasOwnProperty(i)) {
+          continue;
+        }
+        if (search(relations[i], searchString)) {
+          result.push(relations[i]);
+        }
+      }
+
+      return result;
+    };
+  });
+
   app.directive('kibiDebounce', function ($timeout) {
     return {
       restrict: 'A',

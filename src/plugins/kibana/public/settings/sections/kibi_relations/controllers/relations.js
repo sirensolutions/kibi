@@ -17,6 +17,7 @@ define(function (require) {
       }
 
       const search = function (obj, searchString) {
+        let result;
         for (const i in obj) {
           if (obj.hasOwnProperty(i)) {
             if (typeof obj[i] === 'object' && obj[i] !== null || _.isArray(obj[i]) && obj[i].length) {
@@ -31,6 +32,7 @@ define(function (require) {
             }
           }
         }
+        return result;
       };
 
       const result = [];

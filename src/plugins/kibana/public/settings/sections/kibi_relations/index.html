@@ -57,10 +57,10 @@
       <!-- Tab panes -->
       <div class="tab-content">
         <div role="tabpanel" class="tab-pane active" data-test-subj="index-relations-tab" ng-class="tab.indexRel ? 'active' : ''">
-          <div class="input-group">
-            <input type="text" class="form-control" ng-model="searchString" placeholder="Search for relation ...">
-          </div>
           <form name="indicesForm" novalidate>
+            <div class="form-group">
+              <input type="text" class="form-control kibi-search-bar" ng-model="searchString" placeholder="Search for relation ...">
+            </div>
             <div class="form-group table-responsive">
               <table class="table table-condensed">
                 <thead>
@@ -228,10 +228,10 @@
           </form>
         </div>
         <div role="tabpanel" class="tab-pane" data-test-subj="dashboard-relations-tab" ng-class="tab.dashboardRel ? 'active' : ''">
-          <div class="input-group">
-            <input type="text" class="form-control" ng-model="searchString" placeholder="Search for relation ...">
-          </div>
           <form name="dashboardsForm" novalidate>
+            <div class="form-group">
+              <input type="text" class="form-control kibi-search-bar" ng-model="searchString" placeholder="Search for relation ...">
+            </div>
             <div class="form-group table-responsive">
               <table class="table table-condensed">
                 <thead>

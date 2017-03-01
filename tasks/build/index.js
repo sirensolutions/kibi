@@ -11,7 +11,7 @@ module.exports = function (grunt) {
       'babel:build',
       '_build:babelOptions',
       '_build:plugins',
-      'kibi_public_plugins', // kibi: task to fetch and unzip plugins to installedPlugins
+      'kibi_public_plugins', // kibi: task to fetch and unzip plugins
       '_build:data',
       '_build:packageJson',
       '_build:readme',

@@ -117,8 +117,9 @@ export default function (program) {
       'A path to scan for plugins, this can be specified multiple ' +
       'times to specify multiple directories',
       pluginDirCollector, [
-        fromRoot('installedPlugins'),
-        fromRoot('src/plugins')
+        fromRoot('plugins'), // installed plugins
+        fromRoot('src/core_plugins'), // kibana plugins
+        fromRoot('src/kibi_plugins') // kibi plugins
       ]
     )
     .action(processCommand);

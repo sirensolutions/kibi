@@ -73,7 +73,7 @@ module.exports = function (grunt) {
     Promise.all(downloadPromises).then(function () {
       const unzipPromises = [];
       _.each(archives, function (archive) {
-        unzipPromises.push(extractArchive(archive.dest, 'build/kibana/installedPlugins'));
+        unzipPromises.push(extractArchive(archive.dest, 'build/kibana/plugins'));
       });
       return Promise.all(unzipPromises);
     })

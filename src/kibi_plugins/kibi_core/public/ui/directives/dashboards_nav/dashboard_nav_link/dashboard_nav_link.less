@@ -3,6 +3,7 @@
 
 .dashboards-nav-link {
   background-color: @dashboard-inactive-background;
+  height: @dashboard-height;
   clear: both;
 
   width: @dashboards-nav-closed-width;
@@ -13,7 +14,6 @@
   &.subnav {
     width: calc(@dashboards-nav-open-width - @dashboards-nav-closed-width);
     line-height: @dashboard-line-height;
-    height: @dashboard-height;
     margin-left: @dashboards-nav-closed-width;
     background-color: @dashboard-subnav;
 
@@ -48,7 +48,6 @@
     width: @dashboards-nav-closed-width;
     height: @dashboard-height;
     text-align: center;
-    font-size: 1.7em;
     color: @white;
   }
 

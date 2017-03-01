@@ -12,9 +12,8 @@
   show-icon="true"
 >
   <a
-     ng-disabled="group.dashboards.length <= 1"
-     ng-click="openSubNav = group.dashboards.length > 1 && !openSubNav && toggleGroupNav(group)"
-     ng-class="{ disabled: group.dashboards.length <= 1 }"
+     ng-show="group.dashboards.length > 1"
+     ng-click="openSubNav = !openSubNav && toggleGroupNav(group)"
      class="dropdown-icon"
      title="{{ group.title }}"
   >

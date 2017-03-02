@@ -6,10 +6,11 @@
   tooltip-popup-delay="0"
   tooltip-append-to-body="1"
 >
+  <!-- title is empty in order to prevent displaying the title from the parent -->
   <a
+    title=""
     class="anchor"
     ng-click="onClick({ $event: $event })"
-    title="{{ title }}"
   >
     <div ng-if="showIcon" class="icon">
       <i

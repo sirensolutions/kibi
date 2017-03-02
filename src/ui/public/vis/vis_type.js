@@ -23,6 +23,10 @@ export default function VisTypeFactory(Private) {
     this.delegateSearch = opts.delegateSearch == null ? false : opts.delegateSearch;
     // kibi: initialize a visualization based on the linked saved search
     this.init = opts.init;
+    // kibi: visualization type versioning
+    if (opts.version) {
+      this.version = opts.version;
+    }
   }
 
   VisType.prototype.createRenderbot = function (vis, $el, uiState) {

@@ -241,7 +241,9 @@ export default function AggConfigFactory(Private, fieldTypeFilter) {
       enabled: self.enabled,
       type: self.type && self.type.name,
       schema: self.schema && self.schema.name,
-      params: outParams
+      params: outParams,
+      // kibi: aggregation type versioning
+      version: self.type.version
     };
   };
 

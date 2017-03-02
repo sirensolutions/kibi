@@ -17,14 +17,13 @@ define(function (require) {
       }
 
       const search = function (obj, searchString) {
-        for (const i in obj) {
-          if (obj.hasOwnProperty(i)) {
-            if (typeof obj[i] === 'object' && obj[i] !== null || _.isArray(obj[i]) && obj[i].length) {
-              return search(obj[i], searchString);
+        for (const key in obj) {
+          if (obj.hasOwnProperty(key)) {
+            if (typeof obj[key] === 'object' && obj[key] !== null || _.isArray(obj[key]) && obj[key].length) {
+              return search(obj[key], searchString);
             }
-
-            if (typeof obj[i] === 'string') {
-              const found = obj[i].match(new RegExp(searchString, 'gi'));
+            if (typeof obj[key] === 'string') {
+              const found = obj[key].match(new RegExp(searchString, 'gi'));
               if (found && found.length) {
                 return true;
               }
@@ -35,12 +34,12 @@ define(function (require) {
 
       const result = [];
 
-      for (const i in relations) {
-        if (!relations.hasOwnProperty(i)) {
+      for (const relation in relations) {
+        if (!relations.hasOwnProperty(relation)) {
           continue;
         }
-        if (search(relations[i], searchString)) {
-          result.push(relations[i]);
+        if (search(relations[relation], searchString)) {
+          result.push(relations[relation]);
         }
       }
 

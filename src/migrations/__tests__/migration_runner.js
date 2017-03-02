@@ -62,7 +62,13 @@ describe('migrations', function () {
       }),
       plugins: {
         elasticsearch: {
-          client: {}
+          getCluster() {
+            return {
+              getClient() {
+                return {};
+              }
+            };
+          }
         },
         plugin1: plugin1,
         plugin2: plugin2,
@@ -182,3 +188,4 @@ describe('migrations', function () {
   });
 
 });
+

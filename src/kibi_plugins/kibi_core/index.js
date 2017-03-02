@@ -116,7 +116,8 @@ module.exports = function (kibana) {
         'plugins/kibi_core/management/sections/sessions'
       ],
       navbarExtensions: [
-        'plugins/kibi_core/management/sections/navbar'
+        'plugins/kibi_core/management/sections/navbar',
+        'plugins/kibi_core/dashboard/navbar'
       ],
       spyModes: [
         'plugins/kibi_core/ui/spy_modes/multi_search_spy_mode'

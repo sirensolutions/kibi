@@ -15,7 +15,11 @@
      ng-show="group.dashboards.length > 1"
      ng-click="openSubNav = !openSubNav && toggleGroupNav(group)"
      class="dropdown-icon"
-     title="{{ group.title }}"
+     title=""
+     tooltip="Show dashboards of the &quot;{{ group.title }}&quot; group"
+     tooltip-placement="right"
+     tooltip-popup-delay="0"
+     tooltip-append-to-body="1"
   >
     <i class="fa fa-level-down"></i>
   </a>

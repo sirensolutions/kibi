@@ -4,7 +4,7 @@ import uiModules from 'ui/modules';
 
 uiModules
 .get('kibana')
-.directive('dashboardNavLink', chrome => {
+.directive('dashboardNavLink', kibiState => {
   return {
     restrict: 'E',
     transclude: true,
@@ -22,6 +22,12 @@ uiModules
       iconCss: '=',
       title: '='
     },
-    template: dashboardNavLinkTemplate
+    template: dashboardNavLinkTemplate,
+    link: function ($scope) {
+      $scope.isDashboardLoaded = Boolean(kibiState._getCurrentDashboardId());
+      $scope.$watch(kibiState._getCurrentDashboardId, id => {
+        $scope.isDashboardLoaded = Boolean(id);
+      });
+    }
   };
 });

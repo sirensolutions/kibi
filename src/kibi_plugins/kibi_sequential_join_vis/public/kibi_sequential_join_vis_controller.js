@@ -6,7 +6,7 @@ import _ from 'lodash';
 import angular from 'angular';
 import chrome from 'ui/chrome';
 import moment from 'moment';
-import DelayExecutionHelper from 'ui/kibi/helpers/delay_execution_helper';
+import DelayExecutionHelperProvider from 'ui/kibi/helpers/delay_execution_helper';
 import SearchHelper from 'ui/kibi/helpers/search_helper';
 import isJoinPruned from 'ui/kibi/helpers/is_join_pruned';
 import uiModules from 'ui/modules';
@@ -14,6 +14,7 @@ import 'ui/kibi/directives/kibi_select';
 import 'ui/kibi/directives/kibi_array_param';
 
 function controller(getAppState, kibiState, $scope, $rootScope, Private, $http, createNotifier, globalState, Promise, kbnIndex) {
+  const DelayExecutionHelper = Private(DelayExecutionHelperProvider);
   const searchHelper = new SearchHelper(kbnIndex);
   const edit = onVisualizePage();
 

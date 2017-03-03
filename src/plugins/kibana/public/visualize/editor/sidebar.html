@@ -64,6 +64,12 @@
       <!-- buckets -->
       <vis-editor-agg-group ng-if="vis.type.schemas.buckets" group-name="buckets"></vis-editor-agg-group>
 
+      <!-- kibi: allows multiple configurations for multi chart plugin -->
+      <div ng-if="vis.type.name == 'kibi_multi_chart_vis'">
+        <kibi-multi-chart-vis-config-new></kibi-multi-chart-vis-config-new>
+      </div>
+      <!-- kibi: end -->
+
     </div>
 
     <div class="vis-editor-config" ng-show="sidebar.section == 'options'">

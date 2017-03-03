@@ -47,12 +47,4 @@ chrome.bootstrap = function () {
   angular.bootstrap(document, ['kibana']);
 };
 
-// KIBI5: keep this ?
-//if (chrome.getApp && chrome.getApp() && chrome.getApp().id === 'kibana') {
-  //require('ui/kibi/styles/kibi'); // kibi: added to style the logo
-  //require('ui/kibi/directives/kibi_nav_bar'); // kibi: added so we can inject our own kibi-nav-bar
-  //require('ui/kibi/directives/kibi_dashboard_search'); // kibi: added so we can inject our own kibi-dashboard-search bar
-  //require('ui/kibi/directives/kibi_relational_filter_panel'); // kibi: add the dashboards graph panel
-//}
-
 module.exports = chrome;

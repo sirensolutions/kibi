@@ -17,10 +17,14 @@ define(function (require) {
       }
 
       const search = function (obj, searchString) {
+        let result;
         for (const key in obj) {
           if (obj.hasOwnProperty(key)) {
             if (typeof obj[key] === 'object' && obj[key] !== null || _.isArray(obj[key]) && obj[key].length) {
-              return search(obj[key], searchString);
+              result = search(obj[key], searchString);
+              if (result) {
+                return result;
+              }
             }
             if (typeof obj[key] === 'string') {
               const found = obj[key].match(new RegExp(searchString, 'gi'));
@@ -30,6 +34,7 @@ define(function (require) {
             }
           }
         }
+        return result;
       };
 
       const result = [];

@@ -60,7 +60,7 @@ name of your cluster.
 --------
 cluster.name: "my_cluster"
 --------
-. Make sure Kibana is configured to point to your local client node. In `kibana.yml`, the `elasticsearch.url` should be set to
+. Make sure Kibana is configured to point to your local client node. In `kibi.yml`, the `elasticsearch.url` should be set to
 `localhost:9200`.
 +
 --------

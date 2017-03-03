@@ -965,7 +965,7 @@ describe('Kibi Settings', function () {
       });
 
       it('should NOT filter dashboard when it is already selected', function (done) {
-        var relations = {
+        const relations = {
           relationsIndices: [
             {
               indices: [
@@ -1003,7 +1003,7 @@ describe('Kibi Settings', function () {
             },
           ]
         };
-        var map = {
+        const map = {
           'index-a': [ 'Da' ],
           'index-b': [ 'Db' ]
         };
@@ -1090,7 +1090,7 @@ describe('Kibi Settings', function () {
       });
 
       it('should NOT filter relation when it is already selected', function (done) {
-        var relations = {
+        const relations = {
           relationsIndices: [{
             indices: [{
               indexPatternId: 'index-a',
@@ -1128,7 +1128,7 @@ describe('Kibi Settings', function () {
             }
           ]
         };
-        var map = {
+        const map = {
           'index-a': ['Da'],
           'index-b': ['Db'],
           'index-c': ['Dc']
@@ -1716,5 +1716,59 @@ describe('Kibi Settings', function () {
         }).catch(done);
       });
     });
+
+    describe('filters: searchFor', () => {
+      let $filter;
+
+      beforeEach(() => {
+        ngMock.module('apps/settings');
+        ngMock.inject((_$filter_) => {
+          $filter = _$filter_;
+        });
+      });
+
+      it('should search and filter the relations', () => {
+        const searchString = 'art';
+        const relationsA = [
+          {
+            'indices': [
+              {'indexPatternType': '','indexPatternId': 'investor'}
+            ]
+          },
+          {
+            'indices': [
+              {'indexPatternType': '','indexPatternId': 'company'},
+              {'indexPatternType': '','indexPatternId': 'article'}
+            ]
+          }
+        ];
+        const relationsB = [
+          {
+            'indices': [
+              {'indexPatternType': '','indexPatternId': 'investor'}
+            ]
+          },
+          {
+            'indices': [
+              {'indexPatternType': '','indexPatternId': 'article'},
+              {'indexPatternType': '','indexPatternId': 'company'}
+            ]
+          },
+          {
+            'indices': [
+              {'rocket': [
+                {'engine': '', 'computer': [{'cpu': '', 'software': 'artificial intelligence'}]}
+              ]}
+            ]
+          }
+        ];
+
+        const resultsA = $filter('searchFor')(relationsA, searchString);
+        const resultsB = $filter('searchFor')(relationsB, searchString);
+        expect(resultsA).to.have.length(1);
+        expect(resultsB).to.have.length(2);
+      });
+    });
+
   });
 });

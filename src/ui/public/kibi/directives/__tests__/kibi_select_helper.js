@@ -479,11 +479,13 @@ describe('Kibi Directives', function () {
 
       beforeEach(function () {
         init({
-          stubIndexPatterns: true
+          stubIndexPatterns: true,
+          stubConfig: true
         });
       });
 
       it('should return the fields', function (done) {
+        config.set('metaFields', [ '_id' ]); // make sure _id is a meta field
         kibiSelectHelper.getFields().then(function (fields) {
           expect(_.find(fields, { label: 'ssl' })).not.to.be.ok();
           expect(_.find(fields, { label: '_id' })).not.to.be.ok();

@@ -14,7 +14,7 @@ define(function (require) {
   require('ui/modules')
   .get('kibana/kibi_sequential_join_vis', ['kibana'])
   .controller('KibiSequentialJoinVisController', function (getAppState, kibiState, $scope, $rootScope, Private, $http, createNotifier,
-                                                           globalState, Promise, kbnIndex) {
+                                                           globalState, Promise, kbnIndex, config) {
     const searchHelper = new SearchHelper(kbnIndex);
     const onVisualizeTab = chrome.onVisualizeTab();
 
@@ -26,14 +26,19 @@ define(function (require) {
     const relationsHelper = Private(require('ui/kibi/helpers/relations_helper'));
     const kibiSequentialJoinVisHelper = Private(require('ui/kibi/helpers/kibi_sequential_join_vis_helper'));
     const currentDashboardId = kibiState._getCurrentDashboardId();
+    $scope.currentDashboardId = currentDashboardId;
     const queryFilter = Private(require('ui/filter_bar/query_filter'));
+
+    $scope.btnCountsEnabled = function () {
+      return config.get('kibi:enableAllRelBtnCounts');
+    };
 
     if (!kibiState.isSirenJoinPluginInstalled()) {
       notify.error('This version of Kibi Relational filter requires the SIREn Join plugin. Please install it and restart Kibi.');
     }
 
     // Update the counts on each button of the related filter
-    var _fireUpdateCounts = function (buttons, dashboardId) {
+    const _fireUpdateCounts = function (buttons, dashboardId, updateOnClick = false) {
       if ($scope.multiSearchData) {
         $scope.multiSearchData.clear();
       }
@@ -45,10 +50,15 @@ define(function (require) {
         ])
         .then(([ indices, joinSeqFilter ]) => {
           button.joinSeqFilter = joinSeqFilter;
-          return kibiSequentialJoinVisHelper.buildCountQuery(button.targetDashboardId, joinSeqFilter)
-          .then((query) => {
-            return { query, button, indices };
-          });
+
+          if ($scope.btnCountsEnabled() || updateOnClick) {
+            return kibiSequentialJoinVisHelper.buildCountQuery(button.targetDashboardId, joinSeqFilter)
+            .then((query) => {
+              return { query, button, indices };
+            });
+          } else {
+            return { guery: undefined, button, indices };
+          }
         })
         .catch((error) => {
           // If computing the indices failed because of an authorization error
@@ -57,12 +67,20 @@ define(function (require) {
             throw error;
           }
           button.forbidden = true;
-          return kibiSequentialJoinVisHelper.buildCountQuery(button.targetDashboardId)
-          .then((query) => {
-            return { query, button, indices: [] };
-          });
+          if ($scope.btnCountsEnabled() || updateOnClick) {
+            return kibiSequentialJoinVisHelper.buildCountQuery(button.targetDashboardId)
+            .then((query) => {
+              return { query, button, indices: [] };
+            });
+          } else {
+            return { guery: undefined, button, indices: [] };
+          }
         });
       })).then((results) => {
+        if (!$scope.btnCountsEnabled() && !updateOnClick) {
+          return Promise.resolve(_.map(results, (result) => result.button));
+        }
+
         const query = _.map(results, result => {
           return searchHelper.optimize(result.indices, result.query);
         }).join('');
@@ -114,6 +132,10 @@ define(function (require) {
           return _.map(results, (result) => result.button);
         });
       }).catch(notify.error);
+    };
+
+    $scope.getCurrentDashboardBtnCounts = function () {
+      _fireUpdateCounts($scope.buttons, currentDashboardId, true);
     };
 
     const delayExecutionHelper = new DelayExecutionHelper(
@@ -176,7 +198,7 @@ define(function (require) {
      * Update counts in reaction to events
      */
 
-    var updateButtons = function (reason) {
+    const updateButtons = function (reason) {
       if (onVisualizeTab) {
         return;
       }
@@ -197,7 +219,7 @@ define(function (require) {
         // http://stackoverflow.com/questions/20481327/data-is-not-getting-updated-in-the-view-after-promise-is-resolved
         // assign data to $scope.buttons once the promises are done
         $scope.buttons = new Array(buttons.length);
-        const getSourceCount = function (currentDashboardId) {
+        const getSourceCount = function (currentDashboardId, updateOnClick = false) {
           const virtualButton = {
             sourceField: this.targetField,
             sourceIndexPatternId: this.targetIndexPatternId,
@@ -213,7 +235,7 @@ define(function (require) {
           // instead of _collectUpdateCountsRequest
           // This could be done in future to further reduce the number of calls but
           // as it requires greater refactoring I postponed it for now
-          return _fireUpdateCounts.call(self, [ virtualButton ], this.targetDashboardId)
+          return _fireUpdateCounts.call(self, [ virtualButton ], this.targetDashboardId, updateOnClick)
           .then(() => virtualButton.targetCount)
           .catch(notify.error);
         };
@@ -226,7 +248,7 @@ define(function (require) {
       .catch(notify.error);
     };
 
-    var kibiDashboardChangedOff = $rootScope.$on('kibi:dashboard:changed', updateButtons.bind(this, 'kibi:dashboard:changed'));
+    const kibiDashboardChangedOff = $rootScope.$on('kibi:dashboard:changed', updateButtons.bind(this, 'kibi:dashboard:changed'));
 
     $scope.$listen(kibiState, 'save_with_changes', function (diff) {
       if (diff.indexOf(kibiState._properties.enabled_relations) !== -1 ||

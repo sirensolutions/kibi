@@ -1,3 +1,6 @@
+// kibi: import object actions registry
+import objectActionsRegistry from 'ui/registry/object_actions';
+
 define(function (require) {
   const _ = require('lodash');
   const angular = require('angular');
@@ -34,6 +37,10 @@ define(function (require) {
         const $state = $scope.state = new AppState();
         $scope.currentTab = null;
         $scope.selectedItems = [];
+
+        // kibi: object actions registry
+        $scope.objectActions = Private(objectActionsRegistry);
+        // kibi: end
 
         const getData = function (filter) {
           const services = registry.all().map(function (obj) {

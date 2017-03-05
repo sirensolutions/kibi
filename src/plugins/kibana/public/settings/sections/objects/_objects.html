@@ -62,6 +62,14 @@
                 <span class="sr-only">Hide</span>
                 <i aria-hidden="true" class="fa fa-eye"></i>
               </button>
+
+              <button
+                ng-repeat="action in objectActions"
+                ng-click="action.execute(service, item)"
+                class="btn btn-default"
+                aria-label="{{ action.label }}">
+                <i aria-hidden="true" class="fa {{ action.icon }}"></i>
+              </button>
             </div>
 
             <div class="pull-left">

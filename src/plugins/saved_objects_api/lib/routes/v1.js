@@ -116,7 +116,8 @@ module.exports = (server, API_ROOT) => {
                 errorBody = {
                   type: 'security_exception',
                   reason: error.message,
-                  status: 403
+                  status: 403,
+                  found: false
                 };
                 break;
               case 'AuthenticationError':
@@ -125,7 +126,8 @@ module.exports = (server, API_ROOT) => {
                 errorBody = {
                   type: 'backend_error',
                   reason: 'An error occurred while connecting to the backend.',
-                  status: error.inner ? error.inner.status : 500
+                  status: error.inner ? error.inner.status : 500,
+                  found: false
                 };
                 break;
             }

@@ -39,7 +39,7 @@ define(function (require) {
         $scope.selectedItems = [];
 
         // kibi: object actions registry
-        $scope.objectActions = Private(objectActionsRegistry);
+        $scope.objectActions = Private(objectActionsRegistry).toJSON();
         // kibi: end
 
         const getData = function (filter) {

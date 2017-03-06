@@ -32,10 +32,12 @@ export default class Model {
     this._client = server.plugins.elasticsearch.createClient({
       auth: false
     });
+    this._authClient = server.plugins.elasticsearch.client;
+
     //TODO: the current implementation of sessions requires them to be
     // writeable by all users; this code must be removed as soon as
     // owner tracking is available.
-    this._sessionClient = server.plugins.elasticsearch.client;
+    this._sessionClient = this._authClient;
   }
 
   /**
@@ -160,8 +162,21 @@ export default class Model {
    */
   async create(id, body, request) {
     try {
+      let requestMiddlewareMethod = 'createRequest';
+      let responseMiddlewareMethod = 'createResponse';
+
+      let response = await this._authClient.get({
+        index: this._config.get('kibana.index'),
+        type: this._type,
+        id: id,
+        ignore: [404]
+      });
+      if (response.found) {
+        requestMiddlewareMethod = 'updateRequest';
+      }
+
       for (const middleware of this._plugin.getMiddlewares()) {
-        await middleware.createRequest(this, id, body, request);
+        await middleware[requestMiddlewareMethod](this, id, body, request);
       }
 
       this._prepare(body);
@@ -181,9 +196,9 @@ export default class Model {
         this._setCredentials(parameters, request);
       }
 
-      const response = await client.create(parameters);
+      response = await client.create(parameters);
       for (const middleware of this._plugin.getMiddlewares()) {
-        await middleware.createResponse(this, id, body, request, response);
+        await middleware[responseMiddlewareMethod](this, id, body, request, response);
       }
       return response;
     } catch (error) {
@@ -202,9 +217,24 @@ export default class Model {
    */
   async update(id, body, request) {
     try {
-      for (const middleware of this._plugin.getMiddlewares()) {
-        await middleware.updateRequest(this, id, body, request);
+      let requestMiddlewareMethod = 'updateRequest';
+      let responseMiddlewareMethod = 'updateResponse';
+
+      let response = await this._authClient.get({
+        index: this._config.get('kibana.index'),
+        type: this._type,
+        id: id,
+        ignore: [404]
+      });
+      if (!response.found) {
+        requestMiddlewareMethod = 'createRequest';
+        responseMiddlewareMethod = 'createResponse';
       }
+
+      for (const middleware of this._plugin.getMiddlewares()) {
+        await middleware[requestMiddlewareMethod](this, id, body, request);
+      }
+
       this._prepare(body);
 
       await this.createMappings(request);
@@ -222,9 +252,9 @@ export default class Model {
         this._setCredentials(parameters, request);
       }
 
-      const response = await client.index(parameters);
+      response = await client.index(parameters);
       for (const middleware of this._plugin.getMiddlewares()) {
-        await middleware.updateResponse(this, id, body, request, response);
+        await middleware[responseMiddlewareMethod](this, id, body, request, response);
       }
       return response;
     } catch (error) {

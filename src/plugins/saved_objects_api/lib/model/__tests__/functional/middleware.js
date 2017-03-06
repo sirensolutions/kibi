@@ -61,10 +61,15 @@ describe('saved_objects_api/functional', function () {
     it('should call registered middlewares when creating an object.', wrapAsync(async () => {
       middlewareMock
       .expects('createRequest')
-      .twice()
+      .once()
+      .withExactArgs(helper.getInstance(), 'idx1', {title: '1'}, undefined);
+      middlewareMock
+      .expects('updateRequest')
+      .once()
       .withExactArgs(helper.getInstance(), 'idx1', {title: '1'}, undefined);
       middlewareMock
       .expects('createResponse')
+      .once()
       .withExactArgs(helper.getInstance(), 'idx1', {title: '1'}, undefined, sinon.match.has('_id', 'idx1'));
 
       await helper.testCreation();
@@ -74,23 +79,23 @@ describe('saved_objects_api/functional', function () {
 
     it('should call registered middlewares when updating an object.', wrapAsync(async () => {
       middlewareMock
-      .expects('updateRequest')
+      .expects('createRequest')
       .withExactArgs(helper.getInstance(), 'idx1', {title: '1'}, undefined);
       middlewareMock
       .expects('updateRequest')
       .withExactArgs(helper.getInstance(), 'idx1', {title: '2'}, undefined);
       middlewareMock
-      .expects('updateRequest')
+      .expects('createRequest')
       .withExactArgs(helper.getInstance(), 'idx2', {title: '1'}, undefined);
 
       middlewareMock
-      .expects('updateResponse')
+      .expects('createResponse')
       .withExactArgs(helper.getInstance(), 'idx1', {title: '1'}, undefined, sinon.match.has('_id', 'idx1'));
       middlewareMock
       .expects('updateResponse')
       .withExactArgs(helper.getInstance(), 'idx1', {title: '2'}, undefined, sinon.match.has('_id', 'idx1'));
       middlewareMock
-      .expects('updateResponse')
+      .expects('createResponse')
       .withExactArgs(helper.getInstance(), 'idx2', {title: '1'}, undefined, sinon.match.has('_id', 'idx2'));
 
       await helper.testIndexing();

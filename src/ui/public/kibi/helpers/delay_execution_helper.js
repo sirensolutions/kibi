@@ -36,7 +36,7 @@ export default function DelayExecutionHelperFactory($timeout) {
       }
       this.timeout = $timeout(() => {
         const ret = this.executeCallback(this.data);
-        if (typeof ret.then === 'function') {
+        if (ret && typeof ret.then === 'function') {
           return ret.then(() => this.cancel());
         } else {
           this.cancel();

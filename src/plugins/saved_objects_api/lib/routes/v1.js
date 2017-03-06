@@ -42,6 +42,49 @@ module.exports = (server, API_ROOT) => {
   }
 
   /**
+   * Returns a single saved object.
+   *
+   * Returns the same response as an Elasticsearch API get operation on success or a
+   * NotFound error if the object does not exist.
+   */
+  server.route({
+    method: 'GET',
+    path: `${API_ROOT}/{index}/{type}/{id}`,
+    handler: (request, reply) => {
+      let model;
+      try {
+        model = getModel(request.params.type);
+      } catch (error) {
+        return reply(Boom.notFound(error));
+      }
+      model.get(request.params.id, request)
+      .then((response) => {
+        reply(response);
+      })
+      .catch((error) => {
+        if (error.name === 'NotFoundError') {
+          return reply({
+            type: 'not_found',
+            reason: error.message,
+            status: 404,
+            found: false
+          }).code(404);
+        }
+        return replyError(error, reply);
+      });
+    },
+    config: {
+      validate: {
+        params: {
+          index: Joi.string().required(),
+          type: Joi.string().required(),
+          id: Joi.string()
+        }
+      }
+    }
+  });
+
+  /**
    * Returns multiple saved objects.
    *
    * Accepts a request and returns a response with the same format as the Elasticsearch

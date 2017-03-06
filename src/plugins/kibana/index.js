@@ -20,6 +20,7 @@ module.exports = function (kibana) {
           'spyModes',
           'navbarExtensions',
           'settingsSections',
+          'objectActions', // kibi: allow to add object actions
           'hacks' // kibi: allow to insert our own version of some kibana components like the kibiee notifier
         ],
 

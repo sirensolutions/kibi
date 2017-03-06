@@ -276,6 +276,13 @@ define(function (require) {
           cache.flush(); // kibi: flush the cache after object was saved
 
           self.id = id;
+
+          // kibi: remove es.indices.refresh as it is handled by the backend
+          if (savedObjectsAPITypes.has(config.type)) {
+            return self.id;
+          }
+          // kibi: end
+
           return es.indices.refresh({
             index: kbnIndex
           })
@@ -341,9 +348,12 @@ define(function (require) {
           type: type,
           id: this.id
         }).then(function () {
-          return es.indices.refresh({
-            index: kbnIndex
-          });
+          // kibi: refresh is handled by the backend
+          if (!savedObjectsAPITypes.has(config.type)) {
+            return es.indices.refresh({
+              index: kbnIndex
+            });
+          }
         });
       };
     }

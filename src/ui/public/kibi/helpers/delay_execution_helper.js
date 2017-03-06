@@ -35,10 +35,14 @@ export default function DelayExecutionHelperFactory($timeout) {
         $timeout.cancel(this.timeout);
       }
       this.timeout = $timeout(() => {
-        this.executeCallback(this.data);
-        this.data = {};
-        $timeout.cancel(this.timeout);
+        const ret = this.executeCallback(this.data);
+        if (typeof ret.then === 'function') {
+          return ret.then(() => this.cancel());
+        } else {
+          this.cancel();
+        }
       }, this.delayTime);
+      return this.timeout;
     }
 
     cancel() {

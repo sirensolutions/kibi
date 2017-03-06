@@ -77,7 +77,7 @@ export default function KibiNavBarHelperFactory(kibiState, globalState, getAppSt
         ${JSON.stringify(dashboardsIds, null, ' ')} because: [${reason}]`;
       console.log(msg); // eslint-disable-line no-console
     }
-    this.delayExecutionHelper.addEventData({
+    return this.delayExecutionHelper.addEventData({
       forceUpdate: forceUpdate,
       ids: dashboardsIds
     });
@@ -196,7 +196,7 @@ export default function KibiNavBarHelperFactory(kibiState, globalState, getAppSt
       (data) => {
         if (onDashboardPage()) {
           const forceUpdate = data.forceUpdate;
-          _fireUpdateAllCounts.call(self, data.ids, forceUpdate);
+          return _fireUpdateAllCounts.call(self, data.ids, forceUpdate);
         }
       },
       750,

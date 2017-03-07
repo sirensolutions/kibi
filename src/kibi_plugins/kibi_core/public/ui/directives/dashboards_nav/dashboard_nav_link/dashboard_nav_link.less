@@ -1,6 +1,8 @@
 @import (reference) "~ui/styles/variables";
 @import (reference) "../variables";
 
+@icon-width: 25px;
+
 .dashboards-nav-link {
   background-color: @dashboard-inactive-background;
   height: @dashboard-height;
@@ -12,13 +14,13 @@
   }
 
   &.subnav {
-    width: calc(@dashboards-nav-open-width - @dashboards-nav-closed-width);
+    width: calc(@dashboards-nav-open-width - @icon-width);
     line-height: @dashboard-line-height;
-    margin-left: @dashboards-nav-closed-width;
+    margin-left: @icon-width;
     background-color: @dashboard-subnav;
 
     .title {
-      width: calc(@dashboards-nav-open-width - @dashboards-nav-closed-width);
+      width: calc(@dashboards-nav-open-width - @icon-width);
     }
 
   }
@@ -45,14 +47,14 @@
   .icon {
     float: left;
     display: inline-block;
-    width: @dashboards-nav-closed-width;
+    width: @icon-width;
     height: @dashboard-height;
     text-align: center;
     color: @white;
   }
 
   /**
-   * This imgae is used to display the icon.
+   * This image is used to display the icon.
    */
   .icon-image {
     height: 18px;
@@ -69,17 +71,42 @@
     background-repeat: no-repeat;
   }
 
-  .title {
-    display: none;
-    width: calc(@dashboards-nav-open-width - @dropdown-width - @dashboards-nav-closed-width);
+  .content {
+    width: calc(@dashboards-nav-closed-width - @icon-width);
     font-size: 0.9em;
-    text-align: left;
-    padding-left: 3px;
     line-height: @dashboard-height;
-    white-space: nowrap;
 
     .is-dashboards-nav-open & {
+      width: calc(@dashboards-nav-open-width - @dropdown-width - @icon-width);
+    }
+  }
+
+  .indicators {
+    padding-left: 3px;
+    font-weight: bold;
+    text-align: left;
+    float: left;
+    display: list-item;
+
+    .is-dashboards-nav-open & {
+      width: calc(@dashboards-nav-closed-width - @icon-width);
+    }
+  }
+
+  .title {
+    display: none;
+    .is-dashboards-nav-open & {
+      width: calc(@dashboards-nav-open-width - @dashboards-nav-closed-width - @dropdown-width);
       display: inline-block;
+      text-align: left;
+      padding-left: 3px;
+      float: left;
+
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+
+      border-left: #777777 solid 2px;
     }
   }
 }

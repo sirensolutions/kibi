@@ -5,6 +5,8 @@ import uiModules from 'ui/modules';
 uiModules
 .get('kibana')
 .directive('dashboardNavLink', kibiState => {
+  const numeral = require('numeral')();
+
   return {
     restrict: 'E',
     transclude: true,
@@ -24,6 +26,13 @@ uiModules
     },
     template: dashboardNavLinkTemplate,
     link: function ($scope) {
+      $scope.$watch('count', count => {
+        delete $scope.countHumanNotation;
+        if (count !== undefined) {
+          $scope.countHumanNotation = numeral.set(count).format('0.[00]a');
+        }
+      });
+
       $scope.isDashboardLoaded = Boolean(kibiState._getCurrentDashboardId());
       $scope.$watch(kibiState._getCurrentDashboardId, id => {
         $scope.isDashboardLoaded = Boolean(id);

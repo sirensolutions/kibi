@@ -89,7 +89,7 @@ var fakeServer = {
                 }
               });
           }
-          return Promise.reject();
+          return Promise.reject(new Error(`Failed with options: ${JSON.stringify(options, null, ' ')}`));
         }
       }
     }

@@ -168,9 +168,13 @@ module.exports = function (kbnServer, server, config) {
     path: '/goto/{urlId}',
     handler: async function (request, reply) {
       try {
-        const url = await shortUrlLookup.getUrl(request.params.urlId);
-        shortUrlAssertValid(url);
-        reply().redirect(config.get('server.basePath') + url);
+        const data = await shortUrlLookup.getUrl(request.params.urlId);
+        shortUrlAssertValid(data.url);
+        reply().redirect(
+          config.get('server.basePath') +
+          data.url +
+         '&_h=' + request.params.urlId
+        ); // kibi: adding the sha to be able to restore kibiSession in the browser
       } catch (err) {
         reply(err);
       }
@@ -183,7 +187,7 @@ module.exports = function (kbnServer, server, config) {
     handler: async function (request, reply) {
       try {
         shortUrlAssertValid(request.payload.url);
-        const urlId = await shortUrlLookup.generateUrlId(request.payload.url);
+        const urlId = await shortUrlLookup.generateUrlId(request.payload);
         reply(urlId);
       } catch (err) {
         reply(err);

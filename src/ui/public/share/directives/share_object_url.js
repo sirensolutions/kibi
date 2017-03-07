@@ -67,7 +67,6 @@ app.directive('shareObjectUrl', function (Private, createNotifier) {
 
       $scope.generateShortUrl = function () {
         if ($scope.shortGenerated) return;
-
         urlShortener.shortenUrl($scope.url)
         .then(shortUrl => {
           updateUrl(shortUrl);
@@ -78,9 +77,6 @@ app.directive('shareObjectUrl', function (Private, createNotifier) {
       $scope.getUrl = function () {
         const urlWithHashes = $location.absUrl();
         let urlWithStates = unhashUrl(urlWithHashes, getUnhashableStates());
-
-        // kibi: add/replace session id with the detached one
-        urlWithStates = urlWithStates.replace(`s:${$scope.$parent.currentSessionId}`, `s:${$scope.$parent.sharedSessionId}`);
         if ($scope.shareAsEmbed) {
           // kibi: added to control when to show hide kibi-nav-bar
           if ($scope.kibiNavbarVisible) {

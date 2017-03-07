@@ -1725,9 +1725,9 @@ describe('Kibi Settings', function () {
         ngMock.module('apps/settings');
         ngMock.inject(($rootScope, $compile) => {
           scope = $rootScope.$new();
-          searchBar = $compile('<input type="text" class="form-control kibi-search-bar" ' +
-            'kibi-relations-search-bar ng-model="relationsIndicesSearchString" ' +
-            'ng-model-options="{ debounce: 350 }" ng-change="searchRelations(\'relationsIndices\')">')(scope);
+          searchBar = $compile('<input type="text" kibi-relations-search-bar ' +
+            'ng-model="relationsIndicesSearchString" ng-model-options="{ debounce: 350 }" ' +
+            'ng-change="searchRelations(\'relationsIndices\')">')(scope);
           scope.$digest();
         });
       });
@@ -1738,37 +1738,37 @@ describe('Kibi Settings', function () {
         searchBar.scope().relations = {
           relationsIndices: [
             {
-              'indices': [
-                {'indexPatternType': '','indexPatternId': 'investor'}
+              indices: [
+                { indexPatternType: '', indexPatternId: 'investor' }
               ]
             },
             {
-              'indices': [
-                {'indexPatternType': '','indexPatternId': 'company'},
-                {'indexPatternType': '','indexPatternId': 'article'}
+              indices: [
+                { indexPatternType: '', indexPatternId: 'company' },
+                { indexPatternType: '', indexPatternId: 'article' }
               ]
             }
           ],
           relationsDashboards: [
             {
-              'indices': [
-                {'indexPatternType': '','indexPatternId': 'investor'}
+              indices: [
+                { indexPatternType: '', indexPatternId: 'investor' }
               ]
             },
             {
-              'indices': [
-                {'indexPatternType': '','indexPatternId': 'article'},
-                {'indexPatternType': '','indexPatternId': 'company'}
+              indices: [
+                { indexPatternType: '', indexPatternId: 'article' },
+                { indexPatternType: '', indexPatternId: 'company' }
               ]
             },
             {
-              'indices': [
+              indices: [
                 {
-                  'rocket': [
+                  rocket: [
                     {
-                      'engine': '',
-                      'computer': [
-                        {'cpu': '', 'software': 'artificial intelligence'}
+                      engine: '',
+                      computer: [
+                        { cpu: '', software: 'artificial intelligence' }
                       ]
                     }
                   ]
@@ -1784,7 +1784,7 @@ describe('Kibi Settings', function () {
 
           let relCounter = 0;
           searchBar.scope().relations[mode].forEach((relation) => {
-            if (!relation.hidden) relCounter++;
+            if (!relation.$$hidden) relCounter++;
           });
 
           if (mode === 'relationsIndices') {

@@ -83,7 +83,7 @@
                 <tbody ng-repeat="relation in relations.relationsIndices"
                   data-test-subj="row-{{$index}}">
                   <tr class="relation-row"
-                      ng-class="{ 'red-border' : relation.errors && relation.errors.length }" ng-hide="relation.hidden">
+                      ng-class="{ 'red-border' : relation.errors && relation.errors.length }" ng-hide="relation.$$hidden">
                     <!--left relation-->
                     <td>
                       <table class="relationPart">
@@ -258,7 +258,7 @@
                 <tbody ng-repeat="relation in relations.relationsDashboards"
                   data-test-subj="row-{{$index}}">
                   <tr class="relation-row"
-                      ng-class="{ 'red-border' : relation.errors && relation.errors.length }" ng-hide="relation.hidden">
+                      ng-class="{ 'red-border' : relation.errors && relation.errors.length }" ng-hide="relation.$$hidden">
                     <td>
                       <kibi-select required object-type="dashboard"
                                             data-test-subj="dashboard-relation-left-dashboard"

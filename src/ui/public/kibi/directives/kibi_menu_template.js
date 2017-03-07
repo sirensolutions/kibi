@@ -54,7 +54,6 @@ uiModules
     };
 
     const show = function () {
-
       $rootScope.$broadcast('kibiMenuTemplate:show', $el);
 
       if ($scope.kibiMenuTemplateOnShowFn) {

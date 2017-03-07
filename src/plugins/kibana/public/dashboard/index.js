@@ -21,8 +21,8 @@ define(function (require) {
   require('plugins/kibana/dashboard/styles/main.less');
 
   require('ui/saved_objects/saved_object_registry').register(require('plugins/kibana/dashboard/services/saved_dashboard_register'));
-  // kibi: added as it is needed by src/plugins/kibana/public/dashboard/partials/save_dashboard.html
-  require('ui/kibi/directives/kibi_select');
+  require('ui/kibi/directives/kibi_select'); // kibi: added as it is needed by src/plugins/kibana/public/dashboard/partials/save_dashboard.html
+  require('ui/kibi/session/kibi_session'); // kibi: added to make kibiSession service available
   // kibi: end
 
   const app = require('ui/modules').get('app/dashboard', [

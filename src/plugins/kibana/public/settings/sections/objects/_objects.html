@@ -35,17 +35,10 @@
         <a ng-disabled="selectedItems.length == 0"
           ng-click="bulkExport()"
           class="btn btn-xs btn-default" aria-label="Export"><i aria-hidden="true" class="fa fa-download"></i> Export</a>
-        <!-- kibi: added to be able to quickly find out current session -->
-        <span ng-show="state.tab == 'sessions'">
-          <label>Show only current session</label>
-          <input type="checkbox" ng-model="showOnlyCurrentSession" />
-        </span>
-        <!-- kibi: end-->
       </div>
       <div ng-repeat="service in services" ng-class="{ active: state.tab === service.title }" class="tab-pane">
         <ul class="list-unstyled">
-          <!-- kibi: added filterItems function -->
-          <li class="item" ng-repeat="item in filterItems(service.data) | orderBy:'title'">
+          <li class="item" ng-repeat="item in service.data | orderBy:'title'">
             <div class="actions pull-right">
               <button
                 ng-click="edit(service, item)"

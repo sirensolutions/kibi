@@ -9,10 +9,10 @@ UiModules.get('kibana')
       es.get({
         index: kbnIndex,
         type: 'url',
-        id: search._s
+        id: search._h
       }).then((res) => {
-        if (res.data._source && res.data._source.kibiSession) {
-          sessionStorage.setItem('kibiSession', JSON.stringify(res.data._source.kibiSession));
+        if (res._source && res._source.kibiSession) {
+          sessionStorage.setItem('kibiSession', JSON.stringify(res._source.kibiSession));
         }
       });
       delete search._s;

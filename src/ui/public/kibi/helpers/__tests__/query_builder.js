@@ -335,6 +335,7 @@ describe('Kibi Components', function () {
         }
       };
 
+      config.set('query:queryString:options', { analyze_wildcard: true });
       appState.filters = [ query ];
       return assertQuery('empty-dashboard', expected);
     });
@@ -371,6 +372,7 @@ describe('Kibi Components', function () {
         }
       };
 
+      config.set('query:queryString:options', { analyze_wildcard: true });
       appState.filters = [ query ];
       return assertQuery('empty-dashboard', expected);
     });

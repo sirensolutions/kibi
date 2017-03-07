@@ -75,7 +75,6 @@ export default function QueryBuilderFactory(Private, kibiState) {
     };
 
     _.each(queries, (q) => {
-      // here add only if not "match *" as it would not add anything to the query anyway
       request.query.bool.must.push(q);
     });
 

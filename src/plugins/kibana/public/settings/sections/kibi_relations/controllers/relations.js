@@ -19,7 +19,7 @@ define(function (require) {
           if (!searchString || searchString.length < 2) {
             for (const relation in scope.relations[mode]) {
               if (scope.relations[mode].hasOwnProperty(relation)) {
-                scope.relations[mode][relation].hidden = false;
+                scope.relations[mode][relation].$$hidden = false;
               }
             }
             return;
@@ -53,9 +53,9 @@ define(function (require) {
               continue;
             }
             if (search(scope.relations[mode][relation], searchString)) {
-              scope.relations[mode][relation].hidden = false;
+              scope.relations[mode][relation].$$hidden = false;
             } else {
-              scope.relations[mode][relation].hidden = true;
+              scope.relations[mode][relation].$$hidden = true;
             }
           }
         };

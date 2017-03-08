@@ -106,6 +106,30 @@ describe('RestQuery', function () {
         done();
       });
     });
+
+    it('NOT empty uri, empty rest_path, undefined selectedDocuments', function (done) {
+      var RestQuery = require('../../queries/rest_query');
+      var restQuery = new RestQuery(fakeServer, {
+        rest_path: '',
+      });
+
+      restQuery.checkIfItIsRelevant({selectedDocuments: undefined}).then(function (ret) {
+        expect(ret).to.be(true);
+        done();
+      });
+    });
+
+    it('NOT empty uri, rest_body does not depend entity, undefined selectedDocuments', function (done) {
+      var RestQuery = require('../../queries/rest_query');
+      var restQuery = new RestQuery(fakeServer, {
+        rest_body: 'doesNotDependEntity',
+      });
+
+      restQuery.checkIfItIsRelevant({selectedDocuments: undefined}).then(function (ret) {
+        expect(ret).to.be(true);
+        done();
+      });
+    });
   });
 
   describe('checkIfItIsRelevant - should fail', function () {
@@ -125,6 +149,29 @@ describe('RestQuery', function () {
       });
     });
 
+    it('NOT empty uri, NOT empty rest_path reject as it is undefined selectedDocuments', function (done) {
+      var RestQuery = require('../../queries/rest_query');
+      var restQuery = new RestQuery(fakeServer, {
+        rest_path: '/id=@doc[id]@'
+      });
+
+      restQuery.checkIfItIsRelevant({selectedDocuments: undefined}).then(function (ret) {
+        expect(ret).to.be(false);
+        done();
+      });
+    });
+
+    it('NOT empty uri, NOT empty rest_body should reject as it is undefined selectedDocuments', function (done) {
+      var RestQuery = require('../../queries/rest_query');
+      var restQuery = new RestQuery(fakeServer, {
+        rest_body: '/id=@doc[id]@'
+      });
+
+      restQuery.checkIfItIsRelevant({selectedDocuments: undefined}).then(function (ret) {
+        expect(ret).to.be(false);
+        done();
+      });
+    });
   });
 
   describe('fetchResults test if correct arguments are passed to generateCacheKey', function () {

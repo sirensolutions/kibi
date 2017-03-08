@@ -80,7 +80,7 @@ describe('RestQuery', function () {
       restQuery.checkIfItIsRelevant({}).then(function (ret) {
         expect(ret).to.be(true);
         done();
-      });
+      }).catch(done);
     });
 
     it('NOT empty uri, empty activation_rules', function (done) {
@@ -92,7 +92,7 @@ describe('RestQuery', function () {
       restQuery.checkIfItIsRelevant({selectedDocuments: ['/company/company/id1']}).then(function (ret) {
         expect(ret).to.be(true);
         done();
-      });
+      }).catch(done);
     });
 
     it('NOT empty uri, activation_rules does not exists, ignored old activationQuery param', function (done) {
@@ -104,7 +104,31 @@ describe('RestQuery', function () {
       restQuery.checkIfItIsRelevant({selectedDocuments: ['/company/company/id1']}).then(function (ret) {
         expect(ret).to.be(true);
         done();
+      }).catch(done);
+    });
+
+    it('NOT empty uri, empty rest_path, undefined selectedDocuments', function (done) {
+      var RestQuery = require('../../queries/rest_query');
+      var restQuery = new RestQuery(fakeServer, {
+        rest_path: '',
       });
+
+      restQuery.checkIfItIsRelevant({selectedDocuments: undefined}).then(function (ret) {
+        expect(ret).to.be(true);
+        done();
+      }).catch(done);
+    });
+
+    it('NOT empty uri, rest_body does not depend on entity, undefined selectedDocuments', function (done) {
+      var RestQuery = require('../../queries/rest_query');
+      var restQuery = new RestQuery(fakeServer, {
+        rest_body: 'doesNotDependEntity',
+      });
+
+      restQuery.checkIfItIsRelevant({selectedDocuments: undefined}).then(function (ret) {
+        expect(ret).to.be(true);
+        done();
+      }).catch(done);
     });
   });
 
@@ -122,9 +146,32 @@ describe('RestQuery', function () {
       restQuery.checkIfItIsRelevant({selectedDocuments: ['/company/company/id1']}).catch(function (err) {
         expect(err.message).to.eql('Could not fetch document [//company/company], check logs for details please.');
         done();
-      });
+      }).catch(done);
     });
 
+    it('NOT empty uri, NOT empty rest_path reject as it is undefined selectedDocuments', function (done) {
+      var RestQuery = require('../../queries/rest_query');
+      var restQuery = new RestQuery(fakeServer, {
+        rest_path: '/id=@doc[id]@'
+      });
+
+      restQuery.checkIfItIsRelevant({selectedDocuments: undefined}).then(function (ret) {
+        expect(ret).to.be(false);
+        done();
+      }).catch(done);
+    });
+
+    it('NOT empty uri, NOT empty rest_body should reject as it is undefined selectedDocuments', function (done) {
+      var RestQuery = require('../../queries/rest_query');
+      var restQuery = new RestQuery(fakeServer, {
+        rest_body: '/id=@doc[id]@'
+      });
+
+      restQuery.checkIfItIsRelevant({selectedDocuments: undefined}).then(function (ret) {
+        expect(ret).to.be(false);
+        done();
+      }).catch(done);
+    });
   });
 
   describe('fetchResults test if correct arguments are passed to generateCacheKey', function () {
@@ -160,7 +207,7 @@ describe('RestQuery', function () {
         expect(spy.callCount).to.equal(1);
         expect(spy.calledWithExactly('GET', 'http://localhost:3000/posts', '', '{}', '{}', '', 'fred')).to.be.ok();
         done();
-      });
+      }).catch(done);
     });
   });
 
@@ -188,7 +235,7 @@ describe('RestQuery', function () {
       restQuery.fetchResults('').then(function (res) {
         expect(res).to.eql(fakeDoc1);
         done();
-      });
+      }).catch(done);
     });
 
     it('simple post request', function (done) {
@@ -213,7 +260,7 @@ describe('RestQuery', function () {
       restQuery.fetchResults('').then(function (res) {
         expect(res).to.eql(fakeDoc1);
         done();
-      });
+      }).catch(done);
     });
 
     it('method different than GET or POST should fail', function (done) {
@@ -238,7 +285,7 @@ describe('RestQuery', function () {
       restQuery.fetchResults('').catch(function (err) {
         expect(err.message).to.equal('Only GET|POST methods are supported at the moment');
         done();
-      });
+      }).catch(done);
     });
 
     it('request with username and password', function (done) {
@@ -265,7 +312,7 @@ describe('RestQuery', function () {
       restQuery.fetchResults('').then(function (res) {
         expect(res).to.eql(fakeDoc2);
         done();
-      });
+      }).catch(done);
     });
 
   });

@@ -5,6 +5,15 @@ define(function (require) {
   require('ui/modules').get('app/dashboard')
   .directive('kibiMenuTemplate', function ($rootScope, $timeout, $window, $compile, $document) {
     const link = function ($scope, $el) {
+
+      const isKibiRelationsSearchBar = function (obj) {
+        for (const key in obj) {
+          if (!obj.hasOwnProperty(key)) continue;
+          if (obj[key] === 'kibi-relations-search-bar') return true;
+        }
+        return false;
+      };
+
       $scope.data = {
         showMenu: false,
         delay: $scope.kibiMenuTemplateHideDelay || 250
@@ -103,6 +112,10 @@ define(function (require) {
         const isSelf = $el[0] === event.target;
         const isMenu = container[0].contains(event.target);
         const isInsideElement = isChild || isSelf;
+
+        if (isKibiRelationsSearchBar(event.target.classList)) {
+          return;
+        }
 
         if (!isInsideElement && !isMenu && $scope.kibiMenuTemplateOnBlurFn) {
           $scope.kibiMenuTemplateOnBlurFn();

@@ -59,7 +59,7 @@
         <div role="tabpanel" class="tab-pane active" data-test-subj="index-relations-tab" ng-class="tab.indexRel ? 'active' : ''">
           <form name="indicesForm" novalidate>
             <div class="form-group">
-              <input type="text" class="form-control kibi-search-bar"
+              <input type="text" class="form-control kibi-relations-search-bar"
                 kibi-relations-search-bar
                 ng-model="relationsIndicesSearchString"
                 ng-model-options="{ debounce: 350 }"
@@ -236,7 +236,7 @@
         <div role="tabpanel" class="tab-pane" data-test-subj="dashboard-relations-tab" ng-class="tab.dashboardRel ? 'active' : ''">
           <form name="dashboardsForm" novalidate>
             <div class="form-group">
-              <input type="text" class="form-control kibi-search-bar"
+              <input type="text" class="form-control kibi-relations-search-bar"
                 kibi-relations-search-bar
                 ng-model="relationsDashboardsSearchString"
                 ng-model-options="{ debounce: 350 }"

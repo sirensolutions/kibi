@@ -13,13 +13,23 @@ define(function (require) {
     return {
       restrict: 'A',
       link: function (scope, element, attrs) {
-        scope.searchRelations = function (mode) {
+        scope.searchRelations = function (mode, place = undefined) {
+          // mode: relationsIndices or relationsDashboards
+          // place: kibi-sequential-join-vis or relations settings
           const searchString = scope[`${mode}SearchString`];
 
           if (!searchString || searchString.length < 2) {
-            for (const relation in scope.relations[mode]) {
-              if (scope.relations[mode].hasOwnProperty(relation)) {
-                scope.relations[mode][relation].$$hidden = false;
+            if (place === 'kibi-sequential-join-vis') {
+              for (const relation in scope.kibiMenuTemplateData) {
+                if (scope.kibiMenuTemplateData.hasOwnProperty(relation)) {
+                  scope.kibiMenuTemplateData[relation].$$hidden = false;
+                }
+              }
+            } else {
+              for (const relation in scope.relations[mode]) {
+                if (scope.relations[mode].hasOwnProperty(relation)) {
+                  scope.relations[mode][relation].$$hidden = false;
+                }
               }
             }
             return;
@@ -46,18 +56,30 @@ define(function (require) {
             return result;
           };
 
-          const result = [];
-
-          for (const relation in scope.relations[mode]) {
-            if (!scope.relations[mode].hasOwnProperty(relation)) {
-              continue;
+          if (place === 'kibi-sequential-join-vis') {
+            for (const relation in scope.kibiMenuTemplateData) {
+              if (!scope.kibiMenuTemplateData.hasOwnProperty(relation)) {
+                continue;
+              }
+              if (search(scope.kibiMenuTemplateData[relation], searchString)) {
+                scope.kibiMenuTemplateData[relation].$$hidden = false;
+              } else {
+                scope.kibiMenuTemplateData[relation].$$hidden = true;
+              }
             }
-            if (search(scope.relations[mode][relation], searchString)) {
-              scope.relations[mode][relation].$$hidden = false;
-            } else {
-              scope.relations[mode][relation].$$hidden = true;
+          } else {
+            for (const relation in scope.relations[mode]) {
+              if (!scope.relations[mode].hasOwnProperty(relation)) {
+                continue;
+              }
+              if (search(scope.relations[mode][relation], searchString)) {
+                scope.relations[mode][relation].$$hidden = false;
+              } else {
+                scope.relations[mode][relation].$$hidden = true;
+              }
             }
           }
+
         };
       }
     };

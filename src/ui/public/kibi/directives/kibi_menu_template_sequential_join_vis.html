@@ -1,6 +1,12 @@
 <div class="kibi-menu-template-sequential-join-vis">
+ <input type="text" class="form-control kibi-relations-search-bar"
+   kibi-relations-search-bar
+   ng-model="relationsIndicesSearchString"
+   ng-model-options="{ debounce: 350 }"
+   ng-change="searchRelations('relationsIndices', 'kibi-sequential-join-vis')"
+   placeholder="Search for relation ...">
   <ul>
-    <li ng-click="relation.onSelect(kibiMenuTemplateContext)" ng-repeat="relation in kibiMenuTemplateData">
+    <li ng-click="relation.onSelect(kibiMenuTemplateContext)" ng-repeat="relation in kibiMenuTemplateData" ng-hide="relation.$$hidden">
       Name: <b>{{relation.label}}</b><br/>
 
       index pattern: <b>{{relation.indices[0].indexPatternId}}</b>

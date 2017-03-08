@@ -128,7 +128,7 @@
     "minimatch": "2.0.10",
     "mkdirp": "0.5.1",
     "moment": "2.13.0",
-    "moment-timezone": "0.5.4",
+    "moment-timezone": "0.5.11",
     "querystring-browser": "1.0.4",
     "raw-loader": "0.5.1",
     "request": "2.61.0",

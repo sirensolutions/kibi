@@ -12,7 +12,9 @@ describe('kbnTopNav directive', function () {
   let build;
   let KbnTopNavController;
 
-  beforeEach(ngMock.module('kibana'));
+  beforeEach(ngMock.module('kibana', $provide => {
+    $provide.constant('elasticsearchPlugins', [ 'siren-platform' ]);
+  }));
   beforeEach(ngMock.inject(function ($compile, $rootScope, Private) {
     KbnTopNavController = Private(KbnTopNavControllerProvider);
 

@@ -1,17 +1,17 @@
 import angular from 'angular';
 import _ from 'lodash';
-import DelayExecutionHelper from 'ui/kibi/helpers/delay_execution_helper';
+import DelayExecutionHelperProvider from 'ui/kibi/helpers/delay_execution_helper';
 import SearchHelper from 'ui/kibi/helpers/search_helper';
 import chrome from 'ui/chrome';
 import DashboardGroupHelperProvider from 'ui/kibi/helpers/dashboard_group_helper';
 import { onDashboardPage } from 'ui/kibi/utils/on_page';
 
-export default function KibiNavBarHelperFactory(kibiState, globalState, getAppState, createNotifier, Private, $rootScope, savedDashboards,
-  kbnIndex) {
+export default function KibiNavBarHelperFactory(kibiState, globalState, getAppState, createNotifier, Private, $rootScope, savedDashboards) {
   const notify = createNotifier({
     location: 'Kibi Navbar helper'
   });
 
+  const DelayExecutionHelper = Private(DelayExecutionHelperProvider);
   const dashboardGroupHelper = Private(DashboardGroupHelperProvider);
 
   /*
@@ -77,7 +77,7 @@ export default function KibiNavBarHelperFactory(kibiState, globalState, getAppSt
         ${JSON.stringify(dashboardsIds, null, ' ')} because: [${reason}]`;
       console.log(msg); // eslint-disable-line no-console
     }
-    this.delayExecutionHelper.addEventData({
+    return this.delayExecutionHelper.addEventData({
       forceUpdate: forceUpdate,
       ids: dashboardsIds
     });
@@ -196,7 +196,7 @@ export default function KibiNavBarHelperFactory(kibiState, globalState, getAppSt
       (data) => {
         if (onDashboardPage()) {
           const forceUpdate = data.forceUpdate;
-          _fireUpdateAllCounts.call(self, data.ids, forceUpdate);
+          return _fireUpdateAllCounts.call(self, data.ids, forceUpdate);
         }
       },
       750,

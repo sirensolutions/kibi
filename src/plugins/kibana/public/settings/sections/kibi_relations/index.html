@@ -59,7 +59,12 @@
         <div role="tabpanel" class="tab-pane active" data-test-subj="index-relations-tab" ng-class="tab.indexRel ? 'active' : ''">
           <form name="indicesForm" novalidate>
             <div class="form-group">
-              <input type="text" class="form-control kibi-search-bar" ng-model="searchString" placeholder="Search for relation ...">
+              <input type="text" class="form-control kibi-search-bar"
+                kibi-relations-search-bar
+                ng-model="relationsIndicesSearchString"
+                ng-model-options="{ debounce: 350 }"
+                ng-change="searchRelations('relationsIndices')"
+                placeholder="Search for relation ...">
             </div>
             <div class="form-group table-responsive">
               <table class="table table-condensed">
@@ -75,10 +80,10 @@
                   </tr>
                 </thead>
                 <!-- here we repeat tbody to be able to show row with the error properly -->
-                <tbody ng-repeat="relation in relations.relationsIndices | searchFor:searchString"
+                <tbody ng-repeat="relation in relations.relationsIndices"
                   data-test-subj="row-{{$index}}">
                   <tr class="relation-row"
-                      ng-class="{ 'red-border' : relation.errors && relation.errors.length }">
+                      ng-class="{ 'red-border' : relation.errors && relation.errors.length }" ng-hide="relation.$$hidden">
                     <!--left relation-->
                     <td>
                       <table class="relationPart">
@@ -207,7 +212,8 @@
                     </td>
                     <td>
                       <div class="btn-group rightCorner">
-                        <kibi-array-param-remove index="{{ $index }}" model="relations.relationsIndices"></kibi-array-param-remove>
+                        <kibi-array-param-remove index="{{ $index }}" model="relations.relationsIndices">
+                          </kibi-array-param-remove>
                       </div>
                     </td>
                   </tr>
@@ -230,7 +236,12 @@
         <div role="tabpanel" class="tab-pane" data-test-subj="dashboard-relations-tab" ng-class="tab.dashboardRel ? 'active' : ''">
           <form name="dashboardsForm" novalidate>
             <div class="form-group">
-              <input type="text" class="form-control kibi-search-bar" ng-model="searchString" placeholder="Search for relation ...">
+              <input type="text" class="form-control kibi-search-bar"
+                kibi-relations-search-bar
+                ng-model="relationsDashboardsSearchString"
+                ng-model-options="{ debounce: 350 }"
+                ng-change="searchRelations('relationsDashboards')"
+                placeholder="Search for relation ...">
             </div>
             <div class="form-group table-responsive">
               <table class="table table-condensed">
@@ -244,10 +255,10 @@
                   </tr>
                 </thead>
                 <!-- here we repeat tbody to be able to show row with the error properly -->
-                <tbody ng-repeat="relation in relations.relationsDashboards | searchFor:searchString"
+                <tbody ng-repeat="relation in relations.relationsDashboards"
                   data-test-subj="row-{{$index}}">
                   <tr class="relation-row"
-                      ng-class="{ 'red-border' : relation.errors && relation.errors.length }">
+                      ng-class="{ 'red-border' : relation.errors && relation.errors.length }" ng-hide="relation.$$hidden">
                     <td>
                       <kibi-select required object-type="dashboard"
                                             data-test-subj="dashboard-relation-left-dashboard"

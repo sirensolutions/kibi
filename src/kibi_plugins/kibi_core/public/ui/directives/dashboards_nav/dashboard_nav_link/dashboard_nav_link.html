@@ -1,16 +1,16 @@
 <div
   class="dashboards-nav-link {{classes}}"
   ng-class="{ active: isActive && isDashboardLoaded }"
-  tooltip="{{ tooltipContent }}"
-  tooltip-placement="right"
-  tooltip-popup-delay="0"
-  tooltip-append-to-body="1"
 >
   <!-- title is empty in order to prevent displaying the title from the parent -->
   <a
     title=""
     class="anchor"
     ng-click="onClick({ $event: $event })"
+    tooltip="{{ tooltipContent }}"
+    tooltip-placement="right"
+    tooltip-popup-delay="0"
+    tooltip-append-to-body="1"
   >
     <div ng-if="showIcon" class="icon">
       <i

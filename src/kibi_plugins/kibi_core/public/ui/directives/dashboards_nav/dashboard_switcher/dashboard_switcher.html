@@ -2,7 +2,6 @@
   ng-repeat="group in groups | orderBy: 'priority'"
   is-active="group.active"
   on-click="group.selected.onSelect(groups)"
-  tooltip-content="getTooltip(group.title)"
   title="group.title"
   count="group.selected.count"
   is-pruned="group.selected.isPruned"

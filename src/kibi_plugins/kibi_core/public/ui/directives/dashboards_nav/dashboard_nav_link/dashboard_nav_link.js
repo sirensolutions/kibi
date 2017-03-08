@@ -18,7 +18,6 @@ uiModules
       classes: '@',
       showIcon: '=',
       isActive: '=',
-      tooltipContent: '=',
       onClick: '&',
       iconUrl: '=',
       iconCss: '=',
@@ -30,6 +29,9 @@ uiModules
         delete $scope.countHumanNotation;
         if (count !== undefined) {
           $scope.countHumanNotation = numeral.set(count).format('0.[00]a');
+          $scope.tooltipContent = `${$scope.title} (${count})`;
+        } else {
+          $scope.tooltipContent = $scope.title;
         }
       });
 

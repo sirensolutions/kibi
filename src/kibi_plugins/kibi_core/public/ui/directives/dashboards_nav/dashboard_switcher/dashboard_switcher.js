@@ -44,14 +44,6 @@ uiModules
         }
       });
 
-      $scope.getTooltip = tooltip => {
-        // If the sidebar is open then we don't need to show the title because
-        // it will already be visible.
-        if (!dashboardsNavState.isOpen()) {
-          return tooltip;
-        }
-      };
-
       $scope.toggleGroupNav = function (group) {
         group.selected.onOpenClose(group);
         return true;

@@ -80,13 +80,13 @@ describe('Kibi Management', function () {
 
   describe('Relations Section', function () {
 
-    it('relations should have version set to 2 by default', function (done) {
+    it('relations should have version set to 2 by default', function () {
       ngMock.module('kibana');
       ngMock.inject(($injector) => {
         config = $injector.get('config');
-        expect(config.get('kibi:relations').version).to.be(2);
-        done();
+        config.remove('kibi:relations'); // make sure we get the default value for this setting
       });
+      expect(config.get('kibi:relations').version).to.be(2);
     });
 
     describe('create an index to dashboards map', function () {

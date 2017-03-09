@@ -1,18 +1,17 @@
 import UiModules from 'ui/modules';
 import chrome from 'ui/chrome';
+import EventsProvider from 'ui/events';
 
 UiModules.get('kibana')
-.run(($rootScope, $location, kbnIndex, es) => {
+.run(($rootScope, $location, $http, kibiSession) => {
+
   $rootScope.$on('$locationChangeSuccess', () => {
     const search = $location.search();
     if (search._h) {
-      es.get({
-        index: kbnIndex,
-        type: 'url',
-        id: search._h
-      }).then((res) => {
-        if (res._source && res._source.kibiSession) {
-          sessionStorage.setItem('kibiSession', JSON.stringify(res._source.kibiSession));
+      $http.get(chrome.getBasePath() + '/kibisession/' + search._h).then((res) => {
+        if (res.data) {
+          sessionStorage.setItem('kibiSession', JSON.stringify(res.data));
+          kibiSession.emit('kibisession:loaded');
         }
       });
       delete search._s;
@@ -20,9 +19,15 @@ UiModules.get('kibana')
     }
   });
 })
-.service('kibiSession', ($location) => {
+.service('kibiSession', ($location, Private) => {
+  const Events = Private(EventsProvider);
 
-  class KibiSession {
+  class KibiSession extends Events {
+    constructor() {
+      super();
+      this.dataString = '{}';
+    }
+
     getData() {
       const data = sessionStorage.getItem('kibiSession');
       if (data) {
@@ -31,9 +36,17 @@ UiModules.get('kibana')
       return {};
     }
 
-    putData(data) {
-      sessionStorage.setItem('kibiSession', JSON.stringify(data));
+    getDataString() {
+      return this.dataString;
     }
+
+    putData(data) {
+      // storing locally so I can watch it
+      this.dataString = JSON.stringify(data);
+      sessionStorage.setItem('kibiSession', this.dataString);
+      this.emit('kibisession:changed');
+    }
+
   }
 
   return new KibiSession();

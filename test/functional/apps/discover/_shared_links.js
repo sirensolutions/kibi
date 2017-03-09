@@ -53,6 +53,23 @@ define(function (require) {
           common.debug('click on the default index button');
           return settingsPage.clickDefaultIndexButton();
         })
+        //kibi: disable the hashed urls which we turned on by default
+        .then(function () {
+          common.debug('disable the hashed urls');
+          return settingsPage.clickAdvancedTab();
+        })
+        .then(function () {
+          common.debug('disable the hashed urls');
+          return settingsPage.setAdvancedSettings('state:storeInSessionStorage', false);
+        })
+        .then(function GetAdvancedSetting() {
+          common.debug('check that hashed urls are disabled');
+          return settingsPage.getAdvancedSettings('state:storeInSessionStorage');
+        })
+        .then(function (advancedSetting) {
+          expect(advancedSetting).to.be('false');
+        })
+        //kibi: end
         .then(function () {
           common.debug('discover');
           return common.navigateToApp('discover');
@@ -83,20 +100,18 @@ define(function (require) {
 
 
         bdd.it('should show the correct formatted URL', function () {
-          // kibi: added empty kibistate to the URL
           var expectedUrl = baseUrl
             + '/app/kibana?_t=1453775307251#'
             + '/discover?_g=(refreshInterval:(display:Off,pause:!f,value:0),time'
             + ':(from:\'2015-09-19T06:31:44.000Z\',mode:absolute,to:\'2015-09'
-            + '-23T18:31:44.000Z\'))&_k=(s:gc46f29539d)&_a=(columns:!(_source),index:\'logstash-'
+            + '-23T18:31:44.000Z\'))&_k=()&_a=(columns:!(_source),index:\'logstash-'
             + '*\',interval:auto,query:(query_string:(analyze_wildcard:!t,query'
             + ':\'*\')),sort:!(\'@timestamp\',desc))';
           return discoverPage.getSharedUrl()
           .then(function (actualUrl) {
             // strip the timestamp out of each URL
-            expect(actualUrl.replace(/_t=\d{13}/,'_t=TIMESTAMP').replace(/s:\w{11}/,'s:SESSION_ID'))
-
-              .to.be(expectedUrl.replace(/_t=\d{13}/,'_t=TIMESTAMP').replace(/s:\w{11}/,'s:SESSION_ID'));
+            expect(actualUrl.replace(/_t=\d{13}/,'_t=TIMESTAMP'))
+              .to.be(expectedUrl.replace(/_t=\d{13}/,'_t=TIMESTAMP'));
           })
           .catch(common.handleError(this));
         });

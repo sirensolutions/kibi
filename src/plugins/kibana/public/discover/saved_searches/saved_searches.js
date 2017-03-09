@@ -33,7 +33,7 @@ define(function (require) {
     this.Class = SavedSearch;
 
     this.loaderProperties = {
-      name: 'savedObjectsAPI',
+      name: 'searches',
       noun: 'Saved Search',
       nouns: 'saved searches'
     };

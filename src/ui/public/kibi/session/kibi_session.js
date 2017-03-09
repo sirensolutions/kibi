@@ -12,9 +12,9 @@ UiModules.get('kibana')
         if (res.data) {
           sessionStorage.setItem('kibiSession', JSON.stringify(res.data));
           kibiSession.emit('kibisession:loaded');
+          delete search._s;
         }
       });
-      delete search._s;
       $location.search(search);
     }
   });

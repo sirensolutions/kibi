@@ -37,6 +37,12 @@ define(function (require) {
         return common.sleep(1000);
       })
       .then(function setAdvancedSettingsClickPropertyValue(selectList) {
+        // kibi: added to be able to change the boolean values
+        if (propertyValue === true || propertyValue === false) {
+          return self.remote.findByCssSelector('input[type="checkbox"]')
+          .click();
+        }
+        // kibi: end
         return self.remote.findByCssSelector('option[label="' + propertyValue + '"]')
         .click();
       })

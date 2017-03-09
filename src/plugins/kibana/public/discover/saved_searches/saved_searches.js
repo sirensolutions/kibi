@@ -18,9 +18,9 @@ define(function (require) {
   });
 
   // kibi: inject Saved Objects API
-  module.service('savedSearches', function (Promise, config, kbnIndex, es, savedObjectsAPI, createNotifier, SavedSearch, kbnUrl, Private) {
+  module.service('savedSearches', function (Promise, config, kbnIndex, savedObjectsAPI, createNotifier, SavedSearch, kbnUrl, Private) {
     const cache = Private(require('ui/kibi/helpers/cache_helper')); // kibi: added to cache requests for saved searches
-    const scanner = new Scanner(es, {
+    const scanner = new Scanner(savedObjectsAPI, {
       index: kbnIndex,
       type: 'search'
     });
@@ -33,7 +33,7 @@ define(function (require) {
     this.Class = SavedSearch;
 
     this.loaderProperties = {
-      name: 'searches',
+      name: 'savedObjectsAPI',
       noun: 'Saved Search',
       nouns: 'saved searches'
     };

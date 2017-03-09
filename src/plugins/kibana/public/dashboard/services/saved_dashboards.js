@@ -14,10 +14,10 @@ define(function (require) {
     title: 'dashboards'
   });
 
-  // kibi: added savedObjectsAPI dep
-  module.service('savedDashboards', function (Promise, SavedDashboard, kbnIndex, es, savedObjectsAPI, kbnUrl, Private) {
+  // kibi: added savedObjectsAPI dep to replace es
+  module.service('savedDashboards', function (Promise, SavedDashboard, kbnIndex, savedObjectsAPI, kbnUrl, Private) {
     const cache = Private(require('ui/kibi/helpers/cache_helper')); // kibi: added to cache requests for saved searches
-    const scanner = new Scanner(es, {
+    const scanner = new Scanner(savedObjectsAPI, {
       index: kbnIndex,
       type: 'dashboard'
     });

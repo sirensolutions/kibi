@@ -33,11 +33,6 @@ export default class Model {
       auth: false
     });
     this._authClient = server.plugins.elasticsearch.client;
-
-    //TODO: the current implementation of sessions requires them to be
-    // writeable by all users; this code must be removed as soon as
-    // owner tracking is available.
-    this._sessionClient = this._authClient;
   }
 
   /**
@@ -127,9 +122,7 @@ export default class Model {
       body: body
     };
     this._setCredentials(parameters, request);
-    //TODO: replace with this._client once owner tracking is available
-    const client = this._type === 'session' ? this._sessionClient : this._client;
-    await client.indices.putMapping(parameters);
+    await this._client.indices.putMapping(parameters);
   }
 
   /**
@@ -190,13 +183,9 @@ export default class Model {
         refresh: true
       };
 
-      //TODO: remove once owner tracking is available
-      const client = this._type === 'session' ? this._sessionClient : this._client;
-      if (this._type !== 'session') {
-        this._setCredentials(parameters, request);
-      }
+      this._setCredentials(parameters, request);
 
-      response = await client.create(parameters);
+      response = await this._client.create(parameters);
       for (const middleware of this._plugin.getMiddlewares()) {
         await middleware[responseMiddlewareMethod](this, id, body, request, response);
       }
@@ -246,13 +235,9 @@ export default class Model {
         refresh: true
       };
 
-      //TODO: remove once owner tracking is available
-      const client = this._type === 'session' ? this._sessionClient : this._client;
-      if (this._type !== 'session') {
-        this._setCredentials(parameters, request);
-      }
+      this._setCredentials(parameters, request);
 
-      response = await client.index(parameters);
+      response = await this._client.index(parameters);
       for (const middleware of this._plugin.getMiddlewares()) {
         await middleware[responseMiddlewareMethod](this, id, body, request, response);
       }
@@ -285,13 +270,9 @@ export default class Model {
         refresh: true
       };
 
-      //TODO: remove once owner tracking is available
-      const client = this._type === 'session' ? this._sessionClient : this._client;
-      if (this._type !== 'session') {
-        this._setCredentials(parameters, request);
-      }
+      this._setCredentials(parameters, request);
 
-      const response = await client.update(parameters);
+      const response = await this._client.update(parameters);
       for (const middleware of this._plugin.getMiddlewares()) {
         await middleware.patchResponse(this, id, fields, request, response);
       }
@@ -302,11 +283,11 @@ export default class Model {
   }
 
   /**
-   * Returns all the objects of the type managed by this model.
+   * Searches objects of the type managed by this model.
    *
    * Arguments and response can be modified and validated by middlewares.
    *
-   * @param {Number} size - The number of results to return.
+   * @param {Number} size - The number of results to return. If not set, returns all objects matching the search.
    * @param {String} search - An optional search string or query body.
    * @param {Object} request - Optional HAPI request.
    * @return {Array} A list of objects of the specified type.
@@ -341,15 +322,58 @@ export default class Model {
         };
       }
 
-      const parameters = {
+      let parameters = {
         index: this._config.get('kibana.index'),
         type: this._type,
         body: body,
-        size: size || 100
       };
-      this._setCredentials(parameters, request);
+      if (size >= 0) {
+        parameters.size = size;
+      } else {
+        parameters.size = 100;
+        parameters.searchType = 'scan';
+        parameters.scroll = '1m';
+      }
 
-      const response = await this._client.search(parameters);
+      this._setCredentials(parameters, request);
+      let response = await this._client.search(parameters);
+      let scrollId = response._scroll_id;
+
+      if (scrollId) {
+        const hits = [];
+        while (true) {
+          hits.push(...response.hits.hits);
+          if (hits.length === response.hits.total) {
+            break;
+          }
+          parameters = {
+            scroll: '1m',
+            scrollId
+          };
+          this._setCredentials(parameters, request);
+          response = await this._client.scroll(parameters);
+          scrollId = response._scroll_id;
+        }
+
+        parameters = {
+          scrollId
+        };
+        this._setCredentials(parameters, request);
+
+        try {
+          await this._client.clearScroll(parameters);
+        } catch (error) {
+          // ignore errors on clearScroll
+        }
+
+        response = {
+          hits: {
+            hits: hits,
+            total: hits.length
+          }
+        };
+      }
+
       for (const middleware of this._plugin.getMiddlewares()) {
         await middleware.searchResponse(this, size, search, request, response);
       }

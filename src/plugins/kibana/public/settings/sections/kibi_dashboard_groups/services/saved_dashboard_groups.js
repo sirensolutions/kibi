@@ -14,7 +14,7 @@ define(function (require) {
     title: 'dashboardgroups'
   });
 
-  module.service('savedDashboardGroups', function (Promise, config, kbnIndex, es, savedObjectsAPI, createNotifier, SavedDashboardGroup,
+  module.service('savedDashboardGroups', function (Promise, config, kbnIndex, savedObjectsAPI, createNotifier, SavedDashboardGroup,
                                                    kbnUrl, Private) {
 
     const cache = Private(require('ui/kibi/helpers/cache_helper'));
@@ -23,7 +23,7 @@ define(function (require) {
       location: 'Saved Dashboard Groups'
     });
 
-    const scanner = new Scanner(es, {
+    const scanner = new Scanner(savedObjectsAPI, {
       index: kbnIndex,
       type: 'dashboardgroup'
     });

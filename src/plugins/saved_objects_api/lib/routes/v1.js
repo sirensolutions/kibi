@@ -297,6 +297,7 @@ module.exports = (server, API_ROOT) => {
    * Querystring parameters:
    *
    *   - size: the number of results to return
+   *   - scroll: if set to any value, the search will return all the objects of the specified type.
    *   - q: a text to search
    *
    * Errors are formatted by a custom handler set in the init method of this plugin.
@@ -311,7 +312,11 @@ module.exports = (server, API_ROOT) => {
       } catch (error) {
         return reply(Boom.notFound(error));
       }
-      model.search(request.query.size, request.query.q || request.payload, request)
+      let size = request.query.size;
+      if (request.query.scroll) {
+        size = 0;
+      }
+      model.search(size, request.query.q || request.payload, request)
       .then((response) => {
         reply(response);
       })
@@ -327,6 +332,8 @@ module.exports = (server, API_ROOT) => {
         },
         query: {
           size: Joi.number().integer().default(100),
+          scroll: Joi.any().default(null),
+          search_type: Joi.any().default(null),
           q: Joi.string().default(null)
         }
       }

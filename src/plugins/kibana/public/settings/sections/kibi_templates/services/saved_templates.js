@@ -13,14 +13,14 @@ define(function (require) {
     title: 'templates'
   });
 
-  module.service('savedTemplates', function (Private, Promise, kbnIndex, es, savedObjectsAPI, createNotifier, SavedTemplate, kbnUrl) {
+  module.service('savedTemplates', function (Private, Promise, kbnIndex, savedObjectsAPI, createNotifier, SavedTemplate, kbnUrl) {
     const cache = Private(require('ui/kibi/helpers/cache_helper'));
 
     const notify = createNotifier({
       location: 'Saved Templates'
     });
 
-    const scanner = new Scanner(es, {
+    const scanner = new Scanner(savedObjectsAPI, {
       index: kbnIndex,
       type: 'template'
     });

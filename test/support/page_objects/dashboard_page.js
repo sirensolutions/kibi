@@ -114,7 +114,7 @@ export default class DashboardPage {
 
   clickDashboardByLinkText(dashName) {
     return this.findTimeout
-    .findByLinkText(dashName)
+    .findByPartialLinkText(dashName)
     .click();
   }
 
@@ -122,26 +122,23 @@ export default class DashboardPage {
   // entry, or at least to a single page of results
   loadSavedDashboard(dashName) {
     const self = this;
-    return PageObjects.common.findTestSubject('dashboardOpenButton')
+    return self.remote
+    .findByCssSelector('input[name="dashboards-filter"]')
     .click()
-    .then(function filterDashboard() {
-      PageObjects.common.debug('Load Saved Dashboard button clicked');
-      return self.remote
-      .findByCssSelector('input[name="filter"]')
-      .click()
-      .type(dashName.replace('-',' '));
-    })
-    .then(() => {
-      return PageObjects.header.isGlobalLoadingIndicatorHidden();
-    })
-    .then(() => {
-      return PageObjects.common.sleep(1000);
-    })
+    .type(dashName.replace('-',' '))
+    // TODO: KIBI5: restore when the filter is backed by ES
+    //.then(() => {
+      //return PageObjects.header.isGlobalLoadingIndicatorHidden();
+    //})
+    //.then(() => {
+      //return PageObjects.common.sleep(1000);
+    //})
     .then(function clickDashboardByLinkedText() {
-      return self
-      .clickDashboardByLinkText(dashName);
+      PageObjects.common.debug('filtered on dashboard name');
+      return self.clickDashboardByLinkText(dashName);
     })
     .then(() => {
+      PageObjects.common.debug(`Loading ${dashName} dashboard`);
       return PageObjects.header.isGlobalLoadingIndicatorHidden();
     });
   }

@@ -2,14 +2,13 @@ import versionCheckMixin from './version_check';
 import { shortUrlAssertValid } from './short_url_assert_valid';
 
 module.exports = function (kbnServer, server, config) {
-  let _ = require('lodash');
-  let fs = require('fs');
-  let Boom = require('boom');
-  let Hapi = require('hapi');
-  let parse = require('url').parse;
-  let format = require('url').format;
-
-  let getDefaultRoute = require('./getDefaultRoute');
+  const _ = require('lodash');
+  const fs = require('fs');
+  const Boom = require('boom');
+  const Hapi = require('hapi');
+  const parse = require('url').parse;
+  const format = require('url').format;
+  const getDefaultRoute = require('./getDefaultRoute');
 
   server = kbnServer.server = new Hapi.Server();
 
@@ -17,7 +16,7 @@ module.exports = function (kbnServer, server, config) {
   kbnServer.mixin(require('./register_hapi_plugins'));
 
   // Create a new connection
-  let connectionOptions = {
+  const connectionOptions = {
     host: config.get('server.host'),
     port: config.get('server.port'),
     state: {
@@ -122,7 +121,7 @@ module.exports = function (kbnServer, server, config) {
 
   // attach the app name to the server, so we can be sure we are actually talking to kibana
   server.ext('onPreResponse', function (req, reply) {
-    let response = req.response;
+    const response = req.response;
 
     if (response.isBoom) {
       response.output.headers['kbn-name'] = kbnServer.name;
@@ -150,7 +149,7 @@ module.exports = function (kbnServer, server, config) {
     method: 'GET',
     path: '/{p*}',
     handler: function (req, reply) {
-      let path = req.path;
+      const path = req.path;
       if (path === '/' || path.charAt(path.length - 1) !== '/') {
         return reply(Boom.notFound());
       }

@@ -181,6 +181,22 @@ module.exports = function (kbnServer, server, config) {
     }
   });
 
+  // kibi: added this handler to be able to fetch the kibiSession data
+  server.route({
+    method: 'GET',
+    path: '/kibisession/{urlId}',
+    handler: async function (request, reply) {
+      try {
+        const data = await shortUrlLookup.getUrl(request.params.urlId);
+        shortUrlAssertValid(data.url);
+        reply(data.kibiSession || {});
+      } catch (err) {
+        reply(err);
+      }
+    }
+  });
+  // kibi: end
+
   server.route({
     method: 'POST',
     path: '/shorten',

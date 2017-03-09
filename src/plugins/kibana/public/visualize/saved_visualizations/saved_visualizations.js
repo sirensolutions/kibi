@@ -12,6 +12,7 @@ define(function (require) {
     title: 'visualizations'
   });
 
+  // kibi: replaced es with savedObjectsAPI
   app.service('savedVisualizations', function (Promise, savedObjectsAPI, kbnIndex, SavedVis, Private, createNotifier, kbnUrl) {
     const visTypes = Private(require('ui/registry/vis_types'));
 

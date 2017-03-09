@@ -14,7 +14,7 @@ define(function (require) {
     title: 'dashboards'
   });
 
-  // kibi: added savedObjectsAPI dep
+  // kibi: added savedObjectsAPI dep to replace es
   module.service('savedDashboards', function (Promise, SavedDashboard, kbnIndex, savedObjectsAPI, kbnUrl, Private) {
     const cache = Private(require('ui/kibi/helpers/cache_helper')); // kibi: added to cache requests for saved searches
     const scanner = new Scanner(savedObjectsAPI, {

@@ -13,25 +13,20 @@ define(function (require) {
     return {
       restrict: 'A',
       link: function (scope, element, attrs) {
-        scope.searchRelations = function (mode, place = undefined) {
-          // mode: relationsIndices or relationsDashboards
-          // place: kibi-sequential-join-vis or relations settings
-          const searchString = scope[`${mode}SearchString`];
+        // path:
+        // 1. Kibi Relations Join Viz: kibiMenuTemplateData
+        // 2. Kibi Relations Settings: relations.relationsIndices or relations.relationsDashboards
+
+        scope.searchRelations = function (path) {
+          const relations = _.get(scope, path);
+
+          if (path.split('.')[0] === 'relations') {
+            path = path.split('.').splice(1)[0];
+          }
+          const searchString = scope[`${path}SearchString`];
 
           if (!searchString || searchString.length < 2) {
-            if (place === 'kibi-sequential-join-vis') {
-              for (const relation in scope.kibiMenuTemplateData) {
-                if (scope.kibiMenuTemplateData.hasOwnProperty(relation)) {
-                  scope.kibiMenuTemplateData[relation].$$hidden = false;
-                }
-              }
-            } else {
-              for (const relation in scope.relations[mode]) {
-                if (scope.relations[mode].hasOwnProperty(relation)) {
-                  scope.relations[mode][relation].$$hidden = false;
-                }
-              }
-            }
+            relations.forEach((relation) => relation.$$hidden = false);
             return;
           }
 
@@ -56,30 +51,13 @@ define(function (require) {
             return result;
           };
 
-          if (place === 'kibi-sequential-join-vis') {
-            for (const relation in scope.kibiMenuTemplateData) {
-              if (!scope.kibiMenuTemplateData.hasOwnProperty(relation)) {
-                continue;
-              }
-              if (search(scope.kibiMenuTemplateData[relation], searchString)) {
-                scope.kibiMenuTemplateData[relation].$$hidden = false;
-              } else {
-                scope.kibiMenuTemplateData[relation].$$hidden = true;
-              }
+          relations.forEach((relation) => {
+            if (search(relation, searchString)) {
+              relation.$$hidden = false;
+            } else {
+              relation.$$hidden = true;
             }
-          } else {
-            for (const relation in scope.relations[mode]) {
-              if (!scope.relations[mode].hasOwnProperty(relation)) {
-                continue;
-              }
-              if (search(scope.relations[mode][relation], searchString)) {
-                scope.relations[mode][relation].$$hidden = false;
-              } else {
-                scope.relations[mode][relation].$$hidden = true;
-              }
-            }
-          }
-
+          });
         };
       }
     };

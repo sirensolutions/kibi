@@ -314,7 +314,7 @@ module.exports = (server, API_ROOT) => {
       }
       let size = request.query.size;
       if (request.query.scroll) {
-        size = 0;
+        size = null;
       }
       model.search(size, request.query.q || request.payload, request)
       .then((response) => {

@@ -287,7 +287,7 @@ export default class Model {
    *
    * Arguments and response can be modified and validated by middlewares.
    *
-   * @param {Number} size - The number of results to return. If set to 0, returns all objects matching the search.
+   * @param {Number} size - The number of results to return. If not set, returns all objects matching the search.
    * @param {String} search - An optional search string or query body.
    * @param {Object} request - Optional HAPI request.
    * @return {Array} A list of objects of the specified type.
@@ -327,7 +327,7 @@ export default class Model {
         type: this._type,
         body: body,
       };
-      if (size) {
+      if (size >= 0) {
         parameters.size = size;
       } else {
         parameters.size = 100;

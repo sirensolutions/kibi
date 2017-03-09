@@ -1778,16 +1778,16 @@ describe('Kibi Settings', function () {
           ]
         };
 
-        const modes = ['relationsIndices', 'relationsDashboards'];
-        modes.forEach((mode) => {
-          searchBar.scope().searchRelations(mode);
+        const paths = ['relations.relationsIndices', 'relations.relationsDashboards'];
+        paths.forEach((path) => {
+          searchBar.scope().searchRelations(path);
 
           let relCounter = 0;
-          searchBar.scope().relations[mode].forEach((relation) => {
+          _.get(searchBar.scope(), path).forEach((relation) => {
             if (!relation.$$hidden) relCounter++;
           });
 
-          if (mode === 'relationsIndices') {
+          if (path === 'relations.relationsIndices') {
             expect(relCounter).to.eql(1);
           } else {
             expect(relCounter).to.eql(2);

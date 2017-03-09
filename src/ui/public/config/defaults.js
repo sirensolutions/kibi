@@ -261,10 +261,6 @@ define(function (require) {
         value: '{ "relationsIndices": [], "relationsDashboards": [], "version": 2 }',
         description: 'Relations between index patterns and dashboards'
       },
-      'kibi:session_cookie_expire': {
-        value: 31536000,
-        description: 'Set duration of cookie session (in seconds)'
-      },
       'kibi:panel_vertical_size': {
         type: 'number',
         value: 2,

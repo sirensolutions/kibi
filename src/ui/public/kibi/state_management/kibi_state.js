@@ -168,7 +168,6 @@ define(function (require) {
       enabled_relations: 'j',
       enabled_relational_panel: 'e',
       groups: 'g',
-      session_id: 's',
       // selected entity properties
       selected_entity_disabled: 'x',
       selected_entity: 'u',
@@ -243,18 +242,6 @@ define(function (require) {
 
     KibiState.prototype.removeTestEntityURI = function () {
       delete this[this._properties.test_selected_entity];
-    };
-
-    KibiState.prototype.deleteSessionId = function (id) {
-      delete this[this._properties.session_id];
-    };
-
-    KibiState.prototype.setSessionId = function (id) {
-      this[this._properties.session_id] = id;
-    };
-
-    KibiState.prototype.getSessionId = function () {
-      return this[this._properties.session_id];
     };
 
     /**

@@ -18,12 +18,12 @@ define(function (require) {
       });
       if (multiChartRequest.length > 0) {
         requests = multiChartRequest;
+        _.each(requests, function (req) {
+          if (req.source && req.source.vis && req.source.vis.$$kibiSingleCall) {
+            req.source.vis.$$kibiSingleCall = false;
+          }
+        });
       }
-      _.each(requests, function (req) {
-        if (req.source && req.source.vis && req.source.vis.$$kibiSingleCall) {
-          req.source.vis.$$kibiSingleCall = false;
-        }
-      });
       //kibi: end
 
       if (!requests.length) return Promise.resolve();

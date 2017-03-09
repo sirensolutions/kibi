@@ -13,14 +13,14 @@ define(function (require) {
     title: 'queries'
   });
 
-  module.service('savedQueries', function (Private, Promise, kbnIndex, es, savedObjectsAPI, createNotifier, SavedQuery, kbnUrl) {
+  module.service('savedQueries', function (Private, Promise, kbnIndex, savedObjectsAPI, createNotifier, SavedQuery, kbnUrl) {
     const cache = Private(require('ui/kibi/helpers/cache_helper'));
 
     const notify = createNotifier({
       location: 'Saved Queries'
     });
 
-    const scanner = new Scanner(es, {
+    const scanner = new Scanner(savedObjectsAPI, {
       index: kbnIndex,
       type: 'query'
     });

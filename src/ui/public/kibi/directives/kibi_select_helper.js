@@ -4,7 +4,7 @@ define(function (require) {
 
   return function KibiSelectHelperFactory(
     config, $http, courier, indexPatterns, timefilter, Private, Promise, kibiState,
-    savedSearches, savedTemplates, savedDashboards, savedQueries, savedDatasources, kbnIndex
+    savedSearches, savedTemplates, savedDashboards, savedQueries, savedDatasources
     ) {
 
     function KibiSelectHelper() {

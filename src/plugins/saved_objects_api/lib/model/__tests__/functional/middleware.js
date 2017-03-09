@@ -177,6 +177,24 @@ describe('saved_objects_api/functional', function () {
       middlewareMock.verify();
     }));
 
+    it('should call registered middlewares when deleting an object.', wrapAsync(async () => {
+      const model = helper.getInstance();
+      await model.create('idx1', {});
+
+      middlewareMock
+      .expects('deleteRequest')
+      .once()
+      .withExactArgs(helper.getInstance(), 'idx1', undefined);
+      middlewareMock
+      .expects('deleteResponse')
+      .once()
+      .withExactArgs(helper.getInstance(), 'idx1', undefined);
+
+      await model.delete('idx1');
+      expect(getMiddlewaresStub.callCount).to.be(4);
+      middlewareMock.verify();
+    }));
+
   });
 
 });

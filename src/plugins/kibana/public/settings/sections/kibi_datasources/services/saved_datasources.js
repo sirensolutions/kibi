@@ -14,7 +14,7 @@ define(function (require) {
     title: 'datasources'
   });
 
-  module.service('savedDatasources', function (Promise, kbnIndex, es, savedObjectsAPI, kbnUrl, SavedDatasource, createNotifier, Private) {
+  module.service('savedDatasources', function (Promise, kbnIndex, savedObjectsAPI, kbnUrl, SavedDatasource, createNotifier, Private) {
 
     const cache = Private(require('ui/kibi/helpers/cache_helper'));
 
@@ -22,7 +22,7 @@ define(function (require) {
       location: 'Saved Datasources'
     });
 
-    const scanner = new Scanner(es, {
+    const scanner = new Scanner(savedObjectsAPI, {
       index: kbnIndex,
       type: 'datasource'
     });

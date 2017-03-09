@@ -16,7 +16,7 @@ define(function (require) {
   require('ui/modules')
   .get('kibana/kibi_state')
   .service('kibiState', function (savedSearches, timefilter, $route, Promise, getAppState, savedDashboards, $rootScope, indexPatterns,
-                                  kbnIndex, globalState, elasticsearchPlugins, $location, config, Private, createNotifier) {
+                                  globalState, elasticsearchPlugins, $location, config, Private, createNotifier) {
     const State = Private(require('ui/state_management/state'));
     const notify = createNotifier({ location: 'Kibi State'});
     const relationsHelper = Private(require('ui/kibi/helpers/relations_helper'));
@@ -698,7 +698,7 @@ define(function (require) {
     /**
      * timeBasedIndices returns an array of time-expanded indices for the given pattern. The time range is the one taken from
      * the kibi state. If the index is not time-based, then an array of the given pattern is returned.
-     * If the intersection of time-ranges from the given dashboards is empty, then an array with kbnIndex is returned.
+     * If the intersection of time-ranges from the given dashboards is empty, then an empty array is returned.
      *
      * @param indexPatternId the pattern to expand
      * @param dashboardIds the ids of dashboard to take a time-range from

@@ -1765,7 +1765,6 @@ describe('Kibi Settings', function () {
           ]
         };
 
-        debugger;
         searchBar.scope().searchRelations();
 
         let relCounter = 0;

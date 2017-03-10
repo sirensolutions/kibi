@@ -1726,30 +1726,17 @@ describe('Kibi Settings', function () {
         ngMock.inject(($rootScope, $compile) => {
           scope = $rootScope.$new();
           searchBar = $compile('<input type="text" kibi-relations-search-bar ' +
+            'kibi-relations-search-bar-path="relations.relationsIndices" ' +
             'ng-model="relationsIndicesSearchString" ng-model-options="{ debounce: 350 }" ' +
-            'ng-change="searchRelations(\'relationsIndices\')">')(scope);
+            'ng-change="searchRelations()">')(scope);
           scope.$digest();
         });
       });
 
       it('should search and filter the relations in settings', () => {
         searchBar.scope().relationsIndicesSearchString = 'art';
-        searchBar.scope().relationsDashboardsSearchString = 'art';
         searchBar.scope().relations = {
           relationsIndices: [
-            {
-              indices: [
-                { indexPatternType: '', indexPatternId: 'investor' }
-              ]
-            },
-            {
-              indices: [
-                { indexPatternType: '', indexPatternId: 'company' },
-                { indexPatternType: '', indexPatternId: 'article' }
-              ]
-            }
-          ],
-          relationsDashboards: [
             {
               indices: [
                 { indexPatternType: '', indexPatternId: 'investor' }
@@ -1778,21 +1765,15 @@ describe('Kibi Settings', function () {
           ]
         };
 
-        const paths = ['relations.relationsIndices', 'relations.relationsDashboards'];
-        paths.forEach((path) => {
-          searchBar.scope().searchRelations(path);
+        debugger;
+        searchBar.scope().searchRelations();
 
-          let relCounter = 0;
-          _.get(searchBar.scope(), path).forEach((relation) => {
-            if (!relation.$$hidden) relCounter++;
-          });
-
-          if (path === 'relations.relationsIndices') {
-            expect(relCounter).to.eql(1);
-          } else {
-            expect(relCounter).to.eql(2);
-          }
+        let relCounter = 0;
+        _.get(searchBar.scope(), 'relations.relationsIndices').forEach((relation) => {
+          if (!relation.$$hidden) relCounter++;
         });
+
+        expect(relCounter).to.eql(2);
       });
     });
 

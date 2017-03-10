@@ -168,7 +168,6 @@ define(function (require) {
       enabled_relations: 'j',
       enabled_relational_panel: 'e',
       groups: 'g',
-      session_id: 's',
       // selected entity properties
       selected_entity_disabled: 'x',
       selected_entity: 'u',
@@ -245,18 +244,6 @@ define(function (require) {
       delete this[this._properties.test_selected_entity];
     };
 
-    KibiState.prototype.deleteSessionId = function (id) {
-      delete this[this._properties.session_id];
-    };
-
-    KibiState.prototype.setSessionId = function (id) {
-      this[this._properties.session_id] = id;
-    };
-
-    KibiState.prototype.getSessionId = function () {
-      return this[this._properties.session_id];
-    };
-
     /**
      * Reset the filters, queries, and time for each dashboard to their saved state.
      */
@@ -266,7 +253,7 @@ define(function (require) {
         globalState.filters = [];
         globalState.save();
       }
-      return savedDashboards.find().then((resp) => {
+      return savedDashboards.find().then(resp => {
         if (resp.hits) {
           const dashboardIdsToUpdate = [];
           const appState = getAppState();
@@ -374,8 +361,6 @@ define(function (require) {
           this.save();
         }
       });
-
-      return Promise.resolve();
     };
 
     KibiState.prototype.getSelectedDashboardId = function (groupId) {

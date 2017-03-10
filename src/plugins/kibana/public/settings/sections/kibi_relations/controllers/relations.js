@@ -12,12 +12,14 @@ define(function (require) {
   app.directive('kibiRelationsSearchBar', () => {
     return {
       restrict: 'A',
+      scope: true,
       link: function (scope, element, attrs) {
-        // path:
+        // attrs.kibiRelationsSearchBarPath:
         // 1. Kibi Relations Join Viz: kibiMenuTemplateData
         // 2. Kibi Relations Settings: relations.relationsIndices or relations.relationsDashboards
 
-        scope.searchRelations = function (path) {
+        scope.searchRelations = function () {
+          let path = attrs.kibiRelationsSearchBarPath;
           const relations = _.get(scope, path);
 
           if (path.split('.')[0] === 'relations') {

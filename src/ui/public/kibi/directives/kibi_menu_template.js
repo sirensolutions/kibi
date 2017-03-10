@@ -9,7 +9,9 @@ define(function (require) {
       const isKibiRelationsSearchBar = function (obj) {
         for (const key in obj) {
           if (!obj.hasOwnProperty(key)) continue;
-          if (obj[key] === 'kibi-relations-search-bar') return true;
+          if (obj[key].nodeName === 'kibi-relations-search-bar') {
+            return true;
+          }
         }
         return false;
       };
@@ -113,7 +115,7 @@ define(function (require) {
         const isMenu = container[0].contains(event.target);
         const isInsideElement = isChild || isSelf;
 
-        if (isKibiRelationsSearchBar(event.target.classList)) {
+        if (isKibiRelationsSearchBar(event.target.attributes)) {
           return;
         }
 

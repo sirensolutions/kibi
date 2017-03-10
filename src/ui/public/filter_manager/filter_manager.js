@@ -32,6 +32,10 @@ define(function (require) {
           if (filter.script) {
             return filter.meta.field === fieldName && filter.script.params.value === value;
           }
+
+          if (filter.query && value === null) {
+            return true;
+          }
         });
 
         if (existing) {
@@ -63,6 +67,17 @@ define(function (require) {
                   lang: field.lang,
                   params: {
                     value: value
+                  }
+                }
+              };
+            } if (value === null) {
+              filter = { meta: { negate: negate, index: index }, query: { } };
+              filter.query = {
+                bool: {
+                  must_not: {
+                    exists: {
+                      field: field.displayName
+                    }
                   }
                 }
               };

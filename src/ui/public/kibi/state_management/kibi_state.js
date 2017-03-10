@@ -253,7 +253,7 @@ define(function (require) {
         globalState.filters = [];
         globalState.save();
       }
-      return savedDashboards.find().then((resp) => {
+      return savedDashboards.find().then(resp => {
         if (resp.hits) {
           const dashboardIdsToUpdate = [];
           const appState = getAppState();
@@ -361,8 +361,6 @@ define(function (require) {
           this.save();
         }
       });
-
-      return Promise.resolve();
     };
 
     KibiState.prototype.getSelectedDashboardId = function (groupId) {

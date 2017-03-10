@@ -10,8 +10,6 @@ import 'plugins/kibana/settings/sections/kibi_datasources/index';      // kibi: 
 import 'plugins/kibana/settings/sections/kibi_queries/index';          // kibi: added by kibi
 import 'plugins/kibana/settings/sections/kibi_templates/index';        // kibi: added by kibi
 import 'plugins/kibana/settings/sections/kibi_dashboard_groups/index'; // kibi: added by kibi
-import 'ui/kibi/helpers/kibi_session_helper/services/index';           // kibi: added by kibi
-
 
 import 'plugins/kibana/settings/styles/main.less';
 import 'ui/filters/start_from';

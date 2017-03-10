@@ -8,7 +8,6 @@ uiModules
 .get('kibana')
 .service('savedObjectsAPITypes', function () {
   return new Set([
-    'session',
     'visualization',
     'index-pattern',
     'config',

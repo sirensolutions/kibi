@@ -2,14 +2,13 @@ import versionCheckMixin from './version_check';
 import { shortUrlAssertValid } from './short_url_assert_valid';
 
 module.exports = function (kbnServer, server, config) {
-  let _ = require('lodash');
-  let fs = require('fs');
-  let Boom = require('boom');
-  let Hapi = require('hapi');
-  let parse = require('url').parse;
-  let format = require('url').format;
-
-  let getDefaultRoute = require('./getDefaultRoute');
+  const _ = require('lodash');
+  const fs = require('fs');
+  const Boom = require('boom');
+  const Hapi = require('hapi');
+  const parse = require('url').parse;
+  const format = require('url').format;
+  const getDefaultRoute = require('./getDefaultRoute');
 
   server = kbnServer.server = new Hapi.Server();
 
@@ -17,7 +16,7 @@ module.exports = function (kbnServer, server, config) {
   kbnServer.mixin(require('./register_hapi_plugins'));
 
   // Create a new connection
-  let connectionOptions = {
+  const connectionOptions = {
     host: config.get('server.host'),
     port: config.get('server.port'),
     state: {
@@ -122,7 +121,7 @@ module.exports = function (kbnServer, server, config) {
 
   // attach the app name to the server, so we can be sure we are actually talking to kibana
   server.ext('onPreResponse', function (req, reply) {
-    let response = req.response;
+    const response = req.response;
 
     if (response.isBoom) {
       response.output.headers['kbn-name'] = kbnServer.name;
@@ -150,7 +149,7 @@ module.exports = function (kbnServer, server, config) {
     method: 'GET',
     path: '/{p*}',
     handler: function (req, reply) {
-      let path = req.path;
+      const path = req.path;
       if (path === '/' || path.charAt(path.length - 1) !== '/') {
         return reply(Boom.notFound());
       }
@@ -168,14 +167,34 @@ module.exports = function (kbnServer, server, config) {
     path: '/goto/{urlId}',
     handler: async function (request, reply) {
       try {
-        const url = await shortUrlLookup.getUrl(request.params.urlId);
-        shortUrlAssertValid(url);
-        reply().redirect(config.get('server.basePath') + url);
+        const data = await shortUrlLookup.getUrl(request.params.urlId);
+        shortUrlAssertValid(data.url);
+        reply().redirect(
+          config.get('server.basePath') +
+          data.url +
+         '&_h=' + request.params.urlId
+        ); // kibi: adding the sha to be able to restore kibiSession in the browser
       } catch (err) {
         reply(err);
       }
     }
   });
+
+  // kibi: added this handler to be able to fetch the kibiSession data
+  server.route({
+    method: 'GET',
+    path: '/kibisession/{urlId}',
+    handler: async function (request, reply) {
+      try {
+        const data = await shortUrlLookup.getUrl(request.params.urlId);
+        shortUrlAssertValid(data.url);
+        reply(data.kibiSession || {});
+      } catch (err) {
+        reply(err);
+      }
+    }
+  });
+  // kibi: end
 
   server.route({
     method: 'POST',
@@ -183,7 +202,7 @@ module.exports = function (kbnServer, server, config) {
     handler: async function (request, reply) {
       try {
         shortUrlAssertValid(request.payload.url);
-        const urlId = await shortUrlLookup.generateUrlId(request.payload.url);
+        const urlId = await shortUrlLookup.generateUrlId(request.payload);
         reply(urlId);
       } catch (err) {
         reply(err);

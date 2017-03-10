@@ -78,7 +78,12 @@ describe('routes', function () {
         };
         kbnTestServer.makeRequest(kbnServer, gotoOptions, (res) => {
           expect(res.statusCode).to.be(302);
-          expect(res.headers.location).to.be(shortenOptions.payload.url);
+          // kibi: added code to strip the _h parameter
+          let actual = res.headers.location;
+          const index = actual.indexOf('&_h=');
+          actual = actual.substring(0, index);
+          // kibi: end
+          expect(actual).to.be(shortenOptions.payload.url);
           done();
         });
       });

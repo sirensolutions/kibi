@@ -24,7 +24,6 @@ define(function (require) {
     // kibi: all below dependencies added by kibi to improve import/export and delete operations
     const cache = Private(require('ui/kibi/helpers/cache_helper'));
     const deleteHelper = Private(require('ui/kibi/helpers/delete_helper'));
-    const kibiSessionHelper = Private(require('ui/kibi/helpers/kibi_session_helper/kibi_session_helper'));
     const refreshKibanaIndex = Private(require('plugins/kibana/settings/sections/indices/_refresh_kibana_index'));
     const getIds = Private(require('ui/index_patterns/_get_ids'));
     // kibi: end
@@ -99,26 +98,9 @@ define(function (require) {
           kbnUrl.change('/settings/objects/{{ service }}/{{ id }}', params);
         };
 
-        // kibi: added by kibi to be able to quickly show the current session
-        $scope.showOnlyCurrentSession = true; // by default show only the user session
-        $scope.filterItems = function (items) {
-          // filter out other sessions only if the checkbox checked
-          // and the current session initialized
-          if ($scope.state && $scope.state.tab === 'sessions' &&
-              $scope.showOnlyCurrentSession && kibiSessionHelper.initialized && kibiSessionHelper.id
-          ) {
-            return _.filter(items, function (session) {
-              return session.id === kibiSessionHelper.id;
-            });
-          }
-          return items;
-        };
-        // kibi: end
-
-
         $scope.bulkDelete = function () {
           // kibi: modified to do some checks before the delete
-          var _delete = function () {
+          const _delete = function () {
             $scope.currentTab.service.delete(_.pluck($scope.selectedItems, 'id'))
             .then(cache.flush)
             .then(refreshData)
@@ -235,7 +217,7 @@ define(function (require) {
 
           const loadIndexPatterns = function (indexPatternDocuments) {
             if (indexPatternDocuments && indexPatternDocuments.length > 0) {
-              var promises = [];
+              const promises = [];
               _.each(indexPatternDocuments, (doc) => {
                 promises.push(createIndexPattern(doc));
               });
@@ -254,7 +236,7 @@ define(function (require) {
             if (configDocument) {
               if (configDocument._id === kbnVersion) {
                 // override existing config values
-                var promises = [];
+                const promises = [];
                 _.each(configDocument._source, function (value, key) {
                   promises.push(config.set(key, value));
                 });
@@ -278,7 +260,7 @@ define(function (require) {
             _.each(docs, function (doc) {
               functionArray.push(function (previousOperationResult) {
                 // previously this part was done in Promise.map
-                var service = _.find($scope.services, {type: doc._type}).service;
+                const service = _.find($scope.services, {type: doc._type}).service;
                 return service.get().then(function (obj) {
                   obj.id = doc._id;
                   return obj.applyESResp(doc).then(function () {

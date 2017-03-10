@@ -42,7 +42,7 @@ module.exports = function (grunt) {
       cmd: binScript,
       args: [
         ...buildTestsArgs,
-        '--server.port=5610',
+        `--server.port=${uiConfig.servers.testserver.port}`, // kibi: make the port configurable
         ...kbnServerFlags,
       ]
     },

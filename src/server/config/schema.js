@@ -8,6 +8,9 @@ import { getData } from '../path';
 
 import pkg from '../../../src/utils/package_json';
 
+// kibi: import
+import serverConfig from '../../../test/server_config';
+
 module.exports = () => Joi.object({
   pkg: Joi.object({
     version: Joi.string().default(Joi.ref('$version')),
@@ -50,7 +53,8 @@ module.exports = () => Joi.object({
     cors: Joi.when('$dev', {
       is: true,
       then: Joi.object().default({
-        origin: ['*://localhost:9876'] // karma test server
+        // kibi: make the port configurable
+        origin: [`*://localhost:${serverConfig.servers.karma.port}`] // karma test server
       }),
       otherwise: Joi.boolean().default(false)
     }),

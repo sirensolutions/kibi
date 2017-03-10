@@ -109,10 +109,6 @@ export default function (chrome, internals) {
   internals.trackPossibleSubUrl = function (url) {
     const { appId, globalState: newGlobalState } = decodeKibanaUrl(url);
 
-    // kibi: hack around issue of kibana inserting a timestamp when running functional tests
-    // see https://github.com/elastic/kibana/issues/10736
-    url = url.replace(/\?[^#]+#/, '#');
-
     for (const link of internals.nav) {
       link.active = startsWith(url, link.url);
       if (link.active) {

@@ -77,8 +77,16 @@ bdd.describe('dashboard tab', function describeIndexTests() {
 
     bdd.it('should save and load dashboard', function saveAndLoadDashboard() {
       const dashboardName = 'Dashboard Test 1';
+
       // TODO: save time on the dashboard and test it
       return PageObjects.dashboard.saveDashboard(dashboardName)
+      // kibi: this is need to show the dashboards sidebar. https://github.com/elastic/kibana/issues/10736
+      // This flip between apps fixes the url so state is preserved when switching apps in test mode.
+      // Without this flip the url in test mode looks something like
+      // "http://localhost:5620/app/kibana?_t=1486069030837#/dashboard?_g=...."
+      // after the initial flip, the url will look like this: "http://localhost:5620/app/kibana#/dashboard?_g=...."
+      .then(() => PageObjects.header.clickVisualize())
+      .then(() => PageObjects.header.clickDashboard())
       // click New Dashboard just to clear the one we just created
       .then(function () {
         return PageObjects.common.try(function () {

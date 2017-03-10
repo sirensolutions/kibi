@@ -12,16 +12,15 @@ define(function (require) {
   app.directive('kibiRelationsSearchBar', () => {
     return {
       restrict: 'A',
+      scope: true,
       link: function (scope, element, attrs) {
-        scope.searchRelations = function (mode) {
-          const searchString = scope[`${mode}SearchString`];
+
+        scope.searchRelations = function () {
+          const relations = _.get(scope, attrs.kibiRelationsSearchBarPath);
+          const searchString = scope[attrs.ngModel];
 
           if (!searchString || searchString.length < 2) {
-            for (const relation in scope.relations[mode]) {
-              if (scope.relations[mode].hasOwnProperty(relation)) {
-                scope.relations[mode][relation].$$hidden = false;
-              }
-            }
+            relations.forEach((relation) => relation.$$hidden = false);
             return;
           }
 
@@ -46,18 +45,13 @@ define(function (require) {
             return result;
           };
 
-          const result = [];
-
-          for (const relation in scope.relations[mode]) {
-            if (!scope.relations[mode].hasOwnProperty(relation)) {
-              continue;
-            }
-            if (search(scope.relations[mode][relation], searchString)) {
-              scope.relations[mode][relation].$$hidden = false;
+          relations.forEach((relation) => {
+            if (search(relation, searchString)) {
+              relation.$$hidden = false;
             } else {
-              scope.relations[mode][relation].$$hidden = true;
+              relation.$$hidden = true;
             }
-          }
+          });
         };
       }
     };

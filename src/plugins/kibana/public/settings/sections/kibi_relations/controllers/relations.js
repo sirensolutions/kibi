@@ -14,18 +14,10 @@ define(function (require) {
       restrict: 'A',
       scope: true,
       link: function (scope, element, attrs) {
-        // attrs.kibiRelationsSearchBarPath:
-        // 1. Kibi Relations Join Viz: kibiMenuTemplateData
-        // 2. Kibi Relations Settings: relations.relationsIndices or relations.relationsDashboards
 
         scope.searchRelations = function () {
-          let path = attrs.kibiRelationsSearchBarPath;
-          const relations = _.get(scope, path);
-
-          if (path.split('.')[0] === 'relations') {
-            path = path.split('.').splice(1)[0];
-          }
-          const searchString = scope[`${path}SearchString`];
+          const relations = _.get(scope, attrs.kibiRelationsSearchBarPath);
+          const searchString = scope[attrs.ngModel];
 
           if (!searchString || searchString.length < 2) {
             relations.forEach((relation) => relation.$$hidden = false);

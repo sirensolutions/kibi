@@ -35,13 +35,15 @@ define(function (require) {
             // with an msearch without any index patterns, elasticsearch would
             // handle that request by querying *all* indexes, which is the
             // opposite of what we want in this case.
+            let type = fetchParams.type;
             if (_.isArray(indexList) && indexList.length === 0) {
               indexList.push(kbnIndex);
+              type = 'null';
               body = emptySearch();
             }
             return angular.toJson({
               index: indexList,
-              type: fetchParams.type,
+              type: type,
               search_type: fetchParams.search_type,
               ignore_unavailable: true
             })

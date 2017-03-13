@@ -327,8 +327,8 @@ export default class Model {
         type: this._type,
         body: body,
       };
-      if (size >= 0) {
-        parameters.size = size;
+      if (size === 0) {
+        parameters.size = 0;
       } else {
         parameters.size = 100;
         parameters.searchType = 'scan';

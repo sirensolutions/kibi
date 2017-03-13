@@ -1,5 +1,6 @@
 define(function (require) {
-  return function MapperService(Private, Promise, es, config, kbnIndex) {
+  // kibi: require savedObjecsAPI service
+  return function MapperService(Private, Promise, es, savedObjectsAPI, config, kbnIndex) {
     let _ = require('lodash');
     let moment = require('moment');
 
@@ -60,12 +61,13 @@ define(function (require) {
         if (cache) return Promise.resolve(cache);
 
         if (!skipIndexPatternCache) {
-          return es.get({
+          // kibi: retrieve index pattern using the saved objects API.
+          return savedObjectsAPI.get({
             index: kbnIndex,
             type: 'index-pattern',
-            id: id,
-            _sourceInclude: ['fields']
+            id: id
           })
+          // kibi: end
           .then(function (resp) {
             if (resp.found && resp._source.fields) {
               fieldCache.set(id, JSON.parse(resp._source.fields));

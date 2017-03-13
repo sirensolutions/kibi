@@ -26,7 +26,7 @@ define(function (require) {
             scope.$apply(function () {
               ngModelCtrl.$setViewValue(elm.val());
             });
-          }, attr.ngDebounce || 1000);
+          }, attr.ngDebounce || 1);
         });
         elm.bind('blur', function () {
           scope.$apply(function () {
@@ -845,7 +845,7 @@ define(function (require) {
         case 'importGraph':
           $timeout(() => {
             $rootScope.$emit('egg:indicesGraph:run', 'stop');
-          }, 1000);
+          }, 1);
           break;
         default:
       }
@@ -857,7 +857,7 @@ define(function (require) {
         case 'importGraph':
           $timeout(() => {
             $rootScope.$emit('egg:dashboardsGraph:run', 'stop');
-          }, 1000);
+          }, 1);
           break;
         default:
       }

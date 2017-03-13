@@ -27,7 +27,7 @@ export default class SearchHelper {
     let typeParameter = '';
     if (_.isArray(indices) && indices.length === 0) {
       computedIndices = [this._defaultIndex];
-      typeParameter = '"type": "null",';
+      typeParameter = ' "type": "null",';
       body = emptySearch();
     }
     return `{"index":${angular.toJson(computedIndices)},${typeParameter} "ignore_unavailable": true}\n${angular.toJson(body)}\n`;

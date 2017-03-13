@@ -64,7 +64,7 @@ define(function () {
     };
 
     mappingSetup.isDefined = function (type) {
-      // kibi: if the object is in savedObjectAPITypes we assumed it is defined
+      // kibi: if the object is in savedObjectAPITypes we assume it is defined
       if (savedObjectsAPITypes.has(type)) {
         return Promise.resolve(true);
       }

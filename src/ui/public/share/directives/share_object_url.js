@@ -1,16 +1,19 @@
 const app = require('ui/modules').get('kibana');
 const Clipboard = require('clipboard');
+const unhashUrl = require('ui/state_management/state_hashing').unhashUrl;
+const getUnhashableStatesProvider = require('ui/state_management/state_hashing').getUnhashableStatesProvider;
 
 require('../styles/index.less');
 
 app.directive('shareObjectUrl', function (Private, createNotifier) {
   const urlShortener = Private(require('../lib/url_shortener'));
+  const getUnhashableStates = Private(getUnhashableStatesProvider);
 
   return {
     restrict: 'E',
     scope: {
       getShareAsEmbed: '&shareAsEmbed',
-      getKibiNavbarVisible:'&kibiNavbarVisible' // kibi: added to control when to show hide kibi-nav-bar
+      isKibiNavbarVisible:'&kibiNavbarVisible' // kibi: added to control when to show hide kibi-nav-bar
     },
     template: require('ui/share/views/share_object_url.html'),
     link: function ($scope, $el) {
@@ -43,6 +46,10 @@ app.directive('shareObjectUrl', function (Private, createNotifier) {
       $scope.clipboard = clipboard;
     },
     controller: function ($scope, $location) {
+      const notify = createNotifier({
+        location: `Share ${$scope.$parent.objectType}`
+      });
+
       function updateUrl(url) {
         $scope.url = url;
 
@@ -56,7 +63,7 @@ app.directive('shareObjectUrl', function (Private, createNotifier) {
       }
 
       $scope.shareAsEmbed = $scope.getShareAsEmbed();
-      $scope.kibiNavbarVisible = $scope.getKibiNavbarVisible(); // kibi: added to control when to show hide kibi-nav-bar
+      $scope.kibiNavbarVisible = $scope.isKibiNavbarVisible(); // kibi: added to control when to show hide kibi-nav-bar
 
       $scope.generateShortUrl = function () {
         if ($scope.shortGenerated) return;
@@ -69,17 +76,22 @@ app.directive('shareObjectUrl', function (Private, createNotifier) {
       };
 
       $scope.getUrl = function () {
-        let url = $location.absUrl();
+        const urlWithHashes = $location.absUrl();
+        let urlWithStates = unhashUrl(urlWithHashes, getUnhashableStates());
+
+        // kibi: add/replace session id with the detached one
+        urlWithStates = urlWithStates.replace(`s:${$scope.$parent.currentSessionId}`, `s:${$scope.$parent.sharedSessionId}`);
         if ($scope.shareAsEmbed) {
           // kibi: added to control when to show hide kibi-nav-bar
           if ($scope.kibiNavbarVisible) {
-            url = url.replace('?', '?embed=true&kibiNavbarVisible=true&');
+            urlWithStates = urlWithStates.replace('?', '?embed=true&kibiNavbarVisible=true&');
           } else {
-            url = url.replace('?', '?embed=true&');
+            urlWithStates = urlWithStates.replace('?', '?embed=true&');
           }
           // kibi: end
         }
-        return url;
+
+        return urlWithStates;
       };
 
       $scope.$watch('getUrl()', updateUrl);

@@ -1,10 +1,10 @@
 define(function () {
-  return function MappingSetupService(kbnIndex, es) {
-    var angular = require('angular');
-    var _ = require('lodash');
-    var mappingSetup = this;
+  return function MappingSetupService(kbnIndex, es, savedObjectsAPITypes) {
+    let angular = require('angular');
+    let _ = require('lodash');
+    let mappingSetup = this;
 
-    var json = {
+    let json = {
       _serialize: function (val) {
         if (val != null) return angular.toJson(val);
       },
@@ -16,23 +16,25 @@ define(function () {
     /**
      * Use to create the mappings, but that should only happen one at a time
      */
-    var activeTypeCreations = {};
+    let activeTypeCreations = {};
 
     /**
      * Get the list of type's mapped in elasticsearch
      * @return {[type]} [description]
      */
-    var getKnownKibanaTypes = _.once(function () {
-      var indexName = kbnIndex;
+    let getKnownKibanaTypes = _.once(function () {
       return es.indices.getFieldMapping({
         // only concerned with types in this kibana index
-        index: indexName,
+        index: kbnIndex,
         // check all types
         type: '*',
         // limit the response to just the _source field for each index
         field: '_source'
       }).then(function (resp) {
-        return _.keys(resp[indexName].mappings);
+        // kbnIndex is not sufficient here, if the kibana indexed is aliased we need to use
+        // the root index name as key
+        const index = _.keys(resp)[0];
+        return _.keys(resp[index].mappings);
       });
     });
 
@@ -70,16 +72,22 @@ define(function () {
         });
       }
 
-      var prom = getKnownKibanaTypes()
+      let prom = getKnownKibanaTypes()
       .then(function (knownTypes) {
         // if the type is in the knownTypes array already
         if (~knownTypes.indexOf(type)) return false;
 
         // we need to create the mapping
-        var body = {};
+        let body = {};
         body[type] = {
           properties: mapping
         };
+
+        // kibi: if the mapping for this type is managed by the saved objects api return true.
+        if (savedObjectsAPITypes.has(type)) {
+          return true;
+        }
+        // kibi: end
 
         return es.indices.putMapping({
           index: kbnIndex,

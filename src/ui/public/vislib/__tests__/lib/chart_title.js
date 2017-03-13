@@ -1,18 +1,18 @@
-var d3 = require('d3');
-var angular = require('angular');
-var _ = require('lodash');
-var $ = require('jquery');
-var ngMock = require('ngMock');
-var expect = require('expect.js');
+let d3 = require('d3');
+let angular = require('angular');
+let _ = require('lodash');
+let $ = require('jquery');
+let ngMock = require('ngMock');
+let expect = require('expect.js');
 
 describe('Vislib ChartTitle Class Test Suite', function () {
-  var ChartTitle;
-  var Data;
-  var persistedState;
-  var chartTitle;
-  var el;
-  var dataObj;
-  var data = {
+  let ChartTitle;
+  let Data;
+  let persistedState;
+  let chartTitle;
+  let el;
+  let dataObj;
+  let data = {
     hits: 621,
     label: '',
     ordered: {

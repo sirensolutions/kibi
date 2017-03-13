@@ -1,8 +1,9 @@
 define(function (require) {
-  return function FetchStrategyForSearch(Private, Promise, timefilter) {
-    var _ = require('lodash');
-    var angular = require('angular');
-    var toJson = require('ui/utils/aggressive_parse').toJson;
+  return function FetchStrategyForSearch(Private, Promise, timefilter, kbnIndex) {
+    let _ = require('lodash');
+    let angular = require('angular');
+    let toJson = require('ui/utils/aggressive_parse').toJson;
+    const emptySearch = require('ui/kibi/empty_search');
 
     return {
       clientMethod: 'msearch',
@@ -21,10 +22,11 @@ define(function (require) {
               return indexList;
             }
 
-            var timeBounds = timefilter.getBounds();
+            let timeBounds = timefilter.getBounds();
             return indexList.toIndexList(timeBounds.min, timeBounds.max);
           })
           .then(function (indexList) {
+            let body = fetchParams.body || {};
             // If we've reached this point and there are no indexes in the
             // index list at all, it means that we shouldn't expect any indexes
             // to contain the documents we're looking for, so we instead
@@ -34,7 +36,8 @@ define(function (require) {
             // handle that request by querying *all* indexes, which is the
             // opposite of what we want in this case.
             if (_.isArray(indexList) && indexList.length === 0) {
-              indexList.push('.kibana-devnull');
+              indexList.push(kbnIndex);
+              body = emptySearch();
             }
             return angular.toJson({
               index: indexList,
@@ -43,7 +46,7 @@ define(function (require) {
               ignore_unavailable: true
             })
             + '\n'
-            + toJson(fetchParams.body || {}, angular.toJson);
+            + toJson(body, angular.toJson);
           });
         })
         .then(function (requests) {
@@ -61,4 +64,5 @@ define(function (require) {
       }
     };
   };
+
 });

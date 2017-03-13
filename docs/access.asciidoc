@@ -1,20 +1,28 @@
 [[access]]
 == Accessing Kibi
 
-Kibi is a web application that you access through port 5606. All you need to do is point your web browser at the
-machine where Kibana is running and specify the port number. For example, `localhost:5606` or
-`http://YOURDOMAIN.com:5606`.
+Kibi is a web application that you access through port {kibi-default-port}. All you need to do is point your web browser at the
+machine where Kibana is running and specify the port number. For example, `{start-url}` or
+`http://YOURDOMAIN.com:{kibi-default-port}`.
 
 When you access Kibi, the <<discover,Discover>> page loads by default with the default index pattern selected. The
 time filter is set to the last 15 minutes and the search query is set to match-all (\*).
 
-If you don't see any documents, try setting the time filter to a wider time range.
+If you don't see any documents, try <<set-time-filter, setting the time filter>> to a wider time range.
 If you still don't see any results, it's possible that you don't *have* any documents.
 
 [[status]]
 === Checking Kibi Status
 
-You can reach the Kibi server's status page by navigating to `localhost:5606/status`. The status page displays
+You can reach the Kibi server's status page by navigating to `{start-url}/status`. The status page displays
 information about the server's resource usage and lists the installed plugins.
 
 image::images/kibi-status-page.png[]
+
+=== Collecting Elasticsearch diagnostics
+
+The *Elasticsearch diagnostics* button generates a single file by collecting different metrics about your elasticsearch cluster.
+All collected information are saved to a local file and never transfered over a network.
+User can see a full list of elasticsearch API calls by clicking the more info icon next to the button.
+
+image::images/kibi_status_page_diagnostics_help.png[]

@@ -5,7 +5,7 @@ define(function (require) {
   require('ui/kibi/directives/kibi_array_param');
 
   require('ui/modules').get('kibana/kibi_data_table_vis')
-  .directive('kibiDataTableVisParams', function (savedDatasources, $rootScope, $route, Private, createNotifier, $window) {
+  .directive('kibiDataTableVisParams', function (savedDatasources, $rootScope, $route, createNotifier, $window) {
 
     var notify = createNotifier({
       location: 'Enhanced search results'
@@ -15,18 +15,6 @@ define(function (require) {
       restrict: 'E',
       template: require('plugins/kibi_data_table_vis/kibi_data_table_vis_params.html'),
       link: function ($scope) {
-        var _shouldEntityURIBeEnabled = Private(require('ui/kibi/components/commons/_should_entity_uri_be_enabled'));
-        // Initialize columns
-        $scope.savedVis = $route.current.locals.savedVis;
-
-        if (typeof $scope.vis.params.columns === 'undefined') {
-          if ($scope.savedVis.savedSearch) {
-            $scope.vis.params.columns = _.clone($scope.savedVis.savedSearch.columns);
-          } else {
-            $scope.vis.params.columns = ['_source'];
-          }
-        }
-
         // ======
         // Events
         // ======
@@ -41,36 +29,6 @@ define(function (require) {
         // ====================================
         // Visualization controller integration
         // ====================================
-
-        var shouldEntityURIBeEnabled = function () {
-          // examine all used queries in order to check if any of them require entityURI
-          var queryIds = _($scope.vis.params.queryIds).pluck('queryId').compact().value();
-
-          _shouldEntityURIBeEnabled(queryIds, null, true).then(function (results) {
-            let value = false;
-
-            _.each($scope.vis.params.queryIds, (snippet, index) => {
-              snippet.isEntityDependent = results[index];
-              if (results[index]) {
-                value = true;
-              }
-            });
-            $scope.vis.params.hasEntityDependentQuery = value;
-
-            if ($scope.vis.params.enableQueryFields === true) {
-              $rootScope.$emit('kibi:entityURIEnabled:kibitable', value);
-            } else {
-              $rootScope.$emit('kibi:entityURIEnabled:kibitable', false);
-            }
-          }).catch(function (err) {
-            notify.warning('Could not determine whether the widget needs an entityURI' +
-                ' to be set: ' + JSON.stringify(err, null, ' '));
-          });
-        };
-
-        $scope.$watch('vis.params.queryIds', function () {
-          shouldEntityURIBeEnabled();
-        }, true);
 
         // check if there is any click actions / relational column definition
         // before removing a column of the table
@@ -124,8 +82,7 @@ define(function (require) {
           removeSavedObjectColumnsChangedHandler();
         });
 
-        // Need to emit an event to update table columns while visualization
-        // is dirty
+        // Need to emit an event to update table columns while visualization is dirty
         $scope.$watch('vis.params.columns', function () {
           $rootScope.$emit('kibi:vis:columns-changed', $scope.vis.params.columns);
         }, true);
@@ -156,7 +113,7 @@ define(function (require) {
         });
 
         $scope.$watch('vis.params.enableQueryFields', function () {
-          if ($scope.vis.params.enableQueryFields !== true) {
+          if (!$scope.vis.params.enableQueryFields) {
             if (previousName) {
               var i = $scope.vis.params.columns.indexOf(previousName);
               if (i > -1) {
@@ -166,21 +123,22 @@ define(function (require) {
             previousName = null;
             delete $scope.vis.params.enableQueryFields;
             delete $scope.vis.params.joinElasticsearchField;
-            if ($scope.vis.params.queryIds) {
-              $scope.vis.params.queryIds.length = 0;
+            if ($scope.vis.params.queryDefinitions) {
+              $scope.vis.params.queryDefinitions.length = 0;
             }
             delete $scope.vis.params.queryFieldName;
             $scope.vis.dirty = true;
           }
-          shouldEntityURIBeEnabled();
         });
 
         $scope.$watchMulti([
           'vis.params.showMeticsAtAllLevels',
           'vis.params.datasourceId',
-          'vis.params.queryIds'
+          'vis.params.queryDefinitions'
         ], function () {
-          if (!$scope.vis) return;
+          if (!$scope.vis) {
+            return;
+          }
           savedDatasources.get($scope.vis.params.datasourceId)
           .then((savedDatasource) => {
             $scope.datasourceType = savedDatasource.type;

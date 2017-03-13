@@ -13,7 +13,7 @@ data source types:
 * A saved search
 * An existing saved visualization
 
-Visualizations are based on the {ref}search-aggregations.html[aggregation] feature introduced in Elasticsearch 1.x.
+Visualizations are based on the {elastic-ref}search-aggregations.html[aggregation] feature introduced in Elasticsearch 1.x.
 
 [float]
 [[createvis]]
@@ -51,6 +51,7 @@ dashboard.
 saved searches on a single timeline component.
 <<radar_chart, Radar Chart>>:: Display multivariate data with a two-dimensional chart.
 <<graph_browser, Kibi Graph Browser*>>:: Displays a graph visualization starting from a selected document
+<<bubble_diagram, Kibi Bubble Diagram*>>:: The Bubble Diagram visualization displays series of data grouped into packed circles.
 
 NOTE: *: available only in Kibi Enterprise Edition.
 
@@ -193,3 +194,10 @@ include::timeline.asciidoc[]
 include::radar_chart.asciidoc[]
 
 include::graph_browser.asciidoc[]
+
+include::box_plot.asciidoc[]
+
+include::bubble_diagram.asciidoc[]
+
+include::scatter_plot.asciidoc[]
+

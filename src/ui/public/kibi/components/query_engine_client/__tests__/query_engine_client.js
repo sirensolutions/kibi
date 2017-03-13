@@ -19,13 +19,6 @@ describe('Kibi Components', function () {
       $httpBackend.verifyNoOutstandingRequest();
     });
 
-    it('should not fire query if there is no selected entity for an entity-dependent query', function () {
-      var queryDef = {
-        isEntityDependent: true
-      };
-      queryEngineClient.getQueriesHtmlFromServer(queryDef, { selectedDocuments: [] });
-    });
-
     it('gets the queries html from the server', function () {
       $httpBackend.expectGET(/\/getQueriesHtml?.*/).respond();
       queryEngineClient.getQueriesHtmlFromServer({}, {});

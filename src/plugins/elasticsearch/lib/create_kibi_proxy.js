@@ -1,17 +1,16 @@
 var createAgent = require('./create_agent');
 var mapUri = require('./map_uri');
-var { resolve } = require('url');
 var _ = require('lodash');
 
 var util = require('./util');
-var filterJoinSet = require('./filter_join').set;
-var filterJoinSequence = require('./filter_join').sequence;
 
 var dbfilter = require('./dbfilter');
 var inject = require('./inject');
-var cryptoHelper = require('../../kibi_core/lib/crypto_helper');
 
 module.exports = function createProxy(server, method, route, config) {
+  var filterJoinSet = require('./filter_join')(server).set;
+  var filterJoinSequence = require('./filter_join')(server).sequence;
+
   var serverConfig = server.config();
 
   var pre = '/elasticsearch';
@@ -20,6 +19,11 @@ module.exports = function createProxy(server, method, route, config) {
   var options = {
     method: method,
     path: path,
+    config: {
+      timeout: {
+        socket: serverConfig.get('elasticsearch.requestTimeout')
+      }
+    },
     handler: {
       kibi_proxy: {
         modifyPayload: (request) => {
@@ -33,6 +37,14 @@ module.exports = function createProxy(server, method, route, config) {
                 savedQueries: {} //TODO: Stephane I think this should be an array - for now it works as there is only one inject;
               };
 
+              // prevent the string to be created
+              if (serverConfig.get('logging.verbose')) {
+                server.log(
+                  ['debug', 'kibi_proxy', 'raw kibi query'],
+                  `\n-------------------------\n${req.url}\n${Buffer.concat(chunks).toString()}\n-------------------------`
+                );
+              }
+
               /* Manipulate a set of queries, at the end of which the resulting queries
                * must be concatenated back into a Buffer. The queries in the body are
                * separated by a newline.
@@ -42,17 +54,11 @@ module.exports = function createProxy(server, method, route, config) {
                 dataToPass.savedQueries = inject.save(query);
                 return query;
               }).map((query) => {
-                var shieldCredentials = serverConfig.has('shield.cookieName') ? request.state[serverConfig.get('shield.cookieName')] : null;
-                return dbfilter(server.plugins.kibi_core.getQueryEngine(), query, shieldCredentials);
-              }).map((query) => {
-                // here detect if it a request to save datasource
-                if (req.url.indexOf('/elasticsearch/' + serverConfig.get('kibana.index') + '/datasource/') === 0 &&
-                    query.datasourceParams &&
-                    query.datasourceType
-                ) {
-                  cryptoHelper.encryptDatasourceParams(serverConfig, query);
+                var credentials = serverConfig.has('shield.cookieName') ? request.state[serverConfig.get('shield.cookieName')] : null;
+                if (request.auth && request.auth.credentials && request.auth.credentials.proxyCredentials) {
+                  credentials = request.auth.credentials.proxyCredentials;
                 }
-                return query;
+                return dbfilter(server.plugins.kibi_core.getQueryEngine(), query, credentials);
               }).map((query) => filterJoinSet(query))
               .map((query) => filterJoinSequence(query))
               .then((data) => {
@@ -60,18 +66,24 @@ module.exports = function createProxy(server, method, route, config) {
                   return new Buffer(JSON.stringify(query) + '\n');
                 });
 
-                // TODO add logging of the preprocessed query for debug
+                // prevent the string to be created
+                if (serverConfig.get('logging.verbose')) {
+                  server.log(
+                    ['debug', 'kibi_proxy', 'translated elasticsearch query'],
+                    '\n-------------------------\n' +
+                      Buffer.concat(buffers).toString() + '\n' +
+                      '-------------------------'
+                  );
+                }
+
                 fulfill({
                   payload: Buffer.concat(buffers),
                   data: dataToPass
                 });
               }).catch((err) => {
-                var errStr = err.toString();
+                let errStr;
                 if (typeof err === 'object' && err.stack) {
-                  if (errStr === 'Error: Invalid key length.') {
-                    errStr = 'Invalid key length - check the encryption key in kibi.yml';
-                    err.message = errStr;
-                  }
+                  errStr = err.toString();
                 } else {
                   errStr = JSON.stringify(err, null, ' ');
                 }
@@ -118,6 +130,7 @@ module.exports = function createProxy(server, method, route, config) {
             });
           });
         },
+        timeout: serverConfig.get('elasticsearch.requestTimeout'),
         mapUri: mapUri(server, null, true),
         passThrough: true,
         agent: createAgent(server),
@@ -126,7 +139,7 @@ module.exports = function createProxy(server, method, route, config) {
     }
   };
 
-  if (config) options.config = config;
+  _.assign(options.config, config);
 
   server.route(options);
 };

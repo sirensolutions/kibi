@@ -1,13 +1,13 @@
-var _ = require('lodash');
+let _ = require('lodash');
 var { startsWith, get, set, omit, wrap, pick } = require('lodash');
-var Tab = require('ui/chrome/Tab');
+let Tab = require('ui/chrome/Tab');
 var { parse } = require('url');
 
 function TabCollection(opts = {}) {
-  var tabs = [];
-  var specs = null;
-  var defaults = opts.defaults || {};
-  var activeTab = null;
+  let tabs = [];
+  let specs = null;
+  let defaults = opts.defaults || {};
+  let activeTab = null;
 
   this.set = function (_specs) {
     specs = _.cloneDeep([].concat(_specs || []));
@@ -46,7 +46,8 @@ function TabCollection(opts = {}) {
     if (!persist || !activeTab) return;
 
     let globalState = get(parse(activeTab.getLastPath(), true), 'query._g');
-    tabs.forEach(tab => tab.updateLastUrlGlobalState(globalState));
+    let kibiState = get(parse(activeTab.getLastPath(), true), 'query._k');
+    tabs.forEach(tab => tab.updateLastUrlGlobalState(globalState, kibiState));
   };
 }
 

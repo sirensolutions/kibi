@@ -17,12 +17,14 @@ program
 // attach commands
 require('./serve/serve')(program);
 require('./plugin/plugin')(program);
+require('./kibi/replace_encryption_key')(program);
+require('./kibi/upgrade')(program);
 
 program
 .command('help <command>')
 .description('Get the help for a specific command')
 .action(function (cmdName) {
-  var cmd = _.find(program.commands, { _name: cmdName });
+  let cmd = _.find(program.commands, { _name: cmdName });
   if (!cmd) return this.error(`unknown command ${cmdName}`);
   cmd.help();
 });
@@ -34,7 +36,7 @@ program
 });
 
 // check for no command name
-var subCommand = argv[2] && !String(argv[2][0]).match(/^-|^\.|\//);
+let subCommand = argv[2] && !String(argv[2][0]).match(/^-|^\.|\//);
 
 if (!subCommand) {
   if (_.intersection(argv.slice(2), ['-h', '--help']).length) {

@@ -6,6 +6,7 @@ const http = require('http');
 const path = require('path');
 const _ = require('lodash');
 const os = require('os');
+const url = require('url');
 
 function GremlinServerHandler(server) {
   this.gremlinServer = null;
@@ -17,6 +18,7 @@ function GremlinServerHandler(server) {
 function startServer(self, fulfill, reject) {
   const config = self.server.config();
   let gremlinServerPath = config.get('kibi_core.gremlin_server.path');
+  let gremlinServerRemoteDebug = config.get('kibi_core.gremlin_server.debug_remote');
 
   if (gremlinServerPath) {
     // regex for ipv4 ip+port
@@ -56,7 +58,6 @@ function startServer(self, fulfill, reject) {
         }
 
         const esClusterName = response.cluster_name;
-        self.url = config.get('kibi_core.gremlin_server.url');
 
         if (config.get('kibi_core.gremlin_server.ssl.ca')) {
           self.ca = fs.readFileSync(config.get('kibi_core.gremlin_server.ssl.ca'));
@@ -78,24 +79,93 @@ function startServer(self, fulfill, reject) {
             self.server.log(['gremlin', 'error'], 'The Kibi Gremlin Server jar file was not found. Please check the configuration');
             return Promise.reject(new Error('The Kibi Gremlin Server jar file was not found. Please check the configuration'));
           }
-          const loggingFilePath = path.parse(gremlinServerPath).dir + path.sep + 'gremlin-es2-server-log.properties';
 
           const [ host, port, ...rest ] = esTransportAddress.split(':');
           const transportClientUsername = config.get('kibi_core.elasticsearch.transport_client.username');
           const transportClientPassword = config.get('kibi_core.elasticsearch.transport_client.password');
+          const elasticAuthPlugin = config.get('kibi_core.elasticsearch.auth_plugin');
+          let transportClientSSLCaKeyStore = config.get('kibi_core.elasticsearch.transport_client.ssl.ca');
+          if (transportClientSSLCaKeyStore) {
+            transportClientSSLCaKeyStore = path.resolve(transportClientSSLCaKeyStore);
+          }
+          const transportClientSSLCaKeyStorePassword = config.get('kibi_core.elasticsearch.transport_client.ssl.ca_password');
+          let transportClientSSLKeyStore = config.get('kibi_core.elasticsearch.transport_client.ssl.key_store');
+          if (transportClientSSLKeyStore) {
+            transportClientSSLKeyStore = path.resolve(transportClientSSLKeyStore);
+          }
+          const transportClientSSLKeyStoreAlias = config.get('kibi_core.elasticsearch.transport_client.ssl.key_store_alias');
+          const transportClientSSLCaKeyStoreAlias = config.get('kibi_core.elasticsearch.transport_client.ssl.ca_alias');
+          const transportClientSSLKeyStorePassword = config.get('kibi_core.elasticsearch.transport_client.ssl.key_store_password');
+          const transportClientSSLHostNameVerification = config.get('kibi_core.elasticsearch.transport_client.ssl.verify_hostname');
+          const transportClientSSLHostNameVerificationResolution = config.get('kibi_core.elasticsearch.transport_client.ssl' +
+                                                                              '.verify_hostname_resolve');
 
-          const args = [
+          self.url = config.get('kibi_core.gremlin_server.url');
+          const serverURL = url.parse(self.url);
+
+          let args = [
             '-jar', gremlinServerPath,
             '--elasticNodeHost=' + host,
             '--elasticNodePort=' + port,
             '--elasticClusterName=' + esClusterName,
-            '--server.port=' + self.url.split(':')[2],
-            '--logging.config=' + loggingFilePath
+            '--server.port=' + serverURL.port
           ];
+          if (serverURL.hostname !== '0.0.0.0') {
+            args.push('--server.address=' + serverURL.hostname);
+          }
+
+          if (gremlinServerRemoteDebug) {
+            args.unshift(gremlinServerRemoteDebug);
+          }
+
+          const logConfigPath = config.get('kibi_core.gremlin_server.log_conf_path');
+          if (logConfigPath) {
+            args.push('--logging.config=' + logConfigPath);
+          }
 
           if (transportClientUsername) {
             args.push('--elasticTransportClientUserName=' + transportClientUsername);
             args.push('--elasticTransportClientPassword=' + transportClientPassword);
+          }
+
+          if (elasticAuthPlugin) {
+            args.push('--elasticAuthPlugin=' + elasticAuthPlugin);
+          }
+
+          if (transportClientSSLCaKeyStore) {
+            args.push('--elasticTransportClientCAKeyStore=' + transportClientSSLCaKeyStore);
+          }
+
+          if (transportClientSSLCaKeyStorePassword) {
+            args.push('--elasticTransportClientCAKeyStorePassword=' + transportClientSSLCaKeyStorePassword);
+          }
+
+          if (transportClientSSLCaKeyStoreAlias) {
+            args.push('--elasticTransportClientCACertAlias=' + transportClientSSLCaKeyStoreAlias);
+          }
+
+          if (transportClientSSLKeyStore) {
+            args.push('--elasticTransportClientKeyStore=' + transportClientSSLKeyStore);
+          }
+
+          if (transportClientSSLKeyStoreAlias) {
+            args.push('--elasticTransportClientCertAlias=' + transportClientSSLKeyStoreAlias);
+          }
+
+          if (transportClientSSLKeyStorePassword) {
+            args.push('--elasticTransportClientKeyStorePassword=' + transportClientSSLKeyStorePassword);
+          }
+
+          if (transportClientSSLHostNameVerification) {
+            args.push('--elasticTransportClientSSLHostNameVerification=true');
+          } else {
+            args.push('--elasticTransportClientSSLHostNameVerification=false');
+          }
+
+          if (transportClientSSLHostNameVerificationResolution) {
+            args.push('--elasticTransportClientSSLHostNameVerificationResolution=true');
+          } else {
+            args.push('--elasticTransportClientSSLHostNameVerificationResolution=false');
           }
 
           if (config.get('kibi_core.gremlin_server.ssl.key_store')) {
@@ -119,8 +189,10 @@ function startServer(self, fulfill, reject) {
           self.gremlinServer.stdout.on('data', (data) => self.server.log(['gremlin', 'info'], ('' + data).trim()));
           self.gremlinServer.on('error', (err) => reject);
 
-          const counter = 15;
+          const maxCounter = 20;
+          const initialTimeout = 10000;
           const timeout = 5000;
+          const counter = maxCounter;
 
           self.ping = function (counter) {
             if (counter > 0) {
@@ -135,7 +207,7 @@ function startServer(self, fulfill, reject) {
                   } else {
                     self.server.log(['gremlin', 'warning'], 'Waiting for the Kibi gremlin server');
                     counter--;
-                    setTimeout(self.ping(counter), timeout);
+                    setTimeout(() => self.ping(counter), timeout);
                   }
                 })
                 .catch(function (err) {
@@ -145,11 +217,12 @@ function startServer(self, fulfill, reject) {
                     self.server.log(['gremlin', 'warning'], 'Waiting for the Kibi gremlin server');
                   }
                   counter--;
-                  setTimeout(self.ping(counter), timeout);
+                  setTimeout(() => self.ping(counter), timeout);
                 });
-              }, timeout);
+              }, counter === maxCounter ? initialTimeout : timeout);
             } else {
               self.server.log(['gremlin', 'error'], 'The Kibi gremlin server did not start correctly');
+              self.gremlinServer.kill('SIGINT');
               reject(new Error('The Kibi gremlin server did not start correctly'));
             }
           };
@@ -165,19 +238,17 @@ function startServer(self, fulfill, reject) {
 
 function isJavaVersionOk(self) {
   return new Promise((fulfill, reject) => {
-    let spawn = require('child_process').spawn('java', ['-version']);
+    const spawn = require('child_process').spawn('java', ['-version']);
     spawn.on('error', function (err) {
       self.server.log(['gremlin', 'error'], err);
     });
     spawn.stderr.on('data', function (data) {
-      var result = self._checkJavaVersionString(data);
+      const result = self._checkJavaVersionString(data);
       if (result) {
-        if (result.v) {
-          fulfill(true);
-        } else {
+        if (!result.v) {
           self.server.log(['gremlin', 'error'], result.e);
-          reject(new Error(result.e));
         }
+        fulfill(true);
       }
     });
   });
@@ -186,10 +257,11 @@ function isJavaVersionOk(self) {
 GremlinServerHandler.prototype._checkJavaVersionString = function (string) {
   if (!this.javaChecked) {
     let ret = {};
-    string = string.toString().split(JSON.stringify(os.EOL))[0];
-    let javaVersion = new RegExp('java version').test(string) ? string.split(' ')[2].replace(/"/g, '') : false;
-    if (javaVersion) {
-      if (javaVersion.startsWith('1.8')) {
+    const versionLine = string.toString().split(os.EOL)[0];
+    //[string, major, minor, patch, update, ...]
+    const matches = versionLine.match(/(\d+?)\.(\d+?)\.(\d+?)(?:_(\d+))?/);
+    if (matches) {
+      if (matches.length >= 2 && matches[2] === '8') {
         ret.v = true;
       } else {
         ret.v = false;

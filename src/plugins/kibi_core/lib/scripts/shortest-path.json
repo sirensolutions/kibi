@@ -1,9 +1,0 @@
-{
-  "title": "Shortest Path",
-  "description": "Tries to find the shortest path between two nodes.",
-  "st_scriptSource": "function beforeAll(graphModel, graphSelection) {\n    if (graphSelection.length === 2) {\n        let dd = '<select ng-options=\"i as i for i in [2,3,4]\" ng-model=\"maxSize\">';\n        dd = dd + '<option style=\"display:none\" value=\"\">select a number</option>';\n        dd = dd + '</select>';\n    \n        _openModal('Pick the max path length', dd);\n    } else {\n        alert('Warning: This script only works with 2 selected nodes');\n    }\n    return null;\n}\n\nfunction onModalOk(scope, graphModel) {\n    return scope.maxSize;\n}\n\nfunction afterModalClosed(graphModel, graphSelection, onOkModalResult) {\n    i = 1;\n    return iterateQuery(i, graphSelection, onOkModalResult);\n}\n\nfunction iterateQuery(i, graphSelection, maxIteration) {\n    if (i <= maxIteration) {\n        let query = 'g.V(\"' + graphSelection[0] + \n        '\").repeat(both().simplePath()).times(' + i + ').path()';\n\n        return _runGremlinQuery(query).then(function (results) {\n            let shortestPath;\n            for (let i=0; i<results.length; i++) {\n                let path = results[i];\n                    if (path.objects[path.objects.length-1].id === graphSelection[1]) {\n                        shortestPath = path;\n                        break;\n                    }\n                if (shortestPath) {\n                    break;\n                }\n            }\n            \n            if (shortestPath) {\n                _addResultsToGraph(shortestPath);\n            }  else {\n                i++;\n                return iterateQuery(i, graphSelection, maxIteration);\n            }\n        });\n    }\n}",
-  "version": 1,
-  "kibanaSavedObjectMeta": {
-    "searchSourceJSON": "{}"
-  }
-}

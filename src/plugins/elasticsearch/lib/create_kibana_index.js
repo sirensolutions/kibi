@@ -1,8 +1,9 @@
-var SetupError = require('./setup_error');
-var format = require('util').format;
+const SetupError = require('./setup_error');
+const { mappings } = require('./kibana_index_mappings');
+
 module.exports = function (server) {
-  var client = server.plugins.elasticsearch.client;
-  var index = server.config().get('kibana.index');
+  const client = server.plugins.elasticsearch.client;
+  const index = server.config().get('kibana.index');
 
   function handleError(message) {
     return function (err) {
@@ -10,22 +11,15 @@ module.exports = function (server) {
     };
   }
 
+  // kibi: we're defining an explicit mapping on version to avoid conflicts occurring when a plugin loads saved objects from JSON (which
+  // would create an implicit mapping of `version` to long).
   return client.indices.create({
     index: index,
     body: {
       settings: {
         number_of_shards: 1
       },
-      mappings: {
-        config: {
-          properties: {
-            buildNum: {
-              type: 'string',
-              index: 'not_analyzed'
-            }
-          }
-        }
-      }
+      mappings
     }
   })
   .catch(handleError('Unable to create Kibana index "<%= kibana.index %>"'))

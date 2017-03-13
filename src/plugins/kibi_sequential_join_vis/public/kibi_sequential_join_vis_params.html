@@ -9,65 +9,54 @@
 
         <div class="form-group">
           <label>Button label</label></br>
-          <input required="true" type="text" ng-model="button.label" class="form-control"/>
+          <input required type="text" ng-model="button.label" class="form-control"/>
         </div>
+
+        <div class="form-group">
+          <label>Relation</label>
+          <kbn-info placement="right" info="Choose index relation to be used to do the join"></kbn-info></br>
+          <!-- hidden required input to invalidate the form properly -->
+          <input type="hidden" name="relationId" required ng-model="button.indexRelationId"/>
+          <span class="form-control relation-select"
+                ng-class="{invalid: !button.indexRelationId, focused: menu.focused}"
+                kibi-menu-template="menu.template"
+                kibi-menu-template-data="menu.relations"
+                kibi-menu-template-context="button"
+                kibi-menu-template-on-focus-fn="menu.onFocus()"
+                kibi-menu-template-on-blur-fn="menu.onBlur()"
+
+                >
+            <span ng-bind="getLabel(button.indexRelationId) || 'Choose relation'"/>
+            <i class="fa fa-sort"/>
+          </span>
+        </div>
+
+        <div class="form-group" ng-if="button.indexRelationId">
+          <label>Target dashboard</label>
+          <kbn-info placement="right" info="On click it will redirect to this dashboard"></kbn-info></br>
+          <kibi-select required
+            object-type="dashboardsForSequentialJoinButton"
+            options="{indexRelationId: button.indexRelationId}"
+            ng-model="button.targetDashboardId">
+          </kibi-select>
+        </div>
+
+        <div class="form-group" ng-if="button.indexRelationId">
+          <label>Source dashboard</label> <span>(optional)</span>
+          <kbn-info placement="right" info="If set the button will appear ONLY on this single dashboard, otherwise it will appear in all dashboards which have an associated saved search based on an index pattern which matches that of the relation"></kbn-info></br>
+          <kibi-select
+            object-type="dashboardsForSequentialJoinButton"
+            options="{otherDashboardId: button.targetDashboardId, indexRelationId: button.indexRelationId}"
+            ng-model="button.sourceDashboardId">
+          </kibi-select>
+        </div>
+
         <div class="form-group">
           <label>Custom filter label</label> <span>(optional)</span>
-          <i class="fa fa-info-circle"
-             tooltip="A custom label for the filter created by pressing the button. The default label is: '... related to ($COUNT) from $DASHBOARD. If used variables $COUNT and $DASHBOARD will be replaced by correct values.'"
-             tooltip-placement="right"
-             tooltip-animation="false"
-             tooltip-popup-delay="0"></i></br>
+           <kbn-info placement="right" info="A custom label for the filter created by pressing the button. The default label is: '... related to ($COUNT) from $DASHBOARD. If used variables $COUNT and $DASHBOARD will be replaced by correct values.'">
+           </kbn-info></br>
           <input type="text" ng-model="button.filterLabel" class="form-control"/>
         </div>
-
-
-        <div class="form-group">
-          <label>Source index</label></br/>
-          <span>(this button will only work on a dashboard having this index as a search source)</span></br>
-          <kibi-select required object-type="indexPattern" ng-model="button.sourceIndexPatternId">
-          </kibi-select>
-        </div>
-        <div class="form-group">
-          <label>Source index type</label></br/>
-          <kibi-select object-type="indexPatternType" index-pattern-id="button.sourceIndexPatternId" ng-model="button.sourceIndexPatternType">
-          </kibi-select>
-        </div>
-        <div class="form-group">
-          <label>Source field</label></br/>
-          <kibi-select required object-type="field" analyzed-warning="true"
-                     index-pattern-id="button.sourceIndexPatternId"  ng-model="button.sourceField">
-          </kibi-select>
-        </div>
-
-
-        <div class="form-group">
-          <label>Target index</label></br/>
-          <kibi-select required object-type="indexPattern" ng-model="button.targetIndexPatternId">
-          </kibi-select>
-        </div>
-        <div class="form-group">
-          <label>Target index type</label></br/>
-          <kibi-select object-type="indexPatternType" index-pattern-id="button.targetIndexPatternId" ng-model="button.targetIndexPatternType">
-          </kibi-select>
-        </div>
-        <div class="form-group">
-          <label>Target field</label></br/>
-          <kibi-select required object-type="field" analyzed-warning="true"
-                     index-pattern-id="button.targetIndexPatternId"  ng-model="button.targetField">
-          </kibi-select>
-        </div>
-        <div class="form-group">
-          <label>Target dashboard</label></br/>
-          <span>On click it will redirect to this dashboard</span></br>
-          <kibi-select required object-type="dashboard" ng-model="button.redirectToDashboard">
-          </kibi-select>
-        </div>
-        <!--
-        TODO: to be discussed but there is an idea to use relationalPanel config to verify that
-        there is a connection from source to target dashboard indexes
-        and show only these target dashboards/indexes which are connected
-         -->
 
         <!-- positioned via css to be in right top corner (keep it the last element) -->
         <div class="btn-group rightCorner">

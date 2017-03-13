@@ -1,3 +1,5 @@
+import { endsWith } from 'lodash';
+
 module.exports = function (grunt) {
   let { resolve } = require('path');
 
@@ -11,9 +13,9 @@ module.exports = function (grunt) {
     'linux-x64',
     'linux-x86',
     'windows',
-    'windows64' // kibi: we distinguish between windowses as we ship the native bindings for sqlite and nodejave
+    'windows64' // kibi: we distinguish between windowses as we ship the native bindings for sqlite and node java
   ].map(function (name) {
-    let win = (name === 'windows' || name === 'windows64');
+    const win = name === 'windows' || name === 'windows64';
 
     let nodeUrl;
     if (name === 'windows') {
@@ -35,12 +37,27 @@ module.exports = function (grunt) {
     let zipName = `${buildName}.zip`;
     let zipPath = resolve(rootPath, `target/${zipName}`);
 
+    let debName;
+    let debPath;
+    let rpmName;
+    let rpmPath;
+    if (name.match('linux')) {
+      let debArch = name.match('x64') ? 'amd64' : 'i386';
+      debName = `kibana_${version}_${debArch}.deb`;
+      debPath = resolve(rootPath, `target/${debName}`);
+
+      let rpmArch = name.match('x64') ? 'x86_64' : 'i386';
+      rpmName = `kibana-${version.replace('-', '_')}-1.${rpmArch}.rpm`;
+      rpmPath = resolve(rootPath, `target/${rpmName}`);
+    }
     return {
       name, win,
       nodeUrl, nodeDir,
       buildName, buildDir,
       tarName, tarPath,
       zipName, zipPath,
+      debName, debPath,
+      rpmName, rpmPath
     };
   });
 };

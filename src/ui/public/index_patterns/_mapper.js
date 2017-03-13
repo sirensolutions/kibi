@@ -1,22 +1,51 @@
 define(function (require) {
   return function MapperService(Private, Promise, es, config, kbnIndex) {
-    var _ = require('lodash');
-    var moment = require('moment');
+    let _ = require('lodash');
+    let moment = require('moment');
 
-    var IndexPatternMissingIndices = require('ui/errors').IndexPatternMissingIndices;
-    var transformMappingIntoFields = Private(require('ui/index_patterns/_transform_mapping_into_fields'));
-    var intervals = Private(require('ui/index_patterns/_intervals'));
-    var patternToWildcard = Private(require('ui/index_patterns/_pattern_to_wildcard'));
+    let IndexPatternMissingIndices = require('ui/errors').IndexPatternMissingIndices;
+    let transformMappingIntoFields = Private(require('ui/index_patterns/_transform_mapping_into_fields'));
+    let _getPathsForIndexPattern = Private(require('ui/kibi/index_patterns/_get_paths_for_index_pattern'));
+    let intervals = Private(require('ui/index_patterns/_intervals'));
+    let patternToWildcard = Private(require('ui/index_patterns/_pattern_to_wildcard'));
 
-    var LocalCache = Private(require('ui/index_patterns/_local_cache'));
+    let LocalCache = Private(require('ui/index_patterns/_local_cache'));
 
     function Mapper() {
 
       // Save a reference to mapper
-      var self = this;
+      let self = this;
 
       // proper-ish cache, keeps a clean copy of the object, only returns copies of it's copy
-      var fieldCache = self.cache = new LocalCache();
+      let fieldCache = self.cache = new LocalCache();
+
+      /**
+       * kibi: getPathsSequenceForIndexPattern returns an object which keys are paths, and values the path as an array
+       * with each element being a field name.
+       */
+      self.getPathsSequenceForIndexPattern = function (indexPattern) {
+        let promise = Promise.resolve(indexPattern.id);
+
+        if (indexPattern.intervalName) {
+          promise = self.getIndicesForIndexPattern(indexPattern)
+          .then(function (existing) {
+            if (existing.matches.length === 0) throw new IndexPatternMissingIndices();
+            return existing.matches.slice(-config.get('indexPattern:fieldMapping:lookBack')); // Grab the most recent
+          });
+        }
+
+        return promise.then(function (indexList) {
+          return es.indices.getMapping({
+            index: indexList,
+            ignoreUnavailable: _.isArray(indexList),
+            allowNoIndices: false,
+            includeDefaults: true
+          });
+        })
+        .catch(handleMissingIndexPattern)
+        .then(_getPathsForIndexPattern);
+      };
+      // kibi: end
 
       /**
        * Gets an object containing all fields with their mappings
@@ -26,9 +55,9 @@ define(function (require) {
        * @async
        */
       self.getFieldsForIndexPattern = function (indexPattern, skipIndexPatternCache) {
-        var id = indexPattern.id;
+        let id = indexPattern.id;
 
-        var cache = fieldCache.get(id);
+        let cache = fieldCache.get(id);
         if (cache) return Promise.resolve(cache);
 
         if (!skipIndexPatternCache) {
@@ -46,7 +75,7 @@ define(function (require) {
           });
         }
 
-        var promise = Promise.resolve(id);
+        let promise = Promise.resolve(id);
         if (indexPattern.intervalName) {
           promise = self.getIndicesForIndexPattern(indexPattern)
           .then(function (existing) {
@@ -77,8 +106,8 @@ define(function (require) {
           index: patternToWildcard(indexPattern.id)
         })
         .then(function (resp) {
-          // var all = Object.keys(resp).sort();
-          var all = _(resp)
+          // let all = Object.keys(resp).sort();
+          let all = _(resp)
           .map(function (index, key) {
             if (index.aliases) {
               return [Object.keys(index.aliases), key];
@@ -91,8 +120,8 @@ define(function (require) {
           .uniq(true)
           .value();
 
-          var matches = all.filter(function (existingIndex) {
-            var parsed = moment(existingIndex, indexPattern.id);
+          let matches = all.filter(function (existingIndex) {
+            let parsed = moment(existingIndex, indexPattern.id);
             return existingIndex === parsed.format(indexPattern.id);
           });
 

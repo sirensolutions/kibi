@@ -3,6 +3,24 @@
 
 .relations-settings {
 
+  .relations .bad-relations > a,
+  .relations .bad-relations > a:hover,
+  .relations .bad-relations > a:focus {
+    color: @dashboard-panel-load-error-color;
+  }
+
+  td.alignLeft {
+    text-align: right;
+  }
+
+  tr.relation-row td:nth-child(1) table,
+  tr.relation-row td:nth-child(3) table {
+    width: 100%;
+  }
+
+  table.relationPart tr td:nth-child(1) {
+    width: 30%;
+  }
 
   .dashboards-section {
     border: 2px #fff solid;
@@ -44,7 +62,7 @@
   // override the table-condensed cell style to make it more compact
   .table-condensed > thead > tr > th {
     border-bottom-width: 1px;
-    height: 70px;
+    height: 50px;
     vertical-align: bottom;
   }
 
@@ -59,7 +77,6 @@
   }
 
   input.small-input.form-control {
-    width: 80px;
     padding: 5px;
   }
 

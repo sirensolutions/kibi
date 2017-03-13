@@ -33,6 +33,10 @@ RestQuery.prototype.checkIfItIsRelevant = function (options) {
     return Promise.resolve(true);
   }
 
+  if (this._checkIfSelectedDocumentRequiredAndNotPresent(options)) {
+    this.logger.warn('No elasticsearch document selected while required by the REST query. [' + this.config.id + ']');
+    return Promise.resolve(false);
+  }
   // evaluate the rules
   return this.rulesHelper.evaluate(this.config.activation_rules, options.selectedDocuments, options.credentials);
 };
@@ -47,9 +51,6 @@ RestQuery.prototype._logFailedRequestDetails = function (msg, originalError, res
 RestQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) {
   var self = this;
 
-  if (self._checkIfSelectedDocumentRequiredAndNotPresent(options)) {
-    return self._returnAnEmptyQueryResultsPromise('No data because the query require entityURI');
-  }
   // currently we use only single selected document
   var uri = options.selectedDocuments && options.selectedDocuments.length > 0 ? options.selectedDocuments[0] : '';
 
@@ -66,14 +67,17 @@ RestQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) {
 
     if (!regex.test(self.config.rest_method)) {
       reject(new Error('Only GET|POST methods are supported at the moment'));
+      return;
     }
 
     if (!(self.config.rest_params instanceof Array)) {
       reject(new Error('rest_params should be an Array. Check the elasticsearch mapping'));
+      return;
     }
 
     if (!(self.config.rest_headers instanceof Array)) {
       reject(new Error('rest_headers should be an Array. Check the elasticsearch mapping'));
+      return;
     }
 
     // user can also use a special variables like $auth_token
@@ -135,7 +139,7 @@ RestQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) {
             throw new Error(msg);
           }
 
-          // TODO: change this once we support xml resp or text resp
+          // TODO: / Kibi / change this once we support xml resp or text resp
           var json;
           try {
             json = JSON.parse(body);
@@ -145,17 +149,22 @@ RestQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) {
             throw new Error(msg);
           }
 
-          // extract subset of the data only if user specified jsonpath expression
-          if (self.config.rest_resp_restriction_path && self.config.rest_resp_restriction_path !== '') {
-            try {
-              data.results = jsonpath.query(json, self.config.rest_resp_restriction_path);
-            } catch (e) {
-              msg = 'Error while executing the JSONPath expression. Details: ' + e.message;
-              self._logFailedRequestDetails(msg, e, resp);
-              throw new Error(msg);
+          data.results = json;
+
+          if (idVariableName && self.config.rest_variables) {
+            var o = _.find(self.config.rest_variables, function (v) {
+              return v.name === idVariableName;
+            });
+
+            if (o) {
+              try {
+                data.ids = jsonpath.query(json, o.value);
+              } catch (e) {
+                msg = 'Error while executing the JSONPath expressionXX. Details: ' + e.message;
+                self._logFailedRequestDetails(msg, e, resp);
+                throw new Error(msg);
+              }
             }
-          } else {
-            data.results = json;
           }
 
           if (self.cache && cacheEnabled) {

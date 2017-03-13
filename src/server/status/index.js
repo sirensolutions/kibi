@@ -1,6 +1,8 @@
+import wrapAuthConfig from './wrap_auth_config';
+
 module.exports = function (kbnServer, server, config) {
-  var _ = require('lodash');
-  var ServerStatus = require('./ServerStatus');
+  let _ = require('lodash');
+  let ServerStatus = require('./ServerStatus');
   var { join } = require('path');
 
   kbnServer.status = new ServerStatus(kbnServer.server);
@@ -9,7 +11,9 @@ module.exports = function (kbnServer, server, config) {
     kbnServer.mixin(require('./metrics'));
   }
 
-  server.route({
+  const wrapAuth = wrapAuthConfig(config.get('status.allowAnonymous'));
+
+  server.route(wrapAuth({
     method: 'GET',
     path: '/api/status',
     handler: function (request, reply) {
@@ -18,20 +22,20 @@ module.exports = function (kbnServer, server, config) {
         metrics: kbnServer.metrics
       });
     }
-  });
+  }));
 
   server.decorate('reply', 'renderStatusPage', function () {
-    var app = kbnServer.uiExports.getHiddenApp('statusPage');
-    var resp = app ? this.renderApp(app) : this(kbnServer.status.toString());
+    let app = kbnServer.uiExports.getHiddenApp('statusPage');
+    let resp = app ? this.renderApp(app) : this(kbnServer.status.toString());
     resp.code(kbnServer.status.isGreen() ? 200 : 503);
     return resp;
   });
 
-  server.route({
+  server.route(wrapAuth({
     method: 'GET',
     path: '/status',
     handler: function (request, reply) {
       return reply.renderStatusPage();
     }
-  });
+  }));
 };

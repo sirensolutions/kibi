@@ -1,79 +1,215 @@
 define(function (require) {
-  return function DashboardGroupHelperFactory(Private, savedSearches, savedDashboards, savedDashboardGroups, Promise) {
-    var _ = require('lodash');
-    var urlHelper        = Private(require('ui/kibi/helpers/url_helper'));
-    var kibiStateHelper  = Private(require('ui/kibi/helpers/kibi_state_helper/kibi_state_helper'));
-    var joinFilterHelper = Private(require('ui/kibi/helpers/join_filter_helper/join_filter_helper'));
-    var countHelper      = Private(require('ui/kibi/helpers/count_helper/count_helper'));
+  let isJoinPruned = require('ui/kibi/helpers/is_join_pruned');
+
+  return function DashboardGroupHelperFactory(
+      $timeout, kibiState, Private, savedDashboards, savedDashboardGroups, Promise, kbnIndex, $http) {
+    const _ = require('lodash');
+    const dashboardHelper = Private(require('ui/kibi/helpers/dashboard_helper'));
+    const countHelper = Private(require('ui/kibi/helpers/count_helper/count_helper'));
+    const kibiUtils = require('kibiutils');
+    const SearchHelper = require('ui/kibi/helpers/search_helper');
+    const chrome = require('ui/chrome');
 
     function DashboardGroupHelper() {
+      this.chrome = chrome;
+      this.searchHelper = new SearchHelper(kbnIndex);
     }
 
     DashboardGroupHelper.prototype.getIdsOfDashboardGroupsTheseDashboardsBelongTo = function (dashboardIds) {
-      return new Promise(function (fulfill, reject) {
-        savedDashboardGroups.find('').then(function (resp) {
-          var ret = [];
-          _.each(resp.hits, function (hit) {
-            var id = hit.id;
-            if (hit.dashboards instanceof Array) {
-              _.each(hit.dashboards, function (d) {
-                if (dashboardIds.indexOf(d.id) !== -1) {
-                  ret.push(id);
-                }
-              });
-            } else {
-              reject(new Error('Property dashboards should be and Array, but was [' + JSON.stringify(hit.dashboards, null, '') + ']'));
-            }
-          });
-          fulfill(_.unique(ret));
+      return savedDashboardGroups.find().then(function (resp) {
+        let ret = [];
+        _.each(resp.hits, function (hit) {
+          let id = hit.id;
+          if (hit.dashboards instanceof Array) {
+            _.each(hit.dashboards, function (d) {
+              if (dashboardIds.indexOf(d.id) !== -1) {
+                ret.push(id);
+              }
+            });
+          } else {
+            const msg = `Property dashboards should be and Array, but was [${JSON.stringify(hit.dashboards, null, '')}]`;
+            return Promise.reject(new Error(msg));
+          }
         });
+        return _.unique(ret);
       });
     };
-
-    var sortByPriority = function (dashboardGroups) {
-      dashboardGroups.sort(function (a, b) {
-        if (a.priority && b.priority) {
-          return a.priority - b.priority;
-        }
-        return 0;
-      });
-    };
-
 
     DashboardGroupHelper.prototype.shortenDashboardName = function (groupTitle, dashboardTitle) {
-      var g = groupTitle.toLowerCase();
-      var d = dashboardTitle.toLowerCase();
+      let g = groupTitle.toLowerCase();
+      let d = dashboardTitle.toLowerCase();
       if (d.indexOf(g) === 0 && d.length > g.length) {
         return dashboardTitle.substring(groupTitle.length).replace(/^[\s-]{1,}/, '');  // replace any leading spaces or dashes
       }
       return dashboardTitle;
     };
 
-    DashboardGroupHelper.prototype._getOnClickForDashboardInGroup = function (dashboardId, groupId) {
-      // here save which one was selected for
-      const currentDashboardId = urlHelper.getCurrentDashboardId();
-      kibiStateHelper.saveFiltersForDashboardId(currentDashboardId, urlHelper.getDashboardFilters(currentDashboardId));
-      kibiStateHelper.saveQueryForDashboardId(currentDashboardId, urlHelper.getDashboardQuery(currentDashboardId));
+    DashboardGroupHelper.prototype.setSelectedDashboardAndActiveGroup = function (dashboardGroups, dashboardId, groupId) {
+      // here iterate over dashboardGroups remove the active group
+      // then set the new active group and set the selected dashboard
+      _.each(dashboardGroups, function (group) {
+        if (group.id === groupId) {
+          group.active = true;
+          _.each(group.dashboards, function (dashboard) {
+            if (dashboard.id === dashboardId) {
+              group.selected = dashboard;
+              return false; // to break the loop
+            }
+          });
+        } else {
+          group.active = false;
+        }
+      });
+    };
 
-      if (groupId) {
-        kibiStateHelper.saveSelectedDashboardId(groupId, dashboardId);
+    let lastEventTimer;
+    DashboardGroupHelper.prototype._getOnClickForDashboardInGroup = function (dashboardGroups, dashboardId, groupId) {
+      $timeout.cancel(lastEventTimer);
+      lastEventTimer = $timeout(() => {
+        // here save which one was selected for
+        if (groupId) {
+          this.setSelectedDashboardAndActiveGroup(dashboardGroups, dashboardId, groupId);
+          kibiState.setSelectedDashboardId(groupId, dashboardId);
+          kibiState.save();
+        }
+        return dashboardHelper.switchDashboard(dashboardId);
+      }, 750);
+      return lastEventTimer;
+    };
+
+    DashboardGroupHelper.prototype.constructFilterIconMessage = function (filters, queries) {
+      if (queries || filters) {
+        if (queries.length > 1 && filters.length !== 0) {
+          return 'This dashboard has a query and ' + filters.length + ' filter' + (filters.length > 1 ? 's' : '') + ' set.';
+        } else if (queries.length > 1) {
+          return 'This dashboard has a query set.';
+        } else if (filters.length !== 0) {
+          return 'This dashboard has ' + filters.length + ' filter' + (filters.length > 1 ? 's' : '') + ' set.';
+        }
       }
+      return null;
+    };
 
-      if (joinFilterHelper.isRelationalPanelEnabled()) {
-        joinFilterHelper.getJoinFilter(dashboardId).then(function (joinFilter) {
-          if (joinFilter) {
-            urlHelper.addFilter(dashboardId, joinFilter);
+    let updateCountOnMetadata = function (metadata, responses) {
+      if (responses && metadata) {
+        if (responses.length === metadata.length) {
+          for (let i = 0; i < responses.length; i++) {
+            let hit = responses[i];
+            if (metadata[i].forbidden) {
+              metadata[i].count = 'Forbidden';
+            } else if (!_.contains(Object.keys(hit), 'error')) {
+              metadata[i].count = hit.hits.total;
+            } else if (_.contains(Object.keys(hit), 'error') && _.contains(hit.error, 'ElasticsearchSecurityException')) {
+              metadata[i].count = 'Forbidden';
+            } else {
+              metadata[i].count = 'Error';
+            }
+            metadata[i].isPruned = isJoinPruned(hit);
           }
-        }).finally(function () {
-          urlHelper.switchDashboard(dashboardId);
-        });
-      } else {
-        urlHelper.switchDashboard(dashboardId);
+        } else {
+          throw new Error('Metadata size different than responses size');
+        }
       }
     };
 
+    let lastFiredMultiCountsQuery;
+    let lastMultiCountsQueryResults;
+    DashboardGroupHelper.prototype.getDashboardsMetadata = function (ids, forceCountsUpdate = false) {
+      const self = this;
+      const idsArray = Array.from(ids); // has to do it as it might be a set
+      return savedDashboards.find().then((resp) => {
+        let dashboards = _.filter(resp.hits, (dashboard) => {
+          return dashboard.savedSearchId && idsArray.indexOf(dashboard.id) !== -1;
+        });
+
+        let metadataPromises = _.map(dashboards, (dashboard) => {
+          return kibiState.getState(dashboard.id)
+          .then(({ index, filters, queries, time }) => {
+            const query = countHelper.constructCountQuery(filters, queries, time);
+            // here take care about correctly expanding timebased indices
+            return kibiState.timeBasedIndices(index, dashboard.id)
+            .then((indices) => ({
+              dashboardId: dashboard.id,
+              filters: filters,
+              queries: queries,
+              query: query,
+              indices: indices
+            }))
+            .catch((error) => {
+              // If computing the indices failed because of an authorization error
+              // set indices to an empty array and mark the dashboard as forbidden.
+              if (error.status === 403) {
+                return {
+                  dashboardId: dashboard.id,
+                  filters: filters,
+                  queries: queries,
+                  query: query,
+                  forbidden: true,
+                  indices: []
+                };
+              }
+              throw error;
+            });
+          });
+        });
+
+        return Promise.all(metadataPromises).then((metadata) => {
+          // here fire the query to get counts
+          const countsQuery = _.map(metadata, result => {
+            return self.searchHelper.optimize(result.indices, result.query);
+          }).join('');
+
+          if (!countsQuery) {
+            return metadata;
+          } else if (countsQuery && lastFiredMultiCountsQuery && lastFiredMultiCountsQuery === countsQuery && !forceCountsUpdate) {
+            updateCountOnMetadata(metadata, lastMultiCountsQueryResults);
+            return metadata;
+          } else {
+            return $http.post(self.chrome.getBasePath() + '/elasticsearch/_msearch?getCountsOnTabs', countsQuery).then((counts) => {
+              lastFiredMultiCountsQuery = countsQuery;
+              lastMultiCountsQueryResults = counts.data.responses;
+              updateCountOnMetadata(metadata, lastMultiCountsQueryResults);
+              return metadata;
+            });
+          }
+        });
+      });
+    };
+
+    DashboardGroupHelper.prototype._getDashboardForGroup = function (groupId, groupTitle, dashboardDef) {
+      let self = this;
+      return {
+        id: dashboardDef.id,
+        title: self.shortenDashboardName(groupTitle, dashboardDef.title),
+        savedSearchId: dashboardDef.savedSearchId,
+        onSelect: function (dashboardGroups) {
+          // NOTE:
+          // do NOT return if currentDashboardId === dashboardDef.id
+          // previously we thought we should do nothing in such case but later
+          // we found that clicking on a dashboard to refresh it is very useful feature
+          self._getOnClickForDashboardInGroup(dashboardGroups, dashboardDef.id, groupId);
+        },
+        onOpenClose: function (group) {
+          // take all dashboards except the selected one
+          let dashboardIds = _.filter(group.dashboards, d => d.id !== group.selected.id).map(d => d.id);
+          self.getDashboardsMetadata(dashboardIds).then((metadata) => {
+            _.each(group.dashboards, (d) => {
+              let foundDashboardMetadata = _.find(metadata, (m) => {
+                return m.dashboardId === d.id;
+              });
+              if (foundDashboardMetadata) {
+                d.count = foundDashboardMetadata.count;
+                d.isPruned = foundDashboardMetadata.isPruned;
+                d.filterIconMessage = self.constructFilterIconMessage(foundDashboardMetadata.filters, foundDashboardMetadata.queries);
+              }
+            });
+          });
+        }
+      };
+    };
+
     DashboardGroupHelper.prototype._computeGroupsFromSavedDashboardGroups = function (currentDashboardId) {
-      var self = this;
+      let self = this;
 
       // get all dashboard groups
       return savedDashboardGroups.find().then(function (respGroups) {
@@ -82,19 +218,19 @@ define(function (require) {
         }
         // here first fetch all dashboards to be able to verify that dashboards mentioned in the group still exists
         return savedDashboards.find().then(function (respDashboards) {
-          var listOfDashboards = _.map(respDashboards.hits, function (hit) {
+          let listOfDashboards = _.map(respDashboards.hits, function (hit) {
             return hit.id;
           });
 
-          var dashboardGroups1 = [];
-          var fail = '';
+          let dashboardGroups1 = [];
+          let fail = '';
           // first iterate over existing groups
           _.each(respGroups.hits, function (group) {
 
             // selected dashboard
-            var selected;
-            var dashboards = [];
-            var dashboardsArray = group.dashboards;
+            let selected;
+            let dashboards = [];
+            let dashboardsArray = group.dashboards;
             // check that all dashboards still exists
             // in case there is one which does not display a warning
             _.each(dashboardsArray, function (d) {
@@ -110,25 +246,16 @@ define(function (require) {
             }
 
             dashboards = _.map(dashboardsArray, function (d) {
-
-              var dashboard = {
-                id: d.id,
-                title: self.shortenDashboardName(group.title, d.title),
-                onClick: function () {
-                  self._getOnClickForDashboardInGroup(d.id, group.id);
-                },
-                filters: kibiStateHelper.getFiltersForDashboardId(d.id)
-              };
-              if (currentDashboardId === d.id) {
+              let dashboard = self._getDashboardForGroup(group.id, group.title, d);
+              if (currentDashboardId && currentDashboardId === dashboard.id) {
                 selected = dashboard;
               }
               return dashboard;
             });
 
-
             // try to get the last selected one for this group
             if (!selected && dashboards.length > 0) {
-              var lastSelectedId = kibiStateHelper.getSelectedDashboardId(group.id);
+              let lastSelectedId = kibiState.getSelectedDashboardId(group.id);
               _.each(dashboards, function (dashboard) {
                 if (dashboard.id === lastSelectedId) {
                   selected = dashboard;
@@ -143,17 +270,14 @@ define(function (require) {
             }
 
             dashboardGroups1.push({
+              id: group.id,
               title: group.title,
-              priority: group.priority,
-              dashboards: dashboards,
-              selected: selected,
-              _selected: selected,
               hide: group.hide,
               iconCss: group.iconCss,
               iconUrl: group.iconUrl,
-              onClick: function () {
-                this.selected.onClick();
-              }
+              priority: group.priority,
+              dashboards: dashboards,
+              selected: selected
             });
 
           }); // end of each
@@ -162,15 +286,13 @@ define(function (require) {
             return Promise.reject(new Error(fail));
           }
 
-          sortByPriority(dashboardGroups1);
-
           return dashboardGroups1;
         });
       });
     };
 
     DashboardGroupHelper.prototype._getListOfDashboardsFromGroups = function (dashboardGroups) {
-      var dashboardsInGroups = [];
+      let dashboardsInGroups = [];
       _.each(dashboardGroups, function (group) {
         if (group.dashboards) {
           _.each(group.dashboards, function (dashboard) {
@@ -185,265 +307,107 @@ define(function (require) {
       return dashboardsInGroups;
     };
 
-
     DashboardGroupHelper.prototype._addAdditionalGroupsFromSavedDashboards = function (currentDashboardId, dashboardGroups1) {
-      var self = this;
+      let self = this;
       // first create array of dashboards already used in dashboardGroups1
-      var dashboardsInGroups = self._getListOfDashboardsFromGroups(dashboardGroups1);
+      let dashboardsInGroups = self._getListOfDashboardsFromGroups(dashboardGroups1);
+      let highestGroup = _.max(dashboardGroups1, 'priority');
+      let highestPriority = highestGroup && highestGroup.priority || 0;
 
-      return urlHelper.getDashboardAndSavedSearchMetas(undefined, true).then(function (results) {
-        const promises = _.map(results, function ({ savedDash, savedSearchMeta }) {
-          if (savedSearchMeta) {
-            return {
-              id: savedDash.id,
-              title: savedDash.title,
-              indexPatternId: savedSearchMeta.index,
-              savedSearchId: savedDash.savedSearchId
-            };
-          } else {
-            return {
-              id: savedDash.id,
-              title: savedDash.title,
-              indexPatternId: null,
-              savedSearchId: null
-            };
-          }
-        });
-
-        return Promise.all(promises).then(function (dashboardDefs) {
-
-          _.each(dashboardDefs, function (dashboardDef) {
-            var isInGroups = false;
-            _.each(dashboardsInGroups, function (dashboard) {
-              if (dashboard.id === dashboardDef.id) {
-                dashboard.indexPatternId = dashboardDef.indexPatternId;
-                dashboard.savedSearchId = dashboardDef.savedSearchId;
-                isInGroups = true;
-                return false;
-              }
-            });
-
-            // so now we know that this dashboard is not in any group
-            if (isInGroups === false) {
-              // not in a group so add it as new group with single dashboard
-              var onlyOneDashboard = {
-                id: dashboardDef.id,
-                title: dashboardDef.title,
-                indexPatternId: dashboardDef.indexPatternId,
-                savedSearchId: dashboardDef.savedSearchId,
-                filters: kibiStateHelper.getFiltersForDashboardId(dashboardDef.id)
-              };
-
-              dashboardGroups1.push({
-                title: dashboardDef.title,
-                dashboards: [onlyOneDashboard],
-                selected: onlyOneDashboard,
-                _selected: onlyOneDashboard,
-                onClick: function () {
-                  self._getOnClickForDashboardInGroup(dashboardDef.id, null);
-                }
-              });
-            }
-          });
-
-          // mark the active group
-          var activeSelected = false;
-          _.each(dashboardGroups1, function (group) {
-            _.each(group.dashboards, function (dashboard) {
-              if (currentDashboardId === dashboard.id) {
-                group.active = true;
-                activeSelected = true;
-                return false;
-              }
-            });
-            if (activeSelected) {
+      return savedDashboards.find().then(function (savedDashboards) {
+        _.each(savedDashboards.hits, function (dashboardDef) {
+          let isInGroups = false;
+          _.each(dashboardsInGroups, function (dashboard) {
+            if (dashboard.id === dashboardDef.id) {
+              // here add savedSearchId property to all already existing dashboard objects
+              dashboard.savedSearchId = dashboardDef.savedSearchId;
+              isInGroups = true;
               return false;
             }
           });
 
-          if (!activeSelected && dashboardGroups1.length > 0) {
-            // make the first one active
-            dashboardGroups1[0].active = true;
+          // so now we know that this dashboard is not in any group
+          if (isInGroups === false) {
+            // not in a group so add it as new group with single dashboard
+            let groupId = kibiUtils.slugifyId(dashboardDef.title);
+            let groupTitle = dashboardDef.title;
+            let onlyOneDashboard = self._getDashboardForGroup(groupId, groupTitle, dashboardDef);
+
+            dashboardGroups1.push({
+              id: groupId,
+              title: groupTitle,
+              dashboards: [onlyOneDashboard],
+              selected: onlyOneDashboard,
+              priority: ++highestPriority
+            });
           }
-
-          // only here we can fulfill the promise
-          return dashboardGroups1;
         });
-      });
-    };
 
-
-
-    DashboardGroupHelper.prototype.getCountQueryForSelectedDashboard = function (groups, groupIndex) {
-      var dashboard = groups[groupIndex].selected;
-
-      if (!dashboard || !dashboard.indexPatternId) {
-        delete groups[groupIndex].count;
-        return Promise.resolve({
-          query: undefined,
-          indexPatternId: undefined,
-          groupIndex: groupIndex
-        });
-      }
-
-      return countHelper.getCountQueryForDashboardId(dashboard.id).then(function (queryDef) {
-        queryDef.groupIndex = groupIndex;
-        return Promise.resolve(queryDef);
-      });
-    };
-
-    DashboardGroupHelper.prototype.detectJoinSetFilterInGroups = function (newDashboardGroups) {
-      for (var gIndex = 0; gIndex < newDashboardGroups.length; gIndex++) {
-        var g = newDashboardGroups[gIndex];
-        if (g.dashboards) {
-          for (var dIndex = 0; dIndex < g.dashboards.length; dIndex++) {
-            var d = g.dashboards[dIndex];
-            var filtersDashboard = kibiStateHelper.getFiltersForDashboardId(d.id);
-            if (filtersDashboard) {
-              // check if there is a join_set in the kibi state
-              for (var fdIndex = 0; fdIndex < filtersDashboard.length; fdIndex++) {
-                var fd = filtersDashboard[fdIndex];
-                if (fd.join_set) {
-                  // return all groups
-                  return true;
-                }
-              }
+        // mark the active group
+        let activeSelected = false;
+        _.each(dashboardGroups1, function (group) {
+          _.each(group.dashboards, function (dashboard) {
+            if (currentDashboardId && currentDashboardId === dashboard.id) {
+              group.active = true;
+              activeSelected = true;
+              return false;
             }
-            if (d.filters) {
-              for (var fIndex = 0; fIndex < d.filters.length; fIndex++) {
-                var f = d.filters[fIndex];
-                if (f.join_set) {
-                  // return all groups
-                  return true;
-                }
-              }
-            }
+          });
+          if (activeSelected) {
+            return false;
           }
+        });
+
+        if (!activeSelected && dashboardGroups1.length > 0) {
+          // make the first one active
+          dashboardGroups1[0].active = true;
         }
-      }
-      return false;
+
+        // only here we can fulfill the promise
+        return dashboardGroups1;
+      });
     };
 
     /**
-     * when possible update just the different properties
-     * if not possible to update just properties - update the whole dashboard or whole group
-     *
-     * return the list of group indexes on which the count should be updated
+     * Copies dashboards groups from src to dest.
+     * Modifies the dest object.
      */
-    DashboardGroupHelper.prototype.updateDashboardGroups = function (oldDashboardGroups, newDashboardGroups) {
-      var groupIndexesToUpdateCountsOn = [];
-      var reasons = [];
+    DashboardGroupHelper.prototype.copy = function (src, dest) {
+      if (!dest) {
+        throw new Error('Dest object should be defined');
+      }
 
+      _.each(src, (group) => {
+        const previousGroup = _.find(dest, { id: group.id });
+        if (previousGroup) {
+          previousGroup.active = group.active;
+          previousGroup.dashboards = group.dashboards;
+          previousGroup.hide = group.hide;
+          previousGroup.iconCss = group.iconCss;
+          previousGroup.iconUrl = group.iconUrl;
+          previousGroup.priority = group.priority;
+          previousGroup.title = group.title;
 
-      for (var gIndex = 0; gIndex < newDashboardGroups.length; gIndex++) {
-        var g = newDashboardGroups[gIndex];
-        // if not the same group replace
-        if (oldDashboardGroups[gIndex].title !== g.title) {
-          oldDashboardGroups[gIndex] = g;
-          if (groupIndexesToUpdateCountsOn.indexOf(gIndex) === -1) {
-            groupIndexesToUpdateCountsOn.push(gIndex);
-            reasons.push('different titles for group ' + gIndex);
-          }
-          continue;
+          // when copying selected reference we keep the count, filterIconMessage and isPruned
+          // properties from the previous group
+          let filterIconMessage = previousGroup.selected.filterIconMessage;
+          let count = previousGroup.selected.count;
+          let isPruned = previousGroup.selected.isPruned;
+          previousGroup.selected = group.selected;
+          previousGroup.selected.filterIconMessage = filterIconMessage;
+          previousGroup.selected.count = count;
+          previousGroup.selected.isPruned = isPruned;
         } else {
-          // the same group lets compare more
-          if (oldDashboardGroups[gIndex].dashboards.length !== g.dashboards.length) {
-            oldDashboardGroups[gIndex] = g;
-            if (groupIndexesToUpdateCountsOn.indexOf(gIndex) === -1) {
-              groupIndexesToUpdateCountsOn.push(gIndex);
-              reasons.push('different number of dashboards for group ' + gIndex);
-            }
-            continue;
-          }
-
-          if (oldDashboardGroups[gIndex].active !== g.active) {
-            oldDashboardGroups[gIndex].active = g.active;
-          }
-
-          if (oldDashboardGroups[gIndex].iconCss !== g.iconCss) {
-            oldDashboardGroups[gIndex].iconCss = g.iconCss;
-          }
-
-          if (oldDashboardGroups[gIndex].iconUrl !== g.iconUrl) {
-            oldDashboardGroups[gIndex].iconUrl = g.iconUrl;
-          }
-          // selected is tricky as it will be changed by the select input element
-          // so instead compare with _selected
-          if (oldDashboardGroups[gIndex]._selected.id !== g._selected.id) {
-
-            // put the old count first so in case it will be the same it will not flip
-            g.count = oldDashboardGroups[gIndex].count;
-
-            // here write the whole group to the scope as
-            // selected must be a proper reference to the correct object in dashboards array
-            oldDashboardGroups[gIndex] = g;
-            if (groupIndexesToUpdateCountsOn.indexOf(gIndex) === -1) {
-              groupIndexesToUpdateCountsOn.push(gIndex);
-              reasons.push('different selected dashboard for group ' + gIndex);
-            }
-          }
-          // now compare each dashboard
-          var updateCount = false;
-          for (var dIndex = 0; dIndex < oldDashboardGroups[gIndex].dashboards.length; dIndex++) {
-            var d = newDashboardGroups[gIndex].dashboards[dIndex];
-
-            // first check that the number of filters changed on selected dashboard
-            if (oldDashboardGroups[gIndex].selected.id === d.id &&
-                !_.isEqual(oldDashboardGroups[gIndex].dashboards[dIndex].filters, d.filters, true)
-            ) {
-              oldDashboardGroups[gIndex].dashboards[dIndex].filters = d.filters;
-              reasons.push('different number of filters for dashboard ' + dIndex + ' for group ' + gIndex);
-              updateCount = true;
-            }
-
-            if (oldDashboardGroups[gIndex].selected.id === d.id &&
-                oldDashboardGroups[gIndex].dashboards[dIndex].indexPatternId !== d.indexPatternId
-            ) {
-              oldDashboardGroups[gIndex].dashboards[dIndex].indexPatternId = d.indexPatternId;
-              reasons.push('different indexPatternId for dashboard ' + dIndex + ' for group ' + gIndex);
-              updateCount = true;
-            }
-
-            if (oldDashboardGroups[gIndex].selected.id === d.id &&
-                oldDashboardGroups[gIndex].dashboards[dIndex].savedSearchId !== d.savedSearchId
-            ) {
-              oldDashboardGroups[gIndex].dashboards[dIndex].savedSearchId = d.savedSearchId;
-              reasons.push('different savedSearchId for dashboard ' + dIndex + ' for group ' + gIndex);
-              updateCount = true;
-            }
-
-            // then if it is not the same dashboard on the same position
-            if (oldDashboardGroups[gIndex].dashboards[dIndex].id !== d.id) {
-              oldDashboardGroups[gIndex].dashboards[dIndex] = d;
-              reasons.push('different dashboard id for dashboard ' + dIndex + ' for group ' + gIndex);
-              updateCount = true;
-            }
-          }
-
-          if (updateCount && groupIndexesToUpdateCountsOn.indexOf(gIndex) === -1) {
-            groupIndexesToUpdateCountsOn.push(gIndex);
-          }
+          // new group
+          dest.push(group);
+        }
+      });
+      for (let destIndex = dest.length - 1; destIndex >= 0; destIndex--) {
+        const srcIndex = _.findIndex(src, { id: dest[destIndex].id });
+        if (srcIndex === -1) {
+          dest.splice(destIndex, 1);
         }
       }
-
-
-      // if there is a join_set filter on any dashboard just update all groups
-      // this can not go at the top as the code above if modifying the oldDashboardGroups
-      // e.g updating the selected one etc...
-      if (this.detectJoinSetFilterInGroups(newDashboardGroups)) {
-        for (var i = 0; i < newDashboardGroups.length; i++) {
-          groupIndexesToUpdateCountsOn.push(i);
-        }
-        return {
-          indexes: groupIndexesToUpdateCountsOn,
-          reasons: ['There is a join_set filter so lets update all groups']
-        };
-      }
-
-      return {
-        indexes: groupIndexesToUpdateCountsOn,
-        reasons: reasons
-      };
     };
 
     /*
@@ -453,12 +417,18 @@ define(function (require) {
           {
             title:
             priority:
-            dashboards:
-            selected:
-            _selected:
+            dashboards: [
+              {
+                id:
+                title:
+                onSelect:
+                onOpenClose:
+              },
+              ...
+            ]
             iconCss:
             iconUrl:
-            onClick:
+            selected: dashboard
           },
           ...
         ]
@@ -467,13 +437,10 @@ define(function (require) {
      *
      */
     DashboardGroupHelper.prototype.computeGroups = function () {
-      var self = this;
-      var currentDashboardId = urlHelper.getCurrentDashboardId();
-      return self._computeGroupsFromSavedDashboardGroups(currentDashboardId).then(function (dashboardGroups1) {
-        return self._addAdditionalGroupsFromSavedDashboards(currentDashboardId, dashboardGroups1);
-      });
+      let currentDashboardId = kibiState._getCurrentDashboardId();
+      return this._computeGroupsFromSavedDashboardGroups(currentDashboardId)
+      .then((dashboardGroups1) => this._addAdditionalGroupsFromSavedDashboards(currentDashboardId, dashboardGroups1));
     };
-
 
     return new DashboardGroupHelper();
   };

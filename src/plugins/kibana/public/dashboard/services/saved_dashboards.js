@@ -1,7 +1,7 @@
 define(function (require) {
-  var module = require('ui/modules').get('app/dashboard');
-  var _ = require('lodash');
-  var Scanner = require('ui/utils/scanner');
+  const module = require('ui/modules').get('app/dashboard');
+  const _ = require('lodash');
+  const Scanner = require('ui/utils/scanner');
 
   // bring in the factory
   require('plugins/kibana/dashboard/services/_saved_dashboard');
@@ -14,12 +14,10 @@ define(function (require) {
     title: 'dashboards'
   });
 
-  // This is the only thing that gets injected into controllers
-  module.service('savedDashboards', function (Promise, SavedDashboard, kbnIndex, es, kbnUrl, Private) {
-
-    var cache = Private(require('ui/kibi/helpers/cache_helper')); // kibi: added to cache requests for saved searches
-
-    var scanner = new Scanner(es, {
+  // kibi: added savedObjectsAPI dep
+  module.service('savedDashboards', function (Promise, SavedDashboard, kbnIndex, es, savedObjectsAPI, kbnUrl, Private) {
+    const cache = Private(require('ui/kibi/helpers/cache_helper')); // kibi: added to cache requests for saved searches
+    const scanner = new Scanner(es, {
       index: kbnIndex,
       type: 'dashboard'
     });
@@ -59,52 +57,42 @@ define(function (require) {
     };
 
     this.mapHits = function (hit) {
-      var source = hit._source;
+      const source = hit._source;
       source.id = hit._id;
       source.url = this.urlFor(hit._id);
       return source;
     };
 
+    // kibi: get dashboards from the Saved Object API.
     this.find = function (searchString, size = 100) {
-      var body;
-      if (searchString) {
-        body = {
-          query: {
-            simple_query_string: {
-              query: searchString + '*',
-              fields: ['title^3', 'description'],
-              default_operator: 'AND'
-            }
-          }
-        };
-      } else {
-        body = { query: {match_all: {}}};
+      if (!searchString) {
+        searchString = null;
       }
 
-      // kibi: get from cahce
-      var cacheKey = 'savedDashboards' + (searchString ? searchString : '');
+      const cacheKey = 'savedDashboards' + (searchString ? searchString : '');
       if (cache && cache.get(cacheKey)) {
         return Promise.resolve(cache.get(cacheKey));
       }
 
-      return es.search({
+      return savedObjectsAPI.search({
         index: kbnIndex,
-        type: 'dashboard',
-        body: body,
+        type: this.type,
+        q: searchString,
         size: size
       })
       .then((resp) => {
-        var ret = {
+        const result = {
           total: resp.hits.total,
           hits: resp.hits.hits.map((hit) => this.mapHits(hit))
         };
 
-        // kibi: put into cache
         if (cache) {
-          cache.set(cacheKey, ret);
+          cache.set(cacheKey, result);
         }
-        return ret;
+        return result;
       });
     };
+    // kibi: end
+
   });
 });

@@ -7,11 +7,25 @@ var expect = require('expect.js');
 require('../kibi_select');
 
 var $rootScope;
+var $scope;
 var $elem;
 
-var init = function (initValue, items, required, modelDisabled, modelRequired, include, filter, filterOptions) {
+var init = function ({
+  initValue = null,
+  items,
+  required = false,
+  modelDisabled = null,
+  modelRequired = null,
+  include = null,
+  filter = null,
+  options = null
+}) {
   // Load the application
-  ngMock.module('kibana');
+  ngMock.module('kibana', function ($provide) {
+    $provide.constant('elasticsearchPlugins', ['siren-join']);
+    $provide.constant('kbnDefaultAppId', '');
+    $provide.constant('kibiDefaultDashboardTitle', '');
+  });
 
   // Create the scope
   ngMock.inject(function (Private, _$rootScope_, $compile, Promise) {
@@ -19,9 +33,9 @@ var init = function (initValue, items, required, modelDisabled, modelRequired, i
     $rootScope.model = initValue;
 
     var selectHelper = Private(require('ui/kibi/directives/kibi_select_helper'));
-    $rootScope.action = sinon.stub(selectHelper, 'getQueries').returns(Promise.resolve(items));
+    $rootScope.action = sinon.stub(selectHelper, 'getSavedSearches').returns(Promise.resolve(items));
 
-    var select = '<kibi-select ng-model="model" object-type="query"';
+    var select = '<kibi-select ng-model="model" object-type="search"';
     if (required) {
       select += ' required';
     }
@@ -39,14 +53,14 @@ var init = function (initValue, items, required, modelDisabled, modelRequired, i
       $rootScope.filter = filter;
       select += ' filter="filter"';
 
-      if (filterOptions !== null && filterOptions !== undefined) {
-        $rootScope.filterOptions = filterOptions;
-        select += ' filter-options="' + filterOptions + '"';
+      if (options !== null && options !== undefined) {
+        $rootScope.options = options;
+        select += ' options="' + options + '"';
       }
     }
-    $elem = angular.element(select + '></kibi-select>');
 
-    $compile($elem)($rootScope);
+    $elem = $compile(select + '></kibi-select>')($rootScope);
+    $scope = $elem.isolateScope();
     $elem.scope().$digest();
   });
 };
@@ -59,19 +73,25 @@ describe('Kibi Directives', function () {
 
     function firstElementIsEmpty(options) {
       expect(options[0]).to.be.ok();
-      expect(options[0].value).to.be('null');  // after porting to 4.4 it changed from '' to 'null'
+      expect(options[0].value).to.be('');
       expect(options[0].text).to.be('');
     }
 
     it('should populate the select options with items returned from the object-type action', function () {
-      var items = [ { value: 1, label: 'joe' } ];
+      var items = [
+        {
+          value: 1,
+          id: 1,
+          label: 'joe'
+        }
+      ];
 
-      init(null, items);
+      init({ items });
 
       expect($rootScope.action.called).to.be.ok();
 
       var select = $elem.find('select');
-      expect(select[0].required).to.be(false);
+      expect($scope.required).to.be(false);
       expect(select[0].disabled).to.be(false);
 
       var options = $elem.find('option');
@@ -85,58 +105,140 @@ describe('Kibi Directives', function () {
     });
 
     it('should populate the select options with required on', function () {
-      var items = [ { value: 1, label: 'joe' } ];
+      var items = [
+        {
+          value: 1,
+          id: 1,
+          label: 'joe'
+        }
+      ];
 
-      init(1, items, true);
+      init({ initValue: 1, items, required: true });
 
       expect($rootScope.action.called).to.be.ok();
 
-      var select = $elem.find('select');
-      expect(select[0].required).to.be(true);
+      expect($scope.required).to.be(true);
 
       var options = $elem.find('option');
-      expect(options).to.have.length(1);
+      expect(options).to.have.length(2);
 
-      expect(options[0]).to.be.ok();
-      expect(options[0].value).to.be('1');
-      expect(options[0].text).to.be('joe');
+      firstElementIsEmpty(options);
+
+      expect(options[1]).to.be.ok();
+      expect(options[1].value).to.be('1');
+      expect(options[1].text).to.be('joe');
     });
 
     it('should require an option to be selected 1', function () {
-      var items = [ { value: 1, label: 'joe' } ];
+      var items = [
+        {
+          value: 1,
+          id: 1,
+          label: 'joe'
+        }
+      ];
 
-      init(null, items, null, null, true);
+      init({ items, modelRequired: true });
 
       expect($rootScope.action.called).to.be.ok();
-      var select = $elem.find('select');
-      expect(select[0].required).to.be(true);
+      expect($scope.required).to.be(true);
     });
 
     it('should require an option to be selected 2', function () {
-      var items = [ { value: 1, label: 'joe' } ];
+      var items = [
+        {
+          value: 1,
+          id: 1,
+          label: 'joe'
+        }
+      ];
 
-      init(null, items, true);
+      init({ items, required: true });
 
       expect($rootScope.action.called).to.be.ok();
-      var select = $elem.find('select');
-      expect(select[0].required).to.be(true);
+      expect($scope.required).to.be(true);
     });
 
     it('should disable the select menu', function () {
-      var items = [ { value: 1, label: 'joe' } ];
+      var items = [
+        {
+          value: 1,
+          id: 1,
+          label: 'joe'
+        }
+      ];
 
-      init(null, items, null, true);
+      init({ items, modelDisabled: true });
 
-      expect($rootScope.action.called).to.be.ok();
+      // do not try to render anything
+      expect($rootScope.action.called).to.not.be.ok();
       var select = $elem.find('select');
       expect(select[0].disabled).to.be(true);
     });
 
-    it('should add the include to the select options XXX', function () {
-      var items = [ { value: 1, label: 'joe' } ];
-      var include = [ { value: 2, label: 'toto' } ];
+    describe('should keep the initial required parameter when enabling a disabled kibi-select', function () {
+      it('should be required', function () {
+        var items = [
+          {
+            value: 1,
+            id: 1,
+            label: 'joe'
+          }
+        ];
 
-      init(null, items, null, null, null, include);
+        init({ items, required: true, modelDisabled: true });
+
+        // do not try to render anything
+        expect($rootScope.action.called).to.not.be.ok();
+        var select = $elem.find('select');
+        expect(select[0].disabled).to.be(true);
+
+        $scope.modelDisabled = false;
+        $scope.$digest();
+        expect($rootScope.action.called).to.be.ok();
+        expect($scope.required).to.be(true);
+      });
+
+      it('should not be required', function () {
+        var items = [
+          {
+            value: 1,
+            id: 1,
+            label: 'joe'
+          }
+        ];
+
+        init({ items, modelDisabled: true });
+
+        // do not try to render anything
+        expect($rootScope.action.called).to.not.be.ok();
+        var select = $elem.find('select');
+        expect(select[0].disabled).to.be(true);
+
+        $scope.modelDisabled = false;
+        $scope.$digest();
+        expect($rootScope.action.called).to.be.ok();
+        expect($scope.required).to.be(false);
+      });
+    });
+
+    it('should add the include to the select options XXX', function () {
+      var items = [
+        {
+          value: 2,
+          id: 2,
+          label: 'joe'
+        }
+      ];
+      var include = [
+        {
+          value: 1,
+          id: 1,
+          label: 'toto'
+        }
+      ];
+
+      init({ items, include });
 
       expect($rootScope.action.called).to.be.ok();
       var options = $elem.find('option');
@@ -146,18 +248,40 @@ describe('Kibi Directives', function () {
 
       expect(options[1]).to.be.ok();
       expect(options[1].value).to.be('2');
-      expect(options[1].text).to.be('toto');
+      expect(options[1].text).to.be('joe');
 
       expect(options[2]).to.be.ok();
       expect(options[2].value).to.be('1');
-      expect(options[2].text).to.be('joe');
+      expect(options[2].text).to.be('toto');
     });
 
-    it('should add the include to the select options and take care of duplicates', function () {
-      var items = [ { value: 1, label: 'joe' }, { value: 3, label: 'tata' } ];
-      var include = [ { value: 1, label: 'joe' }, { value: 2, label: 'toto' } ];
+    it('should remove duplicates when adding the include to the select options', function () {
+      var items = [
+        {
+          value: 1,
+          id: 1,
+          label: 'joe'
+        },
+        {
+          value: 3,
+          id: 3,
+          label: 'tata'
+        }
+      ];
+      var include = [
+        {
+          value: 1,
+          id: 1,
+          label: 'joe'
+        },
+        {
+          value: 2,
+          id: 2,
+          label: 'toto'
+        }
+      ];
 
-      init(null, items, null, null, null, include);
+      init({ items, include });
 
       expect($rootScope.action.called).to.be.ok();
       var options = $elem.find('option');
@@ -170,17 +294,28 @@ describe('Kibi Directives', function () {
       expect(options[1].text).to.be('joe');
 
       expect(options[2]).to.be.ok();
-      expect(options[2].value).to.be('2');
-      expect(options[2].text).to.be('toto');
+      expect(options[2].value).to.be('3');
+      expect(options[2].text).to.be('tata');
 
       expect(options[3]).to.be.ok();
-      expect(options[3].value).to.be('3');
-      expect(options[3].text).to.be('tata');
+      expect(options[3].value).to.be('2');
+      expect(options[3].text).to.be('toto');
     });
 
-    it('should exclude items from the select', function () {
-      var items = [ { value: 1, label: 'joe' }, { value: 2, label: 'toto' } ];
-      var filter = function (id, item) {
+    it('should exclude items from the select based on item value', function () {
+      var items = [
+        {
+          value: 1,
+          id: 1,
+          label: 'joe'
+        },
+        {
+          value: 2,
+          id: 2,
+          label: 'toto'
+        }
+      ];
+      var filter = function (item, options, selected) {
         if (item) {
           return item.value === 1;
         } else {
@@ -188,7 +323,7 @@ describe('Kibi Directives', function () {
         }
       };
 
-      init(null, items, null, null, null, null, filter);
+      init({ items, filter });
 
       expect($rootScope.action.called).to.be.ok();
       var options = $elem.find('option');
@@ -201,9 +336,20 @@ describe('Kibi Directives', function () {
       expect(options[1].text).to.be('toto');
     });
 
-    it('should exclude items from the select based on the filterOptions', function () {
-      var items = [ { value: 1, label: 'joe' }, { value: 2, label: 'toto' } ];
-      var filter = function (id, item, options) {
+    it('should exclude items from the select based on the filter options', function () {
+      var items = [
+        {
+          value: 1,
+          id: 1,
+          label: 'joe'
+        },
+        {
+          value: 2,
+          id: 2,
+          label: 'toto'
+        }
+      ];
+      var filter = function (item, options) {
         if (item) {
           return item.label === options.name;
         } else {
@@ -211,7 +357,7 @@ describe('Kibi Directives', function () {
         }
       };
 
-      init(null, items, null, null, null, null, filter, '{name: \'joe\'}');
+      init({ items, filter, options: '{name: \'joe\'}' });
 
       expect($rootScope.action.called).to.be.ok();
       var options = $elem.find('option');
@@ -225,17 +371,34 @@ describe('Kibi Directives', function () {
     });
 
     it('should exclude some items and include others from the select options', function () {
-      var items = [ { value: 1, label: 'joe' }, { value: 2, label: 'toto' } ];
-      var filter = function (id, item) {
+      var items = [
+        {
+          value: 1,
+          id: 1,
+          label: 'joe'
+        },
+        {
+          value: 2,
+          id: 2,
+          label: 'toto'
+        }
+      ];
+      var filter = function (item, options, selected) {
         if (item) {
           return item.value === 1;
         } else {
           return false;
         }
       };
-      var include = [ { value: 3, label: 'tata' } ];
+      var include = [
+        {
+          id: 3,
+          value: 3,
+          label: 'tata'
+        }
+      ];
 
-      init(null, items, null, null, null, include, filter);
+      init({ items, include, filter });
 
       expect($rootScope.action.called).to.be.ok();
       var options = $elem.find('option');
@@ -253,17 +416,29 @@ describe('Kibi Directives', function () {
     });
 
     it('should exclude items that were explicitly included', function () {
-      var items = [ { value: 2, label: 'toto' } ];
-      var filter = function (id, item) {
+      var items = [
+        {
+          value: 2,
+          id: 2,
+          label: 'toto'
+        }
+      ];
+      var filter = function (item, options, selected) {
         if (item) {
           return item.value === 1;
         } else {
           return false;
         }
       };
-      var include = [ { value: 1, label: 'joe' } ];
+      var include = [
+        {
+          value: 1,
+          id: 1,
+          label: 'joe'
+        }
+      ];
 
-      init(null, items, null, null, null, include, filter);
+      init({ items, include, filter });
 
       expect($rootScope.action.called).to.be.ok();
       var options = $elem.find('option');
@@ -277,44 +452,96 @@ describe('Kibi Directives', function () {
     });
 
     it('should automatically select the element if it is the only one and the select is required', function () {
-      var items = [ { value: 2, label: 'toto' } ];
+      var items = [
+        {
+          value: 2,
+          id: 2,
+          label: 'toto'
+        }
+      ];
 
-      init(2, items, true);
-
-      var options = $elem.find('option');
-      expect(options).to.have.length(1);
-
-      expect(options[0].defaultSelected).to.be(true);
-      expect(options[0].value).to.be('2');
-    });
-
-    xit('should NOT automatically select the element if it is the only one and the select is optional', function () {
-      var items = [ { value: 2, label: 'toto' } ];
-
-      init(null, items);
+      init({ initValue: 2, items, required: true });
 
       var options = $elem.find('option');
       expect(options).to.have.length(2);
-      expect(options[0].defaultSelected).to.be(false); // TODO: <- here it is not true
-      expect(options[0].value).to.be('null'); // after porting to 4.4 it changed from '' to 'null'
+
+      firstElementIsEmpty(options);
+
+      expect(options[1].defaultSelected).to.be(true);
+      expect(options[1].value).to.be('2');
+    });
+
+    it('should NOT automatically select the element if it is the only one and the select is optional', function () {
+      var items = [
+        {
+          value: 2,
+          id: 2,
+          label: 'toto'
+        }
+      ];
+
+      init({ items });
+
+      var options = $elem.find('option');
+      expect(options).to.have.length(2);
+      expect(options[0].defaultSelected).to.be(true);
+      expect(options[0].value).to.be('');
       expect(options[1].defaultSelected).to.be(false);
       expect(options[1].value).to.be('2');
     });
 
     it('should set analyzedField to true if the selected item is analyzed', function () {
-      var items = [ { value: 2, label: 'toto', options: { analyzed: true } } ];
+      var items = [
+        {
+          value: 1,
+          id: 1,
+          label: 'tata'
+        },
+        {
+          value: 2,
+          id: 2,
+          label: 'toto',
+          options: {
+            analyzed: true
+          }
+        }
+      ];
 
-      init(2, items);
-      expect($elem.isolateScope().analyzedField).to.be(true);
+      init({ initValue: 2, items });
+      expect($scope.analyzedField).to.be(true);
+    });
+
+    it('should set analyzedField to true if the auto-selected item is analyzed', function () {
+      var items = [
+        {
+          value: 2,
+          id: 2,
+          label: 'toto',
+          options: {
+            analyzed: true
+          }
+        }
+      ];
+
+      init({ items, required: true });
+      expect($scope.analyzedField).to.be(true);
     });
 
     it('should select the option that is already in the ngModel controller', function () {
-      var items = [ { value: 2, label: 'toto', options: { analyzed: true } } ];
+      var items = [
+        {
+          value: 2,
+          id: 2,
+          label: 'toto',
+          options: {
+            analyzed: true
+          }
+        }
+      ];
 
-      init(2, items);
+      init({ initValue: 2, items });
 
-      var ngModel = $elem.controller('ngModel');
-      expect(ngModel.$valid).to.be(true);
+      expect($scope.isInvalid()).to.be(false);
 
       var options = $elem.find('option');
       expect(options).to.have.length(2);
@@ -324,12 +551,86 @@ describe('Kibi Directives', function () {
     });
 
     it('should set model as invalid if empty and select is required', function () {
-      var items = [ { value: 2, label: 'toto', options: { analyzed: true } } ];
+      var items = [
+        {
+          value: 1,
+          id: 1,
+          label: 'tata'
+        },
+        {
+          value: 2,
+          id: 2,
+          label: 'toto'
+        }
+      ];
 
-      init('', items, true);
+      init({ items, required: true });
 
-      var ngModel = $elem.controller('ngModel');
-      expect(ngModel.$valid).to.be(false);
+      expect($scope.isInvalid()).to.be(true);
+    });
+
+    it('should sort the items by label', function () {
+      var items = [
+        {
+          value: 1,
+          id: 1,
+          label: 'bbb'
+        },
+        {
+          value: 2,
+          id: 2,
+          label: 'aaa'
+        }
+      ];
+
+      init({ items });
+
+      expect($rootScope.action.called).to.be.ok();
+
+      var options = $elem.find('option');
+      expect(options).to.have.length(3); // the joe element plus the null one
+
+      firstElementIsEmpty(options);
+
+      expect(options[1]).to.be.ok();
+      expect(options[1].value).to.be('2');
+      expect(options[1].text).to.be('aaa');
+      expect(options[2]).to.be.ok();
+      expect(options[2].value).to.be('1');
+      expect(options[2].text).to.be('bbb');
+    });
+
+    it('should sort the included items too', function () {
+      var items = [
+        {
+          value: 2,
+          id: 2,
+          label: 'aaa'
+        }
+      ];
+      var include = [
+        {
+          value: 1,
+          id: 1,
+          label: 'bbb'
+        }
+      ];
+
+      init({ items, include });
+
+      expect($rootScope.action.called).to.be.ok();
+      var options = $elem.find('option');
+      expect(options).to.have.length(3);
+
+      firstElementIsEmpty(options);
+
+      expect(options[1]).to.be.ok();
+      expect(options[1].value).to.be('2');
+      expect(options[1].text).to.be('aaa');
+
+      expect(options[2]).to.be.ok();
+      expect(options[2].value).to.be('1');
+      expect(options[2].text).to.be('bbb');
     });
   });
 });

@@ -1,21 +1,22 @@
 define(function (require) {
   return function AggTypeMetricPercentileRanksProvider(Private) {
-    var _ = require('lodash');
+    let _ = require('lodash');
 
-    var MetricAggType = Private(require('ui/agg_types/metrics/MetricAggType'));
-    var getResponseAggConfigClass = Private(require('ui/agg_types/metrics/getResponseAggConfigClass'));
-    var fieldFormats = Private(require('ui/registry/field_formats'));
+    let MetricAggType = Private(require('ui/agg_types/metrics/MetricAggType'));
+    let getResponseAggConfigClass = Private(require('ui/agg_types/metrics/getResponseAggConfigClass'));
+    let fieldFormats = Private(require('ui/registry/field_formats'));
 
-    var valuesEditor = require('ui/agg_types/controls/percentile_ranks.html');
+    let valuesEditor = require('ui/agg_types/controls/percentile_ranks.html');
     // required by the values editor
     require('ui/number_list');
 
-    var valueProps = {
+    let valueProps = {
       makeLabel: function () {
-        var field = this.field();
-        var format = (field && field.format) || fieldFormats.getDefaultInstance('number');
+        let field = this.field();
+        let format = (field && field.format) || fieldFormats.getDefaultInstance('number');
+        const label = this.params.customLabel || this.fieldDisplayName();
 
-        return 'Percentile rank ' + format.convert(this.key, 'text') + ' of "' + this.fieldDisplayName() + '"';
+        return 'Percentile rank ' + format.convert(this.key, 'text') + ' of "' + label + '"';
       }
     };
 
@@ -37,7 +38,7 @@ define(function (require) {
         }
       ],
       getResponseAggs: function (agg) {
-        var ValueAggConfig = getResponseAggConfigClass(agg, valueProps);
+        let ValueAggConfig = getResponseAggConfigClass(agg, valueProps);
 
         return agg.params.values.map(function (value) {
           return new ValueAggConfig(value);
@@ -49,7 +50,7 @@ define(function (require) {
       getValue: function (agg, bucket) {
         // values for 1, 5, and 10 will come back as 1.0, 5.0, and 10.0 so we
         // parse the keys and respond with the value that matches
-        return _.find(bucket[agg.parentId].values, function (value, key) {
+        return _.find(bucket[agg.parentId] && bucket[agg.parentId].values, function (value, key) {
           return agg.key === parseFloat(key);
         }) / 100;
       }

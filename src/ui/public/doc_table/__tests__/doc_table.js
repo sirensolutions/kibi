@@ -1,28 +1,28 @@
-var angular = require('angular');
-var expect = require('expect.js');
-var $ = require('jquery');
-var _ = require('lodash');
-var sinon = require('auto-release-sinon');
-var searchResponse = require('fixtures/search_response');
-var ngMock = require('ngMock');
+let angular = require('angular');
+let expect = require('expect.js');
+let $ = require('jquery');
+let _ = require('lodash');
+let sinon = require('auto-release-sinon');
+let searchResponse = require('fixtures/search_response');
+let ngMock = require('ngMock');
 
 // Load the kibana app dependencies.
 require('ui/private');
 require('ui/doc_table');
 
 
-var $parentScope;
+let $parentScope;
 
 
-var $scope;
+let $scope;
 
 
-var $timeout;
+let $timeout;
 
 
-var searchSource;
+let searchSource;
 
-var init = function ($elem, props) {
+let init = function ($elem, props) {
   ngMock.inject(function ($rootScope, $compile, _$timeout_) {
     $timeout = _$timeout_;
     $parentScope = $rootScope;
@@ -40,13 +40,13 @@ var init = function ($elem, props) {
   });
 };
 
-var destroy = function () {
+let destroy = function () {
   $scope.$destroy();
   $parentScope.$destroy();
 };
 
 describe('docTable', function () {
-  var $elem;
+  let $elem;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(function () {

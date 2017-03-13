@@ -59,14 +59,38 @@ define(function (require) {
 
       var dashboardGroup = $scope.dashboardGroup = $route.current.locals.dashboardGroup;
 
-      $scope.filter = function (id, item) {
-        var dashboard = item.value;
-        var allDashboards = _($scope.dashboardGroup.dashboards).pluck('id');
+      var allDashboardsGroups = [];
+
+      savedDashboardGroups.find().then(function (data) {
+        allDashboardsGroups = data.hits;
+      });
+
+      $scope.filter = function (item, options, selected) {
+        if (selected) {
+          return false;
+        }
+
+        var dashboard = item && item.value;
+        var allDashboardIds = _($scope.dashboardGroup.dashboards).pluck('id');
 
         if (!dashboard) {
-          return allDashboards.value();
+          return allDashboardIds.value();
         }
-        return allDashboards.compact().contains(dashboard);
+
+        var toRemove = false;
+        _.each(allDashboardsGroups, function (group) {
+          _.each(group.dashboards,function (dash) {
+            if (dash.id === dashboard) {
+              toRemove = true;
+              return false;
+            }
+          });
+          if (toRemove) {
+            return false;
+          }
+        });
+
+        return toRemove || allDashboardIds.compact().contains(dashboard);
       };
 
       $scope.submit = function () {
@@ -82,15 +106,6 @@ define(function (require) {
         });
       };
 
-      $scope.delete = function () {
-        if ($window.confirm('Are you sure about deleting [' + dashboardGroup.title + ']')) {
-          dashboardGroup.delete().then(function (resp) {
-            $rootScope.$emit('kibi:dashboardgroup:changed', resp);
-            kbnUrl.change('settings/dashboardgroups', {});
-          });
-        }
-      };
-
       $scope.newDashboardGroup = function () {
         kbnUrl.change('settings/dashboardgroups', {});
       };
@@ -102,25 +117,6 @@ define(function (require) {
       }
       $scope.nbDashboards = 0;
       getNumberOfDashboards();
-
-      $scope.clone = function () {
-        savedDashboardGroups.get().then(function (savedDashboardGroupClone) {
-          savedDashboardGroupClone.id = dashboardGroup.id + '-clone';
-          savedDashboardGroupClone.title = dashboardGroup.title + ' clone';
-          savedDashboardGroupClone.description = dashboardGroup.description;
-          savedDashboardGroupClone.dashboards = dashboardGroup.dashboards;
-          savedDashboardGroupClone.priority = dashboardGroup.priority + 1;
-          savedDashboardGroupClone.iconCss = dashboardGroup.iconCss;
-          savedDashboardGroupClone.iconUrl = dashboardGroup.iconUrl;
-
-          savedDashboardGroupClone.save().then(function (resp) {
-            notify.info('Dashboard Group ' + savedDashboardGroupClone.title + ' was successfuly cloned');
-            $rootScope.$emit('kibi:dashboardgroup:changed', resp);
-            kbnUrl.change('settings/dashboardgroups/' + kibiUtils.slugifyId(savedDashboardGroupClone.id));
-          });
-
-        });
-      };
 
       function addTitle() {
         var promises = _($scope.dashboardGroup.dashboards).filter(function (d) {

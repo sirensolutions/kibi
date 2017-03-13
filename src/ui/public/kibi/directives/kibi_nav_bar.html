@@ -1,4 +1,4 @@
-<nav>
+<nav ng-class="{splitTabs: splitTabs}">
 
   <div class="tab-cell">
     <div role="tabpanel" class="tab-container">
@@ -6,42 +6,56 @@
       <ul class="nav nav-tabs" style="border-bottom: none;">
         <li role="presentation"
             ng-class="{active: group.active === true}"
-            ng-repeat="group in dashboardGroups" ng-show="!group.hide">
-          <a ng-click="group.onClick()">
-            <i  ng-if="group.iconCss" class="icon {{group.iconCss}}"></i>
+            ng-repeat="group in dashboardGroups | orderBy: 'priority'"
+            data-test-subj={{group.title}}
+            ng-show="!group.hide">
+          <a ng-click="group.selected.onSelect(dashboardGroups)"
+             ng-class="{filter: group.selected.filterIconMessage, icon: group.iconCss}">
+            <i ng-if="group.iconCss" class="icon {{group.iconCss}}"></i>
             <img class="icon" ng-if="group.iconUrl" ng-src="{{group.iconUrl}}"/>
             {{group.title}}
-            <span ng-if="group.active && group.dashboards.length > 1">
-              <select
-                ng-model="group.selected"
-                ng-change="group.selected.onClick()"
-                ng-options="dashboard.title for dashboard in group.dashboards track by dashboard.id"
-                kibi-stop-click-event>
-              </select>
+            <span class="dashboard-select"
+                  ng-if="group.active && group.dashboards.length > 1"
+                  kibi-menu-template="dashboardSelectData.template"
+                  kibi-menu-template-data="group.dashboards"
+                  kibi-menu-template-context="dashboardGroups"
+                  kibi-menu-template-on-show-fn="dashboardSelectData.onOpen()">
+              <span ng-bind="group.selected.title"></span>
+              <!-- compare count to undefined to show zero -->
+              <span ng-if="group.selected.count !== undefined"> ({{group.selected.count}})</span>
+              <span ng-if="group.selected.filterIconMessage" aria-hidden="true" data-toggle="tooltip"
+                    data-placement="bottom" title="{{group.selected.filterIconMessage}}">
+                <i class="fa fa-filter"/>
+              </span>
+              <span ng-if="group.selected.isPruned" aria-hidden="true" data-toggle="tooltip"
+                    data-placement="bottom"
+                    title="Count may be lower than the actual value because a join operation was pruned"> *
+              </span>
+              <i class="fa fa-sort"/>
             </span>
-            <span ng-if="group.count != undefined">({{ group.count }})</span>
+
+            <span ng-if="!group.active || (group.active && group.dashboards.length == 1)">
+              <!-- compare count to undefined to show zero -->
+              <br ng-if="group.selected.count !== undefined && splitTabs"/>
+              <span ng-if="group.selected.count !== undefined" class="fischio">
+                ({{ group.selected.count }})
+              </span>
+              <span ng-if="group.selected.filterIconMessage" class="filter-icon">
+                <i class="fa fa-filter" aria-hidden="true" data-toggle="tooltip"
+                data-placement="bottom" title="{{ group.selected.filterIconMessage }}"/>
+              </span>
+              <span ng-if="group.selected.isPruned" aria-hidden="true" data-toggle="tooltip"
+                data-placement="bottom" title="Count may be lower than the actual value because a join operation was pruned"> *</span>
+            </span>
           </a>
         </li>
-
-        <li role="presentation"
-          ng-if="relationalFilterVisible"
-          ng-class="{active: relationalFilterPanelOpened === true}">
-          <a ng-click="openRelationalFilterPanel()"
-            style="padding: 4px 9px; margin: 7px 0 0 2px; border: none; border-radius: 4px;" >
-            <span class="fa-stack fa-lg">
-              <i class="fa fa-arrows-h fa-stack-1x"></i>
-              <i class="fa fa-map-o fa-stack-1x"></i>
-            </span>
-          </a>
-        </li>
-
       </ul>
     </div>
   </div>
 
-  <div class="tab-scroller">
-    <button ng-mouseup="scrollTabs(false)" ng-mousedown="scrollTabs(1)" ng-disabled="tabScrollerState[0]"><i class="fa fa-caret-left"></i></button>
-    <button ng-mouseup="scrollTabs(false)" ng-mousedown="scrollTabs(-1)" ng-disabled="tabScrollerState[1]"><i class="fa fa-caret-right"></i></button>
+  <div class="tab-scroller" ng-show="tabScrollerVisible">
+    <button ng-mouseup="scrollTabs(false)" ng-mousedown="scrollTabs(1)" ng-disabled="tabScrollerState.leftArrow"><i class="fa fa-caret-left"></i></button>
+    <button ng-mouseup="scrollTabs(false)" ng-mousedown="scrollTabs(-1)" ng-disabled="tabScrollerState.rightArrow"><i class="fa fa-caret-right"></i></button>
   </div>
 
   <kibi-dashboard-toolbar ng-show="!appEmbedded"></kibi-dashboard-toolbar>

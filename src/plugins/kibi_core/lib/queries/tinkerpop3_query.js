@@ -22,7 +22,7 @@ TinkerPop3Query.prototype = _.create(AbstractQuery.prototype, {
  */
 TinkerPop3Query.prototype.checkIfItIsRelevant = function (options) {
   if (this._checkIfSelectedDocumentRequiredAndNotPresent(options)) {
-    return Promise.reject('No elasticsearch document selected while required by the activation query. [' + this.config.id + ']');
+    return Promise.reject('No elasticsearch document selected while required by the tinkerpop query. [' + this.config.id + ']');
   }
 
   return Promise.resolve(true);
@@ -32,10 +32,6 @@ TinkerPop3Query.prototype.checkIfItIsRelevant = function (options) {
 TinkerPop3Query.prototype.fetchResults = function (options, onlyIds, idVariableName) {
   var self = this;
   var start = new Date().getTime();
-
-  if (self._checkIfSelectedDocumentRequiredAndNotPresent(options)) {
-    return self._returnAnEmptyQueryResultsPromise('No data because the query require entityURI');
-  }
 
   var gremlinUrl = this.config.datasource.datasourceClazz.datasource.datasourceParams.url;
   var ca = this.server.config().get('kibi_core.gremlin_server.ssl.ca');
@@ -67,18 +63,14 @@ TinkerPop3Query.prototype.fetchResults = function (options, onlyIds, idVariableN
       }
     }
 
-    return Promise.all([self.queryHelper.fetchDocuments('config'),
-    self.queryHelper.fetchDocuments('index-pattern')]).then(function (results) {
-      let configHits = results[0];
-      let indexPatternHits = results[1];
+    return Promise.all([
+      self.queryHelper.fetchDocuments('config'),
+      self.queryHelper.fetchDocuments('index-pattern')
+    ])
+    .then(function ([ configHits, indexPatternHits ]) {
       var kibiRelations = null;
-      var serverVersion = self.server.config().get('pkg').version;
-      var configDocs = [];
-      if (configHits.hits.total > 0) {
-        configDocs = _.filter(configHits.hits.hits, function (doc) {
-          return doc._id === serverVersion;
-        });
-      }
+      var serverVersion = self.server.config().get('pkg').kibiVersion;
+      var configDocs = configHits.hits.total && _.filter(configHits.hits.hits, '_id', serverVersion) || [];
 
       if (configDocs.length === 0) {
         return Promise.reject(new Error('No config documents found'));
@@ -152,7 +144,7 @@ TinkerPop3Query.prototype.fetchResults = function (options, onlyIds, idVariableN
           'Content-Type': 'application/json; charset=UTF-8'
         },
         json: {
-          query: query,
+          queries: [query],
           relationsIndices: kibiRelationsJson.relationsIndices,
           credentials: options.credentials,
           indexPatterns: indexPatterns,
@@ -165,7 +157,7 @@ TinkerPop3Query.prototype.fetchResults = function (options, onlyIds, idVariableN
 
       return rp(gremlinOptions).then(function (parsed) {
         var data = {
-          result: parsed
+          result: parsed[0]
         };
 
         if (idVariableName) {

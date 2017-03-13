@@ -6,6 +6,26 @@ let path = require('path');
 let utils = require('requirefrom')('src/utils');
 let fromRoot = utils('fromRoot');
 const randomBytes = require('crypto').randomBytes;
+const getData = require('../path').getData;
+import pkg from '../../../src/utils/packageJson';
+
+let uiConfig;
+try {
+  uiConfig = require('../../../test/serverConfig');
+} catch (err) {
+  if (err.code === 'MODULE_NOT_FOUND') {
+    // kibi: make sure karma.port is defined during optimize step
+    // as the "test" folder is no longer present during this step
+    uiConfig = {
+      servers: {
+        karma: {
+          port: 9876
+        }
+      }
+    };
+  }
+}
+
 
 module.exports = () => Joi.object({
   pkg: Joi.object({
@@ -42,7 +62,7 @@ module.exports = () => Joi.object({
     cors: Joi.when('$dev', {
       is: true,
       then: Joi.object().default({
-        origin: ['*://localhost:9876'] // karma test server
+        origin: ['*://localhost:' + uiConfig.servers.karma.port] // karma test server
       }),
       otherwise: Joi.boolean().default(false)
     }),
@@ -87,6 +107,10 @@ module.exports = () => Joi.object({
     initialize: Joi.boolean().default(true)
   }).default(),
 
+  path: Joi.object({
+    data: Joi.string().default(getData())
+  }).default(),
+
   optimize: Joi.object({
     enabled: Joi.boolean().default(true),
     bundleFilter: Joi.string().default('!tests'),
@@ -113,6 +137,25 @@ module.exports = () => Joi.object({
       )
       .default(Joi.ref('$dev')),
     profile: Joi.boolean().default(false)
+  }).default(),
+
+  status: Joi.object({
+    allowAnonymous: Joi.boolean().default(false)
+  }).default(),
+
+  tilemap: Joi.object({
+    url: Joi.string().default(`https://tiles.elastic.co/v1/default/{z}/{x}/{y}.png?my_app_name=kibana&my_app_version=${pkg.version}&elastic_tile_service_tos=agree`),
+    options: Joi.object({
+      attribution: Joi.string().default('© [Elastic Tile Service](https://www.elastic.co/elastic-tile-service)'),
+      minZoom: Joi.number().min(1, 'Must not be less than 1').default(1),
+      maxZoom: Joi.number().default(10),
+      tileSize: Joi.number(),
+      subdomains: Joi.array().items(Joi.string()).single(),
+      errorTileUrl: Joi.string().uri(),
+      tms: Joi.boolean(),
+      reuseTiles: Joi.boolean(),
+      bounds: Joi.array().items(Joi.array().items(Joi.number()).min(2).required()).min(2)
+    }).default()
   }).default()
 
 }).default();

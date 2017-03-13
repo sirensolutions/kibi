@@ -1,27 +1,27 @@
 define(function (require) {
-  var moment = require('moment-timezone');
-  var _ = require('lodash');
+  let moment = require('moment-timezone');
+  let _ = require('lodash');
 
-  return function configDefaultsProvider() {
-    // wraped in provider so that a new instance is given to each app/test
+  return function configDefaultsProvider(kibiEnterpriseEnabled) {
+    // wrapped in provider so that a new instance is given to each app/test
 
-    return {
+    const options = {
       'buildNum': {
         readonly: true
       },
       'query:queryString:options': {
         value: '{ "analyze_wildcard": true }',
-        description: 'Options for the lucene query string parser',
+        description: '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html" target="_blank">Options</a> for the lucene query string parser',
         type: 'json'
       },
       'sort:options': {
         value: '{ "unmapped_type": "boolean" }',
-        description: 'Options the Elasticsearch sort parameter',
+        description: '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-sort.html" target="_blank">Options</a> for the Elasticsearch sort parameter',
         type: 'json'
       },
       'dateFormat': {
         value: 'MMMM Do YYYY, HH:mm:ss.SSS',
-        description: 'When displaying a pretty formatted date, use this format',
+        description: 'When displaying a pretty formatted date, use this <a href="http://momentjs.com/docs/#/displaying/format/" target="_blank">format</a>',
       },
       'dateFormat:tz': {
         value: 'Browser',
@@ -33,7 +33,7 @@ define(function (require) {
         type: 'json',
         value:
           '[\n' +
-          '  ["", "hh:mm:ss.SSS"],\n' +
+          '  ["", "HH:mm:ss.SSS"],\n' +
           '  ["PT1S", "HH:mm:ss"],\n' +
           '  ["PT1M", "HH:mm"],\n' +
           '  ["PT1H",\n' +
@@ -42,9 +42,9 @@ define(function (require) {
           '  ["P1YT", "YYYY"]\n' +
           ']',
         description: 'Values that define the format used in situations where timebased' +
-        ' data is rendered in order, and formatted timestamps should adapt to the' +
-        ' interval between measurements. Keys are' +
-        ' <a href="http://en.wikipedia.org/wiki/ISO_8601#Time_intervals" target="_blank">' +
+          ' data is rendered in order, and formatted timestamps should adapt to the' +
+          ' interval between measurements. Keys are' +
+          ' <a href="http://en.wikipedia.org/wiki/ISO_8601#Time_intervals" target="_blank">' +
         'ISO8601 intervals.</a>'
       },
       'defaultIndex': {
@@ -56,7 +56,7 @@ define(function (require) {
         description: 'Fields that exist outside of _source to merge into our document when displaying it',
       },
       'discover:sampleSize': {
-        value: 500,
+        value: 50, // kibi: in kibi the default is 50
         description: 'The number of rows to show in the table',
       },
       'doc_table:highlight': {
@@ -85,10 +85,10 @@ define(function (require) {
       'visualization:tileMap:maxPrecision': {
         value: 7,
         description: 'The maximum geoHash precision displayed on tile maps: 7 is high, 10 is very high, ' +
-        '12 is the max. ' +
-        '<a href="http://www.elastic.co/guide/en/elasticsearch/reference/current/' +
+          '12 is the max. ' +
+          '<a href="http://www.elastic.co/guide/en/elasticsearch/reference/current/' +
         'search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator" target="_blank">' +
-        'Explanation of cell dimensions</a>',
+          'Explanation of cell dimensions</a>',
       },
       'visualization:tileMap:WMSdefaults': {
         value: JSON.stringify({
@@ -104,7 +104,7 @@ define(function (require) {
           }
         }, null, '  '),
         type: 'json',
-        description: 'Default properties for the WMS map server support in the tile map'
+        description: 'Default <a href="http://leafletjs.com/reference.html#tilelayer-wms" target="_blank">properties</a> for the WMS map server support in the tile map'
       },
       'visualization:colorMapping': {
         type: 'json',
@@ -159,22 +159,27 @@ define(function (require) {
       'format:number:defaultPattern': {
         type: 'string',
         value: '0,0.[000]',
-        description: 'Default numeral format for the "number" format'
+        description: 'Default <a href="http://numeraljs.com/" target="_blank">numeral format</a> for the "number" format'
       },
       'format:bytes:defaultPattern': {
         type: 'string',
         value: '0,0.[000]b',
-        description: 'Default numeral format for the "bytes" format'
+        description: 'Default <a href="http://numeraljs.com/" target="_blank">numeral format</a> for the "bytes" format'
       },
       'format:percent:defaultPattern': {
         type: 'string',
         value: '0,0.[000]%',
-        description: 'Default numeral format for the "percent" format'
+        description: 'Default <a href="http://numeraljs.com/" target="_blank">numeral format</a> for the "percent" format'
       },
       'format:currency:defaultPattern': {
         type: 'string',
         value: '($0,0.[00])',
-        description: 'Default numeral format for the "currency" format'
+        description: 'Default <a href="http://numeraljs.com/" target="_blank">numeral format</a> for the "currency" format'
+      },
+      'savedObjects:perPage': {
+        type: 'number',
+        value: 5,
+        description: 'Number of objects to show per page in the load dialog'
       },
       'timepicker:timeDefaults': {
         type: 'json',
@@ -202,24 +207,41 @@ define(function (require) {
         value: false,
         description: 'New dashboards use dark theme by default'
       },
+      'state:storeInSessionStorage': {
+        value: false,
+        description: 'The URL can sometimes grow to be too large for some browsers to ' +
+          'handle. To counter-act this we are testing if storing parts of the URL in ' +
+          'sessions storage could help. Please let us know how it goes!'
+      },
+      'notifications:lifetime:error': {
+        value: 300000,
+        description: 'The time in milliseconds which an error notification ' +
+          'will be displayed on-screen for. Setting to Infinity will disable.'
+      },
+      'notifications:lifetime:warning': {
+        value: 10000,
+        description: 'The time in milliseconds which a warning notification ' +
+          'will be displayed on-screen for. Setting to Infinity will disable.'
+      },
+      'notifications:lifetime:info': {
+        value: 5000,
+        description: 'The time in milliseconds which an information notification ' +
+          'will be displayed on-screen for. Setting to Infinity will disable.'
+      },
 
       // kibi: added by kibi
       'kibi:awesomeDemoMode' : {
         value: false,
         description: 'Set to true to suppress all warnings and errors'
       },
-      'kibi:graphExpansionLimit' : {
-        value: 100,
-        description: 'Limit the number of elements to retrieve during the graph expansion'
+      'kibi:splitTabs' : {
+        value: false,
+        description: 'Set to true to split dashboard tabs on two lines'
       },
       'kibi:timePrecision' : {
         type: 'string',
-        value: '',
+        value: 's',
         description: 'Set to generate time filters with certain precision. Possible values are: s, m, h, d, w, M, y'
-      },
-      'kibi:zoom' : {
-        value: 1.0,
-        description: 'Set the zoom level for the whole page. Good if the default size is too big for you. Does not work in Firefox.'
       },
       'kibi:relationalPanel': {
         value: false,
@@ -227,12 +249,8 @@ define(function (require) {
       },
       'kibi:relations': {
         type: 'json',
-        value: '{ "relationsIndices": [], "relationsDashboards": [] }',
+        value: '{ "relationsIndices": [], "relationsDashboards": [], "version": 2 }',
         description: 'Relations between index patterns and dashboards'
-      },
-      'kibi:shieldAuthorizationWarning': {
-        value: true,
-        description: 'Set to true to show all authorization warnings from Shield'
       },
       'kibi:session_cookie_expire': {
         value: 31536000,
@@ -240,5 +258,38 @@ define(function (require) {
       }
       // kibi: end
     };
+
+    // kibi: enterprise options
+    const enterpriseOptions = {
+      'kibi:shieldAuthorizationWarning': {
+        value: true,
+        description: 'Set to true to show all authorization warnings from Shield'
+      },
+      'kibi:graphUseWebGl' : {
+        value: true,
+        description: 'Set to false to disable WebGL rendering'
+      },
+      'kibi:graphUseFiltersFromDashboards' : {
+        value: false,
+        description: 'Set to true to use filters from dashboards on expansion'
+      },
+      'kibi:graphExpansionLimit' : {
+        value: 500,
+        description: 'Limit the number of elements to retrieve during the graph expansion'
+      },
+      'kibi:graphRelationFetchLimit' : {
+        value: 2500,
+        description: 'Limit the number of relations to retrieve after the graph expansion'
+      },
+      'kibi:graphMaxConcurrentCalls' : {
+        value: 15,
+        description: 'Limit the number of concurrent calls done by the Graph Browser'
+      }
+    };
+
+    if (kibiEnterpriseEnabled) {
+      return _.merge({}, options, enterpriseOptions);
+    }
+    return options;
   };
 });

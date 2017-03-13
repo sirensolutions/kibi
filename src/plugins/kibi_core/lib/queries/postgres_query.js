@@ -5,8 +5,6 @@ var pg      = require('pg');
 var AbstractQuery = require('./abstract_query');
 var QueryHelper = require('../query_helper');
 
-var debug = false;
-
 function PostgresQuery(server, queryDefinition, cache) {
   AbstractQuery.call(this, server, queryDefinition, cache);
   this.queryHelper = new QueryHelper(server);
@@ -110,15 +108,16 @@ PostgresQuery.prototype._getType = function (typeNum) {
 };
 
 PostgresQuery.prototype._executeQuery = function (query, connectionString) {
+  var self = this;
   return new Promise(function (fulfill, reject) {
     try {
       pg.connect(connectionString, function (err, client, done) {
         if (err) {
           reject(err);
+          return;
         }
-        if (debug) {
-          console.log('got client');
-        }
+
+        self.logger.debug('got client');
 
         client.query(query, function (err, result) {
           if (err) {
@@ -129,18 +128,15 @@ PostgresQuery.prototype._executeQuery = function (query, connectionString) {
               };
             }
 
-            if (debug) {
-              console.log('got error instead of result');
-              console.log(err);
-            }
+            self.logger.debug('got error instead of result');
+            self.logger.debug(err);
 
             reject(err);
             return;
           }
 
-          if (debug) {
-            console.log('got result');
-          }
+          self.logger.debug('got result');
+
           fulfill(result);
           client.end();
           //done(); //TODO: investigate where exactly to call this method to release client to the pool
@@ -159,7 +155,7 @@ PostgresQuery.prototype.checkIfItIsRelevant = function (options) {
   var self = this;
 
   if (self._checkIfSelectedDocumentRequiredAndNotPresent(options)) {
-    self.logger.warn('No elasticsearch document selected while required by the posgres activation query. [' + self.config.id + ']');
+    self.logger.warn('No elasticsearch document selected while required by the posgres query. [' + self.config.id + ']');
     return Promise.resolve(false);
   }
   var uri = options.selectedDocuments && options.selectedDocuments.length > 0 ? options.selectedDocuments[0] : '';
@@ -209,11 +205,6 @@ PostgresQuery.prototype.checkIfItIsRelevant = function (options) {
 PostgresQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) {
   var start = new Date().getTime();
   var self = this;
-  // special case - we can not simply reject the Promise
-  // bacause this will cause the whole group of promisses to be rejected
-  if (self._checkIfSelectedDocumentRequiredAndNotPresent(options)) {
-    return self._returnAnEmptyQueryResultsPromise('No data because the query require entityURI');
-  }
   // currently we use only single selected document
   var uri = options.selectedDocuments && options.selectedDocuments.length > 0 ? options.selectedDocuments[0] : '';
 
@@ -226,18 +217,17 @@ PostgresQuery.prototype.fetchResults = function (options, onlyIds, idVariableNam
 
   return self.queryHelper.replaceVariablesUsingEsDocument(this.config.resultQuery, uri, options.credentials).then(function (query) {
     // special case if the uri is required but it is empty
-    if (debug) {
-      console.log('----------');
-      console.log('this.resultQueryRequireEntityURI: [' + this.resultQueryRequireEntityURI + ']');
-      console.log('uri: [' + uri + ']');
-      console.log('query: [' + query + ']');
-    }
+
+    self.logger.debug(
+      '----------\n' +
+      'this.resultQueryRequireEntityURI: [' + self.resultQueryRequireEntityURI + ']\n' +
+      'uri: [' + uri + ']\n' +
+      'query: [' + query + ']'
+    );
 
 
-    if (debug) {
-      console.log('start to fetch results for');
-      console.log(query);
-    }
+    self.logger.debug('start to fetch results for query');
+    self.logger.debug(query);
 
     var cacheKey = null;
 

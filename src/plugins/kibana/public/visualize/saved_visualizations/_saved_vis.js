@@ -2,16 +2,16 @@ define(function (require) {
   require('ui/modules')
   .get('app/visualize')
   .factory('SavedVis', function (config, $injector, courier, Promise, savedSearches, Private, createNotifier) {
-    var _ = require('lodash');
-    var Vis = Private(require('ui/Vis'));
+    const _ = require('lodash');
+    const Vis = Private(require('ui/Vis'));
 
-    var notify = createNotifier({
+    const notify = createNotifier({
       location: 'SavedVis'
     });
 
     _.class(SavedVis).inherits(courier.SavedObject);
     function SavedVis(opts) {
-      var self = this;
+      const self = this;
       opts = opts || {};
       if (typeof opts !== 'object') opts = { id: opts };
 
@@ -26,7 +26,7 @@ define(function (require) {
           title: 'New Visualization',
           visState: (function () {
             if (!opts.type) return null;
-            var def = {};
+            const def = {};
             def.type = opts.type;
             return def;
           }()),
@@ -54,7 +54,7 @@ define(function (require) {
     SavedVis.searchSource = true;
 
     SavedVis.prototype._afterEsResp = function () {
-      var self = this;
+      const self = this;
 
       return self._getLinkedSavedSearch()
       .then(function () {
@@ -63,6 +63,12 @@ define(function (require) {
         return self.vis ? self._updateVis() : self._createVis();
       })
       .then(function (vis) {
+
+        // kibi: allow the plugin to initialize some parameters based on the linked savedSearch
+        if (self.vis.type.init) {
+          self.vis.type.init(self.vis, self.savedSearch);
+        }
+
         self.searchSource.aggs(function () {
           self.vis.requesting();
           return self.vis.aggs.toDsl();
@@ -73,9 +79,9 @@ define(function (require) {
     };
 
     SavedVis.prototype._getLinkedSavedSearch = Promise.method(function () {
-      var self = this;
-      var linkedSearch = !!self.savedSearchId;
-      var current = self.savedSearch;
+      const self = this;
+      const linkedSearch = !!self.savedSearchId;
+      const current = self.savedSearch;
 
       if (linkedSearch && current && current.id === self.savedSearchId) {
         return;
@@ -97,7 +103,7 @@ define(function (require) {
     });
 
     SavedVis.prototype._createVis = function () {
-      var self = this;
+      const self = this;
 
       if (self.stateJSON) {
         self.visState = Vis.convertOldState(self.typeName, JSON.parse(self.stateJSON));
@@ -118,7 +124,7 @@ define(function (require) {
     };
 
     SavedVis.prototype._updateVis = function () {
-      var self = this;
+      const self = this;
 
       self.vis.indexPattern = self.searchSource.get('index');
       self.visState.title = self.title;

@@ -1,5 +1,5 @@
-var _ = require('lodash');
-var TabCollection = require('../TabCollection');
+let _ = require('lodash');
+let TabCollection = require('../TabCollection');
 
 module.exports = function (chrome, internals) {
 
@@ -88,10 +88,31 @@ module.exports = function (chrome, internals) {
    */
   chrome.getActiveTabTitle = activeGetter('title');
 
+  /**
+   * kibi: onDashboardTab returns true if the active tab is the dashboard
+   */
+  chrome.onDashboardTab = function () {
+    return this.getActiveTabId() === 'dashboard';
+  };
+
+  /**
+   * kibi: onVisualizeTab returns true if the active tab is the visualize
+   */
+  chrome.onVisualizeTab = function () {
+    return this.getActiveTabId() === 'visualize';
+  };
+
+  /**
+   * kibi: onSettingsTab returns true if the active tab is the settings
+   */
+  chrome.onSettingsTab = function () {
+    return this.getActiveTabId() === 'settings';
+  };
+
   // create a getter for properties of the active tab
   function activeGetter(prop) {
     return function (def) {
-      var active = chrome.getActiveTab();
+      let active = chrome.getActiveTab();
       return !active ? def : active[prop];
     };
   }

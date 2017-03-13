@@ -5,12 +5,12 @@ import 'plugins/kibana/settings/sections/objects/index';
 import 'plugins/kibana/settings/sections/status/index';
 import 'plugins/kibana/settings/sections/about/index';
 
-import 'plugins/kibana/settings/sections/kibi_relations/index';        //kibi: added by kibi
-import 'plugins/kibana/settings/sections/kibi_datasources/index';      //kibi: added by kibi
-import 'plugins/kibana/settings/sections/kibi_queries/index';          //kibi: added by kibi
-import 'plugins/kibana/settings/sections/kibi_templates/index';        //kibi: added by kibi
-import 'plugins/kibana/settings/sections/kibi_dashboard_groups/index'; //kibi: added by kibi
-import 'ui/kibi/helpers/kibi_state_helper/services/index';             //kibi: added by kibi
+import 'plugins/kibana/settings/sections/kibi_relations/index';        // kibi: added by kibi
+import 'plugins/kibana/settings/sections/kibi_datasources/index';      // kibi: added by kibi
+import 'plugins/kibana/settings/sections/kibi_queries/index';          // kibi: added by kibi
+import 'plugins/kibana/settings/sections/kibi_templates/index';        // kibi: added by kibi
+import 'plugins/kibana/settings/sections/kibi_dashboard_groups/index'; // kibi: added by kibi
+import 'ui/kibi/helpers/kibi_session_helper/services/index';           // kibi: added by kibi
 
 
 import 'plugins/kibana/settings/styles/main.less';
@@ -38,7 +38,6 @@ uiModules
 .get('apps/settings')
 .directive('kbnSettingsApp', function (Private, $route, timefilter) {
   const sections = Private(registry);
-  const kibiLicenseHelper = Private(require('kibie/kibi/helpers/kibi_license_helper')); // kibi: added to verify kibi license
 
   return {
     restrict: 'E',
@@ -48,7 +47,6 @@ uiModules
       sectionName: '@section'
     },
     link: function ($scope, $el) {
-      kibiLicenseHelper.verifyLicense(); //kibi: added to verify kibi license
 
       timefilter.enabled = false;
       $scope.sections = sections;
@@ -57,6 +55,16 @@ uiModules
 
       $scope.sections.forEach(function (section) {
         section.class = (section === $scope.section) ? 'active' : void 0;
+      });
+
+      // kibi: allow to disable the save button if the object is invalid
+      $scope.isObjectValid = true;
+      $scope.$watch(function (scope) {
+        return scope.section.isObjectValid && scope.section.isObjectValid();
+      }, function (isObjectValid) {
+        if (isObjectValid !== undefined) {
+          $scope.isObjectValid = isObjectValid;
+        }
       });
     }
   };

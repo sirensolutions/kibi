@@ -1,29 +1,27 @@
-module.exports = function createPackages(grunt) {
-  let { config } = grunt;
-  let { resolve } = require('path');
-  let { execFile } = require('child_process');
+import { execFile } from 'child_process';
+import Promise from 'bluebird';
+import { resolve } from 'path';
+import _ from 'lodash'; // kibi: dependencies added by
+import fs from 'fs'; // kibi: dependencies added by
 
-  let Promise = require('bluebird'); // kibi: dependencies added by
+export default (grunt) => {
+  const { config, log } = grunt;
+
   let mkdirp = Promise.promisify(require('mkdirp')); // kibi: dependencies added by
-  let _ = require('lodash'); // kibi: dependencies added by
-  let fs = require('fs'); // kibi: dependencies added by
 
   let buildPath = resolve(config.get('root'), 'build');
   let exec = async (cmd, args) => {
-    grunt.log.writeln(` > ${cmd} ${args.join(' ')}`);
+    log.writeln(` > ${cmd} ${args.join(' ')}`);
     await Promise.fromNode(cb => execFile(cmd, args, { cwd: buildPath }, cb));
   };
 
+  async function archives({ name, buildName, zipPath, tarPath }) {
+    await exec('tar', ['-chzf', tarPath, buildName]);
 
-  let archives = async (platform) => {
-    // kibana.tar.gz
-    await exec('tar', ['-zchf', platform.tarPath, platform.buildName]);
-
-    // kibana.zip
-    if (/windows/.test(platform.name)) {
-      await exec('zip', ['-rq', '-ll', platform.zipPath, platform.buildName]);
+    if (/windows/.test(name)) {
+      await exec('zip', ['-rq', '-ll', zipPath, buildName]);
     } else {
-      await exec('zip', ['-rq', platform.zipPath, platform.buildName]);
+      await exec('zip', ['-rq', zipPath, buildName]);
     }
   };
 
@@ -32,23 +30,23 @@ module.exports = function createPackages(grunt) {
   // now lets swap the bindings
   function copyFile(source, target) {
     return new Promise(function (resolve, reject) {
-      var rd = fs.createReadStream(source);
+      let rd = fs.createReadStream(source);
       rd.on('error', reject);
-      var wr = fs.createWriteStream(target);
+      let wr = fs.createWriteStream(target);
       wr.on('error', reject);
       wr.on('finish', resolve);
       rd.pipe(wr);
     });
   }
 
-  var toCopy = [];
-  grunt.config.get('platforms').forEach(({ name, buildDir }) => {
-    var nodeVersion = 'v46';
-    var sqliteBindingSrc;
-    var sqliteBindingDestFolder;
-    var sqliteBindingDest;
-    var nodejavaBindingSrc = __dirname + '/../../resources/nodejavabridges/' + name + '/nodejavabridge_bindings.node';
-    var nodejavaBindingDest = buildDir + '/node_modules/jdbc/node_modules/java/build/Release/nodejavabridge_bindings.node';
+  let toCopy = [];
+  config.get('platforms').forEach(({ name, buildDir }) => {
+    let nodeVersion = 'v48';
+    let sqliteBindingSrc;
+    let sqliteBindingDestFolder;
+    let sqliteBindingDest;
+    let nodejavaBindingSrc = __dirname + '/../../resources/nodejavabridges/' + name + '/nodejavabridge_bindings.node';
+    let nodejavaBindingDest = buildDir + '/node_modules/java/build/Release/nodejavabridge_bindings.node';
     switch (name) {
       case 'darwin-x64':
         sqliteBindingSrc   = __dirname + '/../../resources/nodesqlite3bindings/' + name + '/node-' + nodeVersion +
@@ -95,9 +93,8 @@ module.exports = function createPackages(grunt) {
   // kibi: end
 
   grunt.registerTask('_build:archives', function () {
-
     // kibi: here swap files before building archives
-    var copyOperations = _.map(toCopy, function (row) {
+    let copyOperations = _.map(toCopy, function (row) {
       return mkdirp(row.sqliteBindingDestFolder).then(function () {
         return copyFile(row.sqliteBindingSrc, row.sqliteBindingDest).then(function () {
           return copyFile(row.nodejavaBindingSrc, row.nodejavaBindingDest);
@@ -107,9 +104,9 @@ module.exports = function createPackages(grunt) {
     // kibi: end
 
     Promise.all(copyOperations).then(function () {
-      grunt.log.ok('All native bindings replaced');
+      log.ok('All native bindings replaced');
       return Promise.all(
-        grunt.config.get('platforms')
+        config.get('platforms')
         .map(async platform => {
 
           grunt.file.mkdir('target');
@@ -117,6 +114,5 @@ module.exports = function createPackages(grunt) {
         })
       );
     }).nodeify(this.async());
-
   });
 };

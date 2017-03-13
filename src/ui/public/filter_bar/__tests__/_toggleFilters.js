@@ -1,18 +1,21 @@
 describe('toggle filters', function () {
-  var _ = require('lodash');
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
-  var sinon = require('auto-release-sinon');
-  var MockState = require('fixtures/mock_state');
-  var storeNames = {
+  let _ = require('lodash');
+  let expect = require('expect.js');
+  let ngMock = require('ngMock');
+  let sinon = require('auto-release-sinon');
+  let MockState = require('fixtures/mock_state');
+  let storeNames = {
     app: 'appState',
     global: 'globalState'
   };
-  var filters;
-  var queryFilter;
-  var $rootScope;
-  var appState;
-  var globalState;
+  let filters;
+  let queryFilter;
+  let $rootScope;
+  let appState;
+  let globalState;
+
+  let toggleRelationalPanelSpy;
+  let isFilterOutdatedStub;
 
   beforeEach(ngMock.module(
     'kibana',
@@ -20,6 +23,16 @@ describe('toggle filters', function () {
     'kibana/global_state',
     function ($provide) {
       $provide.service('courier', require('fixtures/mock_courier'));
+
+      $provide.service('kibiState', function () {
+        isFilterOutdatedStub = sinon.stub();
+        toggleRelationalPanelSpy = sinon.spy();
+        return new MockState({
+          isFilterOutdated: isFilterOutdatedStub,
+          toggleRelationalPanel: toggleRelationalPanelSpy,
+          filters: []
+        });
+      });
 
       appState = new MockState({ filters: [] });
       $provide.service('getAppState', function () {
@@ -53,6 +66,44 @@ describe('toggle filters', function () {
   }));
 
   describe('toggling a filter', function () {
+    describe('kibi', function () {
+      it('should toggle the relational panel if join filter is present', function () {
+        filters = [
+          {
+            join_set: {},
+            meta: { negate: false, disabled: false }
+          }
+        ];
+        appState.filters = filters;
+
+        queryFilter.toggleFilter(filters[0]);
+        expect(appState.filters[0].meta.disabled).to.be(true);
+        expect(toggleRelationalPanelSpy.calledWith()).to.be(true);
+      });
+
+      it('should not toggle the filter if it is outdated', function () {
+        const filter = {
+          join_sequence: [],
+          meta: { label: 'join', disabled: true }
+        };
+
+        isFilterOutdatedStub.returns(true);
+        queryFilter.toggleFilter(filter);
+        expect(filter.meta.disabled).to.be(true);
+      });
+
+      it('should toggle the filter if it is not outdated', function () {
+        const filter = {
+          join_sequence: [],
+          meta: { label: 'join', disabled: true, version: 2 }
+        };
+
+        isFilterOutdatedStub.returns(false);
+        queryFilter.toggleFilter(filter);
+        expect(filter.meta.disabled).to.be(false);
+      });
+    });
+
     it('should toggle the disabled property in appState', function () {
       _.each(filters, function (filter) {
         expect(filter.meta.disabled).to.be(false);
@@ -74,7 +125,7 @@ describe('toggle filters', function () {
     });
 
     it('should fire the update and fetch events', function () {
-      var emitSpy = sinon.spy(queryFilter, 'emit');
+      let emitSpy = sinon.spy(queryFilter, 'emit');
       appState.filters = filters;
       $rootScope.$digest();
 

@@ -2,7 +2,7 @@ define(function (require) {
   var bdd = require('intern!bdd');
   var expect = require('intern/dojo/node!expect.js');
   var config = require('intern').config;
-  var Common = require('../../support/pages/Common');
+  var Common = require('../../support/pages/common');
 
   bdd.describe('status page', function () {
     var common;
@@ -21,7 +21,7 @@ define(function (require) {
         .findByCssSelector('.plugin_status_breakdown')
         .getVisibleText()
         .then(function (text) {
-          expect(text.indexOf('plugin:kibana Ready')).to.be.above(-1);
+          expect(text.indexOf('kibana 1.0.0 Ready')).to.be.above(-1);
         });
       })
       .catch(common.handleError(self));

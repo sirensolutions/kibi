@@ -21,11 +21,26 @@ var JdbcQuery;
 function QueryEngine(server) {
   this.server = server;
   this.config = server.config();
+  const sslCA = this.config.get('kibi_core.gremlin_server.ssl.ca');
+  if (sslCA) {
+    this.sslCA = fs.readFileSync(sslCA);
+  }
   this.queries = [];
   this.initialized = false;
   this.log = logger(server, 'query_engine');
   this.client = server.plugins.elasticsearch.client;
 }
+
+QueryEngine.prototype._onStatusGreen = function () {
+  return this.loadPredefinedData().then(() => {
+    return this.setupJDBC().then(() => {
+      return this.reloadQueries().then(() => {
+        this.initialized = true;
+        return true;
+      });
+    });
+  });
+};
 
 QueryEngine.prototype._init = function (cacheSize = 500, enableCache = true, cacheMaxAge = 1000 * 60 * 60) {
   // populate an array templatesDefinitions which contain templatesdefinition objects
@@ -65,20 +80,24 @@ QueryEngine.prototype._init = function (cacheSize = 500, enableCache = true, cac
   }
 
   return new Promise((fulfill, reject) => {
-    var elasticsearchStatus = self.server.plugins.elasticsearch.status;
-
-    elasticsearchStatus.on('change', function (prev, prevmsg) {
-      if (elasticsearchStatus.state === 'green') {
-        self.loadPredefinedData().then(function () {
-          return self.setupJDBC().then(function () {
-            return self.reloadQueries().then(function () {
-              self.initialized = true;
-              fulfill({ message: 'QueryEngine initialized successfully.' });
-            });
-          });
-        }).catch(reject);
-      }
-    });
+    var succesfullInitializationMsg = { message: 'QueryEngine initialized successfully.' };
+    var elasticsearchStatus = _.get(self, 'server.plugins.elasticsearch.status');
+    if (elasticsearchStatus && elasticsearchStatus.state === 'green') {
+      // already green - fire the _onStatusGreen
+      self._onStatusGreen().then(function () {
+        fulfill(succesfullInitializationMsg);
+      }).catch(reject);
+    } else {
+      // not ready yet - bind _onStatusGreen to change event so it will fire immediatelly when it becomes green
+      elasticsearchStatus.on('change', function () {
+        // fire the _onStatusGreen only when elasticsearch status is green
+        if (self.server.plugins.elasticsearch.status.state === 'green') {
+          self._onStatusGreen().then(function () {
+            fulfill(succesfullInitializationMsg);
+          }).catch(reject);
+        }
+      });
+    }
   });
 };
 
@@ -89,20 +108,20 @@ QueryEngine.prototype.loadPredefinedData = function () {
     var tryToLoad = function () {
       self._isKibiIndexPresent().then(function () {
         self.log.info('Found kibi index');
-        self._loadTemplates().then(function () {
-          if (self.config.get('pkg.kibiEnterpriseEnabled')) {
-            return self._loadDatasources().then(function () {
-              return self._loadQueries().then(function () {
-                return self._loadScripts().then(function () {
+        self._loadTemplatesMapping().then(function () {
+          self._loadTemplates().then(function () {
+            if (self.config.get('pkg.kibiEnterpriseEnabled')) {
+              return self._loadDatasources().then(function () {
+                return self._loadQueries().then(function () {
                   return self._refreshKibiIndex().then(function () {
                     fulfill(true);
                   });
                 });
               });
-            });
-          } else {
-            fulfill(true);
-          }
+            } else {
+              fulfill(true);
+            }
+          }).catch(reject);
         }).catch(reject);
       }).catch(function (err) {
         self.log.warn('Could not retrieve Kibi index: ' + err);
@@ -122,29 +141,6 @@ QueryEngine.prototype._isKibiIndexPresent = function () {
   })
   .then(function (kibiIndex) {
     return !!kibiIndex || Promise.reject(new Error('Kibi index does not exists'));
-  });
-};
-
-QueryEngine.prototype._loadTemplatesMapping = function () {
-  var self = this;
-
-  // here prevent an issue where by default version field was mapped to type long
-  // https://github.com/sirensolutions/kibi-internal/issues/775
-  var mapping = {
-    template: {
-      properties: {
-        version: {
-          type: 'integer'
-        }
-      }
-    }
-  };
-
-  return self.client.indices.putMapping({
-    timeout: '1000ms',
-    index: self.config.get('kibana.index'),
-    type: 'template',
-    body: mapping
   });
 };
 
@@ -171,10 +167,11 @@ QueryEngine.prototype.gremlin = function (datasourceParams, options) {
     uri: datasourceParams.url,
     timeout: parsedTimeout
   };
-  var ca = this.config.get('kibi_core.gremlin_server.ssl.ca');
-  if (ca) {
-    gremlinOptions.ca = fs.readFileSync(ca);
+
+  if (this.sslCA) {
+    gremlinOptions.ca = this.sslCA;
   }
+
   _.assign(gremlinOptions, options);
   if (gremlinOptions.data) {
     gremlinOptions.data.credentials = datasourceParams.credentials;
@@ -187,18 +184,50 @@ QueryEngine.prototype.gremlin = function (datasourceParams, options) {
 };
 
 QueryEngine.prototype.gremlinPing = function (baseGraphAPIUrl) {
-  const gremlinOptions = {
+  const options = {
     method: 'GET',
     uri: baseGraphAPIUrl + '/ping',
     timeout: 5000
   };
 
-  return rp(gremlinOptions);
+  if (this.sslCA) {
+    options.ca = this.sslCA;
+  }
+  return rp(options);
 };
 
+/**
+ * Loads templates mapping.
+ *
+ * @return {Promise}
+ */
+QueryEngine.prototype._loadTemplatesMapping = function () {
+  var mapping = {
+    template: {
+      properties: {
+        version: {
+          type: 'integer'
+        }
+      }
+    }
+  };
+
+  return this.client.indices.putMapping({
+    timeout: '1000ms',
+    index: this.config.get('kibana.index'),
+    type: 'template',
+    body: mapping
+  });
+};
+
+/**
+ * Loads default templates.
+ *
+ * @return {Promise.<*>}
+ */
 QueryEngine.prototype._loadTemplates = function () {
   var self = this;
-  // load default template examples
+
   var templatesToLoad = [
     'kibi-json-jade',
     'kibi-table-jade',
@@ -207,34 +236,30 @@ QueryEngine.prototype._loadTemplates = function () {
 
   self.log.info('Loading templates');
 
-  return self._loadTemplatesMapping().then(function () {
-    _.each(templatesToLoad, function (templateId) {
-      fs.readFile(path.join(__dirname, 'templates', templateId + '.json'), function (err, data) {
-        if (err) {
-          throw err;
+  return Promise.all(templatesToLoad.map((templateId) => {
+    return fs.readFile(path.join(__dirname, 'templates', templateId + '.json'), function (err, data) {
+      if (err) {
+        throw err;
+      }
+      return self.client.create({
+        timeout: '1000ms',
+        index: self.config.get('kibana.index'),
+        type: 'template',
+        id: templateId,
+        body: data.toString()
+      })
+      .then(() => {
+        self.log.info('Template [' + templateId + '] successfully loaded');
+      })
+      .catch((err) => {
+        if (err.statusCode === 409) {
+          self.log.warn('Template [' + templateId + '] already exists');
+        } else {
+          self.log.error('Could not load template [' + templateId + ']', err);
         }
-        self.client.create({
-          timeout: '1000ms',
-          index: self.config.get('kibana.index'),
-          type: 'template',
-          id: templateId,
-          body: data.toString()
-        })
-        .then(function (resp) {
-          self.log.info('Template [' + templateId + '] successfully loaded');
-        })
-        .catch(function (err) {
-          if (err.statusCode === 409) {
-            self.log.warn('Template [' + templateId + '] already exists');
-          } else {
-            self.log.error('Could not load template [' + templateId + ']', err);
-          }
-        });
       });
     });
-  }).catch(function (err) {
-    self.log.error('Could not load the mapping for template object', err);
-  });
+  }));
 };
 
 QueryEngine.prototype._loadDatasources = function () {
@@ -253,6 +278,7 @@ QueryEngine.prototype._loadDatasources = function () {
       fs.readFile(path.join(__dirname, 'datasources', datasourceId + '.json'), function (err, data) {
         if (err) {
           reject(err);
+          return;
         }
         // check whether HTTP or HTTPS is used
         if (self.config.has('kibi_core.gremlin_server.url')) {
@@ -260,7 +286,7 @@ QueryEngine.prototype._loadDatasources = function () {
           var datasourceObj = JSON.parse(data.toString());
           var datasourceObjParam = JSON.parse(datasourceObj.datasourceParams);
 
-          datasourceObjParam.url = gremlinUrl + '/graph/query';
+          datasourceObjParam.url = gremlinUrl + '/graph/queryBatch';
           datasourceObj.datasourceParams = JSON.stringify(datasourceObjParam);
 
           data = new Buffer(JSON.stringify(datasourceObj).length);
@@ -296,7 +322,7 @@ QueryEngine.prototype._loadQueries = function () {
   var self = this;
   // load default query examples
   var queriesToLoad = [
-    '1Kibi-Graph-Query'
+    'Kibi-Graph-Query'
   ];
 
   self.log.info('Loading queries');
@@ -308,6 +334,7 @@ QueryEngine.prototype._loadQueries = function () {
       fs.readFile(path.join(__dirname, 'queries', queryId + '.json'), function (err, data) {
         if (err) {
           reject(err);
+          return;
         }
         self.client.create({
           timeout: '1000ms',
@@ -325,57 +352,6 @@ QueryEngine.prototype._loadQueries = function () {
             self.log.warn('Query [' + queryId + '] already exists');
           } else {
             self.log.error('Could not load query [' + queryId + ']', err);
-          }
-          fulfill(true);
-        });
-      });
-    }));
-  });
-
-  return Promise.all(promises);
-};
-
-QueryEngine.prototype._loadScripts = function () {
-  var self = this;
-  // load default scripts examples
-  var scriptsToLoad = [
-    'select-all',
-    'select-by-type',
-    'select-extend',
-    'select-invert',
-    'select-by-edge-count',
-    'show-nodes-count-by-type',
-    'replace-investment-nodes',
-    'shortest-path',
-    'expand-by-relation'
-  ];
-
-  self.log.info('Loading scripts');
-
-  var promises = [];
-  _.each(scriptsToLoad, function (scriptId) {
-    promises.push(new Promise(function (fulfill, reject) {
-
-      fs.readFile(path.join(__dirname, 'scripts', scriptId + '.json'), function (err, data) {
-        if (err) {
-          reject(err);
-        }
-        self.client.create({
-          timeout: '1000ms',
-          index: self.config.get('kibana.index'),
-          type: 'script',
-          id: scriptId,
-          body: data.toString()
-        })
-        .then(function (resp) {
-          self.log.info('Script [' + scriptId + '] successfully loaded');
-          fulfill(true);
-        })
-        .catch(function (err) {
-          if (err.statusCode === 409) {
-            self.log.warn('Script [' + scriptId + '] already exists');
-          } else {
-            self.log.error('Could not load script [' + scriptId + ']', err);
           }
           fulfill(true);
         });
@@ -450,18 +426,17 @@ QueryEngine.prototype.reloadQueries = function () {
           id:                hit._id,
           label:             hit._source.title,
           description:       hit._source.description,
-          activationQuery:   hit._source.st_activationQuery,
-          resultQuery:       hit._source.st_resultQuery,
-          datasourceId:      hit._source.st_datasourceId,
+          activationQuery:   hit._source.activationQuery,
+          resultQuery:       hit._source.resultQuery,
+          datasourceId:      hit._source.datasourceId,
           rest_method:       hit._source.rest_method,
           rest_path:         hit._source.rest_path,
           rest_body:         hit._source.rest_body,
-          rest_resp_restriction_path: hit._source.rest_resp_restriction_path,
-          tags:              hit._source.st_tags
+          tags:              hit._source.tags
         };
 
-        if (datasourcesIds.indexOf(hit._source.st_datasourceId) === -1) {
-          datasourcesIds.push(hit._source.st_datasourceId);
+        if (datasourcesIds.indexOf(hit._source.datasourceId) === -1) {
+          datasourcesIds.push(hit._source.datasourceId);
         }
         // here we are querying the elastic search
         // and rest_params, rest_headers
@@ -475,6 +450,11 @@ QueryEngine.prototype.reloadQueries = function () {
           queryDefinition.rest_headers = JSON.parse(hit._source.rest_headers);
         } catch (e) {
           queryDefinition.rest_headers = [];
+        }
+        try {
+          queryDefinition.rest_variables = JSON.parse(hit._source.rest_variables);
+        } catch (e) {
+          queryDefinition.rest_variables = [];
         }
         try {
           queryDefinition.rest_resp_status_code = parseInt(hit._source.rest_resp_status_code);
@@ -556,18 +536,19 @@ QueryEngine.prototype.reloadQueries = function () {
   });
 };
 
-
 QueryEngine.prototype.clearCache =  function () {
   return this._init().then(() => {
     if (this.cache) {
       const promisedReset = Promise.method(this.cache.reset);
-      return promisedReset().then(this.reloadQueries()).return('Cache cleared, Queries reloaded');
+      return promisedReset()
+      .then(() => this.reloadQueries())
+      .then(() => 'Cache cleared, Queries reloaded');
     }
     // here we are reloading queries no matter that cache is enabled or not
-    return this.reloadQueries().return('The cache is disabled, Queries reloaded');
+    return this.reloadQueries()
+    .then(() => 'The cache is disabled, Queries reloaded');
   });
 };
-
 
 /**
  * return a ordered list of query objects which:
@@ -653,7 +634,7 @@ QueryEngine.prototype._getQueries = function (queryIds, options) {
       if (resp) {
         filteredQueries.push(fromRightFolder[i]); // here important to use fromRightFolder !!!
       } else {
-        filteredQueries.push(new InactivatedQuery(fromRightFolder[i].id));
+        filteredQueries.push(new InactivatedQuery(self.server, fromRightFolder[i].id));
       }
     });
 

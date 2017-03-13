@@ -30,10 +30,10 @@ image::images/relational_panel/panel.png["Relational panel",align="center"]
 [[relational-panel-browsing]]
 ==== Browsing
 
-Since a <<saving-dashboards,saved search>> is now associated with a dashboard, a count indicating the current number of documents in that dashboard is displayed on each tab. For example on the previous image, there are 3558 articles, 840 companies, and 840 investments rounds that are inter-connected. These numbers coupled with the relational panel allows to get a feeling of the current state of the joined dashboards.
+Since a <<saving-dashboards,saved search>> is now associated with a dashboard, a count indicating the current number of documents in that dashboard is displayed on each tab. For example on the previous image, there are 151714 articles, 6419 companies, and 13231 investments rounds that are inter-connected. These numbers coupled with the relational panel allows to get a feeling of the current state of the joined dashboards.
 The current set of connected dashboards are displayed in the label of the blue filter image:images/relational_panel/filter.png["relational panel filter"].
 
-Since all the dashboards in the set are connected to each other, adding a filter to a dashboard will also update the connected dashboards. If you select **TechCrunch** as the source for articles, there are now in total 653 articles. Being automatically updated, we observe that only 311 companies and investments out of 840 are actually connected to those articles from TechCrunch.
+Since all the dashboards in the set are connected to each other, adding a filter to a dashboard will also update the connected dashboards. If you select **TechCrunch** as the source for articles, there are now in total 27772 articles. Being automatically updated, we observe that only 3748 companies (out of 6419) and 8136 investments (out of 13231) are actually connected to those articles from TechCrunch.
 
 image::images/relational_panel/with_filter.png["Relational panel with a filter",align="center"]
 
@@ -48,50 +48,33 @@ image::images/relational_panel/explanation.png["Explanation of the relational fi
 [[relational_filter]]
 === Relational filter
 
-The Relational Filter visualization allows to "pivot" from a dashboard
+The relational filter visualization allows to "pivot" from a dashboard
 to another by creating a join between multiple indices based on their
 relations. This allows to interactivelly build the sequence of dashboards to join.
 
-Relations are defined between index fields; for example, let's take the
-following indices:
+The relational filter visualzation is configured based on the <<kibi-settings-relation,relationships>> between indices defined in the settings tab.
+For example, let's take the following indices:
 
 [horizontal]
-_Articles_:: an index containing articles; each document in the index has
-a field called `companyid` that contains the ID of the company mentioned in the
-article. The index is displayed on dashboard named `Articles`.
-_Companies_:: an index containing information about companies; each document
-in the index has a field called `id` that contains the ID of the company.
-The index is displayed on a dashboard named `Companies`.
+_article_:: an index containing articles; each document in the index has a field called `companies` which is an array that contains the ID of companies mentioned in the article. This index is displayed on the dashboard entitled `Articles`.
+_company_:: an index containing information about companies; each document in the index has a field called `id` that contains the ID of the company. This index is displayed on the dashboard entitled `Companies`.
 
-Using the Relational filter visualization, it is possible to configure a
-relation between `Articles.companyid` and `Companies.id` and use it as a
-filter on the Companies index.
+Both indices are <<kibi-settings-relation,configured>> so that they are joined on the field `companies` of `article` with the the field `id` of `company`. Then, it is possible to use that configuration in order to create a relational filter that would filter companies based on connected articles (or vice-versa).
 
-The result is that it becomes possible to search specific articles in the
-_Articles_ dashboard, then switch to the _Companies_ dashboard and see only
-companies mentioned in _Articles'_ search results.
+In the _Articles_ dashboard, the relational filter visualization is displayed as a button which indicates the number of documents in the _Companies_ dashboard that are mentioned in the articles of the current dashboard.
 
-In the _Articles_ dashboard, the relation is displayed as a button which,
-if configured properly, will display the number of documents in the _Companies_
-dashboard related to the documents displayed in the _Articles_ dashboard.
+The screenshot below shows the button for the relation described in the example; there are 18237 companies mentioned in the 618155 articles currently displayed:
 
-The screenshot below shows the button for the relation described in the
-example; there are 48 companies mentioned in the 234 articles currently
-displayed:
+image::images/relational_filter/relational_filter_companies_source.png["Relational filter button on the Articles dashboard",align="center", width="400"]
 
-image::images/relational_filter/relational_filter_companies_source.png["Relational filter button in source dashboard",align="center", width="400"]
+Clicking on the button will switch you to the _Companies_ dashboard and display the 18237 companies; the relational filter is displayed in the filter bar, as displayed below:
 
-Clicking on the button will switch to the _Companies_ dashboard and display
-the 48 companies; the relational filter is displayed in the filter bar, as
-displayed below:
+image::images/relational_filter/relational_filter_companies_target.png["Relational filter on the Companies dashboard",align="center", width="400"]
 
-image::images/relational_filter/relational_filter_companies_target.png["Relational filter in target dashboard",align="center", width="400"]
+The relational filter visualization requires the {siren-join-website}[Siren Join plugin {siren-join-version}] for
+Elasticsearch. The plugin is compatible with Elasticsearch {elasticsearch-version}.
 
-The Relational Filter visualization requires the {siren-join-website}[Siren Join plugin {siren-join-version}] for
-Elasticsearch. The plugin is compatible with Elasticsearch {siren-join-version}.
-
-For more information about the Siren Join plugin visit our website at
-http://siren.solutions .
+For more information about the Siren Join plugin visit our website at https://siren.solutions/searchplugins/join/.
 
 [float]
 [[relational_filter_config]]
@@ -100,25 +83,15 @@ http://siren.solutions .
 Click on the _Add filter_ button to create a new filter in the visualization;
 the filter is defined by the following parameters:
 
-- _Button label_: the label of the button that will be displayed inside the
-visualization, e.g. `Companies -->`.
-- _Custom filter label_: the label of the filter that will be displayed in the
-filter bar, Default is `... related to ($COUNT) from $DASHBOARD.`,
-where:
-$COUNT is a number of items on source dashboard,
-$DASHBOARD is a source dashboard name.
-User can use these two variable placeholders when writing custom filter label.
-- _Source index_: the source index in the relation.
-- _Source index type_: the source index document type.
-- _Source field_: the source index field in the relation.
-- _Target index_: the index to be joined with _Source index_.
-- _Target field_: the field in the target index related to _Source field_.
-- _Target index type_: the target index document type.
-- _Target dashboard_: the dashboard on which the join filter will be applied
-when clicking on the button.
+* _Button label_: the label of the button that will be displayed inside the visualization, e.g. `Companies -->`.
+* _Custom filter label_: the label of the filter that will be displayed in the filter bar, which by default is `... related to ($COUNT) from $DASHBOARD.`. Several variables are available for customizing the label:
+** $COUNT is a number of items on source dashboard,
+** $DASHBOARD is a source dashboard name.
+* _Source dashboard_: optional parameter that indicates on which dashboard the relational filter should appear in.
+* _Target dashboard_: the dashboard to join the current dashboard with. The current dashboard is equal to the previous field if set.
+* _Relation_: the label of the relation between indices to use for this relational filter. This is set in the <<kibi-settings-relation,relations>> settings tab.
 
-The screenshot below shows the configuration of a relation between
-`Articles` and `Companies`:
+The screenshot below shows the configuration of a relation from the `Articles` dashboard to the `Companies` dashboard, using the `mentions` relation:
 
 image::images/relational_filter/relational_filter_config.png["Relational filter configuration",align="center"]
 
@@ -130,38 +103,78 @@ to the currently displayed dashboard.
 [[relational_filter_usage]]
 ==== Usage
 
-When clicking on a button in the Relational Filter visualization,
-the current state of the source dashboard is added to relational filter
-and applied on the target dashboard.
-To see the explanation of a relational filter, just move the mouse over it.
+When clicking on a button in the relational filter visualization,
+the current state of the source dashboard is added to the relational filter
+and applied to the target dashboard.
+Just move the mouse over relational filter to see an explanation of what is being joined.
 
-Below we started on **Articles** dashboard, searched for pizza and clicked
-on the relational button to rotate to **Companies**.
-As we see on the explanation there is only one step which shows
-what queries and filters were applied on **Articles**.
+[float]
+===== Walkthrough example
 
-```
-1 article.companyid -> company.id
-  query pizza
-  time filter on pdate
-```
+We start on the **Articles** dashboard, search for `pizza` and click on the relational filter to switch to the **Companies** dashboard.
 
-image::images/relational_filter/relational_filter_explanation1.png["Relational filter explanation",align="center"]
+image::images/relational_filter/example_1.png["Relational filter explanation",align="center"]
 
-Next we added a regular filter country to USA (`countrycode: USA`) and clicked
-on a relational filter button to go to **Investments**.
-Now the explanation shows two steps.
+Hovering over the blue filter displays an explanation. It indicates that the relational filter involves only one join, i.e., the one from `Articles` to `Companies` with `pizza` filtering the articles.
 
-```
-2 company.id -> investment.companyid
-  filter countrycode
-  time filter on funded_date
+image::images/relational_filter/example_2.png["Relational filter explanation",align="center"]
 
-1 article.companyid -> company.id
-  query pizza
-  time filter on pdate
-```
+Next, we add a regular filter to the `Companies` dashboard by clicking on the `USA` row of the `Companies by Country` visualization.
 
-image::images/relational_filter/relational_filter_explanation2.png["Relational filter explanation",align="center"]
+image::images/relational_filter/example_3.png["Relational filter explanation",align="center"]
 
-Explanation steps are always shown in reverse - last one on the top.
+Now, we click on the `Investment rounds -->` button which takes us to the `Investment rounds` dashboard.
+The explanation on that filter shows that the investment rounds are filtered as follows:
+
+- the current investments rounds are joined with companies from the USA; and
+- those companies are joined with articles which match the term `pizza`.
+
+image::images/relational_filter/example_4.png["Relational filter explanation",align="center"]
+
+NOTE: The sequence of the joins in the explanation are shown in reverse, i.e., the last join is on top.
+
+[float]
+[[relational-filter_viewing-detailed-information]]
+==== Viewing Detailed Information
+
+To display the raw data behind the visualization, click the bar at the bottom of the container. Tabs with detailed
+information about the raw data replace the visualization, as in this example:
+
+image::images/relational_filter/spy.png["Spy panel of the relational filter visualization",align="center"]
+
+This panel provides two kinds data: information about the query behind the relational filter in the `Multi Search` tab, and details about the visualization object in the `Debug` tab.
+
+[float]
+===== Multi Search
+
+This pane presents information about the {elastic-ref}search-multi-search.html[msearch] request executed to perform the joins. A relational filter corresponds to one query of the msearch.
+
+On the top, the time reported in `Multi search request duration` informs on how long the msearch request took. There is also additional information about each query of the msearch:
+
+- _Query Duration_: The time spent for this particular query.
+- _Hits_: the total number of documents resulting from the query.
+- _Index_: the index pattern used to execute the query.
+- _Type_: the type of the indices matched by the index pattern.
+
+For a particular relational filter, you can get additional information about the query that got executed.
+
+.Filterjoin
+This displays a table that provides several statistics about each join.
+
+image::images/relational_filter/spy_filterjoin.png["Details about the filterjoin query",align="center"]
+
+.Raw Request
+The filterjoin query as sent by Kibi. This uses the internal API for defining the join.
+
+.Translated Request
+The filterjoin query as sent to the Elasticsearch cluster, presented in JSON format.
+
+.Response
+The raw response from the server, presented in JSON format.
+
+[float]
+===== Debug
+
+The Debug tab presents the JSON object that Kibi uses for this relational filter.
+
+image::images/relational_filter/spy_debug.png["Debug spy panel of the relational filter visualization",align="center"]

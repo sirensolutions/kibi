@@ -1,8 +1,14 @@
 var _ = require('lodash');
 module.exports = function (grunt) {
   grunt.registerTask('test:server', [ 'esvm:test', 'simplemocha:all', 'esvm_shutdown:test' ]);
+  grunt.registerTask('test:serverCoverage', [ 'esvm:test', 'mocha_istanbul:all', 'esvm_shutdown:test' ]);
   grunt.registerTask('test:browser', [ 'run:testServer', 'karma:unit' ]);
-  grunt.registerTask('test:coverage', [ 'run:testCoverageServer', 'karma:coverage' ]);
+  grunt.registerTask('test:browserCoverage', [ 'run:testCoverageServer', 'karma:coverage' ]);
+
+  grunt.registerTask('test:coverage', [
+    'test:serverCoverage',
+    'test:browserCoverage'
+  ]);
 
   grunt.registerTask('test:quick', [
     'test:server',
@@ -18,19 +24,17 @@ module.exports = function (grunt) {
   grunt.registerTask('test:ui', [
     'esvm:ui',
     'run:testUIServer',
-    'downloadSelenium',
-    'run:seleniumServer',
+    'run:chromeDriver',
     'intern:dev',
     'esvm_shutdown:ui',
-    'stop:seleniumServer',
+    'stop:chromeDriver',
     'stop:testUIServer'
   ]);
 
   grunt.registerTask('test:ui:server', [
     'esvm:ui',
     'run:testUIServer',
-    'downloadSelenium',
-    'run:devSeleniumServer:keepalive'
+    'run:devChromeDriver:keepalive'
   ]);
 
   grunt.registerTask('test:ui:runner', [

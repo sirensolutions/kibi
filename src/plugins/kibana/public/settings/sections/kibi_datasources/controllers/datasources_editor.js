@@ -5,6 +5,7 @@ define(function (require) {
   require('plugins/kibana/settings/sections/kibi_datasources/services/saved_datasources');
 
   require('ui/kibi/components/query_engine_client/query_engine_client');
+  require('ui/kibi/directives/kibi_validate');
 
   require('ui/routes')
   .when('/settings/datasources', {
@@ -81,14 +82,15 @@ define(function (require) {
           }
         }
 
-        if (kibiUtils.isSQL(datasource.datasourceType)) {
-          const msg = 'Changes in jdbc datasource require application restart. ' +
-            'Please restart kibi and do not forget to set kibi_core.load_jdbc to true.';
+        if (kibiUtils.isJDBC(datasource.datasourceType)) {
+          const msg = 'Changes in a JDBC datasource requires the application to be restarted. ' +
+            'Please restart Kibi and do not forget to set kibi_core.load_jdbc to true.';
           notify.warning(msg);
         }
 
         if (datasource.datasourceType === kibiUtils.DatasourceTypes.tinkerpop3) {
-          const baseUrl = datasource.datasourceParams.url.replace('/graph/query', '');
+          const datasourceUrl = datasource.datasourceParams.url;
+          let baseUrl = datasourceUrl.replace(/\/graph\/query(Batch)?/, '');
 
           queryEngineClient.gremlinPing(baseUrl).then(function (response) {
             if (response.data.error) {
@@ -135,34 +137,8 @@ define(function (require) {
         });
       }
 
-      $scope.delete = function () {
-        if ($window.confirm('Are you sure you want to delete the datasource [' + datasource.title + ']')) {
-          datasource.delete().then(function (resp) {
-            queryEngineClient.clearCache().then(function () {
-              kbnUrl.change('settings/datasources', {});
-            });
-          });
-        }
-      };
-
       $scope.newDatasource = function () {
         kbnUrl.change('settings/datasources', {});
-      };
-
-      $scope.clone = function () {
-        savedDatasources.get().then(function (savedDatasourceClone) {
-          savedDatasourceClone.id = datasource.id + '-clone';
-          savedDatasourceClone.title = datasource.title + ' clone';
-          savedDatasourceClone.description = datasource.description;
-
-          savedDatasourceClone.save().then(function (resp) {
-            notify.info('Datasource ' + savedDatasourceClone.title + 'successfully saved');
-            queryEngineClient.clearCache().then(function () {
-              $rootScope.$emit('kibi:datasource:changed', resp);
-              kbnUrl.change('settings/datasources/' + resp);
-            });
-          });
-        });
       };
 
       $scope.$watch('datasource.datasourceType', function () {

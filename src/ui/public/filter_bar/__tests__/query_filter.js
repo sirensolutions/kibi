@@ -1,13 +1,19 @@
-var _ = require('lodash');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
-var queryFilter;
-var EventEmitter;
-var $rootScope;
+let MockState = require('fixtures/mock_state');
+let _ = require('lodash');
+let expect = require('expect.js');
+let ngMock = require('ngMock');
+let queryFilter;
+let EventEmitter;
+let $rootScope;
 
 describe('Query Filter', function () {
   describe('Module', function () {
-    beforeEach(ngMock.module('kibana'));
+    beforeEach(ngMock.module('kibana', function ($provide) {
+      $provide.service('kibiState', function () {
+        return new MockState({ filters: [] });
+      });
+    }));
+
     beforeEach(ngMock.inject(function (_$rootScope_, Private) {
       $rootScope = _$rootScope_;
       queryFilter = Private(require('ui/filter_bar/query_filter'));

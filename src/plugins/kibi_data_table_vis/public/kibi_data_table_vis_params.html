@@ -30,24 +30,15 @@
             </div>
 
             <div class="form-group">
-              <label>On click I want to</label>
+              <label>On click I want to
               <a href="http://siren.solutions/kibi/docs/current/external-datasources.html" target="_blank">
-                <i class="fa fa-info-circle help-icon"
-                   tooltip="Click to see the relevant documentation"
-                   tooltip-placement="right"
-                   tooltip-animation="false"
-                   tooltip-popup-delay="0"
-                   tooltip-append-to-body="true">
-                </i>
+                <kbn-info info="Click to see the relevant documentation"></kbn-info>
               </a>
+              </label>
               </br>
               <select required ng-model="clickOption.type" class="form-control">
                 <option value="link">Follow the URL</option>
                 <option value="select">Select the document</option>
-                <!--
-                THIS OPTION IS COMING
-                <option value="filter">Filter</option>
-                 -->
               </select>
             </div>
 
@@ -108,27 +99,36 @@
       </div>
 
       <ul>
-        <li ng-repeat="queryId in vis.params.queryIds" class="queryOptionArea" >
+        <li ng-repeat="queryDefinition in vis.params.queryDefinitions" class="queryOptionArea" >
+
+          <div class="header">
+            <h2>Query {{$index +1}}</h2>
+          </div>
 
           <div class="content">
             <div class="form-group">
-              <label>Target query {{$index + 1}}</label>
-              <kibi-select required object-type="query" ng-model="queryId.queryId"></kibi-select>
+              <label>Target query</label>
+              <kibi-select required object-type="query" ng-model="queryDefinition.queryId"></kibi-select>
             </div>
             <div class="form-group">
-              <label>Target query variable name {{$index + 1}}</label>
-              <kibi-select required object-type="queryVariable" query-id="queryId.queryId" ng-model="queryId.queryVariableName"></kibi-select>
+              <label>Target query variable name</label>
+              <kibi-select
+                required
+                object-type="queryVariable"
+                query-id="queryDefinition.queryId"
+                model-disabled="!queryDefinition.queryId"
+                ng-model="queryDefinition.queryVariableName">
+              </kibi-select>
             </div>
 
-
             <div class="btn-group rightCorner">
-              <kibi-array-param-remove index="{{ $index }}" model="vis.params.queryIds"></kibi-array-param-remove>
+              <kibi-array-param-remove index="{{ $index }}" model="vis.params.queryDefinitions"></kibi-array-param-remove>
             </div>
 
           </div>
         </li>
       </ul>
-      <kibi-array-param-add required label="query" model="vis.params.queryIds"></kibi-array-param-add>
+      <kibi-array-param-add required label="query" model="vis.params.queryDefinitions"></kibi-array-param-add>
     </div>
   </section>
 

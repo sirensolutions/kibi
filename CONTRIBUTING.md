@@ -10,7 +10,7 @@ Please make sure you have signed the [Contributor License Agreement](http://sire
 
 ### Development Environment Setup
 
-- Clone the kibi repo and move into it
+- Clone the Kibi repo and move into it
 
   ```sh
   git clone https://github.com/sirensolutions/kibi.git kibi
@@ -63,13 +63,6 @@ Please make sure you have signed the [Contributor License Agreement](http://sire
 The `config/kibi.yml` file stores user configuration directives. Since this file is checked into source control, however, developer preferences can't be saved without the risk of accidentally committing the modified version. To make customizing configuration easier during development, the Kibi CLI will look for a `config/kibi.dev.yml` file if run with the `--dev` flag. This file behaves just like the non-dev version and accepts any of the [standard settings](https://www.elastic.co/guide/en/kibana/master/kibana-server-properties.html).
 
 The `config/kibi.dev.yml` file is very commonly used to store some opt-in/**unsafe** optimizer tweaks which can significantly increase build performance. Below is a commonly used `config/kibi.dev.yml` file, but additional options can be found [in #4611](https://github.com/elastic/kibana/pull/4611#issue-99706918).
-=======
-#### `config/kibana.dev.yml`
-
-The `config/kibana.yml` file stores user configuration directives. Since this file is checked into source control, however, developer preferences can't be saved without the risk of accidentally committing the modified version. To make customizing configuration easier during development, the Kibana CLI will look for a `config/kibana.dev.yml` file if run with the `--dev` flag. This file behaves just like the non-dev version and accepts any of the [standard settings](https://www.elastic.co/guide/en/kibana/master/kibana-server-properties.html).
-
-The `config/kibana.dev.yml` file is very commonly used to store some opt-in/**unsafe** optimizer tweaks which can significantly increase build performance. Below is a commonly used `config/kibana.dev.yml` file, but additional options can be found [in #4611](https://github.com/elastic/kibana/pull/4611#issue-99706918).
->>>>>>> upstream/4.4
 
 ```yaml
 optimize:
@@ -114,6 +107,15 @@ npm run test && npm run build
 
 Distributable packages can be found in `target/` after the build completes.
 
+#### Debugging custom kibi queries
+
+Kibi use custom filters which are then translated to elasticsearch queries on the backend.
+In order to see the queries before and after translations enable verbose logging by adding following line to kibi.dev.yml
+
+```
+logging.verbose: true
+```
+
 #### Debugging test failures
 
 The standard `npm run test` task runs several sub tasks and can take several minutes to complete, making debugging failures pretty painful. In order to ease the pain specialized tasks provide alternate methods for running the tests.
@@ -125,6 +127,9 @@ The standard `npm run test` task runs several sub tasks and can take several min
   <dt><code>npm run test:server</code> or <code>npm run test:browser</code></dt>
   <dd>Runs the tests for just the server or browser</dd>
 
+  <dt><code>npm run test:server -- --grep 'Migration'</code></dt>
+  <dd>Runs the server tests which match the grep expression</dd>
+
   <dt><code>npm run test:dev</code></dt>
   <dd>
     Initializes an environment for debugging the browser tests. Includes an dedicated instance of the kibi server for building the test bundle, and a karma server. When running this task the build is optimized for the first time and then a karma-owned instance of the browser is opened. Click the "debug" button to open a new tab that executes the unit tests.
@@ -132,20 +137,6 @@ The standard `npm run test` task runs several sub tasks and can take several min
     <img src="http://i.imgur.com/DwHxgfq.png">
   </dd>
 </dl>
-
-#### OS packages
-
-Packages are built using fpm, pleaserun, dpkg, and rpm.  fpm and pleaserun can be installed using gem.  Package building has only been tested on Linux and is not supported on any other platform.
-```sh
-gem install pleaserun
-gem install fpm
-npm run build:ospackages
-```
-
-To specify a package to build you can add `rpm` or `deb` as an argument.
-```sh
-npm run build:ospackages -- --rpm
-```
 
 ### Functional UI Testing
 
@@ -156,15 +147,15 @@ npm run build:ospackages -- --rpm
 
 #### Running tests using npm task:
 
-*The Selenium server that is started currently only runs the tests in Firefox*
+*The ChromeDriver that is started currently only runs the tests in Chrome browser*
 
-To runt the functional UI tests, execute the following command:
+To run the functional UI tests, execute the following command:
 
 `npm run test:ui`
 
 The task above takes a little time to start the servers.  You can also start the servers and leave them running, and then run the tests separately:
 
-`npm run test:ui:server` will start the server required to run the selenium tests, leave this open
+`npm run test:ui:server` will start the server required to run the UI tests, leave this open
 
 `npm run test:ui:runner` will run the frontend tests and close when complete
 
@@ -182,6 +173,25 @@ Once you've got the services running, execute the following:
 - At least the initial tests for the Settings, Discover, and Visualize tabs all depend on a very specific set of logstash-type data (generated with makelogs).  Since that is a static set of data, all the Discover and Visualize tests use a specific Absolute time range.  This guarantees the same results each run.
 - These tests have been developed and tested with Chrome and Firefox browser.  In theory, they should work on all browsers (that's the benefit of Intern using Leadfoot).
 - These tests should also work with an external testing service like https://saucelabs.com/ or https://www.browserstack.com/ but that has not been tested.
+- https://theintern.github.io/
+- https://theintern.github.io/leadfoot/module-leadfoot_Element.html
+
+#### Building OS packages
+
+Packages are built using fpm, pleaserun, dpkg, and rpm.  fpm and pleaserun can be installed using gem.  Package building has only been tested on Linux and is not supported on any other platform.
+```sh
+apt-get install ruby-dev rpm
+gem install fpm -v 1.5.0
+gem install pleaserun -v 0.0.24
+npm run build -- --skip-archives
+```
+
+To specify a package to build you can add `rpm` or `deb` as an argument.
+```sh
+npm run build -- --rpm
+```
+
+Distributable packages can be found in `target/` after the build completes.
 
 ### Submit a pull request
 
@@ -215,3 +225,7 @@ Remember, someone is blocked by a pull awaiting review, make it count. Be thorou
 1. **Hand it back** If you found issues, re-assign the submitter to the pull to address them. Repeat until mergable.
 1. **Hand it off** If you're the first reviewer and everything looks good but the changes are more than a few lines, hand the pull to someone else to take a second look. Again, try to find the right person to assign it to.
 1. **Merge the code** When everything looks good, merge into the target branch. Check the labels on the pull to see if backporting is required, and perform the backport if so.
+
+### Possible Errors
+
+Sometimes after fresh plugin install, you get the following error `Invalid <name> plugin type`. The remedy for this is to delete all contents of the kibi optimize bundles folder, for example `rm -rf kibi-internal/optimize/bundles/*`, then reboot kibi.

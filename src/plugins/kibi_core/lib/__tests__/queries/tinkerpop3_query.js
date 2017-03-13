@@ -13,7 +13,9 @@ var fakeServer = {
         } else if (key === 'kibana.index') {
           return '.kibi';
         } else if (key === 'pkg') {
-          return { version : '0.3.2' };
+          return {
+            kibiVersion: '0.3.2'
+          };
         } else {
           return '';
         }
@@ -86,7 +88,7 @@ var fakeServer = {
   }
 };
 
-var fakeGraphResponse = {
+var fakeGraphResponse = [{
   queryActivated: true,
   data: {
     result: {
@@ -144,8 +146,7 @@ var fakeGraphResponse = {
       templateVars: {
         label: 'Preview'
       },
-      open: true,
-      showFilterButton: false
+      open: true
     },
     results: {
       bindings: []
@@ -158,7 +159,7 @@ var fakeGraphResponse = {
     id: 'afbf795e-9b27-47f7-b945-41520e9f1aed'
   },
   html: ''
-};
+}];
 
 var fakeTinkerpop3Result = {
   queryActivated: true,
@@ -218,8 +219,7 @@ var fakeTinkerpop3Result = {
       templateVars: {
         label: 'Preview'
       },
-      open: true,
-      showFilterButton: false
+      open: true
     },
     results: {
       bindings: []
@@ -246,7 +246,7 @@ var queryDefinition = {
     datasourceClazz: {
       datasource: {
         datasourceParams: {
-          url: 'http://localhost:3000/graph/query',
+          url: 'http://localhost:3000/graph/queryBatch',
           cache_enabled: true,
           timeout: 1000
         }
@@ -271,7 +271,7 @@ describe('TinkerPop3Query', function () {
     mockery.registerMock('request-promise', function (rpOptions) {
 
       // here return different resp depends on rpOptions.href
-      if (rpOptions.uri.indexOf('http://localhost:3000/graph/query') !== -1) {
+      if (rpOptions.uri.indexOf('http://localhost:3000/graph/queryBatch') !== -1) {
         return Promise.resolve(fakeGraphResponse);
       } else {
         return Promise.reject(new Error('Document does not exists'));
@@ -298,7 +298,7 @@ describe('TinkerPop3Query', function () {
           datasourceClazz: {
             datasource: {
               datasourceParams: {
-                url: 'http://localhost:3000/graph/query',
+                url: 'http://localhost:3000/graph/queryBatch',
                 timeout: '1000'
               }
             },
@@ -327,7 +327,7 @@ describe('TinkerPop3Query', function () {
       tinkerPop3Query.fetchResults({credentials: {username: 'fred'}}).then(function (res) {
         expect(res.result).to.eql(fakeTinkerpop3Result);
         expect(spy.callCount).to.equal(1);
-        expect(spy.calledWithExactly('http://localhost:3000/graph/query', '', undefined, undefined, 'fred')).to.be.ok();
+        expect(spy.calledWithExactly('http://localhost:3000/graph/queryBatch', '', undefined, undefined, 'fred')).to.be.ok();
 
         tinkerPop3Query.generateCacheKey.restore();
         done();

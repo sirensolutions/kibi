@@ -1,19 +1,23 @@
 
-var _ = require('lodash');
-var fixtures = require('fixtures/fake_hierarchical_data');
-var sinon = require('auto-release-sinon');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
+let _ = require('lodash');
+let fixtures = require('fixtures/fake_hierarchical_data');
+let sinon = require('auto-release-sinon');
+let expect = require('expect.js');
+let ngMock = require('ngMock');
 
-var Vis;
-var Notifier;
-var AggConfigs;
-var indexPattern;
-var buildHierarchicalData;
+let Vis;
+let Notifier;
+let AggConfigs;
+let indexPattern;
+let buildHierarchicalData;
 
 describe('buildHierarchicalData', function () {
 
-  beforeEach(ngMock.module('kibana'));
+  beforeEach(ngMock.module('kibana', function ($provide) {
+    $provide.constant('kbnDefaultAppId', '');
+    $provide.constant('kibiDefaultDashboardTitle', '');
+    $provide.constant('elasticsearchPlugins', ['siren-join']);
+  }));
   beforeEach(ngMock.inject(function (Private, $injector) {
     // stub the error method before requiring vis causes Notifier#error to be bound
     Notifier = $injector.get('Notifier');
@@ -27,11 +31,11 @@ describe('buildHierarchicalData', function () {
 
 
   describe('metric only', function () {
-    var vis;
-    var results;
+    let vis;
+    let results;
 
     beforeEach(function () {
-      var id = 1;
+      let id = 1;
       vis = new Vis(indexPattern, {
         type: 'pie',
         aggs: [
@@ -44,7 +48,7 @@ describe('buildHierarchicalData', function () {
     });
 
     it('should set the slices with one child to a consistent label', function () {
-      var checkLabel = 'Count';
+      let checkLabel = 'Count';
       expect(results).to.have.property('slices');
       expect(results.slices).to.have.property('children');
       expect(results.slices.children).to.have.length(1);
@@ -63,8 +67,8 @@ describe('buildHierarchicalData', function () {
   describe('rows and columns', function () {
 
     it('should set the rows', function () {
-      var id = 1;
-      var vis = new Vis(indexPattern, {
+      let id = 1;
+      let vis = new Vis(indexPattern, {
         type: 'pie',
         aggs: [
           { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
@@ -75,13 +79,13 @@ describe('buildHierarchicalData', function () {
       });
       // We need to set the aggs to a known value.
       _.each(vis.aggs, function (agg) { agg.id = 'agg_' + id++; });
-      var results = buildHierarchicalData(vis, fixtures.threeTermBuckets);
+      let results = buildHierarchicalData(vis, fixtures.threeTermBuckets);
       expect(results).to.have.property('rows');
     });
 
     it('should set the columns', function () {
-      var id = 1;
-      var vis = new Vis(indexPattern, {
+      let id = 1;
+      let vis = new Vis(indexPattern, {
         type: 'pie',
         aggs: [
           { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
@@ -92,18 +96,18 @@ describe('buildHierarchicalData', function () {
       });
       // We need to set the aggs to a known value.
       _.each(vis.aggs, function (agg) { agg.id = 'agg_' + id++; });
-      var results = buildHierarchicalData(vis, fixtures.threeTermBuckets);
+      let results = buildHierarchicalData(vis, fixtures.threeTermBuckets);
       expect(results).to.have.property('columns');
     });
 
   });
 
   describe('threeTermBuckets', function () {
-    var vis;
-    var results;
+    let vis;
+    let results;
 
     beforeEach(function () {
-      var id = 1;
+      let id = 1;
       vis = new Vis(indexPattern, {
         type: 'pie',
         aggs: [
@@ -141,11 +145,11 @@ describe('buildHierarchicalData', function () {
   });
 
   describe('oneHistogramBucket', function () {
-    var vis;
-    var results;
+    let vis;
+    let results;
 
     beforeEach(function () {
-      var id = 1;
+      let id = 1;
       vis = new Vis(indexPattern, {
         type: 'pie',
         aggs: [
@@ -173,11 +177,11 @@ describe('buildHierarchicalData', function () {
   });
 
   describe('oneRangeBucket', function () {
-    var vis;
-    var results;
+    let vis;
+    let results;
 
     beforeEach(function () {
-      var id = 1;
+      let id = 1;
       vis = new Vis(indexPattern, {
         type: 'pie',
         aggs: [
@@ -214,11 +218,11 @@ describe('buildHierarchicalData', function () {
   });
 
   describe('oneFilterBucket', function () {
-    var vis;
-    var results;
+    let vis;
+    let results;
 
     beforeEach(function () {
-      var id = 1;
+      let id = 1;
       vis = new Vis(indexPattern, {
         type: 'pie',
         aggs: [
@@ -250,11 +254,11 @@ describe('buildHierarchicalData', function () {
   });
 
   describe('oneFilterBucket that is a split', function () {
-    var vis;
-    var results;
+    let vis;
+    let results;
 
     beforeEach(function () {
-      var id = 1;
+      let id = 1;
       vis = new Vis(indexPattern, {
         type: 'pie',
         aggs: [
@@ -277,7 +281,7 @@ describe('buildHierarchicalData', function () {
     });
 
     it('should set the hits attribute for the results', function () {
-      var errCall = Notifier.prototype.error.getCall(0);
+      let errCall = Notifier.prototype.error.getCall(0);
       expect(errCall).to.be.ok();
       expect(errCall.args[0]).to.contain('not supported');
 

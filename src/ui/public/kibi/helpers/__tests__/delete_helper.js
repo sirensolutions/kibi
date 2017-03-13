@@ -58,16 +58,20 @@ describe('Kibi Components', function () {
       ngMock.module('kibana', function ($provide) {
         $provide.constant('kibiEnterpriseEnabled', false);
         $provide.constant('kbnDefaultAppId', '');
-        $provide.constant('kibiDefaultDashboardId', '');
+        $provide.constant('kibiDefaultDashboardTitle', '');
         $provide.constant('elasticsearchPlugins', []);
       });
 
       ngMock.module('dashboard_groups_editor/services/saved_dashboard_groups', function ($provide) {
-        $provide.service('savedDashboardGroups', (Promise) => mockSavedObjects(Promise)('savedDashboardGroups', fakeSavedDashboardGroups));
+        $provide.service('savedDashboardGroups', (Promise, Private) => {
+          return mockSavedObjects(Promise, Private)('savedDashboardGroups', fakeSavedDashboardGroups);
+        });
       });
 
       ngMock.module('app/visualize', function ($provide) {
-        $provide.service('savedVisualizations', (Promise) => mockSavedObjects(Promise)('savedVisualizations', fakeSavedVisualisations));
+        $provide.service('savedVisualizations', (Promise, Private) => {
+          return mockSavedObjects(Promise, Private)('savedVisualizations', fakeSavedVisualisations);
+        });
       });
 
       ngMock.inject(function (Private) {
@@ -75,8 +79,38 @@ describe('Kibi Components', function () {
       });
     });
 
-
     require('testUtils/noDigestPromises').activateForSuite();
+
+    describe('getVisualisations', function () {
+      it('should return the visualisation that use query 456', function (done) {
+        deleteHelper._getVisualisations([ '456', '789' ]).then(function (visData) {
+          expect(visData[0]).to.eql([ '456' ]);
+          expect(visData[1]).to.have.length(1);
+          expect(visData[1][0].title).to.be('myvis2');
+          done();
+        }).catch(done);
+      });
+
+      it('should return the visualisations that use queries 123 and 456', function (done) {
+        deleteHelper._getVisualisations([ '456', '123' ]).then(function (visData) {
+          expect(visData[0]).to.have.length(2);
+          expect(visData[0]).to.contain('123');
+          expect(visData[0]).to.contain('456');
+          expect(visData[1]).to.have.length(2);
+          expect(visData[1][0].title).to.be('myvis1');
+          expect(visData[1][1].title).to.be('myvis2');
+          done();
+        }).catch(done);
+      });
+
+      it('should return no visualisation', function (done) {
+        deleteHelper._getVisualisations([ '666' ]).then(function (visData) {
+          expect(visData[0]).to.have.length(0);
+          expect(visData[1]).to.have.length(0);
+          done();
+        }).catch(done);
+      });
+    });
 
     it('should call the delegated delete method method if the service is neither a query nor a dashboard', function () {
       var spy = sinon.spy();

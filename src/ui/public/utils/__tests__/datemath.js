@@ -1,16 +1,16 @@
-var dateMath = require('ui/utils/dateMath');
-var expect = require('expect.js');
-var moment = require('moment');
-var _ = require('lodash');
-var sinon = require('auto-release-sinon');
+let dateMath = require('ui/utils/dateMath');
+let expect = require('expect.js');
+let moment = require('moment');
+let _ = require('lodash');
+let sinon = require('auto-release-sinon');
 
 describe('dateMath', function () {
   // Test each of these intervals when testing relative time
-  var spans = ['s', 'm', 'h', 'd', 'w', 'M', 'y'];
-  var anchor =  '2014-01-01T06:06:06.666Z';
-  var unix = moment(anchor).valueOf();
-  var format = 'YYYY-MM-DDTHH:mm:ss.SSSZ';
-  var clock;
+  let spans = ['s', 'm', 'h', 'd', 'w', 'M', 'y'];
+  let anchor =  '2014-01-01T06:06:06.666Z';
+  let unix = moment(anchor).valueOf();
+  let format = 'YYYY-MM-DDTHH:mm:ss.SSSZ';
+  let clock;
 
   describe('errors', function () {
     it('should return undefined if passed something falsy', function () {
@@ -39,10 +39,10 @@ describe('dateMath', function () {
   });
 
   describe('objects and strings', function () {
-    var mmnt;
-    var date;
-    var string;
-    var now;
+    let mmnt;
+    let date;
+    let string;
+    let now;
 
     beforeEach(function () {
       clock = sinon.useFakeTimers(unix);
@@ -70,8 +70,8 @@ describe('dateMath', function () {
   });
 
   describe('subtraction', function () {
-    var now;
-    var anchored;
+    let now;
+    let anchored;
 
     beforeEach(function () {
       clock = sinon.useFakeTimers(unix);
@@ -80,8 +80,8 @@ describe('dateMath', function () {
     });
 
     _.each(spans, function (span) {
-      var nowEx = 'now-5' + span;
-      var thenEx =  anchor + '||-5' + span;
+      let nowEx = 'now-5' + span;
+      let thenEx =  anchor + '||-5' + span;
 
       it('should return 5' + span + ' ago', function () {
         expect(dateMath.parse(nowEx).format(format)).to.eql(now.subtract(5, span).format(format));
@@ -94,8 +94,8 @@ describe('dateMath', function () {
   });
 
   describe('addition', function () {
-    var now;
-    var anchored;
+    let now;
+    let anchored;
 
     beforeEach(function () {
       clock = sinon.useFakeTimers(unix);
@@ -104,8 +104,8 @@ describe('dateMath', function () {
     });
 
     _.each(spans, function (span) {
-      var nowEx = 'now+5' + span;
-      var thenEx =  anchor + '||+5' + span;
+      let nowEx = 'now+5' + span;
+      let thenEx =  anchor + '||+5' + span;
 
       it('should return 5' + span + ' from now', function () {
         expect(dateMath.parse(nowEx).format()).to.eql(now.add(5, span).format());
@@ -119,8 +119,8 @@ describe('dateMath', function () {
   });
 
   describe('rounding', function () {
-    var now;
-    var anchored;
+    let now;
+    let anchored;
 
     beforeEach(function () {
       clock = sinon.useFakeTimers(unix);
@@ -140,27 +140,27 @@ describe('dateMath', function () {
 
   });
 
-  describe('precise parsing', function () {
+  describe('kibi - parse time with precision', function () {
 
-    it('parse time with precision', function () {
-
+    it('should round the time with the given precision', function () {
       _.each(spans, function (precision) {
-        var expected = moment(anchor).startOf(precision).format(format);
+        const expected = moment(anchor).startOf(precision).format(format);
         expect(dateMath.parseWithPrecision(anchor, null, precision).format(format)).to.equal(expected);
         expect(dateMath.parseWithPrecision(anchor, true, precision).format(format)).to.equal(expected);
       });
     });
 
-    it('parse time with precision - should throw error when wrong precision', function () {
+    it('should throw error when wrong precision', function () {
       try {
         dateMath.parseWithPrecision(anchor, null, 'WRONG');
+        expect.fail('should fail');
       } catch (e) {
         expect(e.message).to.equal('Wrong precision argument use one of y,M,w,d,h,m,s');
       }
     });
 
-    it('parse time with precision - should NOT throw error when precision false or undefined', function () {
-      var expected = moment(anchor).format(format);
+    it('should NOT throw an error when precision false or undefined', function () {
+      const expected = moment(anchor).format(format);
       expect(dateMath.parseWithPrecision(anchor).format(format)).to.equal(expected);
     });
 

@@ -1,0 +1,75 @@
+@import (reference) "~ui/kibi/styles/kibi_variables.less";
+@import (reference) "~ui/styles/mixins.less";
+
+.kibi-menu-template {
+  display: none;
+  position: absolute;
+  &.visible {
+    display: block;
+  }
+}
+
+/* specific class dashboard tabs template */
+.kibi-menu-template-kibi-navbar {
+  border-color: @kibi-menu-template-border-light @kibi-menu-template-border-dark @kibi-menu-template-border-dark @kibi-menu-template-border-dark;
+  border-style: solid;
+  border-width: 1px;
+  border-radius: 0 2px 2px 2px;
+  background-color: @kibi-menu-template-bg;
+  margin-top: -1px;
+  padding: 0 2px 2px 2px;
+
+  ul {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+
+    li {
+      margin-top: 2px;
+      padding: 4px;
+      cursor: pointer;
+      background-color: @kibi-menu-template-item-bg;
+      &:hover{
+        background-color: @kibi-menu-template-item-bg-hover;
+      }
+    }
+  }
+
+  span.smallNumber {
+    font-size: 90%;
+  }
+}
+
+/* specific class for use in vis params */
+.kibi-menu-template-sequential-join-vis {
+  border-color: @kibi-menu-template-border-dark;
+  border-style: solid;
+  border-width: 1px;
+  border-radius: 2px;
+  background-color: @kibi-menu-template-bg;
+  margin-top: -1px;
+  padding: 0;
+  .box-shadow(0, 0, 5px, 0px);
+  max-height: inherit;
+  overflow: auto;
+
+  ul {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+
+    li {
+      margin-top: 2px;
+      padding: 4px 8px;
+      cursor: pointer;
+      background-color: @kibi-menu-template-item-bg;
+      &:hover{
+        background-color: @kibi-menu-template-item-bg-hover;
+      }
+
+      i.fa {
+        margin: 0 3px;
+      }
+    }
+  }
+}

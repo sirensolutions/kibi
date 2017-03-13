@@ -1,7 +1,7 @@
-<div id="sindicetech_entity_info_vis_params" class="sindicetech-entity-info-vis-params">
+<div id="sindicetech_entity_info_vis_params" class="kibi-query-viewer-params">
 
   <ul>
-    <li ng-repeat="queryOption in vis.params.queryOptions" class="queryOptionArea" >
+    <li ng-repeat="queryDefinition in vis.params.queryDefinitions" class="queryOptionArea" >
       <div class="header">
         <h2>Query {{$index + 1}}</h2>
       </div>
@@ -14,19 +14,19 @@
               placement="right"
               info="The label is passed to the template via the config object, i.e., 'config.templateVars.label'."></kbn-info>
           </label>
-          <input type="text" ng-model="queryOption._label" placeholder="Optional" class="form-control" />
+          <input type="text" ng-model="queryDefinition._label" placeholder="Optional" class="form-control" ng-change="labelChanged($index)" />
         </div>
 
         <div class="form-group">
-          <label>Source query</label>
-          <a ng-if="queryOption.queryId && queryOption.queryId !== ''" ng-click="editQuery($index)" > Edit selected query</a></br>
-          <kibi-select required object-type="query" ng-model="queryOption.queryId"></kibi-select>
+          <label>Source query <a ng-if="queryDefinition.queryId && queryDefinition.queryId !== ''" ng-click="editQuery($index)" class="form-group label" > Edit selected query</a></label>
+          </br>
+          <kibi-select required object-type="query" ng-model="queryDefinition.queryId"></kibi-select>
         </div>
 
         <div class="form-group">
-          <label>Template</label>
-          <a ng-if="queryOption.templateId && queryOption.templateId !== ''" ng-click="editTemplate($index)" > Edit selected template</a></br>
-          <kibi-select required object-type="template" ng-model="queryOption.templateId"></kibi-select>
+          <label>Template <a ng-if="queryDefinition.templateId && queryDefinition.templateId !== ''" ng-click="editTemplate($index)" class="form-group label" > Edit selected template</a></label>
+          </br>
+          <kibi-select required object-type="template" ng-model="queryDefinition.templateId"></kibi-select>
         </div>
 
         <div class="vis-editor-agg-editor-advanced-toggle">
@@ -43,11 +43,23 @@
             Template variables
             <kbn-info info="Specify the JSON configuration passed to the template."></kbn-info>
           </label>
-          <div ng-class="{ 'red-border': !!jsonError[$index].message }"
-               ui-ace="{ onLoad: aceLoaded, mode: 'json' }"
-               msd-elastic id="templateVars-{{$index}}"
-               ng-model="queryOption._templateVarsString"
-               class="form-control templateVariablesEditor">
+          <div id="templateVars-{{$index}}"
+               ng-class="{ 'red-border': !!jsonError[$index].message }"
+               ui-ace="{
+                 onLoad: aceLoaded,
+                 advanced: {
+                   tabSize: 2
+                 },
+                 rendererOptions: {
+                   showPrintMargin: false,
+                   maxLines: 4294967296
+                 },
+                 mode: 'json'
+               }"
+               msd-elastic
+               ng-model="queryDefinition._templateVarsString"
+               class="form-control templateVariablesEditor"
+               ng-change="templateChanged()" >
           </div>
           <div class="form-group hintbox" ng-if="!!jsonError[$index].message">
             <h4 class="hintbox-heading">
@@ -58,51 +70,20 @@
           </div>
 
           <div class="form-group">
-            <input type="checkbox" ng-model="queryOption.open" />
-            <label>Render opened</label>
+            <label><input type="checkbox" ng-model="queryDefinition.open" /> Render opened</label>
           </div>
-
-          <!-- see issue https://github.com/sirensolutions/kibi-internal/issues/100 for details
-          <div class="form-group">
-            <input type="checkbox" ng-model="queryOption.showFilterButton" />
-            <label>Show relational filter button</label>
-          </div>
-          -->
-
-          <div ng-if="queryOption.showFilterButton" >
-
-            <div class="form-group">
-              <label>Source query variable</label></br>
-              <kibi-select required object-type="queryVariable" query-id="queryOption.queryId" ng-model="queryOption.queryVariableName"></kibi-select>
-            </div>
-
-            <div class="form-group">
-              <label>Target index</label>
-              <kibi-select required object-type="indexPattern" ng-model="queryOption.targetIndex"></kibi-select>
-            </div>
-            <div class="form-group">
-              <label>Target field</label>
-              <kibi-select required object-type="field" analyzed-warning="true"
-                         index-pattern-id="queryOption.targetIndex" ng-model="queryOption.targetField"></kibi-select>
-            </div>
-            <div class="form-group">
-              <label>Target dashboard</label>
-              <kibi-select object-type="dashboard" ng-model="queryOption.redirectToDashboard"></kibi-select>
-            </div>
-          </div>
-
 
         </div>
 
         <div class="btn-group rightCorner">
-          <kibi-array-param-up index="{{ $index }}" model="vis.params.queryOptions"></kibi-array-param-up>
-          <kibi-array-param-down index="{{ $index }}" model="vis.params.queryOptions"></kibi-array-param-down>
-          <kibi-array-param-remove index="{{ $index }}" model="vis.params.queryOptions"></kibi-array-param-remove>
+          <kibi-array-param-up index="{{ $index }}" model="vis.params.queryDefinitions"></kibi-array-param-up>
+          <kibi-array-param-down index="{{ $index }}" model="vis.params.queryDefinitions"></kibi-array-param-down>
+          <kibi-array-param-remove index="{{ $index }}" model="vis.params.queryDefinitions"></kibi-array-param-remove>
         </div>
 
       </div>
     </li>
   </ul>
-  <kibi-array-param-add required default="{{ { open: true } }}" label="filter" model="vis.params.queryOptions"></kibi-array-param-add>
+  <kibi-array-param-add required default="{{ { open: true } }}" label="filter" model="vis.params.queryDefinitions"></kibi-array-param-add>
 
 </div>

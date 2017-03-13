@@ -1,8 +1,8 @@
 define(function (require) {
-  var _ = require('lodash');
+  const _ = require('lodash');
 
-  var html = require('ui/kibi/kibi_doc_table/kibi_doc_table.html');
-  var getSort = require('ui/doc_table/lib/get_sort');
+  const html = require('ui/kibi/kibi_doc_table/kibi_doc_table.html');
+  const getSort = require('ui/doc_table/lib/get_sort');
 
   require('ui/directives/truncated');
   require('ui/directives/infinite_scroll');
@@ -10,10 +10,14 @@ define(function (require) {
 
   require('ui/kibi/kibi_doc_table/kibi_doc_table.less');
   require('ui/kibi/kibi_doc_table/components/kibi_table_row');
+  // kibi: allow to query external datasources for populating a column
   require('ui/kibi/components/query_engine_client/query_engine_client');
 
   require('ui/modules').get('kibana')
-  .directive('kibiDocTable', function (config, createNotifier, getAppState, queryEngineClient, savedQueries, Promise, Private, courier) {
+  .directive('kibiDocTable', function (kibiState, config, createNotifier, Private, courier) {
+    const VirtualIndexPattern = Private(require('ui/kibi/components/commons/virtual_index_pattern'));
+    const fieldFormats = Private(require('ui/registry/field_formats'));
+
     return {
       restrict: 'E',
       template: html,
@@ -31,7 +35,7 @@ define(function (require) {
         queryColumn: '='
       },
       link: function ($scope) {
-        var notify = createNotifier({
+        const notify = createNotifier({
           location: 'Enhanced search results'
         });
         $scope.limit = 50;
@@ -40,8 +44,8 @@ define(function (require) {
           columns: $scope.columns
         };
 
-        var prereq = (function () {
-          var fns = [];
+        const prereq = (function () {
+          const fns = [];
 
           return function register(fn) {
             fns.push(fn);
@@ -59,27 +63,65 @@ define(function (require) {
           };
         }());
 
+        // Export results as CSV
+        $scope._saveAs = require('@spalger/filesaver').saveAs;
+        $scope.csv = {
+          separator: config.get('csv:separator'),
+          quoteValues: config.get('csv:quoteValues')
+        };
+
+        $scope.exportAsCsv = function () {
+          const csv = new Blob([$scope.toCsv()], { type: 'text/plain' });
+          const filename = (_.get($scope, '$parent.savedVis.id') || 'kibi-table') + '.csv';
+          $scope._saveAs(csv, filename);
+        };
+
+        $scope.toCsv = function () {
+          const rows = $scope.hits;
+          const nonAlphaNumRE = /[^a-zA-Z0-9]/;
+          const allDoubleQuoteRE = /"/g;
+          let columns;
+
+          if ($scope.indexPattern.timeFieldName) {
+            columns = [ $scope.indexPattern.timeFieldName, ...$scope.columns ];
+          } else {
+            columns = $scope.columns;
+          }
+
+          function escape(val) {
+            if (_.isObject(val)) {
+              val = val.valueOf();
+            }
+            val = String(val);
+            if ($scope.csv.quoteValues && nonAlphaNumRE.test(val)) {
+              val = '"' + val.replace(allDoubleQuoteRE, '""') + '"';
+            }
+            return val;
+          }
+
+          // escape each cell in each row
+          const csvRows = rows.map(function (row) {
+            return _.map(columns, (column, i) => {
+              if (i === 0 && $scope.indexPattern.timeFieldName) {
+                const text = $scope.indexPattern.formatField(row, column);
+                return escape(text);
+              } else {
+                return escape(_.get(row._source, column));
+              }
+            });
+          });
+
+          // add the columns to the rows
+          csvRows.unshift(columns.map(escape));
+
+          return csvRows.map(function (row) {
+            return row.join($scope.csv.separator) + '\r\n';
+          }).join('');
+        };
+
         $scope.addRows = function () {
           $scope.limit += 50;
         };
-
-        // TODO is this needed ?
-        //// This exists to fix the problem of an empty initial column list not playing nice with watchCollection.
-        //$scope.$watch('columns', function (columns) {
-          //if (columns.length !== 0) return;
-
-          //var $state = getAppState();
-          //$scope.columns.push('_source');
-          //if ($state) $state.replace();
-        //});
-
-        //$scope.$watchCollection('columns', function (columns, oldColumns) {
-          //if (oldColumns.length === 1 && oldColumns[0] === '_source' && $scope.columns.length > 1) {
-            //_.pull($scope.columns, '_source');
-          //}
-
-          //if ($scope.columns.length === 0) $scope.columns.push('_source');
-        //});
 
         // kibi: increase the number of results retrieved
         const sampleSize = config.get('discover:sampleSize');
@@ -102,6 +144,46 @@ define(function (require) {
         };
         // kibi: end
 
+        function addRelationalColumn() {
+          // validate here and do not inject if all require values are not set
+          if ($scope.queryColumn && $scope.queryColumn.queryDefinitions && $scope.queryColumn.queryDefinitions.length &&
+              $scope.queryColumn.joinElasticsearchField && $scope.queryColumn.name) {
+            const virtualIndexPattern = new VirtualIndexPattern($scope.indexPattern);
+            $scope.searchSource.index(virtualIndexPattern);
+
+            $scope.searchSource.inject([
+              {
+                entityURI: kibiState.isSelectedEntityDisabled() ? '' : kibiState.getEntityURI(),
+                queryDefs: $scope.queryColumn.queryDefinitions,
+                // it is the field from table to do the comparison
+                sourcePath: $scope.indexPattern.fields.byName[$scope.queryColumn.joinElasticsearchField].path,
+                fieldName: $scope.queryColumn.name
+              }
+            ]);
+
+            const injectedField = {
+              analyzed: false,
+              bucketable: true,
+              count: 0,
+              displayName: $scope.queryColumn.name,
+              name: $scope.queryColumn.name,
+              scripted: false,
+              sortable: false,
+              type: 'string',
+              format: fieldFormats.getDefaultInstance('string')
+            };
+            virtualIndexPattern.addVirtualField(injectedField);
+          }
+        }
+
+        $scope.$listen(kibiState, 'save_with_changes', function (diff) {
+          if (diff.indexOf(kibiState._properties.selected_entity) !== -1 ||
+              diff.indexOf(kibiState._properties.selected_entity_disabled) !== -1 ||
+              diff.indexOf(kibiState._properties.test_selected_entity) !== -1) {
+            addRelationalColumn();
+          }
+        });
+
         $scope.$watch('searchSource', prereq(function (searchSource) {
           if (!$scope.searchSource) return;
 
@@ -111,10 +193,12 @@ define(function (require) {
           $scope.searchSource.sort(getSort($scope.sorting, $scope.indexPattern));
 
           // kibi: source filtering
-          var sourceFiltering = $scope.indexPattern.getSourceFiltering();
+          const sourceFiltering = $scope.indexPattern.getSourceFiltering();
           if (sourceFiltering && sourceFiltering.all) {
             $scope.searchSource.source(sourceFiltering.all);
           }
+          // relational column
+          addRelationalColumn();
           // kibi: end
 
           // Set the watcher after initialization
@@ -129,7 +213,7 @@ define(function (require) {
             if ($scope.searchSource) $scope.searchSource.destroy();
           });
 
-          var previousSearchSource = $scope.searchSource;
+          const previousSearchSource = $scope.searchSource;
 
           // TODO: we need to have some way to clean up result requests
           $scope.searchSource.onResults().then(function onResults(searchResp) {
@@ -151,8 +235,7 @@ define(function (require) {
                   if (hit.fields[name] &&
                       hit.fields[name] instanceof Array &&
                       hit.fields[name].length > 0) {
-                    // remove the 0/1 entity dependent flag
-                    hit._source[name] = _(hit.fields[name]).map((column) => column.substring(1)).join(', ');
+                    hit._source[name] = hit.fields[name].join(', ');
                   }
                   delete hit.fields[name];
                 }
@@ -163,7 +246,21 @@ define(function (require) {
             return $scope.searchSource.onResults().then(onResults);
           }).catch(notify.fatal);
 
-          $scope.searchSource.onError(notify.error).catch(notify.fatal);
+          $scope.searchSource
+          .onError((error) => {
+            if (error.message) {
+              const matches = error.message.match(/from \+ size must be less than or equal to: \[(\d+)]/);
+              if (matches) {
+                const message = `Can't retrieve more than ${matches[1]} results.` +
+                                'Please check the index.max_result_window Elasticsearch index setting.';
+                const expError = new Error(message);
+                expError.stack = message;
+                return notify.error(expError);
+              }
+            }
+            notify.error(error);
+          })
+          .catch(notify.error);
         }));
 
       }

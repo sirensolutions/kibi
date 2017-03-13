@@ -5,17 +5,17 @@ define(function (require) {
   return _.assign({
     debug: true,
     capabilities: {
-      'selenium-version': '2.53.0',
       'idle-timeout': 99
     },
     environments: [{
-      browserName: 'firefox'
+      browserName: 'chrome'
     }],
     tunnelOptions: serverConfig.servers.webdriver,
     functionalSuites: [
       'test/functional/status_page/index',
       'test/functional/apps/settings/index',
-      'test/functional/apps/discover/index'
+      'test/functional/apps/discover/index',
+      'test/functional/apps/visualize/index'
     ],
     excludeInstrumentation: /(fixtures|node_modules)\//,
     loaderOptions: {
@@ -25,7 +25,8 @@ define(function (require) {
       }
     },
     timeouts: {
-      default: 90000
+      // this is how long a test can run before timing out
+      default: 360000
     },
   }, serverConfig);
 });

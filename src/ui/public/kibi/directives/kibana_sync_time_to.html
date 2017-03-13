@@ -1,0 +1,27 @@
+<div ng-switch on="mode">
+
+  <div ng-switch-when="relative">
+    <div class="kbn-timepicker-section">
+      <label>&nbsp;</label>
+      <br>
+      <div class="form-group">
+        <button type="button" ng-click="applyRelative()" class="btn btn-primary kbn-timepicker-go" ng-disabled="!relative.preview">
+          Go
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div ng-switch-when="absolute">
+    <div class="kbn-timepicker-section kbn-timepicker-alert">
+      <label>&nbsp;</label>
+      <div class="form-group">
+        <button ng-click="applyAbsolute()" class="btn btn-primary kbn-timepicker-go" ng-disabled="absolute.from > absolute.to || !absolute.from || !absolute.to" type="button">
+          Go
+        </button>
+        <span class="small" ng-show="absolute.from > absolute.to"><strong>From</strong> must occur before <strong>To</strong></span>
+      </div>
+    </div>
+  </div>
+
+</div>

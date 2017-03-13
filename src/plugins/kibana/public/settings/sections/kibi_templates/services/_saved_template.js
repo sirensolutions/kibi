@@ -20,19 +20,17 @@ define(function (require) {
         mapping: {
           title: 'string',
           description: 'string',
-          st_templateSource: 'string',
-          st_templateEngine: 'string',
-          _previewQueryId: 'string', // used only to temporary store query id for preview
+          templateSource: 'string',
+          templateEngine: 'string',
           version: 'integer'
         },
 
         defaults: {
           title: 'New Saved Template',
           description: '',
-          st_templateSource: '',
-          st_templateEngine: 'handlebars',
-          _previewQueryId: '',
-          version: 1
+          templateSource: '',
+          templateEngine: 'jade',
+          version: 2
         },
 
         searchSource: true

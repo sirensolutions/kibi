@@ -37,162 +37,139 @@ define(function (require) {
     }
   });
 
-
   var app = require('ui/modules').get('apps/settings', ['kibana', 'ui.ace', 'ngSanitize']);
   var angular = require('angular');
 
-  app.controller(
-    'TemplatesEditor',
-    function ($rootScope, $scope, $route, $window, kbnUrl, Private, SavedTemplate, savedQueries, savedDatasources,
-              savedTemplates, createNotifier, queryEngineClient, $element) {
-      var _shouldEntityURIBeEnabled = Private(require('ui/kibi/components/commons/_should_entity_uri_be_enabled'));
-      var _setEntityURI =  Private(require('ui/kibi/components/commons/_set_entity_uri'));
+  app.controller('TemplatesEditor', function ($scope, $route, $window, kbnUrl, Private, createNotifier, queryEngineClient, kibiState,
+                                              $element) {
+    const _shouldEntityURIBeEnabled = Private(require('ui/kibi/components/commons/_should_entity_uri_be_enabled'));
 
-      var notify = createNotifier({
-        location: 'Templates editor'
-      });
-
-      $scope.holder = {
-        entityURI: '',
-        entityURIEnabled: false,
-        visible: true
-      };
-
-      _setEntityURI($scope.holder);
-      var off = $rootScope.$on('kibi:selectedEntities:changed', function (event, se) {
-        _setEntityURI($scope.holder);
-      });
-      $scope.$on('$destroy', off);
-
-
-      $scope.jsonPreviewActive = false;
-      $scope.htmlPreviewActive = true;
-      $scope.tabClick = function () {
-        $scope.jsonPreviewActive = !$scope.jsonPreviewActive;
-        $scope.htmlPreviewActive = !$scope.htmlPreviewActive;
-      };
-
-
-      $scope.templateFinderOpen = false;
-      $scope.openTemplateFinder = function () {
-        $scope.templateFinderOpen = true;
-      };
-      $scope.closeTemplateFinder = function (hit, event) {
-        $scope.templateFinderOpen = false;
-        kbnUrl.change('settings/templates/' + hit.id);
-      };
-
-      var template = $scope.template = $route.current.locals.template;
-      $scope.$templateTitle = $route.current.locals.template.title;
-
-
-      $scope.jumpToQuery = function () {
-        kbnUrl.change('/settings/queries/' + $scope.template._previewQueryId);
-      };
-
-      var refreshPreview = function () {
-        $scope.json_preview_content = 'Loading ...';
-        $scope.html_preview_content = 'Loading ...';
-
-        if ($scope.template._previewQueryId && $scope.template._previewQueryId !== '') {
-
-          queryEngineClient.getQueriesHtmlFromServer(
-            [
-              {
-                open: true,
-                queryId: $scope.template._previewQueryId,
-                showFilterButton: false,
-                templateId: template.id,
-                templateVars: {
-                  label: '{{config.templateVars.label}}'
-                }
-              }
-            ],
-            {
-              selectedDocuments: [$scope.holder.entityURI]
-            }
-          ).then(function (resp) {
-            if (resp && resp.data && resp.data.snippets && resp.data.snippets.length === 1) {
-              var snippet = resp.data.snippets[0];
-              $scope.json_preview_content = JSON.stringify(snippet, null, ' ');
-
-              if (snippet.queryActivated === true) {
-                $scope.html_preview_content = snippet.html;
-              } else {
-                $scope.html_preview_content = 'Query deactivated. Check activation query or change entity URI';
-              }
-            }
-          });
-        }
-      };
-
-
-      $scope.$watch('template._previewQueryId', function () {
-        if ($scope.template._previewQueryId) {
-          _shouldEntityURIBeEnabled([$scope.template._previewQueryId])
-            .then(function (entityURIEnabled) {
-              $scope.holder.entityURIEnabled = entityURIEnabled;
-            }).then(savedQueries.get($scope.template._previewQueryId))
-          .then((savedQuery) => savedQuery && savedDatasources.get(savedQuery.st_datasourceId))
-            .then((savedDatasource) => {
-              // set datasourceType
-              if (savedDatasource) {
-                $scope.datasourceType = savedDatasource.type;
-              }
-            }).catch(notify.error);
-
-          refreshPreview();
-        }
-      });
-
-      $scope.submit = function () {
-        if (!$element.find('form[name="objectForm"]').hasClass('ng-valid')) {
-          $window.alert('Please fill in all the required parameters.');
-          return;
-        }
-        var titleChanged = $scope.$templateTitle !== $scope.template.title;
-        template.id = template.title;
-        template.save().then(function (resp) {
-          // here flush the cache and refresh preview
-          queryEngineClient.clearCache().then(function () {
-            notify.info('Template ' + template.title + 'successfuly saved');
-            if (titleChanged) {
-              kbnUrl.change('/settings/templates/' + template.id);
-            } else {
-              refreshPreview();
-            }
-          });
-        });
-      };
-
-      $scope.delete = function () {
-        if ($window.confirm('Are you sure about deleting [' + template.title + ']')) {
-          template.delete().then(function (resp) {
-            kbnUrl.change('/settings/templates', {});
-          });
-        }
-      };
-
-      //TODO understand how the validation was done in object editor
-      $scope.aceLoaded = function (editor) {
-        return;
-      };
-
-      $scope.newTemplate = function () {
-        kbnUrl.change('/settings/templates', {});
-      };
-
-      $scope.clone = function () {
-        template.id = template.title + '-clone';
-        template.title = template.title + ' clone';
-        template.save().then(function (resp) {
-          // here flush the cache and refresh preview
-          return queryEngineClient.clearCache().then(function () {
-            notify.info('Template ' + template.title + 'successfuly saved');
-            kbnUrl.change('/settings/templates/' + template.id);
-          });
-        }).catch(notify.error);
-      };
-
+    var notify = createNotifier({
+      location: 'Templates editor'
     });
+
+    $scope.holder = {
+      entityURIEnabled: false,
+      visible: true
+    };
+    $scope.preview = {
+      queryId: null
+    };
+
+    $scope.$on('$destroy', function () {
+      kibiState.removeTestEntityURI();
+      kibiState.save();
+    });
+
+    $scope.jsonPreviewActive = false;
+    $scope.htmlPreviewActive = true;
+    $scope.tabClick = function (preview) {
+      switch (preview) {
+        case 'json':
+          $scope.jsonPreviewActive = true;
+          $scope.htmlPreviewActive = false;
+          break;
+        case 'html':
+          $scope.jsonPreviewActive = false;
+          $scope.htmlPreviewActive = true;
+          break;
+      }
+    };
+
+
+    $scope.templateFinderOpen = false;
+    $scope.openTemplateFinder = function () {
+      $scope.templateFinderOpen = true;
+    };
+    $scope.closeTemplateFinder = function (hit, event) {
+      $scope.templateFinderOpen = false;
+      kbnUrl.change('settings/templates/' + hit.id);
+    };
+
+    var template = $scope.template = $route.current.locals.template;
+    $scope.$templateTitle = $route.current.locals.template.title;
+
+
+    $scope.jumpToQuery = function () {
+      kbnUrl.change('/settings/queries/' + _.get($scope, 'preview.queryId'));
+    };
+
+    var refreshPreview = function () {
+      $scope.json_preview_content = 'Loading ...';
+      $scope.html_preview_content = 'Loading ...';
+
+      if (_.get($scope, 'preview.queryId')) {
+        return queryEngineClient.getQueriesHtmlFromServer(
+          [
+            {
+              open: true,
+              queryId: _.get($scope, 'preview.queryId'),
+              templateId: template.id,
+              templateVars: {
+                label: '{{config.templateVars.label}}'
+              }
+            }
+          ],
+          {
+            selectedDocuments: kibiState.isSelectedEntityDisabled() ? [] : [ kibiState.getEntityURI() ]
+          }
+        ).then(function (resp) {
+          if (resp && resp.data && resp.data.snippets && resp.data.snippets.length === 1) {
+            var snippet = resp.data.snippets[0];
+            $scope.json_preview_content = JSON.stringify(snippet, null, ' ');
+
+            if (snippet.queryActivated === true) {
+              $scope.html_preview_content = snippet.html;
+            } else {
+              $scope.html_preview_content = 'Query deactivated. Check activation query or change entity URI';
+            }
+          }
+        });
+      }
+    };
+
+    $scope.$listen(kibiState, 'save_with_changes', function (diff) {
+      if (diff.indexOf(kibiState._properties.test_selected_entity) !== -1 && $scope.holder.entityURIEnabled) {
+        refreshPreview();
+      }
+    });
+
+    $scope.$watch('preview.queryId', function (queryId) {
+      if (queryId) {
+        _shouldEntityURIBeEnabled([ queryId ])
+        .then((isEntityDependent) => {
+          $scope.holder.entityURIEnabled = isEntityDependent;
+          return refreshPreview();
+        }).catch(notify.error);
+      }
+    });
+
+    $scope.submit = function () {
+      if (!$element.find('form[name="objectForm"]').hasClass('ng-valid')) {
+        $window.alert('Please fill in all the required parameters.');
+        return;
+      }
+      var titleChanged = $scope.$templateTitle !== $scope.template.title;
+      template.id = template.title;
+      template.save().then(function (resp) {
+        // here flush the cache and refresh preview
+        queryEngineClient.clearCache().then(function () {
+          notify.info('Template ' + template.title + 'successfuly saved');
+          if (titleChanged) {
+            kbnUrl.change('/settings/templates/' + template.id);
+          } else {
+            return refreshPreview();
+          }
+        }).catch(notify.error);
+      });
+    };
+
+    $scope.aceLoaded = function (editor) {
+      return;
+    };
+
+    $scope.newTemplate = function () {
+      kbnUrl.change('/settings/templates', {});
+    };
+  });
 });

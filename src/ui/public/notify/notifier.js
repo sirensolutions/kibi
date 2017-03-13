@@ -1,28 +1,23 @@
 define(function (require) {
-  var _ = require('lodash');
-  var $ = require('jquery');
+  let _ = require('lodash');
+  let $ = require('jquery');
+  let metadata = require('ui/metadata');
+  let formatMsg = require('kibie/notify/lib/_format_msg');
 
-  var metadata = require('ui/metadata');
-  var formatMsg = require('kibie/notify/lib/_format_msg');
+  let notifs = [];
+  let version = metadata.version;
+  let buildNum = metadata.buildNum;
+  let consoleGroups = ('group' in window.console) && ('groupCollapsed' in window.console) && ('groupEnd' in window.console);
 
-  var notifs = [];
-  var setTO = setTimeout;
-  var clearTO = clearTimeout;
-  var version = metadata.version;
-  var buildNum = metadata.buildNum;
-  var consoleGroups = ('group' in window.console) && ('groupCollapsed' in window.console) && ('groupEnd' in window.console);
+  let fatalSplashScreen = require('ui/notify/partials/fatal_splash_screen.html');
 
-  var fatalSplashScreen = require('ui/notify/partials/fatal_splash_screen.html');
-
-  var awesomeDemoMode = false; // kibi: added by kibi
-
-  var log = _.bindKey(console, 'log');
+  let log = _.bindKey(console, 'log');
 
   // used to identify the first call to fatal, set to false there
-  var firstFatal = true;
+  let firstFatal = true;
 
-  var fatalToastTemplate = (function lazyTemplate(tmpl) {
-    var compiled;
+  let fatalToastTemplate = (function lazyTemplate(tmpl) {
+    let compiled;
     return function (vars) {
       return (compiled || (compiled = _.template(tmpl)))(vars);
     };
@@ -35,45 +30,103 @@ define(function (require) {
     return Date.now();
   }
 
-  function closeNotif(cb, key) {
+  function closeNotif(notif, cb = _.noop, key) {
     return function () {
       // this === notif
-      var i = notifs.indexOf(this);
+      let i = notifs.indexOf(notif);
       if (i !== -1) notifs.splice(i, 1);
-      if (this.timerId) this.timerId = clearTO(this.timerId);
-      if (typeof cb === 'function') cb(key);
+
+      cancelTimer(notif);
+      cb(key);
     };
   }
 
+  function cancelTimer(notif) {
+    if (notif.timerId) {
+      Notifier.config.clearInterval(notif.timerId);
+      notif.timerId = undefined;
+    }
+  }
+
+  function timerCanceler(notif, cb = _.noop, key) {
+    return function cancelNotifTimer() {
+      cancelTimer(notif);
+      cb(key);
+    };
+  }
+
+  /**
+   * Initiates a timer to update _timeRemaining_ on the notif at second
+   * intervals and clears the notif once the notif _lifetime_ has been reached.
+   */
+  function startNotifTimer(notif, cb) {
+    var interval = 1000;
+
+    if (notif.lifetime === Infinity) return;
+
+    notif.timeRemaining = Math.floor(notif.lifetime / interval);
+
+    notif.timerId = Notifier.config.setInterval(function () {
+      notif.timeRemaining -= 1;
+
+      if (notif.timeRemaining === 0) {
+        closeNotif(notif, cb, 'ignore')();
+      }
+    }, interval, notif.timeRemaining);
+
+    notif.cancelTimer = timerCanceler(notif, cb);
+  }
+
+  function restartNotifTimer(notif, cb) {
+    cancelTimer(notif);
+    startNotifTimer(notif, cb);
+  }
+
   function add(notif, cb) {
+    // kibi: with awesomeDemoMode we ignore errors
+    if (notif.type === 'danger' && Notifier.config.awesomeDemoMode) {
+      return;
+    }
+
     _.set(notif, 'info.version', version);
     _.set(notif, 'info.buildNum', buildNum);
 
-    // kibi: added awesomeDemoMode
-    if (notif.lifetime !== Infinity && awesomeDemoMode !== true) {
-      notif.timerId = setTO(function () {
-        closeNotif(cb, 'ignore').call(notif);
-      }, notif.lifetime);
-    }
+    notif.clear = closeNotif(notif);
 
-    notif.clear = closeNotif();
     if (notif.actions) {
       notif.actions.forEach(function (action) {
-        notif[action] = closeNotif(cb, action);
+        notif[action] = closeNotif(notif, cb, action);
+      });
+    } else if (notif.customActions) {
+      // wrap all of the custom functions in a close
+      notif.customActions = notif.customActions.map(action => {
+        return {
+          key: action.text,
+          callback: closeNotif(notif, action.callback, action.text)
+        };
       });
     }
 
     notif.count = (notif.count || 0) + 1;
 
-    var dup = _.find(notifs, function (item) {
+    notif.isTimed = function isTimed() {
+      return notif.timerId ? true : false;
+    };
+
+    let dup = _.find(notifs, function (item) {
       return item.content === notif.content && item.lifetime === notif.lifetime;
     });
 
     if (dup) {
       dup.count += 1;
       dup.stacks = _.union(dup.stacks, [notif.stack]);
+
+      restartNotifTimer(dup, cb);
+
       return dup;
     }
+
+    startNotifTimer(notif, cb);
 
     notif.stacks = [notif.stack];
     notifs.push(notif);
@@ -81,7 +134,7 @@ define(function (require) {
   }
 
   function formatInfo() {
-    var info = [];
+    let info = [];
 
     if (!_.isUndefined(version)) {
       info.push(`Version: ${version}`);
@@ -96,7 +149,7 @@ define(function (require) {
 
   // browsers format Error.stack differently; always include message
   function formatStack(err) {
-    var stackMsg;
+    let stackMsg;
 
     if (err.stack && !~err.stack.indexOf(err.message)) {
       stackMsg = 'Error: ' + err.message + '\n' + err.stack;
@@ -119,12 +172,8 @@ define(function (require) {
    * Functionality to check that
    */
   function Notifier(opts) {
-    var self = this;
+    let self = this;
     opts = opts || {};
-
-    if (opts.awesomeDemoMode) {
-      awesomeDemoMode = opts.awesomeDemoMode;
-    }
 
     // label type thing to say where notifications came from
     self.from = opts.location;
@@ -134,14 +183,30 @@ define(function (require) {
     });
   }
 
+  /**
+   * Log a major, important, event in the lifecycle of the application
+   * @param {string} name - The name of the lifecycle event
+   * @param {boolean} success - Simple flag stating whether the lifecycle event succeeded
+   */
+  Notifier.prototype.lifecycle = createGroupLogger('lifecycle', {
+    open: true
+  });
+
+  Notifier.config = {
+    awesomeDemoMode: false, // kibi: hide error messages
+    errorLifetime: 300000,
+    warningLifetime: 10000,
+    infoLifetime: 5000,
+    setInterval: window.setInterval,
+    clearInterval: window.clearInterval
+  };
+
+  Notifier.applyConfig = function (config) {
+    _.merge(Notifier.config, config);
+  };
+
   // to be notified when the first fatal error occurs, push a function into this array.
   Notifier.fatalCallbacks = [];
-
-  // set the timer functions that all notification managers will use
-  Notifier.setTimerFns = function (set, clear) {
-    setTO = set;
-    clearTO = clear;
-  };
 
   // simply a pointer to the global notif list
   Notifier.prototype._notifs = notifs;
@@ -156,15 +221,6 @@ define(function (require) {
   });
 
   /**
-   * Log a major, important, event in the lifecycle of the application
-   * @param {string} name - The name of the lifecycle event
-   * @param {boolean} success - Simple flag stating whether the lifecycle event succeeded
-   */
-  Notifier.prototype.lifecycle = createGroupLogger('lifecycle', {
-    open: true
-  });
-
-  /**
    * Wrap a function so that it's execution time gets logged.
    *
    * @param {function} fn - the function to wrap, it's .name property is
@@ -172,7 +228,7 @@ define(function (require) {
    * @return {function} - the wrapped function
    */
   Notifier.prototype.timed = function (name, fn) {
-    var self = this;
+    let self = this;
 
     if (typeof name === 'function') {
       fn = name;
@@ -180,8 +236,8 @@ define(function (require) {
     }
 
     return function WrappedNotifierFunction() {
-      var cntx = this;
-      var args = arguments;
+      let cntx = this;
+      let args = arguments;
 
       return self.event(name, function () {
         return fn.apply(cntx, args);
@@ -217,17 +273,17 @@ define(function (require) {
       });
     }
 
-    var html = fatalToastTemplate({
+    let html = fatalToastTemplate({
       info: formatInfo(),
       msg: formatMsg(err, this.from),
       stack: formatStack(err)
     });
 
-    var $container = $('#fatal-splash-screen');
+    let $container = $('#fatal-splash-screen');
 
     if (!$container.size()) {
       $(document.body)
-        // in case the app has not completed boot
+      // in case the app has not completed boot
       .removeAttr('ng-cloak')
       .html(fatalSplashScreen);
 
@@ -248,7 +304,7 @@ define(function (require) {
       content: formatMsg(err, this.from),
       icon: 'warning',
       title: 'Error',
-      lifetime: Infinity,
+      lifetime: Notifier.config.errorLifetime,
       actions: ['report', 'accept'],
       stack: formatStack(err)
     }, cb);
@@ -265,9 +321,70 @@ define(function (require) {
       content: formatMsg(msg, this.from),
       icon: 'warning',
       title: 'Warning',
-      lifetime: 10000,
+      lifetime: Notifier.config.warningLifetime,
       actions: ['accept']
     }, cb);
+  };
+
+  /**
+   * Display a custom message
+   * @param  {String} msg - required
+   * @param  {Object} config - required
+   * @param  {Function} cb - optional
+   *
+   * config = {
+   *   title: 'Some Title here',
+   *   type: 'info',
+   *   actions: [{
+   *     text: 'next',
+   *     callback: function() { next(); }
+   *   }, {
+   *     text: 'prev',
+   *     callback: function() { prev(); }
+   *   }]
+   * }
+   */
+  Notifier.prototype.custom = function (msg, config, cb) {
+    // There is no helper condition that will allow for 2 parameters, as the
+    // other methods have. So check that config is an object
+    if (!_.isPlainObject(config)) {
+      throw new Error('config param is required, and must be an object');
+    }
+
+    // workaround to allow callers to send `config.type` as `error` instead of
+    // reveal internal implementation that error notifications use a `danger`
+    // style
+    if (config.type === 'error') {
+      config.type = 'danger';
+    }
+
+    const getLifetime = (type) => {
+      switch (type) {
+        case 'warning':
+          return 10000;
+        case 'danger':
+          return 300000;
+        default: // info
+          return 5000;
+      }
+    };
+
+    const mergedConfig = _.assign({
+      type: 'info',
+      title: 'Notification',
+      content: formatMsg(msg, this.from),
+      lifetime: getLifetime(config.type)
+    }, config);
+
+    const hasActions = _.get(mergedConfig, 'actions.length');
+    if (hasActions) {
+      mergedConfig.customActions = mergedConfig.actions;
+      delete mergedConfig.actions;
+    } else {
+      mergedConfig.actions = ['accept'];
+    }
+
+    return add(mergedConfig, cb);
   };
 
   /**
@@ -281,7 +398,7 @@ define(function (require) {
       content: formatMsg(msg, this.from),
       icon: 'info-circle',
       title: 'Debug',
-      lifetime: 5000,
+      lifetime: Notifier.config.infoLifetime,
       actions: ['accept']
     }, cb);
   };
@@ -292,7 +409,7 @@ define(function (require) {
     Notifier.prototype.log = _.noop;
   } else {
     Notifier.prototype.log = function () {
-      var args = [].slice.apply(arguments);
+      let args = [].slice.apply(arguments);
       if (this.from) args.unshift(this.from + ':');
       log.apply(null, args);
     };
@@ -301,15 +418,15 @@ define(function (require) {
   // general functionality used by .event() and .lifecycle()
   function createGroupLogger(type, opts) {
     // Track the groups managed by this logger
-    var groups = window[type + 'Groups'] = {};
+    let groups = window[type + 'Groups'] = {};
 
     return function logger(name, success) {
-      var status; // status of the timer
-      var exec; // function to execute and wrap
-      var ret; // return value
+      let status; // status of the timer
+      let exec; // function to execute and wrap
+      let ret; // return value
 
-      var complete = function (val) { logger(name, true); return val; };
-      var failure = function (err) { logger(name, false); throw err; };
+      let complete = function (val) { logger(name, true); return val; };
+      let failure = function (err) { logger(name, false); throw err; };
 
       if (typeof success === 'function' || success === void 0) {
         // start
@@ -325,7 +442,7 @@ define(function (require) {
       }
       else {
         groups[name] = now() - (groups[name] || 0);
-        var time = ' in ' + groups[name].toFixed(2) + 'ms';
+        let time = ' in ' + groups[name].toFixed(2) + 'ms';
 
         // end
         if (success) {

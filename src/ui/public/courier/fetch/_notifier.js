@@ -1,6 +1,6 @@
 define(function (require) {
-  return function CourierFetchNotifier(Notifier) {
-    return new Notifier({
+  return function CourierFetchNotifier(createNotifier) {
+    return createNotifier({
       location: 'Courier Fetch'
     });
   };

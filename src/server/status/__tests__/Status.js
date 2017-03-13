@@ -1,12 +1,14 @@
-var expect = require('expect.js');
-var sinon = require('sinon');
-var Status = require('../Status');
-var ServerStatus = require('../ServerStatus');
+let expect = require('expect.js');
+let sinon = require('sinon');
+let Status = require('../Status');
+let ServerStatus = require('../ServerStatus');
 
 describe('Status class', function () {
 
-  var server;
-  var serverStatus;
+  const plugin = {id: 'test', version: '1.2.3'};
+
+  let server;
+  let serverStatus;
 
   beforeEach(function () {
     server = { expose: sinon.stub(), log: sinon.stub() };
@@ -14,11 +16,11 @@ describe('Status class', function () {
   });
 
   it('should have an "uninitialized" state initially', function () {
-    expect(serverStatus.create('test')).to.have.property('state', 'uninitialized');
+    expect(serverStatus.create(plugin)).to.have.property('state', 'uninitialized');
   });
 
   it('emits change when the status is set', function (done) {
-    var status = serverStatus.create('test');
+    let status = serverStatus.create(plugin);
 
     status.once('change', function (prev, prevMsg) {
       expect(status.state).to.be('green');
@@ -41,8 +43,8 @@ describe('Status class', function () {
   });
 
   it('should only trigger the change listener when something changes', function () {
-    var status = serverStatus.create('test');
-    var stub = sinon.stub();
+    let status = serverStatus.create(plugin);
+    let stub = sinon.stub();
     status.on('change', stub);
     status.green('Ready');
     status.green('Ready');
@@ -51,26 +53,28 @@ describe('Status class', function () {
   });
 
   it('should create a JSON representation of the status', function () {
-    var status = serverStatus.create('test');
+    let status = serverStatus.create(plugin);
     status.green('Ready');
 
-    var json = status.toJSON();
+    let json = status.toJSON();
+    expect(json.name).to.eql(plugin.id);
+    expect(json.version).to.eql(plugin.version);
     expect(json.state).to.eql('green');
     expect(json.message).to.eql('Ready');
   });
 
   function testState(color) {
     it(`should change the state to ${color} when #${color}() is called`, function () {
-      var status = serverStatus.create('test');
-      var message = 'testing ' + color;
+      let status = serverStatus.create(plugin);
+      let message = 'testing ' + color;
       status[color](message);
       expect(status).to.have.property('state', color);
       expect(status).to.have.property('message', message);
     });
 
     it(`should trigger the "change" listner when #${color}() is called`, function (done) {
-      var status = serverStatus.create('test');
-      var message = 'testing ' + color;
+      let status = serverStatus.create(plugin);
+      let message = 'testing ' + color;
       status.on('change', function (prev, prevMsg) {
         expect(status.state).to.be(color);
         expect(status.message).to.be(message);
@@ -83,8 +87,8 @@ describe('Status class', function () {
     });
 
     it(`should trigger the "${color}" listner when #${color}() is called`, function (done) {
-      var status = serverStatus.create('test');
-      var message = 'testing ' + color;
+      let status = serverStatus.create(plugin);
+      let message = 'testing ' + color;
       status.on(color, function (prev, prevMsg) {
         expect(status.state).to.be(color);
         expect(status.message).to.be(message);

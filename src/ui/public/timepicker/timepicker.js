@@ -1,16 +1,21 @@
 define(function (require) {
-  var html = require('ui/timepicker/timepicker.html');
-  var module = require('ui/modules').get('ui/timepicker');
-  var _ = require('lodash');
-  var dateMath = require('ui/utils/dateMath');
-  var moment = require('moment');
+  let html = require('ui/timepicker/timepicker.html');
+  let module = require('ui/modules').get('ui/timepicker');
+  let _ = require('lodash');
+  let dateMath = require('ui/utils/dateMath');
+  let moment = require('moment');
 
+  require('ui/timepicker/timepicker.less');
   require('ui/directives/input_datetime');
   require('ui/directives/inequality');
   require('ui/timepicker/quick_ranges');
   require('ui/timepicker/refresh_intervals');
   require('ui/timepicker/time_units');
   require('ui/timepicker/toggle');
+
+  // kibi: added to allow syncing time to other dashboards
+  require('ui/kibi/directives/kibi_sync_time_to');
+  // kibi: end
 
   module.directive('kbnTimepicker', function (quickRanges, timeUnits, refreshIntervals) {
     return {
@@ -24,7 +29,7 @@ define(function (require) {
       },
       template: html,
       controller: function ($scope) {
-        var init = function () {
+        let init = function () {
           $scope.setMode($scope.mode);
         };
 
@@ -61,6 +66,18 @@ define(function (require) {
           {text: 'Years ago', value: 'y'},
         ];
 
+        $scope.$watch('from', function (date) {
+          if (moment.isMoment(date) && $scope.mode === 'absolute') {
+            $scope.absolute.from = date;
+          }
+        });
+
+        $scope.$watch('to', function (date) {
+          if (moment.isMoment(date) && $scope.mode === 'absolute') {
+            $scope.absolute.to = date;
+          }
+        });
+
         $scope.$watch('absolute.from', function (date) {
           if (_.isDate(date)) $scope.absolute.from = moment(date);
         });
@@ -74,8 +91,8 @@ define(function (require) {
             case 'quick':
               break;
             case 'relative':
-              var fromParts = $scope.from.toString().split('-');
-              var relativeParts = [];
+              let fromParts = $scope.from.toString().split('-');
+              let relativeParts = [];
 
               // Try to parse the relative time, if we can't use moment duration to guestimate
               if ($scope.to.toString() === 'now' && fromParts[0] === 'now' && fromParts[1]) {
@@ -86,11 +103,11 @@ define(function (require) {
                 $scope.relative.unit = relativeParts[2];
               } else {
                 // kibi: add support for time precision
-                var duration = moment.duration(moment().diff(dateMath.parseWithPrecision($scope.from, false, $scope.kibiTimePrecision)));
-                var units = _.pluck(_.clone($scope.relativeOptions).reverse(), 'value');
+                let duration = moment.duration(moment().diff(dateMath.parseWithPrecision($scope.from, false, $scope.kibiTimePrecision)));
+                let units = _.pluck(_.clone($scope.relativeOptions).reverse(), 'value');
                 if ($scope.from.toString().split('/')[1]) $scope.relative.round = true;
-                for (var i = 0; i < units.length; i++) {
-                  var as = duration.as(units[i]);
+                for (let i = 0; i < units.length; i++) {
+                  let as = duration.as(units[i]);
                   if (as > 1) {
                     $scope.relative.count = Math.round(as);
                     $scope.relative.unit = units[i];
@@ -119,6 +136,11 @@ define(function (require) {
         $scope.setQuick = function (from, to, description) {
           $scope.from = from;
           $scope.to = to;
+          // kibi: sync time to other dashboards
+          if ($scope.syncTimeTo) {
+            $scope.syncTimeTo();
+          }
+          // kibi: end
         };
 
         $scope.setToNow = function () {
@@ -127,7 +149,7 @@ define(function (require) {
 
         $scope.formatRelative = function () {
           // kibi: add support for time precision
-          var parsed = dateMath.parseWithPrecision(getRelativeString(), false, $scope.kibiTimePrecision);
+          let parsed = dateMath.parseWithPrecision(getRelativeString(), false, $scope.kibiTimePrecision);
           $scope.relative.preview =  parsed ? parsed.format($scope.format) : undefined;
           return parsed;
         };

@@ -33,7 +33,7 @@ define(function (require) {
       return getFieldStats(pattern, timeFieldName, start, stop)
       .then(resp => omitIndicesWithoutTimeField(resp.indices, timeFieldName))
       .then(indices => sortIndexStats(indices, timeFieldName, sortDirection));
-    };
+    }
 
     // creates the configuration hash that must be passed to the elasticsearch
     // client

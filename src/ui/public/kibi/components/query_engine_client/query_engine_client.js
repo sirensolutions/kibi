@@ -1,6 +1,7 @@
 define(function (require) {
 
   var chrome = require('ui/chrome');
+  const angular = require('angular');
   var _ = require('lodash');
 
   require('ui/modules').get('kibana/query_engine_client')
@@ -16,19 +17,9 @@ define(function (require) {
         queryDefs = [queryDefs];
       }
 
-      queryDefs = _.filter(queryDefs, (queryDef) => !queryDef.isEntityDependent || options.selectedDocuments.length);
-
-      if (!queryDefs.length) {
-        return Promise.resolve({
-          data: {
-            error: 'Empty selected document uri'
-          }
-        });
-      }
-
       var params = {
-        options: JSON.stringify(options),
-        queryDefs: JSON.stringify(queryDefs)
+        options: angular.toJson(options),
+        queryDefs: angular.toJson(queryDefs)
       };
 
       return $http.get(chrome.getBasePath() + url, { params: params });

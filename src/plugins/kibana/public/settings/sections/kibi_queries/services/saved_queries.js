@@ -1,10 +1,10 @@
-define(function (require) {
-  var _ = require('lodash');
-  var Scanner = require('ui/utils/scanner');
+import _ from 'lodash';
+import Scanner from 'ui/utils/scanner';
 
+define(function (require) {
   require('plugins/kibana/settings/sections/kibi_queries/services/_saved_query');
 
-  var module = require('ui/modules').get('queries_editor/services/saved_queries', []);
+  const module = require('ui/modules').get('queries_editor/services/saved_queries', []);
 
   // Register this service with the saved object registry so it can be
   // edited by the object editor.
@@ -13,14 +13,14 @@ define(function (require) {
     title: 'queries'
   });
 
-  module.service('savedQueries', function (Private, Promise, kbnIndex, es, createNotifier, SavedQuery, kbnUrl) {
+  module.service('savedQueries', function (Private, Promise, kbnIndex, es, savedObjectsAPI, createNotifier, SavedQuery, kbnUrl) {
+    const cache = Private(require('ui/kibi/helpers/cache_helper'));
 
-    var cache = Private(require('ui/kibi/helpers/cache_helper'));
-    var notify = createNotifier({
+    const notify = createNotifier({
       location: 'Saved Queries'
     });
 
-    var scanner = new Scanner(es, {
+    const scanner = new Scanner(es, {
       index: kbnIndex,
       type: 'query'
     });
@@ -35,12 +35,15 @@ define(function (require) {
     };
 
     this.get = function (id) {
-      var cacheKey = 'savedQueries-id-' + id;
-      if (cache && cache.get(cacheKey)) {
+      let cacheKey;
+      if (id) {
+        cacheKey = 'savedQueries-id-' + id;
+      }
+      if (cacheKey && cache && cache.get(cacheKey)) {
         return cache.get(cacheKey);
       }
-      var promise = (new SavedQuery(id)).init();
-      if (cache) {
+      const promise = (new SavedQuery(id)).init();
+      if (cacheKey && cache) {
         cache.set(cacheKey, promise);
       }
       return promise;
@@ -65,45 +68,38 @@ define(function (require) {
     };
 
     this.mapHits = function (hit) {
-      var source = hit._source;
+      const source = hit._source;
       source.id = hit._id;
       source.url = this.urlFor(hit._id);
       return source;
     };
 
     this.find = function (searchString) {
-      var self = this;
-      var body = searchString ? {
-        query: {
-          simple_query_string: {
-            query: searchString + '*',
-            fields: ['title^3', 'description'],
-            default_operator: 'AND'
-          }
-        }
-      } : { query: {match_all: {}}};
+      if (!searchString) {
+        searchString = null;
+      }
 
       // cache the results of this method
-      var cacheKey = 'savedQueries' + (searchString ? searchString : '');
+      const cacheKey = 'savedQueries' + (searchString ? searchString : '');
       if (cache && cache.get(cacheKey)) {
         return Promise.resolve(cache.get(cacheKey));
       }
 
-      return es.search({
+      return savedObjectsAPI.search({
         index: kbnIndex,
-        type: 'query',
-        body: body,
+        type: this.type,
+        q: searchString,
         size: 100
       })
       .then((resp) => {
-        var ret = {
+        const result = {
           total: resp.hits.total,
           hits: resp.hits.hits.map((hit) => this.mapHits(hit))
         };
         if (cache) {
-          cache.set(cacheKey, ret);
+          cache.set(cacheKey, result);
         }
-        return ret;
+        return result;
       });
     };
   });

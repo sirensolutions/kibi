@@ -1,5 +1,5 @@
-var expect = require('expect.js');
-var ngMock = require('ngMock');
+let expect = require('expect.js');
+let ngMock = require('ngMock');
 
 describe('AggTypesComponent', function () {
   require('./AggType');
@@ -9,10 +9,14 @@ describe('AggTypesComponent', function () {
   require('./buckets/_range');
 
   describe('bucket aggs', function () {
-    var bucketAggs;
-    var BucketAggType;
+    let bucketAggs;
+    let BucketAggType;
 
-    beforeEach(ngMock.module('kibana'));
+    beforeEach(ngMock.module('kibana', function ($provide) {
+      $provide.constant('kbnDefaultAppId', '');
+      $provide.constant('kibiDefaultDashboardTitle', '');
+      $provide.constant('elasticsearchPlugins', ['siren-join']);
+    }));
     beforeEach(ngMock.inject(function (Private) {
       bucketAggs = Private(require('ui/agg_types/index')).byType.buckets;
       BucketAggType = Private(require('ui/agg_types/buckets/_bucket_agg_type'));
@@ -26,10 +30,14 @@ describe('AggTypesComponent', function () {
   });
 
   describe('metric aggs', function () {
-    var metricAggs;
-    var MetricAggType;
+    let metricAggs;
+    let MetricAggType;
 
-    beforeEach(ngMock.module('kibana'));
+    beforeEach(ngMock.module('kibana', function ($provide) {
+      $provide.constant('kbnDefaultAppId', '');
+      $provide.constant('kibiDefaultDashboardTitle', '');
+      $provide.constant('elasticsearchPlugins', ['siren-join']);
+    }));
     beforeEach(ngMock.inject(function (Private) {
       metricAggs = Private(require('ui/agg_types/index')).byType.metrics;
       MetricAggType = Private(require('ui/agg_types/metrics/MetricAggType'));

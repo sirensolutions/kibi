@@ -1,16 +1,20 @@
 
-var _ = require('lodash');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
+let _ = require('lodash');
+let expect = require('expect.js');
+let ngMock = require('ngMock');
 
 describe('AggConfig Filters', function () {
   describe('histogram', function () {
-    var AggConfig;
-    var indexPattern;
-    var Vis;
-    var createFilter;
+    let AggConfig;
+    let indexPattern;
+    let Vis;
+    let createFilter;
 
-    beforeEach(ngMock.module('kibana'));
+    beforeEach(ngMock.module('kibana', function ($provide) {
+      $provide.constant('kbnDefaultAppId', '');
+      $provide.constant('kibiDefaultDashboardTitle', '');
+      $provide.constant('elasticsearchPlugins', ['siren-join']);
+    }));
     beforeEach(ngMock.inject(function (Private) {
       Vis = Private(require('ui/Vis'));
       AggConfig = Private(require('ui/Vis/AggConfig'));
@@ -19,7 +23,7 @@ describe('AggConfig Filters', function () {
     }));
 
     it('should return an range filter for histogram', function () {
-      var vis = new Vis(indexPattern, {
+      let vis = new Vis(indexPattern, {
         type: 'histogram',
         aggs: [
           {
@@ -30,8 +34,8 @@ describe('AggConfig Filters', function () {
         ]
       });
 
-      var aggConfig = vis.aggs.byTypeName.histogram[0];
-      var filter = createFilter(aggConfig, 2048);
+      let aggConfig = vis.aggs.byTypeName.histogram[0];
+      let filter = createFilter(aggConfig, 2048);
       expect(filter).to.have.property('meta');
       expect(filter.meta).to.have.property('index', indexPattern.id);
       expect(filter).to.have.property('range');

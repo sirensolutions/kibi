@@ -10,7 +10,6 @@ define(function (require) {
 
   module.factory('SavedQuery', function (courier) {
 
-
     _.class(SavedQuery).inherits(courier.SavedObject);
 
     function SavedQuery(id) {
@@ -22,18 +21,17 @@ define(function (require) {
         mapping: {
           title: 'string',
           description: 'string',
-          st_activationQuery: 'string',
-          st_resultQuery: 'string',
-          st_datasourceId: 'string',
-          _previewTemplateId: 'string', // used only to temporary store template id for preview
-          st_tags: 'string',
+          activationQuery: 'string',
+          resultQuery: 'string',
+          datasourceId: 'string',
+          tags: 'string',
           rest_params: 'json',
           rest_headers: 'json',
+          rest_variables: 'json',
           rest_body: 'string',
           rest_method: 'string',
           rest_path: 'string',
           rest_resp_status_code: 'long',
-          rest_resp_restriction_path: 'string',
           activation_rules: 'json',
           version: 'integer'
         },
@@ -41,20 +39,19 @@ define(function (require) {
         defaults: {
           title: 'New Saved Query',
           description: '',
-          st_activationQuery: '',
-          st_resultQuery: '',
-          st_datasourceId: '',
-          _previewTemplateId: '',
-          st_tags: '',
+          activationQuery: '',
+          resultQuery: '',
+          datasourceId: '',
+          tags: '',
           rest_params: '[]',
           rest_headers: '[]',
+          rest_variables: '[]',
           rest_body: '',
           rest_method: 'GET',
           rest_path: '',
           rest_resp_status_code: 200,
-          rest_resp_restriction_path: '$',
           activation_rules: '[]',
-          version: 1
+          version: 2
         },
         init: function () {
           try {
@@ -72,6 +69,13 @@ define(function (require) {
             throw new Error('Could not parse rest_headers for query [' + this.id + ']');
           }
           try {
+            if (this.rest_variables && typeof this.rest_variables === 'string') {
+              this.rest_variables = JSON.parse(this.rest_variables);
+            }
+          } catch (e) {
+            throw new Error('Could not parse rest_variables for query [' + this.id + ']');
+          }
+          try {
             if (this.activation_rules && typeof this.activation_rules === 'string') {
               this.activation_rules = JSON.parse(this.activation_rules);
             }
@@ -85,8 +89,6 @@ define(function (require) {
     }
 
     SavedQuery.type = 'query';
-
-
 
     return SavedQuery;
   });

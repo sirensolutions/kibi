@@ -1,11 +1,11 @@
-var $ = require('jquery');
-var _ = require('lodash');
-var notify = require('ui/notify');
+const $ = require('jquery');
+const _ = require('lodash');
+const notify = require('ui/notify');
 
 require('plugins/statusPage/statusPageMetric');
 require('plugins/statusPage/statusPage.less');
 
-var chrome = require('ui/chrome')
+const chrome = require('ui/chrome')
 .setTabs([
   {
     id: '',
@@ -14,9 +14,14 @@ var chrome = require('ui/chrome')
   }
 ])
 .setRootTemplate(require('plugins/statusPage/statusPage.html'))
-.setRootController('ui', function ($http, $scope) {
-  var ui = this;
+.setRootController('ui', function ($http, $scope, kbnIndex, $window) {
+  const ui = this;
   ui.loading = false;
+
+  // kibi: added to be able to save diagnostics as json
+  $scope.esUrls = require('./lib/kibi_es_apis_calls');
+  $scope.esDiagnostics = require('./lib/kibi_es_diagnostics')(ui, $http, kbnIndex, $window);
+  // kibi: end
 
   ui.refresh = function () {
     ui.loading = true;
@@ -31,11 +36,11 @@ var chrome = require('ui/chrome')
         ui.fetchError = null;
       }
 
-      var data = resp.data;
+      const data = resp.data;
       ui.metrics = data.metrics;
       ui.statuses = data.status.statuses;
 
-      var overall = data.status.overall;
+      const overall = data.status.overall;
       if (!ui.serverState || (ui.serverState !== overall.state)) {
         ui.serverState = overall.state;
         ui.serverStateMessage = overall.title;

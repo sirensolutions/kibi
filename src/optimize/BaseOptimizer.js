@@ -3,10 +3,10 @@ let { defaults } = require('lodash');
 let { resolve } = require('path');
 let { writeFile } = require('fs');
 let webpack = require('webpack');
-var Boom = require('boom');
+let Boom = require('boom');
 let DirectoryNameAsMain = require('webpack-directory-name-as-main');
 let ExtractTextPlugin = require('extract-text-webpack-plugin');
-var CommonsChunkPlugin = require('webpack/lib/optimize/CommonsChunkPlugin');
+let CommonsChunkPlugin = require('webpack/lib/optimize/CommonsChunkPlugin');
 
 let utils = require('requirefrom')('src/utils');
 let fromRoot = utils('fromRoot');
@@ -100,27 +100,27 @@ class BaseOptimizer {
           {
             test: /\.less$/,
             loader: ExtractTextPlugin.extract(
-              'style',
-              `css${mapQ}!autoprefixer${mapQ ? mapQ + '&' : '?'}{ "browsers": ["last 2 versions","> 5%"] }!less${mapQ}`
+              'style-loader',
+              `css-loader${mapQ}!autoprefixer${mapQ ? mapQ + '&' : '?'}{ "browsers": ["last 2 versions","> 5%"] }!less-loader${mapQ}`
             )
           },
-          { test: /\.css$/, loader: ExtractTextPlugin.extract('style', `css${mapQ}`) },
-          { test: /\.jade$/, loader: 'jade' },
-          { test: /\.json$/, loader: 'json' },
-          { test: /\.(html|tmpl)$/, loader: 'raw' },
-          { test: /\.png$/, loader: 'url?limit=10000&name=[path][name].[ext]' },
-          { test: /\.(woff|woff2|ttf|eot|svg|ico)(\?|$)/, loader: 'file?name=[path][name].[ext]' },
-          { test: /[\/\\]src[\/\\](plugins|ui)[\/\\].+\.js$/, loader: `rjs-repack${mapQ}` },
+          { test: /\.css$/, loader: ExtractTextPlugin.extract('style', `css-loader${mapQ}`) },
+          { test: /\.jade$/, loader: 'jade-loader' },
+          { test: /\.json$/, loader: 'json-loader' },
+          { test: /\.(html|tmpl)$/, loader: 'raw-loader' },
+          { test: /\.png$/, loader: 'url-loader?limit=10000&name=[path][name].[ext]' },
+          { test: /\.(woff|woff2|ttf|eot|svg|ico)(\?|$)/, loader: 'file-loader?name=[path][name].[ext]' },
+          { test: /[\/\\]src[\/\\](plugins|ui)[\/\\].+\.js$/, loader: `rjs-repack-loader${mapQ}` },
           {
             test: /\.js$/,
             exclude: babelExclude.concat(this.env.noParse),
-            loader: 'babel',
+            loader: 'babel-loader',
             query: babelOptions.webpack
           },
           {
             test: /\.jsx$/,
             exclude: babelExclude.concat(this.env.noParse),
-            loader: 'babel',
+            loader: 'babel-loader',
             query: defaults({
               nonStandard: true,
             }, babelOptions.webpack)

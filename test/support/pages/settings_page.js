@@ -2,14 +2,17 @@
 define(function (require) {
   var config = require('intern').config;
   var Promise = require('bluebird');
-  var Common = require('./Common');
+  var Common = require('./common');
+  var HeaderPage = require('./header_page');
 
   var defaultTimeout = config.timeouts.default;
   var common;
+  var headerPage;
 
   function settingsPage(remote) {
     this.remote = remote;
     common = new Common(this.remote);
+    headerPage = new HeaderPage(this.remote);
   }
 
   settingsPage.prototype = {
@@ -20,10 +23,19 @@ define(function (require) {
       return common.findTestSubject('settingsNav advanced').click();
     },
 
+    getAdvancedSettings: function getAdvancedSettings(propertyName) {
+      common.debug('in getAdvancedSettings');
+      return common.findTestSubject('advancedSetting&' + propertyName + ' currentValue')
+      .getVisibleText();
+    },
+
     setAdvancedSettings: function setAdvancedSettings(propertyName, propertyValue) {
       var self = this;
       return common.findTestSubject('advancedSetting&' + propertyName + ' editButton')
       .click()
+      .then(function () {
+        return common.sleep(1000);
+      })
       .then(function setAdvancedSettingsClickPropertyValue(selectList) {
         return self.remote.findByCssSelector('option[label="' + propertyValue + '"]')
         .click();
@@ -34,16 +46,10 @@ define(function (require) {
       });
     },
 
-    getAdvancedSettings: function getAdvancedSettings(propertyName) {
-      common.debug('in setAdvancedSettings');
-      return common.findTestSubject('advancedSetting&' + propertyName + ' currentValue')
-      .getVisibleText();
-    },
-
-
     navigateTo: function () {
       return common.navigateToApp('settings');
     },
+
 
     getTimeBasedEventsCheckbox: function () {
       return this.remote.setFindTimeout(defaultTimeout)
@@ -96,7 +102,8 @@ define(function (require) {
 
     getCreateButton: function () {
       return this.remote.setFindTimeout(defaultTimeout)
-      .findByCssSelector('.btn');
+      // kibi: taken fix from kibana as the wrong button was taken
+      .findDisplayedByCssSelector('[type="submit"]');
     },
 
     clickCreateButton: function () {
@@ -106,7 +113,7 @@ define(function (require) {
 
     clickDefaultIndexButton: function () {
       return this.remote.setFindTimeout(defaultTimeout)
-      .findByCssSelector('button.btn.btn-warning.ng-scope').click();
+      .findByCssSelector('button.btn.btn-success.ng-scope').click();
     },
 
     clickDeletePattern: function () {
@@ -207,6 +214,9 @@ define(function (require) {
       )
       .then(function (page) {
         return page.click();
+      })
+      .then(function () {
+        return headerPage.getSpinnerDone();
       });
     },
 
@@ -283,6 +293,8 @@ define(function (require) {
           .then(function (currentUrl) {
             if (!currentUrl.match(/indices\/.+\?/)) {
               throw new Error('Index pattern not created');
+            } else {
+              common.debug('Index pattern created: ' + currentUrl);
             }
           });
         });

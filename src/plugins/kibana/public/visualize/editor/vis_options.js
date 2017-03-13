@@ -1,6 +1,6 @@
 define(function (require) {
-  var _ = require('lodash');
-  var $ = require('jquery');
+  const _ = require('lodash');
+  const $ = require('jquery');
 
   require('ui/modules')
   .get('app/visualize')
@@ -10,10 +10,11 @@ define(function (require) {
       template: require('plugins/kibana/visualize/editor/vis_options.html'),
       scope: {
         vis: '=',
+        savedVis: '=',
       },
       link: function ($scope, $el) {
-        var $optionContainer = $el.find('.visualization-options');
-        var $editor = $compile($scope.vis.type.params.editor)($scope);
+        const $optionContainer = $el.find('.visualization-options');
+        const $editor = $compile($scope.vis.type.params.editor)($scope);
         $optionContainer.append($editor);
 
         $scope.$watch('vis.type.schemas.all.length', function (len) {

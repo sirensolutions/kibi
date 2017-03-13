@@ -1,14 +1,12 @@
 define(function (require) {
-  var _ = require('lodash');
+  const _ = require('lodash');
 
   require('ui/kibi/directives/kibi_dashboard_search.less');
 
-  var app = require('ui/modules').get('app/dashboard');
+  const app = require('ui/modules').get('app/dashboard');
 
-  app.directive('kibiDashboardSearch', function (Private, $rootScope) {
-
-    var urlHelper   = Private(require('ui/kibi/helpers/url_helper'));
-
+  app.directive('kibiDashboardSearch', function ($rootScope) {
+    const chrome = require('ui/chrome');
     return {
       restrict: 'E',
       //require: '^dashboardApp', // kibi: does not inherits from dashboardApp because we want to place it in different place
@@ -17,18 +15,18 @@ define(function (require) {
 
         $scope.$on('$routeChangeSuccess', function () {
           // check that it should be visible or not
-          $scope.showSearch = urlHelper.getCurrentDashboardId() ? true : false;
+          $scope.showSearch = chrome.onDashboardTab();
         });
 
         $scope.filterResults = function () {
           $rootScope.$emit('kibi:dashboard:invoke-method', 'filterResults');
         };
 
-        $scope.$watch('state', function () {
+        $scope.$watch('state.query', function () {
           $rootScope.$emit('kibi:dashboard:set-property', 'state', $scope.state);
         }, true);
 
-        var off = $rootScope.$on('stDashboardOnProperty', function (event, property, value) {
+        const off = $rootScope.$on('stDashboardOnProperty', function (event, property, value) {
           $scope[property] = value;
         });
         $scope.$on('$destroy', off);

@@ -1,9 +1,14 @@
 <div ng-show="show" class="kibi-relational-filter-panel config animate-kibi-relational-filter-panel">
 
-  <div class="container  container-fluid">
+  <div class="container container-fluid">
     <h2>Relational Filter Panel</h2>
 
-    <eeg eeg-id="'relationalPanel'" class="eeg"></eeg>
+    <eeg ng-show="validRelations" eeg-id="'relationalPanel'" class="eeg"></eeg>
+
+    <div ng-show="!validRelations" class="load-error">
+      <i aria-hidden="true" class="fa fa-exclamation-triangle"></i>
+      <span>The defined relations are invalid, you need to <a href="#/settings/relations">correct</a> them.</span>
+    </div>
 
   </div>
   <div class="config-close remove" ng-click="close()">

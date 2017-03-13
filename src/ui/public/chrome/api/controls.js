@@ -1,4 +1,4 @@
-var _ = require('lodash');
+let _ = require('lodash');
 
 module.exports = function (chrome, internals) {
   /**
@@ -10,7 +10,7 @@ module.exports = function (chrome, internals) {
    *     determines if the Kibana chrome should be displayed
    */
 
-  var def = true;
+  let def = true;
   internals.setVisibleDefault = (_def) => def = Boolean(_def);
 
   /**
@@ -34,7 +34,7 @@ module.exports = function (chrome, internals) {
   var kibiNavbarVisibleDefault = true;
   internals.setKibiNavbarVisibleDefault = (_def1) => kibiNavbarVisibleDefault = Boolean(_def1);
 
-  chrome.getKibiNavbarVisible = () => {
+  chrome.isKibiNavbarVisible = () => {
     return kibiNavbarVisibleDefault;
   };
   // kibi: added

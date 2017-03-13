@@ -1,5 +1,8 @@
 define(function (require) {
-  var module = require('ui/modules').get('kibana/config', [
+  require('ui/notify');
+  require('ui/saved_objects_api');
+
+  let module = require('ui/modules').get('kibana/config', [
     'kibana/notify'
   ]);
 
@@ -8,28 +11,30 @@ define(function (require) {
   });
 
   // service for delivering config variables to everywhere else
-  module.service('config', function (Private, Notifier, kbnVersion, kbnIndex, $rootScope, buildNum) {
-    var config = this;
+  module.service('config', function (Private, createNotifier, kibiVersion, kbnIndex, $rootScope, buildNum) {
+    let config = this;
 
-    var angular = require('angular');
-    var _ = require('lodash');
-    var defaults = Private(require('ui/config/defaults'));
-    var DelayedUpdater = Private(require('ui/config/_delayed_updater'));
-    var vals = Private(require('ui/config/_vals'));
+    let angular = require('angular');
+    let _ = require('lodash');
+    let defaults = Private(require('ui/config/defaults'));
+    let DelayedUpdater = Private(require('ui/config/_delayed_updater'));
+    let vals = Private(require('ui/config/_vals'));
 
-    var notify = new Notifier({
+    let notify = createNotifier({
       location: 'Config'
     });
 
     // active or previous instance of DelayedUpdater. This will log and then process an
     // update once it is requested by calling #set() or #clear().
-    var updater;
+    let updater;
 
-    var DocSource = Private(require('ui/courier/data_source/doc_source'));
-    var doc = (new DocSource())
+    // kibi: use the Saved Objects API to manipulate the configuration
+    let DocSource = Private(require('ui/courier/data_source/savedobject_source'));
+    // kibi: end
+    let doc = (new DocSource())
       .index(kbnIndex)
       .type('config')
-      .id(kbnVersion);
+      .id(kibiVersion);
 
     /******
      * PUBLIC API
@@ -42,13 +47,13 @@ define(function (require) {
      * @return {Promise} - Resolved when the config loads initially
      */
     config.init = _.once(function () {
-      var complete = notify.lifecycle('config init');
+      let complete = notify.lifecycle('config init');
 
       return (function getDoc() {
 
         // used to apply an entire es response to the vals, silentAndLocal will prevent
         // event/notifications/writes from occuring.
-        var applyMassUpdate = function (resp, silentAndLocal) {
+        let applyMassUpdate = function (resp, silentAndLocal) {
           _.union(_.keys(resp._source), _.keys(vals)).forEach(function (key) {
             change(key, resp._source[key], silentAndLocal);
           });
@@ -77,7 +82,7 @@ define(function (require) {
     });
 
     config.get = function (key, defaultVal) {
-      var keyVal;
+      let keyVal;
 
       if (vals[key] == null) {
         if (defaultVal == null) {
@@ -127,7 +132,7 @@ define(function (require) {
     config.$bind = function ($scope, key, property) {
       if (!property) property = key;
 
-      var update = function () {
+      let update = function () {
         $scope[property] = config.get(key);
       };
 

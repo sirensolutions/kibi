@@ -40,12 +40,12 @@
           </div>
 
           <div class="form-group">
-            <label>Icon CSS class <i class="fa fa-info-circle ng-scope" tooltip-placement="" tooltip-popup-delay="250" tooltip="Paste a Font Awesome CSS class here, e.g., &quot;fa fa-at&quot;"></i></label>
+            <label>Icon CSS class<kbn-info placement="right" info="Paste a Font Awesome CSS class here, e.g., &quot;fa fa-at&quot;"></kbn-info></label>
             <input type="text" ng-model="dashboardGroup.iconCss" class="form-control"/>
           </div>
 
           <div class="form-group">
-            <label>Hide this dashboard group <i class="fa fa-info-circle ng-scope" tooltip-placement="" tooltip-popup-delay="250" tooltip="Useful if you have half baked dashboards"></i></label>
+            <label>Hide this dashboard group <kbn-info placement="right" info="Useful if you have half baked dashboards"></kbn-info></label>
             <input type="checkbox" ng-model="dashboardGroup.hide" class="form-control"/>
           </div>
 
@@ -71,16 +71,7 @@
             <kibi-array-param-add disable="nbDashboards === dashboardGroup.dashboards.length" required label="dashboard" model="dashboardGroup.dashboards"></kibi-array-param-add>
           </div>
 
-
-          <div class="form-group" style="margin-top:10px;">
-            <button class="btn btn-primary" ng-click="cancel()">Cancel</button>
-            <button class="btn btn-info" ng-click="clone()" ng-disabled="objectForm.$invalid">Clone</button>
-            <button class="btn btn-success" ng-click="submit()" ng-disabled="objectForm.$invalid">Save</button>
-            <button class="btn btn-danger" ng-click="delete()">Delete</button>
-          </div>
         </form>
-
-
       </div>
 
     </div>

@@ -18,17 +18,18 @@ define(function (require) {
     // Vis object of this type.
     return new TemplateVisType({
       name: 'kibiqueryviewervis',
-      title: 'Kibi Query Viewer',
+      title: 'Kibi query viewer',
       icon: 'fa-file-text',
       description: 'Your SQL/SPARQL queries results here (which can be parametric with the Kibi currently selected entity)',
       template: require('plugins/kibi_query_viewer_vis/kibi_query_viewer_vis.html'),
       params: {
         defaults: {
-          queryOptions: []
+          queryDefinitions: []
         },
         editor: '<kibi-query-viewer-vis-params></kibi-query-viewer-vis-params>'
       },
-      requiresSearch: false
+      requiresSearch: false,
+      version: 2
     });
   };
 

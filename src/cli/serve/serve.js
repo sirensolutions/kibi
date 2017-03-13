@@ -5,6 +5,7 @@ let { resolve } = require('path');
 let cwd = process.cwd();
 let src = require('requirefrom')('src');
 let fromRoot = src('utils/fromRoot');
+const getConfig = require('../../server/path').getConfig;
 
 let canCluster;
 try {
@@ -35,13 +36,14 @@ module.exports = function (program) {
   .option(
     '-c, --config <path>',
     'Path to the config file, can be changed with the CONFIG_PATH environment variable as well',
-    process.env.CONFIG_PATH || fromRoot('config/kibi.yml')) // kibi: renamed kibana to kibi
+    getConfig())
   .option('-p, --port <port>', 'The port to bind to', parseInt)
   .option('-q, --quiet', 'Prevent all logging except errors')
   .option('-Q, --silent', 'Prevent all logging')
   .option('--verbose', 'Turns on verbose logging')
   .option('-H, --host <host>', 'The host to bind to')
   .option('-l, --log-file <path>', 'The file to log to')
+  .option('--quit-after-init', 'Quit the server after a successful initialization.')
   .option(
     '--plugin-dir <path>',
     'A path to scan for plugins, this can be specified multiple ' +
@@ -114,6 +116,9 @@ module.exports = function (program) {
     try {
       kbnServer = new KbnServer(_.merge(settings, this.getUnknownOptions()));
       await kbnServer.ready();
+      if (opts.quitAfterInit) {
+        process.exit(0);
+      }
     }
     catch (err) {
       let { server } = kbnServer;

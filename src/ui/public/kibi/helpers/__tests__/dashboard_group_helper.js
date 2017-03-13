@@ -1,7 +1,11 @@
-var expect = require('expect.js');
-var ngMock = require('ngMock');
+import Promise from 'bluebird';
+const expect = require('expect.js');
+const ngMock = require('ngMock');
+const MockState = require('fixtures/mock_state');
+const mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
+const sinon = require('auto-release-sinon');
+const chrome = require('ui/chrome');
 
-var mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
 var fakeSavedDashboards = [
   {
     id: 'Articles',
@@ -102,52 +106,67 @@ var fakeSavedSearches = [
   }
 ];
 
-var $rootScope;
 var dashboardGroupHelper;
-var kibiStateHelper;
+var appState;
+let kibiState;
+var $httpBackend;
 
-function init(savedDashboards, savedDashboardGroups, savedSearches) {
+function init({ currentDashboardId = 'Articles', indexPatterns, savedDashboards, savedDashboardGroups, savedSearches }) {
   return function () {
+    ngMock.module('kibana', function ($provide) {
+      $provide.constant('kibiEnterpriseEnabled', false);
+      $provide.constant('kbnDefaultAppId', 'dashboard');
+      $provide.constant('kibiDefaultDashboardTitle', 'Articles');
+      $provide.constant('elasticsearchPlugins', ['siren-join']);
+
+      appState = new MockState({ filters: [] });
+      $provide.service('getAppState', () => {
+        return function () { return appState; };
+      });
+    });
 
     ngMock.module('app/dashboard', function ($provide) {
-      $provide.service('savedDashboards', (Promise) => mockSavedObjects(Promise)('savedDashboard', savedDashboards));
+      $provide.service('savedDashboards', (Promise, Private) => {
+        return mockSavedObjects(Promise, Private)('savedDashboard', savedDashboards || []);
+      });
+    });
+
+    ngMock.module('kibana/index_patterns', function ($provide) {
+      $provide.service('indexPatterns', (Promise, Private) => mockSavedObjects(Promise, Private)('indexPatterns', indexPatterns || []));
     });
 
     ngMock.module('dashboard_groups_editor/services/saved_dashboard_groups', function ($provide) {
-      $provide.service('savedDashboardGroups', (Promise) => mockSavedObjects(Promise)('savedDashboardGroups', savedDashboardGroups));
+      $provide.service('savedDashboardGroups', (Promise, Private) => {
+        return mockSavedObjects(Promise, Private)('savedDashboardGroups', savedDashboardGroups || []);
+      });
     });
 
-    if (savedSearches) {
-      ngMock.module('kibana', function ($provide) {
-        $provide.constant('kibiEnterpriseEnabled', false);
-        $provide.constant('kbnDefaultAppId', 'dashboard');
-        $provide.constant('kibiDefaultDashboardId', 'Articles');
-        $provide.constant('elasticsearchPlugins', ['siren-join']);
-        $provide.service('savedSearches', (Promise) => mockSavedObjects(Promise)('savedSearches', savedSearches));
-      });
-    } else {
-      ngMock.module('kibana', function ($provide) {
-        $provide.constant('kibiEnterpriseEnabled', false);
-        $provide.constant('kbnDefaultAppId', 'dashboard');
-        $provide.constant('kibiDefaultDashboardId', 'Articles');
-        $provide.constant('elasticsearchPlugins', ['siren-join']);
-      });
-    }
+    ngMock.module('discover/saved_searches', function ($provide) {
+      $provide.service('savedSearches', (Promise, Private) => mockSavedObjects(Promise, Private)('savedSearches', savedSearches || []));
+    });
 
-
-    ngMock.inject(function ($injector, Private, _$rootScope_) {
-      $rootScope = _$rootScope_;
+    ngMock.inject(function ($injector, _kibiState_, Private) {
+      kibiState = _kibiState_;
       dashboardGroupHelper = Private(require('ui/kibi/helpers/dashboard_group_helper'));
-      kibiStateHelper = Private(require('ui/kibi/helpers/kibi_state_helper/kibi_state_helper'));
+      sinon.stub(chrome, 'getBasePath').returns('');
+      sinon.stub(kibiState, '_getCurrentDashboardId').returns(currentDashboardId);
+      $httpBackend = $injector.get('$httpBackend');
     });
   };
 }
 
 describe('Kibi Components', function () {
   describe('DashboardGroupHelper', function () {
+
+    require('testUtils/noDigestPromises').activateForSuite();
+
     describe('Simple tests', function () {
 
-      beforeEach(init(fakeSavedDashboards, fakeSavedDashboardGroups, fakeSavedSearches));
+      beforeEach(init({
+        savedDashboards: fakeSavedDashboards,
+        savedDashboardGroups: fakeSavedDashboardGroups,
+        savedSearches: fakeSavedSearches
+      }));
 
       it('shortenDashboardName should shorten', function () {
         expect(dashboardGroupHelper.shortenDashboardName('TEST', 'TEST dashboard')).to.be('dashboard');
@@ -187,10 +206,7 @@ describe('Kibi Components', function () {
           expect(groupIds).to.eql(expected);
           done();
         }).catch(done);
-
-        $rootScope.$apply();
       });
-
 
       it('getIdsOfDashboardGroupsTheseDashboardsBelongTo - there is NOT a group with a dashboard', function (done) {
         var dashboardIds = ['ArticlesXXX'];
@@ -198,492 +214,250 @@ describe('Kibi Components', function () {
         dashboardGroupHelper.getIdsOfDashboardGroupsTheseDashboardsBelongTo(dashboardIds).then(function (groupIds) {
           expect(groupIds).to.eql([]);
           done();
-        });
-
-        $rootScope.$apply();
-      });
-
-      it('computeGroups 1', function (done) {
-        var expected = [];
-        dashboardGroupHelper.computeGroups().then(function (groups) {
-
-          expect(groups).to.have.length(5);
-
-          expect(groups[0].title).to.equal('Group 1');
-          expect(groups[0].dashboards).to.have.length(2);
-          expect(groups[0].dashboards[0].id).to.match(/^Companies|Articles$/);
-          expect(groups[0].dashboards[1].id).to.match(/^Companies|Articles$/);
-
-          expect(groups[1].title).to.equal('Group 2');
-          expect(groups[1].dashboards).to.have.length(0);
-
-          expect(groups[2].title).to.equal('time testing 1');
-          expect(groups[2].dashboards).to.have.length(1);
-          expect(groups[2].dashboards[0].id).to.equal('time-testing-1');
-          expect(groups[2].dashboards[0].title).to.equal('time testing 1');
-
-          expect(groups[3].title).to.equal('time testing 2');
-          expect(groups[3].dashboards).to.have.length(1);
-          expect(groups[3].dashboards[0].id).to.equal('time-testing-2');
-          expect(groups[3].dashboards[0].title).to.equal('time testing 2');
-
-          expect(groups[4].title).to.equal('time testing 3');
-          expect(groups[4].dashboards).to.have.length(1);
-          expect(groups[4].dashboards[0].id).to.equal('time-testing-3');
-          expect(groups[4].dashboards[0].title).to.equal('time testing 3');
-
-          done();
         }).catch(done);
-
-        $rootScope.$apply();
       });
 
 
     });
 
-    describe('no dashboards', function () {
-      beforeEach(init([], fakeSavedDashboardGroups));
+    describe('compute groups', function () {
+      describe('on no dashboard', function () {
+        beforeEach(init({
+          currentDashboardId: '',
+          savedDashboards: fakeSavedDashboards,
+          savedDashboardGroups: fakeSavedDashboardGroups,
+          savedSearches: fakeSavedSearches
+        }));
 
-      it('computeGroups 2', function (done) {
-        dashboardGroupHelper.computeGroups().catch(function (err) {
-          // here if there are groups but there is no dashboards we should get na error
-          expect(err.message).to.be(
-            '"Group 1" dashboard group contains non existing dashboard "Companies". Edit dashboard group to remove non existing dashboard'
-          );
-          done();
+        it('no current dashboard', function (done) {
+          dashboardGroupHelper.computeGroups().then(function (groups) {
+            // computeGroups should return all 5 groups, even when no dashboard is selected
+            expect(groups).to.have.length(5);
+            done();
+          }).catch(done);
         });
+      });
 
-        $rootScope.$apply();
+      describe('for the current dashboard Articles', function () {
+        beforeEach(init({
+          savedDashboards: fakeSavedDashboards,
+          savedDashboardGroups: fakeSavedDashboardGroups,
+          savedSearches: fakeSavedSearches
+        }));
+
+        it('computeGroups 1', function (done) {
+          dashboardGroupHelper.computeGroups().then(function (groups) {
+
+            expect(groups).to.have.length(5);
+
+            expect(groups[0].title).to.equal('Group 1');
+            expect(groups[0].dashboards).to.have.length(2);
+            expect(groups[0].dashboards[0].id).to.match(/^Companies|Articles$/);
+            expect(groups[0].dashboards[1].id).to.match(/^Companies|Articles$/);
+
+            expect(groups[1].title).to.equal('Group 2');
+            expect(groups[1].dashboards).to.have.length(0);
+
+            expect(groups[2].title).to.equal('time testing 1');
+            expect(groups[2].dashboards).to.have.length(1);
+            expect(groups[2].dashboards[0].id).to.equal('time-testing-1');
+            expect(groups[2].dashboards[0].title).to.equal('time testing 1');
+
+            expect(groups[3].title).to.equal('time testing 2');
+            expect(groups[3].dashboards).to.have.length(1);
+            expect(groups[3].dashboards[0].id).to.equal('time-testing-2');
+            expect(groups[3].dashboards[0].title).to.equal('time testing 2');
+
+            expect(groups[4].title).to.equal('time testing 3');
+            expect(groups[4].dashboards).to.have.length(1);
+            expect(groups[4].dashboards[0].id).to.equal('time-testing-3');
+            expect(groups[4].dashboards[0].title).to.equal('time testing 3');
+
+            done();
+          }).catch(done);
+        });
+      });
+
+      describe('dashboards do not exist', function () {
+        beforeEach(init({ savedDashboardGroups: fakeSavedDashboardGroups }));
+
+        it('computeGroups 2', function (done) {
+          dashboardGroupHelper.computeGroups()
+          .then(() => done('this should fail'))
+          .catch(function (err) {
+            // here if there are groups but there is no dashboards we should get an error
+            expect(err.message).to.be(
+              '"Group 1" dashboard group contains non existing dashboard "Companies". Edit dashboard group to remove non existing dashboard'
+            );
+            done();
+          });
+        });
+      });
+
+      describe('no dashboards groups', function () {
+        beforeEach(init({ savedDashboards: fakeSavedDashboards, savedSearches: fakeSavedSearches }));
+
+        it('computeGroups 3', function (done) {
+          dashboardGroupHelper.computeGroups().then(function (groups) {
+            // here if there are no groups but there are 5 dashboards we expect 5 pseudo group created
+            expect(groups).to.have.length(5);
+            done();
+          }).catch(done);
+        });
+      });
+
+      describe('no dashboards groups, no dashboards', function () {
+        beforeEach(init({ savedSearches: fakeSavedSearches }));
+
+        it('computeGroups 4', function (done) {
+          dashboardGroupHelper.computeGroups().then(function (groups) {
+            // here if there are no groups but there are 5 dashboards we expect 5 pseudo group created
+            expect(groups).to.have.length(0);
+            done();
+          }).catch(done);
+        });
       });
     });
 
-    describe('no dashboards groups', function () {
-      beforeEach(init(fakeSavedDashboards, [], fakeSavedSearches));
-
-      it('computeGroups 3', function (done) {
-        dashboardGroupHelper.computeGroups().then(function (groups) {
-          // here if there are no groups but there are 5 dashboards we expect 5 pseudo group created
-          expect(groups).to.have.length(5);
-          done();
-        }).catch(done);
-
-        $rootScope.$apply();
-      });
-    });
-
-    describe('no dashboards groups, no dashboards', function () {
-      beforeEach(init([], [], fakeSavedSearches));
-
-      it('computeGroups 4', function (done) {
-        dashboardGroupHelper.computeGroups().then(function (groups) {
-          // here if there are no groups but there are 5 dashboards we expect 5 pseudo group created
-          expect(groups).to.have.length(0);
-          done();
-        }).catch(done);
-
-        $rootScope.$apply();
-      });
-    });
-
-
-    describe('updateDashboardGroups', function () {
-      beforeEach(init([], []));
-
-      describe('when there is a delta on group level', function () {
-
-        it('different dashboard group titles - group 0', function () {
-          var oldDashboardGroups = [{
-            title: 'Title A'
-          }];
-          var newDashboardGroups = [{
-            title: 'Title B'
-          }];
-
-          var expected = {
-            indexes: [0],
-            reasons: ['different titles for group 0']
-          };
-
-          var actual = dashboardGroupHelper.updateDashboardGroups(oldDashboardGroups, newDashboardGroups);
-          expect(actual).to.eql(expected);
-        });
-
-        it('different dashboard group titles - group 1', function () {
-          var oldDashboardGroups = [
-            {
-              title: 'Title A0',
-              dashboards: [],
-              _selected: {},
-              selected: {}
-            },
-            {
-              title: 'Title A1',
-              dashboards: [],
-              _selected: {},
-              selected: {}
-            }
-          ];
-          var newDashboardGroups = [
-            {
-              title: 'Title A0',
-              dashboards: [],
-              _selected: {},
-              selected: {}
-            },
-            {
-              title: 'Title B1',
-              dashboards: [],
-              _selected: {},
-              selected: {}
-            }
-          ];
-
-          var expected = {
-            indexes: [1],
-            reasons: ['different titles for group 1']
-          };
-
-          var actual = dashboardGroupHelper.updateDashboardGroups(oldDashboardGroups, newDashboardGroups);
-          expect(actual).to.eql(expected);
-        });
-
-        it('different number of dashboards in a group 0', function () {
-          var oldDashboardGroups = [
-            {
-              title: 'Title A0',
-              dashboards: [{}, {}],
-              _selected: {},
-              selected: {}
-            }
-          ];
-          var newDashboardGroups = [
-            {
-              title: 'Title A0',
-              dashboards: [{}],
-              _selected: {},
-              selected: {}
-            }
-          ];
-
-          var expected = {
-            indexes: [0],
-            reasons: ['different number of dashboards for group 0']
-          };
-
-          var actual = dashboardGroupHelper.updateDashboardGroups(oldDashboardGroups, newDashboardGroups);
-          expect(actual).to.eql(expected);
-        });
-
-        it('different dashboard is _selected', function () {
-          var oldDashboardGroups = [
-            {
-              title: 'Title A0',
-              dashboards: [{id: 1}, {id: 2}],
-              selected: {id: 1},
-              _selected: {id: 1}
-            }
-          ];
-          var newDashboardGroups = [
-            {
-              title: 'Title A0',
-              dashboards: [{id: 1}, {id: 2}],
-              selected: {id: 1},
-              _selected: {id: 2}
-            }
-          ];
-
-          var expected = {
-            indexes: [0],
-            reasons: ['different selected dashboard for group 0']
-          };
-
-          var actual = dashboardGroupHelper.updateDashboardGroups(oldDashboardGroups, newDashboardGroups);
-          expect(actual).to.eql(expected);
-        });
-
-      });
-
-      describe('when there is delta on in single dashboard level', function () {
-
-        it('different number of filters for selected dashboard', function () {
-
-          var oldDashboardGroups = [
-            {
-              title: 'Title A0',
-              dashboards: [{id: 1, filters: [{}, {}] }],
-              selected: {id: 1},
-              _selected: {id: 1}
-            }
-          ];
-          var newDashboardGroups = [
-            {
-              title: 'Title A0',
-              dashboards: [{id: 1, filters: [{}] }],
-              selected: {id: 1},
-              _selected: {id: 1}
-            }
-          ];
-
-          var expected = {
-            indexes: [0],
-            reasons: ['different number of filters for dashboard 0 for group 0']
-          };
-
-          var actual = dashboardGroupHelper.updateDashboardGroups(oldDashboardGroups, newDashboardGroups);
-          expect(actual).to.eql(expected);
-        });
-
-        it('different indexPatternId for selected dashboard', function () {
-
-          var oldDashboardGroups = [
-            {
-              title: 'Title A0',
-              dashboards: [{id: 1, indexPatternId: 'indexA'}],
-              selected: {id: 1},
-              _selected: {id: 1}
-            }
-          ];
-          var newDashboardGroups = [
-            {
-              title: 'Title A0',
-              dashboards: [{id: 1, indexPatternId: 'indexB'}],
-              selected: {id: 1},
-              _selected: {id: 1}
-            }
-          ];
-
-          var expected = {
-            indexes: [0],
-            reasons: ['different indexPatternId for dashboard 0 for group 0']
-          };
-
-          var actual = dashboardGroupHelper.updateDashboardGroups(oldDashboardGroups, newDashboardGroups);
-          expect(actual).to.eql(expected);
-        });
-
-        it('different savedSearchId for selected dashboard', function () {
-
-          var oldDashboardGroups = [
-            {
-              title: 'Title A0',
-              dashboards: [{id: 1, savedSearchId: 'savedSearchA'}],
-              selected: {id: 1},
-              _selected: {id: 1}
-            }
-          ];
-          var newDashboardGroups = [
-            {
-              title: 'Title A0',
-              dashboards: [{id: 1, savedSearchId: 'savedSearchB'}],
-              selected: {id: 1},
-              _selected: {id: 1}
-            }
-          ];
-
-          var expected = {
-            indexes: [0],
-            reasons: ['different savedSearchId for dashboard 0 for group 0']
-          };
-
-          var actual = dashboardGroupHelper.updateDashboardGroups(oldDashboardGroups, newDashboardGroups);
-          expect(actual).to.eql(expected);
-        });
-
-        it('different dashboard ids for dashboards on the same positions', function () {
-
-          var oldDashboardGroups = [
-            {
-              title: 'Title A0',
-              dashboards: [{id: 1}, {id: 2}],
-              selected: {id: 1},
-              _selected: {id: 1}
-            }
-          ];
-          var newDashboardGroups = [
-            {
-              title: 'Title A0',
-              dashboards: [{id: 2}, {id: 1}],
-              selected: {id: 1},
-              _selected: {id: 1}
-            }
-          ];
-
-          var expected = {
-            indexes: [0],
-            reasons: ['different dashboard id for dashboard 0 for group 0', 'different dashboard id for dashboard 1 for group 0']
-          };
-
-          var actual = dashboardGroupHelper.updateDashboardGroups(oldDashboardGroups, newDashboardGroups);
-          expect(actual).to.eql(expected);
-        });
-
-      });
-
-      describe('when there is joinFilter on the dashboard update all counts', function () {
-        //TODO: later we can analyze which dashboardGroups should be
-        // updated but for now just update all
-        it('different number of filters for selected dashboard', function () {
-
-          var oldDashboardGroups = [
-            {
-              title: 'Title A0',
-              dashboards: [{ id: 1, filters: [ {join_set:{}} ] }],
-              selected: {id: 1},
-              _selected: {id: 1}
-            },
-            {
-              title: 'Title B0',
-              dashboards: [{ id: 2, filters: [] }],
-              selected: {id: 2},
-              _selected: {id: 2}
-            }
-          ];
-          var newDashboardGroups = [
-            {
-              title: 'Title A0',
-              dashboards: [{ id: 1, filters: [ {join_set:{}} ] }],
-              selected: {id: 1},
-              _selected: {id: 1}
-            },
-            {
-              title: 'Title B0',
-              dashboards: [{id: 2, filters: [] }],
-              selected: {id: 2},
-              _selected: {id: 2}
-            }
-          ];
-
-          var expected = {
-            indexes: [0, 1],
-            reasons: ['There is a join_set filter so lets update all groups']
-          };
-
-          var actual = dashboardGroupHelper.updateDashboardGroups(oldDashboardGroups, newDashboardGroups);
-          expect(actual).to.eql(expected);
-        });
-
-        it('should update counts if the kibi state has a join_set that is not yet in the app state', function () {
-
-          var oldDashboardGroups = [
-            {
-              id: 'd0',
-              title: 'Title A0',
-              dashboards: [{ id: 1, filters: [] }],
-              selected: {id: 1},
-              _selected: {id: 1}
-            },
-            {
-              id: 'd1',
-              title: 'Title B0',
-              dashboards: [{ id: 2, filters: [] }],
-              selected: {id: 2},
-              _selected: {id: 2}
-            }
-          ];
-          var newDashboardGroups = [
-            {
-              title: 'Title A0',
-              dashboards: [{ id: 1, filters: [] }],
-              selected: {id: 1},
-              _selected: {id: 1}
-            },
-            {
-              title: 'Title B0',
-              dashboards: [{id: 2, filters: [] }],
-              selected: {id: 2},
-              _selected: {id: 2}
-            }
-          ];
-
-          var expected = {
-            indexes: [0, 1],
-            reasons: ['There is a join_set filter so lets update all groups']
-          };
-
-          kibiStateHelper.saveFiltersForDashboardId(1, [ { join_set: {} } ]);
-          var actual = dashboardGroupHelper.updateDashboardGroups(oldDashboardGroups, newDashboardGroups);
-          expect(actual).to.eql(expected);
-        });
-      });
-
-    });
-
-    describe('getCountQueryForSelectedDashboard', function () {
-
-      beforeEach(init(fakeSavedDashboardsForCounts, [], fakeSavedSearches));
-
-      it('selected dashboard does NOT exist', function (done) {
-        var groups = [
+    describe('getDashboardsMetadata', function () {
+      beforeEach(init({
+        indexPatterns: [
           {
-            title: 'Title A0',
-            dashboards: [{id: 1}]
+            id: 'time-testing-4',
+            timeField: 'date',
+            fields: [
+              {
+                name: 'date',
+                type: 'date'
+              }
+            ]
           }
-        ];
+        ],
+        savedDashboards: fakeSavedDashboardsForCounts,
+        savedSearches: fakeSavedSearches
+      }));
 
-        var expected = {
-          query: undefined,
-          indexPatternId: undefined,
-          groupIndex: 0
-        };
-
-        dashboardGroupHelper.getCountQueryForSelectedDashboard(groups, 0).then(function (countQueryDef) {
-          expect(countQueryDef).to.eql(expected);
+      it('dashboard does NOT exist', function (done) {
+        dashboardGroupHelper.getDashboardsMetadata(['dash-do-not-exist']).then(function (meta) {
+          expect(meta).to.eql([]);
           done();
-        });
-
-        $rootScope.$apply();
+        }).catch(done);
       });
 
-      it('selected dashboard exists but it does NOT have indexPatternId ', function (done) {
-        var groups = [
-          {
-            title: 'Title A0',
-            dashboards: [{id: 1}, {id: 2}],
-            selected: {id: 1},
-            _selected: {id: 1}
-          }
-        ];
-
-        var expected = {
-          query: undefined,
-          indexPatternId: undefined,
-          groupIndex: 0
-        };
-
-        dashboardGroupHelper.getCountQueryForSelectedDashboard(groups, 0).then(function (countQueryDef) {
-          expect(countQueryDef).to.eql(expected);
+      it('dashboard exist but has no savedSearch', function (done) {
+        dashboardGroupHelper.getDashboardsMetadata(['Articles']).then(function (meta) {
+          expect(meta).to.eql([]);
           done();
-        });
-
-        $rootScope.$apply();
+        }).catch(done);
       });
 
-      it('selected dashboard do exist and have indexPatternId ', function (done) {
+      it('dashboard exist and it has savedSearch but index does not exists', function (done) {
+        dashboardGroupHelper.getDashboardsMetadata(['search-ste']).then(function (meta) {
+          done(new Error('Should fail'));
+        }).catch(function (err) {
+          expect(err.message).equal('Could not find object with id: search-ste');
+          done();
+        });
+      });
 
-        // this dashboard has to exist (the fakeDashboard should have it)
-        var selectedDashboard = {id: 'time-testing-4', indexPatternId: 'time-testing-4'};
-        var groups = [
-          {
-            title: 'Group 1',
-            dashboards: [selectedDashboard, {id: 2}],
-            selected: selectedDashboard,
-            _selected: selectedDashboard
-          }
-        ];
+      it('dashboard exist and it has savedSearch and index exists', function (done) {
 
-        dashboardGroupHelper.getCountQueryForSelectedDashboard(groups, 0).then(function (countQueryDef) {
-          expect(countQueryDef).to.have.property('query');
-          expect(countQueryDef.indexPatternId).to.equal('time-testing-4');
-          expect(countQueryDef.groupIndex).to.equal(0);
+        $httpBackend.whenPOST('/elasticsearch/_msearch?getCountsOnTabs').respond(200, {
+          responses: [
+            {
+              hits: {
+                total: 42
+              }
+            }
+          ]
+        });
+
+        dashboardGroupHelper.getDashboardsMetadata(['time-testing-4']).then(function (metas) {
+          expect(metas.length).to.equal(1);
+          expect(metas[0].count).to.equal(42);
+          expect(metas[0].isPruned).to.equal(false);
+          expect(metas[0].dashboardId).to.equal('time-testing-4');
+          expect(metas[0].indices).to.eql(['time-testing-4']);
           done();
         }).catch(done);
 
-        $rootScope.$apply();
+        setTimeout(function () {
+          $httpBackend.flush();
+        }, 500);
       });
 
+      it('dashboard exist and it has savedSearch and index exists the results were pruned', function (done) {
+
+        $httpBackend.whenPOST('/elasticsearch/_msearch?getCountsOnTabs').respond(200, {
+          responses: [
+            {
+              coordinate_search: {
+                actions: [
+                  {
+                    is_pruned: true
+                  }
+                ]
+              },
+              hits: {
+                total: 42
+              }
+            }
+          ]
+        });
+
+        dashboardGroupHelper.getDashboardsMetadata(['time-testing-4']).then(function (metas) {
+          expect(metas.length).to.equal(1);
+          expect(metas[0].count).to.equal(42);
+          expect(metas[0].isPruned).to.equal(true);
+          expect(metas[0].dashboardId).to.equal('time-testing-4');
+          expect(metas[0].indices).to.eql(['time-testing-4']);
+          done();
+        }).catch(done);
+
+        setTimeout(function () {
+          $httpBackend.flush();
+        }, 500);
+      });
+
+      it('dashboard exist and it has savedSearch and index exists but is not accessible', function (done) {
+
+        const authError = new Error();
+        authError.status = 403;
+
+        sinon.stub(kibiState, 'timeBasedIndices').returns(Promise.reject(authError));
+
+        $httpBackend.whenPOST('/elasticsearch/_msearch?getCountsOnTabs').respond(200, {
+          responses: [{
+            hits: {
+              total: 0
+            }
+          }]
+        });
+
+        dashboardGroupHelper.getDashboardsMetadata(['time-testing-4']).then(function (metas) {
+          expect(metas.length).to.equal(1);
+          expect(metas[0].count).to.equal('Forbidden');
+          expect(metas[0].forbidden).to.be(true);
+          expect(metas[0].dashboardId).to.equal('time-testing-4');
+          expect(metas[0].indices).to.eql([]);
+          done();
+        }).catch(done);
+
+        setTimeout(function () {
+          $httpBackend.flush();
+        }, 500);
+      });
+
+      it('dashboard exist and it has savedSearch and index exists but a non auth error occurs when resolving indices', function (done) {
+
+        sinon.stub(kibiState, 'timeBasedIndices').returns(Promise.reject(new Error()));
+
+        dashboardGroupHelper.getDashboardsMetadata(['time-testing-4'])
+        .then(() => done(new Error('timeBasedIndices error was not rethrown.')))
+        .catch(() => done());
+
+      });
 
     });
-
   });
-
 });

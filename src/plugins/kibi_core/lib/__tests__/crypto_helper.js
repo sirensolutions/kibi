@@ -77,18 +77,18 @@ describe('Crypto Helper', function () {
           //invalid tag
           encrypted = 'AES-GCM:NhxjhWFkEf8wrxfAA1oHo644:CgMFVVVQAAMAoAAA:faPn/SPOXfqYMWNysdOkVw==';
 
-          expect(cryptoHelper.decrypt).withArgs(defaultKey, encrypted)
-            .to.throwError('Value can\'t be decrypted.');
+          expect(cryptoHelper.decrypt.bind(cryptoHelper)).withArgs(defaultKey, encrypted)
+            .to.throwError(/Value can't be decrypted./);
 
           //invalid iv
           encrypted = 'AES-GCM:NhxjhWFkEf8wrxfAA1oHo644:AgMFVVVQAAMAoAAA:FaPn/SPOXfqYMWNysdOkVw==';
-          expect(cryptoHelper.decrypt).withArgs('JhWzsL2ZrgiaPjv+sHtMIPSDxu3yfPvNqMSQoEectxo=', encrypted)
-            .to.throwError('Value can\'t be decrypted.');
+          expect(cryptoHelper.decrypt.bind(cryptoHelper)).withArgs('JhWzsL2ZrgiaPjv+sHtMIPSDxu3yfPvNqMSQoEectxo=', encrypted)
+            .to.throwError(/Value can't be decrypted./);
 
           // invalid key
           encrypted = 'AES-GCM:NhxjhWFkEf8wrxfAA1oHo644:CgMFVVVQAAMAoAAA:FaPn/SPOXfqYMWNysdOkVw==';
-          expect(cryptoHelper.decrypt).withArgs('JhWzsL2ZrgiaPjv+sHtMIPSDxu3yfPvNqMSQoEectxo=', encrypted)
-            .to.throwError('Value can\'t be decrypted.');
+          expect(cryptoHelper.decrypt.bind(cryptoHelper)).withArgs('JhWzsL2ZrgiaPjv+sHtMIPSDxu3yfPvNqMSQoEectxo=', encrypted)
+            .to.throwError(/Value can't be decrypted./);
 
           cryptoHelper.generateIV.restore();
         });
@@ -121,17 +121,16 @@ describe('Crypto Helper', function () {
       });
 
       it('should throw an error if the algorithm is not supported', function () {
-        expect(cryptoHelper.encrypt).withArgs('', 'key', 'plain')
-          .to.throwError('Unsupported algorithm.');
+        expect(cryptoHelper.encrypt.bind(cryptoHelper)).withArgs('', 'key', 'plain')
+          .to.throwError(/Unsupported algorithm./);
 
-        expect(cryptoHelper.encrypt).withArgs('AES-CTR', 'key', 'plain')
-          .to.throwError('Unsupported algorithm.');
+        expect(cryptoHelper.encrypt.bind(cryptoHelper)).withArgs('AES-CTR', 'key', 'plain')
+          .to.throwError(/Unsupported algorithm./);
       });
 
       it('should throw an error if the key length is invalid', function () {
-        var cryptoHelper = require('../crypto_helper');
-        expect(cryptoHelper.encrypt).withArgs('AES-GCM', 'SU5WQUxJRCBLRVk=', 'plain')
-          .to.throwError('Invalid key length.');
+        expect(cryptoHelper.encrypt.bind(cryptoHelper)).withArgs('AES-GCM', 'SU5WQUxJRCBLRVk=', 'plain')
+          .to.throwError(/Invalid key length/);
       });
 
       it('should return null when requested to encrypt empty values', function () {
@@ -156,23 +155,24 @@ describe('Crypto Helper', function () {
       });
 
       it('should throw an error if the encrypted message an incorrect number of parts', function () {
-        expect(cryptoHelper.decrypt).withArgs(defaultKey, 'a')
-          .to.throwError('Invalid encrypted message.');
-        expect(cryptoHelper.decrypt).withArgs(defaultKey, 'a:b')
-          .to.throwError('Invalid encrypted message.');
-        expect(cryptoHelper.decrypt).withArgs(defaultKey, 'a:b:c')
-          .to.throwError('Invalid encrypted message.');
+        expect(cryptoHelper.decrypt.bind(cryptoHelper)).withArgs(defaultKey, 'a')
+          .to.throwError(/Invalid encrypted message./);
+        expect(cryptoHelper.decrypt.bind(cryptoHelper)).withArgs(defaultKey, 'a:b')
+          .to.throwError(/Invalid encrypted message./);
+        expect(cryptoHelper.decrypt.bind(cryptoHelper)).withArgs(defaultKey, 'a:b:c')
+          .to.throwError(/Invalid encrypted message./);
       });
 
       it('should throw an error if the algorithm is not supported', function () {
         var encrypted = 'AES-CTR:NhxjhWFkEf8wrxfAA1oHo644:CgMFVVVQAAMAoAAA:FaPn/SPOXfqYMWNysdOkVw==';
-        expect(cryptoHelper.decrypt).withArgs(defaultKey, encrypted)
-          .to.throwError('Unsupported algorithm.');
+        expect(cryptoHelper.decrypt.bind(cryptoHelper)).withArgs(defaultKey, encrypted)
+          .to.throwError(/Unsupported algorithm./);
       });
 
       it('should throw an error if the key size is invalid', function () {
-        expect(cryptoHelper.decrypt).withArgs('SU5WQUxJRCBLRVk=:SU5WQUxJRCBLRVk=:SU5WQUxJRCBLRVk=:SU5WQUxJRCBLRVk=', 'plain')
-          .to.throwError('Invalid key length.');
+        expect(cryptoHelper.decrypt.bind(cryptoHelper))
+        .withArgs('invalid key', 'AES-GCM:SU5WQUxJRCBLRVk=:SU5WQUxJRCBLRVk=:SU5WQUxJRCBLRVk=')
+        .to.throwError(/Invalid key length/);
       });
 
     });
@@ -186,8 +186,8 @@ describe('Crypto Helper', function () {
           datasourceParams: '{invalid json}'
         };
 
-        expect(cryptoHelper.encryptDatasourceParams).withArgs(defaultConfig, query)
-          .to.throwError('Could not parse datasourceParams: [{invalid json}] in the query ');
+        expect(cryptoHelper.encryptDatasourceParams.bind(cryptoHelper)).withArgs(defaultConfig, query)
+          .to.throwError(/Could not parse datasourceParams: {invalid json} is not valid JSON/);
       });
 
       describe('getting a known IV', function () {
@@ -262,7 +262,7 @@ describe('Crypto Helper', function () {
         };
 
         expect(cryptoHelper.encryptDatasourceParams).withArgs(defaultConfig, query)
-          .to.throwError('Could not get schema for datasource type: type1 .');
+          .to.throwError(/Could not get schema for datasource type: type1 ./);
       });
     });
   });

@@ -1,11 +1,11 @@
 
-var expect = require('expect.js');
-var angular = require('angular');
-var ngMock = require('ngMock');
+let expect = require('expect.js');
+let angular = require('angular');
+let ngMock = require('ngMock');
 
 describe('Vislib ErrorHandler Test Suite', function () {
-  var ErrorHandler;
-  var errorHandler;
+  let ErrorHandler;
+  let errorHandler;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {

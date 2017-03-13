@@ -1,290 +1,238 @@
 /*eslint no-use-before-define: 1*/
-
 define(function (require) {
-
   require('ui/kibi/directives/kibi_nav_bar.less');
   require('ui/kibi/directives/kibi_dashboard_toolbar');
   require('ui/kibi/directives/kibi_stop_click_event');
+  require('ui/kibi/directives/kibi_menu_template');
+  const _ = require('lodash');
+  const menuTemplateHtml = require('ui/kibi/directives/kibi_menu_template_kibi_nav_bar.html');
 
-  var _ = require('lodash');
+  require('ui/routes')
+  .addSetupWork(function (Private) {
+    const kibiNavBarHelper = Private(require('ui/kibi/directives/kibi_nav_bar_helper'));
+    return kibiNavBarHelper.init();
+  });
 
-  var app = require('ui/modules').get('app/dashboard');
-
-  app.directive('kibiNavBar', function ($rootScope, $http, Promise, config, Private, $timeout, createNotifier) {
-    var ResizeChecker        = Private(require('ui/vislib/lib/resize_checker'));
-    var urlHelper            = Private(require('ui/kibi/helpers/url_helper'));
-    var kibiStateHelper      = Private(require('ui/kibi/helpers/kibi_state_helper/kibi_state_helper'));
-    var dashboardGroupHelper = Private(require('ui/kibi/helpers/dashboard_group_helper'));
-    var indexPath            = Private(require('ui/kibi/components/commons/_index_path'));
-
-    var notify = createNotifier({
-      name: 'kibi_nav_bar directive'
-    });
+  require('ui/modules')
+  .get('app/dashboard')
+  .directive('kibiNavBar', function ($rootScope, kibiState, config, Private, $timeout) {
+    const chrome = require('ui/chrome');
+    const ResizeChecker = Private(require('ui/vislib/lib/resize_checker'));
+    const kibiNavBarHelper = Private(require('ui/kibi/directives/kibi_nav_bar_helper'));
+    const queryFilter = Private(require('ui/filter_bar/query_filter'));
 
     return {
       restrict: 'E',
       // Note: does not require dashboardApp as the st-nav-bar is placed outside of dashboardApp
-      scope: {
-        chrome: '='
-      },
       template: require('ui/kibi/directives/kibi_nav_bar.html'),
       link: function ($scope, $el) {
 
-
-        var _writeToScope = function (newDashboardGroups) {
-          if (!$scope.dashboardGroups) {
-            $scope.dashboardGroups = newDashboardGroups;
-            _updateAllCounts(null, [ 'oldDashboardsGroups was undefined' ]);
-          } else if ($scope.dashboardGroups.length !== newDashboardGroups.length) {
-            $scope.dashboardGroups = newDashboardGroups;
-            _updateAllCounts(null, [ 'dashboardsGroups length not the same' ]);
-          } else {
-            var changes = dashboardGroupHelper.updateDashboardGroups($scope.dashboardGroups, newDashboardGroups);
-            _updateAllCounts(changes.indexes, changes.reasons);
+        $scope.dashboardSelectData = {
+          template: menuTemplateHtml,
+          onOpen: function () {
+            var activeGroup = _.find($scope.dashboardGroups, g => g.active === true);
+            activeGroup.selected.onOpenClose(activeGroup);
           }
         };
 
+        $scope.dashboardGroups = kibiNavBarHelper.getDashboardGroups();
 
-        var lastFiredMultiCountQuery;
-        var _fireUpdateAllCounts = function (groupIndexesToUpdate, reason) {
-          if (console) console.log('Counts will be updated because: [' + reason + ']');
-
-          var promises  = [];
-          if (groupIndexesToUpdate && groupIndexesToUpdate.constructor === Array && groupIndexesToUpdate.length > 0) {
-            promises = _.map(groupIndexesToUpdate, function (index) {
-              return dashboardGroupHelper.getCountQueryForSelectedDashboard($scope.dashboardGroups, index);
-            });
-          } else {
-            promises = _.map($scope.dashboardGroups, function (g, index) {
-              return dashboardGroupHelper.getCountQueryForSelectedDashboard($scope.dashboardGroups, index);
-            });
-          }
-
-          Promise.all(promises).then(function (results) {
-            // if there is resolved promise with no query property
-            // it means that this group has no index attached and should be skipped when updating the group counts
-            // so keep track of indexes to know which group counts should be updated
-            var indexesToUpdate = [];
-            var query = '';
-
-            _.each(results, function (result, index) {
-              if (result.query && result.indexPatternId) {
-                query += '{"index" : "' + indexPath(result.indexPatternId) + '"}\n';
-                query += JSON.stringify(result.query) + '\n';
-                indexesToUpdate.push(index);
-              }
-            });
-
-            if (query !== '' && lastFiredMultiCountQuery !== query) {
-              lastFiredMultiCountQuery = query;
-
-              //Note: ?getCountsOnTabs has no meaning, it is just useful to filter when inspecting requests
-              $http.post($scope.chrome.getBasePath() + '/elasticsearch/_msearch?getCountsOnTabs', query)
-              .then(function (response) {
-                if (response.data.responses.length !== indexesToUpdate.length) {
-                  notify.warning('The number of counts responses does not match the dashboardGroups which should be updated');
-                } else {
-                  _.each(response.data.responses, function (hit, i) {
-                    // get the coresponding groupIndex from results
-                    var tab = $scope.dashboardGroups[results[indexesToUpdate[i]].groupIndex];
-                    try {
-                      if (!_.contains(Object.keys(hit),'error')) {
-                        tab.count = hit.hits.total;
-                      } else if (_.contains(Object.keys(hit),'error') &&
-                      _.contains(hit.error,'ElasticsearchSecurityException')) {
-                        tab.count = 'Unauthorized';
-                      } else {
-                        tab.count = 'Error';
-                      }
-                    } catch (e) {
-                      notify.warning('An error occurred while getting counts for tab ' + tab.title + ': ' + e);
-                    }
-                  });
-                }
-              });
-
-            }
-          }).catch(notify.warning);
-        };
-
-
-        // debounce count queries
-        var lastEventTimer;
-        var _updateAllCounts = function (groupIndexesToUpdate, reason) {
-          if ($el.css('display') === 'none') {
-            return;
-          }
-
-          $timeout.cancel(lastEventTimer);
-          if (!groupIndexesToUpdate) {
-            // there are no indexes so it means we have to update all counts
-            // in this case fire the query immediately
-            _fireUpdateAllCounts(groupIndexesToUpdate, reason);
-          } else {
-            lastEventTimer = $timeout(function () {
-              _fireUpdateAllCounts(groupIndexesToUpdate, reason);
-            }, 750);
-          }
-        };
-
-
-        var removeLocationChangeSuccessHandler = $rootScope.$on('$locationChangeSuccess', function (event, newUrl, oldUrl) {
-          // only if we are on dashboards
-          if (urlHelper.isItDashboardUrl()) {
-            $el.show();
-          } else {
-            $el.hide();
-            return;
-          }
-
-          const currentDashboardId = urlHelper.getCurrentDashboardId();
-          kibiStateHelper.saveFiltersForDashboardId(currentDashboardId, urlHelper.getDashboardFilters(currentDashboardId));
-          kibiStateHelper.saveQueryForDashboardId(currentDashboardId, urlHelper.getDashboardQuery(currentDashboardId));
-
-          // check that changes on the same dashboard require counts update
-          if (urlHelper.shouldUpdateCountsBasedOnLocation(oldUrl, newUrl)) {
-            $timeout(function () {
-              dashboardGroupHelper.computeGroups().then(function (dashboardGroups) {
-                _writeToScope(dashboardGroups);
-              });
-            });
-          }
+        var removeLocationChangeSuccessHandler = $rootScope.$on('$locationChangeSuccess', function () {
+          chrome.onDashboardTab() ? $el.show() : $el.hide();
         });
 
-        $scope.$on('$routeChangeSuccess', function () {
-          dashboardGroupHelper.computeGroups().then(function (dashboardGroups) {
-            _writeToScope(dashboardGroups);
-          });
-        });
-
-        $scope.relationalFilterVisible = false;
-        var removeInitConfigHandler = $rootScope.$on('init:config', function () {
+        $scope.splitTabs = config.get('kibi:splitTabs');
+        $scope.relationalFilterVisible = config.get('kibi:relationalPanel');
+        const removeInitConfigHandler = $rootScope.$on('init:config', function () {
           $scope.relationalFilterVisible = config.get('kibi:relationalPanel');
+          $scope.splitTabs = config.get('kibi:splitTabs');
         });
-        var removeRelationalPanelHandler = $rootScope.$on('change:config.kibi:relationalPanel', function () {
+
+        const removeRelationalPanelHandler = $rootScope.$on('change:config.kibi:relationalPanel', function () {
           $scope.relationalFilterVisible = config.get('kibi:relationalPanel');
         });
 
-
-        var removeDashboardGroupChangedHandler = $rootScope.$on('kibi:dashboardgroup:changed', function () {
-          delete $scope.dashboardGroups;
-        });
-
-
-        $scope.relationalFilterPanelOpened = false;
-
-        $scope.openRelationalFilterPanel = function () {
-          $scope.relationalFilterPanelOpened = !$scope.relationalFilterPanelOpened;
-          $rootScope.$emit('relationalFilterPanelOpened', $scope.relationalFilterPanelOpened);
-        };
-
-        var removeRelationalFilterPanelClosedHandler = $rootScope.$on('relationalFilterPanelClosed', function () {
-          $scope.relationalFilterPanelOpened = false;
-        });
-
-        // close panel when user navigates to a different route
-        var removeRouteChangeSuccessHandler = $rootScope.$on('$routeChangeSuccess', function (event, next, prev, err) {
-          $scope.relationalFilterPanelOpened = false;
-        });
-
-        // rerender tabs if any dashboard got saved
-        var removeDashboardChangedHandler = $rootScope.$on('kibi:dashboard:changed', function (event, dashId) {
-          dashboardGroupHelper.computeGroups().then(function (dashboardGroups) {
-            _writeToScope(dashboardGroups);
-          });
-        });
-        // everywhere use this event !!! to be consistent
-        // make a comment that it was required because not all compononts can listen to
-        // esResponse
-        var removeAutorefreshHandler = $rootScope.$on('courier:searchRefresh', function (event) {
-          dashboardGroupHelper.computeGroups().then(function (dashboardGroups) {
-            _writeToScope(dashboardGroups);
-          });
-        });
-
-        var removeUpdateTabCounts = $rootScope.$on('kibi:update-tab-counts', function (event) {
-          dashboardGroupHelper.computeGroups().then(function (dashboardGroups) {
-            _writeToScope(dashboardGroups);
-          });
+        const removeSplitTabsHandler = $rootScope.$on('change:config.kibi:splitTabs', function () {
+          $scope.splitTabs = config.get('kibi:splitTabs');
         });
 
         // =============
         // Tab scrolling
         // =============
 
-        var tabContainer = $el.find('.tab-container');
-        $scope.tabResizeChecker = new ResizeChecker(tabContainer);
-        $scope.tabScrollerState = [true, false];
+        var $tabContainer = $el.find('.tab-container');
+        var tabContainerElement = $el[0];
+
+        $scope.tabResizeChecker = new ResizeChecker($tabContainer);
+        $scope.tabScrollerState = {
+          leftArrow: true,
+          rightArrow: false
+        };
 
         var updateTabScroller = function () {
-          var sl = tabContainer.scrollLeft();
-          $scope.tabScrollerState[0] = sl === 0;
-          $scope.tabScrollerState[1] = sl === tabContainer[0].scrollWidth - tabContainer[0].clientWidth;
+          var sl = $tabContainer.scrollLeft();
+          const oldArrowLeft = $scope.tabScrollerState.leftArrow;
+          const oldArrowRight = $scope.tabScrollerState.rightArrow;
+          $scope.tabScrollerState.leftArrow = sl === 0;
+          $scope.tabScrollerState.rightArrow = sl === $tabContainer[0].scrollWidth - $tabContainer[0].clientWidth;
+          if (
+            pressedButtonDirection === 'left' &&
+            oldArrowLeft === true &&
+            $scope.tabScrollerState.leftArrow === false &&
+            $tabContainer.scrollLeft() !== 0
+          ) {
+            stopScrolling = true;
+          }
+          if (
+            pressedButtonDirection === 'right' &&
+            oldArrowRight === true &&
+            $scope.tabScrollerState.rightArrow === false
+          ) {
+            stopScrolling = true;
+          }
         };
 
-        var removeTabDashboardGroupChangedHandler = $rootScope.$on('kibi:dashboardgroup:changed', function (event, id) {
-          updateTabScroller();
-        });
+        function isActiveTabVisible(activeTab) {
+          if (activeTab) {
+            const tab = activeTab.getBoundingClientRect();
+            return (tab.right > 0) && (tab.left + activeTab.offsetWidth - $tabContainer.width() <= 0);
+          }
+        };
 
-        var removeTabDashboardChangedHandler = $rootScope.$on('kibi:dashboard:changed', function (event, id) {
-          updateTabScroller();
-        });
+        function makeVisible() {
+          const $activeTab = $el.find('.nav-tabs li.active');
+          const activeTabElement = $activeTab[0];
+          if (!activeTabElement) {
+            return;
+          }
+          if (!isActiveTabVisible(activeTabElement)) {
+            $tabContainer.stop(true);
+            var tabContainerWidth = $tabContainer.width();
+            var activeTabOffsetLeft = $activeTab.offset().left;
+            var activeTabWidth = $activeTab.width();
+            scroll(-1, activeTabOffsetLeft + activeTabWidth - tabContainerWidth);
+          } else {
+            updateTabScroller();
+          }
+        }
 
         $scope.onTabContainerResize = function () {
-          if (tabContainer[0].offsetWidth < tabContainer[0].scrollWidth) {
-            $el.find('.tab-scroller').addClass('visible');
-          } else {
-            $el.find('.tab-scroller').removeClass('visible');
-          }
-          updateTabScroller();
+          $scope.tabScrollerVisible = $tabContainer.width() < tabContainerElement.scrollWidth;
+          makeVisible();
         };
 
-        $scope.tabResizeChecker.on('resize', $scope.onTabContainerResize);
+        $scope.$watch(($scope) => {
+          const countsArray = _($scope.dashboardGroups)
+          .map(g => _.pluck(g.dashboards, 'count'))
+          .flatten()
+          .compact()
+          .value();
+          return countsArray.length === 0 ? null : countsArray.join();
+        }, (counts) => {
+          if (counts) {
+            $timeout(makeVisible, 250);
+          }
+        });
+
+        $scope.tabResizeChecker.on('resize', () => {
+          $scope.onTabContainerResize();
+        });
 
         var amount = 90;
         var stopScrolling = false;
+        var pressedButtonDirection;
 
-        function scroll(direction, amount) {
-          var scrollLeft = tabContainer.scrollLeft() - direction * amount;
-          tabContainer.animate({scrollLeft: scrollLeft}, 250, 'linear', function () {
+        function scrollByButton(direction, amount) {
+          pressedButtonDirection = direction === 1 ? 'left' : 'right';
+          scroll(direction, amount)
+          .then(() => {
             if (!stopScrolling) {
-              scroll(direction, amount * 1.75);
+              scrollByButton(direction, amount);
             }
-            updateTabScroller();
           });
         }
 
+        function scroll(direction, amount) {
+          if (!$tabContainer) {
+            return Promise.resolve();
+          }
+
+          return new Promise((fulfill, reject) => {
+            $tabContainer.stop(true);
+            var tabContainerScrollLeft = $tabContainer.scrollLeft();
+            var scrollLeft =  tabContainerScrollLeft - direction * amount;
+            $tabContainer.animate(
+              {scrollLeft: scrollLeft},
+              {
+                duration: 100,
+                easing: 'linear',
+                complete: () => {
+                  updateTabScroller();
+                  fulfill();
+                },
+                fail: (err) => {
+                  reject(err);
+                }
+              }
+            );
+          });
+        }
+
+        // used by the scrolling buttons
         $scope.scrollTabs = function (direction) {
           if (direction === false) {
             stopScrolling = true;
-            tabContainer.stop();
+            $tabContainer.stop();
             updateTabScroller();
             return;
           }
           stopScrolling = false;
-          scroll(direction, amount);
-          updateTabScroller();
+          scrollByButton(direction, amount);
         };
 
-        $el.on('$destroy', function () {
-          removeAutorefreshHandler();
+        // rerender tabs if any dashboard got saved
+        var removeDashboardChangedHandler = $rootScope.$on('kibi:dashboard:changed', function (event, dashId) {
+          updateTabScroller();
+          kibiNavBarHelper.computeDashboardsGroups('Dashboard changed')
+          .then(() => kibiNavBarHelper.updateAllCounts([ dashId ], 'kibi:dashboard:changed event'));
+        });
+
+        $scope.$watch(function (scope) {
+          return kibiState._getCurrentDashboardId();
+        }, (currentDashboardId) => {
+          if (currentDashboardId) {
+            kibiNavBarHelper.computeDashboardsGroups('current dashboard changed');
+          }
+        });
+
+        var removeDashboardGroupChangedHandler = $rootScope.$on('kibi:dashboardgroup:changed', function () {
+          updateTabScroller();
+          kibiNavBarHelper.computeDashboardsGroups('Dashboard group changed');
+        });
+
+        $scope.$listen(queryFilter, 'update', function () {
+          let currentDashboardId = kibiState._getCurrentDashboardId();
+          if (currentDashboardId) {
+            const dashboardIds = kibiState.addAllConnected(currentDashboardId);
+            kibiNavBarHelper.updateAllCounts(dashboardIds, 'filters change');
+          }
+        });
+
+        $scope.$on('$destroy', function () {
+          kibiNavBarHelper.cancelExecutionInProgress();
           removeInitConfigHandler();
-          removeDashboardGroupChangedHandler();
-          removeRelationalFilterPanelClosedHandler();
           removeRelationalPanelHandler();
-          removeRouteChangeSuccessHandler();
-          removeLocationChangeSuccessHandler();
+          removeSplitTabsHandler();
+          removeDashboardGroupChangedHandler();
           removeDashboardChangedHandler();
-          removeTabDashboardChangedHandler();
-          removeTabDashboardGroupChangedHandler();
-          removeUpdateTabCounts();
+          removeLocationChangeSuccessHandler();
 
           $scope.tabResizeChecker.off('resize', $scope.onTabContainerResize);
           $scope.tabResizeChecker.destroy();
-          tabContainer = null;
+          $tabContainer = null;
         });
-
       }
+
     };
   });
 

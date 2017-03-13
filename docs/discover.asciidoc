@@ -27,6 +27,7 @@ To set a time filter with the Time Picker:
 the relative start time as any number of seconds, minutes, hours, days, months, or years ago.
 . To specify an absolute Time Filter, click *Absolute* and enter the start date in the *From* field and the end date in
 the *To* field.
+. Click *Apply* button to set the selected time range to only the current dashboard or select other dashboards from the list and then click *Apply* button to set selected time range to more than one dashboard.
 . Click the caret at the bottom of the Time Picker to hide it.
 
 To set a Time Filter from the histogram, do one of the following:

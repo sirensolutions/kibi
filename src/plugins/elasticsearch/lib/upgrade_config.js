@@ -1,39 +1,48 @@
-var Promise = require('bluebird');
-var isUpgradeable = require('./is_upgradeable');
-var _ = require('lodash');
-var format = require('util').format;
+const Promise = require('bluebird');
+const isUpgradeable = require('./is_upgradeable');
+const _ = require('lodash');
+const format = require('util').format;
 
-var utils = require('requirefrom')('src/utils');
+const utils = require('requirefrom')('src/utils');
 
 module.exports = function (server) {
-  var MAX_INTEGER = Math.pow(2, 53) - 1;
+  const MAX_INTEGER = Math.pow(2, 53) - 1;
 
-  var client = server.plugins.elasticsearch.client;
-  var config = server.config();
+  const client = server.plugins.elasticsearch.client;
+  const config = server.config();
 
   return function (response) {
-    var newConfig = {};
-
     // Check to see if there are any doc. If not then we set the build number and id
     if (response.hits.hits.length === 0) {
       return client.create({
         index: config.get('kibana.index'),
         type: 'config',
         body: { buildNum: config.get('pkg.buildNum') },
-        id: config.get('pkg.version')
+        id: config.get('pkg.kibiVersion') // kibi: use kibi version instead of kibana's
       });
     }
 
     // if we already have a the current version in the index then we need to stop
-    var devConfig = _.find(response.hits.hits, function currentVersion(hit) {
-      return hit._id !== '@@version' && hit._id === config.get('pkg.version');
+    const devConfig = _.find(response.hits.hits, function currentVersion(hit) {
+      return hit._id !== '@@version' && hit._id === config.get('pkg.kibiVersion'); // kibi: use kibi version instead of kibana's
     });
 
     if (devConfig) return Promise.resolve();
 
+    // kibi: Sort upgradeable configs by numeric build number.
+    const hits = response.hits.hits.filter((hit) => {
+      const buildNum = parseInt(_.get(hit, '_source.buildNum', 0));
+      return buildNum > 0;
+    });
+
+    hits.sort((a, b) => {
+      return b._source.buildNum - a._source.buildNum;
+    });
+    // kibi: end
+
     // Look for upgradeable configs. If none of them are upgradeable
     // then resolve with null.
-    var body = _.find(response.hits.hits, isUpgradeable.bind(null, server));
+    const body = _.find(hits, isUpgradeable.bind(null, server));
     if (!body) return Promise.resolve();
 
     // if the build number is still the template string (which it wil be in development)
@@ -43,14 +52,14 @@ module.exports = function (server) {
     server.log(['plugin', 'elasticsearch'], {
       tmpl: 'Upgrade config from <%= prevVersion %> to <%= newVersion %>',
       prevVersion: body._id,
-      newVersion: config.get('pkg.version')
+      newVersion: config.get('pkg.kibiVersion') // kibi: use kibi version instead of kibana's
     });
 
     return client.create({
       index: config.get('kibana.index'),
       type: 'config',
       body: body._source,
-      id: config.get('pkg.version')
+      id: config.get('pkg.kibiVersion') // kibi: use kibi version instead of kibana's
     });
   };
 };

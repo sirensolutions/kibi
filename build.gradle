@@ -6,6 +6,7 @@
 
 plugins {
   id "com.moowork.node" version "0.12"
+  id "org.ajoberstar.grgit" version "1.5.1"
 }
 
 apply plugin: 'distribution'
@@ -13,6 +14,7 @@ apply plugin: 'maven-publish'
 apply plugin: 'groovy'
 
 import groovy.json.JsonSlurper
+import org.ajoberstar.grgit.Grgit
 
 ///////////////////////////////////////////////////
 //                                               //
@@ -71,10 +73,26 @@ node {
 //                                               //
 ///////////////////////////////////////////////////
 
-task build(dependsOn: [npmInstall, npm_run_test, npm_run_build]) << {}
+// Clones the local repository to generate a source artifact.
+task cloneSources << {
+  delete("${buildDir}/sources")
+  Grgit.clone(dir: file("${buildDir}/sources"), uri: "file://${projectDir}")
+}
 
+def getBuildArgs() {
+  if (project.version.endsWith("-SNAPSHOT")) {
+    return ["run", "build", "--", "--release=false", "--skip-os-packages=true"]
+  }
+  return ["run", "build", "--", "--release=true", "--skip-os-packages=true"]
+}
+
+task npmBuildWithOpts(type: NpmTask) {
+  args = getBuildArgs()
+}
+
+task build(dependsOn: [npmInstall, npm_run_test, npmBuildWithOpts])
 npm_run_test.mustRunAfter npmInstall
-npm_run_build.mustRunAfter npm_run_test
+npmBuildWithOpts.mustRunAfter npm_run_test
 
 ///////////////////////////////////////////////////
 //                                               //
@@ -94,6 +112,16 @@ distributions {
     }
   }
 
+  /**
+   * Distribution for the kibi sources
+   */
+  src {
+    baseName = 'kibi-core'
+    contents {
+      from { "${buildDir}/sources" }
+    }
+  }
+
 }
 
 ///////////////////////////////////////////////////
@@ -106,10 +134,14 @@ publishing {
   publications {
 
     /**
-     * Prepare Kibi distribution artifact for each platform
+     * Core Kibi distribution
      */
 
     coreDist(MavenPublication) {
+
+      /**
+       * Artifacts for each platform
+       */
 
       artifact(new File("${projectDir}/target", "kibi-${project.version}-darwin-x64.zip")) {
         classifier "darwin-x64"
@@ -131,13 +163,22 @@ publishing {
         classifier "windows64"
       }
 
+      /**
+       * Source artifact
+       */
+
+      artifact srcDistZip {
+        dependsOn cloneSources
+        classifier "sources"
+      }
+
       groupId project.group
       artifactId "kibi-core"
       version project.version
     }
 
     /**
-     * Prepare source documentation artifact
+     * Source artifact for documentation
      */
 
     srcDoc(MavenPublication) {

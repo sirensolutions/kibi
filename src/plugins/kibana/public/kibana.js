@@ -4,23 +4,20 @@ require('plugins/kibana/dashboard/index');
 require('plugins/kibana/settings/index');
 require('plugins/kibana/doc/index');
 require('ui/timepicker');
-require('ui/kibi/default_route');
 
-var moment = require('moment-timezone');
+const moment = require('moment-timezone');
 
-var chrome = require('ui/chrome');
-var routes = require('ui/routes');
-var modules = require('ui/modules');
+const chrome = require('ui/chrome');
+const routes = require('ui/routes');
+const modules = require('ui/modules');
 
-var kibanaLogoUrl = require('ui/images/kibana.svg');
+const kibanaLogoUrl = require('ui/images/kibana.svg');
 
 routes.enable();
 
 routes
 .otherwise({
-  // kibi: redirect to kibi default route handler which will compute kibi default path
-  // or fallback to what was here before
-  redirectTo: '/default'
+  redirectTo: `/${chrome.getInjected('kbnDefaultAppId', 'discover')}`
 });
 
 chrome

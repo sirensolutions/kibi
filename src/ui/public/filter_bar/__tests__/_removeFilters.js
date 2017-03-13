@@ -1,18 +1,21 @@
 describe('remove filters', function () {
-  var _ = require('lodash');
-  var sinon = require('auto-release-sinon');
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
-  var MockState = require('fixtures/mock_state');
-  var storeNames = {
+  let _ = require('lodash');
+  let sinon = require('auto-release-sinon');
+  let expect = require('expect.js');
+  let ngMock = require('ngMock');
+  let MockState = require('fixtures/mock_state');
+  let storeNames = {
     app: 'appState',
     global: 'globalState'
   };
-  var filters;
-  var queryFilter;
-  var $rootScope;
-  var appState;
-  var globalState;
+  let filters;
+  let queryFilter;
+  let $rootScope;
+  let appState;
+  let globalState;
+
+  let disableAllRelationsSpy;
+  let toggleRelationalPanelSpy;
 
   beforeEach(ngMock.module(
     'kibana',
@@ -20,6 +23,17 @@ describe('remove filters', function () {
     'kibana/global_state',
     function ($provide) {
       $provide.service('courier', require('fixtures/mock_courier'));
+
+      $provide.service('kibiState', function () {
+        disableAllRelationsSpy = sinon.spy();
+        toggleRelationalPanelSpy = sinon.spy();
+        return new MockState({
+          disableAllRelations: disableAllRelationsSpy,
+          toggleRelationalPanel: toggleRelationalPanelSpy,
+          filters: [],
+          getEnabledRelations: () => []
+        });
+      });
 
       appState = new MockState({ filters: [] });
       $provide.service('getAppState', function () {
@@ -53,6 +67,23 @@ describe('remove filters', function () {
   }));
 
   describe('removing a filter', function () {
+    describe('kibi', function () {
+      it('should disable all relations if the join filter is present', function () {
+        filters = [
+          {
+            join_set: {},
+            meta: { negate: false, disabled: true }
+          }
+        ];
+        appState.filters = filters;
+        expect(appState.filters).to.have.length(1);
+        queryFilter.removeFilter(filters[0]);
+        expect(appState.filters).to.have.length(0);
+        expect(disableAllRelationsSpy.called).to.be(true);
+        expect(toggleRelationalPanelSpy.calledWith(true)).to.be(true);
+      });
+    });
+
     it('should remove the filter from appState', function () {
       appState.filters = filters;
       expect(appState.filters).to.have.length(3);
@@ -68,7 +99,7 @@ describe('remove filters', function () {
     });
 
     it('should fire the update and fetch events', function () {
-      var emitSpy = sinon.spy(queryFilter, 'emit');
+      let emitSpy = sinon.spy(queryFilter, 'emit');
       appState.filters = filters;
       $rootScope.$digest();
 
@@ -115,7 +146,7 @@ describe('remove filters', function () {
       appState.filters.push(filters[2]);
       $rootScope.$digest();
 
-      var missedFilter = _.cloneDeep(filters[0]);
+      let missedFilter = _.cloneDeep(filters[0]);
       missedFilter.meta = {
         negate: !filters[0].meta.negate
       };
@@ -132,12 +163,20 @@ describe('remove filters', function () {
       globalState.filters.push(filters[0]);
       globalState.filters.push(filters[1]);
       appState.filters.push(filters[2]);
+      // kibi: should remove the join filter too
+      appState.filters.push({
+        join_set: {},
+        meta: { negate: false, disabled: true }
+      });
       expect(globalState.filters).to.have.length(2);
-      expect(appState.filters).to.have.length(1);
+      expect(appState.filters).to.have.length(2);
 
       queryFilter.removeAll();
       expect(globalState.filters).to.have.length(0);
       expect(appState.filters).to.have.length(0);
+
+      expect(disableAllRelationsSpy.called).to.be(true);
+      expect(toggleRelationalPanelSpy.calledWith(true)).to.be(true);
     });
   });
 });

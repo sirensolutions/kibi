@@ -1,15 +1,18 @@
 define(function (require) {
-  var _ = require('lodash');
-  var $ = require('jquery');
-  var angular = require('angular');
-  var ConfigTemplate = require('ui/ConfigTemplate');
-  var chrome = require('ui/chrome');
+  const _ = require('lodash');
+  const $ = require('jquery');
+  const angular = require('angular');
+  const ConfigTemplate = require('ui/ConfigTemplate');
+  const chrome = require('ui/chrome');
+  const stateMonitorFactory = require('ui/state_management/state_monitor_factory');
+  const kibiUtils = require('kibiutils');
 
   require('ui/directives/config');
   require('ui/courier');
   require('ui/config');
   require('ui/notify');
   require('ui/typeahead');
+  require('ui/navbar_extensions');
   require('ui/share');
 
   require('plugins/kibana/dashboard/directives/grid');
@@ -22,7 +25,7 @@ define(function (require) {
   require('ui/kibi/directives/kibi_select');
   // kibi: end
 
-  var app = require('ui/modules').get('app/dashboard', [
+  const app = require('ui/modules').get('app/dashboard', [
     'elasticsearch',
     'ngRoute',
     'kibana/courier',
@@ -35,18 +38,42 @@ define(function (require) {
   .when('/dashboard', {
     template: require('plugins/kibana/dashboard/index.html'),
     resolve: {
-      dash: function (timefilter, savedDashboards, config) {
-        // kibi: do not show the timepicker when no dashboard is selected
-        // Since tabs can show counts unrelated to the time shown in the timefilter, this would be misleading
-        timefilter.enabled = false;
-        return savedDashboards.get();
+      dash: function (timefilter, savedDashboards, kibiDefaultDashboardTitle, courier) {
+        // kibi:
+        // - get all the dashboards
+        // - if none, just create a new one
+        // - if any try to load the default dashboard if set, otherwise load the first dashboard
+        // - if the default dashboard is missing, load the first dashboard
+        // - if the first dashboard is missing, create a new one
+        return savedDashboards.find().then(function (resp) {
+          if (resp.hits.length) {
+            timefilter.enabled = true;
+            // kibi: select the first dashboard if default_dashboard_title is not set
+            let dashboardId = resp.hits[0].id;
+            let redirectToWhenMissing = '/dashboard/new-dashboard/create/';
+            if (kibiDefaultDashboardTitle) {
+              dashboardId = kibiUtils.slugifyId(kibiDefaultDashboardTitle);
+              redirectToWhenMissing = `/dashboard/${resp.hits[0].id}`;
+            }
+            return savedDashboards.get(dashboardId).catch(err => {
+              if (kibiDefaultDashboardTitle) {
+                err.message = `The default dashboard with title "${kibiDefaultDashboardTitle}" does not exist.
+                  Please correct the "kibi_core.default_dashboard_title" parameter in kibi.yml`;
+              }
+              return courier.redirectWhenMissing({
+                dashboard : redirectToWhenMissing
+              })(err);
+            });
+          }
+          return savedDashboards.get();
+        });
       }
     }
   })
   .when('/dashboard/:id', {
     template: require('plugins/kibana/dashboard/index.html'),
     resolve: {
-      dash: function (timefilter, savedDashboards, Notifier, $route, $location, courier) {
+      dash: function (timefilter, savedDashboards, Notifier, $route, courier) {
         // kibi: show the timepicker when loading a dashboard
         timefilter.enabled = true;
         return savedDashboards.get($route.current.params.id)
@@ -55,113 +82,104 @@ define(function (require) {
         }));
       }
     }
+  })
+  // kibi: this path is used to show an empty dashboard when creating a new one
+  .when('/dashboard/new-dashboard/create/', {
+    template: require('plugins/kibana/dashboard/index.html'),
+    resolve: {
+      dash: function (savedDashboards) {
+        return savedDashboards.get();
+      }
+    }
   });
 
   app.directive('dashboardApp', function (courier, AppState, timefilter, kbnUrl, createNotifier) {
     return {
-      controller: function ($timeout, globalState, $scope, $rootScope, $route, $routeParams, $location, Private, getAppState, config) {
+      controllerAs: 'dashboardApp',
+      controller: function (config, kibiState, globalState, $scope, $rootScope, $route, $location, $routeParams, Private, getAppState) {
 
-        var queryFilter = Private(require('ui/filter_bar/query_filter'));
-        var kibiStateHelper = Private(require('ui/kibi/helpers/kibi_state_helper/kibi_state_helper'));
+        const queryFilter = Private(require('ui/filter_bar/query_filter'));
+        const getEmptyQueryOptionHelper = Private(require('ui/kibi/helpers/get_empty_query_with_options_helper'));
 
-        var notify = createNotifier({
+        const notify = createNotifier({
           location: 'Dashboard'
         });
 
-        var dash = $scope.dash = $route.current.locals.dash;
+        const dash = $scope.dash = $route.current.locals.dash;
 
-        var dashboardTimeFilter = kibiStateHelper.getTimeForDashboardId(dash.id);
-        if (dashboardTimeFilter) {
+        const dashboardTime = kibiState._getDashboardProperty(dash.id, kibiState._properties.time);
+        if (dashboardTime) {
           // kibi: time from the kibi state.
           // this allows to set a time (not save it with a dashboard), switch between dashboards, and
           // still retain the time set until the app is reloaded
-          timefilter.time.mode = dashboardTimeFilter.mode;
-          timefilter.time.to = dashboardTimeFilter.to;
-          timefilter.time.from = dashboardTimeFilter.from;
+          timefilter.time.mode = dashboardTime.m;
+          timefilter.time.from = dashboardTime.f;
+          timefilter.time.to = dashboardTime.t;
         } else if (dash.timeRestore && dash.timeTo && dash.timeFrom && !getAppState.previouslyStored()) {
+          // time saved with the dashboard
           timefilter.time.mode = dash.timeMode;
           timefilter.time.to = dash.timeTo;
           timefilter.time.from = dash.timeFrom;
+        } else {
+          // default time
+          const timeDefaults = config.get('timepicker:timeDefaults');
+          timefilter.time.mode = timeDefaults.mode;
+          timefilter.time.to = timeDefaults.to;
+          timefilter.time.from = timeDefaults.from;
         }
 
         // kibi: below listener on globalState is needed to react when the global time is changed by the user
         // either directly in time widget or by clicking on histogram chart etc
-        var saveWithChangesHandler = function (diff) {
-          if (dash.id && diff.indexOf('time') !== -1 && timefilter.time.from && timefilter.time.to) {
-            // kibiStateHelper.saveTimeForDashboardId calls globalState.save
-            // In order to avoid a loop of events on globalstate, call that function in the next tick
-            $timeout(function () {
-              kibiStateHelper.saveTimeForDashboardId(dash.id, timefilter.time.mode, timefilter.time.from, timefilter.time.to);
-            });
+        const saveWithChangesHandler = function (diff) {
+          if (dash.id && diff.indexOf('time') !== -1 && timefilter.time.from && timefilter.time.to &&
+              !kibiState._isDefaultTime(timefilter.time.mode, timefilter.time.from, timefilter.time.to)) {
+            kibiState._saveTimeForDashboardId(dash.id, timefilter.time.mode, timefilter.time.from, timefilter.time.to);
+            kibiState.save();
           }
         };
         globalState.on('save_with_changes', saveWithChangesHandler);
 
-        var matchQueryFilter = function (filter) {
+        const matchQueryFilter = function (filter) {
           return filter.query && filter.query.query_string && !filter.meta;
         };
 
-        var extractQueryFromFilters = function (filters) {
-          var filter = _.find(filters, matchQueryFilter);
+        const extractQueryFromFilters = function (filters) {
+          const filter = _.find(filters, matchQueryFilter);
           if (filter) return filter.query;
         };
 
         // kibi: get the filters and query from the kibi state
-        var dashboardQuery = kibiStateHelper.getQueryForDashboardId(dash.id);
-        // Note: important !!! we pass a flag includePinnedFilters = false
-        // as we do NOT want pinned filters to be copied to appState
-        // as pinned filters should always stay in kibana global state
-        var dashboardFilters = kibiStateHelper.getFiltersForDashboardId(dash.id, false);
-        if (dashboardFilters && !dashboardFilters.length) {
-          dashboardFilters = undefined;
-        }
+        const dashboardQuery = kibiState._getDashboardProperty(dash.id, kibiState._properties.query);
+        // do not take pinned filters !
+        const dashboardFilters = kibiState._getDashboardProperty(dash.id, kibiState._properties.filters);
 
-        var stateDefaults = {
+        const stateDefaults = {
           id: dash.id, // kibi: added to identity a dashboard in helper methods
           title: dash.title,
           panels: dash.panelsJSON ? JSON.parse(dash.panelsJSON) : [],
           options: dash.optionsJSON ? JSON.parse(dash.optionsJSON) : {},
           uiState: dash.uiStateJSON ? JSON.parse(dash.uiStateJSON) : {},
           // kibi: get the query from the kibi state, and if unset get the one the searchsource
-          query: dashboardQuery || extractQueryFromFilters(dash.searchSource.getOwn('filter')) || {query_string: {query: '*'}},
+          query: dashboardQuery || extractQueryFromFilters(dash.searchSource.getOwn('filter')) || getEmptyQueryOptionHelper.getQuery(),
           // kibi: get the filters from the kibi state, and if unset get the one the searchsource
           filters: dashboardFilters || _.reject(dash.searchSource.getOwn('filter'), matchQueryFilter)
         };
 
-        var $state = $scope.state = new AppState(stateDefaults);
-        var $uiState = $scope.uiState = $state.makeStateful('uiState');
+        let stateMonitor;
+        const $appStatus = this.appStatus = $scope.appStatus = {};
+        const $state = $scope.state = new AppState(stateDefaults);
+        const $uiState = $scope.uiState = $state.makeStateful('uiState');
 
         // kibi: added so the kibi-dashboard-toolbar which was moved out could comunicate with the main app
-        var cache = Private(require('ui/kibi/helpers/cache_helper'));
-        var joinFilterHelper = Private(require('ui/kibi/helpers/join_filter_helper/join_filter_helper'));
-
-        var _addRemoveJoinSetFilter = function (panelEnabled) {
-          if (panelEnabled === false) {
-            $state.filters = _.filter($state.filters, function (f) {
-              return !f.join_set;
-            });
-          } else {
-            joinFilterHelper.updateJoinSetFilter();
-          }
-        };
-
-        var relationalPanelListenerOff = $rootScope.$on('change:config.kibi:relationalPanel', function (event, panelEnabled) {
-          _addRemoveJoinSetFilter(panelEnabled);
-        });
-        _addRemoveJoinSetFilter(config.get('kibi:relationalPanel'));
-
-        var stDashboardInvokeMethodOff = $rootScope.$on('kibi:dashboard:invoke-method', function (event, methodName) {
+        const stDashboardInvokeMethodOff = $rootScope.$on('kibi:dashboard:invoke-method', function (event, methodName) {
           $scope[methodName]();
         });
-        var stDashboardSetProperty = $rootScope.$on('kibi:dashboard:set-property', function (event, property, data) {
+        const stDashboardSetProperty = $rootScope.$on('kibi:dashboard:set-property', function (event, property, data) {
           $scope[property] = data;
         });
 
         $scope.$watch('configTemplate', function () {
           $rootScope.$emit('stDashboardOnProperty', 'configTemplate', $scope.configTemplate);
-        }, true);
-        $scope.$watch('state', function () {
-          $rootScope.$emit('stDashboardOnProperty', 'state', $scope.state);
         }, true);
 
         $scope.$on('$destroy', function () {
@@ -170,7 +188,6 @@ define(function (require) {
           dash.destroy();
           stDashboardInvokeMethodOff();
           stDashboardSetProperty();
-          relationalPanelListenerOff();
         });
         // kibi: end
 
@@ -198,18 +215,27 @@ define(function (require) {
         function init() {
           updateQueryOnRootSource();
 
-          var docTitle = Private(require('ui/doc_title'));
+          const docTitle = Private(require('ui/doc_title'));
           if (dash.id) {
             docTitle.change(dash.title);
           }
 
           initPanelIndices();
+
+          // watch for state changes and update the appStatus.dirty value
+          stateMonitor = stateMonitorFactory.create($state, stateDefaults);
+          stateMonitor.onChange((status) => {
+            $rootScope.$emit('stDashboardOnProperty', 'state', $scope.state);
+            $appStatus.dirty = status.dirty;
+          });
+          $scope.$on('$destroy', () => stateMonitor.destroy());
+
           $scope.$emit('application.load');
         }
 
         function initPanelIndices() {
           // find the largest panelIndex in all the panels
-          var maxIndex = getMaxPanelIndex();
+          let maxIndex = getMaxPanelIndex();
 
           // ensure that all panels have a panelIndex
           $scope.state.panels.forEach(function (panel) {
@@ -220,7 +246,7 @@ define(function (require) {
         }
 
         function getMaxPanelIndex() {
-          var index = $scope.state.panels.reduce(function (idx, panel) {
+          let index = $scope.state.panels.reduce(function (idx, panel) {
             // if panel is missing an index, add one and increment the index
             return Math.max(idx, panel.panelIndex || idx);
           }, 0);
@@ -228,7 +254,7 @@ define(function (require) {
         }
 
         function updateQueryOnRootSource() {
-          var filters = queryFilter.getFilters();
+          const filters = queryFilter.getFilters();
           if ($state.query) {
             dash.searchSource.set('filter', _.union(filters, [{
               query: $state.query
@@ -239,10 +265,17 @@ define(function (require) {
         }
 
         function setDarkTheme(enabled) {
-          var theme = Boolean(enabled) ? 'theme-dark' : 'theme-light';
+          const theme = Boolean(enabled) ? 'theme-dark' : 'theme-light';
           chrome.removeApplicationClass(['theme-dark', 'theme-light']);
           chrome.addApplicationClass(theme);
         }
+
+        // update root source on kibiState reset
+        $scope.$listen(kibiState, 'reset_app_state_query', function () {
+          updateQueryOnRootSource();
+          $state.save();
+          $scope.refresh();
+        });
 
         // update root source when filters update
         $scope.$listen(queryFilter, 'update', function () {
@@ -254,7 +287,8 @@ define(function (require) {
         $scope.$listen(queryFilter, 'fetch', $scope.refresh);
 
         $scope.newDashboard = function () {
-          kbnUrl.change('/dashboard', {});
+          // kibi: changed from '/dashboard' because now there's a specific path for dashboard creation
+          kbnUrl.change('/dashboard/new-dashboard/create', {});
         };
 
         $scope.filterResults = function () {
@@ -264,6 +298,10 @@ define(function (require) {
         };
 
         $scope.save = function () {
+          // kibi: lock the dashboard so kibi_state._getCurrentDashboardId ignore the change for a moment
+          dash.locked = true;
+
+          const previousDashId = dash.id;
           $state.title = dash.id = dash.title;
           $state.save();
 
@@ -277,6 +315,8 @@ define(function (require) {
 
           dash.save()
           .then(function (id) {
+            delete dash.locked; // kibi: our lock for the dashboard!
+            stateMonitor.setInitialState($state.toJSON());
             $scope.configTemplate.close('save');
             if (id) {
               notify.info('Saved Dashboard as "' + dash.title + '"');
@@ -286,10 +326,17 @@ define(function (require) {
               }
             }
           })
-          .catch(notify.fatal);
+          .catch((err) => {
+            // kibi: if the dashboard can't be saved rollback the dashboard id
+            dash.id = previousDashId;
+            delete dash.locked; // kibi: our lock for the dashboard!
+            $scope.configTemplate.close('save');
+            notify.error(err);
+            // kibi: end
+          });
         };
 
-        var pendingVis = _.size($state.panels);
+        let pendingVis = _.size($state.panels);
         $scope.$on('ready:vis', function () {
           if (pendingVis) pendingVis--;
           if (pendingVis === 0) {
@@ -323,6 +370,22 @@ define(function (require) {
           addVis: $scope.addVis,
           addSearch: $scope.addSearch
         };
+
+        // kibi: If you click the back/forward browser button:
+        // 1. The $locationChangeSuccess event is fired when you click back/forward browser button.
+        $rootScope.$on('$locationChangeSuccess', () => $rootScope.actualLocation = $location.url());
+        // 2. The following watcher is fired.
+        $rootScope.$watch(() => { return $location.url(); }, (newLocation, oldLocation) => {
+          if ($rootScope.actualLocation === newLocation) {
+            /* kibi: Here we execute init() if the newLocation is equal to the URL we saved during
+               the $locationChangeSuccess event above. */
+            init();
+          }
+        });
+        /* kibi: If you click an ordinary hyperlink, the above order is reversed.
+           First, you have the watcher fired, then the $locationChangeSuccess event.
+           That's why the actualLocation and newLocation will never be equal inside the watcher callback
+           if you click on an ordinary hyperlink. */
 
         init();
       }

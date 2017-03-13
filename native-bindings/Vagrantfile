@@ -1,0 +1,110 @@
+# encoding: utf-8
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+
+# important run with:  privileged: false
+$installNodeScript = <<SCRIPT
+  sudo apt-get install -y git
+
+  #install nvm
+  wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.31.1/install.sh | bash
+
+  echo "source ~/.nvm/nvm.sh" >> /home/vagrant/.profile
+  source /home/vagrant/.profile
+
+  nvm install 6.9.0
+  nvm alias default 6.9.0
+SCRIPT
+
+
+$installJava8 = <<SCRIPT
+  echo debconf shared/accepted-oracle-license-v1-1 select true | sudo debconf-set-selections
+  echo debconf shared/accepted-oracle-license-v1-1 seen true | sudo debconf-set-selections
+  sudo apt-add-repository -y ppa:webupd8team/java
+  sudo apt-get update
+  sudo apt-get install -y oracle-java8-installer
+SCRIPT
+
+
+$installNative = <<SCRIPT
+  sudo apt-get install -y g++
+  npm install sqlite3@3.1.8 jdbc@0.3.1
+SCRIPT
+
+
+# node version to folder mapping
+# 0.12.10   node-v14-linux-ia32
+# 4.3.2  node-v46-linux-ia32
+# 4.6.4  node-v48-linux-ia32
+
+
+$copyNative32 = <<SCRIPT
+  mkdir -p native-bindings/linux32/sqlite3/lib/binding/node-v48-linux-ia32
+  cp node_modules/sqlite3/lib/binding/node-v48-linux-ia32/node_sqlite3.node \
+  native-bindings/linux32/sqlite3/lib/binding/node-v48-linux-ia32/node_sqlite3.node
+
+  mkdir -p native-bindings/linux32/jdbc/node_modules/java/build/Release
+  cp node_modules/java/build/Release/nodejavabridge_bindings.node \
+  native-bindings/linux32/jdbc/node_modules/java/build/Release/nodejavabridge_bindings.node
+SCRIPT
+
+
+$copyNative64 = <<SCRIPT
+  mkdir -p native-bindings/linux64/sqlite3/lib/binding/node-v48-linux-x64
+  cp node_modules/sqlite3/lib/binding/node-v48-linux-x64/node_sqlite3.node \
+  native-bindings/linux64/sqlite3/lib/binding/node-v48-linux-x64/node_sqlite3.node
+
+  mkdir -p native-bindings/linux64/jdbc/node_modules/java/build/Release
+  cp node_modules/java/build/Release/nodejavabridge_bindings.node \
+  native-bindings/linux64/jdbc/node_modules/java/build/Release/nodejavabridge_bindings.node
+SCRIPT
+
+
+Vagrant.configure(2) do |config|
+
+  config.vm.define "ubuntu32" do |b|
+    b.vm.box = "reelio/trusty32"
+    b.vm.hostname = "ubuntu32"
+    b.vm.provider "virtualbox" do |v|
+      v.memory = 2048
+      v.cpus = 2
+    end
+
+    b.vm.synced_folder ".", "/vagrant", disabled: true
+    b.vm.synced_folder "./native-bindings", "/home/vagrant/native-bindings", type: "nfs", mount_options: ['rw', 'vers=3', 'tcp', 'fsc' ,'actimeo=1']
+
+    b.vm.network "private_network", ip: "192.168.50.15"
+    b.vm.provision "fix-no-tty", type: "shell" do |s|
+      s.privileged = false
+      s.inline = "sudo sed -i '/tty/!s/mesg n/tty -s \\&\\& mesg n/' /root/.profile"
+    end
+    b.vm.provision "shell", inline: $installNodeScript, privileged: false
+    b.vm.provision "shell", inline: $installJava8, privileged: false
+    b.vm.provision "shell", inline: $installNative, privileged: false
+    b.vm.provision "shell", inline: $copyNative32, privileged: false
+  end
+
+  config.vm.define "ubuntu64" do |b|
+    b.vm.box = "ubuntu/trusty64"
+    b.vm.hostname = "ubuntu64"
+    b.vm.provider "virtualbox" do |v|
+      v.memory = 2048
+      v.cpus = 2
+    end
+
+    b.vm.synced_folder ".", "/vagrant", disabled: true
+    b.vm.synced_folder "./native-bindings", "/home/vagrant/native-bindings", type: "nfs", mount_options: ['rw', 'vers=3', 'tcp', 'fsc' ,'actimeo=1']
+
+    b.vm.network "private_network", ip: "192.168.50.15"
+    b.vm.provision "fix-no-tty", type: "shell" do |s|
+      s.privileged = false
+      s.inline = "sudo sed -i '/tty/!s/mesg n/tty -s \\&\\& mesg n/' /root/.profile"
+    end
+    b.vm.provision "shell", inline: $installNodeScript, privileged: false
+    b.vm.provision "shell", inline: $installJava8, privileged: false
+    b.vm.provision "shell", inline: $installNative, privileged: false
+    b.vm.provision "shell", inline: $copyNative64, privileged: false
+  end
+
+end

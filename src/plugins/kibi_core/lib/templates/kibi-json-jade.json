@@ -1,9 +1,9 @@
 {
   "title": "kibi-json-jade",
   "description": "A Jade template that displays query results as a JSON object.",
-  "st_templateSource": "//- The data passed to the template has the following format\n//- {\n//-   id: STRING, // a unique random id\n//-   results: {...}, // data returned by the query\n//-   config: {},     // query configuration\n//-   \n//- }\n//-\n//- Data returned by the query is assigned\n//- to the **results** property \n//- and can be used inside the template.\n\npre(id=id)= empty\nscript(type='text/javascript').\n  var id = '!{id}';\n  var x = !{JSON.stringify(results)};\n  var el = document.getElementById(id);\n  el.innerHTML = JSON.stringify(x, null, ' ');",
-  "st_templateEngine": "jade",
-  "version": 1,
+  "templateSource": "//- The data passed to the template has the following format\n//- {\n//-   id: STRING, // a unique random id\n//-   results: {...}, // data returned by the query\n//-   config: {},     // query configuration\n//-   \n//- }\n//-\n//- Data returned by the query is assigned\n//- to the **results** property \n//- and can be used inside the template.\n\npre(id=id)= empty\nscript(type='text/javascript').\n  var id = '!{id}';\n  var x = !{JSON.stringify(results)};\n  var el = document.getElementById(id);\n  el.innerHTML = JSON.stringify(x, null, ' ');",
+  "templateEngine": "jade",
+  "version": 2,
   "kibanaSavedObjectMeta": {
     "searchSourceJSON": "{}"
   }

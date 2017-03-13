@@ -30,6 +30,7 @@ rules:
   no-bitwise: 0
   no-caller: 2
   no-cond-assign: 0
+  no-const-assign: 2
   no-debugger: 2
   no-empty: 2
   no-eval: 2
@@ -54,8 +55,10 @@ rules:
   no-unused-expressions: 0
   no-unused-vars: 0
   no-use-before-define: [ 2, nofunc ]
+  no-var: 1
   no-with: 2
   one-var: [ 2, never ]
+  prefer-const: 1
   quotes: [ 2, single ]
   semi-spacing: [ 2, { before: false, after: true } ]
   semi: [ 2, always ]

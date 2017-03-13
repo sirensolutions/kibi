@@ -1,9 +1,11 @@
 define(function (require) {
-  var _ = require('lodash');
+  const _ = require('lodash');
   require('plugins/kibana/visualize/saved_visualizations/saved_visualizations');
   require('plugins/kibana/visualize/editor/sidebar');
   require('plugins/kibana/visualize/editor/agg_filter');
 
+  const stateMonitorFactory = require('ui/state_management/state_monitor_factory');
+  require('ui/navbar_extensions');
   require('ui/visualize');
   require('ui/collapsible_sidebar');
   require('ui/share');
@@ -15,8 +17,8 @@ define(function (require) {
     template: require('plugins/kibana/visualize/editor/editor.html'),
     resolve: {
       savedVis: function (savedVisualizations, courier, $route, Private) {
-        var visTypes = Private(require('ui/registry/vis_types'));
-        var visType = _.find(visTypes, {name: $route.current.params.type});
+        const visTypes = Private(require('ui/registry/vis_types'));
+        const visType = _.find(visTypes, {name: $route.current.params.type});
         if (visType.requiresSearch && !$route.current.params.indexPattern && !$route.current.params.savedSearchId) {
           throw new Error('You must provide either an indexPattern or a savedSearchId');
         }
@@ -31,6 +33,12 @@ define(function (require) {
   .when('/visualize/edit/:id', {
     template: require('plugins/kibana/visualize/editor/editor.html'),
     resolve: {
+      isEntityDependent: function (Private, savedVisualizations, $route) {
+        const doesVisDependsOnSelectedEntities = Private(require('ui/kibi/components/commons/_does_vis_depends_on_selected_entities'));
+        return savedVisualizations.get($route.current.params.id)
+        .then((savedVis) => doesVisDependsOnSelectedEntities(savedVis.vis))
+        .catch(() => false);
+      },
       savedVis: function (savedVisualizations, courier, $route) {
         return savedVisualizations.get($route.current.params.id)
         .catch(courier.redirectWhenMissing({
@@ -48,69 +56,60 @@ define(function (require) {
     'kibana/notify',
     'kibana/courier'
   ])
-  .controller('VisEditor', function (
-    $rootScope, globalState, $scope, $route, timefilter, AppState,
-    $location, kbnUrl, $timeout, courier, Private, Promise, createNotifier
-  ) {
+  .directive('visualizeApp', function () {
+    return {
+      controllerAs: 'visualizeApp',
+      controller: VisEditor,
+    };
+  });
 
-    var angular = require('angular');
-    var ConfigTemplate = require('ui/ConfigTemplate');
-    var docTitle = Private(require('ui/doc_title'));
-    var brushEvent = Private(require('ui/utils/brush_event'));
-    var queryFilter = Private(require('ui/filter_bar/query_filter'));
-    var filterBarClickHandler = Private(require('ui/filter_bar/filter_bar_click_handler'));
+  function VisEditor($scope, $route, timefilter, AppState, kbnUrl, $timeout, courier, kibiState, Private, Promise, createNotifier) {
+    // kibi: dependencies added by kibi
+    const doesVisDependsOnSelectedEntities = Private(require('ui/kibi/components/commons/_does_vis_depends_on_selected_entities'));
+    const hasAnyOfVisSavedSearchesATimeField = Private(require('ui/kibi/components/commons/_has_any_of_vis_saved_searches_a_time_field'));
+    // kibi: end
 
-    var setEntityURI = Private(require('ui/kibi/components/commons/_set_entity_uri'));
+    const angular = require('angular');
+    const ConfigTemplate = require('ui/ConfigTemplate');
+    const Notifier = require('ui/notify/notifier');
+    const docTitle = Private(require('ui/doc_title'));
+    const brushEvent = Private(require('ui/utils/brush_event'));
+    const queryFilter = Private(require('ui/filter_bar/query_filter'));
+    const filterBarClickHandler = Private(require('ui/filter_bar/filter_bar_click_handler'));
+    const getEmptyQueryOptionHelper = Private(require('ui/kibi/helpers/get_empty_query_with_options_helper'));
 
     $scope.holder = {
-      entityURI: '',
-      entityURIEnabled: false,
-      visible: $location.path().indexOf('/visualize/') !== -1
+      entityURIEnabled: $route.current.locals.isEntityDependent,
+      visible: true
     };
-    $scope.$watch('holder.entityURI', function (entityURI) {
-      if (entityURI && $scope.holder.visible) {
-        globalState.se_temp = [entityURI];
-        globalState.save();
+
+    $scope.$listen(kibiState, 'save_with_changes', function (diff) {
+      if (diff.indexOf(kibiState._properties.test_selected_entity) !== -1) {
         $scope.fetch();
       }
     });
 
-    setEntityURI($scope.holder);
-    var removeSetEntityUriHandler = $rootScope.$on('kibi:selectedEntities:changed', function (event, se) {
-      setEntityURI($scope.holder);
-    });
-
-    var off1 = $rootScope.$on('kibi:entityURIEnabled:kibitable', function (event, enabled) {
-      $scope.holder.entityURIEnabled = !!enabled;
-    });
-    var off2 = $rootScope.$on('kibi:entityURIEnabled:external_query_terms_filter', function (event, enabled) {
-      $scope.holder.entityURIEnabled = !!enabled;
-    });
-    var off3 = $rootScope.$on('kibi:entityURIEnabled:kibigraph', function (event, enabled) {
-      $scope.holder.entityURIEnabled = !!enabled;
-    });
-    var off4 = $rootScope.$on('kibi:entityURIEnabled:kibiqueryviewer', function (event, enabled) {
-      $scope.holder.entityURIEnabled = !!enabled;
-    });
-
-    var notify = createNotifier({
+    const notify = createNotifier({
       location: 'Visualization Editor'
     });
 
-    var savedVis = $route.current.locals.savedVis;
+    let stateMonitor;
+    const $appStatus = this.appStatus = {};
 
-    var vis = savedVis.vis;
-    var editableVis = vis.createEditableVis();
+    const savedVis = $route.current.locals.savedVis;
+
+    const vis = savedVis.vis;
+    const editableVis = vis.createEditableVis();
     vis.requesting = function () {
-      var requesting = editableVis.requesting;
+      const requesting = editableVis.requesting;
       requesting.call(vis);
       requesting.call(editableVis);
     };
 
-    var searchSource = savedVis.searchSource;
+    const searchSource = savedVis.searchSource;
 
     // config panel templates
-    var configTemplate = new ConfigTemplate({
+    const configTemplate = new ConfigTemplate({
       save: require('plugins/kibana/visualize/editor/panels/save.html'),
       load: require('plugins/kibana/visualize/editor/panels/load.html'),
       share: require('plugins/kibana/visualize/editor/panels/share.html'),
@@ -120,16 +119,16 @@ define(function (require) {
       docTitle.change(savedVis.title);
     }
 
-    var $state = $scope.$state = (function initState() {
-      var savedVisState = vis.getState();
-      var stateDefaults = {
-        uiState: savedVis.uiStateJSON ? JSON.parse(savedVis.uiStateJSON) : {},
-        linked: !!savedVis.savedSearchId,
-        query: searchSource.getOwn('query') || {query_string: {query: '*'}},
-        filters: searchSource.getOwn('filter') || [],
-        vis: savedVisState
-      };
+    const savedVisState = vis.getState();
+    const stateDefaults = {
+      uiState: savedVis.uiStateJSON ? JSON.parse(savedVis.uiStateJSON) : {},
+      linked: !!savedVis.savedSearchId,
+      query: searchSource.getOwn('query') || getEmptyQueryOptionHelper.getQuery(),
+      filters: searchSource.getOwn('filter') || [],
+      vis: savedVisState
+    };
 
+    let $state = $scope.$state = (function initState() {
       $state = new AppState(stateDefaults);
 
       if (!angular.equals($state.vis, savedVisState)) {
@@ -154,9 +153,16 @@ define(function (require) {
       $scope.editableVis = editableVis;
       $scope.state = $state;
       $scope.uiState = $state.makeStateful('uiState');
+      $scope.appStatus = $appStatus;
 
       $scope.conf = _.pick($scope, 'doSave', 'savedVis', 'shareData');
       $scope.configTemplate = configTemplate;
+
+      stateMonitor = stateMonitorFactory.create($state, stateDefaults);
+      stateMonitor.ignoreProps([ 'vis.listeners' ]).onChange((status) => {
+        $appStatus.dirty = status.dirty;
+      });
+      $scope.$on('$destroy', () => stateMonitor.destroy());
 
       editableVis.listeners.click = vis.listeners.click = filterBarClickHandler($state);
       editableVis.listeners.brush = vis.listeners.brush = brushEvent;
@@ -184,7 +190,10 @@ define(function (require) {
       $state.replace();
 
       $scope.$watch('searchSource.get("index").timeFieldName', function (timeField) {
-        timefilter.enabled = !!timeField;
+        // kibi: decide to show/hide timefilter in case requiresMultiSearch is true
+        hasAnyOfVisSavedSearchesATimeField($scope.vis, timeField).then((has) => {
+          timefilter.enabled = has;
+        });
       });
 
       // update the searchSource when filters update
@@ -239,10 +248,9 @@ define(function (require) {
 
       $scope.$on('$destroy', function () {
         savedVis.destroy();
-        off1();
-        off2();
-        off3();
-        off4();
+        // remove the test_selected_entity
+        kibiState.removeTestEntityURI();
+        kibiState.save();
       });
     }
 
@@ -250,7 +258,7 @@ define(function (require) {
       $state.save();
       searchSource.set('filter', queryFilter.getFilters());
       if (!$state.linked) searchSource.set('query', $state.query);
-      if ($scope.vis.type.requiresSearch) {
+      if ($scope.vis.type.requiresMultiSearch || $scope.vis.type.requiresSearch) {
         courier.fetch();
       }
     };
@@ -266,6 +274,7 @@ define(function (require) {
 
       savedVis.save()
       .then(function (id) {
+        stateMonitor.setInitialState($state.toJSON());
         configTemplate.close('save');
 
         if (id) {
@@ -273,15 +282,15 @@ define(function (require) {
           if (savedVis.id === $route.current.params.id) return;
           kbnUrl.change('/visualize/edit/{{id}}', {id: savedVis.id});
         }
-      }, notify.fatal);
+      }, notify.error); // kibi: changed from fatal to error
     };
 
     $scope.unlink = function () {
       if (!$state.linked) return;
 
       $state.linked = false;
-      var parent = searchSource.getParent(true);
-      var parentsParent = parent.getParent(true);
+      const parent = searchSource.getParent(true);
+      const parentsParent = parent.getParent(true);
 
       // display unlinking for 2 seconds, unless it is double clicked
       $scope.unlinking = $timeout($scope.clearUnlinking, 2000);
@@ -316,10 +325,17 @@ define(function (require) {
         $state.vis = vis.getState();
         $state.save();
 
-        if (fetch) $scope.fetch();
+        if (fetch) {
+          // kibi: decide to show/hide entity picker and timefilter
+          hasAnyOfVisSavedSearchesATimeField(toVis, $scope.searchSource.get('index').timeFieldName)
+          .then((has) => timefilter.enabled = has)
+          .then(() => doesVisDependsOnSelectedEntities(toVis))
+          .then((isEntityDependent) => $scope.holder.entityURIEnabled = isEntityDependent)
+          .then($scope.fetch);
+        }
       };
     }
 
     init();
-  });
+  }
 });

@@ -69,7 +69,7 @@ image::images/enhanced_search_results/click_follow_url.png["Follow URL on click"
 To configure a click handler, you must set the following parameters:
 
 - _Column_ -- the name of the column to which the handler will be bound.
-- _On click I want to_ -- the action to perform on click.
+- _On click I want to_ -- the action to perform on click, select **Follow the URL** here.
 - _URL field_ -- the name of the field containing the URL.
 - _URL format_ -- a custom format string to compose the URL, where _@URL@_ is
 replaced with the value of the field set in _URL field_.
@@ -94,33 +94,8 @@ section.
 To configure an entity selection action you must set the following parameters:
 
 - _Column_ -- the name of the column to which the handler will be bound.
-- _Selected entity URI scheme_ -- the data source type.
-- _URI format_ -- a format string used to compose the entity URI.
+- _On click I want to_ -- the action to perform on click, select **Select the document** here.
 - _Redirect to dashboard_ -- if set, clicking on the cell will select the
 entity and display the specified dashboard.
 
-===== SQL
-
-When the data source is a SQL database, you must set two additional parameters:
-
-1. _Table name_ -- the name of the table in which the entity is stored; sets
-the value of the _@TABLE@_ variable in the query at runtime.
-2. _PKVALUE field_ -- the value of the field which identifies the entity;
-sets the value of the _@PKVALUE@_ variable in the query at runtime.
-
-In the screenshot below, the value of the field _id_ in the clicked document
-will set the value of the _@PKVALUE@_ variable, while the value of the
-_@TABLE@_ variable will not bet set (because the query doesn't make use of
-the variable).
-
-image::images/enhanced_search_results/click_select_entity_sql.png["Configuration of an entity selection handler on a SQL datasource",align="center"]
-
-===== SPARQL
-
-When the data source is a SPARQL endpoint, you must set which index field
-stores the entity URI; it is possible to customize the URI by customizing the
-_URI format_ field.
-
-In the screenshot below, _id_ is chosen.
-
-image::images/enhanced_search_results/click_select_entity_sparql.png["Configuration of an entity selection handler on a SPARQL datasource",align="center"]
+image::images/enhanced_search_results/click_select_entity.png["Configuration of an entity selection handler",align="center"]

@@ -2,28 +2,43 @@
 = Kibi User Guide
 :toc: right
 
+:enterprise_enabled: false
 :java-version: 1.8
-:siren-join-version: 2.2.0-1
+:siren-join-version: 2.4.2-1
 :siren-join-website: https://github.com/sirensolutions/siren-join/
-:kibana-version: 4.4.2
-:kibana-announcement: https://www.elastic.co/blog/kibana-4-4-2-and-4-3-3-and-4-1-6
-:kibi-version: 4.4.2
-:elastic-ref: https://www.elastic.co/guide/en/elasticsearch/reference/2.2/
-:elasticsearch-version: 2.2.0
+:kibana-version: 4.6.4
+:kibana-announcement: https://www.elastic.co/blog/kibana-5-1-2-and-4-6-4-released
+:kibi-version: 4.6.4
+:elastic-ref: https://www.elastic.co/guide/en/elasticsearch/reference/2.4/
+:elasticsearch-version: 2.4.2
+:shield-ref: https://www.elastic.co/guide/en/shield/2.4/
+:sense-ref: https://www.elastic.co/guide/en/sense/current/
+:searchguard-ref: https://github.com/floragunncom/search-guard-docs
+:searchguard-management-api-ref: https://github.com/floragunncom/search-guard-rest-api/wiki
+:searchguard-sgadmin-ref: https://github.com/floragunncom/search-guard/wiki#search-guard-admin-standalone
+:searchguard-matrix-ref: https://github.com/floragunncom/search-guard/wiki#version-matrix
+:searchguard-setup-ref: https://github.com/floragunncom/search-guard/tree/es-2.3.5
 :kibi-ref: http://siren.solutions/kibi/docs/current/
 :start-url: http://localhost:5606
 :start-url-shield: https://localhost:5606
+:kibi-default-port: 5606
 
-:ref: http://www.elastic.co/guide/en/elasticsearch/reference/current/
-:shield: https://www.elastic.co/guide/en/shield/current
 :k4issue: https://github.com/elastic/kibana/issues/
 :k4pull: https://github.com/elastic/kibana/pull/
+:version: 4.6
+:compatible-es-versions: 2.4.x
+:es-compability-table-ref: https://github.com/sirensolutions/kibi/blob/master/README.md#compatibility-table-kibi--elasticsearch
+
+:repo: https://github.com/elastic/kibana/
+:branch: 4.6
 
 include::introduction.asciidoc[]
 
 include::kibi_license.asciidoc[]
 
 include::setup.asciidoc[]
+
+include::upgrade.asciidoc[]
 
 include::getting_started.asciidoc[]
 
@@ -39,6 +54,8 @@ include::external_datasources.asciidoc[]
 
 include::kibi_gremlin_server.asciidoc[]
 
+include::sentinl_joinquery.asciidoc[]
+
 include::visualize.asciidoc[]
 
 include::relational_filter.asciidoc[]
@@ -46,6 +63,10 @@ include::relational_filter.asciidoc[]
 include::dashboard.asciidoc[]
 
 include::settings.asciidoc[]
+
+include::access_control.asciidoc[]
+
+include::searchguard_integration.asciidoc[]
 
 include::shield_integration.asciidoc[]
 

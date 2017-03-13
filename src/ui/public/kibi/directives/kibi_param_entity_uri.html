@@ -19,7 +19,8 @@
                object-type="indexPatternType"
                index-pattern-id="c.indexPattern"
                model-disabled="!(entityUriHolder.entityURIEnabled && c.indexPattern)"
-               model-required="entiryUriHolder.entityURIEnabled"
+               model-required="entityUriHolder.entityURIEnabled"
+               include="c.extraTypeItems"
                class="selectEntityUriParts"></kibi-select>
     <kibi-select ng-model="c.id"
                object-type="documentIds"
@@ -27,7 +28,7 @@
                index-pattern-type="c.type"
                include="c.extraIdItems"
                model-disabled="!(entityUriHolder.entityURIEnabled && c.type)"
-               model-required="entiryUriHolder.entityURIEnabled"
+               model-required="entityUriHolder.entityURIEnabled"
                class="selectEntityUriParts"></kibi-select>
   </form>
 </div>

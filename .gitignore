@@ -1,4 +1,5 @@
 .aws-config.json
+.signing-config.json
 .DS_Store
 .node_binaries
 node_modules
@@ -10,11 +11,14 @@ target
 .idea
 *.iml
 *.log
-/test/output
+/test/screenshots/failure/*.png
+/test/screenshots/session/*.png
+/html_docs
 /esvm
 .htpasswd
 .eslintcache
 installedPlugins
+data
 disabledPlugins
 webpackstats.json
 config/kibi.dev.yml
@@ -28,3 +32,5 @@ selenium
 # Gradle
 .gradle/
 build-gradle/
+/pki
+/gremlin_server

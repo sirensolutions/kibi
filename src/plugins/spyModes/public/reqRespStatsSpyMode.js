@@ -1,8 +1,8 @@
 define(function (require) {
-  var _ = require('lodash');
-  var reqRespStatsHTML = require('plugins/spyModes/reqRespStatsSpyMode.html');
+  const _ = require('lodash');
+  const reqRespStatsHTML = require('plugins/spyModes/reqRespStatsSpyMode.html');
 
-  var linkReqRespStats = function ($scope, config) {
+  const linkReqRespStats = function ($scope, config) {
     $scope.$bind('req', 'searchSource.history[searchSource.history.length - 1]');
     $scope.$watchMulti([
       'req',
@@ -12,9 +12,9 @@ define(function (require) {
     ], function () {
       if (!$scope.searchSource || !$scope.req) return;
 
-      var req = $scope.req;
-      var resp = $scope.req.resp;
-      var stats = $scope.stats = [];
+      const req = $scope.req;
+      const resp = $scope.req.resp;
+      const stats = $scope.stats = [];
 
       if (resp && resp.took != null) stats.push(['Query Duration', resp.took + 'ms']);
       if (req && req.ms != null) stats.push(['Request Duration', req.ms + 'ms']);
@@ -34,6 +34,10 @@ define(function (require) {
       name: 'request',
       display: 'Request',
       order: 2,
+      // kibi: do not show if the vis is incompatible with this mode
+      allowSpyMode: function (visType) {
+        return !visType.requiresMultiSearch;
+      },
       template: reqRespStatsHTML,
       link: linkReqRespStats
     };
@@ -43,6 +47,10 @@ define(function (require) {
       name: 'response',
       display: 'Response',
       order: 3,
+      // kibi: do not show if the vis is incompatible with this mode
+      allowSpyMode: function (visType) {
+        return !visType.requiresMultiSearch;
+      },
       template: reqRespStatsHTML,
       link: linkReqRespStats
     };
@@ -52,6 +60,10 @@ define(function (require) {
       name: 'stats',
       display: 'Statistics',
       order: 4,
+      // kibi: do not show if the vis is incompatible with this mode
+      allowSpyMode: function (visType) {
+        return !visType.requiresMultiSearch;
+      },
       template: reqRespStatsHTML,
       link: linkReqRespStats
     };

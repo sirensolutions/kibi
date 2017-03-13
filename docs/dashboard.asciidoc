@@ -59,10 +59,8 @@ when sharing a dashboard on a public facing server.
 NOTE: To view shared dashboards users must be able to access Kibi; keep
 this in mind if your Kibi instance is protected by an authentication proxy.
 
-To share a dashboard, click the *Share* image:images/ShareVis.png[Share]
-button:
-
 To share a dashboard, click the *Share* button image:images/share-dashboard.png[] to display the _Sharing_ panel.
+
 
 image:images/sharing-panel.png[]
 
@@ -142,20 +140,24 @@ information about the raw data replace the visualization, as in this example:
 .Table
 A representation of the underlying data, presented as a paginated data grid. You can sort the items
 in the table by clicking on the table headers at the top of each column.
+
 image:images/NYCTA-Table.jpg[]
 
 .Request
 The raw request used to query the server, presented in JSON format.
+
 image:images/NYCTA-Request.jpg[]
 
 .Response
 The raw response from the server, presented in JSON format.
+
 image:images/NYCTA-Response.jpg[]
 
 .Statistics
 A summary of the statistics related to the request and the response, presented as a data grid. The data
 grid includes the query duration, the request duration, the total number of records found on the server, and the
 index pattern used to make the query.
+
 image:images/NYCTA-Statistics.jpg[]
 
 To export the raw data behind the visualization as a comma-separated-values (CSV) file, click on either the
@@ -185,6 +187,20 @@ by default; the other dashboards in the group can be selected through the
 dropdown menu embedded in the tab:
 
 image::images/dashboard/dashboardgroup_tab.png["A dashboard group tab",align="center"]
+
+If the dashboard is associated with a saved search the count of documents on the dashboard is displayed next to the dashboard name.
+Two additional indicators that might be displayed are:
+
+* _Filters/Queries indicator_ - the filter icon is displayed if there are any filter or query on the dashboard
+* _Pruned joins indicator_ - a star symbol is displayed if any of the join operations was pruned
+
+An example image below was taken on the *Articles detailed per source* dashboard.
+By opening the select dropdown, we see that there are 7225 documents on *Articles* dashboard.
+We also know that there are some filters or queries on this dashboard
+and at least one of the join operations was pruned.
+
+image::images/dashboard/dashboard_counts_and_indicators.png["A dashboard counts and indicators",align="center"]
+
 
 Dashboard groups can be managed by clicking on the
 <<kibi-settings-dashboards-groups,Dashboard Groups Settings>> tab.

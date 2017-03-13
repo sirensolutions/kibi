@@ -5,10 +5,7 @@ define(function (require) {
   var _ = require('lodash');
   var app = require('ui/modules').get('app/dashboard');
 
-  app.directive('kibiDashboardToolbar', function (config, timefilter, savedDashboards, getAppState, Private, $rootScope) {
-
-    var kibiStateHelper = Private(require('ui/kibi/helpers/kibi_state_helper/kibi_state_helper'));
-
+  app.directive('kibiDashboardToolbar', function (kibiState, $rootScope) {
     return {
       restrict: 'E',
       //require: '^dashboardApp', // kibi: does not inherits from dashboardApp because we want to place it in different place
@@ -21,46 +18,28 @@ define(function (require) {
         };
 
         $scope.resetFiltersQueriesTimes = function () {
-          // remove all filters and queries across dashboards
-          // except pinned filters
-          const resetAppState = savedDashboards.find().then((resp) => {
-            if (resp.hits) {
-              var appState = getAppState();
-              _.each(resp.hits, (dashboard) => {
-                if (dashboard.id === appState.id) {
-                  const meta = JSON.parse(dashboard.kibanaSavedObjectMeta.searchSourceJSON);
-                  // filters
-                  appState.filters = _.reject(meta.filter, (filter) => filter.query && filter.query.query_string && !filter.meta);
-                  // query
-                  const query = _.find(meta.filter, (filter) => filter.query && filter.query.query_string && !filter.meta);
-                  appState.query = query && query.query || {query_string: {analyze_wildcard: true, query: '*'}};
-                  // time
-                  if (dashboard.timeRestore && dashboard.timeFrom && dashboard.timeTo) {
-                    timefilter.time.mode = dashboard.timeMode;
-                    timefilter.time.to = dashboard.timeTo;
-                    timefilter.time.from = dashboard.timeFrom;
-                  } else {
-                    var timeDefaults = config.get('timepicker:timeDefaults');
-                    // These can be date math strings or moments.
-                    timefilter.time = timeDefaults;
-                  }
-                  return false;
-                }
-              });
-              appState.save();
-            }
-          });
-
-          Promise.all([ resetAppState, kibiStateHelper.resetFiltersQueriesTimes() ])
-          .then(() => {
-            // if join_set was deleted
-            // emit event so others can react (kibiStateHelper, relationalPanel)
-
-            // here we would have to check that the join_set is either in app state or kibi state
-            // we skip the check and simply emit the event
-            $rootScope.$emit('kibi:join_set:removed');
-          });
+          kibiState.resetFiltersQueriesTimes();
         };
+
+        $scope.relationalFilterPanelOpened = false;
+
+        $scope.openRelationalFilterPanel = function () {
+          $scope.relationalFilterPanelOpened = !$scope.relationalFilterPanelOpened;
+          $rootScope.$emit('relationalFilterPanelOpened', $scope.relationalFilterPanelOpened);
+        };
+
+        var removeRelationalFilterPanelClosedHandler = $rootScope.$on('relationalFilterPanelClosed', function () {
+          $scope.relationalFilterPanelOpened = false;
+        });
+
+        // close panel when user navigates to a different route
+        var removeRouteChangeSuccessHandler = $rootScope.$on('$routeChangeSuccess', function (event, next, prev, err) {
+          if (!next.locals.dash) {
+            // only if we switched to a non dashboard page
+            $rootScope.$emit('relationalFilterPanelOpened', false);
+            $scope.relationalFilterPanelOpened = false;
+          }
+        });
 
         $scope.$watch('configTemplate', function () {
           $rootScope.$emit('kibi:dashboard:set-property', 'configTemplate', $scope.configTemplate);
@@ -69,7 +48,10 @@ define(function (require) {
         var off = $rootScope.$on('stDashboardOnProperty', function (event, property, value) {
           $scope[property] = value;
         });
-        $scope.$on('$destroy', off);
+        $scope.$on('$destroy', function () {
+          removeRouteChangeSuccessHandler();
+          removeRelationalFilterPanelClosedHandler();
+        });
       }
     };
   });

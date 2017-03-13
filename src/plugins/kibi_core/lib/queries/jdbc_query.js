@@ -5,8 +5,6 @@ var AbstractQuery = require('./abstract_query');
 var JdbcHelper    = require('../jdbc_helper');
 var QueryHelper = require('../query_helper');
 
-var debug = false;
-
 function JdbcQuery(server, queryDefinition, cache) {
   AbstractQuery.call(this, server, queryDefinition, cache);
   this.logger = require('../logger')(server, 'jdbc_query');
@@ -67,14 +65,13 @@ JdbcQuery.prototype._executeQuery = function (query) {
   return new Promise(function (fulfill, reject) {
     self.jdbc.reserve(function (err, connObj) {
       if (err) {
-        reject(err);
+        return reject(err);
       }
       if (connObj) {
-        // Grab the Connection for use.
         var conn = connObj.conn;
         conn.createStatement(function (err, statement) {
           if (err) {
-            reject(err);
+            return reject(err);
           }
           statement.executeQuery(query, function (err, resultset) {
             if (err) {
@@ -84,20 +81,28 @@ JdbcQuery.prototype._executeQuery = function (query) {
                   message: err.message
                 };
               }
-              reject(err);
+              self.jdbc.release(connObj, function (releaseError) {
+                if (releaseError) {
+                  self.logger.error(releaseError);
+                }
+                return reject(err);
+              });
+              return;
             }
 
             resultset.toObjArray(function (err, results) {
-              if (err) {
-                reject(err);
-              }
-              fulfill(results);
-              self.jdbc.release(connObj, function (err) {
-                if (err) {
-                  self.logger.erro(err);
+              self.jdbc.release(connObj, function (releaseError) {
+                if (releaseError) {
+                  self.logger.error(releaseError);
+                  if (!err) {
+                    return reject(releaseError);
+                  }
                 }
+                if (err) {
+                  return reject(err);
+                }
+                fulfill(results);
               });
-
             });
           });
         });
@@ -117,13 +122,13 @@ JdbcQuery.prototype.checkIfItIsRelevant = function (options) {
   return self._init().then(function (data) {
 
     if (self._checkIfSelectedDocumentRequiredAndNotPresent(options)) {
-      self.logger.warn('No elasticsearch document selected while required by the jdbc activation query. [' + self.config.id + ']');
+      self.logger.warn('No elasticsearch document selected while required by the jdbc query. [' + self.config.id + ']');
       return Promise.resolve(false);
     }
     var uri = options.selectedDocuments && options.selectedDocuments.length > 0 ? options.selectedDocuments[0] : '';
 
     // here do not use getConnectionString method as it might contain sensitive information like decrypted password
-    var connectionString = self.config.datasource.datasourceClazz.datasource.datasourceParams.connectionString;
+    var connectionString = self.config.datasource.datasourceClazz.datasource.datasourceParams.connection_string;
     var maxAge = self.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
     var cacheEnabled = self.config.datasource.datasourceClazz.datasource.datasourceParams.cache_enabled;
 
@@ -159,15 +164,10 @@ JdbcQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) {
   return self._init().then(function (data) {
 
     var start = new Date().getTime();
-    // special case - we can not simply reject the Promise
-    // bacause it will cause the whole group of promissses to be rejected
-    if (self._checkIfSelectedDocumentRequiredAndNotPresent(options)) {
-      return self._returnAnEmptyQueryResultsPromise('No data because the query require entityURI');
-    }
     // currently we use only single selected document
     var uri = options.selectedDocuments && options.selectedDocuments.length > 0 ? options.selectedDocuments[0] : '';
 
-    var connectionString = self.config.datasource.datasourceClazz.datasource.datasourceParams.connectionString;
+    var connectionString = self.config.datasource.datasourceClazz.datasource.datasourceParams.connection_string;
     var maxAge = self.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
     var cacheEnabled = self.config.datasource.datasourceClazz.datasource.datasourceParams.cache_enabled;
 

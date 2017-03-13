@@ -1,17 +1,17 @@
 define(function (require) {
   require('elasticsearch-browser/elasticsearch.angular.js');
-  var _ = require('lodash');
+  const _ = require('lodash');
 
-  var es; // share the client amoungst all apps
+  let es; // share the client amoungst all apps
   require('ui/modules')
     .get('kibana', ['elasticsearch', 'kibana/config'])
-    .service('es', function (esFactory, esUrl, $q, esApiVersion) {
+    .service('es', function (esFactory, esUrl, $q, esApiVersion, esRequestTimeout) {
       if (es) return es;
 
       es = esFactory({
         host: esUrl,
         log: 'info',
-        requestTimeout: 0,
+        requestTimeout: esRequestTimeout,
         apiVersion: esApiVersion,
         plugins: [function (Client, config) {
 

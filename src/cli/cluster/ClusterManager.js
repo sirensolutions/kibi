@@ -3,7 +3,7 @@ let { join } = require('path');
 let { debounce, compact, invoke, bindAll, once } = require('lodash');
 
 let Log = require('../Log');
-let Worker = require('./Worker');
+let Worker = require('./worker');
 
 module.exports = class ClusterManager {
   constructor(opts) {
@@ -51,7 +51,7 @@ module.exports = class ClusterManager {
   }
 
   setupWatching() {
-    var chokidar = require('chokidar');
+    let chokidar = require('chokidar');
     let utils = require('requirefrom')('src/utils');
     let fromRoot = utils('fromRoot');
 

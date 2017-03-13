@@ -1,3 +1,6 @@
+import placeholderSchema from './yaml/placeholder_schema';
+import { match, replace } from './yaml/placeholder';
+
 let _ = require('lodash');
 let fs = require('fs');
 let yaml = require('js-yaml');
@@ -32,6 +35,11 @@ let legacySettingMap = {
   request_timeout: 'elasticsearch.requestTimeout',
   shard_timeout: 'elasticsearch.shardTimeout',
   startup_timeout: 'elasticsearch.startupTimeout',
+  tilemap_url: 'tilemap.url',
+  tilemap_min_zoom: 'tilemap.options.minZoom',
+  tilemap_max_zoom: 'tilemap.options.maxZoom',
+  tilemap_attribution: 'tilemap.options.attribution',
+  tilemap_subdomains: 'tilemap.options.subdomains',
   verify_ssl: 'elasticsearch.ssl.verify',
 };
 
@@ -42,15 +50,24 @@ const deprecatedSettings = {
 module.exports = function (path) {
   if (!path) return {};
 
-  let file = yaml.safeLoad(fs.readFileSync(path, 'utf8'));
+  let file = yaml.safeLoad(fs.readFileSync(path, 'utf8'), {
+    schema: placeholderSchema
+  });
 
   function apply(config, val, key) {
     if (_.isPlainObject(val)) {
       _.forOwn(val, function (subVal, subKey) {
         apply(config, subVal, key + '.' + subKey);
       });
-    } else {
-      _.set(config, key, val);
+    }
+    else if (_.isArray(val)) {
+      config[key] = [];
+      val.forEach((subVal, i) => {
+        apply(config, subVal, key + '.' + i);
+      });
+    }
+    else {
+      _.set(config, key, replace(val));
     }
   }
 

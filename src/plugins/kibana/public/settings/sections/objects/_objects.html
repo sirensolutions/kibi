@@ -2,16 +2,15 @@
   <kbn-settings-objects class="container">
     <div class="header">
       <h2 class="title">Edit Saved Objects</h2>
-      <!-- kibi: temporarily disabled by kibi
       <button class="btn btn-default controls" ng-click="exportAll()"><i aria-hidden="true" class="fa fa-download"></i> Export Everything</button>
       <button file-upload="importAll(fileContents)" class="btn btn-default controls" ng-click><i aria-hidden="true" class="fa fa-upload"></i> Import</button>
-      -->
     </div>
     <p>
       From here you can delete saved objects, such as saved searches. You can also edit the raw data of saved objects. Typically objects are only modified via their associated application, which is probably what you should use instead of this screen. Each tab is limited to 100 results. You can use the filter to find objects not in the default list.
     </p>
-    <form role="form">
-      <input aria-label="Filter" ng-model="advancedFilter" class="form-control span12" type="text" placeholder="Filter"/>
+    <form class="input-group input-group-unstyled" role="form">
+      <input aria-label="Filter" ng-model="advancedFilter" class="form-control" type="text" placeholder="Filter" />
+      <kbn-info class="input-group-addon" placement="left" info="This filter query does not support these characters: +, |, -, *, ( and ). If you need to use them, surround all your query with quotes."></kbn-info>
     </form>
 
     <ul class="nav nav-tabs">
@@ -33,15 +32,13 @@
           confirm-click="bulkDelete()"
           confirmation="Are you sure you want to delete the selected {{currentTab.title}}? This action is irreversible!"
           class="btn btn-xs btn-danger" aria-label="Delete"><i aria-hidden="true" class="fa fa-trash"></i> Delete</a>
-        <!-- kibi: temporarily disabled by kibi
         <a ng-disabled="selectedItems.length == 0"
           ng-click="bulkExport()"
           class="btn btn-xs btn-default" aria-label="Export"><i aria-hidden="true" class="fa fa-download"></i> Export</a>
-        -->
         <!-- kibi: added to be able to quickly find out current session -->
-        <span>
+        <span ng-show="state.tab == 'sessions'">
           <label>Show only current session</label>
-          <input ng-show="state.tab == 'sessions'" type="checkbox" ng-model="showOnlyCurrentSession" />
+          <input type="checkbox" ng-model="showOnlyCurrentSession" />
         </span>
         <!-- kibi: end-->
       </div>

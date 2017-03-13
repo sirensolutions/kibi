@@ -1,108 +1,42 @@
 [[releasenotes]]
 == Kibi Release Notes
 
-=== Kibi 4.4.2 and Kibana 4.4.2 Release Notes
+include::releasenotes_4.6.4.asciidoc[]
 
-* Various bug fixes and stability improvements
-* Various documentation improvements
-* Relational filter was not correctly refreshed
-* Fixed issue with wrong default value for siren.filterjoin.cache.size
-* Default join settings were incorrect
-* Improved datasourcetype conditions
-* Improves kibi session management
-* No error shown when the key has wrong length
-* Label on Entity Clipboard missing
-* Correct permission on executable files
-* Check that siren-join is installed on all data nodes
-* Update of node-jdbc to jdbc@0.3.1 and sqlite to sqlite3@3.1.4
-* ES client nodes discovery makes the gremlin server not working [Enterprise Edition only]
-* null pointer exception in gremlin server [Enterprise Edition only]
-* id instead of label on the graph [Enterprise Edition only]
-* 500 - [Object object] error [Enterprise Edition only]
-* Incorectly parsed remote_address [Enterprise Edition only]
-* Add more graph scripts [Enterprise Edition only]
-* Saving termsEncoding bloom [Enterprise Edition only]
+include::releasenotes_4.6.3-1.asciidoc[]
 
-Below are the issues relevant to Kibana.
+include::releasenotes_4.6.3.asciidoc[]
 
-* http://github.com/elastic/kibana/pull/6420[Issue 6420]: Bump node to v4.3.2
-* http://github.com/elastic/kibana/pull/6353[Issue 6353: Add basePath to short URLs
-* http://github.com/elastic/kibana/pull/6228[Issue 6228]: HTML unsafe characters in field names no longer break Kibana
-* http://github.com/elastic/kibana/pull/6083[Issue 6083]: Plugin installer support for .tgz file types
-* http://github.com/elastic/kibana/pull/5971[Issue 5971]: Fix active search source hover background issue
-* http://github.com/elastic/kibana/pull/5942[Issue 5942]: Fix for save button disabled when opening spy panel
-* http://github.com/elastic/kibana/pull/6133[Issue 6133] and http://github.com/elastic/kibana/pull/6103[6103]]: Distro packages now have a description, vendor, maintainer, url, license and priority metadata
+include::releasenotes_4.5.4-1.asciidoc[]
 
-=== Kibi 4.4.1 Release Notes
+include::releasenotes_4.5.4.asciidoc[]
 
+include::releasenotes_4.5.3-6.asciidoc[]
 
-* Various bug fixes and stability improvements.
-* Various error handling improvements
-* Caching can now be enabled/disabled per datasource from UI configuration
-* New version of Kibi Timeline plugin 0.1.4
-* Improved kibi.bat file for Windows
-* Improved documentation
-* Improved quality of the demo dataset
-* Default terms encoding for Siren Join changed to long
-* New Advanced Join Settings plugin [Enterprise Edition only]
-* Full Shield integration [Enterprise Edition only]
-* New Graph Browser visualization [Enterprise Edition only]
-* New Kibi Thinkerpop3 datasource [Enterprise Edition only]
-* New Kibi Gremlin Server component [Enterprise Edition only]
-* New Ansible/Vagrant deployment scripts for GCE and AWS [Enterprise Edition only]
+include::releasenotes_4.5.3-5.asciidoc[]
 
-=== Kibi 0.3.2 Release Notes
+include::releasenotes_4.5.3-4.asciidoc[]
 
+include::releasenotes_4.5.3-3.asciidoc[]
 
-* Various bug fixes and stability improvements.
-* New version of kibi_timeline_vis 0.1.2
-* Siren join plugin version upgraded to https://github.com/sirensolutions/siren-join/tree/2.2.0-1[2.2.0-1]
+include::releasenotes_4.5.3-2.asciidoc[]
 
-=== Kibi 0.3.1 and Kibana 4.4.1 Release Notes
+include::releasenotes_4.5.3-1.asciidoc[]
 
+include::releasenotes_4.5.3.asciidoc[]
 
-* Various bug fixes and stability improvements.
-* The 0.3.1 release of Kibi requires Elasticsearch 2.2.0.
-* Siren join plugin version upgraded to https://github.com/sirensolutions/siren-join/tree/2.2.0[2.2.0].
+include::releasenotes_4.4.2-2.asciidoc[]
 
-Below are the issues relevant to Kibana.
+include::releasenotes_4.4.2-1.asciidoc[]
 
+include::releasenotes_4.4.2.asciidoc[]
 
-* Bump node.js to 0.12.10 from 0.12.9
-* http://github.com/elastic/kibana/issues/6185[Issue 6185]:  Fixes a bug where the active HTTP spinner in the chrome bar is gone
+include::releasenotes_4.4.1-1.asciidoc[]
 
-=== Kibi 0.3 and Kibana 4.4 Release Notes
+include::releasenotes_4.4.1.asciidoc[]
 
-* The 0.3 release of Kibi requires Elasticsearch 2.1.2.
+include::releasenotes_0.3.2.asciidoc[]
 
-Using event times to create index names is no longer supported as of this release. Current versions of Elasticsearch include sophisticated date parsing APIs that Kibana uses to determine date information, removing the need to specify dates in the index pattern name.
+include::releasenotes_0.3.1.asciidoc[]
 
-Below are the issues relevant to Kibana.
-
-Enhancements
-
-* http://github.com/elastic/kibana/issues/1362[Issue 1362]: Color palette selector added.
-* http://github.com/elastic/kibana/issues/1553[Issue 1553]: Kibana can shorten URLs for shared or embedded items.
-* http://github.com/elastic/kibana/issues/5733[Issue 5733]: Time-based index pattern expansion can be set at index pattern creation time.
-* http://github.com/elastic/kibana/issues/5775[Issue 5775]: Adds a configuration option to change the maximum payload size sent to the server.
-* http://github.com/elastic/kibana/issues/4966[Issue 4966]: Logo is now in SVG format.
-* http://github.com/elastic/kibana/issues/3625[Issue 3625]: Downloaded visualizations now use the visualization name as the filename.
-* http://github.com/elastic/kibana/issues/5279[Issue 5279]: Large strings are truncated with an ellipsis (...).
-* http://github.com/elastic/kibana/issues/5241[Issue 5241]: Truncated visualization names are displayed in full as tooltips.
-
-Bug Fixes
-
-* http://github.com/elastic/kibana/issues/5897[Issue 5897]: Embedding links no longer include navigation and search bars.
-* http://github.com/elastic/kibana/issues/5896[Issue 5896]: Bookmarked URLs to saved filtered searches from a previous version of Kibana display correctly.
-* http://github.com/elastic/kibana/issues/5744[Issue 5744]: Fixes bug that caused incorrect display of "No results found" in some cases.
-* http://github.com/elastic/kibana/issues/5824[Issue 5824]: Corrects a fatal error when Kibana starts with node x86 on Windows x64 systems.
-
-Plugin System Changes
-
-* http://github.com/elastic/kibana/issues/5226[Issue 5226]: Plugins are explicit when they start to route.
-* http://github.com/elastic/kibana/pull/5725[Pull Request 5725]: Plugins can extend Chrome navigation.
-* http://github.com/elastic/kibana/issues/4720[Issue 4720]: Adds support for zip compression.
-* http://github.com/elastic/kibana/pull/5704[Pull Request 5704]: Removes Github shortcuts from the plugin installer.
-* http://github.com/elastic/kibana/issues/5661[Issue 5661]: Fixes the plugin optimization path.
-* http://github.com/elastic/kibana/pull/5538[Pull Request 5538]: Apps can use empty export types.
-
+include::releasenotes_0.3.0.asciidoc[]

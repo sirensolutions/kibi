@@ -99,7 +99,7 @@ define(function (require) {
         index: '@',
         postAction: '&'
       },
-      template: '<button class="btn btn-xs btn-danger" ng-click="removeParam()" > <i class="fa fa-times"></i> </button>',
+      template: '<button type="button" class="btn btn-xs btn-danger" ng-click="removeParam()" > <i class="fa fa-times"></i> </button>',
       link: function ($scope, element, attrs) {
         $scope.removeParam = function () {
           if (!kibiArrayParamService.required || $scope.model.length > 1) {

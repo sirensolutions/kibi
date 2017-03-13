@@ -1,6 +1,6 @@
 define(function (require) {
 
-  var Eeg = require('kibi-eeg');
+  const Eeg = require('kibi-eeg');
 
   require('ui/modules')
   .get('kibana')
@@ -19,9 +19,16 @@ define(function (require) {
       },
       template: '<div></div>',
       link: function ($scope, element, attrs) {
+        const layersOrder = ['legend', 'links','linksLabelsBack','nodes','linksLabels'];
+        const minNodeSize = 15;
+        const baseURL = '';
+
         if ($scope.graph === undefined) {
           element.empty();
-          $scope.g = new Eeg(element, {baseURL: ''});
+          if ($scope.g) {
+            $scope.g.destroy();
+          }
+          $scope.g = new Eeg(element, {baseURL, layersOrder, minNodeSize});
         }
 
         $scope.$watch('graph', function (graph) {
@@ -29,7 +36,12 @@ define(function (require) {
             element.empty();
 
             if ($scope.graph.options) {
-              $scope.graph.options.baseURL = '';
+              if ($scope.g) {
+                $scope.g.destroy();
+              }
+              $scope.graph.options.baseURL = baseURL;
+              $scope.graph.options.layersOrder = layersOrder;
+              $scope.graph.options.minNodeSize = minNodeSize;
               $scope.g = new Eeg(element, $scope.graph.options);
             }
 
@@ -43,20 +55,23 @@ define(function (require) {
           }
         });
 
-        var off = $rootScope.$on('egg:' + $scope.eegId + ':run', function (event, method) {
+        const off = $rootScope.$on('egg:' + $scope.eegId + ':run', function (event, method) {
           if ($scope.g) {
             if (method === 'importGraph') {
               element.empty();
             }
 
-            var args = Array.prototype.slice.apply(arguments);
+            const args = Array.prototype.slice.apply(arguments);
             args.shift();
             args.shift();
-            var result = $scope.g[method].apply($scope.g, args);
+            const result = $scope.g[method].apply($scope.g, args);
             $rootScope.$emit('egg:' + $scope.eegId + ':results', method, result);
           }
         });
-        $scope.$on('$destroy', off);
+        $scope.$on('$destroy', () => {
+          $scope.g.destroy();
+          off();
+        });
       }
     };
   });

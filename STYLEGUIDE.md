@@ -775,7 +775,7 @@ Several already exist, and can be found in `src/kibana/utils/_mixins.js`
 
 ## Filenames
 
-All filenames should use `snake_case` and *can* start with an underscore if the module is not intended to be used outside of it's containing module.
+All filenames should use `snake_case` and *can* start with an underscore if the module is not intended to be used outside of its containing module.
 
 *Right:*
   - `src/kibana/index_patterns/index_pattern.js`

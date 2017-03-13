@@ -78,8 +78,6 @@ QueryHelper.prototype.replaceVariablesUsingEsDocument = function (s, uri, creden
   var type = parts[1];
   var id = parts[2];
 
-  // TODO: add caching of document
-
   return self.fetchDocument(index, type, id, credentials).then(function (doc) {
     //now parse the query and replace the placeholders
     if (typeof s === 'string' || s instanceof String) {
@@ -93,7 +91,6 @@ QueryHelper.prototype.replaceVariablesUsingEsDocument = function (s, uri, creden
     }
   });
 };
-
 
 QueryHelper.prototype.fetchDocument = function (index, type, id, credentials) {
   var self = this;
@@ -120,10 +117,31 @@ QueryHelper.prototype.fetchDocument = function (index, type, id, credentials) {
   });
 };
 
+QueryHelper.prototype._arrayToCommaSeparatedList = function (a) {
+  let ret = '';
+  for (let i = 0; i < a.length; i++) {
+    let v = a[i];
+    if (i > 0) {
+      ret += ',';
+    }
+    if (typeof v === 'string' || v instanceof String) {
+      ret += '"' + v.replace(/"/, '\\"') + '"';
+    } else if (v !== null && typeof v === 'object') {
+      ret += JSON.stringify(v);
+    } else {
+      ret += v;
+    }
+  }
+  return ret;
+};
+
 /**
  * Replace variable placeholders
  * Currently supported syntax:
  *    @doc[_source][id]@
+ * Special variables @doc[_source][id]@
+ * will be replaced by values extracted from the documents
+ * matching the current selection
  *
  */
 QueryHelper.prototype._replaceVariablesInTheQuery = function (doc, query, datasource) {
@@ -145,6 +163,10 @@ QueryHelper.prototype._replaceVariablesInTheQuery = function (doc, query, dataso
       value = index + '/' + type + '/' + id;
     } else {
       value = self._getValue(doc, group);
+    }
+
+    if (value instanceof Array) {
+      value = self._arrayToCommaSeparatedList(value);
     }
 
     var reGroup = self._escapeRegexSpecialCharacters(match[1]);

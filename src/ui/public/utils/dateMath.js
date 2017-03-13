@@ -1,12 +1,12 @@
 define(function (require) {
-  var _ = require('lodash');
-  var moment = require('moment');
+  let _ = require('lodash');
+  let moment = require('moment');
 
-  var units = ['y', 'M', 'w', 'd', 'h', 'm', 's'];
-  var unitsAsc = _.sortBy(units, function (unit) {
+  let units = ['y', 'M', 'w', 'd', 'h', 'm', 's'];
+  let unitsAsc = _.sortBy(units, function (unit) {
     return moment.duration(1, unit).valueOf();
   });
-  var unitsDesc = unitsAsc.reverse();
+  let unitsDesc = unitsAsc.reverse();
 
   /* This is a simplified version of elasticsearch's date parser */
   function parse(text, roundUp) {
@@ -14,10 +14,10 @@ define(function (require) {
     if (moment.isMoment(text)) return text;
     if (_.isDate(text)) return moment(text);
 
-    var time;
-    var mathString = '';
-    var index;
-    var parseString;
+    let time;
+    let mathString = '';
+    let index;
+    let parseString;
 
     if (text.substring(0, 3) === 'now') {
       time = moment();
@@ -43,15 +43,15 @@ define(function (require) {
   }
 
   function parseDateMath(mathString, time, roundUp) {
-    var dateTime = time;
-    var i = 0;
-    var len = mathString.length;
+    let dateTime = time;
+    let i = 0;
+    let len = mathString.length;
 
     while (i < len) {
-      var c = mathString.charAt(i++);
-      var type;
-      var num;
-      var unit;
+      let c = mathString.charAt(i++);
+      let type;
+      let num;
+      let unit;
 
       if (c === '/') {
         type = 0;
@@ -68,7 +68,7 @@ define(function (require) {
       } else if (mathString.length === 2) {
         num = mathString.charAt(i);
       } else {
-        var numFrom = i;
+        let numFrom = i;
         while (!isNaN(mathString.charAt(i))) {
           i++;
           if (i > 10) return undefined;
@@ -103,20 +103,32 @@ define(function (require) {
   // kibi: added by kibi
   function parseWithPrecision(text, roundUp, precision) {
     var t = parse(text, roundUp);
-    if (precision) {
+
+    roundWithPrecision(t, precision);
+    return t;
+  }
+
+  /**
+   * roundWithPrecision rounds the time to the given precision (seconds, minutes, ...).
+   *
+   * @param time a moment object
+   * @param precision the precision as a string
+   */
+  function roundWithPrecision(time, precision) {
+    if (precision && moment.isMoment(time)) {
       if (_.contains(units, precision)) {
-        return t.startOf(precision);
+        return time.startOf(precision);
       } else {
         throw new Error('Wrong precision argument use one of ' + units);
       }
     }
-    return t;
   }
   // kibi: end
 
   return {
-    parse: parse,
-    parseWithPrecision: parseWithPrecision,
+    parse,
+    parseWithPrecision,
+    roundWithPrecision,
 
     units: Object.freeze(units),
     unitsAsc: Object.freeze(unitsAsc),

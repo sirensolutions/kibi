@@ -1,0 +1,28 @@
+=== Kibi 4.6.4 and Kibana 4.6.4 Release Notes
+
+The 4.6.4 release of Kibi requires Elasticsearch 2.4 or later.
+
+==== Kibi Changes
+
+* Added - merge upstream changes from Kibana 4.6.4.
+
+==== Kibana Changes
+
+[float]
+[[enhancements]]
+===== Enhancements
+
+* {k4pull}8733[Pull Request 8733]: Upgrade Node.js to version 6.9.0 for improved memory use and a segfault fix.
+* {k4pull}8022[Pull Request 8022]: Add state:storeInSessionState option enabling shorter URLs and enhancing Internet Explorer support.
+* {k4pull}8313[Pull Request 8313]: Upgrade Hapi server to 14.2.0 to support the new Node.js version.
+* {k4pull}9014[Pull Request 9014]: Improved rendering performance on Discover app with large numbers of fields.
+
+
+[float]
+[[bugfixes]]
+===== Bug Fixes
+* {k4pull}8966[Pull Request 8966]: Trailing slash redirects now include the basepath configuration.
+* {k4pull}8338[Pull Request 8338]: Fix alias support when fetching types.
+* {k4pull}7123[Pull Request 7123]: Honor custom label for percentile ranks aggregation.
+* {k4pull}7021[Pull Request 7021]: Honor custom label for percentile and median metric visualizations.
+* {k4pull}6463[Pull Request 6463]: Use unmapped_type instead of ignore_unmapped in config migration.

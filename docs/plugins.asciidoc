@@ -5,6 +5,8 @@ Add-on functionality for Kibi is implemented with plug-in modules. You can use t
 command to manage these modules. You can also install a plugin manually by moving the plugin file to the
 `installedPlugins` directory and unpacking the plugin files into a new directory.
 
+A list of existing Kibana plugins is available on https://github.com/elastic/kibana/wiki/Known-Plugins[GitHub].
+
 [float]
 === Installing Plugins
 
@@ -12,6 +14,15 @@ Use the following command to install a plugin:
 
 [source,shell]
 bin/kibi plugin --install <org>/<package>/<version>
+
+[NOTE]
+====
+Elasticsearch plugins follow the elasticsearch versionning,
+e.g. to installing Marvel plugin for this perticular Kibi version which comes by default
+with elasticsearch v{elasticsearch-version} use:
+
+`bin/kibi plugin -i elasticsearch/marvel/{elasticsearch-version}`
+====
 
 You can also use `-i` instead of `--install`, as in the following example:
 
@@ -66,6 +77,11 @@ bin/kibi plugin --remove marvel
 You can also remove a plugin manually by deleting the plugin's subdirectory under the `installedPlugins` directory.
 
 [float]
+=== Listing Installed Plugins
+
+Use `--list` or `-l` option to list the currently installed plugins.
+
+[float]
 === Updating Plugins
 
 To update a plugin, remove the current version and reinstall the plugin.
@@ -116,3 +132,5 @@ installed plugins:
 image::images/app-picker.png[]
 
 Click a plugin's icon to switch to that plugin's functionality.
+
+include::known-plugins.asciidoc[]

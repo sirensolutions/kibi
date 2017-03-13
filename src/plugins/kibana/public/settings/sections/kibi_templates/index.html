@@ -32,7 +32,7 @@
 
           <div class="form-group">
             <label>Engine</label><br/>
-            <select required="true" ng-model="template.st_templateEngine" class="form-control">
+            <select required="true" ng-model="template.templateEngine" class="form-control">
               <option value="jade">jade</option>
               <option value="handlebars">handlebars</option>
             <select>
@@ -41,31 +41,23 @@
           <div class="form-group">
             <label>Source</label>
 
-            <div ng-if="template.st_templateEngine === 'handlebars'"
+            <div ng-if="template.templateEngine === 'handlebars'"
               ui-ace="{ onLoad: aceLoaded, mode: 'handlebars' }" id="{{template.title}}"
-              ng-model="template.st_templateSource"
+              ng-model="template.templateSource"
               ng-class="{ 'red-border': objectForm.handlebarsTemplate.$invalid }"
               name="handlebarsTemplate"
               style="height: 400px" required>
             </div>
 
-            <div ng-if="template.st_templateEngine === 'jade'"
+            <div ng-if="template.templateEngine === 'jade'"
               ui-ace="{ onLoad: aceLoaded, mode: 'jade' }" id="{{template.title}}"
-              ng-model="template.st_templateSource"
+              ng-model="template.templateSource"
               ng-class="{ 'red-border': objectForm.jadeTemplate.$invalid }"
               name="jadeTemplate"
               style="height: 400px" required>
             </div>
 
           </div>
-
-          <div class="form-group">
-            <button class="btn btn-primary" ng-click="cancel()">Cancel</button>
-            <button class="btn btn-info" ng-click="clone()" ng-disabled="objectForm.$invalid">Clone</button>
-            <button class="btn btn-success" ng-click="submit()" ng-disabled="objectForm.$invalid">Save</button>
-            <button class="btn btn-danger" ng-click="delete()">Delete</button>
-          </div>
-
        </form>
       </div>
 
@@ -76,27 +68,19 @@
           <kibi-param-entity-uri entity-uri-holder="holder"></kibi-param-entity-uri>
 
           <div class="form-group">
-            <label>Query id</label>
-            <span class="small-note"> Pick the query id to see preview, save template to refresh</span>
-            <a ng-show="template._previewQueryId" ng-click="jumpToQuery()">Edit query</a>
-            <kibi-select required object-type="query" ng-model="template._previewQueryId"></kibi-select>
+            <label>Query</label>
+            <span class="small-note"> Pick the query to see a preview of the template</span>
+            <a ng-show="preview.queryId" ng-click="jumpToQuery()">Edit query</a>
+            <kibi-select required object-type="query" ng-model="preview.queryId"></kibi-select>
           </div>
-
-          <div class="form-group">
-            <!-- here we are accessing entityURI form inside kibi-param-entity-uri -->
-            <button ng-click="submit()" ng-disabled="previewForm.entityURI.$invalid || previewForm.$invalid" class="btn btn-success span3" >
-              Refresh
-            </button>
-          </div>
-
 
           <div role="tabpanel">
           <!-- Nav tabs -->
             <ul class="nav nav-tabs">
-              <li ng-click="tabClick()" ng-class="htmlPreviewActive ? 'active' : ''">
+              <li ng-click="tabClick('html')" ng-class="htmlPreviewActive ? 'active' : ''">
                 <a aria-controls="preview_html" role="tab" >Preview Html</a>
               </li>
-              <li ng-click="tabClick()" ng-class="jsonPreviewActive ? 'active' : ''">
+              <li ng-click="tabClick('json')" ng-class="jsonPreviewActive ? 'active' : ''">
                 <a href="" aria-controls="preview_json" role="tab" >Preview Json</a>
               </li>
             </ul>

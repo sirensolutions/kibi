@@ -1,17 +1,22 @@
 define(function (require) {
+  require('angular-sanitize');
+
   require('ui/modules')
-  .get('kibana/directive')
-  .directive('visualize', function (savedDashboards, savedSearches, SavedVis, indexPatterns, Private, config, $timeout, createNotifier) {
+  .get('kibana/directive', ['ngSanitize'])
+  .directive('visualize', function (kibiState, savedDashboards, savedSearches, Private, config, $timeout, createNotifier) {
 
     require('ui/visualize/spy');
     require('ui/visualize/visualize.less');
     require('ui/visualize/visualize_legend');
 
-    var $ = require('jquery');
-    var _ = require('lodash');
-    var visTypes = Private(require('ui/registry/vis_types'));
+    let $ = require('jquery');
+    let _ = require('lodash');
+    let visTypes = Private(require('ui/registry/vis_types'));
+    // kibi: to hold onto stats about msearch requests from visualizations like the relational filter
+    // This is then displayed in the multisearch spy mode
+    const KibiSpyData = Private(require('ui/kibi/spy/kibi_spy_data'));
 
-    var notify = createNotifier({
+    let notify = createNotifier({
       location: 'Visualize'
     });
 
@@ -23,12 +28,12 @@ define(function (require) {
         uiState: '=?',
         searchSource: '=?',
         editableVis: '=?',
-        esResp: '=?',
+        esResp: '=?'
       },
       template: require('ui/visualize/visualize.html'),
       link: function ($scope, $el, attr) {
-        var chart; // set in "vis" watcher
-        var minVisChartHeight = 180;
+        let chart; // set in "vis" watcher
+        let minVisChartHeight = 180;
 
         if (_.isUndefined($scope.showSpyPanel)) {
           $scope.showSpyPanel = true;
@@ -36,19 +41,19 @@ define(function (require) {
 
         function getter(selector) {
           return function () {
-            var $sel = $el.find(selector);
+            let $sel = $el.find(selector);
             if ($sel.size()) return $sel;
           };
         }
 
-        var getVisEl = getter('.visualize-chart');
-        var getVisContainer = getter('.vis-container');
+        let getVisEl = getter('.visualize-chart');
+        let getVisContainer = getter('.vis-container');
 
         // Show no results message when isZeroHits is true and it requires search
         $scope.showNoResultsMessage = function () {
-          var requiresSearch = _.get($scope, 'vis.type.requiresSearch');
-          var isZeroHits = _.get($scope,'esResp.hits.total') === 0;
-          var shouldShowMessage = !_.get($scope, 'vis.params.handleNoResults');
+          let requiresSearch = _.get($scope, 'vis.type.requiresSearch');
+          let isZeroHits = _.get($scope,'esResp.hits.total') === 0;
+          let shouldShowMessage = !_.get($scope, 'vis.params.handleNoResults');
 
           return Boolean(requiresSearch && isZeroHits && shouldShowMessage);
         };
@@ -57,17 +62,23 @@ define(function (require) {
         $scope.spy = {};
         $scope.spy.mode = ($scope.uiState) ? $scope.uiState.get('spy.mode', {}) : {};
 
-        var applyClassNames = function () {
-          var $visEl = getVisContainer();
-          var fullSpy = ($scope.spy.mode && ($scope.spy.mode.fill || $scope.fullScreenSpy));
+        $scope.multiSearchData = null;
+        if (_.get($scope, 'vis.type.requiresMultiSearch')) {
+          $scope.multiSearchData = new KibiSpyData();
+        }
+
+        let applyClassNames = function () {
+          let $visEl = getVisContainer();
+          let $spyEl = getter('.visualize-spy-container')();
+          let fullSpy = ($scope.spy.mode && ($scope.spy.mode.fill || $scope.fullScreenSpy));
 
           $visEl.toggleClass('spy-only', Boolean(fullSpy));
+          if ($spyEl) {
+            $spyEl.toggleClass('only', Boolean(fullSpy));
+          }
 
-          // kibi: skip checking that vis it is too small
-          if (
-            $scope.vis &&
-            ($scope.vis.type.name === 'kibiqueryviewervis' || $scope.vis.type.name === 'kibi_sequential_join_vis')
-          ) {
+          // kibi: skip checking that vis is too small
+          if (_.get($scope, 'vis.type.name') === 'kibiqueryviewervis' || _.get($scope, 'vis.type.name') === 'kibi_sequential_join_vis') {
             // for these 2 visualisations
             // buttons are small and query viewer dynamically inject html so at the begining
             // its size is 0;
@@ -75,19 +86,20 @@ define(function (require) {
           }
           // kibi: end
 
-          // Basically a magic number, chart must be at least this big or only the spy will show
-          var visTooSmall = 100;
           $timeout(function () {
             if (shouldHaveFullSpy()) {
               $visEl.addClass('spy-only');
+              if ($spyEl) {
+                $spyEl.toggleClass('only', Boolean(fullSpy));
+              }
             };
           }, 0);
         };
 
         // we need to wait for some watchers to fire at least once
         // before we are "ready", this manages that
-        var prereq = (function () {
-          var fns = [];
+        let prereq = (function () {
+          let fns = [];
 
           return function register(fn) {
             fns.push(fn);
@@ -97,7 +109,9 @@ define(function (require) {
 
               if (fns.length) {
                 _.pull(fns, fn);
-                if (!fns.length) {
+                // kibi: let the visualization broadcast this event
+                // since it takes care of the searchSource
+                if (!fns.length && !_.get($scope, 'vis.type.delegateSearch')) {
                   $scope.$root.$broadcast('ready:vis');
                 }
               }
@@ -105,14 +119,14 @@ define(function (require) {
           };
         }());
 
-        var loadingDelay = config.get('visualization:loadingDelay');
+        let loadingDelay = config.get('visualization:loadingDelay');
         $scope.loadingStyle = {
           '-webkit-transition-delay': loadingDelay,
           'transition-delay': loadingDelay
         };
 
         function shouldHaveFullSpy() {
-          var $visEl = getVisEl();
+          let $visEl = getVisEl();
           if (!$visEl) return;
 
           return ($visEl.height() < minVisChartHeight)
@@ -129,7 +143,7 @@ define(function (require) {
         });
 
         $scope.$watch('vis', prereq(function (vis, oldVis) {
-          var $visEl = getVisEl();
+          let $visEl = getVisEl();
           if (!$visEl) return;
 
           if (!attr.editableVis) {
@@ -137,41 +151,40 @@ define(function (require) {
           }
 
           if (oldVis) $scope.renderbot = null;
-          if (vis) $scope.renderbot = vis.type.createRenderbot(vis, $visEl, $scope.uiState);
+          if (vis) $scope.renderbot = vis.type.createRenderbot(vis, $visEl, $scope.uiState, $scope.multiSearchData, $scope.searchSource);
+
+          // kibi: associate the vis with the searchSource
+          if ($scope.searchSource) {
+            $scope.searchSource.vis = $scope.vis;
+          }
+          // kibi: end
         }));
 
         $scope.$watchCollection('vis.params', prereq(function () {
           if ($scope.renderbot) $scope.renderbot.updateParams();
         }));
 
-        $scope.$watch('searchSource', prereq(function (searchSource) {
-          // kibi: get the saved search associated with the current dashboard, in order to have the corrent search_source
-          if (searchSource && !$scope.vis.type.requiresSearch) {
-            $scope.searchSource.disable();
-            var urlHelper = Private(require('ui/kibi/helpers/url_helper'));
-            savedDashboards.get(urlHelper.getCurrentDashboardId()).then(function (savedCurrentDashboard) {
-              if (savedCurrentDashboard.savedSearchId) {
-                return savedSearches.get(savedCurrentDashboard.savedSearchId).then(function (savedSearch) {
-                  $scope.searchSource.inherits(savedSearch.searchSource);
-                  $scope.searchSource.enable();
-                });
-              }
-            }).catch(notify.error);
-          }
-          // kibi: end
-          if (!searchSource || attr.esResp) return;
+        // kibi: if delegateSearch is true, the visualization takes care of retrieving the results.
+        // kibi: if the visualization does not require a search do not trigger a query
+        if (!_.get($scope, 'vis.type.delegateSearch') &&
+            (_.get($scope, 'vis.type.requiresSearch') || _.get($scope, 'vis.type.requiresMultiSearch'))) {
+          $scope.$watch('searchSource', prereq(function (searchSource) {
+            if (!searchSource || attr.esResp) {
+              return;
+            }
 
-          // TODO: we need to have some way to clean up result requests
-          searchSource.onResults().then(function onResults(resp) {
-            if ($scope.searchSource !== searchSource) return;
+            // TODO: we need to have some way to clean up result requests
+            searchSource.onResults().then(function onResults(resp) {
+              if ($scope.searchSource !== searchSource) return;
 
-            $scope.esResp = resp;
+              $scope.esResp = resp;
 
-            return searchSource.onResults().then(onResults);
-          }).catch(notify.fatal);
+              return searchSource.onResults().then(onResults);
+            }).catch(notify.fatal);
 
-          searchSource.onError(notify.error).catch(notify.fatal);
-        }));
+            searchSource.onError(notify.error).catch(notify.fatal);
+          }));
+        }
 
         $scope.$watch('esResp', prereq(function (resp, prevResp) {
           if (!resp) return;

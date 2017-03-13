@@ -1,7 +1,7 @@
 define(function (require) {
-  var _ = require('lodash');
-  var has = _.has;
-  var formatESMsg = require('ui/notify/lib/_format_es_msg');
+  let _ = require('lodash');
+  let has = _.has;
+  let formatESMsg = require('ui/notify/lib/_format_es_msg');
 
   /**
    * Formats the error message from an error object, extended elasticsearch
@@ -11,12 +11,12 @@ define(function (require) {
    * @returns {string}
    */
   function formatMsg(err, from) {
-    var rtn = '';
+    let rtn = '';
     if (from) {
       rtn += from + ': ';
     }
 
-    var esMsg = formatESMsg(err);
+    let esMsg = formatESMsg(err);
 
     if (typeof err === 'string') {
       rtn += err;
@@ -26,7 +26,11 @@ define(function (require) {
       rtn += formatMsg.describeError(err);
     } else if (has(err, 'status') && has(err, 'data')) {
       // is an Angular $http "error object"
-      rtn += 'Error ' + err.status + ' ' + err.statusText + ': ' + err.data.message;
+      if (!err.data) {
+        rtn += 'An error occurred while performing a request, please check your connection.';
+      } else {
+        rtn += 'Error ' + err.status + ' ' + err.statusText + ': ' + err.data.message;
+      }
     } else if (has(err, 'options') && has(err, 'response')) {
       // kibi: added to handle request-promise errors
       rtn += formatMsg.describeRequestPromiseError(err);

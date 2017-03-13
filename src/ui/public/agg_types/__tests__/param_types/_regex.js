@@ -1,14 +1,18 @@
 describe('Regex', function () {
-  var _ = require('lodash');
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
+  let _ = require('lodash');
+  let expect = require('expect.js');
+  let ngMock = require('ngMock');
 
-  var BaseAggParam;
-  var RegexAggParam;
-  var Vis;
-  var indexPattern;
+  let BaseAggParam;
+  let RegexAggParam;
+  let Vis;
+  let indexPattern;
 
-  beforeEach(ngMock.module('kibana'));
+  beforeEach(ngMock.module('kibana', function ($provide) {
+    $provide.constant('kbnDefaultAppId', '');
+    $provide.constant('kibiDefaultDashboardTitle', '');
+    $provide.constant('elasticsearchPlugins', ['siren-join']);
+  }));
   // fetch out deps
   beforeEach(ngMock.inject(function (Private) {
     BaseAggParam = Private(require('ui/agg_types/param_types/base'));
@@ -19,7 +23,7 @@ describe('Regex', function () {
 
   describe('constructor', function () {
     it('should be an instance of BaseAggParam', function () {
-      var aggParam = new RegexAggParam({
+      let aggParam = new RegexAggParam({
         name: 'some_param',
         type: 'regex'
       });
@@ -30,13 +34,13 @@ describe('Regex', function () {
   });
 
   describe('write results', function () {
-    var aggParam;
-    var aggConfig;
-    var output = { params: {} };
-    var paramName = 'exclude';
+    let aggParam;
+    let aggConfig;
+    let output = { params: {} };
+    let paramName = 'exclude';
 
     beforeEach(function () {
-      var vis = new Vis(indexPattern, {
+      let vis = new Vis(indexPattern, {
         type: 'pie',
         aggs: [
           { type: 'terms', schema: 'split', params: { field: 'extension' }},

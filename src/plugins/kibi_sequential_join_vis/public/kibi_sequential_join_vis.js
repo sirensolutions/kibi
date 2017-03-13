@@ -18,7 +18,7 @@ define(function (require) {
     // Vis object of this type.
     return new TemplateVisType({
       name: 'kibi_sequential_join_vis',
-      title: 'Kibi Relational filter',
+      title: 'Kibi relational filter',
       icon: 'fa-arrows-h',
       description: 'Relational widget displays buttons which allow user to switch between dashboards and preserve applied restrictions',
       template: require('plugins/kibi_sequential_join_vis/kibi_sequential_join_vis.html'),
@@ -28,7 +28,9 @@ define(function (require) {
         },
         editor: '<kibi-sequential-join-vis-params></kibi-sequential-join-vis-params>'
       },
-      requiresSearch: false
+      requiresMultiSearch: true,
+      requiresSearch: false,
+      version: 2
     });
   }
 

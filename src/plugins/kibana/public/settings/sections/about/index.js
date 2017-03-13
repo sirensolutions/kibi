@@ -16,10 +16,11 @@ uiModules.get('apps/settings')
   $scope.buildSha = buildSha;
   $scope.kibiVersion = kibiVersion; // kibi: added to manage kibi version
   $scope.kibiKibanaAnnouncement = kibiKibanaAnnouncement; // kibi: added by kibi
+  $scope.currentYear = new Date().getFullYear(); // kibi: added by kibi
 });
 
 registry.register(_.constant({
-  order: 1001,
+  order: 1010, // kibi: change to 1010 to make sure it comes after license
   name: 'about',
   display: 'About',
   url: '#/settings/about'

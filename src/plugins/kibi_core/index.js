@@ -1,13 +1,39 @@
+const _ = require('lodash');
 const http = require('http');
 const path = require('path');
 const Boom = require('boom');
 const errors = require('request-promise/errors');
 
+const util = require('../elasticsearch/lib/util');
+
+const dbfilter = require('../elasticsearch/lib/dbfilter');
+const inject = require('../elasticsearch/lib/inject');
+
+import cryptoHelper from './lib/crypto_helper';
+
+/**
+ * The Kibi core plugin.
+ *
+ * The plugin exposes the following methods to other hapi plugins:
+ *
+ * - getQueryEngine: returns an instance of QueryEngine.
+ * - getIndexHelper: returns an instance of IndexHelper.
+ */
 module.exports = function (kibana) {
 
   var datasourcesSchema = require('./lib/datasources_schema');
   var QueryEngine = require('./lib/query_engine');
+  var IndexHelper = require('./lib/index_helper');
   var queryEngine;
+  var indexHelper;
+
+  let migrations = [
+    require('./lib/migrations/migration_1'),
+    require('./lib/migrations/migration_2'),
+    require('./lib/migrations/migration_3'),
+    require('./lib/migrations/migration_4'),
+    require('./lib/migrations/migration_5')
+  ];
 
   var _validateQueryDefs = function (queryDefs) {
     if (queryDefs && queryDefs instanceof Array) {
@@ -48,6 +74,9 @@ module.exports = function (kibana) {
     if (config.has('shield.cookieName')) {
       options.credentials = req.state[config.get('shield.cookieName')];
     }
+    if (req.auth && req.auth.credentials && req.auth.credentials.proxyCredentials) {
+      options.credentials = req.auth.credentials.proxyCredentials;
+    }
     queryEngine[method](queryDefs, options)
     .then(function (queries) {
       return reply({
@@ -59,7 +88,9 @@ module.exports = function (kibana) {
       if (error instanceof Error) {
         err = Boom.wrap(error, 400);
       } else {
-        err = Boom.badRequest('Failed to execute query on an external datasource', error);
+        //When put additional data in badRequest() it's not be used. So we need to add error.message manually
+        const msg = 'Failed to execute query on an external datasource' + (error.message ? ': ' + error.message : '');
+        err = Boom.badRequest(msg);
       }
       return reply(err);
     });
@@ -78,14 +109,27 @@ module.exports = function (kibana) {
 
         enterprise_enabled: Joi.boolean().default(false),
         elasticsearch: Joi.object({
+          auth_plugin: Joi.string().allow('').default(''),
           transport_client: Joi.object({
-            username: Joi.string().default(''),
-            password: Joi.string().default('')
+            username: Joi.string().allow('').default(''),
+            password: Joi.string().allow('').default(''),
+            ssl: Joi.object({
+              ca: Joi.string().allow('').default(''),
+              ca_password: Joi.string().allow('').default(''),
+              ca_alias: Joi.string().allow('').default(''),
+              key_store: Joi.string().allow('').default(''),
+              key_store_password: Joi.string().allow('').default(''),
+              key_store_alias: Joi.string().allow('').default(''),
+              verify_hostname: Joi.boolean().default(true),
+              verify_hostname_resolve: Joi.boolean().default(false)
+            })
           })
         }),
         gremlin_server: Joi.object({
+          log_conf_path: Joi.string().allow('').default(''),
+          debug_remote: Joi.string().allow('').default(''),
           path: Joi.string().allow('').default(''),
-          url: Joi.string().default('http://127.0.0.1:8080'),
+          url: Joi.string().uri({ scheme: ['http', 'https'] }).default('http://127.0.0.1:8080'),
           ssl: Joi.object({
             key_store: Joi.string().default(''),
             key_store_password: Joi.string().default(''),
@@ -99,13 +143,16 @@ module.exports = function (kibana) {
         datasources_schema: Joi.any().default(datasourcesSchema),
         datasource_cache_size: Joi.number().default(500),
 
-        default_dashboard_id: Joi.string().allow('').default('')
+        default_dashboard_title: Joi.string().allow('').default('')
       }).default();
     },
 
     init: function (server, options) {
       const config = server.config();
       var datasourceCacheSize   = config.get('kibi_core.datasource_cache_size');
+
+      const filterJoinSet = require('../elasticsearch/lib/filter_join')(server).set;
+      const filterJoinSequence = require('../elasticsearch/lib/filter_join')(server).sequence;
 
       this.status.yellow('Initialising the query engine');
       queryEngine = new QueryEngine(server);
@@ -114,11 +161,18 @@ module.exports = function (kibana) {
         this.status.green('Query engine initialized');
       }).catch((err) => {
         server.log(['error','kibi_core'], err);
-        this.status.red('Query engine initializiation failed');
+        this.status.red('Query engine initialization failed');
       });
 
-      // expose the queryengine to the other Hapi plugins
       server.expose('getQueryEngine', () => queryEngine);
+
+      server.expose('getCryptoHelper', () => cryptoHelper);
+
+      indexHelper = new IndexHelper(server);
+      server.expose('getIndexHelper', () => indexHelper);
+
+      // Expose the migrations
+      server.expose('getMigrations', () => migrations);
 
       server.route({
         method: 'GET',
@@ -165,7 +219,9 @@ module.exports = function (kibana) {
               const { username, password } = req.state[config.get('shield.cookieName')];
               params.credentials = { username, password };
             }
-
+            if (req.auth && req.auth.credentials && req.auth.credentials.proxyCredentials) {
+              params.credentials = req.auth.credentials.proxyCredentials;
+            }
             return queryEngine.gremlin(params, req.payload.params.options);
           })
           .then(reply)
@@ -175,9 +231,46 @@ module.exports = function (kibana) {
           .catch(errors.RequestError, function (err) {
             if (err.error.code === 'ETIMEDOUT') {
               reply(Boom.create(408, err.message, ''));
+            } else if (err.error.code === 'ECONNREFUSED') {
+              reply({ error: `Could not send request to Gremlin server, please check if it is running. Details: ${err.message}`});
             } else {
-              reply({ error: 'An error occurred while sending a gremlin query: ' + JSON.stringify(err) });
+              reply({ error: `An error occurred while sending a gremlin query: ${err.message}`});
             }
+          });
+        }
+      });
+
+      /*
+       * Translate a query containing kibi-specific DSL into an Elasticsearch query
+       */
+      server.route({
+        method: 'POST',
+        path:'/translateToES',
+        handler: function (req, reply) {
+          var serverConfig = server.config();
+          util.getQueriesAsPromise(req.payload.query)
+          .map((query) => {
+            // Remove the custom queries from the body
+            inject.save(query);
+            return query;
+          }).map((query) => {
+            var credentials = serverConfig.has('shield.cookieName') ? req.state[serverConfig.get('shield.cookieName')] : null;
+            if (req.auth && req.auth.credentials && req.auth.credentials.proxyCredentials) {
+              credentials = req.auth.credentials.proxyCredentials;
+            }
+            return dbfilter(server.plugins.kibi_core.getQueryEngine(), query, credentials);
+          }).map((query) => filterJoinSet(query))
+          .map((query) => filterJoinSequence(query))
+          .then((data) => {
+            reply({ translatedQuery: data[0] });
+          }).catch((err) => {
+            let errStr;
+            if (typeof err === 'object' && err.stack) {
+              errStr = err.toString();
+            } else {
+              errStr = JSON.stringify(err, null, ' ');
+            }
+            reply(Boom.wrap(new Error(errStr, 400)));
           });
         }
       });
@@ -194,8 +287,10 @@ module.exports = function (kibana) {
           .catch(errors.RequestError, function (err) {
             if (err.error.code === 'ETIMEDOUT') {
               reply(Boom.create(408, err.message, ''));
+            } else if (err.error.code === 'ECONNREFUSED') {
+              reply({ error: `Could not send request to Gremlin server, please check if it is running. Details: ${err.message}`});
             } else {
-              reply({ error: 'An error occurred while sending a gremlin ping: ' + JSON.stringify(err) });
+              reply({ error: `An error occurred while sending a gremlin ping: ${err.message}`});
             }
           });
         }
@@ -207,11 +302,12 @@ module.exports = function (kibana) {
         path:'/static/{param*}',
         handler: {
           directory: {
-            path: path.normalize(__dirname + '../../../../installedPlugins/')
+            path: path.normalize(path.join(__dirname, '../../../installedPlugins/'))
           }
         }
       });
     }
+
   });
 
 };

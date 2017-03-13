@@ -1,8 +1,7 @@
 define(function (require) {
-  var _ = require('lodash');
-  var $ = require('jquery');
-  var addWordBreaks = require('ui/utils/add_word_breaks');
-  var module = require('ui/modules').get('app/discover');
+  const _ = require('lodash');
+  const $ = require('jquery');
+  const module = require('ui/modules').get('app/discover');
 
   require('ui/highlight');
   require('ui/highlight/highlight_tags');
@@ -12,7 +11,7 @@ define(function (require) {
 
 
   // guesstimate at the minimum number of chars wide cells in the table should be
-  var MIN_LINE_LENGTH = 20;
+  const MIN_LINE_LENGTH = 20;
 
   /**
    * kibiTableRow directive. Copied from kbnTableRow for Kibi
@@ -22,18 +21,16 @@ define(function (require) {
    * <tr ng-repeat="row in rows" kibi-table-row="row"></tr>
    * ```
    */
-  module.directive('kibiTableRow', function ($rootScope, $compile, globalState, kbnUrl, $route, $window, createNotifier,
-        Private, courier) {
-    var noWhiteSpace = require('ui/utils/no_white_space');
+  module.directive('kibiTableRow', function ($compile, kibiState, $window, createNotifier, Private, courier) {
+    const noWhiteSpace = require('ui/utils/no_white_space');
 
-    var openRowHtml = require('ui/doc_table/components/table_row/open.html');
-    var detailsHtml = require('ui/doc_table/components/table_row/details.html');
-    var cellTemplate = _.template(noWhiteSpace(require('ui/kibi/kibi_doc_table/components/kibi_table_row/cell.html')));
-    var truncateByHeightTemplate = _.template(noWhiteSpace(require('ui/partials/truncate_by_height.html')));
+    const dashboardHelper = Private(require('ui/kibi/helpers/dashboard_helper'));
+    const openRowHtml = require('ui/doc_table/components/table_row/open.html');
+    const detailsHtml = require('ui/doc_table/components/table_row/details.html');
+    const cellTemplate = _.template(noWhiteSpace(require('ui/kibi/kibi_doc_table/components/kibi_table_row/cell.html')));
+    const truncateByHeightTemplate = _.template(noWhiteSpace(require('ui/partials/truncate_by_height.html')));
 
-    var _isInSelectedEntities = Private(require('ui/kibi/components/commons/_is_this_entity_in_selected_entities'));
-
-    var notify = createNotifier({
+    const notify = createNotifier({
       location: 'Enhanced search results'
     });
 
@@ -44,25 +41,26 @@ define(function (require) {
         filter: '=',
         indexPattern: '=',
         row: '=kibiTableRow',
+        // kibi: associate an action when clicking on a cell
         cellClickHandlers: '='
       },
       link: function ($scope, $el, attrs) {
         $el.after('<tr>');
         $el.empty();
 
-        var init = function () {
+        const init = function () {
           createSummaryRow($scope.row, $scope.row._id);
         };
 
         // when we compile the details, we use this $scope
-        var $detailsScope;
+        let $detailsScope;
 
         // when we compile the toggle button in the summary, we use this $scope
-        var $toggleScope;
+        let $toggleScope;
 
         // toggle display of the rows details, a full list of the fields from each row
         $scope.toggleRow = function () {
-          var $detailsTr = $el.next();
+          const $detailsTr = $el.next();
 
           $scope.open = !$scope.open;
 
@@ -89,21 +87,23 @@ define(function (require) {
           $compile($detailsTr)($detailsScope);
         };
 
-        $scope.$watchCollection('columns', function () {
-          createSummaryRow($scope.row, $scope.row._id);
-        });
-
+        // kibi: cell actions
         $scope.$watch('cellClickHandlers', function () {
           createSummaryRow($scope.row);
         }, true);
 
-        var saveWithChangesHandler = function (diff) {
-          if (diff.indexOf('entityDisabled') !== -1 || diff.indexOf('se') !== -1) {
+        $scope.$listen(kibiState, 'save_with_changes', function (diff) {
+          if (diff.indexOf(kibiState._properties.selected_entity) !== -1 ||
+              diff.indexOf(kibiState._properties.selected_entity_disabled) !== -1 ||
+              diff.indexOf(kibiState._properties.test_selected_entity) !== -1) {
             createSummaryRow($scope.row);
           }
-        };
+        });
+        // kibi: end of cell actions
 
-        globalState.on('save_with_changes', saveWithChangesHandler);
+        $scope.$watchCollection('columns', function () {
+          createSummaryRow($scope.row, $scope.row._id);
+        });
 
         $scope.$watch('row', function () {
           createSummaryRow($scope.row);
@@ -113,20 +113,12 @@ define(function (require) {
           createSummaryRow($scope.row, $scope.row._id);
         });
 
-        var off = $rootScope.$on('kibi:selectedEntities:changed', function () {
-          createSummaryRow($scope.row);
-        });
-        $scope.$on('$destroy', function () {
-          off();
-          globalState.off('save_with_changes', saveWithChangesHandler);
-        });
-
         // create a tr element that lists the value for each *column*
         function createSummaryRow(row) {
-          var indexPattern = $scope.indexPattern;
+          const indexPattern = $scope.indexPattern;
 
           // We just create a string here because its faster.
-          var newHtmls = [
+          const newHtmls = [
             openRowHtml
           ];
 
@@ -143,34 +135,39 @@ define(function (require) {
               timefield: false,
               sourcefield: (column === '_source'),
               formatted: _displayField(row, column, true),
+              // kibi: this is to retrieve the correct cell when applying click actions
               column: column
             }));
           });
 
-          var $cells = $el.children();
+          let $cells = $el.children();
 
+          // kibi: entity selection
           $el.children('[data-column]')
             .removeClass('selectedEntityCell disabled')
             .css('cursor', 'auto')
             .off('click');
 
           newHtmls.forEach(function (html, i) {
-            var $cell = $cells.eq(i);
-            var column = $cell.data('column');
+            const $cell = $cells.eq(i);
+            // kibi: cell actions
+            const column = $cell.data('column');
+
+            // Remove click CSS style for every cell
+            $cell.removeClass('click');
 
             if ($scope.cellClickHandlers && $scope.cellClickHandlers[column]) {
 
               _.each($scope.cellClickHandlers[column], function (clickHandler) {
 
-                var type = clickHandler.type;
+                const type = clickHandler.type;
 
                 // Style the cell value as a link
                 $cell.addClass('click');
 
-                if (globalState.se && globalState.se.length > 0 && type === 'select' &&
-                    _isInSelectedEntities(globalState.se, row.$$_flattened._id, column)
-                   ) {
-                  if (globalState.entityDisabled === true) {
+                if (type === 'select' &&
+                    kibiState.isEntitySelected(row.$$_flattened._index, row.$$_flattened._type, row.$$_flattened._id, column)) {
+                  if (kibiState.isSelectedEntityDisabled()) {
                     $cell.addClass('selectedEntityCell disabled');
                   } else {
                     $cell.addClass('selectedEntityCell');
@@ -181,9 +178,9 @@ define(function (require) {
                   e.preventDefault();
 
                   if (type === 'link') {
-                    var valueField = clickHandler.valueField;
-                    var idValue = row.$$_flattened[valueField];
-                    var uriFormat = clickHandler.uriFormat;
+                    const valueField = clickHandler.valueField;
+                    let idValue = row.$$_flattened[valueField];
+                    const uriFormat = clickHandler.uriFormat;
 
                     // Check if idValue is an array; if so, use the first
                     // element of the array as the value and display a warning
@@ -200,7 +197,7 @@ define(function (require) {
                       return;
                     }
                     // open the URL in a new tab
-                    var win;
+                    let win;
                     if (uriFormat.trim() === '@URL@') {
                       win = $window.open(idValue, '_blank');
                     } else {
@@ -211,34 +208,17 @@ define(function (require) {
                     }
 
                   } else if (type === 'select') {
-                    var entityId = row.$$_flattened._index + '/' +
-                      row.$$_flattened._type + '/' +
-                      row.$$_flattened._id + '/' +
-                      column;
+                    const entityId = `${row.$$_flattened._index}/${row.$$_flattened._type}/${row.$$_flattened._id}/${column}`;
 
-                    if (!globalState.se) {
-                      globalState.se = [];
-                    }
-                    if (globalState.se.indexOf(entityId) === -1) {
+                    kibiState.disableSelectedEntity(false);
+                    kibiState.setEntityURI(entityId);
+                    kibiState.save();
 
-                      // this is to make sure only one gets selected for now
-                      // to allow multiple selection simpy remove the line below
-                      globalState.se = [];
-
-                      globalState.se.push(entityId);
-                      globalState.entityDisabled = false;
-                      globalState.save();
-                    }
-
-                    // switch to different dashboard only if user gave one in settings
-                    var targetDashboardId = clickHandler.targetDashboardId;
-                    if (targetDashboardId && targetDashboardId !== '') {
-                      kbnUrl.change('/dashboard/{{id}}', {id:  targetDashboardId});
-                      $route.reload();
+                    // switch to a different dashboard only if user gave one in settings
+                    const targetDashboardId = clickHandler.targetDashboardId;
+                    if (targetDashboardId) {
+                      return dashboardHelper.switchDashboard(targetDashboardId);
                     } else {
-                      // as there is no need for reload just broadcast the change
-                      $rootScope.$emit('kibi:selectedEntities:changed', globalState.se);
-
                       // Call courier.fetch to update visualizations
                       // This will update all the visualisations, not only the one
                       // which strictly depend on selected entityURI
@@ -254,13 +234,13 @@ define(function (require) {
 
             if ($cell.data('discover:html') === html) return;
 
-            var reuse = _.find($cells.slice(i + 1), function (cell) {
+            const reuse = _.find($cells.slice(i + 1), function (cell) {
               return $.data(cell, 'discover:html') === html;
             });
 
-            var $target = reuse ? $(reuse).detach() : $(html);
+            const $target = reuse ? $(reuse).detach() : $(html);
             $target.data('discover:html', html);
-            var $before = $cells.eq(i - 1);
+            const $before = $cells.eq(i - 1);
             if ($before.size()) {
               $before.after($target);
             } else {
@@ -287,18 +267,14 @@ define(function (require) {
         /**
          * Fill an element with the value of a field
          */
-        function _displayField(row, fieldName, breakWords) {
-          var indexPattern = $scope.indexPattern;
-          var text = indexPattern.formatField(row, fieldName);
+        function _displayField(row, fieldName, truncate) {
+          const indexPattern = $scope.indexPattern;
+          let text = indexPattern.formatField(row, fieldName);
 
-          if (breakWords) {
-            text = addWordBreaks(text, MIN_LINE_LENGTH);
-
-            if (text.length > MIN_LINE_LENGTH) {
-              return truncateByHeightTemplate({
-                body: text
-              });
-            }
+          if (truncate && text.length > MIN_LINE_LENGTH) {
+            return truncateByHeightTemplate({
+              body: text
+            });
           }
 
           return text;

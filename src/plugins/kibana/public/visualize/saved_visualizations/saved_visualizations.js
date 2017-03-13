@@ -1,7 +1,7 @@
 define(function (require) {
-  var app = require('ui/modules').get('app/visualize');
-  var _ = require('lodash');
-  var Scanner = require('ui/utils/scanner');
+  const app = require('ui/modules').get('app/visualize');
+  const _ = require('lodash');
+  const Scanner = require('ui/utils/scanner');
 
   require('plugins/kibana/visualize/saved_visualizations/_saved_vis');
 
@@ -12,15 +12,15 @@ define(function (require) {
     title: 'visualizations'
   });
 
-  app.service('savedVisualizations', function (Promise, es, kbnIndex, SavedVis, Private, createNotifier, kbnUrl) {
-    var visTypes = Private(require('ui/registry/vis_types'));
+  app.service('savedVisualizations', function (Promise, es, savedObjectsAPI, kbnIndex, SavedVis, Private, createNotifier, kbnUrl) {
+    const visTypes = Private(require('ui/registry/vis_types'));
 
-    var scanner = new Scanner(es, {
+    const scanner = new Scanner(es, {
       index: kbnIndex,
       type: 'visualization'
     });
 
-    var notify = createNotifier({
+    const notify = createNotifier({
       location: 'Saved Visualization Service'
     });
 
@@ -56,11 +56,11 @@ define(function (require) {
     };
 
     this.mapHits = function (hit) {
-      var source = hit._source;
+      const source = hit._source;
       source.id = hit._id;
       source.url = this.urlFor(hit._id);
 
-      var typeName = source.typeName;
+      let typeName = source.typeName;
       if (source.visState) {
         try { typeName = JSON.parse(source.visState).type; }
         catch (e) { /* missing typename handled below */ } // eslint-disable-line no-empty
@@ -77,26 +77,16 @@ define(function (require) {
       return source;
     };
 
+    // kibi: get visualizations from the Saved Object API.
     this.find = function (searchString, size = 100) {
-      var body;
-      if (searchString) {
-        body = {
-          query: {
-            simple_query_string: {
-              query: searchString + '*',
-              fields: ['title^3', 'description'],
-              default_operator: 'AND'
-            }
-          }
-        };
-      } else {
-        body = { query: {match_all: {}}};
+      if (!searchString) {
+        searchString = null;
       }
 
-      return es.search({
+      return savedObjectsAPI.search({
         index: kbnIndex,
-        type: 'visualization',
-        body: body,
+        type: this.type,
+        q: searchString,
         size: size
       })
       .then((resp) => {
@@ -106,5 +96,6 @@ define(function (require) {
         };
       });
     };
+    // kibi: end
   });
 });

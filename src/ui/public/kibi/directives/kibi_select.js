@@ -1,98 +1,165 @@
 define(function (require) {
 
-  var kibiUtils = require('kibiutils');
-  var _ = require('lodash');
-  var module = require('ui/modules').get('kibana');
+  const kibiUtils = require('kibiutils');
+  const _ = require('lodash');
+  const module = require('ui/modules').get('kibana');
+  require('ui/kibi/directives/kibi_angular_qtip2');
 
   module.directive('kibiSelect', function (Private) {
-    var selectHelper = Private(require('ui/kibi/directives/kibi_select_helper'));
+    const selectHelper = Private(require('ui/kibi/directives/kibi_select_helper'));
 
     return {
       require: 'ngModel',
       restrict: 'E',
       replace: true,
       scope: {
-        // the id of the kibi-select object
-        id: '=?',
+        // pass the data to populate the options with
+        delegatedData: '&?',
+        // objectType - text - possible values are:
+        // - query: returns external query IDs
+        // - dashboard: returns dashboard IDs
+        // - search: returns saved search IDs
+        // - template: returns query template IDs
+        // - datasource: returns datasource IDs
+        // - indexPatternType: returns index pattern Type
+        // - field: returns a list of field names
+        // - indexPattern: returns a list of index pattern IDs
+        // - documentIds: returns a list of document IDs
+        // - queryVariable: returns the projected variables of an external query
+        // - iconType: node icon
+        // - labelType: node label
+        // - dashboardsForSequentialJoinButton: returns filtered dashboards based on otherDashboardId and/or indexRelationId passed via options
+        // - delegate: use the options from delegatedData
+        objectType: '@',
         // Filter function which returns true for items to be removed.
-        // There are two arguments:
-        // - id: the id of the kibi-select
+        // There are three arguments:
         // - item: the item
+        // - option: the optional options map
+        // - selected: true if the item is the currently selected one
         // Since the filter function is called with arguments, a function named "myfunc" should be passed
         // as 'filter="myfunc"'.
         // See http://weblogs.asp.net/dwahlin/creating-custom-angularjs-directives-part-3-isolate-scope-and-function-parameters
         //
         // If the item is **undefined**, the function may return an object that is used in the angular watcher.
         filter: '&?',
-        filterOptions: '=?', // optional options map eg: { param: value }
-        objectType:       '@',  // text
-        indexPatternId:   '=?', // optional only for objectType === field | indexPatternType | documentIds
+        // Options map
+        // optional, options map which are passed to getDashboard
+        // also passed to filter function
+        // options: {
+        //   hasSavedSearch: false, // used when objectType==dashboard
+        // }
+        options: '=?',
+        // TODO: move all the below options to options
+        indexPatternId: '=?', // optional only for objectType === field | indexPatternType | documentIds
         indexPatternType: '=?', // optional only for objectType === documentIds
-        fieldTypes:       '=?', // optional only for objectType === field, value should be array of strings
-        queryId:          '=?', // optional only for objectType === queryVariable
-        modelDisabled:    '=?', // use to disable the underlying select
-        modelRequired:    '=?', // use to disable the underlying select
-        include:          '=?', // extra values can be passed here
-        analyzedWarning:  '@'   // set to true or false to disable/enable analyzed field warning
+        fieldTypes: '=?', // optional only for objectType === field, value should be array of strings
+        queryId: '=?', // optional only for objectType === queryVariable
+        modelDisabled: '=?', // use to disable the underlying select
+        modelRequired: '=?', // use to disable the underlying select
+        include: '=?', // extra values can be passed here
+        analyzedWarning: '@',   // set to true or false to disable/enable analyzed field warning
+        scriptedFields: '@' // optional set to true or false to display or not scripted fields (default: true)
       },
       template: require('ui/kibi/directives/kibi_select.html'),
       controller: function () {
         // One can use a decorator and override this method to add custom object types to the kibi-select
-        this.extendedObjectType = function (scope) {
-        };
+        this.extendedObjectType = function (scope) {};
       },
       link: function (scope, element, attrs, ngModelCtrl) {
-        scope.isValid = true;
-        scope.required = scope.modelRequired;
-        scope.disabled = scope.modelDisabled;
-        if (attrs.hasOwnProperty('required')) {
-          scope.required = true;
+        scope.disabled = Boolean(scope.modelDisabled);
+
+        scope.analyzedWarningHtml =
+        '<p>' +
+        '<strong>Careful!</strong> The field selected contains analyzed strings. Values such as <i>foo-bar</i> ' +
+        'will be broken into <i>foo</i> and <i>bar</i>. See ' +
+        '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/2.4/mapping-types.html" target="_blank">Mapping Types</a>' +
+        ' for more information on setting this field as <i>not_analyzed</i>' +
+        '</p>';
+
+        scope.wildcardWarningHtml =
+        '<p>' +
+        'Unable to determine variable names from a wildcard query, please specify the variable name below. ' +
+        'You can review the list of columns in <strong><a href="{{linkToQuery}}">the query</a></strong> ' +
+        'or explicitly return the relevant columns in the SELECT clause.' +
+        '</p>';
+
+        scope.retrieveErrorHtml =
+        '<p>' +
+        'An error occured while retrieving this select\'s data.' +
+        '</p>';
+
+        function initRequired(scope, attrs) {
+          scope.required = Boolean(scope.modelRequired);
+          if (attrs.hasOwnProperty('required')) {
+            scope.required = true;
+          }
         }
-        scope.modelObject = ngModelCtrl.$viewValue; //object
+        initRequired(scope, attrs);
+
         scope.items = [];
+
+        scope.isInvalid = function () {
+          return ngModelCtrl.$invalid;
+        };
+
+        function setModelObject() {
+          scope.modelObject = ngModelCtrl.$viewValue; //object
+          if (ngModelCtrl && ngModelCtrl.$viewValue && ngModelCtrl.$viewValue.options) {
+            scope.analyzedField = Boolean(ngModelCtrl.$viewValue.options.analyzed);
+          }
+        }
 
         scope.$watch(
           function () {
             return ngModelCtrl.$modelValue;
           },
-          function (newValue) {
-            scope.modelObject = ngModelCtrl.$viewValue; //object
-          }
+          setModelObject.bind(this)
         );
+        setModelObject();
 
-        var _setViewValue = function () {
-          if (scope.modelObject) {
-            ngModelCtrl.$setViewValue(scope.modelObject);
+        const _setViewValue = function (modelObject) {
+          if (modelObject) {
+            ngModelCtrl.$setViewValue(modelObject);
           } else {
             ngModelCtrl.$setViewValue(null);
           }
         };
 
-        scope.$watch('modelDisabled', function () {
-          scope.disabled = scope.modelDisabled;
-          if (scope.modelDisabled) {
-            scope.required = false;
-          }
-          _setViewValue();
-        });
-
-        scope.$watch('modelRequired', function () {
-          if (scope.modelRequired !== undefined) {
-            scope.required = scope.modelRequired;
-            _setViewValue();
+        scope.$watch('modelDisabled', function (newValue, oldValue, myScope) {
+          if (newValue !== undefined) {
+            myScope.disabled = newValue;
+            if (newValue) {
+              myScope.required = false;
+            } else {
+              initRequired(scope, attrs);
+            }
+            _setViewValue(myScope.modelObject);
           }
         });
 
-        scope.$watch('modelObject', function () {
-          _setViewValue();
+        scope.$watch('modelRequired', function (newValue, oldValue, myScope) {
+          if (newValue !== undefined) {
+            myScope.required = newValue;
+            _setViewValue(myScope.modelObject);
+          }
+        });
+
+        scope.$watch('modelObject', function (newValue, oldValue, myScope) {
+          if (newValue !== undefined) {
+            _setViewValue(newValue);
+          }
         }, true);
 
         ngModelCtrl.$formatters.push(function (modelValue) {
           // here what is passed to a formatter is just a string
-          var formatted;
+          let formatted;
           if (scope.items.length) {
             formatted = _.find(scope.items, function (item) {
-              return item.value === modelValue;
+              return _.isEqual(item.value, modelValue);
+            });
+          } else if (scope.include && scope.include.length) {
+            formatted = _.find(scope.include, function (item) {
+              return _.isEqual(item.value, modelValue);
             });
           }
 
@@ -106,11 +173,16 @@ define(function (require) {
         });
 
         ngModelCtrl.$parsers.push(function (viewValue) {
-          var ret = viewValue ? viewValue.value : null;
-          scope.isValid = scope.required ? !!ret : true;
-          ngModelCtrl.$setValidity('stSelect', scope.required ? !!ret : true);
-          return ret;
+          return viewValue ? viewValue.value : null;
         });
+
+        ngModelCtrl.$validators.validValue = function (modelValue, viewValue) {
+          return scope.required ? Boolean(modelValue) : true;
+        };
+
+        ngModelCtrl.$validators.retrieveError = function (modelValue, viewValue) {
+          return !scope.retrieveError;
+        };
 
         function autoSelect(items) {
           if (scope.required) {
@@ -119,48 +191,40 @@ define(function (require) {
           return false;
         }
 
-        var _renderSelect = function (items) {
+        const _renderSelect = function (scope, items) {
           scope.analyzedField = false;
           scope.items = items;
           if (scope.items) {
             if (scope.include && scope.include.length) {
-              // adds the extra items at the head
               // remove elements in items that appear in the extra items
               _.remove(scope.items, function (item) {
                 return !!_.find(scope.include, function (extraItem) {
-                  return item.value === extraItem.value;
+                  return _.isEqual(item.value, extraItem.value);
                 });
               });
-              scope.items = scope.include.concat(scope.items);
+              scope.items.push(...scope.include);
             }
+
             if (scope.filter && _.isFunction(scope.filter())) {
               _.remove(scope.items, function (item) {
-                var selected = !!ngModelCtrl.$viewValue && !!ngModelCtrl.$viewValue.value &&
-                  ngModelCtrl.$viewValue.value === item.value;
+                const selected = !!ngModelCtrl.$viewValue && !!ngModelCtrl.$viewValue.value &&
+                  _.isEqual(ngModelCtrl.$viewValue.value, item.value);
 
-                var toRemove = scope.filter()(scope.id, item, scope.filterOptions);
-
-                return toRemove && !selected;
-              });
-            }
-            // if the select is NOT required, the user is able to choose an empty element
-            if (!scope.required && scope.items.length > 0 && _.first(scope.items).value !== null) {
-              scope.items.splice(0, 0, {
-                label: '',
-                value: null
+                return scope.filter()(item, scope.options, selected);
               });
             }
           }
 
-          var item = _.find(scope.items, function (item) {
-            return ngModelCtrl.$viewValue && item.value === ngModelCtrl.$viewValue.value;
+          const item = _.find(scope.items, function (item) {
+            return ngModelCtrl.$viewValue && _.isEqual(item.value, ngModelCtrl.$viewValue.value);
           });
 
-          if (item && item.options && item.options.analyzed) {
-            scope.analyzedField = true;
+          if (item && item.options) {
+            scope.analyzedField = Boolean(item.options.analyzed);
           } else if (autoSelect(scope.items)) {
             // select automatically if only 1 option is available and the select is required
             scope.modelObject = scope.items[0];
+            scope.analyzedField = _.get(scope.items[0], 'options.analyzed');
           } else if (scope.items && scope.items.length > 0 && !item) {
             // object saved in the model is not in the list of items
             scope.modelObject = {
@@ -170,20 +234,28 @@ define(function (require) {
           }
         };
 
-        var _render = function () {
+        const _render = function (scope) {
           let promise;
+          if (scope.scriptedFields === undefined || scope.scriptedFields === null) scope.scriptedFields = true;
 
+          // if disabled, do not try to render anything
+          if (scope.disabled) {
+            return;
+          }
           if (ngModelCtrl.extendedObjectType) {
             promise = ngModelCtrl.extendedObjectType(scope);
           }
 
           if (!promise) {
             switch (scope.objectType) {
+              case 'delegate':
+                promise = Promise.resolve(scope.delegatedData()() || []);
+                break;
               case 'query':
                 promise = selectHelper.getQueries();
                 break;
               case 'dashboard':
-                promise = selectHelper.getDashboards();
+                promise = selectHelper.getDashboards(scope.options);
                 break;
               case 'search':
                 promise = selectHelper.getSavedSearches();
@@ -198,16 +270,13 @@ define(function (require) {
                 promise = selectHelper.getIndexTypes(scope.indexPatternId);
                 break;
               case 'field':
-                promise = selectHelper.getFields(scope.indexPatternId, scope.fieldTypes);
+                promise = selectHelper.getFields(scope.indexPatternId, scope.fieldTypes, scope.scriptedFields);
                 break;
               case 'indexPattern':
                 promise = selectHelper.getIndexesId();
                 break;
               case 'documentIds':
                 promise = selectHelper.getDocumentIds(scope.indexPatternId, scope.indexPatternType);
-                break;
-              case 'joinRelations':
-                promise = selectHelper.getJoinRelations();
                 break;
               case 'queryVariable':
                 promise = selectHelper.getQueryVariables(scope.queryId);
@@ -223,39 +292,44 @@ define(function (require) {
                   });
                 }
                 break;
-              case 'fontAwesomeIcon':
-                promise = selectHelper.getFontAwesomeIcon();
-                break;
               case 'iconType':
                 promise = selectHelper.getIconType();
                 break;
               case 'labelType':
                 promise = selectHelper.getLabelType();
                 break;
+              case 'dashboardsForSequentialJoinButton':
+                promise = selectHelper.getDashboardsForButton(scope.options);
+                break;
             }
           }
 
           scope.retrieveError = '';
           if (promise) {
-            promise.then(_renderSelect).catch(function (err) {
-              scope.retrieveError = _.isEmpty(err) ? '' : err;
-              ngModelCtrl.$setValidity('stSelect', false);
+            promise.then(_renderSelect.bind(this, scope)).catch(function (err) {
+              scope.retrieveError = err.message;
             });
           }
         };
 
-        scope.$watchMulti(['indexPatternId', 'indexPatternType', 'queryId', 'include', 'modelDisabled', 'modelRequired'], function () {
-          _render();
+        scope.$watchMulti([
+          'options', 'indexPatternId', 'indexPatternType',
+          'queryId', 'include', 'modelDisabled', 'modelRequired'
+        ],
+        function () {
+          _render(scope);
         });
 
         scope.$watch(function (scope) {
           if (scope.filter && _.isFunction(scope.filter())) {
-            return scope.filter()(scope.id);
+            return scope.filter()(null, scope.options);
           }
-        }, function () {
-          _render();
+        }, function (newValue, oldValue, scope) {
+          _render(scope);
         }, true);
-        _render();
+
+        // init
+        _render(scope);
       }
 
     };

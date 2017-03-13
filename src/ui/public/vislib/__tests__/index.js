@@ -1,14 +1,14 @@
 
-var _ = require('lodash');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
-var d3 = require('d3');
+let _ = require('lodash');
+let expect = require('expect.js');
+let ngMock = require('ngMock');
+let d3 = require('d3');
 require('ui/vislib/styles/main.less');
 
-var angular = require('angular');
+let angular = require('angular');
 
 describe('Vislib Index Test Suite', function () {
-  var vislib;
+  let vislib;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {

@@ -46,22 +46,20 @@ define(function (require) {
 
   app.controller(
     'QueriesEditor',
-    function ($rootScope, $scope, $route, $window, kbnUrl, createNotifier, queryEngineClient,
-              savedDatasources, Private, $element) {
-
-      var queryHelper = Private(require('ui/kibi/helpers/query_helper'));
-      var setEntityUri = Private(require('ui/kibi/components/commons/_set_entity_uri'));
-      var doesQueryDependsOnEntity = Private(require('ui/kibi/components/commons/_does_query_depends_on_entity'));
+    function (kibiState, $scope, $route, $window, kbnUrl, createNotifier, queryEngineClient, savedDatasources, $element) {
+      var doesQueryDependOnEntity = require('kibiutils').doesQueryDependOnEntity;
 
       $scope.isJDBC = kibiUtils.isJDBC;
       $scope.isSPARQL = kibiUtils.isSPARQL;
       $scope.isSQL = kibiUtils.isSQL;
       $scope.DatasourceTypes = kibiUtils.DatasourceTypes;
+      $scope.preview = {
+        templateId: 'kibi-table-jade'
+      };
 
       // we have to wrap the value into object - this prevents weird thing related to transclusion
       // see http://stackoverflow.com/questions/25180613/angularjs-transclusion-creates-new-scope
       $scope.holder = {
-        entityURI: '',
         entityURIEnabled: false,
         visible: true,
         jsonPreviewActive: false,
@@ -70,21 +68,22 @@ define(function (require) {
       };
       $scope.starDetectedInAQuery = false;
 
-      setEntityUri($scope.holder);
-      var off = $rootScope.$on('kibi:selectedEntities:changed', function (event, se) {
-        setEntityUri($scope.holder);
-      });
-      $scope.$on('$destroy', off);
-
-      $scope.tabClick = function () {
-        $scope.holder.jsonPreviewActive = !$scope.holder.jsonPreviewActive;
-        $scope.holder.htmlPreviewActive = !$scope.holder.htmlPreviewActive;
+      $scope.tabClick = function (preview) {
+        switch (preview) {
+          case 'json':
+            $scope.holder.jsonPreviewActive = true;
+            $scope.holder.htmlPreviewActive = false;
+            break;
+          case 'html':
+            $scope.holder.jsonPreviewActive = false;
+            $scope.holder.htmlPreviewActive = true;
+            break;
+        }
       };
 
       var notify = createNotifier({
         location: 'Queries Editor'
       });
-
 
       $scope.snippetFinderOpen = false;
       $scope.openQueryFinder = function () {
@@ -98,17 +97,23 @@ define(function (require) {
       $scope.query = $route.current.locals.query;
       $scope.$queryTitle = $route.current.locals.query.title;
 
-      if (!$scope.query._previewTemplateId) {
-        $scope.query._previewTemplateId = 'kibi-table-jade';
-      }
-
       const _enableEntityUri = function () {
-        $scope.holder.entityURIEnabled = false;
-        if ($scope.query.id && $scope.query.id.charAt(0) === '1') {
-          $scope.holder.entityURIEnabled = true;
-        }
+        $scope.holder.entityURIEnabled = doesQueryDependOnEntity([ $scope.query ]);
       };
       _enableEntityUri();
+
+      $scope.$listen(kibiState, 'save_with_changes', function (diff) {
+        if (diff.indexOf(kibiState._properties.test_selected_entity) !== -1 && $scope.holder.entityURIEnabled) {
+          $scope.preview();
+        }
+      });
+
+      $scope.$watch('preview.templateId', function (templateId) {
+        if (templateId) {
+          $scope.preview.templateId = templateId;
+          $scope.preview();
+        }
+      });
 
       // for headers and params $watch with true as normal watch fail to detect the change in the arrays
       $scope.$watch('query.rest_headers', function () {
@@ -121,29 +126,62 @@ define(function (require) {
         _enableEntityUri();
       });
 
-      $scope.$watchMulti(['query.st_activationQuery', 'query.st_resultQuery', 'query.rest_body'], function () {
+      $scope.$watchMulti(['query.activationQuery', 'query.resultQuery', 'query.rest_body'], function () {
         _enableEntityUri();
         if ($scope.datasourceType !== kibiUtils.DatasourceTypes.rest) {
           var starRegex = /\*/g;
+          //used for remove lines between parenthesis or curly brackets
+          //shouldn't detect subselect star which is between parenthesis or curly brackets
+          var parenthesisOrCurlyBracketsRegex = /\([^\)]*\)|\{[^\)]*\}/g;
+          var checkStarActivationQuery = false;
+          var checkStarResultQuery = false;
+
+          if ($scope.query.activationQuery) {
+            checkStarActivationQuery = starRegex.test($scope.query.activationQuery.replace(parenthesisOrCurlyBracketsRegex, ''));
+          }
+          if ($scope.query.resultQuery) {
+            checkStarResultQuery = starRegex.test($scope.query.resultQuery.replace(parenthesisOrCurlyBracketsRegex, ''));
+          }
           // test for a star in a query
-          // TODO why test st_activationQuery ?
-          $scope.starDetectedInAQuery = starRegex.test($scope.query.st_activationQuery) || starRegex.test($scope.query.st_resultQuery);
+          // TODO why test activationQuery ?
+          $scope.starDetectedInAQuery = checkStarActivationQuery || checkStarResultQuery;
         }
       });
 
-      $scope.$watch('query.st_datasourceId', function () {
-        if ($scope.query.st_datasourceId) {
+      $scope.$watch('query.datasourceId', function () {
+        if ($scope.query.datasourceId) {
           $scope.datasourceType = null;
 
           // now check the datasourceType
-          savedDatasources.get($scope.query.st_datasourceId).then(function (savedDatasource) {
+          savedDatasources.get($scope.query.datasourceId).then(function (savedDatasource) {
             $scope.datasourceType = savedDatasource.datasourceType;
 
+            if (savedDatasource.datasourceParams) {
+              _.each(savedDatasource.datasourceParams.headers, function (headerFromDatasource) {
+                var header = _.find($scope.query.rest_headers, function (headerFromQuery) {
+                  return headerFromQuery.name === headerFromDatasource.name;
+                });
+                if (!header) {
+                  $scope.query.rest_headers.push(headerFromDatasource);
+                }
+              });
+
+              _.each(savedDatasource.datasourceParams.params, function (paramFromDatasource) {
+                var param = _.find($scope.query.rest_params, function (paramFromQuery) {
+                  return paramFromQuery.name === paramFromDatasource.name;
+                });
+                if (!param) {
+                  $scope.query.rest_params.push(paramFromDatasource);
+                }
+              });
+            }
+
             _enableEntityUri();
+
             if (savedDatasource.datasourceType === kibiUtils.DatasourceTypes.rest) {
-              $scope.query._previewTemplateId = 'kibi-json-jade';
+              $scope.preview.templateId = 'kibi-json-jade';
             } else {
-              $scope.query._previewTemplateId = 'kibi-table-jade';
+              $scope.preview.templateId = 'kibi-table-jade';
             }
             return $scope.preview();
           }).catch(notify.error);
@@ -153,17 +191,17 @@ define(function (require) {
 
       // here we have to translate back and forth between tags array from query object
       // and array of tag objects required by tag widget
-      $scope.tags = _.map($scope.query.st_tags, function (tag) {
+      $scope.tags = _.map($scope.query.tags, function (tag) {
         return {
           text: tag
         };
       });
 
       $scope.$watch('tags', function (tags) {
-        $scope.query.st_tags = _.map(tags, function (tag) {
+        $scope.query.tags = _.map(tags, function (tag) {
           return tag.text;
         });
-        $scope.query.st_tags.sort();
+        $scope.query.tags.sort();
       }, true);
 
       $scope.submit = function () {
@@ -172,13 +210,8 @@ define(function (require) {
           return;
         }
         var titleChanged = $scope.$queryTitle !== $scope.query.title;
-        if (doesQueryDependsOnEntity([ $scope.query ])) {
-          $scope.holder.entityURIEnabled = true;
-          $scope.query.id = '1' + $scope.query.title;
-        } else {
-          $scope.holder.entityURIEnabled = false;
-          $scope.query.id = '0' + $scope.query.title;
-        }
+        $scope.query.id = $scope.query.title;
+        _enableEntityUri();
         return $scope.query.save().then(function (savedQueryId) {
           notify.info('Query ' + $scope.query.title + ' successfuly saved');
           if (titleChanged) {
@@ -190,38 +223,12 @@ define(function (require) {
         });
       };
 
-      $scope.delete = function () {
-        if (!$scope.query.id) {
-          notify.error('The query [' + $scope.query.title + '] does not have an ID');
-          return;
-        }
-
-        // here check if this query is used in any visualisation
-        return queryHelper.getVisualisations([ $scope.query.id ]).then(function (visData) {
-          var vis = visData[1];
-          if (vis.length) {
-            $window.alert(
-              'This query [' + $scope.query.title + '] is used in the following' +
-              (vis.length === 1 ? ' visualization' : ' visualizations') + ': \n' +
-              JSON.stringify(_.pluck(vis, 'title'), null, ' ') +
-              '\n\nPlease edit or delete' + (vis.length === 1 ? ' it ' : ' them ') + 'first.\n\n'
-            );
-          } else {
-            if ($window.confirm('Are you sure about deleting [' + $scope.query.title + '] ?')) {
-              return $scope.query.delete().then(function (resp) {
-                kbnUrl.change('settings/queries', {});
-              });
-            }
-          }
-        });
-      };
-
       $scope.jumpToTemplate = function () {
-        kbnUrl.change('/settings/templates/' + $scope.query._previewTemplateId);
+        kbnUrl.change('/settings/templates/' + $scope.preview.templateId);
       };
 
       $scope.jumpToDatasource = function () {
-        kbnUrl.change('/settings/datasources/' + $scope.query.st_datasourceId);
+        kbnUrl.change('/settings/datasources/' + $scope.query.datasourceId);
       };
 
       $scope.preview = function () {
@@ -231,7 +238,7 @@ define(function (require) {
         $scope.holder.jsonPreview = '';
         $scope.holder.htmlPreview = '';
 
-        if ($scope.query.id && (!$scope.holder.entityURIEnabled || $scope.holder.entityURI)) {
+        if ($scope.query.id && (!$scope.holder.entityURIEnabled || kibiState.getEntityURI())) {
           $scope.spinIt = true;
           return queryEngineClient.clearCache().then(function () {
             return queryEngineClient.getQueriesHtmlFromServer(
@@ -239,16 +246,14 @@ define(function (require) {
                 {
                   open: true,
                   queryId: $scope.query.id,
-                  showFilterButton: false,
-                  // this is one of ours default templates and should always be loaded when queryEngine starts
-                  templateId: $scope.query._previewTemplateId,
+                  templateId: $scope.preview.templateId,
                   templateVars: {
                     label: 'Preview'
                   }
                 }
               ],
               {
-                selectedDocuments: [$scope.holder.entityURI]
+                selectedDocuments: kibiState.isSelectedEntityDisabled() ? [] : [ kibiState.getEntityURI() ]
               }
             );
           }).then(function (resp) {
@@ -277,16 +282,10 @@ define(function (require) {
         kbnUrl.change('settings/queries', {});
       };
 
-      $scope.clone = function () {
-        $scope.query.id = $scope.query.title + '-clone';
-        $scope.query.title = $scope.query.title + ' clone';
-
-        $scope.query.save().then(function (savedQueryid) {
-          $scope.preview();
-          notify.info('Query ' + $scope.query.title + 'successfuly saved');
-          kbnUrl.change('settings/queries/' + savedQueryid);
-        });
-      };
+      $scope.$on('$destroy', function () {
+        kibiState.removeTestEntityURI();
+        kibiState.save();
+      });
 
       $scope.preview();
     });

@@ -11,7 +11,14 @@ module.exports = function (kibana) {
           kibana.autoload.styles,
           'ui/chrome',
           'angular'
-        )
+        ),
+        injectVars: function (server, options) {
+          let config = server.config();
+          return {
+            kbnIndex: config.get('kibana.index')
+          };
+
+        }
       }
     }
   });

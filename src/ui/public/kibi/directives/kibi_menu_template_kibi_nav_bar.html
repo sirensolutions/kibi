@@ -1,0 +1,18 @@
+<div class="kibi-menu-template-kibi-navbar">
+  <ul>
+    <li ng-click="dashboard.onSelect(kibiMenuTemplateContext)" ng-repeat="dashboard in kibiMenuTemplateData">
+      <b>{{dashboard.title}}</b>
+      <br/>
+      <span ng-if="dashboard.count !== undefined && dashboard.savedSearchId" class="smallNumber">Count: {{dashboard.count}}</span>
+      <span ng-if="dashboard.count === undefined && dashboard.savedSearchId" class="spinner"></span>
+      <span ng-if="dashboard.filterIconMessage" aria-hidden="true" data-toggle="tooltip"
+            data-placement="bottom" title="{{dashboard.filterIconMessage}}">
+        <i class="fa fa-filter"/>
+      </span>
+      <span ng-if="dashboard.isPruned" aria-hidden="true" data-toggle="tooltip"
+            data-placement="bottom"
+            title="Count may be lower than the actual value because a join operation was pruned"> *
+      </span>
+    </li>
+  </ul>
+</div>

@@ -1,6 +1,7 @@
-# Kibi 4.4.2-1
+# Kibi 4.6.4-SNAPSHOT
 
-Kibi extends Kibana 4.4.2 with data intelligence features; the core feature of
+Kibi extends Kibana 4.6.4 with data intelligence features; the core feature of
+
 Kibi is the capability to join and filter data from multiple Elasticsearch
 indexes and from SQL/NOSQL data sources ("external queries").
 
@@ -8,6 +9,12 @@ In addition, Kibi provides UI features and visualizations like dashboard
 groups, tabs, cross entity relational navigation buttons, an enhanced search
 results table, analytical aggregators, HTML templates on query results, and
 much more.
+
+## Upgrade from previous version
+
+* Move any custom configurations in your old kibi.yml to your new one
+* Reinstall plugins
+* Start or restart Kibi
 
 ## Quick start
 
@@ -25,18 +32,18 @@ documentation.
 
 ## Compatibility Table Kibi / Elasticsearch
 
-Kibi    | Elasticsearch
----     | ---
-4.4.2-1	| 2.2.x, 2.3.x
-4.4.2   | 2.2.x, 2.3.x
-4.4.1   | 2.2.x, 2.3.x
-0.3.x   | 2.2.x
-0.2.0   | 1.6, 1.7
-0.1.x   | 1.6, 1.7
+Kibi  | Elasticsearch
+----- | -------------
+4.6.x | 2.4.x
+4.5.x | 2.3.x
+4.4.x | 2.2.x, 2.3.x
+0.3.x | 2.2.x
+0.2.0 | 1.6, 1.7
+0.1.x | 1.6, 1.7
 
 ## License
 
-Copyright 2015–2016 SIREn Solutions
+Copyright 2015–2017 SIREn Solutions
 
 Kibi is Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
 
@@ -53,6 +60,3 @@ For more information see the licensing section on Kibi website
 
 Kibana is a trademark of Elasticsearch BV, registered in the U.S. and in other
 countries.
-
-Elasticsearch is a trademark of Elasticsearch BV, registered in the U.S. and in
-other countries.

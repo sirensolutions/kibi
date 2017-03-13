@@ -304,7 +304,9 @@ saved-object-finder {
   span.finder-hit-count {
     position: absolute;
     right: 10px;
-    top: 25px;
+  /* kibi: changed top:25px -> margin-top:-21 to fix issue where hit count was not
+     properly positioned in the middle of the row */
+    margin-top:-21px;
     font-size: 0.85em;
   }
 
@@ -443,7 +445,7 @@ fieldset {
   margin: @form-group-margin-bottom;
   padding: @form-group-margin-bottom;
   border: 1px solid @input-border;
-  border-radius: @input-border-radius;
+  border-radius: @input-border-radius-base;
 }
 
 [fixed-scroll] {

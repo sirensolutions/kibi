@@ -6,173 +6,143 @@ define(function (require) {
   require('angular-animate');
   require('eeg');
 
-  var jQuery = require('jquery');
-  var _ = require('lodash');
+  const jQuery = require('jquery');
+  const _ = require('lodash');
 
-  var app = require('ui/modules').get('kibana', ['ngAnimate']);
+  const app = require('ui/modules')
+    .get('kibana', ['ngAnimate'])
+    .config(['$animateProvider', ($animateProvider) => {
+      $animateProvider.classNameFilter(/animate-.*/);
+    }]);
 
-  app.animation('.animate-kibi-relational-filter-panel', function () {
+  app.animation('.animate-kibi-relational-filter-panel', function ($rootScope) {
     return {
       beforeAddClass: function (element, className, doneFn) {
-        // close
-        jQuery(element).slideUp(250, doneFn);
+        // close by adding ng-hide class
+        jQuery(element).slideUp(100, doneFn);
       },
 
       removeClass: function (element, className, doneFn) {
-        // open
-        element.css('display', 'none');
-        jQuery(element).slideDown(250, doneFn);
+        // open by removing ng-hide class
+        jQuery(element).slideDown(100, () => {
+          // call update when animation is finished to redraw the legend
+          // as it could have been drawn incorrectly due to the fact the panel is not visible
+          // when initial import is done
+          $rootScope.$emit('egg:relationalPanel:run', 'update');
+          doneFn();
+        });
       }
     };
   });
 
-  app.directive(
-    'kibiRelationalFilterPanel',
-    function ($location, config, $rootScope, Private, createNotifier) {
+  app.directive('kibiRelationalFilterPanel', function (kibiState, config, $rootScope, Private, createNotifier) {
+    const relationsHelper = Private(require('ui/kibi/helpers/relations_helper'));
+    const notify = createNotifier({
+      location: 'Relational Filter Panel'
+    });
 
-      var joinFilterHelper = Private(require('ui/kibi/helpers/join_filter_helper/join_filter_helper'));
-      var kibiStateHelper  = Private(require('ui/kibi/helpers/kibi_state_helper/kibi_state_helper'));
-      var urlHelper        = Private(require('ui/kibi/helpers/url_helper'));
-      var notify = createNotifier({
-        location: 'Relational Filter Panel'
-      });
+    return {
+      restrict: 'E',
+      template: require('ui/kibi/directives/kibi_relational_filter_panel.html'),
+      link: function ($scope, $el) {
+        const _initPanel = function () {
+          _checkIfRelationsAreValid();
+          $scope.relations = config.get('kibi:relations');
+          const relDashboards = _.cloneDeep($scope.relations.relationsDashboardsSerialized);
+          if (!relDashboards) {
+            return;
+          }
+          relDashboards.options.draggable = false;
 
-      return {
-        restrict: 'E',
-        template: require('ui/kibi/directives/kibi_relational_filter_panel.html'),
-        link: function ($scope, $el) {
-
-
-          var _initScope = function () {
-            $scope.relationalPanel = {
-              enabled: config.get('kibi:relationalPanel'),
-              relations: config.get('kibi:relations')
-            };
-          };
-
-          var init = false;
-          var _initPanel = function () {
-            var relDashboards = _.cloneDeep($scope.relationalPanel.relations.relationsDashboardsSerialized);
-            if (!relDashboards) {
+          _.each(relDashboards.links, function (link) {
+            const relation = _.find(
+              $scope.relations.relationsDashboards,
+              {relation: link.data.relation, dashboards: [link.source.replace(/^eegid-/, ''), link.target.replace(/^eegid-/, '')]}
+            );
+            if (!relation) {
               return;
             }
-            relDashboards.options.draggable = false;
 
-            _.each(relDashboards.links, function (link) {
-              var relation = _.find(
-                $scope.relationalPanel.relations.relationsDashboards,
-                {relation: link.data.id, dashboards: [link.source.replace(/^eegid-/, ''), link.target.replace(/^eegid-/, '')]}
-              );
-              if (!relation) {
-                return;
+            link.html = `
+              <div>
+                <input type="checkbox"
+                      ${kibiState.isRelationalPanelEnabled() ? '' : 'disabled'}
+                      ${kibiState.isRelationEnabled(relation) ? 'checked' : ''}/>
+                &nbsp;<label>${link.linkType}</label>
+              </div>`;
+          });
+
+          relDashboards.options.onLinkClick = function (el, d, i) {
+            // find the relation
+            const relation = _.find($scope.relations.relationsDashboards, d.data);
+            if (relation) {
+              // add or remove the relation id from kibi state
+              const enabled = jQuery(el).find('input[type=\'checkbox\']').is(':checked');
+              if (enabled) {
+                kibiState.enableRelation(relation);
+              } else {
+                kibiState.disableRelation(relation);
               }
-
-              link.html = '<div>' +
-                '<input type="checkbox" ' + (kibiStateHelper.isRelationEnabled(relation) ? 'checked' : '') + '/>' +
-                '&nbsp;<label>' + link.linkType + '</label>' +
-                '</div>';
-            });
-
-
-            relDashboards.options.onLinkClick = function (el, d, i) {
-              // find the relation
-              var relation = _.find($scope.relationalPanel.relations.relationsDashboards, function (r) {
-                return r.dashboards.indexOf(d.source.label) !== -1 && r.dashboards.indexOf(d.target.label) !== -1;
-              });
-              if (relation) {
-                // add or remove the relation id from kibi state
-                var enabled = jQuery(el).find('input[type=\'checkbox\']').is(':checked');
-                var updateJoinSetOnPromises = [];
-                if (enabled) {
-                  kibiStateHelper.enableRelation(relation);
-                } else {
-                  kibiStateHelper.disableRelation(relation);
-                  updateJoinSetOnPromises.push(joinFilterHelper.updateJoinSetFilter(relation.dashboards));
-                }
-                // Note: here we have to update the JoinSetFilter for all dashboards from
-                // all enabled relations and not only for these from clicked relation
-                // This is needed as relational buttons takes filters from kibi state
-                // and if the filter is missing the counts on buttons will be wrong
-
-                // TODO: join_set should be stored as 1 another property in kibi state
-                // and not per dashboard as join_set will be always one for all dashboards
-                // issue: https://github.com/sirensolutions/kibi-internal/issues/1011
-                _.each(kibiStateHelper.getEnabledRelations(), function (relDashboards) {
-                  updateJoinSetOnPromises.push(joinFilterHelper.updateJoinSetFilter(relDashboards));
-                });
-                Promise.all(updateJoinSetOnPromises).then(function () {
-                  $rootScope.$emit('kibi:update-tab-counts');
-                });
-              }
-            };
-
-            $rootScope.$emit('egg:relationalPanel:run', 'importGraph', relDashboards);
-            init = true;
+              kibiState.save();
+            } else {
+              notify.warning(`Unable to find relation between dashboards ${d.data.dashboards[0]} and ${d.data.dashboards[0]}`);
+            }
           };
 
-          $scope.close = function () {
-            $scope.show = false;
-            $rootScope.$emit('relationalFilterPanelClosed', false);
-          };
+          $rootScope.$emit('egg:relationalPanel:run', 'importGraph', relDashboards);
+        };
 
-          var _checkFilterJoinPlugin = function () {
-            var enabled = joinFilterHelper.isRelationalPanelEnabled();
-            var installed = joinFilterHelper.isSirenJoinPluginInstalled();
-            if (enabled && !installed) {
-              notify.error(
-                'The siren-join plugin is enabled but not installed. ' +
+        function _checkIfRelationsAreValid() {
+          const { validIndices, validDashboards } = relationsHelper.checkIfRelationsAreValid();
+          $scope.validRelations = validIndices && validDashboards;
+        };
+
+        _checkIfRelationsAreValid();
+
+        $scope.close = function () {
+          $scope.show = false;
+          $rootScope.$emit('relationalFilterPanelClosed', false);
+        };
+
+        var _checkFilterJoinPlugin = function () {
+          const enabled = kibiState.isRelationalPanelButtonEnabled();
+          const installed = kibiState.isSirenJoinPluginInstalled();
+          if (enabled && !installed) {
+            notify.error(
+              'The siren-join plugin is enabled but not installed. ' +
                 'Please install the plugin and restart Kibi, or ' +
                 'disable the relational panel in Settings -> Advanced -> kibi:relationalPanel');
-            }
-          };
+          }
+        };
 
-          var off1 = $rootScope.$on('init:config', function () {
-            _initScope();
-            _checkFilterJoinPlugin();
+        var initConfigOff = $rootScope.$on('init:config', function () {
+          _checkFilterJoinPlugin();
+          _initPanel();
+        });
+
+        $scope.show = false;
+        var relationalFilterPanelOpenedOff = $rootScope.$on('relationalFilterPanelOpened', function (event, relationalFilterPanelOpened) {
+          $scope.show = relationalFilterPanelOpened;
+          if (relationalFilterPanelOpened) {
             _initPanel();
-          });
+          }
+        });
 
-
-          // recreate it after user change configuration
-          var off2 = $rootScope.$on('change:config.kibi:relations', function () {
-            _initScope();
-            _checkFilterJoinPlugin();
-            if ($scope.ignoreNextConfigurationChangedEvent === true) {
-              $scope.ignoreNextConfigurationChangedEvent = false;
-            } else {
-              _initPanel();
-            }
-          });
-
-          $scope.show = false;
-          var off3 = $rootScope.$on('relationalFilterPanelOpened', function (event, relationalFilterPanelOpened) {
-            $scope.show = relationalFilterPanelOpened;
-          });
-
-          var off4 = $rootScope.$on('$routeChangeSuccess', function (event, next, prev, err) {
-            $scope.show = false;
-            if (urlHelper.isItDashboardUrl() && init && $scope.relationalPanel.enabled) {
-              // try to enable filter when user switch to dashboards app
-              joinFilterHelper.updateJoinSetFilter();
-            }
-          });
-
-          var off5 = $rootScope.$on('kibi:update-relational-panel', function () {
-            _initScope();
+        const updateRelationalPanelOnSave = function (diff) {
+          if (diff.indexOf(kibiState._properties.enabled_relations) !== -1 && !kibiState.getEnabledRelations().length) {
             _initPanel();
-          });
+          } else if (diff.indexOf(kibiState._properties.enabled_relational_panel) !== -1) {
+            _initPanel();
+          }
+        };
+        $scope.$listen(kibiState, 'save_with_changes', updateRelationalPanelOnSave.bind(this));
 
-
-          $scope.$on('$destroy', function () {
-            off1();
-            off2();
-            off3();
-            off4();
-            off5();
-          });
-
-        } // end of link function
-      };
-    });
+        $scope.$on('$destroy', function () {
+          initConfigOff();
+          relationalFilterPanelOpenedOff();
+        });
+      } // end of link function
+    };
+  });
 
 });

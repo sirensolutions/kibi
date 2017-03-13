@@ -5,22 +5,36 @@ define(function (require) {
 
   require('ui/modules').get('kibana/kibi_query_viewer_vis')
 
-  .directive('kibiQueryViewerVisParams', function ($rootScope, kbnUrl, Private, createNotifier) {
-
-    var notify = createNotifier({
-      location: 'Kibi Query Viewer Params'
-    });
-
+  .directive('kibiQueryViewerVisParams', function (kbnUrl) {
     return {
       restrict: 'E',
       template: require('plugins/kibi_query_viewer_vis/kibi_query_viewer_vis_params.html'),
       link: function ($scope) {
 
-        var _shouldEntityURIBeEnabled = Private(require('ui/kibi/components/commons/_should_entity_uri_be_enabled'));
+        // Handle label textbox changes
+        $scope.labelChanged = function (index) {
+          let option = $scope.vis.params.queryDefinitions[index];
+          if (!option) {
+            return option;
+          }
+          if (!option.templateVars) {
+            option.templateVars = {};
+          }
+          if (option._label) {
+            if (option._templateVarsString) {
+              option.templateVars = JSON.parse(option._templateVarsString);
+            }
+            option.templateVars.label = option._label;
+          } else {
+            option.templateVars.label = '';
+          }
+          option._templateVarsString = JSON.stringify(option.templateVars, null, ' ');
+        };
 
-        var updateScope = function () {
+        // Handle template textarea changes
+        $scope.templateChanged = function () {
           $scope.jsonError = [];
-          $scope.vis.params.queryOptions = _.map($scope.vis.params.queryOptions, function (option, index) {
+          $scope.vis.params.queryDefinitions = _.map($scope.vis.params.queryDefinitions, function (option, index) {
             $scope.jsonError.push({
               message: '',
               block: ''
@@ -33,13 +47,9 @@ define(function (require) {
             }
             try {
               if (option._templateVarsString) {
-                option.templateVars = JSON.parse(option._templateVarsString);
-              }
-
-              if (option._label) {
-                option.templateVars.label = option._label;
-              } else if (!option.templateVars.label) {
-                option.templateVars.label = '';
+                let toJson = JSON.parse(option._templateVarsString);
+                option.templateVars = toJson;
+                option._label = toJson.label;
               }
             } catch (err) {
               $scope.jsonError[index].message = err.toString();
@@ -48,39 +58,12 @@ define(function (require) {
           });
         };
 
-        $scope.$watch(function (myscope) {
-          // only triggers when the queryId, template vars or the _label change
-          return _.map(myscope.vis.params.queryOptions, function (option) {
-            return option._templateVarsString + option._label + option.queryId;
-          });
-        }, function () {
-          updateScope();
-
-          var queryIds = _($scope.vis.params.queryOptions).pluck('queryId').compact().value();
-
-          _shouldEntityURIBeEnabled(queryIds, null, true).then((results) => {
-            let value = false;
-
-            _.each($scope.vis.params.queryOptions, (queryOption, index) => {
-              queryOption.isEntityDependent = results[index];
-              if (results[index]) {
-                value = true;
-              }
-            });
-            $scope.vis.params.hasEntityDependentQuery = value;
-
-            $rootScope.$emit('kibi:entityURIEnabled:kibiqueryviewer', value);
-          }).catch(function (err) {
-            notify.warning('Could not determine that widget need entityURI\n' + JSON.stringify(err, null, ' '));
-          });
-        }, true);
-
         $scope.editTemplate = function (index) {
-          kbnUrl.change('/settings/templates/' + $scope.vis.params.queryOptions[index].templateId);
+          kbnUrl.change('/settings/templates/' + $scope.vis.params.queryDefinitions[index].templateId);
         };
 
         $scope.editQuery = function (index) {
-          kbnUrl.change('/settings/queries/' + $scope.vis.params.queryOptions[index].queryId);
+          kbnUrl.change('/settings/queries/' + $scope.vis.params.queryDefinitions[index].queryId);
         };
 
       }

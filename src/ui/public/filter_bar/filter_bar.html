@@ -10,7 +10,11 @@
 </div>
 
 <div class="bar" ng-show="filters.length || showKibiEntityClipboard">
-  <div class="filter" ng-class="{join: filter.join_set || filter.join_sequence, dependsOnSelectedEntities: filter.meta.dependsOnSelectedEntities && filter.meta.markDependOnSelectedEntities, dependsOnSelectedEntitiesDisabled: filter.meta.dependsOnSelectedEntitiesDisabled && filter.meta.dependsOnSelectedEntities, negate: filter.meta.negate, disabled: filter.meta.disabled }" ng-repeat="filter in filters">
+  <div
+    class="filter"
+    ng-repeat="filter in filters"
+    data-test-subj="{{filter.join_set ? 'join_set' : (filter.join_sequence ? 'join_sequence' : 'regular')}}"
+    ng-class="{join: filter.join_set || filter.join_sequence, dependsOnSelectedEntities: filter.meta.dependsOnSelectedEntities && filter.meta.markDependOnSelectedEntities, dependsOnSelectedEntitiesDisabled: filter.meta.dependsOnSelectedEntitiesDisabled && filter.meta.dependsOnSelectedEntities, negate: filter.meta.negate, disabled: filter.meta.disabled }">
     <div class="filter-description">
       <span ng-if="filter.$state.store == 'globalState'"><i class="fa fa-fw fa-thumb-tack pinned"></i></span>
       <span ng-if="filter.meta.alias">{{ filter.meta.alias }}</span>
@@ -23,7 +27,7 @@
       </span>
     </div>
     <div class="filter-actions">
-      <a ng-if="!filter.join_set" class="action filter-toggle" ng-click="toggleFilter(filter)">
+      <a class="action filter-toggle" ng-click="toggleFilter(filter)">
         <i ng-show="filter.meta.disabled" class="fa fa-fw fa-square-o disabled"></i>
         <i ng-hide="filter.meta.disabled" class="fa fa-fw fa-check-square-o enabled"></i>
       </a>

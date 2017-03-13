@@ -19,7 +19,7 @@ as it's possible to set values that are incompatible with one another.
 === Creating an Index Pattern to Connect to Elasticsearch
 An _index pattern_ identifies one or more Elasticsearch indices that you want to explore with Kibi. Kibi looks for
 index names that match the specified pattern.
-An asterisk ({asterisk}) in the pattern matches zero or more characters. For example, the pattern `myindex-{asterisk}` matches all
+An asterisk (*) in the pattern matches zero or more characters. For example, the pattern `myindex-*` matches all
 indices whose names start with `myindex-`, such as `myindex-1` and `myindex-2`.
 
 An index pattern can also simply be the name of a single index.
@@ -40,6 +40,9 @@ the *Add* button in the Index Patterns list.
 . If your index contains a timestamp field that you want to use to perform time-based comparisons, select the *Index
 contains time-based events* option and select the index field that contains the timestamp. Kibi reads the index
 mapping to list all of the fields that contain a timestamp.
+
+. By default, Kibi restricts wildcard expansion of time-based index patterns to indices with data within the currently
+selected time range. Click *Do not expand index pattern when search* to disable this behavior.
 
 . Click *Create* to add the index pattern.
 
@@ -211,11 +214,11 @@ Scripted field values are computed at query time so they aren't indexed and cann
 NOTE: Kibana cannot query scripted fields.
 
 WARNING: Computing data on the fly with scripted fields can be very resource intensive and can have a direct impact on
-Kibana's performance. Keep in mind that there's no built-in validation of a scripted field. If your scripts are
+Kibi's performance. Keep in mind that there's no built-in validation of a scripted field. If your scripts are
 buggy, you'll get exceptions whenever you try to view the dynamically generated data.
 
 Scripted fields use the Lucene expression syntax. For more information,
-see http://www.elastic.co/guide/en/elasticsearch/reference/current/modules-scripting.html#_lucene_expressions_scripts[
+see {elastic-ref}/modules-scripting.html#_lucene_expressions_scripts[
 Lucene Expressions Scripts].
 
 You can reference any single value numeric field in your expressions, for example:
@@ -235,7 +238,7 @@ To create a scripted field:
 . Click *Save Scripted Field*.
 
 For more information about scripted fields in Elasticsearch, see
-http://www.elastic.co/guide/en/elasticsearch/reference/current/modules-scripting.html[Scripting].
+{elastic-ref}/modules-scripting.html[Scripting].
 
 NOTE: In Elasticsearch releases 1.4.3 and later, this functionality requires you to enable
 {elastic-ref}modules-scripting.html[dynamic Groovy scripting].
@@ -305,8 +308,10 @@ In this panel, you can define relationships between index patterns. These relati
 A relationship is defined as a **join** operation between two indices with the following fields:
 
 - _Left Index Pattern_: the left index of the join;
+- _Left Type_: the type of the left index of the join;
 - _Left Field_: the field of the left index to join on;
 - _Right Index Pattern_: the right index of the join;
+- _Right Type_: the type of the right index of the join;
 - _Right Field_: the field of the right index to join with; and
 - _Label_: the label of the relation.
 
@@ -322,6 +327,12 @@ For example, in the image below, that icon is displayed next to the field "id" o
 image::images/relations_settings/investor_index.png["Investor Index",align="center"]
 
 ===== Advanced settings for index relations [Enterprise Edition only]
+
+ifeval::["{enterprise_enabled}" == "false"]
+  NOTE: Documentation for Advanced settings for index relations is available only in Kibi Enterprise Edition.
+endif::[]
+
+ifeval::["{enterprise_enabled}" == "true"]
 
 In most cases the default index relation settings are sufficient.
 However, for scenarios involving very large joins or when precision is critical,
@@ -346,6 +357,8 @@ On this panel, the user can manually configure the following parameters for each
 By setting the above parameters, one can optimise the precision and the performance of the join operation.
 
 NOTE: Advanced Join Settings are available only in Kibi Enterprise. Free Kibi version always use the default values for all advanced parameters.
+
+endif::[]
 
 ==== Graph of Dashboards
 
@@ -458,13 +471,11 @@ You can set the default options used when performing a {elastic-ref}query-dsl-qu
 include::advanced_settings.asciidoc[]
 
 [[kibana-server-properties]]
-=== Setting Kibana Server Properties
+=== Setting Kibi Server Properties
 
-The Kibana server reads properties from the `kibana.yml` file on startup. The default settings configure Kibana to run
-on `localhost:5601`. To change the host or port number, or connect to Elasticsearch running on a different machine,
-you'll need to update your `kibana.yml` file. You can also enable SSL and set a variety of other options.
-
-include::kibana_yml.asciidoc[]
+The Kibi server reads properties from the `kibi.yml` file on startup. The default settings configure Kibana to listen on port
+`{kibi-default-port}` on all the IP addresses. To change the host or port number, or connect to Elasticsearch running on a different
+machine, you'll need to update your `kibi.yml` file. You can also enable SSL and set a variety of other options.
 
 deprecated[4.2, The names of several Kibana server properties changed in the 4.2 release of Kibana. The previous names remain as functional aliases, but are now deprecated and will be removed in a future release of Kibana]
 
@@ -474,7 +485,7 @@ deprecated[4.2, The names of several Kibana server properties changed in the 4.2
 +
 *alias*: `port` deprecated[4.2]
 +
-*default*: `5601`
+*default*: `{kibi-default-port}`
 
 `server.host` added[4.2]:: The host to bind the Kibana server to.
 +
@@ -599,8 +610,10 @@ you are using a self-signed certificate so the certificate can be verified. Disa
 [[managing-saved-objects]]
 == Managing Saved Searches, Visualizations, and Dashboards
 
-You can view, edit, and delete saved searches, visualizations, and dashboards from *Settings > Objects*. You can also
-export or import sets of searches, visualizations, and dashboards.
+You can view, edit, and delete saved searches, visualizations, and dashboards from *Settings > Objects*. You can also:
+* export or import sets of objects (searches, visualizations, dashboards, etc.) by using "Export" button
+* export all objects plus configuration, and index-patterns by using "Export Everything" button
+
 Viewing a saved object displays the selected item in the *Discover*, *Visualize*, or *Dashboard* page. To view a saved
 object:
 
@@ -640,11 +653,14 @@ To delete a saved object:
 To export a set of objects:
 
 . Go to *Settings > Objects*.
-. Select the type of object you want to export. You can export a set of dashboards, searches, or visualizations.
+. Select the type of object you want to export. You can export a set of objects (searches, visualizations, dashboards, etc) by using "Export" button
+  or you can export all objects plus configuration, and index-patterns by using "Export Everything" button.
 . Click the selection box for the objects you want to export, or click the *Select All* box.
 . Click *Export* to select a location to write the exported JSON.
 
-WARNING: Exported dashboards do not include their associated index patterns. Re-create the index patterns manually before
+IMPORTANT: If you need to export every object you have in your Kibi installation, you can use "Export Everything" button.
+
+WARNING: Exported dashboards do not include their associated index patterns (not "Export Everything" button). Re-create the index patterns manually before
 importing saved dashboards to a Kibana instance running on another Elasticsearch cluster.
 
 To import a set of objects:
@@ -658,8 +674,21 @@ To import a set of objects:
 === Kibi server configuration
 
 The Kibi server reads its configuration from the `config/kibi.yml` file at startup.
-The default settings configure Kibi to run on `localhost:5606`. To change the host or port number, or connect to Elasticsearch running on a different machine,
+The default settings configure Kibi to run on `{start-url}`. To change the host or port number, or connect to Elasticsearch running on a different machine,
 you'll need to update your `kibi.yml` file. You can also enable SSL and set a variety of other options.
+
+.Environment variable placeholders
+
+It is possible to use environment variable placeholders in configuration
+settings; the syntax of placeholders is `${ENV_VARIABLE_NAME}`.
+
+For example, to set `elasticsearch.url` to the value of the environment
+variable `ES_URL`, edit `config_kibi.yml` as follows:
+
+[source,yaml]
+----
+elasticsearch.url: ${ES_URL}
+----
 
 include::kibi_yml.asciidoc[]
 
@@ -673,7 +702,7 @@ deprecated[0.3, The names of several Kibi server properties changed in the 0.3 r
 +
 *alias*: `port` deprecated[0.3]
 +
-*default*: `5606`
+*default*: `{kibi-default-port}`
 
 `server.host` added[0.3]:: The host to bind the Kibana server to.
 +

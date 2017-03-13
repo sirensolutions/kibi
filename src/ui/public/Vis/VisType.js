@@ -1,6 +1,6 @@
 define(function (require) {
   return function VisTypeFactory(Private) {
-    var VisTypeSchemas = Private(require('ui/Vis/Schemas'));
+    let VisTypeSchemas = Private(require('ui/Vis/Schemas'));
 
     function VisType(opts) {
       opts = opts || {};
@@ -13,8 +13,17 @@ define(function (require) {
       this.description = opts.description;
       this.schemas = opts.schemas || new VisTypeSchemas();
       this.params = opts.params || {};
+      if (opts.version) {
+        this.version = opts.version;
+      }
       this.requiresSearch = opts.requiresSearch == null ? true : opts.requiresSearch; // Default to true unless otherwise specified
-      this.defaultSection = opts.defaultSection; // kibi: the visualisation configuration default section
+      // kibi: Default to false unless otherwise specified
+      // this is used for the spy panel of visualizations that query more than one index
+      this.requiresMultiSearch = opts.requiresMultiSearch == null ? false : opts.requiresMultiSearch;
+      // kibi: allow a visualization to retrieve results by itself
+      this.delegateSearch = opts.delegateSearch == null ? false : opts.delegateSearch;
+      // kibi: initialize a visualization based on the linked saved search
+      this.init = opts.init;
     }
 
     return VisType;

@@ -1,9 +1,10 @@
-var util = require('./util');
-var kibiUtils = require('kibiutils');
-var Promise = require('bluebird');
+const util = require('./util');
+const _ = require('lodash');
+const kibiUtils = require('kibiutils');
+const Promise = require('bluebird');
 
 // The set of custom queries
-var _customQueries = [ 'inject' ];
+const _customQueries = [ 'inject' ];
 
 /**
  * Save stores the custom queries and removes them from the query body.
@@ -22,12 +23,16 @@ exports.save = function (query) {
     const label = _customQueries[i];
     const objects = util.traverse(query, label, getQuery);
 
-    if (objects.length > 1) {
-      throw new Error('Expected only one ' + label + ' query object');
-    }
     if (objects.length === 1) {
       util.delete(query, objects[0].path, label);
-      _savedQueries[label] = objects[0].value;
+
+      const injectQueries = objects[0].value;
+      const nbQueryDefs = _.reduce(injectQueries, (acc, injectQuery) => acc + injectQuery.queryDefs.length, 0);
+      if (nbQueryDefs) {
+        _savedQueries[label] = injectQueries;
+      }
+    } else if (objects.length > 1) {
+      throw new Error('Expected only one ' + label + ' query object');
     }
   }
   return _savedQueries;
@@ -43,12 +48,12 @@ exports.runSavedQueries = function (response, queryEngine, savedQueries) {
     return Promise.resolve(response);
   }
 
-  var promises = [];
+  const promises = [];
 
-  for (var key in savedQueries) {
+  for (let key in savedQueries) {
     if (savedQueries.hasOwnProperty(key)) {
-      for (var i = 0; i < savedQueries[key].length; i++) {
-        var savedQuery = savedQueries[key][i];
+      for (let i = 0; i < savedQueries[key].length; i++) {
+        const savedQuery = savedQueries[key][i];
         switch (key) {
           case 'inject':
             promises.push(exports._runInject(savedQuery, queryEngine));
@@ -68,17 +73,17 @@ exports.runSavedQueries = function (response, queryEngine, savedQueries) {
  */
 function _runSavedQueries(response, runQueries) {
   if (response.responses !== undefined) {
-    for (var i = 0; i < response.responses.length; i++) {
+    for (let i = 0; i < response.responses.length; i++) {
       if (response.responses[i].hits !== undefined) {
 
         // for each of the hits, apply the post-process queries
-        var hits = response.responses[i].hits.hits;
-        for (var j = 0; j < hits.length; j++) {
+        const hits = response.responses[i].hits.hits;
+        for (let j = 0; j < hits.length; j++) {
           if (!hits[j].hasOwnProperty('fields')) {
             hits[j].fields = {};
           }
-          for (var k = 0; k < runQueries.length; k++) {
-            var res = runQueries[k](hits[j]._source);
+          for (let k = 0; k < runQueries.length; k++) {
+            const res = runQueries[k](hits[j]);
             hits[j].fields[res.key] = res.value;
           }
         }
@@ -90,14 +95,14 @@ function _runSavedQueries(response, runQueries) {
 }
 
 /**
- * RunInject runs the given query and returns a function that stores the results into an object for a given source
+ * RunInject runs the given query and returns a function that stores the results into an object for a given hit
  */
 exports._runInject = function (query, queryEngine) {
   return Promise.try(function () {
-    var entityURI = query.entityURI;
-    var queryDefs = query.queryDefs;
-    var sourcePath = query.sourcePath;
-    var fieldName = query.fieldName;
+    const entityURI = query.entityURI;
+    const queryDefs = query.queryDefs;
+    const sourcePath = query.sourcePath;
+    const fieldName = query.fieldName;
 
     if (queryDefs === undefined) {
       throw new Error('Missing queryDefs field in the inject object: ' + query);
@@ -109,64 +114,29 @@ exports._runInject = function (query, queryEngine) {
       throw new Error('Missing fieldName field in the inject object: ' + query);
     }
 
-    sourcePath = sourcePath.split('.');
-
     return queryEngine.getIdsFromQueries(queryDefs, {selectedDocuments: [entityURI]})
     .then(function (setOfIds) {
-      return function (source) {
-        var res = { key: fieldName, value: [] };
-        kibiUtils.goToElement(source, sourcePath.slice(0, sourcePath.length - 1), function (val) {
-          var lastPart = sourcePath[sourcePath.length - 1];
+      return function (hit) {
+        const res = {
+          key: fieldName,
+          value: []
+        };
 
-          // for each result set of a query
-          for (var i = 0; i < setOfIds.length; i++) {
-            // for each result in the set for that query
-            for (var j = 0; j < setOfIds[i].ids.length; j++) {
-              var id = setOfIds[i].ids[j];
-              if (_findId(val, lastPart, id)) {
-                res.value.push(queryDefs[i].queryId);
-                break;
-              }
+        const ids = kibiUtils.getValuesAtPath(hit._source, sourcePath);
+        // for each result set of a query
+        for (let i = 0; i < setOfIds.length; i++) {
+          // for each result in the set for that query
+          for (let j = 0; j < setOfIds[i].ids.length; j++) {
+            const id = setOfIds[i].ids[j];
+            if (_.contains(ids, id)) {
+              res.value.push(queryDefs[i].queryId);
+              break;
             }
           }
-        });
+        }
 
         return res;
       };
     });
   });
 };
-
-/**
- * FindId returns true if there is property with value id in the given val
- */
-function _findId(val, property, id) {
-  if (!val) {
-    return false;
-  }
-  if (val.constructor === Object) {
-    if (val.hasOwnProperty(property)) {
-      if (!val[property]) {
-        return false;
-      }
-      if (val[property] === id) {
-        return true;
-      } else if (val[property].constructor === Array) {
-        for (var i = 0; i < val[property].length; i++) {
-          if (val[property][i] === id) {
-            return true;
-          }
-        }
-      }
-    }
-  } else if (val.constructor === Array) {
-    for (var vali = 0; vali < val.length; vali++) {
-      if (_findId(val[vali], property, id)) {
-        return true;
-      }
-    }
-  } else {
-    throw new Error('Unknown object: ' + val);
-  }
-  return false;
-}

@@ -1,61 +1,26 @@
-var src = require('requirefrom')('src');
-var expect = require('expect.js');
-var util = require('util');
-var format = util.format;
-
-var KbnServer = src('server/KbnServer');
-var fromRoot = src('utils/fromRoot');
-var rp = require('request-promise'); // kibi: added by kibi
-var url = require('url');  // kibi: added by kibi
+const expect = require('expect.js');
+const { format } = require('util');
+const requirefrom = require('requirefrom');
+const kbnTestServer = requirefrom('test')('utils/kbn_server');
+const fromRoot = require('../../../../utils/fromRoot');
 
 describe('plugins/elasticsearch', function () {
   describe('routes', function () {
 
-    var kbnServer;
+    let kbnServer;
 
     before(function () {
-      kbnServer = new KbnServer({
-        server: {
-          autoListen: false,
-          xsrf: {
-            disableProtection: true
-          }
-        },
-        logging: { quiet: true },
+      this.timeout(60000); // kibi: increased timeout for slower machines
+
+      kbnServer = kbnTestServer.createServer({
         plugins: {
           scanDirs: [
             fromRoot('src/plugins')
           ]
-        },
-        optimize: {
-          enabled: false
-        },
-        elasticsearch: {
-          url: 'http://localhost:9210'
         }
       });
-
-      return kbnServer.ready().then(function () {
-        // kibi: added by kibi to make sure that there is no kibi index when this tests are run
-        // here make sure that .kibi index does not exists
-        return new Promise(function (fulfill, reject) {
-          rp({
-            method: 'DELETE',
-            uri: url.parse('http://localhost:9210/' + kbnServer.server.config().get('kibana.index') + '/'),
-            json: true,
-            headers: {
-              'content-type': 'application/json'
-            },
-            timeout: 1000
-          }).then(function () {
-            fulfill(true);
-          }).catch(function (err) {
-            // error here means that there was not kibi index - so all fine
-            fulfill(true);
-          });
-        });
-        // kibi: end
-      });
+      return kbnServer.ready()
+      .then(() => kbnServer.server.plugins.elasticsearch.waitUntilReady());
     });
 
 
@@ -64,15 +29,14 @@ describe('plugins/elasticsearch', function () {
     });
 
 
-    function testRoute(options) {
+    function testRoute(options, statusCode = 200) {
       if (typeof options.payload === 'object') {
         options.payload = JSON.stringify(options.payload);
       }
 
-      var statusCode = options.statusCode || 200;
       describe(format('%s %s', options.method, options.url), function () {
         it('should return ' + statusCode, function (done) {
-          kbnServer.server.inject(options, function (res) {
+          kbnTestServer.makeRequest(kbnServer, options, function (res) {
             try {
               expect(res.statusCode).to.be(statusCode);
               done();
@@ -97,10 +61,18 @@ describe('plugins/elasticsearch', function () {
 
     testRoute({
       method: 'POST',
-      url: '/elasticsearch/.kibi',
-      payload: {settings: { number_of_shards: 1 }},
-      statusCode: 200
-    });
+      url: '/elasticsearch/.kibi'
+    }, 405);
+
+    testRoute({
+      method: 'PUT',
+      url: '/elasticsearch/.kibi'
+    }, 405);
+
+    testRoute({
+      method: 'DELETE',
+      url: '/elasticsearch/.kibi'
+    }, 405);
 
     testRoute({
       method: 'GET',
@@ -110,9 +82,8 @@ describe('plugins/elasticsearch', function () {
     testRoute({
       method: 'POST',
       url: '/elasticsearch/.kibi/_bulk',
-      payload: '{}',
-      statusCode: 400
-    });
+      payload: '{}'
+    }, 400);
 
     testRoute({
       method: 'POST',

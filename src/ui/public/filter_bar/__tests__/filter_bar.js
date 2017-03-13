@@ -1,24 +1,24 @@
-var angular = require('angular');
-var _ = require('lodash');
-var $ = require('jquery');
-var ngMock = require('ngMock');
-var expect = require('expect.js');
-var sinon = require('sinon');
+let angular = require('angular');
+let _ = require('lodash');
+let $ = require('jquery');
+let ngMock = require('ngMock');
+let expect = require('expect.js');
+let sinon = require('sinon');
 
 require('ui/filter_bar');
-var mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
-var MockState = require('fixtures/mock_state');
+let mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
+let MockState = require('fixtures/mock_state');
 
 describe('Filter Bar Directive', function () {
-  var $rootScope;
-  var $compile;
-  var $timeout;
-  var Promise;
-  var appState;
-  var queryFilter;
-  var mapFilter;
-  var $el;
-  var $scope;
+  let $rootScope;
+  let $compile;
+  let $timeout;
+  let Promise;
+  let appState;
+  let queryFilter;
+  let mapFilter;
+  let $el;
+  let $scope;
   // require('testUtils/noDigestPromises').activateForSuite();
 
   beforeEach(ngMock.module('kibana/global_state', function ($provide) {
@@ -31,7 +31,17 @@ describe('Filter Bar Directive', function () {
     // load the application
     ngMock.module('kibana', function ($provide) {
       $provide.constant('kbnDefaultAppId', '');
-      $provide.constant('kibiDefaultDashboardId', '');
+      $provide.constant('kibiDefaultDashboardTitle', '');
+      $provide.constant('elasticsearchPlugins', ['siren-join']);
+
+      $provide.service('kibiState', function () {
+        return new MockState({
+          _getCurrentDashboardId: _.noop,
+          isSelectedEntityDisabled: _.constant(false),
+          getEntityURI: _.noop
+        });
+      });
+
       $provide.service('$route', function () {
         return {
           reload: _.noop
@@ -39,12 +49,12 @@ describe('Filter Bar Directive', function () {
       });
     });
 
-    ngMock.module('ui/kibi/helpers/kibi_state_helper/services/saved_sessions', function ($provide) {
-      $provide.service('savedSessions', (Promise) => mockSavedObjects(Promise)('savedSession'));
+    ngMock.module('ui/kibi/helpers/kibi_session_helper/services/saved_sessions', function ($provide) {
+      $provide.service('savedSessions', (Promise, Private) => mockSavedObjects(Promise, Private)('savedSession'));
     });
 
     ngMock.module('queries_editor/services/saved_queries', function ($provide) {
-      $provide.service('savedQueries', (Promise) => mockSavedObjects(Promise)('savedQueries'));
+      $provide.service('savedQueries', (Promise, Private) => mockSavedObjects(Promise, Private)('savedQueries'));
     });
 
     ngMock.module('kibana/courier', function ($provide) {
@@ -52,21 +62,20 @@ describe('Filter Bar Directive', function () {
     });
 
     ngMock.module('discover/saved_searches', function ($provide) {
-      $provide.service('savedSearches', (Promise) => mockSavedObjects(Promise)('savedSearch'));
+      $provide.service('savedSearches', (Promise, Private) => mockSavedObjects(Promise, Private)('savedSearch'));
     });
 
     ngMock.module('app/dashboard', function ($provide) {
-      $provide.service('savedDashboards', (Promise) => mockSavedObjects(Promise)('savedDashboard'));
+      $provide.service('savedDashboards', (Promise, Private) => mockSavedObjects(Promise, Private)('savedDashboard'));
     });
 
-    ngMock.inject(function (Private, $injector, _$rootScope_, _$compile_, _$timeout_) {
+    ngMock.inject(function (Private, $injector, _$rootScope_, _$compile_) {
       $rootScope = _$rootScope_;
       $compile = _$compile_;
-      $timeout = _$timeout_;
       Promise = $injector.get('Promise');
       mapFilter = Private(require('ui/filter_bar/lib/mapFilter'));
 
-      var queryFilter = Private(require('ui/filter_bar/query_filter'));
+      let queryFilter = Private(require('ui/filter_bar/query_filter'));
       queryFilter.getFilters = function () {
         return appState.filters;
       };
@@ -81,7 +90,7 @@ describe('Filter Bar Directive', function () {
         $scope = $el.isolateScope();
       });
 
-      var off = $rootScope.$on('filterbar:updated', function () {
+      let off = $rootScope.$on('filterbar:updated', function () {
         off();
         // force a nextTick so it continues *after* the $digest loop completes
         setTimeout(done, 0);
@@ -99,7 +108,8 @@ describe('Filter Bar Directive', function () {
         meta: {
           index: 'logstash-*',
           alias: '123 articles',
-          alias_tmpl: '$COUNT articles'
+          alias_tmpl: '$COUNT articles',
+          buttons: []
         },
         join_sequence: {
           reverse: _.noop
@@ -144,7 +154,7 @@ describe('Filter Bar Directive', function () {
     ])());
 
     it('should render all the filters in state', function () {
-      var filters = $el.find('.filter');
+      let filters = $el.find('.filter');
       expect(filters).to.have.length(5);
       expect($(filters[0]).find('span')[0].innerHTML).to.equal('_type:');
       expect($(filters[0]).find('span')[1].innerHTML).to.equal('"apache"');
@@ -157,7 +167,7 @@ describe('Filter Bar Directive', function () {
     });
 
     it('should be able to set an alias', function () {
-      var filter = $el.find('.filter')[4];
+      let filter = $el.find('.filter')[4];
       expect($(filter).find('span')[0].innerHTML).to.equal('foo');
     });
 

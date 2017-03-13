@@ -1,15 +1,15 @@
-var RouteManager = require('ui/routes/RouteManager');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
+let RouteManager = require('ui/routes/RouteManager');
+let expect = require('expect.js');
+let ngMock = require('ngMock');
 
-var wrapRouteWithPrep = require('ui/routes/wrapRouteWithPrep');
-var Promise = require('bluebird');
-var _ = require('lodash');
-var stub = require('auto-release-sinon').stub;
+let wrapRouteWithPrep = require('ui/routes/wrapRouteWithPrep');
+let Promise = require('bluebird');
+let _ = require('lodash');
+let stub = require('auto-release-sinon').stub;
 
 require('ui/private');
 
-var routes;
+let routes;
 
 describe('wrapRouteWithPrep fn', function () {
   require('testUtils/noDigestPromises').activateForSuite();
@@ -18,20 +18,20 @@ describe('wrapRouteWithPrep fn', function () {
     routes = new RouteManager();
   });
 
-  var SchedulingTest = function (opts) {
+  let SchedulingTest = function (opts) {
     opts = opts || {};
 
-    var delaySetup = opts.delayUserWork ? 0 : 50;
-    var delayUserWork = opts.delayUserWork ? 50 : 0;
+    let delaySetup = opts.delayUserWork ? 0 : 50;
+    let delayUserWork = opts.delayUserWork ? 50 : 0;
 
     return function () {
       ngMock.module('kibana', 'kibana/notify');
-      var setupComplete = false;
-      var userWorkComplete = false;
-      var route;
-      var Private;
-      var Promise;
-      var $injector;
+      let setupComplete = false;
+      let userWorkComplete = false;
+      let route;
+      let Private;
+      let Promise;
+      let $injector;
 
       ngMock.inject(function ($rootScope, _Private_, _Promise_, _$injector_) {
         Private = _Private_;

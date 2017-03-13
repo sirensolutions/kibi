@@ -12,8 +12,32 @@
   }
 }
 
-.query_editor .table-condensed {
-  margin-bottom: 0;
+.query_editor {
+  .html_preview_content {
+    padding:4px;
+    margin-top:4px;
+    border: 1px solid #cccccc;
+    padding: 4px;
+    overflow: auto;
+  }
+  .json_preview_content {
+    margin-top: 4px;
+  }
+  .help-section {
+    width:50%;
+    float:left;
+    margin-top:10px;
+    table thead tr th {
+      padding-top: 0;
+      padding-bottom: 5px;
+    }
+  }
+  .table-condensed {
+    margin-bottom: 0;
+  }
+  .star_detected {
+    color:orange;
+  }
 }
 
 .queries-settings .btn {
@@ -88,17 +112,4 @@
 }
 .query_editor .half:first-child {
   margin-left: 0;
-}
-
-.query_editor {
-  .html_preview_content {
-    padding:4px;
-    margin-top:4px;
-    border: 1px solid #cccccc;
-    padding: 4px;
-    overflow: auto;
-  }
-  .json_preview_content {
-    margin-top: 4px;
-  }
 }

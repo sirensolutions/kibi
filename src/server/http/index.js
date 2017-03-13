@@ -1,3 +1,6 @@
+import versionCheckMixin from './version_check';
+import { shortUrlAssertValid } from './short_url_assert_valid';
+
 module.exports = function (kbnServer, server, config) {
   let _ = require('lodash');
   let fs = require('fs');
@@ -11,9 +14,10 @@ module.exports = function (kbnServer, server, config) {
   server = kbnServer.server = new Hapi.Server();
 
   const shortUrlLookup = require('./short_url_lookup')(server);
+  kbnServer.mixin(require('./register_hapi_plugins'));
 
   // Create a new connection
-  var connectionOptions = {
+  let connectionOptions = {
     host: config.get('server.host'),
     port: config.get('server.port'),
     state: {
@@ -150,10 +154,10 @@ module.exports = function (kbnServer, server, config) {
       if (path === '/' || path.charAt(path.length - 1) !== '/') {
         return reply(Boom.notFound());
       }
-
+      const pathPrefix = config.get('server.basePath') ? `${config.get('server.basePath')}/` : '';
       return reply.redirect(format({
         search: req.url.search,
-        pathname: path.slice(0, -1),
+        pathname: pathPrefix + path.slice(0, -1),
       }))
       .permanent(true);
     }
@@ -165,6 +169,7 @@ module.exports = function (kbnServer, server, config) {
     handler: async function (request, reply) {
       try {
         const url = await shortUrlLookup.getUrl(request.params.urlId);
+        shortUrlAssertValid(url);
         reply().redirect(config.get('server.basePath') + url);
       } catch (err) {
         reply(err);
@@ -177,6 +182,7 @@ module.exports = function (kbnServer, server, config) {
     path: '/shorten',
     handler: async function (request, reply) {
       try {
+        shortUrlAssertValid(request.payload.url);
         const urlId = await shortUrlLookup.generateUrlId(request.payload.url);
         reply(urlId);
       } catch (err) {
@@ -184,6 +190,8 @@ module.exports = function (kbnServer, server, config) {
       }
     }
   });
+
+  kbnServer.mixin(versionCheckMixin);
 
   return kbnServer.mixin(require('./xsrf'));
 };

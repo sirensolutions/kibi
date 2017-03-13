@@ -1,7 +1,7 @@
-var _ = require('lodash');
-var minimatch = require('minimatch');
+const _ = require('lodash');
+const minimatch = require('minimatch');
 
-var UiAppCollection = require('./UiAppCollection');
+const UiAppCollection = require('./UiAppCollection');
 
 class UiExports {
   constructor({ urlBasePath }) {
@@ -11,15 +11,16 @@ class UiExports {
     this.exportConsumer = _.memoize(this.exportConsumer);
     this.consumers = [];
     this.bundleProviders = [];
+    this.defaultInjectedVars = [];
   }
 
   consumePlugin(plugin) {
     plugin.apps = new UiAppCollection(this);
 
-    var types = _.keys(plugin.uiExportsSpecs);
+    const types = _.keys(plugin.uiExportsSpecs);
     if (!types) return false;
 
-    var unkown = _.reject(types, this.exportConsumer, this);
+    const unkown = _.reject(types, this.exportConsumer, this);
     if (unkown.length) {
       throw new Error('unknown export types ' + unkown.join(', ') + ' in plugin ' + plugin.id);
     }
@@ -40,7 +41,7 @@ class UiExports {
   exportConsumer(type) {
     for (let consumer of this.consumers) {
       if (!consumer.exportConsumer) continue;
-      let fn = consumer.exportConsumer(type);
+      const fn = consumer.exportConsumer(type);
       if (fn) return fn;
     }
 
@@ -49,10 +50,16 @@ class UiExports {
       case 'apps':
         return (plugin, specs) => {
           for (let spec of [].concat(specs || [])) {
-            let app = this.apps.new(_.defaults({}, spec, {
+            const app = this.apps.new(_.defaults({}, spec, {
               id: plugin.id,
               urlBasePath: this.urlBasePath
             }));
+
+            plugin.extendInit((server, options) => { // eslint-disable-line no-loop-func
+              const wrapped = app.getInjectedVars;
+              app.getInjectedVars = () => wrapped.call(plugin, server, options);
+            });
+
             plugin.apps.add(app);
           }
         };
@@ -61,6 +68,7 @@ class UiExports {
       case 'fieldFormats':
       case 'spyModes':
       case 'chromeNavControls':
+      case 'navbarExtensions':
       case 'settingsSections':
       case 'hacks':
         return (plugin, spec) => {
@@ -78,13 +86,20 @@ class UiExports {
             this.aliases[adhocType] = _.union(this.aliases[adhocType] || [], spec);
           });
         };
+
+      case 'injectDefaultVars':
+        return (plugin, injector) => {
+          plugin.extendInit(async (server, options) => {
+            _.merge(this.defaultInjectedVars, await injector.call(plugin, server, options));
+          });
+        };
     }
   }
 
   find(patterns) {
-    var aliases = this.aliases;
-    var names = _.keys(aliases);
-    var matcher = _.partialRight(minimatch.filter, { matchBase: true });
+    const aliases = this.aliases;
+    const names = _.keys(aliases);
+    const matcher = _.partialRight(minimatch.filter, { matchBase: true });
 
     return _.chain(patterns)
     .map(function (pattern) {

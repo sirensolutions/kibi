@@ -1,14 +1,15 @@
-var expect = require('expect.js');
-var sinon = require('auto-release-sinon');
-var ngMock = require('ngMock');
-var jQuery = require('jquery');
-var Promise = require('bluebird');
-var noDigestPromises = require('testUtils/noDigestPromises');
-var globalState;
-var $scope;
+const chrome = require('ui/chrome');
+let expect = require('expect.js');
+let sinon = require('auto-release-sinon');
+let ngMock = require('ngMock');
+let jQuery = require('jquery');
+let Promise = require('bluebird');
+let noDigestPromises = require('testUtils/noDigestPromises');
+let kibiState;
+let $scope;
 
-var mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
-var fakeSavedDatasources = [
+let mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
+let savedDatasources = [
   {
     id: 'ds1',
     title: 'ds1 datasource',
@@ -28,15 +29,19 @@ var fakeSavedDatasources = [
 
 describe('Kibi Controllers', function () {
 
-  function init(options) {
-    ngMock.module('kibana');
+  function init({ hits, snippet, snippetError, query, datasourceType }) {
+    ngMock.module('kibana', function ($provide) {
+      $provide.constant('kbnDefaultAppId', '');
+      $provide.constant('kibiDefaultDashboardTitle', '');
+      $provide.constant('elasticsearchPlugins', ['siren-join']);
+    });
 
     ngMock.module('kibi_datasources/services/saved_datasources', function ($provide) {
-      $provide.service('savedDatasources', (Promise) => mockSavedObjects(Promise)('savedDatasources', fakeSavedDatasources));
+      $provide.service('savedDatasources', (Promise, Private) => mockSavedObjects(Promise, Private)('savedDatasources', savedDatasources));
     });
 
     ngMock.module('app/visualize', function ($provide) {
-      $provide.service('savedVisualizations', (Promise) => mockSavedObjects(Promise)('savedVisualizations', options.hits));
+      $provide.service('savedVisualizations', (Promise, Private) => mockSavedObjects(Promise, Private)('savedVisualizations', hits));
     });
 
     ngMock.module('kibana/query_engine_client', function ($provide) {
@@ -46,10 +51,10 @@ describe('Kibi Controllers', function () {
             return Promise.resolve();
           },
           getQueriesHtmlFromServer: function () {
-            var resp = {
+            let resp = {
               data: {
-                snippets: options.snippet ? [ options.snippet ] : [],
-                error: options.snippetError
+                snippets: snippet ? [ snippet ] : [],
+                error: snippetError
               }
             };
             return Promise.resolve(resp);
@@ -58,20 +63,23 @@ describe('Kibi Controllers', function () {
       });
     });
 
-    ngMock.inject(function ($rootScope, $controller, _globalState_) {
-      var fakeRoute = {
-        current: {
-          locals: {}
-        }
-      };
-      fakeRoute.current.locals.query = options.query;
+    ngMock.inject(function ($rootScope, $controller, _kibiState_) {
+      sinon.stub(chrome, 'onSettingsTab').returns(true);
 
-      globalState = _globalState_;
+      kibiState = _kibiState_;
+      sinon.stub(kibiState, 'getEntityURI').returns('entity1');
+
       $scope = $rootScope;
-      $scope.datasourceType = options.datasourceType;
+      $scope.datasourceType = datasourceType;
       $controller('QueriesEditor', {
         $scope: $scope,
-        $route: fakeRoute,
+        $route: {
+          current: {
+            locals: {
+              query: query
+            }
+          }
+        },
         $element: jQuery('<div><form name="objectForm" class="ng-valid"></div>')
       });
       $scope.$digest();
@@ -82,44 +90,84 @@ describe('Kibi Controllers', function () {
 
     noDigestPromises.activateForSuite();
 
-    it('should set kibi-table-jade as the default template if not set', function () {
-      var query = {
-        title: 'ahah'
-      };
-      init({ query: query });
-      expect(query._previewTemplateId).to.be('kibi-table-jade');
-    });
-
     it('should enable the entity URI', function () {
-      var query = {
-        id: '1ahah', // starts with 1 to indicate it is dependent on an entity
+      let query = {
+        id: 'ahah',
         title: 'ahah',
-        _previewTemplateId: 'mytmpl',
-        st_activationQuery: '@doc[id]@'
+        activationQuery: '@doc[id]@'
       };
       init({ query: query });
-      expect(query._previewTemplateId).to.be('mytmpl');
       expect($scope.holder.entityURIEnabled).to.be(true);
     });
 
     it('should detect the star', function () {
-      var query = {
+      let query = {
         title: 'ahah',
-        _previewTemplateId: 'mytmpl',
-        st_activationQuery: 'select * { ?s :name ?o }'
+        activationQuery: 'select * { ?s :name ?o }'
       };
       init({ query: query });
-      expect(query._previewTemplateId).to.be('mytmpl');
       expect($scope.holder.entityURIEnabled).to.be(false);
       expect($scope.starDetectedInAQuery).to.be(true);
     });
 
+    it('should not detect the subselect star for SPARQL', function () {
+      let query = {
+        title: 'ahah',
+        activationQuery: 'SELECT ?id { { SELECT * { ?s :name ?o } }}'
+      };
+      init({ query: query });
+      expect($scope.holder.entityURIEnabled).to.be(false);
+      expect($scope.starDetectedInAQuery).to.be(false);
+    });
+
+    it('should detect the star for SQL query', function () {
+      let query = {
+        title: 'ahah',
+        activationQuery: 'select * from company limit 10'
+      };
+      init({ query: query });
+      expect($scope.holder.entityURIEnabled).to.be(false);
+      expect($scope.starDetectedInAQuery).to.be(true);
+    });
+
+    it('should not detect the subselect star for SQL', function () {
+      let query = {
+        title: 'ahah',
+        activationQuery: 'select id from ( select * from company limit 100 ) limit 10'
+      };
+      init({ query: query });
+      expect($scope.holder.entityURIEnabled).to.be(false);
+      expect($scope.starDetectedInAQuery).to.be(false);
+    });
+
+    it('should detect comment lines for activationQuery', function () {
+      let query = {
+        title: 'commented lines',
+        activationQuery: 'select * \n' +
+                         'from test \n' +
+                         '/* where name \n' + '= \'@doc[_source][github_id]@\' */'
+      };
+      init({ query: query });
+      expect($scope.holder.entityURIEnabled).to.be(false);
+    });
+
+    it('should detect comment lines for resultQuery', function () {
+      let query = {
+        title: 'commented lines',
+        resultQuery: 'select * \n' +
+                     'from test \n' +
+                     '/* where name \n' + '= \'@doc[_source][github_id]@\' */'
+      };
+      init({ query: query });
+      expect($scope.holder.entityURIEnabled).to.be(false);
+    });
+
     it('should submit the query', function (done) {
-      var query = {
+      let query = {
         title: '123',
         save: sinon.stub().returns(Promise.resolve('queryid'))
       };
-      var snippet = {
+      let snippet = {
         john: 'connor',
         html: 'are you there'
       };
@@ -132,11 +180,11 @@ describe('Kibi Controllers', function () {
         expect($scope.holder.htmlPreview).to.be('are you there');
         expect($scope.holder.jsonPreview).to.be.ok();
         done();
-      });
+      }).catch(done);
     });
 
     it('should display an error on submit if the query is not correct', function (done) {
-      var query = {
+      let query = {
         title: '123',
         save: sinon.stub().returns(Promise.resolve('queryid'))
       };
@@ -149,140 +197,34 @@ describe('Kibi Controllers', function () {
         expect($scope.holder.jsonPreview).to.be.ok();
         expect($scope.holder.htmlPreview).to.match(/Error/);
         done();
-      });
-    });
-
-    it('should delete the query 123', function (done) {
-      var query = {
-        id: '123',
-        delete: sinon.stub().returns(Promise.resolve({}))
-      };
-      var hits = [
-        {
-          title: 'john',
-          visState: '{"params":{"queryIds":[{"id":"","queryId":"another one","queryVariableName":"competitor"}]}}',
-          description: '',
-          savedSearchId: 'Articles',
-          version: 1,
-          kibanaSavedObjectMeta: {
-            searchSourceJSON: '{"filter":[]}'
-          }
-        }
-      ];
-      var snippet = {
-        john: 'connor',
-        html: 'are you there'
-      };
-
-      sinon.stub(window, 'confirm').returns(true);
-
-      init({ query: query, snippet: snippet, hits: hits });
-
-      $scope.delete().then(function () {
-        expect(query.delete.callCount).to.be(1);
-        done();
       }).catch(done);
-    });
-
-    it('should delete the query even if the query id is in the visualisation title', function (done) {
-      var query = {
-        id: '123',
-        delete: sinon.stub().returns(Promise.resolve({}))
-      };
-      var hits = [
-        {
-          title: 'got you 123',
-          visState: '{"params":{"queryIds":[{"id":"","queryId":"another one","queryVariableName":"competitor"}]}}',
-          description: '',
-          savedSearchId: 'Articles',
-          version: 1,
-          kibanaSavedObjectMeta: {
-            searchSourceJSON: '{"filter":[]}'
-          }
-        }
-      ];
-      var snippet = {
-        john: 'connor',
-        html: 'are you there'
-      };
-
-      sinon.stub(window, 'confirm').returns(true);
-
-      init({ query: query, snippet: snippet, hits: hits });
-
-      $scope.delete().then(function () {
-        expect(query.delete.callCount).to.be(1);
-        done();
-      }).catch(done);
-    });
-
-    it('should not delete the query if some visualisations still depend on it', function (done) {
-      var query = {
-        title: 'iron',
-        id: '123'
-      };
-      var hits = [
-        {
-          title: 'myvis',
-          visState: '{"params":{"queryIds":[{"id":"","queryId":"123","queryVariableName":"competitor"}]}}',
-          description: '',
-          savedSearchId: 'Articles',
-          version: 1,
-          kibanaSavedObjectMeta: {
-            searchSourceJSON: '{"filter":[]}'
-          }
-        }
-      ];
-      var snippet = {
-        john: 'connor',
-        html: 'are you there'
-      };
-      var stub = sinon.stub(window, 'alert', function () { return false; });
-
-      init({ query: query, snippet: snippet, hits: hits });
-
-      $scope.delete().then(function () {
-        expect(stub.callCount).to.be(1);
-        expect(stub.getCall(0).args[0]).to.match(/myvis/);
-        done();
-      }).catch(done);
-    });
-
-    it('should grab the selected document', function () {
-      var query = {
-        id: '123'
-      };
-      init({ query: query });
-
-      globalState.se = [ 'grishka' ];
-      $scope.$emit('kibi:selectedEntities:changed', '');
     });
 
     it('should update the REST datasource', function () {
       noDigestPromises.deactivate();
-      var query = {};
+      let query = {};
       init({ query: query, datasourceType: '123' });
 
-      var stub = sinon.spy($scope, 'preview');
+      let stub = sinon.spy($scope, 'preview');
       expect($scope.datasourceType).to.be('123');
-      query.st_datasourceId = 'ds3';
+      query.datasourceId = 'ds3';
       $scope.$digest();
       expect($scope.datasourceType).to.be('rest');
-      expect(query._previewTemplateId).to.be('kibi-json-jade');
+      expect($scope.preview.templateId).to.be('kibi-json-jade');
       expect(stub.called).to.be(true);
     });
 
     it('should update the datasource type along with the datasource ID', function () {
       noDigestPromises.deactivate();
-      var query = {};
+      let query = {};
       init({ query: query, datasourceType: '123' });
 
-      var stub = sinon.spy($scope, 'preview');
+      let stub = sinon.spy($scope, 'preview');
       expect($scope.datasourceType).to.be('123');
-      query.st_datasourceId = 'ds1';
+      query.datasourceId = 'ds1';
       $scope.$digest();
       expect($scope.datasourceType).to.be('sparql_http');
-      expect(query._previewTemplateId).to.be('kibi-table-jade');
+      expect($scope.preview.templateId).to.be('kibi-table-jade');
       expect(stub.called).to.be(true);
     });
   });

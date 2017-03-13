@@ -5,11 +5,23 @@ var $ = require('jquery');
 var $scope;
 var $el;
 
+var mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
+
 describe('Kibi Controllers', function () {
 
-  function init(dashboardGroup) {
-    ngMock.module('apps/settings');
+  function init({ dashboardGroup, savedDashboardGroups }) {
+    ngMock.module('kibana', function ($provide) {
+      $provide.constant('kbnDefaultAppId', '');
+      $provide.constant('kibiDefaultDashboardTitle', '');
+      $provide.constant('elasticsearchPlugins', ['siren-join']);
+    });
+
     ngMock.module('app/dashboard', function ($provide) {
+
+      $provide.service('savedDashboardGroups', (Promise, Private) => {
+        return mockSavedObjects(Promise, Private)('savedDashboardGroups', savedDashboardGroups);
+      });
+
       $provide.service('savedDashboards', function (Promise) {
         return {
           get: function (id) {
@@ -29,7 +41,7 @@ describe('Kibi Controllers', function () {
                   id: 'Dogs'
                 }
               ]
-            );
+              );
           }
         };
       });
@@ -57,18 +69,19 @@ describe('Kibi Controllers', function () {
 
   describe('dashboard groups editor', function () {
     it('should retrieve the title of the dashboard from its id', function () {
-      var dashboardGroup = {
-        dashboards: [
-          {
-            id: 'Dogs'
-          },
-          {
-            id: 'Cats'
-          }
-        ]
-      };
+      init({
+        dashboardGroup : {
+          dashboards: [
+            {
+              id: 'Dogs'
+            },
+            {
+              id: 'Cats'
+            }
+          ]
+        }
+      });
 
-      init(dashboardGroup);
       $scope.$digest();
 
       expect($scope.dashboardGroup).to.be.ok();
@@ -78,19 +91,20 @@ describe('Kibi Controllers', function () {
     });
 
     it('should only retrieve the title of the dashboard if it is missing', function () {
-      var dashboardGroup = {
-        dashboards: [
-          {
-            id: 'Dogs',
-            title: 'my bad one'
-          },
-          {
-            id: 'Cats'
-          }
-        ]
-      };
+      init({
+        dashboardGroup :{
+          dashboards: [
+            {
+              id: 'Dogs',
+              title: 'my bad one'
+            },
+            {
+              id: 'Cats'
+            }
+          ]
+        }
+      });
 
-      init(dashboardGroup);
       $scope.$digest();
 
       expect($scope.dashboardGroup).to.be.ok();
@@ -100,15 +114,16 @@ describe('Kibi Controllers', function () {
     });
 
     it('should save the dashboardGroup on submit', function (done) {
-      var dashboardGroup = {
-        dashboards: [
-          {
-            id: 'Dogs'
-          }
-        ]
-      };
+      init({
+        dashboardGroup: {
+          dashboards: [
+            {
+              id: 'Dogs'
+            }
+          ]
+        }
+      });
 
-      init(dashboardGroup);
       $scope.submit();
       $scope.$on('kibi:dashboardgroup:changed', function (event, groupId) {
         expect(groupId).to.be('123');
@@ -117,7 +132,89 @@ describe('Kibi Controllers', function () {
 
       $scope.$digest();
 
-      expect(dashboardGroup.save.called).to.be.ok();
+      expect($scope.dashboardGroup.save.called).to.be.ok();
+    });
+
+    it('forbid assigning a dashboard to more than one group', function () {
+
+      init({
+        dashboardGroup: {
+          dashboards: [
+            {
+              id: 'About',
+              title: 'About'
+            }
+          ]
+        },
+        savedDashboardGroups: [
+          {
+            dashboards: [
+              {
+                id: 'About',
+                title: 'About'
+              },
+              {
+                id: 'Companies',
+                title: 'Companies'
+              }
+            ]
+          }
+        ]
+      });
+
+      $scope.$digest();
+
+      expect($scope.filter({ value: 'About' })).to.be(true);
+      expect($scope.filter({ value: 'Companies' })).to.be(true);
+      expect($scope.filter({ value: 'Articles' })).to.be(false);
+    });
+
+    it('forbid assigning a dashboard to more than one group for two dashboard groups', function () {
+
+      init({
+        dashboardGroup: {
+          dashboards: [
+            {
+              id: 'About',
+              title: 'About'
+            },
+          ]
+        },
+        savedDashboardGroups: [
+          {
+            dashboards: [
+              {
+                id: 'About',
+                title: 'About'
+              },
+              {
+                id: 'Companies',
+                title: 'Companies'
+              }
+            ]
+          },
+          {
+            dashboards: [
+              {
+                id: 'Investors',
+                title: 'Investors'
+              },
+              {
+                id: 'Articles detailed per source',
+                title: 'Articles detailed per source'
+              }
+            ]
+          }
+        ]
+      });
+
+      $scope.$digest();
+
+      expect($scope.filter({ value: 'About' })).to.be(true);
+      expect($scope.filter({ value: 'Companies' })).to.be(true);
+      expect($scope.filter({ value: 'Articles' })).to.be(false);
+      expect($scope.filter({ value: 'Investors' })).to.be(true);
+      expect($scope.filter({ value: 'Articles detailed per source' })).to.be(true);
     });
   });
 });

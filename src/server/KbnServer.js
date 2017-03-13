@@ -10,9 +10,9 @@ module.exports = class KbnServer {
   constructor(settings) {
     this.name = pkg.name;
     this.version = pkg.version;
-    this.kibiVersion = pkg.kibiVersion; // kibi: added to manage kibi version
-    this.kibiKibanaAnnouncement = pkg.kibiKibanaAnnouncement; // kibi: added by kibi
-    this.kibiEnterpriseEnabled = pkg.kibiEnterpriseEnabled; // kibi: added by kibi
+    this.kibiVersion = pkg.kibi_version; // kibi: added to manage kibi version
+    this.kibiKibanaAnnouncement = pkg.kibi_kibana_announcement; // kibi: added by kibi
+    this.kibiEnterpriseEnabled = pkg.kibi_enterprise_enabled; // kibi: added by kibi
     this.build = pkg.build || false;
     this.rootDir = rootDir;
     this.settings = settings || {};
@@ -21,6 +21,7 @@ module.exports = class KbnServer {
       require('./config/setup'), // sets this.config, reads this.settings
       require('./http'), // sets this.server
       require('./logging'),
+      require('./warnings'),
       require('./status'),
 
       // find plugins and set this.plugins

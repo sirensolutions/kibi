@@ -1,14 +1,15 @@
 describe('Kibi Controllers', function () {
   var $scope;
+  var sinon = require('auto-release-sinon');
   var Promise = require('bluebird');
   var ngMock = require('ngMock');
   var expect = require('expect.js');
-  var globalState;
 
   function init(options) {
     ngMock.module('kibana', function ($provide) {
       $provide.constant('kbnDefaultAppId', '');
-      $provide.constant('kibiDefaultDashboardId', '');
+      $provide.constant('kibiDefaultDashboardTitle', '');
+      $provide.constant('elasticsearchPlugins', ['siren-join']);
     });
 
     ngMock.module('apps/settings');
@@ -32,13 +33,13 @@ describe('Kibi Controllers', function () {
       });
     });
 
-    ngMock.inject(function ($rootScope, $controller, _globalState_) {
-      globalState = _globalState_;
+    ngMock.inject(function (kibiState, $rootScope, $controller) {
+      sinon.stub(kibiState, 'getEntityURI').returns('entity1');
       $scope = $rootScope;
       $scope.vis = {
         params: options.params
       };
-      $controller('KibiQueryViewerVisController', { $scope: $scope });
+      $controller('KibiQueryViewerVisController', { $scope });
       $scope.$digest();
     });
   }
@@ -55,7 +56,7 @@ describe('Kibi Controllers', function () {
 
     it('should display no result', function (done) {
       var params = {
-        queryOptions: [ 123 ]
+        queryDefinitions: [ 123 ]
       };
 
       init({ params: params });
@@ -63,12 +64,12 @@ describe('Kibi Controllers', function () {
         expect($scope.holder.html).to.be('No result');
         expect($scope.holder.activeFetch).to.be(false);
         done();
-      });
+      }).catch(done);
     });
 
     it('should display the template', function (done) {
       var params = {
-        queryOptions: [
+        queryDefinitions: [
           {
             queryId: 123
           }
@@ -88,12 +89,12 @@ describe('Kibi Controllers', function () {
         expect($scope.holder.html).to.contain('grishka');
         expect($scope.holder.activeFetch).to.be(false);
         done();
-      });
+      }).catch(done);
     });
 
     it('should warn that the query is not activated', function (done) {
       var params = {
-        queryOptions: [
+        queryDefinitions: [
           {
             queryId: 123
           }

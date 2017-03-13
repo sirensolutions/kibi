@@ -29,7 +29,6 @@ SQLiteQuery.prototype = _.create(AbstractQuery.prototype, {
 SQLiteQuery.prototype.openConnection = function () {
   var dbfile = this.config.datasource.datasourceClazz.datasource.datasourceParams.db_file_path;
   var modes  = this.config.datasource.datasourceClazz.datasource.datasourceParams.modes;
-  //TODO: how to pass one or more modes ??
 
   var timeout = this.config.datasource.datasourceClazz.datasource.datasourceParams.timeout;
   if (!timeout) {
@@ -53,7 +52,22 @@ SQLiteQuery.prototype.openConnection = function () {
       }
     }
 
-    var db = new sqlite3.Database(dbfile, sqlite3.OPEN_READONLY, function (error) {
+    var modeValue = 0;
+    _.each(modes, function (mode) {
+      switch (mode) {
+        case 'OPEN_READONLY':
+          modeValue = modeValue | sqlite3.OPEN_READONLY;
+          break;
+        case 'OPEN_READWRITE':
+          modeValue = modeValue | sqlite3.OPEN_READWRITE;
+          break;
+        case 'OPEN_CREATE':
+          modeValue = modeValue | sqlite3.OPEN_CREATE;
+          break;
+      }
+    });
+
+    var db = new sqlite3.Database(dbfile, modeValue, function (error) {
       if (error) {
         reject(self._augmentError(error));
         return;
@@ -102,7 +116,7 @@ SQLiteQuery.prototype.checkIfItIsRelevant = function (options) {
   var self = this;
 
   if (self._checkIfSelectedDocumentRequiredAndNotPresent(options)) {
-    self.logger.warn('No elasticsearch document selected while required by the sqlite activation query. [' + self.config.id + ']');
+    self.logger.warn('No elasticsearch document selected while required by the sqlite query. [' + self.config.id + ']');
     return Promise.resolve(false);
   }
   var uri = options.selectedDocuments && options.selectedDocuments.length > 0 ? options.selectedDocuments[0] : '';
@@ -149,11 +163,6 @@ SQLiteQuery.prototype.fetchResults = function (options, onlyIds, idVariableName)
   var start = new Date().getTime();
   var self = this;
 
-  // special case - we can not simply reject the Promise
-  // bacause this will cause the whole group of promises to be rejected
-  if (self._checkIfSelectedDocumentRequiredAndNotPresent(options)) {
-    return self._returnAnEmptyQueryResultsPromise('No data because the query require entityURI');
-  }
   // currently we use only single selected document
   var uri = options.selectedDocuments && options.selectedDocuments.length > 0 ? options.selectedDocuments[0] : '';
 

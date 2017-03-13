@@ -65,42 +65,48 @@ A Kibi restart is required to apply changes to kibi.yml configuration file.
 * drivername - e.g.: "org.postgresql.Driver"
 * libs - comma separated list of jars (they can be just filenames then it is asumend they are in libpath folder or they can have absolute paths to jars)
 
+ifeval::["{enterprise_enabled}" == "true"]
+
 *Kibi Tinkerpop3 [Enterprise Edition only]*
 
 NOTE: Kibi Tinkerpop3 datasource is available only in Kibi Enterprise Edition.
 
-* url - url of the Kibi Gremlin Server e.g.: http://localhost:8080/graph/query
+* url - url of the Kibi Gremlin Server e.g.: http://localhost:8080/graph/queryBatch
+
+endif::[]
 
 
 === Parameters encryption
 
-Sensitive datasource configuration elements like passwords
-are encrypted before they are stored in .kibi index.
-Make sure to change *datasource_encryption_key* in kibi.yml.
-To do it use scripts provided in **bin/** folder.
+Sensitive datasource parameters like passwords are encrypted before being
+stored in the `.kibi` index.
 
-Linux:
+Before creating datasources containing sensitive parameters, make sure to set
+a custom encryption key by running the `replace_encryption_key` command:
 
-```
-bin/replace_encryption_key.sh OLD_KEY ALGORITHM NEW_KEY PATH_TO_KIBI_YML
-```
+[source,bash]
+----
+bin/kibi replace_encryption_key [options] <current_key> <new_key> <new_cipher>
+----
 
-Windows:
+* **<current_key>** a base64 encoded string containing the current encryption key.
+* **<new_key>** a base64 encoded string containing the new encryption key.
+* **<new_cipher>** the cipher algorithm to use (currently only AES-GCM is supported).
 
-```
-bin\replace_encryption_key.bat OLD_KEY ALGORITHM NEW_KEY PATH_TO_KIBI_YML
-```
+The current encryption key can be read from the `kibi.yml` file in the
+`datasource_encryption_key` parameter.
 
-Where:
+Keys can have a length of 16, 24 or 32 bytes; a quick way to encode a plaintext
+string to base64 is to use the `base64` utility from the coreutils package:
 
-* **OLD_KEY** and **NEW_KEY** - a base64encoded string which contain a key which is either 16, 24, or 32 bytes long,
-e.g. if your key in plaintext is 32 bytes long string ```changemechangemechangemechangeme``` after base64 encoding
-it should be ```Y2hhbmdlbWVjaGFuZ2VtZWNoYW5nZW1lY2hhbmdlbWU=```
-* **ALGORITHM** - currently only AES-GCM is supported
-* **PATH_TO_KIBI_YML** - an absolute path to kibi.yml file
+[source,bash]
+----
+$ echo -n changemechangemechangemechangeme | base64
+Y2hhbmdlbWVjaGFuZ2VtZWNoYW5nZW1lY2hhbmdlbWU=
+----
 
-NOTE: Make sure to set the configuration file as readable only to the user running
-the Kibi process as it contains the *datasource_encryption_key*.
+NOTE: Make sure to set the configuration file as readable only by the user
+running the Kibi process.
 
 [[entity_selection]]
 === Datasource entity selection
@@ -220,8 +226,7 @@ Below is an example of configuration for a query named *Company Info* using
 a variable to get the value of property called *id* of currently selected entity
 In the example, _@doc[_source][id]@_ is replaced with an id taken from selected company.
 In the Selected Entity box we see that the selected company is
-from index: *company*, has a type: *Company* and has the id *AU9r0i2d0nSzQcsnt*
-
+from index: *company*, has a type: *Company* and has the id *AVgfaYQ0Q2VQXwxDgyfY*
 
 image::images/external_sources/query_table_var.png["SQL query with variables",align="center"]
 

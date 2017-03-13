@@ -10,7 +10,7 @@ function JdbcDatasourceDef(server, datasource) {
 util.inherits(JdbcDatasourceDef, AbstractDatasourceDef);
 
 JdbcDatasourceDef.prototype.getConnectionString = function () {
-  //TODO: what the string will be?
+  //TODO: / Kibi / what the string will be?
   return this.populateParameters('jdbc://${username}:${password}@${host}/${dbname}');
 };
 

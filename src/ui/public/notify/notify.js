@@ -1,23 +1,17 @@
 define(function (require) {
-  var _ = require('lodash');
-  var $ = require('jquery');
-  var modules = require('ui/modules');
-  var module = modules.get('kibana/notify');
-  var errors = require('ui/notify/errors');
-  var Notifier = require('kibie/notify/notifier');
-  var rootNotifier = new Notifier();
+  let _ = require('lodash');
+  let $ = require('jquery');
+  let modules = require('ui/modules');
+  let module = modules.get('kibana/notify');
+  let errors = require('ui/notify/errors');
+  let Notifier = require('kibie/notify/notifier');
+  let rootNotifier = new Notifier();
 
   require('ui/notify/directives');
+  require('ui/directives/truncated');
 
-  module.factory('createNotifier', function (config) {
+  module.factory('createNotifier', function () {
     return function (opts) {
-      // kibi: set the awesomeDemoMode and shieldAuthorizationWarning flag
-      if (!opts) {
-        opts = {};
-      }
-      opts.awesomeDemoMode = config.get('kibi:awesomeDemoMode');
-      opts.shieldAuthorizationWarning = config.get('kibi:shieldAuthorizationWarning');
-      // kibi: end
       return new Notifier(opts);
     };
   });
@@ -26,9 +20,36 @@ define(function (require) {
     return Notifier;
   });
 
-  module.run(function ($timeout) {
-    // provide alternate methods for setting timeouts, which will properly trigger digest cycles
-    Notifier.setTimerFns($timeout, $timeout.cancel);
+  // teach Notifier how to use angular interval services
+  module.run(function ($interval) {
+    Notifier.applyConfig({
+      setInterval: $interval,
+      clearInterval: $interval.cancel
+    });
+  });
+
+  module.run(function ($rootScope, $injector, kibiEnterpriseEnabled) {
+    if ($injector.has('config')) {
+      let configInitListener = $rootScope.$on('init:config', function () {
+        applyConfig();
+        configInitListener();
+      });
+
+      $rootScope.$on('change:config', applyConfig);
+
+      function applyConfig() {
+        const config = $injector.get('config');
+        Notifier.applyConfig({
+          // kibi: set the awesomeDemoMode and shieldAuthorizationWarning flag
+          awesomeDemoMode: config.get('kibi:awesomeDemoMode'),
+          shieldAuthorizationWarning: kibiEnterpriseEnabled ? config.get('kibi:shieldAuthorizationWarning') : true,
+          // kibi: end
+          errorLifetime: config.get('notifications:lifetime:error'),
+          warningLifetime: config.get('notifications:lifetime:warning'),
+          infoLifetime: config.get('notifications:lifetime:info')
+        });
+      }
+    }
   });
 
   /**
@@ -48,5 +69,4 @@ define(function (require) {
   };
 
   return rootNotifier;
-
 });

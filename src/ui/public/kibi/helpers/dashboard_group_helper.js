@@ -228,6 +228,11 @@ define(function (require) {
           // first iterate over existing groups
           _.each(respGroups.hits, function (group) {
 
+            // ignores empties dashboard objects inside a dashboard group
+            group.dashboards = _.filter(group.dashboards, function (dashboard) {
+              return dashboard.id !== undefined && dashboard.title !== undefined;
+            });
+
             // selected dashboard
             let selected;
             let dashboards = [];

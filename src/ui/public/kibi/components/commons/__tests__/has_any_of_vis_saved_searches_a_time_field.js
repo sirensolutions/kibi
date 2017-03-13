@@ -59,25 +59,25 @@ describe('Kibi Components', function () {
           kibiTimelineType1 = new TemplateVisType({
             name: 'kibi_timeline',
             template: '<div/>', // if not provided will throw an exception
-            requiresMultiSearch: true,
+            requiresMultiSearch: true
           });
 
           kibiTimelineType2 = new VislibVisType({
             name: 'kibi_timeline',
             template: '<div/>', // if not provided will throw an exception
-            requiresMultiSearch: true,
+            requiresMultiSearch: true
           });
 
           unsupportedType = new TemplateVisType({
             name: 'unsupported',
             template: '<div/>', // if not provided will throw an exception
-            requiresMultiSearch: true,
+            requiresMultiSearch: true
           });
 
           requiresMultiSearchFalseType = new TemplateVisType({
             name: 'pie',
             template: '<div/>', // if not provided will throw an exception
-            requiresMultiSearch: false,
+            requiresMultiSearch: false
           });
 
         });
@@ -86,7 +86,6 @@ describe('Kibi Components', function () {
       noDigestPromises.activateForSuite();
 
       describe('unsupported vis type', function () {
-
         it('should silently return false for unsupported vis type', function (done) {
           const vis = {
             type: unsupportedType
@@ -97,27 +96,13 @@ describe('Kibi Components', function () {
             done();
           }).catch(done);
         });
-
-        it('should throw an error when type is not an instance of TemplateVisType or VislibVisType', function (done) {
-          const vis = {
-            type: 'kibi_timeline' // valid vis but type should be a TemplateVisType
-          };
-
-          hasAnyOfVisSavedSearchesATimeField(vis).then(function (res) {
-            done('Should throw an error');
-          }).catch(function (err) {
-            expect(err.message).to.equal('vis.type should be an instance of TemplateVisType or VislibVisType');
-            done();
-          });
-        });
-
       });
 
-      describe('requiresMultiSearchFalseType (pie)', function () {
+      describe('requiresMultiSearch is false', function () {
 
         it('should return false if no timeFieldName', function (done) {
           const vis = {
-            type: requiresMultiSearchFalseType,
+            type: requiresMultiSearchFalseType
           };
           hasAnyOfVisSavedSearchesATimeField(vis).then(function (res) {
             expect(res).to.equal(false);
@@ -127,14 +112,13 @@ describe('Kibi Components', function () {
 
         it('should return true if there is timeFieldName', function (done) {
           const vis = {
-            type: requiresMultiSearchFalseType,
+            type: requiresMultiSearchFalseType
           };
           hasAnyOfVisSavedSearchesATimeField(vis, 'myDate').then(function (res) {
             expect(res).to.equal(true);
             done();
           }).catch(done);
         });
-
 
       });
 
@@ -214,7 +198,6 @@ describe('Kibi Components', function () {
             done();
           }).catch(done);
         });
-
 
       });
     });

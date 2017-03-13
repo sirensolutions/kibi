@@ -12,7 +12,7 @@ export default class HeaderPage {
   }
 
   clickSelector(selector) {
-    return this.try(() => {
+    return PageObjects.common.try(() => {
       return this.remote.setFindTimeout(defaultFindTimeout)
       .findByCssSelector(selector)
       .then(tab => {
@@ -29,11 +29,13 @@ export default class HeaderPage {
   clickVisualize() {
     PageObjects.common.debug('click Visualize tab');
     this.clickSelector('a[href*=\'visualize\']');
+    return PageObjects.common.sleep(3000);
   }
 
   clickDashboard() {
     PageObjects.common.debug('click Dashboard tab');
     this.clickSelector('a[href*=\'dashboard\']');
+    return PageObjects.common.sleep(3000);
   }
 
   clickSettings() {

@@ -245,7 +245,7 @@ function VisEditor(createNotifier, kibiState, $scope, $route, timefilter, AppSta
 
     $state.replace();
 
-    $scope.$watch('searchSource.get("index").timeFieldName', function (timeField) {
+    $scope.$watch('indexPattern.timeFieldName', function (timeField) {
       // kibi: decide to show/hide timefilter in case requiresMultiSearch is true
       hasAnyOfVisSavedSearchesATimeField($scope.vis, timeField).then((has) => {
         timefilter.enabled = has;

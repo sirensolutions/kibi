@@ -1,6 +1,9 @@
 import { times, zipObject } from 'lodash';
 
-const TOTAL_CI_SHARDS = 4;
+// kibi: imports
+import serverConfig from '../../test/server_config';
+
+const TOTAL_CI_SHARDS = 6; // kibi: bumped from 4 to 6 to make the tests pass on jenkins
 
 module.exports = function (grunt) {
   const config = {
@@ -11,7 +14,7 @@ module.exports = function (grunt) {
       captureTimeout: 30000,
       browserNoActivityTimeout: 120000,
       frameworks: ['mocha'],
-      port: 9876,
+      port: serverConfig.servers.karma.port, // kibi: make karma port configurable
       colors: true,
       logLevel: grunt.option('debug') || grunt.option('verbose') ? 'DEBUG' : 'INFO',
       autoWatch: false,
@@ -22,15 +25,15 @@ module.exports = function (grunt) {
 
       // list of files / patterns to load in the browser
       files: [
-        'http://localhost:5610/bundles/commons.bundle.js',
-        'http://localhost:5610/bundles/tests.bundle.js',
-        'http://localhost:5610/bundles/commons.style.css',
-        'http://localhost:5610/bundles/tests.style.css'
+        `http://localhost:${serverConfig.servers.testserver.port}/bundles/commons.bundle.js`, // kibi: make port configurable
+        `http://localhost:${serverConfig.servers.testserver.port}/bundles/tests.bundle.js`, // kibi: make port configurable
+        `http://localhost:${serverConfig.servers.testserver.port}/bundles/commons.style.css`, // kibi: make port configurable
+        `http://localhost:${serverConfig.servers.testserver.port}/bundles/tests.style.css` // kibi: make port configurable
       ],
 
       proxies: {
-        '/tests/': 'http://localhost:5610/tests/',
-        '/bundles/': 'http://localhost:5610/bundles/'
+        '/tests/': `http://localhost:${serverConfig.servers.testserver.port}/tests/`, // kibi: make port configurable
+        '/bundles/': `http://localhost:${serverConfig.servers.testserver.port}/bundles/` // kibi: make port configurable
       },
 
       client: {
@@ -130,10 +133,11 @@ module.exports = function (grunt) {
       singleRun: true,
       options: {
         files: [
-          'http://localhost:5610/bundles/commons.bundle.js',
-          `http://localhost:5610/bundles/tests.bundle.js?shards=${TOTAL_CI_SHARDS}&shard_num=${n}`,
-          'http://localhost:5610/bundles/commons.style.css',
-          'http://localhost:5610/bundles/tests.style.css'
+          // kibi: make the port configurable
+          `http://localhost:${serverConfig.servers.testserver.port}/bundles/commons.bundle.js`,
+          `http://localhost:${serverConfig.servers.testserver.port}/bundles/tests.bundle.js?shards=${TOTAL_CI_SHARDS}&shard_num=${n}`,
+          `http://localhost:${serverConfig.servers.testserver.port}/bundles/commons.style.css`,
+          `http://localhost:${serverConfig.servers.testserver.port}/bundles/tests.style.css`
         ]
       }
     };

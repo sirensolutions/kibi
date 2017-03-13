@@ -13,7 +13,15 @@
     ></dashboards-nav-control>
 
     <form role="form">
-      <input ng-disabled="!isDashboardsNavOpen" aria-label="Filter" ng-model="dashboardFilter" class="form-control span12" type="text" placeholder="Filter" />
+      <input
+          name="dashboards-filter"
+          ng-disabled="!isDashboardsNavOpen"
+          aria-label="Filter"
+          ng-model="dashboardFilter"
+          class="form-control span12"
+          type="text"
+          placeholder="Filter"
+        />
     </form>
   </div>
 

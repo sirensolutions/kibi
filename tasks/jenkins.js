@@ -23,11 +23,10 @@ module.exports = function (grunt) {
 
   grunt.registerTask('jenkins:unit', [
     'jenkins:env',
-    'rejectRejFiles',
-
     'eslint:source',
     'licenses',
     'test:server',
+    'test:ui',
     'test:browser-ci',
     'test:api',
   ]);

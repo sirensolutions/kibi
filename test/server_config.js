@@ -7,7 +7,10 @@ module.exports = {
     webdriver: {
       protocol: process.env.TEST_WEBDRIVER_PROTOCOL || 'http',
       hostname: process.env.TEST_WEBDRIVER_HOSTNAME || 'localhost',
-      port: parseInt(process.env.TEST_WEBDRIVER_PORT, 10) || 4444
+      port: parseInt(process.env.TEST_WEBDRIVER_PORT, 10) || 4444,
+      // kibi: by passing TEST_UI_PROXY_PORT we can run 2 test:ui processes on the same box
+      // important for running PRs on Jenkins
+      proxyPort: parseInt(process.env.TEST_PROXY_PORT, 10) || 9000
     },
     kibana: {
       protocol: process.env.TEST_KIBANA_PROTOCOL || 'http',
@@ -26,6 +29,15 @@ module.exports = {
       auth: shield.admin.username + ':' + shield.admin.password,
       username: shield.admin.username,
       password: shield.admin.password
+    },
+    // kibi: by making testserver and karma ports
+    // custom so we can run 2 test:browser processes on the same box
+    // important for running PRs on Jenkins
+    testserver: {
+      port: parseInt(process.env.TEST_TESTSERVER_PORT, 10) || 5610
+    },
+    karma: {
+      port: parseInt(process.env.TEST_KARMA_PORT, 10) || 9876
     }
   },
   apps: {

@@ -7,7 +7,8 @@ describe('Kibi Components', function () {
 
       it('should return a query against the default index with an empty search body when there are no indices', () => {
         const searchHelper = new SearchHelper('.kibiz');
-        const expected = '{"index":[".kibiz"], "ignore_unavailable": true}\n{"query":{"bool":{"must_not":[{"match_all":{}}]}}}\n';
+        const expected = '{"index":[".kibiz"], "type": "null", "ignore_unavailable": true}\n' +
+                         '{"query":{"bool":{"must_not":[{"match_all":{}}]}}}\n';
 
         const actual = searchHelper.optimize([], {
           size: 0,

@@ -19,7 +19,7 @@ define(function (require) {
   require('ui/modules').get('apps/settings')
   .directive('kbnSettingsObjects', function (
     kbnIndex, createNotifier, Private, kbnUrl, Promise,
-    queryEngineClient, kbnVersion, es, config) {
+    queryEngineClient, kbnVersion, savedObjectsAPI, config) { // kibi: replaces es with savedObjectsAPI
 
     // kibi: all below dependencies added by kibi to improve import/export and delete operations
     const cache = Private(require('ui/kibi/helpers/cache_helper'));
@@ -139,8 +139,8 @@ define(function (require) {
 
         function retrieveAndExportDocs(objs) {
           if (!objs.length) return notify.error('No saved objects to export.');
-          es.mget({
-            index: kbnIndex,
+          // kibi: use savedObjectsAPI instead of es
+          savedObjectsAPI.mget({
             body: {docs: objs.map(transformToMget)}
           })
           .then(function (response) {
@@ -150,7 +150,8 @@ define(function (require) {
 
         // Takes an object and returns the associated data needed for an mget API request
         function transformToMget(obj) {
-          return {_id: obj.id, _type: obj.type};
+          // kibi: added index
+          return {index: kbnIndex, _id: obj.id, _type: obj.type};
         }
 
         function saveToFile(results) {
@@ -207,7 +208,7 @@ define(function (require) {
 
           // kibi: load index-patterns
           const createIndexPattern = function (doc) {
-            return es.index({
+            return savedObjectsAPI.index({
               index: kbnIndex,
               type: 'index-pattern',
               id: doc._id,

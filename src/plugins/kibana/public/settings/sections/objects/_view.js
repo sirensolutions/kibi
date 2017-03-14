@@ -15,7 +15,7 @@ define(function (require) {
     return {
       restrict: 'E',
       controller: function ($scope, $injector, $routeParams, $location, $window, $rootScope,
-        es, Private, queryEngineClient, createNotifier) {
+        savedObjectsAPI, Private, queryEngineClient, createNotifier) { // kibi: replaced es with savedObjectsAPI
         const notify = createNotifier({ location: 'SavedObject view' });
         const castMappingType = Private(require('ui/index_patterns/_cast_mapping_type'));
         const serviceObj = registry.get($routeParams.service);
@@ -104,7 +104,7 @@ define(function (require) {
 
         $scope.title = service.type;
 
-        es.get({
+        savedObjectsAPI.get({
           index: kbnIndex,
           type: service.type,
           id: $routeParams.id
@@ -166,8 +166,8 @@ define(function (require) {
 
           // kibi: wrapped the original function
           // as we need to do our checks before
-          var _delete = function () {
-            es.delete({
+          const _delete = function () {
+            savedObjectsAPI.delete({
               index: kbnIndex,
               type: service.type,
               id: $routeParams.id
@@ -202,7 +202,7 @@ define(function (require) {
             _.set(source, field.name, value);
           });
 
-          es.index({
+          savedObjectsAPI.index({
             index: kbnIndex,
             type: service.type,
             id: $routeParams.id,
@@ -228,30 +228,26 @@ define(function (require) {
         };
 
         function redirectHandler(action) {
-          return es.indices.refresh({
-            index: kbnIndex
-          })
-          .then(function (resp) {
-            const msg = 'You successfully ' + action + ' the "' + $scope.obj._source.title + '" ' + $scope.title.toLowerCase() + ' object';
+          // kibi: removed refresh
+          const msg = 'You successfully ' + action + ' the "' + $scope.obj._source.title + '" ' + $scope.title.toLowerCase() + ' object';
 
-            $location.path('/settings/objects').search({
-              _a: rison.encode({
-                tab: serviceObj.title
-              })
-            });
-            notify.info(msg);
+          $location.path('/settings/objects').search({
+            _a: rison.encode({
+              tab: serviceObj.title
+            })
           });
+          notify.info(msg);
         }
 
         // kibi: methods to identify our fields
-        var kibiFields = [
+        const kibiFields = [
           {name: 'activationQuery', size: 1},
           {name: 'resultQuery',     size: 4},
           {name: 'templateVars',    size: 2}
         ];
 
         $scope.isItKibiField = function (field) {
-          var ret = false;
+          let ret = false;
           _.each(kibiFields, function (stField) {
             if (stField.name === field.name) {
               ret = true;
@@ -261,7 +257,7 @@ define(function (require) {
           return ret;
         };
         $scope.computeKibiFieldTextareaSize = function (field) {
-          var size = 1;
+          let size = 1;
           _.each(kibiFields, function (stField) {
             if (stField.name === field.name) {
               size = stField.size;

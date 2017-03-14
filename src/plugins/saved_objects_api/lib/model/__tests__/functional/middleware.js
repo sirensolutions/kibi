@@ -150,9 +150,7 @@ describe('saved_objects_api/functional', function () {
       .withExactArgs(helper.getInstance(), 10, 'q', undefined);
       middlewareMock
       .expects('searchResponse')
-      .withExactArgs(helper.getInstance(), 10, 'q', undefined,
-        sinon.match.has('hits', { hits: [], max_score: null, total: 0 })
-      );
+      .withExactArgs(helper.getInstance(), 10, 'q', undefined, { hits: { hits: [], total: 0 }});
 
       await model.search(10, 'q');
       expect(getMiddlewaresStub.callCount).to.be(6);

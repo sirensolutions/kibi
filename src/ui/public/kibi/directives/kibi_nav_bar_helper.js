@@ -2,10 +2,9 @@ define(function (require) {
   const angular = require('angular');
   const _ = require('lodash');
   const DelayExecutionHelper = require('ui/kibi/helpers/delay_execution_helper');
-  const SearchHelper = require('ui/kibi/helpers/search_helper');
 
   return function KibiNavBarHelperFactory(kibiState, globalState, getAppState, createNotifier, Private, $http, Promise, $rootScope,
-                                          savedDashboards, kbnIndex) {
+                                          savedDashboards) {
     const notify = createNotifier({
       location: 'Kibi Navbar helper'
     });

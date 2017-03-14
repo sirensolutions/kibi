@@ -1,6 +1,5 @@
 import '../dashboard_nav_link/dashboard_nav_link';
 import '../dashboards_nav_control/dashboards_nav_control';
-import './dashboard_switcher.less';
 import KibiNavBarHelperProvider from 'ui/kibi/directives/kibi_nav_bar_helper';
 import QueryFilterProvider from 'ui/filter_bar/query_filter';
 import template from './dashboard_switcher.html';
@@ -26,7 +25,7 @@ uiModules
       filter: '=',
     },
     template,
-    controller($scope, dashboardsNavState) {
+    controller($scope) {
       const groups = kibiNavBarHelper.getDashboardGroups();
 
       $scope.groups = groups;
@@ -43,15 +42,6 @@ uiModules
           });
         }
       });
-
-      $scope.toggleGroupNav = function (group) {
-        group.selected.onOpenClose(group);
-        return true;
-      };
-
-      $scope.isActiveSubDashboard = function (group, dashboard) {
-        return group.selected.id === dashboard.id;
-      };
 
       // rerender tabs if any dashboard got saved
       const removeDashboardChangedHandler = $rootScope.$on('kibi:dashboard:changed', function (event, dashId) {

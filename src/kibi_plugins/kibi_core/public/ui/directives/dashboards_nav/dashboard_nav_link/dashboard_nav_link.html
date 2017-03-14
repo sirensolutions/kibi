@@ -1,55 +1,53 @@
 <div
-  class="dashboards-nav-link {{classes}}"
-  ng-class="{ active: isActive && isDashboardLoaded }"
+  class="dashboards-nav-link"
+  ng-class="{ active: group.active && isDashboardLoaded }"
 >
-  <!-- title is empty in order to prevent displaying the title from the parent -->
   <a
-    title=""
     class="anchor"
-    ng-click="onClick({ $event: $event })"
+    ng-click="group.selected.onSelect({ $event: $event })"
     tooltip="{{ tooltipContent }}"
     tooltip-placement="right"
     tooltip-popup-delay="0"
     tooltip-append-to-body="1"
   >
-    <div ng-if="showIcon" class="icon">
+    <div class="icon">
       <i
-         ng-if="iconCss"
-         class="icon-image {{iconCss}}"
+         ng-if="group.iconCss"
+         class="icon-image {{group.iconCss}}"
       ></i>
 
       <img
-         ng-if="iconUrl"
+         ng-if="group.iconUrl"
          class="icon-image"
-         ng-src="{{iconUrl}}"
+         ng-src="{{group.iconUrl}}"
       />
 
       <span
-         ng-if="!iconCss && !iconUrl"
+         ng-if="!group.iconCss && !group.iconUrl"
          class="icon-placeholder"
       >
-         {{ title[0] }}
+         {{ group.title[0] }}
       </span>
     </div>
 
     <div class="content">
       <div class="indicators">
           <!--dashboard count-->
-          <span ng-if="count !== undefined">{{countHumanNotation}}</span>
-          <span ng-if="count === undefined && countSpinner" class="spinner"></span>
+          <span ng-if="group.selected.count !== undefined">{{countHumanNotation}}</span>
+          <span ng-if="group.selected.count === undefined" class="spinner"></span>
         <!--filters indicator-->
         <span
-           ng-if="filterIconMessage"
+           ng-if="group.selected.filterIconMessage"
            aria-hidden="true"
            data-toggle="tooltip"
            data-placement="bottom"
-           title="{{filterIconMessage}}"
+           title="{{group.selected.filterIconMessage}}"
            >
            <i class="fa fa-filter"/>
         </span>
           <!--join pruning indicator-->
           <span
-              ng-if="isPruned"
+              ng-if="group.selected.isPruned"
               aria-hidden="true"
               data-toggle="tooltip"
               data-placement="bottom"
@@ -57,14 +55,33 @@
               >
               <i class="fa fa-star"></i>
           </span>
+          <!--dashboard in group menu-->
+          <div class="dropdown-icon-alone"
+               ng-if="!isSidebarOpen && group.dashboards.length > 1"
+               kibi-menu-template="groupMenuTemplate"
+               kibi-menu-template-on-show-fn="toggleGroupNav(group)"
+               kibi-menu-template-data="group.dashboards"
+               kibi-menu-template-context="groups"
+          >
+            <i class="fa fa-sort"/>
+          </div>
       </div>
 
       <div class="title">
-        {{ title }}
+        <!--dashboard in group menu-->
+        <div class="truncate" ng-if="group.dashboards.length === 1">{{group.title}}</div>
+        <div class="dashboard-select"
+             ng-if="group.dashboards.length > 1"
+             kibi-menu-template="groupMenuTemplate"
+             kibi-menu-template-on-show-fn="toggleGroupNav(group)"
+             kibi-menu-template-data="subDashboards"
+             kibi-menu-template-context="groups"
+        >
+          <div class="text truncate">{{ group.title }} ({{ group.selected.title }})</div>
+          <i class="dropdown-icon fa fa-sort"/>
+        </div>
       </div>
     </div>
   </a>
 
-  <!--subnav-->
-  <ng-transclude></ng-transclude>
 </div>

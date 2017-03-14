@@ -1,6 +1,8 @@
+@import (reference) "~ui/kibi/styles/kibi_variables";
 @import (reference) "~ui/styles/variables";
 @import (reference) "../variables";
 
+@dropdown-icon-width: 15px;
 @icon-width: 25px;
 
 .dashboards-nav-link {
@@ -13,16 +15,39 @@
     width: @dashboards-nav-open-width;
   }
 
-  &.subnav {
-    width: calc(@dashboards-nav-open-width - @icon-width);
-    line-height: @dashboard-line-height;
-    margin-left: @icon-width;
-    background-color: @dashboard-subnav;
+  .dropdown-icon-alone {
+    width: @dropdown-icon-width;
+    float: right;
+  }
 
-    .title {
-      width: calc(@dashboards-nav-open-width - @icon-width);
+  .dashboard-select {
+    display: none;
+
+    .is-dashboards-nav-open & {
+      display: inline-block;
+      color: @black;
+      background-color: @white;
+      border-width: 1px;
+      border-color: @kibi-menu-template-border-dark;
+      border-style: solid;
+      padding: 2px 4px;
+      border-radius: 2px;
+      width: calc(@dashboards-nav-open-width - @dashboards-nav-closed-width - 10px); // some space on the right
+      line-height: @dashboard-line-height;
+      margin-top: 4px;
+
+      .dropdown-icon {
+        width: @dropdown-icon-width;
+        float: right;
+        margin-top: 6px;
+      }
+
+      .text {
+        width: calc(@dashboards-nav-open-width - @dashboards-nav-closed-width - @dropdown-icon-width - 25px); // some space on the right + extra space for the dropdown icon
+        float: left;
+        padding-left: 3px;
+      }
     }
-
   }
 
   &:hover,
@@ -77,7 +102,7 @@
     line-height: @dashboard-height;
 
     .is-dashboards-nav-open & {
-      width: calc(@dashboards-nav-open-width - @dropdown-width - @icon-width);
+      width: calc(@dashboards-nav-open-width - @icon-width);
     }
   }
 
@@ -88,25 +113,24 @@
     float: left;
     display: list-item;
 
-    .is-dashboards-nav-open & {
-      width: calc(@dashboards-nav-closed-width - @icon-width);
-    }
+    width: calc(@dashboards-nav-closed-width - @icon-width);
   }
 
   .title {
     display: none;
     .is-dashboards-nav-open & {
-      width: calc(@dashboards-nav-open-width - @dashboards-nav-closed-width - @dropdown-width);
+      width: calc(@dashboards-nav-open-width - @dashboards-nav-closed-width);
       display: inline-block;
       text-align: left;
       padding-left: 3px;
+      padding-right: 3px;
       float: left;
-
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-
-      border-left: #777777 solid 2px;
     }
+  }
+
+  .truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 }

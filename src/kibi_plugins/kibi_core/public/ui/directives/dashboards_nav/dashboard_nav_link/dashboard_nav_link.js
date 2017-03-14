@@ -1,37 +1,53 @@
 import dashboardNavLinkTemplate from './dashboard_nav_link.html';
 import './dashboard_nav_link.less';
 import uiModules from 'ui/modules';
+import groupMenuTemplate from 'ui/kibi/directives/kibi_menu_template_kibi_nav_bar.html';
+import _ from 'lodash';
 
 uiModules
 .get('kibana')
-.directive('dashboardNavLink', kibiState => {
+.directive('dashboardNavLink', (kibiState, dashboardsNavState) => {
   const numeral = require('numeral')();
 
   return {
     restrict: 'E',
     transclude: true,
     scope: {
-      count: '=',
-      countSpinner: '=',
-      isPruned: '=',
-      filterIconMessage: '=',
-      classes: '@',
-      showIcon: '=',
-      isActive: '=',
-      onClick: '&',
-      iconUrl: '=',
-      iconCss: '=',
-      title: '='
+      filter: '=',
+      groups: '=',
+      group: '='
     },
     template: dashboardNavLinkTemplate,
     link: function ($scope) {
-      $scope.$watch('count', count => {
+      $scope.groupMenuTemplate = groupMenuTemplate;
+
+      $scope.isSidebarOpen = dashboardsNavState.isOpen();
+      $scope.$watch(dashboardsNavState.isOpen, isOpen => {
+        $scope.isSidebarOpen = isOpen;
+      });
+
+      $scope.$watch('filter', filter => {
+        $scope.subDashboards = $scope.group.dashboards;
+        if (filter) {
+          filter = filter.toLowerCase();
+          $scope.subDashboards = _.filter($scope.group.dashboards, d => _.contains(d.title, filter));
+        }
+      });
+
+      $scope.toggleGroupNav = function () {
+        const activeGroup = _.find($scope.groups, 'active', true);
+        activeGroup.selected.onOpenClose(activeGroup);
+      };
+
+      $scope.$watch([ 'group.selected.title', 'group.selected.count' ], () => {
         delete $scope.countHumanNotation;
-        if (count !== undefined) {
-          $scope.countHumanNotation = numeral.set(count).format('0.[00]a');
-          $scope.tooltipContent = `${$scope.title} (${count})`;
-        } else {
-          $scope.tooltipContent = $scope.title;
+        $scope.tooltipContent = $scope.group.title;
+        if ($scope.group.dashboards.length > 1) {
+          $scope.tooltipContent += ` (${$scope.group.selected.title})`;
+        }
+        if ($scope.group.selected.count !== undefined) {
+          $scope.countHumanNotation = numeral.set($scope.group.selected.count).format('0.[00]a');
+          $scope.tooltipContent += ` (${$scope.group.selected.count})`;
         }
       });
 

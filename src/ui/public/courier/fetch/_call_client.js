@@ -30,7 +30,10 @@ define(function (require) {
             case ABORTED:
               return ABORTED;
             case DUPLICATE:
-              return req._uniq.resp;
+              if (req._uniq.resp) {
+                return req._uniq.resp;
+              }
+              return responses[_.findIndex(executable, req._uniq)];
             default:
               return responses[_.findIndex(executable, req)];
           }

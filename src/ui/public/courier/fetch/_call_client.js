@@ -30,12 +30,14 @@ define(function (require) {
             case ABORTED:
               return ABORTED;
             case DUPLICATE:
+              // kibi: modified by kibi
               // if the resp attribute of the deduplicated request has not been
               // set at this point, retrieve the response to it from the responses array.
               if (req._uniq.resp) {
                 return req._uniq.resp;
               }
               return responses[_.findIndex(executable, req._uniq)];
+              // kibi: end
             default:
               return responses[_.findIndex(executable, req)];
           }

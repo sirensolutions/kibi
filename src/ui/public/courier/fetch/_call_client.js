@@ -30,6 +30,8 @@ define(function (require) {
             case ABORTED:
               return ABORTED;
             case DUPLICATE:
+              // if the resp attribute of the deduplicated request has not been
+              // set at this point, retrieve the response to it from the responses array.
               if (req._uniq.resp) {
                 return req._uniq.resp;
               }

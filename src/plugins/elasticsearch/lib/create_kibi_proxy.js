@@ -13,6 +13,14 @@ module.exports = function createProxy(server, method, route, config) {
 
   var serverConfig = server.config();
 
+  function getCredentials(request) {
+    let credentials = serverConfig.has('shield.cookieName') ? request.state[serverConfig.get('shield.cookieName')] : null;
+    if (request.auth && request.auth.credentials && request.auth.credentials.proxyCredentials) {
+      credentials = request.auth.credentials.proxyCredentials;
+    }
+    return credentials;
+  }
+
   var pre = '/elasticsearch';
   var sep = route[0] === '/' ? '' : '/';
   var path = `${pre}${sep}${route}`;
@@ -34,7 +42,8 @@ module.exports = function createProxy(server, method, route, config) {
             req.on('data', (chunk) => chunks.push(chunk));
             req.on('end', () => {
               const dataToPass = {
-                savedQueries: {} //TODO: Stephane I think this should be an array - for now it works as there is only one inject;
+                savedQueries: {}, //TODO: Stephane I think this should be an array - for now it works as there is only one inject;
+                credentials: {}
               };
 
               // prevent the string to be created
@@ -54,10 +63,8 @@ module.exports = function createProxy(server, method, route, config) {
                 dataToPass.savedQueries = inject.save(query);
                 return query;
               }).map((query) => {
-                var credentials = serverConfig.has('shield.cookieName') ? request.state[serverConfig.get('shield.cookieName')] : null;
-                if (request.auth && request.auth.credentials && request.auth.credentials.proxyCredentials) {
-                  credentials = request.auth.credentials.proxyCredentials;
-                }
+                const credentials = getCredentials(request);
+                dataToPass.credentials = credentials;
                 return dbfilter(server.plugins.kibi_core.getQueryEngine(), query, credentials);
               }).map((query) => filterJoinSet(query))
               .map((query) => filterJoinSequence(query))
@@ -110,7 +117,8 @@ module.exports = function createProxy(server, method, route, config) {
             response.on('end', () => {
               const data = Buffer.concat(chunks);
               if (data.length !== 0) {
-                inject.runSavedQueries(JSON.parse(data.toString()), server.plugins.kibi_core.getQueryEngine(), dataPassed.savedQueries)
+                inject.runSavedQueries(JSON.parse(data.toString()), server.plugins.kibi_core.getQueryEngine(), dataPassed.savedQueries,
+                    dataPassed.credentials)
                   .then((r) => {
                     dataPassed.body = new Buffer(JSON.stringify(r));
                     fulfill({

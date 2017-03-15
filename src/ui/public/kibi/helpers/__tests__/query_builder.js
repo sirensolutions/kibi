@@ -31,7 +31,6 @@ describe('Kibi Components', function () {
     beforeEach(function () {
       ngMock.module('kibana', function ($provide) {
         $provide.constant('kibiEnterpriseEnabled', false);
-        $provide.constant('elasticsearchPlugins', ['siren-platform']);
         $provide.constant('kbnDefaultAppId', '');
         $provide.constant('kibiDefaultDashboardTitle', '');
 
@@ -133,6 +132,7 @@ describe('Kibi Components', function () {
         timefilter.time = defaultTime;
         kibiState = _kibiState_;
         sinon.stub(kibiState, '_getCurrentDashboardId').returns('empty-dashboard');
+        sinon.stub(kibiState, 'isSirenJoinPluginInstalled').returns(true);
         queryBuilder = Private(QueryBuilderProvider);
       });
     });

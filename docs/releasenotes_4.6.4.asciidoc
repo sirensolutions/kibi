@@ -12,29 +12,30 @@ The 4.6.4 release of Kibi requires Elasticsearch 2.4 or later.
 * Fixed - honour timezone settings in Graph Browser timebar [Enterprise Edition only]
 
 * Improved - upgraded moment-timezone to version 0.5.11
-* Improved - upgraded siren-join version to 2.4.4
+* Improved - upgraded siren-join to version 2.4.4
+* Improved - upgraded license plugin to version 2.4.4 [Enterprise Edition only]
+* Improved - upgraded Kibi Timeline plugin to version 4.6.4
 * Improved - init explanation only on filter bar filters
 * Improved - added link to sample kibi.yml file into the documentation
 * Improved - tests coverage and quality
 * Improved - removed savedSession objects in favour of sharing through shortened URLs stored in kibi index
 * Improved - field formatter support in Graph Browser tooltips [Enterprise Edition only]
 
+* Added - merge upstream changes from Kibana 4.6.4.
 * Added - column name aliases to kibi-doc-table plugin
 * Added - priority field for dashboards
-* Added - merge upstream changes from Kibana 4.6.4.
 * Added - hashed URL are now enabled by default
 * Added - and option to increase grid resolution
 * Added - kibi:enableAllDashboardsCounts to disable counts on all dashboards.
 * Added - kibi:enableAllRelBtnCounts to disable counts on all relational buttons.
 * Added - search on relations
-
-* Added support for ACL rules on saved objects [Enterprise Edition only]
-* Added new Kibi Multi Chart plugin [Enterprise Edition only]
-* Added new Kibi Box Plot plugin [Enterprise Edition only]
-* Added new Kibi Scatter Plot plugin [Enterprise Edition only]
-* Added new Kibi Bubble Diagram plugin [Enterprise Edition only]
-* Added new Kibi Vector Map plugin [Enterprise Edition only]
-* Added new Kibi Horizontal Bar Chart plugin [Enterprise Edition only]
+* Added - support for ACL rules on saved objects [Enterprise Edition only]
+* Added - new Kibi Multi Chart plugin [Enterprise Edition only]
+* Added - new Kibi Box Plot plugin [Enterprise Edition only]
+* Added - new Kibi Scatter Plot plugin [Enterprise Edition only]
+* Added - new Kibi Bubble Diagram plugin [Enterprise Edition only]
+* Added - new Kibi Vector Map plugin [Enterprise Edition only]
+* Added - new Kibi Horizontal Bar Chart plugin [Enterprise Edition only]
 
 
 ==== Kibana Changes

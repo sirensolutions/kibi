@@ -12,10 +12,10 @@ This visualization displays a multiple types of chart according to the current s
 NOTE: Kibi Multi Chart is available only in Kibi Enterprise Edition.
 
 [float]
-==== Multi chart
+==== Multi Chart
 image::images/multi_chart/multi_chart_on_dashboard.png["multi chart",align="center"]
 
-Multi chart is not a type of chart by it self, it can contains a set of already existent chart (such as a Pie chart) and allow to switch
+Multi Chart is not a type of chart by itself, it can contains a set of other charts (such as a Pie chart) and allow to switch
 to other type of chart with the same aggregations.
 
 ==== Multi configurations
@@ -31,7 +31,7 @@ the configuration as a separated one.
 
 image::images/multi_chart/new_configuration.png["new configuration",align="center"]
 
-Multi chart has this options to allow multiple configurations
+Multi Chart has the following options
 
  * *Show type selector* - Allows to show/hide the button bar for the chart type selection.
  * *Show dropdown menu* - Allows to show/hide the dropdown menu for the aggregation configuration selection.

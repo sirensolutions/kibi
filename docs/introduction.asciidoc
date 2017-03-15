@@ -37,6 +37,9 @@ with multiple groups of data coming from different indices.
 
 - The <<kibi_scatter_plot,Scatter plot>> visualization, which displays a scatter plot chart in different modes.
 
+- The <<kibi_multi_chart,Multi chart>> visualization, which displays a different type of charts for the same data
+and allow save and select multiple aggregation configurations.
+
 - The <<kibi_box_plot,Box plot>> visualization, which displays a box plot chart from the data in the current set of Elasticsearch documents.
 
 - The <<enhanced_search_results,Enhanced search results>> visualization, which

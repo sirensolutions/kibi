@@ -201,3 +201,4 @@ include::bubble_diagram.asciidoc[]
 
 include::scatter_plot.asciidoc[]
 
+include::multi_chart.asciidoc[]

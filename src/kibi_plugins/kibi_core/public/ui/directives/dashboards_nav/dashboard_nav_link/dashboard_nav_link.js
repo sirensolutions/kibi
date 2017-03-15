@@ -39,7 +39,7 @@ uiModules
         activeGroup.selected.onOpenClose(activeGroup);
       };
 
-      $scope.$watch([ 'group.selected.title', 'group.selected.count' ], () => {
+      $scope.$watchGroup([ 'group.selected.title', 'group.selected.count' ], () => {
         delete $scope.countHumanNotation;
         $scope.tooltipContent = $scope.group.title;
         if ($scope.group.dashboards.length > 1) {

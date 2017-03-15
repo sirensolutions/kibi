@@ -74,7 +74,7 @@ define(function (require) {
             scope.$apply(function () {
               ngModelCtrl.$setViewValue(elm.val());
             });
-          }, attr.ngDebounce || 1000);
+          }, attr.kibiDebounce || 1000);
         });
         elm.bind('blur', function () {
           scope.$apply(function () {

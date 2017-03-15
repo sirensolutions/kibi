@@ -16,7 +16,7 @@ module.exports = function (grunt) {
       dest: '/tmp/kibi_wordcloud_vis.zip'
     },
     {
-      url: 'https://github.com/sirensolutions/kibi_timeline_vis/raw/4.6.3-1/target/kibi_timeline_vis-4.6.3-1.zip',
+      url: 'https://github.com/sirensolutions/kibi_timeline_vis/raw/4.6.4/target/kibi_timeline_vis-4.6.4.zip',
       dest: '/tmp/kibi_timeline_vis.zip'
     },
     {

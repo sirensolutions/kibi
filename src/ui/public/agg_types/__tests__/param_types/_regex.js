@@ -15,7 +15,6 @@ describe('Regex', function () {
   beforeEach(ngMock.module('kibana', function ($provide) {
     $provide.constant('kbnDefaultAppId', '');
     $provide.constant('kibiDefaultDashboardTitle', '');
-    $provide.constant('elasticsearchPlugins', ['siren-platform']);
   }));
   // fetch out deps
   beforeEach(ngMock.inject(function (Private) {

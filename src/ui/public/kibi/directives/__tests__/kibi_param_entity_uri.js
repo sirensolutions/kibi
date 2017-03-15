@@ -16,7 +16,6 @@ const init = function (entityURI, mappings) {
   ngMock.module('kibana', function ($compileProvider, $provide) {
     $provide.constant('kbnDefaultAppId', '');
     $provide.constant('kibiDefaultDashboardTitle', '');
-    $provide.constant('elasticsearchPlugins', ['siren-platform']);
     $provide.constant('kibiDatasourcesSchema', {});
 
     $compileProvider.directive('kibiSelect', function () {

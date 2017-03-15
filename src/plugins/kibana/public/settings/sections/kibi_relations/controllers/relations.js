@@ -893,7 +893,7 @@ define(function (require) {
         case 'importGraph':
           $timeout(() => {
             $rootScope.$emit('egg:indicesGraph:run', 'stop');
-          }, 1000);
+          }, 1); //stop immediately basically disabling the animation
           break;
         default:
       }
@@ -905,7 +905,7 @@ define(function (require) {
         case 'importGraph':
           $timeout(() => {
             $rootScope.$emit('egg:dashboardsGraph:run', 'stop');
-          }, 1000);
+          }, 1); //stop immediately basically disabling the animation
           break;
         default:
       }

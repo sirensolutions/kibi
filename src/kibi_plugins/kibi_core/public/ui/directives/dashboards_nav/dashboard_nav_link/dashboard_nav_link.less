@@ -1,5 +1,9 @@
+@import (reference) "~ui/kibi/styles/kibi_variables";
 @import (reference) "~ui/styles/variables";
 @import (reference) "../variables";
+
+@dropdown-icon-width: 15px;
+@icon-width: 25px;
 
 .dashboards-nav-link {
   background-color: @dashboard-inactive-background;
@@ -11,16 +15,39 @@
     width: @dashboards-nav-open-width;
   }
 
-  &.subnav {
-    width: calc(@dashboards-nav-open-width - @dashboards-nav-closed-width);
-    line-height: @dashboard-line-height;
-    margin-left: @dashboards-nav-closed-width;
-    background-color: @dashboard-subnav;
+  .dropdown-icon-alone {
+    width: @dropdown-icon-width;
+    float: right;
+  }
 
-    .title {
-      width: calc(@dashboards-nav-open-width - @dashboards-nav-closed-width);
+  .dashboard-select {
+    display: none;
+
+    .is-dashboards-nav-open & {
+      display: inline-block;
+      color: @black;
+      background-color: @white;
+      border-width: 1px;
+      border-color: @kibi-menu-template-border-dark;
+      border-style: solid;
+      padding: 2px 4px;
+      border-radius: 2px;
+      width: calc(@dashboards-nav-open-width - @dashboards-nav-closed-width - 10px); // some space on the right
+      line-height: @dashboard-line-height;
+      margin-top: 4px;
+
+      .dropdown-icon {
+        width: @dropdown-icon-width;
+        float: right;
+        margin-top: 6px;
+      }
+
+      .text {
+        width: calc(@dashboards-nav-open-width - @dashboards-nav-closed-width - @dropdown-icon-width - 25px); // some space on the right + extra space for the dropdown icon
+        float: left;
+        padding-left: 3px;
+      }
     }
-
   }
 
   &:hover,
@@ -45,14 +72,14 @@
   .icon {
     float: left;
     display: inline-block;
-    width: @dashboards-nav-closed-width;
+    width: @icon-width;
     height: @dashboard-height;
     text-align: center;
     color: @white;
   }
 
   /**
-   * This imgae is used to display the icon.
+   * This image is used to display the icon.
    */
   .icon-image {
     height: 18px;
@@ -69,17 +96,41 @@
     background-repeat: no-repeat;
   }
 
-  .title {
-    display: none;
-    width: calc(@dashboards-nav-open-width - @dropdown-width - @dashboards-nav-closed-width);
+  .content {
+    width: calc(@dashboards-nav-closed-width - @icon-width);
     font-size: 0.9em;
-    text-align: left;
-    padding-left: 3px;
     line-height: @dashboard-height;
-    white-space: nowrap;
 
     .is-dashboards-nav-open & {
-      display: inline-block;
+      width: calc(@dashboards-nav-open-width - @icon-width);
     }
+  }
+
+  .indicators {
+    padding-left: 3px;
+    font-weight: bold;
+    text-align: left;
+    float: left;
+    display: list-item;
+
+    width: calc(@dashboards-nav-closed-width - @icon-width);
+  }
+
+  .title {
+    display: none;
+    .is-dashboards-nav-open & {
+      width: calc(@dashboards-nav-open-width - @dashboards-nav-closed-width);
+      display: inline-block;
+      text-align: left;
+      padding-left: 3px;
+      padding-right: 3px;
+      float: left;
+    }
+  }
+
+  .truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 }

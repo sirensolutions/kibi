@@ -1,6 +1,6 @@
 [[bubble_diagram]]
 
-=== Bubble Diagram [Enterprise Edition only][Coming Soon]
+=== Bubble Diagram [Enterprise Edition only]
 
 ifeval::["{enterprise_enabled}" == "false"]
   NOTE: Documentation for Kibi Bubble Diagram visualisation is available only in Kibi Enterprise Edition.

@@ -77,7 +77,6 @@ describe('No global chart settings', function () {
     // kibi: for running kibi tests
     $provide.constant('kbnDefaultAppId', '');
     $provide.constant('kibiDefaultDashboardTitle', '');
-    $provide.constant('elasticsearchPlugins', ['siren-platform']);
   }));
   beforeEach(ngMock.inject(function (Private) {
     chart1 = Private(FixturesVislibVisFixtureProvider)(visLibParams1);
@@ -177,7 +176,6 @@ aggArray.forEach(function (dataAgg, i) {
       // kibi: for running kibi tests
       $provide.constant('kbnDefaultAppId', '');
       $provide.constant('kibiDefaultDashboardTitle', '');
-      $provide.constant('elasticsearchPlugins', ['siren-platform']);
     }));
     beforeEach(ngMock.inject(function (Private) {
       vis = Private(FixturesVislibVisFixtureProvider)(visLibParams);

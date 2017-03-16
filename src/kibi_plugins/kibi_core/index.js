@@ -98,7 +98,7 @@ module.exports = function (kibana) {
   };
 
   return new kibana.Plugin({
-    require: ['kibana'],
+    require: [ 'kibana' ],
 
     id: 'kibi_core',
 
@@ -125,7 +125,6 @@ module.exports = function (kibana) {
       injectDefaultVars: function (server, options) {
         const vars = {};
 
-        vars.elasticsearchPlugins = server.config().get('elasticsearch.plugins');
         if (options) {
           vars.kibiDatasourcesSchema = options.datasources_schema;
           vars.kibiDefaultDashboardTitle = options.default_dashboard_title;

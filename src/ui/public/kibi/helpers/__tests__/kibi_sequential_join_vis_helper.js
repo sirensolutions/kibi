@@ -33,7 +33,6 @@ function init({
     $provide.constant('kibiEnterpriseEnabled', enableEnterprise);
     $provide.constant('kbnDefaultAppId', '');
     $provide.constant('kibiDefaultDashboardTitle', '');
-    $provide.constant('elasticsearchPlugins', []);
 
     appState = new MockState({ filters: [] });
     $provide.service('getAppState', function () {

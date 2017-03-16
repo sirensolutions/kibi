@@ -31,7 +31,6 @@ describe('Kibi Directives', function () {
         $provide.constant('kbnIndex', '.kibi');
         $provide.constant('kbnDefaultAppId', '');
         $provide.constant('kibiDefaultDashboardTitle', '');
-        $provide.constant('elasticsearchPlugins', ['siren-platform']);
         if (savedDatasources) {
           $provide.service('savedDatasources', (Promise, Private) => {
             return mockSavedObjects(Promise, Private)('savedDatasources', savedDatasources);

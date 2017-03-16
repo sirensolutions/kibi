@@ -31,7 +31,6 @@ describe('Kibi Directives', function () {
         });
         $provide.constant('kbnDefaultAppId', '');
         $provide.constant('kibiDefaultDashboardTitle', '');
-        $provide.constant('elasticsearchPlugins', ['siren-platform']);
       });
 
       ngMock.module('app/dashboard', function ($provide) {

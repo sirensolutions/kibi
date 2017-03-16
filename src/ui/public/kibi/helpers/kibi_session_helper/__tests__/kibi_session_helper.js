@@ -60,7 +60,6 @@ describe('Kibi Components', function () {
       ngMock.module('kibana', function ($provide) {
         $provide.constant('kbnDefaultAppId', '');
         $provide.constant('kibiDefaultDashboardTitle', '');
-        $provide.constant('elasticsearchPlugins', []);
 
         $provide.service('savedSessions', function () {
           return {

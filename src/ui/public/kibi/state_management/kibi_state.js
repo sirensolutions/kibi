@@ -12,16 +12,17 @@ import RelationsHelperProvider from 'ui/kibi/helpers/relations_helper';
 import { getAppUrl } from 'ui/chrome';
 
 function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppState, savedDashboards, $rootScope, indexPatterns, globalState,
-    elasticsearchPlugins, $location, config, Private, createNotifier) {
+    $location, config, Private, createNotifier) {
   const State = Private(StateManagementStateProvider);
   const notify = createNotifier({ location: 'Kibi State'});
   const relationsHelper = Private(RelationsHelperProvider);
+  let elasticsearchPlugins = [];
 
   _.class(KibiState).inherits(State);
   function KibiState(defaults) {
     KibiState.Super.call(this, '_k', defaults);
 
-    this.init = _.once(function () {
+    this.init = _.once(function (esAdmin) {
       // do not try to initialize the kibistate if it was already done via the URL
       if (_.size(this.toObject())) {
         return;
@@ -55,6 +56,15 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
           search[this._urlParam] = this.toRISON();
           $location.search(search).replace();
         }
+      })
+      .then(() => {
+        return esAdmin.cat.plugins({
+          h: 'component',
+          format: 'json'
+        })
+        .then(plugins => {
+          elasticsearchPlugins = _.pluck(plugins, 'component');
+        });
       }).catch(notify.error);
     });
   }
@@ -1186,7 +1196,7 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
   return new KibiState();
 }
 
-uiRoutes.addSetupWork(kibiState => kibiState.init());
+uiRoutes.addSetupWork((kibiState, esAdmin) => kibiState.init(esAdmin));
 
 uiModules
 .get('kibana/kibi_state')

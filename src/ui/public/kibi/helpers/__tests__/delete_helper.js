@@ -61,7 +61,6 @@ describe('Kibi Components', function () {
         $provide.constant('kibiEnterpriseEnabled', false);
         $provide.constant('kbnDefaultAppId', '');
         $provide.constant('kibiDefaultDashboardTitle', '');
-        $provide.constant('elasticsearchPlugins', []);
       });
 
       ngMock.module('dashboard_groups_editor/services/saved_dashboard_groups', function ($provide) {

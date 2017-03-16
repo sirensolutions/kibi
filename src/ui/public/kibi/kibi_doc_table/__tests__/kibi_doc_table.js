@@ -44,7 +44,6 @@ describe('Kibi doc table', function () {
   beforeEach(ngMock.module('kibana', function ($provide) {
     $provide.constant('kbnDefaultAppId', '');
     $provide.constant('kibiDefaultDashboardTitle', '');
-    $provide.constant('elasticsearchPlugins', ['siren-platform']);
   }));
 
   beforeEach(function () {

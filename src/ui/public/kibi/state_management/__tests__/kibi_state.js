@@ -69,7 +69,6 @@ describe('State Management', function () {
       $provide.constant('kibiEnterpriseEnabled', kibiEnterpriseEnabled);
       $provide.constant('kbnDefaultAppId', '');
       $provide.constant('kibiDefaultDashboardTitle', '');
-      $provide.constant('elasticsearchPlugins', ['siren-platform']);
     });
 
     ngMock.module('kibana/index_patterns', function ($provide) {
@@ -95,6 +94,7 @@ describe('State Management', function () {
       kibiState = _kibiState_;
 
       disableFiltersIfOutdatedSpy = sinon.spy(kibiState, 'disableFiltersIfOutdated');
+      sinon.stub(kibiState, 'isSirenJoinPluginInstalled').returns(true);
 
       config = _config_;
       const defaultTime = {

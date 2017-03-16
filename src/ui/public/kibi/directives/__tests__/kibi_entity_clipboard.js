@@ -22,7 +22,6 @@ describe('Kibi Components', function () {
         function ($provide) {
           $provide.constant('kbnDefaultAppId', '');
           $provide.constant('kibiDefaultDashboardTitle', '');
-          $provide.constant('elasticsearchPlugins', ['siren-platform']);
           $provide.service('$route', function () {
             return {
               reload: _.noop

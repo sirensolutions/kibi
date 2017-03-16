@@ -12,11 +12,10 @@ import RelationsHelperProvider from 'ui/kibi/helpers/relations_helper';
 import { getAppUrl } from 'ui/chrome';
 
 function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppState, savedDashboards, $rootScope, indexPatterns, globalState,
-    $location, config, Private, createNotifier) {
+    elasticsearchPlugins, $location, config, Private, createNotifier) {
   const State = Private(StateManagementStateProvider);
   const notify = createNotifier({ location: 'Kibi State'});
   const relationsHelper = Private(RelationsHelperProvider);
-  let elasticsearchPlugins = [];
 
   _.class(KibiState).inherits(State);
   function KibiState(defaults) {
@@ -56,15 +55,6 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
           search[this._urlParam] = this.toRISON();
           $location.search(search).replace();
         }
-      })
-      .then(() => {
-        return esAdmin.cat.plugins({
-          h: 'component',
-          format: 'json'
-        })
-        .then(plugins => {
-          elasticsearchPlugins = _.pluck(plugins, 'component');
-        });
       }).catch(notify.error);
     });
   }
@@ -977,13 +967,6 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
       return Promise.reject(new Error('Missing dashboard ID'));
     }
 
-    // check siren-platform plugin
-    if (this.isRelationalPanelButtonEnabled() && !this.isSirenJoinPluginInstalled()) {
-      const error = 'The Siren Platform plugin is enabled but not installed. Please install the plugin and restart Kibi, ' +
-        'or disable the relational panel in Settings -> Advanced -> kibi:relationalPanel';
-      return Promise.reject(new Error(error));
-    }
-
     const options = {
       pinned: true,
       disabled: false
@@ -1009,7 +992,17 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
     // on a dashboard without assosiated savedSearch
     const getMetas = this._getDashboardAndSavedSearchMetas(dashboardIds, true);
 
-    return getMetas.then((metas) => {
+    // check siren-platform plugin
+    return this.isSirenJoinPluginInstalled()
+    .then(isInstalled => {
+      if (this.isRelationalPanelButtonEnabled() && !isInstalled) {
+        const error = 'The Siren Platform plugin is enabled but not installed. Please install the plugin and restart Kibi, ' +
+          'or disable the relational panel in Management / Relations';
+        return Promise.reject(new Error(error));
+      }
+    })
+    .then(() => getMetas)
+    .then((metas) => {
       const promises = [];
 
       // extra check for metas
@@ -1190,7 +1183,8 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
   };
 
   KibiState.prototype.isSirenJoinPluginInstalled = function () {
-    return elasticsearchPlugins.indexOf('siren-platform') !== -1;
+    return elasticsearchPlugins()
+    .then(plugins => plugins.indexOf('siren-platform') !== -1);
   };
 
   return new KibiState();
@@ -1200,4 +1194,21 @@ uiRoutes.addSetupWork((kibiState, esAdmin) => kibiState.init(esAdmin));
 
 uiModules
 .get('kibana/kibi_state')
+.service('elasticsearchPlugins', (Promise, esAdmin) => {
+  let plugins;
+
+  return function getPlugins() {
+    if (plugins) {
+      return Promise.resolve(plugins);
+    }
+    return esAdmin.cat.plugins({
+      h: 'component',
+      format: 'json'
+    })
+    .then(components => {
+      plugins = _.pluck(components, 'component');
+      return plugins;
+    });
+  };
+})
 .service('kibiState', Private => Private(KibiStateProvider));

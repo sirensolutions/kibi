@@ -298,6 +298,7 @@ module.exports = (server, API_ROOT) => {
    *
    *   - size: the number of results to return; if not 0, will return all the objects of the specified type.
    *   - q: a text to search
+   *   - exclude: a comma separated list of fields to exclude
    *
    * Errors are formatted by a custom handler set in the init method of this plugin.
    */
@@ -312,7 +313,11 @@ module.exports = (server, API_ROOT) => {
         return reply(Boom.notFound(error));
       }
       let size = request.query.size;
-      model.search(size, request.query.q || request.payload, request)
+      let exclude = [];
+      if (request.query.exclude) {
+        exclude = request.query.exclude.split(',');
+      }
+      model.search(size, request.query.q || request.payload, request, exclude)
       .then((response) => {
         reply(response);
       })
@@ -330,7 +335,8 @@ module.exports = (server, API_ROOT) => {
           size: Joi.number().integer().default(100),
           scroll: Joi.any().default(null),
           search_type: Joi.any().default(null),
-          q: Joi.string().default(null)
+          q: Joi.string().default(null),
+          exclude: Joi.string().default(null)
         }
       }
     }

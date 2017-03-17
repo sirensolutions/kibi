@@ -290,10 +290,11 @@ export default class Model {
    * @param {Number} size - The number of results to return. If not set, returns all objects matching the search.
    * @param {String} search - An optional search string or query body.
    * @param {Object} request - Optional HAPI request.
+   * @param {Array} exclude - An optional list of fields to exclude.
    * @return {Array} A list of objects of the specified type.
    * @throws {NotFoundError} if the object does not exist.
    */
-  async search(size, search, request) {
+  async search(size, search, request, exclude) {
     try {
       for (const middleware of this._plugin.getMiddlewares()) {
         await middleware.searchRequest(this, size, search, request);
@@ -327,6 +328,13 @@ export default class Model {
         type: this._type,
         body: body,
       };
+
+      if (exclude && exclude.length > 0) {
+        parameters.body._source = {
+          excludes: exclude
+        };
+      }
+
       if (size === 0) {
         parameters.size = 0;
       } else {

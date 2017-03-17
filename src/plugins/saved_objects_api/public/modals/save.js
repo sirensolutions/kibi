@@ -2,8 +2,7 @@ import uiModules from 'ui/modules';
 
 uiModules
 .get('kibana')
-.controller('SavedObjectsAPIModalSaveController', function ($scope, $timeout, $modalInstance, savedObjectService, savedObject,
-                                                            createNotifier) {
+.controller('SavedObjectsAPIModalSaveController', function ($scope, $timeout, $modalInstance, savedObjectService, savedObject) {
 
   $scope.savedObject = savedObject;
   $scope.savedObjectService = savedObjectService;
@@ -12,10 +11,6 @@ uiModules
     saving: false
   };
 
-  const notify = createNotifier({
-    location: 'Saved Objects API'
-  });
-
   $scope.submit = function () {
     savedObject.title = savedObject.id = $scope.state.title;
     $scope.state.saving = true;
@@ -23,7 +18,6 @@ uiModules
       savedObject.save()
       .then((id) => $modalInstance.close(savedObject))
       .catch((error) => {
-        notify.error(error);
         $modalInstance.dismiss();
       });
     });

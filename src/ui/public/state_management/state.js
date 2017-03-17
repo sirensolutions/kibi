@@ -3,7 +3,7 @@ import angular from 'angular';
 import rison from 'ui/utils/rison';
 import applyDiff from 'ui/utils/diff_object';
 import EventsProvider from 'ui/events';
-import Notifier from 'ui/notify/notifier';
+import Notifier from 'kibie/notify/notifier'; // kibi: import Kibi notifier
 import 'ui/config';
 
 import {

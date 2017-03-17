@@ -1,7 +1,7 @@
 const _ = require('lodash');
 import { format as formatUrl, parse as parseUrl } from 'url';
 
-import Notifier from 'ui/notify/notifier';
+import Notifier from 'kibie/notify/notifier'; // kibi: import Kibi notifier
 import { UrlOverflowServiceProvider } from '../../error_url_overflow';
 
 const URL_LIMIT_WARN_WITHIN = 1000;

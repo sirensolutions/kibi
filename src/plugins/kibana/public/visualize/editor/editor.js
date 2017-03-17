@@ -71,7 +71,7 @@ define(function (require) {
 
     const angular = require('angular');
     const ConfigTemplate = require('ui/ConfigTemplate');
-    const Notifier = require('ui/notify/notifier');
+    const Notifier = require('kibie/notify/notifier'); // kibi: import Kibi notifier
     const docTitle = Private(require('ui/doc_title'));
     const brushEvent = Private(require('ui/utils/brush_event'));
     const queryFilter = Private(require('ui/filter_bar/query_filter'));

@@ -34,7 +34,7 @@ module.exports = function (chrome, internals) {
       // kibi: clean the hashed params from the URL if session storage empty
       const url = kibiRemoveHashedParams(window.location.href, sessionStorage);
       if (url) {
-        window.location.replace(url);
+        window.location.href = url;
       }
       // kibi:
       chrome.$setupXsrfRequestInterceptor($httpProvider);

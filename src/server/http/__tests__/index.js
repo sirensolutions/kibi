@@ -72,18 +72,17 @@ describe('routes', function () {
 
     it('redirects shortened urls', (done) => {
       kbnTestServer.makeRequest(kbnServer, shortenOptions, (res) => {
+        const payload = res.payload; // kibi: store payload
         const gotoOptions = {
           method: 'GET',
           url: '/goto/' + res.payload
         };
         kbnTestServer.makeRequest(kbnServer, gotoOptions, (res) => {
           expect(res.statusCode).to.be(302);
-          // kibi: added code to strip the _h parameter
+          // kibi: verify the redirect according to our implementation
           let actual = res.headers.location;
-          const index = actual.indexOf('&_h=');
-          actual = actual.substring(0, index);
+          expect(actual).to.be(`/app/kibana#/discover?_h=${payload}`);
           // kibi: end
-          expect(actual).to.be(shortenOptions.payload.url);
           done();
         });
       });

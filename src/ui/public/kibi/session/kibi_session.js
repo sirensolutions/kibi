@@ -1,21 +1,42 @@
 import UiModules from 'ui/modules';
 import chrome from 'ui/chrome';
 import EventsProvider from 'ui/events';
+import Notifier from 'kibie/notify/notifier';
+import hashUrl from './hash_url';
 
 UiModules.get('kibana')
-.run(($rootScope, $location, $http, kibiSession) => {
+.run(($rootScope, $location, $window, $http, config, kibiSession) => {
+
+  const notify = new Notifier({
+    location: 'Kibi Session'
+  });
 
   $rootScope.$on('$locationChangeSuccess', () => {
     const search = $location.search();
     if (search._h) {
-      $http.get(chrome.getBasePath() + '/kibisession/' + search._h).then((res) => {
-        if (res.data) {
-          sessionStorage.setItem('kibiSession', JSON.stringify(res.data));
+      $http.get(chrome.getBasePath() + '/kibisession/' + search._h)
+      .then((res) => {
+        if (res.data.kibiSession) {
+          sessionStorage.setItem('kibiSession', JSON.stringify(res.data.kibiSession));
           kibiSession.emit('kibisession:loaded');
-          delete search._s;
+        }
+        let target = res.data.url;
+        if (res.data.url && config.get('state:storeInSessionStorage')) {
+          try {
+            target = hashUrl(res.data.url);
+          } catch (error) {
+            notify.error(error);
+            target = null;
+          }
+        }
+        if (target) {
+          $window.location.href = target;
+        }
+        else {
+          delete search._h;
+          $location.search(search);
         }
       });
-      $location.search(search);
     }
   });
 })

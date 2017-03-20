@@ -2,6 +2,7 @@ const _ = require('lodash');
 import { format as formatUrl, parse as parseUrl } from 'url';
 
 import Notifier from 'kibie/notify/notifier'; // kibi: import Kibi notifier
+import kibiRemoveHashedParams from './kibi_remove_hashed_params'; // kibi: import util to clean the url
 import { UrlOverflowServiceProvider } from '../../error_url_overflow';
 
 const URL_LIMIT_WARN_WITHIN = 1000;
@@ -29,7 +30,15 @@ module.exports = function (chrome, internals) {
       a.href = chrome.addBasePath('/elasticsearch');
       return a.href;
     }()))
-    .config(chrome.$setupXsrfRequestInterceptor)
+    .config(($httpProvider) => {
+      // kibi: clean the hashed params from the URL if session storage empty
+      const url = kibiRemoveHashedParams(window.location.href, sessionStorage);
+      if (url) {
+        window.location.href = url;
+      }
+      // kibi:
+      chrome.$setupXsrfRequestInterceptor($httpProvider);
+    })
     .run(($location, $rootScope, Private) => {
       const notify = new Notifier();
       const urlOverflow = Private(UrlOverflowServiceProvider);

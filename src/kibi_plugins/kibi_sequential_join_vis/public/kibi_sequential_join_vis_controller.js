@@ -28,10 +28,6 @@ function controller(getAppState, kibiState, $scope, $rootScope, Private, $http, 
   const currentDashboardId = kibiState._getCurrentDashboardId();
   const queryFilter = Private(QueryFilterProvider);
 
-  if (!kibiState.isSirenJoinPluginInstalled()) {
-    notify.error('This version of Kibi Relational filter requires the Siren Platform plugin. Please install it and restart Kibi.');
-  }
-
   // Update the counts on each button of the related filter
   const _fireUpdateCounts = function (buttons, dashboardId) {
     if ($scope.multiSearchData) {
@@ -185,11 +181,20 @@ function controller(getAppState, kibiState, $scope, $rootScope, Private, $http, 
       console.log(`Updating counts on the relational buttons because: ${reason}`);
     }
     const self = this;
-    let promise;
+
+    let promise = kibiState.isSirenJoinPluginInstalled()
+    .then(isInstalled => {
+      if (!isInstalled) {
+        return Promise.reject(new Error(
+          'This version of Kibi Relational filter requires the Siren Platform plugin. Please install it and restart Kibi.'
+        ));
+      }
+    });
+
     if (!$scope.buttons || !$scope.buttons.length) {
-      promise = _constructButtons.call(self);
+      promise = promise.then(() => _constructButtons.call(self));
     } else {
-      promise = Promise.resolve($scope.buttons);
+      promise = promise.then(() => Promise.resolve($scope.buttons));
     }
     promise
     .then((buttons) => _collectUpdateCountsRequest.call(self, buttons, currentDashboardId))

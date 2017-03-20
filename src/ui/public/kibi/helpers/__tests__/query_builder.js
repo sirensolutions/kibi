@@ -119,7 +119,7 @@ describe('Kibi Components', function () {
         ]));
       });
 
-      ngMock.inject(function (_config_, timefilter, _kibiState_, Private) {
+      ngMock.inject(function (Promise, _config_, timefilter, _kibiState_, Private) {
         const defaultTime = {
           mode: 'absolute',
           from: defaultStartTime,
@@ -132,7 +132,7 @@ describe('Kibi Components', function () {
         timefilter.time = defaultTime;
         kibiState = _kibiState_;
         sinon.stub(kibiState, '_getCurrentDashboardId').returns('empty-dashboard');
-        sinon.stub(kibiState, 'isSirenJoinPluginInstalled').returns(true);
+        sinon.stub(kibiState, 'isSirenJoinPluginInstalled').returns(Promise.resolve(true));
         queryBuilder = Private(QueryBuilderProvider);
       });
     });

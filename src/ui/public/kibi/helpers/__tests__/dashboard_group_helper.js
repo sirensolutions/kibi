@@ -150,6 +150,7 @@ function init({ currentDashboardId = 'Articles', indexPatterns, savedDashboards,
     dashboardGroupHelper = Private(DashboardGroupHelperProvider);
     sinon.stub(chrome, 'getBasePath').returns('');
     sinon.stub(kibiState, '_getCurrentDashboardId').returns(currentDashboardId);
+    sinon.stub(kibiState, 'isSirenJoinPluginInstalled').returns(Promise.resolve(true));
     $httpBackend = $injector.get('$httpBackend');
   });
 }
@@ -471,19 +472,18 @@ describe('Kibi Components', function () {
         }).catch(done);
       });
 
-      it('dashboard exist but has no savedSearch', function (done) {
-        dashboardGroupHelper.getDashboardsMetadata(['Articles']).then(function (meta) {
-          expect(meta).to.eql([]);
-          done();
-        }).catch(done);
+      it('dashboard exist but has no savedSearch', function () {
+        return dashboardGroupHelper.getDashboardsMetadata(['Articles'])
+        .then(function (meta) {
+          expect(meta).to.have.length(0);
+        });
       });
 
-      it('dashboard exist and it has savedSearch but index does not exists', function (done) {
-        dashboardGroupHelper.getDashboardsMetadata(['search-ste']).then(function (meta) {
-          done(new Error('Should fail'));
+      it('dashboard exist and it has savedSearch but index does not exists', function () {
+        return dashboardGroupHelper.getDashboardsMetadata(['search-ste']).then(function (meta) {
+          expect().fail('Should fail');
         }).catch(function (err) {
           expect(err.message).equal('Could not find object with id: search-ste');
-          done();
         });
       });
 

@@ -170,9 +170,7 @@ module.exports = function (kbnServer, server, config) {
         const data = await shortUrlLookup.getUrl(request.params.urlId);
         shortUrlAssertValid(data.url);
         reply().redirect(
-          config.get('server.basePath') +
-          data.url +
-         '&_h=' + request.params.urlId
+          `${config.get('server.basePath')}/app/kibana#/discover?_h=${request.params.urlId}`
         ); // kibi: adding the sha to be able to restore kibiSession in the browser
       } catch (err) {
         reply(err);
@@ -188,7 +186,7 @@ module.exports = function (kbnServer, server, config) {
       try {
         const data = await shortUrlLookup.getUrl(request.params.urlId);
         shortUrlAssertValid(data.url);
-        reply(data.kibiSession || {});
+        reply(data || {});
       } catch (err) {
         reply(err);
       }

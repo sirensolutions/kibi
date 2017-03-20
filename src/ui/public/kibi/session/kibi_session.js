@@ -3,19 +3,21 @@ import chrome from 'ui/chrome';
 import EventsProvider from 'ui/events';
 
 UiModules.get('kibana')
-.run(($rootScope, $location, $http, kibiSession) => {
+.run(($rootScope, $location, $window, $http, kibiSession) => {
 
   $rootScope.$on('$locationChangeSuccess', () => {
     const search = $location.search();
     if (search._h) {
-      $http.get(chrome.getBasePath() + '/kibisession/' + search._h).then((res) => {
-        if (res.data) {
-          sessionStorage.setItem('kibiSession', JSON.stringify(res.data));
+      $http.get(chrome.getBasePath() + '/kibisession/' + search._h)
+      .then((res) => {
+        if (res.data.kibiSession) {
+          sessionStorage.setItem('kibiSession', JSON.stringify(res.data.kibiSession));
           kibiSession.emit('kibisession:loaded');
-          delete search._s;
+        }
+        if (res.data.url) {
+          $window.location.href = res.data.url;
         }
       });
-      $location.search(search);
     }
   });
 })

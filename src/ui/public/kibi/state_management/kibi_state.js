@@ -20,6 +20,7 @@ define(function (require) {
     const State = Private(require('ui/state_management/state'));
     const notify = createNotifier({ location: 'Kibi State'});
     const relationsHelper = Private(require('ui/kibi/helpers/relations_helper'));
+    const decorateQuery = Private(require('ui/courier/data_source/_decorate_query'));
 
     _.class(KibiState).inherits(State);
     function KibiState(defaults) {
@@ -562,13 +563,11 @@ define(function (require) {
      * Returns the current set of queries for the given dashboard
      */
     KibiState.prototype._getQueries = function (dashboardId, appState, metas) {
-      let query = {
+      let query = decorateQuery({
         query_string: {
-          // TODO: https://github.com/sirensolutions/kibi-internal/issues/1153
-          analyze_wildcard: true,
           query: '*'
         }
-      };
+      });
 
       if (appState && this._getCurrentDashboardId() === dashboardId) {
         if (appState.query) {

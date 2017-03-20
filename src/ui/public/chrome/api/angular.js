@@ -57,7 +57,7 @@ module.exports = function (chrome, internals) {
           const { host, path, search, protocol } = parseUrl(window.location.href);
           // rewrite the entire url to force the browser to reload and
           // discard any potentially unstable state from before
-          window.location.href = formatUrl({ host, path, search, protocol, hash: '#/error/url-overflow' });
+          window.location.href = formatUrl({ host, pathname: path, search, protocol, hash: '#/error/url-overflow' });
         }
       };
 

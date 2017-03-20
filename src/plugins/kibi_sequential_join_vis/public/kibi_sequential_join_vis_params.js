@@ -21,37 +21,6 @@ define(function (require) {
         const relations = config.get('kibi:relations');
         $scope.focused = [];
 
-        $scope.isIntraIndexRelation = function (relationId) {
-          if (!relationId) return false;
-
-          const relation = relationId.split('/').filter((val) => { return val.length > 0; });
-          if (relation.length > 4) {
-            const sameIndex = relation.slice(2, relation.length).find((e) => { return e === relation[0]; });
-            const cmd = 'curl -XPUT host:port/';
-            if (sameIndex) {
-              if (relation.length === 5) {
-                $scope.intraIndexRelationInfo = {
-                  aliases :[
-                    `${cmd}${relation[0]}/_alias/a_type_name`,
-                    `${cmd}${relation[0]}/_alias/b_type_name`
-                  ]
-                };
-              } else {
-                $scope.intraIndexRelationInfo = {
-                  aliases :[
-                    `${cmd}${relation.slice(0, 2).join('/_alias/')}`,
-                    `${cmd}${relation.slice(3, 5).join('/_alias/')}`
-                  ]
-                };
-              }
-              return true;
-            }
-            return false;
-          }
-
-          return false;
-        };
-
         $scope.getLabel = function (relationId) {
           if (relationId) {
             const rel =  _.find(relations.relationsIndices, (rel) => {

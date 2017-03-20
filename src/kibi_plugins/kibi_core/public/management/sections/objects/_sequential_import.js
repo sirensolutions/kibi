@@ -47,12 +47,27 @@ export default function loadObjectsFactory(kbnIndex, Private, esAdmin, Promise, 
   };
 
   // now execute this sequentially
-  const executeSequentially = function (services, docs) {
+  const executeSequentially = function (services, docs, notify) {
     const functionArray = _.map(docs, function (doc) {
       return function (previousOperationResult) {
-        // previously this part was done in Promise.map
-        const service = _.find(services, {type: doc._type}).service;
+        const { service } = _.find(services, { type: doc._type }) || {};
+
+        if (!service) {
+          const msg = `Skipped import of "${doc._source.title}" (${doc._id})`;
+          const reason = `Invalid type: "${doc._type}"`;
+
+          notify.warning(`${msg}, ${reason}`, {
+            lifetime: 0,
+          });
+
+          return;
+        }
+
         return service.get().then(function (obj) {
+          obj.id = doc._id;
+          return obj.applyESResp(doc).then(function () {
+            return obj.save({ confirmOverwrite : true });
+          });
           obj.id = doc._id;
           return obj.applyESResp(doc).then(function () {
             return obj.save({ confirmOverwrite: true });
@@ -71,7 +86,7 @@ export default function loadObjectsFactory(kbnIndex, Private, esAdmin, Promise, 
     );
   };
 
-  return function loadObjects(services, docs, configDocument) {
+  return function loadObjects(services, docs, configDocument, notify) {
     // added to manage index-patterns import
     const indexPatternDocuments = _.filter(docs, function (o) {
       return o._type === 'index-pattern';
@@ -103,7 +118,7 @@ export default function loadObjectsFactory(kbnIndex, Private, esAdmin, Promise, 
       return loadConfig(configDocument);
     })
     .then(function () {
-      return executeSequentially(services, docs);
+      return executeSequentially(services, docs, notify);
     });
   };
 };

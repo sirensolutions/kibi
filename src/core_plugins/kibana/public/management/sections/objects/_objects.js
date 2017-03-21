@@ -213,11 +213,11 @@ uiModules.get('apps/management')
         // lets order the export to make sure that searches comes before visualisations
         // then also import object sequentially to avoid errors
         const configDocument = find(docs, '_type', 'config');
-        return loadObjects($scope.services, docs, configDocument)
+        return loadObjects($scope.services, docs, configDocument, notify)
         .then(refreshKibanaIndex)
         .then(() => queryEngineClient.clearCache()) // kibi: to clear backend cache
-        .then(refreshData, notify.error)
-        .catch(notify.error); // kibi: log errors when loading objects
+        .then(refreshData)
+        .catch(notify.error);
       };
 
       // TODO: Migrate all scope methods to the controller.

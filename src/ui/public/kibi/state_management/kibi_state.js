@@ -53,11 +53,7 @@ define(function (require) {
               }
             });
 
-            // Do not call save() method to prevent sending events
-            // persist the state in the URL
-            const search = $location.search();
-            search[this._urlParam] = this.toRISON();
-            $location.search(search).replace();
+            this.save(true, true);
           }
         }).catch(notify.error);
       });

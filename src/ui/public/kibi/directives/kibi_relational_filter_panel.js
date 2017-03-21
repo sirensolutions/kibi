@@ -114,7 +114,7 @@ uiModules
         });
       };
 
-      const initConfigOff = $rootScope.$on('init:config', function () {
+      const initConfigOff = config.watch('init:config', function () {
         _checkFilterJoinPlugin()
         .then(() => _initPanel());
       });

@@ -252,7 +252,7 @@ module.directive('filterBar', function (config, $rootScope, kibiState, createNot
           addJoinSetFilter(currentDashboardId);
         }
       };
-      const relationalPanelListenerOff = $rootScope.$on('change:config.kibi:relationalPanel', function (event, panelEnabled) {
+      const relationalPanelListenerOff = config.watch('kibi:relationalPanel', function (event, panelEnabled) {
         addJoinSetFilterOnRelationalPanel(panelEnabled);
       });
       addJoinSetFilterOnRelationalPanel(config.get('kibi:relationalPanel'));

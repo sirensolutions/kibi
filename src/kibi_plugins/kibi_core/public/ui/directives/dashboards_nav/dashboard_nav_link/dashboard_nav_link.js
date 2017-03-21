@@ -39,6 +39,16 @@ uiModules
         activeGroup.selected.onOpenClose(activeGroup);
       };
 
+      $scope.doesGroupHasAnyHiglightedDashboard = function (dashboards) {
+        // here iterate over dashboards check if highlighted dashboard exists
+        for (let i = 0; i < dashboards.length; i++) {
+          if (dashboards[i].$$highlight === true) {
+            return true;
+          }
+        }
+        return false;
+      };
+
       $scope.$watchGroup([ 'group.selected.title', 'group.selected.count' ], () => {
         delete $scope.countHumanNotation;
         $scope.tooltipContent = $scope.group.title;

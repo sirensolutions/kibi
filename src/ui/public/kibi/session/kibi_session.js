@@ -20,10 +20,10 @@ UiModules.get('kibana')
           sessionStorage.setItem('kibiSession', JSON.stringify(res.data.kibiSession));
           kibiSession.emit('kibisession:loaded');
         }
-        let target = res.data.url;
+        let target = chrome.getBasePath() + res.data.url;
         if (res.data.url && config.get('state:storeInSessionStorage')) {
           try {
-            target = hashUrl(res.data.url);
+            target = chrome.getBasePath() + hashUrl(res.data.url);
           } catch (error) {
             notify.error(error);
             target = null;

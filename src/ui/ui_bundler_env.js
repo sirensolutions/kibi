@@ -55,9 +55,7 @@ module.exports = class UiBundlerEnv {
       // kibi: added alias to test folder to simplify imports
       test_kibana: fromRoot('test'),
       // kibi: added alias to utils folder to simplify imports
-      utils_kibana: fromRoot('src/utils'),
-      // kibi: added alias to migrations folder to simplify imports
-      migrations: fromRoot('src/migrations')
+      utils_kibana: fromRoot('src/utils')
     };
 
     // map of which plugins created which aliases

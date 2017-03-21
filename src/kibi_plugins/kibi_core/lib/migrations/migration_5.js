@@ -1,8 +1,7 @@
 import _ from 'lodash';
 import requirefrom from 'requirefrom';
-
 const pkg = requirefrom('src/utils')('package_json');
-const Migration = requirefrom('src/migrations')('migration');
+import Migration from 'kibiutils/lib/migrations/migration';
 
 /**
  * Kibi Core - Migration 5.

@@ -65,6 +65,15 @@ describe('State Management', function () {
       globalState = new MockState({ filters: pinned || [] });
       $provide.service('globalState', () => globalState);
 
+      $provide.service('esAdmin', (Promise) => {
+        return {
+          cat: {
+            plugins() {
+              return Promise.resolve([ { component: 'siren-platform' } ]);
+            }
+          }
+        };
+      });
       $provide.constant('kbnIndex', '.kibi');
       $provide.constant('kibiEnterpriseEnabled', kibiEnterpriseEnabled);
       $provide.constant('kbnDefaultAppId', '');
@@ -94,7 +103,6 @@ describe('State Management', function () {
       kibiState = _kibiState_;
 
       disableFiltersIfOutdatedSpy = sinon.spy(kibiState, 'disableFiltersIfOutdated');
-      sinon.stub(kibiState, 'isSirenJoinPluginInstalled').returns(true);
 
       config = _config_;
       const defaultTime = {
@@ -2127,7 +2135,10 @@ describe('State Management', function () {
         });
 
         it('should be enabled if the plugin is installed', function () {
-          expect(kibiState.isSirenJoinPluginInstalled()).to.be.ok();
+          return kibiState.isSirenJoinPluginInstalled()
+          .then(installed => {
+            expect(installed).to.be(true);
+          });
         });
 
         it('should fail if the focused dashboard cannot be retrieved', function (done) {

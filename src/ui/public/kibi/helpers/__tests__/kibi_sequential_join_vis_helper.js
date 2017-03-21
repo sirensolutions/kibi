@@ -62,6 +62,7 @@ function init({
     kibiState = _kibiState_;
     sequentialJoinVisHelper = Private(SequentialJoinVisHelperProvider);
     sinon.stub(kibiState, '_getCurrentDashboardId').returns(currentDashboardId);
+    sinon.stub(kibiState, 'isSirenJoinPluginInstalled').returns(Promise.resolve(true));
     saveAppStateStub = sinon.stub(kibiState, 'saveAppState').returns(Promise.resolve());
 
     const defaultTime = {

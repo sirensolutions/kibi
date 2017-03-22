@@ -27,16 +27,6 @@
         </tr>
         <tr>
           <td colspan="2">
-            <button class="btn btn-xs" ng-disabled="!multiSearchData.hasFilterjoinStats(item)" ng-click="showFilterjoin = !showFilterjoin">Filterjoin</button>
-            <paginated-table
-              ng-show="showFilterjoin"
-              columns="filterjoinStats[$index].headers"
-              rows="filterjoinStats[$index].rows">
-            </paginated-table>
-          </td>
-        </tr>
-        <tr>
-          <td colspan="2">
             <button class="btn btn-xs" ng-click="showRawRequest = !showRawRequest">Raw Request</button>
             <pre ng-show="showRawRequest">{{item.query | json}}</pre>
           </td>
@@ -51,6 +41,12 @@
           <td colspan="2">
             <button class="btn btn-xs" ng-click="showResponse = !showResponse">Response</button>
             <pre ng-show="showResponse">{{item.response | json}}</pre>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2">
+            <button class="btn btn-xs" ng-click="debug = !debug">Debug</button>
+            <pre ng-show="debug">{{item.actions | json}}</pre>
           </td>
         </tr>
       </tbody>

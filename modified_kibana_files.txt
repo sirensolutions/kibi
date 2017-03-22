@@ -94,7 +94,6 @@ src/server/http/short_url_lookup.js
 src/server/config/schema.js
 src/server/KbnServer.js
 src/server/pid/index.js
-+src/migrations
 
 src/testUtils/stub_index_pattern.js
 +src/testUtils/wrap_async.js

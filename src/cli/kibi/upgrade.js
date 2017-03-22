@@ -4,8 +4,8 @@ import { merge } from 'lodash';
 import readYamlConfig from '../serve/read_yaml_config';
 import { resolve } from 'path';
 import fromRoot from '../../utils/from_root';
-import MigrationRunner from '../../migrations/migration_runner';
-import MigrationLogger from '../../migrations/migration_logger';
+import MigrationRunner from 'kibiutils/lib/migrations/migration_runner';
+import MigrationLogger from 'kibiutils/lib/migrations/migration_logger';
 
 const pathCollector = function () {
   const paths = [];

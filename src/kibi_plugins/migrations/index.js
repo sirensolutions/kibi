@@ -1,5 +1,5 @@
-import MigrationRunner from '../../migrations/migration_runner';
-import MigrationLogger from '../../migrations/migration_logger';
+import MigrationRunner from 'kibiutils/lib/migrations/migration_runner';
+import MigrationLogger from 'kibiutils/lib/migrations/migration_logger';
 
 /**
  * The migrations plugin checks if there are objects that can be upgraded.

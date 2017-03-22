@@ -1,7 +1,5 @@
 import { transform } from 'lodash';
-import requirefrom from 'requirefrom';
-
-const Migration = requirefrom('src/migrations')('migration');
+import Migration from 'kibiutils/lib/migrations/migration';
 
 /**
  * Kibi Core - Migration 3.

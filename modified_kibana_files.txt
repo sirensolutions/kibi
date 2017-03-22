@@ -172,6 +172,7 @@ src/ui/public/paginated_table/paginated_table.html
 
 src/ui/public/partials/saved_object_finder.html
 
++src/ui/public/share/service.js
 src/ui/public/share/directives/share.js
 src/ui/public/share/directives/share_object_url.js
 src/ui/public/share/views/share.html

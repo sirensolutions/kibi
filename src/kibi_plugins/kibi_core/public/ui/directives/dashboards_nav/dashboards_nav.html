@@ -1,17 +1,9 @@
 <nav
   class="dashboards-nav"
   ng-class="{'is-dashboards-nav-open': isDashboardsNavOpen, 'is-dashboards-nav-visible': isVisible, 'is-global-nav-open': isGlobalNavOpen}"
-  ng-show="isVisible"
->
-  <div class="menu">
-    <!-- Open/close sidebar -->
-    <dashboards-nav-control
-      tooltip-content="{{ dashboardsNavToggleButton.tooltipContent }}"
-      on-click="toggleDashboardsNav($event)"
-      kbn-icon="{{ dashboardsNavToggleButton.icon }}"
-      title="{{ dashboardsNavToggleButton.title }}"
-    ></dashboards-nav-control>
+  ng-show="isVisible">
 
+  <div class="menu">
     <form role="form">
       <input
           name="dashboards-filter"
@@ -30,5 +22,15 @@
     <dashboard-switcher
       filter="dashboardFilter"
     ></dashboard-switcher>
+
+    <!-- Open/close sidebar -->
+    <dashboards-nav-control
+        tooltip-content="{{ dashboardsNavToggleButton.tooltipContent }}"
+        on-click="toggleDashboardsNav($event)"
+        kbn-icon="{{ dashboardsNavToggleButton.icon }}"
+        title="{{ dashboardsNavToggleButton.title }}"
+        is-open="isDashboardsNavOpen"
+    ></dashboards-nav-control>
   </div>
+
 </nav>

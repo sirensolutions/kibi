@@ -9,6 +9,7 @@ uiModules
     restrict: 'E',
     replace: true,
     scope: {
+      isOpen: '=',
       isActive: '=',
       tooltipContent: '@',
       onClick: '&',

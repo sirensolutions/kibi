@@ -21,17 +21,12 @@ block content
       height: 185px;
       padding: 0;
       text-align: center;
-      background: #3caed2;
     }
 
     .kibanaLoader__logo {
       width: 150px;
       height: 100%;
       padding: 20px;
-      background-color: #E8488B;
-      -webkit-animation: colorShift 3s infinite;
-              animation: colorShift 3s infinite;
-      box-shadow: inset -10px 0 20px -10px rgba(0, 0, 0, 0.5);
     }
 
     .kibanaLoader__content {
@@ -44,57 +39,59 @@ block content
           -ms-flex-align: center;
               align-items: center;
       -webkit-box-pack: center;
-      -webkit-justify-content: center;
+      -webkit-justify-content: flex-start; /* siren: changed */
           -ms-flex-pack: center;
-              justify-content: center;
+              justify-content: flex-start; /* siren: changed */
       -webkit-box-flex: 1;
       -webkit-flex: 1 1 auto;
           -ms-flex: 1 1 auto;
               flex: 1 1 auto;
-      color: white;
-      font-size: 38px;
-      font-weight: 300;
+      color: #b2b2b2; /* siren: changed */
+      font-size: 48px; /* siren: changed */
       font-family: "Open Sans", "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif;
       padding-bottom: 12px;
     }
 
+    /* siren: changed colorShift to siren colors */
+    .ellipsis {
+      -webkit-animation: colorShift 3s infinite;
+              animation: colorShift 3s infinite;
+    }
+
     @-webkit-keyframes colorShift {
       0% {
-        background-color: #DD4484;
+        color: #b2b2b2;
       }
-      33% {
-        background-color: #E4BB51;
-      }
-      66% {
-        background-color: #8AC336;
+      50% {
+        color: #fff;
       }
       100% {
-        background-color: #DD4484;
+        color: #b2b2b2;
       }
     }
 
     @keyframes colorShift {
       0% {
-        background-color: #DD4484;
+        color: #b2b2b2;
       }
-      33% {
-        background-color: #E4BB51;
-      }
-      66% {
-        background-color: #8AC336;
+      50% {
+        color: #fff;
       }
       100% {
-        background-color: #DD4484;
+        color: #b2b2b2;
       }
     }
+
 
   .kibanaWelcomeView
     .kibanaLoader
       .kibanaLoader__logo
         .kibanaWelcomeLogo
       .kibanaLoader__content
-        // kibi: renamed to kibi
-        | Loading Kibi
+        // kibi: renamed to Siren
+        | Loading Siren
+        div.ellipsis
+          | &nbsp;...
 
 
   script.

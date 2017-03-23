@@ -28,12 +28,6 @@ const internals = _.defaults(
   }
 );
 
-// KIBI5: where is the icon set now ?
-//$('<link>').attr({
-  //href: require('ui/kibi/images/favicon.ico'), // kibi: replaced kibana favicon
-  //rel: 'shortcut icon'
-//}).appendTo('head');
-
 require('./api/apps')(chrome, internals);
 require('./api/xsrf')(chrome, internals);
 require('./api/nav')(chrome, internals);

@@ -4,6 +4,8 @@
     ng-repeat="button in buttons"
     ng-click="button.click()"
     ng-disabled="button.disabled"
+    ng-mouseover="hoverIn(button)"
+    ng-mouseleave="hoverOut()"
     ng-class="button.targetCount == 0 ? 'btn disabled-btn-relational' : 'btn btn-relational'"
     >
       {{button.label}}

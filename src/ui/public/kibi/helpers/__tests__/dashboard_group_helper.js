@@ -584,5 +584,55 @@ describe('Kibi Components', function () {
         .catch(() => done());
       });
     });
+
+    describe('highlight dashboard', function () {
+      beforeEach(() => init({
+        savedDashboards: fakeSavedDashboards,
+        savedDashboardGroups: fakeSavedDashboardGroups,
+        savedSearches: fakeSavedSearches
+      }));
+
+      it('setButtonOnHoverProperty', function () {
+        const dashboardId = 'A';
+        const dA = {id: 'A'};
+        const dB = {id: 'B'};
+        const dC = {id: 'C'};
+        const groups = [
+          {
+            dashboards: [dA, dB]
+          },
+          {
+            dashboards: [dB, dC]
+          }
+        ];
+
+        dashboardGroupHelper.setDashboardHighlight(groups, dashboardId);
+        expect(groups[0].dashboards[0].$$highlight).to.equal(true);
+        expect(groups[0].dashboards[1].$$highlight).to.equal(false);
+      });
+
+      it('resetButtonOnHoverProperty', function () {
+        const dashboardId = 'A';
+        const dA = {id: 'A'};
+        const dB = {id: 'B'};
+        const dC = {id: 'C'};
+        const groups = [
+          {
+            dashboards: [dA, dB]
+          },
+          {
+            dashboards: [dB, dC]
+          }
+        ];
+
+        dashboardGroupHelper.setDashboardHighlight(groups, dashboardId);
+        expect(groups[0].dashboards[0].$$highlight).to.equal(true);
+        expect(groups[0].dashboards[1].$$highlight).to.equal(false);
+
+        dashboardGroupHelper.resetDashboardHighlight(groups);
+        expect(groups[0].dashboards[0].$$highlight).to.equal(false);
+        expect(groups[0].dashboards[1].$$highlight).to.equal(false);
+      });
+    });
   });
 });

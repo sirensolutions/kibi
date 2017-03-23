@@ -1,6 +1,6 @@
 <div
   class="dashboards-nav-link"
-  ng-class="{ active: group.active && isDashboardLoaded }"
+  ng-class="{ active: group.active && isDashboardLoaded, highlight: doesGroupHasAnyHiglightedDashboard(group.dashboards) }"
 >
   <a
     class="anchor"

@@ -62,6 +62,29 @@ export default function DashboardGroupHelperFactory($timeout, kibiState, Private
     });
   };
 
+  DashboardGroupHelper.prototype.setDashboardHighlight = function (dashboardGroups, dashboardId) {
+    // here iterate over dashboardGroups remove all highlighted groups
+    // then set the new highlight group
+    _.each(dashboardGroups, function (group) {
+      _.each(group.dashboards, function (dashboard) {
+        if (dashboard.id === dashboardId) {
+          dashboard.$$highlight = true;
+        } else {
+          dashboard.$$highlight = false;
+        }
+      });
+    });
+  };
+
+  DashboardGroupHelper.prototype.resetDashboardHighlight = function (dashboardGroups) {
+    // here iterate over dashboardGroups remove all highlighted groups
+    _.each(dashboardGroups, function (group) {
+      _.each(group.dashboards, function (dashboard) {
+        dashboard.$$highlight = false;
+      });
+    });
+  };
+
   let lastEventTimer;
   DashboardGroupHelper.prototype._getOnClickForDashboardInGroup = function (dashboardGroups, dashboardId, groupId) {
     $timeout.cancel(lastEventTimer);

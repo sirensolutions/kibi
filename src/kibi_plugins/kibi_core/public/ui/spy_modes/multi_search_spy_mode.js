@@ -13,14 +13,12 @@ function VisSpyMulti() {
     },
     template,
     link($scope) {
-      $scope.multiSearchData.translateQueries();
-      $scope.filterjoinStats = _.map($scope.multiSearchData.getData(), item => $scope.multiSearchData.getFilterjoinStats(item));
-      $scope.$watch('multiSearchData', () => {
+      $scope.multiSearchData.getDebugData();
+      $scope.$watchCollection(() => $scope.multiSearchData.getData(), () => {
         if ($scope.multiSearchData) {
-          $scope.multiSearchData.translateQueries();
-          $scope.filterjoinStats = _.map($scope.multiSearchData.getData(), item => $scope.multiSearchData.getFilterjoinStats(item));
+          $scope.multiSearchData.getDebugData();
         }
-      }, true);
+      });
     }
   };
 }

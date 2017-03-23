@@ -1,5 +1,6 @@
 import '../dashboard_nav_link/dashboard_nav_link';
 import '../dashboards_nav_control/dashboards_nav_control';
+import './dashboard_switcher.less';
 import KibiNavBarHelperProvider from 'ui/kibi/directives/kibi_nav_bar_helper';
 import QueryFilterProvider from 'ui/filter_bar/query_filter';
 import template from './dashboard_switcher.html';

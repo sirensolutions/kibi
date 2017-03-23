@@ -1,3 +1,5 @@
+<div class="no-groups" ng-if="groups.length === 0">No dashboards ...</div>
+
 <dashboard-nav-link
   ng-repeat="group in groups | orderBy: 'priority'"
   group="group"

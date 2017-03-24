@@ -90,11 +90,47 @@ RestQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) {
       '${password}': self.config.datasource.datasourceClazz.populateParameters('${password}')
     };
 
+    // get all params from datasource and merge them with the one from the query
+    const mergedHeaders = [];
+    const mergedParams = [];
+    if (self.config.rest_headers) {
+      _.each(self.config.rest_headers, header => {
+        const found = _.find(mergedHeaders, h => h.name === header.name);
+        if (!found) {
+          mergedHeaders.push(header);
+        }
+      });
+    }
+    if (_.get(self.config, 'datasource.datasourceParams.headers')) {
+      _.each(self.config.datasource.datasourceParams.headers, header => {
+        const found = _.find(mergedHeaders, h => h.name === header.name);
+        if (!found) {
+          mergedHeaders.push(header);
+        }
+      });
+    }
+
+    if (self.config.rest_params) {
+      _.each(self.config.rest_params, param => {
+        const found = _.find(mergedParams, p => p.name === param.name);
+        if (!found) {
+          mergedParams.push(param);
+        }
+      });
+    }
+    if (_.get(self.config, 'datasource.datasourceParams.params')) {
+      _.each(self.config.datasource.datasourceParams.params, param => {
+        const found = _.find(mergedParams, p => p.name === param.name);
+        if (!found) {
+          mergedParams.push(param);
+        }
+      });
+    }
 
     // the whole replacement of values is happening here
     self.queryHelper.replaceVariablesForREST(
-      self.config.rest_headers,
-      self.config.rest_params,
+      mergedHeaders,
+      mergedParams,
       self.config.rest_body,
       self.config.rest_path,
       uri, availableVariables,

@@ -1,0 +1,18 @@
+[[kibi_vector_map]]
+=== Kibi Vector Map [Enterprise Edition only]
+
+ifeval::["{enterprise_enabled}" == "false"]
+  NOTE: Documentation for Kibi Vector Map is available only in Kibi Enterprise Edition.
+endif::[]
+
+ifeval::["{enterprise_enabled}" == "true"]
+
+This visualization displays a vector map from the data in the current set of Elasticsearch documents.
+
+NOTE: Kibi Vector Map is available only in Kibi Enterprise Edition.
+
+[float]
+==== Usage
+image::images/vector_map/vector_map.png["Vector Map",align="center"]
+
+endif::[]

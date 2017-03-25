@@ -39,10 +39,10 @@ describe('plugins/elasticsearch', function () {
     upgradeDoc('4.0.0-rc2', '4.0.2', true);
     upgradeDoc('4.0.1', '4.1.0-rc', true);
     upgradeDoc('4.0.0-rc1', '4.0.0', true);
-    upgradeDoc('4.0.0-rc1-SNAPSHOT', '4.0.0', false);
-    upgradeDoc('4.1.0-rc1-SNAPSHOT', '4.1.0-rc1', false);
-    // kibi: support alpha/beta release cycle
-    upgradeDoc('5.0.0-alpha1', '5.0.0', true);
+    upgradeDoc('4.0.0-rc1-snapshot', '4.0.0', false);
+    upgradeDoc('4.1.0-rc1-snapshot', '4.1.0-rc1', false);
+    // kibi: additional tests
+    upgradeDoc('4.6.3', '4.6.4', true);
 
     // kibi: support upgrade from a release to a snapshot
     upgradeDoc('4.5.4', '4.5.4-SNAPSHOT', true);
@@ -58,6 +58,18 @@ describe('plugins/elasticsearch', function () {
     upgradeDoc('4.5.4-beta2', '4.5.4', true);
     upgradeDoc('4.5.4-beta2', '4.5.4-beta-3', true);
     upgradeDoc('4.5.4-beta-4', '4.5.4-rc-1', true);
+
+    // kibi: dash upgrades
+    upgradeDoc('4.6.3', '4.6.3-1', true);
+    upgradeDoc('4.5.4', '4.5.4-1', true);
+    upgradeDoc('4.6.3-1', '4.6.3', false);
+    upgradeDoc('4.6.3-1', '4.6.3-2', true);
+    upgradeDoc('4.6.3', '4.6.4-1', true);
+    upgradeDoc('4.5.4-1', '4.5.4', false);
+    upgradeDoc('4.5.4-1', '4.6.3-1', true);
+    upgradeDoc('4.5.4-beta-2', '4.6.3-1', true);
+    upgradeDoc('4.5.3-1', '4.5.3-6', true);
+    upgradeDoc('4.5.3', '4.5.3-6', true);
 
     it('should handle missing _id field', function () {
       const doc = {

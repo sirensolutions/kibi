@@ -265,8 +265,10 @@ module.exports = function (kibana) {
           .catch(errors.RequestError, function (err) {
             if (err.error.code === 'ETIMEDOUT') {
               reply(Boom.create(408, err.message, ''));
+            } else if (err.error.code === 'ECONNREFUSED') {
+              reply({ error: `Could not send request to Gremlin server, please check if it is running. Details: ${err.message}`});
             } else {
-              reply({ error: 'An error occurred while sending a gremlin query: ' + JSON.stringify(err) });
+              reply({ error: `An error occurred while sending a gremlin query: ${err.message}`});
             }
           });
         }
@@ -319,8 +321,10 @@ module.exports = function (kibana) {
           .catch(errors.RequestError, function (err) {
             if (err.error.code === 'ETIMEDOUT') {
               reply(Boom.create(408, err.message, ''));
+            } else if (err.error.code === 'ECONNREFUSED') {
+              reply({ error: `Could not send request to Gremlin server, please check if it is running. Details: ${err.message}`});
             } else {
-              reply({ error: 'An error occurred while sending a gremlin ping: ' + JSON.stringify(err) });
+              reply({ error: `An error occurred while sending a gremlin ping: ${err.message}`});
             }
           });
         }

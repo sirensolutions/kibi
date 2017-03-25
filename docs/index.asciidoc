@@ -4,18 +4,18 @@
 
 :enterprise_enabled: false
 :java-version: 1.8
-:siren-join-version: 2.4.1
+:siren-join-version: 2.4.4
 :siren-join-website: https://github.com/sirensolutions/siren-join/
-:kibana-version: 4.6.3
-:kibana-announcement: https://www.elastic.co/blog/kibana-5-0-1-and-4-6-3-released
-:kibi-version: 4.6.3
+:kibana-version: 4.6.4
+:kibana-announcement: https://www.elastic.co/blog/kibana-5-1-2-and-4-6-4-released
+:kibi-version: 4.6.4
 :elastic-ref: https://www.elastic.co/guide/en/elasticsearch/reference/2.4/
-:elasticsearch-version: 2.4.1
+:elasticsearch-version: 2.4.4
 :shield-ref: https://www.elastic.co/guide/en/shield/2.4/
 :sense-ref: https://www.elastic.co/guide/en/sense/current/
 :searchguard-ref: https://github.com/floragunncom/search-guard-docs
 :searchguard-management-api-ref: https://github.com/floragunncom/search-guard-rest-api/wiki
-:searchguard-central-ref: https://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22com.floragunn%22%20AND%20a%3A%22search-guard-2%22
+:searchguard-sgadmin-ref: https://github.com/floragunncom/search-guard/wiki#search-guard-admin-standalone
 :searchguard-matrix-ref: https://github.com/floragunncom/search-guard/wiki#version-matrix
 :searchguard-setup-ref: https://github.com/floragunncom/search-guard/tree/es-2.3.5
 :kibi-ref: http://siren.solutions/kibi/docs/current/
@@ -28,6 +28,9 @@
 :version: 4.6
 :compatible-es-versions: 2.4.x
 :es-compability-table-ref: https://github.com/sirensolutions/kibi/blob/master/README.md#compatibility-table-kibi--elasticsearch
+
+:repo: https://github.com/elastic/kibana/
+:branch: 4.6
 
 include::introduction.asciidoc[]
 

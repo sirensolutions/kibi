@@ -53,11 +53,13 @@ export default function (chrome, internals) {
         internals.setKibiNavbarVisibleDefault($location.search().kibiNavbarVisible);
         // kibi: end
 
-        // listen for route changes, propogate to tabs
+        // listen for route changes, propagate to tabs
         const onRouteChange = function () {
+          // kibi: set URLs with hashes otherwise they might overflow
           const urlWithHashes = window.location.href;
           const urlWithStates = unhashUrl(urlWithHashes, getUnhashableStates());
-          internals.trackPossibleSubUrl(urlWithStates);
+          internals.trackPossibleSubUrl(urlWithHashes);
+          // kibi: end
         };
 
         $rootScope.$on('$routeChangeSuccess', onRouteChange);

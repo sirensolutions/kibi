@@ -13,6 +13,8 @@ import LoadObjectsProvider from 'plugins/kibi_core/management/sections/objects/_
 import KibiSessionHelperProvider from 'ui/kibi/helpers/kibi_session_helper/kibi_session_helper';
 import DeleteHelperProvider from 'ui/kibi/helpers/delete_helper';
 import CacheProvider from 'ui/kibi/helpers/cache_helper';
+import objectActionsRegistry from 'ui/registry/object_actions';
+// kibi: end
 
 const MAX_SIZE = Math.pow(2, 31) - 1;
 
@@ -34,13 +36,18 @@ uiModules.get('apps/management')
   return {
     restrict: 'E',
     controllerAs: 'managementObjectsController',
-    controller: function (kbnVersion, indexPatterns, queryEngineClient, $scope, $injector, $q, AppState, esAdmin) {
+    // kibi: replaces esAdmin with savedObjectsAPI
+    controller: function (kbnVersion, indexPatterns, queryEngineClient, $scope, $injector, $q, AppState, savedObjectsAPI) {
       const notify = createNotifier({ location: 'Saved Objects' });
 
       // TODO: Migrate all scope variables to the controller.
       const $state = $scope.state = new AppState();
       $scope.currentTab = null;
       $scope.selectedItems = [];
+
+      // kibi: object actions registry
+      $scope.objectActions = Private(objectActionsRegistry).toJSON();
+      // kibi: end
 
       this.areAllRowsChecked = function areAllRowsChecked() {
         if ($scope.currentTab.data.length === 0) {
@@ -78,29 +85,6 @@ uiModules.get('apps/management')
       const refreshData = () => {
         return getData(this.advancedFilter);
       };
-
-      // kibi: added by kibi to be able to quickly show the current session
-      $scope.kibi = {
-        showOnlyCurrentSession: true // by default show only the user session
-      };
-
-      $scope.$watch('kibi.showOnlyCurrentSession', function (showOnlyCurrentSession) {
-        if (showOnlyCurrentSession !== undefined) {
-          $scope.kibi.showOnlyCurrentSession = showOnlyCurrentSession;
-        }
-      });
-
-      $scope.filterItems = function (items) {
-        // filter out other sessions only if the checkbox checked
-        // and the current session initialized
-        if ($scope.state && $scope.state.tab === 'sessions' &&
-            $scope.kibi.showOnlyCurrentSession && kibiSessionHelper.initialized && kibiSessionHelper.id
-        ) {
-          return filter(items, 'id', kibiSessionHelper.id);
-        }
-        return items;
-      };
-      // kibi: end
 
       // TODO: Migrate all scope methods to the controller.
       $scope.toggleAll = function () {
@@ -180,8 +164,8 @@ uiModules.get('apps/management')
 
       function retrieveAndExportDocs(objs) {
         if (!objs.length) return notify.error('No saved objects to export.');
-        return esAdmin.mget({
-          index: kbnIndex,
+        // kibi: use savedObjectsAPI instead of es
+        savedObjectsAPI.mget({
           body: {docs: objs.map(transformToMget)}
         })
         .then(function (response) {
@@ -191,7 +175,8 @@ uiModules.get('apps/management')
 
       // Takes an object and returns the associated data needed for an mget API request
       function transformToMget(obj) {
-        return {_id: obj.id, _type: obj.type};
+        // kibi: added index
+        return {index: kbnIndex, _id: obj.id, _type: obj.type};
       }
 
       function saveToFile(results) {

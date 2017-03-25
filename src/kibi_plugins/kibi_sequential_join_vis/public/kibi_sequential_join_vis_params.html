@@ -18,12 +18,12 @@
           <!-- hidden required input to invalidate the form properly -->
           <input type="hidden" name="relationId" required ng-model="button.indexRelationId"/>
           <span class="form-control relation-select"
-                ng-class="{invalid: !button.indexRelationId, focused: menu.focused}"
+                ng-class="{invalid: !button.indexRelationId, focused: focused[$index]}"
                 kibi-menu-template="menu.template"
                 kibi-menu-template-data="menu.relations"
                 kibi-menu-template-context="button"
-                kibi-menu-template-on-focus-fn="menu.onFocus()"
-                kibi-menu-template-on-blur-fn="menu.onBlur()"
+                kibi-menu-template-on-focus-fn="menu.onFocus($index)"
+                kibi-menu-template-on-blur-fn="menu.onBlur($index)"
 
                 >
             <span ng-bind="getLabel(button.indexRelationId) || 'Choose relation'"/>

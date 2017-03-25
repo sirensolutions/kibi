@@ -77,14 +77,41 @@
     </div>
 
     <kibi-array-param-add label="click handler" post-action="clickHandlersChanged()" model="vis.params.clickOptions"></kibi-array-param-add>
+  </section>
+
+  <section>
+    <h2><i class="fa fa-share"></i> Rename columns</h2>
+    <div class="form-group">
+      <label>
+        <input type="checkbox" ng-model="vis.params.enableColumnAliases"/> Enable column rename
+      </label>
+    </div>
+
+    <div ng-if="vis.params.enableColumnAliases">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Column</th>
+            <th>Alias</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr ng-repeat="column in vis.params.columns">
+            <td>{{vis.params.columns[$index]}}</td>
+            <td><input type="text" ng-model="vis.params.columnAliases[$index]" /></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
   </section>
 
   <section>
     <h2><i class="fa fa-code-fork"></i> Relational column</h2>
     <div class="form-group">
-      <input type="checkbox" ng-model="vis.params.enableQueryFields" />
-      <label>Enable relational column</label>
+      <label>
+        <input type="checkbox" ng-model="vis.params.enableQueryFields" /> Enable relational column
+      </label>
     </div>
 
     <div ng-if="vis.params.enableQueryFields">

@@ -5,7 +5,6 @@ import KibiNavBarHelperProvider from 'ui/kibi/directives/kibi_nav_bar_helper';
 import DashboardGroupHelperProvider from 'ui/kibi/helpers/dashboard_group_helper';
 import { onVisualizePage } from 'ui/kibi/utils/on_page';
 import _ from 'lodash';
-import angular from 'angular';
 import chrome from 'ui/chrome';
 import moment from 'moment';
 import DelayExecutionHelperProvider from 'ui/kibi/helpers/delay_execution_helper';
@@ -15,7 +14,7 @@ import uiModules from 'ui/modules';
 import 'ui/kibi/directives/kibi_select';
 import 'ui/kibi/directives/kibi_array_param';
 
-function controller(getAppState, kibiState, $scope, $rootScope, Private, $http, createNotifier, globalState, Promise, kbnIndex) {
+function controller(getAppState, kibiState, $scope, $rootScope, Private, $http, createNotifier, globalState, Promise, kbnIndex, config) {
   const DelayExecutionHelper = Private(DelayExecutionHelperProvider);
   const kibiNavBarHelper = Private(KibiNavBarHelperProvider);
   const dashboardGroupHelper = Private(DashboardGroupHelperProvider);
@@ -30,10 +29,15 @@ function controller(getAppState, kibiState, $scope, $rootScope, Private, $http, 
   const relationsHelper = Private(RelationsHelperProvider);
   const kibiSequentialJoinVisHelper = Private(KibiSequentialJoinVisHelperProvider);
   const currentDashboardId = kibiState._getCurrentDashboardId();
+  $scope.currentDashboardId = currentDashboardId;
   const queryFilter = Private(QueryFilterProvider);
 
+  $scope.btnCountsEnabled = function () {
+    return config.get('kibi:enableAllRelBtnCounts');
+  };
+
   // Update the counts on each button of the related filter
-  const _fireUpdateCounts = function (buttons, dashboardId) {
+  const _fireUpdateCounts = function (buttons, dashboardId, updateOnClick = false) {
     if ($scope.multiSearchData) {
       $scope.multiSearchData.clear();
     }
@@ -45,10 +49,14 @@ function controller(getAppState, kibiState, $scope, $rootScope, Private, $http, 
       ])
       .then(([ indices, joinSeqFilter ]) => {
         button.joinSeqFilter = joinSeqFilter;
-        return kibiSequentialJoinVisHelper.buildCountQuery(button.targetDashboardId, joinSeqFilter)
-        .then((query) => {
-          return { query, button, indices };
-        });
+        if ($scope.btnCountsEnabled() || updateOnClick) {
+          return kibiSequentialJoinVisHelper.buildCountQuery(button.targetDashboardId, joinSeqFilter)
+          .then((query) => {
+            return { query, button, indices };
+          });
+        } else {
+          return { query: undefined, button, indices };
+        }
       })
       .catch((error) => {
         // If computing the indices failed because of an authorization error
@@ -57,12 +65,19 @@ function controller(getAppState, kibiState, $scope, $rootScope, Private, $http, 
           throw error;
         }
         button.forbidden = true;
-        return kibiSequentialJoinVisHelper.buildCountQuery(button.targetDashboardId)
-        .then((query) => {
-          return { query, button, indices: [] };
-        });
+        if ($scope.btnCountsEnabled() || updateOnClick) {
+          return kibiSequentialJoinVisHelper.buildCountQuery(button.targetDashboardId)
+          .then((query) => {
+            return { query, button, indices: [] };
+          });
+        } else {
+          return { guery: undefined, button, indices: [] };
+        }
       });
     })).then((results) => {
+      if (!$scope.btnCountsEnabled() && !updateOnClick) {
+        return Promise.resolve(_.map(results, (result) => result.button));
+      }
       const query = _.map(results, result => {
         return searchHelper.optimize(result.indices, result.query);
       }).join('');
@@ -114,6 +129,10 @@ function controller(getAppState, kibiState, $scope, $rootScope, Private, $http, 
         return _.map(results, (result) => result.button);
       });
     }).catch(notify.error);
+  };
+
+  $scope.getCurrentDashboardBtnCounts = function () {
+    _fireUpdateCounts($scope.buttons, currentDashboardId, true);
   };
 
   const delayExecutionHelper = new DelayExecutionHelper(

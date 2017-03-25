@@ -83,6 +83,7 @@ class UiExports {
       case 'chromeNavControls':
       case 'navbarExtensions':
       case 'managementSections':
+      case 'objectActions': // kibi: object actions
       case 'devTools':
       case 'docViews':
       case 'hacks':

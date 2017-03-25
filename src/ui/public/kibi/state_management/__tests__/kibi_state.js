@@ -531,9 +531,31 @@ describe('State Management', function () {
               id: 'weather-*',
               timeField: 'date',
               indexList: [ 'weather-2015-01' ]
+            },
+            {
+              id: 'logs',
+              timeField: 'date',
+              missing: true
+            },
+            {
+              id: 'error',
+              timeField: 'date',
+              error: true
             }
           ]
         }));
+
+        it('should return an empty array if the index pattern does not match any index', function (done) {
+          kibiState.timeBasedIndices('logs')
+          .then(() => done())
+          .catch((error) => done(`Unexpected error: ${error}`));
+        });
+
+        it('should throw an error if the index pattern cannot be retrieved because of a generic error', function (done) {
+          kibiState.timeBasedIndices('error')
+          .then(() => done(`Expected a rejection.`))
+          .catch((error) => done());
+        });
 
         it('should get an array of indices for a time-based pattern', function (done) {
           const stub = sinon.stub(kibiState, 'getTimeBounds').returns({
@@ -645,6 +667,16 @@ describe('State Management', function () {
                 type: 'date'
               }
             ]
+          },
+          {
+            id: 'logs',
+            timeField: 'date',
+            missing: true
+          },
+          {
+            id: 'error',
+            timeField: 'date',
+            error: true
           }
         ],
         savedDashboards: [
@@ -657,6 +689,11 @@ describe('State Management', function () {
             id: 'dashboard2',
             title: 'dashboard2',
             savedSearchId: 'search1'
+          },
+          {
+            id: 'logs',
+            title: 'Logs',
+            savedSearchId: 'search-logs'
           }
         ],
         savedSearches: [
@@ -664,6 +701,18 @@ describe('State Management', function () {
             id: 'search1',
             kibanaSavedObjectMeta: {
               searchSourceJSON: JSON.stringify({ index: 'index1' })
+            }
+          },
+          {
+            id: 'search-logs',
+            kibanaSavedObjectMeta: {
+              searchSourceJSON: JSON.stringify(
+                {
+                  index: 'logs',
+                  filter: [],
+                  query: {}
+                }
+              )
             }
           }
         ],
@@ -715,6 +764,19 @@ describe('State Management', function () {
           done();
         }).catch(done);
       });
+
+      it('should not reject promise if the index pattern does not match any index', function (done) {
+        kibiState.getState('logs')
+        .then(() => done())
+        .catch((error) => done(`Unexpected error: ${error}`));
+      });
+
+      it('should reject promise if the index pattern cannot be retrieved because of a generic error', function (done) {
+        kibiState.getState('error')
+        .then(() => done(`Expected a rejection.`))
+        .catch((error) => done());
+      });
+
     });
 
     describe('Synchronize time across dashboard', function () {

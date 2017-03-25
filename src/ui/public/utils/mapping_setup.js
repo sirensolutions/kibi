@@ -1,6 +1,7 @@
 import angular from 'angular';
 import _ from 'lodash';
 define(function () {
+  // kibi: require savedObjectsAPITypes and Promise
   return function MappingSetupService(kbnIndex, esAdmin, savedObjectsAPITypes) {
     const mappingSetup = this;
 
@@ -35,7 +36,15 @@ define(function () {
         // the root index name as key
         const index = _.keys(resp)[0];
         return _.keys(resp[index].mappings);
+      })
+      // kibi: ignore authorization errors
+      .catch((error) => {
+        if (error.status === 403) {
+          return [];
+        }
+        throw error;
       });
+
     });
 
     mappingSetup.expandShorthand = function (sh) {
@@ -55,6 +64,10 @@ define(function () {
     };
 
     mappingSetup.isDefined = function (type) {
+      // kibi: if the object is in savedObjectAPITypes we assume it is defined
+      if (savedObjectsAPITypes.has(type)) {
+        return Promise.resolve(true);
+      }
       return getKnownKibanaTypes()
       .then(function (knownTypes) {
         // if the type is in the knownTypes array already

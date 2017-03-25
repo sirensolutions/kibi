@@ -79,6 +79,28 @@ describe('RestQuery', function () {
         expect(ret).to.be(true);
       });
     });
+
+    it('NOT empty uri, empty rest_path, undefined selectedDocuments', function () {
+      var RestQuery = require('../../queries/rest_query');
+      var restQuery = new RestQuery(fakeServer, {
+        rest_path: '',
+      });
+
+      return restQuery.checkIfItIsRelevant({selectedDocuments: undefined}).then(function (ret) {
+        expect(ret).to.be(true);
+      });
+    });
+
+    it('NOT empty uri, rest_body does not depend on entity, undefined selectedDocuments', function () {
+      var RestQuery = require('../../queries/rest_query');
+      var restQuery = new RestQuery(fakeServer, {
+        rest_body: 'doesNotDependEntity',
+      });
+
+      return restQuery.checkIfItIsRelevant({selectedDocuments: undefined}).then(function (ret) {
+        expect(ret).to.be(true);
+      });
+    });
   });
 
   describe('checkIfItIsRelevant - should fail', function () {
@@ -96,6 +118,27 @@ describe('RestQuery', function () {
       });
     });
 
+    it('NOT empty uri, NOT empty rest_path reject as it is undefined selectedDocuments', function () {
+      var RestQuery = require('../../queries/rest_query');
+      var restQuery = new RestQuery(fakeServer, {
+        rest_path: '/id=@doc[id]@'
+      });
+
+      return restQuery.checkIfItIsRelevant({selectedDocuments: undefined}).then(function (ret) {
+        expect(ret).to.be(false);
+      });
+    });
+
+    it('NOT empty uri, NOT empty rest_body should reject as it is undefined selectedDocuments', function () {
+      var RestQuery = require('../../queries/rest_query');
+      var restQuery = new RestQuery(fakeServer, {
+        rest_body: '/id=@doc[id]@'
+      });
+
+      return restQuery.checkIfItIsRelevant({selectedDocuments: undefined}).then(function (ret) {
+        expect(ret).to.be(false);
+      });
+    });
   });
 
   describe('fetchResults test if correct arguments are passed to generateCacheKey', function () {

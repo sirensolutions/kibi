@@ -13,9 +13,13 @@ import builtin from './lib/model/builtin';
  *
  * `registerType(configuration)`: allows to register a new type with the specified configuration.
  *                                Configuration is expected to contain a `schema` attribute with
- *                                a Joi instance containing the schema of the type and a `type`
- *                                attribute with the type name.
+ *                                a Joi instance containing the schema of the type, a `type`
+ *                                attribute containing the type name and an optional `title`
+ *                                attribute containing the type title.
  * `getModel(typeName)`: returns the model instance for the specified type name.
+ * `getTypes()`: returns the registered type as `{type: 'name', title: 'title'}`.
+ * `registerMiddleware(middleware)`: allows to register an API middleware.
+ * `getMiddlewares()`: returns the list of registered API middlewares.
  * `getServerCredentials`: returns the server credentials.
  */
 export default function (kibana) {
@@ -24,11 +28,13 @@ export default function (kibana) {
 
   return new kibana.Plugin({
     name: 'saved_objects_api',
-    require: ['elasticsearch'],
+    require: ['elasticsearch', 'kibi_core'],
 
     init(server, options) {
-      const registry = initRegistry(server);
       const config = server.config();
+
+      const typeRegistry = initRegistry(server);
+      const middlewares = new Set();
 
       require('./lib/routes/v1')(server, API_ROOT);
 
@@ -54,9 +60,12 @@ export default function (kibana) {
       });
 
       server.expose('registerType', (configuration) => {
-        registry.set(configuration.type, new Model(server, configuration.type, configuration.schema));
+        typeRegistry.set(configuration.type, new Model(server, configuration.type, configuration.schema, configuration.title));
       });
-      server.expose('getModel', (typeName) => registry.get(typeName));
+      server.expose('registerMiddleware', (middleware) => middlewares.add(middleware));
+      server.expose('getMiddlewares', () => middlewares);
+      server.expose('getModel', (typeName) => typeRegistry.get(typeName));
+      server.expose('getTypes', () => typeRegistry.list());
       server.expose('getServerCredentials', () => {
         const username = config.get('elasticsearch.username');
         const password = config.get('elasticsearch.password');
@@ -74,6 +83,7 @@ export default function (kibana) {
     uiExports: {
       hacks: [
         'plugins/saved_objects_api/services/types',
+        'plugins/saved_objects_api/modals/service'
       ],
       injectDefaultVars: () => ({
         savedObjectsAPIBuiltin: builtin

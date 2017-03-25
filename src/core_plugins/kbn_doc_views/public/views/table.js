@@ -13,13 +13,27 @@ docViewsRegistry.register(function () {
         hit: '=',
         indexPattern: '=',
         filter: '=',
-        columns: '='
+        columns: '=',
+        columnAliases: '=?' // kibi: added columnAliases this was needed to support aliases in kibi-doc-table
       },
       controller: function ($scope) {
         $scope.mapping = $scope.indexPattern.fields.byName;
         $scope.flattened = $scope.indexPattern.flattenHit($scope.hit);
         $scope.formatted = $scope.indexPattern.formatHit($scope.hit);
         $scope.fields = _.keys($scope.flattened).sort();
+
+        // kibi: constructing aliases map
+        $scope.aliases = {};
+        _.each($scope.fields, (fieldName) =>{
+          $scope.aliases[fieldName] = fieldName;
+          if ($scope.columns && $scope.columnAliases && $scope.columnAliases.length > 0) {
+            const index = $scope.columns.indexOf(fieldName);
+            if ($scope.columnAliases[index]) {
+              $scope.aliases[fieldName] = $scope.columnAliases[index];
+            }
+          }
+        });
+        // kibi: end
 
         $scope.toggleColumn = function (fieldName) {
           _.toggleInOut($scope.columns, fieldName);

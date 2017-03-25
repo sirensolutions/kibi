@@ -13,19 +13,6 @@ uiModules.get('app/dashboard')
         // check that it should be visible or not
         $scope.showSearch = onDashboardPage();
       });
-
-      $scope.filterResults = function () {
-        $rootScope.$emit('kibi:dashboard:invoke-method', 'filterResults');
-      };
-
-      $scope.$watch('state', function () {
-        $rootScope.$emit('kibi:dashboard:set-property', 'state', $scope.state);
-      }, true);
-
-      const off = $rootScope.$on('stDashboardOnProperty', function (event, property, value) {
-        $scope[property] = value;
-      });
-      $scope.$on('$destroy', off);
     }
   };
 });

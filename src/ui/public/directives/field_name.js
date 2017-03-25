@@ -9,7 +9,8 @@ module.directive('fieldName', function ($compile, $rootScope, $filter) {
     scope: {
       'field': '=',
       'fieldName': '=',
-      'fieldType': '='
+      'fieldType': '=',
+      'fieldAlias': '=?' // kibi: added fieldAlias to support column renaming in kibi-doc-table
     },
     link: function ($scope, $el) {
 
@@ -41,6 +42,7 @@ module.directive('fieldName', function ($compile, $rootScope, $filter) {
       $rootScope.$watchMulti.call($scope, [
         'field',
         'fieldName',
+        'fieldAlias', // kibi: added fieldAlias to support column renaming in kibi-doc-table
         'fieldType',
         'field.rowCount'
       ], function () {
@@ -50,17 +52,36 @@ module.directive('fieldName', function ($compile, $rootScope, $filter) {
         const results = $scope.field ? !$scope.field.rowCount && !$scope.field.scripted : false;
         const scripted = $scope.field ? $scope.field.scripted : false;
 
-        const displayName = $filter('shortDots')(name);
-
+        // kibi: build element structure before setting field name
         $el
           .attr('title', name)
           .toggleClass('no-results', results)
           .toggleClass('scripted', scripted)
-          .prepend(typeIcon(type))
-          .append($('<span>')
-            .text(displayName)
-            .addClass('discover-field-name')
-          );
+          .prepend(typeIcon(type));
+
+        // kibi: support alias for column name
+        // check if alias is different than original name to avoid showing
+        // the same name in parenthesis
+        let fieldDisplayName = $filter('shortDots')(name);
+        if ($scope.fieldAlias && $scope.fieldAlias !== name) {
+          $el
+            .append($('<span>')
+              .text($filter('shortDots')($scope.fieldAlias))
+              .addClass('discover-field-name')
+            );
+          $el
+            .append($('<span>')
+              .text(fieldDisplayName)
+              .addClass('original-field-name')
+            );
+        } else {
+          $el
+            .append($('<span>')
+              .text(fieldDisplayName)
+              .addClass('discover-field-name')
+            );
+        }
+        // kibi: end
       });
     }
   };

@@ -69,6 +69,7 @@ describe('ui/courier/fetch/strategy/search', () => {
         search.reqsFetchParamsToBody(reqsFetchParams).then(val => value = val);
         $rootScope.$apply();
         expect(_.includes(value, '"index":[".kibi"]')).to.be(true);
+        expect(_.includes(value, '"type":"null"')).to.be(true);
         expect(_.includes(value, query)).to.be(true);
       });
 

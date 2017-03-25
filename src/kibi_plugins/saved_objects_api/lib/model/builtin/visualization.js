@@ -19,7 +19,7 @@ export default class VisualizationModel extends Model {
       })
     });
 
-    super(server, 'visualization', schema);
+    super(server, 'visualization', schema, 'Visualization');
   }
 }
 

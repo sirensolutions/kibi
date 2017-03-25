@@ -53,7 +53,7 @@ export default function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnU
     .map(function (buttonDef) {
       const button = _.clone(buttonDef);
 
-      button.click = function () {
+      button.click = function (updateOnClick = false) {
         let alias = button.filterLabel || '... related to ($COUNT) from $DASHBOARD';
         const currentDashboardId = kibiState._getCurrentDashboardId();
 
@@ -84,7 +84,7 @@ export default function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnU
             this.joinSeqFilter.meta.alias = alias;
             if (alias.indexOf('$COUNT') !== -1) {
               this.joinSeqFilter.meta.alias_tmpl = alias;
-              return this.getSourceCount(currentDashboardId)
+              return this.getSourceCount(currentDashboardId, updateOnClick)
               .then((sourceCount) => {
                 this.joinSeqFilter.meta.alias = alias.replace(/\$COUNT/g, sourceCount);
                 switchToDashboard.apply(this);

@@ -36,9 +36,12 @@ uiModules
       infiniteScroll: '=?',
       filter: '=?',
 
-      // kibi: to make the cellClickHandlers available to the scope of kibiTableRow
+      // kibi:
+      // added cellClickHandlers, queryColumn and columnAliases
+      // to make them available to the scope of kibiTableRow and kibiTableHeader
       cellClickHandlers: '=',
-      queryColumn: '='
+      queryColumn: '=',
+      columnAliases: '=?',
     },
     link: function ($scope) {
       const notify = createNotifier({

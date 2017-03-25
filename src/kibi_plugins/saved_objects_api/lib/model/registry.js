@@ -39,5 +39,19 @@ export default class TypeRegistry {
     return instance;
   }
 
+  /**
+   * @returns an array of objects with two attributes, `type` and `title`.
+   */
+  list() {
+    const types = [];
+    this[instanceMap].forEach((model, type) => {
+      types.push({
+        type,
+        title: model.title
+      });
+    });
+    return types;
+  }
+
 }
 

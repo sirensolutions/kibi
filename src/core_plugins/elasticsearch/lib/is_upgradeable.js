@@ -22,6 +22,34 @@ function computePreReleaseIndex(matches) {
   ];
 }
 
+/**
+ * Some Kibi versions use the dash, which is considered a pre-release by semver.
+ */
+function lowerThan(version, packageVersion) {
+  const dashRe = /^(\d\.\d\.\d)-(\d?)$/;
+  let semVersion = version;
+  let versionIncrement = 0;
+  let semPackageVersion = packageVersion;
+  let packageVersionIncrement = 0;
+
+  let matches = version.match(dashRe);
+  if (matches) {
+    semVersion = matches[1];
+    versionIncrement = parseInt(matches[2], 10);
+  }
+
+  matches = packageVersion.match(dashRe);
+  if (matches) {
+    semPackageVersion = matches[1];
+    packageVersionIncrement = parseInt(matches[2], 10);
+  }
+
+  if (semver.eq(semVersion, semPackageVersion)) {
+    return versionIncrement < packageVersionIncrement;
+  }
+  return semver.lt(version, packageVersion);
+}
+
 module.exports = function (server, doc) {
   const config = server.config();
   if (/snapshot/i.test(doc._id)) return false;
@@ -55,7 +83,8 @@ module.exports = function (server, doc) {
     if (semver.eq(version, packageVersion)) {
       return isSnapshot || preReleaseIndex < packagePreReleaseIndex;
     }
-    return semver.lt(version, packageVersion);
+    // kibi: handle dash versions
+    return lowerThan(version, packageVersion);
   } catch (e) {
     return false;
   }

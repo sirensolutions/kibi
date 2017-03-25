@@ -35,6 +35,7 @@ module.exports = function (kibana) {
           'fieldFormats',
           'navbarExtensions',
           'managementSections',
+          'objectActions', // kibi: added objectActions
           'devTools',
           'docViews',
           'hacks' // kibi: allow to insert our own version of some kibana components like the kibiee notifier

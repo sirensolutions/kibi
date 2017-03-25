@@ -41,8 +41,15 @@ export default class SettingsPage {
     await PageObjects.common.findTestSubject('advancedSetting-' + propertyName + '-editButton').click();
     await PageObjects.header.isGlobalLoadingIndicatorHidden();
     await PageObjects.common.sleep(1000);
-    await this.remote.setFindTimeout(defaultFindTimeout)
+    // kibi: added to be able to change the boolean values
+    if (propertyValue === true || propertyValue === false) {
+      await this.remote.setFindTimeout(defaultFindTimeout)
+      .findByCssSelector('input[type="checkbox"]').click();
+    } else {
+      await this.remote.setFindTimeout(defaultFindTimeout)
       .findByCssSelector('option[label="' + propertyValue + '"]').click();
+    }
+    // kibi: end
     await PageObjects.header.isGlobalLoadingIndicatorHidden();
     await PageObjects.common.findTestSubject('advancedSetting-' + propertyName + '-saveButton').click();
     await PageObjects.header.isGlobalLoadingIndicatorHidden();

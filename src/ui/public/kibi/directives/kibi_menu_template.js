@@ -11,6 +11,16 @@ uiModules
       delay: $scope.kibiMenuTemplateHideDelay || 250
     };
 
+    const isKibiRelationsSearchBar = function (obj) {
+      for (const key in obj) {
+        if (!obj.hasOwnProperty(key)) continue;
+        if (obj[key].nodeName === 'kibi-relations-search-bar') {
+          return true;
+        }
+      }
+      return false;
+    };
+
     const getRandomInt = function (min, max) {
       return Math.floor(Math.random() * (max - min + 1)) + min;
     };
@@ -103,6 +113,10 @@ uiModules
       const isSelf = $el[0] === event.target;
       const isMenu = container[0].contains(event.target);
       const isInsideElement = isChild || isSelf;
+
+      if (isKibiRelationsSearchBar(event.target.attributes)) {
+        return;
+      }
 
       if (!isInsideElement && !isMenu && $scope.kibiMenuTemplateOnBlurFn) {
         $scope.kibiMenuTemplateOnBlurFn();

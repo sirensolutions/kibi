@@ -39,6 +39,13 @@ with multiple groups of data coming from different indices.
 
 - The <<kibi_box_plot,Box plot>> visualization, which displays a box plot chart from the data in the current set of Elasticsearch documents.
 
+- The <<kibi_vector_map,Kibi Vector Map>> visualization, which displays a vector map where countries are colored based on aggregated field value.
+
+- The <<kibi_horizontal_bar_chart,Kibi Horizontal Bar Chart>> visualization, which displays a horizontal bar chart.
+
+- The <<kibi_multi_chart,Multi chart>> visualization, which displays a different type of charts for the same data
+and allow save and select multiple aggregation configurations.
+
 - The <<enhanced_search_results,Enhanced search results>> visualization, which
 displays query results in a table.
 
@@ -60,12 +67,5 @@ Kibi is currently developed as a fork of Kibana {kibana-version}. The plugin API
 
 === What's new in Kibi v{kibi-version}
 
-This new version of Kibi provides many improvements and new features, the main ones are listed below:
-
-* Support for object migration from Kibi 4.4.2
-* Improved Export and Import - Kibi is now able to export and reimport all configuration and index patterns
-* Added headers and parameters to a REST datasource configuration
-* Added more graph scripts to Graph Browser [Enterprise Edition only]
-* Scalability improvements in Graph Browser [Enterprise Edition only]
-
+This new version of Kibi provides many improvements and new features.
 To see all changes check <<releasenotes,full release notes>>

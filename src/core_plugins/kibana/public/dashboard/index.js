@@ -106,6 +106,7 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
     controller: function (kibiState, globalState, config, $scope, $rootScope, $route, $routeParams, $location, Private, getAppState) {
 
       const queryFilter = Private(FilterBarQueryFilterProvider);
+      const getEmptyQueryOptionHelper = Private(require('ui/kibi/helpers/get_empty_query_with_options_helper'));
 
       const notify = createNotifier({
         location: 'Dashboard'
@@ -172,7 +173,7 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
         options: dash.optionsJSON ? JSON.parse(dash.optionsJSON) : {},
         uiState: dash.uiStateJSON ? JSON.parse(dash.uiStateJSON) : {},
         // kibi: get the query from the kibi state, and if unset get the one the searchsource
-        query: dashboardQuery || extractQueryFromFilters(dash.searchSource.getOwn('filter')) || {query_string: {query: '*'}},
+        query: dashboardQuery || extractQueryFromFilters(dash.searchSource.getOwn('filter')) || getEmptyQueryOptionHelper.getQuery(),
         // kibi: get the filters from the kibi state, and if unset get the one the searchsource
         filters: dashboardFilters || _.reject(dash.searchSource.getOwn('filter'), matchQueryFilter)
       };
@@ -408,6 +409,22 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
         timefilter: $scope.timefilter
       };
 
+      // kibi: If you click the back/forward browser button:
+      // 1. The $locationChangeSuccess event is fired when you click back/forward browser button.
+      $rootScope.$on('$locationChangeSuccess', () => $rootScope.actualLocation = $location.url());
+      // 2. The following watcher is fired.
+      $rootScope.$watch(() => { return $location.url(); }, (newLocation, oldLocation) => {
+        if ($rootScope.actualLocation === newLocation) {
+          /* kibi: Here we execute init() if the newLocation is equal to the URL we saved during
+          the $locationChangeSuccess event above. */
+          init();
+        }
+      });
+      /* kibi: If you click an ordinary hyperlink, the above order is reversed.
+         First, you have the watcher fired, then the $locationChangeSuccess event.
+         That's why the actualLocation and newLocation will never be equal inside the watcher callback
+         if you click on an ordinary hyperlink.
+       */
       init();
     }
   };

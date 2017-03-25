@@ -42,6 +42,7 @@ uiModules
     restrict: 'A',
     scope: {
       columns: '=',
+      columnAliases: '=?', // kibi: column aliases
       filter: '=',
       indexPattern: '=',
       row: '=kibiTableRow',
@@ -83,6 +84,9 @@ uiModules
         $detailsTr.html(detailsHtml);
 
         $detailsScope.row = $scope.row;
+        // kibi: passing columns and columnAliases to details view
+        $detailsScope.columns = $scope.columns;
+        $detailsScope.columnAliases = $scope.columnAliases;
 
         $compile($detailsTr)($detailsScope);
       };

@@ -1,4 +1,5 @@
 import expect from 'expect.js';
+import { merge } from 'lodash';
 import sinon from 'sinon';
 import url from 'url';
 import initRegistry from '../../../init_registry';
@@ -22,8 +23,9 @@ export default class ModelTestHelper {
    * @param {String} typename - The name of the ES type managed the the model class being tested.
    * @param {String} stringField - The name of a stringField in the mapping that will be set during tests.
    * @param {String} prefix - The prefix for objects created by the helper.
+   * @param {Array} plugins - Mocked server plugins.
    */
-  constructor(timeout, typename, stringField, prefix) {
+  constructor(timeout, typename, stringField, prefix, plugins) {
     const clusterUrl =  url.format(serverConfig.servers.elasticsearch);
     this._prefix = prefix;
     this._stringField = stringField;
@@ -54,10 +56,17 @@ export default class ModelTestHelper {
           getCryptoHelper: () => ({
             encryptDatasourceParams: () => {}
           })
+        },
+        saved_objects_api: {
+          getMiddlewares: () => []
         }
       },
       config: () => configMock
     };
+
+    if (plugins) {
+      merge(this._server.plugins, plugins);
+    }
     this._registry = initRegistry(this._server);
   }
 

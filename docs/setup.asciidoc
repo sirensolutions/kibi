@@ -73,6 +73,8 @@ an overview of the included demo dataset is available in
 If you want to connect Kibi to a different Elasticsearch cluster, open
 the configuration file in `kibi/config/kibi.yml`, set the correct URL in
 the `elasticsearch.url` parameter, then restart Kibi.
+Example of a https://github.com/sirensolutions/kibi/blob/master/config/kibi.yml[kibi.yml] file.
+
 
 [float]
 [[connect]]
@@ -83,7 +85,7 @@ That's it. That's all you need to configure to start using Kibi. You can add ind
 <<settings-create-pattern,Settings tab>>.
 
 TIP: By default, Kibi connects to the Elasticsearch instance running on `localhost`. To connect to a different
-Elasticsearch instance, modify the Elasticsearch URL in the `kibana.yml` configuration file and restart Kibi. For
+Elasticsearch instance, modify the Elasticsearch URL in the `kibi.yml` configuration file and restart Kibi. For
 information about using Kibi with your production nodes, see <<production>>.
 
 To configure the Elasticsearch indices you want to access with Kibi:

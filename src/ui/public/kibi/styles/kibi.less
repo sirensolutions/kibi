@@ -2,13 +2,25 @@
 @import (reference) "~ui/styles/variables.less";
 @import (reference) "~ui/kibi/styles/kibi_variables";
 
+// Used in document detail table view when an alias is defined for table column
+span.original-field-name {
+  font-style: italic;
+  margin-left: 4px;
+  color: @gray-light;
+}
+
 // Buttons ================================================
-.btn-relational {
+.btn.btn-relational {
   .button-variant(@btn-relational-color; @btn-relational-bg; @btn-relational-border);
 }
 
-.disabled-btn-relational {
+.btn.disabled-btn-relational {
   .button-variant(@btn-relational-color; @btn-disabled-relational-bg; @btn-relational-border);
+}
+
+/* traditional bootstrap white btn-default which in kibana was overriten to grey */
+.btn.kibi-btn-default {
+  .button-variant(@kibi-btn-default-color; @kibi-btn-default-bg; @kibi-btn-default-border);
 }
 
 // Panel ================================================
@@ -126,3 +138,4 @@ navbar button {
     }
   }
 }
+

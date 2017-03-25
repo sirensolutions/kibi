@@ -15,7 +15,10 @@ describe('discoverField', function () {
   let indexPattern;
   let $elem;
 
-  beforeEach(ngMock.module('kibana'));
+  beforeEach(ngMock.module('kibana', function ($provide) {
+    //kibi: provide elasticsearchPlugins constant
+    $provide.constant('elasticsearchPlugins', ['siren-join']);
+  }));
   beforeEach(ngMock.inject(function (Private, $rootScope, $compile) {
     $elem = angular.element('<discover-field></discover-field>');
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);

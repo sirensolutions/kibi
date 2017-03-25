@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import { each } from 'lodash';
 import $ from 'jquery';
 import uiModules from 'ui/modules';
 import DocViewsProvider from 'ui/registry/doc_views';
@@ -15,7 +15,8 @@ uiModules.get('kibana')
       hit: '=',
       indexPattern: '=',
       filter: '=?',
-      columns: '=?'
+      columns: '=?',
+      columnAliases: '=?' // kibi: added columnAliases this was needed to support aliases in kibi-doc-table
     },
     template: function ($el, $attr) {
       const $viewer = $('<div class="doc-viewer">');

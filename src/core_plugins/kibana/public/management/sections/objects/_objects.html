@@ -174,6 +174,18 @@
                     class="kuiIcon fa-eye"
                   ></span>
                 </button>
+
+                <button
+                  ng-repeat="action in objectActions"
+                  ng-click="action.execute(service, item)"
+                  class="kuiMicroButton kuiTableRowHoverReveal"
+                  aria-label="{{ action.label }}"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="kuiIcon {{ action.icon }}"
+                  ></span>
+                </button>
               </div>
             </td>
           </tr>

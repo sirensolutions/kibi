@@ -19,6 +19,7 @@ uiModules
       });
 
       const relations = config.get('kibi:relations');
+      $scope.focused = [];
 
       $scope.getLabel = function (relationId) {
         if (relationId) {
@@ -40,6 +41,7 @@ uiModules
           notify.error('Could not find relation: ' + button.indexRelationId + '. Check relations configuration.');
           delete button.indexRelationId;
         }
+        $scope.focused.push(false);
       });
 
       const filteredRelations = _(relations.relationsIndices)
@@ -52,17 +54,21 @@ uiModules
           };
         }
       })
+      .sortBy(function (rel) {
+        return rel.indices[0].indexPatternId;
+      })
       .sortBy((rel) => rel.label)
       .value();
 
       $scope.menu = {
         template: menuTemplateHtml,
         relations: filteredRelations,
-        onFocus: function () {
-          $scope.menu.focused = true;
+        onFocus: function (index) {
+          _.fill($scope.focused, false);
+          $scope.focused[index] = true;
         },
-        onBlur: function () {
-          $scope.menu.focused = false;
+        onBlur: function (index) {
+          _.fill($scope.focused, false);
         },
 
       };

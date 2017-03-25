@@ -6,7 +6,7 @@ import SearchHelper from 'ui/kibi/helpers/search_helper';
 import chrome from 'ui/chrome';
 
 export default function DashboardGroupHelperFactory($timeout, kibiState, Private, savedDashboards, savedDashboardGroups, Promise, kbnIndex,
-    $http) {
+    $http, config) {
   const dashboardHelper = Private(DashboardHelperProvider);
   const queryBuilder = Private(QueryBuilderProvider);
 
@@ -142,7 +142,8 @@ export default function DashboardGroupHelperFactory($timeout, kibiState, Private
     const idsArray = Array.from(ids); // has to do it as it might be a set
     return savedDashboards.find().then((resp) => {
       const dashboards = _.filter(resp.hits, (dashboard) => {
-        return dashboard.savedSearchId && idsArray.indexOf(dashboard.id) !== -1;
+        return dashboard.savedSearchId && idsArray.indexOf(dashboard.id) !== -1
+          && config.get('kibi:enableAllDashboardsCounts');
       });
 
       const metadataPromises = _.map(dashboards, (dashboard) => {
@@ -241,10 +242,20 @@ export default function DashboardGroupHelperFactory($timeout, kibiState, Private
       }
       // here first fetch all dashboards to be able to verify that dashboards mentioned in the group still exists
       return savedDashboards.find().then(function (respDashboards) {
+        const listOfDashboards = _.map(respDashboards.hits, function (hit) {
+          return hit.id;
+        });
+
         const dashboardGroups1 = [];
         let fail = '';
         // first iterate over existing groups
         _.each(respGroups.hits, function (group) {
+
+          // ignores empties dashboard objects inside a dashboard group
+          group.dashboards = _.filter(group.dashboards, function (dashboard) {
+            return dashboard.id !== undefined && dashboard.title !== undefined;
+          });
+
 
           // selected dashboard
           let selected;
@@ -252,7 +263,7 @@ export default function DashboardGroupHelperFactory($timeout, kibiState, Private
           // check that all dashboards still exists
           // in case there is one which does not display a warning
           _.each(dashboardsArray, function (d) {
-            if (!_.find(respDashboards.hits, 'id', d.id)) {
+            if (listOfDashboards.indexOf(d.id) === -1) {
               fail = '"' + group.title + '"' + ' dashboard group contains non existing dashboard "' + d.id + '". ' +
                 'Edit dashboard group to remove non existing dashboard';
               return false;

@@ -87,6 +87,20 @@ uiModules
         $rootScope.$emit('kibi:vis:columns-changed', $scope.vis.params.columns);
       }, true);
 
+      $scope.$watch('vis.params.enableColumnAliases', (enableColumnAliases) => {
+        if (!enableColumnAliases) {
+          $scope.vis.params.columnAliases = [];
+        } else {
+          // prepopulate aliases to original names if not defined
+          _.each($scope.vis.params.columns, (columnName, index) => {
+            if (!$scope.vis.params.columnAliases[index]) {
+              $scope.vis.params.columnAliases[index] = columnName;
+            }
+          });
+        }
+        $rootScope.$emit('kibi:vis:columnAliases-changed', $scope.vis.params.columnAliases);
+      }, true);
+
       // =======
       // Queries
       // =======

@@ -10,7 +10,8 @@ import IndexPatternsLocalCacheProvider from 'ui/index_patterns/_local_cache';
 // kibi: imports
 import PathsProvider from 'ui/kibi/index_patterns/_get_paths_for_index_pattern';
 
-export default function MapperService(Private, Promise, es, esAdmin, config, kbnIndex) {
+// kibi: require savedObjecsAPI service instead of esAdmin
+export default function MapperService(Private, Promise, es, savedObjectsAPI, config, kbnIndex) {
 
   const enhanceFieldsWithCapabilities = Private(EnhanceFieldsWithCapabilitiesProvider);
   const transformMappingIntoFields = Private(IndexPatternsTransformMappingIntoFieldsProvider);
@@ -65,18 +66,19 @@ export default function MapperService(Private, Promise, es, esAdmin, config, kbn
      * @async
      */
     self.getFieldsForIndexPattern = function (indexPattern, skipIndexPatternCache) {
-      const id = indexPattern.id;
+      let id = indexPattern.id;
 
       const cache = fieldCache.get(id);
       if (cache) return Promise.resolve(cache);
 
       if (!skipIndexPatternCache) {
-        return esAdmin.get({
+        // kibi: retrieve index pattern using the saved objects API.
+        return savedObjectsAPI.get({
           index: kbnIndex,
           type: 'index-pattern',
-          id: id,
-          _sourceInclude: ['fields']
+          id: id
         })
+        // kibi: end
         .then(function (resp) {
           if (resp.found && resp._source.fields) {
             fieldCache.set(id, JSON.parse(resp._source.fields));
@@ -85,20 +87,19 @@ export default function MapperService(Private, Promise, es, esAdmin, config, kbn
         });
       }
 
-      let indexList = id;
-      let promise = Promise.resolve();
+      let promise = Promise.resolve(id);
       if (indexPattern.intervalName) {
         promise = self.getIndicesForIndexPattern(indexPattern)
         .then(function (existing) {
           if (existing.matches.length === 0) throw new IndexPatternMissingIndices();
-          indexList = existing.matches.slice(-config.get('indexPattern:fieldMapping:lookBack')); // Grab the most recent
+          return existing.matches.slice(-config.get('indexPattern:fieldMapping:lookBack')); // Grab the most recent
         });
       }
 
-      return promise.then(function () {
+      return promise.then(function (indexList) {
         return es.indices.getFieldMapping({
           index: indexList,
-          fields: '*',
+          field: '*',
           ignoreUnavailable: _.isArray(indexList),
           allowNoIndices: false,
           includeDefaults: true
@@ -106,7 +107,6 @@ export default function MapperService(Private, Promise, es, esAdmin, config, kbn
       })
       .catch(handleMissingIndexPattern)
       .then(transformMappingIntoFields)
-      .then(fields => enhanceFieldsWithCapabilities(fields, indexList))
       .then(function (fields) {
         fieldCache.set(id, fields);
         return fieldCache.get(id);
@@ -114,12 +114,12 @@ export default function MapperService(Private, Promise, es, esAdmin, config, kbn
     };
 
     self.getIndicesForIndexPattern = function (indexPattern) {
-      return es.indices.getAlias({
+      return es.indices.getAliases({
         index: patternToWildcard(indexPattern.id)
       })
       .then(function (resp) {
         // let all = Object.keys(resp).sort();
-        const all = _(resp)
+        let all = _(resp)
         .map(function (index, key) {
           if (index.aliases) {
             return [Object.keys(index.aliases), key];
@@ -132,8 +132,8 @@ export default function MapperService(Private, Promise, es, esAdmin, config, kbn
         .uniq(true)
         .value();
 
-        const matches = all.filter(function (existingIndex) {
-          const parsed = moment(existingIndex, indexPattern.id);
+        let matches = all.filter(function (existingIndex) {
+          let parsed = moment(existingIndex, indexPattern.id);
           return existingIndex === parsed.format(indexPattern.id);
         });
 

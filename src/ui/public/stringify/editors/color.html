@@ -1,7 +1,7 @@
 <div class="form-group">
   <div ng-repeat="color in editor.formatParams.colors">
     <div class="editor-color">
-      <button ng-if="editor.formatParams.colors.length > 1" aria-label="Remove Color" ng-click="removeColor($index)" tooltip="Remove Color" tooltip-append-to-body="true" type="button" class="btn btn-xs btn-danger editor-color-remove">
+      <button ng-if="editor.formatParams.colors.length > 1" aria-label="Remove Color" ng-click="removeColor($index)" tooltip="Remove Color" type="button" class="btn btn-xs btn-danger editor-color-remove">
         <i aria-hidden="true" class="fa fa-times"></i>
       </button>
       <div class="form-group" ng-if="editor.formatParams.fieldType === 'number'">
@@ -44,7 +44,7 @@
     </div>
   </div>
 
-  <button aria-label="Add Color" ng-click="addColor()" tooltip="Add Color" tooltip-append-to-body="true" type="button" class="btn btn-primary btn-xs">
+  <button aria-label="Add Color" ng-click="addColor()" tooltip="Add Color" type="button" class="btn btn-primary btn-xs">
       <span class="sr-only">Add Color</span>
       <i aria-hidden="true" class="fa fa-plus"></i> Add Color
   </button>

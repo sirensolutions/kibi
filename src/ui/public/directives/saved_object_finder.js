@@ -26,7 +26,9 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
       // optional useLocalManagement attr,  removes link to management section
       useLocalManagement: '=?useLocalManagement',
       // kibi: optional needed for filtering visualizations based on dashboard savedSearchId
-      savedSearchId: '=?savedSearchId'
+      savedSearchId: '=?savedSearchId',
+      // kibi: allow to override the number of objects per page
+      perPage: '=?perPage'
     },
     template: savedObjectFinderTemplate,
     controllerAs: 'finder',
@@ -48,8 +50,11 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
       // the text input element
       const $input = $element.find('input[ng-model=filter]');
 
-      // The number of items to show in the list
-      $scope.perPage = config.get('savedObjects:perPage');
+      // kibi: allow to override the number of objects per page
+      if (!$scope.perPage) {
+        // The number of items to show in the list
+        $scope.perPage = config.get('savedObjects:perPage');
+      }
 
       // the list that will hold the suggestions
       const $list = $element.find('ul');

@@ -91,6 +91,7 @@ define(function (require) {
           jQuery('.filter').each(function (index) {
             const $el = jQuery(this);
             if ($el.hasClass('join') && explanations[index]) {
+              $el.qtip('destroy', true);
               $el.qtip({
                 content: {
                   title: 'Steps - last one on top',

@@ -37,6 +37,12 @@
     </label>
     <kibi-select object-type="search" ng-model="opts.dashboard.savedSearchId"></kibi-select>
   </div>
+  <div class="form-group">
+    <label>Order
+      <kbn-info placement="right" info="For ordering the dashboard tabs"></kbn-info>
+    </label>
+    <input type="number" ng-model="opts.dashboard.priority" class="form-control ng-pristine ng-valid ng-touched">
+  </div>
   <!-- kibi: end -->
 
   <button type="submit" ng-disabled="!opts.dashboard.title" class="btn btn-primary" aria-label="Save dashboard">

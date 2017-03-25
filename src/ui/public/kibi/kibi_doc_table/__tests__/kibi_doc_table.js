@@ -47,8 +47,14 @@ describe('Kibi doc table', function () {
   }));
 
   beforeEach(function () {
-    $elem = angular.element(`<kibi-doc-table query-column="queryColumn" search-source="searchSource" columns="columns"
-                            sorting="sorting"></kibi-doc-table>`);
+    $elem = angular.element(
+      `<kibi-doc-table
+        query-column="queryColumn"
+        search-source="searchSource"
+        columns="columns"
+        column-aliases="columnAliases"
+        sorting="sorting">
+      </kibi-doc-table>`);
     ngMock.inject(function (Private) {
       searchSource = Private(StubbedSearchSourceProvider);
     });
@@ -115,7 +121,63 @@ describe('Kibi doc table', function () {
     expect($elem.find('table').length).to.be(1);
   });
 
-  describe('Kibi tests', function () {
+  describe('Kibi additional functionalities tests', function () {
+
+    describe('test if column aliases work', function () {
+
+      it('should correctly display the column name if there is no alias', function () {
+        init($elem, {
+          searchSource: searchSource,
+          columns: ['label'],
+          columnAliases: [],
+          queryColumn: {}
+        });
+        searchSource.crankResults({
+          hits: {
+            total : 49487,
+            max_score : 1.0,
+            hits: [
+              {
+                _index: 'aaa',
+                _type: 'AAA',
+                _id: '42',
+                _score: 1,
+                _source: {label: 'labelValue'}
+              }
+            ]
+          }
+        });
+        $scope.$digest();
+        expect(_.trim($elem.find('.table-header-name').text())).to.equal('label');
+      });
+
+      it('should correctly replace an column name with an alias', function () {
+        init($elem, {
+          searchSource: searchSource,
+          columns: ['label'],
+          columnAliases: ['labelAlias'],
+          queryColumn: {}
+        });
+        searchSource.crankResults({
+          hits: {
+            total : 49487,
+            max_score : 1.0,
+            hits: [
+              {
+                _index: 'aaa',
+                _type: 'AAA',
+                _id: '42',
+                _score: 1,
+                _source: {label: 'labelValue'}
+              }
+            ]
+          }
+        });
+        $scope.$digest();
+        expect(_.trim($elem.find('.table-header-name').text())).to.equal('labelAlias');
+      });
+    });
+
     describe('inject sql query column', function () {
       beforeEach(function () {
         init($elem, {

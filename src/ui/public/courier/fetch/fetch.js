@@ -14,7 +14,23 @@ export default function fetchService(Private, Promise) {
   const INCOMPLETE = Private(ReqStatusProvider).INCOMPLETE;
 
   function fetchQueued(strategy) {
-    const requests = requestQueue.getStartable(strategy);
+    let requests = requestQueue.getStartable(strategy);
+
+    //kibi: Adding $$kibiSingleCall = true to a member of a visualization allows to avoid all other requests
+    //kibi: i.e. This is usefull for multi chart plugin
+    const multiChartRequest = _.filter(requests, function (req) {
+      return req.source && req.source.vis && req.source.vis.$$kibiSingleCall;
+    });
+    if (multiChartRequest.length > 0) {
+      requests = multiChartRequest;
+      _.each(requests, function (req) {
+        if (req.source && req.source.vis && req.source.vis.$$kibiSingleCall) {
+          req.source.vis.$$kibiSingleCall = false;
+        }
+      });
+    }
+    //kibi: end
+
     if (!requests.length) return Promise.resolve();
     else return fetchThese(requests);
   }

@@ -14,7 +14,10 @@ describe('Kibi Services', function () {
 
     beforeEach(function () {
 
-      ngMock.module('kibana');
+      ngMock.module('kibana', function ($provide) {
+        // kibi: provide elasticsearchPlugins constant
+        $provide.constant('elasticsearchPlugins', ['siren-join']);
+      });
 
       ngMock.inject(function ($injector, Private, _$rootScope_) {
         savedTemplates = $injector.get('savedTemplates');

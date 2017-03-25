@@ -70,13 +70,17 @@ describe('routes', function () {
 
     it('redirects shortened urls', (done) => {
       kbnTestServer.makeRequest(kbnServer, shortenOptions, (res) => {
+        const payload = res.payload; // kibi: store payload
         const gotoOptions = {
           method: 'GET',
           url: '/goto/' + res.payload
         };
         kbnTestServer.makeRequest(kbnServer, gotoOptions, (res) => {
           expect(res.statusCode).to.be(302);
-          expect(res.headers.location).to.be(shortenOptions.payload.url);
+          // kibi: verify the redirect according to our implementation
+          let actual = res.headers.location;
+          expect(actual).to.be(`/app/kibana#/discover?_h=${payload}`);
+          // kibi: end
           done();
         });
       });

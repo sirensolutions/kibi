@@ -3,7 +3,8 @@ import Scanner from 'ui/utils/scanner';
 import { StringUtils } from 'ui/utils/string_utils';
 
 export class SavedObjectLoader {
-  constructor(SavedObjectClass, kbnIndex, esAdmin, kbnUrl, { savedObjectsAPI, caching: { cache, find, get } = {}, mapHit } = {}) {
+  // kibi: added properties and remove esAdmin
+  constructor(SavedObjectClass, kbnIndex, kbnUrl, { savedObjectsAPI, caching: { cache, find, get } = {}, mapHit } = {}) {
     // kibi: kibi properties
     this.savedObjectsAPI = savedObjectsAPI;
     this.mapHit = mapHit;
@@ -17,9 +18,8 @@ export class SavedObjectLoader {
     this.lowercaseType = this.type.toLowerCase();
     this.kbnIndex = kbnIndex;
     this.kbnUrl = kbnUrl;
-    this.esAdmin = esAdmin;
 
-    this.scanner = new Scanner(esAdmin, {
+    this.scanner = new Scanner(savedObjectsAPI, {
       index: kbnIndex,
       type: this.lowercaseType
     });

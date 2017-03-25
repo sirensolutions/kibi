@@ -1,13 +1,9 @@
 const app = require('ui/modules').get('kibana');
 const Clipboard = require('clipboard');
-const unhashUrl = require('ui/state_management/state_hashing').unhashUrl;
-const getUnhashableStatesProvider = require('ui/state_management/state_hashing').getUnhashableStatesProvider;
 
 require('../styles/index.less');
 
-app.directive('shareObjectUrl', function (Private, createNotifier) {
-  const urlShortener = Private(require('../lib/url_shortener'));
-  const getUnhashableStates = Private(getUnhashableStatesProvider);
+app.directive('shareObjectUrl', function (Private, createNotifier, sharingService) { // kibi: depend on sharing service
 
   return {
     restrict: 'E',
@@ -45,11 +41,7 @@ app.directive('shareObjectUrl', function (Private, createNotifier) {
 
       $scope.clipboard = clipboard;
     },
-    controller: function ($scope, $location) {
-      const notify = createNotifier({
-        location: `Share ${$scope.$parent.objectType}`
-      });
-
+    controller: function ($scope) { // kibi: removed $location
       function updateUrl(url) {
         $scope.url = url;
 
@@ -67,7 +59,7 @@ app.directive('shareObjectUrl', function (Private, createNotifier) {
 
       $scope.generateShortUrl = function () {
         if ($scope.shortGenerated) return;
-        urlShortener.shortenUrl($scope.url)
+        sharingService.generateShortUrl($scope.shareAsEmbed, $scope.kibiNavbarVisible) // kibi: use sharing service to shorten URL.
         .then(shortUrl => {
           updateUrl(shortUrl);
           $scope.shortGenerated = true;
@@ -75,19 +67,8 @@ app.directive('shareObjectUrl', function (Private, createNotifier) {
       };
 
       $scope.getUrl = function () {
-        const urlWithHashes = $location.absUrl();
-        let urlWithStates = unhashUrl(urlWithHashes, getUnhashableStates());
-        if ($scope.shareAsEmbed) {
-          // kibi: added to control when to show hide kibi-nav-bar
-          if ($scope.kibiNavbarVisible) {
-            urlWithStates = urlWithStates.replace('?', '?embed=true&kibiNavbarVisible=true&');
-          } else {
-            urlWithStates = urlWithStates.replace('?', '?embed=true&');
-          }
-          // kibi: end
-        }
-
-        return urlWithStates;
+        // kibi: use sharing service to fetch the current state URL.
+        return sharingService.getSharedUrl($scope.shareAsEmbed, $scope.kibiNavbarVisible);
       };
 
       $scope.$watch('getUrl()', updateUrl);

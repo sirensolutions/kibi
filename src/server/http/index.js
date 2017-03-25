@@ -169,8 +169,17 @@ module.exports = function (kbnServer, server, config) {
       try {
         const data = await shortUrlLookup.getUrl(request.params.urlId);
         shortUrlAssertValid(data.url);
+        // kibi: if embedding parameters are set they must be included in the initial URL
+        let embeddingParameters = '';
+        if (data.url.match(/[&?]embed=true/)) {
+          embeddingParameters += 'embed=true&';
+          if (data.url.match(/[&?]kibiNavbarVisible=true/)) {
+            embeddingParameters += 'kibiNavbarVisible=true&';
+          }
+        }
+        // kibi: end
         reply().redirect(
-          `${config.get('server.basePath')}/app/kibana#/discover?_h=${request.params.urlId}`
+          `${config.get('server.basePath')}/app/kibana#/discover?${embeddingParameters}_h=${request.params.urlId}`
         ); // kibi: adding the sha to be able to restore kibiSession in the browser
       } catch (err) {
         reply(err);

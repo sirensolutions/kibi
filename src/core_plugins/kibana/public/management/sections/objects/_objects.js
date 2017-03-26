@@ -10,7 +10,6 @@ import uiModules from 'ui/modules';
 // kibi: imports
 import RefreshKibanaIndexProvider from 'plugins/kibana/management/sections/indices/_refresh_kibana_index';
 import LoadObjectsProvider from 'plugins/kibi_core/management/sections/objects/_sequential_import';
-import KibiSessionHelperProvider from 'ui/kibi/helpers/kibi_session_helper/kibi_session_helper';
 import DeleteHelperProvider from 'ui/kibi/helpers/delete_helper';
 import CacheProvider from 'ui/kibi/helpers/cache_helper';
 import objectActionsRegistry from 'ui/registry/object_actions';
@@ -28,7 +27,6 @@ uiModules.get('apps/management')
   // kibi: all below dependencies added by kibi to improve import/export and delete operations
   const cache = Private(CacheProvider);
   const deleteHelper = Private(DeleteHelperProvider);
-  const kibiSessionHelper = Private(KibiSessionHelperProvider);
   const refreshKibanaIndex = Private(RefreshKibanaIndexProvider);
   const loadObjects = Private(LoadObjectsProvider);
   // kibi: end

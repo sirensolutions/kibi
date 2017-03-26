@@ -27,7 +27,7 @@ uiRoutes
     dashboardGroup: function ($route, courier, savedDashboardGroups) {
       return savedDashboardGroups.get($route.current.params.id)
       .catch(courier.redirectWhenMissing({
-        dashboardGroup : '/management/kibana/dashboardgroups'
+        dashboardGroup: '/management/kibana/dashboardgroups'
       }));
     }
   }

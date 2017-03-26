@@ -1,12 +1,9 @@
-import DashboardGroupHelperProvider from 'ui/kibi/helpers/dashboard_group_helper';
 import _ from 'lodash';
 
-export default function DeleteHelperFactory(savedVisualizations, Private, $window) {
+export default function DeleteHelperFactory(Promise, dashboardGroups, savedVisualizations, Private, $window) {
 
   function DeleteHelper() {
   }
-
-  const dashboardGroupHelper = Private(DashboardGroupHelperProvider);
 
   /**
    * GetVisualisations returns visualisations that are used by the list of queries
@@ -39,9 +36,20 @@ export default function DeleteHelperFactory(savedVisualizations, Private, $windo
    * Delete selected objects with pre-processing that depends on the type of the service
    */
   DeleteHelper.prototype.deleteByType = function (type, ids, delcb) {
+    if (!delcb) {
+      throw new Error('delete method was not passed');
+    }
+
     switch (type) {
+      case 'dashboardgroup':
+        let promise = delcb();
+        if (!Promise.is(promise)) {
+          promise = Promise.resolve('deleted');
+        }
+        return promise.then(() => dashboardGroups.computeGroups(`deleted dashboard groups ${JSON.stringify(ids, null, ' ')}`));
+
       case 'dashboard':
-        return dashboardGroupHelper.getIdsOfDashboardGroupsTheseDashboardsBelongTo(ids)
+        return dashboardGroups.getIdsOfDashboardGroupsTheseDashboardsBelongTo(ids)
         .then(function (dashboardGroupNames) {
           if (dashboardGroupNames && dashboardGroupNames.length > 0) {
             const plural = dashboardGroupNames.length > 1;
@@ -51,11 +59,12 @@ export default function DeleteHelperFactory(savedVisualizations, Private, $windo
               'Please edit the group' + (plural ? 's' : '') +
               ' and remove the dashboard from its configuration first.';
             $window.alert(msg);
-            return;
           } else {
-            if (delcb) {
-              delcb();
+            let promise = delcb();
+            if (!Promise.is(promise)) {
+              promise = Promise.resolve('deleted');
             }
+            return promise.then(() => dashboardGroups.computeGroups(`deleted dashboards ${JSON.stringify(ids, null, ' ')}`));
           }
         });
 
@@ -70,16 +79,12 @@ export default function DeleteHelperFactory(savedVisualizations, Private, $windo
               (visData[1].length === 1 ? ' this visualization ' : ' those visualizations ') + 'first.\n\n';
             $window.alert(msg);
           } else {
-            if (delcb) {
-              delcb();
-            }
+            delcb();
           }
         });
 
       default:
-        if (delcb) {
-          delcb();
-        }
+        delcb();
     }
   };
 

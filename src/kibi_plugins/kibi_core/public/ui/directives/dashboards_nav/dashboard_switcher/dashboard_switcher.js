@@ -8,17 +8,14 @@ import uiModules from 'ui/modules';
 import uiRoutes from 'ui/routes';
 import _ from 'lodash';
 
-uiRoutes
-.addSetupWork(function (Private) {
-  const kibiNavBarHelper = Private(KibiNavBarHelperProvider);
-  return kibiNavBarHelper.init();
-});
-
 uiModules
 .get('kibana')
-.directive('dashboardSwitcher', function (kibiState, Private, $rootScope) {
+.directive('dashboardSwitcher', function (dashboardGroups, createNotifier, kibiState, Private, $rootScope) {
   const kibiNavBarHelper = Private(KibiNavBarHelperProvider);
   const queryFilter = Private(QueryFilterProvider);
+  const notify = createNotifier({
+    location: 'Dashboard Navigation Bar'
+  });
 
   return {
     restrict: 'E',
@@ -27,39 +24,29 @@ uiModules
     },
     template,
     controller($scope) {
-      const groups = kibiNavBarHelper.getDashboardGroups();
-
-      $scope.groups = groups;
-
-      $scope.$watch('filter', filter => {
-        $scope.groups = groups;
-        if (filter) {
-          filter = filter.toLowerCase();
-          $scope.groups = _.filter(groups, group => {
-            if (_.contains(group.title.toLowerCase(), filter)) {
-              return true;
-            }
-            return _.find(group.dashboards, dashboard => _.contains(dashboard.title.toLowerCase(), filter));
-          });
+      $scope.groups = dashboardGroups.getGroups();
+      $scope.$watchCollection(() => dashboardGroups.getGroups(), function (groups) {
+        if (groups) {
+          $scope.groups = groups;
         }
       });
+
+      const computeDashboardsGroups = function (reason) {
+        return dashboardGroups.computeGroups(reason)
+        .then((groups) => {
+          dashboardGroups.copy(groups, $scope.groups);
+        })
+        .catch(notify.error);
+      };
 
       // rerender tabs if any dashboard got saved
       const removeDashboardChangedHandler = $rootScope.$on('kibi:dashboard:changed', function (event, dashId) {
-        kibiNavBarHelper.computeDashboardsGroups('Dashboard changed')
+        computeDashboardsGroups('Dashboard changed')
         .then(() => kibiNavBarHelper.updateAllCounts([ dashId ], 'kibi:dashboard:changed event'));
       });
 
-      $scope.$watch(function (scope) {
-        return kibiState._getCurrentDashboardId();
-      }, (currentDashboardId) => {
-        if (currentDashboardId) {
-          kibiNavBarHelper.computeDashboardsGroups('current dashboard changed');
-        }
-      });
-
-      const removeDashboardGroupChangedHandler = $rootScope.$on('kibi:dashboardgroup:changed', function () {
-        kibiNavBarHelper.computeDashboardsGroups('Dashboard group changed');
+      $rootScope.$on('kibi:dashboardgroup:changed', function () {
+        computeDashboardsGroups('Dashboard group changed');
       });
 
       $scope.$listen(queryFilter, 'update', function () {
@@ -72,7 +59,6 @@ uiModules
 
       $scope.$on('$destroy', function () {
         kibiNavBarHelper.cancelExecutionInProgress();
-        removeDashboardGroupChangedHandler();
         removeDashboardChangedHandler();
       });
     }

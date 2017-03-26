@@ -99,7 +99,7 @@ export default function MapperService(Private, Promise, es, savedObjectsAPI, con
       return promise.then(function (indexList) {
         return es.indices.getFieldMapping({
           index: indexList,
-          field: '*',
+          fields: '*',
           ignoreUnavailable: _.isArray(indexList),
           allowNoIndices: false,
           includeDefaults: true

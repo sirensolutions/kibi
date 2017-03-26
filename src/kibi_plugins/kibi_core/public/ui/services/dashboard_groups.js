@@ -20,7 +20,37 @@ uiModules
   let lastFiredMultiCountsQuery;
   let lastMultiCountsQueryResults;
 
-  const updateCountOnMetadata = function (metadata, responses) {
+  const _shortenDashboardName = function (groupTitle, dashboardTitle) {
+    const g = groupTitle.toLowerCase();
+    const d = dashboardTitle.toLowerCase();
+    if (d.indexOf(g) === 0 && d.length > g.length) {
+      return dashboardTitle.substring(groupTitle.length).replace(/^[\s-]{1,}/, '');  // replace any leading spaces or dashes
+    }
+    return dashboardTitle;
+  };
+
+  const _getDashboardForGroup = function (groupId, groupTitle, dashboardDef) {
+    return {
+      id: dashboardDef.id,
+      title: _shortenDashboardName(groupTitle, dashboardDef.title),
+      savedSearchId: dashboardDef.savedSearchId
+    };
+  };
+
+  const _constructFilterIconMessage = function (filters, queries) {
+    if (queries || filters) {
+      if (queries.length > 1 && filters.length !== 0) {
+        return `This dashboard has a query and ${filters.length} filter${filters.length > 1 ? 's' : ''} set.`;
+      } else if (queries.length > 1) {
+        return 'This dashboard has a query set.';
+      } else if (filters.length !== 0) {
+        return `This dashboard has ${filters.length} filter${filters.length > 1 ? 's' : ''} set.`;
+      }
+    }
+    return null;
+  };
+
+  const _updateCountOnMetadata = function (metadata, responses) {
     if (responses && metadata) {
       if (responses.length === metadata.length) {
         for (let i = 0; i < responses.length; i++) {
@@ -42,7 +72,7 @@ uiModules
     }
   };
 
-  const getDashboardsMetadata = function (ids, forceCountsUpdate = false) {
+  const _getDashboardsMetadata = function (ids, forceCountsUpdate = false) {
     return savedDashboards.find()
     .then((resp) => {
       const dashboards = _.filter(resp.hits, dashboard => dashboard.savedSearchId && _.contains(ids, dashboard.id));
@@ -85,13 +115,13 @@ uiModules
 
         if (countsQuery) {
           if (lastFiredMultiCountsQuery && lastFiredMultiCountsQuery === countsQuery && !forceCountsUpdate) {
-            updateCountOnMetadata(metadata, lastMultiCountsQueryResults);
+            _updateCountOnMetadata(metadata, lastMultiCountsQueryResults);
           } else {
             return es.msearch({ body: countsQuery })
             .then(response => {
               lastFiredMultiCountsQuery = countsQuery;
               lastMultiCountsQueryResults = response.responses;
-              updateCountOnMetadata(metadata, lastMultiCountsQueryResults);
+              _updateCountOnMetadata(metadata, lastMultiCountsQueryResults);
               return metadata;
             });
           }
@@ -155,7 +185,7 @@ uiModules
         console.log(msg); // eslint-disable-line no-console
       }
 
-      return getDashboardsMetadata(ids, forceCountsUpdate)
+      return _getDashboardsMetadata(ids, forceCountsUpdate)
       .then(metadata => {
         _.each(this.groups, (g) => {
           _.each(g.dashboards, (d) => {
@@ -163,7 +193,7 @@ uiModules
             if (foundDashboardMetadata) {
               d.count = foundDashboardMetadata.count;
               d.isPruned = foundDashboardMetadata.isPruned;
-              d.filterIconMessage = this.constructFilterIconMessage(
+              d.filterIconMessage = _constructFilterIconMessage(
                 foundDashboardMetadata.filters,
                 foundDashboardMetadata.queries
               );
@@ -183,14 +213,14 @@ uiModules
       // take all dashboards except the selected one
       const dashboardIds = _(group.dashboards).reject('id', group.selected.id).map('id').value();
 
-      return getDashboardsMetadata(dashboardIds)
+      return _getDashboardsMetadata(dashboardIds)
       .then(metadata => {
         _.each(group.dashboards, d => {
           const foundDashboardMetadata = _.find(metadata, 'dashboardId', d.id);
           if (foundDashboardMetadata) {
             d.count = foundDashboardMetadata.count;
             d.isPruned = foundDashboardMetadata.isPruned;
-            d.filterIconMessage = this.constructFilterIconMessage(foundDashboardMetadata.filters, foundDashboardMetadata.queries);
+            d.filterIconMessage = _constructFilterIconMessage(foundDashboardMetadata.filters, foundDashboardMetadata.queries);
           }
         });
       });
@@ -214,61 +244,26 @@ uiModules
       return _.unique(ret);
     }
 
-    shortenDashboardName(groupTitle, dashboardTitle) {
-      const g = groupTitle.toLowerCase();
-      const d = dashboardTitle.toLowerCase();
-      if (d.indexOf(g) === 0 && d.length > g.length) {
-        return dashboardTitle.substring(groupTitle.length).replace(/^[\s-]{1,}/, '');  // replace any leading spaces or dashes
-      }
-      return dashboardTitle;
-    }
-
-    setSelectedDashboardAndActiveGroup(dashboardId) {
-      // here iterate over dashboard groups remove the active group
-      // then set the new active group and set the selected dashboard
-      _.each(this.groups, function (group) {
-        const activeDashboard = _.find(group.dashboards, 'id', dashboardId);
-        if (activeDashboard) {
-          group.active = true;
-          group.selected = activeDashboard;
-          kibiState.setSelectedDashboardId(group.id, dashboardId);
-          kibiState.save();
-        } else {
-          group.active = false;
-        }
-      });
-    }
-
     selectDashboard(dashboardId) {
       $timeout.cancel(lastSelectDashboardEventTimer);
       lastSelectDashboardEventTimer = $timeout(() => {
-        // here save which one was selected for
-        this.setSelectedDashboardAndActiveGroup(dashboardId);
+        // save which one was selected for:
+        // - iterate over dashboard groups remove the active group
+        // - set the new active group and set the selected dashboard
+        _.each(this.groups, function (group) {
+          const activeDashboard = _.find(group.dashboards, 'id', dashboardId);
+          if (activeDashboard) {
+            group.active = true;
+            group.selected = activeDashboard;
+            kibiState.setSelectedDashboardId(group.id, dashboardId);
+            kibiState.save();
+          } else {
+            group.active = false;
+          }
+        });
         return dashboardHelper.switchDashboard(dashboardId);
       }, selectDelay);
       return lastSelectDashboardEventTimer;
-    }
-
-    constructFilterIconMessage(filters, queries) {
-      if (queries || filters) {
-        if (queries.length > 1 && filters.length !== 0) {
-          return 'This dashboard has a query and ' + filters.length + ' filter' + (filters.length > 1 ? 's' : '') + ' set.';
-        } else if (queries.length > 1) {
-          return 'This dashboard has a query set.';
-        } else if (filters.length !== 0) {
-          return 'This dashboard has ' + filters.length + ' filter' + (filters.length > 1 ? 's' : '') + ' set.';
-        }
-      }
-      return null;
-    }
-
-    _getDashboardForGroup(groupId, groupTitle, dashboardDef) {
-      const self = this;
-      return {
-        id: dashboardDef.id,
-        title: self.shortenDashboardName(groupTitle, dashboardDef.title),
-        savedSearchId: dashboardDef.savedSearchId
-      };
     }
 
     _getListOfDashboardsFromGroups(dashboardGroups) {
@@ -383,7 +378,7 @@ uiModules
             }
 
             const dashboards = _.map(dashboardsArray, function (d) {
-              const dashboard = self._getDashboardForGroup(group.id, group.title, _.find(respDashboards.hits, 'id', d.id));
+              const dashboard = _getDashboardForGroup(group.id, group.title, _.find(respDashboards.hits, 'id', d.id));
               if (currentDashboardId && currentDashboardId === dashboard.id) {
                 selected = dashboard;
               }
@@ -452,7 +447,7 @@ uiModules
             // not in a group so add it as new group with single dashboard
             const groupId = dashboardDef.id;
             const groupTitle = dashboardDef.title;
-            const onlyOneDashboard = self._getDashboardForGroup(groupId, groupTitle, dashboardDef);
+            const onlyOneDashboard = _getDashboardForGroup(groupId, groupTitle, dashboardDef);
 
             dashboardGroups1.push({
               id: groupId,

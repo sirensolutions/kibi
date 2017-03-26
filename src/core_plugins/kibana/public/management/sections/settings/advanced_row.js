@@ -62,8 +62,8 @@ uiModules.get('apps/management')
           if (_.isFunction(conf.validator)) {
             value = conf.validator(conf.unsavedValue);
             if (value instanceof Error) {
-              return Promise.reject(value);
-            };
+              return Promise.reject(`Wrong value set for: ${conf.name}. ${value.message}`);
+            }
           }
           return config.set(conf.name, value);
           // kibi: end

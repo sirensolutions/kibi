@@ -1,20 +1,20 @@
 import { merge } from 'lodash';
 import moment from 'moment-timezone';
 
+// kibi: added
+const positiveIntegerValidator = function (val) {
+  if (!/^\+?(0|[1-9]\d*)$/.test(val)) {
+    return new Error('Should be positive integer but was [' + val + '].');
+  }
+  return parseInt(val);
+};
+// kibi: end
+
 export default function defaultSettingsProvider(kibiEnterpriseEnabled) {
   const weekdays = moment.weekdays().slice();
   const [defaultWeekday] = weekdays;
 
   // wrapped in provider so that a new instance is given to each app/test
-
-  // kibi: added
-  const positiveIntegerValidator = function (val, name) {
-    if (!/^\+?(0|[1-9]\d*)$/.test(val)) {
-      return new Error('Wrong value set for: ' + name + '. Should be positive integer but was [' + val + '].');
-    }
-    return parseInt(val);
-  };
-  // kibi: end
 
   const options = {
     'buildNum': {
@@ -319,22 +319,6 @@ export default function defaultSettingsProvider(kibiEnterpriseEnabled) {
       value: false,
       description: 'Set to true to suppress all warnings and errors'
     },
-    'kibi:graphUseWebGl' : {
-      value: true,
-      description: 'Set to false to disable WebGL rendering'
-    },
-    'kibi:graphExpansionLimit' : {
-      value: 500,
-      description: 'Limit the number of elements to retrieve during the graph expansion'
-    },
-    'kibi:graphRelationFetchLimit' : {
-      value: 2500,
-      description: 'Limit the number of relations to retrieve after the graph expansion'
-    },
-    'kibi:graphMaxConcurrentCalls' : {
-      value: 15,
-      description: 'Limit the number of concurrent calls done by the Graph Browser'
-    },
     'kibi:timePrecision' : {
       type: 'string',
       value: 's',
@@ -357,17 +341,13 @@ export default function defaultSettingsProvider(kibiEnterpriseEnabled) {
       type: 'number',
       value: 2,
       description: 'Set to change the default vertical panel size.',
-      validator: function (val) {
-        return positiveIntegerValidator(val, 'kibi:panel_vertical_size');
-      }
+      validator: positiveIntegerValidator
     },
     'kibi:vertical_grid_resolution': {
       type: 'number',
       value: 100,
       description: 'Set to change vertical grid resolution.',
-      validator: function (val) {
-        return positiveIntegerValidator(val, 'kibi:vertical_grid_resolution');
-      }
+      validator: positiveIntegerValidator
     },
     'kibi:enableAllDashboardsCounts' : {
       value: true,

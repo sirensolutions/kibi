@@ -1,7 +1,7 @@
 import expect from 'expect.js';
 import sinon from 'auto-release-sinon';
-import ngMock from 'ngMock';
-import rison from 'ui/utils/rison';
+import ngMock from 'ng_mock';
+import rison from 'rison-node';
 import hashUrl from '../hash_url';
 import {
   hashedItemStoreSingleton,

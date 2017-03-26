@@ -23,6 +23,7 @@ uiModules
   const _shortenDashboardName = function (groupTitle, dashboardTitle) {
     const g = groupTitle.toLowerCase();
     const d = dashboardTitle.toLowerCase();
+
     if (d.indexOf(g) === 0 && d.length > g.length) {
       return dashboardTitle.substring(groupTitle.length).replace(/^[\s-]{1,}/, '');  // replace any leading spaces or dashes
     }

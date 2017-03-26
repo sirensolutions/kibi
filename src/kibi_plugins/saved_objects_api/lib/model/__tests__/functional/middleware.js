@@ -2,8 +2,8 @@ import requirefrom from 'requirefrom';
 import sinon from 'sinon';
 import expect from 'expect.js';
 import Scenario from './scenarios/empty/scenario';
-const wrapAsync = requirefrom('src/testUtils')('wrap_async');
-const serverConfig = requirefrom('test')('serverConfig');
+const wrapAsync = requirefrom('src/test_utils')('wrap_async');
+const serverConfig = requirefrom('test')('server_config');
 import ModelTestHelper from './helper';
 
 describe('saved_objects_api/functional', function () {

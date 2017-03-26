@@ -115,8 +115,8 @@ module.exports = async function (kbnServer, server, config) {
     path: '/goto/{urlId}',
     handler: async function (request, reply) {
       try {
-        const url = await shortUrlLookup.getUrl(request.params.urlId, request);
-        shortUrlAssertValid(url);
+        const data = await shortUrlLookup.getUrl(request.params.urlId, request);
+        shortUrlAssertValid(data.url);
         reply().redirect(
           `${config.get('server.basePath')}/app/kibana#/discover?_h=${request.params.urlId}`
         ); // kibi: adding the sha to be able to restore kibiSession in the browser
@@ -132,7 +132,7 @@ module.exports = async function (kbnServer, server, config) {
     path: '/kibisession/{urlId}',
     handler: async function (request, reply) {
       try {
-        const data = await shortUrlLookup.getUrl(request.params.urlId);
+        const data = await shortUrlLookup.getUrl(request.params.urlId, request);
         shortUrlAssertValid(data.url);
         reply(data || {});
       } catch (err) {

@@ -30,7 +30,6 @@ export default class Model {
     this._schema = schema;
 
     this._cluster = server.plugins.elasticsearch.getCluster('admin');
-    this._authClient = server.plugins.elasticsearch.client;
   }
 
   /**
@@ -156,7 +155,7 @@ export default class Model {
       let requestMiddlewareMethod = 'createRequest';
       let responseMiddlewareMethod = 'createResponse';
 
-      let response = await this._authClient.get({
+      let response = await this._cluster.callWithInternalUser('get', {
         index: this._config.get('kibana.index'),
         type: this._type,
         id: id,
@@ -207,7 +206,7 @@ export default class Model {
       let requestMiddlewareMethod = 'updateRequest';
       let responseMiddlewareMethod = 'updateResponse';
 
-      let response = await this._authClient.get({
+      let response = await this._cluster.callWithInternalUser('get', {
         index: this._config.get('kibana.index'),
         type: this._type,
         id: id,
@@ -235,7 +234,7 @@ export default class Model {
 
       this._setCredentials(parameters, request);
 
-      return await this._cluster.callWithRequest({}, 'index', parameters);
+      await this._cluster.callWithRequest({}, 'index', parameters);
       for (const middleware of this._plugin.getMiddlewares()) {
         await middleware[responseMiddlewareMethod](this, id, body, request, response);
       }
@@ -336,7 +335,6 @@ export default class Model {
         parameters.size = 0;
       } else {
         parameters.size = 100;
-        parameters.searchType = 'scan';
         parameters.scroll = '1m';
       }
 

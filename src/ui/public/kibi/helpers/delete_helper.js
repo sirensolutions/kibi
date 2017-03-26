@@ -40,33 +40,31 @@ export default function DeleteHelperFactory(Promise, dashboardGroups, savedVisua
       throw new Error('delete method was not passed');
     }
 
+    const _delete = function () {
+      let promise = delcb();
+      if (!Promise.is(promise)) {
+        promise = Promise.resolve();
+      }
+      return promise;
+    };
+
     switch (type) {
       case 'dashboardgroup':
-        let promise = delcb();
-        if (!Promise.is(promise)) {
-          promise = Promise.resolve('deleted');
-        }
-        return promise.then(() => dashboardGroups.computeGroups(`deleted dashboard groups ${JSON.stringify(ids, null, ' ')}`));
+        return _delete().then(() => dashboardGroups.computeGroups(`deleted dashboard groups ${JSON.stringify(ids, null, ' ')}`));
 
       case 'dashboard':
-        return dashboardGroups.getIdsOfDashboardGroupsTheseDashboardsBelongTo(ids)
-        .then(function (dashboardGroupNames) {
-          if (dashboardGroupNames && dashboardGroupNames.length > 0) {
-            const plural = dashboardGroupNames.length > 1;
-            const msg =
-              'Dashboard ' + JSON.stringify(ids, null, ' ') + ' is referred by the following dashboardGroup' +
-              (plural ? 's' : '') + ':\n' + dashboardGroupNames.join(', ') + '\n' +
-              'Please edit the group' + (plural ? 's' : '') +
-              ' and remove the dashboard from its configuration first.';
-            $window.alert(msg);
-          } else {
-            let promise = delcb();
-            if (!Promise.is(promise)) {
-              promise = Promise.resolve('deleted');
-            }
-            return promise.then(() => dashboardGroups.computeGroups(`deleted dashboards ${JSON.stringify(ids, null, ' ')}`));
-          }
-        });
+        const dashboardGroupNames = dashboardGroups.getIdsOfDashboardGroupsTheseDashboardsBelongTo(ids);
+        if (dashboardGroupNames && dashboardGroupNames.length > 0) {
+          const plural = dashboardGroupNames.length > 1;
+          const msg =
+            'Dashboard ' + JSON.stringify(ids, null, ' ') + ' is referred by the following dashboardGroup' +
+            (plural ? 's' : '') + ':\n' + dashboardGroupNames.join(', ') + '\n' +
+            'Please edit the group' + (plural ? 's' : '') +
+            ' and remove the dashboard from its configuration first.';
+          $window.alert(msg);
+          return Promise.resolve();
+        }
+        return _delete().then(() => dashboardGroups.computeGroups(`deleted dashboards ${JSON.stringify(ids, null, ' ')}`));
 
       case 'query':
         return this._getVisualisations(ids).then(function (visData) {
@@ -84,7 +82,7 @@ export default function DeleteHelperFactory(Promise, dashboardGroups, savedVisua
         });
 
       default:
-        delcb();
+        return _delete();
     }
   };
 

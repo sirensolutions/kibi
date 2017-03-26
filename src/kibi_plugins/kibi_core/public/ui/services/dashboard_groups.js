@@ -197,23 +197,21 @@ uiModules
     }
 
     getIdsOfDashboardGroupsTheseDashboardsBelongTo(dashboardIds) {
-      return savedDashboardGroups.find().then(function (resp) {
-        const ret = [];
-        _.each(resp.hits, function (hit) {
-          const id = hit.id;
-          if (hit.dashboards instanceof Array) {
-            _.each(hit.dashboards, function (d) {
-              if (dashboardIds.indexOf(d.id) !== -1) {
-                ret.push(id);
-              }
-            });
-          } else {
-            const msg = `Property dashboards should be and Array, but was [${JSON.stringify(hit.dashboards, null, '')}]`;
-            return Promise.reject(new Error(msg));
-          }
-        });
-        return _.unique(ret);
+      const ret = [];
+      _.each(this.groups, function (group) {
+        const id = group.id;
+        if (group.dashboards instanceof Array) {
+          _.each(group.dashboards, function (d) {
+            if (dashboardIds.indexOf(d.id) !== -1) {
+              ret.push(id);
+            }
+          });
+        } else {
+          const msg = `Property dashboards should be and Array, but was [${JSON.stringify(group.dashboards, null, '')}]`;
+          return Promise.reject(new Error(msg));
+        }
       });
+      return _.unique(ret);
     }
 
     shortenDashboardName(groupTitle, dashboardTitle) {

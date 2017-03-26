@@ -96,7 +96,7 @@ uiModules
     setGroupHighlight(dashboardId) {
       // here iterate over dashboardGroups remove all highlighted groups
       // then set the new highlight group
-      _.each(this.groups, function (group) {
+      _.each(this.getGroups(), function (group) {
         _.each(group.dashboards, function (dashboard) {
           if (dashboard.id === dashboardId) {
             dashboard.$$highlight = true;
@@ -109,7 +109,7 @@ uiModules
 
     resetGroupHighlight() {
       // here iterate over dashboardGroups remove all highlighted groups
-      _.each(this.groups, function (group) {
+      _.each(this.getGroups(), function (group) {
         _.each(group.dashboards, function (dashboard) {
           dashboard.$$highlight = false;
         });
@@ -117,7 +117,7 @@ uiModules
     }
 
     getDashboardsInGroup(groupId) {
-      const group = _.find(this.groups, 'id', groupId);
+      const group = _.find(this.getGroups(), 'id', groupId);
       return group.dashboards;
     }
 
@@ -188,7 +188,7 @@ uiModules
 
       return this._getDashboardsMetadata(ids, forceCountsUpdate)
       .then(metadata => {
-        _.each(this.groups, (g) => {
+        _.each(this.getGroups(), (g) => {
           _.each(g.dashboards, (d) => {
             const foundDashboardMetadata = _.find(metadata, 'dashboardId', d.id);
             if (foundDashboardMetadata) {
@@ -210,7 +210,7 @@ uiModules
     }
 
     updateMetadataOfGroupId(groupId, forceCountsUpdate = false) {
-      const group = _.find(this.groups, 'id', groupId);
+      const group = _.find(this.getGroups(), 'id', groupId);
       // take all dashboards except the selected one
       const dashboardIds = _(group.dashboards).reject('id', group.selected.id).map('id').value();
 
@@ -229,7 +229,7 @@ uiModules
 
     getIdsOfDashboardGroupsTheseDashboardsBelongTo(dashboardIds) {
       const ret = [];
-      _.each(this.groups, function (group) {
+      _.each(this.getGroups(), function (group) {
         const id = group.id;
         if (group.dashboards instanceof Array) {
           _.each(group.dashboards, function (d) {
@@ -251,7 +251,7 @@ uiModules
         // save which one was selected for:
         // - iterate over dashboard groups remove the active group
         // - set the new active group and set the selected dashboard
-        _.each(this.groups, function (group) {
+        _.each(this.getGroups(), function (group) {
           const activeDashboard = _.find(group.dashboards, 'id', dashboardId);
           if (activeDashboard) {
             group.active = true;
@@ -339,7 +339,7 @@ uiModules
     getVisibleDashboardIds(dashboardIds) {
       // filter the given dashboardIds
       // to use only the selected/visible dashboard from each group
-      return _(this.groups)
+      return _(this.getGroups())
       .filter('selected')
       .filter(g => !dashboardIds || _.contains(dashboardIds, g.selected.id))
       .map('selected.id')

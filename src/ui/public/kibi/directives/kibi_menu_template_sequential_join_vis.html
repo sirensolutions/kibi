@@ -1,6 +1,6 @@
 <div class="kibi-menu-template-sequential-join-vis">
   <ul>
-    <li ng-click="relation.onSelect(kibiMenuTemplateContext)" ng-repeat="relation in kibiMenuTemplateData">
+    <li ng-click="relation.onSelect(kibiMenuTemplateLocals.button)" ng-repeat="relation in kibiMenuTemplateLocals.relations">
       Name: <b>{{relation.label}}</b><br/>
 
       index pattern: <b>{{relation.indices[0].indexPatternId}}</b>

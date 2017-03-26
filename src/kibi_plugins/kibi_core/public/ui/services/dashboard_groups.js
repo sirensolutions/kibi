@@ -20,20 +20,10 @@ uiModules
   let lastFiredMultiCountsQuery;
   let lastMultiCountsQueryResults;
 
-  const _shortenDashboardName = function (groupTitle, dashboardTitle) {
-    const g = groupTitle.toLowerCase();
-    const d = dashboardTitle.toLowerCase();
-
-    if (d.indexOf(g) === 0 && d.length > g.length) {
-      return dashboardTitle.substring(groupTitle.length).replace(/^[\s-]{1,}/, '');  // replace any leading spaces or dashes
-    }
-    return dashboardTitle;
-  };
-
   const _getDashboardForGroup = function (groupId, groupTitle, dashboardDef) {
     return {
       id: dashboardDef.id,
-      title: _shortenDashboardName(groupTitle, dashboardDef.title),
+      title: this._shortenDashboardName(groupTitle, dashboardDef.title),
       savedSearchId: dashboardDef.savedSearchId
     };
   };
@@ -73,65 +63,6 @@ uiModules
     }
   };
 
-  const _getDashboardsMetadata = function (ids, forceCountsUpdate = false) {
-    return savedDashboards.find()
-    .then((resp) => {
-      const dashboards = _.filter(resp.hits, dashboard => dashboard.savedSearchId && _.contains(ids, dashboard.id));
-      const metadataPromises = _.map(dashboards, (dashboard) => {
-        return kibiState.getState(dashboard.id).then(({ index, filters, queries, time }) => {
-          const query = queryBuilder(filters, queries, time);
-          query.size = 0; // we do not need hits just a count
-          // here take care about correctly expanding timebased indices
-          return kibiState.timeBasedIndices(index, dashboard.id)
-          .then((indices) => ({
-            dashboardId: dashboard.id,
-            filters,
-            queries,
-            query,
-            indices
-          }))
-          .catch((error) => {
-            // If computing the indices failed because of an authorization error
-            // set indices to an empty array and mark the dashboard as forbidden.
-            if (error.status === 403) {
-              return {
-                dashboardId: dashboard.id,
-                filters,
-                queries,
-                query,
-                forbidden: true,
-                indices: []
-              };
-            }
-            throw error;
-          });
-        });
-      });
-
-      return Promise.all(metadataPromises).then((metadata) => {
-        // here fire the query to get counts
-        const countsQuery = _.map(metadata, result => {
-          return searchHelper.optimize(result.indices, result.query);
-        }).join('');
-
-        if (countsQuery) {
-          if (lastFiredMultiCountsQuery && lastFiredMultiCountsQuery === countsQuery && !forceCountsUpdate) {
-            _updateCountOnMetadata(metadata, lastMultiCountsQueryResults);
-          } else {
-            return es.msearch({ body: countsQuery })
-            .then(response => {
-              lastFiredMultiCountsQuery = countsQuery;
-              lastMultiCountsQueryResults = response.responses;
-              _updateCountOnMetadata(metadata, lastMultiCountsQueryResults);
-              return metadata;
-            });
-          }
-        }
-        return metadata;
-      });
-    });
-  };
-
   class DashboardGroups {
     constructor() {
       this.init = _.once(() => {
@@ -146,6 +77,16 @@ uiModules
           this.groups = groups;
         });
       });
+    }
+
+    _shortenDashboardName(groupTitle, dashboardTitle) {
+      const g = groupTitle.toLowerCase();
+      const d = dashboardTitle.toLowerCase();
+
+      if (d.indexOf(g) === 0 && d.length > g.length) {
+        return dashboardTitle.substring(groupTitle.length).replace(/^[\s-]{1,}/, '');  // replace any leading spaces or dashes
+      }
+      return dashboardTitle;
     }
 
     getGroups() {
@@ -180,13 +121,72 @@ uiModules
       return group.dashboards;
     }
 
+    _getDashboardsMetadata(ids, forceCountsUpdate = false) {
+      return savedDashboards.find()
+      .then((resp) => {
+        const dashboards = _.filter(resp.hits, dashboard => dashboard.savedSearchId && _.contains(ids, dashboard.id));
+        const metadataPromises = _.map(dashboards, (dashboard) => {
+          return kibiState.getState(dashboard.id).then(({ index, filters, queries, time }) => {
+            const query = queryBuilder(filters, queries, time);
+            query.size = 0; // we do not need hits just a count
+            // here take care about correctly expanding timebased indices
+            return kibiState.timeBasedIndices(index, dashboard.id)
+              .then((indices) => ({
+                dashboardId: dashboard.id,
+                filters,
+                queries,
+                query,
+                indices
+              }))
+              .catch((error) => {
+                // If computing the indices failed because of an authorization error
+                // set indices to an empty array and mark the dashboard as forbidden.
+                if (error.status === 403) {
+                  return {
+                    dashboardId: dashboard.id,
+                    filters,
+                    queries,
+                    query,
+                    forbidden: true,
+                    indices: []
+                  };
+                }
+                throw error;
+              });
+          });
+        });
+
+        return Promise.all(metadataPromises).then((metadata) => {
+          // here fire the query to get counts
+          const countsQuery = _.map(metadata, result => {
+            return searchHelper.optimize(result.indices, result.query);
+          }).join('');
+
+          if (countsQuery) {
+            if (lastFiredMultiCountsQuery && lastFiredMultiCountsQuery === countsQuery && !forceCountsUpdate) {
+              _updateCountOnMetadata(metadata, lastMultiCountsQueryResults);
+            } else {
+              return es.msearch({ body: countsQuery })
+                .then(response => {
+                  lastFiredMultiCountsQuery = countsQuery;
+                  lastMultiCountsQueryResults = response.responses;
+                  _updateCountOnMetadata(metadata, lastMultiCountsQueryResults);
+                  return metadata;
+                });
+            }
+          }
+          return metadata;
+        });
+      });
+    }
+
     updateMetadataOfDashboardIds(ids, forceCountsUpdate = false) {
       if (console) {
         const msg = `update metadata for following dashboards: ${JSON.stringify(ids, null, ' ')}`;
         console.log(msg); // eslint-disable-line no-console
       }
 
-      return _getDashboardsMetadata(ids, forceCountsUpdate)
+      return this._getDashboardsMetadata(ids, forceCountsUpdate)
       .then(metadata => {
         _.each(this.groups, (g) => {
           _.each(g.dashboards, (d) => {
@@ -214,7 +214,7 @@ uiModules
       // take all dashboards except the selected one
       const dashboardIds = _(group.dashboards).reject('id', group.selected.id).map('id').value();
 
-      return _getDashboardsMetadata(dashboardIds)
+      return this._getDashboardsMetadata(dashboardIds)
       .then(metadata => {
         _.each(group.dashboards, d => {
           const foundDashboardMetadata = _.find(metadata, 'dashboardId', d.id);
@@ -379,7 +379,7 @@ uiModules
             }
 
             const dashboards = _.map(dashboardsArray, function (d) {
-              const dashboard = _getDashboardForGroup(group.id, group.title, _.find(respDashboards.hits, 'id', d.id));
+              const dashboard = _getDashboardForGroup.call(self, group.id, group.title, _.find(respDashboards.hits, 'id', d.id));
               if (currentDashboardId && currentDashboardId === dashboard.id) {
                 selected = dashboard;
               }
@@ -448,7 +448,7 @@ uiModules
             // not in a group so add it as new group with single dashboard
             const groupId = dashboardDef.id;
             const groupTitle = dashboardDef.title;
-            const onlyOneDashboard = _getDashboardForGroup(groupId, groupTitle, dashboardDef);
+            const onlyOneDashboard = _getDashboardForGroup.call(self, groupId, groupTitle, dashboardDef);
 
             dashboardGroups1.push({
               id: groupId,

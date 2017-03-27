@@ -18,7 +18,11 @@ export class SavedObjectLoader {
     this.kbnIndex = kbnIndex;
     this.kbnUrl = kbnUrl;
 
-    this.scanner = new Scanner(this.savedObjectsAPI, {
+    let scannerClient = esAdmin;
+    if (this.savedObjectsAPI) {
+      scannerClient = savedObjectsAPI;
+    }
+    this.scanner = new Scanner(scannerClient, {
       index: kbnIndex,
       type: this.lowercaseType
     });

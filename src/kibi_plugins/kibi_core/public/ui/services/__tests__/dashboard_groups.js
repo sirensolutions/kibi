@@ -1,3 +1,4 @@
+import DashboardHelperProvider from 'ui/kibi/helpers/dashboard_helper';
 import noDigestPromises from 'test_utils/no_digest_promises';
 import Promise from 'bluebird';
 import expect from 'expect.js';
@@ -113,6 +114,9 @@ let appState;
 let kibiState;
 let es;
 
+let setSelectedDashboardIdStub;
+let switchDashboardStub;
+
 function init({ currentDashboardId = 'Articles', indexPatterns, savedDashboards, savedDashboardGroups, savedSearches } = {}) {
   ngMock.module('kibana', function ($provide) {
     $provide.constant('kibiEnterpriseEnabled', false);
@@ -122,6 +126,12 @@ function init({ currentDashboardId = 'Articles', indexPatterns, savedDashboards,
     appState = new MockState({ filters: [] });
     $provide.service('getAppState', () => {
       return function () { return appState; };
+    });
+
+    $provide.service('$timeout', () => {
+      const mockTimeout = fn => Promise.resolve(fn());
+      mockTimeout.cancel = _.noop;
+      return mockTimeout;
     });
   });
 
@@ -145,12 +155,15 @@ function init({ currentDashboardId = 'Articles', indexPatterns, savedDashboards,
     $provide.service('savedSearches', (Promise, Private) => mockSavedObjects(Promise, Private)('savedSearches', savedSearches || []));
   });
 
-  ngMock.inject(function (_es_, _dashboardGroups_, _kibiState_) {
+  ngMock.inject(function (Private, _es_, _dashboardGroups_, _kibiState_) {
+    const dashboardHelper = Private(DashboardHelperProvider);
+    switchDashboardStub = sinon.stub(dashboardHelper, 'switchDashboard');
     kibiState = _kibiState_;
     dashboardGroups = _dashboardGroups_;
     sinon.stub(chrome, 'getBasePath').returns('');
     sinon.stub(kibiState, '_getCurrentDashboardId').returns(currentDashboardId);
     sinon.stub(kibiState, 'isSirenJoinPluginInstalled').returns(Promise.resolve(true));
+    setSelectedDashboardIdStub = sinon.stub(kibiState, 'setSelectedDashboardId');
     es = _es_;
   });
 }
@@ -375,6 +388,48 @@ describe('Kibi Services', function () {
 
           return dashboardGroups.computeGroups().then(function () {
             expect(dashboardGroups.getIdsOfDashboardGroupsTheseDashboardsBelongTo(dashboardIds)).to.have.length(0);
+          });
+        });
+      });
+
+      describe('selectDashboard', function () {
+        beforeEach(() => init({
+          savedDashboards: fakeSavedDashboards,
+          savedDashboardGroups: fakeSavedDashboardGroups,
+          savedSearches: fakeSavedSearches
+        }));
+
+        it('should switch to desired dashboard', function () {
+          return dashboardGroups.computeGroups()
+          .then(() => dashboardGroups.selectDashboard('Articles'))
+          .then(() => {
+            _.each(dashboardGroups.getGroups(), group => {
+              if (group.id === 'group-1') {
+                expect(group.active).to.be(true);
+                expect(group.selected.id).to.be('Articles');
+                sinon.assert.calledWith(setSelectedDashboardIdStub, 'group-1', 'Articles');
+                sinon.assert.calledWith(switchDashboardStub, 'Articles');
+              } else {
+                expect(group.active).to.be(false);
+              }
+            });
+          });
+        });
+
+        it('should not save in state the selected dashboard when switching to desired dashboard if the group is virtual', function () {
+          return dashboardGroups.computeGroups()
+          .then(() => dashboardGroups.selectDashboard('time-testing-1'))
+          .then(() => {
+            _.each(dashboardGroups.getGroups(), group => {
+              if (group.id === 'time-testing-1') {
+                expect(group.active).to.be(true);
+                expect(group.selected.id).to.be('time-testing-1');
+                sinon.assert.notCalled(setSelectedDashboardIdStub);
+                sinon.assert.calledWith(switchDashboardStub, 'time-testing-1');
+              } else {
+                expect(group.active).to.be(false);
+              }
+            });
           });
         });
       });

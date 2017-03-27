@@ -244,17 +244,16 @@ uiModules
         // save which one was selected for:
         // - iterate over dashboard groups remove the active group
         // - set the new active group and set the selected dashboard
-        _.each(this.getGroups(), function (group) {
-          const activeDashboard = _.find(group.dashboards, 'id', dashboardId);
-          if (activeDashboard) {
-            group.active = true;
-            group.selected = activeDashboard;
-            kibiState.setSelectedDashboardId(group.id, dashboardId);
-            kibiState.save();
-          } else {
-            group.active = false;
-          }
+        _.each(this.getGroups(), group => {
+          group.active = false;
         });
+        const activeGroup = _.findWhere(this.getGroups(), { dashboards: [ { id: dashboardId } ] });
+        activeGroup.active = true;
+        activeGroup.selected = _.find(activeGroup.dashboards, 'id', dashboardId);
+        if (!activeGroup.virtual) {
+          kibiState.setSelectedDashboardId(activeGroup.id, dashboardId);
+          kibiState.save();
+        }
         return dashboardHelper.switchDashboard(dashboardId);
       }, selectDelay);
       return lastSelectDashboardEventTimer;

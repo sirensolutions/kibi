@@ -49,6 +49,18 @@ RestQuery.prototype._logFailedRequestDetails = function (msg, originalError, res
   this.logger.error(resp);
 };
 
+const mergeObjects = function (dest, sourceObject, sourcePath) {
+  const source = _.get(sourceObject, sourcePath);
+  if (source) {
+    _.each(source, candidate => {
+      const found = _.find(dest, c => c.name === candidate.name);
+      if (!found) {
+        dest.push(candidate);
+      }
+    });
+  }
+};
+
 RestQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) {
   var self = this;
 
@@ -93,39 +105,10 @@ RestQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) {
     // get all params from datasource and merge them with the one from the query
     const mergedHeaders = [];
     const mergedParams = [];
-    if (self.config.rest_headers) {
-      _.each(self.config.rest_headers, header => {
-        const found = _.find(mergedHeaders, h => h.name === header.name);
-        if (!found) {
-          mergedHeaders.push(header);
-        }
-      });
-    }
-    if (_.get(self.config, 'datasource.datasourceParams.headers')) {
-      _.each(self.config.datasource.datasourceParams.headers, header => {
-        const found = _.find(mergedHeaders, h => h.name === header.name);
-        if (!found) {
-          mergedHeaders.push(header);
-        }
-      });
-    }
-
-    if (self.config.rest_params) {
-      _.each(self.config.rest_params, param => {
-        const found = _.find(mergedParams, p => p.name === param.name);
-        if (!found) {
-          mergedParams.push(param);
-        }
-      });
-    }
-    if (_.get(self.config, 'datasource.datasourceParams.params')) {
-      _.each(self.config.datasource.datasourceParams.params, param => {
-        const found = _.find(mergedParams, p => p.name === param.name);
-        if (!found) {
-          mergedParams.push(param);
-        }
-      });
-    }
+    mergeObjects(mergedHeaders, self.config, 'rest_headers');
+    mergeObjects(mergedHeaders, self.config, 'datasource.datasourceParams.headers');
+    mergeObjects(mergedParams, self.config, 'rest_params');
+    mergeObjects(mergedParams, self.config, 'datasource.datasourceParams.params');
 
     // the whole replacement of values is happening here
     self.queryHelper.replaceVariablesForREST(

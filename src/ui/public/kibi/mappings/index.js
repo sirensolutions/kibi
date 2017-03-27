@@ -2,8 +2,7 @@ import uiModules from 'ui/modules';
 
 uiModules
 .get('kibana')
-.factory('mappings', (Private, es) => {
-  const indexPath = Private(require('ui/kibi/components/commons/_index_path'));
+.factory('mappings', (es) => {
 
   class Mappings {
     constructor() {

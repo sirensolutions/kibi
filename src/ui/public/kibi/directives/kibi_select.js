@@ -4,6 +4,7 @@ define(function (require) {
   const _ = require('lodash');
   const module = require('ui/modules').get('kibana');
   require('ui/kibi/directives/kibi_angular_qtip2');
+  require('ui/kibi/mappings');
 
   module.directive('kibiSelect', function (Private) {
     const selectHelper = Private(require('ui/kibi/directives/kibi_select_helper'));

@@ -5,11 +5,6 @@ import $ from 'jquery';
 describe('markdown vis controller', function () {
   let $scope;
 
-  beforeEach(ngMock.module('kibana', function ($provide) {
-    // kibi: provide elasticsearchPlugins constant
-    $provide.constant('elasticsearchPlugins', ['siren-join']);
-  }));
-
   beforeEach(ngMock.module('kibana/markdown_vis'));
   beforeEach(ngMock.inject(function ($rootScope, $controller) {
     $scope = $rootScope.$new();

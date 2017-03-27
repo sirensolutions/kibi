@@ -10,10 +10,7 @@ import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logsta
 let indexPattern;
 
 describe('fieldCalculator', function () {
-  beforeEach(ngMock.module('kibana', function ($provide) {
-    //kibi: provide elasticsearchPlugins constant
-    $provide.constant('elasticsearchPlugins', ['siren-join']);
-  }));
+  beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
   }));

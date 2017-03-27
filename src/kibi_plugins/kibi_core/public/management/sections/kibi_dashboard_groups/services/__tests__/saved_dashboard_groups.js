@@ -14,9 +14,7 @@ describe('Kibi Services', function () {
 
     beforeEach(function () {
 
-      ngMock.module('kibana', function ($provide) {
-        $provide.constant('elasticsearchPlugins', ['siren-join']);
-      });
+      ngMock.module('kibana');
 
       ngMock.inject(function ($injector, Private, _$rootScope_) {
         savedDashboardGroups = $injector.get('savedDashboardGroups');

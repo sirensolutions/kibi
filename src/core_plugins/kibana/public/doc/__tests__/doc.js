@@ -10,10 +10,7 @@ let timefilter;
 
 const init = function (index, type, id) {
 
-  ngMock.module('kibana', function ($provide) {
-    // kibi: provide elasticsearchPlugins constant
-    $provide.constant('elasticsearchPlugins', ['siren-join']);
-  });
+  ngMock.module('kibana');
 
   // Stub services
   ngMock.module(function ($provide) {

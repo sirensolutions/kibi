@@ -23,11 +23,6 @@ RestQuery.prototype = _.create(AbstractQuery.prototype, {
  * Return a promise which when resolved should return true or false.
  */
 RestQuery.prototype.checkIfItIsRelevant = function (options) {
-  if (this._checkIfSelectedDocumentRequiredAndNotPresent(options)) {
-    this.logger.warn('No elasticsearch document selected while required by the REST query. [' + this.config.id + ']');
-    return Promise.resolve(false);
-  }
-
   // no document selected there is nothing to check against
   if (!options.selectedDocuments || options.selectedDocuments.length === 0) {
     return Promise.resolve(true);
@@ -38,6 +33,10 @@ RestQuery.prototype.checkIfItIsRelevant = function (options) {
     return Promise.resolve(true);
   }
 
+  if (this._checkIfSelectedDocumentRequiredAndNotPresent(options)) {
+    this.logger.warn('No elasticsearch document selected while required by the REST query. [' + this.config.id + ']');
+    return Promise.resolve(false);
+  }
   // evaluate the rules
   return this.rulesHelper.evaluate(this.config.activation_rules, options.selectedDocuments, options.credentials);
 };

@@ -19,9 +19,6 @@ describe('kibi/session/hashUrl', () => {
   let hashedItemStoreSpy;
 
   beforeEach(() => {
-    ngMock.module('kibana', ($provide) => {
-      $provide.constant('elasticsearchPlugins', ['siren-join']);
-    });
     hashedItemStoreSpy = sinon.spy(hashedItemStoreSingleton, 'setItem');
   });
 

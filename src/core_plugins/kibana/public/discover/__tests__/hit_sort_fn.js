@@ -6,11 +6,7 @@ import PluginsKibanaDiscoverHitSortFnProvider from 'plugins/kibana/discover/_hit
 describe('hit sort function', function () {
   let createHitSortFn;
 
-  beforeEach(ngMock.module('kibana', function ($provide) {
-    //kibi: provide elasticsearchPlugins constant
-    $provide.constant('elasticsearchPlugins', ['siren-join']);
-  }));
-
+  beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
     createHitSortFn = Private(PluginsKibanaDiscoverHitSortFnProvider);
   }));

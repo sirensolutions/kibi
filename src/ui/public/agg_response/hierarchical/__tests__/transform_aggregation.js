@@ -8,11 +8,7 @@ describe('buildHierarchicalData()', function () {
     let transform;
     let fixture;
 
-    beforeEach(ngMock.module('kibana', function ($provide) {
-      //kibi: provide elasticsearchPlugins constant
-      $provide.constant('elasticsearchPlugins', ['siren-join']);
-    }));
-
+    beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
       transform = Private(AggResponseHierarchicalTransformAggregationProvider);
     }));

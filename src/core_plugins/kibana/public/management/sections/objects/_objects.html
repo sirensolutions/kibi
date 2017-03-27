@@ -130,23 +130,13 @@
             </th>
             <th class="kuiTableHeaderCell">
               Title
-              <!--KIBI5: float that to the right-->
-              <!-- kibi: added to be able to quickly find out current session -->
-              <span ng-show="state.tab == 'sessions'">
-                <label>
-                  <input type="checkbox" ng-model="kibi.showOnlyCurrentSession" />
-                  Show only current session
-                </label>
-              </span>
-              <!-- kibi: end-->
             </th>
           </tr>
         </thead>
 
         <tbody>
-          <!-- kibi: added filterItems function -->
           <tr
-            ng-repeat="item in filterItems(service.data) | orderBy:'title'"
+            ng-repeat="item in service.data | orderBy:'title'"
             class="kuiTableRow"
           >
             <td class="kuiTableRowCell kuiTableRowCell--checkBox">

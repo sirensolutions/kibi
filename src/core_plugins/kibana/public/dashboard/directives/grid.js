@@ -164,8 +164,7 @@ app.directive('dashboardGrid', function ($compile, config, createNotifier) { // 
 
       // tell gridster to add the panel, and create additional meatadata like $scope
       function addPanel(panel) {
-        PanelUtils.initializeDefaults(panel);
-        panel.size_y = config.get('kibi:panel_vertical_size'); // kibi: added possibility to change hardcoded value
+        PanelUtils.initializeDefaults(panel, config); // siren: pass config to PanelUtils
 
         const panelHtml = `
             <li>

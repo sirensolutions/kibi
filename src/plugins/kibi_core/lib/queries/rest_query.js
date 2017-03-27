@@ -1,11 +1,11 @@
-var _ = require('lodash');
-var Promise = require('bluebird');
-var url = require('url');
-var rp = require('request-promise');
-var jsonpath = require('jsonpath');
-var AbstractQuery = require('./abstract_query');
-var QueryHelper = require('../query_helper');
-var RulesHelper = require('../rules_helper');
+const _ = require('lodash');
+const Promise = require('bluebird');
+const url = require('url');
+const rp = require('request-promise');
+const jsonpath = require('jsonpath');
+const AbstractQuery = require('./abstract_query');
+const QueryHelper = require('../query_helper');
+const RulesHelper = require('../rules_helper');
 
 function RestQuery(server, queryDefinition, cache) {
   AbstractQuery.call(this, server, queryDefinition, cache);
@@ -49,22 +49,34 @@ RestQuery.prototype._logFailedRequestDetails = function (msg, originalError, res
   this.logger.error(resp);
 };
 
+const mergeObjects = function (dest, sourceObject, sourcePath) {
+  const source = _.get(sourceObject, sourcePath);
+  if (source) {
+    _.each(source, candidate => {
+      const found = _.find(dest, c => c.name === candidate.name);
+      if (!found) {
+        dest.push(candidate);
+      }
+    });
+  }
+};
+
 RestQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) {
-  var self = this;
+  const self = this;
 
   // currently we use only single selected document
-  var uri = options.selectedDocuments && options.selectedDocuments.length > 0 ? options.selectedDocuments[0] : '';
+  const uri = options.selectedDocuments && options.selectedDocuments.length > 0 ? options.selectedDocuments[0] : '';
 
-  var urlS = this.config.datasource.datasourceClazz.datasource.datasourceParams.url;
-  var timeout = this.config.datasource.datasourceClazz.datasource.datasourceParams.timeout;
-  var maxAge = this.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
-  var username = this.config.datasource.datasourceClazz.datasource.datasourceParams.username;
-  var password = this.config.datasource.datasourceClazz.datasource.datasourceParams.password;
-  var cacheEnabled = this.config.datasource.datasourceClazz.datasource.datasourceParams.cache_enabled;
+  const urlS = this.config.datasource.datasourceClazz.datasource.datasourceParams.url;
+  const timeout = this.config.datasource.datasourceClazz.datasource.datasourceParams.timeout;
+  const maxAge = this.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
+  const username = this.config.datasource.datasourceClazz.datasource.datasourceParams.username;
+  const password = this.config.datasource.datasourceClazz.datasource.datasourceParams.password;
+  const cacheEnabled = this.config.datasource.datasourceClazz.datasource.datasourceParams.cache_enabled;
 
   return new Promise(function (fulfill, reject) {
-    var start = new Date().getTime();
-    var regex = /^GET|POST$/;
+    const start = new Date().getTime();
+    const regex = /^GET|POST$/;
 
     if (!regex.test(self.config.rest_method)) {
       reject(new Error('Only GET|POST methods are supported at the moment'));
@@ -82,7 +94,7 @@ RestQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) {
     }
 
     // user can also use a special variables like $auth_token
-    var availableVariables = {
+    const availableVariables = {
       // for now we support only auth_token username password
       // so user can provide any of these in params, headers, or body
       '${auth_token}': self.config.datasource.datasourceClazz.populateParameters('${auth_token}'),
@@ -90,23 +102,30 @@ RestQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) {
       '${password}': self.config.datasource.datasourceClazz.populateParameters('${password}')
     };
 
+    // get all params from datasource and merge them with the one from the query
+    const mergedHeaders = [];
+    const mergedParams = [];
+    mergeObjects(mergedHeaders, self.config, 'rest_headers');
+    mergeObjects(mergedHeaders, self.config, 'datasource.datasourceParams.headers');
+    mergeObjects(mergedParams, self.config, 'rest_params');
+    mergeObjects(mergedParams, self.config, 'datasource.datasourceParams.params');
 
     // the whole replacement of values is happening here
     self.queryHelper.replaceVariablesForREST(
-      self.config.rest_headers,
-      self.config.rest_params,
+      mergedHeaders,
+      mergedParams,
       self.config.rest_body,
       self.config.rest_path,
       uri, availableVariables,
       options.credentials)
     .then(function (results) {
       // here convert the params and headers from array to map
-      var headers = _.zipObject(_.pluck(results.headers, 'name'), _.pluck(results.headers, 'value'));
-      var params = _.zipObject(_.pluck(results.params, 'name'), _.pluck(results.params, 'value'));
-      var body = results.body;
-      var path = results.path;
+      const headers = _.zipObject(_.pluck(results.headers, 'name'), _.pluck(results.headers, 'value'));
+      const params = _.zipObject(_.pluck(results.params, 'name'), _.pluck(results.params, 'value'));
+      const body = results.body;
+      const path = results.path;
 
-      var key;
+      let key;
       if (self.cache && cacheEnabled) {
         key = self.generateCacheKey(
           self.config.rest_method,
@@ -116,7 +135,7 @@ RestQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) {
           JSON.stringify(params),
           body,
           self._getUsername(options));
-        var v = self.cache.get(key);
+        const v = self.cache.get(key);
         if (v) {
           return fulfill(v);
         }
@@ -124,14 +143,14 @@ RestQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) {
 
       // to check any option visit
       // https://github.com/request/request#requestoptions-callback
-      var rpOptions = {
+      const rpOptions = {
         method: self.config.rest_method,
         uri: url.parse(url.resolve(urlS, path)),
         headers: headers,
         timeout: timeout || 5000,
         transform: function (body, resp) {
-          var msg;
-          var data = {
+          let msg;
+          const data = {
             results: {}
           };
           if (resp.statusCode !== self.config.rest_resp_status_code) {
@@ -141,7 +160,7 @@ RestQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) {
           }
 
           // TODO: / Kibi / change this once we support xml resp or text resp
-          var json;
+          let json;
           try {
             json = JSON.parse(body);
           } catch (e) {
@@ -153,7 +172,7 @@ RestQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) {
           data.results = json;
 
           if (idVariableName && self.config.rest_variables) {
-            var o = _.find(self.config.rest_variables, function (v) {
+            const o = _.find(self.config.rest_variables, function (v) {
               return v.name === idVariableName;
             });
 
@@ -195,7 +214,7 @@ RestQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) {
       rp(rpOptions).then(function (resp) {
         fulfill(resp);
       }).catch(function (err) {
-        var msg = 'Rest request failed: ' + JSON.stringify(rpOptions.uri, null, ' ') + '.\nDetails: ' + err.message;
+        const msg = 'Rest request failed: ' + JSON.stringify(rpOptions.uri, null, ' ') + '.\nDetails: ' + err.message;
         self._logFailedRequestDetails(msg, err, null);
         reject(new Error(msg));
       });

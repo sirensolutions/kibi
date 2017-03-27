@@ -1,6 +1,6 @@
 define(function (require) {
   // kibi: require savedObjecsAPI service
-  return function MapperService(Private, Promise, es, savedObjectsAPI, config, kbnIndex) {
+  return function MapperService(Private, Promise, es, savedObjectsAPI, config, kbnIndex, mappings) {
     let _ = require('lodash');
     let moment = require('moment');
 
@@ -36,11 +36,8 @@ define(function (require) {
         }
 
         return promise.then(function (indexList) {
-          return es.indices.getMapping({
-            index: indexList,
-            ignoreUnavailable: true,
-            allowNoIndices: true
-          });
+          // kibi: use our service to reduce the number of calls to the backend
+          return mappings.getMapping(indexList);
         })
         .catch(handleMissingIndexPattern)
         .then(_getPathsForIndexPattern);

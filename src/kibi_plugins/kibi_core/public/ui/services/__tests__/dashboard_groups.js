@@ -6,6 +6,7 @@ import MockState from 'fixtures/mock_state';
 import mockSavedObjects from 'fixtures/kibi/mock_saved_objects';
 import sinon from 'auto-release-sinon';
 import chrome from 'ui/chrome';
+import _ from 'lodash';
 
 const fakeSavedDashboards = [
   {
@@ -154,7 +155,7 @@ function init({ currentDashboardId = 'Articles', indexPatterns, savedDashboards,
   });
 }
 
-describe('Kibi Components', function () {
+describe('Kibi Services', function () {
   describe('DashboardGroups Service', function () {
 
     noDigestPromises.activateForSuite();
@@ -173,7 +174,8 @@ describe('Kibi Components', function () {
             priority: 1,
             title: 'title 1',
             selected: { id: 'd1' },
-            dashboards: [ { id: 'd1' } ]
+            dashboards: [ { id: 'd1' } ],
+            virtual: true
           },
           {
             id: 'group2',
@@ -224,6 +226,7 @@ describe('Kibi Components', function () {
         expect(dst[0].title).to.be('title 1');
         expect(dst[0].dashboards).to.have.length(1);
         expect(dst[0].dashboards[0].id).to.be('d1');
+        expect(dst[0].virtual).to.be(true);
 
         expect(dst[1].id).to.be('group2');
         expect(dst[1].active).to.be(true);
@@ -232,6 +235,7 @@ describe('Kibi Components', function () {
         expect(dst[1].iconUrl).to.be('icon aaa');
         expect(dst[1].priority).to.be(2);
         expect(dst[1].title).to.be('title 2');
+        expect(dst[1].virtual).to.be(undefined);
       });
 
       it('save metadata from dest groups', function () {
@@ -349,7 +353,7 @@ describe('Kibi Components', function () {
       });
 
       describe('getIdsOfDashboardGroupsTheseDashboardsBelongTo', function () {
-        it('there is a group with a dashboard', function () {
+        it('there is a group with the dashboard', function () {
           const dashboardIds = ['Articles'];
           const expected = ['group-1'];
 
@@ -358,8 +362,16 @@ describe('Kibi Components', function () {
           });
         });
 
-        it('there is NOT a group with a dashboard', function () {
+        it('there is no group with the dashboard', function () {
           const dashboardIds = ['ArticlesXXX'];
+
+          return dashboardGroups.computeGroups().then(function () {
+            expect(dashboardGroups.getIdsOfDashboardGroupsTheseDashboardsBelongTo(dashboardIds)).to.have.length(0);
+          });
+        });
+
+        it('should not return virtual groups', function () {
+          const dashboardIds = ['time-testing-1'];
 
           return dashboardGroups.computeGroups().then(function () {
             expect(dashboardGroups.getIdsOfDashboardGroupsTheseDashboardsBelongTo(dashboardIds)).to.have.length(0);
@@ -404,6 +416,20 @@ describe('Kibi Components', function () {
 
             done();
           }).catch(done);
+        });
+
+        it('should create virtual groups for dashboards without one set by the user', function () {
+          return dashboardGroups.computeGroups()
+          .then(function (groups) {
+            const group1 = _.find(groups, 'id', 'group-1');
+
+            expect(group1).to.be.ok();
+            expect(group1.virtual).to.not.be.ok();
+
+            const timeTesting1 = _.find(groups, 'id', 'time-testing-1');
+            expect(timeTesting1).to.be.ok();
+            expect(timeTesting1.virtual).to.be(true);
+          });
         });
       });
 

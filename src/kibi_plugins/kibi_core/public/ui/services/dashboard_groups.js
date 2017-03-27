@@ -228,21 +228,14 @@ uiModules
     }
 
     getIdsOfDashboardGroupsTheseDashboardsBelongTo(dashboardIds) {
-      const ret = [];
-      _.each(this.getGroups(), function (group) {
-        const id = group.id;
-        if (group.dashboards instanceof Array) {
-          _.each(group.dashboards, function (d) {
-            if (dashboardIds.indexOf(d.id) !== -1) {
-              ret.push(id);
-            }
-          });
-        } else {
-          const msg = `Property dashboards should be and Array, but was [${JSON.stringify(group.dashboards, null, '')}]`;
-          return Promise.reject(new Error(msg));
-        }
-      });
-      return _.unique(ret);
+      return _(this.getGroups())
+      // do not consider groups that were created programmatically
+      .reject('virtual')
+      // keep only the groups which dashboards contains some of the ids passed in argument
+      .filter(group => _.intersection(dashboardIds, _.pluck(group.dashboards, 'id')).length)
+      // return the id of the groups
+      .map('id')
+      .value();
     }
 
     selectDashboard(dashboardId) {
@@ -301,6 +294,7 @@ uiModules
       _.each(src, srcGroup => {
         const destGroup = _.find(dest, 'id', srcGroup.id);
         if (destGroup) {
+          destGroup.virtual = srcGroup.virtual;
           destGroup.active = srcGroup.active;
           destGroup.hide = srcGroup.hide;
           destGroup.iconCss = srcGroup.iconCss;
@@ -465,6 +459,7 @@ uiModules
             const onlyOneDashboard = _getDashboardForGroup.call(self, groupId, groupTitle, dashboardDef);
 
             dashboardGroups1.push({
+              virtual: true,
               id: groupId,
               title: groupTitle,
               dashboards: [ onlyOneDashboard ],

@@ -1700,7 +1700,7 @@ describe('Kibi Management', function () {
       let searchBar;
 
       beforeEach(() => {
-        ngMock.module('apps/settings');
+        ngMock.module('apps/management');
         ngMock.inject(($rootScope, $compile) => {
           scope = $rootScope.$new();
           searchBar = $compile('<input type="text" kibi-relations-search-bar ' +

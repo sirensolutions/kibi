@@ -29,7 +29,7 @@ describe('Kibi Controllers', function () {
       $provide.constant('kibiDefaultDashboardTitle', '');
     });
 
-    ngMock.module('apps/settings');
+    ngMock.module('apps/management');
 
     ngMock.inject(function ($rootScope, $compile) {
       $scope = $rootScope.$new();

@@ -437,7 +437,7 @@ describe('RestQuery', () => {
       });
     });
 
-   describe('passing parameters', () => {
+    describe('passing parameters', () => {
       it('from datasource are correctly passed', done => {
         const RestQuery = require('../../queries/rest_query');
         const restQuery = new RestQuery(fakeServer, {

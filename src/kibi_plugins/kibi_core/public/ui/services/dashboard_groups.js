@@ -346,7 +346,29 @@ uiModules
       .value();
     }
 
-    _computeGroupsFromSavedDashboardGroups(currentDashboardId) {
+    setActiveGroupFromUrl() {
+      const currentDashboardId = kibiState._getCurrentDashboardId();
+
+      if (!currentDashboardId) {
+        throw new Error('Unable to get the current dashboard');
+      }
+
+      _(this.getGroups())
+      .each(group => {
+        group.active = false;
+      })
+      .each(group => {
+        const dashboard = _.find(group.dashboards, 'id', currentDashboardId);
+
+        if (dashboard) {
+          group.active = true;
+          return false;
+        }
+      })
+      .value();
+    }
+
+    _computeGroupsFromSavedDashboardGroups() {
       const self = this;
 
       // get all dashboard groups
@@ -361,8 +383,6 @@ uiModules
           // first iterate over existing groups
           _.each(respGroups.hits, function (group) {
 
-            // selected dashboard
-            let selected;
             const dashboardsArray = group.dashboards;
             // check that all dashboards still exists
             // in case there is one which does not display a warning
@@ -378,23 +398,17 @@ uiModules
               return false;
             }
 
-            const dashboards = _.map(dashboardsArray, function (d) {
-              const dashboard = _getDashboardForGroup.call(self, group.id, group.title, _.find(respDashboards.hits, 'id', d.id));
-              if (currentDashboardId && currentDashboardId === dashboard.id) {
-                selected = dashboard;
-              }
-              return dashboard;
+            // selected dashboard
+            let selected;
+
+            const dashboards = _.map(dashboardsArray, d => {
+              return _getDashboardForGroup.call(self, group.id, group.title, _.find(respDashboards.hits, 'id', d.id));
             });
 
             // try to get the last selected one for this group
-            if (!selected && dashboards.length > 0) {
+            if (dashboards.length > 0) {
               const lastSelectedId = kibiState.getSelectedDashboardId(group.id);
-              _.each(dashboards, function (dashboard) {
-                if (dashboard.id === lastSelectedId) {
-                  selected = dashboard;
-                  return false;
-                }
-              });
+              selected = _.find(dashboards, 'id', lastSelectedId);
             }
 
             // nothing worked select the first one
@@ -424,7 +438,7 @@ uiModules
       });
     }
 
-    _addAdditionalGroupsFromSavedDashboards(currentDashboardId, dashboardGroups1) {
+    _addAdditionalGroupsFromSavedDashboards(dashboardGroups1) {
       const self = this;
       // first create array of dashboards already used in dashboardGroups1
       const dashboardsInGroups = self._getListOfDashboardsFromGroups(dashboardGroups1);
@@ -459,26 +473,6 @@ uiModules
             });
           }
         });
-
-        // mark the active group
-        let activeSelected = false;
-        _.each(dashboardGroups1, function (group) {
-          _.each(group.dashboards, function (dashboard) {
-            if (currentDashboardId && currentDashboardId === dashboard.id) {
-              group.active = true;
-              activeSelected = true;
-              return false;
-            }
-          });
-          if (activeSelected) {
-            return false;
-          }
-        });
-
-        if (!activeSelected && dashboardGroups1.length > 0) {
-          // make the first one active
-          dashboardGroups1[0].active = true;
-        }
 
         // only here we can fulfill the promise
         return dashboardGroups1;
@@ -515,9 +509,8 @@ uiModules
       if (console) {
         console.log('Dashboard Groups will be recomputed because: [' + reason + ']'); // eslint-disable-line no-console
       }
-      const currentDashboardId = kibiState._getCurrentDashboardId();
-      return this._computeGroupsFromSavedDashboardGroups(currentDashboardId)
-      .then((dashboardGroups1) => this._addAdditionalGroupsFromSavedDashboards(currentDashboardId, dashboardGroups1))
+      return this._computeGroupsFromSavedDashboardGroups()
+      .then((dashboardGroups1) => this._addAdditionalGroupsFromSavedDashboards(dashboardGroups1))
       .then(groups => {
         this.groups = groups;
         return groups;

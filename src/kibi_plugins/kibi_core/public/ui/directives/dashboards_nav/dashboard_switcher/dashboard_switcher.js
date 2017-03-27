@@ -27,7 +27,15 @@ uiModules
       $scope.groups = dashboardGroups.getGroups();
       $scope.$watchCollection(() => dashboardGroups.getGroups(), function (groups) {
         if (groups) {
-          $scope.groups = groups;
+          dashboardGroups.setActiveGroupFromUrl();
+          $scope.groups = dashboardGroups.getGroups();
+        }
+      });
+
+      $scope.$watch(() => kibiState._getCurrentDashboardId(), currentDashboardId => {
+        if (currentDashboardId) {
+          dashboardGroups.setActiveGroupFromUrl();
+          $scope.groups = dashboardGroups.getGroups();
         }
       });
 

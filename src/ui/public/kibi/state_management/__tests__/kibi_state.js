@@ -110,6 +110,8 @@ describe('State Management', function () {
         from: defaultStartTime,
         to: defaultEndTime
       };
+
+      config.set('query:queryString:options', {analyze_wildcard: true});
       config.set('timepicker:timeDefaults', defaultTime);
       timefilter.time = defaultTime;
     });

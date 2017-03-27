@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import { isEqual } from 'lodash';
 import qs from 'ui/utils/query_string';
 import { parseWithPrecision } from 'ui/kibi/utils/date_math_precision';
 import uniqFilters from 'ui/filter_bar/lib/uniq_filters';
@@ -110,7 +111,12 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
    * - analyze_wildcard is set to true
    */
   KibiState.prototype._isDefaultQuery = function (query) {
-    return _.get(query, 'query_string.query') === '*' && _.get(query, 'query_string.analyze_wildcard') === true;
+    const defaultQuery = decorateQuery({
+      query_string: {
+        query: '*'
+      }
+    });
+    return isEqual(query, defaultQuery);
   };
 
   /**

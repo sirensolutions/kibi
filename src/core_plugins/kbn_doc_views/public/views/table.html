@@ -1,11 +1,14 @@
 <table class="table table-condensed">
   <tbody>
     <tr ng-repeat="field in fields">
-      <td field-name="field"
+      <!-- kibi: added field-alias parameter to support column aliases in kibi-doc-table -->
+      <td field-alias="aliases[field]"
+          field-name="field"
           field-type="mapping[field].type"
           width="1%"
           class="doc-viewer-field">
       </td>
+      <!-- kibi: end -->
       <td width="1%" class="doc-viewer-buttons" ng-if="filter">
         <!--kibi: do not allow to filter on a field when in edit mode-->
         <span ng-if="mapping[field].filterable && !edit">
@@ -28,9 +31,10 @@
             tooltip-append-to-body="1"
             class="fa fa-columns"></i>
         </span>
+        <!-- kibi: replaced present with available -->
         <span ng-if="!indexPattern.metaFields.includes(field)">
           <i ng-click="filter('_exists_', field, '+')"
-            tooltip="Filter for field present"
+            tooltip="Filter for field available"
             tooltip-append-to-body="1"
             class="fa fa-asterisk"></i>
         </span>

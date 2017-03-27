@@ -7,7 +7,7 @@ import 'ui/filters/trust_as_html';
 import 'ui/filters/short_dots';
 import noWhiteSpace from 'ui/utils/no_white_space';
 import openRowHtml from 'ui/doc_table/components/table_row/open.html';
-import detailsHtml from 'ui/doc_table/components/table_row/details.html';
+import detailsHtml from 'ui/kibi/kibi_doc_table/components/kibi_table_row/details.html';
 import truncateByHeightTemplateHtml from 'ui/partials/truncate_by_height.html';
 import uiModules from 'ui/modules';
 

@@ -14,7 +14,7 @@ docViewsRegistry.register(function () {
         indexPattern: '=',
         filter: '=',
         columns: '=',
-        columnAliases: '=?' // kibi: added columnAliases this was needed to support aliases in kibi-doc-table
+        columnAliases: '='
       },
       controller: function ($scope) {
         $scope.mapping = $scope.indexPattern.fields.byName;

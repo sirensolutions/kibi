@@ -10,6 +10,7 @@ import 'ui/doc_table/components/table_header';
 
 import 'ui/kibi/kibi_doc_table/kibi_doc_table.less';
 import 'ui/kibi/kibi_doc_table/components/kibi_table_row';
+import 'ui/kibi/kibi_doc_table/components/kibi_table_header';
 
 import fileSaver from '@spalger/filesaver';
 

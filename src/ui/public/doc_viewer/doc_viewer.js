@@ -16,7 +16,7 @@ uiModules.get('kibana')
       indexPattern: '=',
       filter: '=?',
       columns: '=?',
-      columnAliases: '=?' // kibi: added columnAliases this was needed to support aliases in kibi-doc-table
+      columnAliases: '=?'
     },
     template: function ($el, $attr) {
       const $viewer = $('<div class="doc-viewer">');
@@ -30,7 +30,8 @@ uiModules.get('kibana')
             <a ng-click="mode='${view.name}'">${view.title}</a>
           </li>`);
         $tabs.append($tab);
-        const $viewAttrs = 'hit="hit" index-pattern="indexPattern" filter="filter" columns="columns"';
+        // kibi: added columnAliases to $viewAttrs
+        const $viewAttrs = 'hit="hit" index-pattern="indexPattern" filter="filter" columns="columns" column-aliases="columnAliases"';
         const $ext = $(`<render-directive ${$viewAttrs} ng-if="mode == '${view.name}'" definition="docViews['${view.name}'].directive">
           </render-directive>`);
         $ext.html(view.directive.template);

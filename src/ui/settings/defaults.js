@@ -364,7 +364,7 @@ export default function defaultSettingsProvider(kibiEnterpriseEnabled) {
   const enterpriseOptions = {
     'kibi:shieldAuthorizationWarning': {
       value: true,
-      description: 'Set to true to show all authorization warnings from Shield'
+      description: 'Set to true to show all authorization warnings'
     },
     'kibi:graphUseWebGl' : {
       value: true,

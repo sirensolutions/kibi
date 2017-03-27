@@ -1,5 +1,5 @@
 define(function (require) {
-  return function IndexPatternFactory(Private, timefilter, createNotifier, config, kbnIndex, Promise, $rootScope, safeConfirm) {
+  return function IndexPatternFactory(Private, timefilter, createNotifier, config, kbnIndex, Promise, $rootScope, safeConfirm, mappings) {
     const _ = require('lodash');
     const errors = require('ui/errors');
     const angular = require('angular');
@@ -310,7 +310,10 @@ define(function (require) {
       self.save = function () {
         const body = self.prepBody();
         // kibi: notify errors
-        return docSource.doIndex(body).then(setId).catch((error) => {
+        return docSource.doIndex(body)
+        .then(setId)
+        .then(mappings.clearCache)
+        .catch((error) => {
           notify.error(error);
           throw error;
         });

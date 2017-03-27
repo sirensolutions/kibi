@@ -4,7 +4,8 @@ define(function (require) {
 
   return function KibiSelectHelperFactory(
     config, $http, courier, indexPatterns, timefilter, Private, Promise, kibiState,
-    savedSearches, savedTemplates, savedDashboards, savedQueries, savedDatasources
+    savedSearches, savedTemplates, savedDashboards, savedQueries, savedDatasources,
+    mappings
     ) {
 
     function KibiSelectHelper() {
@@ -125,12 +126,8 @@ define(function (require) {
       if (!indexPatternId) {
         return Promise.resolve([]);
       }
-
-      return $http.get(chrome.getBasePath() + '/elasticsearch/' + indexPath(indexPatternId) + '/_mappings')
-      .then(function (response) {
+      return mappings.getMapping(indexPatternId).then((response) => {
         var types = [];
-
-
         for (var indexId in response.data) {
           if (response.data[indexId].mappings) {
             for (var type in response.data[indexId].mappings) {

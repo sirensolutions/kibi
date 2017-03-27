@@ -66,7 +66,7 @@ export default function MapperService(Private, Promise, es, savedObjectsAPI, con
      * @async
      */
     self.getFieldsForIndexPattern = function (indexPattern, skipIndexPatternCache) {
-      let id = indexPattern.id;
+      const id = indexPattern.id;
 
       const cache = fieldCache.get(id);
       if (cache) return Promise.resolve(cache);
@@ -87,16 +87,17 @@ export default function MapperService(Private, Promise, es, savedObjectsAPI, con
         });
       }
 
-      let promise = Promise.resolve(id);
+      let indexList = id;
+      let promise = Promise.resolve();
       if (indexPattern.intervalName) {
         promise = self.getIndicesForIndexPattern(indexPattern)
         .then(function (existing) {
           if (existing.matches.length === 0) throw new IndexPatternMissingIndices();
-          return existing.matches.slice(-config.get('indexPattern:fieldMapping:lookBack')); // Grab the most recent
+          indexList = existing.matches.slice(-config.get('indexPattern:fieldMapping:lookBack')); // Grab the most recent
         });
       }
 
-      return promise.then(function (indexList) {
+      return promise.then(function () {
         return es.indices.getFieldMapping({
           index: indexList,
           fields: '*',
@@ -107,6 +108,7 @@ export default function MapperService(Private, Promise, es, savedObjectsAPI, con
       })
       .catch(handleMissingIndexPattern)
       .then(transformMappingIntoFields)
+      .then(fields => enhanceFieldsWithCapabilities(fields, indexList))
       .then(function (fields) {
         fieldCache.set(id, fields);
         return fieldCache.get(id);
@@ -114,12 +116,12 @@ export default function MapperService(Private, Promise, es, savedObjectsAPI, con
     };
 
     self.getIndicesForIndexPattern = function (indexPattern) {
-      return es.indices.getAliases({
+      return es.indices.getAlias({
         index: patternToWildcard(indexPattern.id)
       })
       .then(function (resp) {
         // let all = Object.keys(resp).sort();
-        let all = _(resp)
+        const all = _(resp)
         .map(function (index, key) {
           if (index.aliases) {
             return [Object.keys(index.aliases), key];
@@ -132,8 +134,8 @@ export default function MapperService(Private, Promise, es, savedObjectsAPI, con
         .uniq(true)
         .value();
 
-        let matches = all.filter(function (existingIndex) {
-          let parsed = moment(existingIndex, indexPattern.id);
+        const matches = all.filter(function (existingIndex) {
+          const parsed = moment(existingIndex, indexPattern.id);
           return existingIndex === parsed.format(indexPattern.id);
         });
 

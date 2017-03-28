@@ -17,7 +17,8 @@ uiModules.get('apps/management')
 .directive('kbnManagementObjectsView', function (kbnIndex, createNotifier) {
   return {
     restrict: 'E',
-    controller: function (queryEngineClient, $scope, $injector, $routeParams, $location, $window, $rootScope, esAdmin, Private) {
+    // kibi: replaces esAdmin with savedObjectsAPI
+    controller: function (queryEngineClient, $scope, $injector, $routeParams, $location, $window, $rootScope, Private, savedObjectsAPI) {
       const notify = createNotifier({ location: 'SavedObject view' });
       const castMappingType = Private(IndexPatternsCastMappingTypeProvider);
       const serviceObj = registry.get($routeParams.service);
@@ -107,7 +108,7 @@ uiModules.get('apps/management')
 
       $scope.title = service.type;
 
-      esAdmin.get({
+      savedObjectsAPI.get({
         index: kbnIndex,
         type: service.type,
         id: $routeParams.id
@@ -169,7 +170,7 @@ uiModules.get('apps/management')
         // kibi: wrapped the original function
         // as we need to do our checks before
         const _delete = function () {
-          return esAdmin.delete({
+          return savedObjectsAPI.delete({
             index: kbnIndex,
             type: service.type,
             id: $routeParams.id
@@ -204,7 +205,7 @@ uiModules.get('apps/management')
           _.set(source, field.name, value);
         });
 
-        esAdmin.index({
+        savedObjectsAPI.index({
           index: kbnIndex,
           type: service.type,
           id: $routeParams.id,
@@ -230,19 +231,15 @@ uiModules.get('apps/management')
       };
 
       function redirectHandler(action) {
-        return esAdmin.indices.refresh({
-          index: kbnIndex
-        })
-        .then(function (resp) {
-          const msg = 'You successfully ' + action + ' the "' + $scope.obj._source.title + '" ' + $scope.title.toLowerCase() + ' object';
+        // kibi: removed esAdmin.indices.refresh
+        const msg = 'You successfully ' + action + ' the "' + $scope.obj._source.title + '" ' + $scope.title.toLowerCase() + ' object';
 
-          $location.path('/management/kibana/objects').search({
-            _a: rison.encode({
-              tab: serviceObj.title
-            })
-          });
-          notify.info(msg);
+        $location.path('/management/kibana/objects').search({
+          _a: rison.encode({
+            tab: serviceObj.title
+          })
         });
+        notify.info(msg);
       }
 
       // kibi: methods to identify our fields

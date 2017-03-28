@@ -3,7 +3,7 @@ import { times, zipObject } from 'lodash';
 // kibi: imports
 import serverConfig from '../../test/server_config';
 
-const TOTAL_CI_SHARDS = 6; // kibi: bumped from 4 to 6 to make the tests pass on jenkins
+const TOTAL_CI_SHARDS = 20; // kibi: bumped to 20 shards to minimize flappy failures
 
 module.exports = function (grunt) {
   const config = {

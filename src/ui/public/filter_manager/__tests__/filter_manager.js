@@ -138,6 +138,59 @@ describe('Filter Manager', function () {
     expect(appState.filters).to.have.length(3);
   });
 
+  describe('Kibi - filter on null value', function () {
+    it('should add a filter with null value', function () {
+      var myField = {displayName: 'myField'};
+      filterManager.add(myField, null, '+', 'myIndex');
+      expect(queryFilter.addFilters.callCount).to.be(1);
+      checkAddFilters(1, [{
+        meta: { negate: false, index: 'myIndex' },
+        query: {
+          bool: {
+            must_not: {
+              exists: {
+                field: 'myField'
+              }
+            }
+          }
+        }
+      }]);
+    });
+
+    it('should negate existing null filter', function () {
+      var myField = {displayName: 'myField'};
+      filterManager.add(myField, null, '+', 'myIndex');
+      sinon.assert.calledOnce(queryFilter.addFilters);
+      checkAddFilters(1, [{
+        meta: { negate: false, index: 'myIndex' },
+        query: {
+          bool: {
+            must_not: {
+              exists: {
+                field: 'myField'
+              }
+            }
+          }
+        }
+      }],0);
+
+      // NOTE: negating exists filters also forces disabled to false
+      filterManager.add(myField, null, '-', 'myIndex');
+      checkAddFilters(1, [{
+        meta: { negate: true, index: 'myIndex', disabled: false },
+        query: {
+          bool: {
+            must_not: {
+              exists: {
+                field: 'myField'
+              }
+            }
+          }
+        }
+      }],0);
+    });
+  });
+
   it('should enable matching filters being changed', function () {
     _.each([true, false], function (negate) {
       appState.filters = [{

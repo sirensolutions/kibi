@@ -79,11 +79,25 @@
     </nav>
 
     <div class="vis-editor-config" ng-show="sidebar.section == 'data'">
+
+      <!-- kibi: allows multiple configurations for multi chart plugin -->
+      <div ng-if="vis.type.name == 'kibi_multi_chart_vis'">
+        <kibi-multi-chart-vis-config vis="vis" saved-vis="savedVis" save-Changes="stageEditableVis()"></kibi-multi-chart-vis-config>
+      </div>
+      <!-- kibi: end -->
+
       <!-- metrics -->
       <vis-editor-agg-group ng-if="vis.type.schemas.metrics" group-name="metrics"></vis-editor-agg-group>
 
       <!-- buckets -->
       <vis-editor-agg-group ng-if="vis.type.schemas.buckets" group-name="buckets"></vis-editor-agg-group>
+
+      <!-- kibi: allows multiple configurations for multi chart plugin -->
+      <div ng-if="vis.type.name == 'kibi_multi_chart_vis'">
+        <kibi-multi-chart-vis-config-new></kibi-multi-chart-vis-config-new>
+      </div>
+      <!-- kibi: end -->
+
     </div>
 
     <div class="vis-editor-config" ng-show="sidebar.section == 'options'">

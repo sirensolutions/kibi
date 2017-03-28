@@ -1,11 +1,22 @@
+import { merge } from 'lodash';
 import moment from 'moment-timezone';
 
-export default function defaultSettingsProvider() {
+// kibi: added
+const positiveIntegerValidator = function (val) {
+  if (!/^\+?(0|[1-9]\d*)$/.test(val)) {
+    return new Error('Should be positive integer but was [' + val + '].');
+  }
+  return parseInt(val);
+};
+// kibi: end
+
+export default function defaultSettingsProvider(kibiEnterpriseEnabled) {
   const weekdays = moment.weekdays().slice();
   const [defaultWeekday] = weekdays;
 
   // wrapped in provider so that a new instance is given to each app/test
-  return {
+
+  const options = {
     'buildNum': {
       readonly: true
     },
@@ -67,7 +78,7 @@ export default function defaultSettingsProvider() {
       description: 'Fields that exist outside of _source to merge into our document when displaying it',
     },
     'discover:sampleSize': {
-      value: 500,
+      value: 50, // kibi: in kibi the default is 50
       description: 'The number of rows to show in the table',
     },
     'doc_table:highlight': {
@@ -308,22 +319,6 @@ export default function defaultSettingsProvider() {
       value: false,
       description: 'Set to true to suppress all warnings and errors'
     },
-    'kibi:graphUseWebGl' : {
-      value: true,
-      description: 'Set to false to disable WebGL rendering'
-    },
-    'kibi:graphExpansionLimit' : {
-      value: 500,
-      description: 'Limit the number of elements to retrieve during the graph expansion'
-    },
-    'kibi:graphRelationFetchLimit' : {
-      value: 2500,
-      description: 'Limit the number of relations to retrieve after the graph expansion'
-    },
-    'kibi:graphMaxConcurrentCalls' : {
-      value: 15,
-      description: 'Limit the number of concurrent calls done by the Graph Browser'
-    },
     'kibi:timePrecision' : {
       type: 'string',
       value: 's',
@@ -342,14 +337,59 @@ export default function defaultSettingsProvider() {
       value: '{ "relationsIndices": [], "relationsDashboards": [], "version": 2 }',
       description: 'Relations between index patterns and dashboards'
     },
-    'kibi:shieldAuthorizationWarning': {
-      value: true,
-      description: 'Set to true to show all authorization warnings from Shield'
+    'kibi:panel_vertical_size': {
+      type: 'number',
+      value: 2,
+      description: 'Set to change the default vertical panel size.',
+      validator: positiveIntegerValidator
     },
-    'kibi:session_cookie_expire': {
-      value: 31536000,
-      description: 'Set duration of cookie session (in seconds)'
+    'kibi:vertical_grid_resolution': {
+      type: 'number',
+      value: 100,
+      description: 'Set to change vertical grid resolution.',
+      validator: positiveIntegerValidator
+    },
+    'kibi:enableAllDashboardsCounts' : {
+      value: true,
+      description: 'Enable counts on all dashboards.'
+    },
+    'kibi:enableAllRelBtnCounts' : {
+      value: true,
+      description: 'Enable counts on all relational buttons.'
     }
     // kibi: end
   };
+
+  // kibi: enterprise options
+  const enterpriseOptions = {
+    'kibi:shieldAuthorizationWarning': {
+      value: true,
+      description: 'Set to true to show all authorization warnings'
+    },
+    'kibi:graphUseWebGl' : {
+      value: true,
+      description: 'Set to false to disable WebGL rendering'
+    },
+    'kibi:graphUseFiltersFromDashboards' : {
+      value: false,
+      description: 'Set to true to use filters from dashboards on expansion'
+    },
+    'kibi:graphExpansionLimit' : {
+      value: 500,
+      description: 'Limit the number of elements to retrieve during the graph expansion'
+    },
+    'kibi:graphRelationFetchLimit' : {
+      value: 2500,
+      description: 'Limit the number of relations to retrieve after the graph expansion'
+    },
+    'kibi:graphMaxConcurrentCalls' : {
+      value: 15,
+      description: 'Limit the number of concurrent calls done by the Graph Browser'
+    }
+  };
+
+  if (kibiEnterpriseEnabled) {
+    return merge({}, options, enterpriseOptions);
+  }
+  return options;
 };

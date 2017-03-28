@@ -44,7 +44,7 @@ export default function (server) {
     return urlDoc;
   }
 
-  async function createUrlDoc(url, urlId, req) {
+  async function createUrlDoc(url, kibiSession, urlId, req) {
     const newUrlId = await new Promise((resolve, reject) => {
       const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
       const kibanaIndex = server.config().get('kibana.index');
@@ -55,6 +55,7 @@ export default function (server) {
         id: urlId,
         body: {
           url,
+          kibiSession,
           'accessCount': 0,
           'createDate': new Date(),
           'accessDate': new Date()
@@ -71,30 +72,31 @@ export default function (server) {
     return newUrlId;
   }
 
-  function createUrlId(url) {
+  function createUrlId(url, kibiSession) {
     const urlId = crypto.createHash('md5')
     .update(url)
+    .update(kibiSession !== undefined ? JSON.stringify(kibiSession, null, '') : '')
     .digest('hex');
-
     return urlId;
   }
 
   return {
-    async generateUrlId(url, req) {
-      const urlId = createUrlId(url);
+    async generateUrlId(url, kibiSession, req) {
+      const urlId = createUrlId(url, kibiSession);
       const urlDoc = await getUrlDoc(urlId, req);
       if (urlDoc) return urlId;
 
-      return createUrlDoc(url, urlId, req);
+      return createUrlDoc(url, kibiSession, urlId, req);
     },
     async getUrl(urlId, req) {
       try {
         const urlDoc = await getUrlDoc(urlId, req);
         if (!urlDoc) throw new Error('Requested shortened url does not exist in kibana index');
-
         updateMetadata(urlId, urlDoc, req);
-
-        return urlDoc._source.url;
+        return {
+          url: urlDoc._source.url,
+          kibiSession: urlDoc._source.kibiSession
+        };
       } catch (err) {
         return '/';
       }

@@ -79,8 +79,11 @@ function VisEditor(createNotifier, kibiState, $scope, $route, timefilter, AppSta
   const queryFilter = Private(FilterBarQueryFilterProvider);
   const filterBarClickHandler = Private(FilterBarFilterBarClickHandlerProvider);
 
+  // kibi: added by kibi
   const doesVisDependsOnSelectedEntities = Private(DoesVisDependsOnSelectedEntitiesProvider);
   const hasAnyOfVisSavedSearchesATimeField = Private(HasAnyOfVisSavedSearchesATimeField);
+  const getEmptyQueryOptionHelper = Private(require('ui/kibi/helpers/get_empty_query_with_options_helper')); // kibi: added by Kibi
+  // kibi: end
 
   const notify = createNotifier({
     location: 'Visualization Editor'
@@ -162,7 +165,7 @@ function VisEditor(createNotifier, kibiState, $scope, $route, timefilter, AppSta
   const stateDefaults = {
     uiState: savedVis.uiStateJSON ? JSON.parse(savedVis.uiStateJSON) : {},
     linked: !!savedVis.savedSearchId,
-    query: searchSource.getOwn('query') || {query_string: {query: '*'}},
+    query: searchSource.getOwn('query') || getEmptyQueryOptionHelper.getQuery(),
     filters: searchSource.getOwn('filter') || [],
     vis: savedVisState
   };

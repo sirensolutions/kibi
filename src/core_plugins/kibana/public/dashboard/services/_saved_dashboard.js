@@ -34,7 +34,8 @@ module.factory('SavedDashboard', function (courier, config) {
         timeTo: undefined,
         timeFrom: undefined,
         refreshInterval: undefined,
-        savedSearchId: undefined // kibi: added to be able to store savedSearchId
+        savedSearchId: undefined, // kibi: added to be able to store savedSearchId
+        priority: 0 // kibi: added to sort dashboards
       },
 
       // if an indexPattern was saved with the searchsource of a SavedDashboard
@@ -68,7 +69,8 @@ module.factory('SavedDashboard', function (courier, config) {
         value: { type: 'integer'}
       }
     },
-    savedSearchId: 'string'
+    savedSearchId: 'string',
+    priority: 'integer' // kibi: added to sort dashboards
   };
 
   SavedDashboard.searchsource = true;

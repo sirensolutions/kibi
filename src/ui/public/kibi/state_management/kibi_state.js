@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import { isEqual } from 'lodash';
 import qs from 'ui/utils/query_string';
 import { parseWithPrecision } from 'ui/kibi/utils/date_math_precision';
 import uniqFilters from 'ui/filter_bar/lib/uniq_filters';
@@ -10,12 +11,14 @@ import uiRoutes from 'ui/routes';
 import StateManagementStateProvider from 'ui/state_management/state';
 import RelationsHelperProvider from 'ui/kibi/helpers/relations_helper';
 import { getAppUrl } from 'ui/chrome';
+import { IndexPatternMissingIndices } from 'ui/errors';
 
 function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppState, savedDashboards, $rootScope, indexPatterns, globalState,
     elasticsearchPlugins, $location, config, Private, createNotifier) {
   const State = Private(StateManagementStateProvider);
   const notify = createNotifier({ location: 'Kibi State'});
   const relationsHelper = Private(RelationsHelperProvider);
+  const decorateQuery = Private(require('ui/courier/data_source/_decorate_query'));
 
   _.class(KibiState).inherits(State);
   function KibiState(defaults) {
@@ -49,11 +52,7 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
             }
           });
 
-          // Do not call save() method to prevent sending events
-          // persist the state in the URL
-          const search = $location.search();
-          search[this._urlParam] = this.toRISON();
-          $location.search(search).replace();
+          this.save(true, true);
         }
       }).catch(notify.error);
     });
@@ -112,7 +111,12 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
    * - analyze_wildcard is set to true
    */
   KibiState.prototype._isDefaultQuery = function (query) {
-    return _.get(query, 'query_string.query') === '*' && _.get(query, 'query_string.analyze_wildcard') === true;
+    const defaultQuery = decorateQuery({
+      query_string: {
+        query: '*'
+      }
+    });
+    return isEqual(query, defaultQuery);
   };
 
   /**
@@ -164,7 +168,6 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
     enabled_relations: 'j',
     enabled_relational_panel: 'e',
     groups: 'g',
-    session_id: 's',
     // selected entity properties
     selected_entity_disabled: 'x',
     selected_entity: 'u',
@@ -239,18 +242,6 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
 
   KibiState.prototype.removeTestEntityURI = function () {
     delete this[this._properties.test_selected_entity];
-  };
-
-  KibiState.prototype.deleteSessionId = function (id) {
-    delete this[this._properties.session_id];
-  };
-
-  KibiState.prototype.setSessionId = function (id) {
-    this[this._properties.session_id] = id;
-  };
-
-  KibiState.prototype.getSessionId = function () {
-    return this[this._properties.session_id];
   };
 
   /**
@@ -573,13 +564,11 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
    * Returns the current set of queries for the given dashboard
    */
   KibiState.prototype._getQueries = function (dashboardId, appState, metas) {
-    let query = {
+    let query = decorateQuery({
       query_string: {
-        // TODO: https://github.com/sirensolutions/kibi-internal/issues/1153
-        analyze_wildcard: true,
         query: '*'
       }
-    };
+    });
 
     if (appState && this._getCurrentDashboardId() === dashboardId) {
       if (appState.query) {
@@ -634,7 +623,8 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
       }
     }
 
-    return indexPatterns.get(index).then((indexPattern) => {
+    return indexPatterns.get(index)
+    .then((indexPattern) => {
       let filter;
       const timefield = indexPattern.timeFieldName && _.find(indexPattern.fields, { name: indexPattern.timeFieldName });
 
@@ -651,6 +641,13 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
       }
 
       return filter;
+    })
+    .catch((error) => {
+      // if the pattern does not match any index, do not break Promise.all and return a null filter.
+      if (error instanceof IndexPatternMissingIndices) {
+        return null;
+      }
+      throw error;
     });
   };
 
@@ -716,6 +713,13 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
         return pattern.toIndexList(min, max);
       }
       return [ indexPatternId ];
+    })
+    .catch((error) => {
+      // If computing the indices failed because the pattern does not match any index return an empty list.
+      if (error instanceof IndexPatternMissingIndices) {
+        return [];
+      }
+      throw error;
     });
   };
 
@@ -984,7 +988,7 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
     const appState = getAppState();
 
     // here ignore the missing meta as getState can be called
-    // on a dashboard without assosiated savedSearch
+    // on a dashboard without associated savedSearch
     const getMetas = this._getDashboardAndSavedSearchMetas(dashboardIds, true);
 
     // check siren-platform plugin
@@ -1004,7 +1008,7 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
       // if dashboardIds is empty or contains only 1 element
       //   - the meta can be missing
       // else
-      //   - each dashboard must have coresponding meta as these mean that we are passing
+      //   - each dashboard must have corresponding meta as these mean that we are passing
       //   set of relationally connected dashboards
       if (dashboardIds.length > 1) {
         for (let i = 0; i < metas.length; i++) {

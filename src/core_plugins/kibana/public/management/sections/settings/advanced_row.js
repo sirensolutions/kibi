@@ -57,7 +57,16 @@ uiModules.get('apps/management')
             return config.remove(conf.name);
           }
 
-          return config.set(conf.name, conf.unsavedValue);
+          // kibi: added to allow for custom validation step before saving the value
+          let value = conf.unsavedValue;
+          if (_.isFunction(conf.validator)) {
+            value = conf.validator(conf.unsavedValue);
+            if (value instanceof Error) {
+              return Promise.reject(`Wrong value set for: ${conf.name}. ${value.message}`);
+            }
+          }
+          return config.set(conf.name, value);
+          // kibi: end
         });
       };
 

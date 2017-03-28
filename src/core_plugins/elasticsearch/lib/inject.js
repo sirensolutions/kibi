@@ -43,7 +43,7 @@ exports.save = function (query) {
  * and adds the id of queries which intersect with the result set in the given response object within
  * the fields attribute of each hit.
  */
-exports.runSavedQueries = function (response, queryEngine, savedQueries) {
+exports.runSavedQueries = function (response, queryEngine, savedQueries, credentials) {
   if (savedQueries.length === 0) {
     return Promise.resolve(response);
   }
@@ -56,7 +56,7 @@ exports.runSavedQueries = function (response, queryEngine, savedQueries) {
         const savedQuery = savedQueries[key][i];
         switch (key) {
           case 'inject':
-            promises.push(exports._runInject(savedQuery, queryEngine));
+            promises.push(exports._runInject(savedQuery, queryEngine, credentials));
             break;
         }
       }
@@ -97,7 +97,7 @@ function _runSavedQueries(response, runQueries) {
 /**
  * RunInject runs the given query and returns a function that stores the results into an object for a given hit
  */
-exports._runInject = function (query, queryEngine) {
+exports._runInject = function (query, queryEngine, credentials) {
   return Promise.try(function () {
     const entityURI = query.entityURI;
     const queryDefs = query.queryDefs;
@@ -114,7 +114,7 @@ exports._runInject = function (query, queryEngine) {
       throw new Error('Missing fieldName field in the inject object: ' + query);
     }
 
-    return queryEngine.getIdsFromQueries(queryDefs, {selectedDocuments: [entityURI]})
+    return queryEngine.getIdsFromQueries(queryDefs, {selectedDocuments: [entityURI], credentials})
     .then(function (setOfIds) {
       return function (hit) {
         const res = {

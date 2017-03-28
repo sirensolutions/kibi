@@ -312,7 +312,6 @@ function controller(Promise, es, kibiState, $rootScope, $scope, $timeout, config
       if (!existingNode) {
         node.keep = true; // this is to tag the nodes to remove
         node.id = id;
-        node.size = $scope[graphProperty].options.minNodeSize;
         $scope[graphProperty].nodes.push(node);
       } else {
         existingNode.keep = true; // this is to tag the nodes to remove
@@ -418,10 +417,8 @@ function controller(Promise, es, kibiState, $rootScope, $scope, $timeout, config
       options: {
         monitorContainerSize: true,
         alwaysShowLinksLabels: true,
-        stopAfter: 2000,
         groupingForce: {},
         nodeIcons: {},
-        minNodeSize: 20,
         colors: {}
       },
       isRelationReady: function (relDash) {
@@ -534,10 +531,8 @@ function controller(Promise, es, kibiState, $rootScope, $scope, $timeout, config
         showLegend: false,
         monitorContainerSize: true,
         alwaysShowLinksLabels: true,
-        stopAfter: 2000,
         groupingForce: {},
         nodeIcons: {},
-        minNodeSize: 20,
         colors: {}
       },
       isRelationReady: function (relation) {
@@ -799,13 +794,28 @@ function controller(Promise, es, kibiState, $rootScope, $scope, $timeout, config
   }, true);
 
   const indicesGraphExportOff = $rootScope.$on('egg:indicesGraph:results', function (event, method, results) {
-    if (method === 'exportGraph') {
-      $scope.relations.relationsIndicesSerialized = results;
+    switch (method) {
+      case 'exportGraph':
+        $scope.relations.relationsIndicesSerialized = results;
+        break;
+      case 'importGraph':
+        $timeout(() => {
+          $rootScope.$emit('egg:indicesGraph:run', 'stop');
+        }, 1); //stop immediately basically disabling the animation
+        break;
+      default:
     }
   });
   const dashboardsGraphExportOff = $rootScope.$on('egg:dashboardsGraph:results', function (event, method, results) {
-    if (method === 'exportGraph') {
-      $scope.relations.relationsDashboardsSerialized = results;
+    switch (method) {
+      case 'exportGraph':
+        $scope.relations.relationsDashboardsSerialized = results;
+      case 'importGraph':
+        $timeout(() => {
+          $rootScope.$emit('egg:dashboardsGraph:run', 'stop');
+        }, 1); //stop immediately basically disabling the animation
+        break;
+      default:
     }
   });
 
@@ -922,6 +932,53 @@ uiModules
           e.stopPropagation();
         }
       });
+    }
+  };
+})
+.directive('kibiRelationsSearchBar', () => {
+  return {
+    restrict: 'A',
+    scope: true,
+    link: function (scope, element, attrs) {
+
+      scope.searchRelations = function () {
+        const relations = _.get(scope, attrs.kibiRelationsSearchBarPath);
+        const searchString = scope[attrs.ngModel];
+
+        if (!searchString || searchString.length < 2) {
+          relations.forEach((relation) => relation.$$hidden = false);
+          return;
+        }
+
+        const search = function (obj, searchString) {
+          let result;
+          for (const key in obj) {
+            if (obj.hasOwnProperty(key)) {
+              if (typeof obj[key] === 'object' && obj[key] !== null || _.isArray(obj[key]) && obj[key].length) {
+                result = search(obj[key], searchString);
+                if (result) {
+                  return result;
+                }
+              }
+              if (typeof obj[key] === 'string') {
+                const found = obj[key].match(new RegExp(searchString, 'gi'));
+                if (found && found.length) {
+                  return true;
+                }
+              }
+            }
+          }
+          return result;
+        };
+
+        relations.forEach((relation) => {
+          if (search(relation, searchString)) {
+            relation.$$hidden = false;
+          } else {
+            relation.$$hidden = true;
+          }
+        });
+      };
     }
   };
 })

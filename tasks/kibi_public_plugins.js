@@ -12,11 +12,11 @@ module.exports = function (grunt) {
       dest: '/tmp/kibi_radar_vis.zip'
     },
     {
-      url: 'https://github.com/sirensolutions/kibi_wordcloud_vis/raw/4.5.3/target/kibi_wordcloud_vis-4.5.3.zip',
+      url: 'https://github.com/sirensolutions/kibi_wordcloud_vis/raw/4.6.3-1/target/kibi_wordcloud_vis-4.6.3-1.zip',
       dest: '/tmp/kibi_wordcloud_vis.zip'
     },
     {
-      url: 'https://github.com/sirensolutions/kibi_timeline_vis/raw/4.6.3/target/kibi_timeline_vis-4.6.3.zip',
+      url: 'https://github.com/sirensolutions/kibi_timeline_vis/raw/4.6.4/target/kibi_timeline_vis-4.6.4.zip',
       dest: '/tmp/kibi_timeline_vis.zip'
     },
     {

@@ -115,14 +115,41 @@ module.exports = async function (kbnServer, server, config) {
     path: '/goto/{urlId}',
     handler: async function (request, reply) {
       try {
-        const url = await shortUrlLookup.getUrl(request.params.urlId, request);
-        shortUrlAssertValid(url);
-        reply().redirect(config.get('server.basePath') + url);
+        const data = await shortUrlLookup.getUrl(request.params.urlId, request);
+        shortUrlAssertValid(data.url);
+        // kibi: if embedding parameters are set they must be included in the initial URL
+        let embeddingParameters = '';
+        if (data.url.match(/[&?]embed=true/)) {
+          embeddingParameters += 'embed=true&';
+          if (data.url.match(/[&?]kibiNavbarVisible=true/)) {
+            embeddingParameters += 'kibiNavbarVisible=true&';
+          }
+        }
+        // kibi: end
+        reply().redirect(
+          `${config.get('server.basePath')}/app/kibana#/discover?${embeddingParameters}_h=${request.params.urlId}`
+        ); // kibi: adding the sha to be able to restore kibiSession in the browser
       } catch (err) {
         reply(handleShortUrlError(err));
       }
     }
   });
+
+  // kibi: added this handler to be able to fetch the kibiSession data
+  server.route({
+    method: 'GET',
+    path: '/kibisession/{urlId}',
+    handler: async function (request, reply) {
+      try {
+        const data = await shortUrlLookup.getUrl(request.params.urlId, request);
+        shortUrlAssertValid(data.url);
+        reply(data || {});
+      } catch (err) {
+        reply(err);
+      }
+    }
+  });
+  // kibi: end
 
   server.route({
     method: 'POST',
@@ -130,7 +157,7 @@ module.exports = async function (kbnServer, server, config) {
     handler: async function (request, reply) {
       try {
         shortUrlAssertValid(request.payload.url);
-        const urlId = await shortUrlLookup.generateUrlId(request.payload.url, request);
+        const urlId = await shortUrlLookup.generateUrlId(request.payload.url, request.payload.kibiSession, request);
         reply(urlId);
       } catch (err) {
         reply(handleShortUrlError(err));

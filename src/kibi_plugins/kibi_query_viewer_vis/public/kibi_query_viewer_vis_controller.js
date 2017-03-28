@@ -27,6 +27,7 @@ uiModules
     return [
       _.map(myscope.vis.params.queryDefinitions, 'templateId'),
       _.map(myscope.vis.params.queryDefinitions, '_label'),
+      _.map(myscope.vis.params.queryDefinitions, '_templateVarsString'),
       _.map(myscope.vis.params.queryDefinitions, 'queryId')
     ];
   }, function () {

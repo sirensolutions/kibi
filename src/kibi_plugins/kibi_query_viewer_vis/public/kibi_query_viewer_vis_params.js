@@ -49,7 +49,7 @@ uiModules
           try {
             if (option._templateVarsString) {
               const toJson = JSON.parse(option._templateVarsString);
-              option.templateVars.label = toJson.label;
+              option.templateVars = toJson;
               option._label = toJson.label;
             }
           } catch (err) {

@@ -1,6 +1,6 @@
 [[shield_integration]]
 
-== Search Guard Integration [Enterprise Edition only]
+== Search Guard Integration and Kibi access control [Enterprise Edition only]
 
 ifeval::["{enterprise_enabled}" == "false"]
   NOTE: Documentation for Search Guard Integration is available only in Kibi
@@ -221,17 +221,11 @@ is run.
 
 `sgadmin.sh` is available in the _plugins/search-guard-2/tools_ directory in
 each Elasticsearch instance in which Search Guard has been installed; a
-standalone version (`sgadmin-standalone.zip`) can be downloaded from the
-{searchguard-central-ref}[Maven Central repository].
+standalone version (`sgadmin-standalone.zip`) can be downloaded from
+{searchguard-sgadmin-ref}[this page].
 
 Once a Search Guard enabled cluster has been initialized, `sgadmin` can be used
 to upload new configurations.
-
-NOTE: if you are using the {searchguard-management-api-ref}[Search Guard REST
-Management API addon], make sure that the sgadmin configuration directory
-contains only the `sg_config.yml` file, otherwise sgadmin will replace users,
-roles, action groups and mappings that might have been modified through the
-API.
 
 ==== Search Guard configuration
 
@@ -660,7 +654,7 @@ $ bash plugins/search-guard-2/tools/sgadmin.sh \
   -nhnv
 ----
 
-You will need to specify the following arguments based on your enviroment
+You will need to specify the following arguments based on your environment
 configuration:
 
 - **-cd**: the path to the directory containing the Search Guard access control
@@ -825,6 +819,8 @@ values in the **kibi_access_control** section:
   cookies when a tab is closed or even across restarts, so it is recommended to
   set **session.ttl** for additional protection. Defaults to **null**.
 - **cookie.name**: the name of the session cookie. Defaults to **kac**.
+- **admin_role**: the Search Guard role authorized to use the Kibi Access
+  Control application. Defaults to **kibiadmin**.
 
 E.g.:
 
@@ -865,6 +861,246 @@ correct, you should see an authentication dialog when browsing to Kibi.
 
 ._Authentication dialog_
 image::images/access_control/login.png["Authentication dialog",align="center"]
+
+=== Search Guard management UI
+
+Kibi Enterprise include an optional user interface for the
+{searchguard-management-api-ref}[Search Guard REST Management API add-on] ; in
+order to use it, the Kibi backend has to connect to the Elasticsearch cluster
+using a PEM client certificate with administrative privileges.
+
+Copy the client certificate and its key to a directory readable by Kibi (e.g. `pki`); then
+add the following parameters to the `kibi_access_control` configuration section:
+
+- **admin_role**: the Search Guard role that has access to the Search Guard
+  management UI (**kibiadmin** by default).
+- **backends.searchguard.admin.ssl.cert**: the path to the administrative
+  client certificate.
+- **backends.searchguard.admin.ssl.key**: the path to the administrative client
+  certificate key.
+
+E.g.:
+
+[source,yaml]
+----
+kibi_access_control:
+  backends:
+    searchguard:
+      admin.ssl.cert: pki/searchguard/CN=sgadmin.crt.pem
+      admin.ssl.key: pki/searchguard/CN=sgadmin.key.pem
+----
+
+It is strongly suggested to setup a dedicated Kibi instance to use the
+Search Guard management UI and allow access to it only to authorized
+users.
+
+NOTE: When using the {searchguard-management-api-ref}[Search Guard REST
+Management API add-on], make sure that the sgadmin configuration directory
+contains only the `sg_config.yml` file, otherwise sgadmin will replace users,
+roles, action groups and mappings that might have been modified through the
+API.
+
+Once the certificate is setup, restart Kibi, login with a user having an
+administrative role, click on the apps button, then click on **Access control**
+and finally on **Authentication**.
+
+._The Access control app_
+image::images/access_control/app.png["The Access control app",align="center"]
+
+The Authentication section allows to browse, edit and create the following
+Search Guard resources:
+
+- Internal users
+- Roles
+- Role mappings
+- Action groups
+
+To verify that the application is working correctly, click on **Roles**
+then click on the browse button; you should see the list of roles defined
+during the initial Search Guard setup or an authorization error if the
+certificate is incorrect:
+
+._Browsing Search Guard roles_
+image::images/access_control/sgroles.png["Browsing Search Guard roles",align="center"]
+
+=== Saved objects access control
+
+Kibi Enterprise features an access control system on saved objects that allows
+to filter dashboards and visualizations visible to end users.
+
+==== Setup
+
+To enable this feature, set the following parameters in the `kibi_access_control`
+configuration section:
+
+- **admin_role**: the Search Guard role that can use the saved objects access
+  control management UI (**kibiadmin** by default).
+- **acl.enabled**: set to true to enable access control on saved objects.
+- **acl.index**: the Elasticsearch index in which access control rules and
+  saved objects metadata will be stored (**.kibiaccess** by default).
+
+E.g.:
+
+[source,yaml]
+----
+kibi_access_control:
+  acl:
+    enabled: true
+----
+
+Before restarting Kibi, it is required to allow the backend user (`.kibiserver`
+by default) all permissions on the index set in
+`kibi_access_control.acl.index`; for example, the following snippet from
+`sg_roles.yml` grants all privileges to the `kibiserver` user on the
+`.kibiaccess` index.
+
+[source,yaml]
+----
+# Permissions for the Kibi server process.
+kibiserver:
+  cluster:
+      - cluster:monitor/nodes/info
+      - cluster:monitor/health
+      - cluster:monitor/state
+      - cluster:monitor/nodes/stats
+      - KIBI_CLUSTER
+  indices:
+    '*':
+      '*':
+        - indices:admin/get
+    '?kibi':
+      '*':
+        - ALL
+    '?kibiaccess':
+      '*':
+        - ALL
+----
+
+In addition, it is recommended to block access on the Kibi index (`.kibi` by
+default) to users by adding the following permissions on the `null` type in
+each user role:
+
+- `indices:data/read/search`
+- `indices:data/read/coordinate-search`
+
+E.g.:
+
+[source, yaml]
+----
+kibiuser:
+  cluster:
+    - KIBI_CLUSTER
+  indices:
+    /(article|investment|company|investor)/:
+      '*':
+        - KIBI_READONLY
+    watcher:
+      '*':
+        - KIBI_READONLY
+    '*':
+      '*':
+        - KIBI_MSEARCH
+    watcher_alarms*:
+      '*':
+        - KIBI_READONLY
+    '?kibi':
+      'null':
+        - 'indices:data/read/search'
+        - 'indices:data/read/coordinate-search'
+----
+
+In this way, users will be able to include the Kibi index in msearch requests
+(which is a performance requirement to avoid querying all indices when time based
+index patterns are configured) but won't be
+able to read saved objects from it.
+
+Roles can be updated either by modifying `sg_roles.yml` and uploading it
+through `sgadmin` or by using the Search Guard management application; make
+sure to set these rules on all Search Guard roles assigned to Kibi users.
+
+Once roles are configured, restart Kibi; if permissions are configured correctly,
+you will be see an **ACL** section in the **Access control** application.
+
+._The ACL section_
+image::images/access_control/acl_section.png["The ACL section",align="center"]
+
+==== Kibi roles and rules
+
+The ACL Roles panel in the ACL section allows to define Kibi roles, which
+are collections of permissions on saved objects; the main purpose of this
+system is to hide dashboards on unauthorized indices to end users and avoid
+unauthorized changes to configuration objects.
+
+The `everyone` role defines permissions for all the users in the system, and is
+mapped by default to any user logged in Kibi; by default it allows all users
+read only access to the Kibi configuration (**Advanced settings**), saved
+searches and index patterns.
+
+._The everyone role_
+image::images/access_control/everyone.png["The everyone role",align="center"]
+
+For most setups it makes sense to grant **view** permissions on visualizations
+as well, then set specific permissions on dashboards and dashboard groups for
+each role.
+
+To define a new role, click on the **Create role** button, then set the
+following parameters:
+
+- **Role ID**: the ID of the role (e.g. `kibiuser`); must be a lowercase
+  alphanumeric string.
+- **Backend roles**: a list of Search Guard roles that will be mapped to this
+  Kibi role (e.g. `kibiuser`)
+- **Rules**: a list of rules on saved object types.
+
+Each rule is defined by three parameters:
+
+- **Action**: allow or deny
+- **Permission**: the permission to allow or deny
+- **Context**: the saved object type on which the permission must be enforced.
+
+._The Create role button_
+image::images/access_control/create_role_button.png["The Create role button",align="center"]
+
+._Saving a role_
+image::images/access_control/saving_role.png["Saving a role",align="center"]
+
+==== Object permissions
+
+In addition to role level permissions, it is possible to define permissions
+on specific objects by visiting **Settings > Objects** and clicking on the
+permissions button next to an object:
+
+._The object permissions button_
+image::images/access_control/object_perms_button.png["The object permissions button",align="center"]
+
+The object permissions form allows to set the owner of the object and custom
+access rules.
+
+By default the owner is set to the user that created the object; the owner has
+all permissions on the created object; it is possible to unset the owner of an
+object by leaving the field blank and clicking on the Save button.
+
+Custom access rules can be used to grant access to an object that would be
+otherwise hidden; for example, if `everyone` is not granted to display
+dashboards but you want to display the `Overview` dashboard to all users, visit
+the object permissions form for the `Overview` dashboard and set the `View`
+permission for `everyone` to `Allow`.
+
+If `everyone` can see dashboards but you'd like to hide the `IT` dashboard to
+users, set the `View` permission for `everyone` to `Deny`.
+
+._The object permissions form_
+image::images/access_control/object_permissions.png["The object permissions form",align="center"]
+
+==== Notes
+
+Although users are not allowed to view or edit the following types unless they
+have permission to do so, they will be retrieved and executed by the backend if
+used by a visualization:
+
+- Query
+- Query templates
+- Data source
 
 === Logstash configuration
 

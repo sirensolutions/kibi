@@ -15,6 +15,7 @@ uiModules
   $scope.cellClickHandlers = {};
   $scope.savedObj = {
     columns: $scope.vis.params.columns,
+    columnAliases: $scope.vis.params.columnAliases,
     sort: $scope.vis.params.sort
   };
 
@@ -67,11 +68,18 @@ uiModules
       if (columns) {
         $scope.savedObj.columns = columns;
       }
-    }, true);
+    });
+
+    const removeVisColumnAliasesChangedHandler = $rootScope.$on('kibi:vis:columnAliases-changed', function (event, columnAliases) {
+      if (columnAliases) {
+        $scope.savedObj.columnAliases = columnAliases;
+      }
+    });
 
     $scope.$on('$destroy', function () {
       removeVisStateChangedHandler();
       removeVisColumnsChangedHandler();
+      removeVisColumnAliasesChangedHandler();
     });
 
     $scope.$watch('savedObj.columns', function () {

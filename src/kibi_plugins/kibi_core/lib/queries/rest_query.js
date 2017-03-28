@@ -23,6 +23,11 @@ RestQuery.prototype = _.create(AbstractQuery.prototype, {
  * Return a promise which when resolved should return true or false.
  */
 RestQuery.prototype.checkIfItIsRelevant = function (options) {
+  if (this._checkIfSelectedDocumentRequiredAndNotPresent(options)) {
+    this.logger.warn('No elasticsearch document selected while required by the REST query. [' + this.config.id + ']');
+    return Promise.resolve(false);
+  }
+
   // no document selected there is nothing to check against
   if (!options.selectedDocuments || options.selectedDocuments.length === 0) {
     return Promise.resolve(true);
@@ -33,10 +38,6 @@ RestQuery.prototype.checkIfItIsRelevant = function (options) {
     return Promise.resolve(true);
   }
 
-  if (this._checkIfSelectedDocumentRequiredAndNotPresent(options)) {
-    this.logger.warn('No elasticsearch document selected while required by the REST query. [' + this.config.id + ']');
-    return Promise.resolve(false);
-  }
   // evaluate the rules
   return this.rulesHelper.evaluate(this.config.activation_rules, options.selectedDocuments, options.credentials);
 };
@@ -45,6 +46,18 @@ RestQuery.prototype._logFailedRequestDetails = function (msg, originalError, res
   this.logger.error(msg, originalError);
   this.logger.error('See the full resp object below');
   this.logger.error(resp);
+};
+
+const mergeObjects = function (dest, sourceObject, sourcePath) {
+  const source = _.get(sourceObject, sourcePath);
+  if (source) {
+    _.each(source, candidate => {
+      const found = _.find(dest, c => c.name === candidate.name);
+      if (!found) {
+        dest.push(candidate);
+      }
+    });
+  }
 };
 
 RestQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) {
@@ -88,11 +101,18 @@ RestQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) {
       '${password}': self.config.datasource.datasourceClazz.populateParameters('${password}')
     };
 
+    // get all params from datasource and merge them with the one from the query
+    const mergedHeaders = [];
+    const mergedParams = [];
+    mergeObjects(mergedHeaders, self.config, 'rest_headers');
+    mergeObjects(mergedHeaders, self.config, 'datasource.datasourceParams.headers');
+    mergeObjects(mergedParams, self.config, 'rest_params');
+    mergeObjects(mergedParams, self.config, 'datasource.datasourceParams.params');
 
     // the whole replacement of values is happening here
     self.queryHelper.replaceVariablesForREST(
-      self.config.rest_headers,
-      self.config.rest_params,
+      mergedHeaders,
+      mergedParams,
       self.config.rest_body,
       self.config.rest_path,
       uri, availableVariables,

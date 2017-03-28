@@ -4,10 +4,11 @@ export class PanelUtils {
   /**
    * Fills in default parameters where not specified.
    * @param {PanelState} panel
+   * @param {Config} config - Reference to config service // siren: added by Siren
    */
-  static initializeDefaults(panel) {
+  static initializeDefaults(panel, config) { // siren: added config
     panel.size_x = panel.size_x || DEFAULT_PANEL_WIDTH;
-    panel.size_y = panel.size_y || DEFAULT_PANEL_HEIGHT;
+    panel.size_y = panel.size_y || config.get('kibi:panel_vertical_size', DEFAULT_PANEL_HEIGHT); // siren: get from config
 
     if (!panel.id) {
       // In the interest of backwards comparability

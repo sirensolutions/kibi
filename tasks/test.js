@@ -52,9 +52,9 @@ module.exports = function (grunt) {
 
   grunt.registerTask('test:quick', [
     'test:server',
-    'test:ui',
     'test:browser',
-    'test:api'
+    'test:api',
+    'test:ui'
   ]);
 
   grunt.registerTask('test:dev', [

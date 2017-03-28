@@ -20,7 +20,9 @@ function toEditableConfig({ def, name, value, isCustom }) {
     defVal: def.value,
     type: getValType(def, value),
     description: def.description,
-    options: def.options
+    options: def.options,
+    // kibi: added to allow for custom validation function
+    validator: def.validator
   };
 
   const editor = getEditorType(conf);
@@ -31,6 +33,12 @@ function toEditableConfig({ def, name, value, isCustom }) {
   conf.markdown = editor === 'markdown';
   conf.normal = editor === 'normal';
   conf.tooComplex = !editor;
+
+  // kibi: pretty print JSON values
+  if (conf.json && conf.value) {
+    conf.value = JSON.stringify(JSON.parse(conf.value), null, ' ');
+  }
+  // kibi: end
 
   return conf;
 }

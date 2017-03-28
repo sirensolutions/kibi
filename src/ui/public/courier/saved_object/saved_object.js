@@ -289,6 +289,11 @@ export default function SavedObjectFactory(savedObjectsAPI, savedObjectsAPITypes
      * @returns {Promise}
      */
     function refreshIndex() {
+      // kibi: do not call es.indices.refresh as it is handled by the backend
+      if (savedObjectsAPITypes.has(config.type)) {
+        return Promise.resolve();
+      }
+      // kibi: end
       return esAdmin.indices.refresh({ index: kbnIndex });
     }
 
@@ -377,7 +382,6 @@ export default function SavedObjectFactory(savedObjectsAPI, savedObjectsAPITypes
           if (err && err.message === OVERWRITE_REJECTED) return;
           notify.error(err); // kibi: added here so the errors are shown by notifier
           return Promise.reject(err);
-          // KIBI5: should we still return the ID ??
         });
     };
 
@@ -398,14 +402,19 @@ export default function SavedObjectFactory(savedObjectsAPI, savedObjectsAPITypes
       if (savedObjectsAPITypes.has(config.type)) {
         client = savedObjectsAPI;
       }
-      return client.delete(
+      return client.delete({
       // kibi: end
-        {
-          index: kbnIndex,
-          type: type,
-          id: this.id
-        })
-        .then(() => { return refreshIndex(); });
+        index: kbnIndex,
+        type: type,
+        id: this.id
+      }).then(() => {
+        // kibi: refresh is handled by the backend
+        if (!savedObjectsAPITypes.has(config.type)) {
+          return esAdmin.indices.refresh({
+            index: kbnIndex
+          });
+        }
+      });
     };
   }
 

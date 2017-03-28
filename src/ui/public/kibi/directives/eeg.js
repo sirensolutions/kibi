@@ -18,13 +18,16 @@ uiModules
     },
     template: '<div></div>',
     link: function ($scope, element, attrs) {
-      const layersOrderArray = [ 'legend', 'links', 'linksLabelsBack', 'nodes', 'linksLabels' ];
+      const layersOrder = ['legend', 'links','linksLabelsBack','nodes','linksLabels'];
+      const minNodeSize = 15;
+      const baseURL = '';
+
       if ($scope.graph === undefined) {
         element.empty();
         if ($scope.g) {
           $scope.g.destroy();
         }
-        $scope.g = new Eeg(element, {baseURL: '', layersOrder: layersOrderArray});
+        $scope.g = new Eeg(element, {baseURL, layersOrder, minNodeSize});
       }
 
       $scope.$watch('graph', function (graph) {
@@ -35,8 +38,9 @@ uiModules
             if ($scope.g) {
               $scope.g.destroy();
             }
-            $scope.graph.options.baseURL = '';
-            $scope.graph.options.layersOrder = layersOrderArray;
+            $scope.graph.options.baseURL = baseURL;
+            $scope.graph.options.layersOrder = layersOrder;
+            $scope.graph.options.minNodeSize = minNodeSize;
             $scope.g = new Eeg(element, $scope.graph.options);
           }
 

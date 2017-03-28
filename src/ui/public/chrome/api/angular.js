@@ -2,7 +2,8 @@ import _ from 'lodash';
 import { format as formatUrl, parse as parseUrl } from 'url';
 
 import modules from 'ui/modules';
-import Notifier from 'ui/notify/notifier';
+import Notifier from 'kibie/notify/notifier'; // kibi: import Kibi notifier
+import kibiRemoveHashedParams from './kibi_remove_hashed_params'; // kibi: import util to clean the url
 import { UrlOverflowServiceProvider } from '../../error_url_overflow';
 
 const URL_LIMIT_WARN_WITHIN = 1000;
@@ -39,7 +40,15 @@ module.exports = function (chrome, internals) {
       a.href = chrome.addBasePath('/es_admin');
       return a.href;
     }()))
-    .config(chrome.$setupXsrfRequestInterceptor)
+    .config(($httpProvider) => {
+      // kibi: clean the hashed params from the URL if session storage empty
+      const url = kibiRemoveHashedParams(window.location.href, sessionStorage);
+      if (url) {
+        window.location.href = url;
+      }
+      // kibi:
+      chrome.$setupXsrfRequestInterceptor($httpProvider);
+    })
     .config(['$compileProvider', function ($compileProvider) {
       if (!internals.devMode) {
         $compileProvider.debugInfoEnabled(false);
@@ -90,7 +99,7 @@ module.exports = function (chrome, internals) {
           const { host, path, search, protocol } = parseUrl(window.location.href);
           // rewrite the entire url to force the browser to reload and
           // discard any potentially unstable state from before
-          window.location.href = formatUrl({ host, path, search, protocol, hash: '#/error/url-overflow' });
+          window.location.href = formatUrl({ host, pathname: path, search, protocol, hash: '#/error/url-overflow' });
         }
       };
 

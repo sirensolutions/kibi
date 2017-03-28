@@ -17,9 +17,12 @@ export class SavedObjectLoader {
     this.lowercaseType = this.type.toLowerCase();
     this.kbnIndex = kbnIndex;
     this.kbnUrl = kbnUrl;
-    this.esAdmin = esAdmin;
 
-    this.scanner = new Scanner(esAdmin, {
+    let scannerClient = esAdmin;
+    if (this.savedObjectsAPI) {
+      scannerClient = savedObjectsAPI;
+    }
+    this.scanner = new Scanner(scannerClient, {
       index: kbnIndex,
       type: this.lowercaseType
     });

@@ -15,7 +15,7 @@ import uiModules from 'ui/modules';
 import shareTemplate from 'ui/share/views/share.html';
 const app = uiModules.get('kibana');
 
-app.directive('share', function (Private) {
+app.directive('share', function (Private, sharingService) {
   const getUnhashableStates = Private(getUnhashableStatesProvider);
   const urlShortener = Private(urlShortenerProvider);
 

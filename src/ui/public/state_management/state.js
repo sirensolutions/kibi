@@ -11,7 +11,7 @@ import angular from 'angular';
 import rison from 'rison-node';
 import applyDiff from 'ui/utils/diff_object';
 import EventsProvider from 'ui/events';
-import Notifier from 'ui/notify/notifier';
+import Notifier from 'kibie/notify/notifier'; // kibi: import Kibi notifier
 
 import {
   createStateHash,
@@ -132,7 +132,7 @@ export default function StateProvider(Private, $rootScope, $location, config) {
    * Saves the state to the url
    * @returns {void}
    */
-  State.prototype.save = function (replace) {
+  State.prototype.save = function (replace, silent) { // kibi: added silent parameter
     let stash = this._readFromURL();
     const state = this.toObject();
     replace = replace || false;
@@ -145,7 +145,7 @@ export default function StateProvider(Private, $rootScope, $location, config) {
     // apply diff to state from stash, will change state in place via side effect
     const diffResults = applyDiff(stash, _.defaults({}, state, this._defaults));
 
-    if (diffResults.keys.length) {
+    if (diffResults.keys.length && !silent) { // kibi: do not send events if silent is set
       this.emit('save_with_changes', diffResults.keys);
     }
 

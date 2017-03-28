@@ -1,4 +1,11 @@
 <div class="kibi-menu-template-sequential-join-vis">
+ <input type="text" class="form-control kibi-relations-search-bar"
+   kibi-relations-search-bar
+   kibi-relations-search-bar-path="kibiMenuTemplateData"
+   ng-model="kibiMenuTemplateDataSearchString"
+   ng-model-options="{ debounce: 350 }"
+   ng-change="searchRelations()"
+   placeholder="Search for relation ...">
   <ul>
     <li ng-click="relation.onSelect(kibiMenuTemplateLocals.button)" ng-repeat="relation in kibiMenuTemplateLocals.relations">
       Name: <b>{{relation.label}}</b><br/>

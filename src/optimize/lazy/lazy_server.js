@@ -1,5 +1,3 @@
-
-import Boom from 'boom';
 import { Server } from 'hapi';
 import { fromNode } from 'bluebird';
 import registerHapiPlugins from '../../server/http/register_hapi_plugins';

@@ -30,18 +30,21 @@ export default function FetchStrategyForSearch(Private, Promise, timefilter, kbn
           // If we've reached this point and there are no indexes in the
           // index list at all, it means that we shouldn't expect any indexes
           // to contain the documents we're looking for, so we instead
-          // perform a request for an index pattern that we know will always
-          // return an empty result (ie. -*). If instead we had gone ahead
-          // with an msearch without any index patterns, elasticsearch would
-          // handle that request by querying *all* indexes, which is the
-          // opposite of what we want in this case.
+          // perform a request to the Kibi index with a search that doesn't
+          // match anything to avoid querying all indices.
+          // Type is set to null to allow the execution of the query
+          // when .kibi is otherwise unaccessible by the user (assuming that
+          // a rule that allows queries on the null type has been setup in
+          // the authentication plugin).
+          let type = fetchParams.type;
           if (_.isArray(indexList) && indexList.length === 0) {
             indexList.push(kbnIndex);
+            type = 'null';
             body = emptySearch();
           }
           return angular.toJson({
             index: indexList,
-            type: fetchParams.type,
+            type: type,
             search_type: fetchParams.search_type,
             ignore_unavailable: true,
             preference: sessionId,

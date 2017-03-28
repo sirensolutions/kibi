@@ -132,3 +132,5 @@ installed plugins:
 image::images/app-picker.png[]
 
 Click a plugin's icon to switch to that plugin's functionality.
+
+include::known-plugins.asciidoc[]

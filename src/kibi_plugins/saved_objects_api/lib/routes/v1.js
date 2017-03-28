@@ -14,18 +14,6 @@ module.exports = (server, API_ROOT) => {
   const getModel = (typename) => server.plugins.saved_objects_api.getModel(typename);
 
   /**
-   * Returns the user credentials from the @request if available.
-   */
-  const getCredentials = (request) => {
-    const authorizationHeader = get(request, 'headers.authorization');
-    if (authorizationHeader) {
-      return {
-        'headers.authorization': authorizationHeader
-      };
-    }
-  };
-
-  /**
    * Wraps model errors and sets the body of the reply.
    *
    * @param {Error} error - The error to handle.
@@ -54,6 +42,49 @@ module.exports = (server, API_ROOT) => {
   }
 
   /**
+   * Returns a single saved object.
+   *
+   * Returns the same response as an Elasticsearch API get operation on success or a
+   * NotFound error if the object does not exist.
+   */
+  server.route({
+    method: 'GET',
+    path: `${API_ROOT}/{index}/{type}/{id}`,
+    handler: (request, reply) => {
+      let model;
+      try {
+        model = getModel(request.params.type);
+      } catch (error) {
+        return reply(Boom.notFound(error));
+      }
+      model.get(request.params.id, request)
+      .then((response) => {
+        reply(response);
+      })
+      .catch((error) => {
+        if (error.name === 'NotFoundError') {
+          return reply({
+            type: 'not_found',
+            reason: error.message,
+            status: 404,
+            found: false
+          }).code(404);
+        }
+        return replyError(error, reply);
+      });
+    },
+    config: {
+      validate: {
+        params: {
+          index: Joi.string().required(),
+          type: Joi.string().required(),
+          id: Joi.string()
+        }
+      }
+    }
+  });
+
+  /**
    * Returns multiple saved objects.
    *
    * Accepts a request and returns a response with the same format as the Elasticsearch
@@ -64,10 +95,9 @@ module.exports = (server, API_ROOT) => {
     method: 'POST',
     path: `${API_ROOT}/_mget`,
     handler: (request, reply) => {
-      const credentials = getCredentials(request);
       const promises = request.payload.docs.map((doc) => {
         try {
-          return getModel(doc._type).get(doc._id, credentials)
+          return getModel(doc._type).get(doc._id, request)
           .then((response) => {
             return response;
           })
@@ -86,7 +116,8 @@ module.exports = (server, API_ROOT) => {
                 errorBody = {
                   type: 'security_exception',
                   reason: error.message,
-                  status: 403
+                  status: 403,
+                  found: false
                 };
                 break;
               case 'AuthenticationError':
@@ -95,7 +126,8 @@ module.exports = (server, API_ROOT) => {
                 errorBody = {
                   type: 'backend_error',
                   reason: 'An error occurred while connecting to the backend.',
-                  status: error.inner ? error.inner.status : 500
+                  status: error.inner ? error.inner.status : 500,
+                  found: false
                 };
                 break;
             }
@@ -146,14 +178,13 @@ module.exports = (server, API_ROOT) => {
     method: 'POST',
     path: `${API_ROOT}/{index}/{type}/{id}`,
     handler: (request, reply) => {
-      const credentials = getCredentials(request);
       let model;
       try {
         model = getModel(request.params.type);
       } catch (error) {
         return reply(Boom.notFound(error));
       }
-      model.update(request.params.id, request.payload, credentials)
+      model.update(request.params.id, request.payload, request)
       .then((response) => {
         reply(response);
       })
@@ -187,14 +218,13 @@ module.exports = (server, API_ROOT) => {
     method: 'POST',
     path: `${API_ROOT}/{index}/{type}/{id}/_create`,
     handler: (request, reply) => {
-      const credentials = getCredentials(request);
       let model;
       try {
         model = getModel(request.params.type);
       } catch (error) {
         return reply(Boom.notFound(error));
       }
-      model.create(request.params.id, request.payload, credentials)
+      model.create(request.params.id, request.payload, request)
       .then((response) => {
         reply(response);
       })
@@ -231,14 +261,13 @@ module.exports = (server, API_ROOT) => {
     method: 'POST',
     path: `${API_ROOT}/{index}/{type}/{id}/_update`,
     handler: (request, reply) => {
-      const credentials = getCredentials(request);
       let model;
       try {
         model = getModel(request.params.type);
       } catch (error) {
         return reply(Boom.notFound(error));
       }
-      model.patch(request.params.id, request.payload.doc, credentials)
+      model.patch(request.params.id, request.payload.doc, request)
       .then((response) => {
         reply(response);
       })
@@ -267,14 +296,13 @@ module.exports = (server, API_ROOT) => {
     method: 'DELETE',
     path: `${API_ROOT}/{index}/{type}/{id}`,
     handler: (request, reply) => {
-      const credentials = getCredentials(request);
       let model;
       try {
         model = getModel(request.params.type);
       } catch (error) {
         return reply(Boom.notFound(error));
       }
-      model.delete(request.params.id, credentials)
+      model.delete(request.params.id, request)
       .then((response) => {
         reply(response);
       })
@@ -301,8 +329,9 @@ module.exports = (server, API_ROOT) => {
    *
    * Querystring parameters:
    *
-   *   - size: the number of results to return
+   *   - size: the number of results to return; if not 0, will return all the objects of the specified type.
    *   - q: a text to search
+   *   - exclude: a comma separated list of fields to exclude
    *
    * Errors are formatted by a custom handler set in the init method of this plugin.
    */
@@ -310,14 +339,18 @@ module.exports = (server, API_ROOT) => {
     method: 'POST',
     path: `${API_ROOT}/{index}/{type}/_search`,
     handler: (request, reply) => {
-      const credentials = getCredentials(request);
       let model;
       try {
         model = getModel(request.params.type);
       } catch (error) {
         return reply(Boom.notFound(error));
       }
-      model.search(request.query.size, request.query.q || request.payload, credentials)
+      let size = request.query.size;
+      let exclude = [];
+      if (request.query.exclude) {
+        exclude = request.query.exclude.split(',');
+      }
+      model.search(size, request.query.q || request.payload, request, exclude)
       .then((response) => {
         reply(response);
       })
@@ -333,7 +366,10 @@ module.exports = (server, API_ROOT) => {
         },
         query: {
           size: Joi.number().integer().default(100),
-          q: Joi.string().default(null)
+          scroll: Joi.any().default(null),
+          search_type: Joi.any().default(null),
+          q: Joi.string().default(null),
+          exclude: Joi.string().default(null)
         }
       }
     }

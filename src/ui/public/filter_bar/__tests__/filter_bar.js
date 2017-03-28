@@ -50,10 +50,6 @@ describe('Filter Bar Directive', function () {
       });
     });
 
-    ngMock.module('ui/kibi/helpers/kibi_session_helper/services/saved_sessions', function ($provide) {
-      $provide.service('savedSessions', (Promise, Private) => mockSavedObjects(Promise, Private)('savedSession'));
-    });
-
     ngMock.module('queries_editor/services/saved_queries', function ($provide) {
       $provide.service('savedQueries', (Promise, Private) => mockSavedObjects(Promise, Private)('savedQueries'));
     });

@@ -27,7 +27,8 @@ function KibiDataTableVisTypeProvider(Private) {
     params: {
       defaults: {
         clickOptions: [],
-        queryDefinitions: []
+        queryDefinitions: [],
+        columnAliases: []
       },
       editor: '<kibi-data-table-vis-params></kibi-data-table-vis-params>'
     },

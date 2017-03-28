@@ -201,3 +201,8 @@ include::bubble_diagram.asciidoc[]
 
 include::scatter_plot.asciidoc[]
 
+include::vector_map.asciidoc[]
+
+include::horizontal_bar_chart.asciidoc[]
+
+include::multi_chart.asciidoc[]

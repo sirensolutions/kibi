@@ -7,7 +7,7 @@ import { PanelUtils } from 'plugins/kibana/dashboard/components/panel/lib/panel_
 
 const app = uiModules.get('app/dashboard');
 
-app.directive('dashboardGrid', function ($compile, createNotifier) {
+app.directive('dashboardGrid', function ($compile, config, createNotifier) { // kibi: added config
   return {
     restrict: 'E',
     require: '^dashboardApp', // must inherit from the dashboardApp
@@ -30,6 +30,12 @@ app.directive('dashboardGrid', function ($compile, createNotifier) {
       const SPACER = 0;
       // pixels used by all of the spacers (gridster puts have a spacer on the ends)
       const spacerSize = SPACER * COLS;
+
+      // kibi: introduced instead of hardcoded value of 100
+      // to allow to increase vertical grid resolution
+      const WIDGET_BASE_HEIGHT = config.get('kibi:vertical_grid_resolution') ?
+        config.get('kibi:vertical_grid_resolution') : 100;
+      // kibi: end
 
       // debounced layout function is safe to call as much as possible
       const safeLayout = _.debounce(layout, 200);
@@ -158,7 +164,7 @@ app.directive('dashboardGrid', function ($compile, createNotifier) {
 
       // tell gridster to add the panel, and create additional meatadata like $scope
       function addPanel(panel) {
-        PanelUtils.initializeDefaults(panel);
+        PanelUtils.initializeDefaults(panel, config); // siren: pass config to PanelUtils
 
         const panelHtml = `
             <li>

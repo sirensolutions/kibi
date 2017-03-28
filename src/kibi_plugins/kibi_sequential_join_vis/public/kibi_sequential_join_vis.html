@@ -2,7 +2,7 @@
 
   <button
     ng-repeat="button in buttons"
-    ng-click="button.click()"
+    ng-click="button.click(true)"
     ng-disabled="button.disabled"
     ng-mouseover="hoverIn(button)"
     ng-mouseleave="hoverOut()"
@@ -15,8 +15,13 @@
         ng-if="!!button.warning"
         tooltip="{{button.warning}}"
         tooltip-placement="right"
-        tooltip-append-to-body="true"
         title="{{button.warning}}">(*)</span>
   </button>
+
+  <span ng-show="!btnCountsEnabled() && currentDashboardId">
+    <a ng-click="getCurrentDashboardBtnCounts();" class="btn-get-current-dashb-btn-counts">
+      <i aria-hidden="true" class="fa fa-refresh fa-lg"></i>
+    </a>
+  <div>
 
 </div>

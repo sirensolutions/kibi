@@ -68,6 +68,60 @@ describe('routes', function () {
       });
     });
 
+    // kibi: embedding parameters tests
+    it('includes embed parameter in redirect from shortened url', (done) => {
+      const options = {
+        method: 'POST',
+        url: '/shorten',
+        payload: {
+          url: '/app/kibana#/visualize/create?embed=true'
+        }
+      };
+      kbnTestServer.makeRequest(kbnServer, options, (res) => {
+        const payload = res.payload;
+        const gotoOptions = {
+          method: 'GET',
+          url: '/goto/' + res.payload
+        };
+        kbnTestServer.makeRequest(kbnServer, gotoOptions, (res) => {
+          let actual = res.headers.location;
+          try {
+            expect(actual).to.be(`/app/kibana#/discover?embed=true&_h=${payload}`);
+            done();
+          } catch (error) {
+            done(error);
+          }
+        });
+      });
+    });
+
+    it('includes kibiNavbarVisible parameters in redirect from shortened url', (done) => {
+      const options = {
+        method: 'POST',
+        url: '/shorten',
+        payload: {
+          url: '/app/kibana#/visualize/create?embed=true&kibiNavbarVisible=true'
+        }
+      };
+      kbnTestServer.makeRequest(kbnServer, options, (res) => {
+        const payload = res.payload;
+        const gotoOptions = {
+          method: 'GET',
+          url: '/goto/' + res.payload
+        };
+        kbnTestServer.makeRequest(kbnServer, gotoOptions, (res) => {
+          let actual = res.headers.location;
+          try {
+            expect(actual).to.be(`/app/kibana#/discover?embed=true&kibiNavbarVisible=true&_h=${payload}`);
+            done();
+          } catch (error) {
+            done(error);
+          }
+        });
+      });
+    });
+    // kibi: end
+
     it('redirects shortened urls', (done) => {
       kbnTestServer.makeRequest(kbnServer, shortenOptions, (res) => {
         const payload = res.payload; // kibi: store payload
@@ -79,7 +133,11 @@ describe('routes', function () {
           expect(res.statusCode).to.be(302);
           // kibi: verify the redirect according to our implementation
           let actual = res.headers.location;
-          expect(actual).to.be(`/app/kibana#/discover?_h=${payload}`);
+          try {
+            expect(actual).to.be(`/app/kibana#/discover?_h=${payload}`);
+          } catch (error) {
+            return done(error);
+          }
           // kibi: end
           done();
         });

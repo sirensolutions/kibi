@@ -1,1 +1,2 @@
-import './directives/share';
+require('./service'); // kibi: require share service
+require('./directives/share');

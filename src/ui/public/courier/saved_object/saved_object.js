@@ -289,7 +289,7 @@ export default function SavedObjectFactory(savedObjectsAPI, savedObjectsAPITypes
      * @returns {Promise}
      */
     function refreshIndex() {
-      // kibi: es.indices.refresh as it is handled by the backend
+      // kibi: do not call es.indices.refresh as it is handled by the backend
       if (savedObjectsAPITypes.has(config.type)) {
         return Promise.resolve();
       }

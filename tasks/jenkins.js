@@ -26,9 +26,9 @@ module.exports = function (grunt) {
     'eslint:source',
     'licenses',
     'test:server',
-    'test:ui',
     'test:browser-ci',
     'test:api',
+    'test:ui' // kibi: execute these after unit tests
   ]);
 
   grunt.registerTask('jenkins:selenium', [

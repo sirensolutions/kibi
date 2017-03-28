@@ -71,7 +71,7 @@ function controller(getAppState, kibiState, $scope, $rootScope, Private, $http, 
             return { query, button, indices: [] };
           });
         } else {
-          return { guery: undefined, button, indices: [] };
+          return { button, indices: [] };
         }
       });
     })).then((results) => {

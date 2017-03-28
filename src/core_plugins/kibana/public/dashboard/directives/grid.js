@@ -213,6 +213,8 @@ app.directive('dashboardGrid', function ($compile, config, createNotifier) { // 
         g.min_widget_width  = (g.options.widget_margins[0] * 2) + g.options.widget_base_dimensions[0];
         g.min_widget_height = (g.options.widget_margins[1] * 2) + g.options.widget_base_dimensions[1];
 
+        //kibi: this was needed for blocking reflow when browser width too small
+        if (g.min_widget_width === 0) { return; }
         g.$widgets.each(function (i, widget) {
           g.resize_widget($(widget));
         });

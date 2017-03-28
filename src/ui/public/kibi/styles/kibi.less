@@ -9,6 +9,16 @@ span.original-field-name {
   color: @gray-light;
 }
 
+// draw any selected text white on blue background
+::-moz-selection {
+  color: @white;
+  background-color: @kibanaBlue1;
+}
+::selection {
+  color: @white;
+  background-color: @kibanaBlue1;
+}
+
 // Buttons ================================================
 .btn.btn-relational {
   .button-variant(@btn-relational-color; @btn-relational-bg; @btn-relational-border);

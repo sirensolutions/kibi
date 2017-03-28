@@ -81,7 +81,6 @@ describe('RestQuery', function () {
     });
 
     it('NOT empty uri, empty rest_path, undefined selectedDocuments', function () {
-      var RestQuery = require('../../queries/rest_query');
       var restQuery = new RestQuery(fakeServer, {
         rest_path: '',
       });
@@ -92,7 +91,6 @@ describe('RestQuery', function () {
     });
 
     it('NOT empty uri, rest_body does not depend on entity, undefined selectedDocuments', function () {
-      var RestQuery = require('../../queries/rest_query');
       var restQuery = new RestQuery(fakeServer, {
         rest_body: 'doesNotDependEntity',
       });

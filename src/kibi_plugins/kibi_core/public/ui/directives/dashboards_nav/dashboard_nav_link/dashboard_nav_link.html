@@ -4,7 +4,7 @@
 >
   <a
     class="anchor"
-    ng-click="group.selected.onSelect({ $event: $event })"
+    ng-click="selectDashboard()"
     tooltip="{{ tooltipContent }}"
     tooltip-placement="right"
     tooltip-popup-delay="0"
@@ -59,9 +59,8 @@
           <div class="dropdown-icon-alone"
                ng-if="!isSidebarOpen && group.dashboards.length > 1"
                kibi-menu-template="groupMenuTemplate"
-               kibi-menu-template-on-show-fn="toggleGroupNav(group)"
-               kibi-menu-template-data="group.dashboards"
-               kibi-menu-template-context="groups"
+               kibi-menu-template-on-show-fn="toggleGroupNav()"
+               kibi-menu-template-locals="groupMenuLocals"
           >
             <i class="fa fa-sort"/>
           </div>
@@ -73,9 +72,8 @@
         <div class="dashboard-select"
              ng-if="group.dashboards.length > 1"
              kibi-menu-template="groupMenuTemplate"
-             kibi-menu-template-on-show-fn="toggleGroupNav(group)"
-             kibi-menu-template-data="subDashboards"
-             kibi-menu-template-context="groups"
+             kibi-menu-template-on-show-fn="toggleGroupNav()"
+             kibi-menu-template-locals="groupMenuLocals"
         >
           <div class="text truncate">{{ group.title }} ({{ group.selected.title }})</div>
           <i class="dropdown-icon fa fa-sort"/>

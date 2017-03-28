@@ -63,8 +63,7 @@ uiModules
         },
         onBlur: function () {
           $scope.menu.focused = false;
-        },
-
+        }
       };
     }
   };

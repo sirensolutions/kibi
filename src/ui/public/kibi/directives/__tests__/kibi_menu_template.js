@@ -22,16 +22,14 @@ describe('Kibi Components', function () {
         $scope = _$rootScope_;
         $document = _$document_;
         $scope.template = template;
-        $scope.items = items;
-        $scope.context = context;
+        $scope.locals = { items, context };
         $scope.onShow = onShow;
         $scope.onHide = onHide;
 
-        let html = `
+        const html = `
           <span style="height: 10px;"
             kibi-menu-template="template"
-            kibi-menu-template-data="items"
-            kibi-menu-template-context="context"
+            kibi-menu-template-locals="locals"
             kibi-menu-template-on-show-fn="onShow()"
             kibi-menu-template-on-hide-fn="onHide()"
             ${leftOffset ? ` kibi-menu-template-left-offset="${leftOffset}"` : ''}
@@ -149,7 +147,7 @@ describe('Kibi Components', function () {
 
       it('using context data variable was correctly replaced', function () {
         init({
-          template: '<span>{{kibiMenuTemplateContext.name}}</span>',
+          template: '<span>{{kibiMenuTemplateLocals.context.name}}</span>',
           context: { name: 'foo' }
         });
 
@@ -160,7 +158,7 @@ describe('Kibi Components', function () {
 
         // now lets change the name
         $scope.$apply(function () {
-          $scope.context.name = 'boo';
+          $scope.locals.context.name = 'boo';
         });
         expect($menu.find('span').text()).to.equal('boo');
       });
@@ -175,7 +173,7 @@ describe('Kibi Components', function () {
 
       it('using items data variables should be correctly replaced', function () {
         init({
-          template: '<span ng-repeat="item in kibiMenuTemplateData">{{item.name}}</span>',
+          template: '<span ng-repeat="item in kibiMenuTemplateLocals.items">{{item.name}}</span>',
           items: [
             { name: 'A'},
             { name: 'B'}
@@ -190,7 +188,7 @@ describe('Kibi Components', function () {
 
         // now lets change the name
         $scope.$apply(function () {
-          $scope.items.push({name: 'C'});
+          $scope.locals.items.push({name: 'C'});
         });
         expect($menu.find('span:nth-child(3)').text()).to.equal('C');
       });
@@ -200,7 +198,7 @@ describe('Kibi Components', function () {
         const clickOnB = sinon.spy();
 
         init({
-          template: '<span ng-repeat="item in kibiMenuTemplateData" ng-click="item.click()">{{item.name}}</span>',
+          template: '<span ng-repeat="item in kibiMenuTemplateLocals.items" ng-click="item.click()">{{item.name}}</span>',
           items: [
             { name: 'A', click: clickOnA},
             { name: 'B', click: clickOnB}

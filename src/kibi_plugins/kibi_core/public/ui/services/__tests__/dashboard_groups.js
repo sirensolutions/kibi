@@ -1,5 +1,5 @@
+import DashboardHelperProvider from 'ui/kibi/helpers/dashboard_helper';
 import noDigestPromises from 'test_utils/no_digest_promises';
-import DashboardGroupHelperProvider from 'ui/kibi/helpers/dashboard_group_helper';
 import Promise from 'bluebird';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
@@ -7,6 +7,7 @@ import MockState from 'fixtures/mock_state';
 import mockSavedObjects from 'fixtures/kibi/mock_saved_objects';
 import sinon from 'auto-release-sinon';
 import chrome from 'ui/chrome';
+import _ from 'lodash';
 
 const fakeSavedDashboards = [
   {
@@ -108,10 +109,13 @@ const fakeSavedSearches = [
   }
 ];
 
-let dashboardGroupHelper;
+let dashboardGroups;
 let appState;
 let kibiState;
-let $httpBackend;
+let es;
+
+let setSelectedDashboardIdStub;
+let switchDashboardStub;
 
 function init({ currentDashboardId = 'Articles', indexPatterns, savedDashboards, savedDashboardGroups, savedSearches } = {}) {
   ngMock.module('kibana', function ($provide) {
@@ -122,6 +126,12 @@ function init({ currentDashboardId = 'Articles', indexPatterns, savedDashboards,
     appState = new MockState({ filters: [] });
     $provide.service('getAppState', () => {
       return function () { return appState; };
+    });
+
+    $provide.service('$timeout', () => {
+      const mockTimeout = fn => Promise.resolve(fn());
+      mockTimeout.cancel = _.noop;
+      return mockTimeout;
     });
   });
 
@@ -145,18 +155,21 @@ function init({ currentDashboardId = 'Articles', indexPatterns, savedDashboards,
     $provide.service('savedSearches', (Promise, Private) => mockSavedObjects(Promise, Private)('savedSearches', savedSearches || []));
   });
 
-  ngMock.inject(function ($injector, _kibiState_, Private) {
+  ngMock.inject(function (Private, _es_, _dashboardGroups_, _kibiState_) {
+    const dashboardHelper = Private(DashboardHelperProvider);
+    switchDashboardStub = sinon.stub(dashboardHelper, 'switchDashboard');
     kibiState = _kibiState_;
-    dashboardGroupHelper = Private(DashboardGroupHelperProvider);
+    dashboardGroups = _dashboardGroups_;
     sinon.stub(chrome, 'getBasePath').returns('');
     sinon.stub(kibiState, '_getCurrentDashboardId').returns(currentDashboardId);
     sinon.stub(kibiState, 'isSirenJoinPluginInstalled').returns(Promise.resolve(true));
-    $httpBackend = $injector.get('$httpBackend');
+    setSelectedDashboardIdStub = sinon.stub(kibiState, 'setSelectedDashboardId');
+    es = _es_;
   });
 }
 
-describe('Kibi Components', function () {
-  describe('DashboardGroupHelper', function () {
+describe('Kibi Services', function () {
+  describe('DashboardGroups Service', function () {
 
     noDigestPromises.activateForSuite();
 
@@ -174,7 +187,8 @@ describe('Kibi Components', function () {
             priority: 1,
             title: 'title 1',
             selected: { id: 'd1' },
-            dashboards: [ { id: 'd1' } ]
+            dashboards: [ { id: 'd1' } ],
+            virtual: true
           },
           {
             id: 'group2',
@@ -213,7 +227,7 @@ describe('Kibi Components', function () {
           }
         ];
 
-        dashboardGroupHelper.copy(src, dst);
+        dashboardGroups.copy(src, dst);
         expect(dst).to.have.length(2);
 
         expect(dst[0].id).to.be('group1');
@@ -225,6 +239,7 @@ describe('Kibi Components', function () {
         expect(dst[0].title).to.be('title 1');
         expect(dst[0].dashboards).to.have.length(1);
         expect(dst[0].dashboards[0].id).to.be('d1');
+        expect(dst[0].virtual).to.be(true);
 
         expect(dst[1].id).to.be('group2');
         expect(dst[1].active).to.be(true);
@@ -233,6 +248,7 @@ describe('Kibi Components', function () {
         expect(dst[1].iconUrl).to.be('icon aaa');
         expect(dst[1].priority).to.be(2);
         expect(dst[1].title).to.be('title 2');
+        expect(dst[1].virtual).to.be(undefined);
       });
 
       it('save metadata from dest groups', function () {
@@ -272,7 +288,7 @@ describe('Kibi Components', function () {
           }
         ];
 
-        dashboardGroupHelper.copy(src, dst);
+        dashboardGroups.copy(src, dst);
         expect(dst).to.have.length(1);
 
         expect(dst[0].id).to.be('group1');
@@ -298,14 +314,16 @@ describe('Kibi Components', function () {
         savedSearches: fakeSavedSearches
       }));
 
-      it('shortenDashboardName should shorten', function () {
-        expect(dashboardGroupHelper.shortenDashboardName('TEST', 'TEST dashboard')).to.be('dashboard');
-        expect(dashboardGroupHelper.shortenDashboardName('TEST', 'TEST-dashboard')).to.be('dashboard');
-      });
+      describe('_shortenDashboardName', function () {
+        it('should shorten', function () {
+          expect(dashboardGroups._shortenDashboardName('TEST', 'TEST dashboard')).to.be('dashboard');
+          expect(dashboardGroups._shortenDashboardName('TEST', 'TEST-dashboard')).to.be('dashboard');
+        });
 
-      it('shortenDashboardName should not shorten', function () {
-        expect(dashboardGroupHelper.shortenDashboardName('BLA', 'TEST dashboard')).to.be('TEST dashboard');
-        expect(dashboardGroupHelper.shortenDashboardName('BLA', 'TEST-dashboard')).to.be('TEST-dashboard');
+        it('should not shorten', function () {
+          expect(dashboardGroups._shortenDashboardName('BLA', 'TEST dashboard')).to.be('TEST dashboard');
+          expect(dashboardGroups._shortenDashboardName('BLA', 'TEST-dashboard')).to.be('TEST-dashboard');
+        });
       });
 
       it('_getListOfDashboardsFromGroups', function () {
@@ -321,30 +339,11 @@ describe('Kibi Components', function () {
           }
         ];
 
-        const actual = dashboardGroupHelper._getListOfDashboardsFromGroups(groups);
+        const actual = dashboardGroups._getListOfDashboardsFromGroups(groups);
         expect(actual.length).to.be(3);
         expect(actual[0]).to.be(dA);
         expect(actual[1]).to.be(dB);
         expect(actual[2]).to.be(dC);
-      });
-
-      it('getIdsOfDashboardGroupsTheseDashboardsBelongTo - there is a group with a dashboard', function (done) {
-        const dashboardIds = ['Articles'];
-        const expected = ['group-1'];
-
-        dashboardGroupHelper.getIdsOfDashboardGroupsTheseDashboardsBelongTo(dashboardIds).then(function (groupIds) {
-          expect(groupIds).to.eql(expected);
-          done();
-        }).catch(done);
-      });
-
-      it('getIdsOfDashboardGroupsTheseDashboardsBelongTo - there is NOT a group with a dashboard', function (done) {
-        const dashboardIds = ['ArticlesXXX'];
-
-        dashboardGroupHelper.getIdsOfDashboardGroupsTheseDashboardsBelongTo(dashboardIds).then(function (groupIds) {
-          expect(groupIds).to.eql([]);
-          done();
-        }).catch(done);
       });
     });
 
@@ -358,11 +357,80 @@ describe('Kibi Components', function () {
         }));
 
         it('no current dashboard', function (done) {
-          dashboardGroupHelper.computeGroups().then(function (groups) {
+          dashboardGroups.computeGroups().then(function (groups) {
             // computeGroups should return all 5 groups, even when no dashboard is selected
             expect(groups).to.have.length(5);
             done();
           }).catch(done);
+        });
+      });
+
+      describe('getIdsOfDashboardGroupsTheseDashboardsBelongTo', function () {
+        it('there is a group with the dashboard', function () {
+          const dashboardIds = ['Articles'];
+          const expected = ['group-1'];
+
+          return dashboardGroups.computeGroups().then(function () {
+            expect(dashboardGroups.getIdsOfDashboardGroupsTheseDashboardsBelongTo(dashboardIds)).to.eql(expected);
+          });
+        });
+
+        it('there is no group with the dashboard', function () {
+          const dashboardIds = ['ArticlesXXX'];
+
+          return dashboardGroups.computeGroups().then(function () {
+            expect(dashboardGroups.getIdsOfDashboardGroupsTheseDashboardsBelongTo(dashboardIds)).to.have.length(0);
+          });
+        });
+
+        it('should not return virtual groups', function () {
+          const dashboardIds = ['time-testing-1'];
+
+          return dashboardGroups.computeGroups().then(function () {
+            expect(dashboardGroups.getIdsOfDashboardGroupsTheseDashboardsBelongTo(dashboardIds)).to.have.length(0);
+          });
+        });
+      });
+
+      describe('selectDashboard', function () {
+        beforeEach(() => init({
+          savedDashboards: fakeSavedDashboards,
+          savedDashboardGroups: fakeSavedDashboardGroups,
+          savedSearches: fakeSavedSearches
+        }));
+
+        it('should switch to desired dashboard', function () {
+          return dashboardGroups.computeGroups()
+          .then(() => dashboardGroups.selectDashboard('Articles'))
+          .then(() => {
+            _.each(dashboardGroups.getGroups(), group => {
+              if (group.id === 'group-1') {
+                expect(group.active).to.be(true);
+                expect(group.selected.id).to.be('Articles');
+                sinon.assert.calledWith(setSelectedDashboardIdStub, 'group-1', 'Articles');
+                sinon.assert.calledWith(switchDashboardStub, 'Articles');
+              } else {
+                expect(group.active).to.be(false);
+              }
+            });
+          });
+        });
+
+        it('should not save in state the selected dashboard when switching to desired dashboard if the group is virtual', function () {
+          return dashboardGroups.computeGroups()
+          .then(() => dashboardGroups.selectDashboard('time-testing-1'))
+          .then(() => {
+            _.each(dashboardGroups.getGroups(), group => {
+              if (group.id === 'time-testing-1') {
+                expect(group.active).to.be(true);
+                expect(group.selected.id).to.be('time-testing-1');
+                sinon.assert.notCalled(setSelectedDashboardIdStub);
+                sinon.assert.calledWith(switchDashboardStub, 'time-testing-1');
+              } else {
+                expect(group.active).to.be(false);
+              }
+            });
+          });
         });
       });
 
@@ -374,7 +442,7 @@ describe('Kibi Components', function () {
         }));
 
         it('computeGroups 1', function (done) {
-          dashboardGroupHelper.computeGroups().then(function (groups) {
+          dashboardGroups.computeGroups().then(function (groups) {
 
             expect(groups).to.have.length(5);
 
@@ -404,13 +472,27 @@ describe('Kibi Components', function () {
             done();
           }).catch(done);
         });
+
+        it('should create virtual groups for dashboards without one set by the user', function () {
+          return dashboardGroups.computeGroups()
+          .then(function (groups) {
+            const group1 = _.find(groups, 'id', 'group-1');
+
+            expect(group1).to.be.ok();
+            expect(group1.virtual).to.not.be.ok();
+
+            const timeTesting1 = _.find(groups, 'id', 'time-testing-1');
+            expect(timeTesting1).to.be.ok();
+            expect(timeTesting1.virtual).to.be(true);
+          });
+        });
       });
 
       describe('dashboards do not exist', function () {
         beforeEach(() => init({ savedDashboardGroups: fakeSavedDashboardGroups }));
 
         it('computeGroups 2', function (done) {
-          dashboardGroupHelper.computeGroups()
+          dashboardGroups.computeGroups()
           .then(() => done('this should fail'))
           .catch(function (err) {
             // here if there are groups but there is no dashboards we should get an error
@@ -426,7 +508,7 @@ describe('Kibi Components', function () {
         beforeEach(() => init({ savedDashboards: fakeSavedDashboards, savedSearches: fakeSavedSearches }));
 
         it('computeGroups 3', function (done) {
-          dashboardGroupHelper.computeGroups().then(function (groups) {
+          dashboardGroups.computeGroups().then(function (groups) {
             // here if there are no groups but there are 5 dashboards we expect 5 pseudo group created
             expect(groups).to.have.length(5);
             done();
@@ -438,7 +520,7 @@ describe('Kibi Components', function () {
         beforeEach(() => init({ savedSearches: fakeSavedSearches }));
 
         it('computeGroups 4', function (done) {
-          dashboardGroupHelper.computeGroups().then(function (groups) {
+          dashboardGroups.computeGroups().then(function (groups) {
             // here if there are no groups but there are 5 dashboards we expect 5 pseudo group created
             expect(groups).to.have.length(0);
             done();
@@ -447,7 +529,7 @@ describe('Kibi Components', function () {
       });
     });
 
-    describe('getDashboardsMetadata', function () {
+    describe('_getDashboardsMetadata', function () {
       beforeEach(() => init({
         indexPatterns: [
           {
@@ -466,30 +548,29 @@ describe('Kibi Components', function () {
       }));
 
       it('dashboard does NOT exist', function (done) {
-        dashboardGroupHelper.getDashboardsMetadata(['dash-do-not-exist']).then(function (meta) {
+        dashboardGroups._getDashboardsMetadata(['dash-do-not-exist']).then(function (meta) {
           expect(meta).to.eql([]);
           done();
         }).catch(done);
       });
 
       it('dashboard exist but has no savedSearch', function () {
-        return dashboardGroupHelper.getDashboardsMetadata(['Articles'])
+        return dashboardGroups._getDashboardsMetadata(['Articles'])
         .then(function (meta) {
           expect(meta).to.have.length(0);
         });
       });
 
       it('dashboard exist and it has savedSearch but index does not exists', function () {
-        return dashboardGroupHelper.getDashboardsMetadata(['search-ste']).then(function (meta) {
+        return dashboardGroups._getDashboardsMetadata(['search-ste']).then(function (meta) {
           expect().fail('Should fail');
         }).catch(function (err) {
           expect(err.message).equal('Could not find object with id: search-ste');
         });
       });
 
-      it('dashboard exist and it has savedSearch and index exists', function (done) {
-
-        $httpBackend.whenPOST('/elasticsearch/_msearch?getCountsOnTabs').respond(200, {
+      it('dashboard exist and it has savedSearch and index exists', function () {
+        sinon.stub(es, 'msearch').returns(Promise.resolve({
           responses: [
             {
               hits: {
@@ -497,25 +578,20 @@ describe('Kibi Components', function () {
               }
             }
           ]
-        });
+        }));
 
-        dashboardGroupHelper.getDashboardsMetadata(['time-testing-4']).then(function (metas) {
+        return dashboardGroups._getDashboardsMetadata(['time-testing-4'])
+        .then(function (metas) {
           expect(metas.length).to.equal(1);
           expect(metas[0].count).to.equal(42);
           expect(metas[0].isPruned).to.equal(false);
           expect(metas[0].dashboardId).to.equal('time-testing-4');
           expect(metas[0].indices).to.eql(['time-testing-4']);
-          done();
-        }).catch(done);
-
-        setTimeout(function () {
-          $httpBackend.flush();
-        }, 500);
+        });
       });
 
-      it('dashboard exist and it has savedSearch and index exists the results were pruned', function (done) {
-
-        $httpBackend.whenPOST('/elasticsearch/_msearch?getCountsOnTabs').respond(200, {
+      it('dashboard exist and it has savedSearch and index exists the results were pruned', function () {
+        sinon.stub(es, 'msearch').returns(Promise.resolve({
           responses: [
             {
               coordinate_search: {
@@ -530,56 +606,47 @@ describe('Kibi Components', function () {
               }
             }
           ]
-        });
+        }));
 
-        dashboardGroupHelper.getDashboardsMetadata(['time-testing-4']).then(function (metas) {
+        return dashboardGroups._getDashboardsMetadata(['time-testing-4'])
+        .then(function (metas) {
           expect(metas.length).to.equal(1);
           expect(metas[0].count).to.equal(42);
           expect(metas[0].isPruned).to.equal(true);
           expect(metas[0].dashboardId).to.equal('time-testing-4');
           expect(metas[0].indices).to.eql(['time-testing-4']);
-          done();
-        }).catch(done);
-
-        setTimeout(function () {
-          $httpBackend.flush();
-        }, 500);
+        });
       });
 
-      it('dashboard exist and it has savedSearch and index exists but is not accessible', function (done) {
-
+      it('dashboard exist and it has savedSearch and index exists but is not accessible', function () {
         const authError = new Error();
         authError.status = 403;
 
         sinon.stub(kibiState, 'timeBasedIndices').returns(Promise.reject(authError));
 
-        $httpBackend.whenPOST('/elasticsearch/_msearch?getCountsOnTabs').respond(200, {
+        sinon.stub(es, 'msearch').returns(Promise.resolve({
           responses: [{
             hits: {
               total: 0
             }
           }]
-        });
+        }));
 
-        dashboardGroupHelper.getDashboardsMetadata(['time-testing-4']).then(function (metas) {
+        return dashboardGroups._getDashboardsMetadata(['time-testing-4'])
+        .then(function (metas) {
           expect(metas.length).to.equal(1);
           expect(metas[0].count).to.equal('Forbidden');
           expect(metas[0].forbidden).to.be(true);
           expect(metas[0].dashboardId).to.equal('time-testing-4');
           expect(metas[0].indices).to.eql([]);
-          done();
-        }).catch(done);
-
-        setTimeout(function () {
-          $httpBackend.flush();
-        }, 500);
+        });
       });
 
       it('dashboard exist and it has savedSearch and index exists but a non auth error occurs when resolving indices', function (done) {
 
         sinon.stub(kibiState, 'timeBasedIndices').returns(Promise.reject(new Error()));
 
-        dashboardGroupHelper.getDashboardsMetadata(['time-testing-4'])
+        dashboardGroups._getDashboardsMetadata(['time-testing-4'])
         .then(() => done(new Error('timeBasedIndices error was not rethrown.')))
         .catch(() => done());
       });
@@ -587,51 +654,72 @@ describe('Kibi Components', function () {
 
     describe('highlight dashboard', function () {
       beforeEach(() => init({
-        savedDashboards: fakeSavedDashboards,
-        savedDashboardGroups: fakeSavedDashboardGroups,
-        savedSearches: fakeSavedSearches
+        savedDashboards: [
+          {
+            title: 'DA',
+            id: 'A'
+          },
+          {
+            title: 'DB',
+            id: 'B'
+          },
+          {
+            title: 'DC',
+            id: 'C'
+          }
+        ],
+        savedDashboardGroups: [
+          {
+            id: 'group 1',
+            title: 'Group 1',
+            dashboards: [
+              {
+                title: 'DA',
+                id: 'A'
+              },
+              {
+                title: 'DB',
+                id: 'B'
+              }
+            ]
+          },
+          {
+            id: 'group 2',
+            title: 'Group 2',
+            dashboards: [
+              {
+                title: 'DB',
+                id: 'B'
+              },
+              {
+                title: 'DC',
+                id: 'C'
+              }
+            ]
+          }
+        ]
       }));
 
-      it('setButtonOnHoverProperty', function () {
-        const dashboardId = 'A';
-        const dA = {id: 'A'};
-        const dB = {id: 'B'};
-        const dC = {id: 'C'};
-        const groups = [
-          {
-            dashboards: [dA, dB]
-          },
-          {
-            dashboards: [dB, dC]
-          }
-        ];
+      beforeEach(() => dashboardGroups.computeGroups());
 
-        dashboardGroupHelper.setDashboardHighlight(groups, dashboardId);
-        expect(groups[0].dashboards[0].$$highlight).to.equal(true);
-        expect(groups[0].dashboards[1].$$highlight).to.equal(false);
+      it('setGroupHighlight', function () {
+        const dashboardId = 'A';
+
+        dashboardGroups.setGroupHighlight(dashboardId);
+        expect(dashboardGroups.getGroups()[0].dashboards[0].$$highlight).to.equal(true);
+        expect(dashboardGroups.getGroups()[0].dashboards[1].$$highlight).to.equal(false);
       });
 
-      it('resetButtonOnHoverProperty', function () {
+      it('resetGroupHighlight', function () {
         const dashboardId = 'A';
-        const dA = {id: 'A'};
-        const dB = {id: 'B'};
-        const dC = {id: 'C'};
-        const groups = [
-          {
-            dashboards: [dA, dB]
-          },
-          {
-            dashboards: [dB, dC]
-          }
-        ];
 
-        dashboardGroupHelper.setDashboardHighlight(groups, dashboardId);
-        expect(groups[0].dashboards[0].$$highlight).to.equal(true);
-        expect(groups[0].dashboards[1].$$highlight).to.equal(false);
+        dashboardGroups.setGroupHighlight(dashboardId);
+        expect(dashboardGroups.getGroups()[0].dashboards[0].$$highlight).to.equal(true);
+        expect(dashboardGroups.getGroups()[0].dashboards[1].$$highlight).to.equal(false);
 
-        dashboardGroupHelper.resetDashboardHighlight(groups);
-        expect(groups[0].dashboards[0].$$highlight).to.equal(false);
-        expect(groups[0].dashboards[1].$$highlight).to.equal(false);
+        dashboardGroups.resetGroupHighlight();
+        expect(dashboardGroups.getGroups()[0].dashboards[0].$$highlight).to.equal(false);
+        expect(dashboardGroups.getGroups()[0].dashboards[1].$$highlight).to.equal(false);
       });
     });
   });

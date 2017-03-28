@@ -169,7 +169,7 @@ uiModules.get('apps/management')
         // kibi: wrapped the original function
         // as we need to do our checks before
         const _delete = function () {
-          esAdmin.delete({
+          return esAdmin.delete({
             index: kbnIndex,
             type: service.type,
             id: $routeParams.id

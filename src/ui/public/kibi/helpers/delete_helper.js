@@ -1,12 +1,9 @@
-import DashboardGroupHelperProvider from 'ui/kibi/helpers/dashboard_group_helper';
 import _ from 'lodash';
 
-export default function DeleteHelperFactory(savedVisualizations, Private, $window) {
+export default function DeleteHelperFactory(Promise, dashboardGroups, savedVisualizations, Private, $window) {
 
   function DeleteHelper() {
   }
-
-  const dashboardGroupHelper = Private(DashboardGroupHelperProvider);
 
   /**
    * GetVisualisations returns visualisations that are used by the list of queries
@@ -39,25 +36,35 @@ export default function DeleteHelperFactory(savedVisualizations, Private, $windo
    * Delete selected objects with pre-processing that depends on the type of the service
    */
   DeleteHelper.prototype.deleteByType = function (type, ids, delcb) {
+    if (!delcb) {
+      throw new Error('delete method was not passed');
+    }
+
+    const _delete = function () {
+      let promise = delcb();
+      if (!Promise.is(promise)) {
+        promise = Promise.resolve();
+      }
+      return promise;
+    };
+
     switch (type) {
+      case 'dashboardgroup':
+        return _delete().then(() => dashboardGroups.computeGroups(`deleted dashboard groups ${JSON.stringify(ids, null, ' ')}`));
+
       case 'dashboard':
-        return dashboardGroupHelper.getIdsOfDashboardGroupsTheseDashboardsBelongTo(ids)
-        .then(function (dashboardGroupNames) {
-          if (dashboardGroupNames && dashboardGroupNames.length > 0) {
-            const plural = dashboardGroupNames.length > 1;
-            const msg =
-              'Dashboard ' + JSON.stringify(ids, null, ' ') + ' is referred by the following dashboardGroup' +
-              (plural ? 's' : '') + ':\n' + dashboardGroupNames.join(', ') + '\n' +
-              'Please edit the group' + (plural ? 's' : '') +
-              ' and remove the dashboard from its configuration first.';
-            $window.alert(msg);
-            return;
-          } else {
-            if (delcb) {
-              delcb();
-            }
-          }
-        });
+        const dashboardGroupNames = dashboardGroups.getIdsOfDashboardGroupsTheseDashboardsBelongTo(ids);
+        if (dashboardGroupNames && dashboardGroupNames.length > 0) {
+          const plural = dashboardGroupNames.length > 1;
+          const msg =
+            'Dashboard ' + JSON.stringify(ids, null, ' ') + ' is referred by the following dashboardGroup' +
+            (plural ? 's' : '') + ':\n' + dashboardGroupNames.join(', ') + '\n' +
+            'Please edit the group' + (plural ? 's' : '') +
+            ' and remove the dashboard from its configuration first.';
+          $window.alert(msg);
+          return Promise.resolve();
+        }
+        return _delete().then(() => dashboardGroups.computeGroups(`deleted dashboards ${JSON.stringify(ids, null, ' ')}`));
 
       case 'query':
         return this._getVisualisations(ids).then(function (visData) {
@@ -70,16 +77,12 @@ export default function DeleteHelperFactory(savedVisualizations, Private, $windo
               (visData[1].length === 1 ? ' this visualization ' : ' those visualizations ') + 'first.\n\n';
             $window.alert(msg);
           } else {
-            if (delcb) {
-              delcb();
-            }
+            delcb();
           }
         });
 
       default:
-        if (delcb) {
-          delcb();
-        }
+        return _delete();
     }
   };
 

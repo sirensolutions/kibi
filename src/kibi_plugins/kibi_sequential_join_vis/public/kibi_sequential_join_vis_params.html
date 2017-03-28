@@ -20,8 +20,7 @@
           <span class="form-control relation-select"
                 ng-class="{invalid: !button.indexRelationId, focused: menu.focused}"
                 kibi-menu-template="menu.template"
-                kibi-menu-template-data="menu.relations"
-                kibi-menu-template-context="button"
+                kibi-menu-template-locals="{ relations: menu.relations, button: button }"
                 kibi-menu-template-on-focus-fn="menu.onFocus()"
                 kibi-menu-template-on-blur-fn="menu.onBlur()"
 

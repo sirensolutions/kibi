@@ -140,7 +140,7 @@ uiModules.get('apps/management')
       $scope.bulkDelete = function () {
         // kibi: modified to do some checks before the delete
         const _delete = function () {
-          $scope.currentTab.service.delete(pluck($scope.selectedItems, 'id'))
+          return $scope.currentTab.service.delete(pluck($scope.selectedItems, 'id'))
           .then(cache.invalidate) // kibi: invalidate the cache of saved objects
           .then(refreshData)
           .then(function () {

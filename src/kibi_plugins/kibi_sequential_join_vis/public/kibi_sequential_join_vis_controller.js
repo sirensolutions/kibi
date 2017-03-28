@@ -2,7 +2,6 @@ import QueryFilterProvider from 'ui/filter_bar/query_filter';
 import KibiSequentialJoinVisHelperProvider from 'ui/kibi/helpers/kibi_sequential_join_vis_helper';
 import RelationsHelperProvider from 'ui/kibi/helpers/relations_helper';
 import KibiNavBarHelperProvider from 'ui/kibi/directives/kibi_nav_bar_helper';
-import DashboardGroupHelperProvider from 'ui/kibi/helpers/dashboard_group_helper';
 import { onVisualizePage } from 'ui/kibi/utils/on_page';
 import _ from 'lodash';
 import angular from 'angular';
@@ -15,10 +14,10 @@ import uiModules from 'ui/modules';
 import 'ui/kibi/directives/kibi_select';
 import 'ui/kibi/directives/kibi_array_param';
 
-function controller(getAppState, kibiState, $scope, $rootScope, Private, $http, createNotifier, globalState, Promise, kbnIndex) {
+function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope, Private, $http, createNotifier, globalState, Promise,
+  kbnIndex) {
   const DelayExecutionHelper = Private(DelayExecutionHelperProvider);
   const kibiNavBarHelper = Private(KibiNavBarHelperProvider);
-  const dashboardGroupHelper = Private(DashboardGroupHelperProvider);
   const searchHelper = new SearchHelper(kbnIndex);
   const edit = onVisualizePage();
 
@@ -293,13 +292,11 @@ function controller(getAppState, kibiState, $scope, $rootScope, Private, $http, 
   }, true);
 
   $scope.hoverIn = function (button) {
-    const dashboards = kibiNavBarHelper.getDashboardGroups();
-    dashboardGroupHelper.setDashboardHighlight(dashboards, button.targetDashboardId);
+    dashboardGroups.setGroupHighlight(button.targetDashboardId);
   };
 
   $scope.hoverOut = function () {
-    const dashboards = kibiNavBarHelper.getDashboardGroups();
-    dashboardGroupHelper.resetDashboardHighlight(dashboards);
+    dashboardGroups.resetGroupHighlight();
   };
 
   // init

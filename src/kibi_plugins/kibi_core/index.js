@@ -105,7 +105,8 @@ module.exports = function (kibana) {
     uiExports: {
       hacks: [
         'plugins/kibi_core/ui/directives/dashboards_nav/dashboards_nav',
-        'plugins/kibi_core/ui/chrome/services/dashboards_nav_state'
+        'plugins/kibi_core/ui/chrome/services/dashboards_nav_state',
+        'plugins/kibi_core/ui/services/dashboard_groups'
       ],
       managementSections: [
         'plugins/kibi_core/management/sections/kibi_dashboard_groups',

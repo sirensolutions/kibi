@@ -1078,6 +1078,25 @@ describe('State Management', function () {
         }).catch(done);
       });
 
+      it('should tag filters coming from the associated saved search', function (done) {
+        const filters = [
+          {
+            term: { field1: 'bbb' },
+            meta: { disabled: false }
+          }
+        ];
+
+        appState.filters = filters;
+        kibiState.getState('dashboard1')
+        .then(({ filters }) => {
+          const appStateFilter = _.find(filters, 'term.field1', 'bbb');
+          expect(appStateFilter.meta.fromSavedSearch).not.to.be.ok();
+          const savedSearchFilter = _.find(filters, 'term.field1', 'aaa');
+          expect(savedSearchFilter.meta.fromSavedSearch).to.be(true);
+          done();
+        }).catch(done);
+      });
+
       it('should not alter the appstate filters', function (done) {
         const filters = [
           {
@@ -1153,7 +1172,8 @@ describe('State Management', function () {
                 field1: 'aaa'
               },
               meta: {
-                disabled: false
+                disabled: false,
+                fromSavedSearch: true
               }
             }
           ];
@@ -1207,7 +1227,8 @@ describe('State Management', function () {
                 field1: 'aaa'
               },
               meta: {
-                disabled: false
+                disabled: false,
+                fromSavedSearch: true
               }
             }
           ];

@@ -34,7 +34,7 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
             const query = _.find(meta.filter, (filter) => filter.query && filter.query.query_string && !filter.meta);
 
             // query
-            if (!this._isDefaultQuery(query) && query && query.query) {
+            if (query && query.query && !this._isDefaultQuery(query.query)) {
               this._setDashboardProperty(dashboard.id, this._properties.query, query.query);
             }
             // filters
@@ -309,7 +309,7 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
           let modified = false;
           if (this[this._properties.dashboards] && this[this._properties.dashboards][dashboard.id]) {
             // query
-            if (!query || this._isDefaultQuery(query)) {
+            if (!query || this._isDefaultQuery(query.query)) {
               if (this._getDashboardProperty(dashboard.id, this._properties.query)) {
                 // kibistate has a query that will be removed with the reset
                 modified = true;
@@ -874,12 +874,7 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
       dashboardIdsAndIndexPattern.get(thatIndex).push(thatDashboardId);
 
       // queries
-      const queries = _(rest[i + 1]).map(fQuery => {
-        // filter out default queries
-        if (fQuery && !this._isDefaultQuery(fQuery)) {
-          return fQuery;
-        }
-      }).compact().value();
+      const queries = _.filter(rest[i + 1], q => q && !this._isDefaultQuery(q)); // filter out default queries
       addObject(queriesPerIndexAndPerDashboard, thatIndex, thatDashboardTitle, queries);
 
       // filters

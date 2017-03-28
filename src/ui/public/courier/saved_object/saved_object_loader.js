@@ -3,7 +3,7 @@ import Scanner from 'ui/utils/scanner';
 import { StringUtils } from 'ui/utils/string_utils';
 
 export class SavedObjectLoader {
-  constructor(SavedObjectClass, kbnIndex, esAdmin,  kbnUrl, { savedObjectsAPI, caching: { cache, find, get } = {}, mapHit } = {}) {
+  constructor(SavedObjectClass, kbnIndex, esAdmin, kbnUrl, { savedObjectsAPI, caching: { cache, find, get } = {}, mapHit } = {}) {
     // kibi: kibi properties
     this.savedObjectsAPI = savedObjectsAPI;
     this.mapHit = mapHit;

@@ -1,5 +1,4 @@
 import * as onPage from 'ui/kibi/utils/on_page';
-import DashboardGroupHelperProvider from 'ui/kibi/helpers/dashboard_group_helper';
 import KibiNavBarHelperProvider from 'ui/kibi/directives/kibi_nav_bar_helper';
 import sinon from 'auto-release-sinon';
 import ngMock from 'ng_mock';
@@ -16,13 +15,14 @@ describe('Kibi Directives', function () {
     let globalState;
     let kibiNavBarHelper;
     let $rootScope;
+    let dashboardGroups;
 
     let timeBasedIndicesStub;
     let getDashboardsMetadataStub;
 
     noDigestPromises.activateForSuite();
 
-    function init({ dashboardsIdsInConnectedComponents = [], savedDashboards = [], dashboardGroups = [] }) {
+    function init({ dashboardsIdsInConnectedComponents = [], savedDashboards = [], groups = [] }) {
       ngMock.module('kibana', ($provide) => {
         $provide.service('$timeout', () => {
           const mockTimeout = fn => Promise.resolve(fn());
@@ -41,7 +41,7 @@ describe('Kibi Directives', function () {
         $provide.service('savedSearches', (Promise, Private) => mockSavedObjects(Promise, Private)('savedSearches', []));
       });
 
-      ngMock.inject(function (_globalState_, _kibiState_, _$rootScope_, Private) {
+      ngMock.inject(function (_dashboardGroups_, _globalState_, _kibiState_, _$rootScope_, Private) {
         globalState = _globalState_;
         kibiState = _kibiState_;
         $rootScope = _$rootScope_;
@@ -54,10 +54,9 @@ describe('Kibi Directives', function () {
         sinon.stub(chrome, 'getBasePath').returns('');
         sinon.stub(onPage, 'onDashboardPage').returns(true);
 
-        kibiNavBarHelper._setDashboardGroups(dashboardGroups);
-
-        const dashboardGroupHelper = Private(DashboardGroupHelperProvider);
-        getDashboardsMetadataStub = sinon.stub(dashboardGroupHelper, 'getDashboardsMetadata');
+        dashboardGroups = _dashboardGroups_;
+        sinon.stub(dashboardGroups, 'getGroups').returns(groups);
+        getDashboardsMetadataStub = sinon.stub(dashboardGroups, '_getDashboardsMetadata');
       });
     }
 
@@ -99,7 +98,7 @@ describe('Kibi Directives', function () {
 
         init({
           savedDashboards: [dash1, dash2],
-          dashboardGroups: [
+          groups: [
             {
               id: 'group dashboard1',
               selected: dash1,
@@ -129,17 +128,15 @@ describe('Kibi Directives', function () {
 
         return kibiNavBarHelper.updateAllCounts([ 'dashboard1', 'dashboard2' ])
         .then(() => {
-          const dashboardGroups = kibiNavBarHelper.dashboardGroups;
-
-          expect(dashboardGroups).to.have.length(2);
-          expect(dashboardGroups[0].id).to.be('group dashboard1');
-          expect(dashboardGroups[0].selected.count).to.not.be.ok();
-          expect(dashboardGroups[0].selected.filterIconMessage).to.not.be.ok();
-          expect(dashboardGroups[0].selected.isPruned).to.not.be.ok();
-          expect(dashboardGroups[1].id).to.be('group dashboard2');
-          expect(dashboardGroups[1].selected.count).to.equal(24);
-          expect(dashboardGroups[1].selected.isPruned).to.equal(true);
-          expect(dashboardGroups[1].selected.filterIconMessage).to.equal('This dashboard has 1 filter set.');
+          expect(dashboardGroups.getGroups()).to.have.length(2);
+          expect(dashboardGroups.getGroups()[0].id).to.be('group dashboard1');
+          expect(dashboardGroups.getGroups()[0].selected.count).to.not.be.ok();
+          expect(dashboardGroups.getGroups()[0].selected.filterIconMessage).to.not.be.ok();
+          expect(dashboardGroups.getGroups()[0].selected.isPruned).to.not.be.ok();
+          expect(dashboardGroups.getGroups()[1].id).to.be('group dashboard2');
+          expect(dashboardGroups.getGroups()[1].selected.count).to.equal(24);
+          expect(dashboardGroups.getGroups()[1].selected.isPruned).to.equal(true);
+          expect(dashboardGroups.getGroups()[1].selected.filterIconMessage).to.equal('This dashboard has 1 filter set.');
         });
       });
     });
@@ -175,7 +172,7 @@ describe('Kibi Directives', function () {
 
         init({
           savedDashboards: [dash1, dash2],
-          dashboardGroups: [
+          groups: [
             {
               id: 'group dashboard1',
               selected: dash1,
@@ -212,12 +209,11 @@ describe('Kibi Directives', function () {
 
           return kibiNavBarHelper.updateAllCounts([ 'dashboard1', 'dashboard2' ])
           .then(() => {
-            const dashboardGroups = kibiNavBarHelper.dashboardGroups;
-            expect(dashboardGroups).to.have.length(2);
-            expect(dashboardGroups[0].id).to.be('group dashboard1');
-            expect(dashboardGroups[0].selected.filterIconMessage).to.be('This dashboard has 1 filter set.');
-            expect(dashboardGroups[1].id).to.be('group dashboard2');
-            expect(dashboardGroups[1].selected.filterIconMessage).to.be(null);
+            expect(dashboardGroups.getGroups()).to.have.length(2);
+            expect(dashboardGroups.getGroups()[0].id).to.be('group dashboard1');
+            expect(dashboardGroups.getGroups()[0].selected.filterIconMessage).to.be('This dashboard has 1 filter set.');
+            expect(dashboardGroups.getGroups()[1].id).to.be('group dashboard2');
+            expect(dashboardGroups.getGroups()[1].selected.filterIconMessage).to.be(null);
           });
         });
 
@@ -241,13 +237,11 @@ describe('Kibi Directives', function () {
 
           return kibiNavBarHelper.updateAllCounts([ 'dashboard1', 'dashboard2' ])
           .then(() => {
-            const dashboardGroups = kibiNavBarHelper.dashboardGroups;
-
-            expect(dashboardGroups).to.have.length(2);
-            expect(dashboardGroups[0].id).to.be('group dashboard1');
-            expect(dashboardGroups[0].selected.filterIconMessage).to.be('This dashboard has 2 filters set.');
-            expect(dashboardGroups[1].id).to.be('group dashboard2');
-            expect(dashboardGroups[1].selected.filterIconMessage).to.be(null);
+            expect(dashboardGroups.getGroups()).to.have.length(2);
+            expect(dashboardGroups.getGroups()[0].id).to.be('group dashboard1');
+            expect(dashboardGroups.getGroups()[0].selected.filterIconMessage).to.be('This dashboard has 2 filters set.');
+            expect(dashboardGroups.getGroups()[1].id).to.be('group dashboard2');
+            expect(dashboardGroups.getGroups()[1].selected.filterIconMessage).to.be(null);
           });
         });
 
@@ -271,13 +265,11 @@ describe('Kibi Directives', function () {
 
           return kibiNavBarHelper.updateAllCounts([ 'dashboard1', 'dashboard2' ])
           .then(() => {
-            const dashboardGroups = kibiNavBarHelper.dashboardGroups;
-
-            expect(dashboardGroups).to.have.length(2);
-            expect(dashboardGroups[0].id).to.be('group dashboard1');
-            expect(dashboardGroups[0].selected.filterIconMessage).to.be('This dashboard has a query set.');
-            expect(dashboardGroups[1].id).to.be('group dashboard2');
-            expect(dashboardGroups[1].selected.filterIconMessage).to.be(null);
+            expect(dashboardGroups.getGroups()).to.have.length(2);
+            expect(dashboardGroups.getGroups()[0].id).to.be('group dashboard1');
+            expect(dashboardGroups.getGroups()[0].selected.filterIconMessage).to.be('This dashboard has a query set.');
+            expect(dashboardGroups.getGroups()[1].id).to.be('group dashboard2');
+            expect(dashboardGroups.getGroups()[1].selected.filterIconMessage).to.be(null);
           });
         });
 
@@ -301,12 +293,11 @@ describe('Kibi Directives', function () {
 
           return kibiNavBarHelper.updateAllCounts([ 'dashboard1', 'dashboard2' ])
           .then(() => {
-            const dashboardGroups = kibiNavBarHelper.dashboardGroups;
-            expect(dashboardGroups).to.have.length(2);
-            expect(dashboardGroups[0].id).to.be('group dashboard1');
-            expect(dashboardGroups[0].selected.filterIconMessage).to.be('This dashboard has a query and 1 filter set.');
-            expect(dashboardGroups[1].id).to.be('group dashboard2');
-            expect(dashboardGroups[1].selected.filterIconMessage).to.be(null);
+            expect(dashboardGroups.getGroups()).to.have.length(2);
+            expect(dashboardGroups.getGroups()[0].id).to.be('group dashboard1');
+            expect(dashboardGroups.getGroups()[0].selected.filterIconMessage).to.be('This dashboard has a query and 1 filter set.');
+            expect(dashboardGroups.getGroups()[1].id).to.be('group dashboard2');
+            expect(dashboardGroups.getGroups()[1].selected.filterIconMessage).to.be(null);
           });
         });
       });
@@ -333,12 +324,11 @@ describe('Kibi Directives', function () {
 
           return kibiNavBarHelper.updateAllCounts([ 'dashboard1', 'dashboard2' ])
           .then(() => {
-            const dashboardGroups = kibiNavBarHelper.dashboardGroups;
-            expect(dashboardGroups).to.have.length(2);
-            expect(dashboardGroups[0].id).to.be('group dashboard1');
-            expect(dashboardGroups[0].selected.count).to.be(42);
-            expect(dashboardGroups[1].id).to.be('group dashboard2');
-            expect(dashboardGroups[1].selected.count).to.be(24);
+            expect(dashboardGroups.getGroups()).to.have.length(2);
+            expect(dashboardGroups.getGroups()[0].id).to.be('group dashboard1');
+            expect(dashboardGroups.getGroups()[0].selected.count).to.be(42);
+            expect(dashboardGroups.getGroups()[1].id).to.be('group dashboard2');
+            expect(dashboardGroups.getGroups()[1].selected.count).to.be(24);
           });
         });
 
@@ -355,12 +345,11 @@ describe('Kibi Directives', function () {
 
           return kibiNavBarHelper.updateAllCounts([ 'dashboard1' ])
           .then(() => {
-            const dashboardGroups = kibiNavBarHelper.dashboardGroups;
-            expect(dashboardGroups).to.have.length(2);
-            expect(dashboardGroups[0].id).to.be('group dashboard1');
-            expect(dashboardGroups[0].selected.count).to.be(42);
-            expect(dashboardGroups[1].id).to.be('group dashboard2');
-            expect(dashboardGroups[1].selected.count).to.not.be.ok();
+            expect(dashboardGroups.getGroups()).to.have.length(2);
+            expect(dashboardGroups.getGroups()[0].id).to.be('group dashboard1');
+            expect(dashboardGroups.getGroups()[0].selected.count).to.be(42);
+            expect(dashboardGroups.getGroups()[1].id).to.be('group dashboard2');
+            expect(dashboardGroups.getGroups()[1].selected.count).to.not.be.ok();
           });
         });
       });
@@ -519,7 +508,7 @@ describe('Kibi Directives', function () {
 
         init({
           savedDashboards: [dash1, dash2],
-          dashboardGroups: [
+          groups: [
             {
               id: 'group odd dashboards',
               selected: dash1,
@@ -547,12 +536,11 @@ describe('Kibi Directives', function () {
 
         return kibiNavBarHelper.updateAllCounts([ 'dashboard1', 'dashboard2' ])
         .then(() => {
-          const dashboardGroups = kibiNavBarHelper.dashboardGroups;
-          expect(dashboardGroups).to.have.length(2);
-          expect(dashboardGroups[0].id).to.be('group odd dashboards');
-          expect(dashboardGroups[0].selected.count).to.be(42);
-          expect(dashboardGroups[1].id).to.be('group even dashboards');
-          expect(dashboardGroups[1].selected.count).to.not.be.ok();
+          expect(dashboardGroups.getGroups()).to.have.length(2);
+          expect(dashboardGroups.getGroups()[0].id).to.be('group odd dashboards');
+          expect(dashboardGroups.getGroups()[0].selected.count).to.be(42);
+          expect(dashboardGroups.getGroups()[1].id).to.be('group even dashboards');
+          expect(dashboardGroups.getGroups()[1].selected.count).to.not.be.ok();
         });
       });
 

@@ -6,7 +6,7 @@ import _ from 'lodash';
 
 uiModules
 .get('kibana')
-.directive('dashboardNavLink', (kibiState, dashboardsNavState) => {
+.directive('dashboardNavLink', (dashboardGroups, kibiState, dashboardsNavState) => {
   const numeral = require('numeral')();
 
   return {
@@ -14,29 +14,26 @@ uiModules
     transclude: true,
     scope: {
       filter: '=',
-      groups: '=',
       group: '='
     },
     template: dashboardNavLinkTemplate,
     link: function ($scope) {
       $scope.groupMenuTemplate = groupMenuTemplate;
+      $scope.groupMenuLocals = {
+        filter: $scope.filter,
+        groupId: $scope.group.id,
+        dashboardGroups
+      };
+
+      $scope.selectDashboard = () => dashboardGroups.selectDashboard($scope.group.selected.id);
 
       $scope.isSidebarOpen = dashboardsNavState.isOpen();
       $scope.$watch(dashboardsNavState.isOpen, isOpen => {
         $scope.isSidebarOpen = isOpen;
       });
 
-      $scope.$watch('filter', filter => {
-        $scope.subDashboards = $scope.group.dashboards;
-        if (filter) {
-          filter = filter.toLowerCase();
-          $scope.subDashboards = _.filter($scope.group.dashboards, d => _.contains(d.title, filter));
-        }
-      });
-
       $scope.toggleGroupNav = function () {
-        const activeGroup = _.find($scope.groups, 'active', true);
-        activeGroup.selected.onOpenClose(activeGroup);
+        dashboardGroups.updateMetadataOfGroupId($scope.group.id);
       };
 
       $scope.doesGroupHasAnyHiglightedDashboard = function (dashboards) {

@@ -126,6 +126,32 @@ describe('State Management', function () {
       Notifier.prototype._notifs.length = 0;
     });
 
+    describe('_isDefaultQuery', function () {
+      beforeEach(() => init());
+
+      it('should be a default query', function () {
+        const query = {
+          query_string: {
+            query: '*',
+            analyze_wildcard: true
+          }
+        };
+
+        expect(kibiState._isDefaultQuery(query)).to.be(true);
+      });
+
+      it('should not be a default query', function () {
+        const query = {
+          query_string: {
+            query: 'dog',
+            analyze_wildcard: true
+          }
+        };
+
+        expect(kibiState._isDefaultQuery(query)).to.be(false);
+      });
+    });
+
     describe('handle state with outdated filters', function () {
       beforeEach(() => init());
 

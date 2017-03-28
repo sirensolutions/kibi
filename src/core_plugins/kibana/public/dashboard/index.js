@@ -103,7 +103,7 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
   return {
     restrict: 'E',
     controllerAs: 'dashboardApp',
-    controller: function (kibiState, globalState, config, $scope, $rootScope, $route, $routeParams, $location, Private, getAppState) {
+    controller: function (kibiState, config, $scope, $rootScope, $route, $routeParams, $location, Private, getAppState) {
 
       const queryFilter = Private(FilterBarQueryFilterProvider);
       const getEmptyQueryOptionHelper = Private(require('ui/kibi/helpers/get_empty_query_with_options_helper'));
@@ -141,16 +141,15 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
         timefilter.time.from = timeDefaults.from;
       }
 
-      // kibi: below listener on globalState is needed to react when the global time is changed by the user
+      // kibi: the listener below is needed to react when the global time is changed by the user
       // either directly in time widget or by clicking on histogram chart etc
-      const saveWithChangesHandler = function (diff) {
-        if (dash.id && diff.indexOf('time') !== -1 && timefilter.time.from && timefilter.time.to &&
-            !kibiState._isDefaultTime(timefilter.time.mode, timefilter.time.from, timefilter.time.to)) {
+      const saveWithChangesHandler = function () {
+        if (dash.id && !kibiState._isDefaultTime(timefilter.time.mode, timefilter.time.from, timefilter.time.to)) {
           kibiState._saveTimeForDashboardId(dash.id, timefilter.time.mode, timefilter.time.from, timefilter.time.to);
           kibiState.save();
         }
       };
-      globalState.on('save_with_changes', saveWithChangesHandler);
+      $scope.$listen(timefilter, 'fetch', saveWithChangesHandler);
 
       // kibi: get the filters and query from the kibi state
       const dashboardQuery = kibiState._getDashboardProperty(dash.id, kibiState._properties.query);
@@ -245,8 +244,6 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
         });
 
         $scope.$on('$destroy', () => {
-          // kibi: remove the listener on globalstate
-          globalState.off('save_with_changes', saveWithChangesHandler);
           stateMonitor.destroy();
           dash.destroy();
 

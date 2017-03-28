@@ -6,10 +6,8 @@ uiModules
 .get('app/dashboard')
 .directive('kibiMenuTemplate', function ($rootScope, $timeout, $window, $compile, $document) {
   const link = function ($scope, $el) {
-    $scope.data = {
-      showMenu: false,
-      delay: $scope.kibiMenuTemplateHideDelay || 250
-    };
+    let isMenuVisible = false;
+    const delay = $scope.kibiMenuTemplateHideDelay || 250;
 
     const isKibiRelationsSearchBar = function (obj) {
       for (const key in obj) {
@@ -63,7 +61,7 @@ uiModules
       container.css({left, top, 'max-height': maxHeight});
     };
 
-    const show = function () {
+    const showMenu = function () {
       $rootScope.$broadcast('kibiMenuTemplate:show', $el);
 
       if ($scope.kibiMenuTemplateOnShowFn) {
@@ -73,22 +71,22 @@ uiModules
       container.addClass('visible');
     };
 
-    const hide = function () {
+    const hideMenu = function () {
       if ($scope.kibiMenuTemplateOnHideFn) {
         $scope.kibiMenuTemplateOnHideFn();
       }
       container.removeClass('visible');
     };
 
-    $scope.$watch('data.showMenu', function (newValue, oldValue) {
-      if (newValue !== oldValue) {
-        if ($scope.data.showMenu) {
-          show();
-        } else {
-          hide();
-        }
+    const toggleMenu = function () {
+      if (isMenuVisible) {
+        isMenuVisible = false;
+        hideMenu();
+      } else {
+        isMenuVisible = true;
+        showMenu();
       }
-    });
+    };
 
     // watch the position of the element and update position of the menu if needed
     $scope.$watch(function () {
@@ -102,9 +100,7 @@ uiModules
       if ($scope.kibiMenuTemplateOnFocusFn) {
         $scope.kibiMenuTemplateOnFocusFn();
       }
-      $scope.$apply(function () {
-        $scope.data.showMenu = !$scope.data.showMenu;
-      });
+      toggleMenu();
     });
 
     // hide when clicking elsewhere in the document
@@ -124,7 +120,7 @@ uiModules
 
       if (!isInsideElement) {
         $scope.$apply(function () {
-          $scope.data.showMenu = false;
+          hideMenu();
         });
       }
     };
@@ -136,31 +132,31 @@ uiModules
       $el.on('mouseover', function (event) {
         $timeout.cancel(timerPromise);
         $scope.$apply(function () {
-          $scope.data.showMenu = true;
+          showMenu();
         });
       });
       $el.on('mouseout', function (event) {
         timerPromise = $timeout(function () {
-          $scope.data.showMenu = false;
-        }, $scope.data.delay);
+          hideMenu();
+        }, delay);
       });
       container.on('mouseover', function (event) {
         $timeout.cancel(timerPromise);
         $scope.$apply(function () {
-          $scope.data.showMenu = true;
+          showMenu();
         });
       });
       container.on('mouseout', function (event) {
-        timerPromise = $timeout (function () {
-          $scope.data.showMenu = false;
-        }, $scope.data.delay);
+        timerPromise = $timeout(function () {
+          hideMenu();
+        }, delay);
       });
     }
 
     // hide when clicking on another kibi dropdown
     const cancelOnShow = $rootScope.$on('kibiMenuTemplate:show', (event, element) => {
       if (element !== $el) {
-        $scope.data.showMenu = false;
+        hideMenu();
       }
     });
 
@@ -180,8 +176,7 @@ uiModules
     link: link,
     scope: {
       kibiMenuTemplate: '=',            // string - html template to be used to create the menu
-      kibiMenuTemplateData: '=',        // array - data used in template when creating menu items
-      kibiMenuTemplateContext: '=',     // object - additional data required by the template
+      kibiMenuTemplateLocals: '=',      // object - additional data required by the template
       kibiMenuTemplateOnShowFn: '&',    // function - executed when menu is shown
       kibiMenuTemplateOnHideFn: '&',    // function - executed when menu is closed
       kibiMenuTemplateOnFocusFn: '&',   // function - executed when element is clicked

@@ -2,72 +2,21 @@ import angular from 'angular';
 import _ from 'lodash';
 import DelayExecutionHelperProvider from 'ui/kibi/helpers/delay_execution_helper';
 import SearchHelper from 'ui/kibi/helpers/search_helper';
-import chrome from 'ui/chrome';
-import DashboardGroupHelperProvider from 'ui/kibi/helpers/dashboard_group_helper';
 import { onDashboardPage } from 'ui/kibi/utils/on_page';
 
-export default function KibiNavBarHelperFactory(kibiState, globalState, getAppState, createNotifier, Private, $rootScope, savedDashboards) {
+export default function KibiNavBarHelperFactory(dashboardGroups, kibiState, globalState, getAppState, createNotifier, Private, $rootScope,
+  savedDashboards) {
   const notify = createNotifier({
     location: 'Kibi Navbar helper'
   });
 
   const DelayExecutionHelper = Private(DelayExecutionHelperProvider);
-  const dashboardGroupHelper = Private(DashboardGroupHelperProvider);
+
+  const NO_METADATA_UPDATE = Symbol.for('no metadata to update on any dashboard');
 
   /*
   * Private Methods
   */
-  const _fireUpdateAllCounts = function (dashboardIds, forceCountsUpdate = false) {
-    const filteredDashboardsIds = new Set();
-    if (!dashboardIds) {
-      // only the selected/visible dashboard from each group
-      _.each(this.dashboardGroups, (g) => {
-        if (g.selected) {
-          filteredDashboardsIds.add(g.selected.id);
-        }
-      });
-    } else {
-      // filter the given dashboardIds
-      // to use only the selected/visible dashboard from each group
-      _.each(this.dashboardGroups, (g) => {
-        if (g.selected && _.contains(dashboardIds, g.selected.id)) {
-          filteredDashboardsIds.add(g.selected.id);
-        }
-      });
-    }
-
-    if (!filteredDashboardsIds.size) {
-      return;
-    }
-    if (console) {
-      const msg = 'KibiNavBar will update the counts for following dashboards ' + JSON.stringify(filteredDashboardsIds, null, ' ');
-      console.log(msg); // eslint-disable-line no-console
-    }
-
-    return dashboardGroupHelper.getDashboardsMetadata(filteredDashboardsIds, forceCountsUpdate)
-    .then((metadata) => {
-      _.each(this.dashboardGroups, (g) => {
-        _.each(g.dashboards, (d) => {
-          const foundDashboardMetadata = _.find(metadata, 'dashboardId', d.id);
-          if (foundDashboardMetadata) {
-            d.count = foundDashboardMetadata.count;
-            d.isPruned = foundDashboardMetadata.isPruned;
-            d.filterIconMessage = dashboardGroupHelper.constructFilterIconMessage(
-              foundDashboardMetadata.filters,
-              foundDashboardMetadata.queries
-            );
-          } else if (filteredDashboardsIds.has(d.id)) {
-            // count for that dashboard was requested but is not in the metadata, likely because it doesn't have a savedSearchId
-            delete d.count;
-            delete d.isPruned;
-            delete d.filterIconMessage;
-          }
-        });
-      });
-    })
-    .catch(notify.warning);
-  };
-
   const updateCounts = function (dashboardsIds, reason, forceUpdate = false) {
     if (!dashboardsIds.length) {
       return;
@@ -89,13 +38,6 @@ export default function KibiNavBarHelperFactory(kibiState, globalState, getAppSt
   // =================
 
   function KibiNavBarHelper() {
-    this.chrome = chrome;
-    this.dashboardGroups = [];
-    this.init = _.once(() => {
-      return this.computeDashboardsGroups('init')
-      .then(() => this.updateAllCounts(null, 'init'));
-    });
-
     const updateCountsOnAppStateChange = function (diff) {
       if (diff.indexOf('query') === -1 && diff.indexOf('filters') === -1) {
         return;
@@ -196,7 +138,14 @@ export default function KibiNavBarHelperFactory(kibiState, globalState, getAppSt
       (data) => {
         if (onDashboardPage()) {
           const forceUpdate = data.forceUpdate;
-          return _fireUpdateAllCounts.call(self, data.ids, forceUpdate);
+          const filteredDashboardsIds = dashboardGroups.getVisibleDashboardIds(data.ids);
+
+          if (!filteredDashboardsIds.length) {
+            return Promise.resolve(NO_METADATA_UPDATE);
+          }
+
+          return dashboardGroups.updateMetadataOfDashboardIds(filteredDashboardsIds, forceUpdate)
+          .catch(notify.warning);
         }
       },
       750,
@@ -221,30 +170,10 @@ export default function KibiNavBarHelperFactory(kibiState, globalState, getAppSt
     }
   };
 
-  KibiNavBarHelper.prototype.computeDashboardsGroups = function (reason) {
-    if (console) {
-      console.log('Dashboard Groups will be recomputed because: [' + reason + ']'); // eslint-disable-line no-console
-    }
-    return dashboardGroupHelper.computeGroups()
-    .then((groups) => {
-      dashboardGroupHelper.copy(groups, this.dashboardGroups);
-      return this.dashboardGroups;
-    })
-    .catch(notify.error);
-  };
-
   KibiNavBarHelper.prototype.cancelExecutionInProgress = function () {
     if (this.delayExecutionHelper) {
       this.delayExecutionHelper.cancel();
     }
-  };
-
-  KibiNavBarHelper.prototype.getDashboardGroups = function () {
-    return this.dashboardGroups;
-  };
-
-  KibiNavBarHelper.prototype._setDashboardGroups = function (groups) {
-    this.dashboardGroups = groups;
   };
 
   return new KibiNavBarHelper();

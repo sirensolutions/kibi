@@ -19,7 +19,7 @@ export default function (Promise, Private) {
       }
 
       if (error) {
-        return Promise.reject(new Error());
+        return Promise.reject(new Error('Generic error message'));
       }
       // kibi: end
 

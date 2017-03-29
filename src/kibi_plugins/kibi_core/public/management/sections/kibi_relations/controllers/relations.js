@@ -312,6 +312,7 @@ function controller(Promise, es, kibiState, $rootScope, $scope, $timeout, config
       if (!existingNode) {
         node.keep = true; // this is to tag the nodes to remove
         node.id = id;
+        node.size = 20;
         $scope[graphProperty].nodes.push(node);
       } else {
         existingNode.keep = true; // this is to tag the nodes to remove

@@ -14,7 +14,8 @@ import IndexPatternsFlattenHitProvider from 'ui/index_patterns/_flatten_hit';
 import IndexPatternsCalculateIndicesProvider from 'ui/index_patterns/_calculate_indices';
 import IndexPatternsPatternCacheProvider from 'ui/index_patterns/_pattern_cache';
 
-export default function IndexPatternFactory(Private, createNotifier, config, kbnIndex, Promise, safeConfirm) {
+// kibi: added mappings service dependency
+export default function IndexPatternFactory(Private, createNotifier, config, kbnIndex, Promise, safeConfirm, mappings) {
   const fieldformats = Private(RegistryFieldFormatsProvider);
   const getIds = Private(IndexPatternsGetIdsProvider);
   const mapper = Private(IndexPatternsMapperProvider);
@@ -368,6 +369,7 @@ export default function IndexPatternFactory(Private, createNotifier, config, kbn
       return docSources.get(this)
       .doIndex(body)
       .then(id => setId(this, id))
+      .then(() => mappings.clearCache())
       // kibi: notify errors
       .catch((error) => {
         notify.error(error);

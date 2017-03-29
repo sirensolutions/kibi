@@ -11,7 +11,7 @@ import IndexPatternsLocalCacheProvider from 'ui/index_patterns/_local_cache';
 import PathsProvider from 'ui/kibi/index_patterns/_get_paths_for_index_pattern';
 
 // kibi: require savedObjecsAPI service instead of esAdmin
-export default function MapperService(Private, Promise, es, savedObjectsAPI, config, kbnIndex) {
+export default function MapperService(Private, Promise, es, savedObjectsAPI, config, kbnIndex, mappings) {
 
   const enhanceFieldsWithCapabilities = Private(EnhanceFieldsWithCapabilitiesProvider);
   const transformMappingIntoFields = Private(IndexPatternsTransformMappingIntoFieldsProvider);
@@ -47,11 +47,8 @@ export default function MapperService(Private, Promise, es, savedObjectsAPI, con
       }
 
       return promise.then(function (indexList) {
-        return es.indices.getMapping({
-          index: indexList,
-          ignoreUnavailable: _.isArray(indexList),
-          allowNoIndices: false
-        });
+        // kibi: use our service to reduce the number of calls to the backend
+        return mappings.getMapping(indexList);
       })
       .catch(handleMissingIndexPattern)
       .then(_getPathsForIndexPattern);

@@ -1,13 +1,14 @@
-var _ = require('lodash');
-var ngMock = require('ngMock');
-var expect = require('expect.js');
+const _ = require('lodash');
+const ngMock = require('ngMock');
+const expect = require('expect.js');
+const sinon = require('auto-release-sinon');
+const mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
 
-var mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
-var kibiSelectHelper;
-var config;
-var $httpBackend;
-var indexPatterns;
-
+let kibiSelectHelper;
+let config;
+let $httpBackend;
+let indexPatterns;
+let mappings;
 
 describe('Kibi Directives', function () {
   describe('KibiSelect Helper', function () {
@@ -105,6 +106,7 @@ describe('Kibi Directives', function () {
         if (options.initHttpBackend) {
           $httpBackend = $injector.get('$httpBackend');
         }
+        mappings = $injector.get('mappings');
       });
     };
 
@@ -467,34 +469,40 @@ describe('Kibi Directives', function () {
       });
 
       it('should get the type of the dog index', function (done) {
-        var data = {
-          dog: {
-            mappings: { animal: {} }
+        const response = {
+          data: {
+            dog: {
+              mappings: { animal: {} }
+            }
           }
         };
+        const getMappingStub = sinon.stub(mappings, 'getMapping').returns(Promise.resolve(response));
 
-        $httpBackend.whenGET('/elasticsearch/dog/_mappings').respond(200, data);
         kibiSelectHelper.getIndexTypes('dog').then(function (types) {
+          sinon.assert.calledOnce(getMappingStub);
           expect(types).to.have.length(1);
           expect(types[0].label).to.be('animal');
           expect(types[0].value).to.be('animal');
+
           done();
         }).catch(done);
-        $httpBackend.flush();
       });
 
       it('should get the type of all returned indices', function (done) {
-        var data = {
-          dog: {
-            mappings: { animal: {} }
-          },
-          dogboy: {
-            mappings: { hero: {} }
+        const response = {
+          data: {
+            dog: {
+              mappings: { animal: {} }
+            },
+            dogboy: {
+              mappings: { hero: {} }
+            }
           }
         };
+        const getMappingStub = sinon.stub(mappings, 'getMapping').returns(Promise.resolve(response));
 
-        $httpBackend.whenGET('/elasticsearch/dog*/_mappings').respond(200, data);
         kibiSelectHelper.getIndexTypes('dog*').then(function (types) {
+          sinon.assert.calledOnce(getMappingStub);
           expect(types).to.have.length(2);
           expect(types[0].label).to.be('animal');
           expect(types[0].value).to.be('animal');
@@ -502,7 +510,6 @@ describe('Kibi Directives', function () {
           expect(types[1].value).to.be('hero');
           done();
         }).catch(done);
-        $httpBackend.flush();
       });
     });
 

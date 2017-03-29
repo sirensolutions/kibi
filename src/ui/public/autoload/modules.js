@@ -11,6 +11,7 @@ import 'ui/elastic_textarea';
 import 'ui/es';
 import 'ui/saved_objects_api'; // kibi: added the saved object API
 import 'ui/kibi/session/kibi_session'; // kibi: added kibi session
+import 'ui/kibi/mappings'; // kibi: added mappings service
 import 'ui/events';
 import 'ui/fancy_forms';
 import 'ui/filter_bar';

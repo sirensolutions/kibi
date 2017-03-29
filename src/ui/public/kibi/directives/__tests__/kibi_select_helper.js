@@ -15,6 +15,7 @@ describe('Kibi Directives', function () {
     let indexPatterns;
     let stubMapping;
     let stubSearch;
+    let mappings;
 
     noDigestPromises.activateForSuite();
 
@@ -89,6 +90,7 @@ describe('Kibi Directives', function () {
         const es = $injector.get('es');
         stubMapping = sinon.stub(es.indices, 'getMapping');
         stubSearch = sinon.stub(es, 'search');
+        mappings = $injector.get('mappings');
       });
     };
 
@@ -416,9 +418,7 @@ describe('Kibi Directives', function () {
     describe('GetIndexTypes', function () {
 
       beforeEach(function () {
-        init({
-          initHttpBackend: true
-        });
+        init();
       });
 
       it('no index pattern id specified', function () {
@@ -428,14 +428,15 @@ describe('Kibi Directives', function () {
       });
 
       it('should get the type of the dog index', function () {
-        const data = {
+        const response = {
           dog: {
             mappings: { animal: {} }
           }
         };
+        const getMappingStub = sinon.stub(mappings, 'getMapping').returns(Promise.resolve(response));
 
-        stubMapping.returns(Promise.resolve(data));
         return kibiSelectHelper.getIndexTypes('dog').then(function (types) {
+          sinon.assert.calledOnce(getMappingStub);
           expect(types).to.have.length(1);
           expect(types[0].label).to.be('animal');
           expect(types[0].value).to.be('animal');
@@ -443,7 +444,7 @@ describe('Kibi Directives', function () {
       });
 
       it('should get the type of all returned indices', function () {
-        const data = {
+        const response = {
           dog: {
             mappings: { animal: {} }
           },
@@ -451,9 +452,10 @@ describe('Kibi Directives', function () {
             mappings: { hero: {} }
           }
         };
+        const getMappingStub = sinon.stub(mappings, 'getMapping').returns(Promise.resolve(response));
 
-        stubMapping.returns(Promise.resolve(data));
         return kibiSelectHelper.getIndexTypes('dog*').then(function (types) {
+          sinon.assert.calledOnce(getMappingStub);
           expect(types).to.have.length(2);
           expect(types[0].label).to.be('animal');
           expect(types[0].value).to.be('animal');

@@ -7,7 +7,7 @@ import RelationsHelperProvider from 'ui/kibi/helpers/relations_helper';
 import kibiUtils from 'kibiutils';
 
 export default function KibiSelectHelperFactory(config, indexPatterns, Private, Promise, kibiState, es, savedSearches, savedTemplates,
-  savedDashboards, savedQueries, savedDatasources) {
+  savedDashboards, savedQueries, savedDatasources, mappings) {
 
   function KibiSelectHelper() {
   }
@@ -128,10 +128,8 @@ export default function KibiSelectHelperFactory(config, indexPatterns, Private, 
       return Promise.resolve([]);
     }
 
-    return es.indices.getMapping({
-      index: indexPath(indexPatternId)
-    })
-    .then(function (response) {
+    return mappings.getMapping(indexPatternId)
+    .then((response) => {
       const types = new Set();
 
       _.each(response, (mapping, indexName) => {

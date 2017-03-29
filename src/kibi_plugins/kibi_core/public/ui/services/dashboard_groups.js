@@ -30,12 +30,15 @@ uiModules
 
   const _constructFilterIconMessage = function (filters, queries) {
     if (queries || filters) {
-      if (queries.length > 1 && filters.length !== 0) {
-        return `This dashboard has a query and ${filters.length} filter${filters.length > 1 ? 's' : ''} set.`;
-      } else if (queries.length > 1) {
+      const nFilters = _.reject(filters, 'meta.fromSavedSearch').length;
+      const hasQuery = !kibiState._isDefaultQuery(queries[0]);
+
+      if (hasQuery && nFilters) {
+        return `This dashboard has a query and ${nFilters} filter${nFilters > 1 ? 's' : ''} set.`;
+      } else if (hasQuery) {
         return 'This dashboard has a query set.';
-      } else if (filters.length !== 0) {
-        return `This dashboard has ${filters.length} filter${filters.length > 1 ? 's' : ''} set.`;
+      } else if (nFilters) {
+        return `This dashboard has ${nFilters} filter${nFilters > 1 ? 's' : ''} set.`;
       }
     }
     return null;
@@ -131,28 +134,28 @@ uiModules
             query.size = 0; // we do not need hits just a count
             // here take care about correctly expanding timebased indices
             return kibiState.timeBasedIndices(index, dashboard.id)
-              .then((indices) => ({
-                dashboardId: dashboard.id,
-                filters,
-                queries,
-                query,
-                indices
-              }))
-              .catch((error) => {
-                // If computing the indices failed because of an authorization error
-                // set indices to an empty array and mark the dashboard as forbidden.
-                if (error.status === 403) {
-                  return {
-                    dashboardId: dashboard.id,
-                    filters,
-                    queries,
-                    query,
-                    forbidden: true,
-                    indices: []
-                  };
-                }
-                throw error;
-              });
+            .then((indices) => ({
+              dashboardId: dashboard.id,
+              filters,
+              queries,
+              query,
+              indices
+            }))
+            .catch((error) => {
+              // If computing the indices failed because of an authorization error
+              // set indices to an empty array and mark the dashboard as forbidden.
+              if (error.status === 403) {
+                return {
+                  dashboardId: dashboard.id,
+                  filters,
+                  queries,
+                  query,
+                  forbidden: true,
+                  indices: []
+                };
+              }
+              throw error;
+            });
           });
         });
 
@@ -167,12 +170,12 @@ uiModules
               _updateCountOnMetadata(metadata, lastMultiCountsQueryResults);
             } else {
               return es.msearch({ body: countsQuery })
-                .then(response => {
-                  lastFiredMultiCountsQuery = countsQuery;
-                  lastMultiCountsQueryResults = response.responses;
-                  _updateCountOnMetadata(metadata, lastMultiCountsQueryResults);
-                  return metadata;
-                });
+              .then(response => {
+                lastFiredMultiCountsQuery = countsQuery;
+                lastMultiCountsQueryResults = response.responses;
+                _updateCountOnMetadata(metadata, lastMultiCountsQueryResults);
+                return metadata;
+              });
             }
           }
           return metadata;
@@ -342,23 +345,14 @@ uiModules
     setActiveGroupFromUrl() {
       const currentDashboardId = kibiState._getCurrentDashboardId();
 
-      if (!currentDashboardId) {
-        throw new Error('Unable to get the current dashboard');
-      }
-
-      _(this.getGroups())
-      .each(group => {
+      _.each(this.getGroups(), group => {
         group.active = false;
-      })
-      .each(group => {
-        const dashboard = _.find(group.dashboards, 'id', currentDashboardId);
+      });
 
-        if (dashboard) {
-          group.active = true;
-          return false;
-        }
-      })
-      .value();
+      if (currentDashboardId) {
+        const currentGroup = _.findWhere(this.getGroups(), { dashboards: [ { id: currentDashboardId } ] });
+        currentGroup.active = true;
+      }
     }
 
     _computeGroupsFromSavedDashboardGroups() {

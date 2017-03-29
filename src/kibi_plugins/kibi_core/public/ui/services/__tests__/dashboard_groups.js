@@ -529,6 +529,206 @@ describe('Kibi Services', function () {
       });
     });
 
+    describe('filter icon message', function () {
+      beforeEach(() => init({
+        currentDashboardId: 'myDashboard',
+        indexPatterns: [
+          {
+            id: 'myindex'
+          }
+        ],
+        savedDashboardGroups: [
+          {
+            id: 'mygroup',
+            title: 'MyGroup',
+            dashboards: [
+              {
+                id: 'myDashboard'
+              }
+            ]
+          }
+        ],
+        savedDashboards: [
+          {
+            id: 'myDashboard',
+            title: 'myDashboard',
+            savedSearchId: 'search with a filter and a query'
+          }
+        ],
+        savedSearches: [
+          {
+            id: 'search with a filter and a query',
+            kibanaSavedObjectMeta: {
+              searchSourceJSON: JSON.stringify(
+                {
+                  index: 'myindex',
+                  filter: [ { query: {}, meta: { disabled: false } } ],
+                  query: {
+                    query_string: {
+                      query: 'ibm'
+                    }
+                  }
+                }
+              )
+            }
+          }
+        ]
+      }));
+
+      it('should be null if there is no query nor filters', function () {
+        sinon.stub(es, 'msearch').returns(Promise.resolve({
+          responses: [
+            {
+              hits: {
+                total: 42
+              }
+            }
+          ]
+        }));
+
+        return dashboardGroups.computeGroups()
+        .then(() => dashboardGroups.updateMetadataOfDashboardIds(['myDashboard']))
+        .then(function () {
+          const groups = dashboardGroups.getGroups();
+          const myGroup = _.find(groups, 'id', 'mygroup');
+          const myDashboard = _.find(myGroup.dashboards, 'id', 'myDashboard');
+          expect(myDashboard.filterIconMessage).to.be(null);
+        });
+      });
+
+      it('should say there is 1 filter', function () {
+        sinon.stub(es, 'msearch').returns(Promise.resolve({
+          responses: [
+            {
+              hits: {
+                total: 42
+              }
+            }
+          ]
+        }));
+        appState.filters = [ { meta: { disabled: false } } ];
+
+        return dashboardGroups.computeGroups()
+        .then(() => dashboardGroups.updateMetadataOfDashboardIds(['myDashboard']))
+        .then(function () {
+          const groups = dashboardGroups.getGroups();
+          const myGroup = _.find(groups, 'id', 'mygroup');
+          const myDashboard = _.find(myGroup.dashboards, 'id', 'myDashboard');
+          expect(myDashboard.filterIconMessage).to.be('This dashboard has 1 filter set.');
+        });
+      });
+
+      it('should not say there is 1 query if default', function () {
+        sinon.stub(es, 'msearch').returns(Promise.resolve({
+          responses: [
+            {
+              hits: {
+                total: 42
+              }
+            }
+          ]
+        }));
+        appState.query = {
+          query_string: {
+            query: '*',
+            analyze_wildcard: true
+          }
+        };
+
+        return dashboardGroups.computeGroups()
+        .then(() => dashboardGroups.updateMetadataOfDashboardIds(['myDashboard']))
+        .then(function () {
+          const groups = dashboardGroups.getGroups();
+          const myGroup = _.find(groups, 'id', 'mygroup');
+          const myDashboard = _.find(myGroup.dashboards, 'id', 'myDashboard');
+          expect(myDashboard.filterIconMessage).to.be(null);
+        });
+      });
+
+      it('should say there is 1 query', function () {
+        sinon.stub(es, 'msearch').returns(Promise.resolve({
+          responses: [
+            {
+              hits: {
+                total: 42
+              }
+            }
+          ]
+        }));
+        appState.query = {
+          query_string: {
+            query: 'torrent',
+            analyze_wildcard: true
+          }
+        };
+
+        return dashboardGroups.computeGroups()
+        .then(() => dashboardGroups.updateMetadataOfDashboardIds(['myDashboard']))
+        .then(function () {
+          const groups = dashboardGroups.getGroups();
+          const myGroup = _.find(groups, 'id', 'mygroup');
+          const myDashboard = _.find(myGroup.dashboards, 'id', 'myDashboard');
+          expect(myDashboard.filterIconMessage).to.be('This dashboard has a query set.');
+        });
+      });
+
+      it('should say there is 1 query and 1 filter', function () {
+        sinon.stub(es, 'msearch').returns(Promise.resolve({
+          responses: [
+            {
+              hits: {
+                total: 42
+              }
+            }
+          ]
+        }));
+        appState.query = {
+          query_string: {
+            query: 'torrent',
+            analyze_wildcard: true
+          }
+        };
+        appState.filters = [ { meta: { disabled: false } } ];
+
+        return dashboardGroups.computeGroups()
+        .then(() => dashboardGroups.updateMetadataOfDashboardIds(['myDashboard']))
+        .then(function () {
+          const groups = dashboardGroups.getGroups();
+          const myGroup = _.find(groups, 'id', 'mygroup');
+          const myDashboard = _.find(myGroup.dashboards, 'id', 'myDashboard');
+          expect(myDashboard.filterIconMessage).to.be('This dashboard has a query and 1 filter set.');
+        });
+      });
+
+      it('should say there is 1 query and 2 filters', function () {
+        sinon.stub(es, 'msearch').returns(Promise.resolve({
+          responses: [
+            {
+              hits: {
+                total: 42
+              }
+            }
+          ]
+        }));
+        appState.query = {
+          query_string: {
+            query: 'torrent',
+            analyze_wildcard: true
+          }
+        };
+        appState.filters = [ { a: {}, meta: { disabled: false } }, { b: {}, meta: { disabled: false } } ];
+
+        return dashboardGroups.computeGroups()
+        .then(() => dashboardGroups.updateMetadataOfDashboardIds(['myDashboard']))
+        .then(function () {
+          const groups = dashboardGroups.getGroups();
+          const myGroup = _.find(groups, 'id', 'mygroup');
+          const myDashboard = _.find(myGroup.dashboards, 'id', 'myDashboard');
+          expect(myDashboard.filterIconMessage).to.be('This dashboard has a query and 2 filters set.');
+        });
+      });
+    });
+
     describe('_getDashboardsMetadata', function () {
       beforeEach(() => init({
         indexPatterns: [

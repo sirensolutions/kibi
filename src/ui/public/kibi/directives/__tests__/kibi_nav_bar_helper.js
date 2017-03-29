@@ -22,6 +22,15 @@ describe('Kibi Directives', function () {
 
     noDigestPromises.activateForSuite();
 
+    function getDefaultQuery() {
+      return {
+        query_string: {
+          query: '*',
+          analyze_wildcard: true
+        }
+      };
+    }
+
     function init({ dashboardsIdsInConnectedComponents = [], savedDashboards = [], groups = [] }) {
       ngMock.module('kibana', ($provide) => {
         $provide.service('$timeout', () => {
@@ -120,7 +129,7 @@ describe('Kibi Directives', function () {
           {
             dashboardId: 'dashboard2',
             count: 24,
-            queries: [],
+            queries: [ getDefaultQuery() ],
             filters: [{}],
             isPruned: true
           }
@@ -194,14 +203,14 @@ describe('Kibi Directives', function () {
             {
               dashboardId: 'dashboard1',
               count: 42,
-              queries: [],
+              queries: [ getDefaultQuery() ],
               filters: [{dummyFilter: {}}],
               isPruned: false
             },
             {
               dashboardId: 'dashboard2',
               count: 24,
-              queries: [],
+              queries: [ getDefaultQuery() ],
               filters: [],
               isPruned: false
             }
@@ -222,14 +231,14 @@ describe('Kibi Directives', function () {
             {
               dashboardId: 'dashboard1',
               count: 42,
-              queries: [],
+              queries: [ getDefaultQuery() ],
               filters: [{dummyFilter1: {}}, {dummyFilter2: {}}],
               isPruned: false
             },
             {
               dashboardId: 'dashboard2',
               count: 24,
-              queries: [],
+              queries: [ getDefaultQuery() ],
               filters: [],
               isPruned: false
             }
@@ -257,7 +266,7 @@ describe('Kibi Directives', function () {
             {
               dashboardId: 'dashboard2',
               count: 24,
-              queries: [],
+              queries: [ getDefaultQuery() ],
               filters: [],
               isPruned: false
             }
@@ -285,7 +294,7 @@ describe('Kibi Directives', function () {
             {
               dashboardId: 'dashboard2',
               count: 24,
-              queries: [],
+              queries: [ getDefaultQuery() ],
               filters: [],
               isPruned: false
             }
@@ -309,14 +318,14 @@ describe('Kibi Directives', function () {
             {
               dashboardId: 'dashboard1',
               count: 42,
-              queries: [],
+              queries: [ getDefaultQuery() ],
               filters: [],
               isPruned: false
             },
             {
               dashboardId: 'dashboard2',
               count: 24,
-              queries: [],
+              queries: [ getDefaultQuery() ],
               filters: [],
               isPruned: false
             }
@@ -337,7 +346,7 @@ describe('Kibi Directives', function () {
             {
               dashboardId: 'dashboard1',
               count: 42,
-              queries: [],
+              queries: [ getDefaultQuery() ],
               filters: [],
               isPruned: false
             }
@@ -528,7 +537,7 @@ describe('Kibi Directives', function () {
           {
             dashboardId: 'dashboard1',
             count: 42,
-            queries: [],
+            queries: [ getDefaultQuery() ],
             filters: [],
             isPruned: false
           }

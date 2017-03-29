@@ -319,6 +319,143 @@ describe('Kibi Components', function () {
       });
     });
 
+    describe('filter icon message', function () {
+      beforeEach(() => init({
+        currentDashboardId: 'myDashboard',
+        indexPatterns: [
+          {
+            id: 'myindex'
+          }
+        ],
+        savedDashboardGroups: [
+          {
+            id: 'mygroup',
+            title: 'MyGroup',
+            dashboards: [
+              {
+                id: 'myDashboard'
+              }
+            ]
+          }
+        ],
+        savedDashboards: [
+          {
+            id: 'myDashboard',
+            title: 'myDashboard',
+            savedSearchId: 'search with a filter and a query'
+          }
+        ],
+        savedSearches: [
+          {
+            id: 'search with a filter and a query',
+            kibanaSavedObjectMeta: {
+              searchSourceJSON: JSON.stringify(
+                {
+                  index: 'myindex',
+                  filter: [ { query: {}, meta: { disabled: false } } ],
+                  query: {
+                    query_string: {
+                      query: 'ibm'
+                    }
+                  }
+                }
+              )
+            }
+          }
+        ]
+      }));
+
+      const executeTest = function (done, dashboardId, expectations) {
+        $httpBackend.whenPOST('/elasticsearch/_msearch?getCountsOnTabs').respond(200, {
+          responses: [
+            {
+              hits: {
+                total: 42
+              }
+            }
+          ]
+        });
+
+        dashboardGroupHelper.getDashboardsMetadata([dashboardId]).then(function (metas) {
+          expectations(metas);
+          done();
+        }).catch(done);
+
+        setTimeout(function () {
+          $httpBackend.flush();
+        }, 500);
+      };
+
+      it('should be null if there is no query nor filters', function (done) {
+        executeTest(done, 'myDashboard', function (metas) {
+          expect(metas).to.have.length(1);
+          expect(metas[0].filterIconMessage).to.equal(null);
+        });
+      });
+
+      it('should say there is 1 filter', function (done) {
+        appState.filters = [ { meta: { disabled: false } } ];
+        executeTest(done, 'myDashboard', function (metas) {
+          expect(metas).to.have.length(1);
+          expect(metas[0].filterIconMessage).to.equal('This dashboard has 1 filter set.');
+        });
+      });
+
+      it('should not say there is 1 query if default', function (done) {
+        appState.query = {
+          query_string: {
+            query: '*',
+            analyze_wildcard: true
+          }
+        };
+        executeTest(done, 'myDashboard', function (metas) {
+          expect(metas).to.have.length(1);
+          expect(metas[0].filterIconMessage).to.equal(null);
+        });
+      });
+
+      it('should say there is 1 query', function (done) {
+        appState.query = {
+          query_string: {
+            query: 'torrent',
+            analyze_wildcard: true
+          }
+        };
+        executeTest(done, 'myDashboard', function (metas) {
+          expect(metas).to.have.length(1);
+          expect(metas[0].filterIconMessage).to.equal('This dashboard has a query set.');
+        });
+      });
+
+      it('should say there is 1 query and 1 filter', function (done) {
+        appState.query = {
+          query_string: {
+            query: 'torrent',
+            analyze_wildcard: true
+          }
+        };
+        appState.filters = [ { meta: { disabled: false } } ];
+        executeTest(done, 'myDashboard', function (metas) {
+          expect(metas).to.have.length(1);
+          expect(metas[0].filterIconMessage).to.equal('This dashboard has a query and 1 filter set.');
+        });
+      });
+
+      it('should say there is 1 query and 2 filters', function (done) {
+        appState.query = {
+          query_string: {
+            query: 'torrent',
+            analyze_wildcard: true
+          }
+        };
+        appState.filters = [ { a: {}, meta: { disabled: false } }, { b: {}, meta: { disabled: false } } ];
+        executeTest(done, 'myDashboard', function (metas) {
+          expect(metas).to.have.length(1);
+          expect(metas[0].filterIconMessage).to.equal('This dashboard has a query and 2 filters set.');
+        });
+      });
+    });
+
     describe('getDashboardsMetadata', function () {
       beforeEach(init({
         indexPatterns: [

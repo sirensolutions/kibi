@@ -312,7 +312,7 @@ define(function (require) {
         // kibi: notify errors
         return docSource.doIndex(body)
         .then(setId)
-        .then(mappings.clearCache)
+        .then(() => mappings.clearCache())
         .catch((error) => {
           notify.error(error);
           throw error;

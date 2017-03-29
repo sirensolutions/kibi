@@ -1,6 +1,12 @@
 @import (reference) "~ui/kibi/styles/kibi_variables.less";
 @import (reference) "~ui/styles/variables.less";
 
+//needed for cell shifting issue in IE11
+@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+  .kibi-data-table-vis { overflow-x: auto; overflow-y: auto; zoom: 1; }
+  .gridster dashboard-panel .panel .panel-content { height: 100%; zoom: 1; }
+}
+
 .kibi-data-table-vis {
   padding: 5px;
 }

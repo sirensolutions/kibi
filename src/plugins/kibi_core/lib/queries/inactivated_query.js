@@ -4,9 +4,8 @@ function InactivatedQuery(server, id) {
   this.id = id;
 }
 
-
 InactivatedQuery.prototype.fetchResults = function (options, onlyIds) {
-  var self = this;
+  const self = this;
   return Promise.resolve({
     queryId: self.id,
     ids: [],
@@ -19,12 +18,18 @@ InactivatedQuery.prototype.fetchResults = function (options, onlyIds) {
   });
 };
 
-
 InactivatedQuery.prototype.getHtml = function (queryDef, options) {
-  var self = this;
+  const self = this;
+  let html = 'No query template is triggered now. Select a document?';
+
+  if (options.verbose) {
+    html = `Query <b>${self.id}</b> not activated, select another document or check activation rules`;
+  }
+
   return Promise.resolve({
     queryId: self.id,
     queryActivated: false,
+    html,
     data: {
       config: {
         id: self.id

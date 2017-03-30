@@ -5,7 +5,7 @@ describe('Kibi Controllers', function () {
   var ngMock = require('ngMock');
   var expect = require('expect.js');
 
-  function init(options) {
+  function init({ snippet, snippetError, params = {} } = {}) {
     ngMock.module('kibana', function ($provide) {
       $provide.constant('kbnDefaultAppId', '');
       $provide.constant('kibiDefaultDashboardTitle', '');
@@ -21,10 +21,10 @@ describe('Kibi Controllers', function () {
             return Promise.resolve();
           },
           getQueriesHtmlFromServer: function () {
-            var resp = {
+            const resp = {
               data: {
-                snippets: options.snippet ? [ options.snippet ] : [],
-                error: options.snippetError
+                snippets: snippet ? [ snippet ] : [],
+                error: snippetError
               }
             };
             return Promise.resolve(resp);
@@ -34,11 +34,9 @@ describe('Kibi Controllers', function () {
     });
 
     ngMock.inject(function (kibiState, $rootScope, $controller) {
-      sinon.stub(kibiState, 'getEntityURI').returns('entity1');
+      sinon.stub(kibiState, 'getEntityURI').returns({ index: 'a', type: 'b', id: 'c' });
       $scope = $rootScope;
-      $scope.vis = {
-        params: options.params
-      };
+      $scope.vis = { params };
       $controller('KibiQueryViewerVisController', { $scope });
       $scope.$digest();
     });
@@ -46,36 +44,33 @@ describe('Kibi Controllers', function () {
 
   describe('Kibi query viewer controller', function () {
     it('should not render templates if no query is set', function () {
-      var params = {};
-
-      init({ params: params });
+      init();
       $scope.renderTemplates();
       expect($scope.holder.html).to.be('');
       expect($scope.holder.activeFetch).to.be(false);
     });
 
-    it('should display no result', function (done) {
-      var params = {
+    it('should display no result', function () {
+      const params = {
         queryDefinitions: [ 123 ]
       };
 
-      init({ params: params });
-      $scope.renderTemplates().then(function () {
+      init({ params });
+      return $scope.renderTemplates().then(function () {
         expect($scope.holder.html).to.be('No result');
         expect($scope.holder.activeFetch).to.be(false);
-        done();
-      }).catch(done);
+      });
     });
 
-    it('should display the template', function (done) {
-      var params = {
+    it('should display the template', function () {
+      const params = {
         queryDefinitions: [
           {
             queryId: 123
           }
         ]
       };
-      var snippet = {
+      const snippet = {
         html: 'grishka',
         data: {
           config: {
@@ -84,32 +79,31 @@ describe('Kibi Controllers', function () {
         }
       };
 
-      init({ params: params, snippet: snippet });
-      $scope.renderTemplates().then(function () {
+      init({ params, snippet });
+      return $scope.renderTemplates().then(function () {
         expect($scope.holder.html).to.contain('grishka');
         expect($scope.holder.activeFetch).to.be(false);
-        done();
-      }).catch(done);
+      });
     });
 
-    it('should warn that the query is not activated', function (done) {
-      var params = {
+    it('should warn that the query is not activated', function () {
+      const params = {
         queryDefinitions: [
           {
             queryId: 123
           }
         ]
       };
-      var snippet = {
-        queryActivated: false
+      const snippet = {
+        queryActivated: false,
+        html: 'No query template is triggered now. Select a document?'
       };
 
-      init({ params: params, snippet: snippet });
-      $scope.renderTemplates().then(function () {
+      init({ params, snippet });
+      return $scope.renderTemplates().then(function () {
         expect($scope.holder.html).to.contain('No query template is triggered now. Select a document?');
         expect($scope.holder.activeFetch).to.be(false);
-        done();
-      }).catch(done);
+      });
     });
   });
 });

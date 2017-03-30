@@ -6,12 +6,13 @@ const mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
 
 let kibiSelectHelper;
 let config;
-let $httpBackend;
 let indexPatterns;
 let mappings;
 
 describe('Kibi Directives', function () {
   describe('KibiSelect Helper', function () {
+
+    let stubSearch;
 
     require('testUtils/noDigestPromises').activateForSuite();
 
@@ -98,14 +99,12 @@ describe('Kibi Directives', function () {
         });
       }
 
-      ngMock.inject(function ($injector, Private) {
+      ngMock.inject(function (es, $injector, Private) {
         kibiSelectHelper = Private(require('ui/kibi/directives/kibi_select_helper'));
         if (options.stubConfig) {
           config = $injector.get('config');
         }
-        if (options.initHttpBackend) {
-          $httpBackend = $injector.get('$httpBackend');
-        }
+        stubSearch = sinon.stub(es, 'search');
         mappings = $injector.get('mappings');
       });
     };
@@ -219,11 +218,6 @@ describe('Kibi Directives', function () {
         });
       });
 
-      afterEach(function () {
-        $httpBackend.verifyNoOutstandingExpectation();
-        $httpBackend.verifyNoOutstandingRequest();
-      });
-
 
       it('should return the ids of the given index', function (done) {
         var ids = fakeHits(
@@ -235,14 +229,13 @@ describe('Kibi Directives', function () {
           }
         );
 
-        $httpBackend.whenGET('/elasticsearch/a/A/_search?size=10').respond(200, ids);
+        stubSearch.returns(Promise.resolve(ids));
         kibiSelectHelper.getDocumentIds('a', 'A').then(function (data) {
           expect(data).to.have.length(2);
           expect(data[0]).to.eql({ label: 'id1', value: 'id1' });
           expect(data[1]).to.eql({ label: 'id2', value: 'id2' });
           done();
         }).catch(done);
-        $httpBackend.flush();
       });
 
       it('should return empty set when the index is not passed', function (done) {
@@ -454,11 +447,6 @@ describe('Kibi Directives', function () {
         init({
           initHttpBackend: true
         });
-      });
-
-      afterEach(function () {
-        $httpBackend.verifyNoOutstandingExpectation();
-        $httpBackend.verifyNoOutstandingRequest();
       });
 
       it('no index pattern id specified', function (done) {

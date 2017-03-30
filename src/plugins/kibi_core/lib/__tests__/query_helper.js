@@ -121,231 +121,215 @@ describe('Query Helper', function () {
   });
 
   describe('replaceVariablesForREST', function () {
-
-    describe('with URI with credentials', function () {
-
-      it('replace in single string', function (done) {
-        var uri = 'index1/type1/id1';
-        var s        = 'select * from table1 where id = \'@doc[_source][id]@\'';
-        var expected = 'select * from table1 where id = \'id1\'';
-
-        queryHelper.replaceVariablesUsingEsDocument(s, uri, credentials).then(function (ret) {
+    [
+      {
+        description: 'with URI with credentials',
+        options: {
+          selectedDocuments: [
+            {
+              index: 'index1',
+              type: 'type1',
+              id: 'id1'
+            }
+          ],
+          credentials
+        },
+        assertions() {
           expect(clientSearchCounter).to.equal(0);
           expect(createdClientSearchCounter).to.equal(1);
-          expect(ret).to.equal(expected);
-          done();
-        });
-      });
-
-      it('replace in single where value is an array of integers', function (done) {
-        var uri = 'index1/type1/id1';
-        var s = '[@doc[_source][numerical_ids]@]';
-        var expected = '[1,2]';
-        queryHelper.replaceVariablesUsingEsDocument(s, uri, credentials).then(function (ret) {
-          expect(clientSearchCounter).to.equal(0);
-          expect(createdClientSearchCounter).to.equal(1);
-          expect(ret).to.equal(expected);
-          done();
-        });
-      });
-
-      it('replace in single where value is an array strings', function (done) {
-        var uri = 'index1/type1/id1';
-        var s = '[@doc[_source][string_ids]@]';
-        var expected = '["a","b"]';
-        queryHelper.replaceVariablesUsingEsDocument(s, uri, credentials).then(function (ret) {
-          expect(clientSearchCounter).to.equal(0);
-          expect(createdClientSearchCounter).to.equal(1);
-          expect(ret).to.equal(expected);
-          done();
-        });
-      });
-
-      it('replace in single where value is an array of mixed strings and integers', function (done) {
-        var uri = 'index1/type1/id1';
-        var s = '[@doc[_source][mixed_ids]@]';
-        var expected = '[1,"a",2,"b"]';
-        queryHelper.replaceVariablesUsingEsDocument(s, uri, credentials).then(function (ret) {
-          expect(clientSearchCounter).to.equal(0);
-          expect(createdClientSearchCounter).to.equal(1);
-          expect(ret).to.equal(expected);
-          done();
-        });
-      });
-
-
-      it('replace in an array of objects with name and value', function (done) {
-        var uri = 'index1/type1/id1';
-        var sA = [
-          {name: 'param1', value: 'select * from table1 where id = \'@doc[_source][id]@\''},
-          {name: 'param2', value: 'select * from table1 where id = \'@doc[_id]@\''}
-        ];
-        var expectedA = [
-          {name: 'param1', value: 'select * from table1 where id = \'id1\''},
-          {name: 'param2', value: 'select * from table1 where id = \'_id1\''}
-        ];
-
-        queryHelper.replaceVariablesUsingEsDocument(sA, uri, credentials).then(function (a) {
-          expect(clientSearchCounter).to.equal(0);
-          expect(createdClientSearchCounter).to.equal(1);
-          expect(a).to.eql(expectedA);
-          done();
-        });
-      });
-
-      it('malformed uri', function (done) {
-        queryHelper.replaceVariablesUsingEsDocument('s', 'index1/type1-and-no-id')
-        .catch(function (err) {
-          expect(clientSearchCounter).to.equal(0);
-          expect(createdClientSearchCounter).to.equal(0);
-          expect(err.message).to.equal('Malformed uri - should have at least 3 parts: index, type, id');
-          done();
-        });
-      });
-    });
-
-    describe('with URI  no credentials', function () {
-
-      it('replace in single string', function (done) {
-        var uri = 'index1/type1/id1';
-        var s        = 'select * from table1 where id = \'@doc[_source][id]@\'';
-        var expected = 'select * from table1 where id = \'id1\'';
-
-        queryHelper.replaceVariablesUsingEsDocument(s, uri).then(function (ret) {
+        }
+      },
+      {
+        description: 'with URI no credentials',
+        options: {
+          selectedDocuments: [
+            {
+              index: 'index1',
+              type: 'type1',
+              id: 'id1'
+            }
+          ]
+        },
+        assertions() {
           expect(clientSearchCounter).to.equal(1);
           expect(createdClientSearchCounter).to.equal(0);
-          expect(ret).to.equal(expected);
-          done();
+        }
+      }
+    ].forEach(({ description, options, assertions }) => {
+      describe(description, function () {
+
+        it('replace in single string', function () {
+          var s        = 'select * from table1 where id = \'@doc[_source][id]@\'';
+          var expected = 'select * from table1 where id = \'id1\'';
+
+          return queryHelper.replaceVariablesUsingEsDocument(s, options)
+            .then(function (ret) {
+              assertions();
+              expect(ret).to.equal(expected);
+            });
         });
-      });
 
-      it('replace in an array of objects with name and value', function (done) {
-        var uri = 'index1/type1/id1';
-        var sA = [
-          {name: 'param1', value: 'select * from table1 where id = \'@doc[_source][id]@\''},
-          {name: 'param2', value: 'select * from table1 where id = \'@doc[_id]@\''}
-        ];
-        var expectedA = [
-          {name: 'param1', value: 'select * from table1 where id = \'id1\''},
-          {name: 'param2', value: 'select * from table1 where id = \'_id1\''}
-        ];
-
-        queryHelper.replaceVariablesUsingEsDocument(sA, uri).then(function (a) {
-          expect(clientSearchCounter).to.equal(1);
-          expect(createdClientSearchCounter).to.equal(0);
-          expect(a).to.eql(expectedA);
-          done();
+        it('replace in single where value is an array of integers', function () {
+          var s = '[@doc[_source][numerical_ids]@]';
+          var expected = '[1,2]';
+          return queryHelper.replaceVariablesUsingEsDocument(s, options)
+            .then(function (ret) {
+              assertions();
+              expect(ret).to.equal(expected);
+            });
         });
-      });
 
-      it('malformed uri', function (done) {
-        queryHelper.replaceVariablesUsingEsDocument('s', 'index1/type1-and-no-id')
-        .catch(function (err) {
-          expect(clientSearchCounter).to.equal(0);
-          expect(createdClientSearchCounter).to.equal(0);
-          expect(err.message).to.equal('Malformed uri - should have at least 3 parts: index, type, id');
-          done();
+        it('replace in single where value is an array strings', function () {
+          var s = '[@doc[_source][string_ids]@]';
+          var expected = '["a","b"]';
+          return queryHelper.replaceVariablesUsingEsDocument(s, options)
+            .then(function (ret) {
+              assertions();
+              expect(ret).to.equal(expected);
+            });
         });
-      });
-    });
 
-    describe('no URI', function () {
-
-      it('ignore the elastic document and variables', function (done) {
-        var path = '';
-        var headers = [
-          { name: 'header1', value: 'header1value'}
-        ];
-        var params = [
-          { name: 'param1', value: 'param1value'}
-        ];
-        var body = 'body';
-
-        var expected = {
-          headers: headers,
-          params: params,
-          body: body,
-          path: path
-        };
-
-        queryHelper.replaceVariablesForREST(headers, params, body, path, null, null).then(function (result) {
-          expect(clientSearchCounter).to.equal(0);
-          expect(createdClientSearchCounter).to.equal(0);
-          expect(result).to.eql(expected);
-          done();
+        it('replace in single where value is an array of mixed strings and integers', function () {
+          var s = '[@doc[_source][mixed_ids]@]';
+          var expected = '[1,"a",2,"b"]';
+          return queryHelper.replaceVariablesUsingEsDocument(s, options).then(function (ret) {
+            assertions();
+            expect(ret).to.equal(expected);
+          });
         });
-      });
 
-      it('should not modify supplied params, headers and body', function (done) {
-        var path = 'path/$auth_token';
-        var headers = [
-          { name: 'header1', value: 'header1value $auth_token'}
-        ];
-        var params = [
-          { name: 'param1', value: 'param1value  $auth_token'}
-        ];
-        var body = 'body $auth_token';
-        var variables = {
-          $auth_token: '123456'
-        };
+        it('replace in an array of objects with name and value', function () {
+          var sA = [
+            {name: 'param1', value: 'select * from table1 where id = \'@doc[_source][id]@\''},
+            {name: 'param2', value: 'select * from table1 where id = \'@doc[_id]@\''}
+          ];
+          var expectedA = [
+            {name: 'param1', value: 'select * from table1 where id = \'id1\''},
+            {name: 'param2', value: 'select * from table1 where id = \'_id1\''}
+          ];
 
-        var expHeaders = [
-          { name: 'header1', value: 'header1value $auth_token'}
-        ];
-        var expParams = [
-          { name: 'param1', value: 'param1value  $auth_token'}
-        ];
-        var expBody = 'body $auth_token';
-        var expPath = 'path/$auth_token';
-
-
-        queryHelper.replaceVariablesForREST(headers, params, body, path, null, variables).then(function (result) {
-          // after repalcement supplied params shoud NOT be modified
-          expect(clientSearchCounter).to.equal(0);
-          expect(createdClientSearchCounter).to.equal(0);
-          expect(headers).to.eql(expHeaders);
-          expect(params).to.eql(expParams);
-          expect(body).to.eql(expBody);
-          expect(path).to.eql(expPath);
-          done();
+          return queryHelper.replaceVariablesUsingEsDocument(sA, options)
+            .then(function (a) {
+              assertions();
+              expect(a).to.eql(expectedA);
+            });
         });
-      });
 
-
-      it('ignore the elastic document but use variables', function (done) {
-        var path = 'path/$auth_token';
-        var headers = [
-          { name: 'header1', value: 'header1value $auth_token'}
-        ];
-        var params = [
-          { name: 'param1', value: 'param1value  $auth_token'}
-        ];
-        var body = 'body $auth_token';
-
-        var variables = {
-          $auth_token: '123456'
-        };
-
-        var expected = {
-          headers: [
-            { name: 'header1', value: 'header1value 123456'}
-          ],
-          params: [
-            { name: 'param1', value: 'param1value  123456'}
-          ],
-          body: 'body 123456',
-          path: 'path/123456'
-        };
-
-        queryHelper.replaceVariablesForREST(headers, params, body, path, null, variables).then(function (result) {
-          expect(clientSearchCounter).to.equal(0);
-          expect(createdClientSearchCounter).to.equal(0);
-          expect(result).to.eql(expected);
-          done();
+        it('bad document identifier', function () {
+          const s = 'select * from table1 where id = \'@doc[_source][id]@\'';
+          const badDocument = [
+            {
+              index: 'index1',
+              type: 'type1-and-no-id'
+            }
+          ];
+          return queryHelper.replaceVariablesUsingEsDocument(s, { selectedDocuments: badDocument })
+          .then(() => expect().fail('should fail'))
+            .catch(function (err) {
+              expect(clientSearchCounter).to.equal(0);
+              expect(createdClientSearchCounter).to.equal(0);
+              expect(err.message).to.equal('The selected document should be identified with 3 components: index, type, and id');
+            });
         });
       });
     });
+  });
 
+  describe('no URI', function () {
+
+    it('ignore the elastic document and variables', function (done) {
+      var path = '';
+      var headers = [
+        { name: 'header1', value: 'header1value'}
+      ];
+      var params = [
+        { name: 'param1', value: 'param1value'}
+      ];
+      var body = 'body';
+
+      var expected = {
+        headers: headers,
+        params: params,
+        body: body,
+        path: path
+      };
+
+      queryHelper.replaceVariablesForREST(headers, params, body, path).then(function (result) {
+        expect(clientSearchCounter).to.equal(0);
+        expect(createdClientSearchCounter).to.equal(0);
+        expect(result).to.eql(expected);
+        done();
+      });
+    });
+
+    it('should not modify supplied params, headers and body', function (done) {
+      var path = 'path/$auth_token';
+      var headers = [
+        { name: 'header1', value: 'header1value $auth_token'}
+      ];
+      var params = [
+        { name: 'param1', value: 'param1value  $auth_token'}
+      ];
+      var body = 'body $auth_token';
+      var variables = {
+        $auth_token: '123456'
+      };
+
+      var expHeaders = [
+        { name: 'header1', value: 'header1value $auth_token'}
+      ];
+      var expParams = [
+        { name: 'param1', value: 'param1value  $auth_token'}
+      ];
+      var expBody = 'body $auth_token';
+      var expPath = 'path/$auth_token';
+
+
+      queryHelper.replaceVariablesForREST(headers, params, body, path, undefined, variables).then(function (result) {
+        // after repalcement supplied params shoud NOT be modified
+        expect(clientSearchCounter).to.equal(0);
+        expect(createdClientSearchCounter).to.equal(0);
+        expect(headers).to.eql(expHeaders);
+        expect(params).to.eql(expParams);
+        expect(body).to.eql(expBody);
+        expect(path).to.eql(expPath);
+        done();
+      });
+    });
+
+
+    it('ignore the elastic document but use variables', function (done) {
+      var path = 'path/$auth_token';
+      var headers = [
+        { name: 'header1', value: 'header1value $auth_token'}
+      ];
+      var params = [
+        { name: 'param1', value: 'param1value  $auth_token'}
+      ];
+      var body = 'body $auth_token';
+
+      var variables = {
+        $auth_token: '123456'
+      };
+
+      var expected = {
+        headers: [
+          { name: 'header1', value: 'header1value 123456'}
+        ],
+        params: [
+          { name: 'param1', value: 'param1value  123456'}
+        ],
+        body: 'body 123456',
+        path: 'path/123456'
+      };
+
+      queryHelper.replaceVariablesForREST(headers, params, body, path, undefined, variables).then(function (result) {
+        expect(clientSearchCounter).to.equal(0);
+        expect(createdClientSearchCounter).to.equal(0);
+        expect(result).to.eql(expected);
+        done();
+      });
+    });
   });
 
   describe('_replaceVariablesInTheQuery', function () {
@@ -370,13 +354,13 @@ describe('Query Helper', function () {
 
     it('replaceVariablesInTheQuery sql query', function () {
       var query = 'select label, description, category_code, url ' +
-                'from company ' +
-                'where id = \'@doc[_source][id]@\' ' +
-                'limit 100';
+        'from company ' +
+        'where id = \'@doc[_source][id]@\' ' +
+        'limit 100';
       var expected = 'select label, description, category_code, url ' +
-                'from company ' +
-                'where id = \'12345\' ' +
-                'limit 100';
+        'from company ' +
+        'where id = \'12345\' ' +
+        'limit 100';
       expect(queryHelper._replaceVariablesInTheQuery(doc, query)).to.eql(expected);
     });
   });
@@ -417,6 +401,5 @@ describe('Query Helper', function () {
     });
 
   });
-
 
 });

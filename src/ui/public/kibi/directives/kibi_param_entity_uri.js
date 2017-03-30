@@ -7,134 +7,149 @@ define(function (require) {
   var chrome = require('ui/chrome');
 
   require('ui/modules').get('kibana')
-  .directive('kibiParamEntityUri', function (kibiState, $http, Private, createNotifier) {
+    .directive('kibiParamEntityUri', function (es, kibiState, Private, createNotifier) {
 
-    var indexPath = Private(require('ui/kibi/components/commons/_index_path'));
+      var indexPath = Private(require('ui/kibi/components/commons/_index_path'));
 
-    var notify = createNotifier({
-      location: 'Selected Entity'
-    });
+      var notify = createNotifier({
+        location: 'Selected Entity'
+      });
 
-    return {
-      restrict: 'E',
-      replace: true,
-      scope: {
-        entityUriHolder: '='
-      },
-      template: require('ui/kibi/directives/kibi_param_entity_uri.html'),
-      link: function ($scope) {
-        $scope.c = {
-          indexPattern: null,
-          index: null,
-          type: null,
-          id: null,
-          extraIndexPatternItems: [],
-          extraTypeItems: [],
-          extraIdItems: []
-        };
+      return {
+        restrict: 'E',
+        replace: true,
+        scope: {
+          entityUriHolder: '='
+        },
+        template: require('ui/kibi/directives/kibi_param_entity_uri.html'),
+        link: function ($scope) {
+          $scope.c = {
+            indexPattern: null,
+            index: null,
+            type: null,
+            id: null,
+            extraIndexPatternItems: [],
+            extraTypeItems: [],
+            extraIdItems: []
+          };
 
-        function updateSelectedEntity() {
-          const entityURI = kibiState.getEntityURI();
-          if (entityURI) {
-            var parts = entityURI.split('/');
+          const updateSelectedEntity = $scope.updateSelectedEntity = function () {
+            const entity = kibiState.getEntityURI();
+            if (entity) {
+              const { index, type, id } = entity;
 
-            if (parts[0]) {
-              $scope.c.extraIndexPatternItems = [
-                {
-                  label: parts[0],
-                  id: parts[0],
-                  value: parts[0]
-                }
-              ];
+              if (index) {
+                $scope.c.extraIndexPatternItems = [
+                  {
+                    label: index,
+                    id: index,
+                    value: index
+                  }
+                ];
+              }
+              if (type) {
+                $scope.c.extraTypeItems = [
+                  {
+                    label: type,
+                    id: type,
+                    value: type
+                  }
+                ];
+              }
+              if (id) {
+                $scope.c.extraIdItems = [
+                  {
+                    label: id,
+                    id: id,
+                    value: id
+                  }
+                ];
+              }
+
+              if (!$scope.c.indexPattern) {
+                $scope.c.indexPattern = index;
+              }
+              $scope.c.index = index;
+              $scope.c.type = type;
+              $scope.c.id = id;
+            } else {
+              $scope.c.indexPattern = null;
             }
-            if (parts[1]) {
-              $scope.c.extraTypeItems = [
-                {
-                  label: parts[1],
-                  id: parts[1],
-                  value: parts[1]
-                }
-              ];
+          };
+
+          $scope.$listen(kibiState, 'save_with_changes', function (diff) {
+            if (diff.indexOf(kibiState._properties.test_selected_entity) !== -1) {
+              updateSelectedEntity();
             }
-            if (parts[2]) {
-              $scope.c.extraIdItems = [
-                {
-                  label: parts[2],
-                  id: parts[2],
-                  value: parts[2]
-                }
-              ];
-            }
+          });
+          updateSelectedEntity();
 
-            if (!$scope.c.indexPattern) {
-              $scope.c.indexPattern = parts[0];
-            }
-            $scope.c.index = parts[0];
-            $scope.c.type = parts[1];
-            $scope.c.id = parts[2];
-          } else {
-            $scope.c.indexPattern = null;
-          }
-        }
-
-        $scope.$listen(kibiState, 'save_with_changes', function (diff) {
-          if (diff.indexOf(kibiState._properties.test_selected_entity) !== -1) {
-            updateSelectedEntity();
-          }
-        });
-        updateSelectedEntity();
-
-        $scope.$watchMulti(['c.indexPattern', 'c.type', 'c.id'], function (newV, oldV) {
-          var diff = _.difference(newV, oldV);
-          if (diff.length !== 3) {
-            // index pattern changed
-            if (oldV[0] !== newV[0]) {
-              $scope.c.index = $scope.c.indexPattern;
-              $scope.c.type = null;
-              $scope.c.id = null;
-
-              $scope.c.extraIndexPatternItems = [];
-              $scope.c.extraTypeItems = [];
-              $scope.c.extraIdItems = [];
-            } else if (oldV[1] !== newV[1]) {
-              // type changed
-              $scope.c.id = null;
-              $scope.c.extraIdItems = [];
-            }
-          }
-
-          if ($scope.c.index && $scope.c.type && $scope.c.id) {
-
-            var path = indexPath($scope.c.index);
+          $scope.updateKibiState = function (index, type, id) {
+            const path = indexPath(index);
 
             if (path.indexOf('*') !== -1) {
-              $http.get(chrome.getBasePath() + '/elasticsearch/' + path + '/' + $scope.c.type + '/_search?q=_id:' + $scope.c.id)
-              .then(function (response) {
-                if (response.data.hits.total === 0) {
-                  notify.warning('No documents found for the specified selection.');
-                  kibiState.setEntityURI(null);
+              return es.search({
+                size: 0,
+                index: path,
+                body: {
+                  query: {
+                    ids: {
+                      type: type,
+                      values: [ id ]
+                    }
+                  }
+                }
+              })
+                .then(function (response) {
+                  if (response.hits.total === 0) {
+                    notify.warning('No documents found for the specified selection.');
+                    kibiState.setEntityURI();
+                    kibiState.save();
+                    return;
+                  }
+                  const hit = response.hits.hits[0];
+                  if (response.hits.total > 1) {
+                    notify.warning('Found more than one document for the specified selection, selected the first one.');
+                  }
+                  kibiState.setEntityURI({ index: hit._index, type: hit._type, id: hit._id });
                   kibiState.save();
-                  return;
-                }
-                var hit = response.data.hits.hits[0];
-                if (response.data.hits.total > 1) {
-                  notify.warning('Found more than one document for the specified selection, selected the first one.');
-                }
-                kibiState.setEntityURI(`${hit._index}/${hit._type}/${hit._id}/`);
-                kibiState.save();
-              }).catch(function () {
-                notify.error('An error occurred while fetching the selected entity, please check if Elasticsearch is running.');
-                kibiState.setEntityURI(null);
-                kibiState.save();
-              });
+                })
+                .catch(function () {
+                  notify.error('An error occurred while fetching the selected entity, please check if Elasticsearch is running.');
+                  kibiState.setEntityURI();
+                  kibiState.save();
+                });
             } else {
-              kibiState.setEntityURI(`${$scope.c.index}/${$scope.c.type}/${$scope.c.id}/`);
+              kibiState.setEntityURI({ index, type, id });
               kibiState.save();
             }
-          }
-        });
+          };
 
-      }
-    };
-  });
+          $scope.$watchMulti(['c.indexPattern', 'c.type', 'c.id'], function (newV, oldV) {
+            const diff = _.difference(newV, oldV);
+            if (diff.length !== 3) {
+              // index pattern changed
+              if (oldV[0] !== newV[0]) {
+                $scope.c.index = $scope.c.indexPattern;
+                $scope.c.type = null;
+                $scope.c.id = null;
+
+                $scope.c.extraIndexPatternItems = [];
+                $scope.c.extraTypeItems = [];
+                $scope.c.extraIdItems = [];
+              } else if (oldV[1] !== newV[1]) {
+                // type changed
+                $scope.c.id = null;
+                $scope.c.extraIdItems = [];
+              }
+            }
+
+            if ($scope.c.index && $scope.c.type && $scope.c.id) {
+              $scope.updateKibiState($scope.c.index, $scope.c.type, $scope.c.id);
+            }
+          });
+
+        }
+      };
+    });
 });

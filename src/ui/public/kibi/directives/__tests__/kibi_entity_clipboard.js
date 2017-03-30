@@ -11,12 +11,11 @@ describe('Kibi Components', function () {
     let globalState;
     let appState;
     let kibiState;
-    let $httpBackend;
 
     let MockState = require('fixtures/mock_state');
     let _ = require('lodash');
 
-    function init(entityDisabled, selectedEntity, currentDashboardId) {
+    function init({ entityDisabled = false, selectedEntity, currentDashboardId, hit } = {}) {
       ngMock.module(
         'kibana',
         'kibana/courier',
@@ -41,193 +40,282 @@ describe('Kibi Components', function () {
             return globalState;
           });
         }
-        );
+      );
 
-      ngMock.inject(function (_kibiState_, _$rootScope_, $compile, $injector) {
+      ngMock.inject(function (Promise, config, _kibiState_, _$rootScope_, $compile, es) {
         sinon.stub(chrome, 'onDashboardTab').returns(true);
 
         kibiState = _kibiState_;
         kibiState.setEntityURI(selectedEntity);
+        sinon.stub(es, 'search').returns(Promise.resolve({
+          hits: {
+            total: 1,
+            hits: [ hit ]
+          }
+        }));
+        config.set('metaFields', [ '_type' ]); // reset the metaFields value
+
+        kibiState = _kibiState_;
+        kibiState.setEntityURI(selectedEntity);
+        kibiState.disableSelectedEntity(entityDisabled);
+        sinon.stub(kibiState, '_getCurrentDashboardId').returns(currentDashboardId);
 
         $rootScope = _$rootScope_;
-        $httpBackend = $injector.get('$httpBackend');
         $compile('<kibi-entity-clipboard></kibi-entity-clipboard>')($rootScope);
-        sinon.stub(kibiState, '_getCurrentDashboardId').returns(currentDashboardId);
       });
     }
 
-    it('selected document', function () {
-      init(false, 'index/type/id/column');
-      $httpBackend.whenGET('/elasticsearch/index/type/id').respond(200, {
-        _source: {
-          column: 'label'
+    require('testUtils/noDigestPromises').activateForSuite();
+
+    it('should listen to kibiState changes', function () {
+      const args = {
+        selectedEntity: {
+          index: 'index',
+          type: 'type',
+          id: 'id',
+          column: 'column'
+        },
+        hit: {
+          _source: {
+            column: 'label'
+          }
         }
-      });
-      $httpBackend.flush();
+      };
+
+      init(args);
       expect($rootScope.disabled).to.be(false);
       expect($rootScope.entityURI).to.be('index/type/id/column');
-    });
 
-    it('selected document with "nested" column', function (done) {
-      init(false, 'index/type/id/a.b.c with spaces');
+      expect(kibiState.listenerCount()).to.be(1);
 
-      $httpBackend.whenGET('/elasticsearch/index/type/id').respond(200, {
-        _source: {
-          a: {
-            b: {
-              'c with spaces': 'correct label'
-            }
-          }
-        }
-      });
+      kibiState.setEntityURI({ index: 'a', type: 'b', id: 'c' });
+      kibiState.listeners('save_with_changes')[0]([ kibiState._properties.selected_entity ]);
+      expect($rootScope.entityURI).to.be('a/b/c/');
 
-      $rootScope.$watch('label', function (label) {
-        if (label) {
-          expect(label).to.equal('correct label');
-          done();
-        }
-      });
-
-      $httpBackend.flush();
-      expect($rootScope.disabled).to.be(false);
-      expect($rootScope.entityURI).to.be('index/type/id/a.b.c with spaces');
-      $rootScope.$apply();
-    });
-
-    it('should truncate long document label', function (done) {
-      init(false, 'index/type/id/a.b.c with spaces');
-
-      $httpBackend.whenGET('/elasticsearch/index/type/id').respond(200, {
-        _source: {
-          a: {
-            b: {
-              'c with spaces': 'Previous  |  Next Image 1 of 5 Beam me up, Scotty... Videoconferencing has'
-            }
-          }
-        }
-      });
-
-      $rootScope.$watch('label', function (label) {
-        if (label) {
-          expect(label).to.equal('Previous  |  Next Image 1 of 5 Beam me up, Scotty......');
-          done();
-        }
-      });
-
-      $httpBackend.flush();
-      $rootScope.$apply();
-    });
-
-    it('selected document with label from meta field column', function (done) {
-      init(false, 'index/type/id/_type');
-
-      $httpBackend.whenGET('/elasticsearch/index/type/id').respond(200, {
-        _type: 'TYPE'
-      });
-
-      $rootScope.$watch('label', function (label) {
-        if (label) {
-          expect(label).to.equal('TYPE');
-          done();
-        }
-      });
-
-      $httpBackend.flush();
-      expect($rootScope.disabled).to.be(false);
-      expect($rootScope.entityURI).to.be('index/type/id/_type');
-      $rootScope.$apply();
-    });
-
-    it('selected document with "nested" column with an array', function (done) {
-      init(false, 'index/type/id/a.b.c with spaces');
-
-      $httpBackend.whenGET('/elasticsearch/index/type/id').respond(200, {
-        _source: {
-          a: {
-            b: {
-              'c with spaces': [ 'aaa' ]
-            }
-          }
-        }
-      });
-
-      $rootScope.$watch('label', function (label) {
-        if (label) {
-          expect(label).to.eql(JSON.stringify([ 'aaa' ]));
-          done();
-        }
-      });
-
-      $httpBackend.flush();
-      expect($rootScope.disabled).to.be(false);
-      expect($rootScope.entityURI).to.be('index/type/id/a.b.c with spaces');
-      $rootScope.$apply();
-    });
-
-    it('selected document with "nested" column with an object', function (done) {
-      init(false, 'index/type/id/a.b.c with spaces');
-
-      $httpBackend.whenGET('/elasticsearch/index/type/id').respond(200, {
-        _source: {
-          a: {
-            b: {
-              'c with spaces': { a: 'b' }
-            }
-          }
-        }
-      });
-
-      $rootScope.$watch('label', function (label) {
-        if (label) {
-          expect(label).to.eql(JSON.stringify({ a: 'b' }));
-          done();
-        }
-      });
-
-      $httpBackend.flush();
-      expect($rootScope.disabled).to.be(false);
-      expect($rootScope.entityURI).to.be('index/type/id/a.b.c with spaces');
-      $rootScope.$apply();
-    });
-
-
-    it('selected document but disabled', function (done) {
-      init(true, 'index/type/id/column');
-      $httpBackend.whenGET('/elasticsearch/index/type/id').respond(200, {
-        _source: {
-          column: 'correct label'
-        }
-      });
-
-      $rootScope.$watch('label', function (label) {
-        if (label) {
-          expect(label).to.equal('correct label');
-          done();
-        }
-      });
-
-      $httpBackend.flush();
+      kibiState.disableSelectedEntity(true);
+      kibiState.listeners('save_with_changes')[0]([ kibiState._properties.selected_entity_disabled ]);
       expect($rootScope.disabled).to.be(true);
-      expect($rootScope.entityURI).to.be('index/type/id/column');
-      $rootScope.$apply();
     });
 
-    it('an entity missing column does not set the label', function () {
-      init(false, 'index/type/id/');
+    it('should select the document', function () {
+      const args = {
+        selectedEntity: {
+          index: 'index',
+          type: 'type',
+          id: 'id',
+          column: 'column'
+        },
+        hit: {
+          _source: {
+            column: 'label'
+          }
+        }
+      };
+
+      init(args);
+      expect($rootScope.disabled).to.be(false);
+      expect($rootScope.entityURI).to.be('index/type/id/column');
+    });
+
+    it('selected document with "nested" column', function () {
+      const args = {
+        selectedEntity: {
+          index: 'index',
+          type: 'type',
+          id: 'id',
+          column: 'a.b.c with spaces'
+        },
+        hit: {
+          _source: {
+            a: {
+              b: {
+                'c with spaces': 'correct label'
+              }
+            }
+          }
+        }
+      };
+
+      init(args);
+
+      return $rootScope.updateSelectedEntity()
+        .then(() => {
+          expect($rootScope.label).to.equal('correct label');
+          expect($rootScope.disabled).to.be(false);
+          expect($rootScope.entityURI).to.be('index/type/id/a.b.c with spaces');
+        });
+    });
+
+    it('should truncate long document label', function () {
+      const args = {
+        selectedEntity: {
+          index: 'index',
+          type: 'type',
+          id: 'id',
+          column: 'a.b.c with spaces'
+        },
+        hit: {
+          _source: {
+            a: {
+              b: {
+                'c with spaces': 'Previous  |  Next Image 1 of 5 Beam me up, Scotty... Videoconferencing has'
+              }
+            }
+          }
+        }
+      };
+
+      init(args);
+
+      return $rootScope.updateSelectedEntity()
+        .then(() => {
+          expect($rootScope.label).to.equal('Previous  |  Next Image 1 of 5 Beam me up, Scotty......');
+        });
+    });
+
+    it('selected document with label from meta field column', function () {
+      const args = {
+        selectedEntity: {
+          index: 'index',
+          type: 'type',
+          id: 'id',
+          column: '_type'
+        },
+        hit: {
+          _type: 'TYPE'
+        }
+      };
+
+      init(args);
+
+      return $rootScope.updateSelectedEntity()
+        .then(() => {
+          expect($rootScope.label).to.equal('TYPE');
+          expect($rootScope.disabled).to.be(false);
+          expect($rootScope.entityURI).to.be('index/type/id/_type');
+        });
+    });
+
+    it('selected document with "nested" column with an array', function () {
+      const args = {
+        selectedEntity: {
+          index: 'index',
+          type: 'type',
+          id: 'id',
+          column: 'a.b.c with spaces'
+        },
+        hit: {
+          _source: {
+            a: {
+              b: {
+                'c with spaces': [ 'aaa' ]
+              }
+            }
+          }
+        }
+      };
+
+      init(args);
+
+      return $rootScope.updateSelectedEntity()
+        .then(() => {
+          expect($rootScope.label).to.eql(JSON.stringify([ 'aaa' ]));
+          expect($rootScope.disabled).to.be(false);
+          expect($rootScope.entityURI).to.be('index/type/id/a.b.c with spaces');
+        });
+    });
+
+    it('selected document with "nested" column with an object', function () {
+      const args = {
+        selectedEntity: {
+          index: 'index',
+          type: 'type',
+          id: 'id',
+          column: 'a.b.c with spaces'
+        },
+        hit: {
+          _source: {
+            a: {
+              b: {
+                'c with spaces': { a: 'b' }
+              }
+            }
+          }
+        }
+      };
+
+      init(args);
+
+      return $rootScope.updateSelectedEntity()
+        .then(() => {
+          expect($rootScope.label).to.eql(JSON.stringify({ a: 'b' }));
+          expect($rootScope.disabled).to.be(false);
+          expect($rootScope.entityURI).to.be('index/type/id/a.b.c with spaces');
+        });
+    });
+
+    it('selected document is disabled', function () {
+      const args = {
+        entityDisabled: true,
+        selectedEntity: {
+          index: 'index',
+          type: 'type',
+          id: 'id',
+          column: 'column'
+        },
+        hit: {
+          _source: {
+            column: 'correct label'
+          }
+        }
+      };
+
+      init(args);
+
+      return $rootScope.updateSelectedEntity()
+        .then(() => {
+          expect($rootScope.label).to.equal('correct label');
+          expect($rootScope.disabled).to.be(true);
+          expect($rootScope.entityURI).to.be('index/type/id/column');
+        });
+    });
+
+    it('an entity missing column sets the label to the document URI', function () {
+      const args = {
+        selectedEntity: {
+          index: 'index',
+          type: 'type',
+          id: 'id',
+          column: ''
+        }
+      };
+
+      init(args);
+
       expect($rootScope.disabled).to.be(false);
       expect($rootScope.entityURI).to.be('index/type/id/');
-      expect($rootScope.label).to.not.be.ok();
+      expect($rootScope.label).to.be('index/type/id/');
     });
 
-    it('an document missing the URI', function () {
-      init(false);
+    it('a document missing the URI', function () {
+      init();
       expect($rootScope.disabled).to.be(false);
       expect($rootScope.entityURI).to.be(undefined);
       expect($rootScope.label).to.be(undefined);
     });
 
     it('should remove the document', function () {
-      init(false, 'index/type/id/column/label');
+      const args = {
+        selectedEntity: {
+          index: 'index',
+          type: 'type',
+          id: 'id',
+          column: 'column/label'
+        }
+      };
+
+      init(args);
+
       $rootScope.removeAllEntities();
       expect($rootScope.disabled).to.be(undefined);
       expect($rootScope.entityURI).to.be(undefined);
@@ -237,7 +325,17 @@ describe('Kibi Components', function () {
     });
 
     it('should remove the document and associated filters', function () {
-      init(false, 'index/type/id/column/label', 'dashboard2');
+      const args = {
+        selectedEntity: {
+          index: 'index',
+          type: 'type',
+          id: 'id',
+          column: 'column/label'
+        },
+        currentDashboardId: 'dashboard2'
+      };
+
+      init(args);
 
       globalState.filters = [
         {
@@ -292,7 +390,8 @@ describe('Kibi Components', function () {
     });
 
     it('should toggle the selected document', function () {
-      init(false);
+      init();
+
       expect($rootScope.disabled).to.be(false);
       expect(kibiState.isSelectedEntityDisabled()).to.be(false);
       $rootScope.toggleClipboard();
@@ -302,6 +401,5 @@ describe('Kibi Components', function () {
       expect($rootScope.disabled).to.be(false);
       expect(kibiState.isSelectedEntityDisabled()).to.be(false);
     });
-
   });
 });

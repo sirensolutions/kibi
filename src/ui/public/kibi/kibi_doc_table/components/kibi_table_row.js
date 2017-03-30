@@ -212,10 +212,14 @@ define(function (require) {
                     }
 
                   } else if (type === 'select') {
-                    const entityId = `${row.$$_flattened._index}/${row.$$_flattened._type}/${row.$$_flattened._id}/${column}`;
-
+                    const entity = {
+                      index: row.$$_flattened._index,
+                      type: row.$$_flattened._type,
+                      id: row.$$_flattened._id,
+                      column
+                    };
                     kibiState.disableSelectedEntity(false);
-                    kibiState.setEntityURI(entityId);
+                    kibiState.setEntityURI(entity);
                     kibiState.save();
 
                     // switch to a different dashboard only if user gave one in settings

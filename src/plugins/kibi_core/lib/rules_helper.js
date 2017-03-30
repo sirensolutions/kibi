@@ -11,24 +11,11 @@ function RulesHelper(server) {
 RulesHelper.prototype.evaluate = function (rules, selectedDocuments, credentials) {
   var self = this;
   // for now there should be only 1 selectedDocument
-  if (selectedDocuments.length !== 1) {
+  if (selectedDocuments.length > 1) {
     return Promise.reject(new Error('RulesHelper supports only 1 selected document at the moment'));
   }
 
-  if (selectedDocuments[0] === '') {
-    return Promise.reject(new Error('Empty selected document uri'));
-  }
-
-  var uri = selectedDocuments[0];
-  var parts = uri.trim().split('/');
-  if (parts.length < 3) {
-    return Promise.reject(new Error('Malformed uri - should have at least 3 parts: index, type, id'));
-  }
-
-  var index = parts[0];
-  var type = parts[1];
-  var id = parts[2];
-
+  const { index, type, id } = selectedDocuments[0];
 
   return self.queryHelper.fetchDocument(index, type, id, credentials).then(function (doc) {
 

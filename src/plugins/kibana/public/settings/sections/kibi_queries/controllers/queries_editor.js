@@ -238,7 +238,8 @@ define(function (require) {
         $scope.holder.jsonPreview = '';
         $scope.holder.htmlPreview = '';
 
-        if ($scope.query.id && (!$scope.holder.entityURIEnabled || kibiState.getEntityURI())) {
+        const entity = kibiState.getEntityURI();
+        if ($scope.query.id && (!$scope.holder.entityURIEnabled || entity)) {
           $scope.spinIt = true;
           return queryEngineClient.clearCache().then(function () {
             return queryEngineClient.getQueriesHtmlFromServer(
@@ -253,7 +254,8 @@ define(function (require) {
                 }
               ],
               {
-                selectedDocuments: kibiState.isSelectedEntityDisabled() ? [] : [ kibiState.getEntityURI() ]
+                selectedDocuments: kibiState.isSelectedEntityDisabled() ? [] : [ entity ],
+                verbose: true
               }
             );
           }).then(function (resp) {

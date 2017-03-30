@@ -144,12 +144,13 @@ describe('State Management', function () {
           const type = 'b';
           const id = 'c';
           const column = 'd';
-          kibiState.setEntityURI(`${index}/${type}/${id}/${column}`);
+
+          kibiState.setEntityURI({ index, type, id, column });
           expect(kibiState.isEntitySelected(index, type, id, column)).to.be(true);
         });
 
         it('should return false if entity is not the one selected', function () {
-          kibiState.setEntityURI('a/b/c/d');
+          kibiState.setEntityURI({ index: 'a', type: 'b', id: 'c', column: 'd' });
           [
             [ 'e', 'b', 'c', 'd' ],
             [ 'a', 'e', 'c', 'd' ],
@@ -170,42 +171,42 @@ describe('State Management', function () {
 
       describe('getEntityURI', function () {
         it('should return the entity when on dashboard tab', function () {
-          const entityURI = 'a/b/c/d';
+          const entityURI = { index: 'a', type: 'b', id: 'c', column: 'd' };
 
           init({
             currentPath: '/dashboard'
           });
           kibiState.setEntityURI(entityURI);
-          expect(kibiState.getEntityURI()).to.be(entityURI);
+          expect(kibiState.getEntityURI()).to.eql(entityURI);
         });
 
         it('should return the entity when on settings tab', function () {
-          const entityURI = 'a/b/c/d';
+          const entityURI = { index: 'a', type: 'b', id: 'c', column: 'd' };
 
           init({
             currentPath: '/settings'
           });
           kibiState.setEntityURI(entityURI);
-          expect(kibiState.getEntityURI()).to.be(entityURI);
+          expect(kibiState.getEntityURI()).to.eql(entityURI);
         });
 
         it('should return the entity when on visualize tab', function () {
-          const entityURI = 'a/b/c/d';
+          const entityURI = { index: 'a', type: 'b', id: 'c', column: 'd' };
 
           init({
             currentPath: '/visualize'
           });
           kibiState.setEntityURI(entityURI);
-          expect(kibiState.getEntityURI()).to.be(entityURI);
+          expect(kibiState.getEntityURI()).to.eql(entityURI);
         });
 
         it('should not return the entity when on discover tab', function () {
-          const entityURI = 'a/b/c/d';
+          const entityURI = { index: 'a', type: 'b', id: 'c', column: 'd' };
 
           init({});
 
           kibiState.setEntityURI(entityURI);
-          expect(kibiState.getEntityURI()).to.be(entityURI);
+          expect(kibiState.getEntityURI()).to.eql(entityURI);
 
           onVisualizeTabSpy.returns(false);
           onSettingsTabSpy.returns(false);
@@ -214,29 +215,29 @@ describe('State Management', function () {
         });
 
         it('should return the test entity when on settings/visualize tab', function () {
-          const entityURI1 = 'a/b/c/d';
-          const entityURI2 = 'e/f/g/h';
+          const entityURI1 = { index: 'a', type: 'b', id: 'c', column: 'd' };
+          const entityURI2 = { index: 'e', type: 'f', id: 'g', column: 'h' };
 
           init({});
 
           kibiState.setEntityURI(entityURI1);
-          expect(kibiState.getEntityURI()).to.be(entityURI1);
+          expect(kibiState.getEntityURI()).to.eql(entityURI1);
 
           onVisualizeTabSpy.returns(true);
           onSettingsTabSpy.returns(false);
           onDashboardTabSpy.returns(false);
           kibiState.setEntityURI(entityURI2);
-          expect(kibiState.getEntityURI()).to.be(entityURI2);
+          expect(kibiState.getEntityURI()).to.eql(entityURI2);
 
           onVisualizeTabSpy.returns(false);
           onSettingsTabSpy.returns(true);
           onDashboardTabSpy.returns(false);
-          expect(kibiState.getEntityURI()).to.be(entityURI2);
+          expect(kibiState.getEntityURI()).to.eql(entityURI2);
 
           onVisualizeTabSpy.returns(false);
           onSettingsTabSpy.returns(false);
           onDashboardTabSpy.returns(true);
-          expect(kibiState.getEntityURI()).to.be(entityURI1);
+          expect(kibiState.getEntityURI()).to.eql(entityURI1);
         });
       });
     });

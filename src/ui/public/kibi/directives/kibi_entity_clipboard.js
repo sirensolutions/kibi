@@ -4,7 +4,7 @@ define(function (require) {
   require('ui/kibi/directives/kibi_entity_clipboard.less');
 
   require('ui/modules').get('kibana')
-  .directive('kibiEntityClipboard', function (kibiState, getAppState, $route, globalState, $http, createNotifier, config) {
+  .directive('kibiEntityClipboard', function (kibiState, getAppState, $route, globalState, es, createNotifier, config) {
     const chrome = require('ui/chrome');
     const notify = createNotifier({
       location: 'Kibi Entity Clipboard'
@@ -16,33 +16,50 @@ define(function (require) {
       replace: true,
       link: function ($scope, $el) {
 
-        const updateSelectedEntity = function () {
+        const toURI = function (index, type, id, column = '') {
+          return `${index}/${type}/${id}/${column}`;
+        };
+
+        const updateSelectedEntity = $scope.updateSelectedEntity = function () {
           if (!chrome.onDashboardTab()) {
             return;
           }
 
           $scope.disabled = Boolean(kibiState.isSelectedEntityDisabled());
-          $scope.entityURI = kibiState.getEntityURI();
-          if ($scope.entityURI) {
-            const parts = $scope.entityURI.split('/');
-            const index = parts[0];
-            const type = parts[1];
-            const id = parts[2];
-            const column = parts[3];
+          const entity = kibiState.getEntityURI();
+          if (entity) {
+            const { index, type, id, column } = entity;
 
-            //delete the old label
-            delete $scope.label;
+            $scope.entityURI = toURI(index, type, id, column);
+            $scope.label = $scope.entityURI;
+
+            if (!column) {
+              return;
+            }
             // fetch document and grab the field value to populate the label
-            $http.get(`${chrome.getBasePath()}/elasticsearch/${index}/${type}/${id}`).then(function (doc) {
-              $scope.label = $scope.entityURI;
-              if (doc.data && column) {
-                if (config.get('metaFields').indexOf(column) !== -1 && doc.data[column]) {
+            // TODO: test when the column is a scripted field
+            return es.search({
+              size: 1,
+              index,
+              body: {
+                query: {
+                  ids: {
+                    type: type,
+                    values: [ id ]
+                  }
+                },
+                _source: column
+              }
+            })
+            .then(function (resp) {
+              if (resp.hits.total) {
+                const doc = resp.hits.hits[0];
+                if (config.get('metaFields').indexOf(column) !== -1 && doc[column]) {
                   // check if column is in meta fields
-                  $scope.label = doc.data[column];
-                } else if (doc.data._source) {
+                  $scope.label = doc[column];
+                } else if (doc._source) {
                   // else try to find it in _source
-                  const getProperty = _.property(column);
-                  let value = getProperty(doc.data._source) || ' - ';
+                  let value = _.get(doc._source, column, ' - ');
                   if (value.constructor === Object || value.constructor === Array) {
                     value = JSON.stringify(value);
                   }
@@ -72,7 +89,7 @@ define(function (require) {
           delete $scope.disabled;
 
           // remove the selecte entity
-          kibiState.setEntityURI(null);
+          kibiState.setEntityURI();
           kibiState.disableSelectedEntity(false);
 
           /*

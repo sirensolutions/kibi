@@ -70,7 +70,7 @@ module.exports = function ({ Plugin }) {
       createKibiProxy(server, 'POST', '/_mget');
       createKibiProxy(server, 'POST', '/_search');
       createKibiProxy(server, 'POST', '/{index}/_search');
-      createKibiProxy(server, 'POST', '/{index}/{type}/_search');
+      createKibiProxy(server, 'POST', '/{index}/{type}/_search'); // siren: for some searches we specify the index type
       createKibiProxy(server, 'POST', '/{index}/_field_stats');
       createKibiProxy(server, 'POST', '/_msearch');
       createKibanaProxy(server, 'POST', '/_search/scroll');

@@ -1,3 +1,4 @@
+var { SELECTED_DOCUMENT_NEEDED, QUERY_RELEVANT, QUERY_DEACTIVATED } = require('../../_symbols');
 var mockery = require('mockery');
 var Promise = require('bluebird');
 var expect = require('expect.js');
@@ -234,9 +235,11 @@ var fakeTinkerpop3Result = {
   html: ''
 };
 
-var cacheMock = {
-  get: function (key) { return '';},
-  set: function (key, value, time) {}
+const cacheMock = {
+  get(key) {
+    return;
+  },
+  set(key, value, time) {}
 };
 
 var queryDefinition = {
@@ -342,7 +345,7 @@ describe('TinkerPop3Query', function () {
 
       tinkerPop3Query.checkIfItIsRelevant({credentials: {username: 'fred'}}).then(function (res) {
 
-        expect(res).to.eql(true);
+        expect(res).to.equal(QUERY_RELEVANT);
         expect(spy.callCount).to.equal(0);
 
         tinkerPop3Query.generateCacheKey.restore();

@@ -30,6 +30,7 @@
       </tbody>
       <tfoot>
         <tr>
+          <!--kibi: support CSV export-->
           <!--span all columns with the little white space at the start and the optional time column-->
           <td colspan="{{ 1 + (indexPattern.timeFieldName ? 1 : 0) + columns.length}}">
             <a class="small" ng-click="exportAsCsv()">
@@ -63,6 +64,7 @@
   </table>
   <kbn-infinite-scroll ng-if="infiniteScroll" more="addRows"></kbn-infinite-scroll>
 
+  <!--kibi: allow the user to see more results-->
   <div ng-show="!infiniteScroll && hits.length < total" class="limit-info">
     Showing {{hits.length}} out of {{total}}
     <a ng-click="increaseSize()">See more</a>

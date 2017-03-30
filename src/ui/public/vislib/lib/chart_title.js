@@ -1,61 +1,38 @@
-define(function (require) {
-  return function ChartTitleFactory(Private) {
-    let d3 = require('d3');
-    let $ = require('jquery');
-    let _ = require('lodash');
+import d3 from 'd3';
+import _ from 'lodash';
+import ErrorHandlerProvider from './_error_handler';
+import TooltipProvider from 'ui/vis/components/tooltip';
 
-    let ErrorHandler = Private(require('ui/vislib/lib/_error_handler'));
-    let Tooltip = Private(require('ui/vislib/components/Tooltip'));
+export default function ChartTitleFactory(Private) {
+  const ErrorHandler = Private(ErrorHandlerProvider);
+  const Tooltip = Private(TooltipProvider);
 
-    /**
-     * Appends chart titles to the visualization
-     *
-     * @class ChartTitle
-     * @constructor
-     * @param el {HTMLElement} Reference to DOM element
-     */
-    _.class(ChartTitle).inherits(ErrorHandler);
-    function ChartTitle(el) {
-      if (!(this instanceof ChartTitle)) {
-        return new ChartTitle(el);
-      }
-
-      this.el = el;
-      this.tooltip = new Tooltip('chart-title', el, function (d) {
+  class ChartTitle extends ErrorHandler {
+    constructor(visConfig) {
+      super();
+      this.el = visConfig.get('el');
+      this.tooltip = new Tooltip('chart-title', this.el, function (d) {
         return '<p>' + _.escape(d.label) + '</p>';
       });
     }
 
-    /**
-     * Renders chart titles
-     *
-     * @method render
-     * @returns {D3.Selection|D3.Transition.Transition} DOM element with chart titles
-     */
-    ChartTitle.prototype.render = function () {
-      let el = d3.select(this.el).select('.chart-title').node();
-      let width = el ? el.clientWidth : 0;
-      let height = el ? el.clientHeight : 0;
+    render() {
+      const el = d3.select(this.el).select('.chart-title').node();
+      const width = el ? el.clientWidth : 0;
+      const height = el ? el.clientHeight : 0;
 
       return d3.select(this.el).selectAll('.chart-title').call(this.draw(width, height));
     };
 
-    /**
-     * Truncates chart title text
-     *
-     * @method truncate
-     * @param size {Number} Height or width of the HTML Element
-     * @returns {Function} Truncates text
-     */
-    ChartTitle.prototype.truncate = function (size) {
-      let self = this;
+    truncate(size) {
+      const self = this;
 
       return function (selection) {
         selection.each(function () {
-          let text = d3.select(this);
-          let n = text[0].length;
-          let maxWidth = size / n * 0.9;
-          let length = this.getComputedTextLength();
+          const text = d3.select(this);
+          const n = text[0].length;
+          const maxWidth = size / n * 0.9;
+          const length = this.getComputedTextLength();
           let str;
           let avg;
           let end;
@@ -75,34 +52,21 @@ define(function (require) {
       };
     };
 
-    /**
-     * Adds tooltip events on truncated chart titles
-     *
-     * @method addMouseEvents
-     * @param target {HTMLElement} DOM element to attach event listeners
-     * @returns {*} DOM element with event listeners attached
-     */
-    ChartTitle.prototype.addMouseEvents = function (target) {
+    addMouseEvents(target) {
       if (this.tooltip) {
         return target.call(this.tooltip.render());
       }
     };
 
-    /**
-     * Appends chart titles to the visualization
-     *
-     * @method draw
-     * @returns {Function} Appends chart titles to a D3 selection
-     */
-    ChartTitle.prototype.draw = function (width, height) {
-      let self = this;
+    draw(width, height) {
+      const self = this;
 
       return function (selection) {
         selection.each(function () {
-          let div = d3.select(this);
-          let dataType = this.parentNode.__data__.rows ? 'rows' : 'columns';
-          let size = dataType === 'rows' ? height : width;
-          let txtHtOffset = 11;
+          const div = d3.select(this);
+          const dataType = this.parentNode.__data__.rows ? 'rows' : 'columns';
+          const size = dataType === 'rows' ? height : width;
+          const txtHtOffset = 11;
 
           self.validateWidthandHeight(width, height);
 
@@ -117,15 +81,16 @@ define(function (require) {
             return 'translate(' + width / 2 + ',' + txtHtOffset + ')';
           })
           .attr('text-anchor', 'middle')
-          .text(function (d) { return d.label; });
+          .text(function (d) {
+            return d.label;
+          });
 
           // truncate long chart titles
-          div.selectAll('text')
-          .call(self.truncate(size));
+          div.selectAll('text').call(self.truncate(size));
         });
       };
     };
+  }
 
-    return ChartTitle;
-  };
-});
+  return ChartTitle;
+};

@@ -1,7 +1,8 @@
+import d3 from 'd3';
+import $ from 'jquery';
+
 define(function () {
   return function ChartTitleSplitFactory() {
-    let d3 = require('d3');
-    let $ = require('jquery');
 
     /*
      * Adds div DOM elements to either the `.y-axis-chart-title` element or the
@@ -12,8 +13,8 @@ define(function () {
      */
     return function (selection) {
       selection.each(function (data) {
-        let div = d3.select(this);
-        let parent = $(this).parents('.vis-wrapper');
+        const div = d3.select(this);
+        const parent = $(this).parents('.vis-wrapper');
 
         if (!data.series) {
           div.selectAll('.chart-title')

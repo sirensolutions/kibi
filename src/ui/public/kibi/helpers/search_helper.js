@@ -1,6 +1,7 @@
 import angular from 'angular';
 import _ from 'lodash';
 import emptySearch from 'ui/kibi/empty_search';
+import { toJson } from 'ui/utils/aggressive_parse';
 
 /**
  * An helper that modifies searches.
@@ -30,7 +31,7 @@ export default class SearchHelper {
       typeParameter = ' "type": "null",';
       body = emptySearch();
     }
-    return `{"index":${angular.toJson(computedIndices)},${typeParameter} "ignore_unavailable": true}\n${angular.toJson(body)}\n`;
+    return `{"index":${angular.toJson(computedIndices)},${typeParameter} "ignore_unavailable": true}\n${toJson(body, angular.toJson)}\n`;
   }
 
 }

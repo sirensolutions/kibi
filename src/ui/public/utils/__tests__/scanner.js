@@ -2,11 +2,11 @@ import Scanner from 'ui/utils/scanner';
 import expect from 'expect.js';
 import Bluebird from 'bluebird';
 import 'elasticsearch-browser';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import sinon from 'sinon';
 import url from 'url';
 
-import serverConfig from '../../../../../test/serverConfig';
+import serverConfig from '../../../../../test/server_config';
 
 describe('Scanner', function () {
   let es;
@@ -20,6 +20,11 @@ describe('Scanner', function () {
       }
     });
   }));
+
+  afterEach(function () {
+    es.close();
+    es = null;
+  });
 
   describe('initialization', function () {
     it('should throw errors if missing arguments on initialization', function () {
@@ -36,8 +41,8 @@ describe('Scanner', function () {
     let search;
     let scroll;
     let scanner;
-    let mockSearch = {'_scroll_id':'abc','took':1,'timed_out':false,'_shards':{'total':1,'successful':1,'failed':0},'hits':{'total':2,'max_score':0.0,'hits':[]}}; // eslint-disable-line max-len
-    let mockScroll = {'took':1,'timed_out':false,'_shards':{'total':1,'successful':1,'failed':0},'hits':{'total':2,'max_score':0.0,'hits':['one', 'two']}}; // eslint-disable-line max-len
+    const mockSearch = {'_scroll_id':'abc','took':1,'timed_out':false,'_shards':{'total':1,'successful':1,'failed':0},'hits':{'total':2,'max_score':0.0,'hits':[]}}; // eslint-disable-line max-len
+    const mockScroll = {'took':1,'timed_out':false,'_shards':{'total':1,'successful':1,'failed':0},'hits':{'total':2,'max_score':0.0,'hits':['one', 'two']}}; // eslint-disable-line max-len
 
     beforeEach(function () {
       scanner = new Scanner(es, {
@@ -48,9 +53,22 @@ describe('Scanner', function () {
       scroll = sinon.stub(scanner.client, 'scroll', (req, cb) => cb(null, mockScroll));
     });
 
+    it('should reject when an error occurs', function (done) {
+      search.restore();
+      search = sinon.stub(scanner.client, 'search', (req, cb) => cb(new Error('fail.')));
+      return scanner.scanAndMap('')
+      .then(function (response) {
+        done(new Error('should reject'));
+      })
+      .catch(function (error) {
+        expect(error.message).to.be('fail.');
+        done();
+      });
+    });
+
     it('should search and then scroll for results', function () {
       return scanner.scanAndMap('')
-      .then(function (error, response) {
+      .then(function (response) {
         expect(search.called).to.be(true);
         expect(scroll.called).to.be(true);
       });
@@ -78,7 +96,7 @@ describe('Scanner', function () {
 
     it('should scroll across multiple pages', function () {
       scroll.restore();
-      let oneResult = {'took':1,'timed_out':false,'_shards':{'total':1,'successful':1,'failed':0},'hits':{'total':2,'max_score':0.0,'hits':['one']}}; // eslint-disable-line max-len
+      const oneResult = {'took':1,'timed_out':false,'_shards':{'total':1,'successful':1,'failed':0},'hits':{'total':2,'max_score':0.0,'hits':['one']}}; // eslint-disable-line max-len
       scroll = sinon.stub(scanner.client, 'scroll', (req, cb) => cb(null, oneResult));
       return scanner.scanAndMap(null, {pageSize: 1})
       .then(function (response) {

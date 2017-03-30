@@ -1,7 +1,7 @@
-let angular = require('angular');
-let expect = require('expect.js');
-let ngMock = require('ngMock');
-require('ui/directives/inequality');
+import angular from 'angular';
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import 'ui/directives/inequality';
 
 describe('greater_than model validator directive', function () {
   let $compile;

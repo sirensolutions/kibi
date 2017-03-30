@@ -1,5 +1,5 @@
-const expect = require('expect.js');
-const SearchHelper = require('ui/kibi/helpers/search_helper');
+import expect from 'expect.js';
+import SearchHelper from 'ui/kibi/helpers/search_helper';
 
 describe('Kibi Components', function () {
   describe('SearchHelper', function () {
@@ -49,5 +49,3 @@ describe('Kibi Components', function () {
     });
   });
 });
-
-

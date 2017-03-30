@@ -1,7 +1,11 @@
-
-let _ = require('lodash');
-let expect = require('expect.js');
-let ngMock = require('ngMock');
+import _ from 'lodash';
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import VisProvider from 'ui/vis';
+import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import FixturesAggRespGeohashGridProvider from 'fixtures/agg_resp/geohash_grid';
+import AggResponseTabifyTabifyProvider from 'ui/agg_response/tabify/tabify';
+import AggResponseGeoJsonGeoJsonProvider from 'ui/agg_response/geo_json/geo_json';
 
 describe('GeoJson Agg Response Converter', function () {
   let vis;
@@ -13,15 +17,14 @@ describe('GeoJson Agg Response Converter', function () {
   beforeEach(ngMock.module('kibana', function ($provide) {
     $provide.constant('kbnDefaultAppId', '');
     $provide.constant('kibiDefaultDashboardTitle', '');
-    $provide.constant('elasticsearchPlugins', ['siren-join']);
   }));
   beforeEach(ngMock.inject(function (Private) {
-    let Vis = Private(require('ui/Vis'));
-    let indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+    const Vis = Private(VisProvider);
+    const indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
 
-    esResponse = Private(require('fixtures/agg_resp/geohash_grid'));
-    tabify = Private(require('ui/agg_response/tabify/tabify'));
-    convert = Private(require('ui/agg_response/geo_json/geo_json'));
+    esResponse = Private(FixturesAggRespGeohashGridProvider);
+    tabify = Private(AggResponseTabifyTabifyProvider);
+    convert = Private(AggResponseGeoJsonGeoJsonProvider);
 
     vis = new Vis(indexPattern, {
       type: 'tile_map',
@@ -59,8 +62,8 @@ describe('GeoJson Agg Response Converter', function () {
 
     describe('with table ' + JSON.stringify(tableOpts), function () {
       it('outputs a chart', function () {
-        let table = makeTable();
-        let chart = makeSingleChart(table);
+        const table = makeTable();
+        const chart = makeSingleChart(table);
         expect(chart).to.only.have.keys(
           'title',
           'tooltipFormatter',
@@ -77,9 +80,9 @@ describe('GeoJson Agg Response Converter', function () {
       });
 
       it('outputs geohash points as features in a feature collection', function () {
-        let table = makeTable();
-        let chart = makeSingleChart(table);
-        let geoJson = chart.geoJson;
+        const table = makeTable();
+        const chart = makeSingleChart(table);
+        const geoJson = chart.geoJson;
 
         expect(geoJson.type).to.be('FeatureCollection');
         expect(geoJson.features).to.be.an('array');
@@ -87,8 +90,8 @@ describe('GeoJson Agg Response Converter', function () {
       });
 
       it('exports a bunch of properties about the geo hash grid', function () {
-        let geoJson = makeGeoJson();
-        let props = geoJson.properties;
+        const geoJson = makeGeoJson();
+        const props = geoJson.properties;
 
         // props
         expect(props).to.be.an('object');
@@ -121,7 +124,7 @@ describe('GeoJson Agg Response Converter', function () {
 
           it('should be geoJson format', function () {
             table.rows.forEach(function (row, i) {
-              let feature = chart.geoJson.features[i];
+              const feature = chart.geoJson.features[i];
               expect(feature).to.have.property('geometry');
               expect(feature.geometry).to.be.an('object');
               expect(feature).to.have.property('properties');
@@ -131,7 +134,7 @@ describe('GeoJson Agg Response Converter', function () {
 
           it('should have valid geometry data', function () {
             table.rows.forEach(function (row, i) {
-              let geometry = chart.geoJson.features[i].geometry;
+              const geometry = chart.geoJson.features[i].geometry;
               expect(geometry.type).to.be('Point');
               expect(geometry).to.have.property('coordinates');
               expect(geometry.coordinates).to.be.an('array');
@@ -143,8 +146,8 @@ describe('GeoJson Agg Response Converter', function () {
 
           it('should have value properties data', function () {
             table.rows.forEach(function (row, i) {
-              let props = chart.geoJson.features[i].properties;
-              let keys = ['value', 'geohash', 'aggConfigResult', 'rectangle', 'center'];
+              const props = chart.geoJson.features[i].properties;
+              const keys = ['value', 'geohash', 'aggConfigResult', 'rectangle', 'center'];
               expect(props).to.be.an('object');
               expect(props).to.only.have.keys(keys);
               expect(props.geohash).to.be.a('string');
@@ -154,15 +157,15 @@ describe('GeoJson Agg Response Converter', function () {
 
           it('should use latLng in properties and lngLat in geometry', function () {
             table.rows.forEach(function (row, i) {
-              let geometry = chart.geoJson.features[i].geometry;
-              let props = chart.geoJson.features[i].properties;
+              const geometry = chart.geoJson.features[i].geometry;
+              const props = chart.geoJson.features[i].properties;
               expect(props.center).to.eql(geometry.coordinates.slice(0).reverse());
             });
           });
 
           it('should handle both AggConfig and non-AggConfig results', function () {
             table.rows.forEach(function (row, i) {
-              let props = chart.geoJson.features[i].properties;
+              const props = chart.geoJson.features[i].properties;
               if (tableOpts.asAggConfigResults) {
                 expect(props.aggConfigResult).to.be(row[metricColI]);
                 expect(props.value).to.be(row[metricColI].value);

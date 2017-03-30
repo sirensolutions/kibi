@@ -9,6 +9,16 @@ span.original-field-name {
   color: @gray-light;
 }
 
+// draw any selected text white on blue background
+::-moz-selection {
+  color: @white;
+  background-color: @kibanaBlue1;
+}
+::selection {
+  color: @white;
+  background-color: @kibanaBlue1;
+}
+
 // Buttons ================================================
 .btn.btn-relational {
   .button-variant(@btn-relational-color; @btn-relational-bg; @btn-relational-border);
@@ -69,34 +79,29 @@ ul.kibi-fixed-size {
 }
 
 .about-kibi-logo{
-  background-image: url('../images/siren_solutions_logo_matt.png');
+  background-image: url('~ui/kibi/images/siren_logo.png');
   width: 128px;
   height: 128px;
 }
 
-div#kibi-primary-navbar {
+.global-nav {
+  .logo-small,
   .logo {
-    background-image: url('../images/no_border@2x.png');
-    background-repeat: no-repeat;
-    background-size: auto 41px;
-    background-position: 2px center;
-    background-color: #222222;
-    width: 252px;
-  }
-  .logo-small {
-    background-image: url('../images/no_border_sm@2x.png');
-    background-repeat: no-repeat;
-    background-size: auto 41px;
-    background-position: 2px center;
-    background-color: #222222;
-    width: 42px;
+    &.kibi {
+      background-image: url('~ui/kibi/images/siren_full_logo.png');
+      background-repeat: no-repeat;
+      background-size: auto 48px;
+      background-position: 2px center;
+      background-color: #e4e4e4;
+      width: 252px;
+    }
   }
 }
+
 
 .kibiTitle {
   font-weight: bold;
 }
-
 
 navbar button {
   padding: 5px @navbar-padding-horizontal!important;

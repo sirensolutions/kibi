@@ -1,19 +1,21 @@
-let d3 = require('d3');
-let angular = require('angular');
-let expect = require('expect.js');
-let ngMock = require('ngMock');
-let _ = require('lodash');
-let $ = require('jquery');
+import d3 from 'd3';
+import angular from 'angular';
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import _ from 'lodash';
 
 // Data
-let seriesPos = require('fixtures/vislib/mock_data/date_histogram/_series');
-let seriesPosNeg = require('fixtures/vislib/mock_data/date_histogram/_series_pos_neg');
-let seriesNeg = require('fixtures/vislib/mock_data/date_histogram/_series_neg');
-let histogramColumns = require('fixtures/vislib/mock_data/histogram/_columns');
-let rangeRows = require('fixtures/vislib/mock_data/range/_rows');
-let termSeries = require('fixtures/vislib/mock_data/terms/_series');
+import seriesPos from 'fixtures/vislib/mock_data/date_histogram/_series';
+import seriesPosNeg from 'fixtures/vislib/mock_data/date_histogram/_series_pos_neg';
+import seriesNeg from 'fixtures/vislib/mock_data/date_histogram/_series_neg';
+import histogramColumns from 'fixtures/vislib/mock_data/histogram/_columns';
+import rangeRows from 'fixtures/vislib/mock_data/range/_rows';
+import termSeries from 'fixtures/vislib/mock_data/terms/_series';
+import $ from 'jquery';
+import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
+import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
 
-let dataTypes = [
+const dataTypes = [
   ['series pos', seriesPos],
   ['series pos neg', seriesPosNeg],
   ['series neg', seriesNeg],
@@ -24,8 +26,8 @@ let dataTypes = [
 
 describe('Vislib Line Chart', function () {
   dataTypes.forEach(function (type, i) {
-    let name = type[0];
-    let data = type[1];
+    const name = type[0];
+    const data = type[1];
 
     describe(name + ' Data', function () {
       let vis;
@@ -35,18 +37,17 @@ describe('Vislib Line Chart', function () {
         // kibi: for running kibi tests
         $provide.constant('kbnDefaultAppId', '');
         $provide.constant('kibiDefaultDashboardTitle', '');
-        $provide.constant('elasticsearchPlugins', ['siren-join']);
       }));
       beforeEach(ngMock.inject(function (Private) {
-        let visLibParams = {
+        const visLibParams = {
           type: 'line',
           addLegend: true,
           addTooltip: true,
           drawLinesBetweenPoints: true
         };
 
-        vis = Private(require('fixtures/vislib/_vis_fixture'))(visLibParams);
-        persistedState = new (Private(require('ui/persisted_state/persisted_state')))();
+        vis = Private(FixturesVislibVisFixtureProvider)(visLibParams);
+        persistedState = new (Private(PersistedStatePersistedStateProvider))();
         vis.on('brush', _.noop);
         vis.render(data, persistedState);
       }));
@@ -135,16 +136,16 @@ describe('Vislib Line Chart', function () {
 
         it('should return a yMin and yMax', function () {
           vis.handler.charts.forEach(function (chart) {
-            let yAxis = chart.handler.yAxis;
-
-            expect(yAxis.domain[0]).to.not.be(undefined);
-            expect(yAxis.domain[1]).to.not.be(undefined);
+            const yAxis = chart.handler.valueAxes[0];
+            const domain = yAxis.getScale().domain();
+            expect(domain[0]).to.not.be(undefined);
+            expect(domain[1]).to.not.be(undefined);
           });
         });
 
         it('should render a zero axis line', function () {
           vis.handler.charts.forEach(function (chart) {
-            let yAxis = chart.handler.yAxis;
+            const yAxis = chart.handler.valueAxes[0];
 
             if (yAxis.yMin < 0 && yAxis.yMax > 0) {
               expect($(chart.chartEl).find('line.zero-line').length).to.be(1);
@@ -170,17 +171,18 @@ describe('Vislib Line Chart', function () {
 
       describe('defaultYExtents is true', function () {
         beforeEach(function () {
-          vis._attr.defaultYExtents = true;
+          vis.visConfigArgs.defaultYExtents = true;
           vis.render(data, persistedState);
         });
 
         it('should return yAxis extents equal to data extents', function () {
           vis.handler.charts.forEach(function (chart) {
-            let yAxis = chart.handler.yAxis;
-            let yVals = [vis.handler.data.getYMin(), vis.handler.data.getYMax()];
-
-            expect(yAxis.domain[0]).to.equal(yVals[0]);
-            expect(yAxis.domain[1]).to.equal(yVals[1]);
+            const yAxis = chart.handler.valueAxes[0];
+            const min = vis.handler.valueAxes[0].axisScale.getYMin();
+            const max = vis.handler.valueAxes[0].axisScale.getYMax();
+            const domain = yAxis.getScale().domain();
+            expect(domain[0]).to.equal(min);
+            expect(domain[1]).to.equal(max);
           });
         });
       });

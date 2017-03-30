@@ -7,7 +7,17 @@ let gremlin;
 describe('Kibi Gremlin Server', function () {
 
   beforeEach(function () {
-    const server = { expose: sinon.stub(), log: sinon.stub() };
+    const server = {
+      expose: sinon.stub(),
+      log: sinon.stub(),
+      plugins: {
+        elasticsearch: {
+          getCluster() {
+            return sinon.stub();
+          }
+        }
+      }
+    };
     const GremlinServerHandler = require('../gremlin_server');
     gremlin = new GremlinServerHandler(server);
   });
@@ -95,7 +105,7 @@ describe('Kibi Gremlin Server', function () {
   it('should not pass the Java 8 check - java not installed', async function () {
     const javaVersion = 'some error complaining java is not installed';
 
-    let ret = gremlin._checkJavaVersionString(javaVersion);
+    const ret = gremlin._checkJavaVersionString(javaVersion);
     expect(ret.v).to.be(false);
     expect(ret.e).to.be('JAVA not found. Please install JAVA 8 and restart Kibi');
   });

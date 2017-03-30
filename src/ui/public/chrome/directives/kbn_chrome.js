@@ -1,22 +1,25 @@
 import $ from 'jquery';
 import { remove } from 'lodash';
 
+import './kbn_chrome.less';
 import UiModules from 'ui/modules';
-import ConfigTemplate from 'ui/ConfigTemplate';
 import { isSystemApiRequest } from 'ui/system_api';
 import {
   getUnhashableStatesProvider,
   unhashUrl,
 } from 'ui/state_management/state_hashing';
 
+// kibi: imports
+import { onDashboardPage } from 'ui/kibi/utils/on_page';
+
 export default function (chrome, internals) {
 
   UiModules
   .get('kibana')
-  .directive('kbnChrome', function ($rootScope) {
+  .directive('kbnChrome', $rootScope => {
     return {
       template($el) {
-        const $content = $(require('ui/chrome/chrome.html'));
+        const $content = $(require('./kbn_chrome.html'));
         const $app = $content.find('.application');
 
         if (internals.rootController) {
@@ -35,6 +38,15 @@ export default function (chrome, internals) {
       controller($scope, $rootScope, $location, $http, Private) {
         const getUnhashableStates = Private(getUnhashableStatesProvider);
 
+        // kibi: show only the bar when on the dashboard page
+        $scope.onDashboardPage = onDashboardPage();
+        $scope.$watch(onDashboardPage, onPage => {
+          if (onPage !== undefined) {
+            $scope.onDashboardPage = onPage;
+          }
+        });
+        // kibi: end
+
         // are we showing the embedded version of the chrome?
         internals.setVisibleDefault(!$location.search().embed);
         // kibi: added to be able to share dashboards with visible kibi-nav-bar
@@ -45,9 +57,8 @@ export default function (chrome, internals) {
         const onRouteChange = function () {
           // kibi: set URLs with hashes otherwise they might overflow
           const urlWithHashes = window.location.href;
-          const persist = chrome.getVisible();
+          const urlWithStates = unhashUrl(urlWithHashes, getUnhashableStates());
           internals.trackPossibleSubUrl(urlWithHashes);
-          internals.tabs.consumeRouteUpdate(urlWithHashes, persist);
           // kibi: end
         };
 
@@ -62,9 +73,6 @@ export default function (chrome, internals) {
         // and some local values
         chrome.httpActive = $http.pendingRequests;
         $scope.notifList = require('ui/notify')._notifs;
-        $scope.appSwitcherTemplate = new ConfigTemplate({
-          switcher: '<app-switcher></app-switcher>'
-        });
 
         return chrome;
       }

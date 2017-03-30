@@ -1,20 +1,24 @@
-let d3 = require('d3');
-let angular = require('angular');
-let expect = require('expect.js');
-let ngMock = require('ngMock');
+import d3 from 'd3';
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import VislibVisProvider from 'ui/vislib/vis';
+import VislibLibDataProvider from 'ui/vislib/lib/data';
+import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
+import VislibVisualizationsPieChartProvider from 'ui/vislib/visualizations/pie_chart';
+import VislibVisualizationsChartProvider from 'ui/vislib/visualizations/_chart';
 
 describe('Vislib _chart Test Suite', function () {
-  let ColumnChart;
+  let PieChart;
   let Chart;
   let Data;
   let persistedState;
   let Vis;
-  let chartData = {};
+  const chartData = {};
   let vis;
   let el;
   let myChart;
   let config;
-  let data = {
+  const data = {
     hits      : 621,
     label     : '',
     ordered   : {
@@ -81,26 +85,26 @@ describe('Vislib _chart Test Suite', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    Vis = Private(require('ui/vislib/vis'));
-    Data = Private(require('ui/vislib/lib/data'));
-    persistedState = new (Private(require('ui/persisted_state/persisted_state')))();
-    ColumnChart = Private(require('ui/vislib/visualizations/column_chart'));
-    Chart = Private(require('ui/vislib/visualizations/_chart'));
+    Vis = Private(VislibVisProvider);
+    Data = Private(VislibLibDataProvider);
+    persistedState = new (Private(PersistedStatePersistedStateProvider))();
+    PieChart = Private(VislibVisualizationsPieChartProvider);
+    Chart = Private(VislibVisualizationsChartProvider);
 
     el = d3.select('body').append('div').attr('class', 'column-chart');
 
     config = {
       type: 'histogram',
-      shareYAxis: true,
       addTooltip: true,
       addLegend: true,
-      stack: d3.layout.stack(),
+      hasTimeField: true,
+      zeroFill: true
     };
 
     vis = new Vis(el[0][0], config);
-    vis.data = new Data(data, config, persistedState);
+    vis.render(data, persistedState);
 
-    myChart = new ColumnChart(vis, el, chartData);
+    myChart = vis.handler.charts[0];
   }));
 
   afterEach(function () {
@@ -121,7 +125,7 @@ describe('Vislib _chart Test Suite', function () {
     myChart.destroy();
 
     expect(function () {
-      myChart.draw();
+      myChart.render();
     }).to.throwError();
   });
 

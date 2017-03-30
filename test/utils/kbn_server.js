@@ -1,12 +1,9 @@
 import url from 'url';
 import { defaultsDeep, set } from 'lodash';
-import requirefrom from 'requirefrom';
 import { header as basicAuthHeader } from './base_auth';
 import { kibanaUser, kibanaServer } from '../shield';
-import serverConfig from '../serverConfig';
-
-const src = requirefrom('src');
-const KbnServer = src('server/KbnServer');
+import KbnServer from '../../src/server/kbn_server';
+import serverConfig from '../server_config';
 
 const SERVER_DEFAULTS = {
   server: {

@@ -1,14 +1,13 @@
-define(function (require) {
-  return function TimeMarkerFactory($rootScope) {
-    let d3 = require('d3');
-    let dateMath = require('ui/utils/dateMath');
+import d3 from 'd3';
 
-    function TimeMarker(times, xScale, height) {
-      if (!(this instanceof TimeMarker)) {
-        return new TimeMarker(times, xScale, height);
-      }
+// kibi: imports
+import { parseWithPrecision } from 'ui/kibi/utils/date_math_precision';
 
-      let currentTimeArr = [{
+export default function TimeMarkerFactory($rootScope) {
+
+  class TimeMarker {
+    constructor(times, xScale, height) {
+      const currentTimeArr = [{
         'time': new Date().getTime(),
         'class': 'time-marker',
         'color': '#c80000',
@@ -21,7 +20,7 @@ define(function (require) {
       this.times = (times.length) ? times.map(function (d) {
         // kibi: add support for time precision
         return {
-          'time': dateMath.parseWithPrecision(d.time, false, $rootScope.kibiTimePrecision),
+          'time': parseWithPrecision(d.time, false, $rootScope.kibiTimePrecision),
           'class': d.class || 'time-marker',
           'color': d.color || '#c80000',
           'opacity': d.opacity || 0.3,
@@ -30,47 +29,47 @@ define(function (require) {
       }) : currentTimeArr;
     }
 
-    TimeMarker.prototype._isTimeBasedChart = function (selection) {
-      let data = selection.data();
+    _isTimeBasedChart(selection) {
+      const data = selection.data();
       return data.every(function (datum) {
         return (datum.ordered && datum.ordered.date);
       });
     };
 
-    TimeMarker.prototype.render = function (selection) {
-      let self = this;
+    render(selection) {
+      const self = this;
 
       // return if not time based chart
       if (!self._isTimeBasedChart(selection)) return;
 
       selection.each(function () {
         d3.select(this).selectAll('time-marker')
-          .data(self.times)
-          .enter().append('line')
-          .attr('class', function (d) {
-            return d.class;
-          })
-          .attr('pointer-events', 'none')
-          .attr('stroke', function (d) {
-            return d.color;
-          })
-          .attr('stroke-width', function (d) {
-            return d.width;
-          })
-          .attr('stroke-opacity', function (d) {
-            return d.opacity;
-          })
-          .attr('x1', function (d) {
-            return self.xScale(d.time);
-          })
-          .attr('x2', function (d) {
-            return self.xScale(d.time);
-          })
-          .attr('y1', self.height)
-          .attr('y2', self.xScale.range()[0]);
+        .data(self.times)
+        .enter().append('line')
+        .attr('class', function (d) {
+          return d.class;
+        })
+        .attr('pointer-events', 'none')
+        .attr('stroke', function (d) {
+          return d.color;
+        })
+        .attr('stroke-width', function (d) {
+          return d.width;
+        })
+        .attr('stroke-opacity', function (d) {
+          return d.opacity;
+        })
+        .attr('x1', function (d) {
+          return self.xScale(d.time);
+        })
+        .attr('x2', function (d) {
+          return self.xScale(d.time);
+        })
+        .attr('y1', self.height)
+        .attr('y2', self.xScale.range()[0]);
       });
     };
+  }
 
-    return TimeMarker;
-  };
-});
+  return TimeMarker;
+};

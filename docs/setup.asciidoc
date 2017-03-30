@@ -44,32 +44,15 @@ $ .\bin\elasticsearch.bat
 ----
 
 To start Kibi, open a second terminal window, change to the directory where you
-extracted Kibi and run the following command:
+extracted Kibi and run the following commands:
 
-[float]
-[[kibana-dynamic-mapping]]
-==== Kibi and Elasticsearch Dynamic Mapping
-By default, Elasticsearch enables {elastic-ref}dynamic-mapping.html[dynamic mapping] for fields. Kibi needs dynamic mapping
-to use fields in visualizations correctly, as well as to manage the `.kibana` index where saved searches,
-visualizations, and dashboards are stored.
-
-If your Elasticsearch use case requires you to disable dynamic mapping, you need to manually provide mappings for
-fields that Kibi uses to create visualizations. You also need to manually enable dynamic mapping for the `.kibana`
-index.
-
-The following procedure assumes that the `.kibi` index does not already exist in Elasticsearch and that the
-`index.mapper.dynamic` setting in `elasticsearch.yml` is set to `false`:
-
-. Start Elasticsearch.
-. Create the `.kibana` index with dynamic mapping enabled just for that index:
-+
 [source,shell]
 ----
 $ cd kibi/
 $ ./bin/kibi
 ----
 
-If you're on Windows, run the following command:
+Or if you're on Windows, run the following commands:
 
 [source,shell]
 ----

@@ -1,26 +1,30 @@
+import FieldFormatProvider from 'ui/registry/field_formats';
+import JoinExplanationHelperProvider from 'ui/filter_bar/join_explanation';
+import IndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import noDigestPromises from 'test_utils/no_digest_promises';
 /*eslint no-use-before-define: 1*/
-var _ = require('lodash');
-var ngMock = require('ngMock');
-var expect = require('expect.js');
-var joinExplanationHelper;
-var joinSequenceFilters;
-var fieldFormat;
+import _ from 'lodash';
+import ngMock from 'ng_mock';
+import expect from 'expect.js';
+
+let joinExplanationHelper;
+let joinSequenceFilters;
+let fieldFormat;
 
 describe('Kibi Components', function () {
   describe('Join Explanation Helper', function () {
 
-    require('testUtils/noDigestPromises').activateForSuite();
+    noDigestPromises.activateForSuite();
 
     beforeEach(function () {
       ngMock.module('kibana', function ($provide) {
         $provide.constant('kbnDefaultAppId', '');
         $provide.constant('kibiDefaultDashboardTitle', '');
-        $provide.constant('elasticsearchPlugins', ['siren-join']);
       });
 
       ngMock.module('kibana/index_patterns', function ($provide) {
         $provide.service('indexPatterns', function (Private, Promise) {
-          var indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+          const indexPattern = Private(IndexPatternProvider);
           return {
             get: function (id) {
               return Promise.resolve(indexPattern);
@@ -30,8 +34,8 @@ describe('Kibi Components', function () {
       });
 
       ngMock.inject(function (Private) {
-        joinExplanationHelper = Private(require('ui/filter_bar/join_explanation'));
-        fieldFormat = Private(require('ui/registry/field_formats'));
+        joinExplanationHelper = Private(JoinExplanationHelperProvider);
+        fieldFormat = Private(FieldFormatProvider);
       });
 
       joinSequenceFilters = {
@@ -106,26 +110,26 @@ describe('Kibi Components', function () {
         </tr>`;
       };
 
-      const groupToHtml = function (relations) {
-        let html = `
-        <tr>
-          <td>
-            <b>Group of relations:</b></br>
-              <table class="group">`;
-        _.each(relations, relation => {
-          html += `
-                <tr>
-                  <td>${joinSequenceToHtml(relation)}</td>
-                </tr>`;
-        });
-        html += `
-            </table>
-          </td>
-        </tr>`;
-        return html;
-      };
-
       const joinSequenceToHtml = function (relations) {
+        const groupToHtml = function (relations) {
+          let html = `
+          <tr>
+            <td>
+              <b>Group of relations:</b></br>
+                <table class="group">`;
+          _.each(relations, relation => {
+            html += `
+                  <tr>
+                    <td>${joinSequenceToHtml(relation)}</td>
+                  </tr>`;
+          });
+          html += `
+              </table>
+            </td>
+          </tr>`;
+          return html;
+        };
+
         let html = '<table class="sequence">';
         _.each(relations, relation => {
           html += relation.group ? groupToHtml(relation.group) : relationToHtml(relation);
@@ -168,14 +172,14 @@ describe('Kibi Components', function () {
         ]
       };
 
-      var filter1 = {
+      const filter1 = {
         query: {
           query_string: {
             query: 'aaa'
           }
         }
       };
-      var filter2 = {
+      const filter2 = {
         query: {
           query_string: {
             query: 'bbb'
@@ -186,7 +190,7 @@ describe('Kibi Components', function () {
       addFilter(joinSequenceGroup.join_sequence[0].group[0][0], filter1);
       addFilter(joinSequenceGroup.join_sequence[0].group[1][0], filter2);
 
-      var expected = expectedJoinSequenceHTML([
+      const expected = expectedJoinSequenceHTML([
         {
           from: { index: [ 'forecast' ], path: 'forecast' },
           to: { index: [ 'weather-2015-03', 'weather-2015-02' ], path: 'forecast' }
@@ -225,7 +229,7 @@ describe('Kibi Components', function () {
     });
 
     it('prints a nice label for query_string', function (done) {
-      var filter = {
+      const filter = {
         query: {
           query_string: {
             query: 'aaa'
@@ -235,7 +239,7 @@ describe('Kibi Components', function () {
 
       addFilter(joinSequenceFilters.join_sequence[0], filter);
 
-      var expected = expectedJoinSequenceHTML([
+      const expected = expectedJoinSequenceHTML([
         {
           from: {
             index: [ 'article' ],
@@ -259,7 +263,7 @@ describe('Kibi Components', function () {
     });
 
     it('prints a nice label for match_phrase_prefix object', function (done) {
-      var filter = {
+      const filter = {
         query: {
           match_phrase_prefix: {
             fieldA: {
@@ -271,7 +275,7 @@ describe('Kibi Components', function () {
 
       addFilter(joinSequenceFilters.join_sequence[0], filter);
 
-      var expected = expectedJoinSequenceHTML([
+      const expected = expectedJoinSequenceHTML([
         {
           from: {
             index: [ 'article' ],
@@ -295,7 +299,7 @@ describe('Kibi Components', function () {
     });
 
     it('prints a nice label for match_phrase_prefix string', function (done) {
-      var filter = {
+      const filter = {
         query: {
           match_phrase_prefix: {
             fieldA: 'aaa bbb'
@@ -305,7 +309,7 @@ describe('Kibi Components', function () {
 
       addFilter(joinSequenceFilters.join_sequence[0], filter);
 
-      var expected = expectedJoinSequenceHTML([
+      const expected = expectedJoinSequenceHTML([
         {
           from: {
             index: [ 'article' ],
@@ -329,7 +333,7 @@ describe('Kibi Components', function () {
     });
 
     it('prints a nice label for match_phrase object', function (done) {
-      var filter = {
+      const filter = {
         query: {
           match_phrase: {
             fieldA: {
@@ -341,7 +345,7 @@ describe('Kibi Components', function () {
 
       addFilter(joinSequenceFilters.join_sequence[0], filter);
 
-      var expected = expectedJoinSequenceHTML([
+      const expected = expectedJoinSequenceHTML([
         {
           from: {
             index: [ 'article' ],
@@ -365,7 +369,7 @@ describe('Kibi Components', function () {
     });
 
     it('prints a nice label for match_phrase string', function (done) {
-      var filter = {
+      const filter = {
         query: {
           match_phrase: {
             fieldA: 'aaa bbb'
@@ -375,7 +379,7 @@ describe('Kibi Components', function () {
 
       addFilter(joinSequenceFilters.join_sequence[0], filter);
 
-      var expected = expectedJoinSequenceHTML([
+      const expected = expectedJoinSequenceHTML([
         {
           from: {
             index: [ 'article' ],
@@ -399,7 +403,7 @@ describe('Kibi Components', function () {
     });
 
     it('prints a nice label for match object', function (done) {
-      var filter = {
+      const filter = {
         query: {
           match: {
             fieldA: {
@@ -411,7 +415,7 @@ describe('Kibi Components', function () {
 
       addFilter(joinSequenceFilters.join_sequence[0], filter);
 
-      var expected = expectedJoinSequenceHTML([
+      const expected = expectedJoinSequenceHTML([
         {
           from: {
             index: [ 'article' ],
@@ -435,7 +439,7 @@ describe('Kibi Components', function () {
     });
 
     it('prints a nice label for match string', function (done) {
-      var filter = {
+      const filter = {
         query: {
           match: {
             fieldA: 'aaa bbb'
@@ -445,7 +449,7 @@ describe('Kibi Components', function () {
 
       addFilter(joinSequenceFilters.join_sequence[0], filter);
 
-      var expected = expectedJoinSequenceHTML([
+      const expected = expectedJoinSequenceHTML([
         {
           from: {
             index: [ 'article' ],
@@ -469,7 +473,7 @@ describe('Kibi Components', function () {
     });
 
     it('prints a nice label for range', function (done) {
-      var filter1 = {
+      const filter1 = {
         range: {
           age: {
             gte: 10,
@@ -477,7 +481,7 @@ describe('Kibi Components', function () {
           }
         }
       };
-      var filter2 = {
+      const filter2 = {
         range: {
           time: {
             gte: 657147471184,
@@ -488,8 +492,8 @@ describe('Kibi Components', function () {
 
       addFilter(joinSequenceFilters.join_sequence[0], filter1, filter2);
 
-      var format = fieldFormat.getDefaultInstance('date');
-      var expected = expectedJoinSequenceHTML([
+      const format = fieldFormat.getDefaultInstance('date');
+      const expected = expectedJoinSequenceHTML([
         {
           from: {
             index: [ 'article' ],
@@ -514,7 +518,7 @@ describe('Kibi Components', function () {
     });
 
     it('prints a nice label for missing filter', function (done) {
-      var filter = {
+      const filter = {
         missing: {
           field: 'joe'
         }
@@ -522,7 +526,7 @@ describe('Kibi Components', function () {
 
       addFilter(joinSequenceFilters.join_sequence[0], filter);
 
-      var expected = expectedJoinSequenceHTML([
+      const expected = expectedJoinSequenceHTML([
         {
           from: {
             index: [ 'article' ],
@@ -546,7 +550,7 @@ describe('Kibi Components', function () {
     });
 
     it('prints a nice label for exists filter', function (done) {
-      var filter = {
+      const filter = {
         exists: {
           field: 'joe'
         }
@@ -554,7 +558,7 @@ describe('Kibi Components', function () {
 
       addFilter(joinSequenceFilters.join_sequence[0], filter);
 
-      var expected = expectedJoinSequenceHTML([
+      const expected = expectedJoinSequenceHTML([
         {
           from: {
             index: [ 'article' ],
@@ -578,7 +582,7 @@ describe('Kibi Components', function () {
     });
 
     it('prints a nice label for negated filters', function (done) {
-      var filter = {
+      const filter = {
         not: {
           exists: {
             field: 'joe'
@@ -588,7 +592,7 @@ describe('Kibi Components', function () {
 
       addFilter(joinSequenceFilters.join_sequence[0], filter);
 
-      var expected = expectedJoinSequenceHTML([
+      const expected = expectedJoinSequenceHTML([
         {
           from: {
             index: [ 'article' ],
@@ -612,7 +616,7 @@ describe('Kibi Components', function () {
     });
 
     it('prints a nice label for unknown filter', function (done) {
-      var filter = {
+      const filter = {
         boo: 'boo',
         baa: 'baa',
         $$hashKey: '42'
@@ -620,7 +624,7 @@ describe('Kibi Components', function () {
 
       addFilter(joinSequenceFilters.join_sequence[0], filter);
 
-      var expected = expectedJoinSequenceHTML([
+      const expected = expectedJoinSequenceHTML([
         {
           from: {
             index: [ 'article' ],
@@ -645,7 +649,7 @@ describe('Kibi Components', function () {
     });
 
     it('prints a nice label for geo bounding box filter', function (done) {
-      var filter = {
+      const filter = {
         geo_bounding_box: {
           joe: {
             top_left: {
@@ -661,7 +665,7 @@ describe('Kibi Components', function () {
       };
       addFilter(joinSequenceFilters.join_sequence[0], filter);
 
-      var expected = expectedJoinSequenceHTML([
+      const expected = expectedJoinSequenceHTML([
         {
           from: {
             index: [ 'article' ],
@@ -685,7 +689,7 @@ describe('Kibi Components', function () {
     });
 
     it('prints a nice label for join_set', function (done) {
-      var relations = [
+      const relations = [
         [
           {
             indices: [ 'article' ],
@@ -700,7 +704,7 @@ describe('Kibi Components', function () {
         ]
       ];
 
-      var filters = [
+      const filters = [
         {
           join_set: {
             focus: focus,
@@ -723,7 +727,7 @@ describe('Kibi Components', function () {
         }
       ];
 
-      var expected =
+      const expected =
       '<ul class="explanation join-set">' +
         '<li>From <b>Time</b>:</br>' +
           '<ul>' +

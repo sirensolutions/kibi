@@ -1,6 +1,6 @@
-let $ = require('jquery');
-let ngMock = require('ngMock');
-let expect = require('expect.js');
+import ngMock from 'ng_mock';
+import expect from 'expect.js';
+import $ from 'jquery';
 
 describe('fancy forms', function () {
   let $el;

@@ -1,21 +1,22 @@
-
-let angular = require('angular');
-let $ = require('jquery');
-let ngMock = require('ngMock');
-let expect = require('expect.js');
+import ngMock from 'ng_mock';
+import expect from 'expect.js';
 
 // Data
-let series = require('fixtures/vislib/mock_data/date_histogram/_series');
-let columns = require('fixtures/vislib/mock_data/date_histogram/_columns');
-let rows = require('fixtures/vislib/mock_data/date_histogram/_rows');
-let stackedSeries = require('fixtures/vislib/mock_data/date_histogram/_stacked_series');
-let dateHistogramArray = [
+import series from 'fixtures/vislib/mock_data/date_histogram/_series';
+import columns from 'fixtures/vislib/mock_data/date_histogram/_columns';
+import rows from 'fixtures/vislib/mock_data/date_histogram/_rows';
+import stackedSeries from 'fixtures/vislib/mock_data/date_histogram/_stacked_series';
+import $ from 'jquery';
+import VislibLibHandlerHandlerProvider from 'ui/vislib/lib/handler';
+import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
+import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
+const dateHistogramArray = [
   series,
   columns,
   rows,
   stackedSeries
 ];
-let names = [
+const names = [
   'series',
   'columns',
   'rows',
@@ -27,16 +28,16 @@ dateHistogramArray.forEach(function (data, i) {
     let Handler;
     let vis;
     let persistedState;
-    let events = [
+    const events = [
       'click',
       'brush'
     ];
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
-      Handler = Private(require('ui/vislib/lib/handler/handler'));
-      vis = Private(require('fixtures/vislib/_vis_fixture'))();
-      persistedState = new (Private(require('ui/persisted_state/persisted_state')))();
+      Handler = Private(VislibLibHandlerHandlerProvider);
+      vis = Private(FixturesVislibVisFixtureProvider)();
+      persistedState = new (Private(PersistedStatePersistedStateProvider))();
       vis.render(data, persistedState);
     }));
 
@@ -130,5 +131,27 @@ dateHistogramArray.forEach(function (data, i) {
         expect(vis.handler.charts.length).to.be(0);
       });
     });
+
+    describe('event proxying', function () {
+
+      it('should only pass the original event object to downstream handlers', function (done) {
+        const event = {};
+        const chart = vis.handler.charts[0];
+
+        const mockEmitter = function () {
+          const args = Array.from(arguments);
+          expect(args.length).to.be(2);
+          expect(args[0]).to.be('click');
+          expect(args[1]).to.be(event);
+          done();
+        };
+
+        vis.emit = mockEmitter;
+        vis.handler.enable('click', chart);
+        chart.events.emit('click', event);
+      });
+
+    });
+
   });
 });

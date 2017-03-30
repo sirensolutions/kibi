@@ -12,6 +12,25 @@ visualize-legend {
   z-index: 10;
   min-height: 0;
   overflow: hidden;
+  flex-direction: row;
+  padding-top: 5px;
+
+  .vis-container--legend-left & {
+    flex-direction: row-reverse;
+  }
+  .vis-container--legend-right & {
+    flex-direction: row;
+  }
+  .vis-container--legend-top & {
+    flex-direction: column-reverse;
+    width: 100%;
+    padding-left: 25px;
+  }
+  .vis-container--legend-bottom & {
+    flex-direction: column;
+    width: 100%;
+    padding-left: 25px;
+  }
 
   .header {
     cursor: pointer;
@@ -21,14 +40,15 @@ visualize-legend {
   .legend-toggle {
     &:hover {
       color: @sidebar-hover-color;
-      background-color: @sidebar-hover-bg;
     }
 
-    background-color: @sidebar-bg;
-    font-size: 10px;
-    height: 30px;
-    padding: 8px 3px;
-    border-bottom-left-radius: @border-radius-small;
+    .vis-container--legend-top &,
+    .vis-container--legend-bottom & {
+      text-align: center;
+    }
+
+    padding-right: 5px;
+    font-size: 14px;
   }
 
   .column-labels {
@@ -36,7 +56,6 @@ visualize-legend {
   }
 
   .legend-ul {
-    border-left: 1px solid @sidebar-bg;
     width: 150px;
     flex: 1 1 auto;
     overflow-x: hidden;
@@ -52,6 +71,16 @@ visualize-legend {
     text-align: left;
 
     flex-direction: column;
+
+    .vis-container--legend-top &,
+    .vis-container--legend-bottom & {
+      width: auto;
+      overflow-y: hidden;
+
+      .legend-value {
+        display: inline-block;
+      }
+    }
   }
 
   .legend-ul.hidden {
@@ -60,7 +89,12 @@ visualize-legend {
 }
 
 .legend-value {
-  &-title {
+  &:hover {
+    cursor: pointer;
+  }
+}
+
+  .legend-value-title {
     padding: 3px;
 
     &:hover {
@@ -68,19 +102,19 @@ visualize-legend {
     }
   }
 
-  &-truncate {
+  .legend-value-truncate {
     overflow-x: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
   }
 
-  &-full {
+  .legend-value-full {
     white-space: normal;
     word-break: break-all;
     background-color: @sidebar-hover-bg;
   }
 
-  &-details {
+  .legend-value-details {
     border-bottom: 1px solid @sidebar-bg;
 
     .filter-button {
@@ -96,7 +130,7 @@ visualize-legend {
     }
   }
 
-  &-color-picker {
+  .legend-value-color-picker {
     width: 130px;
     margin: auto;
 
@@ -111,10 +145,3 @@ visualize-legend {
       font-size: 18px
     }
   }
-}
-
-.legend-value:hover {
-  cursor: pointer;
-}
-
-

@@ -1,6 +1,9 @@
 <div class="kibi-menu-template-kibi-navbar">
   <ul>
-    <li ng-click="dashboard.onSelect(kibiMenuTemplateContext)" ng-repeat="dashboard in kibiMenuTemplateData">
+    <li
+      ng-repeat="dashboard in kibiMenuTemplateLocals.dashboardGroups.getDashboardsInGroup(kibiMenuTemplateLocals.groupId) | filter:kibiMenuTemplateLocals.filter"
+      ng-click="kibiMenuTemplateLocals.dashboardGroups.selectDashboard(dashboard.id)"
+    >
       <b>{{dashboard.title}}</b>
       <br/>
       <span ng-if="dashboard.count !== undefined && dashboard.savedSearchId" class="smallNumber">Count: {{dashboard.count}}</span>

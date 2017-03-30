@@ -1,0 +1,51 @@
+<form
+  role="form"
+  ng-submit="opts.save()"
+>
+  <!--KIBI5: see how it differs from the new way-->
+  <!--<div class="form-group">-->
+    <!--[>kibi: dashboardgroup name tooltip<]-->
+    <!--<label for="dashboardTitle">Save As-->
+      <!--<kbn-info placement="right" info="The name of the dashboard will be shortened if you put it in a dashboard group with the same prefix, e.g., a 'People locations' dashboard will be displated as simply 'locations'-->
+      <!--in the dropdown menu if placed in a 'People' dashboard group."></kbn-info>-->
+    <!--</label>-->
+    <!--<input id="dashboardTitle" type="text" ng-model="opts.dashboard.title" class="form-control" placeholder="Dashboard title" input-focus="select">-->
+  <!--</div>-->
+  <div class="kuiLocalDropdownTitle">Save {{opts.dashboard.getDisplayName()}}</div>
+  <input
+    class="kuiLocalDropdownInput"
+    id="dashboardTitle"
+    type="text"
+    ng-model="opts.dashboard.title"
+    placeholder="Dashboard title"
+    input-focus="select"
+  >
+
+  <saved-object-save-as-check-box saved-object="opts.dashboard"></saved-object-save-as-check-box>
+
+  <div class="form-group">
+    <label>
+      <input type="checkbox" ng-model="opts.dashboard.timeRestore" ng-checked="opts.dashboard.timeRestore">
+      Store time with {{opts.dashboard.getDisplayName()}}
+      <kbn-info placement="bottom" info="Change the time filter to the currently selected time each time this dashboard is loaded"></kbn-info>
+    </label>
+  </div>
+  <!-- kibi: associate a saved search with this dashboard -->
+  <div class="form-group">
+    <label>Saved Search
+      <kbn-info placement="right" info="For counts calculation on tabs"></kbn-info>
+    </label>
+    <kibi-select object-type="search" ng-model="opts.dashboard.savedSearchId"></kibi-select>
+  </div>
+  <div class="form-group">
+    <label>Order
+      <kbn-info placement="right" info="For ordering the dashboard tabs"></kbn-info>
+    </label>
+    <input type="number" ng-model="opts.dashboard.priority" class="form-control ng-pristine ng-valid ng-touched">
+  </div>
+  <!-- kibi: end -->
+
+  <button type="submit" ng-disabled="!opts.dashboard.title" class="btn btn-primary" aria-label="Save dashboard">
+    Save
+  </button>
+</form>

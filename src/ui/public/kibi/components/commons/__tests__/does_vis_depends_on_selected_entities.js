@@ -1,7 +1,11 @@
-var doesVisDependsOnSelectedEntities;
+import noDigestPromises from 'test_utils/no_digest_promises';
+import DoesVisDependsOnSelectedEntitiesProvider from 'ui/kibi/components/commons/_does_vis_depends_on_selected_entities';
+import ngMock from 'ng_mock';
+import expect from 'expect.js';
+import mockSavedObjects from 'fixtures/kibi/mock_saved_objects';
 
-var mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
-var fakeSavedQueries = [
+let doesVisDependsOnSelectedEntities;
+const fakeSavedQueries = [
   {
     id: 'query1',
     title: '',
@@ -13,8 +17,6 @@ var fakeSavedQueries = [
     resultQuery: 'SELECT * FROM mytable WHERE id = \'123\''
   }
 ];
-var ngMock = require('ngMock');
-var expect = require('expect.js');
 
 describe('Kibi Components', function () {
   describe('Commons', function () {
@@ -28,11 +30,11 @@ describe('Kibi Components', function () {
         });
 
         ngMock.inject(function (Private) {
-          doesVisDependsOnSelectedEntities = Private(require('ui/kibi/components/commons/_does_vis_depends_on_selected_entities'));
+          doesVisDependsOnSelectedEntities = Private(DoesVisDependsOnSelectedEntitiesProvider);
         });
       });
 
-      require('testUtils/noDigestPromises').activateForSuite();
+      noDigestPromises.activateForSuite();
 
       [
         'kibiqueryviewervis',
@@ -40,7 +42,7 @@ describe('Kibi Components', function () {
       ].forEach(function (visName) {
         describe(`vis ${visName}`, function () {
           it('should depend on the entity', function (done) {
-            var vis = {
+            const vis = {
               type: {
                 name: visName
               },
@@ -61,7 +63,7 @@ describe('Kibi Components', function () {
           });
 
           it('should not depend on the entity', function (done) {
-            var vis = {
+            const vis = {
               type: {
                 name: visName
               },
@@ -82,7 +84,7 @@ describe('Kibi Components', function () {
           });
 
           it('should fail if the query does not exist', function (done) {
-            var vis = {
+            const vis = {
               type: {
                 name: visName
               },
@@ -115,7 +117,7 @@ describe('Kibi Components', function () {
       ].forEach(function (visName) {
         describe(`vis ${visName}`, function () {
           it('should depend on the entity', function (done) {
-            var vis = {
+            const vis = {
               type: {
                 name: visName
               },
@@ -139,7 +141,7 @@ describe('Kibi Components', function () {
           });
 
           it('should not depend on the entity', function (done) {
-            var vis = {
+            const vis = {
               type: {
                 name: visName
               },
@@ -163,7 +165,7 @@ describe('Kibi Components', function () {
           });
 
           it('should fail if the query does not exist', function (done) {
-            var vis = {
+            const vis = {
               type: {
                 name: visName
               },
@@ -192,7 +194,7 @@ describe('Kibi Components', function () {
 
       describe('vis kibi_graph_browser', function () {
         it('should depend on the entity', function (done) {
-          var vis = {
+          const vis = {
             type: {
               name: 'kibi_graph_browser'
             },
@@ -210,7 +212,7 @@ describe('Kibi Components', function () {
         });
 
         it('should not depend on the entity', function (done) {
-          var vis = {
+          const vis = {
             type: {
               name: 'kibi_graph_browser'
             },
@@ -228,7 +230,7 @@ describe('Kibi Components', function () {
         });
 
         it('should fail if the query does not exist', function (done) {
-          var vis = {
+          const vis = {
             type: {
               name: 'kibi_graph_browser'
             },
@@ -249,7 +251,7 @@ describe('Kibi Components', function () {
       });
 
       it('should not depend on entity for some unknown vis', function (done) {
-        var vis = {
+        const vis = {
           type: {
             name: 'extra-pie'
           },

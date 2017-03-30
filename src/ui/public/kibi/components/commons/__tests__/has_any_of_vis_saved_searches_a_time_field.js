@@ -1,6 +1,11 @@
-const mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
-const ngMock = require('ngMock');
-const expect = require('expect.js');
+import HasAnyOfVisSavedSearchesATimeFieldProvider from 'ui/kibi/components/commons/_has_any_of_vis_saved_searches_a_time_field';
+import VislibVisTypeProvider from 'ui/vislib_vis_type/vislib_vis_type';
+import TemplateVisTypeProvider from 'ui/template_vis_type/template_vis_type';
+import mockSavedObjects from 'fixtures/kibi/mock_saved_objects';
+import ngMock from 'ng_mock';
+import expect from 'expect.js';
+import noDigestPromises from 'test_utils/no_digest_promises';
+
 const fakeSavedSearches = [
   {
     id: 'savedSearchWithTimeField',
@@ -47,41 +52,40 @@ describe('Kibi Components', function () {
         });
 
         ngMock.inject(function (Private) {
-          hasAnyOfVisSavedSearchesATimeField = Private(require('ui/kibi/components/commons/_has_any_of_vis_saved_searches_a_time_field'));
-          const TemplateVisType = Private(require('ui/template_vis_type/TemplateVisType'));
-          const VislibVisType = Private(require('ui/vislib_vis_type/VislibVisType'));
+          hasAnyOfVisSavedSearchesATimeField = Private(HasAnyOfVisSavedSearchesATimeFieldProvider);
+          const TemplateVisType = Private(TemplateVisTypeProvider);
+          const VislibVisType = Private(VislibVisTypeProvider);
 
           kibiTimelineType1 = new TemplateVisType({
             name: 'kibi_timeline',
             template: '<div/>', // if not provided will throw an exception
-            requiresMultiSearch: true,
+            requiresMultiSearch: true
           });
 
           kibiTimelineType2 = new VislibVisType({
             name: 'kibi_timeline',
             template: '<div/>', // if not provided will throw an exception
-            requiresMultiSearch: true,
+            requiresMultiSearch: true
           });
 
           unsupportedType = new TemplateVisType({
             name: 'unsupported',
             template: '<div/>', // if not provided will throw an exception
-            requiresMultiSearch: true,
+            requiresMultiSearch: true
           });
 
           requiresMultiSearchFalseType = new TemplateVisType({
             name: 'pie',
             template: '<div/>', // if not provided will throw an exception
-            requiresMultiSearch: false,
+            requiresMultiSearch: false
           });
 
         });
       });
 
-      require('testUtils/noDigestPromises').activateForSuite();
+      noDigestPromises.activateForSuite();
 
       describe('unsupported vis type', function () {
-
         it('should silently return false for unsupported vis type', function (done) {
           const vis = {
             type: unsupportedType
@@ -92,27 +96,13 @@ describe('Kibi Components', function () {
             done();
           }).catch(done);
         });
-
-        it('should throw an error when type is not an instance of TemplateVisType or VislibVisType', function (done) {
-          const vis = {
-            type: 'kibi_timeline' // valid vis but type should be a TemplateVisType
-          };
-
-          hasAnyOfVisSavedSearchesATimeField(vis).then(function (res) {
-            done('Should throw an error');
-          }).catch(function (err) {
-            expect(err.message).to.equal('vis.type should be an instance of TemplateVisType or VislibVisType');
-            done();
-          });
-        });
-
       });
 
-      describe('requiresMultiSearchFalseType (pie)', function () {
+      describe('requiresMultiSearch is false', function () {
 
         it('should return false if no timeFieldName', function (done) {
           const vis = {
-            type: requiresMultiSearchFalseType,
+            type: requiresMultiSearchFalseType
           };
           hasAnyOfVisSavedSearchesATimeField(vis).then(function (res) {
             expect(res).to.equal(false);
@@ -122,14 +112,13 @@ describe('Kibi Components', function () {
 
         it('should return true if there is timeFieldName', function (done) {
           const vis = {
-            type: requiresMultiSearchFalseType,
+            type: requiresMultiSearchFalseType
           };
           hasAnyOfVisSavedSearchesATimeField(vis, 'myDate').then(function (res) {
             expect(res).to.equal(true);
             done();
           }).catch(done);
         });
-
 
       });
 
@@ -209,7 +198,6 @@ describe('Kibi Components', function () {
             done();
           }).catch(done);
         });
-
 
       });
     });

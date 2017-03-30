@@ -1,9 +1,9 @@
-var expect = require('expect.js');
-var ngMock = require('ngMock');
-var datasourceHelper;
+import DatasourceHelperProvider from 'ui/kibi/helpers/datasource_helper';
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import mockSavedObjects from 'fixtures/kibi/mock_saved_objects';
 
-var mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
-var fakeSavedDatasources = [
+const fakeSavedDatasources = [
   {
     id: 'ds1',
     title: 'ds1 datasource',
@@ -20,8 +20,9 @@ var fakeSavedDatasources = [
     datasourceType: 'rest'
   }
 ];
-var $rootScope;
 
+let datasourceHelper;
+let $rootScope;
 
 describe('Kibi Components', function () {
   describe('Datasource Helper', function () {
@@ -36,7 +37,7 @@ describe('Kibi Components', function () {
 
       ngMock.inject(function ($injector, Private, _$rootScope_) {
         $rootScope = _$rootScope_;
-        datasourceHelper = Private(require('ui/kibi/helpers/datasource_helper'));
+        datasourceHelper = Private(DatasourceHelperProvider);
       });
     });
 

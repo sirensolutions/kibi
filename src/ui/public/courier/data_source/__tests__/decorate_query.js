@@ -1,10 +1,11 @@
-let moment = require('moment');
-let expect = require('expect.js');
-let ngMock = require('ngMock');
+import moment from 'moment';
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import _ from 'lodash';
+import DecorateQueryProvider from 'ui/courier/data_source/_decorate_query';
 
 describe('Query decorator', function () {
 
-  let _ = require('lodash');
   let config;
 
   let indexPattern;
@@ -17,7 +18,7 @@ describe('Query decorator', function () {
     function ($provide) {
       // Super simple config stub
       $provide.service('config', function () {
-        let keys = {};
+        const keys = {};
         return {
           get: function (key) { return keys[key]; },
           set: function (key, value) { keys[key] = value; }
@@ -28,7 +29,7 @@ describe('Query decorator', function () {
 
   beforeEach(ngMock.inject(function (Private, $injector, _config_) {
     config = _config_;
-    fn = Private(require('ui/courier/data_source/_decorate_query'));
+    fn = Private(DecorateQueryProvider);
   }));
 
   it('should be a function', function () {

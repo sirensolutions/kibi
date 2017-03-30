@@ -1,91 +1,95 @@
-define(function (require) {
-  return function fetchService(Private, Promise) {
-    let _ = require('lodash');
+import _ from 'lodash';
 
-    let requestQueue = Private(require('ui/courier/_request_queue'));
-    let fetchThese = Private(require('ui/courier/fetch/_fetch_these'));
+import RequestQueueProvider from '../_request_queue';
+import FetchTheseProvider from './fetch_these';
+import CallResponseHandlersProvider from './call_response_handlers';
+import ReqStatusProvider from './req_status';
 
-    let callResponseHandlers = Private(require('ui/courier/fetch/_call_response_handlers'));
-    let INCOMPLETE = Private(require('ui/courier/fetch/_req_status')).INCOMPLETE;
+export default function fetchService(Private, Promise) {
 
-    function fetchQueued(strategy) {
-      let requests = requestQueue.getStartable(strategy);
+  const requestQueue = Private(RequestQueueProvider);
+  const fetchThese = Private(FetchTheseProvider);
 
-      //kibi: Adding $$kibiSingleCall = true to a member of a visualization allows to avoid all other requests
-      //kibi: i.e. This is usefull for multi chart plugin
-      const multiChartRequest = _.filter(requests, function (req) {
-        return req.source && req.source.vis && req.source.vis.$$kibiSingleCall;
-      });
-      if (multiChartRequest.length > 0) {
-        requests = multiChartRequest;
-        _.each(requests, function (req) {
-          if (req.source && req.source.vis && req.source.vis.$$kibiSingleCall) {
-            req.source.vis.$$kibiSingleCall = false;
-          }
-        });
-      }
-      //kibi: end
+  const callResponseHandlers = Private(CallResponseHandlersProvider);
+  const INCOMPLETE = Private(ReqStatusProvider).INCOMPLETE;
 
-      if (!requests.length) return Promise.resolve();
-      else return fetchThese(requests);
-    }
+  function fetchQueued(strategy) {
+    let requests = requestQueue.getStartable(strategy);
 
-    this.fetchQueued = fetchQueued;
-
-    function fetchASource(source, strategy) {
-      let defer = Promise.defer();
-
-      fetchThese([
-        source._createRequest(defer)
-      ]);
-
-      return defer.promise;
-    }
-
-    /**
-     * Fetch a single doc source
-     * @param {DocSource} source - The DocSource to request
-     * @async
-     */
-    this.doc = fetchASource;
-
-    /**
-     * Fetch a single search source
-     * @param {SearchSource} source - The SearchSource to request
-     * @async
-     */
-    this.search = fetchASource;
-
-    /**
-     * Fetch a list of requests
-     * @param {array} reqs - the requests to fetch
-     * @async
-     */
-    this.these = fetchThese;
-
-    /**
-     * Send responses to a list of requests, used when requests
-     * should be skipped (like when a doc is updated with an index).
-     *
-     * This logic is a simplified version of what fetch_these does, and
-     * could have been added elsewhere, but I would rather the logic be
-     * here than outside the courier/fetch module.
-     *
-     * @param {array[Request]} requests - the list of requests to respond to
-     * @param {array[any]} responses - the list of responses for each request
-     */
-    this.fakeFetchThese = function (requests, responses) {
-      return Promise.map(requests, function (req) {
-        return req.start();
-      })
-      .then(function () {
-        return callResponseHandlers(requests, responses);
-      })
-      .then(function (requestStates) {
-        if (_.contains(requestStates, INCOMPLETE)) {
-          throw new Error('responding to requests did not complete!');
+    //kibi: Adding $$kibiSingleCall = true to a member of a visualization allows to avoid all other requests
+    //kibi: i.e. This is usefull for multi chart plugin
+    const multiChartRequest = _.filter(requests, function (req) {
+      return req.source && req.source.vis && req.source.vis.$$kibiSingleCall;
+    });
+    if (multiChartRequest.length > 0) {
+      requests = multiChartRequest;
+      _.each(requests, function (req) {
+        if (req.source && req.source.vis && req.source.vis.$$kibiSingleCall) {
+          req.source.vis.$$kibiSingleCall = false;
         }
       });
-    };
+    }
+    //kibi: end
+
+    if (!requests.length) return Promise.resolve();
+    else return fetchThese(requests);
+  }
+
+  this.fetchQueued = fetchQueued;
+
+  function fetchASource(source, strategy) {
+    const defer = Promise.defer();
+
+    fetchThese([
+      source._createRequest(defer)
+    ]);
+
+    return defer.promise;
+  }
+
+  /**
+   * Fetch a single doc source
+   * @param {DocSource} source - The DocSource to request
+   * @async
+   */
+  this.doc = fetchASource;
+
+  /**
+   * Fetch a single search source
+   * @param {SearchSource} source - The SearchSource to request
+   * @async
+   */
+  this.search = fetchASource;
+
+  /**
+   * Fetch a list of requests
+   * @param {array} reqs - the requests to fetch
+   * @async
+   */
+  this.these = fetchThese;
+
+  /**
+   * Send responses to a list of requests, used when requests
+   * should be skipped (like when a doc is updated with an index).
+   *
+   * This logic is a simplified version of what fetch_these does, and
+   * could have been added elsewhere, but I would rather the logic be
+   * here than outside the courier/fetch module.
+   *
+   * @param {array[Request]} requests - the list of requests to respond to
+   * @param {array[any]} responses - the list of responses for each request
+   */
+  this.fakeFetchThese = function (requests, responses) {
+    return Promise.map(requests, function (req) {
+      return req.start();
+    })
+    .then(function () {
+      return callResponseHandlers(requests, responses);
+    })
+    .then(function (requestStates) {
+      if (_.contains(requestStates, INCOMPLETE)) {
+        throw new Error('responding to requests did not complete!');
+      }
+    });
   };
-});
+};

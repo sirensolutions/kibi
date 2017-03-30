@@ -1,6 +1,10 @@
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import VisProvider from 'ui/vis';
+import VisAggConfigProvider from 'ui/vis/agg_config';
+import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import AggTypesBucketsCreateFilterTermsProvider from 'ui/agg_types/buckets/create_filter/terms';
 describe('AggConfig Filters', function () {
-  let expect = require('expect.js');
-  let ngMock = require('ngMock');
 
   describe('terms', function () {
     let AggConfig;
@@ -11,22 +15,21 @@ describe('AggConfig Filters', function () {
     beforeEach(ngMock.module('kibana', function ($provide) {
       $provide.constant('kbnDefaultAppId', '');
       $provide.constant('kibiDefaultDashboardTitle', '');
-      $provide.constant('elasticsearchPlugins', ['siren-join']);
     }));
     beforeEach(ngMock.inject(function (Private) {
-      Vis = Private(require('ui/Vis'));
-      AggConfig = Private(require('ui/Vis/AggConfig'));
-      indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
-      createFilter = Private(require('ui/agg_types/buckets/create_filter/terms'));
+      Vis = Private(VisProvider);
+      AggConfig = Private(VisAggConfigProvider);
+      indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+      createFilter = Private(AggTypesBucketsCreateFilterTermsProvider);
     }));
 
     it('should return a match filter for terms', function () {
-      let vis = new Vis(indexPattern, {
+      const vis = new Vis(indexPattern, {
         type: 'histogram',
         aggs: [ { type: 'terms', schema: 'segment', params: { field: '_type' } } ]
       });
-      let aggConfig = vis.aggs.byTypeName.terms[0];
-      let filter = createFilter(aggConfig, 'apache');
+      const aggConfig = vis.aggs.byTypeName.terms[0];
+      const filter = createFilter(aggConfig, 'apache');
       expect(filter).to.have.property('query');
       expect(filter.query).to.have.property('match');
       expect(filter.query.match).to.have.property('_type');

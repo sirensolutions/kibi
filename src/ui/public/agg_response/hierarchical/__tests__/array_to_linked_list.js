@@ -1,6 +1,5 @@
-
-let arrayToLinkedList = require('ui/agg_response/hierarchical/_array_to_linked_list');
-let expect = require('expect.js');
+import arrayToLinkedList from 'ui/agg_response/hierarchical/_array_to_linked_list';
+import expect from 'expect.js';
 describe('buildHierarchicalData()', function () {
   describe('arrayToLinkedList', function () {
 

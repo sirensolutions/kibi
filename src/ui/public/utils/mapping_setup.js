@@ -1,11 +1,11 @@
+import angular from 'angular';
+import _ from 'lodash';
 define(function () {
   // kibi: require savedObjectsAPITypes and Promise
-  return function MappingSetupService(kbnIndex, es, savedObjectsAPITypes, Promise) {
-    let angular = require('angular');
-    let _ = require('lodash');
-    let mappingSetup = this;
+  return function MappingSetupService(kbnIndex, esAdmin, savedObjectsAPITypes) {
+    const mappingSetup = this;
 
-    let json = {
+    const json = {
       _serialize: function (val) {
         if (val != null) return angular.toJson(val);
       },
@@ -17,20 +17,20 @@ define(function () {
     /**
      * Use to create the mappings, but that should only happen one at a time
      */
-    let activeTypeCreations = {};
+    const activeTypeCreations = {};
 
     /**
      * Get the list of type's mapped in elasticsearch
      * @return {[type]} [description]
      */
-    let getKnownKibanaTypes = _.once(function () {
-      return es.indices.getFieldMapping({
+    const getKnownKibanaTypes = _.once(function () {
+      return esAdmin.indices.getFieldMapping({
         // only concerned with types in this kibana index
         index: kbnIndex,
         // check all types
         type: '*',
         // limit the response to just the _source field for each index
-        field: '_source'
+        fields: '_source'
       }).then(function (resp) {
         // kbnIndex is not sufficient here, if the kibana indexed is aliased we need to use
         // the root index name as key
@@ -85,13 +85,13 @@ define(function () {
         });
       }
 
-      let prom = getKnownKibanaTypes()
+      const prom = getKnownKibanaTypes()
       .then(function (knownTypes) {
         // if the type is in the knownTypes array already
         if (~knownTypes.indexOf(type)) return false;
 
         // we need to create the mapping
-        let body = {};
+        const body = {};
         body[type] = {
           properties: mapping
         };
@@ -102,7 +102,7 @@ define(function () {
         }
         // kibi: end
 
-        return es.indices.putMapping({
+        return esAdmin.indices.putMapping({
           index: kbnIndex,
           type: type,
           body: body

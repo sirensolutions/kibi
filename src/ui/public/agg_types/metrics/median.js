@@ -1,29 +1,33 @@
-define(function (require) {
-  return function AggTypeMetricMaxProvider(Private) {
-    let _ = require('lodash');
-    let MetricAggType = Private(require('ui/agg_types/metrics/MetricAggType'));
-    let getResponseAggConfigClass = Private(require('ui/agg_types/metrics/getResponseAggConfigClass'));
-    let percentiles = Private(require('ui/agg_types/metrics/percentiles'));
+import AggTypesMetricsMetricAggTypeProvider from 'ui/agg_types/metrics/metric_agg_type';
+import AggTypesMetricsPercentilesProvider from 'ui/agg_types/metrics/percentiles';
+export default function AggTypeMetricMedianProvider(Private) {
 
-    return new MetricAggType({
-      name: 'median',
-      dslName: 'percentiles',
-      title: 'Median',
-      makeLabel: function (aggConfig) {
-        return 'Median ' + aggConfig.params.field.displayName;
+  const MetricAggType = Private(AggTypesMetricsMetricAggTypeProvider);
+  const percentiles = Private(AggTypesMetricsPercentilesProvider);
+
+  return new MetricAggType({
+    name: 'median',
+    dslName: 'percentiles',
+    title: 'Median',
+    makeLabel: function (aggConfig) {
+      return 'Median ' + aggConfig.getFieldDisplayName();
+    },
+    params: [
+      {
+        name: 'field',
+        filterFieldTypes: 'number'
       },
-      params: [
-        {
-          name: 'field',
-          filterFieldTypes: 'number'
-        },
-        {
-          name: 'percents',
-          default: [50]
+      {
+        name: 'percents',
+        default: [50]
+      },
+      {
+        write(agg, output) {
+          output.params.keyed = false;
         }
-      ],
-      getResponseAggs: percentiles.getResponseAggs,
-      getValue: percentiles.getValue
-    });
-  };
-});
+      }
+    ],
+    getResponseAggs: percentiles.getResponseAggs,
+    getValue: percentiles.getValue
+  });
+};

@@ -1,15 +1,18 @@
-const ngMock = require('ngMock');
+import ShouldEntityUriBeEnabledProvider from 'ui/kibi/components/commons/_should_entity_uri_be_enabled';
+import noDigestPromises from 'test_utils/no_digest_promises';
+import ngMock from 'ng_mock';
+import expect from 'expect.js';
+import _ from 'lodash';
+import mockSavedObjects from 'fixtures/kibi/mock_saved_objects';
+
 let shouldEntityUriBeEnabled;
-const expect = require('expect.js');
-const _ = require('lodash');
-const mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
 
 describe('Kibi Components', function () {
   describe('Commons', function () {
 
     describe('_should_entity_uri_be_enabled use query ids', function () {
 
-      require('testUtils/noDigestPromises').activateForSuite();
+      noDigestPromises.activateForSuite();
 
       beforeEach(function () {
         ngMock.module('kibana');
@@ -71,7 +74,7 @@ describe('Kibi Components', function () {
         });
 
         ngMock.inject(function (Private) {
-          shouldEntityUriBeEnabled = Private(require('ui/kibi/components/commons/_should_entity_uri_be_enabled'));
+          shouldEntityUriBeEnabled = Private(ShouldEntityUriBeEnabledProvider);
         });
       });
 

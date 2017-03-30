@@ -1,17 +1,13 @@
-define(function (require) {
-  return function DatasourceHelperFactory(savedDatasources) {
+export default function DatasourceHelperFactory(savedDatasources) {
 
-    function DatasourceHelper() {
-    }
+  function DatasourceHelper() {
+  }
 
-    DatasourceHelper.prototype.getDatasourceType = function (datasourceId) {
-      return savedDatasources.get(datasourceId).then(function (datasource) {
-        return datasource.datasourceType;
-      });
-    };
-
-
-    return new DatasourceHelper();
+  DatasourceHelper.prototype.getDatasourceType = function (datasourceId) {
+    return savedDatasources.get(datasourceId).then(function (datasource) {
+      return datasource.datasourceType;
+    });
   };
 
-});
+  return new DatasourceHelper();
+};

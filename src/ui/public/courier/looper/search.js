@@ -1,35 +1,38 @@
-define(function (require) {
-  return function SearchLooperService(Private, Promise, createNotifier, $rootScope) {
-    let fetch = Private(require('ui/courier/fetch/fetch'));
-    let searchStrategy = Private(require('ui/courier/fetch/strategy/search'));
-    let requestQueue = Private(require('ui/courier/_request_queue'));
+import FetchProvider from '../fetch';
+import SearchStrategyProvider from '../fetch/strategy/search';
+import RequestQueueProvider from '../_request_queue';
+import LooperProvider from './_looper';
 
-    let Looper = Private(require('ui/courier/looper/_looper'));
-    let notif = createNotifier({ location: 'Search Looper' });
+export default function SearchLooperService(Private, Promise, createNotifier, $rootScope) {
+  const fetch = Private(FetchProvider);
+  const searchStrategy = Private(SearchStrategyProvider);
+  const requestQueue = Private(RequestQueueProvider);
 
-    /**
-     * The Looper which will manage the doc fetch interval
-     * @type {Looper}
-     */
-    let searchLooper = new Looper(null, function () {
-      $rootScope.$broadcast('courier:searchRefresh');
-      return fetch.these(
-        requestQueue.getInactive(searchStrategy)
-      );
+  const Looper = Private(LooperProvider);
+  const notif = createNotifier({ location: 'Search Looper' });
+
+  /**
+   * The Looper which will manage the doc fetch interval
+   * @type {Looper}
+   */
+  const searchLooper = new Looper(null, function () {
+    $rootScope.$broadcast('courier:searchRefresh');
+    return fetch.these(
+      requestQueue.getInactive(searchStrategy)
+    );
+  });
+
+  searchLooper.onHastyLoop = function () {
+    if (searchLooper.afterHastyQueued) return;
+
+    searchLooper.afterHastyQueued = Promise.resolve(searchLooper.active)
+    .then(function () {
+      return searchLooper._loopTheLoop();
+    })
+    .finally(function () {
+      searchLooper.afterHastyQueued = null;
     });
-
-    searchLooper.onHastyLoop = function () {
-      if (searchLooper.afterHastyQueued) return;
-
-      searchLooper.afterHastyQueued = Promise.resolve(searchLooper.active)
-      .then(function () {
-        return searchLooper._loopTheLoop();
-      })
-      .finally(function () {
-        searchLooper.afterHastyQueued = null;
-      });
-    };
-
-    return searchLooper;
   };
-});
+
+  return searchLooper;
+};

@@ -1,17 +1,19 @@
-const sinon = require('auto-release-sinon');
-const ngMock = require('ngMock');
-const expect = require('expect.js');
-const _ = require('lodash');
-const mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
-const isChrome = !!window.chrome && !!window.chrome.webstore;
-const pollUntil = require('./_poll_until');
+import noDigestPromises from 'test_utils/no_digest_promises';
+import sinon from 'auto-release-sinon';
+import ngMock from 'ng_mock';
+import expect from 'expect.js';
+import _ from 'lodash';
+import pollUntil from './_poll_until';
+import mockSavedObjects from 'fixtures/kibi/mock_saved_objects';
 
-require('../kibi_sync_time_to');
+import '../kibi_sync_time_to';
+
+const isChrome = !!window.chrome && !!window.chrome.webstore;
 
 describe('Kibi Components', function () {
   describe('kibi_sync_time_to', function () {
 
-    require('testUtils/noDigestPromises').activateForSuite();
+    noDigestPromises.activateForSuite();
 
     let $timeout;
     let $rootScope;
@@ -143,7 +145,6 @@ describe('Kibi Components', function () {
         function ($provide) {
           $provide.constant('kbnDefaultAppId', '');
           $provide.constant('kibiDefaultDashboardTitle', '');
-          $provide.constant('elasticsearchPlugins', ['siren-join']);
           $provide.service('$route', function () {
             return {
               reload: _.noop

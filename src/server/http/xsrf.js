@@ -2,8 +2,6 @@ import { badRequest } from 'boom';
 
 export default function (kbnServer, server, config) {
   const disabled = config.get('server.xsrf.disableProtection');
-  // COMPAT: We continue to check on the kbn-version header for backwards
-  // compatibility since all existing consumers have been required to use it.
   const versionHeader = 'kbn-version';
   const xsrfHeader = 'kbn-xsrf';
 

@@ -1,0 +1,18 @@
+=== Kibi 5.2.2 and Kibana 5.2.2 Release Notes
+
+The 5.2.2 release of Kibi requires Elasticsearch 5.2 or later.
+
+==== Kibana Changes
+
+[float]
+[[bugfixes]]
+===== Bug Fixes
+Build::
+* {k4issue}9652[Issue 9652]: Kibana builds now include a NOTICE file
+Console::
+* {k4pull}10244[Pull Request 10244]: Literal strings in JSON editor are now more clearly identifiable
+Management::
+* {k4pull}10521[Pull Request 10521]: Attempting to import a missing type now results in a warning
+Visualize::
+* {k4issue}10153[Issue 10153]: Fixed regression where include and exclude patterns triggered an error
+* {k4issue}10295[Issue 10295]: Fixed regression where grouped bar charts did not properly scale down their y-axis

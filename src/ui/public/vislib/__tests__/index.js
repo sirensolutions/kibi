@@ -1,18 +1,18 @@
+import _ from 'lodash';
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import d3 from 'd3';
 
-let _ = require('lodash');
-let expect = require('expect.js');
-let ngMock = require('ngMock');
-let d3 = require('d3');
-require('ui/vislib/styles/main.less');
-
-let angular = require('angular');
+import angular from 'angular';
+import 'ui/vislib/styles/main.less';
+import VislibProvider from 'ui/vislib';
 
 describe('Vislib Index Test Suite', function () {
   let vislib;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    vislib = Private(require('ui/vislib'));
+    vislib = Private(VislibProvider);
   }));
 
   it('should return an object', function () {

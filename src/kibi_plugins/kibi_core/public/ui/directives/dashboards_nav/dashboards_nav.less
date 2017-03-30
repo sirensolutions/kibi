@@ -1,0 +1,84 @@
+@import (reference) "~ui/styles/mixins";
+@import (reference) "~ui/styles/variables";
+@import (reference) "./variables";
+
+@logo-height: 70px;
+
+.dashboards-nav {
+  position: fixed;
+  width: 0;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 0;
+  background-color: #e4e4e4;
+  overflow: hidden;
+
+  .menu {
+    height: @logo-height;
+    flex: 1;
+    flex-direction: column;
+    display: flex;
+    justify-content: space-between;
+    padding: 34px 6px 0 6px;
+    input {
+      border: none;
+    }
+  }
+
+  &.is-dashboards-nav-visible {
+    width: @dashboards-nav-closed-width;
+    left: @global-nav-closed-width;
+
+    + .app-wrapper {
+      left: @global-nav-closed-width + @dashboards-nav-closed-width;
+    }
+
+    &.is-global-nav-open {
+      left: @global-nav-open-width;
+
+      + .app-wrapper {
+        left: @global-nav-open-width + @dashboards-nav-closed-width;
+      }
+    }
+
+    &.is-dashboards-nav-open {
+      width: @dashboards-nav-open-width;
+
+      + .app-wrapper {
+        left: @global-nav-closed-width + @dashboards-nav-open-width;
+      }
+
+      &.is-global-nav-open {
+        + .app-wrapper {
+          left: @global-nav-open-width + @dashboards-nav-open-width;
+        }
+      }
+    }
+  }
+
+  /**
+   * 3. Allow user to scroll to see clipped nav items when the nav is too short.
+   * 4. Style the scrollbar to look good in Chrome and Safari.
+   */
+  .links {
+    height: 100%;
+    overflow-x: hidden; /* 3 */
+    overflow-y: auto; /* 3 */
+
+    &::-webkit-scrollbar { /* 4 */
+      width: 16px;
+      height: 16px;
+    }
+
+    &::-webkit-scrollbar-thumb { /* 4 */
+      background-color: #2f99c1;
+      border: 6px solid transparent;
+      background-clip: content-box;
+    }
+
+    &::-webkit-scrollbar-track { /* 4 */
+      background-color: transparent;
+    }
+  }
+}

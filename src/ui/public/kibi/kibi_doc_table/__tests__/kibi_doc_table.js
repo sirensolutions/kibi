@@ -1,12 +1,12 @@
-const angular = require('angular');
-const expect = require('expect.js');
-const $ = require('jquery');
-const _ = require('lodash');
-const sinon = require('auto-release-sinon');
-const searchResponse = require('fixtures/search_response');
-const ngMock = require('ngMock');
-
-require('ui/kibi/kibi_doc_table');
+import angular from 'angular';
+import expect from 'expect.js';
+import $ from 'jquery';
+import _ from 'lodash';
+import sinon from 'auto-release-sinon';
+import searchResponse from 'fixtures/search_response';
+import ngMock from 'ng_mock';
+import 'ui/kibi/kibi_doc_table';
+import StubbedSearchSourceProvider from 'fixtures/stubbed_search_source';
 
 describe('Kibi doc table', function () {
   let $elem;
@@ -44,7 +44,6 @@ describe('Kibi doc table', function () {
   beforeEach(ngMock.module('kibana', function ($provide) {
     $provide.constant('kbnDefaultAppId', '');
     $provide.constant('kibiDefaultDashboardTitle', '');
-    $provide.constant('elasticsearchPlugins', ['siren-join']);
   }));
 
   beforeEach(function () {
@@ -57,7 +56,7 @@ describe('Kibi doc table', function () {
         sorting="sorting">
       </kibi-doc-table>`);
     ngMock.inject(function (Private) {
-      searchSource = Private(require('fixtures/stubbed_search_source'));
+      searchSource = Private(StubbedSearchSourceProvider);
     });
     init($elem, {
       searchSource: searchSource,
@@ -73,10 +72,6 @@ describe('Kibi doc table', function () {
 
   it('should compile', function () {
     expect($elem.text()).to.not.be.empty();
-  });
-
-  it('should set the source filtering defintion', function () {
-    expect($scope.indexPattern.getSourceFiltering.called).to.be(true);
   });
 
   it('should set the indexPattern to that of the searchSource', function () {
@@ -293,7 +288,7 @@ describe('Kibi doc table', function () {
         expect(call.args[0].slices).to.eql([
           'time,one,two,"with double-quotes("")"' + '\r\n' +
             // "-" this is the time column since the index pattern has a time field.
-            '"-",1,2,"""foobar"""' + '\r\n'
+            '" - ",1,2,"""foobar"""' + '\r\n'
         ]);
         expect(call.args[0].opts).to.eql({
           type: 'text/plain'
@@ -339,10 +334,6 @@ describe('Kibi doc table', function () {
         });
         expect(call.args[1]).to.be('my-table.csv');
       });
-    });
-
-    it('should set the source filtering definition', function () {
-      expect($scope.indexPattern.getSourceFiltering.called).to.be(true);
     });
   });
 });

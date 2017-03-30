@@ -1,10 +1,10 @@
-var _ = require('lodash');
-var Promise = require('bluebird');
+const _ = require('lodash');
+const Promise = require('bluebird');
 
 module.exports = Promise.method(function (kbnServer, server) {
-  var self = this;
+  const self = this;
 
-  var clean = _.once(function (code) {
+  const clean = _.once(function (code) {
 
     return kbnServer.cleaningArray.reduce(function (p, task) {
       return p.then(task());

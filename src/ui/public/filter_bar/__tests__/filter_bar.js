@@ -1,13 +1,15 @@
-let angular = require('angular');
-let _ = require('lodash');
-let $ = require('jquery');
-let ngMock = require('ngMock');
-let expect = require('expect.js');
-let sinon = require('sinon');
+import angular from 'angular';
+import _ from 'lodash';
+import ngMock from 'ng_mock';
+import expect from 'expect.js';
+import sinon from 'sinon';
 
-require('ui/filter_bar');
-let mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
-let MockState = require('fixtures/mock_state');
+import mockSavedObjects from 'fixtures/kibi/mock_saved_objects';
+import MockState from 'fixtures/mock_state';
+import $ from 'jquery';
+import 'ui/filter_bar';
+import FilterBarLibMapFilterProvider from 'ui/filter_bar/lib/map_filter';
+import FilterBarQueryFilterProvider from 'ui/filter_bar/query_filter';
 
 describe('Filter Bar Directive', function () {
   let $rootScope;
@@ -19,7 +21,7 @@ describe('Filter Bar Directive', function () {
   let mapFilter;
   let $el;
   let $scope;
-  // require('testUtils/noDigestPromises').activateForSuite();
+  // require('test_utils/no_digest_promises').activateForSuite();
 
   beforeEach(ngMock.module('kibana/global_state', function ($provide) {
     $provide.service('getAppState', _.constant(_.constant(
@@ -32,7 +34,6 @@ describe('Filter Bar Directive', function () {
     ngMock.module('kibana', function ($provide) {
       $provide.constant('kbnDefaultAppId', '');
       $provide.constant('kibiDefaultDashboardTitle', '');
-      $provide.constant('elasticsearchPlugins', ['siren-join']);
 
       $provide.service('kibiState', function () {
         return new MockState({
@@ -69,88 +70,87 @@ describe('Filter Bar Directive', function () {
       $rootScope = _$rootScope_;
       $compile = _$compile_;
       Promise = $injector.get('Promise');
-      mapFilter = Private(require('ui/filter_bar/lib/mapFilter'));
+      mapFilter = Private(FilterBarLibMapFilterProvider);
 
-      let queryFilter = Private(require('ui/filter_bar/query_filter'));
+      const queryFilter = Private(FilterBarQueryFilterProvider);
       queryFilter.getFilters = function () {
         return appState.filters;
       };
     });
   });
 
-  function init(filters) {
-    return function (done) {
-      Promise.map(filters, mapFilter).then(function (filters) {
-        appState.filters = filters;
-        $el = $compile('<filter-bar></filter-bar>')($rootScope);
-        $scope = $el.isolateScope();
-      });
+  function init(filters, done) {
+    Promise.map(filters, mapFilter).then(function (filters) {
+      appState.filters = filters;
+      $el = $compile('<filter-bar></filter-bar>')($rootScope);
+      $scope = $el.isolateScope();
+    });
 
-      let off = $rootScope.$on('filterbar:updated', function () {
-        off();
-        // force a nextTick so it continues *after* the $digest loop completes
-        setTimeout(done, 0);
-      });
+    const off = $rootScope.$on('filterbar:updated', function () {
+      off();
+      // force a nextTick so it continues *after* the $digest loop completes
+      setTimeout(done, 0);
+    });
 
-      // kick off the digest loop
-      $rootScope.$digest();
-    };
+    // kick off the digest loop
+    $rootScope.$digest();
   }
 
-  describe('join sequence alias', function () {
-
-    beforeEach(() => init([
-      {
-        meta: {
-          index: 'logstash-*',
-          alias: '123 articles',
-          alias_tmpl: '$COUNT articles',
-          buttons: []
+  describe('KIBI', function () {
+    describe('join sequence alias', function () {
+      beforeEach((done) => init([
+        {
+          meta: {
+            index: 'logstash-*',
+            alias: '123 articles',
+            alias_tmpl: '$COUNT articles',
+            buttons: []
+          },
+          join_sequence: {
+            reverse: _.noop
+          }
         },
-        join_sequence: {
-          reverse: _.noop
+        {
+          meta: {
+            index: 'logstash-*'
+          },
+          exists: {
+            field: '@timestamp'
+          }
         }
-      },
-      {
-        meta: {
-          index: 'logstash-*'
-        },
-        exists: {
-          field: '@timestamp'
-        }
-      }
-    ])());
+      ], done));
 
-    it('should leave the alias as is', function () {
-      expect($scope.state.filters[0].meta.alias).to.be('123 articles');
-    });
+      it('should leave the alias as is', function () {
+        expect($scope.state.filters[0].meta.alias).to.be('123 articles');
+      });
 
-    it('should replace the count with dots if a filter is added', function () {
-      expect($scope.state.filters[0].meta.alias).to.be('123 articles');
-      $scope.state.filters.push({ meta: { index: 'logstash-*' }, query: { match: { '_type': { query: 'apache' } } } });
-      $scope.$digest();
-      expect($scope.state.filters[0].meta.alias).to.be('... articles');
-    });
+      it('should replace the count with dots if a filter is added', function () {
+        expect($scope.state.filters[0].meta.alias).to.be('123 articles');
+        $scope.state.filters.push({ meta: { index: 'logstash-*' }, query: { match: { '_type': { query: 'apache' } } } });
+        $scope.$digest();
+        expect($scope.state.filters[0].meta.alias).to.be('... articles');
+      });
 
-    it('should replace the count with dots if a filter is removed', function () {
-      expect($scope.state.filters[0].meta.alias).to.be('123 articles');
-      $scope.state.filters.pop();
-      $scope.$digest();
-      expect($scope.state.filters[0].meta.alias).to.be('... articles');
+      it('should replace the count with dots if a filter is removed', function () {
+        expect($scope.state.filters[0].meta.alias).to.be('123 articles');
+        $scope.state.filters.pop();
+        $scope.$digest();
+        expect($scope.state.filters[0].meta.alias).to.be('... articles');
+      });
     });
   });
 
   describe('Element rendering', function () {
-    beforeEach(() => init([
-      { meta: { index: 'logstash-*' }, query: { match: { '_type': { query: 'apache' } } } },
-      { meta: { index: 'logstash-*' }, query: { match: { '_type': { query: 'nginx' } } } },
-      { meta: { index: 'logstash-*' }, exists: { field: '@timestamp' } },
-      { meta: { index: 'logstash-*' }, missing: { field: 'host' }, disabled: true },
-      { meta: { index: 'logstash-*', alias: 'foo' }, query: { match: { '_type': { query: 'nginx' } } } },
-    ])());
+    beforeEach(done => init([
+        { meta: { index: 'logstash-*' }, query: { match: { '_type': { query: 'apache' } } } },
+        { meta: { index: 'logstash-*' }, query: { match: { '_type': { query: 'nginx' } } } },
+        { meta: { index: 'logstash-*' }, exists: { field: '@timestamp' } },
+        { meta: { index: 'logstash-*' }, missing: { field: 'host' }, disabled: true },
+        { meta: { index: 'logstash-*', alias: 'foo' }, query: { match: { '_type': { query: 'nginx' } } } },
+    ], done));
 
     it('should render all the filters in state', function () {
-      let filters = $el.find('.filter');
+      const filters = $el.find('.filter');
       expect(filters).to.have.length(5);
       expect($(filters[0]).find('span')[0].innerHTML).to.equal('_type:');
       expect($(filters[0]).find('span')[1].innerHTML).to.equal('"apache"');
@@ -163,7 +163,7 @@ describe('Filter Bar Directive', function () {
     });
 
     it('should be able to set an alias', function () {
-      let filter = $el.find('.filter')[4];
+      const filter = $el.find('.filter')[4];
       expect($(filter).find('span')[0].innerHTML).to.equal('foo');
     });
 

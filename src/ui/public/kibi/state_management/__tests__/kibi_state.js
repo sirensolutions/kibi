@@ -1,15 +1,17 @@
-const chrome = require('ui/chrome');
-const moment = require('moment');
-const sinon = require('auto-release-sinon');
-const _ = require('lodash');
-const MockState = require('fixtures/mock_state');
-const mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
-const Promise = require('bluebird');
-const expect = require('expect.js');
-const ngMock = require('ngMock');
-const dateMath = require('ui/utils/dateMath');
+import Notifier from 'ui/notify/notifier';
+import * as onPage from 'ui/kibi/utils/on_page';
+import moment from 'moment';
+import sinon from 'auto-release-sinon';
+import _ from 'lodash';
+import Promise from 'bluebird';
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import MockState from 'fixtures/mock_state';
+import mockSavedObjects from 'fixtures/kibi/mock_saved_objects';
+import { parseWithPrecision } from 'ui/kibi/utils/date_math_precision';
+import noDigestPromises from 'test_utils/no_digest_promises';
 
-require('ui/kibi/state_management/kibi_state');
+import 'ui/kibi/state_management/kibi_state';
 
 describe('State Management', function () {
   let $location;
@@ -22,18 +24,25 @@ describe('State Management', function () {
 
   let disableFiltersIfOutdatedSpy;
 
-  let onDashboardTabSpy;
-  let onSettingsTabSpy;
-  let onVisualizeTabSpy;
+  let onDashboardPageSpy;
+  let onManagementPageSpy;
+  let onVisualizePageSpy;
 
   const defaultStartTime = '2006-09-01T12:00:00.000Z';
   const defaultEndTime = '2010-09-05T12:00:00.000Z';
 
-  const init = function ({ kibiEnterpriseEnabled = false, pinned, savedDashboards = [], savedSearches = [], indexPatterns = [],
-                         currentPath = '/dashboard', currentDashboardId = 'dashboard1' }) {
+  const init = function ({
+      kibiEnterpriseEnabled = false,
+      pinned,
+      savedDashboards = [],
+      savedSearches = [],
+      indexPatterns = [],
+      currentPath = '/dashboard',
+      currentDashboardId = 'dashboard1'
+    } = {}) {
     ngMock.module('kibana', 'kibana/courier', 'kibana/global_state', ($provide) => {
       $provide.service('$route', () => {
-        var myRoute = {
+        const myRoute = {
           current: {
             locals: {
               dash: {
@@ -54,15 +63,21 @@ describe('State Management', function () {
       });
 
       globalState = new MockState({ filters: pinned || [] });
-      $provide.service('globalState', () => {
-        return globalState;
-      });
+      $provide.service('globalState', () => globalState);
 
+      $provide.service('esAdmin', (Promise) => {
+        return {
+          cat: {
+            plugins() {
+              return Promise.resolve([ { component: 'siren-platform' } ]);
+            }
+          }
+        };
+      });
       $provide.constant('kbnIndex', '.kibi');
       $provide.constant('kibiEnterpriseEnabled', kibiEnterpriseEnabled);
       $provide.constant('kbnDefaultAppId', '');
       $provide.constant('kibiDefaultDashboardTitle', '');
-      $provide.constant('elasticsearchPlugins', ['siren-join']);
     });
 
     ngMock.module('kibana/index_patterns', function ($provide) {
@@ -78,9 +93,9 @@ describe('State Management', function () {
     });
 
     ngMock.inject(function (_indexPatterns_, _timefilter_, _config_, _$location_, _kibiState_) {
-      onDashboardTabSpy = sinon.stub(chrome, 'onDashboardTab').returns(currentPath.split('/')[1] === 'dashboard');
-      onVisualizeTabSpy = sinon.stub(chrome, 'onVisualizeTab').returns(currentPath.split('/')[1] === 'visualize');
-      onSettingsTabSpy = sinon.stub(chrome, 'onSettingsTab').returns(currentPath.split('/')[1] === 'settings');
+      onDashboardPageSpy = sinon.stub(onPage, 'onDashboardPage').returns(currentPath.split('/')[1] === 'dashboard');
+      onVisualizePageSpy = sinon.stub(onPage, 'onVisualizePage').returns(currentPath.split('/')[1] === 'visualize');
+      onManagementPageSpy = sinon.stub(onPage, 'onManagementPage').returns(currentPath.split('/')[1] === 'settings');
 
       indexPatternsService = _indexPatterns_;
       timefilter = _timefilter_;
@@ -95,6 +110,8 @@ describe('State Management', function () {
         from: defaultStartTime,
         to: defaultEndTime
       };
+
+      config.set('query:queryString:options', {analyze_wildcard: true});
       config.set('timepicker:timeDefaults', defaultTime);
       timefilter.time = defaultTime;
     });
@@ -102,10 +119,41 @@ describe('State Management', function () {
 
   describe('Kibi State', function () {
 
-    require('testUtils/noDigestPromises').activateForSuite();
+    noDigestPromises.activateForSuite();
+
+    // https://github.com/elastic/kibana/pull/8822 ensure that the notifier is emptied by each test
+    afterEach(() => {
+      Notifier.prototype._notifs.length = 0;
+    });
+
+    describe('_isDefaultQuery', function () {
+      beforeEach(() => init());
+
+      it('should be a default query', function () {
+        const query = {
+          query_string: {
+            query: '*',
+            analyze_wildcard: true
+          }
+        };
+
+        expect(kibiState._isDefaultQuery(query)).to.be(true);
+      });
+
+      it('should not be a default query', function () {
+        const query = {
+          query_string: {
+            query: 'dog',
+            analyze_wildcard: true
+          }
+        };
+
+        expect(kibiState._isDefaultQuery(query)).to.be(false);
+      });
+    });
 
     describe('handle state with outdated filters', function () {
-      beforeEach(() => init({}));
+      beforeEach(() => init());
 
       it('should disable join_sequence filter if the version is not set', function () {
         const filters = [
@@ -137,7 +185,7 @@ describe('State Management', function () {
 
     describe('selected entity', function () {
       describe('isEntitySelected', function () {
-        beforeEach(() => init({}));
+        beforeEach(() => init());
 
         it('should return true if the given entity is the one selected', function () {
           const index = 'a';
@@ -202,14 +250,14 @@ describe('State Management', function () {
         it('should not return the entity when on discover tab', function () {
           const entityURI = 'a/b/c/d';
 
-          init({});
+          init();
 
           kibiState.setEntityURI(entityURI);
           expect(kibiState.getEntityURI()).to.be(entityURI);
 
-          onVisualizeTabSpy.returns(false);
-          onSettingsTabSpy.returns(false);
-          onDashboardTabSpy.returns(false);
+          onVisualizePageSpy.returns(false);
+          onManagementPageSpy.returns(false);
+          onDashboardPageSpy.returns(false);
           expect(kibiState.getEntityURI).to.throwException(/Cannot get entity URI/);
         });
 
@@ -217,32 +265,32 @@ describe('State Management', function () {
           const entityURI1 = 'a/b/c/d';
           const entityURI2 = 'e/f/g/h';
 
-          init({});
+          init();
 
           kibiState.setEntityURI(entityURI1);
           expect(kibiState.getEntityURI()).to.be(entityURI1);
 
-          onVisualizeTabSpy.returns(true);
-          onSettingsTabSpy.returns(false);
-          onDashboardTabSpy.returns(false);
+          onVisualizePageSpy.returns(true);
+          onManagementPageSpy.returns(false);
+          onDashboardPageSpy.returns(false);
           kibiState.setEntityURI(entityURI2);
           expect(kibiState.getEntityURI()).to.be(entityURI2);
 
-          onVisualizeTabSpy.returns(false);
-          onSettingsTabSpy.returns(true);
-          onDashboardTabSpy.returns(false);
+          onVisualizePageSpy.returns(false);
+          onManagementPageSpy.returns(true);
+          onDashboardPageSpy.returns(false);
           expect(kibiState.getEntityURI()).to.be(entityURI2);
 
-          onVisualizeTabSpy.returns(false);
-          onSettingsTabSpy.returns(false);
-          onDashboardTabSpy.returns(true);
+          onVisualizePageSpy.returns(false);
+          onManagementPageSpy.returns(false);
+          onDashboardPageSpy.returns(true);
           expect(kibiState.getEntityURI()).to.be(entityURI1);
         });
       });
     });
 
     describe('Relations', function () {
-      beforeEach(() => init({}));
+      beforeEach(() => init());
 
       it('getEnabledRelations should return an empty array if no j', function () {
         expect(kibiState.getEnabledRelations()).to.eql([]);
@@ -370,16 +418,15 @@ describe('State Management', function () {
         expect(kibiState.toObject()).to.eql({ fizz: 'buzz' });
       });
 
-      it('should not have a dashboard entry if every dashboard has no filter, default query/time', function (done) {
-        kibiState.getState('dashboard0')
+      it('should not have a dashboard entry if every dashboard has no filter, default query/time', function () {
+        return kibiState.getState('dashboard0')
         .then(({ filters, queries, time }) => {
           expect(filters).to.have.length(0);
           expect(queries).to.have.length(1);
           expect(kibiState._isDefaultQuery(queries[0])).to.be(true);
           expect(kibiState[kibiState._properties.dashboards]).to.not.be.ok();
           expect(time).to.be(null);
-          done();
-        }).catch(done);
+        });
       });
 
       it('should fail if dashboard is not passed', function (done) {
@@ -439,7 +486,7 @@ describe('State Management', function () {
       }));
 
       it('get saved dashboard and saved search the order of dashboardIds should be preserved' , function (done) {
-        var ignoreMissingSavedSearch = true;
+        const ignoreMissingSavedSearch = true;
         // this tests checks that although the savedDashboard order is
         // 'Articles', 'search-ste'
         // when we provide the ids in reverse order like 'search-ste', 'Articles'
@@ -455,7 +502,7 @@ describe('State Management', function () {
       });
 
       it('get saved dashboard and saved search the order of dashboardIds should be preserved 2' , function (done) {
-        var ignoreMissingSavedSearch = true;
+        const ignoreMissingSavedSearch = true;
         kibiState._getDashboardAndSavedSearchMetas([ 'Articles', 'search-ste'], ignoreMissingSavedSearch).then(function (results) {
           expect(results).to.have.length(2);
           expect(results[0].savedDash.id).to.be('Articles');
@@ -485,7 +532,7 @@ describe('State Management', function () {
       });
 
       it('should NOT reject if saved search is missing for dashboard but ignoreMissingSavedSearch=true', function (done) {
-        var ignoreMissingSavedSearch = true;
+        const ignoreMissingSavedSearch = true;
         kibiState._getDashboardAndSavedSearchMetas([ 'Articles', 'search-ste' ], ignoreMissingSavedSearch).then(function (results) {
           done();
         }).catch(done);
@@ -711,8 +758,8 @@ describe('State Management', function () {
           expect(state1.time).to.eql({
             range: {
               date: {
-                gte: dateMath.parseWithPrecision('2006-09-01T12:00:00.000Z', false).valueOf(),
-                lte: dateMath.parseWithPrecision('2009-09-01T12:00:00.000Z', true).valueOf(),
+                gte: parseWithPrecision('2006-09-01T12:00:00.000Z', false).valueOf(),
+                lte: parseWithPrecision('2009-09-01T12:00:00.000Z', true).valueOf(),
                 format: 'epoch_millis'
               }
             }
@@ -720,8 +767,8 @@ describe('State Management', function () {
           expect(state2.time).to.eql({
             range: {
               date: {
-                gte: dateMath.parseWithPrecision('2004-09-01T12:00:00.000Z', false).valueOf(),
-                lte: dateMath.parseWithPrecision('2010-09-01T12:00:00.000Z', true).valueOf(),
+                gte: parseWithPrecision('2004-09-01T12:00:00.000Z', false).valueOf(),
+                lte: parseWithPrecision('2010-09-01T12:00:00.000Z', true).valueOf(),
                 format: 'epoch_millis'
               }
             }
@@ -736,8 +783,8 @@ describe('State Management', function () {
           expect(time).to.eql({
             range: {
               date: {
-                gte: dateMath.parseWithPrecision(defaultStartTime, false).valueOf(),
-                lte: dateMath.parseWithPrecision(defaultEndTime, true).valueOf(),
+                gte: parseWithPrecision(defaultStartTime, false).valueOf(),
+                lte: parseWithPrecision(defaultEndTime, true).valueOf(),
                 format: 'epoch_millis'
               }
             }
@@ -881,8 +928,8 @@ describe('State Management', function () {
         kibiState.getState('dashboard2')
         .then(({ queries }) => {
           expect(queries).to.have.length(2);
-          queries[0].query.query_string.query = 'toto';
-          queries[1].query.query_string.query = 'tata';
+          queries[0].query_string.query = 'toto';
+          queries[1].query_string.query = 'tata';
           expect(kibiState._getDashboardProperty('dashboard2', kibiState._properties.query).query_string.query).to.be('mobile');
           done();
         }).catch(done);
@@ -899,8 +946,8 @@ describe('State Management', function () {
         kibiState.getState('dashboard1')
         .then(({ queries }) => {
           expect(queries).to.have.length(2);
-          queries[0].query.query_string.query = 'toto';
-          queries[1].query.query_string.query = 'tata';
+          queries[0].query_string.query = 'toto';
+          queries[1].query_string.query = 'tata';
           expect(appState.query.query_string.query).to.be('mobile');
           done();
         }).catch(done);
@@ -922,8 +969,8 @@ describe('State Management', function () {
         kibiState._setDashboardProperty('dashboard2', kibiState._properties.query, query2);
         Promise.all([ kibiState.getState('dashboard1'), kibiState.getState('dashboard2') ])
         .then(([ state1, state2 ]) => {
-          expect(state1.queries).to.eql([ { query: query1 }, { query: { query_string: { query: 'torrent' } } } ]);
-          expect(state2.queries).to.eql([ { query: query2 }, { query: { query_string: { query: 'torrent' } } } ]);
+          expect(state1.queries).to.eql([ query1, { query_string: { query: 'torrent' } } ]);
+          expect(state2.queries).to.eql([ query2, { query_string: { query: 'torrent' } } ]);
           done();
         }).catch(done);
       });
@@ -939,8 +986,8 @@ describe('State Management', function () {
         kibiState._setDashboardProperty('dashboard2', kibiState._properties.query, query);
         Promise.all([ kibiState.getState('dashboard1'), kibiState.getState('dashboard2') ])
         .then(([ state1, state2 ]) => {
-          expect(state1.queries).to.eql([ { query: { query_string: { query: 'torrent' } } } ]);
-          expect(state2.queries).to.eql([ { query: { query_string: { query: 'torrent' } } } ]);
+          expect(state1.queries).to.eql([ { query_string: { query: 'torrent' } } ]);
+          expect(state2.queries).to.eql([ { query_string: { query: 'torrent' } } ]);
           done();
         }).catch(done);
       });
@@ -1031,6 +1078,25 @@ describe('State Management', function () {
         }).catch(done);
       });
 
+      it('should tag filters coming from the associated saved search', function (done) {
+        const filters = [
+          {
+            term: { field1: 'bbb' },
+            meta: { disabled: false }
+          }
+        ];
+
+        appState.filters = filters;
+        kibiState.getState('dashboard1')
+        .then(({ filters }) => {
+          const appStateFilter = _.find(filters, 'term.field1', 'bbb');
+          expect(appStateFilter.meta.fromSavedSearch).not.to.be.ok();
+          const savedSearchFilter = _.find(filters, 'term.field1', 'aaa');
+          expect(savedSearchFilter.meta.fromSavedSearch).to.be(true);
+          done();
+        }).catch(done);
+      });
+
       it('should not alter the appstate filters', function (done) {
         const filters = [
           {
@@ -1106,7 +1172,8 @@ describe('State Management', function () {
                 field1: 'aaa'
               },
               meta: {
-                disabled: false
+                disabled: false,
+                fromSavedSearch: true
               }
             }
           ];
@@ -1160,7 +1227,8 @@ describe('State Management', function () {
                 field1: 'aaa'
               },
               meta: {
-                disabled: false
+                disabled: false,
+                fromSavedSearch: true
               }
             }
           ];
@@ -1280,7 +1348,7 @@ describe('State Management', function () {
           }).catch(done);
         });
 
-        it('should save appstate to kibistate', function (done) {
+        it('should save appstate to kibistate', function () {
           const filter1 = {
             term: { field1: 'bbb' },
             meta: { disabled: false }
@@ -1300,7 +1368,8 @@ describe('State Management', function () {
           appState.filters = [ filter1 ];
           appState.query = query;
           timefilter.time = time;
-          kibiState.saveAppState()
+
+          return kibiState.saveAppState()
           .then(() => {
             expect(kibiState._getDashboardProperty('dashboard1', kibiState._properties.filters)).to.eql([ filter1 ]);
             expect(kibiState._getDashboardProperty('dashboard1', kibiState._properties.query)).to.eql(query);
@@ -1309,8 +1378,7 @@ describe('State Management', function () {
               f: time.from,
               t: time.to
             });
-            done();
-          }).catch(done);
+          });
         });
 
         it('should save disabled filter to kibistate', function (done) {
@@ -1732,7 +1800,7 @@ describe('State Management', function () {
       });
 
       it('should not emit a reset events if no dashboard got changed', function (done) {
-        var counts = {
+        const counts = {
           reset: 0,
           reset_app_state_query: 0,
           save_with_changes: 0
@@ -1877,7 +1945,7 @@ describe('State Management', function () {
         });
 
         it('should output correct join label 1', function (done) {
-          var relations = [
+          const relations = [
             {
               dashboards: [ 'a', 'b' ],
               relation: 'index-a//id/index-b//id'
@@ -1904,7 +1972,7 @@ describe('State Management', function () {
         });
 
         it('should output correct join label 2', function (done) {
-          var relations = [
+          const relations = [
             {
               dashboards: [ 'a', 'b' ],
               relation: 'index-a//id/index-b//id'
@@ -1931,7 +1999,7 @@ describe('State Management', function () {
         });
 
         it('should output correct join label 3', function (done) {
-          var relations = [
+          const relations = [
             {
               dashboards: [ 'a', 'b' ],
               relation: 'index-a//id/index-b//id'
@@ -1955,10 +2023,10 @@ describe('State Management', function () {
       });
 
       describe('Dashboard IDs in connected component', function () {
-        beforeEach(() => init({}));
+        beforeEach(() => init());
 
         it('should return a, b but not c and d', function () {
-          var relations = [
+          const relations = [
             {
               dashboards: [ 'a', 'b' ]
             },
@@ -1974,7 +2042,7 @@ describe('State Management', function () {
         });
 
         it('should not return anything', function () {
-          var relations = [
+          const relations = [
             {
               dashboards: [ 'a', 'b' ]
             }
@@ -1985,7 +2053,7 @@ describe('State Management', function () {
         });
 
         it('should return only a', function () {
-          var relations = [
+          const relations = [
             {
               dashboards: [ 'a', 'a' ]
             }
@@ -1997,7 +2065,7 @@ describe('State Management', function () {
         });
 
         it('should return a and b', function () {
-          var relations = [
+          const relations = [
             {
               dashboards: [ 'a', 'b' ]
             },
@@ -2013,7 +2081,7 @@ describe('State Management', function () {
         });
 
         it('should support multiple relations between two dashboards', function () {
-          var relations = [
+          const relations = [
             {
               dashboards: [ 'a', 'b' ],
               relation: 'index-a//id1/index-b//id1'
@@ -2171,7 +2239,6 @@ describe('State Management', function () {
         });
 
         it('should be disabled/enabled according to relationalPanel', function () {
-          expect(kibiState.isRelationalPanelButtonEnabled()).to.not.be.ok();
           config.set('kibi:relationalPanel', true);
           expect(kibiState.isRelationalPanelButtonEnabled()).to.be.ok();
           config.set('kibi:relationalPanel', false);
@@ -2179,11 +2246,14 @@ describe('State Management', function () {
         });
 
         it('should be enabled if the plugin is installed', function () {
-          expect(kibiState.isSirenJoinPluginInstalled()).to.be.ok();
+          return kibiState.isSirenJoinPluginInstalled()
+          .then(installed => {
+            expect(installed).to.be(true);
+          });
         });
 
         it('should fail if the focused dashboard cannot be retrieved', function (done) {
-          var relDash = {
+          const relDash = {
             dashboards: [ 'dashboard-a', 'does-not-exist' ],
             relation: 'index-a//id/index-b//id'
           };
@@ -2196,7 +2266,7 @@ describe('State Management', function () {
         });
 
         it('should fail if the focused dashboard does not have a saved search', function (done) {
-          var relDash = {
+          const relDash = {
             dashboards: [ 'dashboard-a', 'dashboard-nossid' ],
             relation: 'index-a//id/index-b//id'
           };
@@ -2218,7 +2288,7 @@ describe('State Management', function () {
 
         it('1 should build the join filter', function (done) {
           config.set('kibi:relationalPanel', true);
-          var relDash = {
+          const relDash = {
             dashboards: [ 'dashboard-a', 'dashboard-b' ],
             relation: 'index-a//id/index-b//id'
           };
@@ -2276,13 +2346,13 @@ describe('State Management', function () {
             expect(filters[1].join_set.queries['index-b']).to.be.ok();
             expect(filters[1].join_set.queries['index-b']['dashboard-b']).to.be.ok();
             expect(filters[1].join_set.queries['index-b']['dashboard-b']).to.have.length(3);
-            expect(filters[1].join_set.queries['index-b']['dashboard-b'][0]).to.eql({ query: { query_string: { query: 'bbb' } } });
+            expect(filters[1].join_set.queries['index-b']['dashboard-b'][0]).to.eql({ query_string: { query: 'bbb' } });
             expect(filters[1].join_set.queries['index-b']['dashboard-b'][1]).to.eql({ exists: { field: 'aaa' } });
             expect(filters[1].join_set.queries['index-b']['dashboard-b'][2]).to.eql({
               range: {
                 date: {
-                  gte: dateMath.parseWithPrecision(defaultStartTime, false).valueOf(),
-                  lte: dateMath.parseWithPrecision(defaultEndTime, true).valueOf(),
+                  gte: parseWithPrecision(defaultStartTime, false).valueOf(),
+                  lte: parseWithPrecision(defaultEndTime, true).valueOf(),
                   format: 'epoch_millis'
                 }
               }
@@ -2333,13 +2403,13 @@ describe('State Management', function () {
             expect(filters[1].join_set.queries['index-b']).to.be.ok();
             expect(filters[1].join_set.queries['index-b']['dashboard-b']).to.be.ok();
             expect(filters[1].join_set.queries['index-b']['dashboard-b']).to.have.length(3);
-            expect(filters[1].join_set.queries['index-b']['dashboard-b'][0]).to.eql({ query: { query_string: { query: 'bbb' } } });
+            expect(filters[1].join_set.queries['index-b']['dashboard-b'][0]).to.eql({ query_string: { query: 'bbb' } });
             expect(filters[1].join_set.queries['index-b']['dashboard-b'][1]).to.eql({ not: { exists: { field: 'aaa' } } });
             expect(filters[1].join_set.queries['index-b']['dashboard-b'][2]).to.eql({
               range: {
                 date: {
-                  gte: dateMath.parseWithPrecision(defaultStartTime, false).valueOf(),
-                  lte: dateMath.parseWithPrecision(defaultEndTime, true).valueOf(),
+                  gte: parseWithPrecision(defaultStartTime, false).valueOf(),
+                  lte: parseWithPrecision(defaultEndTime, true).valueOf(),
                   format: 'epoch_millis'
                 }
               }
@@ -2370,22 +2440,18 @@ describe('State Management', function () {
             expect(filters[0].join_set.queries['index-b']['dashboard-b']).to.have.length(3);
             // from the dashboard meta
             expect(filters[0].join_set.queries['index-b']['dashboard-b'][0]).to.eql({
-              query: {
-                query_string: { query: 'ccc' }
-              }
+              query_string: { query: 'ccc' }
             });
             // from the search meta
             expect(filters[0].join_set.queries['index-b']['dashboard-b'][1]).to.eql({
-              query: {
-                query_string: { query: 'bbb' }
-              }
+              query_string: { query: 'bbb' }
             });
             // time
             expect(filters[0].join_set.queries['index-b']['dashboard-b'][2]).to.eql({
               range: {
                 date: {
-                  gte: dateMath.parseWithPrecision(defaultStartTime, false).valueOf(),
-                  lte: dateMath.parseWithPrecision(defaultEndTime, true).valueOf(),
+                  gte: parseWithPrecision(defaultStartTime, false).valueOf(),
+                  lte: parseWithPrecision(defaultEndTime, true).valueOf(),
                   format: 'epoch_millis'
                 }
               }
@@ -2424,19 +2490,17 @@ describe('State Management', function () {
             expect(filters[0].join_set.queries['index-b']['dashboard-b']).to.be.ok();
             expect(filters[0].join_set.queries['index-b']['dashboard-b']).to.have.length(3);
             // from the dashboard meta
-            expect(filters[0].join_set.queries['index-b']['dashboard-b'][0]).to.eql({ query: query });
+            expect(filters[0].join_set.queries['index-b']['dashboard-b'][0]).to.eql(query);
             // from the search meta
             expect(filters[0].join_set.queries['index-b']['dashboard-b'][1]).to.eql({
-              query: {
-                query_string: { query: 'bbb' }
-              }
+              query_string: { query: 'bbb' }
             });
             // time
             expect(filters[0].join_set.queries['index-b']['dashboard-b'][2]).to.eql({
               range: {
                 date: {
-                  gte: dateMath.parseWithPrecision(defaultStartTime, false).valueOf(),
-                  lte: dateMath.parseWithPrecision(defaultEndTime, true).valueOf(),
+                  gte: parseWithPrecision(defaultStartTime, false).valueOf(),
+                  lte: parseWithPrecision(defaultEndTime, true).valueOf(),
                   format: 'epoch_millis'
                 }
               }
@@ -2471,17 +2535,15 @@ describe('State Management', function () {
             expect(filters[0].join_set.queries['index-b']['dashboard-b']).to.be.ok();
             expect(filters[0].join_set.queries['index-b']['dashboard-b']).to.have.length(2);
             expect(filters[0].join_set.queries['index-b']['dashboard-b'][0]).to.eql({
-              query: {
-                query_string: {
-                  query: 'bbb'
-                }
+              query_string: {
+                query: 'bbb'
               }
             });
             expect(filters[0].join_set.queries['index-b']['dashboard-b'][1]).to.eql({
               range: {
                 date: {
-                  gte: dateMath.parseWithPrecision('2005-09-01T12:00:00.000Z', false).valueOf(),
-                  lte: dateMath.parseWithPrecision('2015-09-05T12:00:00.000Z', true).valueOf(),
+                  gte: parseWithPrecision('2005-09-01T12:00:00.000Z', false).valueOf(),
+                  lte: parseWithPrecision('2015-09-05T12:00:00.000Z', true).valueOf(),
                   format: 'epoch_millis'
                 }
               }

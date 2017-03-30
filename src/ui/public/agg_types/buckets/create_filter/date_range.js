@@ -1,19 +1,17 @@
-define(function (require) {
-  let dateRange = require('ui/utils/date_range');
+import dateRange from 'ui/utils/date_range';
+import buildRangeFilter from 'ui/filter_manager/lib/range';
 
-  return function createDateRangeFilterProvider(config) {
-    let buildRangeFilter = require('ui/filter_manager/lib/range');
+export default function createDateRangeFilterProvider(config) {
 
-    return function (agg, key) {
-      let range = dateRange.parse(key, config.get('dateFormat'));
+  return function (agg, key) {
+    const range = dateRange.parse(key, config.get('dateFormat'));
 
-      let filter = {};
-      if (range.from) filter.gte = +range.from;
-      if (range.to) filter.lt = +range.to;
-      if (range.to && range.from) filter.format = 'epoch_millis';
+    const filter = {};
+    if (range.from) filter.gte = +range.from;
+    if (range.to) filter.lt = +range.to;
+    if (range.to && range.from) filter.format = 'epoch_millis';
 
-      return buildRangeFilter(agg.params.field, filter, agg.vis.indexPattern);
-    };
-
+    return buildRangeFilter(agg.params.field, filter, agg.vis.indexPattern);
   };
-});
+
+};

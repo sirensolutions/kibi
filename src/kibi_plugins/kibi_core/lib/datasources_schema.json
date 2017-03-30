@@ -1,0 +1,465 @@
+{
+  "base": [
+    {
+      "name": "timeout",
+      "label": "Timeout",
+      "inputType": "number",
+      "dataType": "integer",
+      "required": false,
+      "multivalued": false,
+      "encrypted": false,
+      "defaultValue": 1000,
+      "placeholder": "Timeout in ms"
+    }
+  ],
+  "sqlite": [
+    {
+      "name": "db_file_path",
+      "label": "Database file path",
+      "required": true,
+      "multivalued": false,
+      "encrypted": false,
+      "inputType": "text",
+      "defaultValue": "",
+      "placeholder": "Absolute path to the database file"
+    },
+    {
+      "name": "modes",
+      "label": "Database operation modes",
+      "required": false,
+      "multivalued": true,
+      "encrypted": false,
+      "inputType": "select",
+      "possibleValues": [
+        "OPEN_READONLY",
+        "OPEN_READWRITE",
+        "OPEN_CREATE"
+      ],
+      "defaultValues": [
+        "OPEN_READONLY"
+      ],
+      "placeholder": ""
+    },
+    {
+      "name": "cache_enabled",
+      "label": "Cache enabled",
+      "inputType": "checkbox",
+      "required": false,
+      "multivalued": false,
+      "encrypted": false,
+      "defaultValue": false,
+      "placeholder": "Enable server side cache for this datasource"
+    },
+    {
+      "name": "max_age",
+      "label": "Max age of cache entries",
+      "inputType": "number",
+      "dataType": "integer",
+      "required": false,
+      "multivalued": false,
+      "encrypted": false,
+      "defaultValue": 3600000,
+      "placeholder": "The max age of an object in the cache, in milliseconds"
+    }
+  ],
+  "mysql": [
+    {
+      "name": "host",
+      "label": "Database host",
+      "inputType": "text",
+      "required": true,
+      "multivalued": false,
+      "encrypted": false,
+      "defaultValue": "",
+      "placeholder": "Host value e.g: localhost"
+    },
+    {
+      "name": "dbname",
+      "label": "Database name",
+      "inputType": "text",
+      "required": true,
+      "multivalued": false,
+      "encrypted": false,
+      "defaultValue": "",
+      "placeholder": "Database name e.g: MyDatabase"
+    },
+    {
+      "name": "username",
+      "label": "Username",
+      "inputType": "text",
+      "required": true,
+      "multivalued": false,
+      "encrypted": false,
+      "defaultValue": "",
+      "placeholder": "Username"
+    },
+    {
+      "name": "password",
+      "label": "Password",
+      "inputType": "password",
+      "required": false,
+      "multivalued": false,
+      "encrypted": true,
+      "defaultValue": "",
+      "placeholder": "Password"
+    },
+    {
+      "name": "cache_enabled",
+      "label": "Cache enabled",
+      "inputType": "checkbox",
+      "required": false,
+      "multivalued": false,
+      "encrypted": false,
+      "defaultValue": false,
+      "placeholder": "Enable server side cache for this datasource"
+    },
+    {
+      "name": "max_age",
+      "label": "Max age of cache entries",
+      "inputType": "number",
+      "dataType": "integer",
+      "required": false,
+      "multivalued": false,
+      "encrypted": false,
+      "defaultValue": 3600000,
+      "placeholder": "The max age of an object in the cache, in milliseconds"
+    }
+  ],
+  "postgresql": [
+    {
+      "name": "host",
+      "label": "Database host",
+      "inputType": "text",
+      "required": true,
+      "multivalued": false,
+      "encrypted": false,
+      "defaultValue": "",
+      "placeholder": "Host value e.g: localhost"
+    },
+    {
+      "name": "dbname",
+      "label": "Database name",
+      "inputType": "text",
+      "required": true,
+      "multivalued": false,
+      "encrypted": false,
+      "defaultValue": "",
+      "placeholder": "Database name e.g: MyDatabase"
+    },
+    {
+      "name": "username",
+      "label": "Username",
+      "inputType": "text",
+      "required": true,
+      "multivalued": false,
+      "encrypted": false,
+      "defaultValue": "",
+      "placeholder": "Username"
+    },
+    {
+      "name": "password",
+      "label": "Password",
+      "inputType": "password",
+      "required": false,
+      "multivalued": false,
+      "encrypted": true,
+      "defaultValue": "",
+      "placeholder": "Password"
+    },
+    {
+      "name": "cache_enabled",
+      "label": "Cache enabled",
+      "inputType": "checkbox",
+      "required": false,
+      "multivalued": false,
+      "encrypted": false,
+      "defaultValue": false,
+      "placeholder": "Enable server side cache for this datasource"
+    },
+    {
+      "name": "max_age",
+      "label": "Max age of cache entries",
+      "inputType": "number",
+      "dataType": "integer",
+      "required": false,
+      "multivalued": false,
+      "encrypted": false,
+      "defaultValue": 3600000,
+      "placeholder": "The max age of an object in the cache, in milliseconds"
+    }
+  ],
+  "rest": [
+    {
+      "name": "headers",
+      "label": "Headers",
+      "required": false,
+      "multivalued": false,
+      "encrypted": false,
+      "inputType": "list",
+      "listParameters": {
+        "name": {
+          "inputType": "text",
+          "dataType": "string"
+        },
+        "value": {
+          "inputType": "text",
+          "dataType": "string"
+        }
+      },
+      "defaultValue": [],
+      "placeholder": "Headers to be used for each request"
+    },
+    {
+      "name": "params",
+      "label": "Parameters",
+      "required": false,
+      "multivalued": false,
+      "encrypted": false,
+      "inputType": "list",
+      "listParameters": {
+        "name": {
+          "inputType": "text",
+          "dataType": "string"
+        },
+        "value": {
+          "inputType": "text",
+          "dataType": "string"
+        }
+      },
+      "defaultValue": [],
+      "placeholder": "Parameters to be used for each request"
+    },
+    {
+      "name": "url",
+      "label": "URL",
+      "required": true,
+      "multivalued": false,
+      "encrypted": false,
+      "inputType": "text",
+      "defaultValue": "",
+      "placeholder": "Rest API url"
+    },
+    {
+      "name": "response_type",
+      "label": "Response type",
+      "required": true,
+      "multivalued": false,
+      "encrypted": false,
+      "inputType": "select",
+      "defaultValue": "json",
+      "possibleValues": [
+        "json"
+      ],
+      "placeholder": "Http response type"
+    },
+    {
+      "name": "username",
+      "label": "Username",
+      "inputType": "text",
+      "required": false,
+      "multivalued": false,
+      "encrypted": false,
+      "defaultValue": "",
+      "placeholder": "Username"
+    },
+    {
+      "name": "password",
+      "label": "Password",
+      "inputType": "password",
+      "required": false,
+      "multivalued": false,
+      "encrypted": true,
+      "defaultValue": "",
+      "placeholder": "Password"
+    },
+    {
+      "name": "auth_token",
+      "label": "Authorization token",
+      "inputType": "password",
+      "required": false,
+      "multivalued": false,
+      "encrypted": true,
+      "defaultValue": "",
+      "placeholder": "Long-lived token"
+    },
+    {
+      "name": "cache_enabled",
+      "label": "Cache enabled",
+      "inputType": "checkbox",
+      "required": false,
+      "multivalued": false,
+      "encrypted": false,
+      "defaultValue": false,
+      "placeholder": "Enable server side cache for this datasource"
+    },
+    {
+      "name": "max_age",
+      "label": "Max age of cache entries",
+      "inputType": "number",
+      "dataType": "integer",
+      "required": false,
+      "multivalued": false,
+      "encrypted": false,
+      "defaultValue": 3600000,
+      "placeholder": "The max age of an object in the cache, in milliseconds"
+    }
+  ],
+  "sparql_http": [
+    {
+      "name": "endpoint_url",
+      "label": "Endpoint URL",
+      "required": true,
+      "multivalued": false,
+      "encrypted": false,
+      "inputType": "text",
+      "defaultValue": "",
+      "placeholder": "A sparql endpoint url"
+    },
+    {
+      "name": "username",
+      "label": "Username",
+      "inputType": "text",
+      "required": false,
+      "multivalued": false,
+      "encrypted": false,
+      "defaultValue": "",
+      "placeholder": "Username"
+    },
+    {
+      "name": "password",
+      "label": "Password",
+      "inputType": "password",
+      "required": false,
+      "multivalued": false,
+      "encrypted": true,
+      "defaultValue": "",
+      "placeholder": "Password"
+    },
+    {
+      "name": "cache_enabled",
+      "label": "Cache enabled",
+      "inputType": "checkbox",
+      "required": false,
+      "multivalued": false,
+      "encrypted": false,
+      "defaultValue": false,
+      "placeholder": "Enable server side cache for this datasource"
+    },
+    {
+      "name": "max_age",
+      "label": "Max age of cache entries",
+      "inputType": "number",
+      "dataType": "integer",
+      "required": false,
+      "multivalued": false,
+      "encrypted": false,
+      "defaultValue": 3600000,
+      "placeholder": "The max age of an object in the cache, in milliseconds"
+    }
+  ],
+  "jdbc": [
+    {
+      "name": "drivername",
+      "label": "Driver name",
+      "required": true,
+      "multivalued": false,
+      "encrypted": false,
+      "inputType": "text",
+      "defaultValue": "",
+      "placeholder": "JDBC driver class name (e.g. com.mysql.jdbc.Driver)"
+    },
+    {
+      "name": "libpath",
+      "label": "Libraries path",
+      "required": true,
+      "multivalued": false,
+      "encrypted": false,
+      "inputType": "text",
+      "defaultValue": "",
+      "placeholder": "Absolute path to the JDBC driver jar folder"
+    },
+    {
+      "name": "connection_string",
+      "label": "Connection string",
+      "required": true,
+      "multivalued": false,
+      "encrypted": false,
+      "inputType": "text",
+      "defaultValue": "",
+      "placeholder": "Connection string without username and password"
+    },
+    {
+      "name": "libs",
+      "label": "Libraries",
+      "required": false,
+      "multivalued": true,
+      "encrypted": false,
+      "inputType": "text",
+      "defaultValue": "",
+      "placeholder": "Comma separated list of jars (can be just filenames, if in libpath folder, or absolute paths otherwise)"
+    },
+    {
+      "name": "username",
+      "label": "Username",
+      "inputType": "text",
+      "required": false,
+      "multivalued": false,
+      "encrypted": false,
+      "defaultValue": "",
+      "placeholder": "Username"
+    },
+    {
+      "name": "password",
+      "label": "Password",
+      "inputType": "password",
+      "required": false,
+      "multivalued": false,
+      "encrypted": true,
+      "defaultValue": "",
+      "placeholder": "Password"
+    },
+    {
+      "name": "cache_enabled",
+      "label": "Cache enabled",
+      "inputType": "checkbox",
+      "required": false,
+      "multivalued": false,
+      "encrypted": false,
+      "defaultValue": false,
+      "placeholder": "Enable server side cache for this datasource"
+    },
+    {
+      "name": "max_age",
+      "label": "Max age of cache entries",
+      "inputType": "number",
+      "dataType": "integer",
+      "required": false,
+      "multivalued": false,
+      "encrypted": false,
+      "defaultValue": 3600000,
+      "placeholder": "The max age of an object in the cache, in milliseconds"
+    }
+  ],
+  "tinkerpop3": [
+    {
+      "name": "url",
+      "label": "Gremlin Server URL",
+      "required": true,
+      "multivalued": false,
+      "encrypted": false,
+      "inputType": "text",
+      "defaultValue": "",
+      "placeholder": "Gremlin Server URL"
+    },
+    {
+      "name": "timeout",
+      "label": "Timeout",
+      "inputType": "text",
+      "required": false,
+      "multivalued": false,
+      "encrypted": false,
+      "defaultValue": 5000,
+      "placeholder": "Timeout in ms"
+    }
+  ]
+}

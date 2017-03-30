@@ -1,0 +1,31 @@
+<div
+  class="dashboards-nav-control"
+  ng-class="{ disabled: !isActive, isOpen: isOpen }"
+  tooltip="{{ tooltipContent }}"
+  tooltip-placement="right"
+  tooltip-popup-delay="0"
+  tooltip-append-to-body="1"
+>
+  <a
+    class="anchor"
+    ng-click="onClick({ $event: $event })"
+    title="{{ title }}"
+  >
+    <div class="icon">
+      <i
+         ng-if="iconCss"
+         class="icon-image {{iconCss}}"
+      ></i>
+
+      <img
+         ng-if="kbnIcon"
+         class="icon-image"
+         kbn-src="{{ '/' + kbnIcon }}"
+      />
+    </div>
+
+    <div ng-if="title" class="title">
+      {{ title }}
+    </div>
+  </a>
+</div>

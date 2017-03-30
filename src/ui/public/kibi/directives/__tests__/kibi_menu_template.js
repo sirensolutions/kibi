@@ -1,10 +1,10 @@
-const ngMock = require('ngMock');
-const expect = require('expect.js');
-const sinon = require('auto-release-sinon');
-const angular = require('angular');
-const _ = require('lodash');
-
-require('../kibi_menu_template');
+import jQuery from 'jquery';
+import ngMock from 'ng_mock';
+import expect from 'expect.js';
+import sinon from 'auto-release-sinon';
+import angular from 'angular';
+import _ from 'lodash';
+import '../kibi_menu_template';
 
 describe('Kibi Components', function () {
   describe('Kibi Menu Template', function () {
@@ -14,42 +14,39 @@ describe('Kibi Components', function () {
     let $document;
     let $menu;
 
-    const init = function ({template = '', items = [], context = {}, onShow, onHide, leftOffset}) {
+    const init = function ({ template = '', items = [], context = {}, onShow, onHide, leftOffset } =  {}) {
 
       ngMock.module('kibana');
 
-      ngMock.inject(function ($compile, _$rootScope_, _$document_) {
+      ngMock.inject(function ($window, $compile, _$rootScope_, _$document_) {
         $scope = _$rootScope_;
         $document = _$document_;
         $scope.template = template;
-        $scope.items = items;
-        $scope.context = context;
+        $scope.locals = { items, context };
         $scope.onShow = onShow;
         $scope.onHide = onHide;
 
-        let html =
-          '<span style="height: 10px;"' +
-          '  kibi-menu-template="template"' +
-          '  kibi-menu-template-data="items"' +
-          '  kibi-menu-template-context="context"' +
-          '  kibi-menu-template-on-show-fn="onShow()"' +
-          '  kibi-menu-template-on-hide-fn="onHide()"';
-        if (leftOffset) {
-          html += ' kibi-menu-template-left-offset="' + leftOffset + '"';
-        }
-        html += '>Text</span>';
+        const html = `
+          <span style="height: 10px;"
+            kibi-menu-template="template"
+            kibi-menu-template-locals="locals"
+            kibi-menu-template-on-show-fn="onShow()"
+            kibi-menu-template-on-hide-fn="onHide()"
+            ${leftOffset ? ` kibi-menu-template-left-offset="${leftOffset}"` : ''}
+          >Text</span>`;
 
         $element = angular.element(html);
         $compile($element)($scope);
         $scope.$digest();
         $menu = $document.find('body div.kibi-menu-template');
+        jQuery($window).scrollTop(0); // there can be a scroll bar when running tests, this cancels it.
       });
     };
 
     describe('empty template', function () {
 
       it('check that container was appended to body, and destroyed', function () {
-        init({});
+        init();
 
         expect($menu.size()).to.equal(1);
         expect($menu[0].children.length).to.equal(0);
@@ -68,7 +65,7 @@ describe('Kibi Components', function () {
         });
 
         it('visible class added removed correctly', function () {
-          init({});
+          init();
           expect($menu.size()).to.equal(1);
 
           // click to show
@@ -81,7 +78,7 @@ describe('Kibi Components', function () {
         });
 
         it('click outside element should hide menu', function () {
-          init({});
+          init();
           expect($menu.size()).to.equal(1);
 
           // click to show
@@ -98,6 +95,7 @@ describe('Kibi Components', function () {
         it('onHide and onShow should be triggered', function () {
           const onShowSpy = sinon.spy();
           const onHideSpy = sinon.spy();
+
           init({
             onShow: onShowSpy,
             onHide: onHideSpy
@@ -113,7 +111,7 @@ describe('Kibi Components', function () {
         });
 
         it('position properties set correctly', function () {
-          init({});
+          init();
 
           expect($menu.size()).to.equal(1);
 
@@ -121,7 +119,7 @@ describe('Kibi Components', function () {
           $element.click();
 
           expect($menu.css('left')).to.equal('0px');
-          expect($menu.css('top')).to.equal($element.height() + 'px');
+          expect($menu.css('top')).to.equal($element.css('height'));
         });
 
         it('position properties set correctly when kibiMenuTemplateLeftOffset set', function () {
@@ -135,7 +133,7 @@ describe('Kibi Components', function () {
           $element.click();
 
           expect($menu.css('left')).to.equal('123px');
-          expect($menu.css('top')).to.equal($element.height() + 'px');
+          expect($menu.css('top')).to.equal($element.css('height'));
         });
 
       });
@@ -149,7 +147,7 @@ describe('Kibi Components', function () {
 
       it('using context data variable was correctly replaced', function () {
         init({
-          template: '<span>{{kibiMenuTemplateContext.name}}</span>',
+          template: '<span>{{kibiMenuTemplateLocals.context.name}}</span>',
           context: { name: 'foo' }
         });
 
@@ -160,14 +158,14 @@ describe('Kibi Components', function () {
 
         // now lets change the name
         $scope.$apply(function () {
-          $scope.context.name = 'boo';
+          $scope.locals.context.name = 'boo';
         });
         expect($menu.find('span').text()).to.equal('boo');
       });
 
     });
 
-    describe('template with ng-repaat', function () {
+    describe('template with ng-repeat', function () {
 
       afterEach(function () {
         $scope.$destroy();
@@ -175,7 +173,7 @@ describe('Kibi Components', function () {
 
       it('using items data variables should be correctly replaced', function () {
         init({
-          template: '<span ng-repeat="item in kibiMenuTemplateData">{{item.name}}</span>',
+          template: '<span ng-repeat="item in kibiMenuTemplateLocals.items">{{item.name}}</span>',
           items: [
             { name: 'A'},
             { name: 'B'}
@@ -190,7 +188,7 @@ describe('Kibi Components', function () {
 
         // now lets change the name
         $scope.$apply(function () {
-          $scope.items.push({name: 'C'});
+          $scope.locals.items.push({name: 'C'});
         });
         expect($menu.find('span:nth-child(3)').text()).to.equal('C');
       });
@@ -200,7 +198,7 @@ describe('Kibi Components', function () {
         const clickOnB = sinon.spy();
 
         init({
-          template: '<span ng-repeat="item in kibiMenuTemplateData" ng-click="item.click()">{{item.name}}</span>',
+          template: '<span ng-repeat="item in kibiMenuTemplateLocals.items" ng-click="item.click()">{{item.name}}</span>',
           items: [
             { name: 'A', click: clickOnA},
             { name: 'B', click: clickOnB}

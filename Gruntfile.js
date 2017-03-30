@@ -1,18 +1,18 @@
-require('babel/register')(require('./src/optimize/babelOptions').node);
+require('babel/register')(require('./src/optimize/babel_options').node);
 
 module.exports = function (grunt) {
   // set the config once before calling load-grunt-config
   // and once during so that we have access to it via
   // grunt.config.get() within the config files
-  var config = {
+  const config = {
     pkg: grunt.file.readJSON('package.json'),
     root: __dirname,
     src: __dirname + '/src',
     buildDir: __dirname + '/build', // temporary build directory
-    plugins: __dirname + '/src/plugins',
+    plugins: __dirname + '/src/core_plugins',
     server: __dirname + '/src/server',
     target: __dirname + '/target', // location of the compressed build targets
-    testUtilsDir: __dirname + '/src/testUtils',
+    testUtilsDir: __dirname + '/src/test_utils',
     configFile: __dirname + '/src/config/kibana.yml',
 
     karmaBrowser: (function () {
@@ -37,15 +37,6 @@ module.exports = function (grunt) {
         ' * Copyright (c) <%= grunt.template.today("yyyy") %> <%= package.author.company %>;' +
         ' Licensed <%= package.license %> */\n'
     },
-
-    lintThese: [
-      'Gruntfile.js',
-      '<%= root %>/tasks/**/*.js',
-      '<%= root %>/test/**/*.js',
-      '<%= src %>/**/*.js',
-      '!<%= src %>/fixtures/**/*.js',
-      '!<%= root %>/test/fixtures/scenarios/**/*.js'
-    ]
   };
 
   grunt.config.merge(config);

@@ -4,15 +4,18 @@ module.exports = function (grunt) {
       options: { mode: true },
       src: [
         'src/**',
+        'ui_framework/dist/**',
         'bin/**',
         'webpackShims/**',
         'config/kibi.yml', // kibi: renamed kibana to kibi
         '!src/**/__tests__/**',
-        '!src/testUtils/**',
+        '!src/test_utils/**',
         '!src/fixtures/**',
-        '!src/plugins/devMode/**',
-        '!src/plugins/testsBundle/**',
+        '!src/core_plugins/dev_mode/**',
+        '!src/core_plugins/tests_bundle/**',
+        '!src/core_plugins/console/public/tests/**',
         '!src/cli/cluster/**',
+        '!src/ui_framework/doc_site/**',
       ],
       dest: 'build/kibana',
       expand: true

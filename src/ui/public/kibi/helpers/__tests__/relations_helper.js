@@ -1,5 +1,7 @@
-const expect = require('expect.js');
-const ngMock = require('ngMock');
+import RelationsHelperProvider from 'ui/kibi/helpers/relations_helper';
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+
 let relationsHelper;
 let $rootScope;
 
@@ -7,9 +9,9 @@ function init({ kibiEnterpriseEnabled = false }) {
   ngMock.module('kibana', function ($provide) {
     $provide.constant('kibiEnterpriseEnabled', kibiEnterpriseEnabled);
   });
-  ngMock.inject(function (_$rootScope_, _config_, Private) {
+  ngMock.inject(function (_$rootScope_, Private) {
     $rootScope = _$rootScope_;
-    relationsHelper = Private(require('ui/kibi/helpers/relations_helper'));
+    relationsHelper = Private(RelationsHelperProvider);
   });
 }
 

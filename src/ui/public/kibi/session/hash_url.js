@@ -1,5 +1,5 @@
 import angular from 'angular';
-import rison from 'ui/utils/rison';
+import rison from 'rison-node';
 
 import {
   createStateHash,

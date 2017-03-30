@@ -1,10 +1,13 @@
+import _ from 'lodash';
+import $ from 'jquery';
+import ngMock from 'ng_mock';
+import expect from 'expect.js';
+import fixtures from 'fixtures/fake_hierarchical_data';
+import sinon from 'auto-release-sinon';
+import AggResponseTabifyTabifyProvider from 'ui/agg_response/tabify/tabify';
+import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import VisProvider from 'ui/vis';
 describe('AggTable Directive', function () {
-  let _ = require('lodash');
-  let $ = require('jquery');
-  let ngMock = require('ngMock');
-  let expect = require('expect.js');
-  let fixtures = require('fixtures/fake_hierarchical_data');
-  let sinon = require('auto-release-sinon');
 
   let $rootScope;
   let $compile;
@@ -15,12 +18,11 @@ describe('AggTable Directive', function () {
   beforeEach(ngMock.module('kibana', function ($provide) {
     $provide.constant('kbnDefaultAppId', '');
     $provide.constant('kibiDefaultDashboardTitle', '');
-    $provide.constant('elasticsearchPlugins', ['siren-join']);
   }));
   beforeEach(ngMock.inject(function ($injector, Private) {
-    tabifyAggResponse = Private(require('ui/agg_response/tabify/tabify'));
-    indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
-    Vis = Private(require('ui/Vis'));
+    tabifyAggResponse = Private(AggResponseTabifyTabifyProvider);
+    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    Vis = Private(VisProvider);
 
     $rootScope = $injector.get('$rootScope');
     $compile = $injector.get('$compile');
@@ -36,10 +38,10 @@ describe('AggTable Directive', function () {
 
 
   it('renders a simple response properly', function () {
-    let vis = new Vis(indexPattern, 'table');
+    const vis = new Vis(indexPattern, 'table');
     $scope.table = tabifyAggResponse(vis, fixtures.metricOnly, { canSplit: false });
 
-    let $el = $compile('<kbn-agg-table table="table"></kbn-agg-table>')($scope);
+    const $el = $compile('<kbn-agg-table table="table"></kbn-agg-table>')($scope);
     $scope.$digest();
 
     expect($el.find('tbody').size()).to.be(1);
@@ -49,14 +51,14 @@ describe('AggTable Directive', function () {
 
   it('renders nothing if the table is empty', function () {
     $scope.table = null;
-    let $el = $compile('<kbn-agg-table table="table"></kbn-agg-table>')($scope);
+    const $el = $compile('<kbn-agg-table table="table"></kbn-agg-table>')($scope);
     $scope.$digest();
 
     expect($el.find('tbody').size()).to.be(0);
   });
 
   it('renders a complex response properly', function () {
-    let vis = new Vis(indexPattern, {
+    const vis = new Vis(indexPattern, {
       type: 'pie',
       aggs: [
         { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
@@ -70,27 +72,27 @@ describe('AggTable Directive', function () {
     });
 
     $scope.table = tabifyAggResponse(vis, fixtures.threeTermBuckets, { canSplit: false });
-    let $el = $('<kbn-agg-table table="table"></kbn-agg-table>');
+    const $el = $('<kbn-agg-table table="table"></kbn-agg-table>');
     $compile($el)($scope);
     $scope.$digest();
 
     expect($el.find('tbody').size()).to.be(1);
 
-    let $rows = $el.find('tbody tr');
+    const $rows = $el.find('tbody tr');
     expect($rows.size()).to.be.greaterThan(0);
 
     function validBytes(str) {
       expect(str).to.match(/^\d+$/);
-      let bytesAsNum = _.parseInt(str);
+      const bytesAsNum = _.parseInt(str);
       expect(bytesAsNum === 0 || bytesAsNum > 1000).to.be.ok();
     }
 
     $rows.each(function (i) {
       // 6 cells in every row
-      let $cells = $(this).find('td');
+      const $cells = $(this).find('td');
       expect($cells.size()).to.be(6);
 
-      let txts = $cells.map(function () {
+      const txts = $cells.map(function () {
         return $(this).text().trim();
       });
 
@@ -110,11 +112,11 @@ describe('AggTable Directive', function () {
 
   describe('aggTable.toCsv()', function () {
     it('escapes and formats the rows and columns properly', function () {
-      let $el = $compile('<kbn-agg-table table="table">')($scope);
+      const $el = $compile('<kbn-agg-table table="table">')($scope);
       $scope.$digest();
 
-      let $tableScope = $el.isolateScope();
-      let aggTable = $tableScope.aggTable;
+      const $tableScope = $el.isolateScope();
+      const aggTable = $tableScope.aggTable;
 
       $tableScope.table = {
         columns: [
@@ -151,13 +153,13 @@ describe('AggTable Directive', function () {
     });
 
     it('calls _saveAs properly', function () {
-      let $el = $compile('<kbn-agg-table table="table">')($scope);
+      const $el = $compile('<kbn-agg-table table="table">')($scope);
       $scope.$digest();
 
-      let $tableScope = $el.isolateScope();
-      let aggTable = $tableScope.aggTable;
+      const $tableScope = $el.isolateScope();
+      const aggTable = $tableScope.aggTable;
 
-      let saveAs = sinon.stub(aggTable, '_saveAs');
+      const saveAs = sinon.stub(aggTable, '_saveAs');
       $tableScope.table = {
         columns: [
           { title: 'one' },
@@ -173,25 +175,25 @@ describe('AggTable Directive', function () {
       aggTable.exportAsCsv();
 
       expect(saveAs.callCount).to.be(1);
-      let call = saveAs.getCall(0);
+      const call = saveAs.getCall(0);
       expect(call.args[0]).to.be.a(FakeBlob);
       expect(call.args[0].slices).to.eql([
         'one,two,"with double-quotes("")"' + '\r\n' +
         '1,2,"""foobar"""' + '\r\n'
       ]);
       expect(call.args[0].opts).to.eql({
-        type: 'text/plain'
+        type: 'text/plain;charset=utf-8'
       });
       expect(call.args[1]).to.be('somefilename.csv');
     });
 
     it('should use the export-title attribute', function () {
-      let expected = 'export file name';
-      let $el = $compile(`<kbn-agg-table table="table" export-title="exportTitle">`)($scope);
+      const expected = 'export file name';
+      const $el = $compile(`<kbn-agg-table table="table" export-title="exportTitle">`)($scope);
       $scope.$digest();
 
-      let $tableScope = $el.isolateScope();
-      let aggTable = $tableScope.aggTable;
+      const $tableScope = $el.isolateScope();
+      const aggTable = $tableScope.aggTable;
       $tableScope.table = {
         columns: [],
         rows: []

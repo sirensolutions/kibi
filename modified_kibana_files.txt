@@ -11,12 +11,10 @@ docs/settings.asciidoc
 src/cli/cli.js
 src/cli/cluster/ClusterManager.js
 src/cli/plugin/__tests__/plugin_downloader.js
-src/cli/plugin/plugin.js
 src/cli/serve/serve.js
 +src/cli/upgrade/upgrade.js
 +src/cli/kibi
 
-src/fixtures/mock_state.js
 src/fixtures/stubbed_doc_source_response.js
 src/fixtures/stubbed_search_source.js
 
@@ -38,7 +36,6 @@ src/plugins/kibana/index.js
 
 +src/plugins/kibana/public/dashboard/__tests__/dashboard_panels.js
 src/plugins/kibana/public/dashboard/components/panel/panel.html
-src/plugins/kibana/public/dashboard/directives/grid.js
 src/plugins/kibana/public/dashboard/components/panel/panel.js
 src/plugins/kibana/public/dashboard/index.html
 src/plugins/kibana/public/dashboard/index.js
@@ -97,7 +94,6 @@ src/server/http/short_url_lookup.js
 src/server/config/schema.js
 src/server/KbnServer.js
 src/server/pid/index.js
-+src/migrations
 
 src/testUtils/stub_index_pattern.js
 +src/testUtils/wrap_async.js
@@ -230,3 +226,9 @@ test/functional/apps/settings/_index_pattern_create_delete.js
 
 webpackShims/ace.js
 webpackShims/angular-sanitize.js
+
+###
+### Kibi 5
+###
+
+src/core_plugins/elasticsearch/lib/kibana_index_mappings.js

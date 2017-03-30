@@ -1,21 +1,20 @@
-import KbnServer from '../../server/KbnServer';
+import KbnServer from '../../server/kbn_server';
 import Promise from 'bluebird';
 import { merge } from 'lodash';
 import Logger from './logger';
 import readYamlConfig from '../serve/read_yaml_config';
 import { resolve } from 'path';
-import requirefrom from 'requirefrom';
-const fromRoot = requirefrom('src/utils')('fromRoot');
+import fromRoot from '../../utils/from_root';
 
-let pathCollector = function () {
-  let paths = [];
+const pathCollector = function () {
+  const paths = [];
   return function (path) {
     paths.push(resolve(process.cwd(), path));
     return paths;
   };
 };
 
-let pluginDirCollector = pathCollector();
+const pluginDirCollector = pathCollector();
 
 /**
  * The command to replace the datasource encryption key.
@@ -41,8 +40,8 @@ export default function (program) {
 
   async function replaceEncryptionKey(currentKey, newKey, newCipher, options) {
 
-    let config = readYamlConfig(options.config);
-    let logger = new Logger(options);
+    const config = readYamlConfig(options.config);
+    const logger = new Logger(options);
 
     merge(
       config,
@@ -73,7 +72,7 @@ export default function (program) {
     try {
       await waitForGreenStatus(kbnServer, 10);
       try {
-        let indexHelper = kbnServer.server.plugins.kibi_core.getIndexHelper();
+        const indexHelper = kbnServer.server.plugins.kibi_core.getIndexHelper();
         await indexHelper.rencryptAllValuesInKibiIndex(currentKey, newCipher, newKey, options.config);
         logger.log('Encryption key replaced successfully.');
       } catch (error) {
@@ -111,8 +110,9 @@ export default function (program) {
       'A path to scan for plugins, this can be specified multiple ' +
       'times to specify multiple directories',
       pluginDirCollector, [
-        fromRoot('installedPlugins'),
-        fromRoot('src/plugins')
+        fromRoot('plugins'), // installed plugins
+        fromRoot('src/core_plugins'), // kibana plugins
+        fromRoot('src/kibi_plugins') // kibi plugins
       ]
     )
     .action(processCommand);

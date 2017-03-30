@@ -1,5 +1,7 @@
-const expect = require('expect.js');
-const ngMock = require('ngMock');
+import SparqlHelperProvider from 'ui/kibi/helpers/sparql_helper';
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+
 let sparqlHelper;
 
 describe('Kibi Components', function () {
@@ -9,7 +11,7 @@ describe('Kibi Components', function () {
     beforeEach(function () {
       ngMock.module('kibana');
       ngMock.inject(function ($injector, Private) {
-        sparqlHelper = Private(require('ui/kibi/helpers/sparql_helper'));
+        sparqlHelper = Private(SparqlHelperProvider);
       });
     });
 

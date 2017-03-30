@@ -1,36 +1,37 @@
-define(function (require) {
-  let _ = require('lodash');
+import savedObjectStrategyProvider from 'ui/courier/fetch/strategy/savedobject';
+import docSourceProvider from 'ui/courier/data_source/doc_source';
+import savedObjectRequestProvider from 'ui/courier/fetch/request/savedobject';
+import _ from 'lodash';
 
-  return function SavedObjectSourceFactory(Private) {
-    let DocSource = Private(require('ui/courier/data_source/doc_source'));
-    let SavedObjectRequest = Private(require('ui/courier/fetch/request/savedobject'));
-    let SavedObjectStrategy = Private(require('ui/courier/fetch/strategy/savedobject'));
+export default function SavedObjectSourceFactory(Private) {
+  const DocSource = Private(docSourceProvider);
+  const SavedObjectRequest = Private(savedObjectRequestProvider);
+  const SavedObjectStrategy = Private(savedObjectStrategyProvider);
 
-    _.class(SavedObjectSource).inherits(DocSource);
-    function SavedObjectSource(initialState) {
-      SavedObjectSource.Super.call(this, initialState, SavedObjectStrategy);
-    }
+  _.class(SavedObjectSource).inherits(DocSource);
+  function SavedObjectSource(initialState) {
+    SavedObjectSource.Super.call(this, initialState, SavedObjectStrategy);
+  }
 
-    /*****
-     * PUBLIC API
-     *****/
+  /*****
+   * PUBLIC API
+   *****/
 
-    SavedObjectSource.prototype._createRequest = function (defer) {
-      return new SavedObjectRequest(this, defer);
-    };
-
-    /*****
-     * PRIVATE API
-     *****/
-
-    /**
-     * Get the type of this SourceAbstract
-     * @return {string} - 'savedObject'
-     */
-    SavedObjectSource.prototype._getType = function () {
-      return 'savedObject';
-    };
-
-    return SavedObjectSource;
+  SavedObjectSource.prototype._createRequest = function (defer) {
+    return new SavedObjectRequest(this, defer);
   };
-});
+
+  /*****
+   * PRIVATE API
+   *****/
+
+  /**
+   * Get the type of this SourceAbstract
+   * @return {string} - 'savedObject'
+   */
+  SavedObjectSource.prototype._getType = function () {
+    return 'savedObject';
+  };
+
+  return SavedObjectSource;
+};

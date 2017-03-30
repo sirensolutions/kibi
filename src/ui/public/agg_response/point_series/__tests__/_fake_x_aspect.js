@@ -1,3 +1,9 @@
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import VisProvider from 'ui/vis';
+import VisAggConfigProvider from 'ui/vis/agg_config';
+import AggTypesAggTypeProvider from 'ui/agg_types/agg_type';
+import AggResponsePointSeriesFakeXAspectProvider from 'ui/agg_response/point_series/_fake_x_aspect';
 describe('makeFakeXAspect', function () {
 
   let makeFakeXAspect;
@@ -5,25 +11,22 @@ describe('makeFakeXAspect', function () {
   let AggType;
   let AggConfig;
   let indexPattern;
-  let expect = require('expect.js');
-  let ngMock = require('ngMock');
 
   beforeEach(ngMock.module('kibana', function ($provide) {
     $provide.constant('kbnDefaultAppId', '');
     $provide.constant('kibiDefaultDashboardTitle', '');
-    $provide.constant('elasticsearchPlugins', ['siren-join']);
   }));
   beforeEach(ngMock.inject(function (Private) {
-    Vis = Private(require('ui/Vis'));
-    AggConfig = Private(require('ui/Vis/AggConfig'));
-    AggType = Private(require('ui/agg_types/AggType'));
-    indexPattern = Private(require('ui/Vis'));
-    makeFakeXAspect = Private(require('ui/agg_response/point_series/_fake_x_aspect'));
+    Vis = Private(VisProvider);
+    AggConfig = Private(VisAggConfigProvider);
+    AggType = Private(AggTypesAggTypeProvider);
+    indexPattern = Private(VisProvider);
+    makeFakeXAspect = Private(AggResponsePointSeriesFakeXAspectProvider);
   }));
 
   it('creates an object that looks like an aspect', function () {
-    let vis = new Vis(indexPattern, { type: 'histogram' });
-    let aspect = makeFakeXAspect(vis);
+    const vis = new Vis(indexPattern, { type: 'histogram' });
+    const aspect = makeFakeXAspect(vis);
 
     expect(aspect)
       .to.have.property('i', -1)

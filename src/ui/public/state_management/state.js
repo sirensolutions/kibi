@@ -1,10 +1,17 @@
+/**
+ * @name State
+ *
+ * @extends Events
+ *
+ * @description Persists generic "state" to and reads it from the URL.
+ */
+
 import _ from 'lodash';
 import angular from 'angular';
-import rison from 'ui/utils/rison';
+import rison from 'rison-node';
 import applyDiff from 'ui/utils/diff_object';
 import EventsProvider from 'ui/events';
 import Notifier from 'kibie/notify/notifier'; // kibi: import Kibi notifier
-import 'ui/config';
 
 import {
   createStateHash,
@@ -12,8 +19,7 @@ import {
   isStateHash,
 } from './state_storage';
 
-export default function StateProvider(createNotifier, Private, $rootScope, $location, config) {
-  const notify = new Notifier();
+export default function StateProvider(Private, $rootScope, $location, config) {
   const Events = Private(EventsProvider);
 
   _.class(State).inherits(Events);
@@ -40,10 +46,14 @@ export default function StateProvider(createNotifier, Private, $rootScope, $loca
       // beginning of full route update, new app will be initialized before
       // $routeChangeSuccess or $routeChangeError
       $rootScope.$on('$routeChangeStart', () => {
+        if (!this._persistAcrossApps) {
+          this.destroy();
+        }
+      }),
+
+      $rootScope.$on('$routeChangeSuccess', () => {
         if (this._persistAcrossApps) {
           this.fetch();
-        } else {
-          this.destroy();
         }
       })
     ]);
@@ -78,13 +88,19 @@ export default function StateProvider(createNotifier, Private, $rootScope, $loca
       $location.search(search).replace();
     }
 
-    if (risonEncoded) {
-      search[this._urlParam] = this.toQueryParam(risonEncoded);
-      $location.search(search).replace();
-      return risonEncoded;
+    if (!risonEncoded) {
+      return null;
     }
 
-    return null;
+    if (this.isHashingEnabled()) {
+      // RISON can find its way into the URL any number of ways, including the navbar links or
+      // shared urls with the entire state embedded. These values need to be translated into
+      // hashes and replaced in the browser history when state-hashing is enabled
+      search[this._urlParam] = this.toQueryParam(risonEncoded);
+      $location.search(search).replace();
+    }
+
+    return risonEncoded;
   };
 
   /**
@@ -105,7 +121,7 @@ export default function StateProvider(createNotifier, Private, $rootScope, $loca
 
     _.defaults(stash, this._defaults);
     // apply diff to state from stash, will change state in place via side effect
-    let diffResults = applyDiff(this, stash);
+    const diffResults = applyDiff(this, stash);
 
     if (diffResults.keys.length) {
       this.emit('fetch_with_changes', diffResults.keys);
@@ -118,7 +134,7 @@ export default function StateProvider(createNotifier, Private, $rootScope, $loca
    */
   State.prototype.save = function (replace, silent) { // kibi: added silent parameter
     let stash = this._readFromURL();
-    let state = this.toObject();
+    const state = this.toObject();
     replace = replace || false;
 
     if (!stash) {
@@ -127,14 +143,14 @@ export default function StateProvider(createNotifier, Private, $rootScope, $loca
     }
 
     // apply diff to state from stash, will change state in place via side effect
-    let diffResults = applyDiff(stash, _.defaults({}, state, this._defaults));
+    const diffResults = applyDiff(stash, _.defaults({}, state, this._defaults));
 
     if (diffResults.keys.length && !silent) { // kibi: do not send events if silent is set
       this.emit('save_with_changes', diffResults.keys);
     }
 
     // persist the state in the URL
-    let search = $location.search();
+    const search = $location.search();
     search[this._urlParam] = this.toQueryParam(state);
     if (replace) {
       $location.search(search).replace();
@@ -159,7 +175,7 @@ export default function StateProvider(createNotifier, Private, $rootScope, $loca
   State.prototype.reset = function () {
     // apply diff to _attributes from defaults, this is side effecting so
     // it will change the state in place.
-    let diffResults = applyDiff(this, this._defaults);
+    const diffResults = applyDiff(this, this._defaults);
     if (diffResults.keys.length) {
       this.emit('reset_with_changes', diffResults.keys);
     }
@@ -210,13 +226,17 @@ export default function StateProvider(createNotifier, Private, $rootScope, $loca
     return rison.encode(this._parseQueryParamValue(hash));
   };
 
+  State.prototype.isHashingEnabled = function () {
+    return !!config.get('state:storeInSessionStorage');
+  };
+
   /**
    *  Produce the hash version of the state in it's current position
    *
    *  @return {string}
    */
   State.prototype.toQueryParam = function (state = this.toObject()) {
-    if (!config.get('state:storeInSessionStorage')) {
+    if (!this.isHashingEnabled()) {
       return rison.encode(state);
     }
 

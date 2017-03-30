@@ -1,0 +1,66 @@
+<div class="kibi-spy">
+  <p>
+  Multi search request duration: {{ multiSearchData.getDuration() }}ms
+  </p>
+  <div ng-repeat="item in multiSearchData.getData()">
+    <button ng-disabled="true" class="btn btn-relational">
+      {{ item.meta.label }}
+      <span> ({{ item.response.hits.total }})</span>
+    </button>
+    <table class="table">
+      <tbody>
+        <tr>
+          <td>Query Duration</td>
+          <td>{{ item.response.took }}ms</td>
+        </tr>
+        <tr>
+          <td>Hits</td>
+          <td>{{ item.response.hits.total }}</td>
+        </tr>
+        <tr>
+          <td>Index</td>
+          <td>{{ item.index }}</td>
+        </tr>
+        <tr>
+          <td>Type</td>
+          <td>{{ item.type || '*' }}</td>
+        </tr>
+        <tr>
+          <td colspan="2">
+            <button class="btn btn-xs" ng-click="showRawRequest = !showRawRequest">Raw Request</button>
+            <pre ng-show="showRawRequest">{{item.query | json}}</pre>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2">
+            <button class="btn btn-xs" ng-click="showRequest = !showRequest">Translated Request</button>
+            <pre ng-show="showRequest">{{item.translatedQuery | json}}</pre>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2">
+            <button class="btn btn-xs" ng-click="showResponse = !showResponse">Response</button>
+            <pre ng-show="showResponse">{{item.response | json}}</pre>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2">
+            <button class="btn btn-xs" ng-click="debug = !debug">Debug</button>
+            <pre ng-show="debug">{{item.actions | json}}</pre>
+          </td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="2">
+            <div class="hintbox" ng-if="showHelp">
+              <p>
+               See the <a href="https://github.com/sirensolutions/siren-join" target="_blank">siren-join</a> documentation for more details.
+              </p>
+            </div>
+          </td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</div>

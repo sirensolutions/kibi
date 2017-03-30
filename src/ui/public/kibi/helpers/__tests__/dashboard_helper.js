@@ -1,6 +1,8 @@
-const expect = require('expect.js');
-const ngMock = require('ngMock');
-const mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
+import noDigestPromises from 'test_utils/no_digest_promises';
+import DashboardHelperProvider from 'ui/kibi/helpers/dashboard_helper';
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import mockSavedObjects from 'fixtures/kibi/mock_saved_objects';
 
 const fakeSavedDashboards = [
   {
@@ -46,7 +48,7 @@ const fakeSavedSearches = [
 describe('Kibi Components', function () {
   describe('Dashboard Helper', function () {
 
-    require('testUtils/noDigestPromises').activateForSuite();
+    noDigestPromises.activateForSuite();
 
     let dashboardHelper;
 
@@ -55,7 +57,6 @@ describe('Kibi Components', function () {
         $provide.constant('kbnDefaultAppId', 'dashboard');
         $provide.constant('kibiDefaultDashboardTitle', '');
         $provide.constant('kibiEnterpriseEnabled', false);
-        $provide.constant('elasticsearchPlugins', ['siren-join']);
         $provide.service('savedDashboards', (Promise, Private) => {
           return mockSavedObjects(Promise, Private)('savedDashboards', fakeSavedDashboards);
         });
@@ -63,7 +64,7 @@ describe('Kibi Components', function () {
       });
 
       ngMock.inject(function (Private) {
-        dashboardHelper = Private(require('ui/kibi/helpers/dashboard_helper'));
+        dashboardHelper = Private(DashboardHelperProvider);
       });
     });
 

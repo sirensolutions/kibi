@@ -1,0 +1,200 @@
+<kbn-management-app section="kibana" class="kuiView">
+  <kbn-management-objects class="kuiViewContent kuiViewContent--constrainedWidth">
+    <!-- Header -->
+    <div class="kuiViewContentItem kuiBar kuiVerticalRhythm">
+      <div class="kuiBarSection">
+        <h1 class="kuiTitle">
+          Edit Saved Objects
+        </h1>
+      </div>
+
+      <div class="kuiBarSection">
+        <button
+          class="kuiButton kuiButton--basic kuiButton--iconText"
+          ng-click="exportAll()"
+        >
+          <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-download"></span>
+          Export Everything
+        </button>
+
+        <file-upload
+          on-read="importAll(fileContents)"
+          upload-selector="[data-import-saved-objects-button]"
+        >
+          <button
+            class="kuiButton kuiButton--basic kuiButton--iconText"
+            data-import-saved-objects-button
+          >
+            <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-upload"></span>
+            Import
+          </button>
+        </file-upload>
+      </div>
+    </div>
+
+    <!-- Intro -->
+    <p class="kuiViewContentItem kuiVerticalRhythm">
+      From here you can delete saved objects, such as saved searches. You can also edit the raw data of saved objects. Typically objects are only modified via their associated application, which is probably what you should use instead of this screen. Each tab is limited to 100 results. You can use the filter to find objects not in the default list.
+    </p>
+
+    <!-- Tabs -->
+    <div class="kuiViewContentItem kuiVerticalRhythm">
+      <div class="kuiTabs">
+        <button
+          class="kuiTab kbn-management-tab"
+          ng-class="{ 'kuiTab-isSelected': state.tab === service.title }"
+          ng-repeat="service in services"
+          title="{{ service.title }}"
+          ng-click="changeTab(service)"
+        >
+          {{ service.title }}
+          <small>
+          ({{service.data.length}}<span ng-show="service.total > service.data.length"> of {{service.total}}</span>)
+          </small>
+        </button>
+      </div>
+    </div>
+
+    <!-- ControlledTable -->
+    <div
+      class="kuiViewContentItem kuiControlledTable kuiVerticalRhythm"
+      ng-repeat="service in services track by $index"
+      ng-show="state.tab === service.title"
+    >
+      <!-- ToolBar -->
+      <div class="kuiToolBar">
+        <div class="kuiToolBarSearch">
+          <div class="kuiToolBarSearchBox">
+            <div class="kuiToolBarSearchBox__icon kuiIcon fa-search"></div>
+            <input
+              class="kuiToolBarSearchBox__input"
+              type="text"
+              placeholder="Search..."
+              aria-label="Filter"
+              ng-model="managementObjectsController.advancedFilter"
+            >
+            <!--kibi: added tooltip for searching with special characters-->
+            <!--KIBI5: add this back somewhere-->
+            <!--<kbn-info class="input-group-addon" placement="left" info="This filter query does not support these characters: +, |, -, *, ( and ). If you need to use them, surround all your query with quotes."></kbn-info>-->
+          </div>
+        </div>
+
+        <div class="kuiToolBarSection">
+          <!-- Bulk delete button -->
+          <button
+            class="kuiButton kuiButton--danger kuiButton--iconText"
+            confirm-click="bulkDelete()"
+            confirmation="Are you sure you want to delete the selected {{currentTab.title}}? This action is irreversible!"
+            aria-label="Delete selected objects"
+            ng-disabled="selectedItems.length == 0"
+          >
+            <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-trash"></span>
+            Delete
+          </button>
+
+          <!-- Bulk export button -->
+          <button
+            class="kuiButton kuiButton--basic kuiButton--iconText"
+            ng-click="bulkExport()"
+            aria-label="Export selected objects"
+            ng-disabled="selectedItems.length == 0"
+          >
+            <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-download"></span>
+            Export
+          </button>
+        </div>
+
+        <div class="kuiToolBarSection">
+          <!-- We need an empty section for the buttons to be positioned consistently. -->
+        </div>
+      </div>
+
+      <!-- NoResults -->
+      <div class="kuiPanel kuiPanel--centered" ng-if="!service.data.length">
+        <div class="kuiNoItems">
+          No {{service.title}} matched your search.
+        </div>
+      </div>
+
+      <!-- Table -->
+      <table class="kuiTable" ng-if="service.data.length">
+        <thead>
+          <tr>
+            <th class="kuiTableHeaderCell kuiTableHeaderCell--checkBox">
+              <input
+                type="checkbox"
+                class="kuiCheckBox"
+                ng-checked="managementObjectsController.areAllRowsChecked()"
+                ng-click="toggleAll()"
+              >
+            </th>
+            <th class="kuiTableHeaderCell">
+              Title
+            </th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr
+            ng-repeat="item in service.data | orderBy:'title'"
+            class="kuiTableRow"
+          >
+            <td class="kuiTableRowCell kuiTableRowCell--checkBox">
+              <input
+                type="checkbox"
+                class="kuiCheckBox"
+                ng-click="toggleItem(item)"
+                ng-checked="selectedItems.indexOf(item) >= 0"
+              >
+            </td>
+            <td class="kuiTableRowCell">
+              <div class="kuiTableRowCell__liner">
+                <a class="kuiLink" href="" ng-click="edit(service, item)">
+                  {{ item.title }}
+                </a>
+
+                <button
+                  class="kuiMicroButton kuiTableRowHoverReveal"
+                  ng-click="open(item)"
+                  aria-label="View"
+                  tooltip="View in app"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="kuiIcon fa-eye"
+                  ></span>
+                </button>
+
+                <!-- siren: icon for object level actions -->
+                <button
+                  ng-repeat="action in objectActions"
+                  ng-click="action.execute(service, item)"
+                  class="kuiMicroButton kuiTableRowHoverReveal"
+                  aria-label="{{ action.label }}"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="kuiIcon {{ action.icon }}"
+                  ></span>
+                </button>
+              </div>
+            </td>
+          </tr>
+
+        </tbody>
+      </table>
+
+      <!-- ToolBarFooter -->
+      <div class="kuiToolBarFooter">
+        <div class="kuiToolBarFooterSection">
+          <div class="kuiToolBarText" ng-hide="selectedItems.length === 0">
+            {{ selectedItems.length }} selected
+          </div>
+        </div>
+        <div class="kuiToolBarFooterSection">
+          <!-- We need an empty section for the buttons to be positioned consistently. -->
+        </div>
+      </div>
+    </div>
+  </kbn-management-objects>
+</kbn-management-app>

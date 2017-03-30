@@ -1,10 +1,12 @@
-
-let _ = require('lodash');
-let fixtures = require('fixtures/fake_hierarchical_data');
-let createRawData = require('ui/agg_response/hierarchical/_create_raw_data');
-let arrayToLinkedList = require('ui/agg_response/hierarchical/_array_to_linked_list');
-let expect = require('expect.js');
-let ngMock = require('ngMock');
+import _ from 'lodash';
+import fixtures from 'fixtures/fake_hierarchical_data';
+import createRawData from 'ui/agg_response/hierarchical/_create_raw_data';
+import arrayToLinkedList from 'ui/agg_response/hierarchical/_array_to_linked_list';
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import VisProvider from 'ui/vis';
+import VisAggConfigsProvider from 'ui/vis/agg_configs';
+import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
 let AggConfigs;
 let Vis;
@@ -18,13 +20,12 @@ describe('buildHierarchicalData()', function () {
     beforeEach(ngMock.module('kibana', function ($provide) {
       $provide.constant('kbnDefaultAppId', '');
       $provide.constant('kibiDefaultDashboardTitle', '');
-      $provide.constant('elasticsearchPlugins', ['siren-join']);
     }));
 
     beforeEach(ngMock.inject(function (Private) {
-      Vis = Private(require('ui/Vis'));
-      AggConfigs = Private(require('ui/Vis/AggConfigs'));
-      indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+      Vis = Private(VisProvider);
+      AggConfigs = Private(VisAggConfigsProvider);
+      indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
     }));
 
     beforeEach(function () {
@@ -38,7 +39,7 @@ describe('buildHierarchicalData()', function () {
           { type: 'terms', schema: 'segment', params: { field: 'geo.src' }}
         ]
       });
-      let buckets = arrayToLinkedList(vis.aggs.bySchemaGroup.buckets);
+      const buckets = arrayToLinkedList(vis.aggs.bySchemaGroup.buckets);
       // We need to set the aggs to a known value.
       _.each(vis.aggs, function (agg) { agg.id = 'agg_' + id++; });
       results = createRawData(vis, fixtures.threeTermBuckets);
@@ -49,7 +50,7 @@ describe('buildHierarchicalData()', function () {
       expect(results.columns).to.have.length(6);
       _.each(results.columns, function (column) {
         expect(column).to.have.property('aggConfig');
-        let agg = column.aggConfig;
+        const agg = column.aggConfig;
         expect(column).to.have.property('categoryName', agg.schema.name);
         expect(column).to.have.property('id', agg.id);
         expect(column).to.have.property('aggType', agg.type);

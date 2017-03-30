@@ -1,7 +1,7 @@
 import expect from 'expect.js';
 import sinon from 'auto-release-sinon';
-import ngMock from 'ngMock';
-import rison from 'ui/utils/rison';
+import ngMock from 'ng_mock';
+import rison from 'rison-node';
 import hashUrl from '../hash_url';
 import {
   hashedItemStoreSingleton,
@@ -19,9 +19,6 @@ describe('kibi/session/hashUrl', () => {
   let hashedItemStoreSpy;
 
   beforeEach(() => {
-    ngMock.module('kibana', ($provide) => {
-      $provide.constant('elasticsearchPlugins', ['siren-join']);
-    });
     hashedItemStoreSpy = sinon.spy(hashedItemStoreSingleton, 'setItem');
   });
 

@@ -5,7 +5,7 @@ function _poll(f, maxTimeInMs, stepInMs, callback, stopTime) {
     }
     return;
   }
-  var currentTime = new Date().getTime();
+  const currentTime = new Date().getTime();
   if (currentTime >= stopTime && callback) {
     callback(new Error('Max time ' + maxTimeInMs + ' reached\nCurrent time ' + currentTime + ' '));
     return;

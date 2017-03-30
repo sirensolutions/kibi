@@ -1,50 +1,49 @@
-define(function (require) {
+import chrome from 'ui/chrome';
+import angular from 'angular';
+import _ from 'lodash';
+import uiModules from 'ui/modules';
 
-  var chrome = require('ui/chrome');
-  const angular = require('angular');
-  var _ = require('lodash');
+uiModules
+.get('kibana/query_engine_client')
+.service('queryEngineClient', function ($http) {
 
-  require('ui/modules').get('kibana/query_engine_client')
-  .service('queryEngineClient', function ($http) {
+  function QueryEngineClient() {}
 
-    function QueryEngineClient() {}
+  QueryEngineClient.prototype._makeRequestToServer = function (url, queryDefs, options) {
+    options = options || {};
+    options.selectedDocuments = _.compact(options.selectedDocuments);
 
-    QueryEngineClient.prototype._makeRequestToServer = function (url, queryDefs, options) {
-      options = options || {};
-      options.selectedDocuments = _.compact(options.selectedDocuments);
+    if (queryDefs && !(queryDefs instanceof Array) && (typeof queryDefs === 'object')) {
+      queryDefs = [queryDefs];
+    }
 
-      if (queryDefs && !(queryDefs instanceof Array) && (typeof queryDefs === 'object')) {
-        queryDefs = [queryDefs];
-      }
-
-      var params = {
-        options: angular.toJson(options),
-        queryDefs: angular.toJson(queryDefs)
-      };
-
-      return $http.get(chrome.getBasePath() + url, { params: params });
+    const params = {
+      options: angular.toJson(options),
+      queryDefs: angular.toJson(queryDefs)
     };
 
-    QueryEngineClient.prototype.getQueriesDataFromServer = function (queryDefs, options) {
-      return this._makeRequestToServer('/getQueriesData', queryDefs, options);
-    };
+    return $http.get(chrome.getBasePath() + url, { params: params });
+  };
 
-    QueryEngineClient.prototype.getQueriesHtmlFromServer = function (queryDefs, options) {
-      return this._makeRequestToServer('/getQueriesHtml', queryDefs, options);
-    };
+  QueryEngineClient.prototype.getQueriesDataFromServer = function (queryDefs, options) {
+    return this._makeRequestToServer('/getQueriesData', queryDefs, options);
+  };
 
-    QueryEngineClient.prototype.gremlin = function (datasourceId, options) {
-      return $http.post(chrome.getBasePath() + '/gremlin', { params: { options, datasourceId } });
-    };
+  QueryEngineClient.prototype.getQueriesHtmlFromServer = function (queryDefs, options) {
+    return this._makeRequestToServer('/getQueriesHtml', queryDefs, options);
+  };
 
-    QueryEngineClient.prototype.gremlinPing = function (url) {
-      return $http.post(chrome.getBasePath() + '/gremlin/ping', { url: url });
-    };
+  QueryEngineClient.prototype.gremlin = function (datasourceId, options) {
+    return $http.post(chrome.getBasePath() + '/gremlin', { params: { options, datasourceId } });
+  };
 
-    QueryEngineClient.prototype.clearCache = function () {
-      return $http.get(chrome.getBasePath() + '/clearCache');
-    };
+  QueryEngineClient.prototype.gremlinPing = function (url) {
+    return $http.post(chrome.getBasePath() + '/gremlin/ping', { url: url });
+  };
 
-    return new QueryEngineClient();
-  });
+  QueryEngineClient.prototype.clearCache = function () {
+    return $http.get(chrome.getBasePath() + '/clearCache');
+  };
+
+  return new QueryEngineClient();
 });

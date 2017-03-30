@@ -1,9 +1,11 @@
-let _ = require('lodash');
-let expect = require('expect.js');
-let ngMock = require('ngMock');
+import _ from 'lodash';
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import AggTypesParamTypesBaseProvider from 'ui/agg_types/param_types/base';
+import AggTypesParamTypesStringProvider from 'ui/agg_types/param_types/string';
 
 module.exports = describe('String', function () {
-  let paramName = 'json_test';
+  const paramName = 'json_test';
   let BaseAggParam;
   let StringAggParam;
   let aggParam;
@@ -12,7 +14,7 @@ module.exports = describe('String', function () {
 
   function initAggParam(config) {
     config = config || {};
-    let defaults = {
+    const defaults = {
       name: paramName,
       type: 'string'
     };
@@ -24,8 +26,8 @@ module.exports = describe('String', function () {
 
   // fetch our deps
   beforeEach(ngMock.inject(function (Private) {
-    BaseAggParam = Private(require('ui/agg_types/param_types/base'));
-    StringAggParam = Private(require('ui/agg_types/param_types/string'));
+    BaseAggParam = Private(AggTypesParamTypesBaseProvider);
+    StringAggParam = Private(AggTypesParamTypesStringProvider);
 
     aggConfig = { params: {} };
     output = { params: {} };
@@ -40,8 +42,8 @@ module.exports = describe('String', function () {
 
   describe('write', function () {
     it('should append param by name', function () {
-      let paramName = 'testing';
-      let params = {};
+      const paramName = 'testing';
+      const params = {};
       params[paramName] = 'some input';
 
       initAggParam({ name: paramName });
@@ -53,8 +55,8 @@ module.exports = describe('String', function () {
     });
 
     it('should not be in output with empty input', function () {
-      let paramName = 'more_testing';
-      let params = {};
+      const paramName = 'more_testing';
+      const params = {};
       params[paramName] = '';
 
       initAggParam({ name: paramName });

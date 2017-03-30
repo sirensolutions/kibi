@@ -1,5 +1,5 @@
-var joinFields = require('../join_fields');
-var expect = require('expect.js');
+import joinFields from '../join_fields';
+import expect from 'expect.js';
 
 describe('Settings', function () {
   describe('Indices', function () {
@@ -9,7 +9,7 @@ describe('Settings', function () {
       });
 
       it('should return index bbb with join on field2 regardless of the order', function () {
-        var relations1 = [
+        const relations1 = [
           {
             indices: [
               {
@@ -23,7 +23,7 @@ describe('Settings', function () {
             ]
           }
         ];
-        var relations2 = [
+        const relations2 = [
           {
             indices: [
               {
@@ -37,9 +37,9 @@ describe('Settings', function () {
             ]
           }
         ];
-        var indexId = 'aaa';
-        var fieldName = 'field1';
-        var expected = [
+        const indexId = 'aaa';
+        const fieldName = 'field1';
+        const expected = [
           {
             indexPatternId: 'bbb',
             path: 'field2'
@@ -51,7 +51,7 @@ describe('Settings', function () {
       });
 
       it('should return index aaa with join on field2', function () {
-        var relations = [
+        const relations = [
           {
             indices: [
               {
@@ -65,9 +65,9 @@ describe('Settings', function () {
             ]
           }
         ];
-        var indexId = 'aaa';
-        var fieldName = 'field1';
-        var expected = [
+        const indexId = 'aaa';
+        const fieldName = 'field1';
+        const expected = [
           {
             indexPatternId: 'aaa',
             path: 'field2'
@@ -78,7 +78,7 @@ describe('Settings', function () {
       });
 
       it('should not return undefined for elements that are not connected', function () {
-        var relations = [
+        const relations = [
           {
             indices: [
               {
@@ -104,9 +104,9 @@ describe('Settings', function () {
             ]
           }
         ];
-        var indexId = 'aaa';
-        var fieldName = 'field1';
-        var expected = [
+        const indexId = 'aaa';
+        const fieldName = 'field1';
+        const expected = [
           {
             indexPatternId: 'bbb',
             path: 'field2'

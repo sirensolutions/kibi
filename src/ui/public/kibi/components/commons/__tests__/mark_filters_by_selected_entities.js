@@ -1,13 +1,15 @@
-let sinon = require('auto-release-sinon');
-let ngMock = require('ngMock');
-let expect = require('expect.js');
-const chrome = require('ui/chrome');
+import MarkFiltersBySelectedEntitiesProvider from 'ui/kibi/components/commons/_mark_filters_by_selected_entities';
+import noDigestPromises from 'test_utils/no_digest_promises';
+import sinon from 'auto-release-sinon';
+import ngMock from 'ng_mock';
+import expect from 'expect.js';
+import * as onPage from 'ui/kibi/utils/on_page';
+import mockSavedObjects from 'fixtures/kibi/mock_saved_objects';
 
 let markFiltersBySelectedEntities;
 let kibiState;
 
-let mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
-let fakeSavedQueries = [
+const fakeSavedQueries = [
   {
     id: 'query1',
     title: '',
@@ -24,13 +26,12 @@ describe('Kibi Components', function () {
   describe('Commons', function () {
     describe('_mark_filters_by_selected_entities', function () {
 
-      require('testUtils/noDigestPromises').activateForSuite();
+      noDigestPromises.activateForSuite();
 
       beforeEach(function () {
         ngMock.module('kibana', function ($provide) {
           $provide.constant('kbnDefaultAppId', '');
           $provide.constant('kibiDefaultDashboardTitle', '');
-          $provide.constant('elasticsearchPlugins', ['siren-join']);
         });
 
         ngMock.module('queries_editor/services/saved_queries', function ($provide) {
@@ -40,14 +41,14 @@ describe('Kibi Components', function () {
         ngMock.inject(function (Private, _kibiState_) {
           kibiState = _kibiState_;
 
-          sinon.stub(chrome, 'onDashboardTab').returns(true);
+          sinon.stub(onPage, 'onDashboardPage').returns(true);
 
-          markFiltersBySelectedEntities = Private(require('ui/kibi/components/commons/_mark_filters_by_selected_entities'));
+          markFiltersBySelectedEntities = Private(MarkFiltersBySelectedEntitiesProvider);
         });
       });
 
       it('should mark dbfilter with query which depends on selected entity and selected entity NOT disabled', function (done) {
-        let filters = [
+        const filters = [
           {
             dbfilter: {
               queryid: 'query1'
@@ -68,7 +69,7 @@ describe('Kibi Components', function () {
       });
 
       it('should mark disabled dbfilter with query which depends on selected document and selected document is disabled', function (done) {
-        let filters = [
+        const filters = [
           {
             dbfilter: {
               queryid: 'query1'
@@ -89,7 +90,7 @@ describe('Kibi Components', function () {
       });
 
       it('should not set dependsOnSelectedEntitiesDisabled to true if filter does not depend on entities', function (done) {
-        let filters = [
+        const filters = [
           {
             dbfilter: {
               queryid: 'query1'
@@ -117,7 +118,7 @@ describe('Kibi Components', function () {
       });
 
       it('should NOT mark dbfilter with query which does NOT depends on selected document', function (done) {
-        let filters = [
+        const filters = [
           {
             dbfilter: {
               queryid: 'query2'
@@ -138,7 +139,7 @@ describe('Kibi Components', function () {
       });
 
       it('query does not exists', function (done) {
-        let filters = [
+        const filters = [
           {
             dbfilter: {
               queryid: 'does-not-exists'

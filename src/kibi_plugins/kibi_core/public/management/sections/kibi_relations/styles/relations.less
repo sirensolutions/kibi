@@ -1,0 +1,142 @@
+@import (reference) "~ui/kibi/styles/kibi_variables.less";
+@import "~ui/kibi/styles/kibi_config_sections.less";
+
+.relations {
+
+  li.bad-relations > a,
+  li.bad-relations > a:hover,
+  li.bad-relations > a:focus {
+    color: @dashboard-panel-load-error-color;
+  }
+
+  td.alignLeft {
+    text-align: right;
+  }
+
+  tr.relation-row td:nth-child(1) table,
+  tr.relation-row td:nth-child(3) table {
+    width: 100%;
+  }
+
+  table.table-condensed {
+    width: 100%;
+  }
+
+  table.relationPart tr td:nth-child(1) {
+    width: 30%;
+  }
+
+  .dashboards-section {
+    border: 2px #fff solid;
+
+    &.highlight {
+      border-color: #dedede;
+    }
+  }
+
+  .indices-section {
+    border: 2px #fff solid;
+    &.highlight {
+      border-color: #dedede;
+    }
+  }
+
+  .btn {
+    margin-top: 5px;
+    margin-bottom: 5px;
+  }
+
+  .indices-relations-config {
+    width: 50%;
+    height: 24px;
+    float: left;
+  }
+  .dashboards-relations-config {
+    width: 49%;
+    float: left;
+    clear: right;
+    height: 24px;
+    .checkbox {
+      margin: 0 0 0 8px;
+      input[type="checkbox"] {
+        margin-left:0;
+      }
+    }
+  }
+  // override the table-condensed cell style to make it more compact
+  .table-condensed > thead > tr > th {
+    border-bottom-width: 1px;
+    height: 50px;
+    vertical-align: bottom;
+  }
+
+  .table-condensed > thead > tr.relation-row > td,
+  .table-condensed > tbody > tr.relation-row > td,
+  .table-condensed > tfoot > tr.relation-row > td {
+    vertical-align: middle;
+    padding-left: 0;
+    &:first-child {
+      padding-left: 5px !important;
+    }
+  }
+
+  input.small-input.form-control {
+    padding: 5px;
+  }
+
+  .table-condensed {
+    margin-bottom: 0;
+  }
+
+  .indices-section {
+    width: 50%;
+    float: left;
+    padding: 8px;
+
+    .indicesGraph{
+      height: 250px;
+      border: 1px #ECF0F1 solid;
+      border-radius: 4px;
+    }
+  }
+
+  .dashboards-section.disabled {
+    opacity: 0.5;
+    background-color: #dedede;
+  }
+
+  .dashboards-section {
+    width: 49%;
+    float: left;
+    padding: 8px;
+
+    .dashboardsGraph{
+      height: 250px;
+      border: 1px #ECF0F1 solid;
+      border-radius: 4px;
+    }
+  }
+
+  .container h2 {
+    margin-top: 0;
+    font-size: 24px;
+  }
+
+  .graphs-section {
+    margin-bottom: 370px;
+  }
+
+  .field-description {
+    color: grey;
+    font-size: 12px;
+  }
+
+  .second-panel {
+    margin-top: 32px;
+  }
+
+  [kibi-relations-search-bar] {
+    margin-top: 20px;
+  }
+}
+

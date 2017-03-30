@@ -1,24 +1,25 @@
-var ngMock = require('ngMock');
-var expect = require('expect.js');
+import IndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import VirtualIndexPatternProvider from 'ui/kibi/components/commons/virtual_index_pattern';
+import ngMock from 'ng_mock';
+import expect from 'expect.js';
+import _ from 'lodash';
 
 describe('Kibi Components', function () {
   describe('Virtual Index Pattern', function () {
-    var _ = require('lodash');
-    var indexPattern;
-    var VirtualIndex;
+    let indexPattern;
+    let VirtualIndexPattern;
 
     beforeEach(function () {
       ngMock.module('kibana');
 
       ngMock.inject(function (Private) {
-        VirtualIndex = Private(require('ui/kibi/components/commons/virtual_index_pattern'));
-        indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+        VirtualIndexPattern = Private(VirtualIndexPatternProvider);
+        indexPattern = Private(IndexPatternProvider);
       });
     });
 
     it('should be a virtual field', function () {
-      var vip = new VirtualIndex(indexPattern);
-      var field = {
+      const virtualField = {
         analyzed: false,
         bucketable: true,
         count: 0,
@@ -28,8 +29,8 @@ describe('Kibi Components', function () {
         sortable: false,
         type: 'string'
       };
+      const vip = new VirtualIndexPattern(indexPattern, virtualField);
 
-      vip.addVirtualField(field);
       expect(_.where(vip.fields, { name: 'aaa' })).not.to.be(undefined);
       expect(_.where(indexPattern.fields, { name: 'aaa' })).to.eql([]);
       expect(vip.fields).to.have.length(indexPattern.fields.length + 1);

@@ -1,16 +1,18 @@
+import 'angular';
+import $ from 'jquery';
+import _ from 'lodash';
+import expect from 'expect.js';
+import sinon from 'auto-release-sinon';
+import ngMock from 'ng_mock';
+import EventsProvider from 'ui/events';
+import ReflowWatcherProvider from 'ui/reflow_watcher';
 describe('Reflow watcher', function () {
-  require('angular');
-  let $ = require('jquery');
-  let _ = require('lodash');
-  let expect = require('expect.js');
-  let sinon = require('auto-release-sinon');
-  let ngMock = require('ngMock');
 
-  let $body = $(document.body);
-  let $window = $(window);
-  let expectStubbedEventAndEl = function (stub, event, $el) {
+  const $body = $(document.body);
+  const $window = $(window);
+  const expectStubbedEventAndEl = function (stub, event, $el) {
     expect(stub.getCalls().some(function (call) {
-      let events = call.args[0].split(' ');
+      const events = call.args[0].split(' ');
       return _.contains(events, event) && $el.is(call.thisValue);
     })).to.be(true);
   };
@@ -20,19 +22,20 @@ describe('Reflow watcher', function () {
   let $rootScope;
   let $onStub;
 
-  beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private, $injector) {
-    $rootScope = $injector.get('$rootScope');
-    EventEmitter = Private(require('ui/events'));
-
+  beforeEach(ngMock.module('kibana', function () {
     // stub jQuery's $.on method while creating the reflowWatcher
     $onStub = sinon.stub($.fn, 'on');
-    reflowWatcher = Private(require('ui/reflow_watcher'));
-    $onStub.restore();
-
+  }));
+  beforeEach(ngMock.inject(function (Private, $injector) {
+    $rootScope = $injector.get('$rootScope');
+    EventEmitter = Private(EventsProvider);
+    reflowWatcher = Private(ReflowWatcherProvider);
     // setup the reflowWatchers $http watcher
     $rootScope.$apply();
   }));
+  afterEach(function () {
+    $onStub.restore();
+  });
 
   it('is an event emitter', function () {
     expect(reflowWatcher).to.be.an(EventEmitter);
@@ -67,7 +70,7 @@ describe('Reflow watcher', function () {
   });
 
   it('triggers the "reflow" event within a new angular tick', function () {
-    let stub = sinon.stub();
+    const stub = sinon.stub();
     reflowWatcher.on('reflow', stub);
     reflowWatcher.trigger();
 

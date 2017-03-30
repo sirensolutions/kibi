@@ -7,7 +7,7 @@
    ng-change="searchRelations()"
    placeholder="Search for relation ...">
   <ul>
-    <li ng-click="relation.onSelect(kibiMenuTemplateContext)" ng-repeat="relation in kibiMenuTemplateData" ng-hide="relation.$$hidden">
+    <li ng-click="relation.onSelect(kibiMenuTemplateLocals.button)" ng-repeat="relation in kibiMenuTemplateLocals.relations">
       Name: <b>{{relation.label}}</b><br/>
 
       index pattern: <b>{{relation.indices[0].indexPatternId}}</b>

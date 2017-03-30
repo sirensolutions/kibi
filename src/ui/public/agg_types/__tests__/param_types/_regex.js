@@ -1,7 +1,11 @@
+import _ from 'lodash';
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import AggTypesParamTypesBaseProvider from 'ui/agg_types/param_types/base';
+import AggTypesParamTypesRegexProvider from 'ui/agg_types/param_types/regex';
+import VisProvider from 'ui/vis';
+import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 describe('Regex', function () {
-  let _ = require('lodash');
-  let expect = require('expect.js');
-  let ngMock = require('ngMock');
 
   let BaseAggParam;
   let RegexAggParam;
@@ -11,19 +15,18 @@ describe('Regex', function () {
   beforeEach(ngMock.module('kibana', function ($provide) {
     $provide.constant('kbnDefaultAppId', '');
     $provide.constant('kibiDefaultDashboardTitle', '');
-    $provide.constant('elasticsearchPlugins', ['siren-join']);
   }));
   // fetch out deps
   beforeEach(ngMock.inject(function (Private) {
-    BaseAggParam = Private(require('ui/agg_types/param_types/base'));
-    RegexAggParam = Private(require('ui/agg_types/param_types/regex'));
-    Vis = Private(require('ui/Vis'));
-    indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+    BaseAggParam = Private(AggTypesParamTypesBaseProvider);
+    RegexAggParam = Private(AggTypesParamTypesRegexProvider);
+    Vis = Private(VisProvider);
+    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
   }));
 
   describe('constructor', function () {
     it('should be an instance of BaseAggParam', function () {
-      let aggParam = new RegexAggParam({
+      const aggParam = new RegexAggParam({
         name: 'some_param',
         type: 'regex'
       });
@@ -36,11 +39,11 @@ describe('Regex', function () {
   describe('write results', function () {
     let aggParam;
     let aggConfig;
-    let output = { params: {} };
-    let paramName = 'exclude';
+    const output = { params: {} };
+    const paramName = 'exclude';
 
     beforeEach(function () {
-      let vis = new Vis(indexPattern, {
+      const vis = new Vis(indexPattern, {
         type: 'pie',
         aggs: [
           { type: 'terms', schema: 'split', params: { field: 'extension' }},
@@ -73,20 +76,6 @@ describe('Regex', function () {
       aggParam.write(aggConfig, output);
       expect(output.params).to.have.property(paramName);
       expect(output.params[paramName]).to.eql({ pattern: 'testing' });
-      expect(output.params[paramName]).not.to.have.property('flags');
-    });
-
-    it('should include flags', function () {
-      aggConfig.params[paramName] = {
-        pattern: 'testing',
-        flags: [ 'TEST1', 'TEST2', 'TEST_RED', 'TEST_BLUE' ]
-      };
-
-      aggParam.write(aggConfig, output);
-      expect(output.params).to.have.property(paramName);
-      expect(output.params[paramName]).to.have.property('flags');
-      expect(typeof output.params[paramName].flags).to.be('string');
-      expect(output.params[paramName].flags).to.be('TEST1|TEST2|TEST_RED|TEST_BLUE');
     });
   });
 });

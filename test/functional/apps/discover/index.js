@@ -1,32 +1,27 @@
-define(function (require) {
-  var bdd = require('intern!bdd');
-  var config = require('intern').config;
-  var url = require('intern/dojo/node!url');
-  var ScenarioManager = require('intern/dojo/node!../../../fixtures/scenario_manager');
-  var discoverTest = require('./_discover');
-  var fieldData = require('./_field_data');
-  var sharedLinks = require('./_shared_links');
-  var collapseExpand = require('./_collapse_expand');
 
-  bdd.describe('discover app', function () {
-    var scenarioManager = new ScenarioManager(url.format(config.servers.elasticsearch));
-    this.timeout = config.timeouts.default;
+import {
+  bdd,
+  remote,
+  scenarioManager,
+  defaultTimeout
+} from '../../../support';
 
-    bdd.before(function () {
-      return this.remote.setWindowSize(1200,800);
-    });
+import PageObjects from '../../../support/page_objects';
 
-    bdd.after(function unloadMakelogs() {
-      return scenarioManager.unload('logstashFunctional');
-    });
+bdd.describe('discover app', function () {
+  this.timeout = defaultTimeout;
 
-    discoverTest(bdd, scenarioManager);
-
-    fieldData(bdd, scenarioManager);
-
-    sharedLinks(bdd, scenarioManager);
-
-    collapseExpand(bdd, scenarioManager);
-
+  bdd.before(function () {
+    return PageObjects.remote.setWindowSize(1200,800);
   });
+
+  bdd.after(function unloadMakelogs() {
+    return scenarioManager.unload('logstashFunctional');
+  });
+
+  require('./_discover');
+  require('./_field_data');
+  require('./_shared_links');
+  require('./_collapse_expand');
+  require('./_source_filters');
 });

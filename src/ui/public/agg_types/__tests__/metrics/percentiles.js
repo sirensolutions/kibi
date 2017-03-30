@@ -1,20 +1,25 @@
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import AggTypeMetricPercentilesProvider from 'ui/agg_types/metrics/percentiles';
+import VisProvider from 'ui/vis';
+import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import MockState from 'fixtures/mock_state';
+
 describe('AggTypeMetricPercentilesProvider class', function () {
-  let ngMock = require('ngMock');
-  let expect = require('expect.js');
 
   let Vis;
   let indexPattern;
   let aggTypeMetricPercentiles;
 
-  beforeEach(ngMock.module('kibana', function ($provide) {
-    //kibi: provide elasticsearchPlugins constant
-    $provide.constant('elasticsearchPlugins', ['siren-join']);
+  beforeEach(ngMock.module('kibana', $provide => {
+    $provide.service('kibiState', function () {
+      return new MockState({ filters: [] });
+    });
   }));
-
   beforeEach(ngMock.inject(function (Private) {
-    Vis = Private(require('ui/Vis'));
-    indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
-    aggTypeMetricPercentiles = Private(require('ui/agg_types/metrics/percentiles'));
+    Vis = Private(VisProvider);
+    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    aggTypeMetricPercentiles = Private(AggTypeMetricPercentilesProvider);
   }));
 
   it('uses the custom label if it is set', function () {

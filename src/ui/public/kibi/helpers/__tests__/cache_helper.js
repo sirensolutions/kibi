@@ -1,8 +1,10 @@
-var _ = require('lodash');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
-var $rootScope;
-var cacheHelper;
+import CacheHelperProvider from 'ui/kibi/helpers/cache_helper';
+import _ from 'lodash';
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+
+let $rootScope;
+let cacheHelper;
 
 describe('Kibi Components', function () {
   describe('Cache Helper', function () {
@@ -11,7 +13,7 @@ describe('Kibi Components', function () {
 
       ngMock.inject(function ($injector, Private, _$rootScope_) {
         $rootScope = _$rootScope_;
-        cacheHelper = Private(require('ui/kibi/helpers/cache_helper'));
+        cacheHelper = Private(CacheHelperProvider);
       });
     });
 
@@ -24,7 +26,7 @@ describe('Kibi Components', function () {
     it('clearing the cache', function () {
       cacheHelper.set('aaa', 'bbb');
       expect(cacheHelper.get('aaa')).to.be('bbb');
-      cacheHelper.flush();
+      cacheHelper.invalidate();
       expect(cacheHelper.get('aaa')).to.be(null);
     });
 

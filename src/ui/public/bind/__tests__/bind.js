@@ -1,7 +1,7 @@
+import sinon from 'auto-release-sinon';
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
 describe('$scope.$bind', function () {
-  let sinon = require('auto-release-sinon');
-  let expect = require('expect.js');
-  let ngMock = require('ngMock');
 
   let $rootScope;
   let $scope;
@@ -16,7 +16,7 @@ describe('$scope.$bind', function () {
     expect($rootScope.$bind).to.be.a('function');
     expect($scope).to.have.property('$bind', $rootScope.$bind);
 
-    let $isoScope = $scope.$new(true);
+    const $isoScope = $scope.$new(true);
     expect($isoScope).to.have.property('$bind', $rootScope.$bind);
   });
 
@@ -33,7 +33,7 @@ describe('$scope.$bind', function () {
   });
 
   it('sets up a binding from the child to the parent scope', function () {
-    let stub = sinon.stub();
+    const stub = sinon.stub();
 
     $rootScope.val = 'foo';
     $scope.$bind('localVal', 'val');
@@ -47,8 +47,8 @@ describe('$scope.$bind', function () {
   });
 
   it('pulls from the scopes $parent by default', function () {
-    let $parent = $rootScope.$new();
-    let $self = $parent.$new();
+    const $parent = $rootScope.$new();
+    const $self = $parent.$new();
 
     $parent.val = 'foo';
     $self.val = 'bar';
@@ -58,8 +58,8 @@ describe('$scope.$bind', function () {
   });
 
   it('accepts an alternate scope to read from', function () {
-    let $parent = $rootScope.$new();
-    let $self = $parent.$new();
+    const $parent = $rootScope.$new();
+    const $self = $parent.$new();
 
     $parent.val = 'foo';
     $self.val = 'bar';

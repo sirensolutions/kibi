@@ -1,35 +1,34 @@
-define(function (require) {
-  return function LayoutFactory(Private) {
-    let d3 = require('d3');
-    let _ = require('lodash');
+import d3 from 'd3';
+import _ from 'lodash';
+import $ from 'jquery';
+import VislibLibLayoutLayoutTypesProvider from './layout_types';
+import AxisProvider from 'ui/vislib/lib/axis';
+export default function LayoutFactory(Private) {
 
-    let layoutType = Private(require('ui/vislib/lib/layout/layout_types'));
-
-    /**
-     * Builds the visualization DOM layout
-     *
-     * The Layout Constructor is responsible for rendering the visualization
-     * layout, which includes all the DOM div elements.
-     * Input:
-     *   1. DOM div - parent element for which the layout is attached
-     *   2. data - data is bound to the div element
-     *   3. chartType (e.g. 'histogram') - specifies the layout type to grab
-     *
-     * @class Layout
-     * @constructor
-     * @param el {HTMLElement} HTML element to which the chart will be appended
-     * @param data {Object} Elasticsearch query results for this specific chart
-     * @param chartType {Object} Reference to chart functions, i.e. Pie
-     */
-    function Layout(el, data, chartType, opts) {
-      if (!(this instanceof Layout)) {
-        return new Layout(el, data, chartType, opts);
-      }
-
-      this.el = el;
-      this.data = data;
-      this.opts = opts;
-      this.layoutType = layoutType[chartType](this.el, this.data);
+  const layoutType = Private(VislibLibLayoutLayoutTypesProvider);
+  const Axis = Private(AxisProvider);
+  /**
+   * Builds the visualization DOM layout
+   *
+   * The Layout Constructor is responsible for rendering the visualization
+   * layout, which includes all the DOM div elements.
+   * Input:
+   *   1. DOM div - parent element for which the layout is attached
+   *   2. data - data is bound to the div element
+   *   3. chartType (e.g. 'histogram') - specifies the layout type to grab
+   *
+   * @class Layout
+   * @constructor
+   * @param el {HTMLElement} HTML element to which the chart will be appended
+   * @param data {Object} Elasticsearch query results for this specific chart
+   * @param chartType {Object} Reference to chart functions, i.e. Pie
+   */
+  class Layout {
+    constructor(config) {
+      this.el = config.get('el');
+      this.data = config.data.data;
+      this.opts = config;
+      this.layoutType = layoutType[config.get('type')](this.el, this.data);
     }
 
     // Render the layout
@@ -39,9 +38,13 @@ define(function (require) {
      *
      * @method render
      */
-    Layout.prototype.render = function () {
+    render() {
       this.removeAll(this.el);
       this.createLayout(this.layoutType);
+      // update y-axis-spacer height based on precalculated horizontal axis heights
+      if (this.opts.get('type') === 'point_series') {
+        this.updateCategoryAxisSize();
+      }
     };
 
     /**
@@ -52,13 +55,36 @@ define(function (require) {
      * @param arr {Array} Json array
      * @returns {*} Creates the visualization layout
      */
-    Layout.prototype.createLayout = function (arr) {
-      let self = this;
-
-      return _.each(arr, function (obj) {
-        self.layout(obj);
+    createLayout(arr) {
+      return _.each(arr, (obj) => {
+        this.layout(obj);
       });
     };
+
+    updateCategoryAxisSize() {
+      const visConfig = this.opts;
+      const axisConfig = visConfig.get('categoryAxes[0]');
+      const axis = new Axis(visConfig, axisConfig);
+      const position = axis.axisConfig.get('position');
+
+      const el = $(this.el).find(`.axis-wrapper-${position}`);
+
+      el.css('visibility', 'hidden');
+      axis.render();
+      const width = el.width();
+      const height = el.height();
+      axis.destroy();
+      el.css('visibility', '');
+
+      if (axis.axisConfig.isHorizontal()) {
+        const spacerNodes = $(this.el).find(`.y-axis-spacer-block-${position}`);
+        el.height(`${height}px`);
+        spacerNodes.height(el.height());
+      } else {
+        el.find('.y-axis-div-wrapper').width(`${width}px`);
+      }
+    };
+
 
     /**
      * Appends a DOM element based on the object keys
@@ -69,7 +95,7 @@ define(function (require) {
      * @param obj {Object} Instructions for creating the layout of a DOM Element
      * @returns {*} DOM Element
      */
-    Layout.prototype.layout = function (obj) {
+    layout(obj) {
       if (!obj.parent) {
         throw new Error('No parent element provided');
       }
@@ -86,7 +112,7 @@ define(function (require) {
         obj.parent = '.' + obj.parent;
       }
 
-      let childEl = this.appendElem(obj.parent, obj.type, obj.class);
+      const childEl = this.appendElem(obj.parent, obj.type, obj.class);
 
       if (obj.datum) {
         childEl.datum(obj.datum);
@@ -97,7 +123,7 @@ define(function (require) {
       }
 
       if (obj.children) {
-        let newParent = childEl[0][0];
+        const newParent = childEl[0][0];
 
         _.forEach(obj.children, function (obj) {
           if (!obj.parent) {
@@ -120,7 +146,7 @@ define(function (require) {
      * @param className {String} CSS class name
      * @returns {*} Reference to D3 Selection
      */
-    Layout.prototype.appendElem = function (el, type, className) {
+    appendElem(el, type, className) {
       if (!el || !type || !className) {
         throw new Error('Function requires that an el, type, and class be provided');
       }
@@ -134,8 +160,8 @@ define(function (require) {
       }
 
       return d3.select(el)
-        .append(type)
-        .attr('class', className);
+      .append(type)
+      .attr('class', className);
     };
 
     /**
@@ -145,10 +171,10 @@ define(function (require) {
      * @param el {HTMLElement} Reference to DOM element
      * @returns {D3.Selection|D3.Transition.Transition} Reference to an empty DOM element
      */
-    Layout.prototype.removeAll = function (el) {
+    removeAll(el) {
       return d3.select(el).selectAll('*').remove();
     };
+  }
 
-    return Layout;
-  };
-});
+  return Layout;
+};

@@ -1,86 +1,164 @@
-define(function (require) {
-  // kibi: include savedObjectsAPI dependencies
-  return function SavedObjectFactory(es, savedObjectsAPI, savedObjectsAPITypes, kbnIndex, Promise, Private, createNotifier, safeConfirm,
-                                     indexPatterns) {
-    let angular = require('angular');
-    let errors = require('ui/errors');
-    let _ = require('lodash');
-    let kibiUtils = require('kibiutils');
+/**
+ * @name SavedObject
+ *
+ * NOTE: SavedObject seems to track a reference to an object in ES,
+ * and surface methods for CRUD functionality (save and delete). This seems
+ * similar to how Backbone Models work.
+ *
+ * This class seems to interface with ES primarily through the es Angular
+ * service and a DocSource instance.
+ */
 
-    let DocSource = Private(require('ui/courier/data_source/doc_source'));
-    let SearchSource = Private(require('ui/courier/data_source/search_source'));
-    // kibi: use a custom source for objects managed by the Saved Objects API
-    let SavedObjectSource = Private(require('ui/courier/data_source/savedobject_source'));
+import angular from 'angular';
+import _ from 'lodash';
+
+import errors from 'ui/errors';
+import uuid from 'node-uuid';
+import MappingSetupProvider from 'ui/utils/mapping_setup';
+
+import DocSourceProvider from '../data_source/admin_doc_source';
+import SearchSourceProvider from '../data_source/search_source';
+
+import SavedObjectSourceProvider from 'ui/courier/data_source/savedobject_source';
+import CacheProvider from 'ui/kibi/helpers/cache_helper';
+
+// kibi: include savedObjectsAPI dependencies
+export default function SavedObjectFactory(savedObjectsAPI, savedObjectsAPITypes, esAdmin, kbnIndex, Promise, Private, Notifier,
+    safeConfirm, indexPatterns) {
+
+  const DocSource = Private(DocSourceProvider);
+  const SearchSource = Private(SearchSourceProvider);
+  const mappingSetup = Private(MappingSetupProvider);
+  // kibi: use a custom source for objects managed by the Saved Objects API
+  const SavedObjectSource = Private(SavedObjectSourceProvider);
+  // kibi: end
+
+  // kibi: added to clear the cache on object save
+  const cache = Private(CacheProvider);
+  // kibi: end
+
+  function SavedObject(config) {
+    if (!_.isObject(config)) config = {};
+
+    /************
+     * Initialize config vars
+     ************/
+    // the doc which is used to store this object
+    // kibi: set source based on type
+    let docSource;
+    if (savedObjectsAPITypes.has(config.type)) {
+      docSource = new SavedObjectSource();
+    } else {
+      docSource = new DocSource();
+    }
     // kibi: end
-    let mappingSetup = Private(require('ui/utils/mapping_setup'));
 
-    // kibi: added to clear the cache on object save
-    var cache = Private(require('ui/kibi/helpers/cache_helper'));
-    // kibi: end
+    // type name for this object, used as the ES-type
+    const type = config.type;
 
-    function SavedObject(config) {
-      if (!_.isObject(config)) config = {};
+    this.getDisplayName = function () {
+      return type;
+    };
 
-      // save an easy reference to this
-      let self = this;
+    /**
+     * Flips to true during a save operation, and back to false once the save operation
+     * completes.
+     * @type {boolean}
+     */
+    this.isSaving = false;
+    this.defaults = config.defaults || {};
 
-      /************
-       * Initialize config vars
-       ************/
-      // the doc which is used to store this object
-      // kibi: set source based on type
-      let docSource;
-      if (savedObjectsAPITypes.has(config.type)) {
-        docSource = new SavedObjectSource();
-      } else {
-        docSource = new DocSource();
+    // Create a notifier for sending alerts
+    const notify = new Notifier({
+      location: 'Saved ' + type
+    });
+
+    // mapping definition for the fields that this object will expose
+    const mapping = mappingSetup.expandShorthand(config.mapping);
+
+    const afterESResp = config.afterESResp || _.noop;
+    const customInit = config.init || _.noop;
+
+    // optional search source which this object configures
+    this.searchSource = config.searchSource ? new SearchSource() : undefined;
+
+    // the id of the document
+    this.id = config.id || void 0;
+
+    // Whether to create a copy when the object is saved. This should eventually go away
+    // in favor of a better rename/save flow.
+    this.copyOnSave = false;
+
+    const parseSearchSource = (searchSourceJson) => {
+      if (!this.searchSource) return;
+
+      // if we have a searchSource, set its state based on the searchSourceJSON field
+      let state;
+      try {
+        state = JSON.parse(searchSourceJson);
+      } catch (e) {
+        state = {};
       }
-      // kibi: end
 
-      // type name for this object, used as the ES-type
-      let type = config.type;
+      const oldState = this.searchSource.toJSON();
+      const fnProps = _.transform(oldState, function (dynamic, val, name) {
+        if (_.isFunction(val)) dynamic[name] = val;
+      }, {});
 
-      // Create a notifier for sending alerts
-      let notify = createNotifier({
-        location: 'Saved ' + type
-      });
+      this.searchSource.set(_.defaults(state, fnProps));
+    };
 
-      // mapping definition for the fields that this object will expose
-      let mapping = mappingSetup.expandShorthand(config.mapping);
+    /**
+     * After creation or fetching from ES, ensure that the searchSources index indexPattern
+     * is an bonafide IndexPattern object.
+     *
+     * @return {Promise<IndexPattern | null>}
+     */
+    const hydrateIndexPattern = () => {
+      if (!this.searchSource) { return Promise.resolve(null); }
 
-      // default field values, assigned when the source is loaded
-      let defaults = config.defaults || {};
+      if (config.clearSavedIndexPattern) {
+        this.searchSource.set('index', undefined);
+        return Promise.resolve(null);
+      }
 
-      let afterESResp = config.afterESResp || _.noop;
-      let customInit = config.init || _.noop;
+      let index = config.indexPattern || this.searchSource.getOwn('index');
 
-      // optional search source which this object configures
-      self.searchSource = config.searchSource && new SearchSource();
+      if (!index) { return Promise.resolve(null); }
 
-      // the id of the document
-      self.id = config.id || void 0;
-      self.defaults = config.defaults;
+      // If index is not an IndexPattern object at this point, then it's a string id of an index.
+      if (!(index instanceof indexPatterns.IndexPattern)) {
+        index = indexPatterns.get(index);
+      }
 
-      /**
-       * Asynchronously initialize this object - will only run
-       * once even if called multiple times.
-       *
-       * @return {Promise}
-       * @resolved {SavedObject}
-       */
-      self.init = _.once(function () {
-        // ensure that the type is defined
-        if (!type) throw new Error('You must define a type name to use SavedObject objects.');
+      // At this point index will either be an IndexPattern, if cached, or a promise that
+      // will return an IndexPattern, if not cached.
+      return Promise.resolve(index)
+        .then((indexPattern) => {
+          this.searchSource.set('index', indexPattern);
+        });
+    };
 
-        // tell the docSource where to find the doc
-        docSource
+    /**
+     * Asynchronously initialize this object - will only run
+     * once even if called multiple times.
+     *
+     * @return {Promise}
+     * @resolved {SavedObject}
+     */
+    this.init = _.once(() => {
+      // ensure that the type is defined
+      if (!type) throw new Error('You must define a type name to use SavedObject objects.');
+
+      // tell the docSource where to find the doc
+      docSource
         .index(kbnIndex)
         .type(type)
-        .id(self.id);
+        .id(this.id);
 
-        // check that the mapping for this type is defined
-        return mappingSetup.isDefined(type)
-        .then(function (defined) {
+      // check that the mapping for this type is defined
+      return mappingSetup.isDefined(type)
+        .then((defined) => {
           // if it is already defined skip this step
           if (defined) return true;
 
@@ -93,271 +171,252 @@ define(function (require) {
             }
           };
 
-          // tell mappingSetup to set type
+            // tell mappingSetup to set type
           return mappingSetup.setup(type, mapping);
         })
-        .then(function () {
+        .then(() => {
           // If there is not id, then there is no document to fetch from elasticsearch
-          if (!self.id) {
+          if (!this.id) {
             // just assign the defaults and be done
-            _.assign(self, defaults);
-            return hydrateIndexPattern().then(function () {
-              return afterESResp.call(self);
+            _.assign(this, this.defaults);
+            return hydrateIndexPattern().then(() => {
+              return afterESResp.call(this);
             });
           }
 
           // fetch the object from ES
-          return docSource.fetch()
-          .then(self.applyESResp);
+          return docSource.fetch().then(this.applyESResp);
         })
-        .then(function () {
-          return customInit.call(self);
+        .then(() => {
+          return customInit.call(this);
         })
-        .then(function () {
+        .then(() => {
           // return our obj as the result of init()
-          return self;
+          return this;
         });
+    });
+
+    this.applyESResp = (resp) => {
+      this._source = _.cloneDeep(resp._source);
+
+      if (resp.found != null && !resp.found) throw new errors.SavedObjectNotFound(type, this.id);
+
+      const meta = resp._source.kibanaSavedObjectMeta || {};
+      delete resp._source.kibanaSavedObjectMeta;
+
+      if (!config.indexPattern && this._source.indexPattern) {
+        config.indexPattern = this._source.indexPattern;
+        delete this._source.indexPattern;
+      }
+
+      // assign the defaults to the response
+      _.defaults(this._source, this.defaults);
+
+      // transform the source using _deserializers
+      _.forOwn(mapping, (fieldMapping, fieldName) => {
+        if (fieldMapping._deserialize) {
+          this._source[fieldName] = fieldMapping._deserialize(this._source[fieldName], resp, fieldName, fieldMapping);
+        }
       });
 
-      self.applyESResp = function (resp) {
-        self._source = _.cloneDeep(resp._source);
+      // Give obj all of the values in _source.fields
+      _.assign(this, this._source);
+      this.lastSavedTitle = this.title;
 
-        if (resp.found != null && !resp.found) throw new errors.SavedObjectNotFound(type, self.id);
-
-        let meta = resp._source.kibanaSavedObjectMeta || {};
-        delete resp._source.kibanaSavedObjectMeta;
-
-        if (!config.indexPattern && self._source.indexPattern) {
-          config.indexPattern = self._source.indexPattern;
-          delete self._source.indexPattern;
-        }
-
-        // assign the defaults to the response
-        _.defaults(self._source, defaults);
-
-        // transform the source using _deserializers
-        _.forOwn(mapping, function ittr(fieldMapping, fieldName) {
-          if (fieldMapping._deserialize) {
-            self._source[fieldName] = fieldMapping._deserialize(self._source[fieldName], resp, fieldName, fieldMapping);
-          }
-        });
-
-        // Give obj all of the values in _source.fields
-        _.assign(self, self._source);
-
-        return Promise.try(function () {
-          parseSearchSource(meta.searchSourceJSON);
+      return Promise.try(() => {
+        parseSearchSource(meta.searchSourceJSON);
+        return hydrateIndexPattern();
+      })
+        .then(() => {
+          return Promise.cast(afterESResp.call(this, resp));
         })
-        .then(hydrateIndexPattern)
-        .then(function () {
-          return Promise.cast(afterESResp.call(self, resp));
-        })
-        .then(function () {
+        .then(() => {
           // Any time obj is updated, re-call applyESResp
-          docSource.onUpdate().then(self.applyESResp, notify.fatal);
+          docSource.onUpdate().then(this.applyESResp, notify.fatal);
         });
-      };
+    };
 
-      function parseSearchSource(searchSourceJson) {
-        if (!self.searchSource) return;
+    /**
+     * Serialize this object
+     *
+     * @return {Object}
+     */
+    this.serialize = () => {
+      const body = {};
 
-        // if we have a searchSource, set its state based on the searchSourceJSON field
-        let state;
-        try {
-          state = JSON.parse(searchSourceJson);
-        } catch (e) {
-          state = {};
+      _.forOwn(mapping, (fieldMapping, fieldName) => {
+        if (this[fieldName] != null) {
+          body[fieldName] = (fieldMapping._serialize)
+            ? fieldMapping._serialize(this[fieldName])
+            : this[fieldName];
         }
+      });
 
-        let oldState = self.searchSource.toJSON();
-        let fnProps = _.transform(oldState, function (dynamic, val, name) {
-          if (_.isFunction(val)) dynamic[name] = val;
-        }, {});
+      if (this.searchSource) {
+        // kibi: - we have to filter out join_set filter as this filter
+        const searchSourceJSON = _.omit(this.searchSource.toJSON(), ['sort', 'size']);
 
-        self.searchSource.set(_.defaults(state, fnProps));
-      }
-
-      /**
-       * After creation or fetching from ES, ensure that the searchSources index indexPattern
-       * is an bonafide IndexPattern object.
-       *
-       * @return {[type]} [description]
-       */
-      function hydrateIndexPattern() {
-        return Promise.try(function () {
-          if (self.searchSource) {
-
-            let index = config.indexPattern || self.searchSource.getOwn('index');
-            if (!index) return;
-            if (config.clearSavedIndexPattern) {
-              self.searchSource.set('index', undefined);
-              return;
-            }
-
-            if (!(index instanceof indexPatterns.IndexPattern)) {
-              index = indexPatterns.get(index);
-            }
-
-            return Promise.resolve(index).then(function (indexPattern) {
-              self.searchSource.set('index', indexPattern);
-            });
-          }
-        });
-      }
-
-      /**
-       * Serialize this object
-       *
-       * @return {Object}
-       */
-      self.serialize = function () {
-        let body = {};
-
-        _.forOwn(mapping, function (fieldMapping, fieldName) {
-          if (self[fieldName] != null) {
-            body[fieldName] = (fieldMapping._serialize)
-              ? fieldMapping._serialize(self[fieldName])
-              : self[fieldName];
-          }
-        });
-
-        if (self.searchSource) {
-
-          var searchSourceJSON = _.omit(self.searchSource.toJSON(), ['sort', 'size']);
-
-          // kibi: - we have to filter out join_set filter as this filter
-          // can only be turned on/off by relational panel and should not be saved
-          if (searchSourceJSON.filter && searchSourceJSON.filter.length > 0) {
-            searchSourceJSON.filter = _.filter(searchSourceJSON.filter, function (filter) {
-              return !filter.join_set;
-            });
-          }
-          if (searchSourceJSON.inject) {
-            // do not serialize the inject queries
-            delete searchSourceJSON.inject;
-          }
-          // kibi: end
-
-          body.kibanaSavedObjectMeta = {
-            searchSourceJSON: angular.toJson(searchSourceJSON)
-          };
-        }
-
-        return body;
-      };
-
-      /**
-       * Save this object
-       *
-       * @return {Promise}
-       * @resolved {String} - The id of the doc
-       */
-      // kibi: add force flag
-      // issue: https://github.com/sirensolutions/kibi-internal/issues/918
-      self.save = function (force) {
-
-        let body = self.serialize();
-
-        // Slugify the object id
-        self.id = kibiUtils.slugifyId(self.id);
-
-        // ensure that the docSource has the current self.id
-        docSource.id(self.id);
-
-        // index the document
-        return self.saveSource(body, force);
-      };
-
-      // kibi: add force flag
-      // issue: https://github.com/sirensolutions/kibi-internal/issues/918
-      self.saveSource = function (source, force) {
-        let finish = function (id) {
-
-          cache.flush(); // kibi: flush the cache after object was saved
-
-          self.id = id;
-
-          // kibi: remove es.indices.refresh as it is handled by the backend
-          if (savedObjectsAPITypes.has(config.type)) {
-            return self.id;
-          }
-          // kibi: end
-
-          return es.indices.refresh({
-            index: kbnIndex
-          })
-          // kibi: return the id regardless of the outcome of the refresh operation.
-          .then(function () {
-            return self.id;
-          })
-          .catch(function (err) {
-            console.log(err);
-            return self.id;
+        // can only be turned on/off by relational panel and should not be saved
+        if (searchSourceJSON.filter && searchSourceJSON.filter.length > 0) {
+          searchSourceJSON.filter = _.filter(searchSourceJSON.filter, function (filter) {
+            return !filter.join_set;
           });
+        }
+        if (searchSourceJSON.inject) {
+          // do not serialize the inject queries
+          delete searchSourceJSON.inject;
+        }
+
+        body.kibanaSavedObjectMeta = {
+          searchSourceJSON: angular.toJson(searchSourceJSON)
         };
-
-        if (force) { // kibi: if the force flag is true, silently updates the document
-          return docSource.doIndex(source).then(finish);
-        } else {
-          return docSource.doCreate(source)
-          .then(finish)
-          .catch(function (err) {
-            // record exists, confirm overwriting
-            if (_.get(err, 'origError.status') === 409) {
-              let confirmMessage = 'Are you sure you want to overwrite ' + self.title + '?';
-
-              return safeConfirm(confirmMessage).then(
-                function () {
-                  return docSource.doIndex(source).then(finish);
-                },
-                _.noop // if the user doesn't overwrite record, just swallow the error
-              );
-            } else {
-              notify.error(err); // kibi: added here so the errors are shown by notifier
-            }
-            return Promise.reject(err);
-          });
-        }
-      };
-
-      /**
-       * Destroy this object
-       *
-       * @return {undefined}
-       */
-      self.destroy = function () {
-        docSource.cancelQueued();
-        if (self.searchSource) {
-          self.searchSource.cancelQueued();
-        }
-      };
-
-      /**
-       * Delete this object from Elasticsearch
-       * @return {promise}
-       */
-      self.delete = function () {
-        // kibi: use the Saved Objects API client if needed
-        let client = es;
-        if (savedObjectsAPITypes.has(config.type)) {
-          client = savedObjectsAPI;
-        }
-        return client.delete({
         // kibi: end
-          index: kbnIndex,
-          type: type,
-          id: this.id
-        }).then(function () {
-          // kibi: refresh is handled by the backend
-          if (!savedObjectsAPITypes.has(config.type)) {
-            return es.indices.refresh({
-              index: kbnIndex
-            });
-          }
-        });
-      };
+      }
+
+      return body;
+    };
+
+    /**
+     * Returns true if the object's original title has been changed. New objects return false.
+     * @return {boolean}
+     */
+    this.isTitleChanged = () => {
+      return this._source && this._source.title !== this.title;
+    };
+
+    /**
+     * Queries es to refresh the index.
+     * @returns {Promise}
+     */
+    function refreshIndex() {
+      // kibi: do not call es.indices.refresh as it is handled by the backend
+      if (savedObjectsAPITypes.has(config.type)) {
+        return Promise.resolve();
+      }
+      // kibi: end
+      return esAdmin.indices.refresh({ index: kbnIndex });
     }
 
-    return SavedObject;
-  };
-});
+    /**
+     * An error message to be used when the user rejects a confirm overwrite.
+     * @type {string}
+     */
+    const OVERWRITE_REJECTED = 'Overwrite confirmation was rejected';
+
+    /**
+     * Attempts to create the current object using the serialized source. If an object already
+     * exists, a warning message requests an overwrite confirmation.
+     * @param source - serialized version of this object (return value from this.serialize())
+     * What will be indexed into elasticsearch.
+     * @returns {Promise} - A promise that is resolved with the objects id if the object is
+     * successfully indexed. If the overwrite confirmation was rejected, an error is thrown with
+     * a confirmRejected = true parameter so that case can be handled differently than
+     * a create or index error.
+     * @resolved {String} - The id of the doc
+     */
+    const createSource = (source) => {
+      return docSource.doCreate(source)
+        .catch((err) => {
+          // record exists, confirm overwriting
+          if (_.get(err, 'origError.status') === 409) {
+            const confirmMessage = `Are you sure you want to overwrite ${this.title}?`;
+
+            return safeConfirm(confirmMessage)
+              .then(() => docSource.doIndex(source))
+              .catch(() => Promise.reject(new Error(OVERWRITE_REJECTED)));
+          }
+          return Promise.reject(err);
+        });
+    };
+
+
+    /**
+     * @typedef {Object} SaveOptions
+     * @property {boolean} confirmOverwrite - If true, attempts to create the source so it
+     * can confirm an overwrite if a document with the id already exists.
+     */
+
+    /**
+     * Saves this object.
+     *
+     * @param {SaveOptions} saveOptions?
+     * @return {Promise}
+     * @resolved {String} - The id of the doc
+     */
+    this.save = (saveOptions = {}) => {
+      // Save the original id in case the save fails.
+      const originalId = this.id;
+      // Read https://github.com/elastic/kibana/issues/9056 and
+      // https://github.com/elastic/kibana/issues/9012 for some background into why this copyOnSave variable
+      // exists.
+      // The goal is to move towards a better rename flow, but since our users have been conditioned
+      // to expect a 'save as' flow during a rename, we are keeping the logic the same until a better
+      // UI/UX can be worked out.
+      if (this.copyOnSave) {
+        this.id = null;
+      }
+
+      // Create a unique id for this object if it doesn't have one already.
+      this.id = this.id || uuid.v1();
+      // ensure that the docSource has the current id
+      docSource.id(this.id);
+
+      const source = this.serialize();
+
+      this.isSaving = true;
+      const doSave = saveOptions.confirmOverwrite ? createSource(source) : docSource.doIndex(source);
+      return doSave
+        .then((id) => { this.id = id; })
+        .then(() => {
+          cache.invalidate(); // kibi: invalidate the cache after object was saved
+        })
+        .then(refreshIndex)
+        .then(() => {
+          this.isSaving = false;
+          this.lastSavedTitle = this.title;
+          return this.id;
+        })
+        .catch((err) => {
+          this.isSaving = false;
+          this.id = originalId;
+          if (err && err.message === OVERWRITE_REJECTED) return;
+          notify.error(err); // kibi: added here so the errors are shown by notifier
+          return Promise.reject(err);
+        });
+    };
+
+    this.destroy = () => {
+      docSource.cancelQueued();
+      if (this.searchSource) {
+        this.searchSource.cancelQueued();
+      }
+    };
+
+    /**
+     * Delete this object from Elasticsearch
+     * @return {promise}
+     */
+    this.delete = () => {
+      // kibi: use the Saved Objects API client if needed
+      let client = esAdmin;
+      if (savedObjectsAPITypes.has(config.type)) {
+        client = savedObjectsAPI;
+      }
+      return client.delete({
+      // kibi: end
+        index: kbnIndex,
+        type: type,
+        id: this.id
+      }).then(() => {
+        // kibi: refresh is handled by the backend
+        if (!savedObjectsAPITypes.has(config.type)) {
+          return esAdmin.indices.refresh({
+            index: kbnIndex
+          });
+        }
+      });
+    };
+  }
+
+  return SavedObject;
+};

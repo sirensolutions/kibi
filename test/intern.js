@@ -1,8 +1,6 @@
 define(function (require) {
-  var serverConfig = require('intern/dojo/node!./serverConfig');
-  var _ = require('intern/dojo/node!lodash');
-
-  return _.assign({
+  const serverConfig = require('intern/dojo/node!./server_config');
+  return Object.assign({
     debug: true,
     capabilities: {
       'idle-timeout': 99
@@ -12,21 +10,13 @@ define(function (require) {
     }],
     tunnelOptions: serverConfig.servers.webdriver,
     functionalSuites: [
-      'test/functional/status_page/index',
-      'test/functional/apps/settings/index',
-      'test/functional/apps/discover/index',
-      'test/functional/apps/visualize/index'
+      'test/functional/index'
     ],
-    excludeInstrumentation: /(fixtures|node_modules)\//,
-    loaderOptions: {
-      paths: {
-        'bluebird': './node_modules/bluebird/js/browser/bluebird.js',
-        'moment': './node_modules/moment/moment.js'
-      }
-    },
-    timeouts: {
-      // this is how long a test can run before timing out
-      default: 360000
-    },
+
+    excludeInstrumentation: /.*/,
+
+    defaultTimeout: 90000,
+    defaultTryTimeout: 40000, // tryForTime could include multiple 'find timeouts'
+    defaultFindTimeout: 10000  // this is how long we try to find elements on page
   }, serverConfig);
 });

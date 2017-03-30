@@ -1,0 +1,100 @@
+<kbn-management-app section="kibana" class="kuiView">
+  <div ng-controller="TemplatesEditor" class="kibana-settings-app templates_editor kibi-config-section" id="templates_editor">
+
+    <div class="container">
+
+      <div class="header">
+        <h2 class="title">Edit Query Result Templates</h2>
+      </div>
+      <p>
+        Use this form to define a template for displaying results of queries over external datasources.
+      </p>
+
+      <div class="config-section">
+        <h2>Config</h2>
+
+        <form ng-if="template" name="objectForm" novalidate>
+
+          <div class="form-group">
+            <label>Title</label>
+            <input type="text" ng-model="template.title" class="form-control" required/>
+            <saved-object-save-as-check-box saved-object="template"></saved-object-save-as-check-box>
+          </div>
+
+          <div class="form-group">
+            <label>Description</label>
+            <input type="text" ng-model="template.description" class="form-control"/>
+          </div>
+
+          <div class="form-group">
+            <label>Engine</label><br/>
+            <select required="true" ng-model="template.templateEngine" class="form-control">
+              <option value="jade">jade</option>
+              <option value="handlebars">handlebars</option>
+            <select>
+          </div>
+
+          <div class="form-group">
+            <label>Source</label>
+
+            <div ng-if="template.templateEngine === 'handlebars'"
+              ui-ace="{ onLoad: aceLoaded, mode: 'handlebars' }" id="{{template.title}}"
+              ng-model="template.templateSource"
+              ng-class="{ 'red-border': objectForm.handlebarsTemplate.$invalid }"
+              name="handlebarsTemplate"
+              style="height: 400px" required>
+            </div>
+
+            <div ng-if="template.templateEngine === 'jade'"
+              ui-ace="{ onLoad: aceLoaded, mode: 'jade' }" id="{{template.title}}"
+              ng-model="template.templateSource"
+              ng-class="{ 'red-border': objectForm.jadeTemplate.$invalid }"
+              name="jadeTemplate"
+              style="height: 400px" required>
+            </div>
+
+          </div>
+       </form>
+      </div>
+
+
+      <div class="preview-section">
+        <form name="previewForm">
+          <h2>Preview</h2>
+          <kibi-param-entity-uri entity-uri-holder="holder"></kibi-param-entity-uri>
+
+          <div class="form-group">
+            <label>Query</label>
+            <span class="small-note"> Pick the query to see a preview of the template</span>
+            <a ng-show="preview.queryId" ng-click="jumpToQuery()">Edit query</a>
+            <kibi-select required object-type="query" ng-model="preview.queryId"></kibi-select>
+          </div>
+
+          <div role="tabpanel">
+          <!-- Nav tabs -->
+            <ul class="nav nav-tabs">
+              <li ng-click="tabClick('html')" ng-class="htmlPreviewActive ? 'active' : ''">
+                <a aria-controls="preview_html" role="tab" >Preview Html</a>
+              </li>
+              <li ng-click="tabClick('json')" ng-class="jsonPreviewActive ? 'active' : ''">
+                <a href="" aria-controls="preview_json" role="tab" >Preview Json</a>
+              </li>
+            </ul>
+
+            <!-- Tab panes -->
+            <div class="tab-content">
+              <div role="tabpanel" class="tab-pane" ng-class="htmlPreviewActive ? 'active' : ''" >
+                <div class="html_preview_content" kibi-dynamic-html="html_preview_content"></div>
+              </div>
+              <div role="tabpanel" class="tab-pane" ng-class="jsonPreviewActive ? 'active' : ''" >
+                <pre class="json_preview_content">{{json_preview_content}}</pre>
+              </div>
+            </div>
+          </div>
+
+        </form>
+      </div>
+    </div>
+
+  </div>
+</kbn-management-app>

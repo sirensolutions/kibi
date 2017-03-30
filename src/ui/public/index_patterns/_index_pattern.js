@@ -1,381 +1,415 @@
-define(function (require) {
-  return function IndexPatternFactory(Private, timefilter, createNotifier, config, kbnIndex, Promise, $rootScope, safeConfirm, mappings) {
-    const _ = require('lodash');
-    const errors = require('ui/errors');
-    const angular = require('angular');
+import _ from 'lodash';
+import errors from 'ui/errors';
+import angular from 'angular';
+import getComputedFields from 'ui/index_patterns/_get_computed_fields';
+import formatHit from 'ui/index_patterns/_format_hit';
+import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
+import IndexPatternsGetIdsProvider from 'ui/index_patterns/_get_ids';
+import IndexPatternsMapperProvider from 'ui/index_patterns/_mapper';
+import IndexPatternsIntervalsProvider from 'ui/index_patterns/_intervals';
+import DocSourceProvider from 'ui/courier/data_source/savedobject_source'; // kibi: use the SavedObjectSource as DocSource
+import UtilsMappingSetupProvider from 'ui/utils/mapping_setup';
+import IndexPatternsFieldListProvider from 'ui/index_patterns/_field_list';
+import IndexPatternsFlattenHitProvider from 'ui/index_patterns/_flatten_hit';
+import IndexPatternsCalculateIndicesProvider from 'ui/index_patterns/_calculate_indices';
+import IndexPatternsPatternCacheProvider from 'ui/index_patterns/_pattern_cache';
 
-    const fieldformats = Private(require('ui/registry/field_formats'));
-    const getIds = Private(require('ui/index_patterns/_get_ids'));
-    const mapper = Private(require('ui/index_patterns/_mapper'));
-    const intervals = Private(require('ui/index_patterns/_intervals'));
-    const getComputedFields = require('ui/index_patterns/_get_computed_fields');
-    // kibi: use the SavedObjectSource as DocSource
-    const DocSource = Private(require('ui/courier/data_source/savedobject_source'));
-    // kibi: end
-    const mappingSetup = Private(require('ui/utils/mapping_setup'));
-    const FieldList = Private(require('ui/index_patterns/_field_list'));
+// kibi: added mappings service dependency
+export default function IndexPatternFactory(Private, createNotifier, config, kbnIndex, Promise, safeConfirm, mappings) {
+  const fieldformats = Private(RegistryFieldFormatsProvider);
+  const getIds = Private(IndexPatternsGetIdsProvider);
+  const mapper = Private(IndexPatternsMapperProvider);
+  const intervals = Private(IndexPatternsIntervalsProvider);
+  const DocSource = Private(DocSourceProvider);
+  const mappingSetup = Private(UtilsMappingSetupProvider);
+  const FieldList = Private(IndexPatternsFieldListProvider);
+  const flattenHit = Private(IndexPatternsFlattenHitProvider);
+  const calculateIndices = Private(IndexPatternsCalculateIndicesProvider);
+  const patternCache = Private(IndexPatternsPatternCacheProvider);
+  const type = 'index-pattern';
+  const notify = createNotifier();
+  const configWatchers = new WeakMap();
+  const docSources = new WeakMap();
+  const getRoutes = () => ({
+    edit: '/management/kibana/indices/{{id}}',
+    addField: '/management/kibana/indices/{{id}}/create-field',
+    indexedFields: '/management/kibana/indices/{{id}}?_a=(tab:indexedFields)',
+    scriptedFields: '/management/kibana/indices/{{id}}?_a=(tab:scriptedFields)',
+    sourceFilters: '/management/kibana/indices/{{id}}?_a=(tab:sourceFilters)'
+  });
 
-    const flattenHit = Private(require('ui/index_patterns/_flatten_hit'));
-    const formatHit = require('ui/index_patterns/_format_hit');
-    const calculateIndices = Private(require('ui/index_patterns/_calculate_indices'));
-    const patternCache = Private(require('ui/index_patterns/_pattern_cache'));
-
-    const type = 'index-pattern';
-
-    const notify = createNotifier();
-
-    const mapping = mappingSetup.expandShorthand({
-      title: 'string',
-      timeFieldName: 'string',
-      notExpandable: 'boolean',
-      intervalName: 'string',
-      sourceFiltering: 'json', // kibi: store which fields are to be retrieved in the source
-      paths: 'json', // kibi: store the path of each field, in order to support dotted field names
-      fields: 'json',
-      fieldFormatMap: {
-        type: 'string',
-        _serialize: function (map) {
-          if (map == null) return;
-
-          let count = 0;
-          const serialized = _.transform(map, function (flat, format, field) {
-            if (!format) return;
-            count++;
-            flat[field] = format;
-          });
-
-          if (count) return angular.toJson(serialized);
-        },
-        _deserialize: function (map) {
-          if (map == null) return {};
-          return _.mapValues(angular.fromJson(map), function (mapping) {
-            const FieldFormat = fieldformats.byId[mapping.id];
-            return FieldFormat && new FieldFormat(mapping.params);
-          });
-        }
+  const mapping = mappingSetup.expandShorthand({
+    title: 'string',
+    timeFieldName: 'string',
+    notExpandable: 'boolean',
+    intervalName: 'string',
+    fields: 'json',
+    sourceFilters: 'json',
+    paths: 'json', // kibi: store the path of each field, in order to support dotted field names
+    fieldFormatMap: {
+      type: 'string',
+      _serialize(map = {}) {
+        const serialized = _.transform(map, serialize);
+        return _.isEmpty(serialized) ? undefined : angular.toJson(serialized);
+      },
+      _deserialize(map = '{}') {
+        return _.mapValues(angular.fromJson(map), deserialize);
       }
+    }
+  });
+
+  function serialize(flat, format, field) {
+    if (format) {
+      flat[field] = format;
+    }
+  }
+
+  function deserialize(mapping) {
+    const FieldFormat = fieldformats.byId[mapping.id];
+    return FieldFormat && new FieldFormat(mapping.params);
+  }
+
+  function updateFromElasticSearch(indexPattern, response) {
+    if (!response.found) {
+      throw new errors.SavedObjectNotFound(type, indexPattern.id);
+    }
+
+    _.forOwn(mapping, (fieldMapping, name) => {
+      if (!fieldMapping._deserialize) {
+        return;
+      }
+      response._source[name] = fieldMapping._deserialize(
+        response._source[name], response, name, fieldMapping
+      );
     });
 
-    function IndexPattern(id) {
-      const self = this;
+    // give index pattern all of the values in _source
+    _.assign(indexPattern, response._source);
 
-      setId(id);
+    const promise = indexFields(indexPattern);
 
-      const docSource = new DocSource();
+    // any time index pattern in ES is updated, update index pattern object
+    docSources
+    .get(indexPattern)
+    .onUpdate()
+    .then(response => updateFromElasticSearch(indexPattern, response), notify.fatal);
 
-      self.init = function () {
-        // tell the docSource where to find the doc
-        docSource
-        .index(kbnIndex)
-        .type(type)
-        .id(self.id);
+    return promise;
+  }
 
-        // listen for config changes and update field list
-        $rootScope.$on('change:config', function () {
-          initFields();
-        });
+  function containsFieldCapabilities(fields) {
+    return _.any(fields, (field) => {
+      return _.has(field, 'aggregatable') && _.has(field, 'searchable');
+    });
+  }
 
-        return mappingSetup.isDefined(type)
-        .then(function (defined) {
-          // create mapping for this type if one does not exist
-          if (defined) return true;
-          return mappingSetup.setup(type, mapping);
-        })
-        .then(function () {
-          // If there is no id, then there is no document to fetch from elasticsearch
-          if (!self.id) return;
+  function indexFields(indexPattern) {
+    let promise = Promise.resolve();
 
-          // fetch the object from ES
-          return docSource.fetch()
-          .then(function applyESResp(resp) {
-            if (!resp.found) throw new errors.SavedObjectNotFound(type, self.id);
+    if (!indexPattern.id) {
+      return promise;
+    }
 
-            // deserialize any json fields
-            _.forOwn(mapping, function ittr(fieldMapping, name) {
-              if (fieldMapping._deserialize) {
-                resp._source[name] = fieldMapping._deserialize(resp._source[name], resp, name, fieldMapping);
-              }
-            });
+    if (!indexPattern.fields || !containsFieldCapabilities(indexPattern.fields)) {
+      promise = indexPattern.refreshFields();
+    }
+    return promise.then(() => initFields(indexPattern))
+    .then(() => indexPattern.kibiPathsFetched = true);
+  }
 
-            // Give obj all of the values in _source
-            _.assign(self, resp._source);
+  function setId(indexPattern, id) {
+    indexPattern.id = id;
+    return id;
+  }
 
-            self._indexFields();
+  function watch(indexPattern) {
+    if (configWatchers.has(indexPattern)) {
+      return;
+    }
+    const unwatch = config.watchAll(() => {
+      if (indexPattern.fields) {
+        initFields(indexPattern); // re-init fields when config changes, but only if we already had fields
+      }
+    });
+    configWatchers.set(indexPattern, { unwatch });
+  }
 
-            // Any time obj is updated, re-call applyESResp
-            docSource.onUpdate().then(applyESResp, notify.fatal);
-          });
-        })
-        .then(function () {
-          // return our obj as the result of init()
-          // kibi: but first make sure fields were initialized
-          if (self.kibiFieldsIndexed) {
-            return self;
-          } else {
-            return self._indexFields().then(() => self);
-          }
-        });
-      };
+  function unwatch(indexPattern) {
+    if (!configWatchers.has(indexPattern)) {
+      return;
+    }
+    configWatchers.get(indexPattern).unwatch();
+    configWatchers.delete(indexPattern);
+  }
 
-      function initFields(fields) {
-        // kibi: if paths not fetched yet do it first
-        if (!self.kibiPathsFetched) {
-          return self._fetchFieldsPath().then(() => {
-            self.fields = new FieldList(self, fields || self.fields || []);
-          });
+  function initFields(indexPattern, input) {
+    // kibi: if paths not fetched yet do it first
+    let promise = Promise.resolve();
+    if (!indexPattern.kibiPathsFetched) {
+      promise = indexPattern._fetchFieldsPath();
+    }
+    return promise.then(() => {
+      const oldValue = indexPattern.fields;
+      const newValue = input || oldValue || [];
+      indexPattern.fields = new FieldList(indexPattern, newValue);
+    });
+  }
+
+  function fetchFields(indexPattern) {
+    return mapper
+    .getFieldsForIndexPattern(indexPattern, true)
+    .then(fields => {
+      const scripted = indexPattern.getScriptedFields();
+      const all = fields.concat(scripted);
+      return initFields(indexPattern, all);
+    });
+  }
+
+  class IndexPattern {
+    constructor(id) {
+      setId(this, id);
+      docSources.set(this, new DocSource());
+
+      this.metaFields = config.get('metaFields');
+      this.getComputedFields = getComputedFields.bind(this);
+
+      this.flattenHit = flattenHit(this);
+      this.formatHit = formatHit(this, fieldformats.getDefaultInstance('string'));
+      this.formatField = this.formatHit.formatField;
+    }
+
+    get routes() {
+      return getRoutes();
+    }
+
+    init() {
+      docSources
+      .get(this)
+      .index(kbnIndex)
+      .type(type)
+      .id(this.id);
+
+      watch(this);
+
+      return mappingSetup
+      .isDefined(type)
+      .then(defined => {
+        if (defined) {
+          return true;
         }
-        self.fields = new FieldList(self, fields || self.fields || []);
-        return Promise.resolve(); // kibi: always return a promise
+        return mappingSetup.setup(type, mapping);
+      })
+      .then(() => {
+        if (!this.id) {
+          return; // no id === no elasticsearch document
+        }
+        return docSources.get(this)
+        .fetch()
+        .then(response => updateFromElasticSearch(this, response));
+      })
+      .then(() => this);
+    }
+
+    // Get the source filtering configuration for that index.
+    getSourceFiltering() {
+      return {
+        excludes: this.sourceFilters && this.sourceFilters.map(filter => filter.value) || []
+      };
+    }
+
+    addScriptedField(name, script, type = 'string', lang) {
+      const scriptedFields = this.getScriptedFields();
+      const names = _.pluck(scriptedFields, 'name');
+
+      if (_.contains(names, name)) {
+        throw new errors.DuplicateField(name);
       }
 
-      self._indexFields = function () {
-        if (self.id) {
-          if (!self.fields) {
-            // kibi: setting additional flags to prevent double execution of _indexFields and _fetchFieldsPath
-            return self.refreshFields().then(() => {
-              self.kibiFieldsIndexed = true;
-              self.kibiPathsFetched = true;
-            });
-          } else {
-            return initFields().then(() => {
-              self.kibiFieldsIndexed = true;
-            });
-          }
-        }
-        return Promise.resolve();
-      };
+      this.fields.push({
+        name: name,
+        script: script,
+        type: type,
+        scripted: true,
+        lang: lang
+      });
 
-      // Set the source filtering configuration for that index
-      self.setSourceFiltering = function (config) {
-        self.sourceFiltering = config;
-        self.save();
-      };
+      this.save();
+    }
 
-      // Get the source filtering configuration for that index
-      self.getSourceFiltering = function () {
-        return self.sourceFiltering;
-      };
+    removeScriptedField(name) {
+      const fieldIndex = _.findIndex(this.fields, {
+        name: name,
+        scripted: true
+      });
+      this.fields.splice(fieldIndex, 1);
+      this.save();
+    }
 
-      self.addScriptedField = function (name, script, type, lang) {
-        type = type || 'string';
+    popularizeField(fieldName, unit = 1) {
+      const field = _.get(this, ['fields', 'byName', fieldName]);
+      if (!field) {
+        return;
+      }
+      const count = Math.max((field.count || 0) + unit, 0);
+      if (field.count === count) {
+        return;
+      }
+      field.count = count;
+      this.save();
+    }
 
-        const scriptFields = _.pluck(self.getScriptedFields(), 'name');
+    getNonScriptedFields() {
+      return _.where(this.fields, { scripted: false });
+    }
 
-        if (_.contains(scriptFields, name)) {
-          throw new errors.DuplicateField(name);
-        }
+    getScriptedFields() {
+      return _.where(this.fields, { scripted: true });
+    }
 
-        self.fields.push({
-          name: name,
-          script: script,
-          type: type,
-          scripted: true,
-          lang: lang
-        });
+    getInterval() {
+      return this.intervalName && _.find(intervals, { name: this.intervalName });
+    }
 
-        self.save();
-      };
-
-      self.removeScriptedField = function (name) {
-        const fieldIndex = _.findIndex(self.fields, {
-          name: name,
-          scripted: true
-        });
-
-        self.fields.splice(fieldIndex, 1);
-
-        self.save();
-      };
-
-      self.popularizeField = function (fieldName, unit) {
-        if (unit == null) unit = 1;
-
-        const field = _.get(self, ['fields', 'byName', fieldName]);
-        if (!field) return;
-
-        const count = Math.max((field.count || 0) + unit, 0);
-        if (field.count !== count) {
-          field.count = count;
-          self.save();
-        }
-      };
-
-      self.getNonScriptedFields = function () {
-        return _.where(self.fields, { scripted: false });
-      };
-
-      self.getScriptedFields = function () {
-        return _.where(self.fields, { scripted: true });
-      };
-
-      self.getInterval = function () {
-        return this.intervalName && _.find(intervals, { name: this.intervalName });
-      };
-
-      self.toIndexList = function (start, stop, sortDirection) {
-        return self
+    toIndexList(start, stop, sortDirection) {
+      return this
         .toDetailedIndexList(start, stop, sortDirection)
-        .then(function (detailedIndices) {
+        .then(detailedIndices => {
           if (!_.isArray(detailedIndices)) {
             return detailedIndices.index;
           }
-
           return _.pluck(detailedIndices, 'index');
         });
-      };
+    }
 
-      self.toDetailedIndexList = Promise.method(function (start, stop, sortDirection) {
-        const interval = self.getInterval();
-
+    toDetailedIndexList(start, stop, sortDirection) {
+      return Promise.resolve().then(() => {
+        const interval = this.getInterval();
         if (interval) {
-          return intervals.toIndexList(self.id, interval, start, stop, sortDirection);
+          return intervals.toIndexList(
+            this.id, interval, start, stop, sortDirection
+          );
         }
 
-        if (self.isWildcard() && self.hasTimeField() && self.canExpandIndices()) {
-          return calculateIndices(self.id, self.timeFieldName, start, stop, sortDirection);
+        if (this.isWildcard() && this.hasTimeField() && this.canExpandIndices()) {
+          return calculateIndices(
+            this.id, this.timeFieldName, start, stop, sortDirection
+          );
         }
 
         return {
-          index: self.id,
+          index: this.id,
           min: -Infinity,
-          max: Infinity,
+          max: Infinity
         };
       });
-
-      self.canExpandIndices = function () {
-        return !this.notExpandable;
-      };
-
-      self.hasTimeField = function () {
-        return !!(this.timeFieldName && this.fields.byName[this.timeFieldName]);
-      };
-
-      self.isWildcard = function () {
-        return _.includes(this.id, '*');
-      };
-
-      self.prepBody = function () {
-        const body = {};
-
-        // serialize json fields
-        _.forOwn(mapping, function (fieldMapping, fieldName) {
-          if (self[fieldName] != null) {
-            body[fieldName] = (fieldMapping._serialize)
-              ? fieldMapping._serialize(self[fieldName])
-              : self[fieldName];
-          }
-        });
-
-        // ensure that the docSource has the current self.id
-        docSource.id(self.id);
-
-        // clear the indexPattern list cache
-        getIds.clearCache();
-        return body;
-      };
-
-      function setId(id) {
-        return self.id = id;
-      }
-
-      self.create = function () {
-        const body = self.prepBody();
-        return docSource.doCreate(body)
-        .then(setId)
-        .catch(function (err) {
-          if (_.get(err, 'origError.status') === 409) {
-            const confirmMessage = 'Are you sure you want to overwrite this?';
-
-            return safeConfirm(confirmMessage).then(
-              function () {
-                return Promise.try(function () {
-                  const cached = patternCache.get(self.id);
-                  if (cached) {
-                    return cached.then(pattern => pattern.destroy());
-                  }
-                })
-                .then(() => docSource.doIndex(body))
-                .then(setId);
-              },
-              _.constant(false) // if the user doesn't overwrite, resolve with false
-            );
-          } else {
-            // kibi: notify errors
-            notify.error(err);
-          }
-          return Promise.resolve(false);
-        });
-      };
-
-      self.save = function () {
-        const body = self.prepBody();
-        // kibi: notify errors
-        return docSource.doIndex(body)
-        .then(setId)
-        .then(() => mappings.clearCache())
-        .catch((error) => {
-          notify.error(error);
-          throw error;
-        });
-        // kibi: end
-      };
-
-      self.refreshFields = function () {
-        return mapper.clearCache(self)
-        .then(self._fetchFieldsPath) // kibi: retrieve the path of each field
-        .then(self._fetchFields)
-        .then(self.save);
-      };
-
-      // kibi: return the field paths sequence in order to support field names with dots
-      self._fetchFieldsPath = function () {
-        return mapper.getPathsSequenceForIndexPattern(self)
-        .then(paths => {
-          self.paths = paths;
-        });
-      };
-      // kibi: end
-
-      self._fetchFields = function () {
-        return mapper.getFieldsForIndexPattern(self, true)
-        .then(function (fields) {
-          // append existing scripted fields
-          fields = fields.concat(self.getScriptedFields());
-          // initialize self.field with this field list
-          return initFields(fields);
-        });
-      };
-
-      self.toJSON = function () {
-        return self.id;
-      };
-
-      self.toString = function () {
-        return '' + self.toJSON();
-      };
-
-      self.destroy = function () {
-        patternCache.clear(self.id);
-        docSource.destroy();
-      };
-
-      self.metaFields = config.get('metaFields');
-      self.getComputedFields = getComputedFields.bind(self);
-
-      self.flattenHit = flattenHit(self);
-      self.formatHit = formatHit(self, fieldformats.getDefaultInstance('string'));
-      self.formatField = self.formatHit.formatField;
     }
 
-    IndexPattern.prototype.routes = {
-      edit: '/settings/indices/{{id}}',
-      addField: '/settings/indices/{{id}}/create-field',
-      indexedFields: '/settings/indices/{{id}}?_a=(tab:indexedFields)',
-      scriptedFields: '/settings/indices/{{id}}?_a=(tab:scriptedFields)',
-      // kibi: added by kibi
-      sourceFiltering: '/settings/indices/{{id}}?_a=(tab:sourceFiltering)'
-    };
+    canExpandIndices() {
+      return !this.notExpandable;
+    }
 
-    return IndexPattern;
-  };
-});
+    hasTimeField() {
+      return !!(this.timeFieldName && this.fields.byName[this.timeFieldName]);
+    }
+
+    isWildcard() {
+      return _.includes(this.id, '*');
+    }
+
+    prepBody() {
+      const body = {};
+
+      // serialize json fields
+      _.forOwn(mapping, (fieldMapping, fieldName) => {
+        if (this[fieldName] != null) {
+          body[fieldName] = (fieldMapping._serialize)
+            ? fieldMapping._serialize(this[fieldName])
+            : this[fieldName];
+        }
+      });
+
+      // ensure that the docSource has the current this.id
+      docSources.get(this).id(this.id);
+
+      // clear the indexPattern list cache
+      getIds.clearCache();
+      return body;
+    }
+
+    create() {
+      const body = this.prepBody();
+      return docSources.get(this)
+      .doCreate(body)
+      .then(id => setId(this, id))
+      .catch(err => {
+        if (_.get(err, 'origError.status') !== 409) {
+          // kibi: notify errors
+          notify.error(err);
+          return Promise.resolve(false);
+        }
+        const confirmMessage = 'Are you sure you want to overwrite this?';
+
+        return safeConfirm(confirmMessage)
+        .then(() => Promise
+          .try(() => {
+            const cached = patternCache.get(this.id);
+            if (cached) {
+              return cached.then(pattern => pattern.destroy());
+            }
+          })
+          .then(() => docSources.get(this).doIndex(body))
+          .then(id => setId(this, id)),
+          _.constant(false) // if the user doesn't overwrite, resolve with false
+        );
+      });
+    }
+
+    save() {
+      const body = this.prepBody();
+      return docSources.get(this)
+      .doIndex(body)
+      .then(id => setId(this, id))
+      .then(() => mappings.clearCache())
+      // kibi: notify errors
+      .catch((error) => {
+        notify.error(error);
+        throw error;
+      });
+      // kibi: end
+    }
+
+    refreshFields() {
+      return mapper
+      .clearCache(this)
+      .then(() => this._fetchFieldsPath()) // kibi: retrieve the path of each field
+      .then(() => fetchFields(this))
+      .then(() => this.save());
+    }
+
+    // kibi: return the field paths sequence in order to support field names with dots
+    _fetchFieldsPath() {
+      return mapper.getPathsSequenceForIndexPattern(this)
+      .then(paths => {
+        this.paths = paths;
+      });
+    }
+    // kibi: end
+
+    toJSON() {
+      return this.id;
+    }
+
+    toString() {
+      return '' + this.toJSON();
+    }
+
+    destroy() {
+      unwatch(this);
+      patternCache.clear(this.id);
+      docSources.get(this).destroy();
+      docSources.delete(this);
+    }
+  }
+
+  return IndexPattern;
+};

@@ -1,12 +1,12 @@
-var ngMock = require('ngMock');
-var expect = require('expect.js');
-var angular = require('angular');
-require('../kibi_validate');
+import '../kibi_validate';
+import ngMock from 'ng_mock';
+import expect from 'expect.js';
+import angular from 'angular';
 
 describe('Kibi Directives', function () {
-  var $rootScope;
-  var $scope;
-  var form;
+  let $rootScope;
+  let $scope;
+  let form;
 
   describe('Kibi Validate', function () {
 
@@ -17,7 +17,7 @@ describe('Kibi Directives', function () {
 
         ngMock.inject(function ($compile, $rootScope) {
           $scope = $rootScope;
-          var element = angular.element(
+          const element = angular.element(
             '<form name="form">' +
             '<input ng-model="model.somenum" name="somenum" kibi-validate="integer" />' +
             '</form>'
@@ -73,7 +73,7 @@ describe('Kibi Directives', function () {
 
         ngMock.inject(function ($compile, $rootScope) {
           $scope = $rootScope;
-          var element = angular.element(
+          const element = angular.element(
             '<form name="form">' +
             '<input ng-model="model.somenum" name="somenum" kibi-validate="positive-integer-or-minus-one" />' +
             '</form>'

@@ -1,5 +1,5 @@
 import expect from 'expect.js';
-import { encode as encodeRison } from 'ui/utils/rison';
+import { encode as encodeRison } from 'rison-node';
 
 import {
   createStateHash,

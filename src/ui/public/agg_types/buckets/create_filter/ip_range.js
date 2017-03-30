@@ -1,20 +1,18 @@
-define(function (require) {
-  let CidrMask = require('ui/utils/CidrMask');
-  let buildRangeFilter = require('ui/filter_manager/lib/range');
-  return function createIpRangeFilterProvider() {
-    return function (aggConfig, key) {
-      let range;
-      if (aggConfig.params.ipRangeType === 'mask') {
-        range = new CidrMask(key).getRange();
-      } else {
-        let addresses = key.split(/\-/);
-        range = {
-          from: addresses[0],
-          to: addresses[1]
-        };
-      }
+import CidrMask from 'ui/utils/cidr_mask';
+import buildRangeFilter from 'ui/filter_manager/lib/range';
+export default function createIpRangeFilterProvider() {
+  return function (aggConfig, key) {
+    let range;
+    if (aggConfig.params.ipRangeType === 'mask') {
+      range = new CidrMask(key).getRange();
+    } else {
+      let [from, to] = key.split(/\s+to\s+/);
+      range = {
+        from: from === '-Infinity' ? -Infinity : from,
+        to: to === 'Infinity' ? Infinity : to
+      };
+    }
 
-      return buildRangeFilter(aggConfig.params.field, {gte: range.from, lte: range.to}, aggConfig.vis.indexPattern);
-    };
+    return buildRangeFilter(aggConfig.params.field, {gte: range.from, lte: range.to}, aggConfig.vis.indexPattern);
   };
-});
+};

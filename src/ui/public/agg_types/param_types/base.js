@@ -1,11 +1,9 @@
-define(function (require) {
-  return function BaseAggParamFactory() {
-    let _ = require('lodash');
+import _ from 'lodash';
+export default function BaseAggParamFactory() {
 
-    function BaseAggParam(config) {
-      _.assign(this, config);
-    }
+  function BaseAggParam(config) {
+    _.assign(this, config);
+  }
 
-    return BaseAggParam;
-  };
-});
+  return BaseAggParam;
+};

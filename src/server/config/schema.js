@@ -1,31 +1,15 @@
-let get = require('lodash').get;
-let Joi = require('joi');
-let fs = require('fs');
-let path = require('path');
+import Joi from 'joi';
+import { get } from 'lodash';
+import { randomBytes } from 'crypto';
+import os from 'os';
 
-let utils = require('requirefrom')('src/utils');
-let fromRoot = utils('fromRoot');
-const randomBytes = require('crypto').randomBytes;
-const getData = require('../path').getData;
-import pkg from '../../../src/utils/packageJson';
+import { fromRoot } from '../../utils';
+import { getData } from '../path';
 
-let uiConfig;
-try {
-  uiConfig = require('../../../test/serverConfig');
-} catch (err) {
-  if (err.code === 'MODULE_NOT_FOUND') {
-    // kibi: make sure karma.port is defined during optimize step
-    // as the "test" folder is no longer present during this step
-    uiConfig = {
-      servers: {
-        karma: {
-          port: 9876
-        }
-      }
-    };
-  }
-}
+import pkg from '../../../src/utils/package_json';
 
+// kibi: import
+import serverConfig from '../../../test/server_config';
 
 module.exports = () => Joi.object({
   pkg: Joi.object({
@@ -43,17 +27,24 @@ module.exports = () => Joi.object({
     prod: Joi.boolean().default(Joi.ref('$prod'))
   }).default(),
 
+  dev: Joi.object({
+    basePathProxyTarget: Joi.number().default(5603),
+  }).default(),
+
   pid: Joi.object({
     file: Joi.string(),
     exclusive: Joi.boolean().default(false)
   }).default(),
 
+
   server: Joi.object({
-    host: Joi.string().hostname().default('0.0.0.0'),
+    uuid: Joi.string().guid().default(),
+    name: Joi.string().default(os.hostname()),
+    host: Joi.string().hostname().default('localhost'),
     port: Joi.number().default(5606), // kibi: changed to avoid colisions with kibana
     maxPayloadBytes: Joi.number().default(1048576),
     autoListen: Joi.boolean().default(true),
-    defaultRoute: Joi.string(),
+    defaultRoute: Joi.string().default('/app/kibana').regex(/^\//, `start with a slash`),
     basePath: Joi.string().default('').allow('').regex(/(^$|^\/.*[^\/]$)/, `start with a slash, don't end with one`),
     ssl: Joi.object({
       cert: Joi.string(),
@@ -62,7 +53,8 @@ module.exports = () => Joi.object({
     cors: Joi.when('$dev', {
       is: true,
       then: Joi.object().default({
-        origin: ['*://localhost:' + uiConfig.servers.karma.port] // karma test server
+        // kibi: make the port configurable
+        origin: [`*://localhost:${serverConfig.servers.karma.port}`] // karma test server
       }),
       otherwise: Joi.boolean().default(false)
     }),
@@ -100,6 +92,10 @@ module.exports = () => Joi.object({
     })
   })
   .default(),
+
+  ops: Joi.object({
+    interval: Joi.number().default(5000),
+  }).default(),
 
   plugins: Joi.object({
     paths: Joi.array().items(Joi.string()).default([]),
@@ -142,11 +138,11 @@ module.exports = () => Joi.object({
   status: Joi.object({
     allowAnonymous: Joi.boolean().default(false)
   }).default(),
-
   tilemap: Joi.object({
-    url: Joi.string().default(`https://tiles.elastic.co/v1/default/{z}/{x}/{y}.png?my_app_name=kibana&my_app_version=${pkg.version}&elastic_tile_service_tos=agree`),
+    manifestServiceUrl: Joi.string().default('https://tiles.elastic.co/v2/manifest'),
+    url: Joi.string(),
     options: Joi.object({
-      attribution: Joi.string().default('© [Elastic Tile Service](https://www.elastic.co/elastic-tile-service)'),
+      attribution: Joi.string(),
       minZoom: Joi.number().min(1, 'Must not be less than 1').default(1),
       maxZoom: Joi.number().default(10),
       tileSize: Joi.number(),
@@ -156,6 +152,13 @@ module.exports = () => Joi.object({
       reuseTiles: Joi.boolean(),
       bounds: Joi.array().items(Joi.array().items(Joi.number()).min(2).required()).min(2)
     }).default()
-  }).default()
+  }).default(),
+  uiSettings: Joi.object({
+    // this is used to prevent the uiSettings from initializing. Since they
+    // require the elasticsearch plugin in order to function we need to turn
+    // them off when we turn off the elasticsearch plugin (like we do in the
+    // optimizer half of the dev server)
+    enabled: Joi.boolean().default(true)
+  }).default(),
 
 }).default();

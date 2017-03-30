@@ -1,0 +1,342 @@
+<kbn-management-app section="kibana" class="kuiView">
+  <div ng-controller="RelationsController" class="app-container container relations kibi-config-section" id="relations">
+
+    <div class="header">
+      <h2 class="title">Relational Configuration</h2>
+    </div>
+    <p>
+    Kibi makes use of the relations between indices (Index Patterns). </br>
+    Once these are defined, one can optionally enable the <b>Relational Panel</b> filter.
+    </p>
+
+    <div class="graphs-section">
+
+      <div class="indices-relations-config">
+        <!-- do not remove - it is here to make sure the graphs are aligned -->
+      </div>
+      <div class="dashboards-relations-config">
+        <div class="checkbox">
+          <label>
+            <input type="checkbox" ng-model="relationalPanel"/> Enable relational panel
+          </label>
+        </div>
+      </div>
+
+      <div class="indices-section" ng-class="{highlight: tab.indexRel}">
+        <h2>Relations between Index Patterns</h2>
+        <eeg eeg-id="'indicesGraph'"
+             graph="indicesGraph"
+             class="eeg indicesGraph"></eeg>
+      </div>
+
+
+      <div class="dashboards-section" ng-class="{highlight: tab.dashboardRel, disabled: !relationalPanel}">
+        <h2>Relational Panel Configuration</h2>
+        <eeg eeg-id="'dashboardsGraph'"
+             graph="dashboardsGraph"
+             class="eeg dashboardsGraph"></eeg>
+      </div>
+    </div>
+
+    <div class="tabpanel" id="tabpanel" role="tabpanel">
+      <!-- Nav tabs -->
+      <ul class="nav nav-tabs">
+        <li ng-click="tabClick('index')" ng-class="{ 'active': tab.indexRel, 'bad-relations': !indicesRelationsAreValid }" class="active">
+          <a href="" aria-controls="index_rel" role="tab">
+            <i ng-show="!indicesRelationsAreValid" aria-hidden="true" class="fa fa-exclamation-triangle"></i> Index Relations
+          </a>
+        </li>
+        <li ng-click="relationalPanel && tabClick('dashboard')"
+            ng-class="{ 'active': tab.dashboardRel, 'bad-relations': !dashboardsRelationsAreValid, disabled: !relationalPanel }">
+          <a href="" aria-controls="config_rel" role="tab">
+            <i ng-show="!dashboardsRelationsAreValid" aria-hidden="true" class="fa fa-exclamation-triangle"></i> Relational Panel
+          </a>
+        </li>
+      </ul>
+
+      <!-- Tab panes -->
+      <div class="tab-content">
+        <div role="tabpanel" class="tab-pane active" data-test-subj="index-relations-tab" ng-class="tab.indexRel ? 'active' : ''">
+          <form name="indicesForm" novalidate>
+            <div class="form-group">
+              <input type="text" class="form-control"
+                kibi-relations-search-bar
+                kibi-relations-search-bar-path="relations.relationsIndices"
+                ng-model="relationsIndicesSearchString"
+                ng-model-options="{ debounce: 350 }"
+                ng-change="searchRelations()"
+                placeholder="Search for relation ..."/>
+            </div>
+            <div class="form-group table-responsive">
+              <table class="table table-condensed">
+                <thead>
+                  <tr>
+                    <th>Left Relation</th>
+                    <th></th>
+                    <th>Right Relation</th>
+                    <th>Label</th>
+                    <!--controls-->
+                    <th ng-if="kibiEnterpriseEnabled"></th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <!-- here we repeat tbody to be able to show row with the error properly -->
+                <tbody ng-repeat="relation in relations.relationsIndices"
+                  data-test-subj="row-{{$index}}">
+                  <tr class="relation-row"
+                      ng-class="{ 'red-border' : relation.errors && relation.errors.length }" ng-hide="relation.$$hidden">
+                    <!--left relation-->
+                    <td>
+                      <table class="relationPart">
+                        <tbody>
+                          <tr>
+                            <td>
+                              index pattern
+                            </td>
+                            <td>
+                              <kibi-select
+                             required
+                             data-test-subj="index-relation-left-index"
+                             object-type="indexPattern"
+                             ng-model="relation.indices[0].indexPatternId"
+                             ></kibi-select>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td>
+                              type
+                            </td>
+                            <td>
+                              <kibi-select
+                             data-test-subj="index-relation-left-type"
+                             object-type="indexPatternType"
+                             model-disabled="!relation.indices[0].indexPatternId"
+                             index-pattern-id="relation.indices[0].indexPatternId"
+                             ng-model="relation.indices[0].indexPatternType"
+                             ></kibi-select>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td>
+                              field
+                            </td>
+                            <td>
+                              <kibi-select
+                             required
+                             data-test-subj="index-relation-left-field"
+                             object-type="field"
+                             analyzed-warning="true"
+                             index-pattern-id="relation.indices[0].indexPatternId"
+                             ng-model="relation.indices[0].path"
+                             ></kibi-select>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </td>
+
+                    <td>
+                      <i aria-hidden="true" class="fa fa-arrows-h"></i>
+                    </td>
+
+                    <!--right relation-->
+                    <td>
+                      <table class="relationPart">
+                        <tbody>
+                          <tr>
+                            <td>
+                              index pattern
+                            </td>
+                            <td>
+                              <kibi-select
+                             required
+                             data-test-subj="index-relation-right-index"
+                             object-type="indexPattern"
+                             ng-model="relation.indices[1].indexPatternId"
+                             ></kibi-select>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td>
+                              type
+                            </td>
+                            <td>
+                              <kibi-select
+                             data-test-subj="index-relation-right-type"
+                             object-type="indexPatternType"
+                             model-disabled="!relation.indices[1].indexPatternId"
+                             index-pattern-id="relation.indices[1].indexPatternId"
+                             ng-model="relation.indices[1].indexPatternType"
+                             ></kibi-select>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td>
+                              field
+                            </td>
+                            <td>
+                              <kibi-select
+                             required
+                             data-test-subj="index-relation-right-field"
+                             object-type="field"
+                             analyzed-warning="true"
+                             index-pattern-id="relation.indices[1].indexPatternId"
+                             ng-model="relation.indices[1].path"
+                             ></kibi-select>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </td>
+
+                    <td>
+                      <input required
+                             ng-model="relation.label"
+                             data-test-subj="index-relation-label"
+                             kibi-debounce="350"
+                             class="form-control small-input"
+                             type="text"
+                             kibi-stop-enter-key-down />
+                    </td>
+
+                    <!--controls-->
+                    <td class="ng-scope alignLeft" ng-if="kibiEnterpriseEnabled">
+                      <div class="actions">
+                        <button
+                           ng-click="edit(relation, $index)"
+                           class="btn btn-xs"
+                           aria-label="Edit">
+                          <span class="sr-only">Edit</span>
+                          <i aria-hidden="true" class="fa fa-pencil"></i>
+                        </button>
+                      </div>
+                    </td>
+                    <td>
+                      <div class="btn-group rightCorner">
+                        <kibi-array-param-remove index="{{ $index }}" model="relations.relationsIndices">
+                          </kibi-array-param-remove>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr ng-if="relation.errors && relation.errors.length">
+                    <td colspan="{{ kibiEnterpriseEnabled ? 6 : 5 }}">
+                      <h4 class="hintbox-heading">
+                        <i class="fa fa-danger text-danger"></i> Warning
+                      </h4>
+                      <ul>
+                        <li ng-repeat="error in unique(relation.errors)" ng-bind-html="error"></li>
+                        <div ng-show="relation.$$isIntraIndexConfig" class="hintbox">
+                          <p>To create the intra-index relation between two types under the same index you need: </p>
+                          <ol>
+                            <li>Create two aliases:</li>
+                              <div class="exclusion-examples" readonly
+                                ng-model="relation.$$isIntraIndexConfig"
+                                ui-ace="{
+                                  useWrapMode: true,
+                                  advanced: {
+                                    highlightActiveLine: false
+                                  },
+                                  rendererOptions: {
+                                    showPrintMargin: false,
+                                    maxLines: 2
+                                  }
+                                }">{{relation.$$isIntraIndexConfig}}</div>
+                            <li>Add the aliases as new index patterns in Settings/Indices</li>
+                            <li>Create a relation between aliases in Settings/Relations</li>
+                          </ol>
+                        </div>
+                      </ul>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <kibi-array-param-add label="relation" model="relations.relationsIndices" default="{{ { indices: [ {}, {} ] } }}"></kibi-array-param-add>
+            </div>
+          </form>
+        </div>
+        <div role="tabpanel" class="tab-pane" data-test-subj="dashboard-relations-tab" ng-class="tab.dashboardRel ? 'active' : ''">
+          <form name="dashboardsForm" novalidate>
+            <div class="form-group">
+              <br>
+              <p>
+                Configure here the relational panel accessible through the Dashboard app.
+                A dashboard is proposed in a menu only if associated with a saved search, which you can apply while saving the dashboard.
+              </p>
+            </div>
+            <div class="form-group">
+              <input type="text" class="form-control"
+                kibi-relations-search-bar
+                kibi-relations-search-bar-path="relations.relationsDashboards"
+                ng-model="relationsDashboardsSearchString"
+                ng-model-options="{ debounce: 350 }"
+                ng-change="searchRelations()"
+                placeholder="Search for relation ..."/>
+            </div>
+            <div class="form-group table-responsive">
+              <table class="table table-condensed">
+                <thead>
+                  <tr>
+                    <th>Left Dashboard</th>
+                    <th></th>
+                    <th>Right Dashboard</th>
+                    <th>Relation</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <!-- here we repeat tbody to be able to show row with the error properly -->
+                <tbody ng-repeat="relation in relations.relationsDashboards"
+                  data-test-subj="row-{{$index}}">
+                  <tr class="relation-row"
+                      ng-class="{ 'red-border' : relation.errors && relation.errors.length }" ng-hide="relation.$$hidden">
+                    <td>
+                      <kibi-select required object-type="dashboard"
+                                            data-test-subj="dashboard-relation-left-dashboard"
+                                            ng-model="relation.dashboards[0]"
+                                            filter="filterDashboards"
+                                            options="{rowIndex: $index}"></kibi-select>
+                    </td>
+                    <td>
+                      <i aria-hidden="true" class="fa fa-arrows-h"></i>
+                    </td>
+                    <td>
+                      <kibi-select required object-type="dashboard"
+                                            data-test-subj="dashboard-relation-right-dashboard"
+                                            ng-model="relation.dashboards[1]"
+                                            filter="filterDashboards"
+                                            options="{rowIndex: $index}"></kibi-select>
+                    </td>
+                    <td>
+                      <kibi-select required object-type="delegate"
+                                            delegated-data="getIndicesRelationsLabel"
+                                            data-test-subj="relation"
+                                            ng-model="relation.relation"
+                                            filter="filterRelations"
+                                            options="{rowIndex: $index}"></kibi-select>
+                    </td>
+                    <td>
+                      <div class="btn-group rightCorner">
+                        <kibi-array-param-remove index="{{ $index }}" model="relations.relationsDashboards"></kibi-array-param-remove>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr ng-if="relation.errors && relation.errors.length">
+                    <td colspan="5">
+                      <h4 class="hintbox-heading">
+                        <i class="fa fa-danger text-danger"></i> Warning
+                      </h4>
+                      <ul>
+                        <li ng-repeat="error in unique(relation.errors)">{{ error }}</li>
+                      </ul>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <kibi-array-param-add label="relation" model="relations.relationsDashboards" default="{{ { dashboards: [ '', '' ] } }}"></kibi-array-param-add>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</kbn-management-app>

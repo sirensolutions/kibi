@@ -2,15 +2,15 @@
 define(function (require) {
   return function JoinExplanationFactory(Private, indexPatterns, Promise, $timeout, kibiState) {
 
-    var jQuery = require('jquery');
-    var qtip = require('kibi-qtip2');
+    const jQuery = require('jquery');
+    const qtip = require('kibi-qtip2');
 
     function JoinExplanationHelper() {}
 
     JoinExplanationHelper.prototype = (function () {
 
-      var fieldFormat = Private(require('ui/registry/field_formats'));
-      var _ = require('lodash');
+      const fieldFormat = Private(require('ui/registry/field_formats'));
+      const _ = require('lodash');
 
       const explainFiltersForJoinSet = function (queriesPerDashboard, indexId) {
         const promises = [];
@@ -85,9 +85,10 @@ define(function (require) {
       }
 
       const initQtip = function (explanations) {
+        jQuery('.qtip').qtip('destroy', true);
         $timeout(function () {
 
-          jQuery('filter-bar .filter').each(function (index) {
+          jQuery('.filter').each(function (index) {
             const $el = jQuery(this);
             if ($el.hasClass('join') && explanations[index]) {
               $el.qtip('destroy', true);

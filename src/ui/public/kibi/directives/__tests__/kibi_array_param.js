@@ -1,14 +1,15 @@
-var sinon = require('auto-release-sinon');
-var angular = require('angular');
-var ngMock = require('ngMock');
-var expect = require('expect.js');
+import Notifier from 'ui/notify/notifier';
+import sinon from 'auto-release-sinon';
+import angular from 'angular';
+import ngMock from 'ng_mock';
+import expect from 'expect.js';
 
-require('../kibi_array_param');
+import '../kibi_array_param';
 
-var $rootScope;
-var $elems = {};
+let $rootScope;
+const $elems = {};
 
-var init = function (required, defaultElement, index, disable) {
+const init = function (required, defaultElement, index, disable) {
   // Load the application
   ngMock.module('kibana');
 
@@ -18,7 +19,7 @@ var init = function (required, defaultElement, index, disable) {
     $rootScope.array = [];
 
     // Create the elements
-    var addAttributes = 'model="array" label="element" post-action="action()"';
+    let addAttributes = 'model="array" label="element" post-action="action()"';
     if (disable) {
       addAttributes += ' disable="true"';
     }
@@ -31,13 +32,13 @@ var init = function (required, defaultElement, index, disable) {
     }
     $elems.add = angular.element('<kibi-array-param-add ' + addAttributes + '></kibi-array-param-add>');
 
-    var rm = '<kibi-array-param-remove model="array" post-action="action()" index="' + index + '"></kibi-array-param-remove>';
+    const rm = '<kibi-array-param-remove model="array" post-action="action()" index="' + index + '"></kibi-array-param-remove>';
     $elems.remove = angular.element(rm);
 
-    var up = '<kibi-array-param-up model="array" post-action="action()" index="' + index + '"></kibi-array-param-up>';
+    const up = '<kibi-array-param-up model="array" post-action="action()" index="' + index + '"></kibi-array-param-up>';
     $elems.up = angular.element(up);
 
-    var down = '<kibi-array-param-down model="array" post-action="action()" index="' + index + '"></kibi-array-param-down>';
+    const down = '<kibi-array-param-down model="array" post-action="action()" index="' + index + '"></kibi-array-param-down>';
     $elems.down = angular.element(down);
 
     'add remove up down'.split(' ').forEach(function (type) {
@@ -53,6 +54,12 @@ var init = function (required, defaultElement, index, disable) {
 
 describe('Kibi Directives', function () {
   describe('kibi_array_param directive', function () {
+
+    // https://github.com/elastic/kibana/pull/8822 ensure that the notifier is emptied by each test
+    afterEach(() => {
+      Notifier.prototype._notifs.length = 0;
+    });
+
     afterEach(function () {
       'add remove up down'.split(' ').forEach(function (type) {
         $elems[type].remove();
@@ -61,7 +68,7 @@ describe('Kibi Directives', function () {
 
     it('should set the button label to "Add element"', function () {
       init(false);
-      var label = $elems.add.find('span').text();
+      const label = $elems.add.find('span').text();
 
       expect(label).to.be('Add element');
     });

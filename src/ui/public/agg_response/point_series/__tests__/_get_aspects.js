@@ -1,8 +1,13 @@
+import _ from 'lodash';
+import moment from 'moment';
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import VisProvider from 'ui/vis';
+import AggResponsePointSeriesAddToSiriProvider from 'ui/agg_response/point_series/_add_to_siri';
+import VisAggConfigProvider from 'ui/vis/agg_config';
+import AggResponsePointSeriesGetAspectsProvider from 'ui/agg_response/point_series/_get_aspects';
+import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 describe('getAspects', function () {
-  let _ = require('lodash');
-  let moment = require('moment');
-  let expect = require('expect.js');
-  let ngMock = require('ngMock');
 
   let Vis;
   let Table;
@@ -13,20 +18,20 @@ describe('getAspects', function () {
   beforeEach(ngMock.module('kibana', function ($provide) {
     $provide.constant('kbnDefaultAppId', '');
     $provide.constant('kibiDefaultDashboardTitle', '');
-    $provide.constant('elasticsearchPlugins', ['siren-join']);
+    $provide.constant('elasticsearchPlugins', ['siren-platform']);
   }));
   beforeEach(ngMock.inject(function (Private) {
-    Vis = Private(require('ui/Vis'));
-    Table = Private(require('ui/agg_response/point_series/_add_to_siri'));
-    AggConfig = Private(require('ui/Vis/AggConfig'));
-    getAspects = Private(require('ui/agg_response/point_series/_get_aspects'));
-    indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+    Vis = Private(VisProvider);
+    Table = Private(AggResponsePointSeriesAddToSiriProvider);
+    AggConfig = Private(VisAggConfigProvider);
+    getAspects = Private(AggResponsePointSeriesGetAspectsProvider);
+    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
   }));
 
   let vis;
   let table;
 
-  let date = _.memoize(function (n) {
+  const date = _.memoize(function (n) {
     return moment().startOf('day').add(n, 'hour').valueOf();
   });
 
@@ -49,7 +54,7 @@ describe('getAspects', function () {
 
   function init(group, x, y) {
     // map args to indicies that should be removed
-    let filter = filterByIndex([
+    const filter = filterByIndex([
       x > 0,
       x > 1,
       group > 0,
@@ -91,7 +96,7 @@ describe('getAspects', function () {
       ].map(filter)
     };
 
-    let aggs = vis.aggs.splice(0, vis.aggs.length);
+    const aggs = vis.aggs.splice(0, vis.aggs.length);
     filter(aggs).forEach(function (filter) {
       vis.aggs.push(filter);
     });
@@ -100,7 +105,7 @@ describe('getAspects', function () {
   it('produces an aspect object for each of the aspect types found in the columns', function () {
     init(1, 1, 1);
 
-    let aspects = getAspects(vis, table);
+    const aspects = getAspects(vis, table);
     validate(aspects.x, 0);
     validate(aspects.series, 1);
     validate(aspects.y, 2);
@@ -109,7 +114,7 @@ describe('getAspects', function () {
   it('uses arrays only when there are more than one aspect of a specific type', function () {
     init(0, 1, 2);
 
-    let aspects = getAspects(vis, table);
+    const aspects = getAspects(vis, table);
 
     validate(aspects.x, 0);
     expect(aspects.series == null).to.be(true);
@@ -138,7 +143,7 @@ describe('getAspects', function () {
   it('creates a fake x aspect if the column does not exist', function () {
     init(0, 0, 1);
 
-    let aspects = getAspects(vis, table);
+    const aspects = getAspects(vis, table);
 
     expect(aspects.x)
       .to.be.an('object')

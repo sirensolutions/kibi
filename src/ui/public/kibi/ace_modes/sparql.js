@@ -1,14 +1,15 @@
+// KIBI5: port this
 /*global ace*/
 ace.define('ace/mode/sparql', function (require, exports, module) {
 
-  var oop = require('../lib/oop');
-  var TextMode = require('./text').Mode;
-  var Tokenizer = require('../tokenizer').Tokenizer;
-  var SparqlHighlightRules = require('./sparql_highlight_rules').SparqlHighlightRules;
-  var MatchingBraceOutdent = require('./matching_brace_outdent').MatchingBraceOutdent;
-  var Range = require('../range').Range;
+  const oop = require('../lib/oop');
+  const TextMode = require('./text').Mode;
+  const Tokenizer = require('../tokenizer').Tokenizer;
+  const SparqlHighlightRules = require('./sparql_highlight_rules').SparqlHighlightRules;
+  const MatchingBraceOutdent = require('./matching_brace_outdent').MatchingBraceOutdent;
+  const Range = require('../range').Range;
 
-  var Mode = function () {
+  const Mode = function () {
     this.$tokenizer = new Tokenizer(new SparqlHighlightRules().getRules());
   };
   oop.inherits(Mode, TextMode);
@@ -18,27 +19,27 @@ ace.define('ace/mode/sparql', function (require, exports, module) {
 });
 ace.define('ace/mode/sparql_highlight_rules', function (require, exports, module) {
 
-  var oop = require('../lib/oop');
-  var lang = require('../lib/lang');
-  var TextHighlightRules = require('./text_highlight_rules').TextHighlightRules;
+  const oop = require('../lib/oop');
+  const lang = require('../lib/lang');
+  const TextHighlightRules = require('./text_highlight_rules').TextHighlightRules;
 
-  var SparqlHighlightRules = function () {
+  const SparqlHighlightRules = function () {
 
-    var builtinFunctions = lang.arrayToMap(
+    const builtinFunctions = lang.arrayToMap(
         'str|lang|langmatches|datatype|bound|sameterm|isiri|isuri|isblank|isliteral|union|a'.split('|')
         );
 
-    var keywords = lang.arrayToMap(
+    const keywords = lang.arrayToMap(
         ('base|BASE|prefix|PREFIX|select|SELECT|ask|ASK|construct|CONSTRUCT|describe|DESCRIBE|where|WHERE|' +
          'from|FROM|reduced|REDUCED|named|NAMED|order|ORDER|limit|LIMIT|offset|OFFSET|filter|FILTER|' +
          'optional|OPTIONAL|graph|GRAPH|by|BY|asc|ASC|desc|DESC').split('|')
         );
 
-    var buildinConstants = lang.arrayToMap(
+    const buildinConstants = lang.arrayToMap(
         'true|TRUE|false|FALSE'.split('|')
         );
 
-    var builtinVariables = lang.arrayToMap(
+    const builtinVariables = lang.arrayToMap(
         ('').split('|')
         );
 

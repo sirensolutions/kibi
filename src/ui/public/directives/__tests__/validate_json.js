@@ -1,30 +1,30 @@
-let angular = require('angular');
-let expect = require('expect.js');
-let ngMock = require('ngMock');
+import angular from 'angular';
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import 'ui/directives/validate_json';
 
 // Load the kibana app dependencies.
-require('ui/directives/validate_json');
 
 let $parentScope;
 let $elemScope;
 let $elem;
-let mockScope = '';
+const mockScope = '';
 
-let input = {
+const input = {
   valid: '{ "test": "json input" }',
   invalid: 'strings are not json'
 };
 
-let markup = {
+const markup = {
   textarea: '<textarea ng-model="mockModel" validate-json></textarea>',
   input: '<input type="text" ng-model="mockModel" validate-json>'
 };
 
-let init = function (type) {
+const init = function (type) {
   // Load the application
   ngMock.module('kibana');
   type = type || 'input';
-  let elMarkup = markup[type];
+  const elMarkup = markup[type];
 
   // Create the scope
   ngMock.inject(function ($injector, $rootScope, $compile) {
@@ -39,7 +39,7 @@ let init = function (type) {
 };
 
 describe('validate-json directive', function () {
-  let checkValid = function (inputVal, className) {
+  const checkValid = function (inputVal, className) {
     $parentScope.mockModel = inputVal;
     $elem.scope().$digest();
     expect($elem.hasClass(className)).to.be(true);

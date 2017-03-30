@@ -1,19 +1,16 @@
+import _ from 'lodash';
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import AggResponseHierarchicalTransformAggregationProvider from 'ui/agg_response/hierarchical/_transform_aggregation';
 
 describe('buildHierarchicalData()', function () {
   describe('transformAggregation()', function () {
-    let _ = require('lodash');
-    let expect = require('expect.js');
-    let ngMock = require('ngMock');
     let transform;
     let fixture;
 
-    beforeEach(ngMock.module('kibana', function ($provide) {
-      //kibi: provide elasticsearchPlugins constant
-      $provide.constant('elasticsearchPlugins', ['siren-join']);
-    }));
-
+    beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
-      transform = Private(require('ui/agg_response/hierarchical/_transform_aggregation'));
+      transform = Private(AggResponseHierarchicalTransformAggregationProvider);
     }));
 
     beforeEach(function () {
@@ -45,17 +42,17 @@ describe('buildHierarchicalData()', function () {
     });
 
     it('relies on metricAgg#getValue() for the size of the children', function () {
-      let aggData = {
+      const aggData = {
         buckets: [
           { key: 'foo' },
           { key: 'bar' }
         ]
       };
 
-      let football = {};
+      const football = {};
       fixture.metric.getValue = _.constant(football);
 
-      let children = transform(fixture.agg, fixture.metric, aggData);
+      const children = transform(fixture.agg, fixture.metric, aggData);
       expect(children).to.be.an(Array);
       expect(children).to.have.length(2);
       expect(children[0]).to.have.property('size', football);
@@ -63,7 +60,7 @@ describe('buildHierarchicalData()', function () {
     });
 
     it('should create two levels of metrics', function () {
-      let children = transform(fixture.agg, fixture.metric, fixture.aggData);
+      const children = transform(fixture.agg, fixture.metric, fixture.aggData);
       fixture.metric.getValue = function (b) { return b.doc_count; };
 
       expect(children).to.be.an(Array);

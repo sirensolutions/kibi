@@ -1,4 +1,4 @@
-let _ = require('lodash');
+import _ from 'lodash';
 
 module.exports = function (chrome, internals) {
   /**
@@ -31,7 +31,7 @@ module.exports = function (chrome, internals) {
   };
 
   // kibi: added to be able to share dashboards with visible kibi-nav-bar
-  var kibiNavbarVisibleDefault = true;
+  let kibiNavbarVisibleDefault = true;
   internals.setKibiNavbarVisibleDefault = (_def1) => kibiNavbarVisibleDefault = Boolean(_def1);
 
   chrome.isKibiNavbarVisible = () => {

@@ -1,7 +1,10 @@
-
-let _ = require('lodash');
-let expect = require('expect.js');
-let ngMock = require('ngMock');
+import _ from 'lodash';
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import VisProvider from 'ui/vis';
+import VisAggConfigProvider from 'ui/vis/agg_config';
+import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import AggTypesBucketsCreateFilterFiltersProvider from 'ui/agg_types/buckets/create_filter/filters';
 
 describe('AggConfig Filters', function () {
   describe('filters', function () {
@@ -13,17 +16,16 @@ describe('AggConfig Filters', function () {
     beforeEach(ngMock.module('kibana', function ($provide) {
       $provide.constant('kbnDefaultAppId', '');
       $provide.constant('kibiDefaultDashboardTitle', '');
-      $provide.constant('elasticsearchPlugins', ['siren-join']);
     }));
     beforeEach(ngMock.inject(function (Private) {
-      Vis = Private(require('ui/Vis'));
-      AggConfig = Private(require('ui/Vis/AggConfig'));
-      indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
-      createFilter = Private(require('ui/agg_types/buckets/create_filter/filters'));
+      Vis = Private(VisProvider);
+      AggConfig = Private(VisAggConfigProvider);
+      indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+      createFilter = Private(AggTypesBucketsCreateFilterFiltersProvider);
     }));
 
     it('should return a filters filter', function () {
-      let vis = new Vis(indexPattern, {
+      const vis = new Vis(indexPattern, {
         type: 'histogram',
         aggs: [
           {
@@ -39,8 +41,8 @@ describe('AggConfig Filters', function () {
         ]
       });
 
-      let aggConfig = vis.aggs.byTypeName.filters[0];
-      let filter = createFilter(aggConfig, '_type:nginx');
+      const aggConfig = vis.aggs.byTypeName.filters[0];
+      const filter = createFilter(aggConfig, '_type:nginx');
       expect(_.omit(filter, 'meta')).to.eql(aggConfig.params.filters[1].input);
       expect(filter.meta).to.have.property('index', indexPattern.id);
 

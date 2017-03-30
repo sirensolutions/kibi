@@ -1,14 +1,27 @@
-const expect = require('expect.js');
-const _ = require('lodash');
-const DelayExecutionHelper = require('ui/kibi/helpers/delay_execution_helper');
-
-let actuallData;
-let executionCounter;
+import ngMock from 'ng_mock';
+import expect from 'expect.js';
+import _ from 'lodash';
+import DelayExecutionHelperProvider from 'ui/kibi/helpers/delay_execution_helper';
 
 describe('Kibi Components', function () {
+  let actualData;
+  let executionCounter;
+  let DelayExecutionHelper;
+  let $timeout;
+
   describe('delayExecutionHelper', function () {
 
-    var collectUniqueIds = function (newData, data) {
+    beforeEach(ngMock.module('kibana'));
+    beforeEach(ngMock.inject(function (_$timeout_, Private) {
+      $timeout = _$timeout_;
+      DelayExecutionHelper = Private(DelayExecutionHelperProvider);
+    }));
+
+    afterEach(function () {
+      $timeout.verifyNoPendingTasks();
+    });
+
+    const collectUniqueIds = function (newData, data) {
       if (data.ids === undefined) {
         data.ids = [];
       }
@@ -19,19 +32,27 @@ describe('Kibi Components', function () {
       });
     };
 
+    let timePointer = 0;
+    const moveTimePointer = function (time) {
+      $timeout.flush(time - timePointer);
+      timePointer = time;
+    };
+    beforeEach(function () {
+      timePointer = 0;
+    });
 
     describe('DELAY_STRATEGY.RESET_COUNTER_ON_NEW_EVENT', function () {
 
       // e1   cancel     X
       //  |___delay______|
-      it('1 event and then cancel before "delay" - should not trigger any callback', function (done) {
-        var actuallData = [];
-        var executionCounter = 0;
-        var helper = new DelayExecutionHelper(
+      it('1 event and then cancel before "delay" - should not trigger any callback', function () {
+        let actualData = [];
+        let executionCounter = 0;
+        const helper = new DelayExecutionHelper(
           collectUniqueIds,
           function (data) {
             executionCounter++;
-            actuallData = data.ids;
+            actualData = data.ids;
           },
           100,
           DelayExecutionHelper.DELAY_STRATEGY.RESET_COUNTER_ON_NEW_EVENT
@@ -40,30 +61,27 @@ describe('Kibi Components', function () {
         helper.addEventData(['id1']);
         // trigger cancel
         // t < delay
-        setTimeout(function () {
-          helper.cancel();
-        }, 50);
+        moveTimePointer(50);
+        helper.cancel();
 
-        setTimeout(function () {
-          // verify that callback not never called
-          // even t > delay * 3
-          expect(actuallData).to.eql([]);
-          expect(executionCounter).to.equal(0);
-          done();
-        }, 320);
+        // verify that callback was never called
+        // even t > delay * 3
+        moveTimePointer(320);
+        expect(actualData).to.eql([]);
+        expect(executionCounter).to.equal(0);
       });
 
       // e1         e2   X         C1
       //  |__delay___|___|         |
       //             |_____________|
-      it('2 events triggered inside "delay" - callback should be triggered a "delay" after second event', function (done) {
-        var actuallData = [];
-        var executionCounter = 0;
-        var helper = new DelayExecutionHelper(
+      it('2 events triggered inside "delay" - callback should be triggered a "delay" after second event', function () {
+        let actualData = [];
+        let executionCounter = 0;
+        const helper = new DelayExecutionHelper(
           collectUniqueIds,
           function (data) {
             executionCounter++;
-            actuallData = data.ids;
+            actualData = data.ids;
           },
           100,
           DelayExecutionHelper.DELAY_STRATEGY.RESET_COUNTER_ON_NEW_EVENT
@@ -71,99 +89,86 @@ describe('Kibi Components', function () {
 
         helper.addEventData(['id1']);
         // trigger second event < delay
-        setTimeout(function () {
-          helper.addEventData(['id2']);
-        }, 50);
+        moveTimePointer(50);
+        helper.addEventData(['id2']);
 
-        setTimeout(function () {
-          // verify that callback not executed
-          // t < delay
-          expect(actuallData).to.eql([]);
-          expect(executionCounter).to.equal(0);
-        }, 80);
-        setTimeout(function () {
-          // verify that callback not executed
-          // 2 * delay < t < delay
-          expect(actuallData).to.eql([]);
-          expect(executionCounter).to.equal(0);
-        }, 120);
-        setTimeout(function () {
-          // verify that callback executed once after
-          // 2 * delay < t
-          expect(actuallData).to.eql(['id1', 'id2']);
-          expect(executionCounter).to.equal(1);
-        }, 220);
-        setTimeout(function () {
-          // verify that callback not executed again
-          // 3 * delay < t
-          expect(actuallData).to.eql(['id1', 'id2']);
-          expect(executionCounter).to.equal(1);
-          done();
-        }, 320);
+        moveTimePointer(80);
+        // verify that callback not executed
+        // t < delay
+        expect(actualData).to.have.length(0);
+        expect(executionCounter).to.equal(0);
 
+        moveTimePointer(120);
+        // verify that callback not executed
+        // delay < t < 2 * delay
+        expect(actualData).to.have.length(0);
+        expect(executionCounter).to.equal(0);
+
+        moveTimePointer(220);
+        // verify that callback executed once after
+        // 2 * delay < t
+        expect(actualData).to.eql(['id1', 'id2']);
+        expect(executionCounter).to.equal(1);
+
+        moveTimePointer(320);
+        // verify that callback not executed again
+        // 3 * delay < t
+        expect(actualData).to.eql(['id1', 'id2']);
+        expect(executionCounter).to.equal(1);
       });
 
       // e1          C1    e2         C2
       //  |__delay___|     |__delay___|
       it(
       '2 events triggered more than "delay" apart - should trigger the callback twice ' +
-      'a "delay" after first event and a "delay" after second event', function (done) {
-        var actuallData = [];
-        var executionCounter = 0;
-        var helper = new DelayExecutionHelper(
+      'a "delay" after first event and a "delay" after second event', function () {
+        let actualData = [];
+        let executionCounter = 0;
+        const helper = new DelayExecutionHelper(
           collectUniqueIds,
           function (data) {
             executionCounter++;
-            actuallData = data.ids;
+            actualData = data.ids;
           },
           100,
           DelayExecutionHelper.DELAY_STRATEGY.RESET_COUNTER_ON_NEW_EVENT
         );
 
         helper.addEventData(['id1']);
+
+        moveTimePointer(50);
+        // verify that callback not executed
+        // t < delay after first event
+        expect(actualData).to.have.length(0);
+        expect(executionCounter).to.equal(0);
+
+        moveTimePointer(150);
+        // verify that callback executed
+        // t > delay after first event
+        expect(actualData).to.eql(['id1']);
+        expect(executionCounter).to.equal(1);
+
         // add data from second event after the delay timeout
-        setTimeout(function () {
-          helper.addEventData(['id2']);
-        }, 300);
+        moveTimePointer(300);
+        helper.addEventData(['id2']);
 
-        setTimeout(function () {
-          // verify that callback not executed
-          // t < delay after first event
-          expect(actuallData).to.eql([]);
-          expect(executionCounter).to.equal(0);
-        }, 50);
+        moveTimePointer(350);
+        // verify that callback not executed again
+        // t < delay after second event
+        expect(actualData).to.eql(['id1']);
+        expect(executionCounter).to.equal(1);
 
-        setTimeout(function () {
-          // verify that callback executed
-          // t > delay after first event
-          expect(actuallData).to.eql(['id1']);
-          expect(executionCounter).to.equal(1);
-        }, 150);
+        moveTimePointer(450);
+        // verify that callback executed again
+        // t > delay after second event
+        expect(actualData).to.eql(['id2']);
+        expect(executionCounter).to.equal(2);
 
-        setTimeout(function () {
-          // verify that callback not executed again
-          // t < delay after second event
-          expect(actuallData).to.eql(['id1']);
-          expect(executionCounter).to.equal(1);
-          done();
-        }, 350);
-
-        setTimeout(function () {
-          // verify that callback executed again
-          // t > delay after second event
-          expect(actuallData).to.eql(['id2']);
-          expect(executionCounter).to.equal(2);
-          done();
-        }, 450);
-
-        setTimeout(function () {
-          // verify that callback not executed again
-          // t > 2 * delay after second event
-          expect(actuallData).to.eql(['id2']);
-          expect(executionCounter).to.equal(2);
-          done();
-        }, 550);
-
+        moveTimePointer(550);
+        // verify that callback not executed again
+        // t > 2 * delay after second event
+        expect(actualData).to.eql(['id2']);
+        expect(executionCounter).to.equal(2);
       });
     });
 
@@ -171,14 +176,14 @@ describe('Kibi Components', function () {
 
       // e1   cancel     X
       //  |___delay______|
-      it('1 event and then cancel before "delay" - should not trigger any callback', function (done) {
-        var actuallData = [];
-        var executionCounter = 0;
-        var helper = new DelayExecutionHelper(
+      it('1 event and then cancel before "delay" - should not trigger any callback', function () {
+        let actualData = [];
+        let executionCounter = 0;
+        const helper = new DelayExecutionHelper(
           collectUniqueIds,
           function (data) {
             executionCounter++;
-            actuallData = data.ids;
+            actualData = data.ids;
           },
           100,
           DelayExecutionHelper.DELAY_STRATEGY.DO_NOT_RESET_COUNTER_ON_NEW_EVENT
@@ -187,29 +192,26 @@ describe('Kibi Components', function () {
         helper.addEventData(['id1']);
         // trigger cancel
         // t < delay
-        setTimeout(function () {
-          helper.cancel();
-        }, 50);
+        moveTimePointer(50);
+        helper.cancel();
 
-        setTimeout(function () {
-          // verify that callback not never called
-          // even t > delay * 3
-          expect(actuallData).to.eql([]);
-          expect(executionCounter).to.equal(0);
-          done();
-        }, 320);
+        moveTimePointer(320);
+        // verify that callback not never called
+        // even t > delay * 3
+        expect(actualData).to.eql([]);
+        expect(executionCounter).to.equal(0);
       });
 
       // e1   e2     C1
       //  |__delay___|
-      it('2 events triggered inside "delay" - callback should be triggerd after a "delay" after first event', function (done) {
-        var actuallData = [];
-        var executionCounter = 0;
-        var helper = new DelayExecutionHelper(
+      it('2 events triggered inside "delay" - callback should be triggerd after a "delay" after first event', function () {
+        let actualData = [];
+        let executionCounter = 0;
+        const helper = new DelayExecutionHelper(
           collectUniqueIds,
           function (data) {
             executionCounter++;
-            actuallData = data.ids;
+            actualData = data.ids;
           },
           100,
           DelayExecutionHelper.DELAY_STRATEGY.DO_NOT_RESET_COUNTER_ON_NEW_EVENT
@@ -217,93 +219,80 @@ describe('Kibi Components', function () {
 
         helper.addEventData(['id1']);
         // add data from second event before the delay timeout
-        setTimeout(function () {
-          helper.addEventData(['id2']);
-        }, 50);
+        moveTimePointer(50);
+        helper.addEventData(['id2']);
 
-        setTimeout(function () {
-          // verify that callback not executed
-          // t < delay
-          expect(actuallData).to.eql([]);
-          expect(executionCounter).to.equal(0);
-        }, 80);
-        setTimeout(function () {
-          // verify that callback executed
-          // 2 * delay < t < delay
-          expect(actuallData).to.eql(['id1', 'id2']);
-          expect(executionCounter).to.equal(1);
-        }, 120);
-        setTimeout(function () {
-          // verify that callback not executed again
-          // 2 * delay < t
-          expect(actuallData).to.eql(['id1', 'id2']);
-          expect(executionCounter).to.equal(1);
-          done();
-        }, 220);
+        moveTimePointer(80);
+        // verify that callback not executed
+        // t < delay
+        expect(actualData).to.eql([]);
+        expect(executionCounter).to.equal(0);
 
+        moveTimePointer(120);
+        // verify that callback executed
+        // 2 * delay < t < delay
+        expect(actualData).to.eql(['id1', 'id2']);
+        expect(executionCounter).to.equal(1);
+
+        moveTimePointer(220);
+        // verify that callback not executed again
+        // 2 * delay < t
+        expect(actualData).to.eql(['id1', 'id2']);
+        expect(executionCounter).to.equal(1);
       });
 
       // e1          C1    e2         C2
       //  |__delay___|     |__delay___|
       it(
       '2 events triggered more than "delay" apart - should trigger the callback twice ' +
-      'a "delay" after first event and a "delay" after second event', function (done) {
-        var actuallData = [];
-        var executionCounter = 0;
-        var helper = new DelayExecutionHelper(
+      'a "delay" after first event and a "delay" after second event', function () {
+        let actualData = [];
+        let executionCounter = 0;
+        const helper = new DelayExecutionHelper(
           collectUniqueIds,
           function (data) {
             executionCounter++;
-            actuallData = data.ids;
+            actualData = data.ids;
           },
           100,
           DelayExecutionHelper.DELAY_STRATEGY.DO_NOT_RESET_COUNTER_ON_NEW_EVENT
         );
 
         helper.addEventData(['id1']);
+
+        moveTimePointer(50);
+        // verify that callback not executed
+        // t < delay after first event
+        expect(actualData).to.eql([]);
+        expect(executionCounter).to.equal(0);
+
+        moveTimePointer(150);
+        // verify that callback executed
+        // t > delay after first event
+        expect(actualData).to.eql(['id1']);
+        expect(executionCounter).to.equal(1);
+
         // add data from second event after the delay timeout
-        setTimeout(function () {
-          helper.addEventData(['id2']);
-        }, 300);
+        moveTimePointer(300);
+        helper.addEventData(['id2']);
 
-        setTimeout(function () {
-          // verify that callback not executed
-          // t < delay after first event
-          expect(actuallData).to.eql([]);
-          expect(executionCounter).to.equal(0);
-        }, 50);
+        moveTimePointer(350);
+        // verify that callback not executed again
+        // t < delay after second event
+        expect(actualData).to.eql(['id1']);
+        expect(executionCounter).to.equal(1);
 
-        setTimeout(function () {
-          // verify that callback executed
-          // t > delay after first event
-          expect(actuallData).to.eql(['id1']);
-          expect(executionCounter).to.equal(1);
-        }, 150);
+        moveTimePointer(450);
+        // verify that callback executed again
+        // t > delay after second event
+        expect(actualData).to.eql(['id2']);
+        expect(executionCounter).to.equal(2);
 
-        setTimeout(function () {
-          // verify that callback not executed again
-          // t < delay after second event
-          expect(actuallData).to.eql(['id1']);
-          expect(executionCounter).to.equal(1);
-          done();
-        }, 350);
-
-        setTimeout(function () {
-          // verify that callback executed again
-          // t > delay after second event
-          expect(actuallData).to.eql(['id2']);
-          expect(executionCounter).to.equal(2);
-          done();
-        }, 450);
-
-        setTimeout(function () {
-          // verify that callback not executed again
-          // t > 2 * delay after second event
-          expect(actuallData).to.eql(['id2']);
-          expect(executionCounter).to.equal(2);
-          done();
-        }, 550);
-
+        moveTimePointer(550);
+        // verify that callback not executed again
+        // t > 2 * delay after second event
+        expect(actualData).to.eql(['id2']);
+        expect(executionCounter).to.equal(2);
       });
     });
 

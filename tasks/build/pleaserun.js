@@ -22,7 +22,8 @@ export default (grunt) => {
         '--sysv-log-path', `${path.logs}/`,
         '-p', service.name,
         '-v', service.version,
-        path.kibanaBin
+        path.kibanaBin,
+        `-c ${path.kibanaConfig}`
       ]);
     });
   });

@@ -1,30 +1,27 @@
-define(function (require) {
-  var bdd = require('intern!bdd');
-  var expect = require('intern/dojo/node!expect.js');
-  var config = require('intern').config;
-  var Common = require('../../support/pages/common');
+import {
+  bdd,
+} from '../../support';
 
-  bdd.describe('status page', function () {
-    var common;
+import PageObjects from '../../support/page_objects';
 
-    bdd.before(function () {
-      common = new Common(this.remote);
-      // load the status page
-      return common.navigateToApp('statusPage', false);
-    });
+const expect = require('expect.js');
 
-    bdd.it('should show the kibana plugin as ready', function () {
-      var self = this;
+bdd.describe('status page', function () {
+  bdd.before(function () {
+    return PageObjects.common.navigateToApp('status_page', false);
+  });
 
-      return common.tryForTime(6000, function () {
-        return self.remote
-        .findByCssSelector('.plugin_status_breakdown')
-        .getVisibleText()
-        .then(function (text) {
-          expect(text.indexOf('kibana 1.0.0 Ready')).to.be.above(-1);
-        });
-      })
-      .catch(common.handleError(self));
-    });
+  bdd.it('should show the kibana plugin as ready', function () {
+    const self = this;
+
+    return PageObjects.common.tryForTime(6000, function () {
+      return PageObjects.common.findTestSubject('statusBreakdown')
+      .getVisibleText()
+      .then(function (text) {
+        PageObjects.common.saveScreenshot('Status');
+        expect(text.indexOf('plugin:kibana')).to.be.above(-1);
+      });
+    })
+    .catch(PageObjects.common.createErrorHandler(self));
   });
 });

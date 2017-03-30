@@ -1,12 +1,14 @@
-const expect = require('expect.js');
-const ngMock = require('ngMock');
+import SqlHelperProvider from 'ui/kibi/helpers/sql_helper';
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+
 let sqlHelper;
 
 function init() {
   return function () {
     ngMock.module('kibana');
-    ngMock.inject(function ($injector, Private) {
-      sqlHelper = Private(require('ui/kibi/helpers/sql_helper'));
+    ngMock.inject(function (Private) {
+      sqlHelper = Private(SqlHelperProvider);
     });
   };
 }

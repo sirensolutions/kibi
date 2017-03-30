@@ -9,19 +9,27 @@
   <tbody ng-repeat-end>
     <tr>
       <td>
+        <!--kibi: added name of the relational column-->
         <kbn-agg-table-group
           ng-if="table.tables"
           group="table"
           per-page="perPage"
-          query-field-name="queryFieldName">
-        </kbn-agg-table-group>
+          query-field-name="queryFieldName"
+          sort="sort"
+          show-total="showTotal"
+          total-func="totalFunc"
+        ></kbn-agg-table-group>
+        <!--kibi: added name of the relational column-->
         <kbn-agg-table
           ng-if="table.rows"
           table="table"
           export-title="exportTitle"
           per-page="perPage"
-          query-field-name="queryFieldName">
-        </kbn-agg-table>
+          query-field-name="queryFieldName"
+          sort="sort"
+          show-total="showTotal"
+          total-func="totalFunc"
+        ></kbn-agg-table>
       </td>
     </tr>
   </tbody>
@@ -38,19 +46,27 @@
   <tbody>
     <tr>
       <td ng-repeat="table in columns">
+        <!--kibi: added name of the relational column-->
         <kbn-agg-table-group
           ng-if="table.tables"
           group="table"
           per-page="perPage"
-          query-field-name="queryFieldName">
-        </kbn-agg-table-group>
+          query-field-name="queryFieldName"
+          sort="sort"
+          show-total="showTotal"
+          total-func="totalFunc"
+        ></kbn-agg-table-group>
+        <!--kibi: added name of the relational column-->
         <kbn-agg-table
           ng-if="table.rows"
           table="table"
           export-title="exportTitle"
           per-page="perPage"
-          query-field-name="queryFieldName">
-        </kbn-agg-table>
+          query-field-name="queryFieldName"
+          sort="sort"
+          show-total="showTotal"
+          total-func="totalFunc"
+        ></kbn-agg-table>
       </td>
     </tr>
   </tbody>

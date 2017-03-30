@@ -1,64 +1,52 @@
-define(function (require) {
-  let _ = require('lodash');
-  let angular = require('angular');
-  require('ace');
+import { each } from 'lodash';
+import $ from 'jquery';
+import uiModules from 'ui/modules';
+import DocViewsProvider from 'ui/registry/doc_views';
 
-  let html = require('ui/doc_viewer/doc_viewer.html');
-  require('ui/doc_viewer/doc_viewer.less');
+import 'ui/render_directive';
+import 'ui/doc_viewer/doc_viewer.less';
 
-  require('ui/modules').get('kibana')
-  .directive('docViewer', function (config, Private, $location) {
-    return {
-      restrict: 'E',
-      template: html,
-      scope: {
-        hit: '=',
-        indexPattern: '=',
-        filter: '=?',
-        columns: '=?',
-        columnAliases: '=?' // kibi: added columnAliases this was needed to support aliases in kibi-doc-table
-      },
-      link: {
-        pre($scope) {
-          $scope.aceLoaded = (editor) => {
-            editor.$blockScrolling = Infinity;
-          };
-        },
-
-        post($scope, $el, attr) {
-          // kibi: do not allow to filter on a field when in edit mode
-          $scope.edit = $location.path().indexOf('edit') !== -1;
-          // If a field isn't in the mapping, use this
-          $scope.mode = 'table';
-          $scope.mapping = $scope.indexPattern.fields.byName;
-          $scope.flattened = $scope.indexPattern.flattenHit($scope.hit);
-          $scope.hitJson = angular.toJson($scope.hit, true);
-          $scope.formatted = $scope.indexPattern.formatHit($scope.hit);
-          $scope.fields = _.keys($scope.flattened).sort();
-
-          // kibi: constructing aliases map
-          $scope.aliases = {};
-          _.each($scope.fields, (fieldName) =>{
-            $scope.aliases[fieldName] = fieldName;
-            if ($scope.columns && $scope.columnAliases && $scope.columnAliases.length > 0) {
-              const index = $scope.columns.indexOf(fieldName);
-              if ($scope.columnAliases[index]) {
-                $scope.aliases[fieldName] = $scope.columnAliases[index];
-              }
-            }
-          });
-          // kibi: end
-
-          $scope.toggleColumn = function (fieldName) {
-            _.toggleInOut($scope.columns, fieldName);
-          };
-
-          $scope.showArrayInObjectsWarning = function (row, field) {
-            let value = $scope.flattened[field];
-            return _.isArray(value) && typeof value[0] === 'object';
-          };
-        }
-      }
-    };
-  });
+uiModules.get('kibana')
+.directive('docViewer', function (config, Private) {
+  const docViews = Private(DocViewsProvider);
+  return {
+    restrict: 'E',
+    scope: {
+      hit: '=',
+      indexPattern: '=',
+      filter: '=?',
+      columns: '=?',
+      columnAliases: '=?'
+    },
+    template: function ($el, $attr) {
+      const $viewer = $('<div class="doc-viewer">');
+      $el.append($viewer);
+      const $tabs = $('<ul class="nav nav-tabs">');
+      const $content = $('<div class="doc-viewer-content">');
+      $viewer.append($tabs);
+      $viewer.append($content);
+      docViews.inOrder.forEach(view => {
+        const $tab = $(`<li ng-show="docViews['${view.name}'].shouldShow(hit)" ng-class="{active: mode == '${view.name}'}">
+            <a ng-click="mode='${view.name}'">${view.title}</a>
+          </li>`);
+        $tabs.append($tab);
+        // kibi: added columnAliases to $viewAttrs
+        const $viewAttrs = 'hit="hit" index-pattern="indexPattern" filter="filter" columns="columns" column-aliases="columnAliases"';
+        const $ext = $(`<render-directive ${$viewAttrs} ng-if="mode == '${view.name}'" definition="docViews['${view.name}'].directive">
+          </render-directive>`);
+        $ext.html(view.directive.template);
+        $content.append($ext);
+      });
+      return $el.html();
+    },
+    controller: function ($scope) {
+      $scope.mode = docViews.inOrder[0].name;
+      $scope.docViews = docViews.byName;
+      // kibi: do not allow to filter on a field when in edit mode
+      //$scope.edit = $location.path().indexOf('edit') !== -1;
+      // KIBI5: this will be unecessary after #2096 is fixed
+      $scope.edit = true;
+      // If a field isn't in the mapping, use this
+    }
+  };
 });

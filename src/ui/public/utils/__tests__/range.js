@@ -1,7 +1,7 @@
+import _ from 'lodash';
+import expect from 'expect.js';
+import parse from 'ui/utils/range';
 describe('Range parsing utility', function () {
-  let _ = require('lodash');
-  let expect = require('expect.js');
-  let parse = require('ui/utils/range');
 
   it('throws an error for inputs that are not formatted properly', function () {
     expect(function () {
@@ -25,7 +25,7 @@ describe('Range parsing utility', function () {
     }).to.throwException(TypeError);
   });
 
-  let tests = {
+  const tests = {
     '[ 0 , 100 ]': {
       props: {
         min: 0,
@@ -92,7 +92,7 @@ describe('Range parsing utility', function () {
   _.forOwn(tests, function (spec, str) {
 
     describe(str, function () {
-      let range = parse(str);
+      const range = parse(str);
 
       it('creation', function () {
         expect(range).to.eql(spec.props);

@@ -1,0 +1,50 @@
+import 'plugins/kibana/visualize/saved_visualizations/_saved_vis';
+import RegistryVisTypesProvider from 'ui/registry/vis_types';
+import uiModules from 'ui/modules';
+import { SavedObjectLoader } from 'ui/courier/saved_object/saved_object_loader';
+
+const app = uiModules.get('app/visualize');
+
+
+// Register this service with the saved object registry so it can be
+// edited by the object editor.
+require('plugins/kibana/management/saved_object_registry').register({
+  service: 'savedVisualizations',
+  title: 'visualizations'
+});
+
+app.service('savedVisualizations', function (savedObjectsAPI, Promise, esAdmin, kbnIndex, SavedVis, Private, createNotifier, kbnUrl) {
+  const visTypes = Private(RegistryVisTypesProvider);
+  const notify = createNotifier({
+    location: 'Saved Visualization Service'
+  });
+
+  const saveVisualizationLoader = new SavedObjectLoader(SavedVis, kbnIndex, esAdmin, kbnUrl, { savedObjectsAPI });
+  saveVisualizationLoader.mapHits = function (hit) {
+    const source = hit._source;
+    source.id = hit._id;
+    source.url = this.urlFor(hit._id);
+
+    let typeName = source.typeName;
+    if (source.visState) {
+      try { typeName = JSON.parse(source.visState).type; }
+      catch (e) { /* missing typename handled below */ } // eslint-disable-line no-empty
+    }
+
+    if (!typeName || !visTypes.byName[typeName]) {
+      if (!typeName) notify.error('Visualization type is missing. Please add a type to this visualization.', hit);
+      else notify.error('Visualization type of "' + typeName + '" is invalid. Please change to a valid type.', hit);
+      return kbnUrl.redirect('/management/kibana/objects/savedVisualizations/{{id}}', { id: source.id });
+    }
+
+    source.type = visTypes.byName[typeName];
+    source.icon = source.type.icon;
+    return source;
+  };
+
+  saveVisualizationLoader.urlFor = function (id) {
+    return kbnUrl.eval('#/visualize/edit/{{id}}', { id: id });
+  };
+
+  return saveVisualizationLoader;
+});

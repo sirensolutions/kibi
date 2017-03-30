@@ -1,42 +1,60 @@
-<form role="form">
-  <div class="form-group finder-form">
-
+<form role="form" class="form-inline">
+  <div class="container-fluid">
     <!--kibi: filter visualizations based on the savedSearchId -->
-    <div ng-if="kibi.onDashboardTab && type === 'visualizations'" class="visualisation-filter-checkbox">
-      <input ng-if="savedSearchId" type="checkbox" ng-model="kibi.basedOnSameSavedSearch" />
-      <label ng-if="savedSearchId">
-        Based on the saved search of the current dashboard: {{savedSearchId}}
-      </label>
-      <input ng-if="!savedSearchId" type="checkbox" disabled/>
-      <label ng-if="!savedSearchId">
-        To be able to filter visualisations based on dashboard's saved search
-        - associate a saved search when saving this dashboard
-      </label>
+    <div class="row">
+      <div class="input-group form-group finder-form col-md-7">
+        <div ng-if="kibi.onDashboardPage && type === 'visualizations'" class="visualisation-filter-checkbox">
+          <input ng-if="savedSearchId" type="checkbox" ng-model="kibi.basedOnSameSavedSearch" />
+          <label ng-if="savedSearchId">
+            Based on the saved search of the current dashboard: {{savedSearchId}}
+          </label>
+          <input ng-if="!savedSearchId" type="checkbox" disabled/>
+          <label ng-if="!savedSearchId">
+            To be able to filter visualisations based on dashboard's saved search
+            - associate a saved search when saving this dashboard
+          </label>
+        </div>
+      </div>
     </div>
     <!-- kibi: end -->
 
-    <div class="finder-form-options" style="float:right;">
-      <a class="small" ng-click="finder.manageObjects(finder.properties.name)">manage {{finder.properties.nouns}}</a>
+    <div class="row">
+      <div class="input-group form-group finder-form col-md-7">
+        <span class="input-group-addon">
+          <i class="fa fa-search"></i>
+        </span>
+        <input
+          input-focus
+          ng-model="filter"
+          ng-attr-placeholder="{{finder.properties.nouns | label }} Filter..."
+          ng-keydown="finder.filterKeyDown($event)"
+          class="form-control"
+          name="filter"
+          type="text"
+          autocomplete="off" />
+      </div>
+      <div class="finder-hit-count col-md-2">
+        <span>{{finder.hitCount}} of {{finder.hitCount}}</span>
+      </div>
+      <div class="finder-manage-object col-md-2" ng-if="!useLocalManagement">
+        <a class="small" ng-click="finder.manageObjects(finder.properties.name)">
+          Manage {{finder.properties.nouns}}
+        </a>
+      </div>
     </div>
-    <div class="clearfix visible-xs-block"></div>
-    <input
-      input-focus
-      ng-model="filter"
-      ng-attr-placeholder="{{finder.properties.noun}} Filter"
-      ng-keydown="finder.filterKeyDown($event)"
-      class="form-control"
-      name="filter"
-      type="text"
-      autocomplete="off" />
-
-    <span class="finder-hit-count"><strong>{{finder.hitCount}}</strong> {{finder.hitCountNoun()}}</span>
   </div>
 </form>
-<paginate list="finder.hits" per-page="{{perPage}}">
-  <ul
-    class="list-group list-group-menu"
-    ng-class="{'select-mode': finder.selector.enabled}">
-
+<paginate list="finder.hits" per-page="20">
+  <ul class="li-striped list-group list-group-menu" ng-class="{'select-mode': finder.selector.enabled}">
+    <li class="list-group-item" ng-click="finder.sortHits(finder.hits)">
+      <span class="paginate-heading">
+        Name
+        <i
+          class="fa"
+          ng-class="finder.isAscending ? 'fa-caret-up' : 'fa-caret-down'">
+        </i>
+      </span>
+    </li>
     <li
       class="list-group-item list-group-menu-item"
       ng-class="{'active': finder.selector.index === $index && finder.selector.enabled}"
@@ -44,18 +62,16 @@
       ng-keydown="finder.hitKeyDown($event, page, paginate)"
       ng-click="finder.onChoose(hit, $event)">
 
-      <a
-        ng-href="{{finder.makeUrl(hit)}}"
-        ng-blur="finder.hitBlur($event)"
-        ng-click="finder.preventClick($event)">
-
-        <i aria-hidden="true" class="fa" ng-if="hit.icon" ng-class="hit.icon"></i>
+      <a ng-href="{{finder.makeUrl(hit)}}"
+          ng-blur="finder.hitBlur($event)"
+          ng-click="finder.preventClick($event)">
+          <i aria-hidden="true" class="finder-type fa" ng-if="hit.icon" ng-class="hit.icon"></i>
           <!-- kibi: style the title our way for our objects -->
           <span ng-class="{kibiTitle: type === 'dashboardgroups' || type === 'templates' || type === 'queries' }">
             {{hit.title}}
           </span>
           <!-- kibi: end -->
-        <p ng-if="hit.description" ng-bind="hit.description"></p>
+          <p ng-if="hit.description" ng-bind="hit.description"></p>
       </a>
     </li>
     <li

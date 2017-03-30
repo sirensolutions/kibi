@@ -1,11 +1,15 @@
+import { values } from 'lodash';
+import _ from 'lodash';
+import ngMock from 'ng_mock';
+import expect from 'expect.js';
+import resp from 'fixtures/agg_resp/range';
+import AggTypesIndexProvider from 'ui/agg_types/index';
+import VisProvider from 'ui/vis';
+import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
 describe('Range Agg', function () {
-  let _ = require('lodash');
-  let ngMock = require('ngMock');
-  let expect = require('expect.js');
-  let values = require('lodash').values;
 
-  let resp = require('fixtures/agg_resp/range');
-  let buckets = values(resp.aggregations[1].buckets);
+  const buckets = values(resp.aggregations[1].buckets);
 
   let range;
   let Vis;
@@ -14,14 +18,13 @@ describe('Range Agg', function () {
   beforeEach(ngMock.module('kibana', function ($provide) {
     $provide.constant('kbnDefaultAppId', '');
     $provide.constant('kibiDefaultDashboardTitle', '');
-    $provide.constant('elasticsearchPlugins', ['siren-join']);
   }));
   beforeEach(ngMock.inject(function (Private) {
-    range = Private(require('ui/agg_types/index')).byName.range;
-    Vis = Private(require('ui/Vis'));
-    indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+    range = Private(AggTypesIndexProvider).byName.range;
+    Vis = Private(VisProvider);
+    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
 
-    let BytesFormat = Private(require('ui/registry/field_formats')).byId.bytes;
+    const BytesFormat = Private(RegistryFieldFormatsProvider).byId.bytes;
 
     indexPattern.fieldFormatMap.bytes = new BytesFormat({
       pattern: '0,0.[000] b'
@@ -32,7 +35,7 @@ describe('Range Agg', function () {
 
   describe('formating', function () {
     it('formats bucket keys properly', function () {
-      let vis = new Vis(indexPattern, {
+      const vis = new Vis(indexPattern, {
         type: 'histogram',
         aggs: [
           {
@@ -49,8 +52,8 @@ describe('Range Agg', function () {
         ]
       });
 
-      let agg = vis.aggs.byTypeName.range[0];
-      let format = function (val) {
+      const agg = vis.aggs.byTypeName.range[0];
+      const format = function (val) {
         return agg.fieldFormatter()(agg.getKey(val));
       };
       expect(format(buckets[0])).to.be('-∞ to 1 KB');

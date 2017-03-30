@@ -7,10 +7,10 @@ import fs from 'fs'; // kibi: dependencies added by
 export default (grunt) => {
   const { config, log } = grunt;
 
-  let mkdirp = Promise.promisify(require('mkdirp')); // kibi: dependencies added by
+  const mkdirp = Promise.promisify(require('mkdirp')); // kibi: dependencies added by
 
-  let buildPath = resolve(config.get('root'), 'build');
-  let exec = async (cmd, args) => {
+  const buildPath = resolve(config.get('root'), 'build');
+  const exec = async (cmd, args) => {
     log.writeln(` > ${cmd} ${args.join(' ')}`);
     await Promise.fromNode(cb => execFile(cmd, args, { cwd: buildPath }, cb));
   };
@@ -30,23 +30,23 @@ export default (grunt) => {
   // now lets swap the bindings
   function copyFile(source, target) {
     return new Promise(function (resolve, reject) {
-      let rd = fs.createReadStream(source);
+      const rd = fs.createReadStream(source);
       rd.on('error', reject);
-      let wr = fs.createWriteStream(target);
+      const wr = fs.createWriteStream(target);
       wr.on('error', reject);
       wr.on('finish', resolve);
       rd.pipe(wr);
     });
   }
 
-  let toCopy = [];
+  const toCopy = [];
   config.get('platforms').forEach(({ name, buildDir }) => {
-    let nodeVersion = 'v48';
+    const nodeVersion = 'v46';
     let sqliteBindingSrc;
     let sqliteBindingDestFolder;
     let sqliteBindingDest;
-    let nodejavaBindingSrc = __dirname + '/../../resources/nodejavabridges/' + name + '/nodejavabridge_bindings.node';
-    let nodejavaBindingDest = buildDir + '/node_modules/java/build/Release/nodejavabridge_bindings.node';
+    const nodejavaBindingSrc = __dirname + '/../../resources/nodejavabridges/' + name + '/nodejavabridge_bindings.node';
+    const nodejavaBindingDest = buildDir + '/node_modules/jdbc/node_modules/java/build/Release/nodejavabridge_bindings.node';
     switch (name) {
       case 'darwin-x64':
         sqliteBindingSrc   = __dirname + '/../../resources/nodesqlite3bindings/' + name + '/node-' + nodeVersion +
@@ -79,7 +79,9 @@ export default (grunt) => {
         sqliteBindingDest = sqliteBindingDestFolder + '/node_sqlite3.node';
         break;
       default:
-        throw new Error('Unknown platform: [' + name + ']');
+        //throw new Error('Unknown platform: [' + name + ']');
+        // KIBI5: what to do here ? I got the error "Error: Unknown platform: [darwin-x86_64]"
+        return;
     }
 
     toCopy.push({
@@ -94,7 +96,7 @@ export default (grunt) => {
 
   grunt.registerTask('_build:archives', function () {
     // kibi: here swap files before building archives
-    let copyOperations = _.map(toCopy, function (row) {
+    const copyOperations = _.map(toCopy, function (row) {
       return mkdirp(row.sqliteBindingDestFolder).then(function () {
         return copyFile(row.sqliteBindingSrc, row.sqliteBindingDest).then(function () {
           return copyFile(row.nodejavaBindingSrc, row.nodejavaBindingDest);

@@ -1,17 +1,19 @@
-const MockState = require('fixtures/mock_state');
-const mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
-const sinon = require('auto-release-sinon');
-const expect = require('expect.js');
-const ngMock = require('ngMock');
-const Promise = require('bluebird');
-const dateMath = require('ui/utils/dateMath');
+import noDigestPromises from 'test_utils/no_digest_promises';
+import SequentialJoinVisHelperProvider from 'ui/kibi/helpers/kibi_sequential_join_vis_helper';
+import MockState from 'fixtures/mock_state';
+import mockSavedObjects from 'fixtures/kibi/mock_saved_objects';
+import sinon from 'auto-release-sinon';
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import Promise from 'bluebird';
+import { parseWithPrecision } from 'ui/kibi/utils/date_math_precision';
 
 let sequentialJoinVisHelper;
-let config;
 let kibiState;
 let appState;
 let $rootScope;
 let saveAppStateStub;
+let config;
 
 const defaultTimeStart = '2006-09-01T12:00:00.000Z';
 const defaultTimeEnd = '2009-09-01T12:00:00.000Z';
@@ -20,20 +22,17 @@ function init({
     currentDashboardId = 'dashboard 1',
     indexPatterns = [],
     savedSearches = [],
-    savedDashboards = [],
+    savedDashboards = [ { id: currentDashboardId, title: currentDashboardId } ],
     enableEnterprise = false,
     relations = {
       relationsIndices: [],
       relationsDashboards: []
     }
-  }) {
+  } = {}) {
   ngMock.module('kibana', 'kibana/courier', 'kibana/global_state', ($provide) => {
     $provide.constant('kibiEnterpriseEnabled', enableEnterprise);
     $provide.constant('kbnDefaultAppId', '');
     $provide.constant('kibiDefaultDashboardTitle', '');
-    $provide.constant('elasticsearchPlugins', []);
-
-    $provide.service('config', require('fixtures/kibi/config'));
 
     appState = new MockState({ filters: [] });
     $provide.service('getAppState', function () {
@@ -57,12 +56,13 @@ function init({
     $provide.service('savedDashboards', (Promise, Private) => mockSavedObjects(Promise, Private)('savedDashboards', savedDashboards));
   });
 
-  ngMock.inject(function (_$rootScope_, timefilter, _config_, _kibiState_, Private, Promise) {
+  ngMock.inject(function (_config_, _$rootScope_, timefilter, _kibiState_, Private, Promise) {
+    config = _config_;
     $rootScope = _$rootScope_;
     kibiState = _kibiState_;
-    config = _config_;
-    sequentialJoinVisHelper = Private(require('ui/kibi/helpers/kibi_sequential_join_vis_helper'));
+    sequentialJoinVisHelper = Private(SequentialJoinVisHelperProvider);
     sinon.stub(kibiState, '_getCurrentDashboardId').returns(currentDashboardId);
+    sinon.stub(kibiState, 'isSirenJoinPluginInstalled').returns(Promise.resolve(true));
     saveAppStateStub = sinon.stub(kibiState, 'saveAppState').returns(Promise.resolve());
 
     const defaultTime = {
@@ -79,8 +79,7 @@ function init({
 describe('Kibi Components', function () {
   describe('sequentialJoinVisHelper', function () {
 
-    require('testUtils/noDigestPromises').activateForSuite();
-
+    noDigestPromises.activateForSuite();
 
     describe('constructButtonArray - buttons configured with sourceDashboard targetDashboard and indexRelationId', function () {
 
@@ -117,7 +116,7 @@ describe('Kibi Components', function () {
       });
     });
 
-    it('should not do anything when a button is clicked in the config window', function (done) {
+    it('should not do anything when a button is clicked in the config window', function () {
       init({
         currentDashboardId: ''
       });
@@ -139,14 +138,14 @@ describe('Kibi Components', function () {
       expect(button.sourceIndexPatternId).to.equal('index1');
       expect(typeof button.click).to.equal('function');
 
-      button.click().then(() => {
+      return button.click()
+      .then(() => {
         sinon.assert.notCalled(saveAppStateStub);
-        done();
-      }).catch(done);
+      });
     });
 
     describe('constructButtonArray', function () {
-      beforeEach(() => init({}));
+      beforeEach(() => init());
 
       it('empty buttonsDef array', function () {
         const buttonDefs = [];
@@ -171,7 +170,7 @@ describe('Kibi Components', function () {
           ];
         });
 
-        it('should set the default filter label if no custom is set', function (done) {
+        it('should set the default filter label if no custom is set', function () {
           const buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, index);
           expect(buttons.length).to.equal(1);
           const button = buttons[0];
@@ -186,14 +185,13 @@ describe('Kibi Components', function () {
             }
           };
 
-          button.click().then(() => {
+          return button.click().then(() => {
             sinon.assert.calledOnce(buttonDefs[0].getSourceCount);
             expect(button.joinSeqFilter.meta.alias).to.eql('... related to (123) from dashboard 1');
-            done();
-          }).catch(done);
+          });
         });
 
-        it('should replace both $COUNT and $DASHBOARD occurrences', function (done) {
+        it('should replace both $COUNT and $DASHBOARD occurrences', function () {
           buttonDefs[0].filterLabel = 'My custom label with placeholders $COUNT $DASHBOARD';
           const buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, index);
           expect(buttons.length).to.equal(1);
@@ -210,14 +208,13 @@ describe('Kibi Components', function () {
           };
 
 
-          button.click().then(() => {
+          return button.click().then(() => {
             sinon.assert.calledOnce(buttonDefs[0].getSourceCount);
             expect(button.joinSeqFilter.meta.alias).to.eql('My custom label with placeholders 123 dashboard 1');
-            done();
-          }).catch(done);
+          });
         });
 
-        it('should replace $DASHBOARD', function (done) {
+        it('should replace $DASHBOARD', function () {
           buttonDefs[0].filterLabel = 'My custom label $DASHBOARD';
           const buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, index);
           expect(buttons.length).to.equal(1);
@@ -233,14 +230,13 @@ describe('Kibi Components', function () {
             }
           };
 
-          button.click().then(() => {
+          return button.click().then(() => {
             sinon.assert.notCalled(buttonDefs[0].getSourceCount);
             expect(button.joinSeqFilter.meta.alias).to.eql('My custom label dashboard 1');
-            done();
-          }).catch(done);
+          });
         });
 
-        it('should replace $COUNT', function (done) {
+        it('should replace $COUNT', function () {
           buttonDefs[0].filterLabel = 'My custom label $COUNT';
           const buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, index);
           expect(buttons.length).to.equal(1);
@@ -256,14 +252,13 @@ describe('Kibi Components', function () {
             }
           };
 
-          button.click().then(() => {
+          return button.click().then(() => {
             sinon.assert.calledOnce(buttonDefs[0].getSourceCount);
             expect(button.joinSeqFilter.meta.alias).to.eql('My custom label 123');
-            done();
-          }).catch(done);
+          });
         });
 
-        it('should replace nothing', function (done) {
+        it('should replace nothing', function () {
           buttonDefs[0].filterLabel = 'My custom label';
           const buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, index);
           expect(buttons.length).to.equal(1);
@@ -279,11 +274,10 @@ describe('Kibi Components', function () {
             }
           };
 
-          button.click().then(() => {
+          return button.click().then(() => {
             sinon.assert.notCalled(buttonDefs[0].getSourceCount);
             expect(button.joinSeqFilter.meta.alias).to.eql('My custom label');
-            done();
-          }).catch(done);
+          });
         });
       });
     });
@@ -313,7 +307,7 @@ describe('Kibi Components', function () {
         ];
       });
 
-      it('should expand the time-based index pattern', function (done) {
+      it('should expand the time-based index pattern', function () {
         const currentDashboardId = 'dashboardA';
         const button = {
           sourceField: 'fa',
@@ -328,14 +322,13 @@ describe('Kibi Components', function () {
         timeBasedIndicesStub.withArgs('ia-*').returns([ 'ia-1', 'ia-2' ]);
         timeBasedIndicesStub.withArgs('ib').returns([ 'ib' ]);
 
-        sequentialJoinVisHelper.getJoinSequenceFilter(currentDashboardId, button).then((rel) => {
+        return sequentialJoinVisHelper.getJoinSequenceFilter(currentDashboardId, button).then((rel) => {
           sinon.assert.called(timeBasedIndicesStub);
           expect(rel.join_sequence).to.have.length(1);
           expect(rel.join_sequence[0].relation).to.have.length(2);
           expect(rel.join_sequence[0].relation[0].indices).to.eql([ 'ia-1', 'ia-2' ]);
           expect(rel.join_sequence[0].relation[1].indices).to.eql([ button.targetIndexPatternId ]);
-          done();
-        }).catch(done);
+        });
       });
     });
 
@@ -370,7 +363,7 @@ describe('Kibi Components', function () {
             kibanaSavedObjectMeta: {
               searchSourceJSON: JSON.stringify({
                 index: 'ia',
-                query: { a: 123 },
+                query: { match: { a: 123 } },
                 filter: []
               })
             }
@@ -378,7 +371,7 @@ describe('Kibi Components', function () {
         ];
       });
 
-      it('should build the join_sequence', function (done) {
+      it('should build the join_sequence', function () {
         const currentDashboardId = 'dashboardA';
         const button = {
           sourceField: 'fa',
@@ -404,33 +397,30 @@ describe('Kibi Components', function () {
           }
         ];
 
-        sequentialJoinVisHelper.getJoinSequenceFilter(currentDashboardId, button).then((rel) => {
+        return sequentialJoinVisHelper.getJoinSequenceFilter(currentDashboardId, button).then((rel) => {
           sinon.assert.called(timeBasedIndicesStub);
           expect(rel.join_sequence).to.have.length(1);
           expect(rel.join_sequence[0].relation).to.have.length(2);
           expect(rel.join_sequence[0].relation[0].indices).to.eql([ button.sourceIndexPatternId ]);
           expect(rel.join_sequence[0].relation[0].path).to.be(button.sourceField);
-          expect(rel.join_sequence[0].relation[0].queries[0].query.bool.must).to.have.length(2);
+          expect(rel.join_sequence[0].relation[0].queries[0].query.bool.must).to.have.length(4);
           expect(rel.join_sequence[0].relation[0].queries[0].query.bool.must[0]).to.be.eql({
-            query: {
-              query_string: {
-                query: '*',
-                analyze_wildcard: true
-              }
-            }
-          });
-          expect(rel.join_sequence[0].relation[0].queries[0].query.bool.must[1]).to.be.eql({ query: { a: 123 } });
-          expect(rel.join_sequence[0].relation[0].queries[0].query.bool.filter.bool.must).to.have.length(2);
-          expect(rel.join_sequence[0].relation[0].queries[0].query.bool.filter.bool.must[0]).to.be.eql({
             term: {
               field: 'aaa'
             }
           });
-          expect(rel.join_sequence[0].relation[0].queries[0].query.bool.filter.bool.must[1]).to.be.eql({
+          expect(rel.join_sequence[0].relation[0].queries[0].query.bool.must[1]).to.be.eql({
+            query_string: {
+              query: '*',
+              analyze_wildcard: true
+            }
+          });
+          expect(rel.join_sequence[0].relation[0].queries[0].query.bool.must[2]).to.be.eql({ match: { a: 123 } });
+          expect(rel.join_sequence[0].relation[0].queries[0].query.bool.must[3]).to.be.eql({
             range: {
               date: {
-                gte: dateMath.parseWithPrecision(defaultTimeStart, false).valueOf(),
-                lte: dateMath.parseWithPrecision(defaultTimeEnd, true).valueOf(),
+                gte: parseWithPrecision(defaultTimeStart, false).valueOf(),
+                lte: parseWithPrecision(defaultTimeEnd, true).valueOf(),
                 format: 'epoch_millis'
               }
             }
@@ -439,11 +429,10 @@ describe('Kibi Components', function () {
           expect(rel.join_sequence[0].relation[1].indices).to.eql([ button.targetIndexPatternId ]);
           expect(rel.join_sequence[0].relation[1].path).to.be(button.targetField);
           expect(rel.join_sequence[0].relation[1].termsEncoding).to.be('long');
-          done();
-        }).catch(done);
+        });
       });
 
-      it('should build the join_sequence with the appropriate index types', function (done) {
+      it('should build the join_sequence with the appropriate index types', function () {
         const currentDashboardId = 'dashboardA';
         const button = {
           sourceField: 'fa',
@@ -471,33 +460,30 @@ describe('Kibi Components', function () {
           }
         ];
 
-        sequentialJoinVisHelper.getJoinSequenceFilter(currentDashboardId, button).then((rel) => {
+        return sequentialJoinVisHelper.getJoinSequenceFilter(currentDashboardId, button).then((rel) => {
           sinon.assert.called(timeBasedIndicesStub);
           expect(rel.join_sequence).to.have.length(1);
           expect(rel.join_sequence[0].relation).to.have.length(2);
           expect(rel.join_sequence[0].relation[0].indices).to.eql([ button.sourceIndexPatternId ]);
           expect(rel.join_sequence[0].relation[0].path).to.be(button.sourceField);
-          expect(rel.join_sequence[0].relation[0].queries[0].query.bool.must).to.have.length(2);
+          expect(rel.join_sequence[0].relation[0].queries[0].query.bool.must).to.have.length(4);
           expect(rel.join_sequence[0].relation[0].queries[0].query.bool.must[0]).to.be.eql({
-            query: {
-              query_string: {
-                query: '*',
-                analyze_wildcard: true
-              }
-            }
-          });
-          expect(rel.join_sequence[0].relation[0].queries[0].query.bool.must[1]).to.be.eql({ query: { a: 123 } });
-          expect(rel.join_sequence[0].relation[0].queries[0].query.bool.filter.bool.must).to.have.length(2);
-          expect(rel.join_sequence[0].relation[0].queries[0].query.bool.filter.bool.must[0]).to.be.eql({
             term: {
               field: 'aaa'
             }
           });
-          expect(rel.join_sequence[0].relation[0].queries[0].query.bool.filter.bool.must[1]).to.be.eql({
+          expect(rel.join_sequence[0].relation[0].queries[0].query.bool.must[1]).to.be.eql({
+            query_string: {
+              query: '*',
+              analyze_wildcard: true
+            }
+          });
+          expect(rel.join_sequence[0].relation[0].queries[0].query.bool.must[2]).to.be.eql({ match: { a: 123 } });
+          expect(rel.join_sequence[0].relation[0].queries[0].query.bool.must[3]).to.be.eql({
             range: {
               date: {
-                gte: dateMath.parseWithPrecision(defaultTimeStart, false).valueOf(),
-                lte: dateMath.parseWithPrecision(defaultTimeEnd, true).valueOf(),
+                gte: parseWithPrecision(defaultTimeStart, false).valueOf(),
+                lte: parseWithPrecision(defaultTimeEnd, true).valueOf(),
                 format: 'epoch_millis'
               }
             }
@@ -506,11 +492,10 @@ describe('Kibi Components', function () {
           expect(rel.join_sequence[0].relation[1].indices).to.eql([ button.targetIndexPatternId ]);
           expect(rel.join_sequence[0].relation[1].path).to.be(button.targetField);
           expect(rel.join_sequence[0].relation[1].termsEncoding).to.be('long');
-          done();
-        }).catch(done);
+        });
       });
 
-      it('should get the query from the search meta', function (done) {
+      it('should get the query from the search meta', function () {
         init({ indexPatterns, savedDashboards, savedSearches });
 
         const timeBasedIndicesStub = sinon.stub(kibiState, 'timeBasedIndices');
@@ -523,31 +508,37 @@ describe('Kibi Components', function () {
           targetField: 'fb',
           targetIndexPatternId: 'ib'
         };
-        sequentialJoinVisHelper.getJoinSequenceFilter('dashboardA', button).then((rel) => {
+        return sequentialJoinVisHelper.getJoinSequenceFilter('dashboardA', button).then((rel) => {
           sinon.assert.called(timeBasedIndicesStub);
           expect(rel.join_sequence).to.have.length(1);
           expect(rel.join_sequence[0].relation).to.have.length(2);
           expect(rel.join_sequence[0].relation[0].indices).to.eql([ button.sourceIndexPatternId ]);
           expect(rel.join_sequence[0].relation[0].path).to.be(button.sourceField);
-          expect(rel.join_sequence[0].relation[0].queries[0].query.bool.must).to.have.length(2);
+          expect(rel.join_sequence[0].relation[0].queries[0].query.bool.must).to.have.length(3);
           expect(rel.join_sequence[0].relation[0].queries[0].query.bool.must[0]).to.be.eql({
-            query: {
-              query_string: {
-                query: '*',
-                analyze_wildcard: true
+            query_string: {
+              query: '*',
+              analyze_wildcard: true
+            }
+          });
+          expect(rel.join_sequence[0].relation[0].queries[0].query.bool.must[1]).to.be.eql({ match: { a: 123 } });
+          expect(rel.join_sequence[0].relation[0].queries[0].query.bool.must[2]).to.be.eql({
+            range: {
+              date: {
+                gte: parseWithPrecision(defaultTimeStart, false).valueOf(),
+                lte: parseWithPrecision(defaultTimeEnd, true).valueOf(),
+                format: 'epoch_millis'
               }
             }
           });
-          expect(rel.join_sequence[0].relation[0].queries[0].query.bool.must[1]).to.be.eql({ query: { a: 123 } });
           expect(rel.join_sequence[0].relation[0].termsEncoding).to.be('long');
           expect(rel.join_sequence[0].relation[1].indices).to.eql([ button.targetIndexPatternId ]);
           expect(rel.join_sequence[0].relation[1].path).to.be(button.targetField);
           expect(rel.join_sequence[0].relation[1].termsEncoding).to.be('long');
-          done();
-        }).catch(done);
+        });
       });
 
-      it('should set the default siren-join parameters', function (done) {
+      it('should set the default siren-platform parameters', function () {
         init({ indexPatterns, savedDashboards, savedSearches });
 
         const timeBasedIndicesStub = sinon.stub(kibiState, 'timeBasedIndices');
@@ -560,17 +551,16 @@ describe('Kibi Components', function () {
           targetField: 'fb',
           targetIndexPatternId: 'ib'
         };
-        sequentialJoinVisHelper.getJoinSequenceFilter('dashboardA', button).then((rel) => {
+        return sequentialJoinVisHelper.getJoinSequenceFilter('dashboardA', button).then((rel) => {
           sinon.assert.called(timeBasedIndicesStub);
           expect(rel.join_sequence).to.have.length(1);
           expect(rel.join_sequence[0].relation).to.have.length(2);
           expect(rel.join_sequence[0].relation[0].termsEncoding).to.be('long');
           expect(rel.join_sequence[0].relation[1].termsEncoding).to.be('long');
-          done();
-        }).catch(done);
+        });
       });
 
-      it('should set the advanced siren-join parameters', function (done) {
+      it('should set the advanced siren-platform parameters', function () {
         init({
           enableEnterprise: true,
           indexPatterns: indexPatterns,
@@ -618,19 +608,18 @@ describe('Kibi Components', function () {
         timeBasedIndicesStub.withArgs('ia').returns([ 'ia' ]);
         timeBasedIndicesStub.withArgs('ib').returns([ 'ib' ]);
 
-        sequentialJoinVisHelper.getJoinSequenceFilter('dashboardA', button).then((rel) => {
+        return sequentialJoinVisHelper.getJoinSequenceFilter('dashboardA', button).then((rel) => {
           sinon.assert.called(timeBasedIndicesStub);
           expect(rel.join_sequence).to.have.length(1);
           expect(rel.join_sequence[0].relation).to.have.length(2);
           expect(rel.join_sequence[0].relation[0].termsEncoding).to.be('enc1');
           expect(rel.join_sequence[0].relation[1].termsEncoding).to.be('enc2');
-          done();
-        }).catch(done);
+        });
       });
     });
 
     describe('composeGroupFromExistingJoinFilters', function () {
-      beforeEach(() => init({}));
+      beforeEach(() => init());
 
       it('should create a group and add it', function () {
         const existingFilters = [

@@ -13,21 +13,22 @@ function GremlinServerHandler(server) {
   this.initialized = false;
   this.server = server;
   this.javaChecked = false;
+  this.callWithInternalUser = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
 }
 
 function startServer(self, fulfill, reject) {
   const config = self.server.config();
   let gremlinServerPath = config.get('kibi_core.gremlin_server.path');
-  let gremlinServerRemoteDebug = config.get('kibi_core.gremlin_server.debug_remote');
+  const gremlinServerRemoteDebug = config.get('kibi_core.gremlin_server.debug_remote');
 
   if (gremlinServerPath) {
     // regex for ipv4 ip+port
     const re = /.*?([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}:[0-9]*).*/;
 
     isJavaVersionOk(self).then(function () {
-      self.server.plugins.elasticsearch.client.nodes.info({ nodeId: '_local' }).then(function (response) {
+      self.callWithInternalUser('nodes.info', { nodeId: '_local' }).then(function (response) {
         let esTransportAddress = null;
-        let esTransportAddressCollectedValues = [];
+        const esTransportAddressCollectedValues = [];
         _.each(response.nodes, (node) => {
           if (node.transport_address) {
             // transport_address can come in many different flavours
@@ -103,7 +104,7 @@ function startServer(self, fulfill, reject) {
           self.url = config.get('kibi_core.gremlin_server.url');
           const serverURL = url.parse(self.url);
 
-          let args = [
+          const args = [
             '-jar', gremlinServerPath,
             '--elasticNodeHost=' + host,
             '--elasticNodePort=' + port,
@@ -256,7 +257,7 @@ function isJavaVersionOk(self) {
 
 GremlinServerHandler.prototype._checkJavaVersionString = function (string) {
   if (!this.javaChecked) {
-    let ret = {};
+    const ret = {};
     const versionLine = string.toString().split(os.EOL)[0];
     //[string, major, minor, patch, update, ...]
     const matches = versionLine.match(/(\d+?)\.(\d+?)\.(\d+?)(?:_(\d+))?/);
@@ -288,7 +289,7 @@ GremlinServerHandler.prototype.start = function () {
   }
 
   return new Promise((fulfill, reject) => {
-    let elasticsearchStatus = self.server.plugins.elasticsearch.status;
+    const elasticsearchStatus = self.server.plugins.elasticsearch.status;
 
     if (elasticsearchStatus.state === 'green') {
       startServer(self, fulfill, reject);
@@ -313,7 +314,7 @@ GremlinServerHandler.prototype.stop = function () {
     self.server.log(['gremlin', 'info'], 'Stopping the Kibi gremlin server');
 
     if (self.gremlinServer) {
-      let exitCode = self.gremlinServer.kill('SIGINT');
+      const exitCode = self.gremlinServer.kill('SIGINT');
       if (exitCode) {
         self.server.log(['gremlin', 'info'], 'The Kibi gremlin server exited successfully');
         fulfill(true);

@@ -1,16 +1,16 @@
-let angular = require('angular');
-let expect = require('expect.js');
-let _ = require('lodash');
-let ngMock = require('ngMock');
+import angular from 'angular';
+import expect from 'expect.js';
+import _ from 'lodash';
+import ngMock from 'ng_mock';
+import 'plugins/kibana/discover/index';
+import 'ui/filters/short_dots';
 
-require('plugins/kibana/discover/index');
-require('ui/filters/short_dots');
 
 let filter;
 
 let config;
 
-let init = function (expandable) {
+const init = function (expandable) {
   // Load the application
   ngMock.module('kibana');
 

@@ -1,13 +1,13 @@
 // generic mixins
 @import (reference) "./mixins";
 @import (reference) "./variables";
-@import (reference) "~bootstrap/less/bootstrap";
+@import (reference) "~ui/styles/bootstrap/bootstrap";
 
 html,
 body {
   .flex-parent();
   height: 100%;
-  margin: 0px;
+  margin: 0;
 }
 
 label > small {
@@ -67,25 +67,25 @@ ul.navbar-inline li {
   font-size: 8pt;
   font-weight: normal;
   opacity: 90%;
+}
 
-  &-inner {
+  .tooltip-inner {
     word-break: normal;
     word-wrap: break-word;
     white-space: normal;
   }
-}
 
 .content {
-  .flex-parent();
-  position: relative;
-  z-index: 0;
+  .real-flex-parent(@flow: row nowrap);
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
 
   > nav {
-    position: relative;
     z-index: 1;
 
     .navbar-right {
-      margin-right: 0;
+      margin-right: 0 !important;
     }
   }
 }
@@ -94,6 +94,7 @@ ul.navbar-inline li {
   .flex-parent(@shrink: 0);
   position: relative;
   z-index: 0;
+  background-color: @white;
 }
 
 .top-fixed {
@@ -129,19 +130,41 @@ a {
   cursor: default;
 }
 
-[ng-click], [clip-copy], [href], [confirm-click] {
+.link, [ng-click], [clip-copy], [href], [confirm-click] {
   cursor: pointer;
 }
 
+.application,
 .app-container {
   > * {
     position: relative;
     z-index: 0;
   }
 
+  .kibana-nav-options {
+    padding-bottom: 0;
+    padding-right: 0px;
+
+    kbn-global-timepicker {
+      line-height: 20px;
+    }
+
+    .kibana-nav-actions {
+      margin-left: auto;
+      padding-right: 0;
+      line-height: 20px;
+
+      .button-group > :last-child {
+        border-radius: 0;
+      }
+    }
+  }
+
   > config {
     z-index: 1;
   }
+  > navbar { padding-bottom: 4px; }
+  > kbn-top-nav { z-index: 3; }
 
   > nav,
   > navbar {
@@ -161,6 +184,7 @@ a {
     &:not(.pull-right):first-child {
       // This is how .navbar-brand accomplishes it's solid placement
       margin-left: -15px;
+      margin-top: 4px;
     }
   }
 }
@@ -173,31 +197,9 @@ a {
   .button-variant(@navbar-default-color; @navbar-default-bg; @navbar-default-border);
 }
 
-// right section of the main nav base
-.navbar-static-top .navbar-right {
-  font-size: @font-size-small;
-
-  .loading-spinner {
-    color: @navbar-inverse-brand-hover-color;
-    vertical-align: middle;
-  }
-}
-
-.navbar-timepicker {
-  > li > a {
-    padding-left: 7px !important;
-    padding-right: 7px !important;
-  }
-
-  &-time-desc > .fa-clock-o {
+  .navbar-timepicker-time-desc > .fa-clock-o {
     padding-right: 5px;
   }
-
-  .fa {
-    font-size: 16px;
-    vertical-align: middle;
-  }
-}
 
 kbn-info i {
   cursor: help;
@@ -265,50 +267,118 @@ table {
 }
 
 //== SavedObjectFinder
-saved-object-finder {
+saved-object-finder,
+paginated-selectable-list {
+  .row {
+    padding: 10px;
+    display: flex;
+    flex-direction: row;
+  }
+
+  .finder-hit-count,
+  .finder-manage-object {
+    min-width: 80px;
+    padding: 5px;
+    text-align: center;
+  }
+
+  .finder-hit-count {
+    flex: 1;
+
+    span {
+      color: @kibanaGray3;
+    }
+  }
+
+  .finder-manage-object {
+    flex: 3;
+    text-align: left;
+    text-transform: capitalize;
+  }
+
   .form-group {
     margin-bottom: 0;
+    float: left;
+    flex: 8;
+
     input {
-      .border-bottom-radius(0);
+      border: none;
+      padding: 5px 0px;
+      border-radius: @border-radius-base;
+    }
+
+    span {
+      padding: 5px 0px;
+      background-color: @white;
+      border: none;
+
+      i {
+        color: @kibanaGray3;
+        width: 15px;
+      }
     }
   }
 
-  .list-group-item {
-    a {
-      i {
-        color: @saved-object-finder-icon-color !important;
+  ul.li-striped {
+    li {
+      border: none;
+    }
+
+    li:nth-child(odd) {
+      background-color: @kibanaGray6;
+    }
+
+    li:nth-child(even) {
+      background-color: @white;
+    }
+
+    .paginate-heading {
+      font-weight: normal;
+      color: @kibanaGray1;
+    }
+
+    .list-group-item {
+      padding: 8px 15px;
+
+      ul {
+        padding: 0;
+        display: flex;
+        flex-direction: row;
+
+        .finder-type {
+          margin-right: 10px;
+        }
       }
 
-      color: @saved-object-finder-link-color !important;
-    }
+      a {
+        i {
+          color: @saved-object-finder-icon-color !important;
+          margin-right: 10px;
+        }
 
-    &:first-child {
-      .border-top-radius(0) !important;
-    }
+        display: block;
+        color: @saved-object-finder-link-color !important;
+      }
 
-    &.list-group-no-results p {
-      margin-bottom: 0 !important;
+      &:first-child {
+        .border-top-radius(0) !important;
+      }
+
+      &.list-group-no-results p {
+        margin-bottom: 0 !important;
+      }
     }
   }
 
-  div.finder-form {
+  .finder-form {
     position: relative;
+  }
 
-    &-options {
+    .finder-form-options {
       .flex-parent();
       flex-direction: row;
       justify-content: flex-end;
     }
-  }
-
-  span.finder-hit-count {
-    position: absolute;
-    right: 10px;
-  /* kibi: changed top:25px -> margin-top:-21 to fix issue where hit count was not
-     properly positioned in the middle of the row */
-    margin-top:-21px;
-    font-size: 0.85em;
-  }
 
   .finder-options {
     max-height: 300px;
@@ -338,6 +408,12 @@ saved-object-finder {
       }
     }
   }
+
+  paginate {
+    paginate-controls {
+      margin: 20px;
+    }
+  }
 }
 
 // when rendered within a config dropdown, don't use a bottom margin
@@ -345,14 +421,6 @@ saved-object-finder {
   margin-bottom: 0;
   background: @config-saved-object-finder-options-bg;
 }
-
-//== Generic Media List
-.media-object {
-  // image in result list
-  width: 65px;
-  height: 65px;
-}
-
 
 //== inputDatetime
 .input-datetime-format {
@@ -423,11 +491,13 @@ style-compile {
 
 .cell-hover {
   background-color: @table-cell-hover-bg;
-  &-show {
+}
+
+  .cell-hover-show {
     // so that the cell doesn't change size on hover
     visibility: hidden;
   }
-}
+
 .cell-hover:hover {
   background-color: @table-cell-hover-hover-bg;
   cursor: cell;
@@ -470,3 +540,598 @@ fieldset {
     }
   }
 }
+
+.panel-product {
+  margin-bottom: 10px;
+
+  .panel-heading {
+    background-color: @kibanaBlue3;
+    border-radius: 0;
+    color: #5a5a5a; /* siren: changed */;
+    font-size: 17px;
+    padding: 7px 10px;
+  }
+
+  .panel-heading--clickable {
+    cursor: pointer;
+  }
+
+  .panel-heading-elasticsearch,
+  .panel-heading-kibana,
+  .panel-heading-beats,
+  .panel-heading-logstash {
+    background-position: 4px 7px;
+    background-repeat: no-repeat;
+    background-size: 26px 26px;
+    padding-left: 32px;
+  }
+
+  .panel-heading-elasticsearch {
+    background-color: @product-elasticsearch;
+    background-image: url("~ui/icons/elasticsearch.svg");
+  }
+
+  .panel-heading-kibana {
+    background-color: @product-siren; /* siren: changed */
+    background-image: url("~ui/kibi/images/siren_logo.png"); /* siren: changed */
+  }
+
+  .panel-heading-beats {
+    background-color: @product-beats;
+    background-image: url("~ui/icons/beats.svg");
+  }
+
+  .panel-heading-logstash {
+    background-color: @product-logstash;
+    background-image: url("~ui/icons/logstash.svg");
+  }
+
+  .panel-body {
+    padding: 10px;
+  }
+}
+
+// TODO: Extract these styles into the UI Framework.
+
+.page-row {
+  padding: 0 10px;
+  margin: 10px 0;
+}
+
+.page-row-text {
+  color: @kibanaGray2;
+  font-size: 14px;
+}
+
+.kuiVerticalRhythm {
+  & + & {
+    margin-top: 10px;
+  }
+}
+
+.kuiView {
+  background-color: #FFFFFF;
+  flex: 1 1 auto;
+}
+
+.kuiViewContent {
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
+.kuiViewContent--constrainedWidth {
+  width: 100%;
+  max-width: 1100px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.kuiViewContentItem {
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.kuiNotice {
+  padding: 40px 60px 48px;
+  margin: 20px;
+  background-color: white;
+}
+
+.kuiNotice__header {
+  margin-bottom: 18px;
+}
+
+/**
+ * 1. Override h1 styles.
+ */
+.kuiNoticeTitle {
+  font-size: 22px;
+  margin-bottom: 12px;
+  margin-top: 0; // 1
+}
+
+.kuiNoticeText {
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+.kuiCard {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #E0E0E0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+  .kuiCard__description {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 18px 0;
+  }
+
+    .kuiCard__descriptionTitle {
+      font-size: 14px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      text-align: center;
+      max-width: ~"calc(100% - 48px)";
+    }
+
+    .kuiCard__descriptionText {
+      font-size: 14px;
+      max-width: ~"calc(100% - 48px)";
+    }
+
+  .kuiCard__footer {
+    text-align: center;
+    font-size: 14px;
+    padding: 0 15px 20px;
+  }
+
+.kuiCard--fixedWidth {
+  max-width: 120px;
+}
+
+.kuiCardGroup {
+  display: flex;
+  border: 1px solid #E0E0E0;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 18px;
+}
+
+  .kuiCardGroup__card {
+    flex: 1 1 0%;
+    border: none;
+    border-radius: 0;
+
+    & + & {
+      border-left: 1px solid #E0E0E0;
+    }
+  }
+
+  .kuiCardGroup__cardDescription {
+    flex: 1 1 auto;
+  }
+
+/**
+ * 1. Override h1.
+ */
+.kuiTitle {
+  margin: 0; // 1
+  font-size: 22px;
+}
+
+.kuiBadge {
+  display: inline-block;
+  margin-left: 0.5em;
+  padding: 0.1em 0.7em;
+  vertical-align: middle;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.kuiBadge--default {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.kuiFormSection {
+  margin-bottom: 16px;
+}
+
+.kuiFormSubSection {
+  margin-bottom: 8px;
+}
+
+.kuiFormLabel {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 700;
+}
+
+.kuiFormSubLabel {
+  display: block;
+  font-weight: normal;
+}
+
+  .kuiFormSubLabel__note {
+    opacity: 0.5;
+    margin-left: 4px;
+    font-size: 12px;
+  }
+
+.kuiTextArea,
+.kuiStaticInput {
+  display: block;
+  width: 100%;
+  font-size: 14px;
+  color: #2d2d2d;
+  border: 1px solid;
+  border-radius: 4px;
+}
+
+.kuiStaticInput {
+  padding: 5px 0;
+  border-color: transparent;
+  background-color: transparent;;
+}
+
+.kuiTextArea {
+  padding: 5px 15px;
+  border-color: #D4D4D4;
+}
+
+.kuiTextArea--nonResizable {
+  resize: none;
+}
+
+.kuiInputNote {
+  margin: 5px 0 10px;
+}
+
+.kuiInputNote--danger {
+  color: #E74C3C;
+}
+
+.kuiInputNote--warning {
+  color: #F39C12;
+}
+
+/**
+ * 1. Override Bootstrap ui-select component styles. If side padding is > 5px, the component breaks.
+ */
+.ui-select-multiple.ui-select-bootstrap {
+  padding: 3px 5px 2px !important; // 1
+  border: 1px solid #D4D4D4; // 1
+  background-color: #ffffff !important; // 1
+
+  &.kuiInputError {
+    border-color: #E74C3C; // 1
+  }
+}
+
+/**
+ * 1. Override label styles.
+ */
+.kuiOptionLabel {
+  font-weight: normal; // 1
+  cursor: pointer;
+}
+
+.kuiFormPanel {
+  border: 1px solid #D4D4D4;
+  padding: 12px;
+}
+
+.kuiList {
+  margin-bottom: 10px;
+}
+
+.kuiListItem {
+  padding: 12px 0;
+
+  & + & {
+    border-top: 2px dashed rgba(212, 212, 212, 0.5);
+  }
+
+  &:first-child {
+    padding-top: 0;
+  }
+
+  &:last-child {
+    padding-bottom: 0;
+  }
+}
+
+/**
+ * Utility class.
+ * TODO: Move to UI Framework.
+ */
+.fullWidth {
+  width: 100% !important;
+}
+
+/**
+ * Utility class.
+ * TODO: Move to UI Framework.
+ */
+.noPadding {
+  padding: 0 !important;
+}
+
+/**
+ * TODO: This is a generic pattern that should be replaced by specific components, e.g. inputGroup.
+ */
+.flexGroup {
+  display: flex;
+  width: 100%;
+}
+
+  .flexGroup__filler {
+    flex: 1 1 auto;
+  }
+
+.kuiColumn + .kuiColumn {
+  padding-left: 10px;
+}
+
+/**
+ * 1. Use inline-block instead of flexbox so that content doesn't overflow.
+ * 2. Content can be aligned by offsetting from the top.
+ */
+// $numColumns: 12;
+// @for $i from 1 through $numColumns {
+//   .kiuColumn--#{$i} {
+//     display: inline-block; /* 1 */
+//     vertical-align: top; /* 2 */
+//     width: $i / $numColumns * 100%;
+//   }
+// }
+
+.makeKuiColumns(12);
+
+.makeKuiColumns(@n, @i: 1) when (@i =< @n) {
+  .kuiColumn--@{i} {
+    display: inline-block; /* 1 */
+    vertical-align: top; /* 2 */
+    width: (@i * 100% / @n);
+  }
+  .makeKuiColumns(@n, (@i + 1));
+}
+
+/**
+ * 1. Override Bootstrap styles.
+ */
+.kuiLocalDropdownCloseButton {
+  color: #2d2d2d !important; /* 1 */
+
+  .theme-dark & {
+    color: #cecece !important; /* 1 */
+  }
+}
+
+
+// TODO: Extract these styles into the UI Framework.
+
+.kuiFormSection {
+  margin-bottom: 16px;
+}
+
+.kuiFormLabel {
+  display: block;
+}
+
+.kuiFormSubLabel {
+  display: block;
+  font-weight: normal;
+}
+
+.kuiTextArea,
+.kuiInput,
+.kuiStaticInput {
+  display: block;
+  width: 100%;
+  font-size: 14px;
+  color: #2d2d2d;
+  border: 1px solid;
+  border-radius: 4px;
+}
+
+.kuiStaticInput {
+  padding: 5px 0;
+  border-color: transparent;
+}
+
+.kuiInput,
+.kuiTextArea {
+  padding: 5px 15px;
+  border-color: #D4D4D4;
+}
+
+.kuiSelect {
+  display: block;
+  width: 100%;
+  height: 32px;
+  padding: 5px 15px;
+  font-size: 14px;
+  line-height: 1.42857143;
+  color: #2D2D2D;
+  background-color: #ffffff;
+  background-image: none;
+  border: 1px solid #D4D4D4;
+  border-radius: 4px;
+}
+
+/**
+ * 1. Override Bootstrap checkbox styles.
+ */
+.kuiCheckBox {
+  margin: 0 !important; // 1
+}
+
+.kuiSideBarSelect {
+  // TODO: @include kuiSelect styles when this is moved to the UI Framework and we're using SASS.
+  height: 24px;
+  font-size: 12px;
+  padding: 0 15px;
+}
+
+.kuiSideBarInput {
+  // TODO: @include kuiInput styles when this is moved to the UI Framework and we're using SASS.
+  height: 24px;
+  font-size: 12px;
+}
+
+.kuiSideBarSection {
+  margin-bottom: 6px;
+}
+
+.kuiSideBarSectionTitle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+  border-bottom: 1px solid #D4D4D4;
+}
+
+.kuiSideBarSectionTitle__text {
+  font-size: 14px;
+  font-weight: 700;
+  color: #5A5A5A;
+}
+
+/**
+ * 1. Override Bootstrap button styles.
+ */
+.kuiSideBarSectionTitle__action {
+  background-color: transparent; // 1
+  padding: 0; // 1
+  cursor: pointer;
+  color: #328CAA;
+
+  &:hover {
+    color: #105A73;
+  }
+}
+
+.kuiSideBarCollapsibleTitle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 4px;
+  border-bottom: 1px solid #E8E8E8;
+}
+
+.kuiSideBarCollapsibleTitle__label {
+  display: flex;
+  align-items: center;
+}
+
+/**
+ * 1. Override FontAwesome .fa styles.
+ */
+.kuiSideBarCollapsibleTitle__caret {
+  width: 12px;
+  height: 12px;
+  font-size: 12px !important; // 1
+  font-weight: 700;
+  color: #5A5A5A;
+}
+
+.kuiSideBarCollapsibleTitle__text {
+  font-size: 12px;
+  font-weight: 700;
+  color: #5A5A5A;
+}
+
+/**
+ * 1. Override Bootstrap button styles.
+ */
+.kuiSideBarCollapsibleTitle__action {
+  background-color: transparent; // 1
+  padding: 0; // 1
+  cursor: pointer;
+  color: #328CAA;
+
+  &:hover {
+    color: #105A73;
+  }
+}
+
+.kuiSideBarCollapsibleSection {
+  padding-left: 16px;
+}
+
+/**
+ * 1. Override Bootstrap h1 styles.
+ */
+.kuiSideBarFormSectionTitle {
+  font-size: 12px;
+  font-weight: 700;
+  color: #5A5A5A;
+  border-bottom: 1px solid #E8E8E8;
+  margin: 4px 0 !important; // 1
+  padding-bottom: 2px;
+}
+
+.kuiSideBarFormRow {
+  display: flex;
+  align-items: center;
+  min-height: 24px;
+  margin-bottom: 1px;
+}
+
+/**
+ * 1. Override .vis-editor-sidebar styles.
+ */
+.kuiSideBarFormRow__label {
+  display: flex;
+  align-items: center;
+  flex: 1 1 40% !important; // 1
+  font-weight: 400;
+}
+
+.kuiSideBarFormRow__label__colorbox {
+  width: 24px;
+  height: 24px;
+  display: inline-block;
+  margin-right: 10px;
+  border: 1px ridge lightgray;
+}
+
+.kuiSideBarFormRow__control {
+  display: flex;
+  align-items: center;
+  flex: 1 1 60%;
+}
+
+/**
+ * 1. Override .sidebar-item styles.
+ */
+.kuiSideBarOptionsLink {
+  display: flex;
+  align-items: baseline;
+  margin-bottom: 8px;
+  font-size: 12px;
+  color: #328CAA !important; // 1
+
+  &:hover {
+    color: #105A73 !important; // 1
+  }
+}
+
+.kuiSideBarOptionsLink__caret {
+  width: 10px;
+  height: 10px;
+}
+
+.kuiSideBarOptionsLink__text {
+  margin-left: 2px;
+}
+
+
+@import "~dragula/dist/dragula.css";

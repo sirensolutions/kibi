@@ -1,11 +1,22 @@
+import _ from 'lodash';
+import sinon from 'auto-release-sinon';
+import ngMock from 'ng_mock';
+import expect from 'expect.js';
+import Promise from 'bluebird';
+import errors from 'ui/errors';
+import IndexedArray from 'ui/indexed_array';
+import FixturesLogstashFieldsProvider from 'fixtures/logstash_fields';
+import FixturesStubbedDocSourceResponseProvider from 'fixtures/stubbed_doc_source_response';
+import DocSourceProvider from 'ui/courier/data_source/savedobject_source';
+import UtilsMappingSetupProvider from 'ui/utils/mapping_setup';
+import IndexPatternsIntervalsProvider from 'ui/index_patterns/_intervals';
+import IndexPatternsIndexPatternProvider from 'ui/index_patterns/_index_pattern';
+import NoDigestPromises from 'test_utils/no_digest_promises';
+import { stubMapper } from 'test_utils/stub_mapper';
+
 describe('index pattern', function () {
-  const _ = require('lodash');
-  const sinon = require('auto-release-sinon');
-  const ngMock = require('ngMock');
-  const expect = require('expect.js');
-  const Promise = require('bluebird');
-  const errors = require('ui/errors');
-  const IndexedArray = require('ui/IndexedArray');
+  NoDigestPromises.activateForSuite();
+
   let IndexPattern;
   let mapper;
   let mappingSetup;
@@ -23,20 +34,20 @@ describe('index pattern', function () {
   beforeEach(ngMock.inject(function (Private, $injector, _config_) {
     $rootScope = $injector.get('$rootScope');
     config = _config_;
-    mockLogstashFields = Private(require('fixtures/logstash_fields'));
-    docSourceResponse = Private(require('fixtures/stubbed_doc_source_response'));
+    mockLogstashFields = Private(FixturesLogstashFieldsProvider);
+    docSourceResponse = Private(FixturesStubbedDocSourceResponseProvider);
 
-    // kibi: stub SavedObjectSource
-    DocSource = Private(require('ui/courier/data_source/savedobject_source'));
-    // kibi: end
+    DocSource = Private(DocSourceProvider);
     sinon.stub(DocSource.prototype, 'doIndex');
     sinon.stub(DocSource.prototype, 'fetch');
+    mapper = stubMapper(Private, mockLogstashFields);
 
-    // stub mapper
-    mapper = Private(require('ui/index_patterns/_mapper'));
-    sinon.stub(mapper, 'getFieldsForIndexPattern', function () {
-      return Promise.resolve(_.filter(mockLogstashFields, { scripted: false }));
+    // stub mappingSetup
+    mappingSetup = Private(UtilsMappingSetupProvider);
+    sinon.stub(mappingSetup, 'isDefined', function () {
+      return Promise.resolve(true);
     });
+
     // kibi: needed to support dotted field names
     sinon.stub(mapper, 'getPathsSequenceForIndexPattern', function () {
       const paths = _(mockLogstashFields)
@@ -47,16 +58,11 @@ describe('index pattern', function () {
       .value();
       return Promise.resolve(paths);
     });
-
-    // stub mappingSetup
-    mappingSetup = Private(require('ui/utils/mapping_setup'));
-    sinon.stub(mappingSetup, 'isDefined', function () {
-      return Promise.resolve(true);
-    });
+    // kibi: end
 
     // stub calculateIndices
     calculateIndices = sinon.spy(function () {
-      return $injector.get('Promise').resolve([
+      return Promise.resolve([
         { index: 'foo', max: Infinity, min: -Infinity },
         { index: 'bar', max: Infinity, min: -Infinity }
       ]);
@@ -64,13 +70,13 @@ describe('index pattern', function () {
     Private.stub(require('ui/index_patterns/_calculate_indices'), calculateIndices);
 
     // spy on intervals
-    intervals = Private(require('ui/index_patterns/_intervals'));
+    intervals = Private(IndexPatternsIntervalsProvider);
     sinon.stub(intervals, 'toIndexList').returns([
       { index: 'foo', max: Infinity, min: -Infinity },
       { index: 'bar', max: Infinity, min: -Infinity }
     ]);
 
-    IndexPattern = Private(require('ui/index_patterns/_index_pattern'));
+    IndexPattern = Private(IndexPatternsIndexPatternProvider);
   }));
 
   // create an indexPattern instance for each test
@@ -124,7 +130,6 @@ describe('index pattern', function () {
 
   describe('fields', function () {
     it('should have expected properties on fields', function () {
-      expect(indexPattern.fields[0]).to.have.property('bucketable');
       expect(indexPattern.fields[0]).to.have.property('displayName');
       expect(indexPattern.fields[0]).to.have.property('filterable');
       expect(indexPattern.fields[0]).to.have.property('format');
@@ -152,19 +157,37 @@ describe('index pattern', function () {
 
   describe('refresh fields', function () {
     // override the default indexPattern, with a truncated field list
-    require('testUtils/noDigestPromises').activateForSuite();
     const indexPatternId = 'test-pattern';
     let indexPattern;
     let fieldLength;
-    let truncatedFields;
+    let customFields;
 
     beforeEach(function () {
       fieldLength = mockLogstashFields.length;
-      truncatedFields = mockLogstashFields.slice(3);
+      customFields = [{
+        analyzed: true,
+        count: 30,
+        filterable: true,
+        indexed: true,
+        name: 'foo',
+        scripted: false,
+        sortable: true,
+        type: 'number',
+        aggregatable: true,
+        searchable: false
+      },
+      {
+        name: 'script number',
+        type: 'number',
+        scripted: true,
+        script: '1234',
+        lang: 'expression'
+      }];
+
       return create(indexPatternId, {
         _source: {
           customFormats: '{}',
-          fields: JSON.stringify(truncatedFields)
+          fields: JSON.stringify(customFields)
         }
       }).then(function (pattern) {
         indexPattern = pattern;
@@ -173,8 +196,8 @@ describe('index pattern', function () {
 
     it('should fetch fields from the doc source', function () {
       // ensure that we don't have all the fields
-      expect(truncatedFields.length).to.not.equal(mockLogstashFields.length);
-      expect(indexPattern.fields).to.have.length(truncatedFields.length);
+      expect(customFields.length).to.not.equal(mockLogstashFields.length);
+      expect(indexPattern.fields).to.have.length(customFields.length);
 
       // ensure that all fields will be included in the returned docSource
       setDocsourcePayload(docSourceResponse(indexPatternId));
@@ -206,15 +229,14 @@ describe('index pattern', function () {
         // called to append scripted fields to the response from mapper.getFieldsForIndexPattern
         expect(scriptedFieldsSpy.callCount).to.equal(1);
 
-        const scripted = _.where(mockLogstashFields, { scripted: true });
-        const expected = _.filter(indexPattern.fields, { scripted: true });
-        expect(_.pluck(expected, 'name')).to.eql(_.pluck(scripted, 'name'));
+        const expected = _.filter(indexPattern.fields, {scripted: true});
+        expect(_.pluck(expected, 'name')).to.eql(['script number']);
       });
     });
   });
 
   describe('add and remove scripted fields', function () {
-    it('should append the scripted field', function (done) {
+    it('should append the scripted field', function () {
       // keep a copy of the current scripted field count
       const saveSpy = sinon.spy(indexPattern, 'save');
       const oldCount = indexPattern.getScriptedFields().length;
@@ -226,15 +248,10 @@ describe('index pattern', function () {
         type: 'boolean'
       };
       indexPattern.addScriptedField(scriptedField.name, scriptedField.script, scriptedField.type);
-
-      // kibi: added then as in kibi _indexFields is fully async now
-      indexPattern._indexFields().then(() => {
-        const scriptedFields = indexPattern.getScriptedFields();
-        expect(saveSpy.callCount).to.equal(1);
-        expect(scriptedFields).to.have.length(oldCount + 1);
-        expect(indexPattern.fields.byName[scriptedField.name].displayName).to.equal(scriptedField.name);
-        done();
-      }).catch(done); // normally triggered by docSource.onUpdate()
+      const scriptedFields = indexPattern.getScriptedFields();
+      expect(saveSpy.callCount).to.equal(1);
+      expect(scriptedFields).to.have.length(oldCount + 1);
+      expect(indexPattern.fields.byName[scriptedField.name].name).to.equal(scriptedField.name);
     });
 
     it('should remove scripted field, by name', function () {
@@ -310,7 +327,6 @@ describe('index pattern', function () {
   });
 
   describe('#toDetailedIndexList', function () {
-    require('testUtils/noDigestPromises').activateForSuite();
     context('when index pattern is an interval', function () {
       let interval;
       beforeEach(function () {
@@ -389,7 +405,6 @@ describe('index pattern', function () {
 
   describe('#toIndexList', function () {
     context('when index pattern is an interval', function () {
-      require('testUtils/noDigestPromises').activateForSuite();
 
       let interval;
       beforeEach(function () {
@@ -420,7 +435,6 @@ describe('index pattern', function () {
     });
 
     context('when index pattern is a time-base wildcard', function () {
-      require('testUtils/noDigestPromises').activateForSuite();
       beforeEach(function () {
         sinon.stub(indexPattern, 'getInterval').returns(false);
         sinon.stub(indexPattern, 'hasTimeField').returns(true);
@@ -442,7 +456,6 @@ describe('index pattern', function () {
     });
 
     context('when index pattern is a time-base wildcard that is configured not to expand', function () {
-      require('testUtils/noDigestPromises').activateForSuite();
       beforeEach(function () {
         sinon.stub(indexPattern, 'getInterval').returns(false);
         sinon.stub(indexPattern, 'hasTimeField').returns(true);
@@ -461,13 +474,8 @@ describe('index pattern', function () {
         sinon.stub(indexPattern, 'getInterval').returns(false);
       });
 
-      it('is fulfilled by id', function () {
-        let indexList;
-        indexPattern.toIndexList().then(function (val) {
-          indexList = val;
-        });
-        $rootScope.$apply();
-
+      it('is fulfilled by id', async function () {
+        const indexList = await indexPattern.toIndexList();
         expect(indexList).to.equal(indexPattern.id);
       });
     });

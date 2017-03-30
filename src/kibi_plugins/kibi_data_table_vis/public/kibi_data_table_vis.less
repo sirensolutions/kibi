@@ -1,0 +1,105 @@
+@import (reference) "~ui/kibi/styles/kibi_variables.less";
+@import (reference) "~ui/styles/variables.less";
+
+//needed for cell shifting issue in IE11
+@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+  .kibi-data-table-vis { overflow-x: auto; overflow-y: auto; zoom: 1; }
+  .gridster dashboard-panel .panel .panel-content { height: 100%; zoom: 1; }
+}
+
+.kibi-data-table-vis {
+  padding: 5px;
+}
+
+.kibi-data-table-vis-params section {
+  border-top: 1px #dedede solid;
+  margin-bottom: 15px;
+
+  &:first-child {
+    margin-top: 15px;
+    border-top: none;
+  }
+
+  .help-icon {
+    vertical-align: top;
+    margin-top:3px;
+  }
+
+  .inline-help {
+    padding: 4px;
+    background: #ffffca;
+    border: 1px solid #222;
+    color: #222;
+  }
+}
+
+.kibi-data-table-vis-params section h2 {
+  font-size: 14px;
+  font-weight: bold;
+  margin: 5px 0 15px 0;
+
+  i {
+    color: #777;
+  }
+}
+
+.kibi-data-table-vis-params section ul {
+  padding: 0;
+  margin: 0;
+}
+
+.kibi-data-table-vis-params div.queryOptionAreaError {
+  border: 2px @state-danger-bg solid;
+}
+
+.kibi-data-table-vis-params li.queryOptionArea {
+  margin-bottom: 15px;
+  padding: 5px;
+  position: relative;
+}
+
+.kibi-data-table-vis-params li.queryOptionArea div.rightCorner {
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+.kibi-data-table-vis-params li.queryOptionArea .header {
+  background-color: #fff;
+}
+
+.kibi-data-table-vis-params li.queryOptionArea .header h2 {
+  font-size: 14px;
+  margin: 2px 0;
+  font-weight: bold;
+  padding: 0;
+}
+
+.kibi-data-table-vis-params li .enhanced-search-content {
+  background-color: #ecf0f1;
+  padding: 0 4px;
+}
+
+.kibi-data-table-vis-params li .enhanced-search-content .form-group {
+  margin-bottom: 5px;
+}
+
+.kibi-data-table-vis-params li .enhanced-search-content .form-group:first-child {
+  margin-top: 4px;
+}
+
+.kibi-data-table-vis-params li .enhanced-search-content input[type='text'] {
+  border-color: #B4BCC2;
+}
+
+.kibi-data-table-vis-params li .enhanced-search-content input[type='text']:focus {
+  border-color: #444;
+}
+
+.kibi-data-table-vis-params li .enhanced-search-content select {
+  border-color: #B4BCC2;
+}
+
+.kibi-data-table-vis-params li .enhanced-search-content select:focus {
+  border-color: #444;
+}

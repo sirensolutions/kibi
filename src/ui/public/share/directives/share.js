@@ -19,7 +19,7 @@ uiModules.get('kibana')
 
       // siren: generate shortened url automatically and set it on the scope
       // throttle to avoid creating multiple urls when states are changing
-      const urlShortener = Private(require('./lib/url_shortener'));
+      const urlShortener = Private(require('../lib/url_shortener'));
       const getUnhashableStates = Private(getUnhashableStatesProvider);
 
       const setUrl = throttle(() => {

@@ -208,8 +208,14 @@ uiModules
                   }
 
                 } else if (type === 'select') {
+                  const entity = {
+                    index: row.$$_flattened._index,
+                    type: row.$$_flattened._type,
+                    id: row.$$_flattened._id,
+                    column
+                  };
                   kibiState.disableSelectedEntity(false);
-                  kibiState.setEntityURI(row.$$_flattened._index, row.$$_flattened._type, row.$$_flattened._id, column);
+                  kibiState.setEntityURI(entity);
                   kibiState.save();
 
                   // switch to a different dashboard only if user gave one in settings

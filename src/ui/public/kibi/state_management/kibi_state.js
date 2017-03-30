@@ -200,7 +200,7 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
     return entityURI.index === index && entityURI.type === type && entityURI.id === id && entityURI.column === column;
   };
 
-  KibiState.prototype.setEntityURI = function (index, type, id, column) {
+  KibiState.prototype.setEntityURI = function ({ index, type, id, column }) {
     if (onDashboardPage()) {
       if (!id) {
         delete this[this._properties.selected_entity];

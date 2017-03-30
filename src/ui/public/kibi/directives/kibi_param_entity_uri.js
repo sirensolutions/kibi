@@ -119,7 +119,7 @@ uiModules
               if (response.data.hits.total > 1) {
                 notify.warning('Found more than one document for the specified selection, selected the first one.');
               }
-              kibiState.setEntityURI(hit._index, hit._type, hit._id);
+              kibiState.setEntityURI({ index: hit._index, type: hit._type, id: hit._id });
               kibiState.save();
             }).catch(function () {
               notify.error('An error occurred while fetching the selected entity, please check if Elasticsearch is running.');
@@ -127,7 +127,7 @@ uiModules
               kibiState.save();
             });
           } else {
-            kibiState.setEntityURI($scope.c.index, $scope.c.type, $scope.c.id);
+            kibiState.setEntityURI({ index: $scope.c.index, type: $scope.c.type, id: $scope.c.id });
             kibiState.save();
           }
         }

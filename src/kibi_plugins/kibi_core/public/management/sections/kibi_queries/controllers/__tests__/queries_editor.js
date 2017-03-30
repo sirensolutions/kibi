@@ -70,7 +70,7 @@ describe('Kibi Controllers', function () {
       sinon.stub(onPage, 'onManagementPage').returns(true);
 
       kibiState = _kibiState_;
-      sinon.stub(kibiState, 'getEntityURI').returns('entity1');
+      sinon.stub(kibiState, 'getEntityURI').returns({ index: 'a', type: 'b', id: 'c' });
 
       $scope = $rootScope;
       $scope.datasourceType = datasourceType;

@@ -217,7 +217,8 @@ function controller(kibiState, $scope, $route, kbnUrl, createNotifier, queryEngi
     $scope.holder.jsonPreview = '';
     $scope.holder.htmlPreview = '';
 
-    if ($scope.query.id && (!$scope.holder.entityURIEnabled || kibiState.getEntityURI())) {
+    const entity = kibiState.getEntityURI();
+    if ($scope.query.id && (!$scope.holder.entityURIEnabled || entity)) {
       $scope.spinIt = true;
       return queryEngineClient.clearCache().then(function () {
         return queryEngineClient.getQueriesHtmlFromServer(
@@ -232,7 +233,7 @@ function controller(kibiState, $scope, $route, kbnUrl, createNotifier, queryEngi
             }
           ],
           {
-            selectedDocuments: kibiState.isSelectedEntityDisabled() ? [] : [ kibiState.getEntityURI() ]
+            selectedDocuments: kibiState.isSelectedEntityDisabled() ? [] : [ entity ]
           }
         );
       }).then(function (resp) {

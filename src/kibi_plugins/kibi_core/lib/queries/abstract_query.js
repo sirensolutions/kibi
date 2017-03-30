@@ -78,9 +78,8 @@ Query.prototype._checkIfSelectedDocumentRequiredAndNotPresent = function (option
   const isEntityDependent = kibiUtils.doesQueryDependOnEntity([ this.config ]);
 
   return isEntityDependent &&
-    (!options || !options.selectedDocuments || options.selectedDocuments.length === 0 || options.selectedDocuments[0] === '');
+    (!options || !options.selectedDocuments || options.selectedDocuments.length === 0 || !options.selectedDocuments[0]);
 };
-
 
 Query.prototype._extractIdsFromSql = function (rows, idVariableName) {
   const ids = [];
@@ -100,7 +99,6 @@ Query.prototype._extractIdsFromSql = function (rows, idVariableName) {
   });
   return _.uniq(ids);
 };
-
 
 Query.prototype._returnAnEmptyQueryResultsPromise = function (message) {
   const self = this;
@@ -229,6 +227,5 @@ Query.prototype.fetchResults = function (options, onlyIds, idVariableName) {
 Query.prototype._postprocessResults = function (data) {
   throw 'Must be implemented by subclass';
 };
-
 
 module.exports = Query;

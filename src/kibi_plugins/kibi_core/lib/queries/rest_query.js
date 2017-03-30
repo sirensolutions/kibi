@@ -63,9 +63,6 @@ const mergeObjects = function (dest, sourceObject, sourcePath) {
 RestQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) {
   const self = this;
 
-  // currently we use only single selected document
-  const uri = options.selectedDocuments && options.selectedDocuments.length > 0 ? options.selectedDocuments[0] : '';
-
   const urlS = this.config.datasource.datasourceClazz.datasource.datasourceParams.url;
   const timeout = this.config.datasource.datasourceClazz.datasource.datasourceParams.timeout;
   const maxAge = this.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
@@ -115,9 +112,9 @@ RestQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) {
       mergedParams,
       self.config.rest_body,
       self.config.rest_path,
-      uri, availableVariables,
-      options.credentials)
-    .then(function (results) {
+      options,
+      availableVariables
+    ).then(function (results) {
       // here convert the params and headers from array to map
       const headers = _.zipObject(_.pluck(results.headers, 'name'), _.pluck(results.headers, 'value'));
       const params = _.zipObject(_.pluck(results.params, 'name'), _.pluck(results.params, 'value'));

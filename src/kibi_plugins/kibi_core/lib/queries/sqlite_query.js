@@ -118,7 +118,6 @@ SQLiteQuery.prototype.checkIfItIsRelevant = function (options) {
     self.logger.warn('No elasticsearch document selected while required by the sqlite query. [' + self.config.id + ']');
     return Promise.resolve(false);
   }
-  const uri = options.selectedDocuments && options.selectedDocuments.length > 0 ? options.selectedDocuments[0] : '';
 
   const dbfile = this.config.datasource.datasourceClazz.datasource.datasourceParams.db_file_path;
   const maxAge = this.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
@@ -127,7 +126,8 @@ SQLiteQuery.prototype.checkIfItIsRelevant = function (options) {
   if (!this.config.activationQuery) {
     return Promise.resolve(true);
   }
-  return self.queryHelper.replaceVariablesUsingEsDocument(this.config.activationQuery, uri, options.credentials).then(function (query) {
+  return self.queryHelper.replaceVariablesUsingEsDocument(this.config.activationQuery, options)
+  .then(function (query) {
 
     if (query.trim() === '') {
       return Promise.resolve(true);
@@ -162,14 +162,12 @@ SQLiteQuery.prototype.fetchResults = function (options, onlyIds, idVariableName)
   const start = new Date().getTime();
   const self = this;
 
-  // currently we use only single selected document
-  const uri = options.selectedDocuments && options.selectedDocuments.length > 0 ? options.selectedDocuments[0] : '';
-
   const dbfile = this.config.datasource.datasourceClazz.datasource.datasourceParams.db_file_path;
   const maxAge = this.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
   const cacheEnabled = this.config.datasource.datasourceClazz.datasource.datasourceParams.cache_enabled;
 
-  return self.queryHelper.replaceVariablesUsingEsDocument(this.config.resultQuery, uri, options.credentials).then(function (query) {
+  return self.queryHelper.replaceVariablesUsingEsDocument(this.config.resultQuery, options)
+  .then(function (query) {
 
     let cacheKey = null;
     if (self.cache && cacheEnabled) {

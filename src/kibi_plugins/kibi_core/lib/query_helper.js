@@ -10,7 +10,7 @@ function QueryHelper(server) {
   this._cluster = server.plugins.elasticsearch.getCluster('data');
 }
 
-QueryHelper.prototype.replaceVariablesForREST = function (headers, params, body, path, uri, variables, credentials) {
+QueryHelper.prototype.replaceVariablesForREST = function (headers, params, body, path, entity, variables, credentials) {
   // clone here !!! headers, params, body
   // so the original one in the config are not modified
   const h = _.cloneDeep(headers);
@@ -41,12 +41,12 @@ QueryHelper.prototype.replaceVariablesForREST = function (headers, params, body,
     }
   }
 
-  // second replace placeholders based on selected entity uri
+  // second replace placeholders based on selected entity
   const promises = [
-    self.replaceVariablesUsingEsDocument(h, uri, credentials),
-    self.replaceVariablesUsingEsDocument(p, uri, credentials),
-    self.replaceVariablesUsingEsDocument(b, uri, credentials),
-    self.replaceVariablesUsingEsDocument(pa, uri, credentials)
+    self.replaceVariablesUsingEsDocument(h, entity, credentials),
+    self.replaceVariablesUsingEsDocument(p, entity, credentials),
+    self.replaceVariablesUsingEsDocument(b, entity, credentials),
+    self.replaceVariablesUsingEsDocument(pa, entity, credentials)
   ];
 
   return Promise.all(promises).then(function (results) {
@@ -62,20 +62,15 @@ QueryHelper.prototype.replaceVariablesForREST = function (headers, params, body,
 /**
  * s can be either a string or (key, value) map
  */
-QueryHelper.prototype.replaceVariablesUsingEsDocument = function (s, uri, credentials, datasource) {
+QueryHelper.prototype.replaceVariablesUsingEsDocument = function (s, { selectedDocuments, credentials } = {}, datasource) {
   const self = this;
-  if (!uri || uri.trim() === '') {
+  const entity = selectedDocuments && selectedDocuments[0];
+
+  if (!entity) {
     return Promise.resolve(s);
   }
 
-  const parts = uri.trim().split('/');
-  if (parts.length < 3) {
-    return Promise.reject(new Error('Malformed uri - should have at least 3 parts: index, type, id'));
-  }
-
-  const index = parts[0];
-  const type = parts[1];
-  const id = parts[2];
+  const { index, type, id } = entity;
 
   return self.fetchDocument(index, type, id, credentials).then(function (doc) {
     //now parse the query and replace the placeholders
@@ -117,7 +112,7 @@ QueryHelper.prototype.fetchDocument = function (index, type, id, credentials) {
 QueryHelper.prototype._arrayToCommaSeparatedList = function (a) {
   let ret = '';
   for (let i = 0; i < a.length; i++) {
-    let v = a[i];
+    const v = a[i];
     if (i > 0) {
       ret += ',';
     }

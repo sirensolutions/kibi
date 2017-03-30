@@ -48,9 +48,7 @@ TinkerPop3Query.prototype.fetchResults = function (options, onlyIds, idVariableN
   }
   timeout = parsedTimeout;
 
-  const uri = options.selectedDocuments && options.selectedDocuments.length > 0 ? options.selectedDocuments[0] : '';
-
-  return self.queryHelper.replaceVariablesUsingEsDocument(self.config.resultQuery, uri, options.credentials, 'tinkerpop3_query')
+  return self.queryHelper.replaceVariablesUsingEsDocument(self.config.resultQuery, options, 'tinkerpop3_query')
   .then(function (query) {
 
     let cacheKey;

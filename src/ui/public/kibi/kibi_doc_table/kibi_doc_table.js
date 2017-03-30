@@ -189,15 +189,16 @@ uiModules
           const virtualIndexPattern = new VirtualIndexPattern($scope.indexPattern, virtualField);
           $scope.searchSource.index(virtualIndexPattern);
 
-          $scope.searchSource.inject([
-            {
-              entityURI: kibiState.isSelectedEntityDisabled() ? '' : kibiState.getEntityURI(),
-              queryDefs: $scope.queryColumn.queryDefinitions,
-              // it is the field from table to do the comparison
-              sourcePath: $scope.indexPattern.fields.byName[$scope.queryColumn.joinElasticsearchField].path,
-              fieldName: $scope.queryColumn.name
-            }
-          ]);
+          const relationalColumn = {
+            queryDefs: $scope.queryColumn.queryDefinitions,
+            // it is the field from table to do the comparison
+            sourcePath: $scope.indexPattern.fields.byName[$scope.queryColumn.joinElasticsearchField].path,
+            fieldName: $scope.queryColumn.name
+          };
+          if (kibiState.isSelectedEntityDisabled()) {
+            relationalColumn.entityURI = kibiState.getEntityURI();
+          }
+          $scope.searchSource.inject([ relationalColumn ]);
         }
       }
 

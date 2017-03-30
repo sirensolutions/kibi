@@ -1,7 +1,7 @@
-const util = require('./util');
-const _ = require('lodash');
-const kibiUtils = require('kibiutils');
-const Promise = require('bluebird');
+import util from './util';
+import _ from 'lodash';
+import kibiUtils from 'kibiutils';
+import Promise from 'bluebird';
 
 // The set of custom queries
 const _customQueries = [ 'inject' ];

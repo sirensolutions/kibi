@@ -33,44 +33,44 @@ uiModules
       };
 
       function updateSelectedEntity() {
-        const entityURI = kibiState.getEntityURI();
-        if (entityURI) {
-          const parts = entityURI.split('/');
+        const entity = kibiState.getEntityURI();
+        if (entity) {
+          const { index, type, id } = entity;
 
-          if (parts[0]) {
+          if (index) {
             $scope.c.extraIndexPatternItems = [
               {
-                label: parts[0],
-                id: parts[0],
-                value: parts[0]
+                label: index,
+                id: index,
+                value: index
               }
             ];
           }
-          if (parts[1]) {
+          if (type) {
             $scope.c.extraTypeItems = [
               {
-                label: parts[1],
-                id: parts[1],
-                value: parts[1]
+                label: type,
+                id: type,
+                value: type
               }
             ];
           }
-          if (parts[2]) {
+          if (id) {
             $scope.c.extraIdItems = [
               {
-                label: parts[2],
-                id: parts[2],
-                value: parts[2]
+                label: id,
+                id: id,
+                value: id
               }
             ];
           }
 
           if (!$scope.c.indexPattern) {
-            $scope.c.indexPattern = parts[0];
+            $scope.c.indexPattern = index;
           }
-          $scope.c.index = parts[0];
-          $scope.c.type = parts[1];
-          $scope.c.id = parts[2];
+          $scope.c.index = index;
+          $scope.c.type = type;
+          $scope.c.id = id;
         } else {
           $scope.c.indexPattern = null;
         }
@@ -119,7 +119,7 @@ uiModules
               if (response.data.hits.total > 1) {
                 notify.warning('Found more than one document for the specified selection, selected the first one.');
               }
-              kibiState.setEntityURI(`${hit._index}/${hit._type}/${hit._id}/`);
+              kibiState.setEntityURI(hit._index, hit._type, hit._id);
               kibiState.save();
             }).catch(function () {
               notify.error('An error occurred while fetching the selected entity, please check if Elasticsearch is running.');
@@ -127,7 +127,7 @@ uiModules
               kibiState.save();
             });
           } else {
-            kibiState.setEntityURI(`${$scope.c.index}/${$scope.c.type}/${$scope.c.id}/`);
+            kibiState.setEntityURI($scope.c.index, $scope.c.type, $scope.c.id);
             kibiState.save();
           }
         }

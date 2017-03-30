@@ -92,7 +92,7 @@ uiModules.get('kibana')
         delete $scope.disabled;
 
         // remove the selecte entity
-        kibiState.setEntityURI(null);
+        kibiState.setEntityURI();
         kibiState.disableSelectedEntity(false);
 
         /*

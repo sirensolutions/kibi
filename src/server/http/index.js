@@ -167,13 +167,14 @@ module.exports = function (kbnServer, server, config) {
     path: '/goto/{urlId}',
     handler: async function (request, reply) {
       try {
+        const urlParts = parse(request.url, true);
         const data = await shortUrlLookup.getUrl(request.params.urlId);
         shortUrlAssertValid(data.url);
         // kibi: if embedding parameters are set they must be included in the initial URL
         let embeddingParameters = '';
-        if (data.url.match(/[&?]embed=true/)) {
+        if (urlParts.query.embed === 'true') {
           embeddingParameters += 'embed=true&';
-          if (data.url.match(/[&?]kibiNavbarVisible=true/)) {
+          if (urlParts.query.kibiNavbarVisible === 'true') {
             embeddingParameters += 'kibiNavbarVisible=true&';
           }
         }

@@ -1,4 +1,3 @@
-import kibiUtils from 'kibiutils';
 import 'ui/kibi/directives/kibi_entity_clipboard.less';
 import { onDashboardPage } from 'ui/kibi/utils/on_page';
 import uiModules from 'ui/modules';
@@ -21,7 +20,7 @@ uiModules.get('kibana')
         return `${index}/${type}/${id}/${column}`;
       };
 
-      const updateSelectedEntity = function () {
+      const updateSelectedEntity = $scope.updateSelectedEntity = function () {
         if (!onDashboardPage()) {
           return;
         }
@@ -39,7 +38,7 @@ uiModules.get('kibana')
           }
           // fetch document and grab the field value to populate the label
           // TODO: test when the column is a scripted field
-          es.search({
+          return es.search({
             size: 1,
             index,
             body: {
@@ -51,7 +50,8 @@ uiModules.get('kibana')
               },
               _source: column
             }
-          }).then(function (resp) {
+          })
+          .then(function (resp) {
             if (resp.hits.total) {
               const doc = resp.hits.hits[0];
               if (config.get('metaFields').indexOf(column) !== -1 && doc[column]) {
@@ -59,10 +59,7 @@ uiModules.get('kibana')
                 $scope.label = doc[column];
               } else if (doc._source) {
                 // else try to find it in _source
-                let value = kibiUtils.getValuesAtPath(doc._source, column);
-                if (!value.length) {
-                  value = ' - ';
-                }
+                let value = _.get(doc._source, column, ' - ');
                 if (value.constructor === Object || value.constructor === Array) {
                   value = JSON.stringify(value);
                 }

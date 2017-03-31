@@ -9,12 +9,14 @@
     <!-- kibi changed class from kibana to kibi -->
     <li
       ng-if="!logoBrand && !smallLogoBrand"
+      ng-click="chrome.openKibiOnNewCleanTab(true)"
       aria-label="{{ appTitle }} Logo"
       class="logo kibi"
     ></li>
 
     <li
       ng-if="logoBrand"
+      ng-click="chrome.openKibiOnNewCleanTab(true)"
       ng-style="{ 'background': logoBrand }"
       aria-label="{{ appTitle }} Logo"
       class="logo hidden-sm"
@@ -22,6 +24,7 @@
 
     <li
       ng-if="smallLogoBrand"
+      ng-click="chrome.openKibiOnNewCleanTab(true)"
       ng-style="{ 'background': smallLogoBrand }"
       aria-label="{{ appTitle }} Logo"
       class="logo-small visible-sm hidden-xs"

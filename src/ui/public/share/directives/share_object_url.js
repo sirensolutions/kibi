@@ -3,7 +3,7 @@ import Clipboard from 'clipboard';
 import '../styles/index.less';
 
 uiModules.get('kibana')
-.directive('shareObjectUrl', function (Private, createNotifier) {
+.directive('shareObjectUrl', function (Private, createNotifier, sharingService) {
 
   return {
     restrict: 'E',
@@ -44,14 +44,9 @@ uiModules.get('kibana')
     },
     controller: function ($scope) { // kibi: removed $location
 
-      $scope.$watch('url', () => {
-        $scope.formattedUrl = $scope.url;
+      $scope.$watch('url', (url) => {
+        $scope.formattedUrl = sharingService.addParamsToUrl($scope.url, $scope.shareAsEmbed, $scope.kibiNavbarVisible);
         if ($scope.shareAsEmbed) {
-          if ($scope.kibiNavbarVisible) {
-            $scope.formattedUrl += '?embed=true&kibiNavbarVisible=true';
-          } else {
-            $scope.formattedUrl += '?embed=true';
-          }
           $scope.formattedUrl = `<iframe src="${$scope.formattedUrl}" height="600" width="800"></iframe>`;
         }
       });

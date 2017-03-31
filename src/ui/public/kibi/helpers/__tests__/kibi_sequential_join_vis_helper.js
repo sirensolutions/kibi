@@ -116,6 +116,102 @@ describe('Kibi Components', function () {
       });
     });
 
+    describe('constructButtonArray - buttons configured with targetDashboard and indexRelationId', function () {
+      it('should correctly filter it out if currentDashboardIndex is neither in source nor in target for the button relation', function () {
+        init({
+          relations: {
+            relationsIndices: [
+              {
+                id: 'ic//fc/id//fd'
+              }
+            ],
+            relationsDashboards: []
+          }
+        });
+        const buttonDefs = [
+          {
+            label: 'from C to D',
+            targetDashboardId: 'dashboardC',
+            indexRelationId: 'ic//fc/id//fd'
+          }
+        ];
+        const dashboardIdIndexPair = {
+          dashboardA: 'ia',
+          dashboardB: 'ib'
+        };
+
+        const index = 'ia';
+        const currentDashboardId = 'dashboardA';
+
+        const buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, index, currentDashboardId, dashboardIdIndexPair);
+        expect(buttons.length).to.equal(0);
+      });
+
+      it('should correctly filter out it if currentDashboardIndex same as relation source index' +
+         'but index of targetDashboard different than relation target index', function () {
+        init({
+          relations: {
+            relationsIndices: [
+              {
+                id: 'ia//fa/ib//fb'
+              }
+            ],
+            relationsDashboards: []
+          }
+        });
+        const buttonDefs = [
+          {
+            label: 'from B to A',
+            targetDashboardId: 'dashboardA',
+            indexRelationId: 'ia//fa/ib//fb'
+          }
+        ];
+        const dashboardIdIndexPair = {
+          dashboardA: 'ia',
+          dashboardB: 'ib',
+          dashboardC: 'ia'
+        };
+
+        const index = 'ia';
+        const currentDashboardId = 'dashboardC';
+
+        const buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, index, currentDashboardId, dashboardIdIndexPair);
+        expect(buttons.length).to.equal(0);
+      });
+
+      it('should correctly filter it out if currentDashboardIndex same as relation target index' +
+         'but index of targetDashboard different than relation source index', function () {
+        init({
+          relations: {
+            relationsIndices: [
+              {
+                id: 'ib//fb/ia//fa'
+              }
+            ],
+            relationsDashboards: []
+          }
+        });
+        const buttonDefs = [
+          {
+            label: 'from B to A',
+            targetDashboardId: 'dashboardA',
+            indexRelationId: 'ib//fb/ia//fa'
+          }
+        ];
+        const dashboardIdIndexPair = {
+          dashboardA: 'ia',
+          dashboardB: 'ib',
+          dashboardC: 'ia'
+        };
+
+        const index = 'ia';
+        const currentDashboardId = 'dashboardC';
+
+        const buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, index, currentDashboardId, dashboardIdIndexPair);
+        expect(buttons.length).to.equal(0);
+      });
+    });
+
     it('should not do anything when a button is clicked in the config window', function () {
       init({
         currentDashboardId: ''

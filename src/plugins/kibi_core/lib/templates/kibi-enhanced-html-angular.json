@@ -2,7 +2,7 @@
   "title": "kibi-enhanced-html-angular",
   "description": "An enhanced search results template.",
   "templateEngine": "html-angular",
-  "templateSource": "<div style=\"clear: both;\">\n<h1>Here are the results.</h1>\n<div ng-repeat=\"hit in hits|limitTo:limit track by hit._index+hit._type+hit._id+hit._score\"\nstyle=\"width: 95%; border:1px solid rgba(0,0,0,0.5); margin: 10px; padding: 10px\">\n<h3>{{indexPattern.formatField(hit,\"title\")}}</h3><span ng-repeat=\"(key,value) in hit._source\"><dt>{{key}}</dt><dd>{{value}}</dd>\n</span>\n</div>\n</div>",
+  "templateSource": "<div style=\"clear: both; word-wrap: break-word;\">\n<div ng-repeat=\"hit in hits|limitTo:limit track by hit._index+hit._type+hit._id+hit._score\"\nstyle=\"width: 240px; border:1px solid rgba(0,0,0,0.2); margin: 10px; padding: 10px; float: left\">\n<h4 ng-if=\"hit._source.title\">{{indexPattern.formatField(hit,\"title\")}}</h4>\n<span ng-repeat=\"(key,value) in hit._source\"\n  ng-if=\"value !== null && value !== undefined && value !== ''\">\n    <dt>{{key}}</dt>\n<dd>{{value}}</dd>\n</span>\n</div>\n</div>",
   "version": 2,
   "kibanaSavedObjectMeta": {
     "searchSourceJSON": "{}"

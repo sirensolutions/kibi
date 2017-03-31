@@ -177,7 +177,7 @@
     "angular-animate": "1.4.8",
     "kibi-icons": "sirensolutions/kibi-icons#1.0.0",
 
-    "lru-cache": "~2.6.4",
+    "lru-cache": "4.0.2",
     "request-promise": "4.1.1",
     "node-forge": "^0.6.37",
     "kibiutils": "sirensolutions/kibiutils#1.5.0",

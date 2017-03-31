@@ -15,6 +15,7 @@ import SQLiteQuery from './queries/sqlite_query';
 import RestQuery from './queries/rest_query';
 import ErrorQuery from './queries/error_query';
 import InactivatedQuery from './queries/inactivated_query';
+import MissingSelectedDocumentQuery from './queries/missing_selected_document_query';
 import TinkerPop3Query from './queries/tinkerpop3_query';
 import JDBC from 'jdbc';
 import jinst from 'jdbc/lib/jinst';
@@ -613,16 +614,18 @@ QueryEngine.prototype._getQueries = function (queryIds, options) {
     return query.checkIfItIsRelevant(options);
   });
 
-  return Promise.all(promises).then(function (sparqlResponses) {
+  return Promise.all(promises).then(function (queryResponses) {
     // order the list prepare the list
     // go over responces and create an array on template objects for which ask queries returned true
 
-    const filteredQueries = [];
-    _.forEach(sparqlResponses, function (resp, i) {
-      if (resp) {
-        filteredQueries.push(fromRightFolder[i]); // here important to use fromRightFolder !!!
-      } else {
-        filteredQueries.push(new InactivatedQuery(self.server, fromRightFolder[i].id));
+    const filteredQueries = _.map(queryResponses, function (resp, i) {
+      switch (resp) {
+        case Symbol.for('query is relevant'):
+          return fromRightFolder[i]; // here important to use fromRightFolder !!!
+        case Symbol.for('query should be deactivated'):
+          return new InactivatedQuery(self.server, fromRightFolder[i].id);
+        case Symbol.for('selected document needed'):
+          return new MissingSelectedDocumentQuery(fromRightFolder[i].id);
       }
     });
 
@@ -693,13 +696,10 @@ QueryEngine.prototype.getQueriesHtml = function (queryDefs, options) {
     return self._getQueries(queryIds, options)
     .then(function (queries) {
 
-      const promises = _.map(queries, function (query) {
-
+      return Promise.map(queries, query => {
         const queryDef = self._getQueryDefById(queryDefs, query.id);
         return query.getHtml(queryDef, options);
-
       });
-      return Promise.all(promises);
     });
   });
 };

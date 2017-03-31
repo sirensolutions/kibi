@@ -382,6 +382,8 @@ function VisEditor(createNotifier, kibiState, $scope, $route, timefilter, AppSta
 
       //verify this before we copy the "new" state
       const isAggregationsChanged = !fromVis.aggs.jsonDataEquals(toVis.aggs);
+      // siren: some information to toggle the pickers is contained in the params
+      const isOptionsChanged = !_.isEqual(fromVis.params, toVis.params);
 
       const view = fromVis.getEnabledState();
       const full = fromVis.getState();
@@ -393,7 +395,7 @@ function VisEditor(createNotifier, kibiState, $scope, $route, timefilter, AppSta
        * Only fetch (full ES round trip), if the play-button has been pressed (ie. 'stage' variable) and if there
        * has been changes in the Data-tab.
        */
-      if (stage && isAggregationsChanged) {
+      if (stage && (isAggregationsChanged || isOptionsChanged)) {
         // kibi: decide to show/hide entity picker and timefilter
         hasAnyOfVisSavedSearchesATimeField(toVis, $scope.searchSource.get('index').timeFieldName)
         .then((has) => timefilter.enabled = has)

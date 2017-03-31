@@ -94,7 +94,8 @@ function controller($scope, $route, kbnUrl, Private, createNotifier, queryEngine
           }
         ],
         {
-          selectedDocuments: kibiState.isSelectedEntityDisabled() ? [] : [ kibiState.getEntityURI() ]
+          selectedDocuments: kibiState.isSelectedEntityDisabled() ? [] : [ kibiState.getEntityURI() ],
+          verbose: true
         }
       ).then(function (resp) {
         if (resp && resp.data && resp.data.snippets && resp.data.snippets.length === 1) {

@@ -92,9 +92,16 @@ QueryHelper.prototype.fetchDocument = function (index, type, id, credentials) {
     client = this._cluster.createClient(credentials);
   }
   return client.search({
-    index: index,
-    type: type,
-    q: '_id: "' + id + '"'
+    size: 1,
+    index,
+    body: {
+      query: {
+        ids: {
+          type,
+          values: [ id ]
+        }
+      }
+    }
   }).then(function (doc) {
     if (doc.hits && doc.hits.hits.length === 1) {
       return doc.hits.hits[0];

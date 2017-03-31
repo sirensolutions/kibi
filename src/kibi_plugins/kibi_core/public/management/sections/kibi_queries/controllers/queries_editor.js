@@ -233,7 +233,8 @@ function controller(kibiState, $scope, $route, kbnUrl, createNotifier, queryEngi
             }
           ],
           {
-            selectedDocuments: kibiState.isSelectedEntityDisabled() ? [] : [ entity ]
+            selectedDocuments: kibiState.isSelectedEntityDisabled() ? [] : [ entity ],
+            verbose: true
           }
         );
       }).then(function (resp) {

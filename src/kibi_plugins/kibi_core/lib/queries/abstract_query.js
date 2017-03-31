@@ -146,7 +146,8 @@ Query.prototype.getHtml = function (queryDef, options) {
   const that = this;
 
   // first run fetch results
-  return that.fetchResults(options, null, queryDef.queryVariableName).then(function (data) {
+  return that.fetchResults(options, null, queryDef.queryVariableName)
+  .then(function (data) {
     // here take the results and compile the result template
 
     // here if there is a prefix replace it in values when they are uris
@@ -205,6 +206,18 @@ Query.prototype.getHtml = function (queryDef, options) {
         error: err,
         data: data
       });
+    });
+  })
+  .catch(err => {
+    // do not reject so that data from other successful queries can be displayed
+    that.log.error(err);
+    return Promise.resolve({
+      error: err,
+      data: {
+        config: {
+          id: that.id
+        }
+      }
     });
   });
 };

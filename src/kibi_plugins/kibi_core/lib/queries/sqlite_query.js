@@ -116,7 +116,7 @@ SQLiteQuery.prototype.checkIfItIsRelevant = function (options) {
 
   if (self._checkIfSelectedDocumentRequiredAndNotPresent(options)) {
     self.logger.warn('No elasticsearch document selected while required by the sqlite query. [' + self.config.id + ']');
-    return Promise.resolve(false);
+    return Promise.resolve(Symbol.for('selected document needed'));
   }
 
   const dbfile = this.config.datasource.datasourceClazz.datasource.datasourceParams.db_file_path;
@@ -124,36 +124,35 @@ SQLiteQuery.prototype.checkIfItIsRelevant = function (options) {
   const cacheEnabled = this.config.datasource.datasourceClazz.datasource.datasourceParams.cache_enabled;
 
   if (!this.config.activationQuery) {
-    return Promise.resolve(true);
+    return Promise.resolve(Symbol.for('query is relevant'));
   }
   return self.queryHelper.replaceVariablesUsingEsDocument(this.config.activationQuery, options)
   .then(function (query) {
 
     if (query.trim() === '') {
-      return Promise.resolve(true);
+      return Promise.resolve(Symbol.for('query is relevant'));
     }
 
     let cacheKey = null;
     if (self.cache && cacheEnabled) {
       cacheKey = self.generateCacheKey(dbfile, query, self._getUsername(options));
       const v = self.cache.get(cacheKey);
-      if (v) {
+      if (v !== undefined) {
         return Promise.resolve(v);
       }
     }
 
     return self._executeQuery(query).then(function (results) {
-      const data = results.length > 0;
+      const isRelevant = results.length > 0 ? Symbol.for('query is relevant') : Symbol.for('query should be deactivated');
 
       if (self.cache && cacheEnabled) {
-        self.cache.set(cacheKey, data, maxAge);
+        self.cache.set(cacheKey, isRelevant, maxAge);
       }
 
-      return data;
+      return isRelevant;
     });
   });
 };
-
 
 /**
  * Executes the query.
@@ -179,8 +178,8 @@ SQLiteQuery.prototype.fetchResults = function (options, onlyIds, idVariableName)
       }
     }
 
-    return self._executeQuery(query).then(function (rows) {
-
+    return self._executeQuery(query)
+    .then(function (rows) {
       const data = {
         ids: [],
         queryActivated: true
@@ -243,7 +242,6 @@ SQLiteQuery.prototype.fetchResults = function (options, onlyIds, idVariableName)
 SQLiteQuery.prototype._postprocessResults = function (data) {
   return data;
 };
-
 
 SQLiteQuery.prototype._augmentError = function (error) {
   if (error.message) {

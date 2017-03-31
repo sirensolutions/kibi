@@ -36,7 +36,7 @@ RulesHelper.prototype.evaluate = function (rules, selectedDocuments, credentials
 
       let regex = /^@doc\[.+?\]@$/;
       if (!regex.test(rule.s)) {
-        return false;
+        return Symbol.for('query should be deactivated');
       }
 
       let propertyGroup = rule.s.replace('@doc', '');
@@ -69,12 +69,12 @@ RulesHelper.prototype.evaluate = function (rules, selectedDocuments, credentials
       }
 
       if (pass !== true) {
-        return false;
+        return Symbol.for('query should be deactivated');
       }
     }
 
     // all the rules passed return true
-    return true;
+    return Promise.resolve(Symbol.for('query is relevant'));
   });
 
 };

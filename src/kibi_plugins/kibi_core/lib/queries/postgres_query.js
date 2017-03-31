@@ -157,7 +157,7 @@ PostgresQuery.prototype.checkIfItIsRelevant = function (options) {
 
   if (self._checkIfSelectedDocumentRequiredAndNotPresent(options)) {
     self.logger.warn('No elasticsearch document selected while required by the posgres query. [' + self.config.id + ']');
-    return Promise.resolve(false);
+    return Promise.resolve(Symbol.for('selected document needed'));
   }
 
   const connectionString = this.config.datasource.datasourceClazz.getConnectionString();
@@ -167,11 +167,14 @@ PostgresQuery.prototype.checkIfItIsRelevant = function (options) {
   const maxAge = this.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
   const cacheEnabled = this.config.datasource.datasourceClazz.datasource.datasourceParams.cache_enabled;
 
+  if (!this.config.activationQuery) {
+    return Promise.resolve(Symbol.for('query is relevant'));
+  }
   return self.queryHelper.replaceVariablesUsingEsDocument(this.config.activationQuery, options)
   .then(function (query) {
 
     if (query.trim() === '') {
-      return Promise.resolve(true);
+      return Promise.resolve(Symbol.for('query is relevant'));
     }
 
     let cacheKey = null;
@@ -179,24 +182,25 @@ PostgresQuery.prototype.checkIfItIsRelevant = function (options) {
     if (self.cache && cacheEnabled) {
       cacheKey = self.generateCacheKey(host + dbname, query, self._getUsername(options));
       const v = self.cache.get(cacheKey);
-      if (v) {
+      if (v !== undefined) {
         return Promise.resolve(v);
       }
     }
 
-    return self._executeQuery(query, connectionString).then(function (result) {
+    return self._executeQuery(query, connectionString).then(function (results) {
       // szydan 29-Apr-2015: we've seen an error where for some reason
-      // result was undefined. I was not able to reproduce this
+      // results was undefined. I was not able to reproduce this
       // adding extra check to reject the Promise in such situation
-      if (result === undefined) {
+      if (results === undefined) {
         return Promise.reject(new Error('No rows property in results'));
       }
-      const data = result.rows.length > 0 ? true : false;
+      const isRelevant = results.length > 0 ? Symbol.for('query is relevant') : Symbol.for('query should be deactivated');
 
       if (self.cache && cacheEnabled) {
-        self.cache.set(cacheKey, data, maxAge);
+        self.cache.set(cacheKey, isRelevant, maxAge);
       }
-      return data;
+
+      return isRelevant;
     });
 
   });

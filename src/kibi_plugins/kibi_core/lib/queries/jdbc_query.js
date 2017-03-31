@@ -124,18 +124,21 @@ JdbcQuery.prototype.checkIfItIsRelevant = function (options) {
 
     if (self._checkIfSelectedDocumentRequiredAndNotPresent(options)) {
       self.logger.warn('No elasticsearch document selected while required by the jdbc query. [' + self.config.id + ']');
-      return Promise.resolve(false);
+      return Promise.resolve(Symbol.for('selected document needed'));
     }
     // here do not use getConnectionString method as it might contain sensitive information like decrypted password
     const connectionString = self.config.datasource.datasourceClazz.datasource.datasourceParams.connection_string;
     const maxAge = self.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
     const cacheEnabled = self.config.datasource.datasourceClazz.datasource.datasourceParams.cache_enabled;
 
+    if (!this.config.activationQuery) {
+      return Promise.resolve(Symbol.for('query is relevant'));
+    }
     return self.queryHelper.replaceVariablesUsingEsDocument(self.config.activationQuery, options)
     .then(function (query) {
 
       if (query.trim() === '') {
-        return Promise.resolve(true);
+        return Promise.resolve(Symbol.for('query is relevant'));
       }
 
       let cacheKey = null;
@@ -143,17 +146,19 @@ JdbcQuery.prototype.checkIfItIsRelevant = function (options) {
       if (self.cache && cacheEnabled) {
         cacheKey = self.generateCacheKey(connectionString, query, self._getUsername(options));
         const v = self.cache.get(cacheKey);
-        if (v) {
+        if (v !== undefined) {
           return Promise.resolve(v);
         }
       }
 
       return self._executeQuery(query).then(function (results) {
-        const data = results.length > 0 ? true : false;
+        const isRelevant = results.length > 0 ? Symbol.for('query is relevant') : Symbol.for('query should be deactivated');
+
         if (self.cache && cacheEnabled) {
-          self.cache.set(cacheKey, data, maxAge);
+          self.cache.set(cacheKey, isRelevant, maxAge);
         }
-        return data;
+
+        return isRelevant;
       });
     });
   });

@@ -22,12 +22,12 @@ TinkerPop3Query.prototype = _.create(AbstractQuery.prototype, {
  */
 TinkerPop3Query.prototype.checkIfItIsRelevant = function (options) {
   if (this._checkIfSelectedDocumentRequiredAndNotPresent(options)) {
-    return Promise.reject('No elasticsearch document selected while required by the tinkerpop query. [' + this.config.id + ']');
+    self.logger.warn('No elasticsearch document selected while required by the tinkerpop query. [' + this.config.id + ']');
+    return Promise.resolve(Symbol.for('selected document needed'));
   }
 
-  return Promise.resolve(true);
+  return Promise.resolve(Symbol.for('query is relevant'));
 };
-
 
 TinkerPop3Query.prototype.fetchResults = function (options, onlyIds, idVariableName) {
   const self = this;

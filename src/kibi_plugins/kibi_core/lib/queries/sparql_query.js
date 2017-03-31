@@ -40,7 +40,7 @@ SparqlQuery.prototype.checkIfItIsRelevant = function (options) {
 
   if (self._checkIfSelectedDocumentRequiredAndNotPresent(options)) {
     self.logger.warn('No elasticsearch document selected while required by the sparql query. [' + self.config.id + ']');
-    return Promise.resolve(false);
+    return Promise.resolve(Symbol.for('selected document needed'));
   }
 
   const endpointUrl = this.config.datasource.datasourceClazz.datasource.datasourceParams.endpoint_url;
@@ -48,11 +48,14 @@ SparqlQuery.prototype.checkIfItIsRelevant = function (options) {
   const maxAge = this.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
   const cacheEnabled = this.config.datasource.datasourceClazz.datasource.datasourceParams.cache_enabled;
 
+  if (!this.config.activationQuery) {
+    return Promise.resolve(Symbol.for('query is relevant'));
+  }
   return self.queryHelper.replaceVariablesUsingEsDocument(this.config.activationQuery, options)
   .then(function (queryNoPrefixes) {
 
     if (queryNoPrefixes.trim() === '') {
-      return Promise.resolve(true);
+      return Promise.resolve(Symbol.for('query is relevant'));
     }
 
     const query = self.config.prefixesString + ' ' + queryNoPrefixes;
@@ -61,17 +64,19 @@ SparqlQuery.prototype.checkIfItIsRelevant = function (options) {
     if (self.cache && cacheEnabled) {
       cacheKey = self.generateCacheKey(endpointUrl, query, self._getUsername(options));
       const v = self.cache.get(cacheKey);
-      if (v) {
+      if (v !== undefined) {
         return Promise.resolve(v);
       }
     }
 
     return self._executeQuery(query, endpointUrl, timeout).then(function (data) {
-      const relevant = data.boolean === true ? true : false;
+      const isRelevant = data.boolean ? Symbol.for('query is relevant') : Symbol.for('query should be deactivated');
+
       if (self.cache && cacheEnabled) {
-        self.cache.set(cacheKey, relevant, maxAge);
+        self.cache.set(cacheKey, isRelevant, maxAge);
       }
-      return relevant;
+
+      return isRelevant;
     });
 
   });

@@ -25,17 +25,17 @@ RestQuery.prototype = _.create(AbstractQuery.prototype, {
 RestQuery.prototype.checkIfItIsRelevant = function (options) {
   if (this._checkIfSelectedDocumentRequiredAndNotPresent(options)) {
     this.logger.warn('No elasticsearch document selected while required by the REST query. [' + this.config.id + ']');
-    return Promise.resolve(false);
+    return Promise.resolve(Symbol.for('selected document needed'));
   }
 
   // no document selected there is nothing to check against
   if (!options.selectedDocuments || options.selectedDocuments.length === 0) {
-    return Promise.resolve(true);
+    return Promise.resolve(Symbol.for('query is relevant'));
   }
 
   // empty rules - let it go
   if (this.config.activation_rules.length === 0) {
-    return Promise.resolve(true);
+    return Promise.resolve(Symbol.for('query is relevant'));
   }
 
   // evaluate the rules

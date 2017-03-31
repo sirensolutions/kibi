@@ -8,8 +8,24 @@
 <div
   ng-if="hits.length"
   ng-class="{ loading: searchSource.activeFetchCount > 0 }">
+  <div class="small-note" style="width: 100%;" ng-if="templateId">
+    <span ng-if="sorting && customView">Results sorted by {{sorting}}</span>
+   <a ng-if="customView" class="pull-right" ng-click='toggleView()'>Change to Standard View</a>
+   <a ng-if="!customView" class="pull-right" ng-click='toggleView()'>Change to Custom View</a>
+  </div>
+
   <paginate ng-if="!infiniteScroll" list="hits" per-page="50" top-controls="true">
-    <table class="kbn-table table" ng-if="indexPattern">
+    <div ng-if="customView" kibi-custom-view
+    template-id="templateId"
+    mode="{{customViewerMode}}"
+    hits="page"
+    columns="columns"
+    column-aliases="columnAliases"
+    sorting="sorting"
+    index-pattern="indexPattern"
+    filter="filter"
+    cell-click-handlers="cellClickHandlers"></div>
+    <table class="kbn-table table" ng-if="indexPattern && !customView">
       <thead
         kibi-table-header
         columns="columns"
@@ -41,7 +57,19 @@
     </table>
   </paginate>
 
-  <table ng-if="infiniteScroll" class="kbn-table table" ng-if="indexPattern">
+ <div ng-if="infiniteScroll">
+   <div ng-if="customView" kibi-custom-view
+   template-id="templateId"
+   mode="{{customViewerMode}}"
+   hits="hits"
+   columns="columns"
+   column-aliases="columnAliases"
+   sorting="sorting"
+   index-pattern="indexPattern"
+   filter="filter"
+   cell-click-handlers="cellClickHandlers"></div>
+
+  <table class="kbn-table table" ng-if="indexPattern && !customView">
     <thead
       kibi-table-header
       columns="columns"
@@ -62,7 +90,7 @@
     </tbody>
   </table>
   <kbn-infinite-scroll ng-if="infiniteScroll" more="addRows"></kbn-infinite-scroll>
-
+</div>
   <div ng-show="!infiniteScroll && hits.length < total" class="limit-info">
     Showing {{hits.length}} out of {{total}}
     <a ng-click="increaseSize()">See more</a>

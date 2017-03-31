@@ -12,7 +12,7 @@
         <h2 class="title">Edit Query Result Templates</h2>
       </div>
       <p>
-        Use this form to define a template for displaying results of queries over external datasources.
+        Use this form to define a template for displaying results of queries over external datasources or enhanced search results.
       </p>
 
       <div class="config-section">
@@ -33,6 +33,7 @@
           <div class="form-group">
             <label>Engine</label><br/>
             <select required="true" ng-model="template.templateEngine" class="form-control">
+              <option value="html-angular">html-angular</option>
               <option value="jade">jade</option>
               <option value="handlebars">handlebars</option>
             <select>
@@ -46,7 +47,7 @@
               ng-model="template.templateSource"
               ng-class="{ 'red-border': objectForm.handlebarsTemplate.$invalid }"
               name="handlebarsTemplate"
-              style="height: 400px" required>
+              required>
             </div>
 
             <div ng-if="template.templateEngine === 'jade'"
@@ -54,15 +55,31 @@
               ng-model="template.templateSource"
               ng-class="{ 'red-border': objectForm.jadeTemplate.$invalid }"
               name="jadeTemplate"
-              style="height: 400px" required>
+              required>
+            </div>
+
+            <div ng-if="template.templateEngine === 'html-angular'"
+              ui-ace="{ onLoad: aceLoaded, mode: 'html' }" id="{{template.title}}"
+              ng-model="template.templateSource"
+              ng-class="{ 'red-border': objectForm.htmlTemplate.$invalid }"
+              name="htmlTemplate"
+              required>
             </div>
 
           </div>
        </form>
       </div>
 
-
-      <div class="preview-section">
+      <div ng-if="template.templateEngine === 'html-angular'" class="preview-section">
+          <h2>Preview</h2>
+          <kibi-param-entity-uri entity-uri-holder="holder"></kibi-param-entity-uri>
+          <div kibi-custom-view
+          template-source="template.templateSource"
+          mode="replay">
+        Template preview here...
+        </div>
+      </div>
+      <div ng-if="template.templateEngine !== 'html-angular'" class="preview-section">
         <form name="previewForm">
           <h2>Preview</h2>
           <kibi-param-entity-uri entity-uri-holder="holder"></kibi-param-entity-uri>

@@ -14,7 +14,7 @@ settingsSectionRegistry.register(_.constant({
   order: 13,
   name: 'templates',
   buttonLabel: 'Template',
-  display: 'Query templates',
+  display: 'Viewers',
   url: '#/settings/templates',
   openObjectFinder: function () {
     angular.element(document.getElementById('templates_editor')).scope().openTemplateFinder();

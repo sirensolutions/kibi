@@ -10,6 +10,7 @@ define(function (require) {
   require('ui/kibi/kibi_doc_table/kibi_doc_table.less');
   require('ui/kibi/kibi_doc_table/components/kibi_table_row');
   require('ui/kibi/kibi_doc_table/components/kibi_table_header');
+  require('ui/kibi/kibi_doc_table/components/kibi_custom_view');
 
   // kibi: allow to query external datasources for populating a column
   require('ui/kibi/components/query_engine_client/query_engine_client');
@@ -30,6 +31,8 @@ define(function (require) {
         searchSource: '=?',
         infiniteScroll: '=?',
         filter: '=?',
+        templateId: '=?',
+        customViewerMode: '=?',
 
         // kibi:
         // added cellClickHandlers, queryColumn and columnAliases
@@ -146,6 +149,23 @@ define(function (require) {
             courier.fetch();
           }
         };
+
+        $scope.customView = false;
+        //initial custom view state:
+        if ($scope.templateId) {
+          $scope.customView = true;
+        }
+        $scope.toggleView = function () {
+          if ($scope.customView) {
+            $scope.customView = false;
+          } else {
+            $scope.customView = true;
+          }
+        };
+        $scope.$watch('templateId', function (templateId) {
+          $scope.customView = templateId ? true : false;
+        });
+
         // kibi: end
 
         function addRelationalColumn() {

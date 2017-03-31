@@ -35,6 +35,6 @@
     ng-model="modelObject"
     ng-options="item.label group by item.group for item in items | orderBy: 'label' track by item.value"
     ng-disabled="disabled">
-    <option value="" ng-show="!required"></option>
+    <option value="" ng-show="!required">{{options.placeholder}}</option>
   </select>
 </div>

@@ -15,6 +15,7 @@ define(function (require) {
     $scope.savedObj = {
       columns: $scope.vis.params.columns,
       columnAliases: $scope.vis.params.columnAliases,
+      templateId: $scope.vis.params.templateId,
       sort: $scope.vis.params.sort
     };
 
@@ -75,9 +76,15 @@ define(function (require) {
         }
       });
 
+      const removeVisTemplateIdChangedHandler = $rootScope.$on('kibi:vis:templateId-changed', function (event, templateId) {
+        $scope.savedObj.templateId = templateId;
+        $scope.customViewerMode = 'record';
+      });
+
       $scope.$on('$destroy', function () {
         removeVisStateChangedHandler();
         removeVisColumnsChangedHandler();
+        removeVisTemplateIdChangedHandler();
       });
 
       $scope.$watch('savedObj.columns', function () {

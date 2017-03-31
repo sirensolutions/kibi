@@ -1,0 +1,10 @@
+{
+  "title": "kibi-enhanced-html-angular",
+  "description": "An enhanced search results template.",
+  "templateEngine": "html-angular",
+  "templateSource": "<div style=\"clear: both;\">\n<h1>Here are the results.</h1>\n<div ng-repeat=\"hit in hits|limitTo:limit track by hit._index+hit._type+hit._id+hit._score\"\nstyle=\"width: 95%; border:1px solid rgba(0,0,0,0.5); margin: 10px; padding: 10px\">\n<h3>{{indexPattern.formatField(hit,\"title\")}}</h3><span ng-repeat=\"(key,value) in hit._source\"><dt>{{key}}</dt><dd>{{value}}</dd>\n</span>\n</div>\n</div>",
+  "version": 2,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{}"
+  }
+}

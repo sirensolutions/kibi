@@ -1,6 +1,6 @@
 import Promise from 'bluebird';
 import expect from 'expect.js';
-import sinon from 'sinon';
+import sinon from 'auto-release-sinon';
 import SparqlQuery from '../../queries/sparql_query';
 
 const fakeServer = {
@@ -35,7 +35,7 @@ const fakeServer = {
 };
 
 const cacheMock = {
-  get(key) { return '';},
+  get(key) { return;},
   set(key, value, time) {}
 };
 
@@ -62,46 +62,34 @@ describe('SparqlQuery', function () {
 
   describe('correct arguments are passed to generateCacheKey', function () {
 
-    it('fetchResults', function (done) {
+    it('fetchResults', function () {
       const sparqlQuery = new SparqlQuery(fakeServer, queryDefinition, cacheMock);
       // stub _execute queryto skip query execution
       sinon.stub(sparqlQuery, '_executeQuery', function () {
         return Promise.resolve({results: {bindings: [{}]}});
       });
 
-      const spy = sinon.spy(sparqlQuery, 'generateCacheKey');
+      const generateCacheKeySpy = sinon.spy(sparqlQuery, 'generateCacheKey');
 
-      sparqlQuery.fetchResults({credentials: {username: 'fred'}}, false, 'variableX').then(function (res) {
+      return sparqlQuery.fetchResults({credentials: {username: 'fred'}}, false, 'variableX').then(function (res) {
         expect(res.results).to.eql({bindings: [{}]});
-        expect(spy.callCount).to.equal(1);
-
-        expect(spy.calledWithExactly('http://localhost:9876', 'select * where {?s ?p ?o}', false, 'variableX', 'fred')).to.be.ok();
-
-        sparqlQuery._executeQuery.restore();
-        sparqlQuery.generateCacheKey.restore();
-        done();
-      }).catch(done);
+        sinon.assert.calledOnce(generateCacheKeySpy);
+        sinon.assert.calledWithExactly(generateCacheKeySpy, 'http://localhost:9876', 'select * where {?s ?p ?o}', false, 'variableX', 'fred');
+      });
     });
 
-    it('checkIfItIsRelevant', function (done) {
+    it('checkIfItIsRelevant', function () {
       const sparqlQuery = new SparqlQuery(fakeServer, queryDefinition, cacheMock);
       // stub _execute queryto skip query execution
-      sinon.stub(sparqlQuery, '_executeQuery', function () {
-        return Promise.resolve({results: {bindings: [{}]}});
+      sinon.stub(sparqlQuery, '_executeQuery').returns(Promise.resolve({results: {bindings: [{}]}}));
+
+      const generateCacheKeySpy = sinon.spy(sparqlQuery, 'generateCacheKey');
+
+      return sparqlQuery.checkIfItIsRelevant({credentials: {username: 'fred'}}).then(function (res) {
+        expect(res).to.equal(Symbol.for('query should be deactivated'));
+        sinon.assert.calledWithExactly(generateCacheKeySpy, 'http://localhost:9876', ' select * where {?s ?p ?o} LIMIT 1', 'fred');
+        expect(generateCacheKeySpy.callCount).to.equal(1);
       });
-
-      const spy = sinon.spy(sparqlQuery, 'generateCacheKey');
-
-      sparqlQuery.checkIfItIsRelevant({credentials: {username: 'fred'}}).then(function (res) {
-        expect(res).to.equal(false);
-        expect(spy.callCount).to.equal(1);
-
-        expect(spy.calledWithExactly('http://localhost:9876', ' select * where {?s ?p ?o} LIMIT 1', 'fred')).to.be.ok();
-
-        sparqlQuery._executeQuery.restore();
-        sparqlQuery.generateCacheKey.restore();
-        done();
-      }).catch(done);
     });
   });
 });

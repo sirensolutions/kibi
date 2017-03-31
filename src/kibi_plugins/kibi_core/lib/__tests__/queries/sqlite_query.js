@@ -1,6 +1,6 @@
 import Promise from 'bluebird';
 import expect from 'expect.js';
-import sinon from 'sinon';
+import sinon from 'auto-release-sinon';
 import SqliteQuery from '../../queries/sqlite_query';
 
 const fakeServer = {
@@ -37,10 +37,10 @@ const fakeServer = {
 describe('SqliteQuery', function () {
 
   describe('fetchResults test if correct arguments are passed to generateCacheKey', function () {
-    it('simple query', function (done) {
+    it('simple query', function () {
 
       const cacheMock = {
-        get: function (key) { return '';},
+        get: function (key) { return;},
         set: function (key, value, time) {}
       };
 
@@ -65,23 +65,15 @@ describe('SqliteQuery', function () {
 
       // stub _init to skip initialization
       // stub _execute queryto skip query execution
-      sinon.stub(sqliteQuery, '_executeQuery', function () {
-        return Promise.resolve({result: {}});
-      });
+      sinon.stub(sqliteQuery, '_executeQuery').returns(Promise.resolve({result: {}}));
 
-      const spy = sinon.spy(sqliteQuery, 'generateCacheKey');
+      const generateCacheKeySpy = sinon.spy(sqliteQuery, 'generateCacheKey');
 
-      sqliteQuery.fetchResults({credentials: {username: 'fred'}}, false, 'variableX').then(function (res) {
+      return sqliteQuery.fetchResults({credentials: {username: 'fred'}}, false, 'variableX').then(function (res) {
         expect(res.results).to.eql({ bindings: [{}]});
-        expect(spy.callCount).to.equal(1);
-
-        expect(spy.calledWithExactly('my.db', 'select * from x', false, 'variableX', 'fred')).to.be.ok();
-
-        sqliteQuery._executeQuery.restore();
-        sqliteQuery.generateCacheKey.restore();
-        done();
-      }).catch(done);
-
+        sinon.assert.calledOnce(generateCacheKeySpy);
+        sinon.assert.calledWithExactly(generateCacheKeySpy, 'my.db', 'select * from x', false, 'variableX', 'fred');
+      });
     });
   });
 

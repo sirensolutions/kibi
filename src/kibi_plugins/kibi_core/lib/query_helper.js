@@ -10,7 +10,7 @@ function QueryHelper(server) {
   this._cluster = server.plugins.elasticsearch.getCluster('data');
 }
 
-QueryHelper.prototype.replaceVariablesForREST = function (headers, params, body, path, entity, variables, credentials) {
+QueryHelper.prototype.replaceVariablesForREST = function (headers, params, body, path, options, variables) {
   // clone here !!! headers, params, body
   // so the original one in the config are not modified
   const h = _.cloneDeep(headers);
@@ -43,10 +43,10 @@ QueryHelper.prototype.replaceVariablesForREST = function (headers, params, body,
 
   // second replace placeholders based on selected entity
   const promises = [
-    self.replaceVariablesUsingEsDocument(h, entity, credentials),
-    self.replaceVariablesUsingEsDocument(p, entity, credentials),
-    self.replaceVariablesUsingEsDocument(b, entity, credentials),
-    self.replaceVariablesUsingEsDocument(pa, entity, credentials)
+    self.replaceVariablesUsingEsDocument(h, options),
+    self.replaceVariablesUsingEsDocument(p, options),
+    self.replaceVariablesUsingEsDocument(b, options),
+    self.replaceVariablesUsingEsDocument(pa, options)
   ];
 
   return Promise.all(promises).then(function (results) {
@@ -71,6 +71,10 @@ QueryHelper.prototype.replaceVariablesUsingEsDocument = function (s, { selectedD
   }
 
   const { index, type, id } = entity;
+
+  if (!index || !type || !id) {
+    return Promise.reject(new Error('The selected document should be identified with 3 components: index, type, and id'));
+  }
 
   return self.fetchDocument(index, type, id, credentials).then(function (doc) {
     //now parse the query and replace the placeholders
@@ -109,7 +113,7 @@ QueryHelper.prototype.fetchDocument = function (index, type, id, credentials) {
     return Promise.reject(new Error('No document matching _id=' + id + ' was found'));
   })
   .catch(err => {
-    const msg = 'Could not fetch document [/' + index + '/' + type + '/' + id + '], check logs for details please.';
+    const msg = `Could not fetch document [/${index}/${type}/${id}], check logs for details please.`;
     this.log.warn(msg);
     this.log.warn(err);
     return Promise.reject(new Error(msg));

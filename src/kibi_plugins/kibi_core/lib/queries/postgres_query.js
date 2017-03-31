@@ -194,7 +194,7 @@ PostgresQuery.prototype.checkIfItIsRelevant = function (options) {
       if (results === undefined) {
         return Promise.reject(new Error('No rows property in results'));
       }
-      const isRelevant = results.length > 0 ? Symbol.for('query is relevant') : Symbol.for('query should be deactivated');
+      const isRelevant = results.rows.length > 0 ? Symbol.for('query is relevant') : Symbol.for('query should be deactivated');
 
       if (self.cache && cacheEnabled) {
         self.cache.set(cacheKey, isRelevant, maxAge);

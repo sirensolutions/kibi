@@ -131,7 +131,7 @@ JdbcQuery.prototype.checkIfItIsRelevant = function (options) {
     const maxAge = self.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
     const cacheEnabled = self.config.datasource.datasourceClazz.datasource.datasourceParams.cache_enabled;
 
-    if (!this.config.activationQuery) {
+    if (!self.config.activationQuery) {
       return Promise.resolve(Symbol.for('query is relevant'));
     }
     return self.queryHelper.replaceVariablesUsingEsDocument(self.config.activationQuery, options)

@@ -35,7 +35,7 @@ const fakeServer = {
 };
 
 const cacheMock = {
-  get: function (key) { return '';},
+  get: function (key) { return; },
   set: function (key, value, time) {}
 };
 
@@ -61,58 +61,34 @@ describe('JdbcQuery', function () {
 
   describe('correct arguments are passed to generateCacheKey', function () {
 
-    it('fetchResults', function (done) {
-      const jdbcQuery = new JdbcQuery(fakeServer, queryDefinition, cacheMock);
+    let jdbcQuery;
+    let generateCacheKeySpy;
+
+    beforeEach(() => {
+      jdbcQuery = new JdbcQuery(fakeServer, queryDefinition, cacheMock);
 
       // stub _init to skip initialization
-      sinon.stub(jdbcQuery, '_init', function () {
-        return Promise.resolve(true);
-      });
+      sinon.stub(jdbcQuery, '_init').returns(Promise.resolve(true));
       // stub _execute queryto skip query execution
-      sinon.stub(jdbcQuery, '_executeQuery', function () {
-        return Promise.resolve({result: []});
-      });
+      sinon.stub(jdbcQuery, '_executeQuery').returns(Promise.resolve({result: []}));
 
-      const spy = sinon.spy(jdbcQuery, 'generateCacheKey');
-
-      jdbcQuery.fetchResults({credentials: {username: 'fred'}}, false, 'variableName').then(function (res) {
-        expect(res.results).to.eql({bindings: [{}]});
-        expect(spy.callCount).to.equal(1);
-
-        expect(spy.calledWithExactly('connectionString', 'select * from x', false, 'variableName', 'fred')).to.be.ok();
-
-        jdbcQuery._init.restore();
-        jdbcQuery._executeQuery.restore();
-        jdbcQuery.generateCacheKey.restore();
-        done();
-      }).catch(done);
+      generateCacheKeySpy = sinon.spy(jdbcQuery, 'generateCacheKey');
     });
 
-    it('checkIfItIsRelevant', function (done) {
-      const jdbcQuery = new JdbcQuery(fakeServer, queryDefinition, cacheMock);
-
-      // stub _init to skip initialization
-      sinon.stub(jdbcQuery, '_init', function () {
-        return Promise.resolve(true);
+    it('fetchResults', function () {
+      return jdbcQuery.fetchResults({credentials: {username: 'fred'}}, false, 'variableName').then(function (res) {
+        expect(res.results).to.eql({bindings: [{}]});
+        sinon.assert.calledOnce(generateCacheKeySpy);
+        sinon.assert.calledWithExactly(generateCacheKeySpy, 'connectionString', 'select * from x', false, 'variableName', 'fred');
       });
-      // stub _execute queryto skip query execution
-      sinon.stub(jdbcQuery, '_executeQuery', function () {
-        return Promise.resolve({result: []});
+    });
+
+    it('checkIfItIsRelevant', function () {
+      return jdbcQuery.checkIfItIsRelevant({credentials: {username: 'fred'}}).then(function (res) {
+        expect(res).to.equal(Symbol.for('query should be deactivated'));
+        sinon.assert.calledOnce(generateCacheKeySpy);
+        sinon.assert.calledWithExactly(generateCacheKeySpy, 'connectionString', 'select * from x LIMIT 1', 'fred');
       });
-
-      const spy = sinon.spy(jdbcQuery, 'generateCacheKey');
-
-      jdbcQuery.checkIfItIsRelevant({credentials: {username: 'fred'}}).then(function (res) {
-        expect(res).to.equal(false);
-        expect(spy.callCount).to.equal(1);
-
-        expect(spy.calledWithExactly('connectionString', 'select * from x LIMIT 1', 'fred')).to.be.ok();
-
-        jdbcQuery._init.restore();
-        jdbcQuery._executeQuery.restore();
-        jdbcQuery.generateCacheKey.restore();
-        done();
-      }).catch(done);
     });
 
   });

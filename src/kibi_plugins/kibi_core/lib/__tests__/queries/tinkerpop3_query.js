@@ -242,7 +242,7 @@ const fakeTinkerpop3Result = {
 
 const cacheMock = {
   get(key) {
-    return '';
+    return;
   },
   set(key, value, time) {}
 };
@@ -307,29 +307,24 @@ describe('TinkerPop3Query', function () {
     it('fetchResults', function () {
       const tinkerPop3Query = new TinkerPop3Query(fakeServer, queryDefinition, cacheMock);
 
-      const spy = sinon.spy(tinkerPop3Query, 'generateCacheKey');
+      const generateCacheKeySpy = sinon.spy(tinkerPop3Query, 'generateCacheKey');
 
       rpStub.returns(Promise.resolve(fakeGraphResponse));
       return tinkerPop3Query.fetchResults({credentials: {username: 'fred'}}).then(function (res) {
         expect(res.result).to.eql(fakeTinkerpop3Result);
-        expect(spy.callCount).to.equal(1);
-        expect(spy.calledWithExactly('http://localhost:3000/graph/queryBatch', '', undefined, undefined, 'fred')).to.be.ok();
-
-        tinkerPop3Query.generateCacheKey.restore();
+        sinon.assert.calledOnce(generateCacheKeySpy);
+        sinon.assert.calledWithExactly(generateCacheKeySpy, 'http://localhost:3000/graph/queryBatch', '', undefined, undefined, 'fred');
       });
     });
 
     it('checkIfItIsRelevant', function () {
       const tinkerPop3Query = new TinkerPop3Query(fakeServer, queryDefinition, cacheMock);
 
-      const spy = sinon.spy(tinkerPop3Query, 'generateCacheKey');
+      const generateCacheKeySpy = sinon.spy(tinkerPop3Query, 'generateCacheKey');
 
       return tinkerPop3Query.checkIfItIsRelevant({credentials: {username: 'fred'}}).then(function (res) {
-
-        expect(res).to.eql(true);
-        expect(spy.callCount).to.equal(0);
-
-        tinkerPop3Query.generateCacheKey.restore();
+        expect(res).to.equal(Symbol.for('query is relevant'));
+        sinon.assert.notCalled(generateCacheKeySpy);
       });
     });
 

@@ -121,7 +121,7 @@ MysqlQuery.prototype.checkIfItIsRelevant = function (options) {
     }
 
     return self._executeQuery(query, connectionString, timeout).then(function (results) {
-      const isRelevant = results.length > 0 ? Symbol.for('query is relevant') : Symbol.for('query should be deactivated');
+      const isRelevant = results.rows.length > 0 ? Symbol.for('query is relevant') : Symbol.for('query should be deactivated');
 
       if (self.cache && cacheEnabled) {
         self.cache.set(cacheKey, isRelevant, maxAge);

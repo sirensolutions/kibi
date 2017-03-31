@@ -39,7 +39,8 @@ RestQuery.prototype.checkIfItIsRelevant = function (options) {
   }
 
   // evaluate the rules
-  return this.rulesHelper.evaluate(this.config.activation_rules, options.selectedDocuments, options.credentials);
+  return this.rulesHelper.evaluate(this.config.activation_rules, options.selectedDocuments, options.credentials)
+  .then(res => res ? Symbol.for('query is relevant') : Symbol.for('query should be deactivated'));
 };
 
 RestQuery.prototype._logFailedRequestDetails = function (msg, originalError, resp) {

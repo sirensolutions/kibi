@@ -56,7 +56,7 @@ describe('RestQuery', () => {
       });
 
       return restQuery.checkIfItIsRelevant({}).then(ret => {
-        expect(ret).to.be(true);
+        expect(ret).to.be(Symbol.for('query is relevant'));
       });
     });
 
@@ -64,10 +64,15 @@ describe('RestQuery', () => {
       const restQuery = new RestQuery(fakeServer, {
         activation_rules: []
       });
+      const doc = {
+        index: 'company',
+        type: 'company',
+        id: 'id1'
+      };
 
-      return restQuery.checkIfItIsRelevant({selectedDocuments: ['/company/company/id1']})
+      return restQuery.checkIfItIsRelevant({selectedDocuments: [ doc ]})
       .then(ret => {
-        expect(ret).to.be(true);
+        expect(ret).to.be(Symbol.for('query is relevant'));
       });
     });
 
@@ -75,10 +80,15 @@ describe('RestQuery', () => {
       const restQuery = new RestQuery(fakeServer, {
         activationQuery: '^/company'
       });
+      const doc = {
+        index: 'company',
+        type: 'company',
+        id: 'id1'
+      };
 
-      return restQuery.checkIfItIsRelevant({selectedDocuments: ['/company/company/id1']})
+      return restQuery.checkIfItIsRelevant({selectedDocuments: [ doc ]})
       .then(ret => {
-        expect(ret).to.be(true);
+        expect(ret).to.be(Symbol.for('query is relevant'));
       });
     });
 
@@ -89,7 +99,7 @@ describe('RestQuery', () => {
 
       return restQuery.checkIfItIsRelevant({selectedDocuments: undefined})
       .then(ret => {
-        expect(ret).to.be(true);
+        expect(ret).to.be(Symbol.for('query is relevant'));
       });
     });
 
@@ -100,7 +110,7 @@ describe('RestQuery', () => {
 
       return restQuery.checkIfItIsRelevant({selectedDocuments: undefined})
       .then(ret => {
-        expect(ret).to.be(true);
+        expect(ret).to.be(Symbol.for('query is relevant'));
       });
     });
   });
@@ -114,10 +124,15 @@ describe('RestQuery', () => {
           p: 'exists'
         }]
       });
+      const doc = {
+        index :'company',
+        type: 'company',
+        id: 'id1'
+      };
 
-      return restQuery.checkIfItIsRelevant({selectedDocuments: ['/company/company/id1']})
+      return restQuery.checkIfItIsRelevant({selectedDocuments: [ doc ]})
       .catch(err => {
-        expect(err.message).to.eql('Could not fetch document [//company/company], check logs for details please.');
+        expect(err.message).to.eql('Could not fetch document [/company/company/id1], check logs for details please.');
       });
     });
 
@@ -128,7 +143,7 @@ describe('RestQuery', () => {
 
       return restQuery.checkIfItIsRelevant({selectedDocuments: undefined})
       .then(ret => {
-        expect(ret).to.be(false);
+        expect(ret).to.equal(Symbol.for('selected document needed'));
       });
     });
 
@@ -139,7 +154,7 @@ describe('RestQuery', () => {
 
       return restQuery.checkIfItIsRelevant({selectedDocuments: undefined})
       .then(ret => {
-        expect(ret).to.be(false);
+        expect(ret).to.equal(Symbol.for('selected document needed'));
       });
     });
   });
@@ -147,7 +162,7 @@ describe('RestQuery', () => {
   describe('fetchResults test if correct arguments are passed to generateCacheKey', () => {
     it('test that username is passed when there are credentials in options', () => {
       const cacheMock = {
-        get: key => '',
+        get: function (key) { return; },
         set: (key, value, time) => {}
       };
 
@@ -167,13 +182,13 @@ describe('RestQuery', () => {
         }
       }, cacheMock);
 
-      const spy = sinon.spy(restQuery, 'generateCacheKey');
+      const generateCacheKeySpy = sinon.spy(restQuery, 'generateCacheKey');
 
       sinon.stub(rp, 'Request').returns(Promise.resolve(fakeDoc1));
       return restQuery.fetchResults({credentials: {username: 'fred'}}).then(res => {
         expect(res).to.eql(fakeDoc1);
-        expect(spy.callCount).to.equal(1);
-        expect(spy.calledWithExactly('GET', 'http://localhost:3000/posts', '', '{}', '{}', '', 'fred')).to.be.ok();
+        sinon.assert.calledOnce(generateCacheKeySpy);
+        sinon.assert.calledWithExactly(generateCacheKeySpy, 'GET', 'http://localhost:3000/posts', '', '{}', '{}', '', 'fred');
       });
     });
   });

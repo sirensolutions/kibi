@@ -63,8 +63,7 @@ describe('SqliteQuery', function () {
         }
       }, cacheMock);
 
-      // stub _init to skip initialization
-      // stub _execute queryto skip query execution
+      // stub _execute query to skip query execution
       sinon.stub(sqliteQuery, '_executeQuery').returns(Promise.resolve({result: {}}));
 
       const generateCacheKeySpy = sinon.spy(sqliteQuery, 'generateCacheKey');

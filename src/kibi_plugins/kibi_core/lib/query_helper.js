@@ -70,6 +70,25 @@ QueryHelper.prototype.replaceVariablesUsingEsDocument = function (s, { selectedD
     return Promise.resolve(s);
   }
 
+  // check if the query has a variable
+  const regex = /(@doc\[.+?\]@)/g;
+  if (typeof s === 'string' || s instanceof String) {
+    if (regex.exec(s) === null) {
+      return Promise.resolve(s);
+    }
+  } else {
+    let hasMatch = false;
+    for (let i = 0; i < s.length; i++) {
+      if (regex.exec(s[i].value) !== null) {
+        hasMatch = true;
+        break;
+      }
+    }
+    if (!hasMatch) {
+      return Promise.resolve(s);
+    }
+  }
+
   const { index, type, id } = entity;
 
   if (!index || !type || !id) {

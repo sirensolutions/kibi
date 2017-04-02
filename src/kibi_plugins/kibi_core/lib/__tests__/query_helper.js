@@ -174,13 +174,14 @@ describe('Query Helper', function () {
         });
 
         it('bad document identifier', function () {
+          const s = 'select * from table1 where id = \'@doc[_source][id]@\'';
           const badDocument = [
             {
               index: 'index1',
               type: 'type1-and-no-id'
             }
           ];
-          return queryHelper.replaceVariablesUsingEsDocument('s', { selectedDocuments: badDocument })
+          return queryHelper.replaceVariablesUsingEsDocument(s, { selectedDocuments: badDocument })
           .then(() => expect().fail('should fail'))
           .catch(function (err) {
             sinon.assert.notCalled(searchStub);

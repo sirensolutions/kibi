@@ -130,6 +130,7 @@ SQLiteQuery.prototype.checkIfItIsRelevant = function (options) {
   .then(function (query) {
 
     if (query.trim() === '') {
+      // TODO is this check necessary ? it seems the previous condition is enough
       return Promise.resolve(Symbol.for('query is relevant'));
     }
 

@@ -47,7 +47,6 @@ QueryEngine.prototype._onStatusGreen = function () {
 };
 
 QueryEngine.prototype._init = function (cacheSize = 500, enableCache = true, cacheMaxAge = 1000 * 60 * 60) {
-  // populate an array templatesDefinitions which contain templatesdefinition objects
   const self = this;
 
   if (self.initialized === true) {
@@ -404,7 +403,6 @@ QueryEngine.prototype.reloadQueries = function () {
   const self = this;
   return self._fetchQueriesFromEs()
   .then(function (resp) {
-
     const queryDefinitions = [];
     const datasourcesIds = [];
     if (resp.hits && resp.hits.hits && resp.hits.hits.length > 0) {
@@ -455,7 +453,6 @@ QueryEngine.prototype.reloadQueries = function () {
         } catch (e) {
           queryDefinition.activation_rules = [];
         }
-
 
         queryDefinitions.push(queryDefinition);
       });
@@ -520,7 +517,7 @@ QueryEngine.prototype.reloadQueries = function () {
       });
     }
   }).catch(function (err) {
-    self.log.error('Something is wrong - elastic search is not running');
+    self.log.error('Something is wrong - elasticsearch is not running');
     self.log.error(err);
   });
 };
@@ -540,7 +537,7 @@ QueryEngine.prototype.clearCache =  function () {
 };
 
 /**
- * return a ordered list of query objects which:
+ * Returns a ordered list of query objects which:
  * a) do match the URI - this is implemented by executing the ASK query of each of the templates and checking which returns TRUE.
  * b) query label matches the names in queryIds (if provided)
  * Order is given by the priority value.
@@ -591,8 +588,6 @@ QueryEngine.prototype._getQueries = function (queryIds, options) {
     }
   }
 
-  // here create an array of promises
-  // filter by name
   const withRightId = _.filter(this.queries, function (query) {
     if (all) {
       return true;
@@ -600,12 +595,12 @@ QueryEngine.prototype._getQueries = function (queryIds, options) {
     return _.indexOf(queryIds, query.id) !== -1;
   });
 
-  // here if after filtering by name we get zero results
+  // here if after filtering we get zero results
   // it means that the requested query is not loaded in memory
   // reject with meaningful error
   if (withRightId.length === 0) {
     return Promise.reject(
-      new Error('Non of requested queries ' + JSON.stringify(queryIds, null, ' ') + ' found in memory')
+      new Error('Non of the requested queries ' + JSON.stringify(queryIds, null, ' ') + ' were found in memory')
     );
   }
   const fromRightFolder = withRightId;
@@ -659,7 +654,6 @@ QueryEngine.prototype._getQueryDefById = function (queryDefs, queryId) {
   });
 };
 
-
 // Returns an array with response data from all relevant queries
 // Use this method when you need just data and not query html
 QueryEngine.prototype.getQueriesData = function (queryDefs, options) {
@@ -690,7 +684,6 @@ QueryEngine.prototype.getQueriesHtml = function (queryDefs, options) {
   const queryIds = _.map(queryDefs, function (queryDef) {
     return queryDef.queryId;
   });
-
 
   return self._init().then(function () {
     return self._getQueries(queryIds, options)

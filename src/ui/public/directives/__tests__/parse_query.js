@@ -65,8 +65,11 @@ describe('parse-query directive', function () {
 
   describe('user input parser', function () {
 
+    let defaultOptions; // kibi: save default options
+
     beforeEach(function () {
       fromUser = Private(ParseQueryLibFromUserProvider);
+      defaultOptions = config.get('query:queryString:options'); // kibi: save default options
       config.set('query:queryString:options', {});
     });
 
@@ -97,6 +100,11 @@ describe('parse-query directive', function () {
     it('should parse valid JSON', function () {
       expect(fromUser('{}')).to.eql({});
       expect(fromUser('{a:b}')).to.eql({query_string: {query: '{a:b}'}});
+    });
+
+    // kibi: reset query options
+    afterEach(function () {
+      config.set('query:queryString:options', defaultOptions);
     });
   });
 

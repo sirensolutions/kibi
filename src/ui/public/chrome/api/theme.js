@@ -99,7 +99,7 @@ module.exports = function (chrome, internals) {
   };
 
   /**
-   * Open a new clean (no cache) tab with Kibi
+   * siren: open a new clean (no cache) tab with Kibi
    */
   chrome.openKibiOnNewCleanTab = function (forcedReload = true) {
     const openNewTab = function (url) {

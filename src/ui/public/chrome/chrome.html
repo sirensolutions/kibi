@@ -24,6 +24,7 @@
     <!-- Full navbar -->
     <div collapse="!showCollapsed" class="navbar-collapse" kbn-chrome-append-nav-controls id="kibi-primary-navbar">
       <ul class="nav navbar-nav kibi-fill-1" role="navigation">
+        <!-- siren: click event. Opens a new clean (no cache) tab with Kibi. -->
         <li
           ng-if="chrome.getBrand('logo')"
           ng-click="chrome.openKibiOnNewCleanTab()"
@@ -32,6 +33,7 @@
           class="logo hidden-sm"
           ></li>
 
+        <!-- siren: click event. Opens a new clean (no cache) tab with Kibi. -->
         <li
           ng-if="chrome.getBrand('smallLogo')"
           ng-click="chrome.openKibiOnNewCleanTab()"

@@ -117,7 +117,6 @@ export default function downloadNodeBuilds(grunt) {
     const downloadDir = join(platform.nodeDir, '..');
     const filePath = resolve(downloadDir, file);
 
-    // KIBI5: is the condition for windows64 still needed ?
     return new Promise((resolve, reject) => {
       createReadStream(filePath)
         .pipe(createGunzip())

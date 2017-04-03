@@ -7,21 +7,27 @@
   <!-- Logo -->
   <div class="global-nav__logo">
     <!-- kibi changed class from kibana to kibi -->
+    <!-- siren: click event. Opens a new clean (no cache) tab with Kibi. -->
     <li
       ng-if="!logoBrand && !smallLogoBrand"
+      ng-click="chrome.openKibiOnNewCleanTab()"
       aria-label="{{ appTitle }} Logo"
       class="logo kibi"
     ></li>
 
+    <!-- siren: click event. Opens a new clean (no cache) tab with Kibi. -->
     <li
       ng-if="logoBrand"
+      ng-click="chrome.openKibiOnNewCleanTab()"
       ng-style="{ 'background': logoBrand }"
       aria-label="{{ appTitle }} Logo"
       class="logo hidden-sm"
     ></li>
 
+    <!-- siren: click event. Opens a new clean (no cache) tab with Kibi. -->
     <li
       ng-if="smallLogoBrand"
+      ng-click="chrome.openKibiOnNewCleanTab()"
       ng-style="{ 'background': smallLogoBrand }"
       aria-label="{{ appTitle }} Logo"
       class="logo-small visible-sm hidden-xs"

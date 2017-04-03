@@ -1,4 +1,5 @@
-let _ = require('lodash');
+const _ = require('lodash');
+const Promise = require('bluebird');
 
 module.exports = function (chrome, internals) {
   /**
@@ -81,8 +82,8 @@ module.exports = function (chrome, internals) {
    * @return {chrome}
    */
   chrome.removeApplicationClass = function (val) {
-    let classesToRemove = [].concat(val || []);
-    let classes = internals.applicationClasses || [];
+    const classesToRemove = [].concat(val || []);
+    const classes = internals.applicationClasses || [];
     _.pull(classes, ...classesToRemove);
 
     internals.applicationClasses = classes;
@@ -95,6 +96,21 @@ module.exports = function (chrome, internals) {
    */
   chrome.getApplicationClasses = function () {
     return internals.applicationClasses.join(' ');
+  };
+
+  /**
+   * siren: open a new clean (no cache) tab with Kibi
+   */
+  chrome.openKibiOnNewCleanTab = function (forcedReload = true) {
+    const openNewTab = function (url) {
+      return new Promise ((resolve, reject) => {
+        resolve(window.open(url));
+      });
+    };
+
+    openNewTab(window.location.origin).then((newTab) => {
+      newTab.location.reload(forcedReload);
+    });
   };
 
 };

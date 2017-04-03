@@ -18,7 +18,7 @@
   "private": false,
   "version": "4.6.4",
   "kibi_kibana_announcement": "https://www.elastic.co/blog/kibana-5-1-2-and-4-6-4-released",
-  "kibi_version": "4.6.4",
+  "kibi_version": "4.6.4-1-SNAPSHOT",
   "kibi_enterprise_enabled": false,
   "build": {
     "number": 8467,
@@ -147,7 +147,7 @@
     "wreck": "6.2.0",
 
     "ng-tags-input": "3.0.0",
-    "antlr4": "^4.5.2",
+    "antlr4": "4.5.2",
     "antlr4-javascript-sparql": "sirensolutions/antlr4-javascript-sparql#1.0.8",
     "antlr4-javascript-sql": "sirensolutions/antlr4-javascript-sql#1.0.3",
     "qtip2": "3.0.2",

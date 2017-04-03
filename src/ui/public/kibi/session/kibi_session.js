@@ -30,9 +30,14 @@ UiModules.get('kibana')
           }
         }
         if (target) {
+          if (search.embed === 'true') {
+            target += '&embed=true';
+          }
+          if (search.kibiNavbarVisible === 'true') {
+            target += '&kibiNavbarVisible=true';
+          }
           $window.location.href = target;
-        }
-        else {
+        } else {
           delete search._h;
           $location.search(search);
         }

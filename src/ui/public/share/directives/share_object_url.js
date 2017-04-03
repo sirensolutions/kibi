@@ -1,15 +1,16 @@
-const app = require('ui/modules').get('kibana');
-const Clipboard = require('clipboard');
+import uiModules from 'ui/modules';
+import Clipboard from 'clipboard';
+import '../styles/index.less';
 
-require('../styles/index.less');
-
-app.directive('shareObjectUrl', function (Private, createNotifier, sharingService) { // kibi: depend on sharing service
+uiModules.get('kibana')
+.directive('shareObjectUrl', function (Private, createNotifier, sharingService) {
 
   return {
     restrict: 'E',
     scope: {
-      getShareAsEmbed: '&shareAsEmbed',
-      isKibiNavbarVisible:'&kibiNavbarVisible' // kibi: added to control when to show hide kibi-nav-bar
+      url: '=',
+      shareAsEmbed: '=',
+      kibiNavbarVisible: '=' // kibi: added to control when to show hide kibi-nav-bar
     },
     template: require('ui/share/views/share_object_url.html'),
     link: function ($scope, $el) {
@@ -42,36 +43,14 @@ app.directive('shareObjectUrl', function (Private, createNotifier, sharingServic
       $scope.clipboard = clipboard;
     },
     controller: function ($scope) { // kibi: removed $location
-      function updateUrl(url) {
-        $scope.url = url;
 
+      $scope.$watch('url', (url) => {
+        $scope.formattedUrl = sharingService.addParamsToUrl($scope.url, $scope.shareAsEmbed, $scope.kibiNavbarVisible);
         if ($scope.shareAsEmbed) {
-          $scope.formattedUrl = `<iframe src="${$scope.url}" height="600" width="800"></iframe>`;
-        } else {
-          $scope.formattedUrl = $scope.url;
+          $scope.formattedUrl = `<iframe src="${$scope.formattedUrl}" height="600" width="800"></iframe>`;
         }
+      });
 
-        $scope.shortGenerated = false;
-      }
-
-      $scope.shareAsEmbed = $scope.getShareAsEmbed();
-      $scope.kibiNavbarVisible = $scope.isKibiNavbarVisible(); // kibi: added to control when to show hide kibi-nav-bar
-
-      $scope.generateShortUrl = function () {
-        if ($scope.shortGenerated) return;
-        sharingService.generateShortUrl($scope.shareAsEmbed, $scope.kibiNavbarVisible) // kibi: use sharing service to shorten URL.
-        .then(shortUrl => {
-          updateUrl(shortUrl);
-          $scope.shortGenerated = true;
-        });
-      };
-
-      $scope.getUrl = function () {
-        // kibi: use sharing service to fetch the current state URL.
-        return sharingService.getSharedUrl($scope.shareAsEmbed, $scope.kibiNavbarVisible);
-      };
-
-      $scope.$watch('getUrl()', updateUrl);
     }
   };
 });

@@ -130,22 +130,6 @@ define(function (require) {
           .catch(common.handleError(this));
         });
 
-        // TODO: verify clipboard contents
-
-        bdd.it('shorten URL button should produce a short URL', function () {
-          var re = new RegExp(baseUrl + '/goto/[0-9a-f]{32}$');
-          return discoverPage.clickShortenUrl()
-          .then(function () {
-            return common.tryForTime(20 * 1000, function tryingForTime() {
-              return discoverPage.getShortenedUrl()
-              .then(function (actualUrl) {
-                expect(actualUrl).to.match(re);
-              });
-            });
-          })
-          .catch(common.handleError(this));
-        });
-
         // NOTE: This test has to run immediately after the test above
         bdd.it('should show toast message for copy to clipboard', function () {
           return discoverPage.clickCopyToClipboard()

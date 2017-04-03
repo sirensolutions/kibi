@@ -79,12 +79,10 @@ describe('Kibi Components', function () {
           query: 'select quantity FROM @doc[_source][table]@ WHERE code = \'@doc[_source][code]@\'',
           expectedVariables: ['quantity']
         },
-        /*
         {
           query: 'select quantity FROM @doc[_source][table]@ WHERE code = \'@doc[_source][code]@',
           expectToThrow: true
         },
-        */
         {
           query: 'select company.label ' +
             'from company ' +

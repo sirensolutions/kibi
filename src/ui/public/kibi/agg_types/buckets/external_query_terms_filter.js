@@ -44,15 +44,16 @@ export default function RelatedEntitiesAggDefinition(Private, createNotifier, ki
               // here we need a label for each one for now it is queryid
               const label = (queryDef.negate ? 'Not-' : '') + id;
 
-              json[label] = {
-                dbfilter: {
-                  entity: kibiState.isSelectedEntityDisabled() ? '' : kibiState.getEntityURI(),
-                  queryid: id,
-                  negate: queryDef.negate ? true : false,
-                  queryVariableName: queryDef.queryVariableName,
-                  path: queryDef.joinElasticsearchField
-                }
+              const dbfilter = {
+                queryid: id,
+                negate: queryDef.negate ? true : false,
+                queryVariableName: queryDef.queryVariableName,
+                path: queryDef.joinElasticsearchField
               };
+              if (kibiState.isSelectedEntityDisabled()) {
+                dbfilter.entity = kibiState.getEntityURI();
+              }
+              json[label] = { dbfilter };
             }
           });
           params.filters = json;

@@ -1,3 +1,4 @@
+import { QUERY_DEACTIVATED } from './_symbols';
 import url    from 'url';
 import Promise from 'bluebird';
 import QueryHelper from './query_helper';
@@ -9,23 +10,11 @@ function RulesHelper(server) {
 RulesHelper.prototype.evaluate = function (rules, selectedDocuments, credentials) {
   const self = this;
   // for now there should be only 1 selectedDocument
-  if (selectedDocuments.length !== 1) {
+  if (selectedDocuments.length > 1) {
     return Promise.reject(new Error('RulesHelper supports only 1 selected document at the moment'));
   }
 
-  if (selectedDocuments[0] === '') {
-    return Promise.reject(new Error('Empty selected document uri'));
-  }
-
-  const uri = selectedDocuments[0];
-  const parts = uri.trim().split('/');
-  if (parts.length < 3) {
-    return Promise.reject(new Error('Malformed uri - should have at least 3 parts: index, type, id'));
-  }
-
-  const index = parts[0];
-  const type = parts[1];
-  const id = parts[2];
+  const { index, type, id } = selectedDocuments[0];
 
   return self.queryHelper.fetchDocument(index, type, id, credentials).then(function (doc) {
 
@@ -36,7 +25,7 @@ RulesHelper.prototype.evaluate = function (rules, selectedDocuments, credentials
 
       let regex = /^@doc\[.+?\]@$/;
       if (!regex.test(rule.s)) {
-        return false;
+        return QUERY_DEACTIVATED;
       }
 
       let propertyGroup = rule.s.replace('@doc', '');

@@ -1,3 +1,4 @@
+import { SELECTED_DOCUMENT_NEEDED, QUERY_RELEVANT, QUERY_DEACTIVATED } from '../_symbols';
 import logger from '../logger';
 import _ from 'lodash';
 import Promise from 'bluebird';
@@ -116,44 +117,44 @@ SQLiteQuery.prototype.checkIfItIsRelevant = function (options) {
 
   if (self._checkIfSelectedDocumentRequiredAndNotPresent(options)) {
     self.logger.warn('No elasticsearch document selected while required by the sqlite query. [' + self.config.id + ']');
-    return Promise.resolve(false);
+    return Promise.resolve(SELECTED_DOCUMENT_NEEDED);
   }
-  const uri = options.selectedDocuments && options.selectedDocuments.length > 0 ? options.selectedDocuments[0] : '';
 
   const dbfile = this.config.datasource.datasourceClazz.datasource.datasourceParams.db_file_path;
   const maxAge = this.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
   const cacheEnabled = this.config.datasource.datasourceClazz.datasource.datasourceParams.cache_enabled;
 
   if (!this.config.activationQuery) {
-    return Promise.resolve(true);
+    return Promise.resolve(QUERY_RELEVANT);
   }
-  return self.queryHelper.replaceVariablesUsingEsDocument(this.config.activationQuery, uri, options.credentials).then(function (query) {
+  return self.queryHelper.replaceVariablesUsingEsDocument(this.config.activationQuery, options)
+  .then(function (query) {
 
     if (query.trim() === '') {
-      return Promise.resolve(true);
+      // TODO is this check necessary ? it seems the previous condition is enough
+      return Promise.resolve(QUERY_RELEVANT);
     }
 
     let cacheKey = null;
     if (self.cache && cacheEnabled) {
       cacheKey = self.generateCacheKey(dbfile, query, self._getUsername(options));
       const v = self.cache.get(cacheKey);
-      if (v) {
+      if (v !== undefined) {
         return Promise.resolve(v);
       }
     }
 
     return self._executeQuery(query).then(function (results) {
-      const data = results.length > 0;
+      const isRelevant = results.length > 0 ? QUERY_RELEVANT : QUERY_DEACTIVATED;
 
       if (self.cache && cacheEnabled) {
-        self.cache.set(cacheKey, data, maxAge);
+        self.cache.set(cacheKey, isRelevant, maxAge);
       }
 
-      return data;
+      return isRelevant;
     });
   });
 };
-
 
 /**
  * Executes the query.
@@ -162,14 +163,12 @@ SQLiteQuery.prototype.fetchResults = function (options, onlyIds, idVariableName)
   const start = new Date().getTime();
   const self = this;
 
-  // currently we use only single selected document
-  const uri = options.selectedDocuments && options.selectedDocuments.length > 0 ? options.selectedDocuments[0] : '';
-
   const dbfile = this.config.datasource.datasourceClazz.datasource.datasourceParams.db_file_path;
   const maxAge = this.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
   const cacheEnabled = this.config.datasource.datasourceClazz.datasource.datasourceParams.cache_enabled;
 
-  return self.queryHelper.replaceVariablesUsingEsDocument(this.config.resultQuery, uri, options.credentials).then(function (query) {
+  return self.queryHelper.replaceVariablesUsingEsDocument(this.config.resultQuery, options)
+  .then(function (query) {
 
     let cacheKey = null;
     if (self.cache && cacheEnabled) {
@@ -181,8 +180,8 @@ SQLiteQuery.prototype.fetchResults = function (options, onlyIds, idVariableName)
       }
     }
 
-    return self._executeQuery(query).then(function (rows) {
-
+    return self._executeQuery(query)
+    .then(function (rows) {
       const data = {
         ids: [],
         queryActivated: true
@@ -245,7 +244,6 @@ SQLiteQuery.prototype.fetchResults = function (options, onlyIds, idVariableName)
 SQLiteQuery.prototype._postprocessResults = function (data) {
   return data;
 };
-
 
 SQLiteQuery.prototype._augmentError = function (error) {
   if (error.message) {

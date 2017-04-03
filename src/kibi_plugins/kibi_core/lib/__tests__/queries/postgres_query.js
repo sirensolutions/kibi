@@ -1,6 +1,7 @@
+import { SELECTED_DOCUMENT_NEEDED, QUERY_RELEVANT, QUERY_DEACTIVATED } from '../../_symbols';
 import Promise from 'bluebird';
 import expect from 'expect.js';
-import sinon from 'sinon';
+import sinon from 'auto-release-sinon';
 import PostgresQuery from '../../queries/postgres_query';
 
 const fakeServer = {
@@ -35,7 +36,7 @@ const fakeServer = {
 };
 
 const cacheMock = {
-  get: function (key) { return '';},
+  get: function (key) { return; },
   set: function (key, value, time) {}
 };
 
@@ -63,46 +64,34 @@ describe('PostgresQuery', function () {
 
   describe('correct arguments are passed to generateCacheKey', function () {
 
-    it('fetchResults', function (done) {
+    it('fetchResults', function () {
       const postgresQuery = new PostgresQuery(fakeServer, queryDefinition, cacheMock);
       // stub _execute queryto skip query execution
       sinon.stub(postgresQuery, '_executeQuery', function () {
         return Promise.resolve({fields: [], rows: []});
       });
 
-      const spy = sinon.spy(postgresQuery, 'generateCacheKey');
+      const generateCacheKeySpy = sinon.spy(postgresQuery, 'generateCacheKey');
 
-      postgresQuery.fetchResults({credentials: {username: 'fred'}}, false, 'variableX').then(function (res) {
+      return postgresQuery.fetchResults({credentials: {username: 'fred'}}, false, 'variableX').then(function (res) {
         expect(res.results).to.eql({ bindings: []});
-        expect(spy.callCount).to.equal(1);
-
-        expect(spy.calledWithExactly('localhostmydb', 'select * from x', false, 'variableX', 'fred')).to.be.ok();
-
-        postgresQuery._executeQuery.restore();
-        postgresQuery.generateCacheKey.restore();
-        done();
-      }).catch(done);
+        sinon.assert.calledOnce(generateCacheKeySpy);
+        sinon.assert.calledWithExactly(generateCacheKeySpy, 'localhostmydb', 'select * from x', false, 'variableX', 'fred');
+      });
     });
 
-    it('checkIfItIsRelevant', function (done) {
+    it('checkIfItIsRelevant', function () {
       const postgresQuery = new PostgresQuery(fakeServer, queryDefinition, cacheMock);
       // stub _execute queryto skip query execution
-      sinon.stub(postgresQuery, '_executeQuery', function () {
-        return Promise.resolve({fields: [], rows: []});
+      sinon.stub(postgresQuery, '_executeQuery').returns(Promise.resolve({fields: [], rows: []}));
+
+      const generateCacheKeySpy = sinon.spy(postgresQuery, 'generateCacheKey');
+
+      return postgresQuery.checkIfItIsRelevant({credentials: {username: 'fred'}}).then(function (res) {
+        expect(res).to.equal(QUERY_DEACTIVATED);
+        sinon.assert.calledOnce(generateCacheKeySpy);
+        sinon.assert.calledWithExactly(generateCacheKeySpy, 'localhostmydb', 'select * from x LIMIT 1', 'fred');
       });
-
-      const spy = sinon.spy(postgresQuery, 'generateCacheKey');
-
-      postgresQuery.checkIfItIsRelevant({credentials: {username: 'fred'}}).then(function (res) {
-        expect(res).to.equal(false);
-        expect(spy.callCount).to.equal(1);
-
-        expect(spy.calledWithExactly('localhostmydb', 'select * from x LIMIT 1', 'fred')).to.be.ok();
-
-        postgresQuery._executeQuery.restore();
-        postgresQuery.generateCacheKey.restore();
-        done();
-      }).catch(done);
     });
 
   });

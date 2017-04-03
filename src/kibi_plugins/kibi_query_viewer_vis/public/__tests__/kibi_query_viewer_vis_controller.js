@@ -6,7 +6,7 @@ import expect from 'expect.js';
 describe('Kibi Controllers', function () {
   let $scope;
 
-  function init(options) {
+  function init({ snippet, snippetError, params = {} } = {}) {
     ngMock.module('kibana', function ($provide) {
       $provide.constant('kbnDefaultAppId', '');
       $provide.constant('kibiDefaultDashboardTitle', '');
@@ -24,8 +24,8 @@ describe('Kibi Controllers', function () {
           getQueriesHtmlFromServer: function () {
             const resp = {
               data: {
-                snippets: options.snippet ? [ options.snippet ] : [],
-                error: options.snippetError
+                snippets: snippet ? [ snippet ] : [],
+                error: snippetError
               }
             };
             return Promise.resolve(resp);
@@ -35,11 +35,9 @@ describe('Kibi Controllers', function () {
     });
 
     ngMock.inject(function (kibiState, $rootScope, $controller) {
-      sinon.stub(kibiState, 'getEntityURI').returns('entity1');
+      sinon.stub(kibiState, 'getEntityURI').returns({ index: 'a', type: 'b', id: 'c' });
       $scope = $rootScope;
-      $scope.vis = {
-        params: options.params
-      };
+      $scope.vis = { params };
       $controller('KibiQueryViewerVisController', { $scope });
       $scope.$digest();
     });
@@ -47,28 +45,25 @@ describe('Kibi Controllers', function () {
 
   describe('Kibi query viewer controller', function () {
     it('should not render templates if no query is set', function () {
-      const params = {};
-
-      init({ params: params });
+      init();
       $scope.renderTemplates();
       expect($scope.holder.html).to.be('');
       expect($scope.holder.activeFetch).to.be(false);
     });
 
-    it('should display no result', function (done) {
+    it('should display no result', function () {
       const params = {
         queryDefinitions: [ 123 ]
       };
 
-      init({ params: params });
-      $scope.renderTemplates().then(function () {
+      init({ params });
+      return $scope.renderTemplates().then(function () {
         expect($scope.holder.html).to.be('No result');
         expect($scope.holder.activeFetch).to.be(false);
-        done();
-      }).catch(done);
+      });
     });
 
-    it('should display the template', function (done) {
+    it('should display the template', function () {
       const params = {
         queryDefinitions: [
           {
@@ -85,15 +80,14 @@ describe('Kibi Controllers', function () {
         }
       };
 
-      init({ params: params, snippet: snippet });
-      $scope.renderTemplates().then(function () {
+      init({ params, snippet });
+      return $scope.renderTemplates().then(function () {
         expect($scope.holder.html).to.contain('grishka');
         expect($scope.holder.activeFetch).to.be(false);
-        done();
-      }).catch(done);
+      });
     });
 
-    it('should warn that the query is not activated', function (done) {
+    it('should warn that the query is not activated', function () {
       const params = {
         queryDefinitions: [
           {
@@ -102,15 +96,15 @@ describe('Kibi Controllers', function () {
         ]
       };
       const snippet = {
-        queryActivated: false
+        queryActivated: false,
+        html: 'No query template is triggered now. Select a document?'
       };
 
-      init({ params: params, snippet: snippet });
-      $scope.renderTemplates().then(function () {
+      init({ params, snippet });
+      return $scope.renderTemplates().then(function () {
         expect($scope.holder.html).to.contain('No query template is triggered now. Select a document?');
         expect($scope.holder.activeFetch).to.be(false);
-        done();
-      }).catch(done);
+      });
     });
   });
 });

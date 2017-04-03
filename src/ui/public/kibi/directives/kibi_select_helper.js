@@ -108,6 +108,7 @@ export default function KibiSelectHelperFactory(config, indexPatterns, Private, 
     return es.search({
       index: indexPath(indexPatternId),
       type: indexPatternType,
+      _source: false,
       size: 10
     }).then(function (response) {
       const ids = [];

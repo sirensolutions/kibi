@@ -8,8 +8,6 @@ import handlebars from 'handlebars';
 import jade from 'jade';
 import kibiUtils from 'kibiutils';
 
-const debug = false;
-
 handlebars.registerHelper('json', function (context) {
   return JSON.stringify(context);
 });
@@ -78,9 +76,8 @@ Query.prototype._checkIfSelectedDocumentRequiredAndNotPresent = function (option
   const isEntityDependent = kibiUtils.doesQueryDependOnEntity([ this.config ]);
 
   return isEntityDependent &&
-    (!options || !options.selectedDocuments || options.selectedDocuments.length === 0 || options.selectedDocuments[0] === '');
+    (!options || !options.selectedDocuments || options.selectedDocuments.length === 0 || !options.selectedDocuments[0]);
 };
-
 
 Query.prototype._extractIdsFromSql = function (rows, idVariableName) {
   const ids = [];
@@ -100,7 +97,6 @@ Query.prototype._extractIdsFromSql = function (rows, idVariableName) {
   });
   return _.uniq(ids);
 };
-
 
 Query.prototype._returnAnEmptyQueryResultsPromise = function (message) {
   const self = this;
@@ -148,7 +144,8 @@ Query.prototype.getHtml = function (queryDef, options) {
   const that = this;
 
   // first run fetch results
-  return that.fetchResults(options, null, queryDef.queryVariableName).then(function (data) {
+  return that.fetchResults(options, null, queryDef.queryVariableName)
+  .then(function (data) {
     // here take the results and compile the result template
 
     // here if there is a prefix replace it in values when they are uris
@@ -208,6 +205,18 @@ Query.prototype.getHtml = function (queryDef, options) {
         data: data
       });
     });
+  })
+  .catch(err => {
+    // do not reject so that data from other successful queries can be displayed
+    that.log.error(err);
+    return Promise.resolve({
+      error: err,
+      data: {
+        config: {
+          id: that.id
+        }
+      }
+    });
   });
 };
 
@@ -229,6 +238,5 @@ Query.prototype.fetchResults = function (options, onlyIds, idVariableName) {
 Query.prototype._postprocessResults = function (data) {
   throw 'Must be implemented by subclass';
 };
-
 
 module.exports = Query;

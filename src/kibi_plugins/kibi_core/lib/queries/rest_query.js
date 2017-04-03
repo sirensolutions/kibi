@@ -1,3 +1,4 @@
+import { SELECTED_DOCUMENT_NEEDED, QUERY_RELEVANT, QUERY_DEACTIVATED } from '../_symbols';
 import _ from 'lodash';
 import Promise from 'bluebird';
 import url from 'url';
@@ -25,21 +26,22 @@ RestQuery.prototype = _.create(AbstractQuery.prototype, {
 RestQuery.prototype.checkIfItIsRelevant = function (options) {
   if (this._checkIfSelectedDocumentRequiredAndNotPresent(options)) {
     this.logger.warn('No elasticsearch document selected while required by the REST query. [' + this.config.id + ']');
-    return Promise.resolve(false);
+    return Promise.resolve(SELECTED_DOCUMENT_NEEDED);
   }
 
   // no document selected there is nothing to check against
   if (!options.selectedDocuments || options.selectedDocuments.length === 0) {
-    return Promise.resolve(true);
+    return Promise.resolve(QUERY_RELEVANT);
   }
 
   // empty rules - let it go
   if (this.config.activation_rules.length === 0) {
-    return Promise.resolve(true);
+    return Promise.resolve(QUERY_RELEVANT);
   }
 
   // evaluate the rules
-  return this.rulesHelper.evaluate(this.config.activation_rules, options.selectedDocuments, options.credentials);
+  return this.rulesHelper.evaluate(this.config.activation_rules, options.selectedDocuments, options.credentials)
+  .then(res => res ? QUERY_RELEVANT : QUERY_DEACTIVATED);
 };
 
 RestQuery.prototype._logFailedRequestDetails = function (msg, originalError, resp) {
@@ -62,9 +64,6 @@ const mergeObjects = function (dest, sourceObject, sourcePath) {
 
 RestQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) {
   const self = this;
-
-  // currently we use only single selected document
-  const uri = options.selectedDocuments && options.selectedDocuments.length > 0 ? options.selectedDocuments[0] : '';
 
   const urlS = this.config.datasource.datasourceClazz.datasource.datasourceParams.url;
   const timeout = this.config.datasource.datasourceClazz.datasource.datasourceParams.timeout;
@@ -115,9 +114,9 @@ RestQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) {
       mergedParams,
       self.config.rest_body,
       self.config.rest_path,
-      uri, availableVariables,
-      options.credentials)
-    .then(function (results) {
+      options,
+      availableVariables
+    ).then(function (results) {
       // here convert the params and headers from array to map
       const headers = _.zipObject(_.pluck(results.headers, 'name'), _.pluck(results.headers, 'value'));
       const params = _.zipObject(_.pluck(results.params, 'name'), _.pluck(results.params, 'value'));

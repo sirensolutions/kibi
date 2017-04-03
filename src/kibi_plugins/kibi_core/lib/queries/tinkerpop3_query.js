@@ -1,3 +1,4 @@
+import { SELECTED_DOCUMENT_NEEDED, QUERY_RELEVANT } from '../_symbols';
 import _ from 'lodash';
 import fs from 'fs';
 import Promise from 'bluebird';
@@ -22,12 +23,12 @@ TinkerPop3Query.prototype = _.create(AbstractQuery.prototype, {
  */
 TinkerPop3Query.prototype.checkIfItIsRelevant = function (options) {
   if (this._checkIfSelectedDocumentRequiredAndNotPresent(options)) {
-    return Promise.reject('No elasticsearch document selected while required by the tinkerpop query. [' + this.config.id + ']');
+    self.logger.warn('No elasticsearch document selected while required by the tinkerpop query. [' + this.config.id + ']');
+    return Promise.resolve(SELECTED_DOCUMENT_NEEDED);
   }
 
-  return Promise.resolve(true);
+  return Promise.resolve(QUERY_RELEVANT);
 };
-
 
 TinkerPop3Query.prototype.fetchResults = function (options, onlyIds, idVariableName) {
   const self = this;
@@ -48,9 +49,7 @@ TinkerPop3Query.prototype.fetchResults = function (options, onlyIds, idVariableN
   }
   timeout = parsedTimeout;
 
-  const uri = options.selectedDocuments && options.selectedDocuments.length > 0 ? options.selectedDocuments[0] : '';
-
-  return self.queryHelper.replaceVariablesUsingEsDocument(self.config.resultQuery, uri, options.credentials, 'tinkerpop3_query')
+  return self.queryHelper.replaceVariablesUsingEsDocument(self.config.resultQuery, options, 'tinkerpop3_query')
   .then(function (query) {
 
     let cacheKey;

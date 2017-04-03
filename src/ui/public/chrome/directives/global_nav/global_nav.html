@@ -7,6 +7,7 @@
   <!-- Logo -->
   <div class="global-nav__logo">
     <!-- kibi changed class from kibana to kibi -->
+    <!-- siren: click event. Opens a new clean (no cache) tab with Kibi. -->
     <li
       ng-if="!logoBrand && !smallLogoBrand"
       ng-click="chrome.openKibiOnNewCleanTab()"
@@ -14,6 +15,7 @@
       class="logo kibi"
     ></li>
 
+    <!-- siren: click event. Opens a new clean (no cache) tab with Kibi. -->
     <li
       ng-if="logoBrand"
       ng-click="chrome.openKibiOnNewCleanTab()"
@@ -22,6 +24,7 @@
       class="logo hidden-sm"
     ></li>
 
+    <!-- siren: click event. Opens a new clean (no cache) tab with Kibi. -->
     <li
       ng-if="smallLogoBrand"
       ng-click="chrome.openKibiOnNewCleanTab()"

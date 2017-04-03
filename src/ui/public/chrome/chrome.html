@@ -26,7 +26,7 @@
       <ul class="nav navbar-nav kibi-fill-1" role="navigation">
         <li
           ng-if="chrome.getBrand('logo')"
-          ng-click="chrome.openKibiOnNewCleanTab(true)"
+          ng-click="chrome.openKibiOnNewCleanTab()"
           ng-style="chrome.getApp().id != 'kibana' ? { 'background': chrome.getBrand('logo') } : ''"
           aria-label="{{ chrome.getAppTitle() }} Logo"
           class="logo hidden-sm"
@@ -34,7 +34,7 @@
 
         <li
           ng-if="chrome.getBrand('smallLogo')"
-          ng-click="chrome.openKibiOnNewCleanTab(true)"
+          ng-click="chrome.openKibiOnNewCleanTab()"
           ng-style="chrome.getApp().id != 'kibana' ? { 'background': chrome.getBrand('smallLogo') } :''"
           aria-label="{{ chrome.getAppTitle() }} Logo"
           class="logo-small visible-sm hidden-xs"

@@ -100,6 +100,8 @@
           Embedded iframe
         </div>
         <div class="kuiLocalDropdownHeader__actions">
+          <!--
+          siren: removed
           <a
             class="kuiLocalDropdownHeader__action"
             ng-if="!share.urlFlags.shortSnapshotIframe"
@@ -115,7 +117,7 @@
           >
             Long URL
           </a>
-
+          -->
           <a
             class="kuiLocalDropdownHeader__action"
             ng-click="share.copyToClipboard('#snapshotIframeUrl')"
@@ -131,7 +133,59 @@
         class="kuiLocalDropdownInput"
         type="text"
         readonly
-        value="{{share.urlFlags.shortSnapshotIframe ? share.makeIframeTag(share.urls.shortSnapshotIframe) : share.makeIframeTag(share.urls.snapshot)}}"
+        value="{{share.urlFlags.shortSnapshotIframe ? share.makeIframeTag(share.urls.shortSnapshot) : share.makeIframeTag(share.urls.snapshot)}}"
+      />
+
+      <!-- Notes -->
+      <!-- siren: removed
+      <div class="kuiLocalDropdownFormNote">
+        Add to your HTML source. Note that all clients must be able to access Kibana.
+      </div>
+      -->
+    </div>
+
+    <!-- iframe -->
+    <div class="kuiLocalDropdownSection" ng-if="share.allowEmbed">
+      <!-- Header -->
+      <div class="kuiLocalDropdownHeader">
+        <div class="kuiLocalDropdownHeader__label">
+          Embedded iframe - all dashboards
+        </div>
+        <div class="kuiLocalDropdownHeader__actions">
+          <!--
+          siren: removed
+          <a
+            class="kuiLocalDropdownHeader__action"
+            ng-if="!share.urlFlags.shortSnapshotIframe2"
+            ng-click="share.toggleShortSnapshotIframeUrl()"
+          >
+            Short URL
+          </a>
+
+          <a
+            class="kuiLocalDropdownHeader__action"
+            ng-if="share.urlFlags.shortSnapshotIframe2"
+            ng-click="share.toggleShortSnapshotIframeUrl()"
+          >
+            Long URL
+          </a>
+          -->
+          <a
+            class="kuiLocalDropdownHeader__action"
+            ng-click="share.copyToClipboard('#snapshotIframeUrl2')"
+          >
+            Copy
+          </a>
+        </div>
+      </div>
+
+      <!-- Input -->
+      <input
+        id="snapshotIframeUrl2"
+        class="kuiLocalDropdownInput"
+        type="text"
+        readonly
+        value="{{share.urlFlags.shortSnapshotIframe2 ? share.makeIframeTag(share.urls.shortSnapshot, true) : share.makeIframeTag(share.urls.snapshot, true)}}"
       />
 
       <!-- Notes -->
@@ -148,6 +202,8 @@
           Link
         </div>
         <div class="kuiLocalDropdownHeader__actions">
+          <!--
+          siren: removed
           <a
             data-test-subj="sharedSnapshotShortUrlButton"
             class="kuiLocalDropdownHeader__action"
@@ -164,7 +220,7 @@
           >
             Long URL
           </a>
-
+          -->
           <a
             data-test-subj="sharedSnapshotCopyButton"
             class="kuiLocalDropdownHeader__action"
@@ -186,9 +242,11 @@
       />
 
       <!-- Notes -->
+      <!-- siren: removed us as we are shortenning urls by default
       <div class="kuiLocalDropdownFormNote">
         We recommend sharing shortened snapshot URLs for maximum compatibility. Internet Explorer has URL length restrictions, and some wiki and markup parsers don't do well with the full-length version of the snapshot URL, but the short URL should work great.
       </div>
+      -->
     </div>
   </div>
 </div>

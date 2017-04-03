@@ -99,20 +99,6 @@ bdd.describe('shared links', function describeIndexTests() {
       });
     });
 
-    // TODO: verify clipboard contents
-    bdd.it('shorten URL button should produce a short URL', function () {
-      const re = new RegExp(baseUrl + '/goto/[0-9a-f]{32}$');
-      return PageObjects.discover.clickShortenUrl()
-      .then(function () {
-        return PageObjects.common.try(function tryingForTime() {
-          PageObjects.common.saveScreenshot('Discover-shorten-url-button');
-          return PageObjects.discover.getSharedUrl()
-          .then(function (actualUrl) {
-            expect(actualUrl).to.match(re);
-          });
-        });
-      });
-    });
 
     // NOTE: This test has to run immediately after the test above
     bdd.it('should show toast message for copy to clipboard', function () {

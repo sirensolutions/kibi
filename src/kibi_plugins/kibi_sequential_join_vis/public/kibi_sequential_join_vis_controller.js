@@ -170,10 +170,28 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
     }
 
     if (!edit) {
-      return kibiState._getDashboardAndSavedSearchMetas([currentDashboardId]).then(([ { savedDash, savedSearchMeta } ]) => {
-        const currentDashboardIndex = savedSearchMeta.index;
-        const currentDashboardId = savedDash.id;
-        const buttons = kibiSequentialJoinVisHelper.constructButtonsArray(buttonsDefs, currentDashboardIndex, currentDashboardId);
+      const dashboardIds = [currentDashboardId];
+      _.each(buttonsDefs, function (button) {
+        if (!_.contains(dashboardIds, button.targetDashboardId)) {
+          dashboardIds.push(button.targetDashboardId);
+        }
+      });
+      return kibiState._getDashboardAndSavedSearchMetas(dashboardIds, true)
+      .then((metas) => {
+        let currentDashboardIndex = '';
+        const dashboardIdIndexPair = new Map();
+        for (let i = 0; i < metas.length; i++) {
+          if (metas[i].savedSearchMeta !== null) {
+            dashboardIdIndexPair.set(metas[i].savedDash.id, metas[i].savedSearchMeta.index);
+          } else {
+            dashboardIdIndexPair.set(metas[i].savedDash.id, null);
+          }
+          if (metas[i].savedDash.id === currentDashboardId) {
+            currentDashboardIndex = metas[i].savedSearchMeta.index;
+          }
+        }
+        const buttons = kibiSequentialJoinVisHelper.constructButtonsArray(buttonsDefs, currentDashboardIndex,
+                                                                           currentDashboardId, dashboardIdIndexPair);
         // retain the buttons order
         for (let i = 0; i < buttons.length; i++) {
           buttons[i].btnIndex = i;

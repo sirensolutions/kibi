@@ -79,12 +79,15 @@ define(function (require) {
 
     DashboardGroupHelper.prototype.constructFilterIconMessage = function (filters, queries) {
       if (queries || filters) {
-        if (queries.length > 1 && filters.length !== 0) {
-          return 'This dashboard has a query and ' + filters.length + ' filter' + (filters.length > 1 ? 's' : '') + ' set.';
-        } else if (queries.length > 1) {
+        const nFilters = _.reject(filters, 'meta.fromSavedSearch').length;
+        const hasQuery = !kibiState._isDefaultQuery(queries[0]);
+
+        if (hasQuery && nFilters) {
+          return `This dashboard has a query and ${nFilters} filter${nFilters > 1 ? 's' : ''} set.`;
+        } else if (hasQuery) {
           return 'This dashboard has a query set.';
-        } else if (filters.length !== 0) {
-          return 'This dashboard has ' + filters.length + ' filter' + (filters.length > 1 ? 's' : '') + ' set.';
+        } else if (nFilters) {
+          return `This dashboard has ${nFilters} filter${nFilters > 1 ? 's' : ''} set.`;
         }
       }
       return null;

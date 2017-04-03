@@ -543,6 +543,9 @@ define(function (require) {
       }
       const smFilters = metas && metas.savedSearchMeta && metas.savedSearchMeta.filter;
       if (smFilters) {
+        _.each(smFilters, filter => {
+          filter.meta.fromSavedSearch = true;
+        });
         filters.push(...smFilters);
       }
       // remove disabled filters

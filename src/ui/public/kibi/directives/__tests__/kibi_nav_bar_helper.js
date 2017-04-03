@@ -24,9 +24,11 @@ describe('Kibi Directives', function () {
 
     function getDefaultQuery() {
       return {
-        query_string: {
-          query: '*',
-          analyze_wildcard: true
+        query: {
+          query_string: {
+            query: '*',
+            analyze_wildcard: true
+          }
         }
       };
     }

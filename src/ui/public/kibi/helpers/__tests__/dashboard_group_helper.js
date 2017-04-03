@@ -320,7 +320,7 @@ describe('Kibi Components', function () {
     });
 
     describe('filter icon message', function () {
-      beforeEach(() => init({
+      beforeEach(init({
         currentDashboardId: 'myDashboard',
         indexPatterns: [
           {
@@ -377,7 +377,7 @@ describe('Kibi Components', function () {
         });
 
         dashboardGroupHelper.getDashboardsMetadata([dashboardId]).then(function (metas) {
-          expectations(metas);
+          expectations(dashboardGroupHelper.constructFilterIconMessage(metas[0].filters, metas[0].queries));
           done();
         }).catch(done);
 
@@ -387,17 +387,15 @@ describe('Kibi Components', function () {
       };
 
       it('should be null if there is no query nor filters', function (done) {
-        executeTest(done, 'myDashboard', function (metas) {
-          expect(metas).to.have.length(1);
-          expect(metas[0].filterIconMessage).to.equal(null);
+        executeTest(done, 'myDashboard', function (filterIconMessage) {
+          expect(filterIconMessage).to.equal(null);
         });
       });
 
       it('should say there is 1 filter', function (done) {
         appState.filters = [ { meta: { disabled: false } } ];
-        executeTest(done, 'myDashboard', function (metas) {
-          expect(metas).to.have.length(1);
-          expect(metas[0].filterIconMessage).to.equal('This dashboard has 1 filter set.');
+        executeTest(done, 'myDashboard', function (filterIconMessage) {
+          expect(filterIconMessage).to.equal('This dashboard has 1 filter set.');
         });
       });
 
@@ -408,9 +406,8 @@ describe('Kibi Components', function () {
             analyze_wildcard: true
           }
         };
-        executeTest(done, 'myDashboard', function (metas) {
-          expect(metas).to.have.length(1);
-          expect(metas[0].filterIconMessage).to.equal(null);
+        executeTest(done, 'myDashboard', function (filterIconMessage) {
+          expect(filterIconMessage).to.equal(null);
         });
       });
 
@@ -421,9 +418,8 @@ describe('Kibi Components', function () {
             analyze_wildcard: true
           }
         };
-        executeTest(done, 'myDashboard', function (metas) {
-          expect(metas).to.have.length(1);
-          expect(metas[0].filterIconMessage).to.equal('This dashboard has a query set.');
+        executeTest(done, 'myDashboard', function (filterIconMessage) {
+          expect(filterIconMessage).to.equal('This dashboard has a query set.');
         });
       });
 
@@ -435,9 +431,8 @@ describe('Kibi Components', function () {
           }
         };
         appState.filters = [ { meta: { disabled: false } } ];
-        executeTest(done, 'myDashboard', function (metas) {
-          expect(metas).to.have.length(1);
-          expect(metas[0].filterIconMessage).to.equal('This dashboard has a query and 1 filter set.');
+        executeTest(done, 'myDashboard', function (filterIconMessage) {
+          expect(filterIconMessage).to.equal('This dashboard has a query and 1 filter set.');
         });
       });
 
@@ -449,9 +444,8 @@ describe('Kibi Components', function () {
           }
         };
         appState.filters = [ { a: {}, meta: { disabled: false } }, { b: {}, meta: { disabled: false } } ];
-        executeTest(done, 'myDashboard', function (metas) {
-          expect(metas).to.have.length(1);
-          expect(metas[0].filterIconMessage).to.equal('This dashboard has a query and 2 filters set.');
+        executeTest(done, 'myDashboard', function (filterIconMessage) {
+          expect(filterIconMessage).to.equal('This dashboard has a query and 2 filters set.');
         });
       });
     });

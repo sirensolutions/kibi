@@ -135,10 +135,9 @@ describe('Kibi Components', function () {
             indexRelationId: 'ic//fc/id//fd'
           }
         ];
-        const dashboardIdIndexPair = {
-          dashboardA: 'ia',
-          dashboardB: 'ib'
-        };
+        const dashboardIdIndexPair = new Map();
+        dashboardIdIndexPair.set('dashboardA', 'ia');
+        dashboardIdIndexPair.set('dashboardB', 'ib');
 
         const index = 'ia';
         const currentDashboardId = 'dashboardA';
@@ -166,11 +165,10 @@ describe('Kibi Components', function () {
             indexRelationId: 'ia//fa/ib//fb'
           }
         ];
-        const dashboardIdIndexPair = {
-          dashboardA: 'ia',
-          dashboardB: 'ib',
-          dashboardC: 'ia'
-        };
+        const dashboardIdIndexPair = new Map();
+        dashboardIdIndexPair.set('dashboardA', 'ia');
+        dashboardIdIndexPair.set('dashboardB', 'ib');
+        dashboardIdIndexPair.set('dashboardC', 'ia');
 
         const index = 'ia';
         const currentDashboardId = 'dashboardC';
@@ -198,11 +196,10 @@ describe('Kibi Components', function () {
             indexRelationId: 'ib//fb/ia//fa'
           }
         ];
-        const dashboardIdIndexPair = {
-          dashboardA: 'ia',
-          dashboardB: 'ib',
-          dashboardC: 'ia'
-        };
+        const dashboardIdIndexPair = new Map();
+        dashboardIdIndexPair.set('dashboardA', 'ia');
+        dashboardIdIndexPair.set('dashboardB', 'ib');
+        dashboardIdIndexPair.set('dashboardC', 'ia');
 
         const index = 'ia';
         const currentDashboardId = 'dashboardC';

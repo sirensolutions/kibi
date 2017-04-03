@@ -169,7 +169,7 @@
 
     "requirefrom": "0.2.1",
     "ng-tags-input": "3.0.0",
-    "antlr4": "^4.5.2",
+    "antlr4": "4.5.2",
     "antlr4-javascript-sparql": "sirensolutions/antlr4-javascript-sparql#1.0.8",
     "antlr4-javascript-sql": "sirensolutions/antlr4-javascript-sql#1.0.3",
     "qtip2": "3.0.2",

@@ -96,7 +96,8 @@ describe('Kibi Controllers', function () {
         ]
       };
       const snippet = {
-        queryActivated: false
+        queryActivated: false,
+        html: 'No query template is triggered now. Select a document?'
       };
 
       init({ params, snippet });

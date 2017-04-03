@@ -29,11 +29,11 @@ export default function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnU
         return relationInfo.source.index === relationInfo.target.index;
       }
       if (dashboardIdIndexPair && currentDashboardIndexId === relationInfo.source.index &&
-          dashboardIdIndexPair[buttonDef.targetDashboardId] !== relationInfo.target.index) {
+          dashboardIdIndexPair.get(buttonDef.targetDashboardId) !== relationInfo.target.index) {
         return false;
       }
       if (dashboardIdIndexPair && currentDashboardIndexId === relationInfo.target.index &&
-         dashboardIdIndexPair[buttonDef.targetDashboardId] !== relationInfo.source.index) {
+         dashboardIdIndexPair.get(buttonDef.targetDashboardId) !== relationInfo.source.index) {
         return false;
       }
       return true;

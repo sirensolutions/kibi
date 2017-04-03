@@ -152,15 +152,21 @@ function controller(getAppState, kibiState, $scope, $rootScope, Private, $http, 
     }
 
     if (!edit) {
-      return kibiState._getDashboardAndSavedSearchMetas(null, true)
+      const dashboardIds = [currentDashboardId];
+      _.each(buttonsDefs, function (button) {
+        if (!_.contains(dashboardIds, button.targetDashboardId)) {
+          dashboardIds.push(button.targetDashboardId);
+        }
+      });
+      return kibiState._getDashboardAndSavedSearchMetas(dashboardIds, true)
       .then((metas) => {
         let currentDashboardIndex = '';
-        const dashboardIdIndexPair = {};
+        const dashboardIdIndexPair = new Map();
         for (let i = 0; i < metas.length; i++) {
           if (metas[i].savedSearchMeta !== null) {
-            dashboardIdIndexPair[metas[i].savedDash.id] = metas[i].savedSearchMeta.index;
+            dashboardIdIndexPair.set(metas[i].savedDash.id, metas[i].savedSearchMeta.index);
           } else {
-            dashboardIdIndexPair[metas[i].savedDash.id] = null;
+            dashboardIdIndexPair.set(metas[i].savedDash.id, null);
           }
           if (metas[i].savedDash.id === currentDashboardId) {
             currentDashboardIndex = metas[i].savedSearchMeta.index;

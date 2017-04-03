@@ -1,3 +1,4 @@
+import { SELECTED_DOCUMENT_NEEDED, QUERY_RELEVANT, QUERY_DEACTIVATED } from '../../_symbols';
 import Promise from 'bluebird';
 import expect from 'expect.js';
 import sinon from 'auto-release-sinon';
@@ -88,7 +89,7 @@ describe('MysqlQuery', function () {
 
       return mysqlQuery.checkIfItIsRelevant({credentials: {username: 'fred'}})
       .then(function (res) {
-        expect(res).to.equal(Symbol.for('query should be deactivated'));
+        expect(res).to.equal(QUERY_DEACTIVATED);
         sinon.assert.calledOnce(generateCacheKeySpy);
         sinon.assert.calledWithExactly(generateCacheKeySpy, 'localhostmydb', 'select * from x LIMIT 1', 'fred');
       });

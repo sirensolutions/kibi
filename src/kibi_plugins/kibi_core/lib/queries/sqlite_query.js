@@ -1,3 +1,4 @@
+import { SELECTED_DOCUMENT_NEEDED, QUERY_RELEVANT, QUERY_DEACTIVATED } from '../_symbols';
 import logger from '../logger';
 import _ from 'lodash';
 import Promise from 'bluebird';
@@ -116,7 +117,7 @@ SQLiteQuery.prototype.checkIfItIsRelevant = function (options) {
 
   if (self._checkIfSelectedDocumentRequiredAndNotPresent(options)) {
     self.logger.warn('No elasticsearch document selected while required by the sqlite query. [' + self.config.id + ']');
-    return Promise.resolve(Symbol.for('selected document needed'));
+    return Promise.resolve(SELECTED_DOCUMENT_NEEDED);
   }
 
   const dbfile = this.config.datasource.datasourceClazz.datasource.datasourceParams.db_file_path;
@@ -124,14 +125,14 @@ SQLiteQuery.prototype.checkIfItIsRelevant = function (options) {
   const cacheEnabled = this.config.datasource.datasourceClazz.datasource.datasourceParams.cache_enabled;
 
   if (!this.config.activationQuery) {
-    return Promise.resolve(Symbol.for('query is relevant'));
+    return Promise.resolve(QUERY_RELEVANT);
   }
   return self.queryHelper.replaceVariablesUsingEsDocument(this.config.activationQuery, options)
   .then(function (query) {
 
     if (query.trim() === '') {
       // TODO is this check necessary ? it seems the previous condition is enough
-      return Promise.resolve(Symbol.for('query is relevant'));
+      return Promise.resolve(QUERY_RELEVANT);
     }
 
     let cacheKey = null;
@@ -144,7 +145,7 @@ SQLiteQuery.prototype.checkIfItIsRelevant = function (options) {
     }
 
     return self._executeQuery(query).then(function (results) {
-      const isRelevant = results.length > 0 ? Symbol.for('query is relevant') : Symbol.for('query should be deactivated');
+      const isRelevant = results.length > 0 ? QUERY_RELEVANT : QUERY_DEACTIVATED;
 
       if (self.cache && cacheEnabled) {
         self.cache.set(cacheKey, isRelevant, maxAge);

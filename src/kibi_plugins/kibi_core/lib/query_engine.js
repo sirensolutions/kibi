@@ -1,3 +1,4 @@
+import Symbols from './_symbols';
 import kibiUtils from 'kibiutils';
 import rp from 'request-promise';
 import Promise from 'bluebird';
@@ -615,11 +616,11 @@ QueryEngine.prototype._getQueries = function (queryIds, options) {
 
     const filteredQueries = _.map(queryResponses, function (resp, i) {
       switch (resp) {
-        case Symbol.for('query is relevant'):
+        case Symbols.QUERY_RELEVANT:
           return fromRightFolder[i]; // here important to use fromRightFolder !!!
-        case Symbol.for('query should be deactivated'):
+        case Symbols.QUERY_DEACTIVATED:
           return new InactivatedQuery(self.server, fromRightFolder[i].id);
-        case Symbol.for('selected document needed'):
+        case Symbols.SELECTED_DOCUMENT_NEEDED:
           return new MissingSelectedDocumentQuery(fromRightFolder[i].id);
       }
     });

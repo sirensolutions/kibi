@@ -1,3 +1,4 @@
+import { SELECTED_DOCUMENT_NEEDED, QUERY_RELEVANT } from '../_symbols';
 import _ from 'lodash';
 import fs from 'fs';
 import Promise from 'bluebird';
@@ -23,10 +24,10 @@ TinkerPop3Query.prototype = _.create(AbstractQuery.prototype, {
 TinkerPop3Query.prototype.checkIfItIsRelevant = function (options) {
   if (this._checkIfSelectedDocumentRequiredAndNotPresent(options)) {
     self.logger.warn('No elasticsearch document selected while required by the tinkerpop query. [' + this.config.id + ']');
-    return Promise.resolve(Symbol.for('selected document needed'));
+    return Promise.resolve(SELECTED_DOCUMENT_NEEDED);
   }
 
-  return Promise.resolve(Symbol.for('query is relevant'));
+  return Promise.resolve(QUERY_RELEVANT);
 };
 
 TinkerPop3Query.prototype.fetchResults = function (options, onlyIds, idVariableName) {

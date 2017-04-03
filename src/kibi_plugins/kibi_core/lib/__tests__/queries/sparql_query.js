@@ -1,3 +1,4 @@
+import { SELECTED_DOCUMENT_NEEDED, QUERY_RELEVANT, QUERY_DEACTIVATED } from '../../_symbols';
 import Promise from 'bluebird';
 import expect from 'expect.js';
 import sinon from 'auto-release-sinon';
@@ -86,7 +87,7 @@ describe('SparqlQuery', function () {
       const generateCacheKeySpy = sinon.spy(sparqlQuery, 'generateCacheKey');
 
       return sparqlQuery.checkIfItIsRelevant({credentials: {username: 'fred'}}).then(function (res) {
-        expect(res).to.equal(Symbol.for('query should be deactivated'));
+        expect(res).to.equal(QUERY_DEACTIVATED);
         sinon.assert.calledWithExactly(generateCacheKeySpy, 'http://localhost:9876', ' select * where {?s ?p ?o} LIMIT 1', 'fred');
         expect(generateCacheKeySpy.callCount).to.equal(1);
       });

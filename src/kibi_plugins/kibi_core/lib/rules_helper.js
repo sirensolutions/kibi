@@ -1,3 +1,4 @@
+import { QUERY_DEACTIVATED } from './_symbols';
 import url    from 'url';
 import Promise from 'bluebird';
 import QueryHelper from './query_helper';
@@ -24,7 +25,7 @@ RulesHelper.prototype.evaluate = function (rules, selectedDocuments, credentials
 
       let regex = /^@doc\[.+?\]@$/;
       if (!regex.test(rule.s)) {
-        return Symbol.for('query should be deactivated');
+        return QUERY_DEACTIVATED;
       }
 
       let propertyGroup = rule.s.replace('@doc', '');

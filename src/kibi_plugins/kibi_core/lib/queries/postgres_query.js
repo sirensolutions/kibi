@@ -1,3 +1,4 @@
+import { SELECTED_DOCUMENT_NEEDED, QUERY_RELEVANT, QUERY_DEACTIVATED } from '../_symbols';
 import _ from 'lodash';
 import Promise from 'bluebird';
 import url from 'url';
@@ -157,7 +158,7 @@ PostgresQuery.prototype.checkIfItIsRelevant = function (options) {
 
   if (self._checkIfSelectedDocumentRequiredAndNotPresent(options)) {
     self.logger.warn('No elasticsearch document selected while required by the posgres query. [' + self.config.id + ']');
-    return Promise.resolve(Symbol.for('selected document needed'));
+    return Promise.resolve(SELECTED_DOCUMENT_NEEDED);
   }
 
   const connectionString = this.config.datasource.datasourceClazz.getConnectionString();
@@ -168,13 +169,13 @@ PostgresQuery.prototype.checkIfItIsRelevant = function (options) {
   const cacheEnabled = this.config.datasource.datasourceClazz.datasource.datasourceParams.cache_enabled;
 
   if (!this.config.activationQuery) {
-    return Promise.resolve(Symbol.for('query is relevant'));
+    return Promise.resolve(QUERY_RELEVANT);
   }
   return self.queryHelper.replaceVariablesUsingEsDocument(this.config.activationQuery, options)
   .then(function (query) {
 
     if (query.trim() === '') {
-      return Promise.resolve(Symbol.for('query is relevant'));
+      return Promise.resolve(QUERY_RELEVANT);
     }
 
     let cacheKey = null;
@@ -194,7 +195,7 @@ PostgresQuery.prototype.checkIfItIsRelevant = function (options) {
       if (results === undefined) {
         return Promise.reject(new Error('No rows property in results'));
       }
-      const isRelevant = results.rows.length > 0 ? Symbol.for('query is relevant') : Symbol.for('query should be deactivated');
+      const isRelevant = results.rows.length > 0 ? QUERY_RELEVANT : QUERY_DEACTIVATED;
 
       if (self.cache && cacheEnabled) {
         self.cache.set(cacheKey, isRelevant, maxAge);

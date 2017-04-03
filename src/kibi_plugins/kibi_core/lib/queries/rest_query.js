@@ -1,3 +1,4 @@
+import { SELECTED_DOCUMENT_NEEDED, QUERY_RELEVANT, QUERY_DEACTIVATED } from '../_symbols';
 import _ from 'lodash';
 import Promise from 'bluebird';
 import url from 'url';
@@ -25,22 +26,22 @@ RestQuery.prototype = _.create(AbstractQuery.prototype, {
 RestQuery.prototype.checkIfItIsRelevant = function (options) {
   if (this._checkIfSelectedDocumentRequiredAndNotPresent(options)) {
     this.logger.warn('No elasticsearch document selected while required by the REST query. [' + this.config.id + ']');
-    return Promise.resolve(Symbol.for('selected document needed'));
+    return Promise.resolve(SELECTED_DOCUMENT_NEEDED);
   }
 
   // no document selected there is nothing to check against
   if (!options.selectedDocuments || options.selectedDocuments.length === 0) {
-    return Promise.resolve(Symbol.for('query is relevant'));
+    return Promise.resolve(QUERY_RELEVANT);
   }
 
   // empty rules - let it go
   if (this.config.activation_rules.length === 0) {
-    return Promise.resolve(Symbol.for('query is relevant'));
+    return Promise.resolve(QUERY_RELEVANT);
   }
 
   // evaluate the rules
   return this.rulesHelper.evaluate(this.config.activation_rules, options.selectedDocuments, options.credentials)
-  .then(res => res ? Symbol.for('query is relevant') : Symbol.for('query should be deactivated'));
+  .then(res => res ? QUERY_RELEVANT : QUERY_DEACTIVATED);
 };
 
 RestQuery.prototype._logFailedRequestDetails = function (msg, originalError, resp) {

@@ -1,3 +1,4 @@
+import { SELECTED_DOCUMENT_NEEDED, QUERY_RELEVANT, QUERY_DEACTIVATED } from '../_symbols';
 import _ from 'lodash';
 import url from 'url';
 import Jdbc from 'jdbc';
@@ -124,7 +125,7 @@ JdbcQuery.prototype.checkIfItIsRelevant = function (options) {
 
     if (self._checkIfSelectedDocumentRequiredAndNotPresent(options)) {
       self.logger.warn('No elasticsearch document selected while required by the jdbc query. [' + self.config.id + ']');
-      return Promise.resolve(Symbol.for('selected document needed'));
+      return Promise.resolve(SELECTED_DOCUMENT_NEEDED);
     }
     // here do not use getConnectionString method as it might contain sensitive information like decrypted password
     const connectionString = self.config.datasource.datasourceClazz.datasource.datasourceParams.connection_string;
@@ -132,13 +133,13 @@ JdbcQuery.prototype.checkIfItIsRelevant = function (options) {
     const cacheEnabled = self.config.datasource.datasourceClazz.datasource.datasourceParams.cache_enabled;
 
     if (!self.config.activationQuery) {
-      return Promise.resolve(Symbol.for('query is relevant'));
+      return Promise.resolve(QUERY_RELEVANT);
     }
     return self.queryHelper.replaceVariablesUsingEsDocument(self.config.activationQuery, options)
     .then(function (query) {
 
       if (query.trim() === '') {
-        return Promise.resolve(Symbol.for('query is relevant'));
+        return Promise.resolve(QUERY_RELEVANT);
       }
 
       let cacheKey = null;
@@ -152,7 +153,7 @@ JdbcQuery.prototype.checkIfItIsRelevant = function (options) {
       }
 
       return self._executeQuery(query).then(function (results) {
-        const isRelevant = results.length > 0 ? Symbol.for('query is relevant') : Symbol.for('query should be deactivated');
+        const isRelevant = results.length > 0 ? QUERY_RELEVANT : QUERY_DEACTIVATED;
 
         if (self.cache && cacheEnabled) {
           self.cache.set(cacheKey, isRelevant, maxAge);

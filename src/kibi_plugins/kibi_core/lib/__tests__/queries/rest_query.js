@@ -1,3 +1,4 @@
+import { SELECTED_DOCUMENT_NEEDED, QUERY_RELEVANT, QUERY_DEACTIVATED } from '../../_symbols';
 import Promise from 'bluebird';
 import expect from 'expect.js';
 import sinon from 'auto-release-sinon';
@@ -56,7 +57,7 @@ describe('RestQuery', () => {
       });
 
       return restQuery.checkIfItIsRelevant({}).then(ret => {
-        expect(ret).to.be(Symbol.for('query is relevant'));
+        expect(ret).to.be(QUERY_RELEVANT);
       });
     });
 
@@ -72,7 +73,7 @@ describe('RestQuery', () => {
 
       return restQuery.checkIfItIsRelevant({selectedDocuments: [ doc ]})
       .then(ret => {
-        expect(ret).to.be(Symbol.for('query is relevant'));
+        expect(ret).to.be(QUERY_RELEVANT);
       });
     });
 
@@ -88,7 +89,7 @@ describe('RestQuery', () => {
 
       return restQuery.checkIfItIsRelevant({selectedDocuments: [ doc ]})
       .then(ret => {
-        expect(ret).to.be(Symbol.for('query is relevant'));
+        expect(ret).to.be(QUERY_RELEVANT);
       });
     });
 
@@ -99,7 +100,7 @@ describe('RestQuery', () => {
 
       return restQuery.checkIfItIsRelevant({selectedDocuments: undefined})
       .then(ret => {
-        expect(ret).to.be(Symbol.for('query is relevant'));
+        expect(ret).to.be(QUERY_RELEVANT);
       });
     });
 
@@ -110,7 +111,7 @@ describe('RestQuery', () => {
 
       return restQuery.checkIfItIsRelevant({selectedDocuments: undefined})
       .then(ret => {
-        expect(ret).to.be(Symbol.for('query is relevant'));
+        expect(ret).to.be(QUERY_RELEVANT);
       });
     });
   });
@@ -143,7 +144,7 @@ describe('RestQuery', () => {
 
       return restQuery.checkIfItIsRelevant({selectedDocuments: undefined})
       .then(ret => {
-        expect(ret).to.equal(Symbol.for('selected document needed'));
+        expect(ret).to.equal(SELECTED_DOCUMENT_NEEDED);
       });
     });
 
@@ -154,7 +155,7 @@ describe('RestQuery', () => {
 
       return restQuery.checkIfItIsRelevant({selectedDocuments: undefined})
       .then(ret => {
-        expect(ret).to.equal(Symbol.for('selected document needed'));
+        expect(ret).to.equal(SELECTED_DOCUMENT_NEEDED);
       });
     });
   });

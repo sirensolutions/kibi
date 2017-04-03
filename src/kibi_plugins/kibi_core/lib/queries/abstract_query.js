@@ -8,8 +8,6 @@ import handlebars from 'handlebars';
 import jade from 'jade';
 import kibiUtils from 'kibiutils';
 
-const debug = false;
-
 handlebars.registerHelper('json', function (context) {
   return JSON.stringify(context);
 });

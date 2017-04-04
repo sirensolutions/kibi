@@ -39,10 +39,11 @@ if (!!kbnIndex) {
 }
 
 function applyConfig(config) {
+  const authWarningKey = 'kibi:shieldAuthorizationWarning'; // siren: configuration key
   Notifier.applyConfig({
     // kibi: set the awesomeDemoMode and shieldAuthorizationWarning flag
     awesomeDemoMode: config.get('kibi:awesomeDemoMode'),
-    shieldAuthorizationWarning: config.get('kibi:shieldAuthorizationWarning', false),
+    shieldAuthorizationWarning: config.isDeclared(authWarningKey) ? config.get(authWarningKey) : false,
     // kibi: end
     bannerLifetime: config.get('notifications:lifetime:banner'),
     errorLifetime: config.get('notifications:lifetime:error'),

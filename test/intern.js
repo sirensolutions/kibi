@@ -5,7 +5,14 @@ define(function (require) {
   return _.assign({
     debug: true,
     capabilities: {
-      'idle-timeout': 99
+      'idle-timeout': 99,
+      // siren: needed so the intern tests can pass with chrome > 57
+      chromeOptions: {
+        args: [
+          'enable-automation', '--disable-infobars'
+        ]
+      }
+      // siren: end
     },
     environments: [{
       browserName: 'chrome'

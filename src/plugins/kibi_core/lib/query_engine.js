@@ -1,3 +1,4 @@
+var Symbols = require('./_symbols');
 var kibiUtils = require('kibiutils');
 var rp = require('request-promise');
 var Promise = require('bluebird');
@@ -15,6 +16,7 @@ var SQLiteQuery = require('./queries/sqlite_query');
 var RestQuery = require('./queries/rest_query');
 var ErrorQuery = require('./queries/error_query');
 var InactivatedQuery = require('./queries/inactivated_query');
+var MissingSelectedDocumentQuery = require('./queries/missing_selected_document_query');
 var TinkerPop3Query;
 var JdbcQuery;
 
@@ -43,8 +45,7 @@ QueryEngine.prototype._onStatusGreen = function () {
 };
 
 QueryEngine.prototype._init = function (cacheSize = 500, enableCache = true, cacheMaxAge = 1000 * 60 * 60) {
-  // populate an array templatesDefinitions which contain templatesdefinition objects
-  var self = this;
+  const self = this;
 
   if (self.initialized === true) {
     return Promise.resolve({
@@ -625,16 +626,18 @@ QueryEngine.prototype._getQueries = function (queryIds, options) {
     return query.checkIfItIsRelevant(options);
   });
 
-  return Promise.all(promises).then(function (sparqlResponses) {
+  return Promise.all(promises).then(function (queryResponses) {
     // order the list prepare the list
     // go over responces and create an array on template objects for which ask queries returned true
 
-    var filteredQueries = [];
-    _.forEach(sparqlResponses, function (resp, i) {
-      if (resp) {
-        filteredQueries.push(fromRightFolder[i]); // here important to use fromRightFolder !!!
-      } else {
-        filteredQueries.push(new InactivatedQuery(self.server, fromRightFolder[i].id));
+    const filteredQueries = _.map(queryResponses, function (resp, i) {
+      switch (resp) {
+        case Symbols.QUERY_RELEVANT:
+          return fromRightFolder[i]; // here important to use fromRightFolder !!!
+        case Symbols.QUERY_DEACTIVATED:
+          return new InactivatedQuery(self.server, fromRightFolder[i].id);
+        case Symbols.SELECTED_DOCUMENT_NEEDED:
+          return new MissingSelectedDocumentQuery(fromRightFolder[i].id);
       }
     });
 

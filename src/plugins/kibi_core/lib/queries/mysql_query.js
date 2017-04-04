@@ -1,3 +1,4 @@
+var { SELECTED_DOCUMENT_NEEDED, QUERY_RELEVANT, QUERY_DEACTIVATED } = require('../_symbols');
 var _       = require('lodash');
 var Promise = require('bluebird');
 var url     = require('url');
@@ -89,9 +90,8 @@ MysqlQuery.prototype.checkIfItIsRelevant = function (options) {
 
   if (self._checkIfSelectedDocumentRequiredAndNotPresent(options)) {
     self.logger.warn('No elasticsearch document selected while required by the mysql query. [' + self.config.id + ']');
-    return Promise.resolve(false);
+    return Promise.resolve(SELECTED_DOCUMENT_NEEDED);
   }
-  var uri = options.selectedDocuments && options.selectedDocuments.length > 0 ? options.selectedDocuments[0] : '';
 
   var connectionString = this.config.datasource.datasourceClazz.getConnectionString();
   var host = this.config.datasource.datasourceClazz.datasource.datasourceParams.host;
@@ -100,28 +100,34 @@ MysqlQuery.prototype.checkIfItIsRelevant = function (options) {
   var maxAge = this.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
   var cacheEnabled = this.config.datasource.datasourceClazz.datasource.datasourceParams.cache_enabled;
 
-  return self.queryHelper.replaceVariablesUsingEsDocument(this.config.activationQuery, uri, options.credentials).then(function (query) {
+  if (!this.config.activationQuery) {
+    return Promise.resolve(QUERY_RELEVANT);
+  }
+  return self.queryHelper.replaceVariablesUsingEsDocument(this.config.activationQuery, options)
+  .then(function (query) {
 
     if (query.trim() === '') {
-      return Promise.resolve(true);
+      return Promise.resolve(QUERY_RELEVANT);
     }
 
     var cacheKey = null;
 
     if (self.cache && cacheEnabled) {
       cacheKey = self.generateCacheKey(host + dbname, query, self._getUsername(options));
-      var v = self.cache.get(cacheKey);
-      if (v) {
+      const v = self.cache.get(cacheKey);
+      if (v !== undefined) {
         return Promise.resolve(v);
       }
     }
 
     return self._executeQuery(query, connectionString, timeout).then(function (results) {
-      var data = results.rows.length > 0 ? true : false;
+      const isRelevant = results.rows.length > 0 ? QUERY_RELEVANT : QUERY_DEACTIVATED;
+
       if (self.cache && cacheEnabled) {
-        self.cache.set(cacheKey, data, maxAge);
+        self.cache.set(cacheKey, isRelevant, maxAge);
       }
-      return data;
+
+      return isRelevant;
     });
 
   });
@@ -129,10 +135,8 @@ MysqlQuery.prototype.checkIfItIsRelevant = function (options) {
 
 
 MysqlQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) {
-  var start = new Date().getTime();
-  var self = this;
-  // currently we use only single selected document
-  var uri = options.selectedDocuments && options.selectedDocuments.length > 0 ? options.selectedDocuments[0] : '';
+  const start = new Date().getTime();
+  const self = this;
 
   var connectionString = this.config.datasource.datasourceClazz.getConnectionString();
   var host = this.config.datasource.datasourceClazz.datasource.datasourceParams.host;
@@ -141,7 +145,8 @@ MysqlQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) 
   var maxAge = this.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
   var cacheEnabled = this.config.datasource.datasourceClazz.datasource.datasourceParams.cache_enabled;
 
-  return self.queryHelper.replaceVariablesUsingEsDocument(this.config.resultQuery, uri, options.credentials).then(function (query) {
+  return self.queryHelper.replaceVariablesUsingEsDocument(this.config.resultQuery, options)
+  .then(function (query) {
 
     var cacheKey = null;
 

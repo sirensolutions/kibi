@@ -1,3 +1,4 @@
+var { SELECTED_DOCUMENT_NEEDED, QUERY_RELEVANT, QUERY_DEACTIVATED } = require('../_symbols');
 var _       = require('lodash');
 var url     = require('url');
 var Jdbc    = require('jdbc');
@@ -123,37 +124,41 @@ JdbcQuery.prototype.checkIfItIsRelevant = function (options) {
 
     if (self._checkIfSelectedDocumentRequiredAndNotPresent(options)) {
       self.logger.warn('No elasticsearch document selected while required by the jdbc query. [' + self.config.id + ']');
-      return Promise.resolve(false);
+      return Promise.resolve(SELECTED_DOCUMENT_NEEDED);
     }
-    var uri = options.selectedDocuments && options.selectedDocuments.length > 0 ? options.selectedDocuments[0] : '';
-
     // here do not use getConnectionString method as it might contain sensitive information like decrypted password
     var connectionString = self.config.datasource.datasourceClazz.datasource.datasourceParams.connection_string;
     var maxAge = self.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
     var cacheEnabled = self.config.datasource.datasourceClazz.datasource.datasourceParams.cache_enabled;
 
-    return self.queryHelper.replaceVariablesUsingEsDocument(self.config.activationQuery, uri, options.credentials).then(function (query) {
+    if (!self.config.activationQuery) {
+      return Promise.resolve(QUERY_RELEVANT);
+    }
+    return self.queryHelper.replaceVariablesUsingEsDocument(self.config.activationQuery, options)
+    .then(function (query) {
 
       if (query.trim() === '') {
-        return Promise.resolve(true);
+        return Promise.resolve(QUERY_RELEVANT);
       }
 
       var cacheKey = null;
 
       if (self.cache && cacheEnabled) {
         cacheKey = self.generateCacheKey(connectionString, query, self._getUsername(options));
-        var v = self.cache.get(cacheKey);
-        if (v) {
+        const v = self.cache.get(cacheKey);
+        if (v !== undefined) {
           return Promise.resolve(v);
         }
       }
 
       return self._executeQuery(query).then(function (results) {
-        var data = results.length > 0 ? true : false;
+        const isRelevant = results.length > 0 ? QUERY_RELEVANT : QUERY_DEACTIVATED;
+
         if (self.cache && cacheEnabled) {
-          self.cache.set(cacheKey, data, maxAge);
+          self.cache.set(cacheKey, isRelevant, maxAge);
         }
-        return data;
+
+        return isRelevant;
       });
     });
   });
@@ -163,16 +168,15 @@ JdbcQuery.prototype.fetchResults = function (options, onlyIds, idVariableName) {
   var self = this;
   return self._init().then(function (data) {
 
-    var start = new Date().getTime();
-    // currently we use only single selected document
-    var uri = options.selectedDocuments && options.selectedDocuments.length > 0 ? options.selectedDocuments[0] : '';
+    const start = new Date().getTime();
 
     var connectionString = self.config.datasource.datasourceClazz.datasource.datasourceParams.connection_string;
     var maxAge = self.config.datasource.datasourceClazz.datasource.datasourceParams.max_age;
     var cacheEnabled = self.config.datasource.datasourceClazz.datasource.datasourceParams.cache_enabled;
 
-    return self.queryHelper.replaceVariablesUsingEsDocument(self.config.resultQuery, uri, options.credentials).then(function (query) {
-      var cacheKey = null;
+    return self.queryHelper.replaceVariablesUsingEsDocument(self.config.resultQuery, options)
+    .then(function (query) {
+      let cacheKey = null;
       if (self.cache && cacheEnabled) {
         cacheKey = self.generateCacheKey(connectionString, query, onlyIds, idVariableName, self._getUsername(options));
         var v =  self.cache.get(cacheKey);

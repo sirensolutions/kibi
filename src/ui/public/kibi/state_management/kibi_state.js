@@ -194,22 +194,22 @@ define(function (require) {
       if (!entityURI || !index || !type || !id || !column) {
         return false;
       }
-      const parts = entityURI.split('/') || [];
-      return parts[0] === index && parts[1] === type && parts[2] === id && parts[3] === column;
+      return entityURI.index === index && entityURI.type === type && entityURI.id === id && entityURI.column === column;
     };
 
-    KibiState.prototype.setEntityURI = function (entityURI) {
+    KibiState.prototype.setEntityURI = function ({ index, type, id, column } = {}) {
       if (chrome.onDashboardTab()) {
-        if (!entityURI) {
+        if (!id) {
+          delete this[this._properties.selected_entity];
           delete this[this._properties.selected_entity];
         } else {
-          this[this._properties.selected_entity] = entityURI;
+          this[this._properties.selected_entity] = { index, type, id, column };
         }
       } else if (chrome.onVisualizeTab() || chrome.onSettingsTab()) {
-        if (!entityURI) {
+        if (!id) {
           delete this[this._properties.test_selected_entity];
         } else {
-          this[this._properties.test_selected_entity] = entityURI;
+          this[this._properties.test_selected_entity] = { index, type, id, column };
         }
       } else {
         throw new Error('Cannot set entity URI because you are not in dashboard/visualize/settings');

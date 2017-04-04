@@ -1,3 +1,4 @@
+var { SELECTED_DOCUMENT_NEEDED, QUERY_RELEVANT, QUERY_DEACTIVATED } = require('../../_symbols');
 var Promise = require('bluebird');
 var expect = require('expect.js');
 var sinon = require('sinon');
@@ -30,7 +31,7 @@ var fakeServer = {
 };
 
 var cacheMock = {
-  get: function (key) { return '';},
+  get: function (key) { return;},
   set: function (key, value, time) {}
 };
 
@@ -89,7 +90,7 @@ describe('PostgresQuery', function () {
       var spy = sinon.spy(postgresQuery, 'generateCacheKey');
 
       postgresQuery.checkIfItIsRelevant({credentials: {username: 'fred'}}).then(function (res) {
-        expect(res).to.equal(false);
+        expect(res).to.equal(QUERY_DEACTIVATED);
         expect(spy.callCount).to.equal(1);
 
         expect(spy.calledWithExactly('localhostmydb', 'select * from x LIMIT 1', 'fred')).to.be.ok();

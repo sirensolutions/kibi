@@ -1,3 +1,4 @@
+var { SELECTED_DOCUMENT_NEEDED, QUERY_RELEVANT, QUERY_DEACTIVATED } = require('../../_symbols');
 const mockery = require('mockery');
 const Promise = require('bluebird');
 const expect = require('expect.js');
@@ -81,7 +82,7 @@ describe('RestQuery', () => {
       });
 
       restQuery.checkIfItIsRelevant({}).then(ret => {
-        expect(ret).to.be(true);
+        expect(ret).to.be(QUERY_RELEVANT);
         done();
       }).catch(done);
     });
@@ -93,7 +94,7 @@ describe('RestQuery', () => {
       });
 
       restQuery.checkIfItIsRelevant({selectedDocuments: ['/company/company/id1']}).then(ret => {
-        expect(ret).to.be(true);
+        expect(ret).to.be(QUERY_RELEVANT);
         done();
       }).catch(done);
     });
@@ -105,7 +106,7 @@ describe('RestQuery', () => {
       });
 
       restQuery.checkIfItIsRelevant({selectedDocuments: ['/company/company/id1']}).then(ret => {
-        expect(ret).to.be(true);
+        expect(ret).to.be(QUERY_RELEVANT);
         done();
       }).catch(done);
     });
@@ -117,7 +118,7 @@ describe('RestQuery', () => {
       });
 
       restQuery.checkIfItIsRelevant({selectedDocuments: undefined}).then(ret => {
-        expect(ret).to.be(true);
+        expect(ret).to.be(QUERY_RELEVANT);
         done();
       }).catch(done);
     });
@@ -129,7 +130,7 @@ describe('RestQuery', () => {
       });
 
       restQuery.checkIfItIsRelevant({selectedDocuments: undefined}).then(ret => {
-        expect(ret).to.be(true);
+        expect(ret).to.be(QUERY_RELEVANT);
         done();
       }).catch(done);
     });
@@ -145,9 +146,14 @@ describe('RestQuery', () => {
           p: 'exists'
         }]
       });
+      const doc = {
+        index :'company',
+        type: 'company',
+        id: 'id1'
+      };
 
-      restQuery.checkIfItIsRelevant({selectedDocuments: ['/company/company/id1']}).catch(err => {
-        expect(err.message).to.eql('Could not fetch document [//company/company], check logs for details please.');
+      restQuery.checkIfItIsRelevant({selectedDocuments: [ doc ]}).catch(err => {
+        expect(err.message).to.eql('Could not fetch document [/company/company/id1], check logs for details please.');
         done();
       }).catch(done);
     });
@@ -159,7 +165,7 @@ describe('RestQuery', () => {
       });
 
       restQuery.checkIfItIsRelevant({selectedDocuments: undefined}).then(ret => {
-        expect(ret).to.be(false);
+        expect(ret).to.equal(SELECTED_DOCUMENT_NEEDED);
         done();
       }).catch(done);
     });
@@ -171,7 +177,7 @@ describe('RestQuery', () => {
       });
 
       restQuery.checkIfItIsRelevant({selectedDocuments: undefined}).then(ret => {
-        expect(ret).to.be(false);
+        expect(ret).to.equal(SELECTED_DOCUMENT_NEEDED);
         done();
       }).catch(done);
     });
@@ -180,7 +186,7 @@ describe('RestQuery', () => {
   describe('fetchResults test if correct arguments are passed to generateCacheKey', () => {
     it('test that username is passed when there are credentials in options', done => {
       const cacheMock = {
-        get: key => '',
+        get: function (key) { return; },
         set: (key, value, time) => {}
       };
 

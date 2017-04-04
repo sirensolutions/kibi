@@ -35,8 +35,8 @@ describe('SqliteQuery', function () {
   describe('fetchResults test if correct arguments are passed to generateCacheKey', function () {
     it('simple query', function (done) {
 
-      var cacheMock = {
-        get: function (key) { return '';},
+      const cacheMock = {
+        get: function (key) { return;},
         set: function (key, value, time) {}
       };
 

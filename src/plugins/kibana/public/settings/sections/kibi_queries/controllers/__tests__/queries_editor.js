@@ -51,12 +51,14 @@ describe('Kibi Controllers', function () {
             return Promise.resolve();
           },
           getQueriesHtmlFromServer: function () {
-            let resp = {
+            const resp = {
               data: {
-                snippets: snippet ? [ snippet ] : [],
-                error: snippetError
+                snippets: snippet ? [ snippet ] : []
               }
             };
+            if (snippetError) {
+              resp.data.error = snippetError;
+            }
             return Promise.resolve(resp);
           }
         };
@@ -67,7 +69,7 @@ describe('Kibi Controllers', function () {
       sinon.stub(chrome, 'onSettingsTab').returns(true);
 
       kibiState = _kibiState_;
-      sinon.stub(kibiState, 'getEntityURI').returns('entity1');
+      sinon.stub(kibiState, 'getEntityURI').returns({ index: 'a', type: 'b', id: 'c' });
 
       $scope = $rootScope;
       $scope.datasourceType = datasourceType;
@@ -80,7 +82,7 @@ describe('Kibi Controllers', function () {
             }
           }
         },
-        $element: jQuery('<div><form name="objectForm" class="ng-valid"></div>')
+        $element: jQuery('<div><form name="objectForm" class="ng-valid"></form></div>')
       });
       $scope.$digest();
     });
@@ -189,7 +191,7 @@ describe('Kibi Controllers', function () {
         save: sinon.stub().returns(Promise.resolve('queryid'))
       };
 
-      init({ query: query, snippetError:'error with the query' });
+      init({ query: query, snippetError: 'error with the query' });
 
       expect($scope.holder.htmlPreview).not.to.be.ok();
       expect($scope.holder.jsonPreview).not.to.be.ok();

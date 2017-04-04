@@ -76,7 +76,7 @@ Query.prototype._checkIfSelectedDocumentRequiredAndNotPresent = function (option
   const isEntityDependent = kibiUtils.doesQueryDependOnEntity([ this.config ]);
 
   return isEntityDependent &&
-    (!options || !options.selectedDocuments || options.selectedDocuments.length === 0 || options.selectedDocuments[0] === '');
+    (!options || !options.selectedDocuments || options.selectedDocuments.length === 0 || !options.selectedDocuments[0]);
 };
 
 
@@ -208,6 +208,18 @@ Query.prototype.getHtml = function (queryDef, options) {
         error: err,
         data: data
       });
+    });
+  })
+  .catch(err => {
+    // do not reject so that data from other successful queries can be displayed
+    that.log.error(err);
+    return Promise.resolve({
+      error: err,
+      data: {
+        config: {
+          id: that.id
+        }
+      }
     });
   });
 };

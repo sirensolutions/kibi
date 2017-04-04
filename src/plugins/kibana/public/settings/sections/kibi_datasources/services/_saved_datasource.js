@@ -1,6 +1,5 @@
 define(function (require) {
   var _ = require('lodash');
-  var setDatasourceSchema = require('plugins/kibana/settings/sections/kibi_datasources/lib/set_datasource_schema');
 
   require('ui/notify');
 
@@ -9,7 +8,9 @@ define(function (require) {
     'kibana/courier'
   ]);
 
-  module.factory('SavedDatasource', function (courier) {
+  module.factory('SavedDatasource', function (Private, courier) {
+
+    var setDatasourceSchema = Private(require('plugins/kibana/settings/sections/kibi_datasources/lib/set_datasource_schema'));
 
     _.class(SavedDatasource).inherits(courier.SavedObject);
 

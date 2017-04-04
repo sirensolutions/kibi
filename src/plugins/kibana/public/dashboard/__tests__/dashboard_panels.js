@@ -28,6 +28,7 @@ describe('dashboard panels', function () {
 
   beforeEach(() => {
     ngMock.module('kibana', function ($provide) {
+      $provide.constant('kibiDatasourcesSchema', {});
       $provide.constant('elasticsearchPlugins', ['siren-join']);
       $provide.constant('kbnDefaultAppId', '');
       $provide.constant('kibiDefaultDashboardTitle', '');

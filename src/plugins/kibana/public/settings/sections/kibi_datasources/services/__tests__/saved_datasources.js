@@ -13,6 +13,7 @@ describe('Kibi Services', function () {
     beforeEach(function () {
 
       ngMock.module('kibana', function ($provide) {
+        $provide.constant('kibiDatasourcesSchema', {});
         $provide.constant('elasticsearchPlugins', ['siren-join']);
       });
 

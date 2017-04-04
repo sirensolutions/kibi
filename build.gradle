@@ -143,11 +143,11 @@ publishing {
        * Artifacts for each platform
        */
 
-      artifact(new File("${projectDir}/target", "kibi-${project.version}-darwin-x64.zip")) {
+      artifact(new File("${projectDir}/target", "kibi-${project.version}-darwin-x86_64.zip")) {
         classifier "darwin-x64"
       }
 
-      artifact(new File("${projectDir}/target", "kibi-${project.version}-linux-x64.zip")) {
+      artifact(new File("${projectDir}/target", "kibi-${project.version}-linux-x86_64.zip")) {
         classifier "linux-x64"
       }
 
@@ -155,7 +155,7 @@ publishing {
         classifier "linux-x86"
       }
 
-      artifact(new File("${projectDir}/target", "kibi-${project.version}-windows.zip")) {
+      artifact(new File("${projectDir}/target", "kibi-${project.version}-windows-x86.zip")) {
         classifier "windows"
       }
 

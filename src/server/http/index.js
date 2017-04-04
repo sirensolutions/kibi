@@ -1,4 +1,4 @@
-import { format } from 'url';
+import { format, parse } from 'url';
 import { resolve } from 'path';
 import _ from 'lodash';
 import fs from 'fs';
@@ -115,13 +115,14 @@ module.exports = async function (kbnServer, server, config) {
     path: '/goto/{urlId}',
     handler: async function (request, reply) {
       try {
+        const urlParts = parse(request.url, true);
         const data = await shortUrlLookup.getUrl(request.params.urlId, request);
         shortUrlAssertValid(data.url);
         // kibi: if embedding parameters are set they must be included in the initial URL
         let embeddingParameters = '';
-        if (data.url.match(/[&?]embed=true/)) {
+        if (urlParts.query.embed === 'true') {
           embeddingParameters += 'embed=true&';
-          if (data.url.match(/[&?]kibiNavbarVisible=true/)) {
+          if (urlParts.query.kibiNavbarVisible === 'true') {
             embeddingParameters += 'kibiNavbarVisible=true&';
           }
         }

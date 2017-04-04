@@ -3,49 +3,61 @@ import { unhashUrl, getUnhashableStatesProvider } from 'ui/state_management/stat
 
 uiModules
 .get('kibana')
-.service('sharingService', function (Private, $location) {
+.service('sharingService', function (Private, $location, config) {
 
   const urlShortener = Private(require('./lib/url_shortener'));
   const getUnhashableStates = Private(getUnhashableStatesProvider);
 
   /**
    * Provides methods to share the current state.
+   * NOTE:
+   * Used in kibi-enterprise/kibi-plugins/enterprise_components/public/api.js
+   *
    */
   class SharingService {
 
     /**
      * Returns the unhashed sharing URL for the current state.
      *
-     * @param {Boolean} shareAsEmbed - Set to true to enable embedding in the URL.
-     * @param {Boolean} displayNavBar - Set to true to display the Kibi navigation bar when embedding is enabled in the URL.
      * @returns {String} - The unhashed sharing URL.
      */
-    getSharedUrl(shareAsEmbed, displayNavBar) {
+    getSharedUrl() {
       const urlWithHashes = $location.absUrl();
-      let urlWithStates = unhashUrl(urlWithHashes, getUnhashableStates());
-      if (shareAsEmbed) {
-        if (displayNavBar) {
-          urlWithStates = urlWithStates.replace('?', '?embed=true&kibiNavbarVisible=true&');
-        } else {
-          urlWithStates = urlWithStates.replace('?', '?embed=true&');
-        }
+      let url = urlWithHashes;
+      if (!config.get('state:storeInSessionStorage')) {
+        url = unhashUrl(urlWithHashes, getUnhashableStates());
       }
-      return urlWithStates;
+      return url;
     }
 
     /**
      * Generates a short URL for the current state.
      *
-     * @param {Boolean} shareAsEmbed - Set to true to enable embedding in the URL.
-     * @param {Boolean} displayNavBar - Set to true to display the Kibi navigation bar when embedding is enabled in the URL.
      * @returns {Promise} - Resolved with the short URL.
      */
-    async generateShortUrl(shareAsEmbed, displayNavBar) {
-      return urlShortener.shortenUrl(this.getSharedUrl(shareAsEmbed, displayNavBar));
+    async generateShortUrl() {
+      return urlShortener.shortenUrl(this.getSharedUrl());
+    }
+
+    /**
+     * Adds parameters to the URL
+     *
+     * @param {String} url - URL to modify
+     * @param {Boolean} shareAsEmbed - Set to true to enable embedding in the URL.
+     * @param {Boolean} displayNavBar - Set to true to display the Kibi navigation bar when embedding is enabled in the URL.
+     */
+    addParamsToUrl(url, shareAsEmbed, displayNavBar) {
+      if (shareAsEmbed) {
+        if (displayNavBar) {
+          url += '?embed=true&kibiNavbarVisible=true';
+        } else {
+          url += '?embed=true';
+        }
+      }
+      return url;
     }
 
   }
 
   return new SharingService();
 });
-

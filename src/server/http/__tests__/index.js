@@ -74,14 +74,14 @@ describe('routes', function () {
         method: 'POST',
         url: '/shorten',
         payload: {
-          url: '/app/kibana#/visualize/create?embed=true'
+          url: '/app/kibana#/visualize/create'
         }
       };
       kbnTestServer.makeRequest(kbnServer, options, (res) => {
         const payload = res.payload;
         const gotoOptions = {
           method: 'GET',
-          url: '/goto/' + res.payload
+          url: '/goto/' + res.payload + '?embed=true'
         };
         kbnTestServer.makeRequest(kbnServer, gotoOptions, (res) => {
           let actual = res.headers.location;
@@ -100,14 +100,14 @@ describe('routes', function () {
         method: 'POST',
         url: '/shorten',
         payload: {
-          url: '/app/kibana#/visualize/create?embed=true&kibiNavbarVisible=true'
+          url: '/app/kibana#/visualize/create'
         }
       };
       kbnTestServer.makeRequest(kbnServer, options, (res) => {
         const payload = res.payload;
         const gotoOptions = {
           method: 'GET',
-          url: '/goto/' + res.payload
+          url: '/goto/' + res.payload + '?embed=true&kibiNavbarVisible=true'
         };
         kbnTestServer.makeRequest(kbnServer, gotoOptions, (res) => {
           let actual = res.headers.location;

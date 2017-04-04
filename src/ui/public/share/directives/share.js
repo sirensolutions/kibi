@@ -74,8 +74,13 @@ app.directive('share', function (Private, sharingService) {
         return unhashUrl(url, getUnhashableStates());
       }
 
-      this.makeUrlEmbeddable = url => {
-        const embedQueryParam = '?embed=true';
+      this.makeUrlEmbeddable = (url, kibiNavbarVisible = false) => {
+        let embedQueryParam = '?embed=true';
+        // siren: added kibiNavbarVisible parameter
+        if (kibiNavbarVisible) {
+          embedQueryParam += '&kibiNavbarVisible=true';
+        }
+        // siren: end
         const urlHasQueryString = url.indexOf('?') !== -1;
         if (urlHasQueryString) {
           return url.replace('?', `${embedQueryParam}&`);
@@ -83,10 +88,10 @@ app.directive('share', function (Private, sharingService) {
         return `${url}${embedQueryParam}`;
       };
 
-      this.makeIframeTag = url => {
+      this.makeIframeTag = (url, kibiNavbarVisible = false) => {
         if (!url) return;
 
-        const embeddableUrl = this.makeUrlEmbeddable(url);
+        const embeddableUrl = this.makeUrlEmbeddable(url, kibiNavbarVisible);
         return `<iframe src="${embeddableUrl}" height="600" width="800"></iframe>`;
       };
 
@@ -94,56 +99,41 @@ app.directive('share', function (Private, sharingService) {
         original: undefined,
         snapshot: undefined,
         shortSnapshot: undefined,
-        shortSnapshotIframe: undefined,
+        shortSnapshotIframe: undefined
       };
 
       this.urlFlags = {
-        shortSnapshot: false,
-        shortSnapshotIframe: false,
+        shortSnapshot: true,
+        shortSnapshotIframe: true
       };
 
       const updateUrls = () => {
         this.urls = {
           original: getOriginalUrl(),
           snapshot: getSnapshotUrl(),
-          shortSnapshot: undefined,
-          shortSnapshotIframe: undefined,
+          shortSnapshot: undefined      // siren: this is the one with goto
         };
 
         // Whenever the URL changes, reset the Short URLs to regular URLs.
         this.urlFlags = {
-          shortSnapshot: false,
-          shortSnapshotIframe: false,
+          shortSnapshot: true,
+          shortSnapshotIframe: true,
+          shortSnapshotIframe2: true
         };
+
+        // siren: generate shortened URL
+        // be careful as this generates new shortened URL
+        // on every state change
+        urlShortener.shortenUrl(this.urls.snapshot).then(shortUrl => {
+          this.urls.shortSnapshot = shortUrl;
+        });
+        // siren: end
       };
 
       // When the URL changes, update the links in the UI.
       $scope.$watch(() => $location.absUrl(), () => {
         updateUrls();
       });
-
-      this.toggleShortSnapshotUrl = () => {
-        this.urlFlags.shortSnapshot = !this.urlFlags.shortSnapshot;
-
-        if (this.urlFlags.shortSnapshot) {
-          urlShortener.shortenUrl(this.urls.snapshot)
-          .then(shortUrl => {
-            this.urls.shortSnapshot = shortUrl;
-          });
-        }
-      };
-
-      this.toggleShortSnapshotIframeUrl = () => {
-        this.urlFlags.shortSnapshotIframe = !this.urlFlags.shortSnapshotIframe;
-
-        if (this.urlFlags.shortSnapshotIframe) {
-          const snapshotIframe = this.makeUrlEmbeddable(this.urls.snapshot);
-          urlShortener.shortenUrl(snapshotIframe)
-          .then(shortUrl => {
-            this.urls.shortSnapshotIframe = shortUrl;
-          });
-        }
-      };
 
       this.copyToClipboard = selector => {
         const notify = new Notifier({

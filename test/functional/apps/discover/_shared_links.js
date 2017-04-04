@@ -99,6 +99,9 @@ bdd.describe('shared links', function describeIndexTests() {
       });
     });
 
+    // siren:
+    // removed test "shorten URL button should produce a short URL"
+    // as we removed the button
 
     // NOTE: This test has to run immediately after the test above
     bdd.it('should show toast message for copy to clipboard', function () {

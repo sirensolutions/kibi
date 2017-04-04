@@ -1,10 +1,9 @@
 {
-  "title": "kibi-enhanced-html-angular",
-  "description": "An enhanced search results template.",
+  "title": "kibi-html-angular",
+  "description": "An html-angular template which display each result as 300x550px snippet.",
+  "templateSource": "<!-- \n  Example html-angular template \n  For each document a small panel 300x550 px is created \n  and populated with all property values \n-->\n<!DOCTYPE html>\n<div style=\"word-wrap: break-word;\">\n  <div \n    ng-repeat=\"hit in hits|limitTo:limit track by hit._index+hit._type+hit._id+hit._score\"\n    class=\"snippet\" \n    style=\"width: 300px;height: 550px; overflow-y: auto; border:1px #ddd solid; margin: 4px; padding: 4px; float: left\">\n    <h4 ng-if=\"hit._source.title\">{{indexPattern.formatField(hit, \"title\")}}</h4>\n    <span ng-repeat=\"(key,value) in hit._source\"\n          ng-if=\"value !== null && value !== undefined && value !== ''\">\n      <dt>{{key}}</dt>\n      <dd>{{value}}</dd>\n    </span>\n  </div>\n</div>\n<div style=\"clear: both;\"></div>",
   "templateEngine": "html-angular",
-  "templateSource": "<div style=\"clear: both; word-wrap: break-word;\">\n<div ng-repeat=\"hit in hits|limitTo:limit track by hit._index+hit._type+hit._id+hit._score\"\nstyle=\"width: 240px; border:1px solid rgba(0,0,0,0.2); margin: 10px; padding: 10px; float: left\">\n<h4 ng-if=\"hit._source.title\">{{indexPattern.formatField(hit,\"title\")}}</h4>\n<span ng-repeat=\"(key,value) in hit._source\"\n  ng-if=\"value !== null && value !== undefined && value !== ''\">\n    <dt>{{key}}</dt>\n<dd>{{value}}</dd>\n</span>\n</div>\n</div>",
   "version": 2,
-
   "kibanaSavedObjectMeta": {
     "searchSourceJSON": "{}"
   }

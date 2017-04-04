@@ -43,7 +43,19 @@
             <label>Source</label>
 
             <div ng-if="template.templateEngine === 'handlebars'"
-              ui-ace="{ onLoad: aceLoaded, mode: 'handlebars' }" id="{{template.title}}"
+              ui-ace="{
+                onLoad: aceLoaded,
+                mode: 'handlebars',
+                advanced: {
+                  tabSize: 2
+                },
+                rendererOptions: {
+                  showPrintMargin: false,
+                  maxLines: 4294967296
+                }
+              }"
+              msd-elastic
+              id="{{template.title}}"
               ng-model="template.templateSource"
               ng-class="{ 'red-border': objectForm.handlebarsTemplate.$invalid }"
               name="handlebarsTemplate"
@@ -51,7 +63,19 @@
             </div>
 
             <div ng-if="template.templateEngine === 'jade'"
-              ui-ace="{ onLoad: aceLoaded, mode: 'jade' }" id="{{template.title}}"
+              ui-ace="{
+                onLoad: aceLoaded,
+                mode: 'jade',
+                advanced: {
+                  tabSize: 2
+                },
+                rendererOptions: {
+                  showPrintMargin: false,
+                  maxLines: 4294967296
+                }
+              }"
+              msd-elastic
+              id="{{template.title}}"
               ng-model="template.templateSource"
               ng-class="{ 'red-border': objectForm.jadeTemplate.$invalid }"
               name="jadeTemplate"
@@ -59,7 +83,19 @@
             </div>
 
             <div ng-if="template.templateEngine === 'html-angular'"
-              ui-ace="{ onLoad: aceLoaded, mode: 'html' }" id="{{template.title}}"
+              ui-ace="{
+                onLoad: aceLoaded,
+                mode: 'html',
+                advanced: {
+                  tabSize: 2
+                },
+                rendererOptions: {
+                  showPrintMargin: false,
+                  maxLines: 4294967296
+                }
+              }"
+              msd-elastic
+              id="{{template.title}}"
               ng-model="template.templateSource"
               ng-class="{ 'red-border': objectForm.htmlTemplate.$invalid }"
               name="htmlTemplate"

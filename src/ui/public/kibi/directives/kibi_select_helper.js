@@ -131,10 +131,10 @@ define(function (require) {
       }
       return mappings.getMapping(indexPatternId).then((response) => {
         var types = [];
-        for (var indexId in response.data) {
-          if (response.data[indexId].mappings) {
-            for (var type in response.data[indexId].mappings) {
-              if (response.data[indexId].mappings.hasOwnProperty(type) && types.indexOf(type) === -1) {
+        for (var indexId in response) {
+          if (response[indexId].mappings) {
+            for (var type in response[indexId].mappings) {
+              if (response[indexId].mappings.hasOwnProperty(type) && types.indexOf(type) === -1) {
                 types.push(type);
               }
             }

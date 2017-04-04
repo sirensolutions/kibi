@@ -458,10 +458,8 @@ describe('Kibi Directives', function () {
 
       it('should get the type of the dog index', function (done) {
         const response = {
-          data: {
-            dog: {
-              mappings: { animal: {} }
-            }
+          dog: {
+            mappings: { animal: {} }
           }
         };
         const getMappingStub = sinon.stub(mappings, 'getMapping').returns(Promise.resolve(response));
@@ -478,13 +476,11 @@ describe('Kibi Directives', function () {
 
       it('should get the type of all returned indices', function (done) {
         const response = {
-          data: {
-            dog: {
-              mappings: { animal: {} }
-            },
-            dogboy: {
-              mappings: { hero: {} }
-            }
+          dog: {
+            mappings: { animal: {} }
+          },
+          dogboy: {
+            mappings: { hero: {} }
           }
         };
         const getMappingStub = sinon.stub(mappings, 'getMapping').returns(Promise.resolve(response));

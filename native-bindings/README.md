@@ -131,10 +131,10 @@ npm install jdbc@0.3.1
 ```
 
 Copy `node_modules/jdbc/node_modules/java/build/Release/nodejavabridge_bindings.node` to
-`resources/nodejavabridges/windows`
+`resources/nodejavabridges/windows-x86`
 
 Copy the directory `node_modules/sqlite3/lib/binding/node-v46-win32-ia32` into
-`resources/nodesqlite3bindings/windows`.
+`resources/nodesqlite3bindings/windows-x86`.
 
 
 Make a PR.

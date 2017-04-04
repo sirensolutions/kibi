@@ -15,9 +15,17 @@ module.exports = function (grunt) {
     'windows-x86',
     'windows64' // kibi: we distinguish between windowses as we ship the native bindings for sqlite and node java
   ].map(function (baseName) {
-    const win = baseName === 'windows-x86';
+    const win = ['windows-x86', 'windows64'].indexOf(baseName) >= 0; // kibi: include Windows 64
 
-    const nodeUrl = win ? `${baseUri}/win-x86/node.exe` : `${baseUri}/node-v${nodeVersion}-${baseName}.tar.gz`;
+    // kibi: download Node for Windows from the correct locations
+    let nodeUrl = `${baseUri}/node-v${nodeVersion}-${baseName}.tar.gz`;
+    if (baseName === 'windows-x86') {
+      nodeUrl = `${baseUri}/win-x86/node.exe`;
+    } else if (baseName === 'windows64') {
+      nodeUrl = `${baseUri}/win-x64/node.exe`;
+    }
+    // kibi: end
+
     const nodeDir = resolve(rootPath, `.node_binaries/${nodeVersion}/${baseName}`);
 
     const name = endsWith(baseName, '-x64')

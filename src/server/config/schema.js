@@ -6,10 +6,23 @@ import os from 'os';
 import { fromRoot } from '../../utils';
 import { getData } from '../path';
 
-import pkg from '../../../src/utils/package_json';
-
 // kibi: import
-import serverConfig from '../../../test/server_config';
+let serverConfig;
+try {
+  serverConfig = require('../../../test/server_config');
+} catch (err) {
+  if (err.code === 'MODULE_NOT_FOUND') {
+    // kibi: make sure karma.port is defined during optimize step
+    // as the "test" folder is no longer present during this step
+    serverConfig = {
+      servers: {
+        karma: {
+          port: 9876
+        }
+      }
+    };
+  }
+}
 
 module.exports = () => Joi.object({
   pkg: Joi.object({

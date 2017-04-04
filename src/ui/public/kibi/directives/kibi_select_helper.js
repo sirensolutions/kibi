@@ -225,7 +225,7 @@ define(function (require) {
               } else {
                 variables = [];
               }
-            } else if (kibiUtils.DatasourceTypes.tinkerpop3 !== datasourceType) {
+            } else {
               return Promise.reject(new Error('Unknown datasource type for query=' + queryId + ': ' + datasourceType));
             }
           } catch (err) {

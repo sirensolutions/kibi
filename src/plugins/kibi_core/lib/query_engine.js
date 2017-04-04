@@ -17,7 +17,6 @@ var RestQuery = require('./queries/rest_query');
 var ErrorQuery = require('./queries/error_query');
 var InactivatedQuery = require('./queries/inactivated_query');
 var MissingSelectedDocumentQuery = require('./queries/missing_selected_document_query');
-var TinkerPop3Query;
 var JdbcQuery;
 
 function QueryEngine(server) {
@@ -51,11 +50,6 @@ QueryEngine.prototype._init = function (cacheSize = 500, enableCache = true, cac
     return Promise.resolve({
       message: 'QueryEngine already initialized'
     });
-  }
-
-  if (self.config.get('pkg.kibiEnterpriseEnabled')) {
-    self.log.info('Loading enterprise components');
-    TinkerPop3Query = require('./queries/tinkerpop3_query');
   }
 
   self.cache = null;
@@ -322,16 +316,12 @@ QueryEngine.prototype._loadDatasources = function () {
 QueryEngine.prototype._loadQueries = function () {
   var self = this;
   // load default query examples
-  var queriesToLoad = [
-    'Kibi-Graph-Query'
-  ];
+  var queriesToLoad = [];
 
   self.log.info('Loading queries');
 
-  var promises = [];
-  _.each(queriesToLoad, function (queryId) {
-    promises.push(new Promise(function (fulfill, reject) {
-
+  return Promise.map(queriesToLoad, function (queryId) {
+    return new Promise(function (fulfill, reject) {
       fs.readFile(path.join(__dirname, 'queries', queryId + '.json'), function (err, data) {
         if (err) {
           reject(err);
@@ -357,10 +347,8 @@ QueryEngine.prototype._loadQueries = function () {
           fulfill(true);
         });
       });
-    }));
+    });
   });
-
-  return Promise.all(promises);
 };
 
 QueryEngine.prototype.setupJDBC = function () {
@@ -517,13 +505,6 @@ QueryEngine.prototype.reloadQueries = function () {
             return new RestQuery(self.server, queryDef, self.cache);
           } else if (queryDef.datasource.datasourceType === kibiUtils.DatasourceTypes.sqlite) {
             return new SQLiteQuery(self.server, queryDef, self.cache);
-          } else if (queryDef.datasource.datasourceType === kibiUtils.DatasourceTypes.tinkerpop3) {
-            if (self.config.get('pkg.kibiEnterpriseEnabled')) {
-              return new TinkerPop3Query(self.server, queryDef, self.cache);
-            } else {
-              self.log.error(`This datasource type [${kibiUtils.DatasourceTypes.tinkerpop3}] - requires Kibi Enterprise Edition`);
-              return false;
-            }
           } else {
             self.log.error('Unknown datasource type [' + queryDef.datasource.datasourceType + '] - could NOT create query object');
             return false;
@@ -532,7 +513,7 @@ QueryEngine.prototype.reloadQueries = function () {
       });
     }
   }).catch(function (err) {
-    self.log.error('Something is wrong - elastic search is not running');
+    self.log.error('Something is wrong - elasticsearch is not running');
     self.log.error(err);
   });
 };

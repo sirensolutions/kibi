@@ -68,6 +68,12 @@ define(function (require) {
       };
       $scope.starDetectedInAQuery = false;
 
+      $scope.rejectTinkerpop = function (item) {
+        if (item) {
+          return item.type === 'tinkerpop3';
+        }
+      };
+
       $scope.tabClick = function (preview) {
         switch (preview) {
           case 'json':

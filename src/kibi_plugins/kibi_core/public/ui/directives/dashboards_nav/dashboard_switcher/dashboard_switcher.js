@@ -7,6 +7,7 @@ import template from './dashboard_switcher.html';
 import uiModules from 'ui/modules';
 import uiRoutes from 'ui/routes';
 import _ from 'lodash';
+import MissingDashboardError from 'ui/kibi/errors/missing_dashboard_error';
 
 uiModules
 .get('kibana')

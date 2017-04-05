@@ -21,7 +21,8 @@ describe('Query decorator', function () {
         const keys = {};
         return {
           get: function (key) { return keys[key]; },
-          set: function (key, value) { keys[key] = value; }
+          set: function (key, value) { keys[key] = value; },
+          isDeclared: () => false
         };
       });
     }

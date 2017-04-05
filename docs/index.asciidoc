@@ -72,6 +72,8 @@ include::shield_integration.asciidoc[]
 
 include::production.asciidoc[]
 
+include::cross_frame_communication.asciidoc[]
+
 include::releasenotes.asciidoc[]
 
 include::acknowledgements.asciidoc[]

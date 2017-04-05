@@ -47,7 +47,7 @@ uiModules
         .catch((err) => {
           // ignore all missing dashboard errors as user might not have permissions to see them
           if (!(err instanceof MissingDashboardError)) {
-            notify.warning(err);
+            notify.error(err);
           }
         });
       };

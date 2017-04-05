@@ -9,7 +9,6 @@ describe('Query Helper', function () {
   let fakeServer;
   let queryHelper;
 
-
   const doc = {
     _id: '_12345_',
     _source: {
@@ -35,7 +34,10 @@ describe('Query Helper', function () {
         {
           _id: '_id1',
           _source: {
-            id: 'id1'
+            id: 'id1',
+            numerical_ids: [1,2],
+            string_ids: ['a','b'],
+            mixed_ids: [1,'a',2,'b']
           }
         }
       ]
@@ -85,26 +87,26 @@ describe('Query Helper', function () {
   describe('fetchDocument test if correct client is used', function () {
     it('no credentials', function () {
       return queryHelper.fetchDocument('index', 'type', 'id')
-        .then(function (doc) {
-          sinon.assert.calledOnce(searchStub);
-          sinon.assert.notCalled(createClientStub);
-        });
+      .then(function (doc) {
+        sinon.assert.calledOnce(searchStub);
+        sinon.assert.notCalled(createClientStub);
+      });
     });
 
     it('with credentials', function () {
       return queryHelper.fetchDocument('index', 'type', 'id', credentials)
-        .then(function (doc) {
-          sinon.assert.notCalled(searchStub);
-          sinon.assert.calledOnce(createClientStub);
-        });
+      .then(function (doc) {
+        sinon.assert.notCalled(searchStub);
+        sinon.assert.calledOnce(createClientStub);
+      });
     });
 
     it('id with colon', function () {
       return queryHelper.fetchDocument('index', 'type', 'id:test')
-        .then(function (doc) {
-          sinon.assert.calledOnce(searchStub);
-          sinon.assert.notCalled(createClientStub);
-        });
+      .then(function (doc) {
+        sinon.assert.calledOnce(searchStub);
+        sinon.assert.notCalled(createClientStub);
+      });
     });
   });
 
@@ -151,6 +153,35 @@ describe('Query Helper', function () {
 
           return queryHelper.replaceVariablesUsingEsDocument(s, options)
           .then(function (ret) {
+            assertions();
+            expect(ret).to.equal(expected);
+          });
+        });
+
+        it('replace in single where value is an array of integers', function () {
+          var s = '[@doc[_source][numerical_ids]@]';
+          var expected = '[1,2]';
+          return queryHelper.replaceVariablesUsingEsDocument(s, options)
+          .then(function (ret) {
+            assertions();
+            expect(ret).to.equal(expected);
+          });
+        });
+
+        it('replace in single where value is an array strings', function () {
+          var s = '[@doc[_source][string_ids]@]';
+          var expected = '["a","b"]';
+          return queryHelper.replaceVariablesUsingEsDocument(s, options)
+          .then(function (ret) {
+            assertions();
+            expect(ret).to.equal(expected);
+          });
+        });
+
+        it('replace in single where value is an array of mixed strings and integers', function () {
+          var s = '[@doc[_source][mixed_ids]@]';
+          var expected = '[1,"a",2,"b"]';
+          return queryHelper.replaceVariablesUsingEsDocument(s, options).then(function (ret) {
             assertions();
             expect(ret).to.equal(expected);
           });

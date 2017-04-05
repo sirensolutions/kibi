@@ -32,6 +32,9 @@ define(function (require) {
           kbnUrl.change('/settings/templates/' + $scope.vis.params.templateId);
         };
 
+        $scope.filterTemplates = function (item) {
+          return item ? item.templateEngine !== 'html-angular' : true;
+        };
 
         // ====================================
         // Visualization controller integration

@@ -166,7 +166,11 @@
       <span class="small-note">Pick a template to render the results.
         <a ng-show="vis.params.templateId" ng-click="jumpToTemplate()"> Edit template</a>
       </span><br/>
-      <kibi-select object-type="template" ng-model="vis.params.templateId" options="{placeholder: 'None. (Table view only)'}"></kibi-select>
+      <kibi-select
+        object-type="template"
+        filter="filterTemplates"
+        ng-model="vis.params.templateId"
+        options="{placeholder: 'None. (Table view only)'}"></kibi-select>
     </div>
   </section>
 

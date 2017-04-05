@@ -26,33 +26,31 @@
     }
   }
 
-  &.is-dashboards-nav-visible {
-    width: @dashboards-nav-closed-width;
-    left: @global-nav-closed-width;
+  width: @dashboards-nav-closed-width;
+  left: @global-nav-closed-width;
+
+  + .app-container {
+    margin-left: @dashboards-nav-closed-width;
+  }
+
+  &.is-global-nav-open {
+    left: @global-nav-open-width;
 
     + .app-container {
-      left: @dashboards-nav-closed-width;
+      margin-left: @dashboards-nav-closed-width;
+    }
+  }
+
+  &.is-dashboards-nav-open {
+    width: @dashboards-nav-open-width;
+
+    + .app-container {
+      margin-left: @dashboards-nav-open-width;
     }
 
     &.is-global-nav-open {
-      left: @global-nav-open-width;
-
       + .app-container {
-        left: @dashboards-nav-closed-width;
-      }
-    }
-
-    &.is-dashboards-nav-open {
-      width: @dashboards-nav-open-width;
-
-      + .app-container {
-        left: @dashboards-nav-open-width;
-      }
-
-      &.is-global-nav-open {
-        + .app-container {
-          left: @dashboards-nav-open-width;
-        }
+        margin-left: @dashboards-nav-open-width;
       }
     }
   }

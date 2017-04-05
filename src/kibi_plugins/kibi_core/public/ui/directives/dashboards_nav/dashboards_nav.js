@@ -47,12 +47,6 @@ uiModules
         updateDashboardsNav();
       });
 
-      $scope.isVisible = onDashboardPage();
-      $scope.$watch(onDashboardPage, onPage => {
-        if (onPage !== undefined) {
-          $scope.isVisible = onPage;
-        }
-      });
     }
   };
 });

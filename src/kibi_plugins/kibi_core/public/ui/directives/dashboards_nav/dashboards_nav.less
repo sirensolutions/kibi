@@ -5,7 +5,7 @@
 @logo-height: 70px;
 
 .dashboards-nav {
-  position: fixed;
+  position: fixed !important;
   width: 0;
   left: 0;
   top: 0;
@@ -26,33 +26,31 @@
     }
   }
 
-  &.is-dashboards-nav-visible {
-    width: @dashboards-nav-closed-width;
-    left: @global-nav-closed-width;
+  width: @dashboards-nav-closed-width;
+  left: @global-nav-closed-width;
 
-    + .app-wrapper {
-      left: @global-nav-closed-width + @dashboards-nav-closed-width;
+  + .app-container {
+    margin-left: @dashboards-nav-closed-width;
+  }
+
+  &.is-global-nav-open {
+    left: @global-nav-open-width;
+
+    + .app-container {
+      margin-left: @dashboards-nav-closed-width;
+    }
+  }
+
+  &.is-dashboards-nav-open {
+    width: @dashboards-nav-open-width;
+
+    + .app-container {
+      margin-left: @dashboards-nav-open-width;
     }
 
     &.is-global-nav-open {
-      left: @global-nav-open-width;
-
-      + .app-wrapper {
-        left: @global-nav-open-width + @dashboards-nav-closed-width;
-      }
-    }
-
-    &.is-dashboards-nav-open {
-      width: @dashboards-nav-open-width;
-
-      + .app-wrapper {
-        left: @global-nav-closed-width + @dashboards-nav-open-width;
-      }
-
-      &.is-global-nav-open {
-        + .app-wrapper {
-          left: @global-nav-open-width + @dashboards-nav-open-width;
-        }
+      + .app-container {
+        margin-left: @dashboards-nav-open-width;
       }
     }
   }

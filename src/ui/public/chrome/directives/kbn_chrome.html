@@ -7,9 +7,6 @@
     app-title="chrome.getAppTitle()"
   ></global-nav>
 
-  <!-- kibi: added dashboards sidebar -->
-  <dashboards-nav ng-if="onDashboardPage"></dashboards-nav>
-
   <div class="app-wrapper" ng-class="{ 'hidden-chrome': !chrome.getVisible() }">
     <div class="app-wrapper-panel">
       <kbn-notifications list="notifList"></kbn-notifications>

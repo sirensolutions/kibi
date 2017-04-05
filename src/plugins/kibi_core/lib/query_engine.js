@@ -226,7 +226,7 @@ QueryEngine.prototype._loadTemplates = function () {
   var templatesToLoad = [
     'kibi-json-jade',
     'kibi-table-jade',
-    'kibi-enhanced-html-angular',
+    'kibi-html-angular',
     'kibi-table-handlebars'
   ];
 

@@ -40,7 +40,7 @@ RestQuery.prototype.checkIfItIsRelevant = function (options) {
   }
 
   // evaluate the rules
-  return this.rulesHelper.evaluate(this.config.activation_rules, options.selectedDocuments, options.credentials)
+  return this.rulesHelper.evaluate(this.config.activation_rules, options)
   .then(res => res ? QUERY_RELEVANT : QUERY_DEACTIVATED);
 };
 

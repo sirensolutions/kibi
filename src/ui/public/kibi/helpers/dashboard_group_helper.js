@@ -1,5 +1,6 @@
 define(function (require) {
   const isJoinPruned = require('ui/kibi/helpers/is_join_pruned');
+  const MissingDashboardError = require('ui/kibi/errors/missing_dashboard_error');
 
   return function DashboardGroupHelperFactory(
       $timeout, kibiState, Private, savedDashboards, savedDashboardGroups, Promise, kbnIndex, $http, config) {
@@ -251,7 +252,7 @@ define(function (require) {
             });
 
             if (fail) {
-              return false;
+              return false; // to break the loop
             }
 
             dashboards = _.map(dashboardsArray, function (d) {
@@ -292,7 +293,7 @@ define(function (require) {
           }); // end of each
 
           if (fail) {
-            return Promise.reject(new Error(fail));
+            return Promise.reject(new MissingDashboardError(fail));
           }
 
           return dashboardGroups1;

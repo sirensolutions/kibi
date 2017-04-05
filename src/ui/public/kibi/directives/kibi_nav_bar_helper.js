@@ -2,6 +2,7 @@ define(function (require) {
   const angular = require('angular');
   const _ = require('lodash');
   const DelayExecutionHelper = require('ui/kibi/helpers/delay_execution_helper');
+  const MissingDashboardError = require('ui/kibi/errors/missing_dashboard_error');
 
   return function KibiNavBarHelperFactory(kibiState, globalState, getAppState, createNotifier, Private, $http, Promise, $rootScope,
                                           savedDashboards) {
@@ -226,6 +227,11 @@ define(function (require) {
       .then((groups) => {
         dashboardGroupHelper.copy(groups, this.dashboardGroups);
         return this.dashboardGroups;
+      }).catch((err) => {
+        // ignore all missing dashboard errors as user might not have permissions to see them
+        if (!(err instanceof MissingDashboardError)) {
+          notify.warning(err);
+        }
       });
     };
 

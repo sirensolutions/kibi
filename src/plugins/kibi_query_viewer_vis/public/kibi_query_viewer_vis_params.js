@@ -66,6 +66,10 @@ define(function (require) {
           kbnUrl.change('/settings/queries/' + $scope.vis.params.queryDefinitions[index].queryId);
         };
 
+        $scope.filterTemplates = function (item) {
+          return item ? item.templateEngine === 'html-angular' : true;
+        };
+
       }
     };
   });

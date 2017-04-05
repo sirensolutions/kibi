@@ -7,7 +7,11 @@ import uiModules from 'ui/modules';
 import uiRoutes from 'ui/routes';
 
 uiRoutes
-.addSetupWork(dashboardGroups => dashboardGroups.init());
+.addSetupWork($injector => {
+  if ($injector.has('kibiState')) {
+    $injector.get('dashboardGroups').init();
+  }
+});
 
 uiModules
 .get('kibana')

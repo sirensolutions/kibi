@@ -15,21 +15,6 @@ const createPath = function (prefix, path) {
   return `${prefix}${path}`;
 };
 
-const responseHandler = function (err, upstreamResponse, request, reply) {
-  if (err) {
-    reply(err);
-    return;
-  }
-
-  if (upstreamResponse.headers.location) {
-    // TODO: Workaround for #8705 until hapi has been updated to >= 15.0.0
-    upstreamResponse.headers.location = encodeURI(upstreamResponse.headers.location);
-  }
-
-  reply(null, upstreamResponse);
-};
-
-
 module.exports = function createProxy(server, method, path, config) {
   const sirenJoin = sirenJoinModule(server);
 
@@ -49,7 +34,7 @@ module.exports = function createProxy(server, method, path, config) {
 
   const handler = {
     kibi_proxy: {
-      modifyPayload: (request) => {
+      onBeforeSendRequest: (request) => {
         const req = request.raw.req;
 
         return new Promise((fulfill, reject) => {
@@ -116,47 +101,39 @@ module.exports = function createProxy(server, method, path, config) {
           });
         });
       },
-      modifyResponse: (response, dataPassed) => {
-        return new Promise((fulfill, reject) => {
-          if (response.headers.location) {
-            // TODO: Workaround for #8705 until hapi has been updated to >= 15.0.0
-            response.headers.location = encodeURI(response.headers.location);
-          }
+      onResponse: (err, response, request, reply, settings, ttl, dataPassed) => {
+        if (response.headers.location) {
+          // TODO: Workaround for #8705 until hapi has been updated to >= 15.0.0
+          response.headers.location = encodeURI(response.headers.location);
+        }
+
+        const chunks = [];
+
+        response.on('error', (error) => {
+          reply(error);
+          return;
+        });
+        response.on('data', (chunk) => chunks.push(chunk));
+        response.on('end', () => {
+          const data = Buffer.concat(chunks);
 
           if (size(dataPassed.savedQueries) === 0) {
-            fulfill({
-              response: response,
-              data: dataPassed
-            });
+            reply(data).header('content-type', 'application/json');
             return;
           }
 
-          const chunks = [];
-
-          response.on('error', reject);
-          response.on('data', (chunk) => chunks.push(chunk));
-          response.on('end', () => {
-            const data = Buffer.concat(chunks);
-            if (data.length !== 0) {
-              inject.runSavedQueries(JSON.parse(data.toString()), server.plugins.kibi_core.getQueryEngine(), dataPassed.savedQueries,
-                  dataPassed.credentials)
-                .then((r) => {
-                  dataPassed.body = new Buffer(JSON.stringify(r));
-                  fulfill({
-                    response: response,
-                    data: dataPassed
-                  });
-                }).catch((err) => {
-                  server.log(['error','create_kibi_proxy'], 'Something went wrong while modifying response: ' + err.stack);
-                  reject(err);
-                });
-            } else {
-              fulfill({
-                response: response,
-                data: dataPassed
+          if (data.length !== 0) {
+            inject.runSavedQueries(JSON.parse(data.toString()), server.plugins.kibi_core.getQueryEngine(), dataPassed.savedQueries,
+                dataPassed.credentials)
+              .then((r) => {
+                reply(new Buffer(JSON.stringify(r))).header('content-type', 'application/json');
+              }).catch((err) => {
+                server.log(['error','create_kibi_proxy'], 'Something went wrong while modifying response: ' + err.stack);
+                reply(err);
               });
-            }
-          });
+          } else {
+            reply({});
+          }
         });
       }
     }
@@ -184,7 +161,7 @@ module.exports = function createProxy(server, method, path, config) {
       xforward: true,
       // required to pass through request headers
       timeout: cluster.getRequestTimeout(),
-      onResponse: responseHandler
+      onResponse: handler.kibi_proxy.onResponse
     });
 
     server.route(options);

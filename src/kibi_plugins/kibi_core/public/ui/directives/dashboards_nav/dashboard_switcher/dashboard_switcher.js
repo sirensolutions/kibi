@@ -7,6 +7,7 @@ import template from './dashboard_switcher.html';
 import uiModules from 'ui/modules';
 import uiRoutes from 'ui/routes';
 import _ from 'lodash';
+import MissingDashboardError from 'ui/kibi/errors/missing_dashboard_error';
 
 uiModules
 .get('kibana')
@@ -44,7 +45,12 @@ uiModules
         .then((groups) => {
           dashboardGroups.copy(groups, $scope.groups);
         })
-        .catch(notify.error);
+        .catch((err) => {
+          // ignore all missing dashboard errors as user might not have permissions to see them
+          if (!(err instanceof MissingDashboardError)) {
+            notify.error(err);
+          }
+        });
       };
 
       // rerender tabs if any dashboard got saved

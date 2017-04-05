@@ -5,6 +5,7 @@ import _ from 'lodash';
 import SearchHelper from 'ui/kibi/helpers/search_helper';
 import uiModules from 'ui/modules';
 import uiRoutes from 'ui/routes';
+import MissingDashboardError from 'ui/kibi/errors/missing_dashboard_error';
 
 uiRoutes
 .addSetupWork($injector => {
@@ -370,7 +371,7 @@ uiModules
         // here first fetch all dashboards to be able to verify that dashboards mentioned in the group still exists
         return savedDashboards.find().then(function (respDashboards) {
           const dashboardGroups1 = [];
-          let fail = '';
+          let missingDashboardMsg = '';
           // first iterate over existing groups
           _.each(respGroups.hits, function (group) {
 
@@ -379,13 +380,13 @@ uiModules
             // in case there is one which does not display a warning
             _.each(dashboardsArray, function (d) {
               if (!_.find(respDashboards.hits, 'id', d.id)) {
-                fail = '"' + group.title + '"' + ' dashboard group contains non existing dashboard "' + d.id + '". ' +
+                missingDashboardMsg = '"' + group.title + '"' + ' dashboard group contains non existing dashboard "' + d.id + '". ' +
                   'Edit dashboard group to remove non existing dashboard';
                 return false;
               }
             });
 
-            if (fail) {
+            if (missingDashboardMsg) {
               return false;
             }
 
@@ -420,8 +421,8 @@ uiModules
 
           }); // end of each
 
-          if (fail) {
-            return Promise.reject(new Error(fail));
+          if (missingDashboardMsg) {
+            return Promise.reject(new MissingDashboardError(missingDashboardMsg));
           }
 
           return dashboardGroups1;

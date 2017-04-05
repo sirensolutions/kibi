@@ -5,6 +5,7 @@ import _ from 'lodash';
 import SearchHelper from 'ui/kibi/helpers/search_helper';
 import uiModules from 'ui/modules';
 import uiRoutes from 'ui/routes';
+import MissingDashboardError from 'ui/kibi/errors/missing_dashboard_error'
 
 uiRoutes
 .addSetupWork($injector => {
@@ -421,7 +422,7 @@ uiModules
           }); // end of each
 
           if (fail) {
-            return Promise.reject(new Error(fail));
+            return Promise.reject(new MissingDashboardError(fail));
           }
 
           return dashboardGroups1;

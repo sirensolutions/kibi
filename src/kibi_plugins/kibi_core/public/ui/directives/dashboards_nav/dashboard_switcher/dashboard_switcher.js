@@ -44,7 +44,12 @@ uiModules
         .then((groups) => {
           dashboardGroups.copy(groups, $scope.groups);
         })
-        .catch(notify.error);
+        .catch((err) => {
+          // ignore all missing dashboard errors as user might not have permissions to see them
+          if (!(err instanceof MissingDashboardError)) {
+            notify.warning(err);
+          }
+        });
       };
 
       // rerender tabs if any dashboard got saved

@@ -251,7 +251,7 @@ define(function (require) {
             });
 
             if (fail) {
-              return false;
+              return false; // to break the loop
             }
 
             dashboards = _.map(dashboardsArray, function (d) {

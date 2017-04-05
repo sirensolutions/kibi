@@ -226,7 +226,7 @@ define(function (require) {
       .then((groups) => {
         dashboardGroupHelper.copy(groups, this.dashboardGroups);
         return this.dashboardGroups;
-      });
+      }).catch(notify.warning);
     };
 
     KibiNavBarHelper.prototype.cancelExecutionInProgress = function () {

@@ -1,0 +1,20 @@
+[[cross_frame_communication]]
+== Cross frame communication [Enterprise Edition only]
+
+ifeval::["{enterprise_enabled}" == "false"]
+  NOTE: Documentation for Cross frame communication is available only in Kibi Enterprise Edition.
+endif::[]
+
+ifeval::["{enterprise_enabled}" == "true"]
+
+To allow cross frame communication Kibi exposes a service at **window.kibi**.
+
+List of available methods:
+
+* **async generateShortUrl(shareAsEmbed, displayNavBar)** Where:
+- shareAsEmbed - Set to true to enable embedding in the URL.
+- displayNavBar - Set to true to display the Kibi navigation bar when embedding is enabled in the URL.
+- returns a promise which resolves with the short URL.
+
+endif::[]
+

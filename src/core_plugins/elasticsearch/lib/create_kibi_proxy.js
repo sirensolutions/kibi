@@ -117,11 +117,6 @@ module.exports = function createProxy(server, method, path, config) {
         });
       },
       onResponse: (err, response, request, reply, settings, ttl, dataPassed) => {
-        //if (response.headers.location) {
-        //  // TODO: Workaround for #8705 until hapi has been updated to >= 15.0.0
-        //  response.headers.location = encodeURI(response.headers.location);
-        //}
-
         const chunks = [];
 
         response.on('error', (error) => {
@@ -147,7 +142,7 @@ module.exports = function createProxy(server, method, path, config) {
                 reply(err);
               });
           } else {
-            reply({});
+            reply(new Error('There is no data in response.'));
           }
         });
       }
@@ -175,8 +170,7 @@ module.exports = function createProxy(server, method, path, config) {
       }),
       xforward: true,
       // required to pass through request headers
-      timeout: cluster.getRequestTimeout(),
-      onResponse: handler.kibi_proxy.onResponse
+      timeout: cluster.getRequestTimeout()
     });
 
     server.route(options);

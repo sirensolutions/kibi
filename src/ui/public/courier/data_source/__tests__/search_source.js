@@ -25,6 +25,43 @@ describe('SearchSource', function () {
     expect(indexPattern).to.not.be(indexPattern2);
   }));
 
+  describe('Kibi', function () {
+    it('should put user queries into the query clause of the filtered query', function () {
+      const initialState = {
+        index: {
+          getComputedFields: function () {
+            return {};
+          }
+        },
+        query: 'google',
+        filter: [
+          {
+            query_string: {
+              query: 'torrent'
+            }
+          },
+          {
+            meta: {
+              disabled: false
+            },
+            match: {
+              message: 'toto'
+            }
+          }
+        ]
+      };
+      const source = new SearchSource(initialState);
+      return source._flatten()
+        .then(flatState => {
+          const query = flatState.body.query;
+          expect(query.bool.must).to.have.length(3);
+          expect(query.bool.must[0].query_string.query).to.be('google');
+          expect(query.bool.must[1].query_string.query).to.be('torrent');
+          expect(query.bool.must[2].match.message).to.be('toto');
+        });
+    });
+  });
+
   describe('#onResults()', function () {
     it('adds a request to the requestQueue', function () {
       const source = new SearchSource();

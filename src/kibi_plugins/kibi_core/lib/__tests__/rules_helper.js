@@ -60,6 +60,25 @@ describe('Rule Helper', function () {
 
   describe('Evaluating rules', function () {
 
+    it('should return false if a rule is not dependent on a selected document', function () {
+      const rules = [
+        {
+          s: '@doc[_source][id]@',
+          p: 'exists'
+        },
+        {
+          s: 'nope',
+          p: 'matches',
+          v: 'id1'
+        }
+      ];
+
+      return rulesHelper.evaluate(rules, { selectedDocuments })
+      .then(function (res) {
+        expect(res).to.equal(false);
+      });
+    });
+
     describe('Matches', function () {
 
       it('should return true as id property exists and matches id1', function (done) {
@@ -75,7 +94,7 @@ describe('Rule Helper', function () {
           }
         ];
 
-        rulesHelper.evaluate(rules, selectedDocuments).then(function (res) {
+        rulesHelper.evaluate(rules, { selectedDocuments }).then(function (res) {
           expect(res).to.equal(true);
           done();
         }).catch(done);
@@ -94,7 +113,7 @@ describe('Rule Helper', function () {
           }
         ];
 
-        rulesHelper.evaluate(rules, selectedDocuments).then(function (res) {
+        rulesHelper.evaluate(rules, { selectedDocuments }).then(function (res) {
           expect(res).to.equal(true);
           done();
         });
@@ -108,7 +127,7 @@ describe('Rule Helper', function () {
           }
         ];
 
-        rulesHelper.evaluate(rules, selectedDocuments).then(function (res) {
+        rulesHelper.evaluate(rules, { selectedDocuments }).then(function (res) {
           expect(res).to.equal(true);
           done();
         });
@@ -122,7 +141,7 @@ describe('Rule Helper', function () {
           }
         ];
 
-        rulesHelper.evaluate(rules, selectedDocuments).then(function (res) {
+        rulesHelper.evaluate(rules, { selectedDocuments }).then(function (res) {
           expect(res).to.equal(false);
           done();
         });
@@ -136,7 +155,7 @@ describe('Rule Helper', function () {
           }
         ];
 
-        rulesHelper.evaluate(rules, selectedDocuments).then(function (res) {
+        rulesHelper.evaluate(rules, { selectedDocuments }).then(function (res) {
           expect(res).to.equal(false);
           done();
         });
@@ -151,7 +170,7 @@ describe('Rule Helper', function () {
           }
         ];
 
-        rulesHelper.evaluate(rules, selectedDocuments).then(function (res) {
+        rulesHelper.evaluate(rules, { selectedDocuments }).then(function (res) {
           expect(res).to.equal(true);
           done();
         });
@@ -165,7 +184,7 @@ describe('Rule Helper', function () {
           }
         ];
 
-        rulesHelper.evaluate(rules, selectedDocuments).then(function (res) {
+        rulesHelper.evaluate(rules, { selectedDocuments }).then(function (res) {
           expect(res).to.equal(true);
           done();
         });
@@ -179,7 +198,7 @@ describe('Rule Helper', function () {
           }
         ];
 
-        rulesHelper.evaluate(rules, selectedDocuments).then(function (res) {
+        rulesHelper.evaluate(rules, { selectedDocuments }).then(function (res) {
           expect(res).to.equal(false);
           done();
         });
@@ -193,7 +212,7 @@ describe('Rule Helper', function () {
           }
         ];
 
-        rulesHelper.evaluate(rules, selectedDocuments).then(function (res) {
+        rulesHelper.evaluate(rules, { selectedDocuments }).then(function (res) {
           expect(res).to.equal(false);
           done();
         });
@@ -215,7 +234,7 @@ describe('Rule Helper', function () {
           }
         ];
 
-        rulesHelper.evaluate(rules, selectedDocuments).then(function (res) {
+        rulesHelper.evaluate(rules, { selectedDocuments }).then(function (res) {
           expect(res).to.equal(true);
           done();
         });
@@ -238,7 +257,7 @@ describe('Rule Helper', function () {
           }
         ];
 
-        rulesHelper.evaluate(rules, selectedDocuments).then(function (res) {
+        rulesHelper.evaluate(rules, { selectedDocuments }).then(function (res) {
           expect(res).to.equal(true);
           done();
         });
@@ -253,7 +272,7 @@ describe('Rule Helper', function () {
           }
         ];
 
-        rulesHelper.evaluate(rules, selectedDocuments).then(function (res) {
+        rulesHelper.evaluate(rules, { selectedDocuments }).then(function (res) {
           expect(res).to.equal(true);
           done();
         });
@@ -268,7 +287,7 @@ describe('Rule Helper', function () {
           }
         ];
 
-        rulesHelper.evaluate(rules, selectedDocuments).then(function (res) {
+        rulesHelper.evaluate(rules, { selectedDocuments }).then(function (res) {
           expect(res).to.equal(false);
           done();
         });
@@ -287,7 +306,7 @@ describe('Rule Helper', function () {
           }
         ];
 
-        rulesHelper.evaluate(rules, selectedDocuments).then(function (res) {
+        rulesHelper.evaluate(rules, { selectedDocuments }).then(function (res) {
           expect(res).to.equal(false);
           done();
         });
@@ -301,7 +320,7 @@ describe('Rule Helper', function () {
           }
         ];
 
-        rulesHelper.evaluate(rules, selectedDocuments).then(function (res) {
+        rulesHelper.evaluate(rules, { selectedDocuments }).then(function (res) {
           expect(res).to.equal(true);
           done();
         });

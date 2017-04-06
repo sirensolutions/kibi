@@ -1,4 +1,3 @@
-import { QUERY_DEACTIVATED } from './_symbols';
 import url    from 'url';
 import Promise from 'bluebird';
 import QueryHelper from './query_helper';
@@ -7,7 +6,7 @@ function RulesHelper(server) {
   this.queryHelper = new QueryHelper(server);
 }
 
-RulesHelper.prototype.evaluate = function (rules, selectedDocuments, credentials) {
+RulesHelper.prototype.evaluate = function (rules, { selectedDocuments, credentials }) {
   const self = this;
   // for now there should be only 1 selectedDocument
   if (selectedDocuments.length > 1) {
@@ -25,7 +24,7 @@ RulesHelper.prototype.evaluate = function (rules, selectedDocuments, credentials
 
       let regex = /^@doc\[.+?\]@$/;
       if (!regex.test(rule.s)) {
-        return QUERY_DEACTIVATED;
+        return false;
       }
 
       let propertyGroup = rule.s.replace('@doc', '');

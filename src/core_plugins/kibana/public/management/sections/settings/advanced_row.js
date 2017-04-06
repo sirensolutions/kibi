@@ -30,12 +30,12 @@ uiModules.get('apps/management')
           .then(function () {
             conf.loading = conf.editing = false;
           })
-          // kibi: cancel edit and notify error
+          // siren: cancel edit and notify error
           .catch((error) => {
             config.set(conf.name, conf.defVal);
             notify.error(error);
           });
-          // kibi: end
+          // siren: end
       };
 
       $scope.maybeCancel = function ($event, conf) {
@@ -57,16 +57,17 @@ uiModules.get('apps/management')
             return config.remove(conf.name);
           }
 
-          // kibi: added to allow for custom validation step before saving the value
+          // siren: added to allow for custom validation step before saving the value
           let value = conf.unsavedValue;
-          if (_.isFunction(conf.validator)) {
-            value = conf.validator(conf.unsavedValue);
+          if (conf.validator) {
+            value = $scope.validator(conf.validator, conf.unsavedValue);
             if (value instanceof Error) {
+              conf.loading = false;
               return Promise.reject(`Wrong value set for: ${conf.name}. ${value.message}`);
             }
           }
           return config.set(conf.name, value);
-          // kibi: end
+          // siren: end
         });
       };
 
@@ -80,6 +81,18 @@ uiModules.get('apps/management')
         });
       };
 
+      // siren: custom validator for value
+      $scope.validator = function (validator, val) {
+        switch (validator) {
+          case 'positiveIntegerValidator':
+            if (!/^\+?(0|[1-9]\d*)$/.test(val)) {
+              return new Error('Should be positive integer but was [' + val + '].');
+            }
+            return parseInt(val);
+            break;
+        }
+      };
+      //  siren: end
     }
   };
 });

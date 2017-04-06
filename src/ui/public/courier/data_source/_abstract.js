@@ -321,10 +321,16 @@ define(function (require) {
                   decorateQuery(filter.query);
                 }
               });
+              // siren: extract the query_string queries so that they contribute to the scoring
+              const userQueries = _(flatState.filters).remove(filter => _.has(filter.query, 'query_string.query')).map('query').value();
 
               flatState.body.query = {
                 filtered: {
-                  query: flatState.body.query,
+                  query: {
+                    bool: {
+                      must: [ flatState.body.query, ...userQueries ]
+                    }
+                  },
                   filter: {
                     bool: {
                       must: _(flatState.filters).filter(filterNegate(false)).map(cleanFilter).value(),

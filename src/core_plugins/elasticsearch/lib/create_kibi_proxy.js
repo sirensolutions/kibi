@@ -32,6 +32,21 @@ module.exports = function createProxy(server, method, path, config) {
     return credentials;
   }
 
+  /*
+  * Assign custom headers to reply() h2o2 interface headers.
+  * reply - reply interface;
+  * buffer - data buffer;
+  * headers - headers to assign for reply;
+  */
+  function replyWithHeaders(reply, buffer, headers) {
+    if (headers.location) {
+      // TODO: Workaround for #8705 until hapi has been updated to >= 15.0.0
+      headers.location = encodeURI(headers.location);
+    }
+
+    reply(buffer).headers = headers;
+  }
+
   const handler = {
     kibi_proxy: {
       onBeforeSendRequest: (request) => {
@@ -118,7 +133,7 @@ module.exports = function createProxy(server, method, path, config) {
           const data = Buffer.concat(chunks);
 
           if (size(dataPassed.savedQueries) === 0) {
-            reply(data).headers = response.headers;
+            replyWithHeaders(reply, data, response.headers);
             return;
           }
 
@@ -126,7 +141,7 @@ module.exports = function createProxy(server, method, path, config) {
             inject.runSavedQueries(JSON.parse(data.toString()), server.plugins.kibi_core.getQueryEngine(), dataPassed.savedQueries,
                 dataPassed.credentials)
               .then((r) => {
-                reply(new Buffer(JSON.stringify(r))).headers = response.headers;
+                replyWithHeaders(reply, new Buffer(JSON.stringify(r)), response.headers);
               }).catch((err) => {
                 server.log(['error','create_kibi_proxy'], 'Something went wrong while modifying response: ' + err.stack);
                 reply(err);

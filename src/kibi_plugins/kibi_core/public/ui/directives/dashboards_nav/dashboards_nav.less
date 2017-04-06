@@ -4,6 +4,15 @@
 
 @logo-height: 70px;
 
+.toaster-container .toaster {
+  &.dashboards-nav-open {
+    margin-left: @dashboards-nav-open-width;
+  }
+  &.dashboards-nav-closed {
+    margin-left: @dashboards-nav-closed-width;
+  }
+}
+
 .dashboards-nav {
   position: fixed !important;
   width: 0;

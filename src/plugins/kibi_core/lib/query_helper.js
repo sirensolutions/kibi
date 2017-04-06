@@ -179,15 +179,7 @@ QueryHelper.prototype._replaceVariablesInTheQuery = function (doc, query, dataso
     group = group.replace('@doc', '');
     group = group.substring(0, group.length - 1);
 
-    var value;
-    if (group === '[_id]' && datasource === 'tinkerpop3_query') {
-      let id = self._getValue(doc, group);
-      let index = self._getValue(doc, '[_index]');
-      let type = self._getValue(doc, '[_type]');
-      value = index + '/' + type + '/' + id;
-    } else {
-      value = self._getValue(doc, group);
-    }
+    var value = self._getValue(doc, group);
 
     if (value instanceof Array) {
       value = self._arrayToCommaSeparatedList(value);

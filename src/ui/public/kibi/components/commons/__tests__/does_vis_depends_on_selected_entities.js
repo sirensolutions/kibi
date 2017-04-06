@@ -190,64 +190,6 @@ describe('Kibi Components', function () {
         });
       });
 
-      describe('vis kibi_graph_browser', function () {
-        it('should depend on the entity', function (done) {
-          var vis = {
-            type: {
-              name: 'kibi_graph_browser'
-            },
-            params: {
-              queryOption: {
-                queryId: 'query1' // this query depends on selected entity
-              }
-            }
-          };
-
-          doesVisDependsOnSelectedEntities(vis).then(function (res) {
-            expect(res).to.equal(true);
-            done();
-          }).catch(done);
-        });
-
-        it('should not depend on the entity', function (done) {
-          var vis = {
-            type: {
-              name: 'kibi_graph_browser'
-            },
-            params: {
-              queryOption: {
-                queryId: 'query2'
-              }
-            }
-          };
-
-          doesVisDependsOnSelectedEntities(vis).then(function (res) {
-            expect(res).to.equal(false);
-            done();
-          }).catch(done);
-        });
-
-        it('should fail if the query does not exist', function (done) {
-          var vis = {
-            type: {
-              name: 'kibi_graph_browser'
-            },
-            params: {
-              queryOption: {
-                queryId: 'query-does-not-exist'
-              }
-            }
-          };
-
-          doesVisDependsOnSelectedEntities(vis).then(function () {
-            done('should fail');
-          }).catch(function (err) {
-            expect(err.message).to.equal('Unable to find queries: ["query-does-not-exist"]');
-            done();
-          });
-        });
-      });
-
       it('should not depend on entity for some unknown vis', function (done) {
         var vis = {
           type: {

@@ -8,9 +8,7 @@ define(function (require) {
     return function (vis) {
       const name = vis.type.name;
       let queryIds;
-      if (name === 'kibi_graph_browser') {
-        queryIds = [ vis.params.queryOption.queryId ];
-      } else if (name === 'kibi-data-table' && vis.params.enableQueryFields) {
+      if (name === 'kibi-data-table' && vis.params.enableQueryFields) {
         queryIds = _.map(vis.params.queryDefinitions, function (queryDef) {
           return queryDef.queryId;
         });

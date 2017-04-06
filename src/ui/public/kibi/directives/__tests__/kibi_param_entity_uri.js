@@ -20,6 +20,7 @@ let init = function () {
     $provide.constant('kbnDefaultAppId', '');
     $provide.constant('kibiDefaultDashboardTitle', '');
     $provide.constant('elasticsearchPlugins', ['siren-join']);
+    $provide.constant('kibiDatasourcesSchema', {});
 
     $compileProvider.directive('kibiSelect', function () {
       return {

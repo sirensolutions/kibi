@@ -25,6 +25,7 @@ var init = function ({
     $provide.constant('elasticsearchPlugins', ['siren-join']);
     $provide.constant('kbnDefaultAppId', '');
     $provide.constant('kibiDefaultDashboardTitle', '');
+    $provide.constant('kibiDatasourcesSchema', {});
   });
 
   // Create the scope

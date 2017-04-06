@@ -24,7 +24,7 @@ uiModules
     getSharedUrl() {
       const urlWithHashes = $location.absUrl();
       let url = urlWithHashes;
-      if (!config.get('state:storeInSessionStorage')) {
+      if (config.get('state:storeInSessionStorage')) {
         url = unhashUrl(urlWithHashes, getUnhashableStates());
       }
       return url;

@@ -1,0 +1,66 @@
+@import (reference) "~ui/kibi/styles/kibi_variables";
+@import (reference) "~ui/styles/variables";
+@import (reference) "../variables";
+
+@icon-width: 25px;
+
+.dashboards-nav-edit-link {
+  background-color: @dashboard-inactive-background;
+  margin-bottom: 1px;
+  clear: both;
+  display: block;
+  padding: 4px;
+
+  width: @dashboards-nav-closed-width;
+  .is-dashboards-nav-open & {
+    width: @dashboards-nav-open-width;
+  }
+
+  .icon {
+    color: @white;
+    display: inline;
+    width: @icon-width;
+    text-align: center;
+    .icon-placeholder {
+      background-position: center;
+      background-size: contain;
+      background-repeat: no-repeat;
+    }
+  }
+  .edit-content {
+    display: inline;
+    .title {
+      color: #ebf7fa;
+      display: inline;
+      padding-left: 4px;
+    }
+    .action {
+      color: @kibanaGray7;
+      float: right;
+      display: inline;
+      padding-right: 5px;
+    }
+  }
+  .dashboards {
+    .dashboard {
+      .dashboard-title {
+        margin-left: 16px;
+        padding-left: 4px;
+        color: @kibanaGray5;
+        display: inline;
+      }
+      .action {
+        color: @kibanaGray7;
+        float: right;
+        display: inline;
+        padding-right: 5px;
+      }
+    }
+  }
+  .dragbar {
+    display: inline;
+    color: @kibanaGray7;
+    padding-left: 5px;
+    padding-right: 5px;
+  }
+}

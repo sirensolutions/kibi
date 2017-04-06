@@ -1,0 +1,58 @@
+<div
+  class="dashboards-nav-edit-link"
+>
+  <div class="dragbar" ng-if="isOnEditMode">
+    <i class="fa fa-bars" aria-hidden="true"></i>
+  </div>
+  <div class="icon">
+    <i
+       ng-if="group.iconCss"
+       class="icon-image {{group.iconCss}}"
+    ></i>
+
+    <img
+       ng-if="group.iconUrl"
+       class="icon-image"
+       ng-src="{{group.iconUrl}}"
+    />
+
+    <span
+       ng-if="!group.iconCss && !group.iconUrl"
+       class="icon-placeholder"
+    >
+       {{ group.title[0] }}
+    </span>
+  </div>
+
+  <div class="edit-content">
+    <div class="title">
+      {{group.title}}
+    </div>
+    <a
+      ng-if="isOnEditMode && !group.virtual"
+      class="action"
+      ng-click="editGroup($event, group)"
+    >
+      <i class="fa fa-pencil" aria-hidden="true"></i>
+    </a>
+  </div>
+
+  <div ng-if="!(isOnEditMode && group.virtual)" class="dashboards">
+    <div class="dashboard" ng-repeat="dashboard in group.dashboards | filter:filter | orderBy: 'priority'">
+      <div class="dragbar" ng-if="isOnEditMode">
+        <i class="fa fa-bars" aria-hidden="true"></i>
+      </div>
+      <div class="dashboard-title">
+        {{dashboard.title}}
+      </div>
+      <a
+        ng-if="isGroupEditorOpen && !isOnEditMode"
+        class="action"
+        ng-click="includeDashboardOnGroup($event, group, dashboard)"
+      >
+        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+      </a>
+    </div>
+  </div>
+
+</div>

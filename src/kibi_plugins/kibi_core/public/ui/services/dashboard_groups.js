@@ -6,6 +6,7 @@ import SearchHelper from 'ui/kibi/helpers/search_helper';
 import uiModules from 'ui/modules';
 import uiRoutes from 'ui/routes';
 import MissingDashboardError from 'ui/kibi/errors/missing_dashboard_error';
+import SimpleEmitter from 'ui/utils/simple_emitter';
 
 uiRoutes
 .addSetupWork($injector => {
@@ -79,6 +80,7 @@ uiModules
           const dashboardIds = _.map(groups, 'selected.id');
           return this.updateMetadataOfDashboardIds(dashboardIds);
         });
+        this.simpleEmitter = new SimpleEmitter();
 
         return Promise.all([ groupsPromise, metadataPromise ])
         .then(([ groups ]) => {
@@ -99,6 +101,18 @@ uiModules
 
     getGroups() {
       return this.groups;
+    }
+
+    getEmitter() {
+      return this.simpleEmitter;
+    }
+
+    setDashboardSelection(group, dashboard) {
+      this.getEmitter().emit('dashboardSelected', group, dashboard);
+    }
+
+    setGroupSelection(group) {
+      this.getEmitter().emit('groupSelected', group);
     }
 
     setGroupHighlight(dashboardId) {

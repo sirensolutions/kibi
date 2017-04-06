@@ -1,13 +1,40 @@
 <div
   class="dashboards-nav-control"
   ng-class="{ disabled: !isActive, isOpen: isOpen }"
-  tooltip="{{ tooltipContent }}"
-  tooltip-placement="right"
-  tooltip-popup-delay="0"
-  tooltip-append-to-body="1"
 >
   <a
+    class="anchor-actions"
+    ng-if="isOpen && !isGroupEditorOpen && !isOnEditMode"
+    ng-click="onNewGroupClick({ $event: $event })"
+  >
+    <div class="icon-action">
+      <i class="fa fa-plus-circle" aria-hidden="true"></i>
+    </div>
+    <div class="title-action">
+      New group
+    </div>
+  </a>
+
+  <a
+    class="anchor-actions"
+    ng-if="isOpen && !isGroupEditorOpen"
+    ng-click="onEditClick({ $event: $event })"
+  >
+    <div class="icon-action">
+      <i class="fa fa-pencil" aria-hidden="true"></i>
+    </div>
+    <div ng-if="isOnEditMode" class="title-action">
+      Close
+    </div>
+    <div ng-if="!isOnEditMode" class="title-action">
+      Edit groups
+    </div>
+  </a>
+
+  <a
+    ng-if="!isOnEditMode && !isGroupEditorOpen"
     class="anchor"
+    ng-class="{'anchor-closed': !isOpen}"
     ng-click="onClick({ $event: $event })"
     title="{{ title }}"
   >
@@ -22,10 +49,6 @@
          class="icon-image"
          kbn-src="{{ '/' + kbnIcon }}"
       />
-    </div>
-
-    <div ng-if="title" class="title">
-      {{ title }}
     </div>
   </a>
 </div>

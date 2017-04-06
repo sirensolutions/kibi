@@ -2,6 +2,7 @@ import angular from 'angular';
 import './dashboard_switcher';
 import './dashboards_nav.less';
 import './dashboards_nav_control';
+import './dashboard_nav_group_editor';
 import dashboardsNavTemplate from './dashboards_nav.html';
 import { onDashboardPage } from 'ui/kibi/utils/on_page';
 import uiModules from 'ui/modules';
@@ -27,6 +28,12 @@ uiModules
           tooltipContent: isOpen ? 'Collapse dashboards bar' : 'Expand dashboards bar',
           icon: 'plugins/kibana/assets/play-circle.svg'
         };
+
+        const onEditMode = dashboardsNavState.isOnEditMode();
+        $scope.isDashboardsNavOnEditMode = onEditMode;
+
+        const onGroupEditorOpen = dashboardsNavState.isGroupEditorOpen();
+        $scope.isDashboardsNavGroupEditorOpen = onGroupEditorOpen;
 
         // Notify visualizations, e.g. the dashboard, that they should re-render.
         $rootScope.$broadcast('globalNav:update');
@@ -55,6 +62,16 @@ uiModules
         angular.element('.toaster-container .toaster')
         .removeClass('dashboards-nav-open dashboards-nav-closed');
       });
+
+      $scope.toggleDashboardsNavEditMode = event => {
+        event.preventDefault();
+        dashboardsNavState.setEditMode(!dashboardsNavState.isOnEditMode());
+      };
+
+      $scope.newDashboardGroup = event => {
+        event.preventDefault();
+        dashboardsNavState.setGroupEditorOpen(!dashboardsNavState.isGroupEditorOpen());
+      };
 
       $rootScope.$on('globalNavState:change', () => {
         updateGlobalNav();

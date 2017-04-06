@@ -1,6 +1,6 @@
 <nav
   class="dashboards-nav"
-  ng-class="{'is-dashboards-nav-open': isDashboardsNavOpen, 'is-global-nav-open': isGlobalNavOpen}">
+  ng-class="{'is-dashboards-nav-open': isDashboardsNavOpen, 'is-dashboards-nav-group-editor-open': isDashboardsNavGroupEditorOpen, 'is-global-nav-open': isGlobalNavOpen}">
 
   <div class="menu">
     <form role="form">
@@ -22,14 +22,23 @@
       filter="dashboardFilter"
     ></dashboard-switcher>
 
-    <!-- Open/close sidebar -->
+    <!-- actions and open/close sidebar -->
     <dashboards-nav-control
-        tooltip-content="{{ dashboardsNavToggleButton.tooltipContent }}"
         on-click="toggleDashboardsNav($event)"
         kbn-icon="{{ dashboardsNavToggleButton.icon }}"
-        title="{{ dashboardsNavToggleButton.title }}"
         is-open="isDashboardsNavOpen"
+        on-edit-click="toggleDashboardsNavEditMode($event)"
+        is-on-edit-mode="isDashboardsNavOnEditMode"
+        on-new-group-click="newDashboardGroup($event)"
+        is-group-editor-open="isDashboardsNavGroupEditorOpen"
     ></dashboards-nav-control>
+  </div>
+
+  <!-- group editor panel -->
+  <div ng-show="isDashboardsNavGroupEditorOpen" class="group-editor">
+    <dashboard-nav-group-editor
+      edit-mode="isDashboardsNavOnEditMode">
+    </dashboard-nav-group-editor>
   </div>
 
 </nav>

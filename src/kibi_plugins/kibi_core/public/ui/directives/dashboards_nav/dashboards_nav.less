@@ -20,7 +20,7 @@
   top: 0;
   bottom: 0;
   z-index: 0;
-  background-color: #e4e4e4;
+  background-color: @nav_color_bg;
   overflow: hidden;
 
   .menu {
@@ -64,6 +64,44 @@
     }
   }
 
+  &.is-dashboards-nav-group-editor-open {
+    > .group-editor {
+      margin-left: @dashboards-nav-closed-width;
+    }
+
+    + .app-container {
+      margin-left: @dashboards-nav-closed-width + @dashboards-nav-group-editor-width;
+    }
+
+    &.is-dashboards-nav-open {
+      > .group-editor {
+        margin-left: @dashboards-nav-open-width;
+      }
+
+      + .app-container {
+        margin-left: @dashboards-nav-open-width + @dashboards-nav-group-editor-width;
+      }
+
+      &.is-global-nav-open {
+        > .group-editor {
+          margin-left: @dashboards-nav-open-width;
+        }
+        + .app-container {
+          margin-left: @dashboards-nav-open-width + @dashboards-nav-group-editor-width;
+        }
+      }
+    }
+
+    &.is-global-nav-open {
+      > .group-editor {
+        margin-left: @dashboards-nav-closed-width;
+      }
+      + .app-container {
+        margin-left: @dashboards-nav-closed-width + @dashboards-nav-group-editor-width;
+      }
+    }
+  }
+
   /**
    * 3. Allow user to scroll to see clipped nav items when the nav is too short.
    * 4. Style the scrollbar to look good in Chrome and Safari.
@@ -88,4 +126,17 @@
       background-color: transparent;
     }
   }
+
+  .group-editor {
+    width: @dashboards-nav-group-editor-width;
+    border-right: 1px solid @kibanaGray4;
+    border-left: 1px solid @kibanaGray4;
+    top: 0;
+    bottom: 0;
+    position: fixed;
+    overflow-x: hidden; /* 3 */
+    overflow-y: auto; /* 3 */
+    background-color: @nav_color_bg;
+  }
+
 }

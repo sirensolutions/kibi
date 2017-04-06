@@ -1,7 +1,15 @@
 <div class="no-groups" ng-if="groups.length === 0">No dashboards ...</div>
 
 <dashboard-nav-link
+  ng-if="!isOnEditMode && !isGroupEditorOpen"
   ng-repeat="group in groups | filter:filter | orderBy: 'priority'"
   group="group"
   filter="filter"
 ></dashboard-nav-link>
+
+<dashboard-nav-edit-link
+  ng-if="isOnEditMode || isGroupEditorOpen"
+  ng-repeat="group in groups | filter:filter | orderBy: 'priority'"
+  group="group"
+  filter="filter"
+></dashboard-nav-edit-link>

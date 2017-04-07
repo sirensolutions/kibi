@@ -113,11 +113,9 @@ uiModules
 
           Promise.all(postSaveActions).then(() => {
             notify.info('Dashboard Group ' + $scope.dashboardGroup.title + ' was successfuly saved');
-            dashboardGroups.computeGroups('new group').then(() => {
-              $scope.setup();
-              dashboardsNavState.setGroupEditorOpen(false);
-              $rootScope.$emit('kibi:dashboardgroup:changed', groupId);
-            });
+            $scope.setup();
+            dashboardsNavState.setGroupEditorOpen(false);
+            $rootScope.$emit('kibi:dashboardgroup:changed', groupId);
           });
         });
       };

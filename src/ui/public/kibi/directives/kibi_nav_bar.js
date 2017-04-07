@@ -70,6 +70,9 @@ define(function (require) {
         };
 
         var updateTabScroller = function () {
+          if (!$tabContainer) {
+            return;
+          }
           var sl = $tabContainer.scrollLeft();
           const oldArrowLeft = $scope.tabScrollerState.leftArrow;
           const oldArrowRight = $scope.tabScrollerState.rightArrow;
@@ -93,13 +96,17 @@ define(function (require) {
         };
 
         function isActiveTabVisible(activeTab) {
-          if (activeTab) {
+          if (activeTab && $tabContainer) {
             const tab = activeTab.getBoundingClientRect();
             return (tab.right > 0) && (tab.left + activeTab.offsetWidth - $tabContainer.width() <= 0);
           }
         };
 
         function makeVisible() {
+          if (!$tabContainer) {
+            return;
+          }
+
           const $activeTab = $el.find('.nav-tabs li.active');
           const activeTabElement = $activeTab[0];
           if (!activeTabElement) {
@@ -117,6 +124,9 @@ define(function (require) {
         }
 
         $scope.onTabContainerResize = function () {
+          if (!$tabContainer) {
+            return;
+          }
           $scope.tabScrollerVisible = $tabContainer.width() < tabContainerElement.scrollWidth;
           makeVisible();
         };
@@ -180,6 +190,9 @@ define(function (require) {
 
         // used by the scrolling buttons
         $scope.scrollTabs = function (direction) {
+          if (!$tabContainer) {
+            return;
+          }
           if (direction === false) {
             stopScrolling = true;
             $tabContainer.stop();

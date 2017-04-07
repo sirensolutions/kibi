@@ -22,7 +22,7 @@ typeahead.directive('kbnTypeahead', function () {
     },
     controllerAs: 'typeahead',
 
-    controller: function ($scope, $element, $timeout, PersistedLog, config) {
+    controller: function ($scope, $element, PersistedLog, config) {
       const self = this;
       self.form = $element.closest('form');
       self.query = '';
@@ -111,21 +111,9 @@ typeahead.directive('kbnTypeahead', function () {
         $scope.inputModel.$render();
         self.persistEntry();
 
-        if (ev && ev.type === 'click') {
-          $timeout(function () {
-            self.submitForm();
-          });
-          // KIBI5: see if still needed
-          //// kibi: https://github.com/sirensolutions/kibi-internal/commit/0e4abf96933de5e854bc2534e8a71e2c6023d9f3
-          //// corrected click logic for typeahead
-          //$rootScope.$emit('kibi:dashboard:invoke-method', 'filterResults');
-          //// kibi: end
-        }
-      };
-
-      self.submitForm = function () {
-        if (self.form.length) {
-          self.form.submit();
+        if (ev && ev.type === 'click' && self.form.length) {
+          // siren: call filterResults from the scope instead via submit, which prevents the form's default action
+          self.form.scope().filterResults();
         }
       };
 

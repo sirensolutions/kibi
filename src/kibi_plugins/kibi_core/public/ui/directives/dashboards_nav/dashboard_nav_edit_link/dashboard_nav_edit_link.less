@@ -3,6 +3,7 @@
 @import (reference) "../variables";
 
 @icon-width: 25px;
+@actions: @kibanaGray6;
 
 .dashboards-nav-edit-link {
   background-color: @dashboard-inactive-background;
@@ -35,10 +36,21 @@
       padding-left: 4px;
     }
     .action {
-      color: @kibanaGray7;
+      color: @actions;
       float: right;
       display: inline;
+      padding-left: 5px;
       padding-right: 5px;
+      &:hover {
+        color: @link-hover-color;
+      }
+    }
+    .info-warning {
+      display: none;
+    }
+    .group-is-empty {
+      display: inline;
+      color: @brand-warning;
     }
   }
   .dashboards {
@@ -50,17 +62,23 @@
         display: inline;
       }
       .action {
-        color: @kibanaGray7;
+        color: @actions;
         float: right;
         display: inline;
         padding-right: 5px;
+        input {
+          margin: 0;
+        }
       }
     }
   }
   .dragbar {
     display: inline;
-    color: @kibanaGray7;
+    color: @actions;
     padding-left: 5px;
     padding-right: 5px;
+    &:hover {
+      color: @link-hover-color;
+    }
   }
 }

@@ -72,15 +72,15 @@ uiModules
     }
   };
 
-  class DashboardGroups {
+  class DashboardGroups extends SimpleEmitter {
     constructor() {
+      super();
       this.init = _.once(() => {
         const groupsPromise = this.computeGroups('init');
         const metadataPromise = groupsPromise.then(groups => {
           const dashboardIds = _.map(groups, 'selected.id');
           return this.updateMetadataOfDashboardIds(dashboardIds);
         });
-        this.simpleEmitter = new SimpleEmitter();
 
         return Promise.all([ groupsPromise, metadataPromise ])
         .then(([ groups ]) => {
@@ -103,16 +103,12 @@ uiModules
       return this.groups;
     }
 
-    getEmitter() {
-      return this.simpleEmitter;
-    }
-
-    setDashboardSelection(group, dashboard) {
-      this.getEmitter().emit('dashboardSelected', group, dashboard);
+    setDashboardSelection(group, dashboard, state) {
+      this.emit('dashboardSelected', group, dashboard, state);
     }
 
     setGroupSelection(group) {
-      this.getEmitter().emit('groupSelected', group);
+      this.emit('groupSelected', group);
     }
 
     setGroupHighlight(dashboardId) {

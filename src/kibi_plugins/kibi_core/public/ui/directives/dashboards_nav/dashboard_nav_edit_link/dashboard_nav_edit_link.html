@@ -28,6 +28,23 @@
     <div class="title">
       {{group.title}}
     </div>
+    <div
+      class="info-warning"
+      ng-class="{'group-is-empty': groupIsEmpty()}"
+      tooltip="This empty group will be deleted."
+      tooltip-placement="right"
+      tooltip-popup-delay="0"
+      tooltip-append-to-body="1"
+    >
+      <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
+    </div>
+    <a
+      ng-if="isOnEditMode && !group.virtual"
+      class="action"
+      ng-click="deleteGroup($event, group)"
+    >
+      <i class="fa fa-times" aria-hidden="true"></i>
+    </a>
     <a
       ng-if="isOnEditMode && !group.virtual"
       class="action"
@@ -45,13 +62,12 @@
       <div class="dashboard-title">
         {{dashboard.title}}
       </div>
-      <a
-        ng-if="isGroupEditorOpen && !isOnEditMode"
-        class="action"
-        ng-click="includeDashboardOnGroup($event, group, dashboard)"
+
+      <div ng-if="isGroupEditorOpen && !isOnEditMode"
+           class="action"
       >
-        <i class="fa fa-arrow-right" aria-hidden="true"></i>
-      </a>
+        <input type="checkbox" ng-click="includeDashboardOnGroup($event, group, dashboard)" />
+      </div>
     </div>
   </div>
 

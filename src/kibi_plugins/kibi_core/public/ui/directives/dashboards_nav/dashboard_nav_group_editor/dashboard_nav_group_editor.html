@@ -18,16 +18,6 @@
       </div>
 
       <div class="form-group">
-        <label>Description</label>
-        <input type="text" ng-model="dashboardGroup.description" class="form-control" />
-      </div>
-
-      <div class="form-group">
-        <label>Priority</label>
-        <input type="number" ng-model="dashboardGroup.priority" class="form-control" />
-      </div>
-
-      <div class="form-group">
         <label>Icon URL</label>
         <input type="text" ng-model="dashboardGroup.iconUrl" class="form-control" />
       </div>
@@ -45,7 +35,7 @@
       </div>
 
       <button
-        ng-disabled="form.$invalid"
+        ng-disabled="!editMode && dashboardsSelected() === 0"
         type="submit"
         class="btn btn-success btn-default"
         disabled="disabled">

@@ -33,9 +33,6 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
     controller: function ($scope, $element, $timeout) {
       const self = this;
 
-      // kibi: true if object was injectoroduced in kibi
-      $scope.isKibiObject = type => type === 'dashboardgroups' || type === 'templates' || type === 'queries';
-
       // kibi: variable to store the checkbox state
       $scope.kibi = {
         onDashboardPage: onDashboardPage(),

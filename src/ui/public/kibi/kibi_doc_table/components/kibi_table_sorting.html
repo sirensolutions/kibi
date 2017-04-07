@@ -1,0 +1,13 @@
+Sort results by
+<select
+  ng-model="selectedSortingColumn"
+  ng-change="changedSortingSelection()"
+  ng-options="value.label for value in sortingColumns track by value.value">
+</select>
+in
+<select
+  ng-model="selectedSortingOrder"
+  ng-change="changedSortingSelection()"
+  ng-options="value.label for value in sortingOrder track by value.value">
+</select>
+order

@@ -11,6 +11,7 @@ define(function (require) {
   require('ui/kibi/kibi_doc_table/components/kibi_table_row');
   require('ui/kibi/kibi_doc_table/components/kibi_table_header');
   require('ui/kibi/kibi_doc_table/components/kibi_custom_view');
+  require('ui/kibi/kibi_doc_table/components/kibi_table_sorting');
 
   // kibi: allow to query external datasources for populating a column
   require('ui/kibi/components/query_engine_client/query_engine_client');
@@ -46,9 +47,11 @@ define(function (require) {
           location: 'Enhanced search results'
         });
         $scope.limit = 50;
-        $scope.persist = {
-          sorting: $scope.sorting,
-          columns: $scope.columns
+
+        // create an object so the sorting
+        // will be correclty modified by inner directives
+        $scope.options = {
+          sorting: $scope.sorting
         };
 
         const prereq = (function () {
@@ -151,17 +154,16 @@ define(function (require) {
         };
 
         $scope.customView = false;
+        $scope.showCustomView = false;
         //initial custom view state:
         if ($scope.templateId) {
           $scope.customView = true;
+          $scope.showCustomView = true;
         }
-        $scope.toggleView = function () {
-          if ($scope.customView) {
-            $scope.customView = false;
-          } else {
-            $scope.customView = true;
-          }
+        $scope.toggleCustomeView = function () {
+          $scope.showCustomView = !$scope.showCustomView;
         };
+
         $scope.$watch('templateId', function (templateId) {
           $scope.customView = templateId ? true : false;
         });
@@ -226,7 +228,7 @@ define(function (require) {
           // kibi: end
 
           // Set the watcher after initialization
-          $scope.$watchCollection('sorting', function (newSort, oldSort) {
+          $scope.$watchCollection('options.sorting', function (newSort, oldSort) {
             // Don't react if sort values didn't really change
             if (newSort === oldSort) return;
             $scope.searchSource.sort(getSort(newSort, $scope.indexPattern));

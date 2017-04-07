@@ -8,10 +8,9 @@ define(function (require) {
   * <tr ng-repeat="row in rows" kibi-table-row="row"></tr>
   * ```
   */
-  module.directive('kibiCustomView', function ($compile,savedTemplates,$cacheFactory) {
+  module.directive('kibiCustomView', function ($compile, savedTemplates, $cacheFactory) {
     return {
       scope: {
-        sorting: '=',
         columns: '=',
         hits: '=',
         indexPattern: '=?',
@@ -24,6 +23,7 @@ define(function (require) {
         cellClickHandlers: '=',
         queryColumn: '=',
         columnAliases: '=?',
+        options: '='
       },
       compile: function (tElem, tAttrs) {
         return function (scope, iElem, iAttrs) {
@@ -40,7 +40,7 @@ define(function (require) {
                 switch (scope.mode) {
                   case 'record':
                     $cache.put('hits', scope.hits || []);
-                    $cache.put('sorting', scope.sorting);
+                    $cache.put('options', scope.options);
                     $cache.put('columns', scope.columns);
                     $cache.put('indexPattern', scope.indexPattern);
                     $cache.put('searchSource', scope.searchSource);
@@ -55,7 +55,7 @@ define(function (require) {
                       return;
                     }
                     scope.hits = scope.hits || $cache.get('hits');
-                    scope.sorting = scope.sorting || $cache.get('sorting');
+                    scope.options = scope.options || $cache.get('options');
                     scope.columns = scope.columns || $cache.get('columns');
                     scope.indexPattern  = scope.indexPattern || $cache.get('indexPattern');
                     scope.searchSource = scope.searchSource || $cache.get('searchSource');

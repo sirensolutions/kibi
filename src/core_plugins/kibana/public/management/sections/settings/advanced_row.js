@@ -89,7 +89,8 @@ uiModules.get('apps/management')
               return new Error('Should be positive integer but was [' + val + '].');
             }
             return parseInt(val);
-            break;
+          default:
+            return new Error('Unknown validator [' + validator + '] for [' + val + '].');
         }
       };
       //  siren: end

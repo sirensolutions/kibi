@@ -24,7 +24,6 @@ define(function (require) {
       restrict: 'E',
       template: html,
       scope: {
-        sorting: '=',
         columns: '=',
         hits: '=?', // You really want either hits & indexPattern, OR searchSource
         indexPattern: '=?',

@@ -50,9 +50,7 @@ describe('docTable', function () {
     init($elem, {
       searchSource: searchSource,
       columns: [],
-      options: {
-        sorting: ['@timestamp', 'desc']
-      }
+      sorting: ['@timestamp', 'desc']
     });
     $scope.$digest();
 

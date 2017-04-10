@@ -11,6 +11,8 @@ define(function (require) {
   // register the provider with the visTypes registry
   require('ui/registry/vis_types').register(KibiDataTableVisTypeProvider);
 
+  require('ui/kibi/kibi_doc_table/components/kibi_table_sorting');
+
   function KibiDataTableVisTypeProvider(Private) {
     const TemplateVisType = Private(require('ui/template_vis_type/TemplateVisType'));
     const _ = require('lodash');

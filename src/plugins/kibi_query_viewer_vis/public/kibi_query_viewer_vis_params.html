@@ -26,7 +26,7 @@
         <div class="form-group">
           <label>Template <a ng-if="queryDefinition.templateId && queryDefinition.templateId !== ''" ng-click="editTemplate($index)" class="form-group label" > Edit selected template</a></label>
           </br>
-          <kibi-select required object-type="template" ng-model="queryDefinition.templateId"></kibi-select>
+          <kibi-select required object-type="template" filter="filterTemplates" ng-model="queryDefinition.templateId"></kibi-select>
         </div>
 
         <div class="vis-editor-agg-editor-advanced-toggle">

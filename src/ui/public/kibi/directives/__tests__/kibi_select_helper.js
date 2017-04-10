@@ -276,7 +276,8 @@ describe('Kibi Directives', function () {
           var expectedTemplates = [
             {
               value: 'template-1',
-              label: 'template 1'
+              label: 'template 1',
+              templateEngine: 'jade'
             }
           ];
           expect(templates).to.be.eql(expectedTemplates);

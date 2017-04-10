@@ -11,8 +11,8 @@ define(function (require) {
       scope: {
         columns: '=',
         columnAliases: '=?',
-        sorting: '=',
         indexPattern: '=',
+        options: '='
       },
       template: headerHtml,
       controller: function ($scope) {
@@ -39,7 +39,7 @@ define(function (require) {
         $scope.headerClass = function (column) {
           if (!sortableField(column)) return;
 
-          const sorting = $scope.sorting;
+          const sorting = $scope.options.sorting;
           const defaultClass = ['fa', 'fa-sort-up', 'table-header-sortchange'];
 
           if (!sorting || column !== sorting[0]) return defaultClass;
@@ -97,7 +97,7 @@ define(function (require) {
         $scope.sort = function (column) {
           if (!column || !sortableField(column)) return;
 
-          const sorting = $scope.sorting = $scope.sorting || [];
+          const sorting = $scope.options.sorting = $scope.options.sorting || [];
 
           let direction = sorting[1] || 'asc';
           if (sorting[0] !== column) {
@@ -106,8 +106,7 @@ define(function (require) {
             direction = sorting[1] === 'asc' ? 'desc' : 'asc';
           }
 
-          $scope.sorting[0] = column;
-          $scope.sorting[1] = direction;
+          $scope.options.sorting = [column, direction];
         };
       }
     };

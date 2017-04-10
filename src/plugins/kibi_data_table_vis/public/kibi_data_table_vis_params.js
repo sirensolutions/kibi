@@ -5,7 +5,7 @@ define(function (require) {
   require('ui/kibi/directives/kibi_array_param');
 
   require('ui/modules').get('kibana/kibi_data_table_vis')
-  .directive('kibiDataTableVisParams', function (savedDatasources, $rootScope, $route, createNotifier, $window) {
+  .directive('kibiDataTableVisParams', function (savedDatasources, $rootScope, $route, createNotifier, $window, kbnUrl) {
 
     const notify = createNotifier({
       location: 'Enhanced search results'
@@ -15,6 +15,8 @@ define(function (require) {
       restrict: 'E',
       template: require('plugins/kibi_data_table_vis/kibi_data_table_vis_params.html'),
       link: function ($scope) {
+
+
         // ======
         // Events
         // ======
@@ -25,6 +27,14 @@ define(function (require) {
             $rootScope.$emit('kibi:vis:state-changed');
           }
         });
+
+        $scope.jumpToTemplate = function () {
+          kbnUrl.change('/settings/templates/' + $scope.vis.params.templateId);
+        };
+
+        $scope.filterTemplates = function (item) {
+          return item ? item.templateEngine !== 'html-angular' : true;
+        };
 
         // ====================================
         // Visualization controller integration
@@ -85,6 +95,10 @@ define(function (require) {
         // Need to emit an event to update table columns while visualization is dirty
         $scope.$watch('vis.params.columns', function () {
           $rootScope.$emit('kibi:vis:columns-changed', $scope.vis.params.columns);
+        }, true);
+
+        $scope.$watch('vis.params.templateId', function (templateId) {
+          $rootScope.$emit('kibi:vis:templateId-changed', templateId);
         }, true);
 
         $scope.$watch('vis.params.enableColumnAliases', (enableColumnAliases) => {

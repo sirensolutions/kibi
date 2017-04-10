@@ -15,8 +15,17 @@ define(function (require) {
     $scope.savedObj = {
       columns: $scope.vis.params.columns,
       columnAliases: $scope.vis.params.columnAliases,
-      sort: $scope.vis.params.sort
+      templateId: $scope.vis.params.templateId,
+      sorting: $scope.vis.params.sort,
+      customView: $scope.vis.params.templateId ? true : false,
+      showCustomView: $scope.vis.params.templateId ? true : false,
     };
+
+    $scope.$watch('vis.params.templateId', function (templateId) {
+      $scope.savedObj.templateId = templateId;
+      $scope.savedObj.customView = templateId ? true : false;
+      $scope.savedObj.showCustomView = templateId ? true : false;
+    });
 
     // NOTE: filter to enable little icons in doc-viewer to filter and add/remove columns
     $scope.filter = function (field, value, operator) {
@@ -75,9 +84,15 @@ define(function (require) {
         }
       });
 
+      const removeVisTemplateIdChangedHandler = $rootScope.$on('kibi:vis:templateId-changed', function (event, templateId) {
+        $scope.savedObj.templateId = templateId;
+        $scope.customViewerMode = 'record';
+      });
+
       $scope.$on('$destroy', function () {
         removeVisStateChangedHandler();
         removeVisColumnsChangedHandler();
+        removeVisTemplateIdChangedHandler();
       });
 
       $scope.$watch('savedObj.columns', function () {

@@ -10,6 +10,7 @@ define(function (require) {
   require('ui/kibi/kibi_doc_table/kibi_doc_table.less');
   require('ui/kibi/kibi_doc_table/components/kibi_table_row');
   require('ui/kibi/kibi_doc_table/components/kibi_table_header');
+  require('ui/kibi/kibi_doc_table/components/kibi_custom_view');
 
   // kibi: allow to query external datasources for populating a column
   require('ui/kibi/components/query_engine_client/query_engine_client');
@@ -23,13 +24,14 @@ define(function (require) {
       restrict: 'E',
       template: html,
       scope: {
-        sorting: '=',
         columns: '=',
         hits: '=?', // You really want either hits & indexPattern, OR searchSource
         indexPattern: '=?',
         searchSource: '=?',
         infiniteScroll: '=?',
         filter: '=?',
+        templateId: '=?',
+        customViewerMode: '=?',
 
         // kibi:
         // added cellClickHandlers, queryColumn and columnAliases
@@ -37,16 +39,13 @@ define(function (require) {
         cellClickHandlers: '=',
         queryColumn: '=',
         columnAliases: '=?',
+        options: '='
       },
       link: function ($scope) {
         const notify = createNotifier({
           location: 'Enhanced search results'
         });
         $scope.limit = 50;
-        $scope.persist = {
-          sorting: $scope.sorting,
-          columns: $scope.columns
-        };
 
         const prereq = (function () {
           const fns = [];
@@ -206,7 +205,7 @@ define(function (require) {
           // kibi: end
 
           // Set the watcher after initialization
-          $scope.$watchCollection('sorting', function (newSort, oldSort) {
+          $scope.$watchCollection('options.sorting', function (newSort, oldSort) {
             // Don't react if sort values didn't really change
             if (newSort === oldSort) return;
             $scope.searchSource.sort(getSort(newSort, $scope.indexPattern));

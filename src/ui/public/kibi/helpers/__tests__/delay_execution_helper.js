@@ -8,11 +8,13 @@ describe('Kibi Components', function () {
   let executionCounter;
   let DelayExecutionHelper;
   let $timeout;
+  let Promise;
 
   describe('delayExecutionHelper', function () {
 
     beforeEach(ngMock.module('kibana'));
-    beforeEach(ngMock.inject(function (_$timeout_, Private) {
+    beforeEach(ngMock.inject(function (_Promise_, _$timeout_, Private) {
+      Promise = _Promise_;
       $timeout = _$timeout_;
       DelayExecutionHelper = Private(DelayExecutionHelperProvider);
     }));
@@ -39,6 +41,37 @@ describe('Kibi Components', function () {
     };
     beforeEach(function () {
       timePointer = 0;
+    });
+
+    describe('cancel executions', function () {
+      it('should pass errors other than cancel events', function (done) {
+        const throwError = () => Promise.reject(new Error('this is to be expected'));
+        const helper = new DelayExecutionHelper(_.noop, throwError, 100, DelayExecutionHelper.DELAY_STRATEGY.RESET_COUNTER_ON_NEW_EVENT);
+
+        helper.addEventData()
+        .then(() => {
+          done('there should be an error!');
+        })
+        .catch(() => {
+          done();
+        });
+        moveTimePointer(150);
+      });
+
+      it('should ignore cancel events', function (done) {
+        const helper = new DelayExecutionHelper(_.noop, _.noop, 100, DelayExecutionHelper.DELAY_STRATEGY.RESET_COUNTER_ON_NEW_EVENT);
+
+        helper.addEventData()
+        .then(() => {
+          done();
+        })
+        .catch(() => {
+          done('should ignore cancel event');
+        });
+        moveTimePointer(50);
+        helper.addEventData();
+        moveTimePointer(150);
+      });
     });
 
     describe('DELAY_STRATEGY.RESET_COUNTER_ON_NEW_EVENT', function () {

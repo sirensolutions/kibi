@@ -11,7 +11,7 @@
   * - delayStrategy - strategy of the delay
   *
   */
-export default function DelayExecutionHelperFactory($timeout) {
+export default function DelayExecutionHelperFactory(Promise, $timeout) {
   class DelayExecutionHelper {
     static get DELAY_STRATEGY() {
       return {
@@ -42,7 +42,11 @@ export default function DelayExecutionHelperFactory($timeout) {
           this.cancel();
         }
       }, this.delayTime);
-      return this.timeout;
+      return this.timeout.catch(err => {
+        if (err !== 'canceled') {
+          return Promise.reject(err);
+        }
+      });
     }
 
     cancel() {

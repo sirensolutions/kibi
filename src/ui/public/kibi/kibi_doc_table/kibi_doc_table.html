@@ -8,20 +8,13 @@
 <div
   ng-if="hits.length"
   ng-class="{ loading: searchSource.activeFetchCount > 0 }">
-  <div class="small-note" style="width: 100%;" ng-if="templateId">
-
-    <kibi-table-sorting ng-if="sorting && showCustomView"></kibi-table-sorting>
-    <!-- TODo position it absolute to the vis window -->
-    <a ng-if="showCustomeView" class="pull-right" ng-click='toggleCustomeView()'>Change to Standard View</a>
-    <a ng-if="!showCustomeView" class="pull-right" ng-click='toggleCustomeView()'>Change to Standard View</a>
-  </div>
 
   <paginate ng-if="!infiniteScroll" list="hits" per-page="50" top-controls="true">
 
     <div
       kibi-custom-view
-      ng-if="customView"
-      ng-show="showCustomView"
+      ng-if="options.customView"
+      ng-show="options.showCustomView"
       template-id="templateId"
       mode="{{customViewerMode}}"
       hits="page"
@@ -33,7 +26,7 @@
       options="options"
     ></div>
 
-    <table class="kbn-table table" ng-if="indexPattern" ng-show="!showCustomView">
+    <table class="kbn-table table" ng-if="indexPattern" ng-show="!options.showCustomView">
       <thead
         kibi-table-header
         columns="columns"
@@ -69,8 +62,8 @@
 
     <div
       kibi-custom-view
-      ng-if="customView"
-      ng-show="showCustomView"
+      ng-if="options.customView"
+      ng-show="options.showCustomView"
       template-id="templateId"
       mode="{{customViewerMode}}"
       hits="hits"
@@ -82,7 +75,7 @@
       options="options"
     ></div>
 
-    <table class="kbn-table table" ng-if="indexPattern" ng-show="!showCustomView">
+    <table class="kbn-table table" ng-if="indexPattern" ng-show="!options.showCustomView">
       <thead
         kibi-table-header
         columns="columns"

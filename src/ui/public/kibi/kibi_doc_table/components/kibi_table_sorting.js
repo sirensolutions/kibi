@@ -7,7 +7,9 @@ define(function (require) {
 
     return {
       restrict: 'E',
-      scope: false,
+      scope: {
+        options: '='
+      },
       template: template,
       link: function ($scope, $el, attrs) {
 
@@ -23,7 +25,7 @@ define(function (require) {
           value: '_score',
           label: 'Score'
         }];
-        _.each($scope.columns, (column) => {
+        _.each($scope.options.columns, (column) => {
           $scope.sortingColumns.push({
             value: column,
             label: column

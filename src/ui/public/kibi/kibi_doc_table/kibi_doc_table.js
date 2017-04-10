@@ -11,7 +11,6 @@ define(function (require) {
   require('ui/kibi/kibi_doc_table/components/kibi_table_row');
   require('ui/kibi/kibi_doc_table/components/kibi_table_header');
   require('ui/kibi/kibi_doc_table/components/kibi_custom_view');
-  require('ui/kibi/kibi_doc_table/components/kibi_table_sorting');
 
   // kibi: allow to query external datasources for populating a column
   require('ui/kibi/components/query_engine_client/query_engine_client');
@@ -41,18 +40,13 @@ define(function (require) {
         cellClickHandlers: '=',
         queryColumn: '=',
         columnAliases: '=?',
+        options: '='
       },
       link: function ($scope) {
         const notify = createNotifier({
           location: 'Enhanced search results'
         });
         $scope.limit = 50;
-
-        // create an object so the sorting
-        // will be correclty modified by inner directives
-        $scope.options = {
-          sorting: $scope.sorting
-        };
 
         const prereq = (function () {
           const fns = [];
@@ -152,22 +146,6 @@ define(function (require) {
             courier.fetch();
           }
         };
-
-        $scope.customView = false;
-        $scope.showCustomView = false;
-        //initial custom view state:
-        if ($scope.templateId) {
-          $scope.customView = true;
-          $scope.showCustomView = true;
-        }
-        $scope.toggleCustomeView = function () {
-          $scope.showCustomView = !$scope.showCustomView;
-        };
-
-        $scope.$watch('templateId', function (templateId) {
-          $scope.customView = templateId ? true : false;
-        });
-
         // kibi: end
 
         function addRelationalColumn() {

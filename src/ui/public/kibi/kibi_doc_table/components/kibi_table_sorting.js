@@ -21,19 +21,23 @@ define(function (require) {
           value: 'desc',
           label: 'descending'
         }];
+
         $scope.sortingColumns = [{
           value: '_score',
-          label: 'Score'
+          label: 'score'
         }];
+
         _.each($scope.options.columns, (column) => {
           $scope.sortingColumns.push({
             value: column,
             label: column
           });
         });
+
         $scope.selectedSortingColumn = _.find($scope.sortingColumns, (column) => {
           return column.value === $scope.options.sorting[0];
         });
+
         $scope.selectedSortingOrder = _.find($scope.sortingOrder, (order) => {
           return order.value === $scope.options.sorting[1];
         });

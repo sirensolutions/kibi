@@ -66,8 +66,8 @@
           ng-blur="finder.hitBlur($event)"
           ng-click="finder.preventClick($event)">
           <i aria-hidden="true" class="finder-type fa" ng-if="hit.icon" ng-class="hit.icon"></i>
-          <!-- kibi: style the title our way for our objects -->
-          <span ng-class="{kibiTitle: type === 'dashboardgroups' || type === 'templates' || type === 'queries' }">
+          <!-- kibi: style the title to differentiate it from the description -->
+          <span ng-class="kibiTitle">
             {{hit.title}}
           </span>
           <!-- kibi: end -->

@@ -1,15 +1,6 @@
 import { merge } from 'lodash';
 import moment from 'moment-timezone';
 
-// kibi: added
-const positiveIntegerValidator = function (val) {
-  if (!/^\+?(0|[1-9]\d*)$/.test(val)) {
-    return new Error('Should be positive integer but was [' + val + '].');
-  }
-  return parseInt(val);
-};
-// kibi: end
-
 export default function defaultSettingsProvider(kibiEnterpriseEnabled) {
   const weekdays = moment.weekdays().slice();
   const [defaultWeekday] = weekdays;
@@ -341,13 +332,13 @@ export default function defaultSettingsProvider(kibiEnterpriseEnabled) {
       type: 'number',
       value: 2,
       description: 'Set to change the default vertical panel size.',
-      validator: positiveIntegerValidator
+      validator: 'positiveIntegerValidator'
     },
     'kibi:vertical_grid_resolution': {
       type: 'number',
       value: 100,
       description: 'Set to change vertical grid resolution.',
-      validator: positiveIntegerValidator
+      validator: 'positiveIntegerValidator'
     },
     'kibi:enableAllDashboardsCounts' : {
       value: true,

@@ -179,6 +179,7 @@ Tooltip.prototype.render = function () {
 };
 
 Tooltip.prototype.destroy = function () {
+  this.hide(); // kibi: fixed the tooltip stays after clicking and movig the mouse problem
   this.binder.destroy();
 };
 

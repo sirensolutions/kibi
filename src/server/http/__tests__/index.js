@@ -54,7 +54,8 @@ describe('routes', function () {
   });
 
   describe('url shortener', () => {
-    const options = {
+    // kibi: renamed to optionsDiscover
+    const optionsDiscover = {
       method: 'POST',
       url: '/shorten',
       payload: {
@@ -63,55 +64,15 @@ describe('routes', function () {
     };
 
     it('generates shortened urls', (done) => {
-      kbnTestServer.makeRequest(kbnServer, options, (res) => {
+      kbnTestServer.makeRequest(kbnServer, optionsDiscover, (res) => {
         expect(typeof res.payload).to.be('string');
         expect(res.payload.length > 0).to.be(true);
         done();
       });
     });
 
-    // kibi: embedding parameters tests
-    it('includes embed parameter in redirect from shortened url', (done) => {
-      kbnTestServer.makeRequest(kbnServer, options, (res) => {
-        const payload = res.payload;
-        const gotoOptions = {
-          method: 'GET',
-          url: '/goto/' + res.payload + '?embed=true'
-        };
-        kbnTestServer.makeRequest(kbnServer, gotoOptions, (res) => {
-          let actual = res.headers.location;
-          try {
-            expect(actual).to.be(`/app/kibana#/discover?embed=true&_h=${payload}`);
-            done();
-          } catch (error) {
-            done(error);
-          }
-        });
-      });
-    });
-
-    it('includes kibiNavbarVisible parameters in redirect from shortened url', (done) => {
-      kbnTestServer.makeRequest(kbnServer, options, (res) => {
-        const payload = res.payload;
-        const gotoOptions = {
-          method: 'GET',
-          url: '/goto/' + res.payload + '?embed=true&kibiNavbarVisible=true'
-        };
-        kbnTestServer.makeRequest(kbnServer, gotoOptions, (res) => {
-          let actual = res.headers.location;
-          try {
-            expect(actual).to.be(`/app/kibana#/discover?embed=true&kibiNavbarVisible=true&_h=${payload}`);
-            done();
-          } catch (error) {
-            done(error);
-          }
-        });
-      });
-    });
-    // kibi: end
-
     it('redirects shortened urls', (done) => {
-      kbnTestServer.makeRequest(kbnServer, options, (res) => {
+      kbnTestServer.makeRequest(kbnServer, optionsDiscover, (res) => {
         const payload = res.payload; // kibi: store payload
         const gotoOptions = {
           method: 'GET',
@@ -132,6 +93,152 @@ describe('routes', function () {
       });
     });
 
-  });
+    // kibi: embedding parameters tests
+    describe('kibi tests for passing the embedded parameters on', () => {
 
+      describe('discover page', () => {
+
+        it('includes embed parameter in redirect from shortened url', (done) => {
+          kbnTestServer.makeRequest(kbnServer, optionsDiscover, (res) => {
+            const payload = res.payload;
+            const gotoOptions = {
+              method: 'GET',
+              url: '/goto/' + res.payload + '?embed=true'
+            };
+            kbnTestServer.makeRequest(kbnServer, gotoOptions, (res) => {
+              let actual = res.headers.location;
+              try {
+                expect(actual).to.be(`/app/kibana#/discover?embed=true&_h=${payload}`);
+                done();
+              } catch (error) {
+                done(error);
+              }
+            });
+          });
+        });
+
+        it('includes kibiNavbarVisible parameters in redirect from shortened url', (done) => {
+          kbnTestServer.makeRequest(kbnServer, optionsDiscover, (res) => {
+            const payload = res.payload;
+            const gotoOptions = {
+              method: 'GET',
+              url: '/goto/' + res.payload + '?embed=true&kibiNavbarVisible=true'
+            };
+            kbnTestServer.makeRequest(kbnServer, gotoOptions, (res) => {
+              let actual = res.headers.location;
+              try {
+                expect(actual).to.be(`/app/kibana#/discover?embed=true&kibiNavbarVisible=true&_h=${payload}`);
+                done();
+              } catch (error) {
+                done(error);
+              }
+            });
+          });
+        });
+      });
+
+      describe('dashboard page', () => {
+
+        const optionsDashboard = {
+          method: 'POST',
+          url: '/shorten',
+          payload: {
+            url: '/app/kibana#/dashboard/dashA'
+          }
+        };
+
+        it('includes embed parameter in redirect from shortened url', (done) => {
+          kbnTestServer.makeRequest(kbnServer, optionsDashboard, (res) => {
+            const payload = res.payload;
+            const gotoOptions = {
+              method: 'GET',
+              url: '/goto/' + res.payload + '?embed=true'
+            };
+            kbnTestServer.makeRequest(kbnServer, gotoOptions, (res) => {
+              let actual = res.headers.location;
+              try {
+                expect(actual).to.be(`/app/kibana#/dashboard?embed=true&_h=${payload}`);
+                done();
+              } catch (error) {
+                done(error);
+              }
+            });
+          });
+        });
+
+        it('includes kibiNavbarVisible parameters in redirect from shortened url', (done) => {
+          kbnTestServer.makeRequest(kbnServer, optionsDashboard, (res) => {
+            const payload = res.payload;
+            const gotoOptions = {
+              method: 'GET',
+              url: '/goto/' + res.payload + '?embed=true&kibiNavbarVisible=true'
+            };
+            kbnTestServer.makeRequest(kbnServer, gotoOptions, (res) => {
+              let actual = res.headers.location;
+              try {
+                expect(actual).to.be(`/app/kibana#/dashboard?embed=true&kibiNavbarVisible=true&_h=${payload}`);
+                done();
+              } catch (error) {
+                done(error);
+              }
+            });
+          });
+        });
+
+      });
+
+      describe('visualize page', () => {
+
+        const optionsVisualize = {
+          method: 'POST',
+          url: '/shorten',
+          payload: {
+            url: '/app/kibana#/visualize/visA'
+          }
+        };
+
+        it('includes embed parameter in redirect from shortened url', (done) => {
+          kbnTestServer.makeRequest(kbnServer, optionsVisualize, (res) => {
+            const payload = res.payload;
+            const gotoOptions = {
+              method: 'GET',
+              url: '/goto/' + res.payload + '?embed=true'
+            };
+            kbnTestServer.makeRequest(kbnServer, gotoOptions, (res) => {
+              let actual = res.headers.location;
+              try {
+                expect(actual).to.be(`/app/kibana#/visualize?embed=true&_h=${payload}`);
+                done();
+              } catch (error) {
+                done(error);
+              }
+            });
+          });
+        });
+
+        it('includes kibiNavbarVisible parameters in redirect from shortened url', (done) => {
+          kbnTestServer.makeRequest(kbnServer, optionsVisualize, (res) => {
+            const payload = res.payload;
+            const gotoOptions = {
+              method: 'GET',
+              url: '/goto/' + res.payload + '?embed=true&kibiNavbarVisible=true'
+            };
+            kbnTestServer.makeRequest(kbnServer, gotoOptions, (res) => {
+              let actual = res.headers.location;
+              try {
+                expect(actual).to.be(`/app/kibana#/visualize?embed=true&kibiNavbarVisible=true&_h=${payload}`);
+                done();
+              } catch (error) {
+                done(error);
+              }
+            });
+          });
+        });
+
+      });
+
+    });
+
+    // kibi: end
+  });
 });

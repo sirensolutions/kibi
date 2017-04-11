@@ -177,7 +177,7 @@ QueryHelper.prototype._replaceVariablesInTheQuery = function (doc, query, dataso
     group = group.replace('@doc', '');
     group = group.substring(0, group.length - 1);
 
-    const value = self._getValue(doc, group);
+    let value = self._getValue(doc, group);
 
     if (value instanceof Array) {
       value = self._arrayToCommaSeparatedList(value);

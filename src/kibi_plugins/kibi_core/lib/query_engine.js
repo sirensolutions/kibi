@@ -17,7 +17,6 @@ import RestQuery from './queries/rest_query';
 import ErrorQuery from './queries/error_query';
 import InactivatedQuery from './queries/inactivated_query';
 import MissingSelectedDocumentQuery from './queries/missing_selected_document_query';
-import TinkerPop3Query from './queries/tinkerpop3_query';
 import JDBC from 'jdbc';
 import jinst from 'jdbc/lib/jinst';
 import JdbcQuery  from './queries/jdbc_query';
@@ -317,16 +316,12 @@ QueryEngine.prototype._loadDatasources = function () {
 QueryEngine.prototype._loadQueries = function () {
   const self = this;
   // load default query examples
-  const queriesToLoad = [
-    'Kibi-Graph-Query'
-  ];
+  const queriesToLoad = [];
 
   self.log.info('Loading queries');
 
-  const promises = [];
-  _.each(queriesToLoad, function (queryId) {
-    promises.push(new Promise(function (fulfill, reject) {
-
+  return Promise.map(queriesToLoad, function (queryId) {
+    return new Promise(function (fulfill, reject) {
       fs.readFile(path.join(__dirname, 'queries', queryId + '.json'), function (err, data) {
         if (err) {
           reject(err);
@@ -352,10 +347,8 @@ QueryEngine.prototype._loadQueries = function () {
           fulfill(true);
         });
       });
-    }));
+    });
   });
-
-  return Promise.all(promises);
 };
 
 QueryEngine.prototype.setupJDBC = function () {
@@ -503,13 +496,6 @@ QueryEngine.prototype.reloadQueries = function () {
             return new RestQuery(self.server, queryDef, self.cache);
           } else if (queryDef.datasource.datasourceType === kibiUtils.DatasourceTypes.sqlite) {
             return new SQLiteQuery(self.server, queryDef, self.cache);
-          } else if (queryDef.datasource.datasourceType === kibiUtils.DatasourceTypes.tinkerpop3) {
-            if (self.config.get('pkg.kibiEnterpriseEnabled')) {
-              return new TinkerPop3Query(self.server, queryDef, self.cache);
-            } else {
-              self.log.error(`This datasource type [${kibiUtils.DatasourceTypes.tinkerpop3}] - requires Kibi Enterprise Edition`);
-              return false;
-            }
           } else {
             self.log.error('Unknown datasource type [' + queryDef.datasource.datasourceType + '] - could NOT create query object');
             return false;

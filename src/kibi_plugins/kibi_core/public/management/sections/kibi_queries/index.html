@@ -28,7 +28,7 @@
 
           <div class="form-group">
             <label>Datasource</label> <a ng-click="jumpToDatasource()">Edit datasource</a></br>
-            <kibi-select required object-type="datasource" ng-model="query.datasourceId"></kibi-select>
+            <kibi-select required object-type="datasource" filter="rejectTinkerpop" ng-model="query.datasourceId"></kibi-select>
           </div>
 
           <div class="form-group">
@@ -37,7 +37,7 @@
           </div>
 
 
-          <div class="form-group" ng-if="datasourceType !== DatasourceTypes.rest && datasourceType !== DatasourceTypes.tinkerpop3">
+          <div class="form-group" ng-if="datasourceType !== DatasourceTypes.rest">
             <label>Activation query</label>
             <span ng-if="query.datasourceId">(Empty = always active)</span>
 
@@ -90,8 +90,7 @@
 
 
           <div class="form-group" ng-if="datasourceType !== DatasourceTypes.rest">
-            <label ng-if="query.datasourceId && datasourceType !== DatasourceTypes.tinkerpop3">Results query</label></br>
-            <label ng-if="query.datasourceId && datasourceType === DatasourceTypes.tinkerpop3">Graph traversal script</label></br>
+            <label ng-if="query.datasourceId">Results query</label></br>
             <span ng-if="datasourceType === DatasourceTypes.mysql || datasourceType === DatasourceTypes.sql_jdbc">
               Hint: To start type <b>SHOW TABLES</b>
             </span>
@@ -100,10 +99,6 @@
             </span>
             <span ng-if="isSPARQL(datasourceType)">
               Hint: To start type <b>SELECT * WHERE {?s ?p ?o} LIMIT 10</b>
-            </span>
-            <span ng-if="datasourceType === DatasourceTypes.tinkerpop3">
-              <b>Note</b>: to use the script with the Graph Browser visualization it should return a list of
-              vertices, edges or both.
             </span>
             <br />
             <span>
@@ -115,16 +110,6 @@
               Star symbol detected. Try to give an explicit list of variables to return
               - it is better performance wise and will simplify relational filters configuration.
             </span>
-
-            <div ng-if="datasourceType === DatasourceTypes.tinkerpop3"
-                 ui-ace="{ onLoad: aceLoaded, mode: 'text' }"
-                 msd-elastic id="templateVars"
-                 ng-model="query.resultQuery"
-                 class="form-control resultQueryEditor"
-                 ng-class="{ 'red-border': objectForm.sparqlQuery.$invalid }"
-                 name="sparqlQuery"
-                 required>
-            </div>
 
             <div ng-if="isSPARQL(datasourceType)"
                  ui-ace="{ onLoad: aceLoaded, mode: 'sparql' }"

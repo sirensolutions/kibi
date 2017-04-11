@@ -178,10 +178,17 @@ module.exports = function (kbnServer, server, config) {
             embeddingParameters += 'kibiNavbarVisible=true&';
           }
         }
-        // kibi: end
-        reply().redirect(
+        // kibi: adding the sha to be able to restore kibiSession in the browser
+        if (_.contains(data.url,'/dashboard/')) {
+          reply().redirect(
+          `${config.get('server.basePath')}/app/kibana#/dashboard?${embeddingParameters}_h=${request.params.urlId}`
+          );
+        } else {
+          reply().redirect(
           `${config.get('server.basePath')}/app/kibana#/discover?${embeddingParameters}_h=${request.params.urlId}`
-        ); // kibi: adding the sha to be able to restore kibiSession in the browser
+        );
+        }
+        // kibi: end
       } catch (err) {
         reply(err);
       }

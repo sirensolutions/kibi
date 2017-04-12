@@ -220,7 +220,22 @@ define(function (require) {
             if (indexPatternDocuments && indexPatternDocuments.length > 0) {
               const promises = [];
               _.each(indexPatternDocuments, (doc) => {
-                promises.push(createIndexPattern(doc));
+                // lets try to fetch the field mappings to check
+                // that index-pattern matches any existing indices
+                const promise = es.indices.getFieldMapping({
+                  index: doc._id,
+                  field: '*',
+                  allowNoIndices: false,
+                  includeDefaults: true
+                }).catch((err) => {
+                  notify.warning(
+                    'Imported index-pattern: [' + doc._id + '] did not match any indices. ' +
+                    'If you would like to remove it go to Settings->Indices'
+                  );
+                }).finally(() => {
+                  return createIndexPattern(doc);
+                });
+                promises.push(promise);
               });
               return Promise.all(promises).then(() => {
                 // very important !!! to clear the cached promise

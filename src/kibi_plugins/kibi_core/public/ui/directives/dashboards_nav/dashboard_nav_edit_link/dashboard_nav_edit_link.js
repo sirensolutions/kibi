@@ -30,6 +30,11 @@ uiModules
 
       $scope.isGroupEditorOpen = dashboardsNavState.isGroupEditorOpen();
       $scope.$watch(dashboardsNavState.isGroupEditorOpen, isGroupEditorOpen => {
+        if (isGroupEditorOpen) {
+          $scope.group.dashboards.forEach(dashboard => {
+            dashboard.selected = false;
+          });
+        }
         $scope.isGroupEditorOpen = isGroupEditorOpen;
       });
 
@@ -44,9 +49,8 @@ uiModules
         dashboardsNavState.setGroupEditorOpen(true);
       };
 
-      $scope.deleteGroup = (event, group) => {
-        event.preventDefault();
-
+      $scope.deleteGroup = () => {
+        const group = $scope.group;
         savedDashboardGroups.delete(group.id)
         .then(cache.invalidate)
         .then(() => {
@@ -66,7 +70,15 @@ uiModules
       };
 
       //TODO: Support drag-drop and reorder mechanisum
-
+      // $scope.$on('drag-start', e => {
+      //   console.log('emit start');
+      //   $scope.$emit('dashboard-nav-link:drag-start', $scope.agg);
+      // });
+      //
+      // $scope.$on('drag-end', e => {
+      //   console.log('emit end');
+      //   $scope.$emit('dashboard-nav-link:drag-end', $scope.agg);
+      // });
 
     }
   };

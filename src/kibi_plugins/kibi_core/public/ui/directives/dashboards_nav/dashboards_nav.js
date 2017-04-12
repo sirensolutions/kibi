@@ -3,6 +3,9 @@ import './dashboard_switcher';
 import './dashboards_nav.less';
 import './dashboards_nav_control';
 import './dashboard_nav_group_editor';
+import './dashboard_draggable/dashboard_draggable_container';
+import './dashboard_draggable/dashboard_draggable_item';
+import './dashboard_draggable/dashboard_draggable_handle';
 import dashboardsNavTemplate from './dashboards_nav.html';
 import { onDashboardPage } from 'ui/kibi/utils/on_page';
 import uiModules from 'ui/modules';
@@ -66,6 +69,12 @@ uiModules
       $scope.toggleDashboardsNavEditMode = event => {
         event.preventDefault();
         dashboardsNavState.setEditMode(!dashboardsNavState.isOnEditMode());
+        if (dashboardsNavState.isOnEditMode()) {
+          $scope.oldFilter = $scope.dashboardFilter;
+          $scope.dashboardFilter = '';
+        } else {
+          $scope.dashboardFilter = $scope.oldFilter;
+        }
       };
 
       $scope.newDashboardGroup = event => {

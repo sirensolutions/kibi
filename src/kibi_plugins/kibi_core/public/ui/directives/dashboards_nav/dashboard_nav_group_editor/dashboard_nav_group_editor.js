@@ -78,10 +78,11 @@ uiModules
         const groups = {};
         if (!$scope.editMode) {
           $scope.dashboardGroup.dashboards = _.map($scope.dashboards, (dashboard) => {
-            delete dashboard.selected;
             groups[dashboard.group.id] = dashboard.group;
-            delete dashboard.group;
-            return dashboard;
+            return {
+              'id': dashboard.id,
+              'title': dashboard.title
+            };
           });
         }
 

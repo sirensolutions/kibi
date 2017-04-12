@@ -1,70 +1,80 @@
-<div
-  class="dashboards-nav-edit-link"
->
-  <div class="dragbar" ng-if="isOnEditMode">
-    <i class="fa fa-bars" aria-hidden="true"></i>
-  </div>
-  <div class="icon">
-    <i
-       ng-if="group.iconCss"
-       class="icon-image {{group.iconCss}}"
-    ></i>
-
-    <img
-       ng-if="group.iconUrl"
-       class="icon-image"
-       ng-src="{{group.iconUrl}}"
-    />
-
-    <span
-       ng-if="!group.iconCss && !group.iconUrl"
-       class="icon-placeholder"
-    >
-       {{ group.title[0] }}
-    </span>
-  </div>
-
-  <div class="edit-content">
-    <div class="title">
-      {{group.title}}
-    </div>
+<div class="dashboards-nav-edit-link-group" dashboard-draggable-item="group">
+  <div>
     <div
-      class="info-warning"
-      ng-class="{'group-is-empty': groupIsEmpty()}"
-      tooltip="This empty group will be deleted."
-      tooltip-placement="right"
-      tooltip-popup-delay="0"
-      tooltip-append-to-body="1"
+      ng-if="isOnEditMode && group.virtual"
+      class="dashboards-nav-edit-link-dragbar"
+      dashboard-draggable-handle
     >
-      <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
+      <i class="fa fa-arrows-v" aria-hidden="true"></i>
     </div>
-    <a
-      ng-if="isOnEditMode && !group.virtual"
-      class="action"
-      ng-click="deleteGroup($event, group)"
-    >
-      <i class="fa fa-times" aria-hidden="true"></i>
-    </a>
-    <a
-      ng-if="isOnEditMode && !group.virtual"
-      class="action"
-      ng-click="editGroup($event, group)"
-    >
-      <i class="fa fa-pencil" aria-hidden="true"></i>
-    </a>
-  </div>
+    <div class="icon">
+      <i
+         ng-if="group.iconCss"
+         class="icon-image {{group.iconCss}}"
+      ></i>
 
-  <div ng-if="!(isOnEditMode && group.virtual)" class="dashboards">
-    <div class="dashboard" ng-repeat="dashboard in group.dashboards | filter:filter | orderBy: 'priority'">
-      <div class="dragbar" ng-if="isOnEditMode">
-        <i class="fa fa-bars" aria-hidden="true"></i>
+      <img
+         ng-if="group.iconUrl"
+         class="icon-image"
+         ng-src="{{group.iconUrl}}"
+      />
+
+      <span
+         ng-if="!group.iconCss && !group.iconUrl"
+         class="icon-placeholder"
+      >
+         {{ group.title[0] }}
+      </span>
+    </div>
+
+    <div class="edit-content">
+      <div class="title">
+        {{group.title}}
+      </div>
+      <div
+        class="info-warning"
+        ng-class="{'group-is-empty': groupIsEmpty()}"
+        tooltip="This empty group will be deleted."
+        tooltip-placement="right"
+        tooltip-popup-delay="0"
+        tooltip-append-to-body="1"
+      >
+        <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
+      </div>
+      <a
+        ng-if="isOnEditMode && !group.virtual"
+        class="action"
+        confirm-click="deleteGroup()"
+      >
+        <i class="fa fa-times" aria-hidden="true"></i>
+      </a>
+      <div
+        ng-if="isOnEditMode && !group.virtual"
+        class="action dashboards-nav-edit-link-dragbar"
+        dashboard-draggable-handle
+      >
+        <i class="fa fa-arrows" aria-hidden="true"></i>
+      </div>
+      <a
+        ng-if="isOnEditMode && !group.virtual"
+        class="action"
+        ng-click="editGroup($event, group)"
+      >
+        <i class="fa fa-pencil" aria-hidden="true"></i>
+      </a>
+    </div>
+  </div>
+  <div ng-if="!(isOnEditMode && group.virtual)">
+    <div class="dashboards-nav-edit-link-dashboard" dashboard-draggable-item="dashboard" ng-repeat="dashboard in group.dashboards">
+      <div class="dashboards-nav-edit-link-dragbar" dashboard-draggable-handle ng-if="isOnEditMode">
+        <i class="fa fa-arrows-v" aria-hidden="true"></i>
       </div>
       <div class="dashboard-title">
         {{dashboard.title}}
       </div>
 
       <div ng-if="isGroupEditorOpen && !isOnEditMode"
-           class="action"
+           class="action-select"
       >
         <input type="checkbox" ng-click="includeDashboardOnGroup($event, group, dashboard)" />
       </div>

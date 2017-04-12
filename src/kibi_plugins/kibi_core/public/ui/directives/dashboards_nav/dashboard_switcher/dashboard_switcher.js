@@ -51,6 +51,15 @@ uiModules
         $scope.isGroupEditorOpen = isGroupEditorOpen;
       });
 
+      // $scope.$on('dashboard-nav-link:drag-start', e => {
+      //   $scope.dragging = true;
+      //   console.log('dragstart');
+      // });
+      // $scope.$on('dashboard-nav-link:drag-end', e => {
+      //   $scope.dragging = false;
+      //   console.log('dragend');
+      // });
+
       const computeDashboardsGroups = function (reason) {
         return dashboardGroups.computeGroups(reason)
         .then((groups) => {

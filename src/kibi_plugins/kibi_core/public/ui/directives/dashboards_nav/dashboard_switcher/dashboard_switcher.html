@@ -7,9 +7,13 @@
   filter="filter"
 ></dashboard-nav-link>
 
-<dashboard-nav-edit-link
+<div
+  dashboard-draggable-container="groups"
   ng-if="isOnEditMode || isGroupEditorOpen"
-  ng-repeat="group in groups | filter:filter | orderBy: 'priority'"
-  group="group"
-  filter="filter"
-></dashboard-nav-edit-link>
+>
+  <dashboard-nav-edit-link
+    ng-repeat="group in groups | orderBy: 'priority'"
+    group="group"
+    filter="filter"
+  ></dashboard-nav-edit-link>
+</div>

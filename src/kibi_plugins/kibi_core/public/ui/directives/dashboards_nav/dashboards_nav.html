@@ -7,6 +7,7 @@
       <input
           name="dashboards-filter"
           ng-disabled="!isDashboardsNavOpen"
+          ng-show="!isDashboardsNavOnEditMode"
           aria-label="Filter"
           ng-model="dashboardFilter"
           class="form-control span12"

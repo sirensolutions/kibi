@@ -5,12 +5,12 @@
 @icon-width: 25px;
 @actions: @kibanaGray6;
 
-.dashboards-nav-edit-link {
+.dashboards-nav-edit-link-group {
   background-color: @dashboard-inactive-background;
-  margin-bottom: 1px;
+  margin-top: 1px;
   clear: both;
-  display: block;
   padding: 4px;
+  display: block;
 
   width: @dashboards-nav-closed-width;
   .is-dashboards-nav-open & {
@@ -53,32 +53,49 @@
       color: @brand-warning;
     }
   }
-  .dashboards {
-    .dashboard {
-      .dashboard-title {
-        margin-left: 16px;
-        padding-left: 4px;
-        color: @kibanaGray5;
-        display: inline;
-      }
-      .action {
-        color: @actions;
-        float: right;
-        display: inline;
-        padding-right: 5px;
-        input {
-          margin: 0;
-        }
-      }
+}
+
+.dashboards-nav-edit-link-dashboard {
+  background-color: @dashboard-inactive-background;
+  display: block;
+
+  width: @dashboards-nav-closed-width;
+  .is-dashboards-nav-open & {
+    width: @dashboards-nav-open-width;
+  }
+
+  .dashboard-title {
+    margin-left: 16px;
+    padding-left: 4px;
+    color: @kibanaGray5;
+    display: inline;
+  }
+  .action {
+    color: @actions;
+    float: right;
+    display: inline;
+    padding-right: 5px;
+    input {
+      margin: -4px;
     }
   }
-  .dragbar {
-    display: inline;
+  .action-select {
     color: @actions;
-    padding-left: 5px;
-    padding-right: 5px;
-    &:hover {
-      color: @link-hover-color;
+    float: right;
+    display: inline;
+    padding-right: 10px;
+    input {
+      margin: -4px;
     }
+  }
+}
+
+.dashboards-nav-edit-link-dragbar {
+  display: inline;
+  color: @actions;
+  padding-left: 5px;
+  padding-right: 5px;
+  &:hover {
+    color: @link-hover-color;
   }
 }

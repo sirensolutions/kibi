@@ -19,7 +19,7 @@ define(function (require) {
   require('ui/modules').get('apps/settings')
   .directive('kbnSettingsObjects', function (
     kbnIndex, createNotifier, Private, kbnUrl, Promise,
-    queryEngineClient, kbnVersion, savedObjectsAPI, config) { // kibi: replaces es with savedObjectsAPI
+    queryEngineClient, kibiVersion, savedObjectsAPI, config) { // kibi: replaces es with savedObjectsAPI
 
     // kibi: all below dependencies added by kibi to improve import/export and delete operations
     const cache = Private(require('ui/kibi/helpers/cache_helper'));
@@ -126,7 +126,7 @@ define(function (require) {
             )
           ).then((results) => {
             // kibi: added by kibi
-            results.push([{id: kbnVersion, type: 'config'}]); // kibi: here we also want to export "config" type
+            results.push([{id: kibiVersion, type: 'config'}]); // kibi: here we also want to export "config" type
             return indexPatterns.getIds().then(function (list) {
               _.each(list, (id) => {
                 results.push([{id: id, type: 'index-pattern'}]); // kibi: here we also want to export all index patterns
@@ -235,7 +235,7 @@ define(function (require) {
           // kibi: override config properties
           const loadConfig = function (configDocument) {
             if (configDocument) {
-              if (configDocument._id === kbnVersion) {
+              if (configDocument._id === kibiVersion) {
                 // override existing config values
                 const promises = [];
                 _.each(configDocument._source, function (value, key) {
@@ -245,7 +245,7 @@ define(function (require) {
               } else {
                 notify.error(
                   'Config object version [' + configDocument._id + '] in the import ' +
-                  'does not match current version [' + kbnVersion + ']\n' +
+                  'does not match current version [' + kibiVersion + ']\n' +
                   'Will NOT import any of the advanced settings parameters'
                 );
               }

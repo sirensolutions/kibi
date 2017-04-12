@@ -68,18 +68,6 @@ uiModules
         }, 0);
         return $scope.group.dashboards.length === selectCount;
       };
-
-      //TODO: Support drag-drop and reorder mechanisum
-      // $scope.$on('drag-start', e => {
-      //   console.log('emit start');
-      //   $scope.$emit('dashboard-nav-link:drag-start', $scope.agg);
-      // });
-      //
-      // $scope.$on('drag-end', e => {
-      //   console.log('emit end');
-      //   $scope.$emit('dashboard-nav-link:drag-end', $scope.agg);
-      // });
-
     }
   };
 });

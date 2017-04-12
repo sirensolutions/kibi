@@ -141,18 +141,22 @@ uiModules
       const saveActions = [];
       const groups = _.clone(_.sortBy(this.getGroups(), 'priority'));
       groups.forEach((group) => {
-        if (group.virtual) return;
         group.priority = priority;
         priority += 10;
       });
       groups.forEach((group) => {
-        if (group.virtual) return;
-        saveActions.push(savedDashboardGroups.get(group.id).then(savedGroup => {
-          savedGroup.priority = group.priority;
-          return savedGroup.save();
-        }));
+        if (group.virtual) {
+          savedDashboards.get(group.id).then(savedDashboard => {
+            savedDashboard.priority = group.priority;
+            return savedDashboard.save();
+          });
+        } else {
+          saveActions.push(savedDashboardGroups.get(group.id).then(savedGroup => {
+            savedGroup.priority = group.priority;
+            return savedGroup.save();
+          }));
+        }
       });
-      //TODO: renumber virtual dashboards
       saveActions.push(cache.invalidate);
       return Promise.all(saveActions);
     }

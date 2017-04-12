@@ -7,7 +7,6 @@ uiModules
     restrict: 'A',
     require: '^dashboardDraggableItem',
     link($scope, $el, attr, ctrl) {
-      ctrl.registerHandle($el);
       $el.addClass('gu-handle');
     }
   };

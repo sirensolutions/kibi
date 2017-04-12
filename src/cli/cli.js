@@ -4,6 +4,7 @@ import Command from './command';
 import serveCommand from './serve/serve';
 import replaceEncryptionKeyCommand from './kibi/replace_encryption_key';
 import upgradeCommand from './kibi/upgrade';
+import backupCommand from './kibi/backup';
 
 const argv = process.env.kbnWorkerArgv ? JSON.parse(process.env.kbnWorkerArgv) : process.argv.slice();
 const program = new Command('bin/kibi'); // kibi: renamed kibana to kibi
@@ -19,6 +20,7 @@ program
 serveCommand(program);
 replaceEncryptionKeyCommand(program);
 upgradeCommand(program);
+backupCommand(program);
 
 program
 .command('help <command>')

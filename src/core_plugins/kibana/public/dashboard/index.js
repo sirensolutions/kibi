@@ -187,6 +187,7 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
       });
 
       $scope.$watch('state.options.darkTheme', setDarkTheme);
+      $scope.$watch('state.options.border', setBorders);
 
       // kibi: removed open button
       $scope.topNavMenu = [{
@@ -247,8 +248,9 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
           stateMonitor.destroy();
           dash.destroy();
 
-          // Remove dark theme to keep it from affecting the appearance of other apps.
+          // Remove dark theme and borders to keep it from affecting the appearance of other apps.
           setDarkTheme(false);
+          setBorders(false);
         });
 
         $scope.$emit('application.load');
@@ -289,6 +291,11 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
         chrome.removeApplicationClass(['theme-dark', 'theme-light']);
         chrome.addApplicationClass(theme);
       }
+
+      function setBorders(enabled) {
+        $scope.$broadcast('border', !enabled);
+      }
+
 
       $scope.expandedPanel = null;
       $scope.hasExpandedPanel = () => $scope.expandedPanel !== null;

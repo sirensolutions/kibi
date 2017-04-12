@@ -7,6 +7,7 @@ import uiModules from 'ui/modules';
 import uiRoutes from 'ui/routes';
 import MissingDashboardError from 'ui/kibi/errors/missing_dashboard_error';
 import SimpleEmitter from 'ui/utils/simple_emitter';
+import CacheProvider from 'ui/kibi/helpers/cache_helper';
 
 uiRoutes
 .addSetupWork($injector => {
@@ -25,6 +26,7 @@ uiModules
   let lastSelectDashboardEventTimer;
   let lastFiredMultiCountsQuery;
   let lastMultiCountsQueryResults;
+  const cache = Private(CacheProvider);
 
   const _getDashboardForGroup = function (groupId, groupTitle, dashboardDef) {
     return {
@@ -132,6 +134,27 @@ uiModules
           dashboard.$$highlight = false;
         });
       });
+    }
+
+    renumberGroups() {
+      let priority = 10;
+      const saveActions = [];
+      const groups = _.clone(_.sortBy(this.getGroups(), 'priority'));
+      groups.forEach((group) => {
+        if (group.virtual) return;
+        group.priority = priority;
+        priority += 10;
+      });
+      groups.forEach((group) => {
+        if (group.virtual) return;
+        saveActions.push(savedDashboardGroups.get(group.id).then(savedGroup => {
+          savedGroup.priority = group.priority;
+          return savedGroup.save();
+        }));
+      });
+      //TODO: renumber virtual dashboards
+      saveActions.push(cache.invalidate);
+      return Promise.all(saveActions);
     }
 
     getDashboardsInGroup(groupId) {

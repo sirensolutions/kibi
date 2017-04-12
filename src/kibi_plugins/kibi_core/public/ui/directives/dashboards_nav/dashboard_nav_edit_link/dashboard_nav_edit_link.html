@@ -65,18 +65,20 @@
     </div>
   </div>
   <div ng-if="!(isOnEditMode && group.virtual)">
-    <div class="dashboards-nav-edit-link-dashboard" dashboard-draggable-item="dashboard" ng-repeat="dashboard in group.dashboards">
-      <div class="dashboards-nav-edit-link-dragbar" dashboard-draggable-handle ng-if="isOnEditMode">
-        <i class="fa fa-arrows-v" aria-hidden="true"></i>
-      </div>
-      <div class="dashboard-title">
-        {{dashboard.title}}
-      </div>
+    <div ng-repeat="dashboard in group.dashboards">
+      <div class="dashboards-nav-edit-link-dashboard" dashboard-draggable-item="$index">
+        <div class="dashboards-nav-edit-link-dragbar" dashboard-draggable-handle ng-if="isOnEditMode">
+          <i class="fa fa-arrows-v" aria-hidden="true"></i>
+        </div>
+        <div class="dashboard-title">
+          {{dashboard.title}}
+        </div>
 
-      <div ng-if="isGroupEditorOpen && !isOnEditMode"
-           class="action-select"
-      >
-        <input type="checkbox" ng-click="includeDashboardOnGroup($event, group, dashboard)" />
+        <div ng-if="isGroupEditorOpen && !isOnEditMode"
+             class="action-select"
+        >
+          <input type="checkbox" ng-click="includeDashboardOnGroup($event, group, dashboard)" />
+        </div>
       </div>
     </div>
   </div>

@@ -2,11 +2,13 @@ import _ from 'lodash';
 import $ from 'jquery';
 import dragula from 'dragula';
 import uiModules from 'ui/modules';
+import CacheProvider from 'ui/kibi/helpers/cache_helper';
 
 uiModules
 .get('kibana')
-.directive('dashboardDraggableContainer', function () {
-
+.directive('dashboardDraggableContainer', function ($rootScope, createNotifier,
+  Private, dashboardGroups, savedDashboardGroups, savedDashboards) {
+  const cache = Private(CacheProvider);
   const $scopes = new WeakMap();
 
   return {
@@ -24,6 +26,9 @@ uiModules
       this.getList = () => _.sortBy($parse($attrs.dashboardDraggableContainer)($scope), 'priority');
     },
     link($scope, $el, attr) {
+      const notify = createNotifier({
+        location: 'Dashboard Groups Editor'
+      });
       const drake = dragula({
         accepts(el, target, source, sibling) {
           const element = $(el).parent().get(0);
@@ -43,22 +48,21 @@ uiModules
         mirrorContainer: $el.parent().get(0)
       });
 
-      const drakeEvents = [
-        'cancel',
-        'cloned',
-        'drag',
-        'dragend',
-        'drop',
-        'out',
-        'over',
-        'remove',
-        'shadow'
-      ];
-      const prettifiedDrakeEvents = {
-        drag: 'start',
-        dragend: 'end'
-      };
-
+      // const drakeEvents = [
+      //   'cancel',
+      //   'cloned',
+      //   'drag',
+      //   'dragend',
+      //   'drop',
+      //   'out',
+      //   'over',
+      //   'remove',
+      //   'shadow'
+      // ];
+      // const prettifiedDrakeEvents = {
+      //   drag: 'start',
+      //   dragend: 'end'
+      // };
       // drakeEvents.forEach(type => {
       //   drake.on(type, (el, ...args) => forwardEvent(type, el, ...args));
       // });
@@ -86,41 +90,79 @@ uiModules
       // }
 
       function drop(el, target, source, sibling) {
-        // console.log('drop', el, target, source, sibling);
+        // console.log('drop', el, target, source, sibling, $scopes);
+
         const list = $scope.dashboardDraggableContainerCtrl.getList();
-        const itemScope = $scopes.get(source);
-        if (!itemScope) return;
-        const item = itemScope.dashboardDraggableItemCtrl.getItem();
-        const fromIndex = list.indexOf(item);
-        const siblingIndex = getItemIndexFromElement(list, $(sibling).parent().get(0));
-
-        const toIndex = getTargetIndex(list, fromIndex, siblingIndex);
-        // _.move(list, item, toIndex);
-        // console.log(list, item, toIndex);
-      }
-
-      function getTargetIndex(list, fromIndex, siblingIndex) {
-        if (siblingIndex === -1) {
-          // means the item was dropped at the end of the list
-          return list.length - 1;
-        } else if (fromIndex < siblingIndex) {
-          // An item moving from a lower index to a higher index will offset the
-          // index of the earlier items by one.
-          return siblingIndex - 1;
+        const targetItemScope = $scopes.get(target);
+        if (!targetItemScope) return;
+        const targetItem = targetItemScope.dashboardDraggableItemCtrl.getItem();
+        const sourceItemScope = $scopes.get(source);
+        if (!sourceItemScope) return;
+        const sourceItem = sourceItemScope.dashboardDraggableItemCtrl.getItem();
+        const siblingItemScope = $scopes.get($(sibling).parent().get(0));
+        let siblingItem = {};
+        if (siblingItemScope) {
+          siblingItem = siblingItemScope.dashboardDraggableItemCtrl.getItem();
         }
-        return siblingIndex;
+
+        const sourceGroup = sourceItemScope.dashboardDraggableItemCtrl.getGroup();
+        const targetGroup = targetItemScope.dashboardDraggableItemCtrl.getGroup();
+        // console.log(sourceGroup.id, sourceItem, targetGroup.id, targetItem);
+
+        dashboardGroups.renumberGroups().then(() => {
+          if (sourceGroup.id === targetGroup.id) {
+            return savedDashboardGroups.get(sourceGroup.id).then(savedGroup => {
+              _.move(savedGroup.dashboards, sourceItem, targetItem);
+              return savedGroup.save();
+            });
+          }
+          if (sourceItemScope.isDashboard) {
+            return savedDashboardGroups.get(sourceGroup.id).then(savedSourceGroup => {
+              return savedDashboardGroups.get(targetGroup.id).then(savedTargetGroup => {
+                const actions = [];
+                const dashboard = savedSourceGroup.dashboards[sourceItem];
+                if (savedSourceGroup.dashboards.length === 1) {
+                  actions.push(savedDashboardGroups.delete(savedSourceGroup.id));
+                } else {
+                  savedSourceGroup.dashboards.splice(sourceItem, 1);
+                  actions.push(savedSourceGroup.save());
+                }
+                savedTargetGroup.dashboards.splice(targetItem, 0, dashboard);
+                actions.push(savedTargetGroup.save());
+                return Promise.all(actions);
+              });
+            });
+          }
+          if (!sourceItemScope.isDashboard && sourceGroup.virtual && !targetGroup.virtual) {
+            return savedDashboardGroups.get(targetGroup.id).then(savedGroup => {
+              savedGroup.dashboards.push({
+                id: sourceGroup.id,
+                title: sourceGroup.title
+              });
+              return savedGroup.save();
+            });
+          }
+          if (!sourceItemScope.isDashboard && sourceGroup.virtual) {
+            return savedDashboards.get(sourceGroup.id).then(savedDashboard => {
+              console.log(targetGroup.priority);
+              savedDashboard.priority = targetGroup.priority - (sibling ? 5 : -5); //TODO: Needs renumber!
+              return savedDashboard.save();
+            });
+          }
+          if (!sourceItemScope.isDashboard && !sourceGroup.virtual) {
+            return savedDashboardGroups.get(sourceGroup.id).then(savedGroup => {
+              savedGroup.priority = targetGroup.priority - (sibling ? 5 : -5);
+              return savedGroup.save();
+            });
+          }
+        })
+        .then(cache.invalidate)
+        .then(() => {
+          notify.info('Dashboard ' + sourceGroup.title + ' was successfuly moved');
+          $rootScope.$emit('kibi:dashboardgroup:changed', sourceGroup.id);
+        });
       }
 
-      function getItemIndexFromElement(list, element) {
-        if (!element) return -1;
-
-        const scope = $scopes.get(element);
-        if (!scope) return;
-        const item = scope.dashboardDraggableItemCtrl.getItem();
-        const index = list.indexOf(item);
-
-        return index;
-      }
     }
   };
 

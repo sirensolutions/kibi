@@ -13,12 +13,13 @@ uiModules
       const dragHandles = $();
 
       this.getItem = () => $parse($attrs.dashboardDraggableItem)($scope);
+      this.getGroup = () => $scope.group;
       this.registerHandle = $el => {
         dragHandles.push(...$el);
       };
     },
     link($scope, $el, attr, draggableController) {
-      $scope.isDashboard = attr.dashboardDraggableItem === 'dashboard';
+      $scope.isDashboard = attr.dashboardDraggableItem !== 'group';
       draggableController.linkDraggableItem($el.get(0), $scope);
     }
   };

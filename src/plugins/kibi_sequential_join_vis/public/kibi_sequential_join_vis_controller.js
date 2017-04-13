@@ -14,9 +14,9 @@ define(function (require) {
   require('ui/modules')
   .get('kibana/kibi_sequential_join_vis', ['kibana'])
   .controller('KibiSequentialJoinVisController', function (getAppState, kibiState, $scope, $rootScope, Private, $http, createNotifier,
-                                                           globalState, Promise, kbnIndex, config) {
+                                                           globalState, Promise, kbnIndex, config, kacConfiguration, savedDashboards) {
     const searchHelper = new SearchHelper(kbnIndex);
-    const onVisualizeTab = chrome.onVisualizeTab();
+    const edit = chrome.onVisualizeTab();
 
     const notify = createNotifier({
       location: 'Kibi Relational filter'
@@ -151,7 +151,7 @@ define(function (require) {
     );
 
     const _collectUpdateCountsRequest = function (buttons, dashboardId) {
-      if (onVisualizeTab || !buttons || !buttons.length) {
+      if (edit || !buttons || !buttons.length) {
         return Promise.resolve([]);
       }
       delayExecutionHelper.addEventData({
@@ -162,22 +162,76 @@ define(function (require) {
     };
 
     const _constructButtons = function () {
-      const buttonsDefs = _.filter($scope.vis.params.buttons, btn => relationsHelper.validateIndicesRelationFromId(btn.indexRelationId));
+      const validatedButtonsDefs = _.filter(
+        $scope.vis.params.buttons,
+        btn => relationsHelper.validateIndicesRelationFromId(btn.indexRelationId)
+      );
 
       $scope.vis.error = '';
 
-      if (buttonsDefs.length !== $scope.vis.params.buttons.length) {
+      if (validatedButtonsDefs.length !== $scope.vis.params.buttons.length) {
         $scope.vis.error = 'Invalid configuration of the Kibi relational filter visualization';
-        if (!onVisualizeTab) {
+        if (!edit) {
           return Promise.reject($scope.vis.error);
         }
       }
 
-      if (!onVisualizeTab) {
-        return kibiState._getDashboardAndSavedSearchMetas([currentDashboardId]).then(([ { savedDash, savedSearchMeta } ]) => {
-          const currentDashboardIndex = savedSearchMeta.index;
-          const currentDashboardId = savedDash.id;
-          const buttons = kibiSequentialJoinVisHelper.constructButtonsArray(buttonsDefs, currentDashboardIndex, currentDashboardId);
+      if (!edit) {
+        // NOTE:
+        // if access control enabled filter out buttons which do not hava access to
+        // either source or target dashboards
+        let getButtonDefs = Promise.resolve(validatedButtonsDefs);
+        if (kacConfiguration && kacConfiguration.acl && kacConfiguration.acl.enabled === true) {
+          getButtonDefs = savedDashboards.find().then((dashboards) => {
+            // iterate over the buttonsDefs and remove the
+            return _.filter(validatedButtonsDefs, (btn) => {
+              // sourceDashboardId is optional
+              if (btn.sourceDashboardId && !_.find(dashboards.hits, 'id', btn.sourceDashboardId)) {
+                return false;
+              }
+              if (!_.find(dashboards.hits, 'id', btn.targetDashboardId)) {
+                return false;
+              }
+              return true;
+            });
+          });
+        }
+
+        return getButtonDefs.then((buttonsDefs) => {
+          const dashboardIds = [currentDashboardId];
+          _.each(buttonsDefs, function (button) {
+            if (!_.contains(dashboardIds, button.targetDashboardId)) {
+              dashboardIds.push(button.targetDashboardId);
+            }
+          });
+
+          return kibiState._getDashboardAndSavedSearchMetas(dashboardIds, true).then((metas) => {
+            return {
+              metas,
+              buttonsDefs
+            };
+          });
+        })
+        .then(({ metas, buttonsDefs }) => {
+          let currentDashboardIndex = '';
+          const dashboardIdIndexPair = new Map();
+          for (let i = 0; i < metas.length; i++) {
+            if (metas[i].savedSearchMeta !== null) {
+              dashboardIdIndexPair.set(metas[i].savedDash.id, metas[i].savedSearchMeta.index);
+            } else {
+              dashboardIdIndexPair.set(metas[i].savedDash.id, null);
+            }
+            if (metas[i].savedDash.id === currentDashboardId) {
+              currentDashboardIndex = metas[i].savedSearchMeta.index;
+            }
+          }
+
+          const buttons = kibiSequentialJoinVisHelper.constructButtonsArray(
+            buttonsDefs,
+            currentDashboardIndex,
+            currentDashboardId,
+            dashboardIdIndexPair
+          );
           // retain the buttons order
           for (let i = 0; i < buttons.length; i++) {
             buttons[i].btnIndex = i;
@@ -190,7 +244,7 @@ define(function (require) {
           return buttons;
         }).catch(notify.error);
       } else {
-        $scope.buttons = kibiSequentialJoinVisHelper.constructButtonsArray(buttonsDefs);
+        $scope.buttons = kibiSequentialJoinVisHelper.constructButtonsArray(validatedButtonsDefs);
       }
     };
 
@@ -199,7 +253,7 @@ define(function (require) {
      */
 
     const updateButtons = function (reason) {
-      if (onVisualizeTab) {
+      if (edit) {
         return;
       }
 

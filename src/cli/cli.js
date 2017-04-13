@@ -2,9 +2,12 @@ import _ from 'lodash';
 import pkg from '../utils/package_json';
 import Command from './command';
 import serveCommand from './serve/serve';
+
+// siren: kibi commands
 import replaceEncryptionKeyCommand from './kibi/replace_encryption_key';
 import upgradeCommand from './kibi/upgrade';
 import backupCommand from './kibi/backup';
+import restoreCommand from './kibi/restore';
 
 const argv = process.env.kbnWorkerArgv ? JSON.parse(process.env.kbnWorkerArgv) : process.argv.slice();
 const program = new Command('bin/kibi'); // kibi: renamed kibana to kibi
@@ -21,6 +24,7 @@ serveCommand(program);
 replaceEncryptionKeyCommand(program);
 upgradeCommand(program);
 backupCommand(program);
+restoreCommand(program);
 
 program
 .command('help <command>')

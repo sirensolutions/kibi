@@ -11,6 +11,7 @@
   clear: both;
   padding: 4px;
   display: block;
+  padding-right: 15px;
 
   width: @dashboards-nav-closed-width;
   .is-dashboards-nav-open & {
@@ -59,9 +60,9 @@
   background-color: @dashboard-inactive-background;
   display: block;
 
-  width: @dashboards-nav-closed-width;
+  width: @dashboards-nav-closed-width - 15px;
   .is-dashboards-nav-open & {
-    width: @dashboards-nav-open-width;
+    width: @dashboards-nav-open-width - 15px;
   }
 
   .dashboard-title {

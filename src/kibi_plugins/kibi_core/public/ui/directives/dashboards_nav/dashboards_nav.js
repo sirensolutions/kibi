@@ -18,7 +18,7 @@ uiModules
     replace: true,
     scope: true,
     template: dashboardsNavTemplate,
-    link: $scope => {
+    link: ($scope, $element) => {
       function updateGlobalNav() {
         $scope.isGlobalNavOpen = globalNavState.isOpen();
       }
@@ -90,7 +90,21 @@ uiModules
         updateDashboardsNav();
       });
 
+      $scope.resize = () => {
+        const $container = angular.element($element.find('.links')[0]);
+        const $navControls = angular.element($element.find('.dashboards-nav-control')[0]);
+        if ($navControls) {
+          const h = $element.height() - $navControls.height() - 70;
+          $container.height(h);
+        }
+      };
 
+      // Re-render if the window is resized
+      angular.element(window).bind('resize', function () {
+        $scope.resize();
+      });
+
+      $scope.resize();
     }
   };
 });

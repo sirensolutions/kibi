@@ -8,53 +8,54 @@ export default function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnU
 
   function KibiSequentialJoinVisHelper() {}
 
-  KibiSequentialJoinVisHelper.prototype.constructButtonsArray = function (buttonDefs, currentDashboardIndexId,
-                                                                          currentDashboardId, dashboardIdIndexPair) {
-    return _.chain(buttonDefs)
-    .filter(function (buttonDef) {
-      // if sourceDashboardId is defined keep only the one which match
-      if (buttonDef.sourceDashboardId && currentDashboardId) {
-        return buttonDef.sourceDashboardId === currentDashboardId;
-      }
-      const relationInfo = relationsHelper.getRelationInfosFromRelationID(buttonDef.indexRelationId);
-      // filter it out if currentDashboardIndex is neither in source nor in target for the button relation
-      if (currentDashboardIndexId &&
-          currentDashboardIndexId !== relationInfo.source.index &&
-          currentDashboardIndexId !== relationInfo.target.index) {
-        return false;
-      }
-      // filter if targetDashboardId == currentDashboardId
-      // the button should be shown only if it is based on a self join relation
-      if (currentDashboardId && currentDashboardId === buttonDef.targetDashboardId) {
-        return relationInfo.source.index === relationInfo.target.index;
-      }
-      if (dashboardIdIndexPair && currentDashboardIndexId === relationInfo.source.index &&
-          dashboardIdIndexPair.get(buttonDef.targetDashboardId) !== relationInfo.target.index) {
-        return false;
-      }
-      if (dashboardIdIndexPair && currentDashboardIndexId === relationInfo.target.index &&
-         dashboardIdIndexPair.get(buttonDef.targetDashboardId) !== relationInfo.source.index) {
-        return false;
-      }
-      return true;
-    })
-    .map(function (button) {
-      if (button.indexRelationId && currentDashboardIndexId) {
-        const relationInfo = relationsHelper.getRelationInfosFromRelationID(button.indexRelationId);
-        if (relationInfo.source.index === currentDashboardIndexId) {
-          button.sourceIndexPatternId = relationInfo.source.index;
-          button.sourceIndexPatternType = relationInfo.source.type;
-          button.sourceField = relationInfo.source.path;
-          button.targetIndexPatternId = relationInfo.target.index;
-          button.targetIndexPatternType = relationInfo.target.type;
-          button.targetField = relationInfo.target.path;
-        } else {
-          button.sourceIndexPatternId = relationInfo.target.index;
-          button.sourceIndexPatternType = relationInfo.target.type;
-          button.sourceField = relationInfo.target.path;
-          button.targetIndexPatternId = relationInfo.source.index;
-          button.targetIndexPatternType = relationInfo.source.type;
-          button.targetField = relationInfo.source.path;
+    KibiSequentialJoinVisHelper.prototype.constructButtonsArray = function (buttonDefs, currentDashboardIndexId,
+                                                                            currentDashboardId, dashboardIdIndexPair) {
+      return _.chain(buttonDefs)
+      .filter(function (buttonDef) {
+        // if sourceDashboardId is defined keep only the one which match
+        if (buttonDef.sourceDashboardId && currentDashboardId) {
+          return buttonDef.sourceDashboardId === currentDashboardId;
+        }
+        const relationInfo = relationsHelper.getRelationInfosFromRelationID(buttonDef.indexRelationId);
+        // filter it out if currentDashboardIndex is neither in source nor in target for the button relation
+        if (currentDashboardIndexId &&
+            currentDashboardIndexId !== relationInfo.source.index &&
+            currentDashboardIndexId !== relationInfo.target.index) {
+          return false;
+        }
+        // filter if targetDashboardId == currentDashboardId
+        // the button should be shown only if it is based on a self join relation
+        if (currentDashboardId && currentDashboardId === buttonDef.targetDashboardId) {
+          return relationInfo.source.index === relationInfo.target.index;
+        }
+        if (dashboardIdIndexPair && currentDashboardIndexId === relationInfo.source.index &&
+            dashboardIdIndexPair.get(buttonDef.targetDashboardId) !== relationInfo.target.index) {
+          return false;
+        }
+        if (dashboardIdIndexPair && currentDashboardIndexId === relationInfo.target.index &&
+            dashboardIdIndexPair.get(buttonDef.targetDashboardId) !== relationInfo.source.index) {
+          return false;
+        }
+        return true;
+      })
+      .map(function (button) {
+        if (button.indexRelationId && currentDashboardIndexId) {
+          const relationInfo = relationsHelper.getRelationInfosFromRelationID(button.indexRelationId);
+          if (relationInfo.source.index === currentDashboardIndexId) {
+            button.sourceIndexPatternId = relationInfo.source.index;
+            button.sourceIndexPatternType = relationInfo.source.type;
+            button.sourceField = relationInfo.source.path;
+            button.targetIndexPatternId = relationInfo.target.index;
+            button.targetIndexPatternType = relationInfo.target.type;
+            button.targetField = relationInfo.target.path;
+          } else {
+            button.sourceIndexPatternId = relationInfo.target.index;
+            button.sourceIndexPatternType = relationInfo.target.type;
+            button.sourceField = relationInfo.target.path;
+            button.targetIndexPatternId = relationInfo.source.index;
+            button.targetIndexPatternType = relationInfo.source.type;
+            button.targetField = relationInfo.source.path;
+          }
         }
       }
       return button;

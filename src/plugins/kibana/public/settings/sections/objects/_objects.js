@@ -142,7 +142,11 @@ define(function (require) {
             body: {docs: objs.map(transformToMget)}
           })
           .then(function (response) {
-            saveToFile(response.docs.map(_.partialRight(_.pick, '_id', '_type', '_source')));
+            //kibi: sort the docs so the config is on the top
+            const docs = response.docs.map(_.partialRight(_.pick, '_id', '_type', '_source'));
+            importExportHelper.moveConfigToTop(docs);
+            // kibi: end
+            saveToFile(docs);
           });
         }
 

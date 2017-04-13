@@ -143,6 +143,24 @@ export default function ImportHelper(config, es, savedObjectsAPI, kibiVersion, k
       });
     }
 
+    moveConfigToTop(docs) {
+      docs.sort(function (a, b) {
+        if (a._type === 'config' && b._type !== 'config') {
+          return -1;
+        } else if (a._type !== 'config' && b._type === 'config') {
+          return 1;
+        } else {
+          if (a._type < b._type) {
+            return -1;
+          } else if (a._type > b._type) {
+            return 1;
+          } else {
+            return 0;
+          }
+        }
+      });
+    }
+
     importDocuments(docs, services, notify) {
       // kibi: change the import to sequential to solve the dependency problem between objects
       // as visualisations could depend on searches

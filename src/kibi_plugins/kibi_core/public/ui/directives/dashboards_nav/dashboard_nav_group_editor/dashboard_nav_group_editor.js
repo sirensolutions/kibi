@@ -1,4 +1,6 @@
 import 'plugins/kibi_core/management/sections/kibi_dashboard_groups/services/saved_dashboard_groups';
+import 'plugins/kibi_core/ui/directives/icon_picker';
+import 'plugins/kibi_core/ui/directives/icon_picker/icon_picker.less';
 import dashboardNavGroupEditorTemplate from './dashboard_nav_group_editor.html';
 import CacheProvider from 'ui/kibi/helpers/cache_helper';
 import './dashboard_nav_group_editor.less';

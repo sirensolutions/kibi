@@ -80,6 +80,7 @@ uiModules
         const sourceItem = sourceItemScope.dashboardDraggableItemCtrl.getItem();
         const sourceGroup = sourceItemScope.dashboardDraggableItemCtrl.getGroup();
 
+        $scope.isSaving = true;
         dashboardGroups.renumberGroups().then(() => {
           // Changes the dashboard order inside a group
           if (sourceGroup.id === targetGroup.id) {
@@ -129,8 +130,13 @@ uiModules
         })
         .then(cache.invalidate)
         .then(() => {
+          $scope.isSaving = false;
           notify.info('Dashboard ' + sourceGroup.title + ' was successfuly moved');
           $rootScope.$emit('kibi:dashboardgroup:changed', sourceGroup.id);
+        })
+        .catch((reason) => {
+          $scope.isSaving = false;
+          notify.error(reason);
         });
       }
 

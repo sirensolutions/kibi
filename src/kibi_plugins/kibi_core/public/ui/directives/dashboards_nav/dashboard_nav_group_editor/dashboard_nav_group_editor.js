@@ -119,6 +119,9 @@ uiModules
             $scope.setup();
             dashboardsNavState.setGroupEditorOpen(false);
             $rootScope.$emit('kibi:dashboardgroup:changed', groupId);
+          })
+          .catch((reason) => {
+            notify.error(reason);
           });
         });
       };

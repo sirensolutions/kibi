@@ -8,7 +8,7 @@
 ></dashboard-nav-link>
 
 <div
-  dashboard-draggable-container="groups"
+  dashboard-draggable-container="groups" ng-disabled="isSaving" ng-class="{'dashboard-switcher-disabled': isSaving}"
   ng-if="isOnEditMode || isGroupEditorOpen"
 >
   <dashboard-nav-edit-link

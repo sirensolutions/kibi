@@ -56,6 +56,9 @@ uiModules
         .then(() => {
           notify.info('Dashboard Group ' + group.title + ' was successfuly deleted');
           $rootScope.$emit('kibi:dashboardgroup:changed', group.id);
+        })
+        .catch((reason) => {
+          notify.error(reason);
         });
       };
 

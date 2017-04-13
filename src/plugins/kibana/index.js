@@ -38,7 +38,7 @@ module.exports = function (kibana) {
         ),
 
         injectVars: function (server, options) {
-          let config = server.config();
+          const config = server.config();
 
           const ret = {
             kbnDefaultAppId: config.get('kibana.defaultAppId'),
@@ -55,6 +55,12 @@ module.exports = function (kibana) {
               ret.kibiWarnings.datasource_encryption_warning = true;
             }
           }
+
+          ret.kacConfiguration = {
+            acl: {
+              enabled: config.has('kibi_access_control.acl.enabled') ? config.get('kibi_access_control.acl.enabled') : false
+            }
+          };
           // kibi:end
 
           return ret;

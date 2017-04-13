@@ -7,7 +7,8 @@ define(function (require) {
 
     function KibiSequentialJoinVisHelper() {}
 
-    KibiSequentialJoinVisHelper.prototype.constructButtonsArray = function (buttonDefs, currentDashboardIndexId, currentDashboardId) {
+    KibiSequentialJoinVisHelper.prototype.constructButtonsArray = function (buttonDefs, currentDashboardIndexId,
+                                                                            currentDashboardId, dashboardIdIndexPair) {
       return _.chain(buttonDefs)
       .filter(function (buttonDef) {
         // if sourceDashboardId is defined keep only the one which match
@@ -25,6 +26,14 @@ define(function (require) {
         // the button should be shown only if it is based on a self join relation
         if (currentDashboardId && currentDashboardId === buttonDef.targetDashboardId) {
           return relationInfo.source.index === relationInfo.target.index;
+        }
+        if (dashboardIdIndexPair && currentDashboardIndexId === relationInfo.source.index &&
+            dashboardIdIndexPair.get(buttonDef.targetDashboardId) !== relationInfo.target.index) {
+          return false;
+        }
+        if (dashboardIdIndexPair && currentDashboardIndexId === relationInfo.target.index &&
+            dashboardIdIndexPair.get(buttonDef.targetDashboardId) !== relationInfo.source.index) {
+          return false;
         }
         return true;
       })

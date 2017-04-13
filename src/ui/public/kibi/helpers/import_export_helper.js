@@ -1,10 +1,9 @@
 import _ from 'lodash';
 
 export default function ImportHelper(config, es, savedObjectsAPI, kibiVersion, kbnIndex,
-  queryEngineClient, createNotifier, Private, Promise, indexPatterns) {
+  queryEngineClient, Private, Promise, indexPatterns) {
 
   const getIds = Private(require('ui/index_patterns/_get_ids'));
-  const notify = createNotifier({ location: 'Import Helper' });
   const visTypes = Private(require('ui/registry/vis_types'));
 
   class ImportExportHelper {
@@ -18,7 +17,7 @@ export default function ImportHelper(config, es, savedObjectsAPI, kibiVersion, k
       });
     }
 
-    loadIndexPatterns(indexPatternDocuments) {
+    loadIndexPatterns(indexPatternDocuments, notify) {
       if (indexPatternDocuments && indexPatternDocuments.length > 0) {
         const promises = [];
         _.each(indexPatternDocuments, (doc) => {
@@ -49,7 +48,7 @@ export default function ImportHelper(config, es, savedObjectsAPI, kibiVersion, k
       }
     }
 
-    loadConfig(configDocument) {
+    loadConfig(configDocument, notify) {
       if (configDocument) {
         if (configDocument._id === kibiVersion) {
           // override existing config values
@@ -62,8 +61,9 @@ export default function ImportHelper(config, es, savedObjectsAPI, kibiVersion, k
           notify.error(
             'Config object version [' + configDocument._id + '] in the import ' +
             'does not match current version [' + kibiVersion + ']\n' +
-            'Will NOT import any of the advanced settings parameters'
+            'Non of the advanced settings parameters were imported'
           );
+          return Promise.resolve(true);
         }
       } else {
         // return Promise so we can chain the other part
@@ -71,7 +71,7 @@ export default function ImportHelper(config, es, savedObjectsAPI, kibiVersion, k
       }
     }
 
-    executeSequentially(docs, services) {
+    executeSequentially(docs, services, notify) {
       const functionArray = [];
       _.each(docs, function (doc) {
         functionArray.push(function (previousOperationResult) {
@@ -143,7 +143,7 @@ export default function ImportHelper(config, es, savedObjectsAPI, kibiVersion, k
       });
     }
 
-    importDocuments(docs, services) {
+    importDocuments(docs, services, notify) {
       // kibi: change the import to sequential to solve the dependency problem between objects
       // as visualisations could depend on searches
       // lets order the export to make sure that searches comes before visualisations
@@ -178,9 +178,9 @@ export default function ImportHelper(config, es, savedObjectsAPI, kibiVersion, k
         }
       });
 
-      return this.loadIndexPatterns(indexPatternDocuments).then(() => {
-        return this.loadConfig(configDocument).then(() => {
-          return this.executeSequentially(docs, services);
+      return this.loadIndexPatterns(indexPatternDocuments, notify).then(() => {
+        return this.loadConfig(configDocument, notify).then(() => {
+          return this.executeSequentially(docs, services, notify);
         });
       });
     }

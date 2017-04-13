@@ -165,7 +165,7 @@ define(function (require) {
             notify.error('The file could not be processed.');
           }
 
-          return importExportHelper.importDocuments(docs, $scope.services)
+          return importExportHelper.importDocuments(docs, $scope.services, notify)
           .then(refreshKibanaIndex)
           .then(importExportHelper.reloadQueries) // kibi: to clear backend cache
           .then(refreshData, notify.error);

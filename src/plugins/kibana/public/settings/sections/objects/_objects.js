@@ -25,12 +25,13 @@ define(function (require) {
     const cache = Private(require('ui/kibi/helpers/cache_helper'));
     const deleteHelper = Private(require('ui/kibi/helpers/delete_helper'));
     const refreshKibanaIndex = Private(require('plugins/kibana/settings/sections/indices/_refresh_kibana_index'));
-    const getIds = Private(require('ui/index_patterns/_get_ids'));
+    const importExportHelper = Private(require('ui/kibi/helpers/import_export_helper'));
     // kibi: end
 
     return {
       restrict: 'E',
-      controller: function ($scope, $injector, $q, AppState, es, indexPatterns) {
+      controller: function ($scope, $injector, $q, AppState) {
+
         const notify = createNotifier({ location: 'Saved Objects' });
 
         const $state = $scope.state = new AppState();
@@ -124,16 +125,13 @@ define(function (require) {
             service.service.scanAll('').then((results) =>
               results.hits.map((hit) => _.extend(hit, {type: service.type}))
             )
-          ).then((results) => {
-            // kibi: added by kibi
-            results.push([{id: kibiVersion, type: 'config'}]); // kibi: here we also want to export "config" type
-            return indexPatterns.getIds().then(function (list) {
-              _.each(list, (id) => {
-                results.push([{id: id, type: 'index-pattern'}]); // kibi: here we also want to export all index patterns
-              });
-              retrieveAndExportDocs(_.flattenDeep(results));
-            });
-            // kibi: end
+          )
+          .then((results) => {
+            // kibi: add extra objects to the export
+            return importExportHelper.addExtraObjectForExportAll(results);
+          })
+          .then((results) => {
+            retrieveAndExportDocs(_.flattenDeep(results));
           });
         };
 
@@ -167,143 +165,9 @@ define(function (require) {
             notify.error('The file could not be processed.');
           }
 
-          // kibi: change the import to sequential to solve the dependency problem between objects
-          // as visualisations could depend on searches
-          // lets order the export to make sure that searches comes before visualisations
-          // then also import object sequentially to avoid errors
-          const configDocument = _.find(docs, function (o) {
-            return o._type === 'config';
-          });
-
-          // kibi: added to manage index-patterns import
-          const indexPatternDocuments = _.filter(docs, function (o) {
-            return o._type === 'index-pattern';
-          });
-
-          docs = _.filter(docs, function (doc) {
-            return doc._type !== 'config' && doc._type !== 'index-pattern';
-          });
-
-          // kibi: added to sort the docs by type
-          docs.sort(function (a, b) {
-            if (a._type === 'search' && b._type !== 'search') {
-              return -1;
-            } else if (a._type !== 'search' && b._type === 'search') {
-              return 1;
-            } else {
-              if (a._type < b._type) {
-                return -1;
-              } else if (a._type > b._type) {
-                return 1;
-              } else {
-                return 0;
-              }
-            }
-          });
-
-          // kibi: added to make sure that after an import queries are in sync
-          function reloadQueries() {
-            return queryEngineClient.clearCache();
-          }
-
-          // kibi: load index-patterns
-          const createIndexPattern = function (doc) {
-            return savedObjectsAPI.index({
-              index: kbnIndex,
-              type: 'index-pattern',
-              id: doc._id,
-              body: doc._source
-            });
-          };
-
-          const loadIndexPatterns = function (indexPatternDocuments) {
-            if (indexPatternDocuments && indexPatternDocuments.length > 0) {
-              const promises = [];
-              _.each(indexPatternDocuments, (doc) => {
-                // lets try to fetch the field mappings to check
-                // that index-pattern matches any existing indices
-                const promise = es.indices.getFieldMapping({
-                  index: doc._id,
-                  field: '*',
-                  allowNoIndices: false,
-                  includeDefaults: true
-                }).catch((err) => {
-                  notify.warning(
-                    'Imported index-pattern: [' + doc._id + '] did not match any indices. ' +
-                    'If you would like to remove it go to Settings->Indices'
-                  );
-                }).finally(() => {
-                  return createIndexPattern(doc);
-                });
-                promises.push(promise);
-              });
-              return Promise.all(promises).then(() => {
-                // very important !!! to clear the cached promise
-                // which returns list of index patterns
-                getIds.clearCache();
-              });
-            } else {
-              return Promise.resolve(true);
-            }
-          };
-
-          // kibi: override config properties
-          const loadConfig = function (configDocument) {
-            if (configDocument) {
-              if (configDocument._id === kibiVersion) {
-                // override existing config values
-                const promises = [];
-                _.each(configDocument._source, function (value, key) {
-                  promises.push(config.set(key, value));
-                });
-                return Promise.all(promises);
-              } else {
-                notify.error(
-                  'Config object version [' + configDocument._id + '] in the import ' +
-                  'does not match current version [' + kibiVersion + ']\n' +
-                  'Will NOT import any of the advanced settings parameters'
-                );
-              }
-            } else {
-              // return Promise so we can chain the other part
-              return Promise.resolve(true);
-            }
-          };
-
-          // kibi: now execute this sequentially
-          const executeSequentially = function (docs) {
-            const functionArray = [];
-            _.each(docs, function (doc) {
-              functionArray.push(function (previousOperationResult) {
-                // previously this part was done in Promise.map
-                const service = _.find($scope.services, {type: doc._type}).service;
-                return service.get().then(function (obj) {
-                  obj.id = doc._id;
-                  return obj.applyESResp(doc).then(function () {
-                    return obj.save();
-                  });
-                });
-                // end
-              });
-            });
-
-            return functionArray.reduce(
-              function (prev, curr, i) {
-                return prev.then(function (res) {
-                  return curr(res);
-                });
-              },
-              Promise.resolve(null)
-            );
-          };
-
-          return loadIndexPatterns(indexPatternDocuments).then(function () {
-            return loadConfig(configDocument).then(function () {
-              return executeSequentially(docs);
-            });
-          })
+          return importExportHelper.importDocuments(docs, $scope.services)
           .then(refreshKibanaIndex)
-          .then(reloadQueries) // kibi: to clear backend cache
+          .then(importExportHelper.reloadQueries) // kibi: to clear backend cache
           .then(refreshData, notify.error);
         };
 

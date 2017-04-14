@@ -141,7 +141,7 @@ uiModules
         $scope.editUrl = '#management/kibana/objects/' + service.name + '/' + id + '?notFound=' + e.savedObjectType;
       });
 
-      $scope.border = !$scope.$parent.opts.ui.border;
+      $scope.border = !$scope.$parent.opts.ui.hideBorder;
       $scope.$on('border', function (event, enabled) {
         $scope.border = enabled;
       });

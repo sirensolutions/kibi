@@ -114,6 +114,13 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
 
       const dash = $scope.dash = $route.current.locals.dash;
 
+      //siren: if there is no hide border option for dashboard set it false as default
+      const optionJson = angular.fromJson(dash.optionsJSON);
+      if (!optionJson.hasOwnProperty('hideBorder')) {
+        optionJson.hideBorder = false;
+        dash.optionsJSON = JSON.stringify(optionJson);
+      };
+
       const dashboardTime = kibiState._getDashboardProperty(dash.id, kibiState._properties.time);
       if (dashboardTime) {
         // kibi: time from the kibi state.
@@ -187,7 +194,7 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
       });
 
       $scope.$watch('state.options.darkTheme', setDarkTheme);
-      $scope.$watch('state.options.border', setBorders);
+      $scope.$watch('state.options.hideBorder', hideBorders);
 
       // kibi: removed open button
       $scope.topNavMenu = [{
@@ -248,9 +255,9 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
           stateMonitor.destroy();
           dash.destroy();
 
-          // Remove dark theme and borders to keep it from affecting the appearance of other apps.
+          // Remove dark theme to keep it from affecting the appearance of other apps.
           setDarkTheme(false);
-          setBorders(false);
+          hideBorders(false);
         });
 
         $scope.$emit('application.load');
@@ -292,7 +299,7 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
         chrome.addApplicationClass(theme);
       }
 
-      function setBorders(enabled) {
+      function hideBorders(enabled) {
         $scope.$broadcast('border', !enabled);
       }
 

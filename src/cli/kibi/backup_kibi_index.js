@@ -1,64 +1,65 @@
-import moment from 'moment';
+import Elasticdump from 'elasticdump';
+import { get } from 'lodash';
 import Promise from 'bluebird';
-import { appendFile, access } from 'fs';
+import { mkdir, access } from 'fs';
 import { join } from 'path';
 
+const ELASTICSEACH_URL = 'http://localhost:9200';
+const KIBI_INDEX = '.kibi';
+
 /**
- * backupKibiIndex writes all the objects saved into the kibi index into a timestamped-file inside the toDir folder.
+ * BackupKibiIndex writes into a file the data and mappings of the kibi index.
+ * If the ACL plugin is present, it saves also the ACL index.
  *
- * @param server the kibi server
+ * @param config the kibi.yml config
  * @param toDir the path to the folder to write to
- * @returns the name of the backup file
  */
-export default async function backupKibiIndex(server, toDir) {
-  const kbnIndex = server.config().get('kibana.index');
-  const client = server.plugins.elasticsearch.getCluster('admin').getClient();
-
-  let dirExists = false;
-  try {
-    await Promise.fromNode(cb => access(toDir, cb));
-    dirExists = true;
-  } catch (err) {
-    // ignore
-  }
-  if (!dirExists) {
-    throw new Error(`Folder [${toDir}] does not exist`);
+export default class BackupKibiIndex {
+  constructor(config, toDir) {
+    this._config = config;
+    this._backupDir = toDir;
   }
 
-  const toFile = join(toDir, `backup-${moment().format('YYYY-MM-DD')}.json`);
-  let fileExists = false;
-  try {
-    await Promise.fromNode(cb => access(toFile, cb));
-    fileExists = true;
-  } catch (err) {
-    // ignore
-  }
-  if (fileExists) {
-    throw new Error(`Cannot backup to [${toFile}] since that file already exists`);
-  }
-
-  const searchTillDone = async function (res) {
-    if (!res.hits.hits.length) {
-      server.log(['info', 'backup'], `Backed Kibi index to [${toFile}]`);
-      return toFile;
+  async backup() {
+    let dirExists;
+    try {
+      await Promise.fromNode(cb => access(this._backupDir, cb));
+      dirExists = true;
+    } catch (err) {
+      dirExists = false;
     }
-
-    let data = '';
-    for (const hit of res.hits.hits) {
-      data += JSON.stringify(hit) + '\n';
+    if (dirExists) {
+      throw new Error(`Backup folder [${this._backupDir}] already exists`);
     }
-    await Promise.fromNode(cb => appendFile(toFile, data, cb));
-    server.log(['info', 'backup'], `Backed ${res.hits.hits.length} objects`);
-    const next = await client.scroll({ scrollId: res._scroll_id, scroll: '1m' });
-    return await searchTillDone(next);
-  };
+    await Promise.fromNode(cb => mkdir(this._backupDir, cb));
 
-  const res = await client.search({
-    index: kbnIndex,
-    scroll: '1m',
-    size: 100
-  });
+    const kibiIndex = get(this._config, 'kibana.index', KIBI_INDEX);
 
-  server.log(['info', 'backup'], `There are ${res.hits.total} objects to backup from index ${kbnIndex}`);
-  return await searchTillDone(res);
+    await this._backupIndex(kibiIndex, 'data');
+    await this._backupIndex(kibiIndex, 'mapping');
+    if (get(this._config, 'kibi_access_control.acl.enabled')) {
+      const aclIndex = get(this._config, 'kibi_access_control.acl.index');
+      await this._backupIndex(aclIndex, 'data');
+      await this._backupIndex(aclIndex, 'mapping');
+    }
+  }
+
+  async _backupIndex(index, type) {
+    const input = get(this._config, 'elasticsearch.url', ELASTICSEACH_URL);
+    const output = join(this._backupDir, `${type}-${index}.json`);
+
+    const options = {
+      scrollTime: '1m',
+      offset: 0,
+      limit: 100,
+      'input-index': index,
+      type,
+      input,
+      output
+    };
+    const elasticdump = new Elasticdump(input, output, options);
+    elasticdump.on('log', message => console.log(message));
+    elasticdump.on('error', message => console.error(message));
+    await Promise.fromNode(cb => elasticdump.dump(cb));
+  }
 }

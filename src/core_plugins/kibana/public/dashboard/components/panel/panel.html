@@ -1,9 +1,10 @@
-<!--kibi: added data-test-subj for selecting a panel in tests-->
-<div class="panel panel-default" ng-switch on="panel.type" ng-if="savedObj || error" data-test-subj="{{::savedObj.title}}">
-  <!--kibi: color the panel if there are selected entities-->
+<!--kibi: added data-test-subj for selecting a panel in tests, added panel-border for panel border style if enabled-->
+<div class="panel panel-default" ng-class="{'panel-border': border}" ng-switch on="panel.type" ng-if="savedObj || error" data-test-subj="{{::savedObj.title}}">
+  <!--kibi: color the panel if there are selected entities, added panel-border for panel heading border style if enabled -->
   <div
     class="panel-heading"
-    ng-class="{selectedEntitiesDependent: markDependOnSelectedEntities && dependsOnSelectedEntities, disabled: selectedEntitiesDisabled && dependsOnSelectedEntities}">
+    ng-class="{selectedEntitiesDependent: markDependOnSelectedEntities && dependsOnSelectedEntities,
+               disabled: selectedEntitiesDisabled && dependsOnSelectedEntities, 'panel-border': border}">
     <span class="panel-title" title="{{::savedObj.title}}">
       {{::savedObj.title}}
     </span>

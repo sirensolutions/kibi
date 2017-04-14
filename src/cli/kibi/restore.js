@@ -74,22 +74,21 @@ export default function restoreCommand(program) {
       }
     );
 
-    const kbnServer = new KbnServer(config);
-
-    await kbnServer.ready();
-
-    const logger = new MigrationLogger(kbnServer.server, 'migrations');
-    const runner = new MigrationRunner(kbnServer.server, logger);
-
     let exitCode = 0;
+    let kbnServer;
     try {
-      await waitForGreenStatus(kbnServer, 10);
-
       // restore index
-      const restoreKibiIndex = new RestoreKibiIndex(kbnServer.server, options.backupFile);
+      const restoreKibiIndex = new RestoreKibiIndex(config, options.backupDir);
       await restoreKibiIndex.restore();
 
       // perform a migration
+      kbnServer = new KbnServer(config);
+
+      await kbnServer.ready();
+      await waitForGreenStatus(kbnServer, 10);
+
+      const logger = new MigrationLogger(kbnServer.server, 'migrations');
+      const runner = new MigrationRunner(kbnServer.server, logger);
       const count = await runner.upgrade();
       if (count > 0) {
         process.stdout.write(`Performed ${count} upgrades.\n`);
@@ -100,7 +99,9 @@ export default function restoreCommand(program) {
       process.stderr.write(`${error}\n`);
       exitCode = 1;
     } finally {
-      await kbnServer.close();
+      if (kbnServer) {
+        await kbnServer.close();
+      }
     }
 
     process.exit(exitCode);
@@ -117,10 +118,10 @@ export default function restoreCommand(program) {
     .option(
       '-c, --config <path>',
       'Path to the config file, can be changed with the CONFIG_PATH environment variable as well',
-      process.env.CONFIG_PATH || fromRoot('config/kibi.dev.yml') || fromRoot('config/kibi.yml')
+      process.env.CONFIG_PATH || fromRoot('config/kibi.yml')
     )
     .option(
-      '--backup-file <path>',
+      '--backup-dir <path>',
       'Path to the file where the Kibi instance data was saved to'
     )
     .option(

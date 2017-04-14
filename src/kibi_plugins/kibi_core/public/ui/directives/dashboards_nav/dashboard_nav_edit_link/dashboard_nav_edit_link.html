@@ -1,12 +1,5 @@
 <div class="dashboards-nav-edit-link-group" dashboard-draggable-item="group">
   <div>
-    <div
-      ng-if="group.virtual"
-      class="dashboards-nav-edit-link-dragbar"
-      dashboard-draggable-handle="move"
-    >
-      <i class="fa fa-arrows-v" aria-hidden="true"></i>
-    </div>
     <div class="icon">
       <i
          ng-if="group.iconCss"
@@ -40,9 +33,8 @@
       </a>
       <div
         class="action dashboards-nav-edit-link-dragbar"
-        dashboard-draggable-handle="order"
+        dashboard-draggable-handle
       >
-        <i class="fa fa-arrows" aria-hidden="true"></i>
       </div>
       <a
         ng-if="!group.virtual"
@@ -56,8 +48,7 @@
   <div ng-if="!group.virtual">
     <div ng-repeat="dashboard in group.dashboards">
       <div class="dashboards-nav-edit-link-dashboard" dashboard-draggable-item="$index">
-        <div class="dashboards-nav-edit-link-dragbar" dashboard-draggable-handle="move">
-          <i class="fa fa-arrows-v" aria-hidden="true"></i>
+        <div class="dashboards-nav-edit-link-dragbar" dashboard-draggable-handle>
         </div>
         <div class="dashboard-title">
           {{dashboard.title}}
@@ -65,5 +56,4 @@
       </div>
     </div>
   </div>
-
 </div>

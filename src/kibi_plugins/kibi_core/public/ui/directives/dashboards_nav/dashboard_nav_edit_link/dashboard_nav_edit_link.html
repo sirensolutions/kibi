@@ -1,7 +1,7 @@
 <div class="dashboards-nav-edit-link-group" dashboard-draggable-item="group">
   <div>
     <div
-      ng-if="isOnEditMode && group.virtual"
+      ng-if="group.virtual"
       class="dashboards-nav-edit-link-dragbar"
       dashboard-draggable-handle="move"
     >
@@ -31,32 +31,21 @@
       <div class="title">
         {{group.title}}
       </div>
-      <div
-        class="info-warning"
-        ng-class="{'group-is-empty': groupIsEmpty()}"
-        tooltip="This empty group will be deleted."
-        tooltip-placement="right"
-        tooltip-popup-delay="0"
-        tooltip-append-to-body="1"
-      >
-        <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
-      </div>
       <a
-        ng-if="isOnEditMode && !group.virtual"
+        ng-if="!group.virtual"
         class="action"
         confirm-click="deleteGroup()"
       >
         <i class="fa fa-times" aria-hidden="true"></i>
       </a>
       <div
-        ng-if="isOnEditMode"
         class="action dashboards-nav-edit-link-dragbar"
         dashboard-draggable-handle="order"
       >
         <i class="fa fa-arrows" aria-hidden="true"></i>
       </div>
       <a
-        ng-if="isOnEditMode && !group.virtual"
+        ng-if="!group.virtual"
         class="action"
         ng-click="editGroup($event, group)"
       >
@@ -64,20 +53,14 @@
       </a>
     </div>
   </div>
-  <div ng-if="!(isOnEditMode && group.virtual)">
+  <div ng-if="!group.virtual">
     <div ng-repeat="dashboard in group.dashboards">
       <div class="dashboards-nav-edit-link-dashboard" dashboard-draggable-item="$index">
-        <div class="dashboards-nav-edit-link-dragbar" dashboard-draggable-handle="move" ng-if="isOnEditMode">
+        <div class="dashboards-nav-edit-link-dragbar" dashboard-draggable-handle="move">
           <i class="fa fa-arrows-v" aria-hidden="true"></i>
         </div>
         <div class="dashboard-title">
           {{dashboard.title}}
-        </div>
-
-        <div ng-if="isGroupEditorOpen && !isOnEditMode"
-             class="action-select"
-        >
-          <input type="checkbox" ng-click="includeDashboardOnGroup($event, group, dashboard)" />
         </div>
       </div>
     </div>

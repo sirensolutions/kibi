@@ -12,13 +12,16 @@ import uiModules from 'ui/modules';
 
 uiModules
 .get('kibana')
-.directive('dashboardsNav', ($rootScope, dashboardsNavState, globalNavState) => {
+.directive('dashboardsNav', ($rootScope, dashboardsNavState, globalNavState, createNotifier, dashboardGroups) => {
   return {
     restrict: 'E',
     replace: true,
     scope: true,
     template: dashboardsNavTemplate,
     link: ($scope, $element) => {
+      const notify = createNotifier({
+        location: 'Dashboard Groups'
+      });
       function updateGlobalNav() {
         $scope.isGlobalNavOpen = globalNavState.isOpen();
       }
@@ -79,7 +82,13 @@ uiModules
 
       $scope.newDashboardGroup = event => {
         event.preventDefault();
-        dashboardsNavState.setGroupEditorOpen(!dashboardsNavState.isGroupEditorOpen());
+        dashboardGroups.newGroup().then((groupId) => {
+          notify.info('New dashboard group was successfuly created');
+          $rootScope.$emit('kibi:dashboardgroup:changed', groupId);
+        })
+        .catch (reason => {
+          notify.error(reason);
+        });
       };
 
       $rootScope.$on('globalNavState:change', () => {

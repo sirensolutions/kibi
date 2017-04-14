@@ -4,7 +4,7 @@
 >
   <a
     class="anchor-actions"
-    ng-if="isOpen && !isGroupEditorOpen && !isOnEditMode"
+    ng-if="isOpen && !isGroupEditorOpen && isOnEditMode"
     ng-click="onNewGroupClick({ $event: $event })"
   >
     <div class="icon-action">
@@ -27,7 +27,7 @@
       Close
     </div>
     <div ng-if="!isOnEditMode" class="title-action">
-      Edit groups
+      Edit
     </div>
   </a>
 

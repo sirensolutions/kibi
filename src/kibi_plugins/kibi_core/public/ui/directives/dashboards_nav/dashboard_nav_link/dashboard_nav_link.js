@@ -6,7 +6,7 @@ import _ from 'lodash';
 
 uiModules
 .get('kibana')
-.directive('dashboardNavLink', (dashboardGroups, kibiState, dashboardsNavState) => {
+.directive('dashboardNavLink', (dashboardGroups, kibiState, dashboardsNavState, createNotifier) => {
   const numeral = require('numeral')();
 
   return {
@@ -18,6 +18,9 @@ uiModules
     },
     template: dashboardNavLinkTemplate,
     link: function ($scope) {
+      const notify = createNotifier({
+        location: 'Dashboard Navigator'
+      });
       $scope.groupMenuTemplate = groupMenuTemplate;
       $scope.groupMenuLocals = {
         filter: $scope.filter,
@@ -25,7 +28,13 @@ uiModules
         dashboardGroups
       };
 
-      $scope.selectDashboard = () => dashboardGroups.selectDashboard($scope.group.selected.id);
+      $scope.selectDashboard = () => {
+        if (!$scope.group.selected) {
+          notify.error(`The group ${$scope.group.title} doesn't contains any dashboard.`);
+        } else {
+          dashboardGroups.selectDashboard($scope.group.selected.id);
+        }
+      };
 
       $scope.isSidebarOpen = dashboardsNavState.isOpen();
       $scope.$watch(dashboardsNavState.isOpen, isOpen => {
@@ -52,7 +61,7 @@ uiModules
         if ($scope.group.dashboards.length > 1) {
           $scope.tooltipContent += ` (${$scope.group.selected.title})`;
         }
-        if ($scope.group.selected.count !== undefined) {
+        if ($scope.group.selected && $scope.group.selected.count !== undefined) {
           $scope.countHumanNotation = numeral.set($scope.group.selected.count).format('0.[00]a');
           $scope.tooltipContent += ` (${$scope.group.selected.count})`;
         }

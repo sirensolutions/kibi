@@ -23,25 +23,6 @@ uiModules
       const notify = createNotifier({
         location: 'Dashboard Groups Editor'
       });
-      $scope.isOnEditMode = dashboardsNavState.isOnEditMode();
-      $scope.$watch(dashboardsNavState.isOnEditMode, isOnEditMode => {
-        $scope.isOnEditMode = isOnEditMode;
-      });
-
-      $scope.isGroupEditorOpen = dashboardsNavState.isGroupEditorOpen();
-      $scope.$watch(dashboardsNavState.isGroupEditorOpen, isGroupEditorOpen => {
-        if (isGroupEditorOpen) {
-          $scope.group.dashboards.forEach(dashboard => {
-            dashboard.selected = false;
-          });
-        }
-        $scope.isGroupEditorOpen = isGroupEditorOpen;
-      });
-
-      $scope.includeDashboardOnGroup = (event, group, dashboard) => {
-        dashboard.selected = event.target.checked;
-        dashboardGroups.setDashboardSelection(group, dashboard, dashboard.selected);
-      };
 
       $scope.editGroup = (event, group) => {
         event.preventDefault();
@@ -60,16 +41,6 @@ uiModules
         .catch((reason) => {
           notify.error(reason);
         });
-      };
-
-      $scope.groupIsEmpty = () => {
-        if ($scope.isOnEditMode) {
-          return;
-        }
-        const selectCount = _.reduce($scope.group.dashboards, (result, dashboard) => {
-          return result + (dashboard.selected ? 1 : 0);
-        }, 0);
-        return $scope.group.dashboards.length === selectCount;
       };
     }
   };

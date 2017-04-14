@@ -161,6 +161,14 @@ uiModules
       return Promise.all(saveActions);
     }
 
+    newGroup() {
+      return savedDashboardGroups.get().then(group => {
+        group.title = 'New group';
+        group.iconCss = 'fa fa-folder-o';
+        return group.save();
+      });
+    }
+
     getDashboardsInGroup(groupId) {
       const group = _.find(this.getGroups(), 'id', groupId);
       return group.dashboards;
@@ -328,11 +336,13 @@ uiModules
       }
 
       const _saveDashboardMeta = function (dash, fromDash) {
-        _.assign(dash, {
-          count: fromDash.count,
-          isPruned: fromDash.isPruned,
-          filterIconMessage: fromDash.filterIconMessage
-        });
+        if (fromDash) {
+          _.assign(dash, {
+            count: fromDash.count,
+            isPruned: fromDash.isPruned,
+            filterIconMessage: fromDash.filterIconMessage
+          });
+        }
       };
 
       _.each(src, srcGroup => {

@@ -114,13 +114,6 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
 
       const dash = $scope.dash = $route.current.locals.dash;
 
-      //siren: if there is no hide border option for dashboard set it false as default
-      const optionJson = angular.fromJson(dash.optionsJSON);
-      if (!optionJson.hasOwnProperty('hideBorder')) {
-        optionJson.hideBorder = false;
-        dash.optionsJSON = JSON.stringify(optionJson);
-      };
-
       const dashboardTime = kibiState._getDashboardProperty(dash.id, kibiState._properties.time);
       if (dashboardTime) {
         // kibi: time from the kibi state.
@@ -302,7 +295,6 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
       function hideBorders(enabled) {
         $scope.$broadcast('border', !enabled);
       }
-
 
       $scope.expandedPanel = null;
       $scope.hasExpandedPanel = () => $scope.expandedPanel !== null;

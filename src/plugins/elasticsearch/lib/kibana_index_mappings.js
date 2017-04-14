@@ -13,5 +13,15 @@ export const mappings = {
         index: 'not_analyzed'
       }
     }
+  },
+  // siren: added
+  url: {
+    properties: {
+      sirenSession: {
+        type: 'object',
+        enabled: false
+      }
+    }
   }
+  // siren: end
 };

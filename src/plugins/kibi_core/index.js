@@ -21,28 +21,29 @@ import cryptoHelper from './lib/crypto_helper';
  */
 module.exports = function (kibana) {
 
-  var datasourcesSchema = require('./lib/datasources_schema');
-  var QueryEngine = require('./lib/query_engine');
-  var IndexHelper = require('./lib/index_helper');
-  var queryEngine;
-  var indexHelper;
+  const datasourcesSchema = require('./lib/datasources_schema');
+  const QueryEngine = require('./lib/query_engine');
+  const IndexHelper = require('./lib/index_helper');
+  let queryEngine;
+  let indexHelper;
 
-  let migrations = [
+  const migrations = [
     require('./lib/migrations/migration_1'),
     require('./lib/migrations/migration_2'),
     require('./lib/migrations/migration_3'),
     require('./lib/migrations/migration_4'),
-    require('./lib/migrations/migration_5')
+    require('./lib/migrations/migration_5'),
+    require('./lib/migrations/migration_6')
   ];
 
-  var _validateQueryDefs = function (queryDefs) {
+  const _validateQueryDefs = function (queryDefs) {
     if (queryDefs && queryDefs instanceof Array) {
       return true;
     }
     return false;
   };
 
-  var handler = function (server, method, req, reply) {
+  const handler = function (server, method, req, reply) {
     const params = req.query;
     let options = {};
     let queryDefs = [];
@@ -70,7 +71,7 @@ module.exports = function (kibana) {
       });
     }
 
-    var config = server.config();
+    const config = server.config();
     if (config.has('shield.cookieName')) {
       options.credentials = req.state[config.get('shield.cookieName')];
     }
@@ -149,7 +150,7 @@ module.exports = function (kibana) {
 
     init: function (server, options) {
       const config = server.config();
-      var datasourceCacheSize   = config.get('kibi_core.datasource_cache_size');
+      const datasourceCacheSize   = config.get('kibi_core.datasource_cache_size');
 
       const filterJoinSet = require('../elasticsearch/lib/filter_join')(server).set;
       const filterJoinSequence = require('../elasticsearch/lib/filter_join')(server).sequence;
@@ -247,14 +248,14 @@ module.exports = function (kibana) {
         method: 'POST',
         path:'/translateToES',
         handler: function (req, reply) {
-          var serverConfig = server.config();
+          const serverConfig = server.config();
           util.getQueriesAsPromise(req.payload.query)
           .map((query) => {
             // Remove the custom queries from the body
             inject.save(query);
             return query;
           }).map((query) => {
-            var credentials = serverConfig.has('shield.cookieName') ? req.state[serverConfig.get('shield.cookieName')] : null;
+            let credentials = serverConfig.has('shield.cookieName') ? req.state[serverConfig.get('shield.cookieName')] : null;
             if (req.auth && req.auth.credentials && req.auth.credentials.proxyCredentials) {
               credentials = req.auth.credentials.proxyCredentials;
             }

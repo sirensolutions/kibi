@@ -1,8 +1,7 @@
-import Promise from 'bluebird';
 import { merge } from 'lodash';
 import readYamlConfig from '../serve/read_yaml_config';
 import fromRoot from '../../utils/from_root';
-import BackupKibiIndex from './backup_kibi_index';
+import BackupKibi from './_backup_kibi';
 
 /**
  * The command to backup a kibi instance
@@ -23,8 +22,8 @@ export default function backupCommand(program) {
 
     let exitCode = 0;
     try {
-      const backupKibiIndex = new BackupKibiIndex(config, options.backupDir);
-      await backupKibiIndex.backup();
+      const backupKibi = new BackupKibi(config, options.backupDir);
+      await backupKibi.backup();
     } catch (error) {
       process.stderr.write(`${error}\n`);
       exitCode = 1;

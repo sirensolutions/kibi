@@ -4,7 +4,7 @@ import { merge } from 'lodash';
 import readYamlConfig from '../serve/read_yaml_config';
 import fromRoot from '../../utils/from_root';
 import { resolve } from 'path';
-import RestoreKibiIndex from './restore_kibi_index.js';
+import RestoreKibi from './_restore_kibi';
 import MigrationRunner from 'kibiutils/lib/migrations/migration_runner';
 import MigrationLogger from 'kibiutils/lib/migrations/migration_logger';
 
@@ -78,8 +78,8 @@ export default function restoreCommand(program) {
     let kbnServer;
     try {
       // restore index
-      const restoreKibiIndex = new RestoreKibiIndex(config, options.backupDir);
-      await restoreKibiIndex.restore();
+      const restoreKibi = new RestoreKibi(config, options.backupDir);
+      await restoreKibi.restore();
 
       // perform a migration
       kbnServer = new KbnServer(config);

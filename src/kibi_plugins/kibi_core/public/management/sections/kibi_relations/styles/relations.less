@@ -26,43 +26,11 @@
     width: 30%;
   }
 
-  .dashboards-section {
-    border: 2px #fff solid;
-
-    &.highlight {
-      border-color: #dedede;
-    }
-  }
-
-  .indices-section {
-    border: 2px #fff solid;
-    &.highlight {
-      border-color: #dedede;
-    }
-  }
-
   .btn {
     margin-top: 5px;
     margin-bottom: 5px;
   }
 
-  .indices-relations-config {
-    width: 50%;
-    height: 24px;
-    float: left;
-  }
-  .dashboards-relations-config {
-    width: 49%;
-    float: left;
-    clear: right;
-    height: 24px;
-    .checkbox {
-      margin: 0 0 0 8px;
-      input[type="checkbox"] {
-        margin-left:0;
-      }
-    }
-  }
   // override the table-condensed cell style to make it more compact
   .table-condensed > thead > tr > th {
     border-bottom-width: 1px;
@@ -89,8 +57,12 @@
   }
 
   .indices-section {
-    width: 50%;
-    float: left;
+    width: 100%;
+    border: 2px #fff solid;
+    &.highlight {
+      border-color: #dedede;
+    }
+
     padding: 8px;
 
     .indicesGraph{
@@ -100,30 +72,9 @@
     }
   }
 
-  .dashboards-section.disabled {
-    opacity: 0.5;
-    background-color: #dedede;
-  }
-
-  .dashboards-section {
-    width: 49%;
-    float: left;
-    padding: 8px;
-
-    .dashboardsGraph{
-      height: 250px;
-      border: 1px #ECF0F1 solid;
-      border-radius: 4px;
-    }
-  }
-
   .container h2 {
     margin-top: 0;
     font-size: 24px;
-  }
-
-  .graphs-section {
-    margin-bottom: 370px;
   }
 
   .field-description {

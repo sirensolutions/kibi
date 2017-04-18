@@ -2,3 +2,28 @@
 
 ==== Kibi Changes
 
+* Fixed - moved URL sharing functions to a service
+* Fixed - shared URLs always go to discover
+* Fixed - clean the hashed params from the URL if session storage empty
+* Fixed - incoreclty vertically align icon
+* Fixed - correctly merge params and headers from datasource and query
+* Fixed - reduce the number of mappings calls in kibiSelect
+* Fixed - filter icon on tab shouldn't appear when the only filter comes from the saved search
+* Fixed - pinned antlr4 dependency
+* Fixed - dashboard group helper should not crash the entire application on exception
+* Fixed - check if tabContainer exists before using it
+* Fixed - tooltip stays after clicking and movig the mouse
+* Fixed - filter out relational filter buttons when ACL enabled and user have no access to a target or source dashboard
+
+* Improved - URL sharing functionality
+* Improved - kibiState uses now decorateQuery function
+* Improved - handling of relation between two types under the same index
+* Improved - IE styling
+* Improved - handling of slashes in the document ID
+* Improved - now queries entered from the search bar contribute to the ranking
+
+* Added - html-angular templates for custom search results view
+* Added - open a new clean web browser tab with Kibi if the logo is clicked
+* Added - service to expose methods for cross frame communication
+* Added - documentation about cross frame communication
+* Added - mapping and renamed kibiSession to sirenSession

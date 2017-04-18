@@ -1,12 +1,13 @@
 import KbnServer from '../../server/kbn_server';
 import Promise from 'bluebird';
-import { merge } from 'lodash';
+import { has, get, merge } from 'lodash';
 import readYamlConfig from '../serve/read_yaml_config';
 import fromRoot from '../../utils/from_root';
 import { resolve } from 'path';
 import RestoreKibi from './_restore_kibi';
 import MigrationRunner from 'kibiutils/lib/migrations/migration_runner';
 import MigrationLogger from 'kibiutils/lib/migrations/migration_logger';
+import syswidecas from 'syswide-cas';
 
 const pathCollector = function () {
   const paths = [];
@@ -73,6 +74,10 @@ export default function restoreCommand(program) {
         }
       }
     );
+
+    if (has(config, 'elasticsearch.ssl.ca')) {
+      syswidecas.addCAs(get(config, 'elasticsearch.ssl.ca'));
+    }
 
     let exitCode = 0;
     let kbnServer;

@@ -1,7 +1,8 @@
-import { merge } from 'lodash';
+import { has, get, merge } from 'lodash';
 import readYamlConfig from '../serve/read_yaml_config';
 import fromRoot from '../../utils/from_root';
 import BackupKibi from './_backup_kibi';
+import syswidecas from 'syswide-cas';
 
 /**
  * The command to backup a kibi instance
@@ -18,6 +19,10 @@ export default function backupCommand(program) {
       catch (e) {
         // ignore
       }
+    }
+
+    if (has(config, 'elasticsearch.ssl.ca')) {
+      syswidecas.addCAs(get(config, 'elasticsearch.ssl.ca'));
     }
 
     let exitCode = 0;

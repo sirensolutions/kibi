@@ -20,5 +20,5 @@ export default function (url, _sessionStorage) {
       return base;
     }
   }
-  return false;
+  return url;
 };

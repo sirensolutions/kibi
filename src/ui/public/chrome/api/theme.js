@@ -98,19 +98,4 @@ module.exports = function (chrome, internals) {
     return internals.applicationClasses.join(' ');
   };
 
-  /**
-   * siren: open a new clean (no cache) tab with Kibi
-   */
-  chrome.openKibiOnNewCleanTab = function (forcedReload = true) {
-    const openNewTab = function (url) {
-      return new Promise ((resolve, reject) => {
-        resolve(window.open(url));
-      });
-    };
-
-    openNewTab(window.location.origin).then((newTab) => {
-      newTab.location.reload(forcedReload);
-    });
-  };
-
 };

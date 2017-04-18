@@ -1,5 +1,6 @@
 import 'ui/directives/config';
 
+import './kibi_reload';
 import './app_switcher';
 import kbnChromeProv from './kbn_chrome';
 import kbnChromeNavControlsProv from './append_nav_controls';

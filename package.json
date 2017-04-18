@@ -188,7 +188,9 @@
     "jsonpath": "0.2.5",
     "handlebars": "2.0.0",
     "kibi-h2o2": "sirensolutions/h2o2#734ef83fdf8250e5e47ffc218b8f4dbe1fe90570",
-    "angular-cookies": "1.4.8"
+    "angular-cookies": "1.4.8",
+    "elasticdump": "3.1.0",
+    "syswide-cas": "3.0.0"
   },
   "devDependencies": {
     "@elastic/eslint-config-kibana": "0.2.1",

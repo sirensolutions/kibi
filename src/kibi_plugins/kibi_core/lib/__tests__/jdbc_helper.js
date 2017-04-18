@@ -1,5 +1,4 @@
 import expect from 'expect.js';
-import mockery from 'mockery';
 import Promise from 'bluebird';
 import sinon from 'auto-release-sinon';
 import JdbcHelper from '../jdbc_helper';

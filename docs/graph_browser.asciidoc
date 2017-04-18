@@ -15,12 +15,11 @@ NOTE: Kibi Graph Browser is available only in Kibi Enterprise Edition.
 
 [float]
 ==== Configuration
-To configure the visualization, add a new *Script* and select:
+To configure the visualization, set the *Source* and select:
 
- * *Query* - the query that will fetch the first node.
  * *Datasource* - the Kibi Tinkerpop3 datasource to be used.
 
-image::images/graph_browser/graph_browser_config_script.png["Graph Browser Script configuration",align="center"]
+image::images/graph_browser/graph_browser_config_source.png["Graph Browser Source configuration",align="center"]
 
 By default every node is assigned with an icon and a label. It is possible to customize the style of both of them.
 

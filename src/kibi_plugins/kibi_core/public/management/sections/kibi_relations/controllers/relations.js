@@ -27,41 +27,10 @@ function controller(Promise, es, kibiState, $rootScope, $scope, $timeout, config
 
   $scope.unique = _.unique;
 
-  // tabs
-  $scope.tab = {
-    indexRel: true,
-    dashboardRel: false
-  };
-
-  $scope.getIndicesRelationsLabel = function () {
-    if ($scope.relations && $scope.relations.relationsIndices) {
-      return _.map($scope.relations.relationsIndices, function (relInd) {
-        return {
-          label: relInd.label,
-          value: relInd.id
-        };
-      });
-    }
-    return [];
-  };
-
-  $scope.tabClick = function (currentTab) {
-    switch (currentTab) {
-      case 'index':
-        $scope.tab.indexRel = true;
-        $scope.tab.dashboardRel = false;
-        break;
-      case 'dashboard':
-        $scope.tab.dashboardRel = true;
-        $scope.tab.indexRel = false;
-        break;
-    }
-  };
-
   // advanced options button
   $scope.edit = function (item, index) {
     const params = {
-      service: 'indices' in item ? 'indices' : 'dashboards',
+      service: 'indices',
       id: index
     };
 
@@ -69,195 +38,11 @@ function controller(Promise, es, kibiState, $rootScope, $scope, $timeout, config
   };
 
   $scope.relations = config.get('kibi:relations');
-  $scope.relationalPanel = config.get('kibi:relationalPanel');
 
   // track if the configuration has been changed
   $scope.changed = false;
-  $scope.$watch('relationalPanel', function (newValue, oldValue) {
-    if (newValue !== oldValue) {
-      $scope.changed = true;
-    }
-  });
 
-  let indexToDashboardsMap = null;
   const nodeTypes = [];
-
-  /**
-   * creates a map index -> dashboards
-   *  {
-   *    indexId: [dashboardId1, dashboardId2],
-   *    ...
-   *  }
-   */
-  $scope.getIndexToDashboardMap = function () {
-    const _createMap = function (results) {
-      // postprocess the results to create the map
-      const indexToDashboardArrayMap = {};
-      _.each(results, function ({ savedDash, savedSearchMeta }) {
-        if (savedSearchMeta && !indexToDashboardArrayMap[savedSearchMeta.index]) {
-          indexToDashboardArrayMap[savedSearchMeta.index] = [savedDash.id];
-        } else if (savedSearchMeta && indexToDashboardArrayMap[savedSearchMeta.index].indexOf(savedDash.id) === -1) {
-          indexToDashboardArrayMap[savedSearchMeta.index].push(savedDash.id);
-        }
-      });
-      return indexToDashboardArrayMap;
-    };
-
-    return kibiState._getDashboardAndSavedSearchMetas(null, true)
-    .then(results => _createMap(results));
-  };
-
-  /**
-   * Filters out the dashboards that are not relevant in the given row
-   * The row index should be passed in options as **rowIndex**
-   * The selected flag is passed by the kibi-delect directive to indicate that the item is the selected one
-   */
-  $scope.filterDashboards = function (item, options, selected) {
-    if (selected !== undefined && selected === true) {
-      return false;
-    }
-
-    const relDash = $scope.relations.relationsDashboards[options.rowIndex];
-
-    if (!item || !item.value) {
-      // this is the watched value
-      return _.pluck($scope.relations.relationsIndices, 'id').concat(relDash).concat(indexToDashboardsMap);
-    }
-    let remove = true;
-
-    // do not remove if the dashboard is associated with an index
-    _.each(indexToDashboardsMap, function (dashboards) {
-      if (dashboards.indexOf(item.value) !== -1) {
-        remove = false;
-        return false;
-      }
-    });
-
-    // remove if the dashboard is not in the list of dashboards that are directly connected to item.value
-    let connectedDashboards;
-    if (!!relDash.dashboards[0] && !relDash.dashboards[1]) {
-      connectedDashboards = _getConnectedDashboards(relDash.dashboards[0], relDash.relation);
-    } else if (!!relDash.dashboards[1] && !relDash.dashboards[0]) {
-      connectedDashboards = _getConnectedDashboards(relDash.dashboards[1], relDash.relation);
-    } else if (!relDash.dashboards[0] && !relDash.dashboards[1] && !!relDash.relation) {
-      // filter based on the selected relation
-      connectedDashboards = _getConnectedDashboards(null, relDash.relation);
-    } else {
-      connectedDashboards = [];
-    }
-
-    if (connectedDashboards.length && connectedDashboards.indexOf(item.value) === -1) {
-      remove = true;
-    }
-
-    if (!!relDash.dashboards[0] && !!relDash.dashboards[1] && !!relDash.relation) {
-      remove = true;
-    }
-    return remove;
-  };
-
-  /**
-   * Returns the index associated with dashboardId
-   */
-  function _getIndexForDashboard(dashboardId) {
-    let dIndex = '';
-
-    if (!dashboardId) {
-      return '';
-    }
-    _.each(indexToDashboardsMap, function (dashboards, index) {
-      if (dashboards.indexOf(dashboardId) !== -1) {
-        dIndex = index;
-        return false;
-      }
-    });
-    return dIndex;
-  }
-
-  /**
-   * Returns the list of dashboards that are directly connected to dashboardId
-   */
-  function _getConnectedDashboards(dashboardId, relDash) {
-    const index = _getIndexForDashboard(dashboardId);
-
-    return _($scope.relations.relationsIndices).map(function (relInd) {
-      if (!relDash || relDash === relInd.id) {
-        let dashboards = [];
-
-        if ((!!relDash && !index) || index === relInd.indices[0].indexPatternId) {
-          dashboards = dashboards.concat(indexToDashboardsMap[relInd.indices[1].indexPatternId]);
-        }
-        if ((!!relDash && !index) || index === relInd.indices[1].indexPatternId) {
-          dashboards = dashboards.concat(indexToDashboardsMap[relInd.indices[0].indexPatternId]);
-        }
-        return dashboards;
-      }
-    }).flatten().compact().uniq().value();
-  }
-
-  /**
-   * Filters out the relations that are not relevant in given row
-   * The row index should be passed in options as **rowIndex** property
-   * The selected flag is passed by the kibi-delect directive to indicate that the item is the selected one
-   */
-  $scope.filterRelations = function (item, options, selected) {
-    if (selected !== undefined && selected === true) {
-      return false;
-    }
-    // for anything about the dashboards relations - we take them from the scope
-    const dashboards = $scope.relations.relationsDashboards[options.rowIndex].dashboards;
-    let lIndex = '';
-    let rIndex = '';
-
-    if (!item || !item.value) {
-      return _.pluck($scope.relations.relationsIndices, 'id')
-      .concat(..._.pluck($scope.relations.relationsIndices, 'label'))
-      .concat(...dashboards)
-      .concat(indexToDashboardsMap);
-    }
-    _.each(indexToDashboardsMap, function (map, index) {
-      if (map.indexOf(dashboards[0]) !== -1) {
-        lIndex = index;
-      }
-      if (map.indexOf(dashboards[1]) !== -1) {
-        rIndex = index;
-      }
-      if (lIndex && rIndex) {
-        // break the loop
-        return false;
-      }
-    });
-
-    const validRelations = _($scope.relations.relationsIndices).map(function (relInd) {
-      if (lIndex && rIndex) {
-        if ((lIndex === relInd.indices[0].indexPatternId && rIndex === relInd.indices[1].indexPatternId) ||
-            (lIndex === relInd.indices[1].indexPatternId && rIndex === relInd.indices[0].indexPatternId)) {
-          return relInd.id;
-        }
-      } else if (lIndex) {
-        if (lIndex === relInd.indices[0].indexPatternId || lIndex === relInd.indices[1].indexPatternId) {
-          return relInd.id;
-        }
-      } else if (rIndex) {
-        if (rIndex === relInd.indices[0].indexPatternId || rIndex === relInd.indices[1].indexPatternId) {
-          return relInd.id;
-        }
-      }
-    }).compact().value();
-    const usedRelations = _($scope.relations.relationsDashboards).map(function (relDash, offset) {
-      if (offset !== options.rowIndex && dashboards[0] && dashboards[1]) {
-        if ((dashboards[0] === relDash.dashboards[0] && dashboards[1] === relDash.dashboards[1]) ||
-            (dashboards[0] === relDash.dashboards[1] && dashboards[1] === relDash.dashboards[0])) {
-          return relDash.relation;
-        }
-      }
-    }).compact().value();
-    return (Boolean(lIndex) || Boolean(rIndex)) &&
-    // remove item if it is not in any valid relation for the indices lIndex and rIndex
-    validRelations.indexOf(item.value) === -1 ||
-    // remove item if it is already used for the same dashboards
-    usedRelations.indexOf(item.value) !== -1;
-  };
 
   function _addClickHandlers(name, options) {
     options.onNodeDragEnd = function () {
@@ -383,118 +168,6 @@ function controller(Promise, es, kibiState, $rootScope, $scope, $timeout, config
     // draw the graph
     $rootScope.$emit(`egg:${graphProperty}:run`, 'importGraph', $scope[graphProperty]);
   };
-
-  /**
-   * Updates the relationships between dashboards
-   */
-  function _updateRelationsDashboards(oldRelations) {
-    const relationId = function (relation) {
-      const i0 = relation.dashboards[0];
-      const i1 = relation.dashboards[1];
-      return relation.relation + (i0 < i1 ? i0 + i1 : i1 + i0);
-    };
-
-    const _getRelationLabel = function (relationId) {
-      let label;
-
-      _.each($scope.relations.relationsIndices, function (relation) {
-        if (relation.id === relationId) {
-          label = relation.label;
-          return false;
-        }
-      });
-      return label;
-    };
-
-    // check for duplicates
-    const uniq = _.groupBy($scope.relations.relationsDashboards, function (relation) {
-      if (relation.relation) {
-        return relationId(relation);
-      }
-    });
-
-    updateGraph({
-      name: 'dashboards',
-      options: {
-        monitorContainerSize: true,
-        alwaysShowLinksLabels: true,
-        groupingForce: {},
-        nodeIcons: {},
-        colors: {}
-      },
-      isRelationReady: function (relDash) {
-        return relDash.relation && relDash.dashboards[0] && relDash.dashboards[1];
-      },
-      getSourceNode: function (relDash) {
-        const sourceNodeIndexId = _getIndexForDashboard(relDash.dashboards[0]);
-
-        return {
-          id: relDash.dashboards[0],
-          label: relDash.dashboards[0],
-          nodeType: sourceNodeIndexId
-        };
-      },
-      getTargetNode: function (relDash) {
-        const targetNodeIndexId = _getIndexForDashboard(relDash.dashboards[1]);
-
-        return {
-          id: relDash.dashboards[1],
-          label: relDash.dashboards[1],
-          nodeType: targetNodeIndexId
-        };
-      },
-      getLink: function (relDash) {
-        return {
-          source: relDash.dashboards[0],
-          target: relDash.dashboards[1],
-          linkType: _getRelationLabel(relDash.relation),
-          data: {
-            relation: relDash.relation,
-            dashboards: relDash.dashboards
-          },
-          undirected: true
-        };
-      },
-      assertions: [
-        {
-          isInvalidRelation: function (relDash) {
-            return uniq[relationId(relDash)].length !== 1;
-          },
-          message: 'These relationships are equivalent, please remove one.'
-        }
-      ]
-    });
-
-    const isEqual = _($scope.relations.relationsDashboards).map(function (relation) {
-      return _.omit(relation, [ '$$hashKey', 'errors' ]);
-    }).isEqual(oldRelations.dashboards);
-
-    if (!isEqual) {
-      $scope.changed = true;
-      $scope.isValid();
-    }
-  }
-
-  // Listen to changes of relations between dashboards
-  $scope.$watch(function ($scope) {
-    return {
-      labelsFromIndices: _.pluck($scope.relations.relationsIndices, 'label'),
-      dashboards: _.map($scope.relations.relationsDashboards, function (relation) {
-        return _.omit(relation, [ 'errors' ]);
-      })
-    };
-  }, function (newRelations, oldRelations) {
-    if (indexToDashboardsMap === null) {
-      $scope.getIndexToDashboardMap(null, true).then(function (map) {
-        indexToDashboardsMap = map;
-        _updateRelationsDashboards(oldRelations);
-      }).catch(function (err) {
-        notify.error('Problem getting index to dashboard map', err);
-      });
-    } else {
-      _updateRelationsDashboards(oldRelations);
-    }
-  }, true);
 
   $scope.updateIndicesGraph = function (oldRelations) {
     // check for duplicates
@@ -729,51 +402,13 @@ function controller(Promise, es, kibiState, $rootScope, $scope, $timeout, config
       });
     };
 
-    const updateDashboardsRelationsBasedOnTheIndicesRelations = function () {
-      if (oldRelations && oldRelations.length) {
-        const relationsIndices = $scope.relations.relationsIndices;
-
-        if (relationsIndices.length < oldRelations.length) {
-          // a relation was deleted
-          const diff = _.difference(_.pluck(oldRelations, 'id'), _.pluck(relationsIndices, 'id'));
-          _.each($scope.relations.relationsDashboards, function (relation) {
-            if (diff.indexOf(relation.relation) !== -1) {
-              relation.relation = '';
-            }
-          });
-        } else if (relationsIndices.length === oldRelations.length) {
-          // check if the definition of a relation was changed
-          const clearRelation = function (oldRelationId) {
-            _.each($scope.relations.relationsDashboards, function (relation) {
-              if (relation.relation === oldRelationId) {
-                relation.relation = '';
-              }
-            });
-          };
-
-          for (let i = 0; i < relationsIndices.length; i++) {
-            if (relationsIndices[i].id && oldRelations[i].id) {
-              const newRelation = relationsHelper.getRelationInfosFromRelationID(relationsIndices[i].id);
-              const oldRelation = relationsHelper.getRelationInfosFromRelationID(oldRelations[i].id);
-
-              if (newRelation.source.index !== oldRelation.source.index || // left index changed
-                  newRelation.target.index !== oldRelation.target.index) { // right index changed
-                clearRelation(oldRelations[i].id);
-              }
-            }
-          }
-        }
-      }
-    };
-
     const isEqual = _($scope.relations.relationsIndices).map(function (relation) {
       return _.omit(relation, [ '$$hashKey', 'errors', 'id' ]);
     }).isEqual(oldRelations);
     if (!isEqual) {
       $scope.changed = true;
       return checkJoinMappings()
-      .then(() => $scope.isValid())
-      .then(() => updateDashboardsRelationsBasedOnTheIndicesRelations());
+      .then(() => $scope.isValid());
     }
   };
 
@@ -802,18 +437,6 @@ function controller(Promise, es, kibiState, $rootScope, $scope, $timeout, config
       case 'importGraph':
         $timeout(() => {
           $rootScope.$emit('egg:indicesGraph:run', 'stop');
-        }, 1); //stop immediately basically disabling the animation
-        break;
-      default:
-    }
-  });
-  const dashboardsGraphExportOff = $rootScope.$on('egg:dashboardsGraph:results', function (event, method, results) {
-    switch (method) {
-      case 'exportGraph':
-        $scope.relations.relationsDashboardsSerialized = results;
-      case 'importGraph':
-        $timeout(() => {
-          $rootScope.$emit('egg:dashboardsGraph:run', 'stop');
         }, 1); //stop immediately basically disabling the animation
         break;
       default:
@@ -865,14 +488,11 @@ function controller(Promise, es, kibiState, $rootScope, $scope, $timeout, config
     cancelRouteChangeHandler();
     cancelLogoutHandler();
     indicesGraphExportOff();
-    dashboardsGraphExportOff();
   });
 
   $scope.isValid = function () {
-    const { validDashboards, validIndices } = relationsHelper.checkIfRelationsAreValid($scope.relations);
-    $scope.dashboardsRelationsAreValid = validDashboards;
-    $scope.indicesRelationsAreValid = validIndices;
-    return validIndices && validDashboards;
+    const { validIndices } = relationsHelper.checkIfRelationsAreValid($scope.relations);
+    return validIndices;
   };
   $scope.isValid();
 
@@ -880,12 +500,8 @@ function controller(Promise, es, kibiState, $rootScope, $scope, $timeout, config
     $scope.relations.relationsIndices = _.map($scope.relations.relationsIndices, function (relation) {
       return _.omit(relation, [ 'errors' ]);
     });
-    $scope.relations.relationsDashboards = _.map($scope.relations.relationsDashboards, function (relation) {
-      return _.omit(relation, [ 'errors' ]);
-    });
 
     return config.set('kibi:relations', $scope.relations)
-    .then(() => config.set('kibi:relationalPanel', $scope.relationalPanel))
     .then(() => {
       notify.info('Relations saved');
       $scope.changed = false;

@@ -33,9 +33,10 @@ module.exports = function (chrome, internals) {
     }()))
     .config(($httpProvider) => {
       // kibi: clean the hashed params from the URL if session storage empty
-      let url = kibiRemoveHashedParams(window.location.href, sessionStorage);
-      url = kibiRemoveSirenSession(window.location.href, sessionStorage);
-      if (url) {
+      const originalURL = window.location.href;
+      let url = kibiRemoveHashedParams(originalURL, sessionStorage);
+      url = kibiRemoveSirenSession(url, sessionStorage);
+      if (originalURL !== url) {
         window.location.href = url;
       }
       // kibi:

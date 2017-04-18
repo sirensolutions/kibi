@@ -14,6 +14,7 @@
 * Fixed - check if tabContainer exists before using it
 * Fixed - tooltip stays after clicking and movig the mouse
 * Fixed - filter out relational filter buttons when ACL enabled and user have no access to a target or source dashboard
+* Fixed - issues when selecting documents
 
 * Improved - URL sharing functionality
 * Improved - kibiState uses now decorateQuery function

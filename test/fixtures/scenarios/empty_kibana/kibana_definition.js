@@ -10,6 +10,14 @@ module.exports = {
           index: 'not_analyzed'
         }
       }
+    },
+    url: {
+      properties: {
+        sirenSession: {
+          type: 'object',
+          enabled: false
+        }
+      }
     }
   }
 };

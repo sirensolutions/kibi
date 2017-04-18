@@ -76,7 +76,7 @@ uiRoutes
       return savedSearches.get($route.current.params.id)
       .catch(courier.redirectWhenMissing({
         'search': '/discover',
-        'index-pattern': '/management/kibana/objects/savedSearches/' + $route.current.params.id
+        'index-pattern': '/management/siren/objects/savedSearches/' + $route.current.params.id
       }));
     }
   }

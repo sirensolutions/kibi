@@ -14,12 +14,12 @@ const indexPatternsResolutions = {
 
 // add a dependency to all of the subsection routes
 uiRoutes
-.defaults(/management\/kibana\/indices/, {
+.defaults(/management\/siren\/indices/, {
   resolve: indexPatternsResolutions
 });
 
 uiRoutes
-.defaults(/management\/kibana\/index/, {
+.defaults(/management\/siren\/index/, {
   resolve: indexPatternsResolutions
 });
 
@@ -39,7 +39,7 @@ uiModules.get('apps/management')
         $scope.indexPatternList = ids.map(function (id) {
           return {
             id: id,
-            url: kbnUrl.eval('#/management/kibana/indices/{{id}}', {id: id}),
+            url: kbnUrl.eval('#/management/siren/indices/{{id}}', {id: id}),
             class: 'sidebar-item-title ' + ($scope.editingId === id ? 'active' : ''),
             default: $scope.defaultIndex === id
           };
@@ -54,5 +54,5 @@ uiModules.get('apps/management')
 management.getSection('kibana').register('indices', {
   display: 'Index Patterns',
   order: 0,
-  url: '#/management/kibana/indices/'
+  url: '#/management/siren/indices/'
 });

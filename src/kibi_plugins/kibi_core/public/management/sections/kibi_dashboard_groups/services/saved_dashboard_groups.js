@@ -32,7 +32,7 @@ uiModules
   const savedDashboardGroupLoader = new SavedObjectLoader(SavedDashboardGroup, kbnIndex, esAdmin, kbnUrl, options);
 
   savedDashboardGroupLoader.urlFor = function (id) {
-    return kbnUrl.eval('#/management/kibana/dashboardgroups/{{id}}', { id: id });
+    return kbnUrl.eval('#/management/siren/dashboardgroups/{{id}}', { id: id });
   };
 
   return savedDashboardGroupLoader;

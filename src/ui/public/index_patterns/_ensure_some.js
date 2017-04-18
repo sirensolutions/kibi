@@ -6,7 +6,7 @@ export default function EnsureSomeIndexPatternsFn(Private, createNotifier, $loca
     return function promiseHandler(patterns) {
       if (!patterns || patterns.length === 0) {
         // notify.warning(new errors.NoDefinedIndexPatterns());
-        kbnUrl.redirectPath('/management/kibana/index');
+        kbnUrl.redirectPath('/management/siren/index');
       }
 
       return patterns;

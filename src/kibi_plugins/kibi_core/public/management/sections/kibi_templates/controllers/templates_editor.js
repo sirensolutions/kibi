@@ -15,7 +15,7 @@ import angular from 'angular';
 import template from 'plugins/kibi_core/management/sections/kibi_templates/index.html';
 
 uiRoutes
-.when('/management/kibana/templates', {
+.when('/management/siren/templates', {
   template,
   reloadOnSearch: false,
   resolve: {
@@ -24,14 +24,14 @@ uiRoutes
     }
   }
 })
-.when('/management/kibana/templates/:id?', {
+.when('/management/siren/templates/:id?', {
   template,
   reloadOnSearch: false,
   resolve: {
     template: function ($route, courier, savedTemplates) {
       return savedTemplates.get($route.current.params.id)
       .catch(courier.redirectWhenMissing({
-        template: '/management/kibana/templates'
+        template: '/management/siren/templates'
       }));
     }
   }
@@ -74,7 +74,7 @@ function controller($scope, $route, kbnUrl, Private, createNotifier, queryEngine
   const template = $scope.template = $route.current.locals.template;
 
   $scope.jumpToQuery = function () {
-    kbnUrl.change('/management/kibana/queries/' + _.get($scope, 'preview.queryId'));
+    kbnUrl.change('/management/siren/queries/' + _.get($scope, 'preview.queryId'));
   };
 
   const refreshPreview = function () {
@@ -140,7 +140,7 @@ function controller($scope, $route, kbnUrl, Private, createNotifier, queryEngine
       .then(function () {
         notify.info(`Template ${template.title} successfuly saved`);
         if (id !== $routeParams.id) {
-          kbnUrl.change(`/management/kibana/templates/${id}`);
+          kbnUrl.change(`/management/siren/templates/${id}`);
         } else {
           return refreshPreview();
         }
@@ -153,7 +153,7 @@ function controller($scope, $route, kbnUrl, Private, createNotifier, queryEngine
   };
 
   $scope.newObject = function () {
-    kbnUrl.change('/management/kibana/templates', {});
+    kbnUrl.change('/management/siren/templates', {});
   };
 }
 

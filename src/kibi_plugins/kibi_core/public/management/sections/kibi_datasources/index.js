@@ -4,5 +4,5 @@ import 'plugins/kibi_core/management/sections/kibi_datasources/controllers/datas
 management.getSection('kibana').register('datasources', {
   display: 'Datasources',
   order: 11,
-  url: '#/management/kibana/datasources'
+  url: '#/management/siren/datasources'
 });

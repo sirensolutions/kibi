@@ -138,7 +138,7 @@ uiModules
         const service = _.find(services, { type: type });
         if (!service) return;
 
-        $scope.editUrl = '#management/kibana/objects/' + service.name + '/' + id + '?notFound=' + e.savedObjectType;
+        $scope.editUrl = '#management/siren/objects/' + service.name + '/' + id + '?notFound=' + e.savedObjectType;
       });
 
       $scope.border = !$scope.$parent.opts.ui.hideBorder;

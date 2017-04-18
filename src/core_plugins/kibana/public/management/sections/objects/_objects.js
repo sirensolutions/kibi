@@ -18,7 +18,7 @@ import objectActionsRegistry from 'ui/registry/object_actions';
 const MAX_SIZE = Math.pow(2, 31) - 1;
 
 uiRoutes
-.when('/management/kibana/objects', {
+.when('/management/siren/objects', {
   template: objectIndexHTML
 });
 
@@ -115,7 +115,7 @@ uiModules.get('apps/management')
           id: item.id
         };
 
-        kbnUrl.change('/management/kibana/objects/{{ service }}/{{ id }}', params);
+        kbnUrl.change('/management/siren/objects/{{ service }}/{{ id }}', params);
       };
 
       // TODO: Migrate all scope methods to the controller.

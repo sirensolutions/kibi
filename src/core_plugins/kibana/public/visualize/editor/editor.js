@@ -52,9 +52,9 @@ uiRoutes
       return savedVisualizations.get($route.current.params.id)
       .catch(courier.redirectWhenMissing({
         'visualization': '/visualize',
-        'search': '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
-        'index-pattern': '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
-        'index-pattern-field': '/management/kibana/objects/savedVisualizations/' + $route.current.params.id
+        'search': '/management/siren/objects/savedVisualizations/' + $route.current.params.id,
+        'index-pattern': '/management/siren/objects/savedVisualizations/' + $route.current.params.id,
+        'index-pattern-field': '/management/siren/objects/savedVisualizations/' + $route.current.params.id
       }));
     }
   }

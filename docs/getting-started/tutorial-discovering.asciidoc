@@ -13,7 +13,7 @@ visualizations of saved searches in Visualize.
 The current index pattern is displayed beneath the query bar. The index pattern
 determines which indices are searched when you submit a query. To search a
 different set of indices, select different pattern from the drop down menu.
-To add an index pattern, go to *Management/Kibana/Index Patterns* and click
+To add an index pattern, go to *management/Siren/Index Patterns* and click
 *Add New*.
 
 You can construct searches by using the field names and the values you're

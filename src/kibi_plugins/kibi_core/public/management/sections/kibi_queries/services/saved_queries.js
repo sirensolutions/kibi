@@ -35,7 +35,7 @@ uiModules
   };
 
   savedQueryLoader.urlFor = function (id) {
-    return kbnUrl.eval('#/management/kibana/queries/{{id}}', { id: id });
+    return kbnUrl.eval('#/management/siren/queries/{{id}}', { id: id });
   };
 
   return savedQueryLoader;

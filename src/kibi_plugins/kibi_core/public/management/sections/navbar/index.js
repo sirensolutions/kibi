@@ -26,10 +26,10 @@ function _getDisplayName($location) {
 function _getSectionName($location) {
   const path = $location.path();
 
-  if (!path.startsWith('/management/kibana/')) {
+  if (!path.startsWith('/management/siren/')) {
     return;
   }
-  return path.replace(/\/management\/kibana\/([^/]+).*/, (match, sectionName) => sectionName);
+  return path.replace(/\/management\/siren\/([^/]+).*/, (match, sectionName) => sectionName);
 }
 
 /**
@@ -65,7 +65,7 @@ function _hideButton(path, ...sectionNames) {
   let hide = true;
 
   for (const sectionName of sectionNames) {
-    hide = hide && !path.startsWith(`/management/kibana/${sectionName}`);
+    hide = hide && !path.startsWith(`/management/siren/${sectionName}`);
   }
   return hide;
 }
@@ -139,7 +139,7 @@ registry.register(function ($location) {
       $scope.sectionName = _getSectionName($location);
       $scope.displayName = _getDisplayName($location);
       $scope.makeUrl = function (hit) {
-        return `#/management/kibana/${_getSectionName($location)}/${hit.id}`;
+        return `#/management/siren/${_getSectionName($location)}/${hit.id}`;
       };
     },
     testId: 'open'

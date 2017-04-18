@@ -4,5 +4,5 @@ import 'plugins/kibi_core/management/sections/kibi_dashboard_groups/controllers/
 management.getSection('kibana').register('dashboardgroups', {
   display: 'Dashboard Groups',
   order: 14,
-  url: '#/management/kibana/dashboardgroups'
+  url: '#/management/siren/dashboardgroups'
 });

@@ -4,5 +4,5 @@ import 'plugins/kibi_core/management/sections/kibi_templates/controllers/templat
 management.getSection('kibana').register('templates', {
   display: 'Query Templates',
   order: 13,
-  url: '#/management/kibana/templates'
+  url: '#/management/siren/templates'
 });

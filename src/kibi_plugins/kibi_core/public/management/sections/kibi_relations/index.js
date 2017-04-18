@@ -4,5 +4,5 @@ import 'plugins/kibi_core/management/sections/kibi_relations/controllers/relatio
 management.getSection('kibana').register('relations', {
   display: 'Relations',
   order: 10,
-  url: '#/management/kibana/relations'
+  url: '#/management/siren/relations'
 });

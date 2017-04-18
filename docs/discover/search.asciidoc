@@ -53,7 +53,7 @@ To save the current search:
 . Click *Save* in the Kibana toolbar.
 . Enter a name for the search and click *Save*.
 
-You can import, export and delete saved searches from *Management/Kibana/Saved Objects*. 
+You can import, export and delete saved searches from *management/Siren/Saved Objects*.
 
 [float]
 [[load-search]]

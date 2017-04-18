@@ -12,26 +12,26 @@ import editTemplate from 'plugins/kibana/management/sections/indices/_edit.html'
 import IngestProvider from 'ui/ingest';
 
 uiRoutes
-.when('/management/kibana/indices/:indexPatternId', {
+.when('/management/siren/indices/:indexPatternId', {
   template: editTemplate,
   resolve: {
     indexPattern: function ($route, courier) {
       return courier.indexPatterns
         .get($route.current.params.indexPatternId)
-        .catch(courier.redirectWhenMissing('/management/kibana/index'));
+        .catch(courier.redirectWhenMissing('/management/siren/index'));
     }
   }
 });
 
 uiRoutes
-.when('/management/kibana/indices', {
+.when('/management/siren/indices', {
   resolve: {
     redirect: function ($location, config) {
       const defaultIndex = config.get('defaultIndex');
-      let path = '/management/kibana/index';
+      let path = '/management/siren/index';
 
       if (defaultIndex) {
-        path = `/management/kibana/indices/${defaultIndex}`;
+        path = `/management/siren/indices/${defaultIndex}`;
       }
 
       $location.path(path).replace();
@@ -84,7 +84,7 @@ uiModules.get('apps/management')
     courier.indexPatterns.delete($scope.indexPattern)
     .then(refreshKibanaIndex)
     .then(function () {
-      $location.url('/management/kibana/index');
+      $location.url('/management/siren/index');
     })
     .catch(notify.fatal);
   };

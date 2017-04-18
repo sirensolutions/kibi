@@ -7,7 +7,7 @@ import uiModules from 'ui/modules';
 import indexTemplate from 'plugins/kibana/management/sections/settings/index.html';
 
 uiRoutes
-.when('/management/kibana/settings', {
+.when('/management/siren/settings', {
   template: indexTemplate
 });
 
@@ -42,5 +42,5 @@ uiModules.get('apps/management')
 management.getSection('kibana').register('settings', {
   display: 'Advanced Settings',
   order: 20,
-  url: '#/management/kibana/settings'
+  url: '#/management/siren/settings'
 });

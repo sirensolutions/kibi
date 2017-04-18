@@ -22,7 +22,7 @@ uiRoutes
 });
 
 require('ui/index_patterns/route_setup/load_default')({
-  whenMissingRedirectTo: '/management/kibana/index'
+  whenMissingRedirectTo: '/management/siren/index'
 });
 
 uiModules

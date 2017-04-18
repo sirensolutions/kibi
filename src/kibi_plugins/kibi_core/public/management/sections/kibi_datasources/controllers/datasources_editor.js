@@ -11,7 +11,7 @@ import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
 
 uiRoutes
-.when('/management/kibana/datasources', {
+.when('/management/siren/datasources', {
   template,
   reloadOnSearch: false,
   resolve: {
@@ -20,14 +20,14 @@ uiRoutes
     }
   }
 })
-.when('/management/kibana/datasources/:id?', {
+.when('/management/siren/datasources/:id?', {
   template,
   reloadOnSearch: false,
   resolve: {
     datasource: function ($route, courier, savedDatasources) {
       return savedDatasources.get($route.current.params.id)
       .catch(courier.redirectWhenMissing({
-        datasource: '/management/kibana/datasources'
+        datasource: '/management/siren/datasources'
       }));
     }
   }
@@ -110,14 +110,14 @@ function controller(Private, $window, $scope, $route, kbnUrl, createNotifier, qu
       if (datasourceId) {
         notify.info('Datasource ' + datasource.title + ' successfully saved');
         queryEngineClient.clearCache().then(function () {
-          kbnUrl.change('management/kibana/datasources/' + datasourceId);
+          kbnUrl.change('management/siren/datasources/' + datasourceId);
         });
       }
     });
   }
 
   $scope.newObject = function () {
-    kbnUrl.change('management/kibana/datasources', {});
+    kbnUrl.change('management/siren/datasources', {});
   };
 
   $scope.$watch('datasource.datasourceType', function () {

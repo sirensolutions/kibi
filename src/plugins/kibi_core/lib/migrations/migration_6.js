@@ -141,7 +141,7 @@ export default class Migration6 extends Migration {
 
         if (result instanceof Error) {
           this._logger.error(
-            'Could upgrage old kibiSession to new sirenSession property in ' +
+            'Could NOT upgrage old kibiSession to new sirenSession property in ' +
             upgradedUrls + ' url object' + (upgradedUrls > 1 ? 's' : ''),
             result
           );

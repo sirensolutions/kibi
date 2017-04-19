@@ -8,6 +8,7 @@ import { UrlOverflowServiceProvider } from '../../error_url_overflow';
 import { hashedItemStoreSingleton, isStateHash } from 'ui/state_management/state_storage';
 
 const URL_LIMIT_WARN_WITHIN = 1000;
+const MAX_RESTORE_SESSION_TIME = 2000;
 
 module.exports = function (chrome, internals) {
   chrome.initialization = function () {
@@ -16,20 +17,20 @@ module.exports = function (chrome, internals) {
       let pollUntilFinishFlag = false;
 
       const url = window.location.href;
-      //TODO: Simon please refactor this.
-      const removeSireSessionResult = kibiRemoveSirenSession(url, sessionStorage);
+      const regex = /clearSirenSession=true/g;
+      const restoreSession = !regex.test(window.location.href);
 
-      if (!sessionStorage.length) {
-        // Ask other tabs for session storage
+      if (!sessionStorage.length && restoreSession) {
+        // Ask the old tabs for session storage
         localStorage.setItem('getSessionStorage', Date.now());
       };
       window.addEventListener('storage', event => {
         if (event.key === 'getSessionStorage') {
-          // Some tab asked for the sessionStorage -> send it
+          // New tab asked for the sessionStorage -> send it
           localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
           localStorage.removeItem('sessionStorage');
-        } else if (event.key === 'sessionStorage' && !removeSireSessionResult.found) {
-          // sessionStorage is empty -> fill it
+        } else if (event.key === 'sessionStorage' && restoreSession) {
+          // THe old tab sent the sessionStorage -> restore it
           let data = {};
           if (event.newValue !== '') {
             data = JSON.parse(event.newValue);
@@ -48,7 +49,7 @@ module.exports = function (chrome, internals) {
 
       pollUntil(() => {
         return pollUntilFinishFlag === true;
-      }, 2000, 5, (error) => {
+      }, MAX_RESTORE_SESSION_TIME, 5, (error) => {
         resolve();
       });
     });
@@ -79,8 +80,7 @@ module.exports = function (chrome, internals) {
       // kibi: clean the hashed params from the URL if session storage empty
       const originalURL = window.location.href;
       let url = kibiRemoveHashedParams(originalURL, sessionStorage);
-      const removeSireSessionResult = kibiRemoveSirenSession(url, sessionStorage);
-      url = removeSireSessionResult.url;
+      url = kibiRemoveSirenSession(url, sessionStorage);
       if (originalURL !== url) {
         window.location.href = url;
       }

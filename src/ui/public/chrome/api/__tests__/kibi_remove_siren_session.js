@@ -17,4 +17,13 @@ describe('kibi_remove_siren_session', function () {
     sinon.assert.calledWith(removeItemSpy, 'sirenSession');
   });
 
+  it('should remove sirenSession when clearSirenSession=true and another parameter', function () {
+    const removeItemSpy = sinon.spy(sessionStorage, 'removeItem');
+    const original = 'http://host:5606/app/kibana#/?clearSirenSession=true&foo=boo';
+    const expected = 'http://host:5606/app/kibana#/?foo=boo';
+    const actual = kibiRemoveSirenSession(original, sessionStorage);
+    expect(actual).to.equal(expected);
+    sinon.assert.calledWith(removeItemSpy, 'sirenSession');
+  });
+
 });

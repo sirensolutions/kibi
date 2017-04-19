@@ -8,7 +8,7 @@ export default (function () {
   const path = require('path');
   const url = require('url');
   const resolve = require('path').resolve;
-  const Elasticdump = require('elasticdump').elasticdump;
+  const Elasticdump = require('elasticdump');
 
   function ElasticDump() {
   }
@@ -28,7 +28,6 @@ export default (function () {
         debug:           false,
         type:            mytype,
         delete:          false,
-        all:             false,
         maxSockets:      null,
         input:           myinput,
         'input-index':   null,
@@ -43,7 +42,6 @@ export default (function () {
         'ignore-errors': false,
         scrollTime:      '10m',
         timeout:         null,
-        skip:            null,
         toLog:           null,
       };
       const dumper = new Elasticdump(options.input, options.output, options);

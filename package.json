@@ -203,7 +203,6 @@
     "chromedriver": "2.28.0",
     "classnames": "2.2.5",
     "del": "1.2.1",
-    "elasticdump": "2.1.1",
     "eslint": "3.11.1",
     "eslint-plugin-mocha": "4.7.0",
     "event-stream": "3.3.2",

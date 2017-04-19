@@ -18,13 +18,13 @@ typeahead.directive('kbnTypeahead', function () {
   return {
     restrict: 'A',
     scope: {
-      historyKey: '@kbnTypeahead'
+      historyKey: '@kbnTypeahead',
+      onSelect: '&'
     },
     controllerAs: 'typeahead',
 
-    controller: function ($scope, $element, PersistedLog, config) {
+    controller: function ($scope, PersistedLog, config) {
       const self = this;
-      self.form = $element.closest('form');
       self.query = '';
       self.hidden = true;
       self.focused = false;
@@ -111,9 +111,9 @@ typeahead.directive('kbnTypeahead', function () {
         $scope.inputModel.$render();
         self.persistEntry();
 
-        if (ev && ev.type === 'click' && self.form.length) {
-          // siren: call filterResults from the scope instead via submit, which prevents the form's default action
-          self.form.scope().filterResults();
+        if ($scope.onSelect && ev && ev.type === 'click') {
+          // siren: to remove our fix once the PR upstream is merged https://github.com/elastic/kibana/pull/11100
+          $scope.onSelect();
         }
       };
 

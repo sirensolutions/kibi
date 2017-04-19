@@ -30,10 +30,10 @@ module.exports = function (chrome, internals) {
           localStorage.removeItem('sessionStorage');
         } else if (event.key === 'sessionStorage' && !removeSireSessionResult.found) {
           // sessionStorage is empty -> fill it
-          if (event.newValue === '') {
-            event.newValue = '{}';
+          let data = {};
+          if (event.newValue !== '') {
+            data = JSON.parse(event.newValue);
           }
-          const data = JSON.parse(event.newValue);
           for (const key in data) {
             if (data.hasOwnProperty(key)) {
               if (isStateHash(key)) {

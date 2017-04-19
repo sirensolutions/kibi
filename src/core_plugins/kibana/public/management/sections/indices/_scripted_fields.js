@@ -21,7 +21,7 @@ uiModules.get('apps/management')
     scope: true,
     link: function ($scope) {
 
-      const fieldCreatorPath = '/management/kibana/indices/{{ indexPattern }}/scriptedField';
+      const fieldCreatorPath = '/management/siren/indices/{{ indexPattern }}/scriptedField';
       const fieldEditorPath = fieldCreatorPath + '/{{ fieldName }}';
 
       $scope.docLinks = docLinks;

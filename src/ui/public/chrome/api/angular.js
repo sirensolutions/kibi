@@ -86,7 +86,7 @@ module.exports = function (chrome, internals) {
                   The URL has gotten big and may cause Kibana
                   to stop working. Please either enable the
                   <code>state:storeInSessionStorage</code>
-                  option in the <a href="#/management/kibana/settings">advanced
+                  option in the <a href="#/management/siren/settings">advanced
                   settings</a> or simplify the onscreen visuals.
                 </p>
               `

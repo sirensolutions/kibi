@@ -16,7 +16,7 @@ import angular from 'angular';
 import kibiUtils from 'kibiutils';
 
 uiRoutes
-.when('/management/kibana/queries', {
+.when('/management/siren/queries', {
   template,
   reloadOnSearch: false,
   resolve: {
@@ -25,14 +25,14 @@ uiRoutes
     }
   }
 })
-.when('/management/kibana/queries/:id?', {
+.when('/management/siren/queries/:id?', {
   template,
   reloadOnSearch: false,
   resolve: {
     query: function ($route, courier, savedQueries) {
       return savedQueries.get($route.current.params.id)
       .catch(courier.redirectWhenMissing({
-        query: '/management/kibana/queries'
+        query: '/management/siren/queries'
       }));
     }
   }
@@ -195,7 +195,7 @@ function controller(kibiState, $scope, $route, kbnUrl, createNotifier, queryEngi
       notify.info(`Query ${$scope.query.title} successfuly saved`);
       if (savedQueryId !== $routeParams.id) {
         // redirect only if the query id changed !!!
-        kbnUrl.change('management/kibana/queries/{{id}}', { id: savedQueryId });
+        kbnUrl.change('management/siren/queries/{{id}}', { id: savedQueryId });
       } else {
         return $scope.preview();
       }
@@ -203,11 +203,11 @@ function controller(kibiState, $scope, $route, kbnUrl, createNotifier, queryEngi
   };
 
   $scope.jumpToTemplate = function () {
-    kbnUrl.change('/management/kibana/templates/' + $scope.preview.templateId);
+    kbnUrl.change('/management/siren/templates/' + $scope.preview.templateId);
   };
 
   $scope.jumpToDatasource = function () {
-    kbnUrl.change('/management/kibana/datasources/' + $scope.query.datasourceId);
+    kbnUrl.change('/management/siren/datasources/' + $scope.query.datasourceId);
   };
 
   $scope.preview = function () {
@@ -260,7 +260,7 @@ function controller(kibiState, $scope, $route, kbnUrl, createNotifier, queryEngi
   };
 
   $scope.newObject = function () {
-    kbnUrl.change('management/kibana/queries', {});
+    kbnUrl.change('management/siren/queries', {});
   };
 
   $scope.$on('$destroy', function () {

@@ -11,7 +11,7 @@ import uiRoutes from 'ui/routes';
 import template from 'plugins/kibi_core/management/sections/kibi_dashboard_groups/index.html';
 
 uiRoutes
-.when('/management/kibana/dashboardgroups', {
+.when('/management/siren/dashboardgroups', {
   template,
   reloadOnSearch: false,
   resolve: {
@@ -20,14 +20,14 @@ uiRoutes
     }
   }
 })
-.when('/management/kibana/dashboardgroups/:id?', {
+.when('/management/siren/dashboardgroups/:id?', {
   template,
   reloadOnSearch: false,
   resolve: {
     dashboardGroup: function ($route, courier, savedDashboardGroups) {
       return savedDashboardGroups.get($route.current.params.id)
       .catch(courier.redirectWhenMissing({
-        dashboardGroup: '/management/kibana/dashboardgroups'
+        dashboardGroup: '/management/siren/dashboardgroups'
       }));
     }
   }
@@ -82,12 +82,12 @@ function controller($rootScope, $scope, $route, kbnUrl, createNotifier, savedDas
     .then(function (groupId) {
       notify.info('Dashboard Group ' + dashboardGroup.title + ' was successfuly saved');
       $rootScope.$emit('kibi:dashboardgroup:changed', groupId);
-      kbnUrl.change(`management/kibana/dashboardgroups/${groupId}`);
+      kbnUrl.change(`management/siren/dashboardgroups/${groupId}`);
     });
   };
 
   $scope.newObject = function () {
-    kbnUrl.change('management/kibana/dashboardgroups', {});
+    kbnUrl.change('management/siren/dashboardgroups', {});
   };
 
   function getNumberOfDashboards() {

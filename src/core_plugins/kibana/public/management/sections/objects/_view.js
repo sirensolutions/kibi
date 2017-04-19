@@ -9,7 +9,7 @@ import uiModules from 'ui/modules';
 import deleteProvider from 'ui/kibi/helpers/delete_helper';
 
 uiRoutes
-.when('/management/kibana/objects/:service/:id', {
+.when('/management/siren/objects/:service/:id', {
   template: objectViewHTML
 });
 
@@ -234,7 +234,7 @@ uiModules.get('apps/management')
         // kibi: removed esAdmin.indices.refresh
         const msg = 'You successfully ' + action + ' the "' + $scope.obj._source.title + '" ' + $scope.title.toLowerCase() + ' object';
 
-        $location.path('/management/kibana/objects').search({
+        $location.path('/management/siren/objects').search({
           _a: rison.encode({
             tab: serviceObj.title
           })

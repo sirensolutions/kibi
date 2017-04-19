@@ -28,7 +28,7 @@ uiModules
   const savedTemplateLoader = new SavedObjectLoader(SavedTemplate, kbnIndex, esAdmin, kbnUrl, options);
 
   savedTemplateLoader.urlFor = function (id) {
-    return kbnUrl.eval('#/management/kibana/templates/{{id}}', { id: id });
+    return kbnUrl.eval('#/management/siren/templates/{{id}}', { id: id });
   };
 
   return savedTemplateLoader;

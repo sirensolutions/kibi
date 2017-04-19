@@ -10,7 +10,7 @@ import uiModules from 'ui/modules';
 import uiRoutes from 'ui/routes';
 
 uiRoutes
-.when('/management/kibana/relations', {
+.when('/management/siren/relations', {
   template,
   reloadOnSearch: false
 });
@@ -34,7 +34,7 @@ function controller(Promise, es, kibiState, $rootScope, $scope, $timeout, config
       id: index
     };
 
-    kbnUrl.change('/management/kibana/relations/{{ service }}/{{ id }}', params);
+    kbnUrl.change('/management/siren/relations/{{ service }}/{{ id }}', params);
   };
 
   $scope.relations = config.get('kibi:relations');

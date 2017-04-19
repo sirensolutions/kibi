@@ -9,7 +9,7 @@ import uiModules from 'ui/modules';
 import createTemplate from 'plugins/kibana/management/sections/indices/_create.html';
 
 uiRoutes
-.when('/management/kibana/index/', {
+.when('/management/siren/index/', {
   template: createTemplate
 });
 
@@ -79,7 +79,7 @@ uiModules.get('apps/management')
               config.set('defaultIndex', indexPattern.id);
             }
             indexPatterns.cache.clear(indexPattern.id);
-            kbnUrl.change('/management/kibana/indices/' + indexPattern.id);
+            kbnUrl.change('/management/siren/indices/' + indexPattern.id);
           });
         }
       });

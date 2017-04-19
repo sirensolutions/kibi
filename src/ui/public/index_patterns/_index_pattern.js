@@ -31,11 +31,11 @@ export default function IndexPatternFactory(Private, createNotifier, config, kbn
   const configWatchers = new WeakMap();
   const docSources = new WeakMap();
   const getRoutes = () => ({
-    edit: '/management/kibana/indices/{{id}}',
-    addField: '/management/kibana/indices/{{id}}/create-field',
-    indexedFields: '/management/kibana/indices/{{id}}?_a=(tab:indexedFields)',
-    scriptedFields: '/management/kibana/indices/{{id}}?_a=(tab:scriptedFields)',
-    sourceFilters: '/management/kibana/indices/{{id}}?_a=(tab:sourceFilters)'
+    edit: '/management/siren/indices/{{id}}',
+    addField: '/management/siren/indices/{{id}}/create-field',
+    indexedFields: '/management/siren/indices/{{id}}?_a=(tab:indexedFields)',
+    scriptedFields: '/management/siren/indices/{{id}}?_a=(tab:scriptedFields)',
+    sourceFilters: '/management/siren/indices/{{id}}?_a=(tab:sourceFilters)'
   });
 
   const mapping = mappingSetup.expandShorthand({

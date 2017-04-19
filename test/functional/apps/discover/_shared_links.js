@@ -39,6 +39,27 @@ bdd.describe('shared links', function describeIndexTests() {
     .then(function loadIfEmptyMakelogs() {
       return scenarioManager.loadIfEmpty('logstashFunctional');
     })
+
+    // siren: disable the hashed urls which we turned on by default
+    .then(function () {
+      return PageObjects.settings.navigateTo();
+    })
+    .then(function () {
+      return PageObjects.settings.clickKibanaSettings();
+    })
+    .then(function () {
+      PageObjects.common.debug('disable the hashed urls');
+      return PageObjects.settings.setAdvancedSettings('state:storeInSessionStorage', false);
+    })
+    .then(function GetAdvancedSetting() {
+      PageObjects.common.debug('check that hashed urls are disabled');
+      return PageObjects.settings.getAdvancedSettings('state:storeInSessionStorage');
+    })
+    .then(function (advancedSetting) {
+      expect(advancedSetting).to.be('false');
+    })
+    //kibi: end
+
     .then(function () {
       PageObjects.common.debug('discover');
       return PageObjects.common.navigateToApp('discover');

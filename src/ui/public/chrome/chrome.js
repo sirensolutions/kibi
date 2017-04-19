@@ -40,8 +40,10 @@ require('./api/template')(chrome, internals);
 require('./api/theme')(chrome, internals);
 
 chrome.bootstrap = function () {
-  chrome.setupAngular();
-  angular.bootstrap(document, ['kibana']);
+  chrome.initialization().then(() => {
+    chrome.setupAngular();
+    angular.bootstrap(document, ['kibana']);
+  });
 };
 
 if (chrome.getApp && chrome.getApp() && chrome.getApp().id === 'kibana') {

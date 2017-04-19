@@ -4,7 +4,7 @@ const expect = require('expect.js');
 const mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
 const _ = require('lodash');
 const noDigestPromises = require('testUtils/noDigestPromises');
-const pollUntil = require('./_poll_until');
+const pollUntil = require('ui/kibi/helpers/_poll_until');
 const chrome = require('ui/chrome');
 
 let kibiState;

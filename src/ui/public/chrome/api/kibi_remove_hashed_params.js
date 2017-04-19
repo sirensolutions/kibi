@@ -10,7 +10,7 @@ export default function (url, _sessionStorage) {
       const paramArray = params.split('&');
       const filteredParams = [];
       for (let i = 0; i < paramArray.length; i++) {
-        if (!paramArray[i].match(regex)) {
+        if (!paramArray[i].match(regex) && !_sessionStorage.getItem(paramArray[i])) {
           filteredParams.push(paramArray[i]);
         }
       }

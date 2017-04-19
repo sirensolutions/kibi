@@ -5,10 +5,56 @@ import Notifier from 'kibie/notify/notifier'; // kibi: import Kibi notifier
 import kibiRemoveHashedParams from './kibi_remove_hashed_params'; // kibi: import util to clean the url
 import kibiRemoveSirenSession from './kibi_remove_siren_session'; // kibi: import util to clean the sirenSession
 import { UrlOverflowServiceProvider } from '../../error_url_overflow';
+import { hashedItemStoreSingleton, isStateHash } from 'ui/state_management/state_storage';
 
 const URL_LIMIT_WARN_WITHIN = 1000;
 
 module.exports = function (chrome, internals) {
+  chrome.initialization = function () {
+    return new Promise((resolve, reject) => {
+      const pollUntil = require('ui/kibi/helpers/_poll_until');
+      let pollUntilFinishFlag = false;
+
+      const url = window.location.href;
+      //TODO: Simon please refactor this.
+      const removeSireSessionResult = kibiRemoveSirenSession(url, sessionStorage);
+
+      if (!sessionStorage.length) {
+        // Ask other tabs for session storage
+        localStorage.setItem('getSessionStorage', Date.now());
+      };
+      window.addEventListener('storage', event => {
+        if (event.key === 'getSessionStorage') {
+          // Some tab asked for the sessionStorage -> send it
+          localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+          localStorage.removeItem('sessionStorage');
+        } else if (event.key === 'sessionStorage' && !removeSireSessionResult.found) {
+          // sessionStorage is empty -> fill it
+          if (event.newValue === '') {
+            event.newValue = '{}';
+          }
+          const data = JSON.parse(event.newValue);
+          for (const key in data) {
+            if (data.hasOwnProperty(key)) {
+              if (isStateHash(key)) {
+                console.log(key, data[key]);
+                sessionStorage.setItem(key, data[key]);
+                hashedItemStoreSingleton.setItem(key, data[key]);
+              }
+            }
+          }
+          pollUntilFinishFlag = true;
+        }
+      });
+
+      pollUntil(() => {
+        return pollUntilFinishFlag === true;
+      }, 2000, 5, (error) => {
+        console.log('Finish', pollUntilFinishFlag);
+        resolve();
+      });
+    });
+  };
 
   chrome.setupAngular = function () {
     const modules = require('ui/modules');
@@ -35,7 +81,8 @@ module.exports = function (chrome, internals) {
       // kibi: clean the hashed params from the URL if session storage empty
       const originalURL = window.location.href;
       let url = kibiRemoveHashedParams(originalURL, sessionStorage);
-      url = kibiRemoveSirenSession(url, sessionStorage);
+      const removeSireSessionResult = kibiRemoveSirenSession(url, sessionStorage);
+      url = removeSireSessionResult.url;
       if (originalURL !== url) {
         window.location.href = url;
       }

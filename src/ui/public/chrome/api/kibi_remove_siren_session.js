@@ -1,6 +1,10 @@
 const regex = /clearSirenSession=true/g;
 
 export default function (url, _sessionStorage) {
+  const ret = {
+    url,
+    found: false
+  };
   if (url.match(regex)) {
     // get the part after ?
     const index = url.indexOf('?');
@@ -8,21 +12,20 @@ export default function (url, _sessionStorage) {
     const params = url.substring(index + 1);
     const paramArray = params.split('&');
     const filteredParams = [];
-    let found = false;
     for (let i = 0; i < paramArray.length; i++) {
       if (!paramArray[i].match(regex)) {
         filteredParams.push(paramArray[i]);
       } else {
-        found = true;
+        ret.found = true;
       }
     }
-    if (found) {
+    if (ret.found) {
       _sessionStorage.removeItem('sirenSession');
     }
+    ret.url = base;
     if (filteredParams.length > 0) {
-      return base + '?' + filteredParams.join('&');
+      ret.url = base + '?' + filteredParams.join('&');
     }
-    return base;
   }
-  return url;
+  return ret;
 };

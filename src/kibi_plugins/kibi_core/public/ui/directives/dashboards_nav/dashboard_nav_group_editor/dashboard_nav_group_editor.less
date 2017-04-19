@@ -2,13 +2,15 @@
 @import (reference) "~ui/styles/variables";
 @import (reference) "../variables";
 
+@dashboards-scrollbar-thumb: #2f99c1;
+
 .dashboards-nav-group-editor {
   clear:both;
   margin:8px;
   color: @sidebar-color;
 
   a {
-    color: @kibanaGray3 !important;
+    color: @kibanaGray3;
   }
 
   .title {
@@ -52,7 +54,7 @@
       }
 
       &::-webkit-scrollbar-thumb { /* 4 */
-        background-color: #2f99c1;
+        background-color: @dashboards-scrollbar-thumb;
         border: 6px solid transparent;
         background-clip: content-box;
       }

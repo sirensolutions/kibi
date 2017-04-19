@@ -3,7 +3,7 @@ import angular from 'angular';
 
 uiModules
 .get('kibana')
-.service('dashboardsNavState', (localStorage, $rootScope) => {
+.service('dashboardsNavState', (sessionStorage, localStorage, $rootScope) => {
   return {
     isOpen: () => {
       const isOpen = localStorage.get('kibi.isDashboardsNavOpen');
@@ -17,23 +17,23 @@ uiModules
     },
 
     isOnEditMode: () => {
-      const isOnEditMode = localStorage.get('kibi.isDashboardsNavOnEditMode');
+      const isOnEditMode = sessionStorage.get('kibi.isDashboardsNavOnEditMode');
       return isOnEditMode === null ? false : isOnEditMode;
     },
 
     setEditMode: isOnEditMode => {
-      localStorage.set('kibi.isDashboardsNavOnEditMode', isOnEditMode);
+      sessionStorage.set('kibi.isDashboardsNavOnEditMode', isOnEditMode);
       $rootScope.$broadcast('dashboardsNavState:change');
       return isOnEditMode;
     },
 
     isGroupEditorOpen: () => {
-      const isGroupEditorOpen = localStorage.get('kibi.isDashboardsNavGroupEditorOpen');
+      const isGroupEditorOpen = sessionStorage.get('kibi.isDashboardsNavGroupEditorOpen');
       return isGroupEditorOpen === null ? false : isGroupEditorOpen;
     },
 
     setGroupEditorOpen: isGroupEditorOpen => {
-      localStorage.set('kibi.isDashboardsNavGroupEditorOpen', isGroupEditorOpen);
+      sessionStorage.set('kibi.isDashboardsNavGroupEditorOpen', isGroupEditorOpen);
       $rootScope.$broadcast('dashboardsNavState:change');
       return isGroupEditorOpen;
     }

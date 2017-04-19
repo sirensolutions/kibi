@@ -143,8 +143,6 @@ uiModules
       groups.forEach((group) => {
         group.priority = priority;
         priority += 10;
-      });
-      groups.forEach((group) => {
         if (group.virtual) {
           savedDashboards.get(group.id).then(savedDashboard => {
             savedDashboard.priority = group.priority;

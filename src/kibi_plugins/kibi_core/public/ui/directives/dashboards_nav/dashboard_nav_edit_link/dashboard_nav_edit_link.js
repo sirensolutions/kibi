@@ -7,7 +7,7 @@ import _ from 'lodash';
 
 uiModules
 .get('kibana')
-.directive('dashboardNavEditLink', ($rootScope, $timeout, dashboardGroups, kibiState, createNotifier,
+.directive('dashboardNavEditLink', ($rootScope, dashboardGroups, createNotifier,
   dashboardsNavState, savedDashboardGroups, Private) => {
 
   return {
@@ -38,9 +38,7 @@ uiModules
           notify.info('Dashboard Group ' + group.title + ' was successfuly deleted');
           $rootScope.$emit('kibi:dashboardgroup:changed', group.id);
         })
-        .catch((reason) => {
-          notify.error(reason);
-        });
+        .catch (notify.error);
       };
     }
   };

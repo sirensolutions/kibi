@@ -9,8 +9,8 @@ import _ from 'lodash';
 
 uiModules
 .get('kibana')
-.directive('dashboardNavGroupEditor', ($rootScope, $route, dashboardGroups,
-  savedDashboardGroups, createNotifier, kibiState, dashboardsNavState, Private) => {
+.directive('dashboardNavGroupEditor', ($rootScope, dashboardGroups,
+  savedDashboardGroups, createNotifier, dashboardsNavState, Private) => {
 
   return {
     restrict: 'E',
@@ -47,9 +47,7 @@ uiModules
             dashboardsNavState.setGroupEditorOpen(false);
             $rootScope.$emit('kibi:dashboardgroup:changed', groupId);
           })
-          .catch((reason) => {
-            notify.error(reason);
-          });
+          .catch (notify.error);
         });
       };
 

@@ -86,9 +86,7 @@ uiModules
           notify.info('New dashboard group was successfuly created');
           $rootScope.$emit('kibi:dashboardgroup:changed', groupId);
         })
-        .catch (reason => {
-          notify.error(reason);
-        });
+        .catch (notify.error);
       };
 
       $rootScope.$on('globalNavState:change', () => {
@@ -104,7 +102,7 @@ uiModules
         const $navControls = angular.element($element.find('.dashboards-nav-control')[0]);
         if ($navControls) {
           const h = $element.height() - $navControls.height() - 70;
-          $container.height(h);
+          $container.height(Math.max(20, h));
         }
       };
 

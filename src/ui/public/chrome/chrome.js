@@ -40,7 +40,8 @@ require('./api/template')(chrome, internals);
 require('./api/theme')(chrome, internals);
 
 chrome.bootstrap = function () {
-  chrome.initialization().then(() => {
+  // siren: wrap in initialization promise
+  chrome.sirenInitialization().then(() => {
     chrome.setupAngular();
     angular.bootstrap(document, ['kibana']);
   });

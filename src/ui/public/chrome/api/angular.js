@@ -1,9 +1,8 @@
-const _ = require('lodash');
+import _ from 'lodash';
 import { format as formatUrl, parse as parseUrl } from 'url';
-
-import Notifier from 'kibie/notify/notifier'; // kibi: import Kibi notifier
-import kibiRemoveHashedParams from './kibi_remove_hashed_params'; // kibi: import util to clean the url
-import kibiRemoveSirenSession from './kibi_remove_siren_session'; // kibi: import util to clean the sirenSession
+import Notifier from 'kibie/notify/notifier'; // siren: import Kibi notifier
+import kibiRemoveHashedParams from './kibi_remove_hashed_params'; // siren: import util to clean the url
+import kibiRemoveSirenSession from './kibi_remove_siren_session'; // siren: import util to clean the sirenSession
 import { UrlOverflowServiceProvider } from '../../error_url_overflow';
 import { hashedItemStoreSingleton, isStateHash } from 'ui/state_management/state_storage';
 
@@ -11,7 +10,9 @@ const URL_LIMIT_WARN_WITHIN = 1000;
 const MAX_RESTORE_SESSION_TIME = 2000;
 
 module.exports = function (chrome, internals) {
-  chrome.initialization = function () {
+
+  // siren: our initialization code that have to be executed before kibana starts
+  chrome.sirenInitialization = function () {
     return new Promise((resolve, reject) => {
       const pollUntil = require('ui/kibi/helpers/_poll_until');
       let pollUntilFinishFlag = false;
@@ -54,6 +55,7 @@ module.exports = function (chrome, internals) {
       });
     });
   };
+  // siren: end
 
   chrome.setupAngular = function () {
     const modules = require('ui/modules');
@@ -65,9 +67,9 @@ module.exports = function (chrome, internals) {
 
     kibana
     .value('kbnVersion', internals.version)
-    .value('kibiVersion', internals.kibiVersion) // kibi: added to manage kibi version
-    .value('kibiEnterpriseEnabled', internals.kibiEnterpriseEnabled) // kibi:
-    .value('kibiKibanaAnnouncement', internals.kibiKibanaAnnouncement) // kibi:
+    .value('kibiVersion', internals.kibiVersion) // siren: added to manage kibi version
+    .value('kibiEnterpriseEnabled', internals.kibiEnterpriseEnabled) // siren:
+    .value('kibiKibanaAnnouncement', internals.kibiKibanaAnnouncement) // siren:
     .value('buildNum', internals.buildNum)
     .value('buildSha', internals.buildSha)
     .value('sessionId', Date.now())
@@ -77,14 +79,14 @@ module.exports = function (chrome, internals) {
       return a.href;
     }()))
     .config(($httpProvider) => {
-      // kibi: clean the hashed params from the URL if session storage empty
+      // siren: clean the hashed params from the URL if session storage empty
       const originalURL = window.location.href;
       let url = kibiRemoveHashedParams(originalURL, sessionStorage);
       url = kibiRemoveSirenSession(url, sessionStorage);
       if (originalURL !== url) {
         window.location.href = url;
       }
-      // kibi:
+      // siren: end
       chrome.$setupXsrfRequestInterceptor($httpProvider);
     })
     .run(($location, $rootScope, Private) => {

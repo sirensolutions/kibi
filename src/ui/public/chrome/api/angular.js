@@ -37,7 +37,6 @@ module.exports = function (chrome, internals) {
           for (const key in data) {
             if (data.hasOwnProperty(key)) {
               if (isStateHash(key)) {
-                console.log(key, data[key]);
                 sessionStorage.setItem(key, data[key]);
                 hashedItemStoreSingleton.setItem(key, data[key]);
               }
@@ -50,7 +49,6 @@ module.exports = function (chrome, internals) {
       pollUntil(() => {
         return pollUntilFinishFlag === true;
       }, 2000, 5, (error) => {
-        console.log('Finish', pollUntilFinishFlag);
         resolve();
       });
     });

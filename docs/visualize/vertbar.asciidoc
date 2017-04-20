@@ -34,7 +34,7 @@ Before you choose a buckets aggregation, specify if you are splitting slices wit
 multiple charts. A multiple chart split must run before any other aggregations. When you split a chart, you can change
 if the splits are displayed in a row or a column by clicking the *Rows | Columns* selector.
 
-include::x_axis_aggs.asciidoc[]
+include::../x_axis_aggs.asciidoc[]
 
 include::color-picker.asciidoc[]
 
@@ -77,4 +77,4 @@ this box to change both upper and lower bounds to match the values returned in t
 [[vertbar-viewing-detailed-information]]
 ==== Viewing Detailed Information
 
-include::visualization_raw_data.asciidoc[]
+include::../visualization_raw_data.asciidoc[]

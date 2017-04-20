@@ -121,7 +121,7 @@ For more information about index patterns, see <<settings-create-pattern, Creati
 [float]
 [[auto-refresh]]
 
-include::autorefresh.asciidoc[]
+include::./discover/autorefresh.asciidoc[]
 
 [float]
 [[field-filter]]

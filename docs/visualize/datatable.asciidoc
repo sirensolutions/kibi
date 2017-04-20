@@ -1,7 +1,7 @@
 [[data-table]]
 === Data Table
 
-include::y_axis_aggs.asciidoc[]
+include::../y_axis_aggs.asciidoc[]
 
 The rows of the data table are called _buckets_. You can define buckets to split the table into rows or to split
 the table into additional tables.
@@ -82,4 +82,4 @@ NOTE: Enabling these behaviors may have a substantial effect on performance.
 [[datatable-viewing-detailed-information]]
 === Viewing Detailed Information
 
-include::visualization_raw_data.asciidoc[]
+include::../visualization_raw_data.asciidoc[]

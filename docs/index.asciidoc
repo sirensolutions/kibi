@@ -46,7 +46,7 @@ include::logstash.asciidoc[]
 
 include::plugins.asciidoc[]
 
-include::access.asciidoc[]
+include::./setup/access.asciidoc[]
 
 include::discover.asciidoc[]
 
@@ -70,7 +70,7 @@ include::searchguard_integration.asciidoc[]
 
 include::shield_integration.asciidoc[]
 
-include::production.asciidoc[]
+include::./setup/production.asciidoc[]
 
 include::cross_frame_communication.asciidoc[]
 

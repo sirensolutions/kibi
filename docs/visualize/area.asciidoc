@@ -26,7 +26,7 @@ values field. Click *+Add* to add a values field.
 
 You can add an aggregation by clicking the *+ Add Aggregation* button.
 
-include::x_axis_aggs.asciidoc[]
+include::../x_axis_aggs.asciidoc[]
 For example, a chart of dates with incident counts can display dates in chronological order, or you can raise the
 priority of the incident-reporting aggregation to show the most active dates first. The chronological order might show
 a time-dependent pattern in incident count, and sorting by active dates can reveal particular outliers in your data.
@@ -75,4 +75,4 @@ this box to change both upper and lower bounds to match the values returned in t
 [[area-viewing-detailed-information]]
 ==== Viewing Detailed Information
 
-include::visualization_raw_data.asciidoc[]
+include::../visualization_raw_data.asciidoc[]

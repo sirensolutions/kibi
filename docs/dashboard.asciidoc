@@ -207,4 +207,4 @@ Dashboard groups can be managed by clicking on the
 
 [float]
 [[dash-autorefresh]]
-include::autorefresh.asciidoc[]
+include::./discover/autorefresh.asciidoc[]

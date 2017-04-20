@@ -89,7 +89,7 @@ image:images/VizEditor.jpg[]
 
 [float]
 [[viz-autorefresh]]
-include::autorefresh.asciidoc[]
+include::./discover/autorefresh.asciidoc[]
 
 [float]
 [[toolbar-panel]]
@@ -171,21 +171,21 @@ include::enhanced_search_results.asciidoc[]
 
 include::kibi_query_viewer.asciidoc[]
 
-include::area.asciidoc[]
+include::./visualize/area.asciidoc[]
 
-include::datatable.asciidoc[]
+include::./visualize/datatable.asciidoc[]
 
-include::line.asciidoc[]
+include::./visualize/line.asciidoc[]
 
-include::markdown.asciidoc[]
+include::./visualize/markdown.asciidoc[]
 
-include::metric.asciidoc[]
+include::./visualize/metric.asciidoc[]
 
 include::pie.asciidoc[]
 
-include::tilemap.asciidoc[]
+include::./visualize/tilemap.asciidoc[]
 
-include::vertbar.asciidoc[]
+include::./visualize/vertbar.asciidoc[]
 
 include::wordcloud.asciidoc[]
 

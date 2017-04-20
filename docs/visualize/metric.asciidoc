@@ -3,7 +3,7 @@
 
 A metric visualization displays a single number for each aggregation you select:
 
-include::y_axis_aggs.asciidoc[]
+include::../y_axis_aggs.asciidoc[]
 
 You can click the *Advanced* link to display more customization options:
 
@@ -24,4 +24,4 @@ Click the *Options* tab to display the font size slider.
 [[metric-viewing-detailed-information]]
 ==== Viewing Detailed Information
 
-include::visualization_raw_data.asciidoc[]
+include::../visualization_raw_data.asciidoc[]

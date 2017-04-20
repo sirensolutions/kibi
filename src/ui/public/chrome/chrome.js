@@ -41,9 +41,10 @@ require('./api/theme')(chrome, internals);
 
 chrome.bootstrap = function () {
   // siren: wrap in initialization promise
-  chrome.sirenInitialization();
-  chrome.setupAngular();
-  angular.bootstrap(document, ['kibana']);
+  chrome.sirenInitialization().then(() => {
+    chrome.setupAngular();
+    angular.bootstrap(document, ['kibana']);
+  });
 };
 
 if (chrome.getApp && chrome.getApp() && chrome.getApp().id === 'kibana') {

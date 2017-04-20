@@ -1,14 +1,8 @@
 import UiModules from 'ui/modules';
 
-const openNewTab = function (url) {
-  return new Promise ((resolve, reject) => {
-    resolve(window.open(url + '/app/kibana#/?clearSirenSession=true', '_blank'));
-  });
-};
-
 UiModules
 .get('kibana')
-.directive('kibiReload', function () {
+.directive('kibiReload', function ($timeout, $window) {
   return {
     restrict: 'A',
     link: function (scope, element, attr) {
@@ -17,10 +11,13 @@ UiModules
 
         // to force reload put kibi-reload="true" in the html
         const forcedReload = new Boolean(attr.kibiReload);
-
-        openNewTab(window.location.origin).then((newTab) => {
-          newTab.location.reload(forcedReload);
-        });
+        const newWindow = $window.open($window.location.origin + '/app/kibana#/?clearSirenSession=true');
+        if (newWindow) {
+          // NOTE: without this little wait firefox will end up with blank window
+          $timeout(() => {
+            newWindow.location.reload(forcedReload);
+          }, 100);
+        }
       });
     }
   };

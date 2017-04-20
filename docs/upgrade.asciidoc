@@ -5,6 +5,7 @@ An existing Kibi installation can be upgraded as follows:
 
 - backup the `.kibi` index.
 - backup the Kibi configuration file (`config/kibi.yml`)
+- backup the .kibiaccess if ACL (Access Control Layer) is enabled
 - {elastic-ref}setup-upgrade.html[upgrade Elasticsearch]; before restarting each node, make sure to install a compatible version of the
   {siren-join-website}#compatibility[SIREn Join] plugin.
 - download and extract the new Kibi version.

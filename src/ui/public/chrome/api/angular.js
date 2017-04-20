@@ -7,7 +7,6 @@ import { UrlOverflowServiceProvider } from '../../error_url_overflow';
 import { hashedItemStoreSingleton, isStateHash } from 'ui/state_management/state_storage';
 
 const URL_LIMIT_WARN_WITHIN = 1000;
-const MAX_RESTORE_SESSION_TIME = 2000;
 
 module.exports = function (chrome, internals) {
   // siren: our initialization code that have to be executed before kibana starts

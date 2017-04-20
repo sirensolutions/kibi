@@ -10,50 +10,31 @@ const URL_LIMIT_WARN_WITHIN = 1000;
 const MAX_RESTORE_SESSION_TIME = 2000;
 
 module.exports = function (chrome, internals) {
-
   // siren: our initialization code that have to be executed before kibana starts
   chrome.sirenInitialization = function () {
-    return new Promise((resolve, reject) => {
-      const pollUntil = require('ui/kibi/helpers/_poll_until');
-      let pollUntilFinishFlag = false;
+    const regex = /clearSirenSession=true/g;
+    const restoreSession = !regex.test(window.location.href);
 
-      const url = window.location.href;
-      const regex = /clearSirenSession=true/g;
-      const restoreSession = !regex.test(window.location.href);
+    window.addEventListener('contextmenu', () => {
+      localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+    });
 
-      if (!sessionStorage.length && restoreSession) {
-        // Ask the old tabs for session storage
-        localStorage.setItem('getSessionStorage', Date.now());
-      };
-      window.addEventListener('storage', event => {
-        if (event.key === 'getSessionStorage') {
-          // New tab asked for the sessionStorage -> send it
-          localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
-          localStorage.removeItem('sessionStorage');
-        } else if (event.key === 'sessionStorage' && restoreSession) {
-          // THe old tab sent the sessionStorage -> restore it
-          let data = {};
-          if (event.newValue !== '') {
-            data = JSON.parse(event.newValue);
-          }
-          for (const key in data) {
-            if (data.hasOwnProperty(key)) {
-              if (isStateHash(key)) {
-                sessionStorage.setItem(key, data[key]);
-                hashedItemStoreSingleton.setItem(key, data[key]);
-              }
+    if (restoreSession) {
+      let value;
+      value = localStorage.getItem('sessionStorage');
+      if (value && value !== '') {
+        const data = JSON.parse(value);
+        localStorage.removeItem('sessionStorage');
+        for (const key in data) {
+          if (data.hasOwnProperty(key)) {
+            if (isStateHash(key)) {
+              sessionStorage.setItem(key, data[key]);
+              hashedItemStoreSingleton.setItem(key, data[key]);
             }
           }
-          pollUntilFinishFlag = true;
         }
-      });
-
-      pollUntil(() => {
-        return pollUntilFinishFlag === true;
-      }, MAX_RESTORE_SESSION_TIME, 5, (error) => {
-        resolve();
-      });
-    });
+      }
+    }
   };
   // siren: end
 

@@ -37,10 +37,16 @@ uiRoutes
 .defaults(/dashboard/, {
   requireDefaultIndex: true
 })
-.when('/dashboard', {
+.when('/dashboard/:id?', {
   template: indexTemplate,
   resolve: {
-    dash: function (createNotifier, Promise, savedDashboards, kibiDefaultDashboardTitle, kbnUrl) {
+    dash: function (createNotifier, Promise, savedDashboards, kibiDefaultDashboardTitle, kbnUrl, $route, courier) {
+      if ($route.current.params.hasOwnProperty('id')) {
+        return savedDashboards.get($route.current.params.id)
+          .catch(courier.redirectWhenMissing({
+            dashboard : '/dashboard/new-dashboard/create/'
+          }));
+      }
       // kibi:
       // - get all the dashboards
       // - if none, just create a new one
@@ -75,17 +81,6 @@ uiRoutes
         kbnUrl.redirect(`/dashboard/${dashboardId}`);
         return Promise.halt();
       });
-    }
-  }
-})
-.when('/dashboard/:id', {
-  template: indexTemplate,
-  resolve: {
-    dash: function (savedDashboards, $route, courier) {
-      return savedDashboards.get($route.current.params.id)
-      .catch(courier.redirectWhenMissing({
-        dashboard : '/dashboard/new-dashboard/create/'
-      }));
     }
   }
 })

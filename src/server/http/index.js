@@ -126,10 +126,17 @@ module.exports = async function (kbnServer, server, config) {
             embeddingParameters += 'kibiNavbarVisible=true&';
           }
         }
+
+        // adding the sha to be able to restore kibiSession in the browser
+        // redirect to discover dasboard or visualize depend on the share url
+        let redirectURL = `${config.get('server.basePath')}/app/kibana#/discover?${embeddingParameters}_h=${request.params.urlId}`;
+        if (data.url.indexOf('/dashboard/') !== -1) {
+          redirectURL = `${config.get('server.basePath')}/app/kibana#/dashboard?${embeddingParameters}_h=${request.params.urlId}`;
+        } else if (data.url.indexOf('/visualize/') !== -1) {
+          redirectURL = `${config.get('server.basePath')}/app/kibana#/visualize?${embeddingParameters}_h=${request.params.urlId}`;
+        }
+        reply().redirect(redirectURL);
         // kibi: end
-        reply().redirect(
-          `${config.get('server.basePath')}/app/kibana#/discover?${embeddingParameters}_h=${request.params.urlId}`
-        ); // kibi: adding the sha to be able to restore kibiSession in the browser
       } catch (err) {
         reply(handleShortUrlError(err));
       }

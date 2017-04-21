@@ -32,7 +32,7 @@
 
         <div class="form-group" ng-if="button.indexRelationId">
           <label>Target dashboard</label>
-          <kbn-info placement="right" info="On click it will redirect to this dashboard"></kbn-info></br>
+          <kbn-info placement="right" info="On click it will redirect to this dashboard. Just dashboards which are associated with Saved Searches can be chosen as Targets (See dashboard 'Save' options)."></kbn-info></br>
           <kibi-select required
             object-type="dashboardsForSequentialJoinButton"
             options="{indexRelationId: button.indexRelationId}"

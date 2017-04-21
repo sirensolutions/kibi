@@ -49,7 +49,7 @@ export default class Tab {
     if (!kibiState) delete query._k;
     else query._k = kibiState;
 
-      this.setLastUrl(`${this.rootUrl}${format({ pathname, query, hash })}`);
+    this.setLastUrl(`${this.rootUrl}${format({ pathname, query, hash })}`);
   }
 
   getLastPath() {

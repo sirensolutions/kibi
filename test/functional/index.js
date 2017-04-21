@@ -21,12 +21,15 @@ define(function (require) {
       'intern/dojo/node!../support'
     ];
 
-    const requestedApps = process.argv.reduce((previous, arg) => {
+    const requestedApps = process.argv.reduce((apps, arg) => {
       const option = arg.split('=');
       const key = option[0];
       const value = option[1];
-      if (key === 'appSuites' && value) return value.split(',');
-    });
+      if (key === 'appSuites' && value) {
+        apps.push(...value.split(','));
+      }
+      return apps;
+    }, []);
 
     const apps = [
       'intern/dojo/node!./apps/xpack',

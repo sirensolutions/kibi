@@ -4,12 +4,13 @@ import Notifier from 'kibie/notify/notifier'; // siren: import Kibi notifier
 import kibiRemoveHashedParams from './kibi_remove_hashed_params'; // siren: import util to clean the url
 import kibiRemoveSirenSession from './kibi_remove_siren_session'; // siren: import util to clean the sirenSession
 import { UrlOverflowServiceProvider } from '../../error_url_overflow';
-import { hashedItemStoreSingleton, isStateHash } from 'ui/state_management/state_storage';
+import { isStateHash } from 'ui/state_management/state_storage';
 
 const URL_LIMIT_WARN_WITHIN = 1000;
 const MAX_RESTORE_SESSION_TIME = 2000;
 const IE_REGEX = /(; ?MSIE |Edge\/\d|Trident\/[\d+\.]+;.*rv:*11\.\d+)/;
 const HASHED_URL_REGEX = /[_gak]+=h@[a-f0-9]+/g;
+const CLEAR_SIREN_SESSION_REGEX = /clearSirenSession=true/g;
 
 module.exports = function (chrome, internals) {
   let isIE = false;
@@ -25,9 +26,9 @@ module.exports = function (chrome, internals) {
       const pollUntil = require('ui/kibi/helpers/_poll_until');
       const sessionId = Math.floor(Math.random() * 10000);
       const url = decodeURIComponent(window.location.href);
-      const regex = /clearSirenSession=true/g;
+      const SIREN_SESSION_NAME = 'sirenSession';
 
-      restoreSession = !regex.test(url);
+      restoreSession = !CLEAR_SIREN_SESSION_REGEX.test(url);
       isIE = window.navigator.userAgent.match(IE_REGEX);
       hashedUrl = url.match(HASHED_URL_REGEX);
 
@@ -42,11 +43,21 @@ module.exports = function (chrome, internals) {
       };
       window.addEventListener('storage', event => {
         if (event.key === 'getSessionStorage') {
-          const id = event.newValue;
           // New tab asked for the sessionStorage -> send it
+          const data = {};
+          for (const key in sessionStorage) {
+            if (sessionStorage.hasOwnProperty(key)) {
+              if (isStateHash(key)) {
+                data[key] = sessionStorage[key];
+              } else if (key === SIREN_SESSION_NAME) {
+                data.hasSirenSession = true;
+              }
+            }
+          }
+          const id = event.newValue;
           localStorage.setItem('sessionStorage', JSON.stringify({
             id: id,
-            session: sessionStorage
+            session: data
           }));
           localStorage.removeItem('sessionStorage');
         } else if (event.key === 'sessionStorage' && restoreSession) {
@@ -57,10 +68,9 @@ module.exports = function (chrome, internals) {
               data = data.session;
               for (const key in data) {
                 if (data.hasOwnProperty(key)) {
-                  if (isStateHash(key)) {
+                  if (key !== SIREN_SESSION_NAME) {
                     sessionStorage.setItem(key, data[key]);
-                    hashedItemStoreSingleton.setItem(key, data[key]);
-                  } else if (key === 'sirenSession') {
+                  } else {
                     hasSirenSession = true;
                   }
                 }

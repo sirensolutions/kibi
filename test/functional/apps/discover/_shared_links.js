@@ -39,27 +39,6 @@ bdd.describe('shared links', function describeIndexTests() {
     .then(function loadIfEmptyMakelogs() {
       return scenarioManager.loadIfEmpty('logstashFunctional');
     })
-
-    // siren: disable the hashed urls which we turned on by default
-    .then(function () {
-      return PageObjects.settings.navigateTo();
-    })
-    .then(function () {
-      return PageObjects.settings.clickKibanaSettings();
-    })
-    .then(function () {
-      PageObjects.common.debug('disable the hashed urls');
-      return PageObjects.settings.setAdvancedSettings('state:storeInSessionStorage', false);
-    })
-    .then(function GetAdvancedSetting() {
-      PageObjects.common.debug('check that hashed urls are disabled');
-      return PageObjects.settings.getAdvancedSettings('state:storeInSessionStorage');
-    })
-    .then(function (advancedSetting) {
-      expect(advancedSetting).to.be('false');
-    })
-    //kibi: end
-
     .then(function () {
       PageObjects.common.debug('discover');
       return PageObjects.common.navigateToApp('discover');
@@ -89,20 +68,15 @@ bdd.describe('shared links', function describeIndexTests() {
       });
     });
 
-    bdd.it('should show the correct formatted URL', function () {
-      // kibi: added empty kibistate to the URL
-      const expectedUrl = baseUrl
-        + '/app/kibana?_t=1453775307251#'
-        + '/discover?_g=(refreshInterval:(display:Off,pause:!f,value:0),time'
-        + ':(from:\'2015-09-19T06:31:44.000Z\',mode:absolute,to:\'2015-09'
-        + '-23T18:31:44.000Z\'))&_k=()&_a=(columns:!(_source),index:\'logstash-'
-        + '*\',interval:auto,query:(query_string:(analyze_wildcard:!t,query'
-        + ':\'*\')),sort:!(\'@timestamp\',desc))';
-      return PageObjects.discover.getSharedUrl()
-      .then(function (actualUrl) {
-        // strip the timestamp out of each URL
-        expect(actualUrl.replace(/_t=\d{13}/,'_t=TIMESTAMP'))
-          .to.be(expectedUrl.replace(/_t=\d{13}/,'_t=TIMESTAMP'));
+    bdd.it('should show the correct formatted URL', async function () {
+      // siren: the URL is always shortened
+      const re = new RegExp(baseUrl + '/goto/[0-9a-f]{32}$');
+      await PageObjects.common.try(async function() {
+        PageObjects.common.saveScreenshot('Discover-shorten-url-button');
+        return PageObjects.discover.getSharedUrl()
+        .then(function (actualUrl) {
+          expect(actualUrl).to.match(re);
+        });
       });
     });
 

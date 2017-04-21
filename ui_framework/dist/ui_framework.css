@@ -797,7 +797,8 @@ body {
  * 2. Fit MicroButton inside of Table rows without pushing them taller.
  */
 .kuiMicroButton {
-  display: inline-block;
+  /* siren: icon should be on right, display property removed, float added */
+  float: right;
   /* 1 */
   -webkit-appearance: none;
      -moz-appearance: none;

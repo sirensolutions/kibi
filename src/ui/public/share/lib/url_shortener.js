@@ -1,7 +1,7 @@
 import chrome from 'ui/chrome';
 import url from 'url';
 
-export default function createUrlShortener(createNotifier, $http, $location, kibiSession) {
+export default function createUrlShortener(createNotifier, $http, $location, sirenSession) {
   const notify = createNotifier({
     location: 'Url Shortener'
   });
@@ -14,10 +14,10 @@ export default function createUrlShortener(createNotifier, $http, $location, kib
     const hash = parsedUrl.hash ? parsedUrl.hash : '';
     const relativeUrl = path + hash;
 
-    // kibi: added kibiSession data
+    // kibi: added sirenSession data
     const formData = {
       url: relativeUrl,
-      kibiSession: kibiSession.getData()
+      sirenSession: sirenSession.getData()
     };
 
     return $http.post(`${basePath}/shorten`, formData).then((result) => {

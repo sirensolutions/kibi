@@ -14,7 +14,7 @@ UiModules.get('kibana')
   $rootScope.$on('$locationChangeSuccess', () => {
     const search = $location.search();
     if (search._h) {
-      $http.get(chrome.getBasePath() + '/kibisession/' + search._h)
+      $http.get(chrome.getBasePath() + '/sirensession/' + search._h)
       .then((res) => {
         if (res.data.sirenSession) {
           sessionStorage.setItem('sirenSession', JSON.stringify(res.data.sirenSession));
@@ -48,7 +48,7 @@ UiModules.get('kibana')
 .service('sirenSession', ($location, Private) => {
   const Events = Private(EventsProvider);
 
-  class KibiSession extends Events {
+  class SirenSession extends Events {
     constructor() {
       super();
       this.dataString = '{}';
@@ -75,5 +75,5 @@ UiModules.get('kibana')
 
   }
 
-  return new KibiSession();
+  return new SirenSession();
 });

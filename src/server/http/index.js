@@ -146,7 +146,7 @@ module.exports = async function (kbnServer, server, config) {
   // kibi: added this handler to be able to fetch the sirenSession data
   server.route({
     method: 'GET',
-    path: '/kibisession/{urlId}',
+    path: '/sirensession/{urlId}',
     handler: async function (request, reply) {
       try {
         const data = await shortUrlLookup.getUrl(request.params.urlId, request);

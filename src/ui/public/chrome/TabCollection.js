@@ -47,11 +47,7 @@ function TabCollection(opts = {}) {
 
     let globalState = get(parse(activeTab.getLastPath(), true), 'query._g');
     let kibiState = get(parse(activeTab.getLastPath(), true), 'query._k');
-
-    // siren: adds the appState to the url that allows copy the session to another tab
-    let appState = get(parse(activeTab.getLastPath(), true), 'query._a');
-
-    tabs.forEach(tab => tab.updateLastUrlGlobalState(globalState, kibiState, appState));
+    tabs.forEach(tab => tab.updateLastUrlGlobalState(globalState, kibiState));
   };
 }
 

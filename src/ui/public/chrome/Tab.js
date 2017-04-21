@@ -32,12 +32,13 @@ export default class Tab {
   }
 
   href() {
-    // siren: code removed to allow copy the full link for the current tab.
-
+    if (this.active) {
+      return this.resetWhenActive ? this.rootUrl : null;
+    }
     return this.lastUrl || this.rootUrl;
   }
 
-  updateLastUrlGlobalState(globalState, kibiState, appState) {
+  updateLastUrlGlobalState(globalState, kibiState) {
     let lastPath = this.getLastPath();
     let { pathname, query, hash } = parse(lastPath, true);
 
@@ -48,12 +49,7 @@ export default class Tab {
     if (!kibiState) delete query._k;
     else query._k = kibiState;
 
-    // siren: adds the appState to the url that allows copy the session to another tab
-    if (!appState) delete query._a;
-    else query._a = appState;
-    // siren: end
-
-    this.setLastUrl(`${this.rootUrl}${format({ pathname, query, hash })}`);
+      this.setLastUrl(`${this.rootUrl}${format({ pathname, query, hash })}`);
   }
 
   getLastPath() {

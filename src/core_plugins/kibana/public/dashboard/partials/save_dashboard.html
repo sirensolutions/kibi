@@ -33,7 +33,9 @@
   <!-- kibi: associate a saved search with this dashboard -->
   <div class="form-group">
     <label>Saved Search
-      <kbn-info placement="right" info="For counts calculation on tabs"></kbn-info>
+      <kbn-info placement="right" info="Selecting a saved search will result in
+      1) The number of current hits being displayed in the dashboard title
+      2) The dashboard being a possible target of pivoting from other dashboards"></kbn-info>
     </label>
     <kibi-select object-type="search" ng-model="opts.dashboard.savedSearchId"></kibi-select>
   </div>

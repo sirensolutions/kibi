@@ -3,24 +3,21 @@ import expect from 'expect.js';
 import _ from 'lodash';
 import sinon from 'sinon';
 import requirefrom from 'requirefrom';
-const fromRoot = requirefrom('src/utils')('fromRoot');
-const packageJson = require(fromRoot('package.json'));
-const wrapAsync = requirefrom('src/testUtils')('wrap_async');
-const indexSnapshot = requirefrom('src/testUtils')('index_snapshot');
-
-const ScenarioManager = requirefrom('src/testUtils')('scenario_manager');
 import Migration from '../../migration_6';
 import Scenario1 from './scenarios/migration_6/scenario1';
 import Scenario2 from './scenarios/migration_6/scenario2';
 import Scenario3 from './scenarios/migration_6/scenario3';
 import Scenario4 from './scenarios/migration_6/scenario4';
+import { format as urlFormat } from 'url';
 
-const serverConfig = requirefrom('test')('serverConfig');
-import url from 'url';
+const wrapAsync = requirefrom('src/test_utils')('wrap_async');
+const indexSnapshot = requirefrom('src/test_utils')('index_snapshot');
+const ScenarioManager = requirefrom('src/test_utils')('scenario_manager');
+const serverConfig = requirefrom('test')('server_config');
 
 describe('kibi_core/migrations/functional', function () {
 
-  const clusterUrl =  url.format(serverConfig.servers.elasticsearch);
+  const clusterUrl = urlFormat(serverConfig.servers.elasticsearch);
   const timeout = 60000;
   this.timeout(timeout);
 

@@ -233,3 +233,5 @@ webpackShims/angular-sanitize.js
 ###
 
 src/core_plugins/elasticsearch/lib/kibana_index_mappings.js
+
+ui_framework/doc_site/build/ui_framework.css

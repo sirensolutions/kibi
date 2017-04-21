@@ -4,7 +4,7 @@ const expect = require('expect.js');
 const _ = require('lodash');
 const mockSavedObjects = require('fixtures/kibi/mock_saved_objects');
 const isChrome = !!window.chrome && !!window.chrome.webstore;
-const pollUntil = require('./_poll_until');
+const pollUntil = require('ui/kibi/helpers/_poll_until');
 
 require('../kibi_sync_time_to');
 
@@ -421,4 +421,3 @@ describe('Kibi Components', function () {
     });
   });
 });
-

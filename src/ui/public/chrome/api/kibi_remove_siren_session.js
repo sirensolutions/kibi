@@ -12,7 +12,7 @@ export default function (url, _sessionStorage) {
     for (let i = 0; i < paramArray.length; i++) {
       if (!paramArray[i].match(regex)) {
         filteredParams.push(paramArray[i]);
-      } else {
+      } else if (found === false) {
         found = true;
       }
     }

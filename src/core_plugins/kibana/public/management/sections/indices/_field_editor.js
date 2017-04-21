@@ -8,7 +8,7 @@ import fieldEditorTemplate from 'plugins/kibana/management/sections/indices/_fie
 uiRoutes
 .when('/management/siren/indices/:indexPatternId/field/:fieldName*', { mode: 'edit' })
 .when('/management/siren/indices/:indexPatternId/create-field/', { mode: 'create' })
-.defaults(/management\/kibana\/indices\/[^\/]+\/(field|create-field)(\/|$)/, {
+.defaults(/management\/siren\/indices\/[^\/]+\/(field|create-field)(\/|$)/, {
   template: fieldEditorTemplate,
   resolve: {
     indexPattern: function ($route, courier) {

@@ -8,48 +8,76 @@ import { hashedItemStoreSingleton, isStateHash } from 'ui/state_management/state
 
 const URL_LIMIT_WARN_WITHIN = 1000;
 const MAX_RESTORE_SESSION_TIME = 2000;
+const IE_REGEX = /(; ?MSIE |Edge\/\d|Trident\/[\d+\.]+;.*rv:*11\.\d+)/;
+const HASHED_URL_REGEX = /[_gak]+=h@[a-f0-9]+/g;
 
 module.exports = function (chrome, internals) {
+  let isIE = false;
+  let restoreSession = false;
+  let sessionRestored = false;
+  let hashedUrl = false;
+  let hasSirenSession = false;
+  const isEmptySession = !sessionStorage.length;
 
   // siren: our initialization code that have to be executed before kibana starts
   chrome.sirenInitialization = function () {
     return new Promise((resolve, reject) => {
       const pollUntil = require('ui/kibi/helpers/_poll_until');
-      let pollUntilFinishFlag = false;
-
-      const url = window.location.href;
+      const sessionId = Math.floor(Math.random() * 10000);
+      const url = decodeURIComponent(window.location.href);
       const regex = /clearSirenSession=true/g;
-      const restoreSession = !regex.test(window.location.href);
 
-      if (!sessionStorage.length && restoreSession) {
+      restoreSession = !regex.test(url);
+      isIE = window.navigator.userAgent.match(IE_REGEX);
+      hashedUrl = url.match(HASHED_URL_REGEX);
+
+      if (isIE) {
+        resolve();
+        return;
+      }
+
+      if (isEmptySession && restoreSession) {
         // Ask the old tabs for session storage
-        localStorage.setItem('getSessionStorage', Date.now());
+        localStorage.setItem('getSessionStorage', sessionId);
       };
       window.addEventListener('storage', event => {
         if (event.key === 'getSessionStorage') {
+          const id = event.newValue;
           // New tab asked for the sessionStorage -> send it
-          localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+          localStorage.setItem('sessionStorage', JSON.stringify({
+            id: id,
+            session: sessionStorage
+          }));
           localStorage.removeItem('sessionStorage');
         } else if (event.key === 'sessionStorage' && restoreSession) {
           // THe old tab sent the sessionStorage -> restore it
-          let data = {};
-          if (event.newValue !== '') {
-            data = JSON.parse(event.newValue);
-          }
-          for (const key in data) {
-            if (data.hasOwnProperty(key)) {
-              if (isStateHash(key)) {
-                sessionStorage.setItem(key, data[key]);
-                hashedItemStoreSingleton.setItem(key, data[key]);
+          if (event.newValue && event.newValue !== '') {
+            let data = JSON.parse(event.newValue);
+            if (data && +data.id === sessionId && !sessionRestored) {
+              data = data.session;
+              for (const key in data) {
+                if (data.hasOwnProperty(key)) {
+                  if (isStateHash(key)) {
+                    sessionStorage.setItem(key, data[key]);
+                    hashedItemStoreSingleton.setItem(key, data[key]);
+                  } else if (key === 'sirenSession') {
+                    hasSirenSession = true;
+                  }
+                }
               }
+              sessionRestored = _.size(data) > 0;
             }
           }
-          pollUntilFinishFlag = true;
         }
       });
 
+      if (!hashedUrl) {
+        resolve();
+        return;
+      }
+
       pollUntil(() => {
-        return pollUntilFinishFlag === true;
+        return sessionRestored === true;
       }, MAX_RESTORE_SESSION_TIME, 5, (error) => {
         resolve();
       });
@@ -80,7 +108,7 @@ module.exports = function (chrome, internals) {
     }()))
     .config(($httpProvider) => {
       // siren: clean the hashed params from the URL if session storage empty
-      const originalURL = window.location.href;
+      const originalURL = decodeURIComponent(window.location.href);
       let url = kibiRemoveHashedParams(originalURL, sessionStorage);
       url = kibiRemoveSirenSession(url, sessionStorage);
       if (originalURL !== url) {
@@ -89,7 +117,18 @@ module.exports = function (chrome, internals) {
       // siren: end
       chrome.$setupXsrfRequestInterceptor($httpProvider);
     })
-    .run(($location, $rootScope, Private) => {
+    .run(($location, $rootScope, Private, createNotifier) => {
+      const _notify = createNotifier();
+      if (restoreSession && hashedUrl) {
+        if (isIE && isEmptySession) {
+          _notify.error('In IE we cannot restore your previous filters in this tab');
+        } else if (hasSirenSession && sessionRestored) {
+          let msg = 'Note: in this new tab you have all the previous filters but not the content of any Graph Browser. ';
+          msg += 'To get a link which would contain also the full graph content use the share link feature.';
+          _notify.warning(msg);
+        }
+      }
+
       const notify = new Notifier();
       const urlOverflow = Private(UrlOverflowServiceProvider);
       const check = (event) => {

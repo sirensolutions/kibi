@@ -32,9 +32,6 @@ export default class Tab {
   }
 
   href() {
-    if (this.active) {
-      return this.resetWhenActive ? this.rootUrl : null;
-    }
     return this.lastUrl || this.rootUrl;
   }
 

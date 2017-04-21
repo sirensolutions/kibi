@@ -24,9 +24,9 @@ module.exports = function (chrome, internals) {
   chrome.sirenInitialization = function () {
     return new Promise((resolve, reject) => {
       const pollUntil = require('ui/kibi/helpers/_poll_until');
-      const sessionId = Math.floor(Math.random() * 10000);
       const url = decodeURIComponent(window.location.href);
       const SIREN_SESSION_NAME = 'sirenSession';
+      const sessionId = Math.floor(Math.random() * 10000);
 
       restoreSession = !CLEAR_SIREN_SESSION_REGEX.test(url);
       isIE = window.navigator.userAgent.match(IE_REGEX);
@@ -37,38 +37,51 @@ module.exports = function (chrome, internals) {
         return;
       }
 
-      if (isEmptySession && restoreSession) {
+      if (hashedUrl && isEmptySession && restoreSession) {
         // Ask the old tabs for session storage
-        localStorage.setItem('getSessionStorage', sessionId);
+        localStorage.setItem('getSessionStorage', JSON.stringify({
+          id: sessionId,
+          hurl: hashedUrl.join('&')
+        }));
       };
       window.addEventListener('storage', event => {
         if (event.key === 'getSessionStorage') {
-          // New tab asked for the sessionStorage -> send it
-          const data = {};
-          for (const key in sessionStorage) {
-            if (sessionStorage.hasOwnProperty(key)) {
-              if (isStateHash(key)) {
-                data[key] = sessionStorage[key];
-              } else if (key === SIREN_SESSION_NAME) {
-                data.hasSirenSession = true;
+          if (event.newValue && event.newValue !== '') {
+            const request = JSON.parse(event.newValue);
+            hashedUrl = decodeURIComponent(window.location.href).match(HASHED_URL_REGEX);
+            if (request.hurl === hashedUrl.join('&')) {
+              // New tab asked for the sessionStorage -> send it
+              const data = {};
+              for (const key in sessionStorage) {
+                if (sessionStorage.hasOwnProperty(key)) {
+                  if (key !== SIREN_SESSION_NAME) {
+                    data[key] = sessionStorage[key];
+                  } else {
+                    data.hasSirenSession = true;
+                  }
+                }
               }
+              localStorage.setItem('sessionStorage', JSON.stringify({
+                id: request.id,
+                hurl: request.hurl,
+                session: data
+              }));
+              localStorage.removeItem('sessionStorage');
             }
           }
-          const id = event.newValue;
-          localStorage.setItem('sessionStorage', JSON.stringify({
-            id: id,
-            session: data
-          }));
-          localStorage.removeItem('sessionStorage');
         } else if (event.key === 'sessionStorage' && restoreSession) {
           // THe old tab sent the sessionStorage -> restore it
           if (event.newValue && event.newValue !== '') {
+            hashedUrl = decodeURIComponent(window.location.href).match(HASHED_URL_REGEX);
             let data = JSON.parse(event.newValue);
-            if (data && +data.id === sessionId && !sessionRestored) {
+            if (data && hashedUrl
+              && data.id === sessionId
+              && data.hurl === hashedUrl.join('&')
+              && !sessionRestored) {
               data = data.session;
               for (const key in data) {
                 if (data.hasOwnProperty(key)) {
-                  if (key !== SIREN_SESSION_NAME) {
+                  if (key !== 'hasSirenSession') {
                     sessionStorage.setItem(key, data[key]);
                   } else {
                     hasSirenSession = true;

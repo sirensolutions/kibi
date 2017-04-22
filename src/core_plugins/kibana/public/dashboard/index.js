@@ -20,8 +20,9 @@ import { savedDashboardRegister } from 'plugins/kibana/dashboard/services/saved_
 import { createPanelState } from 'plugins/kibana/dashboard/components/panel/lib/panel_state';
 require('ui/saved_objects/saved_object_registry').register(savedDashboardRegister);
 
-// kibi: added as it is needed by src/plugins/kibana/public/dashboard/partials/save_dashboard.html
-import 'ui/kibi/directives/kibi_select';
+// kibi: imports
+import 'ui/kibi/directives/kibi_select'; // added as it is needed by src/plugins/kibana/public/dashboard/partials/save_dashboard.html
+import 'ui/kibi/session/siren_session'; // added to make sirenSession service available
 // kibi: end
 
 const app = uiModules.get('app/dashboard', [

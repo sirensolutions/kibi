@@ -13,9 +13,10 @@ import urlShortenerProvider from '../lib/url_shortener';
 
 import uiModules from 'ui/modules';
 import shareTemplate from 'ui/share/views/share.html';
-const app = uiModules.get('kibana');
 
-app.directive('share', function (Private, sharingService) {
+uiModules
+.get('kibana')
+.directive('share', function (Private) {
   const getUnhashableStates = Private(getUnhashableStatesProvider);
   const urlShortener = Private(urlShortenerProvider);
 

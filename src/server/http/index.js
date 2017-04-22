@@ -127,7 +127,7 @@ module.exports = async function (kbnServer, server, config) {
           }
         }
 
-        // adding the sha to be able to restore kibiSession in the browser
+        // adding the sha to be able to restore sirenSession in the browser
         // redirect to discover dasboard or visualize depend on the share url
         let redirectURL = `${config.get('server.basePath')}/app/kibana#/discover?${embeddingParameters}_h=${request.params.urlId}`;
         if (data.url.indexOf('/dashboard/') !== -1) {
@@ -143,10 +143,10 @@ module.exports = async function (kbnServer, server, config) {
     }
   });
 
-  // kibi: added this handler to be able to fetch the kibiSession data
+  // kibi: added this handler to be able to fetch the sirenSession data
   server.route({
     method: 'GET',
-    path: '/kibisession/{urlId}',
+    path: '/sirensession/{urlId}',
     handler: async function (request, reply) {
       try {
         const data = await shortUrlLookup.getUrl(request.params.urlId, request);

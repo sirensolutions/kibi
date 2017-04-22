@@ -42,9 +42,13 @@ export default class SettingsPage {
     await PageObjects.header.isGlobalLoadingIndicatorHidden();
     await PageObjects.common.sleep(1000);
     // kibi: added to be able to change the boolean values
-    if (propertyValue === true || propertyValue === false) {
-      await this.remote.setFindTimeout(defaultFindTimeout)
-      .findByCssSelector('input[type="checkbox"]').click();
+    if (typeof propertyValue === 'boolean') {
+      const checkbox = await this.remote.setFindTimeout(defaultFindTimeout).findByCssSelector('input[type="checkbox"]');
+      const isSelected = await checkbox.isSelected();
+      if ((isSelected && !propertyValue) || // I don't want the property to be set
+          (!isSelected && propertyValue)) { // I want the property to be set
+        await checkbox.click();
+      }
     } else {
       await this.remote.setFindTimeout(defaultFindTimeout)
       .findByCssSelector('option[label="' + propertyValue + '"]').click();

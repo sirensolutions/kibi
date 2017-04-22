@@ -16,6 +16,16 @@ export const mappings = {
       }
     }
   },
+  // siren: added mappings for the session object
+  url: {
+    properties: {
+      sirenSession: {
+        type: 'object',
+        enabled: false
+      }
+    }
+  },
+  // siren: end
   server: {
     properties: {
       uuid: {

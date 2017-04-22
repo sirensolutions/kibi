@@ -44,7 +44,7 @@ export default function (server) {
     return urlDoc;
   }
 
-  async function createUrlDoc(url, kibiSession, urlId, req) {
+  async function createUrlDoc(url, sirenSession, urlId, req) {
     const newUrlId = await new Promise((resolve, reject) => {
       const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
       const kibanaIndex = server.config().get('kibana.index');
@@ -55,7 +55,7 @@ export default function (server) {
         id: urlId,
         body: {
           url,
-          kibiSession,
+          sirenSession,
           'accessCount': 0,
           'createDate': new Date(),
           'accessDate': new Date()
@@ -72,21 +72,21 @@ export default function (server) {
     return newUrlId;
   }
 
-  function createUrlId(url, kibiSession) {
+  function createUrlId(url, sirenSession) {
     const urlId = crypto.createHash('md5')
     .update(url)
-    .update(kibiSession !== undefined ? JSON.stringify(kibiSession, null, '') : '')
+    .update(sirenSession !== undefined ? JSON.stringify(sirenSession, null, '') : '')
     .digest('hex');
     return urlId;
   }
 
   return {
-    async generateUrlId(url, kibiSession, req) {
-      const urlId = createUrlId(url, kibiSession);
+    async generateUrlId(url, sirenSession, req) {
+      const urlId = createUrlId(url, sirenSession);
       const urlDoc = await getUrlDoc(urlId, req);
       if (urlDoc) return urlId;
 
-      return createUrlDoc(url, kibiSession, urlId, req);
+      return createUrlDoc(url, sirenSession, urlId, req);
     },
     async getUrl(urlId, req) {
       try {
@@ -95,7 +95,7 @@ export default function (server) {
         updateMetadata(urlId, urlDoc, req);
         return {
           url: urlDoc._source.url,
-          kibiSession: urlDoc._source.kibiSession
+          sirenSession: urlDoc._source.sirenSession
         };
       } catch (err) {
         return '/';

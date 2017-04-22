@@ -5,7 +5,7 @@ import Notifier from 'kibie/notify/notifier';
 import hashUrl from './hash_url';
 
 UiModules.get('kibana')
-.run(($rootScope, $location, $window, $http, config, kibiSession) => {
+.run(($rootScope, $location, $window, $http, config, sirenSession) => {
 
   const notify = new Notifier({
     location: 'Kibi Session'
@@ -14,11 +14,11 @@ UiModules.get('kibana')
   $rootScope.$on('$locationChangeSuccess', () => {
     const search = $location.search();
     if (search._h) {
-      $http.get(chrome.getBasePath() + '/kibisession/' + search._h)
+      $http.get(chrome.getBasePath() + '/sirensession/' + search._h)
       .then((res) => {
-        if (res.data.kibiSession) {
-          sessionStorage.setItem('kibiSession', JSON.stringify(res.data.kibiSession));
-          kibiSession.emit('kibisession:loaded');
+        if (res.data.sirenSession) {
+          sessionStorage.setItem('sirenSession', JSON.stringify(res.data.sirenSession));
+          sirenSession.emit('kibisession:loaded');
         }
         let target = chrome.getBasePath() + res.data.url;
         if (res.data.url && config.get('state:storeInSessionStorage')) {
@@ -45,17 +45,17 @@ UiModules.get('kibana')
     }
   });
 })
-.service('kibiSession', ($location, Private) => {
+.service('sirenSession', ($location, Private) => {
   const Events = Private(EventsProvider);
 
-  class KibiSession extends Events {
+  class SirenSession extends Events {
     constructor() {
       super();
       this.dataString = '{}';
     }
 
     getData() {
-      const data = sessionStorage.getItem('kibiSession');
+      const data = sessionStorage.getItem('sirenSession');
       if (data) {
         return JSON.parse(data);
       }
@@ -69,11 +69,11 @@ UiModules.get('kibana')
     putData(data) {
       // storing locally so I can watch it
       this.dataString = JSON.stringify(data);
-      sessionStorage.setItem('kibiSession', this.dataString);
+      sessionStorage.setItem('sirenSession', this.dataString);
       this.emit('kibisession:changed');
     }
 
   }
 
-  return new KibiSession();
+  return new SirenSession();
 });

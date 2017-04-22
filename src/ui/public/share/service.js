@@ -12,6 +12,8 @@ uiModules
   /**
    * Provides methods to share the current state.
    * NOTE:
+   * This service has to be here so that it exposes urlShortener.
+   *
    * Used in kibi-enterprise/kibi-plugins/enterprise_components/public/api.js
    *
    */

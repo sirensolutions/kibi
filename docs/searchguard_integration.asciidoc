@@ -763,24 +763,6 @@ kibi_core:
     auth_plugin: "searchguard"
 ----
 
-Then, specify the the following configuration values for the Kibi transport
-client in the **kibi_core.elasticsearch.transport_client.ssl** section:
-
-- **ca**: the path to the Search Guard truststore file.
-- **ca_password**: the password of the Search Guard truststore file.
-- **ca_alias**: the alias of the CA certificate in the Search Guard truststore
-  file.
-- **key_store**: the path to the transport client certificate keystore.
-- **key_store_password**: the password of the transport client certificate
-  keystore.
-- **key_store_alias**: the alias of the kibitransport client certificate in the
-  keystore.
-- **verify_hostname**: set to **false** to disable SSL hostname verification.
-  Defaults to **true**.
-- **verify_hostname_resolve**: if set to **true** the transport client will
-  resolve Elasticsearch node names using DNS when performing host name
-  verification.  Defaults to **false**.
-
 E.g.:
 
 [source,yaml]
@@ -788,13 +770,6 @@ E.g.:
 kibi_core:
   elasticsearch:
     auth_plugin: "searchguard"
-    transport_client:
-      ssl:
-        ca: "pki/searchguard/truststore.jks"
-        ca_password: "password"
-        key_store: "pki/searchguard/CN=demouser-keystore.jks"
-        key_store_password: "password"
-        verify_hostname: true
 ----
 
 To enable the Kibi access control plugin, specify the following configuration

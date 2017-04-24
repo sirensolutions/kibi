@@ -153,6 +153,7 @@
                   {{ item.title }}
                 </a>
 
+                <!-- siren: kuiTableRowHoverReveal class removed to make actions always visible -->
                 <button
                   class="kuiMicroButton"
                   ng-click="open(item)"
@@ -165,7 +166,7 @@
                   ></span>
                 </button>
 
-                <!-- siren: icon for object level actions -->
+                <!-- siren: icon for object level actions, kuiTableRowHoverReveal class removed to make actions always visible   -->
                 <button
                   ng-repeat="action in objectActions"
                   ng-click="action.execute(service, item)"

@@ -32,19 +32,24 @@ module.exports = function createProxy(server, method, path, config) {
     return credentials;
   }
 
-  /*
-  * Assign custom headers to reply() h2o2 interface headers.
-  * reply - reply interface;
-  * buffer - data buffer;
-  * headers - headers to assign for reply;
-  */
-  function replyWithHeaders(reply, buffer, headers) {
-    if (headers.location) {
+  /**
+   * Sends the proxied response to the client.
+   *
+   * @param reply - reply interface
+   * @param buffer - data buffer
+   * @param upstream - the upstream response
+   * @param ttl - The upstream ttl as returned by h2o2.
+   */
+  function sendResponse(reply, buffer, upstream, ttl) {
+    if (upstream.headers.location) {
       // TODO: Workaround for #8705 until hapi has been updated to >= 15.0.0
-      headers.location = encodeURI(headers.location);
+      upstream.headers.location = encodeURI(upstream.headers.location);
     }
 
-    reply(buffer).headers = headers;
+    reply(buffer)
+    .code(upstream.statusCode)
+    .ttl(ttl)
+    .headers = upstream.headers;
   }
 
   const handler = {
@@ -128,7 +133,7 @@ module.exports = function createProxy(server, method, path, config) {
           const data = Buffer.concat(chunks);
 
           if (size(dataPassed.savedQueries) === 0) {
-            replyWithHeaders(reply, data, response.headers);
+            sendResponse(reply, data, response, ttl);
             return;
           }
 
@@ -136,7 +141,7 @@ module.exports = function createProxy(server, method, path, config) {
             inject.runSavedQueries(JSON.parse(data.toString()), server.plugins.kibi_core.getQueryEngine(), dataPassed.savedQueries,
                 dataPassed.credentials)
               .then((r) => {
-                replyWithHeaders(reply, new Buffer(JSON.stringify(r)), response.headers);
+                sendResponse(reply, new Buffer(JSON.stringify(r)), response, ttl);
               }).catch((err) => {
                 server.log(['error','create_kibi_proxy'], 'Something went wrong while modifying response: ' + err.stack);
                 reply(err);

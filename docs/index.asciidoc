@@ -6,18 +6,18 @@
 :java-version: 1.8
 :siren-join-version: 2.4.4
 :siren-join-website: https://github.com/sirensolutions/siren-join/
-:kibana-version: 4.6.4
-:kibana-announcement: https://www.elastic.co/blog/kibana-5-1-2-and-4-6-4-released
-:kibi-version: 4.6.4
-:elastic-ref: https://www.elastic.co/guide/en/elasticsearch/reference/2.4/
-:elasticsearch-version: 2.4.4
+:kibana-version: 5.2.2
+:kibana-announcement: https://www.elastic.co/blog/kibana-5-2-2-released
+:kibi-version: 5.2.2-ALPHA-1
+:elastic-ref: https://www.elastic.co/guide/en/elasticsearch/reference/5.2/
+:elasticsearch-version: 5.2.2
 :shield-ref: https://www.elastic.co/guide/en/shield/2.4/
 :sense-ref: https://www.elastic.co/guide/en/sense/current/
 :searchguard-ref: https://github.com/floragunncom/search-guard-docs
 :searchguard-management-api-ref: https://github.com/floragunncom/search-guard-rest-api/wiki
 :searchguard-sgadmin-ref: https://github.com/floragunncom/search-guard/wiki#search-guard-admin-standalone
 :searchguard-matrix-ref: https://github.com/floragunncom/search-guard/wiki#version-matrix
-:searchguard-setup-ref: https://github.com/floragunncom/search-guard/tree/es-2.3.5
+:searchguard-setup-ref: https://github.com/floragunncom/search-guard/tree/es-5.2.2
 :kibi-ref: http://siren.solutions/kibi/docs/current/
 :start-url: http://localhost:5606
 :start-url-shield: https://localhost:5606
@@ -25,12 +25,12 @@
 
 :k4issue: https://github.com/elastic/kibana/issues/
 :k4pull: https://github.com/elastic/kibana/pull/
-:version: 4.6
-:compatible-es-versions: 2.4.x
+:version: 5.2
+:compatible-es-versions: 5.2.x
 :es-compability-table-ref: https://github.com/sirensolutions/kibi/blob/master/README.md#compatibility-table-kibi--elasticsearch
 
 :repo: https://github.com/elastic/kibana/
-:branch: 4.6
+:branch: 5.2.2
 
 include::introduction.asciidoc[]
 

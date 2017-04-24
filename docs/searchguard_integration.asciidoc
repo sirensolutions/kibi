@@ -1,4 +1,4 @@
-[[shield_integration]]
+[[searchguard_integration]]
 
 == Search Guard Integration and Kibi access control [Enterprise Edition only]
 
@@ -12,6 +12,14 @@ ifeval::["{enterprise_enabled}" == "true"]
 This section offers an overview of how to integrate Search Guard with Kibi; for
 further reference and detailed options please consult the
 {searchguard-ref}[Search Guard documentation].
+
+Before proceeding, make sure that:
+
+- Kibi is either running with HTTPS enabled or behind a reverse SSL proxy.
+- The Gremlin Server is running with HTTPS enabled.
+
+Please refer to the <<access_control,Authentication and access control>> section for instructions on how on to enable HTTPS in
+both components.
 
 === SSL Certificates
 
@@ -829,36 +837,69 @@ Kibi Enterprise include an optional user interface for the
 order to use it, the Kibi backend has to connect to the Elasticsearch cluster
 using a PEM client certificate with administrative privileges.
 
+It is strongly suggested to setup a dedicated Kibi instance to use the
+Search Guard management UI and allow access to it only to authorized
+users.
+
+==== Add-on installation
+
+To install the Search Guard REST Management API add-on it is required
+to download the correct jar for your Elasticsearch / Search Guard version
+from {searchguard-management-api-ref}[this page]
+and copy it to the `plugins/search-guard-2` directory of each node in the
+cluster.
+
+To access the API it is required to use a client certificate with
+administrative privileges; to enable optional client certificate authentication
+on the REST interface, ensure that the following option is present in
+`elasticsearch.yml`:
+
+[source,yaml]
+----
+searchguard.ssl.http.clientauth_mode: OPTIONAL
+----
+
+Once the plugin has been copied and the configuration updated, the nodes
+must be restarted; a rolling restart is enough to install the add-on.
+
+NOTE: When using this add-on, make sure that the sgadmin configuration directory
+contains only the `sg_config.yml` file, otherwise sgadmin will replace users,
+roles, action groups and mappings that might have been modified through the
+API.
+
+==== Kibi configuration
+
 Copy the client certificate and its key to a directory readable by Kibi (e.g. `pki`); then
 add the following parameters to the `kibi_access_control` configuration section:
 
 - **admin_role**: the Search Guard role that has access to the Search Guard
   management UI (**kibiadmin** by default).
 - **backends.searchguard.admin.ssl.cert**: the path to the administrative
-  client certificate.
+  client certificate bundle in PEM format.
 - **backends.searchguard.admin.ssl.key**: the path to the administrative client
-  certificate key.
+  certificate key in PEM format.
 
 E.g.:
 
 [source,yaml]
 ----
 kibi_access_control:
+  admin_role: kibiadmin
   backends:
     searchguard:
-      admin.ssl.cert: pki/searchguard/CN=sgadmin.crt.pem
+      admin.ssl.cert: pki/searchguard/CN=sgadmin.crtfull.pem
       admin.ssl.key: pki/searchguard/CN=sgadmin.key.pem
 ----
 
-It is strongly suggested to setup a dedicated Kibi instance to use the
-Search Guard management UI and allow access to it only to authorized
-users.
+Please note that the administrative client certificate bundle must contain
+both the full CA chain and the client certificate; if using certificates generated
+by the TLS generation service, the file name will be `CN=sgadmin.crtfull.pem`,
+otherwise it is possible to generate the bundle manually by using cat, e.g.:
 
-NOTE: When using the {searchguard-management-api-ref}[Search Guard REST
-Management API add-on], make sure that the sgadmin configuration directory
-contains only the `sg_config.yml` file, otherwise sgadmin will replace users,
-roles, action groups and mappings that might have been modified through the
-API.
+[source,bash]
+----
+$ cat user.crt.pem ca-chain.pem > user.crtfull.pem
+----
 
 Once the certificate is setup, restart Kibi, login with a user having an
 administrative role, click on the apps button, then click on **Access control**
@@ -866,6 +907,11 @@ and finally on **Authentication**.
 
 ._The Access control app_
 image::images/access_control/app.png["The Access control app",align="center"]
+
+If you get an error upon opening the Authentication app,
+most probably the client certificate does not contain
+the full CA chain or the add-on has not been installed correctly; please
+check Elasticsearch and Kibi logs for related errors.
 
 The Authentication section allows to browse, edit and create the following
 Search Guard resources:
@@ -1182,5 +1228,56 @@ marvel.agent.exporters:
 
 For more information about agent configuration options please refer to
 {shield-ref}/marvel.html[Using Marvel with Shield].
+
+=== Handling of authorization errors
+
+Kibi EE parses generic authorization errors from Elasticsearch to report them
+in a more understandable way.
+
+While using Kibi EE on a secured cluster, you might see the following errors:
+
+* _"Kibi Relational Filter: Could not load filter Relational visualization: one
+or more join relations refers to unauthorized data"_: displayed when a search
+query contains relations between unauthorized indices.
+* _"One or more visualizations Refers to unauthorized data"_: displayed when a
+dashboard contains one or more visualizations loading data from unauthorized
+indices.
+* _"Enhanced search results: Refers to unauthorized data"_: displayed
+when an "Enhanced search results" visualization tries to load data from
+unauthorized indices.
+* _"Kibi Relational Filter: there are relations with unauthorized data"_:
+displayed when there are relationships between unauthorized indices.
+* _"One or more saved search refers to unauthorized data"_: displayed when a
+saved search is executed on an unauthorized index.
+
+These errors appear for five seconds as a yellow toaster at the top of the
+screen.
+
+Authorization errors can be hidden by changing the value of the
+*kibi:shieldAuthorizationWarning* setting: click on the _Settings_ tab, then on
+_Advanced_ tab, and uncheck the setting to hide authorization errors messages.
+Regardless of this setting, all authorization errors will still be reported as
+warnings in the logs.
+
+._Two warning messages example_
+image::images/authorization-warning-messages.png["Two warning messages example",align="center"]
+
+If a dashboard is configured on an index on which you have no permission, all
+the visualizations loading data from the index will be empty and the custom
+warning message will be displayed at the top of the screen; in addition, the
+document count for the dashboard will display the message *Unauthorized*.
+
+If a dashboard is configured on an index on which you have permission to see only
+a subset of documents or fields, the visualizations will only process and display
+the data you're authorized to view.
+
+._A visualizations that loads unauthorized data._
+image::images/authorization-visualization-error.png["A visualization that loads unauthorized data.",align="left"]
+
+._A visualizations that refers to an unauthorized index._
+image::images/authorization-visualization-empty.png["A visualization that refers to an unauthorized index.",align="left"]
+
+endif::[]
+
 
 endif::[]

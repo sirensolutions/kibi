@@ -55,6 +55,28 @@ describe('plugins/elasticsearch', function () {
 
     }
 
+    // kibi: checks for version 2.3.5
+    it('passes with 2.3.5 nodes', function () {
+      setNodes('2.3.5');
+      return checkEsVersion(server);
+    });
+
+    it('passes with nodes on different supported versions', function () {
+      // NOTE: this cluster would not work, just a sanity check for the check function
+      setNodes('2.3.5', '1.4.4');
+      return checkEsVersion(server);
+    });
+
+    it('fails on other 2.3 versions', function () {
+      setNodes('2.3.4');
+      return checkEsVersion(server)
+      .then(() => {
+        throw new Error('Expected check to fail');
+      })
+      .catch(() => {});
+    });
+    // kibi: end
+
     it('passes with single a node that matches', function () {
       setNodes('1.4.3');
       return checkEsVersion(server);

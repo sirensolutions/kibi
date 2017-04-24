@@ -23,29 +23,4 @@ to the {shield-ref}kibana.html[Using Kibana with Shield] documentation; make
 sure to set the correct index name when configuring privileges for the
 `kibana4-server` user, which is `.kibi` by default.
 
-==== Transport client configuration
-
-To allow the Kibi transport client to connect to an Elasticsearch cluster
-secured with Shield, it is required to grant the
-`cluster:monitor/nodes/liveness` to a specific user.
-
-Once you created this user, specify its credentials in the
-**kibi_core.elasticsearch.transport_client** section:
-
-----
-kibi_core:
-  elasticsearch:
-    transport_client:
-      username: kibitransport
-      password: password
-----
-
-Then, set the **kibi_core.elasticsearch.auth_plugin** option to **shield**:
-
-----
-kibi_core:
-  elasticsearch:
-    auth_plugin: "shield"
-----
-
 endif::[]

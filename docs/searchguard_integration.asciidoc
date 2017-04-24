@@ -29,14 +29,10 @@ To setup a Search Guard cluster, you will need to generate the following files:
   the node.
 - A **keystore** file, for each administrative user, containing a certificate
   bundle that identifies the user.
-- A **keystore** file containing a certificate bundle to identify the Kibi
-  transport client.
 - A **keystore** file containing an SSL certificate for the Elasticsearch HTTP
   REST API.
 
-These files can be either Java KeyStore files or PKCS12 bundles, with the
-exception of the certificate for the Kibi transport client which must be
-a Java KeyStore file.
+These files can be either Java KeyStore files or PKCS12 bundles.
 
 ==== Sample certificates
 
@@ -53,7 +49,6 @@ _kibi/pki/searchguard_ directory:
 - **CN=sgadmin-keystore.jks**: a certificate for the Search Guard administrative
   user.
 - **truststore.jks**: a copy of the CA certificate chain truststore.
-- **CN=demouser-keystore.jks**: a certificate for the _kibitransport_ user.
 - **ca.pem**: the certificate chain in the truststore converted to PEM
   format.
 
@@ -437,11 +432,6 @@ sentinl:
         - indices:admin/template/put
         - CREATE_INDEX
 
-# Permissions for the Kibi transport client.
-kibitransport:
-  cluster:
-      - cluster:monitor/nodes/liveness
-
 # Permissions for the Kibi server process.
 kibiserver:
   cluster:
@@ -521,7 +511,6 @@ The file defines the following roles:
 - **sentinl**: defines the permission for a Sentinl user; the role is
   not required if the Sentinl plugin is not installed.
 - **marvel**: defines the permissions for a Marvel agent.
-- **kibitransport**: defines the permissions for the Kibi transport client.
 - **kibiserver**: defines the permissions for the Kibi server process.
 - **kibiadmin**: defines the permissions for a Kibi user with read/write
   access to the .kibi index.
@@ -613,10 +602,6 @@ kibiuser:
 kibinoinvestor:
   users:
     - kibinoinvestor
-
-kibitransport:
-  users:
-    - 'CN=demouser'
 
 logstash:
   users:

@@ -6,6 +6,8 @@ import SearchHelper from 'ui/kibi/helpers/search_helper';
 import uiModules from 'ui/modules';
 import uiRoutes from 'ui/routes';
 import MissingDashboardError from 'ui/kibi/errors/missing_dashboard_error';
+import SimpleEmitter from 'ui/utils/simple_emitter';
+import CacheProvider from 'ui/kibi/helpers/cache_helper';
 
 uiRoutes
 .addSetupWork($injector => {
@@ -24,6 +26,7 @@ uiModules
   let lastSelectDashboardEventTimer;
   let lastFiredMultiCountsQuery;
   let lastMultiCountsQueryResults;
+  const cache = Private(CacheProvider);
 
   const _getDashboardForGroup = function (groupId, groupTitle, dashboardDef) {
     return {
@@ -71,8 +74,9 @@ uiModules
     }
   };
 
-  class DashboardGroups {
+  class DashboardGroups extends SimpleEmitter {
     constructor() {
+      super();
       this.init = _.once(() => {
         const groupsPromise = this.computeGroups('init');
         const metadataPromise = groupsPromise.then(groups => {
@@ -101,6 +105,14 @@ uiModules
       return this.groups;
     }
 
+    setDashboardSelection(group, dashboard, state) {
+      this.emit('dashboardSelected', group, dashboard, state);
+    }
+
+    setGroupSelection(group) {
+      this.emit('groupSelected', group);
+    }
+
     setGroupHighlight(dashboardId) {
       // here iterate over dashboardGroups remove all highlighted groups
       // then set the new highlight group
@@ -121,6 +133,37 @@ uiModules
         _.each(group.dashboards, function (dashboard) {
           dashboard.$$highlight = false;
         });
+      });
+    }
+
+    renumberGroups() {
+      let priority = 10;
+      const saveActions = [];
+      const groups = _.clone(_.sortBy(this.getGroups(), 'priority'));
+      groups.forEach((group) => {
+        group.priority = priority;
+        priority += 10;
+        if (group.virtual) {
+          savedDashboards.get(group.id).then(savedDashboard => {
+            savedDashboard.priority = group.priority;
+            return savedDashboard.save();
+          });
+        } else {
+          saveActions.push(savedDashboardGroups.get(group.id).then(savedGroup => {
+            savedGroup.priority = group.priority;
+            return savedGroup.save();
+          }));
+        }
+      });
+      saveActions.push(cache.invalidate);
+      return Promise.all(saveActions);
+    }
+
+    newGroup() {
+      return savedDashboardGroups.get().then(group => {
+        group.title = 'New group';
+        group.iconCss = 'fa fa-folder-o';
+        return group.save();
       });
     }
 
@@ -291,11 +334,13 @@ uiModules
       }
 
       const _saveDashboardMeta = function (dash, fromDash) {
-        _.assign(dash, {
-          count: fromDash.count,
-          isPruned: fromDash.isPruned,
-          filterIconMessage: fromDash.filterIconMessage
-        });
+        if (fromDash) {
+          _.assign(dash, {
+            count: fromDash.count,
+            isPruned: fromDash.isPruned,
+            filterIconMessage: fromDash.filterIconMessage
+          });
+        }
       };
 
       _.each(src, srcGroup => {

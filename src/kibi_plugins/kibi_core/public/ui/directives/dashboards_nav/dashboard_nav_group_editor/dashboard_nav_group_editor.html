@@ -1,0 +1,42 @@
+<div class="dashboards-nav-group-editor">
+  <div class="title">
+    {{title}}
+    <a aria-label="Cancel" class="cancel" ng-click="cancel()">
+      <i aria-hidden="true" class="fa fa-times-circle"></i>
+    </a>
+  </div>
+  <div class="description">
+    Use this form to specify a group of dashboards. A dashboard group is represented as a single element with the name of the selected dashboard as the tab label.
+  </div>
+  <div class="content">
+    <form name="objectForm" novalidate ng-submit="save()">
+
+      <div class="form-group">
+        <label>Title</label>
+        <input type="text" ng-model="dashboardGroup.title" class="form-control" />
+      </div>
+
+      <div class="form-group">
+        <label>Icon URL</label>
+        <input type="text" ng-model="dashboardGroup.iconUrl" class="form-control" />
+      </div>
+
+      <div class="form-group">
+        <label>
+          Icon CSS class
+          <kbn-info placement="right" info="Paste a Font Awesome CSS class here, e.g., &quot;fa fa-at&quot;"></kbn-info>
+        </label>
+        <div class="input-group">
+          <icon-picker ng-model="dashboardGroup.iconCss"></icon-picker>
+          <input class="form-control" type="text" ng-model="dashboardGroup.iconCss" />
+        </div>
+      </div>
+
+      <button
+        type="submit"
+        class="btn btn-success btn-default">
+        <span>Save</span>
+      </button>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,59 @@
+<div class="dashboards-nav-edit-link-group" dashboard-draggable-item="group">
+  <div>
+    <div class="icon">
+      <i
+         ng-if="group.iconCss"
+         class="icon-image {{group.iconCss}}"
+      ></i>
+
+      <img
+         ng-if="group.iconUrl"
+         class="icon-image"
+         ng-src="{{group.iconUrl}}"
+      />
+
+      <span
+         ng-if="!group.iconCss && !group.iconUrl"
+         class="icon-placeholder"
+      >
+         {{ group.title[0] }}
+      </span>
+    </div>
+
+    <div class="edit-content">
+      <div class="title">
+        {{group.title}}
+      </div>
+      <a
+        ng-if="!group.virtual"
+        class="action"
+        confirm-click="deleteGroup()"
+      >
+        <i class="fa fa-times" aria-hidden="true"></i>
+      </a>
+      <div
+        class="action dashboards-nav-edit-link-dragbar"
+        dashboard-draggable-handle
+      >
+      </div>
+      <a
+        ng-if="!group.virtual"
+        class="action"
+        ng-click="editGroup($event, group)"
+      >
+        <i class="fa fa-pencil" aria-hidden="true"></i>
+      </a>
+    </div>
+  </div>
+  <div ng-if="!group.virtual">
+    <div ng-repeat="dashboard in group.dashboards">
+      <div class="dashboards-nav-edit-link-dashboard" dashboard-draggable-item="$index">
+        <div class="dashboards-nav-edit-link-dragbar" dashboard-draggable-handle>
+        </div>
+        <div class="dashboard-title">
+          {{dashboard.title}}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

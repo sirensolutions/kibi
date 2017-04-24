@@ -1,4 +1,5 @@
 import '../dashboard_nav_link/dashboard_nav_link';
+import '../dashboard_nav_edit_link/dashboard_nav_edit_link';
 import '../dashboards_nav_control/dashboards_nav_control';
 import './dashboard_switcher.less';
 import KibiNavBarHelperProvider from 'ui/kibi/directives/kibi_nav_bar_helper';
@@ -11,7 +12,7 @@ import MissingDashboardError from 'ui/kibi/errors/missing_dashboard_error';
 
 uiModules
 .get('kibana')
-.directive('dashboardSwitcher', function (dashboardGroups, createNotifier, kibiState, Private, $rootScope) {
+.directive('dashboardSwitcher', function (dashboardGroups, dashboardsNavState, createNotifier, kibiState, Private, $rootScope) {
   const kibiNavBarHelper = Private(KibiNavBarHelperProvider);
   const queryFilter = Private(QueryFilterProvider);
   const notify = createNotifier({
@@ -38,6 +39,16 @@ uiModules
           dashboardGroups.setActiveGroupFromUrl();
           $scope.groups = dashboardGroups.getGroups();
         }
+      });
+
+      $scope.isOnEditMode = dashboardsNavState.isOnEditMode();
+      $scope.$watch(dashboardsNavState.isOnEditMode, isOnEditMode => {
+        $scope.isOnEditMode = isOnEditMode;
+      });
+
+      $scope.isGroupEditorOpen = dashboardsNavState.isGroupEditorOpen();
+      $scope.$watch(dashboardsNavState.isGroupEditorOpen, isGroupEditorOpen => {
+        $scope.isGroupEditorOpen = isGroupEditorOpen;
       });
 
       const computeDashboardsGroups = function (reason) {

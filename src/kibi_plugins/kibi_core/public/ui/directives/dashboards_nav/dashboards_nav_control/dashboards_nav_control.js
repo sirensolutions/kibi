@@ -15,7 +15,11 @@ uiModules
       onClick: '&',
       kbnIcon: '@',
       iconCss: '@',
-      title: '@'
+      title: '@',
+      onEditClick: '&',
+      isOnEditMode: '=',
+      onNewGroupClick: '&',
+      isGroupEditorOpen: '='
     },
     template
   };

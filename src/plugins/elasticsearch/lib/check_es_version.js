@@ -18,8 +18,11 @@ module.exports = function (server) {
         return false;
       }
 
+      // kibi: support 2.3.5 as well
+      const engineVersions = [engineVersion, '2.3.5'];
+
       // remove nodes that satify required engine version
-      return !versionSatisfies(node.version, engineVersion);
+      return !versionSatisfies(node.version, engineVersions);
     });
 
     if (!badNodes.length) return true;

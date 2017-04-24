@@ -1,12 +1,19 @@
 const semver = require('semver');
 
-module.exports = function (actual, expected) {
+module.exports = function (actual, supported) { // kibi: replaced expected with supported
+  // kibi: support multiple ES versions
   try {
     const ver = cleanVersion(actual);
-    return semver.satisfies(ver, expected);
+    for (const version of supported) {
+      if (semver.satisfies(ver, version)) {
+        return true;
+      }
+    }
+    return false;
   } catch (err) {
     return false;
   }
+  // kibi: end
 
   function cleanVersion(version) {
     const match = version.match(/\d+\.\d+\.\d+/);

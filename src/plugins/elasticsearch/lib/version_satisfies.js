@@ -1,13 +1,18 @@
+import {isArray} from 'lodash'; // kibi: import isArray
 const semver = require('semver');
 
 module.exports = function (actual, supported) { // kibi: replaced expected with supported
   // kibi: support multiple ES versions
   try {
     const ver = cleanVersion(actual);
-    for (const version of supported) {
-      if (semver.satisfies(ver, version)) {
-        return true;
+    if (isArray(supported)) {
+      for (const version of supported) {
+        if (semver.satisfies(ver, version)) {
+          return true;
+        }
       }
+    } else {
+      return semver.satisfies(ver, supported);
     }
     return false;
   } catch (err) {

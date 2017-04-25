@@ -5,11 +5,11 @@
       <div class="input-group form-group finder-form col-md-7">
         <div ng-if="kibi.onDashboardPage && type === 'visualizations'" class="visualisation-filter-checkbox">
           <input ng-if="savedSearchId" type="checkbox" ng-model="kibi.basedOnSameSavedSearch" />
-          <label ng-if="savedSearchId">
+          <label class="based-saved-search" ng-if="savedSearchId">
             Based on the saved search of the current dashboard: {{savedSearchId}}
           </label>
           <input ng-if="!savedSearchId" type="checkbox" disabled/>
-          <label ng-if="!savedSearchId" style="display: inline; padding-left: 5px">
+          <label class="based-saved-search" ng-if="!savedSearchId">
             To be able to filter visualisations based on dashboard's saved search
             - associate a saved search when saving this dashboard
           </label>
@@ -41,7 +41,7 @@
     </div>
   </div>
 </form>
-<paginate list="finder.hits" per-page="5">
+<paginate list="finder.hits" per-page="8">
   <ul class="li-striped list-group list-group-menu" ng-class="{'select-mode': finder.selector.enabled}">
     <li class="list-group-item" ng-click="finder.sortHits(finder.hits)">
       <span class="paginate-heading">

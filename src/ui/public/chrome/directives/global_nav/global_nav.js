@@ -41,9 +41,12 @@ module.directive('globalNav', globalNavState => {
         updateGlobalNav();
       });
 
-      scope.toggleGlobalNav = event => {
-        event.preventDefault();
-        globalNavState.setOpen(!globalNavState.isOpen());
+      scope.toggleGlobalNav = (event, force) => {
+        // siren: allows user to click on empty areas
+        if (event.target === event.currentTarget || force) {
+          event.preventDefault();
+          globalNavState.setOpen(!globalNavState.isOpen());
+        }
       };
 
     }

@@ -35,7 +35,8 @@
   </div>
 
   <!-- Links -->
-  <div class="global-nav__links">
+  <!-- siren: allows user to click on empty areas -->
+  <div class="global-nav__links" ng-click="toggleGlobalNav($event)">
     <!-- Main apps -->
     <div class="global-nav__links-section">
       <app-switcher
@@ -51,7 +52,7 @@
       <global-nav-link
         class="{{ globalNavToggleButton.classes }}"
         tooltip-content="globalNavToggleButton.tooltipContent"
-        on-click="toggleGlobalNav($event)"
+        on-click="toggleGlobalNav($event, true)"
         icon="'plugins/kibana/assets/play-circle.svg'"
         title="globalNavToggleButton.title"
       ></global-nav-link>

@@ -59,9 +59,11 @@ uiModules
       updateGlobalNav();
       updateDashboardsNav();
 
-      $scope.toggleDashboardsNav = event => {
-        event.preventDefault();
-        dashboardsNavState.setOpen(!dashboardsNavState.isOpen());
+      $scope.toggleDashboardsNav = (event, force) => {
+        if (event.target === event.currentTarget || force) {
+          event.preventDefault();
+          dashboardsNavState.setOpen(!dashboardsNavState.isOpen());
+        }
       };
 
       $scope.$on('$destroy', () => {

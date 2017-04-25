@@ -12,9 +12,26 @@
         data-transclude-slot="topLeftCorner"
         class="kuiLocalTitle"
       >
+        <!-- siren: adds group icon, bigger title and stats -->
+        <i
+          ng-show="dash.id"
+          ng-if="dash.group.iconCss"
+          class="dashboard-icon-image {{dash.group.iconCss}}"
+        ></i>
+        <img
+          ng-show="dash.id"
+          ng-if="dash.group.iconUrl"
+          ng-src="dashboard-icon-image {{dash.group.iconUrl}}"
+        />
         <span
           ng-show="dash.id"
           ng-bind="dash.lastSavedTitle"
+          class="dashboard-title"
+        ></span>
+        <span
+          ng-show="dash.id && dash.group.selected.count !== undefined"
+          ng-bind="dash.group.selected.formatedCount"
+          class="dashboard-stats"
         ></span>
       </div>
 

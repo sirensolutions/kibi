@@ -8,7 +8,6 @@ module.exports = function (grunt) {
   const tempFolder = require('os').tmpdir(); // siren: add OS check and set temp folder location
   const rimraf = require('rimraf'); //siren: Added to remove temp files after processing
 
->>>>>>> Remove temp files after extraction
   const archives = [
     {
       url: 'https://github.com/sirensolutions/kibi_radar_vis/releases/download/5.2.2/kibi_radar_vis-5.2.2.zip',

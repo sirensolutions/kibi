@@ -6,10 +6,11 @@
   tooltip-popup-delay="0"
   tooltip-append-to-body="1"
 >
+  <!-- siren: allows user to click on empty areas -->
   <a
     class="global-nav-link__anchor"
     href="{{ getHref() }}"
-    ng-click="onClick({ $event: $event })"
+    ng-click="onClick({ $event: $event, force: true })"
     data-test-subj="appLink"
     title="{{ title }}"
   >

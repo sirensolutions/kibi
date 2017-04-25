@@ -2,11 +2,10 @@
   class="dashboards-nav"
   ng-class="{'is-dashboards-nav-open': isDashboardsNavOpen, 'is-dashboards-nav-group-editor-open': isDashboardsNavGroupEditorOpen, 'is-global-nav-open': isGlobalNavOpen}">
 
-  <div class="menu">
+  <div class="menu" ng-click="toggleDashboardsNav($event)">
     <form role="form">
       <input
           name="dashboards-filter"
-          ng-disabled="!isDashboardsNavOpen"
           ng-show="!isDashboardsNavOnEditMode"
           aria-label="Filter"
           ng-model="dashboardFilter"
@@ -17,7 +16,7 @@
     </form>
   </div>
 
-  <div class="links">
+  <div class="links" ng-click="toggleDashboardsNav($event)">
     <!-- dashboards sidebar -->
     <dashboard-switcher
       filter="dashboardFilter"
@@ -25,7 +24,7 @@
 
     <!-- actions and open/close sidebar -->
     <dashboards-nav-control
-        on-click="toggleDashboardsNav($event)"
+        on-click="toggleDashboardsNav($event, true)"
         kbn-icon="{{ dashboardsNavToggleButton.icon }}"
         is-open="isDashboardsNavOpen"
         on-edit-click="toggleDashboardsNavEditMode($event)"

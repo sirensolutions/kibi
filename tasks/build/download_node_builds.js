@@ -35,15 +35,22 @@ export default function downloadNodeBuilds(grunt) {
     });
   };
 
+  const getFilename = platform => {
+    if (!platform.win) return basename(platform.nodeUrl);
+
+    const baseNameParts = basename(platform.nodeUrl).split('.');
+    const archVersion = dirname(platform.nodeUrl).match(/win-.*$/)[0];
+    return `${baseNameParts[0]}-${archVersion}.${baseNameParts[1]}`;
+  };
+
   const checkShaSum = (platform) => {
-    const file = basename(platform.nodeUrl);
+    const file = getFilename(platform);
     const downloadDir = join(platform.nodeDir, '..');
     const filePath = resolve(downloadDir, file);
     const expected = {
       hash: 'sha256',
-      expected: platform.win ? shaSums[basename(dirname(platform.nodeUrl)) + '/' + file] : shaSums[file]
+      expected: platform.win ? shaSums[basename(dirname(platform.nodeUrl)) + '/node.exe'] : shaSums[file]
     };
-
     if (!grunt.file.isFile(filePath)) {
       return false;
     }
@@ -58,7 +65,7 @@ export default function downloadNodeBuilds(grunt) {
 
   const getNodeBuild = (platform) => {
     const downloadDir = join(platform.nodeDir, '..');
-    const file = basename(platform.nodeUrl);
+    const file = getFilename(platform);
     const filePath = resolve(downloadDir, file);
 
     if (grunt.file.isFile(filePath)) {
@@ -73,7 +80,6 @@ export default function downloadNodeBuilds(grunt) {
       return payload;
     })
     .then(payload => writeFileAsync(filePath, payload));
-
   };
 
   const start = async (platform) => {
@@ -113,7 +119,7 @@ export default function downloadNodeBuilds(grunt) {
   });
 
   const extractNodeBuild = async (platform) => {
-    const file = basename(platform.nodeUrl);
+    const file = getFilename(platform);
     const downloadDir = join(platform.nodeDir, '..');
     const filePath = resolve(downloadDir, file);
 
@@ -128,7 +134,7 @@ export default function downloadNodeBuilds(grunt) {
   };
 
   const extract = async(platform) => {
-    const file = basename(platform.nodeUrl);
+    const file = getFilename(platform);
     const downloadDir = join(platform.nodeDir, '..');
     const filePath = resolve(downloadDir, file);
 
@@ -138,7 +144,7 @@ export default function downloadNodeBuilds(grunt) {
 
     if (platform.win) {
       grunt.file.mkdir(platform.nodeDir);
-      grunt.file.copy(filePath, resolve(platform.nodeDir, file));
+      grunt.file.copy(filePath, resolve(platform.nodeDir, 'node.exe'));
     } else {
       await extractNodeBuild(platform);
     }
@@ -147,5 +153,4 @@ export default function downloadNodeBuilds(grunt) {
   grunt.registerTask('_build:extractNodeBuilds', function () {
     map(platforms, extract).nodeify(this.async());
   });
-
 };

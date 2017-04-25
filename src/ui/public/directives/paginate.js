@@ -95,6 +95,9 @@ uiModules.get('kibana')
         if (number) {
           if (number.hasOwnProperty('number')) number = number.number;
           $scope.page = $scope.pages[number - 1] || $scope.pages[0];
+
+          //siren: update value of paginationCount
+          self.updatePaginationCount(number);
         }
       };
 
@@ -134,6 +137,18 @@ uiModules.get('kibana')
         } else {
           $scope.page = $scope.pages[0];
         }
+
+        // siren: initial first value of paginationCount
+        self.updatePaginationCount(count ? 1 : 0);
+      };
+
+      // siren: update value of paginationCount
+      self.updatePaginationCount = function (number) {
+        $scope.paginationCount = 0;
+        for(let i = 0; i < number; i++) {
+          $scope.paginationCount = $scope.paginationCount + $scope.pages[i].length;
+        }
+        return;
       };
 
       self.changePage = function (page) {

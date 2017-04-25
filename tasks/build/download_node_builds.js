@@ -34,7 +34,9 @@ export default function downloadNodeBuilds(grunt) {
       });
     });
   };
-
+  // siren: returns the filename with architecture inserted on windows
+  // to prevent node.exe binary being overwritten by
+  // different architecture node.exe download
   const getFilename = platform => {
     if (!platform.win) return basename(platform.nodeUrl);
 
@@ -42,14 +44,15 @@ export default function downloadNodeBuilds(grunt) {
     const archVersion = dirname(platform.nodeUrl).match(/win-.*$/)[0];
     return `${baseNameParts[0]}-${archVersion}.${baseNameParts[1]}`;
   };
+  //siren: end
 
   const checkShaSum = (platform) => {
-    const file = getFilename(platform);
+    const file = getFilename(platform); // siren: get filename by OS and arch
     const downloadDir = join(platform.nodeDir, '..');
     const filePath = resolve(downloadDir, file);
     const expected = {
       hash: 'sha256',
-      expected: platform.win ? shaSums[basename(dirname(platform.nodeUrl)) + '/node.exe'] : shaSums[file]
+      expected: platform.win ? shaSums[basename(dirname(platform.nodeUrl)) + '/node.exe'] : shaSums[file] //siren: use original filename on windows (without architecture) to match shaSum keys
     };
     if (!grunt.file.isFile(filePath)) {
       return false;
@@ -65,7 +68,7 @@ export default function downloadNodeBuilds(grunt) {
 
   const getNodeBuild = (platform) => {
     const downloadDir = join(platform.nodeDir, '..');
-    const file = getFilename(platform);
+    const file = getFilename(platform); // siren: get filename by OS and arch
     const filePath = resolve(downloadDir, file);
 
     if (grunt.file.isFile(filePath)) {
@@ -119,7 +122,7 @@ export default function downloadNodeBuilds(grunt) {
   });
 
   const extractNodeBuild = async (platform) => {
-    const file = getFilename(platform);
+    const file = getFilename(platform); // siren: get filename by OS and arch
     const downloadDir = join(platform.nodeDir, '..');
     const filePath = resolve(downloadDir, file);
 
@@ -134,7 +137,7 @@ export default function downloadNodeBuilds(grunt) {
   };
 
   const extract = async(platform) => {
-    const file = getFilename(platform);
+    const file = getFilename(platform); // siren: get filename by OS and arch
     const downloadDir = join(platform.nodeDir, '..');
     const filePath = resolve(downloadDir, file);
 
@@ -144,7 +147,7 @@ export default function downloadNodeBuilds(grunt) {
 
     if (platform.win) {
       grunt.file.mkdir(platform.nodeDir);
-      grunt.file.copy(filePath, resolve(platform.nodeDir, 'node.exe'));
+      grunt.file.copy(filePath, resolve(platform.nodeDir, 'node.exe'));  // siren: rename file back to node.exe from .e.g node-win-x64.exe
     } else {
       await extractNodeBuild(platform);
     }

@@ -77,14 +77,12 @@ uiModules
         // Removes a dashboard from one group
         $scope.isSaving = true;
         savedDashboardGroups.get(sourceGroup.id).then(savedSourceGroup => {
-          const dashboard = savedSourceGroup.dashboards[sourceItem];
           savedSourceGroup.dashboards.splice(sourceItem, 1);
           return savedSourceGroup.save();
         })
         .then(cache.invalidate)
         .then(() => {
           $scope.isSaving = false;
-          notify.info('Dashboard ' + sourceGroup.title + ' was successfuly moved');
           $rootScope.$emit('kibi:dashboardgroup:changed', sourceGroup.id);
         })
         .catch((reason) => {
@@ -107,9 +105,9 @@ uiModules
         $scope.isSaving = true;
         dashboardGroups.renumberGroups().then(() => {
           // Changes the dashboard order inside a group
-          if (sourceGroup.id === targetGroup.id) {
+          if (sourceGroup.id === targetGroup.id && !sourceGroup.virtual && !targetGroup.virtual) {
             return savedDashboardGroups.get(sourceGroup.id).then(savedGroup => {
-              const swap = savedGroup.dashboards[sourceItem];
+              const swap = _.clone(savedGroup.dashboards[sourceItem]);
               savedGroup.dashboards.splice(sourceItem, 1);
               savedGroup.dashboards.splice(targetItem, 0, swap);
               return savedGroup.save();
@@ -120,7 +118,7 @@ uiModules
             return savedDashboardGroups.get(sourceGroup.id).then(savedSourceGroup => {
               return savedDashboardGroups.get(targetGroup.id).then(savedTargetGroup => {
                 const actions = [];
-                const dashboard = savedSourceGroup.dashboards[sourceItem];
+                const dashboard = _.clone(savedSourceGroup.dashboards[sourceItem]);
                 savedSourceGroup.dashboards.splice(sourceItem, 1);
                 actions.push(savedSourceGroup.save());
                 if (!sibling) {
@@ -161,7 +159,6 @@ uiModules
         .then(cache.invalidate)
         .then(() => {
           $scope.isSaving = false;
-          notify.info('Dashboard ' + sourceGroup.title + ' was successfuly moved');
           $rootScope.$emit('kibi:dashboardgroup:changed', sourceGroup.id);
         })
         .catch((reason) => {

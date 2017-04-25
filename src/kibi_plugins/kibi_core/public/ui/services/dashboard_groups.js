@@ -257,6 +257,7 @@ uiModules
             }
           });
         });
+        this.emit('dashboardsMetadataUpdated', ids);
       });
     }
 
@@ -275,6 +276,7 @@ uiModules
             d.filterIconMessage = _constructFilterIconMessage(foundDashboardMetadata.filters, foundDashboardMetadata.queries);
           }
         });
+        this.emit('groupsMetadataUpdated', groupId);
       });
     }
 
@@ -551,6 +553,7 @@ uiModules
       .then((dashboardGroups1) => this._addAdditionalGroupsFromSavedDashboards(dashboardGroups1))
       .then(groups => {
         this.groups = groups;
+        this.emit('groupsChanged');
         return groups;
       });
     }

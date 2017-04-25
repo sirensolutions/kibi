@@ -5,15 +5,15 @@ module.exports = function (grunt) {
   const _ = require('lodash');
   const Promise = require('bluebird');
   const DecompressZip = require('@bigfunger/decompress-zip');
-
+  const tempFolder = (/^win/.test(process.platform)) ? 'c://windows/temp/' : '/tmp/' // siren: add OS check and set temp folder location
   const archives = [
     {
       url: 'https://github.com/sirensolutions/kibi_radar_vis/releases/download/5.2.2/kibi_radar_vis-5.2.2.zip',
-      dest: '/tmp/kibi_radar_vis.zip'
+      dest: `${tempFolder}kibi_radar_vis.zip` // siren: Add temp folder location to filepath
     },
     {
       url: 'https://github.com/sirensolutions/kibi_timeline_vis/releases/download/5.2.2-SNAPSHOT/kibi_timeline_vis-5.2.2-SNAPSHOT.zip',
-      dest: '/tmp/kibi_timeline_vis.zip'
+      dest: `${tempFolder}kibi_timeline_vis.zip` //siren: Add temp folder location to filepath
     }
   ];
 

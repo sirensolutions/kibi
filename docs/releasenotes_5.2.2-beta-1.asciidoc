@@ -1,6 +1,6 @@
-=== Kibi 5.2.2-ALPHA-1 and Kibana 5.2.2 Release Notes
+=== Kibi 5.2.2-beta-1 and Kibana 5.2.2 Release Notes
 
-The 5.2.2-ALPHA-1 release of Kibi requires Elasticsearch 5.2 or later.
+The 5.2.2-beta-1 release of Kibi requires Elasticsearch 5.2 or later.
 
 ==== Kibana Changes
 

@@ -106,7 +106,7 @@ define(function (require) {
   });
 
   app.controller('RelationsController',
-  function (Promise, es, kibiState, $rootScope, $scope, $timeout, config, Private, $element, kbnUrl, createNotifier,
+  function (Promise, es, kibiState, $rootScope, $scope, $timeout, $interval, config, Private, $element, kbnUrl, createNotifier,
             kibiEnterpriseEnabled, $window) {
     const notify = createNotifier({
       location: 'Relations Editor'
@@ -356,6 +356,18 @@ define(function (require) {
         $rootScope.$emit(`egg:${name}Graph:run`, 'exportGraph');
       };
     };
+
+    const cancelIntervals = {};
+    const refresh = function (graphProperty) {
+      const stop = $interval(() => {
+        if ($scope[graphProperty]) {
+          $rootScope.$emit(`egg:${graphProperty}:run`, 'update');
+        }
+      }, 100);
+      cancelIntervals[graphProperty] = stop;
+    };
+    refresh('dashboardsGraph');
+    refresh('indicesGraph');
 
     /**
      * Update the graph visualization.
@@ -977,6 +989,7 @@ define(function (require) {
     });
 
     $scope.$on('$destroy', function () {
+      _.each(cancelIntervals, (stop, name) => $interval.cancel(stop));
       $($window).off('beforeunload', onBeforeUnload);
       cancelRouteChangeHandler();
       cancelLogoutHandler();

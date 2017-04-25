@@ -4,6 +4,7 @@ import EventsProvider from 'ui/events';
 import Notifier from 'kibie/notify/notifier';
 import hashUrl from './hash_url';
 
+
 UiModules.get('kibana')
 .run(($rootScope, $location, $window, $http, config, sirenSession) => {
 
@@ -17,8 +18,7 @@ UiModules.get('kibana')
       $http.get(chrome.getBasePath() + '/kibisession/' + search._h)
       .then((res) => {
         if (res.data.sirenSession) {
-          sessionStorage.setItem('sirenSession', JSON.stringify(res.data.sirenSession));
-          sirenSession.emit('kibisession:loaded');
+          sirenSession.putData(res.data.sirenSession, true);
         }
         let target = chrome.getBasePath() + res.data.url;
         if (res.data.url && config.get('state:storeInSessionStorage')) {
@@ -55,9 +55,8 @@ UiModules.get('kibana')
     }
 
     getData() {
-      const data = sessionStorage.getItem('sirenSession');
-      if (data) {
-        return JSON.parse(data);
+      if (this.dataString) {
+        return JSON.parse(this.dataString);
       }
       return {};
     }
@@ -66,11 +65,14 @@ UiModules.get('kibana')
       return this.dataString;
     }
 
-    putData(data) {
+    putData(data, initial) {
       // storing locally so I can watch it
       this.dataString = JSON.stringify(data);
-      sessionStorage.setItem('sirenSession', this.dataString);
-      this.emit('kibisession:changed');
+      if (initial) {
+        this.emit('kibisession:loaded');
+      } else {
+        this.emit('kibisession:changed');
+      }
     }
 
   }

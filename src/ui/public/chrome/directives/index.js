@@ -1,4 +1,5 @@
 import './global_nav';
+import './kibi_reload'; // siren: added 
 
 import kbnChromeProv from './kbn_chrome';
 import kbnChromeNavControlsProv from './append_nav_controls';

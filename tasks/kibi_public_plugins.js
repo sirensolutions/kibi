@@ -6,6 +6,7 @@ module.exports = function (grunt) {
   const Promise = require('bluebird');
   const DecompressZip = require('@bigfunger/decompress-zip');
   const tempFolder = (/^win/.test(process.platform)) ? 'c://windows/temp/' : '/tmp/'; // siren: add OS check and set temp folder location
+
   const archives = [
     {
       url: 'https://github.com/sirensolutions/kibi_radar_vis/releases/download/5.2.2/kibi_radar_vis-5.2.2.zip',

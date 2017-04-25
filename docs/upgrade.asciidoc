@@ -4,6 +4,7 @@
 An existing Kibi installation can be upgraded as follows:
 
 - backup the `.kibi` index.
+- backup the `.kibiaccess` index if Kibi ACL is enabled.
 - backup the Kibi configuration file (`config/kibi.yml`)
 - {elastic-ref}setup-upgrade.html[upgrade Elasticsearch]; before restarting each node, make sure to install a compatible version of the
   {siren-join-website}#compatibility[SIREn Join] plugin.
@@ -35,6 +36,8 @@ kibi_core:
 
 Before upgrading it is strongly recommended to have a backup of the `.kibi` index; the recommended way to perform regular backups of
 Elasticsearch indexes is through the {elastic-ref}modules-snapshots.html[snapshot and restore modules].
+
+If Kibi ACL is enabled, include the `.kibiaccess` index in the backup.
 
 A useful tool to take a one-off backup is https://www.npmjs.com/package/elasticdump[elasticdump]; once installed, it is possible to dump
 the `.kibi` index mappings and data on two separate files by running the following commands:

@@ -114,10 +114,13 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
 
       // siren: adds information about the group membership and stats
       function getMetadata() {
+        delete dash.group;
         const groupId = dashboardGroups.getIdsOfDashboardGroupsTheseDashboardsBelongTo([dash.id])[0];
-        dash.group = _.find(dashboardGroups.getGroups(), 'id', groupId);
-        if (dash.group && dash.group.selected) {
-          dash.group.selected.formatedCount = `(${numeral.set(dash.group.selected.count).format('0,0')})`;
+        if (groupId) {
+          dash.group = _.find(dashboardGroups.getGroups(), 'id', groupId);
+          if (dash.group && dash.group.selected) {
+            dash.group.selected.formatedCount = `(${numeral.set(dash.group.selected.count).format('0,0')})`;
+          }
         }
       }
       dashboardGroups.on('groupsMetadataUpdated', () => {
@@ -125,7 +128,6 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
       }).on('dashboardsMetadataUpdated', () => {
         getMetadata();
       });
-      getMetadata();
       // siren: end
 
       const dashboardTime = kibiState._getDashboardProperty(dash.id, kibiState._properties.time);
@@ -244,6 +246,9 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
       const docTitle = Private(DocTitleProvider);
 
       function init() {
+        // siren: calls getMetadata to fetch dashboard related info
+        getMetadata();
+
         updateQueryOnRootSource();
 
         if (dash.id) {

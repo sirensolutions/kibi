@@ -12,7 +12,7 @@ describe('Kibi Settings', function () {
   let indexToDashboardMapPromise;
   let unbind = [];
 
-  function init({ digest = true, mappings, savedDashboards, savedSearches, indexToDashboardsMap, relations, events }) {
+  function init({ digest = true, mappings, savedDashboards, savedSearches, indexToDashboardsMap, relations, events } = {}) {
     ngMock.module('kibana', function ($provide) {
       $provide.constant('kbnDefaultAppId', 'dashboard');
       $provide.constant('kibiDefaultDashboardTitle', '');
@@ -156,9 +156,262 @@ describe('Kibi Settings', function () {
       );
     });
 
+    describe('update graph', function () {
+      it('should import the existing serialized graph if it contains nodes', function () {
+        const relations = {
+          relationsIndicesSerialized: {
+            options: {
+              colors: {}
+            },
+            nodes: [ 'my node' ]
+          },
+          relationsIndices: [ {} ]
+        };
+
+        init({ relations, digest: false });
+
+        $scope.updateGraph({
+          name: 'indices',
+          getSourceNode(relation) {
+            return {
+              id: 'id',
+              label: 'label',
+              nodeType: 'source_type'
+            };
+          },
+          getTargetNode(relation) {
+            return {
+              id: 'id',
+              label: 'label',
+              nodeType: 'target_type'
+            };
+          },
+          getLink(relation) {
+            return {
+              source: 'source',
+              target: 'target',
+              linkType: 'link',
+              undirected: true
+            };
+          }
+        });
+
+        // since the serialized graph has a node and it is the first load, it is loaded directly
+        expect($scope.indicesGraph.options.colors.source_type).to.not.be.ok();
+        expect($scope.indicesGraph.options.colors.target_type).to.not.be.ok();
+      });
+
+      it('should not import the existing serialized graph if it does not have nodes', function () {
+        const relations = {
+          relationsIndicesSerialized: {
+            options: {
+              colors: {}
+            },
+            nodes: []
+          },
+          relationsIndices: [ {} ]
+        };
+
+        init({ relations, digest: false });
+
+        $scope.updateGraph({
+          name: 'indices',
+          getSourceNode(relation) {
+            return {
+              id: 'id',
+              label: 'label',
+              nodeType: 'source_type'
+            };
+          },
+          getTargetNode(relation) {
+            return {
+              id: 'id',
+              label: 'label',
+              nodeType: 'target_type'
+            };
+          },
+          getLink(relation) {
+            return {
+              source: 'source',
+              target: 'target',
+              linkType: 'link',
+              undirected: true
+            };
+          }
+        });
+
+        // since nodes of the serialized graph is empty, the relations are processed
+        expect($scope.indicesGraph.options.colors.source_type).to.be.ok();
+        expect($scope.indicesGraph.options.colors.target_type).to.be.ok();
+      });
+
+      it('should not import the existing serialized graph if not the first load', function () {
+        const relations = {
+          relationsIndicesSerialized: {
+            options: {
+              colors: {}
+            },
+            nodes: [ 'my node' ],
+            links: []
+          },
+          relationsIndices: [ {} ]
+        };
+
+        init({ relations, digest: false });
+
+        $scope.indicesGraph = {}; // just so it is not falsy
+
+        $scope.updateGraph({
+          name: 'indices',
+          getSourceNode(relation) {
+            return {
+              id: 'id',
+              label: 'label',
+              nodeType: 'source_type'
+            };
+          },
+          getTargetNode(relation) {
+            return {
+              id: 'id',
+              label: 'label',
+              nodeType: 'target_type'
+            };
+          },
+          getLink(relation) {
+            return {
+              source: 'source',
+              target: 'target',
+              linkType: 'link',
+              undirected: true
+            };
+          }
+        });
+
+        // since this is not the first load, the relations are processed
+        expect($scope.indicesGraph.options.colors.source_type).to.be.ok();
+        expect($scope.indicesGraph.options.colors.target_type).to.be.ok();
+      });
+
+      it('should populate colors correctly', function () {
+        const relations = {
+          relationsIndices: [ {} ]
+        };
+
+        init({ relations, digest: false });
+        $scope.updateGraph({
+          name: 'indices',
+          options: {
+            colors: {}
+          },
+          getSourceNode(relation) {
+            return {
+              id: 'id',
+              label: 'label',
+              nodeType: 'source_type'
+            };
+          },
+          getTargetNode(relation) {
+            return {
+              id: 'id',
+              label: 'label',
+              nodeType: 'target_type'
+            };
+          },
+          getLink(relation) {
+            return {
+              source: 'source',
+              target: 'target',
+              linkType: 'link',
+              undirected: true
+            };
+          }
+        });
+
+        expect($scope.indicesGraph.options.colors.source_type).to.be.ok();
+        expect($scope.indicesGraph.options.colors.target_type).to.be.ok();
+      });
+    });
+
     describe('index patterns graph', function () {
 
       afterEach(after);
+
+      it('should not update the graph', function () {
+        init({ digest: false });
+
+        const updateGraphStub = sinon.stub($scope, 'updateGraph');
+        const diff1 = [
+          {
+            indices: [
+              {
+                indexPatternId: '',
+                path: 'p1'
+              },
+              {
+                indexPatternId: 'i2',
+                path: 'p2'
+              }
+            ]
+          }
+        ];
+        const diff2 = [
+          {
+            indices: [
+              {
+                indexPatternId: 'i1',
+                path: ''
+              },
+              {
+                indexPatternId: 'i2',
+                path: 'p2'
+              }
+            ]
+          }
+        ];
+        const diff3 = [
+          {
+            indices: [
+              {
+                indexPatternId: 'i1',
+                path: 'p1'
+              },
+              {
+                indexPatternId: '',
+                path: 'p2'
+              }
+            ]
+          }
+        ];
+        const diff4 = [
+          {
+            indices: [
+              {
+                indexPatternId: 'i1',
+                path: 'p1'
+              },
+              {
+                indexPatternId: 'i2',
+                path: ''
+              }
+            ]
+          }
+        ];
+
+        $scope.updateIndicesGraph(null, diff1);
+        sinon.assert.notCalled(updateGraphStub);
+        updateGraphStub.reset();
+
+        $scope.updateIndicesGraph(null, diff2);
+        sinon.assert.notCalled(updateGraphStub);
+        updateGraphStub.reset();
+
+        $scope.updateIndicesGraph(null, diff3);
+        sinon.assert.notCalled(updateGraphStub);
+        updateGraphStub.reset();
+
+        $scope.updateIndicesGraph(null, diff4);
+        sinon.assert.notCalled(updateGraphStub);
+      });
 
       it('should create the graph of indices', function () {
         const relations = {
@@ -736,7 +989,42 @@ describe('Kibi Settings', function () {
     });
 
     describe('dashboards graph', function () {
-      it('should remove all if all components are defined - what is retained is up to st-select', function (done) {
+      it('should not update the graph', function () {
+        init({ digest: false });
+
+        const updateGraphStub = sinon.stub($scope, 'updateGraph');
+        const diff1 = [
+          {
+            relation: 'rel',
+            dashboards: [ 'd1', '' ]
+          }
+        ];
+        const diff2 = [
+          {
+            relation: 'rel',
+            dashboards: [ '', 'd2' ]
+          }
+        ];
+        const diff3 = [
+          {
+            relation: '',
+            dashboards: [ 'd1', 'd2' ]
+          }
+        ];
+
+        $scope._updateRelationsDashboards(null, diff1);
+        sinon.assert.notCalled(updateGraphStub);
+        updateGraphStub.reset();
+
+        $scope._updateRelationsDashboards(null, diff2);
+        sinon.assert.notCalled(updateGraphStub);
+        updateGraphStub.reset();
+
+        $scope._updateRelationsDashboards(null, diff3);
+        sinon.assert.notCalled(updateGraphStub);
+      });
+
+      it('should remove all if all components are defined - what is retained is up to kibi-select', function (done) {
         const relations = {
           relationsIndices: [
             {

@@ -99,8 +99,10 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
   return {
     restrict: 'E',
     controllerAs: 'dashboardApp',
-    controller: function (kibiState, config, $scope, $rootScope, $route, $routeParams, $location, Private, getAppState) {
+    controller: function (kibiState, config, $scope, $rootScope, $route, $routeParams, $location, Private, getAppState,
+      dashboardGroups) {
 
+      const numeral = require('numeral')();
       const queryFilter = Private(FilterBarQueryFilterProvider);
       const getEmptyQueryOptionHelper = Private(require('ui/kibi/helpers/get_empty_query_with_options_helper'));
 
@@ -109,6 +111,24 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
       });
 
       const dash = $scope.dash = $route.current.locals.dash;
+
+      // siren: adds information about the group membership and stats
+      function getMetadata() {
+        delete dash.group;
+        const groupId = dashboardGroups.getIdsOfDashboardGroupsTheseDashboardsBelongTo([dash.id])[0];
+        if (groupId) {
+          dash.group = _.find(dashboardGroups.getGroups(), 'id', groupId);
+          if (dash.group && dash.group.selected) {
+            dash.group.selected.formatedCount = `(${numeral.set(dash.group.selected.count).format('0,0')})`;
+          }
+        }
+      }
+      dashboardGroups.on('groupsMetadataUpdated', () => {
+        getMetadata();
+      }).on('dashboardsMetadataUpdated', () => {
+        getMetadata();
+      });
+      // siren: end
 
       const dashboardTime = kibiState._getDashboardProperty(dash.id, kibiState._properties.time);
       if (dashboardTime) {
@@ -226,6 +246,9 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
       const docTitle = Private(DocTitleProvider);
 
       function init() {
+        // siren: calls getMetadata to fetch dashboard related info
+        getMetadata();
+
         updateQueryOnRootSource();
 
         if (dash.id) {
@@ -346,6 +369,8 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
         dash.timeTo = dash.timeRestore ? timefilter.time.to : undefined;
         dash.refreshInterval = dash.timeRestore ? timeRestoreObj : undefined;
         dash.optionsJSON = angular.toJson($state.options);
+
+        // siren: adds information about the group membership
 
         dash.save()
         .then(function (id) {

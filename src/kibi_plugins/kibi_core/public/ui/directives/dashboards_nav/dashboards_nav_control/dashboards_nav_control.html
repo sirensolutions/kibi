@@ -21,13 +21,14 @@
     ng-click="onEditClick({ $event: $event })"
   >
     <div class="icon-action">
-      <i class="fa fa-pencil" aria-hidden="true"></i>
+      <i ng-if="isOnEditMode" class="fa fa-times" aria-hidden="true"></i>
+      <i ng-if="!isOnEditMode" class="fa fa-pencil" aria-hidden="true"></i>
     </div>
     <div ng-if="isOnEditMode" class="title-action">
-      Close
+      Close edit mode
     </div>
     <div ng-if="!isOnEditMode" class="title-action">
-      Edit
+      Edit groups
     </div>
   </a>
 
@@ -35,7 +36,7 @@
     ng-if="!isOnEditMode && !isGroupEditorOpen"
     class="anchor"
     ng-class="{'anchor-closed': !isOpen}"
-    ng-click="onClick({ $event: $event })"
+    ng-click="onClick({ $event: $event, force: true })"
     title="{{ title }}"
   >
     <div class="icon">

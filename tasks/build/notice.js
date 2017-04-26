@@ -17,8 +17,17 @@ export default function licenses(grunt) {
         cwd: buildPath
       });
       installedPackages.toString().trim().split('\n').forEach(pkg => {
+        let modulePath; // siren: declare vars as const/let block scoped
+        let dirPath;
+        let packageName;
+        let drive;
         const packageDetails = pkg.split(':');
-        const [modulePath, packageName] = packageDetails;
+        if (/^win/.test(process.platform)) { //siren: if windows, rebuild modulePath from drive name and directory path
+          [drive, dirPath, packageName] = packageDetails;
+          modulePath = `${drive}:${dirPath}`;
+        } else {
+          [modulePath, packageName] = packageDetails;
+        } //siren: end
         const licenses = glob.sync(path.join(modulePath, '*LICENSE*'));
         const notices = glob.sync(path.join(modulePath, '*NOTICE*'));
         packagePaths[packageName] = {

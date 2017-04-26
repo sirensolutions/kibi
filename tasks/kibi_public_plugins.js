@@ -5,15 +5,17 @@ module.exports = function (grunt) {
   const _ = require('lodash');
   const Promise = require('bluebird');
   const DecompressZip = require('@bigfunger/decompress-zip');
+  const tempFolder = require('os').tmpdir(); // siren: add OS check and set temp folder location
+  const rimraf = require('rimraf'); //siren: Added to remove temp files after processing
 
   const archives = [
     {
       url: 'https://github.com/sirensolutions/kibi_radar_vis/releases/download/5.2.2/kibi_radar_vis-5.2.2.zip',
-      dest: '/tmp/kibi_radar_vis.zip'
+      dest: `${tempFolder}/kibi_radar_vis.zip` // siren: Add temp folder location to filepath
     },
     {
       url: 'https://github.com/sirensolutions/kibi_timeline_vis/releases/download/5.2.2-SNAPSHOT/kibi_timeline_vis-5.2.2-SNAPSHOT.zip',
-      dest: '/tmp/kibi_timeline_vis.zip'
+      dest: `${tempFolder}/kibi_timeline_vis.zip` //siren: Add temp folder location to filepath
     }
   ];
 
@@ -51,7 +53,9 @@ module.exports = function (grunt) {
         path: pathToUnzip
       });
 
-      unzipper.on('extract', resolve);
+      unzipper.on('extract', () => {
+        rimraf(tempArchiveFile, resolve); // siren: remove temp files on extraction end
+      });
     });
   };
 

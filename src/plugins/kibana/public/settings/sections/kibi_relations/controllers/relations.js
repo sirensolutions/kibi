@@ -106,7 +106,7 @@ define(function (require) {
   });
 
   app.controller('RelationsController',
-  function (Promise, es, kibiState, $rootScope, $scope, $timeout, config, Private, $element, kbnUrl, createNotifier,
+  function (Promise, es, kibiState, $rootScope, $scope, $timeout, $interval, config, Private, $element, kbnUrl, createNotifier,
             kibiEnterpriseEnabled, $window) {
     const notify = createNotifier({
       location: 'Relations Editor'
@@ -172,7 +172,7 @@ define(function (require) {
     });
 
     let indexToDashboardsMap = null;
-    const nodeTypes = [];
+    const nodeTypes = new Set();
 
     /**
      * creates a map index -> dashboards
@@ -351,18 +351,29 @@ define(function (require) {
       usedRelations.indexOf(item.value) !== -1;
     };
 
-    function _addClickHandlers(name, options) {
+    const _addClickHandlers = function (name, options) {
       options.onNodeDragEnd = function () {
-        $rootScope.$emit('egg:' + name + 'Graph:run', 'exportGraph');
+        $rootScope.$emit(`egg:${name}Graph:run`, 'exportGraph');
       };
-    }
+    };
+
+    const cancelIntervals = {};
+    const refresh = function (graphProperty) {
+      const stop = $interval(() => {
+        if ($scope[graphProperty]) {
+          $rootScope.$emit(`egg:${graphProperty}:run`, 'update');
+        }
+      }, 100);
+      cancelIntervals[graphProperty] = stop;
+    };
+    refresh('dashboardsGraph');
+    refresh('indicesGraph');
 
     /**
      * Update the graph visualization.
      * - name: the name of the graph, indices or dashboards
      * - options: the options for the eeg graph
-     * - isRelationReady: function that checks if a relation is complete
-     * - onRelationReady: function that is called once isRelationReady returns true. It is called before anything else.
+     * - preProcessRelation: Function that is called before anything else.
      * - assertions: array of assertions to be applied on a relation. An assertion is an object with two fields:
      *   - a method "isInvalidRelation"" called on a relation. If it returns true the relation is not valid.
      *   - a field message containing the error message
@@ -370,23 +381,28 @@ define(function (require) {
      * - getTargetNode: function that returns the target node object for a given relation
      * - getLink: function that returns the link object connecting the two nodes
      */
-    const updateGraph = function ({ name, options, isRelationReady, assertions, onRelationReady,
-                                               getSourceNode, getTargetNode, getLink }) {
+    const updateGraph = function ({
+      name,
+      options = { colors: {} },
+      assertions = [],
+      preProcessRelation,
+      getSourceNode,
+      getTargetNode,
+      getLink }) {
       const graphProperty = `${name}Graph`;
       const relationsGraphProperty = `relations${_.capitalize(name)}`;
       const serializedGraphProperty = `relations${_.capitalize(name)}Serialized`;
-
       const firstLoad = !$scope[graphProperty];
 
-      if (firstLoad && $scope.relations[serializedGraphProperty]) {
+      if (firstLoad && $scope.relations[serializedGraphProperty] && $scope.relations[serializedGraphProperty].nodes.length) {
         // first load of the graph
         $scope[graphProperty] = $scope.relations[serializedGraphProperty];
         _addClickHandlers(name, $scope[graphProperty].options);
         $rootScope.$emit(`egg:${graphProperty}:run`, 'importGraph', $scope[graphProperty]);
         return;
-      } else if (!$scope[graphProperty]) {
+      } else if (firstLoad) {
         $scope[graphProperty] = {
-          options: options,
+          options,
           nodes: [],
           links: []
         };
@@ -397,13 +413,10 @@ define(function (require) {
       }
 
       const addNode = function (node) {
-        const id = node.id;
-
-        node.id = `eegid-${id}`; // eeg prefix the ID
+        node.id = `eegid-${node.id}`; // eeg prefix the ID
         const existingNode = _.findWhere($scope[graphProperty].nodes, node);
         if (!existingNode) {
           node.keep = true; // this is to tag the nodes to remove
-          node.id = id;
           node.size = 20;
           $scope[graphProperty].nodes.push(node);
         } else {
@@ -415,45 +428,37 @@ define(function (require) {
       _.each($scope.relations[relationsGraphProperty], function (relation) {
         const errors = [];
 
-        if (isRelationReady(relation)) {
-          if (onRelationReady) {
-            onRelationReady(relation);
-          }
-
-          _.each(assertions, assertion => {
-            if (assertion.isInvalidRelation(relation)) {
-              errors.push(assertion.message);
-            }
-          });
-
-          // build the graph visualisation
-          const sourceNode = getSourceNode(relation);
-          const targetNode = getTargetNode(relation);
-          const link = getLink(relation);
-
-          addNode(sourceNode);
-          addNode(targetNode);
-
-          const source = link.source;
-          const target = link.target;
-          link.source = `eegid-${link.source}`;
-          link.target = `eegid-${link.target}`;
-          const existingLink = _.findWhere($scope[graphProperty].links, link);
-          if (!existingLink) {
-            link.keep = true; // this is to tag the nodes to remove
-            $scope[graphProperty].links.push(link);
-          } else {
-            existingLink.keep = true; // this is to tag the nodes to remove
-          }
-
-          // build types array to build color map
-          if (nodeTypes.indexOf(sourceNode.id) === -1) {
-            nodeTypes.push(sourceNode.id);
-          }
-          if (nodeTypes.indexOf(targetNode.id) === -1) {
-            nodeTypes.push(targetNode.id);
-          }
+        if (preProcessRelation) {
+          preProcessRelation(relation);
         }
+
+        _.each(assertions, assertion => {
+          if (assertion.isInvalidRelation(relation)) {
+            errors.push(assertion.message);
+          }
+        });
+
+        // build the graph visualisation
+        const sourceNode = getSourceNode(relation);
+        const targetNode = getTargetNode(relation);
+        const link = getLink(relation);
+
+        addNode(sourceNode);
+        addNode(targetNode);
+
+        link.source = `eegid-${link.source}`;
+        link.target = `eegid-${link.target}`;
+        const existingLink = _.findWhere($scope[graphProperty].links, link);
+        if (!existingLink) {
+          link.keep = true; // this is to tag the nodes to remove
+          $scope[graphProperty].links.push(link);
+        } else {
+          existingLink.keep = true; // this is to tag the nodes to remove
+        }
+
+        // build types array to build color map
+        nodeTypes.add(sourceNode.nodeType);
+        nodeTypes.add(targetNode.nodeType);
 
         relation.errors = errors;
         if (errors.length) {
@@ -461,25 +466,41 @@ define(function (require) {
         }
       });
 
-      $scope.typeToColor = color(nodeTypes);
-      _.each(nodeTypes, function (nodeType) {
+      $scope.typeToColor = color(Array.from(nodeTypes));
+      for (const nodeType of nodeTypes) {
         $scope[graphProperty].options.colors[nodeType] = $scope.typeToColor(nodeType);
-      });
+      }
 
       // remove deleted nodes and links
       $scope[graphProperty].nodes = _($scope[graphProperty].nodes).filter('keep', true).map(n => _.omit(n, 'keep')).value();
       $scope[graphProperty].links = _($scope[graphProperty].links).filter('keep', true).map(l => _.omit(l, 'keep')).value();
 
       // save the graph layout
-      $scope.relations[`relations${_.capitalize(name)}Serialized`] = $scope[graphProperty];
+      $scope.relations[serializedGraphProperty] = $scope[graphProperty];
       // draw the graph
       $rootScope.$emit(`egg:${graphProperty}:run`, 'importGraph', $scope[graphProperty]);
     };
+    $scope.updateGraph = updateGraph;
+
+    // returns true if all the relations in the diff array have all required parameters
+    const _areRelationsReady = (diff, isRelationReady) => _.reduce(diff, (acc, value) => acc && isRelationReady(value), true);
 
     /**
      * Updates the relationships between dashboards
+     *
+     * @param oldRelations array the previous state of the relations between dashboards
+     * @param diff array the difference between the new and old states of the relations
      */
-    function _updateRelationsDashboards(oldRelations) {
+    const _updateRelationsDashboards = $scope._updateRelationsDashboards = function (oldRelations, diff) {
+      const isRelationReady = function (relDash) {
+        return relDash.relation && relDash.dashboards[0] && relDash.dashboards[1];
+      };
+
+      if (!_areRelationsReady(diff, isRelationReady)) {
+        // the new relations are not ready yet
+        return;
+      }
+
       const relationId = function (relation) {
         const i0 = relation.dashboards[0];
         const i1 = relation.dashboards[1];
@@ -513,9 +534,6 @@ define(function (require) {
           groupingForce: {},
           nodeIcons: {},
           colors: {}
-        },
-        isRelationReady: function (relDash) {
-          return relDash.relation && relDash.dashboards[0] && relDash.dashboards[1];
         },
         getSourceNode: function (relDash) {
           const sourceNodeIndexId = _getIndexForDashboard(relDash.dashboards[0]);
@@ -565,7 +583,7 @@ define(function (require) {
         $scope.changed = true;
         $scope.isObjectValid();
       }
-    }
+    };
 
     // Listen to changes of relations between dashboards
     $scope.$watch(function ($scope) {
@@ -576,19 +594,33 @@ define(function (require) {
         })
       };
     }, function (newRelations, oldRelations) {
+      if (!newRelations.dashboards.length && !oldRelations.dashboards.length) {
+        return;
+      }
+      const diff = _.difference(newRelations.dashboards, oldRelations.dashboards);
       if (indexToDashboardsMap === null) {
         $scope.getIndexToDashboardMap(null, true).then(function (map) {
           indexToDashboardsMap = map;
-          _updateRelationsDashboards(oldRelations);
+          _updateRelationsDashboards(oldRelations, diff);
         }).catch(function (err) {
           notify.error('Problem getting index to dashboard map', err);
         });
       } else {
-        _updateRelationsDashboards(oldRelations);
+        _updateRelationsDashboards(oldRelations, diff);
       }
     }, true);
 
-    $scope.updateIndicesGraph = function (oldRelations) {
+    $scope.updateIndicesGraph = function (oldRelations, diff) {
+      const isRelationReady = function (relation) {
+        const indices = relation.indices;
+        return indices[0].indexPatternId && indices[0].path && indices[1].indexPatternId && indices[1].path;
+      };
+
+      if (!_areRelationsReady(diff, isRelationReady)) {
+        // the new relations are not ready yet
+        return;
+      }
+
       // check for duplicates
       const uniq = _.groupBy($scope.relations.relationsIndices, function (relation, offset) {
         const indexa = relation.indices[0];
@@ -628,11 +660,7 @@ define(function (require) {
           nodeIcons: {},
           colors: {}
         },
-        isRelationReady: function (relation) {
-          const indices = relation.indices;
-          return indices[0].indexPatternId && indices[0].path && indices[1].indexPatternId && indices[1].path;
-        },
-        onRelationReady: function (relation) {
+        preProcessRelation: function (relation) {
           const indices = relation.indices;
 
           if (!relation.label) {
@@ -896,7 +924,11 @@ define(function (require) {
         return normalized;
       });
     }, function (newRelations, oldRelations) {
-      $scope.updateIndicesGraph(oldRelations);
+      if (!newRelations.length && !oldRelations.length) {
+        return;
+      }
+      const diff = _.difference(newRelations, oldRelations);
+      $scope.updateIndicesGraph(oldRelations, diff);
     }, true);
 
     const indicesGraphExportOff = $rootScope.$on('egg:indicesGraph:results', function (event, method, results) {
@@ -966,6 +998,7 @@ define(function (require) {
     });
 
     $scope.$on('$destroy', function () {
+      _.each(cancelIntervals, (stop, name) => $interval.cancel(stop));
       $($window).off('beforeunload', onBeforeUnload);
       cancelRouteChangeHandler();
       cancelLogoutHandler();

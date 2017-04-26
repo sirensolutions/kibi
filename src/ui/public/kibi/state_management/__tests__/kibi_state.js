@@ -83,8 +83,7 @@ describe('State Management', function () {
       $provide.service('savedDashboards', (Promise, Private) => mockSavedObjects(Promise, Private)('savedDashboards', savedDashboards));
     });
 
-    ngMock.inject(function ($httpBackend, _indexPatterns_, _timefilter_, _config_, _$location_, $injector) {
-      $httpBackend.whenGET('/getElasticsearchPlugins').respond([ 'siren-platform' ]);
+    ngMock.inject(function (elasticsearchPlugins, _indexPatterns_, _timefilter_, _config_, _$location_, _kibiState_) {
       onDashboardPageSpy = sinon.stub(onPage, 'onDashboardPage').returns(currentPath.split('/')[1] === 'dashboard');
       onVisualizePageSpy = sinon.stub(onPage, 'onVisualizePage').returns(currentPath.split('/')[1] === 'visualize');
       onManagementPageSpy = sinon.stub(onPage, 'onManagementPage').returns(currentPath.split('/')[1] === 'settings');
@@ -92,9 +91,11 @@ describe('State Management', function () {
       indexPatternsService = _indexPatterns_;
       timefilter = _timefilter_;
       $location = _$location_;
-      kibiState = $injector.get('kibiState');
+      kibiState = _kibiState_;
 
       disableFiltersIfOutdatedSpy = sinon.spy(kibiState, 'disableFiltersIfOutdated');
+
+      sinon.stub(elasticsearchPlugins, 'get').returns([ 'siren-platform' ]);
 
       config = _config_;
       const defaultTime = {

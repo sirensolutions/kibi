@@ -121,6 +121,7 @@ src/ui/public/chrome/chrome.html
 src/ui/public/chrome/chrome.js
 src/ui/public/chrome/context.js
 src/ui/public/chrome/directives/kbn_chrome.js
+src/ui/public/chrome/directives/index.js
 
 src/ui/public/config/defaults.js
 

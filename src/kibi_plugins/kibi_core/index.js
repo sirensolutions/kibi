@@ -348,9 +348,9 @@ module.exports = function (kibana) {
         method: 'GET',
         path:'/getElasticsearchPlugins',
         handler: function (request, reply) {
-          const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
+          const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('data');
 
-          return callWithRequest(request, 'cat.plugins', {
+          return callWithInternalUser('cat.plugins', {
             h: 'component',
             format: 'json'
           })

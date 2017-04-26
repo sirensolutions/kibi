@@ -5,7 +5,6 @@ import ngMock from 'ng_mock';
 import $ from 'jquery';
 import 'plugins/kibana/visualize/editor/agg';
 
-
 describe('Vis-Editor-Agg plugin directive', function () {
   const $parentScope = {};
   let $scope;
@@ -44,7 +43,6 @@ describe('Vis-Editor-Agg plugin directive', function () {
   beforeEach(ngMock.module('kibana', function ($provide) {
     $provide.constant('kbnDefaultAppId', '');
     $provide.constant('kibiDefaultDashboardTitle', '');
-    $provide.constant('elasticsearchPlugins', ['siren-platform']);
   }));
   beforeEach(ngMock.inject(function ($rootScope, $compile) {
     $parentScope.agg = {

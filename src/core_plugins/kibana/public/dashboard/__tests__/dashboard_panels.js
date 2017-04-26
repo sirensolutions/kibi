@@ -31,7 +31,6 @@ describe('dashboard panels', function () {
   }
 
   beforeEach(ngMock.module('kibana', $provide => {
-    $provide.constant('elasticsearchPlugins', ['siren-platform']);
     $provide.constant('kibiDatasourcesSchema', {});
   }));
 

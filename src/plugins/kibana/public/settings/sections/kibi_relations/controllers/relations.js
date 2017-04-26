@@ -381,7 +381,13 @@ define(function (require) {
      * - getTargetNode: function that returns the target node object for a given relation
      * - getLink: function that returns the link object connecting the two nodes
      */
-    const updateGraph = function ({ name, options = { colors: {} }, assertions = [], preProcessRelation, getSourceNode, getTargetNode,
+    const updateGraph = function ({
+      name,
+      options = { colors: {} },
+      assertions = [],
+      preProcessRelation,
+      getSourceNode,
+      getTargetNode,
       getLink }) {
       const graphProperty = `${name}Graph`;
       const relationsGraphProperty = `relations${_.capitalize(name)}`;
@@ -476,6 +482,9 @@ define(function (require) {
     };
     $scope.updateGraph = updateGraph;
 
+    // returns true if all the relations in the diff array have all required parameters
+    const _areRelationsReady = (diff, isRelationReady) => _.reduce(diff, (acc, value) => acc && isRelationReady(value), true);
+
     /**
      * Updates the relationships between dashboards
      *
@@ -487,7 +496,7 @@ define(function (require) {
         return relDash.relation && relDash.dashboards[0] && relDash.dashboards[1];
       };
 
-      if (!_.reduce(diff, (acc, value) => acc && isRelationReady(value), true)) {
+      if (!_areRelationsReady(diff, isRelationReady)) {
         // the new relations are not ready yet
         return;
       }
@@ -607,7 +616,7 @@ define(function (require) {
         return indices[0].indexPatternId && indices[0].path && indices[1].indexPatternId && indices[1].path;
       };
 
-      if (!_.reduce(diff, (acc, value) => acc && isRelationReady(value), true)) {
+      if (!_areRelationsReady(diff, isRelationReady)) {
         // the new relations are not ready yet
         return;
       }

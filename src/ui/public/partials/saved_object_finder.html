@@ -5,11 +5,11 @@
       <div class="input-group form-group finder-form col-md-7">
         <div ng-if="kibi.onDashboardPage && type === 'visualizations'" class="visualisation-filter-checkbox">
           <input ng-if="savedSearchId" type="checkbox" ng-model="kibi.basedOnSameSavedSearch" />
-          <label ng-if="savedSearchId">
+          <label class="based-saved-search" ng-if="savedSearchId">
             Based on the saved search of the current dashboard: {{savedSearchId}}
           </label>
           <input ng-if="!savedSearchId" type="checkbox" disabled/>
-          <label ng-if="!savedSearchId">
+          <label class="based-saved-search" ng-if="!savedSearchId">
             To be able to filter visualisations based on dashboard's saved search
             - associate a saved search when saving this dashboard
           </label>
@@ -33,9 +33,6 @@
           type="text"
           autocomplete="off" />
       </div>
-      <div class="finder-hit-count col-md-2">
-        <span>{{finder.hitCount}} of {{finder.hitCount}}</span>
-      </div>
       <div class="finder-manage-object col-md-2" ng-if="!useLocalManagement">
         <a class="small" ng-click="finder.manageObjects(finder.properties.name)">
           Manage {{finder.properties.nouns}}
@@ -44,7 +41,7 @@
     </div>
   </div>
 </form>
-<paginate list="finder.hits" per-page="20">
+<paginate list="finder.hits" per-page="8">
   <ul class="li-striped list-group list-group-menu" ng-class="{'select-mode': finder.selector.enabled}">
     <li class="list-group-item" ng-click="finder.sortHits(finder.hits)">
       <span class="paginate-heading">
@@ -80,4 +77,7 @@
       <p ng-bind="'No matching ' + finder.properties.nouns + ' found.'"></p>
     </li>
   </ul>
+  <div class="finder-hit-count">
+     <span>{{paginationCount}} of {{finder.hitCount}}</span>
+  </div>
 </paginate>

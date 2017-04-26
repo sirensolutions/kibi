@@ -222,19 +222,17 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
     }
     const self = this;
 
-    let promise = kibiState.isSirenJoinPluginInstalled()
-    .then(isInstalled => {
-      if (!isInstalled) {
-        return Promise.reject(new Error(
-          'This version of Kibi Relational filter requires the Siren Platform plugin. Please install it and restart Kibi.'
-        ));
-      }
-    });
+    if (!kibiState.isSirenJoinPluginInstalled()) {
+      return Promise.reject(new Error(
+        'This version of Kibi Relational filter requires the Siren Platform plugin. Please install it and restart Kibi.'
+      ));
+    }
 
+    let promise;
     if (!$scope.buttons || !$scope.buttons.length) {
-      promise = promise.then(() => _constructButtons.call(self));
+      promise = _constructButtons.call(self);
     } else {
-      promise = promise.then(() => Promise.resolve($scope.buttons));
+      promise = Promise.resolve($scope.buttons);
     }
     promise
     .then((buttons) => _collectUpdateCountsRequest.call(self, buttons, currentDashboardId))

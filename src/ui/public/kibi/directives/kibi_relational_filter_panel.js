@@ -102,21 +102,20 @@ uiModules
       };
 
       const _checkFilterJoinPlugin = function () {
-        return kibiState.isSirenJoinPluginInstalled()
-        .then(installed => {
-          const enabled = kibiState.isRelationalPanelButtonEnabled();
-          if (enabled && !installed) {
-            notify.error(
-              'The siren-platform plugin is enabled but not installed. ' +
-              'Please install the plugin and restart Kibi, or disable the relational panel in Management / Relations'
-            );
-          }
-        });
+        const installed = kibiState.isSirenJoinPluginInstalled();
+        const enabled = kibiState.isRelationalPanelButtonEnabled();
+
+        if (enabled && !installed) {
+          notify.error(
+            'The siren-platform plugin is enabled but not installed. ' +
+            'Please install the plugin and restart Kibi, or disable the relational panel in Management / Relations'
+          );
+        }
       };
 
       const initConfigOff = config.watch('init:config', function () {
-        _checkFilterJoinPlugin()
-        .then(() => _initPanel());
+        _checkFilterJoinPlugin();
+        _initPanel();
       });
 
       $scope.show = false;

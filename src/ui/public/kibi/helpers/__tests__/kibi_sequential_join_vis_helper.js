@@ -81,134 +81,6 @@ describe('Kibi Components', function () {
 
     noDigestPromises.activateForSuite();
 
-    describe('constructButtonArray - buttons configured with sourceDashboard targetDashboard and indexRelationId', function () {
-
-      it('should correctly assign source and target index, type and field', function () {
-        init({
-          relations: {
-            relationsIndices: [
-              {
-                id: 'ia//fa/ib//fb'
-              }
-            ],
-            relationsDashboards: []
-          }
-        });
-        const buttonDefs = [
-          {
-            label: 'from A to B',
-            sourceDashboardId: 'dashboardA',
-            redirectToDashboard: 'dashboardB',
-            indexRelationId: 'ia//fa/ib//fb'
-          }
-        ];
-
-        const index = 'ia';
-
-        const buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, index);
-        expect(buttons.length).to.equal(1);
-        expect(buttons[0].sourceIndexPatternId).to.equal('ia');
-        expect(buttons[0].sourceIndexPatternType).to.equal('');
-        expect(buttons[0].sourceField).to.equal('fa');
-        expect(buttons[0].targetIndexPatternId).to.equal('ib');
-        expect(buttons[0].targetIndexPatternType).to.equal('');
-        expect(buttons[0].targetField).to.equal('fb');
-      });
-    });
-
-    describe('constructButtonArray - buttons configured with targetDashboard and indexRelationId', function () {
-      it('should correctly filter it out if currentDashboardIndex is neither in source nor in target for the button relation', function () {
-        init({
-          relations: {
-            relationsIndices: [
-              {
-                id: 'ic//fc/id//fd'
-              }
-            ],
-            relationsDashboards: []
-          }
-        });
-        const buttonDefs = [
-          {
-            label: 'from C to D',
-            targetDashboardId: 'dashboardC',
-            indexRelationId: 'ic//fc/id//fd'
-          }
-        ];
-        const dashboardIdIndexPair = new Map();
-        dashboardIdIndexPair.set('dashboardA', 'ia');
-        dashboardIdIndexPair.set('dashboardB', 'ib');
-
-        const index = 'ia';
-        const currentDashboardId = 'dashboardA';
-
-        const buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, index, currentDashboardId, dashboardIdIndexPair);
-        expect(buttons.length).to.equal(0);
-      });
-
-      it('should correctly filter out it if currentDashboardIndex same as relation source index' +
-         'but index of targetDashboard different than relation target index', function () {
-        init({
-          relations: {
-            relationsIndices: [
-              {
-                id: 'ia//fa/ib//fb'
-              }
-            ],
-            relationsDashboards: []
-          }
-        });
-        const buttonDefs = [
-          {
-            label: 'from B to A',
-            targetDashboardId: 'dashboardA',
-            indexRelationId: 'ia//fa/ib//fb'
-          }
-        ];
-        const dashboardIdIndexPair = new Map();
-        dashboardIdIndexPair.set('dashboardA', 'ia');
-        dashboardIdIndexPair.set('dashboardB', 'ib');
-        dashboardIdIndexPair.set('dashboardC', 'ia');
-
-        const index = 'ia';
-        const currentDashboardId = 'dashboardC';
-
-        const buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, index, currentDashboardId, dashboardIdIndexPair);
-        expect(buttons.length).to.equal(0);
-      });
-
-      it('should correctly filter it out if currentDashboardIndex same as relation target index' +
-         'but index of targetDashboard different than relation source index', function () {
-        init({
-          relations: {
-            relationsIndices: [
-              {
-                id: 'ib//fb/ia//fa'
-              }
-            ],
-            relationsDashboards: []
-          }
-        });
-        const buttonDefs = [
-          {
-            label: 'from B to A',
-            targetDashboardId: 'dashboardA',
-            indexRelationId: 'ib//fb/ia//fa'
-          }
-        ];
-        const dashboardIdIndexPair = new Map();
-        dashboardIdIndexPair.set('dashboardA', 'ia');
-        dashboardIdIndexPair.set('dashboardB', 'ib');
-        dashboardIdIndexPair.set('dashboardC', 'ia');
-
-        const index = 'ia';
-        const currentDashboardId = 'dashboardC';
-
-        const buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, index, currentDashboardId, dashboardIdIndexPair);
-        expect(buttons.length).to.equal(0);
-      });
-    });
-
     it('should not do anything when a button is clicked in the config window', function () {
       init({
         currentDashboardId: ''
@@ -238,20 +110,146 @@ describe('Kibi Components', function () {
     });
 
     describe('constructButtonArray', function () {
-      beforeEach(() => init());
+      describe('buttons configured with sourceDashboard targetDashboard and indexRelationId', function () {
+        it('should correctly assign source and target index, type and field', function () {
+          init({
+            relations: {
+              relationsIndices: [
+                {
+                  id: 'ia//fa/ib//fb'
+                }
+              ],
+              relationsDashboards: []
+            }
+          });
+          const buttonDefs = [
+            {
+              label: 'from A to B',
+              sourceDashboardId: 'dashboardA',
+              redirectToDashboard: 'dashboardB',
+              indexRelationId: 'ia//fa/ib//fb'
+            }
+          ];
+
+          const index = 'ia';
+
+          const buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, index);
+          expect(buttons.length).to.equal(1);
+          expect(buttons[0].sourceIndexPatternId).to.equal('ia');
+          expect(buttons[0].sourceIndexPatternType).to.equal('');
+          expect(buttons[0].sourceField).to.equal('fa');
+          expect(buttons[0].targetIndexPatternId).to.equal('ib');
+          expect(buttons[0].targetIndexPatternType).to.equal('');
+          expect(buttons[0].targetField).to.equal('fb');
+        });
+      });
+
+      describe('buttons configured with targetDashboard and indexRelationId', function () {
+        it('should correctly filter out if currentDashboardIndex is neither in source nor in target for the button relation', function () {
+          init({
+            relations: {
+              relationsIndices: [
+                {
+                  id: 'ic//fc/id//fd'
+                }
+              ],
+              relationsDashboards: []
+            }
+          });
+          const buttonDefs = [
+            {
+              label: 'from C to D',
+              targetDashboardId: 'dashboardC',
+              indexRelationId: 'ic//fc/id//fd'
+            }
+          ];
+          const dashboardIdIndexPair = new Map();
+          dashboardIdIndexPair.set('dashboardA', 'ia');
+          dashboardIdIndexPair.set('dashboardB', 'ib');
+
+          const index = 'ia';
+          const currentDashboardId = 'dashboardA';
+
+          const buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, index, currentDashboardId, dashboardIdIndexPair);
+          expect(buttons.length).to.equal(0);
+        });
+
+        it('should correctly filter out it if currentDashboardIndex same as relation source index' +
+          'but index of targetDashboard different than relation target index', function () {
+          init({
+            relations: {
+              relationsIndices: [
+                {
+                  id: 'ia//fa/ib//fb'
+                }
+              ],
+              relationsDashboards: []
+            }
+          });
+          const buttonDefs = [
+            {
+              label: 'from B to A',
+              targetDashboardId: 'dashboardA',
+              indexRelationId: 'ia//fa/ib//fb'
+            }
+          ];
+          const dashboardIdIndexPair = new Map();
+          dashboardIdIndexPair.set('dashboardA', 'ia');
+          dashboardIdIndexPair.set('dashboardB', 'ib');
+          dashboardIdIndexPair.set('dashboardC', 'ia');
+
+          const index = 'ia';
+          const currentDashboardId = 'dashboardC';
+
+          const buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, index, currentDashboardId, dashboardIdIndexPair);
+          expect(buttons.length).to.equal(0);
+        });
+
+        it('should correctly filter it out if currentDashboardIndex same as relation target index' +
+          'but index of targetDashboard different than relation source index', function () {
+          init({
+            relations: {
+              relationsIndices: [
+                {
+                  id: 'ib//fb/ia//fa'
+                }
+              ],
+              relationsDashboards: []
+            }
+          });
+          const buttonDefs = [
+            {
+              label: 'from B to A',
+              targetDashboardId: 'dashboardA',
+              indexRelationId: 'ib//fb/ia//fa'
+            }
+          ];
+          const dashboardIdIndexPair = new Map();
+          dashboardIdIndexPair.set('dashboardA', 'ia');
+          dashboardIdIndexPair.set('dashboardB', 'ib');
+          dashboardIdIndexPair.set('dashboardC', 'ia');
+
+          const index = 'ia';
+          const currentDashboardId = 'dashboardC';
+
+          const buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs, index, currentDashboardId, dashboardIdIndexPair);
+          expect(buttons.length).to.equal(0);
+        });
+      });
 
       it('empty buttonsDef array', function () {
         const buttonDefs = [];
         const expected = [];
-        const buttons = sequentialJoinVisHelper.constructButtonsArray(buttonDefs);
 
-        expect(buttons).to.eql(expected);
+        init();
+        expect(sequentialJoinVisHelper.constructButtonsArray(buttonDefs)).to.eql(expected);
       });
 
       describe('custom filter label', function () {
         let index;
         let buttonDefs;
 
+        beforeEach(() => init());
         beforeEach(function () {
           index = 'index1';
           buttonDefs = [

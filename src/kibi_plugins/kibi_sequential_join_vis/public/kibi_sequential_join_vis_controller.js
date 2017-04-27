@@ -157,15 +157,12 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
     return Promise.resolve(buttons);
   };
 
-  const _constructButtons = function () {
-    const validatedButtonsDefs = _.filter(
-      $scope.vis.params.buttons,
-      btn => relationsHelper.validateIndicesRelationFromId(btn.indexRelationId)
-    );
+  const _constructButtons = $scope._constructButtons = function () {
+    const buttonDefs = _.filter($scope.vis.params.buttons, btn => relationsHelper.validateIndicesRelationFromId(btn.indexRelationId));
 
     $scope.vis.error = '';
 
-    if (validatedButtonsDefs.length !== $scope.vis.params.buttons.length) {
+    if (buttonDefs.length !== $scope.vis.params.buttons.length) {
       $scope.vis.error = 'Invalid configuration of the Kibi relational filter visualization';
       if (!edit) {
         return Promise.reject($scope.vis.error);
@@ -178,7 +175,7 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
       if (_.get(kacConfiguration, 'acl.enabled')) {
         getButtonDefs = savedDashboards.find().then((dashboards) => {
           // iterate over the buttonsDefs and remove the
-          return _.filter(validatedButtonsDefs, (btn) => {
+          return _.filter(buttonDefs, (btn) => {
             // sourceDashboardId is optional
             if (btn.sourceDashboardId && !_.find(dashboards.hits, 'id', btn.sourceDashboardId)) {
               return false;
@@ -190,7 +187,7 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
           });
         });
       } else {
-        getButtonDefs = Promise.resolve(validatedButtonsDefs);
+        getButtonDefs = Promise.resolve(buttonDefs);
       }
 
       return getButtonDefs.then((buttonsDefs) => {
@@ -244,7 +241,7 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
       })
       .catch(notify.error);
     } else {
-      $scope.buttons = kibiSequentialJoinVisHelper.constructButtonsArray(validatedButtonsDefs);
+      $scope.buttons = kibiSequentialJoinVisHelper.constructButtonsArray(buttonDefs);
     }
   };
 

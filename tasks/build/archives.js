@@ -3,6 +3,7 @@ import Promise from 'bluebird';
 import { resolve } from 'path';
 import _ from 'lodash'; // kibi: dependencies added by
 import fs from 'fs'; // kibi: dependencies added by
+const isWin = /^win/.test(process.platform);
 
 export default (grunt) => {
   const { config, log } = grunt;
@@ -16,12 +17,18 @@ export default (grunt) => {
   };
 
   async function archives({ name, buildName, zipPath, tarPath }) {
-    await exec('tar', ['-chzf', tarPath, buildName]);
-
-    if (/windows/.test(name)) {
-      await exec('zip', ['-rq', '-ll', zipPath, buildName]);
+    // siren: windows (with Java installed) can use jar instead of tar/zip
+    // assume Java is installed as they're using ElasticSearch
+    if (isWin) {
+      await exec('jar', ['-cMf', tarPath, buildName]);
+      await exec('jar', ['-cMf', zipPath, buildName]);
     } else {
-      await exec('zip', ['-rq', zipPath, buildName]);
+      await exec('tar', ['-chzf', tarPath, buildName]);
+      if (/windows/.test(name)) {
+        await exec('zip', ['-rq', '-ll', zipPath, buildName]);
+      } else {
+        await exec('zip', ['-rq', zipPath, buildName]);
+      }
     }
   };
 

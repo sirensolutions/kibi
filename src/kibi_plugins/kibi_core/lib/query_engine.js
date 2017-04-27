@@ -17,10 +17,7 @@ import RestQuery from './queries/rest_query';
 import ErrorQuery from './queries/error_query';
 import InactivatedQuery from './queries/inactivated_query';
 import MissingSelectedDocumentQuery from './queries/missing_selected_document_query';
-import JDBC from 'jdbc';
-import jinst from 'jdbc/lib/jinst';
-import JdbcQuery  from './queries/jdbc_query';
-import JdbcHelper from './jdbc_helper';
+let JdbcQuery;
 
 function QueryEngine(server) {
   this.server = server;
@@ -353,6 +350,10 @@ QueryEngine.prototype._loadQueries = function () {
 
 QueryEngine.prototype.setupJDBC = function () {
   if (this.config.get('kibi_core.load_jdbc') === true) {
+    const JDBC = require('jdbc');
+    const jinst = require('jdbc/lib/jinst');
+    JdbcQuery  = require('./queries/jdbc_query');
+    const JdbcHelper = require('./jdbc_helper');
     const jdbcHelper = new JdbcHelper(this.server);
 
     return jdbcHelper.prepareJdbcPaths().then(function (paths) {

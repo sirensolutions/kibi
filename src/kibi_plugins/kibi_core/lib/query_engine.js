@@ -142,8 +142,7 @@ QueryEngine.prototype._isKibiIndexPresent = function () {
 
 QueryEngine.prototype._refreshKibiIndex = function () {
   return this.cluster.callWithInternalUser('indices.refresh', {
-    index: this.config.get('kibana.index'),
-    force: true
+    index: this.config.get('kibana.index')
   });
 };
 

@@ -32,45 +32,53 @@ kibi_core:
 ----
 
 [float]
-=== Backing up the .kibi index.
+=== Backing up and Restoring the Kibi indices.
 
 Before upgrading it is strongly recommended to have a backup of the `.kibi` index; the recommended way to perform regular backups of
 Elasticsearch indexes is through the {elastic-ref}modules-snapshots.html[snapshot and restore modules].
 
-A useful tool to take a one-off backup is https://www.npmjs.com/package/elasticdump[elasticdump]; once installed, it is possible to dump
-the `.kibi` index mappings and data on two separate files by running the following commands:
+Kibi ships with a command line interface for creating dumps of the `.kibi` index and, in case the `ACL` is enabled, the `.kibiaccess` index as well.
+An index dump is composed of two parts: its mappings and its data.
+
+[float]
+==== Backup
+
+The backup command requires a running Elasticsearch instance and the path to a folder where the dumps will be written to.
+
+You can know more about its options by executing the following:
 
 [source,shell]
 ----
-elasticdump --input=http://<cluster address>:<cluster port>/<kibi index> --type=mapping --output=<mappings_dump_file>
-
-elasticdump --input=http://<cluster address>:<cluster port>/<kibi index> --type=data --output=<data_dump_file>
+$ ./bin/kibi backup --help
 ----
 
-Full example:
+For example, the following line will dump in `<MY_FOLDER>` the `.kibi` index, and the `.kibiaccess` index if the option `kibi_access_control.acl.enabled` is true in `kibi.yml`:
 
 [source,shell]
 ----
-$ elasticdump --input=http://192.168.99.100:9200/.kibi --type=mapping --output=mappings.json
-$ elasticdump --input=http://192.168.99.100:9200/.kibi --type=data --output=data.json
+$ ./bin/kibi backup --backup-dir <MY_FOLDER>
 ----
 
-If needed, you can restore the index from dumps by running the following commands:
+[float]
+==== Restore
 
-[source,shell]
-----
-elasticdump --input=<mappings_dump_file> --type=mapping --output=http://<cluster address>:<cluster port>/<kibi index>
+The restore command requires a running Elasticsearch instance and the path to a folder where the dumps were written to by the previous backup command.
 
-elasticdump --input=<data_file> --type=data --output=http://<cluster address>:<cluster port>/<kibi index>
-----
-
-Full example:
+You can know more about its options by executing the following:
 
 [source,shell]
 ----
-$ elasticdump --input=mappings.json --type=mapping --output=http://192.168.99.100:9200/.kibi
-$ elasticdump --input=data.json --type=data --output=http://192.168.99.100:9200/.kibi
+$ ./bin/kibi restore --help
 ----
+
+For example, you can restore the previously saved indices by executing the command and pointing to the dump folder, with `.kibiaccess` as well if the option `kibi_access_control.acl.enabled` is true in `kibi.yml`:
+
+[source,shell]
+----
+$ ./bin/kibi restore --backup-dir <MY_FOLDER>
+----
+
+In addition, an <<kibi-upgrade-command,upgrade>> of the Kibi indices is also executed after a successful restore.
 
 [float]
 [[kibi-upgrade-command]]

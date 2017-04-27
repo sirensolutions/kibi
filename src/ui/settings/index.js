@@ -56,12 +56,12 @@ export default function setupSettings(kbnServer, server, config) {
   async function getRaw(req) {
     assertRequest(req);
     return Promise
-      .all([getDefaults(), getUserProvided(req)])
+      .all([getDefaults(kbnServer.kibiEnterpriseEnabled), getUserProvided(req)]) // kibi: pass Enterprise enabled
       .then(([defaults, user]) => defaultsDeep(user, defaults));
   }
 
   function getDefaults() {
-    return Promise.resolve(defaultsProvider());
+    return Promise.resolve(defaultsProvider(kbnServer.kibiEnterpriseEnabled)); // kibi: pass Enterprise enabled
   }
 
   async function getUserProvided(req, { ignore401Errors = false } = {}) {

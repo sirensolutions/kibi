@@ -37,7 +37,7 @@ kibi_core:
 Before upgrading it is strongly recommended to have a backup of the `.kibi` index; the recommended way to perform regular backups of
 Elasticsearch indexes is through the {elastic-ref}modules-snapshots.html[snapshot and restore modules].
 
-Kibi ships with a command line interface for creating dumps of the `.kibi` index and, in case the `ACL` is enabled, the `.kibiaccess` as well.
+Kibi ships with a command line interface for creating dumps of the `.kibi` index and, in case the `ACL` is enabled, the `.kibiaccess` index as well.
 An index dump is composed of two parts: its mappings and its data.
 
 [float]

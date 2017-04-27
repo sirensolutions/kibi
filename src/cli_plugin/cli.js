@@ -6,13 +6,13 @@ import installCommand from './install';
 import removeCommand from './remove';
 
 const argv = process.env.kbnWorkerArgv ? JSON.parse(process.env.kbnWorkerArgv) : process.argv.slice();
-const program = new Command('bin/kibana-plugin');
+const program = new Command('bin/kibi-plugin');
 
 program
 .version(pkg.version)
 .description(
-  'The Kibana plugin manager enables you to install and remove plugins that ' +
-  'provide additional functionality to Kibana'
+  'The Kibi plugin manager enables you to install and remove plugins that ' +
+  'provide additional functionality to Kibi'
 );
 
 listCommand(program);

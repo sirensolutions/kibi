@@ -375,4 +375,49 @@ module.exports = (server, API_ROOT) => {
     }
   });
 
+  /**
+   * Returns the number of saved objects of a specific type, using the same
+   * format as an Elasticsearch count response.
+   *
+   * Errors are returned in the same format as Elasticsearch.
+   *
+   * Querystring parameters:
+   *
+   *   - q: a text to search
+   *
+   * Errors are formatted by a custom handler set in the init method of this plugin.
+   */
+  server.route({
+    method: 'POST',
+    path: `${API_ROOT}/{index}/{type}/_count`,
+    handler: (request, reply) => {
+      let model;
+      try {
+        model = getModel(request.params.type);
+      } catch (error) {
+        return reply(Boom.notFound(error));
+      }
+      model.count(request.query.q || request.payload, request)
+      .then((count) => {
+        reply({
+          count: count
+        });
+      })
+      .catch((error) => {
+        return replyError(error, reply);
+      });
+    },
+    config: {
+      validate: {
+        params: {
+          index: Joi.string().required(),
+          type: Joi.string().required()
+        },
+        query: {
+          q: Joi.string().default(null)
+        }
+      }
+    }
+  });
+
 };

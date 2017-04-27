@@ -162,7 +162,7 @@ function init({ currentDashboardId = 'Articles', indexPatterns, savedDashboards,
     dashboardGroups = _dashboardGroups_;
     sinon.stub(chrome, 'getBasePath').returns('');
     sinon.stub(kibiState, '_getCurrentDashboardId').returns(currentDashboardId);
-    sinon.stub(kibiState, 'isSirenJoinPluginInstalled').returns(Promise.resolve(true));
+    sinon.stub(kibiState, 'isSirenJoinPluginInstalled').returns(true);
     setSelectedDashboardIdStub = sinon.stub(kibiState, 'setSelectedDashboardId');
     es = _es_;
   });

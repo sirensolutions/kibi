@@ -45,7 +45,7 @@ module.exports = function (kibana) {
     return false;
   };
 
-  const handler = function (server, method, req, reply) {
+  const queryEngineHandler = function (server, method, req, reply) {
     const params = req.query;
     let options = {};
     let queryDefs = [];
@@ -214,7 +214,7 @@ module.exports = function (kibana) {
         method: 'GET',
         path:'/clearCache',
         handler: function (req, reply) {
-          handler(server, 'clearCache', req, reply);
+          queryEngineHandler(server, 'clearCache', req, reply);
         }
       });
 
@@ -222,7 +222,7 @@ module.exports = function (kibana) {
         method: 'GET',
         path:'/getQueriesHtml',
         handler: function (req, reply) {
-          handler(server, 'getQueriesHtml', req, reply);
+          queryEngineHandler(server, 'getQueriesHtml', req, reply);
         }
       });
 
@@ -230,7 +230,7 @@ module.exports = function (kibana) {
         method: 'GET',
         path:'/getQueriesData',
         handler: function (req, reply) {
-          handler(server, 'getQueriesData', req, reply);
+          queryEngineHandler(server, 'getQueriesData', req, reply);
         }
       });
 
@@ -238,7 +238,7 @@ module.exports = function (kibana) {
         method: 'GET',
         path:'/getIdsFromQueries',
         handler: function (req, reply) {
-          handler(server, 'getIdsFromQueries', req, reply);
+          queryEngineHandler(server, 'getIdsFromQueries', req, reply);
         }
       });
 
@@ -340,6 +340,21 @@ module.exports = function (kibana) {
           directory: {
             path: path.normalize(__dirname + '../../../plugins/')
           }
+        }
+      });
+
+      // Adding a route to return the list of installed Elasticsearch plugins
+      server.route({
+        method: 'GET',
+        path:'/getElasticsearchPlugins',
+        handler: function (request, reply) {
+          const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('data');
+
+          return callWithInternalUser('cat.plugins', {
+            h: 'component',
+            format: 'json'
+          })
+          .then(components => reply(_.pluck(components, 'component')));
         }
       });
     }

@@ -17,7 +17,6 @@ describe('Kibi Management', function () {
       $provide.constant('kbnDefaultAppId', 'dashboard');
       $provide.constant('kibiDefaultDashboardTitle', '');
       $provide.constant('kibiEnterpriseEnabled', false);
-      $provide.constant('elasticsearchPlugins', ['siren-platform']);
     });
 
     ngMock.module('discover/saved_searches', function ($provide) {

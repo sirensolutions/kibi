@@ -65,15 +65,6 @@ describe('State Management', function () {
       globalState = new MockState({ filters: pinned || [] });
       $provide.service('globalState', () => globalState);
 
-      $provide.service('esAdmin', (Promise) => {
-        return {
-          cat: {
-            plugins() {
-              return Promise.resolve([ { component: 'siren-platform' } ]);
-            }
-          }
-        };
-      });
       $provide.constant('kbnIndex', '.kibi');
       $provide.constant('kibiEnterpriseEnabled', kibiEnterpriseEnabled);
       $provide.constant('kbnDefaultAppId', '');
@@ -92,7 +83,7 @@ describe('State Management', function () {
       $provide.service('savedDashboards', (Promise, Private) => mockSavedObjects(Promise, Private)('savedDashboards', savedDashboards));
     });
 
-    ngMock.inject(function (_indexPatterns_, _timefilter_, _config_, _$location_, _kibiState_) {
+    ngMock.inject(function (elasticsearchPlugins, _indexPatterns_, _timefilter_, _config_, _$location_, _kibiState_) {
       onDashboardPageSpy = sinon.stub(onPage, 'onDashboardPage').returns(currentPath.split('/')[1] === 'dashboard');
       onVisualizePageSpy = sinon.stub(onPage, 'onVisualizePage').returns(currentPath.split('/')[1] === 'visualize');
       onManagementPageSpy = sinon.stub(onPage, 'onManagementPage').returns(currentPath.split('/')[1] === 'settings');
@@ -103,6 +94,8 @@ describe('State Management', function () {
       kibiState = _kibiState_;
 
       disableFiltersIfOutdatedSpy = sinon.spy(kibiState, 'disableFiltersIfOutdated');
+
+      sinon.stub(elasticsearchPlugins, 'get').returns([ 'siren-platform' ]);
 
       config = _config_;
       const defaultTime = {
@@ -2247,10 +2240,7 @@ describe('State Management', function () {
         });
 
         it('should be enabled if the plugin is installed', function () {
-          return kibiState.isSirenJoinPluginInstalled()
-          .then(installed => {
-            expect(installed).to.be(true);
-          });
+          expect(kibiState.isSirenJoinPluginInstalled()).to.be(true);
         });
 
         it('should fail if the focused dashboard cannot be retrieved', function (done) {

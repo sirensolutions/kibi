@@ -14,7 +14,7 @@ import 'ui/kibi/directives/kibi_select';
 import 'ui/kibi/directives/kibi_array_param';
 
 function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope, Private, $http, createNotifier, globalState, Promise,
-  kbnIndex, config) {
+  kbnIndex, config, kacConfiguration, savedDashboards) {
   const DelayExecutionHelper = Private(DelayExecutionHelperProvider);
   const kibiNavBarHelper = Private(KibiNavBarHelperProvider);
   const searchHelper = new SearchHelper(kbnIndex);
@@ -157,12 +157,13 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
     return Promise.resolve(buttons);
   };
 
-  const _constructButtons = function () {
-    const buttonsDefs = _.filter($scope.vis.params.buttons, btn => relationsHelper.validateIndicesRelationFromId(btn.indexRelationId));
+  const _constructButtons = $scope._constructButtons = function () {
+    const originalButtonDefs = _.filter($scope.vis.params.buttons,
+      btn => relationsHelper.validateIndicesRelationFromId(btn.indexRelationId));
 
     $scope.vis.error = '';
 
-    if (buttonsDefs.length !== $scope.vis.params.buttons.length) {
+    if (originalButtonDefs.length !== $scope.vis.params.buttons.length) {
       $scope.vis.error = 'Invalid configuration of the Kibi relational filter visualization';
       if (!edit) {
         return Promise.reject($scope.vis.error);
@@ -170,16 +171,46 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
     }
 
     if (!edit) {
-      const dashboardIds = [currentDashboardId];
-      _.each(buttonsDefs, function (button) {
-        if (!_.contains(dashboardIds, button.targetDashboardId)) {
-          dashboardIds.push(button.targetDashboardId);
-        }
-      });
-      return kibiState._getDashboardAndSavedSearchMetas(dashboardIds, true)
-      .then((metas) => {
+      let getButtonDefs;
+
+      if (_.get(kacConfiguration, 'acl.enabled')) {
+        getButtonDefs = savedDashboards.find().then((dashboards) => {
+          // iterate over the original definitions and remove the ones that depend on missing dashboards
+          return _.filter(originalButtonDefs, (btn) => {
+            // sourceDashboardId is optional
+            if (btn.sourceDashboardId && !_.find(dashboards.hits, 'id', btn.sourceDashboardId)) {
+              return false;
+            }
+            if (!_.find(dashboards.hits, 'id', btn.targetDashboardId)) {
+              return false;
+            }
+            return true;
+          });
+        });
+      } else {
+        getButtonDefs = Promise.resolve(originalButtonDefs);
+      }
+
+      return getButtonDefs.then((buttonDefs) => {
+        const dashboardIds = [ currentDashboardId ];
+        _.each(buttonDefs, function (button) {
+          if (!_.contains(dashboardIds, button.targetDashboardId)) {
+            dashboardIds.push(button.targetDashboardId);
+          }
+        });
+
+        return kibiState._getDashboardAndSavedSearchMetas(dashboardIds, true)
+        .then((metas) => {
+          return {
+            metas,
+            buttonDefs
+          };
+        });
+      })
+      .then(({ metas, buttonDefs }) => {
         let currentDashboardIndex = '';
         const dashboardIdIndexPair = new Map();
+
         for (let i = 0; i < metas.length; i++) {
           if (metas[i].savedSearchMeta !== null) {
             dashboardIdIndexPair.set(metas[i].savedDash.id, metas[i].savedSearchMeta.index);
@@ -190,8 +221,14 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
             currentDashboardIndex = metas[i].savedSearchMeta.index;
           }
         }
-        const buttons = kibiSequentialJoinVisHelper.constructButtonsArray(buttonsDefs, currentDashboardIndex,
-                                                                           currentDashboardId, dashboardIdIndexPair);
+
+        const buttons = kibiSequentialJoinVisHelper.constructButtonsArray(
+          buttonDefs,
+          currentDashboardIndex,
+          currentDashboardId,
+          dashboardIdIndexPair
+        );
+
         // retain the buttons order
         for (let i = 0; i < buttons.length; i++) {
           buttons[i].btnIndex = i;
@@ -202,9 +239,10 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
             `No button has a source index matching the current dashboard index: ${currentDashboardIndex}.`;
         }
         return buttons;
-      }).catch(notify.error);
+      })
+      .catch(notify.error);
     } else {
-      $scope.buttons = kibiSequentialJoinVisHelper.constructButtonsArray(buttonsDefs);
+      $scope.buttons = kibiSequentialJoinVisHelper.constructButtonsArray(originalButtonDefs);
     }
   };
 

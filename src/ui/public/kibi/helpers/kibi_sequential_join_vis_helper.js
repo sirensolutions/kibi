@@ -33,7 +33,7 @@ export default function KibiSequentialJoinVisHelperFactory(savedDashboards, kbnU
         return false;
       }
       if (dashboardIdIndexPair && currentDashboardIndexId === relationInfo.target.index &&
-         dashboardIdIndexPair.get(buttonDef.targetDashboardId) !== relationInfo.source.index) {
+          dashboardIdIndexPair.get(buttonDef.targetDashboardId) !== relationInfo.source.index) {
         return false;
       }
       return true;

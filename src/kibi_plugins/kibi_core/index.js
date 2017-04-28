@@ -125,8 +125,10 @@ module.exports = function (kibana) {
         'plugins/kibi_core/ui/spy_modes/multi_search_spy_mode'
       ],
       injectDefaultVars: function (server, options) {
+        const config = server.config();
         const vars = {};
 
+        // kibi_core options
         if (options) {
           vars.kibiDatasourcesSchema = options.datasources_schema;
           vars.kibiDefaultDashboardTitle = options.default_dashboard_title;
@@ -135,6 +137,12 @@ module.exports = function (kibana) {
             vars.kibiWarnings.datasource_encryption_warning = true;
           }
         }
+        // other options
+        vars.kacConfiguration = {
+          acl: {
+            enabled: config.has('kibi_access_control.acl.enabled') ? config.get('kibi_access_control.acl.enabled') : false
+          }
+        };
 
         return vars;
       }

@@ -15,7 +15,6 @@ import 'ui/kibi/directives/kibi_array_param';
 
 function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope, Private, $http, createNotifier, globalState, Promise,
   kbnIndex, config, kacConfiguration, savedDashboards, timefilter) {
-
   const DelayExecutionHelper = Private(DelayExecutionHelperProvider);
   const kibiNavBarHelper = Private(KibiNavBarHelperProvider);
   const searchHelper = new SearchHelper(kbnIndex);

@@ -16,7 +16,6 @@ describe('Kibi Directives', function () {
     let kibiNavBarHelper;
     let $rootScope;
     let dashboardGroups;
-    let timefilter;
 
     let timeBasedIndicesStub;
     let getDashboardsMetadataStub;
@@ -39,6 +38,15 @@ describe('Kibi Directives', function () {
           mockTimeout.cancel = _.noop;
           return mockTimeout;
         });
+        $provide.service('timefilter', () => {
+          const timefilter = {
+            refreshInterval: {
+              display: '5 seconds',
+              pause: false
+            }
+          };
+          return timefilter;
+        });
         $provide.constant('kbnDefaultAppId', '');
         $provide.constant('kibiDefaultDashboardTitle', '');
       });
@@ -51,11 +59,10 @@ describe('Kibi Directives', function () {
         $provide.service('savedSearches', (Promise, Private) => mockSavedObjects(Promise, Private)('savedSearches', []));
       });
 
-      ngMock.inject(function (_dashboardGroups_, _globalState_, _kibiState_, _$rootScope_, _timefilter_, Private) {
+      ngMock.inject(function (_dashboardGroups_, _globalState_, _kibiState_, _$rootScope_, Private) {
         globalState = _globalState_;
         kibiState = _kibiState_;
         $rootScope = _$rootScope_;
-        timefilter = _timefilter_;
         kibiNavBarHelper = Private(KibiNavBarHelperProvider);
 
         sinon.stub(kibiState, '_getDashboardsIdInConnectedComponent').returns(dashboardsIdsInConnectedComponents);
@@ -574,10 +581,6 @@ describe('Kibi Directives', function () {
       }));
 
       it('should update the counts of current dashboard plus connected dashboards on courier:searchRefresh', function () {
-        timefilter.refreshInterval = {
-          display: '5 seconds',
-          pause: false
-        };
         const stub = sinon.stub(kibiNavBarHelper, 'updateAllCounts');
         $rootScope.$broadcast('courier:searchRefresh');
         expect(stub.calledWith(null, 'courier:searchRefresh event', true)).to.be(true);

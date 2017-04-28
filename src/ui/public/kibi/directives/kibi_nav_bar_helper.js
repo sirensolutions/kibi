@@ -5,7 +5,7 @@ import SearchHelper from 'ui/kibi/helpers/search_helper';
 import { onDashboardPage } from 'ui/kibi/utils/on_page';
 
 export default function KibiNavBarHelperFactory(dashboardGroups, kibiState, globalState, getAppState, createNotifier, Private, $rootScope,
-  savedDashboards) {
+  savedDashboards, timefilter) {
   const notify = createNotifier({
     location: 'Kibi Navbar helper'
   });
@@ -110,11 +110,14 @@ export default function KibiNavBarHelperFactory(dashboardGroups, kibiState, glob
     // make a comment that it was required because not all components can listen to
     // esResponse
     $rootScope.$on('courier:searchRefresh', (event) => {
-      const currentDashboard = kibiState._getCurrentDashboardId();
-      if (!currentDashboard) {
-        return;
+      if ((timefilter.refreshInterval.display !== 'Off')
+          && (timefilter.refreshInterval.pause === false)) {
+        const currentDashboard = kibiState._getCurrentDashboardId();
+        if (!currentDashboard) {
+          return;
+        }
+        this.updateAllCounts(null, 'courier:searchRefresh event', true);
       }
-      this.updateAllCounts(null, 'courier:searchRefresh event', true);
     });
 
     const self = this;

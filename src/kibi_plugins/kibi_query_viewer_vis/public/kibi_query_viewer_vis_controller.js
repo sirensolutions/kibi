@@ -10,7 +10,7 @@ import kibiUtils from 'kibiutils';
 /*global alert:false */
 uiModules
 .get('kibana/kibi_query_viewer_vis', ['kibana'])
-.controller('KibiQueryViewerVisController', function ($rootScope, $scope, kibiState, queryEngineClient, createNotifier) {
+.controller('KibiQueryViewerVisController', function ($rootScope, $scope, kibiState, queryEngineClient, createNotifier, timefilter) {
   const notify = createNotifier({
     location: 'Kibi Query Viewer'
   });
@@ -46,7 +46,10 @@ uiModules
 
   // when autoupdate is on we detect the refresh here
   const removeAutorefreshHandler = $rootScope.$on('courier:searchRefresh', function (event) {
-    $scope.renderTemplates();
+    if ((timefilter.refreshInterval.display !== 'Off')
+        && (timefilter.refreshInterval.pause === false)) {
+      $scope.renderTemplates();
+    }
   });
 
   $scope.$on('$destroy', function () {

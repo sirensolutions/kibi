@@ -38,6 +38,15 @@ describe('Kibi Directives', function () {
           mockTimeout.cancel = _.noop;
           return mockTimeout;
         });
+        $provide.service('timefilter', () => {
+          const timefilter = {
+            refreshInterval: {
+              display: '5 seconds',
+              pause: false
+            }
+          };
+          return timefilter;
+        });
         $provide.constant('kbnDefaultAppId', '');
         $provide.constant('kibiDefaultDashboardTitle', '');
       });

@@ -14,7 +14,7 @@ import 'ui/kibi/directives/kibi_select';
 import 'ui/kibi/directives/kibi_array_param';
 
 function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope, Private, $http, createNotifier, globalState, Promise,
-  kbnIndex, config, kacConfiguration, savedDashboards) {
+  kbnIndex, config, kacConfiguration, savedDashboards, timefilter) {
   const DelayExecutionHelper = Private(DelayExecutionHelperProvider);
   const kibiNavBarHelper = Private(KibiNavBarHelperProvider);
   const searchHelper = new SearchHelper(kbnIndex);
@@ -346,12 +346,15 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
 
   // when autoupdate is on we detect the refresh here
   const removeAutorefreshHandler = $rootScope.$on('courier:searchRefresh', (event) => {
-    const currentDashboard = kibiState._getCurrentDashboardId();
-    if (!currentDashboard) {
-      return;
-    }
+    if ((timefilter.refreshInterval.display !== 'Off')
+        && (timefilter.refreshInterval.pause === false)) {
+      const currentDashboard = kibiState._getCurrentDashboardId();
+      if (!currentDashboard) {
+        return;
+      }
 
-    updateButtons('courier:searchRefresh');
+      updateButtons('courier:searchRefresh');
+    }
   });
 
   $scope.$on('$destroy', function () {

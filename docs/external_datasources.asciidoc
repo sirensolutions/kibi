@@ -145,12 +145,13 @@ image::images/external_sources/entity_selection_hover.png["Entity selection opti
 
 You can define templates to format query results.
 
-Kibi supports two template engines:
+Kibi supports three template engines:
 
 * http://jade-lang.com/[jade]
 * http://handlebarsjs.com/[handlebars]
+* html-angular
 
-There are three pre-defined templates:
+There are four pre-defined templates:
 
 * _kibi-json-jade_: this template presents the query results as a pretty-printed
 JSON object using the _jade_ engine. This is useful to test queries while
@@ -159,6 +160,7 @@ writing them.
 using the _jade_ engine.
 * _kibi-table-handlebars_: like _kibi-table-jade_, using the _handlebars_
 engine instead.
+* _kibi-html-angular_: this template for each document displays a panel populated with all property values (Currently supported only in Enhanced search results visualisation)
 
 You can define your own custom template by clicking on the _Settings / Templates_
 tab.

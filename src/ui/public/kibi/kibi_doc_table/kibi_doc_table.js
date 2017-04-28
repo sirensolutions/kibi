@@ -11,6 +11,7 @@ import 'ui/doc_table/components/table_header';
 import 'ui/kibi/kibi_doc_table/kibi_doc_table.less';
 import 'ui/kibi/kibi_doc_table/components/kibi_table_row';
 import 'ui/kibi/kibi_doc_table/components/kibi_table_header';
+import 'ui/kibi/kibi_doc_table/components/kibi_custom_view';
 
 import fileSaver from '@spalger/filesaver';
 
@@ -29,13 +30,14 @@ uiModules
     restrict: 'E',
     template: html,
     scope: {
-      sorting: '=',
       columns: '=',
       hits: '=?', // You really want either hits & indexPattern, OR searchSource
       indexPattern: '=?',
       searchSource: '=?',
       infiniteScroll: '=?',
       filter: '=?',
+      templateId: '=?',
+      customViewerMode: '=?',
 
       // kibi:
       // added cellClickHandlers, queryColumn and columnAliases
@@ -43,16 +45,13 @@ uiModules
       cellClickHandlers: '=',
       queryColumn: '=',
       columnAliases: '=?',
+      options: '='
     },
     link: function ($scope) {
       const notify = createNotifier({
         location: 'Enhanced search results'
       });
       $scope.limit = 50;
-      $scope.persist = {
-        sorting: $scope.sorting,
-        columns: $scope.columns
-      };
 
       const prereq = (function () {
         const fns = [];
@@ -223,7 +222,7 @@ uiModules
         // kibi: end
 
         // Set the watcher after initialization
-        $scope.$watchCollection('sorting', function (newSort, oldSort) {
+        $scope.$watchCollection('options.sorting', function (newSort, oldSort) {
           // Don't react if sort values didn't really change
           if (newSort === oldSort) return;
           $scope.searchSource.sort(getSort(newSort, $scope.indexPattern));

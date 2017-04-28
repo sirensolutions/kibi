@@ -63,7 +63,8 @@ export default function KibiSelectHelperFactory(config, indexPatterns, Private, 
         const items = _.map(data.hits, function (hit) {
           return {
             label: hit.title,
-            value: hit.id
+            value: hit.id,
+            templateEngine: hit.templateEngine
           };
         });
         return items;

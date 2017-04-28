@@ -220,6 +220,7 @@ QueryEngine.prototype._loadTemplates = function () {
   const self = this;
 
   const templatesToLoad = [
+    'kibi-html-angular',
     'kibi-json-jade',
     'kibi-table-jade',
     'kibi-table-handlebars'

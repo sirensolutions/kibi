@@ -158,11 +158,12 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
   };
 
   const _constructButtons = $scope._constructButtons = function () {
-    const buttonDefs = _.filter($scope.vis.params.buttons, btn => relationsHelper.validateIndicesRelationFromId(btn.indexRelationId));
+    const originalButtonDefs = _.filter($scope.vis.params.buttons,
+      btn => relationsHelper.validateIndicesRelationFromId(btn.indexRelationId));
 
     $scope.vis.error = '';
 
-    if (buttonDefs.length !== $scope.vis.params.buttons.length) {
+    if (originalButtonDefs.length !== $scope.vis.params.buttons.length) {
       $scope.vis.error = 'Invalid configuration of the Kibi relational filter visualization';
       if (!edit) {
         return Promise.reject($scope.vis.error);
@@ -174,8 +175,8 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
 
       if (_.get(kacConfiguration, 'acl.enabled')) {
         getButtonDefs = savedDashboards.find().then((dashboards) => {
-          // iterate over the buttonsDefs and remove the
-          return _.filter(buttonDefs, (btn) => {
+          // iterate over the original definitions and remove the ones that depend on missing dashboards
+          return _.filter(originalButtonDefs, (btn) => {
             // sourceDashboardId is optional
             if (btn.sourceDashboardId && !_.find(dashboards.hits, 'id', btn.sourceDashboardId)) {
               return false;
@@ -187,12 +188,12 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
           });
         });
       } else {
-        getButtonDefs = Promise.resolve(buttonDefs);
+        getButtonDefs = Promise.resolve(originalButtonDefs);
       }
 
-      return getButtonDefs.then((buttonsDefs) => {
+      return getButtonDefs.then((buttonDefs) => {
         const dashboardIds = [ currentDashboardId ];
-        _.each(buttonsDefs, function (button) {
+        _.each(buttonDefs, function (button) {
           if (!_.contains(dashboardIds, button.targetDashboardId)) {
             dashboardIds.push(button.targetDashboardId);
           }
@@ -202,11 +203,11 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
         .then((metas) => {
           return {
             metas,
-            buttonsDefs
+            buttonDefs
           };
         });
       })
-      .then(({ metas, buttonsDefs }) => {
+      .then(({ metas, buttonDefs }) => {
         let currentDashboardIndex = '';
         const dashboardIdIndexPair = new Map();
 
@@ -222,7 +223,7 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
         }
 
         const buttons = kibiSequentialJoinVisHelper.constructButtonsArray(
-          buttonsDefs,
+          buttonDefs,
           currentDashboardIndex,
           currentDashboardId,
           dashboardIdIndexPair
@@ -241,7 +242,7 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
       })
       .catch(notify.error);
     } else {
-      $scope.buttons = kibiSequentialJoinVisHelper.constructButtonsArray(buttonDefs);
+      $scope.buttons = kibiSequentialJoinVisHelper.constructButtonsArray(originalButtonDefs);
     }
   };
 

@@ -72,6 +72,7 @@ uiModules
       const removeSavedObjectColumnsChangedHandler = $rootScope.$on('kibi:vis:savedObjectColumns-changed',
         function (event, savedObject) {
           if (savedObject && savedObject.columns !== $scope.vis.params.columns) {
+            fillColumnAliases();
             savedObject.columns = $scope.vis.params.columns;
           }
         }
@@ -83,20 +84,28 @@ uiModules
       });
 
       // Need to emit an event to update table columns while visualization is dirty
-      $scope.$watch('vis.params.columns', function () {
-        $rootScope.$emit('kibi:vis:columns-changed', $scope.vis.params.columns);
+      $scope.$watch('vis.params.columns', columns => {
+        if (columns) {
+          fillColumnAliases();
+          $rootScope.$emit('kibi:vis:columns-changed', columns);
+        }
       }, true);
+
+      function fillColumnAliases() {
+        // prepopulate aliases to original names if not defined
+        _.each($scope.vis.params.columns, (columnName, index) => {
+          if (!$scope.vis.params.columnAliases[index]) {
+            $scope.vis.params.columnAliases[index] = columnName;
+          }
+        });
+        _.remove($scope.vis.params.columnAliases, column => !_.contains($scope.vis.params.columns, column));
+      }
 
       $scope.$watch('vis.params.enableColumnAliases', (enableColumnAliases) => {
         if (!enableColumnAliases) {
           $scope.vis.params.columnAliases = [];
         } else {
-          // prepopulate aliases to original names if not defined
-          _.each($scope.vis.params.columns, (columnName, index) => {
-            if (!$scope.vis.params.columnAliases[index]) {
-              $scope.vis.params.columnAliases[index] = columnName;
-            }
-          });
+          fillColumnAliases();
         }
         $rootScope.$emit('kibi:vis:columnAliases-changed', $scope.vis.params.columnAliases);
       }, true);

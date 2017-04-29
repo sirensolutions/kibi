@@ -138,6 +138,10 @@ function VisEditor(createNotifier, kibiState, $scope, $route, timefilter, AppSta
     description: 'Save Visualization',
     template: require('plugins/kibana/visualize/editor/panels/save.html'),
     testId: 'visualizeSaveButton',
+    // kibi: disable the save button if the visualization is being edited
+    disableButton() {
+      return Boolean($scope.editableVis.dirty);
+    }
   }, {
     key: 'open',
     description: 'Open Saved Visualization',

@@ -18,6 +18,62 @@ define(function (require) {
   VisualizePage.prototype = {
     constructor: VisualizePage,
 
+    /**
+     * getColumnNames gets the column names of a doc table directive
+     *
+     * @returns an array of column names
+     * @author kibi
+     */
+    getColumnNames() {
+      return this.remote
+      .setFindTimeout(defaultTimeout)
+      .findAllByClassName('table-header-name')
+      .then(columns => {
+        const promises = [];
+
+        for (const column of columns) {
+          promises.push(column.getVisibleText());
+        }
+        return Promise.all(promises);
+      });
+    },
+
+    /**
+     * toggleColumn displays the field as a column of the doc table
+     *
+     * @param column the name of the field
+     * @author kibi
+     */
+    toggleColumn(column) {
+      common.debug(`toggle column [${column}]`);
+      return common.findTestSubject(`toggle-${column}-column`)
+      .click();
+    },
+
+    /**
+     * toggleTableRowDetails opens the details view of a document
+     *
+     * @author kibi
+     */
+    toggleTableRowDetails() {
+      common.debug('toggleTableRowDetails');
+      return common.findTestSubject('tableRowDetails')
+      .click();
+    },
+
+    /**
+     * clickKibiDataTable creates a new kibi data table visualization
+     *
+     * @author kibi
+     */
+    clickKibiDataTable() {
+      common.debug('clickKibiDataTable');
+      return this.remote
+      .setFindTimeout(defaultTimeout)
+      .findByPartialLinkText('Enhanced search results')
+      .click();
+    },
+
     clickAreaChart: function clickAreaChart() {
       return this.remote
       .setFindTimeout(defaultTimeout)

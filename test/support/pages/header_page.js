@@ -32,11 +32,13 @@ define(function (require) {
     clickDiscover: function () {
       common.debug('click Discover tab');
       this.clickSelector('a[href*=\'discover\']');
+      return common.sleep(3000);
     },
 
     clickVisualize: function () {
       common.debug('click Visualize tab');
       this.clickSelector('a[href*=\'visualize\']');
+      return common.sleep(3000);
     },
 
     clickDashboard: function () {

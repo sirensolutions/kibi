@@ -24,6 +24,7 @@ export default class HeaderPage {
   clickDiscover() {
     PageObjects.common.debug('click Discover tab');
     this.clickSelector('a[href*=\'discover\']');
+    return PageObjects.common.sleep(3000);
   }
 
   clickVisualize() {

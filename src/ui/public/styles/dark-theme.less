@@ -448,7 +448,7 @@
     }
   }
 
-  .filter-bar {
+  filter-bar .bar {
     background: @filter-bar-bar-bg;
     border-bottom-color: @filter-bar-bar-border;
 
@@ -560,12 +560,22 @@
           color: @dashboard-panel-heading-link-color;
           opacity: 1;
         }
+        &.panel-border {
+          background-color: @panel-header-bg;
+          border-color: @panel-border;
+        }
       }
 
       .load-error {
         .fa-exclamation-triangle {
           color: @dashboard-panel-load-error-color;
         }
+      }
+      &.panel-border{
+         border: 1px solid @panel-border;
+         border-radius: 4px;
+         box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+         box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05) 0 0 0 rgba(0, 0, 0, 0.5);
       }
     }
   }
@@ -582,4 +592,3 @@
     color: @dark-button-font;
   }
 }
-

@@ -403,7 +403,9 @@ uiModules
 
       if (currentDashboardId) {
         const currentGroup = _.findWhere(this.getGroups(), { dashboards: [ { id: currentDashboardId } ] });
-        currentGroup.active = true;
+        if (currentGroup) {
+          currentGroup.active = true;
+        }
       }
     }
 

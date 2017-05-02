@@ -9,6 +9,7 @@ define(function (require) {
   var HeaderPage = require('../../../support/pages/header_page');
   var SettingsPage = require('../../../support/pages/settings_page');
 
+  var kibiDataTableTest = require('./_kibi_data_table');
   var chartTypeTest = require('./_chart_types');
   var areaChartTest = require('./_area_chart');
   var lineChartTest = require('./_line_chart');
@@ -45,6 +46,8 @@ define(function (require) {
     bdd.after(function unloadMakelogs() {
       return scenarioManager.unload('logstashFunctional');
     });
+
+    kibiDataTableTest(bdd, scenarioManager);
 
     chartTypeTest(bdd, scenarioManager);
 

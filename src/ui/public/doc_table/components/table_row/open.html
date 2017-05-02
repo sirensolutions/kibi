@@ -1,5 +1,7 @@
 <td ng-click="toggleRow()">
+  <!--kibi: added data-test-subj for UI tests-->
   <i
+    data-test-subj="tableRowDetails"
     class="fa discover-table-open-icon"
     ng-class="{ 'fa-caret-down': open, 'fa-caret-right': !open }">
   </i>

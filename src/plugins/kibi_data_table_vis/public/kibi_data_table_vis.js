@@ -30,6 +30,7 @@ define(function (require) {
         defaults: {
           clickOptions: [],
           queryDefinitions: [],
+          columns: [],
           columnAliases: []
         },
         editor: '<kibi-data-table-vis-params></kibi-data-table-vis-params>'
@@ -37,12 +38,10 @@ define(function (require) {
       delegateSearch: true,
       init: function (vis, savedSearch) {
         if (savedSearch) {
-          if (!vis.params.columns) {
+          if (!vis.params.columns.length) {
             vis.params.columns = _.clone(savedSearch.columns);
           }
           vis.params.sort = _.clone(savedSearch.sort);
-        } else {
-          vis.params.columns = ['_source'];
         }
       },
       version: 2

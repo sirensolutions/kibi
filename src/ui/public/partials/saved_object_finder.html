@@ -1,9 +1,9 @@
 <form role="form" class="form-inline">
   <div class="container-fluid">
     <!--kibi: filter visualizations based on the savedSearchId -->
-    <div class="row">
+    <div class="row" ng-if="kibi.onDashboardPage && type === 'visualizations'">
       <div class="input-group form-group finder-form col-md-7">
-        <div ng-if="kibi.onDashboardPage && type === 'visualizations'" class="visualisation-filter-checkbox">
+        <div class="visualisation-filter-checkbox">
           <input ng-if="savedSearchId" type="checkbox" ng-model="kibi.basedOnSameSavedSearch" />
           <label class="based-saved-search" ng-if="savedSearchId">
             Based on the saved search of the current dashboard: {{savedSearchId}}

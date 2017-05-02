@@ -8,7 +8,12 @@
       <div class="spinner"></div>
     </div>
     <div class="form-group" ng-if="!state.opening">
-      <saved-object-finder type="{{ savedObjectService.type }}" per-page="3" on-choose="open"></saved-object-finder>
+      <saved-object-finder
+        type="{{ savedObjectService.loaderProperties.name }}"
+        per-page="5"
+        on-choose="open"
+        use-local-management="true">
+      </saved-object-finder>
     </div>
   </div>
   <div class="modal-footer" ng-if="!state.opening">

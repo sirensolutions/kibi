@@ -387,6 +387,17 @@ export default class Model {
   }
 
   /**
+   * Counts objects of the type managed by this model.
+   * @param {Object} request - Optional HAPI request.
+   * @param {String} search - An optional search string or query body.
+   * @return {Number} The number of objects of the type managed by this model.
+   */
+  async count(search, request) {
+    const response = await this.search(0, search, request, null);
+    return response.hits.total;
+  }
+
+  /**
    * Returns the object with the specified id.
    *
    * Arguments and response can be modified or validated by middlewares.

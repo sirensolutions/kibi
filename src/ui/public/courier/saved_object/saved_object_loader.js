@@ -3,13 +3,14 @@ import Scanner from 'ui/utils/scanner';
 import { StringUtils } from 'ui/utils/string_utils';
 
 export class SavedObjectLoader {
-  constructor(SavedObjectClass, kbnIndex, esAdmin, kbnUrl, { savedObjectsAPI, caching: { cache, find, get } = {}, mapHit } = {}) {
+  constructor(SavedObjectClass, kbnIndex, esAdmin, kbnUrl, { savedObjectsAPI, caching: { cache, find, get } = {}, mapHit, exclude } = {}) {
     // kibi: kibi properties
     this.savedObjectsAPI = savedObjectsAPI;
     this.mapHit = mapHit;
     this.cache = cache;
     this.cacheGet = get;
     this.cacheFind = find;
+    this.exclude = exclude;
     // kibi: end
 
     this.type = SavedObjectClass.type;
@@ -102,7 +103,8 @@ export class SavedObjectLoader {
    * https://github.com/elastic/kibana/issues/8044 for reference.
    *
    * @param searchString
-   * @param size
+   * @param size - The number of documents to return
+   * @param exclude - A list of fields to exclude
    * @returns {Promise}
    */
   find(searchString, size = 100) {
@@ -120,6 +122,7 @@ export class SavedObjectLoader {
       index: this.kbnIndex,
       type: this.lowercaseType,
       q: searchString,
+      exclude: this.exclude,
       size
     })
     .then((resp) => {

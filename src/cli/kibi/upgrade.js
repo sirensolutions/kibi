@@ -85,7 +85,7 @@ export default function (program) {
       await waitForGreenStatus(kbnServer, 10);
       const count = await runner.upgrade();
       if (count > 0) {
-        process.stdout.write('Performed' + count + 'upgrade' + (count > 1 ? 's' : '') + '.\n');
+        process.stdout.write('Performed ' + count + ' upgrade' + (count > 1 ? 's' : '') + '.\n');
       } else {
         process.stdout.write('No objects upgraded.\n');
       }

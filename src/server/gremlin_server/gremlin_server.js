@@ -26,210 +26,121 @@ function startServer(self, fulfill, reject) {
     const re = /.*?([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}:[0-9]*).*/;
 
     isJavaVersionOk(self).then(function () {
-      self.callWithInternalUser('nodes.info', { nodeId: '_local' }).then(function (response) {
-        let esTransportAddress = null;
-        const esTransportAddressCollectedValues = [];
-        _.each(response.nodes, (node) => {
-          if (node.transport_address) {
-            // transport_address can come in many different flavours
-            // currently we support this ones for ipv4:
-            // 127.0.0.1:9300
-            // demo.example.com/127.0.0.1:9300
-            // inet[/127.0.0.1:9303]
-            esTransportAddressCollectedValues.push(node.transport_address);
-            const matches = node.transport_address.match(re);
-            if (matches.length === 2 && matches[1].indexOf(node.ip) === 0) {
-              esTransportAddress = matches[1];
-              return false; // to break the loop
-            }
-          }
-        });
-        if (!esTransportAddress) {
-          return Promise.reject(
-            new Error(
-              'Unable to get the transport address.\n' +
-              'Currently supported values are:\n' +
-              '127.0.0.1:9300\n' +
-              'host.com/127.0.0.1:9300\n' +
-              'inet[/127.0.0.1:9303]\n' +
-              'While values returned by the cluster are:\n' +
-              JSON.stringify(esTransportAddressCollectedValues, null, '')
-            )
-          );
+
+      if (config.get('kibi_core.gremlin_server.ssl.ca')) {
+        self.ca = fs.readFileSync(config.get('kibi_core.gremlin_server.ssl.ca'));
+      }
+
+      if (path.parse(gremlinServerPath).ext !== '.jar') {
+        self.server.log(['gremlin', 'error'], 'The configuration property kibi_core.gremlin_server.path does not point to a jar file');
+        return Promise.reject(new Error('The configuration property kibi_core.gremlin_server.path does not point to a jar file'));
+      }
+
+      if (!path.isAbsolute(gremlinServerPath)) {
+        const rootDir = path.normalize(__dirname + path.sep + '..' + path.sep + '..' + path.sep + '..' + path.sep);
+        const gremlinDirtyDir = path.join(rootDir, gremlinServerPath);
+        gremlinServerPath = path.resolve(path.normalize(gremlinDirtyDir));
+      }
+
+      return fs.access(gremlinServerPath, fs.F_OK, (error) => {
+        if (error !== null) {
+          self.server.log(['gremlin', 'error'], 'The Kibi Gremlin Server jar file was not found. Please check the configuration');
+          return Promise.reject(new Error('The Kibi Gremlin Server jar file was not found. Please check the configuration'));
         }
 
-        const esClusterName = response.cluster_name;
+        self.url = config.get('kibi_core.gremlin_server.url');
+        const serverURL = url.parse(self.url);
 
-        if (config.get('kibi_core.gremlin_server.ssl.ca')) {
-          self.ca = fs.readFileSync(config.get('kibi_core.gremlin_server.ssl.ca'));
+        const args = [
+          '-jar', gremlinServerPath,
+          '--elasticsearch.url=' + config.get('elasticsearch.url'),
+          '--server.port=' + serverURL.port
+        ];
+        if (serverURL.hostname !== '0.0.0.0') {
+          args.push('--server.address=' + serverURL.hostname);
         }
 
-        if (path.parse(gremlinServerPath).ext !== '.jar') {
-          self.server.log(['gremlin', 'error'], 'The configuration property kibi_core.gremlin_server.path does not point to a jar file');
-          return Promise.reject(new Error('The configuration property kibi_core.gremlin_server.path does not point to a jar file'));
+        if (gremlinServerRemoteDebug) {
+          args.unshift(gremlinServerRemoteDebug);
         }
 
-        if (!path.isAbsolute(gremlinServerPath)) {
-          const rootDir = path.normalize(__dirname + path.sep + '..' + path.sep + '..' + path.sep + '..' + path.sep);
-          const gremlinDirtyDir = path.join(rootDir, gremlinServerPath);
-          gremlinServerPath = path.resolve(path.normalize(gremlinDirtyDir));
+        const logConfigPath = config.get('kibi_core.gremlin_server.log_conf_path');
+        if (logConfigPath) {
+          args.push('--logging.config=' + logConfigPath);
         }
 
-        return fs.access(gremlinServerPath, fs.F_OK, (error) => {
-          if (error !== null) {
-            self.server.log(['gremlin', 'error'], 'The Kibi Gremlin Server jar file was not found. Please check the configuration');
-            return Promise.reject(new Error('The Kibi Gremlin Server jar file was not found. Please check the configuration'));
-          }
+        const elasticsearchCA = config.get('elasticsearch.ssl.ca');
+        if (elasticsearchCA) {
+          args.push('--elasticsearch.ssl.ca=' + elasticsearchCA);
+        }
 
-          const [ host, port, ...rest ] = esTransportAddress.split(':');
-          const transportClientUsername = config.get('kibi_core.elasticsearch.transport_client.username');
-          const transportClientPassword = config.get('kibi_core.elasticsearch.transport_client.password');
-          const elasticAuthPlugin = config.get('kibi_core.elasticsearch.auth_plugin');
-          let transportClientSSLCaKeyStore = config.get('kibi_core.elasticsearch.transport_client.ssl.ca');
-          if (transportClientSSLCaKeyStore) {
-            transportClientSSLCaKeyStore = path.resolve(transportClientSSLCaKeyStore);
-          }
-          const transportClientSSLCaKeyStorePassword = config.get('kibi_core.elasticsearch.transport_client.ssl.ca_password');
-          let transportClientSSLKeyStore = config.get('kibi_core.elasticsearch.transport_client.ssl.key_store');
-          if (transportClientSSLKeyStore) {
-            transportClientSSLKeyStore = path.resolve(transportClientSSLKeyStore);
-          }
-          const transportClientSSLKeyStoreAlias = config.get('kibi_core.elasticsearch.transport_client.ssl.key_store_alias');
-          const transportClientSSLCaKeyStoreAlias = config.get('kibi_core.elasticsearch.transport_client.ssl.ca_alias');
-          const transportClientSSLKeyStorePassword = config.get('kibi_core.elasticsearch.transport_client.ssl.key_store_password');
-          const transportClientSSLHostNameVerification = config.get('kibi_core.elasticsearch.transport_client.ssl.verify_hostname');
-          const transportClientSSLHostNameVerificationResolution = config.get('kibi_core.elasticsearch.transport_client.ssl' +
-                                                                              '.verify_hostname_resolve');
+        const elasticsearchVerifyHostname = config.get('elasticsearch.ssl.verify');
+        if (elasticsearchVerifyHostname) {
+          args.push('--elasticsearch.ssl.verify=true');
+        } else {
+          args.push('--elasticsearch.ssl.verify=false');
+        }
 
-          self.url = config.get('kibi_core.gremlin_server.url');
-          const serverURL = url.parse(self.url);
+        if (config.get('kibi_core.gremlin_server.ssl.key_store')) {
+          args.push('--server.ssl.enabled=true');
+          args.push('--server.ssl.key-store=' + config.get('kibi_core.gremlin_server.ssl.key_store'));
+          args.push('--server.ssl.key-store-password=' + config.get('kibi_core.gremlin_server.ssl.key_store_password'));
+        } else if (config.get('server.ssl.key') && config.get('server.ssl.cert')) {
+          const msg = 'Since you are using Elasticsearch Shield, you should configure the SSL for the gremlin server ' +
+            'by configuring the key store in kibi.yml\n' +
+            'The following properties are required:\n' +
+            'kibi_core.gremlin_server.ssl.key_store\n' +
+            'kibi_core.gremlin_server.ssl.key_store_password\n' +
+            'kibi_core.gremlin_server.ssl.ca (optional)';
+          self.server.log(['gremlin','error'], msg);
+          return Promise.reject(new Error(msg));
+        }
 
-          const args = [
-            '-jar', gremlinServerPath,
-            '--elasticNodeHost=' + host,
-            '--elasticNodePort=' + port,
-            '--elasticClusterName=' + esClusterName,
-            '--server.port=' + serverURL.port
-          ];
-          if (serverURL.hostname !== '0.0.0.0') {
-            args.push('--server.address=' + serverURL.hostname);
-          }
+        self.server.log(['gremlin', 'info'], 'Starting the Kibi gremlin server');
+        self.gremlinServer = childProcess.spawn('java', args);
+        self.gremlinServer.stderr.on('data', (data) => self.server.log(['gremlin', 'error'], ('' + data).trim()));
+        self.gremlinServer.stdout.on('data', (data) => self.server.log(['gremlin', 'info'], ('' + data).trim()));
+        self.gremlinServer.on('error', (err) => reject);
 
-          if (gremlinServerRemoteDebug) {
-            args.unshift(gremlinServerRemoteDebug);
-          }
+        const maxCounter = 20;
+        const initialTimeout = 10000;
+        const timeout = 5000;
+        const counter = maxCounter;
 
-          const logConfigPath = config.get('kibi_core.gremlin_server.log_conf_path');
-          if (logConfigPath) {
-            args.push('--logging.config=' + logConfigPath);
-          }
-
-          if (transportClientUsername) {
-            args.push('--elasticTransportClientUserName=' + transportClientUsername);
-            args.push('--elasticTransportClientPassword=' + transportClientPassword);
-          }
-
-          if (elasticAuthPlugin) {
-            args.push('--elasticAuthPlugin=' + elasticAuthPlugin);
-          }
-
-          if (transportClientSSLCaKeyStore) {
-            args.push('--elasticTransportClientCAKeyStore=' + transportClientSSLCaKeyStore);
-          }
-
-          if (transportClientSSLCaKeyStorePassword) {
-            args.push('--elasticTransportClientCAKeyStorePassword=' + transportClientSSLCaKeyStorePassword);
-          }
-
-          if (transportClientSSLCaKeyStoreAlias) {
-            args.push('--elasticTransportClientCACertAlias=' + transportClientSSLCaKeyStoreAlias);
-          }
-
-          if (transportClientSSLKeyStore) {
-            args.push('--elasticTransportClientKeyStore=' + transportClientSSLKeyStore);
-          }
-
-          if (transportClientSSLKeyStoreAlias) {
-            args.push('--elasticTransportClientCertAlias=' + transportClientSSLKeyStoreAlias);
-          }
-
-          if (transportClientSSLKeyStorePassword) {
-            args.push('--elasticTransportClientKeyStorePassword=' + transportClientSSLKeyStorePassword);
-          }
-
-          if (transportClientSSLHostNameVerification) {
-            args.push('--elasticTransportClientSSLHostNameVerification=true');
-          } else {
-            args.push('--elasticTransportClientSSLHostNameVerification=false');
-          }
-
-          if (transportClientSSLHostNameVerificationResolution) {
-            args.push('--elasticTransportClientSSLHostNameVerificationResolution=true');
-          } else {
-            args.push('--elasticTransportClientSSLHostNameVerificationResolution=false');
-          }
-
-          if (config.get('kibi_core.gremlin_server.ssl.key_store')) {
-            args.push('--server.ssl.enabled=true');
-            args.push('--server.ssl.key-store=' + config.get('kibi_core.gremlin_server.ssl.key_store'));
-            args.push('--server.ssl.key-store-password=' + config.get('kibi_core.gremlin_server.ssl.key_store_password'));
-          } else if (config.get('server.ssl.key') && config.get('server.ssl.cert')) {
-            const msg = 'Since you are using Elasticsearch Shield, you should configure the SSL for the gremlin server ' +
-              'by configuring the key store in kibi.yml\n' +
-              'The following properties are required:\n' +
-              'kibi_core.gremlin_server.ssl.key_store\n' +
-              'kibi_core.gremlin_server.ssl.key_store_password\n' +
-              'kibi_core.gremlin_server.ssl.ca (optional)';
-            self.server.log(['gremlin','error'], msg);
-            return Promise.reject(new Error(msg));
-          }
-
-          self.server.log(['gremlin', 'info'], 'Starting the Kibi gremlin server');
-          self.gremlinServer = childProcess.spawn('java', args);
-          self.gremlinServer.stderr.on('data', (data) => self.server.log(['gremlin', 'error'], ('' + data).trim()));
-          self.gremlinServer.stdout.on('data', (data) => self.server.log(['gremlin', 'info'], ('' + data).trim()));
-          self.gremlinServer.on('error', (err) => reject);
-
-          const maxCounter = 20;
-          const initialTimeout = 10000;
-          const timeout = 5000;
-          const counter = maxCounter;
-
-          self.ping = function (counter) {
-            if (counter > 0) {
-              setTimeout(function () {
-                self._ping()
-                .then(function (resp) {
-                  const jsonResp = JSON.parse(resp.toString());
-                  if (jsonResp.status === 'ok') {
-                    self.server.log(['gremlin', 'info'], 'Kibi gremlin server running at ' + self.url);
-                    self.initialized = true;
-                    fulfill({ message: 'The Kibi gremlin server started successfully.' });
-                  } else {
-                    self.server.log(['gremlin', 'warning'], 'Waiting for the Kibi gremlin server');
-                    counter--;
-                    setTimeout(() => self.ping(counter), timeout);
-                  }
-                })
-                .catch(function (err) {
-                  if (err.error.code !== 'ECONNREFUSED') {
-                    self.server.log(['gremlin', 'error'], 'Failed to ping the Kibi gremlin server: ' + err.message);
-                  } else {
-                    self.server.log(['gremlin', 'warning'], 'Waiting for the Kibi gremlin server');
-                  }
+        self.ping = function (counter) {
+          if (counter > 0) {
+            setTimeout(function () {
+              self._ping()
+              .then(function (resp) {
+                const jsonResp = JSON.parse(resp.toString());
+                if (jsonResp.status === 'ok') {
+                  self.server.log(['gremlin', 'info'], 'Kibi gremlin server running at ' + self.url);
+                  self.initialized = true;
+                  fulfill({ message: 'The Kibi gremlin server started successfully.' });
+                } else {
+                  self.server.log(['gremlin', 'warning'], 'Waiting for the Kibi gremlin server');
                   counter--;
                   setTimeout(() => self.ping(counter), timeout);
-                });
-              }, counter === maxCounter ? initialTimeout : timeout);
-            } else {
-              self.server.log(['gremlin', 'error'], 'The Kibi gremlin server did not start correctly');
-              self.gremlinServer.kill('SIGINT');
-              reject(new Error('The Kibi gremlin server did not start correctly'));
-            }
-          };
-          self.ping(counter);
-        });
-      }).catch(reject);
+                }
+              })
+              .catch(function (err) {
+                if (err.error.code !== 'ECONNREFUSED') {
+                  self.server.log(['gremlin', 'error'], 'Failed to ping the Kibi gremlin server: ' + err.message);
+                } else {
+                  self.server.log(['gremlin', 'warning'], 'Waiting for the Kibi gremlin server');
+                }
+                counter--;
+                setTimeout(() => self.ping(counter), timeout);
+              });
+            }, counter === maxCounter ? initialTimeout : timeout);
+          } else {
+            self.server.log(['gremlin', 'error'], 'The Kibi gremlin server did not start correctly');
+            self.gremlinServer.kill('SIGINT');
+            reject(new Error('The Kibi gremlin server did not start correctly'));
+          }
+        };
+        self.ping(counter);
+      });
     });
   } else {
     self.server.log(['gremlin', 'warning'], 'The configuration property kibi_core.gremlin_server.path is empty');

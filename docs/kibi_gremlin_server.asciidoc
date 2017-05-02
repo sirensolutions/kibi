@@ -25,10 +25,6 @@ kibi_core:
 
 ```yml
 kibi_core:
-  elasticsearch:
-    transport_client:
-      username: 'transport_client'
-      password: 'password'
   gremlin_server:
     url: https://127.0.0.1:8061
     path: /opt/gremlin_server/gremlin-es2-server-0.1.0.jar

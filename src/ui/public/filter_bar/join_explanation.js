@@ -126,7 +126,7 @@ define(function (require) {
         } else if (f.range) {
           prop = Object.keys(f.range)[0];
           return Promise.resolve(' ' + prop + ': <b>' + formatDate(fields, prop, f.range[prop].gte) +
-            '</b> to <b>' + formatDate(fields, prop, f.range[prop].lte) + '</b> ');
+            '</b> to <b>' + formatDate(fields, prop, f.range[prop].lt) + '</b> ');
         } else if (f.dbfilter) {
           return Promise.resolve(' ' + (f.dbfilter.negate ? 'NOT' : '') + ' dbfilter: <b>' + f.dbfilter.queryid + '</b> ');
         } else if (f.or) {

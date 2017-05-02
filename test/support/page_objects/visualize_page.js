@@ -11,6 +11,62 @@ export default class VisualizePage {
     this.remote = remote;
   }
 
+  /**
+   * getColumnNames gets the column names of a doc table directive
+   *
+   * @returns an array of column names
+   * @author kibi
+   */
+  getColumnNames() {
+    return this.remote
+    .setFindTimeout(defaultFindTimeout * 2)
+    .findAllByClassName('table-header-name')
+    .then(columns => {
+      const promises = [];
+
+      for (const column of columns) {
+        promises.push(column.getVisibleText());
+      }
+      return Promise.all(promises);
+    });
+  }
+
+  /**
+   * toggleColumn displays the field as a column of the doc table
+   *
+   * @param column the name of the field
+   * @author kibi
+   */
+  toggleColumn(column) {
+    PageObjects.common.debug(`toggle column [${column}]`);
+    return PageObjects.common.findTestSubject(`toggle-${column}-column`)
+    .click();
+  }
+
+  /**
+   * toggleTableRowDetails opens the details view of a document
+   *
+   * @author kibi
+   */
+  toggleTableRowDetails() {
+    PageObjects.common.debug('toggleTableRowDetails');
+    return PageObjects.common.findTestSubject('tableRowDetails')
+    .click();
+  }
+
+  /**
+   * clickKibiDataTable creates a new kibi data table visualization
+   *
+   * @author kibi
+   */
+  clickKibiDataTable() {
+    PageObjects.common.debug('clickKibiDataTable');
+    return this.remote
+    .setFindTimeout(defaultFindTimeout)
+    .findByPartialLinkText('Enhanced search results')
+    .click();
+  }
+
   clickAreaChart() {
     return this.remote
     .setFindTimeout(defaultFindTimeout)

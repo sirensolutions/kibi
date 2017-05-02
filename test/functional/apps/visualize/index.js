@@ -32,6 +32,7 @@ bdd.describe('visualize app', function () {
     });
   });
 
+  require('./_kibi_data_table');
   require('./_chart_types');
   require('./_area_chart');
   require('./_line_chart');

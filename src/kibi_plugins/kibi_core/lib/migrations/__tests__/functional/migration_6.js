@@ -1,6 +1,5 @@
 import elasticsearch from 'elasticsearch';
 import expect from 'expect.js';
-import _ from 'lodash';
 import sinon from 'sinon';
 import requirefrom from 'requirefrom';
 import Migration from '../../migration_6';
@@ -10,8 +9,6 @@ import Scenario3 from './scenarios/migration_6/scenario3';
 import Scenario4 from './scenarios/migration_6/scenario4';
 import { format as urlFormat } from 'url';
 
-const wrapAsync = requirefrom('src/test_utils')('wrap_async');
-const indexSnapshot = requirefrom('src/test_utils')('index_snapshot');
 const ScenarioManager = requirefrom('src/test_utils')('scenario_manager');
 const serverConfig = requirefrom('test')('server_config');
 
@@ -35,27 +32,23 @@ describe('kibi_core/migrations/functional', function () {
     }
   };
 
-  async function snapshot() {
-    return indexSnapshot(client, '.kibi');
-  }
-
   describe('Kibi Core Migration 6 - Functional test', function () {
     let infoSpy;
     let errorSpy;
     let Scenario;
 
-    beforeEach(wrapAsync(async () => {
+    beforeEach(async () => {
       infoSpy = sinon.spy(configuration.logger, 'info');
       errorSpy = sinon.spy(configuration.logger, 'error');
-    }));
+    });
 
-    afterEach(wrapAsync(async () => {
+    afterEach(async () => {
       await scenarioManager.unload(Scenario);
       configuration.logger.info.restore();
       configuration.logger.error.restore();
-    }));
+    });
 
-    it('should set mapping for kibiSession if not present', wrapAsync(async () => {
+    it('should set mapping for sirenSession if not present', async () => {
       Scenario = Scenario1;
       await scenarioManager.reload(Scenario);
       const migration = new Migration(configuration);
@@ -67,9 +60,9 @@ describe('kibi_core/migrations/functional', function () {
 
       sinon.assert.notCalled(errorSpy);
       sinon.assert.calledWith(infoSpy, 'Going to set the mapping for url.sirenSession property');
-    }));
+    });
 
-    it('should NOT set mapping for kibiSession if alredy present', wrapAsync(async () => {
+    it('should NOT set mapping for sirenSession if already present', async () => {
       Scenario = Scenario2;
       await scenarioManager.reload(Scenario);
       const migration = new Migration(configuration);
@@ -81,9 +74,9 @@ describe('kibi_core/migrations/functional', function () {
 
       sinon.assert.notCalled(errorSpy);
       sinon.assert.notCalled(infoSpy);
-    }));
+    });
 
-    it('should copy kibiSession to sirenSession if present', wrapAsync(async () => {
+    it('should copy kibiSession to sirenSession if present', async () => {
       Scenario = Scenario3;
       await scenarioManager.reload(Scenario);
       const migration = new Migration(configuration);
@@ -95,9 +88,9 @@ describe('kibi_core/migrations/functional', function () {
 
       sinon.assert.notCalled(errorSpy);
       sinon.assert.calledWith(infoSpy, 'Updating the url object with _id=1');
-    }));
+    });
 
-    it('should NOT copy kibiSession if == null', wrapAsync(async () => {
+    it('should NOT copy kibiSession if == null', async () => {
       Scenario = Scenario4;
       await scenarioManager.reload(Scenario);
       const migration = new Migration(configuration);
@@ -109,7 +102,7 @@ describe('kibi_core/migrations/functional', function () {
 
       sinon.assert.notCalled(errorSpy);
       sinon.assert.notCalled(infoSpy);
-    }));
+    });
 
   });
 });

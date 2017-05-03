@@ -47,7 +47,12 @@ uiModules
         });
       }
 
-      management.getSection('kibana').info = `Build ${buildNum}, Commit SHA ${buildSha.substr(0, 8)}`;
+      // siren: about section improved
+      management.getSection('kibana').info = {
+        build: buildNum,
+        sha: buildSha.substr(0, 8)
+      };
+
     }
   };
 });

@@ -115,6 +115,10 @@ define(function (require) {
 
       const createFilterLabel = function (f, fields) {
         let prop;
+        let lowerBound;
+        let upperBound;
+        let lowerBoundDescriptor;
+        let upperBoundDescriptor;
         if (f.query && f.query.query_string && f.query.query_string.query) {
           return Promise.resolve(' query: <b>' + f.query.query_string.query + '</b> ');
         } else if (f.query && f.query.match) {
@@ -125,8 +129,13 @@ define(function (require) {
           return Promise.resolve(formatMatch(f, 'match_phrase_prefix'));
         } else if (f.range) {
           prop = Object.keys(f.range)[0];
-          return Promise.resolve(' ' + prop + ': <b>' + formatDate(fields, prop, f.range[prop].gte) +
-            '</b> to <b>' + formatDate(fields, prop, f.range[prop].lte) + '</b> ');
+          lowerBound = _.has(f.range[prop], 'gte') ? f.range[prop].gte : f.range[prop].gt;
+          upperBound = _.has(f.range[prop], 'lte') ? f.range[prop].lte : f.range[prop].lt;
+          lowerBoundDescriptor = _.has(f.range[prop], 'gte') ? 'inclusive' : 'exclusive';
+          upperBoundDescriptor = _.has(f.range[prop], 'lte') ? 'inclusive' : 'exclusive';
+          return Promise.resolve(' ' + prop + ': <b>' + formatDate(fields, prop, lowerBound) +
+            '</b> (' + lowerBoundDescriptor + ') to <b>' + formatDate(fields, prop, upperBound) +
+            '</b> (' + upperBoundDescriptor + ') ');
         } else if (f.dbfilter) {
           return Promise.resolve(' ' + (f.dbfilter.negate ? 'NOT' : '') + ' dbfilter: <b>' + f.dbfilter.queryid + '</b> ');
         } else if (f.or) {

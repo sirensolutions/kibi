@@ -27,25 +27,29 @@ export default function (server) {
   };
 
   const addFilterJoinToParent = function (query, fjObject, types, negate) {
+    // If types are declared in the relation, the filter_join must be enclosed
+    // in query.bool containing both the filterjoin and the match on the type.
+    if (types) {
+      const typeAndJoin = {
+        bool: {
+          must: [fjObject]
+        }
+      };
+      addSourceTypes(typeAndJoin.bool.must, types);
+      fjObject = typeAndJoin;
+    }
     if (query.constructor === Array) {
       // this filterjoin is the root
       query.push(fjObject);
-      addSourceTypes(query, types);
     } else {
       // add to the parent filterjoin
       if (negate) {
         if (!_.get(query, 'filter.bool.must_not')) {
-          _.set(query, 'filter.bool.must_not', [{
-            bool: {
-              must: []
-            }
-          }]);
+          _.set(query, 'filter.bool.must_not', []);
         }
-        query.filter.bool.must_not[0].bool.must.push(fjObject);
-        addSourceTypes(query.filter.bool.must_not[0].bool.must, types);
+        query.filter.bool.must_not.push(fjObject);
       } else {
         query.filter.bool.must.push(fjObject);
-        addSourceTypes(query.filter.bool.must, types);
       }
     }
   };
@@ -150,21 +154,6 @@ export default function (server) {
       const path = objects[i].path;
       if (util.length(json, path) !== 1) {
         throw new Error('The object at ' + path.join('.') + ' must only contain the join filter\n' + JSON.stringify(json, null, ' '));
-      }
-      // if a relation contains a filter on the source type, the FilterJoin API will generate a list of two filters:
-      // - a filterjoin
-      // - a type filter
-      //
-      // To exclude documents for which match BOTH these filters, we need to enclose the filters in a must clause,
-      // otherwise must_not will filter out documents which match ANY of these filters.
-      //
-      const occurrence = path[path.length - 2];
-      if (occurrence === 'must_not') {
-        objects[i].value = {
-          bool: {
-            must: [objects[i].value]
-          }
-        };
       }
       const label = path[path.length - 1];
       util.replace(json, path.slice(0, path.length - 1), label, label, objects[i].value);

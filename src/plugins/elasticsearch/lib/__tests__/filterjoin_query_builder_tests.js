@@ -30,31 +30,37 @@ describe('FilterJoin query builder', function () {
     });
     const expected = [
       {
-        filterjoin: {
-          id1: {
-            indices: [ 'i2' ],
-            types: [ 't2' ],
-            path: 'id2',
-            query: {
-              bool: {
-                filter: {
-                  bool: {
-                    must: []
+        bool: {
+          must: [
+            {
+              filterjoin: {
+                id1: {
+                  indices: ['i2'],
+                  types: ['t2'],
+                  path: 'id2',
+                  query: {
+                    bool: {
+                      filter: {
+                        bool: {
+                          must: []
+                        }
+                      },
+                      must: [
+                        {
+                          match_all: {}
+                        }
+                      ]
+                    }
                   }
-                },
-                must: [
-                  {
-                    match_all: {}
-                  }
-                ]
+                }
+              }
+            },
+            {
+              type: {
+                value: 't1'
               }
             }
-          }
-        }
-      },
-      {
-        type: {
-          value: 't1'
+          ]
         }
       }
     ];
@@ -75,39 +81,45 @@ describe('FilterJoin query builder', function () {
     });
     const expected = [
       {
-        filterjoin: {
-          id1: {
-            indices: [ 'i2' ],
-            types: [ 't2' ],
-            path: 'id2',
-            query: {
-              bool: {
-                filter: {
-                  bool: {
-                    must: [
-                      {
-                        term: {
-                          age: 24
+        bool: {
+          must: [
+            {
+              filterjoin: {
+                id1: {
+                  indices: ['i2'],
+                  types: ['t2'],
+                  path: 'id2',
+                  query: {
+                    bool: {
+                      filter: {
+                        bool: {
+                          must: [
+                            {
+                              term: {
+                                age: 24
+                              }
+                            }
+                          ]
                         }
-                      }
-                    ]
+                      },
+                      must: [
+                        {
+                          match_all: {}
+                        }
+                      ]
+                    }
                   }
-                },
-                must: [
-                  {
-                    match_all: {}
-                  }
-                ]
+                }
+              },
+            },
+            {
+              type: {
+                value: 't1'
               }
             }
-          }
+          ]
         }
       },
-      {
-        type: {
-          value: 't1'
-        }
-      }
     ];
     expect(expected).to.eql(builder.toObject());
   });
@@ -169,6 +181,232 @@ describe('FilterJoin query builder', function () {
                 filter: {
                   bool: {
                     must: [
+                      {
+                        filterjoin: {
+                          id21: {
+                            indices: [ 'i3' ],
+                            path: 'id3',
+                            query: {
+                              bool: {
+                                filter: {
+                                  bool: {
+                                    must: []
+                                  }
+                                },
+                                must: [
+                                  {
+                                    match_all: {}
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                must: [
+                  {
+                    match_all: {}
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    ];
+    expect(expected).to.eql(builder.toObject());
+  });
+
+  it('should create a query with two filterjoins that are negated', function () {
+    const builder = new FilterJoinBuilder();
+    builder.addFilterJoin({
+      sourcePath: 'id1',
+      targetIndices: [ 'i2' ],
+      targetPath: 'id2'
+    });
+    builder.addFilterJoin({
+      sourcePath: 'id',
+      targetIndices: [ 'i4' ],
+      targetPath: 'id',
+      negate: true
+    });
+    const expected = [
+      {
+        filterjoin: {
+          id1: {
+            indices: [ 'i2' ],
+            path: 'id2',
+            query: {
+              bool: {
+                filter: {
+                  bool: {
+                    must: []
+                  }
+                },
+                must: [{
+                  match_all: {}
+                }]
+              }
+            }
+          }
+        }
+      },
+      {
+        filterjoin: {
+          id: {
+            indices: [ 'i4' ],
+            path: 'id',
+            query: {
+              bool: {
+                filter: {
+                  bool: {
+                    must: []
+                  }
+                },
+                must: [{
+                  match_all: {}
+                }]
+              }
+            }
+          }
+        }
+      }
+    ];
+    expect(expected).to.eql(builder.toObject());
+  });
+
+  it('should create a query with two nested filterjoins that are negated', function () {
+    const builder = new FilterJoinBuilder();
+    const root = builder.addFilterJoin({
+      sourcePath: 'id1',
+      targetIndices: [ 'i2' ],
+      targetPath: 'id2'
+    });
+    root.addFilterJoin({
+      sourcePath: 'id21',
+      targetIndices: [ 'i3' ],
+      targetPath: 'id3',
+      negate: true
+    });
+    root.addFilterJoin({
+      sourceTypes: ['moo'],
+      sourcePath: 'id21',
+      targetIndices: [ 'i3' ],
+      targetPath: 'id3',
+      negate: true
+    });
+    const expected = [
+      {
+        filterjoin: {
+          id1: {
+            indices: [ 'i2' ],
+            path: 'id2',
+            query: {
+              bool: {
+                filter: {
+                  bool: {
+                    must: [],
+                    must_not: [
+                      {
+                        filterjoin: {
+                          id21: {
+                            indices: [ 'i3' ],
+                            path: 'id3',
+                            query: {
+                              bool: {
+                                filter: {
+                                  bool: {
+                                    must: []
+                                  }
+                                },
+                                must: [
+                                  {
+                                    match_all: {}
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        }
+                      },
+                      {
+                        bool: {
+                          must: [
+                            {
+                              filterjoin: {
+                                id21: {
+                                  indices: ['i3'],
+                                  path: 'id3',
+                                  query: {
+                                    bool: {
+                                      filter: {
+                                        bool: {
+                                          must: []
+                                        }
+                                      },
+                                      must: [
+                                        {
+                                          match_all: {}
+                                        }
+                                      ]
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            {
+                              type: {
+                                value: 'moo'
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                },
+                must: [
+                  {
+                    match_all: {}
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    ];
+    expect(expected).to.eql(builder.toObject());
+  });
+
+  it('should create a query with a nested filterjoin that is negated', function () {
+    const builder = new FilterJoinBuilder();
+    builder.addFilterJoin({
+      sourcePath: 'id1',
+      targetIndices: [ 'i2' ],
+      targetPath: 'id2'
+    })
+    .addFilterJoin({
+      sourcePath: 'id21',
+      targetIndices: [ 'i3' ],
+      targetPath: 'id3',
+      negate: true
+    });
+    const expected = [
+      {
+        filterjoin: {
+          id1: {
+            indices: [ 'i2' ],
+            path: 'id2',
+            query: {
+              bool: {
+                filter: {
+                  bool: {
+                    must: [],
+                    must_not: [
                       {
                         filterjoin: {
                           id21: {
@@ -284,15 +522,23 @@ describe('FilterJoin query builder', function () {
     expect(expected).to.eql(builder.toObject());
   });
 
-  it('should create a query with a nested filterjoin that is negated', function () {
+  it('should create a query with two nested negated filterjoins from the same index having a source type', function () {
     const builder = new FilterJoinBuilder();
-    builder.addFilterJoin({
+    const rootJoin = builder.addFilterJoin({
       sourcePath: 'id1',
       targetIndices: [ 'i2' ],
       targetPath: 'id2'
-    })
-    .addFilterJoin({
+    });
+    rootJoin.addFilterJoin({
       sourcePath: 'id21',
+      sourceTypes: [ 'ram' ],
+      targetIndices: [ 'i3' ],
+      targetPath: 'id3',
+      negate: true
+    });
+    rootJoin.addFilterJoin({
+      sourcePath: 'id21',
+      sourceTypes: [ 'ram' ],
       targetIndices: [ 'i3' ],
       targetPath: 'id3',
       negate: true
@@ -332,6 +578,44 @@ describe('FilterJoin query builder', function () {
                                     }
                                   }
                                 }
+                              }
+                            },
+                            {
+                              type: {
+                                value: 'ram'
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        bool: {
+                          must: [
+                            {
+                              filterjoin: {
+                                id21: {
+                                  indices: [ 'i3' ],
+                                  path: 'id3',
+                                  query: {
+                                    bool: {
+                                      filter: {
+                                        bool: {
+                                          must: []
+                                        }
+                                      },
+                                      must: [
+                                        {
+                                          match_all: {}
+                                        }
+                                      ]
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            {
+                              type: {
+                                value: 'ram'
                               }
                             }
                           ]

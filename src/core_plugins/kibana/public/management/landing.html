@@ -45,7 +45,38 @@
             </ul>
           </div>
           <div class="management-section-info">
-            {{::section.info}}
+            <!-- siren: about section improved -->
+            <div class="kbn-settings-about container">
+              <div class="col-md-6 col-md-offset-3 jumbotron">
+                <center>
+                  <div class="about-kibi-logo"></div>
+                  <h2>Kibi</h2>
+                  <p></p>
+                  <table class="table table-condensed kbn-settings-about-versions">
+                    <tbody>
+                      <tr>
+                        <td>Version</td>
+                        <td>{{::kbnVersion}}</td>
+                      </tr>
+                      <tr>
+                        <td>Build</td>
+                        <td>{{::section.info.build}}</td>
+                      </tr>
+                      <tr>
+                        <td>Commit SHA</td>
+                        <td>{{::section.info.sha}}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <p></p>
+                  <small>© 2015-2017 All Rights Reserved - SIREn Solutions</small>
+                  <br>
+                  <br>
+                  <small>Kibana is a trademark of Elasticsearch BV, registered in the U.S. and in other countries.</small>
+                </center>
+              </div>
+            </div>
+            <!-- siren: end -->
           </div>
         </div>
       </div>

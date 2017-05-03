@@ -1,11 +1,27 @@
 <div ng-controller="KibiDataTableVisController" class="kibi-data-table-vis">
 
-  <kibi-doc-table
-    search-source="searchSource"
-    sorting="savedObj.sort"
-    columns="savedObj.columns"
-    filter="filter"
+  <div class="small-note" ng-if="vis.params.templateId">
+    <kibi-table-sorting options="savedObj" ng-if="savedObj.sorting && savedObj.showCustomView"></kibi-table-sorting>
+    <a
+      ng-if="savedObj.showCustomView"
+      class="pull-right"
+      ng-click='savedObj.showCustomView = !savedObj.showCustomView'
+    >Change back to Standard View</a>
+    <a
+       ng-if="!savedObj.showCustomView"
+       class="pull-right"
+       ng-click='savedObj.showCustomView = !savedObj.showCustomView'
+    >Change to Custom View</a>
+  </div>
 
+  <kibi-doc-table
+    options="savedObj"
+    search-source="searchSource"
+    sorting="savedObj.sorting"
+    columns="savedObj.columns"
+    template-id="savedObj.templateId"
+    custom-viewer-mode="customViewerMode"
+    filter="filter"
     cell-click-handlers="cellClickHandlers"
     query-column="queryColumn"
     column-aliases="savedObj.columnAliases"

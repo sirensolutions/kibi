@@ -5,22 +5,15 @@ import sinon from 'auto-release-sinon';
 import searchResponse from 'fixtures/search_response';
 import ngMock from 'ng_mock';
 import $ from 'jquery';
-import 'ui/private';
-import 'ui/doc_table';
 import FixturesStubbedSearchSourceProvider from 'fixtures/stubbed_search_source';
 
 // Load the kibana app dependencies.
-
+import 'ui/private';
+import 'ui/doc_table';
 
 let $parentScope;
-
-
 let $scope;
-
-
 let $timeout;
-
-
 let searchSource;
 
 const init = function ($elem, props) {

@@ -9,13 +9,29 @@
   ng-if="hits.length"
   ng-class="{ loading: searchSource.activeFetchCount > 0 }">
   <paginate ng-if="!infiniteScroll" list="hits" per-page="50" top-controls="true">
-    <table class="kbn-table table" ng-if="indexPattern">
+
+    <div
+      kibi-custom-view
+      ng-if="options.customView"
+      ng-show="options.showCustomView"
+      template-id="templateId"
+      mode="{{customViewerMode}}"
+      hits="page"
+      columns="columns"
+      column-aliases="columnAliases"
+      index-pattern="indexPattern"
+      filter="filter"
+      cell-click-handlers="cellClickHandlers"
+      options="options"
+    ></div>
+
+    <table class="kbn-table table" ng-if="indexPattern" ng-show="!options.showCustomView">
       <thead
         kibi-table-header
         columns="columns"
         column-aliases="columnAliases"
         index-pattern="indexPattern"
-        sorting="sorting">
+        options="options">
       </thead>
       <tbody>
         <tr ng-repeat="row in page|limitTo:limit track by row._index+row._type+row._id+row._score"
@@ -42,35 +58,53 @@
     </table>
   </paginate>
 
-  <table ng-if="infiniteScroll" class="kbn-table table" ng-if="indexPattern">
-    <thead
-      kibi-table-header
+  <div ng-if="infiniteScroll">
+
+    <div
+      kibi-custom-view
+      ng-if="options.customView"
+      ng-show="options.showCustomView"
+      template-id="templateId"
+      mode="{{customViewerMode}}"
+      hits="hits"
       columns="columns"
       column-aliases="columnAliases"
       index-pattern="indexPattern"
-      sorting="sorting">
-    </thead>
-    <tbody>
-      <tr ng-repeat="row in hits|limitTo:limit track by row._index+row._type+row._id+row._score"
-        kibi-table-row="row"
+      filter="filter"
+      cell-click-handlers="cellClickHandlers"
+      options="options"
+    ></div>
+
+    <table class="kbn-table table" ng-if="indexPattern" ng-show="!options.showCustomView">
+      <thead
+        kibi-table-header
         columns="columns"
         column-aliases="columnAliases"
-        sorting="sorting"
         index-pattern="indexPattern"
-        filter="filter"
-        cell-click-handlers="cellClickHandlers"
-        class="discover-table-row"></tr>
-    </tbody>
-  </table>
-  <kbn-infinite-scroll ng-if="infiniteScroll" more="addRows"></kbn-infinite-scroll>
+        options="options">
+      </thead>
+      <tbody>
+        <tr ng-repeat="row in hits|limitTo:limit track by row._index+row._type+row._id+row._score"
+          kibi-table-row="row"
+          columns="columns"
+          column-aliases="columnAliases"
+          sorting="sorting"
+          index-pattern="indexPattern"
+          filter="filter"
+          cell-click-handlers="cellClickHandlers"
+          class="discover-table-row"></tr>
+      </tbody>
+    </table>
+    <kbn-infinite-scroll more="addRows"></kbn-infinite-scroll>
+  </div>
 
   <!--kibi: allow the user to see more results-->
   <div ng-show="!infiniteScroll && hits.length < total" class="limit-info">
     Showing {{hits.length}} out of {{total}}
     <a ng-click="increaseSize()">See more</a>
   </div>
-
 </div>
+
 <div ng-if="hits != null && !hits.length" class="table-vis-error">
   <h2><i class="fa fa-meh-o"></i></h2>
   <h4>No results found</h4>

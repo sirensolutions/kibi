@@ -6,7 +6,7 @@ import template from 'plugins/kibi_data_table_vis/kibi_data_table_vis_params.htm
 
 uiModules
 .get('kibana/kibi_data_table_vis')
-.directive('kibiDataTableVisParams', function (savedDatasources, $rootScope, $route, createNotifier, $window) {
+.directive('kibiDataTableVisParams', function (savedDatasources, $rootScope, $route, createNotifier, $window, kbnUrl) {
   const notify = createNotifier({
     location: 'Enhanced search results'
   });
@@ -15,6 +15,7 @@ uiModules
     restrict: 'E',
     template,
     link: function ($scope) {
+
       // ======
       // Events
       // ======
@@ -25,6 +26,14 @@ uiModules
           $rootScope.$emit('kibi:vis:state-changed');
         }
       });
+
+      $scope.jumpToTemplate = function () {
+        kbnUrl.change('/settings/templates/' + $scope.vis.params.templateId);
+      };
+
+      $scope.filterTemplates = function (item) {
+        return item ? item.templateEngine !== 'html-angular' : true;
+      };
 
       // ====================================
       // Visualization controller integration
@@ -100,6 +109,10 @@ uiModules
         });
         _.remove($scope.vis.params.columnAliases, column => !_.contains($scope.vis.params.columns, column));
       }
+
+      $scope.$watch('vis.params.templateId', function (templateId) {
+        $rootScope.$emit('kibi:vis:templateId-changed', templateId);
+      }, true);
 
       $scope.$watch('vis.params.enableColumnAliases', (enableColumnAliases) => {
         if (!enableColumnAliases) {

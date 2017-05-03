@@ -53,7 +53,7 @@ describe('Kibi doc table', function () {
         search-source="searchSource"
         columns="columns"
         column-aliases="columnAliases"
-        sorting="sorting">
+        options="options">
       </kibi-doc-table>`);
     ngMock.inject(function (Private) {
       searchSource = Private(StubbedSearchSourceProvider);
@@ -61,7 +61,9 @@ describe('Kibi doc table', function () {
     init($elem, {
       searchSource: searchSource,
       columns: [],
-      sorting: ['@timestamp', 'desc'],
+      options: {
+        sorting: ['@timestamp', 'desc'],
+      },
       queryColumn: {}
     });
   });

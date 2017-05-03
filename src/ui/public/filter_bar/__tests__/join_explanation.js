@@ -473,14 +473,14 @@ describe('Kibi Components', function () {
         range: {
           age: {
             gte: 10,
-            lte: 20
+            lt: 20
           }
         }
       };
       var filter2 = {
         range: {
           time: {
-            gte: 657147471184,
+            gt: 657147471184,
             lte: 1210414920534
           }
         }

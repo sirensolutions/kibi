@@ -489,15 +489,16 @@ describe('Kibi Components', function () {
       addFilter(joinSequenceFilters.join_sequence[0], filter1, filter2);
 
       var format = fieldFormat.getDefaultInstance('date');
+      var queries = [
+        'age: <b>10</b> (inclusive) to <b>20</b> (exclusive)',
+        `time: <b>${format.convert(657147471184, 'html')}</b> (exclusive) to <b>${format.convert(1210414920534, 'html')}</b> (inclusive)`
+      ];
       var expected = expectedJoinSequenceHTML([
         {
           from: {
             index: [ 'article' ],
             path: 'id',
-            queries: [
-              'age: <b>10</b> to <b>20</b>',
-              `time: <b>${format.convert(657147471184, 'html')}</b> to <b>${format.convert(1210414920534, 'html')}</b>`
-            ]
+            queries
           },
           to: {
             index: [ 'company' ],
@@ -711,7 +712,7 @@ describe('Kibi Components', function () {
                   {
                     range: {
                       fake_field: {
-                        gte: 1125576000000, // these timestamps match the times in fakeSavedDashboards time-testing-3 dashboard
+                        gt: 1125576000000, // these timestamps match the times in fakeSavedDashboards time-testing-3 dashboard
                         lte: 1441454400000
                       }
                     }
@@ -727,7 +728,7 @@ describe('Kibi Components', function () {
       '<ul class="explanation join-set">' +
         '<li>From <b>Time</b>:</br>' +
           '<ul>' +
-            '<li> fake_field: <b>1125576000000</b> to <b>1441454400000</b> </li>' +
+            '<li> fake_field: <b>1125576000000</b> (exclusive) to <b>1441454400000</b> (inclusive) </li>' +
           '</ul>' +
         '</li>' +
       '</ul>';

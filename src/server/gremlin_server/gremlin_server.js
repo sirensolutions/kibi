@@ -52,6 +52,7 @@ function startServer(self, fulfill, reject) {
 
         const args = [
           '-jar', gremlinServerPath,
+          '-Djava.security.egd=file:/dev/./urandom',
           '--elasticsearch.url=' + config.get('elasticsearch.url'),
           '--server.port=' + serverURL.port
         ];

@@ -1,4 +1,4 @@
-import { get, set } from 'lodash';
+import { get, set, forIn, isArray, isObject } from 'lodash';
 
 function Builder() {
   this.query = [];
@@ -16,29 +16,28 @@ Builder.prototype.clear = function () {
  * toObject returns the query object
  */
 Builder.prototype.toObject = function () {
-  const expand = function (queryOut, query) {
-    for (let i = 0; i < query.length; i++) {
-      if (query[i] instanceof FilterJoinBuilder) {
-        // must branch of the child
-        const must = query[i].filterjoin.query.bool.filter.bool.must;
-        if (must) {
-          query[i].filterjoin.query.bool.filter.bool.must = expand([], must);
+  const replace = function (obj) {
+    if (obj instanceof FilterJoinBuilder) {
+      return replace(obj.fjQuery);
+    } else if (isArray(obj)) {
+      const values = obj.splice(0, obj.length);
+      values.forEach((value) => {
+        if (value instanceof FilterJoinBuilder) {
+          replace(value).forEach(result => obj.push(result));
+        } else {
+          obj.push(replace(value));
         }
-        // must_not branch of the child
-        const mustNot = query[i].filterjoin.query.bool.filter.bool.must_not;
-        if (mustNot && mustNot[0].bool) {
-          mustNot[0].bool.must = expand([], mustNot[0].bool.must);
-        }
-        // the current filterjoin query
-        queryOut.push(...query[i].fjQuery);
-      } else {
-        queryOut.push(query[i]);
-      }
+      });
+      return obj;
+    } else if (isObject(obj)) {
+      forIn(obj, (child, key) => {
+        obj[key] = replace(child);
+      });
     }
-    return queryOut;
+    return obj;
   };
 
-  return expand([], this.query);
+  return replace(this.query);
 };
 
 /**
@@ -63,8 +62,17 @@ Builder.prototype.addFilterJoin = function ({ orderBy, maxTermsPerShard, termsEn
     targetTypes,
     targetPath
   });
-  addSourceTypes(filterJoinBuilder.fjQuery, sourceTypes);
-  this.query.push(filterJoinBuilder);
+  if (sourceTypes) {
+    const typeAndJoin = {
+      bool: {
+        must: [filterJoinBuilder]
+      }
+    };
+    addSourceTypes(typeAndJoin.bool.must, sourceTypes);
+    this.query.push(typeAndJoin);
+  } else {
+    this.query.push(filterJoinBuilder);
+  }
   return filterJoinBuilder;
 };
 
@@ -128,20 +136,24 @@ FilterJoinBuilder.prototype.addFilterJoin = function ({ orderBy, maxTermsPerShar
     targetPath
   });
   const query = this.filterjoin.query.bool;
+
+  let filterJoin = filterJoinBuilder;
+  if (sourceTypes) {
+    filterJoin = {
+      bool: {
+        must: [filterJoinBuilder]
+      }
+    };
+    addSourceTypes(filterJoin.bool.must, sourceTypes);
+  }
   // add to the parent filterjoin
   if (negate) {
     if (!get(query, 'filter.bool.must_not')) {
-      set(query, 'filter.bool.must_not', [{
-        bool: {
-          must: []
-        }
-      }]);
+      set(query, 'filter.bool.must_not', []);
     }
-    query.filter.bool.must_not[0].bool.must.push(filterJoinBuilder);
-    addSourceTypes(query.filter.bool.must_not[0].bool.must, sourceTypes);
+    query.filter.bool.must_not.push(filterJoin);
   } else {
-    query.filter.bool.must.push(filterJoinBuilder);
-    addSourceTypes(query.filter.bool.must, sourceTypes);
+    query.filter.bool.must.push(filterJoin);
   }
   return filterJoinBuilder;
 };

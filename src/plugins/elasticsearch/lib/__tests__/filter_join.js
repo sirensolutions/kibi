@@ -70,29 +70,36 @@ describe('FilterJoin querying', function () {
         const actual = filterJoinSet([ query ]);
         expect(actual).to.eql([
           {
-            filterjoin: {
-              id: {
-                indices: [
-                  '.kibi'
-                ],
-                types: [
-                  'type'
-                ],
-                path: 'id',
-                query: {
-                  bool: {
-                    must_not: [
-                      {
-                        match_all: {}
+            bool: {
+              must: [
+                {
+                  filterjoin: {
+                    id: {
+                      indices: [
+                        '.kibi'
+                      ],
+                      types: [
+                        'type'
+                      ],
+                      path: 'id',
+                      query: {
+                        bool: {
+                          must_not: [
+                            {
+                              match_all: {}
+                            }
+                          ]
+                        }
                       }
-                    ]
+                    }
+                  }
+                },
+                {
+                  type: {
+                    value: 'type'
                   }
                 }
-              }
-            }
-          }, {
-            type: {
-              value: 'type'
+              ]
             }
           }
         ]);
@@ -117,52 +124,68 @@ describe('FilterJoin querying', function () {
         const actual = filterJoinSet([ query ]);
         expect(actual).to.eql([
           {
-            filterjoin: {
-              id: {
-                indices: [
-                  'weather-2015-01',
-                  'weather-2015-02'
-                ],
-                types: ['type'],
-                path: 'id',
-                query: {
-                  bool: {
-                    must: [{
-                      match_all: {}
-                    }],
-                    filter: {
-                      bool: {
-                        must: [{
-                          filterjoin: {
-                            id: {
-                              indices: ['.kibi'],
-                              path: 'id',
-                              types: ['type'],
-                              query: {
-                                bool: {
-                                  must_not: [
-                                    {
-                                      match_all: {}
-                                    }
-                                  ]
+            bool: {
+              must: [
+                {
+                  filterjoin: {
+                    id: {
+                      indices: [
+                        'weather-2015-01',
+                        'weather-2015-02'
+                      ],
+                      types: ['type'],
+                      path: 'id',
+                      query: {
+                        bool: {
+                          must: [{
+                            match_all: {}
+                          }],
+                          filter: {
+                            bool: {
+                              must: [
+                                {
+                                  bool: {
+                                    must: [
+                                      {
+                                        filterjoin: {
+                                          id: {
+                                            indices: ['.kibi'],
+                                            path: 'id',
+                                            types: ['type'],
+                                            query: {
+                                              bool: {
+                                                must_not: [
+                                                  {
+                                                    match_all: {}
+                                                  }
+                                                ]
+                                              }
+                                            }
+                                          }
+                                        }
+                                      },
+                                      {
+                                        type: {
+                                          value: 'type'
+                                        }
+                                      }
+                                    ]
+                                  }
                                 }
-                              }
+                              ]
                             }
-                          },
-                        }, {
-                          type: {
-                            value: 'type'
                           }
-                        }]
+                        }
                       }
                     }
                   }
+                },
+                {
+                  type: {
+                    value: 'type'
+                  }
                 }
-              }
-            }
-          }, {
-            type: {
-              value: 'type'
+              ]
             }
           }
         ]);
@@ -1286,6 +1309,81 @@ describe('FilterJoin querying', function () {
   });
 
   describe('Join Sequence', function () {
+
+    it('multiple join sequences in a must_not', function () {
+      const query = [
+        {
+          query: {
+            bool: {
+              must: [
+                {
+                  match_all: {}
+                }
+              ],
+              filter: {
+                bool: {
+                  must_not: [
+                    {
+                      join_sequence: [
+                        {
+                          relation: [
+                            {pattern: 'A', path: 'aaa', indices: ['A']},
+                            {pattern: 'B', path: 'bbb', indices: ['B'], types: ['A']}
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      join_sequence: [
+                        {
+                          relation: [
+                            {pattern: 'C', path: 'ccc', indices: ['C']},
+                            {pattern: 'D', path: 'ddd', indices: ['D']}
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      ];
+      const builder = new FilterJoinBuilder();
+      builder.addFilterJoin({
+        sourcePath: 'bbb',
+        sourceTypes: ['A'],
+        targetIndices: [ 'A' ],
+        targetPath: 'aaa'
+      });
+      builder.addFilterJoin({
+        sourcePath: 'ddd',
+        targetIndices: [ 'C' ],
+        targetPath: 'ccc'
+      });
+
+      const expected = [
+        {
+          query: {
+            bool: {
+              must: [{
+                match_all:{}
+              }],
+              filter: {
+                bool: {
+                  must_not: builder.toObject()
+                }
+              }
+            }
+          }
+        }
+      ];
+
+      const actual = filterJoinSeq(query);
+      expect(actual).to.eql(expected);
+    });
+
     describe('Filterjoin with nested join sequence', function () {
       describe('Error handling', function () {
         it('should fail on the sequence not being an array', function () {
@@ -1449,6 +1547,77 @@ describe('FilterJoin querying', function () {
 
         const builder = new FilterJoinBuilder();
         const fj = builder.addFilterJoin({ sourcePath: 'path3', targetIndices: [ 'aaa' ], targetPath: 'id' });
+        fj.addFilterJoin({
+          negate: true,
+          sourceTypes: [ 'A' ],
+          sourcePath: 'id',
+          targetIndices: [ 'bbb' ],
+          targetPath: 'path1',
+          targetTypes: [ 'B' ]
+        });
+        fj.addFilterJoin({
+          sourcePath: 'id',
+          targetIndices: [ 'bbb' ],
+          targetPath: 'path2'
+        });
+
+        const actual = filterJoinSeq(query);
+        expect(actual).to.eql(builder.toObject());
+      });
+
+      it('multiple nested negated join sequences', function () {
+        const query = [
+          {
+            join_sequence: [
+              {
+                group: [
+                  [
+                    {
+                      relation: [
+                        { indices: [ 'bbb' ], path: 'path1', pattern: 'bbb', types: [ 'B' ] },
+                        { indices: [ 'aaa' ], path: 'id', pattern: 'aaa' }
+                      ],
+                      negate: true
+                    }
+                  ],
+                  [
+                    {
+                      relation: [
+                        { indices: [ 'bbb' ], path: 'path1', pattern: 'bbb', types: [ 'B' ] },
+                        { indices: [ 'aaa' ], path: 'id', pattern: 'aaa', types: [ 'A' ] }
+                      ],
+                      negate: true
+                    }
+                  ],
+                  [
+                    {
+                      relation: [
+                        { indices: [ 'bbb' ], path: 'path2', pattern: 'bbb' },
+                        { indices: [ 'aaa' ], path: 'id', pattern: 'aaa' }
+                      ]
+                    }
+                  ]
+                ]
+              },
+              {
+                relation: [
+                  { pattern: 'aaa', path: 'id', indices: [ 'aaa' ] },
+                  { pattern: 'ccc', path: 'path3', indices: [ 'ccc' ] }
+                ]
+              }
+            ]
+          }
+        ];
+
+        const builder = new FilterJoinBuilder();
+        const fj = builder.addFilterJoin({ sourcePath: 'path3', targetIndices: [ 'aaa' ], targetPath: 'id' });
+        fj.addFilterJoin({
+          negate: true,
+          sourcePath: 'id',
+          targetIndices: [ 'bbb' ],
+          targetPath: 'path1',
+          targetTypes: [ 'B' ]
+        });
         fj.addFilterJoin({
           negate: true,
           sourceTypes: [ 'A' ],

@@ -53,7 +53,8 @@ uiModules
         kibiVersion: kibiVersion,
         kibiKibanaAnnouncement: kibiKibanaAnnouncement,
         build: buildNum,
-        sha: buildSha
+        sha: buildSha,
+        currentYear: new Date().getFullYear()
       };
 
     }

@@ -56,20 +56,27 @@
                     <tbody>
                       <tr>
                         <td>Version</td>
-                        <td>{{::kbnVersion}}</td>
+                        <td>{{::section.info.kibiVersion}}</td>
                       </tr>
+
                       <tr>
                         <td>Build</td>
                         <td>{{::section.info.build}}</td>
                       </tr>
+
                       <tr>
                         <td>Commit SHA</td>
-                        <td>{{::section.info.sha}}</td>
+                        <td>{{::section.info.sha | limitTo:7}}</td>
+                      </tr>
+
+                      <tr>
+                        <td>Powered by</td>
+                        <td><a href="{{::section.info.kibiKibanaAnnouncement}}">Kibana {{kbnVersion}}</a></td>
                       </tr>
                     </tbody>
                   </table>
                   <p></p>
-                  <small>© 2015-2017 All Rights Reserved - SIREn Solutions</small>
+                  <small>© 2015-{{::section.info.currentYear}} All Rights Reserved - SIREn Solutions</small>
                   <br>
                   <br>
                   <small>Kibana is a trademark of Elasticsearch BV, registered in the U.S. and in other countries.</small>

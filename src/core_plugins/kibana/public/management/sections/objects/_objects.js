@@ -12,7 +12,7 @@ import RefreshKibanaIndexProvider from 'plugins/kibana/management/sections/indic
 import DeleteHelperProvider from 'ui/kibi/helpers/delete_helper';
 import CacheProvider from 'ui/kibi/helpers/cache_helper';
 import objectActionsRegistry from 'ui/registry/object_actions';
-import ImportExportProvider from 'ui/kibi/helpers/import_export_helper';
+import ImportExportProvider from 'plugins/kibi_core/management/sections/objects/import_export_helper';
 // kibi: end
 
 const MAX_SIZE = Math.pow(2, 31) - 1;
@@ -165,7 +165,7 @@ uiModules.get('apps/management')
           body: {docs: objs.map(transformToMget)}
         })
         .then(function (response) {
-          //kibi: sort the docs so the config is on the top
+          // kibi: sort the docs so the config is on the top
           const docs = response.docs.map(partialRight(pick, '_id', '_type', '_source'));
           importExportHelper.moveConfigToTop(docs);
           // kibi: end

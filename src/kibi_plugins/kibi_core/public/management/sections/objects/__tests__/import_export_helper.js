@@ -1,12 +1,14 @@
 import expect from 'expect.js';
-import ngMock from 'ngMock';
+import ngMock from 'ng_mock';
 import sinon from 'auto-release-sinon';
 import Promise from 'bluebird';
+import noDigestPromises from 'test_utils/no_digest_promises';
+import ImportExportHelperProvider from '../import_export_helper';
 
 describe('Kibi Components', function () {
   describe('ImportExportHelper', function () {
 
-    require('testUtils/noDigestPromises').activateForSuite();
+    noDigestPromises.activateForSuite();
 
     let importExportHelper;
     let indexPatterns;
@@ -26,13 +28,12 @@ describe('Kibi Components', function () {
 
       ngMock.module('kibana', function ($provide) {
         $provide.constant('kibiVersion', 'x.x.x-x');
-        $provide.service('config', require('fixtures/kibi/config'));
       });
       ngMock.inject(function (Private, _indexPatterns_, _config_, _es_) {
         es = _es_;
         indexPatterns = _indexPatterns_;
         config = _config_;
-        importExportHelper = Private(require('ui/kibi/helpers/import_export_helper'));
+        importExportHelper = Private(ImportExportHelperProvider);
       });
     }
 
@@ -80,7 +81,7 @@ describe('Kibi Components', function () {
           key1: 'value1'
         }
       };
-      const configSetSpy = sinon.spy(config, 'set');
+      const configSetSpy = sinon.stub(config, 'set').returns(Promise.resolve());
 
       importExportHelper.loadConfig(configToLoad, notify).then(() => {
         sinon.assert.notCalled(notifyWarningSpy);

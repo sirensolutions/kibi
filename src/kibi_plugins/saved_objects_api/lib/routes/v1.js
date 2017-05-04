@@ -345,7 +345,7 @@ module.exports = (server, API_ROOT) => {
       } catch (error) {
         return reply(Boom.notFound(error));
       }
-      let size = request.query.size;
+      const size = request.query.size;
       let exclude = [];
       if (request.query.exclude) {
         exclude = request.query.exclude.split(',');
@@ -369,7 +369,8 @@ module.exports = (server, API_ROOT) => {
           scroll: Joi.any().default(null),
           search_type: Joi.any().default(null),
           q: Joi.string().default(null),
-          exclude: Joi.string().default(null)
+          exclude: Joi.string().default(null),
+          sort: Joi.string().default(null)
         }
       }
     }

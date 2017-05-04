@@ -276,15 +276,6 @@ function controller(Promise, es, kibiState, $rootScope, $scope, $timeout, config
             return uniq[getRelationId(indices)].length !== 1;
           },
           message: 'These relationships are equivalent, please remove one.'
-        },
-        {
-          isInvalidRelation: function (relation) {
-            const indices = relation.indices;
-            return indices[0].indexPatternId === indices[1].indexPatternId &&
-              indices[0].indexPatternType === indices[1].indexPatternType &&
-              indices[0].path === indices[1].path;
-          },
-          message: 'Left and right sides of the relation cannot be the same.'
         }
       ]
     });

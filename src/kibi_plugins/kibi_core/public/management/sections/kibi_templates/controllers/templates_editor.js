@@ -155,6 +155,12 @@ function controller($scope, $route, kbnUrl, Private, createNotifier, queryEngine
   $scope.newObject = function () {
     kbnUrl.change('/management/siren/templates', {});
   };
+
+  // expose some methods to the navbar buttons
+  [ 'isValid', 'newObject', 'saveObject' ]
+  .forEach(name => {
+    $element.data(name, $scope[name]);
+  });
 }
 
 uiModules

@@ -120,6 +120,12 @@ function controller($rootScope, $scope, $route, kbnUrl, createNotifier, savedDas
       addTitle(dashboards);
     }
   }, true);
+
+  // expose some methods to the navbar buttons
+  [ 'isValid', 'newObject', 'saveObject' ]
+  .forEach(name => {
+    $element.data(name, $scope[name]);
+  });
 }
 
 uiModules

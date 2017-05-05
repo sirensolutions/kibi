@@ -16,7 +16,7 @@ uiRoutes
 });
 
 function controller(Promise, es, kibiState, $rootScope, $scope, $timeout, config, Private, kbnUrl, createNotifier, kibiEnterpriseEnabled,
-    $window) {
+    $window, $element) {
   const notify = createNotifier({
     location: 'Relations Editor'
   });
@@ -508,6 +508,12 @@ function controller(Promise, es, kibiState, $rootScope, $scope, $timeout, config
     })
     .catch(notify.error);
   };
+
+  // expose some methods to the navbar buttons
+  [ 'isValid', 'saveObject' ]
+  .forEach(name => {
+    $element.data(name, $scope[name]);
+  });
 }
 
 uiModules

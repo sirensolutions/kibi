@@ -46,7 +46,7 @@
             <ng-form name="innerForm" novalidate>
               <div class="form-group">
                 <label>{{param.label}}</label>
-                <span ng-if="param.inputType=='list'">(Optional. Default={{param.defaultValue || 'undefined'}})</span>
+                <span ng-if="param.inputType == 'list'">(Optional. Default={{param.defaultValue || 'undefined'}})</span>
                 <span ng-if="param.inputType == 'number' && !param.required">(Optional. Default={{param.defaultValue || 'undefined'}})</span>
                 <span ng-if="param.inputType == 'text' && !param.required">(Optional. Default={{param.defaultValue || 'undefined'}})</span>
                 <span ng-if="param.inputType == 'checkbox' && !param.required">(Optional. Default={{param.defaultValue === false ? 'false' : 'true'}})</span>

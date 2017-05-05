@@ -173,17 +173,13 @@ describe('Kibi Components', function () {
       };
 
       const filter1 = {
-        query: {
-          query_string: {
-            query: 'aaa'
-          }
+        query_string: {
+          query: 'aaa'
         }
       };
       const filter2 = {
-        query: {
-          query_string: {
-            query: 'bbb'
-          }
+        query_string: {
+          query: 'bbb'
         }
       };
 
@@ -230,10 +226,8 @@ describe('Kibi Components', function () {
 
     it('prints a nice label for query_string', function (done) {
       const filter = {
-        query: {
-          query_string: {
-            query: 'aaa'
-          }
+        query_string: {
+          query: 'aaa'
         }
       };
 
@@ -264,11 +258,9 @@ describe('Kibi Components', function () {
 
     it('prints a nice label for match_phrase_prefix object', function (done) {
       const filter = {
-        query: {
-          match_phrase_prefix: {
-            fieldA: {
-              query: 'aaa bbb'
-            }
+        match_phrase_prefix: {
+          fieldA: {
+            query: 'aaa bbb'
           }
         }
       };
@@ -300,10 +292,8 @@ describe('Kibi Components', function () {
 
     it('prints a nice label for match_phrase_prefix string', function (done) {
       const filter = {
-        query: {
-          match_phrase_prefix: {
-            fieldA: 'aaa bbb'
-          }
+        match_phrase_prefix: {
+          fieldA: 'aaa bbb'
         }
       };
 
@@ -334,11 +324,9 @@ describe('Kibi Components', function () {
 
     it('prints a nice label for match_phrase object', function (done) {
       const filter = {
-        query: {
-          match_phrase: {
-            fieldA: {
-              query: 'aaa bbb'
-            }
+        match_phrase: {
+          fieldA: {
+            query: 'aaa bbb'
           }
         }
       };
@@ -370,10 +358,8 @@ describe('Kibi Components', function () {
 
     it('prints a nice label for match_phrase string', function (done) {
       const filter = {
-        query: {
-          match_phrase: {
-            fieldA: 'aaa bbb'
-          }
+        match_phrase: {
+          fieldA: 'aaa bbb'
         }
       };
 
@@ -404,11 +390,9 @@ describe('Kibi Components', function () {
 
     it('prints a nice label for match object', function (done) {
       const filter = {
-        query: {
-          match: {
-            fieldA: {
-              query: 'aaa bbb'
-            }
+        match: {
+          fieldA: {
+            query: 'aaa bbb'
           }
         }
       };
@@ -440,10 +424,8 @@ describe('Kibi Components', function () {
 
     it('prints a nice label for match string', function (done) {
       const filter = {
-        query: {
-          match: {
-            fieldA: 'aaa bbb'
-          }
+        match: {
+          fieldA: 'aaa bbb'
         }
       };
 
@@ -492,12 +474,12 @@ describe('Kibi Components', function () {
 
       addFilter(joinSequenceFilters.join_sequence[0], filter1, filter2);
 
-      var format = fieldFormat.getDefaultInstance('date');
-      var queries = [
+      const format = fieldFormat.getDefaultInstance('date');
+      const queries = [
         'age: <b>10</b> (inclusive) to <b>20</b> (exclusive)',
         `time: <b>${format.convert(657147471184, 'html')}</b> (exclusive) to <b>${format.convert(1210414920534, 'html')}</b> (inclusive)`
       ];
-      var expected = expectedJoinSequenceHTML([
+      const expected = expectedJoinSequenceHTML([
         {
           from: {
             index: [ 'article' ],

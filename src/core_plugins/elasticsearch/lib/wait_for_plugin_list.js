@@ -2,7 +2,7 @@ import _ from 'lodash';
 
 module.exports = function (plugin, server) {
   const config = server.config();
-  const callWithInternalUser = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
+  const callWithInternalUser = server.plugins.elasticsearch.getCluster('data').callWithInternalUser;
 
   return Promise.all(
     [

@@ -1,4 +1,6 @@
 import { SavedObjectLoader } from 'ui/courier/saved_object/saved_object_loader';
+// siren: timeline-sheet saved object via savedObjectsAPI
+import CacheProvider from 'ui/kibi/helpers/cache_helper';
 
 define(function (require) {
   const module = require('ui/modules').get('app/sheet');
@@ -15,8 +17,17 @@ define(function (require) {
   });
 
   // This is the only thing that gets injected into controllers
-  module.service('savedSheets', function (Promise, SavedSheet, kbnIndex, esAdmin, kbnUrl) {
-    const savedSheetLoader = new SavedObjectLoader(SavedSheet, kbnIndex, esAdmin, kbnUrl);
+  module.service('savedSheets', function (savedObjectsAPI, Private, SavedSheet, kbnIndex, esAdmin, kbnUrl) {
+    // siren: timeline-sheet saved object via savedObjectsAPI
+    const options = {
+      caching: {
+        find: true,
+        get: true,
+        cache: Private(CacheProvider)
+      },
+      savedObjectsAPI
+    };
+    const savedSheetLoader = new SavedObjectLoader(SavedSheet, kbnIndex, esAdmin, kbnUrl, options);
     savedSheetLoader.urlFor = function (id) {
       return kbnUrl.eval('#/{{id}}', { id: id });
     };

@@ -16,7 +16,6 @@ describe('Kibi Directives', function () {
     let kibiNavBarHelper;
     let $rootScope;
     let dashboardGroups;
-
     let timeBasedIndicesStub;
     let getDashboardsMetadataStub;
 
@@ -47,6 +46,17 @@ describe('Kibi Directives', function () {
           };
           return timefilter;
         });
+        $provide.service('joinExplanation', () => {
+          return {
+            constructFilterIconMessage: (filters, queries) => {
+              if (filters && filters.length === 1 && filters[0].filter) {
+                return Promise.resolve(filters[0].filter);
+              } else {
+                return Promise.resolve(null);
+              }
+            }
+          };
+        });
         $provide.constant('kbnDefaultAppId', '');
         $provide.constant('kibiDefaultDashboardTitle', '');
       });
@@ -64,7 +74,6 @@ describe('Kibi Directives', function () {
         kibiState = _kibiState_;
         $rootScope = _$rootScope_;
         kibiNavBarHelper = Private(KibiNavBarHelperProvider);
-
         sinon.stub(kibiState, '_getDashboardsIdInConnectedComponent').returns(dashboardsIdsInConnectedComponents);
         sinon.stub(kibiState, '_getCurrentDashboardId').returns('dashboard1');
         timeBasedIndicesStub = sinon.stub(kibiState, 'timeBasedIndices').returns(Promise.resolve([ 'id' ]));
@@ -131,7 +140,6 @@ describe('Kibi Directives', function () {
         });
       });
 
-
       it('should set count, isPruned and filterIconMessage to undefined if there is no metadata for the requested dashboard', function () {
         // return meta only for second dashboard
         getDashboardsMetadataStub.returns(Promise.resolve([
@@ -139,7 +147,7 @@ describe('Kibi Directives', function () {
             dashboardId: 'dashboard2',
             count: 24,
             queries: [ getDefaultQuery() ],
-            filters: [{}],
+            filters: [{filter: 'dash2query'}],
             isPruned: true
           }
         ]));
@@ -154,7 +162,7 @@ describe('Kibi Directives', function () {
           expect(dashboardGroups.getGroups()[1].id).to.be('group dashboard2');
           expect(dashboardGroups.getGroups()[1].selected.count).to.equal(24);
           expect(dashboardGroups.getGroups()[1].selected.isPruned).to.equal(true);
-          expect(dashboardGroups.getGroups()[1].selected.filterIconMessage).to.equal('This dashboard has 1 filter set.');
+          expect(dashboardGroups.getGroups()[1].selected.filterIconMessage).to.equal('dash2query');
         });
       });
     });
@@ -213,7 +221,7 @@ describe('Kibi Directives', function () {
               dashboardId: 'dashboard1',
               count: 42,
               queries: [ getDefaultQuery() ],
-              filters: [{ dummyFilter: {} }],
+              filters: [{filter: 'dash1query'}],
               isPruned: false
             },
             {
@@ -229,7 +237,7 @@ describe('Kibi Directives', function () {
           .then(() => {
             expect(dashboardGroups.getGroups()).to.have.length(2);
             expect(dashboardGroups.getGroups()[0].id).to.be('group dashboard1');
-            expect(dashboardGroups.getGroups()[0].selected.filterIconMessage).to.be('This dashboard has 1 filter set.');
+            expect(dashboardGroups.getGroups()[0].selected.filterIconMessage).to.be('dash1query');
             expect(dashboardGroups.getGroups()[1].id).to.be('group dashboard2');
             expect(dashboardGroups.getGroups()[1].selected.filterIconMessage).to.be(null);
           });
@@ -241,7 +249,7 @@ describe('Kibi Directives', function () {
               dashboardId: 'dashboard1',
               count: 42,
               queries: [ getDefaultQuery() ],
-              filters: [{ dummyFilter1: {} }, { dummyFilter2: {} }],
+              filters: [{filter: '2filtersDash1Message'}],
               isPruned: false
             },
             {
@@ -257,7 +265,7 @@ describe('Kibi Directives', function () {
           .then(() => {
             expect(dashboardGroups.getGroups()).to.have.length(2);
             expect(dashboardGroups.getGroups()[0].id).to.be('group dashboard1');
-            expect(dashboardGroups.getGroups()[0].selected.filterIconMessage).to.be('This dashboard has 2 filters set.');
+            expect(dashboardGroups.getGroups()[0].selected.filterIconMessage).to.be('2filtersDash1Message');
             expect(dashboardGroups.getGroups()[1].id).to.be('group dashboard2');
             expect(dashboardGroups.getGroups()[1].selected.filterIconMessage).to.be(null);
           });
@@ -268,8 +276,8 @@ describe('Kibi Directives', function () {
             {
               dashboardId: 'dashboard1',
               count: 42,
-              queries: [{ query: 'saved_with_dash' }, { query: 'set_on_search_bar' }],
-              filters: [],
+              queries: [{query: 'saved_with_dash'}, {query: 'set_on_search_bar'}],
+              filters: [{filter: '2queryDash1Message'}],
               isPruned: false
             },
             {
@@ -285,7 +293,7 @@ describe('Kibi Directives', function () {
           .then(() => {
             expect(dashboardGroups.getGroups()).to.have.length(2);
             expect(dashboardGroups.getGroups()[0].id).to.be('group dashboard1');
-            expect(dashboardGroups.getGroups()[0].selected.filterIconMessage).to.be('This dashboard has a query set.');
+            expect(dashboardGroups.getGroups()[0].selected.filterIconMessage).to.be('2queryDash1Message');
             expect(dashboardGroups.getGroups()[1].id).to.be('group dashboard2');
             expect(dashboardGroups.getGroups()[1].selected.filterIconMessage).to.be(null);
           });
@@ -296,8 +304,8 @@ describe('Kibi Directives', function () {
             {
               dashboardId: 'dashboard1',
               count: 42,
-              queries: [{ query: 'saved_with_dash' }, { query: 'set_on_search_bar' }],
-              filters: [{ filter: 'set_on_filter_bar' }],
+              queries: [{query: 'saved_with_dash'}, {query: 'set_on_search_bar'}],
+              filters: [{filter: '1query2filtersDash1Message'}],
               isPruned: false
             },
             {
@@ -313,7 +321,7 @@ describe('Kibi Directives', function () {
           .then(() => {
             expect(dashboardGroups.getGroups()).to.have.length(2);
             expect(dashboardGroups.getGroups()[0].id).to.be('group dashboard1');
-            expect(dashboardGroups.getGroups()[0].selected.filterIconMessage).to.be('This dashboard has a query and 1 filter set.');
+            expect(dashboardGroups.getGroups()[0].selected.filterIconMessage).to.be('1query2filtersDash1Message');
             expect(dashboardGroups.getGroups()[1].id).to.be('group dashboard2');
             expect(dashboardGroups.getGroups()[1].selected.filterIconMessage).to.be(null);
           });

@@ -8,6 +8,12 @@ import dashboardListingTemplate from './listing/dashboard_listing.html';
 import { DashboardListingController } from './listing/dashboard_listing';
 import { DashboardConstants } from './dashboard_constants';
 
+// kibi: imports
+import 'ui/kibi/directives/kibi_select'; // added as it is needed by src/plugins/kibana/public/dashboard/partials/save_dashboard.html
+import 'ui/kibi/session/siren_session'; // added to make sirenSession service available
+import 'ui/filter_bar/join_explanation'; // provides explanations of queries and filters to tooltips
+// kibi: end
+
 require('ui/saved_objects/saved_object_registry').register(savedDashboardRegister);
 
 uiRoutes

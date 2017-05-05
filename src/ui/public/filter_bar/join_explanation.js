@@ -74,8 +74,8 @@ define(function (require) {
       }
 
       function formatMatch(f, matchType) {
-        const match = Object.keys(f.query[matchType])[0];
-        const matchQuery = f.query[matchType][match];
+        const match = Object.keys(f[matchType])[0];
+        const matchQuery = f[matchType][match];
 
         if (matchQuery.constructor === Object) {
           return ' match on ' + match + ': <b>' + matchQuery.query + '</b> ';
@@ -120,13 +120,13 @@ define(function (require) {
         let upperBound;
         let lowerBoundDescriptor;
         let upperBoundDescriptor;
-        if (f.query && f.query.query_string && f.query.query_string.query) {
-          return Promise.resolve(' query: <b>' + f.query.query_string.query + '</b> ');
-        } else if (f.query && f.query.match) {
+        if (f.query_string && f.query_string.query) {
+          return Promise.resolve(' query: <b>' + f.query_string.query + '</b> ');
+        } else if (f.match) {
           return Promise.resolve(formatMatch(f, 'match'));
-        } else if (f.query && f.query.match_phrase) {
+        } else if (f.match_phrase) {
           return Promise.resolve(formatMatch(f, 'match_phrase'));
-        } else if (f.query && f.query.match_phrase_prefix) {
+        } else if (f.match_phrase_prefix) {
           return Promise.resolve(formatMatch(f, 'match_phrase_prefix'));
         } else if (f.range) {
           prop = Object.keys(f.range)[0];

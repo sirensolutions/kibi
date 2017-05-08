@@ -66,7 +66,7 @@ define(function (require) {
           _.move($scope.columns, index, index + 1);
         };
 
-        $scope.toggleColumn = function (fieldName) {
+        $scope.toggleColumn = function (fieldName, customColumnName) {
           // kibi: emit kibi:remove:column in order to clean the clickOptions on a column
           if (_.contains($scope.columns, fieldName)) {
             const ind = $scope.columns.indexOf(fieldName);
@@ -74,7 +74,7 @@ define(function (require) {
               $scope.columnAliases.splice(ind, 1);
             }
             $scope.columns.splice(ind, 1);
-            $rootScope.$emit('kibi:remove:column', { fieldName: fieldName, index: ind });
+            $rootScope.$emit('kibi:remove:column', { fieldName: fieldName, index: ind, customName: customColumnName });
           } else {
             if ($scope.columnAliases) {
               $scope.columnAliases.push(fieldName);
@@ -87,7 +87,7 @@ define(function (require) {
           if (column) {
             // kibi: adding alias
             if ($scope.columnAliases && $scope.columnAliases.length === $scope.columns.length) {
-              $scope.columnAliases.splice(column.index, 0, column.fieldName);
+              $scope.columnAliases.splice(column.index, 0, column.customName);
             }
             $scope.columns.splice(column.index, 0, column.fieldName);
           }

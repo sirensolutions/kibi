@@ -288,7 +288,7 @@ QueryEngine.prototype._loadDatasources = function () {
           data = new Buffer(JSON.stringify(datasourceObj).length);
           data.write(JSON.stringify(datasourceObj), 'utf-8');
         }
-        self.client.create({
+        self.client.index({
           timeout: '1000ms',
           index: self.config.get('kibana.index'),
           type: 'datasource',
@@ -300,11 +300,7 @@ QueryEngine.prototype._loadDatasources = function () {
           fulfill(true);
         })
         .catch(function (err) {
-          if (err.statusCode === 409) {
-            self.log.warn('Datasource [' + datasourceId + '] already exists');
-          } else {
-            self.log.error('Could not load datasource [' + datasourceId + ']', err);
-          }
+          self.log.error('Could not load datasource [' + datasourceId + ']', err);
           fulfill(true);
         });
       });

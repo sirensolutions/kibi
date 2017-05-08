@@ -42,11 +42,6 @@ uiModules.get('kibana')
     controller: function ($scope) {
       $scope.mode = docViews.inOrder[0].name;
       $scope.docViews = docViews.byName;
-      // kibi: do not allow to filter on a field when in edit mode
-      //$scope.edit = $location.path().indexOf('edit') !== -1;
-      // KIBI5: this will be unecessary after #2096 is fixed
-      $scope.edit = true;
-      // If a field isn't in the mapping, use this
     }
   };
 });

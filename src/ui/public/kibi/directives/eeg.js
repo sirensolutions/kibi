@@ -1,5 +1,7 @@
 import uiModules from 'ui/modules';
 import Eeg from 'kibi-eeg';
+import chrome from 'ui/chrome';
+import { endsWith } from 'lodash';
 
 uiModules
 .get('kibana')
@@ -18,10 +20,12 @@ uiModules
     },
     template: '<div></div>',
     link: function ($scope, element, attrs) {
-      const layersOrder = ['legend', 'links','linksLabelsBack','nodes','linksLabels'];
+      const layersOrder = ['legend', 'links', 'linksLabelsBack', 'nodes', 'linksLabels'];
       const minNodeSize = 15;
-      const baseURL = '';
-
+      let baseURL = chrome.getBasePath();
+      if (baseURL && !endsWith(baseURL, '/')) {
+        baseURL += '/';
+      }
       if ($scope.graph === undefined) {
         element.empty();
         if ($scope.g) {

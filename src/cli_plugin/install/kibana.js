@@ -35,7 +35,8 @@ export async function rebuildCache(settings, logger) {
       },
       plugins: {
         initialize: false,
-        scanDirs: [settings.pluginDir, fromRoot('src/core_plugins')]
+        // kibi: added src/kibi_plugins
+        scanDirs: [settings.pluginDir, fromRoot('src/core_plugins'), fromRoot('src/kibi_plugins')]
       },
       uiSettings: {
         enabled: false

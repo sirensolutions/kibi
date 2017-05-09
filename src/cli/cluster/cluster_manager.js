@@ -87,6 +87,7 @@ module.exports = class ClusterManager {
     const fromRoot = require('../../utils/from_root');
 
     const watchPaths = [
+      fromRoot('src/kibi_plugins'), // kibi: added so our plugins are watched too
       fromRoot('src/core_plugins'),
       fromRoot('src/server'),
       fromRoot('src/ui'),

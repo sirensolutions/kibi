@@ -18,7 +18,6 @@ UiModules.get('kibana')
       .then((res) => {
         if (res.data.sirenSession) {
           sessionStorage.setItem('sirenSession', JSON.stringify(res.data.sirenSession));
-          sirenSession.emit('kibisession:loaded');
         }
         let target = chrome.getBasePath() + res.data.url;
         if (res.data.url && config.get('state:storeInSessionStorage')) {
@@ -70,7 +69,6 @@ UiModules.get('kibana')
       // storing locally so I can watch it
       this.dataString = JSON.stringify(data);
       sessionStorage.setItem('sirenSession', this.dataString);
-      this.emit('kibisession:changed');
     }
 
   }

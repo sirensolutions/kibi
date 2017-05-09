@@ -26,8 +26,6 @@ define(function (require) {
         },
 
         post($scope, $el, attr) {
-          // kibi: do not allow to filter on a field when in edit mode
-          $scope.edit = $location.path().indexOf('edit') !== -1;
           // If a field isn't in the mapping, use this
           $scope.mode = 'table';
           $scope.mapping = $scope.indexPattern.fields.byName;

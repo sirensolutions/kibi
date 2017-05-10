@@ -366,6 +366,16 @@ describe('Kibi Services', function () {
         });
       });
 
+      describe('getGroup', function () {
+        it('should get the group the dashboard belongs to', function () {
+          return dashboardGroups.computeGroups().then(function () {
+            const group = dashboardGroups.getGroup('Articles');
+            expect(group).to.be.ok();
+            expect(group.id).to.eql('group-1');
+          });
+        });
+      });
+
       describe('getIdsOfDashboardGroupsTheseDashboardsBelongTo', function () {
         it('there is a group with the dashboard', function () {
           const dashboardIds = ['Articles'];

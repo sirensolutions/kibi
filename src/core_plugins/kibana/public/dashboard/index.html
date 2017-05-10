@@ -30,9 +30,8 @@
         ></span>
         <span
           ng-show="dash.id && dash.group.selected.count !== undefined"
-          ng-bind="dash.group.selected.formatedCount"
           class="dashboard-stats"
-        ></span>
+          >({{dash.group.selected.formatedCount}})</span>
       </div>
 
       <!-- Search. -->

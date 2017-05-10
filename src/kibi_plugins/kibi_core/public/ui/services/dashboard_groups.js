@@ -297,6 +297,13 @@ uiModules
       });
     }
 
+    getGroup(dashboardId) {
+      if (!dashboardId) {
+        throw new Error('Missing dashboard Id');
+      }
+      return _.find(this.getGroups(), group => _.find(group.dashboards, 'id', dashboardId));
+    }
+
     getIdsOfDashboardGroupsTheseDashboardsBelongTo(dashboardIds) {
       return _(this.getGroups())
       // do not consider groups that were created programmatically

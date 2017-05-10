@@ -287,7 +287,8 @@ export default function KibiSelectHelperFactory(config, indexPatterns, Private, 
     const otherDashboardId = dashboardOptions.otherDashboardId;
     const indexRelationId = dashboardOptions.indexRelationId;
 
-    return kibiState._getDashboardAndSavedSearchMetas(null, true).then((metas) => {
+    return kibiState._getDashboardAndSavedSearchMetas(null, false)
+    .then((metas) => {
       // first filter out dashboards without savedSearchId
       let filteredMetas = _.filter(metas, (meta) => {
         return meta.savedDash.savedSearchId;

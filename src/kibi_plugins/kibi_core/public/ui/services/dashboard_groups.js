@@ -18,7 +18,9 @@ uiRoutes
 
 uiModules
 .get('kibana')
-.service('dashboardGroups', (es, $timeout, kibiState, Private, savedDashboards, savedDashboardGroups, Promise, kbnIndex) => {
+.service('dashboardGroups', (createNotifier, es, $timeout, kibiState, Private, savedDashboards, savedDashboardGroups, Promise,
+  kbnIndex) => {
+  const notify = createNotifier();
   const dashboardHelper = Private(DashboardHelperProvider);
   const queryBuilder = Private(QueryBuilderProvider);
   const searchHelper = new SearchHelper(kbnIndex);
@@ -57,7 +59,9 @@ uiModules
       if (responses.length === metadata.length) {
         for (let i = 0; i < responses.length; i++) {
           const hit = responses[i];
-          if (metadata[i].forbidden) {
+          if (metadata[i].error) {
+            metadata[i].count = 'Error';
+          } else if (metadata[i].forbidden) {
             metadata[i].count = 'Forbidden';
           } else if (!_.contains(Object.keys(hit), 'error')) {
             metadata[i].count = hit.hits.total;
@@ -177,7 +181,8 @@ uiModules
       .then((resp) => {
         const dashboards = _.filter(resp.hits, dashboard => dashboard.savedSearchId && _.contains(ids, dashboard.id));
         const metadataPromises = _.map(dashboards, (dashboard) => {
-          return kibiState.getState(dashboard.id).then(({ index, filters, queries, time }) => {
+          return kibiState.getState(dashboard.id)
+          .then(({ index, filters, queries, time }) => {
             const query = queryBuilder(filters, queries, time);
             query.size = 0; // we do not need hits just a count
             // here take care about correctly expanding timebased indices
@@ -204,14 +209,26 @@ uiModules
               }
               throw error;
             });
+          })
+          .catch(err => {
+            notify.warning(err);
+            return {
+              dashboardId: dashboard.id,
+              filters: [],
+              queries: [],
+              indices: [],
+              error: true
+            };
           });
         });
 
         return Promise.all(metadataPromises).then((metadata) => {
+          metadata = _.sortBy(metadata, result => ids.indexOf(result.dashboardId));
           // here fire the query to get counts
           const countsQuery = _.map(metadata, result => {
             return searchHelper.optimize(result.indices, result.query);
-          }).join('');
+          })
+          .join('');
 
           if (countsQuery) {
             if (lastFiredMultiCountsQuery && lastFiredMultiCountsQuery === countsQuery && !forceCountsUpdate) {

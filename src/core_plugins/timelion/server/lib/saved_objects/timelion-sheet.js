@@ -1,6 +1,6 @@
 import Joi from 'joi';
 
-// siren: Configuration for the timeline-sheet saved object.
+// siren: Configuration for the timelion-sheet saved object.
 const TimelionSheetConfiguration = {
   type: 'timelion-sheet',
   title: 'Timelion Sheet',

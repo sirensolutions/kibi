@@ -38,7 +38,10 @@
           <ul>
             <li ng-repeat="d in dashboards | orderBy: orderByTitle">
               <input type="checkbox" ng-disabled="d.disabled" ng-model="d.selected"/>
-              <label>{{d.title}} <span ng-if="d.disabled" class="smallText"> (current)</span></label>
+              <!-- kibi: tooltip and limit added -->
+              <span tooltip={{d.title}} tooltip-placement="left" tooltip-popup-delay="400" tooltip-append-to-body="1">
+                <label>{{d.title | limitTo: 30 }}{{d.title.length  > 30 ? '...' : ''}} <span ng-if="d.disabled" class="smallText"> (current)</span></label>
+              </span>
             </li>
           </ul>
         </div>

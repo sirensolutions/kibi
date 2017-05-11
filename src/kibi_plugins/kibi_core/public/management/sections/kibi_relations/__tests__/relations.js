@@ -103,31 +103,6 @@ describe('Kibi Management', function () {
         });
       });
 
-      it('should throw an error if left and right sides of the join are the same', function () {
-        const relations = {
-          relationsIndices: [
-            {
-              indices: [
-                {
-                  indexPatternId: 'index-a',
-                  path: 'path-a'
-                },
-                {
-                  indexPatternId: 'index-a',
-                  path: 'path-a'
-                }
-              ],
-              label: 'rel-a-a'
-            }
-          ]
-        };
-
-        init({ relations });
-        _.each($scope.relations.relationsIndices, function (relation) {
-          expect(relation.errors).to.eql([ 'Left and right sides of the relation cannot be the same.' ]);
-        });
-      });
-
       describe('check field mapping for the siren-join', function () {
         noDigestPromises.activateForSuite();
 

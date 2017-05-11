@@ -1,4 +1,4 @@
-import { get, set } from 'lodash';
+import { get, set, forIn, isArray, isObject } from 'lodash';
 
 /**
  * addSourceTypes adds the types information for the source index of the join
@@ -95,20 +95,24 @@ class JoinBuilder {
       targetPath
     });
     const query = this.join.request.query.bool;
+
+    let join = joinBuilder;
+    if (sourceTypes) {
+      join = {
+        bool: {
+          must: [ joinBuilder ]
+        }
+      };
+      addSourceTypes(join.bool.must, sourceTypes);
+    }
     // add to the parent join
     if (negate) {
       if (!get(query, 'filter.bool.must_not')) {
-        set(query, 'filter.bool.must_not', [{
-          bool: {
-            must: []
-          }
-        }]);
+        set(query, 'filter.bool.must_not', []);
       }
-      query.filter.bool.must_not[0].bool.must.push(joinBuilder);
-      addSourceTypes(query.filter.bool.must_not[0].bool.must, sourceTypes);
+      query.filter.bool.must_not.push(join);
     } else {
-      query.filter.bool.must.push(joinBuilder);
-      addSourceTypes(query.filter.bool.must, sourceTypes);
+      query.filter.bool.must.push(join);
     }
     return joinBuilder;
   }
@@ -161,29 +165,28 @@ export default class Builder {
    * toObject returns the query object
    */
   toObject() {
-    const expand = function (queryOut, query) {
-      for (let i = 0; i < query.length; i++) {
-        if (query[i] instanceof JoinBuilder) {
-          // must branch of the child
-          const must = query[i].join.request.query.bool.filter.bool.must;
-          if (must) {
-            query[i].join.request.query.bool.filter.bool.must = expand([], must);
+    const replace = function (obj) {
+      if (obj instanceof JoinBuilder) {
+        return replace(obj.fjQuery);
+      } else if (isArray(obj)) {
+        const values = obj.splice(0, obj.length);
+        values.forEach((value) => {
+          if (value instanceof JoinBuilder) {
+            replace(value).forEach(result => obj.push(result));
+          } else {
+            obj.push(replace(value));
           }
-          // must_not branch of the child
-          const mustNot = query[i].join.request.query.bool.filter.bool.must_not;
-          if (mustNot && mustNot[0].bool) {
-            mustNot[0].bool.must = expand([], mustNot[0].bool.must);
-          }
-          // the current join query
-          queryOut.push(...query[i].fjQuery);
-        } else {
-          queryOut.push(query[i]);
-        }
+        });
+        return obj;
+      } else if (isObject(obj)) {
+        forIn(obj, (child, key) => {
+          obj[key] = replace(child);
+        });
       }
-      return queryOut;
+      return obj;
     };
 
-    return expand([], this.query);
+    return replace(this.query);
   }
 
   /**
@@ -207,8 +210,17 @@ export default class Builder {
       targetTypes,
       targetPath
     });
-    addSourceTypes(joinBuilder.fjQuery, sourceTypes);
-    this.query.push(joinBuilder);
+    if (sourceTypes) {
+      const typeAndJoin = {
+        bool: {
+          must: [ joinBuilder ]
+        }
+      };
+      addSourceTypes(typeAndJoin.bool.must, sourceTypes);
+      this.query.push(typeAndJoin);
+    } else {
+      this.query.push(joinBuilder);
+    }
     return joinBuilder;
   }
 }

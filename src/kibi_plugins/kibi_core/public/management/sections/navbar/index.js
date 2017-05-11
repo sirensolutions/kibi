@@ -33,24 +33,26 @@ function _getSectionName($location) {
 }
 
 /**
- * _getScope returns the scope associated with the section's editor
+ * _getMethod returns the scope associated with the section's editor
  *
- * @param $location the location service
- * @returns the scope for the section
+ * @param $document service the document service
+ * @param $location service the location service
+ * @param name string the name of the method
+ * @returns function the method bound to the element
  */
-function _getScope($location) {
+function _getMethod($document, $location, name) {
   const sectionName = _getSectionName($location);
   switch (sectionName) {
     case 'dashboardgroups':
-      return angular.element(document.getElementById('dashboard_groups_editor')).scope();
+      return angular.element($document.find('#dashboard_groups_editor')).data(name);
     case 'templates':
-      return angular.element(document.getElementById('templates_editor')).scope();
+      return angular.element($document.find('#templates_editor')).data(name);
     case 'relations':
-      return angular.element(document.getElementById('relations')).scope();
+      return angular.element($document.find('#relations')).data(name);
     case 'queries':
-      return angular.element(document.getElementById('queries_editor')).scope();
+      return angular.element($document.find('#queries_editor')).data(name);
     case 'datasources':
-      return angular.element(document.getElementById('datasources_editor')).scope();
+      return angular.element($document.find('#datasources_editor')).data(name);
   }
 }
 
@@ -71,16 +73,16 @@ function _hideButton(path, ...sectionNames) {
 }
 
 // register the new button
-registry.register(function ($location) {
+registry.register(function ($document, $location) {
   return {
     appName: 'management-subnav',
     key: 'new',
     order: 1,
     run() {
-      const scope = _getScope($location);
+      const newObject = _getMethod($document, $location, 'newObject');
 
-      if (scope) {
-        scope.newObject();
+      if (newObject) {
+        newObject();
       }
     },
     tooltip() {
@@ -93,28 +95,28 @@ registry.register(function ($location) {
   };
 })
 // register the save button
-.register(function ($location) {
+.register(function ($location, $document) {
   return {
     appName: 'management-subnav',
     key: 'save',
     order: 2,
     run() {
-      const scope = _getScope($location);
+      const saveObject = _getMethod($document, $location, 'saveObject');
 
-      if (scope) {
-        scope.saveObject();
+      if (saveObject) {
+        saveObject();
       }
     },
     tooltip() {
       return `Save ${_getDisplayName($location)}`;
     },
     disableButton() {
-      const scope = _getScope($location);
+      const isValid = _getMethod($document, $location, 'isValid');
 
-      if (!scope) {
+      if (!isValid) {
         return true;
       }
-      return !scope.isValid();
+      return !isValid();
     },
     hideButton() {
       return _hideButton($location.path(), 'dashboardgroups', 'templates', 'queries', 'datasources', 'relations');

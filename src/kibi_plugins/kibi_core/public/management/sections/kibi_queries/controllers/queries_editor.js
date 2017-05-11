@@ -269,6 +269,12 @@ function controller(kibiState, $scope, $route, kbnUrl, createNotifier, queryEngi
   });
 
   $scope.preview();
+
+  // expose some methods to the navbar buttons
+  [ 'isValid', 'newObject', 'saveObject' ]
+  .forEach(name => {
+    $element.data(name, $scope[name]);
+  });
 }
 
 uiModules

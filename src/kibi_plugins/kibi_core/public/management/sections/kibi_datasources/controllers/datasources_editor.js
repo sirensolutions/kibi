@@ -5,7 +5,6 @@ import 'ui/kibi/components/query_engine_client/query_engine_client';
 import 'ui/kibi/directives/kibi_validate';
 import SetDatasourceSchemaProvider from 'plugins/kibi_core/management/sections/kibi_datasources/lib/set_datasource_schema';
 import template from 'plugins/kibi_core/management/sections/kibi_datasources/index.html';
-import angular from 'angular';
 import kibiUtils from 'kibiutils';
 import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
@@ -123,6 +122,12 @@ function controller(Private, $window, $scope, $route, kbnUrl, createNotifier, qu
   $scope.$watch('datasource.datasourceType', function () {
     // here reinit the datasourceDef
     setDatasourceSchema(datasource);
+  });
+
+  // expose some methods to the navbar buttons
+  [ 'isValid', 'newObject', 'saveObject' ]
+  .forEach(name => {
+    $element.data(name, $scope[name]);
   });
 }
 

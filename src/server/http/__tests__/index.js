@@ -11,7 +11,8 @@ describe('routes', function () {
     kbnServer = kbnTestServer.createServer({
       plugins: {
         scanDirs: [
-          fromRoot('src/core_plugins')
+          fromRoot('src/core_plugins'),
+          fromRoot('src/kibi_plugins') // siren: added path to the kibi plugins folder
         ]
       }
     });

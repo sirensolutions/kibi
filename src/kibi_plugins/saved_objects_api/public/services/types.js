@@ -16,7 +16,8 @@ uiModules
     'query',
     'template',
     'datasource',
-    'search'
+    'search',
+    'timelion-sheet'
   ]);
 })
 .value('savedObjectsAPIUrl', (function () {

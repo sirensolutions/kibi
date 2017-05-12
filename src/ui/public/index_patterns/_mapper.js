@@ -1,4 +1,4 @@
-import { IndexPatternMissingIndices } from 'ui/errors';
+import { IndexPatternMissingIndices, IndexPatternAuthorizationError } from 'ui/errors';
 import _ from 'lodash';
 import moment from 'moment';
 import EnhanceFieldsWithCapabilitiesProvider from 'ui/index_patterns/_enhance_fields_with_capabilities';
@@ -157,7 +157,10 @@ export default function MapperService(Private, Promise, es, savedObjectsAPI, con
   }
 
   function handleMissingIndexPattern(err) {
-    if (err.status >= 400) {
+    // kibi: handle authorization errors
+    if (err.status === 403) {
+      return Promise.reject(new IndexPatternAuthorizationError());
+    } else if (err.status >= 400) {
       // transform specific error type
       return Promise.reject(new IndexPatternMissingIndices());
     } else {

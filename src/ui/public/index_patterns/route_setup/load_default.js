@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import Notifier from 'kibie/notify/notifier';
-import { NoDefaultIndexPattern, NoDefinedIndexPatterns } from 'ui/errors';
+import { IndexPatternAuthorizationError, NoDefaultIndexPattern, NoDefinedIndexPatterns } from 'ui/errors';
 import GetIdsProvider from '../_get_ids';
 import CourierDataSourceRootSearchSourceProvider from 'ui/courier/data_source/_root_search_source';
 import uiRoutes from 'ui/routes';
@@ -40,10 +40,22 @@ module.exports = function (opts) {
         }
       }
 
-      return notify.event('loading default index pattern', function () {
-        return indexPatterns.get(defaultId).then(function (pattern) {
+      // kibi: handle authorization errors when accessing the default index
+      return notify.event('loading default index pattern', function loadIndexPattern(indexPattern) {
+        const indexPatternId = indexPattern || defaultId;
+        return indexPatterns.get(indexPatternId).then(function (pattern) {
+          if (indexPatternId !== defaultId) {
+            config.set('defaultIndex', indexPatternId);
+            defaultId = indexPatternId;
+          }
           rootSearchSource.getGlobalSource().set('index', pattern);
-          notify.log('index pattern set to', defaultId);
+          notify.log('index pattern set to', indexPatternId);
+        })
+        .catch(err => {
+          if (err instanceof IndexPatternAuthorizationError && patterns.length) {
+            return loadIndexPattern(patterns.pop());
+          }
+          throw err;
         });
       });
     });

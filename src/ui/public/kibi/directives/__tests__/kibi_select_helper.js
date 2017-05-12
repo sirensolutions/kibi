@@ -1,3 +1,4 @@
+import Notifier from 'ui/notify/notifier';
 import sinon from 'auto-release-sinon';
 import KibiSelectHelperProvider from 'ui/kibi/directives/kibi_select_helper';
 import IndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
@@ -707,6 +708,11 @@ describe('Kibi Directives', function () {
     describe('getDashboardsForButton', function () {
       const fakeSavedDashboards = [
         {
+          id: 'Test',
+          title: 'Test',
+          savedSearchId: 'unknown'
+        },
+        {
           id: 'Articles',
           title: 'Articles',
           savedSearchId: 'savedArticles'
@@ -823,6 +829,41 @@ describe('Kibi Directives', function () {
           stubConfig: true
         });
         config.set('kibi:relations', relations);
+      });
+
+      afterEach(() => {
+        Notifier.prototype._notifs.length = 0;
+      });
+
+      it('should notify if the saved search associated to a dashboard is missing', function () {
+        const expectedDashboards = [
+          {
+            label: 'Articles',
+            value: 'Articles'
+          },
+          {
+            label: 'Companies',
+            value: 'Companies'
+          },
+          {
+            label: 'Companies Timeline',
+            value: 'Companies-Timeline'
+          },
+          {
+            label: 'Investments',
+            value: 'Investments'
+          }
+        ];
+        const options = {
+          otherDashboardId: 'Companies'
+        };
+
+        return kibiSelectHelper.getDashboardsForButton(options)
+        .then(function () {
+          expect(Notifier.prototype._notifs).to.have.length(1);
+          expect(Notifier.prototype._notifs[0].type).to.be('warning');
+          expect(Notifier.prototype._notifs[0].content).to.contain('The dashboard [Test] is associated with an unknown saved search.');
+        });
       });
 
       it('should not propose any dashboard if the relation does not exist', function () {

@@ -62,7 +62,12 @@ uiModules
           $scope.tooltipContent += ` (${$scope.group.selected.title})`;
         }
         if ($scope.group.selected && $scope.group.selected.count !== undefined) {
-          $scope.countHumanNotation = numeral.set($scope.group.selected.count).format('0.[00]a');
+          try {
+            $scope.countHumanNotation = numeral.set($scope.group.selected.count).format('0.[00]a');
+          } catch (err) {
+            // count may not be a number, e.g., it can be Forbidden
+            $scope.countHumanNotation = $scope.group.selected.count;
+          }
           $scope.tooltipContent += ` (${$scope.group.selected.count})`;
         }
       });

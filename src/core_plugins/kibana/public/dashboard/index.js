@@ -115,11 +115,13 @@ app.directive('dashboardApp', function (createNotifier, courier, AppState, timef
       // siren: adds information about the group membership and stats
       function getMetadata() {
         delete dash.group;
-        const groupId = dashboardGroups.getIdsOfDashboardGroupsTheseDashboardsBelongTo([dash.id])[0];
-        if (groupId) {
-          dash.group = _.find(dashboardGroups.getGroups(), 'id', groupId);
+        if (dash.id) {
+          dash.group = dashboardGroups.getGroup(dash.id);
           if (dash.group && dash.group.selected) {
-            dash.group.selected.formatedCount = `(${numeral.set(dash.group.selected.count).format('0,0')})`;
+            dash.group.selected.formatedCount = dash.group.selected.count;
+            if (_.isNumber(dash.group.selected.count)) {
+              dash.group.selected.formatedCount = numeral.set(dash.group.selected.count).format('0,0');
+            }
           }
         }
       }

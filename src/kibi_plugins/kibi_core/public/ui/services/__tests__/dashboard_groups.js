@@ -1,3 +1,4 @@
+import Notifier from 'ui/notify/notifier';
 import DashboardHelperProvider from 'ui/kibi/helpers/dashboard_helper';
 import noDigestPromises from 'test_utils/no_digest_promises';
 import Promise from 'bluebird';
@@ -362,6 +363,16 @@ describe('Kibi Services', function () {
             expect(groups).to.have.length(5);
             done();
           }).catch(done);
+        });
+      });
+
+      describe('getGroup', function () {
+        it('should get the group the dashboard belongs to', function () {
+          return dashboardGroups.computeGroups().then(function () {
+            const group = dashboardGroups.getGroup('Articles');
+            expect(group).to.be.ok();
+            expect(group.id).to.eql('group-1');
+          });
         });
       });
 
@@ -743,9 +754,19 @@ describe('Kibi Services', function () {
             ]
           }
         ],
-        savedDashboards: fakeSavedDashboardsForCounts,
+        savedDashboards: fakeSavedDashboardsForCounts.concat(
+          {
+            id: 'dashboardX',
+            title: 'dashboardX',
+            savedSearchId: 'searchX'
+          }
+        ),
         savedSearches: fakeSavedSearches
       }));
+
+      afterEach(() => {
+        Notifier.prototype._notifs.length = 0;
+      });
 
       it('dashboard does NOT exist', function (done) {
         dashboardGroups._getDashboardsMetadata(['dash-do-not-exist']).then(function (meta) {
@@ -761,11 +782,68 @@ describe('Kibi Services', function () {
         });
       });
 
+      it('dashboard exist and it references an unknown saved search', function () {
+        sinon.stub(es, 'msearch').returns(Promise.resolve({
+          responses: [
+            {
+              hits: {
+                total: 0
+              }
+            },
+            {
+              hits: {
+                total: 42
+              }
+            }
+          ]
+        }));
+
+        return dashboardGroups._getDashboardsMetadata([ 'dashboardX', 'time-testing-4' ])
+        .then(function (metas) {
+          expect(metas.length).to.equal(2);
+          expect(metas[0].count).to.equal('Error');
+          expect(metas[0].dashboardId).to.equal('dashboardX');
+          expect(metas[1].count).to.equal(42);
+          expect(metas[1].isPruned).to.equal(false);
+          expect(metas[1].dashboardId).to.equal('time-testing-4');
+          expect(metas[1].indices).to.eql(['time-testing-4']);
+
+          expect(Notifier.prototype._notifs).to.have.length(1);
+          expect(Notifier.prototype._notifs[0].type).to.be('warning');
+          expect(Notifier.prototype._notifs[0].content)
+            .to.contain('The dashboard [dashboardX] is associated with an unknown saved search.');
+        });
+      });
+
       it('dashboard exist and it has savedSearch but index does not exists', function () {
-        return dashboardGroups._getDashboardsMetadata(['search-ste']).then(function (meta) {
-          expect().fail('Should fail');
-        }).catch(function (err) {
-          expect(err.message).equal('Could not find object with id: search-ste');
+        sinon.stub(es, 'msearch').returns(Promise.resolve({
+          responses: [
+            {
+              hits: {
+                total: 0
+              }
+            },
+            {
+              hits: {
+                total: 42
+              }
+            }
+          ]
+        }));
+
+        return dashboardGroups._getDashboardsMetadata([ 'search-ste', 'time-testing-4' ])
+        .then(function (metas) {
+          expect(metas.length).to.equal(2);
+          expect(metas[0].count).to.equal('Error');
+          expect(metas[0].dashboardId).to.equal('search-ste');
+          expect(metas[1].count).to.equal(42);
+          expect(metas[1].isPruned).to.equal(false);
+          expect(metas[1].dashboardId).to.equal('time-testing-4');
+          expect(metas[1].indices).to.eql(['time-testing-4']);
+
+          expect(Notifier.prototype._notifs).to.have.length(1);
+          expect(Notifier.prototype._notifs[0].type).to.be('warning');
+          expect(Notifier.prototype._notifs[0].content).to.contain('Could not find object with id: search-ste');
         });
       });
 
@@ -842,13 +920,19 @@ describe('Kibi Services', function () {
         });
       });
 
-      it('dashboard exist and it has savedSearch and index exists but a non auth error occurs when resolving indices', function (done) {
-
-        sinon.stub(kibiState, 'timeBasedIndices').returns(Promise.reject(new Error()));
+      it('dashboard exist and it has savedSearch and index exists but a non auth error occurs when resolving indices', function () {
+        sinon.stub(kibiState, 'timeBasedIndices').returns(Promise.reject(new Error('timeBasedIndices failed')));
 
         dashboardGroups._getDashboardsMetadata(['time-testing-4'])
-        .then(() => done(new Error('timeBasedIndices error was not rethrown.')))
-        .catch(() => done());
+        .then(function (metas) {
+          expect(metas.length).to.equal(1);
+          expect(metas[0].count).to.equal('Error');
+          expect(metas[0].indices).to.eql(['time-testing-4']);
+
+          expect(Notifier.prototype._notifs).to.have.length(1);
+          expect(Notifier.prototype._notifs[0].type).to.be('warning');
+          expect(Notifier.prototype._notifs[0].content).to.contain('timeBasedIndices failed');
+        });
       });
     });
 

@@ -443,64 +443,62 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
 
   /**
    * For each dashboard id in the argument, return a promise with the saved dashboard and associated saved search meta.
-   * If ignoreMissingSavedSearch is false, the promise is rejected if a dashboard does not have a saved search associated.
    * If dashboardIds is undefined, all dashboards are returned.
+   *
+   * @param dashboardIds array list of dashboard ids
+   * @param failOnMissingMeta boolean if true then an unknown saved search will fail, otherwise a notification is printed and it is skipped
+   * @returns Promise array of dashboard and search pairs
    */
-  KibiState.prototype._getDashboardAndSavedSearchMetas = function (dashboardIds, ignoreMissingSavedSearch = false) {
+  KibiState.prototype._getDashboardAndSavedSearchMetas = function (dashboardIds, failOnMissingMeta = true) {
     const getAllDashboards = !dashboardIds;
 
     dashboardIds = _.compact(dashboardIds);
 
-    if (!getAllDashboards && !dashboardIds.length) {
-      const msg = `Dashboards ${JSON.stringify(dashboardIds)} are not saved. It needs to be for one of the visualizations.`;
-      return Promise.reject(new Error(msg));
-    }
-
     // use find to minimize number of requests
-    return Promise.all([ savedSearches.find(), savedDashboards.find() ]).then((results) => {
-      const savedSearchesRes = results[0];
-      const savedDashboardsRes = results[1];
-
-      const promises = _(savedDashboardsRes.hits)
+    return Promise.all([ savedSearches.find(), savedDashboards.find() ])
+    .then(([ savedSearchesRes, savedDashboardsRes ]) => {
+      const errors = [];
+      const savedDashboardsAndsavedMetas = _(savedDashboardsRes.hits)
       // keep the dashboards that are in the array passed as argument
       .filter((savedDash) => getAllDashboards || _.contains(dashboardIds, savedDash.id))
-      .map((savedDash) => {
-        if (!ignoreMissingSavedSearch && !savedDash.savedSearchId) {
-          return Promise.reject(new Error(`The dashboard [${savedDash.title}] is expected to be associated with a saved search.`));
+      .tap(savedDashMetas => {
+        if (!getAllDashboards && savedDashMetas.length !== dashboardIds.length) {
+          errors.push(`Unable to retrieve dashboards: ${_.difference(dashboardIds, _.pluck(savedDashMetas, 'id'))}.`);
         }
+      })
+      .map((savedDash) => {
         const savedSearch = _.find(savedSearchesRes.hits, (hit) => hit.id === savedDash.savedSearchId);
         const savedSearchMeta = savedSearch ? JSON.parse(savedSearch.kibanaSavedObjectMeta.searchSourceJSON) : null;
         return { savedDash, savedSearchMeta };
       })
+      .sortBy(({ savedDash }) => {
+        if (dashboardIds && dashboardIds.length > 0) {
+          // here we need to sort the results based on dashboardIds order
+          return dashboardIds.indexOf(savedDash.id);
+        }
+      })
+      .filter(({ savedSearchMeta, savedDash }) => {
+        if (!savedSearchMeta && savedDash.savedSearchId) {
+          errors.push(`The dashboard [${savedDash.title}] is associated with an unknown saved search.
+            It may have been removed or you do not have the rights to access it.`);
+          return false;
+        }
+        return true;
+      })
       .value();
 
-      if (!getAllDashboards && dashboardIds.length !== promises.length) {
-        const found = _(promises).filter((arg) => typeof arg === 'object').map(({ savedDash, savedSearchMeta }) => savedDash.id).value();
-        return Promise.reject(new Error(`Unable to retrieve dashboards: ${JSON.stringify(_.difference(dashboardIds, found))}.`));
-      }
-      return Promise.all(promises).then((savedDashboardsAndsavedMetas) => {
-        // here we need to sort the results based on dashboardIds order
-        if (dashboardIds && dashboardIds.length > 0) {
-          const ordered = [];
-          let error;
-          _.each(dashboardIds, (id) => {
-            const hit = _.find(savedDashboardsAndsavedMetas, (dashAndMeta) => {
-              return id === dashAndMeta.savedDash.id;
-            });
-            if (hit) {
-              ordered.push(hit);
-            } else {
-              error = new Error('Could not find dashboard [' + id + '] in savedDashboards');
-              return false; // to break the loop
-            }
-          });
-          if (error) {
-            return Promise.reject(error);
+      if (errors.length) {
+        if (failOnMissingMeta) {
+          return Promise.reject(new Error(errors[0])); // take the first error
+        } else {
+          // notify of all errors
+          for (const error of errors) {
+            notify.warning(error);
           }
-          return ordered;
         }
-        return savedDashboardsAndsavedMetas;
-      });
+      }
+
+      return savedDashboardsAndsavedMetas;
     });
   };
 
@@ -989,9 +987,14 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
 
     const appState = getAppState();
 
+    if (!dashboardIds.length) {
+      const msg = `Dashboards ${JSON.stringify(dashboardIds)} are not saved. It needs to be for one of the visualizations.`;
+      return Promise.reject(new Error(msg));
+    }
+
     // here ignore the missing meta as getState can be called
     // on a dashboard without associated savedSearch
-    const getMetas = this._getDashboardAndSavedSearchMetas(dashboardIds, true);
+    const getMetas = this._getDashboardAndSavedSearchMetas(dashboardIds);
 
     // check siren-platform plugin
     if (this.isRelationalPanelButtonEnabled() && !this.isSirenJoinPluginInstalled()) {
@@ -1013,7 +1016,7 @@ function KibiStateProvider(savedSearches, timefilter, $route, Promise, getAppSta
       if (dashboardIds.length > 1) {
         for (let i = 0; i < metas.length; i++) {
           if (!metas[i].savedSearchMeta) {
-            const error = 'The dashboard [' + metas[i].savedDash.id + '] is expected to be associated with a saved search.';
+            const error = `The dashboard [${metas[i].savedDash.title}] is expected to be associated with a saved search.`;
             return Promise.reject(new Error(error));
           }
         }

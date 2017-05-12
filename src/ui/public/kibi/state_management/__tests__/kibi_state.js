@@ -454,8 +454,13 @@ describe('State Management', function () {
       beforeEach(() => init({
         savedDashboards: [
           {
+            id: 'Companies',
+            title: 'Companies'
+          },
+          {
             id: 'Articles',
-            title: 'Articles'
+            title: 'Articles',
+            savedSearchId: 'missing search'
           },
           {
             id: 'search-ste',
@@ -479,65 +484,69 @@ describe('State Management', function () {
         ]
       }));
 
-      it('get saved dashboard and saved search the order of dashboardIds should be preserved' , function (done) {
-        const ignoreMissingSavedSearch = true;
+      it('get saved dashboard and saved search the order of dashboardIds should be preserved' , function () {
         // this tests checks that although the savedDashboard order is
         // 'Articles', 'search-ste'
         // when we provide the ids in reverse order like 'search-ste', 'Articles'
         // we get the meta in the same order as the ids were provided
-        kibiState._getDashboardAndSavedSearchMetas([ 'search-ste', 'Articles'], ignoreMissingSavedSearch).then(function (results) {
-          expect(results).to.have.length(2);
-          expect(results[0].savedDash.id).to.be('search-ste');
-          expect(results[0].savedSearchMeta.index).to.be('search-ste');
-          expect(results[1].savedDash.id).to.be('Articles');
-          expect(results[1].savedSearchMeta).to.be(null);
-          done();
-        }).catch(done);
+        return Promise.all([
+          kibiState._getDashboardAndSavedSearchMetas([ 'search-ste', 'Companies' ]),
+          kibiState._getDashboardAndSavedSearchMetas([ 'Companies', 'search-ste' ])
+        ])
+        .then(function ([ results1, results2 ]) {
+          expect(results1).to.have.length(2);
+          expect(results1[0].savedDash.id).to.be('search-ste');
+          expect(results1[0].savedSearchMeta.index).to.be('search-ste');
+          expect(results1[1].savedDash.id).to.be('Companies');
+          expect(results1[1].savedSearchMeta).to.be(null);
+
+          expect(results2).to.have.length(2);
+          expect(results2[0].savedDash.id).to.be('Companies');
+          expect(results2[0].savedSearchMeta).to.be(null);
+          expect(results2[1].savedDash.id).to.be('search-ste');
+          expect(results2[1].savedSearchMeta.index).to.be('search-ste');
+        });
       });
 
-      it('get saved dashboard and saved search the order of dashboardIds should be preserved 2' , function (done) {
-        const ignoreMissingSavedSearch = true;
-        kibiState._getDashboardAndSavedSearchMetas([ 'Articles', 'search-ste'], ignoreMissingSavedSearch).then(function (results) {
-          expect(results).to.have.length(2);
-          expect(results[0].savedDash.id).to.be('Articles');
-          expect(results[0].savedSearchMeta).to.be(null);
-          expect(results[1].savedDash.id).to.be('search-ste');
-          expect(results[1].savedSearchMeta.index).to.be('search-ste');
-          done();
-        }).catch(done);
-      });
-
-      it('get saved dashboard and saved search', function (done) {
-        kibiState._getDashboardAndSavedSearchMetas([ 'search-ste' ]).then(function (results) {
+      it('get saved dashboard and saved search', function () {
+        return kibiState._getDashboardAndSavedSearchMetas([ 'search-ste' ]).then(function (results) {
           expect(results).to.have.length(1);
           expect(results[0].savedDash.id).to.be('search-ste');
           expect(results[0].savedSearchMeta.index).to.be('search-ste');
-          done();
-        }).catch(done);
+        });
       });
 
-      it('should reject promise if saved search is missing for dashboard', function (done) {
+      it('should reject promise if saved search associated to a dashboard is missing', function (done) {
         kibiState._getDashboardAndSavedSearchMetas([ 'Articles' ]).then(function (results) {
           done('should fail');
         }).catch(function (err) {
-          expect(err.message).to.be('The dashboard [Articles] is expected to be associated with a saved search.');
+          expect(err.message).to.contain('The dashboard [Articles] is associated with an unknown saved search.');
           done();
         });
       });
 
-      it('should NOT reject if saved search is missing for dashboard but ignoreMissingSavedSearch=true', function (done) {
-        const ignoreMissingSavedSearch = true;
-        kibiState._getDashboardAndSavedSearchMetas([ 'Articles', 'search-ste' ], ignoreMissingSavedSearch).then(function (results) {
-          done();
-        }).catch(done);
+      it('should warn if saved search associated to a dashboard is missing and failOnMissingMeta is false', function () {
+        return kibiState._getDashboardAndSavedSearchMetas([ 'Articles' ], false).then(function (results) {
+          expect(Notifier.prototype._notifs).to.have.length(1);
+          expect(Notifier.prototype._notifs[0].type).to.be('warning');
+          expect(Notifier.prototype._notifs[0].content).to.contain('The dashboard [Articles] is associated with an unknown saved search.');
+        });
       });
 
       it('should reject promise if an unknown dashboard is requested', function (done) {
         kibiState._getDashboardAndSavedSearchMetas([ 'search-ste', 'unknown dashboard' ]).then(function (results) {
           done('should fail');
         }).catch(function (err) {
-          expect(err.message).to.be('Unable to retrieve dashboards: ["unknown dashboard"].');
+          expect(err.message).to.be('Unable to retrieve dashboards: unknown dashboard.');
           done();
+        });
+      });
+
+      it('should warn if an unknown dashboard is requested and failOnMissingMeta is false', function () {
+        return kibiState._getDashboardAndSavedSearchMetas([ 'search-ste', 'unknown dashboard' ], false).then(function (results) {
+          expect(Notifier.prototype._notifs).to.have.length(1);
+          expect(Notifier.prototype._notifs[0].type).to.be('warning');
+          expect(Notifier.prototype._notifs[0].content).to.contain('Unable to retrieve dashboards: unknown dashboard.');
         });
       });
     });
@@ -2250,10 +2259,12 @@ describe('State Management', function () {
           };
           config.set('kibi:relationalPanel', true);
           kibiState.enableRelation(relDash);
-          kibiState.getState('does-not-exist').catch(function (err) {
-            expect(err.message).to.be('Unable to retrieve dashboards: ["does-not-exist"].');
+          kibiState.getState('does-not-exist')
+          .then(() => done('should fail'))
+          .catch(function (err) {
+            expect(err.message).to.be('Unable to retrieve dashboards: does-not-exist.');
             done();
-          }).catch(done);
+          });
         });
 
         it('should fail if the focused dashboard does not have a saved search', function (done) {

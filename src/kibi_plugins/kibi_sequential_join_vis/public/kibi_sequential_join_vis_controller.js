@@ -199,7 +199,7 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
           }
         });
 
-        return kibiState._getDashboardAndSavedSearchMetas(dashboardIds, true)
+        return kibiState._getDashboardAndSavedSearchMetas(dashboardIds, false)
         .then((metas) => {
           return {
             metas,
@@ -208,18 +208,18 @@ function controller(dashboardGroups, getAppState, kibiState, $scope, $rootScope,
         });
       })
       .then(({ metas, buttonDefs }) => {
-        let currentDashboardIndex = '';
+        let currentDashboardIndex;
         const dashboardIdIndexPair = new Map();
 
         for (let i = 0; i < metas.length; i++) {
-          if (metas[i].savedSearchMeta !== null) {
-            dashboardIdIndexPair.set(metas[i].savedDash.id, metas[i].savedSearchMeta.index);
-          } else {
-            dashboardIdIndexPair.set(metas[i].savedDash.id, null);
-          }
+          dashboardIdIndexPair.set(metas[i].savedDash.id, metas[i].savedSearchMeta.index);
           if (metas[i].savedDash.id === currentDashboardId) {
             currentDashboardIndex = metas[i].savedSearchMeta.index;
           }
+        }
+
+        if (!currentDashboardIndex) {
+          return [];
         }
 
         const buttons = kibiSequentialJoinVisHelper.constructButtonsArray(

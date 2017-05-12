@@ -174,6 +174,17 @@ define(function (require) {
   _.class(errors.SavedObjectNotFound).inherits(KbnError);
 
   /**
+   * Authorization error when accessing an indexPattern
+   * @author siren
+   */
+  errors.IndexPatternAuthorizationError = function IndexPatternAuthorizationError() {
+    KbnError.call(this,
+      'IndexPattern\'s configured pattern matches indices you do not have access to',
+      errors.IndexPatternAuthorizationError);
+  };
+  _.class(errors.IndexPatternAuthorizationError).inherits(KbnError);
+
+  /**
    * Tried to call a method that relies on SearchSource having an indexPattern assigned
    */
   errors.IndexPatternMissingIndices = function IndexPatternMissingIndices(type) {

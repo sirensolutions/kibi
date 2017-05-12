@@ -235,6 +235,17 @@ uiModules
 
         const previousSearchSource = $scope.searchSource;
 
+        //kibi: extract fields from query
+        const extractFieldsFromQuery = function (query) {
+          const fieldRegex = /([^\s]+)([\s]+)*:/g;
+          let match;
+          const fields = [];
+          while (match = fieldRegex.exec(query)) {
+            fields.push(match[1].replace(/[\s]*:/g, ''));
+          }
+          return fields;
+        };
+
         // TODO: we need to have some way to clean up result requests
         $scope.searchSource.onResults().then(function onResults(searchResp) {
 
@@ -263,6 +274,17 @@ uiModules
             });
           }
           $scope.hits = searchResp.hits.hits;
+
+          //kibi: check there are no results and the search contains an alias set
+          if ($scope.hits.length === 0) {
+            const $state = getAppState();
+            const fields = extractFieldsFromQuery($state.query.query_string.query);
+            _.each(fields, function (field) {
+              if (_.contains($scope.columnAliases, field) && !(_.contains($scope.columns, field))) {
+                return notify.warning('You are searching for an alias [' + field + '] please use the field name');
+              }
+            });
+          }
 
           return $scope.searchSource.onResults().then(onResults);
         }).catch(notify.fatal);

@@ -65,7 +65,7 @@ uiModules
           try {
             $scope.countHumanNotation = numeral.set($scope.group.selected.count).format('0.[00]a');
           } catch (err) {
-            // count may not a number, e.g., it can be Forbidden
+            // count may not be a number, e.g., it can be Forbidden
             $scope.countHumanNotation = $scope.group.selected.count;
           }
           $scope.tooltipContent += ` (${$scope.group.selected.count})`;

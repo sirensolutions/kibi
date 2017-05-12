@@ -33,6 +33,14 @@ you can type in a name to display on the visualization.
 *Significant Terms*:: Displays the results of the experimental
 {es-ref}search-aggregations-bucket-significantterms-aggregation.html[_significant terms_] aggregation.
 
+*External query terms filter*:: a Kibi aggregator where one can define one or
+more buckets based on some record value (typically a primary key) matching the
+results of an external query. Multiple such buckets, corresponding to multiple
+queries, can be defined. For more information see the _query_ menu in the
+configuration. This displays the results of the
+<<external-query-terms-filter-aggregation,external query terms filter>>
+aggregation.
+
 Once you've specified an X axis aggregation, you can define sub-aggregations to refine the visualization. Click *+ Add
 Sub Aggregation* to define a sub-aggregation, then choose *Split Area* or *Split Chart*, then select a sub-aggregation
 from the list of types.

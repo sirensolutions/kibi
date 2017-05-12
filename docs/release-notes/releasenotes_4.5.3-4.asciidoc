@@ -1,0 +1,6 @@
+== Kibi 4.5.3-4
+
+[float]
+=== Kibi Changes
+
+* Support time-based indices for relational filters and tab counts

@@ -1,54 +1,100 @@
 [[upgrade]]
-== Upgrading Kibana
+== Upgrading from a previous version
 
-[IMPORTANT]
-===========================================
-Before upgrading Kibana:
+NOTE: Before upgrading make sure to check the <<breaking-changes>> section.
 
-* Consult the <<breaking-changes,breaking changes>> docs.
-* Test upgrades in a dev environment before upgrading your production servers.
-* Backup your data using the Elasticsearch
-  {es-ref}modules-snapshots.html[snapshots] feature.
-  You **cannot roll back** to an earlier version unless you have a backup of
-  your data.
-* If you are using custom plugins, check that a compatible version is
-  available.
-===========================================
+An existing Kibi installation can be upgraded as follows:
 
-Depending on which version of Kibana you're upgrading from, the upgrade process
-will vary. Please consult the following table to determine which process you
-should follow:
+- backup the `.kibi` index.
+- backup the Kibi configuration file (`config/kibi.yml`)
+- backup the .kibiaccess if ACL (Access Control Layer) is enabled.
+- {es-ref}setup-upgrade.html[upgrade Elasticsearch]; before restarting each node, make sure to install a compatible version of the
+  {vanguard-website}#compatibility[SIREn Join] plugin and access control plugins if required.
+- download and extract the new Kibi version.
+- copy the previous configuration file to the `config` directory of the new installation.
+- copy the files from the `data` directory in your old installation of the new installation.
+- check for breaking changes to the configuration described below.
+- install the compatible versions of third party Kibi/Kibana plugins that you might need in addition to the bundled ones.
+- execute the <<kibi-upgrade-command, upgrade command>>.
 
-[cols="1<m,1<m,3",options="header",]
-|=======================================================================
-|Upgrade From   |Upgrade To     |Supported Upgrade Type
-|3.x            |5.x            |<<upgrade-new-install,New installation>>
-|4.0 or 4.1     |5.x            |<<upgrade-standard-reindex,Standard upgrade & reindex>>
-|4.x >= 4.2     |5.x            |<<upgrade-standard,Standard upgrade>>
-|5.0.0 pre GA   |5.x            |<<upgrade-standard-reindex,Standard upgrade & reindex>>
-|5.x            |5.y            |<<upgrade-standard,Standard upgrade>> (where `y > x`)
-|=======================================================================
+[float]
+=== Backing up and Restoring the Kibi indices.
 
-[IMPORTANT]
-===========================================
-Reindex is required if you ever upgraded from Kibana 4.1 or 4.0
+Before upgrading it is strongly recommended to have a backup of the `.kibi` index; the recommended way to perform regular backups of
+Elasticsearch indexes is through the {elastic-ref}modules-snapshots.html[snapshot and restore modules].
 
-Even if you're running Kibana version 4.2 or higher, if you have previously
-upgraded from Kibana 4.0 or 4.1, you will need to do a
-<<upgrade-standard-reindex,Standard upgrade & reindex>> when upgrading to 5.x.
+Kibi ships with a command line interface for creating dumps of the `.kibi` index and, in case the `ACL` is enabled, the `.kibiaccess` index as well.
+An index dump is composed of two parts: its mappings and its data.
 
-This is due to the Elasticsearch requirement that any index that was initially
-created before Elasticsearch 2.0 must be reindexed even if it's currently
-working in Elasticsearch 2.x.
+[float]
+==== Backup
 
-You only need to do this once when moving to 5.x.
-===========================================
+The backup command requires a running Elasticsearch instance and the path to a folder where the dumps will be written to.
 
-NOTE: Saved searches, visualizations, and dashboards created in Kibana 4.x are
-generally compatible with 5.x.
+You can know more about its options by executing the following:
 
-include::upgrade/upgrade-standard.asciidoc[]
+[source,shell]
+----
+$ ./bin/kibi backup --help
+----
 
-include::upgrade/upgrade-standard-reindex.asciidoc[]
+For example, the following line will dump in `<MY_FOLDER>` the `.kibi` index, and the `.kibiaccess` index if the option `kibi_access_control.acl.enabled` is true in `kibi.yml`:
 
-include::upgrade/upgrade-new-install.asciidoc[]
+[source,shell]
+----
+$ ./bin/kibi backup --backup-dir <MY_FOLDER>
+----
+
+[float]
+==== Restore
+
+The restore command requires a running Elasticsearch instance and the path to a folder where the dumps were written to by the previous backup command.
+
+You can know more about its options by executing the following:
+
+[source,shell]
+----
+$ ./bin/kibi restore --help
+----
+
+For example, you can restore the previously saved indices by executing the command and pointing to the dump folder, with `.kibiaccess` as well if the option `kibi_access_control.acl.enabled` is true in `kibi.yml`:
+
+[source,shell]
+----
+$ ./bin/kibi restore --backup-dir <MY_FOLDER>
+----
+
+In addition, an <<kibi-upgrade-command,upgrade>> of the Kibi indices is also executed after a successful restore.
+
+[float]
+[[kibi-upgrade-command]]
+=== Upgrading the .kibi index.
+
+To upgrade the objects in the `.kibi` index (dashboards, visualizations, etc.), move to the directory in which Kibi is installed and
+execute the following command:
+
+[source,shell]
+----
+bin/kibi upgrade
+----
+
+The command will look for out of date objects and upgrade them, e.g.:
+
+[source,shell]
+----
+$ bin/kibi upgrade
+  log   [17:58:33.494] [info][status][plugin:elasticsearch] Status changed from uninitialized to yellow - Waiting for Elasticsearch
+  log   [17:58:36.127] [info][migrations] Executing migration "Upgrade scripts from version 1 to version 2"
+  log   [17:58:36.141] [info][migrations] Executed migration "Upgrade scripts from version 1 to version 2"
+  log   [17:58:36.142] [info][migrations] Executing migration "Upgrade kibi graph browser visualization to version 2."
+  log   [17:58:36.157] [info][migrations] Executed migration "Upgrade kibi graph browser visualization to version 2."
+  log   [17:58:36.158] [info][migrations] Executing migration "Upgrade saved queries from version 1 to version 2"
+  log   [17:58:36.242] [info][migrations] Executed migration "Upgrade saved queries from version 1 to version 2"
+  log   [17:58:36.242] [info][migrations] Executing migration "Upgrade saved templates from version 1 to version 2"
+  log   [17:58:36.303] [info][migrations] Executed migration "Upgrade saved templates from version 1 to version 2"
+  log   [17:58:36.303] [info][migrations] Executing migration "Upgrade saved queries definitions in external query terms aggregation, enhanced search results and query viewer."
+  log   [17:58:36.400] [info][migrations] Executed migration "Upgrade saved queries definitions in external query terms aggregation, enhanced search results and query viewer."
+Upgraded 20 objects.
+----
+
+It is possible to run the command multiple times, however running the command at the same time from multiple machines is not supported.

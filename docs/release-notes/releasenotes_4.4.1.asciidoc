@@ -1,0 +1,19 @@
+== Kibi 4.4.1
+
+[float]
+=== Kibi Changes
+
+* Various bug fixes and stability improvements.
+* Various error handling improvements
+* Caching can now be enabled/disabled per datasource from UI configuration
+* New version of Kibi Timeline plugin 0.1.4
+* Improved kibi.bat file for Windows
+* Improved documentation
+* Improved quality of the demo dataset
+* Default terms encoding for Siren Join changed to long
+* New Advanced Join Settings plugin [Enterprise Edition only]
+* Full Shield integration [Enterprise Edition only]
+* New Graph Browser visualization [Enterprise Edition only]
+* New Kibi Thinkerpop3 datasource [Enterprise Edition only]
+* New Kibi Gremlin Server component [Enterprise Edition only]
+* New Ansible/Vagrant deployment scripts for GCE and AWS [Enterprise Edition only]

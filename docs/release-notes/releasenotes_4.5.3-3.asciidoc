@@ -1,0 +1,7 @@
+== Kibi 4.5.3-3
+
+[float]
+=== Kibi Changes
+
+* Added csv export for kibi data table
+* Fixed issues with time syncing across dashboards

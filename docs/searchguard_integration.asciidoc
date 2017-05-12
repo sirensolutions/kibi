@@ -2,13 +2,6 @@
 
 == Search Guard Integration and Kibi access control [Enterprise Edition only]
 
-ifeval::["{enterprise_enabled}" == "false"]
-  NOTE: Documentation for Search Guard Integration is available only in Kibi
-  Enterprise Edition.
-endif::[]
-
-ifeval::["{enterprise_enabled}" == "true"]
-
 This section offers an overview of how to integrate Search Guard with Kibi; for
 further reference and detailed options please consult the
 {searchguard-ref}[Search Guard documentation].
@@ -18,8 +11,8 @@ Before proceeding, make sure that:
 - Kibi is either running with HTTPS enabled or behind a reverse SSL proxy.
 - The Gremlin Server is running with HTTPS enabled.
 
-Please refer to the <<access_control,Authentication and access control>> section for instructions on how on to enable HTTPS in
-both components.
+Please refer to the <<access_control,Authentication and access control>>
+section for instructions on how on to enable HTTPS in both components.
 
 === SSL Certificates
 
@@ -51,16 +44,15 @@ _elasticsearch/config_ directory:
 - **CN=localhost-keystore.jks**: a certificate for the bundled Elasticsearch
   node, used for both transport and REST API encryption.
 
+The password of all Java keystores is `password`.
+
 In addition, the following certificates are included in the
 _kibi/pki/searchguard_ directory:
 
-- **CN=sgadmin-keystore.jks**: a certificate for the Search Guard administrative
-  user.
-- **truststore.jks**: a copy of the CA certificate chain truststore.
-- **ca.pem**: the certificate chain in the truststore converted to PEM
-  format.
-
-The password for all keystores is `password`.
+- **CN=sgadmin.crtfull.pem**: a certificate bundle
+  with administrative privileges over the Search Guard Management REST API.
+- **CN=sgadmin.key.pem**: the key of the administrative certificate.
+- **ca.pem**: the cluster CA certificate chain in PEM format.
 
 ==== Issuing certificates in an existing PKI infrastructure
 
@@ -100,7 +92,7 @@ wildcard certificate.
 
 ==== Issuing certificates using the TLS certificate generator
 
-Floragunn provides a TLS certificate generation service at
+Floragunn GmbH provides a TLS certificate generation service at
 https://floragunn.com/tls-certificate-generator/ which can be used to create
 a bundle of certificates for evaluation purposes.
 
@@ -120,7 +112,7 @@ The bundle has the following contents:
 
 === Search Guard installation
 
-Install the *search-guard-ssl* and *search-guard-2* plugins on every node the
+Install the *search-guard-5* plugin on each node in the
 Elasticsearch cluster by changing to the node directory and running the
 commands below; to find the most recent version of the plugins for your
 Elasticsearch version please consult the
@@ -128,8 +120,7 @@ Elasticsearch version please consult the
 
 [source,shell]
 ----
-$ bin/plugin install -b com.floragunn/search-guard-ssl/<version>
-$ bin/plugin install -b com.floragunn/search-guard-2/<version>
+$ bin/elasticsearch-plugin install -b com.floragunn:search-guard-5:<version>
 ----
 
 Then, copy the following files to the _config_ directory of each node:
@@ -176,6 +167,11 @@ options:
 - **searchguard.authcz.admin_dn**: a list of Distinguished Names in SSL client
   certificates which are authorized to submit administrative requests.
 
+**Client certificate authentication options:**
+
+- **searchguard.ssl.http.clientauth_mode**: set to `OPTIONAL` to enable optional
+client certificate authentication on the REST endpoint.
+
 E.g.:
 
 [source,yaml]
@@ -193,6 +189,7 @@ searchguard.ssl.http.truststore_filepath: truststore.jks
 searchguard.ssl.http.truststore_password: password
 searchguard.authcz.admin_dn:
   - CN=sgadmin
+searchguard.ssl.http.clientauth_mode: OPTIONAL
 ----
 
 NOTE: Make sure that all the files in the configuration directory and the
@@ -286,76 +283,122 @@ mechanisms and backends; the above configuration:
 
 [source,yaml]
 ----
-ALL:
+UNLIMITED:
+  - "*"
+
+###### INDEX LEVEL ######
+
+INDICES_ALL:
   - "indices:*"
+
+# for backward compatibility
+ALL:
+  - INDICES_ALL
+
 MANAGE:
   - "indices:monitor/*"
   - "indices:admin/*"
+
 CREATE_INDEX:
   - "indices:admin/create"
+  - "indices:admin/mapping/put"
+
 MANAGE_ALIASES:
   - "indices:admin/aliases*"
+
+# for backward compatibility
 MONITOR:
+  - INDICES_MONITOR
+
+INDICES_MONITOR:
   - "indices:monitor/*"
+
 DATA_ACCESS:
   - "indices:data/*"
+  - CRUD
+
 WRITE:
   - "indices:data/write*"
+  - "indices:admin/mapping/put"
+
 READ:
   - "indices:data/read*"
+  - "indices:admin/mappings/fields/get*"
+
 DELETE:
   - "indices:data/write/delete*"
+
 CRUD:
   - READ
   - WRITE
+
 SEARCH:
   - "indices:data/read/search*"
   - "indices:data/read/msearch*"
   - SUGGEST
+
 SUGGEST:
   - "indices:data/read/suggest*"
+
 INDEX:
   - "indices:data/write/index*"
   - "indices:data/write/update*"
+  - "indices:admin/mapping/put"
+  - "indices:data/write/bulk*"
+
 GET:
   - "indices:data/read/get*"
   - "indices:data/read/mget*"
 
-# CLUSTER
+###### CLUSTER LEVEL ######
+
 CLUSTER_ALL:
-  - cluster:*
+  - "cluster:*"
+
 CLUSTER_MONITOR:
-  - cluster:monitor/*
+  - "cluster:monitor/*"
+
+CLUSTER_COMPOSITE_OPS_RO:
+  - "indices:data/read/mget"
+  - "indices:data/read/msearch"
+  - "indices:data/read/mtv"
+  - "indices:data/read/coordinate-msearch*"
+  - "indices:admin/aliases/exists*"
+  - "indices:admin/aliases/get*"
+
+CLUSTER_COMPOSITE_OPS:
+  - "indices:data/write/bulk"
+  - "indices:admin/aliases*"
+  - CLUSTER_COMPOSITE_OPS_RO
+
+##### KIBI #####
 
 KIBI_CLUSTER:
-  - indices:data/read/scroll
-  - cluster:admin/plugin/siren/license/get
-
-KIBI_MSEARCH:
-  - indices:data/read/coordinate-msearch*
-  - indices:data/read/msearch*
+  - "indices:data/read/scroll"
+  - "cluster:internal/data/transfer/*"
+  - "indices:data/read/msearch*"
+  - "indices:siren/task/msearch*"
+  - CLUSTER_COMPOSITE_OPS_RO
 
 KIBI_READONLY:
-  - indices:data/read/field_stats*
-  - indices:data/read/get*
-  - indices:data/read/mget*
-  - indices:data/read/search*
-  - indices:data/read/coordinate-search*
-  - indices:admin/mappings/get*
-  - indices:admin/mappings/fields/get*
-  - indices:admin/validate/query*
-  - indices:admin/get*
-  - indices:admin/version/get*
-  - KIBI_MSEARCH
+  - "indices:data/read/field_stats*"
+  - "indices:data/read/get*"
+  - "indices:data/read/mget*"
+  - "indices:data/read/search*"
+  - "indices:admin/mappings/get*"
+  - "indices:admin/mappings/fields/get*"
+  - "indices:admin/validate/query*"
+  - "indices:admin/get*"
+  - "indices:admin/version/get*"
 
 KIBI_READWRITE:
-  - indices:admin/exists*
-  - indices:admin/mapping/put*
-  - indices:admin/refresh*
-  - indices:data/write/delete*
-  - indices:data/write/index*
-  - indices:data/write/update*
-  - KIBI_READONLY
+  - "indices:admin/exists*"
+  - "indices:admin/mapping/put*"
+  - "indices:admin/refresh*"
+  - "indices:data/write/delete*"
+  - "indices:data/write/index*"
+  - "indices:data/write/update*"
+  - "KIBI_READONLY
 ----
 
 This file contains named groups of permissions which can be used in the roles
@@ -368,11 +411,8 @@ groups plus three Kibi specific groups:
 - **KIBI_READONLY**: groups all the permissions needed to search any
   Elasticsearch index from Kibi. The group has to be assigned on all indices
   that a role has access to.
-- **KIBI_MSEARCH**: groups all the permissions to execute msearch requests; the
-  group has to be assigned on all indices to roles that have access only to a
-  subset of indices.
 - **KIBI_CLUSTER**: sets the permission to read results from scrolling
-  searches.
+  searches and send composite requests.
 
 **Roles (sg_roles.yml)**
 
@@ -409,16 +449,6 @@ logstash:
         - CRUD
         - CREATE_INDEX
 
-# Permissions for a Marvel agent.
-marvel:
-  cluster:
-    - indices:admin/template/get
-    - indices:admin/template/put
-  indices:
-    '?marvel*':
-      '*':
-        - ALL
-
 # Permissions for a Sentinl user.
 sentinl:
   cluster:
@@ -445,9 +475,11 @@ kibiserver:
   cluster:
       - cluster:monitor/nodes/info
       - cluster:monitor/health
+      - cluster:monitor/main
       - cluster:monitor/state
       - cluster:monitor/nodes/stats
       - KIBI_CLUSTER
+      - CLUSTER_COMPOSITE_OPS
   indices:
     '*':
       '*':
@@ -455,12 +487,14 @@ kibiserver:
     '?kibi':
       '*':
         - ALL
+    '?kibiaccess':
+      '*':
+        - ALL
 
 # Permissions for a Kibi administrator (read-write access to the .kibi index).
 kibiadmin:
   cluster:
     - KIBI_CLUSTER
-    - cluster:admin/plugin/siren/license/put
   indices:
     '*':
       '*':
@@ -486,12 +520,18 @@ kibiuser:
     'watcher_alarms*':
       '*':
         - KIBI_READONLY
-    '/(article|investment|company|investor)/':
+    'article':
       '*':
         - KIBI_READONLY
-    '*':
+    'company':
       '*':
-        - KIBI_MSEARCH
+        - KIBI_READONLY
+    'investment':
+      '*':
+        - KIBI_READONLY
+    'investor':
+      '*':
+        - KIBI_READONLY
 
 # Permissions for a Kibi user (read only), with no access to the investor index.
 kibinoinvestor:
@@ -501,12 +541,15 @@ kibinoinvestor:
     '?kibi':
       '*':
         - KIBI_READONLY
-    '/(article|company|investment)/':
+    'article':
       '*':
         - KIBI_READONLY
-    '*':
+    'company':
       '*':
-        - KIBI_MSEARCH
+        - KIBI_READONLY
+    'investment':
+      '*':
+        - KIBI_READONLY
 ----
 
 The file defines the following roles:
@@ -974,7 +1017,7 @@ kibiserver:
     '*':
       '*':
         - indices:admin/get
-    '?kibi':
+    '?kibi*':
       '*':
         - ALL
     '?kibiaccess':
@@ -1017,8 +1060,7 @@ kibiuser:
 
 In this way, users will be able to include the Kibi index in msearch requests
 (which is a performance requirement to avoid querying all indices when time based
-index patterns are configured) but won't be
-able to read saved objects from it.
+index patterns are configured) but won't be able to read saved objects from it.
 
 Roles can be updated either by modifying `sg_roles.yml` and uploading it
 through `sgadmin` or by using the Search Guard management application; make
@@ -1168,14 +1210,14 @@ output:
 The root certification authority in PEM format must be copied to all nodes
 running one or more beats.
 
-=== Sense configuration
+=== Console configuration
 
-In order to successfully submit queries from Sense to a cluster secured by
+In order to successfully submit queries from console to a cluster secured by
 Search Guard set the following parameters in `config/kibi.yml`:
 
 [source,yaml]
 ----
-sense.proxyConfig:
+console.proxyConfig:
   - match:
       protocol: "https"
 
@@ -1185,49 +1227,6 @@ sense.proxyConfig:
 
 `sense.proxyConfig.ssl.ca` must point to the CA certificate bundle, so it can
 be set to the same value as the `elasticsearch.ssl.ca` parameter.
-
-For more details about proxy options please refer to the
-{sense-ref}/installing.html[Sense documentation].
-
-=== Marvel configuration
-
-In order to store Marvel data in a cluster secured by Search Guard it is
-required to configure agent exporters to submit data over an authenticated
-HTTPS connection.
-
-The exporter configuration in `elasticsearch.yml` must include the following
-parameters:
-
-- `type`: `http`.
-- `host`: an array of URLs that will be contacted by the exporter.
-- `auth.username`: the username of the Marvel agent user.
-- `auth.password`: the password of the Marvel agent user.
-- `ssl.truststore.path`: the path to the CA certificate truststore (this will
-  usually be the same as the one specified in the Search Guard configuration).
-- `ssl.truststore.password`: the password of the CA certificate truststore.
-
-For example, the following configuration defines an exporters which sends data
-to the cluster at `https://localhost:9220`, authenticating as the `marvel`
-user:
-
-[source,yaml]
-----
-marvel.agent.exporters:
-  id1:
-    type: http
-    host: ["https://localhost:9220"]
-
-    auth:
-      username: marvel
-      password: password
-
-    ssl:
-      truststore.path: truststore.jks
-      truststore.password: password
-----
-
-For more information about agent configuration options please refer to
-{shield-ref}/marvel.html[Using Marvel with Shield].
 
 === Handling of authorization errors
 
@@ -1276,8 +1275,3 @@ image::images/authorization-visualization-error.png["A visualization that loads 
 
 ._A visualizations that refers to an unauthorized index._
 image::images/authorization-visualization-empty.png["A visualization that refers to an unauthorized index.",align="left"]
-
-endif::[]
-
-
-endif::[]

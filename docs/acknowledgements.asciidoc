@@ -1,5 +1,5 @@
 [[acknowledgements]]
-== Acknowledgements
+= Acknowledgements
 
 Kibana is a trademark of Elasticsearch BV, registered in the U.S. and
 in other countries.

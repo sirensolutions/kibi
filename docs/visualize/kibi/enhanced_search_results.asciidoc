@@ -1,0 +1,103 @@
+[[enhanced_search_results]]
+== Enhanced search results
+
+Enhanced search results is a visualisation that shows the documents matched by
+a query on an Elasticsearch index, similar to the stock Discover table.
+
+In addition to column configuration, the visualization provides the following
+features:
+
+- it is possible to enable a column that indicates whether or not a search
+result is matched by a query on an external datasource. This is described in
+<<relational-column>>.
+- it is possible to define click handlers on the cells in a column, e.g.
+to open the URL displayed in a cell. This is described in <<click-handlers>>.
+
+image::images/enhanced_search_results/config.png["Configuration view of the Enhanced search results table",align="center"]
+
+[float]
+[[relational-column]]
+=== Relational Column
+
+The relational column can be used to display if a search result is matched
+by a query on an external datasource.
+
+To enable the relational column, check the _Enable Relational Column_ checkbox.
+
+The screenshot below shows the configuration of a relational column named
+_Why Relevant?_ where the value of a cell depends on the query
+_Top 50 companies (HR count)_: if the value of the _label_ *index field* of a
+document matches the value of the _label_ variable in at least one record
+returned by the query, the name of the query will be displayed inside the cell.
+
+image::images/enhanced_search_results/relational_column_config.png["Relational column configuration",align="center"]
+
+image::images/enhanced_search_results/relational_column_sample.png["Relational column example",align="center"]
+
+In order to configure the relational column, you must set the following
+parameters:
+
+- _Column name_: the column name that will be displayed in the table header.
+- _Source Field_: the name of the index field that will be compared to a
+variable in the query results.
+- _Target query_: the name of the query to execute.
+- _Target query variable name_: the name of the query variable that will be
+compared to the index field specified in _Source field_.
+
+[float]
+[[click-handlers]]
+=== Click handlers
+
+It is possible to define two different actions when clicking on a cell;
+
+- Open an URL defined in the corresponding index field.
+- Select an entity in an external datasource matching the corresponding index
+field.
+
+[float]
+[[click-handlers-follow-url]]
+=== Follow URL
+
+Select the _Follow URL_ action to open a URL stored in an index field in a
+new window.
+
+For example, the following configuration defines an handler that opens the
+URL stored in the field _homepage_url_ when clicking on the cell
+displaying the _label_ field.
+
+image::images/enhanced_search_results/click_follow_url.png["Follow URL on click",align="center"]
+
+To configure a click handler, you must set the following parameters:
+
+- _Column_ -- the name of the column to which the handler will be bound.
+- _On click I want to_ -- the action to perform on click, select **Follow the URL** here.
+- _URL field_ -- the name of the field containing the URL.
+- _URL format_ -- a custom format string to compose the URL, where _@URL@_ is
+replaced with the value of the field set in _URL field_.
+
+_URL format_ can be used to create dynamic URL; the screenshot
+below shows a configuration in which the value of the the _id_ field is
+used to define the path of an URL on example.org.
+
+With this configuration, if the _id_ field is set to 11 the resulting URL
+will be _http://example.org/11_ .
+
+image::images/enhanced_search_results/click_follow_url_custom_format.png["Follow URL with a custom format on click",align="center"]
+
+[float]
+[[click-handlers-select-entity]]
+=== Select an entity
+
+Select the _Select an entity_ action if you want to select an entity stored
+in an external datasource matching the selected Elasticsearch document;
+for more information about entity selection, please read the <<entity_selection>>
+section.
+
+To configure an entity selection action you must set the following parameters:
+
+- _Column_ -- the name of the column to which the handler will be bound.
+- _On click I want to_ -- the action to perform on click, select **Select the document** here.
+- _Redirect to dashboard_ -- if set, clicking on the cell will select the
+entity and display the specified dashboard.
+
+image::images/enhanced_search_results/click_select_entity.png["Configuration of an entity selection handler",align="center"]

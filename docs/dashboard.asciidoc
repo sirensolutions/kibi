@@ -1,36 +1,36 @@
 [[dashboard]]
-== Dashboard
+= Dashboard
 
+[partintro]
+--
 A Kibi _dashboard_ displays a set of saved visualizations in a customizable
 grid layout. You can save a dashboard to share or reload at a later time.
 
 In Kibi, dashboards are displayed as tabs and can be organized as <<dashboard-groups, dashboard groups>>.
+--
 
-[float]
 [[dashboard-getting_started]]
-=== Getting Started
+== Getting Started
 
 You need at least one saved <<visualize, visualization>> to use a dashboard.
 
-[float]
 [[creating-a-new-dashboard]]
-==== Building a New Dashboard
+== Building a New Dashboard
 
 The first time you click the *Dashboard* tab, Kibi displays the first available
 dashboard or, if no dashboards have been defined, the dashboard creation screen.
 
 image:images/NewDashboard.png[New Dashboard screen]
 
-Build your dashboard by adding visualizations. By default, Kibana dashboards use a light color theme. To use a dark color
+Build your dashboard by adding visualizations. By default, Kibi dashboards use a light color theme. To use a dark color
 theme instead, click the *Settings* image:images/SettingsButton.jpg[Gear] button and check the *Use dark theme* box.
 
 image:images/darktheme.png[Dark Theme Example]
 
 NOTE: You can change the default theme in the *Advanced* section of the *Settings* tab.
 
-[float]
 [[saving-dashboards]]
-==== Saving Dashboards
+== Saving Dashboards
 
 To save the dashboard, click the *Save Dashboard* image:images/SaveVis.png[Save]
 button:
@@ -47,10 +47,8 @@ in the corresponding tab, select a *Saved Search*:
 
 image::images/dashboard/save_dashboard_opts.png["Dashboard settings",align="center"]
 
-
-[float]
 [[sharing-dashboards]]
-==== Sharing Dashboards
+== Sharing Dashboards
 
 You can share dashboards with other users by sending a link or by embedding
 them into HTML pages; make sure that your Kibi installation is properly secured
@@ -61,22 +59,19 @@ this in mind if your Kibi instance is protected by an authentication proxy.
 
 To share a dashboard, click the *Share* button image:images/share-dashboard.png[] to display the _Sharing_ panel.
 
-
 image:images/sharing-panel.png[]
 
 Click the *Copy to Clipboard* button image:images/share-link.png[] to copy the native URL or embed HTML to the clipboard.
 Click the *Generate short URL* button image:images/share-short-link.png[] to create a shortened URL for sharing or
 embedding.
 
-[float]
 [[embedding-dashboards]]
-==== Embedding Dashboards
+== Embedding Dashboards
 
 To embed a dashboard, copy the embed code from the _Share_ display into your external web application.
 
-[float]
 [[adding-visualizations-to-a-dashboard]]
-==== Adding Visualizations to a Dashboard
+== Adding Visualizations to a Dashboard
 
 To add a visualization to the dashboard, click the *Add Visualization* image:images/AddVis.png[Plus]
 button in the toolbar panel, then select a previously created visualization
@@ -92,17 +87,15 @@ The visualization you select appears in a _container_ on your dashboard.
 NOTE: If you see a message about the container's height or width being too
 small, <<resizing-containers,resize the container>>.
 
-[float]
-==== Reset all dashboards to their default state
+== Reset all dashboards to their default state
 
 One can save with dashboard some specific filters, a custom query or a certain time range.
 If you click on the *Reset the time, filters, and queries from all dashboards to their default saved state* image:images/remove-all-filters.png[Minus] button in the toolbar panel, the temporary filters/queries/time set on **all** dashboards would be removed, reverted to a dashboard's default state with the saved filters/query/time.
 
 NOTE: If the <<relational-panel,relational panel>> is <<relations-settings-enable,enabled>>, clicking this button does not remove the <<relational-panel-browsing,filter>>. If you want to do so, you need to disable the relational panel in the <<kibi-settings-relations,Relations settings>>.
 
-[float]
 [[customizing-your-dashboard]]
-=== Customizing Dashboard Elements
+== Customizing Dashboard Elements
 
 The visualizations in your dashboard are stored in resizable _containers_ that
 you can arrange on the dashboard. This section discusses customizing these
@@ -110,14 +103,14 @@ containers.
 
 [float]
 [[moving-containers]]
-==== Moving Containers
+=== Moving Containers
 
 Click and hold a container's header to move the container around the dashboard. Other containers will shift as needed
 to make room for the moving container. Release the mouse button to confirm the container's new location.
 
 [float]
 [[resizing-containers]]
-==== Resizing Containers
+=== Resizing Containers
 
 Move the cursor to the bottom right corner of the container until the cursor changes to point at the corner. After the
 cursor changes, click and drag the corner of the container to change the container's size. Release the mouse button to
@@ -125,14 +118,14 @@ confirm the new container size.
 
 [float]
 [[removing-containers]]
-==== Removing Containers
+=== Removing Containers
 
 Click the *x* icon at the top right corner of a container to remove that container from the dashboard. Removing a
 container from a dashboard does not delete the saved visualization in that container.
 
 [float]
 [[viewing-detailed-information]]
-==== Viewing Detailed Information
+=== Viewing Detailed Information
 
 To display the raw data behind the visualization, click the bar at the bottom of the container. Tabs with detailed
 information about the raw data replace the visualization, as in this example:
@@ -162,11 +155,10 @@ image:images/NYCTA-Statistics.jpg[]
 
 To export the raw data behind the visualization as a comma-separated-values (CSV) file, click on either the
 *Raw* or *Formatted* links at the bottom of any of the detailed information tabs. A raw export contains the data as it
-is stored in Elasticsearch. A formatted export contains the results of any applicable Kibana [field formatters].
+is stored in Elasticsearch. A formatted export contains the results of any applicable Kibi [field formatters].
 
-[float]
 [[changing-the-visualization]]
-=== Changing the Visualization
+== Changing the Visualization
 
 Click the _Edit_ button image:images/EditVis.png[Pencil button] at the top right of a container to open the
 visualization in the <<visualize,Visualize>> page.
@@ -177,7 +169,7 @@ include::filter_pinning.asciidoc[]
 
 [float]
 [[dashboard-groups]]
-=== Dashboard Groups
+== Dashboard Groups
 
 Dashboards can be organized in dashboard groups; dashboard groups are displayed
 as tabs just like dashboards.
@@ -201,10 +193,9 @@ and at least one of the join operations was pruned.
 
 image::images/dashboard/dashboard_counts_and_indicators.png["A dashboard counts and indicators",align="center"]
 
-
 Dashboard groups can be managed by clicking on the
 <<kibi-settings-dashboards-groups,Dashboard Groups Settings>> tab.
 
 [float]
 [[dash-autorefresh]]
-include::./discover/autorefresh.asciidoc[]
+include::discover/autorefresh.asciidoc[]

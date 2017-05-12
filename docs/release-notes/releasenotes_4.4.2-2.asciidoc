@@ -1,0 +1,9 @@
+== Kibi 4.4.2-2
+
+[float]
+=== Kibi Changes
+
+* Backport fix for Truncate document label if too long
+* Backport fix for Error when label is used for a purple filter is an array
+* Backport fix for Export/Import takes care about index patterns too
+* Bumped timeline version to 4.4.2-2

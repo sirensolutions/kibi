@@ -3,51 +3,57 @@
 
 Kibi is an open source data intelligence platform built upon
 {kibana-announcement}[Kibana {kibana-version}]. +
-Current Kibi v{kibi-version} support elasticsearch v{elasticsearch-version}
-and Siren Join Plugin version v{siren-join-version}.
-
+Kibi {kibi-version} supports Elasticsearch {elasticsearch-version}
+and the Vanguard plugin version {vanguard-version}.
 
 Kibi allows to perform complex analytics on large volumes of data by providing
 customizable visualizations (charts, maps, metrics and tables) on Elasticsearch
-queries; visualizations can be organized into multiple dashboards, presented
-in a tabbed user interface.
+searches; visualizations can be organized into multiple dashboards.
 
-Elasticsearch results can be filtered and augmented by queries on multiple
-external datasources such as SQL databases and triplestores; queries on
-external datasources can also be used as aggregations in visualizations.
+Search results can be filtered interactively through a variety of techniques
+(date ranges, full text queries, field value matching); by setting up relations
+between indices it is possible to filter search results matching documents in a
+different dashboard, for example by displaying only companies that received
+investments in a particular year.
 
-In addition to standard Kibana visualizations, Kibi provides:
+In addition, search results can be filtered and augmented by queries on multiple
+external datasources such as SQL databases and REST APIs; queries on external
+datasources can also be used as aggregations in visualizations.
+
+In addition to visualizations provided by Kibana, Kibi provides:
 
 - The <<relational_filter, Relational Filter>> visualization, which allows
 to configure relations between fields in different indices and apply
 cross-dashboard filters (pivoting).
 
-- The <<relational-panel, Relational Panel>>, which defines relations between indices by specifying on which fields to join. This enables to browse dashboards as a **connected** set, where filtering one dashboards updates results from the other dashboards.
-
-- The <<wordcloud,Kibi Word Cloud>> visualization, which displays a cloud of
-high frequency terms from the documents returned by an Elasticsearch query.
-
 - The <<timeline,Kibi Timeline>> visualization, which displays a timeline
 with multiple groups of data coming from different indices.
 
-- The <<radar_chart,Radar Chart>> visualization, which is a https://en.wikipedia.org/wiki/Radar_chart[graphical method] for displaying multivarate data.
-with multiple groups of data coming from different indices.
+- The <<radar_chart,Radar Chart>> visualization, which is a
+  https://en.wikipedia.org/wiki/Radar_chart[graphical method] for displaying
+  multivariate data with multiple groups of data coming from different indices.
 
-- The <<bubble_diagram,Bubble Diagram>> visualization, which displays series of data grouped into packed circles.
+- The <<bubble_diagram,Bubble Diagram>> visualization, which displays series of
+  data grouped into packed circles.
 
-- The <<kibi_scatter_plot,Scatter plot>> visualization, which displays a scatter plot chart in different modes.
+- The <<kibi_scatter_plot,Scatter plot>> visualization, which displays a
+  scatter plot chart in different modes.
 
-- The <<kibi_box_plot,Box plot>> visualization, which displays a box plot chart from the data in the current set of Elasticsearch documents.
+- The <<kibi_box_plot,Box plot>> visualization, which displays a box plot chart
+  from the data in the current set of Elasticsearch documents.
 
-- The <<kibi_vector_map,Kibi Vector Map>> visualization, which displays a vector map where countries are colored based on aggregated field value.
+- The <<kibi_vector_map,Kibi Vector Map>> visualization, which displays a
+  vector map where countries are colored based on aggregated field value.
 
-- The <<kibi_horizontal_bar_chart,Kibi Horizontal Bar Chart>> visualization, which displays a horizontal bar chart.
+- The <<kibi_horizontal_bar_chart,Kibi Horizontal Bar Chart>> visualization,
+  which displays a horizontal bar chart.
 
-- The <<kibi_multi_chart,Multi chart>> visualization, which displays a different type of charts for the same data
-and allow save and select multiple aggregation configurations.
+- The <<kibi_multi_chart,Multi chart>> visualization, which displays a
+  different type of charts for the same data and allow save and select multiple
+  aggregation configurations.
 
 - The <<enhanced_search_results,Enhanced search results>> visualization, which
-displays query results in a table.
+  displays query results in a table.
 
 - The <<kibi_query_viewer,Kibi Query Viewer>>, which enables the
 visualization of queries on external datasource through Jade or Handlebars
@@ -57,13 +63,15 @@ templates.
 selected Elasticsearch documents as a node of a graph and allows the user to visually
 explore the connection between vertices.
 
-The Relational Filter visualization requires the {siren-join-website}[Siren Join plugin {siren-join-version}] for
-Elasticsearch. The plugin is compatible with Elasticsearch {siren-join-version}.
+The Relational Filter visualization requires the {vanguard-website}[Vanguard
+plugin {vanguard-version}] for Elasticsearch.
 
 [float]
 === How does Kibi compare to Kibana?
 
-Kibi is currently developed as a fork of Kibana {kibana-version}. The plugin API of https://www.elastic.co/blog/kibana-4-3-1-and-4-2-2-and-4-1-4[Kibana 4.2.x] allows us to keep the amount of forked code to a minimum, but as the API is currently in development, a fork is still needed.
+Kibi is currently developed as a fork of Kibana {kibana-version}; although
+configuration objects are mostly the same, it is recommended to keep Kibi and
+Kibana in separate indices.
 
 === What's new in Kibi v{kibi-version}
 

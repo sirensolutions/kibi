@@ -1,0 +1,10 @@
+== Kibi 4.5.3-1
+
+[float]
+=== Kibi Changes
+
+* Fixed Do not allow to define relations for relational buttons on scripted fields
+* Fixed problem with jdbc datasource
+* Added a visual hint to identify dashboards which state differ from the default one
+* Added new ability to quickly set time for more than one dashboard
+* Disabled session automatic synching to ES

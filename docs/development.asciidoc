@@ -1,16 +1,5 @@
 [[development]]
-= Contributing to Kibana
+= Contributing
 
-[partintro]
---
-Contributing to Kibana can be daunting at first, but it doesn't have to be. If
-you're planning a pull request to the Kibana repository, you may want to start
-with <<core-development>>.
-
-If you'd prefer to use Kibana's internal plugin API, then check out
-<<plugin-development>>.
---
-
-include::development/core-development.asciidoc[]
-
-include::development/plugin-development.asciidoc[]
+For up-to-date documentation on how to contribute to Kibana and/or develop Kibana
+plugins (compatible with Kibi) please refer to the {kibana-ref}/development.html[Kibana documentation].

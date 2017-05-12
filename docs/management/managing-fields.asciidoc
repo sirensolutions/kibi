@@ -8,7 +8,7 @@ the field's format from the *Format* drop-down. Format options vary based on the
 You can also set the field's popularity value in the *Popularity* text entry box to any desired value. Click the
 *Update Field* button to confirm your changes or *Cancel* to return to the list of fields.
 
-Kibana has field formatters for the following field types:
+Kibi has field formatters for the following field types:
 
 * <<field-formatters-string, Strings>>
 * <<field-formatters-date, Dates>>
@@ -66,13 +66,13 @@ Scripted fields compute data on the fly from the data in your Elasticsearch indi
 the Discover tab as part of the document data, and you can use scripted fields in your visualizations.
 Scripted field values are computed at query time so they aren't indexed and cannot be searched.
 
-NOTE: Kibana cannot query scripted fields.
+NOTE: Kibi cannot query scripted fields.
 
 WARNING: Computing data on the fly with scripted fields can be very resource intensive and can have a direct impact on
-Kibana's performance. Keep in mind that there's no built-in validation of a scripted field. If your scripts are
+Kibi's performance. Keep in mind that there's no built-in validation of a scripted field. If your scripts are
 buggy, you'll get exceptions whenever you try to view the dynamically generated data.
 
-When you define a scripted field in Kibana, you have a choice of scripting languages. Starting with 5.0, the default 
+When you define a scripted field in Kibi, you have a choice of scripting languages. Starting with 5.0, the default 
 options are {es-ref}modules-scripting-expression.html[Lucene expressions] and {es-ref}modules-scripting-painless.html[Painless]. 
 While you can use other scripting languages if you enable dynamic scripting for them in Elasticsearch, this is not recommended 
 because they cannot be sufficiently {es-ref}modules-scripting-security.html[sandboxed].

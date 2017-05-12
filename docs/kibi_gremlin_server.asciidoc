@@ -1,11 +1,5 @@
 [[kibi_gremlin_server]]
-== Kibi Gremlin Server [Enterprise Edition only]
-
-ifeval::["{enterprise_enabled}" == "false"]
-  NOTE: Documentation for Kibi Gremlin Server is available only in Kibi Enterprise Edition.
-endif::[]
-
-ifeval::["{enterprise_enabled}" == "true"]
+= Kibi Gremlin Server
 
 The **Kibi Gremlin Server** component is a backend component required by the <<graph_browser,Kibi Graph Browser>>
 visualisation.
@@ -23,6 +17,7 @@ kibi_core:
 To use Gremlin Server with an authentication enabled cluster, please refer
 to the <<access_control,Authentication and access control>> section.
 
+[float]
 === Log4J File Configuration Path:
 
 **Log4J** configuration file is optional for the Gremlin server. If you want to use your own custom configuration, you can specify the path to your file with the `kibi_core.gremlin_server.log_conf_path` parameter inside your _kibi.yml_ file.
@@ -52,4 +47,3 @@ log4j.appender.FILE.layout.ConversionPattern=%-5p %c: %m%n
 # Print only messages of level WARN or above in the package org.springframework
 log4j.logger.org.springframework=WARN
 ```
-endif::[]

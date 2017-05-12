@@ -1,0 +1,27 @@
+== Kibi 4.6.3-1
+
+[float]
+=== Kibi Changes
+
+* Added - kibi:splitTabs option to split name and counts on tabs
+* Added - kibi:graphUseFiltersFromDashboards option to customize menu when expanding nodes with filters from dashbords
+
+* Fixed - Not able to scroll smoothly on relations configuration page
+* Fixed - Timepicker does not show on the visualize page for visualizations depending on several searches
+* Fixed - Improved documentation about es compatibility
+* Fixed - If a dashboard contains a kibi_sequential_join_vis, Kibi triggers a search query for the visualization on the default index pattern
+* Fixed - initQtip functions is destroying all qtips
+* Fixed - Sort relations by name and index pattern when choosing relation in relational panel configuration
+* Fixed - Template vars other than "label" ignored in Kibi Query Viewer visualisation
+* Fixed - Currently selected tab not visible when navigating to Settings and back
+* Fixed - Match all Internet Explorer versions in URLOverflowService
+* Fixed - Session persistence bug in Graph Browser [Enterprise Edition only]
+* Fixed - Edge removal issue in Graph Browser [Enterprise Edition only]
+
+* Improved - Better handling of patterns not matching any index
+* Improved - UI improvements in Kibi Query Viewer visualisation
+* Improved - Simplified option menu when expanding nodes with filters from dashbords
+* Improved - bumped Kibi Timeline visualisation to version 4.6.3-1
+* Improved - bumped Kibi Wordcloud visualisation to version 4.6.3-1
+
+* Removed - kibi:zoom option - use browser zoom instead

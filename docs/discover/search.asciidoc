@@ -50,7 +50,7 @@ and the currently selected index pattern.
 
 To save the current search:
 
-. Click *Save* in the Kibana toolbar.
+. Click *Save* in the Kibi toolbar.
 . Enter a name for the search and click *Save*.
 
 You can import, export and delete saved searches from *management/Siren/Saved Objects*.
@@ -60,7 +60,7 @@ You can import, export and delete saved searches from *management/Siren/Saved Ob
 === Opening a Saved Search
 To load a saved search into Discover:
 
-. Click *Open* in the Kibana toolbar.
+. Click *Open* in the Kibi toolbar.
 . Select the search you want to open.
 
 If the saved search is associated with a different index pattern than is currently
@@ -88,7 +88,7 @@ retrieve the latest results.
 To enable auto refresh:
 
 . Click the *Time Picker* image:images/time-picker.jpg[Time Picker] in the
-Kibana toolbar.
+Kibi toolbar.
 . Click *Auto refresh*.
 . Choose a refresh interval from the list.
 +

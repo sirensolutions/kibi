@@ -15,6 +15,7 @@
 :sense-ref: https://www.elastic.co/guide/en/sense/current/
 :searchguard-ref: https://github.com/floragunncom/search-guard-docs
 :searchguard-management-api-ref: https://github.com/floragunncom/search-guard-rest-api/wiki
+:searchguard-kerberos-ref: https://github.com/floragunncom/search-guard-auth-http-kerberos/wiki
 :searchguard-sgadmin-ref: https://github.com/floragunncom/search-guard/wiki#search-guard-admin-standalone
 :searchguard-matrix-ref: https://github.com/floragunncom/search-guard/wiki#version-matrix
 :searchguard-setup-ref: https://github.com/floragunncom/search-guard/tree/es-2.3.5
@@ -67,6 +68,8 @@ include::settings.asciidoc[]
 include::access_control.asciidoc[]
 
 include::searchguard_integration.asciidoc[]
+
+include::kerberos.asciidoc[]
 
 include::shield_integration.asciidoc[]
 

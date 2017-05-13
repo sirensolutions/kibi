@@ -1,0 +1,417 @@
+[[kerberos-authentication]]
+
+== Kerberos/SPNEGO authentication support [Enterprise Edition only]
+
+ifeval::["{enterprise_enabled}" == "false"]
+  NOTE: Kerberos authentication is available only in Kibi Enterprise Edition.
+endif::[]
+
+ifeval::["{enterprise_enabled}" == "true"]
+
+This section offers an overview of how to enable Kerberos/SPNEGO authentication
+in Kibi EE.
+
+Before enabling Kerberos support you should setup Kibi and Search Guard as
+described in the <<searchguard_integration>> chapter.
+
+=== Limitations
+
+The current implementation requires disabling the Kerberos replay cache in
+Search Guard, as the Kibi backend needs to make multiple requests to the
+Elasticsearch cluster on behalf of the user in several places without the
+ability to generate new service tickets.
+
+As long as all the traffic to Kibi is encrypted and the service ticket lifetime
+is short (the default in most system is 5 to 10 minutes) this should not pose a
+significant security risk.
+
+=== Pre requisites
+
+[float]
+==== Service Principal
+
+In order to enable Kerberos authentication, you need to create a service
+Principal to identify the Elasticsearch REST interface; usually the principal
+name is `HTTP/<public DNS name of the cluster>` (e.g. `HTTP/es.ad.local`).
+
+[float]
+===== Active Directory
+
+On an Active Directory domain controller it is possible to use the `setspn`
+command to set a Service Principal Name for a domain user; for example, the
+following command run in an elevated command prompt associates the Service
+Principal Name `HTTP/es.ad.local` to a user named `elasticsearch`:
+
+[source,shell]
+----
+setspn -A HTTP/es.cluster.local elasticsearch
+----
+
+Please refer to the Active Directory documentation for more details about
+setspn and Kerberos integration.
+
+[float]
+==== Keytab
+
+Once the service Principal is defined, you need to generate a keytab file that
+will be used by the Kerberos add-on to authenticate with the KDC.
+
+[float]
+===== Active Directory
+
+On an Active Directory domain controller you can generate a keytab by running
+the `ktpass` command in an elevated command prompt as follows:
+
+[source,shell]
+----
+ktpass -out es.keytab -princ <principal name>@<domain> /mapuser <principal user> /pass "<principal user password>" /kvno 0
+----
+
+For example, to generate a keytab for the SPN `HTTP/es.ad.local`, associated to
+`elasticsearch` user in the `AD.LOCAL` domain, you need to run the following
+command:
+
+[source,shell]
+----
+ktpass -out es.keytab -princ HTTP/es.ad.local@AD.LOCAL /mapuser elasticsearch /pass "password" /kvno 0
+----
+
+[float]
+==== Verification
+
+NOTE: This verification step is optional but it is useful to ensure that the
+keytab is correct before configuring Search Guard.
+
+To verify that the keytab works correctly, copy it to a different machine with
+access to the KDC / Domain controller; the keytab contains the credentials of
+the service principal user so it should be removed from any intermediate
+machine used to transfer the file the transfer and from the target machine once
+the test is complete.
+
+Create a file named `krb5.conf` in the same directory as the keytab with the
+contents below; replace `AD.LOCAL` with your domain name and `DC.AD.LOCAL` with
+the name or IP address of your KDC or domain controller, keeping the case of
+domains as in the example:
+
+[source,ini]
+----
+[libdefaults]
+default_realm = AD.LOCAL
+forwardable=true
+default_tkt_enctypes = rc4-hmac,aes256-cts-hmac-sha1-96,aes128-cts-hmac-sha1-96
+default_tgs_enctypes = rc4-hmac,aes256-cts-hmac-sha1-96,aes128-cts-hmac-sha1-96
+
+[realms]
+AD.LOCAL = {
+kdc = dc.ad.local:88
+default_domain = ad.local
+}
+
+[domain_realm]
+.ad.local = AD.LOCAL
+ad.local = AD.LOCAL
+----
+
+[float]
+===== *nix systems
+
+On Linux and MacOS systems, set the `KRB5_CONFIG` variable temporarily to point
+to the absolute path of the file created before and run `kinit -t <keytab>
+<principal>`, e.g.:
+
+[source,shell]
+----
+KRB5_CONFIG=./krb5.conf kinit -t es.keytab HTTP/es.ad.local
+----
+
+If the keytab is correct, kinit should exit immediately and not show a password
+prompt; to verify that the ticket has been issued, execute the `klist -v`
+command and check that it outputs the details of the ticket:
+
+[source,shell]
+----
+klist -v
+Credentials cache: API:123
+        Principal: HTTP/es.ad.local@ES.AD.LOCAL
+    Cache version: 0
+
+Server: krbtgt/AD.LOCAL@AD.LOCAL
+Client: HTTP/es.ad.local@AD.LOCAL
+Ticket etype: aes256-cts-hmac-sha1-96, kvno 2
+Session key: arcfour-hmac-md5
+Ticket length: 1194
+Auth time:  May 12 19:59:10 2017
+End time:   May 13 05:59:10 2017
+Ticket flags: enc-pa-rep, pre-authent, initial, forwardable
+Addresses: addressless
+----
+
+You can then destroy the ticket by executing the `kdestroy` command.
+
+[float]
+===== Windows systems
+
+If you're running Elasticsearch nodes on Windows, you can use the Kerberos
+tools bundled with the Java Runtime Environment to verify the keytab.
+
+If the JRE directory is not in the system path, prepend it to each command.
+
+Execute `kinit <principal> -t <keytab> -J-Djava.security.krb5.conf=<path to
+krb5.conf>` to get a ticket, e.g.:
+
+[source,shell]
+----
+kinit HTTP/es.ad.local -t es.keytab -J-D"java.security.krb5.conf=C:\Users\test\krb5.conf"
+----
+
+If the keytab is correct `kinit` will print the path to the file where the
+ticket has been saved, e.g.:
+
+[source,shell]
+----
+New ticket is stored in cache file C:\Users\test\krb5cc_test
+----
+
+Execute `klist` to see the details of the ticket; to destroy the ticket you can
+simply remove the file create by `kinit`.
+
+=== Setup and configuration
+
+[float]
+==== Search Guard add-on
+Kerberos authentication support requires the installation of the commercial
+Search Guard Kerberos HTTP Authentication add-on; to install it, download the
+correct jar for your Search Guard version from {searchguard-kerberos-ref}[this
+page] and copy it to the `plugins/search-guard-2` directory on each node.
+
+[float]
+==== Kerberos configuration file
+Create a file named `krb5.conf` in the `config` directory of each node with the
+following contents; replace `AD.LOCAL` with your domain name and `DC.AD.LOCAL`
+with the name or IP address of your KDC/domain controller, keeping the case
+of domains as in the example:
+
+[source,ini]
+----
+[libdefaults]
+default_realm = AD.LOCAL
+forwardable=true
+default_tkt_enctypes = rc4-hmac,aes256-cts-hmac-sha1-96,aes128-cts-hmac-sha1-96
+default_tgs_enctypes = rc4-hmac,aes256-cts-hmac-sha1-96,aes128-cts-hmac-sha1-96
+
+[realms]
+AD.LOCAL = {
+kdc = dc.ad.local:88
+default_domain = ad.local
+}
+
+[domain_realm]
+.ad.local = AD.LOCAL
+ad.local = AD.LOCAL
+----
+
+[float]
+==== Keytab
+
+Copy the keytab file for the service principal to the configuration directory
+of each Elasticsearch node.
+
+[float]
+==== Elasticsearch configuration
+
+Add the following options to the `elasticsearch.yml` file of each node:
+
+- `searchguard.kerberos.krb5_filepath`: the path to the Kerberos configuration
+  file, usually `krb5.conf`.
+- `searchguard.kerberos.acceptor_keytab_filepath`: the path to the keytab file
+  relative to the configuration directory of the Elasticsearch node. **It is
+  mandatory to store the keytab in this directory.**
+- `searchguard.kerberos.acceptor_principal`: the name of the principal stored
+  in the keytab (e.g. `HTTP/es.ad.local`).
+
+Example configuration:
+
+[source,yaml]
+----
+searchguard.kerberos.krb5_filepath: 'krb5.conf'
+searchguard.kerberos.acceptor_keytab_filepath: 'es.keytab'
+searchguard.kerberos.acceptor_principal: 'HTTP/es.ad.local'
+----
+
+To disable the Kerberos replay cache in Search Guard, you'll need to set the
+`sun.security.krb5.rcache` JVM property to `none`; this can be done by setting
+the `ES_JAVA_OPTS` environment variable to include
+`-dsun.security.krb5.rcache=none`.
+
+For information on where to set/modify this variable please refer to
+{elastic-ref}setup-service.html[Running as a service on Linux] or
+{elastic-ref}setup-service-win[Running as a service on Windows].
+
+[float]
+==== Cluster restart
+Once the previous steps have been completed on all nodes, perform a rolling
+restart of the cluster.
+
+[float]
+==== Search Guard authenticator configuration
+
+To complete the Kerberos configuration you need to modify your `sg_config.yml`
+file and upload it to the cluster using `sgadmin`; **if you are using the
+Search Guard management API make sure to include only the `sg_config.yml` in
+the sgadmin configuration directory or you will overwrite internal users,
+actiongroups, roles and mappings defined through the API**.
+
+To enable Kerberos authentication over HTTP, you need to:
+
+- Add a Kerberos authenticator stanza to `searchguard.authc`
+- Disable challenge in the existing HTTP Basic authenticator if enabled
+
+Example `sg_config.yml`:
+
+[source,yaml]
+----
+searchguard:
+  dynamic:
+    http:
+      anonymous_auth_enabled: false
+      xff:
+        enabled: false
+    authc:
+      kerberos_auth_domain:
+        enabled: true
+        order: 2
+        http_authenticator:
+          type: kerberos
+          challenge: true
+          config:
+            krb_debug: false
+            strip_realm_from_principal: true
+        authentication_backend:
+          type: noop
+      basic_internal_auth_domain:
+        enabled: true
+        order: 1
+        http_authenticator:
+          type: basic
+          challenge: false
+        authentication_backend:
+          type: intern
+----
+
+With the above configuration, if the user is not authenticated Search Guard
+will reply with a 401 challenge; SPNEGO compatible browsers will then repeat
+the request automatically with Kerberos credentials if the cluster is in a
+trusted network or display an authentication popup where the user can enter its
+domain credentials.
+
+If an HTTP request to the cluster contains an HTTP Basic authorization header,
+it will still be authenticated by the http_authenticator defined in
+`basic_internal_auth_domain`; it is necessary to leave this enabled as the Kibi
+backend uses this method to authenticate with the cluster.
+
+It is possible to enable only a single HTTP challenge; if your browser is
+configured to automatically send Kerberos credentials in a trusted zone it is
+possible to disable the challenge attribute by setting
+`kerberos_auth_domain.http_authenticator.challenge` to `false`.
+
+For more details about configuring Search Guard authenticator please refer to
+the {searchguard-ref}/blob/master/README.md[official documentation].
+
+=== Verification
+
+Once `sg_config.yml` has been loaded you can verify if the authentication is
+working by mapping a username in the Active Directory / Kerberos domain to a
+Search Guard role mapping, e.g.:
+
+[source,yaml]
+----
+kibiuser:
+  users:
+    - kibiuser
+    - domainuser
+----
+
+Once the mapping is loaded to the cluster, logon to a machine in the domain
+with the domain user and open the cluster URL in a Kerberos enabled browser
+(e.g. Chrome on Windows).
+
+If everything is setup correctly you should see the default JSON response of
+Elasticsearch in the browser without having to enter credentials, e.g.:
+
+[source,json]
+----
+{
+  "name" : "Node",
+  "cluster_name" : "cluster",
+  "cluster_uuid" : "nimUDAyBQWSskuHoAQG06A",
+  "version" : {
+    "number" : "2.4.4",
+    "build_hash" : "fcbb46dfd45562a9cf00c604b30849a6dec6b017",
+    "build_timestamp" : "2017-01-03T11:33:16Z",
+    "build_snapshot" : false,
+    "lucene_version" : "5.5.2"
+  },
+  "tagline" : "You Know, for Search"
+}
+----
+
+If you're getting an authentication popup, ensure that the Elasticsearch
+cluster URL is in a trusted zone.
+
+To add a site to the trusted zone on Windows you need to:
+
+- open Internet Explorer and click on **Internet options**.
+- click on the **Security** tab.
+- click on **Local Intranet**.
+- click on **Sites**.
+- click on **Advanced**.
+- add the URL of the cluster to the list (the port can be omitted).
+
+Once the cluster is in the trusted zone try to open the cluster URL again.
+
+Internet Explorer options are also used by Chrome on Windows.
+
+._Trusted sites_
+image::images/access_control/kerberos/internet_options.png["Trusted sites setup",align="center"]
+
+=== Troubleshooting
+
+To check why a request is not authenticated you can check the Elasticsearch
+logs of the client node serving the REST API.
+
+The most common issues are:
+
+- cluster URL not present in the trusted sites list.
+- a keytab containing an incorrect Service Principal Name and/or a wrong
+  password for the user account associated to the SPN.
+- an incorrect address of the domain controller / KDC in the `krb5.conf` file.
+
+To get additional debugging information you can set `krb_debug` to `true`
+temporarily in `sg_config.yml` and upload it to the cluster using `sgadmin`.
+
+=== Kibi configuration
+
+To enable SPNEGO support in Kibi, set the
+`kibi_access_control.backends.searchguard.authenticator` option to
+`http-negotiate`, in `kibi.yml` e.g.:
+
+[source,yaml]
+----
+kibi_access_control:
+  #... existing options
+  backends:
+    searchguard:
+      #... existing options
+      authenticator: 'http-negotiate'
+----
+
+Then restart Kibi and verify that you can login from a browser in the domain
+using a user defined in Search Guard.
+
+When SPNEGO support is enabled, cookie based authentication will be disabled;
+if you need to provide both authentications for different networks, it is
+possible to start an additional Kibi instance with
+`kibi_access_control.backend.searchguard.authenticator` set to `http-basic` or
+not set at all.
+
+endif::[]

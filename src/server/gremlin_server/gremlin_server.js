@@ -86,7 +86,7 @@ function startServer(self, fulfill, reject) {
           args.push('--server.ssl.key-store=' + config.get('kibi_core.gremlin_server.ssl.key_store'));
           args.push('--server.ssl.key-store-password=' + config.get('kibi_core.gremlin_server.ssl.key_store_password'));
         } else if (config.get('server.ssl.key') && config.get('server.ssl.cert')) {
-          const msg = 'Since you are using Elasticsearch Shield, you should configure the SSL for the gremlin server ' +
+          const msg = 'Since access control is enabled, Gremlin Server must be configured to serve requests over HTTPS ' +
             'by configuring the key store in kibi.yml\n' +
             'The following properties are required:\n' +
             'kibi_core.gremlin_server.ssl.key_store\n' +

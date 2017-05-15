@@ -281,7 +281,9 @@ uiModules
             const fields = extractFieldsFromQuery($state.query.query_string.query);
             _.each(fields, function (field) {
               if (_.contains($scope.columnAliases, field) && !(_.contains($scope.columns, field))) {
-                return notify.warning('You are searching for an alias [' + field + '] please use the field name');
+                const indexOfAlias = _.indexOf($scope.columnAliases, field);
+                return notify.warning('You seem to be using an alias: [' + field + '].' +
+                  'The actual field name you probably want is: [' + $scope.columns[indexOfAlias] + ']');
               }
             });
           }

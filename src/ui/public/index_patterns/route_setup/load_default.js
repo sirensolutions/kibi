@@ -52,8 +52,14 @@ module.exports = function (opts) {
           notify.log('index pattern set to', indexPatternId);
         })
         .catch(err => {
-          if (err instanceof IndexPatternAuthorizationError && patterns.length) {
-            return loadIndexPattern(patterns.pop());
+          if (err instanceof IndexPatternAuthorizationError) {
+            if (patterns.length) {
+              return loadIndexPattern(patterns.pop());
+            } else {
+              // kibi: unset the defaultIndex since none of the known index patterns can be accessed
+              config.set('defaultIndex');
+              throw new NoDefaultIndexPattern();
+            }
           }
           throw err;
         });

@@ -124,6 +124,11 @@ module.exports = function createProxy(server, method, path, config) {
       onResponse: (err, response, request, reply, settings, ttl, dataPassed) => {
         const chunks = [];
 
+        if (response === null || response === undefined) {
+          server.log(['error','create_kibi_proxy'], 'Something went wrong response is: ' + response);
+          return;
+        }
+
         response.on('error', (error) => {
           reply(error);
           return;

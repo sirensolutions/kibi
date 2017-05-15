@@ -1,7 +1,7 @@
 /**
  * Thrown when access to an object is not authorized.
  */
-export default class AuthorizationError {
+export default class AuthorizationError extends Error {
   /**
    * Creates a new AuthorizationError.
    *
@@ -9,9 +9,19 @@ export default class AuthorizationError {
    * @param {Error} inner - An optional error that caused the AuthenticationError.
    */
   constructor(message, inner) {
+    super(message);
     this.name = 'AuthorizationError';
-    this.message = message;
     this.inner = inner;
-    this.stack = new Error().stack;
+
+    return new Proxy(this, {
+      get(target, name) {
+        const value = target[name];
+
+        if (value) {
+          return value;
+        }
+        return inner[name];
+      }
+    });
   }
 }

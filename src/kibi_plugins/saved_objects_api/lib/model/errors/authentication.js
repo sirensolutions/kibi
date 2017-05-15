@@ -1,7 +1,7 @@
 /**
  * Thrown when authentication is required.
  */
-export default class AuthenticationError {
+export default class AuthenticationError extends Error {
   /**
    * Creates a new AuthenticationError.
    *
@@ -9,9 +9,19 @@ export default class AuthenticationError {
    * @param {Error} inner - An optional error that caused the AuthenticationError.
    */
   constructor(message, inner) {
+    super(message);
     this.name = 'AuthenticationError';
-    this.message = message;
     this.inner = inner;
-    this.stack = new Error().stack;
+
+    return new Proxy(this, {
+      get(target, name) {
+        const value = target[name];
+
+        if (value) {
+          return value;
+        }
+        return inner[name];
+      }
+    });
   }
 }

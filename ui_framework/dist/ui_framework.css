@@ -224,7 +224,6 @@ body {
   /* 2 */
   font-size: 10px !important;
   /* 2 */
-  -webkit-transition: background-color 0.1s linear;
   transition: background-color 0.1s linear; }
   .kuiCheckBox:before {
     position: relative;
@@ -235,7 +234,6 @@ body {
     font-size: 1em;
     opacity: 0;
     color: #ffffff;
-    -webkit-transition: opacity 0.1s linear;
     transition: opacity 0.1s linear; }
   .kuiCheckBox:checked {
     border-color: #328CAA;
@@ -269,7 +267,6 @@ body {
   border: 1px solid #DEDEDE;
   color: #191E23;
   border-radius: 4px;
-  -webkit-transition: border-color 0.1s linear;
   transition: border-color 0.1s linear;
   /**
    * 1. Angular will add an ng-untouched class to an input if it hasn't been touched yet.
@@ -306,7 +303,6 @@ body {
   border: 1px solid #DEDEDE;
   color: #191E23;
   border-radius: 4px;
-  -webkit-transition: border-color 0.1s linear;
   transition: border-color 0.1s linear;
   /**
    * 1. Angular will add an ng-untouched class to an input if it hasn't been touched yet.
@@ -335,7 +331,6 @@ body {
   border: 1px solid #DEDEDE;
   color: #191E23;
   border-radius: 4px;
-  -webkit-transition: border-color 0.1s linear;
   transition: border-color 0.1s linear;
   /**
    * 1. Angular will add an ng-untouched class to an input if it hasn't been touched yet.
@@ -797,8 +792,7 @@ body {
  * 2. Fit MicroButton inside of Table rows without pushing them taller.
  */
 .kuiMicroButton {
-  /* siren: icon should be on right, display property removed, float added */
-  float: right;
+  display: inline-block;
   /* 1 */
   -webkit-appearance: none;
      -moz-appearance: none;
@@ -943,6 +937,13 @@ body {
   display: flex;
   border-bottom: 2px solid #E4E4E4; }
 
+/* kibi: added kibi-break-tabs class to fixed the tabs in management/siren/objects */
+.kuiTabs.kibi-break-tabs {
+  display: inline-block; }
+  .kuiTabs.kibi-break-tabs button {
+    padding: 8px 12px; }
+
+/* kibi: end */
 /**
    * 1. Override button styles (some of which are from Bootstrap).
    */
@@ -952,7 +953,8 @@ body {
           appearance: none;
   /* 1 */
   cursor: pointer;
-  padding: 10px 30px;
+  padding: 10px 10px;
+  /* kibi: reduced left/right padding from 30 -> 10 */
   font-size: 14px;
   color: #9fa3a7;
   background-color: #ffffff;

@@ -937,7 +937,7 @@ body {
   display: flex;
   border-bottom: 2px solid #E4E4E4; }
 
-/* kibi: added kibi-break-tabs class to fixed the tabs in management/siren/objects */
+/* kibi: added kibi-break-tabs class to fix the tabs in management/siren/objects */
 .kuiTabs.kibi-break-tabs {
   display: inline-block; }
   .kuiTabs.kibi-break-tabs button {

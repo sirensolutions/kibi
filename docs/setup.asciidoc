@@ -48,7 +48,7 @@ extracted Kibi and run the following commands:
 
 [source,shell]
 ----
-$ cd kibi/
+$ cd kibi
 $ ./bin/kibi
 ----
 
@@ -56,8 +56,8 @@ Or if you're on Windows, run the following commands:
 
 [source,shell]
 ----
-$ cd kibi\
-$ .\bin\kibi.bat
+$ cd kibi
+$ bin\kibi.bat
 ----
 
 Upon first launch, the Windows firewall might display the following dialog

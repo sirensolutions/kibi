@@ -1,5 +1,5 @@
 import angular from 'angular';
-import { once, cloneDeep, defaultsDeep, isPlainObject } from 'lodash';
+import { isEqual, once, cloneDeep, defaultsDeep, isPlainObject } from 'lodash';
 import uiRoutes from 'ui/routes';
 import uiModules from 'ui/modules';
 import ConfigDelayedUpdaterProvider from 'ui/config/_delayed_updater';
@@ -92,9 +92,15 @@ any custom setting configuration watchers for "${key}" may fix this issue.`);
     } else {
       const { type } = settings[key];
       if (type === 'json' && typeof value !== 'string') {
-        settings[key].userValue = angular.toJson(value);
-      } else {
+        if (!isEqual(value, JSON.parse(settings[key].value))) {
+          settings[key].userValue = angular.toJson(value);
+        } else {
+          delete settings[key].userValue;
+        }
+      } else if (value !== settings[key].value) {
         settings[key].userValue = value;
+      } else {
+        delete settings[key].userValue;
       }
     }
   }

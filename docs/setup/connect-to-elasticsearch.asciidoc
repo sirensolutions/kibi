@@ -12,8 +12,8 @@ restart Kibi. For information about using Kibi with your production nodes, see <
 
 To configure the Elasticsearch indices you want to access with Kibi:
 
-. Point your browser at port 5601 to access the Kibi UI. For example, `localhost:5601` or
-`http://YOURDOMAIN.com:5601`.
+. Point your browser at port {kibi-default-port} to access the Kibi UI. For example, `localhost:{kibi-default-port}` or
+`http://YOURDOMAIN.com:{kibi-default-port}`.
 +
 image:images/Start-Page.png[Kibi start page]
 +

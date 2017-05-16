@@ -83,10 +83,10 @@ export default function setupSettings(kbnServer, server, config) {
       const resp = await configModel.get(config.get('pkg.kibiVersion'), req, { wrap401Errors: !ignore401Errors });
       userSettings = resp._source;
     } catch (err) {
-      if (err.statusCode === 401 && !ignore401Errors) {
+      if (err.status === 401 && !ignore401Errors) {
         throw err;
       }
-      if (!(err instanceof errors.NoConnections) || err.statusCode !== 403 || err.statusCode !== 404) {
+      if (!(err instanceof errors.NoConnections) && err.status !== 403 && err.status !== 404) {
         throw err;
       }
     }
@@ -97,7 +97,7 @@ export default function setupSettings(kbnServer, server, config) {
     assertRequest(req);
     const configModel = server.plugins.saved_objects_api.getModel('config');
 
-    await configModel.update(config.get('pkg.kibiVersion'), { doc: changes }, req);
+    await configModel.patch(config.get('pkg.kibiVersion'), changes, req);
     return {};
   }
 

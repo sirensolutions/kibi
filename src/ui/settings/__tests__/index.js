@@ -4,6 +4,7 @@ import expect from 'expect.js';
 import init from '..';
 import defaultsProvider from '../defaults';
 import { errors as esErrors } from 'elasticsearch';
+import requirefrom from 'requirefrom';
 
 describe('ui settings', function () {
   describe('overview', function () {
@@ -207,7 +208,8 @@ describe('ui settings', function () {
         await uiSettings.getUserProvided(req);
         throw new Error('expect getUserProvided() to throw');
       } catch (err) {
-        expect(err).to.be.a(esErrors[401]);
+        // kibi: the error is wrapped by the savedObjetsAPI plugin
+        expect(err.inner).to.be.a(esErrors[401]);
       }
     });
 
@@ -365,7 +367,8 @@ function expectElasticsearchUpdateQuery(server, req, configGet, doc) {
     index: configGet('kibana.index'),
     id: configGet('pkg.version'),
     type: 'config',
-    body: { doc }
+    body: { doc },
+    refresh: true
   });
 }
 
@@ -414,14 +417,6 @@ function instantiate({ getResult, callWithRequest, settingsStatusOverrides } = {
   adminCluster.callWithInternalUser.withArgs('get', sinon.match.any).returns(Promise.resolve({ _source: getResult }));
   adminCluster.callWithInternalUser.withArgs('update', sinon.match.any).returns(Promise.resolve());
 
-  const server = {
-    decorate: (_, key, value) => server[key] = value,
-    plugins: {
-      elasticsearch: {
-        getCluster: sinon.stub().withArgs('admin').returns(adminCluster)
-      }
-    }
-  };
   const configGet = sinon.stub();
   configGet.withArgs('kibana.index').returns('.kibana');
   configGet.withArgs('pkg.version').returns('1.2.3-test');
@@ -432,6 +427,27 @@ function instantiate({ getResult, callWithRequest, settingsStatusOverrides } = {
   const config = {
     get: configGet
   };
+
+  const server = {
+    config() {
+      return config;
+    },
+    decorate: (_, key, value) => server[key] = value,
+    plugins: {
+      saved_objects_api: {
+        status: {
+          state: 'green'
+        },
+        getMiddlewares: () => []
+      },
+      elasticsearch: {
+        getCluster: sinon.stub().withArgs('admin').returns(adminCluster)
+      }
+    }
+  };
+  const ConfigModel = requirefrom('src/kibi_plugins/saved_objects_api/lib/model/builtin/')('config');
+  server.plugins.saved_objects_api.getModel = sinon.stub().withArgs('config').returns(new ConfigModel(server));
+
   const setupSettings = init(kbnServer, server, config);
   const uiSettings = server.uiSettings();
   return { server, uiSettings, configGet, req };

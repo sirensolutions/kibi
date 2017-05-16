@@ -59,6 +59,10 @@ any custom setting configuration watchers for "${key}" may fix this issue.`);
 
   // siren: custom validator for value
   const _validators = function (validator, val) {
+    if (val === null) {
+      // unset the value
+      return null;
+    }
     switch (validator) {
       case 'positiveIntegerValidator':
         if (!/^\+?(0|[1-9]\d*)$/.test(val)) {
@@ -72,8 +76,10 @@ any custom setting configuration watchers for "${key}" may fix this issue.`);
   // siren: end
 
   function change(key, value) {
+    const declared = config.isDeclared(key);
+
     // kibi: added to allow for custom validation step before saving the value
-    if (settings[key].validator) {
+    if (declared && settings[key].validator) {
       try {
         value = _validators(settings[key].validator, value);
       } catch (err) {
@@ -84,7 +90,6 @@ any custom setting configuration watchers for "${key}" may fix this issue.`);
     }
     // kibi: end
 
-    const declared = config.isDeclared(key);
     const oldVal = declared ? settings[key].userValue : undefined;
     const newVal = key in defaults && defaults[key].defaultValue === value ? null : value;
     const unchanged = oldVal === newVal;

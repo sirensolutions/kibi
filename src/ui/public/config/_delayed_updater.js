@@ -1,4 +1,4 @@
-export default function DelayedUpdaterFactory($http, chrome, Promise) {
+export default function DelayedUpdaterFactory($timeout, $http, chrome, Promise) {
   let unsavedChanges = {};
   let unresolvedPromises = [];
   let saveTimeout = null;
@@ -12,10 +12,10 @@ export default function DelayedUpdaterFactory($http, chrome, Promise) {
 
   function saveSoon(resolve, reject) {
     if (saveTimeout) {
-      clearTimeout(saveTimeout);
+      $timeout.cancel(saveTimeout);
     }
 
-    saveTimeout = setTimeout(fire, 200);
+    saveTimeout = $timeout(fire, 200);
     unresolvedPromises.push({ resolve, reject });
   }
 
@@ -26,7 +26,7 @@ export default function DelayedUpdaterFactory($http, chrome, Promise) {
     unresolvedPromises = [];
     unsavedChanges = {};
 
-    persist(changes)
+    return persist(changes)
       .then(result => settle(promises, `resolve`, result))
       .catch(reason => settle(promises, `reject`, reason));
   }
